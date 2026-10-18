@@ -63,7 +63,99 @@ extern "C" char *cCommSystem_getSignature(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00255A20);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_003F42A0(void);
+extern "C" int func_003F3CC0_5A20(int sel, int a, int b) __asm__("func_003F3CC0");
+extern "C" int func_003F3C50(void* params, int a);
+extern "C" void func_00255FE8(void* self, int reason);
+extern "C" void func_00256038(void* self, int* out);
+extern char D_00536810[];
+
+struct sCommVE_5A20 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sCommObj_5A20 {
+    char pad0[8];
+    sCommVE_5A20* vt;   // 0x8
+};
+
+struct sComm_5A20 {
+    sCommObj_5A20* objs[1];   // 0x0
+    char pad4[0x1C - 4];
+    int index;                // 0x1C
+    int state;                // 0x20
+    int timer;                // 0x24
+    char pad28[4];
+    int bband;                // 0x2C
+    int type;                 // 0x30
+};
+
+extern "C" void func_00255A20(sComm_5A20* self)
+{
+    int i;
+    func_003F42A0();
+    switch (self->state) {
+    case 0:
+    case 1:
+    case 6:
+        break;
+    case 2:
+        if (func_003F3CC0_5A20(0x6F6E6C6E, 0, 0) == 0) {
+            func_003F3C50(D_00536810 + (self->index << 8), 0);
+            self->state = 3;
+        }
+        break;
+    case 3: {
+        if (func_003F3CC0_5A20(0x6F6E6C6E, 0, 0) != 0 && func_003F3CC0_5A20(0x686F7374, 0, 0) != 0) {
+            self->state = 4;
+            self->timer = 0x708;
+            self->type = func_003F3CC0_5A20(0x74797065, 0, 0);
+            int bb = func_003F3CC0_5A20(0x62626E64, 0, 0);
+            if (bb == 1) {
+                self->bband = bb;
+            }
+        }
+        int conn = func_003F3CC0_5A20(0x636F6E6E, 0, 0);
+        if ((conn >> 24) == '-') {
+            func_00255FE8(self, conn);
+            self->timer = 0;
+        }
+        break;
+    }
+    case 4: {
+        int addr;
+        func_00256038(self, &addr);
+        if (addr != 0) {
+            self->timer = 0;
+            self->state = 5;
+        }
+        break;
+    }
+    case 5:
+        for (i = 0; i < 1; i++) {
+            sCommObj_5A20* o = self->objs[i];
+            if (o != 0) {
+                o->vt[3].fn((char*)o + o->vt[3].delta);
+            }
+        }
+        break;
+    }
+    if (self->timer > 0) {
+        self->timer--;
+        if (self->timer <= 0) {
+            func_00255FE8(self, 0x74696D65);
+            self->timer = 0;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", cCommSystem_openDSockChannel);
@@ -439,7 +531,33 @@ extern "C" void func_002563A8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_002563F8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_00256460(char* self);
+extern "C" void func_00256510(char* self);
+extern "C" void func_002565E0(char* self);
+
+extern "C" void func_002563F8(char* self)
+{
+    switch (*(int*)self) {
+    case 1:
+        func_00256460(self);
+        break;
+    case 2:
+        func_00256510(self);
+        break;
+    case 4:
+        func_002565E0(self);
+        break;
+    case 0:
+    case 3:
+    case 5:
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00256460);
@@ -695,7 +813,29 @@ extern "C" void func_00256998(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00256A00);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_00256A58(void* self);
+extern "C" void func_00256AA8(char* self);
+
+extern "C" void func_00256A00(char* self)
+{
+    switch (*(int*)((char*)self + 0xC)) {
+    case 1:
+        func_00256A58(self);
+        break;
+    case 2:
+        func_00256AA8(self);
+        break;
+    case 0:
+    case 3:
+    case 4:
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00256A58);
@@ -860,7 +1000,36 @@ extern "C" void func_00256EE0(int self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00257038);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_00258330(void *arg0);
+extern "C" void func_00258870(void *, int, int);
+extern "C" void func_0031AD18(void);
+// Switches the controller to a new mode, running per-mode setup first.
+extern "C" void func_00257038(void *self, int mode)
+{
+    switch (mode) {
+    case 14:
+        func_00258330(self);
+        func_00258870(self, 0xE10, 0);
+        func_0031AD18();
+        *(int *)((char *)self + 0x70) = mode;
+        return;
+    case 15:
+        *(int *)((char *)self + 0x84) = 0;
+        *(int *)((char *)self + 0x78) = 0;
+        break;
+    case 1: case 3: case 5: case 7: case 9: case 11: case 13:
+        func_00258870(self, 0x708, 0);
+        break;
+    case 2: case 4: case 6: case 8: case 10: case 12:
+        break;
+    }
+    *(int *)((char *)self + 0x70) = mode;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_156860", func_002570D8);
 
@@ -1230,7 +1399,116 @@ extern "C" int func_00257E98_impl(char* self, int type, const void* data, int le
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00257F98);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: the unit declares this as (void*, int, int, int); dst is the packet buffer
+extern "C" int func_00257BD8_7F98(void* self, int ch, void* dst, int size) __asm__("func_00257BD8");
+// PORT: defined later in the unit with a struct param; bind a void* view by asm label
+extern "C" void func_002588A8_7F98(void* self) __asm__("func_002588A8");
+
+struct sGamePacket_7F98 {
+    unsigned char type;
+    int a;      // 0x4
+    int b;      // 0x8
+};
+
+struct sGameComm_7F98 {
+    int f0;
+    int f4;
+    char pad8[4];
+    int fC;
+    int f10;
+    int f14;
+    char pad18[0x3C - 0x18];
+    int f3C;
+    char pad40[0x50 - 0x40];
+    int f50;
+    char pad54[4];
+    int f58;
+    int f5C;
+    int f60;
+    int f64;
+    char pad68[0x70 - 0x68];
+    int f70;
+    int f74;
+    int f78;
+    int f7C;
+    char pad80[4];
+    int f84;
+    int f88;
+    int f8C;
+    char pad90[0x3F4 - 0x90];
+    int f3F4;
+    int f3F8;
+    int f3FC;
+    char pad400[4];
+    int f404;
+    char pad408[4];
+    int f40C;
+    char pad410[0x500 - 0x410];
+    int f500[60];
+};
+
+extern "C" void func_00257F98(sGameComm_7F98* self)
+{
+    sGamePacket_7F98 msg;
+    while (func_00257BD8_7F98(self, 3, &msg, 0xC)) {
+        switch (msg.type) {
+        case 0:
+            if (self->f7C == 0) {
+                func_00258870(self, 0xE4C, 1);
+            } else {
+                self->f3F8 = 1;
+            }
+            self->f78 = 1;
+            self->f5C = 0;
+            self->f50++;
+            self->f3FC = 0;
+            break;
+        case 1:
+            self->f5C = 0;
+            self->f78 = 0;
+            if (self->f74 != 0 && self->f64 > 0) {
+                self->f64 = 0x4B0;
+            }
+            self->f3F8 = 0;
+            self->f60 = 0;
+            self->f84 = 0;
+            if (self->f7C == 0) {
+                func_00258870(self, 0x708, 0);
+            } else {
+                func_002588A8_7F98(self);
+            }
+            break;
+        case 3:
+            self->f3F4 = 1;
+            break;
+        case 5:
+            self->f88 = 1;
+            if (self->f3C == 0) {
+                self->f3C = *(int*)((char*)D_004A28A8 + 0x18) / *(int*)((char*)D_004A28A8 + 0x10);
+            }
+            self->f78 = 0;
+            self->f0 = 0;
+            self->f14 = 1;
+            if (self->f4 == 0 && self->f70 < 15) {
+                self->f8C = 1;
+            }
+            break;
+        case 2:
+            self->f58++;
+            break;
+        case 4:
+            self->f404 = 1;
+            self->f40C = msg.a;
+            self->f500[msg.a / 60 % 60] = msg.b;
+            break;
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_156860", func_00258160);

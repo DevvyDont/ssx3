@@ -7225,7 +7225,109 @@ extern "C" int func_00265A38(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265A68);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int D_004A3940;
+extern "C" void func_00265D98(void* state);
+extern "C" void func_00265E40(void* state);
+extern "C" void func_00265E80(void* state);
+extern "C" void func_00265EC8(void* state);
+extern "C" void func_00265F00(void* state);
+extern "C" int func_003F80E0(int* status);
+
+struct cDsObj265A68 {
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05(int a);
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual int v11();
+};
+
+// Advances the DirtySock login state machine one step; each "wait" state checks that the socket is idle.
+extern "C" void func_00265A68(int* state)
+{
+    ((cDsObj265A68*)D_004A33D8)->v03();
+    int status = 0;
+    switch (*state) {
+    case 0:
+        break;
+    case 2:
+        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+            func_00265D98(state);
+        }
+        break;
+    case 6:
+        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+            func_00265E40(state);
+        }
+        break;
+    case 10:
+        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+            func_00265E80(state);
+        }
+        break;
+    case 14:
+        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+            func_00265EC8(state);
+        }
+        break;
+    case 18:
+        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+            func_00265F00(state);
+        }
+        break;
+    case 3:
+    case 7:
+    case 11:
+    case 15: {
+        int r = func_003F80E0(&status);
+        state[1] = r;
+        if (r == 0) {
+            if (status == 2) {
+                *state += 1;
+            }
+        } else {
+            *state += 2;
+        }
+        break;
+    }
+    case 4:
+    case 8:
+    case 12:
+    case 16:
+    case 21:
+        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+            ((cDsObj265A68*)D_004A33D8)->v05(0);
+        }
+        break;
+    case 19:
+        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+            ((cDsObj265A68*)D_004A33D8)->v08();
+            *state = 20;
+        }
+        break;
+    case 20:
+        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+            if (D_004A3940 != 0) {
+                *state = 0x16;
+            } else {
+                *state = 0x15;
+            }
+        }
+        break;
+    case 22:
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265CB0);
@@ -7951,7 +8053,105 @@ extern "C" void func_00266348(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00266358);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_00266578(int err);
+extern int D_004A3940;
+extern "C" int func_002C51D0(void* self, int id);
+void func_002C67E8(void* self, int a1);
+extern "C" void func_002C68C8(void* self, int i, char* out);
+extern "C" int func_003FA360(char* name);
+
+struct cDsObj266358 {
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual int v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual int v20();
+};
+
+// Polls the current DirtySock operation: *status is 1 while busy, 2 when finished; *out receives the result.
+extern "C" int func_00266358(int* status, int* out)
+{
+    *out = 0;
+    switch (D_004A33D4) {
+    case 3:
+    case 15:
+    case 16:
+        *status = 2;
+        return 0;
+    case 10:
+        *status = 2;
+        *out = 0x800;
+        return 0;
+    }
+    if (((cDsObj266358*)D_004A33D8)->v11()) {
+        *status = 1;
+        return 0;
+    }
+    *status = 2;
+    if (func_002C51D0(D_004A33D8, *(int*)((char*)D_004A33D8 + 0xC))) {
+        return func_00266578(func_002C51D0(D_004A33D8, *(int*)((char*)D_004A33D8 + 0xC)));
+    }
+    switch (D_004A33D4) {
+    case 0:
+        break;
+    case 1:
+        if (D_004A33E4 > 0) {
+            *status = 1;
+            D_004A33E4--;
+            func_002C67E8(D_004A33D8, D_004A33DC);
+            return 0;
+        }
+        D_004A33E0 = 1;
+        break;
+    case 2:
+        if (*(int*)((char*)D_004A33D8 + 0x54) <= 0) {
+            *out = 0;
+            break;
+        }
+        for (int i = 0; i < *(int*)((char*)D_004A33D8 + 0x54); i++) {
+            func_002C68C8(D_004A33D8, i, D_00537190);
+            if (func_003FA360(D_00537190)) {
+                *out = 1;
+                return 0;
+            }
+        }
+        *out = 0;
+        break;
+    case 5:
+        *out = D_004A3940;
+        break;
+    case 6:
+        *out = D_004A3940;
+        break;
+    case 14:
+        *out = D_004A3940;
+        break;
+    case 9:
+        *out = ((cDsObj266358*)D_004A33D8)->v20() << 10;
+        break;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00266550);
@@ -7967,7 +8167,95 @@ extern "C" void func_00266550(char* dst)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00266578);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int D_004A33D4;
+
+// Maps a network error code to a front-end message id depending on the current connection stage.
+extern "C" int func_00266578(int err)
+{
+    switch (D_004A33D4) {
+    case 1:
+        break;
+    case 2:
+        switch (err) {
+        case -2: return 9;
+        case -4: return 4;
+        }
+        break;
+    case 9:
+        switch (err) {
+        case -2: return 0x11;
+        }
+        break;
+    case 4:
+        switch (err) {
+        case -2: return 9;
+        case -3: return 0xD;
+        case -4: return 4;
+        case -5: return 0xD;
+        case -7: return 0xD;
+        }
+        break;
+    case 8:
+        switch (err) {
+        case -2: return 9;
+        case -4: return 4;
+        }
+        return 0x11;
+    case 5:
+        switch (err) {
+        case -2: return 9;
+        case -3: return 0xE;
+        case -4: return 4;
+        case -5: return 0xD;
+        case -8: return 0xD;
+        }
+        break;
+    case 7:
+        switch (err) {
+        case -2: return 9;
+        case -4: return 4;
+        }
+        break;
+    case 6:
+        switch (err) {
+        case -2: return 9;
+        case -4: return 4;
+        case -5: return 0xD;
+        }
+        break;
+    case 14:
+        switch (err) {
+        case -2: return 9;
+        case -3: return 0xE;
+        case -4: return 4;
+        case -5: return 0xD;
+        case -8: return 0xD;
+        }
+        break;
+    case 11:
+        switch (err) {
+        case -2: return 9;
+        case -3: return 0xE;
+        case -4: return 8;
+        }
+        break;
+    case 12:
+    case 13:
+        switch (err) {
+        case -2: return 9;
+        case -4: return 4;
+        case -5: return 5;
+        case -6: return 6;
+        }
+        break;
+    }
+    return 3;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00266728);

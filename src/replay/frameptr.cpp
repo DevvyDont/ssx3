@@ -618,7 +618,158 @@ void func_0026F4A0(void* self, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026F4A8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+void func_0026F4A0(void* self, int state);
+struct sFrameDesc_F4A8 {
+    short type;
+    char a;
+    char b;
+};
+// PORT: local views of callees declared with other parameter types later in the unit
+extern "C" void* func_0026D760_F4A8(void* self, sFrameDesc_F4A8* desc) __asm__("func_0026D760");
+// PORT: func_0026D740 is mangled with one parameter (__FPv) but is called here
+// with (self, block); bind the 2-arg form to the symbol.
+void func_0026D740_F4A8(void* self, void* block) __asm__("func_0026D740__FPv");
+extern "C" void func_0026F8A0_F4A8(void* self, int a1, int a2, int a3) __asm__("func_0026F8A0");
+extern "C" void func_0026FB88(void* self, int a1);
+extern "C" void func_0026FE50(char* self);
+extern "C" void func_00270538(void* self);
+extern "C" void func_00270628(void* self);
+extern "C" void func_00270670(void* self);
+extern "C" void func_00270E18(void* self);
+int func_00320C48(void* obj, int id);
+extern char* D_004A28A8;
+struct sApp_F4A8 {
+    char pad0[0xB0];
+    void* players[4];       // 0xB0
+};
+// PORT: typed view of the app global
+extern sApp_F4A8* D_004A28A8_F4A8 __asm__("D_004A28A8");
+
+struct sReplay_F4A8 {
+    int state;              // 0x0
+    char pad4[0x14];
+    int keyRate;            // 0x18
+    char pad1C[0x4];
+    int f20;                // 0x20
+    char pad24[0x4];
+    int player;             // 0x28
+    char pad2C[0x39C];
+    int frame;              // 0x3C8
+    int seconds;            // 0x3CC
+    void* block;            // 0x3D0
+    int f3D4;               // 0x3D4
+    char pad3D8[0xAC];
+    int last;               // 0x484
+    char pad488[0x17C];
+    int f604;               // 0x604
+    int f608;               // 0x608
+    int f60C;               // 0x60C
+    int paused;             // 0x610
+    int timer;              // 0x614
+    int f618;               // 0x618
+    int f61C;               // 0x61C
+    int f620;               // 0x620
+    int f624;               // 0x624
+};
+
+static inline void addFrame_F4A8(sReplay_F4A8* self, short type)
+{
+    sFrameDesc_F4A8 desc;
+    desc.type = type;
+    desc.a = 0;
+    desc.b = 0;
+    func_0026D740_F4A8(self, func_0026D760_F4A8(self, &desc));
+}
+
+// Replay recorder/player: per-frame update of the replay state machine.
+extern "C" void func_0026F4A8(sReplay_F4A8* self)
+{
+    int s = self->state;
+    bool ok = !(s == 14 || s == 15);
+    if (!ok)
+        return;
+    if (self->timer > 0)
+        self->timer--;
+    self->f604 = 0;
+    if (self->f618 == 7)
+        func_0026F4A0(self, 3);
+    if (!(self->state == 3 || self->state == 4))
+        self->f20 = 0;
+    switch (self->state) {
+    case 11:
+        func_0026F4A0(self, 12);
+        return;
+    case 2:
+        if (self->last < self->frame - 1) {
+            func_0026FB88(self, 0);
+            func_0026FE50((char*)self);
+            return;
+        }
+        func_00270670(self);
+    case 0:
+    case 12:
+        func_0026F4A0(self, 0);
+        self->block = 0;
+        if (self->f60C != 0) {
+            if (self->f608 != 0)
+                return;
+            func_00270628(self);
+            func_00270E18(self);
+            func_00270538(self);
+            addFrame_F4A8(self, 1);
+            func_0026F4A0(self, 13);
+            return;
+        }
+        if (self->f624 != 0) {
+            func_0026F8A0_F4A8(self, self->f3D4, 1, 0);
+            func_0026F4A0(self, 2);
+            self->f624 = 0;
+            self->f620 = 1;
+            return;
+        }
+        if (self->paused == 0 && self->frame % 60 == 0) {
+            func_00270538(self);
+            if (self->frame == 0 || (self->keyRate != 0 && self->frame % self->keyRate == 0))
+                addFrame_F4A8(self, 1);
+            else
+                addFrame_F4A8(self, 0);
+        }
+        if (self->paused == 0)
+            self->seconds++;
+        self->frame++;
+        return;
+    case 3: {
+        void* o = D_004A28A8_F4A8->players[self->player];
+        if (o != 0 && func_00320C48(o, 0x6B))
+            func_0026FB88(self, 0);
+        func_0026FE50((char*)self);
+        return;
+    }
+    case 9:
+        func_0026F8A0_F4A8(self, 0, 0, 1);
+        func_0026F4A0(self, 1);
+        self->f61C = 1;
+        return;
+    case 8:
+        func_0026F8A0_F4A8(self, 0, 0, 0);
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        func_0026F4A0(self, 3);
+        return;
+    default:
+        func_0026FE50((char*)self);
+    case 10:
+    case 13:
+        return;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026F7B8);
@@ -837,5 +988,108 @@ extern "C" void func_0026FA78(int* self)
 
 INCLUDE_ASM("replay/frameptr", func_0026FB88);
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026FE50);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void cGameViewMan_updateAll(void* list);
+// PORT: func_0026E448 is declared (void*) in replay.cpp but takes the frame index too
+extern "C" void func_00270378(void* self);
+void* func_0026E448_2(void* self, int frame) __asm__("func_0026E448__FPv");
+extern "C" void func_0026E568(void* self);
+extern "C" void func_0026E528(void* self);
+extern "C" void func_001620D0(void* p);
+
+struct sVE_26FE50 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_0026FE50(char* self)
+{
+    int redraw = 0;
+    switch (*(int*)(self + 0x618)) {
+    case 1:
+        func_002702F8(self, 0);
+        redraw = 1;
+        func_002703F0(self, 1);
+        if (*(int*)(self + 0x484) == 0) {
+            func_0026F4A0(self, 6);
+        } else {
+            func_0026F4A0(self, 5);
+        }
+        break;
+    case 2:
+        func_00270378(self);
+        redraw = 1;
+        func_002703F0(self, 1);
+        if (*(int*)(self + 0x484) == 0) {
+            func_0026F4A0(self, 6);
+        } else {
+            func_0026F4A0(self, 5);
+        }
+        break;
+    case 3: {
+        redraw = 1;
+        char* f = (char*)func_0026E448_2(self, *(int*)(self + 0x484));
+        *(char**)(self + 0x488) = f;
+        if (*(int*)(self + 0x484) == *(int*)(f + 0x30)) {
+            func_0026E568(self);
+        } else {
+            char* n = *(char**)(f + 0x14);
+            if (n != 0 && *(int*)(n + 0x30) == *(int*)(self + 0x484)) {
+                func_0026E568(self);
+            }
+        }
+        func_002703F0(self, 1);
+        if (*(int*)(self + 0x484) == 0) {
+            func_0026F4A0(self, 6);
+        } else {
+            func_0026F4A0(self, 5);
+        }
+        break;
+    }
+    case 4:
+        redraw = 1;
+        if (*(int*)(*(char**)(self + 0x488) + 0x14) != 0) {
+            func_0026E528(self);
+            func_002703F0(self, 1);
+            func_0026F4A0(self, 5);
+        }
+        break;
+    case 5:
+        func_002703F0(self, 0);
+        func_0026F4A0(self, 4);
+        break;
+    case 6:
+        if (*(int*)self == 3) {
+            func_0026F4A0(self, 1);
+        } else {
+            func_0026F4A0(self, 3);
+        }
+        break;
+    case 7:
+        func_0026F4A0(self, 3);
+        break;
+    case 8:
+        break;
+    default:
+        if (*(int*)self != 3) {
+            *(int*)(self + 0x604) = 1;
+            func_002703F0(self, 0);
+        }
+        break;
+    }
+    *(int*)(self + 0x618) = 0;
+    if (redraw) {
+        char* views = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x84);
+        char* o = *(char**)(*(char**)(views + 4) + 0xA8);
+        func_001620D0(o);
+        sVE_26FE50* vt = *(sVE_26FE50**)(o + 0x14);
+        vt[4].fn(o + vt[4].delta);
+        cGameViewMan_updateAll(views);
+    }
+}
+#endif
 

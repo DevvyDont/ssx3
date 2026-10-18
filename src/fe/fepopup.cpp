@@ -2028,9 +2028,146 @@ extern "C" int func_001CA150(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CA180);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" char* func_00397870(void* list, int idx);
 
+struct sVE1CA180 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+static inline void SetColour1CA180(char* obj, void* colour)
+{
+    sVE1CA180* vt = *(sVE1CA180**)(obj + 8);
+    vt[11].fn(obj + vt[11].delta, colour);
+}
+
+// Popup menu event handler: on draw (5) colours the selected entry; 0x101 = not handled.
+extern "C" int func_001CA180(char* self, char* menu, int msg)
+{
+    switch (msg) {
+    case 5: {
+        int sel = *(unsigned char*)(menu + 0x95);
+        for (int i = 0; i < *(unsigned char*)(menu + 0x96); i++) {
+            char* obj = func_00397870(menu + 0x74, i);
+            if (obj == *(char**)(self + 0x88)) {
+                obj = *(char**)(self + 0x84);
+            }
+            if (i == sel) {
+                SetColour1CA180(obj, self + 0x32C);
+            } else {
+                SetColour1CA180(obj, self + 0x33C);
+            }
+        }
+        break;
+    }
+    case 8: case 9:
+        return 0;
+    case 7:
+        return *(int*)(self + 0x310) ? 0x101 : 0;
+    case 6:
+        return *(int*)(self + 0xB8) ? 0 : 0x101;
+    }
+    return 0x101;
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CA298);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void cScreenPopup_createConfirmationPopup(void* self, int idx);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, unsigned char a4);
+extern "C" void func_001CD088(void* popup, int a1);
+extern "C" void func_0039F290(void* stack, void* item);
+extern char D_0045D8D8[];
+
+struct sPopupVE_1CA298 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+struct sPopupOwner_1CA298 {
+    char pad0[8];
+    sPopupVE_1CA298* vt;   // 0x8
+};
+
+struct sBtn_1CA298 {
+    int confirm;
+    int b;
+    int c;
+};
+
+static inline void Notify_1CA298(sPopupOwner_1CA298* o, int vi, void* self, int v)
+{
+    o->vt[vi].fn((char*)o + o->vt[vi].delta, self, v);
+}
+
+extern "C" void func_001CA298(char* self, int id, int ev)
+{
+    switch (ev) {
+    case 5:
+        if (*(int*)(self + 0x30C) != 0) {
+            int handled = 0;
+            int i;
+            *(int*)(self + 0xB8) = 0;
+            for (i = 0; i < 5; i++) {
+                if (id == ((int*)(self + 0x90))[i]) {
+                    if (((sBtn_1CA298*)(self + 0x2D0))[i].confirm != 0) {
+                        cScreenPopup_createConfirmationPopup(self, i);
+                    } else {
+                        Notify_1CA298(*(sPopupOwner_1CA298**)(self + 0x20), 17, self, i + 15);
+                    }
+                    handled = 1;
+                    break;
+                }
+            }
+            if (handled) {
+                break;
+            }
+            if (id != *(int*)(self + 0x88)) {
+                break;
+            }
+            void* p = cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0);
+            *(void**)(self + 0x2A8) = func_001CB030(p, *(void**)(self + 0x10), self, 0, 0xF);
+            func_001CD088(*(void**)(self + 0x2A8), *(int*)(self + 0x328));
+            func_0039F290(*(char**)(*(char**)(*(char**)(self + 0x40) + 0xD0) + 0x10) + 0x18, *(void**)(self + 0x2A8));
+            if (*(cUIText**)(self + 0x84) != 0) {
+                cScreenPopup_setTextString(self, self + 0x2B4, *(cUIText**)(self + 0x84));
+            }
+        } else {
+            *(int*)(self + 0xB8) = 1;
+        }
+        break;
+    case 6:
+        if (*(int*)(self + 0x310) != 0) {
+            Notify_1CA298(*(sPopupOwner_1CA298**)(self + 0x20), 17, self, 0x14);
+        }
+        break;
+    case 7:
+    case 8:
+        break;
+    case 13:
+        cBXString_cBXString4(self + 0x2B0, *(char**)(self + 0x2A8) + 0x74);
+        if (*(cUIText**)(self + 0x80) != 0 && *(int*)(*(char**)(self + 0x2B0) - 8) != 0) {
+            cScreenPopup_checkAndFixTextEntry(self, *(cUIText**)(self + 0x80), *(const char**)(self + 0x2B0));
+        }
+        break;
+    default:
+        {
+            sPopupOwner_1CA298* o = *(sPopupOwner_1CA298**)(self + 0x20);
+            ((void (*)(void*, int, int))o->vt[19].fn)((char*)o + o->vt[19].delta, id, ev);
+        }
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CA488);
@@ -2139,7 +2276,58 @@ void* func_001CA578(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CA598);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_001CB418(void* popup, const char* a1);
+extern "C" void func_001CCF00(void* popup, const char* a1);
+// PORT: the unit declares func_0039F190 as void; it returns a value this caller ignores.
+extern "C" int func_0039F190_i(void* self, int a1) __asm__("func_0039F190");
+
+struct sVE1CA598 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, int);
+};
+
+// Child-popup message handler: forwards results, plays sounds and closes the popup when done.
+extern "C" void func_001CA598(char* self, void* child, int msg)
+{
+    switch (msg) {
+    case 0x15:
+        if (child == *(void**)(self + 0x2A8)) {
+            func_001CB418(child, *(const char**)(self + 0x2B0));
+            func_001CCF00(*(void**)(self + 0x2A8), *(const char**)(self + 0x2B4));
+        }
+        break;
+    case 0xF:
+        func_0039F190_i(*(char**)(self + 0x10) + 0x18, 1);
+        *(int*)(self + 0x320) = *(int*)(self + 0x324) + 0xF;
+        break;
+    case 0x10: case 0x14:
+        *(int*)(self + 0x320) = -1;
+        func_0039F190_i(*(char**)(self + 0x10) + 0x18, 1);
+        break;
+    case 0x11: case 0x12: case 0x13:
+        func_0039F190_i(*(char**)(self + 0x10) + 0x18, 1);
+        break;
+    case 0x16:
+        if (child == *(void**)(self + 0x2A8)) {
+            *(void**)(self + 0x2A8) = 0;
+        }
+        if (child == *(void**)(self + 0x2AC)) {
+            *(void**)(self + 0x2AC) = 0;
+            if (*(int*)(self + 0x320) != -1) {
+                char* obj = *(char**)(self + 0x20);
+                sVE1CA598* vt = *(sVE1CA598**)(obj + 8);
+                vt[17].fn(obj + vt[17].delta, self, *(int*)(self + 0x320));
+            }
+        }
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_checkAndFixTextEntry);
@@ -2269,7 +2457,57 @@ extern "C" void cBuyPopupInfo_initBuySong(int* self, int a1, int a2, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CAA18);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+extern char D_004661F8[];
+extern char D_00466210[];
+extern char D_00466228[];
+extern char D_00466240[];
+extern char D_00466258[];
+extern char D_00466270[];
+extern char D_00466288[];
+
+// Fills in a popup description: title, OK button and the message text for the given kind.
+extern "C" void func_001CAA18(int* desc, int kind, int a2, int a3, int a4)
+{
+    desc[4] = a2;
+    desc[3] = 2;
+    desc[8] = GetHashValue32(D_004661F8);
+    desc[7] = 3;
+    desc[2] = -1;
+    desc[0] = a3;
+    desc[1] = a4;
+    switch (kind) {
+    case 3:
+        desc[6] = GetHashValue32(D_00466210);
+        desc[5] = 3;
+        break;
+    case 4:
+        desc[6] = GetHashValue32(D_00466228);
+        desc[5] = 3;
+        break;
+    case 5:
+        desc[6] = GetHashValue32(D_00466240);
+        desc[5] = 3;
+        break;
+    case 6:
+        desc[6] = GetHashValue32(D_00466258);
+        desc[5] = 3;
+        break;
+    case 7:
+        desc[6] = GetHashValue32(D_00466270);
+        desc[5] = 3;
+        break;
+    case 8:
+        desc[6] = GetHashValue32(D_00466288);
+        desc[5] = 3;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_initBuyBolt);
@@ -3338,7 +3576,204 @@ extern "C" void func_001CC190(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CC1E0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" char* strcpy(char* dst, const char* src);
+extern "C" int strlen(const char* s);
+extern "C" void func_00416210(void* dst, int c, int n);
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void cKeyboardPopup_redrawScreen(void* self);
+extern "C" int cKeyboardPopup_getObjName(void* self, int key, char* out, int a3);
+extern "C" void func_001CC848(void* self, int a1);
+extern "C" void func_001CC7C8(void* self);
+extern "C" void func_001CE5E0(void* self, int digit);
+extern "C" void func_001CC1E0(void* self, int a1);
+// PORT: func_001CE560's third parameter is an int* out-param; the unit declares it (void*, int, int).
+int func_001CE560_out(void* self, int idx, int* out) __asm__("func_001CE560");
+// func_0039F190 returns its last list node in $v0; the unit declares it void.
+void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
+
+struct sVE_C1E0 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+struct sUIObj_C1E0 {
+    char pad_0x0[0x8];
+    sVE_C1E0* vt;                   // 0x8
+};
+
+struct sColor_C1E0 {
+    float r, g, b, a;
+    sColor_C1E0(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
+};
+
+
+struct sKeyboard_C1E0 {
+    char pad_0x0[0x10];
+    char* owner;                    // 0x10
+    char pad_0x14[0xC];
+    sUIObj_C1E0* parent;            // 0x20
+    char pad_0x24[0x1C];
+    void* screen;                   // 0x40
+    char pad_0x44[0x10];
+    int pendingAccept;              // 0x54
+    int needText;                   // 0x58
+    int done;                       // 0x5C
+    int maxLen;                     // 0x60
+    int minLen;                     // 0x64
+    int caps;                       // 0x68
+    int shift;                      // 0x6C
+    char pad_0x70[0x4];
+    char text[0xC0];                // 0x74
+    int cursor;                     // 0x134
+    int mark;                       // 0x138
+    int end;                        // 0x13C
+    int key;                        // 0x140
+    char pad_0x144[0x2DC];
+    int closeOnAccept;              // 0x420
+};
+
+// Handles the currently selected key of the on-screen keyboard.
+extern "C" void func_001CC1E0(void* self_, int flag)
+{
+    sKeyboard_C1E0* self = (sKeyboard_C1E0*)self_;
+    int redo = 0;
+    int moved;
+    if (self->pendingAccept != 0) {
+        int key = self->key;
+        if (key != 0x37 && key != 0x46) {
+            self->pendingAccept = 0;
+            self->key = 0x46;
+            func_001CC1E0(self, 0);
+            redo = 1;
+            self->key = key;
+        }
+    }
+    moved = 0;
+    if (flag == 0 && func_001CE560_out(self, self->key, 0) != 0) {
+        switch (self->key) {
+        case 27: {
+            int len = strlen(self->text);
+            if (self->cursor != len) {
+                if (self->cursor == 0)
+                    break;
+                if (self->cursor > 0)
+                    self->cursor--;
+                strcpy(&self->text[self->cursor], &self->text[self->cursor + 1]);
+                if (self->mark == self->cursor + 1) {
+                    self->mark = self->cursor;
+                    moved = 1;
+                }
+                if ((unsigned int)strlen(self->text) < (unsigned int)self->end)
+                    self->end = strlen(self->text);
+            } else if (self->mark == self->cursor) {
+                self->mark = 0;
+            } else {
+                if (self->cursor > 0)
+                    self->cursor--;
+                self->text[self->cursor] = 0;
+                self->end = self->cursor;
+            }
+            break;
+        }
+        case 28:
+        case 69:
+        case 79:
+            break;
+        case 42:
+            self->caps ^= 1;
+            cKeyboardPopup_redrawScreen(self);
+            break;
+        case 56:
+            self->shift ^= 1;
+            cKeyboardPopup_redrawScreen(self);
+            break;
+        case 70:
+            func_00416210(self->text, 0, 0x40);
+            self->text[0] = 0;
+            self->cursor = 0;
+            self->end = 0;
+            self->mark = 0;
+            break;
+        case 76:
+            if (self->cursor == self->mark) {
+                if (self->cursor != 0)
+                    self->mark = self->cursor - 1;
+                moved = 1;
+            }
+            if (self->cursor > 0)
+                self->cursor--;
+            break;
+        case 83: {
+            int len = strlen(self->text);
+            if (self->cursor != len) {
+                if (self->cursor < self->maxLen - 1)
+                    self->cursor++;
+                if (self->end == self->cursor)
+                    self->end++;
+            }
+            break;
+        }
+        case 55:
+            if (self->closeOnAccept != 0)
+                func_0039F190_r(self->owner + 0x18, 1);
+            self->done = 1;
+            self->parent->vt[19].fn((char*)self->parent + self->parent->vt[19].delta, 0, 0xD);
+            break;
+        case 75:
+            if (func_001CE560_out(self, 0x4B, 0) != 0)
+                func_001CC7C8(self);
+            break;
+        case 0:
+            func_0039F190_r(self->owner + 0x18, 1);
+            self->parent->vt[19].fn((char*)self->parent + self->parent->vt[19].delta, 0, 0xE);
+            break;
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+            func_001CE5E0(self, self->key - 4);
+            break;
+        default:
+            func_001CC7C8(self);
+            break;
+        }
+    }
+    if (self->key != 0x38 && self->shift != 0) {
+        self->shift ^= 1;
+        cKeyboardPopup_redrawScreen(self);
+    }
+    func_001CC848(self, moved);
+    if (self->needText != 0)
+        func_001CE3C8(self, 0x4B, strlen(self->text) != 0, 2);
+    if (strlen(self->text) < self->minLen)
+        func_001CE3C8(self, 0x37, 0, 2);
+    else
+        func_001CE3C8(self, 0x37, 1, 2);
+    cKeyboardPopup_redrawScreen(self);
+    if (redo) {
+        char name[32];
+        cKeyboardPopup_getObjName(self, 0x46, name, 1);
+        sUIObj_C1E0* o = (sUIObj_C1E0*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        if (o != 0) {
+            // PORT: takes the address of a temporary (accepted by g++ 2.95); use a named local elsewhere.
+            o->vt[11].fn((char*)o + o->vt[11].delta, &sColor_C1E0(0.3f, 0, 0, 0));
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CC620);

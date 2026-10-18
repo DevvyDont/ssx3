@@ -6386,7 +6386,157 @@ extern "C" void func_001AE680(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AE7A0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int cBENewRaceInterface_setNumberAI_E7A0(void* iface, int n) __asm__("cBENewRaceInterface_setNumberAI");
+extern "C" void func_001AE680_E7A0(void* self) __asm__("func_001AE680");
+extern "C" void func_001AF568_E7A0(void* self) __asm__("func_001AF568");
+extern "C" int func_0039A738_E7A0(void* item) __asm__("func_0039A738");
+extern "C" void func_0025F4C0_E7A0(void* self, int a1, int a2) __asm__("func_0025F4C0");
+extern "C" void func_0025F628_E7A0(void* self, int a1, int a2) __asm__("func_0025F628");
+extern "C" void func_0039F600_E7A0(void* list) __asm__("func_0039F600");
+extern "C" void* func_00186610_E7A0(void* mem, int a1, int a2) __asm__("func_00186610");
+extern "C" void cUIStateStack_pushSpecial_E7A0(void* stack, void* state, int a2, int a3) __asm__("cUIStateStack_pushSpecial");
+extern "C" void func_001AF098_E7A0(void* self, int on) __asm__("func_001AF098");
+extern "C" void func_001AEC60_E7A0(void* self, int v) __asm__("func_001AEC60");
+extern "C" void func_001AF208_E7A0(void* self, void* item, int on) __asm__("func_001AF208");
+extern int D_004A25A4;
+extern int D_004A2594;
+extern int D_004A2598;
+extern int D_00534B34[];
+extern char D_00460C38[];
+
+struct sRaceOpts_E7A0 {
+    char pad0[0x18];
+    unsigned int low : 6;
+    unsigned int bit6 : 1;
+    unsigned int bit7 : 1;
+    unsigned int bit8 : 1;
+    unsigned int high : 23;
+};
+extern sRaceOpts_E7A0 D_005308B8_E7A0 __asm__("D_005308B8");
+
+struct sIVE_E7A0 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+static inline void commit_E7A0(char* iface)
+{
+    sIVE_E7A0* ivt = *(sIVE_E7A0**)(iface + 0xC);
+    ivt[1].fn(iface + ivt[1].delta);
+}
+
+struct cState_E7A0 {
+    char pad0[0x10];
+    char* engine;            // 0x10
+    signed char f14;         // 0x14
+    char pad15[0x6D0 - 0x15];
+    int f6D0;                // 0x6D0
+    char pad6D4[0x6DC - 0x6D4];
+    void* aiOn;              // 0x6DC
+    void* numAI;             // 0x6E0
+    void* opt8;              // 0x6E4
+    void* opt6;              // 0x6E8
+    void* opt7;              // 0x6EC
+};
+
+// Message handler for the race-options screen.
+extern "C" void func_001AE7A0(cState_E7A0* self, void* a1, int msg)
+{
+    if (a1 == 0) {
+        return;
+    }
+    switch (msg) {
+    case 5:
+        switch (*(int*)((char*)a1 + 0x18)) {
+        case 7: {
+            func_001AE680_E7A0(self);
+            D_004A25A4 = 1;
+            D_004A2594 = 0;
+            D_004A2598 = 0;
+            char* p = (char*)func_00186610_E7A0(cMemMan_alloc(0x33C, D_00460C38, 0x100, 0), *(int*)&self->engine, 1);
+            *(int*)(p + 0x1C) = (*(int*)(p + 0x1C) & ~0x3F00) | 0x100;
+            cUIStateStack_pushSpecial_E7A0(self->engine + 0x18, p, 0, 0);
+            break;
+        }
+        case 9: {
+            if (self->f6D0) {
+                break;
+            }
+            func_001AE680_E7A0(self);
+            func_001AF568_E7A0(self);
+            char* opts = (char*)cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+            D_00534B34[0] = func_0039A738_E7A0(self->aiOn) != 0;
+            commit_E7A0(opts);
+            if (func_0039A738_E7A0(self->aiOn)) {
+                D_005308B8_E7A0.bit6 = 1;
+                D_005308B8_E7A0.bit7 = 1;
+                D_005308B8_E7A0.bit8 = 1;
+                char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+                cBENewRaceInterface_setNumberAI_E7A0(race, 0);
+                commit_E7A0(race);
+            } else {
+                D_005308B8_E7A0.bit6 = func_0039A738_E7A0(self->opt6);
+                D_005308B8_E7A0.bit8 = func_0039A738_E7A0(self->opt8);
+                D_005308B8_E7A0.bit7 = func_0039A738_E7A0(self->opt7);
+                char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+                cBENewRaceInterface_setNumberAI_E7A0(race, func_0039A738_E7A0(self->numAI));
+                commit_E7A0(race);
+            }
+            func_0025F4C0_E7A0(D_004A3028, *(int*)((char*)D_004A3028 + 0x98), self->f14);
+            break;
+        }
+        case 10:
+            if (self->f6D0) {
+                func_0025F628_E7A0(D_004A3028, 0, 1);
+            }
+            func_0039F600_E7A0(self->engine + 0x18);
+            break;
+        }
+        break;
+    case 6:
+        func_0025F628_E7A0(D_004A3028, 0, self->f6D0);
+        func_0039F600_E7A0(self->engine + 0x18);
+        break;
+    case 9:
+        if (a1 == self->aiOn) {
+            char* opts = (char*)cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+            D_00534B34[0] = func_0039A738_E7A0(self->aiOn) != 0;
+            commit_E7A0(opts);
+            func_001AF098_E7A0(self, func_0039A738_E7A0(self->aiOn) != 0);
+            func_001AEC60_E7A0(self, self->f6D0);
+        } else if (a1 == self->opt6) {
+            D_005308B8_E7A0.bit6 = func_0039A738_E7A0(a1);
+        } else if (a1 == self->opt8) {
+            D_005308B8_E7A0.bit8 = func_0039A738_E7A0(a1);
+        } else if (a1 == self->opt7) {
+            D_005308B8_E7A0.bit7 = func_0039A738_E7A0(a1);
+        } else if (a1 == self->numAI) {
+            char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+            cBENewRaceInterface_setNumberAI_E7A0(race, func_0039A738_E7A0(self->numAI));
+            D_004A4E8C = func_0039A738_E7A0(self->numAI);
+            commit_E7A0(race);
+        }
+        break;
+    case 1:
+        func_001AF208_E7A0(self, a1, 1);
+        break;
+    case 2:
+        func_001AF208_E7A0(self, a1, 0);
+        break;
+    case 7:
+        break;
+    default:
+        func_001A8918(self, (int)a1, msg);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AEBF0);
@@ -10006,7 +10156,103 @@ void func_001B4198(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B41A8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_001A8770(void* self);
+extern "C" void func_001B4888(void* self, int a1, int a2, int a3);
+extern "C" void func_001B5068(void* self, int a1);
+extern "C" void func_001B43A8(void* self);
+extern "C" void func_001B4470(void* self);
+extern "C" void func_001B45E8(void* self);
+extern "C" int func_0039F698(void* p);
+void func_002C67E8(void* self, int a1);
+extern char* D_004A1B78_p __asm__("D_004A1B78");
+extern int D_004A1B80;
+
+struct sVEv1B41A8 {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+struct sVE1B41A8 {
+    short delta;
+    short index;
+    int (*fn)(void*, ...);
+};
+
+static inline int VCall1B41A8(int slot)
+{
+    char* obj = D_004A1B78_p;
+    sVE1B41A8* vt = *(sVE1B41A8**)obj;
+    return vt[slot].fn(obj + vt[slot].delta);
+}
+
+// Per-frame update for the online-login screen: steps the login state machine on the network object.
+extern "C" void func_001B41A8(void* self)
+{
+    if (D_004A1B78_p != 0) {
+        char* obj = D_004A1B78_p;
+        sVEv1B41A8* vt = *(sVEv1B41A8**)obj;
+        vt[3].fn(obj + vt[3].delta);
+    }
+    switch (*(int*)((char*)self + 0x708)) {
+    case 1:
+        *(int*)((char*)self + 0x708) = 2;
+        break;
+    case 2:
+        if (VCall1B41A8(11) == 0) {
+            func_002C67E8(D_004A1B78_p, D_004A1B80);
+            *(int*)((char*)self + 0x708) = 3;
+        }
+        break;
+    case 3:
+        if (VCall1B41A8(11) == 0) {
+            func_001B4470(self);
+        }
+        break;
+    case 4:
+        func_001B43A8(self);
+        break;
+    case 5:
+        if ((*(int*)((char*)self + 0x6E0))-- < 0) {
+            if (VCall1B41A8(53) == 0) {
+                func_001B5068(self, -1);
+                func_001B4888(self, 0x842, 0x18, D_004A1B80);
+            } else {
+                func_0039F698(*(char**)((char*)self + 0x10) + 0x18);
+            }
+            *(int*)((char*)self + 0x708) = 0;
+            break;
+        }
+    case 0:
+        if (VCall1B41A8(11) == 0) {
+            char* obj = D_004A1B78_p;
+            sVEv1B41A8* vt = *(sVEv1B41A8**)obj;
+            vt[5].fn(obj + vt[5].delta, D_004A1B80);
+        }
+        break;
+    case 6:
+        *(int*)((char*)self + 0x708) = 7;
+        break;
+    case 7:
+        if (VCall1B41A8(11) == 0) {
+            func_002C67E8(D_004A1B78_p, D_004A1B80);
+            *(int*)((char*)self + 0x708) = 8;
+        }
+        break;
+    case 8:
+        if (VCall1B41A8(11) == 0) {
+            func_001B45E8(self);
+        }
+        break;
+    }
+    func_001A8770(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B43A8);
@@ -12366,13 +12612,170 @@ extern "C" void func_001B7C70(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B7CB8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int* D_004A33D0;
+extern "C" void func_00265A68(void* self);
+extern "C" int func_00265D38(void* self);
+extern "C" void func_002659E8(void* self);
+extern "C" void* func_001B70D0(void*, int);
+void* func_001B77A8(void* self);
+extern "C" void func_001B77C8(void* self);
+extern "C" void func_001B7820(void* self);
+extern "C" void func_001B78F0(void* self);
+extern "C" void func_001B7938(void* self);
+extern "C" void func_001B7A08(void* self);
+extern "C" void func_001B7A50(void* self);
+extern "C" void func_001B7A98(void* self);
+extern "C" void func_001B7BC0(void* self);
+extern "C" void func_001B7C28(void* self);
+extern "C" void func_001B7C70(void* self);
+
+// Polls the memory card, then runs the step handler for the current memory-card state.
+extern "C" void func_001B7CB8(void* self)
+{
+    func_00265A68(D_004A33D0);
+    int* mc = D_004A33D0;
+    *(int*)((char*)self + 0x6D4) = mc[1];
+    if (func_00265D38(mc) != 0) {
+        *(int*)((char*)self + 0x6D8) = 1;
+        if (*(int*)((char*)self + 0x6D4) == 0) {
+            *(int*)((char*)self + 0x6D4) = 2;
+        }
+    }
+    switch (*(int*)((char*)self + 0x6DC)) {
+    case 0: func_001B70D0(self, 1); break;
+    case 1: func_001B77A8(self); break;
+    case 2: func_001B77C8(self); break;
+    case 5: func_001B70D0(self, 6); break;
+    case 6: func_001B7820(self); break;
+    case 8: func_001B78F0(self); break;
+    case 11: func_001B70D0(self, 0xC); break;
+    case 12: func_001B7938(self); break;
+    case 14: func_001B7A08(self); break;
+    case 16: func_001B7A50(self); break;
+    case 19: func_001B70D0(self, 0x14); break;
+    case 20: func_001B7A98(self); break;
+    case 22: func_001B7BC0(self); break;
+    case 7: case 13: case 21: case 25: func_002659E8(D_004A33D0); break;
+    case 26: func_001B7C28(self); break;
+    case 27: func_001B7C70(self); break;
+    case 28: case 29: break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B7E40);
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B8238);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: func_002C2718/func_002C26D0 are varargs formatters; the unit declares fixed-arg views
+extern "C" void func_002C2718_1B8238(char* buf, const char* fmt, ...) __asm__("func_002C2718");
+extern "C" void func_002C26D0_1B8238(void* dst, int fmt, ...) __asm__("func_002C26D0");
+extern char D_004A12C0[];
+struct sVEntry_001B8238 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+static inline int Loc_001B8238(char* key)
+{
+    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry_001B8238* vt = *(sVEntry_001B8238**)(obj + 4);
+    return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
+}
+extern char D_004642E0[];
+extern char D_00463F20[];
+extern char D_00464588[];
+extern char D_004644D8[];
 
+extern "C" void func_001B8238(char* self)
+{
+    char buf[32];
+    func_002C2718_1B8238(buf, D_004A12C0, 1);
+    switch (*(int*)(self + 0x6DC)) {
+    case 3:
+    case 23: {
+        int name = Loc_001B8238(D_004642E0);
+        int str = Loc_001B8238(D_00463F20);
+        func_002C26D0_1B8238(self + 0x702, str, 1, name);
+        break;
+    }
+    case 9:
+    case 15:
+    case 17: {
+        int str = Loc_001B8238(D_00464588);
+        func_002C26D0_1B8238(self + 0x702, str, 1, 0x11);
+        break;
+    }
+    case 28: {
+        int str = Loc_001B8238(D_004644D8);
+        func_002C26D0_1B8238(self + 0x702, str, buf);
+        break;
+    }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B83C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_002C2718_1B83C0(char* buf, const char* fmt, ...) __asm__("func_002C2718");
+extern "C" void func_002C26D0_1B83C0(void* dst, int fmt, ...) __asm__("func_002C26D0");
+extern char D_004A12C0[];
+extern char D_00464608[];
+extern char D_00464628[];
+extern char D_00464640[];
+extern char D_004644F0[];
+
+struct sVEntry_001B83C0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+static inline int Loc_001B83C0(char* key)
+{
+    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry_001B83C0* vt = *(sVEntry_001B83C0**)(obj + 4);
+    return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
+}
+
+// Formats the localized string for key into the dialog's text buffer at 0x702.
+static inline void SetText_001B83C0(char* self, char* key, char* buf)
+{
+    int str = Loc_001B83C0(key);
+    func_002C26D0_1B83C0(self + 0x702, str, buf);
+}
+
+extern "C" void func_001B83C0(char* self)
+{
+    char buf[32];
+    func_002C2718_1B83C0(buf, D_004A12C0, 1);
+    switch (*(int*)(self + 0x6DC)) {
+    case 3:
+        SetText_001B83C0(self, D_00464608, buf);
+        break;
+    case 9:
+    case 17:
+    case 28:
+        SetText_001B83C0(self, D_00464628, buf);
+        break;
+    case 23:
+        SetText_001B83C0(self, D_00464640, buf);
+        break;
+    case 15:
+        SetText_001B83C0(self, D_004644F0, buf);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/feasyncfile", func_001B84D8);
 
@@ -12680,7 +13083,60 @@ extern "C" void func_001B91C8(void* self, void* a1, int kind)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B92C8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" int func_001A97B8(void* self, void* a1, int a2);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" void* func_001AD130(void* mem, int a1);
+extern const char D_00462D68[];
+extern char D_00462D80[];
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+
+// Tracks a pending flag across messages; on 0x16 either asks for confirmation or opens the next screen.
+extern "C" void func_001B92C8(void* self, void* a1, int a2)
+{
+    switch (a2) {
+    case 0xF: case 0x10: case 0x14:
+        *(int*)((char*)self + 0x6E8) = 0;
+        func_001A97B8(self, a1, a2);
+        break;
+    case 0x11:
+        *(int*)((char*)self + 0x6E8) = 1;
+        func_001A97B8(self, a1, a2);
+        break;
+    case 0x16:
+        if (*(int*)((char*)self + 0x6E8) != 0) {
+            func_001A97B8(self, a1, a2);
+            void* p = func_001A9C50(self);
+            char* sub = (char*)p + 0xBC;
+            *(int*)((char*)p + 0xBC) = 2;
+            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462D80);
+            *(int*)((char*)p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
+            func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+            *(int*)((char*)p + 0x150) = 0x81E;
+            *(int*)((char*)p + 0x168) = 0;
+            *(int*)((char*)p + 0x164) = 0;
+            func_001A9BC0(self, p);
+        } else {
+            func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), *(int*)((char*)self + 0x10)));
+        }
+        *(int*)((char*)self + 0x6E8) = 0;
+        break;
+    default:
+        func_001A97B8(self, a1, a2);
+        break;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feasyncfile", func_001B9428);
@@ -13628,7 +14084,40 @@ extern "C" void func_001BA9F8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BAA88);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_001BB158(void* self, void* a1, unsigned int a2);
+extern "C" void func_001BB0E8(void* self, void* a1, int a2);
+extern "C" void func_001BB098(void* self, void* a1, int a2);
+extern "C" void func_001BADE8(void* self, void* a1, int a2);
+extern "C" void func_001BAED8(void* self, void* a1, int a2);
+// Dispatches a message to the matching handler, falling back to the base handler.
+extern "C" void func_001BAA88(void* self, void* a1, int a2)
+{
+    switch (*(int*)((char*)a1 + 0x18)) {
+    case 0x81F:
+        func_001BB158(self, a1, a2);
+        break;
+    case 0x821:
+        func_001BB0E8(self, a1, a2);
+        break;
+    case 0x822:
+        func_001BB098(self, a1, a2);
+        break;
+    case 0x80E:
+        func_001BADE8(self, a1, a2);
+        break;
+    case 0x82C:
+        func_001BAED8(self, a1, a2);
+        break;
+    default:
+        func_001A97B8(self, a1, a2);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001BAB28);
@@ -13779,7 +14268,71 @@ extern "C" void func_001BADE8(void* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BAED8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+// PORT: the unit declares func_001A97B8 as returning int; this caller ignores the result.
+extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void func_0025C610(void* net);
+extern void* D_004A3028;
+extern char D_00462D80[];
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+extern char D_00462C70[];
+extern char D_00462C88[];
+
+// Tracks a pending flag; on 0x16 shows either the confirm popup or the network-connect popup.
+extern "C" void func_001BAED8(void* self, void* a1, int a2)
+{
+    switch (a2) {
+    case 0xF: case 0x10: case 0x14:
+        *(int*)((char*)self + 0x6D8) = 0;
+        func_001A97B8_v(self, a1, a2);
+        break;
+    case 0x11:
+        *(int*)((char*)self + 0x6D8) = 1;
+        func_001A97B8_v(self, a1, a2);
+        break;
+    case 0x16:
+        func_001A97B8_v(self, a1, a2);
+        if (*(int*)((char*)self + 0x6D8) != 0) {
+            void* p = func_001A9C50(self);
+            char* sub = (char*)p + 0xBC;
+            *(int*)((char*)p + 0xBC) = 2;
+            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462D80);
+            *(int*)((char*)p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
+            func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+            *(int*)((char*)p + 0x164) = 0;
+            *(int*)((char*)p + 0x150) = 0x81F;
+            func_001A9BC0(self, p);
+        } else {
+            void* p = func_001A9C50(self);
+            char* sub = (char*)p + 0xBC;
+            *(int*)((char*)p + 0xBC) = 1;
+            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462C70);
+            *(int*)((char*)p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
+            *(int*)((char*)p + 0x150) = 0x80E;
+            func_001A9BC0(self, p);
+            cBXString_cBXString4((char*)D_004A3028 + 0x48, **(char***)((char*)self + 0x6D0));
+            cBXString_cBXString4((char*)D_004A3028 + 0x4C, (*(char***)((char*)self + 0x6D0))[1]);
+            func_0025C610(D_004A3028);
+        }
+        *(int*)((char*)self + 0x6D8) = 0;
+        break;
+    default:
+        func_001A97B8_v(self, a1, a2);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001BB098);
@@ -14805,7 +15358,72 @@ extern "C" void func_001BC818(void* self, void* a1, int kind)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BC990);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+// PORT: the unit declares func_001A97B8 as returning int; this caller ignores the result.
+extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void func_0025C610(void* net);
+extern void* D_004A3028;
+extern char D_00462D80[];
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+extern char D_00462C70[];
+extern char D_00462C88[];
+
+// Tracks a pending flag; on 0x16 shows either the confirm popup or the network-connect popup.
+extern "C" void func_001BC990(void* self, void* a1, int a2)
+{
+    switch (a2) {
+    case 0xF: case 0x10: case 0x14:
+        *(int*)((char*)self + 0x6D4) = 0;
+        func_001A97B8_v(self, a1, a2);
+        break;
+    case 0x11:
+        *(int*)((char*)self + 0x6D4) = 1;
+        func_001A97B8_v(self, a1, a2);
+        break;
+    case 0x16:
+        func_001A97B8_v(self, a1, a2);
+        if (*(int*)((char*)self + 0x6D4) != 0) {
+            void* p = func_001A9C50(self);
+            char* sub = (char*)p + 0xBC;
+            *(int*)((char*)p + 0xBC) = 2;
+            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462D80);
+            *(int*)((char*)p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
+            func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+            *(int*)((char*)p + 0x168) = 0;
+            *(int*)((char*)p + 0x164) = 0;
+            *(int*)((char*)p + 0x150) = 0x81F;
+            func_001A9BC0(self, p);
+        } else {
+            void* p = func_001A9C50(self);
+            char* sub = (char*)p + 0xBC;
+            *(int*)((char*)p + 0xBC) = 1;
+            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462C70);
+            *(int*)((char*)p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
+            *(int*)((char*)p + 0x150) = 0x80E;
+            func_001A9BC0(self, p);
+            cBXString_cBXString4((char*)D_004A3028 + 0x48, **(char***)((char*)self + 0x6D8));
+            cBXString_cBXString4((char*)D_004A3028 + 0x4C, (*(char***)((char*)self + 0x6D8))[1]);
+            func_0025C610(D_004A3028);
+        }
+        *(int*)((char*)self + 0x6D4) = 0;
+        break;
+    default:
+        func_001A97B8_v(self, a1, a2);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001BCB58);
@@ -15144,7 +15762,123 @@ extern "C" void func_001BCE38(void* self, cFEVObj_001BCE38* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BD1B8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_001BE7D8_D1B8(void* mem, int a1, void* owner) __asm__("func_001BE7D8");
+extern "C" int func_0039A738_D1B8(void* item) __asm__("func_0039A738");
+extern "C" void func_001BD460_D1B8(void* self, int id, int a2) __asm__("func_001BD460");
+extern "C" void func_001BD428_D1B8(void* self) __asm__("func_001BD428");
+extern "C" int func_0025F180_D1B8(void* self, int id) __asm__("func_0025F180");
+extern "C" void func_0025D770_D1B8(void* self, int id) __asm__("func_0025D770");
+extern char D_00464F60[];
+
+struct sVE_D1B8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sObj_D1B8 {
+    int pad[2];
+    sVE_D1B8* vt;
+};
+
+struct cState_D1B8 {
+    char pad0[0x10];
+    int engine;              // 0x10
+    char pad14[0x1C - 0x14];
+    int flags;               // 0x1C
+    char pad20[0x40 - 0x20];
+    char* screen;            // 0x40
+    char pad44[0x6D4 - 0x44];
+    char* info;              // 0x6D4
+    char pad6D8[0x700 - 0x6D8];
+    void* backBtn;           // 0x700
+    char pad704[0x708 - 0x704];
+    char* items[4];          // 0x708
+    void* btns[4];           // 0x718
+    char pad728[0x740 - 0x728];
+    sObj_D1B8* texts[4];     // 0x740
+    int vals[4];             // 0x750
+    int changed;             // 0x760
+    int sel;                 // 0x764
+    int selVal;              // 0x768
+    char pad76C[0x774 - 0x76C];
+    int curId;               // 0x774
+    int busy;                // 0x778
+};
+
+// Message handler for the profile-select screen.
+extern "C" void func_001BD1B8(cState_D1B8* self, char* a1, int msg)
+{
+    switch (msg) {
+    case 9:
+        for (int i = 0; i < 4; i++) {
+            if (a1 == self->items[i]) {
+                self->vals[i] = (unsigned char)a1[0x319];
+                self->busy = 0;
+                int id = func_0039A738_D1B8(a1);
+                self->curId = id;
+                int r = func_0025F180_D1B8(D_004A3028, id);
+                sObj_D1B8* t = self->texts[i];
+                t->vt[9].fn((char*)t + t->vt[9].delta, r);
+                func_0025D770_D1B8(D_004A3028, self->curId);
+                return;
+            }
+        }
+        break;
+    case 5: {
+        char* item = 0;
+        if (a1 == self->backBtn) {
+            void* p = func_001BE7D8_D1B8(cMemMan_alloc(0x6E8, D_00464F60, 0, 0), self->engine, self);
+            *(int*)((char*)p + 0x18) = 0x823;
+            func_0039F290(*(char**)(*(char**)(self->screen + 0xD0) + 0x10) + 0x18, p);
+        }
+        for (int i = 0; i < 4; i++) {
+            if (a1 == self->btns[i]) {
+                item = self->items[i];
+                break;
+            }
+        }
+        if (item == 0) {
+            break;
+        }
+        if (func_0039A738_D1B8(item) == -1) {
+            break;
+        }
+        func_001BD460_D1B8(self, func_0039A738_D1B8(item), 0);
+        break;
+    }
+    case 6:
+        func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), self->engine));
+        break;
+    case 7: {
+        self->changed = 1;
+        int n = *(int*)(*(char**)(self->info + 0xA0) + 0x18);
+        self->sel = n;
+        if (n < 4) {
+            self->selVal = (unsigned char)self->items[n][0x319];
+        }
+        func_001A8918(self, (int)a1, msg);
+        break;
+    }
+    case 8:
+        if ((self->flags & 6) == 0) {
+            func_001A9B58(self);
+        }
+        break;
+    case 13:
+        func_001BD428_D1B8(self);
+        break;
+    default:
+        func_001A8918(self, (int)a1, msg);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001BD428);
@@ -15283,7 +16017,59 @@ extern "C" void func_001BD610(void* self, int a1, int a2, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BD738);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void func_001A8A40(void* self, void* obj);
+// PORT: func_001BE510 is defined as (self) in this unit, but this caller passes a second arg.
+void func_001BE510_BD738(void* self, int a1) __asm__("func_001BE510");
+extern "C" const char* func_0039A708(void* a);
+extern "C" void func_001BE0A8(void* self);
+// PORT: func_001BE038 is defined later with its own list type; bound by asm label.
+void func_001BE038_BD738(void* self) __asm__("func_001BE038");
+struct sFEObj_001B1F88;
+extern "C" sFEObj_001B1F88* func_001B1F88(sFEObj_001B1F88* mem, int a1);
+extern "C" void func_001BD848(void* self, int a1, int a2);
+extern const char D_0045FF10[];
+
+struct sFE1BD738 {
+    char pad0[0x708];
+    void* boxes[4];     // 0x708
+};
+
+// Message handler for the slot-select screen; unknown messages go to the base handler.
+extern "C" void* func_001BD738(char* self, int a1, int a2)
+{
+    switch (a1) {
+    case 0xE0:
+        func_001BE510_BD738(self, *(int*)(self + 0x774));
+        break;
+    case 0xDF: {
+        int n = *(int*)(*(char**)(*(char**)(self + 0x6D4) + 0xA0) + 0x18);
+        *(int*)(self + 0x764) = n;
+        if (n < 4) {
+            cBXString_cBXString4(self + 0x76C, func_0039A708(((sFE1BD738*)self)->boxes[n]));
+        }
+        func_001BE0A8(self);
+        func_001BE038_BD738(self);
+        break;
+    }
+    case 0xDC: case 0xE4:
+        func_001A8A40(self, func_001B1F88((sFEObj_001B1F88*)cMemMan_alloc(0x73C, D_0045FF10, 0, 0), *(int*)(self + 0x10)));
+        break;
+    case 0x102:
+        func_001BD848(self, a1, a2);
+        break;
+    default:
+        return func_001A8E40_3(self, a1, a2);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001BD848);
@@ -17046,7 +17832,101 @@ extern "C" void func_001BFD98(void* self, void* popup)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BFE70);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_001C0F40_FE70(void* mem, int a1, void* owner) __asm__("func_001C0F40");
+extern "C" void* func_001BCB58_FE70(void* mem, int a1) __asm__("func_001BCB58");
+extern "C" void* func_001C2D18_FE70(void* mem, int a1) __asm__("func_001C2D18");
+extern "C" void* func_001C1C50_FE70(void* mem, int a1) __asm__("func_001C1C50");
+extern char D_004654E0[];
+extern char D_00465500[];
+extern const char D_004611A8[];
+extern char D_00465510[];
+extern char D_00465530[];
+
+class cFEFactory_001BFE70 {
+public:
+    int f0;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void* create(void* owner, int a2);
+};
+
+// Memory-card async state message handler: creates the next screen or shows an error popup.
+extern "C" void func_001BFE70(void* self, void* a1, unsigned int a2)
+{
+    char* s = (char*)self;
+    if (a1 == 0) {
+        return;
+    }
+    switch (a2) {
+    case 5:
+        switch (*(unsigned int*)((char*)a1 + 0x18)) {
+        case 1: {
+            D_004A4E88 = 1;
+            void* p = func_001C0F40_FE70(cMemMan_alloc(0x734, D_004654E0, 0, 0), *(int*)(s + 0x10), self);
+            *(int*)((char*)p + 0x18) = 0x82E;
+            func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)(s + 0x40) + 0xD0) + 0x10) + 0x18, p);
+            break;
+        }
+        case 2:
+            func_001A8A40(self, func_001BCB58_FE70(cMemMan_alloc(0xB84, D_00461B30, 0, 0), *(int*)(s + 0x10)));
+            break;
+        case 3:
+            func_001A8A40(self, func_001C2D18_FE70(cMemMan_alloc(0x6F0, D_00465500, 0, 0), *(int*)(s + 0x10)));
+            break;
+        case 0: {
+            void* obj = (*(cFEFactory_001BFE70**)*(void**)(s + 0x10))->create(self, 0);
+            if (obj == 0) {
+                break;
+            }
+            func_001A8A40(self, obj);
+            break;
+        }
+        case 4:
+            func_001A8A40(self, func_001C1C50_FE70(cMemMan_alloc(0x6D0, D_004611A8, 0, 0), *(int*)(s + 0x10)));
+            break;
+        case 5: {
+            void* p = func_001A9C50(self);
+            char* sub = (char*)p + 0xBC;
+            *(int*)((char*)p + 0xBC) = 2;
+            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00465510);
+            *(int*)((char*)p + 0xC0) = 3;
+            func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+            func_001C57C0(sub, 1, GetHashValue32(D_00462C88));
+            *(int*)((char*)p + 0x150) = 0x82D;
+            func_001A9BC0(self, p);
+            break;
+        }
+        }
+        break;
+    case 6: {
+        void* p = func_001A9C50(self);
+        char* sub = (char*)p + 0xBC;
+        *(int*)((char*)p + 0xBC) = 2;
+        *(int*)((char*)p + 0xC4) = GetHashValue32(D_00465530);
+        *(int*)((char*)p + 0xC0) = 3;
+        func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
+        func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
+        *(int*)((char*)p + 0x150) = 0x846;
+        func_001A9BC0(self, p);
+        break;
+    }
+    case 8:
+        if ((*(int*)(s + 0x1C) & 6) == 0) {
+            func_001A9B58(self);
+        }
+        break;
+    default:
+        func_001A8918(self, (int)a1, a2);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C0138);
@@ -17390,7 +18270,58 @@ extern "C" void func_001C0CE0(void* self, void* item)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C0D28);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" void func_001A8918(void* self, int a1, int msg);
+extern "C" void* func_001BEE30(void* mem, int a1);
+extern "C" void* func_001B88F0(void* self, int a1, int a2);
+extern "C" void* func_001BA3E0(void* self, int a1);
+extern "C" void* func_001C1C50(void* self, int a1);
+extern char D_00465740[];
+extern char D_00462ED0[];
+extern char D_00464848[];
+extern const char D_004611A8[];
+
+// On confirm (msg 5/6), opens the screen that matches this menu's id; other messages go to the base handler.
+extern "C" void func_001C0D28(void* self, int a1, unsigned int msg)
+{
+    void* obj;
+    if (a1 == 0) {
+        return;
+    }
+    switch (msg) {
+    case 5:
+    case 6:
+        switch (*(int*)((char*)self + 0x18)) {
+        case 0x12:
+            obj = func_001BEE30(cMemMan_alloc(0x6D4, D_00465740, 0, 0), *(int*)((char*)self + 0x10));
+            break;
+        case 0x14:
+            obj = func_001B88F0(cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), *(int*)((char*)self + 0x10), 1);
+            break;
+        case 0x15:
+            obj = func_001B88F0(cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), *(int*)((char*)self + 0x10), 0);
+            break;
+        case 0x16:
+            obj = func_001BA3E0(cMemMan_alloc(0x6E0, D_00464848, 0, 0), *(int*)((char*)self + 0x10));
+            break;
+        case 0x13:
+        default:
+            obj = func_001C1C50(cMemMan_alloc(0x6D0, D_004611A8, 0, 0), *(int*)((char*)self + 0x10));
+            break;
+        }
+        func_001A8A40(self, obj);
+        break;
+    default:
+        func_001A8918(self, a1, msg);
+        break;
+    }
+}
+#endif
 
 extern "C" void* func_001A8E40(void* self);
 
@@ -17840,7 +18771,85 @@ extern "C" void func_001C17F8(void* self, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C19C8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001B0F60(void* self, int a1);
+extern "C" void func_001A8A40(void* self, void* obj);
+extern "C" void func_001AB178(void* self, int err);
+extern "C" int func_0039F698(void* p);
+extern "C" void* func_001A9C50(void* self);
+extern "C" void func_001A9BC0(void* self, void* popup);
+void func_001C57C0(void* self, int a1, int a2);
+extern const char D_00461C60[];
+extern char D_00461618[];
+extern char D_00465958[];
+
+struct cFEObj_001C19C8 {
+    int f0;
+    int f4;
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17(void* a1, int a2);
+};
+
+// Message handler: on 0xE7 confirms (if armed) or closes the screen; other ids as in the sibling handlers.
+extern "C" void* func_001C19C8(void* self, int a1, int a2)
+{
+    switch (a1) {
+    case 0xE6:
+        *(int*)((char*)self + 0x6F0) = 1;
+        break;
+    case 0x10C: case 0x112:
+        func_0039F698(*(char**)((char*)self + 0x10) + 0x18);
+        func_001AB178(self, a1);
+        break;
+    case 0xE7:
+        if (*(int*)((char*)self + 0x6F0) != 0) {
+            void* p = func_001A9C50(self);
+            char* sub = (char*)p + 0xBC;
+            *(int*)((char*)p + 0xBC) = 1;
+            func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00465958);
+            *(int*)((char*)p + 0xC0) = 3;
+            *(int*)((char*)p + 0x150) = 0x82F;
+            *(int*)((char*)p + 0x14C) = 6;
+            func_001A9BC0(self, p);
+        } else {
+            *(int*)((char*)self + 0x6EC) = 0;
+            (*(cFEObj_001C19C8**)((char*)self + 0x20))->v17(self, 0x14);
+        }
+        break;
+    case 0xF3:
+        func_001A8A40(self, func_001B0F60(cMemMan_alloc(0x6E4, D_00461C60, 0x100, 0), *(int*)((char*)self + 0x10)));
+        break;
+    default:
+        return func_001A8E40_3(self, a1, a2);
+    case 0xEF:
+        break;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C1B48);
@@ -18002,7 +19011,94 @@ extern "C" void func_001C1E08(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C1EA8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_001C5018(void* self, int a1);
+extern "C" void* func_001C20F8(void* self, int a1);
+extern "C" void* func_001887A0(void* self, int engine, int reset);
+extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
+extern const char D_00465AD0[];
+extern const char D_00465AE0[];
+extern char D_00464860[];
+extern const char D_0045D698[];
+
+struct sColor_1C1EA8 {
+    float r, g, b, a;
+};
+
+struct sTextVE_1C1EA8 {
+    short delta;
+    short index;
+    void (*fn)(void*, sColor_1C1EA8*);
+};
+
+extern "C" void func_001C1EA8(char* self, char* msg, int ev)
+{
+    if (msg == 0) {
+        return;
+    }
+    switch (ev) {
+    case 5:
+        switch (*(int*)(msg + 0x18)) {
+        case 0:
+            func_001A8A40(self, func_001C5018(cMemMan_alloc(0x6D0, D_00465AD0, 0, 0), *(int*)(self + 0x10)));
+            break;
+        case 1:
+            func_001A8A40(self, func_001C20F8(cMemMan_alloc(0x6FC, D_00465AE0, 0, 0), *(int*)(self + 0x10)));
+            break;
+        case 2: {
+            char* p = (char*)func_001C0418(cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), *(int*)(self + 0x10));
+            *(int*)(p + 0x18) = 0x13;
+            func_001A8A40(self, p);
+            break;
+        }
+        case 3:
+            if ((*(int*)(self + 0x1C) & 6) == 0) {
+                char* q = (char*)func_001887A0(cMemMan_alloc(0x54, D_0045D698, 0x100, 0), *(int*)(self + 0x10), 0);
+                *(int*)(q + 0x1C) = (*(int*)(q + 0x1C) & ~0x3F00) | 0x100;
+                cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, q, 0, 0);
+            }
+            break;
+        }
+        break;
+    case 6:
+        func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)(self + 0x10)));
+        break;
+    case 1: {
+        sColor_1C1EA8 c;
+        sTextVE_1C1EA8* vt = *(sTextVE_1C1EA8**)(msg + 8);
+        char* obj = msg + vt[11].delta;
+        c.r = 1.0f;
+        c.g = 1.0f;
+        c.b = 1.0f;
+        c.a = 1.0f;
+        vt[11].fn(obj, &c);
+        break;
+    }
+    case 2: {
+        sColor_1C1EA8 c;
+        sTextVE_1C1EA8* vt = *(sTextVE_1C1EA8**)(msg + 8);
+        char* obj = msg + vt[11].delta;
+        c.r = 1.0f;
+        c.g = 0.0f;
+        c.b = 0.0f;
+        c.a = 0.0f;
+        vt[11].fn(obj, &c);
+        break;
+    }
+    case 8:
+        if ((*(int*)(self + 0x1C) & 6) == 0) {
+            func_001A9B58(self);
+        }
+        break;
+    default:
+        func_001A8918(self, (int)msg, ev);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C20F8);
@@ -18776,7 +19872,208 @@ extern "C" void func_001C3570(void* self, void* menu)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C3668);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+int GetHashValue32(char* str);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* cUIScreen_getObjectByHashName_3668(void* self, int hash) __asm__("cUIScreen_getObjectByHashName");
+extern "C" void func_001A8918_3668(void* self, void* w, int msg) __asm__("func_001A8918");
+extern "C" void func_001A8A40_3668(void* self, void* obj) __asm__("func_001A8A40");
+extern "C" void* func_001BFBB8_3668(void* mem, void* a1) __asm__("func_001BFBB8");
+extern "C" void func_001C49C8_3668(void* self) __asm__("func_001C49C8");
+extern "C" int func_0039A738_3668(void* w) __asm__("func_0039A738");
+extern "C" void func_001C4B78_3668(void* self, int v) __asm__("func_001C4B78");
+extern "C" void func_001C3310_3668(void* self) __asm__("func_001C3310");
+extern "C" void func_001C3EE8_3668(void* self, int mode) __asm__("func_001C3EE8");
+extern "C" void func_001A9B58_3668(void* self) __asm__("func_001A9B58");
+extern "C" void func_003A0290_3668(void* w, void* pos) __asm__("func_003A0290");
+extern "C" int func_0025F338_3668(void* p) __asm__("func_0025F338");
+extern "C" void func_001C3D68_3668(void* self, int idx, int count) __asm__("func_001C3D68");
+extern void* D_004A3028;
+extern const char D_0045FF28[];
+extern char D_00465C78[];
+extern char D_00465C88[];
+extern char D_00465C98[];
+extern char D_00465CA8[];
+extern char D_00465CB8[];
+extern char D_00465CC8[];
+extern char D_00465CF0[];
+extern char D_00465D00[];
+extern char D_00465D10[];
+extern char D_00465D60[];
+extern char D_00465E10[];
+extern char D_00465E20[];
+extern char D_004A1C10[];
+
+struct cVec_3668 {
+    float x, y, z, w;
+    cVec_3668(float a, float b, float c, float e) { x = a; y = b; z = c; w = e; }
+};
+
+struct cPos_3668 {
+    float x, y, z;
+};
+
+class cObj_3668 {
+public:
+    int pad[2];
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05();
+    virtual void v06(); virtual void v07(); virtual void v08();
+    virtual void setVisible(int on);
+    virtual void v10();
+    virtual void setColor(const cVec_3668& v);
+    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16();
+    virtual void v17(); virtual void v18(); virtual void v19();
+    virtual void getSize(cPos_3668* out);
+};
+
+// Same slot-9 setVisible, declared with other return types so the two highlight-off arms are not cross-jumped.
+class cObjB_3668 {
+public:
+    int pad[2];
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05();
+    virtual void v06(); virtual void v07(); virtual void v08();
+    virtual float setVisible(int on);
+};
+
+class cObjC_3668 {
+public:
+    int pad[2];
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05();
+    virtual void v06(); virtual void v07(); virtual void v08();
+    virtual double setVisible(int on);
+};
+
+static inline cObj_3668* getObj_3668(char* self, char* name)
+{
+    return (cObj_3668*)cUIScreen_getObjectByHashName_3668(*(void**)(self + 0x40), GetHashValue32(name));
+}
+
+static inline int isButton_3668(cObj_3668* w, char* name)
+{
+    int id = *(int*)((char*)w + 0x38);
+    return id == GetHashValue32(name);
+}
+
+// Widget events of the online leaderboard screen: page buttons, row highlight and row selection.
+extern "C" void func_001C3668(char* self, cObj_3668* w, int msg)
+{
+    cObj_3668* o;
+    cObjB_3668* p;
+    if (w == 0) {
+        return;
+    }
+    switch (msg) {
+    case 6:
+        func_001A8A40_3668(self, func_001BFBB8_3668(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(void**)(self + 0x10)));
+        return;
+    case 9:
+        if (isButton_3668(w, D_00465C78)) {
+            func_001C49C8_3668(self);
+        } else if (isButton_3668(w, D_00465C88)) {
+            func_001C4B78_3668(self, func_0039A738_3668(w));
+            func_001C3310_3668(self);
+        }
+    case 1:
+        if (*(void**)(self + 0x40) == 0) {
+            return;
+        }
+        if (isButton_3668(w, D_00465CF0)) {
+            func_001C3EE8_3668(self, 0);
+        } else if (isButton_3668(w, D_00465D10)) {
+            func_001C3EE8_3668(self, 2);
+        } else if (isButton_3668(w, D_00465D00)) {
+            func_001C3EE8_3668(self, 1);
+        } else if (isButton_3668(w, D_00465C78)) {
+            w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
+            o = getObj_3668(self, D_00465CA8);
+            o->setVisible(1);
+            o = getObj_3668(self, D_00465C98);
+            o->setVisible(1);
+            o = getObj_3668(self, D_00465E10);
+            o->setVisible(1);
+        } else if (isButton_3668(w, D_00465C88)) {
+            w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
+            o = getObj_3668(self, D_00465CC8);
+            o->setVisible(1);
+            o = getObj_3668(self, D_00465CB8);
+            o->setVisible(1);
+            o = getObj_3668(self, D_00465E20);
+            o->setVisible(1);
+        } else {
+            char buf[0x20];
+            for (int i = 0; i < 10; i++) {
+                sprintf(buf, D_00465D60, i);
+                if (isButton_3668(w, buf)) {
+                    cPos_3668 pos;
+                    cPos_3668 size;
+                    cObj_3668* t = getObj_3668(self, D_004A1C10);
+                    func_003A0290_3668(w, &pos);
+                    w->getSize(&size);
+                    pos.y = pos.y - size.y + 14.0f;
+                    pos.x = pos.x + -40.0f;
+                    *(cPos_3668*)((char*)t + 0x44) = pos;
+                    t->setVisible(1);
+                    func_001C3D68_3668(self, i + *(int*)(self + 0x6E8), func_0025F338_3668(D_004A3028));
+                    break;
+                }
+            }
+        }
+        break;
+    case 2:
+        if (isButton_3668(w, D_00465CF0)) {
+            if (*(int*)(self + 0x6E0) != 0) {
+                break;
+            }
+            w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
+        } else if (isButton_3668(w, D_00465D10)) {
+            if (*(int*)(self + 0x6E0) != 2) {
+                break;
+            }
+            w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
+        } else if (isButton_3668(w, D_00465D00)) {
+            if (*(int*)(self + 0x6E0) != 1) {
+                break;
+            }
+            w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
+        } else if (isButton_3668(w, D_00465C78)) {
+            w->setColor(cVec_3668(1.0f, 0.0f, 0.0f, 0.0f));
+            p = (cObjB_3668*)getObj_3668(self, D_00465CA8);
+            p->setVisible(0);
+            p = (cObjB_3668*)getObj_3668(self, D_00465C98);
+            p->setVisible(0);
+            p = (cObjB_3668*)getObj_3668(self, D_00465E10);
+            p->setVisible(0);
+        } else if (isButton_3668(w, D_00465C88)) {
+            w->setColor(cVec_3668(1.0f, 0.0f, 0.0f, 0.0f));
+            p = (cObjB_3668*)getObj_3668(self, D_00465CC8);
+            ((cObjC_3668*)p)->setVisible(0);
+            p = (cObjB_3668*)getObj_3668(self, D_00465CB8);
+            ((cObjC_3668*)p)->setVisible(0);
+            p = (cObjB_3668*)getObj_3668(self, D_00465E20);
+            ((cObjC_3668*)p)->setVisible(0);
+        }
+        break;
+    case 8:
+        if ((*(int*)(self + 0x1C) & 6) == 0) {
+            func_001A9B58_3668(self);
+        }
+        return;
+    case 5:
+        return;
+    default:
+        goto other;
+    }
+    func_001A8918_3668(self, w, msg);
+    return;
+other:
+    func_001A8918_3668(self, w, msg);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C3D68);

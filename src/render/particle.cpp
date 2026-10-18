@@ -2794,9 +2794,79 @@ extern "C" void func_0037BA50(char* self, void* mat, cQuad128_BA50* a, cQuad128_
 
 INCLUDE_ASM("render/particle", func_0037BB10);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037BC40);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// Pages used by a w x h buffer of the given GS pixel format (32-bit pages are 64x32, 16-bit 64x64).
+static inline int pages_37BC40(int psm, int bw, int h)
+{
+    switch (psm) {
+    case 0:
+    case 1:
+    case 48:
+    case 49:
+        return bw * ((h + 31) >> 5);
+    case 2:
+    case 10:
+    case 50:
+    case 58:
+        return bw * ((h + 63) >> 6);
+    }
+    return 0;
+}
 
+static inline int zpages_37BC40(int psm, int bw, int h)
+{
+    switch (psm) {
+    case 48:
+    case 49:
+        return bw * ((h + 31) >> 5);
+    case 50:
+    case 58:
+        return bw * ((h + 63) >> 6);
+    }
+    return 0;
+}
+
+// Size in 256-byte blocks of the frame, texture and z buffers for a w x h screen.
+extern "C" int func_0037BC40(void* self, int w, int h, int fbPsm, int texPsm, int zPsm)
+{
+    int bw = (w + 63) >> 6;
+    int fb = pages_37BC40(fbPsm, bw, h);
+    int tex = pages_37BC40(texPsm, bw, h);
+    int z = zpages_37BC40(zPsm, bw, h);
+    return (fb + tex + z) << 5;
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/particle", func_0037BD38);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_0037BD38(void* self, int a, int b)
+{
+    switch (a) {
+    case 0:
+    case 1:
+    case 10:
+    case '0':
+    case '1':
+    case ':':
+        if (b == '0' || b == '1' || b == ':') {
+            return 1;
+        }
+        break;
+    case 2:
+    case '2':
+        if (b == '2') {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_0037BD98);
 

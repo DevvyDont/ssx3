@@ -570,7 +570,43 @@ extern "C" void func_00291438(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_00291710);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_0011FE98(void* rider);
+
+// PORT: the unit declares this as int(void*, int); defined under an asm label with its real type
+extern "C" int func_00291710_impl(void* self, void* rider) __asm__("func_00291710");
+extern "C" int func_00291710_impl(void* self, void* rider)
+{
+    int x;
+    if (func_0011FE98(rider) == 4) {
+        x = *(int*)((char*)self + 0x598C);
+    } else {
+        x = *(int*)((char*)rider + 0x438);
+    }
+    switch (x) {
+    case 2: case 3: case 13:
+        return 1;
+    case 1:
+        return 2;
+    case 4:
+        return 3;
+    case 7: case 8: case 18:
+        return 7;
+    case 9:
+        return 5;
+    case 10:
+        return 4;
+    case 11:
+        return 8;
+    case -1: case 0: case 5: case 6: case 12: case 14: case 15: case 16: case 17: case 19:
+        return 0;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002917B8);
@@ -1589,7 +1625,53 @@ extern "C" int func_00294F48(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_00294F78);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sVEnt_294F78 { short delta; short index; int (*fn)(void*, int, int); };
+
+extern "C" void func_00294F78(void* self, int cue)
+{
+    int id = -1;
+    switch (cue) {
+    case 5: case 6:
+        id = -1;
+        break;
+    case 7:
+        id = 0x10;
+        break;
+    case 8:
+        id = 0x11;
+        break;
+    case 0: case 9:
+        id = 3;
+        break;
+    case 1: case 10:
+        id = 4;
+        break;
+    case 2: case 11:
+        id = 2;
+        break;
+    case 3: case 12:
+        id = 1;
+        break;
+    case 4: case 13:
+        id = 0xD;
+        break;
+    case 14:
+        id = 0x12;
+        break;
+    case 15:
+        id = 7;
+        break;
+    }
+    if (id != -1) {
+        sVEnt_294F78* vt = *(sVEnt_294F78**)((char*)self + 0xC);
+        vt[1].fn((char*)self + vt[1].delta, 0, id);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_00295028);
@@ -5102,7 +5184,31 @@ extern "C" int func_0029F198(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029F2B0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: the unit declares this as void(int, int); defined under an asm label with its real type
+extern "C" int func_0029F2B0_impl(unsigned int idx, int flag) __asm__("func_0029F2B0");
+extern "C" int func_0029F2B0_impl(unsigned int idx, int flag)
+{
+    if (flag == 0) {
+        switch (idx) {
+        case 6: return 1;
+        case 3: return 2;
+        case 0: return 4;
+        case 8: return 8;
+        case 1: return 0x10;
+        case 4: return 0x20;
+        case 9: return 0x80;
+        case 7: return 0x40;
+        case 5: return 0x100;
+        case 2: return 0x200;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029F330);
@@ -5136,7 +5242,48 @@ extern "C" int func_0029F378(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029F3F8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_0028BC58(void* bank, int slot, char* name, int a3);
+extern char D_004A36E0[];
+extern char D_00482E88[];
+extern char D_00482E98[];
+extern char D_00482EA8[];
+extern char D_00482EB8[];
+extern char D_00482EC8[];
+extern char D_00482ED8[];
+extern char D_00482EE8[];
+extern char D_00482EF8[];
+extern char D_00482F08[];
+extern char D_00482F18[];
+extern char D_00482F28[];
+extern char D_00482F38[];
+extern char D_00482F48[];
+
+extern "C" void func_0029F3F8(char* self)
+{
+    char buf[64];
+    switch (func_0029F378(self, *(void**)((char*)func_0028B1D8() + 0x28))) {
+    case 6: sprintf(buf, D_004A36E0, D_00482E88, D_00482E98); break;
+    case 3: sprintf(buf, D_004A36E0, D_00482E88, D_00482EA8); break;
+    case 0: sprintf(buf, D_004A36E0, D_00482E88, D_00482EB8); break;
+    case 8: sprintf(buf, D_004A36E0, D_00482E88, D_00482EC8); break;
+    case 1: sprintf(buf, D_004A36E0, D_00482E88, D_00482ED8); break;
+    case 4: sprintf(buf, D_004A36E0, D_00482E88, D_00482EE8); break;
+    case 9: sprintf(buf, D_004A36E0, D_00482E88, D_00482EF8); break;
+    case 7: sprintf(buf, D_004A36E0, D_00482E88, D_00482F08); break;
+    case 5: sprintf(buf, D_004A36E0, D_00482E88, D_00482F18); break;
+    case 2: sprintf(buf, D_004A36E0, D_00482E88, D_00482F28); break;
+    default: sprintf(buf, D_004A36E0, D_00482E88, D_00482F38); break;
+    }
+    func_0028BC58(**(void***)(self + 0x118), 0xE, buf, 0);
+    sprintf(buf, D_004A36E0, D_00482E88, D_00482F48);
+    func_0028BC58(**(void***)(self + 0x118), 0xF, buf, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029F5E0);
@@ -6184,7 +6331,57 @@ int func_002A1BD0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A1BD8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// Maps a sound id (and, for the combined ids 0x11..0x15, a sub-id) to its channel bit.
+extern "C" int func_002A1BD8(void* self, int a, int b)
+{
+    switch (a) {
+    case 0: return 0x1;
+    case 1: return 0x2;
+    case 2: return 0x4;
+    case 3: return 0x8;
+    case 4: return 0x10;
+    case 5: return 0x40;
+    case 6: return 0x80;
+    case 7: return 0x100;
+    case 8: return 0x200;
+    case 9: return 0x400;
+    case 10: return 0x800;
+    case 11: return 0x1000;
+    case 12: return 0x2000;
+    case 13: return 0x4000;
+    case 14: return 0x8000;
+    case 15: return 0x10000;
+    case 16: return 0x20000;
+    }
+    if (b != -1) {
+        if (a == 0x11) {
+            if (b == 0xE) return 0x1;
+            if (b == 0xF) return 0x40;
+            if (b == 0x10) return 0x200;
+        } else if (a == 0x12) {
+            if (b == 0xE) return 0x2;
+            if (b == 0x11) return 0x1000;
+        } else if (a == 0x13) {
+            if (b == 0xE) return 0x4;
+            if (b == 0x10) return 0x400;
+            if (b == 0x11) return 0x2000;
+        } else if (a == 0x14) {
+            if (b == 0xE) return 0x8;
+            if (b == 0xF) return 0x80;
+        } else if (a == 0x15) {
+            if (b == 0xE) return 0x10;
+            if (b == 0xF) return 0x100;
+            if (b == 0x10) return 0x800;
+            if (b == 0x11) return 0x4000;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A1D48);
@@ -6200,9 +6397,49 @@ extern "C" void func_002A1D48(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A1DA0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: the unit declares this as void(void*, int, int); defined under an asm label with its real type
+extern "C" int func_002A1DA0_impl(void* self, unsigned int idx, int flag) __asm__("func_002A1DA0");
+extern "C" int func_002A1DA0_impl(void* self, unsigned int idx, int flag)
+{
+    if (flag == 0) {
+        switch (idx) {
+        case 6: return 1;
+        case 3: return 2;
+        case 0: return 4;
+        case 8: return 8;
+        case 1: return 0x10;
+        case 4: return 0x20;
+        case 9: return 0x40;
+        case 7: return 0x80;
+        case 5: return 0x100;
+        case 2: return 0x200;
+        }
+    }
+    return 0x1000;
+}
+#endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A1E20);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_002A1E20(void* self, unsigned int x)
+{
+    switch (x) {
+    case 0: case 1: case 5: case 8: case 11: case 14: case 17: case 18:
+        return 1;
+    case 2: case 3: case 6: case 9: case 12: case 15: case 19: case 20:
+        return 2;
+    case 4: case 7: case 10: case 13: case 16: case 21:
+        return 4;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A1E68);
 
@@ -6726,7 +6963,110 @@ extern "C" void func_002A2DA0(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A2E50);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_002A4770(void* self);
+extern "C" void func_002A2188(void* self);
+extern "C" void func_002A23D0(void* self, int a1);
+extern "C" void func_002A2018(void* self);
+extern "C" void func_002A2A10(void* self);
+extern "C" void func_002A2B88(void* self);
+extern "C" void func_002A2260(void* self);
+extern "C" void func_002A2318(void* self);
+extern "C" void func_002A20D0(void* self);
+extern "C" int func_002A1E20(void* self, unsigned int a1);
+extern "C" int* func_00144BC0(void*);
+extern "C" void* func_0028B1E8();
+extern "C" unsigned int func_002ADF60(void* rng);
+extern "C" int func_00146E98(void* iface, int a1);
+// PORT: declared signed char elsewhere; the caller here sign-extends an int result itself.
+int cBENewPlayerInterface_getRiderCharID_i(void* self, int riderIndex) __asm__("cBENewPlayerInterface_getRiderCharID__FPvi");
+int cBERewardInterface_getTrackMedal(void* self, int a1, int ch, int a3, int track);
+void func_002B1758(void* snd, int a1);
+
+// Front-end music: picks the next track (a queued one, else a random one not played yet in this round of
+// 5 or 8 tracks; the bonus track joins once both medals are won), marks it played and starts it.
+extern "C" void func_002A2E50(void* vself, int bonus)
+{
+    char* self = (char*)vself;
+    int pick = 0;
+    if (*(int*)(self + 0x5790) == 0 && *(int*)(self + 0x6258) == 0) {
+        *(int*)(self + 0x5790) = 1;
+        *(int*)(self + 0x5798) = 3;
+        *(unsigned int*)(self + 0x573C) |= 0x80;
+        *(int*)(self + 0x578C) = 0;
+    } else {
+        if (func_002A4770(self) != 0) {
+            return;
+        }
+        int queued = *(int*)(self + 0x5798);
+        if (queued != -1 && *(int*)(self + 0x6258) == 0) {
+            pick = queued;
+            *(int*)(self + 0x5798) = -1;
+        } else {
+            int n = bonus == 0 ? 8 : 5;
+            int left = 0;
+            for (int i = 0; i < n; i++) {
+                left += ((*(int*)(self + 0x573C) >> i) ^ 1) & 1;
+            }
+            if (left == 0) {
+                *(unsigned int*)(self + 0x573C) = 0;
+                left = n;
+                int track = 0xE;
+                void* players = cBE_getInterface_Fv(cBE_getBE(), 1);
+                signed char ch = cBENewPlayerInterface_getRiderCharID_i(players, func_00146E98(players, 0));
+                int sel = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+                if (sel != 1) {
+                    track = sel == 2 ? 0xF : 0x10;
+                }
+                void* rewards = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+                int gold = cBERewardInterface_getTrackMedal(rewards, 0, ch, 4, track) != -1;
+                int plat = cBERewardInterface_getTrackMedal(rewards, 0, ch, 5, track) != -1;
+                if (gold && plat) {
+                    *(unsigned int*)(self + 0x573C) |= 8;
+                }
+            }
+            int r = (func_002ADF60(*(void**)(**(char***)(self + 0x118) + 0x1D8)) & 0x7FFF) * left / 0x7FFF + 1;
+            int cnt = 0;
+            while (cnt < r) {
+                cnt += ((*(int*)(self + 0x573C) >> pick) ^ 1) & 1;
+                pick += cnt < r;
+            }
+        }
+    }
+    *(unsigned int*)(self + 0x573C) |= 1 << pick;
+    char* snd = self + 0x5560;
+    switch (pick) {
+    case 0:
+        func_002A2188(self);
+        break;
+    case 1:
+        func_002A23D0(self, -1);
+        break;
+    case 2:
+        func_002A2018(self);
+        break;
+    case 3:
+        func_002A2A10(self);
+        break;
+    case 4:
+        func_002A2B88(self);
+        break;
+    case 5:
+        func_002A2260(self);
+        break;
+    case 6:
+        func_002A2318(self);
+        break;
+    case 7:
+        func_002A20D0(self);
+        break;
+    }
+    func_002B1758(snd, 0);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A3170);

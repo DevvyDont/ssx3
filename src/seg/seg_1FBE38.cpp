@@ -4316,7 +4316,108 @@ extern "C" V3_2048 func_00302048(int n, Ent_2048 *e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00302210);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_003E6574_2210(void*, void*, int) __asm__("func_003E6574");
+struct Flag_2210 { char c; Flag_2210() {} Flag_2210(const Flag_2210& o) : c(o.c) {} };
+struct Defaults_2210 { int v[3]; Flag_2210 flag; };
+extern Defaults_2210 D_004FBC20_2210 __asm__("D_004FBC20");
+extern int D_004A5730_2210 __asm__("D_004A5730");
+extern const int D_004465C8_2210[] __asm__("D_004465C8");
+extern char* const D_00445E40_2210[] __asm__("D_00445E40");
+extern int* D_004A3DD8_2210 __asm__("D_004A3DD8");
+extern char* D_004A28A8_2210 __asm__("D_004A28A8");
+struct V3_2210 { float x, y, z; };
+extern V3_2210 D_004C9098_2210 __asm__("D_004C9098");
+extern "C" void* cBE_getBE_2210() __asm__("cBE_getBE");
+extern "C" void* cBE_getInterface_2210(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" int func_00144CE0_2210(void* iface, int id) __asm__("func_00144CE0");
+extern "C" void func_0022CEA8_2210(void* self, int hash, char* name) __asm__("func_0022CEA8");
+extern "C" void func_0022D088_2210(void* self, int hash, char* name) __asm__("func_0022D088");
+extern "C" void func_00231250_2210(void* self, int a, int b, int refresh) __asm__("func_00231250");
+extern "C" void* func_0028B180_2210() __asm__("func_0028B180");
+extern "C" void func_002A49E8_2210(void* self) __asm__("func_002A49E8");
+
+struct Ent_2210 { int idx; int val; int pad; int kind; };
+
+class cRider_2210 {
+public:
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05();
+    virtual void v06(); virtual void v07(); virtual void v08();
+    virtual bool isBusy();
+};
+
+extern "C" V3_2210 func_00302210(int n, Ent_2210* e)
+{
+    if (D_004A5730_2210 == 0) {
+        D_004FBC20_2210.v[0] = -1;
+        D_004FBC20_2210.v[1] = -1;
+        D_004FBC20_2210.v[2] = -1;
+        D_004A5730_2210 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        D_004FBC20_2210.flag = Flag_2210(D_004FBC20_2210.flag);
+    }
+    int v[4] __attribute__((aligned(16)));
+    int* vp = v;
+    func_003E6574_2210(vp, &D_004FBC20_2210, 0x10);
+    Ent_2210* p = e;
+    for (int i = 0; i < n; i++, p++) {
+        int k = p->idx;
+        int* d = (int*)((k << 2) + (int)vp);
+        if (p->kind != D_004465C8_2210[k] && D_004465C8_2210[k] == 2)
+            *(float*)d = (float)p->val;
+        else
+            *d = p->val;
+    }
+    int ok;
+    int cur = *D_004A3DD8_2210;
+    if (cur != -1) {
+        char* lvl = *(char**)(*(char**)(D_004A28A8_2210 + 0x84) + 0xC);
+        char* q = *(char**)(lvl + (cur << 2) + 0x28);
+        char* a = q ? q + 0x6C0 : 0;
+        char* r = a ? a - 0x6C0 : 0;
+        ok = !((cRider_2210*)(r + 0x6C0))->isBusy();
+    } else {
+        ok = 0;
+    }
+    if (ok) {
+        int sel = vp[2];
+        int action = vp[1];
+        int id = vp[0];
+        char* name = 0;
+        void* iface = cBE_getInterface_2210(cBE_getBE_2210(), 0);
+        char* ui = *(char**)(*(char**)(D_004A28A8_2210 + 0x84) + 0x78);
+        if ((unsigned int)sel < 8) {
+            name = D_00445E40_2210[sel];
+        }
+        int hash = func_00144CE0_2210(iface, id);
+        switch ((unsigned int)action) {
+        case 0:
+            func_0022CEA8_2210(ui, hash, name);
+            break;
+        case 1:
+            break;
+        case 2:
+            func_0022D088_2210(ui, hash, name);
+            break;
+        case 3:
+            func_00231250_2210(*(void**)(D_004A28A8_2210 + 0x84), 0xE, 2, 0);
+            func_002A49E8_2210(func_0028B180_2210());
+            break;
+        case 4:
+            func_00231250_2210(*(void**)(D_004A28A8_2210 + 0x84), 0xE, 0, 0);
+            break;
+        case 5:
+            *(int*)(ui + 0x1A4) = 1;
+            break;
+        }
+    }
+    return D_004C9098_2210;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00302490);
@@ -4900,7 +5001,76 @@ extern "C" void* func_003036B0(void* self, int n, Ent_36B0* e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_003037B0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_003E6574(void*, void*, int);
+int* func_00226610(void*);
+struct Flag_37B0 { char c; Flag_37B0() {} Flag_37B0(const Flag_37B0& o) : c(o.c) {} };
+extern int D_004A57D0_37B0 __asm__("D_004A57D0");
+extern Flag_37B0 D_004A57D4_37B0 __asm__("D_004A57D4");
+extern int D_004A57D8_37B0 __asm__("D_004A57D8");
+extern int D_004A3D30_37B0[2] __asm__("D_004A3D30");
+extern int* D_004A3DD8_37B0 __asm__("D_004A3DD8");
+extern char* D_004A28A8_37B0 __asm__("D_004A28A8");
+extern "C" int func_00122EE8_37B0(char* rider, int which) __asm__("func_00122EE8");
+
+struct Ent_37B0 { int idx; int val; int pad; int kind; };
+
+extern "C" void* func_003037B0(void* self, int n, Ent_37B0* e)
+{
+    if (D_004A57D8_37B0 == 0) {
+        D_004A57D0_37B0 = -1;
+        D_004A57D8_37B0 = 1;
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        D_004A57D4_37B0 = Flag_37B0(D_004A57D4_37B0);
+    }
+    int v[4] __attribute__((aligned(16)));
+    int* vp = v;
+    func_003E6574(vp, &D_004A57D0_37B0, 8);
+    Ent_37B0* p = e;
+    for (int i = 0; i < n; i++, p++) {
+        int k = p->idx;
+        int* d = (int*)((k << 2) + (int)vp);
+        if (p->kind != D_004A3D30_37B0[k] && D_004A3D30_37B0[k] == 2)
+            *(float*)d = (float)p->val;
+        else
+            *d = p->val;
+    }
+    char* lvl = *(char**)(*(char**)(D_004A28A8_37B0 + 0x84) + 0xC);
+    char* q = *(char**)(lvl + (*D_004A3DD8_37B0 << 2) + 0x28);
+    char* a = q ? q + 0x6C0 : 0;
+    char* r = a ? a - 0x6C0 : 0;
+    int res;
+    switch (vp[0]) {
+    case 3: res = func_00122EE8_37B0(r, 0); break;
+    case 4: res = func_00122EE8_37B0(r, 1); break;
+    case 1: res = func_00122EE8_37B0(r, 2); break;
+    case 0: res = func_00122EE8_37B0(r, 3); break;
+    case 2: res = func_00122EE8_37B0(r, 4); break;
+    case 5: res = func_00122EE8_37B0(r, 5); break;
+    case 6: res = func_00122EE8_37B0(r, 6); break;
+    case 7: res = func_00122EE8_37B0(r, 7); break;
+    case 9: res = func_00122EE8_37B0(r, 8); break;
+    case 10: res = func_00122EE8_37B0(r, 9); break;
+    case 11: res = func_00122EE8_37B0(r, 10); break;
+    case 12: res = func_00122EE8_37B0(r, 11); break;
+    case 13: res = func_00122EE8_37B0(r, 12); break;
+    case 14: res = func_00122EE8_37B0(r, 13); break;
+    case 15: res = func_00122EE8_37B0(r, 14); break;
+    case 16: res = func_00122EE8_37B0(r, 15); break;
+    case 17: res = func_00122EE8_37B0(r, 16); break;
+    case 8: res = func_00122EE8_37B0(r, 17); break;
+    case 18: res = func_00122EE8_37B0(r, 18); break;
+    default: res = 0; break;
+    }
+    *(int*)((char*)self + 8) = 1;
+    *func_00226610(self) = res;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_003039F0);
