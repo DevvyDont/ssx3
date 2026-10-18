@@ -1383,7 +1383,29 @@ extern "C" unsigned int func_003AF428(char* s, unsigned int len)
     return r;
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AF560);
+//100%
+extern "C" long func_0041E9E0(const char* s, char** end, int base);
+
+extern "C" int func_003AF560(char** ps, unsigned int* plen, int* out)
+{
+    unsigned int i = 0;
+    char saved = 9;
+    for (; i < *plen; i++) {
+        unsigned char c = ((unsigned char*)*ps)[i];
+        if (c == 9 || c == 10) {
+            ((unsigned char*)*ps)[i] = 0;
+            saved = c;
+            break;
+        }
+    }
+    char* end;
+    long v = func_0041E9E0(*ps, &end, 10);
+    *plen -= end - *ps;
+    if (i != *plen) (*ps)[i] = saved;
+    if (end == *ps) return 0;
+    *out = v;
+    return 1;
+}
 
 INCLUDE_ASM("world/wscriptcache", func_003AF670);
 
