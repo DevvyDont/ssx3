@@ -531,7 +531,39 @@ void* func_0031AAF0(void* self)
     return func_00423DE0(*(int*)((char*)self + 0xc));
 }
 
-INCLUDE_ASM("bx/memblockman", func_0031AB10);
+//100%
+// Thread entry: passes the handle at 0xC to func_00423DC0, then loops on func_00423CC0 forever.
+extern "C" void func_00423CC0();
+
+extern "C" void func_0031AB10(void* self)
+{
+    func_00423DC0(*(int*)((char*)self + 0xC));
+    for (;;)
+        func_00423CC0();
+}
+
+//100%
+// Thread body: marks the thread running, then halts or runs the virtual main.
+// PORT: the splat asm covered this together with func_0031AB10; it has no symbol of its own.
+extern "C" int func_00423C90_AB30(void) __asm__("func_00423C90");
+extern "C" void func_00423D10(int);
+int cExecutionMan_checkHalt(void* self, int flag);
+
+extern "C" void func_0031AB30(void* self)
+{
+    // volatile: other threads poll this flag (see func_0031ABD0), so the store stays before the call.
+    *(volatile int*)((char*)self + 0x4038) = 1;
+    int id = func_00423C90_AB30();
+    if (id != *(int*)((char*)self + 0x14040))
+        func_00423D10(*(int*)((char*)self + 0x14040));
+    if (id == *(int*)((char*)self + 0x10)) {
+        cExecutionMan_checkHalt(self, 0);
+    } else {
+        sMemBlkVEntryB* vt = *(sMemBlkVEntryB**)((char*)self + 0x8);
+        vt[5].fn((char*)self + vt[5].delta);
+        func_0031AAF0(self);
+    }
+}
 
 //100%
 void func_0031ABC0(void* self)
