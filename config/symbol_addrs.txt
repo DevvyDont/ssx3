@@ -822,6 +822,15 @@ D_108EC = 0x000108EC; // ignore:true
 // render (font/particle/bezierman): +0x20 / +0x80 offsets added to an uncached 0x30000000-based packet pointer, not addresses.
 D_30000020 = 0x30000020; // ignore:true
 D_30000080 = 0x30000080; // ignore:true
+// The same uncached-pointer (0x30000000 | addr) + offset family, found by scanning the asm for D_3000xxxx (2026-10-18).
+D_30000010 = 0x30000010; // ignore:true
+D_30000030 = 0x30000030; // ignore:true
+D_30000040 = 0x30000040; // ignore:true
+D_30000050 = 0x30000050; // ignore:true
+D_30000060 = 0x30000060; // ignore:true
+D_30000070 = 0x30000070; // ignore:true
+D_300000A0 = 0x300000A0; // ignore:true
+D_300000B0 = 0x300000B0; // ignore:true
 
 // Names taken from debug strings printed by the function itself
 // MPEG-2 header parser; marker_bit string "group_of_pictures_header()"
