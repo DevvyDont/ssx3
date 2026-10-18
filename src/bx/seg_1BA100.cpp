@@ -759,7 +759,70 @@ extern "C" void func_002BA6B0(Arg_A6B0* arg, int v, int v2) {
 }
 
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BA920);
+//100%
+struct Rec_A920 { signed char v; char pad[0x17]; };
+struct Q_A920 { int a, b, c, d; };
+struct Obj_A920 {
+    int pad0;
+    Rec_A920 cur;
+    volatile int idx;
+    Rec_A920* recs;
+    int arr24[4];
+    int* p34;
+    int* vals;
+    int* p3C;
+    int arr40[4][2];
+    int* p60;
+    int* p64;
+    int* p68;
+    int* p6C;
+    Q_A920* q70;
+    int* p74;
+    int* p78;
+    int* p7C;
+    int* p80;
+    int* p84;
+};
+extern "C" void* func_00416210(void*, int, unsigned int);
+
+
+struct Outer_A920 { char pad[0x1D8]; Obj_A920 sub; };
+struct Arg_A920 { Outer_A920* o; int* vals; int* vals2; };
+extern "C" void func_002BA920(Arg_A920* arg, int v, int v2, int v3) {
+    Outer_A920* o = arg->o;
+    Obj_A920* p = &o->sub;
+    o->sub.idx++;
+    p->recs[o->sub.idx] = o->sub.cur;
+    o->sub.arr24[o->sub.idx] = 0;
+    p->p34[o->sub.idx] = 0;
+    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
+    p->p3C[o->sub.idx] = 0;
+    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
+    p->p60[o->sub.idx] = 0;
+    p->p64[o->sub.idx] = 0;
+    p->p68[o->sub.idx] = 0;
+    p->p6C[o->sub.idx] = 0;
+    p->q70[o->sub.idx].b = 0;
+    p->q70[o->sub.idx].a = 100;
+    p->q70[o->sub.idx].c = 90;
+    p->q70[o->sub.idx].d = 50;
+    p->p74[o->sub.idx] = 0;
+    p->p80[o->sub.idx] = 0;
+    p->p84[o->sub.idx] = 0;
+    p->p78[o->sub.idx] = 127;
+    p->p7C[o->sub.idx] = 1;
+    arg->vals[arg->o->sub.idx] = v;
+    arg->vals2[arg->o->sub.idx] = v2;
+    Outer_A920* o2 = arg->o;
+    Obj_A920* q = &o2->sub;
+    q->vals[o2->sub.idx] = v3;
+    // Clamp the value to 0..127 as MAX(MIN(v, 127), 0); each use re-reads it.
+    q->recs[o2->sub.idx].v = ((q->vals[q->idx] < 127 ? q->vals[q->idx] : 127) < 0 ? 0
+                         : (q->vals[q->idx] < 127 ? q->vals[q->idx] : 127));
+    func_002906B8(arg);
+}
+
+
 
 //100%
 extern "C" int func_002BAC30(void *arg0) {
