@@ -2650,7 +2650,52 @@ extern "C" int func_00108C28(S_8C28 *arg0, void *arg1) {
 
 INCLUDE_ASM("seg/seg_1218", func_00108C80);
 
-INCLUDE_ASM("seg/seg_1218", func_00108E88);
+//100%
+//100%
+struct sQuat_8E88 {
+    float v[4];
+} __attribute__((aligned(16)));
+extern sQuat_8E88 D_004FF130;
+extern "C" void func_0010CAB8(void* self);
+extern "C" void func_0010D170(void* self);
+extern "C" void func_003E6448_8E88(void* dst, int value, int size) __asm__("func_003E6448");
+
+// PORT: the unit declares this as void(void) (its caller passes $a0 through); defined under an asm label with its real type
+extern "C" void func_00108E88_impl(char* self) __asm__("func_00108E88");
+extern "C" void func_00108E88_impl(char* self)
+{
+    *(int*)(self + 0xE0C) = -1;
+    *(int*)(self + 0xE10) = 0;
+    *(int*)(self + 0xE14) = 0;
+    *(int*)(self + 0xE18) = 0;
+    *(int*)(self + 0xE20) = 0;
+    *(int*)(self + 0xE24) = 0;
+    *(int*)(self + 0xE28) = 0;
+    *(int*)(self + 0xE1C) = 0;
+    *(int*)(self + 0xE2C) = 0;
+    *(int*)(self + 0xE38) = 0;
+    *(int*)(self + 0xE3C) = 0;
+    *(int*)(self + 0xE30) = 0;
+    *(int*)(self + 0xE34) = 0;
+    *(int*)(self + 0xDF0) = 0;
+    *(int*)(self + 0xE74) = 0;
+    *(int*)(self + 0xE78) = 0;
+    *(short*)(self + 0xF38) = 0;
+    *(int*)(self + 0xF30) = 0;
+    *(int*)(self + 0xF34) = 0;
+    *(sQuat_8E88*)(self + 0xE50) = D_004FF130;
+    *(sQuat_8E88*)(self + 0xE60) = D_004FF130;
+    *(int*)(self + 0xE40) = 0;
+    func_0010CAB8(self);
+    *(int*)(self + 0xE70) = -1;
+    *(float*)(self + 0xDF4) = 1.0f;
+    *(Fn_8E88*)(self + 0xF44) = D_0043CF20[1];
+    *(short*)(self + 0xF38) = 1;
+    func_003E6448_8E88(self + 0xE7C, 0, 0x3C);
+    func_003E6448_8E88(self + 0xEB8, 0, 0x3C);
+    func_003E6448_8E88(self + 0xEF4, 0, 0x3C);
+    func_0010D170(self);
+}
 
 //100%
 extern "C" void func_00108E88();
