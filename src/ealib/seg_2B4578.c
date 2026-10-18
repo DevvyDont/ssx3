@@ -750,7 +750,28 @@ int func_003B6548(int a, int n) {
     return r;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B65D0);
+//100%
+// Returns 1 if an entry with this id is found for which func_003B8AB8 returns 0, under the func_003B58A0/58D8 lock.
+struct E_65D0 { int f0; char p[0xE]; short id; char p2[0x8C - 0x14]; };
+struct G_65D0 { char p[0x17E]; short n; char p2[0x1F0 - 0x180]; struct E_65D0 *tab; };
+extern struct G_65D0 D_0050A8E8_65D0 __asm__("D_0050A8E8");
+extern int func_003B64D8_65D0(int) __asm__("func_003B64D8");
+extern int func_003B8AB8_65D0(int) __asm__("func_003B8AB8");
+int func_003B65D0(int id) {
+    int found = 0;
+    int i;
+    if (func_003B64D8_65D0(id) != 0) return -8;
+    func_003B58A0();
+    for (i = 0; i < D_0050A8E8_65D0.n; i++) {
+        struct E_65D0 *e = &D_0050A8E8_65D0.tab[i];
+        if (e->id == id && func_003B8AB8_65D0(e->f0) == 0) {
+            found = 1;
+            break;
+        }
+    }
+    func_003B58D8();
+    return found;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -808,7 +829,21 @@ int func_003B6788(int arg0, char *arg1, int arg2, int arg3) {
     return 0;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6820);
+//100%
+// Checks slot a, then forwards channel entry b of its object to func_003BB588.
+struct Ch_6820 { char p[6]; unsigned short n; };
+typedef struct { struct Ch_6820 *p; int pad[3]; } Ent_6820;
+extern Ent_6820 *D_0050AADC_6820[] __asm__("D_0050AADC");
+extern int func_003B64D8_6820(int) __asm__("func_003B64D8");
+extern int func_003C6540_6820(void *, int) __asm__("func_003C6540");
+extern int func_003BB588_6820(void *, int, int, int, int) __asm__("func_003BB588");
+int func_003B6820(int a, int b, int c) {
+    struct Ch_6820 *ch;
+    if (func_003B64D8_6820(a) < 0) return -8;
+    ch = D_0050AADC_6820[0][a].p;
+    if (b < 0 || b >= ch->n) return -8;
+    return func_003BB588_6820(ch, func_003C6540_6820(ch, b), a, b, c);
+}
 
 //100%
 extern int func_003B8CC8(int, int);
@@ -2622,7 +2657,22 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C0858);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C08F8);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C09B8);
+//100%
+// Saves seven DMA channel registers (0x1000D010..D420) into the block, then calls func_003C4A38.
+struct G_09B8 { char p[0x1AAE]; unsigned short rate; char p2[0x1B1C - 0x1AB0]; int save[7]; int h; };
+extern struct G_09B8 D_0050AD00_09B8 __asm__("D_0050AD00");
+extern int D_0050A94C_09B8[] __asm__("D_0050A94C");
+extern void func_003C4A38_09B8(int, int, int, int) __asm__("func_003C4A38");
+void func_003C09B8(void) {
+    D_0050AD00_09B8.save[0] = *(volatile int *)0x1000D010;
+    D_0050AD00_09B8.save[1] = *(volatile int *)0x1000D080;
+    D_0050AD00_09B8.save[2] = *(volatile int *)0x1000D020;
+    D_0050AD00_09B8.save[3] = *(volatile int *)0x1000D410;
+    D_0050AD00_09B8.save[4] = *(volatile int *)0x1000D430;
+    D_0050AD00_09B8.save[5] = *(volatile int *)0x1000D480;
+    D_0050AD00_09B8.save[6] = *(volatile int *)0x1000D420;
+    func_003C4A38_09B8(D_0050A94C_09B8[0], D_0050AD00_09B8.h, D_0050AD00_09B8.rate >> 4, 0x10000);
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C0A60);
 
@@ -3178,9 +3228,30 @@ int func_003C36A8(int a, int b) {
     return 0;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C36C8);
+//100%
+struct V_36C8 { char pad[0x14]; short x; short y; };
+struct G_36C8 { char pad[0xCB0]; struct V_36C8 *v; };
+struct F_36C8 { char pad[0xC]; float x; float y; };
+extern struct G_36C8 D_0050AD00_36C8 __asm__("D_0050AD00");
+extern struct F_36C8 D_0050AB08_36C8 __asm__("D_0050AB08");
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C3728);
+void func_003C36C8(int n, int flags) {
+    if (D_0050AD00_36C8.v != 0 && (flags & 8)) {
+        D_0050AD00_36C8.v->x = (int)(D_0050AB08_36C8.x * 32767.0f);
+        D_0050AD00_36C8.v->y = (int)(D_0050AB08_36C8.y * 32767.0f);
+    }
+}
+
+//100%
+struct S2_3728 { short v[2]; };
+extern struct S2_3728 D_0044DD78_3728[] __asm__("D_0044DD78");
+
+void func_003C3728(unsigned int a, float *out) {
+    int i;
+    for (i = 0; i < 2; i++) {
+        out[i] = (float)D_0044DD78_3728[(a >> 8) & 0xFF].v[i] / 32767.0f;
+    }
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3780);
 
@@ -3590,7 +3661,30 @@ int func_003C5788(int arg0, int *arg1) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C57F0);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5880);
+//100%
+// Stores v into config byte 0x2E/0x2F/0x30 (which 0..2) and writes the config back.
+extern int func_003B4DD8_5880(void *) __asm__("func_003B4DD8");
+extern void func_003B4FC0_5880(void *) __asm__("func_003B4FC0");
+
+int func_003C5880(int which, int v) {
+    char sp[0xE0];
+    func_003B4DD8_5880(sp);
+    switch (which) {
+    case 0:
+        sp[0x2E] = v;
+        break;
+    case 1:
+        sp[0x2F] = v;
+        break;
+    case 2:
+        sp[0x30] = v;
+        break;
+    default:
+        return -5;
+    }
+    func_003B4FC0_5880(sp);
+    return 0;
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5908);
 
@@ -3616,7 +3710,25 @@ int func_003C5998(int arg0, float f) {
     return 0;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C5A28);
+//100%
+// Reads byte 0x40 (which 0) or 0x41 (which 1) of the current config as a 0..1 float.
+extern void func_003B4DD8_5A28(void *) __asm__("func_003B4DD8");
+
+int func_003C5A28(int which, float *out) {
+    unsigned char sp[0xE0];
+    func_003B4DD8_5A28(sp);
+    switch (which) {
+    case 0:
+        *out = sp[0x40] * 0.01f;
+        break;
+    case 1:
+        *out = sp[0x41] * 0.01f;
+        break;
+    default:
+        return -5;
+    }
+    return 0;
+}
 
 //100%
 int func_003C5AA0(void) {
@@ -3966,7 +4078,28 @@ void func_003C6320(void *arg0, void *arg1) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6380);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C64A8);
+//100%
+// 64-bit by 32-bit unsigned shift-subtract divide; the dividend arrives as a by-value {lo, hi} pair.
+typedef struct { unsigned int lo, hi; } U64_64A8;
+
+unsigned int func_003C64A8(U64_64A8 x, unsigned int d) {
+    unsigned int lo, hi, q;
+    int i;
+    lo = x.lo;
+    hi = x.hi;
+    q = 0;
+    for (i = 31; i >= 0; i--) {
+        hi <<= 1;
+        hi += lo >> 31;
+        q <<= 1;
+        lo <<= 1;
+        if (hi >= d) {
+            hi -= d;
+            q++;
+        }
+    }
+    return q;
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6500);
 
@@ -3984,7 +4117,23 @@ void *func_003C6540(char *arg0, int arg1) {
     return arg0 + ((arg1 << 2) + 0x14) + temp_3;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6580);
+//100%
+// Index of the largest of the first n shorts at entry a + 4; -1 if none.
+struct E_6580 { int f0; short v[0x44]; };
+extern struct E_6580 *D_0050AAD8_6580 __asm__("D_0050AAD8");
+
+int func_003C6580(int a, int n) {
+    int best = -1;
+    int idx = -1;
+    int i;
+    for (i = 0; i < n; i++) {
+        if (best < D_0050AAD8_6580[a].v[i]) {
+            best = D_0050AAD8_6580[a].v[i];
+            idx = i;
+        }
+    }
+    return idx;
+}
 
 //100%
 int func_003C65E0(int arg0) {
@@ -5176,7 +5325,27 @@ void func_003C9938(void *arg0) {
     }
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C9960);
+//100%
+extern int func_003C96F0_9960[] __asm__("func_003C96F0");
+extern int func_003C9938_9960[] __asm__("func_003C9938");
+extern int func_003CE0E0_9960(int) __asm__("func_003CE0E0");
+extern signed char func_003CE118_9960(int) __asm__("func_003CE118");
+extern int func_003CE378_9960(int) __asm__("func_003CE378");
+extern int func_003CD1A8_9960(int) __asm__("func_003CD1A8");
+extern int func_003CDDB8_9960(int) __asm__("func_003CDDB8");
+
+void func_003C9960(void *arg0, void *arg1) {
+    (*(int **)((char*)(arg0) + (0))) = func_003C96F0_9960;
+    (*(int *)((char*)(arg0) + (0x24))) = func_003CE378_9960(func_003CE0E0_9960((*(int *)((char*)(arg1) + (0x1C)))));
+    (*(signed char *)((char*)(arg0) + (0x38))) = func_003CE118_9960((*(int *)((char*)(arg1) + (0x1C))));
+    (*(int *)((char*)(arg0) + (0x1C))) = 0;
+    (*(short *)((char*)(arg0) + (0x2C))) = 0;
+    (*(int *)((char*)(arg0) + (0x30))) = (*(int *)((char*)(arg1) + (0x24)));
+    (*(int *)((char*)(arg0) + (0x20))) = (*(int *)((char*)(arg1) + (0xC)));
+    (*(int **)((char*)(arg0) + (4))) = func_003C9938_9960;
+    (*(int *)((char*)(arg0) + (0x34))) = func_003CDDB8_9960(func_003CD1A8_9960(0xD68));
+    (*(int *)((char*)(arg0) + (0x28))) = 0;
+}
 
 //100%
 int func_003C99F8(void *arg0) {
@@ -5658,7 +5827,20 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CAEA0);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CAFD0);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003CB110);
+//100%
+// Sets f24 = v / 4096 clamped to [0.5, 2.0]; the double compares are the soft-float
+// helpers called directly (func_00413AF8 = float->double, func_00412500 = double compare).
+struct O_B110 { char p[0x24]; float f; };
+extern long fptodp_B110(float) __asm__("func_00413AF8");
+extern int dpcmp_B110(long, long) __asm__("func_00412500");
+void func_003CB110(struct O_B110 *o, int v) {
+    o->f = v * (1.0f / 4096.0f);
+    if (dpcmp_B110(fptodp_B110(o->f), 0x3FE0000000000000L) < 0) {
+        o->f = 0.5f;
+    } else if (dpcmp_B110(fptodp_B110(o->f), 0x4000000000000000L) > 0) {
+        o->f = 2.0f;
+    }
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CB1A8);
 
@@ -6294,7 +6476,22 @@ int func_003CE1B0(int arg0, int idx, int arg2, int arg3, int arg4, int arg5, A6_
     return 0;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003CE378);
+//100%
+// Index of the stream whose func_003BA6E8 key matches, or -1.
+// volatile pointee: retail keeps the *p load out of the jal delay slot.
+struct G_E378 { char p[0x46]; unsigned char n; };
+struct W_E378 { char p[0x304]; int *volatile *q[100]; };
+extern struct G_E378 D_0050A8E8_E378 __asm__("D_0050A8E8");
+extern struct W_E378 D_005157B8_E378 __asm__("D_005157B8");
+extern int func_003BA6E8_E378(int *) __asm__("func_003BA6E8");
+int func_003CE378(int key) {
+    int i;
+    for (i = 0; i < D_0050A8E8_E378.n; i++) {
+        int *volatile *p = D_005157B8_E378.q[i];
+        if (p && func_003BA6E8_E378(*p) == key) return i;
+    }
+    return -1;
+}
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE410);
 
@@ -7723,7 +7920,29 @@ int func_003D4950(char *arg0) {
     return var_16;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003D49D0);
+//100%
+// Returns v of the entry whose a/b byte is closest to t (first 127-or-better wins), -1 for an empty table.
+struct E_49D0 { signed char a; signed char b; unsigned short v; };
+int func_003D49D0(int n, int t, struct E_49D0 *tab) {
+    int best;
+    struct E_49D0 *bp = tab;
+    int i;
+    if (n <= 0) return -1;
+    best = 0x7F;
+    for (i = 0; i < n; i++) {
+        int d0 = tab[i].a - t;
+        int d1 = tab[i].b - t;
+        int d;
+        if (d0 <= -1) d0 = -d0;
+        if (d1 <= -1) d1 = -d1;
+        d = d0 < d1 ? d0 : d1;
+        if (d < best) {
+            best = d;
+            bp = &tab[i];
+        }
+    }
+    return bp->v;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -7750,7 +7969,31 @@ int func_003D4A50(unsigned arg0) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D4B00);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003D4BB0);
+//100%
+// Finds the active entry whose id (f30) matches and selects it through the inlined func_003D5450 body.
+struct E_4BB0 { char pad[0x30]; int f30; int f34; char pad2[0x928 - 0x38]; };
+extern struct E_4BB0 D_00517610_4BB0[] __asm__("D_00517610");
+extern unsigned int D_0044F430_4BB0 __asm__("D_0044F430");
+extern struct E_4BB0 *D_0044F420_4BB0 __asm__("D_0044F420");
+static inline int select_4BB0(int i) {
+    if (D_0044F430_4BB0 == 0) D_0044F430_4BB0 = 0xFFFFFFFF;
+    if ((unsigned int)i < 4 && D_00517610_4BB0[i].f34 != 0) {
+        D_0044F430_4BB0 = D_00517610_4BB0[i].f30;
+        D_0044F420_4BB0 = &D_00517610_4BB0[i];
+        return D_0044F430_4BB0;
+    }
+    if (i != -1) D_0044F430_4BB0 = 0;
+    return D_0044F430_4BB0;
+}
+int func_003D4BB0(int id) {
+    int i;
+    for (i = 0; i < 4; i++) {
+        if (D_00517610_4BB0[i].f34 != 0 && D_00517610_4BB0[i].f30 == id) {
+            return select_4BB0(i);
+        }
+    }
+    return 0;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -7919,7 +8162,22 @@ int func_003D53B8(int arg0, int arg1) {
     return 0;
 }
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003D5450);
+//100%
+// Selects entry i (0..3) of D_00517610 as current; any other i except -1 clears the current id.
+struct E_5450 { char pad[0x30]; int f30; int f34; char pad2[0x928 - 0x38]; };
+extern struct E_5450 D_00517610_5450[] __asm__("D_00517610");
+extern unsigned int D_0044F430_5450 __asm__("D_0044F430");
+extern struct E_5450 *D_0044F420_5450 __asm__("D_0044F420");
+int func_003D5450(int i) {
+    if (D_0044F430_5450 == 0) D_0044F430_5450 = 0xFFFFFFFF;
+    if ((unsigned int)i < 4 && D_00517610_5450[i].f34 != 0) {
+        D_0044F430_5450 = D_00517610_5450[i].f30;
+        D_0044F420_5450 = &D_00517610_5450[i];
+        return D_0044F430_5450;
+    }
+    if (i != -1) D_0044F430_5450 = 0;
+    return D_0044F430_5450;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern void func_003D5128(int);
