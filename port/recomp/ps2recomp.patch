@@ -1545,7 +1545,7 @@ index ea86a9c..9cf92aa 100644
      struct PendingTransfer
      {
 diff --git a/ps2xRuntime/include/runtime/ps2_vu1.h b/ps2xRuntime/include/runtime/ps2_vu1.h
-index 67c8184..05a01a7 100644
+index 67c8184..09fd41b 100644
 --- a/ps2xRuntime/include/runtime/ps2_vu1.h
 +++ b/ps2xRuntime/include/runtime/ps2_vu1.h
 @@ -3,6 +3,7 @@
@@ -1667,7 +1667,7 @@ index 67c8184..05a01a7 100644
      struct XgkickPipeline
      {
          static constexpr uint32_t kBufferSize = 0x10000u;
-@@ -189,15 +198,27 @@ private:
+@@ -189,15 +198,29 @@ private:
          uint64_t issueCycle = 0;
          bool active = false;
          bool currentTagEop = false;
@@ -1690,7 +1690,10 @@ index 67c8184..05a01a7 100644
  
      static constexpr uint32_t kFmacLatency = 4u;
 -    static constexpr uint32_t kAccForwardLatency = 1u;
-     static constexpr uint32_t kMaxFlagEntries = 8u;
+-    static constexpr uint32_t kMaxFlagEntries = 8u;
++    // run() lands flags every cycle, so it never holds more than 8 (two a
++    // cycle); a compiled run lands them only when read or when this fills.
++    static constexpr uint32_t kMaxFlagEntries = 32u;
      static constexpr uint32_t kMaxPendingStores = 8u;
 -    static constexpr uint32_t kMaxPendingVfWrites = 16u;
      static constexpr uint32_t kMaxPendingViWrites = 8u;
@@ -1698,7 +1701,7 @@ index 67c8184..05a01a7 100644
      static constexpr uint32_t kMaxDecodedPairs = 0x4000u / 8u;
  
      Unit m_unit;
-@@ -209,22 +230,48 @@ private:
+@@ -209,22 +232,48 @@ private:
      uint64_t m_cachedCodeGeneration = 0;
      bool m_decodedCodeCacheValid = false;
  
@@ -1753,7 +1756,7 @@ index 67c8184..05a01a7 100644
      uint64_t m_nextWriteSequence = 0;
      uint64_t m_efuResourceReady = 0;
      uint32_t m_workingClip = 0;
-@@ -244,6 +291,56 @@ private:
+@@ -244,6 +293,61 @@ private:
               uint8_t *vuData, uint32_t dataSize,
               GS &gs, PS2Memory *memory, uint32_t maxCycles);
  
@@ -1779,7 +1782,7 @@ index 67c8184..05a01a7 100644
 +    struct CompiledCache;
 +    std::shared_ptr<CompiledCache> m_compiled;
 +    bool m_compiledEnabled = false;
-+    CompiledCode &compiledCodeFor(const uint8_t *vuCode, uint32_t codeSize, const DecodedInstructionPair *decodedCode);
++    CompiledCode *compiledCodeFor(const uint8_t *vuCode, uint32_t codeSize, PS2Memory *memory);
 +    // Runs a program from its start through compiled blocks, handing over to
 +    // run() for anything they don't cover. False, changing nothing, when it
 +    // can't start.
@@ -1794,15 +1797,20 @@ index 67c8184..05a01a7 100644
 +    void execFastPair(const void *pair, uint8_t *vuData, uint32_t dataSize, GS &gs, PS2Memory *memory);
 +    void execSimpleOps(const void *pair, uint8_t *vuData, uint32_t dataSize, GS &gs, PS2Memory *memory);
 +    void saveShownValues(const void *pair);
++    // The pc, branch and E bit logic after a control pair.
++    void finishControlPair(bool eBit, bool &programEnded);
 +    // While a compiled run is on, stores land as they issue, flag results
 +    // stay queued until something reads them, and PATH1 catches up before
 +    // each store and after each pair. Q, P and slow VI writes land at the
 +    // first pair at or after their cycle.
 +    bool m_compiledRun = false;
++    uint32_t m_compiledCodeSize = 0;
 +    uint64_t m_xgkickProgressCycle = 0; // PATH1 has moved through this cycle
 +    uint64_t m_compiledNextVi = ~0ull;  // the first cycle a queued VI write lands
 +    uint64_t m_compiledNextEvent = 0;   // the first cycle Q, P or a VI write lands
 +    void commitFlagsUpTo(uint64_t cycle);
++    // queueFmacFlags for a compiled run.
++    void pushCompiledFmacFlags(uint32_t mac, uint32_t statusSet);
 +    void catchUpXgkick();
 +    // Lands the Q, P and VI writes due by m_cycle, in cycle order.
 +    void commitCompiledEvents();
@@ -1810,7 +1818,7 @@ index 67c8184..05a01a7 100644
      InstructionUsage decodeUpperUsage(uint32_t upper) const;
      InstructionUsage decodeLowerUsage(uint32_t lower) const;
      static void addVfRead(InstructionUsage &usage, uint8_t reg, uint8_t lanes);
-@@ -251,32 +348,61 @@ private:
+@@ -251,32 +355,61 @@ private:
      static uint8_t vfReadLanes(const InstructionUsage &usage, uint8_t reg);
      DecodedInstructionPair decodeInstructionPair(const uint8_t *vuCode, uint32_t pc) const;
      DecodedInstructionPair getDecodedInstructionPairForPc(const uint8_t *vuCode, uint32_t codeSize, PS2Memory *memory, uint32_t pc);
@@ -1876,7 +1884,7 @@ index 67c8184..05a01a7 100644
      void commitReadyPipelines();
      void advanceOneCycle();
      void advanceTo(uint64_t targetCycle);
-@@ -289,7 +415,7 @@ private:
+@@ -289,7 +422,7 @@ private:
  
      float normalizeOperand(float value) const;
      float normalizeResult(float value, uint32_t &laneFlags) const;
@@ -5278,10 +5286,10 @@ index b02c7ca..024694b 100644
      }
 diff --git a/ps2xRuntime/src/lib/vu/ps2_vu1_compiled.cpp b/ps2xRuntime/src/lib/vu/ps2_vu1_compiled.cpp
 new file mode 100644
-index 0000000..172180a
+index 0000000..61d5cd9
 --- /dev/null
 +++ b/ps2xRuntime/src/lib/vu/ps2_vu1_compiled.cpp
-@@ -0,0 +1,1355 @@
+@@ -0,0 +1,1449 @@
 +// Compiled blocks for VU1 programs.
 +//
 +// The interpreter (run()) is the spec: a compiled run must leave the same
@@ -5297,6 +5305,7 @@ index 0000000..172180a
 +// timing rebuilt, so run() carries on as if it had run the whole program.
 +
 +#include "runtime/ps2_vu1.h"
++#include "runtime/ps2_memory.h"
 +#include "ps2_vu1_detail.h"
 +
 +#include <algorithm>
@@ -5310,14 +5319,26 @@ index 0000000..172180a
 +
 +void VU1Interpreter::commitFlagsUpTo(uint64_t cycle)
 +{
-+    for (; m_flagCount != 0u && m_flagPipeline[m_flagHead].readyCycle <= cycle; --m_flagCount)
++    uint32_t head = m_flagHead;
++    uint32_t count = m_flagCount;
++    if (count == 0u || m_flagPipeline[head].readyCycle > cycle)
++        return;
++    uint32_t mac = m_state.mac;
++    uint32_t status = m_state.status;
++    uint32_t clip = m_state.clip;
++    for (; count != 0u && m_flagPipeline[head].readyCycle <= cycle; --count)
 +    {
-+        const FlagPipelineEntry &entry = m_flagPipeline[m_flagHead];
-+        m_state.mac = (m_state.mac & entry.macKeep) | entry.macSet;
-+        m_state.status = (m_state.status & entry.statusKeep) | entry.statusSet;
-+        m_state.clip = (m_state.clip & entry.clipKeep) | entry.clipSet;
-+        m_flagHead = (m_flagHead + 1u) % kMaxFlagEntries;
++        const FlagPipelineEntry &entry = m_flagPipeline[head];
++        mac = (mac & entry.macKeep) | entry.macSet;
++        status = (status & entry.statusKeep) | entry.statusSet;
++        clip = (clip & entry.clipKeep) | entry.clipSet;
++        head = (head + 1u) % kMaxFlagEntries;
 +    }
++    m_state.mac = mac;
++    m_state.status = status;
++    m_state.clip = clip;
++    m_flagHead = head;
++    m_flagCount = count;
 +}
 +
 +void VU1Interpreter::catchUpXgkick()
@@ -5414,7 +5435,7 @@ index 0000000..172180a
 +namespace
 +{
 +    // vuNormalizeOperand on four lanes.
-+    inline __m128 normalizeOperands(__m128 value)
++    __attribute__((always_inline)) inline __m128 normalizeOperands(__m128 value)
 +    {
 +        const __m128i bits = _mm_castps_si128(value);
 +        const __m128i exponent = _mm_and_si128(bits, _mm_set1_epi32(0x7F800000));
@@ -5479,6 +5500,28 @@ index 0000000..172180a
 +    result.toAcc = toAcc;
 +    out = result;
 +    return true;
++}
++
++__attribute__((always_inline)) inline void VU1Interpreter::pushCompiledFmacFlags(uint32_t mac, uint32_t statusSet)
++{
++    if (m_flagCount == kMaxFlagEntries) [[unlikely]]
++    {
++        commitFlagsUpTo(m_cycle);
++        if (m_flagCount == kMaxFlagEntries)
++        {
++            reportReservedInstruction(true, 0xFFFFFFFFu);
++            return;
++        }
++    }
++    FlagPipelineEntry &entry = m_flagPipeline[(m_flagHead + m_flagCount++) % kMaxFlagEntries];
++    entry.issueCycle = m_cycle;
++    entry.readyCycle = m_cycle + kFmacLatency;
++    entry.macKeep = 0u;
++    entry.macSet = mac;
++    entry.statusKeep = 0xFF0u;
++    entry.statusSet = statusSet;
++    entry.clipKeep = ~0u;
++    entry.clipSet = 0u;
 +}
 +
 +bool VU1Interpreter::execFmacCompiled(const CompiledFmac &op)
@@ -5564,8 +5607,9 @@ index 0000000..172180a
 +        return false;
 +    const uint32_t zeros = static_cast<uint32_t>(_mm_movemask_ps(zero)) & op.components;
 +    const uint32_t negative = static_cast<uint32_t>(_mm_movemask_ps(result)) & op.components;
-+    queueFmacFlags(kReverseLanes[zeros] | (static_cast<uint32_t>(kReverseLanes[negative]) << 4),
-+                   (zeros != 0u ? 0x1u : 0u) | (negative != 0u ? 0x2u : 0u), productSticky);
++    const uint32_t current = (zeros != 0u ? 0x1u : 0u) | (negative != 0u ? 0x2u : 0u);
++    pushCompiledFmacFlags(kReverseLanes[zeros] | (static_cast<uint32_t>(kReverseLanes[negative]) << 4),
++                          current | ((current | productSticky) << 6));
 +    writeLanes(op.toAcc ? m_state.acc : m_state.vf[op.fd], result, op.components);
 +    return true;
 +}
@@ -5625,7 +5669,7 @@ index 0000000..172180a
 +        bool queuesEvent = false;  // queues Q, P or a slow VI write
 +        bool startsXgkick = false;
 +        bool keepDeclared = false; // an op run() relies on issueVfWrite to trim
-+        bool slow = false;         // not simple, a control pair or keepDeclared: execCompiledPair
++        bool slow = false;         // not simple or keepDeclared: execCompiledPair
 +        bool special = false;      // readsFlags, queuesEvent or startsXgkick
 +        UpperOp upperOp = UpperCall;
 +        LowerOp lowerOp = LowerCall;
@@ -5642,6 +5686,12 @@ index 0000000..172180a
 +        int16_t immediate = 0;
 +        uint16_t branchTarget = 0;
 +        CompiledFmac fmac{};
++        uint32_t upper = 0;
++        uint32_t lower = 0;
++        // The lower op reads the register the upper one writes, and nothing
++        // else ties them: the lower op runs first and sees the old value.
++        bool lowerFirst = false;
++        bool eBit = false;
 +    };
 +
 +    enum class Exit : uint8_t
@@ -5822,7 +5872,10 @@ index 0000000..172180a
 +            pair.writtenVi = static_cast<uint8_t>(std::countr_zero(viWrites));
 +        pair.viLatency = decoded.hazards.viWriteLatency;
 +        pair.delaysBranchRead = decoded.lowerUsage.delaysNextBranchRead;
-+        pair.simple = !decoded.iBit && decoded.upperVfShadowReg == 0u;
++        pair.upper = decoded.upper;
++        pair.lower = decoded.lower;
++        pair.eBit = decoded.eBit;
++        pair.simple = !decoded.iBit;
 +        const InstructionUsage &lowerUsage = decoded.lowerUsage;
 +        pair.queuesEvent = lowerUsage.pipeline == PipelineFdiv || lowerUsage.pipeline == PipelineEfu ||
 +                           (pair.writtenVi != 0u && pair.viLatency > 1u);
@@ -5841,20 +5894,45 @@ index 0000000..172180a
 +                break;
 +            }
 +        }
++        if (pair.simple)
++        {
++            pair.vfS = FS(lower);
++            pair.vfT = FT(lower);
++            pair.viS = VIS(lower);
++            pair.viT = VIT(lower);
++            pair.viD = VID(lower);
++            pair.dest = DEST(lower);
++            pair.lowerOp = lowerOpFor(lower, pair);
++            if (const uint8_t shadow = decoded.upperVfShadowReg; shadow != 0u)
++            {
++                // The lower op sees the shadowed register's old value when it
++                // runs first, unless it writes a register the upper op uses.
++                bool writesVf = false;
++                switch (pair.lowerOp)
++                {
++                case LowerCall:
++                    pair.simple = false;
++                    break;
++                case LowerLq: case LowerLqi: case LowerMove: case LowerMr32: case LowerMfir:
++                    writesVf = true;
++                    break;
++                default:
++                    break;
++                }
++                if (writesVf && (pair.vfT == 0u || pair.vfT == shadow ||
++                                 vfReadLanes(decoded.upperUsage, pair.vfT) != 0u))
++                    pair.simple = false;
++                pair.lowerFirst = pair.simple;
++            }
++        }
 +        if (!pair.simple)
 +        {
++            pair.lowerOp = LowerCall;
 +            pair.keepDeclared = true;
 +            return;
 +        }
 +
 +        pair.upperOp = upperOpFor(decoded, pair.fmac);
-+        pair.vfS = FS(lower);
-+        pair.vfT = FT(lower);
-+        pair.viS = VIS(lower);
-+        pair.viT = VIT(lower);
-+        pair.viD = VID(lower);
-+        pair.dest = DEST(lower);
-+        pair.lowerOp = lowerOpFor(lower, pair);
 +        pair.keepDeclared = (pair.upperOp == UpperCall && decoded.upperUsage.vfWrite.reg != 0u) ||
 +                            (pair.lowerOp == LowerCall && decoded.lowerUsage.vfWrite.reg != 0u);
 +    }
@@ -5903,7 +5981,7 @@ index 0000000..172180a
 +            pair.pc = static_cast<uint16_t>(pc);
 +            decodePair(decoded, pair);
 +            pair.control = isBranch || decoded.eBit || inDelaySlot;
-+            pair.slow = !pair.simple || pair.keepDeclared || pair.control;
++            pair.slow = !pair.simple || pair.keepDeclared;
 +            pair.special = pair.readsFlags || pair.queuesEvent || pair.startsXgkick;
 +            const uint32_t stall = stallFor(timing, decoded);
 +            pair.stall = static_cast<uint8_t>(stall);
@@ -5998,16 +6076,17 @@ index 0000000..172180a
 +    uint64_t switches = 0;
 +};
 +
-+VU1Interpreter::CompiledCode &VU1Interpreter::compiledCodeFor(const uint8_t *vuCode, uint32_t codeSize,
-+                                                              const DecodedInstructionPair *decodedCode)
++// The interpreter's decoded pairs are only rebuilt for a new image: a known
++// one keeps its own copy, and run() rebuilds them if it takes over.
++VU1Interpreter::CompiledCode *VU1Interpreter::compiledCodeFor(const uint8_t *vuCode, uint32_t codeSize,
++                                                              PS2Memory *memory)
 +{
 +    if (!m_compiled)
 +        m_compiled = std::make_shared<CompiledCache>();
 +    CompiledCache &cache = *m_compiled;
-+    // decodedCodeFor has just brought m_cachedCodeGeneration up to date.
-+    if (cache.current && cache.code == vuCode && cache.codeSize == codeSize &&
-+        cache.generation == m_cachedCodeGeneration)
-+        return *cache.current;
++    const uint64_t generation = memory->getVU1CodeGeneration();
++    if (cache.current && cache.code == vuCode && cache.codeSize == codeSize && cache.generation == generation)
++        return cache.current;
 +
 +    CompiledCode *found = nullptr;
 +    for (const std::unique_ptr<CompiledCode> &image : cache.images)
@@ -6020,6 +6099,9 @@ index 0000000..172180a
 +    }
 +    if (!found)
 +    {
++        const DecodedInstructionPair *decodedCode = decodedCodeFor(vuCode, codeSize, memory);
++        if (!decodedCode)
++            return nullptr;
 +        if (cache.images.size() == CompiledCache::kMaxImages)
 +        {
 +            const auto oldest = std::min_element(cache.images.begin(), cache.images.end(),
@@ -6037,8 +6119,8 @@ index 0000000..172180a
 +    cache.current = found;
 +    cache.code = vuCode;
 +    cache.codeSize = codeSize;
-+    cache.generation = m_cachedCodeGeneration;
-+    return *found;
++    cache.generation = generation;
++    return found;
 +}
 +
 +void VU1Interpreter::commitCompiledEvents()
@@ -6107,28 +6189,32 @@ index 0000000..172180a
 +                                                                         uint32_t dataSize, GS &gs, PS2Memory *memory)
 +{
 +    const CompiledCode::Pair &pair = *static_cast<const CompiledCode::Pair *>(pairPointer);
-+    const DecodedInstructionPair &decoded = *pair.decoded;
 +    int32_t *vi = m_state.vi;
-+    switch (pair.upperOp)
++    const auto execUpperOp = [&]() __attribute__((always_inline))
 +    {
-+    case CompiledCode::UpperNop:
-+        break;
-+    case CompiledCode::UpperFmac:
-+        if (!execFmacCompiled(pair.fmac))
-+            execUpper(decoded.upper);
-+        break;
-+    case CompiledCode::UpperVector:
-+        m_currentUpperInstruction = decoded.upper;
-+        execUpperVector(decoded.upper);
-+        break;
-+    case CompiledCode::UpperClip:
-+        m_currentUpperInstruction = decoded.upper;
-+        execClip(decoded.upper);
-+        break;
-+    default:
-+        execUpper(decoded.upper);
-+        break;
-+    }
++        switch (pair.upperOp)
++        {
++        case CompiledCode::UpperNop:
++            break;
++        case CompiledCode::UpperFmac:
++            if (!execFmacCompiled(pair.fmac))
++                execUpper(pair.upper);
++            break;
++        case CompiledCode::UpperVector:
++            m_currentUpperInstruction = pair.upper;
++            execUpperVector(pair.upper);
++            break;
++        case CompiledCode::UpperClip:
++            m_currentUpperInstruction = pair.upper;
++            execClip(pair.upper);
++            break;
++        default:
++            execUpper(pair.upper);
++            break;
++        }
++    };
++    if (!pair.lowerFirst)
++        execUpperOp();
 +
 +    const uint32_t addressMask = dataSize - 1u;
 +    const auto takeBranch = [&]()
@@ -6172,10 +6258,10 @@ index 0000000..172180a
 +            vi[pair.viT] = static_cast<int16_t>(vi[pair.viS] - pair.immediate);
 +        break;
 +    case CompiledCode::LowerFcand:
-+        vi[1] = (m_state.clip & (decoded.lower & 0xFFFFFFu)) != 0u ? 1 : 0;
++        vi[1] = (m_state.clip & (pair.lower & 0xFFFFFFu)) != 0u ? 1 : 0;
 +        break;
 +    case CompiledCode::LowerFcor:
-+        vi[1] = ((m_state.clip | (decoded.lower & 0xFFFFFFu)) == 0xFFFFFFu) ? 1 : 0;
++        vi[1] = ((m_state.clip | (pair.lower & 0xFFFFFFu)) == 0xFFFFFFu) ? 1 : 0;
 +        break;
 +    case CompiledCode::LowerIadd:
 +        if (pair.viD != 0u)
@@ -6229,7 +6315,7 @@ index 0000000..172180a
 +    case CompiledCode::LowerMtir:
 +    {
 +        uint32_t bits;
-+        std::memcpy(&bits, &m_state.vf[pair.vfS][(decoded.lower >> 21) & 0x3u], 4);
++        std::memcpy(&bits, &m_state.vf[pair.vfS][(pair.lower >> 21) & 0x3u], 4);
 +        if (pair.viT != 0u)
 +            vi[pair.viT] = static_cast<int16_t>(bits & 0xFFFFu);
 +        break;
@@ -6271,10 +6357,11 @@ index 0000000..172180a
 +            takeBranch();
 +        break;
 +    default:
-+        execLower(decoded.lower, vuData, dataSize, gs, memory, decoded.upper);
++        execLower(pair.lower, vuData, dataSize, gs, memory, pair.upper);
 +        break;
 +    }
-+
++    if (pair.lowerFirst)
++        execUpperOp();
 +}
 +
 +// Keeps the old values of lanes that get a result with none on its way.
@@ -6290,6 +6377,37 @@ index 0000000..172180a
 +        float *shown = &m_vfShown[reg * 4u];
 +        _mm_storeu_ps(shown, _mm_blendv_ps(_mm_loadu_ps(shown), _mm_loadu_ps(m_state.vf[reg]), components));
 +    }
++}
++
++// What execCompiledPair does after a control pair: the pc moves on, and a
++// branch or E bit due takes effect.
++__attribute__((always_inline)) inline void VU1Interpreter::finishControlPair(bool eBit, bool &programEnded)
++{
++    uint32_t nextPc = m_state.pc + 8u;
++    if (nextPc >= m_compiledCodeSize)
++        nextPc = 0u;
++    m_state.pc = nextPc;
++    if (m_state.branchPending)
++    {
++        if (m_state.branchDelay == 0u)
++        {
++            m_state.pc = m_state.branchTarget & microAddressMask();
++            m_state.branchPending = false;
++        }
++        else
++            --m_state.branchDelay;
++    }
++    // D and T bits are off whenever this runs.
++    if (m_state.haltAfterDelaySlot)
++    {
++        m_state.stoppedByD = m_pendingHaltD;
++        m_state.stoppedByT = m_pendingHaltT;
++        programEnded = true;
++    }
++    else if (m_state.ebit)
++        programEnded = true;
++    else if (eBit)
++        m_state.ebit = true;
 +}
 +
 +// execCompiledPair for the common pairs: simple, not a control pair, and
@@ -6405,33 +6523,8 @@ index 0000000..172180a
 +    _mm_storeu_ps(m_state.vf[0], _mm_set_ps(1.0f, 0.0f, 0.0f, 0.0f));
 +    vi[0] = 0;
 +
-+    if (!pair.control)
-+        return;
-+    uint32_t nextPc = m_state.pc + 8u;
-+    if (nextPc >= m_cachedCodeSize)
-+        nextPc = 0u;
-+    m_state.pc = nextPc;
-+    if (m_state.branchPending)
-+    {
-+        if (m_state.branchDelay == 0u)
-+        {
-+            m_state.pc = m_state.branchTarget & microAddressMask();
-+            m_state.branchPending = false;
-+        }
-+        else
-+            --m_state.branchDelay;
-+    }
-+    // D and T bits are off whenever this runs.
-+    if (m_state.haltAfterDelaySlot)
-+    {
-+        m_state.stoppedByD = m_pendingHaltD;
-+        m_state.stoppedByT = m_pendingHaltT;
-+        programEnded = true;
-+    }
-+    else if (m_state.ebit)
-+        programEnded = true;
-+    else if (decoded.eBit)
-+        m_state.ebit = true;
++    if (pair.control)
++        finishControlPair(decoded.eBit, programEnded);
 +}
 +
 +bool VU1Interpreter::runCompiled(uint8_t *vuCode, uint32_t codeSize,
@@ -6442,11 +6535,14 @@ index 0000000..172180a
 +        return false;
 +    if (codeSize > kVu1PcMask + 1u)
 +        return false;
-+    const DecodedInstructionPair *runDecoded = decodedCodeFor(vuCode, codeSize, memory);
-+    if (!runDecoded)
++    if (!memory || vuCode != memory->getVU1Code())
 +        return false;
-+    CompiledCode &compiled = compiledCodeFor(vuCode, codeSize, runDecoded);
++    CompiledCode *compiledImage = compiledCodeFor(vuCode, codeSize, memory);
++    if (!compiledImage)
++        return false;
++    CompiledCode &compiled = *compiledImage;
 +    const DecodedInstructionPair *decodedCode = compiled.decoded.data();
++    m_compiledCodeSize = codeSize;
 +
 +    m_activeVuData = vuData;
 +    m_activeVuDataSize = dataSize;
@@ -6525,7 +6621,13 @@ index 0000000..172180a
 +            if (pair.special && pair.readsFlags)
 +                commitFlagsUpTo(m_cycle);
 +            if (!pair.slow)
++            {
++                if (pair.control)
++                    m_state.pc = pair.pc;
 +                execFastPair(&pair, vuData, dataSize, gs, memory);
++                if (pair.control)
++                    finishControlPair(pair.eBit, programEnded);
++            }
 +            else
 +                execCompiledPair(&pair, vuData, dataSize, gs, memory, programEnded);
 +            if (pair.special)
