@@ -1594,7 +1594,47 @@ extern "C" void *func_002BC980(void *arg0) {
     return arg0;
 }
 
-INCLUDE_ASM("bx/seg_1BA100", func_002BC9B0);
+//100%
+// Query impl constructor: clears eight pairs, copies the default pair into each slot pair, sets weights.
+struct sPair_002BC9B0
+{
+    int a;
+    int b;
+};
+extern sPair_002BC9B0 D_004A53D0_2BC9B0 __asm__("D_004A53D0");
+extern char D_00484290[];
+struct sQuery_002BC9B0
+{
+    float minValue;         // 0x00
+    char* vtable;           // 0x04
+    sPair_002BC9B0 p[8];    // 0x08
+    float w0;               // 0x48
+    float w1;               // 0x4C
+    float w2;               // 0x50
+    float w3;               // 0x54
+};
+extern "C" void* func_002BC9B0(sQuery_002BC9B0* o)
+{
+    o->vtable = D_00484290;
+    o->minValue = -99999.0f;
+    o->p[0].a = o->p[0].b = 0;
+    o->p[1].a = o->p[1].b = 0;
+    o->p[2].a = o->p[2].b = 0;
+    o->p[3].a = o->p[3].b = 0;
+    o->p[4].a = o->p[4].b = 0;
+    o->p[5].a = o->p[5].b = 0;
+    o->p[6].a = o->p[6].b = 0;
+    o->p[7].a = o->p[7].b = 0;
+    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; o->p[0] = o->p[1] = t; }
+    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; o->p[2] = o->p[3] = t; }
+    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; o->p[4] = o->p[5] = t; }
+    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; o->p[6] = o->p[7] = t; }
+    o->w1 = 1.0f;
+    o->w3 = 0.75f;
+    o->w0 = 1.0f;
+    o->w2 = 0.75f;
+    return o;
+}
 
 //100%
 extern char D_00484058[];
