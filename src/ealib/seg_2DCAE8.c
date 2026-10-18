@@ -206,7 +206,31 @@ void func_003DC038(int arg0, int arg1) {
     func_003DBFD8(arg0, arg1);
 }
 
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003DC068);
+//100%
+extern char *func_00418D48_C068(int, int, int *, int *) __asm__("func_00418D48");
+extern int strlen_C068(char *) __asm__("strlen");
+unsigned short *func_003DC068(unsigned short *dst, int val, int prec) {
+    int exp, sign;
+    int i = 0;
+    int k = 0;
+    char *s = func_00418D48_C068(val, prec, &exp, &sign);
+    int len = strlen_C068(s);
+    int total = exp + prec;
+    for (; i != total + 1; i++) {
+        if (i == prec) {
+            *--dst = '.';
+        } else {
+            int t = total - k;
+            if (len < t) {
+                *--dst = '0';
+            } else {
+                *--dst = s[t - 1];
+            }
+            k++;
+        }
+    }
+    return dst;
+}
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DC148);
 
@@ -369,7 +393,58 @@ int func_003DCF40(T_CF40 arg0) {
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DCF70);
 
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003DCFC0);
+//100%
+struct H_CFC0 { unsigned int v; };
+typedef struct Ent_CFC0 {
+    int f0, f4, busy, fC;
+    int prio;
+    char pad[0x18];
+    struct Ent_CFC0 *next;
+} Ent_CFC0;
+typedef struct Sys_CFC0 {
+    int f0, f4, f8, count, f10;
+    char mutex[0x10];
+    Ent_CFC0 *cur;
+    char *table;
+    int f2C;
+    Ent_CFC0 *head;
+} Sys_CFC0;
+extern Sys_CFC0 D_00519AB0_CFC0 __asm__("D_00519AB0");
+extern char D_00519AC4_CFC0[] __asm__("D_00519AC4");
+extern void MUTEX_lock_CFC0(void *) __asm__("MUTEX_lock");
+extern void MUTEX_unlock_CFC0(void *) __asm__("MUTEX_unlock");
+
+void func_003DCFC0(struct H_CFC0 h, int prio) {
+    struct H_CFC0 c;
+    Ent_CFC0 *e;
+    Ent_CFC0 *p;
+    Ent_CFC0 *prev;
+    int old;
+    unsigned int u = h.v;
+    int ok = 0;
+
+    e = (Ent_CFC0 *)(D_00519AB0_CFC0.table + ((unsigned char *)&h)[3] * 0x30);
+    c.v = u;
+    if (u != 0) {
+        unsigned int x = (*(unsigned int *)(((unsigned char *)&c)[3] * 0x30 + D_00519AB0_CFC0.table) ^ u) & 0xFFFFF;
+        ok = x == 0;
+    }
+    if (ok == 0) return;
+    MUTEX_lock_CFC0(D_00519AB0_CFC0.mutex);
+    old = e->prio;
+    e->prio = prio;
+    if (D_00519AB0_CFC0.count >= 2 && e != D_00519AB0_CFC0.cur && e->busy == 0 && old != prio) {
+        prev = 0;
+        for (p = D_00519AB0_CFC0.head; p != 0 && p != e; p = p->next) prev = p;
+        if (prev != 0) prev->next = e->next;
+        else D_00519AB0_CFC0.head = e->next;
+        prev = 0;
+        for (e->next = D_00519AB0_CFC0.head; e->next != 0 && !(e->prio < e->next->prio); e->next = prev->next) prev = e->next;
+        if (prev != 0) prev->next = e;
+        else D_00519AB0_CFC0.head = e;
+    }
+    MUTEX_unlock_CFC0(D_00519AC4_CFC0);
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -1584,7 +1659,77 @@ void func_003DFE18(char *l, char *n) {
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DFE88);
 
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003DFED0);
+//100%
+extern void MUTEX_lock_FED0(void *) __asm__("MUTEX_lock");
+extern void MUTEX_unlock_FED0(void *) __asm__("MUTEX_unlock");
+extern int func_003DFE88_FED0(char *, int *) __asm__("func_003DFE88");
+
+static inline void hdr_FED0(int *h, int *plen, char *cur) {
+    if (*plen & 0xFF000000) {
+        *plen = 8;
+        h[1] = 8;
+        h[0] = *(int *)(cur + 0x11C);
+    }
+}
+
+int func_003DFED0(char *s) {
+    char *cur = *(char **)(s + 0x60);
+    int *h;
+    int len;
+    int r;
+    int st;
+    int a;
+    char *e;
+    int o;
+    int end;
+    int id;
+    int a2;
+
+    while ((end = *(int *)(s + 0x58), h = *(int **)(s + 0x54), end - (int)h >= 8)
+           && (len = h[1], ((len & 0xFF000000) ? (id = *(int *)(cur + 0x11C), len = 8, h[1] = len, h[0] = id) : 0),
+               *(unsigned int *)(s + 0x58) >= *(unsigned int *)(s + 0x54) + len)) {
+        if (h[0] == *(int *)(cur + 0x11C)) {
+            a = *(int *)(s + 0x54) & 0x3F;
+            len = ((len + a + 0x3F) & ~0x3F) - a;
+        }
+        r = func_003DFE88_FED0(s, h);
+        if (r < 0) {
+            MUTEX_lock_FED0(s + 4);
+            st = *(int *)(cur + 4) == 4;
+            if (!st) {
+                h[0] = -2;
+                *(int *)(s + 0x54) += len;
+            }
+            MUTEX_unlock_FED0(s + 4);
+        } else {
+            h[1] = len | (r << 24);
+            MUTEX_lock_FED0(s + 4);
+            st = *(int *)(cur + 4) == 4;
+            if (!st) {
+                e = *(char **)(s + 0x24) + (r * 16 - 16);
+                *(int *)(e + 8) += len;
+                if (*(int *)(e + 8) == len) *(int **)(e + 0xC) = h;
+                o = *(int *)(s + 0x4C);
+                *(int *)(s + 0x4C) = o + len;
+                *(int *)(s + 0x54) += len;
+                if (o < *(int *)(s + 0x44) && !(*(int *)(s + 0x4C) < *(int *)(s + 0x44))) {
+                    *(int *)(s + 0x48) = 0;
+                }
+            }
+            MUTEX_unlock_FED0(s + 4);
+        }
+        if (st) {
+            if (h[0] != *(int *)(cur + 0x11C)) {
+                a2 = *(int *)(s + 0x54) & 0x3F;
+                len = ((len + a2 + 0x3F) & ~0x3F) - a2;
+                h[1] = len | (r << 24);
+            }
+            return 0;
+        }
+        if (h[0] == *(int *)(cur + 0x11C)) return 1;
+    }
+    return 0;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -1745,7 +1890,7 @@ void func_003E0B28(int a0, int a1) {
 
 //100% - objdiff report; single-function view differs only in a relocation name
 typedef struct { char pad[0x38]; int s38; int pad3C; int f40; char pad44[4]; int f48; char pad4C[0x128]; int f174; } O_0B98;
-extern void func_003DCFC0(int, int);
+extern void func_003DCFC0_0B98(int, int) __asm__("func_003DCFC0");
 
 void func_003E0B98(int arg0, int arg1) {
     O_0B98 *o;
@@ -1755,7 +1900,7 @@ void func_003E0B98(int arg0, int arg1) {
         o->f48 = arg1;
         if (arg1 != 0) {
             if (o->s38 == 1) {
-                func_003DCFC0(o->f174, o->f40);
+                func_003DCFC0_0B98(o->f174, o->f40);
             }
         }
     }
@@ -4486,7 +4631,61 @@ int func_003E8260(struct S_8260 *s, int a1, int a2, int a3, int a4) {
     return 0;
 }
 
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8368);
+//100%
+typedef struct { int h; int f4; int pad[3]; } Ent_8368;
+typedef struct { int f0; int pad4[2]; int state; char padC[0x300]; Ent_8368 t[8]; } Self_8368;
+extern long D_004A48B0_8368[] __asm__("D_004A48B0");
+extern long D_004A48B8_8368[] __asm__("D_004A48B8");
+extern long D_004A48C0_8368[] __asm__("D_004A48C0");
+extern char D_004A48C8_8368[] __asm__("D_004A48C8");
+extern char D_004A48D0_8368[] __asm__("D_004A48D0");
+extern int func_003EE778_8368(int, int) __asm__("func_003EE778");
+extern int func_003EE1E8_8368(int, int, int) __asm__("func_003EE1E8");
+extern void func_004162D0_8368(char *, char *) __asm__("func_004162D0");
+extern void func_003F5910_8368(int, int, int, char *, int) __asm__("func_003F5910");
+extern int func_003EE9A0_8368(int) __asm__("func_003EE9A0");
+extern void *func_003EE480_8368(int, int) __asm__("func_003EE480");
+extern void func_00259210_8368(void *) __asm__("func_00259210");
+extern void func_003EE820_8368(int) __asm__("func_003EE820");
+extern void func_003EE260_8368(int) __asm__("func_003EE260");
+
+int func_003E8368(Self_8368 *self, unsigned int idx, int enable) {
+    char buf[256];
+    int e;
+
+    if (idx >= 8) return 0;
+    if (idx == 0) {
+        __builtin_memcpy(buf, D_004A48B0_8368, 7);
+    } else if (idx == 2) {
+        __builtin_memcpy(buf, D_004A48B8_8368, 7);
+    } else if (idx == 1) {
+        __builtin_memcpy(buf, D_004A48C0_8368, 7);
+    } else {
+        buf[0] = 0;
+    }
+    if (enable && self->t[idx].h == 0) {
+        self->t[idx].h = func_003EE778_8368(1000, 2000);
+        self->t[idx].f4 = func_003EE1E8_8368(100, 100, 0);
+        if (self->state != 0x6F66666C && self->state != 0x72646972 && self->state != 0x636F6E6E && buf[0] != 0) {
+            func_004162D0_8368(buf, D_004A48C8_8368);
+            func_003F5910_8368(self->f0, 0x73656C65, 0, buf, -1);
+        }
+    }
+    if (!enable && self->t[idx].h != 0) {
+        while ((e = func_003EE9A0_8368(self->t[idx].h)) != 0) {
+            func_00259210_8368(func_003EE480_8368(self->t[idx].f4, e));
+        }
+        func_003EE820_8368(self->t[idx].h);
+        self->t[idx].h = 0;
+        func_003EE260_8368(self->t[idx].f4);
+        self->t[idx].f4 = 0;
+        if (self->state != 0x6F66666C && self->state != 0x72646972 && self->state != 0x636F6E6E && buf[0] != 0) {
+            func_004162D0_8368(buf, D_004A48D0_8368);
+            func_003F5910_8368(self->f0, 0x73656C65, 0, buf, -1);
+        }
+    }
+    return self->t[idx].f4;
+}
 
 //100%
 typedef struct { int a; int b; int x; int y; int d; } E_85B0;
@@ -4551,7 +4750,44 @@ void func_003E8688(T_8688 *self, unsigned int i, int h) {
     }
 }
 
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8778);
+//100%
+typedef struct { int h; int f4; int pad[3]; } Ent_8778;
+typedef struct { int v[42]; } Blk_8778;
+typedef struct { char pad[0x310]; Ent_8778 t[8]; } Self_8778;
+extern int func_003EEC88_8778(int, char *) __asm__("func_003EEC88");
+extern char *func_002591E8_8778(int) __asm__("func_002591E8");
+extern void func_00416210_8778(void *, int, int) __asm__("func_00416210");
+extern void strcpy_8778(char *, char *) __asm__("strcpy");
+extern int func_003EE320_8778(int, char *) __asm__("func_003EE320");
+extern void func_003EEB30_8778(int, char *, int) __asm__("func_003EEB30");
+
+int func_003E8778(Self_8778 *self, unsigned int idx, char *arg) {
+    if (idx < 8) {
+        if (self->t[idx].h == 0) return -1;
+        if (idx == 3) {
+            char *p;
+            int r;
+            if (func_003EEC88_8778(self->t[idx].h, arg) != 0) return 0;
+            p = func_002591E8_8778(0x138);
+            func_00416210_8778(p, 0, 0x138);
+            strcpy_8778(p + 8, arg);
+            r = func_003EE320_8778(self->t[idx].f4, p);
+            func_003EEB30_8778(self->t[idx].h, p + 8, r);
+        } else if (idx - 4 < 4) {
+            char *p;
+            int r;
+            if (func_003EEC88_8778(self->t[idx].h, arg + 8) != 0) return 0;
+            p = func_002591E8_8778(0xA8);
+            *(Blk_8778 *)p = *(Blk_8778 *)arg;
+            r = func_003EE320_8778(self->t[idx].f4, p);
+            func_003EEB30_8778(self->t[idx].h, p + 8, r);
+        } else {
+            return -1;
+        }
+        return 1;
+    }
+    return -1;
+}
 
 //100%
 typedef struct { int a; int b; int x; int y; int d; } E_8968;
@@ -4609,7 +4845,78 @@ void func_003E8AF8(void *arg0, int arg1) {
     }
 }
 
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8B10);
+//100%
+typedef struct { int h; int f4; int pad[3]; } Ent_8B10;
+typedef struct {
+    int f0; int pad4[2]; int state;
+    char pad10[0x14];
+    char key[0x10];
+    char f34[0x2DC];
+    Ent_8B10 t[8];
+    char pad3B0[0x108];
+    int f4B8;
+    char f4BC[0x4C];
+    int f508;
+    int f50C;
+} Self_8B10;
+extern int *func_003E7718_8B10(Self_8B10 *, int, int, int) __asm__("func_003E7718");
+extern void cDirtysock_tag_TagFieldDupl_8B10(char *, int, char *) __asm__("cDirtysock_tag_TagFieldDupl");
+extern int func_003ECB00_8B10(char *, int, char *) __asm__("func_003ECB00");
+extern char *cDirtysock_tag_TagFieldFind_8B10(char *, char *) __asm__("cDirtysock_tag_TagFieldFind");
+extern int cDirtysock_tag_TagFieldGetString_8B10(char *, char *, int, char *) __asm__("cDirtysock_tag_TagFieldGetString");
+extern void cDirtysock_tag_TagFieldSetCrypt_8B10(char *, int, char *, char *, char *) __asm__("cDirtysock_tag_TagFieldSetCrypt");
+extern void cDirtysock_tag_TagFieldSetNumber_8B10(char *, int, char *, int) __asm__("cDirtysock_tag_TagFieldSetNumber");
+extern void cDirtysock_tag_TagFieldSetString_8B10(char *, int, char *, char *) __asm__("cDirtysock_tag_TagFieldSetString");
+extern int cDirtysock_tag_TagFieldGetNumber_8B10(char *, int) __asm__("cDirtysock_tag_TagFieldGetNumber");
+extern void func_003F35D0_8B10(char *, int, char *, char *, int, int) __asm__("func_003F35D0");
+extern int func_003EE9A0_8B10(int) __asm__("func_003EE9A0");
+extern void *func_003EE480_8B10(int, int) __asm__("func_003EE480");
+extern void func_00259210_8B10(void *) __asm__("func_00259210");
+extern void func_003F5910_8B10(int, int, int, char *, int) __asm__("func_003F5910");
+extern char D_004A48D8_8B10[] __asm__("D_004A48D8");
+extern char D_004A4888_8B10[] __asm__("D_004A4888");
+extern char D_004A48E0_8B10[] __asm__("D_004A48E0");
+extern char D_004A48E8_8B10[] __asm__("D_004A48E8");
+
+int func_003E8B10(Self_8B10 *self, int kind, char *data, int a3, int a4) {
+    char buf[0x200];
+    char key[0x20];
+    int *r;
+    int n;
+    int e;
+
+    if (self->state != 0x69646C65 && self->state != 0x61757468 && self->state != 0x61636374 && self->state != 0x736B6579) {
+        return -1;
+    }
+    r = func_003E7718_8B10(self, kind, a3, a4);
+    if (r == 0) return -2;
+    if (kind == 0x61757468 || kind == 0x61636374 || kind == 0x70617373) {
+        cDirtysock_tag_TagFieldDupl_8B10(buf, 0x200, data);
+        func_003ECB00_8B10(buf, 0x200, self->f34);
+        cDirtysock_tag_TagFieldGetString_8B10(cDirtysock_tag_TagFieldFind_8B10(buf, D_004A48D8_8B10), key + 1, 0x1F, D_004A4888_8B10);
+        if (self->key[0] == 0) {
+            cDirtysock_tag_TagFieldSetCrypt_8B10(buf, 0x200, D_004A48D8_8B10, self->f4BC, key + 1);
+            cDirtysock_tag_TagFieldSetNumber_8B10(buf, 0x200, D_004A48E0_8B10, self->f4B8);
+        } else {
+            key[0] = '~';
+            func_003F35D0_8B10(key + 1, 0x1F, key + 1, self->key, 0x10, 0x10);
+            cDirtysock_tag_TagFieldSetString_8B10(buf, 0x200, D_004A48D8_8B10, key);
+        }
+        data = buf;
+    }
+    if (kind == 0x736E6170) {
+        n = cDirtysock_tag_TagFieldGetNumber_8B10(cDirtysock_tag_TagFieldFind_8B10(data, D_004A48E8_8B10), 0);
+        if ((unsigned int)(n - 4) < 4 && self->t[n].h != 0) {
+            while ((e = func_003EE9A0_8B10(self->t[n].h)) != 0) {
+                func_00259210_8B10(func_003EE480_8B10(self->t[n].f4, e));
+            }
+        }
+        self->f508 = 0;
+        self->f50C++;
+    }
+    func_003F5910_8B10(self->f0, kind, 0, data, -1);
+    return *r;
+}
 
 //100%
 int func_003E8D70(void *arg0, int arg1) {
@@ -4698,7 +5005,51 @@ int func_003E8FB8(void *arg0) {
     return temp_2 ^ temp_3;
 }
 
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8FD0);
+//100%
+extern void func_003E76A8_8FD0(void *, const char *, ...) __asm__("func_003E76A8");
+extern char D_00495F48_8FD0[] __asm__("D_00495F48");
+extern char D_00495F68_8FD0[] __asm__("D_00495F68");
+extern char D_00495F78_8FD0[] __asm__("D_00495F78");
+extern char D_00495F88_8FD0[] __asm__("D_00495F88");
+extern char D_004A48F0_8FD0[] __asm__("D_004A48F0");
+
+void func_003E8FD0(void *out, int *p) {
+    int a = p[1];
+    int b = p[2];
+    char *s = (char *)p[3];
+    int n;
+    int bad;
+
+    if (b == 0) b = 0x2D2D2D2D;
+    if (a == -1) {
+        a = 0x2A2A2A2A;
+        if (b == -1) {
+            b = 0x636F6E6E;
+        } else if (b == (int)0xFEFEFEFE) {
+            b = 0x64697363;
+        } else {
+            b = 0x2D2D2D2D;
+        }
+    }
+    func_003E76A8_8FD0(out, D_00495F48_8FD0, a >> 24, a >> 16, a >> 8, a, b >> 24, b >> 16, b >> 8, b);
+    n = 0;
+    bad = 0;
+    for (; s[n] != 0 && s[n] < 0x7F; n++) {
+        if (s[n] < 0x20 && !(s[n] == '\t' || s[n] == '\n') && s[n] != '\r') {
+            bad = 1;
+            break;
+        }
+    }
+    if (n == 0) {
+        func_003E76A8_8FD0(out, D_00495F68_8FD0);
+    } else if (bad == 1) {
+        func_003E76A8_8FD0(out, D_00495F78_8FD0);
+    } else if (n > 0xF0) {
+        func_003E76A8_8FD0(out, D_00495F88_8FD0);
+    } else {
+        func_003E76A8_8FD0(out, D_004A48F0_8FD0, s);
+    }
+}
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E9160);
 

@@ -2141,7 +2141,73 @@ unsigned int func_003DB4D0(void) {
     return s;
 }
 
-INCLUDE_ASM("ealib/seg_2D7498", func_003DB5C0);
+//100%
+typedef struct { unsigned short val; unsigned short key; } Hist_B5C0;
+extern Hist_B5C0 D_00450B88_B5C0[] __asm__("D_00450B88");
+extern int D_004A4858;
+extern unsigned int func_003DB4D0(void);
+
+int func_003DB5C0(int range, int key) {
+    int half = range / 2;
+    int tries = 0;
+    int done = 0;
+    int r;
+    int v;
+    int best = -1;
+    int n;
+    int idx;
+    int found;
+    int i;
+    int k;
+    int stop;
+    int kk;
+
+    if (half >= 11) half = 10;
+    r = (func_003DB4D0() >> 16) * range >> 16;
+    if (key == -1) return r;
+    kk = key & 0xFFFF;
+    do {
+        v = (func_003DB4D0() >> 16) * range >> 16;
+        n = half;
+        if (n > 32) n = 32;
+        idx = D_004A4858;
+        found = -1;
+        i = 0;
+        k = 0;
+        stop = 0;
+        do {
+            if (i < n) {
+                if (D_00450B88_B5C0[idx].key == kk) {
+                    i++;
+                    if (D_00450B88_B5C0[idx].val == v) {
+                        stop = 1;
+                        found = i - 1;
+                    }
+                }
+            } else {
+                stop = 1;
+            }
+            idx--;
+            k++;
+            if (idx < 0) idx += 32;
+            if (k >= 33) stop = 1;
+        } while (!stop);
+        if (found == -1) {
+            r = v;
+            done = 1;
+        } else if (found > best) {
+            best = found;
+            r = v;
+        }
+        tries++;
+        if (tries >= 32) done = 1;
+    } while (!done);
+    D_004A4858++;
+    if (D_004A4858 >= 32) D_004A4858 = 0;
+    D_00450B88_B5C0[D_004A4858].val = r;
+    D_00450B88_B5C0[D_004A4858].key = kk;
+    return v;
+}
 
 //100%
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
