@@ -776,7 +776,41 @@ extern "C" void* func_002EBE20(void* self, sBtRectBE20 rect)
     return self;
 }
 
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EBF48);
+//100%
+//100%
+struct sBTQuad_BF48 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sBTVtx_BF48 {
+    float x, y, z;
+    int pad;
+    int r, g, b, a;
+    sBTQuad_BF48 st;
+};
+
+extern "C" void func_002EBF48(sBTVtx_BF48* o, float* c, float x, float y)
+{
+    if (*(short*)(*(char**)(D_004A5B80 + 0xE84) + 0x10) != -1) {
+        o->r = (int)(c[1] * 128.0f);
+        o->g = (int)(c[2] * 128.0f);
+        o->b = (int)(c[3] * 128.0f);
+        o->a = (int)(c[0] * 128.0f);
+    } else {
+        o->r = (int)(c[1] * 255.0f);
+        o->g = (int)(c[2] * 255.0f);
+        o->b = (int)(c[3] * 255.0f);
+        o->a = (int)(c[0] * 128.0f);
+    }
+    o->z = 1.0f;
+    sBTQuad_BF48 q;
+    q.w = 1.0f;
+    q.x = x;
+    q.y = y;
+    q.z = 0.0f;
+    o->st = q;
+    o->x = D_004A3B30 + D_004A3B38 * 0.0015625f * x;
+    o->y = D_004A3B3C + D_004A3B44 * 0.0020833334f * y;
+}
 
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EC060);
 
