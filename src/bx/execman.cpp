@@ -173,7 +173,28 @@ void* func_00320B48(void* self)
     return func_00320550(0, 0xffff);
 }
 
-INCLUDE_ASM("bx/execman", func_00320B68);
+//100%
+// Branchless ceil(log2(x)) for x > 0: count leading zeros by halving, then round up for non-powers of two.
+extern "C" int func_00320B68(int x)
+{
+    int n;
+    int t;
+    int y;
+    n = ((x - 0x10000) >> 31) & 16;
+    y = x << n;
+    t = ((y - 0x1000000) >> 31) & 8;
+    y <<= t;
+    n += t;
+    t = ((y - 0x10000000) >> 31) & 4;
+    y <<= t;
+    n += t;
+    t = ((y - 0x40000000) >> 31) & 2;
+    y <<= t;
+    n += t;
+    n += 1 + (y >> 31);
+    n += (-(x & (x - 1))) >> 31;
+    return n ^ 31;
+}
 
 //100%
 extern "C" void* func_00320FA8(int, int, int);
