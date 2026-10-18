@@ -58,7 +58,20 @@ extern "C" char* func_003EB840(char* record, const char* prefix, const char* nam
     return r;
 }
 
-INCLUDE_ASM("dirtysock/tags", func_003EB8B8);
+extern char D_004A4A78[];
+
+// Finds the D_004A4A78 field and skips leading blanks; null if the value is empty.
+extern "C" unsigned char* func_003EB8B8(char* record)
+{
+    unsigned char* p = (unsigned char*)cDirtysock_tag_TagFieldFind_B840(record, D_004A4A78);
+    if (p != 0) {
+        while (*p != 0 && *p <= ' ')
+            p++;
+        if (*p == 0)
+            p = 0;
+    }
+    return p;
+}
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldDelete);
 
@@ -127,7 +140,30 @@ extern "C" int func_003EBCB0(unsigned char* buf, int size, const char* val)
     return 0;
 }
 
-INCLUDE_ASM("dirtysock/tags", func_003EBD70);
+extern char D_004A4A80[];
+
+// Ends the record with the separator D_004A4A70 unless its last byte is a control
+// char or already the separator, then appends D_004A4A80 if 4 more bytes fit.
+extern "C" int func_003EBD70(unsigned char* buf, int size)
+{
+    const char* s = D_004A4A80;
+    int ret = -1;
+    int n = 0;
+    while (buf[n] != 0)
+        n++;
+    if (n > 0 && buf[n - 1] >= 0x20 && buf[n - 1] != D_004A4A70 && n < size - 1) {
+        buf[n] = D_004A4A70;
+        n++;
+        buf[n] = 0;
+    }
+    if (n + 4 < size) {
+        while (*s != 0)
+            buf[n++] = *s++;
+        buf[n] = 0;
+        ret = 0;
+    }
+    return ret;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
