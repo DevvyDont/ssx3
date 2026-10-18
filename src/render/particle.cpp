@@ -2830,7 +2830,116 @@ extern "C" int func_0037BD38(void* self, unsigned int kind, int c)
     return 0;
 }
 
-INCLUDE_ASM("render/particle", func_0037BD98);
+//100%
+// Sets up a GS texture: stores the formats and sizes, works out GS pages for the three buffers,
+// allocates them and uploads, then waits for the GS and starts the draw.
+extern "C" void func_00367078(void* gs);
+void* func_00367340(void* self, int a1, int a2);
+extern "C" int func_003673D8(void* gs, int size);
+extern "C" void func_00424020(int a);
+extern "C" void func_003FD910(int a, int b, int c, int d);
+extern "C" void func_003E6690(int a);
+extern "C" void func_00382AF0(void* a, void* b, int c);
+
+#define F_U(o) (*(unsigned int*)(s + (o)))
+#define F_I(o) (*(int*)(s + (o)))
+#define F_S(o) (*(short*)(s + (o)))
+
+static inline int func_00396080_i(void)
+{
+    *(volatile unsigned long*)0x12001000 = 8;
+    while (!(*(volatile unsigned long*)0x12001000 & 8)) {
+    }
+    return (*(volatile unsigned long*)0x12001000 >> 13) & 0x1;
+}
+
+extern "C" int func_0037BD98(void* self, unsigned int size, int h, int w0, int h0, int fmt0, int fmt1,
+                             int fmt2, short a8, short x, short y, int flag)
+{
+    char* s = (char*)self;
+    void* gs;
+    if (func_0037BD38(self, fmt1, fmt2) == 0) {
+        return 0;
+    }
+    F_I(0x5A58) = h;
+    F_I(0x5A30) = w0;
+    F_I(0x5A34) = h0;
+    F_I(0x5A3C) = fmt1;
+    F_I(0x5A38) = fmt0;
+    F_I(0x5A40) = fmt2;
+    F_S(0x5A44) = x;
+    F_S(0x5A46) = y;
+    F_I(0x5A74) = 0;
+    F_I(0x5A54) = size;
+    F_S(0x5A48) = 2;
+    F_I(0x5A4C) = flag;
+    F_I(0x5A60) = 0;
+    switch (size) {
+    case 0x100:
+        F_I(0x5A64) = 9;
+        break;
+    case 0x140:
+        F_I(0x5A64) = 7;
+        break;
+    case 0x180:
+        F_I(0x5A64) = 6;
+        break;
+    case 0x200:
+        F_I(0x5A64) = 4;
+        break;
+    case 0x280:
+        F_I(0x5A64) = 3;
+        break;
+    }
+    F_U(0x5A50) = (F_U(0x5A30) + 0x3F) >> 6;
+    F_U(0x5A5C) = (F_U(0x5A54) + 0x3F) >> 6;
+    switch (F_U(0x5A38)) {
+    case 0x00: case 0x01: case 0x30: case 0x31:
+        F_I(0x59D0) = 0;
+        F_U(0x5A68) = F_U(0x5A5C) * ((F_U(0x5A58) + 0x1F) >> 5);
+        break;
+    case 0x02: case 0x0A: case 0x32: case 0x3A:
+        F_I(0x59D0) = 1;
+        F_U(0x5A68) = F_U(0x5A5C) * ((F_U(0x5A58) + 0x3F) >> 6);
+        break;
+    }
+    switch (F_U(0x5A3C)) {
+    case 0x00: case 0x01: case 0x30: case 0x31:
+        F_U(0x5A6C) = F_U(0x5A50) * ((F_U(0x5A34) + 0x1F) >> 5);
+        break;
+    case 0x02: case 0x0A: case 0x32: case 0x3A:
+        F_U(0x5A6C) = F_U(0x5A50) * ((F_U(0x5A34) + 0x3F) >> 6);
+        break;
+    }
+    switch (F_U(0x5A40)) {
+    case 0x30: case 0x31:
+        F_U(0x5A70) = F_U(0x5A50) * ((F_U(0x5A34) + 0x1F) >> 5);
+        break;
+    case 0x32: case 0x3A:
+        F_U(0x5A70) = F_U(0x5A50) * ((F_U(0x5A34) + 0x3F) >> 6);
+        break;
+    }
+    gs = *(void**)(s + 0x18F4);
+    func_00367078(gs);
+    F_I(0x5A78) = func_003673D8(gs, F_I(0x5A6C) << 13);
+    F_I(0x5A7C) = func_003673D8(gs, F_I(0x5A68) << 13);
+    F_I(0x5A80) = func_003673D8(gs, F_I(0x5A70) << 13);
+    if (*(long*)(s + 0x5A38) == 0x100000001L) {
+        func_00367340(*(void**)(s + 0x18F4), F_I(0x5A78) << 11,
+                      F_I(0x5A54) * F_I(0x5A58) + F_I(0x5A30) * F_I(0x5A34) * 2);
+    } else if (F_I(0x5A38) == 1) {
+        func_00367340(*(void**)(s + 0x18F4), F_I(0x5A7C) << 11,
+                      F_I(0x5A54) * F_I(0x5A58) + F_I(0x5A30) * F_I(0x5A34));
+    } else {
+        func_00367340(*(void**)(s + 0x18F4), F_I(0x5A80) << 11, F_I(0x5A30) * F_I(0x5A34));
+    }
+    func_00424020(0);
+    func_00396080_i();
+    func_003FD910(a8, F_S(0x5A44), flag ? 0x50 : F_S(0x5A48), F_S(0x5A46));
+    func_003E6690(flag ? 3 : 1);
+    func_00382AF0(self, 0, 1);
+    return 1;
+}
 
 //100%
 struct sPtBits_C198 {
