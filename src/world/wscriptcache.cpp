@@ -2567,7 +2567,7 @@ INCLUDE_ASM("world/wscriptcache", func_003B13D8);
 // PORT: func_003B1498 takes no arguments (the unit declares it void*(void*)); bound by asm label
 extern "C" void func_003B1498_noarg(void) __asm__("func_003B1498");
 extern "C" void func_003B14F0(void);
-extern "C" void func_003B16E0(void);
+extern "C" void group_of_pictures_header(void);
 extern "C" void func_003B17A8(void);
 
 extern "C" int func_003B13D8(void)
@@ -2579,7 +2579,7 @@ extern "C" int func_003B13D8(void)
             func_003B14F0();
             break;
         case 0x1B8:
-            func_003B16E0();
+            group_of_pictures_header();
             break;
         case 0x1B7:
             return 0;
@@ -2611,7 +2611,7 @@ void func_003B1498_impl(void* self)
 INCLUDE_ASM("world/wscriptcache", func_003B14F0);
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003B16E0);
+INCLUDE_ASM("world/wscriptcache", group_of_pictures_header);
 #ifdef SKIP_ASM
 extern int D_00509648[];
 extern int D_0044C378[];
@@ -2628,7 +2628,7 @@ extern char D_00495468[];
 void* func_003B2360(void* self);
 extern "C" void func_003B1988(void);
 
-extern "C" void func_003B16E0(void)
+extern "C" void group_of_pictures_header(void)
 {
     if (D_0050A088.ptr == D_00509648) {
         D_0044C378[0] = D_0044C37C[0] + 1;
@@ -2897,7 +2897,7 @@ extern "C" void func_003B1D58(void)
 }
 #endif
 
-INCLUDE_ASM("world/wscriptcache", func_003B1EE0);
+INCLUDE_ASM("world/wscriptcache", sequence_scalable_extension);
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B1FC8);
@@ -2985,7 +2985,7 @@ extern "C" void func_003B20B8(void)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003B2230);
+INCLUDE_ASM("world/wscriptcache", picture_spatial_scalable_extension);
 #ifdef SKIP_ASM
 extern void* D_005095F8[];
 extern int D_005095FC[];
@@ -2998,7 +2998,7 @@ extern char D_004955D0[];
 void* func_003B2360(void* self);
 
 // PORT: func_003B1300 really returns unsigned int (unit declares void*)
-extern "C" void func_003B2230(void)
+extern "C" void picture_spatial_scalable_extension(void)
 {
     *(int*)((char*)D_0050A088.ptr + 0x430) = 1;
     D_005095F8[0] = func_003B1300(0xA);
@@ -3068,7 +3068,7 @@ void* func_003B2380(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003B23A0);
+INCLUDE_ASM("world/wscriptcache", copyright_extension);
 #ifdef SKIP_ASM
 extern void* D_00509610[];
 extern void* D_00509614[];
@@ -3081,7 +3081,7 @@ extern char D_00495658[];
 extern char D_00495688[];
 void* func_003B2360(void* self);
 
-extern "C" void func_003B23A0(void)
+extern "C" void copyright_extension(void)
 {
     D_00509610[0] = func_003B1300(1);
     D_00509614[0] = func_003B1300(8);
