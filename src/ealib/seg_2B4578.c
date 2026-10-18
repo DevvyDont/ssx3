@@ -2,7 +2,29 @@
 
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_unpack);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B38B8);
+#ifdef SKIP_ASM
+int func_003B38B8(int arg0) {
+    int var_5;
+
+    var_5 = 0;
+    switch (arg0) {
+    case 15:
+    case 16:
+        var_5 = 0x20;
+        break;
+    case 18:
+    case 24:
+        var_5 = 0;
+        break;
+    case 32:
+        var_5 = 0x21;
+        break;
+    }
+    return var_5;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3900);
@@ -197,7 +219,34 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_cloneat);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4690);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4708);
+#ifdef SKIP_ASM
+int func_003B4708(int arg0) {
+    int var_5;
+
+    var_5 = 0;
+    switch (arg0) {
+    case 0x20:
+    case 0x21:
+    case 0x22:
+    case 0x24:
+    case 0x29:
+    case 0x2A:
+    case 0x2C:
+    case 0x2D:
+    case 0x2E:
+    case 0x30:
+    case 0x31:
+    case 0x32:
+    case 0x33:
+    case 0x38:
+        var_5 = 1;
+        break;
+    }
+    return var_5;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4740);
 
