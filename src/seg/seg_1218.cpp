@@ -2086,7 +2086,7 @@ extern "C" void func_001057B8(cRider* rider, char* obj, char* info, sHit_57B8* h
         float c = (1.0f - grip) * inv;
         bounce = Sqrt_57B8((b * b - c) >? 0.0f) - b; // PORT: g++ maximum operator
     }
-    float facing = DotV_57B8(*(t4Vector*)((char*)rider + 0x180), hit->n);
+    float facing = DotV_57B8(rider->unk_180, hit->n);
     if (func_0011FE98(rider) == 1 || (func_0011FE98(rider) == 2 && *(int*)((char*)rider->mRiderHandler + 0x30) == 1)) {
         if (Len_57B8(rider->mVelocity) < 833.3333740234375f) {
             float* acc = &rider->unk_3F4;
@@ -2121,7 +2121,7 @@ extern "C" void func_001057B8(cRider* rider, char* obj, char* info, sHit_57B8* h
         t4Vector* pos = vt2[kRiderVt_getPosition].fn(sub + vt2[kRiderVt_getPosition].delta);
         sVEv_57B8* vt3 = *(sVEv_57B8**)sub;
         t4Vector* vel = vt3[kRiderVt_getVelocity].fn(sub + vt3[kRiderVt_getVelocity].delta);
-        cAirPredictor_startLaunchIntoAir_57B8(rider->mAirPredictor, pos, vel, *(float*)((char*)rider + 0x2E4));
+        cAirPredictor_startLaunchIntoAir_57B8(rider->mAirPredictor, pos, vel, rider->unk_2E4);
         return;
     }
     AddEq_57B8(rider->mVelocity, Scale_57B8(hit->n, bounce));
@@ -2363,8 +2363,8 @@ static inline sQuat_6848 AxisAngle_6848(const sV_6848& axis, float angle)
     return sQuat_6848(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-#define LAND_STATE(r) (*(int*)((char*)(r) + 0x328))
-#define LAND_KIND(r) (*(int*)((char*)(r) + 0x330))
+#define LAND_STATE(r) ((r)->unk_328)
+#define LAND_KIND(r) ((r)->unk_330)
 
 extern "C" int func_00106848(cRider* self)
 {

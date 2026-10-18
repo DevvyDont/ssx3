@@ -931,19 +931,19 @@ extern "C" void func_00292DA0(void* self, void* obj) {
     int b;
     cRider* rider = *(cRider**)((char*)obj + 0x80);
     int st = func_0011FE98(rider);
-    if (st != *(int*)((char*)rider + 0x760)) {
-        *(int*)((char*)rider + 0x760) = st;
+    if (st != rider->unk_760) {
+        rider->unk_760 = st;
     }
     a = 0;
     b = 0x40;
     if (st == 1 || st == 5) {
-        if (func_002934D0(self, *(int*)((char*)rider + 0x768), rider) == 2) {
-            *(int*)((char*)rider + 0x768) = 9;
+        if (func_002934D0(self, rider->unk_768, rider) == 2) {
+            rider->unk_768 = 9;
         }
     } else {
         int id = func_00291710(self, (int)rider);
-        if (id != *(int*)((char*)rider + 0x768)) {
-            *(int*)((char*)rider + 0x768) = id;
+        if (id != rider->unk_768) {
+            rider->unk_768 = id;
             func_002ABB38(obj);
             func_00291C88(self, (int)rider, id);
         } else {
@@ -980,15 +980,15 @@ extern "C" void func_00292EF8(void* self, void* obj) {
     int b;
     cRider* rider = *(cRider**)((char*)obj + 0x80);
     int st = func_0011FE98(rider);
-    if (st != *(int*)((char*)rider + 0x760)) {
-        *(int*)((char*)rider + 0x760) = st;
+    if (st != rider->unk_760) {
+        rider->unk_760 = st;
     }
     a = 0;
     b = 0x40;
     if (st == 0 || st == 4) {
         int id = func_00291710(self, (int)rider);
-        if (id != *(int*)((char*)rider + 0x768)) {
-            *(int*)((char*)rider + 0x768) = id;
+        if (id != rider->unk_768) {
+            rider->unk_768 = id;
             func_002ABB38(obj);
             func_00291C88(self, (int)rider, func_00291710(self, (int)rider));
         }
@@ -1025,13 +1025,13 @@ extern "C" void func_00293018(void* self, void* obj) {
     a = 0;
     int st = func_0011FE98(rider);
     if (st == 1 || st == 5) {
-        if (func_002934D0(self, *(int*)((char*)rider + 0x76C), rider) == 2) {
-            *(int*)((char*)rider + 0x76C) = 9;
+        if (func_002934D0(self, rider->unk_76C, rider) == 2) {
+            rider->unk_76C = 9;
         }
     } else {
         int id = func_00291710(self, (int)rider);
-        if (id != *(int*)((char*)rider + 0x76C)) {
-            *(int*)((char*)rider + 0x76C) = id;
+        if (id != rider->unk_76C) {
+            rider->unk_76C = id;
             func_002ABB38(obj);
             func_00292508(self, (int)rider, func_00291710(self, (int)rider));
         } else {
@@ -1469,7 +1469,7 @@ extern "C" void func_002948D0(void* vself, cRider* rider, float v)
         }
     }
     func_00290B58_sCurve c = D_00482D30;
-    int vol = (int)func_00290B58(&c, *(float*)((char*)rider + 0x770));
+    int vol = (int)func_00290B58(&c, rider->unk_770);
     if (vol > 127) {
         vol = 127;
     }
