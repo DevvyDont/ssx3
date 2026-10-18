@@ -67,7 +67,24 @@ void cCrowdRender2D_init_impl(sCR2D_init* self)
     self->fmt = *(unsigned char*)s;
 }
 
-INCLUDE_ASM("visualfx/crowdrender2d", cCrowdRender2D_purge__FPi);
+//100%
+struct sVEntP_B8E0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+extern "C" void func_002523A8(void* p);
+int cCrowdRender2D_purge(int* param_1)
+{
+    for (int i = 0; i < 1; i++) {
+        for (int j = 0; j < D_00445D38_B7A8[i].count; j++) {
+            char* g = D_004A5B80;
+            sVEntP_B8E0* vt = *(sVEntP_B8E0**)(g + 0x10D8);
+            vt[50].fn(g + vt[50].delta, D_00445D38_B7A8[i].frames[j]);
+        }
+    }
+    func_002523A8(*(void**)param_1);
+}
 
 //100%
 //https://decomp.me/scratch/Rbiv4
