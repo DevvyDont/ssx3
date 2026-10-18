@@ -636,7 +636,207 @@ extern "C" void func_0020D4F0(void* self, void* item)
 
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020D568);
 
-INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Dialog_onWidgetEvent);
+//100%
+struct cUIScreen;
+unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cGame_exit(void* game, int toFrontEnd);
+extern "C" void cGame_restart(void* self);
+void cReplay_stopAutoReplay(void* self);
+extern "C" void cRider_quitEvent(char* self);
+extern "C" void func_00231250(void* self, int a, int b, int refresh);
+extern "C" void cGameModeMan_initGameMode(void* self, int mode);
+extern "C" void cBENewRaceInterface_setGameEvent(void* self, int ev);
+extern "C" void cBENewRaceInterface_setGameMode(void* self, int mode);
+extern "C" void cBE_setState(int state);
+extern "C" void* func_00212138(void* self, void* a1, int a2);
+extern "C" void* func_00211088(void* self, void* a1, int a2, int a3);
+extern "C" void func_0030B758(void* self);
+extern "C" void func_00128A10(void* self);
+extern "C" void func_0011DE60(void* self, int a1, int a2);
+extern "C" void func_0011DF18(void* self, int notify);
+extern "C" void func_00230180(void* self);
+void func_00238348(void* self);
+extern "C" void func_00257610(void* self, int a1);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
+extern int D_004A2708;
+extern int D_004A2A54;
+extern int D_004A2A50;
+extern int D_005366E8[];
+extern int D_004428F0[];
+extern int D_004A11BC;
+extern int D_004A11B8;
+extern char D_0046E050[];
+extern char D_0046F9C0[];
+
+struct sI10_D5A8 { char pad[0x10]; int f10; };
+struct sSelf_D5A8 { char pad[0x54]; int f54; };
+// Same vtable entry; the void/int return only changes v0/v1 choice around the call.
+struct sVV_D5A8 { short delta; short index; void (*fn)(void*); };
+struct sGame_D5A8 { char pad[0xC]; char* f0C; };
+struct sApp_D5A8 { char pad[0x84]; char* game; };
+struct sP40_D5A8 { char pad[0x40]; char* f40; };
+struct sP18_D5A8 { char pad[0x18]; char* f18; };
+static inline char* Game_D5A8() { return ((sApp_D5A8*)D_004A28A8)->game; }
+static inline char* Rider_D5A8() { return ((sP18_D5A8*)((sP40_D5A8*)((sGame_D5A8*)Game_D5A8())->f0C)->f40)->f18; }
+struct sVE_20D5A8 { short delta; short index; int (*fn)(void*); };
+struct sStFlags_20D5A8 { char pad[0x1C]; unsigned int lo : 8; unsigned int mode : 6; };
+
+static inline void Play_20D5A8(char* self)
+{
+    int f = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_0046E050));
+    if (f != 0xFFFF) {
+        cUIScreen_playFrame(*(void**)(self + 0x40), f, 1);
+    }
+}
+
+static inline void Pop_20D5A8()
+{
+    D_004A26FC = 3;
+    D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+}
+
+extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (w == 0) {
+        return;
+    }
+    switch (ev) {
+    case 5:
+        Play_20D5A8(self);
+        switch (*(int*)(w + 0x18)) {
+        case 0:
+            *(int*)(self + 0x54) = 1;
+            switch (*(int*)(self + 0x9C)) {
+            case 0: {
+                int kind = D_00535BC8[0x4A];
+                if (kind >= 6 && kind <= 11) {
+                    if (D_004A2708) {
+                        Pop_20D5A8();
+                    } else {
+                        cReplay_stopAutoReplay(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+                        D_004A26FC = 3;
+                    }
+                    int mode = 0xE;
+                    if (kind == 7 || kind == 10) {
+                        mode = 0xF;
+                    } else if (kind == 8 || kind == 11) {
+                        mode = 0x10;
+                    }
+                    char* iface = (char*)cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 0);
+                    void* gm = *(void**)((char*)D_004A28A8 + 0xC0);
+                    cBE_setState(0);
+                    cBENewRaceInterface_setGameMode(iface, D_00535BC8[0x48]);
+                    cBENewRaceInterface_setGameEvent(iface, kind);
+                    D_004A11BC = mode;
+                    *(int*)(D_00535BC8 + 0x40) = mode;
+                    sVV_D5A8* vt = *(sVV_D5A8**)(iface + 0xC);
+                    D_004A11B8 = 1;
+                    vt[1].fn(iface + vt[1].delta);
+                    cGameModeMan_initGameMode(gm, D_00535BC8[0x4A]);
+                    cGame_exit(*(void**)((char*)D_004A28A8 + 0x84), 1);
+                } else if (D_004A2708) {
+                    Pop_20D5A8();
+                    cGame_restart(Game_D5A8());
+                } else {
+                    cReplay_stopAutoReplay(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+                    func_00238348(*(void**)((char*)D_004A28A8 + 0xC0));
+                    func_00231250(*(void**)((char*)D_004A28A8 + 0x84), 0xD, 0, 1);
+                    D_004A26FC = 3;
+                }
+                break;
+            }
+            case 1: {
+                cReplay_stopAutoReplay(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+                *(int*)(self + 0x54) = 0;
+                cBE_getInterface_Fv(cBE_getBE(), 4);
+                if (D_004A2EEC) {
+                    func_00257610(D_004A2EEC, 0);
+                }
+                int any = 0;
+                int z = 0;
+                cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+                cBE_getInterface_Fv(cBE_getBE(), 0);
+                if (D_00535BC8[0x49] != 0) {
+                    cGame_exit(*(void**)((char*)D_004A28A8 + 0x84), 0);
+                } else
+                chk:
+                if (any) {
+                    char* ui = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
+                    sStFlags_20D5A8* st = (sStFlags_20D5A8*)func_00212138(cMemMan_alloc(0x234, D_0046F9C0, 0x100, 0), *(void**)(self + 0x10), 1);
+                    st->mode = 1;
+                    cUIStateStack_pushSpecial(ui + 0x18, st, 0, 0);
+                } else {
+                    func_0020AB50(0x26);
+                    cOVStateManager_addPDATemplate();
+                }
+                // The dead `goto chk` (folded only at combine) keeps `any = 0` from
+                // being propagated by gcse, so the zero flag and its test survive
+                // as in the original (same trick as gamestate func_00235080).
+                { int t = z + 1; if (t != 1) { any = 1; goto chk; } }
+                break;
+            }
+            case 2:
+                func_0020AB50(0x1D);
+                break;
+            case 3:
+                Pop_20D5A8();
+                func_0030B758(D_004A3DD8);
+                break;
+            case 4: {
+                cReplay_stopAutoReplay(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+                D_004A26FC = 3;
+                char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+                char* i10 = (char*)cBE_getInterface_Fv(cBE_getBE(), 10);
+                cBE_setState(0);
+                cBENewRaceInterface_setGameEvent(iface, 0xC);
+                cBENewRaceInterface_setGameMode(iface, 4);
+                sVE_20D5A8* vt = *(sVE_20D5A8**)(iface + 0xC);
+                vt[1].fn(iface + vt[1].delta);
+                cGameModeMan_initGameMode(*(void**)((char*)D_004A28A8 + 0xC0), 0xC);
+                func_00128A10(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
+                ((sI10_D5A8*)i10)->f10 = 1;
+                func_00231250(*(void**)((char*)D_004A28A8 + 0x84), 1, 1, 0);
+                func_00230180(*(void**)((char*)D_004A28A8 + 0x84));
+                func_0011DE60(*(void**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x40) + 0x18), 1, 2);
+                func_0011DF18(*(void**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x40) + 0x18), 1);
+                break;
+            }
+            case 5:
+                Pop_20D5A8();
+                cRider_quitEvent(Rider_D5A8());
+                break;
+            case 6: {
+                ((sSelf_D5A8*)self)->f54 = 0;
+                char* ui = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
+                sStFlags_20D5A8* st = (sStFlags_20D5A8*)func_00211088(cMemMan_alloc(0x27C, D_0046F9C0, 0x100, 0), *(void**)(self + 0x10), *(unsigned char*)(self + 0x14), 0x18);
+                st->mode = 1;
+                cUIStateStack_pushSpecial(ui + 0x18, st, 0, 0);
+                break;
+            }
+            }
+            break;
+        case 1:
+            if (*(int*)(self + 0x9C) != 6) {
+                func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+            } else {
+                ((sSelf_D5A8*)self)->f54 = 1;
+                cGame_exit(*(void**)((char*)D_004A28A8 + 0x84), 0);
+            }
+            break;
+        }
+        break;
+    case 6:
+        if (*(int*)(self + 0x9C) != ev) {
+            Play_20D5A8(self);
+            func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+        }
+        break;
+    }
+}
 
 //100%
 struct cUIScreen;
