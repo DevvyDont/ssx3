@@ -521,7 +521,21 @@ int cBXString_FindLastOf(cBXString* self, char ch, int len)
 
 extern "C" char* func_0041ACC0(char* str, int ch);
 
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318C60);
+#ifdef SKIP_ASM
+extern "C" int func_0041AC40(int);
+
+extern "C" int func_00318C60(int *arg0) {
+    int temp_2;
+
+    temp_2 = func_0041AC40(*arg0);
+    if (temp_2 == 0) {
+        return -1;
+    }
+    return temp_2 - *arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstring", cBXString_FindFirstOf__FP9cBXStringc);

@@ -42,7 +42,13 @@ extern "C" bool func_0014EF70(void* self, int riderIndex)
 INCLUDE_ASM("be/beintcharacter", func_0014EFA8);
 
 
+//100%
 INCLUDE_ASM("be/beintcharacter", func_0014F100);
+#ifdef SKIP_ASM
+extern "C" void func_0014F100(void) {
+
+}
+#endif
 INCLUDE_ASM("be/beintcharacter", func_0014F108);
 INCLUDE_ASM("be/beintcharacter", func_0014F138);
 INCLUDE_ASM("be/beintcharacter", func_0014F170);

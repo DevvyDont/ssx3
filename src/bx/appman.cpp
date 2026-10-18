@@ -239,7 +239,15 @@ extern "C" void cAppMan_mainLoop(void* p)
 
 int cExecutionMan_checkHalt(void* self, int flag);
 
+//100%
 INCLUDE_ASM("bx/appman", func_00317308);
+#ifdef SKIP_ASM
+extern "C" void func_00317478(int);
+
+extern "C" void func_00317308(void *arg0) {
+    func_00317478((*(int *)((char*)(arg0) + (8))));
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/appman", cAppMan_checkHalt__FP7cAppMan);

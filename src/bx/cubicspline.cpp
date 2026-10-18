@@ -706,7 +706,13 @@ extern "C" sMallinfo_31FC20 func_0031FC20(void* ms)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031FE28);
+#ifdef SKIP_ASM
+extern "C" void func_0031FE28(void) {
+
+}
+#endif
 INCLUDE_ASM("bx/cubicspline", func_0031FE30);
 
 //100%
@@ -809,7 +815,13 @@ int func_003200C0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_003200E0);
+#ifdef SKIP_ASM
+extern "C" void func_003200E0(void) {
+
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003200E8__FPv);

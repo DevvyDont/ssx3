@@ -75,7 +75,13 @@ int cBELibrary_getRiderIndex(int flag)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014A180);
+#ifdef SKIP_ASM
+extern "C" void func_0014A180(void) {
+
+}
+#endif
 
 INCLUDE_ASM("be/belibrary", func_0014A188);
 
@@ -536,9 +542,33 @@ void* func_0014BDB8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014BDC8);
+#ifdef SKIP_ASM
+extern "C" void func_0014C548(void **, int, int, int);
+
+extern "C" void func_0014BDC8(int arg0, int arg1, int arg2) {
+    func_0014C548(D_004A6750, arg0, arg1, arg2);
+}
+#endif
+//100%
 INCLUDE_ASM("be/belibrary", func_0014BE00);
+#ifdef SKIP_ASM
+extern "C" void func_0014C590(void **, int, int, int);
+
+extern "C" void func_0014BE00(int arg0, int arg1, int arg2) {
+    func_0014C590(D_004A6750, arg0, arg1, arg2);
+}
+#endif
+//100%
 INCLUDE_ASM("be/belibrary", func_0014BE38);
+#ifdef SKIP_ASM
+extern "C" void func_0014C5D8(void **, int, int, int);
+
+extern "C" void func_0014BE38(int arg0, int arg1, int arg2) {
+    func_0014C5D8(D_004A6750, arg0, arg1, arg2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014BE70);

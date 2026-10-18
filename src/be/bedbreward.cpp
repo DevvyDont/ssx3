@@ -129,14 +129,55 @@ extern "C" int func_0015BBF8(void) {
     return D_004A11BC;
 }
 #endif
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015BC00);
+#ifdef SKIP_ASM
+extern int D_004A11B8;
+
+extern "C" int func_0015BC00(void) {
+    return D_004A11B8;
+}
+#endif
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015BC08);
+#ifdef SKIP_ASM
+extern int D_004A11B8;
+
+extern "C" void func_0015BC08(void) {
+    D_004A11B8 = 0;
+}
+#endif
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015BC10);
+#ifdef SKIP_ASM
+extern "C" void cBXString_cBXString4(int *);
+extern int D_004A4CB8;
+
+extern "C" void func_0015BC10(void) {
+    cBXString_cBXString4(&D_004A4CB8);
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015BC30);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015BC60);
+#ifdef SKIP_ASM
+extern void *D_004A11B4;
+
+extern "C" void func_0015BC60(int arg0) {
+    (*(int *)((char*)(D_004A11B4) + (8))) = arg0;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015BC70);
 INCLUDE_ASM("be/bedbreward", func_0015BC88);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015BCB0);
+#ifdef SKIP_ASM
+extern void *D_004A11C0;
+
+extern "C" void func_0015BCB0(int arg0) {
+    (*(int *)((char*)(D_004A11C0) + (8))) = arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015BCC0__FPv);
@@ -155,9 +196,29 @@ void func_0015BCC8(void* self)
 #endif
 
 INCLUDE_ASM("be/bedbreward", func_0015BCD0);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015BCF8);
+#ifdef SKIP_ASM
+extern "C" int func_0015BCF8(void *arg0) {
+    return (*(int *)((char*)(arg0) + (0x10)));
+}
+#endif
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015BD00);
+#ifdef SKIP_ASM
+extern "C" void func_0015BD00(void *arg0, int arg1) {
+    (*(int *)((char*)(arg0) + (0x10))) = arg1;
+}
+#endif
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015BD08);
+#ifdef SKIP_ASM
+extern void *D_004A1238;
+
+extern "C" void func_0015BD08(int arg0) {
+    (*(int *)((char*)(D_004A1238) + (8))) = arg0;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015BD18);
 INCLUDE_ASM("be/bedbreward", func_0015BD30);
 INCLUDE_ASM("be/bedbreward", func_0015BD58);
@@ -167,7 +228,13 @@ INCLUDE_ASM("be/bedbreward", func_0015BEE8);
 INCLUDE_ASM("be/bedbreward", func_0015BF10);
 INCLUDE_ASM("be/bedbreward", func_0015BF38);
 INCLUDE_ASM("be/bedbreward", func_0015BF60);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015BF88);
+#ifdef SKIP_ASM
+extern "C" int func_0015BF88(void) {
+    return 0;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015BF90);
 INCLUDE_ASM("be/bedbreward", func_0015BFA8);
 INCLUDE_ASM("be/bedbreward", func_0015BFD0);
@@ -189,7 +256,15 @@ INCLUDE_ASM("be/bedbreward", func_0015C188);
 INCLUDE_ASM("be/bedbreward", func_0015C1B8);
 INCLUDE_ASM("be/bedbreward", func_0015C1E0);
 INCLUDE_ASM("be/bedbreward", func_0015C1F0);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C200);
+#ifdef SKIP_ASM
+extern void *D_004A120C;
+
+extern "C" void func_0015C200(int arg0) {
+    (*(int *)((char*)(D_004A120C) + (8))) = arg0;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015C210);
 
 //100%
@@ -224,7 +299,15 @@ INCLUDE_ASM("be/bedbreward", func_0015C368);
 INCLUDE_ASM("be/bedbreward", func_0015C388);
 INCLUDE_ASM("be/bedbreward", func_0015C398);
 INCLUDE_ASM("be/bedbreward", func_0015C3B8);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C3C8);
+#ifdef SKIP_ASM
+extern void *D_004A1204;
+
+extern "C" void func_0015C3C8(int arg0) {
+    (*(int *)((char*)(D_004A1204) + (8))) = arg0;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015C3D8);
 INCLUDE_ASM("be/bedbreward", func_0015C3E8);
 INCLUDE_ASM("be/bedbreward", func_0015C3F8);
@@ -237,11 +320,25 @@ INCLUDE_ASM("be/bedbreward", func_0015C5A8);
 INCLUDE_ASM("be/bedbreward", func_0015C5B8);
 INCLUDE_ASM("be/bedbreward", func_0015C5C8);
 INCLUDE_ASM("be/bedbreward", func_0015C600);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C610);
+#ifdef SKIP_ASM
+extern "C" int func_0015C610(void) {
+    return 8;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015C618);
 INCLUDE_ASM("be/bedbreward", func_0015C660);
 INCLUDE_ASM("be/bedbreward", func_0015C678);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C6A0);
+#ifdef SKIP_ASM
+extern void *D_004A11C4;
+
+extern "C" void func_0015C6A0(int arg0) {
+    (*(int *)((char*)(D_004A11C4) + (8))) = arg0;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015C6B0);
 
 //100%
@@ -277,13 +374,53 @@ void func_0015C6E0(void* self)
 #endif
 
 INCLUDE_ASM("be/bedbreward", func_0015C6E8);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C710);
+#ifdef SKIP_ASM
+extern void *D_004A1210;
+
+extern "C" void func_0015C710(int arg0) {
+    (*(int *)((char*)(D_004A1210) + (8))) = arg0;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015C720);
 INCLUDE_ASM("be/bedbreward", func_0015C738);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C760);
+#ifdef SKIP_ASM
+extern "C" int func_0015C760(void *arg0) {
+    int var_3;
+
+    var_3 = 0;
+    if (((*(int *)((char*)(arg0) + (0x10))) != 0) || ((*(int *)((char*)(arg0) + (0x14))) != 0)) {
+        var_3 = 1;
+    }
+    return var_3;
+}
+#endif
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C788);
+#ifdef SKIP_ASM
+extern "C" int func_0015C788(void *arg0) {
+    int var_3;
+
+    var_3 = 0;
+    if (((*(int *)((char*)(arg0) + (0x18))) >= 0) || ((*(int *)((char*)(arg0) + (0x1C))) >= 0)) {
+        var_3 = 1;
+    }
+    return var_3;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015C7B0);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C7C0);
+#ifdef SKIP_ASM
+extern void *D_004A1248;
+
+extern "C" void func_0015C7C0(int arg0) {
+    (*(int *)((char*)(D_004A1248) + (8))) = arg0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C7D0__FPv);
@@ -302,7 +439,15 @@ void func_0015C7D8(void* self)
 #endif
 
 INCLUDE_ASM("be/bedbreward", func_0015C7E0);
+//100%
 INCLUDE_ASM("be/bedbreward", func_0015C808);
+#ifdef SKIP_ASM
+extern void *D_004A124C;
+
+extern "C" void func_0015C808(int arg0) {
+    (*(int *)((char*)(D_004A124C) + (8))) = arg0;
+}
+#endif
 INCLUDE_ASM("be/bedbreward", func_0015C818);
 
 //100%

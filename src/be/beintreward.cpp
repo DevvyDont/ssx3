@@ -102,14 +102,62 @@ extern "C" char* func_00156B28(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00156B70);
+#ifdef SKIP_ASM
+extern "C" int func_00156B70(void *arg0) {
+    return (*(int *)((char*)(func_0015A478(arg0)) + (8)));
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintreward", func_00156B90);
+#ifdef SKIP_ASM
+extern "C" int func_00156B90(void *arg0) {
+    return (*(int *)((char*)(func_0015A478(arg0)) + (0xC)));
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintreward", func_00156BB0);
+#ifdef SKIP_ASM
+extern "C" int func_00156BB0(void *arg0) {
+    return (*(int *)((char*)(func_0015A478(arg0)) + (0x10)));
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintreward", func_00156BD0);
+#ifdef SKIP_ASM
+extern "C" int func_00156BD0(void *arg0) {
+    return (*(int *)((char*)(func_0015A478(arg0)) + (0x14)));
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintreward", func_00156BF0);
+#ifdef SKIP_ASM
+extern "C" int func_00156BF0(void *arg0) {
+    return (*(int *)((char*)(func_0015A478(arg0)) + (0x18)));
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintreward", func_00156C10);
+#ifdef SKIP_ASM
+extern "C" int func_00156C10(void *arg0) {
+    return (*(int *)((char*)(func_0015A478(arg0)) + (0x1C)));
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintreward", func_00156C30);
+#ifdef SKIP_ASM
+extern "C" int func_00156C30(void *arg0) {
+    return (*(int *)((char*)(func_0015A478(arg0)) + (0x20)));
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintreward", func_00156C50);
+#ifdef SKIP_ASM
+extern "C" int func_00156C50(void *arg0) {
+    return (*(int *)((char*)(func_0015A478(arg0)) + (0x24)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00156C70);
@@ -1377,7 +1425,13 @@ void* func_00158F30(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00158F50);
+#ifdef SKIP_ASM
+extern "C" void *func_00158F50(void) {
+    return *D_004C3EF0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00158F60);
