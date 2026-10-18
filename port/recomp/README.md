@@ -82,6 +82,14 @@ or any disc file.
     their sound playing through the PC's audio device. SSX 3's sound driver mixes everything on the IOP and streams
     the mix to core 0 in blocks of 512 frames. The runtime dropped the data and finished each block about 400 times
     too soon, so the driver kept resending stale blocks. Paced, a race draws about 4% more frames;
+  - a VU1 interpreter that does about half the work for the same results. The add, subtract, multiply and
+    multiply-add instructions run on all four fields at once with SSE4.1, with a short path for their flags when
+    every result is an ordinary float. Each instruction pair's register waits are worked out once, when the code is
+    decoded. Queued flags, stores and integer writes land through a wheel of per-cycle slots instead of being
+    searched for every cycle, and vector and `ACC` results go into the registers when they issue, since every read
+    of a field already waits until its result is due. The 4,000 recorded VU1 runs still give bit-identical output,
+    with 46% fewer instructions. In a race on a 4-core machine the game thread went from busy nearly all the time
+    to about two thirds of it, and now waits on the two GS workers;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -169,6 +177,7 @@ shadows and the course draw with the right textures, and the race plays from the
 Sound plays through the PC's audio device: the music, and the radio track shown at the start of a race. The game
 makes sound only as fast as it runs, so while it runs slower than the PS2 the sound comes in short runs with gaps.
 
-It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 5 to 7 frames a second.
+It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 8 frames a second. There the two GS
+worker threads set the pace: the game thread waits on them about a third of the time.
 
 When a guest address with no function is reached, the scheduler prints its last 64 dispatches (`[sched-trace]`).
