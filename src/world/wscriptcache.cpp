@@ -2347,7 +2347,35 @@ extern "C" void func_003B17A8(void)
     func_003B2440();
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003B1878);
+//100%
+extern unsigned char D_0044C2D8[];
+extern int D_005094F8[];
+
+// PORT: func_003B1300 really returns unsigned int (unit declares void*)
+extern "C" int func_003B1878(void)
+{
+    int r;
+    if (*(int*)((char*)D_0050A088.ptr + 0x420) != 0) {
+        r = 0;
+        if (D_005094F8[0] >= 0xAF1) r = (int)func_003B1300(3);
+    } else {
+        r = 0;
+    }
+    if (*(int*)((char*)D_0050A088.ptr + 0x424) == 1)
+        *(int*)((char*)D_0050A088.ptr + 0x434) = (int)func_003B1300(7);
+    int v = (int)func_003B1300(5);
+    char* p = (char*)D_0050A088.ptr;
+    *(int*)(p + 0x438) = *(int*)(p + 0x420) != 0 ? (*(int*)(p + 0x428) != 0 ? D_0044C2D8[v] : v * 2) : v;
+    if (func_003B1300(1)) {
+        *(int*)((char*)D_0050A088.ptr + 0x43C) = (int)func_003B1300(1);
+        func_003B1300(1);
+        func_003B1300(6);
+        func_003B2318();
+    } else {
+        *(int*)((char*)D_0050A088.ptr + 0x43C) = 0;
+    }
+    return r;
+}
 
 //100%
 extern "C" void func_003B1AB0(void);
