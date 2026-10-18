@@ -110,6 +110,17 @@ or any disc file.
     bit-identical output, with 18% fewer instructions, and replay 1.4 times as fast in the 32-bit build; 400,000
     random microprograms end in the same state as before the change. In a race on a 4-core machine the GS workers
     still set the pace: about 9 frames a second against 8.5 before, within this machine's run-to-run noise;
+  - compiled blocks for VU1 programs, again with the same results. A VU1 instruction's stall depends only on how
+    many cycles each queued result still needs, never on a value, so a straight run of instruction pairs is
+    compiled once for each start address and pipeline timing it is entered with, with every stall known ahead.
+    Blocks skip the interpreter's hazard checks and per-cycle commits and run the common pairs through decoded
+    paths; stores land as they issue, and flag results stay queued until something reads them. Anything a block
+    can't run (D or T bits, a reserved op, the end of the cycle budget, a GS packet error) hands over to the
+    interpreter at that pair with the pipeline timing rebuilt. Blocks are kept for up to 8 code images, found by
+    content, since the game uploads the same microcode again and again. The 4,000 recorded VU1 runs still give
+    bit-identical output with 48% fewer instructions, and replay twice as fast in the 32-bit build. A test runs
+    3,000 random microprograms both ways. In a race on a 4-core machine the game thread is busy about a third
+    less for the same frame rate, which the GS workers still set. `PS2X_VU1_COMPILED=0` turns them off;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
