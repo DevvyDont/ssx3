@@ -2780,7 +2780,105 @@ extern "C" void func_0025EAA0(void* self, const char* value)
     func_003E8B10(*(void**)((char*)self + 0x54), 0x6F6E6C6E, buf, (int)func_00268E50, self);
 }
 
-INCLUDE_ASM("dirtysock/tagsunk", func_0025EB00);
+//100%
+// Handles a user record: with no type code it parses the record's name fields, counts and
+// stats into a 0x10D message; any type other than 'uusr' becomes a 0x102 message.
+extern char D_004A31D8[];
+extern char D_004A2F38[];
+extern char D_004A31E0[];
+extern char D_004A31E8[];
+extern char D_004A31F0[];
+extern char D_004A31F8[];
+extern char D_004A3130[];
+extern void* D_00481110[];
+
+struct sMsgListNode_25EB00 {
+    sMsgListNode_25EB00* next;
+    sMsgListNode_25EB00* prev;
+    void* data;
+};
+
+struct sMsgListIter_25EB00 {
+    sMsgListNode_25EB00* node;
+    sMsgListIter_25EB00(sMsgListNode_25EB00* x) : node(x) {}
+    sMsgListIter_25EB00(const sMsgListIter_25EB00& x) : node(x.node) {}
+};
+
+struct sMsgList_25EB00 {
+    sMsgListNode_25EB00* head;
+    sMsgListIter_25EB00 end() { return head; }
+    sMsgListIter_25EB00 insert(sMsgListIter_25EB00 pos, void* const& x)
+    {
+        sMsgListNode_25EB00* tmp = (sMsgListNode_25EB00*)operator new(0xC, D_004804A8, 0x20000000, 0);
+        void** data = &tmp->data;
+        if (data != 0)
+            *data = x;
+        tmp->next = pos.node;
+        tmp->prev = pos.node->prev;
+        pos.node->prev->next = tmp;
+        pos.node->prev = tmp;
+        return tmp;
+    }
+};
+
+struct sUserStats_25EB00 { int a, b, c, d, e; };
+
+struct sUserMsg_25EB00 {
+    int kind;
+    void** vt;
+    char name[0x20];
+    char s2[0x20];
+    char s3[0x100];
+    int n2;                     // 0x148
+    int n1;                     // 0x14C
+    sUserStats_25EB00 stats;    // 0x150
+};
+
+extern "C" void func_0025EB00(char* self, char* msg)
+{
+    int type = *(int*)(msg + 0x8);
+    if (type == 0) {
+        char name[0x100];
+        char s2[0x100];
+        char s3[0x100];
+        char raw[0x20];
+        int st[0x10];
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31D8), name, 0x100, D_004A2F40);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F38), s2, 0x100, D_004A2F40);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31E0), s3, 0x100, D_004A2F40);
+        int n1 = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31E8), -1);
+        int n2 = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31F0), -1);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31F8), raw, 0x14, D_004A2F40);
+        int n3 = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3130), 0);
+        cDirtysock_tag_TagFieldGetStructure(raw, st, 0x40, D_004A2F30);
+        sUserStats_25EB00 info;
+        info.a = n3;
+        info.b = st[2];
+        info.c = st[2] + st[3] + st[4];
+        info.d = st[6];
+        info.e = n1;
+        sUserMsg_25EB00* m = (sUserMsg_25EB00*)operator new(0x164, D_00480488, 0x20000000, 0);
+        m->kind = 0x10D;
+        m->vt = D_00481110;
+        m->n2 = n2;
+        m->n1 = n1;
+        strcpy(m->name, name);
+        strcpy(m->s2, s2);
+        strcpy(m->s3, s3);
+        m->stats = info;
+        sMsgList_25EB00* l = (sMsgList_25EB00*)(self + 0xF0);
+        void* mp = m;
+        l->insert(l->end(), mp);
+    } else if (type != 0x75757372) {
+        int* m = (int*)operator new(0xC, D_00480488, 0x20000000, 0);
+        m[0] = 0x102;
+        *(void***)((char*)m + 0x4) = D_00481290;
+        m[2] = type;
+        sMsgList_25EB00* l = (sMsgList_25EB00*)(self + 0xF0);
+        void* mp = m;
+        l->insert(l->end(), mp);
+    }
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern char D_004A3200[];
