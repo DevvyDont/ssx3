@@ -4452,7 +4452,77 @@ extern "C" int func_00383770(char* self, int a1, int a2, int a3, int a4, int a5)
     return 1;
 }
 
-INCLUDE_ASM("render/particle", func_00383808);
+//100%
+// Uploads an image to GS memory: works out bytes per row from the pixel format, waits for DMA, then builds
+// GIF/DMA packets in scratchpad in chunks of at most 0x7FFF0 bytes and kicks the transfer.
+extern "C" void func_00371F98(unsigned int tadr, int flags);
+
+extern "C" void func_00383808(void* self, int src, int dbp, int w, int h, int dbw, int psm, int dsax, int dsay)
+{
+    int bpr = 0;
+    unsigned long* p = (unsigned long*)0x70000000;
+    unsigned long bitbltbuf;
+    int id = 3;
+
+    switch (psm) {
+    case 0:
+        bpr = w << 2;
+        break;
+    case 1:
+        bpr = w * 3;
+        break;
+    case 2:
+    case 10:
+        bpr = w << 1;
+        break;
+    case 19:
+        bpr = w;
+        break;
+    case 20:
+        bpr = w >> 1;
+        break;
+    }
+
+    while (*(volatile int*)0x1000A000 & 0x100) {
+    }
+    bitbltbuf = ((unsigned long)dbp << 32) | ((unsigned long)(dbw >> 6) << 48) | ((unsigned long)psm << 56);
+
+    do {
+        int rows;
+        int qwc;
+        unsigned long* q = p + 16;
+        rows = 0x7FFF0 / bpr;
+        if (h < rows) {
+            rows = h;
+        }
+        p[0] = 0x10000007;
+        p[1] = 0;
+        p[2] = 0x1000000000000005;
+        p[3] = 0xE;
+        p[4] = bitbltbuf;
+        p[5] = 0x50;
+        p[6] = ((unsigned long)dsax << 32) | ((unsigned long)dsay << 48);
+        p[7] = 0x51;
+        p[9] = 0x52;
+        p[10] = 0;
+        p[11] = 0x3F;
+        p[12] = 0;
+        p[13] = 0x53;
+        p[8] = w | ((unsigned long)rows << 32);
+        h -= rows;
+        qwc = (bpr * rows) >> 4;
+        p[14] = qwc | 0x8000 | 0x0800000000000000;
+        p[15] = 0;
+        unsigned long srcHi = (unsigned long)src << 32;
+        *q = qwc | (h != 0 ? srcHi | ((unsigned long)id << 28) : srcHi);
+        dsay += rows;
+        p[17] = 0;
+        p += 18;
+        src += bpr * rows;
+    } while (h != 0);
+
+    func_00371F98(0x70000000, 6);
+}
 
 INCLUDE_ASM("render/particle", func_00383A10);
 
