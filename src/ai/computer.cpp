@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rider.h"
 
 INCLUDE_ASM("ai/computer", cComputer_setIndividualRiderDifficulty);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rider.h"
 
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onCreateScreen);
 

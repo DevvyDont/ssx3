@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rider.h"
 
 INCLUDE_ASM("visualfx/angerfx", cAngerFX_cAngerFX);
 
