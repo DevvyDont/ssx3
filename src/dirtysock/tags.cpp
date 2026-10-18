@@ -108,7 +108,45 @@ extern "C" unsigned char* func_003EB8B8(char* record)
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldDelete);
 
-INCLUDE_ASM("dirtysock/tags", func_003EB9E8);
+extern "C" int strlen(const char* s);
+
+// Renames field `name` in the record to `newname`, shifting the rest of the record;
+// -1 if the field is missing or the longer name does not fit.
+extern "C" int func_003EB9E8(unsigned char* rec, int size, const char* name, const char* newname)
+{
+    unsigned char* p = (unsigned char*)cDirtysock_tag_TagFieldFind_B840((char*)rec, name);
+    unsigned char* q;
+    unsigned char* e;
+    int d;
+    if (p == 0)
+        return -1;
+    if (p[-1] == ' ')
+        p--;
+    q = p - 1;
+    p = q;
+    while (q != rec && q[-1] > 0x20)
+        q--;
+    d = strlen(newname) - (p - q);
+    if (d < 0) {
+        while (*p != 0)
+            p[d] = *p;
+        *p = 0;
+    }
+    if (d > 0) {
+        e = p;
+        while (*e != 0)
+            e++;
+        if (e - rec < size - d)
+            return -1;
+        while (e != p) {
+            e[d] = *e;
+            e--;
+        }
+    }
+    while (*newname != 0)
+        *q++ = *newname++;
+    return 0;
+}
 
 //100%
 extern "C" int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src)
