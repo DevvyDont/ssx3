@@ -4215,7 +4215,21 @@ extern "C" void func_00362058(int arg0, int arg1, int arg2, int arg3) {
     func_004249B8(arg1);
 }
 #endif
+//100%
 INCLUDE_ASM("object/railmodifier", func_003620C8);
+#ifdef SKIP_ASM
+extern "C" void func_00423AD0(int, int);
+
+extern "C" void func_003620C8(char* self, int idx)
+{
+    func_00424950(idx);
+    char* base = self + 0x40;
+    int* slot = (int*)(base + (idx << 2));
+    int old = *slot;
+    *slot = -1;
+    func_00423AD0(idx, old);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00362120);
@@ -5524,7 +5538,40 @@ extern "C" int func_003667F8(sRailNodeMan* self, int size)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00366888);
+#ifdef SKIP_ASM
+struct sRailLink6888 {
+    int flags;      // 0x0
+    int f4;
+    int prev;       // 0x8
+    int fC;
+    int next;       // 0x10
+    int f14;
+    int f18;
+};
+
+// Returns the index of the disabled link with the largest f4 (at least 0), or -1.
+extern "C" int func_00366888(void* self)
+{
+    char* s = (char*)self;
+    int i = *(int*)(s + 0x23C0);
+    int best = 0;
+    int idx = -1;
+    while (i >= 0) {
+        sRailLink6888* links = *(sRailLink6888**)(s + 0x1FF0);
+        if (!(links[i].flags & 1)) {
+            int v = links[i].f4;
+            if (v >= best) {
+                best = v;
+                idx = i;
+            }
+        }
+        i = links[i].next;
+    }
+    return idx;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_003668F8);
@@ -5607,7 +5654,34 @@ extern "C" int func_00366CE0(sRailNodeMan* self, int size, int owner, int skipB,
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00366DD8);
+#ifdef SKIP_ASM
+struct sRailLinkDD8 {
+    int flags;      // 0x0
+    int f4;
+    int prev;       // 0x8
+    int fC;
+    int next;       // 0x10
+    int f14;
+    int f18;
+};
+
+// Finds the enabled link whose prev field equals `key`; returns its index or -1.
+extern "C" int func_00366DD8(void* self, int key)
+{
+    char* s = (char*)self;
+    int i = *(int*)(s + 0x23C0);
+    while (i >= 0) {
+        sRailLinkDD8* links = *(sRailLinkDD8**)(s + 0x1FF0);
+        if ((links[i].flags & 1) && links[i].prev == key) {
+            return i;
+        }
+        i = links[i].next;
+    }
+    return -1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_00366E30);

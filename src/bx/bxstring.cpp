@@ -376,8 +376,50 @@ extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString*
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318760);
+#ifdef SKIP_ASM
+// local string temp: non-POD (user copy ctor) so it gets a 16-byte BLKmode stack slot
+struct sBXTmp_318760 {
+    char* p;
+    sBXTmp_318760(char* s) : p(s) {}
+    sBXTmp_318760(const sBXTmp_318760& o) : p(o.p) {}
+};
+
+// cBXString(a + ch). PORT: pointer held in int for the negative header offset.
+extern "C" cBXString* func_00318760(cBXString* self, cBXString* a, char ch)
+{
+    sBXTmp_318760 tmp(D_004A3E90);
+    char c = ch;
+    int sa = *(int*)a;
+    func_00318540((cBXString*)&tmp, *(int*)(sa - 8), (char*)sa, 1, &c);
+    cBXString_cBXString1(self, (cBXString*)&tmp);
+    cBXString__cBXString((cBXString*)&tmp, 2);
+    return self;
+}
+#endif
+//100%
 INCLUDE_ASM("bx/bxstring", func_003187C8);
+#ifdef SKIP_ASM
+// local string temp: non-POD (user copy ctor) so it gets a 16-byte BLKmode stack slot
+struct sBXTmp_3187C8 {
+    char* p;
+    sBXTmp_3187C8(char* s) : p(s) {}
+    sBXTmp_3187C8(const sBXTmp_3187C8& o) : p(o.p) {}
+};
+
+// cBXString(ch + b). PORT: pointer held in int for the negative header offset.
+extern "C" cBXString* func_003187C8(cBXString* self, char ch, cBXString* b)
+{
+    sBXTmp_3187C8 tmp(D_004A3E90);
+    char c = ch;
+    int sb = *(int*)b;
+    func_00318540((cBXString*)&tmp, 1, &c, *(int*)(sb - 8), (char*)sb);
+    cBXString_cBXString1(self, (cBXString*)&tmp);
+    cBXString__cBXString((cBXString*)&tmp, 2);
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", cBXString_ConcatImpl);
@@ -502,7 +544,27 @@ struct cBXString {
 };
 
 INCLUDE_ASM("bx/bxstring", func_00318AF8);
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318B40);
+#ifdef SKIP_ASM
+extern "C" void cBXString__cBXString(cBXString* self, int flags);
+
+// Make the string unique (copy-on-write detach) when its two header counts differ.
+// PORT: pointer held in int for the negative header offsets.
+extern "C" void func_00318B40(cBXString* self)
+{
+    int s = *(int*)self;
+    if (*(int*)(s - 8) != *(int*)(s - 4)) {
+        cBXString tmp;
+        cBXString_cBXString1(&tmp, self);
+        int len = *(int*)(*(int*)&tmp - 8);
+        cBXString_Reset(self);
+        cBXString_Realloc(self, len);
+        func_0041605C(self->str, tmp.str, len);
+        cBXString__cBXString(&tmp, 2);
+    }
+}
+#endif
 INCLUDE_ASM("bx/bxstring", func_00318BC0);
 //100%
 INCLUDE_ASM("bx/bxstring", func_00318BF8);
@@ -583,8 +645,43 @@ extern "C" void func_00318D28(cBXString* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318D90);
+#ifdef SKIP_ASM
+extern unsigned char D_00499C81[];
+static inline int to_lower(int c) { if (D_00499C81[c] & 1) return c + 0x20; return c; }
+// In-place lower-case; D_00499C81 is the ctype table (+1), bit 1 = upper-case.
+// PORT: pointer held in int to get the target's negative load offset.
+extern "C" void func_00318D90(cBXString* self)
+{
+    func_00318120(self);
+    char* p = self->str;
+    int i = *(int*)((int)p - 8);
+    while (--i >= 0)
+    {
+        *p = to_lower(*p);
+        p++;
+    }
+}
+#endif
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318DF8);
+#ifdef SKIP_ASM
+// Replace every `from` with `to` in place.
+// PORT: pointer held in int to get the target's negative load offset.
+extern "C" void func_00318DF8(cBXString* self, char from, char to)
+{
+    func_00318120(self);
+    char* p = self->str;
+    int i = *(int*)((int)p - 8);
+    while (--i >= 0)
+    {
+        if (*p == from)
+            *p = to;
+        p++;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", func_00318E68);
@@ -598,10 +695,46 @@ extern "C" void func_00318E68(cBXString* self, int idx, char ch)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318EB8);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void*, int, unsigned int);
+
+// cBXString(ch, n): n copies of ch.
+extern "C" cBXString* func_00318EB8(cBXString* self, char ch, int n)
+{
+    *(char**)self = D_004A3E90;
+    if (n > 0) {
+        cBXString_Realloc(self, n);
+        func_00416210(*(char**)self, ch, n);
+    }
+    return self;
+}
+#endif
 INCLUDE_ASM("bx/bxstring", func_00318F20);
 INCLUDE_ASM("bx/bxstring", func_00318F58);
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318F90);
+#ifdef SKIP_ASM
+// Mid(start, count). PORT: pointer held in int for the header offset.
+extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int start, int count)
+{
+    if (start < 0)
+        start = 0;
+    if (count < 0)
+        count = 0;
+    int len = *(int*)(*(int*)other - 8);
+    if (len < start + count)
+        count = len - start;
+    if (len < start)
+        count = 0;
+    char* tmp = D_004A3E90;
+    func_003181E8(other, (cBXString*)&tmp, count, start, 0);
+    cBXString_cBXString1(self, (cBXString*)&tmp);
+    cBXString__cBXString((cBXString*)&tmp, 2);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstring", func_00319028);

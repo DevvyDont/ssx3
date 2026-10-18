@@ -241,7 +241,33 @@ extern "C" void func_001C5DD8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C5E58);
+#ifdef SKIP_ASM
+struct sVEntry_5E58 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline void Call9_5E58(char* o, int a)
+{
+    if (o != 0) {
+        sVEntry_5E58* vt = *(sVEntry_5E58**)(o + 8);
+        vt[9].fn(o + vt[9].delta, a);
+    }
+}
+
+extern "C" void func_001C5E58(void* self, int a)
+{
+    char* s = (char*)self;
+    Call9_5E58(*(char**)(s + 0x70), a);
+    Call9_5E58(*(char**)(s + 0x74), a);
+    Call9_5E58(*(char**)(s + 0x78), a);
+    Call9_5E58(*(char**)(s + 0x7C), a);
+    Call9_5E58(*(char**)(s + 0x88), a);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001C5F20);
@@ -1593,7 +1619,62 @@ extern "C" void func_001C8930(void* self, void* obj, unsigned char state, float 
 
 INCLUDE_ASM("fe/fepopup", func_001C8A38);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C8EF0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float* size);
+extern "C" void func_001C9210_s(void* self, void* text, const char* str, float* size) __asm__("func_001C9210");
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern void* D_004A28A8;
+extern char D_004660A8[];
+
+struct sVEntry_8EF0 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+extern "C" void func_001C8EF0(void* vself, int* item, float* size, int flag, float extra)
+{
+    char* self = (char*)vself;
+    void* text;
+    if (flag != 0)
+        text = *(void**)(self + 0x74);
+    else
+        text = *(void**)(self + 0x78);
+    if (text == 0)
+        return;
+    switch (item[0]) {
+    case 0:
+        break;
+    case 2:
+        func_001C9210_s(self, text, (const char*)item[1], size);
+        goto add;
+    case 1:
+        func_001C9038(self, text, (unsigned short*)item[1], size);
+        goto add;
+    case 3: {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntry_8EF0* vt = *(sVEntry_8EF0**)(o + 4);
+        unsigned short* str = vt[4].fn(o + vt[4].delta, item[1]);
+        if (str) {
+            func_001C9038(self, text, str, size);
+            goto add;
+        } else {
+            char buf[0x40];
+            sprintf(buf, D_004660A8, item[1]);
+            func_001C9210_s(self, text, buf, size);
+        }
+        break;
+    }
+    default:
+    add:
+        size[1] += extra;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001C9038);
@@ -2009,7 +2090,26 @@ extern "C" void cScreenPopup_createConfirmationPopup(void* self, int idx)
 
 INCLUDE_ASM("fe/fepopup", func_001C9CD0);
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CA0F0);
+#ifdef SKIP_ASM
+struct sVEntry_A0F0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_001CA0F0(void* self, int idx, int a)
+{
+    char* o = *(char**)((char*)self + (idx << 2) + 0x90);
+    if (o != 0) {
+        sVEntry_A0F0* vt = *(sVEntry_A0F0**)(o + 8);
+        vt[8].fn(o + vt[8].delta, a);
+        sVEntry_A0F0* vt2 = *(sVEntry_A0F0**)(o + 8);
+        vt2[25].fn(o + vt2[25].delta, 1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CA150);
