@@ -55,7 +55,7 @@ or any disc file.
     fails it is dropped anyway, and rounding filtered texels without a libm call. 8,000 GS packets recorded in a race
     replay to the same VRAM about 10% faster;
   - GS drawing on worker threads. The runner queues draws, uploads and VRAM writes, and every worker runs them in
-    order, each in the rounding mode its caller had, drawing only its own bands of 16 rows. Uploads, VRAM writes, and
+    order, each in the rounding mode its caller had, drawing only its own bands of rows. Uploads, VRAM writes, and
     draws that read what another worker may still be drawing (render to texture, effects that read their own
     framebuffer) wait for every worker at that point and run on one. Anything that reads VRAM back waits for the queue
     first, so what the game sees is unchanged, and the window shows a frame once everything drawn before it is done,
@@ -97,6 +97,11 @@ or any disc file.
     texels straight from VRAM instead of copying each 8 KiB page first. The 8,000 recorded race packets replay to the
     same VRAM, also with round-toward-zero and on several workers, with 22% fewer instructions. A race on a 4-core
     machine went from about 8 to about 10 frames a second;
+  - the GS workers drawing bands of 4 rows instead of 16, and waiting for each other once per texture rather than
+    once per mip level: a texture's transfers, texture flushes and CLUT load now run together while the workers
+    wait. With 16-row bands a small object's rows fell to only a few workers. Replaying the recorded race packets on
+    8 workers, the busiest drew 42% more pixels between waits than the average, and 6% more with 4-row bands, for
+    the same total work. On a 4-core machine's two workers neither change moved the frame rate;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the

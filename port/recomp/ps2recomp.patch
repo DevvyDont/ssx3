@@ -1098,15 +1098,17 @@ index 0485d50..ab1e7ad 100644
  #define FPU_C_F_S(a, b) (0)
  #define FPU_C_UN_S(a, b) (isnan((float)(a)) || isnan((float)(b)))
 diff --git a/ps2xRuntime/include/runtime/gs/gs_cpu_backend.h b/ps2xRuntime/include/runtime/gs/gs_cpu_backend.h
-index 2421f9e..74f8408 100644
+index 2421f9e..d47ddad 100644
 --- a/ps2xRuntime/include/runtime/gs/gs_cpu_backend.h
 +++ b/ps2xRuntime/include/runtime/gs/gs_cpu_backend.h
-@@ -33,7 +33,21 @@ public:
+@@ -33,7 +33,23 @@ public:
      void SnapshotVram(std::vector<uint8_t> &out) const override;
      GSTransferSnapshot GetTransferSnapshot() const override;
  
-+    // Draws only the rows in band `index` of every `count` bands of 16 rows, so several
-+    // backends can share one VRAM and split the drawing between them.
++    // Draws only the rows in band `index` of every `count` bands of 4 rows, so several
++    // backends can share one VRAM and split the drawing between them. Thin bands spread
++    // the rows of a small object over every backend. A band of 4 rows is made of whole
++    // 64-byte columns of the 32- and 16-bit buffers, so no two backends write one column.
 +    void SetRowBand(uint32_t index, uint32_t count);
 +
 +    // The texel columns and rows, before wrapping, that DrawSprite reads drawing a UV
@@ -1117,13 +1119,13 @@ index 2421f9e..74f8408 100644
  private:
 +    bool OwnsRow(int y) const
 +    {
-+        return m_bandCount <= 1u || ((static_cast<uint32_t>(y) >> 4u) % m_bandCount) == m_bandIndex;
++        return m_bandCount <= 1u || ((static_cast<uint32_t>(y) >> 2u) % m_bandCount) == m_bandIndex;
 +    }
 +
      void ResetUnlocked();
      void LoadClutUnlocked(const GSTex0Reg &tex0, const GSTexClutReg &texclut);
      uint32_t ReadVramUnlocked(uint32_t psm, uint32_t base, uint32_t bw, uint32_t x, uint32_t y) const;
-@@ -44,8 +58,90 @@ private:
+@@ -44,8 +60,90 @@ private:
      void DrawSprite(const GSPrimitiveBatch &batch);
      void DrawTriangle(const GSPrimitiveBatch &batch);
      void DrawLine(const GSPrimitiveBatch &batch);
@@ -1215,7 +1217,7 @@ index 2421f9e..74f8408 100644
      uint32_t LookupCLUT(const GSDrawState &state, uint8_t index, uint8_t cpsm, uint8_t csm, uint8_t csa, uint8_t sourcePsm);
  
      void PerformLocalToLocalTransfer();
-@@ -72,7 +168,26 @@ private:
+@@ -72,7 +170,26 @@ private:
      std::array<WriteVramFunc, kPsmHandlerCount> m_writeVramFuncs{};
      std::array<uint16_t, 512> m_clut{};
      std::array<uint32_t, 2> m_clutCbp{};
@@ -1290,10 +1292,10 @@ index 1cb1540..a094d65 100644
  }
 diff --git a/ps2xRuntime/include/runtime/gs/gs_threaded_backend.h b/ps2xRuntime/include/runtime/gs/gs_threaded_backend.h
 new file mode 100644
-index 0000000..fd02c33
+index 0000000..43fe622
 --- /dev/null
 +++ b/ps2xRuntime/include/runtime/gs/gs_threaded_backend.h
-@@ -0,0 +1,166 @@
+@@ -0,0 +1,173 @@
 +#pragma once
 +
 +#include "runtime/gs/gs_backend.h"
@@ -1425,6 +1427,10 @@ index 0000000..fd02c33
 +    void classifyDraw(Command &command, const PageTracker::Access *drawn, size_t count,
 +                      const PageTracker::PageSet &textured, bool readsOwnPixels);
 +    void markRunAlone(Command &command);
++    // The end of the run of commands from m_working[begin], a runAlone one, that
++    // the barrier can run in one go: runAlone commands, and the CLUT loads and
++    // texture flushes between them, which it runs on every worker's backend.
++    size_t aloneRunEnd(size_t begin) const;
 +    void runCommand(GSCpuBackend &backend, const Command &command);
 +    void runAlone(const Command &command);
 +    void workerMain(size_t index);
@@ -1447,8 +1453,11 @@ index 0000000..fd02c33
 +    PageTracker m_pages;
 +
 +    std::barrier<BarrierCompletion> m_barrier;
-+    // What the barrier runs once every worker has arrived, set by the first worker.
-+    const Command *m_aloneCommand = nullptr;
++    // The commands the barrier runs once every worker has arrived,
++    // m_working[m_aloneBegin, m_aloneEnd), set by the first worker. Empty for a
++    // plain wait.
++    size_t m_aloneBegin = 0;
++    size_t m_aloneEnd = 0;
 +
 +    mutable std::mutex m_transferMutex;
 +    GSTransferSnapshot m_transferSnapshot{};
@@ -3346,10 +3355,10 @@ index f0ad507..c937bde 100644
      return false;
 diff --git a/ps2xRuntime/src/lib/gs/gs_threaded_backend.cpp b/ps2xRuntime/src/lib/gs/gs_threaded_backend.cpp
 new file mode 100644
-index 0000000..30f835f
+index 0000000..c0fd907
 --- /dev/null
 +++ b/ps2xRuntime/src/lib/gs/gs_threaded_backend.cpp
-@@ -0,0 +1,841 @@
+@@ -0,0 +1,875 @@
 +#include "runtime/gs/gs_threaded_backend.h"
 +#include "runtime/gs/ps2_gs_common.h"
 +
@@ -3657,15 +3666,25 @@ index 0000000..30f835f
 +
 +void GSThreadedBackend::BarrierCompletion::operator()() noexcept
 +{
-+    if (!self->m_aloneCommand)
-+        return;
-+    try
++    for (size_t i = self->m_aloneBegin; i < self->m_aloneEnd; ++i)
 +    {
-+        self->runAlone(*self->m_aloneCommand);
-+    }
-+    catch (...)
-+    {
-+        // A failed command must not take the workers, and every later draw, with it.
++        const Command &command = self->m_working[i];
++        try
++        {
++            if (command.runAlone)
++            {
++                self->runAlone(command);
++            }
++            else
++            {
++                for (Worker &worker : self->m_workers)
++                    self->runCommand(*worker.backend, command);
++            }
++        }
++        catch (...)
++        {
++            // A failed command must not take the workers, and every later draw, with it.
++        }
 +    }
 +}
 +
@@ -3742,6 +3761,22 @@ index 0000000..30f835f
 +{
 +    command.runAlone = true;
 +    m_pages.Clear();
++}
++
++size_t GSThreadedBackend::aloneRunEnd(size_t begin) const
++{
++    // Nothing between them draws, so the workers have nothing to do in between.
++    // SSX 3 sends a texture's mip levels as one transfer each, with a texture
++    // flush after each and a CLUT load after the last.
++    size_t end = begin + 1u;
++    while (end < m_working.size())
++    {
++        const Command &next = m_working[end];
++        if (!next.runAlone && next.kind != CommandKind::LoadClut && next.kind != CommandKind::TextureFlush)
++            break;
++        ++end;
++    }
++    return end;
 +}
 +
 +void GSThreadedBackend::classifyDraw(Command &command, const PageTracker::Access *drawn, size_t count,
@@ -3968,15 +4003,23 @@ index 0000000..30f835f
 +        seenGeneration = m_batchGeneration;
 +        lock.unlock();
 +
-+        for (const Command &command : m_working)
++        for (size_t i = 0; i < m_working.size(); ++i)
 +        {
++            const Command &command = m_working[i];
 +            if (command.waitForAll || command.runAlone)
 +            {
++                const size_t end = command.runAlone ? aloneRunEnd(i) : i;
 +                if (index == 0u)
-+                    m_aloneCommand = command.runAlone ? &command : nullptr;
++                {
++                    m_aloneBegin = i;
++                    m_aloneEnd = end;
++                }
 +                m_barrier.arrive_and_wait();
 +                if (command.runAlone)
++                {
++                    i = end - 1u;
 +                    continue;
++                }
 +            }
 +            try
 +            {
@@ -6770,7 +6813,7 @@ index 2866d2b..ab51b27 100644
          {
              // _mm_set_ps lists lanes 3..0
 diff --git a/ps2xTest/src/ps2_gs_tests.cpp b/ps2xTest/src/ps2_gs_tests.cpp
-index 0458a8c..efd7f1d 100644
+index 0458a8c..4915e32 100644
 --- a/ps2xTest/src/ps2_gs_tests.cpp
 +++ b/ps2xTest/src/ps2_gs_tests.cpp
 @@ -4,6 +4,8 @@
@@ -6816,7 +6859,7 @@ index 0458a8c..efd7f1d 100644
  
              const uint64_t imrPattern = 0x0123456789ABCDEFull;
              mem.write64(kGsImr, imrPattern);
-@@ -3006,6 +3013,279 @@ void register_ps2_gs_tests()
+@@ -3006,6 +3013,305 @@ void register_ps2_gs_tests()
                       "switching raster backends must retain the logical 4 MiB GS local memory");
          });
  
@@ -6832,7 +6875,7 @@ index 0458a8c..efd7f1d 100644
 +                    gs.setRasterBackend(std::make_unique<GSThreadedBackend>(workers));
 +
 +                // Two 64x256 framebuffers, A at page 0 and B at page 8, sharing a depth
-+                // buffer at page 16. Workers draw bands of 16 rows.
++                // buffer at page 16. Workers draw bands of 4 rows.
 +                constexpr uint64_t kFrameA = (1ull << 16) | (static_cast<uint64_t>(GS_PSM_CT32) << 24);
 +                constexpr uint64_t kFrameB = 8ull | kFrameA;
 +                gs.writeRegister(GS_REG_ZBUF_1, 16ull);
@@ -6907,6 +6950,32 @@ index 0458a8c..efd7f1d 100644
 +                                     (8ull << 32) | (120ull << 48), 16ull | (16ull << 32), 0ull,
 +                                     block.data(), static_cast<uint32_t>(block.size()));
 +                drawSprite(kFrameA, 8u, false);
++
++                // A CLUT at page 24 and an 8-bit texture at page 25, uploaded with a texture
++                // flush between them and loaded as a CLUT right after, with no draw in between,
++                // as SSX 3 sends a texture's mip levels. Then draw rows of A with them.
++                std::vector<uint8_t> clut(16u * 16u * 4u);
++                for (uint8_t &byte : clut)
++                    byte = static_cast<uint8_t>(next(256u));
++                std::vector<uint8_t> indices(16u * 16u);
++                for (uint8_t &index : indices)
++                    index = static_cast<uint8_t>(next(256u));
++                gs.uploadImageNative((24ull << 5 << 32) | (1ull << 48) | (static_cast<uint64_t>(GS_PSM_CT32) << 56),
++                                     0ull, 16ull | (16ull << 32), 0ull, clut.data(), static_cast<uint32_t>(clut.size()));
++                gs.writeRegister(GS_REG_TEXFLUSH, 0ull);
++                gs.uploadImageNative((25ull << 5 << 32) | (2ull << 48) | (static_cast<uint64_t>(GS_PSM_T8) << 56),
++                                     0ull, 16ull | (16ull << 32), 0ull, indices.data(), static_cast<uint32_t>(indices.size()));
++                gs.writeRegister(GS_REG_TEX0_1, (25ull << 5) | (2ull << 14) | (static_cast<uint64_t>(GS_PSM_T8) << 20) |
++                                                    (4ull << 26) | (4ull << 30) | (1ull << 34) | (1ull << 35) |
++                                                    ((24ull << 5) << 37) | (static_cast<uint64_t>(GS_PSM_CT32) << 51) |
++                                                    (1ull << 61));
++                gs.writeRegister(GS_REG_FRAME_1, kFrameA);
++                gs.writeRegister(GS_REG_TEST_1, (1ull << 16) | (1ull << 17));
++                gs.writeRegister(GS_REG_PRIM, static_cast<uint64_t>(GS_PRIM_SPRITE) | (1ull << 4) | (1ull << 8));
++                gs.writeRegister(GS_REG_UV, 0ull);
++                gs.writeRegister(GS_REG_XYZ2, (16ull << 4) | ((64ull << 4) << 16));
++                gs.writeRegister(GS_REG_UV, 256ull | (256ull << 16));
++                gs.writeRegister(GS_REG_XYZ2, (48ull << 4) | ((192ull << 4) << 16));
 +
 +                // Resample A into B with bilinear filtering, 256 rows of texels onto 255, as
 +                // SSX 3's last full-screen pass does: B's pages start where A's rows end.
