@@ -803,7 +803,62 @@ extern "C" void func_00328F28(sCell_8F28* c, sBox_8F28* b)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/aifwddiff", func_003291E0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_00328808_91E0(sNode_003284B8* node, int idx, sItem_00328660* item, sCell_00328660* from,
+                              sCell_00328660* to, sRoot_8C20* root) __asm__("func_00328808");
+
+static inline int Equal_91E0(const sCell_8F28& a, const sCell_8F28& b)
+{
+    return a.level == b.level && a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
+static inline void Remove_91E0(sRoot_8C20* root, int idx, sItem_00328660* item, sCell_8F28* from)
+{
+    func_003284B8((sNode_003284B8*)root->node, idx, (sItem_003284B8*)item, (sCell_003284B8*)from,
+                  (sCell_003284B8*)root);
+    if (((sNode_003284B8*)root->node)->empty()) {
+        operator_delete((int*)root->node);
+        root->node = 0;
+    }
+}
+
+static inline void Move_91E0(sRoot_8C20* root, int idx, sItem_00328660* item, sCell_8F28* from, sCell_8F28* to)
+{
+    if (!Contains_8C20(root->cell, *(sCell_00328660*)to)) {
+        Remove_91E0(root, idx, item, from);
+        func_00328C20(root, idx, item, (sCell_00328660*)to);
+    } else {
+        func_00328808_91E0((sNode_003284B8*)root->node, idx, item, (sCell_00328660*)from, (sCell_00328660*)to, root);
+    }
+}
+
+extern "C" void func_003291E0(sRoot_8C20 (*roots)[2][2], int idx, sItem_00328660* item, sBox_8F28* box,
+                              sBox_8F28* oldBox)
+{
+    sCell_8F28 oc;
+    sCell_8F28 nc;
+    func_00328F28(&oc, oldBox);
+    func_00328F28(&nc, box);
+    if (Equal_91E0(nc, oc)) {
+        return;
+    }
+    unsigned int nx = (unsigned int)nc.x >> 31;
+    unsigned int ny = (unsigned int)nc.y >> 31;
+    unsigned int nz = (unsigned int)nc.z >> 31;
+    unsigned int ox = (unsigned int)oc.x >> 31;
+    unsigned int oy = (unsigned int)oc.y >> 31;
+    unsigned int oz = (unsigned int)oc.z >> 31;
+    if (nx != ox || ny != oy || nz != oz) {
+        Remove_91E0(&roots[ox][oy][oz], idx, item, &oc);
+        func_00328C20(&roots[nx][ny][nz], idx, item, (sCell_00328660*)&nc);
+    } else {
+        Move_91E0(&roots[nx][ny][nz], idx, item, &oc, &nc);
+    }
+}
+#endif
 
 INCLUDE_ASM("intersect/aifwddiff", func_00329590);
 
