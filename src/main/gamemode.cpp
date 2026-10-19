@@ -379,7 +379,60 @@ extern "C" void func_00238590(void* self, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamemode", func_002385D0);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+class cGmStream_385D0 {
+public:
+    virtual void write(void* p, int n);
+    virtual void read(void* p, int n);
+};
+
+class cGameModeObj_2385D0 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void save(cGmStream_385D0* s);
+    virtual void load(cGmStream_385D0* s);
+};
+
+extern int D_00536708[];
+
+extern "C" void func_002385D0(char* self, cGmStream_385D0* s)
+{
+    s->write(self + 4, 4);
+    s->write(self, 4);
+    s->write(self + 8, 4);
+    s->write(self + 0x10, 4);
+    s->write(self + 0x14, 4);
+    s->write(self + 0x18, 0x28);
+    s->write(self + 0x68, 4);
+    s->write(self + 0x6C, 4);
+    s->write(self + 0x70, 4);
+    s->write(D_00536730, 0x28);
+    s->write(D_00536708, 0x28);
+    s->write(self + 0x78, 4);
+    s->write(self + 0x7C, 4);
+    s->write(self + 0x80, 4);
+    s->write(D_00536640, 0x28);
+    s->write(self + 0x84, 4);
+    s->write(self + 0x88, 4);
+    s->write(self + 0x8C, 4);
+    s->write(self + 0x90, 4);
+    s->write(self + 0x94, 4);
+    s->write(self + 0x98, 4);
+    s->write(self + 0x9C, 4);
+    ((cGameModeObj_2385D0*)D_00536668[*(int*)(self + 4)])->save(s);
+}
+#endif
 INCLUDE_ASM("main/gamemode", func_002388A0);
 
 //100%

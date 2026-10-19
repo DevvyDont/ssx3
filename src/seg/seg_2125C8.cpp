@@ -51,7 +51,38 @@ extern "C" void func_003115E0_impl(RangeTable_15E0* t)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2125C8", func_00311710);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct sWeighted_1710 {
+    int value;
+    int weight;
+    int flags;
+};
+extern sWeighted_1710 D_00449960[];
+unsigned int AIrand();
+
+extern "C" int func_00311710(RangeTable_15E0* t, int idx, int mask)
+{
+    int start = t->r[idx].start;
+    int i, end, total;
+    if (t->r[idx].count == 1) return D_00449960[start].value;
+    end = start + t->r[idx].count;
+    total = 0;
+    for (int j = start; j < end; j++) {
+        if ((D_00449960[j].flags & mask) == mask) total += D_00449960[j].weight;
+    }
+    int r = AIrand() % total;
+    for (i = start; i < end; i++) {
+        if ((D_00449960[i].flags & mask) == mask) {
+            r -= D_00449960[i].weight;
+            if (r <= 0) return D_00449960[i].value;
+        }
+    }
+    return D_00449960[end - 1].value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2125C8", func_00311860);

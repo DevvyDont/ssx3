@@ -665,7 +665,102 @@ extern "C" void func_00182420(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onWidgetCreate);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern char D_004A1400[];
+extern char D_0045D790[];
+extern char D_0045D7A0[];
+extern char D_0045D7B0[];
+extern char D_004A1408[];
+extern char* D_00440FA0[];
+extern char D_004C66B8[];
+extern "C" void func_0039B760(void* w, unsigned char n);
+
+struct sCWVt_2460 { short delta; short index; void (*fn)(void*, int); };
+struct sCWVtP_2460 { short delta; short index; void (*fn)(void*, void*); };
+struct sCW_2460 {
+    int f0;
+    int f4;
+    sCWVt_2460* vt;             // 0x8
+    int fC;
+    int f10;
+    unsigned b0 : 1;            // 0x14
+    unsigned b1 : 31;
+    int id18;                   // 0x18
+    char pad1C[0x38 - 0x1C];
+    int hash;                   // 0x38
+    char pad3C[0x78 - 0x3C];
+    int f78;                    // 0x78
+    int f7C;                    // 0x7C
+};
+struct sCheat_2460 {
+    char pad0[0x48];
+    sCW_2460* f48;              // 0x48
+    sCW_2460* f4C;              // 0x4C
+    sCW_2460* f50;              // 0x50
+    sCW_2460* slots[6];         // 0x54
+    sCW_2460* f6C;              // 0x6C
+    int f70, f74;
+    int count;                  // 0x78
+    char pad7C[0xF4 - 0x7C];
+    int vals[6];                // 0xF4
+};
+
+static inline void vcall_2460(sCW_2460* w, int k, int v)
+{
+    w->vt[k].fn((char*)w + w->vt[k].delta, v);
+}
+
+extern "C" void cFEStateCheatCharSelect_onWidgetCreate(sCheat_2460* self, sCW_2460* w)
+{
+    int h = w->hash;
+    if (h == GetHashValue32(D_004A1400)) {
+        self->f6C = w;
+        w->id18 = 0;
+        self->f6C->b0 = 0;
+        if (self->count >= 6) func_0039B760(self->f6C, self->count);
+        return;
+    }
+    if (h == GetHashValue32(D_0045D790)) {
+        self->f48 = w;
+        vcall_2460(w, 9, self->count >= 7);
+        return;
+    }
+    if (h == GetHashValue32(D_0045D7A0)) {
+        self->f4C = w;
+        vcall_2460(w, 9, self->count >= 7);
+        return;
+    }
+    if (h == GetHashValue32(D_0045D7B0)) {
+        self->f50 = w;
+        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+        return;
+    }
+    int i = 0;
+    char** tb = D_00440FA0;
+    sCW_2460** sp = self->slots;
+    for (; i < 6; sp++, tb++, i++) {
+        if (h == GetHashValue32(*tb)) {
+            *sp = w;
+            w->id18 = i;
+            if (i == 0) {
+                sCWVtP_2460* e = &((sCWVtP_2460*)self->slots[0]->vt)[21];
+                e->fn((char*)self->slots[0] + e->delta, D_004C66B8);
+            }
+            if (i >= self->count) {
+                vcall_2460(*sp, 9, 0);
+                vcall_2460(*sp, 8, 1);
+            } else {
+                sCW_2460* sl = *sp;
+                sl->f7C = (&self->vals[0])[i];
+                sl->f78 = -1;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharselect", func_00182690);

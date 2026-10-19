@@ -178,7 +178,113 @@ float func_001E9290(void* self, void* a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001E92A8);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" float func_003921F0(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
+struct sFont_1E92A8 {
+    char pad0[0x14];
+    int lineH;          // 0x14
+    char pad18[0x18];
+    float w30;          // 0x30
+    float h34;          // 0x34
+    float sx;           // 0x38
+    float sy;           // 0x3C
+};
+struct sIcon_1E92A8 {
+    int hash;           // 0x0
+    char pad4[8];
+    float w;            // 0xC
+    float h;            // 0x10
+    char pad14[0x10];
+};
+struct sSeg_1E92A8 {
+    float w;
+    unsigned short* str;
+};
+struct sLine_1E92A8 {
+    float total;        // 0x0
+    float height;       // 0x4
+    sFont_1E92A8* font; // 0x8
+    float yoff;         // 0xC
+    float sx;           // 0x10
+    float sy;           // 0x14
+    int count;          // 0x18
+    sSeg_1E92A8 segs[6];// 0x1C
+    unsigned short text[1]; // 0x4C
+};
+extern sIcon_1E92A8 D_004C8980[];
+
+extern "C" void func_001E92A8(void* p)
+{
+    sLine_1E92A8* self = (sLine_1E92A8*)p;
+    unsigned short* s;
+    int n = 0;
+    sFont_1E92A8* font = self->font;
+    sSeg_1E92A8* segs = self->segs;
+    char buf[16];
+    char name[32];
+    font->sx = font->w30 * self->sx;
+    font->sy = font->h34 * self->sy;
+    self->segs[0].w = 0;
+    float maxh = self->segs[0].w;
+    self->count = 0;
+    self->segs[0].str = self->text;
+    s = self->segs[0].str;
+    float total = maxh;
+    while (*s != 0) {
+        if (*s == 0x40) {
+            *s = 0;
+            s++;
+            if (*segs[n].str != 0) {
+                float w = func_003921F0(font, segs[n].str, buf, 1, font->sx, font->sy);
+                total += w;
+                segs[n].w = w;
+            }
+            n++;
+            char* d = name;
+            do {
+                if (*s == 0x20 || *s == 0) break;
+                *d = *s;
+                s++;
+                d++;
+            } while (1);
+            *d = 0;
+            int h = GetHashValue32(name);
+            sIcon_1E92A8* e = 0;
+            for (sIcon_1E92A8* q = D_004C8980; q->hash != 0; q++) {
+                if (q->hash == h) { e = q; break; }
+            }
+            // The icon entry is kept in the segment's string slot.
+            segs[n].str = (unsigned short*)e;
+            float ew = e->w;
+            segs[n].w = ew;
+            total += ew;
+            n++;
+            if (maxh < e->h) maxh = e->h;
+            segs[n].str = s;
+            segs[n].w = 0;
+            if (*s != 0) s++;
+        } else {
+            s++;
+        }
+    }
+    if (*segs[n].str != 0) {
+        float w = func_003921F0(font, segs[n].str, buf, 0, font->sx, font->sy);
+        total += w;
+        segs[n].w = w;
+        n++;
+    }
+    self->count = n;
+    float h = (float)font->lineH * font->h34 * self->sy;
+    self->total = total;
+    // PORT: `>?` is the g++ maximum operator (EE max.s).
+    float m = h >? maxh;
+    self->height = m;
+    self->yoff = (m - h) * 0.5f;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/ovstatehud", func_001E94E0);

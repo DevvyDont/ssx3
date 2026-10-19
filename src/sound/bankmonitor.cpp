@@ -2902,7 +2902,82 @@ extern "C" int func_002B1458(sBankEntries* self, int a, int b, int c, int d, int
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1520);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+class cBMVoice_1520 {
+public:
+    // vptr at 0; slot N at vtable offset N*8
+    virtual int v01();
+    virtual int v02();
+    virtual int v03();
+    virtual int v04();
+    virtual int v05();
+    virtual int v06();
+    virtual int v07();
+    virtual int v08();
+};
+
+struct sBMObj_1520 {
+    char pad[0x6C0];
+    char voice[4];          // 0x6C0, a cBMVoice_1520
+    char pad6C4[0x870 - 0x6C4];
+    int z;                  // 0x870
+};
+
+struct sBMEnt_1520 {
+    int used;       // 0x18
+    int pad1C;
+    int id;         // 0x20
+    int key;        // 0x24
+    sBMObj_1520* obj;   // 0x28
+    int w;          // 0x2C
+    float t;        // 0x30
+    int k;          // 0x34
+};
+
+struct sBMon_1520 {
+    int pad0;
+    char** slots;           // 0x4
+    char pad8[0xC - 0x8];
+    int curK;               // 0xC
+    int curId;              // 0x10
+    char pad14[0x18 - 0x14];
+    sBMEnt_1520 ents[10];   // 0x18
+};
+
+extern "C" int func_002B1520(sBMon_1520* self, int id, int key)
+{
+    for (int j = 0; j < 10; j++) {
+        if (self->ents[j].used != 0 && self->ents[j].id == id && self->ents[j].key == key) {
+            int v = 0;
+            int u = 0;
+            int z = -1;
+            if (self->ents[j].obj != 0) {
+                v = ((cBMVoice_1520*)self->ents[j].obj->voice)->v05();
+                u = ((cBMVoice_1520*)self->ents[j].obj->voice)->v08();
+                z = self->ents[j].obj->z;
+            }
+            *(int*)(self->slots[id] + 0x8CC) = v;
+            *(int*)(self->slots[id] + 0x8F8) = u;
+            *(int*)(self->slots[id] + 0x8FC) = z;
+            *(float*)(self->slots[id] + 0x8F4) = self->ents[j].t;
+            *(int*)(self->slots[id] + 0x8D0) = self->ents[j].w;
+            int k = self->ents[j].k;
+            if (k != 0) {
+                self->curK = k;
+                self->curId = id;
+            } else {
+                self->curK = 0;
+                self->curId = -1;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B16A0);

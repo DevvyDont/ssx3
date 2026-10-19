@@ -1315,7 +1315,47 @@ extern "C" void func_0034D6F0(void* vself, float v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034D778);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" void func_0034D778(char* self)
+{
+    if (!IsLoaded_34B9B0(*(sModel_34B9B0**)(self + 0x18))) {
+        return;
+    }
+    char* ctx = D_004A5B80;
+    float one = 1.0f;
+    {
+        sModel_34B9B0* m = *(sModel_34B9B0**)(self + 0x18);
+        sVE93_34B9B0* vt = *(sVE93_34B9B0**)(ctx + 0x10D8);
+        char* thisp = ctx + vt[93].delta;
+        sVec4_34B9B0 a(*(float*)((char*)m + 0x60), *(float*)((char*)m + 0x64), *(float*)((char*)m + 0x68), one);
+        sVec4_34B9B0 b(*(float*)((char*)m + 0x6C), *(float*)((char*)m + 0x70), *(float*)((char*)m + 0x74), one);
+        sVec4_34B9B0* pb = &b;
+        sVE43_34B9B0* vt43 = *(sVE43_34B9B0**)(ctx + 0x10D8);
+        sPair_34B9B0 c = vt43[43].fn(ctx + vt43[43].delta);
+        if (vt[93].fn(thisp, &a, pb, &c) == 1) {
+            return;
+        }
+    }
+    TOP_34B9B0(ctx)[1] = TOP_34B9B0(ctx)[0];
+    sRS_34B9B0* t = TOP_34B9B0(ctx);
+    TOP_34B9B0(ctx) = t + 1;
+    ((int*)t)[6] = (((int*)t)[6] & ~0x7C) | 0x14;
+    sModel_34B9B0* m = *(sModel_34B9B0**)(self + 0x18);
+    char* pos = (char*)m + 0x10;
+    char* h = *(char**)(self + 0x40);
+    if (h != 0) {
+        sVE7_34B9B0* hv = *(sVE7_34B9B0**)(h + 4);
+        hv[7].fn(h + hv[7].delta, pos, *(void**)((char*)m + 0x94), 0);
+    } else {
+        sVE96_34B9B0* v96 = *(sVE96_34B9B0**)(ctx + 0x10D8);
+        v96[96].fn(ctx + v96[96].delta, m, 0, 0, 0);
+    }
+    TOP_34B9B0(ctx)--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flagset", func_0034D960);

@@ -2576,7 +2576,40 @@ int func_001E0F58(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0F60);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" void* func_001A8500(void* self, int a1, int a2);
+extern void* D_00467F28[];
+extern int D_004A3E90;
+
+struct sAlloc_E0F60 {
+    sAlloc_E0F60() {}
+    sAlloc_E0F60(const sAlloc_E0F60&) {}
+};
+
+// The zeroed triple at 0x6E8 looks like an STL vector; its constructor takes an
+// allocator temporary, which is what leaves the unused stack slot.
+static inline void InitVec_E0F60(void* self, const sAlloc_E0F60& a = sAlloc_E0F60())
+{
+    *(int*)((char*)self + 0x6E8) = 0;
+    *(int*)((char*)self + 0x6EC) = 0;
+    *(int*)((char*)self + 0x6F0) = 0;
+}
+
+extern "C" void* func_001E0F60(void* self)
+{
+    func_001A8500(self, 0, 0);
+    int d = D_004A3E90;
+    *(void***)((char*)self + 0x8) = D_00467F28;
+    *(int*)((char*)self + 0x6D0) = d;
+    *(int*)((char*)self + 0x6D4) = d;
+    *(int*)((char*)self + 0x6E0) = d;
+    InitVec_E0F60(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0FB8__FPv);
@@ -2634,7 +2667,38 @@ extern "C" int func_001E0FC0(func_001E0FC0_cObj* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0FF0);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" void* func_001A8500(void* self, int a1, int a2);
+extern void* D_00467E18[];
+extern int D_004A3E90;
+
+struct sAlloc_E0FF0 {
+    sAlloc_E0FF0() {}
+    sAlloc_E0FF0(const sAlloc_E0FF0&) {}
+};
+
+// The zeroed triple at 0x6DC looks like an STL vector; its constructor takes an
+// allocator temporary, which is what leaves the unused stack slot.
+static inline void InitVec_E0FF0(void* self, const sAlloc_E0FF0& a = sAlloc_E0FF0())
+{
+    *(int*)((char*)self + 0x6DC) = 0;
+    *(int*)((char*)self + 0x6E0) = 0;
+    *(int*)((char*)self + 0x6E4) = 0;
+}
+
+extern "C" void* func_001E0FF0(void* self)
+{
+    func_001A8500(self, 0, 0);
+    int d = D_004A3E90;
+    *(void***)((char*)self + 0x8) = D_00467E18;
+    *(int*)((char*)self + 0x6D0) = d;
+    InitVec_E0FF0(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1040__FPv);
@@ -4569,7 +4633,20 @@ extern "C" int func_001E3460(int* out)
     return -1;
 }
 #endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E34D8);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" int func_001E34D8(int i)
+{
+    sPopupEntry18* a = &D_004C6C08[i];
+    int n = i + 1;
+    sPopupEntry18* b = &D_004C6C08[n];
+    if (b->field_0x4 == a->field_0x4)
+        return n;
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3510);
@@ -5313,7 +5390,36 @@ extern "C" void func_001E4458(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E4578);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" void func_001E4658(void* self);
+extern "C" void func_001E48B0(void* self);
+extern "C" void func_001E4458(void* self);
+
+extern "C" int func_001E4578(char* self, void* widget, int event, int value)
+{
+    switch (event) {
+    case 4:
+        *(int*)(self + 0x174) = value;
+        func_001E4658(self);
+        func_001E48B0(self);
+        break;
+    case 5:
+        func_001E4458(self);
+        return 0x101;
+    case 9:
+        return 0;
+    case 8:
+        return *(int*)(self + 0x170) != 0;
+    case 6:
+    case 7:
+        return 1;
+    }
+    return 0x101;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E4610);
@@ -6191,7 +6297,47 @@ extern "C" void func_001E5800(void* self, void* a1, unsigned int msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E58E0);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" int func_001E34D8(int i);
+extern "C" int func_001E3408();
+extern "C" int func_001E3460(int* out);
+extern "C" void func_001E5428(void* self);
+// PORT: func_001E33E8 is declared (void*) but called with no argument here
+unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
+
+extern "C" void func_001E58E0(void* self)
+{
+    int id = *(int*)((char*)self + 0x68);
+    sPopupEntry18_5800* a = &D_004C6C08_5800[id];
+    sEntry14_5800* b = &D_00441630_5800[a->field_0x4];
+    if (b->type == 4) {
+        int n = func_001E34D8(id);
+        if (n == -1) {
+            char* o = *(char**)((char*)self + 0x20);
+            sVE5800* vt = *(sVE5800**)(o + 8);
+            vt[17].fn(o + vt[17].delta, self, 0x14);
+            return;
+        }
+        *(int*)((char*)self + 0x68) = n;
+        *(int*)((char*)self + 0x6C) = *(int*)((char*)self + 0x6C) + 1;
+        func_001E5428(self);
+    } else if (func_001E3408() > 0) {
+        sPopupList* t = func_001E39F8_list();
+        int idx;
+        *(int*)((char*)self + 0x68) = func_001E3460(&idx);
+        t->mask |= 1 << idx;
+        *(int*)((char*)self + 0x6C) = func_001E33E8_noarg() - idx;
+        func_001E5428(self);
+    } else {
+        char* o = *(char**)((char*)self + 0x20);
+        sVE5800* vt = *(sVE5800**)(o + 8);
+        vt[17].fn(o + vt[17].delta, self, 0x14);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E5A18);

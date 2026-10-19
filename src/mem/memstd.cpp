@@ -772,7 +772,48 @@ extern "C" sMemNode_251718* func_00253100(sMemClass_251718* cls, int size, int b
     return n->tag != 0x4253 ? n : 0;
 }
 #endif
+//100%
 INCLUDE_ASM("mem/memstd", func_00253170);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// Largest block in the class whose payload exceeds size - 1, walking forward
+// (dir 0) or backward; 0 if none.
+extern "C" sMemNode_251718* func_00253170(sMemClass_251718* cls, int size, int dir)
+{
+    int best = size - 1;
+    if (best < 0) {
+        best = 0;
+    }
+    sMemNode_251718* r = 0;
+    sMemNode_251718* p;
+    if (dir == 0) {
+        p = cls->head.next;
+        for (;;) {
+            if (best < p->size - 0x10) {
+                if (p->tag == 0x4253) {
+                    break;
+                }
+                r = p;
+                best = r->size - 0x10;
+            }
+            p = p->next;
+        }
+    } else {
+        p = cls->head.prev;
+        for (;;) {
+            if (best < p->size - 0x10) {
+                if (p->tag == 0x4253) {
+                    break;
+                }
+                r = p;
+                best = r->size - 0x10;
+            }
+            p = p->prev;
+        }
+    }
+    return r;
+}
+#endif
 //100%
 INCLUDE_ASM("mem/memstd", func_00253230);
 #ifdef SKIP_ASM

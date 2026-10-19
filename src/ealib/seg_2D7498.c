@@ -920,7 +920,51 @@ void func_003D7B98(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D7C38);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct R_7C38 { unsigned int f0; unsigned short h; unsigned char c; unsigned char d; short s8; short next; void *p; int arr[20]; };
+struct G_7C38 { int z[8]; int a[8]; int b[8]; int n; struct R_7C38 r[16]; };
+extern struct G_7C38 D_0044FFF8_7C38 __asm__("D_0044FFF8");
+
+void func_003D7C38(unsigned int arg0) {
+    int d;
+    int j = -1;
+    if (arg0 < 16 && D_0044FFF8_7C38.r[arg0].s8 == 0) {
+        d = D_0044FFF8_7C38.r[arg0].d;
+        D_0044FFF8_7C38.r[arg0].c = 0;
+        if (arg0 == D_0044FFF8_7C38.b[d]) {
+            D_0044FFF8_7C38.b[d] = j;
+        }
+        if (arg0 == D_0044FFF8_7C38.a[d]) {
+            D_0044FFF8_7C38.a[d] = j;
+        }
+        j = D_0044FFF8_7C38.r[arg0].next;
+        while (j != -1) {
+            if ((unsigned int)j >= 16) {
+                break;
+            }
+            if (D_0044FFF8_7C38.r[j].s8 != 0 && D_0044FFF8_7C38.r[j].c != 0) {
+                if (j == D_0044FFF8_7C38.a[d]) {
+                    D_0044FFF8_7C38.a[d] = -1;
+                }
+                D_0044FFF8_7C38.r[j].c = 0;
+                j = D_0044FFF8_7C38.r[j].next;
+            } else {
+                j = -1;
+            }
+        }
+        if (D_0044FFF8_7C38.r[arg0].s8 == 0) {
+            D_0044FFF8_7C38.z[d]--;
+        }
+        if (D_0044FFF8_7C38.z[d] < 0) {
+            D_0044FFF8_7C38.z[d] = 0;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2D7498", func_003D7D58);
 
@@ -1351,7 +1395,56 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D8598);
 
 INCLUDE_ASM("ealib/seg_2D7498", func_003D85C8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D8780);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+int func_003D8780(short *arg0, unsigned char *p, int idx) {
+    int w = p[5];
+    int r = 1;
+    if (w < idx) {
+        r = 0;
+    } else {
+        int v = arg0[1];
+        if (v != -1) {
+            int b = 0;
+            if (v < *(unsigned short *)(p + 0xA)) {
+                int bit = w * v + idx;
+                unsigned char f = p[4];
+                int t = f & 0xF;
+                int off = 0;
+                unsigned char *q = p + ((w * (t + 2) + 0xF) & 0x3FFC) + t * 4;
+                unsigned char *s;
+                int k;
+                unsigned char m;
+                if (f & 0x80) {
+                    off = (w + 7) / 8 + 1;
+                }
+                s = q + off;
+                if (p[6] != 0) {
+                    s += p[6] + 1;
+                }
+                k = bit / 8;
+                m = 1 << (bit - k * 8);
+                b = s[k] & m;
+            }
+            r = b;
+            if (r == 0) {
+                goto out;
+            }
+        }
+        if (p[4] & 0x80) {
+            int t = p[4] & 0xF;
+            unsigned char *q = p + ((p[5] * (t + 2) + 0xF) & 0x3FFC) + t * 4;
+            int k = idx / 8;
+            unsigned char m = 1 << (idx - k * 8);
+            r = (q + k)[1] & m;
+        }
+    }
+out:
+    return r;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2D7498", func_003D88C8);
 
@@ -1698,7 +1791,43 @@ int func_003DA578(struct S_A578 *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DA5C8);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+enum E_A5C8 { E_A5C8_0, E_A5C8_1, E_A5C8_2 };
+int func_003DA5C8(unsigned char *arg0, unsigned int *tbl, short *out) {
+    unsigned int idx = arg0[2];
+    int t = arg0[3];
+    unsigned short id = *(unsigned short *)arg0;
+    int h;
+    out[1] = -1;
+    out[0] = -1;
+    switch ((enum E_A5C8)t) {
+    case 0:
+        out[0] = func_003D6D50(id);
+        break;
+    case 1:
+        if (idx >= 20) {
+            out[0] = -1;
+        } else {
+            out[0] = func_003D6DB8(id, *(unsigned short *)&tbl[idx]);
+        }
+        break;
+    case 2:
+        h = func_003D6D50(id);
+        if (func_003D6CF8(h, tbl[idx]) != 0) {
+            out[1] = *(unsigned short *)&tbl[idx];
+        } else {
+            h = -1;
+        }
+        out[0] = h;
+        break;
+    }
+    if (out[0] > -1) return 1;
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DA6B0);

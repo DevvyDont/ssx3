@@ -4961,7 +4961,37 @@ extern "C" void func_001CE520(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001CE560);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct sPopupK1CE560 { char p[0x148]; int a[84]; int b[84]; };
+// PORT: out is an int* out-param (the unit declares it int)
+extern "C" int func_001CE560(void* self, int idx, int out)
+{
+    bool b = *(int*)((char*)self + 0x68) != 0;
+    int flag;
+    if (*(int*)((char*)self + 0x6C)) {
+        flag = b;
+        flag = !flag;
+    } else {
+        flag = b != 0;
+    }
+    if (idx >= 15 && idx <= 26) {
+        // PORT: reads the int field at 0x6C as a bool (bool is 4 bytes in SN gcc 2.95); use `*(int*)... == 0` off-PS2.
+        flag = !*(bool*)((char*)self + 0x6C);
+    }
+    if (flag) {
+        if (out)
+            *(int*)out = ((sPopupK1CE560*)self)->b[idx];
+        return ((sPopupK1CE560*)self)->a[idx];
+    } else {
+        if (out)
+            *(int*)out = ((sPopupK1CE560*)self)->a[idx];
+        return ((sPopupK1CE560*)self)->b[idx];
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CE5E0);

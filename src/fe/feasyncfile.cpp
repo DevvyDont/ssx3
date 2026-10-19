@@ -1558,7 +1558,29 @@ extern "C" int func_001A56D0(sOwner1A56D0* self, const char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A5768);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct sOwner1A5768 {
+    char pad[0x6E8];
+    char*** mBegin;
+    char*** mEnd;
+};
+
+static inline unsigned int Count1A5768(sOwner1A5768* s) { return s->mEnd - s->mBegin; }
+
+extern "C" int func_001A5768(sOwner1A5768* self, const char* name)
+{
+    unsigned int i;
+    for (i = 0; i < Count1A5768(self); i++) {
+        if (func_0041AA88(**(char***)((char*)self->mBegin + (i << 2)), name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A5800);
@@ -15635,7 +15657,27 @@ extern "C" int func_001BB968(void* self, int year)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001BB9B0);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// Days in a month (1-based); February uses the leap-year test.
+extern "C" int func_001BB9B0(void* self, int month, int year)
+{
+    if (month == 2) {
+        if (func_001BB968(self, year))
+            return 29;
+        return 28;
+    }
+    if (month >= 8)
+        month++;
+    if (month % 2 == 1)
+        return 31;
+    return 30;
+}
+
+extern "C" void* func_001BBC40(void* self);
+#endif
 
 extern "C" void* func_001BBC40(void* self);
 

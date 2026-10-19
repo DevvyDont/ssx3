@@ -2085,7 +2085,62 @@ extern "C" void* func_003B0948(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B09A0);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern void* D_00456810[];
+
+struct sWSList_09A0 {
+    sWSNode2* next;
+    sWSNode2* prev;
+    int empty() { return next == (sWSNode2*)this; }
+    sWSNode2* front() { return next; }
+    void kill() { next = (sWSNode2*)7; prev = (sWSNode2*)7; }
+};
+
+struct sPl_09A0 {
+    void** vt;
+    char pad4[0x14];
+    sWSList_09A0 list18;
+    sWSList_09A0 list20;
+    char pad28[4];
+    void* work;
+    char pad30[0x48];
+    void* ipuBuf;
+};
+
+static inline void wsUnlink_09A0(sWSNode2* n)
+{
+    void* obj = n ? (char*)n - 8 : 0;
+    sWSNode2* next = n->next;
+    sWSNode2* prev = n->prev;
+    prev->next = next;
+    next->prev = prev;
+    n->prev = (sWSNode2*)0xB;
+    n->next = (sWSNode2*)0xB;
+    if (obj) func_003B08E0(obj, 3);
+}
+
+extern "C" void func_003B09A0(sPl_09A0* self, int flags)
+{
+    self->vt = D_00456850;
+    if (self->work != 0) {
+        D_00509434[0](self->work);
+        self->work = 0;
+    }
+    if (self->ipuBuf != 0) {
+        D_00509434[0](self->ipuBuf);
+        self->ipuBuf = 0;
+    }
+    while (!self->list18.empty()) wsUnlink_09A0(self->list18.front());
+    while (!self->list20.empty()) wsUnlink_09A0(self->list20.front());
+    self->list20.kill();
+    self->list18.kill();
+    self->vt = D_00456810;
+    if (flags & 1) D_00509434[0](self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B0B10);

@@ -5424,13 +5424,16 @@ struct sRailLink {
 
 //95.0% - logic verified correct; the target puts the mult result in v1 and
 // ours lands in v0. Reordering the locals does not shift the allocation.
+//100%
 INCLUDE_ASM("object/railmodifier", func_00365FE8);
 #ifdef SKIP_ASM
-extern "C" void func_00365FE8(void* self)
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// Pop a link index off the free list headed at f23DC.
+extern "C" int func_00365FE8(sRailModE40* self)
 {
-    int i = *(int*)((char*)self + 0x23dc);
-    sRailLink* b = *(sRailLink**)((char*)self + 0x1ff0);
-    *(int*)((char*)self + 0x23dc) = b[i].field_0x10;
+    int i = self->f23DC;
+    self->f23DC = self->links[i].next;
+    return i;
 }
 #endif
 

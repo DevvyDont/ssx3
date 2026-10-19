@@ -573,7 +573,133 @@ extern "C" int func_0016D260(sCamTrigStack* self, int key, int* changed, int* ou
 
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D320);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016E1D8);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern void* D_004A28A8;
+extern "C" void func_00162060(void* self, int mode, int arg, float blend);
+
+struct sCamEvt_E1D8 {
+    int type;
+    int pad4;
+    unsigned int id;
+    float dur;
+};
+
+struct sCams_E1D8 {
+    int count;
+    char* cam[1];
+};
+
+extern "C" void func_0016E1D8(sCamEvt_E1D8* evt, char* rider)
+{
+    sCams_E1D8* cams = *(sCams_E1D8**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+    void* cam = *(void**)(cams->cam[*(int*)(rider + 0x870)] + 0xA8);
+    switch (evt->type) {
+    case 2: {
+        float rate;
+        if (evt->dur != 0.0f)
+            rate = 1.0f / evt->dur * 0.016666668f;
+        else
+            rate = 1.0f;
+        func_00162060(cam, 0x5C, (int)evt, rate);
+        break;
+    }
+    case 1: {
+        float rate;
+        if (evt->dur != 0.0f)
+            rate = 1.0f / evt->dur * 0.016666668f;
+        else
+            rate = 1.0f;
+        func_00162060(cam, 0x5B, (int)evt, rate);
+        break;
+    }
+    case 0: {
+        float rate = 0.0f;
+        if (evt->dur == rate)
+            rate = 1.0f;
+        else
+            rate = 1.0f / evt->dur * 0.016666668f;
+        int mode;
+        switch (evt->id) {
+        case 3: mode = 4; break;
+        case 7: mode = 3; break;
+        case 1: mode = 2; break;
+        case 2: mode = 1; break;
+        case 4: mode = 7; break;
+        case 5: mode = 5; break;
+        case 6: mode = 6; break;
+        case 8: mode = 8; break;
+        case 10: mode = 9; break;
+        case 9: mode = 10; break;
+        case 11: mode = 11; break;
+        case 12: mode = 12; break;
+        case 13: mode = 13; break;
+        case 14: mode = 14; break;
+        case 15: mode = 15; break;
+        case 16: mode = 16; break;
+        case 17: mode = 17; break;
+        case 18: mode = 18; break;
+        case 19: mode = 19; break;
+        case 20: mode = 20; break;
+        case 21: mode = 21; break;
+        case 22: mode = 22; break;
+        case 23: mode = 23; break;
+        case 24: mode = 24; break;
+        case 25: mode = 25; break;
+        case 26: mode = 26; break;
+        case 27: mode = 27; break;
+        case 28: mode = 28; break;
+        case 29: mode = 29; break;
+        case 30: mode = 30; break;
+        case 31: mode = 31; break;
+        case 32: mode = 32; break;
+        case 33: mode = 0x29; break;
+        case 34: case 35: case 36: case 37: case 38: case 39: case 40: case 41: mode = evt->id - 1; break;
+        case 44: mode = 0x2A; break;
+        case 45: mode = 0x2B; break;
+        case 46: mode = 0x2C; break;
+        case 47: mode = 0x2D; break;
+        case 48: mode = 0x2E; break;
+        case 49: mode = 0x2F; break;
+        case 50: mode = 0x30; break;
+        case 51: mode = 0x31; break;
+        case 52: mode = 0x32; break;
+        case 53: mode = 0x33; break;
+        case 54: mode = 0x34; break;
+        case 55: mode = 0x35; break;
+        case 56: mode = 0x36; break;
+        case 57: mode = 0x37; break;
+        case 58: mode = 0x38; break;
+        case 59: mode = 0x39; break;
+        case 60: mode = 0x3A; break;
+        case 61: mode = 0x3B; break;
+        case 62: mode = 0x3C; break;
+        case 63: mode = 0x3D; break;
+        case 64: mode = 0x3E; break;
+        case 65: mode = 0x3F; break;
+        case 66: mode = 0x40; break;
+        case 67: mode = 0x41; break;
+        case 68: mode = 0x42; break;
+        case 69: mode = 0x43; break;
+        case 70: mode = 0x44; break;
+        case 71: mode = 0x45; break;
+        case 72: mode = 0x46; break;
+        case 73: mode = 0x47; break;
+        case 74: mode = 0x48; break;
+        case 75: mode = 0x49; break;
+        case 42: mode = 0x4C; break;
+        case 0:
+        case 43:
+        default: mode = 0; break;
+        }
+        func_00162060(cam, mode, 0, rate);
+        break;
+    }
+    }
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016E560);
 

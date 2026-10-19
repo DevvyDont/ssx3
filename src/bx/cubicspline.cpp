@@ -131,7 +131,31 @@ extern "C" void func_0031E0E0(void* self)
 #endif
 INCLUDE_ASM("bx/cubicspline", func_0031E190);
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031E1D8);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// dlmalloc 2.7 largebin_index() (portable highest-bit version).
+extern "C" int func_0031E1D8(unsigned int sz)
+{
+    unsigned int x = sz >> 8;
+    unsigned int m;
+    if (x >= 0x10000)
+        return 95;
+    {
+        unsigned int n = ((x - 0x100) >> 16) & 8;
+        x <<= n;
+        m = ((x - 0x1000) >> 16) & 4;
+        n += m;
+        x <<= m;
+        m = ((x - 0x4000) >> 16) & 2;
+        n += m;
+        x = (x << m) >> 14;
+        m = 13 - n + (x & ~(x >> 1));
+    }
+    return 32 + (m << 2) + ((sz >> (m + 6)) & 3);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031E260__FPv);
@@ -375,7 +399,236 @@ extern "C" int func_0031E6D8(void* ms, unsigned int pad, sMState_31E6D8* av)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031E818);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// dlmalloc 2.7.0 malloc()
+struct sMChunk_31E818
+{
+    unsigned int prev_size;      // 0x0
+    unsigned int size;           // 0x4
+    sMChunk_31E818* fd;          // 0x8
+    sMChunk_31E818* bk;          // 0xC
+};
+
+struct sMState_31E818
+{
+    unsigned int max_fast;              // 0x0
+    sMChunk_31E818* fastbins[11];       // 0x4
+    sMChunk_31E818* top;                // 0x30
+    sMChunk_31E818* last_remainder;     // 0x34
+    sMChunk_31E818* bins[192];          // 0x38
+    unsigned int binmap[3];             // 0x338
+};
+
+extern "C" int func_0031E1D8(unsigned int sz);
+// PORT: the unit declares these with their own state types; bind the malloc view by asm label.
+extern "C" void func_0031EEE8_E818(void* ms, sMState_31E818* av) __asm__("func_0031EEE8");
+extern "C" void* func_0031E2D8_E818(void* ms, unsigned int nb, sMState_31E818* av) __asm__("func_0031E2D8");
+
+#define BIN_AT_31E818(av, i) ((sMChunk_31E818*)((char*)&(av)->bins[(i) << 1] - 8))
+
+extern "C" void* func_0031E818(void* ms, unsigned int bytes)
+{
+    sMState_31E818* av = *(sMState_31E818**)ms;
+    unsigned int nb;
+    unsigned int idx;
+    sMChunk_31E818* bin;
+    sMChunk_31E818** fb;
+    sMChunk_31E818* victim;
+    unsigned int size;
+    int victim_index;
+    sMChunk_31E818* remainder;
+    unsigned int remainder_size;
+    unsigned int block;
+    unsigned int bit;
+    unsigned int map;
+    sMChunk_31E818* fwd;
+    sMChunk_31E818* bck;
+
+    if (bytes >= (unsigned int)-32) {
+        *func_00415FB8() = 12;
+        return 0;
+    }
+    nb = (bytes + 4 + 15 < 16) ? 16 : (bytes + 4 + 15) & ~15U;
+
+    if (!(av->max_fast & 1)) {
+        if (av->max_fast == 0)
+            func_0031EEE8_E818(ms, av);
+        goto use_top;
+    }
+
+    if (nb <= av->max_fast) {
+        fb = &av->fastbins[(nb >> 3) - 2];
+        if ((victim = *fb) != 0) {
+            *fb = victim->fd;
+            return (char*)victim + 8;
+        }
+    }
+
+    if (nb < 256) {
+        idx = nb >> 3;
+        sMChunk_31E818** base = &av->bins[idx << 1];
+        bin = (sMChunk_31E818*)((char*)base - 8);
+        if ((victim = base[1]) != bin) {
+            bck = victim->bk;
+            ((sMChunk_31E818*)((char*)victim + nb))->size |= 1;
+            base[1] = bck;
+            bck->fd = bin;
+            return (char*)victim + 8;
+        }
+    } else {
+        idx = func_0031E1D8(nb);
+        if (av->max_fast & 2)
+            func_0031EEE8_E818(ms, av);
+    }
+
+    while ((victim = BIN_AT_31E818(av, 1)->bk) != BIN_AT_31E818(av, 1)) {
+        bck = victim->bk;
+        size = victim->size & ~3U;
+
+        if (nb < 256 && bck == BIN_AT_31E818(av, 1) && victim == av->last_remainder && size > nb + 16) {
+            remainder_size = size - nb;
+            remainder = (sMChunk_31E818*)((char*)victim + nb);
+            av->bins[3] = av->bins[2] = remainder;
+            av->last_remainder = remainder;
+            remainder->bk = remainder->fd = BIN_AT_31E818(av, 1);
+            victim->size = nb | 1;
+            remainder->size = remainder_size | 1;
+            ((sMChunk_31E818*)((char*)remainder + remainder_size))->prev_size = remainder_size;
+            return (char*)victim + 8;
+        }
+
+        BIN_AT_31E818(av, 1)->bk = bck;
+        bck->fd = BIN_AT_31E818(av, 1);
+
+        if (size == nb) {
+            ((sMChunk_31E818*)((char*)victim + size))->size |= 1;
+            return (char*)victim + 8;
+        }
+
+        if (size < 256) {
+            victim_index = size >> 3;
+            sMChunk_31E818** base = &av->bins[victim_index << 1];
+            bck = (sMChunk_31E818*)((char*)base - 8);
+            fwd = base[0];
+        } else {
+            victim_index = func_0031E1D8(size);
+            sMChunk_31E818** base = &av->bins[victim_index << 1];
+            bck = (sMChunk_31E818*)((char*)base - 8);
+            fwd = base[0];
+            if (fwd != bck) {
+                if (size < bck->bk->size) {
+                    fwd = bck;
+                    bck = base[1];
+                } else if (size >= 256) {
+                    size |= 1;
+                    while (size < fwd->size)
+                        fwd = fwd->fd;
+                    bck = fwd->bk;
+                }
+            }
+        }
+
+        av->binmap[victim_index >> 5] |= 1U << (victim_index & 31);
+        victim->bk = bck;
+        victim->fd = fwd;
+        fwd->bk = victim;
+        bck->fd = victim;
+    }
+
+    if (!(nb < 256)) {
+        sMChunk_31E818** base = &av->bins[idx << 1];
+        bin = (sMChunk_31E818*)((char*)base - 8);
+        for (victim = base[1]; victim != bin; victim = victim->bk) {
+            size = victim->size & ~3U;
+            if (size >= nb) {
+                remainder_size = size - nb;
+                fwd = victim->fd;
+                bck = victim->bk;
+                fwd->bk = bck;
+                bck->fd = fwd;
+                void* mem = (char*)victim + 8;
+                if (remainder_size < 16) {
+                    ((sMChunk_31E818*)((char*)victim + size))->size |= 1;
+                    return mem;
+                } else {
+                    remainder = (sMChunk_31E818*)((char*)victim + nb);
+                    av->bins[3] = av->bins[2] = remainder;
+                    remainder->bk = remainder->fd = BIN_AT_31E818(av, 1);
+                    victim->size = nb | 1;
+                    remainder->size = remainder_size | 1;
+                    ((sMChunk_31E818*)((char*)remainder + remainder_size))->prev_size = remainder_size;
+                    return mem;
+                }
+            }
+        }
+    }
+
+    ++idx;
+    bin = BIN_AT_31E818(av, idx);
+    block = idx >> 5;
+    map = av->binmap[block];
+    bit = 1U << (idx & 31);
+
+    for (;;) {
+        if (bit > map || bit == 0) {
+            do {
+                if (++block >= 3)
+                    goto use_top;
+            } while ((map = av->binmap[block]) == 0);
+            bin = BIN_AT_31E818(av, block << 5);
+            bit = 1;
+        }
+
+        while ((bit & map) == 0) {
+            bin = (sMChunk_31E818*)((char*)bin + 8);
+            bit <<= 1;
+        }
+
+        victim = bin->bk;
+        if (victim == bin) {
+            av->binmap[block] = map &= ~bit;
+            bin = (sMChunk_31E818*)((char*)bin + 8);
+            bit <<= 1;
+        } else {
+            size = victim->size & ~3U;
+            remainder_size = size - nb;
+            bck = victim->bk;
+            bin->bk = bck;
+            bck->fd = bin;
+            if (remainder_size < 16) {
+                ((sMChunk_31E818*)((char*)victim + size))->size |= 1;
+                return (char*)victim + 8;
+            } else {
+                remainder = (sMChunk_31E818*)((char*)victim + nb);
+                av->bins[3] = av->bins[2] = remainder;
+                remainder->bk = remainder->fd = BIN_AT_31E818(av, 1);
+                if (nb < 256)
+                    av->last_remainder = remainder;
+                victim->size = nb | 1;
+                remainder->size = remainder_size | 1;
+                ((sMChunk_31E818*)((char*)remainder + remainder_size))->prev_size = remainder_size;
+                return (char*)victim + 8;
+            }
+        }
+    }
+
+use_top:
+    victim = av->top;
+    size = victim->size & ~3U;
+    if (size >= nb + 16) {
+        remainder_size = size - nb;
+        remainder = (sMChunk_31E818*)((char*)victim + nb);
+        av->top = remainder;
+        victim->size = nb | 1;
+        remainder->size = remainder_size | 1;
+        return (char*)victim + 8;
+    }
+    return func_0031E2D8_E818(ms, nb, av);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031ED60);
@@ -584,7 +837,128 @@ extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031F018);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// dlmalloc 2.7 realloc() (no mmap support: an mmapped chunk fails with ENOMEM).
+struct sMChunk_31F018
+{
+    unsigned int prev_size;      // 0x0
+    unsigned int size;           // 0x4
+    sMChunk_31F018* fd;          // 0x8
+    sMChunk_31F018* bk;          // 0xC
+};
+
+extern "C" void func_003E6574(void* d, void* s, int n);
+
+extern "C" void* func_0031F018(void* ms, void* oldmem, unsigned int bytes)
+{
+    char* av = *(char**)ms;
+    unsigned int nb;
+    sMChunk_31F018* oldp;
+    unsigned int oldsize;
+    sMChunk_31F018* newp;
+    unsigned int newsize;
+    char* newmem;
+    sMChunk_31F018* next;
+    sMChunk_31F018* remainder;
+    unsigned int remainder_size;
+    unsigned int head;
+
+    if (oldmem == 0)
+        return func_0031E818(ms, bytes);
+
+    if (bytes >= (unsigned int)-32)
+        goto nomem;
+    nb = (bytes + 4 + 15 < 16) ? 16 : (bytes + 4 + 15) & ~15;
+
+    head = *(unsigned int*)((char*)oldmem - 4);
+    oldp = (sMChunk_31F018*)((char*)oldmem - 8);
+    oldsize = head & ~3;
+    if (head & 2)
+        goto nomem;
+
+    if (oldsize >= nb) {
+        newp = oldp;
+        newsize = oldsize;
+    } else {
+        next = (sMChunk_31F018*)((char*)oldp + oldsize);
+        if (next == *(sMChunk_31F018**)(av + 0x30)) {
+            if ((newsize = oldsize + (next->size & ~3)) >= nb + 16) {
+                *(unsigned int*)((int)oldmem - 4) = (head & 1) | nb;
+                *(sMChunk_31F018**)(av + 0x30) = (sMChunk_31F018*)((char*)oldp + nb);
+                ((sMChunk_31F018*)((char*)oldp + nb))->size = (newsize - nb) | 1;
+                return oldmem;
+            }
+        } else if (!(((sMChunk_31F018*)((char*)next + (next->size & ~1)))->size & 1) &&
+                   (newsize = oldsize + (next->size & ~3)) >= nb) {
+            sMChunk_31F018* bck;
+            sMChunk_31F018* fwd;
+            newp = oldp;
+            fwd = next->fd;
+            bck = next->bk;
+            fwd->bk = bck;
+            bck->fd = fwd;
+            goto split;
+        }
+
+        newmem = (char*)func_0031E818(ms, nb - 15);
+        if (newmem == 0)
+            return 0;
+        newp = (sMChunk_31F018*)(newmem - 8);
+        newsize = *(unsigned int*)(newmem - 4) & ~3;
+        if (newp == next) {
+            newsize += oldsize;
+            newp = oldp;
+        } else {
+            unsigned int copysize = oldsize - 4;
+            unsigned int* sp = (unsigned int*)oldmem;
+            unsigned int* dp = (unsigned int*)newmem;
+            unsigned int ncopies = copysize / 4;
+            if (ncopies > 9) {
+                func_003E6574(dp, sp, copysize);
+            } else {
+                dp[0] = sp[0];
+                dp[1] = sp[1];
+                dp[2] = sp[2];
+                if (ncopies > 4) {
+                    dp[3] = sp[3];
+                    dp[4] = sp[4];
+                    if (ncopies > 6) {
+                        dp[5] = sp[5];
+                        dp[6] = sp[6];
+                        if (ncopies > 8) {
+                            dp[7] = sp[7];
+                            dp[8] = sp[8];
+                        }
+                    }
+                }
+            }
+            func_0031ED60_E2D8(ms, oldmem);
+            return (char*)newp + 8;
+        }
+    }
+
+split:
+    remainder_size = newsize - nb;
+    if (remainder_size < 16) {
+        newp->size = (newp->size & 1) | newsize;
+        ((sMChunk_31F018*)((char*)newp + newsize))->size |= 1;
+    } else {
+        remainder = (sMChunk_31F018*)((char*)newp + nb);
+        newp->size = (newp->size & 1) | nb;
+        remainder->size = remainder_size | 1;
+        ((sMChunk_31F018*)((char*)remainder + remainder_size))->size |= 1;
+        func_0031ED60_E2D8(ms, (char*)remainder + 8);
+    }
+    return (char*)newp + 8;
+
+nomem:
+    *func_00415FB8() = 12;
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031F2C8);

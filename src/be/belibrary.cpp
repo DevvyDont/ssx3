@@ -1279,7 +1279,60 @@ extern "C" void func_0014D240(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014D368);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct sLibItem_0014D368 {
+    signed char category; // 0x00
+    signed char sub;      // 0x01
+    short pad_0x02;
+    short id;             // 0x04
+    char pad_0x06[0x12];
+    int key18;            // 0x18
+    char pad_0x1C[0xC];
+    int key28;            // 0x28
+    int key2C;            // 0x2C
+    char pad_0x30[0x8];
+};
+
+struct sLib_0014D368 {
+    int field_0x0;
+    sLibItem_0014D368* items; // 0x04
+    char pad_0x08[0x14];
+    int itemCount;            // 0x1C
+    char pad_0x20[0xC];
+    int catCount[30];         // 0x2C
+    int catStart[30];         // 0xA4
+};
+
+// Returns the index of an item: directly if it points into the table, else by matching its keys.
+extern "C" int func_0014D368(sLib_0014D368* self, sLibItem_0014D368* item)
+{
+    sLibItem_0014D368* items = self->items;
+    int idx = item - items;
+    if (idx < 0 || idx >= self->itemCount) {
+        int start = self->catStart[item->category];
+        int end = start + self->catCount[item->category];
+        int i = start;
+        if (i < end) {
+            sLibItem_0014D368* p = &items[start];
+            do {
+                if (p->id == item->id && p->sub == item->sub && p->key28 == item->key28 &&
+                    p->key18 == item->key18 && p->key2C == item->key2C) {
+                    idx = i;
+                    goto done;
+                }
+                i++;
+                p++;
+            } while (i < end);
+        }
+        idx = -1;
+    }
+done:
+    return idx;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014D448);

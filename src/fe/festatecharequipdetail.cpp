@@ -2563,7 +2563,56 @@ extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20*
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019D140);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct sEquipTable_DC20;
+extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i);
+struct sEquipSlot_D140 {
+    int state;              // 0x000
+    char pad_0x4[0x118];
+    unsigned int stamp;     // 0x11C
+};
+
+extern "C" void func_0019D140(void* self, int bank)
+{
+    unsigned int best = 0;
+    int bestIdx = -1;
+    int found;
+    int i;
+    sEquipSlot_D140* p = (sEquipSlot_D140*)((char*)self + bank * 0x12000);
+    found = bank;
+    for (i = 0; i < 256; i++, p++) {
+        if (p->state == 3 && (best == 0 || p->stamp < best)) {
+            best = p->stamp;
+            bestIdx = i;
+        }
+    }
+    if (bestIdx == -1) {
+        int b;
+        for (b = 0; b < 10; b++) {
+            if (b == bank) {
+                continue;
+            }
+            p = (sEquipSlot_D140*)((char*)self + b * 0x12000);
+            for (i = 0; i < 256; i++, p++) {
+                if (p->state == 3 && (best == 0 || p->stamp < best)) {
+                    best = p->stamp;
+                    found = b;
+                    bestIdx = i;
+                }
+            }
+            if (bestIdx >= 0) {
+                break;
+            }
+        }
+    }
+    if (bestIdx >= 0) {
+        func_0019D8B8((sEquipTable_DC20*)self, found, bestIdx);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019D250);

@@ -164,7 +164,33 @@ extern "C" int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tags", func_003EBBA8);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" int func_003EBBA8(const unsigned char* rec, char* buf, int len)
+{
+    int n = 0;
+    if (len > 0)
+        *buf = 0;
+    if (rec == 0 || *rec == 0)
+        return 0;
+    for (const unsigned char* p = rec; *p != 0; p++) {
+        if (*p != '=' && *p != ':')
+            continue;
+        if (p[1] < 0x20 && p[-1] <= 0x20)
+            break;
+        const unsigned char* s = p;
+        while (s != rec && s[-1] > 0x20)
+            s--;
+        while (s != p && n + 1 < len)
+            buf[n++] = *s++;
+        buf[n] = 0;
+        break;
+    }
+    return n;
+}
+#endif
 //100%
 INCLUDE_ASM("dirtysock/tags", func_003EBCB0);
 #ifdef SKIP_ASM
@@ -523,8 +549,107 @@ extern "C" int func_003ECB00(char* record, int len, unsigned char* data)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", func_003ECBD8);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
+typedef char* func_003ECBD8_va_list;
+#define func_003ECBD8_va_start(ap)                                       \
+    (ap = (char*)__builtin_next_arg()                                    \
+          - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
+#define func_003ECBD8_va_arg(ap, T) (ap += 8, *(T*)(ap - 8))
+
+extern "C" int cDirtysock_tag_TagFieldSetString(char* buf, int size, const char* key, const char* value);
+extern char D_004A4A90[];
+
+// TagFieldPrintf-style formatter: copies fmt into buf, turning whitespace runs into the
+// field separator and %s/%d/%a/%f/%e/%r into tag fields from the arguments.
+extern "C" int func_003ECBD8(char* buf, int len, const char* fmt, ...)
+{
+    func_003ECBD8_va_list args;
+    func_003ECBD8_va_start(args);
+    int size = len;
+    unsigned char c = *fmt++;
+    while (c != 0 && len >= 2) {
+        if (c <= ' ') {
+            *buf++ = D_004A4A70;
+            len--;
+            while (*fmt != 0 && *fmt <= ' ')
+                fmt++;
+        } else if (c != '%') {
+            *buf++ = c;
+            len--;
+        } else if (*fmt != 0) {
+            int n = 0;
+            c = *fmt++;
+            if (buf[-1] == '=') {
+                buf--;
+                len++;
+            }
+            *buf = 0;
+            if (c == 's') {
+                n = cDirtysock_tag_TagFieldSetString(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, char*));
+            } else if (c == 'd') {
+                n = cDirtysock_tag_TagFieldSetNumber(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, int));
+            } else if (c == 'a') {
+                n = cDirtysock_tag_TagFieldSetAddress(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, unsigned int));
+            } else if (c == 'f') {
+                n = cDirtysock_tag_TagFieldSetFlags(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, int));
+            } else if (c == 'e') {
+                n = cDirtysock_tag_TagFieldSetEpoch(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, unsigned int));
+            } else if (c == 'r') {
+                const char* r = func_003ECBD8_va_arg(args, char*);
+                while (*r != 0 && len > 0) {
+                    *buf++ = *r++;
+                    len--;
+                }
+            }
+            if (n > 0) {
+                buf += n;
+                len -= n;
+            }
+        }
+        c = *fmt++;
+    }
+    if (len > 0)
+        *buf = 0;
+    return size - len;
+}
+#endif
+//100%
 INCLUDE_ASM("dirtysock/tags", func_003ECE38);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// Finds the next "=" or ":" field separator in p and copies the following value into out (or dflt when there is none); returns the value start or 0.
+extern "C" unsigned char* func_003ECE38(unsigned char* src, int unused, char* out, int size, const char* dflt)
+{
+    int i;
+    unsigned char* p = src;
+    while (*p != 0) {
+        if ((*p == '=' || *p == ':') && p[1] < 0x20) {
+            if (p[1] == 0)
+                break;
+            p += 2;
+            if (out != 0) {
+                size--;
+                for (i = 0; i < size && p[i] != 0; i++)
+                    out[i] = p[i];
+                out[i] = 0;
+            }
+            return p;
+        }
+        p++;
+    }
+    if (out != 0 && dflt != 0) {
+        size--;
+        for (i = 0; i < size && dflt[i] != 0; i++)
+            out[i] = dflt[i];
+        out[i] = 0;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetNumber);
