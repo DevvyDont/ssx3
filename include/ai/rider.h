@@ -63,11 +63,14 @@ struct sRiderChannel {
 // timing). 6 of them fill cRider 0x000-0x0D8 exactly: a fixed 6-rider table (notes/subsystems/riders-cap.md).
 struct sRiderPair {
     int unk_00;         // tested as "active" (func_00107888)
-    char unk_04[0xC];
+    char unk_04[0x4];
+    float unk_08;       // distance to that rider, compared < 1000 (func_00115D48)
+    float unk_0C;       // bearing to that rider; minus the heading, wrapped to +-pi (func_00115D48)
     int unk_10;         // a tick (func_00107888)
     int unk_14;         // a tick (func_00107888)
     int unk_18;         // a tick (func_00107888)
-    char unk_1C[0x8];
+    int unk_1C;         // tested nonzero (func_00115D48)
+    int unk_20;         // tick of the last glance, compared against now - 600 (func_00115D48)
 };
 
 struct cRider {
@@ -85,7 +88,8 @@ struct cRider {
     /* 0x104 */ char unk_104[0xC];
     /* 0x110 */ t4Vector mPosition; // [R] getPosition (func_001408F0)
     /* 0x120 */ t4Vector mRotation; // [P] getRotation (unshifted); quaternion, normalised by updateOrientationImplicit
-    /* 0x130 */ char unk_130[0x20];
+    /* 0x130 */ t4Vector unk_130; // moved by AddEq by the wall-hit displacement (func_00137138)
+    /* 0x140 */ char unk_140[0x10];
     /* 0x150 */ int unk_150;
     /* 0x154 */ char unk_154[0x1C];
     /* 0x170 */ t4Vector unk_170; // dotted with mVelocity (rejected above 277.78) and the launch dir (func_00114DB8)
@@ -124,7 +128,7 @@ struct cRider {
     /* 0x350 */ float unk_350; // shove-strength factor (func_00107888)
     /* 0x354 */ int unk_354; // = -1 on transport (func_0011D660)
     /* 0x358 */ int unk_358; // cleared on transport (func_0011D660)
-    /* 0x35C */ int unk_35C; // cleared on transport (func_0011D660)
+    /* 0x35C */ float unk_35C; // cleared on transport (func_0011D660); += 1/60 per frame, compared < 1.0f (func_00115D48)
     /* 0x360 */ char unk_360[0x10];
     /* 0x370 */ t4Vector mGroundNormal; // [P] getGroundNormal, preview 0x350 (+0x20 assumed); slope = atan2(|xy|, z) in func_00121950
     /* 0x380 */ t4Vector unk_380; // copy of mGroundNormal taken before the ground probe (func_001242B0)
