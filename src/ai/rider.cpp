@@ -792,7 +792,23 @@ extern "C" void func_0011FEF8(void *arg0) {
     func_00111860((*(int *)((char*)(arg0) + (0x77C))));
 }
 #endif
+//100%
 INCLUDE_ASM("ai/rider", func_0011FF18);
+#ifdef SKIP_ASM
+struct sVEntry0011FF18 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+// Forwards its second argument to vtable slot 1 of the rider handler.
+extern "C" void func_0011FF18(cRider* self, void* out)
+{
+    char* obj = (char*)self->mRiderHandler;
+    sVEntry0011FF18* vt = *(sVEntry0011FF18**)(obj + 0xDE8);
+    vt[1].fn(obj + vt[1].delta, out);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_0011FF48);
@@ -820,7 +836,19 @@ void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBECharacterInterface_getWeight(void* iface, int character);
 extern "C" float cBEStatInterface_getCollisionAttrib(void* iface, int character, int stat);
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011FF70);
+#ifdef SKIP_ASM
+// Copies the quadword of the anim model's transform unk_8A8 into dst (sibling of func_0011FF48).
+extern "C" void* func_0011FF70(void* dst, cRider* self)
+{
+    cAnimModel* q = self->mAnimModel;
+    int i = self->unk_8A8;
+    sRiderXform* b = (sRiderXform*)q->bones;
+    *(cQuad128*)dst = b[i].q;
+    return dst;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", cRider_getMass);

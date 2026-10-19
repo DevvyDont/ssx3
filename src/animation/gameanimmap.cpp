@@ -8,7 +8,14 @@ void cGameAnimMap_testResolve()
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_003150B8);
+#ifdef SKIP_ASM
+extern "C" void* func_003150B8(void* self, ...)
+{
+    return self;
+}
+#endif
 
 INCLUDE_ASM("animation/gameanimmap", func_003150F8);
 
@@ -105,8 +112,28 @@ extern "C" void func_003159A8(void *arg0) {
     (*(long *)((char*)(arg0) + (0x20))) = -1;
 }
 #endif
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_003159B8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_003159B8(long* bits, int bit)
+{
+    long old = bits[0];
+    long mask = (long)1 << bit;
+    bits[0] = old & ~mask;
+    bits[1] = bits[1] | (mask & old);
+}
+#endif
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_003159E8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" bool func_003159E8(long* bits, int bit)
+{
+    long mask = (long)1 << bit;
+    return (*bits & mask) != 0;
+}
+#endif
 
 //99.38%
 INCLUDE_ASM("animation/gameanimmap", func_00315A00__FPv);

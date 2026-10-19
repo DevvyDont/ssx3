@@ -102,7 +102,19 @@ struct cCameraTriggerList2 {
     int count; // 0x4
 };
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C0D8);
+#ifdef SKIP_ASM
+extern "C" int* func_0016C0D8(cCameraTriggerList2* self, int key)
+{
+    for (int i = 0; i < self->count; i++) {
+        int* p = (int*)self->arr[i];
+        if (*p == key)
+            return p;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_insert__FP19cCameraTriggerList2Pvi);

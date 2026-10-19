@@ -854,7 +854,26 @@ extern "C" int func_0019F6A8(void *arg0, int arg1) {
     return (*(int *)((char*)((*(void **)((char*)(arg0) + (8)))) + (0x2C))) + ((*(int *)(((char*)(arg0) + (arg1 << 2)) + (0xC7C))) << 5);
 }
 #endif
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F6C8);
+#ifdef SKIP_ASM
+// R5900 128-bit GPR quadword (single lq/sq pair); same typedef as ai/rider.cpp.
+typedef int cQuad128 __attribute__((mode(TI)));
+
+// 0x20-byte bone element, quadword at offset 0 and 0x10 (cAnimModel::bones layout)
+struct sFeBone_19F6C8 {
+    cQuad128 q0;
+    cQuad128 q1;
+};
+
+extern "C" void func_0019F6C8(void* self, int slot, cQuad128* src)
+{
+    char* model = *(char**)((char*)self + 0x8);
+    int bone = *(int*)((char*)self + (slot << 2) + 0xC7C);
+    sFeBone_19F6C8* bones = *(sFeBone_19F6C8**)(model + 0x2C);
+    bones[bone].q0 = *src;
+}
+#endif
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019F6F0);
 #ifdef SKIP_ASM
@@ -862,7 +881,24 @@ extern "C" int func_0019F6F0(void *arg0, int arg1) {
     return (*(int *)((char*)((*(void **)((char*)(arg0) + (8)))) + (0x2C))) + ((*(int *)(((char*)(arg0) + (arg1 << 2)) + (0xC7C))) << 5) + 0x10;
 }
 #endif
+//100%
 INCLUDE_ASM("fe/feridermanager", func_0019F718);
+#ifdef SKIP_ASM
+typedef int cQuad128 __attribute__((mode(TI)));
+
+struct sFeBone_19F718 {
+    cQuad128 q0;
+    cQuad128 q1;
+};
+
+extern "C" void func_0019F718(void* self, int slot, cQuad128* src)
+{
+    char* model = *(char**)((char*)self + 0x8);
+    int bone = *(int*)((char*)self + (slot << 2) + 0xC7C);
+    sFeBone_19F718* bones = *(sFeBone_19F718**)(model + 0x2C);
+    bones[bone].q1 = *src;
+}
+#endif
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019F740);
 #ifdef SKIP_ASM

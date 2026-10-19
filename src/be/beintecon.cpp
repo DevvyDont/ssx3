@@ -98,7 +98,20 @@ extern "C" int func_001509F8(void* self, int rider)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintecon", func_00150A58);
+#ifdef SKIP_ASM
+extern "C" void func_00150A58(void* self, int a, int b, int value)
+{
+    if (a < 2) {
+        int bOff = b * 0xF88;
+        int aOff = a * 0x9B50;
+        int off = bOff + aOff;
+        char* p = (char*)D_004A6CA8 + off;
+        *(int*)(p + 0xAC4) = value;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintecon", func_00150A90);
@@ -686,8 +699,47 @@ extern "C" void func_00151A88(sEconItems_151A88* self, int k)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintecon", func_00151BD0);
+#ifdef SKIP_ASM
+struct sEconItem_151BD0
+{
+    short id;
+    unsigned short flags;
+};
+
+struct sEconItems_151BD0
+{
+    char pad[0x288];
+    short* lookup;                  // 0x288
+    int count;                      // 0x28C
+    sEconItem_151BD0 items[0x20D];  // 0x290
+};
+
+static inline unsigned int clearBits_151BD0(unsigned int f, unsigned int m)
+{
+    return f & ~m;
+}
+
+extern "C" void func_00151BD0(sEconItems_151BD0* self)
+{
+    for (int i = 0; i < self->count; i++) {
+        sEconItem_151BD0* p = &self->items[i];
+        unsigned int f = p->flags;
+        p->flags = (f & 0x20) ? (f | 0x16) : clearBits_151BD0(clearBits_151BD0(f, 0x10), 4);
+    }
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintecon", func_00151C20);
+#ifdef SKIP_ASM
+extern "C" short func_00151C20(void* self, int i)
+{
+    if (i >= *(int*)((char*)self + 0x28C))
+        return -1;
+    return *(short*)((i << 2) + (int)self + 0x290);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintecon", func_00151C48);
@@ -976,5 +1028,28 @@ extern "C" int func_001521F0(sEconItems_1521F0* self)
 #endif
 
 
+//100%
 INCLUDE_ASM("be/beintecon", func_00152340);
+#ifdef SKIP_ASM
+static inline bool testFlag_152340(unsigned int flags, unsigned int mask)
+{
+    return (flags & mask) != 0;
+}
+
+extern "C" bool func_00152340(void* self, int id)
+{
+    int idx = (*(short**)((char*)self + 0x288))[id];
+    unsigned int flags = *(unsigned short*)((idx << 2) + (int)self + 0x292);
+    return testFlag_152340(flags, 0x10);
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintecon", func_00152368);
+#ifdef SKIP_ASM
+extern "C" bool func_00152368(void* self, int id, unsigned int mask)
+{
+    int idx = (*(short**)((char*)self + 0x288))[id];
+    unsigned int flags = *(unsigned short*)((idx << 2) + (int)self + 0x292);
+    return (~flags & mask) == 0;
+}
+#endif

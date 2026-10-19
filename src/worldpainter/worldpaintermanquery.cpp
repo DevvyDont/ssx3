@@ -19,9 +19,38 @@ void* cWorldPainterMan_getQuery(void* self, cWorldPainterManArg* x)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0AA0);
+#ifdef SKIP_ASM
+extern "C" void func_002C0AA0(void* self, int* dst, int* src, float t)
+{
+    if (t == 1.0f) {
+        *dst = *src;
+    } else {
+        *dst = (int)((float)*dst * (1.0f - t) + (float)*src * t);
+    }
+}
+#endif
+//100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0AF0);
+#ifdef SKIP_ASM
+extern "C" void func_002C0AF0(void* self, float* dst, float* src, float t)
+{
+    if (t == 1.0f) {
+        *dst = *src;
+    } else {
+        *dst = *dst * (1.0f - t) + *src * t;
+    }
+}
+#endif
+//100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0B30);
+#ifdef SKIP_ASM
+extern "C" void* func_002C0B30(void* self, ...)
+{
+    return self;
+}
+#endif
 
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0B70);
 
@@ -627,7 +656,20 @@ void* func_002C1688(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C16A8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// LANDING: later declaration (line ~656) is `extern "C" void func_002C16A8(int, int, int);` used by its caller
+// with an int expression; retype it to (void*, int, int) and drop the alias if the lander prefers.
+extern "C" void func_002C16A8_impl(void* self, int a, int b) __asm__("func_002C16A8");
+
+extern "C" void func_002C16A8_impl(void* self, int a, int b)
+{
+    *(int*)((char*)self + 0x4) = a;
+    *(int*)((char*)self + 0x0) = b;
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C16B8);

@@ -353,7 +353,28 @@ cExecutionMan* cExecutionMan_halt(cExecutionMan* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/appman", func_00317478);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// LANDING: the unit declares `extern "C" void func_00317478(int);` (line ~245, used by func_00317308);
+// retype it to (cExecutionMan*, int, int) or keep the alias below.
+struct sVEntry00317478 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00317478_impl(cExecutionMan* self, int a1, int a2) __asm__("func_00317478");
+
+extern "C" void func_00317478_impl(cExecutionMan* self, int a1, int a2)
+{
+    self->field_0x4 = a2;
+    sVEntry00317478* vt = (sVEntry00317478*)self->field_0x8;
+    self->field_0x0 = a1;
+    vt[13].fn((char*)self + vt[13].delta);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/appman", cExecutionMan_checkHalt__FPvi);
