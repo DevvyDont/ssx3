@@ -1712,11 +1712,13 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA418);
 struct G_A418 { int pad[4]; int (*cb)(int, void *); };
 struct E_A418 { char data[0x60]; };
 extern struct G_A418 D_0044FF90_A418 __asm__("D_0044FF90");
-extern struct E_A418 D_0045006C_A418[] __asm__("D_0045006C");
+/* D_0044FFF8's request entries are 0x60 bytes from +0x64; each one's data starts 0x10 in. */
+struct T_A418 { char head[0x74]; struct E_A418 e[16]; };
+extern struct T_A418 D_0044FFF8_A418 __asm__("D_0044FFF8");
 extern int func_003D9FB0_A418(struct E_A418 *) __asm__("func_003D9FB0");
 
 int func_003DA418(int idx) {
-    struct E_A418 *e = &D_0045006C_A418[idx];
+    struct E_A418 *e = &D_0044FFF8_A418.e[idx];
     int r;
     int i;
     int k;

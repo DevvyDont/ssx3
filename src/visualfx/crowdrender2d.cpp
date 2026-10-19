@@ -71,7 +71,9 @@ struct sCrowdAnim2D {
     void* f1C;
 };
 
-extern int D_00445DD0[];
+// D_00445D38 is one 0xD8-byte crowd anim def (sCrowdAnimDef_BAC0 below); its frames[] start at +0x98.
+struct sCrowdAnimDefFrames_ctor { char pad_0x0[0x98]; int frames[16]; };
+extern sCrowdAnimDefFrames_ctor D_00445D38_ctor __asm__("D_00445D38");
 extern char* D_004A5B64;
 
 void* cCrowdAnim2D_cCrowdAnim2D(void* memory, void* param_1)
@@ -81,7 +83,7 @@ void* cCrowdAnim2D_cCrowdAnim2D(void* memory, void* param_1)
     a->f8 = 4;
     a->f4 = 0;
     a->fC = 0;
-    a->f10 = D_00445DD0[0];
+    a->f10 = D_00445D38_ctor.frames[0];
     a->f0 = 0;
     a->f18 = *(int*)(D_004A5B64 + 0x1C);
     a->f14 = 3;

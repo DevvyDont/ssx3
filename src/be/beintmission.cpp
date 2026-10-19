@@ -752,16 +752,17 @@ extern "C" int func_001542E0(void* self, int group)
 //100%
 INCLUDE_ASM("be/beintmission", func_00154368);
 #ifdef SKIP_ASM
-// D_0043EE20 is D_0043EE10 + 0x10: the `group` field of each 0x24-byte
-// sMissionDef_0043EE10 entry, addressed through its own symbol.
-struct sMissionGroup_0043EE20
+// One 0x24-byte entry of the mission table at D_0043EE10.
+struct sMissionDef_00154368
 {
-    int group;          // 0x00 (0x10 in sMissionDef_0043EE10)
-    char pad_0x04[0x20];
+    int id;             // 0x00
+    char pad_0x04[0xC];
+    int group;          // 0x10
+    char pad_0x14[0x10];
 };
 
 extern sMissionEntry_0043D950 D_0043D950[];
-extern sMissionGroup_0043EE20 D_0043EE20[];
+extern sMissionDef_00154368 D_0043EE10_00154368[] __asm__("D_0043EE10");
 
 extern "C" int func_00154368(void* self, int owner)
 {
@@ -772,7 +773,7 @@ extern "C" int func_00154368(void* self, int owner)
         {
             if (D_0043D950[j].owner == owner)
             {
-                if (D_0043EE20[i].group == j)
+                if (D_0043EE10_00154368[i].group == j)
                 {
                     n++;
                 }
