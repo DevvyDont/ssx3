@@ -385,7 +385,16 @@ extern "C" int func_0036A3B0(int arg0) {
     return (temp_2 | (temp_2 * 2)) & 0x5555;
 }
 #endif
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036A3E0);
+#ifdef SKIP_ASM
+extern "C" int func_0036A3B0(int);
+
+extern "C" int func_0036A3E0(unsigned short a, unsigned short b)
+{
+    return func_0036A3B0(a) | (func_0036A3B0(b) << 1);
+}
+#endif
 
 INCLUDE_ASM("render/graphicsman", func_0036A428);
 
@@ -1083,7 +1092,21 @@ extern "C" void func_003705E0(char* self, void* a1, char* d)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_00370708);
+#ifdef SKIP_ASM
+extern "C" void func_0036D3D8(void *, float);
+
+extern "C" void func_00370708(float *self, float f)
+{
+    if (f == 0.0f) {
+        func_0036D3D8((char *)self + 0x10, 0.0f);
+        return;
+    }
+    *self = f;
+    func_0036D3D8((char *)self + 0x10, f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_00370758);
