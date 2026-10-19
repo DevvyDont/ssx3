@@ -270,7 +270,19 @@ int func_001DF378(void* self)
 extern void* D_0046D0D0[];
 extern "C" void* func_0039E390(void*);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF380);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_0046B160[];
+
+extern "C" void* func_001DF380(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_0046B160;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF3B8__FPv);
@@ -284,7 +296,19 @@ void* func_001DF3B8(void* self)
 
 extern "C" void* func_0039E390(void*);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF3E0);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_0046B090[];
+
+extern "C" void* func_001DF3E0(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_0046B090;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF418__FPv);
@@ -371,7 +395,20 @@ void func_001DF578(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF580);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8500(void*, int, int);
+extern void* D_0046AE58[];
+
+extern "C" void* func_001DF580(void* self)
+{
+    func_001A8500(self, 0, 0);
+    *(int*)((char*)self + 0x6F8) = 0;
+    *(void***)((char*)self + 0x8) = D_0046AE58;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF5C0__FPv);
@@ -507,7 +544,23 @@ extern "C" int func_001DF778(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x6D0)));
 }
 #endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF780);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8500(void*, int, int);
+extern void* D_0046A7F8[];
+extern int D_004A3E90;
+
+extern "C" void* func_001DF780(void* self)
+{
+    func_001A8500(self, 0, 0);
+    int g = D_004A3E90;
+    *(void***)((char*)self + 0x8) = D_0046A7F8;
+    *(int*)((char*)self + 0x76C) = g;
+    *(int*)((char*)self + 0xB80) = g;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF7C8);
@@ -526,7 +579,24 @@ extern "C" void func_001DF7C8(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF828);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8500(void*, int, int);
+extern void* D_0046A6E8[];
+extern int D_004A3E90;
+
+extern "C" void* func_001DF828(void* self)
+{
+    func_001A8500(self, 0, 0);
+    int g = D_004A3E90;
+    *(void***)((char*)self + 0x8) = D_0046A6E8;
+    *(int*)((char*)self + 0x6DC) = g;
+    *(int*)((char*)self + 0x6E0) = g;
+    *(int*)((char*)self + 0x6E4) = g;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF878);
@@ -676,7 +746,19 @@ extern "C" int func_001DF9D0(void *arg0) {
     return (*(int *)((char*)(arg0) + (0xAE4)));
 }
 #endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF9D8);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_0046A3C8[];
+
+extern "C" void* func_001DF9D8(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_0046A3C8;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFA10);
@@ -808,7 +890,19 @@ int func_001DFAE8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFAF0);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_0046A248[];
+
+extern "C" void* func_001DFAF0(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_0046A248;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFB28);
@@ -868,7 +962,19 @@ int func_001DFBB8(void* self, void* other)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFBC0);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_0046A0C8[];
+
+extern "C" void* func_001DFBC0(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_0046A0C8;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFBF8);
@@ -928,7 +1034,19 @@ int func_001DFC88(void* self, void* other)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFC90);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_00469F48[];
+
+extern "C" void* func_001DFC90(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_00469F48;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFCC8);
@@ -988,7 +1106,19 @@ int func_001DFD58(void* self, void* other)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFD60);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_00469DC8[];
+
+extern "C" void* func_001DFD60(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_00469DC8;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFD98);
@@ -1048,7 +1178,19 @@ int func_001DFE28(void* self, void* other)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFE30);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_00469C48[];
+
+extern "C" void* func_001DFE30(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_00469C48;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFE68);
@@ -1108,7 +1250,19 @@ int func_001DFEF8(void* self, void* other)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFF00);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_00469AC8[];
+
+extern "C" void* func_001DFF00(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_00469AC8;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFF38);
@@ -1168,7 +1322,19 @@ int func_001DFFC8(void* self, void* other)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFFD0);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_004699F8[];
+
+extern "C" void* func_001DFFD0(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_004699F8;
+    return self;
+}
+#endif
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0008);
 #ifdef SKIP_ASM
@@ -1230,8 +1396,31 @@ extern "C" void func_001E0040(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0x254))) = arg1;
 }
 #endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0048);
+#ifdef SKIP_ASM
+struct sBlock24 {
+    int w[9];
+};
+
+extern "C" void func_001E0048(void* self, void* src)
+{
+    *(sBlock24*)((char*)self + 0x24C) = *(sBlock24*)src;
+}
+#endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0098);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_00469858[];
+
+extern "C" void* func_001E0098(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_00469858;
+    return self;
+}
+#endif
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E00D0);
 #ifdef SKIP_ASM
@@ -1279,7 +1468,19 @@ extern "C" int func_001E0130(void *arg0) {
     return var_5;
 }
 #endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0178);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_00469788[];
+
+extern "C" void* func_001E0178(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_00469788;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E01B0__FPv);
@@ -1291,7 +1492,19 @@ void* func_001E01B0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E01D8);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_004696B8[];
+
+extern "C" void* func_001E01D8(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_004696B8;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0210);
@@ -1311,7 +1524,19 @@ extern "C" void func_001E0210(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0268);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_004695E8[];
+
+extern "C" void* func_001E0268(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_004695E8;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E02A0__FPv);
@@ -1475,7 +1700,19 @@ int func_001E0508(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0510);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_00469448[];
+
+extern "C" void* func_001E0510(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_00469448;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0548__FPv);
@@ -1494,7 +1731,19 @@ extern "C" int func_001E0570(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x74)));
 }
 #endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0578);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_00469378[];
+
+extern "C" void* func_001E0578(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_00469378;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E05B0__FPv);
@@ -1532,8 +1781,24 @@ extern "C" int func_001E05E0(void* unused, unsigned long bits) {
     return count;
 }
 #endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0610);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_001E0610(void* self, int bit)
+{
+    *(long*)((char*)self + 0x158) |= 1L << bit;
+}
+#endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0628);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_001E0628(void* self, int bit)
+{
+    *(long*)((char*)self + 0x158) &= ~(1L << bit);
+}
+#endif
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0648);
 #ifdef SKIP_ASM
@@ -1542,8 +1807,24 @@ extern "C" int func_001E0648(void *arg0) {
     return (*(long *)((char*)(arg0) + (0x158))) == 0;
 }
 #endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0658);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" int func_001E0658(void* self, int bit)
+{
+    return (*(long*)((char*)self + 0x158) & ~(1L << bit)) == 0;
+}
+#endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0678);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" int func_001E0678(void* self, int bit)
+{
+    return (*(unsigned long*)((char*)self + 0x158) >> bit) & 1;
+}
+#endif
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0698);
 #ifdef SKIP_ASM
@@ -1563,8 +1844,24 @@ extern "C" int func_001E0698(void *arg0) {
     return var_5;
 }
 #endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E06D0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" int func_001E06D0(void* self, int bit)
+{
+    return (*(unsigned long*)((char*)self + 0x160) >> bit) & 1;
+}
+#endif
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E06F0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" void func_001E06F0(void* self, int bit)
+{
+    *(long*)((char*)self + 0x160) |= 1L << bit;
+}
+#endif
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0708);
 #ifdef SKIP_ASM
@@ -1647,7 +1944,19 @@ void func_001E07B8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E07C0);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_00469248[];
+
+extern "C" void* func_001E07C0(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_00469248;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E07F8__FPv);
@@ -1659,7 +1968,19 @@ void* func_001E07F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0820);
+#ifdef SKIP_ASM
+extern "C" void* func_0039E2A0(void* self, void* engine);
+extern void* D_00469178[];
+
+extern "C" void* func_001E0820(void* self)
+{
+    func_0039E2A0(self, 0);
+    *(void***)((char*)self + 0x8) = D_00469178;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0858__FPv);
@@ -1671,7 +1992,24 @@ void* func_001E0858(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0880);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8500(void*, int, int);
+extern void* D_00469068[];
+extern int D_004A3E90;
+
+extern "C" void* func_001E0880(void* self)
+{
+    func_001A8500(self, 0, 0);
+    int g = D_004A3E90;
+    *(void***)((char*)self + 0x8) = D_00469068;
+    *(int*)((char*)self + 0x6DC) = g;
+    *(int*)((char*)self + 0x6D0) = 0;
+    *(int*)((char*)self + 0x6E0) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E08D0__FPv);
@@ -1724,7 +2062,22 @@ void func_001E0948(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0950);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8500(void*, int, int);
+extern void* D_00468E38[];
+extern int D_00441268[];
+
+extern "C" void* func_001E0950(void* self)
+{
+    func_001A8500(self, 0, 0);
+    *(void***)((char*)self + 0x8) = D_00468E38;
+    *(int**)((char*)self + 0x6D8) = D_00441268;
+    *(int*)((char*)self + 0x6D0) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E09A0);
@@ -1758,7 +2111,22 @@ int func_001E0A00(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0A08);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8500(void*, int, int);
+extern void* D_00468D20[];
+extern int D_004A3E90;
+
+extern "C" void* func_001E0A08(void* self)
+{
+    func_001A8500(self, 0, 0);
+    int g = D_004A3E90;
+    *(void***)((char*)self + 0x8) = D_00468D20;
+    *(int*)((char*)self + 0x6D0) = g;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0A50);
@@ -1920,7 +2288,22 @@ int func_001E0C28(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0C30);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8500(void*, int, int);
+extern void* D_004688E0[];
+
+extern "C" void* func_001E0C30(void* self)
+{
+    func_001A8500(self, 0, 0);
+    *(int*)((char*)self + 0x6D0) = 0;
+    *(void***)((char*)self + 0x8) = D_004688E0;
+    *(int*)((char*)self + 0x6D4) = 0;
+    *(int*)((char*)self + 0x6D8) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0C78__FPv);
@@ -2082,7 +2465,20 @@ int func_001E0E40(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0E48);
+#ifdef SKIP_ASM
+extern "C" void* func_001A8500(void*, int, int);
+extern void* D_00468388[];
+
+extern "C" void* func_001E0E48(void* self)
+{
+    func_001A8500(self, 0, 0);
+    *(int*)((char*)self + 0x6D0) = 0;
+    *(void***)((char*)self + 0x8) = D_00468388;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0E88__FPv);
@@ -2147,7 +2543,19 @@ int func_001E0EF0(void* self)
 extern void* D_00468050[];
 extern "C" void* func_001BEE78(void*);
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0EF8);
+#ifdef SKIP_ASM
+extern "C" void* func_001BEE30(void* self, int);
+extern void* D_00468050[];
+
+extern "C" void* func_001E0EF8(void* self)
+{
+    func_001BEE30(self, 0);
+    *(void***)((char*)self + 0x8) = D_00468050;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0F30__FPv);
@@ -3715,7 +4123,24 @@ extern "C" int func_001E2BB8(int type, int all)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2C60);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sEntry14_2C60 {
+    int type;
+    int start;   // 0x4
+    int count;   // 0x8
+    int fC;
+    int f10;
+};
+extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
+
+extern "C" int func_001E2C60(int i)
+{
+    return D_00441630_2C60[i].count;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2C80);
@@ -3784,7 +4209,18 @@ extern "C" int func_001E2D58(int v, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2D98);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
+
+extern "C" int func_001E2D98(int v, int i)
+{
+    int* p = (int*)&D_00441630_2C60[0] + i * 5;
+    return p[3] == v;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2DC0);
@@ -3812,7 +4248,17 @@ extern "C" int func_001E2DC0(int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2E80);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
+
+extern "C" int func_001E2E80(int i, int n)
+{
+    return D_00441630_2C60[i].start + n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2EA0);
@@ -4167,7 +4613,16 @@ extern "C" int func_001E3570(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E35F0);
+#ifdef SKIP_ASM
+extern "C" void* func_001E39F8(void* self);
+
+extern "C" int func_001E35F0(void* self)
+{
+    return (int)func_001E39F8(self) + ((int)self << 3);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E3620);

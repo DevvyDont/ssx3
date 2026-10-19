@@ -1215,7 +1215,21 @@ extern "C" void func_002CBE10(void *self) {
     *(int *)((char *)self + 0) = 0;
 }
 #endif
+//100%
 INCLUDE_ASM("util/menu", func_002CBE20);
+#ifdef SKIP_ASM
+extern int (*D_004A54BC)(int, int);
+extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void*, const void*));
+extern "C" int func_002D4008(const void*, const void*);
+
+extern "C" void func_002CBE20(void* self, int (*cmp)(int, int))
+{
+    D_004A54BC = cmp;
+    func_00418EF8((char*)self + 0xC, *(int*)self, 4, func_002D4008);
+    D_004A54BC = 0;
+    func_002CAAB0(self);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CBE68);
@@ -1770,8 +1784,39 @@ extern "C" void func_002CC758(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CC7B0);
+#ifdef SKIP_ASM
+// PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
+cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
+
+extern void* D_00486E30[];
+
+extern "C" void* func_002CC7B0(void* self)
+{
+    cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
+    *(int*)((char*)self + 0x14) = 0;
+    *(void***)((char*)self + 0x10) = D_00486E30;
+    *(int*)((char*)self + 0x20) = 0;
+    *(int*)((char*)self + 0x18) = 0;
+    return self;
+}
+#endif
+//100%
 INCLUDE_ASM("util/menu", func_002CC7F8);
+#ifdef SKIP_ASM
+extern void* D_00486E30[];
+
+extern "C" void* func_002CC7F8(void* self, void* text)
+{
+    cMenuItem_cMenuItem((cMenuItem*)self, text);
+    *(int*)((char*)self + 0x14) = 0;
+    *(void***)((char*)self + 0x10) = D_00486E30;
+    *(int*)((char*)self + 0x20) = 0;
+    *(int*)((char*)self + 0x18) = 0;
+    return self;
+}
+#endif
 //100%
 INCLUDE_ASM("util/menu", func_002CC838);
 #ifdef SKIP_ASM
@@ -2099,7 +2144,22 @@ extern "C" s2CCF08Item* func_002CCF08(s2CCF08Item* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CCF50);
+#ifdef SKIP_ASM
+extern void* D_00486D40[];
+
+extern "C" void* func_002CCF50(void* self, void* text)
+{
+    cMenuItem_cMenuItem((cMenuItem*)self, text);
+    *(int*)((char*)self + 0x14) = 0;
+    *(void***)((char*)self + 0x10) = D_00486D40;
+    *(int*)((char*)self + 0x1C) = 0;
+    *(int*)((char*)self + 0x20) = 0;
+    *(int*)((char*)self + 0x18) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CCF98);
@@ -2196,7 +2256,23 @@ extern "C" void func_002CD0E8(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CD128);
+#ifdef SKIP_ASM
+// PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
+cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
+
+extern void* D_00486CF0[];
+
+extern "C" void* func_002CD128(void* self)
+{
+    cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
+    *(int*)((char*)self + 0x14) = 0;
+    *(void***)((char*)self + 0x10) = D_00486CF0;
+    *(int*)((char*)self + 0x18) = 0;
+    return self;
+}
+#endif
 //100%
 INCLUDE_ASM("util/menu", func_002CD168);
 #ifdef SKIP_ASM
@@ -2401,7 +2477,25 @@ extern "C" void* func_002CD3F8(void* self)
     return self;
 }
 #endif
+//100%
 INCLUDE_ASM("util/menu", func_002CD450);
+#ifdef SKIP_ASM
+extern void* D_00486C00[];
+
+extern "C" void* func_002CD450(void* self, void* text)
+{
+    cMenuItem_cMenuItem((cMenuItem*)self, text);
+    *(int*)((char*)self + 0x14) = 0;
+    *(void***)((char*)self + 0x10) = D_00486C00;
+    *(int*)((char*)self + 0x18) = 0;
+    *(char*)((char*)self + 0x1C) = 0;
+    *(char*)((char*)self + 0x1D) = 0;
+    *(int*)((char*)self + 0x24) = 0;
+    *(int*)((char*)self + 0x20) = 0;
+    *(int*)((char*)self + 0x28) = 0;
+    return self;
+}
+#endif
 //100%
 INCLUDE_ASM("util/menu", func_002CD4A0);
 #ifdef SKIP_ASM
@@ -2421,7 +2515,24 @@ extern "C" void* func_002CD4A0(void* self, void* text, int a2, signed char a3, s
     return self;
 }
 #endif
+//100%
 INCLUDE_ASM("util/menu", func_002CD528);
+#ifdef SKIP_ASM
+extern "C" void func_002CD528(void* self, int lo, int hi)
+{
+    char* s = (char*)self;
+    signed char* p = *(signed char**)(s + 0x18);
+    *(signed char*)(s + 0x1D) = hi;
+    *(signed char*)(s + 0x1C) = lo;
+    if (p != 0) {
+        if (*p < *(signed char*)(s + 0x1C))
+            *p = lo;
+        signed char* q = *(signed char**)(s + 0x18);
+        if (*(signed char*)(s + 0x1D) < *q)
+            *q = *(signed char*)(s + 0x1D);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CD578);
@@ -2573,7 +2684,25 @@ extern "C" void* func_002CD850(void* self)
     return self;
 }
 #endif
+//100%
 INCLUDE_ASM("util/menu", func_002CD8A8);
+#ifdef SKIP_ASM
+extern void* D_00486BB0[];
+
+extern "C" void* func_002CD8A8(void* self, void* text)
+{
+    cMenuItem_cMenuItem((cMenuItem*)self, text);
+    *(int*)((char*)self + 0x14) = 0;
+    *(void***)((char*)self + 0x10) = D_00486BB0;
+    *(int*)((char*)self + 0x18) = 0;
+    *(int*)((char*)self + 0x1C) = 0;
+    *(int*)((char*)self + 0x20) = 0;
+    *(int*)((char*)self + 0x28) = 0;
+    *(int*)((char*)self + 0x24) = 0;
+    *(int*)((char*)self + 0x2C) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", cIntMenuItem_cIntMenuItem);
@@ -3904,7 +4033,19 @@ extern "C" void func_002CF928(int arg0) {
     func_002CBD50(arg0 + 0x18);
 }
 #endif
+//100%
 INCLUDE_ASM("util/menu", func_002CF948);
+#ifdef SKIP_ASM
+extern "C" void func_002CF948(void* self)
+{
+    char* s = (char*)self;
+    func_002CBE10(s + 0x18);
+    void* item = *(void**)(s + 0x14);
+    if (item != 0) {
+        cExpandMenuItem_addItem3(self, item, -1);
+    }
+}
+#endif
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CF988);
 #ifdef SKIP_ASM
