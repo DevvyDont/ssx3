@@ -121,6 +121,15 @@ or any disc file.
     bit-identical output with 53% fewer instructions, and replay 2.3 times as fast in the 32-bit build. A test runs
     3,000 random microprograms both ways. In a race on a 4-core machine the game thread is busy about a third
     less for the same frame rate, which the GS workers still set. `PS2X_VU1_COMPILED=0` turns them off;
+  - the GS rasterizer's pixel code specialised by format, again with the same results. Each texture format's
+    swizzle is read inline instead of through one shared function. The common frame and depth buffer pairs get their
+    own copy of the sprite and triangle loops, which reads and writes a pixel at one worked-out address instead of
+    calling through a table for every access. A triangle tests only the pixels of each row that can pass its edge
+    tests, instead of its whole bounding box, which in a race holds 4.5 times as many pixels as pass. That range is
+    solved in double precision with room for the float rounding, so every pixel it leaves out fails the float tests
+    too; 900,000 random triangles checked it against the full test in both rounding modes. The 8,000 recorded race packets replay to the same
+    VRAM, also with round-toward-zero and on several workers, with 25% fewer instructions. In a race on a 4-core
+    machine with the old and new code swapped every 30 s, the new code drew about 30% more frames;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -208,7 +217,7 @@ shadows and the course draw with the right textures, and the race plays from the
 Sound plays through the PC's audio device: the music, and the radio track shown at the start of a race. The game
 makes sound only as fast as it runs, so while it runs slower than the PS2 the sound comes in short runs with gaps.
 
-It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 10 frames a second. There the two GS
-worker threads set the pace: the game thread waits on them about a third of the time.
+It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 9 to 12 frames a second. There the two
+GS worker threads still set the pace.
 
 When a guest address with no function is reached, the scheduler prints its last 64 dispatches (`[sched-trace]`).
