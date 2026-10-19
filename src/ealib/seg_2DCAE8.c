@@ -3225,7 +3225,30 @@ int FILE_loadsizez(int arg0, int *arg1, int arg2) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1AD0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern int func_003DEBF0_1AD0(int, int, int, int *) __asm__("func_003DEBF0");
+extern int func_003DEC60_1AD0(int, int, int, int, int) __asm__("func_003DEC60");
+extern void func_003DECA0_1AD0(int, int) __asm__("func_003DECA0");
+typedef struct { int h; int s; int n; } B_1AD0;
+
+// The unit later declares func_003E1AD0 as a data array; define this one under a local name.
+int func_003E1AD0_impl(int a, B_1AD0 *b) __asm__("func_003E1AD0");
+int func_003E1AD0_impl(int a, B_1AD0 *b) {
+    int h;
+    int n = b->n;
+    if (n <= 0) n = 0x7FFFFFFF;
+    if (func_003DEBF0_1AD0(b->h, 1, a, &h)) {
+        n = func_003DEC60_1AD0(h, 0, b->s, n, a - 1);
+        func_003DECA0_1AD0(h, a - 1);
+        return n;
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1B68);

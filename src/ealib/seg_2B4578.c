@@ -5477,7 +5477,39 @@ void func_003C2A50(int id) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C2EC8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct E_2EC8 { char pad[4]; short ch[15]; char pad22; unsigned char n; unsigned short flags; char pad3[0x5F - 0x26]; signed char on; char pad4[0x8C - 0x60]; };
+struct G_2EC8 { char pad[0x49]; unsigned char mode; char pad2[0x1F0 - 0x4A]; struct E_2EC8 *ents; };
+extern struct G_2EC8 D_0050A8E8_2EC8 __asm__("D_0050A8E8");
+struct M_2EC8 { char pad[8]; long mask; };
+struct H_2EC8 { char pad[0xCB0]; struct M_2EC8 *m; };
+extern struct H_2EC8 D_0050AD00_2EC8 __asm__("D_0050AD00");
+extern void f_2A50_2EC8(int) __asm__("func_003C2A50");
+
+void func_003C2EC8(int idx) {
+    struct E_2EC8 *e = &D_0050A8E8_2EC8.ents[idx];
+    int i;
+    if (e->flags & 8) {
+        for (i = 0; i < e->n; i++) {
+            if (e->on) D_0050AD00_2EC8.m->mask |= 1L << e->ch[i];
+            else D_0050AD00_2EC8.m->mask &= ~(1L << e->ch[i]);
+            if (D_0050A8E8_2EC8.mode == 2) {
+                if (e->on) D_0050AD00_2EC8.m->mask |= 1L << (e->ch[i] + 0x18);
+                else D_0050AD00_2EC8.m->mask &= ~(1L << (e->ch[i] + 0x18));
+            }
+        }
+    } else if (e->flags & 0x100) {
+        f_2A50_2EC8(idx);
+    } else {
+        f_2A50_2EC8(idx);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3010);
@@ -5706,7 +5738,39 @@ void func_003C3728(unsigned int a, float *out) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3780);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+void func_003C3780(int ang, float *x, float *y, int dx, int dy) {
+    int q, r, t;
+    if (dx < 0 && dy < 0) {
+        q = dx < dy ? 1 : 2;
+    } else if (dx >= 0 && dy >= 0) {
+        q = dx < dy ? 2 : 1;
+    } else {
+        int ax = dx > -1 ? dx : -dx;
+        if (dy < 0 ? -dy < ax : dy < ax)
+            q = 4;
+        else
+            q = 3;
+    }
+    r = 0;
+    if ((unsigned)(ang - 0x4000) < 0x8000) {
+        t = 4;
+        if (*x < *y) t = 3;
+        if (q < 3) r = (t == 3 && q == 2) ? 1 : 2;
+    } else {
+        t = 1;
+        if (*x < *y) t = 2;
+        if (q >= 3) r = (t == 2 && q == 3) ? 1 : 2;
+    }
+    if (dx < 0) *x = -*x;
+    if (dy < 0) *y = -*y;
+    if (r == 1) *x = -*x;
+    else if (r == 2) *y = -*y;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C38E0);
 
@@ -6953,7 +7017,47 @@ void func_003C60E0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6158);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// Scans the mask table at 0x4E from *idx for an entry whose 0x71C/0xE0 bits
+// match the element's flags at 0x18; returns the matching bits (0 if none).
+struct G_6158 { char p[0x4C]; unsigned char n; char p1; unsigned short tbl[1]; };
+struct E_6158 { char p[3]; signed char b3; char p1[0x14]; unsigned short f18; };
+extern struct G_6158 D_0050A8E8_6158 __asm__("D_0050A8E8");
+
+int func_003C6158(int *idx, struct E_6158 *e) {
+    int r = 0;
+    while (*idx < D_0050A8E8_6158.n) {
+        int m = D_0050A8E8_6158.tbl[*idx] & 0x71C;
+        if (e->f18 & 0x71C) {
+            r = e->f18 & m;
+            if (r != 0) goto ok;
+            goto next;
+        } else {
+            r = m;
+        }
+    ok:
+        {
+            int m2 = D_0050A8E8_6158.tbl[*idx] & 0xE0;
+            if (e->f18 & 0xE0) {
+                int t = e->f18 & m2;
+                r |= t;
+                if (t == 0) { r = 0; goto next; }
+            } else {
+                r |= m2;
+            }
+        }
+        if (e->b3 != 1 && (r & 0x80)) { r = 0; goto next; }
+        if (r) { (*idx)++; break; }
+    next:
+        (*idx)++;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6240);
