@@ -874,7 +874,135 @@ extern "C" int func_00116378(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_001163B0);
+#ifdef SKIP_ASM
+extern "C" int func_00311AE8(void*, int);
+extern "C" void* func_00311B20(void* anim, int layer);
+extern "C" int func_001446A0(void* p, int i);
+extern "C" int func_001446B8(void* p, int i);
+extern "C" void func_00311E88(void* anim, int layer, float t);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+int func_00312AA0(void* anim, int layer);
+struct cAnimSequence;
+void cAnimSequence_fadeWeight(cAnimSequence* seq, float a, float b);
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline t4Vector GetSide_163B0(cRider* r)
+{
+    return r->mMatrix.row[0];
+}
+
+static inline t4Vector Scale_163B0(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+static inline int seqDone_163B0(char* p)
+{
+    return func_001446A0(p, 2) && func_001446B8(p, 2);
+}
+
+extern "C" int func_001163B0(cRider* self, int a1, int a2)
+{
+    if (func_00311AE8(self->mRiderAnim, 1) == 3) {
+        if (a1 != 0 && a2 != 0) {
+            if (seqDone_163B0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0)) {
+                *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x90) = 0.0f;
+                *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)((char*)self + 0x8C0);
+                cRiderAnimBase_play(self->mRiderAnim, 0x145, 0, -1.0f);
+                float w = *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x94);
+                float f = *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x98);
+                float t = *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x9C);
+                char* q = (char*)func_00311B20(self->mRiderAnim, 0);
+                *(float*)(q + 0x98) = w;
+                *(float*)(q + 0x94) = w;
+                if (t != 0.0f)
+                    cAnimSequence_fadeWeight((cAnimSequence*)func_00311B20(self->mRiderAnim, 0), f, t);
+                *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+            }
+        } else {
+            *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x90) = 1.0f;
+            func_00311E88(self->mRiderAnim, 0, 0.1f);
+        }
+    }
+    if (func_00311AE8(self->mRiderAnim, 1) == 0xD) {
+        int id = func_00312AA0(self->mRiderAnim, 1);
+        int match = self->unk_320 ? id == 0x143 : id == 0x144;
+        if ((a1 != 0 && a2 == 0 && match) || (a1 == 0 && a2 != 0 && !match)) {
+            if (seqDone_163B0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0)) {
+                *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x90) = 0.0f;
+                *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)((char*)self + 0x8C0);
+                if (id == 0x143)
+                    cRiderAnimBase_play(self->mRiderAnim, 0x146, 0, -1.0f);
+                else
+                    cRiderAnimBase_play(self->mRiderAnim, 0x147, 0, -1.0f);
+                *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+            }
+            if (func_00311AE8(self->mRiderAnim, 0) == 0xD) {
+                float d = self->unk_300 * 0.01111111231148243f;
+                float cur = self->unk_350;
+                float v = 1.0f;
+                if (d + 1.0f < cur)
+                    v = cur - d;
+                else if (cur < 1.0f - d)
+                    v = cur + d;
+                self->unk_350 = v;
+                char* q = (char*)func_00311B20(self->mRiderAnim, 0);
+                *(float*)(q + 0x94) = *(float*)(q + 0x98) = self->unk_350;
+            }
+            if (match)
+                self->unk_340 = Scale_163B0(GetSide_163B0(self), -1.0f);
+            else
+                self->unk_340 = GetSide_163B0(self);
+        } else {
+            *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x90) = 1.0f;
+            func_00311E88(self->mRiderAnim, 0, 0.1f);
+        }
+    }
+    if (a1 != 0 && a2 != 0) {
+        if (func_00311AE8(self->mRiderAnim, 1) == 0xD && func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
+            func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+            return 1;
+        if (func_00311AE8(self->mRiderAnim, 1) == 3 && func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+            return 1;
+        *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)((char*)self + 0x8C0);
+        cRiderAnimBase_play(self->mRiderAnim, 0x142, 1, -1.0f);
+        *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+        self->unk_350 = 0.0f;
+    } else if (a1 != 0 || a2 != 0) {
+        if (func_00311AE8(self->mRiderAnim, 1) == 3 && func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
+            func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+            return 1;
+        if (func_00311AE8(self->mRiderAnim, 1) == 0xD && func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+            return 1;
+        int anim;
+        if (a1 != 0) {
+            anim = self->unk_320 ? 0x143 : 0x144;
+            self->unk_340 = Scale_163B0(GetSide_163B0(self), -1.0f);
+        } else {
+            self->unk_340 = GetSide_163B0(self);
+            anim = self->unk_320 ? 0x144 : 0x143;
+        }
+        *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)((char*)self + 0x8C0);
+        cRiderAnimBase_play(self->mRiderAnim, anim, 1, -1.0f);
+        *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+        self->unk_350 = 0.0f;
+    }
+    return func_00311AE8(self->mRiderAnim, 1) == 3 || func_00311AE8(self->mRiderAnim, 1) == 0xD;
+}
+#endif
 
 extern "C" void func_00116930(void) {
 }

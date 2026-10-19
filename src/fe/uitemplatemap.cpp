@@ -512,7 +512,176 @@ extern "C" void cUITemplate_MAP_onUpdate(void* vself)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupLayout);
+#ifdef SKIP_ASM
+extern "C" void cUIState_showObjSafe(void* self, char* name);
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_00207430(void* self);
+struct cUIText;
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern int D_004A259C;
+extern int D_004A25A0;
+extern int D_004A25A4;
+extern unsigned int D_004A2594;
+extern char D_0046F9E0[];
+extern char D_00470600[];
+extern char D_004706D8[];
+extern char D_004707A0[];
+extern char D_004707C0[];
+extern char D_004707D8[];
+extern char D_004707E8[];
+extern char D_004707F8[];
+extern char D_00470808[];
+extern char D_00470818[];
+extern char D_00470828[];
+extern char D_00470840[];
+extern char D_00470850[];
+extern char D_00470860[];
+extern char D_00470870[];
+extern char D_00470888[];
+extern char D_004708A0[];
+extern char D_004708B8[];
+extern char D_004708D0[];
+extern char D_004708E0[];
+extern char D_004708F8[];
+extern char D_00470908[];
+extern char D_004A25B0[];
+extern char D_004A2608[];
+extern char D_004A2610[];
+extern char D_004A2618[];
+extern char D_004A2620[];
+extern char D_004A2628[];
+extern char D_004A2630[];
+
+extern "C" void cUITemplate_MAP_setupLayout(void* vself)
+{
+    char* self = (char*)vself;
+    char name[32];
+    char next[32];
+    char again[32];
+    cUIText* title = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x2E8), GetHashValue32(D_0046F9E0));
+    switch (D_004A259C) {
+    case 0: {
+        cUIText_setUnicodeStringByID(title, GetHashValue32(D_004707C0));
+        cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004707D8);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2608);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004707E8);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004707F8);
+        if (*(int*)(self + 0x2CC) == 0)
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004A2610);
+        int state = 0;
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004707A0);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2608);
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x2E8), GetHashValue32(D_00470600));
+        if (o != 0)
+            state = *(unsigned char*)(o + 0x95);
+        if (*(int*)self != 0 && state != 3)
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004A2608);
+        if (state == 3) {
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A25B0);
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470808);
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470818);
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2618);
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2620);
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2628);
+        } else if (D_004A2594 >= 2) {
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004A25B0);
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_00470808);
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_00470818);
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004A2618);
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004A2620);
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004A2628);
+        }
+        break;
+    }
+    case 1: {
+        int state = 0;
+        cUIText_setUnicodeStringByID(title, GetHashValue32(D_00470828));
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004707D8);
+        cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004707E8);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004707F8);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2610);
+        cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004707A0);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470840);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470850);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470860);
+        sprintf(name, D_00470870, D_004A25A4);
+        cUIState_showObjSafe(*(void**)(self + 0x2EC), name);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470888);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004708A0);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004708B8);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004708D0);
+        sprintf(next, D_004706D8, D_004A25A4 + 1);
+        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x2E8), GetHashValue32(next));
+        if (o != 0)
+            state = *(unsigned char*)(o + 0x95);
+        if (*(int*)self != 0 || state == 3) {
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004708D0);
+            switch (state) {
+            case 0:
+            case 1:
+                cUIState_showObjSafe(*(void**)(self + 0x2EC), D_00470888);
+                break;
+            case 2:
+                cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004708A0);
+                break;
+            case 3:
+                cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004708B8);
+                break;
+            }
+        }
+        if (state == 3) {
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A25B0);
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470808);
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470818);
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2618);
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2620);
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2628);
+        } else if (D_004A2594 >= 2) {
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004A25B0);
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_00470808);
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_00470818);
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004A2618);
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004A2620);
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004A2628);
+        }
+        break;
+    }
+    case 2:
+        if (D_004A25A0 == 0) {
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2610);
+            cUIText_setUnicodeStringByID(title, GetHashValue32(D_004708E0));
+        } else if (D_004A25A0 == 1) {
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2610);
+            cUIText_setUnicodeStringByID(title, GetHashValue32(D_004708F8));
+        } else {
+            cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2610);
+            cUIText_setUnicodeStringByID(title, GetHashValue32(D_00470908));
+        }
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004707D8);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004707E8);
+        cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004707F8);
+        cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004707A0);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470840);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470850);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470860);
+        sprintf(name, D_00470870, D_004A25A4);
+        cUIState_showObjSafe(*(void**)(self + 0x2EC), name);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_004A2630);
+        if (*(int*)self != 0)
+            cUIState_showObjSafe(*(void**)(self + 0x2EC), D_004A2630);
+        func_00207430(self);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470840);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470850);
+        cUIState_hideObjSafe(*(void**)(self + 0x2EC), D_00470860);
+        sprintf(again, D_00470870, D_004A25A4);
+        cUIState_showObjSafe(*(void**)(self + 0x2EC), again);
+        break;
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupMenuFocus);
 

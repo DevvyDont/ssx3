@@ -1762,7 +1762,121 @@ extern "C" void func_002AC180(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AC220);
+#ifdef SKIP_ASM
+extern "C" void func_003B58A0();
+extern "C" void func_003B58D8();
+extern "C" int func_003B6820(int a, int b, void* desc);
+extern "C" int func_003B9A00(void* desc, int a, int b, int c);
+
+struct sSndDesc_C220 {
+    char c[0x18];
+};
+
+struct sSndEnv_C220 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+
+struct sSndPlayOpts_C220 {
+    char* vbase;                // 0x00
+    sSndDesc_C220 cur;          // 0x04
+    volatile int depth;         // 0x1C
+    sSndDesc_C220* descs;       // 0x20
+    int f24[4];                 // 0x24
+    int* f34;                   // 0x34
+    int* f38;                   // 0x38
+    int* f3C;                   // 0x3C
+    char f40[4][8];             // 0x40
+    int* f60;                   // 0x60
+    int* f64;                   // 0x64
+    int* f68;                   // 0x68
+    int* f6C;                   // 0x6C
+    sSndEnv_C220* env;          // 0x70
+    int* f74;                   // 0x74
+    int* f78;                   // 0x78
+    int* f7C;                   // 0x7C
+    int* f80;                   // 0x80
+    int* f84;                   // 0x84
+};
+
+#define C220_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define C220_MAX(a, b) ((a) < (b) ? (b) : (a))
+
+// PORT: the unit declares func_002AC220(void*) later; the real function also takes the play options
+extern "C" void func_002AC220_impl(void* self, sSndPlayOpts_C220* opts) __asm__("func_002AC220");
+
+extern "C" void func_002AC220_impl(void* self, sSndPlayOpts_C220* opts)
+{
+    *(int*)((char*)self + 0x8) = 1;
+    *(int*)((char*)self + 0x54) = 0;
+    switch (*(int*)self) {
+    case 1:
+        opts->depth++;
+        opts->descs[opts->depth] = opts->cur;
+        opts->f24[opts->depth] = 0;
+        opts->f34[opts->depth] = 0;
+        opts->f38[opts->depth] = opts->descs[opts->depth].c[0];
+        opts->f3C[opts->depth] = 0;
+        func_00416210((char*)opts + opts->depth * 8 + 0x40, 0, 8);
+        opts->f60[opts->depth] = 0;
+        opts->f64[opts->depth] = 0;
+        opts->f68[opts->depth] = 0;
+        opts->f6C[opts->depth] = 0;
+        opts->env[opts->depth].f4 = 0;
+        opts->env[opts->depth].f0 = 100;
+        opts->env[opts->depth].f8 = 90;
+        opts->env[opts->depth].fC = 50;
+        opts->f74[opts->depth] = 0;
+        opts->f80[opts->depth] = 0;
+        opts->f84[opts->depth] = 0;
+        opts->f78[opts->depth] = 127;
+        opts->f7C[opts->depth] = 1;
+        opts->f3C[opts->depth] = *(int*)((char*)self + 0x60);
+        opts->f38[opts->depth] = 0;
+        opts->descs[opts->depth].c[0] = C220_MAX(C220_MIN(opts->f38[opts->depth], 127), 0);
+        func_003B58A0();
+        *(int*)((char*)self + 0x4) = func_003B6820(*(int*)((char*)self + 0xC), *(int*)((char*)self + 0x10), &opts->descs[opts->depth]);
+        func_003B58D8();
+        opts->depth--;
+        break;
+    case 2:
+        opts->depth++;
+        opts->descs[opts->depth] = opts->cur;
+        opts->f24[opts->depth] = 0;
+        opts->f34[opts->depth] = 0;
+        opts->f38[opts->depth] = opts->descs[opts->depth].c[0];
+        opts->f3C[opts->depth] = 0;
+        func_00416210((char*)opts + opts->depth * 8 + 0x40, 0, 8);
+        opts->f60[opts->depth] = 0;
+        opts->f64[opts->depth] = 0;
+        opts->f68[opts->depth] = 0;
+        opts->f6C[opts->depth] = 0;
+        opts->env[opts->depth].f4 = 0;
+        opts->env[opts->depth].f0 = 100;
+        opts->env[opts->depth].f8 = 90;
+        opts->env[opts->depth].fC = 50;
+        opts->f74[opts->depth] = 0;
+        opts->f80[opts->depth] = 0;
+        opts->f84[opts->depth] = 0;
+        opts->f78[opts->depth] = 127;
+        opts->f7C[opts->depth] = 1;
+        opts->f3C[opts->depth] = *(int*)((char*)self + 0x60);
+        opts->f38[opts->depth] = 0;
+        opts->descs[opts->depth].c[0] = C220_MAX(C220_MIN(opts->f38[opts->depth], 127), 0);
+        func_003B58A0();
+        *(int*)((char*)self + 0x4) = func_003B9A00(&opts->descs[opts->depth], *(int*)((char*)self + 0xC), *(int*)((char*)self + 0x10), -1);
+        func_003B58D8();
+        opts->depth--;
+        break;
+    case 3:
+        break;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AC7F0);
