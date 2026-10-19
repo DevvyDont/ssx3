@@ -1587,7 +1587,59 @@ extern "C" void* func_0014DAA0(void* self, int a1, int a2)
     return func_0014DAC0(self, a1, a2, &count);
 }
 #endif
+//100%
 INCLUDE_ASM("be/belibrary", func_0014DAC0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct sLibEntry_0014DAC0 {
+    short field_0x0;
+    short key;      // 0x2
+    int field_0x4;
+    int field_0x8;
+};
+
+struct sLib_0014DAC0 {
+    int field_0x0;
+    int field_0x4;
+    sLibEntry_0014DAC0* entries; // 0x8
+    char pad_0xC[0x200];
+    int count[30];               // 0x20C
+    int start[30];               // 0x284
+};
+
+// Finds the first entry with this key in a sorted bucket; also counts matches.
+extern "C" int func_0014DAC0_impl(void* self, int a, int b, int* out) __asm__("func_0014DAC0");
+extern "C" int func_0014DAC0_impl(void* self, int a, int b, int* out)
+{
+    sLib_0014DAC0* lib = (sLib_0014DAC0*)self;
+    *out = 0;
+    int n = lib->count[a];
+    if (n <= 0) {
+        return 0;
+    }
+    int start = lib->start[a];
+    int end = start + n;
+    int i = start;
+    sLibEntry_0014DAC0* found = 0;
+    if (i < end) {
+        do {
+            int off = i * 12;
+            sLibEntry_0014DAC0* e = (sLibEntry_0014DAC0*)(off + (int)lib->entries);
+            if (e->key == b) {
+                if (found == 0) {
+                    found = e;
+                }
+                (*out)++;
+            } else if (b < e->key) {
+                break;
+            }
+            i++;
+        } while (i < end);
+    }
+    return (int)found;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014DB40);

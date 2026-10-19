@@ -1081,7 +1081,114 @@ extern "C" void func_0026FA78(int* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/frameptr", func_0026FB88);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern char D_004A5A58;
+extern "C" void func_002305C8(void* self);
+
+struct sFpViewVEntry_FB88 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sFpView_FB88 {
+    sFpViewVEntry_FB88* vt;
+};
+
+static inline bool isStateFB88(char* s, int st)
+{
+    return *(int*)s == st;
+}
+
+static inline bool isActiveFB88(char* s)
+{
+    int st = *(int*)s;
+    return st != 0 && st < 10;
+}
+
+static inline bool isIdleFB88(char* s)
+{
+    bool r = false;
+    if (isActiveFB88(s)) r = *(int*)(s + 0x484) == *(int*)(s + 0x3CC);
+    return r;
+}
+
+static inline bool isIdleNoCamFB88(char* s)
+{
+    bool r = false;
+    if (isActiveFB88(s)) r = *(int*)(s + 0x484) == 0;
+    return r;
+}
+
+// PORT: returns whether a menu action was queued; the unit declares it
+// void earlier, so the definition goes through an asm label.
+extern "C" int func_0026FB88_FB88(void* self, int a1) __asm__("func_0026FB88");
+extern "C" int func_0026FB88_impl(void* self, int a1) __asm__("func_0026FB88");
+extern "C" int func_0026FB88_impl(void* self, int a1)
+{
+    char* s = (char*)self;
+    char* g = D_004A28A8;
+    sFpView_FB88* v = (sFpView_FB88*)&D_004A5A58;
+    sFpView_FB88* cur = *(sFpView_FB88**)(*(char**)(*(char**)(g + 0x84) + 0x48) + 0x14);
+    if (cur != 0) v = cur;
+    if (*(int*)(s + 0x618) != 0) return 0;
+    int r = 0;
+    void* pad = *(void**)(g + (*(int*)(s + 0x28) << 2) + 0xB0);
+    if (*(int*)(s + 0x61C) == 0 && *(int*)(s + 0x620) == 0) {
+        if (func_00320C48(pad, 0x6A)) {
+            *(int*)(s + 0x1C) = 10;
+            *(int*)(s + 0x20) = 0;
+            if (!isStateFB88(s, 3)) r = 7;
+            else r = isIdleFB88(s) ? 0 : 5;
+        } else if (func_00320C48(pad, 0x6B)) {
+            if (*(int*)(s + 0x1C) > 0) *(int*)(s + 0x1C) -= 1;
+            *(int*)(s + 0x20) ^= 1;
+            if (*(int*)(s + 0x1C) <= 0 && *(int*)(s + 0x20) == 0) {
+                if (!isStateFB88(s, 3)) r = 7;
+                else r = isIdleFB88(s) ? 0 : 5;
+            }
+        } else if (func_00320C48(pad, 0x67)) {
+            if (!isStateFB88(s, 3)) r = 7;
+            else r = isIdleFB88(s) ? 0 : 6;
+        } else if (func_00320C48(pad, 0x66)) {
+            if (a1) {
+                func_002305C8(*(void**)(D_004A28A8 + 0x84));
+                *(int*)(s + 0x618) = 8;
+            } else if (!isStateFB88(s, 3)) {
+                *(int*)(s + 0x618) = 7;
+            }
+            return 0;
+        } else if (func_00320C48(pad, 0x68)) {
+            if (!isStateFB88(s, 3)) r = 7;
+            else if (!isIdleFB88(s)) {
+                v->vt[2].fn((char*)v + v->vt[2].delta, 2);
+                r = 4;
+            } else {
+                v->vt[2].fn((char*)v + v->vt[2].delta, 4);
+            }
+        } else if (func_00320C48(pad, 0x69)) {
+            if (isStateFB88(s, 3)) {
+                if (!isIdleNoCamFB88(s)) {
+                    v->vt[2].fn((char*)v + v->vt[2].delta, 2);
+                    r = 3;
+                } else {
+                    v->vt[2].fn((char*)v + v->vt[2].delta, 4);
+                }
+            } else {
+                r = 7;
+            }
+        } else if (func_00320C48(pad, 0x6C)) {
+            v->vt[2].fn((char*)v + v->vt[2].delta, 2);
+            func_0026ED98(self);
+        }
+    }
+    *(int*)(s + 0x618) = r;
+    return r != 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026FE50);

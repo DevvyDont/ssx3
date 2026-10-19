@@ -1252,7 +1252,76 @@ extern "C" void func_002B7318(void* self, sTriggerEntry18* e)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7410);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct sBox_2B7410 {
+    float x0, y0, z0, w0;
+    float x1, y1, z1, w1;
+};
+struct sCell_2B7410 {
+    int pad;
+    int ix, iy, iz;
+};
+struct sQNode_2B7410 {
+    char pad[0x10];
+    int* items;     // 0x10
+};
+extern void func_00328F28_7410(sCell_2B7410* out, sBox_2B7410* box) __asm__("func_00328F28");
+extern "C" void func_003284B8(int* items, int kind, sWtmEnt18* e, sCell_2B7410* cell, sQNode_2B7410* node);
+// PORT: func_002B77C0 (defined below) takes the entry pointer as its int id
+extern "C" void func_002B77C0_7410(void* self, sWtmEnt18* e) __asm__("func_002B77C0");
+void operator_delete(int* p);
+
+static inline void GetCell_2B7410(sCell_2B7410* c, sBox_2B7410* b)
+{
+    func_00328F28_7410(c, b);
+}
+static inline void Remove_2B7410(sQNode_2B7410* n, sWtmEnt18* e, sCell_2B7410* c)
+{
+    func_003284B8(n->items, 2, e, c, n);
+}
+static inline char* Child_2B7410(char* p, int i, int d) { return i > -1 ? p : p + d; }
+static inline bool QEmpty_2B7410(int* c)
+{
+    if (c[0] || c[1] || c[2] || c[3] || c[4] || c[5] || c[6] || c[7]) return false;
+    for (int i = 0; i < 3; i++) {
+        if (c[8 + i] != 0) return false;
+    }
+    return true;
+}
+
+extern "C" void func_002B7410(void* self, sWtmEnt18* e)
+{
+    if (e == 0) return;
+    if (e->active == 0) return;
+    if (((int*)((sTriggerEntry18*)e)->unk10)[1] == 0) return;
+    sVec3_2B6CF8 lo;
+    sVec3_2B6CF8 hi;
+    func_002B6CF8(self, e, &lo, &hi);
+    char* base = *(char**)((char*)func_0028B1C8() + 0x20);
+    sBox_2B7410 box;
+    box.x0 = lo.x;
+    box.y0 = lo.y;
+    box.z0 = lo.z;
+    box.w0 = 1.0f;
+    box.x1 = hi.x;
+    box.y1 = hi.y;
+    box.z1 = hi.z;
+    box.w1 = 1.0f;
+    (*(int*)(base + 0xA0))++;
+    sCell_2B7410 cell;
+    GetCell_2B7410(&cell, &box);
+    sQNode_2B7410* n = (sQNode_2B7410*)Child_2B7410(Child_2B7410(Child_2B7410(base, cell.ix, 0x50), cell.iy, 0x28), cell.iz, 0x14);
+    Remove_2B7410(n, e, &cell);
+    if (QEmpty_2B7410(n->items)) {
+        operator_delete(n->items);
+        n->items = 0;
+    }
+    func_002B77C0_7410(self, e);
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B75D0);
 

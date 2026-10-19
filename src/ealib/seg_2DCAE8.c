@@ -156,7 +156,18 @@ void USTR_copy(int a, int b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", USTR_ncopy);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+void USTR_ncopy_impl(unsigned short *d, unsigned short *s, int n) __asm__("USTR_ncopy");
+void USTR_ncopy_impl(unsigned short *d, unsigned short *s, int n) {
+    int i;
+    for (i = 0; i < n && s[i] != 0; i++) d[i] = s[i];
+    d[i] = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DBE90);
@@ -695,7 +706,64 @@ void func_003DCF70_impl(int h, Fn_CF70 fn) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DCFC0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct H_CFC0 { unsigned int v; };
+typedef struct Ent_CFC0 {
+    int f0, f4, busy, fC;
+    int prio;
+    char pad[0x18];
+    struct Ent_CFC0 *next;
+} Ent_CFC0;
+typedef struct Sys_CFC0 {
+    int f0, f4, f8, count, f10;
+    char mutex[0x10];
+    Ent_CFC0 *cur;
+    char *table;
+    int f2C;
+    Ent_CFC0 *head;
+} Sys_CFC0;
+extern Sys_CFC0 D_00519AB0_CFC0 __asm__("D_00519AB0");
+extern char D_00519AC4_CFC0[] __asm__("D_00519AC4");
+extern void MUTEX_lock_CFC0(void *) __asm__("MUTEX_lock");
+extern void MUTEX_unlock_CFC0(void *) __asm__("MUTEX_unlock");
+
+void func_003DCFC0_impl(struct H_CFC0 h, int prio) __asm__("func_003DCFC0");
+void func_003DCFC0_impl(struct H_CFC0 h, int prio) {
+    struct H_CFC0 c;
+    Ent_CFC0 *e;
+    Ent_CFC0 *p;
+    Ent_CFC0 *prev;
+    int old;
+    unsigned int u = h.v;
+    int ok = 0;
+
+    e = (Ent_CFC0 *)(D_00519AB0_CFC0.table + ((unsigned char *)&h)[3] * 0x30);
+    c.v = u;
+    if (u != 0) {
+        unsigned int x = (*(unsigned int *)(((unsigned char *)&c)[3] * 0x30 + D_00519AB0_CFC0.table) ^ u) & 0xFFFFF;
+        ok = x == 0;
+    }
+    if (ok == 0) return;
+    MUTEX_lock_CFC0(D_00519AB0_CFC0.mutex);
+    old = e->prio;
+    e->prio = prio;
+    if (D_00519AB0_CFC0.count >= 2 && e != D_00519AB0_CFC0.cur && e->busy == 0 && old != prio) {
+        prev = 0;
+        for (p = D_00519AB0_CFC0.head; p != 0 && p != e; p = p->next) prev = p;
+        if (prev != 0) prev->next = e->next;
+        else D_00519AB0_CFC0.head = e->next;
+        prev = 0;
+        for (e->next = D_00519AB0_CFC0.head; e->next != 0 && !(e->prio < e->next->prio); e->next = prev->next) prev = e->next;
+        if (prev != 0) prev->next = e;
+        else D_00519AB0_CFC0.head = e;
+    }
+    MUTEX_unlock_CFC0(D_00519AC4_CFC0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DD148);
