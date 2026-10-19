@@ -477,7 +477,16 @@ extern "C" cBXString* cBXString_Concat(cBXString* self, const char* str)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318968);
+#ifdef SKIP_ASM
+extern "C" cBXString* func_00318968(cBXString* self, char ch)
+{
+    char buf = ch;
+    cBXString_ConcatImpl(self, 1, &buf);
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", func_003189A0);
@@ -543,7 +552,17 @@ struct cBXString {
     char* str;
 };
 
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318AF8);
+#ifdef SKIP_ASM
+extern "C" char* func_00318AF8(cBXString* self, int len)
+{
+    func_003189D0(self, len);
+    *(int*)(*(int*)self - 8) = len;
+    self->str[len] = 0;
+    return self->str;
+}
+#endif
 //100%
 INCLUDE_ASM("bx/bxstring", func_00318B40);
 #ifdef SKIP_ASM
@@ -565,7 +584,16 @@ extern "C" void func_00318B40(cBXString* self)
     }
 }
 #endif
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318BC0);
+#ifdef SKIP_ASM
+extern "C" char* func_00318BC0(cBXString* self)
+{
+    char* r = func_003189D0(self, 0);
+    *(int*)(*(int*)self - 0xC) = -1;
+    return r;
+}
+#endif
 //100%
 INCLUDE_ASM("bx/bxstring", func_00318BF8);
 #ifdef SKIP_ASM
@@ -623,7 +651,20 @@ int cBXString_FindFirstOf(cBXString* self, char ch)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318CE8);
+#ifdef SKIP_ASM
+extern "C" char* func_0041AD80(char* str);
+
+extern "C" int func_00318CE8(cBXString* self, int unused, int start)
+{
+    char* result = func_0041AD80(self->str + start);
+    if (result == 0) {
+        return -1;
+    }
+    return result - self->str;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/bxstring", func_00318D28);
@@ -711,8 +752,27 @@ extern "C" cBXString* func_00318EB8(cBXString* self, char ch, int n)
     return self;
 }
 #endif
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318F20);
+#ifdef SKIP_ASM
+extern "C" cBXString* func_00318F20(cBXString* self, char ch)
+{
+    char buf = ch;
+    cBXString_InitFromCString(self, 1, &buf);
+    return self;
+}
+#endif
+//100%
 INCLUDE_ASM("bx/bxstring", func_00318F58);
+#ifdef SKIP_ASM
+extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int start, int count);
+
+extern "C" cBXString* func_00318F58(cBXString* self, cBXString* other, int start)
+{
+    func_00318F90(self, other, start, *(int*)(*(int*)other - 8) - start);
+    return self;
+}
+#endif
 //100%
 INCLUDE_ASM("bx/bxstring", func_00318F90);
 #ifdef SKIP_ASM
@@ -793,5 +853,29 @@ extern "C" cBXString* cBXString_cBXString5(cBXString* self, cBXString* other, in
 #endif
 
 
+//100%
 INCLUDE_ASM("bx/bxstring", func_00319120);
+#ifdef SKIP_ASM
+// PORT: the unit defines cBXString_cBXString5 returning cBXString*; the caller ignores the result.
+void cBXString_cBXString5_v(cBXString* self, cBXString* other, int n) __asm__("cBXString_cBXString5");
+extern "C" int func_0041AD10(char* str, int ch);
+
+extern "C" cBXString* func_00319120(cBXString* self, cBXString* other, int ch)
+{
+    cBXString_cBXString5_v(self, other, func_0041AD10(other->str, ch));
+    return self;
+}
+#endif
+//100%
 INCLUDE_ASM("bx/bxstring", func_00319170);
+#ifdef SKIP_ASM
+// PORT: the unit defines cBXString_cBXString5 returning cBXString*; the caller ignores the result.
+void cBXString_cBXString5_v(cBXString* self, cBXString* other, int n) __asm__("cBXString_cBXString5");
+extern "C" int func_0041AB08(char* str, int ch);
+
+extern "C" cBXString* func_00319170(cBXString* self, cBXString* other, int ch)
+{
+    cBXString_cBXString5_v(self, other, func_0041AB08(other->str, ch));
+    return self;
+}
+#endif
