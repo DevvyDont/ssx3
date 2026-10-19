@@ -5013,7 +5013,140 @@ extern "C" void func_003816F0(sPtGfx_16F0* self, sPtObj_16F0* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00381AD0);
+#ifdef SKIP_ASM
+struct sPartGsCtx;
+struct sPartGsVtx;
+struct sPartGsPos;
+extern "C" void func_00384FD0(sPartGsCtx* ctx, sPartGsVtx* v, sPartGsPos* pos);
+extern "C" void func_003850A8(sPartGsCtx* ctx, sPartGsVtx* v, sPartGsPos* pos);
+extern "C" void* func_00384D98(void* self, unsigned int* src);
+extern void func_00384E50_1AD0(void* ctx, int mode) __asm__("func_00384E50");
+
+struct sPt1AD0 {
+    float x, y, z, w;
+    sPt1AD0() {}
+} __attribute__((aligned(16)));
+
+struct sMat1AD0 {
+    sPt1AD0 r[4];
+};
+
+struct sVtx1AD0 {
+    sPt1AD0 st;
+    sPt1AD0 rgba;
+    sPt1AD0 pos;
+    sVtx1AD0() {}
+};
+
+struct sCtx1AD0 {
+    int w[5];
+};
+
+extern "C" int func_00383A10(void* self, sVtx1AD0* v, sPt1AD0* p, int* codes);
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * vector); the PC port needs a C fallback.
+static inline sPt1AD0 MulMat1AD0(const sMat1AD0* m, const sPt1AD0& v)
+{
+    sPt1AD0 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_00381AD0(char* self, int n, sVtx1AD0* vtx)
+{
+    sPt1AD0 prev;
+    sCtx1AD0 ctx;
+    int i;
+    int prevCode;
+
+    if (*(int*)(self + 0x6B90) == 0) {
+        func_0037D968(self);
+    }
+    prevCode = -1;
+    func_00384D98(&ctx, (unsigned int*)(self + 0x5A00));
+    for (i = 0; i < n; i++, vtx++) {
+        sPt1AD0 cur = MulMat1AD0((sMat1AD0*)(self + 0x6B30), vtx->pos);
+        int code = 0;
+        cur.w = 1.0f / cur.w;
+        cur.x *= cur.w;
+        cur.y *= cur.w;
+        if (cur.x < *(float*)(self + 0x6B70)) code |= 2;
+        if (*(float*)(self + 0x6B80) < cur.x) code |= 1;
+        if (cur.y < *(float*)(self + 0x6B74)) code |= 8;
+        if (*(float*)(self + 0x6B84) < cur.y) code |= 4;
+        if (cur.w < 0.0f) {
+            code ^= 0x2F;
+        } else {
+            if (cur.z > *(float*)(self + 0x6B78)) code |= 0x20;
+            if (cur.z < *(float*)(self + 0x6B88)) code |= 0x10;
+        }
+        if (code == 0) {
+            if (prevCode == 0) {
+                func_00384FD0((sPartGsCtx*)&ctx, (sPartGsVtx*)vtx, (sPartGsPos*)&cur);
+            } else if (i != 0) {
+                int codes[2];
+                sVtx1AD0 v[2];
+                sPt1AD0 p[2];
+                p[0] = prev;
+                v[0] = *(sVtx1AD0*)((int)vtx - sizeof(sVtx1AD0));
+                codes[0] = prevCode;
+                p[1] = cur;
+                v[1] = *vtx;
+                codes[1] = code;
+                func_00383A10(self, v, p, codes);
+                func_003850A8((sPartGsCtx*)&ctx, (sPartGsVtx*)&v[0], (sPartGsPos*)&p[0]);
+                func_00384FD0((sPartGsCtx*)&ctx, (sPartGsVtx*)vtx, (sPartGsPos*)&cur);
+            } else {
+                func_003850A8((sPartGsCtx*)&ctx, (sPartGsVtx*)vtx, (sPartGsPos*)&cur);
+            }
+        } else if (prevCode == 0) {
+            sVtx1AD0 v[2];
+            sPt1AD0 p[2];
+            int codes[2];
+            p[0] = prev;
+            v[0] = *(sVtx1AD0*)((int)vtx - sizeof(sVtx1AD0));
+            codes[0] = prevCode;
+            p[1] = cur;
+            v[1] = *vtx;
+            codes[1] = code;
+            func_00383A10(self, v, p, codes);
+            func_00384FD0((sPartGsCtx*)&ctx, (sPartGsVtx*)&v[1], (sPartGsPos*)&p[1]);
+        } else if ((prevCode & code) == 0) {
+            sVtx1AD0 v[2];
+            sPt1AD0 p[2];
+            int codes[2];
+            p[0] = prev;
+            v[0] = *(sVtx1AD0*)((int)vtx - sizeof(sVtx1AD0));
+            codes[0] = prevCode;
+            p[1] = cur;
+            v[1] = *vtx;
+            codes[1] = code;
+            if (func_00383A10(self, v, p, codes)) {
+                func_003850A8((sPartGsCtx*)&ctx, (sPartGsVtx*)&v[0], (sPartGsPos*)&p[0]);
+                func_00384FD0((sPartGsCtx*)&ctx, (sPartGsVtx*)&v[1], (sPartGsPos*)&p[1]);
+            }
+        }
+        prev = cur;
+        prevCode = code;
+    }
+    func_00384E50_1AD0(&ctx, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00381F10);
@@ -5758,11 +5891,184 @@ extern "C" void func_00385290(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_003852E8);
+#ifdef SKIP_ASM
+struct sPtVtx52E8 {
+    float x, y, z;
+};
 
+struct sPtRow52E8 {
+    int field_0x0;
+    short* out;             // 0x4
+    int field_0x8;
+    int field_0xC;
+};
+
+struct sPtSurf52E8 {
+    char pad_0x0[0x190];
+    unsigned short w;           // 0x190
+    unsigned short h;           // 0x192
+    char pad_0x194[0xC];
+    int field_0x1A0;            // 0x1A0
+    int field_0x1A4;            // 0x1A4
+    char pad_0x1A8[0xC];
+    sPtRow52E8* rowTabs[2];     // 0x1B4
+    int rows;                   // 0x1BC
+};
+
+struct sPartVec3;
+extern "C" void func_00385A38(void* self, short* out, int i, sPartVec3* v);
+
+extern "C" void func_003852E8(sPtSurf52E8* self, sPtVtx52E8* verts)
+{
+    int idx = self->field_0x1A0 == 0;
+    for (int i = 0; i < self->rows; i++) {
+        int w = self->w;
+        sPtRow52E8* row = &self->rowTabs[idx][i];
+        int base = i * w;
+        int next = base + w;
+        int k = 0;
+        int j = 0;
+        if (j < self->w) {
+            sPtVtx52E8* p1 = &verts[next];
+            sPtVtx52E8* p0 = &verts[base];
+            do {
+                func_00385A38(self, row->out, k, (sPartVec3*)p0);
+                func_00385A38(self, row->out, k + 1, (sPartVec3*)p1);
+                k += 2;
+                p0++;
+                p1++;
+                j++;
+            } while (j < self->w);
+        }
+    }
+    self->field_0x1A4 = 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/particle", func_00385410);
+#ifdef SKIP_ASM
+struct sPtUV5410 {
+    float u, v;
+};
 
+struct sShortUV;
+
+struct sPtRow5410 {
+    int field_0x0;
+    int field_0x4;
+    sShortUV* uv;           // 0x8
+    int field_0xC;
+};
+
+struct sPtSurf5410 {
+    char pad_0x0[0x190];
+    unsigned short w;           // 0x190
+    unsigned short h;           // 0x192
+    char pad_0x194[0xC];
+    int field_0x1A0;            // 0x1A0
+    int field_0x1A4;            // 0x1A4
+    char pad_0x1A8[0xC];
+    sPtRow5410* rowTabs[2];     // 0x1B4
+    int rows;                   // 0x1BC
+};
+
+extern "C" void func_00385BA0(void* self, sShortUV* dst, int idx, float* src);
+
+extern "C" void func_00385410(sPtSurf5410* self, sPtUV5410* uvs)
+{
+    int idx = self->field_0x1A0 == 0;
+    for (int i = 0; i < self->rows; i++) {
+        int w = self->w;
+        sPtRow5410* row = &self->rowTabs[idx][i];
+        int base = i * w;
+        int next = base + w;
+        int k = 0;
+        int j = 0;
+        if (j < self->w) {
+            sPtUV5410* p1 = (sPtUV5410*)((next << 3) + (int)uvs);  // PORT: pointer in int
+            sPtUV5410* p0 = (sPtUV5410*)((base << 3) + (int)uvs);  // PORT: pointer in int
+            do {
+                func_00385BA0(self, row->uv, k, (float*)p0);
+                func_00385BA0(self, row->uv, k + 1, (float*)p1);
+                k += 2;
+                p0++;
+                p1++;
+                j++;
+            } while (j < self->w);
+        }
+    }
+    self->field_0x1A4 = 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("render/particle", func_00385530);
+#ifdef SKIP_ASM
+struct sPartVec3;
+extern "C" void func_00385A38(void* self, short* out, int i, sPartVec3* v);
+extern "C" void func_00385AA0(void* self, unsigned short* buf, int idx, const float* c);
+
+struct sPartPos5530 {
+    float x, y, z;
+};
+
+struct sPartCol5530 {
+    float c[4];
+};
+
+struct sPartStrip5530 {
+    int field_0x0;
+    short* pos;                 // 0x4
+    int field_0x8;
+    unsigned short* col;        // 0xC
+};
+
+struct sPartGrid5530 {
+    char pad_0x0[0x190];
+    unsigned short cols;            // 0x190
+    char pad_0x192[0x1A0 - 0x192];
+    int sel;                        // 0x1A0
+    int dirty;                      // 0x1A4
+    char pad_0x1A8[0x1B4 - 0x1A8];
+    sPartStrip5530* strips[2];      // 0x1B4
+    int rows;                       // 0x1BC
+};
+
+extern "C" void func_00385530(sPartGrid5530* self, sPartPos5530* pos, sPartCol5530* col)
+{
+    int back = self->sel == 0;
+    for (int i = 0; i < self->rows; i++) {
+        sPartStrip5530* s = &self->strips[back][i];
+        int n = self->cols;
+        int a = i * n;
+        int b = a + n;
+        int k = 0;
+        int j = 0;
+        if (j < self->cols) {
+            sPartPos5530* p1 = &pos[b];
+            sPartPos5530* p0 = &pos[a];
+            sPartCol5530* c1 = (sPartCol5530*)((b << 4) + (int)col);  // PORT: pointer in int
+            sPartCol5530* c0 = (sPartCol5530*)((a << 4) + (int)col);  // PORT: pointer in int
+            do {
+                func_00385AA0(self, s->col, k, c0->c);
+                func_00385A38(self, s->pos, k, (sPartVec3*)p0);
+                func_00385AA0(self, s->col, k + 1, c1->c);
+                func_00385A38(self, s->pos, k + 1, (sPartVec3*)p1);
+                k += 2;
+                p0++;
+                c0++;
+                p1++;
+                c1++;
+                j++;
+            } while (j < self->cols);
+        }
+    }
+    self->dirty = 1;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_003856B8);
 

@@ -289,7 +289,44 @@ extern "C" int func_001538E8(void* self, int rider, int bit, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintmission", func_001539A8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+struct sBits8_1539A8 {
+    unsigned int w[2];
+};
+struct sCfg_1539A8 {
+    char pad[0x40];
+    int base;           // 0x40
+};
+extern sCfg_1539A8 D_005305B0;
+extern char D_004A6CB0_raw[] __asm__("D_004A6CB0");
+extern char D_004A6CA8_raw[] __asm__("D_004A6CA8");
+
+extern "C" void func_001539A8(void* self, int rider, int idx, sBits8_1539A8* src)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    int bb = D_005305B0.base * 12;
+    *(sBits8_1539A8*)(D_004A6CB0_raw + (idx * 12 + (c * 0xF88 + profile * 0x9B50 + bb))) = *src;
+    int count = 0;
+    for (int i = 0; i < 64; i++) {
+        int off = i / 32 * 4;
+        off += idx * 12;
+        off += D_005305B0.base * 12;
+        off += c * 0xF88;
+        off += profile * 0x9B50;
+        if (*(unsigned int*)(D_004A6CB0_raw + off) & (1 << i))
+            count++;
+    }
+    char* p = D_004A6CA8_raw + ((idx + D_005305B0.base) * 12 + c * 0xF88 + profile * 0x9B50);
+    *(signed char*)(p + 4) = count;
+}
+#endif
 
 INCLUDE_ASM("be/beintmission", func_00153B00);
 
