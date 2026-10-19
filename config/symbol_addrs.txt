@@ -909,3 +909,14 @@ D_00450B88 = 0x00450B88; // size:0x80
 // render/particle: vertex buffer of 0x30-byte {a, b, pos} (func_003726C8), sized to the next referenced symbol;
 // D_00501460 / D_005014A0 were vertex 0's and 1's pos.
 D_00501440 = 0x00501440; // size:0x3120
+// Small ($gp) 8-byte objects whose second word splat named separately. A gp-relative sym+4 address is never
+// "simple" in SN gcc's mips.c, so it never fills a delay slot: every access to the inner name stays out of the slot.
+// fe/feasyncfile: D_004A4E8C (6 functions, none in a delay slot) is D_004A4E88[1].
+D_004A4E88 = 0x004A4E88; // size:0x8
+// fe/fepopupmisc: string table; D_004A1544 was its second entry (func_001DEC68). D_004A1548 stays its own symbol.
+D_004A1540 = 0x004A1540; // size:0x8
+// bx/seg_1BA100: an 8-byte pair constructed in place by func_002BAFB0; D_004A52E4 was its second word.
+D_004A52E0 = 0x004A52E0; // size:0x8
+// ai/rider: an 8-byte config struct read directly (its lw fills a jal delay slot in func_0010EB30, so it is its
+// own small symbol, not D_004A4C00+8).
+D_004A4C08 = 0x004A4C08; // size:0x8

@@ -6554,7 +6554,8 @@ extern "C" void func_001AF930(void* screen);
 extern "C" void func_0025E6D0(void* self, const char* str);
 extern "C" void func_001A9930(void* self);
 extern void* D_004A3028;
-extern int D_004A4E8C;
+// D_004A4E88 is 8 bytes (config/symbol_addrs.txt); its second word was the separate symbol D_004A4E8C.
+extern int D_004A4E88_w[2] __asm__("D_004A4E88");
 extern char D_004630C8[];
 extern char D_004630E0[];
 
@@ -6580,7 +6581,7 @@ extern "C" void func_001ADE88(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
         char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-        cBENewRaceInterface_setNumberAI(iface, D_004A4E8C);
+        cBENewRaceInterface_setNumberAI(iface, D_004A4E88_w[1]);
         sVE1ADE88i* ivt = *(sVE1ADE88i**)(iface + 0xC);
         ivt[1].fn(iface + ivt[1].delta);
         func_001AF728(self, iface, *(void**)((char*)self + 0x40));
@@ -6915,7 +6916,7 @@ extern "C" void func_001AE7A0(cState_E7A0* self, void* a1, int msg)
         } else if (a1 == self->numAI) {
             char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
             cBENewRaceInterface_setNumberAI_E7A0(race, func_0039A738_E7A0(self->numAI));
-            D_004A4E8C = func_0039A738_E7A0(self->numAI);
+            D_004A4E88_w[1] = func_0039A738_E7A0(self->numAI);
             commit_E7A0(race);
         }
         break;
