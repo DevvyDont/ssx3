@@ -48,7 +48,81 @@ extern "C" void cFEPopupVideoCalibration_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DEC68);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// D_004A1540 is an 8-byte string table; this reads its second entry.
+extern char* D_004A1540_DEC68[2] __asm__("D_004A1540");
+extern char D_0045DDB8[];
+extern char D_0045DDC8[];
+
+struct sVEi_EC68 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sVEm_EC68 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sDefObj_EC68 {
+    sVEm_EC68* vt;
+};
+extern sDefObj_EC68 D_004A5A58_EC68 __asm__("D_004A5A58");
+
+struct sPopup_EC68 {
+    char pad0[0x10];
+    char* owner;                // 0x10
+    char pad14[0x8];            // 0x14
+    int flags;                  // 0x1C
+    char pad20[0x20];           // 0x20
+    void* screen;               // 0x40
+    char pad44[0x4];            // 0x44
+    signed char shown;          // 0x48
+};
+
+extern "C" int func_001DEC68(sPopup_EC68* self, char* in)
+{
+    sVEi_EC68* vt = *(sVEi_EC68**)(in + 8);
+    if (vt[5].fn(in + vt[5].delta) != 0) {
+        if (self->shown == 0) {
+            cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1540));
+            if (obj != 0) {
+                obj->v09(0);
+            }
+            obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1540_DEC68[1]));
+            if (obj != 0) {
+                obj->v09(1);
+            }
+            cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045DD90));
+            if (text != 0) {
+                cUIText_setUnicodeStringByID(text, GetHashValue32(D_0045DDB8));
+            }
+            obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045DDC8));
+            if (obj != 0) {
+                obj->v09(0);
+            }
+            self->shown = 1;
+        } else {
+            self->flags = ((self->flags | 0x80) & ~0x3F00) | 0x700;
+        }
+        sDefObj_EC68* p = *(sDefObj_EC68**)(self->owner + 0x14);
+        if (p == 0)
+            p = &D_004A5A58_EC68;
+        if (p != 0)
+            p->vt[2].fn((char*)p + p->vt[2].delta, 6);
+    }
+    return 1;
+}
+
+extern void* D_0046B230[];
+extern "C" void* func_0039E390(void*);
+#endif
 
 extern void* D_0046B230[];
 extern "C" void* func_0039E390(void*);

@@ -7296,7 +7296,53 @@ extern "C" void func_001AEC60(void* self, int on)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AF098);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern int D_005308D0[];
+extern signed char D_00535C12[];
+// D_004A4E88 is 8 bytes; the byte read is its second word's low byte (+4).
+extern unsigned char D_004A4E88_AF098[8] __asm__("D_004A4E88");
+extern "C" void func_0039A7A8(void* self, int a1);
+
+extern "C" void func_001AF098(void* self, int all)
+{
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (all) {
+        func_0039A7A8(*(void**)((char*)self + 0x6E4), 1);
+        func_0039A7A8(*(void**)((char*)self + 0x6E8), 1);
+        func_0039A7A8(*(void**)((char*)self + 0x6EC), 1);
+        func_0039A7A8(*(void**)((char*)self + 0x6E0), 0);
+        return;
+    }
+    if (*(int*)(*(char**)((char*)self + 0x6D8) + 0x4) != 0) {
+        func_0039A7A8(*(void**)((char*)self + 0x6E4), (D_005308D0[0] >> 8) & 1);
+    } else {
+        func_0039A7A8(*(void**)((char*)self + 0x6E4), 1);
+    }
+    if (*(int*)(*(char**)((char*)self + 0x6D8) + 0xC) != 0) {
+        func_0039A7A8(*(void**)((char*)self + 0x6E8), (D_005308D0[0] >> 6) & 1);
+    } else {
+        func_0039A7A8(*(void**)((char*)self + 0x6E8), 1);
+    }
+    if (*(int*)(*(char**)((char*)self + 0x6D8) + 0x8) != 0) {
+        int f = D_005308D0[0] >> 7;
+        func_0039A7A8(*(void**)((char*)self + 0x6EC), f & 1);
+    } else {
+        func_0039A7A8(*(void**)((char*)self + 0x6EC), 1);
+    }
+    if (D_00535C12[0] != 0) {
+        cBENewRaceInterface_setNumberAI(iface, 0);
+        sVE1ADE88i* ivt = *(sVE1ADE88i**)(iface + 0xC);
+        ivt[1].fn(iface + ivt[1].delta);
+        func_0039A7A8(*(void**)((char*)self + 0x6E0), 0);
+    } else {
+        func_0039A7A8(*(void**)((char*)self + 0x6E0), D_004A4E88_AF098[4]);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AF208);
