@@ -1,6 +1,81 @@
 #include "common.h"
 
-INCLUDE_ASM("seg/seg_CF758", setChallengeName);
+//100%
+class cUIText;
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_E758(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int GetHashValue32(char*);
+void cUIText_setAsciiString(cUIText* text, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
+extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, int n);
+extern "C" void func_003A0E90(cUIText* self, const unsigned short* str);
+extern "C" char* func_00144C60(void* iface, int id);
+
+struct sChalVEnt_E758 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+struct sChalSlot_E758 {
+    signed char type;
+    signed char val;
+};
+
+extern sChalSlot_E758 D_0045AAD8[][4][5];
+extern char* D_004A28A8;
+extern char D_00466BB8[], D_00466BD0[], D_00466BE8[];
+extern char D_00466C00[], D_00466C10[], D_00466C20[], D_00466C30[];
+extern char D_00466C40[], D_00466C50[], D_00466C60[];
+extern char D_00466C70[], D_00466C80[], D_00466C90[], D_00466CA8[], D_00466CB8[], D_00466CC8[];
+
+extern "C" void setChallengeName(cUIText* text, int mountain, int peak, int idx)
+{
+    if (peak == 3) {
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466BB8));
+        return;
+    }
+    if (peak == 2) {
+        if (idx == 0) cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466BD0));
+        else cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466BE8));
+        return;
+    }
+    void* iface = cBE_getInterface_E758(cBE_getBE(), 0);
+    int type = D_0045AAD8[mountain][peak][idx].type;
+    int val = D_0045AAD8[mountain][peak][idx].val;
+    if (type == 4) {
+        unsigned short out[200];
+        unsigned short buf[32];
+        if (mountain == 0) func_002C2540(buf, D_00466C00);
+        else if (mountain == 1) func_002C2540(buf, D_00466C10);
+        else if (mountain == 2) func_002C2540(buf, D_00466C20);
+        char* obj = *(char**)(D_004A28A8 + 0x8C);
+        sChalVEnt_E758* vt = *(sChalVEnt_E758**)(obj + 4);
+        int n = vt[4].fn(obj + vt[4].delta, GetHashValue32(D_00466C30));
+        func_002C26D0(out, buf, n);
+        func_003A0E90(text, out);
+    } else if (type == 5) {
+        if (mountain == 0) cUIText_setAsciiString(text, D_00466C40);
+        else if (mountain == 1) cUIText_setAsciiString(text, D_00466C50);
+        else if (mountain == 2) cUIText_setAsciiString(text, D_00466C60);
+    } else if (type == 6) {
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466C70));
+    } else if (type == 7) {
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466C80));
+    } else if (type == 8) {
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466C90));
+    } else if (type == 9) {
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466CA8));
+    } else if (type == 10) {
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466CB8));
+    } else if (type == 11) {
+        cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466CC8));
+    } else {
+        cUIText_setAsciiString(text, func_00144C60(iface, val));
+    }
+}
 
 INCLUDE_ASM("seg/seg_CF758", setChallengeStats);
 

@@ -500,7 +500,98 @@ extern "C" void func_0026F180(cReplayFramePtr_F180* self)
     func_0026F228(self);
 }
 
-INCLUDE_ASM("replay/frameptr", func_0026F228);
+//100%
+void func_0026D168(void* self);
+void func_0026E5C0(void* self);
+extern "C" void func_0026E5D0(void* list, void* block);
+extern "C" void func_003E6448(void* dst, int c, int n);
+
+struct sFpSlot_F228 {
+    int id;
+    char data[0xAC];
+    int fB0;
+};
+
+extern "C" void func_0026F228(void* self)
+{
+    char* s = (char*)self;
+    unsigned int st = *(int*)s - 14;
+    bool b = !(st < 2);
+    if (!b) return;
+    func_0026F498(self);
+    int i = 0;
+    char* l0 = s + 0x3B0;
+    char* l1 = s + 0x3BC;
+    int none = -1;
+    *(int*)(s + 0x4) = 15;
+    func_0026F4A0(self, 10);
+    *(int*)(s + 0x60C) = 0;
+    *(int*)(s + 0x610) = 0;
+    *(int*)(s + 0x614) = 0;
+    *(int*)(s + 0x628) = 0;
+    *(int*)(s + 0x62C) = 0;
+    *(int*)(s + 0x28) = 0;
+    *(int*)(s + 0x608) = 0;
+    *(int*)(s + 0x484) = 0;
+    *(int*)(s + 0x3C8) = 0;
+    *(int*)(s + 0x3CC) = 0;
+    *(int*)(s + 0x488) = 0;
+    *(int*)(s + 0x3D4) = 0;
+    *(int*)(s + 0x3AC) = 0;
+    *(int*)(s + 0x3D0) = 0;
+    *(int*)(s + 0x1C) = 0;
+    *(int*)(s + 0x20) = 0;
+    *(int*)(s + 0x618) = 0;
+    *(int*)(s + 0x61C) = 0;
+    *(int*)(s + 0x620) = 0;
+    *(int*)(s + 0x624) = 0;
+    *(int*)(s + 0x63C) = 0;
+    *(int*)(s + 0x650) = 0;
+    *(int*)(s + 0x640) = 0;
+    *(int*)(s + 0x644) = 0;
+    *(int*)(s + 0x648) = 0;
+    *(int*)(s + 0x638) = 0;
+    *(int*)(s + 0x64C) = 0;
+    *(int*)(s + 0x654) = 0;
+    *(int*)(s + 0x658) = 0;
+    *(int*)(s + 0x65C) = 0;
+    *(int*)(s + 0x660) = 0;
+    *(int*)(s + 0x664) = 0;
+    *(int*)(s + 0x66C) = 0;
+    *(int*)(s + 0x674) = 0;
+    *(int*)(s + 0x678) = 0;
+    *(int*)(s + 0x67C) = 0;
+    *(int*)(s + 0x668) = 0;
+    sFpSlot_F228* e = (sFpSlot_F228*)(s + 0x494);
+    char* d = s + 0x498;
+    void** pp = (void**)(s + 0x48C);
+    do {
+        if (*pp) func_0026D168(*pp);
+        e->fB0 = 0;
+        e->id = none;
+        func_003E6448(d, 0, 0xAC);
+        d += 0xB4;
+        pp++;
+        e->id = i;
+        i++;
+        e++;
+    } while (i < 2);
+    func_0026E5C0(l0);
+    func_0026E5C0(l1);
+    for (i = 0; i < *(int*)(s + 8); i++) {
+        func_0026E5D0(l1, s + 0x2C + i * 0x38);
+    }
+    int three = 3;
+    *(int*)(s + 0x630) = 0;
+    *(int*)(s + 0x634) = 0;
+    if (*(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x7C) == 1) {
+        *(int*)(s + 0xC) = three;
+        *(int*)(s + 0x10) = three;
+    } else {
+        *(int*)(s + 0xC) = 1;
+        *(int*)(s + 0x10) = 0;
+    }
+}
 
 //100%
 void func_0026E5C0(void* self);
@@ -871,7 +962,109 @@ extern "C" void func_0026FA78(int* self)
     }
 }
 
-INCLUDE_ASM("replay/frameptr", func_0026FB88);
+//100%
+extern char D_004A5A58;
+extern "C" void func_002305C8(void* self);
+
+struct sFpViewVEntry_FB88 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sFpView_FB88 {
+    sFpViewVEntry_FB88* vt;
+};
+
+static inline bool isStateFB88(char* s, int st)
+{
+    return *(int*)s == st;
+}
+
+static inline bool isActiveFB88(char* s)
+{
+    int st = *(int*)s;
+    return st != 0 && st < 10;
+}
+
+static inline bool isIdleFB88(char* s)
+{
+    bool r = false;
+    if (isActiveFB88(s)) r = *(int*)(s + 0x484) == *(int*)(s + 0x3CC);
+    return r;
+}
+
+static inline bool isIdleNoCamFB88(char* s)
+{
+    bool r = false;
+    if (isActiveFB88(s)) r = *(int*)(s + 0x484) == 0;
+    return r;
+}
+
+// PORT: returns whether a menu action was queued; the unit declares it
+// void earlier, so the definition goes through an asm label.
+extern "C" int func_0026FB88_impl(void* self, int a1) __asm__("func_0026FB88");
+extern "C" int func_0026FB88_impl(void* self, int a1)
+{
+    char* s = (char*)self;
+    char* g = D_004A28A8;
+    sFpView_FB88* v = (sFpView_FB88*)&D_004A5A58;
+    sFpView_FB88* cur = *(sFpView_FB88**)(*(char**)(*(char**)(g + 0x84) + 0x48) + 0x14);
+    if (cur != 0) v = cur;
+    if (*(int*)(s + 0x618) != 0) return 0;
+    int r = 0;
+    void* pad = *(void**)(g + (*(int*)(s + 0x28) << 2) + 0xB0);
+    if (*(int*)(s + 0x61C) == 0 && *(int*)(s + 0x620) == 0) {
+        if (func_00320C48(pad, 0x6A)) {
+            *(int*)(s + 0x1C) = 10;
+            *(int*)(s + 0x20) = 0;
+            if (!isStateFB88(s, 3)) r = 7;
+            else r = isIdleFB88(s) ? 0 : 5;
+        } else if (func_00320C48(pad, 0x6B)) {
+            if (*(int*)(s + 0x1C) > 0) *(int*)(s + 0x1C) -= 1;
+            *(int*)(s + 0x20) ^= 1;
+            if (*(int*)(s + 0x1C) <= 0 && *(int*)(s + 0x20) == 0) {
+                if (!isStateFB88(s, 3)) r = 7;
+                else r = isIdleFB88(s) ? 0 : 5;
+            }
+        } else if (func_00320C48(pad, 0x67)) {
+            if (!isStateFB88(s, 3)) r = 7;
+            else r = isIdleFB88(s) ? 0 : 6;
+        } else if (func_00320C48(pad, 0x66)) {
+            if (a1) {
+                func_002305C8(*(void**)(D_004A28A8 + 0x84));
+                *(int*)(s + 0x618) = 8;
+            } else if (!isStateFB88(s, 3)) {
+                *(int*)(s + 0x618) = 7;
+            }
+            return 0;
+        } else if (func_00320C48(pad, 0x68)) {
+            if (!isStateFB88(s, 3)) r = 7;
+            else if (!isIdleFB88(s)) {
+                v->vt[2].fn((char*)v + v->vt[2].delta, 2);
+                r = 4;
+            } else {
+                v->vt[2].fn((char*)v + v->vt[2].delta, 4);
+            }
+        } else if (func_00320C48(pad, 0x69)) {
+            if (isStateFB88(s, 3)) {
+                if (!isIdleNoCamFB88(s)) {
+                    v->vt[2].fn((char*)v + v->vt[2].delta, 2);
+                    r = 3;
+                } else {
+                    v->vt[2].fn((char*)v + v->vt[2].delta, 4);
+                }
+            } else {
+                r = 7;
+            }
+        } else if (func_00320C48(pad, 0x6C)) {
+            v->vt[2].fn((char*)v + v->vt[2].delta, 2);
+            func_0026ED98(self);
+        }
+    }
+    *(int*)(s + 0x618) = r;
+    return r != 0;
+}
 
 //100%
 extern char* D_004A28A8;

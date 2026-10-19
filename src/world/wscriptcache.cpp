@@ -1239,9 +1239,52 @@ extern "C" void* func_003AF010(void* self)
     return self;
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AF020);
+//100%
+extern char D_00495260[];
+struct sElem_AF020 {
+    char pad[0x34];
+    // PORT: the constructor is func_003B0340, defined later in this unit as a C function.
+    sElem_AF020() __asm__("func_003B0340");
+    ~sElem_AF020() {}
+    void* operator new[](unsigned int size) { return D_00509430_ADEC8.alloc(D_00495260, size, 0, 0, D_00509430_ADEC8.flags); }
+    void operator delete[](void* p) { D_00509430_ADEC8.free(p); }
+};
+struct sArr_AF020 {
+    sElem_AF020* arr;
+    int n;
+};
 
-INCLUDE_ASM("world/wscriptcache", func_003AF0C8);
+extern "C" void func_003AF020(sArr_AF020* self, int flags)
+{
+    if (self->arr) {
+        delete[] self->arr;
+        self->arr = 0;
+    }
+    self->n = 0;
+    if (flags & 1) D_00509430_ADEC8.free(self);
+}
+
+//100%
+extern "C" void func_003B03A8(void* self, int value);
+extern "C" void func_003B03B0(void* self, int value);
+extern "C" void func_003B03B8(void* self, int value);
+extern "C" void func_003B03C0(void* self, int value);
+extern "C" void func_003B03C8(void* self, int value);
+extern "C" void func_003B03D0(void* self, int value);
+
+extern "C" void func_003AF0C8(sArr_AF020* self, int n, int a, int b, int c, int d)
+{
+    self->arr = new sElem_AF020[n];
+    self->n = n;
+    if (n) func_003B03D0(self->arr, 0);
+    for (unsigned int i = 0; i < (unsigned int)self->n; i++) {
+        func_003B03A8(&self->arr[i], a);
+        func_003B03B0(&self->arr[i], b);
+        func_003B03B8(&self->arr[i], c);
+        func_003B03C0(&self->arr[i], d);
+        func_003B03C8(&self->arr[i], i);
+    }
+}
 
 // Entry i of the 0x34-byte entries, or 0 past the count
 extern "C" void* func_003AF230(void* self, unsigned int i)
@@ -1309,11 +1352,90 @@ extern "C" int func_003AF378(const char* a, const char* b)
     return a[i] - b[i];
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003AF428);
+//100%
+struct sNames_AF428 { const char* n[5]; };
+struct sVals_AF428 { unsigned int v[5]; };
+extern sNames_AF428 D_00495290;
+extern sVals_AF428 D_004952A8;
 
-INCLUDE_ASM("world/wscriptcache", func_003AF560);
+extern "C" unsigned int func_003AF428(char* s, unsigned int len)
+{
+    unsigned int i = 0;
+    char saved = 9;
+    for (; i < len; i++) {
+        char c = s[i];
+        if (c == 9 || c == 13) {
+            s[i] = 0;
+            saved = c;
+            break;
+        }
+    }
+    sNames_AF428 names = D_00495290;
+    sVals_AF428 vals = D_004952A8;
+    unsigned int r = 0xFFFFFFFF;
+    for (unsigned int k = 0; k < 5; k++) {
+        if (func_003AF378(names.n[k], s) == 0) {
+            r = vals.v[k];
+            break;
+        }
+    }
+    if (i != len) s[i] = saved;
+    return r;
+}
 
-INCLUDE_ASM("world/wscriptcache", func_003AF670);
+//100%
+extern "C" long func_0041E9E0(const char* s, char** end, int base);
+
+extern "C" int func_003AF560(char** ps, unsigned int* plen, int* out)
+{
+    unsigned int i = 0;
+    char saved = 9;
+    for (; i < *plen; i++) {
+        unsigned char c = ((unsigned char*)*ps)[i];
+        if (c == 9 || c == 10) {
+            ((unsigned char*)*ps)[i] = 0;
+            saved = c;
+            break;
+        }
+    }
+    char* end;
+    long v = func_0041E9E0(*ps, &end, 10);
+    *plen -= end - *ps;
+    if (i != *plen) (*ps)[i] = saved;
+    if (end == *ps) return 0;
+    *out = v;
+    return 1;
+}
+
+//100%
+extern "C" void func_003AF670(char** ps, unsigned int* plen, char** words, unsigned int* lens, unsigned int nwords, unsigned int* outIdx)
+{
+    char* s = *ps;
+    if (s == 0) {
+        *ps = 0;
+        *plen = 0;
+        *outIdx = 0xFFFFFFFF;
+        return;
+    }
+    func_003AF300(&s, plen);
+    for (unsigned int i = 0; i < *plen; i++) {
+        for (unsigned int k = 0; k < nwords; k++) {
+            unsigned int j;
+            for (j = 0; j < lens[k] && i + j < *plen && words[k][j] == s[i + j]; j++) {
+            }
+            if (j == lens[k]) {
+                unsigned int t = i + j;
+                *ps = s + t;
+                *plen -= t;
+                *outIdx = k;
+                return;
+            }
+        }
+    }
+    *ps = 0;
+    *plen = 0;
+    *outIdx = 0xFFFFFFFF;
+}
 
 INCLUDE_ASM("world/wscriptcache", func_003AF7F0);
 
@@ -1733,7 +1855,58 @@ extern "C" void* func_003B0948(void* self)
     return self;
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003B09A0);
+//100%
+extern void* D_00456810[];
+
+struct sWSList_09A0 {
+    sWSNode2* next;
+    sWSNode2* prev;
+    int empty() { return next == (sWSNode2*)this; }
+    sWSNode2* front() { return next; }
+    void kill() { next = (sWSNode2*)7; prev = (sWSNode2*)7; }
+};
+
+struct sPl_09A0 {
+    void** vt;
+    char pad4[0x14];
+    sWSList_09A0 list18;
+    sWSList_09A0 list20;
+    char pad28[4];
+    void* work;
+    char pad30[0x48];
+    void* ipuBuf;
+};
+
+static inline void wsUnlink_09A0(sWSNode2* n)
+{
+    void* obj = n ? (char*)n - 8 : 0;
+    sWSNode2* next = n->next;
+    sWSNode2* prev = n->prev;
+    prev->next = next;
+    next->prev = prev;
+    n->prev = (sWSNode2*)0xB;
+    n->next = (sWSNode2*)0xB;
+    if (obj) func_003B08E0(obj, 3);
+}
+
+extern "C" void func_003B09A0(sPl_09A0* self, int flags)
+{
+    self->vt = D_00456850;
+    if (self->work != 0) {
+        D_00509434[0](self->work);
+        self->work = 0;
+    }
+    if (self->ipuBuf != 0) {
+        D_00509434[0](self->ipuBuf);
+        self->ipuBuf = 0;
+    }
+    while (!self->list18.empty()) wsUnlink_09A0(self->list18.front());
+    while (!self->list20.empty()) wsUnlink_09A0(self->list20.front());
+    self->list20.kill();
+    self->list18.kill();
+    self->vt = D_00456810;
+    if (flags & 1) D_00509434[0](self);
+}
 
 //100%
 extern "C" void func_003B0B40(void* a, void* b, void* c);
@@ -2253,7 +2426,35 @@ extern "C" void func_003B17A8(void)
     func_003B2440();
 }
 
-INCLUDE_ASM("world/wscriptcache", func_003B1878);
+//100%
+extern unsigned char D_0044C2D8[];
+extern int D_005094F8[];
+
+// PORT: func_003B1300 really returns unsigned int (unit declares void*)
+extern "C" int func_003B1878(void)
+{
+    int r;
+    if (*(int*)((char*)D_0050A088.ptr + 0x420) != 0) {
+        r = 0;
+        if (D_005094F8[0] >= 0xAF1) r = (int)func_003B1300(3);
+    } else {
+        r = 0;
+    }
+    if (*(int*)((char*)D_0050A088.ptr + 0x424) == 1)
+        *(int*)((char*)D_0050A088.ptr + 0x434) = (int)func_003B1300(7);
+    int v = (int)func_003B1300(5);
+    char* p = (char*)D_0050A088.ptr;
+    *(int*)(p + 0x438) = *(int*)(p + 0x420) != 0 ? (*(int*)(p + 0x428) != 0 ? D_0044C2D8[v] : v * 2) : v;
+    if (func_003B1300(1)) {
+        *(int*)((char*)D_0050A088.ptr + 0x43C) = (int)func_003B1300(1);
+        func_003B1300(1);
+        func_003B1300(6);
+        func_003B2318();
+    } else {
+        *(int*)((char*)D_0050A088.ptr + 0x43C) = 0;
+    }
+    return r;
+}
 
 //100%
 extern "C" void func_003B1AB0(void);
