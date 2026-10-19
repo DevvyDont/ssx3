@@ -3435,7 +3435,95 @@ extern "C" int func_0037D348(sPtGfx_D348* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037D450);
+#ifdef SKIP_ASM
+struct sPtRS_D450 {
+    int f0;
+    int f4;
+    int f8;                         // bits 0..4 = key
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_D450 {
+    sPtRS_D450 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short one;                      // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_D450 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_D450 ents[1];            // 0x80
+};
+
+struct sPtGfx_D450 {
+    char pad_0x0[0xE84];
+    sPtRS_D450* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_D450* ring;             // 0x18F0
+    char pad_0x18F4[0x5900 - 0x18F4];
+    unsigned short scX;             // 0x5900
+    unsigned short scY;             // 0x5902
+    unsigned short scW;             // 0x5904
+    unsigned short scH;             // 0x5906
+    char pad_0x5908[0x5A00 - 0x5908];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x2C];
+    unsigned int width;             // 0x5A30
+    unsigned int height;            // 0x5A34
+    char pad_0x5A38[0x4];
+    unsigned int psm;               // 0x5A3C
+    char pad_0x5A40[0x10];
+    unsigned int fbw;               // 0x5A50
+    char pad_0x5A54[0x30];
+    unsigned int fbp;               // 0x5A84
+};
+
+// PORT: 64-bit `ulong` GS packet words; uncached (0x30000000) pointers held in int.
+extern "C" int func_0037D450(sPtGfx_D450* self)
+{
+    unsigned int buf = self->bufAddr;
+    ulong* p = (ulong*)(buf | 0x30000000);
+    p[0] = 0x10000006;
+    p[1] = 0;
+    p[2] = (ulong)0x8800 << 45;
+    p[3] = (ulong)0x50000005 << 32;
+    p[4] = ((ulong)0x10000000 << 32) | 0x8004;
+    p[5] = 0xE;
+    p[6] = (ulong)self->fbp | ((ulong)self->fbw << 16) | ((ulong)self->psm << 24);
+    p[7] = 0x4C;
+    p[8] = (ulong)self->scX | ((ulong)(self->scX + (self->scW - 1)) << 16) | ((ulong)self->scY << 32) | ((ulong)(self->scY + (self->scH - 1)) << 48);
+    p[9] = 0x40;
+    p[10] = (ulong)self->scX | ((ulong)(self->scX + (self->scW - 1)) << 16) | ((ulong)self->scY << 32) | ((ulong)(self->scY + (self->scH - 1)) << 48);
+    p[11] = 0x41;
+    p[12] = (ulong)((0x800 - (self->width >> 1)) << 4) | ((ulong)((0x800 - (self->height >> 1)) << 4) << 32);
+    p[13] = 0x18;
+    p += 14;
+    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+    sPtRing_D450* ring = self->ring;
+    sPtRS_D450* rs = self->top;
+    self->bufAddr = next;
+    int one = 1;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_D450* e = (sPtEnt_D450*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->one = one;
+        e->next = next;
+        e->key = key;
+        e->buf = buf;
+    }
+    self->bufAddr += 0x10;
+    return 0;
+}
+#endif
 
 extern "C" void* func_00367CD0(int);
 
@@ -4748,7 +4836,112 @@ extern "C" void func_003816F0(sPtGfx_16F0* self, sPtObj_16F0* obj)
 
 INCLUDE_ASM("render/particle", func_00381AD0);
 
+//100%
 INCLUDE_ASM("render/particle", func_00381F10);
+#ifdef SKIP_ASM
+struct sPtRS_1F10 {
+    int f0;                         // bits 6..9 = layer
+    int f4;
+    int f8;                         // bits 0..4 = key
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_1F10 {
+    sPtRS_1F10 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_1F10 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_1F10 ents[1];            // 0x80
+};
+
+struct sPtGfx_1F10 {
+    char pad_0x0[0xE84];
+    sPtRS_1F10* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_1F10* ring;             // 0x18F0
+    char pad_0x18F4[0x5A00 - 0x18F4];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x6B90 - 0x5A04];
+    int texReady;                   // 0x6B90
+};
+
+struct sMat_1F10 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+extern char D_3BF0[];
+
+// PORT: PS2-only VU0 inline asm (matrix copy); the PC port needs a C fallback.
+static inline void CopyMat_1F10(sMat_1F10* dst, const sMat_1F10* src)
+{
+    __asm__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+extern "C" void func_0037D968(void* self);
+
+// PORT: uncached (0x30000000) pointers held in int; 64-bit GS words are `unsigned long`.
+extern "C" void func_00381F10(sPtGfx_1F10* self, sMat_1F10* m, float* col, int n)
+{
+    self->top->f0 = (self->top->f0 & ~0x3C0) | 0xC0;
+    self->top->fC &= 0xC0000000;
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    unsigned int buf = self->bufAddr;
+    unsigned long* p = (unsigned long*)(buf | 0x30000000);
+    p[0] = 0x1000000A;
+    p[1] = 0;
+    p[2] = 0;
+    p[3] = (unsigned long)0xD811 << 47;
+    p[4] = ((unsigned long)0x10014000 << 32) | 1;
+    p[5] = 0xE;
+    p[6] = (long)(int)(col[1] * 128.0f) | ((long)(int)(col[2] * 128.0f) << 8) | ((long)(int)(col[3] * 128.0f) << 16) | ((long)(int)(col[0] * 128.0f) << 24) | ((unsigned long)0x3F800000 << 32);
+    p[7] = 1;
+    p[8] = (unsigned long)(n | 0x8000) | ((unsigned long)0x800A << 45);
+    p[9] = 4;
+    CopyMat_1F10((sMat_1F10*)(p + 10), m);
+    p[18] = n;
+    p[19] = 0;
+    p[20] = 0;
+    p[21] = (unsigned long)(((unsigned int)D_3BF0 >> 3) | 0x14000000) << 32;
+    p += 22;
+    self->bufAddr = (unsigned int)p & 0x0FFFFFFF;
+    sPtRing_1F10* ring = self->ring;
+    unsigned int next = self->bufAddr;
+    sPtRS_1F10* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_1F10* e = (sPtEnt_1F10*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->bufAddr += 0x10;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00382170);
