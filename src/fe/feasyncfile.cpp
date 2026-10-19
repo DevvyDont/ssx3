@@ -5122,7 +5122,70 @@ extern "C" void func_001ABC50(sFEObj_001ABC50* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001ABCD0);
+#ifdef SKIP_ASM
+// PORT: the unit declares func_001A97B8 as returning int; this call site ignores the result
+extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
+extern "C" void func_00260F80();
+extern "C" int func_00261460(void* self);
+extern "C" void func_002613C8(void* self);
+extern "C" void func_0025B800(void* self);
+extern "C" int func_00263128(void* self, const char* name);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_001AFE08(void* self, int a1, int a2, const char* name);
+extern void* func_001ADDD0_BCD0(void* self, int a1, int a2) __asm__("func_001ADDD0");
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void* cBXString_cBXString2(void* self, const char* str);
+extern "C" void* cBXString_operatorE(void* self, void* other);
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern void* D_004A3328;
+extern void* D_004A3028;
+extern int D_004A4E88_v[2] __asm__("D_004A4E88");
+extern char D_005308B8[];
+extern char D_00462AC8[];
+extern char D_00462AE8[];
+
+extern "C" void func_001ABCD0(void* self, int a1, void* a2, int a3, int a4)
+{
+    *(int*)((char*)self + 0x6C4) = 0;
+    func_001A97B8_v(self, a2, a3);
+    if (D_004A3328 == 0) {
+        func_00260F80();
+    }
+    if (func_00261460(D_004A3328) == 0) {
+        func_002613C8(D_004A3328);
+    }
+    if (D_004A3328 == 0) {
+        func_0025B800(D_004A3028);
+    }
+    if (func_00263128(D_004A3328, (const char*)a1)) {
+        void* p = func_001AFE08(cMemMan_alloc(0x6D8, D_00462AC8, 0x100, 0), *(int*)((char*)self + 0x10), (int)self, (const char*)a1);
+        if (a4) {
+            *(int*)((char*)p + 0x18) = 0x834;
+        } else {
+            *(int*)((char*)p + 0x18) = 0x801;
+        }
+        func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+    } else {
+        func_003E6448(D_005308B8, 0, 0x20);
+        char* g = (char*)D_004A3028;
+        D_004A4E88_v[1] = 4;
+        char s[4];
+        cBXString_cBXString2(s, (const char*)a1);
+        cBXString_operatorE(g + 0x98, s);
+        cBXString__cBXString(s, 2);
+        void* p = func_001ADDD0_BCD0(cMemMan_alloc(0x6F0, D_00462AE8, 0x100, 0), *(int*)((char*)self + 0x10), (int)self);
+        if (a4) {
+            *(int*)((char*)p + 0x18) = 0x834;
+        } else {
+            *(int*)((char*)p + 0x18) = 0x800;
+        }
+        func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001ABE58);
@@ -6728,7 +6791,154 @@ extern "C" int func_001AE100(void* self, int a1, unsigned int key)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001AE128);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int GetHashValue32(char* str);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+void cUIText_setUnicodeStringByID(cUIText* self, int id);
+extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
+extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data);
+extern "C" void func_0039A7A8(void* self, int a1);
+extern void* D_004A3028;
+extern unsigned char D_004A4E88_E128[8] __asm__("D_004A4E88");
+extern char D_00461520[];
+extern char D_00463108[];
+extern char D_00463118[];
+extern char D_00463130[];
+extern char D_00463140[];
+extern char D_00463150[];
+extern char D_00463168[];
+extern char D_00463178[];
+extern char D_00463190[];
+extern char D_004631A0[];
+extern char D_004631B8[];
+extern char D_004631C8[];
+extern char D_004631D8[];
+extern char D_004631E8[];
+extern char D_00462C88[];
+extern char D_004631F8[];
+extern char D_0045DCC8[];
+extern char D_0045FCD8[];
+extern char D_00463210[];
+extern char D_00463228[];
+extern char D_004A14F8[];
+extern char D_004A1500[];
+extern char D_004A1508[];
+extern char D_004A1510[];
+extern char D_00463238[];
+extern char D_00463248[];
+extern char D_00463260[];
+extern char D_004630E0[];
+
+class cFEVObj_001AE128 {
+public:
+    char pad[0x8];
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09(int on);
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24(int on);
+    virtual void v25(int on);
+};
+
+static inline int IsHash1AE128(int id, char* name) { return id == GetHashValue32(name); }
+
+extern "C" void func_001AE128(void* self, cUIText* item)
+{
+    cFEVObj_001AE128* obj = (cFEVObj_001AE128*)item;
+    if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00461520)) {
+        obj->v09(1);
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463108)) {
+        cUIText_setAsciiString(item, *(const char**)((char*)D_004A3028 + 0x98));
+        obj->v09(1);
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463118)) {
+        obj->v09(1);
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463130)) {
+        *(int*)((char*)item + 0x18) = 7;
+        obj->v25(1);
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463140)) {
+        cUIText_setUnicodeStringByID(item, GetHashValue32(D_00463150));
+        obj->v09(1);
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463168)) {
+        cUIText_setUnicodeStringByID(item, GetHashValue32(D_00463178));
+        obj->v09(1);
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463190)) {
+        cUIText_setUnicodeStringByID(item, GetHashValue32(D_004631A0));
+        obj->v09(1);
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_004631B8)) {
+        obj->v09(1);
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_004631C8)) {
+        cUIText_setUnicodeStringByID(item, GetHashValue32(D_004631D8));
+        *(int*)((char*)item + 0x18) = 9;
+        obj->v25(1);
+        obj->v09(1);
+        obj->v25(1);
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_004631E8)) {
+        cUIText_setUnicodeStringByID(item, GetHashValue32(D_00462C88));
+        *(int*)((char*)item + 0x18) = 0xA;
+        obj->v09(1);
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_004631F8)) {
+        cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045DCC8), 1);
+        cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045FCD8), 0);
+        obj->v09(1);
+        obj->v24(1);
+        *(cUIText**)((char*)self + 0x6DC) = item;
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463210)) {
+        cUIListBox_addEntryByStringID(item, GetHashValue32(D_00463228), 0);
+        cUIListBox_addEntryByAsciiString(item, D_004A14F8, 1);
+        cUIListBox_addEntryByAsciiString(item, D_004A1500, 2);
+        cUIListBox_addEntryByAsciiString(item, D_004A1508, 3);
+        cUIListBox_addEntryByAsciiString(item, D_004A1510, 4);
+        obj->v09(1);
+        obj->v24(1);
+        *(cUIText**)((char*)self + 0x6E0) = item;
+        func_0039A7A8(item, D_004A4E88_E128[4]);
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463238)) {
+        cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045DCC8), 0);
+        cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045FCD8), 1);
+        obj->v09(1);
+        obj->v24(1);
+        *(cUIText**)((char*)self + 0x6E4) = item;
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463248)) {
+        cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045DCC8), 0);
+        cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045FCD8), 1);
+        obj->v09(1);
+        obj->v24(1);
+        *(cUIText**)((char*)self + 0x6E8) = item;
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463260)) {
+        cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045DCC8), 0);
+        cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045FCD8), 1);
+        obj->v09(1);
+        obj->v24(1);
+        *(cUIText**)((char*)self + 0x6EC) = item;
+    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_004630E0)) {
+        *(int*)((char*)item + 0x14) |= 0x80;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AE680);

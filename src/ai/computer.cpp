@@ -1442,7 +1442,242 @@ extern "C" void func_0010E910(char* self, int a1, int a2, int a3, char* evt, flo
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010EB30);
+#ifdef SKIP_ASM
+extern "C" void func_00312660(void* buf, void* anim, int id, int a3, float t);
+extern "C" void func_0030ECD8(void* xf, void* model, void* buf, int a3);
+extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, void* xf);
+extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float a);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" void cRider_updateOrientationImplicit(cRider* self);
+extern "C" void cRider_doLeanPoseAdjust(cRider* self, t4Vector* pos);
+extern "C" void func_00116930(cRider* self);
+extern "C" void func_0011DFE0(cRider* self, const t4Vector& axis, float angle);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" float func_00119B08(cRiderMetrix* m, int a);
+extern "C" void func_00296310(void* mgr, cRider* rider);
+extern "C" void func_0029F660(void* mgr, void* rider, int a, int b);
+extern "C" void func_002961F0(void* mgr, cRider* rider, float v);
+void func_0011FEC8_EB30(void* self, int v) __asm__("func_0011FEC8__FPv");
+void func_0011FE78_EB30(void* self, int v) __asm__("func_0011FE78__FPv");
+struct sCfg_EB30 { int a; int b; };
+extern sCfg_EB30 D_004A4C08;
+
+struct sQuat_EB30
+{
+    float x, y, z, w;
+    sQuat_EB30() {}
+    sQuat_EB30(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+extern sQuat_EB30 D_004FF130_EB30 __asm__("D_004FF130");
+extern sQuat_EB30 D_004FF160_EB30 __asm__("D_004FF160");
+
+static inline sQuat_EB30 AxisAngle_EB30(const sQuat_EB30& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return sQuat_EB30(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+static inline t4Vector GetUp_EB30(cRider* rider) { return rider->mMatrix.row[2]; }
+
+// Clears the anim's position offset and sets its heading quaternion to -angle about D_004FF160.
+static inline void ResetAnimOrientation_EB30(char* ra, float angle)
+{
+    *(sQuat_EB30*)(ra + 0x30) = D_004FF130_EB30;
+    *(sQuat_EB30*)(ra + 0x40) = AxisAngle_EB30(D_004FF160_EB30, -angle);
+}
+
+struct sVE_EB30 { short delta; short index; void (*fn)(void*, float); };
+
+struct sXf_EB30
+{
+    sQuat_EB30 pos;
+    sQuat_EB30 rot;
+};
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sQuat_EB30 QuatMul_EB30(const sQuat_EB30& a, const sQuat_EB30& b)
+{
+    sQuat_EB30 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sQuat_EB30 Sub_EB30(const sQuat_EB30& a, const sQuat_EB30& b)
+{
+    sQuat_EB30 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sQuat_EB30 Add_EB30(const sQuat_EB30& a, const sQuat_EB30& b)
+{
+    sQuat_EB30 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
+static inline sQuat_EB30 Rot_EB30(const sQuat_EB30& q, const sQuat_EB30& v)
+{
+    sQuat_EB30 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sQuat_EB30 Scale_EB30(const sQuat_EB30& v, float s)
+{
+    sQuat_EB30 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+static inline sQuat_EB30 Conj_EB30(const sXf_EB30& p)
+{
+    sQuat_EB30 r;
+    r.w = p.rot.w;
+    r.x = p.rot.x;
+    r.y = p.rot.y;
+    r.z = p.rot.z;
+    r.x = -r.x;
+    r.y = -r.y;
+    r.z = -r.z;
+    return r;
+}
+
+static inline sXf_EB30 Invert_EB30(const sXf_EB30& a)
+{
+    sXf_EB30 r;
+    r.rot = Conj_EB30(a);
+    r.pos = Add_EB30(Scale_EB30(Rot_EB30(r.rot, Sub_EB30(a.pos, D_004FF130_EB30)), -1.0f), D_004FF130_EB30);
+    return r;
+}
+
+static inline sXf_EB30 Combine_EB30(const sXf_EB30& a, const sXf_EB30& b)
+{
+    sXf_EB30 r;
+    r.rot = QuatMul_EB30(a.rot, b.rot);
+    r.pos = Add_EB30(Rot_EB30(a.rot, Sub_EB30(b.pos, D_004FF130_EB30)), a.pos);
+    return r;
+}
+
+
+extern "C" void func_0010EB30(cRider* rider, int anim, int a2, int a3, char* evt)
+{
+    sVE_EB30* vt = *(sVE_EB30**)&rider->mVtbl;
+    vt[kRiderVt_vibrationBump].fn((char*)rider + vt[kRiderVt_vibrationBump].delta, *(float*)(evt + 0x30) * 5.0f);
+    float amt = func_00119B08(rider->mMetrix, a2);
+    func_0010E098(rider, 1, amt);
+    func_00296310(func_0028B180(), rider);
+    func_0029F660(func_0028B180(), rider, 0, 0);
+    func_002961F0(func_0028B180(), rider, amt);
+    func_00111AA0_impl(rider->mRiderHandler, evt, evt + 0x20, a3, *(float*)(evt + 0x30));
+    func_0011FEC8_EB30(rider, 0xD);
+    if (rider->unk_328 == 3) {
+        float ang = 1.5707963705062866f;
+        func_0011DFE0(rider, GetUp_EB30(rider), ang);
+        cRiderAnimBase_changeHeadingOffset(rider->mRiderAnim, ang);
+        ResetAnimOrientation_EB30((char*)rider->mRiderAnim, 0.0f);
+    } else if (rider->unk_328 == 4) {
+        float ang = -1.5707963705062866f;
+        func_0011DFE0(rider, GetUp_EB30(rider), ang);
+        cRiderAnimBase_changeHeadingOffset(rider->mRiderAnim, ang);
+        ResetAnimOrientation_EB30((char*)rider->mRiderAnim, 0.0f);
+    }
+    rider->unk_328 = 0;
+    func_00116930(rider);
+    cRider_doLeanPoseAdjust(rider, &rider->mPosition);
+    cRider_updateOrientationImplicit(rider);
+    rider->unk_1F0[0].target = 0.0f;
+    rider->unk_1F0[0].cur = 0.0f;
+    rider->unk_1F0[0].rate = 0.0f;
+    rider->unk_1F0[2].target = 0.0f;
+    rider->unk_1F0[2].cur = 0.0f;
+    rider->unk_1F0[2].rate = 0.0f;
+    rider->unk_1F0[8].target = 0.0f;
+    rider->unk_1F0[8].cur = 0.0f;
+    rider->unk_1F0[8].rate = 0.0f;
+    rider->unk_330 = 0;
+    char buf[0x50];
+    func_00312660(buf, rider->mRiderAnim, anim, D_004A4C08.a, rider->unk_1F0[0].target);
+    sXf_EB30 a;
+    func_0030ECD8(&a, rider->mAnimModel, buf, 0);
+    char* trk = (char*)rider->mAnimModel;
+    sQuat_EB30* n = (sQuat_EB30*)((rider->unk_89C << 4) + *(int*)(trk + 0x24));
+    sXf_EB30 node;
+    node.pos = sQuat_EB30(n->x * *(float*)(trk + 0x140), n->y * *(float*)(trk + 0x144),
+                          n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C));
+    node.rot = *(sQuat_EB30*)(*(char**)((char*)rider->mAnimModel + 0x28) + (rider->unk_89C << 4));
+    sXf_EB30 y = Combine_EB30(node, Invert_EB30(a));
+    *(sXf_EB30*)&rider->mPosition = Combine_EB30(*(sXf_EB30*)&rider->mPosition, y);
+    cRider_updateOrientationImplicit(rider);
+    sXf_EB30 w = Invert_EB30(y);
+    cRiderAnimBase_changeOrientationOffset(rider->mRiderAnim, &w);
+    cRiderAnimBase_play(rider->mRiderAnim, anim, 0, -1.0f);
+    func_0011FEC8_EB30(rider, 8);
+    func_0011FE78_EB30(rider, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_0010F1C0);
