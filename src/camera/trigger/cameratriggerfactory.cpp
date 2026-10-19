@@ -2650,7 +2650,102 @@ extern "C" int func_0017A2C8(int* self, int start, void* key)
     return -1;
 }
 
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A378);
+extern "C" void* FILE_loadsizez(const char* name, int* size, int align);
+extern "C" void func_00318350(void* self, const char* s, int len);
+extern "C" void* func_002523A8(void* self);
+extern "C" void cBXString__cBXString(void* self, int flags);
+extern "C" int func_0017A830(void* selfp, char* name, char* tag);
+extern "C" char* strcpy(char* d, const char* s);
+
+struct sCamEntry_17A378 {
+    char name[0x40];    // 0x00
+    char tag[0x40];     // 0x40
+    int type;           // 0x80
+    int f84;            // 0x84
+    int f88;            // 0x88
+};
+
+struct sCamMgr_17A378 {
+    int count;                          // 0x0000
+    sCamEntry_17A378 entries[0x100];    // 0x0004
+};
+
+struct sStr_17A378 {
+    char* s;
+    sStr_17A378() {}
+    sStr_17A378(const sStr_17A378&);
+};
+
+// Load a text list of camera names: each token (whitespace separated, optionally quoted,
+// path prefix up to the last '\' or ':' and any extension dropped) is added as a type 0x16
+// entry when func_0017A830 says it is new and present.
+extern "C" void func_0017A378(void* selfp, const char* file)
+{
+    sCamMgr_17A378* self = (sCamMgr_17A378*)selfp;
+    int size;
+    char* buf = (char*)FILE_loadsizez(file, &size, 0x100);
+    if (buf == 0)
+        return;
+    char* p = buf;
+    for (;;) {
+        while (p < buf + size) {
+            int ws = 0;
+            char c = *p;
+            if (c == ' ' || c == '\t' || c == '\n' || c == '\r')
+                ws = 1;
+            if (!ws)
+                break;
+            p++;
+        }
+        if (!(p < buf + size))
+            break;
+        if (*p == '"' || *p == '\'')
+            p++;
+        if (!(p < buf + size))
+            break;
+        char* start = p;
+        char* stop = 0;
+        for (;;) {
+            while (p < buf + size) {
+                int ok = 0;
+                char c = *p;
+                if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ||
+                    c == '_' || c == '.' || c == '-' || c == '/')
+                    ok = 1;
+                if (!ok)
+                    break;
+                if (stop == 0 && *p == '.')
+                    stop = p;
+                p++;
+            }
+            if ((p < buf + size && *p == '\\') || *p == ':') {
+                start = p + 1;
+                stop = 0;
+                p = start;
+                continue;
+            }
+            break;
+        }
+        if (stop == 0)
+            stop = p;
+        if (p < buf + size && (*p == '"' || *p == '\''))
+            p++;
+        if (stop == start)
+            continue;
+        sStr_17A378 str;
+        func_00318350(&str, start, stop - start);
+        if (func_0017A830(self, str.s, str.s)) {
+            strcpy(self->entries[self->count].name, str.s);
+            strcpy(self->entries[self->count].tag, str.s);
+            self->entries[self->count].type = 0x16;
+            self->entries[self->count].f84 = 0;
+            self->count++;
+        }
+        cBXString__cBXString(&str, 2);
+    }
+    func_002523A8(buf);
+}
+
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A638);
 

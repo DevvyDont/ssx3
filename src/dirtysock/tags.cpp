@@ -14,7 +14,95 @@ char* cDirtysock_tag__TagFieldSetupAppend(char* buf, char* dst, char* name)
     return dst;
 }
 
-INCLUDE_ASM("dirtysock/tags", cDirtysock_tag__TagFieldSetupTerm);
+extern char D_004A4A70;
+extern unsigned char D_004964C0[];
+extern "C" int func_00415FC8(const void* a, const void* b, unsigned int n);
+extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
+extern "C" void* func_0041605C(void* dst, const void* src, unsigned int n);
+
+// Adds or replaces the "name=value" term temp in the record. Names compare
+// through the D_004964C0 class table; "~..." terms are appended at the end.
+extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp)
+{
+    unsigned char* rec = (unsigned char*)record;
+    unsigned char* p;
+    unsigned char* start;
+    unsigned char* end;
+    int n;
+    int d;
+    unsigned int a;
+    unsigned int b;
+    if (rec == 0) return -1;
+    if (temp == 0 || (unsigned char)*temp <= ' ') return -1;
+    if (*temp == '~') {
+        p = rec;
+        while (*p != 0) p++;
+        if (p != rec && p[-1] >= 0x20 && p[-1] != D_004A4A70 && p < rec + len - 1) {
+            *p++ = D_004A4A70;
+            *p = 0;
+        }
+        end = p;
+        start = p;
+    } else {
+        p = rec;
+        for (;;) {
+            if (*p == 0) {
+                if (p != rec && p[-1] >= 0x20 && p[-1] != D_004A4A70 && p < rec + len - 1) {
+                    *p++ = D_004A4A70;
+                    *p = 0;
+                }
+                end = p;
+                start = p;
+                break;
+            }
+            if (*p <= ' ') {
+                p++;
+                continue;
+            }
+            if (D_004964C0[*p] == 1) {
+                end = p;
+                start = p;
+                break;
+            }
+            a = D_004964C0[*p];
+            b = D_004964C0[*temp];
+            n = 0;
+            while (a == b && a >= 2) {
+                n++;
+                a = D_004964C0[p[n]];
+                b = D_004964C0[temp[n]];
+            }
+            if (a + b == 2) {
+                end = p;
+                start = p;
+                while (*end >= 0x20) end++;
+                if (*end != 0) end++;
+                goto found;
+            }
+            p++;
+            while (*p >= 0x20) p++;
+        }
+    }
+found:
+    int old = end - p;
+    n = 0;
+    while (temp[n] >= 0x20) n++;
+    p = end;
+    n++;
+    d = n - old;
+    while (*p != 0) p++;
+    p++;
+    if (d > 0 && rec + len - p < d) return -1;
+    if (d == 0 && func_00415FC8(start, temp, n) == 0) return 0;
+    if (d > 0) func_0041610C(end + d, end, p - end);
+    if (d < 0) func_0041610C(start, start - d, p - (start - d));
+    func_0041605C(start, temp, n);
+    if (start[n] == 0 && D_004A4A70 != '\n')
+        start[n - 1] = 0;
+    else
+        start[n - 1] = D_004A4A70;
+    return n - 1;
+}
 
 //100%
 // Sets the byte flag at D_004A4A70 and returns its old value.
@@ -27,7 +115,40 @@ extern "C" int func_003EB578(int v)
     return old;
 }
 
-INCLUDE_ASM("dirtysock/tags", func_003EB588);
+// Normalizes a record in place: header control runs become `sep` (stopping at the first
+// key line), a trailing sep becomes a newline (or the end), then each control run in the
+// body becomes one '\n' (a run of the same char stays separate lines).
+extern "C" void func_003EB588(unsigned char* d, unsigned char sep)
+{
+    unsigned char* buf = d;
+    unsigned char* s = d;
+    if (*s != 0) {
+        do {
+            if (*s < 0x20) {
+                *d++ = sep;
+                while (*s != 0 && *s < 0x20)
+                    s++;
+                if ((*s == '=' || *s == ':') && s[1] < 0x20)
+                    break;
+            } else {
+                *d++ = *s++;
+            }
+        } while (*s != 0);
+    }
+    if (d != buf && d[-1] == sep)
+        d[-1] = (sep == '\n' || *s != 0) ? '\n' : 0;
+    while (*s != 0) {
+        if (*s < 0x20) {
+            *d++ = '\n';
+            unsigned char c = *s++;
+            while (*s != 0 && *s < 0x20 && *s != c)
+                s++;
+        } else {
+            *d++ = *s++;
+        }
+    }
+    *d = 0;
+}
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldFind);
 
@@ -58,11 +179,62 @@ extern "C" char* func_003EB840(char* record, const char* prefix, const char* nam
     return r;
 }
 
-INCLUDE_ASM("dirtysock/tags", func_003EB8B8);
+extern char D_004A4A78[];
+
+// Finds the D_004A4A78 field and skips leading blanks; null if the value is empty.
+extern "C" unsigned char* func_003EB8B8(char* record)
+{
+    unsigned char* p = (unsigned char*)cDirtysock_tag_TagFieldFind_B840(record, D_004A4A78);
+    if (p != 0) {
+        while (*p != 0 && *p <= ' ')
+            p++;
+        if (*p == 0)
+            p = 0;
+    }
+    return p;
+}
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldDelete);
 
-INCLUDE_ASM("dirtysock/tags", func_003EB9E8);
+extern "C" int strlen(const char* s);
+
+// Renames field `name` in the record to `newname`, shifting the rest of the record;
+// -1 if the field is missing or the longer name does not fit.
+extern "C" int func_003EB9E8(unsigned char* rec, int size, const char* name, const char* newname)
+{
+    unsigned char* p = (unsigned char*)cDirtysock_tag_TagFieldFind_B840((char*)rec, name);
+    unsigned char* q;
+    unsigned char* e;
+    int d;
+    if (p == 0)
+        return -1;
+    if (p[-1] == ' ')
+        p--;
+    q = p - 1;
+    p = q;
+    while (q != rec && q[-1] > 0x20)
+        q--;
+    d = strlen(newname) - (p - q);
+    if (d < 0) {
+        while (*p != 0)
+            p[d] = *p;
+        *p = 0;
+    }
+    if (d > 0) {
+        e = p;
+        while (*e != 0)
+            e++;
+        if (e - rec < size - d)
+            return -1;
+        while (e != p) {
+            e[d] = *e;
+            e--;
+        }
+    }
+    while (*newname != 0)
+        *q++ = *newname++;
+    return 0;
+}
 
 //100%
 extern "C" int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src)
@@ -127,7 +299,30 @@ extern "C" int func_003EBCB0(unsigned char* buf, int size, const char* val)
     return 0;
 }
 
-INCLUDE_ASM("dirtysock/tags", func_003EBD70);
+extern char D_004A4A80[];
+
+// Ends the record with the separator D_004A4A70 unless its last byte is a control
+// char or already the separator, then appends D_004A4A80 if 4 more bytes fit.
+extern "C" int func_003EBD70(unsigned char* buf, int size)
+{
+    const char* s = D_004A4A80;
+    int ret = -1;
+    int n = 0;
+    while (buf[n] != 0)
+        n++;
+    if (n > 0 && buf[n - 1] >= 0x20 && buf[n - 1] != D_004A4A70 && n < size - 1) {
+        buf[n] = D_004A4A70;
+        n++;
+        buf[n] = 0;
+    }
+    if (n + 4 < size) {
+        while (*s != 0)
+            buf[n++] = *s++;
+        buf[n] = 0;
+        ret = 0;
+    }
+    return ret;
+}
 
 //100% - objdiff report; single-function view differs only in a relocation name
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
