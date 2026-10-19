@@ -262,7 +262,299 @@ extern "C" void func_0028A558(void* self, int a1, const char* name, int a3, int 
 
 INCLUDE_ASM("sound/asyncsys", func_0028A728);
 
+//100%
 INCLUDE_ASM("sound/asyncsys", func_0028AAF8);
+#ifdef SKIP_ASM
+extern "C" int func_003B6098(void* sema, int a1);
+extern "C" int func_003B6300(int id);
+extern "C" int func_003B6528(int id);
+extern "C" int f_6548_AAF8(void* data, int id) __asm__("func_003B6548");
+extern "C" int func_003DF980(int handle);
+extern "C" void func_003E6574(void* dst, void* src, int n);
+extern "C" int ASYNCFILE_release(int handle, int* buf, int* size);
+extern "C" void func_0028A298(void* self);
+
+struct sRing_AAF8 {
+    int size;
+    int* data;
+    int head;
+    int tail;
+};
+
+struct sVE_AAF8 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, int, int);
+};
+
+typedef void (*tDone_AAF8)(void*, int, int, int, char*, int, int);
+
+struct sAsync_AAF8 {
+    int result;             // 0x0
+    int busy;               // 0x4
+    int slot;               // 0x8
+    char names[6][0x40];    // 0xC
+    char pad18C[0x18C - 0xC - 6 * 0x40];
+    sRing_AAF8 q18C;        // 0x18C
+    sRing_AAF8 q19C;        // 0x19C
+    sRing_AAF8 q1AC;        // 0x1AC
+    sRing_AAF8 q1BC;        // 0x1BC
+    void* buf;              // 0x1CC
+    int bufSize;            // 0x1D0
+    sVE_AAF8* vt;           // 0x1D4
+};
+
+extern "C" void func_0028AAF8(void* self)
+{
+    sAsync_AAF8* s = (sAsync_AAF8*)self;
+    if (s->busy == 0) {
+        return;
+    }
+    int kind;
+    {
+        sRing_AAF8* q = &s->q1AC;
+        if (s->q1AC.head == s->q1AC.tail) {
+            kind = -1;
+        } else {
+            kind = q->data[q->tail];
+        }
+    }
+    switch (kind) {
+    case 0:
+    case 2:
+        switch (func_003DF980(s->result)) {
+        case 0:
+            break;
+        case 1: {
+            int buf = 0;
+            int size = 0;
+            ASYNCFILE_release(s->result, &buf, &size);
+            if (size > 0) {
+                if (func_003B6098(s, buf) != 7) {
+                    func_003B6300(s->result);
+                    sRing_AAF8* q0 = &s->q18C;
+                    sVE_AAF8* vt = s->vt;
+                    char* thisp = (char*)s + vt[3].delta;
+                    int (**pf)(void*, int, int, int) = &vt[3].fn;
+                    int a;
+                    int c;
+                    if (s->q18C.head == s->q18C.tail) {
+                        a = -1;
+                    } else {
+                        a = q0->data[q0->tail];
+                    }
+                    int n = size;
+                    {
+                        sRing_AAF8* q3 = &s->q1BC;
+                        if (s->q1BC.head == s->q1BC.tail) {
+                            c = -1;
+                        } else {
+                            c = q3->data[q3->tail];
+                        }
+                    }
+                    int r = (*pf)(thisp, a, n, c);
+                    func_003E6574((void*)r, (void*)buf, size);
+                    func_003B6098(s, r);
+                    sVE_AAF8* vt2 = s->vt;
+                    char* thisp2 = (char*)s + vt2[5].delta;
+                    tDone_AAF8* pf2 = (tDone_AAF8*)&vt2[5].fn;
+                    int b;
+                    int idx;
+                    if (s->q18C.head == s->q18C.tail) {
+                        b = -1;
+                    } else {
+                        b = q0->data[q0->tail];
+                    }
+                    {
+                        sRing_AAF8* q1 = &s->q19C;
+                        if (s->q19C.head == s->q19C.tail) {
+                            idx = -1;
+                        } else {
+                            idx = q1->data[q1->tail];
+                        }
+                    }
+                    (*pf2)(thisp2, b, s->result, 0, s->names[idx], r, size);
+                } else {
+                    int id = func_003B6528(s->result);
+                    sRing_AAF8* q0 = &s->q18C;
+                    // PORT: g++ 2.95 virtual calls (vptr at 0x1D4) written out by hand: delta + saved &pfn, args evaluated after.
+                    sVE_AAF8* vt = s->vt;
+                    char* thisp = (char*)s + vt[3].delta;
+                    int (**pf)(void*, int, int, int) = &vt[3].fn;
+                    int a;
+                    int c;
+                    if (s->q18C.head == s->q18C.tail) {
+                        a = -1;
+                    } else {
+                        a = q0->data[q0->tail];
+                    }
+                    {
+                        sRing_AAF8* q3 = &s->q1BC;
+                        if (s->q1BC.head == s->q1BC.tail) {
+                            c = -1;
+                        } else {
+                            c = q3->data[q3->tail];
+                        }
+                    }
+                    int r = (*pf)(thisp, a, id, c);
+                    f_6548_AAF8((void*)r, s->result);
+                    sVE_AAF8* vt2 = s->vt;
+                    char* thisp2 = (char*)s + vt2[5].delta;
+                    tDone_AAF8* pf2 = (tDone_AAF8*)&vt2[5].fn;
+                    int b;
+                    int idx;
+                    if (s->q18C.head == s->q18C.tail) {
+                        b = -1;
+                    } else {
+                        b = q0->data[q0->tail];
+                    }
+                    {
+                        sRing_AAF8* q1 = &s->q19C;
+                        if (s->q19C.head == s->q19C.tail) {
+                            idx = -1;
+                        } else {
+                            idx = q1->data[q1->tail];
+                        }
+                    }
+                    (*pf2)(thisp2, b, s->result, 0, s->names[idx], r, id);
+                }
+            } else {
+                sRing_AAF8* q0 = &s->q18C;
+                sVE_AAF8* vt2 = s->vt;
+                char* thisp2 = (char*)s + vt2[5].delta;
+                tDone_AAF8* pf2 = (tDone_AAF8*)&vt2[5].fn;
+                int b;
+                int idx;
+                if (s->q18C.head == s->q18C.tail) {
+                    b = -1;
+                } else {
+                    b = q0->data[q0->tail];
+                }
+                {
+                    sRing_AAF8* q1 = &s->q19C;
+                    if (s->q19C.head == s->q19C.tail) {
+                        idx = -1;
+                    } else {
+                        idx = q1->data[q1->tail];
+                    }
+                }
+                (*pf2)(thisp2, b, -1, 2, s->names[idx], 0, 0);
+            }
+            s->busy = 0;
+            if (s->q18C.head != s->q18C.tail) {
+                if (++s->q18C.tail >= s->q18C.size) {
+                    s->q18C.tail = 0;
+                }
+            }
+            if (s->q19C.head != s->q19C.tail) {
+                if (++s->q19C.tail >= s->q19C.size) {
+                    s->q19C.tail = 0;
+                }
+            }
+            if (s->q1AC.head != s->q1AC.tail) {
+                if (++s->q1AC.tail >= s->q1AC.size) {
+                    s->q1AC.tail = 0;
+                }
+            }
+            if (s->q1BC.head != s->q1BC.tail) {
+                if (++s->q1BC.tail >= s->q1BC.size) {
+                    s->q1BC.tail = 0;
+                }
+            }
+            func_0028A298(s);
+            break;
+        }
+        case -1:
+        default:
+            func_00289DF0(s, 0);
+            break;
+        }
+        break;
+    case 1:
+        switch (func_003DF980(s->result)) {
+        case 0:
+            break;
+        case 1: {
+            int buf = 0;
+            int size = 0;
+            ASYNCFILE_release(s->result, &buf, &size);
+            if (size > 0) {
+                func_003B6098(s, buf);
+                sRing_AAF8* q0 = &s->q18C;
+                sVE_AAF8* vt2 = s->vt;
+                char* thisp2 = (char*)s + vt2[5].delta;
+                tDone_AAF8* pf2 = (tDone_AAF8*)&vt2[5].fn;
+                int b;
+                int idx;
+                if (s->q18C.head == s->q18C.tail) {
+                    b = -1;
+                } else {
+                    b = q0->data[q0->tail];
+                }
+                {
+                    sRing_AAF8* q1 = &s->q19C;
+                    if (s->q19C.head == s->q19C.tail) {
+                        idx = -1;
+                    } else {
+                        idx = q1->data[q1->tail];
+                    }
+                }
+                (*pf2)(thisp2, b, s->result, 0, s->names[idx], buf, size);
+            } else {
+                sRing_AAF8* q0 = &s->q18C;
+                sVE_AAF8* vt2 = s->vt;
+                char* thisp2 = (char*)s + vt2[5].delta;
+                tDone_AAF8* pf2 = (tDone_AAF8*)&vt2[5].fn;
+                int b;
+                int idx;
+                if (s->q18C.head == s->q18C.tail) {
+                    b = -1;
+                } else {
+                    b = q0->data[q0->tail];
+                }
+                {
+                    sRing_AAF8* q1 = &s->q19C;
+                    if (s->q19C.head == s->q19C.tail) {
+                        idx = -1;
+                    } else {
+                        idx = q1->data[q1->tail];
+                    }
+                }
+                (*pf2)(thisp2, b, -1, 2, s->names[idx], buf, 0);
+            }
+            s->busy = 0;
+            if (s->q18C.head != s->q18C.tail) {
+                if (++s->q18C.tail >= s->q18C.size) {
+                    s->q18C.tail = 0;
+                }
+            }
+            if (s->q19C.head != s->q19C.tail) {
+                if (++s->q19C.tail >= s->q19C.size) {
+                    s->q19C.tail = 0;
+                }
+            }
+            if (s->q1AC.head != s->q1AC.tail) {
+                if (++s->q1AC.tail >= s->q1AC.size) {
+                    s->q1AC.tail = 0;
+                }
+            }
+            if (s->q1BC.head != s->q1BC.tail) {
+                if (++s->q1BC.tail >= s->q1BC.size) {
+                    s->q1BC.tail = 0;
+                }
+            }
+            func_0028A298(s);
+            break;
+        }
+        case -1:
+        default:
+            func_00289DF0(s, 0);
+            break;
+        }
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B0F0);
