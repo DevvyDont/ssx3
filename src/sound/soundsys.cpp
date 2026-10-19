@@ -992,7 +992,60 @@ extern "C" void func_00292AE8(char* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_00292B48);
+#ifdef SKIP_ASM
+struct sSndKey8B48 {
+    long v;
+} __attribute__((packed));
+class cSndSub292B48 {
+public:
+    char pad[0x8D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03(long key);
+};
+class cSndBase292B48 {
+public:
+    char pad[0x1D4];
+    virtual void b01();
+};
+class cSndObj292B48 : public cSndBase292B48, public cSndSub292B48 {
+};
+extern const sSndKey8B48 D_004A3688[];
+extern const sSndKey8B48 D_004A3690[];
+extern const sSndKey8B48 D_004A3698[];
+extern const sSndKey8B48 D_004A36A0[];
+// View (func_00299638 declares D_004A36A8 with the unit's sSndKey8 type).
+extern const sSndKey8B48 D_004A36A8_b48[] __asm__("D_004A36A8");
+extern const sSndKey8B48 D_004A36B0[];
+extern const sSndKey8B48 D_004A36B8[];
+extern "C" void func_002913D8(void* self);
+extern "C" void func_002AD5F0(void* p, int idx, int a2, float v);
+extern "C" void func_002ADDE0(void* p, long key);
+
+static inline void sndKeyCall(void* self, long key)
+{
+    (**(cSndObj292B48***)((char*)self + 0x118))->v03(key);
+}
+
+// PORT: 64-bit long sound keys
+extern "C" void func_00292B48(void* self)
+{
+    func_002913D8(self);
+    sndKeyCall(self, D_004A3688[0].v);
+    sndKeyCall(self, D_004A3690[0].v);
+    sndKeyCall(self, D_004A3698[0].v);
+    sndKeyCall(self, D_004A36A0[0].v);
+    func_002ADDE0(**(char***)((char*)self + 0x118) + 0x1D8, D_004A36A8_b48[0].v);
+    if (*(int*)((char*)self + 0x59E4) > 0) {
+        func_002AD5F0(**(char***)((char*)self + 0x118) + 0x1D8, *(int*)((char*)self + 0x59E0), 1, 0.0f);
+        *(int*)((char*)self + 0x59E4) = 0;
+    }
+    sndKeyCall(self, D_004A36B0[0].v);
+    sndKeyCall(self, D_004A36B8[0].v);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_00292CB8);
