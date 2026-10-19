@@ -241,7 +241,30 @@ int func_002AA068_impl(void* self, int a1, int* out)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AA0C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct func_002AA0C0_sStatus {
+    int state;
+    int a;
+    int b;
+    int c;
+};
+
+// the unit declares func_002AA068 later with a different pointer type; alias it
+void func_002AA068_status(void* self, func_002AA0C0_sStatus* out, int flags) __asm__("func_002AA068");
+
+extern "C" float func_002AA0C0(void* self)
+{
+    func_002AA0C0_sStatus st;
+    func_002AA068_status(self, &st, 0);
+    if (st.state == 2) {
+        return (float)st.a;
+    }
+    return 0.0f;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AA108);
@@ -267,8 +290,40 @@ extern "C" float func_002AA108(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AA150);
+#ifdef SKIP_ASM
+struct func_002AA150_sStatus {
+    int state;
+    int a;
+    int b;
+    int c;
+};
+
+extern "C" int func_002AA150(void* self, int minVal)
+{
+    func_002AA150_sStatus st;
+    func_002AA020(self, &st);
+    return st.b >= minVal;
+}
+#endif
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AA188);
+#ifdef SKIP_ASM
+struct func_002AA188_sStatus {
+    int state;
+    int a;
+    int b;
+    int c;
+};
+
+extern "C" int func_002AA188(void* self)
+{
+    func_002AA188_sStatus st;
+    func_002AA068(self, (func_002AA1B8_sStatus*)&st, 0);
+    return st.state == 1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AA1B8);
@@ -290,7 +345,18 @@ extern "C" int func_002AA1B8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AA1E8);
+#ifdef SKIP_ASM
+extern "C" void func_003B7D80(int, int);
+
+extern "C" void func_002AA1E8(void* self)
+{
+    int buf[2];
+    func_002AA020(self, buf);
+    func_003B7D80(buf[1], 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA210);
@@ -311,8 +377,39 @@ extern "C" int func_002AA210(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AA240);
+#ifdef SKIP_ASM
+extern "C" void func_003B7D80(int, int);
+
+extern "C" void func_002AA240(void* self, int arg1)
+{
+    func_003B7D80(arg1, 0);
+}
+#endif
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AA260);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct func_002AA260_sStatus {
+    int state;
+    int a;
+    int b;
+    int c;
+};
+
+void func_002AA068_status(void* self, func_002AA260_sStatus* out, int flags) __asm__("func_002AA068");
+
+extern "C" float func_002AA260(void* self)
+{
+    func_002AA260_sStatus st;
+    func_002AA068_status(self, &st, 0);
+    if (st.state == 2) {
+        return (float)(st.a + st.b);
+    }
+    return 0.0f;
+}
+#endif
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA2B0);
 #ifdef SKIP_ASM
@@ -726,7 +823,20 @@ extern "C" int func_002AAD78(void* self, int i, int a, int b, int c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AADC0);
+#ifdef SKIP_ASM
+extern "C" int func_002AA398(void*, int, int, int);
+
+extern "C" int func_002AADC0(void* self, int idx, int arg2, int arg3, int arg4)
+{
+    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    if (stream != 0) {
+        return func_002AA398(stream, arg2, arg3, arg4);
+    }
+    return -1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AAE08);
@@ -770,9 +880,42 @@ extern "C" float func_002AAE78(void* self, int i)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AAEC0);
+#ifdef SKIP_ASM
+extern "C" float func_002AA260(void*);
+
+extern "C" float func_002AAEC0(void* self, int idx)
+{
+    void* stream;
+    if (idx < 0 || (stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4)) == 0) {
+        return 0.0f;
+    }
+    return func_002AA260(stream);
+}
+#endif
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AAF08);
+#ifdef SKIP_ASM
+extern "C" int func_002AA150(void*, int);
+
+extern "C" int func_002AAF08(void* self, int idx, int arg2)
+{
+    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    return stream != 0 ? func_002AA150(stream, arg2) : 0;
+}
+#endif
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AAF40);
+#ifdef SKIP_ASM
+extern "C" int func_002AA188(void*);
+
+extern "C" int func_002AAF40(void* self, int idx)
+{
+    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    return stream != 0 ? func_002AA188(stream) : 0;
+}
+#endif
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AAF78);
 #ifdef SKIP_ASM
@@ -821,8 +964,32 @@ extern "C" int func_002AB028(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AB060);
+#ifdef SKIP_ASM
+extern "C" void func_002AA1E8(void*);
+
+extern "C" void func_002AB060(void* self, int idx)
+{
+    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    if (stream != 0) {
+        func_002AA1E8(stream);
+    }
+}
+#endif
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AB098);
+#ifdef SKIP_ASM
+extern "C" void func_002AA240(void*, int);
+
+extern "C" void func_002AB098(void* self, int idx, int arg2)
+{
+    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    if (stream != 0) {
+        func_002AA240(stream, arg2);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AB0D0);
@@ -836,8 +1003,29 @@ extern "C" void func_002AB0D0(void* self, int i, int val)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AB0F0);
+#ifdef SKIP_ASM
+extern "C" void func_002AB0F0(void* self, int idx, int val)
+{
+    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    if (stream != 0) {
+        func_002A9F30(stream, val);
+    }
+}
+#endif
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AB128);
+#ifdef SKIP_ASM
+extern "C" int func_002AB128(void* self, int idx)
+{
+    void* p = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    if (p != 0) {
+        return *(int*)((char*)p + 0x8);
+    }
+    return -1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AB150);
@@ -863,8 +1051,28 @@ int func_002AB188(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AB1A0);
+#ifdef SKIP_ASM
+extern "C" void func_003B7D80(int, int);
+
+extern "C" int func_002AB1A0(void* self, void* arg1)
+{
+    func_003B7D80(*(int*)((char*)arg1 + 0x1C), 0);
+    return 1;
+}
+#endif
+//100%
 INCLUDE_ASM("sound/streamsys", func_002AB1C8);
+#ifdef SKIP_ASM
+extern "C" int func_002AA448(void*, int);
+
+extern "C" int func_002AB1C8(void* self, int idx, int arg2)
+{
+    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    return stream != 0 ? func_002AA448(stream, arg2) : -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AB200);
@@ -1248,7 +1456,17 @@ extern "C" int func_002ABB80(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/streamsys", func_002ABBD8);
+#ifdef SKIP_ASM
+extern "C" float func_002ABBD8(void* self, float* a, float* b)
+{
+    float dx = a[0] - b[0];
+    float dy = a[1] - b[1];
+    float dz = a[2] - b[2];
+    return dx * dx + dy * dy + dz * dz;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002ABC18);

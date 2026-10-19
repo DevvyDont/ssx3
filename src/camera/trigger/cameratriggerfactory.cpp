@@ -1141,13 +1141,32 @@ extern "C" void* func_001747A0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174808);
+#ifdef SKIP_ASM
+extern "C" void* func_00174808(void* self, ...)
+{
+    return self;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174848);
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00175A20);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176270);
+#ifdef SKIP_ASM
+extern void* D_0045BDE0[];
+
+extern "C" void func_00176270(void* self, int flags)
+{
+    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762A0);
 #ifdef SKIP_ASM
@@ -1201,7 +1220,28 @@ extern "C" void func_001762E8(void) {
 
 }
 #endif
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762F0);
+#ifdef SKIP_ASM
+class cTriggerVirt5 {
+public:
+    int field_0x0;
+    int field_0x4;
+    int field_0x8;
+    int field_0xC;
+    // vptr at 0x10; slot N lives at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+};
+
+extern "C" void func_001762F0(cTriggerVirt5* self)
+{
+    self->v05();
+}
+#endif
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176318);
 #ifdef SKIP_ASM
@@ -2074,7 +2114,14 @@ extern "C" void func_00177588(cCamCtrlK8940* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177610);
+#ifdef SKIP_ASM
+extern "C" void* func_00177610(void* self, ...)
+{
+    return self;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177650);
 
@@ -2836,7 +2883,14 @@ extern "C" void func_00178E90(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178F18);
+#ifdef SKIP_ASM
+extern "C" void* func_00178F18(void* self, ...)
+{
+    return self;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178F58);
 
@@ -2859,7 +2913,14 @@ void* func_00179738(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00179758);
+#ifdef SKIP_ASM
+extern "C" void* func_00179758(void* self, ...)
+{
+    return self;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00179798);
 
