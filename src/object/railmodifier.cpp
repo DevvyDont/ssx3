@@ -725,7 +725,128 @@ extern "C" void func_0035E1E0(void* self, func_0035E1E0_cObj* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035E248);
+#ifdef SKIP_ASM
+struct sM44_E248 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (unit quaternion -> 4x4 rotation matrix, row 3 = (0,0,0,1)).
+static inline void QuatToMtx_E248(sM44_E248& m, const sRmVec4& q)
+{
+    __asm__ __volatile__(
+        "lqc2       $vf4, %1\n"
+        "vaddw.xyz  $vf1, $vf0, $vf0w\n"
+        "vadd.xyz   $vf5, $vf4, $vf4\n"
+        "vsub.w     $vf10, $vf10, $vf10\n"
+        "vsub.w     $vf11, $vf11, $vf11\n"
+        "vsub.w     $vf12, $vf12, $vf12\n"
+        "vmul.xyz   $vf6, $vf5, $vf4\n"
+        "vmulw.xyz  $vf7, $vf5, $vf4w\n"
+        "vopmula.xyz ACC, $vf5, $vf4\n"
+        "vmadd.xyz  $vf8, $vf0, $vf0\n"
+        "vsubay.x   ACC, $vf1, $vf6y\n"
+        "vmsubz.x   $vf10, $vf1, $vf6z\n"
+        "vsubaz.y   ACC, $vf1, $vf6z\n"
+        "vmsubx.y   $vf11, $vf1, $vf6x\n"
+        "vsubax.z   ACC, $vf1, $vf6x\n"
+        "vmsuby.z   $vf12, $vf1, $vf6y\n"
+        "vaddaz.y   ACC, $vf0, $vf8z\n"
+        "vmaddz.y   $vf10, $vf1, $vf7z\n"
+        "vaddax.z   ACC, $vf0, $vf8x\n"
+        "vmaddx.z   $vf11, $vf1, $vf7x\n"
+        "vaddax.y   ACC, $vf0, $vf8x\n"
+        "vmsubx.y   $vf12, $vf1, $vf7x\n"
+        "vadday.z   ACC, $vf0, $vf8y\n"
+        "vmsuby.z   $vf10, $vf1, $vf7y\n"
+        "vaddaz.x   ACC, $vf0, $vf8z\n"
+        "vmsubz.x   $vf11, $vf1, $vf7z\n"
+        "vadday.x   ACC, $vf0, $vf8y\n"
+        "vmaddy.x   $vf12, $vf1, $vf7y\n"
+        "sqc2       $vf0, 0x30(%0)\n"
+        "sqc2       $vf10, 0x0(%0)\n"
+        "sqc2       $vf11, 0x10(%0)\n"
+        "sqc2       $vf12, 0x20(%0)\n"
+        :
+        : "r"(&m), "m"(q)
+        : "memory");
+}
+
+// The 3x3 rotation part of a 4x4 matrix.
+static inline sRmMat33 Get33_E248(const sM44_E248& m)
+{
+    sRmMat33 r;
+    r.m[0][0] = m.m[0][0];
+    r.m[0][1] = m.m[0][1];
+    r.m[0][2] = m.m[0][2];
+    r.m[1][0] = m.m[1][0];
+    r.m[1][1] = m.m[1][1];
+    r.m[1][2] = m.m[1][2];
+    r.m[2][0] = m.m[2][0];
+    r.m[2][1] = m.m[2][1];
+    r.m[2][2] = m.m[2][2];
+    return r;
+}
+
+static inline void Transpose33_E248(sRmMat33& m)
+{
+    float t;
+    t = m.m[0][1]; m.m[0][1] = m.m[1][0]; m.m[1][0] = t;
+    t = m.m[0][2]; m.m[0][2] = m.m[2][0]; m.m[2][0] = t;
+    t = m.m[1][2]; m.m[1][2] = m.m[2][1]; m.m[2][1] = t;
+}
+
+// r = b * a (a applied first).
+static inline sRmMat33 Mul33_E248(const sRmMat33& a, const sRmMat33& b)
+{
+    sRmMat33 r;
+    r.m[0][0] = a.m[0][0] * b.m[0][0] + a.m[1][0] * b.m[0][1] + a.m[2][0] * b.m[0][2];
+    r.m[1][0] = a.m[0][0] * b.m[1][0] + a.m[1][0] * b.m[1][1] + a.m[2][0] * b.m[1][2];
+    r.m[2][0] = a.m[0][0] * b.m[2][0] + a.m[1][0] * b.m[2][1] + a.m[2][0] * b.m[2][2];
+    r.m[0][1] = a.m[0][1] * b.m[0][0] + a.m[1][1] * b.m[0][1] + a.m[2][1] * b.m[0][2];
+    r.m[1][1] = a.m[0][1] * b.m[1][0] + a.m[1][1] * b.m[1][1] + a.m[2][1] * b.m[1][2];
+    r.m[2][1] = a.m[0][1] * b.m[2][0] + a.m[1][1] * b.m[2][1] + a.m[2][1] * b.m[2][2];
+    r.m[0][2] = a.m[0][2] * b.m[0][0] + a.m[1][2] * b.m[0][1] + a.m[2][2] * b.m[0][2];
+    r.m[1][2] = a.m[0][2] * b.m[1][0] + a.m[1][2] * b.m[1][1] + a.m[2][2] * b.m[1][2];
+    r.m[2][2] = a.m[0][2] * b.m[2][0] + a.m[1][2] * b.m[2][1] + a.m[2][2] * b.m[2][2];
+    return r;
+}
+
+struct sRmInertiaOwner_E248 {
+    char pad_0x0[0x280];
+    sRmMat33 inertia;   // 0x280: body-space inertia
+};
+
+// r = I * a, with I the body inertia (passed through its owner so each element is an offset from it).
+static inline sRmMat33 MulI_E248(const sRmMat33& a, const sRmInertiaOwner_E248* body)
+{
+    sRmMat33 r;
+    r.m[0][0] = a.m[0][0] * body->inertia.m[0][0] + a.m[1][0] * body->inertia.m[0][1] + a.m[2][0] * body->inertia.m[0][2];
+    r.m[1][0] = a.m[0][0] * body->inertia.m[1][0] + a.m[1][0] * body->inertia.m[1][1] + a.m[2][0] * body->inertia.m[1][2];
+    r.m[2][0] = a.m[0][0] * body->inertia.m[2][0] + a.m[1][0] * body->inertia.m[2][1] + a.m[2][0] * body->inertia.m[2][2];
+    r.m[0][1] = a.m[0][1] * body->inertia.m[0][0] + a.m[1][1] * body->inertia.m[0][1] + a.m[2][1] * body->inertia.m[0][2];
+    r.m[1][1] = a.m[0][1] * body->inertia.m[1][0] + a.m[1][1] * body->inertia.m[1][1] + a.m[2][1] * body->inertia.m[1][2];
+    r.m[2][1] = a.m[0][1] * body->inertia.m[2][0] + a.m[1][1] * body->inertia.m[2][1] + a.m[2][1] * body->inertia.m[2][2];
+    r.m[0][2] = a.m[0][2] * body->inertia.m[0][0] + a.m[1][2] * body->inertia.m[0][1] + a.m[2][2] * body->inertia.m[0][2];
+    r.m[1][2] = a.m[0][2] * body->inertia.m[1][0] + a.m[1][2] * body->inertia.m[1][1] + a.m[2][2] * body->inertia.m[1][2];
+    r.m[2][2] = a.m[0][2] * body->inertia.m[2][0] + a.m[1][2] * body->inertia.m[2][1] + a.m[2][2] * body->inertia.m[2][2];
+    return r;
+}
+
+// World-space inertia: rotT * inertia * rot, with rot from the body quaternion (self + 0x40).
+extern "C" void func_0035E248(void* self)
+{
+    sM44_E248 m;
+    QuatToMtx_E248(m, *(sRmVec4*)((char*)self + 0x40));
+    sRmMat33 rot;
+    sRmMat33 rotT;
+    rotT = Get33_E248(m);
+    rot = rotT;
+    Transpose33_E248(rotT);
+    *(sRmMat33*)((char*)self + 0x80) = Mul33_E248(MulI_E248(rot, (sRmInertiaOwner_E248*)self), rotT);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035E770);
@@ -5259,7 +5380,97 @@ extern "C" void func_00364360(void* self, ulong** pp)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_003645B8);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+static inline void vu0CopyMtx_45B8(void* dst, const void* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+struct sM44_45B8 {
+    float m[16];
+    sM44_45B8& operator=(const sM44_45B8& o) { vu0CopyMtx_45B8(this, &o); return *this; }
+} __attribute__((aligned(16)));
+
+struct sV4_45B8 {
+    float v[4];
+} __attribute__((aligned(16)));
+
+#define MTX_EQ_45B8(a, b) \
+    ((a).m[0] == (b).m[0] && (a).m[1] == (b).m[1] && (a).m[2] == (b).m[2] && (a).m[3] == (b).m[3] && \
+     (a).m[4] == (b).m[4] && (a).m[5] == (b).m[5] && (a).m[6] == (b).m[6] && (a).m[7] == (b).m[7] && \
+     (a).m[8] == (b).m[8] && (a).m[9] == (b).m[9] && (a).m[10] == (b).m[10] && (a).m[11] == (b).m[11] && \
+     (a).m[12] == (b).m[12] && (a).m[13] == (b).m[13] && (a).m[14] == (b).m[14] && (a).m[15] == (b).m[15])
+#define VEC_EQ_45B8(a, b) \
+    ((a).v[0] == (b).v[0] && (a).v[1] == (b).v[1] && (a).v[2] == (b).v[2] && (a).v[3] == (b).v[3])
+
+// One cached transform set (0x180 bytes).
+struct sRailXf_45B8 {
+    sM44_45B8 m0;       // 0x000
+    sM44_45B8 m1;       // 0x040
+    sM44_45B8 m2;       // 0x080
+    sV4_45B8 v0;        // 0x0C0
+    sV4_45B8 v1;        // 0x0D0
+    sM44_45B8 key0;     // 0x0E0
+    sM44_45B8 key1;     // 0x120
+    sV4_45B8 key2;      // 0x160
+    sV4_45B8 key3;      // 0x170
+
+    // Each compares one key of a cached entry against this probe; entry first.
+    int Key0Eq(const sM44_45B8& e) const { return MTX_EQ_45B8(e, key0); }
+    int Key1Eq(const sM44_45B8& e) const { return MTX_EQ_45B8(e, key1); }
+    int Key2Eq(const sV4_45B8& e) const { return VEC_EQ_45B8(e, key2); }
+    int Key3Eq(const sV4_45B8& e) const { return VEC_EQ_45B8(e, key3); }
+};
+
+struct sRailXfTable_45B8 {
+    char pad_0x00[0x69CC0];
+    int found;                  // 0x69CC0
+    int pad_0x69CC4;
+    int count;                  // 0x69CC8
+    int pad_0x69CCC;
+    sRailXf_45B8 entries[1];    // 0x69CD0
+};
+
+extern "C" void func_003645B8(sRailXfTable_45B8* self, sRailXf_45B8* in)
+{
+    int i;
+    self->found = -1;
+    for (i = 0; i < self->count; i++) {
+        if (in->Key0Eq(self->entries[i].key0) && in->Key1Eq(self->entries[i].key1) &&
+            in->Key2Eq(self->entries[i].key2) && in->Key3Eq(self->entries[i].key3)) {
+            self->found = i;
+            break;
+        }
+    }
+    if (self->found < 0) {
+        self->entries[self->count].m0 = in->m0;
+        self->entries[self->count].m1 = in->m1;
+        self->entries[self->count].m2 = in->m2;
+        self->entries[self->count].v0 = in->v0;
+        self->entries[self->count].v1 = in->v1;
+        self->entries[self->count].key0 = in->key0;
+        self->entries[self->count].key1 = in->key1;
+        self->entries[self->count].key2 = in->key2;
+        self->entries[self->count].key3 = in->key3;
+        self->found = self->count;
+        self->count++;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00364B88);
