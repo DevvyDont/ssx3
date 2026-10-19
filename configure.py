@@ -125,6 +125,39 @@ compiler_type = "gcc"
 """)
 
 
+def rewrite_uld_hi_for_objdiff():
+    """Objects mode only: `lui $r, %hi(SYM + 0x7)` -> `%hi(SYM)` where that lui feeds an unaligned 64-bit load.
+
+    For an 8-byte value read with ldl %lo(SYM + 0x7) / ldr %lo(SYM), splat writes the lui as %hi(SYM + 0x7) and
+    modern gas pairs that HI16 with the ldl's LO16. The EE assembler the game was built with pairs it with the
+    ldr's LO16 (+0), and objdiff reads a HI16's addend from the LO16 after it, so identical bytes compared as
+    +7 vs +0 (sound-key family, 2026-10-18). Only rewritten when both spellings give the same immediate and the
+    function has the matching ldr. Never used for the linked ELF (same bytes either way).
+    """
+    import re
+
+    hi7 = re.compile(r"(lui\s+(\$\w+), )%hi\((D_([0-9A-F]{8})) \+ 0x7\)")
+    rewritten = 0
+    for f in Path("asm/nonmatchings").rglob("*.s"):
+        text = f.read_text()
+        if " + 0x7)" not in text:
+            continue
+
+        def sub(m):
+            nonlocal rewritten
+            addr = int(m.group(4), 16)
+            same = ((addr + 7 + 0x8000) >> 16) == ((addr + 0x8000) >> 16)
+            if same and re.search(r"ldr\s+\$\w+, %%lo\(%s\)\(%s\)" % (m.group(3), re.escape(m.group(2))), text):
+                rewritten += 1
+                return f"{m.group(1)}%hi({m.group(3)})"
+            return m.group(0)
+
+        new_text = hi7.sub(sub, text)
+        if new_text != text:
+            f.write_text(new_text)
+    print(f"uld %hi rewrite for objdiff: {rewritten} lui")
+
+
 def rewrite_lit4_loads_for_objdiff():
     """Objects mode only: turn `lwc1 $fN, (D_x)` loads of .lit4 pool entries back into `li.s $fN, value`.
 
@@ -582,6 +615,7 @@ def main():
 
     if do_objects:
         rewrite_lit4_loads_for_objdiff()
+        rewrite_uld_hi_for_objdiff()
         build_stuff(linker_entries, skip_checksum=True, objects_only=True, dual_objects=True)
     else:
         build_stuff(linker_entries, do_skip_checksum)
