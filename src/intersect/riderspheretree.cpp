@@ -1229,7 +1229,138 @@ extern "C" int func_0032D028(void* selfp, void* a1, void* a2, void* pos, int dep
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032D208);
+#ifdef SKIP_ASM
+struct sSphereLevel_D208 {
+    float radius;   // 0x0
+    float offset;   // 0x4
+    int stride;     // 0x8
+};
+
+struct sSphereTreeInfo_D208 {
+    char pad_0x00[0xC];
+    int depth;                      // 0x0C
+    char pad_0x10[0x10];
+    sSphereLevel_D208* levels;      // 0x20
+    char pad_0x24[4];
+    unsigned char* masks;           // 0x28
+};
+
+struct sSphereOct_D208 {
+    sSphereVec4 dirs[8];            // 0x00
+    char pad_0x80[0x10];
+    float scale;                    // 0x90
+    float best;                     // 0x94: deepest penetration found so far
+    sSphereTreeInfo_D208* tree;     // 0x98
+    int order[8];                   // 0x9C: child visiting order
+};
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sSphereVec4 Scale_D208(const sSphereVec4& v, float s)
+{
+    sSphereVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sSphereVec4 Add_D208(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sSphereVec4 Sub_D208(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_D208(const sSphereVec4& a, const sSphereVec4& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline sSphereVec4 ZeroW_D208(const sSphereVec4& in)
+{
+    sSphereVec4 r = in;
+    r.w = 0;
+    return r;
+}
+
+// Sphere tree against the plane through the origin with normal *a1: records the deepest
+// penetration below self->best (*outA = push-out vector, *outB = contact point).
+extern "C" void func_0032D208(void* selfp, void* a1, void* pos, int depth, int base, void* outA, void* outB)
+{
+    sSphereOct_D208* self = (sSphereOct_D208*)selfp;
+    float d = Dot_D208(*(sSphereVec4*)a1, *(sSphereVec4*)pos);
+    float r = self->tree->levels[depth].radius * self->scale;
+    if (!(d < r + self->best))
+        return;
+    float f;
+    unsigned char mask = self->tree->masks[base];
+    if (depth < self->tree->depth && mask != 0) {
+        f = self->tree->levels[depth + 1].offset;
+        for (int i = 0; i < 8; i++) {
+            int k = self->order[i];
+            if ((mask >> k) & 1) {
+                sSphereVec4 p = Add_D208(*(sSphereVec4*)pos, Scale_D208(self->dirs[k], f));
+                func_0032D208(self, a1, &p, depth + 1, (k + 1) * self->tree->levels[depth].stride + base, outA, outB);
+            }
+        }
+        return;
+    }
+    f = d - r;
+    if (f < self->best) {
+        sSphereVec4 n = ZeroW_D208(*(sSphereVec4*)a1);
+        *(sSphereVec4*)outA = Scale_D208(n, f);
+        *(sSphereVec4*)outB = Sub_D208(*(sSphereVec4*)pos, Scale_D208(n, d));
+        self->best = f;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032D440);

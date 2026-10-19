@@ -1094,7 +1094,109 @@ extern "C" void func_0012A558(void) {
 
 }
 #endif
+//100%
 INCLUDE_ASM("ai/ai", func_0012A560);
+#ifdef SKIP_ASM
+extern "C" void* func_0026AF70(void* tree, int id);
+extern "C" float func_0026A138(void* node);
+t4Vector func_0026AB20_A560(void* path, int* inRange, float t) __asm__("func_0026AB20");
+void func_0011D660_A560(cRider* self, t4Vector* pos, t4Vector* dir, int n, float t) __asm__("func_0011D660");
+// PORT: prototype mismatch. func_0011FEC8/func_0011FE78 are defined with one param, but callers pass a mode in $a1.
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline t4Vector vSub_A560(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vLen_A560(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
+static inline void vDivEq_A560(t4Vector& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s));
+}
+
+static inline int NodeCount_A560(char* tree)
+{
+    return *(int*)(tree + 0x10);
+}
+
+static inline t4Vector Front_A560(cRider* r)
+{
+    return r->mMatrix.row[1];
+}
+
+// Puts the riders (all, or only rider `which`) back on the first path node that has a distance, facing along the path.
+extern "C" void func_0012A560(sAiObj12A340* self, int which)
+{
+    int n = NodeCount_A560(D_004D33A0);
+    for (int i = 0; i < n; i++) {
+        void* node = func_0026AF70(D_004D33A0, i);
+        float d = func_0026A138(node);
+        if (d != -1.0f) {
+            float back = d - 1000.0f;
+            if (back < 0.0f)
+                back = 0.0f;
+            t4Vector ahead = func_0026AB20_A560(node, 0, d);
+            t4Vector pos = func_0026AB20_A560(node, 0, back);
+            for (int j = 0; j < self->mCount; j++) {
+                if (which == -1 || which == j) {
+                    func_0011FEC8_impl(self->mRiders[j], 0);
+                    func_0011FE78_impl(self->mRiders[j], 0);
+                    t4Vector dir = vSub_A560(ahead, pos);
+                    float len = vLen_A560(dir);
+                    if (len > 1.0f)
+                        vDivEq_A560(dir, len);
+                    else
+                        dir = Front_A560((cRider*)self->mRiders[j]);
+                    func_0011D660_A560((cRider*)self->mRiders[j], &pos, &dir, 5, 0.0f);
+                }
+            }
+            return;
+        }
+    }
+}
+#endif
 INCLUDE_ASM("ai/ai", func_0012A768);
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", func_0012A998);

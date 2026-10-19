@@ -290,7 +290,59 @@ int func_003B4478(unsigned char *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_cloneat);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int func_003B3BB0_neat(char *) __asm__("func_003B3BB0");
+extern int func_003B4708_neat(int) __asm__("func_003B4708");
+extern void func_003E6188_neat(char *, char *, int) __asm__("func_003E6188");
+extern int sprintf_neat(char *, char *, ...) __asm__("sprintf");
+extern char D_004957B8_neat[] __asm__("D_004957B8");
+
+void SHAPE_cloneat(char *dst, char *src) {
+    char *p = src;
+    int off = 0;
+    char *prev = 0;
+    char *q;
+    char *np;
+    int align = (((int)p + 0xF) & -16) - (int)p;
+    int a22;
+    int mask;
+    int size, n;
+    if (p != 0) {
+        mask = -16;
+        a22 = align - 0x10;
+        do {
+            size = func_003B3BB0_neat(p);
+            if (off != 0) {
+                if (func_003B4708_neat(*(unsigned char *)p) != 0) {
+                    off = (((off - align) + 0x1F) & mask) + a22;
+                } else {
+                    off = (((off - align) + 0xF) & mask) + align;
+                }
+            }
+            q = prev;
+            prev = dst + off;
+            if (q != 0) {
+                *(int *)q = *(unsigned char *)q | ((prev - q) << 8);
+            }
+            *(int *)prev = *(unsigned char *)prev;
+            if (size != 0) {
+                func_003E6188_neat(prev, p, size);
+                if (*(unsigned char *)prev == 0x69 && size >= 0x15) {
+                    sprintf_neat(prev + 0x10, D_004957B8_neat, *(short *)(prev + 4));
+                }
+            }
+            n = *(int *)p >> 8;
+            np = 0;
+            if (n != 0) np = p + n;
+            p = np;
+            off += size;
+        } while (p != 0);
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4690);
 
@@ -2469,7 +2521,35 @@ int func_003B9D00(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B9DC8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_003B58A0();
+extern void func_003B58D8();
+extern int func_003B8D98(int);
+extern int func_003B9FC8_9DC8(int) __asm__("func_003B9FC8");
+extern char D_0050A120_9DC8[] __asm__("D_0050A120");
+
+int func_003B9DC8(int arg0) {
+    int var_16;
+    char *temp_4;
+
+    func_003B58A0();
+    var_16 = func_003B8D98(arg0);
+    if (var_16 < 0) {
+        func_003B58D8();
+        return var_16;
+    }
+    temp_4 = D_0050A120_9DC8 + var_16 * 0x70;
+    if (*(signed char *)(temp_4 + 0x28) == 5) {
+        *(signed char *)(temp_4 + 0x28) = 3;
+    }
+    var_16 = func_003B9FC8_9DC8(arg0);
+    func_003B58D8();
+    return var_16;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B9E48);
@@ -5903,7 +5983,25 @@ int func_003C5788(int arg0, int *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C57F0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int func_003B4DD8_57F0(void *) __asm__("func_003B4DD8");
+
+int func_003C57F0(int arg0, int *arg1) {
+    unsigned char buf[0xE0];
+    *arg1 = 0;
+    func_003B4DD8_57F0(buf);
+    switch (arg0) {
+    case 0: *arg1 = buf[6]; break;
+    case 1: *arg1 = buf[7]; break;
+    case 2: *arg1 = buf[8]; break;
+    default: return -5;
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5880);
@@ -5935,7 +6033,21 @@ int func_003C5880(int which, int v) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5908);
+#ifdef SKIP_ASM
+int func_003C5908(int arg0, int *arg1) {
+    unsigned char buf[0xE0];
+    func_003B4DD8_5880(buf);
+    switch (arg0) {
+    case 0: *arg1 = buf[0x2E]; break;
+    case 1: *arg1 = buf[0x2F]; break;
+    case 2: *arg1 = buf[0x30]; break;
+    default: return -5;
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5998);

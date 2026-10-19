@@ -234,7 +234,44 @@ extern "C" void func_0015D700(void* self, float x, float y, float z)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/cameraalgorithms", func_0015D780);
+#ifdef SKIP_ASM
+struct func_0015D780_V { float x, y, z, w; } __attribute__((aligned(16)));
+
+extern "C" float func_0031C228(float);
+
+static inline float atan2_15D780(float y, float x, float zero)
+{
+    if (x == zero) {
+        if (y == zero)
+            return y;
+        return zero <= y ? 1.5707963705062866f : -1.5707963705062866f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < zero) {
+        if (zero < y)
+            r += 3.1415927410125732f;
+        else
+            r -= 3.1415927410125732f;
+    }
+    return r;
+}
+
+extern "C" float func_0015D780(void* self)
+{
+    func_0015D780_V v;
+    float x = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x30) - *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x38));
+    float y = 1.0f - 2.0f * (*(float*)((char*)self + 0x38) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x30) * *(float*)((char*)self + 0x30));
+    float z = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x30));
+    v.x = x;
+    v.y = y;
+    v.z = z;
+    v.w = 0;
+    float w = v.w;
+    return atan2_15D780(y, x, w);
+}
+#endif
 //100%
 INCLUDE_ASM("camera/cameraalgorithms", func_0015D880);
 #ifdef SKIP_ASM

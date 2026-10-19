@@ -2198,7 +2198,53 @@ extern "C" void func_001A6E70(sOwner1A6E70* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A6F70);
+#ifdef SKIP_ASM
+extern "C" void func_00260F80();
+extern "C" int func_00261460(void* self);
+extern "C" void func_002613C8(void* self);
+extern "C" void func_0025B800(void* self);
+extern "C" int func_00262598(void* self);
+extern "C" const char* func_002625C8(void* self, int idx);
+extern "C" int func_00262400(void* self, int a1);
+extern "C" int func_00263128(void* self, const char* name);
+// PORT: the unit declares func_00262A38 with an int name parameter; this caller passes a string
+extern "C" int func_00262A38(void* self, int a1);
+extern "C" void func_00261EF8(void* self, int a1, int a2, int a3);
+extern void* D_004A3328;
+extern void* D_004A3028;
+
+static inline void* GetSession_001A6F70()
+{
+    if (D_004A3328 == 0) {
+        func_00260F80();
+    }
+    if (func_00261460(D_004A3328) == 0) {
+        func_002613C8(D_004A3328);
+    }
+    if (D_004A3328 == 0) {
+        func_0025B800(D_004A3028);
+    }
+    return D_004A3328;
+}
+
+// For every save slot that is in use, starts an operation (2) on the files that are neither busy nor present.
+extern "C" void func_001A6F70(void)
+{
+    char buf[0x10];
+    int n = func_00262598(GetSession_001A6F70());
+    for (int i = 0; i < n; i++) {
+        const char* name = func_002625C8(GetSession_001A6F70(), i);
+        if (name != 0 && func_00262400(GetSession_001A6F70(), i) != 0) {
+            int a = func_00263128(GetSession_001A6F70(), name);
+            int b = func_00262A38(GetSession_001A6F70(), (int)name);
+            if (a == 0 && b == 0)
+                func_00261EF8(GetSession_001A6F70(), (int)name, 2, (int)buf); // PORT: pointer passed as int (unit prototype)
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/feasyncfile", func_001A71B0);

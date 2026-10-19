@@ -230,7 +230,287 @@ extern "C" void* func_003430D0(void* self, void* unused, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00343130);
+#ifdef SKIP_ASM
+// PORT: 128-bit TImode quadword (the PC port needs a 16-byte struct).
+typedef int cQuad3130 __attribute__((mode(TI)));
+extern cQuad3130 D_004FF150;
+
+struct sVec3130 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat3130 {
+    sVec3130 r[4];
+    sMat3130() {}
+    // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+    sMat3130(const sMat3130& o)
+    {
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            :
+            : "r"(this), "r"(&o)
+            : "memory");
+    }
+    // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+    sMat3130& operator=(const sMat3130& o)
+    {
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            :
+            : "r"(this), "r"(&o)
+            : "memory");
+        return *this;
+    }
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * matrix).
+static inline sMat3130 mulMat3130(const sMat3130& a, const sMat3130& b)
+{
+    sMat3130 r;
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        :
+        : "r"(&r), "r"(&a), "r"(&b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (load a vector into vf8).
+static inline void loadVf8_3130(const sVec3130& v)
+{
+    __asm__ __volatile__("lqc2      $vf8, 0x0(%0)\n" : : "r"(&v));
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * vf8).
+static inline sVec3130 mulVec3130(const sMat3130& m)
+{
+    sVec3130 r;
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(&m)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec3130 sub3130(const sVec3130& a, const sVec3130& b)
+{
+    sVec3130 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place a += b).
+static inline void addEq3130(sVec3130& a, const sVec3130& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline sVec3130 scale3130(const sVec3130& v, float s)
+{
+    sVec3130 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sVec3130 cross3130(const sVec3130& a, const sVec3130& b)
+{
+    sVec3130 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float len3130(const sVec3130& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec3130 norm3130(const sVec3130& v)
+{
+    sVec3130 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+static inline sVec3130 pos3130(const sMat3130& m)
+{
+    return m.r[3];
+}
+
+struct sBone3130 {
+    int parent;                 // 0x0
+    int pad4;                   // 0x4
+    int pad8;                   // 0x8
+    sMat3130* mat;              // 0xC
+};
+
+struct sVE3130 {
+    short delta;
+    short index;
+    sMat3130* (*fn)(void*);
+};
+
+struct sHit3130 {
+    sVec3130 pos;               // 0x00
+    sVec3130 dir;               // 0x10
+    sVec3130 angVel;            // 0x20
+    sVec3130 vel;               // 0x30
+    char pad40[0x1C];           // 0x40
+    int bone;                   // 0x5C
+};
+
+struct sNode3130 {
+    char pad0[0xC];
+    sVE3130* vt;                // 0x0C
+    char pad10[0x8];            // 0x10
+    char* model;                // 0x18
+    float strength;             // 0x1C
+    signed char flags[32];      // 0x20
+};
+
+extern "C" void func_00343130(sNode3130* self, sHit3130* hit)
+{
+    if (hit->bone < 0) {
+        return;
+    }
+    sMat3130* w = self->vt[24].fn((char*)self + self->vt[24].delta);
+    sBone3130* bones = *(sBone3130**)(*(char**)(self->model + 0x80) + 0x8);
+    sMat3130 m = *bones[hit->bone].mat;
+    for (int p = bones[hit->bone].parent; p != -1; p = bones[p].parent) {
+        m = mulMat3130(*bones[p].mat, m);
+    }
+    m = mulMat3130(*w, m);
+    if (self->flags[hit->bone] != 0) {
+        sVec3130 d = sub3130(hit->pos, pos3130(m));
+        float k = self->strength / len3130(d);
+        sVec3130 s = scale3130(hit->dir, k);
+        sVec3130 c = cross3130(d, s);
+        addEq3130(hit->angVel, c);
+        addEq3130(hit->vel, s);
+    } else {
+        loadVf8_3130(*(sVec3130*)&D_004FF150);
+        sVec3130 n = norm3130(mulVec3130(m));
+        sVec3130 c = scale3130(cross3130(n, hit->dir), self->strength);
+        addEq3130(hit->angVel, c);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_003434E8);

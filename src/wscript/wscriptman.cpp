@@ -569,7 +569,116 @@ extern "C" void func_00309F18(sWSMan9F18* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A060);
+#ifdef SKIP_ASM
+struct func_00309DD0_sValue;
+struct sValue_30A060 {
+    int word0;
+    int word1;
+    int type;
+};
+struct sCall_30A060 {
+    int pad;
+    ~sCall_30A060() {}
+};
+struct sVE_30A060 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sVEF_30A060 {
+    short delta;
+    short index;
+    void (*fn)(void*, float);
+};
+
+void func_00226600(void* self, int a1, int a2);
+extern "C" void* func_002224A8(void* self);
+extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
+extern "C" void* func_00224DA0(void* mem, int a1);
+extern "C" void func_00224DF0(void* obj, int flags);
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void func_00309C88(void* self, int* idx);
+extern "C" int func_003A6B78(void* world, int id, int flag);
+extern "C" int func_003A6D18(void*, int*);
+extern "C" void func_003097E0(void* self, int v);
+extern char* D_004A28A8;
+extern char D_004898D8[];
+
+static inline bool valid_30A060(int* id) { return *id != -1; }
+
+extern "C" void func_0030A060(void* self, void* a1, void* a2, void* obj)
+{
+    int saved = *(int*)self;
+    {
+        sVE_30A060* vt = *(sVE_30A060**)obj;
+        *(int*)self = vt[7].fn((char*)obj + vt[7].delta);
+    }
+    *(int*)((char*)self + 0x290) = *(int*)((char*)a2 + 0x50);
+    *(void**)((char*)self + 0x294) = a1;
+    *(void**)((char*)self + 0x298) = a2;
+    int r;
+    {
+        sVE_30A060* vt = *(sVE_30A060**)obj;
+        r = vt[8].fn((char*)obj + vt[8].delta);
+    }
+    if (r) {
+        if (*(int*)(*(char**)(D_004A28A8 + 0x84) + 0x214) != 4) {
+            char* rider = obj ? (char*)obj - 0x6C0 : 0;
+            if (*(int*)(rider + 0x480) != 0) {
+                *(int*)self = saved;
+                goto done;
+            }
+        }
+        func_003097E0(self, *(int*)(*(char**)((char*)self + 0x290) + 0x78));
+    }
+    {
+        sValue_30A060 arg;
+        sValue_30A060 ret;
+        sCall_30A060 call;
+        int id = func_003A6B78(*(void**)((char*)self + 0x28C), *(int*)((char*)self + 0x290), 2);
+        if (valid_30A060(&id)) {
+            if (*(int*)((char*)self + 0x2A4) == 0 && *(int*)((char*)self + 0x2A8) == 0) {
+                func_00309C88(self, &id);
+            } else {
+                func_00226600(&arg, func_003A6D18(*(void**)((char*)self + 0x28C), &id), 0);
+                ret.type = 0;
+                ret.word0 = 0;
+                func_002224A8(&call);
+                char* o = *(char**)((char*)self + 0x2A8);
+                if (o != 0)
+                    o = *(char**)(o + 0x3C);
+                else
+                    o = *(char**)((char*)self + 0x2A4);
+                void* table = *(void**)(o + 0x1C);
+                if (table != 0) {
+                    func_002224B8(&call, &arg, table, &ret);
+                } else {
+                    table = func_00224DA0(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
+                    func_002224B8(&call, &arg, table, &ret);
+                    if (table != 0)
+                        func_00224DF0(table, 3);
+                }
+                func_00225B90((func_00309DD0_sValue*)&ret, 2);
+            }
+        }
+    }
+    {
+        char* v = *(char**)(*(char**)((char*)self + 0x290) + 0xC);
+        if (v != 0) {
+            sVEF_30A060* vt = *(sVEF_30A060**)(v + 0xC);
+            vt[41].fn(v + vt[41].delta, 0.5f);
+        }
+    }
+    *(int*)self = saved;
+done:
+    *(int*)((char*)self + 0x294) = 0;
+    *(int*)((char*)self + 0x298) = 0;
+    *(int*)((char*)self + 0x290) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A270);

@@ -1270,7 +1270,78 @@ extern "C" int func_0038FC48(void* self, int w, int h, unsigned char* src, unsig
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038FED0);
+#ifdef SKIP_ASM
+extern "C" void* func_0041605C(void* dst, const void* src, int n);
+
+// Swizzles a w x h 4-bit texture in 128 x 128 tiles through func_0038F9C0.
+extern "C" int func_0038FED0(void* self, int w, int h, unsigned char* src, unsigned char* dst)
+{
+    unsigned char tile[0x2000];
+    unsigned char out[0x2000];
+    int i;
+    int j;
+    int k;
+
+    for (i = 0; i < 11; i++) {
+        if (w == (0x400 >> i))
+            break;
+    }
+    if (i == 11)
+        return -1;
+    func_00416210(tile, 0, 0x2000);
+    func_00416210(out, 0, 0x2000);
+    for (i = 0; i < 11; i++) {
+        if (h == (0x400 >> i))
+            break;
+    }
+    if (i == 11)
+        return -1;
+
+    int nx = (w - 1) / 128 + 1;
+    int ny = (h - 1) / 128 + 1;
+    int srow;
+    int nrows;
+    int drows;
+    int drow;
+    if (nx == 1) {
+        srow = w / 2;
+        drows = w / 4;
+    } else {
+        srow = 0x40;
+        drows = 0x20;
+    }
+    if (ny == 1) {
+        nrows = h;
+        drow = h * 2;
+    } else {
+        drow = 0x100;
+        nrows = 0x80;
+    }
+
+    for (i = 0; i < ny; i++) {
+        for (j = 0; j < nx; j++) {
+            unsigned char* d = tile;
+            unsigned char* s = src + srow * (nx << 7) * i + srow * j;
+            for (k = 0; k < nrows; k++) {
+                func_0041605C(d, s, srow);
+                s += srow * nx;
+                d += 0x40;
+            }
+            func_0038F9C0(self, 0x80, 0x80, tile, out);
+            unsigned char* s2 = out;
+            unsigned char* d2 = dst + drow * (nx << 5) * i + drow * j;
+            for (k = 0; k < drows; k++) {
+                func_0041605C(d2, s2, drow);
+                d2 += drow * nx;
+                s2 += 0x100;
+            }
+        }
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("render/lightman", func_00390198);
 

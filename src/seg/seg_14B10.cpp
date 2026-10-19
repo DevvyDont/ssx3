@@ -443,7 +443,83 @@ extern "C" void func_00115168(char* s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_00115358);
+#ifdef SKIP_ASM
+struct V3_5358 {
+    float x, y, z;
+    V3_5358() {}
+    V3_5358(t4Vector v) { x = v.x; y = v.y; z = v.z; }
+};
+
+struct Q_5358 {
+    float x, y, z, w;
+    Q_5358() {}
+    Q_5358(const V3_5358& v, float aw) { x = v.x; y = v.y; z = v.z; w = aw; }
+} __attribute__((aligned(16)));
+
+extern "C" void cRider_updateOrientationImplicit(cRider* self);
+extern "C" void func_0011DFE0_5358(void* self, Q_5168 dir, float angle) __asm__("func_0011DFE0");
+// PORT: the unit defines func_00116930 with no parameters; this caller passes the rider.
+extern "C" void func_00116930_5358(void* self) __asm__("func_00116930");
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline t4Vector QuatMul_5358(const Q_5358& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+extern "C" void func_00115358(cRider* self)
+{
+    // Half turn about the up axis (quaternion (up, 0)) whenever the landing state disagrees with the stance flag.
+    int state = self->unk_328;
+    if (state == 2) {
+        if (self->unk_320 == 0) {
+            self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
+            cRider_updateOrientationImplicit(self);
+            func_00115168((char*)self);
+        }
+    } else if (state == 1) {
+        if (self->unk_320 != 0) {
+            self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
+            cRider_updateOrientationImplicit(self);
+            func_00115168((char*)self);
+        }
+    } else {
+        if (self->unk_320 != 0) {
+            self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
+            cRider_updateOrientationImplicit(self);
+            func_00115168((char*)self);
+        }
+        if (self->unk_328 == 4) {
+            func_0011DFE0_5358(self, *(Q_5168*)&self->mMatrix.row[2], 1.5707964f);
+            cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, 1.5707964f);
+            SetHeading_5168((char*)self->mRiderAnim, 1.5707964f);
+        } else {
+            func_0011DFE0_5358(self, *(Q_5168*)&self->mMatrix.row[2], -1.5707964f);
+            cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, -1.5707964f);
+            SetHeading_5168((char*)self->mRiderAnim, -1.5707964f);
+        }
+    }
+    func_00116930_5358(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00115640);

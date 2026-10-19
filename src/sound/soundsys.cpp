@@ -2710,7 +2710,179 @@ extern "C" void func_00298138(void* self, void* obj, void* obj2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_00298488);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+extern "C" int func_00288A20(void* self, void* obj);
+extern "C" int func_00288B40(void* self, int which, float f);
+int func_00288C08_8488(void* self, int which, float f) __asm__("func_00288C08");
+extern "C" int func_00295028(void* self, int a, int b);
+extern "C" void func_00295628(void* self, void* evt, int h, int t, int a, int idx);
+extern "C" void func_002A9988(void* self, float a, float b);
+extern "C" float func_00290C10(int i, float v);
+
+struct sVec4_8488 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4-component add).
+static inline sVec4_8488 vu0Add_8488(const sVec4_8488& a, const sVec4_8488& b)
+{
+    sVec4_8488 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0Length_8488(const sVec4_8488& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+class cSs8488Obj {
+public:
+    virtual void v01();
+    virtual sVec4_8488* v02();
+    virtual void v03();
+    virtual void v04();
+    virtual int v05();
+};
+struct sSs8488RiderA {
+    char pad0[0x6C0];
+};
+struct sSs8488Rider : public sSs8488RiderA, public cSs8488Obj {
+    char pad6C4[0x87C - 0x6C4];
+    int f87C;
+};
+
+struct sSnd8488Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSnd8488E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSnd8488Sub {
+    char pad0[4];
+    sSnd8488Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSnd8488Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSnd8488E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSnd8488Mgr {
+    char pad0[0x1D8];
+    sSnd8488Sub sub;         // 0x1D8
+};
+struct sSnd8488Sys {
+    sSnd8488Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSnd8488Mgr** p118;      // 0x118
+};
+
+static inline int snd8488Add(void* vself, void* obj, int a, int b, int c)
+{
+    sSnd8488Sys* self = (sSnd8488Sys*)vself;
+    sSnd8488Mgr* m = self->mgr;
+    sSnd8488Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSnd8488Mgr* m3 = *self->p118;
+    sSnd8488Sub* s3 = &m3->sub;
+    s3->vals[m3->sub.cur] = c;
+    s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+    sSnd8488Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, 5, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    func_002A9988(&(*self->p118)->sub, 100.0f, -1.0f);
+    pp = self->p118;
+    r = func_00288A20(self, obj);
+    (*pp)->sub.p64[(*pp)->sub.cur] = r;
+    sSnd8488Mgr* m2 = *self->p118;
+    m2->sub.tgt[m2->sub.cur] = (char*)obj + 0x110;
+    return func_002906B8(self);
+}
+
+void func_00298488_8488(void* self, sSs8488Rider* a, sSs8488Rider* b) __asm__("func_00298488");
+void func_00298488_8488(void* self, sSs8488Rider* a, sSs8488Rider* b)
+{
+    if (func_00288B40(self, a->v05(), 100.0f) < 0) return;
+    if (func_00288C08_8488(self, a->v05(), 100.0f) == 0) return;
+    bool okA = *(int*)((char*)a + 0x874) && a->f87C;
+    if (!okA) {
+        bool okB = *(int*)((char*)b + 0x874) && b->f87C;
+        if (!okB) return;
+    }
+    if (func_00295028(self, 7, 0) != 0) return;
+    sVec4_8488 sum = vu0Add_8488(*a->v02(), *b->v02());
+    int c = (int)func_00290C10(1, (float)(int)vu0Length_8488(sum));
+    int h = snd8488Add(self, a, 0, 0x36, c);
+    func_00295628(self, (void*)7, h, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 0x32, 0, 0);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002989A8);
