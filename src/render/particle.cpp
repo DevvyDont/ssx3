@@ -855,8 +855,127 @@ extern "C" void func_00372098(int enable)
     *(volatile unsigned int*)0x1000E000 &= 0xFFFFFFFE;
 }
 #endif
+//100%
 INCLUDE_ASM("render/particle", func_003720F0);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// Walks a DMA chain, rebasing REF tag addresses onto the chain start; returns the address past the RET tag.
+extern "C" unsigned long* func_003720F0(unsigned long* chain)
+{
+    unsigned long* p = chain;
+    int done = 0;
+
+    do {
+        unsigned long tag = *p;
+        int id = (int)(tag >> 28) & 7;
+        int addr = (long)tag >> 32;
+        int qwc = (int)tag & 0xFFFF;
+
+        switch (id) {
+        case 0:
+        case 2:
+        case 4:
+        case 5:
+        case 7:
+            break;
+        case 1:
+            p += 2;
+            p += qwc * 2;
+            break;
+        case 3:
+            *p = ((unsigned long)(unsigned int)((char*)chain + addr) << 32) | (*p & 0xFFFFFFFF);
+            p += 2;
+            break;
+        case 6:
+            p += 2;
+            p += qwc * 2;
+            done = 1;
+            break;
+        }
+    } while (done == 0);
+    return p;
+}
+#endif
+//100%
 INCLUDE_ASM("render/particle", func_00372198);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// Walks a DMA chain, rebasing REF tag addresses onto the chain start; returns the address past the RET tag.
+
+
+extern "C" void* func_003E6574(void*, void*, int);
+
+extern "C" void func_00372198(char* buf, int addrA, int addrB, int addrC)
+{
+    char* dst = buf + 0x10;
+    char* src = buf;
+    int count = 0;
+    int done = 0;
+    unsigned long tag;
+
+    while (done == 0) {
+        tag = *(unsigned long*)src;
+        int id = (int)(tag >> 28) & 7;
+        int addr = (long)tag >> 32;
+        int qwc = (int)tag & 0xFFFF;
+
+        switch (id) {
+        case 0:
+        case 2:
+        case 4:
+        case 5:
+        case 7:
+            break;
+        case 1: {
+            int size = qwc << 4;
+            src += 0x10;
+            func_003E6574(dst, src, size);
+            src += size;
+            dst += size;
+            count += qwc;
+            break;
+        }
+        case 3:
+            if (addr == addrA) {
+                *(unsigned long*)dst = 0;
+                count++;
+                dst += 8;
+                src += 0x10;
+                *(unsigned long*)dst = 0;
+                dst += 8;
+            } else if (addr == addrB) {
+                *(unsigned long*)dst = 0;
+                count++;
+                dst += 8;
+                src += 0x10;
+                *(unsigned long*)dst = 0;
+                dst += 8;
+            } else if (addr == addrC) {
+                *(unsigned long*)dst = 0x3000000005000001;
+                count++;
+                src += 0x10;
+                dst += 8;
+                *(unsigned long*)dst = 0;
+                dst += 8;
+            }
+            break;
+        case 6:
+            func_003E6574(dst, src, (qwc + 1) * 0x10);
+            src += 0x10;
+            dst += 0x10;
+            src += qwc * 0x10;
+            dst += qwc * 0x10;
+            done = 1;
+            break;
+        }
+    }
+
+    tag = *(unsigned long*)buf;
+    *(unsigned long*)buf = (tag & 0xFFFF0000) | (count & 0xFFFF);
+}
+#endif
 INCLUDE_ASM("render/particle", func_00372348);
 
 //100%
