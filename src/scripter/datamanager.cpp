@@ -176,8 +176,23 @@ extern "C" void func_00275B08(sDmTable275B08* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00275B78);
+#ifdef SKIP_ASM
+extern "C" int func_00275B78(void* self, char* o)
+{
+    return *(int*)(o + 8);
+}
+#endif
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00275B80);
+#ifdef SKIP_ASM
+extern "C" void func_00275B80(void* self, char* o, int* out0, int* out1)
+{
+    *out0 = *(int*)o;
+    *out1 = *(int*)(o + 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00275B98);
@@ -1247,7 +1262,20 @@ extern "C" int func_002771C8(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/datamanager", func_00277248);
+#ifdef SKIP_ASM
+extern "C" void* func_00283D70(void* list, int i);
+extern "C" int func_00277DD8(void* self, void* a1);
+
+extern "C" int func_00277248(char* self)
+{
+    if (*(int*)(self + 0xA4) != 3) {
+        return 0;
+    }
+    return func_00277DD8(self, func_00283D70(self + 0xC, 0));
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00277298);

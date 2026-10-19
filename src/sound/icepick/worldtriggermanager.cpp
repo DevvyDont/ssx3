@@ -813,8 +813,34 @@ void func_002B6900(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6918);
+#ifdef SKIP_ASM
+extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d);
+
+extern "C" int func_002B6918(void* self, int idx)
+{
+    int type;
+    int a;
+    int b;
+    func_002B63D0(self, idx, &type, &a, &b, 0, 2);
+    return type == 3;
+}
+#endif
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6950);
+#ifdef SKIP_ASM
+extern "C" void func_00289400(void* self);
+
+extern "C" void func_002B6950(char* self, int a1, int a2)
+{
+    if (a1 == 0 || a2 == 0) {
+        *(int*)(self + 0x334) = a1;
+        return;
+    }
+    func_00289400(func_0028B180());
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6988);
@@ -855,7 +881,20 @@ extern "C" int func_002B69B8(void* self, void* src, void* state)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6A38);
+#ifdef SKIP_ASM
+struct sTrigObj_6A38 { char pad[0xC]; int state; };
+struct sTrigEnt_6A38 { int a; sTrigObj_6A38* obj; };
+
+extern "C" int func_002B6A38(char* self, unsigned int idx)
+{
+    if (idx < 2U) {
+        return 0;
+    }
+    return (*(sTrigEnt_6A38**)(self + 0x33C))[idx].obj->state == 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6A68);
@@ -1367,7 +1406,14 @@ extern "C" float func_002B82B8(float curve, float t)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B83B8);
+#ifdef SKIP_ASM
+extern "C" void* func_002B83B8(void* self, ...)
+{
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B83F8);

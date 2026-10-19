@@ -1992,9 +1992,61 @@ extern "C" sPair_B7B8 func_0016B7B8(char* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BC88);
+#ifdef SKIP_ASM
+// PORT: `<?` (GNU min operator) gives the target's min.s
+static inline float Clamp_0016BC88(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+extern "C" void func_0016BC88(float* p)
+{
+    *p = Clamp_0016BC88(*p, 5.0f, 80.0f);
+}
+#endif
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BCB8);
+#ifdef SKIP_ASM
+// PORT: `<?` (GNU min operator) gives the target's min.s
+static inline float Clamp_0016BCB8(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+extern "C" void func_0016BCB8(float* p)
+{
+    *p = Clamp_0016BCB8(*p, -3000.0f, 3000.0f);
+}
+#endif
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BCE0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ffloor_BCE0(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+extern "C" void func_0016BCE0(float* p)
+{
+    float a = *p;
+    float n = ffloor_BCE0(a * 0.15915493667125702f + 0.5f);
+    *p = a - n * 6.2831854820251465f;
+}
+#endif
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BD30);
 #ifdef SKIP_ASM
@@ -2031,12 +2083,98 @@ extern "C" void func_0016BD30(float* p)
     *p = Clamp_BD30(w, -1.5707963705062866f, 1.5707963705062866f);
 }
 #endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BDA0);
+#ifdef SKIP_ASM
+extern "C" void func_0016BCE0(float* p);
+
+extern "C" void func_0016BDA0(float* p)
+{
+    float r = *p * 0.01745329424738884f;
+    func_0016BCE0(&r);
+    *p = r * 57.2957763671875f;
+}
+#endif
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BDE8);
+#ifdef SKIP_ASM
+extern "C" void func_0016BD30(float* p);
+
+extern "C" void func_0016BDE8(float* p)
+{
+    float r = *p * 0.01745329424738884f;
+    func_0016BD30(&r);
+    *p = r * 57.2957763671875f;
+}
+#endif
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BE30);
+#ifdef SKIP_ASM
+// PORT: `<?` (GNU min operator) gives the target's min.s
+static inline float Clamp_0016BE30(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+extern "C" void func_0016BE30(float* p)
+{
+    *p = Clamp_0016BE30(*p, -180.0f, 180.0f);
+}
+#endif
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BE60);
+#ifdef SKIP_ASM
+// PORT: `<?` (GNU min operator) gives the target's min.s
+static inline float Clamp_0016BE60(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+extern "C" void func_0016BE60(float* p)
+{
+    *p = Clamp_0016BE60(*p, 0.0f, 10.0f);
+}
+#endif
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BE90);
+#ifdef SKIP_ASM
+// PORT: `<?` (GNU min operator) gives the target's min.s
+static inline float Clamp_0016BE90(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+extern "C" void func_0016BE90(float* p)
+{
+    *p = Clamp_0016BE90(*p, 0.0f, 30.0f);
+}
+#endif
+//100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BEC0);
+#ifdef SKIP_ASM
+// PORT: `<?` (GNU min operator) gives the target's min.s
+static inline float Clamp_0016BEC0(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+extern "C" void func_0016BEC0(float* p)
+{
+    *p = Clamp_0016BEC0(*p, -10000.0f, 10000.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BEE8__FPv);

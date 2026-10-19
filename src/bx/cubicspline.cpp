@@ -795,9 +795,40 @@ extern "C" void* func_0031F718(void* ms, unsigned int n, unsigned int elem_size)
     return mem;
 }
 #endif
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031F7F0);
+#ifdef SKIP_ASM
+// PORT: the unit declares func_0031ED60(void*); the body really takes (ms, mem).
+extern "C" void func_0031ED60_F7F0(void* ms, void* mem) __asm__("func_0031ED60");
+
+extern "C" void func_0031F7F0(void* ms, void* mem)
+{
+    func_0031ED60_F7F0(ms, mem);
+}
+#endif
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031F810);
+#ifdef SKIP_ASM
+extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks);
+
+// dlmalloc 2.7 independent_calloc()
+extern "C" void* func_0031F810(void* ms, unsigned int n, unsigned int elem_size, void** chunks)
+{
+    unsigned int sz = elem_size;
+    return func_0031F858(ms, n, &sz, 3, chunks);
+}
+#endif
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031F838);
+#ifdef SKIP_ASM
+extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks);
+
+// dlmalloc 2.7 independent_comalloc()
+extern "C" void* func_0031F838(void* ms, unsigned int n, unsigned int* sizes, void** chunks)
+{
+    return func_0031F858(ms, n, sizes, 0, chunks);
+}
+#endif
 INCLUDE_ASM("bx/cubicspline", func_0031F858);
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FAA8);
@@ -840,7 +871,22 @@ extern "C" void* func_0031FB00(void** ms, unsigned int bytes)
     return func_0031F2C8_memalign(ms, pagesize, (bytes + pagesize - 1) & ~(pagesize - 1));
 }
 #endif
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031FB68);
+#ifdef SKIP_ASM
+struct sMState_31EEE8;
+struct sMState_31E6D8;
+extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av);
+extern "C" int func_0031E6D8(void* ms, unsigned int pad, sMState_31E6D8* av);
+
+// dlmalloc 2.7 malloc_trim(): consolidate fastbins, then sYSTRIm.
+extern "C" int func_0031FB68(void** ms, unsigned int pad)
+{
+    void* av = *ms;
+    func_0031EEE8(ms, (sMState_31EEE8*)av);
+    return func_0031E6D8(ms, pad, (sMState_31E6D8*)av);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FBB8__FPvT0);
@@ -1083,7 +1129,16 @@ extern "C" unsigned int func_0031FFD8(void* self, long incr) // PORT: 64-bit lon
 
 extern "C" int func_0031F2C8(void* self);
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_00320038);
+#ifdef SKIP_ASM
+extern "C" void* func_0031E818(void* ms, unsigned int bytes);
+
+extern "C" void* func_00320038(void* ms, unsigned int bytes)
+{
+    return func_0031E818(ms, bytes);
+}
+#endif
 
 //99.29%
 INCLUDE_ASM("bx/cubicspline", func_00320058__FPv);
@@ -1107,7 +1162,16 @@ int func_00320078(void* self)
 
 extern "C" int func_0031ED60(void* self);
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_00320098);
+#ifdef SKIP_ASM
+extern "C" int func_00320098(char* self, unsigned int addr)
+{
+    unsigned int base = *(unsigned int*)(self + 4);
+    unsigned int end = base + *(unsigned int*)(self + 0xC);
+    return base < addr && addr < end;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003200C0__FPv);

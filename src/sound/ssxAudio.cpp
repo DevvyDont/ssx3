@@ -524,7 +524,18 @@ extern "C" void func_00285FB0(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_002861D0);
+#ifdef SKIP_ASM
+struct sSaVt61D0 { short delta; short index; int (*fn)(void*, int); };
+
+extern "C" void func_002861D0(char* self)
+{
+    char* mon = self + 0x118;
+    sSaVt61D0* vt = *(sSaVt61D0**)(self + 0x5558);
+    vt[4].fn(mon + vt[4].delta, 1);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/ssxAudio", func_00286200);
@@ -1225,9 +1236,36 @@ extern "C" void* func_00287968(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_002879A0);
+#ifdef SKIP_ASM
+extern "C" char* func_002879A0(char* self, int idx)
+{
+    return &self[0x62BC + (idx << 4)];
+}
+#endif
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_002879B0);
+#ifdef SKIP_ASM
+// PORT: func_00287700's real parameter order is (self, int, float); the unit declares (self, float, int).
+void func_00287700_if(void*, int, float) __asm__("func_00287700");
+
+extern "C" void func_002879B0(char* self, int idx)
+{
+    func_00287700_if(self, idx, *(float*)(self + (idx << 4) + 0x62BC) + 0.09090909361839294f);
+}
+#endif
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_002879E0);
+#ifdef SKIP_ASM
+// PORT: func_00287700's real parameter order is (self, int, float); the unit declares (self, float, int).
+void func_00287700_if(void*, int, float) __asm__("func_00287700");
+
+extern "C" void func_002879E0(char* self, int idx)
+{
+    func_00287700_if(self, idx, *(float*)(self + (idx << 4) + 0x62BC) - 0.09090909361839294f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00287A10);
@@ -2095,9 +2133,52 @@ extern "C" void func_00288F60(void* self, int mode)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00289398);
+#ifdef SKIP_ASM
+extern "C" void func_00288F60(void* self, int mode);
+
+extern "C" void func_00289398(char* self)
+{
+    int cur = *(int*)(self + 0x6470);
+    if (cur == 0) {
+        *(int*)(self + 0x6470) = 5;
+    } else {
+        *(int*)(self + 0x6470) = cur - 1;
+    }
+    func_00288F60(self, *(int*)(self + 0x6470));
+}
+#endif
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_002893C8);
+#ifdef SKIP_ASM
+extern "C" void func_00288F60(void* self, int mode);
+
+extern "C" void func_002893C8(char* self)
+{
+    int n = *(int*)(self + 0x6470) + 1;
+    *(int*)(self + 0x6470) = n;
+    if (n == 6) {
+        *(int*)(self + 0x6470) = 0;
+    }
+    func_00288F60(self, *(int*)(self + 0x6470));
+}
+#endif
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00289400);
+#ifdef SKIP_ASM
+struct sSndKey8_9400 {
+    long v;
+} __attribute__((packed));
+extern const sSndKey8_9400 D_004A3600[];
+extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
+
+// PORT: 64-bit long sound key
+extern "C" void func_00289400(char* self)
+{
+    func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0xFA, D_004A3600->v, 0, 0, 0, 0, 0);
+}
+#endif
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289448);
 #ifdef SKIP_ASM

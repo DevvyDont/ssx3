@@ -1788,7 +1788,21 @@ extern "C" void func_0010F878(sComputer_0010F878* self)
 
 INCLUDE_ASM("ai/computer", func_0010F998);
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010FBF0);
+#ifdef SKIP_ASM
+extern "C" int func_0010FBF0(char* self, int value)
+{
+    int count = 0;
+    for (int i = 0; i < *(int*)(self + 0x78); i++) {
+        cRider* rider = *(cRider**)(self + 0x28 + i * 4);
+        if (*(int*)((char*)rider + 0xAB8) == value) {
+            count++;
+        }
+    }
+    return count;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_0010FC30);
@@ -2181,8 +2195,36 @@ extern "C" void func_00111728(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_00111830);
+#ifdef SKIP_ASM
+extern const char* D_00459D70[];
+extern char D_00456C48[];
+
+extern "C" const char* func_00111830(char* self)
+{
+    unsigned int state = *(unsigned int*)(self + 0xDE0);
+    if (state >= 7U) {
+        return D_00456C48;
+    }
+    return D_00459D70[state];
+}
+#endif
+//100%
 INCLUDE_ASM("ai/computer", func_00111860);
+#ifdef SKIP_ASM
+extern const char* D_00459DC8[];
+extern char D_00456C48[];
+
+extern "C" const char* func_00111860(char* self)
+{
+    unsigned int state = *(unsigned int*)(self + 0xDE4);
+    if (state >= 15U) {
+        return D_00456C48;
+    }
+    return D_00459DC8[state];
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_00111890);

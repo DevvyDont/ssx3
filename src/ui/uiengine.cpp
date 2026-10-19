@@ -482,7 +482,27 @@ extern "C" s398380Item* func_00398380(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_003983B8);
+#ifdef SKIP_ASM
+struct sUiEntry_83B8 {
+    int value;          // 0x00
+    char pad4[0x18];
+    int key;            // 0x1C
+};
+
+extern "C" int func_003983B8(char* self, int key)
+{
+    int count = *(int*)(self + 0x10);
+    for (int i = 0; i < count; i++) {
+        sUiEntry_83B8* e = &(*(sUiEntry_83B8**)(self + 0xC))[i];
+        if (e->key == key) {
+            return e->value;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiengine", func_003983F0);

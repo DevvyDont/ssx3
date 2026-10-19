@@ -473,8 +473,24 @@ extern "C" void func_0028BDE0(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028BE08);
+#ifdef SKIP_ASM
+extern "C" void func_0028B6C8(void* dst, void* src);
+
+extern "C" void func_0028BE08(void* self, int i, int j)
+{
+    func_0028B6C8((char*)*(void**)((char*)self + 0xACC) + i * 0x60, (char*)*(void**)((char*)self + 0xACC) + j * 0x60);
+}
+#endif
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028BE38);
+#ifdef SKIP_ASM
+extern "C" void func_0028BE38(void* self, int i)
+{
+    func_0028B730((sBankNode*)((char*)*(void**)((char*)self + 0xACC) + i * 0x60));
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", func_0028BE60);
@@ -1390,7 +1406,14 @@ extern "C" int func_0028DF18(void* self, int quiet)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028E068);
+#ifdef SKIP_ASM
+extern "C" int func_0028E068(void* self)
+{
+    return func_0028DF18(self, 1) != 0;
+}
+#endif
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028E088);
 #ifdef SKIP_ASM
@@ -1513,7 +1536,19 @@ extern "C" void func_0028E100(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028E510);
+#ifdef SKIP_ASM
+struct sBmVtE510 { short delta; short index; int (*fn)(void*, int); };
+
+extern "C" int func_0028E510(char* self, char* ev)
+{
+    char* mon = self + 0x118;
+    sBmVtE510* vt = *(sBmVtE510**)(self + 0x5558);
+    vt[4].fn(mon + vt[4].delta, *(int*)(ev + 0x1C));
+    return 1;
+}
+#endif
 INCLUDE_ASM("sound/bankmanager", func_0028E548);
 
 //100%
