@@ -1323,7 +1323,50 @@ extern "C" void func_001210B0(cRider* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_001211F8);
+#ifdef SKIP_ASM
+extern "C" void func_00120378(void* self);
+
+static inline void approach_11F8(sRiderChannel* t)
+{
+    float res;
+    float target = t->target;
+    float rate = t->rate;
+    float cur = t->cur;
+    if (target + rate < cur)
+        res = cur - rate;
+    else if (cur < target - rate)
+        res = cur + rate;
+    else
+        res = target;
+    t->cur = res;
+}
+
+extern "C" void func_001211F8(cRider* self)
+{
+    func_00120378(self);
+    approach_11F8(&self->unk_1F0[0]);
+    approach_11F8(&self->unk_1F0[1]);
+    approach_11F8(&self->unk_1F0[2]);
+    approach_11F8(&self->unk_1F0[3]);
+    approach_11F8(&self->unk_1F0[4]);
+    approach_11F8(&self->unk_1F0[5]);
+    approach_11F8(&self->unk_1F0[6]);
+    approach_11F8(&self->unk_1F0[7]);
+    approach_11F8(&self->unk_1F0[8]);
+    approach_11F8(&self->unk_1F0[9]);
+    approach_11F8(&self->unk_1F0[10]);
+    approach_11F8(&self->unk_1F0[11]);
+    approach_11F8(&self->unk_1F0[12]);
+    approach_11F8(&self->unk_1F0[13]);
+    approach_11F8(&self->unk_1F0[14]);
+    approach_11F8(&self->unk_1F0[15]);
+    approach_11F8(&self->unk_1F0[16]);
+    approach_11F8(&self->unk_1F0[17]);
+    approach_11F8(&self->unk_1F0[18]);
+}
+#endif
 
 extern "C" void* func_00111408(void* obj);
 

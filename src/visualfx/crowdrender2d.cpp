@@ -76,11 +76,27 @@ extern "C" void cCrowdRender2D_init_impl(int* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/crowdrender2d", cCrowdRender2D_purge__FPi);
 #ifdef SKIP_ASM
-int cCrowdRender2D_purge(int *param_1)
+struct sCrowdVEntry2D {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+int cCrowdRender2D_purge(int* param_1)
 {
-	return *param_1;
+    int i;
+    for (i = 0; i < 1; i++) {
+        int j;
+        for (j = 0; j < D_00445D38_B6D0[i].count; j++) {
+            char* obj = D_004A5B80;
+            sCrowdVEntry2D* vt = *(sCrowdVEntry2D**)(obj + 0x10D8);
+            vt[0x32].fn(obj + vt[0x32].delta, D_00445D38_B6D0[i].handles[j]);
+        }
+    }
+    return func_002523A8(*param_1);
 }
 #endif
 

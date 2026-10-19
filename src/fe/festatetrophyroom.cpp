@@ -1290,7 +1290,35 @@ extern "C" int func_001D5C28(int size)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5D78);
+#ifdef SKIP_ASM
+extern void* D_004A2028;
+extern void* D_004A28A8;
+extern "C" void* func_00227F80(void* app);
+extern "C" int func_002710A8(void* self, int* a, int* b);
+extern "C" void func_00241138(void* self, int a, int b);
+
+// D_004A2028: the active memory-card state object (passed to cFEMemCard_createReadBuffer in this unit).
+struct sFEMemCard_5D78 {
+    char pad[0x1BC];
+    int mode;   // 0x1BC
+};
+
+extern "C" int func_001D5D78(int key)
+{
+    int out;
+    if (((sFEMemCard_5D78*)D_004A2028)->mode == 1) {
+        void* r = func_00227F80(D_004A28A8);
+        if (func_002710A8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28), &out, &key) != 0) {
+            func_00241138(r, out, key);
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5DF0);
