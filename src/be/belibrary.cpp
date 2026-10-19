@@ -85,7 +85,66 @@ extern "C" void func_0014A180(void) {
 
 INCLUDE_ASM("be/belibrary", func_0014A188);
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014A5E0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+class cBEIface_14A5E0 {
+public:
+    char pad[0xC];
+    virtual void v1();
+    virtual void onLoad();
+};
+cBEIface_14A5E0* cBENewRaceInterface_getThis();
+cBEIface_14A5E0* cBENewPlayerInterface_getThis();
+cBEIface_14A5E0* cBEBAGTInterface_getThis();
+cBEIface_14A5E0* cBEMissionInterface_getThis();
+cBEIface_14A5E0* cBEScoreInterface_getThis();
+extern "C" cBEIface_14A5E0* func_00147F78(void);
+
+struct sBlk4C_14A5E0 { char d[0x4C]; };
+struct sBlkA8_14A5E0 { char d[0xA8]; };
+struct sBlkF88_14A5E0 { char d[0xF88]; };
+struct sBlk9B50_14A5E0 { char d[0x9B50]; };
+struct sBlk20_14A5E0 { char d[0x20]; };
+
+extern sBlkF88_14A5E0 D_004A6CA8_14A5E0[] __asm__("D_004A6CA8");
+extern sBlkF88_14A5E0 D_004B07F8[];
+extern sBlk9B50_14A5E0 D_004BA348;
+extern sBlk20_14A5E0 D_005308B8;
+
+extern "C" void func_0014A5E0(char* p)
+{
+    cBEIface_14A5E0* o;
+    int idx;
+
+    *(sBlk4C_14A5E0*)D_005305B0 = *(sBlk4C_14A5E0*)p;
+    cBENewRaceInterface_getThis()->onLoad();
+    p += 0x4C;
+    *(sBlkA8_14A5E0*)D_00535B20 = *(sBlkA8_14A5E0*)p;
+    cBENewPlayerInterface_getThis()->onLoad();
+    p += 0xA8;
+    idx = D_00535B20[0].mCharID;
+    D_004A6CA8_14A5E0[idx] = *(sBlkF88_14A5E0*)p;
+    p += 0xF88;
+    idx = D_00535B20[1].mCharID;
+    if (idx >= 0) {
+        D_004B07F8[idx] = *(sBlkF88_14A5E0*)p;
+        p += 0xF88;
+    }
+    D_004BA348 = *(sBlk9B50_14A5E0*)p;
+    p += 0x9B50;
+    D_005308B8 = *(sBlk20_14A5E0*)p;
+    o = cBEBAGTInterface_getThis();
+    o->onLoad();
+    o = cBEMissionInterface_getThis();
+    o->onLoad();
+    o = cBEScoreInterface_getThis();
+    o->onLoad();
+    o = func_00147F78();
+    o->onLoad();
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014AB20);
