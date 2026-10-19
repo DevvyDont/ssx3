@@ -182,7 +182,15 @@ extern "C" int func_0014AC50(int a0)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014AC70);
+#ifdef SKIP_ASM
+extern "C" int func_0014AC70(void* self, int rider, int* outChar)
+{
+    *outChar = cBELibrary_getCharacterID(rider);
+    return cBELibrary_getProfileIndex(rider);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014ACB0);
@@ -197,7 +205,17 @@ extern "C" void func_0014ACB0(void* self, int a1, int a2, void* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014ACF8);
+#ifdef SKIP_ASM
+extern "C" void* func_0014AD28(void* self, int a1, int a2);
+extern "C" void func_00151A88(void*, int);
+
+extern "C" void func_0014ACF8(void* self, int a1, int a2)
+{
+    func_00151A88(func_0014AD28(self, a1, a2), a2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014AD28);
@@ -220,10 +238,43 @@ extern "C" void* func_0014AD50(void* self, int rider)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014ADA8);
+#ifdef SKIP_ASM
+extern "C" void* func_0014ADA8(void* self, int a1, int a2, int a3)
+{
+    int off = a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)D_004A6CA8 + off;
+    return p + (a3 * 4 + 0x290);
+}
+#endif
+//100%
 INCLUDE_ASM("be/belibrary", func_0014ADD8);
+#ifdef SKIP_ASM
+extern "C" int func_0014AC70(void* self, int rider, int* outChar);
+extern "C" void* func_0014ADA8(void* self, int a1, int a2, int a3);
+
+extern "C" void* func_0014ADD8(void* self, int rider, int a2)
+{
+    int ch = 0;
+    int profile = func_0014AC70(self, rider, &ch);
+    return func_0014ADA8(self, profile, ch, a2);
+}
+#endif
 INCLUDE_ASM("be/belibrary", func_0014AE28);
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/belibrary", func_0014AE60);
+#ifdef SKIP_ASM
+extern "C" int func_0014AC70(void* self, int rider, int* outChar);
+extern "C" void* func_0014AE28(void* self, int a1, int a2, int* out);
+
+extern "C" void* func_0014AE60(void* self, int rider, int* out)
+{
+    int ch;
+    int profile = func_0014AC70(self, rider, &ch);
+    return func_0014AE28(self, profile, ch, out);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014AEA8);
@@ -346,7 +397,16 @@ extern "C" void func_0014B0F0(void* self, int a, int b, int idx)
     func_0014AFB0(self, a, b, idx, on);
 }
 #endif
+//100%
 INCLUDE_ASM("be/belibrary", func_0014B170);
+#ifdef SKIP_ASM
+extern "C" void func_00152368(void*, int, int);
+
+extern "C" void func_0014B170(void* self, int a1, int a2, int a3, int a4)
+{
+    func_00152368((char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88, a3, a4);
+}
+#endif
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/belibrary", func_0014B1B0);
 #ifdef SKIP_ASM
@@ -1009,9 +1069,33 @@ extern "C" void func_0014C488(sBEKeyTableG2* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014C548);
+#ifdef SKIP_ASM
+extern "C" void func_0014C548(void** vself, int g, int key, int v)
+{
+    sBEGroupTable* self = (sBEGroupTable*)vself;
+    *(char*)((char*)&self->entries[func_0014D448(self, g, key)] + 0x10) = v;
+}
+#endif
+//100%
 INCLUDE_ASM("be/belibrary", func_0014C590);
+#ifdef SKIP_ASM
+extern "C" void func_0014C590(void** vself, int g, int key, int v)
+{
+    sBEGroupTable* self = (sBEGroupTable*)vself;
+    *(char*)((char*)&self->entries[func_0014D448(self, g, key)] + 0x1) = v;
+}
+#endif
+//100%
 INCLUDE_ASM("be/belibrary", func_0014C5D8);
+#ifdef SKIP_ASM
+extern "C" void func_0014C5D8(void** vself, int g, int key, int v)
+{
+    sBEGroupTable* self = (sBEGroupTable*)vself;
+    *(short*)((char*)&self->entries[func_0014D448(self, g, key)] + 0xC) = v;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014C620);
@@ -1439,7 +1523,17 @@ extern "C" int func_0014DA18(int arg0, int arg1) {
 }
 #endif
 INCLUDE_ASM("be/belibrary", func_0014DA28);
+//100%
 INCLUDE_ASM("be/belibrary", func_0014DAA0);
+#ifdef SKIP_ASM
+extern "C" void* func_0014DAC0(void*, int, int, int*);
+
+extern "C" void* func_0014DAA0(void* self, int a1, int a2)
+{
+    int count;
+    return func_0014DAC0(self, a1, a2, &count);
+}
+#endif
 INCLUDE_ASM("be/belibrary", func_0014DAC0);
 
 //100%

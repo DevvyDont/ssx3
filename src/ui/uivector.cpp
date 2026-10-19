@@ -2569,7 +2569,21 @@ extern "C" void func_003A6038(char* self, char* str)
     strcpy(self + 0x8C, str);
 }
 #endif
+//100%
 INCLUDE_ASM("ui/uivector", func_003A6088);
+#ifdef SKIP_ASM
+extern "C" unsigned int strlen(const char*);
+extern "C" char* strcpy(char*, const char*);
+
+extern "C" void func_003A6088(char* self, char* str)
+{
+    if (strlen(str) >= 0x19U) {
+        self[0xA5] = 0;
+        return;
+    }
+    strcpy(self + 0xA5, str);
+}
+#endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A60D8);
 #ifdef SKIP_ASM
