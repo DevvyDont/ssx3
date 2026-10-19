@@ -2116,7 +2116,155 @@ extern "C" void* func_0018D7F0(void* self, int a1, int a2, int a3, int a4)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* text, const char* str);
+extern "C" void func_003A0E90(void* text, char* str);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern void* D_004A28A8;
+extern char D_0045E140[];
+extern char D_004A15D0[];
+extern char D_004A15D8[];
+extern char D_0045E150[];
+extern char D_0045E168[];
+extern char D_004A1460[];
+extern char D_004A1458[];
+extern char D_0045E178[];
+extern char D_0045E190[];
+extern char D_0045E1A0[];
+extern char D_0045E1B8[];
+extern char D_0045E1C8[];
+extern char D_0045E1D8[];
+extern char D_0045E1E8[];
+extern char D_0045E200[];
+extern char D_0045E210[];
+extern char D_004A12C0[];
+extern char D_004A1408[];
+
+struct sColor_DD60 {
+    float r, g, b, a;
+};
+extern sColor_DD60 D_004C66C8;
+
+class cUIObj_DD60 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void setHighlight(int v);
+};
+
+struct sVE_DD60 {
+    short delta;
+    short index;
+    char* (*fn)(void*, int);
+};
+
+static inline cUIObj_DD60* getObj_DD60(void* self, char* name)
+{
+    return (cUIObj_DD60*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+}
+
+// Looks up a localized string by the hash of its name.
+static inline char* getString_DD60(char* name)
+{
+    char* loc = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVE_DD60* vt = *(sVE_DD60**)(loc + 4);
+    char* thisp = loc + vt[4].delta;
+    return vt[4].fn(thisp, GetHashValue32(name));
+}
+
+extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
+{
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045E140), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen == 0) {
+        return;
+    }
+    cUIScreen_playFrame(screen, 0, 0);
+    cUIObj_DD60* o;
+    o = getObj_DD60(self, D_004A15D0);
+    o->setVisible(0);
+    o = getObj_DD60(self, D_004A15D8);
+    o->setVisible(0);
+    char* title;
+    if (*(int*)((char*)self + 0x1BC) == 1) {
+        title = getString_DD60(D_0045E150);
+        o = getObj_DD60(self, D_004A15D8);
+        o->setVisible(1);
+        o = getObj_DD60(self, D_0045E168);
+        getObj_DD60(self, D_004A1460)->setVisible(0);
+        o->setVisible(1);
+        o = getObj_DD60(self, D_004A1458);
+        o->setVisible(0);
+    } else if (*(int*)((char*)self + 0x22C) != 0) {
+        title = getString_DD60(D_0045E178);
+        o = getObj_DD60(self, D_004A15D0);
+        o->setVisible(1);
+        o = getObj_DD60(self, D_0045E190);
+        o->setVisible(1);
+    } else {
+        title = getString_DD60(D_0045E1A0);
+        o = getObj_DD60(self, D_004A15D8);
+        o->setVisible(1);
+        o = getObj_DD60(self, D_0045E1B8);
+        getObj_DD60(self, D_004A1460)->setVisible(0);
+        o->setVisible(1);
+        o = getObj_DD60(self, D_004A1458);
+        o->setVisible(0);
+    }
+    func_003A0E90(getObj_DD60(self, D_0045E1C8), title);
+    cUIText_setAsciiString((cUIText*)getObj_DD60(self, D_0045E1D8), D_004A1408);
+    cUIText_setAsciiString((cUIText*)getObj_DD60(self, D_0045E1E8), D_004A1408);
+    char* slot = getString_DD60(D_0045E200);
+    char buf[32];
+    for (int i = 1; i < 5; i++) {
+        sprintf(buf, D_0045E210, i);
+        o = getObj_DD60(self, buf);
+        *(int*)((char*)o + 0x18) = i - 1;
+        func_003A0E90(o, slot);
+        *(sColor_DD60*)((char*)o + 0x88) = D_004C66C8;
+        o->setHighlight(1);
+        if (*(int*)((char*)self + 0x1BC) != 1 && i >= 2) {
+            o->setEnabled(1);
+            o->setVisible(0);
+            sprintf(buf, D_004A12C0, i);
+            o = getObj_DD60(self, buf);
+            o->setVisible(0);
+            cUIText_setAsciiString((cUIText*)o, buf);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018DDD0);

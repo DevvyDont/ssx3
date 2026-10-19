@@ -1617,7 +1617,104 @@ extern "C" void func_001C8930(void* self, void* obj, unsigned char state, float 
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C8A38);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sVec3_8A38 {
+    float x, y, z;
+    sVec3_8A38() {}
+    sVec3_8A38(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+struct sVec3_7258;
+extern sVec3_8A38 D_004FF0D8_8A38 __asm__("D_004FF0D8");
+extern "C" void func_001C70F0(void* self, sVec3_7258* v);
+extern "C" void func_001C8930(void* self, void* obj, unsigned char state, float t);
+extern "C" void func_001C9CD0(void* self, int v);
+
+#define OBJ_8A38(off) (*(char**)((char*)self + (off)))
+#define VEC_8A38(p, off) (*(sVec3_8A38*)((char*)(p) + (off)))
+
+// Resets the popup's widgets: unit scale and home positions, then re-anchors the side items.
+extern "C" void func_001C8A38(void* self)
+{
+    if (OBJ_8A38(0x48) != 0) {
+        VEC_8A38(OBJ_8A38(0x48), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(0x48), 0x44) = VEC_8A38(self, 0x188);
+    }
+    if (OBJ_8A38(0x4C) != 0) {
+        VEC_8A38(OBJ_8A38(0x4C), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(0x4C), 0x44) = VEC_8A38(self, 0x194);
+    }
+    if (OBJ_8A38(0x50) != 0) {
+        VEC_8A38(OBJ_8A38(0x50), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(0x50), 0x44) = VEC_8A38(self, 0x224);
+    }
+    if (OBJ_8A38(0x54) != 0) {
+        VEC_8A38(OBJ_8A38(0x54), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(0x54), 0x44) = VEC_8A38(self, 0x230);
+    }
+    if (OBJ_8A38(0x58) != 0) {
+        VEC_8A38(OBJ_8A38(0x58), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(0x58), 0x44) = VEC_8A38(self, 0x23C);
+    }
+    if (OBJ_8A38(0x5C) != 0) {
+        VEC_8A38(OBJ_8A38(0x5C), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(0x5C), 0x44) = VEC_8A38(self, 0x248);
+    }
+    if (OBJ_8A38(0x60) != 0) {
+        VEC_8A38(OBJ_8A38(0x60), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(0x60), 0x44) = VEC_8A38(self, 0x254);
+    }
+    if (OBJ_8A38(0x8C) != 0) {
+        VEC_8A38(OBJ_8A38(0x8C), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(0x8C), 0x44) = VEC_8A38(self, 0x200);
+    }
+    if (OBJ_8A38(0x6C) != 0) {
+        VEC_8A38(OBJ_8A38(0x6C), 0x44) = VEC_8A38(self, 0x1A0);
+    }
+    if (OBJ_8A38(0x70) != 0) {
+        VEC_8A38(OBJ_8A38(0x70), 0x44) = VEC_8A38(self, 0x1AC);
+    }
+    if (OBJ_8A38(0x74) != 0) {
+        VEC_8A38(OBJ_8A38(0x74), 0x44) = VEC_8A38(self, 0x1C4);
+        func_001C8930(self, OBJ_8A38(0x74), 9, 0.0f);
+    }
+    if (OBJ_8A38(0x7C) != 0) {
+        VEC_8A38(OBJ_8A38(0x7C), 0x44) = VEC_8A38(self, 0x1B8);
+        func_001C8930(self, OBJ_8A38(0x74), 9, 0.0f);
+    }
+    if (OBJ_8A38(0x78) != 0) {
+        VEC_8A38(OBJ_8A38(0x78), 0x44) = VEC_8A38(self, 0x1D0);
+        func_001C8930(self, OBJ_8A38(0x74), 9, 0.0f);
+    }
+    if (OBJ_8A38(0x80) != 0) {
+        VEC_8A38(OBJ_8A38(0x80), 0x44) = VEC_8A38(self, 0x1DC);
+    }
+    if (OBJ_8A38(0x88) != 0) {
+        VEC_8A38(OBJ_8A38(0x88), 0x44) = VEC_8A38(self, 0x1E8);
+    }
+    int i;
+    for (i = 0; i < 5; i++) {
+        void* o = *(void**)((char*)self + 0x90 + i * 4);
+        if (o != 0) {
+            func_001C8930(self, o, 10, *(float*)((char*)self + 0x29C) * 0.5f);
+        }
+    }
+    sVec3_8A38 t = D_004FF0D8_8A38;
+    t.x = 472.0f;
+    func_001C70F0(self, (sVec3_7258*)&t);
+    sVec3_8A38 one;
+    one.x = 1.0f;
+    one.y = 1.0f;
+    one.z = 1.0f;
+    VEC_8A38(self, 0x278) = one;
+    func_001C9CD0(self, -*(int*)((char*)self + 0x314));
+}
+
+#undef OBJ_8A38
+#undef VEC_8A38
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001C8EF0);

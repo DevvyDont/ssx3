@@ -1073,5 +1073,195 @@ extern "C" void func_00399E28(func_00399E28_sObj* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_00399F00);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
+extern "C" void func_0039FEB8(void* self, void* pos, void* size);
+extern "C" void func_00391E30(void* font, float x, float y, int str);
+extern char* D_004A289C_9F00 __asm__("D_004A289C");
+
+struct sV2_9F00 {
+    float x, y;
+    sV2_9F00() {}
+    sV2_9F00(float ax, float ay) : x(ax), y(ay) {}
+};
+struct sV3_9F00 {
+    float x, y, z;
+    sV3_9F00() {}
+    sV3_9F00(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+struct sV4_9F00 {
+    float x, y, z, w;
+    sV4_9F00() {}
+    sV4_9F00(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+struct sCol_9F00 {
+    float r, g, b, a;
+};
+struct sRect_9F00 {
+    float x0, y0, x1, y1;
+};
+
+struct sFont_9F00 {
+    char pad0[0x14];
+    int height;             // 0x14
+    char pad18[0x10];
+    sV2_9F00 shadowOfs;     // 0x28
+    sV2_9F00 scale;         // 0x30
+    sV2_9F00 cur;           // 0x38
+    sCol_9F00 color;        // 0x40
+    sCol_9F00 shadowColor;  // 0x50
+};
+
+struct sLayerBits_9F00 {
+    unsigned char lo;
+    unsigned char layer : 5;
+};
+
+struct sStrEntry_9F00 {
+    int str;
+    int pad[4];
+};
+
+struct sText_9F00 {
+    char pad0[0x14];
+    int flags14;            // 0x14
+    char pad18[0x4];
+    sCol_9F00 color;        // 0x1C
+    char pad2C[0x18];
+    sV3_9F00 pos;           // 0x44
+    float sx;               // 0x50
+    float sy;               // 0x54
+    char pad58[0x4];
+    char* owner;            // 0x5C
+    float w;                // 0x60
+    float h;                // 0x64
+    char pad68[0xC];
+    int flags;              // 0x74
+    sCol_9F00 shadowColor;  // 0x78
+    sCol_9F00 hiColor;      // 0x88
+    char pad98[0x4];
+    sStrEntry_9F00 strs[1]; // 0x9C
+};
+
+struct sVert_9F00 {
+    float u, v, q;
+    int pad;
+    int r, g, b, a;
+    sV4_9F00 pos;
+};
+
+struct sVE_9F00 { short delta; short index; void (*fn)(void*, int, void*, int); };
+
+static inline void setLayer_9F00(sText_9F00* self)
+{
+    int* d = (int*)(*(char**)(D_004A289C_9F00 + 0xE84) + 8);
+    *d = (*d & ~0x3E0) | (((((sLayerBits_9F00*)&self->flags14)->layer + 9) << 5) & 0x3E0);
+}
+
+extern "C" void func_00399F00(sText_9F00* self, float x, float y)
+{
+    sFont_9F00* font = (sFont_9F00*)func_00399920(self);
+    if (font == 0 || *((unsigned char*)self + 0x318) == 0) {
+        return;
+    }
+    sV2_9F00 s(self->sx, self->sy);
+    font->cur.x = font->scale.x * s.x;
+    font->cur.y = font->scale.y * s.y;
+    if (((self->flags14 >> 5) & 1) && ((self->flags >> 5) & 1)) {
+        font->color = self->hiColor;
+    } else {
+        font->color = self->color;
+    }
+    if ((self->flags >> 2) & 1) {
+        sCol_9F00 c = self->shadowColor;
+        c.r = self->color.r;
+        font->shadowColor = c;
+        font->shadowOfs = sV2_9F00(2.0f, 2.0f);
+    } else {
+        font->shadowOfs = sV2_9F00(0.0f, 0.0f);
+    }
+    int str;
+    if (self->flags & 0x10) {
+        str = self->strs[0].str;
+    } else {
+        str = self->strs[*((unsigned char*)self + 0x319)].str;
+    }
+    setLayer_9F00(self);
+    int over = 0;
+    float* box = &self->w;
+    {
+        sRect_9F00 r;
+        func_003921F0(font, str, &r, 0, s.x, s.y);
+        if (self->w < r.x1) {
+            over = 1;
+        }
+        sV3_9F00 size(r.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
+        sV3_9F00 p(self->pos.x + x, self->pos.y + y, 0.0f);
+        func_0039FEB8(self, &p, &size);
+        func_00391E30(font, p.x, p.y, str);
+    }
+    char* loc = *(char**)(*(char**)(*(char**)(self->owner + 0xD0) + 0x10) + 0x10);
+    if (loc == 0) {
+        return;
+    }
+    if ((*(int*)loc >> 26) & 1) {
+        sV3_9F00 p = self->pos;
+        p.x += x;
+        p.y += y;
+        func_0039FEB8(self, &p, box);
+        setLayer_9F00(self);
+        sVert_9F00 verts[5];
+        unsigned int i;
+        if (!over) {
+            for (i = 0; i < 5; i++) {
+                verts[i].q = 1.0f;
+                verts[i].u = 0.0f;
+                verts[i].v = 0.0f;
+                verts[i].a = 0xFF;
+                verts[i].r = 0xFF;
+                verts[i].g = 0;
+                verts[i].b = 0;
+                sV4_9F00 t;
+                t.x = p.x;
+                t.y = p.y;
+                t.z = p.z;
+                t.w = 1.0f;
+                verts[i].pos = t;
+            }
+            verts[1].pos.x += self->w;
+            verts[2].pos.x += self->w;
+            verts[2].pos.y += self->h;
+            verts[3].pos.y += self->h;
+            sVE_9F00* vt = *(sVE_9F00**)(D_004A289C_9F00 + 0x10D8);
+            vt[73].fn(D_004A289C_9F00 + vt[73].delta, 5, verts, 0);
+        } else {
+            *(short*)(*(char**)(D_004A289C_9F00 + 0xE84) + 0x10) = -1;
+            for (i = 0; i < 4; i++) {
+                verts[i].q = 1.0f;
+                verts[i].u = 0.0f;
+                verts[i].v = 0.0f;
+                verts[i].a = 0x40;
+                verts[i].r = 0x80;
+                verts[i].g = 0;
+                verts[i].b = 0;
+                sV4_9F00 t;
+                t.x = p.x;
+                t.y = p.y;
+                t.z = p.z;
+                t.w = 1.0f;
+                verts[i].pos = t;
+            }
+            verts[1].pos.x += self->w;
+            verts[2].pos.y += self->h;
+            verts[3].pos.x += self->w;
+            verts[3].pos.y += self->h;
+            sVE_9F00* vt = *(sVE_9F00**)(D_004A289C_9F00 + 0x10D8);
+            vt[71].fn(D_004A289C_9F00 + vt[71].delta, 4, verts, 0);
+        }
+    }
+}
+#endif
 

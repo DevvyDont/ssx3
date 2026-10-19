@@ -1375,7 +1375,219 @@ extern "C" int func_0032D440(void* self, sSphereVec4* a, sSphereVec4* b, sSphere
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032D470);
+#ifdef SKIP_ASM
+struct sSphereLevel_D470 {
+    float radius;   // 0x0
+    float offset;   // 0x4
+    int stride;     // 0x8
+};
+
+struct sSphereTreeInfo_D470 {
+    char pad_0x00[0xC];
+    int depth;                      // 0x0C
+    char pad_0x10[0x10];
+    sSphereLevel_D470* levels;      // 0x20
+    char pad_0x24[4];
+    unsigned char* masks;           // 0x28
+};
+
+struct sSphereOct_D470 {
+    sSphereVec4 dirs[8];            // 0x00
+    char pad_0x80[0x10];
+    float scale;                    // 0x90
+    float best;                     // 0x94: deepest penetration found so far
+    sSphereTreeInfo_D470* tree;     // 0x98
+    int order[8];                   // 0x9C: child visiting order
+};
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sSphereVec4 Scale_D470(const sSphereVec4& v, float s)
+{
+    sSphereVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sSphereVec4 Add_D470(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sSphereVec4 Sub_D470(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_D470(const sSphereVec4& a, const sSphereVec4& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_D470(const sSphereVec4& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only FPU sqrt.s helper.
+static inline float Sqrt_D470(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// Does the segment from the start point (e = center - start) along g pass within sqrt(rr) of the center?
+static inline bool SegHit_D470(const sSphereVec4& e, const sSphereVec4& g, float ee, float rr)
+{
+    float len = Length_D470(g);
+    float proj = Dot_D470(e, g) / len;
+    if (proj < 0.0f) {
+        return false;
+    }
+    float t = ee - proj * proj;
+    if (rr < t) {
+        return false;
+    }
+    if (len < proj - Sqrt_D470(rr - t)) {
+        return false;
+    }
+    return true;
+}
+
+// PORT: the unit's 5-arg func_0032D440 also receives the radius in $f12 here.
+extern "C" int func_0032D440_r(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d, float r) __asm__("func_0032D440");
+// PORT: the unit declares func_0032D470 as returning int; it returns nothing.
+extern "C" void func_0032D470_v(void* selfp, sSphereVec4* a1, sSphereVec4* a2, sSphereVec4* a3, sSphereVec4* v, sSphereVec4* pos, int depth, int base, sSphereVec4* outA, sSphereVec4* outB) __asm__("func_0032D470");
+
+// Sphere tree against the triangle (a1, a2, a3) moving along v: records the deepest
+// penetration below self->best (*outA = push-out vector, *outB = contact point).
+extern "C" void func_0032D470_v(void* selfp, sSphereVec4* a1, sSphereVec4* a2, sSphereVec4* a3, sSphereVec4* v, sSphereVec4* pos, int depth, int base, sSphereVec4* outA, sSphereVec4* outB)
+{
+    sSphereOct_D470* self = (sSphereOct_D470*)selfp;
+    float d = Dot_D470(*v, Sub_D470(*pos, *a1));
+    float r = self->tree->levels[depth].radius * self->scale;
+    if (depth == 0 && d < 0.0f) {
+        return;
+    }
+    if (!(d < r + self->best)) {
+        return;
+    }
+    int leaf = 0;
+    unsigned char mask = self->tree->masks[base];
+    if (!(depth < self->tree->depth && depth < 3 && mask != 0)) {
+        leaf = 1;
+    }
+    sSphereVec4 p = Sub_D470(*pos, Scale_D470(*v, d));
+    if (func_0032D440_r(self, a1, a2, a3, &p, r) == 0) {
+        if (leaf) {
+            return;
+        }
+        if (r < 20.0f) {
+            return;
+        }
+        sSphereVec4 e = Sub_D470(*pos, *a1);
+        float rr = r * r;
+        float ee = Dot_D470(e, e);
+        if (rr < ee) {
+            sSphereVec4 g = Sub_D470(*a2, *a1);
+            bool miss = !SegHit_D470(e, g, ee, rr);
+            if (miss) {
+                sSphereVec4 g2 = Sub_D470(*a3, *a1);
+                miss = !SegHit_D470(e, g2, ee, rr);
+                if (miss) {
+                    sSphereVec4 e3 = Sub_D470(*pos, *a2);
+                    float ee3 = Dot_D470(e3, e3);
+                    sSphereVec4 g3 = Sub_D470(*a3, *a2);
+                    miss = !SegHit_D470(e3, g3, ee3, rr);
+                    if (miss) {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    if (!leaf) {
+        float f = self->tree->levels[depth + 1].offset;
+        for (int i = 0; i < 8; i++) {
+            int k = self->order[i];
+            if ((mask >> k) & 1) {
+                sSphereVec4 q = Add_D470(*pos, Scale_D470(self->dirs[k], f));
+                func_0032D470_v(self, a1, a2, a3, v, &q, depth + 1, (k + 1) * self->tree->levels[depth].stride + base, outA, outB);
+            }
+        }
+        return;
+    }
+    float f = d - r;
+    if (f < self->best) {
+        sSphereVec4 n = Scale_D470(*v, -f);
+        *outA = n;
+        *outB = p;
+        self->best = f;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032DA40);
