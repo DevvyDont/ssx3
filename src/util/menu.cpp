@@ -3729,7 +3729,30 @@ extern "C" void func_002D0500(void* self, int a1)
     func_002CA988_5(self, a1, *(int*)((char*)self + 0x18), 0, buf);
 }
 
-INCLUDE_ASM("util/menu", func_002D05A8);
+//100%
+//100%
+extern void* D_00486858[];
+extern char D_004A39D8[];
+extern char D_004A39E0[];
+extern char D_004A39E8[];
+
+extern "C" void* func_002D05A8(void* self, void* name, float* values, int a3, float lo, float hi)
+{
+    char* s = (char*)self;
+    func_002CF860(self, name, s + 0x654);
+    *(float**)(s + 0x5AC) = values;
+    *(void***)(s + 0x10) = D_00486858;
+    // PORT: the unit types these parameters loosely; the index goes in text, the value pointer and label in the ints
+    cFloatMenuItem_cFloatMenuItem((cFloatMenuItem_sItem*)(s + 0x5B8), (void*)0, (int)values, (int)D_004A39D8, lo, hi);
+    cFloatMenuItem_cFloatMenuItem((cFloatMenuItem_sItem*)(s + 0x5EC), (void*)1, (int)(values + 1), (int)D_004A39E0, lo, hi);
+    cFloatMenuItem_cFloatMenuItem((cFloatMenuItem_sItem*)(s + 0x620), (void*)2, (int)(values + 2), (int)D_004A39E8, lo, hi);
+    func_002D03F0((sMenuItem_2CC7B0*)(s + 0x654), a3, (int)values);
+    cExpandMenuItem_addItem3(self, s + 0x5B8, -1);
+    cExpandMenuItem_addItem3(self, s + 0x5EC, -1);
+    cExpandMenuItem_addItem3(self, s + 0x620, -1);
+    *(int*)(s + 0x670) = 0;
+    return self;
+}
 
 //100%
 extern "C" void* func_002CFA08(void* self);

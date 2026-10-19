@@ -1237,6 +1237,15 @@ void func_0028DF08(void* self)
     *(int*)((char*)self + 0x629C) = -1;
 }
 
+struct sBankArgEF90 {
+    long v;
+} __attribute__((packed));
+
+extern sBankArgEF90 D_004A3648[];
+extern sBankArgEF90 D_004A3650[];
+extern sBankArgEF90 D_004A3658[];
+extern "C" void func_002ADCA0(void* p, int a, long b, int c, int d, int e, int f, int g);
+
 INCLUDE_ASM("sound/bankmanager", func_0028DF18);
 
 extern "C" int func_0028DF18(void* self, int a);
@@ -1373,13 +1382,6 @@ extern "C" void func_0028E888(void* self)
 }
 
 INCLUDE_ASM("sound/bankmanager", func_0028E8C0);
-
-struct sBankArgEF90 {
-    long v;
-} __attribute__((packed));
-
-extern sBankArgEF90 D_004A3648[];
-extern "C" void func_002ADCA0(void* p, int a, long b, int c, int d, int e, int f, int g);
 
 extern "C" void func_0028EF90(void* selfp)
 {
@@ -1801,7 +1803,32 @@ extern "C" void func_0028FA98(void* self, float v)
     }
 }
 
-INCLUDE_ASM("sound/bankmanager", func_0028FAE0);
+//100%
+int func_002B4908(void* self);
+// PORT: the sound name is passed as an 8-byte long; declared here by asm label
+void func_002ADDE0_FAE0(void* bm, long key) __asm__("func_002ADDE0");
+
+extern "C" void func_0028FAE0(void* selfp)
+{
+    char* self = (char*)selfp;
+    if (func_0028D960(self)) {
+        func_002ADDE0_FAE0(**(char***)(self + 0x118) + 0x1D8, D_004A3648[0].v);
+        func_002ADDE0_FAE0(**(char***)(self + 0x118) + 0x1D8, D_004A3650[0].v);
+        func_002ADDE0_FAE0(**(char***)(self + 0x118) + 0x1D8, D_004A3658[0].v);
+        int st = func_002B49E0(self + 0x118);
+        if ((unsigned int)(st - 1) < 3 || st == 0x191 || *(int*)(self + 0x530) == 0) {
+            func_0028DEF0(self, 0x12);
+            *(int*)(self + 0x5828) = 1;
+            func_002B3AC0(self + 0x118);
+            func_0028D488(self);
+            func_0028CF98(self, 0, 0, -1, 0);
+            sBankArgEF90* nm = D_004A3650;
+            char* snd = **(char***)(self + 0x118) + 0x1D8;
+            int n = func_002B4908(self + 0x118);
+            func_002ADCA0(snd, 3000, nm->v, 0, 4, n, 0, 0);
+        }
+    }
+}
 
 extern "C" void* func_002B3AC0(void*);
 

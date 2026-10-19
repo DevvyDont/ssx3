@@ -953,7 +953,62 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F3030);
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F3418);
 
-INCLUDE_ASM("seg/seg_1F1548", func_002F3550);
+//100%
+//100%
+extern "C" void* func_00354648(void* self, void* a1);
+extern char D_00488230[];
+extern "C" void func_002F39C8(void* arg0);
+
+struct sElemA_3550 {
+    char d[0x3C];
+};
+struct sElemB_3550 {
+    char d[0x4C];
+};
+struct sObj_3550 {
+    char pad0[0xC];
+    char* vtable;               // 0xC
+    int f10;                    // 0x10
+    int f14;                    // 0x14
+    int f18;                    // 0x18
+    sElemA_3550 a[30];          // 0x1C
+    sElemB_3550 b[30];          // 0x724
+    // 0x100C
+    int f100C;
+    int f1010;
+    int f1014;
+    int f1018;
+    float f101C;
+    int f1020;
+    int f1024;
+};
+
+extern "C" sObj_3550* func_002F3550(sObj_3550* self, void* a1, int a2)
+{
+    int i;
+    sElemA_3550* pa = self->a;
+    func_00354648(self, a1);
+    self->f10 = a2;
+    self->f14 = 0;
+    self->vtable = D_00488230;
+    self->f18 = 0;
+    for (int j = 29; j != -1; j--, pa++) {
+        func_002F2588((int*)pa);
+    }
+    sElemB_3550* pb = self->b;
+    for (i = 29; i != -1; i--, pb++) {
+        func_002F2D60(pb);
+    }
+    self->f100C = 0;
+    self->f1010 = 0;
+    self->f1014 = 0;
+    self->f1018 = 0;
+    self->f101C = 1.0f;
+    self->f1020 = 0;
+    self->f1024 = 0;
+    func_002F39C8(self);
+    return self;
+}
 
 //100%
 extern "C" void func_003546C8(void *);

@@ -19,7 +19,49 @@ void cUIThread_deleteThread(void* self)
     }
 }
 
-INCLUDE_ASM("ui/uiscreen", func_0039C558);
+//100%
+//100%
+extern "C" void func_00397948_v(void*) __asm__("func_00397948");
+extern "C" void func_003A4868(void*);
+extern "C" void func_0039FC48(void* self, int flags);
+void operator_delete(int*);
+void cMemMan_free(void*);
+extern void* D_00494670[];
+extern void* D_004949E8[];
+extern void* D_00494C98[];
+extern void* D_00494CC0[];
+
+extern "C" void func_0039C558(void* self, int flags)
+{
+    char* s = (char*)self;
+    *(void***)(s + 0x8) = D_00494670;
+    if (*(void**)(s + 0x3C) != 0) {
+        cMemMan_free(*(void**)(s + 0x3C));
+    }
+    if (*(void**)(s + 0xC) != 0 && (*(int*)(s + 0x14) & 2)) {
+        cMemMan_free(*(void**)(s + 0xC));
+    }
+    char* sub = s + 0x40;
+    *(void***)(s + 0x48) = D_004949E8;
+    *(void***)(s + 0xCC) = D_00494C98;
+    func_00397948_v(s + 0xB4);
+    *(void***)(s + 0xC8) = D_00494CC0;
+    func_003A4868(s + 0xC0);
+    *(void***)(s + 0xBC) = D_00494CC0;
+    func_003A4868(s + 0xB4);
+    func_0039FC48(sub, 2);
+    *(void***)(s + 0x30) = D_00494C98;
+    func_00397948_v(s + 0x18);
+    *(void***)(s + 0x2C) = D_00494CC0;
+    func_003A4868(s + 0x24);
+    *(void***)(s + 0x20) = D_00494CC0;
+    func_003A4868(s + 0x18);
+    *(void***)(s + 0x8) = D_00494CC0;
+    func_003A4868(self);
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
 
 //100%
 extern "C" int func_003B4818(void* data);
