@@ -449,7 +449,14 @@ void* func_003AD230(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AD250);
+#ifdef SKIP_ASM
+extern "C" void* func_003AD250(void* self, ...)
+{
+    return self;
+}
+#endif
 
 INCLUDE_ASM("world/wscriptcache", func_003AD290);
 
@@ -617,8 +624,30 @@ extern "C" void* func_003ADE08(void* self, int a1, int a2, int a3, int a4, int a
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ADE58);
+#ifdef SKIP_ASM
+extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
+
+extern "C" void* func_003ADE58(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8)
+{
+    *(int*)((char*)self + 0x60) = 0;
+    func_003ADEC8(self, a1, a2, a3, a4, a5, a6, a7, a8);
+    return self;
+}
+#endif
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003ADE90);
+#ifdef SKIP_ASM
+extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
+
+extern "C" void* func_003ADE90(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+{
+    *(int*)((char*)self + 0x60) = 0;
+    func_003ADEC8(self, a1, a2, a3, a4, a5, a6, 2, a7);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003ADEC8);
@@ -1448,7 +1477,25 @@ extern "C" void func_003AF0C8(void* vself, unsigned int count, int a2, int a3, i
     }
 }
 #endif
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AF230);
+#ifdef SKIP_ASM
+struct sWScriptEntry_3AF230 {
+    char pad[0x34];
+};
+struct sWScriptArray_3AF230 {
+    sWScriptEntry_3AF230* items;
+    unsigned int count;
+};
+
+extern "C" sWScriptEntry_3AF230* func_003AF230(sWScriptArray_3AF230* self, unsigned int i)
+{
+    if (self->count < i) {
+        return 0;
+    }
+    return &self->items[i];
+}
+#endif
 INCLUDE_ASM("world/wscriptcache", func_003AF258);
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AF2F8);

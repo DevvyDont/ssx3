@@ -395,11 +395,29 @@ extern "C" void func_0026BA88(void* dst, void* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("path/pathsys", func_0026BAA8);
+#ifdef SKIP_ASM
+extern "C" void* func_0026BAA8(void* self, ...)
+{
+    return self;
+}
+#endif
 
 INCLUDE_ASM("path/pathsys", func_0026BAE8);
 
+//100%
 INCLUDE_ASM("path/pathsys", func_0026C3D0);
+#ifdef SKIP_ASM
+extern "C" void* func_0026C3D0(void* dst, void* src)
+{
+    *(float*)((char*)dst + 0x0) = *(float*)((char*)src + 0xC);
+    *(float*)((char*)dst + 0x4) = *(float*)((char*)src + 0x10);
+    *(float*)((char*)dst + 0x8) = *(float*)((char*)src + 0x14);
+    *(float*)((char*)dst + 0xC) = 1.0f;
+    return dst;
+}
+#endif
 //100%
 INCLUDE_ASM("path/pathsys", func_0026C400);
 #ifdef SKIP_ASM

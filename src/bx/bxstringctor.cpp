@@ -380,7 +380,17 @@ extern "C" void func_00268E28(void* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_00268E50);
+#ifdef SKIP_ASM
+extern sShortPad16 D_004A31D0;
+extern "C" void func_0025EB00(int);
+
+extern "C" void func_00268E50(void* self, void* a1, int a2)
+{
+    func_0025EB00(a2 + D_004A31D0.v);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00268E78);
@@ -1757,7 +1767,31 @@ extern "C" int func_0026A0B8(sBXRangeList* self, float a, float b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A138);
+#ifdef SKIP_ASM
+struct sEntry_0026A138 {
+    int type;
+    int pad4;
+    float value;
+    int pad[1];
+};
+struct sTable_0026A138 {
+    int count;
+    sEntry_0026A138* entries;
+};
+
+extern "C" float func_0026A138(sTable_0026A138* t)
+{
+    int i;
+    for (i = 0; i < t->count; i++) {
+        sEntry_0026A138* e = &t->entries[i];
+        if (e->type == 1)
+            return e->value;
+    }
+    return -1.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A180);
@@ -1907,8 +1941,57 @@ done:
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A920);
+#ifdef SKIP_ASM
+struct sEntry_0026A920 {
+    int key0;
+    int key1;
+    int pad[2];
+};
+struct sTable_0026A920 {
+    int count;
+    sEntry_0026A920* entries;
+};
+
+extern "C" sEntry_0026A920* func_0026A920(sTable_0026A920* t, int k0, int k1)
+{
+    int i = 0;
+    sEntry_0026A920* p = t->entries;
+    while (i < t->count) {
+        i++;
+        if (p->key0 == k0 && p->key1 == k1)
+            return p;
+        p++;
+    }
+    return 0;
+}
+#endif
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A970);
+#ifdef SKIP_ASM
+struct sEntry_0026A970 {
+    int key;
+    int pad[3];
+};
+struct sTable_0026A970 {
+    int count;
+    sEntry_0026A970* entries;
+};
+
+extern "C" sEntry_0026A970* func_0026A970(sTable_0026A970* t, int key)
+{
+    int i = 0;
+    sEntry_0026A970* p = t->entries;
+    while (i < t->count) {
+        i++;
+        if (p->key == key)
+            return p;
+        p++;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A9B0);

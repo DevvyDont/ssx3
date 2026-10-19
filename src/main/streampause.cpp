@@ -19,7 +19,14 @@ cStreamPause* cStreamPause_construct()
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/streampause", func_00242D50);
+#ifdef SKIP_ASM
+extern "C" void* func_00242D50(void* self, ...)
+{
+    return self;
+}
+#endif
 //100%
 INCLUDE_ASM("main/streampause", func_00242D90);
 #ifdef SKIP_ASM
@@ -100,7 +107,20 @@ extern "C" void func_00243838(void* self, int flags)
 #endif
 
 
+//100%
 INCLUDE_ASM("main/streampause", func_002438B0);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+extern void* D_0046D970[];
+
+extern "C" void func_002438B0(void* self, int flags)
+{
+    *(void***)((char*)self + 0x0) = D_0046D970;
+    if (flags & 1) {
+        operator_delete((int*)self);
+    }
+}
+#endif
 //100%
 INCLUDE_ASM("main/streampause", func_002438E0);
 #ifdef SKIP_ASM

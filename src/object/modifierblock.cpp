@@ -295,7 +295,24 @@ extern "C" int func_00352E50(tModifierBlock* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/modifierblock", func_00352E98);
+#ifdef SKIP_ASM
+struct sMbVEntryV_2E98 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+extern "C" void func_00352E98(tModifierBlock* self)
+{
+    sBoundBoxNode* node = self->node;
+    if (node != 0) {
+        sMbVEntryV_2E98* vt = *(sMbVEntryV_2E98**)node;
+        vt[3].fn((char*)node + vt[3].delta);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/modifierblock", func_00352ED0);

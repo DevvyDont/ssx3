@@ -26,7 +26,17 @@ extern "C" void func_0038DC20(void) {
 
 }
 #endif
+//100%
 INCLUDE_ASM("render/lightman", func_0038DC28);
+#ifdef SKIP_ASM
+extern "C" void func_0038DC28(void* self)
+{
+    *(unsigned int*)((char*)self + 0x0) = 0xFFFFFFFF;
+    *(unsigned int*)((char*)self + 0x4) = 0xFFFFFFFF;
+    *(unsigned int*)((char*)self + 0x8) = 0xFFFFFFFF;
+    *(unsigned int*)((char*)self + 0xC) = 0xFFFFFFFF;
+}
+#endif
 //100%
 INCLUDE_ASM("render/lightman", func_0038DC48);
 #ifdef SKIP_ASM
@@ -924,7 +934,28 @@ extern "C" int func_0038F4F8(void* self, unsigned int addr, int size, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038F560);
+#ifdef SKIP_ASM
+struct sLightDma_F560 {
+    int field_0x0;
+    int count;              // 0x4
+    int next;               // 0x8
+    int cur;                // 0xC
+    int defSize;            // 0x10
+    int result[3];          // 0x14
+    unsigned int addr[3];   // 0x20
+    int size[3];            // 0x2C
+};
+
+// PORT: func_0038F598 takes (self, size, flags) and returns the buffer address.
+unsigned int func_0038F598_f560(sLightDma_F560* self, int size, int flags) __asm__("func_0038F598");
+
+extern "C" unsigned int func_0038F560(sLightDma_F560* self, int flags)
+{
+    return func_0038F598_f560(self, self->size[self->cur] << 4, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_0038F598);
@@ -998,7 +1029,26 @@ extern "C" void func_0038F6A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038F6D0);
+#ifdef SKIP_ASM
+struct sLightDma_F6D0 {
+    int field_0x0;
+    int count;              // 0x4
+    int next;               // 0x8
+    int cur;                // 0xC
+    int defSize;            // 0x10
+    int result[3];          // 0x14
+    unsigned int addr[3];   // 0x20
+};
+
+extern "C" unsigned int func_0038F6D0(sLightDma_F6D0* self, int end)
+{
+    int cur = self->cur;
+    int size = end - self->result[cur];
+    return self->addr[cur] + (((size + (-size & 0xF)) >> 4) << 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_0038F708);

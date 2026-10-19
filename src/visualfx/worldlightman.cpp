@@ -729,11 +729,27 @@ extern "C" int func_002F6B38(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6B48);
+#ifdef SKIP_ASM
+extern "C" void* func_002F6B48(void* self, ...)
+{
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F6B88);
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A50);
+#ifdef SKIP_ASM
+extern char D_004FF1A0[];
+
+extern "C" void* func_002F7A50()
+{
+    return D_004FF1A0;
+}
+#endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A60);
 #ifdef SKIP_ASM
@@ -949,7 +965,19 @@ void func_002F7C30(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C38);
+#ifdef SKIP_ASM
+extern void* D_00488648[];
+extern "C" void* func_002D6410(void* self);
+
+extern "C" void* func_002F7C38(void* self)
+{
+    *(void***)self = D_00488648;
+    func_002D6410(self);
+    return self;
+}
+#endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C70);
 #ifdef SKIP_ASM
@@ -1532,7 +1560,16 @@ void func_002F8168(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8170);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+extern "C" int func_002F8170(unsigned long* bits, int n)
+{
+    unsigned long mask = (unsigned long)1 << n;
+    return (*bits & mask) != 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8188);
@@ -1727,7 +1764,14 @@ void func_002F8FF8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F9000);
+#ifdef SKIP_ASM
+extern "C" void* func_002F9000(void* self, ...)
+{
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/worldlightman", func_002F9040);
 
@@ -1752,7 +1796,14 @@ void func_002FA5F8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002FA600);
+#ifdef SKIP_ASM
+extern "C" void* func_002FA600(void* self, ...)
+{
+    return self;
+}
+#endif
 
 INCLUDE_ASM("visualfx/worldlightman", func_002FA640);
 
