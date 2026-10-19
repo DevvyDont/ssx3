@@ -1075,7 +1075,76 @@ extern "C" void* func_001FDBF0(void* self, int a1, int a2)
     return self;
 }
 
-INCLUDE_ASM("fe/ovstatepause", func_001FDC30);
+//100%
+int GetHashValue32(char* str);
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* text, const char* s);
+extern "C" void func_0020A380(void* self);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern char D_0046E378[];
+extern char D_0046E9F8[];
+extern char D_004700E0[];
+extern char D_004700F0[];
+extern char D_00470100[];
+extern char D_00470118[];
+extern char D_00470130[];
+extern char D_00470148[];
+extern char D_004A2560[];
+extern int D_004A2A54;
+extern int D_004A2A50;
+extern int D_005366E8[];
+extern int D_004428F0[];
+
+class cUIObj_1FDC30 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08(int on);
+    virtual void v09(int on);
+};
+
+static inline void* engine_1FDC30(char* self)
+{
+    return *(void**)(self + 0x10);
+}
+
+extern "C" void func_001FDC30(char* self)
+{
+    void* scr = cUIEngine_addScreenByHashName(engine_1FDC30(self), self, GetHashValue32(D_004700E0), 0);
+    *(void**)(self + 0x40) = scr;
+    if (scr != 0) {
+        cUIScreen_playFrame(scr, 0, 0);
+        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004700F0)), D_004A2560);
+        cUIObj_1FDC30* o = (cUIObj_1FDC30*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00470100));
+        o->v09(1);
+        o = (cUIObj_1FDC30*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00470118));
+        o->v09(0);
+        o = (cUIObj_1FDC30*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046E9F8));
+        o->v09(0);
+        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00470130)), D_004A2560);
+        for (int i = 1; i < 5; i++) {
+            char buf[0x20];
+            sprintf(buf, D_00470148, i);
+            o = (cUIObj_1FDC30*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
+            *(int*)((char*)o + 0x18) = i - 1;
+        }
+    }
+    void* s2 = cUIEngine_addScreenByHashName(engine_1FDC30(self), self, GetHashValue32(D_0046E378), 0);
+    if (s2 != 0)
+        cUIScreen_playFrame(s2, 0, 0);
+    D_005366E8[++D_004A2A54] = 2;
+    D_004A2A50 = D_004428F0[2];
+    func_0020A380(self);
+}
 
 //100%
 extern void* D_004A28A8;
@@ -2300,7 +2369,95 @@ extern "C" int func_001FF748(char* self, int a1, int msg, int a3)
 
 INCLUDE_ASM("fe/ovstatepause", func_001FF7B8);
 
-INCLUDE_ASM("fe/ovstatepause", func_001FFD08);
+//100%
+extern "C" void func_001FF7B8_1FFD08(char* self, unsigned short* out, int idx) __asm__("func_001FF7B8");
+
+struct sName_1FFD08 {
+    char c[2];
+};
+extern char D_004A2580[];
+
+struct sCol_1FFD08 {
+    float r, g, b, a;
+};
+
+class cUIObj_1FFD08 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08(int on);
+    virtual void v09(int on);
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25(int on);
+};
+
+extern "C" void func_001FFD08(void* vself, int base)
+{
+    char* self = (char*)vself;
+    sName_1FFD08 name = *(sName_1FFD08*)D_004A2580;
+    unsigned short text[0xC8];
+    int i;
+    for (i = 0; i < 9; i++) {
+        name.c[0] = '0' + i;
+        func_001FF7B8_1FFD08(self, text, i + base);
+        cUIObj_1FFD08* o = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name.c));
+        if (o != 0) {
+            func_003A0E90(o, text);
+        }
+        if (*(int*)(self + 0x9C) < 10) {
+            sCol_1FFD08 c;
+            c.r = 1.0f;
+            c.g = 0.3960784673690796f;
+            c.b = 0.7215686440467834f;
+            c.a = 0.7882353663444519f;
+            *(sCol_1FFD08*)((char*)o + 0x88) = c;
+            o->v25(1);
+            o->v08(1);
+        }
+    }
+    if (base == 0) {
+        cUIObj_1FFD08* o = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A2570));
+        if (o != 0) {
+            o->v09(0);
+        }
+    } else {
+        cUIObj_1FFD08* o = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A2570));
+        if (o != 0) {
+            o->v09(1);
+        }
+    }
+    if (*(int*)(self + 0x9C) <= base + 9) {
+        cUIObj_1FFD08* o = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A2578));
+        if (o != 0) {
+            o->v09(0);
+        }
+    } else {
+        cUIObj_1FFD08* o = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A2578));
+        if (o != 0) {
+            o->v09(1);
+        }
+    }
+}
 
 //100%
 extern "C" const char* func_0014EE58(void* iface, int a1);

@@ -165,7 +165,16 @@ extern "C" void func_0020CA10(void)
     D_004A2468 = 0;
 }
 
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020CB58);
+//100%
+int GetHashValue32(char* str);
+extern "C" int func_0039F9D8(void* stack, int hash);
+extern char D_00471A40[];
+
+extern "C" int func_0020CB58(void)
+{
+    char* stack = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48) + 0x18;
+    return func_0039F9D8(stack, GetHashValue32(D_00471A40)) != 0;
+}
 
 //100%
 int GetHashValue32(char* str);
