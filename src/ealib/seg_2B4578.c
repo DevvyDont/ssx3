@@ -11841,7 +11841,103 @@ int *func_003D32A8(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D32B8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct T_32B8 { int a; unsigned int len; };
+struct E_32B8 {
+    short h0;
+    unsigned short h2;
+    unsigned int w4;
+    unsigned int w8;
+    unsigned int wC;
+};
+struct V_32B8 {
+    char pad0[0x20];
+    unsigned int lo : 4;
+    int ch : 5;
+    unsigned int hi : 23;
+    char pad24[0x36 - 0x24];
+    short h36;
+    char pad38[0x40 - 0x38];
+    unsigned int x40;
+    char pad44[0x54 - 0x44];
+    int x54;
+};
+struct O_32B8 {
+    unsigned int lo : 4;
+    unsigned int f4 : 4;
+    unsigned int n : 8;
+    unsigned int rest : 16;
+    int w4;
+    int w8;
+    unsigned int wC;
+    int w10;
+    int w14;
+    int w18;
+};
+struct G_32B8 {
+    char pad0[0x34];
+    char *hdr;
+    short *a;
+    char pad3C[0x50 - 0x3C];
+    struct T_32B8 *tab;
+};
+extern struct G_32B8 *D_0044F420_32B8 __asm__("D_0044F420");
+extern int fAEC58_32B8(int, unsigned int *, unsigned int *) __asm__("func_002AEC58");
+
+int func_003D32B8_32B8(struct V_32B8 *v, struct O_32B8 *o) __asm__("func_003D32B8");
+
+int func_003D32B8_32B8(struct V_32B8 *v, struct O_32B8 *o) {
+    struct E_32B8 *e;
+    struct T_32B8 t;
+    unsigned int end;
+    unsigned int start;
+    float len;
+    float rate;
+    float a;
+    float b;
+    float x;
+    float p;
+    float q;
+    float r;
+    int n;
+
+    e = (struct E_32B8 *)(D_0044F420_32B8->hdr + D_0044F420_32B8->a[v->h36] * 4);
+    t = D_0044F420_32B8->tab[e->h0 - 1];
+    len = t.len;
+    if (e->w4 & 0x0F000000) {
+        len /= (unsigned int)(((e->w4 >> 24) & 0xF) * ((e->w4 >> 20) & 0xF));
+    }
+    rate = (float)t.len / (float)((e->w4 >> 20) & 0xF);
+    fAEC58_32B8(v->x54, &end, &start);
+    if (v->ch > 0 && (e->wC & 2)) {
+        a = (float)start + (float)v->x40 * (float)(unsigned int)(((e->w4 >> 24) & 0xF) * ((e->w4 >> 20) & 0xF) + (1 - v->ch));
+        b = (float)t.len - a;
+    } else {
+        a = start;
+        b = end;
+    }
+    x = b / len;
+    n = (int)x;
+    p = x * len;
+    q = rate - p;
+    r = (float)(n + 1) * len - p;
+    if (o != 0) {
+        o->lo = (e->w4 >> 24) & 0xF;
+        o->f4 = (e->w8 >> 4) & 0xF;
+        o->w18 = (int)a;
+        o->wC = t.len;
+        o->w4 = (int)len;
+        o->w8 = (int)rate;
+        o->w14 = (int)q;
+        o->w10 = (int)r;
+        o->n = n;
+    }
+    return n;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D3658);
 
