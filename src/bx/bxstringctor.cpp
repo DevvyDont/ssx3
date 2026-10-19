@@ -33,7 +33,25 @@ cBXString2* cBXString_cBXString(cBXString2* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_002688E0);
+#ifdef SKIP_ASM
+extern "C" void cBXString__cBXString(void* self, int flags);
+void operator_delete(int*);
+extern char D_0046D8C0[];
+
+extern "C" void func_002688E0(void* self, int flags)
+{
+    *(void**)((char*)self + 0xC) = D_0046D8C0;
+    cBXString__cBXString((char*)self + 8, 2);
+    cBXString__cBXString((char*)self + 4, 2);
+    cBXString__cBXString(self, 2);
+    if (flags & 1)
+    {
+        operator_delete((int*)self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00268950);
@@ -1644,7 +1662,30 @@ extern "C" sBXVec4K2 func_00269F18(sBXPath* path, float* t)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A000);
+#ifdef SKIP_ASM
+struct sEntry_0026A000 {
+    int type;
+    int pad4;
+    float lo;
+    float hi;
+};
+struct sTable_0026A000 {
+    int count;
+    sEntry_0026A000* entries;
+};
+
+extern "C" int func_0026A000(sTable_0026A000* t, float x) {
+    int i;
+    for (i = 0; i < t->count; i++) {
+        sEntry_0026A000* e = &t->entries[i];
+        if (!(x < e->lo) && !(e->hi < x) && e->type == 0xD)
+            return 0;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026A068__FPv);
@@ -2141,7 +2182,35 @@ extern "C" void func_0026ADF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AE70);
+#ifdef SKIP_ASM
+void cMemMan_free(void*);
+extern "C" void func_0026ADA8(void* self, int arg1);
+extern "C" int func_003E22F0(int, int);
+// PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
+void func_0026BA68_3(void* dst, void* src) __asm__("func_0026BA68");
+extern "C" int func_0026B410(void* self, char* p);
+extern "C" int cPathSys_resolvePaths(void* self, char* p);
+
+extern "C" void func_0026AE70(void* self, int arg1)
+{
+    int header;
+    void* old = *(void**)((char*)self + 0x48);
+    if (old != 0) {
+        cMemMan_free(old);
+    } else {
+        func_0026ADA8(self, arg1);
+    }
+    *(int*)((char*)self + 0x48) = 0;
+    char* p = (char*)func_003E22F0(arg1, 0);
+    *(char**)((char*)self + 0x48) = p;
+    func_0026BA68_3(&header, p);
+    p += 4;
+    p += func_0026B410(self, p);
+    cPathSys_resolvePaths(self, p);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AF00);

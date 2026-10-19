@@ -3357,7 +3357,29 @@ extern "C" void func_00274860(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0x1C))) = arg1;
 }
 #endif
+//100%
 INCLUDE_ASM("replay/replaycache", func_00274868);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_00274830_v(void*, int) __asm__("func_00274830");
+extern "C" void func_00274A30(void* p);
+
+extern "C" void func_00274868(char* self, int flag)
+{
+    float savedScale = *(float*)(self + 0x24);
+    *(int*)(self + 0x44) = flag;
+    *(float*)(self + 0x24) = 1.0f;
+    int savedIdx = *(int*)(self + 0x1C);
+    func_00274830_v(self, 0);
+    while (*(int*)(self + 0x20) != 0) {
+        *(float*)(self + 0x24) = 1.0f;
+        func_00274A30(self);
+    }
+    *(float*)(self + 0x24) = savedScale;
+    *(int*)(self + 0x1C) = savedIdx;
+    *(int*)(self + 0x44) = 0;
+}
+#endif
 //100%
 INCLUDE_ASM("replay/replaycache", func_002748F8);
 #ifdef SKIP_ASM

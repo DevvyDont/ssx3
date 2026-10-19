@@ -84,7 +84,29 @@ extern "C" void func_00313AD8(void* self, int key)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00313B38);
+#ifdef SKIP_ASM
+void operator_delete(int* ptr);
+struct sNode_00313B38 {
+    int id;
+    int refs;
+    float time;
+    sNode_00313B38* next;
+};
+
+extern "C" void func_00313B38(char* self, int id, float time) {
+    sNode_00313B38** link;
+    for (link = (sNode_00313B38**)(self + 0xAC); *link != 0; link = &(*link)->next) {
+        sNode_00313B38* n = *link;
+        if (n->id == id && n->time == time && n->refs == 0) {
+            *link = n->next;
+            operator_delete((int*)n);
+            return;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313BA8);
@@ -832,8 +854,34 @@ void func_00314AA0_impl(void* self, char* data)
 #endif
 
 INCLUDE_ASM("animation/animsequencer", func_00314AC0);
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314AE0);
+#ifdef SKIP_ASM
+extern "C" int func_0041AA88(const char* a, const char* b);
+
+extern "C" int func_00314AE0(char* self, const char* name) {
+    int i;
+    for (i = 0; i < *(short*)(*(char**)(self + 4) + 4); i++) {
+        if (func_0041AA88(name, *(char**)(self + 8) + i * 0x60) == 0)
+            return 1;
+    }
+    return 0;
+}
+#endif
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314B70);
+#ifdef SKIP_ASM
+extern "C" int func_0041AA88(const char* a, const char* b);
+
+extern "C" char* func_00314B70(char* self, const char* name) {
+    int i;
+    for (i = 0; i < *(short*)(*(char**)(self + 4) + 4); i++) {
+        if (func_0041AA88(name, *(char**)(self + 8) + i * 0x60) == 0)
+            return *(char**)(self + 8) + i * 0x60;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314C00);

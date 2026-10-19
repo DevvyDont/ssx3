@@ -1100,6 +1100,54 @@ extern "C" void func_00212508(void* self)
 
 
 INCLUDE_ASM("fe/ovstateprofile", func_00212680);
+//100%
 INCLUDE_ASM("fe/ovstateprofile", func_002126C0);
+#ifdef SKIP_ASM
+extern "C" int func_002126C0(const char* first1, const char* last1, const char* first2, const char* last2)
+{
+    for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
+        if (*first1 < *first2) return 1;
+        if (*first2 < *first1) return 0;
+    }
+    return first1 == last1 && first2 != last2;
+}
+#endif
+//100%
 INCLUDE_ASM("fe/ovstateprofile", func_00212728);
+#ifdef SKIP_ASM
+extern "C" int func_00212728(const char* first1, const char* last1, const char* first2, const char* last2)
+{
+    for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
+        if (*first1 < *first2) return -1;
+        if (*first2 < *first1) return 1;
+    }
+    if (first2 == last2) return first1 != last1;
+    return -1;
+}
+#endif
+//100%
 INCLUDE_ASM("fe/ovstateprofile", func_00212788);
+#ifdef SKIP_ASM
+void operator_delete(int*);
+
+struct sListNode_00212788 {
+    sListNode_00212788* next;
+    sListNode_00212788* prev;
+};
+struct sList_00212788 {
+    int pad0;
+    sListNode_00212788* node;
+};
+
+extern "C" void func_00212788(sList_00212788* self)
+{
+    sListNode_00212788* cur = self->node->next;
+    while (cur != self->node) {
+        sListNode_00212788* tmp = cur;
+        cur = cur->next;
+        operator_delete((int*)tmp);
+    }
+    self->node->next = self->node;
+    self->node->prev = self->node;
+}
+#endif

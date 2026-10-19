@@ -325,7 +325,26 @@ extern "C" int func_00282450(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282498);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* func_00282CB0_v(void) __asm__("func_00282CB0");
+void func_00274808(void* self, float t);
+
+extern "C" int func_00282498(float t)
+{
+    if (t < 0.01f) return 0;
+    char* c = (char*)func_00282CB0_v();
+    if (c == 0) return 0;
+    if (*(int*)(c + 4) == 1) {
+        *(float*)(c + 0x18) = t;
+        return 1;
+    }
+    func_00274808(*(void**)c, t);
+    return 1;
+}
+#endif
 INCLUDE_ASM("scripter/bxscriptengine", func_00282500);
 INCLUDE_ASM("scripter/bxscriptengine", func_00282510);
 

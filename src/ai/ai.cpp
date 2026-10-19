@@ -820,7 +820,22 @@ extern "C" int func_0012A250(sAiObj12A250* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012A2B0);
+#ifdef SKIP_ASM
+extern "C" void func_00112180(void* rider, int v);
+extern "C" void func_0026AF00(void* self);
+extern "C" void func_0026ADA8(void*, int);
+extern char D_004D33A0[];
+extern "C" void func_0012A2B0(void* self, int arg1) {
+    int i;
+    func_0026AF00(D_004D33A0);
+    func_0026ADA8(D_004D33A0, arg1);
+    for (i = 0; i < *(int*)((char*)self + 0x78); i++) {
+        func_00112180(*(void**)((char*)self + 0x28 + (i << 2)), 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012A340);
@@ -908,7 +923,16 @@ extern "C" void func_0012A4D0(void) {
     func_0026ADE8(&(*(int*)&D_004D33A0));
 }
 #endif
+//100%
 INCLUDE_ASM("ai/ai", func_0012A4F0);
+#ifdef SKIP_ASM
+extern "C" void func_0012A4F0(void* self) {
+    int i;
+    for (i = 0; i < *(int*)((char*)self + 0x78); i++) {
+        func_00112180(*(void**)((char*)self + 0x28 + (i << 2)), 0);
+    }
+}
+#endif
 //100%
 INCLUDE_ASM("ai/ai", func_0012A558);
 #ifdef SKIP_ASM
@@ -952,7 +976,42 @@ extern "C" void func_0012A998(void* self)
     }
 }
 #endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", func_0012AA78);
+#ifdef SKIP_ASM
+extern "C" int func_0011C0E0(void*);
+struct sVE_0012AA78 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sEnt_0012AA78 {
+    char pad[0x18];
+    cRider* rider;
+};
+struct sOwner_0012AA78 {
+    char pad[0x48];
+    sEnt_0012AA78* ent[8];
+    char pad2[0x80 - 0x68];
+    int count;
+};
+
+extern "C" int func_0012A1F0(void*, int);
+
+extern "C" int func_0012AA78(sOwner_0012AA78* self) {
+    int i;
+    int ok = 1;
+    for (i = 0; i < self->count; i++) {
+        if (func_0011C0E0(self->ent[i]->rider) == 0) {
+            char* obj = (char*)&self->ent[i]->rider->mVtbl;
+            sVE_0012AA78* vt = *(sVE_0012AA78**)obj;
+            if (func_0012A1F0(self, vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta)) != 0)
+                ok = 0;
+        }
+    }
+    return ok;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012AB20);
@@ -1095,7 +1154,20 @@ extern "C" void func_0012AD70(void* self)
     }
 }
 #endif
+//100%
 INCLUDE_ASM("ai/ai", func_0012ADC0);
+#ifdef SKIP_ASM
+extern "C" int func_0012ADC0(void* self) {
+    int i;
+    int ok = 1;
+    for (i = 0; i < *(int*)((char*)self + 0x88); i++) {
+        void* p = *(void**)((char*)self + 0x70 + (i << 2));
+        if (func_0011C0E0(*(void**)((char*)p + 0x18)) == 0)
+            ok = 0;
+    }
+    return ok;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012AE38);
