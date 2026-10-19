@@ -841,7 +841,104 @@ void func_003D76F0(int a0, int n, ...) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D7760);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct H_7760 { unsigned short h0; unsigned short h2; unsigned short h4; unsigned char pad6[4]; unsigned char flags; };
+struct R_7760 { unsigned int f0; unsigned short h; unsigned char c; unsigned char d; short s8; short next; struct H_7760 *p; int arr[20]; };
+struct G_7760 { int z[8]; int a[8]; int b[8]; int n; struct R_7760 r[16]; };
+extern struct G_7760 D_0044FFF8_7760 __asm__("D_0044FFF8");
+struct E_7760 { unsigned char *p; int x; };
+extern struct E_7760 D_0044FFB8_7760[] __asm__("D_0044FFB8");
+extern int D_004506A0_7760[] __asm__("D_004506A0");
+extern int D_004A483C;
+struct K_7760 { unsigned char b[4]; };
+struct L_7760 { int n; unsigned short *ids; };
+int func_003DB9A0(void);
+void func_003D7C38(unsigned int);
+
+static __inline__ int find_7760(unsigned char *arg0, struct E_7760 **pres) {
+    int found = 0;
+    int i = 0;
+    do {
+        unsigned char *q = D_0044FFB8_7760[i].p;
+        if (q != 0 && q[9] == arg0[2] && q[8] == arg0[3]) {
+            *pres = &D_0044FFB8_7760[i];
+            found = 1;
+            goto done;
+        }
+        i++;
+    } while (i < 8);
+done:
+    return found;
+}
+
+int func_003D7760(struct L_7760 *list, int arg1) {
+    int best = -1;
+    unsigned int bestAge = 0xFFFFFFFF;
+    int maxPri = 0;
+    unsigned short bestH = 0;
+    unsigned int now;
+    int i, j;
+    struct H_7760 *p;
+    int expired, inList, blocked;
+    unsigned int age;
+
+    now = func_003DB9A0() + D_004A483C;
+    for (i = 0; i < 16; i++) {
+        if (D_0044FFF8_7760.r[i].c == 0) continue;
+        if (D_0044FFF8_7760.r[i].d != arg1) continue;
+        if (D_0044FFF8_7760.r[i].s8 != 0) continue;
+        expired = 0;
+        blocked = 0;
+        inList = 1;
+        p = D_0044FFF8_7760.r[i].p;
+        if (list != 0) {
+            unsigned short id = p->h0;
+            int f = 0;
+            for (j = 0; j < list->n; j++) {
+                if (list->ids[j] == id) {
+                    f = 1;
+                    break;
+                }
+            }
+            inList = f;
+        }
+        age = now - D_0044FFF8_7760.r[i].f0;
+        if (p->h2 != 0 && p->h2 < age) {
+            expired = 1;
+        }
+        if (D_004506A0_7760[arg1] == 1 && (p->flags & 1)) {
+            struct K_7760 k;
+            struct E_7760 *res;
+            int b = 0;
+            k = *(struct K_7760 *)D_0044FFF8_7760.r[i].arr;
+            if (find_7760((unsigned char *)&k, &res) && p->h4 < *(unsigned short *)(res->p + 0x16)) {
+                b = 1;
+            }
+            blocked = b;
+        }
+        if (expired) {
+            func_003D7C38(i);
+            continue;
+        }
+        if (!inList) continue;
+        if (blocked) continue;
+        if (maxPri < p->h4) {
+            best = i;
+            bestAge = age;
+            maxPri = p->h4;
+            bestH = D_0044FFF8_7760.r[best].h;
+        } else if (p->h4 == maxPri && (age < bestAge || (age == bestAge && bestH < D_0044FFF8_7760.r[i].h))) {
+            best = i;
+            bestAge = age;
+            bestH = D_0044FFF8_7760.r[best].h;
+        }
+    }
+    return best;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2D7498", func_003D7A50);

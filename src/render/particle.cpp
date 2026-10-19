@@ -1088,7 +1088,185 @@ extern "C" void func_00372660(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_003726C8);
+#ifdef SKIP_ASM
+struct sPtV4_26C8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sPtVtx_26C8 {
+    sPtV4_26C8 a;
+    sPtV4_26C8 b;
+    sPtV4_26C8 pos;                 // 0x20
+};
+
+struct sPtRS_26C8 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtVEntry_26C8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, sPtVtx_26C8*, int);
+};
+
+struct sPtCtx_26C8 {
+    char pad_0x0[0xE84];
+    sPtRS_26C8* top;                // 0xE84
+    char pad_0xE88[0x10D8 - 0xE88];
+    sPtVEntry_26C8* vtable;         // 0x10D8
+};
+
+struct sPtTrail_26C8 {
+    int f0;
+    int n;                          // 0x4
+    sPtV4_26C8* pts;                // 0x8
+};
+
+extern int D_004A41D4;
+extern float D_004A41D8;
+extern float D_004A41DC;
+extern sPtV4_26C8 D_004FF160;
+extern sPtVtx_26C8 D_00501440_v26C8[] __asm__("D_00501440");
+extern sPtRS_26C8 D_00501420_rs26C8 __asm__("D_00501420");
+extern sPtCtx_26C8* D_004A5B80_ctx26C8 __asm__("D_004A5B80");
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sPtV4_26C8 Sub_26C8(const sPtV4_26C8& a, const sPtV4_26C8& b)
+{
+    sPtV4_26C8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector subtract).
+static inline void SubEq_26C8(sPtV4_26C8& a, const sPtV4_26C8& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sPtV4_26C8 Add_26C8(const sPtV4_26C8& a, const sPtV4_26C8& b)
+{
+    sPtV4_26C8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sPtV4_26C8 Norm_26C8(const sPtV4_26C8& v)
+{
+    sPtV4_26C8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sPtV4_26C8 Cross_26C8(const sPtV4_26C8& a, const sPtV4_26C8& b)
+{
+    sPtV4_26C8 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sPtV4_26C8 Scale_26C8(const sPtV4_26C8& v, float s)
+{
+    sPtV4_26C8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_003726C8(sPtTrail_26C8* self)
+{
+    if (D_004A41D4 == 0) {
+        return;
+    }
+    sPtV4_26C8 dir = Norm_26C8(Sub_26C8(self->pts[self->n], self->pts[0]));
+    sPtV4_26C8 a = Scale_26C8(Norm_26C8(Cross_26C8(dir, D_004FF160)), D_004A41D8);
+    sPtV4_26C8 b = Scale_26C8(a, -1.0f);
+    SubEq_26C8(a, Scale_26C8(D_004FF160, D_004A41DC));
+    SubEq_26C8(b, Scale_26C8(D_004FF160, D_004A41DC));
+    for (int i = 0; i < self->n + 1; i++) {
+        D_00501440_v26C8[2 * i].pos = Add_26C8(self->pts[i], b);
+        D_00501440_v26C8[2 * i + 1].pos = self->pts[i];
+        D_00501440_v26C8[2 * (i + self->n + 2)].pos = self->pts[i];
+        D_00501440_v26C8[((self->n + i) << 1) + 5].pos = Add_26C8(self->pts[i], a);
+    }
+    D_00501440_v26C8[2 * self->n + 2] = D_00501440_v26C8[2 * self->n + 1];
+    D_00501440_v26C8[2 * self->n + 3] = D_00501440_v26C8[2 * self->n + 4];
+    sPtCtx_26C8* ctx = D_004A5B80_ctx26C8;
+    ctx->top[1] = ctx->top[0];
+    ctx->top++;
+    *ctx->top = D_00501420_rs26C8;
+    sPtVEntry_26C8* vt = ctx->vtable;
+    vt[71].fn((char*)ctx + vt[71].delta, ((self->n + 1) << 2) | 2, D_00501440_v26C8, 0);
+    for (int i = 0; i < self->n + 1; i++) {
+        D_00501440_v26C8[i].pos = self->pts[i];
+    }
+    vt = ctx->vtable;
+    vt[73].fn((char*)ctx + vt[73].delta, self->n + 1, D_00501440_v26C8, 0);
+    ctx->top--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00372AA0);
