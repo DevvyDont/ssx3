@@ -17,7 +17,100 @@ char* cDirtysock_tag__TagFieldSetupAppend(char* buf, char* dst, char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag__TagFieldSetupTerm);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern signed char D_004A4A70;
+extern unsigned char D_004964C0[];
+extern "C" int func_00415FC8(const void* a, const void* b, unsigned int n);
+extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
+extern "C" void* func_0041605C(void* dst, const void* src, unsigned int n);
+
+// Adds or replaces the "name=value" term temp in the record. Names compare
+// through the D_004964C0 class table; "~..." terms are appended at the end.
+extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp)
+{
+    unsigned char* rec = (unsigned char*)record;
+    unsigned char* p;
+    unsigned char* start;
+    unsigned char* end;
+    int n;
+    int d;
+    unsigned int a;
+    unsigned int b;
+    if (rec == 0) return -1;
+    if (temp == 0 || (unsigned char)*temp <= ' ') return -1;
+    if (*temp == '~') {
+        p = rec;
+        while (*p != 0) p++;
+        if (p != rec && p[-1] >= 0x20 && p[-1] != D_004A4A70 && p < rec + len - 1) {
+            *p++ = D_004A4A70;
+            *p = 0;
+        }
+        end = p;
+        start = p;
+    } else {
+        p = rec;
+        for (;;) {
+            if (*p == 0) {
+                if (p != rec && p[-1] >= 0x20 && p[-1] != D_004A4A70 && p < rec + len - 1) {
+                    *p++ = D_004A4A70;
+                    *p = 0;
+                }
+                end = p;
+                start = p;
+                break;
+            }
+            if (*p <= ' ') {
+                p++;
+                continue;
+            }
+            if (D_004964C0[*p] == 1) {
+                end = p;
+                start = p;
+                break;
+            }
+            a = D_004964C0[*p];
+            b = D_004964C0[*temp];
+            n = 0;
+            while (a == b && a >= 2) {
+                n++;
+                a = D_004964C0[p[n]];
+                b = D_004964C0[temp[n]];
+            }
+            if (a + b == 2) {
+                end = p;
+                start = p;
+                while (*end >= 0x20) end++;
+                if (*end != 0) end++;
+                goto found;
+            }
+            p++;
+            while (*p >= 0x20) p++;
+        }
+    }
+found:
+    int old = end - p;
+    n = 0;
+    while (temp[n] >= 0x20) n++;
+    p = end;
+    n++;
+    d = n - old;
+    while (*p != 0) p++;
+    p++;
+    if (d > 0 && rec + len - p < d) return -1;
+    if (d == 0 && func_00415FC8(start, temp, n) == 0) return 0;
+    if (d > 0) func_0041610C(end + d, end, p - end);
+    if (d < 0) func_0041610C(start, start - d, p - (start - d));
+    func_0041605C(start, temp, n);
+    if (start[n] == 0 && D_004A4A70 != '\n')
+        start[n - 1] = 0;
+    else
+        start[n - 1] = D_004A4A70;
+    return n - 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tags", func_003EB578);
@@ -32,7 +125,45 @@ extern "C" signed char func_003EB578(signed char arg0) {
     return temp_2;
 }
 #endif
+//100%
 INCLUDE_ASM("dirtysock/tags", func_003EB588);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// Normalizes a record in place: header control runs become `sep` (stopping at the first
+// key line), a trailing sep becomes a newline (or the end), then each control run in the
+// body becomes one '\n' (a run of the same char stays separate lines).
+extern "C" void func_003EB588(unsigned char* d, unsigned char sep)
+{
+    unsigned char* buf = d;
+    unsigned char* s = d;
+    if (*s != 0) {
+        do {
+            if (*s < 0x20) {
+                *d++ = sep;
+                while (*s != 0 && *s < 0x20)
+                    s++;
+                if ((*s == '=' || *s == ':') && s[1] < 0x20)
+                    break;
+            } else {
+                *d++ = *s++;
+            }
+        } while (*s != 0);
+    }
+    if (d != buf && d[-1] == sep)
+        d[-1] = (sep == '\n' || *s != 0) ? '\n' : 0;
+    while (*s != 0) {
+        if (*s < 0x20) {
+            *d++ = '\n';
+            unsigned char c = *s++;
+            while (*s != 0 && *s < 0x20 && *s != c)
+                s++;
+        } else {
+            *d++ = *s++;
+        }
+    }
+    *d = 0;
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldFind);
 
@@ -815,7 +946,67 @@ extern "C" int func_003ED0F8(const char* pData, char* pBuffer, int iLength, cons
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetString);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// Copies a tag field value (quoted or bare, with %xx decoding) into pBuffer, or the default.
+extern "C" int cDirtysock_tag_TagFieldGetString(const char* pData, char* pBuffer, int iLength, const char* pDefval)
+{
+    int iSize;
+    unsigned char cQuote;
+    const unsigned char* p;
+
+    if (pData == 0) {
+        if (pDefval == 0) {
+            return -1;
+        }
+        if (pBuffer == 0) {
+            return strlen(pDefval);
+        }
+        for (iSize = 1; (iSize < iLength) && (*pDefval != 0); ++iSize) {
+            *pBuffer++ = *pDefval++;
+        }
+        *pBuffer = 0;
+        return iSize - 1;
+    }
+    if ((*pData == '"') || (*pData == '\'')) {
+        cQuote = *pData++;
+    } else {
+        cQuote = 0;
+    }
+    if (pBuffer == 0) {
+        p = (const unsigned char*)pData;
+        for (iSize = 0; (*p != cQuote) && (*p >= ' '); ++iSize) {
+            if ((p[0] == '%') && (p[1] >= ' ') && (p[2] >= ' ')) {
+                p += 2;
+            }
+            ++p;
+        }
+        return iSize;
+    }
+    if (iLength <= 0) {
+        return -1;
+    }
+    p = (const unsigned char*)pData;
+    for (iSize = 1; (iSize < iLength) && (*p != cQuote) && (*p >= ' ');) {
+        if ((p[0] == '%') && (p[1] == '%')) {
+            *pBuffer++ = '%';
+            p += 2;
+            ++iSize;
+        } else if ((p[0] == '%') && (p[1] >= ' ') && (p[2] >= ' ')) {
+            ++iSize;
+            *pBuffer++ = D_004961C0[p[1]] | D_004962C0[p[2]];
+            p += 3;
+        } else {
+            ++iSize;
+            *pBuffer++ = *p++;
+        }
+    }
+    *pBuffer = 0;
+    return iSize - 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetBinary);

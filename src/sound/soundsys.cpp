@@ -1799,7 +1799,44 @@ extern "C" void func_00294678(void* self, char* rider)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002947B0);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_00294880(void* self, int i, int v);
+extern "C" void func_0029FCC8(void* self, void* rider);
+extern "C" void func_002A7408(void* self, int i);
+extern "C" int func_00288AE0(void* self);
+// func_00285D98 returns a rider pointer here (the unit declares it int).
+void* func_00285D98_p(void* self, int which) __asm__("func_00285D98");
+
+
+
+// Six rider slots at 0x59E8.
+struct sSnd4860 {
+    char pad[0x59E8];
+    int vals[6];
+};
+
+extern "C" void func_00294678(void* self, char* rider);
+
+// Refresh the six rider slots at 0x59E8, clearing those whose rider is gone.
+extern "C" void func_002947B0(void* self)
+{
+    sSnd4860* s = (sSnd4860*)self;
+    for (int i = 0; i < 6; i++) {
+        if (s->vals[i] != 0 && i < *(int*)((char*)func_0028B1D8() + 0x78)) {
+            char* rider = *(char**)((char*)func_0028B1D8() + (i << 2) + 0x28);
+            if (rider != 0) {
+                func_00294678(self, rider);
+                continue;
+            }
+        }
+        s->vals[i] = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_00294860);

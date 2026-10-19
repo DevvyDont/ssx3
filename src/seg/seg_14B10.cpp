@@ -889,7 +889,91 @@ extern "C" int func_00116938(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", gGenTrickName);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern int D_0043D160[];
+
+struct sTrickDesc {
+    unsigned int f0 : 3;
+    unsigned int f3 : 4;
+    unsigned int f7 : 3;
+    unsigned int f10 : 2;
+    unsigned int f12 : 4;
+    unsigned int f16 : 3;
+    unsigned int f19 : 3;
+    unsigned int f22 : 6;
+    unsigned int f28 : 4;
+    unsigned int f32 : 3;
+    unsigned int f35 : 7;
+    unsigned int f42 : 1;
+    unsigned int f43 : 7;
+    unsigned int f50 : 2;
+    unsigned int f52 : 4;
+    unsigned int f56 : 3;
+    unsigned int f59 : 5;
+};
+
+extern char* D_0043D118[];
+extern char* D_0043D130[];
+extern char* D_0043CF40[];
+extern char* D_0043CF60[];
+extern char* D_0043CF70[];
+extern char* D_0043CFB0[];
+extern char* D_0043CFC8[];
+extern char* D_0043CFE0[];
+extern char* D_0043D0C0[];
+extern char* D_004A0FF0[2];
+extern char* D_0043D2B8[];
+extern char* D_0043D2D0[];
+extern char* D_0043D2E0[];
+extern char* D_0043D100[];
+extern char* D_0043D320[];
+
+// The unit later declares gGenTrickName with a different second parameter type; bind this one by symbol.
+extern "C" void gGenTrickName_desc(char* out, sTrickDesc* t, int) __asm__("gGenTrickName");
+extern "C" void gGenTrickName_desc(char* out, sTrickDesc* t, int)
+{
+    const char* p;
+    p = D_0043D118[t->f0];
+    while (*p) *out++ = *p++;
+    p = D_0043D130[t->f3];
+    while (*p) *out++ = *p++;
+    p = D_0043CF40[t->f7];
+    while (*p) *out++ = *p++;
+    p = D_0043CF60[t->f10];
+    while (*p) *out++ = *p++;
+    p = D_0043CF70[t->f12];
+    while (*p) *out++ = *p++;
+    p = D_0043CFB0[t->f16];
+    while (*p) *out++ = *p++;
+    p = D_0043CFC8[t->f19];
+    while (*p) *out++ = *p++;
+    p = D_0043CFE0[t->f22];
+    while (*p) *out++ = *p++;
+    p = D_0043D0C0[t->f28];
+    while (*p) *out++ = *p++;
+    p = ((char**)D_0043D160)[t->f35];
+    while (*p) *out++ = *p++;
+    p = D_004A0FF0[t->f42];
+    while (*p) *out++ = *p++;
+    p = ((char**)D_0043D160)[t->f43];
+    while (*p) *out++ = *p++;
+    p = D_0043D2B8[t->f32];
+    while (*p) *out++ = *p++;
+    p = D_0043D2D0[t->f50];
+    while (*p) *out++ = *p++;
+    p = D_0043D2E0[t->f52];
+    while (*p) *out++ = *p++;
+    p = D_0043D100[t->f56];
+    while (*p) *out++ = *p++;
+    p = D_0043D320[t->f59];
+    while (*p) *out++ = *p++;
+    *out = 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_14B10", gGenMonsterTrickReqName);
