@@ -64,6 +64,11 @@ for _u, _d in list(UNIT_CC.items()):
     if not os.path.isfile(f"{_d}/bin/ee-gcc2953.exe"):
         print(f"warning: {_d} missing; {_u} builds with the default compiler")
         del UNIT_CC[_u]
+# Fork-only: the assemblers that build our C get a 16 MB frag-obstack chunk (tools/patch_as_chunk.py). Stock
+# gas splits frags every ~998 instructions, and its R5900 short-loop padding miscounts loops across those splits;
+# where they fall depends on what precedes a function in the unit, which differs between our mixed asm/C builds
+# and EA's all-C build. Idempotent; leaves unknown binaries alone.
+subprocess.run([sys.executable, f"{TOOLS_DIR}/patch_as_chunk.py", CC_DIR, *sorted(set(UNIT_CC.values()))], check=True)
 # The game was built without C++ exception support: its constructors and destructors have no EH cleanup
 # landing pads, which g++ 2.95 emits by default (e.g. cAngerFX_cAngerFX only matches with -fno-exceptions).
 COMMON_CXXFLAGS = "-fno-exceptions"
