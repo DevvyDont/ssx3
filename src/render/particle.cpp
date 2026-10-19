@@ -2830,7 +2830,116 @@ extern "C" int func_0037BD38(void* self, unsigned int kind, int c)
     return 0;
 }
 
-INCLUDE_ASM("render/particle", func_0037BD98);
+//100%
+// Sets up a GS texture: stores the formats and sizes, works out GS pages for the three buffers,
+// allocates them and uploads, then waits for the GS and starts the draw.
+extern "C" void func_00367078(void* gs);
+void* func_00367340(void* self, int a1, int a2);
+extern "C" int func_003673D8(void* gs, int size);
+extern "C" void func_00424020(int a);
+extern "C" void func_003FD910(int a, int b, int c, int d);
+extern "C" void func_003E6690(int a);
+extern "C" void func_00382AF0(void* a, void* b, int c);
+
+#define F_U(o) (*(unsigned int*)(s + (o)))
+#define F_I(o) (*(int*)(s + (o)))
+#define F_S(o) (*(short*)(s + (o)))
+
+static inline int func_00396080_i(void)
+{
+    *(volatile unsigned long*)0x12001000 = 8;
+    while (!(*(volatile unsigned long*)0x12001000 & 8)) {
+    }
+    return (*(volatile unsigned long*)0x12001000 >> 13) & 0x1;
+}
+
+extern "C" int func_0037BD98(void* self, unsigned int size, int h, int w0, int h0, int fmt0, int fmt1,
+                             int fmt2, short a8, short x, short y, int flag)
+{
+    char* s = (char*)self;
+    void* gs;
+    if (func_0037BD38(self, fmt1, fmt2) == 0) {
+        return 0;
+    }
+    F_I(0x5A58) = h;
+    F_I(0x5A30) = w0;
+    F_I(0x5A34) = h0;
+    F_I(0x5A3C) = fmt1;
+    F_I(0x5A38) = fmt0;
+    F_I(0x5A40) = fmt2;
+    F_S(0x5A44) = x;
+    F_S(0x5A46) = y;
+    F_I(0x5A74) = 0;
+    F_I(0x5A54) = size;
+    F_S(0x5A48) = 2;
+    F_I(0x5A4C) = flag;
+    F_I(0x5A60) = 0;
+    switch (size) {
+    case 0x100:
+        F_I(0x5A64) = 9;
+        break;
+    case 0x140:
+        F_I(0x5A64) = 7;
+        break;
+    case 0x180:
+        F_I(0x5A64) = 6;
+        break;
+    case 0x200:
+        F_I(0x5A64) = 4;
+        break;
+    case 0x280:
+        F_I(0x5A64) = 3;
+        break;
+    }
+    F_U(0x5A50) = (F_U(0x5A30) + 0x3F) >> 6;
+    F_U(0x5A5C) = (F_U(0x5A54) + 0x3F) >> 6;
+    switch (F_U(0x5A38)) {
+    case 0x00: case 0x01: case 0x30: case 0x31:
+        F_I(0x59D0) = 0;
+        F_U(0x5A68) = F_U(0x5A5C) * ((F_U(0x5A58) + 0x1F) >> 5);
+        break;
+    case 0x02: case 0x0A: case 0x32: case 0x3A:
+        F_I(0x59D0) = 1;
+        F_U(0x5A68) = F_U(0x5A5C) * ((F_U(0x5A58) + 0x3F) >> 6);
+        break;
+    }
+    switch (F_U(0x5A3C)) {
+    case 0x00: case 0x01: case 0x30: case 0x31:
+        F_U(0x5A6C) = F_U(0x5A50) * ((F_U(0x5A34) + 0x1F) >> 5);
+        break;
+    case 0x02: case 0x0A: case 0x32: case 0x3A:
+        F_U(0x5A6C) = F_U(0x5A50) * ((F_U(0x5A34) + 0x3F) >> 6);
+        break;
+    }
+    switch (F_U(0x5A40)) {
+    case 0x30: case 0x31:
+        F_U(0x5A70) = F_U(0x5A50) * ((F_U(0x5A34) + 0x1F) >> 5);
+        break;
+    case 0x32: case 0x3A:
+        F_U(0x5A70) = F_U(0x5A50) * ((F_U(0x5A34) + 0x3F) >> 6);
+        break;
+    }
+    gs = *(void**)(s + 0x18F4);
+    func_00367078(gs);
+    F_I(0x5A78) = func_003673D8(gs, F_I(0x5A6C) << 13);
+    F_I(0x5A7C) = func_003673D8(gs, F_I(0x5A68) << 13);
+    F_I(0x5A80) = func_003673D8(gs, F_I(0x5A70) << 13);
+    if (*(long*)(s + 0x5A38) == 0x100000001L) {
+        func_00367340(*(void**)(s + 0x18F4), F_I(0x5A78) << 11,
+                      F_I(0x5A54) * F_I(0x5A58) + F_I(0x5A30) * F_I(0x5A34) * 2);
+    } else if (F_I(0x5A38) == 1) {
+        func_00367340(*(void**)(s + 0x18F4), F_I(0x5A7C) << 11,
+                      F_I(0x5A54) * F_I(0x5A58) + F_I(0x5A30) * F_I(0x5A34));
+    } else {
+        func_00367340(*(void**)(s + 0x18F4), F_I(0x5A80) << 11, F_I(0x5A30) * F_I(0x5A34));
+    }
+    func_00424020(0);
+    func_00396080_i();
+    func_003FD910(a8, F_S(0x5A44), flag ? 0x50 : F_S(0x5A48), F_S(0x5A46));
+    func_003E6690(flag ? 3 : 1);
+    func_00382AF0(self, 0, 1);
+    return 1;
+}
 
 //100%
 struct sPtBits_C198 {
@@ -4343,7 +4452,77 @@ extern "C" int func_00383770(char* self, int a1, int a2, int a3, int a4, int a5)
     return 1;
 }
 
-INCLUDE_ASM("render/particle", func_00383808);
+//100%
+// Uploads an image to GS memory: works out bytes per row from the pixel format, waits for DMA, then builds
+// GIF/DMA packets in scratchpad in chunks of at most 0x7FFF0 bytes and kicks the transfer.
+extern "C" void func_00371F98(unsigned int tadr, int flags);
+
+extern "C" void func_00383808(void* self, int src, int dbp, int w, int h, int dbw, int psm, int dsax, int dsay)
+{
+    int bpr = 0;
+    unsigned long* p = (unsigned long*)0x70000000;
+    unsigned long bitbltbuf;
+    int id = 3;
+
+    switch (psm) {
+    case 0:
+        bpr = w << 2;
+        break;
+    case 1:
+        bpr = w * 3;
+        break;
+    case 2:
+    case 10:
+        bpr = w << 1;
+        break;
+    case 19:
+        bpr = w;
+        break;
+    case 20:
+        bpr = w >> 1;
+        break;
+    }
+
+    while (*(volatile int*)0x1000A000 & 0x100) {
+    }
+    bitbltbuf = ((unsigned long)dbp << 32) | ((unsigned long)(dbw >> 6) << 48) | ((unsigned long)psm << 56);
+
+    do {
+        int rows;
+        int qwc;
+        unsigned long* q = p + 16;
+        rows = 0x7FFF0 / bpr;
+        if (h < rows) {
+            rows = h;
+        }
+        p[0] = 0x10000007;
+        p[1] = 0;
+        p[2] = 0x1000000000000005;
+        p[3] = 0xE;
+        p[4] = bitbltbuf;
+        p[5] = 0x50;
+        p[6] = ((unsigned long)dsax << 32) | ((unsigned long)dsay << 48);
+        p[7] = 0x51;
+        p[9] = 0x52;
+        p[10] = 0;
+        p[11] = 0x3F;
+        p[12] = 0;
+        p[13] = 0x53;
+        p[8] = w | ((unsigned long)rows << 32);
+        h -= rows;
+        qwc = (bpr * rows) >> 4;
+        p[14] = qwc | 0x8000 | 0x0800000000000000;
+        p[15] = 0;
+        unsigned long srcHi = (unsigned long)src << 32;
+        *q = qwc | (h != 0 ? srcHi | ((unsigned long)id << 28) : srcHi);
+        dsay += rows;
+        p[17] = 0;
+        p += 18;
+        src += bpr * rows;
+    } while (h != 0);
+
+    func_00371F98(0x70000000, 6);
+}
 
 INCLUDE_ASM("render/particle", func_00383A10);
 
