@@ -1203,7 +1203,98 @@ extern "C" void* func_0031F838(void* ms, unsigned int n, unsigned int* sizes, vo
     return func_0031F858(ms, n, sizes, 0, chunks);
 }
 #endif
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031F858);
+#ifdef SKIP_ASM
+// dlmalloc 2.7 iALLOc() (independent_calloc / independent_comalloc worker)
+struct sMChunk_31F858
+{
+    unsigned int prev_size;      // 0x0
+    unsigned int size;           // 0x4
+};
+
+extern "C" void func_003E6448(void* dst, int c, int n);
+
+extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks)
+{
+    sMState_31EEE8* av = *(sMState_31EEE8**)ms;
+    unsigned int element_size;
+    unsigned int contents_size;
+    unsigned int array_size;
+    void* mem;
+    sMChunk_31F858* p;
+    unsigned int remainder_size;
+    void** marray;
+    sMChunk_31F858* array_chunk;
+    int mmx;
+    unsigned int size;
+    unsigned int i;
+
+    if (av->max_fast == 0)
+        func_0031EEE8(ms, av);
+
+    if (chunks != 0) {
+        if (n == 0)
+            return chunks;
+        marray = chunks;
+        array_size = 0;
+    } else {
+        if (n == 0)
+            return func_0031E818(ms, 0);
+        marray = 0;
+        array_size = (n * sizeof(void*) + 4 + 15 < 16) ? 16 : (n * sizeof(void*) + 4 + 15) & ~15;
+    }
+
+    if (opts & 1) {
+        element_size = (*sizes + 4 + 15 < 16) ? 16 : (*sizes + 4 + 15) & ~15;
+        contents_size = n * element_size;
+    } else {
+        element_size = 0;
+        contents_size = 0;
+        for (i = 0; i != n; ++i)
+            contents_size += (sizes[i] + 4 + 15 < 16) ? 16 : (sizes[i] + 4 + 15) & ~15;
+    }
+
+    size = contents_size + array_size - 15;
+
+    mmx = *(int*)((char*)av + 0x354);
+    *(int*)((char*)av + 0x354) = 0;
+    mem = func_0031E818(ms, size);
+    *(int*)((char*)av + 0x354) = mmx;
+    if (mem == 0)
+        return 0;
+
+    p = (sMChunk_31F858*)((char*)mem - 8);
+    remainder_size = *(unsigned int*)((char*)mem - 4) & ~3;
+
+    if (opts & 2)
+        func_003E6448(mem, 0, remainder_size - 4 - array_size);
+
+    if (marray == 0) {
+        array_chunk = (sMChunk_31F858*)((char*)p + contents_size);
+        marray = (void**)((char*)array_chunk + 8);
+        array_chunk->size = (remainder_size - contents_size) | 1;
+        remainder_size = contents_size;
+    }
+
+    for (i = 0; ; ++i) {
+        marray[i] = (char*)p + 8;
+        if (i != n - 1) {
+            if (element_size != 0)
+                size = element_size;
+            else
+                size = (sizes[i] + 4 + 15 < 16) ? 16 : (sizes[i] + 4 + 15) & ~15;
+            remainder_size -= size;
+            p->size = size | 1;
+            p = (sMChunk_31F858*)((char*)p + size);
+        } else {
+            p->size = remainder_size | 1;
+            break;
+        }
+    }
+    return marray;
+}
+#endif
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FAA8);
 #ifdef SKIP_ASM

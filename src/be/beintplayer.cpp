@@ -495,7 +495,72 @@ extern "C" int func_001464D0(void* self, int index, int c, int kind, int flag)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_001466A0);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBENewPlayerInterface_getPlayerID(int index);
+extern int D_004A6CA8[];
+struct sTrackInfo_1466A0 {
+    char pad0[0x54];
+    int kind;                   // 0x54
+    char pad58[0x64 - 0x58];
+};
+extern sTrackInfo_1466A0 D_0043D950[];
+
+// PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
+extern "C" int func_001466A0(void* self, int index)
+{
+    int profile = cBELibrary_getProfileIndex(index);
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    signed char c = D_00534FE0[id].mCharID;
+    int kind = D_0043D950[D_005305B0[16]].kind;
+    if (*(signed char*)&D_005305B0[18] == 5) {
+        switch (kind) {
+        case 0:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(long*)(p + 0x278) >> 6) & 1;
+        }
+        case 1:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(long*)(p + 0x278) >> 7) & 1;
+        }
+        case 2:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(long*)(p + 0x278) >> 8) & 1;
+        }
+        }
+    } else {
+        switch (kind) {
+        case 0:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(long*)(p + 0x278) >> 9) & 1;
+        }
+        case 1:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(long*)(p + 0x278) >> 10) & 1;
+        }
+        case 2:
+            {
+            int off = c * 0xF88 + profile * 0x9B50;
+            char* p = (char*)D_004A6CA8 + off;
+            return (int)(*(long*)(p + 0x278) >> 11) & 1;
+        }
+        }
+    }
+    return 0;
+}
+#endif
 //100%
 INCLUDE_ASM("be/beintplayer", func_001468B0);
 #ifdef SKIP_ASM

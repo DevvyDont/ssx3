@@ -918,7 +918,73 @@ extern "C" void func_0014BE70(void* vself)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/belibrary", func_0014C068);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern char D_0045A610[];
+
+struct sBEEnt_14C068 {
+    signed char type;       // 0x0
+    char pad1[3];
+    short slot;             // 0x4
+    short group;            // 0x6
+    char pad8[0x38 - 0x8];
+};
+
+struct sBELib_14C068 {
+    char* buf;                      // 0x0
+    sBEEnt_14C068* entries;         // 0x4
+    char pad8[0x18 - 0x8];
+    unsigned short* table;          // 0x18
+    int n0;                         // 0x1C
+    char pad20[0x11C - 0x20];
+    unsigned short* count[30];      // 0x11C
+    unsigned short* first[30];      // 0x194
+    char pad20C[0x4DC - 0x20C];
+    unsigned short* index[30];      // 0x4DC
+};
+
+extern "C" void func_0014C068(sBELib_14C068* self)
+{
+    int last = D_004A11E8;
+    unsigned short* p;
+
+    self->table = new (D_0045A610, 0, 0) unsigned short[last * 90];
+    p = self->table;
+    for (int i = 0; i < 30; i++) {
+        self->count[i] = p;
+        p += D_004A11E8;
+    }
+    for (int i = 0; i < 30; i++) {
+        self->first[i] = p;
+        p += D_004A11E8;
+    }
+    for (int i = 0; i < 30; i++) {
+        self->index[i] = p;
+        p += D_004A11E8;
+        func_003E6448(self->index[i], 0, D_004A11E8 * 2);
+    }
+    for (int i = 0; i < self->n0; i++) {
+        self->index[self->entries[i].type][self->entries[i].slot] = i;
+    }
+    for (int i = 0; i < 30; i++) {
+        func_003E6448(self->first[i], 0, D_004A11E8 * 2);
+        func_003E6448(self->count[i], 0, D_004A11E8 * 2);
+    }
+    for (int i = 0; i < self->n0; i++) {
+        int g = self->entries[i].group;
+        int t = self->entries[i].type;
+        if (g != -1) {
+            self->count[t][g]++;
+            if (last != g) {
+                last = g;
+                self->first[t][g] = i;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/belibrary", func_0014C2B0);

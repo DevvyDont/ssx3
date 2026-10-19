@@ -533,7 +533,124 @@ extern "C" void* func_002523A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_002523D0);
+#ifdef SKIP_ASM
+extern "C" void MUTEX_lock(void* mutex);
+extern "C" void MUTEX_unlock(void* mutex);
+extern "C" int func_00252960(int unused, int id);
+
+struct sMemNode_2523D0 {
+    unsigned short tag;         // 0x0
+    unsigned short flags;       // 0x2
+    int size;                   // 0x4
+    sMemNode_2523D0* end;       // 0x8 (next block in memory)
+    sMemNode_2523D0* back;      // 0xC (previous block in memory)
+    sMemNode_2523D0* next;      // 0x10 (free list)
+    sMemNode_2523D0* prev;      // 0x14 (free list)
+};
+
+struct sMemClass_2523D0 {
+    char pad0[0x10];
+    sMemNode_2523D0 head;       // 0x10
+    int align;                  // 0x28
+    char pad2C[0xC];
+    int locked;                 // 0x38
+    char mutex[4];              // 0x3C
+};
+
+extern void* D_004D2438[];
+
+static inline void Unlink_2523D0(sMemNode_2523D0* b)
+{
+    sMemNode_2523D0* p = b->prev;
+    sMemNode_2523D0* n = b->next;
+    p->next = n;
+    n->prev = p;
+}
+
+// PORT: pointer arithmetic done in int (see func_00252660).
+extern "C" int func_002523D0(void* mem)
+{
+    sMemClass_2523D0* cls;
+    sMemNode_2523D0* blk;
+    sMemNode_2523D0* back;
+    sMemNode_2523D0* fwd;
+    sMemNode_2523D0* split;
+    sMemNode_2523D0* p;
+    sMemNode_2523D0* q;
+
+    int size;
+    int sz;
+
+    if (mem != 0) {
+        cls = (sMemClass_2523D0*)D_004D2438[*(unsigned short*)((int)mem - 0xE) & 0x3F];
+        blk = (sMemNode_2523D0*)((int)mem - 0x10);
+        if (cls->locked) {
+            MUTEX_lock(cls->mutex);
+        }
+        back = *(sMemNode_2523D0**)((int)mem - 4);
+        fwd = *(sMemNode_2523D0**)((int)mem - 8);
+        if (back->flags & 0x4000) {
+            Unlink_2523D0(back);
+            back->tag = 0x424F;
+            back->flags &= ~0x4000;
+            blk = back;
+            back = blk->back;
+            blk->end = fwd;
+            back->end = blk;
+            fwd->back = blk;
+        }
+        if (fwd->flags & 0x4000) {
+            Unlink_2523D0(fwd);
+            fwd->tag = 0x424F;
+            fwd->flags &= ~0x4000;
+            fwd = fwd->end;
+            blk->back = back;
+            blk->end = fwd;
+            fwd->back = blk;
+        }
+        size = back->size + func_00252960(func_00252658(&back->next), back->flags);
+        if (size <= 7) {
+            size = 8;
+        }
+        split = (sMemNode_2523D0*)((char*)back + ((size + cls->align + 0xF) & -cls->align));
+        if (blk != split) {
+            split->flags = blk->flags;
+            blk = split;
+            blk->end = fwd;
+            blk->back = back;
+            back->end = blk;
+            fwd->back = blk;
+        }
+        q = &cls->head;
+        p = q;
+        sz = (char*)blk->end - (char*)blk;
+        if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)blk) {
+            do
+                p = p->prev;
+            while (blk < p);
+            q = p->next;
+        } else {
+            do
+                q = q->next;
+            while (q < blk);
+            p = q->prev;
+        }
+        blk->size = sz;
+        blk->next = q;
+        blk->prev = p;
+        p->next = blk;
+        q->prev = blk;
+        blk->tag = 0x4246;
+        blk->flags |= 0x4000;
+        if (cls->locked) {
+            MUTEX_unlock(cls->mutex);
+        }
+    }
+    return 1;
+}
+#endif
 //100%
 INCLUDE_ASM("mem/memstd", func_002525F8);
 #ifdef SKIP_ASM
@@ -627,7 +744,121 @@ extern "C" void* func_002526B8(void* block, int size)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00252718);
+#ifdef SKIP_ASM
+extern "C" void MUTEX_lock(void* mutex);
+extern "C" void MUTEX_unlock(void* mutex);
+extern "C" void* MEM_initblock(void* self, const char* name, int size, int hdr, int flags, void* prev, void* next);
+extern "C" int func_00252960(int unused, int id);
+extern "C" void func_003E6188(void* a, void* b);
+
+struct sMemNode_252718 {
+    unsigned short tag;         // 0x0
+    unsigned short flags;       // 0x2
+    int size;                   // 0x4
+    sMemNode_252718* end;       // 0x8 (next block in memory)
+    sMemNode_252718* back;      // 0xC (previous block in memory)
+    sMemNode_252718* next;      // 0x10 (free list)
+    sMemNode_252718* prev;      // 0x14 (free list)
+};
+
+struct sMemClass_252718 {
+    char pad0[0x10];
+    sMemNode_252718 head;       // 0x10
+    int align;                  // 0x28
+    char pad2C[0xC];
+    int locked;                 // 0x38
+    char mutex[4];              // 0x3C
+};
+
+extern void* D_004D2438[];
+
+static inline void Unlink_252718(sMemNode_252718* b)
+{
+    sMemNode_252718* p = b->prev;
+    sMemNode_252718* n = b->next;
+    p->next = n;
+    n->prev = p;
+}
+
+// PORT: pointer arithmetic done in int (see func_00252660).
+extern "C" void* func_00252718(void* mem, int size)
+{
+    int id = *(unsigned short*)((int)mem - 0xE);
+    sMemClass_252718* cls = (sMemClass_252718*)D_004D2438[id & 0x3F];
+    sMemNode_252718* blk = (sMemNode_252718*)((int)mem - 0x10);
+    sMemNode_252718* fwd;
+    sMemNode_252718* nb;
+    sMemNode_252718* p;
+    sMemNode_252718* q;
+    int want;
+    int avail;
+    int hdr;
+    int sz;
+
+    if (cls->locked) {
+        MUTEX_lock(cls->mutex);
+    }
+    fwd = *(sMemNode_252718**)((int)mem - 8);
+    if (fwd->flags & 0x4000) {
+        Unlink_252718(fwd);
+        fwd->tag = 0x424F;
+        fwd->flags &= ~0x4000;
+        fwd = fwd->end;
+        *(sMemNode_252718**)((int)mem - 8) = fwd;
+        fwd->back = blk;
+    }
+    want = size;
+    if (want < 8) {
+        if (want == -1) {
+            want = 0x40000000;
+        } else if (want >= 0) {
+            want = 8;
+        }
+    }
+    hdr = func_00252960(0, id);
+    avail = ((char*)fwd - (char*)blk) - 0x10;
+    want = (((want + hdr + 0x10) + (cls->align - 1)) & -cls->align) - 0x10;
+    if (avail < want) {
+        want = avail;
+        size = avail - hdr;
+    }
+    func_003E6188((char*)mem + size, (char*)mem + blk->size);
+    blk->size = size;
+    if (avail - want > 0x40) {
+        nb = (sMemNode_252718*)((char*)mem + (want + 0x10));
+        MEM_initblock(nb, 0, 0, 0, 0, blk, fwd);
+        q = &cls->head;
+        p = q;
+        sz = (char*)nb->end - (char*)nb;
+        if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)nb) {
+            do
+                p = p->prev;
+            while (nb < p);
+            q = p->next;
+        } else {
+            do
+                q = q->next;
+            while (q < nb);
+            p = q->prev;
+        }
+        nb->size = sz;
+        nb->next = q;
+        nb->prev = p;
+        p->next = nb;
+        q->prev = nb;
+        nb->tag = 0x4246;
+        nb->flags |= 0x4000;
+        fwd->back = nb;
+        blk->end = nb;
+    }
+    if (cls->locked) {
+        MUTEX_unlock(cls->mutex);
+    }
+    return mem;
+}
+#endif
 //100%
 INCLUDE_ASM("mem/memstd", func_00252960);
 #ifdef SKIP_ASM

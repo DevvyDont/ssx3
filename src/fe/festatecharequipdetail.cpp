@@ -1394,7 +1394,102 @@ extern "C" void func_0019ACA0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019AD18);
+#ifdef SKIP_ASM
+extern "C" int func_0019B518(void* self);
+extern "C" int func_0019B598(void* self);
+extern "C" void func_0019B7E0(void* self, int idx);
+extern "C" void func_0019BA60(void* self, int idx);
+extern "C" void* func_003A0C28(void* item);
+extern "C" void func_003A0E90(void* item, void* value);
+
+struct sVEntry0019AD18a {
+    short delta;
+    short index;
+    void (*fn)(void*, char*);
+};
+
+struct sVEntry0019AD18b {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+static inline int isMode1_19AD18(void* self)
+{
+    return *(int*)((char*)self + 0xC8) == 1;
+}
+
+struct sCharEquipDetail_19AD18 {
+    char pad0[0x5C];
+    int f5C;                 // 0x5C
+    char pad60[0x8C - 0x60];
+    char* a8C[6];            // 0x8C
+    char* aA4[6];            // 0xA4
+    char padBC[0xC8 - 0xBC];
+    int fC8;                 // 0xC8
+};
+
+static inline void copyRow_19AD18(sCharEquipDetail_19AD18* self, int dst, int src)
+{
+    char* o = self->a8C[dst];
+    sVEntry0019AD18a* vt = *(sVEntry0019AD18a**)(o + 8);
+    vt[11].fn(o + vt[11].delta, self->a8C[src] + 0x1C);
+    func_003A0E90(self->a8C[dst], func_003A0C28(self->a8C[src]));
+    o = self->aA4[dst];
+    sVEntry0019AD18b* vt2 = *(sVEntry0019AD18b**)(o + 8);
+    vt2[9].fn(o + vt2[9].delta, (*(int*)(self->aA4[src] + 0x14) >> 6) & 1);
+}
+
+extern "C" void func_0019AD18(sCharEquipDetail_19AD18* self, int n)
+{
+    if (self->f5C == 0) {
+        return;
+    }
+    if (n < -6 || n > 6) {
+        if (isMode1_19AD18(self)) {
+            func_0019B598(self);
+        } else {
+            func_0019B518(self);
+        }
+        return;
+    }
+    if (n < 0) {
+        int i;
+        for (i = 5; i >= -n; i--) {
+            copyRow_19AD18(self, i, i + n);
+        }
+        if (isMode1_19AD18(self)) {
+            int j;
+            for (j = 0; j < -n; j++) {
+                func_0019BA60(self, j);
+            }
+        } else {
+            int j;
+            for (j = 0; j < -n; j++) {
+                func_0019B7E0(self, j);
+            }
+        }
+    } else if (n > 0) {
+        int i;
+        for (i = n; i < 6; i++) {
+            copyRow_19AD18(self, i - n, i);
+        }
+        if (isMode1_19AD18(self)) {
+            int j;
+            for (j = 6 - n; j < 6; j++) {
+                func_0019BA60(self, j);
+            }
+        } else {
+            int j;
+            for (j = 6 - n; j < 6; j++) {
+                func_0019B7E0(self, j);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019AFD0);

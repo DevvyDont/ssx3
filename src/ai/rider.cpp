@@ -5,7 +5,135 @@
 // single lq/sq pair instead of word-by-word.
 typedef int cQuad128 __attribute__((mode(TI)));
 
+//100%
 INCLUDE_ASM("ai/rider", cRider_cRider);
+#ifdef SKIP_ASM
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void func_00140738(void* self);
+extern "C" void* func_0027F968(void* self);
+extern "C" void* func_002F1850(void* mem, void* rider);
+extern "C" void* func_002EC9E0(void* self, int a1, int a2);
+void* func_003758F8(void* self);
+extern "C" void func_00283298(void* rig);
+extern "C" void* func_0028B180();
+// PORT: func_00289AF0 is declared (void*) but takes (mgr, rider).
+void func_00289AF0_impl(void* mgr, void* rider) __asm__("func_00289AF0__FPv");
+extern "C" void* func_003E6448(void* dst, int value, int size);
+// PORT: memset-like; called as void here.
+extern "C" void func_003E6448_v(void* dst, int value, int size) __asm__("func_003E6448");
+extern void* D_004A28A8;
+extern void* D_00459C18[];
+extern char D_00459B90[];
+extern void* D_00459BD0[];
+extern void* D_00459CC8[];
+extern const char D_004578A8[];
+extern const char D_004578C8[];
+extern const char D_004578E0[];
+extern const char D_004578F0[];
+extern const char D_00457908[];
+extern const char D_00457920[];
+extern const char D_00457938[];
+extern const char D_00457950[];
+
+struct sKey8_B698 {
+    int a, b;
+};
+extern sKey8_B698 D_004A5960[];
+
+struct sRiderAux_B698 {
+    int f0;                     // 0x000
+    int f4;                     // 0x004
+    unsigned int f8;            // 0x008
+    char padC[0x100];           // 0x00C
+    unsigned int f10C;          // 0x10C
+    char pad110[0x100];         // 0x110
+    unsigned int f210;          // 0x210
+    char pad214[0xA14 - 0x214];
+};
+
+// PORT: the unit declares cRider_cRider as void, but the ctor returns this; bind by asm label.
+extern "C" void* cRider_cRider_impl(cRider* self) __asm__("cRider_cRider");
+extern "C" void* cRider_cRider_impl(cRider* self)
+{
+    unsigned int none = 0xFFFFFFFF;
+    int one = 1;
+    func_00140738(self);
+    self->mVtbl = D_00459CC8;
+    func_0027F968(&self->mScriptObjRiderVtbl);
+    self->mScriptObjectVtbl = D_00459BD0;
+    self->mAIIndex = -1;
+    self->mViewIndex = -1;
+    self->mSafeRenderTick = -1;
+    self->mScriptObjRiderVtbl = D_00459B90;
+    self->mVtbl = D_00459C18;
+    self->unk_434 = 0x31;
+    self->unk_880 = 0;
+    self->mRenderFlag = one;
+    self->mIsHuman = 0;
+    self->mIsActor = 0;
+    self->mIsLocal = one;
+    self->mRiderAnim = 0;
+    self->mAnimModel = 0;
+    self->mSphereTree = 0;
+    self->unk_3FC = 0;
+    self->unk_430 = none;
+    *(sKey8_B698*)&self->unk_AAC = D_004A5960[0];
+    self->unk_AC0 = (int*)cMemMan_alloc(0x20, D_004578A8, 0, 0);
+    self->unk_ABC = (int*)cMemMan_alloc(0x20, D_004578C8, 0, 0);
+    sRiderAux_B698* aux = new (D_004578E0, 0, 0) sRiderAux_B698;
+    int team = *(int*)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20);
+    aux->f0 = team;
+    aux->f4 = 0;
+    aux->f8 = none;
+    aux->f10C = none;
+    aux->f210 = none;
+    self->unk_860 = aux;
+    self->unk_88C = func_002F1850(cMemMan_alloc(0xA8, D_004578F0, 0, 0), self);
+    self->unk_890 = func_002EC9E0(cMemMan_alloc(0xC8, D_00457908, 0, 0), (int)self, (int)self->unk_88C);
+    self->unk_864 = cMemMan_alloc(0x10, D_00457920, 0, 0);
+    self->unk_868 = cMemMan_alloc(0x10, D_00457938, 0, 0);
+    func_003E6448_v(self->unk_794, 0, 0x20);
+    self->mFocusBox = 0;
+    self->unk_5B0 = 0;
+    self->mIsInNIS = 0;
+    self->unk_AC8 = 0;
+    self->unk_AD0 = 0;
+    *(cQuad128*)&self->unk_AE0 = 0;
+    self->unk_AF0 = 0;
+    self->unk_AF4 = 0;
+    self->unk_AF8 = 0;
+    self->unk_AFC = 0;
+    self->unk_B00 = one;
+    self->unk_B04 = 0;
+    int i;
+    for (i = 3; i >= 0; i--) {
+        self->unk_B08[i] = -1;
+    }
+    int m1 = -1;
+    self->mShadow = func_003758F8(cMemMan_alloc(0x1A0, D_00457950, 0, 0));
+    self->unk_450 = m1;
+    self->unk_AA4 = 0;
+    self->mIsOnScreen = 0;
+    self->unk_B1C = 0;
+    func_00283298(self->unk_6DC);
+    self->mWipeoutSlideHandle = m1;
+    self->mWipeoutTumbleHandle = m1;
+    func_00289AF0_impl(func_0028B180(), self);
+    self->unk_B24 = 0.0f;
+    self->unk_304 = 1;
+    self->unk_B20 = 1;
+    self->unk_B30 = 0;
+    self->unk_B34 = 0;
+    self->unk_B28 = 31;
+    self->unk_B2C = 3;
+    self->unk_308 = 1;
+    self->unk_30C = 4000.0f;
+    self->unk_310 = 0.18000000715255737f;
+    self->unk_314 = 0.014999999664723873f;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_0011B978);
