@@ -114,11 +114,63 @@ extern "C" int func_003209B8(int *arg0) {
     return *arg0;
 }
 #endif
+//100%
 INCLUDE_ASM("bx/execman", func_003209C0);
+#ifdef SKIP_ASM
+class cExecObj {
+public:
+    int pad0;
+    int pad4;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual unsigned int v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11();
+};
+
+extern "C" void func_003209C0(cExecutionMan *self) {
+    ((cExecObj *)self->field_0x8)->v4();
+}
+#endif
+//100%
 INCLUDE_ASM("bx/execman", func_003209F0);
+#ifdef SKIP_ASM
+extern "C" void func_003209F0(cExecutionMan *self) {
+    ((cExecObj *)self->field_0x8)->v3();
+}
+#endif
+//100%
 INCLUDE_ASM("bx/execman", func_00320A20);
+#ifdef SKIP_ASM
+extern "C" unsigned int func_00320A20(cExecutionMan *self) {
+    cExecObj *obj = (cExecObj *)self->field_0x8;
+    if (obj != 0) {
+        return obj->v5();
+    }
+    return 0xFFFFFFFF;
+}
+#endif
+//100%
 INCLUDE_ASM("bx/execman", func_00320A60);
+#ifdef SKIP_ASM
+extern "C" void func_00320A60(cExecutionMan *self) {
+    ((cExecObj *)self->field_0x8)->v10();
+}
+#endif
+//100%
 INCLUDE_ASM("bx/execman", func_00320A90);
+#ifdef SKIP_ASM
+extern "C" void func_00320A90(cExecutionMan *self) {
+    ((cExecObj *)self->field_0x8)->v11();
+}
+#endif
 //100%
 INCLUDE_ASM("bx/execman", func_00320AC0);
 #ifdef SKIP_ASM

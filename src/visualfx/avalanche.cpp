@@ -754,7 +754,19 @@ extern "C" void func_002D9660(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D96B0);
+#ifdef SKIP_ASM
+extern "C" void* func_002D96B0(void* self, int id)
+{
+    for (void* n = *(void**)((char*)self + 0x4); n != 0; n = *(void**)((char*)n + 0xF4)) {
+        if (*(int*)((char*)n + 0xF8) == id) {
+            return n;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", func_002D96E0);

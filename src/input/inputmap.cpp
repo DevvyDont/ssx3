@@ -19,7 +19,23 @@ extern "C" void cInputMap_init(void* self, int count)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputmap", func_00320D08);
+#ifdef SKIP_ASM
+void cMemMan_free(void* p);
+
+extern "C" void func_00320D08(void *self)
+{
+    void *p = *(void **)((char *)self + 4);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+    p = *(void **)((char *)self + 0x14);
+    if (p != 0) {
+        cMemMan_free(p);
+    }
+}
+#endif
 //100%
 INCLUDE_ASM("input/inputmap", func_00320D50);
 #ifdef SKIP_ASM

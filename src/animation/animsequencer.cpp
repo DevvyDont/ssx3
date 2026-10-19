@@ -468,7 +468,38 @@ extern "C" void func_00314368(sSequencer_00314368* self, sSeqNode_00314368* node
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_003143C8);
+#ifdef SKIP_ASM
+// Same layout as the unit's cAnimSequenceNode / cAnimSequencer (declared later in the unit).
+struct sSeqNode_003143C8 {
+    char pad_0x00[0xC8];
+    sSeqNode_003143C8* next; // 0xC8
+};
+
+struct sSequencer_003143C8 {
+    int mCount;                        // 0x0
+    sSeqNode_003143C8* mFirstSequence; // 0x4
+};
+
+extern "C" void func_003143C8(sSequencer_003143C8* self, sSeqNode_003143C8* node)
+{
+    if (self->mFirstSequence == node) {
+        self->mFirstSequence = node->next;
+    } else {
+        sSeqNode_003143C8* cur = self->mFirstSequence;
+        while (cur != 0) {
+            if (cur->next == node) {
+                break;
+            }
+            cur = cur->next;
+        }
+        cur->next = node->next;
+    }
+    node->next = 0;
+    self->mCount--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314418);
@@ -690,8 +721,32 @@ cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314788);
+#ifdef SKIP_ASM
+extern "C" int func_00314788(cAnimSequencer *self, int id) {
+    for (cAnimSequenceNode *n = self->mFirstSequence; n != 0; n = n->next) {
+        if (*(int *)n == id) {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
+//100%
 INCLUDE_ASM("animation/animsequencer", func_003147B8);
+#ifdef SKIP_ASM
+extern "C" int func_003147B8(cAnimSequencer *self, int id) {
+    int index = 0;
+    for (cAnimSequenceNode *n = self->mFirstSequence; n != 0; n = n->next) {
+        if (*(int *)n == id) {
+            return index;
+        }
+        index++;
+    }
+    return -1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animsequencer", func_003147F0);
@@ -834,7 +889,19 @@ void* func_00314A40(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314A60);
+#ifdef SKIP_ASM
+// PORT: asm label (same two-argument binding func_00314A18 uses for func_00314AA0).
+void func_00314AA0_impl(void* self, char* data) __asm__("func_00314AA0");
+extern "C" char *func_003E22F0(int, int);
+
+extern "C" void func_00314A60(void *self, int a1, int a2) {
+    char *data = func_003E22F0(a1, a2);
+    *(char **)self = data;
+    func_00314AA0_impl(self, data);
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314AA0);
@@ -853,7 +920,17 @@ void func_00314AA0_impl(void* self, char* data)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/animsequencer", func_00314AC0);
+#ifdef SKIP_ASM
+extern "C" short func_00314AC0(void *self) {
+    char *p = *(char **)((char *)self + 4);
+    if (p != 0) {
+        return *(short *)(p + 4);
+    }
+    return 0;
+}
+#endif
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314AE0);
 #ifdef SKIP_ASM

@@ -86,8 +86,26 @@ extern "C" void func_003513D0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/instanceman", func_00351410);
+#ifdef SKIP_ASM
+class cInstSink {
+public:
+    virtual void v0(void *p, int n);
+    virtual void v1(void *p, int n);
+};
+
+extern "C" void func_00351410(void *src, cInstSink *sink) {
+    sink->v0(src, 0x40);
+}
+#endif
+//100%
 INCLUDE_ASM("object/instanceman", func_00351448);
+#ifdef SKIP_ASM
+extern "C" void func_00351448(void *src, cInstSink *sink) {
+    sink->v1(src, 0x40);
+}
+#endif
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/instanceman", func_00351480);
 #ifdef SKIP_ASM
@@ -377,7 +395,21 @@ extern "C" void func_00351948(void* self, sImMat44* m)
 
 extern "C" void* func_00351538(void* self);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/instanceman", func_00351A10);
+#ifdef SKIP_ASM
+extern void* D_00490AB0[];
+// PORT: func_00351A60 is defined later in the unit as (void*); bound by asm label with its real float argument.
+void func_00351A60_vf(void* self, float f) __asm__("func_00351A60__FPv");
+
+extern "C" void* func_00351A10(void* self, float* src, float f)
+{
+    func_00351330(self, src, f);
+    *(void***)((char*)self + 0x84) = D_00490AB0;
+    func_00351A60_vf(self, f);
+    return self;
+}
+#endif
 
 //99.29%
 INCLUDE_ASM("object/instanceman", func_00351A60__FPv);

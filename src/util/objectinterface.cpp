@@ -192,8 +192,45 @@ extern "C" void* func_002D21C0(void* p)
 #endif
 
 
+//100%
 INCLUDE_ASM("util/objectinterface", func_002D21D0);
+#ifdef SKIP_ASM
+// PORT: later callers in the unit declare func_002D21D0 as void; bound by asm label with its real int return.
+int func_002D21D0_impl(signed char **stream, float v) __asm__("func_002D21D0");
+
+union uFloatBits_002D21D0 {
+    float f;
+    unsigned int u;
+};
+
+int func_002D21D0_impl(signed char **stream, float v)
+{
+    uFloatBits_002D21D0 b;
+    b.f = v;
+    unsigned int bits = b.u;
+    signed char *p = *stream;
+    p[0] = bits;
+    p[1] = bits >> 8;
+    p[2] = bits >> 16;
+    p[3] = bits >> 24;
+    *stream += 4;
+    return 4;
+}
+#endif
+//100%
 INCLUDE_ASM("util/objectinterface", func_002D2210);
+#ifdef SKIP_ASM
+extern "C" int func_002D2210(signed char **stream, unsigned int v)
+{
+    signed char *p = *stream;
+    p[0] = v;
+    p[1] = v >> 8;
+    p[2] = v >> 16;
+    p[3] = v >> 24;
+    *stream += 4;
+    return 4;
+}
+#endif
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/objectinterface", func_002D2248);
 #ifdef SKIP_ASM

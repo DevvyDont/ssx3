@@ -445,7 +445,16 @@ extern "C" void func_0026CD20(void* self)
 
 extern "C" void* func_0026CC18(void*);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026CD98);
+#ifdef SKIP_ASM
+extern "C" void func_0026CD98(void *self)
+{
+    func_0026CBB8(self);
+    *(int *)(*(char **)((char *)self + 4) + 8) = 0;
+    *(int *)((char *)self + 0x70) = 2;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/playbackman", func_0026CDD0__FPv);
@@ -481,7 +490,27 @@ extern "C" void func_0026CDF8(void* self)
 
 INCLUDE_ASM("replay/playbackman", func_0026CE50);
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026CFE8);
+#ifdef SKIP_ASM
+struct sPbEntry_0026CFE8 {
+    int id;
+    int unk4;
+    int unk8;
+};
+
+extern "C" int func_0026CFE8(void *self, int id)
+{
+    int count = *(int *)((char *)self + 0x50);
+    for (int i = 0; i < count; i++) {
+        sPbEntry_0026CFE8 *entries = *(sPbEntry_0026CFE8 **)((char *)self + 0x58);
+        if (entries[i].id == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+#endif
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026D020);
 #ifdef SKIP_ASM
