@@ -73,8 +73,8 @@ struct sRiderPair {
 struct cRider {
     /* 0x000 */ sRiderPair unk_000[6]; // [U] per other rider, by its mAIIndex (func_00107888)
     /* 0x0D8 */ int unk_0D8; // set to -1, then passed to func_00117540(mMetrix, v) (func_0011D390)
-    /* 0x0DC */ int unk_0DC; // cleared on reset (func_0011D390)
-    /* 0x0E0 */ int unk_0E0; // cleared on reset (func_0011D390)
+    /* 0x0DC */ float unk_0DC; // cleared on reset (func_0011D390); rubber-band threshold, c.lt.s in func_0010D938, func_0010DEF0
+    /* 0x0E0 */ float unk_0E0; // cleared on reset (func_0011D390); rubber-band threshold, c.lt.s in func_0010D990
     /* 0x0E4 */ char unk_0E4[0x8];
     /* 0x0EC */ int unk_0EC; // selector 0..5: func_002A34D0 switches it to 1,2,4,8,0x10,0x200; func_002A1E68 compares it 0..4
     /* 0x0F0 */ int unk_0F0; // cleared on reset (func_0011D390)
