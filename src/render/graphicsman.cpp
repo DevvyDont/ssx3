@@ -1177,7 +1177,146 @@ extern "C" void* func_00370018(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", func_00370058);
+#ifdef SKIP_ASM
+extern "C" void func_0036CE00(void* self, float a, float b, float c);
+extern "C" void func_0036CE28(void* self, float a, float b);
+extern "C" void func_0036CCB8(char* self);
+extern "C" void func_0036D008(void* self);
+extern "C" void func_0036D500(void* a, void* b);
+struct sGmV4_0058 {
+    float x, y, z, w;
+    sGmV4_0058() {}
+    sGmV4_0058(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+    // PORT: 128-bit integer copy (one lq/sq pair).
+    sGmV4_0058(const sGmV4_0058& o) { *(cQuad128*)this = *(const cQuad128*)&o; }
+} __attribute__((aligned(16)));
+
+// The unit's func_0036D318 takes pointers; this caller passes the four corners as references to temporaries.
+extern "C" void func_0036D318_0058(void* self, const sGmV4_0058& a, const sGmV4_0058& b, const sGmV4_0058& c,
+                                   const sGmV4_0058& d, float t) __asm__("func_0036D318");
+
+struct sGmMtx_0058 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sGmV4_0058 vu0Add_0058(const sGmV4_0058& a, const sGmV4_0058& b)
+{
+    sGmV4_0058 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sGmV4_0058 vu0Scale_0058(const sGmV4_0058& v, float s)
+{
+    sGmV4_0058 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v / s).
+static inline sGmV4_0058 vu0Div_0058(const sGmV4_0058& v, float s)
+{
+    sGmV4_0058 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (m * v).
+static inline sGmV4_0058 vu0ApplyGM_0058(const sGmMtx_0058* m, const sGmV4_0058& v)
+{
+    sGmV4_0058 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (d -= b).
+static inline void vu0SubInGM_0058(sGmV4_0058& d, const sGmV4_0058& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(d)
+        : "m"(d), "m"(b)
+        : "memory");
+}
+
+// Sets up the view from the camera parameters p (frustum planes transformed by m).
+extern "C" void func_00370058(void* self, void* m, void* p, void* a3, float t)
+{
+    func_0036CE00(self, *(float*)((char*)p + 0x10), *(float*)((char*)p + 0xCC), *(float*)((char*)p + 0x18));
+    float h = *(float*)((char*)p + 0x1C) * 0.5f;
+    func_0036CE28(self, *(float*)((char*)p + 0x14) - h, *(float*)((char*)p + 0x14) + h);
+    if (t < 0.0f) {
+        func_0036CCB8((char*)self);
+    } else {
+        *(float*)((char*)self + 0x38) = t;
+    }
+    func_0036D008(self);
+    *(sGmV4_0058*)((char*)self + 0xB0) = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x24), *(float*)((char*)p + 0x28), *(float*)((char*)p + 0x2C), 1.0f));
+    *(sGmV4_0058*)((char*)self + 0xC0) = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x30), *(float*)((char*)p + 0x34), *(float*)((char*)p + 0x38), 0.0f));
+    *(sGmV4_0058*)((char*)self + 0xD0) = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x3C), *(float*)((char*)p + 0x40), *(float*)((char*)p + 0x44), 0.0f));
+    vu0SubInGM_0058(*(sGmV4_0058*)((char*)self + 0xB0), vu0Scale_0058(vu0Add_0058(*(sGmV4_0058*)((char*)self + 0xC0), *(sGmV4_0058*)((char*)self + 0xD0)), 1.5f));
+    *(sGmV4_0058*)((char*)self + 0x70) = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x48), *(float*)((char*)p + 0x4C), *(float*)((char*)p + 0x50), 0.0f)), *(float*)((char*)p + 0xC));
+    *(sGmV4_0058*)((char*)self + 0x80) = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x54), *(float*)((char*)p + 0x58), *(float*)((char*)p + 0x5C), 0.0f)), *(float*)((char*)p + 0xC));
+    *(sGmV4_0058*)((char*)self + 0x90) = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x60), *(float*)((char*)p + 0x64), *(float*)((char*)p + 0x68), 0.0f)), *(float*)((char*)p + 0xC));
+    *(sGmV4_0058*)((char*)self + 0xA0) = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x6C), *(float*)((char*)p + 0x70), *(float*)((char*)p + 0x74), 0.0f)), *(float*)((char*)p + 0xC));
+    vu0SubInGM_0058(*(sGmV4_0058*)((char*)self + 0x70), vu0Scale_0058(vu0Add_0058(vu0Add_0058(*(sGmV4_0058*)((char*)self + 0x80), *(sGmV4_0058*)((char*)self + 0x90)), *(sGmV4_0058*)((char*)self + 0xA0)), 1.5f));
+    func_0036D318_0058(self,
+                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)p + 0x88), *(float*)((char*)p + 0x8C), *(float*)((char*)p + 0x90), *(float*)((char*)p + 0x84)), 128.0f),
+                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)p + 0x98), *(float*)((char*)p + 0x9C), *(float*)((char*)p + 0xA0), *(float*)((char*)p + 0x94)), 128.0f),
+                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)p + 0xA8), *(float*)((char*)p + 0xAC), *(float*)((char*)p + 0xB0), *(float*)((char*)p + 0xA4)), 128.0f),
+                       vu0Scale_0058(sGmV4_0058(*(float*)((char*)p + 0xB8), *(float*)((char*)p + 0xBC), *(float*)((char*)p + 0xC0), *(float*)((char*)p + 0xB4)), 128.0f),
+                       *(float*)((char*)p + 0x14) + *(float*)((char*)p + 0x1C) * 0.5f);
+    func_0036D3D8(self, *(float*)((char*)p + 0x8) < 0.0f ? *(float*)((char*)p + 0x14) + *(float*)((char*)p + 0x1C) * 0.5f : 0.0f);
+    func_0036D500(self, a3);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", func_003705E0);

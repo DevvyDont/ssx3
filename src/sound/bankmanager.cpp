@@ -1101,7 +1101,97 @@ extern "C" void func_0028CDF8(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028CF98);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+extern "C" int* func_00144BC0(void*);
+extern "C" int func_00285D98(void* self, int which);
+extern "C" int func_00288AE0(void* self);
+extern "C" void* func_0028B1E8();
+extern "C" void func_0028F108(void* self, int a1);
+extern "C" int func_002A1E20(void* self, int id);
+extern "C" int func_002A42C8(void* self);
+extern "C" void func_002B3CC0(void* mon, int a1);
+extern "C" void func_002B46D0(void* mon);
+int func_002B4908(void* self);
+extern char D_00482A38[];
+extern char D_00482A48[];
+extern char D_00482A58[];
+extern char D_004A3630[];
+extern char D_004A3638[];
+extern char D_004A3640[];
+
+struct sBmInfo_CF98 {
+    int f0;                 // 0x0
+    char pad_0x4[0x60];
+};
+
+
+static inline void bmLoad_CF98(void* self, char* name, int bank, int id)
+{
+    char* mon = (char*)self + 0x118;
+    sBmVtCD48* vt = *(sBmVtCD48**)((char*)self + 0x5558);
+    ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, name, 0xC, func_00287968(self, bank, 0), 0);
+    func_002B49C0(mon, id);
+}
+
+// Starts the menu / in-game music bank for the current state.
+extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
+{
+    if (func_00288AE0(self) != 0 && *(int*)((char*)self + 0x6294) == 0) {
+        return;
+    }
+    *(int*)((char*)self + 0x6280) = 0;
+    *(int*)((char*)self + 0x62A0) = -1;
+    *(int*)((char*)self + 0x623C) = 0;
+    *(int*)((char*)self + 0x6240) = 0;
+    if (*(int*)((char*)self + 0x608C) == 2) {
+        int t = type == -1 ? func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0))) : type;
+        if (t == 1) {
+            bmLoad_CF98(self, D_00482A38, 8, 0x65);
+        } else if (t == 2) {
+            bmLoad_CF98(self, D_00482A48, 8, 0x66);
+        } else {
+            bmLoad_CF98(self, D_00482A58, 8, 0x67);
+        }
+        char* mon = (char*)self + 0x118;
+        func_002B46D0(mon);
+        *(int*)((char*)self + 0x6280) = 1;
+        func_002B3CC0(mon, 0);
+        func_002B3C28(mon, 0x7F);
+        return;
+    }
+    sBmInfo_CF98 info = *(sBmInfo_CF98*)func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0));
+    char* mon = (char*)self + 0x118;
+    if (info.f0 >= 0x11 && a2 == 0 && a4 == 0 && func_002A42C8(self) == 0) {
+        int t = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+        if (t == 1) {
+            bmLoad_CF98(self, D_004A3630, 1, 1);
+        } else if (t == 2) {
+            bmLoad_CF98(self, D_004A3638, 1, 2);
+        } else {
+            bmLoad_CF98(self, D_004A3640, 1, 3);
+        }
+        func_002B3CC0(mon, 1);
+        sBmVtCD48* vt2 = *(sBmVtCD48**)((char*)self + 0x5558);
+        ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, 0xC);
+        func_002B3C28(mon, 0x7F);
+        return;
+    }
+    sBmVtCD48* vt = *(sBmVtCD48**)((char*)self + 0x5558);
+    ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, 0, 0xC, func_00287968(self, 1, 0), 0);
+    *(int*)((char*)self + 0x62A4) = *(int*)((char*)self + 0x508);
+    *(int*)((char*)self + 0x5778) = func_002B4908(mon);
+    func_002B3CC0(mon, 1);
+    if (a4 != 0 && info.f0 >= 0x11) {
+        a1 = 0x24;
+    }
+    sBmVtCD48* vt2 = *(sBmVtCD48**)((char*)self + 0x5558);
+    ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, a1);
+    func_0028F108(self, func_00285D98(self, -1));
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028D488);

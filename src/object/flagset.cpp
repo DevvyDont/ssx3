@@ -1546,7 +1546,157 @@ extern "C" void func_0034DC90(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034DD18);
+#ifdef SKIP_ASM
+extern "C" void* func_0034E320(void* self, int i);
+
+struct sFsMat44_DD18 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
+static inline void vu0MulMatFS(sFsMat44_DD18* d, const sFsMat44_DD18* a, const sFsMat44_DD18* b)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(a), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+static inline void vu0CopyMatFS(sFsMat44_DD18* d, const sFsMat44_DD18* s)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(s)
+        : "memory");
+}
+
+struct sFsV4_DD18 {
+    float v[4];
+    sFsV4_DD18() {}
+    sFsV4_DD18(const float& x, const float& y, const float& z, const float& w)
+    {
+        v[0] = x;
+        v[1] = y;
+        v[2] = z;
+        v[3] = w;
+    }
+} __attribute__((aligned(16)));
+
+static inline sFsV4_DD18 operator*(const sFsV4_DD18& a, const sFsV4_DD18& b)
+{
+    return sFsV4_DD18(a.v[0] * b.v[0], a.v[1] * b.v[1], a.v[2] * b.v[2], a.v[3] * b.v[3]);
+}
+
+struct sFsMtx_DD18 {
+    float m[4][4];
+    sFsMtx_DD18() {}
+    sFsMtx_DD18(const sFsMtx_DD18& o) { vu0CopyMatFS((sFsMat44_DD18*)this, (const sFsMat44_DD18*)&o); }
+    sFsV4_DD18 getRow(int i) const { return *(const sFsV4_DD18*)m[i]; }
+    sFsMtx_DD18& operator=(const sFsMtx_DD18& o)
+    {
+        vu0CopyMatFS((sFsMat44_DD18*)this, (const sFsMat44_DD18*)&o);
+        return *this;
+    }
+} __attribute__((aligned(16)));
+
+// parent * (local bone matrix with its translation scaled)
+static inline sFsMtx_DD18 mulScaledFS(const sFsMtx_DD18& parent, const sFsMtx_DD18& src, const sFsV4_DD18& s)
+{
+    sFsMtx_DD18 m;
+    *(sFsV4_DD18*)m.m[0] = src.getRow(0);
+    *(sFsV4_DD18*)m.m[1] = src.getRow(1);
+    *(sFsV4_DD18*)m.m[2] = src.getRow(2);
+    *(sFsV4_DD18*)m.m[3] = src.getRow(3) * s;
+    sFsMtx_DD18 r;
+    vu0MulMatFS((sFsMat44_DD18*)&r, (const sFsMat44_DD18*)&parent, (const sFsMat44_DD18*)&m);
+    return r;
+}
+
+struct sFsBone_DD18 {
+    int parent;             // 0x0
+    char pad_0x4[0x4];
+    int animated;           // 0x8: matrix comes from func_0034E320
+    sFsMtx_DD18* mtx;       // 0xC
+};
+
+struct sFsSkel_DD18 {
+    char pad_0x0[0x4];
+    int count;              // 0x4
+    sFsBone_DD18* bones;    // 0x8
+};
+
+struct sFsModel_DD18 {
+    char pad_0x0[0x80];
+    sFsSkel_DD18* skel;     // 0x80
+    float scale;            // 0x84
+};
+
+// Builds the world matrix of every bone: root or parent * (bone matrix with its translation scaled).
+extern "C" void func_0034DD18(void* self, void* vroot, sFsMtx_DD18* out)
+{
+    sFsMtx_DD18* root = (sFsMtx_DD18*)vroot;
+    sFsModel_DD18* model = *(sFsModel_DD18**)((char*)self + 0x2C);
+    sFsSkel_DD18* skel = model->skel;
+    float s = model->scale;
+    sFsBone_DD18* b = skel->bones;
+    sFsV4_DD18 scale(s, s, s, 1.0f);
+    int k = 0;
+    for (int i = 0; i < skel->count; i++, b++) {
+        if (b->animated) {
+            if (b->parent != -1) {
+                out[i] = mulScaledFS(out[b->parent], *(sFsMtx_DD18*)func_0034E320(self, k++), scale);
+            } else {
+                out[i] = mulScaledFS(*root, *(sFsMtx_DD18*)func_0034E320(self, k++), scale);
+            }
+        } else {
+            if (b->parent != -1) {
+                out[i] = mulScaledFS(out[b->parent], *b->mtx, scale);
+            } else {
+                out[i] = mulScaledFS(*root, *b->mtx, scale);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flagset", func_0034E320);

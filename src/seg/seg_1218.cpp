@@ -3573,7 +3573,314 @@ extern "C" int func_00106848(cRider* self)
 #undef LAND_KIND
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00106F78);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+extern "C" int func_00108A48_6F78(cRider* self, void* land) __asm__("func_00108A48");
+extern "C" int func_00334680_6F78(void*, t4Vector*, t4Vector*, int, float) __asm__("func_00334680");
+
+struct sHit_6F78 {
+    t4Vector pos;       // 0x00
+    t4Vector n;         // 0x10
+    t4Vector vel;       // 0x20
+    char pad30[0x1C];
+    int mat;            // 0x4C
+    char* obj;          // 0x50
+    char pad54[0x2C];
+} __attribute__((aligned(16)));
+
+struct sLand_6F78 {
+    char pad0[0x80];
+} __attribute__((aligned(16)));
+
+struct sInfo_6F78 {
+    t4Vector pos;       // 0x00
+    t4Vector dir;       // 0x10
+    t4Vector off;       // 0x20
+    float vn;           // 0x30
+} __attribute__((aligned(16)));
+
+struct sVEh_6F78 { short delta; short index; void (*fn)(void*, sHit_6F78*); };
+struct sVEhv_6F78 { short delta; short index; void (*fn)(void*, sHit_6F78*, t4Vector*); };
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_6F78(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_6F78(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline t4Vector Norm_6F78(const t4Vector& v)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline t4Vector Scale_6F78(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector * scalar).
+static inline void ScaleEq_6F78(t4Vector& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector / scalar).
+static inline void DivEq_6F78(t4Vector& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline t4Vector Add_6F78(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void AddEq_6F78(t4Vector& a, const t4Vector& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline t4Vector Sub_6F78(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a -= b).
+static inline void SubEq_6F78(t4Vector& a, const t4Vector& b)
+{
+    __asm__(
+        ".set noreorder\n"
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set reorder\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: g++ minimum operator.
+static inline float Clamp_6F78(float x, float lo, float hi)
+{
+    if (lo <= x)
+        return x <? hi;
+    return lo;
+}
+
+struct sV4_6F78 : t4Vector {
+    sV4_6F78(float ax, float ay, float az, float aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+};
+
+static inline sV4_6F78 Front_6F78(const sAnimModelBone* b)
+{
+    return sV4_6F78(2.0f * (b->rot.y * b->rot.x - b->rot.w * b->rot.z),
+                    1.0f - 2.0f * (b->rot.z * b->rot.z + b->rot.x * b->rot.x),
+                    2.0f * (b->rot.y * b->rot.z + b->rot.w * b->rot.x),
+                    0.0f);
+}
+
+// Snaps the rider onto the rail found ahead of its current bone; returns 1 when it lands on it.
+// PORT: the unit declares func_00106F78 as void(void*); it returns 0/1.
+extern "C" int func_00106F78_impl(cRider* self) __asm__("func_00106F78");
+extern "C" int func_00106F78_impl(cRider* self)
+{
+    if (func_0011FE98(self) == 4) {
+        return 0;
+    }
+    sAnimModelBone* b = &self->mAnimModel->bones[self->unk_89C];
+    const t4Vector& dir = Front_6F78(b);
+    sHit_6F78 hit;
+    if (!func_00334680_6F78(self->unk_860, &b->pos, &hit.pos, 1, 300.0f)) {
+        return 0;
+    }
+    float speed = Len_6F78(self->mVelocity);
+    if (speed > 0.0010000000474974513f) {
+        float back = Dot_6F78(Sub_6F78(hit.pos, b->pos), self->mVelocity);
+        if (back < speed * -0.20000000298023224f) {
+            return 0;
+        }
+    }
+    float along = Clamp_6F78(Dot_6F78(dir, Sub_6F78(hit.pos, b->pos)), -50.0f, 50.0f);
+    t4Vector delta = Sub_6F78(Add_6F78(b->pos, Scale_6F78(dir, along)), hit.pos);
+    if (Len_6F78(delta) > 50.0f) {
+        return 0;
+    }
+    sLand_6F78 land;
+    if (func_00108A48_6F78(self, &land)) {
+        return 0;
+    }
+    float vn = Dot_6F78(self->mVelocity, hit.n);
+    if (vn < 0.0f) {
+        vn = -vn;
+        ScaleEq_6F78(hit.n, -1.0f);
+    }
+    if (hit.obj != 0) {
+        char* h = *(char**)(hit.obj + 0xC);
+        if (h != 0) {
+            sVEh_6F78* vt = *(sVEh_6F78**)(h + 0xC);
+            vt[42].fn(h + vt[42].delta, &hit);
+        }
+    }
+    sInfo_6F78 info;
+    info.pos = hit.pos;
+    info.dir = Norm_6F78(self->mVelocity);
+    info.vn = vn;
+    t4Vector off = Sub_6F78(b->pos, hit.pos);
+    SubEq_6F78(off, Scale_6F78(hit.n, Dot_6F78(off, hit.n)));
+    if (func_001231A8(self)) {
+        SubEq_6F78(off, Scale_6F78(self->mGroundNormal, Dot_6F78(off, self->mGroundNormal)));
+    }
+    float l = Len_6F78(off);
+    if (l < 0.0010000000474974513f) {
+        off = hit.n;
+    } else {
+        DivEq_6F78(off, l);
+    }
+    info.off = off;
+    float d = Dot_6F78(delta, off);
+    if (d < 50.0f) {
+        func_00106538(self, Scale_6F78(off, 50.0f - d));
+    }
+    t4Vector oldVel = self->mVelocity;
+    float push = (Dot_6F78(off, Sub_6F78(hit.vel, self->mVelocity)) >? 0.0f) + 55.55555725097656f; // PORT: g++ maximum operator
+    AddEq_6F78(self->mVelocity, Scale_6F78(off, push));
+    t4Vector imp = Scale_6F78(Sub_6F78(oldVel, self->mVelocity), (float)*(int*)(D_004A28A8 + 0x10));
+    if (hit.obj != 0) {
+        char* h = *(char**)(hit.obj + 0xC);
+        if (h != 0) {
+            sVEhv_6F78* vt = *(sVEhv_6F78**)(h + 0xC);
+            vt[43].fn(h + vt[43].delta, &hit, &imp);
+        }
+    }
+    if (func_0011FE98(self) == 0) {
+        hit.n = off;
+        func_001065B0(self, &hit);
+        cRider_updateOrientationImplicit(self);
+    }
+    func_00105D98(self, &info, hit.mat);
+    return 1;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_00107578);
 
