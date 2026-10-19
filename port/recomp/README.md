@@ -136,6 +136,12 @@ or any disc file.
     operations in the same order. The per-pixel scissor test is skipped where the loop already keeps to the scissor
     rectangle. The 8,000 recorded race packets replay to the same VRAM with 16% fewer instructions. In a race on a
     4-core machine with the old and new code swapped every 30 s, the new code drew about 8% more frames;
+  - the GS pixel loops working from their own copies of the draw state and vertices they read for every pixel. Writes
+    to VRAM go through byte pointers, so before this the compiler had to read that state again after each pixel
+    write. A filtered sample that reads the same four texels as the one before reuses their colours, as long as the
+    texture page cache has not loaded another page since. The 8,000 recorded race packets replay to the same VRAM
+    with 12% fewer instructions. In a race with the old and new code swapped every 30 s, the new code drew about 4%
+    more frames, which is within this machine's run-to-run noise;
   - debug switches.
 - `ssx3_overrides.cpp` holds the game-specific replacements: it skips the network and USB keyboard drivers,
   answers the module search, routes `isceSifSendCmd`, and keeps the runtime's scratch buffers in the
@@ -223,7 +229,7 @@ shadows and the course draw with the right textures, and the race plays from the
 Sound plays through the PC's audio device: the music, and the radio track shown at the start of a race. The game
 makes sound only as fast as it runs, so while it runs slower than the PS2 the sound comes in short runs with gaps.
 
-It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 11 to 14 frames a second. There the two
+It is far from full speed. On a 4-core 2.1 GHz Xeon, a race draws about 12 to 14 frames a second. There the two
 GS worker threads still set the pace.
 
 When a guest address with no function is reached, the scheduler prints its last 64 dispatches (`[sched-trace]`).
