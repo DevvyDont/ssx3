@@ -1462,7 +1462,22 @@ extern "C" void func_002F8030(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8060);
+#ifdef SKIP_ASM
+struct sLightVec_002F8060 { float x, y, z, w; };
+
+extern void* D_004880C0[];
+void func_002E4D70(void* self);
+
+extern "C" void* func_002F8060(void* self, sLightVec_002F8060 v)
+{
+    func_002E4D70(self);
+    *(void***)self = D_004880C0;
+    *(sLightVec_002F8060*)((char*)self + 4) = v;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F80D8);

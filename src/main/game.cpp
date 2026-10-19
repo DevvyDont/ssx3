@@ -966,4 +966,20 @@ extern "C" int func_0022E0E0(void* self, int a1)
 #endif
 
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/game", func_0022E118);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0022D088(void* self, int a1, int a2);
+extern signed char D_00535C11[];
+
+extern "C" void func_0022E118(void* self, int a1)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535C11[0] == 0) {
+        func_0022D088(self, a1, 1);
+        *(int*)((char*)self + 0x1CC) = 1;
+    }
+}
+#endif

@@ -120,7 +120,18 @@ extern "C" int func_00150A90(void* self, int a, int b, int amount)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintecon", func_00150AE0);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+extern "C" int func_00150AE0(void* self, int rider, int a2)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    return func_00150A90(self, profile, cBELibrary_getCharacterID(rider), a2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintecon", func_00150B48);

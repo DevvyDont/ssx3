@@ -519,7 +519,25 @@ extern "C" void* func_002EF198(int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF1F0);
+#ifdef SKIP_ASM
+extern int D_004A3B64;
+extern int D_004A55B0;
+
+extern "C" void* func_002EF1F0(int i)
+{
+    if (D_004A3B64 != 0) {
+        return &D_004A55B0;
+    }
+    {
+        sRSMEntry* e = &D_004FA370[i];
+        sRSMObj* o = *e->p1C;
+        sRSMVEntry* vt = o->vt;
+        return vt[40].fn((char*)o + vt[40].delta);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF248);

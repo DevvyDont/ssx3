@@ -450,7 +450,30 @@ extern "C" void cUIScreen_createAllObjects(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039D008);
+#ifdef SKIP_ASM
+struct sObjRec_0039D008 {
+    short pad0;
+    unsigned short size; // 0x2
+    int key;             // 0x4
+};
+
+extern "C" void* func_0039D008(void* self, int key)
+{
+    sObjRec_0039D008* e = (sObjRec_0039D008*)(*(char**)((char*)self + 0x38) + 4);
+    unsigned int i;
+    for (i = 0; i < *(*(unsigned int**)((char*)self + 0x38)); i++) {
+        if (e->key == key) {
+            char* obj = cUIScreen_createObjectByStruct(self, (char*)e);
+            *(int*)(obj + 0x38) = key;
+            return obj;
+        }
+        e = (sObjRec_0039D008*)((char*)e + e->size);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_createObjectByStruct);
@@ -1480,8 +1503,64 @@ extern "C" void func_0039E758(void* self, cListNode* node)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039E778);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+
+struct sVEntry_func_0039E778 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0039E778(void* self)
+{
+    void* n = cList_first((cList*)((char*)self + 0x24));
+    if (n != 0) {
+        do {
+            char* obj = (char*)n + 0x40;
+            if ((*(int*)((char*)n + 0x54) >> 6) & 1) {
+                sVEntry_func_0039E778* vt = *(sVEntry_func_0039E778**)((char*)n + 0x48);
+                vt[9].fn(obj + vt[9].delta, 0);
+            }
+            n = *(void**)((char*)n + 4);
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+}
+#endif
+//100%
 INCLUDE_ASM("ui/uiscreen", func_0039E7F0);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void* cList_first(cList*);
+int cListNode_isSentinel(cListNode*);
+
+struct sVEntry_func_0039E7F0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_0039E7F0(void* self)
+{
+    void* n = cList_first((cList*)((char*)self + 0x24));
+    if (n != 0) {
+        do {
+            char* obj = (char*)n + 0x40;
+            if ((*(int*)((char*)n + 0x54) >> 6) & 1) {
+                sVEntry_func_0039E7F0* vt = *(sVEntry_func_0039E7F0**)((char*)n + 0x48);
+                vt[9].fn(obj + vt[9].delta, 1);
+            }
+            n = *(void**)((char*)n + 4);
+        } while (!cListNode_isSentinel((cListNode*)n));
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uiscreen", func_0039E868);

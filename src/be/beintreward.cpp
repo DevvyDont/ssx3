@@ -1810,7 +1810,18 @@ extern "C" void func_00159B08(void* self, int rider, int k)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00159C68);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+
+extern "C" void func_00159C68(void* self, int rider, int bit)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    func_00159CD0(self, profile, cBELibrary_getCharacterID(rider), bit);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00159CD0);
@@ -2111,7 +2122,26 @@ extern "C" void func_0015A510(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_0015A548);
+#ifdef SKIP_ASM
+extern "C" int func_0015A548(void* self, int n, unsigned char* bits)
+{
+    int i = 0;
+    int bi = 0;
+    int count = 0;
+    while (i < n) {
+        unsigned char b = bits[bi];
+        int j;
+        bi++;
+        for (j = 0; j < 8 && i < n; j++) {
+            count += (b >> j) & 1;
+            i++;
+        }
+    }
+    return count;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A5B0);

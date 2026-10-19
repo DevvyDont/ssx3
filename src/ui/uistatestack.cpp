@@ -650,7 +650,20 @@ extern "C" void func_0039FD38(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uistatestack", func_0039FD80);
+#ifdef SKIP_ASM
+extern "C" int func_00397458(void* obj);
+
+extern "C" void func_0039FD80(void* self, float f)
+{
+    void* obj = *(void**)((char*)self + 0xC);
+    if (obj != 0) {
+        float v = (float)func_00397458(obj) * f;
+        *(short*)((char*)*(void**)((char*)self + 0xC) + 0xA) = (short)v;
+    }
+}
+#endif
 //100%
 INCLUDE_ASM("ui/uistatestack", func_0039FDD8);
 #ifdef SKIP_ASM

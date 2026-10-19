@@ -882,7 +882,26 @@ extern "C" int func_002795D0(void* self, int key, int a, int b, int c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002796B8);
+#ifdef SKIP_ASM
+extern "C" int func_002795D0(void* self, int key, int a, int b, int c);
+
+struct sEnt_002796B8 { int a; int key; int c; };
+
+extern "C" int func_002796B8(char* self, int id, int a, int b, int c)
+{
+    int i = 0;
+    if (**(int**)(self + 0x52C) > 0) {
+        do {
+            if ((*(sEnt_002796B8**)(self + 0x530))[i].key == id)
+                return func_002795D0(self, i, a, b, c);
+            i++;
+        } while (i < **(int**)(self + 0x52C));
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00279720);
