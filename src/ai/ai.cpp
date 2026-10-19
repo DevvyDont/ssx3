@@ -3785,6 +3785,9 @@ extern "C" void func_0012DF48(void* self)
 //100%
 INCLUDE_ASM("ai/ai", func_0012E010);
 #ifdef SKIP_ASM
+// D_004A4C08 is its own 8-byte config struct (config/symbol_addrs.txt), not D_004A4C00 + 8.
+struct sCfg_E010 { int a; int b; };
+extern sCfg_E010 D_004A4C08_E010 __asm__("D_004A4C08");
 extern "C" void func_00312660(void* buf, void* anim, int id, int a3, float t);
 extern "C" void func_0030ECD8(void* xf, void* model, void* buf, int a3);
 extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, void* xf);
@@ -3927,7 +3930,7 @@ extern "C" void func_0012E010(void* self)
     if (*(int*)(r + 0x150) != 1)
         anim = 0x19A;
     char buf[0x50];
-    func_00312660(buf, *(void**)(r + 0x784), anim, (&D_004A4C00)[2], 0.0f);
+    func_00312660(buf, *(void**)(r + 0x784), anim, D_004A4C08_E010.a, 0.0f);
     sXf_12E010 a;
     func_0030ECD8(&a, *(void**)(*(char**)((char*)self + 0x80) + 0x780), buf, 0);
     char* rd = *(char**)((char*)self + 0x80);
