@@ -10087,7 +10087,138 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D3658);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D37A0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003D3900);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` bitfields (8 bytes on EE); use uint64_t off-PS2.
+struct E_3900 {
+    short type;
+    unsigned short h2;
+    unsigned int w4;
+    unsigned int w8;
+    unsigned int wC;
+};
+struct V_3900 {
+    char pad0[0x20];
+    unsigned int lo : 4;
+    int ch : 5;
+    unsigned int hi : 23;
+    char pad24[0x2C - 0x24];
+    short h2C;
+    char pad2E[2];
+    struct E_3900 *cur;
+};
+struct G_3900 {
+    char pad0[0x30];
+    unsigned int x30;
+    char *hdr;
+    short *a;
+    char pad3C[4];
+    short *b;
+    char pad44[0x54 - 0x44];
+    unsigned int *tab54;
+    struct V_3900 *voices[32];
+};
+struct Ev_3900 {
+    int w0;
+    int w4;
+    signed char b8;
+    unsigned char b9;
+    short pad;
+    unsigned char bC;
+    unsigned long f7 : 7;
+    unsigned long f1 : 1;
+    unsigned short hE;
+};
+struct Q_3900 {
+    int p0;
+    int p1;
+    int p2;
+    unsigned long lo : 12;
+    unsigned long b : 4;
+    unsigned long idx : 6;
+    unsigned long hi : 10;
+};
+struct P_3900 { char pad[0x30]; unsigned int x30; char pad2[0x928 - 0x34]; };
+extern struct G_3900 *D_0044F420_3900 __asm__("D_0044F420");
+extern void (*D_0044F424_3900)(int, int) __asm__("D_0044F424");
+extern int D_0044F430_3900 __asm__("D_0044F430");
+extern unsigned int D_0044F438_3900 __asm__("D_0044F438");
+extern struct P_3900 D_00517610_3900[4] __asm__("D_00517610");
+extern int f3C90_3900(int, int) __asm__("func_003D3C90");
+extern int f37A0_3900(int, int) __asm__("func_003D37A0");
+extern void f6210_3900(void *, int, int) __asm__("func_00416210");
+extern void f0B18_3900(void *, void *) __asm__("func_003D0B18");
+extern char *fcopy_3900(void *) __asm__("PATHI_copyevent");
+extern int f1F80_3900(unsigned int, char *) __asm__("func_003D1F80");
+
+int func_003D3900(int id, int start, int vel) {
+    struct Ev_3900 ev;
+    struct Q_3900 q;
+    struct E_3900 *e;
+    struct V_3900 *v;
+    unsigned int t;
+    unsigned int w;
+    short k;
+    short type;
+    int save;
+
+    save = vel;
+    k = f3C90_3900(id, start);
+    e = (struct E_3900 *)(D_0044F420_3900->hdr + D_0044F420_3900->a[k] * 4);
+    v = D_0044F420_3900->voices[e->h2 & 0x1F];
+    while (e->type <= 0) {
+        type = e->type;
+        if (type == 0) {
+            v->cur = e;
+            if (e->w8 & 0x7C00) {
+                f6210_3900(&q, 0, 0x10);
+                f6210_3900(&ev, 0, 0x10);
+                t = D_0044F420_3900->tab54[((e->w8 >> 10) & 0x1F) - 1];
+                if (t & 0x80) {
+                    ev.bC = 100;
+                } else {
+                    ev.bC = 0;
+                }
+                ev.f1 = (t >> 7) & 1;
+                ev.b9 = 6;
+                ev.hE = 0x25A0;
+                ev.f7 = ((e->w8 >> 10) & 0x1F) - 1;
+                ev.b8 = -1;
+                q.p1 = ev.hE;
+                ev.w4 = D_0044F438_3900 + ev.hE;
+                ev.w0 = 0x1F000001;
+                q.b = 0;
+                f0B18_3900(&q, &ev);
+                f1F80_3900(D_00517610_3900[0].x30, fcopy_3900(&q));
+            }
+            if ((e->w4 & 0xE0000) == 0x20000) {
+                vel = (D_0044F438_3900 / 23) & 0x7F;
+            }
+            if (D_0044F424_3900 != 0) {
+                D_0044F424_3900(D_0044F430_3900, k);
+            }
+        } else if (type == -1) {
+            w = *(unsigned int *)e;
+            if (w & 0xF0000000) {
+                if (k != v->h2C) {
+                    v->h2C = k;
+                    v->lo = w >> 28;
+                }
+            }
+        } else if (type == -2) {
+            vel = (D_0044F438_3900 / 23) & 0x7F;
+        } else if (type == -3) {
+            f1F80_3900(D_0044F420_3900->x30, (D_0044F420_3900->hdr + D_0044F420_3900->b[(e->wC >> 2) & 0xFFF] * 4));
+        }
+        t = f37A0_3900(k, vel);
+        vel = save;
+        k = f3C90_3900(id, t);
+        e = (struct E_3900 *)(D_0044F420_3900->hdr + D_0044F420_3900->a[k] * 4);
+    }
+    return (short)f3C90_3900(id, k);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003D3C90);
 

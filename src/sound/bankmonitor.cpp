@@ -2677,8 +2677,65 @@ extern "C" void func_002B1248(int *arg0) {
     func_002AB1A0(*arg0);
 }
 #endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B1268);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPacked8_1268 { long v; } __attribute__((packed));
+extern const sPacked8_1268 D_004A37E0_2B1268[] __asm__("D_004A37E0");
+extern "C" int func_002AB150(void* self, int i);
+extern "C" void func_002AB0D0(void* self, int i, int val);
+extern "C" void func_002ADCA0(int a, int b, long t, void* c, int d, int e, int f, int g);
+extern "C" int func_002B1248_pp(void* self, void* msg) __asm__("func_002B1248");
+struct sVE1268 { short delta; short index; int (*fn)(void*, int, int, int); };
+
+extern "C" int func_002B1268(void* self, void* msg)
+{
+    char* ent = *(char**)((char*)msg + 0x18);
+    if (func_002AB150(*(void**)self, func_002B1220(D_004A37B4, *(int*)ent)) != *(int*)((char*)msg + 0x1C)) {
+        func_002ADCA0(**(int**)D_004A37B4 + 0x1D8, 0xC8, D_004A37E0_2B1268[0].v, *(void**)((char*)msg + 0x18), *(int*)((char*)msg + 0x1C), *(int*)((char*)msg + 0x20), 0, 0);
+        return 1;
+    }
+    int slot = *(int*)((char*)msg + 0x20);
+    if (slot != -1) {
+        sVE1268* vt = *(sVE1268**)((char*)self + 0x1BC);
+        int r = vt[3].fn((char*)self + vt[3].delta, *(int*)ent, slot, *(int*)(ent + 0x8D0));
+        if (r != 0) {
+            func_002AB0D0(*(void**)self, *(int*)(ent + 4), r);
+        }
+    }
+    return func_002B1248_pp(self, msg);
+}
+#endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B1348);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPacked8_1348 { long v; } __attribute__((packed));
+extern const sPacked8_1348 D_004A37D8_2B1348[] __asm__("D_004A37D8");
+extern "C" int func_002AB150(void* self, int i);
+extern "C" void func_002ADCA0(int a, int b, long t, void* c, int d, int e, int f, int g);
+extern "C" int func_002B1268(void* self, void* msg);
+
+extern "C" int func_002B1348(void* self, void* msg)
+{
+    char* ent = *(char**)((char*)msg + 0x18);
+    if (func_002AAE08(*(void**)self, *(int*)(ent + 4)) - 1 > 0) {
+        if (func_002AB028(*(void**)self, *(int*)(ent + 4)) != 0) {
+            float f = func_002AAE78(*(void**)self, *(int*)(ent + 4));
+            func_002ADCA0(**(int**)D_004A37B4 + 0x1D8, (int)f, D_004A37D8_2B1348[0].v, ent, *(int*)((char*)msg + 0x1C), *(int*)((char*)msg + 0x20), 0, 0);
+            return 1;
+        }
+        if (func_002AB150(*(void**)self, func_002B1220(D_004A37B4, *(int*)ent)) != *(int*)((char*)msg + 0x1C)) {
+            return 0;
+        }
+        return func_002B1268(self, msg);
+    }
+    return func_002B1268(self, msg);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1428);
@@ -3782,7 +3839,28 @@ extern "C" void func_002B3D48(void* self, float v)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B3D80);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPacked8_3D80 { long v; } __attribute__((packed));
+extern const sPacked8_3D80 D_004A3850_3D80[] __asm__("D_004A3850");
+extern void func_002ADCA0_3D80(int a, int b, long t, int c, int d, int e, int f, int g) __asm__("func_002ADCA0");
+
+extern "C" void func_002B3D80(void* self, signed char target, float duration)
+{
+    signed char cur;
+    void* voice = *(void**)((char*)self + 0x408);
+    if (voice != 0 && target != (cur = *(signed char*)((char*)voice + 0x40))) {
+        int steps = (target - cur) / 25;
+        *(int*)((char*)self + 0x414) = target;
+        *(float*)((char*)self + 0x410) = (float)cur;
+        *(float*)((char*)self + 0x40C) = (float)steps / duration;
+        func_002ADCA0_3D80(**(int**)self + 0x1D8, 0x28, D_004A3850_3D80[0].v, 0, 0, 0, 0, 0);
+    }
+}
+#endif
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3E20);
 #ifdef SKIP_ASM
@@ -4104,7 +4182,23 @@ extern "C" void func_002B43D8(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B4470);
+#ifdef SKIP_ASM
+struct sPacked8_4470 { long v; } __attribute__((packed));
+extern const sPacked8_4470 D_004A3838_4470[] __asm__("D_004A3838");
+extern void func_002ADCA0_4470(int a, int b, long t, int c, int d, int e, int f, int g) __asm__("func_002ADCA0");
+
+// PORT: 64-bit long sound key, read unaligned from a const table
+extern "C" void func_002B4470(void* self)
+{
+    void* p = *(void**)((char*)self + 0x408);
+    if (p != 0 && *(int*)((char*)p + 0x4C) == 0) {
+        *(int*)((char*)p + 0x4C) = 1;
+        func_002ADCA0_4470(*(int*)(*(int*)self) + 0x1D8, 0, D_004A3838_4470[0].v, 0, 0, 0, 0, 0);
+    }
+}
+#endif
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B44D8);
 #ifdef SKIP_ASM
@@ -4126,7 +4220,27 @@ extern "C" void func_002B44D8(void* self)
 }
 #endif
 INCLUDE_ASM("sound/bankmonitor", func_002B4540);
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B4568);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern const sPacked8 D_004A3840_2B4568[] __asm__("D_004A3840");
+extern "C" int func_002B2778(void* ent);
+extern "C" int func_002B2500(void* ent);
+extern "C" void func_002ADCA0(int a, int b, long t, void* c, int d, int e, int f, int g);
+
+extern "C" void func_002B4568(void* self, void* ent)
+{
+    if (*(void**)((char*)self + 0x408) != 0) {
+        float a = func_002B2690(ent);
+        float b = func_002B2718(ent);
+        int c = func_002B2778(ent) + 1;
+        int d = func_002B2500(ent);
+        func_002ADCA0(**(int**)self + 0x1D8, (int)b, D_004A3840_2B4568[0].v, *(void**)((char*)self + 0x408), d, c, (int)a, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B4620);
