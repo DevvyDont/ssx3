@@ -1323,7 +1323,22 @@ extern "C" void func_001F6840(void* self, char* name, const char* str)
 
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupRidersBest);
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F6EE0);
+#ifdef SKIP_ASM
+extern "C" int func_001F6EE0(void* self, unsigned int mask, int n, int count)
+{
+    int seen = -1;
+    for (int i = 0; i < count; i++) {
+        unsigned int bit = 1u << i;
+        if (mask & bit) {
+            seen++;
+            if (seen == n) return i;
+        }
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F6F30);

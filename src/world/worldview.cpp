@@ -145,7 +145,22 @@ extern "C" int func_003A99D8(func_003A99D8_sView* self, unsigned int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003A9A48);
+#ifdef SKIP_ASM
+struct sWVSlot_9A48 { int state; int pad; };
+struct sWV_9A48 { char pad0[4]; cWorldViewSectionList* sec; char pad8[0xC]; sWVSlot_9A48 slots[1]; };
+extern "C" int func_003A9A48(sWV_9A48* self, unsigned int idx)
+{
+    if (self->sec != 0 && idx < (unsigned int)self->sec->mNumSections) {
+        if (self->slots[idx].state == 6) {
+            self->slots[idx].state = 5;
+        }
+        return 1;
+    }
+    return 0;
+}
+#endif
 //100%
 INCLUDE_ASM("world/worldview", func_003A9A90);
 #ifdef SKIP_ASM
@@ -433,7 +448,15 @@ extern "C" void func_003AA028(void* self_, void* sec_, int cam, int loaded)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003AA2D8);
+#ifdef SKIP_ASM
+extern "C" void* func_003AA2D8(void* self)
+{
+    *(unsigned int*)((char*)self + 8) = 0xFFFFFFFF;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldview", func_003AA2F0);

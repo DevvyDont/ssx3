@@ -1111,7 +1111,19 @@ extern "C" void func_0019A638(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A758);
+#ifdef SKIP_ASM
+extern "C" void func_0019FA78(void* a0, int a1);
+
+extern "C" void func_0019A758(void* self)
+{
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C);
+    if (mgr != 0) {
+        func_0019FA78(func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A798);
@@ -3115,8 +3127,23 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019DF20);
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E070);
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E1C0);
+#ifdef SKIP_ASM
+extern "C" int func_0019E1C0(sTableK19D250* self, int bank) {
+    for (int i = 0; i < 0x100; i++) {
+        if ((unsigned int)self->banks[bank].e[i].state >= 2) return 0;
+    }
+    return 1;
+}
+#endif
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E208);
+#ifdef SKIP_ASM
+extern "C" int func_0019E208(sTableK19D250* self, int bank, int i) {
+    return self->banks[bank].e[i].state == 2;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E238);
@@ -3140,7 +3167,14 @@ extern "C" int func_0019E238(sEquipTable* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E268);
+#ifdef SKIP_ASM
+extern "C" char* func_0019E268(sTableK19D250* self, int bank, int i) {
+    if (self->banks[bank].e[i].state == -1) return 0;
+    return self->banks[bank].e[i].name;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2B0);
@@ -3154,10 +3188,44 @@ extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2F0);
+#ifdef SKIP_ASM
+extern "C" void* func_0019E2F0(sTableK19D250* self, int bank, int i) {
+    if (self->banks[bank].e[i].state != 1) return 0;
+    return self->banks[bank].e[i].data;
+}
+#endif
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E330);
+#ifdef SKIP_ASM
+extern "C" int func_0019E330(char* base, int a, int b) {
+    char* pb = base + 0x104;
+    char* qb = base + 0x118;
+    int s = b * 0x120 + a * 0x12000;
+    int* p = (int*)(pb + s);
+    int* q = (int*)(qb + s);
+    int r = *p;
+    *p = 0;
+    *(int*)(base + 0xB4000) -= *q;
+    *q = 0;
+    return r;
+}
+#endif
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E380);
+#ifdef SKIP_ASM
+extern "C" int func_0019E380(sTableK19D250* self, int bank, int i) {
+    return self->banks[bank].e[i].f110;
+}
+#endif
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3A8);
+#ifdef SKIP_ASM
+extern "C" int func_0019E3A8(sTableK19D250* self, int bank, int i) {
+    return self->banks[bank].e[i].timer;
+}
+#endif
 
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3D0);
 

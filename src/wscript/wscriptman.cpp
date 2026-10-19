@@ -812,7 +812,14 @@ extern "C" void func_0030A610(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030A660);
+#ifdef SKIP_ASM
+extern "C" int func_0030A660(char* self, int a1)
+{
+    return func_003A6B78(*(void**)(self + 0x28C), a1, 5) != -1;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("wscript/wscriptman", func_0030A688);
@@ -1581,7 +1588,14 @@ extern "C" func_0030B388_cObj* func_0030B388(void* self, unsigned int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B3F0);
+#ifdef SKIP_ASM
+extern "C" void func_0030B3F0(void* self, int name)
+{
+    func_0030B388(self, GetHashValue32__FPc(name));
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B428);
@@ -1719,7 +1733,19 @@ extern "C" int func_0030B590(char* self) {
     return 0;
 }
 #endif
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B608);
+#ifdef SKIP_ASM
+void func_0026CBB0(void* self);
+
+extern "C" void func_0030B608(char* self)
+{
+    func_0026CDF8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x34));
+    func_0026CBB0(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x34));
+    *(int*)(self + 0x2AC) = 6;
+    *(int*)(self + 0x2B0) = *(int*)(self + 0x2A0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B658);
@@ -2474,7 +2500,14 @@ extern "C" cWScriptQueueEntry* func_0030C870(cWScriptQueue* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C898);
+#ifdef SKIP_ASM
+extern "C" void* func_0030C898(void* self, ...)
+{
+    return self;
+}
+#endif
 
 INCLUDE_ASM("wscript/wscriptman", func_0030C8D8);
 
@@ -2691,8 +2724,22 @@ extern "C" int func_0030D330(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x1C4))) != (*(int *)((char*)(arg0) + (0x1C8)));
 }
 #endif
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D348);
+#ifdef SKIP_ASM
+extern "C" void func_0030D348(char* self)
+{
+    func_0030C820((cWScriptQueue*)(self + 0x1C4));
+}
+#endif
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D368);
+#ifdef SKIP_ASM
+extern "C" void func_0030D368(char* self)
+{
+    func_0030C870((cWScriptQueue*)(self + 0x1C4));
+}
+#endif
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D388);
 #ifdef SKIP_ASM
@@ -2700,7 +2747,13 @@ extern "C" void func_0030D388(int *arg0, int arg1) {
     *arg0 = arg1;
 }
 #endif
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D390);
+#ifdef SKIP_ASM
+extern "C" int func_0030D390(void* self, unsigned int a1) {
+    return a1 < 10;
+}
+#endif
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D398);
 #ifdef SKIP_ASM
@@ -2760,8 +2813,28 @@ int func_0030D3D8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D3E0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_0030AC98_a1(void* self) __asm__("func_0030AC98");
+
+extern "C" void func_0030D3E0(char* self)
+{
+    func_0030AC98_a1(*(void**)(self + 0x10));
+}
+#endif
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D400);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_0030ADA8_a1(void* self) __asm__("func_0030ADA8");
+
+extern "C" void func_0030D400(char* self)
+{
+    func_0030ADA8_a1(*(void**)(self + 0x10));
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D420);

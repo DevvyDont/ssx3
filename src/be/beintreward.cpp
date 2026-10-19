@@ -939,7 +939,16 @@ extern "C" int func_00157E60(void* self, int a1, int a2, int bit)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00157EA0);
+#ifdef SKIP_ASM
+// PORT: 64-bit ulong bit test (ld/dsrlv).
+extern "C" int func_00157EA0(void* self, int a1, int a2, int bit)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return (int)((*(ulong*)(p + 0xF78) >> bit) & 1);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_00157EE0);
@@ -1274,7 +1283,15 @@ extern "C" long func_00158750(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00158778);
+#ifdef SKIP_ASM
+extern "C" int func_00158778(void* self, int a1, int a2)
+{
+    char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
+    return func_00157390(self, 0x40, (signed char*)(p + 0xF70));
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintreward", func_001587B8);
@@ -1363,7 +1380,18 @@ int func_001588B0(void* self, int a1)
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
 extern int D_004A6CA8[];
 
+//100%
 INCLUDE_ASM("be/beintreward", func_001588C8);
+#ifdef SKIP_ASM
+extern "C" int func_001588C8(void* self, int idx, int v)
+{
+    int* row = D_0045AFE8 + idx * 4;
+    for (int i = 0; i < 4; i++) {
+        if (v >= row[i]) return i;
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackMedal__FPviiii);
@@ -1455,8 +1483,26 @@ extern "C" int cBERewardInterface_getEarningsMedal(void* self, int a, int b, int
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintreward", func_00158B70);
+#ifdef SKIP_ASM
+extern "C" int func_00158B70(void* self, int idx, int v)
+{
+    int* row = D_0045B018 + idx * 4;
+    for (int i = 0; i < 4; i++) {
+        if (v >= row[i]) return i;
+    }
+    return -1;
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintreward", func_00158BB8);
+#ifdef SKIP_ASM
+extern "C" int func_00158BB8(void* self, int idx, unsigned int v)
+{
+    return (v < (unsigned int)D_0045B048[idx]) ? -1 : 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00158BE0);

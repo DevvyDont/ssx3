@@ -782,7 +782,23 @@ extern "C" int func_0012A180(sAiObj128A48* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012A1F0);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern int D_00536708[];
+
+extern "C" int func_0012A1F0(void* self, int idx)
+{
+    char* tbl = *(char**)((char*)D_004A28A8 + 0xC0);
+    int v = *(int*)((char*)tbl + (idx << 2) + 0x18);
+    int found = 0;
+    for (int i = 0; i < 6; i++) {
+        if (v == D_00536708[i]) found = 1;
+    }
+    return found;
+}
+#endif
 //100%
 INCLUDE_ASM("ai/ai", func_0012A240);
 #ifdef SKIP_ASM
@@ -1284,7 +1300,16 @@ extern "C" void func_0012B030(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_0012B060);
+#ifdef SKIP_ASM
+extern "C" void func_0012B060(void* self)
+{
+    cAI_purgeMissionRiders(self);
+    func_0010F3B8(self);
+    *(int*)((char*)self + 0x10) = 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", func_0012B090);

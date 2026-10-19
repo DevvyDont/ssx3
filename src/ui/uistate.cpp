@@ -289,4 +289,14 @@ done:
 #endif
 
 
+//100%
 INCLUDE_ASM("ui/uistate", func_0039F200);
+#ifdef SKIP_ASM
+extern "C" void func_0039F200(void* self, char* node)
+{
+    int flags = *(int*)(node + 0x1C);
+    if (((flags >> 5) & 1) && (((unsigned int)flags >> 8) & 0x3F) == 5) {
+        *(int*)(node + 0x1C) = (flags & ~0x3F00) | 0x680;
+    }
+}
+#endif

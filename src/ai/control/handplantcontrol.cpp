@@ -1618,7 +1618,14 @@ extern "C" void func_0013F880(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F8B8);
+#ifdef SKIP_ASM
+extern "C" void* func_0013F8B8(void* self, ...)
+{
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F8F8);
@@ -2057,7 +2064,34 @@ extern "C" void func_00140918(void *arg0, long long *arg1) {
     (*(long long *)((char*)(arg0) + (0x1E0))) = (long long) *arg1;
 }
 #endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140928);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+static inline void hpCopyMat(void* dst, const void* src)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+extern "C" void* func_00140928(void* out, char* self)
+{
+    hpCopyMat(out, self + 0x160);
+    return out;
+}
+#endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140958);
 #ifdef SKIP_ASM
@@ -2884,7 +2918,18 @@ extern "C" int func_00144010(void *arg0, float fparg0) {
     return var_3;
 }
 #endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144040);
+#ifdef SKIP_ASM
+struct sPair8_4040 { int a; int b; };
+extern sPair8_4040 D_0043CF20[];
+
+extern "C" void func_00144040(char* self, int idx)
+{
+    *(sPair8_4040*)(self + 0xF44) = D_0043CF20[idx];
+    *(short*)(self + 0xF38) = idx;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144068__FPv);
@@ -3027,7 +3072,14 @@ extern "C" void func_00144130(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0xC))) = arg1;
 }
 #endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144138);
+#ifdef SKIP_ASM
+extern "C" int func_00144138(char* self)
+{
+    return (int)((float)*(int*)(self + 0xC) * 0.01666666753590107f);
+}
+#endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144158);
 #ifdef SKIP_ASM
@@ -3292,7 +3344,21 @@ void* func_00144610(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144630);
+#ifdef SKIP_ASM
+extern "C" void* cRiderAnimBase_cRiderAnimBase(void* self);
+extern void* D_00458458[];
+
+extern "C" void* func_00144630(char* self)
+{
+    cRiderAnimBase_cRiderAnimBase(self);
+    *(int*)(self + 0x60) = 0;
+    *(void***)(self + 0x58) = D_00458458;
+    *(int*)(self + 0x64) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144670);
