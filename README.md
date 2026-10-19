@@ -4,6 +4,19 @@ This is a work-in-progress decompilation of SSX 3 (2003) for the PlayStation 2. 
 
 The main goal of this project is to decompile the game code to matching source code. This project doesn't contain any game assets or original code from the game's executable. It requires your own copy of the game to build and run this project.
 
+## Roadmap
+
+- [ ] **1. Matching decompilation.** All game code as C that compiles back into a byte-identical `SLUS_207.72`. The full executable already rebuilds byte-identical, with the unmatched functions still in assembly ([progress](#progress)).
+- [ ] **2. Readability pass.** Replace `void*` access and pointer arithmetic with real types and classes, give functions meaningful names, and move toward an object-oriented structure.
+- [ ] **3. Native PC port.** A DirectX renderer, keyboard and Xbox controller support, and modern graphics settings, with the whole game playable on PC.
+- [ ] **4. Online rework.** Dedicated servers and online races of up to 6 players.
+
+Stretch goals:
+
+- [ ] **5. Track packs.** Import the tracks of SSX (2000), SSX Tricky and SSX On Tour from your own discs, with full online support.
+- [ ] **6. Co-op Conquer the Mountain.** Play the career mode online with a friend.
+- [ ] **7. Mod manager.** Tooling for modding the game (details to come).
+
 ## Setup
 
 You will need:
