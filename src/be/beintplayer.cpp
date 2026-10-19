@@ -703,7 +703,14 @@ extern "C" int func_00146E98(void* self, int second)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00146F40);
+#ifdef SKIP_ASM
+extern "C" void func_00146F40(void* self, int index, const char* name)
+{
+    strncpy((char*)&D_00534FE0[cBENewPlayerInterface_getPlayerID(index)], name, 0xC);
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00146F88);
@@ -1067,10 +1074,70 @@ extern "C" void func_00147658(void* self, int index, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147698);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPlayerCharEntryExt_7698 {
+    char pad_0x00[0x14];
+    int field_0x14;
+    char pad_0x18[4];
+};
+extern sPlayerCharEntryExt_7698 D_00534FE0_ext[] __asm__("D_00534FE0");
+
+extern "C" int func_00147698(void* self, int index)
+{
+    return D_00534FE0_ext[cBENewPlayerInterface_getPlayerID(index)].field_0x14;
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintplayer", func_001476D8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPlayerCharEntryExt_76D8 {
+    char pad_0x00[0x14];
+    int field_0x14;
+    int field_0x18;
+};
+extern sPlayerCharEntryExt_76D8 D_00534FE0_ext_76D8[] __asm__("D_00534FE0");
+
+extern "C" void func_001476D8(void* self, int index, int value)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    D_00534FE0_ext_76D8[id].field_0x14 = value;
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147718);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPlayerCharEntryExt_7718 {
+    char pad_0x00[0x18];
+    int field_0x18;
+};
+extern sPlayerCharEntryExt_7718 D_00534FE0_ext_7718[] __asm__("D_00534FE0");
+
+extern "C" int func_00147718(void* self, int index)
+{
+    return D_00534FE0_ext_7718[cBENewPlayerInterface_getPlayerID(index)].field_0x18;
+}
+#endif
+//100%
 INCLUDE_ASM("be/beintplayer", func_00147758);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sPlayerCharEntryExt_7758 {
+    char pad_0x00[0x18];
+    int field_0x18;
+};
+extern sPlayerCharEntryExt_7758 D_00534FE0_ext_7758[] __asm__("D_00534FE0");
+
+extern "C" void func_00147758(void* self, int index, int value)
+{
+    int id = cBENewPlayerInterface_getPlayerID(index);
+    D_00534FE0_ext_7758[id].field_0x18 = value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerID__Fi);
@@ -1081,7 +1148,24 @@ int cBENewPlayerInterface_getPlayerID(int index)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_001477B0);
+#ifdef SKIP_ASM
+struct sPlayerFlags_001477B0 {
+    char pad_0x00[0x10];
+    unsigned int flag0 : 1;
+    unsigned int rest : 31;
+    char pad_0x14[0x1C - 0x14];
+};
+
+extern "C" int func_001477B0(void* self, int index)
+{
+    if (D_00534FE0[index].field_0xc == -1) {
+        return -1;
+    }
+    return ((sPlayerFlags_001477B0*)D_00534FE0)[index].flag0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isMissionMan__Fi);
@@ -1873,7 +1957,24 @@ extern "C" void func_00148AA8(void* self, int rider, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148B50);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// Same layout as the unit's sPlayerStatRow (defined at func_00148B78, later in the unit).
+struct sPlayerStat7View_00148B50 {
+    signed char v[7];
+};
+struct sPlayerStatRowView_00148B50 {
+    sPlayerStat7View_00148B50 e[10];
+};
+extern sPlayerStatRowView_00148B50 D_00535538_view00148B50[] __asm__("D_00535538");
+
+extern "C" void func_00148B50(void* self, int a1, int value, int a2)
+{
+    D_00535538_view00148B50[a1].e[a2].v[0] = value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148B78);
@@ -1892,7 +1993,14 @@ extern "C" signed char func_00148B78(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148BA0);
+#ifdef SKIP_ASM
+extern "C" void func_00148BA0(void* self, int a1, int value, int a2)
+{
+    D_00535538[a1].e[a2].v[1] = value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148BC8);
@@ -1903,7 +2011,14 @@ extern "C" signed char func_00148BC8(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148BF0);
+#ifdef SKIP_ASM
+extern "C" void func_00148BF0(void* self, int a1, int value, int a2)
+{
+    D_00535538[a1].e[a2].v[2] = value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148C18);
@@ -1914,7 +2029,14 @@ extern "C" signed char func_00148C18(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148C40);
+#ifdef SKIP_ASM
+extern "C" void func_00148C40(void* self, int a1, int value, int a2)
+{
+    D_00535538[a1].e[a2].v[3] = value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148C68);
@@ -1925,7 +2047,14 @@ extern "C" signed char func_00148C68(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148C90);
+#ifdef SKIP_ASM
+extern "C" void func_00148C90(void* self, int a1, int value, int a2)
+{
+    D_00535538[a1].e[a2].v[4] = value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148CB8);
@@ -1936,7 +2065,14 @@ extern "C" signed char func_00148CB8(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148CE0);
+#ifdef SKIP_ASM
+extern "C" void func_00148CE0(void* self, int a1, int value, int a2)
+{
+    D_00535538[a1].e[a2].v[5] = value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148D08);
@@ -1947,7 +2083,14 @@ extern "C" signed char func_00148D08(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintplayer", func_00148D30);
+#ifdef SKIP_ASM
+extern "C" void func_00148D30(void* self, int a1, int value, int a2)
+{
+    D_00535538[a1].e[a2].v[6] = value;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148D58);

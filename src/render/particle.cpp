@@ -275,7 +275,21 @@ extern "C" void func_003710D0_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00371268);
+#ifdef SKIP_ASM
+extern "C" void func_0036D3D8(void* p, float v);
+
+extern "C" void func_00371268(char* self, float v)
+{
+    if (v == 0.0f) {
+        func_0036D3D8(self + 0x20, 0.0f);
+        return;
+    }
+    *(float*)self = v;
+    func_0036D3D8(self + 0x20, v);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003712B8);
@@ -616,7 +630,17 @@ extern "C" void func_003717C0(sPtObj17C0* self, int a1, int a2, sPtCol17C0* col,
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_003718E8);
+#ifdef SKIP_ASM
+// PORT: PS2 hardware registers (D2 = GIF DMA channel CHCR, 0x10003010 = VIF1 area register).
+extern "C" void func_003718E8(void)
+{
+    while (*(volatile int*)0x1000A000 & 0x100) {
+    }
+    *(volatile int*)0x10003010 = 4;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00371940);
@@ -816,7 +840,21 @@ extern "C" void func_00371F98(unsigned int tadr, int flags)
     }
 }
 #endif
+//100%
 INCLUDE_ASM("render/particle", func_00372098);
+#ifdef SKIP_ASM
+// PORT: PS2 hardware registers (0x1000E000 = D_CTRL, 0x1000E020 = D_PCR).
+extern "C" void func_00372098(int enable)
+{
+    if (enable != 0) {
+        *(volatile unsigned int*)0x1000E000 |= 1;
+        *(volatile int*)0x1000E020;
+        *(volatile int*)0x1000E020 = 1;
+        return;
+    }
+    *(volatile unsigned int*)0x1000E000 &= 0xFFFFFFFE;
+}
+#endif
 INCLUDE_ASM("render/particle", func_003720F0);
 INCLUDE_ASM("render/particle", func_00372198);
 INCLUDE_ASM("render/particle", func_00372348);
@@ -3160,7 +3198,15 @@ extern "C" void func_0037C720(void* self, float a)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037C770);
+#ifdef SKIP_ASM
+extern "C" float func_0037C770(void* self)
+{
+    unsigned int v = *(unsigned int*)((char*)self + 0x59F8);
+    return 1.0f - (float)v * 0.0078125f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037C7C0);
@@ -3979,7 +4025,38 @@ extern "C" sPartQVec func_0037DEE0(void* self, sPartQVec* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037DF40);
+#ifdef SKIP_ASM
+struct sPartVec4_DF40 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
+extern "C" sPartVec4_DF40 func_0037DF40(void* self, sPartVec4_DF40* v)
+{
+    char* m = (char*)self + 0x58A0;
+    sPartVec4_DF40 r;
+    __asm__ __volatile__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2         $vf10, %1\n"
+        "lqc2         $vf1, 0x0(%2)\n"
+        "lqc2         $vf2, 0x10(%2)\n"
+        "lqc2         $vf3, 0x20(%2)\n"
+        "lqc2         $vf4, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf1, $vf10x\n"
+        "vmadday.xyzw ACC, $vf2, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf3, $vf10z\n"
+        "vmaddw.xyzw  $vf11, $vf4, $vf10w\n"
+        "sqc2         $vf11, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(*v), "r"(m)
+        : "memory");
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037DF88);

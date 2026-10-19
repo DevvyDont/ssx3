@@ -378,8 +378,34 @@ extern "C" unsigned short* func_002C25B8(unsigned short* dst, unsigned short* sr
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C25F8);
+#ifdef SKIP_ASM
+extern "C" unsigned short* func_002C25F8(unsigned short* dst, const char* src, int n)
+{
+    unsigned short* start = dst;
+    while (*src && n > 0) {
+        *dst++ = *src++;
+        n--;
+    }
+    *dst = 0;
+    return start;
+}
+#endif
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2640);
+#ifdef SKIP_ASM
+extern "C" unsigned char* func_002C2640(unsigned char* dst, const unsigned short* src, int n)
+{
+    unsigned char* start = dst;
+    while (*src && n > 0) {
+        *dst++ = *src++;
+        n--;
+    }
+    *dst = 0;
+    return start;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C2688);
@@ -485,8 +511,32 @@ extern "C" void func_002C28A0(void) {
     func_003E4E98();
 }
 #endif
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C28C0);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00486030[];
+
+extern "C" int func_002C28C0(int unused, int size, int zeroFlag)
+{
+    return (int)new (D_00486030, zeroFlag ? 0x100 : 0, 0) char[size];
+}
+#endif
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C28F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// Unit declares func_002523A8 / func_002C28F8 later with void return; keep the int-returning
+// signatures under asm labels. The argument passes straight through in a0.
+extern "C" int func_002523A8_ret(void* p) __asm__("func_002523A8");
+extern "C" int func_002C28F8_impl(void* p) __asm__("func_002C28F8");
+
+extern "C" int func_002C28F8_impl(void* p)
+{
+    return func_002523A8_ret(p) != 0;
+}
+#endif
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2918);
 #ifdef SKIP_ASM
@@ -552,7 +602,24 @@ extern "C" void func_002C2B08(void) {
     func_003E5398();
 }
 #endif
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2B28);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_002C28C0(int, int, int);
+extern "C" void func_003E5698(int);
+extern char D_004A3898[];
+
+// The unit declares func_002C2B28 later as void(); keep the real signature under an asm label.
+extern "C" int func_002C2B28_impl(void) __asm__("func_002C2B28");
+
+extern "C" int func_002C2B28_impl(void)
+{
+    int p = func_002C28C0((int)D_004A3898, 0x10, 0);
+    func_003E5698(p);
+    return p;
+}
+#endif
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C2B68);
 #ifdef SKIP_ASM
@@ -627,8 +694,32 @@ extern "C" void func_002C2BD8(char* self) {
     *(void**)(self + 0x38) = (void*)&func_002C2BB8;
 }
 #endif
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2D30);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_00486098[];
+
+extern "C" int func_002C2D30(int unused, int size, int zeroFlag)
+{
+    return (int)new (D_00486098, zeroFlag ? 0x100 : 0, 0) char[size];
+}
+#endif
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2D68);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// Unit declares func_002523A8 / func_002C2D68 later with void return; keep the int-returning
+// signatures under asm labels. The argument passes straight through in a0.
+extern "C" int func_002523A8_ret(void* p) __asm__("func_002523A8");
+extern "C" int func_002C2D68_impl(void* p) __asm__("func_002C2D68");
+
+extern "C" int func_002C2D68_impl(void* p)
+{
+    return func_002523A8_ret(p) != 0;
+}
+#endif
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2D88);
 #ifdef SKIP_ASM
@@ -666,7 +757,22 @@ extern "C" int func_002C2DB0(int block, int a, int size, int c) {
     }
 }
 #endif
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2E40);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// The unit declares func_002C2E40 later as void(); keep the real signature under an asm label.
+extern "C" int func_002C2E40_impl(unsigned short* s) __asm__("func_002C2E40");
+
+extern "C" int func_002C2E40_impl(unsigned short* s)
+{
+    int n = 0;
+    while (*s++) {
+        n++;
+    }
+    return n;
+}
+#endif
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", func_002C2E78);
 #ifdef SKIP_ASM

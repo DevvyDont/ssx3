@@ -29,7 +29,21 @@ cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_00329938);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* func_00329A28_v(void* self) __asm__("func_00329A28");
+
+// NOTE: the array's offset is unconstrained by the target: the empty-ctor loop is deleted
+// (vec_mark), leaving only the dead `li 0x13; li -1` pair. 0x30 = sSphereNode children[].
+extern "C" void* func_00329938(void* self)
+{
+    new ((char*)self + 0x30) sRiderSphere_329910[20];
+    func_00329A28_v(self);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_00329970);
@@ -44,7 +58,20 @@ extern "C" void func_00329970(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_00329998);
+#ifdef SKIP_ASM
+extern "C" void func_00329998(void* self, float radius)
+{
+    *(unsigned int*)((char*)self + 0x28) = 0xFFFFFFFF;
+    *(int*)((char*)self + 0x2C) = 1;
+    *(float*)((char*)self + 0x20) = radius;
+    *(float*)((char*)self + 0x40) = radius;
+    *(int*)((char*)self + 0x24) = -1;
+    *(int*)((char*)self + 0x44) = -1;
+    *(int*)((char*)self + 0x0) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_003299C8);
@@ -706,7 +733,37 @@ extern "C" float func_0032C5A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C5E0);
+#ifdef SKIP_ASM
+struct sSphereVec4_C5E0 {
+    float x, y, z, w;
+    sSphereVec4_C5E0() {}
+    sSphereVec4_C5E0(float* n) { x = n[5]; y = n[6]; z = n[7]; w = 1.0f; }
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sSphereVec4_C5E0 Add_C5E0(const sSphereVec4_C5E0& a, const sSphereVec4_C5E0& b)
+{
+    sSphereVec4_C5E0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_0032C5E0(void* self, sSphereVec4_C5E0* v)
+{
+    float* n = *(float**)((char*)self + 0x98);
+    sSphereVec4_C5E0 p = Add_C5E0(sSphereVec4_C5E0(n), *v);
+    *(sSphereVec4_C5E0*)((char*)self + 0x80) = p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C630);
