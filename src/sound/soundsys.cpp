@@ -460,7 +460,30 @@ extern "C" void func_002910E0(void* vself)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002913D8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sVE_13D8 {
+    short delta;
+    short index;
+    void (*fn)(void*, long);
+};
+
+extern const sSndKey8_10E0 D_004A3680_13D8[] __asm__("D_004A3680");
+
+// PORT: 64-bit long sound key
+extern "C" void func_002913D8(void* self)
+{
+    char* s = (char*)self;
+    char* sys = **(char***)(s + 0x118);
+    sVE_13D8* vt = *(sVE_13D8**)(sys + 0xAB0);
+    char* obj = sys + 0x1D8;
+    vt[3].fn(obj + vt[3].delta, D_004A3680_13D8->v);
+    *(int*)(s + 0x5830) = 0;
+    *(int*)(s + 0x5834) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_00291430);
@@ -936,7 +959,38 @@ extern "C" void func_00292A50(void* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_00292AE8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sSndId292AE8 {
+    long v;
+} __attribute__((packed));
+extern const sSndId292AE8 D_004A36A8[];
+extern "C" void func_002ADDE0(void* bank, long id);
+
+struct sVE292AE8 { short delta; short index; void (*fn)(void*, int); };
+
+struct sBank292AE8 {
+    char pad0[0x8D8];
+    sVE292AE8* vt;      // 0x8D8
+};
+struct sSys292AE8 {
+    char pad0[0x1D8];
+    sBank292AE8 bank;   // 0x1D8
+};
+
+// Notifies the sound bank, then (re)starts the default ambient stream.
+// PORT: the 8-byte stream id is passed by value from an unaligned global (64-bit `long`).
+extern "C" void func_00292AE8(char* self, int a1)
+{
+    sSys292AE8* sys = **(sSys292AE8***)(self + 0x118);
+    sVE292AE8* vt = sys->bank.vt;
+    sys = (sSys292AE8*)&sys->bank;
+    vt[4].fn((char*)sys + vt[4].delta, a1);
+    func_002ADDE0(&(**(sSys292AE8***)(self + 0x118))->bank, D_004A36A8[0].v);
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_00292B48);
 
@@ -6314,7 +6368,58 @@ extern "C" int func_002A1820(void* self, sSs1820Rider* a, sSs1820Rider* b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A19D8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_002A31C0(void* self);
+extern "C" void func_002A32B0(void* self);
+extern "C" void func_002A3358(void* self);
+extern "C" void func_002A3860(void* self);
+extern "C" void func_002A2018(void* self);
+extern "C" void func_002A2188(void* self);
+extern "C" void func_002A2568(void* self, int a1);
+extern "C" void func_002A2638(void* self);
+extern "C" void func_002A39E0(void* self);
+extern "C" void func_002A3708(void* self, char* rider);
+extern const sSndKey8 D_004A3648_19D8[] __asm__("D_004A3648");
+
+// PORT: 64-bit long sound key
+// Front-end sound event dispatcher; returns 1 if the event was handled.
+extern "C" int func_002A19D8(void* self, int ev)
+{
+    if (ev == 0) {
+        func_002A31C0(self);
+        if (*(int*)((char*)self + 0x530) == 0) {
+            func_0028D488(self);
+            func_002ADCA0(**(char***)((char*)self + 0x118) + 0x1D8, 10, D_004A3648_19D8[0].v, 0, 3, 1, 0, 0);
+        }
+    } else if (ev == 1) {
+        func_002A32B0(self);
+    } else if (ev == 2) {
+        func_002A3358(self);
+    } else if (ev == 3) {
+        func_002A3400(self);
+    } else if (ev == 7) {
+        func_002A3860(self);
+    } else if (ev == 8) {
+        func_002A2018(self);
+    } else if (ev == 10) {
+        func_002A2188(self);
+    } else if (ev == 12) {
+        func_002A2568(self, -1);
+    } else if (ev == 14) {
+        func_002A2638(self);
+    } else if (ev == 15) {
+        func_002A39E0(self);
+    } else if (ev == 5) {
+        func_002A3708(self, *(char**)((char*)func_0028B1D8() + 0x28));
+    } else {
+        return 0;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A1B58);
@@ -8113,7 +8218,24 @@ extern "C" int func_002A4770(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A49E8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sSndId2A49E8 {
+    long v;
+} __attribute__((packed));
+extern const sSndId2A49E8 D_004A36F0[];
+extern "C" void func_002ADCA0(void* bank, int a1, long id, int a3, int a4, int a5, int a6, int a7);
+
+// Flags the transition and fades the ambient stream back in.
+// PORT: the 8-byte stream id is passed by value from an unaligned global (64-bit `long`).
+extern "C" void func_002A49E8(char* self)
+{
+    *(int*)(self + 0x5818) = 1;
+    func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0x7530, D_004A36F0[0].v, 0, 0, 0, 0, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4A38);
@@ -8138,7 +8260,34 @@ extern "C" int func_002A4A68(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A4A78);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sSndKey8_4A78 {
+    long v;
+} __attribute__((packed));
+extern const sSndKey8_4A78 D_004A3650[];
+extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
+extern "C" int func_0028DEF0(void* self, int a1);
+
+// PORT: 64-bit long sound key
+extern "C" void func_002A4A78(void* self)
+{
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (*(int*)((char*)self + 0x578C) == 0 && D_00535C11[0] == 0) {
+        if (func_002A3F90(self) != 0) {
+            func_0028DEF0(self, 0xD);
+            func_002ADCA0(**(char***)((char*)self + 0x118) + 0x1D8, 2, D_004A3650->v, 0, 2, 0, 0, 0);
+        } else {
+            char* p = **(char***)((char*)self + 0x118) + 0x1D8;
+            const sSndKey8_4A78* key = D_004A3650;
+            int r = func_002B4908((char*)self + 0x118);
+            func_002ADCA0(p, 2, key->v, 0, 4, r, 0, 0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4B68);
@@ -9375,7 +9524,35 @@ extern "C" int func_002A7678(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A7718);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sSndKey8_7718 {
+    long v;
+} __attribute__((packed));
+extern const sSndKey8_7718 D_004A3700[];
+extern "C" void func_002A6430(void* voice, float a1);
+
+struct sVE_7718 {
+    short delta;
+    short index;
+    void (*fn)(void*, long);
+};
+
+// PORT: 64-bit long sound key
+extern "C" void func_002A7718(void* self)
+{
+    char* s = (char*)self;
+    for (int i = 0; i < *(int*)(s + 0x14); i++) {
+        func_002A6430(*(char**)(s + 0x18) + i * 0x190, 0.0f);
+    }
+    char* sys = *(char**)s;
+    sVE_7718* vt = *(sVE_7718**)(sys + 0xAB0);
+    char* obj = sys + 0x1D8;
+    vt[3].fn(obj + vt[3].delta, D_004A3700->v);
+}
+#endif
 
 INCLUDE_ASM("sound/soundsys", func_002A77A8);
 
