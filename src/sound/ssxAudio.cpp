@@ -563,7 +563,116 @@ extern "C" void func_00286200(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_FrontEndLoad);
+#ifdef SKIP_ASM
+struct cAsyncSys;
+// PORT: cAsyncSys_ASYNCSYS_Init__FP9cAsyncSysUi is called with a third argument here; bound by asm label.
+void cAsyncSys_Init3(cAsyncSys* self, unsigned int a1, int a2) __asm__("cAsyncSys_ASYNCSYS_Init__FP9cAsyncSysUi");
+extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" char* func_002A7B08(void* self);
+extern "C" void func_0028BDA8(void* p, int pool, int size, int a3, int a4);
+extern "C" void func_002A6D78(void* self, char* name, char* ext, int mode, int a4);
+extern "C" void func_0029F3F8(void* self, int a1);
+extern char* D_004A3558;
+// Default stream-group extension string (gcc inlines strcpy of the literal as an aligned block copy).
+extern char D_004A35A0[] __attribute__((aligned(8)));
+extern char D_004A35A8[];
+extern char D_004A35B0[];
+extern char D_004A35B8[];
+extern char D_004A35C0[];
+extern char D_004A35C8[];
+extern char D_004A35D0[];
+extern char D_004828D0[];
+extern char D_004828E0[];
+extern char D_004828F0[];
+extern char D_00535BC8[];
+
+// Front-end audio setup: reads the audio ini, registers each stream group with the async system.
+extern "C" void cSSXAudio_FrontEndLoad(char* self)
+{
+    char ext[0x40];
+    char key[0x80];
+    sIniParser5FB0 parser;
+    char name[0x80];
+    char val[0x60];
+    char msg[0x70];
+    __builtin_memcpy(ext, D_004A35A0, 6);
+    func_00288D18(self, 1);
+    cAsyncSys_Init3(**(cAsyncSys***)(self + 0x118), 0, 0);
+    *(char*)(self + 0x5838) = D_004A35A8[0];
+    *(int*)(self + 0x5878) = 0;
+    func_002A77F8_r(&parser, D_004A3554, 0x100);
+    parser.cur = parser.start;
+    if (func_002A7BF8(&parser, D_004A3570)) {
+        while (func_002A7F90(&parser) == 0) {
+            if (func_0041AA88(func_002A7DA0(&parser), D_004828C0) == 0) {
+                func_002A7FF8_r(&parser, D_004828C0, key);
+            }
+        }
+    }
+    parser.cur = parser.start;
+    char* section;
+    while ((section = func_002A7B08(&parser)) != 0) {
+        if (func_004165A8(section, ext) == 0) {
+            strcpy(name, key);
+            strcpy(self + 0x587C, name);
+            while (func_002A7F90(&parser) == 0) {
+                char* k = func_002A7DA0(&parser);
+                func_002A7FF8_r(&parser, D_004828C0, name);
+                if (func_0041AA88(k, D_004A3580) == 0) {
+                    func_002A7FF8_r(&parser, D_004A3580, val);
+                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                    func_0028BC58(**(void***)(self + 0x118), 0, msg, 0);
+                } else if (func_0041AA88(k, D_004A35B0) == 0) {
+                    func_002A7FF8_r(&parser, D_004A35B0, val);
+                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                    func_0028BC58(**(void***)(self + 0x118), 1, msg, 0);
+                } else if (func_0041AA88(k, D_004828D0) == 0) {
+                    func_002A7FF8_r(&parser, D_004828D0, val);
+                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                    func_0028BC58(**(void***)(self + 0x118), 0x10, msg, 0);
+                } else if (func_0041AA88(k, D_004A35B8) == 0) {
+                    func_002A7FF8_r(&parser, D_004A35B8, val);
+                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                    func_0028BC58(**(void***)(self + 0x118), 5, msg, 0);
+                } else if (func_0041AA88(k, D_004A35C0) == 0) {
+                    func_002A7FF8_r(&parser, D_004A35C0, val);
+                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                    func_0028BC58(**(void***)(self + 0x118), 6, msg, 0);
+                } else if (func_0041AA88(k, D_004A35C8) == 0) {
+                    func_002A7FF8_r(&parser, D_004A35C8, val);
+                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                    func_0028BC58(**(void***)(self + 0x118), 7, msg, 0);
+                } else if (func_0041AA88(k, D_004828E0) == 0) {
+                    func_002A7FF8_r(&parser, D_004828E0, val);
+                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                    func_0028BC58(**(void***)(self + 0x118), 2, msg, 0);
+                } else if (func_0041AA88(k, D_004828F0) == 0) {
+                    func_002A7FF8_r(&parser, D_004828F0, val);
+                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                    func_0028BC58(**(void***)(self + 0x118), 4, msg, 0);
+                } else if (func_0041AA88(k, D_004A35D0) == 0) {
+                    func_002A7FF8_r(&parser, D_004A35D0, val);
+                    sprintf(msg, D_004A3588, D_004A3590, name, val);
+                    func_0028BC58(**(void***)(self + 0x118), 10, msg, 0);
+                }
+            }
+        }
+    }
+    func_0028BDA8(**(void***)(self + 0x118), 3, 0x19000, 0, 0);
+    func_0028BDA8(**(void***)(self + 0x118), 12, 0x6A400, 0, 0);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if ((signed char)D_00535BC8[0x49] == 2) {
+        func_002A6D78(self, D_004A3558, ext, 2, 5);
+    } else {
+        func_002A6D78(self, D_004A3558, ext, 1, 5);
+    }
+    func_0029F3F8(self, 0);
+    *(int*)(self + 0x627C) = 1;
+    func_002A7890(&parser, 2);
+}
+#endif
 
 INCLUDE_ASM("sound/ssxAudio", func_002867E8);
 

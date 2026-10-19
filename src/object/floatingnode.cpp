@@ -173,7 +173,199 @@ extern "C" void func_0034F048(cFloatingNode* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/floatingnode", func_0034F120);
+#ifdef SKIP_ASM
+extern "C" void func_0031BE50(float* s, float* c, float angle); // sincos
+
+struct sQuad_F120 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat_F120 {
+    sQuad_F120 row[4];
+};
+
+struct sVec4_F120 {
+    float x, y, z, w;
+    sVec4_F120() {}
+    sVec4_F120(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+// Bone: parent index (-1 for the root) and its local transform.
+struct sBone_F120 {
+    int parent;
+    int pad4[2];
+    sMat_F120* local;   // 0xC
+};
+
+struct sSkel_F120 {
+    int pad0;
+    int count;          // 0x4
+    sBone_F120* bones;  // 0x8
+};
+
+// The tilt angles are read through a view of the spring block at +0x2C (see func_0034F930).
+struct sFloatTilt_F120 {
+    char pad0[0x28];
+    float pos2;         // 0x54
+    char pad2C[0x38 - 0x2C];
+    float pos3;         // 0x64
+};
+
+struct sFloatingNode_F120 {
+    char pad0[0x12];
+    unsigned short flags;   // 0x12
+    char pad14[0x18 - 0x14];
+    char* info;             // 0x18
+    char pad1C[0x2C - 0x1C];
+    float k;                // 0x2C
+    char pad30[0x50 - 0x30];
+    float pos1;             // 0x50
+};
+
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+static inline void Copy_F120(void* dst, const void* src)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
+static inline void Mul_F120(void* out, const void* a, const void* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(out), "r"(a), "r"(b)
+        : "memory");
+}
+
+static inline sQuad_F120 Row_F120(const sMat_F120* m, int k)
+{
+    return m->row[k];
+}
+
+static inline sVec4_F120 CompMul_F120(const sQuad_F120& a, const sVec4_F120& b)
+{
+    return sVec4_F120(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
+}
+
+// dst = parent * (local with its translation scaled by s).
+static inline void Pose_F120(sMat_F120* dst, const sMat_F120* parent, const sMat_F120* local, const sVec4_F120& s)
+{
+    sMat_F120 l;
+    l.row[0] = Row_F120(local, 0);
+    l.row[1] = Row_F120(local, 1);
+    l.row[2] = Row_F120(local, 2);
+    sVec4_F120 v = CompMul_F120(Row_F120(local, 3), s);
+    l.row[3] = *(sQuad_F120*)&v;
+    sMat_F120 t;
+    Mul_F120(&t, parent, &l);
+    Copy_F120(dst, &t);
+}
+
+// Poses a floating object's skeleton: the root bob/tilt transform, then each bone under its parent.
+extern "C" void func_0034F120(sFloatingNode_F120* self, sMat_F120* mat, sMat_F120* out)
+{
+    sMat_F120 m;
+    sQuad_F120 base = mat->row[3];
+    float pos[3];
+    float rot[3];
+    pos[0] = 0.0f;
+    pos[1] = 0.0f;
+    pos[2] = self->pos1 - base.z;
+    sFloatTilt_F120* tilt = (sFloatTilt_F120*)&self->k;
+    rot[0] = tilt->pos2;
+    rot[1] = tilt->pos3;
+    rot[2] = 0.0f;
+    // Rotation from the tilt angles (same construction as func_00351800), translated by pos.
+    float sx, cx, sy, cy, sz, cz;
+    func_0031BE50(&sx, &cx, rot[0]);
+    func_0031BE50(&sy, &cy, rot[1]);
+    func_0031BE50(&sz, &cz, rot[2]);
+    float sxsy = sx * sy;
+    float cxsy = cx * sy;
+    float cxsz = cx * sz;
+    m.row[0].x = cy * cz;
+    m.row[0].y = -cy * sz;
+    m.row[0].z = sy;
+    m.row[0].w = 0.0f;
+    m.row[1].x = sxsy * cz + cxsz;
+    m.row[1].y = cx * cz - sxsy * sz;
+    m.row[1].z = -sx * cy;
+    m.row[1].w = 0.0f;
+    m.row[2].x = sx * sz - cxsy * cz;
+    m.row[2].y = cxsz * sy + sx * cz;
+    m.row[2].z = cx * cy;
+    m.row[2].w = 0.0f;
+    m.row[3].x = pos[0];
+    m.row[3].y = pos[1];
+    m.row[3].z = pos[2];
+    m.row[3].w = 1.0f;
+    sSkel_F120* skel = *(sSkel_F120**)(self->info + 0x80);
+    float sc4 = *(float*)(self->info + 0x84);
+    sBone_F120* bone = skel->bones;
+    sVec4_F120 scale(sc4, sc4, sc4, 1.0f);
+    int i;
+    for (i = 0; i < skel->count; i++, bone++) {
+        sMat_F120 r;
+        if (bone->parent != -1) {
+            Pose_F120(&r, &out[bone->parent], bone->local, scale);
+            Copy_F120(&out[i], &r);
+        } else {
+            sMat_F120 w;
+            sMat_F120 t;
+            Mul_F120(&t, mat, &m);
+            Copy_F120(&w, &t);
+            Pose_F120(&r, &w, bone->local, scale);
+            Copy_F120(&out[i], &r);
+        }
+    }
+    self->flags &= 0xFFFE;
+}
+#endif
 
 INCLUDE_ASM("object/floatingnode", func_0034F600);
 

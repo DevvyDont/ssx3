@@ -110,7 +110,285 @@ extern "C" void func_002F53B0(func_002F53B0_sMan* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F5400);
+#ifdef SKIP_ASM
+extern char D_005047F8[];
+extern int D_004A43C4;
+extern int D_004A3B64;
+extern char* D_004A5B64;
+
+struct sVec_5400 {
+    float x, y, z, w;
+    sVec_5400() {}
+    sVec_5400(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+// Plain (ctor-less) quadword for matrix rows, so a local matrix needs no construction loop.
+struct sQuad_5400 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat_5400 {
+    sQuad_5400 row[4];
+};
+
+struct sAABox_5400 {
+    sVec_5400 min;
+    sVec_5400 max;
+    sAABox_5400() {}
+    sAABox_5400(const sVec_5400& a, const sVec_5400& b) { min = a; max = b; }
+};
+
+// 0xA0-byte light set (ten quadwords).
+struct sLightSet_5400 {
+    sVec_5400 v[10];
+};
+
+struct sBox_5400 {
+    unsigned int id;
+    int priority;
+    char pad08[0x8];
+    sAABox_5400 bounds; // 0x10
+    void* cell;         // 0x30
+};
+
+struct sNode_5400 {
+    unsigned int id;          // 0x0
+    int priority;             // 0x4
+    char pad08[0x8];
+    sLightSet_5400 cur;       // 0x10
+    sVec_5400 pos;            // 0xB0
+    sBox_5400* box;           // 0xC0
+    char padC4[0xC];
+    sLightSet_5400 target;    // 0xD0
+    sNode_5400* next;         // 0x170
+    sNode_5400* prev;         // 0x174
+    char pad178[8];
+};
+
+struct sMan_5400 {
+    char pad000[0x4];
+    char* world;              // 0x4
+    char pad008[0x210 - 0x8];
+    sNode_5400 nodes[32];     // 0x210
+    sNode_5400* heads[32];    // 0x3210
+    unsigned int count;       // 0x3290
+};
+
+// Light-set reference: a name until first use, then a cached handle tagged 0x123400.
+struct sLightRef_5400 {
+    int handle;
+    int magic;
+};
+
+struct sVEf_5400 {
+    short delta;
+    short index;
+    int (*fn)(void*, float, float, float);
+};
+struct sVEr_5400 {
+    short delta;
+    short index;
+    sLightRef_5400* (*fn)(void*);
+};
+
+// The unit defines func_002F59D0 later with its own node type.
+extern "C" sNode_5400* func_002F59D0_n(sMan_5400* self, int priority) __asm__("func_002F59D0");
+extern "C" sBox_5400* func_002F5A70(sMan_5400* self, int priority);
+extern "C" void func_002F5AF0(void* self, void* a1, void* a2, void* a3, int count);
+extern "C" void func_0034FED8(void* obj, int a1, sMat_5400* out);
+extern "C" void func_00331450(void* cell, sAABox_5400* box);
+extern "C" sLightSet_5400* func_002EE2F8(void);
+extern "C" int func_0038AC50(void*, void*);
+extern "C" sLightSet_5400* func_0038ABF8(void* self, int i);
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec_5400 Sub_5400(const sVec_5400& a, const sVec_5400& b)
+{
+    sVec_5400 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec_5400 Add_5400(const sVec_5400& a, const sVec_5400& b)
+{
+    sVec_5400 r;
+    __asm__ __volatile__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_5400(const sVec_5400& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+static inline sVec_5400 Trans_5400(const sMat_5400& m)
+{
+    return *(const sVec_5400*)&m.row[3];
+}
+
+static inline sVec_5400 ObjPos_5400(char* obj)
+{
+    return *(sVec_5400*)(obj + 0x40);
+}
+
+static inline sLightSet_5400* Resolve_5400(sLightRef_5400* ref)
+{
+    if (ref->magic != 0x123400) {
+        ref->handle = func_0038AC50(D_005047F8, ref);
+        ref->magic = 0x123400;
+    }
+    return func_0038ABF8(D_005047F8, ref->handle);
+}
+
+// Pushes node onto the front of hash chain heads[slot].
+static inline void Link_5400(sNode_5400** heads, int slot, sNode_5400* node)
+{
+    sNode_5400** p = heads + slot;
+    sNode_5400* old = *p;
+    node->prev = 0;
+    node->next = old;
+    if (old != 0) {
+        old->prev = node;
+    }
+    *p = node;
+}
+
+static inline sLightRef_5400* GetRef_5400(char* o, int slot)
+{
+    sVEr_5400* vt = *(sVEr_5400**)(o + 4);
+    return vt[slot].fn(o + vt[slot].delta);
+}
+
+// Finds (or allocates) the cached light set for obj, refreshing it when obj has moved.
+extern "C" sLightSet_5400* func_002F5400(sMan_5400* self, char* obj, int force)
+{
+    unsigned int key = *(unsigned int*)(obj + 0x78);
+    int slot = (key >> 8) & 0x1F;
+    int found = 0;
+    sNode_5400* node;
+    for (node = self->heads[slot]; node != 0; node = node->next) {
+        if (node->id == *(unsigned int*)(obj + 0x78)) {
+            found = 1;
+            break;
+        }
+    }
+    int prio = *(int*)(D_004A5B64 + 0x18);
+    if (!found) {
+        if (self->count < 32) {
+            node = &self->nodes[self->count++];
+        } else {
+            node = func_002F59D0_n(self, prio);
+        }
+        node->id = *(unsigned int*)(obj + 0x78);
+        Link_5400(self->heads, slot, node);
+    }
+    node->priority = prio;
+    int reload = 0;
+    int moved = 0;
+    sVec_5400 pos;
+    if (!found) {
+        reload = 1;
+        moved = 1;
+        if (*(int*)(obj + 0xC) != 0) {
+            sMat_5400 m;
+            func_0034FED8(obj, 0, &m);
+            pos = Trans_5400(m);
+        } else {
+            pos = ObjPos_5400(obj);
+        }
+    } else if (force) {
+        if (*(int*)(obj + 0xC) != 0) {
+            sMat_5400 m;
+            func_0034FED8(obj, 0, &m);
+            pos = Trans_5400(m);
+        } else {
+            pos = ObjPos_5400(obj);
+        }
+        float d = Length_5400(Sub_5400(pos, node->pos));
+        if (10.0f < d) moved = 1;
+        if (500.0f < d) reload = 1;
+    }
+    if (moved) {
+        node->pos = pos;
+        int rebuild = 0;
+        if (node->box == 0 || node->box->id != node->id) {
+            node->box = func_002F5A70(self, node->priority);
+            node->box->id = node->id;
+            rebuild = 1;
+        }
+        node->box->priority = node->priority;
+        if (!rebuild) {
+            sBox_5400* b = node->box;
+            int inside = 0;
+            if (b->bounds.min.x < node->pos.x && node->pos.x < b->bounds.max.x && b->bounds.min.y < node->pos.y && node->pos.y < b->bounds.max.y &&
+                b->bounds.min.z < node->pos.z && node->pos.z < b->bounds.max.z) {
+                inside = 1;
+            }
+            if (!inside) rebuild = 1;
+        }
+        if (rebuild) {
+            float extent = 1000.0f;
+            node->box->bounds = sAABox_5400(Sub_5400(node->pos, sVec_5400(extent, extent, extent, 0.0f)),
+                                            Add_5400(node->pos, sVec_5400(extent, extent, extent, 0.0f)));
+            func_00331450(node->box->cell, &node->box->bounds);
+        }
+        if (reload) {
+            if (D_004A3B64 != 0) {
+                node->target = *func_002EE2F8();
+            } else {
+                char* world = self->world;
+                sVEf_5400* vt = *(sVEf_5400**)(world + 4);
+                vt[2].fn(world + vt[2].delta, node->pos.x, node->pos.y, -99999.0f);
+                sLightRef_5400* ref = GetRef_5400(*(char**)self->world, 40);
+                if (*(signed char*)ref != 0) {
+                    node->target = *Resolve_5400(ref);
+                } else {
+                    ref = GetRef_5400(*(char**)self->world, 37);
+                    if (*(signed char*)ref != 0) {
+                        node->target = *Resolve_5400(ref);
+                    } else {
+                        node->target = *func_0038ABF8(D_005047F8, D_004A43C4);
+                    }
+                }
+            }
+        }
+        node->cur = node->target;
+        func_002F5AF0(self, &node->pos, node->box->cell, &node->cur, 4);
+    }
+    return &node->cur;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F5998);

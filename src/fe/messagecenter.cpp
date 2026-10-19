@@ -1,6 +1,210 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_onWidgetCreate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+void cUIText_setAsciiString(cUIText* self, const char* str);
+extern "C" int USTR_length(unsigned short* s);
+void cMemMan_free(void* p);
+extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, int n);
+extern "C" void func_003A0E90(void* text, void* p);
+// func_00198AF0 formats a money amount; the unit declares its parameter as void*.
+extern "C" const char* func_00198AF0_amount(int amount) __asm__("func_00198AF0");
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char* D_004A28A8;
+extern char D_00460470[];
+extern char D_00460488[];
+extern char D_00460588[];
+extern char D_00460598[];
+extern char D_004605A8[];
+extern char D_004605B8[];
+extern char D_004605C8[];
+extern char D_004605D8[];
+extern char D_004605F0[];
+extern char D_00460600[];
+extern char D_00460610[];
+extern char D_00460620[];
+extern char D_00460630[];
+extern char D_00460640[];
+extern char D_0045DB90[];
+extern char D_004A1408[];
+extern char D_004A18B8[];
+extern char D_004A18C0[];
+extern char D_004A18C8[];
+extern char D_004A18D0[];
+extern char* D_004A18A0;
+extern char* D_004A18A4;
+extern char* D_004411A0[];
+extern char* D_004411C0[];
+extern char* D_00441200[];
+
+struct sVEi_6F98 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sVEs_6F98 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+struct sWidget_6F98 {
+    char pad0[0x8];
+    sVEi_6F98* vt;      // 0x8
+    char padC[0x18 - 0xC];
+    int index;          // 0x18
+    char pad1C[0x38 - 0x1C];
+    int hash;           // 0x38
+};
+
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+struct sReqLine_6F98 {
+    char pad0[0x158];
+    ulong done;                  // 0x158
+    ulong sel;                   // 0x160
+    int count;                   // 0x168
+    int f16C;                    // 0x16C
+    sWidget_6F98* w170;          // 0x170
+    sWidget_6F98* slotA[8];      // 0x174
+    sWidget_6F98* slotB[8];      // 0x194
+    sWidget_6F98* title;         // 0x1B4
+    sWidget_6F98* artist;        // 0x1B8
+    sWidget_6F98* opts[6];       // 0x1BC
+    sWidget_6F98* w1D4;          // 0x1D4
+    sWidget_6F98* w1D8;          // 0x1D8
+    sWidget_6F98* w1DC;          // 0x1DC
+    sWidget_6F98* w1E0;          // 0x1E0
+    sWidget_6F98* w1E4;          // 0x1E4
+    sWidget_6F98* text;          // 0x1E8
+    sWidget_6F98* w1EC;          // 0x1EC
+    sWidget_6F98* w1F0;          // 0x1F0
+    sWidget_6F98* w1F4;          // 0x1F4
+    sWidget_6F98* w1F8;          // 0x1F8
+    sWidget_6F98* w1FC;          // 0x1FC
+    sWidget_6F98* w200;          // 0x200
+};
+
+static inline void show_6F98(sWidget_6F98* w, int on)
+{
+    w->vt[9].fn((char*)w + w->vt[9].delta, on);
+}
+
+static inline int countBits_6F98(ulong v)
+{
+    int n = 0;
+    for (int i = 0; i < 64; i++) {
+        n += (v >> i) & 1;
+    }
+    return n;
+}
+
+extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, sWidget_6F98* w)
+{
+    int hash = w->hash;
+    if (hash == GetHashValue32(D_00460588)) {
+        self->title = w;
+        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+    } else if (hash == GetHashValue32(D_00460598)) {
+        self->artist = w;
+        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+    } else if (hash == GetHashValue32(D_00460488)) {
+        self->text = w;
+    } else if (hash == GetHashValue32(D_004A18B8)) {
+        self->w1EC = w;
+    } else if (hash == GetHashValue32(D_004605A8)) {
+        self->w1F0 = w;
+    } else if (hash == GetHashValue32(D_004605B8)) {
+        show_6F98(w, 0);
+    } else if (hash == GetHashValue32(D_004605C8)) {
+        char* db = *(char**)(D_004A28A8 + 0x8C);
+        sVEs_6F98* vt = *(sVEs_6F98**)(db + 4);
+        unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_004605D8));
+        int len = USTR_length(fmt) + 5;
+        unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, D_00460470, 0x100, 0);
+        func_002C26D0(buf, fmt, countBits_6F98(self->done));
+        self->w1E4 = w;
+        func_003A0E90(w, buf);
+        if (buf != 0) {
+            cMemMan_free(buf);
+        }
+    } else if (hash == GetHashValue32(D_004A18C0)) {
+        show_6F98(w, 0);
+    } else if (hash == GetHashValue32(D_004A18C8)) {
+        self->w1D4 = w;
+        show_6F98(w, 0);
+    } else if (hash == GetHashValue32(D_004A18D0)) {
+        if (self->f16C == 0) {
+            show_6F98(w, 0);
+        }
+        self->w1DC = w;
+    } else if (hash == GetHashValue32(D_004605F0)) {
+        self->w1D8 = w;
+        cUIText_setAsciiString((cUIText*)w, D_004A1408);
+        if (self->f16C == 0) {
+            show_6F98(w, 0);
+        }
+    } else if (hash == GetHashValue32(D_00460600)) {
+        if (self->f16C == 0) {
+            show_6F98(w, 0);
+        }
+    } else if (hash == GetHashValue32(D_00460610)) {
+        self->w1E0 = w;
+        cUIText_setAsciiString((cUIText*)self->w1E0, func_00198AF0_amount(self->count));
+        if (self->f16C == 0) {
+            show_6F98(w, 0);
+        }
+    } else if (hash == GetHashValue32(D_00460620)) {
+        if (self->f16C == 0 || countBits_6F98(self->sel) >= 6) {
+            show_6F98(w, 0);
+        }
+    } else if (hash == GetHashValue32(D_0045DB90)) {
+        self->w170 = w;
+    } else if (hash == GetHashValue32(D_00460630)) {
+        self->w1F4 = w;
+        show_6F98(w, 0);
+    } else if (hash == GetHashValue32(D_00460640)) {
+        self->w1FC = w;
+        show_6F98(w, 1);
+    } else if (hash == GetHashValue32(D_004A18A0)) {
+        self->w1F8 = w;
+        show_6F98(self->w1F4, 0);
+    } else if (hash == GetHashValue32(D_004A18A4)) {
+        self->w200 = w;
+        show_6F98(w, 1);
+    } else {
+        int i;
+        for (i = 0; i < 8; i++) {
+            if (hash == GetHashValue32(D_004411A0[i])) {
+                self->slotA[i] = w;
+                show_6F98(w, 0);
+                break;
+            }
+            if (hash == GetHashValue32(D_004411C0[i])) {
+                self->slotB[i] = w;
+                show_6F98(w, 0);
+                break;
+            }
+        }
+        if (i < 8) {
+            w->index = i;
+            return;
+        }
+        for (i = 0; i < 6; i++) {
+            if (hash == GetHashValue32(D_00441200[i])) {
+                self->opts[i] = w;
+                if (self->f16C != 0 && 6 - i > countBits_6F98(self->sel)) {
+                    show_6F98(w, 1);
+                } else {
+                    show_6F98(w, 0);
+                }
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/messagecenter", func_00197500);
