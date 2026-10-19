@@ -2067,7 +2067,43 @@ extern "C" long long *func_00140958(long long *arg0, void *arg1) {
     return arg0;
 }
 #endif
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140968);
+#ifdef SKIP_ASM
+#include "bx/math3d.h"
+extern "C" float func_0031C228(float);
+
+static inline t4Vector getVec_0968(void* self) {
+    return *(t4Vector*)((char*)self + 0x1B0);
+}
+
+static inline float atan2_0968(float y, float x) {
+    float a;
+
+    if (x == 0.0f) {
+        if (y == 0.0f) {
+            return y;
+        }
+        if (y >= 0.0f) {
+            return 1.5707963705062866f;
+        }
+        return -1.5707963705062866f;
+    }
+    a = func_0031C228(y / x);
+    if (x < 0.0f) {
+        if (y > 0.0f) {
+            a += 3.1415927410125732f;
+        } else {
+            a -= 3.1415927410125732f;
+        }
+    }
+    return a;
+}
+
+extern "C" float func_00140968(void* self) {
+    return atan2_0968(getVec_0968(self).y, getVec_0968(self).x);
+}
+#endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A28);
 #ifdef SKIP_ASM

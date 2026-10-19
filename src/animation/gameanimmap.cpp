@@ -57,7 +57,29 @@ extern "C" void func_003158E0(void *arg0, float fparg0) {
     (*(float *)((char*)(arg0) + (0x1C))) = fparg0;
 }
 #endif
+//100%
 INCLUDE_ASM("animation/gameanimmap", func_003158E8);
+#ifdef SKIP_ASM
+#include "bx/math3d.h"
+extern "C" void func_0031BE50(float *, float *, float);
+extern t4Vector D_004FF130;
+extern t4Vector D_004FF160;
+
+extern "C" void func_003158E8(void *self, float angle) {
+    t4Vector q;
+    float s;
+    float c;
+    const t4Vector* axis = &D_004FF160;
+
+    *(t4Vector *)((char*)self + 0x30) = D_004FF130;
+    func_0031BE50(&s, &c, -angle * 0.5f);
+    q.w = c;
+    q.x = s * axis->x;
+    q.y = s * axis->y;
+    q.z = s * axis->z;
+    *(t4Vector *)((char*)self + 0x40) = q;
+}
+#endif
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_00315988);
 #ifdef SKIP_ASM

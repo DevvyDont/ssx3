@@ -28,7 +28,29 @@ extern "C" void cConsoleConfig_setTimeString(void* self, char* dst, int size, in
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/statemachine", func_002C7038);
+#ifdef SKIP_ASM
+extern char D_00486540[];
+extern char D_00486550[];
+
+extern "C" void func_002C7038(void* self, char* dst, int size, int a, int b, int c, int mode)
+{
+    char buf[0x40];
+    switch (mode) {
+    case 0:
+        func_002C27C0(buf, D_00486540, c, b, a);
+        break;
+    case 1:
+        func_002C27C0(buf, D_00486550, b, a, c);
+        break;
+    case 2:
+        func_002C27C0(buf, D_00486550, a, b, c);
+        break;
+    }
+    func_002C25B8(dst, buf, size);
+}
+#endif
 //100%
 INCLUDE_ASM("util/statemachine", func_002C7100);
 #ifdef SKIP_ASM
@@ -103,8 +125,47 @@ extern "C" void func_002C7260(int self, int *day, int *month, int *year, int cou
     }
 }
 #endif
+//100%
 INCLUDE_ASM("util/statemachine", func_002C7328);
+#ifdef SKIP_ASM
+extern "C" int func_002C7328(void* self, int* sec, int* min, int* hour, int add) {
+    int total;
+    int rem;
+    int q;
+
+    total = *hour * 0xE10 + *min * 0x3C + *sec + add;
+    q = total / 86400;
+    rem = total % 86400;
+    *hour = (rem / 3600) % 24;
+    *min = (rem / 60) % 60;
+    *sec = rem % 60;
+    return q;
+}
+#endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/statemachine", func_002C73C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_002C7328_v(void*, int*, int*, int*, int) __asm__("func_002C7328");
+extern "C" void func_002C7260_v(void*, int*, int*, int*, int) __asm__("func_002C7260");
+extern char* D_004A28A8;
+
+extern "C" void func_002C73C0(void* self) {
+    int rem;
+    int now;
+    int ticks;
+
+    now = *(int*)(D_004A28A8 + 0x18);
+    ticks = (now - *(int*)((char*)self + 0x20)) / *(int*)(D_004A28A8 + 0x10);
+    if (ticks != 0) {
+        *(int*)((char*)self + 0x20) = now;
+        rem = func_002C7328_v(self, (int*)((char*)self + 0x10), (int*)((char*)self + 0xC), (int*)((char*)self + 8), ticks);
+        if (rem != 0) {
+            func_002C7260_v(self, (int*)((char*)self + 0x1C), (int*)((char*)self + 0x18), (int*)((char*)self + 0x14), rem);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/statemachine", func_002C7440);

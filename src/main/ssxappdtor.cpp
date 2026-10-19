@@ -1502,7 +1502,25 @@ void func_00244880(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244888);
+#ifdef SKIP_ASM
+extern "C" void func_0022E8B8(int);
+extern "C" int func_0022E920(int);
+
+extern "C" int func_00244888(void *self) {
+    func_0022E8B8(*(int *)((char*)self + 0x84));
+    if (*(int *)((char*)self + 0x9C) != 0) {
+        return 0;
+    }
+    if (func_0022E920(*(int *)((char*)self + 0x84)) == 0) {
+        *(int *)((char*)self + 0x9C) = 1;
+        *(int *)((char*)self + 0xA0) = 1;
+        return 0;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002448E0);
@@ -1600,7 +1618,50 @@ extern "C" void func_00244A38(void) {
 
 }
 #endif
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_00244A40);
+#ifdef SKIP_ASM
+extern "C" void cGameViewMan_updateAll(int);
+extern "C" void func_0022D8D8(void *);
+extern "C" void func_0022E8B8(int);
+extern "C" int func_0022E920(int);
+extern "C" void func_00230F40(void *);
+void func_003A6928(void *);
+extern "C" void func_003A88A8(void *);
+extern void *D_004A289C;
+
+extern "C" int func_00244A40(void *self) {
+    void *vtbl;
+
+    if ((func_0022E920(*(int *)((char*)self + 0x84)) == 0) || (*(int *)(*(char **)((char*)self + 0x78) + 0x1D0) == 0)) {
+        *(int *)(**(char ***)((char*)self + 0x10) + 0x3D4) = 0;
+        func_003A6928(*(void **)((char*)self + 0x10));
+        cGameViewMan_updateAll(*(int *)((char*)self + 0x84));
+        if (*(int *)(*(char **)((char*)self + 0x78) + 0x1D0) == 0) {
+            func_00230F40(self);
+            func_0022D8D8(*(void **)((char*)self + 0x78));
+        }
+        if ((*(int *)((char*)self + 0x9C) == 0) && (func_0022E920(*(int *)((char*)self + 0x84)) == 0)) {
+            *(int *)((char*)self + 0xA0) = 1;
+        }
+        *(int *)((char*)self + 0x9C) = 1;
+        if (*(int *)((char*)self + 0xA0) != 0) {
+            vtbl = *(void **)((char*)D_004A289C + 0x10D8);
+            (*(void (**)(void *))((char*)vtbl + 0x9C))((char*)D_004A289C + *(short *)((char*)vtbl + 0x98));
+            func_0022E8B8(*(int *)((char*)self + 0x84));
+            func_003A88A8(**(void ***)((char*)self + 0x10));
+            *(int *)((char*)self + 0xA0) = 0;
+        }
+        return 0;
+    }
+    *(int *)(**(char ***)((char*)self + 0x10) + 0x3D4) = 1;
+    *(int *)((char*)self + 0x9C) = 0;
+    *(int *)((char*)self + 0xA0) = 0;
+    func_003A6928(*(void **)((char*)self + 0x10));
+    func_0022D8D8(*(void **)((char*)self + 0x78));
+    return 1;
+}
+#endif
 INCLUDE_ASM("main/ssxappdtor", func_00244B48);
 INCLUDE_ASM("main/ssxappdtor", func_00244E60);
 //100%
@@ -1628,7 +1689,25 @@ extern "C" void func_00245140(void) {
 }
 #endif
 INCLUDE_ASM("main/ssxappdtor", func_00245168);
+//100%
 INCLUDE_ASM("main/ssxappdtor", func_002451B0);
+#ifdef SKIP_ASM
+extern "C" void func_002451B0(void *self) {
+    int i;
+    char *obj;
+    char *vtbl;
+
+    i = 0;
+    if (*(int *)(*(char **)((char*)self + 0xC) + 0x78) > 0) {
+        do {
+            obj = *(char **)(*(char **)((char*)self + 0xC) + (i << 2) + 0x28);
+            i++;
+            vtbl = *(char **)(obj + 0x6C0);
+            (*(void (**)(void *))(vtbl + 0x9C))(obj + *(short *)(vtbl + 0x98));
+        } while (i < *(int *)(*(char **)((char*)self + 0xC) + 0x78));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00245228__FPv);

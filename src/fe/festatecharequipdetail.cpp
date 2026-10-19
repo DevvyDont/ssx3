@@ -846,7 +846,24 @@ extern "C" int func_0019A098(void* self, const char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A1E0);
+#ifdef SKIP_ASM
+struct sEquipTable;
+extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
+extern "C" void func_0019A9B8(void* self);
+extern void* D_004A28A8;
+
+extern "C" void func_0019A1E0(void* self)
+{
+    if (*(int*)((char*)self + 0xA60) == 0
+        && func_0019E238((sEquipTable*)(*(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70), *(int*)((char*)self + 0xBC),
+                         *(int*)((char*)self + 0xA64))) {
+        *(int*)((char*)self + 0xA60) = 1;
+        func_0019A9B8(self);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A238);

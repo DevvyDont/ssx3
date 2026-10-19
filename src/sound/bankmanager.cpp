@@ -68,7 +68,32 @@ extern "C" void func_0028B650(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028B6C8);
+#ifdef SKIP_ASM
+extern "C" void func_0028B6C8(void *dst, void *src) {
+    int flag;
+
+    if (*(void **)((char*)src + 0x18) != 0) {
+        *(void **)((char*)dst + 0x18) = src;
+        *(void **)((char*)dst + 0x1C) = *(void **)((char*)src + 0x1C);
+        *(void **)((char*)src + 0x1C) = dst;
+        *(void **)((char*)*(void **)((char*)dst + 0x1C) + 0x18) = dst;
+    } else {
+        *(void **)((char*)src + 0x18) = dst;
+        *(void **)((char*)src + 0x1C) = dst;
+        *(void **)((char*)dst + 0x18) = src;
+        *(void **)((char*)dst + 0x1C) = src;
+    }
+    flag = *(int *)((char*)src + 8);
+    if (flag != 0) {
+        *(int *)((char*)dst + 8) = flag;
+        *(int *)((char*)dst + 0x10) = *(int *)((char*)src + 0x10);
+        *(int *)((char*)dst + 0x14) = *(int *)((char*)src + 0x14);
+        *(int *)((char*)dst + 0xC) = *(int *)((char*)src + 0xC);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028B730);
@@ -1366,7 +1391,30 @@ extern "C" int func_0028DF18(void* self, int quiet)
 #endif
 
 INCLUDE_ASM("sound/bankmanager", func_0028E068);
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028E088);
+#ifdef SKIP_ASM
+extern "C" int func_002B2550(int);
+
+extern "C" int func_0028E088(char *self, char *arg) {
+    int obj;
+    int t;
+
+    obj = *(int *)(self + 0x520);
+    if (obj == 0 || func_002B2550(obj) == -1) {
+        *(int *)(self + 0x6274) = 1;
+        *(int *)(self + 0x6278) = *(int *)(arg + 0x1C);
+        return 1;
+    }
+    t = *(int *)(arg + 0x20);
+    if (t == 1) {
+        *(int *)(self + 0x6274) = t;
+        *(int *)(self + 0x6278) = *(int *)(arg + 0x1C);
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028E100);

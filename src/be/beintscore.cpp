@@ -549,7 +549,27 @@ extern "C" bool func_001557E0(void* self, int rider)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintscore", func_00155848);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
+extern signed char D_005305F9[];
+
+extern "C" int func_00155848(void* self, int rider, int a, int b)
+{
+    if (D_005305F9[0] != 0)
+        return 0;
+    int profile = cBELibrary_getProfileIndex(rider);
+    if ((unsigned int)profile >= 3)
+        return 0;
+    int c = cBELibrary_getCharacterID(rider);
+    unsigned short* stats = (unsigned short*)cBECharProfileDB_getScoreStats(D_004A6CA8 + profile * 0x9b50 + c * 0xf88, a, b);
+    if (stats == 0)
+        return 0;
+    return stats[1];
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintscore", func_001558F8);
@@ -576,4 +596,21 @@ extern "C" int func_001558F8(void* self, int rider, int a, int b)
 #endif
 
 
+//100%
 INCLUDE_ASM("be/beintscore", func_001559A8);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+extern "C" void func_00152528(void* iface, int a, int b, int c);
+extern signed char D_005305F9[];
+
+extern "C" void func_001559A8(void* self, int rider, int a, int b, int c)
+{
+    if (D_005305F9[0] != 0)
+        return;
+    int profile = cBELibrary_getProfileIndex(rider);
+    if ((unsigned int)profile >= 3)
+        return;
+    int ch = cBELibrary_getCharacterID(rider);
+    func_00152528(D_004A6CA8 + profile * 0x9b50 + ch * 0xf88, a, b, c);
+}
+#endif
