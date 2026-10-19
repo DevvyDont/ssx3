@@ -223,7 +223,11 @@ struct cRider {
     /* 0x8A0 */ int unk_8A0; // same array
     /* 0x8A4 */ char unk_8A4[0x4];
     /* 0x8A8 */ int unk_8A8; // bone index into mAnimModel+0x30 (0x40-byte matrices, row 3 = position) (func_002E3AF8, func_002D5048)
-    /* 0x8AC */ char unk_8AC[0x3C];
+    /* 0x8AC */ char unk_8AC[0x14];
+    /* 0x8C0 */ long unk_8C0; // 64-bit (PORT: long is 64-bit on the EE); copied to mRiderAnim+0x20 before each cRiderAnimBase_play, then reset to -1 (func_001163B0, func_00115D48)
+    /* 0x8C8 */ char unk_8C8[0x8];
+    /* 0x8D0 */ long unk_8D0; // 64-bit; same use for the wide-glance anims (func_00115D48)
+    /* 0x8D8 */ char unk_8D8[0x10];
     /* 0x8E8 */ int unk_8E8; // bone index (func_00122898)
     /* 0x8EC */ char unk_8EC[0x2C];
     /* 0x918 */ int unk_918; // bone index (func_00122898)
@@ -388,6 +392,8 @@ CHECK_OFFSET(cRider, mLOD, 0x898);
 CHECK_OFFSET(cRider, unk_89C, 0x89C);
 CHECK_OFFSET(cRider, unk_8A0, 0x8A0);
 CHECK_OFFSET(cRider, unk_8A8, 0x8A8);
+CHECK_OFFSET(cRider, unk_8C0, 0x8C0);
+CHECK_OFFSET(cRider, unk_8D0, 0x8D0);
 CHECK_OFFSET(cRider, unk_8E8, 0x8E8);
 CHECK_OFFSET(cRider, unk_918, 0x918);
 CHECK_OFFSET(cRider, unk_9D0, 0x9D0);
