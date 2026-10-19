@@ -2907,7 +2907,55 @@ extern "C" float func_003955A8(void *arg0) {
     return (*(float *)((char*)(arg0) + (0x59FC)));
 }
 #endif
+//100%
 INCLUDE_ASM("render/font", func_003955B0);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct sRS_55B0 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short pad;
+};
+struct sEnt_55B0 {
+    sRS_55B0 rs;                    // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+struct sRing_55B0 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sEnt_55B0 ents[1];              // 0x80
+};
+struct sGfx_55B0 {
+    char pad_0x0[0xE84];
+    sRS_55B0* top;                  // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sRing_55B0* ring;               // 0x18F0
+};
+
+// Queues a draw entry with the current render state in the uncached ring.
+extern "C" void func_003955B0(sGfx_55B0* gfx, unsigned int buf, unsigned int next, int flag)
+{
+    sRS_55B0* rs = gfx->top;
+    sRing_55B0* ring = gfx->ring;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sEnt_55B0* e = (sEnt_55B0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = flag;
+    }
+}
+#endif
 //100%
 INCLUDE_ASM("render/font", func_00395658);
 #ifdef SKIP_ASM

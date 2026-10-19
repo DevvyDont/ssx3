@@ -1496,7 +1496,36 @@ extern "C" sWScriptEntry_3AF230* func_003AF230(sWScriptArray_3AF230* self, unsig
     return &self->items[i];
 }
 #endif
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AF258);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" void* func_003AF258_impl(void* self, unsigned int key) __asm__("func_003AF258");
+extern "C" void* func_003AF258_impl(void* self, unsigned int key)
+{
+    struct S { char* arr; int n; };
+    S* s = (S*)self;
+    if (s->n == 0) {
+        return 0;
+    }
+    int hi = s->n;
+    char* arr = s->arr;
+    int lo = -1;
+    while (hi - lo >= 2) {
+        int mid = (hi + lo) / 2;
+        if (key <= *(unsigned int*)(arr + mid * 0x34 + 0x14)) {
+            hi = mid;
+        } else {
+            lo = mid;
+        }
+    }
+    int i = hi - 1;
+    if (i < 0) i = 0;
+    i = (i < s->n - 1) ? i : s->n - 1;
+    return arr + i * 0x34;
+}
+#endif
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AF2F8);
 #ifdef SKIP_ASM
@@ -1504,7 +1533,21 @@ extern "C" int func_003AF2F8(void *arg0) {
     return (*(int *)((char*)(arg0) + (4)));
 }
 #endif
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AF300);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern unsigned char D_00499C81[];
+extern "C" void func_003AF300(char** pp, unsigned int* plen)
+{
+    unsigned int i;
+    char* p = *pp;
+    for (i = 0; i < *plen && ((D_00499C81 + p[i])[0] & 8) != 0; i++) {
+    }
+    *pp = p + i;
+    *plen -= i;
+}
+#endif
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AF378);
 #ifdef SKIP_ASM
