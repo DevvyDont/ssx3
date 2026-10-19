@@ -1063,7 +1063,47 @@ void func_003D7C38(unsigned int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D7D58);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct P_7D58 { char pad[9]; signed char b9; unsigned char ba; };
+struct R_7D58 { unsigned int f0; unsigned short h; unsigned char c; unsigned char d; short s8; short next; struct P_7D58 *p; int arr[20]; };
+struct G_7D58 { int z[8]; int a[8]; int b[8]; int n; struct R_7D58 r[16]; };
+extern struct G_7D58 D_0044FFF8_7D58 __asm__("D_0044FFF8");
+void func_003D7C38(unsigned int);
+
+void func_003D7D58(int idx) {
+    int i;
+    unsigned int f;
+    unsigned short g;
+    int d;
+    unsigned int f0;
+    unsigned short h;
+    f0 = D_0044FFF8_7D58.r[idx].f0;
+    d = D_0044FFF8_7D58.r[idx].d;
+    h = D_0044FFF8_7D58.r[idx].h;
+    D_0044FFF8_7D58.n = 0;
+    for (i = 0; i < 16; i++) {
+        if (i == idx) {
+            continue;
+        }
+        if (D_0044FFF8_7D58.r[i].c == 0 || D_0044FFF8_7D58.r[i].d != d || D_0044FFF8_7D58.r[i].s8 != 0) {
+            continue;
+        }
+        f = D_0044FFF8_7D58.r[i].f0;
+        g = D_0044FFF8_7D58.r[i].h;
+        if (f < f0 || (f == f0 && g < h)) {
+            if (((D_0044FFF8_7D58.r[i].p->ba >> 2) & 1) == 0) {
+                func_003D7C38(i);
+            }
+        } else if (D_0044FFF8_7D58.r[i].p->b9 == 100 && D_0044FFF8_7D58.r[i].d == d) {
+            D_0044FFF8_7D58.n = 1;
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2D7498", func_003D7EC8);
@@ -2555,7 +2595,78 @@ unsigned int func_003DB4D0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DB5C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+typedef struct { unsigned short val; unsigned short key; } Hist_B5C0;
+extern Hist_B5C0 D_00450B88_B5C0[] __asm__("D_00450B88");
+extern int D_004A4858;
+extern unsigned int func_003DB4D0(void);
+
+int func_003DB5C0(int range, int key) {
+    int half = range / 2;
+    int tries = 0;
+    int done = 0;
+    int r;
+    int v;
+    int best = -1;
+    int n;
+    int idx;
+    int found;
+    int i;
+    int k;
+    int stop;
+    int kk;
+
+    if (half >= 11) half = 10;
+    r = (func_003DB4D0() >> 16) * range >> 16;
+    if (key == -1) return r;
+    kk = key & 0xFFFF;
+    do {
+        v = (func_003DB4D0() >> 16) * range >> 16;
+        n = half;
+        if (n > 32) n = 32;
+        idx = D_004A4858;
+        found = -1;
+        i = 0;
+        k = 0;
+        stop = 0;
+        do {
+            if (i < n) {
+                if (D_00450B88_B5C0[idx].key == kk) {
+                    i++;
+                    if (D_00450B88_B5C0[idx].val == v) {
+                        stop = 1;
+                        found = i - 1;
+                    }
+                }
+            } else {
+                stop = 1;
+            }
+            idx--;
+            k++;
+            if (idx < 0) idx += 32;
+            if (k >= 33) stop = 1;
+        } while (!stop);
+        if (found == -1) {
+            r = v;
+            done = 1;
+        } else if (found > best) {
+            best = found;
+            r = v;
+        }
+        tries++;
+        if (tries >= 32) done = 1;
+    } while (!done);
+    D_004A4858++;
+    if (D_004A4858 >= 32) D_004A4858 = 0;
+    D_00450B88_B5C0[D_004A4858].val = r;
+    D_00450B88_B5C0[D_004A4858].key = kk;
+    return v;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DB790);
