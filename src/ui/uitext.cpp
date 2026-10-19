@@ -815,7 +815,27 @@ extern "C" void cUITextScroll_addUnicodeString(void* self, unsigned short* str)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uitext", func_003A1C80);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+typedef void (*fnUT1C80)(char*, int);
+
+struct sUTVEntry1C80 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+extern "C" void func_003A1C80(void* self, char* str)
+{
+    func_003A18C0_1(self);
+    *(int*)((char*)self + 0xC0) = 0;
+    (*(sUTVEntry1C80**)((char*)self + 8))[5].fn((char*)self + (*(sUTVEntry1C80**)((char*)self + 8))[5].delta, 1);
+    (*(sUTVEntry1C80**)((char*)self + 8))[24].fn((char*)self + (*(sUTVEntry1C80**)((char*)self + 8))[24].delta, 0);
+    func_003A19F8(self, str);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uitext", func_003A1CF0);

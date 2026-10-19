@@ -253,7 +253,132 @@ extern "C" void func_002F5B68(void* a, void* b, void* mgrp, void** outp, int max
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F5D30);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" float func_002F5D30(void* a, void* b, void* light);
+
+struct func_002F6168_sVec3;
+struct func_002F6168_sLight;
+extern "C" int func_002F6168(void* self, func_002F6168_sVec3* p, func_002F6168_sLight* light,
+                             float* outDist, float* outInvDist, float* outDot);
+
+struct sLight_5D30 {
+    char pad0[0x10];
+    int type;               // 0x10
+    float intensity;        // 0x14
+    float scale;            // 0x18
+    float radius;           // 0x1C
+    char pad20[0x5C - 0x20];
+    float inner;            // 0x5C
+    float outer;            // 0x60
+    signed char fallPow;    // 0x64
+    signed char conePow;    // 0x65
+};
+
+static inline float Atten_5D30(sLight_5D30* l, float dist)
+{
+    if (l->radius < 5000.0f || dist <= 3750.0f) {
+        return 1.0f;
+    }
+    return 1.0f - (dist - 3750.0f) * 0.0008f;
+}
+
+static inline float Fall_5D30(sLight_5D30* l, float inv)
+{
+    int p = l->fallPow;
+    float s = inv * 100.0f;
+    if (s < 1.0f) {
+        switch (p) {
+        case 1:
+            return s;
+        case 2:
+            return s * s;
+        case 3:
+            return s * s * s;
+        }
+    }
+    return 1.0f;
+}
+
+static inline float PowN_5D30(float x, int n)
+{
+    if (x == 0.0f) {
+        return 0.0f;
+    }
+    if (n < 0) {
+        x = 1.0f / x;
+        n = -n;
+    }
+    float r = 1.0f;
+    while (n) {
+        if (n & 1) {
+            r *= x;
+        }
+        n >>= 1;
+        x *= x;
+    }
+    return r;
+}
+
+static inline float Pow_5D30(float x, int n)
+{
+    switch (n) {
+    case 0:
+        return 1.0f;
+    case 1:
+        return x;
+    case 2:
+        return x * x;
+    case 3:
+        return x * x * x;
+    case 4:
+        return x * x * x * x;
+    default:
+        return PowN_5D30(x, n);
+    }
+}
+
+extern "C" float func_002F5D30(void* a, void* b, void* lp)
+{
+    sLight_5D30* l = (sLight_5D30*)lp;
+    float dist;
+    float inv;
+    float dot;
+    float att;
+    float v;
+    switch (l->type) {
+    case 0:
+        return l->scale;
+    case 1:
+        if (func_002F6168(a, (func_002F6168_sVec3*)b, (func_002F6168_sLight*)l, &dist, &inv, &dot)) {
+            if (dot >= l->outer) {
+                att = Atten_5D30(l, dist);
+                v = Fall_5D30(l, inv) * l->intensity * att;
+                if (l->inner <= dot) {
+                    v *= Pow_5D30(dot, l->conePow);
+                } else {
+                    v *= Pow_5D30(l->inner, l->conePow);
+                    v *= (dot - l->outer) / (l->inner - l->outer);
+                }
+                return l->scale * v;
+            }
+        }
+        break;
+    case 2:
+        if (func_002F6168(a, (func_002F6168_sVec3*)b, (func_002F6168_sLight*)l, &dist, &inv, 0)) {
+            att = Atten_5D30(l, dist);
+            v = Fall_5D30(l, inv) * l->intensity * att;
+            return l->scale * v;
+        }
+        break;
+    case 3:
+        return 0.0f;
+    }
+    return 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6168);

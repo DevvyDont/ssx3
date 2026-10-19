@@ -1597,7 +1597,29 @@ extern "C" void func_0017F868(sDebugFE_17F868* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017FA60);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" void func_00369FF8(void* p);
+extern int D_004A4324;
+struct sVec3K17FA60 {
+    int x, y, z;
+    sVec3K17FA60() { x = 0; y = 0; z = 0; }
+};
+typedef void (*tFn_17FA60)(void*, const sVec3K17FA60&);
+
+extern "C" void func_0017FA60(void* self)
+{
+    char* m;
+    char* vt;
+    func_00369FF8(D_004A289C);
+    D_004A4324 = 0;
+    m = D_004A289C;
+    vt = *(char**)(m + 0x10D8);
+    ((tFn_17FA60)*(void**)(vt + 0x7C))(m + *(short*)(vt + 0x78), sVec3K17FA60());
+}
+#endif
 
 extern "C" void* func_00231CF0(void* self);
 
@@ -2297,7 +2319,27 @@ extern "C" int func_001807C8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_001807D8);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct sStarsK1807D8 {
+    char pad_0x000[0xEC];
+    char name[0x40];    // 0xEC
+    char stars[0x40];   // 0x12C
+};
+
+extern "C" char* func_001807D8(sStarsK1807D8* self)
+{
+    int n = strlen(self->name);
+    int i;
+    for (i = 0; i < n; i++) {
+        self->stars[i] = '*';
+    }
+    self->stars[n] = 0;
+    return self->stars;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_00180840);

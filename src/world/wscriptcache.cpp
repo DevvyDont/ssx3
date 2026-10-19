@@ -1505,7 +1505,29 @@ extern "C" int func_003AF2F8(void *arg0) {
 }
 #endif
 INCLUDE_ASM("world/wscriptcache", func_003AF300);
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AF378);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern unsigned char D_00499C81[];
+
+static inline int to_lower_3AF378(int c) { if (D_00499C81[c] & 1) return c + 0x20; return c; }
+extern "C" int func_003AF378(const char* a, const char* b)
+{
+    int i;
+    int r;
+    r = 0;
+    i = 0;
+    while (a[i] != 0 && b[i] != 0) {
+        r += to_lower_3AF378(a[i]) - to_lower_3AF378(b[i]);
+        if (r != 0) {
+            return r;
+        }
+        i++;
+    }
+    return a[i] - b[i];
+}
+#endif
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/wscriptcache", func_003AF428);
 #ifdef SKIP_ASM
@@ -1578,7 +1600,40 @@ extern "C" int func_003AF560(unsigned char **pp, unsigned int *plen, int *out) {
     return 1;
 }
 #endif
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/wscriptcache", func_003AF670);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" void func_003AF300(char** pp, unsigned int* plen);
+extern "C" void func_003AF670(char** ps, unsigned int* plen, char** words, unsigned int* lens, unsigned int nwords, unsigned int* outIdx)
+{
+    char* s = *ps;
+    if (s == 0) {
+        *ps = 0;
+        *plen = 0;
+        *outIdx = 0xFFFFFFFF;
+        return;
+    }
+    func_003AF300(&s, plen);
+    for (unsigned int i = 0; i < *plen; i++) {
+        for (unsigned int k = 0; k < nwords; k++) {
+            unsigned int j;
+            for (j = 0; j < lens[k] && i + j < *plen && words[k][j] == s[i + j]; j++) {
+            }
+            if (j == lens[k]) {
+                unsigned int t = i + j;
+                *ps = s + t;
+                *plen -= t;
+                *outIdx = k;
+                return;
+            }
+        }
+    }
+    *ps = 0;
+    *plen = 0;
+    *outIdx = 0xFFFFFFFF;
+}
+#endif
 INCLUDE_ASM("world/wscriptcache", func_003AF7F0);
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B0340);

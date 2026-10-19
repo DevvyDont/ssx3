@@ -473,5 +473,83 @@ int func_00150540(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintbagt", func_00150558);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct sBagtSlot0558 {
+    unsigned char a;
+    unsigned char b;
+    unsigned short c;
+    unsigned short d;
+};
+struct sBagtDef0558 {
+    int pad_0x00[3];
+    unsigned short count;
+    unsigned short pad_0x0E;
+    int pad_0x10;
+};
+extern const sBagtDef0558 D_0045AEB8_bagt[] __asm__("D_0045AEB8");
+extern "C" void func_003E6448(void*, int, int);
+
+extern "C" void func_00150558(int mode, sBagtSlot0558* e)
+{
+    int i;
+    func_003E6448(e, 0, 0x5A);
+    switch (mode) {
+    case 0:
+        e[0].a = 1; e[0].b = 3; e[1].a = 0; e[1].b = 2; e[2].a = 0; e[2].b = 2;
+        e[3].a = 1; e[3].b = 2; e[4].a = 0; e[4].b = 7; e[9].a = 1; e[9].b = 3;
+        break;
+    case 1:
+        e[0].a = 0; e[0].b = 2; e[1].a = 0; e[1].b = 2; e[2].a = 1; e[2].b = 3;
+        e[3].a = 0; e[3].b = 3; e[4].a = 1; e[4].b = 2; e[9].a = 0; e[9].b = 9;
+        break;
+    case 2:
+        e[0].a = 1; e[0].b = 3; e[1].a = 1; e[1].b = 3; e[2].a = 0; e[2].b = 2;
+        e[3].a = 0; e[3].b = 2; e[4].a = 0; e[4].b = 8; e[9].a = 1; e[9].b = 3;
+        break;
+    case 3:
+        e[0].a = 1; e[0].b = 2; e[1].a = 0; e[1].b = 3; e[2].a = 0; e[2].b = 3;
+        e[3].a = 1; e[3].b = 2; e[4].a = 0; e[4].b = 2; e[9].a = 1; e[9].b = 6;
+        break;
+    case 4:
+        e[0].a = 1; e[0].b = 3; e[1].a = 1; e[1].b = 2; e[2].a = 0; e[2].b = 2;
+        e[3].a = 1; e[3].b = 2; e[4].a = 1; e[4].b = 10; e[9].a = 1; e[9].b = 3;
+        break;
+    case 5:
+        e[0].a = 0; e[0].b = 2; e[1].a = 0; e[1].b = 3; e[2].a = 0; e[2].b = 2;
+        e[3].a = 0; e[3].b = 2; e[4].a = 0; e[4].b = 3; e[9].a = 1; e[9].b = 7;
+        break;
+    case 6:
+        e[0].a = 0; e[0].b = 2; e[1].a = 0; e[1].b = 2; e[2].a = 1; e[2].b = 3;
+        e[3].a = 0; e[3].b = 3; e[4].a = 1; e[4].b = 2; e[9].a = 0; e[9].b = 8;
+        break;
+    case 7:
+        e[0].a = 1; e[0].b = 3; e[1].a = 1; e[1].b = 2; e[2].a = 0; e[2].b = 2;
+        e[3].a = 1; e[3].b = 3; e[4].a = 0; e[4].b = 9; e[9].a = 0; e[9].b = 2;
+        break;
+    case 8:
+        e[0].a = 1; e[0].b = 3; e[1].a = 1; e[1].b = 2; e[2].a = 0; e[2].b = 3;
+        e[3].a = 1; e[3].b = 2; e[4].a = 0; e[4].b = 3; e[9].a = 0; e[9].b = 10;
+        break;
+    default:
+        e[0].a = 0; e[0].b = 2; e[1].a = 1; e[1].b = 3; e[2].a = 0; e[2].b = 3;
+        e[3].a = 1; e[3].b = 3; e[4].a = 1; e[4].b = 6; e[9].a = 1; e[9].b = 2;
+        break;
+    }
+    for (i = 0; i < 15; i++) {
+        int j;
+        e[i].c = 0;
+        e[i].d = 0;
+        for (j = 0; j < D_0045AEB8_bagt[i].count; j++) {
+            e[i].c |= 1 << j;
+            e[i].d |= 1 << j;
+        }
+        e[i].d &= 0xFFFC;
+        e[i].c = (e[i].c & 0xFFFC) & ~(1 << e[i].b);
+    }
+}
+#endif
 

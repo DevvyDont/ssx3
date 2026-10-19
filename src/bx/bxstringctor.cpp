@@ -2196,7 +2196,30 @@ extern "C" int func_0026AC88(sBXRangeList* self, float lo, float hi)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AD00);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct sBXBox2 {
+    char pad_0x00[0x1C];
+    float min[3]; // 0x1C
+    float max[3]; // 0x28
+};
+
+// Whether the XY rectangle [lo, hi] overlaps the box's XY extent.
+extern "C" int func_0026AD00(sBXBox2* self, float* lo, float* hi)
+{
+    if (hi[0] < self->min[0])
+        return 0;
+    if (hi[1] < self->min[1])
+        return 0;
+    if (lo[0] > self->max[0])
+        return 0;
+    if (lo[1] > self->max[1])
+        return 0;
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AD70);

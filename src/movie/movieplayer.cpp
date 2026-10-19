@@ -3574,7 +3574,41 @@ extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* self, int idx, ch
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", func_00241928);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern "C" unsigned short* func_002C2540_r(void*, void*) __asm__("func_002C2540");
+extern "C" void func_002C26D0_v(void* dst, void* fmt, ...) __asm__("func_002C26D0");
+extern char D_004A2C90[];
+extern char D_004A2C98[];
+
+struct sMPSlot1928 {
+    int a;      // 0x344
+    int b;      // 0x348
+    int c;      // 0x34C
+    int d;      // 0x350
+    int id;     // 0x354
+    char pad[0xE0 - 0x14];
+};
+
+struct sMP1928 {
+    char pad[0x344];
+    sMPSlot1928 slots[1];
+};
+
+extern "C" void func_00241928(sMP1928* self, int i, void* out)
+{
+    if (self->slots[i].d != 0 && self->slots[i].a != 0 && self->slots[i].b != 0 && self->slots[i].c != 0) {
+        char name[0x200];
+        char path[0x200];
+        func_002C2540_r(name, D_004A2C90);
+        func_002C2540_r(path, D_004A2C98);
+        func_002C26D0_v(out, path, self->slots[i].id, name);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", func_002419D8);
