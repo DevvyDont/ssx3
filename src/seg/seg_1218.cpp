@@ -2296,7 +2296,310 @@ extern "C" void func_00104DE0(char* self, cStream_4DE0* s) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00104E70);
+#ifdef SKIP_ASM
+struct sV4_4E70 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sTri_4E70 {
+    float a;
+    float b;
+    unsigned short flags;
+    unsigned short pad;
+};
+
+struct sMat_4E70 {
+    char pad[0x10];
+    sTri_4E70 tris[1];
+};
+
+class cSurfObj_4E70;
+
+struct sSurf_4E70 {
+    char pad[0xC];
+    cSurfObj_4E70* obj;
+    char pad10[0x78 - 0x10];
+    unsigned int id;
+    char pad7C[0x88 - 0x7C];
+    sMat_4E70* mat;
+};
+
+struct sOwner_4E70 {
+    char pad[0x150];
+    unsigned int order;
+};
+
+struct sHit_4E70 {
+    sV4_4E70 pos;
+    sV4_4E70 normal;
+    char pad20[0x20];
+    float dist;
+    char pad44[0xC];
+    sSurf_4E70* surf;
+    sOwner_4E70* owner;
+    int pad58;
+    int idx;
+    char pad60[0x20];
+    sHit_4E70() {}
+} __attribute__((aligned(16)));
+
+class cSurfObj_4E70 {
+public:
+    int f0, f4, f8;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void OnHit(sHit_4E70* h);
+};
+
+class cScope_4E70 {
+public:
+    char pad[0x50];
+    virtual void v0();
+    virtual void v1();
+    virtual float Height();
+};
+
+extern sV4_4E70 D_004FF120_4E70 __asm__("D_004FF120");
+extern "C" int func_00334458_4E70(void*, cScope_4E70*, sHit_4E70*, int, int) __asm__("func_00334458");
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_4E70(const sV4_4E70& a, const sV4_4E70& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_4E70(const sV4_4E70& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV4_4E70 Sub_4E70(const sV4_4E70& a, const sV4_4E70& b)
+{
+    sV4_4E70 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void AddEq_4E70(sV4_4E70& a, const sV4_4E70& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b));
+}
+
+// PORT: PS2-only VU0 inline asm (vector divided by scalar).
+static inline sV4_4E70 Div_4E70(const sV4_4E70& v, float s)
+{
+    sV4_4E70 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2-only FPU asm (absolute value).
+static inline float Abs_4E70(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline int IsWall_4E70(const sHit_4E70& h)
+{
+    sTri_4E70* t = &h.surf->mat->tris[h.idx];
+    int r = 0;
+    if ((t->flags & 1) && t->a != 0.0f)
+        r = 1;
+    return r;
+}
+
+static inline int Facing_4E70(char* self, const sHit_4E70& h)
+{
+    int r = 1;
+    if (!(Dot_4E70(Sub_4E70(h.pos, *(sV4_4E70*)(*(char**)(self + 0xAA0) + 0x10)), h.normal) < 0.0f))
+        r = 0;
+    return r;
+}
+
+#define IDS_4E70 ((unsigned int*)(self + 0x5B8))
+
+extern "C" float func_00104E70(char* self, cScope_4E70* sc, sHit_4E70* out)
+{
+    int nIds = 0;
+    sHit_4E70 hits[64];
+    int n = func_00334458_4E70(*(void**)(self + 0x860), sc, hits, 64, 0);
+    if (n == 0)
+        return -1.0f;
+    if (hits[0].surf)
+        IDS_4E70[nIds++] = hits[0].surf->id;
+    int best = 0;
+    float hgt = sc->Height();
+    float bestD = Abs_4E70(hits[0].dist - hgt);
+    int bestWall = IsWall_4E70(hits[0]);
+    int bestFacing = Facing_4E70(self, hits[0]);
+    for (int i = 1; i < n; i++) {
+        if (hits[i].surf) {
+            int j;
+            for (j = 0; j < nIds; j++) {
+                if (IDS_4E70[j] == hits[i].surf->id)
+                    break;
+            }
+            if (j >= nIds)
+                IDS_4E70[nIds++] = hits[i].surf->id;
+        }
+        float dd = Abs_4E70(hits[i].dist - hgt);
+        int wall = IsWall_4E70(hits[i]);
+        if (wall && !bestWall) {
+            best = i;
+            bestD = dd;
+            bestWall = 1;
+            continue;
+        }
+        else if (bestWall && !wall)
+            continue;
+        int facing = Facing_4E70(self, hits[i]);
+        if (facing && !bestFacing) {
+            best = i;
+            bestD = dd;
+            bestFacing = 1;
+            continue;
+        }
+        else if (bestFacing && !facing)
+            continue;
+        if (dd < bestD) {
+            best = i;
+            bestD = dd;
+            continue;
+        }
+        if (dd == bestD) {
+            // PORT: index-first address arithmetic through int
+            sHit_4E70* a = (sHit_4E70*)((i << 7) + (int)hits);
+            sHit_4E70* b = (sHit_4E70*)((best << 7) + (int)hits);
+            int take;
+            if (a->surf) {
+                if (!b->surf)
+                    take = 1;
+                else
+                    take = a->surf->id < b->surf->id;
+            } else {
+                if (b->surf)
+                    take = 0;
+                else
+                    take = a->owner->order < b->owner->order;
+            }
+            if (take)
+                best = i;
+        }
+    }
+    *out = hits[best];
+    if (n >= 2) {
+        sV4_4E70 sum = D_004FF120_4E70;
+        for (int k = 0; k < n; k++) {
+            if (IsWall_4E70(hits[k]))
+                AddEq_4E70(sum, hits[k].normal);
+        }
+        float len = Len_4E70(sum);
+        if (len > 0.0010000000474974513f)
+            out->normal = Div_4E70(sum, len);
+    }
+    IDS_4E70[nIds] = 0xFFFFFFFF;
+    if (out->surf && out->surf->obj)
+        out->surf->obj->OnHit(out);
+    return out->dist;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", func_00105398);
@@ -2779,7 +3082,159 @@ INCLUDE_ASM("seg/seg_1218", func_00105D98);
 
 INCLUDE_ASM("seg/seg_1218", func_00106538);
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_001065B0);
+#ifdef SKIP_ASM
+struct sV4_65B0
+{
+    float x, y, z, w;
+    sV4_65B0() {}
+    sV4_65B0(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
+} __attribute__((aligned(16)));
+
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" float func_0031C228(float);
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sV4_65B0 Cross_65B0(const sV4_65B0& a, const sV4_65B0& b)
+{
+    sV4_65B0 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sV4_65B0 Norm_65B0(const sV4_65B0& v)
+{
+    sV4_65B0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_65B0(const sV4_65B0& a, const sV4_65B0& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sV4_65B0 QuatMul_65B0(const sV4_65B0& a, const sV4_65B0& b)
+{
+    sV4_65B0 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline float Atan2_65B0(float y, float x)
+{
+    if (x == 0.0f) {
+        if (y == 0.0f)
+            return y;
+        if (y >= 0.0f)
+            return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f) {
+        if (y > 0.0f)
+            r += 3.1415927410125732f;
+        else
+            r -= 3.1415927410125732f;
+    }
+    return r;
+}
+
+static inline float Clamp_65B0(float v, float lo, float hi)
+{
+    // PORT: `<?` is the g++ minimum operator (EE min.s).
+    return (v >= lo) ? (v <? hi) : lo;
+}
+
+static inline sV4_65B0 AxisAngle_65B0(const sV4_65B0& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return sV4_65B0(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+static inline sV4_65B0 Up_65B0(char* self) { return *(sV4_65B0*)(self + 0x1C0); }
+static inline sV4_65B0 Fwd_65B0(char* self) { return *(sV4_65B0*)(self + 0x1B0); }
+
+static inline void Rotate_65B0(char* self, const sV4_65B0& axis, float angle)
+{
+    *(sV4_65B0*)(self + 0x120) = QuatMul_65B0(*(sV4_65B0*)(self + 0x120), AxisAngle_65B0(axis, angle));
+}
+
+extern "C" void func_001065B0_impl(char* self, char* arg) __asm__("func_001065B0");
+extern "C" void func_001065B0_impl(char* self, char* arg)
+{
+    sV4_65B0 n = Norm_65B0(Cross_65B0(Up_65B0(self), *(sV4_65B0*)(arg + 0x10)));
+    sV4_65B0 c = Cross_65B0(Up_65B0(self), n);
+    float x = Dot_65B0(Fwd_65B0(self), c);
+    float y = Dot_65B0(Fwd_65B0(self), n);
+    float angle = Atan2_65B0(y, x);
+    float lim = 1.9198623895645142f;
+    float step = 0.349065899848938f;
+    float d;
+    if (angle > 0.0f)
+        d = Clamp_65B0(lim - angle, 0.0f, step);
+    else
+        d = Clamp_65B0(-lim - angle, -step, 0.0f);
+    if (d != 0.0f) {
+        Rotate_65B0(self, Up_65B0(self), -d);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00106828);

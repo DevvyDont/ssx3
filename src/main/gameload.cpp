@@ -1221,7 +1221,48 @@ extern "C" int func_00231AB8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gameload", func_00231B50);
+#ifdef SKIP_ASM
+#include "bx/math3d.h"
+
+struct sQuadVtx {
+    sQuadVtx() {}
+    float u, v, q, pad;
+    int r, g, b, a;
+    t4Vector pos;
+};
+
+extern "C" void func_00231B50(void* self, int value) {
+    sQuadVtx verts[4];
+    t4Vector p;
+    int i;
+    char* obj;
+
+    for (i = 0; i < 4; i++) {
+        verts[i].a = 0x80;
+        verts[i].r = 0x80;
+        verts[i].g = 0x80;
+        verts[i].b = 0x80;
+        verts[i].q = 1.0f;
+    }
+    p.x = 0.0f; p.y = 0.0f; p.z = 0.0f; p.w = 1.0f;
+    verts[0].pos = p;
+    p.x = 1.0f; p.y = 0.0f; p.z = 0.0f;
+    verts[1].pos = p;
+    p.x = 0.0f; p.y = 1.0f; p.z = 0.0f;
+    verts[2].pos = p;
+    p.x = 1.0f; p.y = 1.0f; p.z = 0.0f;
+    verts[3].pos = p;
+    verts[0].u = 0.0f; verts[0].v = 0.0f;
+    verts[1].u = 1.0f; verts[1].v = 0.0f;
+    verts[2].u = 0.0f; verts[2].v = 1.0f;
+    verts[3].u = 1.0f; verts[3].v = 1.0f;
+    *(short*)(*(char**)((char*)D_004A289C + 0xE84) + 0x10) = value;
+    obj = *(char**)((char*)D_004A289C + 0x10D8);
+    (*(void (**)(void*, int, void*, int))(obj + 0x23C))((char*)D_004A289C + *(short*)(obj + 0x238), 4, verts, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gameload", func_00231C70);

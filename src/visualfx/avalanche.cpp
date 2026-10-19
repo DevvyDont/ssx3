@@ -252,7 +252,91 @@ extern "C" void tActiveAvalancheNode_calculateScale(void* self, float t)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", func_002D7CA8);
+#ifdef SKIP_ASM
+struct sAvVec4CA8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sAvMatrixCA8 {
+    sAvVec4CA8 row[4];
+};
+struct sAvFrameCA8 {
+    sAvVec4CA8 pos;             // 0x0
+    sAvVec4CA8 vel;             // 0x10
+    sAvMatrixCA8 rot;           // 0x20
+};
+struct sAvDataCA8 {
+    char pad0[0xF0];
+    unsigned short type;        // 0xF0
+    unsigned char emit;         // 0xF2
+    char padF3[0x100 - 0xF3];
+    float duration;             // 0x100
+    char pad104[0x10C - 0x104];
+    float speed;                // 0x10C
+};
+struct sAvNodeCA8 {
+    sAvFrameCA8 getFrameData(float t) __asm__("tActiveAvalancheNode_getFrameData");
+    char pad0[0x60];
+    sAvVec4CA8 pos;             // 0x60
+    sAvMatrixCA8 rot;           // 0x70
+    float scale;                // 0xB0
+    float fB4;                  // 0xB4
+    char padB8[0xC0 - 0xB8];
+    sAvVec4CA8 vel;             // 0xC0
+    char emitter[0x1FC - 0xD0]; // 0xD0
+    float f1FC;                 // 0x1FC
+    char pad200[0x2E0 - 0x200];
+    sAvDataCA8* data;           // 0x2E0
+};
+
+extern "C" void func_002D7DD8(void* self, int force);
+extern "C" void func_003717C0(void* em, void* pos, void* d, void* vel, int alive, float dt);
+extern sAvVec4CA8 D_004FF120_7CA8 __asm__("D_004FF120");
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void vu0CopyMatrixCA8(sAvMatrixCA8* dst, sAvMatrixCA8* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+extern "C" int func_002D7CA8(sAvNodeCA8* self, float t)
+{
+    if (self->data == 0) return 0;
+    t *= self->data->speed;
+    sAvFrameCA8 fd = self->getFrameData(t);
+    if (t * 30.0f < self->data->duration) {
+        sAvVec4CA8* pos = &self->pos;
+        self->pos = fd.pos;
+        vu0CopyMatrixCA8(&self->rot, &fd.rot);
+        self->vel = fd.vel;
+        sAvDataCA8* d = self->data;
+        sAvVec4CA8* vel = &self->vel;
+        if (d->type != 2 && d->emit != 0) {
+            void* org = &D_004FF120_7CA8;
+            void* em = self->emitter;
+            self->f1FC = self->fB4;
+            int alive = t < d->duration;
+            func_003717C0(em, pos, org, vel, alive, 0.01666666753590107f);
+        }
+        return 1;
+    }
+    if (self->data->type == 2) return 1;
+    func_002D7DD8(self, 0);
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/avalanche", func_002D7DD8);
