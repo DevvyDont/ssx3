@@ -117,7 +117,7 @@ struct cRider {
     /* 0x310 */ float unk_310; // = 0.18 (ctor)
     /* 0x314 */ float unk_314; // = 0.015 (ctor)
     /* 0x318 */ float unk_318;
-    /* 0x31C */ int unk_31C; // cleared on transport (func_0011D660)
+    /* 0x31C */ float unk_31C; // cleared on transport (func_0011D660); lwc1, compared > 0.0f, scales mGroundNormal (func_0011EB98)
     /* 0x320 */ int unk_320; // copied into unk_2D8 (func_00123640)
     /* 0x324 */ int unk_324; // = func_0014EF70(interface 2, mAIIndex) (func_0011D390)
     /* 0x328 */ int unk_328; // landing state 1..4 from the board-vs-ground angle (func_00106848); 3/4 rotate the rider +-90 deg about mMatrix.row[2] (func_0010EB30)
@@ -132,7 +132,7 @@ struct cRider {
     /* 0x360 */ char unk_360[0x10];
     /* 0x370 */ t4Vector mGroundNormal; // [P] getGroundNormal, preview 0x350 (+0x20 assumed); slope = atan2(|xy|, z) in func_00121950
     /* 0x380 */ t4Vector unk_380; // copy of mGroundNormal taken before the ground probe (func_001242B0)
-    /* 0x390 */ char unk_390[0x10];
+    /* 0x390 */ t4Vector unk_390; // reference axis for lean rotation: Cross/Dot with the bone side vector (func_0011EB98)
     /* 0x3A0 */ t4Vector unk_3A0; // Normalize(front minus its mGroundNormal component) (func_001242B0)
     /* 0x3B0 */ t4Vector unk_3B0; // Cross(mGroundNormal, unk_3A0); scaled by lean (doLeanPoseAdjust, func_001242B0)
     /* 0x3C0 */ char unk_3C0[0x10];
@@ -221,7 +221,7 @@ struct cRider {
     /* 0x898 */ int mLOD; // [U] 0-2 from camera distance (func_00121F30)
     /* 0x89C */ int unk_89C; // index into mAnimModel's 0x20-byte transform array
     /* 0x8A0 */ int unk_8A0; // same array
-    /* 0x8A4 */ char unk_8A4[0x4];
+    /* 0x8A4 */ int unk_8A4; // second bone index into mAnimModel localPos/localRot/bones, like unk_8A0 (func_0011EB98)
     /* 0x8A8 */ int unk_8A8; // bone index into mAnimModel+0x30 (0x40-byte matrices, row 3 = position) (func_002E3AF8, func_002D5048)
     /* 0x8AC */ char unk_8AC[0x14];
     /* 0x8C0 */ long unk_8C0; // 64-bit (PORT: long is 64-bit on the EE); copied to mRiderAnim+0x20 before each cRiderAnimBase_play, then reset to -1 (func_001163B0, func_00115D48)
