@@ -922,3 +922,12 @@ D_004A52E0 = 0x004A52E0; // size:0x8
 D_004A4C08 = 0x004A4C08; // size:0x8
 // ui/uitext: an 8-byte object read with ldl/ldr (cUIText_render2D's `ldl D+7`); D_004A5A64 / D_004A5A67 were inside it.
 D_004A5A60 = 0x004A5A60; // size:0x8
+// sound/icepick/worldtriggermanager: an 8-byte static object (func_002B8818's static init); D_004A5264 was its second word.
+D_004A5260 = 0x004A5260; // size:0x8
+// wscript/wscriptman: an 8-byte static object (func_0030C8D8's static init); D_004A58D4 was its second word.
+D_004A58D0 = 0x004A58D0; // size:0x8
+// Static-init targets that only reloc_addrs entries reference (func_00250CB0, __sti__all_in_one_scripter_cpp), so
+// splat never created them.
+D_004D1C68 = 0x004D1C68;
+D_004D37A8 = 0x004D37A8;
+D_004D3AC8 = 0x004D3AC8;

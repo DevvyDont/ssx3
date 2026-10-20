@@ -73,3 +73,112 @@ rom:0xFCFC reloc:MIPS_LO16 symbol:D_004FF130
 rom:0x4B624 reloc:MIPS_HI16 symbol:D_004A6CA8
 rom:0x4B628 reloc:MIPS_HI16 symbol:D_004BA348
 rom:0x4B62C reloc:MIPS_HI16 symbol:D_005308B8
+
+// camera/trigger/cameratriggerfactory static-init functions (func_00175A20, func_00177650, func_00178F58, func_00179798):
+// splat left the %hi/%lo halves of their D_004C5xxx-D_004C62xx colour-table stores unpaired (raw 0x4C0000 >> 16 / 0x5xxx).
+rom:0x76C30 reloc:MIPS_HI16 symbol:D_004C5740
+rom:0x76C5C reloc:MIPS_LO16 symbol:D_004C5740
+rom:0x76E0C reloc:MIPS_HI16 symbol:D_004C5650
+rom:0x76E4C reloc:MIPS_LO16 symbol:D_004C5650
+rom:0x76F1C reloc:MIPS_HI16 symbol:D_004C5700
+rom:0x76F44 reloc:MIPS_LO16 symbol:D_004C5700
+rom:0x76F40 reloc:MIPS_HI16 symbol:D_004C56D0
+rom:0x76F54 reloc:MIPS_LO16 symbol:D_004C56D0
+rom:0x76F6C reloc:MIPS_LO16 symbol:D_004C56D0
+rom:0x770C4 reloc:MIPS_HI16 symbol:D_004C57A0
+rom:0x770D8 reloc:MIPS_LO16 symbol:D_004C57A0
+rom:0x770DC reloc:MIPS_LO16 symbol:D_004C57A0
+rom:0x7717C reloc:MIPS_HI16 symbol:D_004C57E0
+rom:0x771C0 reloc:MIPS_LO16 symbol:D_004C57E0
+rom:0x789FC reloc:MIPS_HI16 symbol:D_004C5A10
+rom:0x78A04 reloc:MIPS_LO16 symbol:D_004C5A10
+rom:0x78B88 reloc:MIPS_LO16 symbol:D_004C5AB0
+rom:0x78B98 reloc:MIPS_LO16 symbol:D_004C5AC0
+rom:0x78BBC reloc:MIPS_HI16 symbol:D_004C5B20
+rom:0x78C20 reloc:MIPS_LO16 symbol:D_004C5B20
+rom:0x78D10 reloc:MIPS_LO16 symbol:D_004C5B80
+rom:0x78D30 reloc:MIPS_LO16 symbol:D_004C5BB0
+rom:0x78D20 reloc:MIPS_HI16 symbol:D_004C5BD0
+rom:0x78DB8 reloc:MIPS_LO16 symbol:D_004C5BD0
+rom:0x78D38 reloc:MIPS_HI16 symbol:D_004C5BE0
+rom:0x78DD0 reloc:MIPS_LO16 symbol:D_004C5BE0
+rom:0x7A304 reloc:MIPS_HI16 symbol:D_004C5D90
+rom:0x7A30C reloc:MIPS_LO16 symbol:D_004C5D90
+rom:0x7A490 reloc:MIPS_LO16 symbol:D_004C5E30
+rom:0x7A4A0 reloc:MIPS_LO16 symbol:D_004C5E40
+rom:0x7A4C4 reloc:MIPS_HI16 symbol:D_004C5EA0
+rom:0x7A528 reloc:MIPS_LO16 symbol:D_004C5EA0
+rom:0x7A618 reloc:MIPS_LO16 symbol:D_004C5F00
+rom:0x7A638 reloc:MIPS_LO16 symbol:D_004C5F30
+rom:0x7A628 reloc:MIPS_HI16 symbol:D_004C5F50
+rom:0x7A6C0 reloc:MIPS_LO16 symbol:D_004C5F50
+rom:0x7A640 reloc:MIPS_HI16 symbol:D_004C5F60
+rom:0x7A6D8 reloc:MIPS_LO16 symbol:D_004C5F60
+rom:0x7AB3C reloc:MIPS_HI16 symbol:D_004C6110
+rom:0x7AB44 reloc:MIPS_LO16 symbol:D_004C6110
+rom:0x7AC80 reloc:MIPS_HI16 symbol:D_004C61C0
+rom:0x7ACB0 reloc:MIPS_LO16 symbol:D_004C61C0
+rom:0x7ACEC reloc:MIPS_LO16 symbol:D_004C61C0
+rom:0x7ACFC reloc:MIPS_LO16 symbol:D_004C61D0
+rom:0x7AE08 reloc:MIPS_LO16 symbol:D_004C6250
+rom:0x7AE34 reloc:MIPS_HI16 symbol:D_004C62A0
+rom:0x7AE70 reloc:MIPS_LO16 symbol:D_004C62A0
+rom:0x7AE3C reloc:MIPS_HI16 symbol:D_004C62B0
+rom:0x7AE98 reloc:MIPS_LO16 symbol:D_004C62B0
+rom:0x7AEAC reloc:MIPS_HI16 symbol:D_004C62C0
+rom:0x7AF1C reloc:MIPS_LO16 symbol:D_004C62C0
+rom:0x7AEB8 reloc:MIPS_HI16 symbol:D_004C62D0
+rom:0x7AF38 reloc:MIPS_LO16 symbol:D_004C62D0
+rom:0x7AEC4 reloc:MIPS_HI16 symbol:D_004C62E0
+rom:0x7AF4C reloc:MIPS_LO16 symbol:D_004C62E0
+rom:0x7AF58 reloc:MIPS_LO16 symbol:D_004C62F0
+
+// sound/icepick/worldtriggermanager func_002B8818 and wscript/wscriptman func_0030C8D8 (static-init functions):
+// splat left %hi/%lo halves of their D_004D3Dxx / D_004FC2xx stores unpaired.
+rom:0x1B9D50 reloc:MIPS_LO16 symbol:D_004D3D38
+rom:0x1B9D60 reloc:MIPS_LO16 symbol:D_004D3D48
+rom:0x1B9D84 reloc:MIPS_HI16 symbol:D_004D3DA8
+rom:0x1B9DE8 reloc:MIPS_LO16 symbol:D_004D3DA8
+rom:0x1B9E20 reloc:MIPS_HI16 symbol:D_004D3DF8
+rom:0x1B9E90 reloc:MIPS_LO16 symbol:D_004D3DF8
+rom:0x1B9EA8 reloc:MIPS_LO16 symbol:D_004D3E08
+rom:0x1B9E6C reloc:MIPS_HI16 symbol:D_004D3E18
+rom:0x1B9EB8 reloc:MIPS_LO16 symbol:D_004D3E18
+rom:0x1B9E58 reloc:MIPS_HI16 symbol:D_004D3E28
+rom:0x1B9EC4 reloc:MIPS_LO16 symbol:D_004D3E28
+rom:0x1B9EB4 reloc:MIPS_HI16 symbol:D_004D3E38
+rom:0x1B9ED8 reloc:MIPS_LO16 symbol:D_004D3E38
+rom:0x20DAAC reloc:MIPS_HI16 symbol:D_004FC280
+rom:0x20DAD4 reloc:MIPS_LO16 symbol:D_004FC280
+rom:0x20DE10 reloc:MIPS_LO16 symbol:D_004FC2A0
+rom:0x20DE20 reloc:MIPS_LO16 symbol:D_004FC2B0
+rom:0x20DE44 reloc:MIPS_HI16 symbol:D_004FC310
+rom:0x20DEA8 reloc:MIPS_LO16 symbol:D_004FC310
+rom:0x20E0D0 reloc:MIPS_LO16 symbol:D_004FC3F0
+
+// main/debugmenu func_00250CB0 and scripter/all_in_one_scripter __sti__all_in_one_scripter_cpp (static-init functions):
+// splat left %hi/%lo halves of their D_004D1Bxx-D_004D3Axx stores unpaired.
+rom:0x15219C reloc:MIPS_HI16 symbol:D_004D1B28
+rom:0x1521C0 reloc:MIPS_LO16 symbol:D_004D1B28
+rom:0x1521E8 reloc:MIPS_LO16 symbol:D_004D1B28
+rom:0x15233C reloc:MIPS_HI16 symbol:D_004D1C08
+rom:0x15235C reloc:MIPS_LO16 symbol:D_004D1C08
+rom:0x152474 reloc:MIPS_HI16 symbol:D_004D1C68
+rom:0x152488 reloc:MIPS_LO16 symbol:D_004D1C68
+rom:0x15249C reloc:MIPS_LO16 symbol:D_004D1C68
+rom:0x184EA4 reloc:MIPS_HI16 symbol:D_004D37A8
+rom:0x184EC0 reloc:MIPS_LO16 symbol:D_004D37A8
+rom:0x184F20 reloc:MIPS_LO16 symbol:D_004D37A8
+rom:0x18536C reloc:MIPS_HI16 symbol:D_004D39E8
+rom:0x185390 reloc:MIPS_LO16 symbol:D_004D39E8
+rom:0x1853EC reloc:MIPS_HI16 symbol:D_004D39F8
+rom:0x1853F8 reloc:MIPS_LO16 symbol:D_004D39F8
+rom:0x185494 reloc:MIPS_HI16 symbol:D_004D3A38
+rom:0x1854C4 reloc:MIPS_LO16 symbol:D_004D3A38
+rom:0x1855F0 reloc:MIPS_HI16 symbol:D_004D3AC8
+rom:0x1855F8 reloc:MIPS_LO16 symbol:D_004D3AC8
+rom:0x1855FC reloc:MIPS_LO16 symbol:D_004D3AC8
+
+// intersect/worldsphtree func_003400D8 (static init): its lui 0x50 / addiu -0xB90 pair for D_004FF470 was left raw.
+rom:0x241258 reloc:MIPS_HI16 symbol:D_004FF470
+rom:0x2412AC reloc:MIPS_LO16 symbol:D_004FF470
