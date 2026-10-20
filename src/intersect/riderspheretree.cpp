@@ -342,9 +342,378 @@ extern "C" void func_00329DC8(void* tree, sVec4_2F650* mnp, sVec4_2F650* mxp)
 
 INCLUDE_ASM("intersect/riderspheretree", func_00329F98);
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032A1C0);
+#ifdef SKIP_ASM
+typedef sSphereVec4 sV_A1C0;
 
+struct sKid_A1C0 {
+    sV_A1C0 pos;        // 0x00
+    float radius;       // 0x10
+    int pad[3];
+};
+
+struct sNode_A1C0 {
+    char pad_0x00[0x10];
+    sV_A1C0 center;     // 0x10
+    float radius;       // 0x20
+    int pad_0x24;
+    unsigned int mask;  // 0x28
+    int count;          // 0x2C
+    sKid_A1C0 kids[1];  // 0x30
+};
+
+// PORT: the unit declares func_0032B6A8 with four pointer args; callers also pass a float tolerance in $f12.
+extern "C" int func_0032B6A8_eps(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d, float eps) __asm__("func_0032B6A8");
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sV_A1C0 Sub_A1C0(const sV_A1C0& a, const sV_A1C0& b)
+{
+    sV_A1C0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sV_A1C0 Scale_A1C0(const sV_A1C0& v, float s)
+{
+    sV_A1C0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_A1C0(const sV_A1C0& a, const sV_A1C0& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_A1C0(const sV_A1C0& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only sqrt.s.
+static inline float Sqrt_A1C0(float x)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// Does the segment from the point v is measured from along e come within sqrt(rr)?
+static inline int SegHit_A1C0(const sV_A1C0& v, float d2, const sV_A1C0& e, float rr)
+{
+    float len = Length_A1C0(e);
+    float t = Dot_A1C0(v, e) / len;
+    if (t < 0.0f) {
+        return 0;
+    }
+    float h = d2 - t * t;
+    if (rr < h) {
+        return 0;
+    }
+    if (len < t - Sqrt_A1C0(rr - h)) {
+        return 0;
+    }
+    return 1;
+}
+
+static inline int Touch_A1C0(const sV_A1C0& c, float r, sV_A1C0* p, sV_A1C0* a, sV_A1C0* b, sV_A1C0* q)
+{
+    if (func_0032B6A8_eps(p, a, b, q, 0.0001f) != 0) {
+        return 1;
+    }
+    float rr = r * r;
+    sV_A1C0 v = Sub_A1C0(c, *p);
+    float d2 = Dot_A1C0(v, v);
+    if (d2 < rr) {
+        return 1;
+    }
+    if (SegHit_A1C0(v, d2, Sub_A1C0(*a, *p), rr)) {
+        return 1;
+    }
+    if (SegHit_A1C0(v, d2, Sub_A1C0(*b, *p), rr)) {
+        return 1;
+    }
+    sV_A1C0 v2 = Sub_A1C0(c, *a);
+    if (SegHit_A1C0(v2, Dot_A1C0(v2, v2), Sub_A1C0(*b, *a), rr)) {
+        return 1;
+    }
+    return 0;
+}
+
+// PORT: the unit declares it later as (void*, int, int, int, int, sSphereVec4*, int); defined under its own name bound to the symbol.
+extern "C" int func_0032A1C0_impl(sNode_A1C0* self, sV_A1C0* p, sV_A1C0* a, sV_A1C0* b, sV_A1C0* n, sV_A1C0* outPush, sV_A1C0* outPoint) __asm__("func_0032A1C0");
+extern "C" int func_0032A1C0_impl(sNode_A1C0* self, sV_A1C0* p, sV_A1C0* a, sV_A1C0* b, sV_A1C0* n, sV_A1C0* outPush, sV_A1C0* outPoint)
+{
+    float dist = Dot_A1C0(*n, Sub_A1C0(self->center, *p));
+    float r = self->radius;
+    if (r < __builtin_fabsf(dist)) {
+        return 0;
+    }
+    sV_A1C0 d = Sub_A1C0(self->center, Scale_A1C0(*n, dist));
+    if (!Touch_A1C0(self->center, r, p, a, b, &d)) {
+        return 0;
+    }
+    if (self->mask == 0) {
+        *outPush = Scale_A1C0(*n, r - dist);
+        *outPoint = d;
+        return 1;
+    }
+    float best = 10000000000.0f;
+    for (int i = 0; i < self->count; i++) {
+        if (self->mask & (1 << i)) {
+            dist = Dot_A1C0(*n, Sub_A1C0(self->kids[i].pos, *p));
+            r = self->kids[i].radius;
+            if (__builtin_fabsf(dist) < r && dist < best) {
+                d = Sub_A1C0(self->kids[i].pos, Scale_A1C0(*n, dist));
+                if (Touch_A1C0(self->kids[i].pos, r, p, a, b, &d)) {
+                    *outPush = Scale_A1C0(*n, r - dist);
+                    *outPoint = d;
+                    best = dist;
+                }
+            }
+        }
+    }
+    return best != 10000000000.0f;
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032AA28);
+#ifdef SKIP_ASM
+typedef sSphereVec4 sV_AA28;
+
+struct sKid_AA28 {
+    sV_AA28 pos;        // 0x00
+    float radius;       // 0x10
+    int pad[3];
+};
+
+struct sNode_AA28 {
+    char pad_0x00[0x10];
+    sV_AA28 center;     // 0x10
+    float radius;       // 0x20
+    int pad_0x24;
+    unsigned int mask;  // 0x28
+    int count;          // 0x2C
+    sKid_AA28 kids[1];  // 0x30
+};
+
+// PORT: the unit declares func_0032B6A8 with four pointer args; callers also pass a float tolerance in $f12.
+extern "C" int func_0032B6A8_eps(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d, float eps) __asm__("func_0032B6A8");
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sV_AA28 Sub_AA28(const sV_AA28& a, const sV_AA28& b)
+{
+    sV_AA28 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sV_AA28 Scale_AA28(const sV_AA28& v, float s)
+{
+    sV_AA28 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_AA28(const sV_AA28& a, const sV_AA28& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_AA28(const sV_AA28& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only sqrt.s.
+static inline float Sqrt_AA28(float x)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// Does the segment from the point v is measured from along e come within sqrt(rr)?
+static inline int SegHit_AA28(const sV_AA28& v, float d2, const sV_AA28& e, float rr)
+{
+    float len = Length_AA28(e);
+    float t = Dot_AA28(v, e) / len;
+    if (t < 0.0f) {
+        return 0;
+    }
+    float h = d2 - t * t;
+    if (rr < h) {
+        return 0;
+    }
+    if (len < t - Sqrt_AA28(rr - h)) {
+        return 0;
+    }
+    return 1;
+}
+
+static inline int Touch_AA28(const sV_AA28& c, float r, sV_AA28* p, sV_AA28* a, sV_AA28* b, sV_AA28* q)
+{
+    if (func_0032B6A8_eps(p, a, b, q, 0.0001f) != 0) {
+        return 1;
+    }
+    float rr = r * r;
+    sV_AA28 v = Sub_AA28(c, *p);
+    float d2 = Dot_AA28(v, v);
+    if (d2 < rr) {
+        return 1;
+    }
+    if (SegHit_AA28(v, d2, Sub_AA28(*a, *p), rr)) {
+        return 1;
+    }
+    if (SegHit_AA28(v, d2, Sub_AA28(*b, *p), rr)) {
+        return 1;
+    }
+    sV_AA28 v2 = Sub_AA28(c, *a);
+    if (SegHit_AA28(v2, Dot_AA28(v2, v2), Sub_AA28(*b, *a), rr)) {
+        return 1;
+    }
+    return 0;
+}
+
+// PORT: the unit declares it later as (void*, int, int, int, int, sSphereVec4*, int); defined under its own name bound to the symbol.
+extern "C" int func_0032AA28_impl(sNode_AA28* self, sV_AA28* p, sV_AA28* a, sV_AA28* b, sV_AA28* np, sV_AA28* outPush, sV_AA28* outPoint) __asm__("func_0032AA28");
+extern "C" int func_0032AA28_impl(sNode_AA28* self, sV_AA28* p, sV_AA28* a, sV_AA28* b, sV_AA28* np, sV_AA28* outPush, sV_AA28* outPoint)
+{
+    sV_AA28 n = *np;
+    float dist = Dot_AA28(n, Sub_AA28(self->center, *p));
+    float r = self->radius;
+    if (r < __builtin_fabsf(dist)) {
+        return 0;
+    }
+    if (dist < 0.0f) {
+        dist = -dist;
+        n = Scale_AA28(n, -1.0f);
+    }
+    sV_AA28 d = Sub_AA28(self->center, Scale_AA28(n, dist));
+    if (!Touch_AA28(self->center, r, p, a, b, &d)) {
+        return 0;
+    }
+    if (self->mask == 0) {
+        *outPush = Scale_AA28(n, r - dist);
+        *outPoint = d;
+        return 1;
+    }
+    float best = 10000000000.0f;
+    for (int i = 0; i < self->count; i++) {
+        if (self->mask & (1 << i)) {
+            dist = Dot_AA28(n, Sub_AA28(self->kids[i].pos, *p));
+            r = self->kids[i].radius;
+            if (dist < r && dist < best) {
+                d = Sub_AA28(self->kids[i].pos, Scale_AA28(n, dist));
+                if (Touch_AA28(self->kids[i].pos, r, p, a, b, &d)) {
+                    *outPush = Scale_AA28(n, r - dist);
+                    *outPoint = d;
+                    best = dist;
+                }
+            }
+        }
+    }
+    return best != 10000000000.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032B2B8);

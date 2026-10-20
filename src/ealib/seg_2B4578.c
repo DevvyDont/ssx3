@@ -3842,7 +3842,144 @@ void func_003BD9C0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BDE08);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Blk_DE08 {
+    int *data;
+    unsigned char sf[24];
+};
+struct S_DE08 {
+    unsigned char mode;
+    unsigned char n;
+    char pad2[6];
+    unsigned char *out;
+    float fC[24];
+    int a6C[6];
+    struct Blk_DE08 *ptrs[5];
+};
+struct C_DE08 {
+    char pad0[0xA00];
+    unsigned short q[16];
+    float *pA20;
+};
+extern struct S_DE08 *D_0050AC68_DE08 __asm__("D_0050AC68");
+extern struct C_DE08 *D_0050AC6C_DE08 __asm__("D_0050AC6C");
+extern int D_0044C760_DE08[] __asm__("D_0044C760");
+extern signed char D_0044DD38_DE08[] __asm__("D_0044DD38");
+extern void f03E0_DE08(struct C_DE08 *, float *) __asm__("func_003C03E0");
+extern void f0564_DE08(void *, void *, float) __asm__("func_003C0564");
+extern void f05E0_DE08(void *, void *, float) __asm__("func_003C05E0");
+extern void f0640_DE08(void *, void *, float) __asm__("func_003C0640");
+
+void func_003BDE08(int ch) {
+    struct Blk_DE08 *blk;
+    unsigned char *sf;
+    unsigned char *out;
+    unsigned short *q;
+    float x;
+    int i;
+    int n;
+    int idx;
+
+    blk = D_0050AC68_DE08->ptrs[ch];
+    f03E0_DE08(D_0050AC6C_DE08, D_0050AC6C_DE08->pA20);
+    sf = blk->sf;
+    for (i = 0; i < 24; i++) {
+        x = D_0050AC6C_DE08->pA20[i] * D_0050AC68_DE08->fC[i];
+        if (x < 4.0f) {
+            idx = D_0044DD38_DE08[(int)x];
+        } else {
+            n = (int)((float)*(int *)&x * 6.5246462099821656e-07f) - 0x2B8;
+            idx = n + 1;
+            if (x < (float)D_0044C760_DE08[n]) {
+                idx = n;
+            }
+        }
+        blk->sf[i] = idx;
+    }
+    out = D_0050AC68_DE08->out + (ch * 0xAC + 0x11C);
+    q = D_0050AC6C_DE08->q;
+    for (i = 0; i < 5; i++) {
+        f0564_DE08((char *)D_0050AC6C_DE08 + i * 0x40, q, 1.0f / (float)D_0044C760_DE08[sf[i]]);
+        out[1] = (out[1] & 0xF8) | (q[0] >> 7);
+        out[0] = (q[0] << 1) | (q[1] >> 9);
+        out[3] = q[1] >> 1;
+        out[2] = (q[1] << 7) | (q[2] >> 3);
+        out[5] = (q[2] << 5) | (q[3] >> 5);
+        out[4] = (q[3] << 3) | (q[4] >> 7);
+        out[7] = (q[4] << 1) | (q[5] >> 9);
+        out[6] = q[5] >> 1;
+        out[9] = (q[5] << 7) | (q[6] >> 3);
+        out[8] = (q[6] << 5) | (q[7] >> 5);
+        out[0xB] = (out[0xB] & 7) | (q[7] << 3);
+        out[0x35D] = (out[0x35D] & 0xF8) | (q[8] >> 7);
+        out[0x35C] = (q[8] << 1) | (q[9] >> 9);
+        out[0x35F] = q[9] >> 1;
+        out[0x35E] = (q[9] << 7) | (q[10] >> 3);
+        out[0x361] = (q[10] << 5) | (q[11] >> 5);
+        out[0x360] = (q[11] << 3) | (q[12] >> 7);
+        out[0x363] = (q[12] << 1) | (q[13] >> 9);
+        out[0x362] = q[13] >> 1;
+        out[0x365] = (q[13] << 7) | (q[14] >> 3);
+        out[0x364] = (q[14] << 5) | (q[15] >> 5);
+        out[0x367] = (out[0x367] & 7) | (q[15] << 3);
+        out += 10;
+    }
+    for (; i < 14; i++) {
+        f05E0_DE08((char *)D_0050AC6C_DE08 + i * 0x40, q, 1.0f / (float)D_0044C760_DE08[sf[i]]);
+        out[1] = (out[1] & 0xF8) | (((unsigned char *)q)[0] >> 5);
+        out[0] = (((unsigned char *)q)[0] << 3) | (((unsigned char *)q)[1] >> 5);
+        out[3] = (((unsigned char *)q)[1] << 3) | (((unsigned char *)q)[2] >> 5);
+        out[2] = (((unsigned char *)q)[2] << 3) | (((unsigned char *)q)[3] >> 5);
+        out[5] = (((unsigned char *)q)[3] << 3) | (((unsigned char *)q)[4] >> 5);
+        out[4] = (((unsigned char *)q)[4] << 3) | (((unsigned char *)q)[5] >> 5);
+        out[7] = (((unsigned char *)q)[5] << 3) | (((unsigned char *)q)[6] >> 5);
+        out[6] = (((unsigned char *)q)[6] << 3) | (((unsigned char *)q)[7] >> 5);
+        out[9] = (out[9] & 7) | (((unsigned char *)q)[7] << 3);
+        out[0x35D] = (out[0x35D] & 0xF8) | (((unsigned char *)q)[8] >> 5);
+        out[0x35C] = (((unsigned char *)q)[8] << 3) | (((unsigned char *)q)[9] >> 5);
+        out[0x35F] = (((unsigned char *)q)[9] << 3) | (((unsigned char *)q)[10] >> 5);
+        out[0x35E] = (((unsigned char *)q)[10] << 3) | (((unsigned char *)q)[11] >> 5);
+        out[0x361] = (((unsigned char *)q)[11] << 3) | (((unsigned char *)q)[12] >> 5);
+        out[0x360] = (((unsigned char *)q)[12] << 3) | (((unsigned char *)q)[13] >> 5);
+        out[0x363] = (((unsigned char *)q)[13] << 3) | (((unsigned char *)q)[14] >> 5);
+        out[0x362] = (((unsigned char *)q)[14] << 3) | (((unsigned char *)q)[15] >> 5);
+        out[0x365] = (out[0x365] & 7) | (((unsigned char *)q)[15] << 3);
+        out += 8;
+    }
+    for (; i < 24; i += 2) {
+        f0640_DE08((char *)D_0050AC6C_DE08 + i * 0x40, q, 1.0f / (float)D_0044C760_DE08[sf[i]]);
+        out[1] = (out[1] & 0xF8) | (((unsigned char *)q)[0] >> 2);
+        out[0] = (((unsigned char *)q)[0] << 6) | (((unsigned char *)q)[1] << 1) | (((unsigned char *)q)[2] >> 4);
+        out[3] = (((unsigned char *)q)[2] << 4) | (((unsigned char *)q)[3] >> 1);
+        out[2] = (((unsigned char *)q)[3] << 7) | (((unsigned char *)q)[4] << 2) | (((unsigned char *)q)[5] >> 3);
+        out[5] = ((unsigned char *)q)[6] | (((unsigned char *)q)[5] << 5);
+        out[4] = (out[4] & 7) | (((unsigned char *)q)[7] << 3);
+        out[0x35D] = (out[0x35D] & 0xF8) | (((unsigned char *)q)[8] >> 2);
+        out[0x35C] = (((unsigned char *)q)[8] << 6) | (((unsigned char *)q)[9] << 1) | (((unsigned char *)q)[10] >> 4);
+        out[0x35F] = (((unsigned char *)q)[10] << 4) | (((unsigned char *)q)[11] >> 1);
+        out[0x35E] = (((unsigned char *)q)[11] << 7) | (((unsigned char *)q)[12] << 2) | (((unsigned char *)q)[13] >> 3);
+        out[0x361] = ((unsigned char *)q)[14] | (((unsigned char *)q)[13] << 5);
+        out[0x360] = (out[0x360] & 7) | (((unsigned char *)q)[15] << 3);
+        f0640_DE08((char *)D_0050AC6C_DE08 + (i + 1) * 0x40, q, 1.0f / (float)D_0044C760_DE08[sf[i + 1]]);
+        out[4] = (out[4] & 0xF8) | (((unsigned char *)q)[0] >> 2);
+        out[7] = (((unsigned char *)q)[0] << 6) | (((unsigned char *)q)[1] << 1) | (((unsigned char *)q)[2] >> 4);
+        out[6] = (((unsigned char *)q)[2] << 4) | (((unsigned char *)q)[3] >> 1);
+        out[9] = (((unsigned char *)q)[3] << 7) | (((unsigned char *)q)[4] << 2) | (((unsigned char *)q)[5] >> 3);
+        out[8] = ((unsigned char *)q)[6] | (((unsigned char *)q)[5] << 5);
+        out[0xB] = (out[0xB] & 7) | (((unsigned char *)q)[7] << 3);
+        out[0x360] = (out[0x360] & 0xF8) | (((unsigned char *)q)[8] >> 2);
+        out[0x363] = (((unsigned char *)q)[8] << 6) | (((unsigned char *)q)[9] << 1) | (((unsigned char *)q)[10] >> 4);
+        out[0x362] = (((unsigned char *)q)[10] << 4) | (((unsigned char *)q)[11] >> 1);
+        out[0x365] = (((unsigned char *)q)[11] << 7) | (((unsigned char *)q)[12] << 2) | (((unsigned char *)q)[13] >> 3);
+        out[0x364] = ((unsigned char *)q)[14] | (((unsigned char *)q)[13] << 5);
+        out[0x367] = (out[0x367] & 7) | (((unsigned char *)q)[15] << 3);
+        out += 10;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BE6E0);
