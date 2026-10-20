@@ -3051,7 +3051,214 @@ INCLUDE_ASM("render/particle", func_00377A10);
 
 INCLUDE_ASM("render/particle", func_00377CF0);
 
+//100%
 INCLUDE_ASM("render/particle", func_003781A0);
+#ifdef SKIP_ASM
+struct sV_81A0 {
+    float x, y, z, w;
+    sV_81A0() {}
+    sV_81A0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sMat_81A0 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sVEnt_81A0 {
+    short delta;
+    short index;
+    sV_81A0 (*fn)(void*, const sV_81A0*);
+};
+
+struct sRS_81A0 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sEnt_81A0 {
+    sRS_81A0 rs;                    // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sRing_81A0 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sEnt_81A0 ents[1];              // 0x80
+};
+
+struct sGfx_81A0 {
+    char pad_0x0[0xE84];
+    sRS_81A0* top;                  // 0xE84
+    char pad_0xE88[0x10D8 - 0xE88];
+    sVEnt_81A0* vtable;             // 0x10D8
+    char pad_0x10DC[0x13E4 - 0x10DC];
+    sMat_81A0* cam;                 // 0x13E4
+    char pad_0x13E8[0x18F0 - 0x13E8];
+    sRing_81A0* ring;               // 0x18F0
+    char pad_0x18F4[0x5A00 - 0x18F4];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x5A30 - 0x5A04];
+    unsigned int width;             // 0x5A30
+    unsigned int height;            // 0x5A34
+    char pad_0x5A38[0x6B90 - 0x5A38];
+    int texReady;                   // 0x6B90
+};
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV_81A0 Scale_81A0(const sV_81A0& v, float s)
+{
+    sV_81A0 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sV_81A0 Add_81A0(const sV_81A0& a, const sV_81A0& b)
+{
+    sV_81A0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV_81A0 Sub_81A0(const sV_81A0& a, const sV_81A0& b)
+{
+    sV_81A0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline void Rot_81A0(sV_81A0* out, const sMat_81A0* m, const sV_81A0& v)
+{
+    float x = v.x * m->m[0][0] + v.y * m->m[0][1];
+    float y = v.x * m->m[1][0] + v.y * m->m[1][1];
+    float z = v.x * m->m[2][0] + v.y * m->m[2][1];
+    float w = v.x * m->m[3][0] + v.y * m->m[3][1];
+    out->x = x;
+    out->y = y;
+    out->z = z;
+    out->w = w;
+}
+
+static inline sV_81A0 Project_81A0(sGfx_81A0* self, const sV_81A0* v)
+{
+    sVEnt_81A0* vt = self->vtable;
+    return vt[92].fn((char*)self + vt[92].delta, v);
+}
+
+extern "C" void func_0037D968(void* self);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+// PORT: uncached (0x30000000) pointers held in int.
+// Emits count camera-facing rotated sprites (GS tri-strip quads) centred on pos.
+extern "C" void func_003781A0(sGfx_81A0* self, sV_81A0* pos, float* size, int* uv0, int* uv1, float* col, int count, float angle)
+{
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    float q = 1.0f;
+    sV_81A0 center = Project_81A0(self, pos);
+    float s, c;
+    func_0031BE50(&s, &c, angle);
+    sV_81A0 a;
+    sV_81A0 b(c, s, 0.0f, 0.0f);
+    Rot_81A0(&a, self->cam, b);
+    Rot_81A0(&b, self->cam, sV_81A0(-b.y, b.x, b.z, b.w));
+    sV_81A0 p1 = Add_81A0(*pos, Scale_81A0(a, size[0]));
+    sV_81A0 p2 = Add_81A0(*pos, Scale_81A0(b, size[1]));
+    p1.w = q;
+    p2.w = q;
+    sV_81A0 d1 = Sub_81A0(Project_81A0(self, &p1), center);
+    sV_81A0 d2 = Sub_81A0(Project_81A0(self, &p2), center);
+    sV_81A0 v0 = Sub_81A0(Sub_81A0(center, d1), d2);
+    sV_81A0 v1 = Sub_81A0(Add_81A0(center, d1), d2);
+    sV_81A0 v2 = Add_81A0(Sub_81A0(center, d1), d2);
+    sV_81A0 v3 = Add_81A0(Add_81A0(center, d1), d2);
+
+    unsigned int buf = self->bufAddr;
+    unsigned long* p = (unsigned long*)(buf | 0x30000000);
+    int xoff = (0x800 - (self->width >> 1)) << 4;
+    int yoff = (0x800 - (self->height >> 1)) << 4;
+    int x0 = xoff + (int)(v0.x * 16.0f);
+    int y0 = yoff + (int)(v0.y * 16.0f);
+    int x1 = xoff + (int)(v1.x * 16.0f);
+    int y1 = yoff + (int)(v1.y * 16.0f);
+    int x2 = xoff + (int)(v2.x * 16.0f);
+    int y2 = yoff + (int)(v2.y * 16.0f);
+    int x3 = xoff + (int)(v3.x * 16.0f);
+    int y3 = yoff + (int)(v3.y * 16.0f);
+    int z = (int)center.z;
+    int cr = (int)(col[1] * 128.0f);
+    int cg = (int)(col[2] * 128.0f);
+    int cb = (int)(col[3] * 128.0f);
+    int ca = (int)(col[0] * 128.0f);
+    for (int i = 0; i < count; i++) {
+        p[0] = 0x10000007;
+        p[1] = 0;
+        p[2] = 0;
+        p[3] = (unsigned long)0x50000006 << 32;
+        p[4] = ((unsigned long)0xA4000000 << 32) | 0x8001;
+        p[5] = 0x5252525210;
+        p[6] = 0x54;
+        p[7] = (unsigned long)cr | ((unsigned long)cg << 8) | ((unsigned long)cb << 16) | ((unsigned long)ca << 24) | ((unsigned long)*(unsigned int*)&q << 32);
+        p[8] = (unsigned long)uv0[0] | ((unsigned long)uv0[1] << 32);
+        p[9] = (unsigned long)x0 | ((unsigned long)y0 << 16) | ((unsigned long)z << 32);
+        p[10] = (unsigned long)uv1[0] | ((unsigned long)uv0[1] << 32);
+        p[11] = (unsigned long)x1 | ((unsigned long)y1 << 16) | ((unsigned long)z << 32);
+        p[12] = (unsigned long)uv0[0] | ((unsigned long)uv1[1] << 32);
+        p[13] = (unsigned long)x2 | ((unsigned long)y2 << 16) | ((unsigned long)z << 32);
+        p[14] = (unsigned long)uv1[0] | ((unsigned long)uv1[1] << 32);
+        p[15] = (unsigned long)x3 | ((unsigned long)y3 << 16) | ((unsigned long)z << 32);
+        p += 16;
+    }
+    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+    self->bufAddr = next;
+    sRing_81A0* ring = self->ring;
+    sRS_81A0* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sEnt_81A0* e = (sEnt_81A0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->bufAddr += 0x10;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00378808);
 
