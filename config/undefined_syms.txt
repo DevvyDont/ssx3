@@ -4,3 +4,9 @@
    config/reloc_addrs.txt. splat only lists symbols its reference tracking marks as referenced, which a
    reloc_addrs-only name isn't, so it never appears in undefined_syms_auto.txt. */
 D_0 = 0x0;
+
+/* Static-init table targets named only by config/reloc_addrs.txt (func_00250CB0, __sti__all_in_one_scripter_cpp),
+   so, like D_0 above, splat never lists them in undefined_syms_auto.txt. */
+D_004D1C68 = 0x4D1C68;
+D_004D37A8 = 0x4D37A8;
+D_004D3AC8 = 0x4D3AC8;
