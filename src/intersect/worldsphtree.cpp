@@ -502,7 +502,92 @@ extern "C" void func_003309D8(sCtx_3309D8* ctx, void* tree)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00330BA8);
+#ifdef SKIP_ASM
+struct sSphNode_340A40;
+extern "C" void func_00340A40(sSphNode_340A40* node, sCtx_3309D8* ctx);
+extern "C" int func_00328360(void* cell, void* box);
+extern "C" void func_00338920(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* box, void* tree, void* cell);
+
+struct sOctNode_330BA8 {
+    sSphNode_340A40* child[8];
+};
+
+struct sCell_330BA8 {
+    int level;
+    int x, y, z;
+    sOctNode_330BA8* tree;
+};
+
+struct sGrid_330BA8 {
+    sCell_330BA8 cells[8];
+    int unkA0;
+};
+
+struct sQuery_330BA8 {
+    sGrid_330BA8* grid;             // 0x0
+    int unk04;                      // 0x4
+    int count;                      // 0x8
+    sNode_3309D8* items[0x40];      // 0xC
+    unsigned int ntris;             // 0x10C
+    void* tris[0x40];               // 0x110
+    unsigned int nobjs;             // 0x210
+};
+
+static inline void collect_330BA8(sOctNode_330BA8* node, sCtx_3309D8* ctx)
+{
+    func_003309D8(ctx, node);
+    if (node->child[0] != 0) func_00340A40(node->child[0], ctx);
+    if (node->child[1] != 0) func_00340A40(node->child[1], ctx);
+    if (node->child[2] != 0) func_00340A40(node->child[2], ctx);
+    if (node->child[3] != 0) func_00340A40(node->child[3], ctx);
+    if (node->child[4] != 0) func_00340A40(node->child[4], ctx);
+    if (node->child[5] != 0) func_00340A40(node->child[5], ctx);
+    if (node->child[6] != 0) func_00340A40(node->child[6], ctx);
+    if (node->child[7] != 0) func_00340A40(node->child[7], ctx);
+}
+
+// One top-level cell: test it, then either take the whole subtree or recurse into it.
+static inline void queryCell_330BA8(sGrid_330BA8* grid, int i, void* box, sCtx_3309D8* ctx, char* flags)
+{
+    sCell_330BA8* cell = &grid->cells[i];
+    if (grid->cells[i].tree != 0) {
+        sOctNode_330BA8* tree = cell->tree;
+        char* flag = &flags[i];
+        int r = func_00328360(cell, box);
+        if (r == 0) {
+            collect_330BA8(tree, ctx);
+        } else if (r == 2) {
+            func_00338920(flag, ctx, ctx, box, tree, cell);
+        }
+    }
+}
+
+extern "C" void func_00330BA8(sQuery_330BA8* self, sBox_3309D8* box)
+{
+    sCtx_3309D8 ctx;
+    char flags[8];
+    sGrid_330BA8* grid = self->grid;
+    sCtx_3309D8* pctx = &ctx;
+    self->unk04 = grid->unkA0;
+    ctx.list = self->items;
+    ctx.count = &self->count;
+    ctx.pad08 = 0x40;
+    ctx.box = box;
+    self->count = 0;
+    queryCell_330BA8(grid, 0, box, pctx, flags);
+    queryCell_330BA8(grid, 1, box, pctx, flags);
+    queryCell_330BA8(grid, 2, box, pctx, flags);
+    queryCell_330BA8(grid, 3, box, pctx, flags);
+    queryCell_330BA8(grid, 4, box, pctx, flags);
+    queryCell_330BA8(grid, 5, box, pctx, flags);
+    queryCell_330BA8(grid, 6, box, pctx, flags);
+    queryCell_330BA8(grid, 7, box, pctx, flags);
+    self->ntris = 0xFFFFFFFF;
+    self->nobjs = 0xFFFFFFFF;
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00331450);
 
