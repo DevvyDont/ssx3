@@ -487,7 +487,397 @@ int func_002306A8(void* self, int i)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gameload", func_002306B8);
+#ifdef SKIP_ASM
+extern "C" float func_002EE400(int id);
+extern "C" void func_002570D8(void* p);
+extern "C" void func_00278918(void* p);
+extern "C" int func_0022E920(void* p);
+extern "C" void cGameViewMan_updateAll(void* p);
+extern "C" void func_00230F40(void* self);
+extern "C" void func_0022E8B8(void* p);
+extern "C" void func_003A88A8(void* p);
+extern "C" void func_002373B8(void* p);
+extern "C" void func_0020CFD0(void);
+extern "C" int func_002CC098(void* p);
+extern "C" void func_002CC0C0(void* p);
+extern "C" int* func_0030C870(void* p);
+extern "C" void func_0020AB50(int id);
+extern "C" void func_0029CED8(void* p, int a, int b, float c);
+extern "C" void func_0030A868(void* p, int a, int b, int c);
+extern "C" void func_00398038(void* p);
+extern "C" void func_0030C820(void* p);
+extern "C" void func_0029ED18(void* p);
+// PORT: the unit defines func_00231840(char* self); this caller passes a second argument (a1 = 0).
+extern "C" int func_00231840_pi(void* self, int a) __asm__("func_00231840");
+// func_00231D18 returns nothing (its body has no return value); the unit declares it void*.
+extern "C" void func_00231D18_v(void* self) __asm__("func_00231D18");
+extern "C" int func_0020CBE8(void);
+extern "C" void func_00326AE0(void* p);
+extern "C" void func_0020CA10(void);
+extern "C" void func_00289B70(void* p);
+extern "C" void func_00294F48(void* p);
+extern "C" int func_0020CBA0(void);
+extern "C" void cPlaybackMan_update(void* p);
+extern "C" int func_00237950(void* p);
+extern "C" int func_002379C8(void* p);
+extern "C" int func_0026CE50(void* p);
+extern "C" void func_0026F4A8(void* p);
+extern "C" int func_00270280(void* p);
+extern "C" void func_00354F98(void* mgr, int a);
+extern "C" void func_00355028(void* mgr, int a);
+extern "C" void func_00309270(void* p);
+extern "C" void func_002294C8(void* p);
+extern "C" void func_003440C8(void* p);
+extern "C" void func_00357BF8(void* p);
+extern "C" void func_002B7848(void* p, void* q, int i);
+void func_00237948(void* p);
+extern "C" void func_003F42A0(void);
+extern "C" void func_001A39F0(void* p);
+extern "C" void func_001E1458(void);
+extern "C" void func_001F3188(void* p);
+
+extern char* D_004A5B64;
+extern void* D_004A2EB8;
+extern void* D_004A28A0;
+extern unsigned int D_004A20CC;
+extern char D_0047B798[];
+
+struct sVEntry_2306B8 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sVEntryI_2306B8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sObjC_2306B8 {
+    char pad0[0x8];
+    sVEntryI_2306B8* vtbl;
+};
+
+struct sObj48_2306B8 {
+    char pad0[0xC];
+    sObjC_2306B8* fC;
+};
+
+// cGame (this unit: cGame_loadTrack/cGame_restart/cGame_exit). Field accesses through this struct
+// (not raw casts) matter: gcc 2.95 lets struct-field loads skip the dependence on fixed-scalar stores.
+struct cGame_2306B8 {
+    char pad0[0x8];
+    int f8;
+    char* fC;
+    char* f10;
+    char pad14[0x28 - 0x14];
+    char* f28;
+    char pad2C[0x30 - 0x2C];
+    char* f30;
+    char* mPlaybackMan;
+    char* f38;
+    char* f3C;
+    char* f40;
+    char pad44[0x48 - 0x44];
+    char* f48;
+    char* f4C;
+    char pad50[0x78 - 0x50];
+    char* f78;
+    char* f7C;
+    char pad80[0x84 - 0x80];
+    char* mGameViewMan;
+    char pad88[0x94 - 0x88];
+    char* f94;
+    char pad98[0x9C - 0x98];
+    int f9C;
+    int fA0;
+    char* fA4;
+    char padA8[0xAC - 0xA8];
+    int fAC;
+    char padB0[0x214 - 0xB0];
+    int f214;
+    char pad218[0x228 - 0x218];
+    unsigned char f228;
+};
+
+static inline void pushState_2306B8(int state)
+{
+    D_005366E8[++D_004A2A54] = state;
+    D_004A2A50 = D_004428F0[state];
+}
+
+static inline int inRace_2306B8(int s)
+{
+    if (s != 0 && s < 10) {
+        return 1;
+    }
+    return 0;
+}
+
+static inline int hasEvents_2306B8(char* list)
+{
+    return *(int*)(list + 0x0) != *(int*)(list + 0x4);
+}
+
+static inline int paused_2306B8(void)
+{
+    return D_004A2A50 & 1;
+}
+
+static inline int notPlaying_2306B8(char* pb)
+{
+    return *(int*)(pb + 0x70) != 1;
+}
+
+static inline int notMode3_2306B8(int s)
+{
+    return s != 3;
+}
+
+// Object at game + 0x84: views at +0x4, count at +0x10.
+struct sViewList_2306B8 {
+    int f0;
+    char* views[3];
+    unsigned int count;
+    unsigned int getCount() { return count; }
+    char* getView(unsigned int i) { return views[i]; }
+};
+
+// Object at game + 0xC: riders at +0x28, count at +0x78.
+struct sRiderList_2306B8 {
+    char pad0[0x28];
+    char* riders[20];
+    int count;
+    int getCount() { return count; }
+    char* getRider(int i) { return riders[i]; }
+};
+
+static inline int canUpdate_2306B8(cGame_2306B8* self)
+{
+    if (*(int*)((char*)D_004A28A8 + 0x4) != 0) {
+        self->f8 = 1;
+        return 0;
+    }
+    return 1;
+}
+
+static inline int updatePause_2306B8(cGame_2306B8* self)
+{
+    if (func_0022E920(self->mGameViewMan) == 0 || *(int*)(self->f78 + 0x1D0) == 0) {
+        *(int*)(*((char**)self->f10) + 0x3D4) = 0;
+        func_003A6928(self->f10);
+        cGameViewMan_updateAll(self->mGameViewMan);
+        if (*(int*)(self->f78 + 0x1D0) == 0) {
+            func_00230F40(self);
+            func_0022D8D8(self->f78);
+        }
+        if (self->f9C == 0 && func_0022E920(self->mGameViewMan) == 0) {
+            self->fA0 = 1;
+        }
+        self->f9C = 1;
+        if (self->fA0 != 0) {
+            char* r = (char*)D_004A289C;
+            sVEntry_2306B8* vt = *(sVEntry_2306B8**)(r + 0x10D8);
+            vt[19].fn(r + vt[19].delta);
+            func_0022E8B8(self->mGameViewMan);
+            func_003A88A8(*((void**)self->f10));
+            self->fA0 = 0;
+        }
+        return 0;
+    }
+    *(int*)(*((char**)self->f10) + 0x3D4) = 1;
+    self->f9C = 0;
+    self->fA0 = 0;
+    func_003A6928(self->f10);
+    func_0022D8D8(self->f78);
+    return 1;
+}
+
+static inline int updateState_2306B8(cGame_2306B8* self)
+{
+    if (func_002CC098(self->fA4) == 0) {
+        char* q = self->f30;
+        char* list = q + 0x1C4;
+        if (*(int*)(q + 0x1C4) != *(int*)(q + 0x1C8)) {
+            int* e = func_0030C870(list);
+            if (e[1] == 8) {
+                func_0020AB50(0x1D);
+                pushState_2306B8(3);
+                func_0029CED8(func_0028B180(), 4, 0, 1.0f);
+                return 0;
+            }
+            if (e[1] == 9) {
+                func_0030A868(self->f30, e[0], 5, e[2]);
+                if (func_0039F9D8(self->f48 + 0x18, GetHashValue32(D_0047B798)) == 0) {
+                    func_0020AB50(0x1E);
+                    pushState_2306B8(3);
+                    func_00398038(self->f48);
+                } else {
+                    func_0030C820((char*)D_004A3DD8 + 0x1C4);
+                }
+                return 0;
+            }
+        }
+    }
+    if (~D_004A20CC != 0) {
+        func_0020AB50(0x22);
+        pushState_2306B8(12);
+        D_004A20CC = 0xFFFFFFFF;
+        func_0029ED18(func_0028B180());
+        return 0;
+    }
+    if (func_002CC098(self->fA4) != 0) {
+        func_00398038(self->f48);
+        func_002CC0C0(self->fA4);
+        return 0;
+    }
+    if (func_00231840_pi(self, 0) != 0 && !inRace_2306B8(*((int*)self->f28))
+        && notPlaying_2306B8(self->mPlaybackMan) && func_0020CBE8() != 0) {
+        func_00326AE0(D_004A28A0);
+        func_0020CA10();
+        pushState_2306B8(2);
+        {
+            sObjC_2306B8* o = ((sObj48_2306B8*)self->f48)->fC;
+            sVEntryI_2306B8* vt = o->vtbl;
+            vt[44].fn((char*)o + vt[44].delta, self->f228);
+        }
+        func_00289B70(func_0028B180());
+        func_00294F48(func_0028B180());
+        return 0;
+    }
+    {
+        int wasPaused = paused_2306B8();
+        func_00398038(self->f48);
+        if (func_0020CBA0() == 0) {
+            cPlaybackMan_update(self->mPlaybackMan);
+            if (func_002CC098(self->fA4) != 0) {
+                return 0;
+            }
+            if (wasPaused && !paused_2306B8()) {
+                return 0;
+            }
+            return 1;
+        }
+        return 0;
+    }
+}
+
+extern "C" void func_002306B8(cGame_2306B8* self)
+{
+    if (*(unsigned int*)(self->mGameViewMan + 0x10) >= 2) {
+        *(int*)(D_004A5B64 + 0x34) = 1;
+    } else {
+        *(int*)(D_004A5B64 + 0x34) = func_002EE400(6) > 0.9f;
+    }
+    if (D_004A2EEC != 0) {
+        func_002570D8(D_004A2EEC);
+    }
+    func_00278918(D_004A28A4);
+    func_00231D18_v(self);
+    if (canUpdate_2306B8(self) && updatePause_2306B8(self)) {
+        if (self->f7C != 0) {
+            func_002373B8(self->f7C);
+        }
+        func_0020CFD0();
+        if (updateState_2306B8(self)) {
+            int skip;
+            if (self->f7C == 0 || func_00237950(self->f7C) != 0) {
+                if (self->f214 == 3) {
+                    func_00230F40(self);
+                    func_00354C98(&D_004A5988, 1);
+                } else {
+                    func_00230F40(self);
+                }
+                if (!paused_2306B8()) {
+                    func_0026F4A8(self->f28);
+                }
+                if (func_00270280(self->f28) == 0 && !(D_004A2A50 & 8)) {
+                    char* w = (char*)D_004A28A4;
+                    sVEntry_2306B8* vt = *(sVEntry_2306B8**)(w + 0x2A8);
+                    vt[5].fn(w + vt[5].delta);
+                }
+            }
+            skip = 0;
+            if ((D_004A2A50 & 1) || func_00270280(self->f28) != 0) {
+                skip = 1;
+            }
+            if (!skip) {
+                if ((self->f7C != 0 && func_002379C8(self->f7C) == 0)
+                    || func_0026CE50(self->mPlaybackMan) != 0) {
+                    skip = 1;
+                }
+            }
+            if (!skip) {
+                if (!(D_004A2A50 & 2)) {
+                    func_00354F98(&D_004A5988, 1);
+                }
+                func_00354F98(&D_004A5988, 5);
+                func_00354F98(&D_004A5988, 6);
+                if (!(D_004A2A50 & 2)) {
+                    func_00355028(&D_004A5988, 1);
+                }
+                {
+                    char* c = self->fC;
+                    sVEntry_2306B8* vt = *(sVEntry_2306B8**)(c + 0xCC);
+                    vt[3].fn(c + vt[3].delta);
+                }
+                if (!(D_004A2A50 & 0x10)) {
+                    func_00354F98(&D_004A5988, 2);
+                }
+                if (!(D_004A2A50 & 4)) {
+                    func_00354F98(&D_004A5988, 3);
+                }
+                func_00309270(self->f30);
+                func_002294C8(self->f38);
+                func_003440C8(self->f3C);
+                func_00357BF8(self->f40);
+                func_00354C98(&D_004A5988, 1);
+            } else {
+                func_00354F98(&D_004A5988, 5);
+                if (!(D_004A2A50 & 4)) {
+                    func_00354F98(&D_004A5988, 3);
+                }
+            }
+            func_00354F98(&D_004A5988, 4);
+            {
+                int s = *((int*)self->f28);
+                if (!inRace_2306B8(s) || notMode3_2306B8(s)) {
+                    cGameViewMan_updateAll(self->mGameViewMan);
+                }
+            }
+            (self->fAC)++;
+            {
+                unsigned int i;
+                for (i = 0; i < (((sViewList_2306B8*)self->mGameViewMan))->getCount(); i++) {
+                    func_002B7848(self->f4C, (((sViewList_2306B8*)self->mGameViewMan))->getView(i) + 0x20, i);
+                }
+            }
+            {
+                int i;
+                for (i = 0; i < (((sRiderList_2306B8*)self->fC))->getCount(); i++) {
+                    char* r = (((sRiderList_2306B8*)self->fC))->getRider(i);
+                    sVEntry_2306B8* vt = *(sVEntry_2306B8**)(r + 0x6C0);
+                    vt[19].fn(r + vt[19].delta);
+                }
+            }
+        }
+        if (self->f7C != 0) {
+            func_00237948(self->f7C);
+        }
+    }
+    if (D_004A2EB8 != 0) {
+        func_003F42A0();
+    }
+    if (*(void**)((char*)D_004A28A8 + 0x11C) != 0) {
+        func_001A39F0(*(void**)((char*)D_004A28A8 + 0x11C));
+    }
+    func_001E1458();
+    func_001F3188(self->f94);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gameload", func_00230E90);

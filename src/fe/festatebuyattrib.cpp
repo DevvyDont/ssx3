@@ -1321,7 +1321,174 @@ extern "C" void func_001F6840(void* self, char* name, const char* str)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupRidersBest);
+#ifdef SKIP_ASM
+struct cUIText;
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+int GetHashValue32(char* str);
+int cBELibrary_getCharacterID(int);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+void cUIText_setUnicodeStringByID(cUIText* text, int id);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" char* func_00144C60(void* race, int track);
+extern "C" char* func_00413AF8(float v);
+extern char D_004A2108[] __attribute__((aligned(8)));
+extern char D_004A2138[];
+extern char D_004A2168[];
+extern char D_004A23B8[];
+extern char D_004A23C0[];
+extern char D_004A23C8[];
+extern char D_004A23D0[];
+extern char D_004A23D8[];
+extern char D_0046F3B8[];
+extern char D_0046F3C8[];
+extern char D_0046F3D8[];
+extern char D_0046F3F0[];
+extern char D_0046F400[];
+extern char D_0046F410[];
+extern char D_0046F428[];
+extern char D_0046F438[];
+extern char D_0046F450[];
+extern char D_0046F460[];
+extern char D_0046F470[];
+extern char D_0046F480[];
+extern char D_0046F490[];
+extern char D_0046F4A8[];
+extern char D_0046F4C0[];
+
+// One "best" record per stat: the value and the track it was set on.
+struct sBestEntry_6890 {
+    int value;
+    int track;
+};
+
+struct sRidersBest_6890 {
+    sBestEntry_6890 entry[8];   // 0x00
+    int pad40[5];               // 0x40
+};
+
+extern "C" sRidersBest_6890* func_00155288(void* iface, int a, int charId);
+
+struct sCareerStats_6890 {
+    char pad0[0x40];
+    void* screen;               // 0x40
+};
+
+extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
+{
+    sCareerStats_6890* self = (sCareerStats_6890*)vself;
+    char buf[112];
+    void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+    void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
+    sRidersBest_6890 best = *func_00155288(iface8, 0, cBELibrary_getCharacterID(0));
+    int value;
+    int track;
+
+    {
+        value = best.entry[0].value;
+        track = best.entry[0].track;
+        if (value > 0) {
+            sprintf(buf, D_004A2138, value);
+            func_001F6840(self, D_004A23B8, buf);
+            sprintf(buf, D_004A23C0, func_00144C60(race, track));
+            func_001F6840(self, D_0046F3B8, buf);
+        } else {
+            func_001F6840(self, D_004A23B8, D_004A2108);
+            func_001F6840(self, D_0046F3B8, D_004A2168);
+        }
+    }
+    {
+        value = best.entry[5].value;
+        track = best.entry[5].track;
+        if (value > 0) {
+            sprintf(buf, D_004A23C8, value);
+            func_001F6840(self, D_0046F3C8, buf);
+            sprintf(buf, D_004A23C0, func_00144C60(race, track));
+            func_001F6840(self, D_0046F3D8, buf);
+        } else {
+            func_001F6840(self, D_0046F3C8, D_004A2108);
+            func_001F6840(self, D_0046F3D8, D_004A2168);
+        }
+    }
+    {
+        value = best.entry[1].value;
+        track = best.entry[1].track;
+        if (value > 0) {
+            sprintf(buf, D_004A2138, value);
+            func_001F6840(self, D_004A23D0, buf);
+            sprintf(buf, D_004A23C0, func_00144C60(race, track));
+            func_001F6840(self, D_0046F3F0, buf);
+        } else {
+            func_001F6840(self, D_004A23D0, D_004A2108);
+            func_001F6840(self, D_0046F3F0, D_004A2168);
+        }
+    }
+    {
+        value = best.entry[2].value;
+        track = best.entry[2].track;
+        if (value > 0) {
+            sprintf(buf, D_004A2138, value);
+            func_001F6840(self, D_0046F400, buf);
+            sprintf(buf, D_004A23C0, func_00144C60(race, track));
+            func_001F6840(self, D_0046F410, buf);
+        } else {
+            func_001F6840(self, D_0046F400, D_004A2108);
+            func_001F6840(self, D_0046F410, D_004A2168);
+        }
+    }
+    {
+        value = best.entry[3].value;
+        track = best.entry[3].track;
+        if (value > 0) {
+            sprintf(buf, D_004A2138, value);
+            func_001F6840(self, D_0046F428, buf);
+            sprintf(buf, D_004A23C0, func_00144C60(race, track));
+            func_001F6840(self, D_0046F438, buf);
+        } else {
+            func_001F6840(self, D_0046F428, D_004A2108);
+            func_001F6840(self, D_0046F438, D_004A2168);
+        }
+    }
+    {
+        value = best.entry[6].value;
+        track = best.entry[6].track;
+        if (value > 0) {
+            sprintf(buf, D_0046F450, func_00413AF8((float)value * 0.009999999776482582f));
+            func_001F6840(self, D_0046F460, buf);
+            sprintf(buf, D_004A23C0, func_00144C60(race, track));
+            func_001F6840(self, D_0046F470, buf);
+        } else {
+            func_001F6840(self, D_0046F460, D_004A2108);
+            func_001F6840(self, D_0046F470, D_004A2168);
+        }
+    }
+    {
+        value = best.entry[7].value;
+        track = best.entry[7].track;
+        if (value > 0) {
+            sprintf(buf, D_004A23C8, value);
+            func_001F6840(self, D_004A23D8, buf);
+            sprintf(buf, D_004A23C0, func_00144C60(race, track));
+            func_001F6840(self, D_0046F480, buf);
+        } else {
+            func_001F6840(self, D_004A23D8, D_004A2108);
+            func_001F6840(self, D_0046F480, D_004A2168);
+        }
+    }
+    cUIText* title = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0046F490));
+    cUIText_setUnicodeStringByID(title, GetHashValue32(D_0046F4A8));
+    if (best.entry[4].value > 0) {
+        sprintf(buf, D_004A2138, best.entry[4].value);
+    } else {
+        // strcpy(buf, "-"): gcc's inline strcpy of a literal is a 2-byte aligned copy
+        __builtin_memcpy(buf, D_004A2108, 2);
+    }
+    func_001F6840(self, D_0046F4C0, buf);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F6EE0);

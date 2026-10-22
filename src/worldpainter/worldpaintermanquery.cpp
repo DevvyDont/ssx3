@@ -52,7 +52,179 @@ extern "C" void* func_002C0B30(void* self, ...)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0B70);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+inline void* operator new(unsigned int, void* p) { return p; }
+
+struct sColor_2C0B70 {
+    float r, g, b, a;
+    sColor_2C0B70(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
+};
+
+
+struct sFlags_2C0B70 {
+    unsigned char a;
+    unsigned int b : 24;
+    sFlags_2C0B70(unsigned char aa, unsigned int ab) : a(aa), b(ab) {}
+};
+
+extern int D_004A53D0;
+extern int D_004A53D4;
+extern sFlags_2C0B70 D_004A53D8;
+extern sFlags_2C0B70 D_004A53E0;
+extern sFlags_2C0B70 D_004A53E8;
+extern sFlags_2C0B70 D_004A53F0;
+extern sFlags_2C0B70 D_004A53F8;
+extern sFlags_2C0B70 D_004A5400;
+extern sFlags_2C0B70 D_004A5408;
+extern sFlags_2C0B70 D_004A5410;
+extern sFlags_2C0B70 D_004A5418;
+extern sFlags_2C0B70 D_004A5420;
+extern sFlags_2C0B70 D_004A5428;
+extern sFlags_2C0B70 D_004A5430;
+extern sFlags_2C0B70 D_004A5438;
+extern sFlags_2C0B70 D_004A5440;
+
+extern sColor_2C0B70 D_004D4638;
+extern sColor_2C0B70 D_004D4648;
+extern sColor_2C0B70 D_004D4658;
+extern sColor_2C0B70 D_004D4668;
+extern sColor_2C0B70 D_004D4678;
+extern sColor_2C0B70 D_004D4688;
+extern sColor_2C0B70 D_004D4698;
+extern sColor_2C0B70 D_004D46A8;
+extern sColor_2C0B70 D_004D46B8;
+extern sColor_2C0B70 D_004D46C8;
+extern sColor_2C0B70 D_004D46D8;
+extern sColor_2C0B70 D_004D46E8;
+extern sColor_2C0B70 D_004D46F8;
+extern sColor_2C0B70 D_004D4708;
+extern sColor_2C0B70 D_004D4718;
+extern sColor_2C0B70 D_004D4728;
+extern sColor_2C0B70 D_004D4738;
+extern sColor_2C0B70 D_004D4748;
+extern sColor_2C0B70 D_004D4758;
+extern sColor_2C0B70 D_004D4768;
+extern sColor_2C0B70 D_004D4778;
+extern sColor_2C0B70 D_004D4788;
+extern sColor_2C0B70 D_004D4798;
+extern sColor_2C0B70 D_004D47A8;
+extern sColor_2C0B70 D_004D47B8;
+extern sColor_2C0B70 D_004D47C8;
+extern sColor_2C0B70 D_004D47D8;
+extern sColor_2C0B70 D_004D47E8;
+extern sColor_2C0B70 D_004D47F8;
+extern sColor_2C0B70 D_004D4808;
+extern sColor_2C0B70 D_004D4818;
+extern sColor_2C0B70 D_004D4828;
+extern sColor_2C0B70 D_004D4838;
+extern sColor_2C0B70 D_004D4848;
+extern sColor_2C0B70 D_004D4858;
+extern sColor_2C0B70 D_004D4868;
+extern sColor_2C0B70 D_004D4878;
+extern sColor_2C0B70 D_004D4888;
+extern sColor_2C0B70 D_004D4898;
+extern sColor_2C0B70 D_004D48A8;
+extern sColor_2C0B70 D_004D48B8;
+extern sColor_2C0B70 D_004D48C8;
+extern sColor_2C0B70 D_004D48D8;
+extern sColor_2C0B70 D_004D48E8;
+extern sColor_2C0B70 D_004D48F8;
+extern sColor_2C0B70 D_004D4908;
+extern sColor_2C0B70 D_004D4918;
+extern sColor_2C0B70 D_004D4928;
+extern sColor_2C0B70 D_004D4938;
+extern sColor_2C0B70 D_004D4948;
+extern sColor_2C0B70 D_004D4958;
+extern sColor_2C0B70 D_004D4968;
+extern sColor_2C0B70 D_004D4978;
+extern sColor_2C0B70 D_004D4988;
+extern sColor_2C0B70 D_004D4998;
+extern sColor_2C0B70 D_004D49A8;
+
+// The unit declares func_002C0B70 later as returning void*; bind this body by asm label.
+extern "C" void func_002C0B70_impl(int initialize, int priority) __asm__("func_002C0B70");
+
+extern "C" void func_002C0B70_impl(int initialize, int priority)
+{
+    if (priority == 0xFFFF && initialize != 0) {
+        new (&D_004D4638) sColor_2C0B70(1.0f, 1.0f, 1.0f, 0.5f);
+        new (&D_004D4648) sColor_2C0B70(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
+        new (&D_004D4658) sColor_2C0B70(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
+        new (&D_004D4668) sColor_2C0B70(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
+        new (&D_004D4678) sColor_2C0B70(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
+        new (&D_004D4688) sColor_2C0B70(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
+        new (&D_004D4698) sColor_2C0B70(0.4411740005016327f, 0.41388601064682007f, 0.3211260139942169f, 0.4398239850997925f);
+        new (&D_004D46A8) sColor_2C0B70(0.500997006893158f, 0.24849599599838257f, 1.0f, 1.0f);
+        new (&D_004D46B8) sColor_2C0B70(0.27687299251556396f, 0.6395620107650757f, 0.13423900306224823f, 0.0f);
+        new (&D_004D46C8) sColor_2C0B70(0.8936439752578735f, 0.5263469815254211f, 0.5051450133323669f, 0.8687300086021423f);
+        new (&D_004D46D8) sColor_2C0B70(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D46E8) sColor_2C0B70(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D46F8) sColor_2C0B70(1.0f, 0.550000011920929f, 0.5350000262260437f, 0.550000011920929f);
+        new (&D_004D4708) sColor_2C0B70(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D4718) sColor_2C0B70(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D4728) sColor_2C0B70(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D4738) sColor_2C0B70(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D4748) sColor_2C0B70(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D4758) sColor_2C0B70(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004D4768) sColor_2C0B70(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004D4778) sColor_2C0B70(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004D4788) sColor_2C0B70(1.0f, 0.7828119993209839f, 0.06171900033950806f, 0.03984399884939194f);
+        new (&D_004D4798) sColor_2C0B70(1.0f, 1.0f, 0.7988259792327881f, 0.0f);
+        new (&D_004D47A8) sColor_2C0B70(0.9886710047721863f, 0.9230499863624573f, 0.34311699867248535f, 0.0f);
+        new (&D_004D47B8) sColor_2C0B70(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D47C8) sColor_2C0B70(1.0f, 1.0f, 0.7976430058479309f, 0.0f);
+        new (&D_004D47D8) sColor_2C0B70(1.0f, 0.9222670197486877f, 0.34179699420928955f, 0.0f);
+        new (&D_004D47E8) sColor_2C0B70(1.0f, 0.7847639918327332f, 0.06054700165987015f, 0.04062499850988388f);
+        new (&D_004D47F8) sColor_2C0B70(1.0f, 0.800000011920929f, 0.44999998807907104f, 1.0f);
+        new (&D_004D4808) sColor_2C0B70(1.0f, 0.3281260132789612f, 1.0f, 0.3539060056209564f);
+        new (&D_004D4818) sColor_2C0B70(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D4828) sColor_2C0B70(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D4838) sColor_2C0B70(1.0f, 0.8613290190696716f, 0.38124799728393555f, 0.0f);
+        new (&D_004D4848) sColor_2C0B70(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D4858) sColor_2C0B70(1.0f, 0.3244380056858063f, 1.0f, 0.0f);
+        new (&D_004D4868) sColor_2C0B70(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D4878) sColor_2C0B70(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D4888) sColor_2C0B70(0.7007060050964355f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D4898) sColor_2C0B70(1.0f, 0.7828530073165894f, 0.06140600144863129f, 0.04146299883723259f);
+        new (&D_004D48A8) sColor_2C0B70(1.0f, 0.32487601041793823f, 1.0f, 0.35280099511146545f);
+        new (&D_004D48B8) sColor_2C0B70(1.0f, 1.0f, 0.7977359890937805f, 0.0f);
+        new (&D_004D48C8) sColor_2C0B70(1.0f, 0.4937489926815033f, 1.0f, 0.49179700016975403f);
+        new (&D_004D48D8) sColor_2C0B70(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D48E8) sColor_2C0B70(1.0f, 0.800000011920929f, 1.0f, 0.800000011920929f);
+        new (&D_004D48F8) sColor_2C0B70(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D4908) sColor_2C0B70(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D4918) sColor_2C0B70(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D4928) sColor_2C0B70(1.0f, 0.3273420035839081f, 1.0f, 0.35390499234199524f);
+        new (&D_004D4938) sColor_2C0B70(1.0f, 1.0f, 0.061000000685453415f, 0.039000000804662704f);
+        new (&D_004D4948) sColor_2C0B70(1.0f, 1.0f, 0.7999979853630066f, 0.0f);
+        new (&D_004D4958) sColor_2C0B70(1.0f, 0.9589840173721313f, 0.6143789887428284f, 0.0f);
+        new (&D_004D4968) sColor_2C0B70(1.0f, 0.9285150170326233f, 0.3399839997291565f, 0.0f);
+        new (&D_004D4978) sColor_2C0B70(1.0f, 0.8738250136375427f, 0.24931700527668f, 0.017578000202775f);
+        new (&D_004D4988) sColor_2C0B70(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
+        new (&D_004D4998) sColor_2C0B70(1.0f, 0.0f, 1.0f, 0.0f);
+        new (&D_004D49A8) sColor_2C0B70(1.0f, 1.0f, 0.0f, 0.0f);
+        D_004A53D4 = 0;
+        D_004A53D0 = 0;
+        new (&D_004A53D8) sFlags_2C0B70(0, 0);
+        new (&D_004A53E0) sFlags_2C0B70(1, 1);
+        new (&D_004A53E8) sFlags_2C0B70(2, 2);
+        new (&D_004A53F0) sFlags_2C0B70(3, 3);
+        new (&D_004A53F8) sFlags_2C0B70(4, 4);
+        new (&D_004A5400) sFlags_2C0B70(5, 5);
+        new (&D_004A5408) sFlags_2C0B70(6, 6);
+        new (&D_004A5410) sFlags_2C0B70(7, 7);
+        new (&D_004A5418) sFlags_2C0B70(8, 8);
+        new (&D_004A5420) sFlags_2C0B70(9, 9);
+        new (&D_004A5428) sFlags_2C0B70(10, 10);
+        new (&D_004A5430) sFlags_2C0B70(11, 11);
+        new (&D_004A5438) sFlags_2C0B70(12, 12);
+        new (&D_004A5440) sFlags_2C0B70(13, 13);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1458__FPv);

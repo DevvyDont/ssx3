@@ -1135,7 +1135,144 @@ extern "C" int func_002D4080(int self, ...) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D40C0);
+#ifdef SKIP_ASM
+inline void* operator new(unsigned int, void* p) { return p; }
+
+struct sColor_40C0 {
+    float r, g, b, a;
+    sColor_40C0(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
+};
+
+struct sSlot_40C0 {
+    unsigned a : 8;
+    unsigned b : 24;
+    int c;
+    sSlot_40C0(int n) { a = n; b = n; }
+};
+
+extern sSlot_40C0 D_004A54C0;
+extern sColor_40C0 D_004D53F0;
+extern sColor_40C0 D_004D5400;
+extern sColor_40C0 D_004D5410;
+extern sColor_40C0 D_004D5420;
+extern sColor_40C0 D_004D5430;
+extern sColor_40C0 D_004D5440;
+extern sColor_40C0 D_004D5450;
+extern sColor_40C0 D_004D5460;
+extern sColor_40C0 D_004D5470;
+extern sColor_40C0 D_004D5480;
+extern sColor_40C0 D_004D5490;
+extern sColor_40C0 D_004D54A0;
+extern sColor_40C0 D_004D54B0;
+extern sColor_40C0 D_004D54C0;
+extern sColor_40C0 D_004D54D0;
+extern sColor_40C0 D_004D54E0;
+extern sColor_40C0 D_004D54F0;
+extern sColor_40C0 D_004D5500;
+extern sColor_40C0 D_004D5510;
+extern sColor_40C0 D_004D5520;
+extern sColor_40C0 D_004D5530;
+extern sColor_40C0 D_004D5540;
+extern sColor_40C0 D_004D5550;
+extern sColor_40C0 D_004D5560;
+extern sColor_40C0 D_004D5570;
+extern sColor_40C0 D_004D5580;
+extern sColor_40C0 D_004D5590;
+extern sColor_40C0 D_004D55A0;
+extern sColor_40C0 D_004D55B0;
+extern sColor_40C0 D_004D55C0;
+extern sColor_40C0 D_004D55D0;
+extern sColor_40C0 D_004D55E0;
+extern sColor_40C0 D_004D55F0;
+extern sColor_40C0 D_004D5600;
+extern sColor_40C0 D_004D5610;
+extern sColor_40C0 D_004D5620;
+extern sColor_40C0 D_004D5630;
+extern sColor_40C0 D_004D5640;
+extern sColor_40C0 D_004D5650;
+extern sColor_40C0 D_004D5660;
+extern sColor_40C0 D_004D5670;
+extern sColor_40C0 D_004D5680;
+extern sColor_40C0 D_004D5690;
+extern sColor_40C0 D_004D56A0;
+extern sColor_40C0 D_004D56B0;
+extern sColor_40C0 D_004D56C0;
+extern sColor_40C0 D_004D56D0;
+extern sColor_40C0 D_004D56E0;
+extern sColor_40C0 D_004D56F0;
+extern sColor_40C0 D_004D5700;
+extern sColor_40C0 D_004D5710;
+extern sColor_40C0 D_004D5720;
+extern sColor_40C0 D_004D5730;
+extern sColor_40C0 D_004D5740;
+extern sColor_40C0 D_004D5750;
+extern sColor_40C0 D_004D5760;
+
+extern "C" void func_002D40C0(int initialize, int priority)
+{
+    if (priority == 0xFFFF && initialize != 0) {
+        new (&D_004D53F0) sColor_40C0(1.0f, 1.0f, 1.0f, 0.5f);
+        new (&D_004D5400) sColor_40C0(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
+        new (&D_004D5410) sColor_40C0(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
+        new (&D_004D5420) sColor_40C0(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
+        new (&D_004D5430) sColor_40C0(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
+        new (&D_004D5440) sColor_40C0(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
+        new (&D_004D5450) sColor_40C0(0.4411740005016327f, 0.41388601064682007f, 0.3211260139942169f, 0.4398239850997925f);
+        new (&D_004D5460) sColor_40C0(0.500997006893158f, 0.24849599599838257f, 1.0f, 1.0f);
+        new (&D_004D5470) sColor_40C0(0.27687299251556396f, 0.6395620107650757f, 0.13423900306224823f, 0.0f);
+        new (&D_004D5480) sColor_40C0(0.8936439752578735f, 0.5263469815254211f, 0.5051450133323669f, 0.8687300086021423f);
+        new (&D_004D5490) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D54A0) sColor_40C0(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D54B0) sColor_40C0(1.0f, 0.550000011920929f, 0.5350000262260437f, 0.550000011920929f);
+        new (&D_004D54C0) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D54D0) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D54E0) sColor_40C0(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D54F0) sColor_40C0(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D5500) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D5510) sColor_40C0(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004D5520) sColor_40C0(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004D5530) sColor_40C0(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004D5540) sColor_40C0(1.0f, 0.7828119993209839f, 0.06171900033950806f, 0.03984399884939194f);
+        new (&D_004D5550) sColor_40C0(1.0f, 1.0f, 0.7988259792327881f, 0.0f);
+        new (&D_004D5560) sColor_40C0(0.9886710047721863f, 0.9230499863624573f, 0.34311699867248535f, 0.0f);
+        new (&D_004D5570) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D5580) sColor_40C0(1.0f, 1.0f, 0.7976430058479309f, 0.0f);
+        new (&D_004D5590) sColor_40C0(1.0f, 0.9222670197486877f, 0.34179699420928955f, 0.0f);
+        new (&D_004D55A0) sColor_40C0(1.0f, 0.7847639918327332f, 0.06054700165987015f, 0.04062499850988388f);
+        new (&D_004D55B0) sColor_40C0(1.0f, 0.800000011920929f, 0.44999998807907104f, 1.0f);
+        new (&D_004D55C0) sColor_40C0(1.0f, 0.3281260132789612f, 1.0f, 0.3539060056209564f);
+        new (&D_004D55D0) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D55E0) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D55F0) sColor_40C0(1.0f, 0.8613290190696716f, 0.38124799728393555f, 0.0f);
+        new (&D_004D5600) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D5610) sColor_40C0(1.0f, 0.3244380056858063f, 1.0f, 0.0f);
+        new (&D_004D5620) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D5630) sColor_40C0(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D5640) sColor_40C0(0.7007060050964355f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D5650) sColor_40C0(1.0f, 0.7828530073165894f, 0.06140600144863129f, 0.04146299883723259f);
+        new (&D_004D5660) sColor_40C0(1.0f, 0.32487601041793823f, 1.0f, 0.35280099511146545f);
+        new (&D_004D5670) sColor_40C0(1.0f, 1.0f, 0.7977359890937805f, 0.0f);
+        new (&D_004D5680) sColor_40C0(1.0f, 0.4937489926815033f, 1.0f, 0.49179700016975403f);
+        new (&D_004D5690) sColor_40C0(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D56A0) sColor_40C0(1.0f, 0.800000011920929f, 1.0f, 0.800000011920929f);
+        new (&D_004D56B0) sColor_40C0(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D56C0) sColor_40C0(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D56D0) sColor_40C0(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D56E0) sColor_40C0(1.0f, 0.3273420035839081f, 1.0f, 0.35390499234199524f);
+        new (&D_004D56F0) sColor_40C0(1.0f, 1.0f, 0.061000000685453415f, 0.039000000804662704f);
+        new (&D_004D5700) sColor_40C0(1.0f, 1.0f, 0.7999979853630066f, 0.0f);
+        new (&D_004D5710) sColor_40C0(1.0f, 0.9589840173721313f, 0.6143789887428284f, 0.0f);
+        new (&D_004D5720) sColor_40C0(1.0f, 0.9285150170326233f, 0.3399839997291565f, 0.0f);
+        new (&D_004D5730) sColor_40C0(1.0f, 0.8738250136375427f, 0.24931700527668f, 0.017578000202775f);
+        new (&D_004D5740) sColor_40C0(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
+        new (&D_004D5750) sColor_40C0(1.0f, 0.0f, 1.0f, 0.0f);
+        new (&D_004D5760) sColor_40C0(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004A54C0) sSlot_40C0(-1);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1D3510", func_002D48D0);

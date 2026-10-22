@@ -66,7 +66,152 @@ extern "C" void func_001FA100(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", func_001FA238);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+extern "C" void* func_00211088(void* self, void* engine, unsigned char a2, int a3);
+extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
+extern "C" void func_0039F190(void* self, int a1);
+extern "C" int func_0039A738(void* obj);
+extern "C" void func_00161EF0(void* a0, int a1, void* a2);
+extern "C" void* func_0028B180();
+extern "C" void func_00287410(void* snd, int v);
+extern "C" void func_00287488(void* snd, int v);
+extern "C" void func_00287520(void* snd, int v);
+extern "C" void func_00287558(void* snd, int v);
+extern "C" void func_002875D0(void* snd, int v);
+extern "C" void func_00266F90(void* self, int* a, int* b);
+extern "C" void func_00266F58(void* self, int a, int b);
+extern "C" void func_00266E88(void* self);
+extern "C" void func_00266E30(void* self);
+extern void* D_004A28A8;
+extern int D_00534B30[];
+extern void* D_004A33F4;
+extern char D_0046F9B0[];
+extern char D_0046F9C0[];
+extern char D_004A2498[];
+extern char D_004A24A0[];
+extern char D_004A24A8[];
+extern char D_004A24B0[];
+extern char D_004A24B8[];
+extern char D_004A24C0[];
+extern char D_004A24C8[];
+extern char D_004A24D0[];
+extern char D_004A24E8[];
+
+struct sOptions_A238 {
+    unsigned int f0 : 4;
+    unsigned int f4 : 4;
+    unsigned int f8 : 4;
+    unsigned int pad12 : 4;
+    int f16 : 1;
+    int f17 : 1;
+    unsigned int pad18 : 12;
+    unsigned int f30 : 2;
+    int data[0x288 / 4 - 1];
+};
+// PORT: D_00535610 is viewed with different types across the program; view bound by asm label
+extern sOptions_A238 D_00535610_A238 __asm__("D_00535610");
+
+struct sVE_A238 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+// The options interface (kind 4).
+struct cBEOptionInterface_A238 {
+    char pad[0xC];
+    sVE_A238* vtbl;
+    sOptions_A238 getOptions() { return D_00535610_A238; }
+};
+
+static inline void SetF0_A238(unsigned char v) { D_00535610_A238.f0 = v; }
+static inline void SetF4_A238(unsigned char v) { D_00535610_A238.f4 = v; }
+static inline void SetF8_A238(unsigned char v) { D_00535610_A238.f8 = v; }
+
+static inline bool IsId_A238(char* obj, char* key)
+{
+    int id = *(int*)(obj + 0x38);
+    return id == GetHashValue32(key);
+}
+
+static inline void* Sound_A238(int slot)
+{
+    char* p = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+    return *(void**)(p + slot);
+}
+
+// Pause-options widget handler: msg 5 opens the sub-state, 6 pops, 9 applies a changed setting.
+extern "C" void func_001FA238(void* self, char* obj, unsigned int msg)
+{
+    if (obj == 0) {
+        return;
+    }
+    cBEOptionInterface_A238* iface = (cBEOptionInterface_A238*)cBE_getInterface_Fv(cBE_getBE(), 4);
+    switch (msg) {
+    case 5:
+        if (IsId_A238(obj, D_004A24E8)) {
+            char* stack = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
+            char* st = (char*)func_00211088(cMemMan_alloc(0x27C, D_0046F9C0, 0x100, 0), *(void**)((char*)self + 0x10),
+                                            *(unsigned char*)((char*)self + 0x14), 0x2A);
+            *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
+            cUIStateStack_pushSpecial(stack + 0x18, st, 0, 0);
+        }
+        break;
+    case 6:
+        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        break;
+    case 9:
+        if (IsId_A238(obj, D_004A2498)) {
+            D_00535610_A238.f30 = *(unsigned char*)(obj + 0x319);
+        } else if (IsId_A238(obj, D_004A24A0)) {
+            int on = func_0039A738(obj);
+            char* p = (char*)Sound_A238(4);
+            func_00161EF0(*(void**)(p + 0xA8), on, p);
+        } else if (IsId_A238(obj, D_004A24A8)) {
+            int on = func_0039A738(obj);
+            char* p = (char*)Sound_A238(8);
+            func_00161EF0(*(void**)(p + 0xA8), on, p);
+        } else if (IsId_A238(obj, D_004A24B0)) {
+            SetF0_A238(*(int*)(obj + 0x74));
+            func_00287410(func_0028B180(), iface->getOptions().f0);
+        } else if (IsId_A238(obj, D_004A24B8)) {
+            SetF8_A238(*(int*)(obj + 0x74));
+            func_00287488(func_0028B180(), iface->getOptions().f8);
+        } else if (IsId_A238(obj, D_004A24C0)) {
+            SetF4_A238(*(int*)(obj + 0x74));
+            func_00287520(func_0028B180(), iface->getOptions().f4);
+        } else if (IsId_A238(obj, D_004A24C8)) {
+            D_00535610_A238.f17 = func_0039A738(obj) != 0;
+            func_00287558(func_0028B180(), iface->getOptions().f17 != 0);
+        } else if (IsId_A238(obj, D_004A24D0)) {
+            D_00535610_A238.f16 = func_0039A738(obj) != 0;
+            func_002875D0(func_0028B180(), iface->getOptions().f16 != 0);
+        }
+        cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+        if (D_00534B30[0] != 0 && IsId_A238(obj, D_0046F9B0)) {
+            int level;
+            int max;
+            func_00266F90(D_004A33F4, &level, &max);
+            level = *(int*)(obj + 0x74) * 10;
+            func_00266F58(D_004A33F4, level, max);
+            if (level < 10) {
+                func_00266E88(D_004A33F4);
+            } else {
+                func_00266E30(D_004A33F4);
+            }
+        }
+        iface->vtbl[1].fn((char*)iface + iface->vtbl[1].delta);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FA9E0);

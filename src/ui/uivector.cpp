@@ -363,7 +363,155 @@ extern "C" void* func_003A3F08(void* self, ...)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uivector", func_003A3F48);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+inline void* operator new(unsigned int, void* p) { return p; }
+
+struct sColor_3A3F48 {
+    float r, g, b, a;
+    sColor_3A3F48(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
+};
+
+void* func_0039E288(void* self);
+extern void* D_0046DD60[];
+extern void* D_004A5A58;
+
+struct sV2_3A3F48 {
+    float x, y;
+    sV2_3A3F48(float ax, float ay) : x(ax), y(ay) {}
+};
+extern sV2_3A3F48 D_004A5A60;
+
+extern sColor_3A3F48 D_005083D0;
+extern sColor_3A3F48 D_005083E0;
+extern sColor_3A3F48 D_005083F0;
+extern sColor_3A3F48 D_00508400;
+extern sColor_3A3F48 D_00508410;
+extern sColor_3A3F48 D_00508420;
+extern sColor_3A3F48 D_00508430;
+extern sColor_3A3F48 D_00508440;
+extern sColor_3A3F48 D_00508450;
+extern sColor_3A3F48 D_00508460;
+extern sColor_3A3F48 D_00508470;
+extern sColor_3A3F48 D_00508480;
+extern sColor_3A3F48 D_00508490;
+extern sColor_3A3F48 D_005084A0;
+extern sColor_3A3F48 D_005084B0;
+extern sColor_3A3F48 D_005084C0;
+extern sColor_3A3F48 D_005084D0;
+extern sColor_3A3F48 D_005084E0;
+extern sColor_3A3F48 D_005084F0;
+extern sColor_3A3F48 D_00508500;
+extern sColor_3A3F48 D_00508510;
+extern sColor_3A3F48 D_00508520;
+extern sColor_3A3F48 D_00508530;
+extern sColor_3A3F48 D_00508540;
+extern sColor_3A3F48 D_00508550;
+extern sColor_3A3F48 D_00508560;
+extern sColor_3A3F48 D_00508570;
+extern sColor_3A3F48 D_00508580;
+extern sColor_3A3F48 D_00508590;
+extern sColor_3A3F48 D_005085A0;
+extern sColor_3A3F48 D_005085B0;
+extern sColor_3A3F48 D_005085C0;
+extern sColor_3A3F48 D_005085D0;
+extern sColor_3A3F48 D_005085E0;
+extern sColor_3A3F48 D_005085F0;
+extern sColor_3A3F48 D_00508600;
+extern sColor_3A3F48 D_00508610;
+extern sColor_3A3F48 D_00508620;
+extern sColor_3A3F48 D_00508630;
+extern sColor_3A3F48 D_00508640;
+extern sColor_3A3F48 D_00508650;
+extern sColor_3A3F48 D_00508660;
+extern sColor_3A3F48 D_00508670;
+extern sColor_3A3F48 D_00508680;
+extern sColor_3A3F48 D_00508690;
+extern sColor_3A3F48 D_005086A0;
+extern sColor_3A3F48 D_005086B0;
+extern sColor_3A3F48 D_005086C0;
+extern sColor_3A3F48 D_005086D0;
+extern sColor_3A3F48 D_005086E0;
+extern sColor_3A3F48 D_005086F0;
+extern sColor_3A3F48 D_00508700;
+extern sColor_3A3F48 D_00508710;
+extern sColor_3A3F48 D_00508720;
+extern sColor_3A3F48 D_00508730;
+extern sColor_3A3F48 D_00508740;
+
+// The unit declares func_003A3F48 later as returning void*; bind this body by asm label.
+extern "C" void func_003A3F48_impl(int initialize, int priority) __asm__("func_003A3F48");
+
+extern "C" void func_003A3F48_impl(int initialize, int priority)
+{
+    if (priority == 0xFFFF) {
+        if (initialize != 0) {
+        new (&D_005083D0) sColor_3A3F48(1.0f, 1.0f, 1.0f, 0.5f);
+        new (&D_005083E0) sColor_3A3F48(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
+        new (&D_005083F0) sColor_3A3F48(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
+        new (&D_00508400) sColor_3A3F48(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
+        new (&D_00508410) sColor_3A3F48(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
+        new (&D_00508420) sColor_3A3F48(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
+        new (&D_00508430) sColor_3A3F48(0.4411740005016327f, 0.41388601064682007f, 0.3211260139942169f, 0.4398239850997925f);
+        new (&D_00508440) sColor_3A3F48(0.500997006893158f, 0.24849599599838257f, 1.0f, 1.0f);
+        new (&D_00508450) sColor_3A3F48(0.27687299251556396f, 0.6395620107650757f, 0.13423900306224823f, 0.0f);
+        new (&D_00508460) sColor_3A3F48(0.8936439752578735f, 0.5263469815254211f, 0.5051450133323669f, 0.8687300086021423f);
+        new (&D_00508470) sColor_3A3F48(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_00508480) sColor_3A3F48(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_00508490) sColor_3A3F48(1.0f, 0.550000011920929f, 0.5350000262260437f, 0.550000011920929f);
+        new (&D_005084A0) sColor_3A3F48(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_005084B0) sColor_3A3F48(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_005084C0) sColor_3A3F48(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_005084D0) sColor_3A3F48(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_005084E0) sColor_3A3F48(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_005084F0) sColor_3A3F48(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_00508500) sColor_3A3F48(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_00508510) sColor_3A3F48(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_00508520) sColor_3A3F48(1.0f, 0.7828119993209839f, 0.06171900033950806f, 0.03984399884939194f);
+        new (&D_00508530) sColor_3A3F48(1.0f, 1.0f, 0.7988259792327881f, 0.0f);
+        new (&D_00508540) sColor_3A3F48(0.9886710047721863f, 0.9230499863624573f, 0.34311699867248535f, 0.0f);
+        new (&D_00508550) sColor_3A3F48(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_00508560) sColor_3A3F48(1.0f, 1.0f, 0.7976430058479309f, 0.0f);
+        new (&D_00508570) sColor_3A3F48(1.0f, 0.9222670197486877f, 0.34179699420928955f, 0.0f);
+        new (&D_00508580) sColor_3A3F48(1.0f, 0.7847639918327332f, 0.06054700165987015f, 0.04062499850988388f);
+        new (&D_00508590) sColor_3A3F48(1.0f, 0.800000011920929f, 0.44999998807907104f, 1.0f);
+        new (&D_005085A0) sColor_3A3F48(1.0f, 0.3281260132789612f, 1.0f, 0.3539060056209564f);
+        new (&D_005085B0) sColor_3A3F48(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_005085C0) sColor_3A3F48(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_005085D0) sColor_3A3F48(1.0f, 0.8613290190696716f, 0.38124799728393555f, 0.0f);
+        new (&D_005085E0) sColor_3A3F48(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_005085F0) sColor_3A3F48(1.0f, 0.3244380056858063f, 1.0f, 0.0f);
+        new (&D_00508600) sColor_3A3F48(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_00508610) sColor_3A3F48(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_00508620) sColor_3A3F48(0.7007060050964355f, 0.0f, 0.0f, 0.0f);
+        new (&D_00508630) sColor_3A3F48(1.0f, 0.7828530073165894f, 0.06140600144863129f, 0.04146299883723259f);
+        new (&D_00508640) sColor_3A3F48(1.0f, 0.32487601041793823f, 1.0f, 0.35280099511146545f);
+        new (&D_00508650) sColor_3A3F48(1.0f, 1.0f, 0.7977359890937805f, 0.0f);
+        new (&D_00508660) sColor_3A3F48(1.0f, 0.4937489926815033f, 1.0f, 0.49179700016975403f);
+        new (&D_00508670) sColor_3A3F48(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_00508680) sColor_3A3F48(1.0f, 0.800000011920929f, 1.0f, 0.800000011920929f);
+        new (&D_00508690) sColor_3A3F48(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_005086A0) sColor_3A3F48(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_005086B0) sColor_3A3F48(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_005086C0) sColor_3A3F48(1.0f, 0.3273420035839081f, 1.0f, 0.35390499234199524f);
+        new (&D_005086D0) sColor_3A3F48(1.0f, 1.0f, 0.061000000685453415f, 0.039000000804662704f);
+        new (&D_005086E0) sColor_3A3F48(1.0f, 1.0f, 0.7999979853630066f, 0.0f);
+        new (&D_005086F0) sColor_3A3F48(1.0f, 0.9589840173721313f, 0.6143789887428284f, 0.0f);
+        new (&D_00508700) sColor_3A3F48(1.0f, 0.9285150170326233f, 0.3399839997291565f, 0.0f);
+        new (&D_00508710) sColor_3A3F48(1.0f, 0.8738250136375427f, 0.24931700527668f, 0.017578000202775f);
+        new (&D_00508720) sColor_3A3F48(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
+        new (&D_00508730) sColor_3A3F48(1.0f, 0.0f, 1.0f, 0.0f);
+        new (&D_00508740) sColor_3A3F48(1.0f, 1.0f, 0.0f, 0.0f);
+            func_0039E288(&D_004A5A58);
+            new (&D_004A5A60) sV2_3A3F48(2.0f, 2.0f);
+        } else {
+            D_004A5A58 = D_0046DD60;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4778);

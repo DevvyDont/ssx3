@@ -1520,7 +1520,180 @@ extern "C" void* func_0035FDD0(void* self, ...)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035FE10);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sV3_FE10 {
+    float x, y, z;
+    sV3_FE10(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+
+struct sV4_FE10 {
+    float x, y, z, w;
+    sV4_FE10(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+    sV4_FE10(float ax, const sV3_FE10& v) : x(ax), y(v.x), z(v.y), w(v.z) {}
+    // Placement form without throw(): g++ then adds no null check (the original was a global's ctor call).
+    void* operator new(unsigned int, void* p) { return p; }
+};
+
+// D_004FFAC0: a Catmull-Rom basis matrix
+struct sMat_FE10 {
+    float m[16];
+    // arguments are the rows of the basis; stored transposed (column-major)
+    sMat_FE10(const float& a00, const float& a01, const float& a02, const float& a03,
+              const float& a10, const float& a11, const float& a12, const float& a13,
+              const float& a20, const float& a21, const float& a22, const float& a23,
+              const float& a30, const float& a31, const float& a32, const float& a33)
+    {
+        m[0] = a00; m[4] = a01; m[8] = a02; m[12] = a03;
+        m[1] = a10; m[5] = a11; m[9] = a12; m[13] = a13;
+        m[2] = a20; m[6] = a21; m[10] = a22; m[14] = a23;
+        m[3] = a30; m[7] = a31; m[11] = a32; m[15] = a33;
+    }
+    void* operator new(unsigned int, void* p) { return p; }
+};
+
+struct sList_FE10 {
+    int a, b;
+    void* operator new(unsigned int, void* p) { return p; }
+};
+void* func_003549D0(void* self);
+
+extern sV4_FE10 D_004FF740_v __asm__("D_004FF740");
+extern sV4_FE10 D_004FF750_v __asm__("D_004FF750");
+extern sV4_FE10 D_004FF760_v __asm__("D_004FF760");
+extern sV4_FE10 D_004FF770_v __asm__("D_004FF770");
+extern sV4_FE10 D_004FF780_v __asm__("D_004FF780");
+extern sV4_FE10 D_004FF790_v __asm__("D_004FF790");
+extern sV4_FE10 D_004FF7A0_v __asm__("D_004FF7A0");
+extern sV4_FE10 D_004FF7B0_v __asm__("D_004FF7B0");
+extern sV4_FE10 D_004FF7C0_v __asm__("D_004FF7C0");
+extern sV4_FE10 D_004FF7D0_v __asm__("D_004FF7D0");
+extern sV4_FE10 D_004FF7E0_v __asm__("D_004FF7E0");
+extern sV4_FE10 D_004FF7F0_v __asm__("D_004FF7F0");
+extern sV4_FE10 D_004FF800_v __asm__("D_004FF800");
+extern sV4_FE10 D_004FF810_v __asm__("D_004FF810");
+extern sV4_FE10 D_004FF820_v __asm__("D_004FF820");
+extern sV4_FE10 D_004FF830_v __asm__("D_004FF830");
+extern sV4_FE10 D_004FF840_v __asm__("D_004FF840");
+extern sV4_FE10 D_004FF850_v __asm__("D_004FF850");
+extern sV4_FE10 D_004FF860_v __asm__("D_004FF860");
+extern sV4_FE10 D_004FF870_v __asm__("D_004FF870");
+extern sV4_FE10 D_004FF880_v __asm__("D_004FF880");
+extern sV4_FE10 D_004FF890_v __asm__("D_004FF890");
+extern sV4_FE10 D_004FF8A0_v __asm__("D_004FF8A0");
+extern sV4_FE10 D_004FF8B0_v __asm__("D_004FF8B0");
+extern sV4_FE10 D_004FF8C0_v __asm__("D_004FF8C0");
+extern sV4_FE10 D_004FF8D0_v __asm__("D_004FF8D0");
+extern sV4_FE10 D_004FF8E0_v __asm__("D_004FF8E0");
+extern sV4_FE10 D_004FF8F0_v __asm__("D_004FF8F0");
+extern sV4_FE10 D_004FF900_v __asm__("D_004FF900");
+extern sV4_FE10 D_004FF910_v __asm__("D_004FF910");
+extern sV4_FE10 D_004FF920_v __asm__("D_004FF920");
+extern sV4_FE10 D_004FF930_v __asm__("D_004FF930");
+extern sV4_FE10 D_004FF940_v __asm__("D_004FF940");
+extern sV4_FE10 D_004FF950_v __asm__("D_004FF950");
+extern sV4_FE10 D_004FF960_v __asm__("D_004FF960");
+extern sV4_FE10 D_004FF970_v __asm__("D_004FF970");
+extern sV4_FE10 D_004FF980_v __asm__("D_004FF980");
+extern sV4_FE10 D_004FF990_v __asm__("D_004FF990");
+extern sV4_FE10 D_004FF9A0_v __asm__("D_004FF9A0");
+extern sV4_FE10 D_004FF9B0_v __asm__("D_004FF9B0");
+extern sV4_FE10 D_004FF9C0_v __asm__("D_004FF9C0");
+extern sV4_FE10 D_004FF9D0_v __asm__("D_004FF9D0");
+extern sV4_FE10 D_004FF9E0_v __asm__("D_004FF9E0");
+extern sV4_FE10 D_004FF9F0_v __asm__("D_004FF9F0");
+extern sV4_FE10 D_004FFA00_v __asm__("D_004FFA00");
+extern sV4_FE10 D_004FFA10_v __asm__("D_004FFA10");
+extern sV4_FE10 D_004FFA20_v __asm__("D_004FFA20");
+extern sV4_FE10 D_004FFA30_v __asm__("D_004FFA30");
+extern sV4_FE10 D_004FFA40_v __asm__("D_004FFA40");
+extern sV4_FE10 D_004FFA50_v __asm__("D_004FFA50");
+extern sV4_FE10 D_004FFA60_v __asm__("D_004FFA60");
+extern sV4_FE10 D_004FFA70_v __asm__("D_004FFA70");
+extern sV4_FE10 D_004FFA80_v __asm__("D_004FFA80");
+extern sV4_FE10 D_004FFA90_v __asm__("D_004FFA90");
+extern sV4_FE10 D_004FFAA0_v __asm__("D_004FFAA0");
+extern sV4_FE10 D_004FFAB0_v __asm__("D_004FFAB0");
+extern sMat_FE10 D_004FFAC0_m __asm__("D_004FFAC0");
+extern sV4_FE10 D_004FFB00_v __asm__("D_004FFB00");
+extern sV4_FE10 D_004FFB10_v __asm__("D_004FFB10");
+extern char D_004A5988;
+
+// Static initialisation of the unit's colour globals D_004FF740..D_004FFAB0, the spline basis D_004FFAC0,
+// D_004FFB00/D_004FFB10 and the list D_004A5988 (g++ __static_initialization_and_destruction_0).
+// The unit declares func_0035FE10 returning void*; bind this definition by asm label.
+extern "C" void func_0035FE10_init(int initialize, int priority) __asm__("func_0035FE10");
+extern "C" void func_0035FE10_init(int initialize, int priority)
+{
+    if (priority == 0xFFFF && initialize != 0) {
+        new (&D_004FF740_v) sV4_FE10(1.0f, 1.0f, 1.0f, 0.5f);
+        new (&D_004FF750_v) sV4_FE10(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
+        new (&D_004FF760_v) sV4_FE10(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
+        new (&D_004FF770_v) sV4_FE10(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
+        new (&D_004FF780_v) sV4_FE10(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
+        new (&D_004FF790_v) sV4_FE10(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
+        new (&D_004FF7A0_v) sV4_FE10(0.4411740005016327f, 0.41388601064682007f, 0.3211260139942169f, 0.4398239850997925f);
+        new (&D_004FF7B0_v) sV4_FE10(0.500997006893158f, 0.24849599599838257f, 1.0f, 1.0f);
+        new (&D_004FF7C0_v) sV4_FE10(0.27687299251556396f, 0.6395620107650757f, 0.13423900306224823f, 0.0f);
+        new (&D_004FF7D0_v) sV4_FE10(0.8936439752578735f, 0.5263469815254211f, 0.5051450133323669f, 0.8687300086021423f);
+        new (&D_004FF7E0_v) sV4_FE10(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004FF7F0_v) sV4_FE10(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004FF800_v) sV4_FE10(1.0f, 0.550000011920929f, 0.5350000262260437f, 0.550000011920929f);
+        new (&D_004FF810_v) sV4_FE10(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004FF820_v) sV4_FE10(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004FF830_v) sV4_FE10(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004FF840_v) sV4_FE10(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004FF850_v) sV4_FE10(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004FF860_v) sV4_FE10(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004FF870_v) sV4_FE10(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004FF880_v) sV4_FE10(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004FF890_v) sV4_FE10(1.0f, 0.7828119993209839f, 0.06171900033950806f, 0.03984399884939194f);
+        new (&D_004FF8A0_v) sV4_FE10(1.0f, 1.0f, 0.7988259792327881f, 0.0f);
+        new (&D_004FF8B0_v) sV4_FE10(0.9886710047721863f, 0.9230499863624573f, 0.34311699867248535f, 0.0f);
+        new (&D_004FF8C0_v) sV4_FE10(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004FF8D0_v) sV4_FE10(1.0f, 1.0f, 0.7976430058479309f, 0.0f);
+        new (&D_004FF8E0_v) sV4_FE10(1.0f, 0.9222670197486877f, 0.34179699420928955f, 0.0f);
+        new (&D_004FF8F0_v) sV4_FE10(1.0f, 0.7847639918327332f, 0.06054700165987015f, 0.04062499850988388f);
+        new (&D_004FF900_v) sV4_FE10(1.0f, 0.800000011920929f, 0.44999998807907104f, 1.0f);
+        new (&D_004FF910_v) sV4_FE10(1.0f, 0.3281260132789612f, 1.0f, 0.3539060056209564f);
+        new (&D_004FF920_v) sV4_FE10(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004FF930_v) sV4_FE10(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004FF940_v) sV4_FE10(1.0f, 0.8613290190696716f, 0.38124799728393555f, 0.0f);
+        new (&D_004FF950_v) sV4_FE10(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004FF960_v) sV4_FE10(1.0f, 0.3244380056858063f, 1.0f, 0.0f);
+        new (&D_004FF970_v) sV4_FE10(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004FF980_v) sV4_FE10(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004FF990_v) sV4_FE10(0.7007060050964355f, 0.0f, 0.0f, 0.0f);
+        new (&D_004FF9A0_v) sV4_FE10(1.0f, 0.7828530073165894f, 0.06140600144863129f, 0.04146299883723259f);
+        new (&D_004FF9B0_v) sV4_FE10(1.0f, 0.32487601041793823f, 1.0f, 0.35280099511146545f);
+        new (&D_004FF9C0_v) sV4_FE10(1.0f, 1.0f, 0.7977359890937805f, 0.0f);
+        new (&D_004FF9D0_v) sV4_FE10(1.0f, 0.4937489926815033f, 1.0f, 0.49179700016975403f);
+        new (&D_004FF9E0_v) sV4_FE10(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004FF9F0_v) sV4_FE10(1.0f, 0.800000011920929f, 1.0f, 0.800000011920929f);
+        new (&D_004FFA00_v) sV4_FE10(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004FFA10_v) sV4_FE10(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004FFA20_v) sV4_FE10(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004FFA30_v) sV4_FE10(1.0f, 0.3273420035839081f, 1.0f, 0.35390499234199524f);
+        new (&D_004FFA40_v) sV4_FE10(1.0f, 1.0f, 0.061000000685453415f, 0.039000000804662704f);
+        new (&D_004FFA50_v) sV4_FE10(1.0f, 1.0f, 0.7999979853630066f, 0.0f);
+        new (&D_004FFA60_v) sV4_FE10(1.0f, 0.9589840173721313f, 0.6143789887428284f, 0.0f);
+        new (&D_004FFA70_v) sV4_FE10(1.0f, 0.9285150170326233f, 0.3399839997291565f, 0.0f);
+        new (&D_004FFA80_v) sV4_FE10(1.0f, 0.8738250136375427f, 0.24931700527668f, 0.017578000202775f);
+        new (&D_004FFA90_v) sV4_FE10(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
+        new (&D_004FFAA0_v) sV4_FE10(1.0f, 0.0f, 1.0f, 0.0f);
+        new (&D_004FFAB0_v) sV4_FE10(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004FFAC0_m) sMat_FE10(-0.5f, 1.5f, -1.5f, 0.5f,
+                                      1.0f, -2.5f, 2.0f, -0.5f,
+                                      -0.5f, 0.0f, 0.5f, 0.0f,
+                                      0.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004FFB00_v) sV4_FE10(1.0f, sV3_FE10(0.23000000417232513f, 0.2800000011920929f, 0.5f));
+        new (&D_004FFB10_v) sV4_FE10(D_004FF7F0_v);
+        func_003549D0(&D_004A5988);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360700);

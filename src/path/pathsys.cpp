@@ -404,7 +404,180 @@ extern "C" void* func_0026BAA8(void* self, ...)
 }
 #endif
 
+//100%
 INCLUDE_ASM("path/pathsys", func_0026BAE8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// A 16-byte vector global constructed from four floats.
+struct sV4_BAE8 {
+    float x, y, z, w;
+    sV4_BAE8(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+    void* operator new(unsigned int, void* p) { return p; }
+} __attribute__((aligned(16)));
+
+// A 16-byte-aligned three-float vector global.
+struct sV3_BAE8 {
+    float x, y, z;
+    sV3_BAE8(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+    void* operator new(unsigned int, void* p) { return p; }
+} __attribute__((aligned(16)));
+
+// Three packed three-float vectors (D_004D3378).
+struct sV3x3_BAE8 {
+    float v[9];
+    void* operator new(unsigned int, void* p) { return p; }
+};
+
+struct sSlot_BAE8 {
+    unsigned a : 8;
+    unsigned b : 24;
+    int c;
+    sSlot_BAE8(int n) { a = n; b = n; }
+    void* operator new(unsigned int, void* p) { return p; }
+};
+
+extern sV4_BAE8 D_004D2FB8;
+extern sV4_BAE8 D_004D2FC8;
+extern sV4_BAE8 D_004D2FD8;
+extern sV4_BAE8 D_004D2FE8;
+extern sV4_BAE8 D_004D2FF8;
+extern sV4_BAE8 D_004D3008;
+extern sV4_BAE8 D_004D3018;
+extern sV4_BAE8 D_004D3028;
+extern sV4_BAE8 D_004D3038;
+extern sV4_BAE8 D_004D3048;
+extern sV4_BAE8 D_004D3058;
+extern sV4_BAE8 D_004D3068;
+extern sV4_BAE8 D_004D3078;
+extern sV4_BAE8 D_004D3088;
+extern sV4_BAE8 D_004D3098;
+extern sV4_BAE8 D_004D30A8;
+extern sV4_BAE8 D_004D30B8;
+extern sV4_BAE8 D_004D30C8;
+extern sV4_BAE8 D_004D30D8;
+extern sV4_BAE8 D_004D30E8;
+extern sV4_BAE8 D_004D30F8;
+extern sV4_BAE8 D_004D3108;
+extern sV4_BAE8 D_004D3118;
+extern sV4_BAE8 D_004D3128;
+extern sV4_BAE8 D_004D3138;
+extern sV4_BAE8 D_004D3148;
+extern sV4_BAE8 D_004D3158;
+extern sV4_BAE8 D_004D3168;
+extern sV4_BAE8 D_004D3178;
+extern sV4_BAE8 D_004D3188;
+extern sV4_BAE8 D_004D3198;
+extern sV4_BAE8 D_004D31A8;
+extern sV4_BAE8 D_004D31B8;
+extern sV4_BAE8 D_004D31C8;
+extern sV4_BAE8 D_004D31D8;
+extern sV4_BAE8 D_004D31E8;
+extern sV4_BAE8 D_004D31F8;
+extern sV4_BAE8 D_004D3208;
+extern sV4_BAE8 D_004D3218;
+extern sV4_BAE8 D_004D3228;
+extern sV4_BAE8 D_004D3238;
+extern sV4_BAE8 D_004D3248;
+extern sV4_BAE8 D_004D3258;
+extern sV4_BAE8 D_004D3268;
+extern sV4_BAE8 D_004D3278;
+extern sV4_BAE8 D_004D3288;
+extern sV4_BAE8 D_004D3298;
+extern sV4_BAE8 D_004D32A8;
+extern sV4_BAE8 D_004D32B8;
+extern sV4_BAE8 D_004D32C8;
+extern sV4_BAE8 D_004D32D8;
+extern sV4_BAE8 D_004D32E8;
+extern sV4_BAE8 D_004D32F8;
+extern sV4_BAE8 D_004D3308;
+extern sV4_BAE8 D_004D3318;
+extern sV4_BAE8 D_004D3328;
+extern sV3_BAE8 D_004D3338;
+extern sV3_BAE8 D_004D3348;
+extern sV3_BAE8 D_004D3358;
+extern sV3_BAE8 D_004D3368;
+extern sV3x3_BAE8 D_004D3378;
+extern sSlot_BAE8 D_004A5158;
+
+// Static initialisation of the unit's colour globals (g++ __static_initialization_and_destruction_0).
+// The unit declares func_0026BAE8 returning void*; bind this definition by asm label.
+extern "C" void func_0026BAE8_init(int initialize, int priority) __asm__("func_0026BAE8");
+extern "C" void func_0026BAE8_init(int initialize, int priority)
+{
+    if (priority == 0xFFFF && initialize != 0) {
+        new (&D_004D2FB8) sV4_BAE8(1.0f, 1.0f, 1.0f, 0.5f);
+        new (&D_004D2FC8) sV4_BAE8(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
+        new (&D_004D2FD8) sV4_BAE8(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
+        new (&D_004D2FE8) sV4_BAE8(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
+        new (&D_004D2FF8) sV4_BAE8(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
+        new (&D_004D3008) sV4_BAE8(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
+        new (&D_004D3018) sV4_BAE8(0.4411740005016327f, 0.41388601064682007f, 0.3211260139942169f, 0.4398239850997925f);
+        new (&D_004D3028) sV4_BAE8(0.500997006893158f, 0.24849599599838257f, 1.0f, 1.0f);
+        new (&D_004D3038) sV4_BAE8(0.27687299251556396f, 0.6395620107650757f, 0.13423900306224823f, 0.0f);
+        new (&D_004D3048) sV4_BAE8(0.8936439752578735f, 0.5263469815254211f, 0.5051450133323669f, 0.8687300086021423f);
+        new (&D_004D3058) sV4_BAE8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D3068) sV4_BAE8(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D3078) sV4_BAE8(1.0f, 0.550000011920929f, 0.5350000262260437f, 0.550000011920929f);
+        new (&D_004D3088) sV4_BAE8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D3098) sV4_BAE8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D30A8) sV4_BAE8(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D30B8) sV4_BAE8(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D30C8) sV4_BAE8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D30D8) sV4_BAE8(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004D30E8) sV4_BAE8(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004D30F8) sV4_BAE8(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004D3108) sV4_BAE8(1.0f, 0.7828119993209839f, 0.06171900033950806f, 0.03984399884939194f);
+        new (&D_004D3118) sV4_BAE8(1.0f, 1.0f, 0.7988259792327881f, 0.0f);
+        new (&D_004D3128) sV4_BAE8(0.9886710047721863f, 0.9230499863624573f, 0.34311699867248535f, 0.0f);
+        new (&D_004D3138) sV4_BAE8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D3148) sV4_BAE8(1.0f, 1.0f, 0.7976430058479309f, 0.0f);
+        new (&D_004D3158) sV4_BAE8(1.0f, 0.9222670197486877f, 0.34179699420928955f, 0.0f);
+        new (&D_004D3168) sV4_BAE8(1.0f, 0.7847639918327332f, 0.06054700165987015f, 0.04062499850988388f);
+        new (&D_004D3178) sV4_BAE8(1.0f, 0.800000011920929f, 0.44999998807907104f, 1.0f);
+        new (&D_004D3188) sV4_BAE8(1.0f, 0.3281260132789612f, 1.0f, 0.3539060056209564f);
+        new (&D_004D3198) sV4_BAE8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D31A8) sV4_BAE8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D31B8) sV4_BAE8(1.0f, 0.8613290190696716f, 0.38124799728393555f, 0.0f);
+        new (&D_004D31C8) sV4_BAE8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D31D8) sV4_BAE8(1.0f, 0.3244380056858063f, 1.0f, 0.0f);
+        new (&D_004D31E8) sV4_BAE8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D31F8) sV4_BAE8(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D3208) sV4_BAE8(0.7007060050964355f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D3218) sV4_BAE8(1.0f, 0.7828530073165894f, 0.06140600144863129f, 0.04146299883723259f);
+        new (&D_004D3228) sV4_BAE8(1.0f, 0.32487601041793823f, 1.0f, 0.35280099511146545f);
+        new (&D_004D3238) sV4_BAE8(1.0f, 1.0f, 0.7977359890937805f, 0.0f);
+        new (&D_004D3248) sV4_BAE8(1.0f, 0.4937489926815033f, 1.0f, 0.49179700016975403f);
+        new (&D_004D3258) sV4_BAE8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D3268) sV4_BAE8(1.0f, 0.800000011920929f, 1.0f, 0.800000011920929f);
+        new (&D_004D3278) sV4_BAE8(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D3288) sV4_BAE8(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D3298) sV4_BAE8(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D32A8) sV4_BAE8(1.0f, 0.3273420035839081f, 1.0f, 0.35390499234199524f);
+        new (&D_004D32B8) sV4_BAE8(1.0f, 1.0f, 0.061000000685453415f, 0.039000000804662704f);
+        new (&D_004D32C8) sV4_BAE8(1.0f, 1.0f, 0.7999979853630066f, 0.0f);
+        new (&D_004D32D8) sV4_BAE8(1.0f, 0.9589840173721313f, 0.6143789887428284f, 0.0f);
+        new (&D_004D32E8) sV4_BAE8(1.0f, 0.9285150170326233f, 0.3399839997291565f, 0.0f);
+        new (&D_004D32F8) sV4_BAE8(1.0f, 0.8738250136375427f, 0.24931700527668f, 0.017578000202775f);
+        new (&D_004D3308) sV4_BAE8(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
+        new (&D_004D3318) sV4_BAE8(1.0f, 0.0f, 1.0f, 0.0f);
+        new (&D_004D3328) sV4_BAE8(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D3338) sV3_BAE8(1.0f, 0.0f, 0.5f);
+        new (&D_004D3348) sV3_BAE8(0.5f, 0.0f, 0.0f);
+        new (&D_004D3358) sV3_BAE8(0.0f, 0.5f, 1.0f);
+        new (&D_004D3368) sV3_BAE8(0.0f, 0.0f, 0.5f);
+        D_004D3378.v[0] = 1.0f;
+        D_004D3378.v[1] = 1.0f;
+        D_004D3378.v[2] = 1.0f;
+        D_004D3378.v[3] = 0.5f;
+        D_004D3378.v[4] = 0.5f;
+        D_004D3378.v[5] = 0.5f;
+        D_004D3378.v[6] = 0.800000011920929f;
+        D_004D3378.v[7] = 0.30000001192092896f;
+        D_004D3378.v[8] = 0.800000011920929f;
+        new (&D_004A5158) sSlot_BAE8(-1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("path/pathsys", func_0026C3D0);

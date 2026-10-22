@@ -1743,7 +1743,177 @@ extern "C" int func_002BBBF8(int a, ...) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BBC38);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sColor_2BBC38 {
+    float r, g, b, a;
+    sColor_2BBC38(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
+};
+
+
+struct sFlags_2BBC38 {
+    unsigned char a;
+    unsigned int b : 24;
+    sFlags_2BBC38(unsigned char aa, unsigned int ab) : a(aa), b(ab) {}
+};
+
+extern int D_004A5358;
+extern int D_004A535C;
+extern sFlags_2BBC38 D_004A5360;
+extern sFlags_2BBC38 D_004A5368;
+extern sFlags_2BBC38 D_004A5370;
+extern sFlags_2BBC38 D_004A5378;
+extern sFlags_2BBC38 D_004A5380;
+extern sFlags_2BBC38 D_004A5388;
+extern sFlags_2BBC38 D_004A5390;
+extern sFlags_2BBC38 D_004A5398;
+extern sFlags_2BBC38 D_004A53A0;
+extern sFlags_2BBC38 D_004A53A8;
+extern sFlags_2BBC38 D_004A53B0;
+extern sFlags_2BBC38 D_004A53B8;
+extern sFlags_2BBC38 D_004A53C0;
+extern sFlags_2BBC38 D_004A53C8;
+
+extern sColor_2BBC38 D_004D42B8;
+extern sColor_2BBC38 D_004D42C8;
+extern sColor_2BBC38 D_004D42D8;
+extern sColor_2BBC38 D_004D42E8;
+extern sColor_2BBC38 D_004D42F8;
+extern sColor_2BBC38 D_004D4308;
+extern sColor_2BBC38 D_004D4318;
+extern sColor_2BBC38 D_004D4328;
+extern sColor_2BBC38 D_004D4338;
+extern sColor_2BBC38 D_004D4348;
+extern sColor_2BBC38 D_004D4358;
+extern sColor_2BBC38 D_004D4368;
+extern sColor_2BBC38 D_004D4378;
+extern sColor_2BBC38 D_004D4388;
+extern sColor_2BBC38 D_004D4398;
+extern sColor_2BBC38 D_004D43A8;
+extern sColor_2BBC38 D_004D43B8;
+extern sColor_2BBC38 D_004D43C8;
+extern sColor_2BBC38 D_004D43D8;
+extern sColor_2BBC38 D_004D43E8;
+extern sColor_2BBC38 D_004D43F8;
+extern sColor_2BBC38 D_004D4408;
+extern sColor_2BBC38 D_004D4418;
+extern sColor_2BBC38 D_004D4428;
+extern sColor_2BBC38 D_004D4438;
+extern sColor_2BBC38 D_004D4448;
+extern sColor_2BBC38 D_004D4458;
+extern sColor_2BBC38 D_004D4468;
+extern sColor_2BBC38 D_004D4478;
+extern sColor_2BBC38 D_004D4488;
+extern sColor_2BBC38 D_004D4498;
+extern sColor_2BBC38 D_004D44A8;
+extern sColor_2BBC38 D_004D44B8;
+extern sColor_2BBC38 D_004D44C8;
+extern sColor_2BBC38 D_004D44D8;
+extern sColor_2BBC38 D_004D44E8;
+extern sColor_2BBC38 D_004D44F8;
+extern sColor_2BBC38 D_004D4508;
+extern sColor_2BBC38 D_004D4518;
+extern sColor_2BBC38 D_004D4528;
+extern sColor_2BBC38 D_004D4538;
+extern sColor_2BBC38 D_004D4548;
+extern sColor_2BBC38 D_004D4558;
+extern sColor_2BBC38 D_004D4568;
+extern sColor_2BBC38 D_004D4578;
+extern sColor_2BBC38 D_004D4588;
+extern sColor_2BBC38 D_004D4598;
+extern sColor_2BBC38 D_004D45A8;
+extern sColor_2BBC38 D_004D45B8;
+extern sColor_2BBC38 D_004D45C8;
+extern sColor_2BBC38 D_004D45D8;
+extern sColor_2BBC38 D_004D45E8;
+extern sColor_2BBC38 D_004D45F8;
+extern sColor_2BBC38 D_004D4608;
+extern sColor_2BBC38 D_004D4618;
+extern sColor_2BBC38 D_004D4628;
+
+// The unit declares func_002BBC38 later as returning void*; bind this body by asm label.
+extern "C" void func_002BBC38_impl(int initialize, int priority) __asm__("func_002BBC38");
+
+extern "C" void func_002BBC38_impl(int initialize, int priority)
+{
+    if (priority == 0xFFFF && initialize != 0) {
+        D_004A535C = 0;
+        D_004A5358 = 0;
+        new (&D_004A5360) sFlags_2BBC38(0, 0);
+        new (&D_004A5368) sFlags_2BBC38(1, 1);
+        new (&D_004A5370) sFlags_2BBC38(2, 2);
+        new (&D_004A5378) sFlags_2BBC38(3, 3);
+        new (&D_004A5380) sFlags_2BBC38(4, 4);
+        new (&D_004A5388) sFlags_2BBC38(5, 5);
+        new (&D_004A5390) sFlags_2BBC38(6, 6);
+        new (&D_004A5398) sFlags_2BBC38(7, 7);
+        new (&D_004A53A0) sFlags_2BBC38(8, 8);
+        new (&D_004A53A8) sFlags_2BBC38(9, 9);
+        new (&D_004A53B0) sFlags_2BBC38(10, 10);
+        new (&D_004A53B8) sFlags_2BBC38(11, 11);
+        new (&D_004A53C0) sFlags_2BBC38(12, 12);
+        new (&D_004A53C8) sFlags_2BBC38(13, 13);
+        new (&D_004D42B8) sColor_2BBC38(1.0f, 1.0f, 1.0f, 0.5f);
+        new (&D_004D42C8) sColor_2BBC38(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
+        new (&D_004D42D8) sColor_2BBC38(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
+        new (&D_004D42E8) sColor_2BBC38(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
+        new (&D_004D42F8) sColor_2BBC38(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
+        new (&D_004D4308) sColor_2BBC38(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
+        new (&D_004D4318) sColor_2BBC38(0.4411740005016327f, 0.41388601064682007f, 0.3211260139942169f, 0.4398239850997925f);
+        new (&D_004D4328) sColor_2BBC38(0.500997006893158f, 0.24849599599838257f, 1.0f, 1.0f);
+        new (&D_004D4338) sColor_2BBC38(0.27687299251556396f, 0.6395620107650757f, 0.13423900306224823f, 0.0f);
+        new (&D_004D4348) sColor_2BBC38(0.8936439752578735f, 0.5263469815254211f, 0.5051450133323669f, 0.8687300086021423f);
+        new (&D_004D4358) sColor_2BBC38(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D4368) sColor_2BBC38(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D4378) sColor_2BBC38(1.0f, 0.550000011920929f, 0.5350000262260437f, 0.550000011920929f);
+        new (&D_004D4388) sColor_2BBC38(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D4398) sColor_2BBC38(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D43A8) sColor_2BBC38(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D43B8) sColor_2BBC38(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D43C8) sColor_2BBC38(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D43D8) sColor_2BBC38(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004D43E8) sColor_2BBC38(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004D43F8) sColor_2BBC38(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004D4408) sColor_2BBC38(1.0f, 0.7828119993209839f, 0.06171900033950806f, 0.03984399884939194f);
+        new (&D_004D4418) sColor_2BBC38(1.0f, 1.0f, 0.7988259792327881f, 0.0f);
+        new (&D_004D4428) sColor_2BBC38(0.9886710047721863f, 0.9230499863624573f, 0.34311699867248535f, 0.0f);
+        new (&D_004D4438) sColor_2BBC38(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D4448) sColor_2BBC38(1.0f, 1.0f, 0.7976430058479309f, 0.0f);
+        new (&D_004D4458) sColor_2BBC38(1.0f, 0.9222670197486877f, 0.34179699420928955f, 0.0f);
+        new (&D_004D4468) sColor_2BBC38(1.0f, 0.7847639918327332f, 0.06054700165987015f, 0.04062499850988388f);
+        new (&D_004D4478) sColor_2BBC38(1.0f, 0.800000011920929f, 0.44999998807907104f, 1.0f);
+        new (&D_004D4488) sColor_2BBC38(1.0f, 0.3281260132789612f, 1.0f, 0.3539060056209564f);
+        new (&D_004D4498) sColor_2BBC38(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D44A8) sColor_2BBC38(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D44B8) sColor_2BBC38(1.0f, 0.8613290190696716f, 0.38124799728393555f, 0.0f);
+        new (&D_004D44C8) sColor_2BBC38(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D44D8) sColor_2BBC38(1.0f, 0.3244380056858063f, 1.0f, 0.0f);
+        new (&D_004D44E8) sColor_2BBC38(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D44F8) sColor_2BBC38(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D4508) sColor_2BBC38(0.7007060050964355f, 0.0f, 0.0f, 0.0f);
+        new (&D_004D4518) sColor_2BBC38(1.0f, 0.7828530073165894f, 0.06140600144863129f, 0.04146299883723259f);
+        new (&D_004D4528) sColor_2BBC38(1.0f, 0.32487601041793823f, 1.0f, 0.35280099511146545f);
+        new (&D_004D4538) sColor_2BBC38(1.0f, 1.0f, 0.7977359890937805f, 0.0f);
+        new (&D_004D4548) sColor_2BBC38(1.0f, 0.4937489926815033f, 1.0f, 0.49179700016975403f);
+        new (&D_004D4558) sColor_2BBC38(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004D4568) sColor_2BBC38(1.0f, 0.800000011920929f, 1.0f, 0.800000011920929f);
+        new (&D_004D4578) sColor_2BBC38(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D4588) sColor_2BBC38(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D4598) sColor_2BBC38(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004D45A8) sColor_2BBC38(1.0f, 0.3273420035839081f, 1.0f, 0.35390499234199524f);
+        new (&D_004D45B8) sColor_2BBC38(1.0f, 1.0f, 0.061000000685453415f, 0.039000000804662704f);
+        new (&D_004D45C8) sColor_2BBC38(1.0f, 1.0f, 0.7999979853630066f, 0.0f);
+        new (&D_004D45D8) sColor_2BBC38(1.0f, 0.9589840173721313f, 0.6143789887428284f, 0.0f);
+        new (&D_004D45E8) sColor_2BBC38(1.0f, 0.9285150170326233f, 0.3399839997291565f, 0.0f);
+        new (&D_004D45F8) sColor_2BBC38(1.0f, 0.8738250136375427f, 0.24931700527668f, 0.017578000202775f);
+        new (&D_004D4608) sColor_2BBC38(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
+        new (&D_004D4618) sColor_2BBC38(1.0f, 0.0f, 1.0f, 0.0f);
+        new (&D_004D4628) sColor_2BBC38(1.0f, 1.0f, 0.0f, 0.0f);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/seg_1BA100", func_002BC4E0);
