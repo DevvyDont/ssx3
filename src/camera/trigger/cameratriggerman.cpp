@@ -705,7 +705,297 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016E560);
 
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016F068);
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016FBB8);
+#ifdef SKIP_ASM
+struct sCtmV_FBB8 {
+    float x, y, z, w;
+    sCtmV_FBB8() {}
+    sCtmV_FBB8(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sCtmM_FBB8 {
+    float m[4][4];
+    sCtmM_FBB8() {}
+    // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+    sCtmM_FBB8(const sCtmM_FBB8& s)
+    {
+        __asm__ __volatile__(
+            ".set noreorder\n"
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            ".set reorder\n"
+            :
+            : "r"(this), "r"(&s)
+            : "memory");
+    }
+    // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+    sCtmM_FBB8& operator=(const sCtmM_FBB8& s)
+    {
+        __asm__ __volatile__(
+            ".set noreorder\n"
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            ".set reorder\n"
+            :
+            : "r"(this), "r"(&s)
+            : "memory");
+        return *this;
+    }
+} __attribute__((aligned(16)));
+
+extern sCtmM_FBB8 D_004FF1A0_FBB8 __asm__("D_004FF1A0");
+extern sCtmV_FBB8 D_004FF140_FBB8 __asm__("D_004FF140");
+extern sCtmV_FBB8 D_004FF150_FBB8 __asm__("D_004FF150");
+extern sCtmV_FBB8 D_004FF160_FBB8 __asm__("D_004FF160");
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
+static inline void ctmMulMtx_FBB8(sCtmM_FBB8* dst, const sCtmM_FBB8* a, const sCtmM_FBB8* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(a), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
+static inline void ctmTransMtx_FBB8(sCtmM_FBB8* m, const sCtmV_FBB8& v)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf4, 0x0(%0)\n"
+        "lqc2         $vf5, 0x10(%0)\n"
+        "lqc2         $vf6, 0x20(%0)\n"
+        "lqc2         $vf7, 0x30(%0)\n"
+        "lqc2         $vf8, %1\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "m"(v)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (scale the rows of m by v: dst.row[i] = m.row[i] * v[i]).
+static inline sCtmM_FBB8 ctmScaleMtx_FBB8(const sCtmM_FBB8* m, const sCtmV_FBB8& v)
+{
+    sCtmM_FBB8 d;
+    sCtmM_FBB8* dst = &d;
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf1, %2\n"
+        "lqc2         $vf4, 0x0(%1)\n"
+        "lqc2         $vf5, 0x10(%1)\n"
+        "lqc2         $vf6, 0x20(%1)\n"
+        "lqc2         $vf7, 0x30(%1)\n"
+        "vmulx.xyzw   $vf8, $vf4, $vf1x\n"
+        "vmuly.xyzw   $vf9, $vf5, $vf1y\n"
+        "vmulz.xyzw   $vf10, $vf6, $vf1z\n"
+        "vmulw.xyzw   $vf11, $vf7, $vf1w\n"
+        "sqc2         $vf8, 0x0(%0)\n"
+        "sqc2         $vf9, 0x10(%0)\n"
+        "sqc2         $vf10, 0x20(%0)\n"
+        "sqc2         $vf11, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(m), "m"(v)
+        : "memory");
+    return d;
+}
+
+// PORT: PS2-only VU0 inline asm (out = m * v).
+static inline sCtmV_FBB8 ctmApplyMtx_FBB8(const sCtmM_FBB8* m, const sCtmV_FBB8& v)
+{
+    sCtmV_FBB8 out;
+    __asm__(
+        ".set noreorder\n"
+        "lqc2         $vf8, %2\n"
+        "lqc2         $vf4, 0x0(%1)\n"
+        "lqc2         $vf5, 0x10(%1)\n"
+        "lqc2         $vf6, 0x20(%1)\n"
+        "lqc2         $vf7, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        ".set reorder\n"
+        : "=m"(out)
+        : "r"(m), "m"(v)
+        : "memory");
+    return out;
+}
+
+static inline void ctmRotAxis_FBB8(sCtmM_FBB8* m, const sCtmV_FBB8& axis, float angle)
+{
+    float s;
+    float c;
+    float one = 1.0f;
+    func_0031BE50(&s, &c, angle);
+    sCtmM_FBB8 r;
+    float t = one - c;
+    float x = axis.x;
+    float y = axis.y;
+    float z = axis.z;
+    float tx = t * x;
+    float ty = t * y;
+    float tz = t * z;
+    float sx = s * x;
+    float sy = s * y;
+    float sz = s * z;
+    r.m[0][0] = tx * x + c;
+    r.m[1][0] = tx * y + sz;
+    r.m[2][0] = tx * z - sy;
+    r.m[0][1] = ty * x - sz;
+    r.m[1][1] = ty * y + c;
+    r.m[2][1] = ty * z + sx;
+    r.m[0][2] = tz * x + sy;
+    r.m[1][2] = tz * y - sx;
+    r.m[2][2] = tz * z + c;
+    r.m[3][0] = 0.0f;
+    r.m[3][1] = 0.0f;
+    r.m[3][2] = 0.0f;
+    r.m[0][3] = 0.0f;
+    r.m[1][3] = 0.0f;
+    r.m[2][3] = 0.0f;
+    r.m[3][3] = one;
+    ctmMulMtx_FBB8(m, m, &r);
+}
+
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sCtmV_FBB8 ctmSub_FBB8(const sCtmV_FBB8& a, const sCtmV_FBB8& b)
+{
+    sCtmV_FBB8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sCtmV_FBB8 ctmAdd_FBB8(const sCtmV_FBB8& a, const sCtmV_FBB8& b)
+{
+    sCtmV_FBB8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float ctmDot_FBB8(const sCtmV_FBB8& a, const sCtmV_FBB8& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sCtmV_FBB8 ctmScale_FBB8(const sCtmV_FBB8& v, float s)
+{
+    sCtmV_FBB8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// Projects *p onto the line through the transformed points src+0x2C and src+0x38
+// (transform as in func_00170240).
+extern "C" void func_0016FBB8(char* src, sCtmV_FBB8* p)
+{
+    sCtmM_FBB8 m(D_004FF1A0_FBB8);
+    float one = 1.0f;
+    ctmTransMtx_FBB8(&m, sCtmV_FBB8(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
+    ctmRotAxis_FBB8(&m, D_004FF140_FBB8, *(float*)(src + 0x10));
+    ctmRotAxis_FBB8(&m, D_004FF150_FBB8, *(float*)(src + 0x14));
+    ctmRotAxis_FBB8(&m, D_004FF160_FBB8, *(float*)(src + 0xC));
+    m = ctmScaleMtx_FBB8(&m, sCtmV_FBB8(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
+    sCtmV_FBB8 pts[2];
+    float w1 = 1.0f;
+    pts[0] = ctmApplyMtx_FBB8(&m, sCtmV_FBB8(*(float*)(src + 0x2C), *(float*)(src + 0x30), *(float*)(src + 0x34), w1));
+    pts[1] = ctmApplyMtx_FBB8(&m, sCtmV_FBB8(*(float*)(src + 0x38), *(float*)(src + 0x3C), *(float*)(src + 0x40), w1));
+    sCtmV_FBB8 d = ctmSub_FBB8(pts[1], pts[0]);
+    float t = ctmDot_FBB8(ctmSub_FBB8(*p, pts[0]), d) / ctmDot_FBB8(d, d);
+    *p = ctmAdd_FBB8(pts[0], ctmScale_FBB8(d, t));
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_00170240);

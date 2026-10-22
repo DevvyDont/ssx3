@@ -1743,7 +1743,180 @@ extern "C" void func_0028E888(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmanager", func_0028E8C0);
+#ifdef SKIP_ASM
+struct sSndKey8_E8C0 {
+    long v;
+} __attribute__((packed));
+extern const sSndKey8_E8C0 D_004A3648_E8C0[] __asm__("D_004A3648");
+extern const sSndKey8_E8C0 D_004A3650_E8C0[] __asm__("D_004A3650");
+extern const sSndKey8_E8C0 D_004A3658_E8C0[] __asm__("D_004A3658");
+extern char D_004A3628[];
+extern signed char D_00535C10[];
+extern char* D_004A28A8;
+extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
+extern "C" void func_002ADDE0(void* mon, long key);
+extern "C" int func_002A3F90(void* self);
+extern "C" int func_002A3FE8(void* self);
+// PORT: func_002A4030 takes (self, id); the unit declares it with one parameter (func_0028E100).
+extern "C" int func_002A4030_id(void* self, int id) __asm__("func_002A4030");
+extern "C" int func_002A4040(void* self);
+extern "C" int func_002A4078(void* self);
+extern "C" int func_002A40E8(void* self);
+extern "C" void func_002A4550(void* self);
+extern "C" int func_002A4718(void* self);
+extern "C" int func_002A4A38(void* self);
+extern "C" char* func_0028B1D8();
+extern "C" void func_0028D5A0(void* self, int id);
+extern "C" void func_00296E20(void* self, int id);
+extern "C" void func_00297438(void* self, int id);
+extern "C" void func_0029B3C0(void* self, int a1);
+extern "C" void func_0029D678(void* self, float v);
+extern "C" void func_002B3A70(void* self);
+
+struct sBmVtE8C0 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+typedef void (*tBmLoadE8C0)(void*, void*, int, void*, int);
+typedef int (*tBmSetE8C0)(void*, int);
+
+// PORT: 64-bit long sound key
+extern "C" void func_0028E8C0(void* vself, int id, int a2)
+{
+    char* self = (char*)vself;
+    if (id == 0x13 && a2 != 0 && *(int*)(self + 0x627C) != 0) {
+        if (func_002A3FE8(self) != 0 && *(int*)(self + 0x578C) == 0) {
+            if (func_0028D960(self)) {
+                cBE_getInterface_Fv(cBE_getBE(), 0);
+                int mode = D_00535C10[0];
+                if (mode != 5 && mode != 6) {
+                    if (*(int*)(self + 0x6258) == 0) {
+                        char* p = **(char***)(self + 0x118) + 0x1D8;
+                        const sSndKey8_E8C0* key = D_004A3650_E8C0;
+                        int r = func_002B4908(self + 0x118);
+                        func_002ADCA0(p, 0, key->v, 0, 4, r, 0, 0);
+                    } else {
+                        char* p = **(char***)(self + 0x118) + 0x1D8;
+                        const sSndKey8_E8C0* key = D_004A3650_E8C0;
+                        int r = func_002B4908(self + 0x118);
+                        func_002ADCA0(p, 0, key->v, 0, 5, r, 0, 0);
+                    }
+                    char* mon = self + 0x118;
+                    sBmVtE8C0* vt = *(sBmVtE8C0**)(self + 0x5558);
+                    ((tBmSetE8C0)vt[4].fn)(mon + vt[4].delta, 0);
+                }
+            }
+        } else if (*(int*)(self + 0x578C) != 0) {
+            if (func_0028D960(self)) {
+                // NOTE: the target keeps this 1 in $s1 across five calls (a named local, not a literal).
+                int wantType = 1;
+                int t = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+                if (*(int*)(self + 0x62B8) == 0) {
+                    func_002B3D48(self + 0x118, 2.0f);
+                }
+                if (t == wantType) {
+                    if (func_0028DEF0(self, 0xB)) {
+                        func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0xBB8, D_004A3648_E8C0->v, 0, 0, 1, 0, 0);
+                        func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0x9C4, D_004A3650_E8C0->v, 0, 0, 0, 0, 0);
+                    }
+                } else {
+                    func_0028DF08(self);
+                    func_0028D488(self);
+                    func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0x7D0, D_004A3648_E8C0->v, 0, 1, 1, 0, 0);
+                    func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0x5DC, D_004A3650_E8C0->v, 0, 7, 0, 0, 0);
+                }
+            }
+        } else {
+            if (func_002A3F90(self) && *(int*)(self + 0x6258) == 0) {
+                func_002A26F0(self, 0, 1);
+                func_002B1758(self + 0x5560, 0);
+                *(int*)(self + 0x574C) = 1;
+            }
+        }
+        *(int*)(self + 0x6258) = 0;
+    } else if (id == 0x14) {
+        if (a2 != 0) {
+            *(int*)(self + 0x6258) = 0;
+            *(int*)(self + 0x577C) = 0;
+            *(int*)(self + 0x6254) = 1;
+            *(int*)(self + 0x5814) = *(int*)(self + 0x6284);
+            func_0028DF08(self);
+            char* mon = self + 0x118;
+            *(int*)(self + 0x578C) = 0;
+            func_002A4550(self);
+            long key = D_004A3648_E8C0->v;
+            func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, key);
+            func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3650_E8C0->v);
+            func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3658_E8C0->v);
+            func_0029D678(self, 5.029983997344971f);
+            func_00296E20(self, *(int*)(func_0028B1D8() + 0x28));
+            func_00297438(self, *(int*)(func_0028B1D8() + 0x28));
+            func_0029B3C0(self, 0);
+            if (func_0028D960(self)) {
+                int flag = 1;
+                if (func_002A4040(self) == 0) {
+                    if (func_002A4078(self) || func_002A40E8(self)) {
+                        if (**(int**)(D_004A28A8 + 0xC0) >= 2) {
+                            func_0028D488(self);
+                            flag = 0;
+                            func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0xA, key, 0, 3, 1, 0, 0);
+                        }
+                    }
+                }
+                if (*(int*)(self + 0x6284) == 0x17 || func_002A4030_id(self, *(int*)(self + 0x6284)) == 0
+                    || *(int*)(self + (*(int*)(self + 0x6284) << 2) + 0x579C) != 1) {
+                    if (flag && *(int*)(self + 0x6284) != 0x17) {
+                        func_0028D488(self);
+                        func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0xA, D_004A3648_E8C0->v, 0, 2, 1, 0, 0);
+                    }
+                    if (func_002A4718(self) && func_002A4A38(self) == 0) {
+                        func_002A26F0(self, 0, 1);
+                        func_002B1758(self + 0x5560, 0);
+                        *(int*)(self + 0x5754) = 1;
+                        *(int*)(self + 0x6258) = 1;
+                    }
+                } else {
+                    char* mon2 = self + 0x118;
+                    if (func_002A4A38(self) == 0) {
+                        func_002B11B0(self + 0x5560, 0);
+                    }
+                    sBmVtE8C0* vt = *(sBmVtE8C0**)(self + 0x5558);
+                    ((tBmLoadE8C0)vt[2].fn)(mon2 + vt[2].delta, D_004A3628, 0xC, func_00287968(self, 1, 0), 1);
+                    func_002B49C0(mon2, 0x191);
+                    if (func_002A1E20(self, *(int*)(self + 0x6284)) == 2) {
+                        sBmVtE8C0* vt2 = *(sBmVtE8C0**)(self + 0x5558);
+                        ((tBmSetE8C0)vt2[4].fn)(mon2 + vt2[4].delta, 2);
+                    } else {
+                        sBmVtE8C0* vt2 = *(sBmVtE8C0**)(self + 0x5558);
+                        ((tBmSetE8C0)vt2[4].fn)(mon2 + vt2[4].delta, 3);
+                    }
+                    func_002B3C28(mon2, 0x7F);
+                    func_002B3A70(mon2);
+                }
+            } else {
+                func_0028D5A0(self, *(int*)(self + 0x6284));
+                sBmVtE8C0* vt = *(sBmVtE8C0**)(self + 0x5558);
+                ((tBmSetE8C0)vt[4].fn)(mon + vt[4].delta, 0x1E);
+            }
+            *(int*)(self + 0x627C) = 1;
+        }
+    } else if (id >= 0x15 && id <= 0x19) {
+        if (func_0028D960(self)) {
+            func_0028D488(self);
+            func_002B3D48(self + 0x118, 1.0f);
+            func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0xBB8, D_004A3648_E8C0->v, 0, 3, 1, 0, 0);
+        }
+    } else {
+        char* mon = self + 0x118;
+        sBmVtE8C0* vt = *(sBmVtE8C0**)(self + 0x5558);
+        ((tBmSetE8C0)vt[4].fn)(mon + vt[4].delta, id);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028EF90);

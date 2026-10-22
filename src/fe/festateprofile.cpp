@@ -397,7 +397,176 @@ extern "C" void func_0018F278(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateprofile", func_0018F2B8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_0018F9D8(void* self);
+extern "C" void* func_00227F80(void* app);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_001D8240();
+extern "C" int func_001D97E0(void* self, void* mp, int dev, int a3);
+extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsigned short* buf, int len);
+extern "C" void func_003A0D00(void* obj, unsigned short* s);
+extern "C" void func_003A0E90(void* obj, unsigned short* s);
+extern void* D_004A28A8;
+extern int D_004A15E8;
+extern char D_0045E1D8[];
+extern char D_0045E1E8[];
+extern char D_0045E260[];
+extern char D_0045E270[];
+extern char D_0045E280[];
+extern char D_004A15F0[];
+extern char D_004A15F8[];
+
+struct sColor_F2B8 {
+    int c[4];
+};
+extern sColor_F2B8 D_004C66C8;
+
+#define V_F2B8(n) virtual void v##n();
+class cMCSub_F2B8 {
+public:
+    V_F2B8(01) V_F2B8(02) V_F2B8(03) V_F2B8(04) V_F2B8(05) V_F2B8(06) V_F2B8(07) V_F2B8(08) V_F2B8(09) V_F2B8(10)
+    V_F2B8(11) V_F2B8(12) V_F2B8(13)
+    virtual void v14(int, void*);
+    virtual void v15(int, void*);
+    virtual void v16(int, void*);
+    V_F2B8(17) V_F2B8(18) V_F2B8(19) V_F2B8(20)
+    V_F2B8(21) V_F2B8(22) V_F2B8(23) V_F2B8(24) V_F2B8(25) V_F2B8(26) V_F2B8(27) V_F2B8(28) V_F2B8(29) V_F2B8(30)
+    V_F2B8(31) V_F2B8(32) V_F2B8(33) V_F2B8(34) V_F2B8(35) V_F2B8(36) V_F2B8(37) V_F2B8(38) V_F2B8(39) V_F2B8(40)
+    V_F2B8(41) V_F2B8(42) V_F2B8(43) V_F2B8(44) V_F2B8(45) V_F2B8(46) V_F2B8(47) V_F2B8(48) V_F2B8(49) V_F2B8(50)
+    V_F2B8(51) V_F2B8(52)
+    virtual int v53();
+    virtual int v54(int);
+    virtual int v55();
+    V_F2B8(56) V_F2B8(57) V_F2B8(58) V_F2B8(59) V_F2B8(60)
+    V_F2B8(61) V_F2B8(62) V_F2B8(63) V_F2B8(64) V_F2B8(65)
+    virtual int v66(int);
+    virtual int v67(int);
+};
+
+class cState_F2B8 {
+public:
+    int pad[2];
+    V_F2B8(01) V_F2B8(02) V_F2B8(03) V_F2B8(04) V_F2B8(05) V_F2B8(06) V_F2B8(07) V_F2B8(08) V_F2B8(09) V_F2B8(10)
+    V_F2B8(11) V_F2B8(12) V_F2B8(13) V_F2B8(14) V_F2B8(15) V_F2B8(16) V_F2B8(17) V_F2B8(18) V_F2B8(19) V_F2B8(20)
+    V_F2B8(21) V_F2B8(22) V_F2B8(23) V_F2B8(24) V_F2B8(25) V_F2B8(26) V_F2B8(27) V_F2B8(28) V_F2B8(29) V_F2B8(30)
+    V_F2B8(31) V_F2B8(32) V_F2B8(33) V_F2B8(34)
+    virtual void v35(int);
+    V_F2B8(36) V_F2B8(37) V_F2B8(38) V_F2B8(39) V_F2B8(40) V_F2B8(41)
+    virtual int v42();
+    virtual void v43();
+};
+
+class cUIObj_F2B8 {
+public:
+    int pad[2];
+    V_F2B8(01) V_F2B8(02) V_F2B8(03) V_F2B8(04) V_F2B8(05) V_F2B8(06) V_F2B8(07)
+    virtual void v08(int);
+    virtual void v09(int);
+    V_F2B8(10) V_F2B8(11) V_F2B8(12) V_F2B8(13) V_F2B8(14) V_F2B8(15) V_F2B8(16) V_F2B8(17) V_F2B8(18) V_F2B8(19)
+    V_F2B8(20) V_F2B8(21) V_F2B8(22) V_F2B8(23) V_F2B8(24)
+    virtual void v25(int);
+};
+#undef V_F2B8
+
+static inline cUIObj_F2B8* getObj_F2B8(cState_F2B8* self, char* name)
+{
+    return (cUIObj_F2B8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+}
+
+// Memory-card profile slots: refreshes the device name and the six slot rows (name, the two detail lines).
+extern "C" void func_0018F2B8(void* vself)
+{
+    cState_F2B8* self = (cState_F2B8*)vself;
+    unsigned short buf[0x320];
+    char name[0x40];
+    char* mp = (char*)func_00227F80(D_004A28A8);
+    if (self->v42()) {
+        if (!(*(cMCSub_F2B8**)(mp + 0x434))->v53()) {
+            func_001D8240();
+            func_0018F9D8(self);
+            return;
+        } else if (*(int*)((char*)self + 0x214) != 3) {
+            self->v35(3);
+        }
+    }
+    if (self->v42()) {
+        int sel = 0;
+        cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 0x320);
+        func_003A0D00(getObj_F2B8(self, D_0045E1E8), buf);
+        *(int*)((char*)self + 0x21C) = *(int*)(mp + 0x428);
+        self->v43();
+        cUIObj_F2B8* o = getObj_F2B8(self, D_0045E1D8);
+        o->v09(0);
+        for (int i = 1; i < 7; i++) {
+            sprintf(name, D_0045E260, i);
+            o = getObj_F2B8(self, name);
+            *(sColor_F2B8*)((char*)o + 0x88) = D_004C66C8;
+            if (!(*(cMCSub_F2B8**)(mp + 0x434))->v67(i - 1) && !(*(cMCSub_F2B8**)(mp + 0x434))->v66(i - 1)
+                && (*(cMCSub_F2B8**)(mp + 0x434))->v55()) {
+                (*(cMCSub_F2B8**)(mp + 0x434))->v14(i - 1, (char*)self + 0x238);
+                func_003A0E90(o, (unsigned short*)((char*)self + 0x238));
+                if (D_004A15E8 != 2 && sel == 0) {
+                    sel = 1;
+                    o->v08(0);
+                    o->v25(0);
+                } else {
+                    o->v25(1);
+                    o->v08(1);
+                }
+                sprintf(name, D_004A15F0, i);
+                o = getObj_F2B8(self, name);
+                o->v09(0);
+                sprintf(name, D_004A15F8, i);
+                o = getObj_F2B8(self, name);
+                o->v09(0);
+            } else if ((*(cMCSub_F2B8**)(mp + 0x434))->v54(*(int*)(mp + 0x428))) {
+                (*(cMCSub_F2B8**)(mp + 0x434))->v14(i - 1, (char*)self + 0x238);
+                func_003A0E90(o, (unsigned short*)((char*)self + 0x238));
+                if ((*(cMCSub_F2B8**)(mp + 0x434))->v66(i - 1)) {
+                    o->v08(1);
+                    o->v25(1);
+                } else {
+                    o->v08(0);
+                    o->v25(0);
+                }
+                sprintf(name, D_004A15F0, i);
+                o = getObj_F2B8(self, name);
+                (*(cMCSub_F2B8**)(mp + 0x434))->v15(i - 1, buf);
+                func_003A0E90(o, buf);
+                o->v09(1);
+                sprintf(name, D_004A15F8, i);
+                o = getObj_F2B8(self, name);
+                (*(cMCSub_F2B8**)(mp + 0x434))->v16(i - 1, buf);
+                func_003A0E90(o, buf);
+                o->v09(1);
+            } else {
+                (*(cMCSub_F2B8**)(mp + 0x434))->v14(i - 1, (char*)self + 0x238);
+                func_003A0E90(o, (unsigned short*)((char*)self + 0x238));
+                o->v25(1);
+                o->v08(1);
+                sprintf(name, D_004A15F0, i);
+                o = getObj_F2B8(self, name);
+                o->v09(0);
+                sprintf(name, D_004A15F8, i);
+                o = getObj_F2B8(self, name);
+                o->v09(0);
+            }
+        }
+        if (func_001D97E0(self, mp, *(int*)(mp + 0x428), 1) == -1)
+            getObj_F2B8(self, D_0045E270)->v09(0);
+        else
+            getObj_F2B8(self, D_0045E270)->v09(1);
+        if (func_001D97E0(self, mp, *(int*)(mp + 0x428), 0) == -1)
+            getObj_F2B8(self, D_0045E280)->v09(0);
+        else
+            getObj_F2B8(self, D_0045E280)->v09(1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateprofile", func_0018F9D8);

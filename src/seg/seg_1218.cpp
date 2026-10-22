@@ -3078,7 +3078,263 @@ extern "C" void func_001057B8(cRider* rider, char* obj, char* info, sHit_57B8* h
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00105D98);
+#ifdef SKIP_ASM
+int func_0011FEE8_5D98(void*) __asm__("func_0011FEE8__FPv");
+int func_0011FE98(void*);
+int AIrand();
+extern "C" int func_00311AE8(void*, int);
+extern "C" void func_00116120(void* rider, int a, int b);
+extern "C" void func_0010EB30(void* rider, int anim, int a2, int a3, void* info);
+extern "C" void func_00108388(char* self, char* info, int flag);
+// The unit declares this later with its own vector type; bind it by asm label.
+extern "C" void cAirPredictor_startLaunchIntoAir_5D98(void*, t4Vector*, t4Vector*, float) __asm__("cAirPredictor_startLaunchIntoAir");
+// Per-material records (0xB0 bytes) reached from the game object; +0x44 makes the contact fatal.
+struct sMat_5D98 {
+    char pad0[0x44];
+    int fatal;          // 0x44
+    char pad48[0x68];
+};
+struct sMatList_5D98 {
+    char pad0[0x44];
+    sMat_5D98* mats;    // 0x44
+    sMat_5D98* getMat(int i) { return &mats[i]; }
+};
+struct sGame_5D98 {
+    char pad0[0x84];
+    sMatList_5D98* matList; // 0x84
+};
+extern sGame_5D98* D_004A28A8_5D98 __asm__("D_004A28A8");
+extern float D_004A4C84;
+
+struct sInfo_5D98 {
+    t4Vector pos;       // 0x00
+    t4Vector dir;       // 0x10
+    t4Vector off;       // 0x20
+    float vn;           // 0x30
+} __attribute__((aligned(16)));
+
+struct sVEf_5D98 { short delta; short index; void (*fn)(void*, float); };
+struct sVEv_5D98 { short delta; short index; t4Vector* (*fn)(void*); };
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_5D98(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_5D98(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline t4Vector Sub_5D98(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only FPU asm (absolute value).
+static inline float Abs_5D98(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: `<?` is the g++ minimum operator (EE min.s).
+static inline float Clamp_5D98(float v, float lo, float hi)
+{
+    return (v >= lo) ? (v <? hi) : lo;
+}
+
+static inline t4Vector Get_5D98(char* p) { return *(t4Vector*)p; }
+
+// Rider bumps into something: pick a wipeout/stumble animation from the contact normal
+// against the rider's axes (rows at 0x160/0x170/0x180, origin at 0x190).
+// The unit declares this earlier as (void*, void*, int); bind the typed body by asm label.
+extern "C" void func_00105D98_impl(cRider* self, sInfo_5D98* info, int id) __asm__("func_00105D98");
+
+extern "C" void func_00105D98_impl(cRider* self, sInfo_5D98* info, int id)
+{
+    if (func_0011FEE8_5D98(self) == 9)
+        return;
+    self->unk_3F0 += 1.0f - (Dot_5D98(info->off, self->unk_3E0) >? 0.0f); // PORT: g++ maximum operator
+    self->unk_3E0 = info->off;
+    if (id != -1) {
+        if (D_004A28A8_5D98->matList->getMat(id)->fatal != 0) {
+            func_00116120(self, 0, 1);
+            return;
+        }
+    }
+    sVEf_5D98* vt = *(sVEf_5D98**)&self->mVtbl;
+    vt[kRiderVt_vibrationBump].fn((char*)self + vt[kRiderVt_vibrationBump].delta, info->vn);
+    char* sub = (char*)&self->mVtbl;
+    if (func_0011FE98(self) == 2) {
+        if (*(int*)((char*)self->mRiderHandler + 0x30) == 1) {
+            sVEv_5D98* vt2 = *(sVEv_5D98**)sub;
+            t4Vector* pos = vt2[kRiderVt_getPosition].fn(sub + vt2[kRiderVt_getPosition].delta);
+            sVEv_5D98* vt3 = *(sVEv_5D98**)sub;
+            t4Vector* vel = vt3[kRiderVt_getVelocity].fn(sub + vt3[kRiderVt_getVelocity].delta);
+            cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->unk_2E4);
+        }
+        char* h = (char*)self->mRiderHandler;
+        *(int*)(h + 0x314) = 1;
+        *(t4Vector*)(h + 0x320) = self->mVelocity;
+        return;
+    }
+    if (func_0011FE98(self) == 1) {
+        sVEv_5D98* vt2 = *(sVEv_5D98**)sub;
+        t4Vector* pos = vt2[kRiderVt_getPosition].fn(sub + vt2[kRiderVt_getPosition].delta);
+        sVEv_5D98* vt3 = *(sVEv_5D98**)sub;
+        t4Vector* vel = vt3[kRiderVt_getVelocity].fn(sub + vt3[kRiderVt_getVelocity].delta);
+        cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->unk_2E4);
+    }
+    float d0 = Dot_5D98(Get_5D98((char*)self + 0x160), info->off);
+    float d1 = Dot_5D98(Get_5D98((char*)self + 0x170), info->off);
+    float d2 = Dot_5D98(Get_5D98((char*)self + 0x180), info->off);
+    t4Vector origin = Get_5D98((char*)self + 0x190);
+    t4Vector rel = Sub_5D98(info->pos, origin);
+    float h = Dot_5D98(rel, Get_5D98((char*)self + 0x180));
+    int cur = func_00311AE8(self->mRiderAnim, 2);
+    int anim = 0x1B6;
+    if (func_0011FEE8_5D98(self) != 0xB) {
+        if (func_0011FE98(self) == 1 && info->off.z > 0.800000011920929f) {
+            if (cur == 0x14 || cur == 0x15) {
+                anim = 0x169;
+            } else if (Abs_5D98(d1) > Abs_5D98(d0) && Abs_5D98(d1) > Abs_5D98(d2)) {
+                anim = d1 < 0.0f ? 0x162 : 0x163;
+            } else if (Abs_5D98(d2) > Abs_5D98(d0) && Abs_5D98(d2) > Abs_5D98(d1)) {
+                if (d2 < 0.0f)
+                    anim = 0x15E;
+                else if (cur == 0x12 || cur == 0x13)
+                    anim = 0x15F;
+            } else {
+                anim = d0 < 0.0f ? 0x165 : 0x164;
+            }
+        } else if (func_0011FE98(self) == 1) {
+            if (Abs_5D98(d1) > Abs_5D98(d0) && Abs_5D98(d1) > Abs_5D98(d2)) {
+                float minSpeed = 416.5320129394531f;
+                if (minSpeed < info->vn) {
+                    if (d1 < 0.0f) {
+                        float len = Len_5D98(self->mVelocity);
+                        if (h < 60.0f && len > D_004A4C84) {
+                            anim = 0x156;
+                        } else {
+                            unsigned int k;
+                            if (len > D_004A4C84)
+                                k = (unsigned int)AIrand() % 6;
+                            else
+                                k = (unsigned int)AIrand() % 3;
+                            if (k == 0)
+                                anim = 0x15B;
+                            else if (k == 1)
+                                anim = 0x157;
+                            else if (k == 2)
+                                anim = 0x158;
+                            else if (k == 3)
+                                anim = 0x15A;
+                            else
+                                anim = 0x159;
+                        }
+                    } else {
+                        anim = (AIrand() & 1) == 0 ? 0x154 : 0x155;
+                    }
+                }
+            } else if (Abs_5D98(d2) > Abs_5D98(d0) && Abs_5D98(d2) > Abs_5D98(d1)) {
+                if (d2 < 0.0f)
+                    anim = 0x15E;
+                else if (cur >= 0x12 && cur <= 0x15)
+                    anim = 0x15F;
+            } else {
+                float minSpeed = 833.337646484375f;
+                if (minSpeed < info->vn)
+                    anim = d0 < 0.0f ? 0x153 : 0x152;
+            }
+            if (anim != 0x1B6 && (cur == 0x14 || cur == 0x15))
+                anim = 0x169;
+        } else {
+            float k = Clamp_5D98(Get_5D98((char*)&self->mMatrix.row[2]).z + 1.0f - Abs_5D98(info->off.z),
+                                 0.20000000298023224f, 1.399999976158142f);
+            if (Abs_5D98(d1) > Abs_5D98(d0) && Abs_5D98(d1) > Abs_5D98(d2)) {
+                if (info->vn > k * 1388.880859375f) {
+                    if (d1 < 0.0f) {
+                        float len = Len_5D98(self->mVelocity);
+                        if (h < 60.0f && len > D_004A4C84) {
+                            anim = 0x14C;
+                        } else {
+                            unsigned int n;
+                            if (len > D_004A4C84)
+                                n = (unsigned int)AIrand() % 6;
+                            else
+                                n = (unsigned int)AIrand() % 3;
+                            if (n == 0)
+                                anim = 0x14E;
+                            else if (n == 1)
+                                anim = 0x14F;
+                            else if (n == 2)
+                                anim = 0x151;
+                            else if (n == 3)
+                                anim = 0x14D;
+                            else
+                                anim = 0x150;
+                        }
+                    } else {
+                        anim = (AIrand() & 1) == 0 ? 0x14A : 0x14B;
+                    }
+                }
+            } else if (Abs_5D98(d2) > Abs_5D98(d0) && Abs_5D98(d2) > Abs_5D98(d1)) {
+            } else if (info->vn > k * 2083.227294921875f) {
+                anim = d0 < 0.0f ? 0x149 : 0x148;
+            }
+        }
+    }
+    if (anim != 0x1B6)
+        func_0010EB30(self, anim, 0, id, info);
+    else
+        func_00108388((char*)self, (char*)info, 1);
+}
+#endif
 
 INCLUDE_ASM("seg/seg_1218", func_00106538);
 

@@ -1314,7 +1314,154 @@ extern "C" void func_003A2220(sSprite_2220* o, sRect_2220 r, sColor_2220 c, int 
     }
 }
 #endif
+//100%
 INCLUDE_ASM("ui/uitext", func_003A23B8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sRect_23B8 {
+    float x, y, w, h;
+    sRect_23B8() {}
+    sRect_23B8(float x_, float y_, float w_, float h_) : x(x_), y(y_), w(w_), h(h_) {}
+};
+struct sColor_23B8 {
+    float a, r, g, b;
+};
+struct sRS_23B8 {
+    char pad[0x10];
+    short tex;              // 0x10
+};
+struct sGfx_23B8 {
+    char pad[0xE84];
+    sRS_23B8* top;          // 0xE84
+};
+// One vertex of a submitted quad (stride 0x30).
+struct sQuadVtx_23B8 {
+    float s, t, q;
+    int pad;
+    int r, g, b, a;
+    float pos[4];
+    sQuadVtx_23B8() {}
+};
+struct sSprite_23B8 {
+    int tex;                // 0x0
+    char pad[8];
+    float v0;               // 0xC
+    float u0;               // 0x10
+    float u1;               // 0x14
+    float v1;               // 0x18
+};
+extern sGfx_23B8* D_004A289C_23B8 __asm__("D_004A289C");
+extern int D_004A28AC_23B8 __asm__("D_004A28AC");
+extern "C" void func_0038E5E8(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
+extern "C" void func_0038E738(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
+
+// Draws the sprite tiled tx by ty times over r (fractional tiles are cropped).
+extern "C" void func_003A23B8(sSprite_23B8* o, sRect_23B8 r, sColor_23B8 c, int flags, float tx, float ty)
+{
+    int tex = o->tex;
+    D_004A289C_23B8->top->tex = tex;
+    float x0 = r.x;
+    float y0 = r.y;
+    float v0 = o->v0;
+    float v1 = o->v1;
+    float u0 = o->u0;
+    float u1 = o->u1;
+    if (tx <= 0.0f) {
+        return;
+    }
+    if (ty <= 0.0f) {
+        return;
+    }
+    float w = r.w / tx;
+    float h = r.h / ty;
+    if (flags & 1) {
+        u0 = u1;
+        u1 = o->u0;
+    }
+    if (flags & 2) {
+        v0 = v1;
+        v1 = o->v0;
+    }
+    int nx = (int)tx;
+    float y = y0;
+    int ny = (int)ty;
+    sQuadVtx_23B8 v[4];
+    float fny = (float)ny;
+    for (int i = 0; i < 4; i++) {
+        sQuadVtx_23B8* p = &v[i];
+        p->a = (int)(c.a * 128.0f);
+        p->r = (int)(c.r * 255.0f);
+        p->g = (int)(c.g * 255.0f);
+        p->b = (int)(c.b * 255.0f);
+        p->q = 1.0f;
+    }
+    int j;
+    float x;
+    if (ny != 0) {
+        for (y = y0, j = 0; j < ny; j++) {
+            x = x0;
+            if (flags & 4) {
+                for (int i = 0; i < nx; i++) {
+                    sRect_23B8 dst(x, y, w, h);
+                    sRect_23B8 uv(u0, v0, u1 - u0, v1 - v0);
+                    func_0038E738(D_004A28AC_23B8, v, &dst, &uv);
+                    x += w;
+                }
+                if ((float)nx != tx) {
+                    sRect_23B8 dst(x, y, (x0 + r.w) - x, h);
+                    sRect_23B8 uv(u0, v0, u1 - u0, (v0 + (v1 - v0) * (tx - (float)nx)) - v0);
+                    func_0038E738(D_004A28AC_23B8, v, &dst, &uv);
+                }
+            } else {
+                for (int i = 0; i < nx; i++) {
+                    sRect_23B8 dst(x, y, w, h);
+                    sRect_23B8 uv(u0, v0, u1 - u0, v1 - v0);
+                    func_0038E5E8(D_004A28AC_23B8, v, &dst, &uv);
+                    x += w;
+                }
+                if ((float)nx != tx) {
+                    sRect_23B8 dst(x, y, (x0 + r.w) - x, h);
+                    sRect_23B8 uv(u0, v0, (u0 + (u1 - u0) * (tx - (float)nx)) - u0, v1 - v0);
+                    func_0038E5E8(D_004A28AC_23B8, v, &dst, &uv);
+                }
+            }
+            y += h;
+        }
+    }
+    if (fny != ty) {
+        x = x0;
+        if (flags & 4) {
+            float u0b = u0 + (u1 - u0) * (1.0f - (ty - fny));
+            float hh = (y0 + r.h) - y;
+            for (int i = 0; i < nx; i++) {
+                sRect_23B8 dst(x, y, w, hh);
+                sRect_23B8 uv(u0b, v0, u1 - u0b, v1 - v0);
+                func_0038E738(D_004A28AC_23B8, v, &dst, &uv);
+                x += w;
+            }
+            if ((float)nx != tx) {
+                sRect_23B8 dst(x, y, (x0 + r.w) - x, hh);
+                sRect_23B8 uv(u0b, v0, u1 - u0b, (v0 + (v1 - v0) * (tx - (float)nx)) - v0);
+                func_0038E738(D_004A28AC_23B8, v, &dst, &uv);
+            }
+        } else {
+            float v1b = v0 + (v1 - v0) * (ty - fny);
+            float hh = (y0 + r.h) - y;
+            for (int i = 0; i < nx; i++) {
+                sRect_23B8 dst(x, y, w, hh);
+                sRect_23B8 uv(u0, v0, u1 - u0, v1b - v0);
+                func_0038E5E8(D_004A28AC_23B8, v, &dst, &uv);
+                x += w;
+            }
+            if ((float)nx != tx) {
+                sRect_23B8 dst(x, y, (x0 + r.w) - x, hh);
+                sRect_23B8 uv(u0, v0, (u0 + (u1 - u0) * (tx - (float)nx)) - u0, v1b - v0);
+                func_0038E5E8(D_004A28AC_23B8, v, &dst, &uv);
+            }
+        }
+    }
+}
+#endif
 //100%
 INCLUDE_ASM("ui/uitext", func_003A2A00);
 #ifdef SKIP_ASM
@@ -1398,7 +1545,156 @@ extern "C" void func_003A2A00(sSprite_2A00* o, sRect_2A00 r, sMat3_2A00 m, sColo
     }
 }
 #endif
+//100%
 INCLUDE_ASM("ui/uitext", func_003A2BC8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sRect_2BC8 {
+    float x, y, w, h;
+    sRect_2BC8() {}
+    sRect_2BC8(float x_, float y_, float w_, float h_) : x(x_), y(y_), w(w_), h(h_) {}
+};
+struct sColor_2BC8 {
+    float a, r, g, b;
+};
+struct sMat3_2BC8 {
+    float m[9];
+};
+struct sRS_2BC8 {
+    char pad[0x10];
+    short tex;              // 0x10
+};
+struct sGfx_2BC8 {
+    char pad[0xE84];
+    sRS_2BC8* top;          // 0xE84
+};
+// One vertex of a submitted quad (stride 0x30).
+struct sQuadVtx_2BC8 {
+    float s, t, q;
+    int pad;
+    int r, g, b, a;
+    float pos[4];
+    sQuadVtx_2BC8() {}
+};
+struct sSprite_2BC8 {
+    int tex;                // 0x0
+    char pad[8];
+    float v0;               // 0xC
+    float u0;               // 0x10
+    float u1;               // 0x14
+    float v1;               // 0x18
+};
+extern sGfx_2BC8* D_004A289C_2BC8 __asm__("D_004A289C");
+extern int D_004A28AC_2BC8 __asm__("D_004A28AC");
+extern "C" void func_0038E880(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
+extern "C" void func_0038EA60(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
+
+// Tiled draw like func_003A23B8, with an extra 3x3 transform m.
+extern "C" void func_003A2BC8(sSprite_2BC8* o, sRect_2BC8 r, sMat3_2BC8 m, sColor_2BC8 c, int flags, float tx, float ty)
+{
+    int j;
+    float x;
+    int tex = o->tex;
+    D_004A289C_2BC8->top->tex = tex;
+    float x0 = r.x;
+    float y0 = r.y;
+    float v0 = o->v0;
+    float v1 = o->v1;
+    float u0 = o->u0;
+    float u1 = o->u1;
+    if (tx <= 0.0f) {
+        return;
+    }
+    if (ty <= 0.0f) {
+        return;
+    }
+    float w = r.w / tx;
+    float h = r.h / ty;
+    if (flags & 1) {
+        u0 = u1;
+        u1 = o->u0;
+    }
+    if (flags & 2) {
+        v0 = v1;
+        v1 = o->v0;
+    }
+    int nx = (int)tx;
+    float y = y0;
+    int ny = (int)ty;
+    sQuadVtx_2BC8 v[4];
+    for (int i = 0; i < 4; i++) {
+        sQuadVtx_2BC8* p = &v[i];
+        p->a = (int)(c.a * 128.0f);
+        p->r = (int)(c.r * 255.0f);
+        p->g = (int)(c.g * 255.0f);
+        p->b = (int)(c.b * 255.0f);
+        p->q = 1.0f;
+    }
+    if (ny != 0) {
+        for (y = y0, j = 0; j < ny; j++) {
+            x = x0;
+            if (flags & 4) {
+                for (int i = 0; i < nx; i++) {
+                    sRect_2BC8 dst(x, y, w, h);
+                    sRect_2BC8 uv(u0, v0, u1 - u0, v1 - v0);
+                    func_0038EA60(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                    x += w;
+                }
+                if ((float)nx != tx) {
+                    sRect_2BC8 dst(x, y, (x0 + r.w) - x, h);
+                    sRect_2BC8 uv(u0, v0, u1 - u0, (v0 + (v1 - v0) * (tx - (float)nx)) - v0);
+                    func_0038EA60(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                }
+            } else {
+                for (int i = 0; i < nx; i++) {
+                    sRect_2BC8 dst(x, y, w, h);
+                    sRect_2BC8 uv(u0, v0, u1 - u0, v1 - v0);
+                    func_0038E880(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                    x += w;
+                }
+                if ((float)nx != tx) {
+                    sRect_2BC8 dst(x, y, (x0 + r.w) - x, h);
+                    sRect_2BC8 uv(u0, v0, (u0 + (u1 - u0) * (tx - (float)nx)) - u0, v1 - v0);
+                    func_0038E880(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                }
+            }
+            y += h;
+        }
+    }
+    if ((float)ny != ty) {
+        x = x0;
+        if (flags & 4) {
+            float u0b = u0 + (u1 - u0) * (1.0f - (ty - (float)ny));
+            float hh = (y0 + r.h) - y;
+            for (int i = 0; i < nx; i++) {
+                sRect_2BC8 dst(x, y, w, hh);
+                sRect_2BC8 uv(u0b, v0, u1 - u0b, v1 - v0);
+                func_0038EA60(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                x += w;
+            }
+            if ((float)nx != tx) {
+                sRect_2BC8 dst(x, y, (x0 + r.w) - x, hh);
+                sRect_2BC8 uv(u0b, v0, u1 - u0b, (v0 + (v1 - v0) * (tx - (float)nx)) - v0);
+                func_0038EA60(D_004A28AC_2BC8, v, &dst, &uv, &m);
+            }
+        } else {
+            float v1b = v0 + (v1 - v0) * (ty - (float)ny);
+            float hh = (y0 + r.h) - y;
+            for (int i = 0; i < nx; i++) {
+                sRect_2BC8 dst(x, y, w, hh);
+                sRect_2BC8 uv(u0, v0, u1 - u0, v1b - v0);
+                func_0038E880(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                x += w;
+            }
+            if ((float)nx != tx) {
+                sRect_2BC8 dst(x, y, (x0 + r.w) - x, hh);
+                sRect_2BC8 uv(u0, v0, (u0 + (u1 - u0) * (tx - (float)nx)) - u0, v1b - v0);
+                func_0038E880(D_004A28AC_2BC8, v, &dst, &uv, &m);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uitext", func_003A3280);
