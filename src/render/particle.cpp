@@ -6304,7 +6304,303 @@ void* func_00382740(void* self)
 
 INCLUDE_ASM("render/particle", func_00382760);
 
+//100%
 INCLUDE_ASM("render/particle", func_00382AF0);
+#ifdef SKIP_ASM
+// PORT: PS2 hardware registers (DMA CHCR, VIF1_STAT, GS privileged PMODE/SMODE2/DISPFB1/DISPLAY1/BGCOLOR/CSR),
+// an uncached-accelerated packet buffer (| 0x30000000) and 64-bit `ulong` GS packet words (8 bytes on EE).
+// The `(ulong)float` casts in DISPLAY1 compile to libgcc's __fixunssfdi (func_00411340).
+// PS2GraphicsMan fields (no shared header yet; names from refs/ssx3-rust docs/investigation/structs/render.md):
+// 0x0/0x4 screenOffset x/y, 0xF44 forceDisplayFlip, 0x5900 scissor x,y,w,h (u16), 0x59D0 dither, 0x59E0 dimx (u64),
+// 0x59E8 blitToDisplay, 0x59EC brightness r,g,b, 0x59F8 alpha, 0x59FC brightness scale, 0x5A30/0x5A34 fbWidth/Height,
+// 0x5A38 displayPsm, 0x5A3C drawPsm, 0x5A40 zPsm, 0x5A44 interlace, 0x5A46 ffmd, 0x5A4C progressive, 0x5A50 fbw,
+// 0x5A54/0x5A58 dispWidth/Height, 0x5A5C dispFbw, 0x5A60 magv, 0x5A64 magh, 0x5A74 vsyncFlipCount, 0x5A78/0x5A7C fbp0/1,
+// 0x5A80 zbp, 0x5A84 drawFbp, 0x5A88 dispFbp.
+extern "C" void func_00371940(unsigned int madr, int qwc, int flags);
+
+extern ulong D_004FFCC0[];
+
+static inline int clamp_382AF0(int v, int lo, int hi)
+{
+    return v < lo ? lo : (v > hi ? hi : v);
+}
+
+// GS primitive coordinate: 12.4 fixed point, centred on 2048.
+static inline int gsCoord_382AF0(int v)
+{
+    return (v << 4) + 0x8000;
+}
+
+// Renderer_SetDisplayRegs: picks the front buffer, waits for DMA/VIF1/GS idle (and optionally a vsync),
+// writes the CRTC registers, then sends a GS state packet (optional draw->display blit strip pass,
+// draw context, brightness sprite strips, scissor) by normal GIF DMA.
+extern "C" void func_00382AF0(void* vself, int en1, int waitVsync)
+{
+    char* self = (char*)vself;
+    ulong* p;
+    int count;
+
+    count = ++*(int*)(self + 0x5A74);
+    if (*(int*)(self + 0xF44) != 0) {
+        *(int*)(self + 0xF44) = 0;
+    } else {
+        if (*(int*)(self + 0x59E8) == 0 && (count & 1) == 0) {
+            *(unsigned int*)(self + 0x5A84) = *(unsigned int*)(self + 0x5A7C);
+            *(unsigned int*)(self + 0x5A88) = *(unsigned int*)(self + 0x5A78);
+        } else {
+            *(unsigned int*)(self + 0x5A84) = *(unsigned int*)(self + 0x5A78);
+            *(unsigned int*)(self + 0x5A88) = *(unsigned int*)(self + 0x5A7C);
+        }
+    }
+
+    while (*(volatile int*)0x10009000 & 0x100) { // D1_CHCR.STR (VIF1)
+    }
+    while (*(volatile int*)0x1000A000 & 0x100) { // D2_CHCR.STR (GIF)
+    }
+    while (*(volatile int*)0x1000D000 & 0x100) { // D8_CHCR.STR (fromSPR)
+    }
+    while (*(volatile int*)0x10003C00 & 0x1F000003) { // VIF1_STAT
+    }
+    while ((*(volatile ulong*)0x12001000 & 0xC000) != 0x4000) { // GS CSR.FIFO empty
+    }
+    if (waitVsync != 0) {
+        *(volatile ulong*)0x12001000 = 8; // CSR.VSINT
+        while (!(*(volatile ulong*)0x12001000 & 8)) {
+        }
+        *(volatile ulong*)0x12001000;
+    }
+
+    // PMODE: EN1, MMOD 1, ALP 0xFF
+    {
+        ulong pmode = (unsigned int)en1;
+        *(volatile ulong*)0x12000000 = pmode | ((ulong)1 << 5) | ((ulong)0xFF << 8);
+    }
+    // SMODE2: INT, FFMD
+    *(volatile ulong*)0x12000020 = (ulong)*(short*)(self + 0x5A44) | ((ulong)*(short*)(self + 0x5A46) << 1);
+    // DISPFB1: FBP, FBW, PSM
+    *(volatile ulong*)0x12000070 = (ulong)*(unsigned int*)(self + 0x5A88)
+                                 | ((ulong)*(unsigned int*)(self + 0x5A5C) << 9)
+                                 | ((ulong)*(unsigned int*)(self + 0x5A38) << 15);
+    // DISPLAY1: DX, DY, MAGH, MAGV, DW, DH
+    if (*(int*)(self + 0x5A4C) != 0) {
+        int w = *(unsigned int*)(self + 0x5A54);
+        int h = *(unsigned int*)(self + 0x5A58);
+        *(volatile ulong*)0x12000080 = (ulong)((int)(*(float*)(self + 0x0) * 4.0f + -43.0f) + 0x158)
+                                     | ((ulong)((int)(12.0f - *(float*)(self + 0x4) * 2.0f) + 0x23) << 12)
+                                     | ((ulong)(0x60E / w - 1) << 23)
+                                     | ((ulong)(w * (0x60E / w) - 1) << 32)
+                                     | ((ulong)(h - 1) << 44);
+    } else {
+        int fieldMul = 1;
+        if (*(short*)(self + 0x5A44) != 0) {
+            fieldMul = *(short*)(self + 0x5A46) == 1 ? 2 : 1;
+        }
+        *(volatile ulong*)0x12000080 = (ulong)(*(float*)(self + 0x0) * 8.0f + 5.0f + 636.0f)
+                                     | ((ulong)(50.0f - *(float*)(self + 0x4) * 2.0f) << 12)
+                                     | ((ulong)*(unsigned int*)(self + 0x5A64) << 23)
+                                     | ((ulong)*(unsigned int*)(self + 0x5A60) << 27)
+                                     | ((ulong)0xA00 << 32)
+                                     | ((ulong)((*(unsigned int*)(self + 0x5A34) - 1) * fieldMul) << 44);
+    }
+    // BGCOLOR
+    *(volatile ulong*)0x120000E0 = 0;
+
+    p = (ulong*)((unsigned int)D_004FFCC0 | 0x30000000);
+
+    if (*(int*)(self + 0x59E8) != 0) {
+        // Copy the draw buffer into the display buffer: GIFtag (11 x A+D)
+        p[0] = ((ulong)1 << 60) | 11;
+        p[1] = 0xE;
+        p[2] = (ulong)*(unsigned int*)(self + 0x5A88) | ((ulong)*(unsigned int*)(self + 0x5A5C) << 16)
+             | ((ulong)*(unsigned int*)(self + 0x5A38) << 24) | ((ulong)0xFF000000 << 32);
+        p[3] = 0x4C; // FRAME_1 (display buffer)
+        p[4] = 0x61;
+        p[5] = 0x14; // TEX1_1
+        p[6] = (ulong)(*(unsigned int*)(self + 0x5A84) << 5) | ((ulong)*(unsigned int*)(self + 0x5A50) << 14)
+             | ((ulong)*(unsigned int*)(self + 0x5A3C) << 20) | ((ulong)10 << 26) | ((ulong)9 << 30);
+        p[7] = 6; // TEX0_1 (draw buffer)
+        p[8] = ((ulong)0x80 << 32) | 0x64;
+        p[9] = 0x42; // ALPHA_1
+        p[10] = 5;
+        p[11] = 8; // CLAMP_1
+        p[12] = ((ulong)(*(unsigned int*)(self + 0x5A54) - 1) << 16) | ((ulong)(*(unsigned int*)(self + 0x5A58) - 1) << 48);
+        p[13] = 0x40; // SCISSOR_1
+        p[14] = ((ulong)(*(unsigned int*)(self + 0x5A54) - 1) << 16) | ((ulong)(*(unsigned int*)(self + 0x5A58) - 1) << 48);
+        p[15] = 0x41; // SCISSOR_2
+        p[16] = (ulong)((0x800 - (*(unsigned int*)(self + 0x5A54) >> 1)) << 4)
+              | ((ulong)((0x800 - (*(unsigned int*)(self + 0x5A58) >> 1)) << 4) << 32);
+        p[17] = 0x18; // XYOFFSET_1
+        p[18] = (ulong)*(unsigned int*)(self + 0x5A80) | ((ulong)(*(unsigned int*)(self + 0x5A40) - 0x30) << 24) | ((ulong)1 << 32);
+        p[19] = 0x4E; // ZBUF_1
+        p[20] = 0x30000;
+        p[21] = 0x47; // TEST_1
+        p[22] = 0;
+        p[23] = 0x3F; // TEXFLUSH
+        {
+            int abe = *(unsigned int*)(self + 0x59F8) != 0x80;
+            // GIFtag: 1 loop, REGLIST {PRIM, RGBAQ}
+            p[24] = ((ulong)2 << 60) | ((ulong)1 << 58) | 1;
+            p[25] = 0x10;
+            p[26] = ((ulong)abe << 6) | 0x11E; // sprite, IIP, TME, FST
+        }
+        {
+            int r = clamp_382AF0((int)((float)*(unsigned int*)(self + 0x59EC) * *(float*)(self + 0x59FC)), 0, 255);
+            int g = clamp_382AF0((int)((float)*(unsigned int*)(self + 0x59F0) * *(float*)(self + 0x59FC)), 0, 255);
+            int b = clamp_382AF0((int)((float)*(unsigned int*)(self + 0x59F4) * *(float*)(self + 0x59FC)), 0, 255);
+            union { float f; int i; } q;
+            q.f = 1.0f;
+            p[27] = (ulong)r | ((ulong)g << 8) | ((ulong)b << 16) | ((ulong)*(unsigned int*)(self + 0x59F8) << 24)
+                  | ((ulong)q.i << 32);
+        }
+        {
+            // Vertical sprite strips, 32 pixels wide.
+            unsigned int w = *(unsigned int*)(self + 0x5A54);
+            int stripW = 32;
+            int n = w / stripW;
+            int du = (*(unsigned int*)(self + 0x5A30) / n) << 4;
+            int x0 = gsCoord_382AF0(-(w >> 1));
+            int ybase = 0x8000 - ((*(unsigned int*)(self + 0x5A58) >> 1) << 4);
+            int y0;
+            int uoff;
+            int xoff;
+            int yoff;
+            int x;
+            int u;
+            int u1;
+            int v1;
+            int y1;
+            int i;
+            if (*(int*)(self + 0x5A4C) != 0) {
+                uoff = 8;
+                xoff = 0;
+                yoff = 0;
+            } else {
+                uoff = 0;
+                xoff = -8;
+                yoff = -8;
+            }
+            y0 = yoff + ybase;
+            x = xoff + x0;
+            v1 = ((*(unsigned int*)(self + 0x5A34) - 1) << 4) + 8;
+            y1 = y0 + ((*(unsigned int*)(self + 0x5A58) - 1) << 4);
+            u = uoff;
+            u1 = u + du;
+            // GIFtag: n + 1 loops, REGLIST {UV, XYZ2, UV, XYZ2}
+            p[28] = (ulong)(n + 1) | ((ulong)1 << 58) | ((ulong)4 << 60);
+            p[29] = 0x5353;
+            p += 30;
+            for (i = 0; i < n; i++) {
+                p[0] = (ulong)u | ((ulong)8 << 16);
+                p[1] = (ulong)x | ((ulong)y0 << 16);
+                p[2] = (ulong)u1 | ((ulong)v1 << 16);
+                p[3] = (ulong)(x + 0x200) | ((ulong)y1 << 16);
+                x += 0x200;
+                u += du;
+                u1 += du;
+                p += 4;
+            }
+            p[0] = (ulong)uoff | ((ulong)((*(unsigned int*)(self + 0x5A34) << 4) - 8) << 16);
+            p[1] = (ulong)(unsigned int)gsCoord_382AF0(-(*(unsigned int*)(self + 0x5A54) >> 1))
+                 | ((ulong)(((*(unsigned int*)(self + 0x5A58) >> 1) << 4) + 0x7FE8) << 16) | ((ulong)0x8000 << 32);
+            p[2] = (ulong)(*(unsigned int*)(self + 0x5A30) << 4) | ((ulong)((*(unsigned int*)(self + 0x5A34) << 4) - 8) << 16);
+            p[3] = (ulong)(((*(unsigned int*)(self + 0x5A54) >> 1) << 4) + 0x8000)
+                 | ((ulong)(((*(unsigned int*)(self + 0x5A58) >> 1) << 4) + 0x7FF8) << 16) | ((ulong)0x8000 << 32);
+            p += 4;
+        }
+    }
+
+    // Draw context: GIFtag (16 x A+D, EOP)
+    p[0] = ((ulong)1 << 60) | 0x8000 | 16;
+    p[1] = 0xE;
+    p[2] = (ulong)*(unsigned int*)(self + 0x5A84) | ((ulong)*(unsigned int*)(self + 0x5A50) << 16)
+         | ((ulong)*(unsigned int*)(self + 0x5A3C) << 24);
+    p[3] = 0x4C; // FRAME_1
+    p[4] = (ulong)*(unsigned int*)(self + 0x5A84) | ((ulong)*(unsigned int*)(self + 0x5A50) << 16)
+         | ((ulong)*(unsigned int*)(self + 0x5A3C) << 24) | ((ulong)0xFF000000 << 32);
+    p[5] = 0x4D; // FRAME_2
+    p[6] = (ulong)*(unsigned int*)(self + 0x5A80) | ((ulong)(*(unsigned int*)(self + 0x5A40) - 0x30) << 24);
+    p[7] = 0x4E; // ZBUF_1
+    p[8] = (ulong)*(unsigned int*)(self + 0x5A80) | ((ulong)(*(unsigned int*)(self + 0x5A40) - 0x30) << 24);
+    p[9] = 0x4F; // ZBUF_2
+    p[10] = (ulong)((0x800 - (*(unsigned int*)(self + 0x5A30) >> 1)) << 4)
+          | ((ulong)((0x800 - (*(unsigned int*)(self + 0x5A34) >> 1)) << 4) << 32);
+    p[11] = 0x18; // XYOFFSET_1
+    p[12] = (ulong)((0x800 - (*(unsigned int*)(self + 0x5A30) >> 1)) << 4)
+          | ((ulong)((0x800 - (*(unsigned int*)(self + 0x5A34) >> 1)) << 4) << 32);
+    p[13] = 0x19; // XYOFFSET_2
+    p[14] = 0;
+    p[15] = 0x4A; // FBA_1
+    p[16] = 0;
+    p[17] = 0x4B; // FBA_2
+    p[18] = ((ulong)0x80 << 32) | 0x80;
+    p[19] = 0x3B; // TEXA
+    p[20] = 1;
+    p[21] = 0x1A; // PRMODECONT
+    p[22] = 1;
+    p[23] = 0x46; // COLCLAMP
+    p[24] = *(unsigned int*)(self + 0x59D0);
+    p[25] = 0x45; // DTHE
+    p[26] = *(ulong*)(self + 0x59E0);
+    p[27] = 0x44; // DIMX
+    p[28] = 0;
+    p[29] = 0x49; // PABE
+    p[30] = 0;
+    p[31] = 0x22; // SCANMSK
+    p[32] = 0;
+    p[33] = 0x3F; // TEXFLUSH
+    p += 34;
+    {
+        // Brightness pass: sprite strips over the frame, 32 pixels wide.
+        unsigned int tw = *(unsigned int*)(self + 0x5A30);
+        unsigned int th = *(unsigned int*)(self + 0x5A34);
+        int n = tw >> 5;
+        int oy = 0x800 - (th >> 1);
+        int x = (0x800 - (tw >> 1)) << 4;
+        int y0 = oy << 4;
+        int y1 = (th + oy) << 4;
+        // GIFtag: 2n + 4 x A+D, EOP
+        p[0] = (ulong)(n * 2 + 4) | 0x8000 | ((ulong)1 << 60);
+        p[1] = 0xE;
+        p[2] = 0x30000;
+        p[3] = 0x47; // TEST_1
+        p[4] = 6;
+        p[5] = 0; // PRIM: sprite
+        p[6] = (ulong)(*(unsigned int*)(self + 0x6AE0) | 0x80000000) | ((ulong)0x3F800000 << 32);
+        p[7] = 1; // RGBAQ
+        p += 8;
+        for (; n != 0; n--) {
+            p[0] = (ulong)x | ((ulong)y0 << 16);
+            p[1] = 5; // XYZ2
+            p[2] = (ulong)(x + 0x200) | ((ulong)y1 << 16);
+            p[3] = 5; // XYZ2
+            x += 0x200;
+            p += 4;
+        }
+    }
+    p[0] = 0x500AD;
+    p[1] = 0x47; // TEST_1
+    p += 2;
+    // GIFtag (2 x A+D, EOP): SCISSOR_1/2 from the scissor rect
+    p[0] = ((ulong)1 << 60) | 0x8000 | 2;
+    p[1] = 0xE;
+    p[2] = (ulong)*(unsigned short*)(self + 0x5900)
+         | ((ulong)(*(unsigned short*)(self + 0x5900) + (*(unsigned short*)(self + 0x5904) - 1)) << 16)
+         | ((ulong)*(unsigned short*)(self + 0x5902) << 32)
+         | ((ulong)(*(unsigned short*)(self + 0x5902) + (*(unsigned short*)(self + 0x5906) - 1)) << 48);
+    p[3] = 0x40;
+    p[4] = (ulong)*(unsigned short*)(self + 0x5900)
+         | ((ulong)(*(unsigned short*)(self + 0x5900) + (*(unsigned short*)(self + 0x5904) - 1)) << 16)
+         | ((ulong)*(unsigned short*)(self + 0x5902) << 32)
+         | ((ulong)(*(unsigned short*)(self + 0x5902) + (*(unsigned short*)(self + 0x5906) - 1)) << 48);
+    p[5] = 0x41;
+    p += 6;
+    {
+        unsigned int size = ((unsigned int)p & 0x0FFFFFFF) - (unsigned int)D_004FFCC0;
+        __asm__ __volatile__("sync.l"); // PORT: EE memory barrier before the DMA kick
+        func_00371940((unsigned int)D_004FFCC0, size >> 4, 6);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00383770);
