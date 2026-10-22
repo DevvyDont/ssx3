@@ -940,3 +940,6 @@ D_00440FE8 = 0x00440FE8; // size:0x10
 // addresses (no %hi pair; func_00362DE8, func_00363490, func_0037E238, func_0038B370).
 D_678A0 = 0x000678A0; // ignore:true
 D_67CAC = 0x00067CAC; // ignore:true
+// libgcc2 __fixunssfdi (float -> unsigned 64-bit): calls exactly __extendsfdf2, __cmpdf2, __muldf3, __fixunsdfsi,
+// __floatdidf, __adddf3, __subdf3; g++ emits it for (unsigned long)float (func_00382AF0, Renderer_SetDisplayRegs).
+__fixunssfdi = 0x00411340; //type:func
