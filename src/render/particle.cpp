@@ -3047,7 +3047,147 @@ extern "C" void func_003779E0(void* self, sPart20* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00377A10);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sRect_7A10 {
+    float x, y, w, h;
+    sRect_7A10(float ax, float ay, float aw, float ah) : x(ax), y(ay), w(aw), h(ah) {}
+};
+
+struct sPtRS_7A10 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short pad;
+};
+
+extern sPtRS_7A10 D_00501420_rs7A10 __asm__("D_00501420");
+extern char D_005059D8[];
+extern "C" void func_00363490(void* ring, unsigned int* a, int* x, unsigned int* b, int* y);
+extern "C" void* func_00423DE0(int sema);  // WaitSema (returns in $2: the call clobbers v0)
+extern "C" void func_00423DC0(int sema);
+extern "C" void func_004247D8(unsigned int start, unsigned int end);
+extern "C" void func_00362CC8(void* ring);
+void func_003673D0(void* p);
+void func_00361F90(void* p);
+
+// PS2GraphicsMan (vptr at +0x10D8, old-style g++ 2.x vtable entries)
+class cGfx_7A10 {
+public:
+    char pad_0x0[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual unsigned int GetWidth();
+    virtual unsigned int GetHeight();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void EndFrame();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void SetViewport(const sRect_7A10& r, int a);
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void DrawClear();
+
+    void EndFrame_impl() __asm__("func_00377A10");
+    void ResetViewport();
+};
+
+// old-style g++ 2.x vtable entry
+struct sVEnt_7A10 {
+    short delta;
+    short index;
+    void (*fn)(void*, const sRect_7A10&, int);
+};
+
+inline void cGfx_7A10::ResetViewport()
+{
+    sVEnt_7A10* vt = *(sVEnt_7A10**)((char*)this + 0x10D8);
+    void (**pf)(void*, const sRect_7A10&, int) = &vt[24].fn;
+    (*pf)((char*)this + vt[24].delta, sRect_7A10(0.0f, 0.0f, (float)GetWidth(), (float)GetHeight()), 1);
+}
+
+void cGfx_7A10::EndFrame_impl()
+{
+    char* s = (char*)this;
+    ResetViewport();
+    DrawClear();
+    unsigned int vif1 = *(unsigned int*)(s + 0x5A00);
+    unsigned int gif1 = *(unsigned int*)(s + 0x5A14);
+    int vif2;
+    int gif2;
+    func_00363490(*(void**)(s + 0x18F0), (unsigned int*)(s + 0x5A00), &vif2, (unsigned int*)(s + 0x5A14), &gif2);
+    func_00423DE0(*(int*)(s + 0x5ACC));
+    // bufState[2] (+0x5A90) and queuedIndex (+0x5AA4) are shared with the DMA kick thread
+    // (func_00382760) and the VIF1 DMA interrupt: volatile, like func_003826E0's bufState.
+    volatile int* bufState = (volatile int*)(s + 0x5A90);
+    *(volatile int*)(s + 0x5AA4) = *(int*)(s + 0x5A10);
+    volatile int* state = &bufState[*(volatile int*)(s + 0x5AA4)];
+    *(unsigned int*)(s + 0x5AA8) = vif1;
+    *(int*)(s + 0x5AAC) = vif2;
+    *(unsigned int*)(s + 0x5AB0) = gif1;
+    *(int*)(s + 0x5AB4) = gif2;
+    *state = 2;
+    func_00423DC0(*(int*)(s + 0x5ACC));
+    func_00423DC0(*(int*)(s + 0x5AC8));
+    *(int*)(s + 0x5A10) = *(int*)(s + 0x5A10) == 0;
+    *(int*)(s + 0x5A24) = *(int*)(s + 0x5A24) == 0;
+    *(unsigned int*)(s + 0x5A00) = *(unsigned int*)(s + 0x5A04) = *(unsigned int*)(s + 0x5A0C) + *(int*)(s + 0x5A10) * 0xCCC80;
+    *(unsigned int*)(s + 0x5A14) = *(unsigned int*)(s + 0x5A18) = *(unsigned int*)(s + 0x5A20) + *(int*)(s + 0x5A24) * 0x26600;
+    func_004247D8(*(unsigned int*)(s + 0x5A00), *(unsigned int*)(s + 0x5A00) + 0xCCC80);
+    func_004247D8(*(unsigned int*)(s + 0x5A14), *(unsigned int*)(s + 0x5A14) + 0x26600);
+    **(sPtRS_7A10**)(s + 0xE84) = D_00501420_rs7A10;
+    func_00362CC8(*(void**)(s + 0x18F0));
+    func_003673D0(*(void**)(s + 0x18F4));
+    ResetViewport();
+    func_00361F90(D_005059D8);
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00377CF0);
 
