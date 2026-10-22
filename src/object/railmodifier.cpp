@@ -5386,7 +5386,176 @@ extern "C" void func_00362CC8(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00362DE8);
+#ifdef SKIP_ASM
+extern void* D_004A4474;
+extern "C" void func_00424698(void* begin, void* end);
+extern "C" void* func_0038F4F8(void* ring, void* src, int size, int flags);
+extern "C" void func_0038F6A8(void* ring);
+extern "C" void func_0038F7B0();
+extern "C" unsigned int func_00364240(unsigned int* self, int key);
+
+// One deferred draw record (0x80; REF structs/render.md / n2-render-layer.md "Record"): render state
+// words, texture key, DMA packet start/end, matrix index, continuation flag.
+struct sRmEntry_2DE8 {
+    unsigned int w[4];      // 0x0
+    short tex[2];           // 0x10
+    int packet;             // 0x14
+    int tail;               // 0x18
+    short mtxIndex;         // 0x1C
+    short continuation;     // 0x1E
+    char pad_0x20[0x60];
+};
+
+// A bucket: one (state, textures, matrix) combination with its DMA chain (0x20; REF structs/render.md "Bucket").
+struct sRmNode_2DE8 {
+    unsigned int* state;    // 0x0
+    int key;                // 0x4  textures (short[2])
+    int mtxIndex;           // 0x8
+    int packet;             // 0xC  first packet start (CALL target)
+    int tail;               // 0x10 last packet end
+    int linked;             // 0x14 chained flag
+    sRmNode_2DE8* link;     // 0x18 next in chain
+    sRmNode_2DE8* next;     // 0x1C hash next
+};
+
+struct sRmSortItem_2DE8 {
+    unsigned int key;
+    sRmNode_2DE8* node;
+};
+
+struct sRmBatch_2DE8 {
+    int count;                          // 0x0
+    char pad_0x4[0x7C];
+    sRmEntry_2DE8 entries[0xA29];       // 0x80
+    char pad_0x51500[0x57494 - 0x51500];
+    int nNodes;                         // 0x57494
+    sRmNode_2DE8 nodes[0x800];          // 0x57498
+    sRmNode_2DE8* stateHash[0x100];     // 0x67498 (unused here)
+    char pad_0x67898[0x678A0 - 0x67898];
+    sRmNode_2DE8* nodeHash[0x100];      // 0x678A0
+    sRmNode_2DE8* last;                 // 0x67CA0
+    int nItems;                         // 0x67CA4
+    sRmSortItem_2DE8 items[1];          // 0x67CA8
+};
+
+// REF n2-render-layer.md: InternState, FindBucket, AppendPacket (0x362978).
+extern "C" unsigned int* func_00394ED0(sRmBatch_2DE8* self, sRmEntry_2DE8* e, int hash);
+extern "C" sRmNode_2DE8* func_00395000(sRmBatch_2DE8* self, unsigned int* state, int key, int hash, int mtxIndex);
+extern "C" void func_00362978(void* self, int packet, int tail);
+
+union sRmTexKey_2DE8 {
+    int i;
+    struct { short u; short v; } s;
+    void set(short u_, short v_) { s.u = u_; s.v = v_; }
+};
+
+static inline int hashPart_2DE8(int x, int s)
+{
+    return (((x >> s) << 5) + x) >> s;
+}
+
+static inline int hash8_2DE8(int x)
+{
+    return (hashPart_2DE8(x, 0) ^ hashPart_2DE8(x, 8) ^ hashPart_2DE8(x, 16) ^ hashPart_2DE8(x, 24)) & 0xFF;
+}
+
+static inline int nodeHash_2DE8(unsigned int* state, int key)
+{
+    int lo = (short)key;
+    int hi = key >> 16;
+    return hash8_2DE8((int)state ^ (lo | ((hi + 2) << 16)));
+}
+
+static inline sRmNode_2DE8* newNode_2DE8(sRmBatch_2DE8* self, unsigned int* state, int key, int mtxIndex)
+{
+    sRmNode_2DE8* n = &self->nodes[self->nNodes++];
+    n->state = state;
+    n->key = key;
+    n->mtxIndex = mtxIndex;
+    n->packet = 0;
+    n->linked = 0;
+    n->link = 0;
+    return n;
+}
+
+static inline unsigned int* findState_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e)
+{
+    int x = e->w[0] ^ e->w[1] ^ e->w[2] ^ e->w[3];
+    return func_00394ED0(self, e, hash8_2DE8(x));
+}
+
+static inline void addEntry_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e, unsigned int* state, int key)
+{
+    sRmNode_2DE8* node;
+    if (e->continuation != 0)
+        node = 0;
+    else
+        node = func_00395000(self, state, key, nodeHash_2DE8(state, key), e->mtxIndex);
+    if (node == 0) {
+        sRmNode_2DE8* n = newNode_2DE8(self, state, key, e->mtxIndex);
+        node = n;
+        if (e->continuation != 0 && self->last != 0) {
+            node->linked = 1;
+        } else {
+            unsigned int sortKey = func_00364240(state, key);
+            int h = nodeHash_2DE8(state, key);
+            n->next = self->nodeHash[h];
+            self->nodeHash[h] = n;
+            self->items[self->nItems].key = sortKey;
+            self->items[self->nItems++].node = n;
+        }
+    }
+    func_00362978(node, e->packet, e->tail);
+    if (e->continuation != 0) {
+        sRmNode_2DE8* prev = self->last;
+        if (prev != 0) {
+            prev->link = node;
+            prev->linked = 1;
+        }
+    }
+    self->last = node;
+}
+
+// DeferMan_BuildBuckets (REF n2-render-layer.md): streams the draw records through the scratchpad in
+// chunks and files each into a bucket by (state, textures, matrix); new buckets get a sort key.
+// PORT: (int) of a pointer for hashing.
+extern "C" void func_00362DE8(void* vself)
+{
+    sRmBatch_2DE8* self = (sRmBatch_2DE8*)vself;
+    self->last = 0;
+    func_00424698(self->entries, (char*)&self->entries[self->count] - 1);
+    void* ring = D_004A4474;
+    int bytes = *(int*)((char*)ring + 0x10) << 4;
+    int chunk = bytes / sizeof(sRmEntry_2DE8);
+    int nChunks = self->count / chunk;
+    int chunkBytes = chunk * sizeof(sRmEntry_2DE8);
+    sRmEntry_2DE8* buf = (sRmEntry_2DE8*)func_0038F4F8(ring, self->entries, chunkBytes, 4);
+    for (int i = 0; i < nChunks; i++) {
+        sRmEntry_2DE8* next = (sRmEntry_2DE8*)func_0038F4F8(ring, &self->entries[(i + 1) * chunk], chunkBytes, 4);
+        for (int j = 0; j < chunk; j++) {
+            sRmEntry_2DE8* e = &buf[j];
+            unsigned int* state = findState_2DE8(self, e);
+            sRmTexKey_2DE8 key;
+            key.set(e->tex[0], e->tex[1]);
+            addEntry_2DE8(self, e, state, key.i);
+        }
+        buf = next;
+        func_0038F6A8(ring);
+        func_0038F7B0();
+    }
+    func_0038F7B0();
+    for (int j = 0; j < self->count - chunk * nChunks; j++) {
+        sRmEntry_2DE8* e = &buf[j];
+        unsigned int* state = findState_2DE8(self, e);
+        sRmTexKey_2DE8 key;
+        key.set(e->tex[0], e->tex[1]);
+        addEntry_2DE8(self, e, state, key.i);
+    }
+    func_0038F6A8(ring);
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00363490);
 
