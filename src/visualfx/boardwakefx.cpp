@@ -4044,7 +4044,7 @@ static inline int texId_7A10(int i)
 // Bone position (row 3 of the rider's bone matrix unk_89C).
 static inline sWakeV4_7A10 bonePos_7A10(cRider* r)
 {
-    return *(sWakeV4_7A10*)((char*)r->mAnimModel->unk_030 + (r->unk_89C << 6) + 0x30);
+    return *(sWakeV4_7A10*)((char*)r->mAnimModel->unk_030 + (r->mBoneHips << 6) + 0x30);
 }
 
 // Fills vertex i of a strip: colour (alpha scaled to 0..128), q = 1, position, then st.

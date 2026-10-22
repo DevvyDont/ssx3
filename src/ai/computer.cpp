@@ -791,7 +791,7 @@ extern "C" int func_0010D938(void* self)
     int p = func_0010DEB0(self);
     if (p == 0)
         return 0;
-    float d = func_00113128((void*)p) - (*(cRider**)((char*)self + 0x18))->unk_4D0;
+    float d = func_00113128((void*)p) - (*(cRider**)((char*)self + 0x18))->mDistToFinish;
     if (d < *(float*)((char*)(*(cRider**)((char*)self + 0x18)) + 0xDC))
         return 1;
     return 0;
@@ -809,7 +809,7 @@ extern "C" int func_0010D990(void* self)
     int p = func_0010DEB0(self);
     if (p == 0)
         return 0;
-    float d = func_00113128((void*)p) - (*(cRider**)((char*)self + 0x18))->unk_4D0;
+    float d = func_00113128((void*)p) - (*(cRider**)((char*)self + 0x18))->mDistToFinish;
     if (*(float*)((char*)*(cRider**)((char*)self + 0x18) + 0xE0) < d)
         return 1;
     return 0;
@@ -1633,41 +1633,41 @@ extern "C" void func_0010EB30(cRider* rider, int anim, int a2, int a3, char* evt
     func_002961F0(func_0028B180(), rider, amt);
     func_00111AA0_impl(rider->mRiderHandler, evt, evt + 0x20, a3, *(float*)(evt + 0x30));
     func_0011FEC8_EB30(rider, 0xD);
-    if (rider->unk_328 == 3) {
+    if (rider->mRailStyle == 3) {
         float ang = 1.5707963705062866f;
         func_0011DFE0(rider, GetUp_EB30(rider), ang);
         cRiderAnimBase_changeHeadingOffset(rider->mRiderAnim, ang);
         ResetAnimOrientation_EB30((char*)rider->mRiderAnim, 0.0f);
-    } else if (rider->unk_328 == 4) {
+    } else if (rider->mRailStyle == 4) {
         float ang = -1.5707963705062866f;
         func_0011DFE0(rider, GetUp_EB30(rider), ang);
         cRiderAnimBase_changeHeadingOffset(rider->mRiderAnim, ang);
         ResetAnimOrientation_EB30((char*)rider->mRiderAnim, 0.0f);
     }
-    rider->unk_328 = 0;
+    rider->mRailStyle = 0;
     func_00116930(rider);
     cRider_doLeanPoseAdjust(rider, &rider->mPosition);
     cRider_updateOrientationImplicit(rider);
-    rider->unk_1F0[0].target = 0.0f;
-    rider->unk_1F0[0].cur = 0.0f;
-    rider->unk_1F0[0].rate = 0.0f;
-    rider->unk_1F0[2].target = 0.0f;
-    rider->unk_1F0[2].cur = 0.0f;
-    rider->unk_1F0[2].rate = 0.0f;
-    rider->unk_1F0[8].target = 0.0f;
-    rider->unk_1F0[8].cur = 0.0f;
-    rider->unk_1F0[8].rate = 0.0f;
-    rider->unk_330 = 0;
+    rider->mSlewed[0].target = 0.0f;
+    rider->mSlewed[0].cur = 0.0f;
+    rider->mSlewed[0].rate = 0.0f;
+    rider->mSlewed[2].target = 0.0f;
+    rider->mSlewed[2].cur = 0.0f;
+    rider->mSlewed[2].rate = 0.0f;
+    rider->mSlewed[8].target = 0.0f;
+    rider->mSlewed[8].cur = 0.0f;
+    rider->mSlewed[8].rate = 0.0f;
+    rider->mPressType = 0;
     char buf[0x50];
-    func_00312660(buf, rider->mRiderAnim, anim, D_004A4C08.a, rider->unk_1F0[0].target);
+    func_00312660(buf, rider->mRiderAnim, anim, D_004A4C08.a, rider->mSlewed[0].target);
     sXf_EB30 a;
     func_0030ECD8(&a, rider->mAnimModel, buf, 0);
     char* trk = (char*)rider->mAnimModel;
-    sQuat_EB30* n = (sQuat_EB30*)((rider->unk_89C << 4) + *(int*)(trk + 0x24));
+    sQuat_EB30* n = (sQuat_EB30*)((rider->mBoneHips << 4) + *(int*)(trk + 0x24));
     sXf_EB30 node;
     node.pos = sQuat_EB30(n->x * *(float*)(trk + 0x140), n->y * *(float*)(trk + 0x144),
                           n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C));
-    node.rot = *(sQuat_EB30*)(*(char**)((char*)rider->mAnimModel + 0x28) + (rider->unk_89C << 4));
+    node.rot = *(sQuat_EB30*)(*(char**)((char*)rider->mAnimModel + 0x28) + (rider->mBoneHips << 4));
     sXf_EB30 y = Combine_EB30(node, Invert_EB30(a));
     *(sXf_EB30*)&rider->mPosition = Combine_EB30(*(sXf_EB30*)&rider->mPosition, y);
     cRider_updateOrientationImplicit(rider);

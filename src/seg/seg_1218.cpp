@@ -3038,7 +3038,7 @@ extern "C" void func_001057B8(cRider* rider, char* obj, char* info, sHit_57B8* h
     float facing = DotV_57B8(rider->unk_180, hit->n);
     if (func_0011FE98(rider) == 1 || (func_0011FE98(rider) == 2 && *(int*)((char*)rider->mRiderHandler + 0x30) == 1)) {
         if (Len_57B8(rider->mVelocity) < 833.3333740234375f) {
-            float* acc = &rider->unk_3F4;
+            float* acc = &rider->mImpactAccum2;
             *acc = *acc + (2.5f - facing) * (hit->n.z >= 0.20000000298023224f ? hit->n.z : 0.20000000298023224f);
         }
     }
@@ -3058,9 +3058,9 @@ extern "C" void func_001057B8(cRider* rider, char* obj, char* info, sHit_57B8* h
         sVEf_57B8* vt = *(sVEf_57B8**)&rider->mVtbl;
         vt[kRiderVt_vibrationBump].fn((char*)rider + vt[kRiderVt_vibrationBump].delta, vn);
         if (func_00312AA0(rider->mRiderAnim, 2) != 0x10C || func_00312AB0(rider->mRiderAnim, 2) > 0.20000000298023224f) {
-            rider->unk_438 = 0;
+            rider->mSurfaceType = 0;
             func_0010E910(rider, 0, 0, 0, hit, speed);
-            func_00119E38(rider->mMetrix, rider->unk_320 != rider->unk_324, 0);
+            func_00119E38(rider->mMetrix, rider->unk_320 != rider->mNaturalStance, 0);
             func_0011FEC8_57B8(rider, 0xD);
             func_0011FEC8_57B8(rider, 5);
             cRiderAnimBase_play(rider->mRiderAnim, 0x10C, 1, -1.0f);
@@ -3199,8 +3199,8 @@ extern "C" void func_00105D98_impl(cRider* self, sInfo_5D98* info, int id)
 {
     if (func_0011FEE8_5D98(self) == 9)
         return;
-    self->unk_3F0 += 1.0f - (Dot_5D98(info->off, self->unk_3E0) >? 0.0f); // PORT: g++ maximum operator
-    self->unk_3E0 = info->off;
+    self->mImpactAccum += 1.0f - (Dot_5D98(info->off, self->mImpulse) >? 0.0f); // PORT: g++ maximum operator
+    self->mImpulse = info->off;
     if (id != -1) {
         if (D_004A28A8_5D98->matList->getMat(id)->fatal != 0) {
             func_00116120(self, 0, 1);
@@ -3715,8 +3715,8 @@ static inline sQuat_6848 AxisAngle_6848(const sV_6848& axis, float angle)
     return sQuat_6848(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-#define LAND_STATE(r) ((r)->unk_328)
-#define LAND_KIND(r) ((r)->unk_330)
+#define RAIL_STYLE(r) ((r)->mRailStyle)
+#define PRESS_TYPE(r) ((r)->mPressType)
 
 extern "C" int func_00106848(cRider* self)
 {
@@ -3741,47 +3741,47 @@ extern "C" int func_00106848(cRider* self)
             vt[43].fn(h + vt[43].delta, &land, Scale_6848(dv, -1.0f));
         }
     }
-    sAnimModelBone* bone = &self->mAnimModel->bones[self->unk_8A0];
+    sAnimModelBone* bone = &self->mAnimModel->bones[self->mBoneBoardRoot];
     sV_6848 side = Side_6848(bone);
     sV_6848 up = Up_6848(bone);
     float a = Dot_6848(*(t4Vector*)&side, land.n);
     float b = Dot_6848(*(t4Vector*)&up, land.n);
     float angle = Atan2_6848(b, a);
-    int prev = LAND_STATE(self);
+    int prev = RAIL_STYLE(self);
     if (func_0011FEE8_57B8(self) == 1) {
         if (self->unk_320 == 0)
-            LAND_STATE(self) = 1;
+            RAIL_STYLE(self) = 1;
         else
-            LAND_STATE(self) = 2;
-    } else if (LAND_KIND(self) != 0) {
+            RAIL_STYLE(self) = 2;
+    } else if (PRESS_TYPE(self) != 0) {
         if (Abs_6848(angle) > 1.5707964897155762f)
-            LAND_STATE(self) = 2;
+            RAIL_STYLE(self) = 2;
         else
-            LAND_STATE(self) = 1;
+            RAIL_STYLE(self) = 1;
     } else if (func_0011FEE8_57B8(self) == 0xC) {
-        LAND_STATE(self) = 3;
+        RAIL_STYLE(self) = 3;
     } else {
         sV_6848 front = Front_6848(bone);
         if (front.z < 0.0f) {
             if (b < 0.0f)
-                LAND_STATE(self) = 4;
+                RAIL_STYLE(self) = 4;
             else
-                LAND_STATE(self) = 3;
+                RAIL_STYLE(self) = 3;
         } else if (Abs_6848(angle) > 2.6179940700531006f) {
-            LAND_STATE(self) = 2;
+            RAIL_STYLE(self) = 2;
         } else if (Abs_6848(angle) < 0.523598849773407f) {
-            LAND_STATE(self) = 1;
+            RAIL_STYLE(self) = 1;
         } else if (angle < -0.523598849773407f) {
-            LAND_STATE(self) = 4;
+            RAIL_STYLE(self) = 4;
         } else {
-            LAND_STATE(self) = 3;
+            RAIL_STYLE(self) = 3;
         }
     }
-    self->unk_438 = land.mat;
+    self->mSurfaceType = land.mat;
     if (func_0011FE98(self) == 1) {
-        func_0010E910(self, 0, LAND_STATE(self), LAND_KIND(self), &land, imp);
+        func_0010E910(self, 0, RAIL_STYLE(self), PRESS_TYPE(self), &land, imp);
     } else {
-        func_0010E098(self, 1, func_00119D40(self->mMetrix, self->unk_320 != self->unk_324, 0, LAND_STATE(self), LAND_KIND(self)));
+        func_0010E098(self, 1, func_00119D40(self->mMetrix, self->unk_320 != self->mNaturalStance, 0, RAIL_STYLE(self), PRESS_TYPE(self)));
     }
     *(int*)(D_004A3500_6848 + 0x598C) = land.mat;
     func_0011FE78_6848(self, 4);
@@ -3792,7 +3792,7 @@ extern "C" int func_00106848(cRider* self)
             fall = 1;
         func_0011FEC8_57B8(self, 0xD);
         func_00115358(self);
-        int kind = LAND_KIND(self);
+        int kind = PRESS_TYPE(self);
         if (kind != 0) {
             if (kind == 1)
                 cRiderAnimBase_play(self->mRiderAnim, 0x1A, 0, -1.0f);
@@ -3803,7 +3803,7 @@ extern "C" int func_00106848(cRider* self)
             func_001326C8((char*)self->mRiderHandler + 0x2B0, fall);
             func_0011FEC8_57B8(self, 7);
         }
-    } else if (prev != LAND_STATE(self)) {
+    } else if (prev != RAIL_STYLE(self)) {
         if (prev == 3) {
             func_0011DFE0(self, GetUp_6848(self), 1.5707963705062866f);
             cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, 1.5707963705062866f);
@@ -3825,8 +3825,8 @@ extern "C" int func_00106848(cRider* self)
     return 1;
 }
 
-#undef LAND_STATE
-#undef LAND_KIND
+#undef RAIL_STYLE
+#undef PRESS_TYPE
 #endif
 
 //100%
@@ -4063,10 +4063,10 @@ extern "C" int func_00106F78_impl(cRider* self)
     if (func_0011FE98(self) == 4) {
         return 0;
     }
-    sAnimModelBone* b = &self->mAnimModel->bones[self->unk_89C];
+    sAnimModelBone* b = &self->mAnimModel->bones[self->mBoneHips];
     const t4Vector& dir = Front_6F78(b);
     sHit_6F78 hit;
-    if (!func_00334680_6F78(self->unk_860, &b->pos, &hit.pos, 1, 300.0f)) {
+    if (!func_00334680_6F78(self->mOverlapList, &b->pos, &hit.pos, 1, 300.0f)) {
         return 0;
     }
     float speed = Len_6F78(self->mVelocity);

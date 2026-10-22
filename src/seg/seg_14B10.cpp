@@ -488,7 +488,7 @@ static inline t4Vector QuatMul_5358(const Q_5358& a, const t4Vector& b)
 extern "C" void func_00115358(cRider* self)
 {
     // Half turn about the up axis (quaternion (up, 0)) whenever the landing state disagrees with the stance flag.
-    int state = self->unk_328;
+    int state = self->mRailStyle;
     if (state == 2) {
         if (self->unk_320 == 0) {
             self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
@@ -507,7 +507,7 @@ extern "C" void func_00115358(cRider* self)
             cRider_updateOrientationImplicit(self);
             func_00115168((char*)self);
         }
-        if (self->unk_328 == 4) {
+        if (self->mRailStyle == 4) {
             func_0011DFE0_5358(self, *(Q_5168*)&self->mMatrix.row[2], 1.5707964f);
             cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, 1.5707964f);
             SetHeading_5168((char*)self->mRiderAnim, 1.5707964f);
@@ -951,21 +951,21 @@ extern "C" int func_001163B0(cRider* self, int a1, int a2)
                 *(long*)((char*)self->mRiderAnim + 0x20) = -1;
             }
             if (func_00311AE8(self->mRiderAnim, 0) == 0xD) {
-                float d = self->unk_300 * 0.01111111231148243f;
-                float cur = self->unk_350;
+                float d = self->mTimeScale * 0.01111111231148243f;
+                float cur = self->mAttackBlend;
                 float v = 1.0f;
                 if (d + 1.0f < cur)
                     v = cur - d;
                 else if (cur < 1.0f - d)
                     v = cur + d;
-                self->unk_350 = v;
+                self->mAttackBlend = v;
                 char* q = (char*)func_00311B20(self->mRiderAnim, 0);
-                *(float*)(q + 0x94) = *(float*)(q + 0x98) = self->unk_350;
+                *(float*)(q + 0x94) = *(float*)(q + 0x98) = self->mAttackBlend;
             }
             if (match)
-                self->unk_340 = Scale_163B0(GetSide_163B0(self), -1.0f);
+                self->mAttackDir = Scale_163B0(GetSide_163B0(self), -1.0f);
             else
-                self->unk_340 = GetSide_163B0(self);
+                self->mAttackDir = GetSide_163B0(self);
         } else {
             *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x90) = 1.0f;
             func_00311E88(self->mRiderAnim, 0, 0.1f);
@@ -980,7 +980,7 @@ extern "C" int func_001163B0(cRider* self, int a1, int a2)
         *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)((char*)self + 0x8C0);
         cRiderAnimBase_play(self->mRiderAnim, 0x142, 1, -1.0f);
         *(long*)((char*)self->mRiderAnim + 0x20) = -1;
-        self->unk_350 = 0.0f;
+        self->mAttackBlend = 0.0f;
     } else if (a1 != 0 || a2 != 0) {
         if (func_00311AE8(self->mRiderAnim, 1) == 3 && func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
             func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 1) == 0)
@@ -990,15 +990,15 @@ extern "C" int func_001163B0(cRider* self, int a1, int a2)
         int anim;
         if (a1 != 0) {
             anim = self->unk_320 ? 0x143 : 0x144;
-            self->unk_340 = Scale_163B0(GetSide_163B0(self), -1.0f);
+            self->mAttackDir = Scale_163B0(GetSide_163B0(self), -1.0f);
         } else {
-            self->unk_340 = GetSide_163B0(self);
+            self->mAttackDir = GetSide_163B0(self);
             anim = self->unk_320 ? 0x144 : 0x143;
         }
         *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)((char*)self + 0x8C0);
         cRiderAnimBase_play(self->mRiderAnim, anim, 1, -1.0f);
         *(long*)((char*)self->mRiderAnim + 0x20) = -1;
-        self->unk_350 = 0.0f;
+        self->mAttackBlend = 0.0f;
     }
     return func_00311AE8(self->mRiderAnim, 1) == 3 || func_00311AE8(self->mRiderAnim, 1) == 0xD;
 }

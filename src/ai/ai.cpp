@@ -7099,7 +7099,7 @@ extern "C" int func_001352A8(void* vself, int trick, int held)
     sTrickAnim_52A8* self = (sTrickAnim_52A8*)vself;
     float speed = func_00120038(self->rider);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
-    int hi = self->rider->unk_2F4 >= 5;
+    int hi = self->rider->mUberLevel >= 5;
     int anim;
 
     if (self->state == 0) {
@@ -7146,7 +7146,7 @@ extern "C" int func_001352A8(void* vself, int trick, int held)
         } else if (held != 0) {
             func_00311E88(self->rider->mRiderAnim, 1, 0.10000000149011612f);
             func_00311E88(self->rider->mRiderAnim, 2, 0.10000000149011612f);
-            if (self->rider->unk_2F0 == 0.0f || (self->rider->unk_B2C & 1) == 0
+            if (self->rider->mUberTimer == 0.0f || (self->rider->mUberFlags & 1) == 0
                 || func_00150198(iface, self->rider->mAIIndex, self->trick, hi) == 0x1B6) {
                 cRider* r = self->rider;
                 cRiderAnimBase_play(r->mRiderAnim, func_00150138(iface, r->mAIIndex, self->trick), 0, -1.0f);

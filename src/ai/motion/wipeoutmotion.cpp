@@ -705,7 +705,7 @@ extern "C" void func_00137860(void* vself)
     sHit_137860 hitB;
     cRider* r = RIDER;
     func_0032F650(&sph, r->mSphereTree, !isHuman_137860(r));
-    float d = func_003342D0(RIDER->unk_860, &sph, &hitA, (int)RIDER->unk_868);
+    float d = func_003342D0(RIDER->mOverlapList, &sph, &hitA, (int)RIDER->mWallHint);
     if (d >= 0.0f)
     {
         float t = func_00138960(self, (char*)&hitB, (sVec4WG*)&hitA.normal);
@@ -726,8 +726,8 @@ extern "C" void func_00137860(void* vself)
             *(t4Vector*)(hd + 0x320) = r2->mVelocity;
             RIDER->unk_3D0 = hitB.v20;
             RIDER->mGroundNormal = hitB.normal;
-            RIDER->unk_438 = hitB.material;
-            RIDER->unk_460 = hitB.pos;
+            RIDER->mSurfaceType = hitB.material;
+            RIDER->mGroundContactPoint = hitB.pos;
             RIDER->unk_454 = vu0Dot_137860(vu0Sub_137860(RIDER->mPosition, hitB.pos), RIDER->mGroundNormal);
             t4Vector impulse = vu0Scale_137860(RIDER->mGroundNormal, -vn);
             vu0AddEq_137860(RIDER->mVelocity, impulse);
