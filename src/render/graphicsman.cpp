@@ -618,7 +618,158 @@ INCLUDE_ASM("render/graphicsman", func_0036B158);
 
 INCLUDE_ASM("render/graphicsman", func_0036B5E8);
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036B9D8);
+#ifdef SKIP_ASM
+// PORT: ulong is 64-bit here (GIF/DMA packet words).
+// Multi-pass offset blur: draws the source region `passes` times as column sprites, each pass
+// shifted diagonally by +-off texels, with the vertex colour scaled by intensity / passes.
+extern "C" void func_0036B9D8(void* vself, int tbp, int tw, int u, int v, int uw, int vh, int fbp,
+                              float intensity, int w, int h, int off, int passes, int* handle)
+{
+    char* self = (char*)vself;
+    int u0 = (u << 4) + 8 + off;
+    int du = ((u + uw) << 4) + 8 - off - u0;
+    int v0 = (v << 4) + 8 + off;
+    int v1 = ((v + vh) << 4) + 8 - off;
+    int cols = w / 32;
+    void* dma = D_004A4474;
+    int zbp = *(int*)(self + 0x5A80);
+    int w16 = w << 4;
+    int x0;
+    int x1;
+    ulong* p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    int grey = (int)(intensity / (float)passes);
+    int fbw = w / 64;
+    if (fbw <= 0) fbw = 1;
+    int tbw = tw / 64;
+    if (tbw <= 0) tbw = 1;
+    p[0] = (cols * 4 * passes + 14) | 0x10000000;
+    p[1] = 0;
+    p += 2;
+    p[0] = (cols * 4 * passes + 13) | ((ulong)0x8000 << 45);
+    p[1] = 0xE;
+    p[2] = (fbp >> 5) | ((ulong)fbw << 16) | 0xFF00000001000000;
+    p[3] = 0x4C;
+    p[4] = (zbp | 0x1000000) | ((ulong)0x8000 << 17);
+    p[5] = 0x4E;
+    p[6] = 0x30000;
+    p[7] = 0x47;
+    p[8] = 0;
+    p[9] = 0x18;
+    p[10] = 0x68 | ((ulong)0x80 << 32);
+    p[11] = 0x42;
+    p[12] = 0;
+    p[13] = 0x3F;
+    p[14] = ((ulong)(w - 1) << 16) | ((ulong)(h - 1) << 48);
+    p[15] = 0x40;
+    p[16] = 0x60;
+    p[17] = 0x14;
+    p[18] = tbp | ((ulong)tbw << 14) | ((ulong)0xD502 << 19);
+    p[19] = 6;
+    p[20] = 0xA | ((ulong)u << 4) | ((ulong)(u + uw - 1) << 14) | ((ulong)v << 24) | ((ulong)(v + vh - 1) << 34);
+    p[21] = 8;
+    p += 22;
+    p[0] = 0x116;
+    p[1] = 0;
+    p[2] = grey | ((ulong)grey << 8) | ((ulong)grey << 16) | 0x3F80000080000000;
+    p[3] = 1;
+    p += 4;
+    *handle = func_0038F668(dma, (char*)p, 4);
+
+    p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    x1 = 0x200;
+    x0 = 0;
+    for (int i = 0; i < cols; i++) {
+        int ua = u0 + x0 * du / w16;
+        int ub = u0 + x1 * du / w16;
+        p[0] = (ua - off) | ((ulong)(v0 - off) << 16);
+        p[1] = 3;
+        p[2] = x0;
+        p[3] = 5;
+        p[4] = (ub - off) | ((ulong)(v1 - off) << 16);
+        p[5] = 3;
+        p[6] = x1 | ((ulong)(h << 4) << 16);
+        p[7] = 5;
+        x0 += 0x200;
+        x1 = (x1 + 0x200 < w16) ? x1 + 0x200 : w16;
+        p += 8;
+    }
+    p[0] = 0x156;
+    p[1] = 0;
+    p += 2;
+    *handle = func_0038F668(dma, (char*)p, 4);
+    if (passes < 2) {
+        return;
+    }
+
+    p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    x1 = 0x200;
+    x0 = 0;
+    for (int i = 0; i < cols; i++) {
+        int ua = u0 + x0 * du / w16;
+        int ub = u0 + x1 * du / w16;
+        p[0] = (ua + off) | ((ulong)(v0 + off) << 16);
+        p[1] = 3;
+        p[2] = x0;
+        p[3] = 5;
+        p[4] = (ub + off) | ((ulong)(v1 + off) << 16);
+        p[5] = 3;
+        p[6] = x1 | ((ulong)(h << 4) << 16);
+        p[7] = 5;
+        x0 += 0x200;
+        x1 = (x1 + 0x200 < w16) ? x1 + 0x200 : w16;
+        p += 8;
+    }
+    *handle = func_0038F668(dma, (char*)p, 4);
+    if (passes < 3) {
+        return;
+    }
+
+    p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    x1 = 0x200;
+    x0 = 0;
+    for (int i = 0; i < cols; i++) {
+        int ua = u0 + x0 * du / w16;
+        int ub = u0 + x1 * du / w16;
+        p[0] = (ua + off) | ((ulong)(v0 - off) << 16);
+        p[1] = 3;
+        p[2] = x0;
+        p[3] = 5;
+        p[4] = (ub + off) | ((ulong)(v1 - off) << 16);
+        p[5] = 3;
+        p[6] = x1 | ((ulong)(h << 4) << 16);
+        p[7] = 5;
+        x0 += 0x200;
+        x1 = (x1 + 0x200 < w16) ? x1 + 0x200 : w16;
+        p += 8;
+    }
+    *handle = func_0038F668(dma, (char*)p, 4);
+    if (passes < 4) {
+        return;
+    }
+
+    p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    x0 = 0;
+    x1 = 0x200;
+    for (int i = 0; i < cols; i++) {
+        int ua = u0 + x0 * du / w16;
+        int ub = u0 + x1 * du / w16;
+        p[0] = (ua - off) | ((ulong)(v0 + off) << 16);
+        p[1] = 3;
+        p[2] = x0;
+        p[3] = 5;
+        p[4] = (ub - off) | ((ulong)(v1 + off) << 16);
+        p[5] = 3;
+        p[6] = x1 | ((ulong)(h << 4) << 16);
+        p[7] = 5;
+        x0 += 0x200;
+        x1 = (x1 + 0x200 < w16) ? x1 + 0x200 : w16;
+        p += 8;
+    }
+    *handle = func_0038F668(dma, (char*)p, 4);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036C188);

@@ -1780,7 +1780,245 @@ extern "C" int func_0011A7A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_0011A8C8);
+#ifdef SKIP_ASM
+extern "C" void func_003E6448(void* dst, int value, int size);
+extern unsigned char D_0043D388[][11];
+extern unsigned char D_0043D4C8[][11];
+
+// Bit layout of the 8-byte trick identity (same fields func_0011B1A8 compares).
+struct sTrickBits_A8C8 {
+    unsigned int k0 : 3;    // w0 bits 0-2
+    unsigned int k1 : 4;    // w0 bits 3-6
+    unsigned int k2 : 3;    // w0 bits 7-9
+    unsigned int a : 2;     // w0 bits 10-11
+    unsigned int b : 4;     // w0 bits 12-15
+    unsigned int c : 3;     // w0 bits 16-18
+    unsigned int d : 3;     // w0 bits 19-21
+    unsigned int tbl : 6;   // w0 bits 22-27
+    unsigned int e : 4;     // w0 bits 28-31
+    unsigned int m0 : 3;    // w1 bits 0-2
+    unsigned int f : 7;     // w1 bits 3-9
+    unsigned int h : 1;     // w1 bit 10
+    unsigned int g : 7;     // w1 bits 11-17
+    unsigned int n : 2;     // w1 bits 18-19
+    unsigned int p : 4;     // w1 bits 20-23
+    unsigned int q : 3;     // w1 bits 24-26
+    unsigned int grade : 5; // w1 bits 27-31
+};
+
+struct sTrickState_A8C8 {
+    int u0;          // 0x00
+    int u4;          // 0x04
+    int u8;          // 0x08
+    int uC;          // 0x0C
+    int u10;         // 0x10
+    char pad14[0xC];
+    int u20;         // 0x20
+    float f24;       // 0x24
+    int u28;         // 0x28
+    float f2C;       // 0x2C
+    int pad30;
+    float f34;       // 0x34
+    float f38;       // 0x38
+    char pad3C[0x24];
+    int u60[3];      // 0x60
+    char pad6C[4];
+    int u70;         // 0x70
+    char pad74[8];
+    int u7C;         // 0x7C
+    char pad80[0x1AC - 0x80];
+    char* rider;     // 0x1AC
+};
+
+extern "C" int func_0011A8C8(void* vself, sTrickId* vid, int stance, int alternate, int style, int flag)
+{
+    sTrickState_A8C8* self = (sTrickState_A8C8*)vself;
+    sTrickBits_A8C8* id = (sTrickBits_A8C8*)vid;
+    int r34;
+    int r38;
+    int flips;
+    int spins;
+    int cnt;
+    int n;
+    int idx;
+    int fidx;
+
+    func_003E6448(id, 0, 8);
+    if (self->u70 != 0) {
+        id->k0 = self->uC;
+        id->m0 = self->u70;
+        if (style != 0) {
+            id->q = 3;
+        }
+        return 1;
+    }
+    if (self->u0 != 0) {
+        self->f34 = -self->f34;
+    }
+    if (self->u20 == 4) {
+        self->f38 = -self->f38;
+    }
+    r34 = func_roundDegrees((int)(self->f34 * 57.2957763671875f));
+    r38 = func_roundDegrees((int)(self->f38 * 57.2957763671875f));
+    flips = abs(r38 / 360);
+    spins = abs(r34 / 180);
+    if (self->u28 != 0) {
+        int v;
+        if (spins >= 2) {
+            if (spins < 12) {
+                if (spins >= 6) v = 14; else v = 13;
+            } else {
+                v = 15;
+            }
+            id->p = v;
+        } else if (spins == 1 && self->f2C >= 3.0f) {
+            if (self->u28 == spins) {
+                if (self->f2C < 12.0f) {
+                    if (self->f2C < 9.0f) {
+                        if (self->f2C >= 6.0f) v = 7; else v = 5;
+                    } else v = 9;
+                } else v = 11;
+            } else {
+                if (self->f2C < 12.0f) {
+                    if (self->f2C < 9.0f) {
+                        if (self->f2C >= 6.0f) v = 8; else v = 6;
+                    } else v = 10;
+                } else v = 12;
+            }
+            id->p = v;
+        } else {
+            if (self->u28 == 1) {
+                id->p = self->u20 ? 3 : 1;
+            } else {
+                id->p = self->u20 == 0 ? 2 : 4;
+            }
+            id->k1 = spins < 11 ? spins : 10;
+        }
+        return 1;
+    }
+    if (self->u20 != 0) {
+        if (self->f24 <= 50.0f) {
+            id->k0 = 5;
+        } else {
+            id->k0 = self->u20;
+            id->k1 = spins < 11 ? spins : 10;
+            if (*(int*)(self->rider + 0x324) != 0) {
+                if (self->u20 == 1) {
+                    id->k0 = 2;
+                } else if (self->u20 == 2) {
+                    id->k0 = 1;
+                }
+            }
+        }
+        return 1;
+    }
+    idx = spins;
+    fidx = flips;
+    cnt = 0;
+    while (flips > 0 && spins >= 3) {
+        flips--;
+        spins -= 3;
+        cnt++;
+    }
+    flips = fidx;
+    spins = idx;
+    if (r34 > 0 || spins >= 15) {
+        idx = spins + 14;
+    }
+    if (r38 < 0 || flips >= 6) {
+        fidx = flips + 5;
+    }
+    for (n = 0; n < 3 && self->u60[n] != 0; n++) {
+    }
+    if (self->u10 == 1) {
+        id->k2 = 5;
+    } else if (self->u10 == 2) {
+        id->k2 = 6;
+    } else if (self->uC != 0) {
+        if (self->u0 != 0) {
+            id->k2 = 3;
+        } else {
+            id->k2 = 2;
+        }
+    } else if (self->u8 != 0) {
+        id->k2 = 4;
+    } else if (self->u0 != 0) {
+        id->k2 = 1;
+    }
+    if (idx < 29 && fidx < 11) {
+        if (self->u4 != 0 && alternate != 0) {
+            id->tbl = D_0043D4C8[idx][fidx];
+        } else {
+            id->tbl = D_0043D388[idx][fidx];
+        }
+    } else {
+        func_003E6448(id, 0, 8);
+        id->tbl = 1;
+        return 1;
+    }
+    if (id->tbl == 0) {
+        if (spins > 0) {
+            if (r34 > 0) {
+                id->a = 2;
+            } else {
+                id->a = 1;
+            }
+        }
+        if (flips == 0) {
+            id->b = spins;
+        }
+        id->c = flips;
+        if (flips > 0) {
+            if (cnt > 0 && cnt == flips) {
+                if (self->f38 > 0.0f) {
+                    id->d = 4;
+                } else {
+                    id->d = 3;
+                }
+            } else {
+                if (self->f38 > 0.0f) {
+                    id->d = 1;
+                } else {
+                    id->d = 2;
+                }
+            }
+        }
+    }
+    if (flips > 0 && spins != flips * 3 && spins < 15) {
+        id->e = spins;
+    }
+    if (flag == 1) {
+        id->q = 4;
+    } else if (flag == 2) {
+        id->q = 5;
+    } else if (style != 0) {
+        id->q = 3;
+    } else if (id->tbl == 0 && (cnt == 0 || id->e != 0)) {
+        if (stance != 0 && self->u0 == 0) {
+            id->q = 2;
+        } else if (spins == 0 && flips == 0 && n > 0) {
+            id->q = 1;
+        }
+    }
+    if (n > 0) {
+        id->f = self->u60[0];
+        if (n >= 2) {
+            id->h = 1;
+            if (n == 2) {
+                id->g = self->u60[1];
+            } else {
+                id->g = 1;
+            }
+        }
+    }
+    if (self->u7C != 0) {
+        id->n = self->u7C;
+    }
+    return flips > 0 || spins > 0 || n > 0 || self->u7C != 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_0011B1A8);

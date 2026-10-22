@@ -7068,7 +7068,170 @@ extern "C" float func_00135180(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_001352A8);
+#ifdef SKIP_ASM
+extern "C" float func_00120038(void* rider);
+extern "C" unsigned short func_001500D8(void* self, int a1, int a2);
+extern "C" unsigned short func_001500F8(void* self, int a1, int a2);
+extern "C" unsigned short func_00150118(void* self, int a1, int a2);
+extern "C" unsigned short func_00150138(void* self, int a1, int a2);
+extern "C" unsigned short func_00150158(void* self, int a1, int a2);
+extern "C" unsigned short func_00150178(void* self, int a1, int a2);
+extern "C" int func_00150198(void* self, int rider, int idx, int second);
+extern "C" int func_001502C8(void* self, int rider, int idx, int second);
+extern "C" int func_001503F8(void* self, int rider, int idx, int second);
+extern "C" float func_00119708(void* metrix, int id);
+extern "C" float func_001197D8(void* metrix, int id);
+extern "C" void func_0029A530(void* self, void* obj);
+
+// Trick-animation sequencer: state at 0x4 (0..5), current trick at 0x8, rider at 0x58.
+struct sTrickAnim_52A8 {
+    int unk_00;
+    int state;      // 0x04
+    int trick;      // 0x08
+    char pad_0C[0x58 - 0xC];
+    cRider* rider;  // 0x58
+};
+
+extern "C" int func_001352A8(void* vself, int trick, int held)
+{
+    sTrickAnim_52A8* self = (sTrickAnim_52A8*)vself;
+    float speed = func_00120038(self->rider);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
+    int hi = self->rider->unk_2F4 >= 5;
+    int anim;
+
+    if (self->state == 0) {
+        if (trick == -1) {
+            if (self->trick != trick) {
+                *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = -1.0f;
+                cRiderAnimBase_play(self->rider->mRiderAnim, 0x11F, 0, -1.0f);
+                self->trick = trick;
+            }
+        } else if (self->trick != trick) {
+            self->trick = trick;
+            if (func_00311AE8(self->rider->mRiderAnim, 2) == 0x12) {
+                cRider* r = self->rider;
+                cRiderAnimBase_play(r->mRiderAnim, func_001500D8(iface, r->mAIIndex, self->trick), 1, -1.0f);
+            } else {
+                cRider* r = self->rider;
+                cRiderAnimBase_play(r->mRiderAnim, func_001500D8(iface, r->mAIIndex, self->trick), 0, -1.0f);
+            }
+            *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = speed;
+        } else if (func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 0)) {
+            self->state = 1;
+        }
+    }
+    if (self->state == 1) {
+        if (func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 1)) {
+            cRider* r = self->rider;
+            func_0010E098(self->rider, 1, func_00119708(r->mMetrix, func_00150118(iface, r->mAIIndex, self->trick)));
+            *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = 0.0f;
+            if (func_001500F8(iface, self->rider->mAIIndex, self->trick) != 0x1B6) {
+                cRider* r2 = self->rider;
+                cRiderAnimBase_play_i(r2->mRiderAnim, func_001500F8(iface, r2->mAIIndex, self->trick), 0, -1.0f);
+                *(float*)(func_00311B20(self->rider->mRiderAnim, 1) + 0x90) = speed;
+            }
+            self->state = 2;
+        }
+    }
+    if (self->state == 2) {
+        if (trick != self->trick) {
+            cRider* r = self->rider;
+            func_0010E098(self->rider, 1, func_001197D8(r->mMetrix, func_00150118(iface, r->mAIIndex, self->trick)));
+            func_00311E88(self->rider->mRiderAnim, 1, 0.33000001311302185f);
+            *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = speed;
+            self->state = 5;
+        } else if (held != 0) {
+            func_00311E88(self->rider->mRiderAnim, 1, 0.10000000149011612f);
+            func_00311E88(self->rider->mRiderAnim, 2, 0.10000000149011612f);
+            if (self->rider->unk_2F0 == 0.0f || (self->rider->unk_B2C & 1) == 0
+                || func_00150198(iface, self->rider->mAIIndex, self->trick, hi) == 0x1B6) {
+                cRider* r = self->rider;
+                cRiderAnimBase_play(r->mRiderAnim, func_00150138(iface, r->mAIIndex, self->trick), 0, -1.0f);
+            } else {
+                cRider* r = self->rider;
+                cRiderAnimBase_play(r->mRiderAnim, func_00150198(iface, r->mAIIndex, self->trick, hi), 0, -1.0f);
+            }
+            func_0029A530(func_0028B180(), self->rider);
+            *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = speed;
+            self->state = 3;
+        }
+    }
+    if (self->state == 3) {
+        if (trick == self->trick && held != 0
+            && func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 1)) {
+            *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = 0.0f;
+            if (func_00311AE8(self->rider->mRiderAnim, 2) == 0x13) {
+                cRider* r = self->rider;
+                func_0010E098(self->rider, 1, func_00119708(r->mMetrix, func_00150178(iface, r->mAIIndex, self->trick)));
+                if (func_00150158(iface, self->rider->mAIIndex, self->trick) != 0x1B6) {
+                    cRider* r2 = self->rider;
+                    cRiderAnimBase_play_i(r2->mRiderAnim, func_00150158(iface, r2->mAIIndex, self->trick), 0, -1.0f);
+                    *(float*)(func_00311B20(self->rider->mRiderAnim, 1) + 0x90) = speed;
+                }
+            } else {
+                cRider* r = self->rider;
+                func_0010E098(self->rider, 1, func_00119708(r->mMetrix, func_001503F8(iface, r->mAIIndex, self->trick, hi)));
+                if (func_001502C8(iface, self->rider->mAIIndex, self->trick, hi) != 0x1B6) {
+                    cRider* r2 = self->rider;
+                    cRiderAnimBase_play_i(r2->mRiderAnim, func_001502C8(iface, r2->mAIIndex, self->trick, hi), 0, -1.0f);
+                    *(float*)(func_00311B20(self->rider->mRiderAnim, 1) + 0x90) = speed;
+                }
+            }
+            self->state = 4;
+        } else if (func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 1)
+                   || func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 3)
+                   || func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 2)) {
+            if (func_00311AE8(self->rider->mRiderAnim, 2) == 0x13) {
+                cRider* r = self->rider;
+                func_0010E098(self->rider, 1, func_00119708(r->mMetrix, func_00150178(iface, r->mAIIndex, self->trick)));
+                cRider* r2 = self->rider;
+                func_0010E098(self->rider, 1, func_001197D8(r2->mMetrix, func_00150178(iface, r2->mAIIndex, self->trick)));
+            } else {
+                cRider* r = self->rider;
+                func_0010E098(self->rider, 1, func_00119708(r->mMetrix, func_001503F8(iface, r->mAIIndex, self->trick, hi)));
+                cRider* r2 = self->rider;
+                func_0010E098(self->rider, 1, func_001197D8(r2->mMetrix, func_001503F8(iface, r2->mAIIndex, self->trick, hi)));
+            }
+            self->state = 5;
+        }
+    }
+    if (self->state == 4) {
+        if (trick != self->trick || held == 0) {
+            if (func_00311AE8(self->rider->mRiderAnim, 2) == 0x13) {
+                cRider* r = self->rider;
+                func_0010E098(self->rider, 1, func_001197D8(r->mMetrix, func_00150178(iface, r->mAIIndex, self->trick)));
+            } else {
+                cRider* r = self->rider;
+                func_0010E098(self->rider, 1, func_001197D8(r->mMetrix, func_001503F8(iface, r->mAIIndex, self->trick, hi)));
+            }
+            func_00311E88(self->rider->mRiderAnim, 1, 0.33000001311302185f);
+            *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = speed;
+            self->state = 5;
+        }
+    }
+    anim = func_00311AE8(self->rider->mRiderAnim, 2);
+    if (self->state == 5) {
+        if (anim == 2 || func_001446A0(func_00311B20(self->rider->mRiderAnim, 2) + 0xB0, 3)) {
+            if (anim == 0x14 && held != 0 && trick != -1
+                && func_00150198(iface, self->rider->mAIIndex, trick, hi) != 0x1B6) {
+                self->trick = trick;
+                func_00311E88(self->rider->mRiderAnim, 1, 0.33000001311302185f);
+                cRider* r = self->rider;
+                cRiderAnimBase_play_i(r->mRiderAnim, func_00150198(iface, r->mAIIndex, self->trick, hi), 1, -1.0f);
+                *(float*)(func_00311B20(self->rider->mRiderAnim, 2) + 0x90) = speed;
+                self->state = 3;
+            } else {
+                self->state = 0;
+                self->trick = -1;
+            }
+        }
+    }
+    return anim >= 0x12 && anim <= 0x14;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_00135B30);
