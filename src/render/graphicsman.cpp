@@ -925,7 +925,106 @@ extern "C" void func_0036C740(void* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036C790);
+#ifdef SKIP_ASM
+extern int D_004A43C8;
+extern int D_004A43CC;
+extern int D_004A43D0;
+extern float D_004A43D8;
+extern float D_004A43E8;
+extern float D_004A43EC;
+extern float D_004A43F8;
+
+// Per-view bloom parameters (7 floats at gm+0x6CD4, see func_0036C740).
+struct sGmBloom_C790 {
+    float v[7];
+};
+
+// Per-view viewport rectangle at gm+0x59B0.
+struct sGmView_C790 {
+    unsigned short x;
+    unsigned short y;
+    unsigned short w;
+    unsigned short h;
+};
+
+struct sGmViews_C790 {
+    char pad[0x59B0];
+    sGmView_C790 views[2];
+};
+
+// PS2GraphicsMan_RenderBloom: downsample the view into the two bloom buffers (in the Z buffer area),
+// blend-fill, blur three levels (compositing each level whose alpha is set), then restore FRAME/XYOFFSET.
+// PORT: ulong is 64-bit here (GIF packet words); the packet is written through the uncached mirror.
+extern "C" void func_0036C790(void* vself, int idx, void* pkt2, int* handle)
+{
+    char* self = (char*)vself;
+    if (D_004A43C8 == 0) {
+        return;
+    }
+    if (D_004A43CC != 0) {
+        func_0036C740(self, idx);
+    }
+    sGmBloom_C790* e = (sGmBloom_C790*)(self + 0x6CD4) + idx;
+    int alpha[4] = {
+        (int)(D_004A43E8 * 127.5f),
+        (int)(D_004A43EC * 127.5f),
+        (int)(e->v[5] * 127.5f),
+        (int)(e->v[6] * 127.5f),
+    };
+    if (alpha[3] == 0 && alpha[2] == 0 && alpha[1] == 0 && alpha[0] == 0) {
+        return;
+    }
+    int buf0 = *(int*)(self + 0x5A80) << 5;
+    int bufs[2];
+    bufs[0] = buf0;
+    bufs[1] = buf0 + 0x400;
+    int offset = (int)(D_004A43F8 * 16.0f);
+    int src = buf0;
+    int th = 1 << D_004A43D0;
+    int tw = th;
+    int x0 = ((sGmViews_C790*)self)->views[idx].x;
+    int y0 = ((sGmViews_C790*)self)->views[idx].y;
+    int w = ((sGmViews_C790*)self)->views[idx].w;
+    int drawFbp = *(int*)(self + 0x5A84);
+    int h = ((sGmViews_C790*)self)->views[idx].h;
+    int width = gmCall_AE20(self, 10);
+    int fbp32 = drawFbp << 5;
+    func_0036B9D8(self, fbp32, width, x0, y0, w, h, src, e->v[3] * 127.5f, tw, th, 0, 1, handle);
+    func_0036C188(self, src, tw, th, (int)(e->v[0] * 127.5f), (int)(D_004A43D8 * 127.5f), handle);
+    for (int i = 0; i < 3; i++) {
+        if (alpha[i] != 0) {
+            func_0036C398(self, src, tw, th, fbp32, x0, y0, w, h, alpha[i], (int)(e->v[4] * 127.5f), handle);
+        }
+        int psrc = src;
+        int pw = tw;
+        int ph = th;
+        src = bufs[(i + 1) & 1];
+        tw >>= 1;
+        th >>= 1;
+        func_0036B9D8(self, psrc, pw, 0, 0, pw, ph, src, e->v[2] * 127.5f, tw, th, offset, 4, handle);
+    }
+    if (alpha[3] != 0) {
+        func_0036C398(self, src, tw, th, fbp32, x0, y0, w, h, alpha[3], (int)(e->v[4] * 127.5f), handle);
+    }
+    ulong* p = (ulong*)(*handle | 0x30000000);
+    unsigned int full = 0x1000;
+    int offX = ((full - gmCall_AE20(self, 10)) >> 1) << 4;
+    int offY = ((full - gmCall_AE20(self, 11)) >> 1) << 4;
+    p[0] = 0x10000003;
+    p[1] = 0;
+    p[2] = 0x1000000000008002;
+    p[3] = 0xE;
+    p[4] = drawFbp | ((ulong)(gmCall_AE20(self, 10) >> 6) << 16);
+    p[5] = 0x4C;
+    p[6] = offX | ((ulong)offY << 32);
+    p[7] = 0x18;
+    p += 8;
+    *handle = (int)p & 0x0FFFFFFF;
+    func_00368138(*(char**)(self + 0x18F4), pkt2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CBF8);
