@@ -515,7 +515,181 @@ extern "C" void func_00228238(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/ssxapp", cSSXApp_initload);
+#ifdef SKIP_ASM
+extern "C" void initOnline();
+extern "C" int BXFILE_exists(const char* name);
+extern "C" int func_003DED50(const char* name, int a1, int a2, void* out);
+extern "C" void func_00256188();
+extern "C" void* func_00277F20(void* self);
+extern "C" void func_00278210(void* self);
+extern "C" int cSSXApp_loadInputMap(void* self, const char* name);
+void func_00244400(void* self, int a1);
+void func_00244408(void* self, int a1);
+int GetHashValue32(char* s);
+extern "C" void func_003984B0(void* self, unsigned int index, void* data, int type);
+extern "C" void cUIFontInterface_loadFonts(void* self);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: func_00228C08 receives self here; the unit defines it later with no parameters.
+extern "C" void func_00228C08_self(void* self) __asm__("func_00228C08");
+extern "C" void cSSXApp_initLocale(void* self);
+extern "C" void func_00311870();
+extern "C" void* func_00314D98(void* self);
+extern "C" void func_00314DD8(void* self);
+extern "C" void* func_00311048(void* self);
+extern "C" void* func_0028B180();
+extern "C" int func_00289D08(void* self, unsigned char a1);
+extern "C" void SSXAUDIO_Init(int a);
+extern "C" void func_0031A6B8();
+extern "C" void func_00287410(void* opt, int v);
+extern "C" void func_00287488(void* opt, int v);
+extern "C" void func_00287520(void* opt, int v);
+extern "C" void func_00287558(void* opt, int v);
+extern "C" void func_002875D0(void* opt, int v);
+void WORLDTRIGGERMANAGER_Init();
+extern "C" int func_004165A8(const void* a, const void* b);
+
+extern char D_0047A828[];
+extern char D_0047A840[];
+extern char D_0047A858[];
+extern char D_0047A870[];
+extern char D_0047A888[];
+extern char* D_004A29C8;
+extern char* D_004A29CC;
+extern char* D_00442100[];
+extern char D_0047A8D0[];
+extern char D_0047A8E0[];
+extern char D_0047A8F8[];
+extern char D_004A29D0[];
+extern char D_0047A910[];
+extern char D_004A29D8[];
+extern char D_004A29E0[];
+extern char D_0047A928[];
+extern char D_0047A940[];
+extern char D_0047A958[];
+extern char D_0047A968[];
+extern char D_004A29E8[];
+extern int D_004A4CB8;
+
+struct sSndCfg_82D0 {
+    unsigned int sfxVol : 4;        // bits 0-3
+    unsigned int musicVol : 4;      // bits 4-7
+    unsigned int speechVol : 4;     // bits 8-11
+    unsigned int output : 2;        // bits 12-13
+    unsigned int pad14 : 2;
+    int f16 : 1;                    // bit 16
+    int f17 : 1;                    // bit 17
+    int pad18 : 14;
+    char rest[0x288 - 4];
+};
+// PORT: D_00535610 is viewed with different types across the program; view bound by asm label
+extern sSndCfg_82D0 D_00535610_82D0 __asm__("D_00535610");
+
+static inline sSndCfg_82D0 Cfg_82D0()
+{
+    return D_00535610_82D0;
+}
+
+struct sFontEntry_82D0 {
+    int key;
+    int unk4;
+    int value;
+    sFontEntry_82D0() : key(0), unk4(0), value(0) {}
+};
+
+struct sFontIface_82D0 {
+    int unk0;
+    sFontEntry_82D0 entries[4];
+    signed char count;
+    int f38;
+    int f3C;
+    int f40;
+    sFontIface_82D0() : unk0(0) { count = 0; f38 = 0; f3C = 0; f40 = 0; }
+};
+
+struct sPlayerInput_82D0 {
+    int a;
+    int b;
+    sPlayerInput_82D0(int x, int y) { func_00244400(this, x); func_00244408(this, y); }
+};
+
+struct sSSXApp_82D0 {
+    char pad_0x00[0x78];
+    void* f78;          // 0x78
+    char pad_0x7C[0xC];
+    sFontIface_82D0* f88; // 0x88
+    char pad_0x8C[0x4];
+    void* f90;          // 0x90
+    void* f94;          // 0x94
+    char pad_0x98[0x10];
+    int fA8[2];         // 0xA8
+    sPlayerInput_82D0* fB0[2]; // 0xB0
+    int fB8[2];         // 0xB8
+    char pad_0xC0[0xC];
+    char* fCC;          // 0xCC
+    char pad_0xD0[0x4];
+    void* fD4;          // 0xD4
+    void* fD8;          // 0xD8
+    void* fDC;          // 0xDC
+    void* fE0;          // 0xE0
+    void* fE4;          // 0xE4
+    void* fE8;          // 0xE8
+    void* fEC[11];      // 0xEC
+    void* f118;         // 0x118
+};
+
+extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
+{
+    initOnline();
+    if (BXFILE_exists(D_0047A828)) func_003DED50(D_0047A828, 0, 100, &self->fD8);
+    if (BXFILE_exists(D_0047A840)) func_003DED50(D_0047A840, 0, 100, &self->fDC);
+    if (BXFILE_exists(D_0047A858)) func_003DED50(D_0047A858, 0, 100, &self->fD4);
+    if (BXFILE_exists(D_0047A870)) func_003DED50(D_0047A870, 0, 100, &self->fE0);
+    func_00256188();
+    func_003DED50(D_0047A888, 0, 100, &self->fE4);
+    func_003DED50(D_004A29C8, 0, 100, &self->fE8);
+    for (int i = 0; i < 11; i++) {
+        func_003DED50(D_00442100[i], 0, 100, &self->fEC[i]);
+    }
+    func_003DED50(D_004A29CC, 0, 100, &self->f118);
+    void* sm = func_00277F20(cMemMan_alloc(0xA50, D_0047A8D0, 0, 0));
+    D_004A28A4 = sm;
+    func_00278210(sm);
+    self->fB8[0] = cSSXApp_loadInputMap(self, D_0047A8E0);
+    self->fB8[1] = cSSXApp_loadInputMap(self, D_0047A8F8);
+    for (int j = 0; j < 2; j++) {
+        self->fB0[j] = new (D_004A29D0, 0, 0) sPlayerInput_82D0(self->fA8[j], self->fB8[0]);
+    }
+    sFontIface_82D0*& fonts = self->f88;
+    fonts = new (D_0047A910, 0, 0) sFontIface_82D0;
+    func_003984B0(self->f88, 0, D_0047A928, GetHashValue32(D_004A29D8));
+    func_003984B0(self->f88, 1, D_0047A940, GetHashValue32(D_004A29E0));
+    cUIFontInterface_loadFonts(self->f88);
+    self->f78 = cBE_getBE();
+    func_00228C08_self(self);
+    cSSXApp_initLocale(self);
+    func_00311870();
+    self->f94 = func_00314D98(cMemMan_alloc(0x1848, D_0047A958, 0, 0));
+    func_00314DD8(self->f94);
+    self->f90 = func_00311048(cMemMan_alloc(0x3FC, D_0047A968, 0, 0));
+    cBE_getInterface_Fv(cBE_getBE(), 4);
+    SSXAUDIO_Init(func_00289D08(func_0028B180(), D_00535610_82D0.output));
+    func_0031A6B8();
+    func_00287410(func_0028B180(), Cfg_82D0().sfxVol);
+    func_00287488(func_0028B180(), Cfg_82D0().speechVol);
+    func_00287520(func_0028B180(), Cfg_82D0().musicVol);
+    func_00287558(func_0028B180(), Cfg_82D0().f17 != 0);
+    func_002875D0(func_0028B180(), Cfg_82D0().f16 != 0);
+    WORLDTRIGGERMANAGER_Init();
+    if (func_004165A8(self->fCC, D_004A29E8)) {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        cBXString_cBXString4(&D_004A4CB8, self->fCC);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_initLocale);

@@ -3833,5 +3833,325 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E66B8);
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E6C08);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E7A10);
+#ifdef SKIP_ASM
+extern int D_004A4724;
+extern "C" void* func_0037A260(void* gfx, int n);
+extern "C" void func_0037A430(void* gfx);
+
+struct sWakeV3_7A10 {
+    float x, y, z;
+};
+
+struct sWakeV4_7A10 {
+    float x, y, z, w;
+    sWakeV4_7A10() {}
+    void SetXYZ(const sWakeV3_7A10& v)
+    {
+        x = v.x;
+        y = v.y;
+        z = v.z;
+    }
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline sWakeV4_7A10 scale_7A10(const sWakeV4_7A10& v, float s)
+{
+    sWakeV4_7A10 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sWakeV4_7A10 add_7A10(const sWakeV4_7A10& a, const sWakeV4_7A10& b)
+{
+    sWakeV4_7A10 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sWakeV4_7A10 sub_7A10(const sWakeV4_7A10& a, const sWakeV4_7A10& b)
+{
+    sWakeV4_7A10 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// Vertex colour, alpha first (as sCol_E058).
+struct sWakeCol_7A10 {
+    float a, r, g, b;
+};
+
+// One strip vertex: st/q, integer RGBA, position (0x30 bytes).
+struct sWakeVtx_7A10 {
+    float s;                // 0x00
+    float t;                // 0x04
+    float q;                // 0x08
+    float pad;              // 0x0C
+    int r;                  // 0x10
+    int g;                  // 0x14
+    int b;                  // 0x18
+    int a;                  // 0x1C
+    sWakeV4_7A10 pos;       // 0x20
+    sWakeVtx_7A10() {}
+};
+
+// Trail segment (0x1C bytes, 30 of them at self+0x50).
+struct sWakeSeg_7A10 {
+    float len;              // 0x00
+    sWakeV3_7A10 p0;        // 0x04
+    sWakeV3_7A10 p1;        // 0x10
+};
+
+// Ribbon point pair (0x20 bytes, 20 of them at self->pts).
+struct sWakePt_7A10 {
+    sWakeV4_7A10 a;
+    sWakeV4_7A10 b;
+};
+
+struct sBoardWake_7A10 {
+    cRider* rider;              // 0x000 (virtual base pointer)
+    float f4;                   // 0x004
+    float alpha;                // 0x008
+    float width;                // 0x00C
+    float v0;                   // 0x010
+    int nsegs;                  // 0x014
+    float f18;                  // 0x018
+    char pad1C[0x14];
+    int head;                   // 0x030
+    char pad34[0x1C];
+    sWakeSeg_7A10 segs[30];     // 0x050
+    int tex;                    // 0x398
+    int ptHead;                 // 0x39C
+    int npts;                   // 0x3A0
+    int f3A4;                   // 0x3A4
+    int f3A8;                   // 0x3A8
+    sWakePt_7A10* pts;          // 0x3AC
+};
+
+// The renderer at D_004A289C; its 71st virtual draws a strip of n vertices.
+class cGfx_7A10 {
+public:
+    char pad[0x10D8];
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void DrawRibbon(int n, sWakeVtx_7A10* v, int flags);
+};
+
+struct sGfxTex_7A10 {
+    char pad[0xF50];
+    int tex[1];             // 0xF50
+};
+
+static inline int texId_7A10(int i)
+{
+    return ((sGfxTex_7A10*)D_004A289C)->tex[i];
+}
+
+// Bone position (row 3 of the rider's bone matrix unk_89C).
+static inline sWakeV4_7A10 bonePos_7A10(cRider* r)
+{
+    return *(sWakeV4_7A10*)((char*)r->mAnimModel->unk_030 + (r->unk_89C << 6) + 0x30);
+}
+
+// Fills vertex i of a strip: colour (alpha scaled to 0..128), q = 1, position, then st.
+static inline void setVtx_7A10(sWakeVtx_7A10* base, int i, float s, float t, const sWakeCol_7A10& c, const sWakeV4_7A10& p)
+{
+    sWakeVtx_7A10* vx = &base[i];
+    vx->r = (int)(c.r * 255.0f);
+    vx->g = (int)(c.g * 255.0f);
+    vx->b = (int)(c.b * 255.0f);
+    vx->a = (int)(c.a * 128.0f);
+    vx->q = 1.0f;
+    vx->pos = p;
+    vx->s = s;
+    vx->t = t;
+}
+
+// Board wake: draws the two ribbons (left/right of each trail point, faded by age) and the
+// segment trail as a strip through the particle vertex buffer.
+extern "C" void func_002E7A10(sBoardWake_7A10* self)
+{
+    if (self->npts == 0 || self->f4 < 3.0f || self->alpha < 0.05f || D_004A4724 == 0)
+        return;
+    ((cGfx_DAB8*)D_004A289C)->PushState();
+    *((cGfx_DAB8*)D_004A289C)->stateTop = D_00501420_DAB8;
+    *(short*)(*(char**)(D_004A289C + 0xE84) + 0x10) = texId_7A10(self->tex);
+    ((cGfx_DAB8*)D_004A289C)->stateTop->f0_2 = 0;
+    ((cGfx_DAB8*)D_004A289C)->stateTop->SetF22(1);
+    ((cGfx_DAB8*)D_004A289C)->stateTop->f4_23 = 0;
+    ((cGfx_DAB8*)D_004A289C)->stateTop->f4_20 = 0;
+    ((cGfx_DAB8*)D_004A289C)->stateTop->f4_12 = 0x14;
+    ((cGfx_DAB8*)D_004A289C)->stateTop->f4_0 = 2;
+    ((cGfx_DAB8*)D_004A289C)->stateTop->f8_10 = 0;
+    ((cGfx_DAB8*)D_004A289C)->stateTop->f8_5 = 7;
+    ((cGfx_DAB8*)D_004A289C)->stateTop->f4_2 = 7;
+    {
+        sWakeVtx_7A10 left[42];
+        sWakeVtx_7A10 right[42];
+        int n = 0;
+        int m = 0;
+        float k = 1.0f / (float)((self->npts - 1) * (self->npts - 1));
+        sWakeV4_7A10 offs = scale_7A10(bonePos_7A10(self->rider), 0.7f);
+        sWakeCol_7A10 col;
+        col.a = 1.0f;
+        col.r = 1.0f;
+        col.g = 1.0f;
+        col.b = 1.0f;
+        sWakeV4_7A10 pa, pb;
+        float dv = 1.0f / (float)self->npts;
+        float x = 0.0f;
+        float v = self->v0;
+        sWakeV4_7A10 dir = *(sWakeV4_7A10*)&self->rider->mMatrix.row[0];
+        sWakeV4_7A10 side = scale_7A10(dir, self->width * 0.5f);
+        int idx = self->ptHead;
+        for (int i = 0; i < self->npts; i++) {
+            if (idx < 0)
+                idx = 19;
+            col.a = self->alpha * (1.0f - x * x * k);
+            if (col.a < 0.0f)
+                col.a = 0.0f;
+            n += 2;
+            pa = add_7A10(self->pts[idx].a, offs);
+            pb = add_7A10(self->pts[idx].b, offs);
+            idx--;
+            x += 1.0f;
+            setVtx_7A10(left, m, 0.0f, v, col, sub_7A10(pa, side));
+            setVtx_7A10(right, m, 0.0f, v, col, sub_7A10(pb, side));
+            m++;
+            setVtx_7A10(left, m, 1.0f, v, col, add_7A10(pa, side));
+            setVtx_7A10(right, m, 1.0f, v, col, add_7A10(pb, side));
+            m++;
+            v += dv;
+        }
+        if (n >= 4) {
+            ((cGfx_7A10*)D_004A289C)->DrawRibbon(n, left, 0);
+            ((cGfx_7A10*)D_004A289C)->DrawRibbon(n, right, 0);
+        }
+    }
+    if (self->nsegs >= 2) {
+        char* gfx = D_004A5B80;
+        sWakeVtx_7A10* p = (sWakeVtx_7A10*)func_0037A260(gfx, self->nsegs * 2);
+        // PORT: g++ minimum operator (<?).
+        float len = self->f4 <? self->f18;
+        float acc = 0.0f;
+        int j;
+        int m = 0;
+        for (j = 0; j < self->nsegs; j++) {
+            acc += self->segs[j].len;
+            float t = acc / len;
+            float vv = self->v0 + t;
+            float al = wakeClampE058(self->alpha * (1.0f - t), 0.0f, 1.0f);
+            sWakeCol_7A10 c;
+            c.a = wakeClampE058(al, 0.0f, 1.0f);
+            c.r = 1.0f;
+            c.g = 1.0f;
+            c.b = 1.0f;
+            int si = (self->head + j) % 30;
+            sWakeV4_7A10 pos;
+            pos.SetXYZ(self->segs[si].p0);
+            pos.w = 1.0f;
+            setVtx_7A10(p, m++, 0.0f, vv, c, pos);
+            pos.SetXYZ(self->segs[si].p1);
+            pos.w = 1.0f;
+            setVtx_7A10(p, m++, 1.0f, vv, c, pos);
+        }
+        func_0037A430(gfx);
+    }
+    ((cGfx_DAB8*)D_004A289C)->stateTop--;
+}
+#endif
 
