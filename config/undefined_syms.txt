@@ -10,3 +10,6 @@ D_0 = 0x0;
 D_004D1C68 = 0x4D1C68;
 D_004D37A8 = 0x4D37A8;
 D_004D3AC8 = 0x4D3AC8;
+/* Static-init table targets named only by config/reloc_addrs.txt (func_0035FE10, batch b12 round 2). */
+D_004FFAB0 = 0x4FFAB0;
+D_004FFB00 = 0x4FFB00;

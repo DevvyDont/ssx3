@@ -182,3 +182,196 @@ rom:0x1855FC reloc:MIPS_LO16 symbol:D_004D3AC8
 // intersect/worldsphtree func_003400D8 (static init): its lui 0x50 / addiu -0xB90 pair for D_004FF470 was left raw.
 rom:0x241258 reloc:MIPS_HI16 symbol:D_004FF470
 rom:0x2412AC reloc:MIPS_LO16 symbol:D_004FF470
+
+// Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
+// mem/memstd func_00253B58 (tools/gen/reloc_from_diff.py)
+rom:0x154F04 reloc:MIPS_HI16 symbol:D_004D26B8
+rom:0x154F0C reloc:MIPS_LO16 symbol:D_004D26B8
+rom:0x155090 reloc:MIPS_LO16 symbol:D_004D2758
+rom:0x1550A0 reloc:MIPS_LO16 symbol:D_004D2768
+rom:0x1550C4 reloc:MIPS_HI16 symbol:D_004D27C8
+rom:0x155128 reloc:MIPS_LO16 symbol:D_004D27C8
+rom:0x155218 reloc:MIPS_LO16 symbol:D_004D2828
+rom:0x155228 reloc:MIPS_HI16 symbol:D_004D2878
+rom:0x155238 reloc:MIPS_LO16 symbol:D_004D2858
+rom:0x155240 reloc:MIPS_HI16 symbol:D_004D2888
+rom:0x1552C0 reloc:MIPS_LO16 symbol:D_004D2878
+rom:0x1552D8 reloc:MIPS_LO16 symbol:D_004D2888
+// mem/memstd func_00254E60 (tools/gen/reloc_from_diff.py)
+rom:0x15620C reloc:MIPS_HI16 symbol:D_004D2A38
+rom:0x156214 reloc:MIPS_LO16 symbol:D_004D2A38
+rom:0x156398 reloc:MIPS_LO16 symbol:D_004D2AD8
+rom:0x1563A8 reloc:MIPS_LO16 symbol:D_004D2AE8
+rom:0x1563CC reloc:MIPS_HI16 symbol:D_004D2B48
+rom:0x156430 reloc:MIPS_LO16 symbol:D_004D2B48
+rom:0x156520 reloc:MIPS_LO16 symbol:D_004D2BA8
+rom:0x156530 reloc:MIPS_HI16 symbol:D_004D2BF8
+rom:0x156540 reloc:MIPS_LO16 symbol:D_004D2BD8
+rom:0x156548 reloc:MIPS_HI16 symbol:D_004D2C08
+rom:0x1565C8 reloc:MIPS_LO16 symbol:D_004D2BF8
+rom:0x1565E0 reloc:MIPS_LO16 symbol:D_004D2C08
+// replay/replaycache func_002718E8 (tools/gen/reloc_from_diff.py)
+rom:0x172E20 reloc:MIPS_LO16 symbol:D_004D3610
+rom:0x172E30 reloc:MIPS_LO16 symbol:D_004D3620
+rom:0x172E54 reloc:MIPS_HI16 symbol:D_004D3680
+rom:0x172EB8 reloc:MIPS_LO16 symbol:D_004D3680
+rom:0x172EF0 reloc:MIPS_HI16 symbol:D_004D36D0
+rom:0x172F28 reloc:MIPS_HI16 symbol:D_004D3700
+rom:0x172F3C reloc:MIPS_HI16 symbol:D_004D36F0
+rom:0x172F60 reloc:MIPS_LO16 symbol:D_004D36D0
+rom:0x172F78 reloc:MIPS_LO16 symbol:D_004D36E0
+rom:0x172F84 reloc:MIPS_HI16 symbol:D_004D3710
+rom:0x172F88 reloc:MIPS_LO16 symbol:D_004D36F0
+rom:0x172F94 reloc:MIPS_LO16 symbol:D_004D3700
+rom:0x172FA8 reloc:MIPS_LO16 symbol:D_004D3710
+// luno/lunovm func_00225DE8 (tools/gen/reloc_from_diff.py)
+rom:0x127194 reloc:MIPS_HI16 symbol:D_004C8E98
+rom:0x12719C reloc:MIPS_LO16 symbol:D_004C8E98
+rom:0x127324 reloc:MIPS_LO16 symbol:D_004C8F38
+rom:0x127334 reloc:MIPS_LO16 symbol:D_004C8F48
+rom:0x127358 reloc:MIPS_HI16 symbol:D_004C8FA8
+rom:0x1273BC reloc:MIPS_LO16 symbol:D_004C8FA8
+rom:0x1274C8 reloc:MIPS_HI16 symbol:D_004C8FF8
+rom:0x1274D0 reloc:MIPS_LO16 symbol:D_004C8FF8
+rom:0x1274F0 reloc:MIPS_HI16 symbol:D_004C9098
+rom:0x1275A8 reloc:MIPS_LO16 symbol:D_004C9098
+// visualfx/worldlightman func_002F9040 (tools/gen/reloc_from_diff.py)
+rom:0x1FA3EC reloc:MIPS_HI16 symbol:D_004FAE10
+rom:0x1FA3F4 reloc:MIPS_LO16 symbol:D_004FAE10
+rom:0x1FA578 reloc:MIPS_LO16 symbol:D_004FAEB0
+rom:0x1FA588 reloc:MIPS_LO16 symbol:D_004FAEC0
+rom:0x1FA5AC reloc:MIPS_HI16 symbol:D_004FAF20
+rom:0x1FA610 reloc:MIPS_LO16 symbol:D_004FAF20
+rom:0x1FA700 reloc:MIPS_LO16 symbol:D_004FAF80
+rom:0x1FA710 reloc:MIPS_HI16 symbol:D_004FAFD0
+rom:0x1FA720 reloc:MIPS_LO16 symbol:D_004FAFB0
+rom:0x1FA728 reloc:MIPS_HI16 symbol:D_004FAFE0
+rom:0x1FA7A8 reloc:MIPS_LO16 symbol:D_004FAFD0
+rom:0x1FA7C0 reloc:MIPS_LO16 symbol:D_004FAFE0
+// visualfx/worldlightman func_002FA640 (tools/gen/reloc_from_diff.py)
+rom:0x1FB9EC reloc:MIPS_HI16 symbol:D_004FB190
+rom:0x1FB9F4 reloc:MIPS_LO16 symbol:D_004FB190
+rom:0x1FBB78 reloc:MIPS_LO16 symbol:D_004FB230
+rom:0x1FBB88 reloc:MIPS_LO16 symbol:D_004FB240
+rom:0x1FBBAC reloc:MIPS_HI16 symbol:D_004FB2A0
+rom:0x1FBC10 reloc:MIPS_LO16 symbol:D_004FB2A0
+rom:0x1FBD00 reloc:MIPS_LO16 symbol:D_004FB300
+rom:0x1FBD10 reloc:MIPS_HI16 symbol:D_004FB350
+rom:0x1FBD20 reloc:MIPS_LO16 symbol:D_004FB330
+rom:0x1FBD28 reloc:MIPS_HI16 symbol:D_004FB360
+rom:0x1FBDA8 reloc:MIPS_LO16 symbol:D_004FB350
+rom:0x1FBDC0 reloc:MIPS_LO16 symbol:D_004FB360
+// worldpainter/worldpaintermanquery func_002C0B70 (tools/gen/reloc_from_diff.py)
+rom:0x1C20A8 reloc:MIPS_LO16 symbol:D_004D4858
+rom:0x1C20B8 reloc:MIPS_LO16 symbol:D_004D4868
+rom:0x1C20DC reloc:MIPS_HI16 symbol:D_004D48C8
+rom:0x1C2140 reloc:MIPS_LO16 symbol:D_004D48C8
+rom:0x1C2178 reloc:MIPS_HI16 symbol:D_004D4918
+rom:0x1C21B0 reloc:MIPS_HI16 symbol:D_004D4948
+rom:0x1C21C4 reloc:MIPS_HI16 symbol:D_004D4938
+rom:0x1C21E8 reloc:MIPS_LO16 symbol:D_004D4918
+rom:0x1C2200 reloc:MIPS_LO16 symbol:D_004D4928
+rom:0x1C220C reloc:MIPS_HI16 symbol:D_004D4958
+rom:0x1C2210 reloc:MIPS_LO16 symbol:D_004D4938
+rom:0x1C221C reloc:MIPS_LO16 symbol:D_004D4948
+rom:0x1C2230 reloc:MIPS_LO16 symbol:D_004D4958
+// bx/seg_1BA100 func_002BBC38 (tools/gen/reloc_from_diff.py)
+rom:0x1BD0B0 reloc:MIPS_HI16 symbol:D_004D4428
+rom:0x1BD11C reloc:MIPS_LO16 symbol:D_004D4428
+rom:0x1BD330 reloc:MIPS_HI16 symbol:D_004D45A8
+rom:0x1BD3A0 reloc:MIPS_LO16 symbol:D_004D45A8
+rom:0x1BD3A8 reloc:MIPS_LO16 symbol:D_004D45B8
+// ui/uivector func_003A3F48 (tools/gen/reloc_from_diff.py)
+rom:0x2A52BC reloc:MIPS_HI16 symbol:D_00508530
+rom:0x2A52C4 reloc:MIPS_LO16 symbol:D_00508530
+rom:0x2A532C reloc:MIPS_HI16 symbol:D_00508570
+rom:0x2A5368 reloc:MIPS_LO16 symbol:D_00508570
+rom:0x2A547C reloc:MIPS_LO16 symbol:D_005085F0
+rom:0x2A567C reloc:MIPS_HI16 symbol:D_00508720
+rom:0x2A56EC reloc:MIPS_LO16 symbol:D_00508720
+rom:0x2A56F8 reloc:MIPS_LO16 symbol:D_00508730
+// fe/festatebuyattrib cFEStateCareerStats_setupRidersBest (tools/gen/reloc_from_diff.py)
+rom:0xF791C reloc:MIPS_HI16 symbol:D_0046F3C8
+rom:0xF7920 reloc:MIPS_HI16 symbol:D_0046F3D8
+rom:0xF7924 reloc:MIPS_HI16 symbol:D_004A23D0
+rom:0xF7928 reloc:MIPS_HI16 symbol:D_0046F3F0
+// path/pathsys func_0026BAE8 (tools/gen/reloc_from_diff.py)
+rom:0x16CCE4 reloc:MIPS_HI16 symbol:D_004D3218
+rom:0x16CCEC reloc:MIPS_LO16 symbol:D_004D3218
+rom:0x16CD54 reloc:MIPS_HI16 symbol:D_004D30A8
+rom:0x16CD5C reloc:MIPS_LO16 symbol:D_004D30A8
+rom:0x16CEC4 reloc:MIPS_HI16 symbol:D_004D30F8
+rom:0x16CECC reloc:MIPS_LO16 symbol:D_004D30F8
+rom:0x16D1A4 reloc:MIPS_LO16 symbol:D_004D32B8
+rom:0x16D25C reloc:MIPS_HI16 symbol:D_004D32F8
+rom:0x16D28C reloc:MIPS_LO16 symbol:D_004D32F8
+rom:0x16D324 reloc:MIPS_LO16 symbol:D_004D3378
+// fe/ovstatepause func_001FA238 (tools/gen/reloc_from_diff.py)
+rom:0xFB3A8 reloc:MIPS_HI16 symbol:D_00534B30
+rom:0xFB458 reloc:MIPS_HI16 symbol:D_00534B30
+rom:0xFB55C reloc:MIPS_HI16 symbol:D_00534B30
+rom:0xFB664 reloc:MIPS_HI16 symbol:D_00534B30
+rom:0xFB770 reloc:MIPS_HI16 symbol:D_00534B30
+// object/railmodifier func_0035FE10 (tools/gen/reloc_from_diff.py)
+rom:0x260F7C reloc:MIPS_HI16 symbol:D_004FF940
+rom:0x261000 reloc:MIPS_LO16 symbol:D_004FF940
+rom:0x26108C reloc:MIPS_HI16 symbol:D_004FFA20
+rom:0x2610DC reloc:MIPS_LO16 symbol:D_004FFA20
+rom:0x261190 reloc:MIPS_HI16 symbol:D_004FF8D0
+rom:0x2611B8 reloc:MIPS_LO16 symbol:D_004FF8D0
+rom:0x261374 reloc:MIPS_LO16 symbol:D_004FF960
+rom:0x26138C reloc:MIPS_HI16 symbol:D_004FF9A0
+rom:0x261394 reloc:MIPS_HI16 symbol:D_004FF9B0
+rom:0x2613C0 reloc:MIPS_LO16 symbol:D_004FF9A0
+rom:0x2613DC reloc:MIPS_LO16 symbol:D_004FF9B0
+rom:0x2613E0 reloc:MIPS_LO16 symbol:D_004FF9B0
+rom:0x261484 reloc:MIPS_HI16 symbol:D_004FFA30
+rom:0x2614A8 reloc:MIPS_HI16 symbol:D_004FFA60
+rom:0x2614D0 reloc:MIPS_LO16 symbol:D_004FFA30
+rom:0x2614EC reloc:MIPS_LO16 symbol:D_004FFA30
+rom:0x2614F4 reloc:MIPS_HI16 symbol:D_004FF750
+rom:0x2614FC reloc:MIPS_LO16 symbol:D_004FF750
+rom:0x26151C reloc:MIPS_LO16 symbol:D_004FFA60
+rom:0x261588 reloc:MIPS_HI16 symbol:D_004FFAB0
+rom:0x2615A4 reloc:MIPS_HI16 symbol:D_004FFB00
+rom:0x2615C8 reloc:MIPS_LO16 symbol:D_004FFB00
+rom:0x2615D8 reloc:MIPS_LO16 symbol:D_004FFAB0
+rom:0x2615FC reloc:MIPS_LO16 symbol:D_004FFAB0
+rom:0x26167C reloc:MIPS_LO16 symbol:D_004FFB00
+// seg/seg_1D3510 func_002D40C0 (tools/gen/reloc_from_diff.py)
+rom:0x1D5464 reloc:MIPS_HI16 symbol:D_004D5570
+rom:0x1D546C reloc:MIPS_LO16 symbol:D_004D5570
+rom:0x1D55A8 reloc:MIPS_HI16 symbol:D_004D5620
+rom:0x1D55D8 reloc:MIPS_LO16 symbol:D_004D5620
+rom:0x1D5614 reloc:MIPS_LO16 symbol:D_004D5620
+rom:0x1D5624 reloc:MIPS_LO16 symbol:D_004D5630
+rom:0x1D5730 reloc:MIPS_LO16 symbol:D_004D56B0
+rom:0x1D575C reloc:MIPS_HI16 symbol:D_004D5700
+rom:0x1D5764 reloc:MIPS_HI16 symbol:D_004D5710
+rom:0x1D5798 reloc:MIPS_LO16 symbol:D_004D5700
+rom:0x1D57C0 reloc:MIPS_LO16 symbol:D_004D5710
+rom:0x1D57D4 reloc:MIPS_HI16 symbol:D_004D5720
+rom:0x1D57E0 reloc:MIPS_HI16 symbol:D_004D5730
+rom:0x1D57EC reloc:MIPS_HI16 symbol:D_004D5740
+rom:0x1D5844 reloc:MIPS_LO16 symbol:D_004D5720
+rom:0x1D5860 reloc:MIPS_LO16 symbol:D_004D5730
+rom:0x1D5874 reloc:MIPS_LO16 symbol:D_004D5740
+rom:0x1D5880 reloc:MIPS_LO16 symbol:D_004D5750
+// main/gameload func_002306B8: the int[14] flag table D_004428F0 indexed by constant (the target's asm names the
+// inner addresses D_004428FC / D_00442920 / D_004428F8, which other functions also use); checked against the asm.
+rom:0x1318B8 reloc:MIPS_HI16 symbol:D_004428F0 addend:0xC
+rom:0x1318BC reloc:MIPS_LO16 symbol:D_004428F0 addend:0xC
+rom:0x131960 reloc:MIPS_HI16 symbol:D_004428F0 addend:0xC
+rom:0x131968 reloc:MIPS_LO16 symbol:D_004428F0 addend:0xC
+rom:0x1319C0 reloc:MIPS_HI16 symbol:D_004428F0 addend:0x30
+rom:0x1319C8 reloc:MIPS_LO16 symbol:D_004428F0 addend:0x30
+rom:0x131AA0 reloc:MIPS_HI16 symbol:D_004428F0 addend:0x8
+rom:0x131AB0 reloc:MIPS_LO16 symbol:D_004428F0 addend:0x8
+
+// Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
+// dirtysock/tagsunk func_00267468 (tools/gen/reloc_from_diff.py)
+rom:0x1689A4 reloc:MIPS_LO16 symbol:D_004D2E58
+rom:0x1689B4 reloc:MIPS_LO16 symbol:D_004D2E68
+rom:0x1689D8 reloc:MIPS_HI16 symbol:D_004D2EC8
+rom:0x168A3C reloc:MIPS_LO16 symbol:D_004D2EC8
+rom:0x168C64 reloc:MIPS_LO16 symbol:D_004D2FA8
