@@ -3845,7 +3845,248 @@ extern "C" void* func_0027F968(void* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027F9F8);
+#ifdef SKIP_ASM
+void func_00283430(void* self);
+int func_0027C958(void* self);
+int func_0027C070(void* self);
+// PORT: the real functions take (engine, id); the unit declares them with one parameter.
+void* func_00279ED8_2(void* engine, int id) __asm__("func_00279ED8__FPv");
+void* func_00279EF8_2(void* engine, int id) __asm__("func_00279EF8__FPv");
+extern "C" void func_0027A0D8(void* engine, int id, void* obj, void* pos, float* a, float* b, float* c);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern void* D_004A28A4;
+extern char D_004FF1A0[];
+extern float D_004FF140[4];
+extern float D_004FF150[4];
+extern float D_004FF160[4];
+
+struct sMat_F9F8 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sVec_F9F8 {
+    float x, y, z, w;
+    sVec_F9F8() {}
+    sVec_F9F8(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sScriptObj_F9F8 {
+    char pad_0x00[0x1C];
+    void* anim0;                // 0x1C
+    void* anim1;                // 0x20
+};
+
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of D_004FF1A0, the identity).
+static inline void LoadIdentity_F9F8(void* dst)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(D_004FF1A0)
+        : "memory");
+}
+
+// Fill r with the rotation about the unit vector `axis` whose sine and cosine are s and c.
+static inline void MakeRot_F9F8(sMat_F9F8* r, float* axis, float s, float c)
+{
+    float t = 1.0f - c;
+    float x = axis[0];
+    float y = axis[1];
+    float z = axis[2];
+    float tx = t * x;
+    float ty = t * y;
+    float tz = t * z;
+    float sx = s * x;
+    float sy = s * y;
+    float sz = s * z;
+    r->m[3][0] = 0.0f;
+    r->m[3][1] = 0.0f;
+    r->m[3][2] = 0.0f;
+    r->m[0][3] = 0.0f;
+    r->m[1][3] = 0.0f;
+    r->m[2][3] = 0.0f;
+    r->m[0][0] = tx * x + c;
+    r->m[1][0] = tx * y + sz;
+    r->m[2][0] = tx * z - sy;
+    r->m[0][1] = ty * x - sz;
+    r->m[1][1] = ty * y + c;
+    r->m[2][1] = ty * z + sx;
+    r->m[0][2] = tz * x + sy;
+    r->m[1][2] = tz * y - sx;
+    r->m[2][2] = tz * z + c;
+}
+
+// out = a * b.
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply).
+static inline void MulMat_F9F8(void* out, const void* a, const void* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(out), "r"(a), "r"(b)
+        : "memory");
+}
+
+// m = m * b.
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply).
+static inline void MulIn_F9F8(void* m, const void* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%0)\n"
+        "lqc2      $vf5, 0x10(%0)\n"
+        "lqc2      $vf6, 0x20(%0)\n"
+        "lqc2      $vf7, 0x30(%0)\n"
+        "lqc2      $vf8, 0x0(%1)\n"
+        "lqc2      $vf9, 0x10(%1)\n"
+        "lqc2      $vf10, 0x20(%1)\n"
+        "lqc2      $vf11, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "r"(b)
+        : "memory");
+}
+
+#define ROTATE2_F9F8(mat, axis, angle) \
+    { \
+        float s; \
+        float c; \
+        func_0031BE50(&s, &c, angle); \
+        sMat_F9F8 r; \
+        MakeRot_F9F8(&r, axis, s, c); \
+        r.m[3][3] = 1.0f; \
+        MulIn_F9F8(mat, &r); \
+    }
+
+// Each rotation matrix is a block-scoped temporary of the caller.
+#define ROTATE_F9F8(mat, axis, angle) \
+    { \
+        float s; \
+        float c; \
+        func_0031BE50(&s, &c, angle); \
+        sMat_F9F8 r; \
+        MakeRot_F9F8(&r, axis, s, c); \
+        r.m[3][3] = 1.0f; \
+        MulMat_F9F8(mat, mat, &r); \
+    }
+
+// PORT: PS2-only VU0 inline asm (matrix-vector product into row 3).
+static inline void Translate_F9F8(void* mat, const sVec_F9F8& v)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf4, 0x0(%0)\n"
+        "lqc2         $vf5, 0x10(%0)\n"
+        "lqc2         $vf6, 0x20(%0)\n"
+        "lqc2         $vf7, 0x30(%0)\n"
+        "lqc2         $vf8, %1\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(mat), "m"(v)
+        : "memory");
+}
+
+extern "C" void func_0027F9F8(char* self)
+{
+    func_00283430(self + 0xC);
+    void* obj = *(void**)(self + 0x8);
+    char* mat = self + 0x30;
+    LoadIdentity_F9F8(mat);
+    *(int*)(self + 0x70) = 0;
+    *(int*)(self + 0x74) = 0;
+    *(int*)(self + 0x78) = 0;
+    char* info = (char*)func_0027C958(obj);
+    *(float*)(self + 0x70) = *(float*)(info + 0x1C) * 0.01745329424738884f;
+    *(float*)(self + 0x74) = *(float*)(info + 0x18) * 0.01745329424738884f;
+    *(float*)(self + 0x78) = *(float*)(info + 0x14) * 0.01745329424738884f;
+    sVec_F9F8 v(*(float*)(info + 0x8), *(float*)(info + 0xC), *(float*)(info + 0x10), 1.0f);
+    sMat_F9F8 m;
+    LoadIdentity_F9F8(&m);
+    Translate_F9F8(&m, v);
+    ROTATE_F9F8(&m, D_004FF160, -*(float*)(self + 0x78));
+    ROTATE_F9F8(&m, D_004FF150, *(float*)(self + 0x74));
+    ROTATE_F9F8(&m, D_004FF140, *(float*)(self + 0x70));
+    sVec_F9F8 pos;
+    float rx, ry, rz;
+    func_0027A0D8(D_004A28A4, *(signed char*)(info + 1), *(void**)((char*)obj + 0x8), &pos, &rx, &ry, &rz);
+    Translate_F9F8(mat, pos);
+    ROTATE2_F9F8(mat, D_004FF160, -rz);
+    ROTATE2_F9F8(mat, D_004FF150, ry);
+    ROTATE2_F9F8(mat, D_004FF140, rx);
+    MulMat_F9F8(mat, mat, &m);
+    *(float*)(self + 0x70) += rx;
+    *(float*)(self + 0x74) += ry;
+    *(float*)(self + 0x78) += rz;
+    char* info2 = (char*)func_0027C070(*(void**)((char*)obj + 0x8));
+    ((sScriptObj_F9F8*)self)->anim0 = func_00279ED8_2(D_004A28A4, *(int*)(info2 + 0x1C));
+    ((sScriptObj_F9F8*)self)->anim1 = func_00279EF8_2(D_004A28A4, *(int*)(info2 + 0x1C));
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002803F0);

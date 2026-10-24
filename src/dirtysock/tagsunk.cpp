@@ -1073,7 +1073,298 @@ extern "C" void func_0025AB40(char* self, const char* a, const char* b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025AC50);
+#ifdef SKIP_ASM
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern char D_00480488[];
+extern char D_004804A8[];
+extern void* D_004812B0[];
+extern void* D_00481290[];
+extern void* D_00481270[];
+extern void* D_004811B0[];
+extern int D_004A3018;
+extern float D_004A5154;
+extern void* D_004A3328;
+extern void* D_004A3028;
+extern void* D_004A2EB8;
+extern void* D_004A28A8;
+extern "C" void func_003E95C8(void* p);
+extern "C" int func_003E8FB8(void* p);
+extern "C" void func_0025A650(char* self);
+extern "C" void func_0025B800(void* self);
+extern "C" void func_003E8260(void* p, int a, int timeout, void* cb, void* user);
+extern "C" void func_00268BA8(void* self, void* a1, int a2);
+extern "C" char* func_003E8A70(void* p, int tag);
+extern "C" void* cBXString_cBXString2(void* self, const char* s);
+extern "C" void func_00260F80(void);
+extern "C" int func_00261460(void* p);
+extern "C" void func_002613C8(void* p);
+extern "C" void func_00261408(void* self);
+extern "C" int func_00263128(char* self, char* name);
+extern "C" void func_00263018(void* self, void* name);
+extern "C" void func_0025F628(void* selfp, int notify, int flag);
+extern "C" void func_0025EED8(char* self);
+extern "C" int* func_002591D0();
+extern "C" void func_00263BA8(void* p, int arg);
+extern "C" int func_00255D38(void* comm, int chan);
+extern "C" void func_00255CC8(void* comm, int chan);
+extern "C" void func_003EE620(void* p);
+extern "C" void func_00261490(void* p);
+extern "C" void func_0017D260(void* self, void* msg);
+void operator_delete(int*);
+
+struct sMsgListNodeAC50 {
+    sMsgListNodeAC50* next;
+    sMsgListNodeAC50* prev;
+    void* data;
+};
+
+struct sMsgListIterAC50 {
+    sMsgListNodeAC50* node;
+    sMsgListIterAC50(sMsgListNodeAC50* x) : node(x) {}
+    sMsgListIterAC50(const sMsgListIterAC50& x) : node(x.node) {}
+};
+
+static inline sMsgListIterAC50 sMsgListAC50_insert(sMsgListIterAC50 pos, void* const& x)
+{
+    sMsgListNodeAC50* tmp = (sMsgListNodeAC50*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+struct sMsgListAC50 {
+    int pad;
+    sMsgListNodeAC50* node;
+    sMsgListIterAC50 begin() { return node->next; }
+    sMsgListIterAC50 end() { return node; }
+    sMsgListIterAC50 erase(sMsgListIterAC50 pos)
+    {
+        sMsgListNodeAC50* next = pos.node->next;
+        sMsgListNodeAC50* prev = pos.node->prev;
+        prev->next = next;
+        next->prev = prev;
+        operator_delete((int*)pos.node);
+        return next;
+    }
+    sMsgListNodeAC50* first() { return node->next; }
+    void* front() { return begin().node->data; }
+    void pop_front() { erase(begin()); }
+    bool empty() { return begin().node == end().node; }
+};
+
+static inline void post_AC50(char* self, void* msg)
+{
+    void* mp = msg;
+    sMsgListAC50_insert(*(sMsgListNodeAC50**)(self + 0xF0), mp);
+}
+
+static inline void* Mgr_AC50()
+{
+    if (D_004A3328 == 0)
+        func_00260F80();
+    if (func_00261460(D_004A3328) == 0)
+        func_002613C8(D_004A3328);
+    if (D_004A3328 == 0)
+        func_0025B800(D_004A3028);
+    return D_004A3328;
+}
+
+static inline int isNeg_AC50(float t)
+{
+    return t < 0.0f;
+}
+
+static inline int expired_AC50(char* self)
+{
+    return isNeg_AC50(*(float*)(self + 0xE0));
+}
+
+struct sDsCallbackAC50 {
+    char pad[0x4];
+    int value;
+    int (*poll)(sDsCallbackAC50* self);
+    void (*close)(sDsCallbackAC50* self);
+};
+
+struct sDsSessAC50 {
+    int state;                  // 0x00
+    int addr;                   // 0x04
+    char pad_0x08[0x54 - 0x08];
+    void* mgr;                  // 0x54
+    sDsCallbackAC50* conn;      // 0x58
+    char pad_0x5C[0xE0 - 0x5C];
+    float timer;                // 0xE0
+};
+
+struct sVEntryAC50 { short delta; short index; void (*fn)(void*, int); };
+
+static inline void closeConn_AC50(char* self)
+{
+    sDsCallbackAC50* obj = *(sDsCallbackAC50**)(self + 0x58);
+    if (obj != 0) {
+        obj->close(obj);
+        *(void**)(self + 0x58) = 0;
+    }
+}
+
+extern "C" void func_0025AC50(char* self)
+{
+    if (*(void**)(self + 0x54) != 0) {
+        func_003E95C8(*(void**)(self + 0x54));
+        int ev = func_003E8FB8(*(void**)(self + 0x54));
+        func_0025A650(self);
+        if (*(int*)(self + 0x10) != 0) {
+            *(int*)(self + 0x10) = 0;
+            func_0025B800(self);
+            int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+            m[0] = 0x115;
+            *(void***)((char*)m + 0x4) = D_004812B0;
+            post_AC50(self, m);
+        } else {
+            int state = *(int*)self;
+            if (state == 2) {
+                sDsCallbackAC50* obj = *(sDsCallbackAC50**)(self + 0x58);
+                int r = obj->poll(obj);
+                if (r > 0) {
+                    sDsSessAC50* sess = (sDsSessAC50*)self;
+                    int g = sess->conn->value;
+                    sess->addr = g;
+                    D_004A3018 = g;
+                    sess->state = 3;
+                    sess->timer = 30.0f;
+                    // PORT: function pointer passed as a callback argument.
+                    func_003E8260(sess->mgr, g, 0x2AF8, (void*)func_00268BA8, self);
+                } else if (r < 0) {
+                    func_0025B800(self);
+                    int* m = (int*)operator new(0xC, D_00480488, 0x20000000, 0);
+                    m[0] = 0x102;
+                    *(void***)((char*)m + 0x4) = D_00481290;
+                    m[2] = 0x646E7366; // 'dnsf'
+                    post_AC50(self, m);
+                }
+                if (r != 0)
+                    closeConn_AC50(self);
+            } else if (state == 3) {
+                if (ev == 0x400) {
+                    char* s = func_003E8A70(*(void**)(self + 0x54), 0x646F776E);
+                    int* m = (int*)operator new(0x10, D_00480488, 0x20000000, 0);
+                    m[0] = 0x102;
+                    m[2] = 0x646F776E; // 'down'
+                    *(void***)((char*)m + 0x4) = D_004811B0;
+                    cBXString_cBXString2((char*)m + 0xC, s);
+                    post_AC50(self, m);
+                    func_0025B800(self);
+                } else if (expired_AC50(self)) {
+                    func_0025B800(self);
+                    int* m = (int*)operator new(0xC, D_00480488, 0x20000000, 0);
+                    m[0] = 0x102;
+                    *(void***)((char*)m + 0x4) = D_00481290;
+                    m[2] = 0x74696D65; // 'time'
+                    post_AC50(self, m);
+                    closeConn_AC50(self);
+                }
+            } else if (state == 0x1A) {
+                if (*(int*)((char*)D_004A3328 + 0xD0) != 0) {
+                    func_00261408(D_004A3328);
+                    int* m = (int*)operator new(0xC, D_00480488, 0x20000000, 0);
+                    int val = *(int*)((char*)D_004A3328 + 0xD0);
+                    m[0] = 0x103;
+                    *(void***)((char*)m + 0x4) = D_00481270;
+                    m[2] = val;
+                    post_AC50(self, m);
+                } else if (func_00261460(D_004A3328) != 0) {
+                    *(int*)self = 1;
+                    int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+                    m[0] = 0xDA;
+                    *(void***)((char*)m + 0x4) = D_004812B0;
+                    post_AC50(self, m);
+                }
+            } else if (state == 0x16) {
+            } else if (state == 0x17) {
+                float t = *(float*)(self + 0xE0);
+                if (t < D_004A5154 - 1.0f)
+                    D_004A5154 = t;
+                if (isNeg_AC50(t)) {
+                    if (func_00263128((char*)Mgr_AC50(), *(char**)(self + 0x98)) != 0)
+                        func_00263018(Mgr_AC50(), *(void**)(self + 0x98));
+                    int type = 0x112;
+                    int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+                    m[0] = type;
+                    *(void***)((char*)m + 0x4) = D_004812B0;
+                    post_AC50(self, m);
+                    *(int*)self = 1;
+                }
+            } else if (state == 0x18) {
+                float t = *(float*)(self + 0xE0);
+                if (t < D_004A5154 - 1.0f)
+                    D_004A5154 = t;
+                if (isNeg_AC50(t)) {
+                    int type = 0x112;
+                    int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+                    m[0] = type;
+                    *(void***)((char*)m + 0x4) = D_004812B0;
+                    post_AC50(self, m);
+                    func_0025F628(self, 0, 1);
+                }
+            } else if (state == 0x14) {
+                if (expired_AC50(self)) {
+                    int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+                    m[0] = 0xE6;
+                    *(void***)((char*)m + 0x4) = D_004812B0;
+                    post_AC50(self, m);
+                    func_0025EED8(self);
+                }
+            } else if (state != 0x19) {
+                int notIdle = state != 1;
+                int active = notIdle || *(int*)(self + 0x44) != 0;
+                if (active && expired_AC50(self)) {
+                    func_0025B800(self);
+                    int* m = (int*)operator new(0xC, D_00480488, 0x20000000, 0);
+                    m[0] = 0x102;
+                    *(void***)((char*)m + 0x4) = D_00481290;
+                    m[2] = 0x74696D65; // 'time'
+                    post_AC50(self, m);
+                    *(int*)(self + 0x44) = 0;
+                    closeConn_AC50(self);
+                }
+            }
+        }
+        int notJoined = *(int*)self != 0x19;
+        if (notJoined) {
+            if (*func_002591D0() != 0)
+                func_00263BA8(func_002591D0(), 0);
+            else if (func_00255D38(D_004A2EB8, 0) != 0)
+                func_00255CC8(D_004A2EB8, 0);
+        }
+        if (*(int*)(self + 0xC) != 0) {
+            func_003EE620(*(void**)(self + 0x5C));
+            func_003EE620(*(void**)(self + 0x60));
+        }
+        char* app = (char*)D_004A28A8;
+        *(float*)(self + 0xE0) -= *(float*)(app + 0x14);
+        *(float*)(self + 0xE4) -= *(float*)(app + 0x14);
+    }
+    func_00261490(D_004A3328);
+    while (((sMsgListAC50*)(self + 0xEC))->first() != *(sMsgListNodeAC50**)(self + 0xF0)) {
+        void* msg = ((sMsgListAC50*)(self + 0xEC))->front();
+        ((sMsgListAC50*)(self + 0xEC))->pop_front();
+        func_0017D260(self, msg);
+        if (msg != 0) {
+            sVEntryAC50* vt = *(sVEntryAC50**)((char*)msg + 4);
+            vt[1].fn((char*)msg + vt[1].delta, 3);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025B608);
