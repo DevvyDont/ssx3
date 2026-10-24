@@ -42,7 +42,8 @@ def retail_tables() -> dict[str, list[int]]:
         if "dlabel jtbl_" not in text:
             continue
         for name, body in re.findall(r"dlabel (jtbl_[0-9A-F]+)\n(.*?)enddlabel \1", text, re.S):
-            out[name] = [int(w, 16) for w in re.findall(r"\.word 0x([0-9A-Fa-f]+)", body)]
+            # entries are raw words, or `.word .LXXXXXXXX` where splat put a branch label at the target address
+            out[name] = [int(h or l, 16) for h, l in re.findall(r"\.word (?:0x([0-9A-Fa-f]+)|\.L([0-9A-Fa-f]{8})\b)", body)]
     return out
 
 
