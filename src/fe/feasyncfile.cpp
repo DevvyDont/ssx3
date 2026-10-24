@@ -4682,7 +4682,492 @@ extern "C" void* func_001A9C50(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A9CC0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cBXString;
+extern "C" void* func_001A9C50(void* self);
+void func_001C57C0(void* self, int a1, int a2);
+extern "C" int USTR_length(void* s);
+extern "C" int strlen(const char* s);
+void cMemMan_free(void* p);
+// PORT: operator_new__FUi really takes (size, tag, flags, d)
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+// PORT: func_002C27C0 is a printf-style formatter; the unit declares it with four args
+extern "C" void func_002C27C0_1A9CC0(void* dst, const char* fmt, void* a, const char* b, const char* c) __asm__("func_002C27C0");
+extern "C" void* cBXString_cBXString1(void* self, void* other);
+extern "C" void cBXString__cBXString(void* self, int flags);
+int cBXString_FindLastOf(cBXString* self, char ch, int len);
+extern "C" void func_00318E68(cBXString* self, int idx, char ch);
+extern "C" void func_00255FA0(void* self);
+extern "C" void func_00260F80();
+extern "C" int func_00261460(void* self);
+extern "C" void func_002613C8(void* self);
+extern "C" void func_00261408(void* self);
+extern "C" void func_0025B800(void* self);
+extern "C" int* func_002591B8();
+extern "C" void func_002636F0(void* p, int a1);
+extern void* D_004A28A8;
+extern void* D_004A2EB8;
+extern void* D_004A3328;
+extern void* D_004A3028;
+extern char D_00461618[];
+extern char D_00461C40[];
+extern char D_00461D68[];
+extern char D_00461D88[];
+extern char D_00461DA0[];
+extern char D_00461DC0[];
+extern char D_00461DE0[];
+extern char D_00461E00[];
+extern char D_00461E20[];
+extern char D_00461E38[];
+extern char D_00461E50[];
+extern char D_00461E70[];
+extern char D_00461E88[];
+extern char D_00461EA0[];
+extern char D_00461EB8[];
+extern char D_00461ED8[];
+extern char D_00461EF0[];
+extern char D_00461F08[];
+extern char D_00461F28[];
+extern char D_00461F40[];
+extern char D_00461F60[];
+extern char D_00461F80[];
+extern char D_00461F98[];
+extern char D_00461FB0[];
+extern char D_00461FC8[];
+extern char D_00461FD8[];
+extern char D_00461FF8[];
+extern char D_00462010[];
+extern char D_00462028[];
+extern char D_00462040[];
+extern char D_00462058[];
+extern char D_00462078[];
+extern char D_00462090[];
+extern char D_004620A8[];
+extern char D_004620C8[];
+extern char D_004620E0[];
+extern char D_004620F0[];
+extern char D_00462108[];
+extern char D_00462118[];
+extern char D_00462130[];
+extern char D_00462140[];
+extern char D_00462158[];
+extern char D_00462170[];
+extern char D_00462190[];
+extern char D_004621A8[];
+extern char D_004621C0[];
+extern char D_004621D8[];
+extern char D_004621E8[];
+extern char D_00462200[];
+extern char D_00462218[];
+extern char D_00462230[];
+extern char D_00462248[];
+extern char D_00462268[];
+extern char D_00462280[];
+extern char D_00462298[];
+extern char D_004622B8[];
+extern char D_004622D0[];
+extern char D_004622E8[];
+extern char D_00462308[];
+extern char D_00462320[];
+extern char D_00462338[];
+extern char D_00462358[];
+extern char D_00462378[];
+extern char D_00462398[];
+extern char D_004623B0[];
+extern char D_004623C8[];
+extern char D_004623E0[];
+extern char D_004623F8[];
+extern char D_00462418[];
+extern char D_00462430[];
+extern char D_00462450[];
+extern char D_00462468[];
+extern char D_00462480[];
+extern char D_00462498[];
+extern char D_004624B0[];
+extern char D_004624D0[];
+extern char D_004624E8[];
+extern char D_00462510[];
+extern char D_00462528[];
+extern char D_00462548[];
+extern char D_00462560[];
+extern char D_00462580[];
+extern char D_00462598[];
+extern char D_004625B0[];
+extern char D_004625C8[];
+extern char D_004625E8[];
+extern char D_00462600[];
+extern char D_00462618[];
+
+struct sVEntry_1A9CC0 {
+    short delta;
+    short index;
+    void* (*fn)(void*, int);
+};
+
+struct sBXString1A9CC0 {
+    char* str;
+    sBXString1A9CC0() {}
+    sBXString1A9CC0(const sBXString1A9CC0& o);
+};
+
+// Popup message line: type 3 = string id.
+static inline void SetMsg_1A9CC0(char* msg, char* id)
+{
+    *(int*)(msg + 8) = GetHashValue32(id);
+    *(int*)(msg + 4) = 3;
+}
+
+static inline void SetText_1A9CC0(char* popup, char* id)
+{
+    *(int*)(popup + 0xC4) = GetHashValue32(id);
+    *(int*)(popup + 0xC0) = 3;
+}
+
+static inline void* GetSession_1A9CC0()
+{
+    if (D_004A3328 == 0) {
+        func_00260F80();
+    }
+    if (func_00261460(D_004A3328) == 0) {
+        func_002613C8(D_004A3328);
+    }
+    if (D_004A3328 == 0) {
+        func_0025B800(D_004A3028);
+    }
+    return D_004A3328;
+}
+
+// Builds the popup for an online error reply (four-character code at data+8).
+extern "C" void func_001A9CC0(void* self, void** popup, void* owner, void* data)
+{
+    char* s = (char*)self;
+    int unknown = 0;
+    int flag = 0;
+    char* p = (char*)func_001A9C50(self);
+    *popup = p;
+    char* sub = p + 0xBC;
+    *(int*)(p + 0xBC) = 1;
+    func_001C57C0(sub, 0, GetHashValue32(D_00461618));
+    *(int*)(p + 0x150) = 0x102;
+    switch (*(int*)((char*)data + 8)) {
+    case 0x696D7374: // 'imst'
+        SetMsg_1A9CC0(sub, D_00461D68);
+        break;
+    case 0x69706572: // 'iper'
+        SetText_1A9CC0(p, D_00461D88);
+        break;
+    case 0x70617373: // 'pass'
+        SetMsg_1A9CC0(sub, D_00461DA0);
+        break;
+    case 0x64626572: // 'dber'
+        SetMsg_1A9CC0(sub, D_00461DC0);
+        break;
+    case 0x6D697373: // 'miss'
+        SetMsg_1A9CC0(sub, D_00461DE0);
+        break;
+    case 0x696E7670: // 'invp'
+        SetText_1A9CC0(p, D_00461E00);
+        break;
+    case 0x6475706C: // 'dupl'
+        SetMsg_1A9CC0(sub, D_00461E20);
+        break;
+    case 0x6D617870: // 'maxp'
+        SetMsg_1A9CC0(sub, D_00461E38);
+        break;
+    case 0x64656670: // 'defp'
+        SetText_1A9CC0(p, D_00461E50);
+        break;
+    case 0x6D617574: // 'maut'
+        SetText_1A9CC0(p, D_00461E70);
+        *(int*)(p + 0x150) = 0x83D;
+        break;
+    case 0x70617574: // 'paut'
+        SetMsg_1A9CC0(sub, D_00461E88);
+        break;
+    case 0x75726F6D: // 'urom'
+        SetMsg_1A9CC0(sub, D_00461EA0);
+        break;
+    case 0x756C7374: // 'ulst'
+        SetText_1A9CC0(p, D_00461EB8);
+        break;
+    case 0x75757372: // 'uusr'
+        SetText_1A9CC0(p, D_00461ED8);
+        break;
+    case 0x7567616D: // 'ugam'
+        SetMsg_1A9CC0(sub, D_00461EF0);
+        break;
+    case 0x756D6163: // 'umac'
+        SetMsg_1A9CC0(sub, D_00461F08);
+        break;
+    case 0x72616E67: // 'rang'
+        SetText_1A9CC0(p, D_00461F28);
+        break;
+    case 0x73747274: // 'strt'
+        SetMsg_1A9CC0(sub, D_00461F40);
+        break;
+    case 0x64657465: // 'dete'
+        SetMsg_1A9CC0(sub, D_00461F60);
+        break;
+    case 0x6B69636B: // 'kick'
+        SetText_1A9CC0(p, D_00461F80);
+        break;
+    case 0x686F7374: // 'host'
+        SetMsg_1A9CC0(sub, D_00461F98);
+        break;
+    case 0x696E676D: // 'ingm'
+        SetMsg_1A9CC0(sub, D_00461FB0);
+        break;
+    case 0x73656C66: // 'self'
+        SetMsg_1A9CC0(sub, D_00461FC8);
+        break;
+    case 0x6E707269: // 'npri'
+        SetText_1A9CC0(p, D_00461FD8);
+        break;
+    case 0x6E726F6D: // 'nrom'
+        SetMsg_1A9CC0(sub, D_00461FF8);
+        break;
+    case 0x6E67616D: // 'ngam'
+        SetMsg_1A9CC0(sub, D_00462010);
+        break;
+    case 0x726F6F6D: // 'room'
+        SetMsg_1A9CC0(sub, D_00462028);
+        break;
+    case 0x61757468: // 'auth'
+        SetMsg_1A9CC0(sub, D_00462040);
+        break;
+    case 0x6E657730: // 'new0'
+        SetText_1A9CC0(p, D_00462058);
+        break;
+    case 0x70736574: // 'pset'
+        SetMsg_1A9CC0(sub, D_00462078);
+        break;
+    case 0x6E6F776E: // 'nown'
+        SetMsg_1A9CC0(sub, D_00462090);
+        break;
+    case 0x6C6F676E: // 'logn'
+        SetText_1A9CC0(p, D_004620A8);
+        break;
+    case 0x66696C74: // 'filt'
+        SetMsg_1A9CC0(sub, D_004620C8);
+        break;
+    case 0x6C6F636B: // 'lock'
+        {
+            const char* fmt = D_004620E0;
+            const char* who = *(const char**)((char*)data + 0x10);
+            char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+            const char* name = *(const char**)((char*)data + 0xC);
+            sVEntry_1A9CC0* vt = *(sVEntry_1A9CC0**)(obj + 4);
+            void* text = vt[4].fn(obj + vt[4].delta, GetHashValue32(D_004620F0));
+            int len = USTR_length(text) + strlen(who) + strlen(name) + 7;
+            if (*(void**)(s + 0x6B8) != 0) {
+                cMemMan_free(*(void**)(s + 0x6B8));
+                *(void**)(s + 0x6B8) = 0;
+            }
+            void* buf = operator_new_tag(len * 2, D_00462108, 0, 0);
+            *(void**)(s + 0x6B8) = buf;
+            func_002C27C0_1A9CC0(buf, fmt, text, who, name);
+            *(void**)(sub + 8) = *(void**)(s + 0x6B8);
+            *(int*)(sub + 4) = 1;
+        }
+        break;
+    case 0x72737276: // 'rsrv'
+        SetMsg_1A9CC0(sub, D_00462118);
+        break;
+    case 0x746F7361: // 'tosa'
+        SetText_1A9CC0(p, D_00462130);
+        break;
+    case 0x73616D65: // 'same'
+        SetText_1A9CC0(p, D_00462140);
+        break;
+    case 0x69676E6F: // 'igno'
+        SetMsg_1A9CC0(sub, D_00462158);
+        break;
+    case 0x6368616C: // 'chal'
+        SetMsg_1A9CC0(sub, D_00462170);
+        break;
+    case 0x67706172: // 'gpar'
+        SetText_1A9CC0(p, D_00462190);
+        break;
+    case 0x66756C6C: // 'full'
+        SetText_1A9CC0(p, D_004621A8);
+        break;
+    case 0x64697361: // 'disa'
+        SetMsg_1A9CC0(sub, D_004621C0);
+        break;
+    case 0x776F6C66: // 'wolf'
+        SetMsg_1A9CC0(sub, D_004621D8);
+        break;
+    case 0x6B696B68: // 'kikh'
+        SetMsg_1A9CC0(sub, D_004621E8);
+        break;
+    case 0x72616E6B: // 'rank'
+        SetMsg_1A9CC0(sub, D_00462200);
+        break;
+    case 0x626F6775: // 'bogu'
+        SetMsg_1A9CC0(sub, D_00462218);
+        break;
+    case 0x71756974: // 'quit'
+        SetMsg_1A9CC0(sub, D_00462230);
+        break;
+    case 0x736F6F6E: // 'soon'
+        SetMsg_1A9CC0(sub, D_00462248);
+        break;
+    case 0x74696D65: // 'time'
+        SetText_1A9CC0(p, D_00462268);
+        break;
+    case 0x6F766572: // 'over'
+        SetText_1A9CC0(p, D_00462280);
+        break;
+    case 0x62616463: // 'badc'
+        SetMsg_1A9CC0(sub, D_00462298);
+        break;
+    case 0x6F6E6C6E: // 'onln'
+        SetMsg_1A9CC0(sub, D_004622B8);
+        break;
+    case 0x61756E72: // 'aunr'
+        SetText_1A9CC0(p, D_004622D0);
+        break;
+    case 0x6E6B696B: // 'nkik'
+        SetText_1A9CC0(p, D_004622E8);
+        break;
+    case 0x626C616B: // 'blak'
+        SetText_1A9CC0(p, D_00462308);
+        break;
+    case 0x6D61696C: // 'mail'
+        SetMsg_1A9CC0(sub, D_00462320);
+        break;
+    case 0x706D616C: // 'pmal'
+        SetText_1A9CC0(p, D_00462338);
+        break;
+    case 0x626F726E: // 'born'
+        SetText_1A9CC0(p, D_00462358);
+        break;
+    case 0x67656E64: // 'gend'
+        SetMsg_1A9CC0(sub, D_00462378);
+        break;
+    case 0x7370616D: // 'spam'
+        SetText_1A9CC0(p, D_00462398);
+        break;
+    case 0x72617574: // 'raut'
+        SetText_1A9CC0(p, D_004623B0);
+        break;
+    case 0x6E656D6C: // 'neml'
+        SetMsg_1A9CC0(sub, D_004623C8);
+        break;
+    case 0x6D616E79: // 'many'
+        SetMsg_1A9CC0(sub, D_004623E0);
+        break;
+    case 0x65636F6E: // 'econ'
+        SetText_1A9CC0(p, D_004623F8);
+        break;
+    case 0x6967616D: // 'igam'
+        SetText_1A9CC0(p, D_00462418);
+        break;
+    case 0x69616472: // 'iadr'
+        SetMsg_1A9CC0(sub, D_00462430);
+        break;
+    case 0x6E706C61: // 'npla'
+        SetMsg_1A9CC0(sub, D_00462450);
+        break;
+    case 0x63686574: // 'chet'
+        SetText_1A9CC0(p, D_00462468);
+        break;
+    case 0x746F6F79: // 'tooy'
+        SetMsg_1A9CC0(sub, D_00462480);
+        break;
+    case 0x6E737276: // 'nsrv'
+        SetMsg_1A9CC0(sub, D_00462498);
+        break;
+    case 0x69706173: // 'ipas'
+        SetMsg_1A9CC0(sub, D_004624B0);
+        break;
+    case 0x696E616D: // 'inam'
+        SetText_1A9CC0(p, D_004624B0);
+        break;
+    case 0x656C656E: // 'elen'
+        SetMsg_1A9CC0(sub, D_004624D0);
+        break;
+    case 0x6974726E: // 'itrn'
+        SetMsg_1A9CC0(sub, D_004624E8);
+        break;
+    case 0x6A6F696E: // 'join'
+        SetMsg_1A9CC0(sub, D_00462510);
+        break;
+    case 0x616A6F69: // 'ajoi'
+        SetMsg_1A9CC0(sub, D_00462528);
+        break;
+    case 0x6E737063: // 'nspc'
+        SetText_1A9CC0(p, D_004621A8);
+        break;
+    case 0x6E666E64: // 'nfnd'
+        SetMsg_1A9CC0(sub, D_00462548);
+        break;
+    case 0x78697374: // 'xist'
+        SetMsg_1A9CC0(sub, D_00462560);
+        break;
+    case 0x7465616D: // 'team'
+        SetMsg_1A9CC0(sub, D_00462580);
+        break;
+    case 0x6D617874: // 'maxt'
+        SetText_1A9CC0(p, D_00462598);
+        break;
+    case 0x74737461: // 'tsta'
+        SetMsg_1A9CC0(sub, D_004625B0);
+        break;
+    case 0x696E7073: // 'inps'
+        SetMsg_1A9CC0(sub, D_004625C8);
+        break;
+    case 0x63646576: // 'cdev'
+        flag = 1;
+        SetMsg_1A9CC0(sub, D_004625E8);
+        break;
+    case 0x646F776E: // 'down'
+        {
+            sBXString1A9CC0 str;
+            cBXString_cBXString1(&str, (char*)data + 0xC);
+            int pos;
+            while ((pos = cBXString_FindLastOf((cBXString*)&str, '\n', 0)) != -1) {
+                int next = pos + 1;
+                if (str.str[next] == '\n') {
+                    func_00318E68((cBXString*)&str, pos, '\r');
+                    func_00318E68((cBXString*)&str, next, '\r');
+                } else {
+                    func_00318E68((cBXString*)&str, pos, ' ');
+                }
+            }
+            *(char**)(sub + 8) = str.str;
+            *(int*)(sub + 4) = 2;
+            *(int*)(sub + 0x10) = GetHashValue32(D_00462600);
+            *(int*)(sub + 0xC) = 3;
+            cBXString__cBXString(&str, 2);
+        }
+        break;
+    case 0x646E7366: // 'dnsf'
+        unknown = 1;
+        SetText_1A9CC0(p, D_00461C40);
+        break;
+    default:
+        unknown = 1;
+        SetMsg_1A9CC0(sub, D_00462618);
+        break;
+    }
+    if (!unknown) {
+        if (!flag) {
+            return;
+        }
+        *(int*)(sub + 0x94) = 0x83D;
+    } else {
+        func_00255FA0(D_004A2EB8);
+        *(int*)(sub + 0x94) = 0x83E;
+    }
+    func_00261408(GetSession_1A9CC0());
+    func_0025B800(D_004A3028);
+    func_002636F0(func_002591B8(), 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AA9B0);

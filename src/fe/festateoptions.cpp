@@ -1213,7 +1213,168 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_updateWidget);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" int cUIListBox_addEntryByStringID_i(void* box, int id, int idx) __asm__("cUIListBox_addEntryByStringID");
+extern "C" void func_0039A670(void* box);
+extern "C" int func_0039A768(void* self, int key, unsigned char* out);
+extern "C" void func_0039A7A8(void* self, int v);
+extern "C" void* func_0028B180();
+int func_00289DC0(void* snd);
+extern "C" void func_00287410(void* snd, int v);
+extern "C" void func_00287488(void* snd, int v);
+extern "C" void func_00287520(void* snd, int v);
+extern "C" void func_00287558(void* snd, int v);
+extern "C" void func_002875D0(void* snd, int v);
+extern char D_0045DF40[];
+extern char D_0045DFD0[];
+extern char D_0045DFE8[];
+extern char D_0045E000[];
+extern char D_0045E018[];
+extern char D_0045E028[];
+extern char D_004A1568[];
+extern char D_004A1590[];
+extern char D_004A1598[];
+extern char D_004A15A0[];
+extern char D_004A15A8[];
+extern char D_004A15B0[];
+extern char D_004A15B8[];
+extern int D_004A1A70;
+
+struct sSndCfg_18B380 {
+    unsigned int sfxVol : 4;        // bits 0-3
+    unsigned int musicVol : 4;      // bits 4-7
+    unsigned int speechVol : 4;     // bits 8-11
+    unsigned int output : 2;        // bits 12-13
+    unsigned int pad14 : 2;
+    int f16 : 1;                    // bit 16
+    int f17 : 1;                    // bit 17
+    int f18 : 1;                    // bit 18
+    int pad19 : 13;
+    char rest[0x288 - 4];
+};
+// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
+extern sSndCfg_18B380 D_00535610_18B380 __asm__("D_00535610");
+
+// The options interface's view of the same settings word (unsigned flags).
+struct sSndOpts_18B380 {
+    unsigned int sfxVol : 4;        // bits 0-3
+    unsigned int musicVol : 4;      // bits 4-7
+    unsigned int speechVol : 4;     // bits 8-11
+    unsigned int output : 2;        // bits 12-13
+    unsigned int pad14 : 2;
+    unsigned int f16 : 1;           // bit 16
+    unsigned int f17 : 1;           // bit 17
+    unsigned int f18 : 1;           // bit 18
+    unsigned int pad19 : 13;
+    char rest[0x288 - 4];
+};
+
+struct sOptionIface_18B380 {
+    // PORT: reinterprets the settings global with unsigned flag bits
+    sSndOpts_18B380 getOptions() { return *(sSndOpts_18B380*)&D_00535610_18B380; }
+};
+
+static inline sSndCfg_18B380 Cfg_18B380()
+{
+    return D_00535610_18B380;
+}
+
+struct sOptSound_18B380 {
+    char pad0[0x40];
+    char* screen;                   // 0x40
+};
+
+static inline void* Find_18B380(sOptSound_18B380* self, char* name)
+{
+    return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+}
+
+// Sound options screen: fills the option widgets from the current sound settings.
+extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
+{
+    sOptSound_18B380* self = (sOptSound_18B380*)vself;
+    sOptionIface_18B380* iface = (sOptionIface_18B380*)cBE_getInterface_Fv(cBE_getBE(), 4);
+    {
+    char* w = (char*)Find_18B380(self, D_004A1568);
+    if (w != 0) {
+        func_0039A670(w);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DFD0), 0);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DFE8), 1);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E000), 2);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E018), 3);
+        unsigned char sel;
+        if (func_0039A768(w, func_00289DC0(func_0028B180()), &sel))
+            func_0039A7A8(w, sel);
+    }
+    }
+    {
+    char* w = (char*)Find_18B380(self, D_004A1590);
+    if (w != 0) {
+        *(int*)(w + 0x78) = 12;
+        *(int*)(w + 0x74) = iface->getOptions().sfxVol;
+        func_00287410(func_0028B180(), Cfg_18B380().sfxVol);
+    }
+    }
+    {
+    char* w = (char*)Find_18B380(self, D_004A1598);
+    if (w != 0) {
+        *(int*)(w + 0x78) = 12;
+        *(int*)(w + 0x74) = iface->getOptions().speechVol;
+        func_00287488(func_0028B180(), Cfg_18B380().speechVol);
+    }
+    }
+    {
+    char* w = (char*)Find_18B380(self, D_004A15A0);
+    if (w != 0) {
+        *(int*)(w + 0x78) = 12;
+        *(int*)(w + 0x74) = iface->getOptions().musicVol;
+        func_00287520(func_0028B180(), Cfg_18B380().musicVol);
+    }
+    }
+    {
+    char* w = (char*)Find_18B380(self, D_004A15A8);
+    if (w != 0) {
+        func_0039A670(w);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF40), 0);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E028), 1);
+        unsigned char sel;
+        if (func_0039A768(w, iface->getOptions().f17, &sel))
+            func_0039A7A8(w, sel);
+        func_00287558(func_0028B180(), Cfg_18B380().f17 != 0);
+    }
+    }
+    {
+    char* w = (char*)Find_18B380(self, D_004A15B0);
+    if (w != 0) {
+        func_0039A670(w);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF40), 0);
+        cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E028), 1);
+        unsigned char sel;
+        if (func_0039A768(w, iface->getOptions().f16, &sel))
+            func_0039A7A8(w, sel);
+        func_002875D0(func_0028B180(), Cfg_18B380().f16 != 0);
+    }
+    }
+    bool on = D_004A1A70 == 1;
+    if (on) {
+        char* w = (char*)Find_18B380(self, D_004A15B8);
+        if (w != 0) {
+            func_0039A670(w);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF40), 0);
+            cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E028), 1);
+            unsigned char sel;
+            if (func_0039A768(w, iface->getOptions().f18, &sel))
+                func_0039A7A8(w, sel);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018BEF8);
