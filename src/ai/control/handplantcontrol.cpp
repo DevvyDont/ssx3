@@ -251,7 +251,396 @@ done:
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00139C88);
+#ifdef SKIP_ASM
+struct sHit_139C88 {
+    sVec4HP pos;                // 0x00
+    sVec4HP normal;             // 0x10
+    sVec4HP vel;                // 0x20
+    char pad30[0x1C];           // 0x30
+    int surface;                // 0x4C
+    char* obj50;                // 0x50
+    char* obj54;                // 0x54
+    char pad58[0x14];           // 0x58
+    float f6C;                  // 0x6C
+    float f70;                  // 0x70
+    char pad74[0xC];            // 0x74
+} __attribute__((aligned(16)));
+
+struct sInfo_139C88 {
+    sVec4HP pos;                // 0x00
+    sVec4HP dir;                // 0x10
+    sVec4HP up;                 // 0x20
+    float speed;                // 0x30
+} __attribute__((aligned(16)));
+
+struct sVEnt_139C88 { short delta; short index; void (*fn)(void*, sHit_139C88*, const sVec4HP&); };
+
+extern void* D_004A28A8;
+extern int D_004A1120;
+extern void* D_004A3DD8;
+extern "C" float func_0013A7B0_9C88(void* self, sHit_139C88* hit) __asm__("func_0013A7B0");
+extern "C" void func_0011E150_9C88(void* rider, int a) __asm__("func_0011E150");
+extern "C" void func_00116120(void* rider, int a, int b);
+extern "C" void func_00106538(void* rider, void* v);
+extern "C" void func_00105398(void* rider, int a1);
+extern "C" void func_00105398_p(void* rider, void* v) __asm__("func_00105398");
+extern "C" void func_00107888(void* rider);
+extern "C" void func_0010EB30_9C88(void* rider, int anim, int a2, int a3, sInfo_139C88* info) __asm__("func_0010EB30");
+extern "C" void func_0010E910(void* rider, int a1, int a2, int a3, sHit_139C88* hit, float spd);
+extern "C" int func_00311AE8(void* ra, int layer);
+extern "C" char* func_00311B20(void* ra, int layer);
+extern "C" bool func_001446A0(void* self, int bit);
+extern "C" int func_001446A0_i(void* self, int bit) __asm__("func_001446A0");
+extern "C" float func_00149120(void* be, int idx, int stat);
+extern "C" void func_00115640(void* rider);
+extern "C" int func_00114CC0(void* rider);
+extern "C" void func_0013A8F8(void* self, float v);
+extern "C" void func_0013A968(void* self, float v);
+extern "C" int func_0013AA48(void* self, void* out);
+extern "C" void func_003098B0(void* p);
+extern "C" void* cBE_getBE();
+extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int func_0011FEE8(void* rider);
+void func_0011FEC8_9C88(void* rider, int v) __asm__("func_0011FEC8__FPv");
+void func_0011FE78_9C88(void* rider, int v) __asm__("func_0011FE78__FPv");
+void func_00113998_9C88(void* ap, void* pos, void* vel) __asm__("func_00113998__FPv");
+int AIrand();
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4HP vu0Scale_139C88(const sVec4HP& v, float s)
+{
+    sVec4HP r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector times scalar).
+static inline void vu0ScaleEq_139C88(sVec4HP& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(v), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4HP vu0Sub_139C88(const sVec4HP& a, const sVec4HP& b)
+{
+    sVec4HP r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector add).
+static inline void vu0AddEq_139C88(sVec4HP& a, const sVec4HP& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_139C88(const sVec4HP& a, const sVec4HP& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0Len_139C88(const sVec4HP& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v / |v| via vrsqrt).
+static inline sVec4HP vu0Normalize_139C88(const sVec4HP& v)
+{
+    sVec4HP r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sVec4HP vu0Cross_139C88(const sVec4HP& a, const sVec4HP& b)
+{
+    sVec4HP r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
+static inline float absf_139C88(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: g++ minimum operator (<?).
+static inline float clamp_139C88(float v, float lo, float hi)
+{
+    float r;
+    if (v >= lo) {
+        r = v <? hi;
+    } else {
+        r = lo;
+    }
+    return r;
+}
+
+// Row k of the rider's transform (side, front, up), by value.
+static inline sVec4HP row_139C88(char* r, int k)
+{
+    return *(sVec4HP*)(r + 0x1A0 + k * 16);
+}
+
+#define RIDER_139C88 (*(char**)((char*)self + 0x4))
+#define V4_139C88(p, off) (*(sVec4HP*)((p) + (off)))
+
+extern "C" void func_00139C88(void* self)
+{
+    sHit_139C88 hit;
+    float d = func_0013A7B0_9C88(self, &hit);
+    float vn = 0.0f;
+    if (d >= 0.5f) {
+        vn = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 0x1E0), hit.vel), hit.normal);
+    }
+    if (d >= 0.5f && vn < 0.0f) {
+        float spd = vu0Len_139C88(V4_139C88(RIDER_139C88, 0x1E0));
+        if (func_0011FEE8(RIDER_139C88) == 5) {
+            func_0011FEC8_9C88(RIDER_139C88, 0xD);
+        }
+        func_00113998_9C88(*(void**)(RIDER_139C88 + 0x788), RIDER_139C88 + 0x110, RIDER_139C88 + 0x1E0);
+        char* surf = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x44) + hit.surface * 0xB0;
+        int fl;
+        if (*(int*)(surf + 0x44) != 0 || (hit.obj54 != 0 && (fl = *(short*)(hit.obj54 + 0xA), (fl & 2) != 0))) {
+            func_00116120(RIDER_139C88, 0, 1);
+            return;
+        }
+        float pen = vu0Dot_139C88(vu0Sub_139C88(hit.pos, V4_139C88(RIDER_139C88, 0x110)), hit.normal) - *(float*)(surf + 0x18);
+        if (0.0f < pen) {
+            sVec4HP push = vu0Scale_139C88(hit.normal, pen);
+            func_00106538(RIDER_139C88, &push);
+        }
+        V4_139C88(RIDER_139C88, 0x370) = hit.normal;
+        V4_139C88(RIDER_139C88, 0x3D0) = hit.vel;
+        *(float*)(RIDER_139C88 + 0x770) = -vn;
+        V4_139C88(RIDER_139C88, 0x380) = V4_139C88(RIDER_139C88, 0x370);
+        if (hit.obj54 != 0) {
+            *(int*)(RIDER_139C88 + 0x430) = *(int*)(hit.obj54 + 0x150);
+            *(float*)(RIDER_139C88 + 0xAAC) = hit.f6C;
+            *(float*)(RIDER_139C88 + 0xAB0) = hit.f70;
+        } else {
+            *(unsigned int*)(RIDER_139C88 + 0x430) = 0xFFFFFFFF;
+        }
+        sVec4HP imp = vu0Scale_139C88(V4_139C88(RIDER_139C88, 0x370), -vn);
+        vu0ScaleEq_139C88(imp, *(float*)(surf + 0x3C));
+        vu0AddEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), imp);
+        char* r = RIDER_139C88;
+        float vn2 = -vu0Dot_139C88(V4_139C88(r, 0x1E0), V4_139C88(r, 0x370));
+        if (*(float*)(surf + 0x40) < vn2) {
+            vu0AddEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), vu0Scale_139C88(V4_139C88(r, 0x370), vn2 - *(float*)(surf + 0x40)));
+        }
+        if (hit.obj50 != 0) {
+            char* h = *(char**)(hit.obj50 + 0xC);
+            if (h != 0) {
+                sVEnt_139C88* vt = *(sVEnt_139C88**)(h + 0xC);
+                vt[43].fn(h + vt[43].delta, &hit, vu0Scale_139C88(vu0Scale_139C88(imp, -1.0f), (float)*(int*)((char*)D_004A28A8 + 0x10)));
+            }
+        }
+        int anim = 0x1B6;
+        char* r2 = RIDER_139C88;
+        V4_139C88(r2, 0x3A0) = vu0Normalize_139C88(vu0Sub_139C88(row_139C88(r2, 1), vu0Scale_139C88(V4_139C88(r2, 0x370), vu0Dot_139C88(row_139C88(r2, 1), V4_139C88(r2, 0x370)))));
+        V4_139C88(RIDER_139C88, 0x3B0) = vu0Cross_139C88(V4_139C88(RIDER_139C88, 0x370), V4_139C88(RIDER_139C88, 0x3A0));
+        *(int*)(RIDER_139C88 + 0x438) = hit.surface;
+        V4_139C88(RIDER_139C88, 0x460) = hit.pos;
+        *(float*)(RIDER_139C88 + 0x454) = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 0x110), hit.pos), V4_139C88(RIDER_139C88, 0x370));
+        if (func_00311AE8(*(void**)(RIDER_139C88 + 0x784), 2) == 0x14) {
+            if (!func_001446A0(func_00311B20(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2)) anim = 0x169;
+        } else if (func_00311AE8(*(void**)(RIDER_139C88 + 0x784), 2) == 0x15) {
+            if (!func_001446A0(func_00311B20(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 3)) anim = 0x169;
+        } else {
+            int flip = 0;
+            if (func_00311AE8(*(void**)(RIDER_139C88 + 0x784), 2) == 0x13) {
+                flip = func_001446A0_i(func_00311B20(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2) == 0;
+            } else if (func_00311AE8(*(void**)(RIDER_139C88 + 0x784), 2) == 0x12 &&
+                       !func_001446A0(func_00311B20(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2)) {
+                flip = func_001446A0_i(func_00311B20(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 0) != 0;
+            }
+            char* r4 = RIDER_139C88;
+            if (vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 0x370)) < 0.0f) {
+                flip = 1;
+            }
+            if (flip) {
+                float a = vu0Dot_139C88(row_139C88(r4, 0), V4_139C88(r4, 0x370));
+                float b = vu0Dot_139C88(row_139C88(r4, 1), V4_139C88(r4, 0x370));
+                float c = vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 0x370));
+                if (absf_139C88(b) > absf_139C88(a) && absf_139C88(b) > absf_139C88(c)) {
+                    anim = b < 0.0f ? 0x162 : 0x163;
+                } else if (absf_139C88(c) > absf_139C88(a) && absf_139C88(c) > absf_139C88(b)) {
+                    if (c < 0.0f) {
+                        anim = 0x15E;
+                    } else {
+                        int k;
+                        if (vu0Len_139C88(V4_139C88(RIDER_139C88, 0x1E0)) > 2222.22216796875f) {
+                            anim = 0x160;
+                            k = AIrand() & 3;
+                        } else {
+                            anim = 0x160;
+                            k = AIrand() & 1;
+                        }
+                        if (k != 0) {
+                            anim = k == 1 ? 0x161 : 0x15F;
+                        }
+                    }
+                } else {
+                    anim = a < 0.0f ? 0x165 : 0x164;
+                }
+            } else if (*(int*)(r4 + 0x330) == 0) {
+                float f = vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 0x3A0));
+                float k = func_00149120(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER_139C88 + 0x86C), *(int*)(RIDER_139C88 + 0xB34)) * 0.29999101161956787f + 1.0f;
+                if (k * 0.699962317943573f < f) {
+                    anim = 0x15C;
+                } else if (f < k * -0.699962317943573f) {
+                    anim = 0x15D;
+                }
+            }
+        }
+        if (anim != 0x1B6) {
+            sInfo_139C88 info;
+            info.pos = hit.pos;
+            info.dir = vu0Normalize_139C88(V4_139C88(RIDER_139C88, 0x1E0));
+            info.up = hit.normal;
+            info.speed = absf_139C88(vn);
+            func_0010EB30_9C88(RIDER_139C88, anim, 0, *(int*)(RIDER_139C88 + 0x438), &info);
+        } else {
+            char* r5 = RIDER_139C88;
+            func_0010E910(r5, *(float*)(r5 + 0x378) < 0.699999988079071f, 0, *(int*)(r5 + 0x330), &hit, spd);
+            func_0011FE78_9C88(RIDER_139C88, 0);
+            if (func_0011FEE8(RIDER_139C88) != 0xC) {
+                if (func_0011FEE8(RIDER_139C88) == 2) {
+                    func_00115640(RIDER_139C88);
+                    if (vn < -1388.888916015625f) {
+                        func_0013A968(self, vn);
+                    }
+                } else if (*(int*)(RIDER_139C88 + 0x330) != 0) {
+                    if (func_0011FEE8(RIDER_139C88) != 1) {
+                        if (*(int*)(RIDER_139C88 + 0x330) == 1) {
+                            cRiderAnimBase_play_i(*(void**)(RIDER_139C88 + 0x784), 0x1A, 0, -1.0f);
+                        } else {
+                            cRiderAnimBase_play_i(*(void**)(RIDER_139C88 + 0x784), 0x22, 0, -1.0f);
+                        }
+                        func_0011FEC8_9C88(RIDER_139C88, 1);
+                    }
+                } else {
+                    func_00115640(RIDER_139C88);
+                    func_0011FEC8_9C88(RIDER_139C88, 0);
+                    if (func_00114CC0(RIDER_139C88)) {
+                        func_0013A8F8(self, vn);
+                    } else {
+                        func_0013A968(self, vn);
+                    }
+                }
+            }
+            char* r6 = RIDER_139C88;
+            float k = clamp_139C88(absf_139C88(vu0Dot_139C88(row_139C88(r6, 1), vu0Normalize_139C88(V4_139C88(r6, 0x1E0)))), 1.0f, 1.0f);
+            vu0ScaleEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), k);
+            func_003098B0(D_004A3DD8);
+        }
+    }
+    func_0011E150_9C88(RIDER_139C88, 0);
+    sVec4HP out;
+    *(int*)(*(char**)(RIDER_139C88 + 0xAA0) + 0x28) = D_004A1120;
+    int got = func_0013AA48(self, &out);
+    *(unsigned int*)(*(char**)(RIDER_139C88 + 0xAA0) + 0x28) = 0xFFFFFFFF;
+    if (got) {
+        func_00105398_p(RIDER_139C88, &out);
+    } else {
+        func_00105398_p(RIDER_139C88, 0);
+    }
+    func_00107888(RIDER_139C88);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013A7B0);

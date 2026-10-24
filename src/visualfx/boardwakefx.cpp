@@ -3831,7 +3831,287 @@ extern "C" void func_002E6640(void* self)
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E66B8);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E6C08);
+#ifdef SKIP_ASM
+// Three floats (12 bytes, unaligned); built through a temporary like a constructed value.
+struct sV3E6C08 {
+    float x, y, z;
+    sV3E6C08() {}
+    sV3E6C08(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+
+struct sTrailEntE6C08 {
+    float len;                  // 0x00
+    sV3E6C08 lo;                // 0x04
+    sV3E6C08 hi;                // 0x10
+};
+
+struct sTrailE6C08 {
+    cRider* rider;              // 0x00
+    float maxLen;               // 0x04
+    char pad8[0xC];             // 0x08
+    int count;                  // 0x14
+    float total;                // 0x18
+    char pad1C[0x4];            // 0x1C
+    t4Vector last;              // 0x20
+    int head;                   // 0x30
+    char pad34[0xC];            // 0x34
+    t4Vector side;              // 0x40
+    sTrailEntE6C08 ring[30];    // 0x50
+};
+
+struct sVtE6C08 {
+    short delta;
+    short index;
+    t4Vector* (*fn)(void*);
+};
+
+int func_00312AA0(void*, int);
+
+#define WAKE_MAX_E6C08(a, b) ((a) > (b) ? (a) : (b))
+
+// PORT: PS2-only inline asm (float absolute value).
+static inline float wakeAbsE6C08(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline t4Vector wakeScaleE6C08(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline t4Vector wakeAddE6C08(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline t4Vector wakeSubE6C08(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void wakeAddEqE6C08(t4Vector& a, const t4Vector& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline t4Vector wakeCrossE6C08(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float wakeLenE6C08(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float wakeDotE6C08(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline t4Vector wakeRowE6C08(cRider* r, int k)
+{
+    return ((t4Vector*)((char*)r->mAnimModel->unk_030 + (r->mBoneBoardChild << 6)))[k];
+}
+
+// Pull a corner down onto the ground plane, 10 units below.
+static inline t4Vector wakeDropE6C08(sTrailE6C08* self, const t4Vector& c, const t4Vector& d)
+{
+    return wakeSubE6C08(c, wakeScaleE6C08(self->rider->mGroundNormal, wakeDotE6C08(self->rider->mGroundNormal, d) - 10.0f));
+}
+
+extern "C" void func_002E6C08(sTrailE6C08* self)
+{
+    if (0.0f < self->maxLen || 0.0f < self->total) {
+        if (0.0f < wakeLenE6C08(self->rider->mVelocity)) {
+            sTrailEntE6C08* ring;
+            if (self->count == 30) {
+                self->total -= self->ring[(self->head + 29) % 30].len;
+                ring = self->ring;
+            } else {
+                ring = self->ring;
+                self->count++;
+            }
+            self->head = (self->head + 29) % 30;
+            char* sub = (char*)&self->rider->mVtbl;
+            sVtE6C08* vt = *(sVtE6C08**)sub;
+            t4Vector pos = *vt[5].fn(sub + vt[5].delta);
+            t4Vector p3 = wakeRowE6C08(self->rider, 3);
+            t4Vector p2 = wakeRowE6C08(self->rider, 2);
+            t4Vector p0 = wakeRowE6C08(self->rider, 0);
+            if (self->rider->unk_320 != 0) {
+                p0 = wakeScaleE6C08(p0, -1.0f);
+            }
+            float dist;
+            if (self->count >= 2) {
+                dist = wakeLenE6C08(wakeSubE6C08(pos, self->last));
+            } else {
+                dist = 0.0f;
+            }
+            self->last = pos;
+            ring[self->head].len = 0.0f;
+            ring[(self->head + 1) % 30].len = dist;
+            self->total += dist;
+            t4Vector c0 = wakeSubE6C08(wakeAddE6C08(p3, wakeScaleE6C08(p0, 75.0f)), wakeScaleE6C08(p2, 17.5f));
+            t4Vector c1 = wakeAddE6C08(wakeAddE6C08(p3, wakeScaleE6C08(p0, 75.0f)), wakeScaleE6C08(p2, 17.5f));
+            t4Vector c2 = wakeSubE6C08(wakeSubE6C08(p3, wakeScaleE6C08(p0, 75.0f)), wakeScaleE6C08(p2, 17.5f));
+            t4Vector c3 = wakeAddE6C08(wakeSubE6C08(p3, wakeScaleE6C08(p0, 75.0f)), wakeScaleE6C08(p2, 17.5f));
+            float lean = 0.0f;
+            if (self->rider->mPressType != 0) {
+                int s = func_00312AA0(self->rider->mRiderAnim, 2);
+                if ((s >= 23 && s <= 28) || s == 37 || s == 38) {
+                    lean = 1.0f;
+                } else {
+                    lean = -1.0f;
+                }
+            }
+            if (0.0f < lean) {
+                wakeAddEqE6C08(c2, wakeScaleE6C08(wakeScaleE6C08(p0, 150.0f), lean));
+                wakeAddEqE6C08(c3, wakeScaleE6C08(wakeScaleE6C08(p0, 150.0f), lean));
+            } else if (lean < 0.0f) {
+                wakeAddEqE6C08(c0, wakeScaleE6C08(wakeScaleE6C08(p0, 150.0f), lean));
+                wakeAddEqE6C08(c1, wakeScaleE6C08(wakeScaleE6C08(p0, 150.0f), lean));
+            }
+            t4Vector n = wakeCrossE6C08(self->rider->mVelocity, self->rider->mGroundNormal);
+            if (wakeDotE6C08(n, self->side) < 0.0f) {
+                n = wakeScaleE6C08(n, -1.0f);
+            }
+            self->side = n;
+            t4Vector d0 = wakeSubE6C08(c0, self->rider->mGroundContactPoint);
+            t4Vector d1 = wakeSubE6C08(c1, self->rider->mGroundContactPoint);
+            t4Vector d2 = wakeSubE6C08(c2, self->rider->mGroundContactPoint);
+            t4Vector d3 = wakeSubE6C08(c3, self->rider->mGroundContactPoint);
+            float h0 = wakeDotE6C08(d0, n);
+            float h1 = wakeDotE6C08(d1, n);
+            float h2 = wakeDotE6C08(d2, n);
+            float h3 = wakeDotE6C08(d3, n);
+            float s = 1.0f / WAKE_MAX_E6C08(wakeAbsE6C08(h0), WAKE_MAX_E6C08(wakeAbsE6C08(h1), WAKE_MAX_E6C08(wakeAbsE6C08(h2), wakeAbsE6C08(h3))));
+            float a = h0 * s;
+            float b = h1 * s;
+            float c = h2 * s;
+            float d = h3 * s;
+            t4Vector lo;
+            t4Vector hi;
+            if (a < b && a < c + 0.5f && a < d + 0.5f) {
+                lo = wakeDropE6C08(self, c0, d0);
+            } else if (b < a && b < c + 0.5f && b < d + 0.5f) {
+                lo = wakeDropE6C08(self, c1, d1);
+            } else if (c < a && c < b && c < d) {
+                lo = wakeDropE6C08(self, c2, d2);
+            } else {
+                lo = wakeDropE6C08(self, c3, d3);
+            }
+            if (b <= a && c - 0.5f <= a && d - 0.5f <= a) {
+                hi = wakeDropE6C08(self, c0, d0);
+            } else if (a <= b && c - 0.5f <= b && d - 0.5f <= b) {
+                hi = wakeDropE6C08(self, c1, d1);
+            } else if (a <= c && b <= c && d <= c) {
+                hi = wakeDropE6C08(self, c2, d2);
+            } else {
+                hi = wakeDropE6C08(self, c3, d3);
+            }
+            self->ring[self->head].lo = sV3E6C08(lo.x, lo.y, lo.z);
+            self->ring[self->head].hi = sV3E6C08(hi.x, hi.y, hi.z);
+        }
+    }
+    int keep = 0;
+    if (1.0f < self->maxLen) {
+        keep = 3;
+    }
+    while (keep < self->count && self->maxLen < self->total) {
+        self->total -= self->ring[(self->head + self->count - 1) % 30].len;
+        self->count--;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E7A10);
