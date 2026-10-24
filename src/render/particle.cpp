@@ -6687,7 +6687,99 @@ void* func_00382740(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00382760);
+#ifdef SKIP_ASM
+struct sPtQuad_2760 {
+    unsigned int w[4];
+} __attribute__((aligned(16)));
+
+struct sPtKickGfx_2760 {
+    char pad_0x0[0x5A8C];
+    volatile int kickState;                  // 0x5A8C (also written by the VIF1-end / VBlank IRQ handlers)
+    volatile int bufState[2];                // 0x5A90
+    volatile int inFlightIndex;              // 0x5A98
+    int inFlightVif2;               // 0x5A9C
+    int inFlightGif2;               // 0x5AA0
+    volatile int queuedIndex;                // 0x5AA4
+    int queuedVif1;                 // 0x5AA8
+    int queuedVif2;                 // 0x5AAC
+    int queuedGif1;                 // 0x5AB0
+    int queuedGif2;                 // 0x5AB4
+    char pad_0x5AB8[0x5AC8 - 0x5AB8];
+    int kickSema;                   // 0x5AC8
+    int queueMutex;                 // 0x5ACC
+    char pad_0x5AD0[0x6D0C - 0x5AD0];
+    void (*phase2Callback)(int);    // 0x6D0C
+    int phase2CallbackArg;          // 0x6D10
+};
+
+extern sPtQuad_2760 D_0044B9C0;
+extern "C" void* func_00423DE0(int sema);
+extern "C" void func_00423DC0(int sema);
+extern "C" void func_00424020(int);
+extern "C" void func_00382AF0(void* self, int a, int b);
+
+// Renderer_DmaKickThread (REF structs/render.md): kicks the queued frame's two-phase VIF1 + GIF DMA chains.
+// PORT: PS2 hardware registers (D1/D2/D8 CHCR+TADR, VIF1 FIFO/STAT, GIF_MODE, GS CSR).
+extern "C" void* func_00382760(void* selfp)
+{
+    sPtKickGfx_2760* self = (sPtKickGfx_2760*)selfp;
+    for (;;) {
+        func_00423DE0(self->kickSema);
+        func_00423DE0(self->queueMutex);
+        if (self->kickState == 5) {
+            self->bufState[self->inFlightIndex] = 0;
+            self->kickState = 0;
+            func_00382AF0(self, 1, 0);
+        }
+        if (self->kickState == 0 && self->bufState[self->queuedIndex] == 2) {
+            while (*(volatile int*)0x10009000 & 0x100) {
+            }
+            while (*(volatile int*)0x1000A000 & 0x100) {
+            }
+            while (*(volatile int*)0x10003C00 & 0x1F000003) {
+            }
+            while ((*(volatile long*)0x12001000 & 0xC000) != 0x4000) {
+            }
+            self->inFlightIndex = self->queuedIndex;
+            self->bufState[self->inFlightIndex] = 3;
+            self->kickState = 1;
+            self->inFlightVif2 = self->queuedVif2;
+            self->inFlightGif2 = self->queuedGif2;
+            func_00424020(0);
+            while (*(volatile int*)0x1000D000 & 0x100) {
+            }
+            *(sPtQuad_2760*)0x10005000 = D_0044B9C0;
+            *(volatile int*)0x10003010 = 4;
+            while (*(volatile int*)0x10003C00 & 0x1F000003) {
+            }
+            while ((*(volatile long*)0x12001000 & 0xC000) != 0x4000) {
+            }
+            *(volatile int*)0x1000A030 = self->queuedGif1;
+            *(volatile int*)0x1000A000 = 0x105;
+            *(volatile int*)0x10009030 = self->queuedVif1;
+            *(volatile int*)0x10009000 = 0x185;
+        } else if (self->kickState == 2) {
+            if (self->phase2Callback) {
+                self->phase2Callback(self->phase2CallbackArg);
+            }
+            *(sPtQuad_2760*)0x10005000 = D_0044B9C0;
+            *(volatile int*)0x10003010 = 4;
+            while (*(volatile int*)0x10003C00 & 0x1F000003) {
+            }
+            while ((*(volatile long*)0x12001000 & 0xC000) != 0x4000) {
+            }
+            *(volatile int*)0x1000A030 = self->inFlightGif2;
+            *(volatile int*)0x1000A000 = 0x105;
+            self->kickState = 3;
+            *(volatile int*)0x10009030 = self->inFlightVif2;
+            *(volatile int*)0x10009000 = 0x185;
+        }
+        func_00423DC0(self->queueMutex);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00382AF0);
