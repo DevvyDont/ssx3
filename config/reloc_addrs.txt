@@ -379,3 +379,70 @@ rom:0x168C64 reloc:MIPS_LO16 symbol:D_004D2FA8
 rom:0x277120 reloc:MIPS_HI16 symbol:D_005083C0
 rom:0x277170 reloc:MIPS_LO16 symbol:D_00508380
 rom:0x27718C reloc:MIPS_LO16 symbol:D_005083C0
+// ealib/seg_2DCAE8 func_003E4040: the directory-scan loop's bound is the end of the 0x800-byte sector buffer at
+// D_00519C80; the separate buffer D_0051A480 starts at the same address (its own lui/addiu at 0x2E5418 stay named).
+rom:0x2E52A4 reloc:MIPS_HI16 symbol:D_00519C80 addend:0x800
+rom:0x2E52AC reloc:MIPS_LO16 symbol:D_00519C80 addend:0x800
+
+// Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
+// ealib/seg_2B4578 func_003CC070 (tools/gen/reloc_from_diff.py)
+rom:0x2CD1DC reloc:MIPS_LO16 symbol:D_00515D44
+rom:0x2CD230 reloc:MIPS_LO16 symbol:D_00515D44
+rom:0x2CD274 reloc:MIPS_LO16 symbol:D_00515D44
+rom:0x2CD2B8 reloc:MIPS_LO16 symbol:D_00515D44
+rom:0x2CD310 reloc:MIPS_LO16 symbol:D_00515D44
+rom:0x2CD378 reloc:MIPS_LO16 symbol:D_00515D44
+rom:0x2CD3B0 reloc:MIPS_LO16 symbol:D_00515D44
+rom:0x2CD404 reloc:MIPS_LO16 symbol:D_00515D44
+rom:0x2CD41C reloc:MIPS_LO16 symbol:D_00515D44
+// render/bezierman func_0038AF30 (tools/gen/reloc_from_diff.py)
+rom:0x28C008 reloc:MIPS_HI16 symbol:D_005049C0 addend:0x40
+rom:0x28C010 reloc:MIPS_LO16 symbol:D_005049C0 addend:0x40
+rom:0x28C078 reloc:MIPS_HI16 symbol:D_005049C0 addend:0x1C0
+rom:0x28C080 reloc:MIPS_LO16 symbol:D_005049C0 addend:0x1C0
+// fe/ovstatepause func_001FFD08 (tools/gen/reloc_from_diff.py)
+rom:0x100D38 reloc:MIPS_HI16 symbol:D_004A2570
+rom:0x100D40 reloc:MIPS_HI16 symbol:D_004A2578
+rom:0x100E4C reloc:MIPS_LO16 symbol:D_004A2570
+rom:0x100E88 reloc:MIPS_LO16 symbol:D_004A2570
+rom:0x100ED0 reloc:MIPS_LO16 symbol:D_004A2578
+rom:0x100F0C reloc:MIPS_LO16 symbol:D_004A2578
+// main/debugmenu func_0024E8D8 (tools/gen/reloc_from_diff.py)
+rom:0x14FAD4 reloc:MIPS_HI16 symbol:D_004C9630
+rom:0x14FB1C reloc:MIPS_LO16 symbol:D_004C9630
+rom:0x14FB4C reloc:MIPS_HI16 symbol:D_004C97F0
+rom:0x14FB54 reloc:MIPS_LO16 symbol:D_004C97F0
+rom:0x14FDC4 reloc:MIPS_HI16 symbol:D_004C9780
+rom:0x14FDE8 reloc:MIPS_LO16 symbol:D_004C9780
+rom:0x14FE10 reloc:MIPS_LO16 symbol:D_004C9780
+rom:0x1500B4 reloc:MIPS_LO16 symbol:D_004C98D0
+// camera/camera func_001673F8 (tools/gen/reloc_from_diff.py)
+rom:0x68544 reloc:MIPS_HI16 symbol:D_004C5100
+rom:0x68564 reloc:MIPS_LO16 symbol:D_004C5100
+rom:0x68650 reloc:MIPS_LO16 symbol:D_004C5100
+rom:0x687D8 reloc:MIPS_HI16 symbol:D_004C51E0
+rom:0x6883C reloc:MIPS_LO16 symbol:D_004C51E0
+rom:0x68858 reloc:MIPS_LO16 symbol:D_004C51E0
+rom:0x688F4 reloc:MIPS_HI16 symbol:D_004C5240
+rom:0x68904 reloc:MIPS_LO16 symbol:D_004C5240
+rom:0x68940 reloc:MIPS_LO16 symbol:D_004C5240
+rom:0x68950 reloc:MIPS_LO16 symbol:D_004C5250
+rom:0x6896C reloc:MIPS_HI16 symbol:D_004C52A0
+rom:0x689C0 reloc:MIPS_LO16 symbol:D_004C52A0
+rom:0x68A74 reloc:MIPS_LO16 symbol:D_004C52F0
+rom:0x68B20 reloc:MIPS_LO16 symbol:D_004C5320
+// main/streampause func_00242EB8 (tools/gen/reloc_from_diff.py)
+rom:0x1440B4 reloc:MIPS_HI16 symbol:D_004C9178
+rom:0x1440FC reloc:MIPS_LO16 symbol:D_004C9178
+rom:0x14412C reloc:MIPS_HI16 symbol:D_004C9338
+rom:0x144134 reloc:MIPS_LO16 symbol:D_004C9338
+rom:0x1443A8 reloc:MIPS_HI16 symbol:D_004C92C8
+rom:0x1443CC reloc:MIPS_LO16 symbol:D_004C92C8
+rom:0x1443F4 reloc:MIPS_LO16 symbol:D_004C92C8
+rom:0x144548 reloc:MIPS_HI16 symbol:D_004C93A8
+rom:0x14456C reloc:MIPS_LO16 symbol:D_004C93A8
+rom:0x1446B0 reloc:MIPS_LO16 symbol:D_004C9418
+
+// Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
+// scripter/ssxscriptengine func_0027A0D8 (tools/gen/reloc_from_diff.py)
+rom:0x17B384 reloc:MIPS_LO16 symbol:D_004D3770

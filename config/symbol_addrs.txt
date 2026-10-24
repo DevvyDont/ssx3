@@ -943,3 +943,16 @@ D_67CAC = 0x00067CAC; // ignore:true
 // libgcc2 __fixunssfdi (float -> unsigned 64-bit): calls exactly __extendsfdf2, __cmpdf2, __muldf3, __fixunsdfsi,
 // __floatdidf, __adddf3, __subdf3; g++ emits it for (unsigned long)float (func_00382AF0, Renderer_SetDisplayRegs).
 __fixunssfdi = 0x00411340; //type:func
+// EA library objects whose fields splat named separately (2026-10-24). Each is sized to the next referenced symbol.
+// ealib/seg_2B4578 path manager: 4 entries of 0x928 (func_003D4C40 sorts them); D_00517640 / D_00517644 were entry 0's
+// mask / hdr (+0x30 / +0x34) and D_005176EC its +0xDC.
+D_00517610 = 0x00517610; // size:0x24A0
+// ealib/seg_2DCAE8: D_00519C4C / D_00519C5C / D_00519C60 were words 3, 7 and 8 of this block (func_003E3AD8; func_003E3B00, func_003E3D78).
+D_00519C40 = 0x00519C40; // size:0x24
+// ealib/seg_2B4578: an 8-byte object; D_005157BC was its second word (func_003C7080).
+D_005157B8 = 0x005157B8; // size:0x8
+// ealib/seg_2B4578: the 0x10-byte head of a struct (count +5, handler +8, bytes +0xE / +0xF); D_00515B50 (+0x10) stays
+// its own symbol because many functions name it.
+D_00515B40 = 0x00515B40; // size:0x10
+// camera/camera: int[2] (func_00161950 / func_00161EF0 index it); D_004A4DD4 was element 1 (func_001673F8).
+D_004A4DD0 = 0x004A4DD0; // size:0x8

@@ -5772,7 +5772,6 @@ extern int f_72F8_3450(void *, int) __asm__("func_003C72F8");
 extern char D_0050AAF4_3450[] __asm__("D_0050AAF4");
 struct G_3450 { char pad[0xF]; char c; void *fn; };
 extern struct G_3450 D_00515B40_3450[] __asm__("D_00515B40");
-extern char D_00515B4F_3450[] __asm__("D_00515B4F");
 extern char D_0044DD70_3450[] __asm__("D_0044DD70");
 extern char f_C878_3450[] __asm__("func_003CC878");
 
@@ -5787,11 +5786,11 @@ void func_003C3450(int arg0) {
     if (arg0 != 1) {
         f_0B10_3450(2, D_0044DD70_3450, 4);
         if (*(unsigned char *)(t + 0x42) != 0)
-            D_00515B4F_3450[0] = 0;
+            D_00515B40_3450[0].c = 0;
     } else {
         q = *(char **)(b + 4);
         if (*(unsigned char *)(t + 0x42) != 0)
-            D_00515B4F_3450[0] = arg0;
+            D_00515B40_3450[0].c = arg0;
         f_0B10_3450(2, q, f_72F8_3450(q + 4, 4));
     }
 }
@@ -7955,10 +7954,10 @@ void func_003C8128(void) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C8148);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern signed char D_00515B4E_8148[16] __asm__("D_00515B4E");
+extern signed char D_00515B40_8148[16] __asm__("D_00515B40");
 
 void func_003C8148(signed char arg0) {
-    D_00515B4E_8148[0] = arg0;
+    D_00515B40_8148[0xE] = arg0;
 }
 #endif
 
@@ -8106,11 +8105,12 @@ void func_003C83A0(int arg0) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C8430);
 #ifdef SKIP_ASM
 extern void func_003C8468();
-extern int (*D_00515B48[])(int);
+struct G_8430 { char pad[8]; int (*handler)(int); };
+extern struct G_8430 D_00515B40_8430 __asm__("D_00515B40");
 
 void func_003C8430(int arg0) {
     func_003C8468();
-    D_00515B48[0](arg0);
+    D_00515B40_8430.handler(arg0);
 }
 #endif
 
@@ -8329,14 +8329,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C8968);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char pad[5]; unsigned char cnt; char pad2[6]; unsigned short add; } H_8968;
 extern H_8968 D_00515B40_8968[] __asm__("D_00515B40");
-extern unsigned char D_00515B45_8968[] __asm__("D_00515B45");
 extern void func_003C85D0_8968(int *, int) __asm__("func_003C85D0");
 
 void func_003C8968(int *src, int len) {
     int buf[8];
     int i, n;
 
-    for (i = 0; i < D_00515B45_8968[0]; i++) {
+    for (i = 0; i < D_00515B40_8968[0].cnt; i++) {
         buf[i] = src[i];
     }
     while (len > 0) {
@@ -11671,7 +11670,7 @@ extern int func_003D5450_1940(int) __asm__("func_003D5450");
 extern int D_0044F420_1940[] __asm__("D_0044F420");
 extern unsigned char D_0044F42C_1940[] __asm__("D_0044F42C");
 extern int D_0044F430_1940[] __asm__("D_0044F430");
-extern char D_00517644_1940[] __asm__("D_00517644");
+extern char D_00517610_1940[] __asm__("D_00517610");
 
 struct P_1940 { char pad[0xDC]; int a[16]; };
 
@@ -11682,8 +11681,8 @@ void func_003D1940(unsigned int mask) {
         if (D_0044F430_1940[0] == 0) {
             if (func_003D5450_1940(-1) != 0) {
                 for (i = 0; i < 4; i++) {
-                    if (*(int *)(D_00517644_1940 + i * 0x928) != 0) {
-                        fl = *(unsigned int *)(D_00517644_1940 + i * 0x928 - 4);
+                    if (*(int *)(D_00517610_1940 + 0x34 + i * 0x928) != 0) {
+                        fl = *(unsigned int *)(D_00517610_1940 + 0x30 + i * 0x928);
                         t = fl & 0xF0000000;
                         if ((t & mask) != 0 && (u = fl & 0x0F000000, (u & mask) != 0)) {
                             if (func_003D5450_1940(i & 0xFF) != 0) {
@@ -12842,7 +12841,6 @@ struct E_4C40 {
     char pad38[0x928 - 0x38];
 };
 extern struct E_4C40 D_00517610_4C40[4] __asm__("D_00517610");
-extern char D_00517644_4C40[] __asm__("D_00517644");
 
 void func_003D4C40(void) {
     struct E_4C40 tmp;
@@ -12850,7 +12848,7 @@ void func_003D4C40(void) {
     int j;
 
     for (i = 0; i < 4; i++) {
-        if (*(void **)(D_00517644_4C40 + i * 0x928) != 0) {
+        if (D_00517610_4C40[i].hdr != 0) {
             for (j = i + 1; j < 4; j++) {
                 if (D_00517610_4C40[j].hdr != 0 && D_00517610_4C40[j].mask < D_00517610_4C40[i].mask) {
                     tmp = D_00517610_4C40[i];
