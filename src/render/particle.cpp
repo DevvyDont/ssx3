@@ -3404,7 +3404,141 @@ INCLUDE_ASM("render/particle", func_00378808);
 
 INCLUDE_ASM("render/particle", func_00379028);
 
+//100%
 INCLUDE_ASM("render/particle", func_00379860);
+#ifdef SKIP_ASM
+struct sPtRS_9860 {
+    int f0;                         // bits 6..9 = layer
+    int f4;
+    int f8;                         // bits 0..4 = key
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sPtEnt_9860 {
+    sPtRS_9860 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_9860 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_9860 ents[1];            // 0x80
+};
+
+struct sPtGfx_9860 {
+    char pad_0x0[0xE84];
+    sPtRS_9860* top;                // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sPtRing_9860* ring;             // 0x18F0
+    char pad_0x18F4[0x5A00 - 0x18F4];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x6B90 - 0x5A04];
+    int texReady;                   // 0x6B90
+};
+
+struct sVtx_9860 {
+    unsigned long q[6];
+} __attribute__((aligned(16)));
+
+extern int D_004A4380;
+extern int D_004A4474;
+extern char D_12B0[];
+extern char D_12B8[];
+extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
+extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
+extern "C" void func_0037D968(void* self);
+
+static inline void QueueRecord_9860(sPtGfx_9860* self, unsigned int buf, unsigned int next, int flag)
+{
+    sPtRing_9860* ring = self->ring;
+    sPtRS_9860* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_9860* e = (sPtEnt_9860*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = flag;
+    }
+}
+
+// PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
+extern "C" void func_00379860(sPtGfx_9860* self, int n, sVtx_9860* src)
+{
+    unsigned int prog;
+    if (D_004A4380) {
+        prog = (unsigned int)D_12B0 >> 3;
+    } else {
+        prog = (unsigned int)D_12B8 >> 3;
+    }
+    D_004A4380 = 0;
+    self->top->f0 = (self->top->f0 & ~0x3C0) | 0xC0;
+    self->top->fC &= 0xC0000000;
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    int prim;
+    unsigned long regs;
+    if (self->top->tex >= 0) {
+        prim = 0x5C;
+        regs = 0x412;
+    } else {
+        prim = 0x4C;
+        regs = 0x41F;
+    }
+    int dma = D_004A4474;
+    unsigned int buf = self->bufAddr;
+    unsigned long* p = func_0038F460(dma, buf, -1, 0);
+    int qwc = *(int*)(dma + 0x10);
+    unsigned long* end = (unsigned long*)((char*)p + qwc * 16);
+    for (; n >= 3; ) {
+        int k = n < 0x49 ? n : 0x48;
+        int m = k * 3;
+        n -= k;
+        if (p + (m + 5) * 2 >= end) {
+            int sz = qwc * 16;
+            unsigned int a = func_0038F668(dma, p, 4);
+            self->bufAddr = a;
+            p = func_0038F460(dma, a, -1, 0);
+            end = (unsigned long*)((char*)p + sz);
+        }
+        p[0] = (m + 4) | 0x10000000;
+        p[1] = 0;
+        p[2] = 0;
+        p[3] = (unsigned long)(unsigned int)(((m + 2) << 16) | 0x6C008000) << 32;
+        p[4] = (unsigned long)k | ((unsigned long)1 << 15) | ((unsigned long)1 << 46) | ((unsigned long)prim << 47) | ((unsigned long)3 << 60);
+        p[5] = regs;
+        p[6] = (long)k * 3;
+        p[7] = 0;
+        p += 8;
+        sVtx_9860* d = (sVtx_9860*)p;
+        int i = k;
+        while (i--) {
+            *d++ = *src++;
+        }
+        n += 2;
+        src -= 2;
+        p = (unsigned long*)((sVtx_9860*)p + k);
+        p[0] = 0;
+        p[1] = (unsigned long)(prog | 0x14000000) << 32;
+        p += 2;
+    }
+    unsigned int next = func_0038F668(dma, p, 4);
+    self->bufAddr = next;
+    QueueRecord_9860(self, buf, next, 0);
+    self->bufAddr += 0x10;
+    self->top->f0 &= ~0x3C0;
+    self->top->fC &= 0xC0000000;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00379BD0);
 
@@ -3522,7 +3656,183 @@ extern "C" sPartEmitter_A540* func_0037A540(void* a0, void* a1, void* a2, unsign
 
 INCLUDE_ASM("render/particle", func_0037A610);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037B548);
+#ifdef SKIP_ASM
+struct sPtRS_B548 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short tex2;
+};
+
+struct sPtEnt_B548 {
+    sPtRS_B548 rs;                  // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sPtRing_B548 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sPtEnt_B548 ents[1];            // 0x80
+};
+
+struct sMat_B548 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sPtGfx_B548 {
+    char pad_0x0[0xE84];
+    sPtRS_B548* top;                // 0xE84
+    char pad_0xE88[0x13E8 - 0xE88];
+    sMat_B548* mats;                // 0x13E8
+    char pad_0x13EC[0x18F0 - 0x13EC];
+    sPtRing_B548* ring;             // 0x18F0
+    char pad_0x18F4[0x5A00 - 0x18F4];
+    unsigned int bufAddr;           // 0x5A00
+};
+
+struct sTrk_B548 {
+    int n;
+    int* idx;
+};
+
+struct sRef_B548 {
+    unsigned int* p;
+    int pad;
+};
+
+struct sBone_B548 {
+    int flags;
+    int name;
+    int x8;
+    int ntracks;
+    sRef_B548* refs;
+};
+
+struct sMdl_B548 {
+    char pad0[0x20];
+    int o20;
+    char pad24[0x18];
+    sTrk_B548* tracks;              // 0x3C
+    char pad40[8];
+    short nbones;                   // 0x48
+};
+
+extern char D_80[];
+extern char D_70[];
+
+// PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+static inline void CopyMtx_B548(void* dst, const sMat_B548* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%0)\n"
+        "lqc2      $vf2, 0x10(%0)\n"
+        "lqc2      $vf3, 0x20(%0)\n"
+        "lqc2      $vf4, 0x30(%0)\n"
+        "sqc2      $vf1, 0x0(%1)\n"
+        "sqc2      $vf2, 0x10(%1)\n"
+        "sqc2      $vf3, 0x20(%1)\n"
+        "sqc2      $vf4, 0x30(%1)\n"
+        :
+        : "r"(src), "r"(dst)
+        : "memory");
+}
+
+static inline void AddMats_B548(unsigned long** pp, sMat_B548* mats, int n, int* idx)
+{
+    unsigned long* q = *pp;
+    q[0] = (long)(((n << 2) + 2) | 0x10000000);
+    q[1] = 0;
+    q[2] = (unsigned long)0x8000 << 45;
+    q[3] = ((unsigned long)(unsigned int)((n << 18) | 0x6C000011) << 32) | 0x1000101;
+    q += 4;
+    for (int k = 0; k < n; k++) {
+        CopyMtx_B548(q, &mats[idx[k]]);
+        q += 8;
+    }
+    q[0] = ((unsigned long)n << 32) | 0x600103FF;
+    q[1] = (unsigned long)(((unsigned int)D_80 >> 3) | 0x14000000)
+           | ((unsigned long)(((unsigned int)D_70 >> 3) | 0x14000000) << 32);
+    q += 2;
+    *pp = q;
+}
+
+static inline void BoneHeader_B548(unsigned long** pp, float* col)
+{
+    float one = 1.0f;
+    (*pp)[1] = 0;
+    (*pp)[2] = 0;
+    (*pp)[3] = (unsigned long)0x50000002 << 32 | 0x11000000;
+    (*pp)[4] = (unsigned long)0x10000000 << 32 | 0x8001;
+    (*pp)[5] = 0xE;
+    (*pp)[6] = (unsigned long)(int)(col[1] * 128.0f) | ((unsigned long)(int)(col[2] * 128.0f) << 8)
+             | ((unsigned long)(int)(col[3] * 128.0f) << 16) | ((unsigned long)(int)(col[0] * 128.0f) << 24)
+             | ((unsigned long)*(unsigned int*)&one << 32);
+    (*pp)[7] = 1;
+    *pp += 8;
+}
+
+static inline void QueueRecord_B548(sPtGfx_B548* self, unsigned int buf, unsigned int next, int flag)
+{
+    sPtRing_B548* ring = self->ring;
+    sPtRS_B548* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtEnt_B548* e = (sPtEnt_B548*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = flag;
+    }
+}
+
+// PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
+extern "C" void func_0037B548(sPtGfx_B548* self, sMdl_B548* m, char* base, float* col)
+{
+    unsigned int buf = self->bufAddr;
+    unsigned long* p = (unsigned long*)(buf | 0x30000000);
+    self->top->f0 |= 0x30;
+    self->top->f4 = (self->top->f4 & ~0x7C) | 4;
+    int cnt = 0;
+    self->top->f4 = (self->top->f4 & ~0xF80) | 0x580;
+    self->top->f0 = (self->top->f0 & 0xF00FFFFF) | 0x06400000;
+    self->top->f4 = (self->top->f4 & 0xFE7FFFFF) | 0x01000000;
+    self->top->f4 = (self->top->f4 & 0xFFCFFFFF) | 0x00300000;
+    self->top->f4 = (self->top->f4 & 0xFFF00FFF) | 0x00014000;
+    self->top->tex = -1;
+    self->top->tex2 = -1;
+    sBone_B548* bone = (sBone_B548*)(base + m->o20);
+    for (int i = 0; i < m->nbones; i++, bone++) {
+        if (bone->flags & 1) {
+            p[0] = 0x10000003;
+            BoneHeader_B548(&p, col);
+            sTrk_B548* tr = &m->tracks[cnt];
+            for (int j = 0; j < bone->ntracks; j++, tr++) {
+                AddMats_B548(&p, self->mats, tr->n, tr->idx);
+                p[0] = ((unsigned long)*bone->refs[j].p << 32) | 0x50000000;
+                p[1] = 0;
+                p += 2;
+            }
+        }
+        cnt += bone->ntracks;
+    }
+    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+    self->bufAddr = next;
+    QueueRecord_B548(self, buf, next, 1);
+    self->bufAddr += 0x10;
+    self->top->f0 &= ~0x3C0;
+    self->top->fC &= 0xC0000000;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037BA50);
