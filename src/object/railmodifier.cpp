@@ -5557,7 +5557,222 @@ extern "C" void func_00362DE8(void* vself)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00363490);
+#ifdef SKIP_ASM
+extern void* D_004A4474;
+extern char* D_004A5B80;
+extern const int D_004A4058[];
+extern "C" void func_00362DE8(void* self);
+extern "C" void func_00364360(void* self, ulong** pp);
+extern "C" void func_00364050(char* self);
+extern "C" void func_003666F8();
+extern "C" void func_0038F300(void* ring, int mode);
+extern "C" void func_00396128(void* obj);
+extern "C" void func_00365F68(void* self);
+extern "C" void func_00365FA8(void* self);
+extern "C" void func_00363C20(void* self, unsigned int* state, int layer, ulong** pp);
+extern "C" void func_00368660(void* obj, int u, int v, int idx, ulong** pp, int* path);
+extern "C" void func_0036AC00(void* gs, int i, ulong** pp, int* path);
+extern "C" void func_0036C790(void* gs, int i, ulong** pp, int* path);
+extern "C" void func_003904A0(void* gs, int i, ulong** pp, int* path);
+
+// A batch node: one (state, texture, layer) combination with its DMA chain (0x20 bytes).
+struct sRmNode_3490 {
+    unsigned int* state;    // 0x0
+    int key;                // 0x4
+    int layer;              // 0x8
+    int packet;             // 0xC
+    int tail;               // 0x10
+    int linked;             // 0x14
+    sRmNode_3490* link;     // 0x18
+    sRmNode_3490* next;     // 0x1C
+};
+
+struct sRmSortItem_3490 {
+    unsigned int key;
+    sRmNode_3490* node;
+};
+
+struct sRmBatch_3490 {
+    char pad_0x0[0x67CA4];
+    int nItems;                         // 0x67CA4
+    sRmSortItem_3490 items[0x400];      // 0x67CA8
+    sRail20_2CC8 state;                 // 0x69CA8
+    char pad_0x69CBC[0x69CC4 - 0x69CBC];
+    int lastTex;                        // 0x69CC4
+};
+
+struct sRmTexUse_3490 {
+    int first;
+    int count;
+};
+
+struct sRmPassTypes_3490 {
+    int v[2];
+};
+
+extern sRmTexUse_3490 D_0053AB80_3490[] __asm__("D_0053AB80");
+
+static inline void resetState_3490(sRail20_2CC8* d)
+{
+    *d = D_00501420;
+}
+
+// Draws the sorted batch: counts texture use, splits the sorted list into three passes by
+// blend mode, then emits each node's DMA chain (closing the VIF/GIF chains between passes).
+// PORT: DMA tags written as 64-bit words through uncached (| 0x30000000 / | 0x20000000) addresses held in int.
+extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int* path, int* out2)
+{
+    sRmPassTypes_3490 split;
+    int bounds[3];
+    ulong* pkt;
+    func_00362DE8(self);
+    *out1 = 0;
+    *out2 = 0;
+    pkt = (ulong*)(*pktAddr | 0x30000000);
+    resetState_3490(&self->state);
+    func_00364360(self, &pkt);
+    func_00364050((char*)self);
+    func_003666F8();
+    void* ring = D_004A4474;
+    int saved = *(int*)ring;
+    func_0038F300(ring, 5);
+    char* gs = D_004A5B80;
+    void* obj = *(void**)(gs + 0x18F4);
+    func_00396128(obj);
+    func_00365F68((char*)obj + 0x1F60);
+    if (self->nItems != 0) {
+        int idx = 0;
+        int pass;
+        for (int i = 0; i < self->nItems; i++) {
+            for (sRmNode_3490* n = self->items[i].node; n != 0; n = n->link) {
+                short u = ((short*)&n->key)[0];
+                if (u >= 0) {
+                    D_0053AB80_3490[u].first = idx;
+                    D_0053AB80_3490[u].count++;
+                }
+                short v = ((short*)&n->key)[1];
+                if (v >= 0) {
+                    D_0053AB80_3490[v].first = idx;
+                    D_0053AB80_3490[v].count++;
+                }
+                idx++;
+            }
+        }
+        split = *(const sRmPassTypes_3490*)D_004A4058;
+        for (int j = 0; j < 2; j++) {
+            int lo = (j == 0) ? 0 : bounds[j - 1];
+            int hi = self->nItems;
+            bounds[j] = 0;
+            while (hi - lo >= 2) {
+                int mid = (lo + hi) >> 1;
+                bounds[j] = mid;
+                if ((int)((self->items[mid].node->state[2] & 0x3E0) >> 5) >= split.v[j])
+                    hi = mid;
+                else
+                    lo = mid;
+            }
+            bounds[j] = hi;
+        }
+        bounds[2] = self->nItems;
+        self->lastTex = -1;
+        unsigned int* prev = 0;
+        idx = 0;
+        for (pass = 0; pass < 3; pass++) {
+            int start = (pass == 0) ? 0 : bounds[pass - 1];
+            int end = bounds[pass];
+            for (int i = start; i < end; i++) {
+                sRmNode_3490* n = self->items[i].node;
+                if (n != 0) {
+                    do {
+                        unsigned int* st = n->state;
+                        if (st != prev) {
+                            func_00363C20(self, st, n->layer, &pkt);
+                            prev = st;
+                        }
+                        int key = n->key;
+                        func_00368660(obj, ((short*)&key)[0], ((short*)&key)[1], idx++, &pkt, path);
+                        if (n->packet != 0) {
+                            pkt[0] = ((ulong)(unsigned int)n->packet << 32) | 0x50000000;
+                            pkt[1] = 0;
+                            pkt += 2;
+                            ulong* t = (ulong*)(n->tail | 0x30000000);
+                            t[0] = 0x60000000;
+                            t[1] = 0;
+                        }
+                        n = n->link;
+                    } while (n != 0);
+                }
+            }
+            switch (split.v[pass]) {
+            case 6: {
+                for (int k = 0; k < *(int*)(gs + 0x59C0); k++)
+                    func_0036AC00(gs, k, &pkt, path);
+                self->lastTex = -1;
+                prev = 0;
+                resetState_3490(&self->state);
+                func_00364360(self, &pkt);
+                int* tc = (int*)((char*)obj + 0x1F4C);
+                for (int k = 0; k < 2; k++)
+                    tc[k] = -1;
+                *(int*)((char*)obj + 0x1F54) = -1;
+                break;
+            }
+            case 9: {
+                pkt[0] = 0x70000000;
+                pkt[1] = 0;
+                pkt += 2;
+                ulong* q = (ulong*)(*path | 0x20000000);
+                q[0] = 0x70000000;
+                q[1] = 0;
+                *path += 0x10;
+                *out1 = (int)pkt & 0x0FFFFFFF;
+                *out2 = *path;
+                for (int k = 0; k < *(int*)(gs + 0x59C0); k++)
+                    func_0036C790(gs, k, &pkt, path);
+                for (int k = 0; k < *(int*)(gs + 0x59C0); k++)
+                    func_003904A0(gs, k, &pkt, path);
+                self->lastTex = -1;
+                prev = 0;
+                resetState_3490(&self->state);
+                func_00364360(self, &pkt);
+                int* tc = (int*)((char*)obj + 0x1F4C);
+                for (int k = 0; k < 2; k++)
+                    tc[k] = -1;
+                *(int*)((char*)obj + 0x1F54) = -1;
+                break;
+            }
+            }
+        }
+    }
+    if (*out1 == 0) {
+        pkt[0] = 0x70000000;
+        pkt[1] = 0;
+        pkt += 2;
+        *out1 = (int)pkt & 0x0FFFFFFF;
+    }
+    if (*out2 == 0) {
+        ulong* q = (ulong*)(*path | 0x20000000);
+        q[0] = 0x70000000;
+        q[1] = 0;
+        *path += 0x10;
+        *out2 = *path;
+    }
+    ulong* q = (ulong*)(*path | 0x20000000);
+    q[0] = 0x70000000;
+    q[1] = 0;
+    *path += 0x10;
+    pkt[0] = 0x70000000;
+    pkt[1] = 0;
+    pkt += 2;
+    *pktAddr = (int)pkt & 0x0FFFFFFF;
+    // PORT: EE `sync` (orders the uncached DMA-tag writes); no C equivalent.
+    __asm__ __volatile__("sync");
+    func_00365FA8((char*)obj + 0x1F60);
+    func_0038F300(ring, saved);
+}
+#endif
 
 INCLUDE_ASM("object/railmodifier", func_00363C20);
 
@@ -5864,7 +6079,509 @@ extern "C" void func_00364C90(void* self, sData20* src)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00364CD0);
+#ifdef SKIP_ASM
+// VU1 microprogram chains (static .vutext DMA chains) and their constant blocks.
+extern char D_0042E590[];
+extern char D_00430A80[];
+extern char D_00434990[];
+extern char D_00435BD0[];
+extern char D_00439A40[];
+extern char D_0043B3F0[];
+extern char D_0044B080[];
+extern char D_0044B140[];
+extern char* D_004A4248;
+extern int D_004A5990;
+
+// PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+static inline void vu0CopyMtx_4CD0(void* dst, const void* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, r = a x b in Sony's sceVu0MulMatrix order).
+static inline void vu0MulMtx_4CD0(void* r, const void* a, const void* b)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        :
+        : "r"(r), "r"(a), "r"(b)
+        : "memory");
+}
+
+// 4x4 matrix whose copies go through VU0.
+struct sMtx_4CD0 {
+    float m[16];
+    sMtx_4CD0() {}
+    sMtx_4CD0(const sMtx_4CD0& o) { vu0CopyMtx_4CD0(this, &o); }
+    sMtx_4CD0& operator=(const sMtx_4CD0& o) { vu0CopyMtx_4CD0(this, &o); return *this; }
+    void set(float a0, float a1, float a2, float a3, float b0, float b1, float b2, float b3,
+             float c0, float c1, float c2, float c3, float d0, float d1, float d2, float d3)
+    {
+        m[0] = a0; m[4] = a1; m[8] = a2; m[12] = a3;
+        m[1] = b0; m[5] = b1; m[9] = b2; m[13] = b3;
+        m[2] = c0; m[6] = c1; m[10] = c2; m[14] = c3;
+        m[3] = d0; m[7] = d1; m[11] = d2; m[15] = d3;
+    }
+} __attribute__((aligned(16)));
+
+static inline sMtx_4CD0 operator*(const sMtx_4CD0& a, const sMtx_4CD0& b)
+{
+    sMtx_4CD0 r;
+    vu0MulMtx_4CD0(&r, &a, &b);
+    return r;
+}
+
+struct sVec_4CD0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// One DMA quadword.
+struct sQw_4CD0 {
+    int w[4];
+} __attribute__((aligned(16)));
+
+// One matrix record of the defer manager (0x180 bytes; REF structs/render.md "MatrixRecord").
+struct sMtxRec_4CD0 {
+    sMtx_4CD0 world;        // 0x000
+    float view[16];         // 0x040
+    sQw_4CD0 worldView[4];  // 0x080
+    sVec_4CD0 guardScale;   // 0x0C0
+    sVec_4CD0 guardOffset;  // 0x0D0
+    float viewProj[16];     // 0x0E0
+    sQw_4CD0 worldClip[4];  // 0x120
+    sVec_4CD0 screenScale;  // 0x160
+    sVec_4CD0 screenOffset; // 0x170
+};
+
+struct sDefer_4CD0 {
+    char pad_0x0[0x69CC0];
+    int curMtx;                 // 0x69CC0
+    char pad_0x69CC4[0xC];
+    sMtxRec_4CD0 mtx[1];        // 0x69CD0
+};
+
+// Bias matrix for the context-2 texture projection (a guarded function-local static in the original).
+extern sMtx_4CD0 D_004FFB80_4CD0 __asm__("D_004FFB80");
+
+// The packet cursor being written.
+struct sPkt_4CD0 {
+    ulong* p;
+    sPkt_4CD0(ulong* q) : p(q) {}
+};
+
+// Copies n quadwords to the packet and advances it.
+static inline void putQw_4CD0(ulong*& p, const void* src, int n)
+{
+    cQuad128* d = (cQuad128*)p;
+    cQuad128* e = d + n;
+    const cQuad128* s = (const cQuad128*)src;
+    while (d != e)
+        *d++ = *s++;
+    p = (ulong*)d;
+}
+
+// DMA CALL tag to a static chain.
+#define DMA_CALL_4CD0(addr) (((ulong)(unsigned int)(addr) << 32) | 0x50000000)
+
+// Per material type, emits the VU1 microprogram CALL and its constant header (mode 0), the matrix
+// header only (mode 1), or the per-draw CALL (mode 2, types 6 and 7).
+// PORT: 64-bit DMA/VIF/GIF words (ulong), 128-bit copies (cQuad128), addresses held in int.
+extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, ulong** pp)
+{
+    sDefer_4CD0* self = (sDefer_4CD0*)vself;
+    sPkt_4CD0 pk(*pp);
+    sMtxRec_4CD0* M = &self->mtx[self->curMtx];
+    switch (type) {
+    case 0:
+        break;
+    case 1:
+        switch (mode) {
+        case 0:
+            pk.p[0] = DMA_CALL_4CD0(D_0042E590);
+            pk.p[1] = 0;
+            pk.p[2] = ((ulong)(int)D_0044B080 << 32) | 0x3000000C;
+            pk.p[3] = 0;
+            pk.p += 4;
+        case 1:
+            pk.p[0] = 0x10000007;
+            pk.p[1] = 0;
+            pk.p[2] = 0;
+            pk.p[3] = 0x6C06000000000000;
+            ((cQuad128*)pk.p)[2] = ((cQuad128*)M)[8];
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[9];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[10];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[11];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[12];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[13];
+            pk.p += 16;
+            break;
+        case 2:
+            break;
+        }
+        break;
+    case 2:
+        switch (mode) {
+        case 0: {
+            float k[4];
+            int* ki = (int*)k;
+            pk.p[0] = DMA_CALL_4CD0(D_00430A80);
+            pk.p[1] = 0;
+            pk.p[2] = 0x1000000D;
+            pk.p[3] = 0;
+            pk.p[4] = 0;
+            pk.p[5] = 0x6C0B000000000000;
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[8];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[9];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[10];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[11];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[12];
+            ((cQuad128*)pk.p)[8] = ((cQuad128*)M)[13];
+            pk.p[0x12] = 0x0000008000000080;
+            pk.p[0x13] = 0x0000008000000080;
+            pk.p[0x14] = 0x302E400000008000;
+            pk.p[0x15] = 0x412;
+            pk.p[0x16] = 0x312E400000008000;
+            pk.p[0x17] = 0x412;
+            pk.p[0x18] = 0x302EC00000008000;
+            pk.p[0x19] = 0x412;
+            pk.p[0x1A] = 0x312EC00000008000;
+            pk.p[0x1B] = 0x412;
+            pk.p[0x1C] = 0;
+            pk.p[0x1D] = 0x6C2A020000000000;
+            char* g = D_004A4248;
+            pk.p[0x1E] = ((ulong)*(int*)(g + 0x1A0) << 32) | 0x30000012;
+            pk.p[0x1F] = 0;
+            ulong ref2 = ((ulong)*(int*)(g + 0x320) << 32) | 0x30000012;
+            pk.p += 0x20;
+            pk.p[0] = ref2;
+            pk.p[1] = 0;
+            pk.p += 2;
+            pk.p[0] = 0x10000006;
+            pk.p[1] = 0;
+            k[0] = 0.3333333432674408f;
+            k[1] = 0.20000000298023224f;
+            k[2] = 0.1428571492433548f;
+            k[3] = 0;
+            pk.p[2] = 0x0000021200000200;
+            pk.p[3] = 0;
+            pk.p[4] = (ulong)ki[0] | ((ulong)ki[0] << 32);
+            pk.p[5] = (ulong)ki[0] | ((ulong)ki[0] << 32);
+            pk.p[6] = 0x0000021600000204;
+            pk.p[7] = 0;
+            pk.p[8] = (ulong)ki[1] | ((ulong)ki[1] << 32);
+            pk.p[9] = (ulong)ki[1] | ((ulong)ki[1] << 32);
+            pk.p[10] = 0x0000021C0000020A;
+            pk.p[11] = 0;
+            pk.p[12] = (ulong)ki[2] | ((ulong)ki[2] << 32);
+            pk.p[13] = (ulong)ki[2] | ((ulong)ki[2] << 32);
+            pk.p += 14;
+            break;
+        }
+        case 1:
+            pk.p[0] = 0x10000007;
+            pk.p[1] = 0;
+            pk.p[2] = 0;
+            pk.p[3] = 0x6C06000000000000;
+            ((cQuad128*)pk.p)[2] = ((cQuad128*)M)[8];
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[9];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[10];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[11];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[12];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[13];
+            pk.p += 16;
+            break;
+        case 2:
+            break;
+        }
+        break;
+    case 3:
+        switch (mode) {
+        case 0:
+            pk.p[0] = DMA_CALL_4CD0(D_00435BD0);
+            pk.p[1] = 0;
+            pk.p[2] = 0x10000008;
+            pk.p[3] = 0;
+            pk.p[4] = 0;
+            pk.p[5] = 0x6C07000000000000;
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[8];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[9];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[10];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[11];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[12];
+            ((cQuad128*)pk.p)[8] = ((cQuad128*)M)[13];
+            pk.p[0x12] = 0x000002C20000010C;
+            pk.p[0x13] = 0;
+            pk.p += 0x14;
+            pk.p[0] = ((ulong)(int)D_0044B140 << 32) | 0x30000007;
+            pk.p[1] = 0;
+            pk.p += 2;
+            break;
+        case 1:
+            pk.p[0] = 0x10000007;
+            pk.p[1] = 0;
+            pk.p[2] = 0;
+            pk.p[3] = 0x6C06000000000000;
+            ((cQuad128*)pk.p)[2] = ((cQuad128*)M)[8];
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[9];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[10];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[11];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[12];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[13];
+            pk.p += 16;
+            break;
+        case 2:
+            break;
+        }
+        break;
+    case 4:
+        switch (mode) {
+        case 0: {
+            pk.p[0] = DMA_CALL_4CD0(D_00439A40);
+            pk.p[1] = 0;
+            pk.p[2] = 0x10000008;
+            pk.p[3] = 0;
+            pk.p[4] = 0;
+            pk.p[5] = 0x6C07000000000000;
+            pk.p += 6;
+            putQw_4CD0(pk.p, M->worldView, 4);
+            sVec_4CD0 a = M->guardScale;
+            a.z *= 0.0625f;
+            putQw_4CD0(pk.p, &a, 1);
+            sVec_4CD0 b = M->guardOffset;
+            b.z *= 0.0625f;
+            putQw_4CD0(pk.p, &b, 1);
+            sVec_4CD0 c;
+            c.x = M->view[0];
+            c.y = M->view[5];
+            c.z = 0;
+            c.w = 0;
+            putQw_4CD0(pk.p, &c, 1);
+            break;
+        }
+        case 1: {
+            pk.p[0] = 0x10000008;
+            pk.p[1] = 0;
+            pk.p[2] = 0;
+            pk.p[3] = 0x6C07000000000000;
+            pk.p += 4;
+            putQw_4CD0(pk.p, M->worldClip, 4);
+            sVec_4CD0 a = M->screenScale;
+            a.z *= 0.0625f;
+            putQw_4CD0(pk.p, &a, 1);
+            sVec_4CD0 b = M->screenOffset;
+            b.z *= 0.0625f;
+            putQw_4CD0(pk.p, &b, 1);
+            sVec_4CD0 c;
+            c.x = M->viewProj[0];
+            c.y = M->viewProj[5];
+            c.z = 0;
+            c.w = 0;
+            putQw_4CD0(pk.p, &c, 1);
+            break;
+        }
+        case 2:
+            break;
+        }
+        break;
+    case 5:
+        switch (mode) {
+        case 0: {
+            pk.p[0] = DMA_CALL_4CD0(D_0043B3F0);
+            pk.p[1] = 0;
+            pk.p[2] = 0x10000004;
+            pk.p[3] = 0;
+            pk.p[4] = 0;
+            pk.p[5] = 0x6C03000000000000;
+            pk.p += 6;
+            sVec_4CD0 a = M->screenScale;
+            a.z *= 0.0625f;
+            putQw_4CD0(pk.p, &a, 1);
+            sVec_4CD0 b = M->screenOffset;
+            b.z *= 0.0625f;
+            putQw_4CD0(pk.p, &b, 1);
+            sVec_4CD0 c;
+            c.x = M->viewProj[0];
+            c.y = M->viewProj[5];
+            c.z = 0;
+            c.w = 0;
+            putQw_4CD0(pk.p, &c, 1);
+            break;
+        }
+        case 1: {
+            pk.p[0] = 0x10000004;
+            pk.p[1] = 0;
+            pk.p[2] = 0;
+            pk.p[3] = 0x6C03000000000000;
+            pk.p += 4;
+            sVec_4CD0 a = M->screenScale;
+            a.z *= 0.0625f;
+            putQw_4CD0(pk.p, &a, 1);
+            sVec_4CD0 b = M->screenOffset;
+            b.z *= 0.0625f;
+            putQw_4CD0(pk.p, &b, 1);
+            sVec_4CD0 c;
+            c.x = M->viewProj[0];
+            c.y = M->viewProj[5];
+            c.z = 0;
+            c.w = 0;
+            putQw_4CD0(pk.p, &c, 1);
+            break;
+        }
+        case 2:
+            break;
+        }
+        break;
+    case 6:
+        if (D_004A5990 == 0) {
+            D_004FFB80_4CD0.set(0.5f, 0, 0, 0.5f, 0, -0.5f, 0, 0.5f, 0, 0, 0, 1.0f, 0, 0, 0, 1.0f);
+            D_004A5990 = 1;
+        }
+        switch (mode) {
+        case 0: {
+            pk.p[0] = DMA_CALL_4CD0(D_00434990);
+            pk.p[1] = 0;
+            pk.p[2] = 0x10000007;
+            pk.p[3] = 0;
+            pk.p[4] = 0;
+            pk.p[5] = 0x6C06000000000000;
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[8];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[9];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[10];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[11];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[12];
+            ((cQuad128*)pk.p)[8] = ((cQuad128*)M)[13];
+            pk.p[0x12] = 0x10000005;
+            pk.p[0x13] = 0;
+            pk.p[0x14] = 0;
+            pk.p[0x15] = 0x6C04039200000000;
+            pk.p[0x16] = 0x312E400000008000;
+            pk.p[0x17] = 0x412;
+            sMtx_4CD0 m = M->world;
+            m = D_004FFB80_4CD0 * m;
+            ((cQuad128*)pk.p)[0xC] = *(cQuad128*)&m.m[0];
+            ((cQuad128*)pk.p)[0xD] = *(cQuad128*)&m.m[4];
+            ((cQuad128*)pk.p)[0xE] = *(cQuad128*)&m.m[8];
+            pk.p += 0x1E;
+            if (w3 != 0) {
+                pk.p[0] = DMA_CALL_4CD0(w3);
+                pk.p[1] = 0;
+                pk.p += 2;
+            }
+            break;
+        }
+        case 1: {
+            pk.p[0] = 0x10000007;
+            pk.p[1] = 0;
+            pk.p[2] = 0;
+            pk.p[3] = 0x6C06000000000000;
+            ((cQuad128*)pk.p)[2] = ((cQuad128*)M)[8];
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[9];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[10];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[11];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[12];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[13];
+            pk.p[0x10] = 0x10000005;
+            pk.p[0x11] = 0;
+            pk.p[0x12] = 0;
+            pk.p[0x13] = 0x6C04039200000000;
+            pk.p[0x14] = 0x312E400000008000;
+            pk.p[0x15] = 0x412;
+            sMtx_4CD0 m = M->world;
+            m = D_004FFB80_4CD0 * m;
+            ((cQuad128*)pk.p)[0xB] = *(cQuad128*)&m.m[0];
+            ((cQuad128*)pk.p)[0xC] = *(cQuad128*)&m.m[4];
+            ((cQuad128*)pk.p)[0xD] = *(cQuad128*)&m.m[8];
+            pk.p += 0x1C;
+            if (w3 != 0) {
+                pk.p[0] = DMA_CALL_4CD0(w3);
+                pk.p[1] = 0;
+                pk.p += 2;
+            }
+            break;
+        }
+        case 2:
+            if (w3 != 0) {
+                pk.p[0] = DMA_CALL_4CD0(w3);
+                pk.p[1] = 0;
+                pk.p += 2;
+            }
+            break;
+        }
+        break;
+    case 7:
+        switch (mode) {
+        case 0:
+            pk.p[0] = DMA_CALL_4CD0(D_00434990);
+            pk.p[1] = 0;
+            pk.p += 2;
+            if (w3 != 0) {
+                pk.p[0] = DMA_CALL_4CD0(w3);
+                pk.p[1] = 0;
+                pk.p += 2;
+            }
+            break;
+        case 1:
+            if (w3 != 0) {
+                pk.p[0] = DMA_CALL_4CD0(w3);
+                pk.p[1] = 0;
+                pk.p += 2;
+            }
+            break;
+        case 2:
+            if (w3 != 0) {
+                pk.p[0] = DMA_CALL_4CD0(w3);
+                pk.p[1] = 0;
+                pk.p += 2;
+            }
+            break;
+        }
+        break;
+    case 8:
+        break;
+    }
+    *pp = pk.p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00365E40);

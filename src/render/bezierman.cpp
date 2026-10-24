@@ -167,7 +167,591 @@ extern "C" void func_0038B338(void* self, void* a, void* b, void* c, void* d)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/bezierman", func_0038B370);
+#ifdef SKIP_ASM
+// REF refs/ssx3-rust crates/ssx3-game/src/packetless/bezier.rs (end_pass): field meanings.
+extern "C" void func_0031BE50(float angle, float* s, float* c);
+
+struct sRS_B370 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex[2];
+};
+
+struct sVt_B370 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+struct sGfx_B370 {
+    char pad_0x0[0x274];
+    int view;                       // 0x274
+    char pad_0x278[0xE84 - 0x278];
+    sRS_B370* top;                  // 0xE84
+    char pad_0xE88[0x10D8 - 0xE88];
+    sVt_B370* vtable;               // 0x10D8
+    char pad_0x10DC[0x18F0 - 0x10DC];
+    char* dm;                       // 0x18F0
+    char pad_0x18F4[0x5A00 - 0x18F4];
+    unsigned int cursor;            // 0x5A00
+    char pad_0x5A04[0x6B90 - 0x5A04];
+    int matValid;                   // 0x6B90
+};
+
+// PORT: Sony's 128-bit quadword (u_long128); used for one aligned 16-byte copy.
+typedef int cQuad_B370 __attribute__((mode(TI)));
+
+struct sV4_B370 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy).
+static inline void Copy_B370(void* dst, const void* src)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+struct sM4_B370 {
+    sV4_B370 r[4];
+    sM4_B370() {}
+    sM4_B370(const sM4_B370& o) { Copy_B370(this, &o); }
+    sM4_B370& operator=(const sM4_B370& o)
+    {
+        Copy_B370(this, &o);
+        return *this;
+    }
+};
+
+static inline sM4_B370 operator*(const sM4_B370& a, const sM4_B370& b)
+{
+    sM4_B370 r;
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(&r), "r"(&a), "r"(&b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_B370 Scale_B370(const sV4_B370& v, float s)
+{
+    sV4_B370 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (matrix times vector).
+static inline sV4_B370 Xform_B370(const sM4_B370& m, const sV4_B370& v)
+{
+    sV4_B370 r;
+    __asm__(
+        "lqc2         $vf8, %2\n"
+        "lqc2         $vf4, 0x0(%1)\n"
+        "lqc2         $vf5, 0x10(%1)\n"
+        "lqc2         $vf6, 0x20(%1)\n"
+        "lqc2         $vf7, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        : "=m"(r)
+        : "r"(&m), "m"(v)
+        : "memory");
+    return r;
+}
+
+static inline sV4_B370 Row3_B370(const sM4_B370& m)
+{
+    return m.r[3];
+}
+
+// Orthonormal inverse in place: transpose the 3x3 part, position = -(R^T * t).
+static inline void OrthoInverse_B370(sM4_B370& t)
+{
+    float tmp;
+    tmp = t.r[0].y;
+    t.r[0].y = t.r[1].x;
+    t.r[1].x = tmp;
+    tmp = t.r[0].z;
+    t.r[0].z = t.r[2].x;
+    t.r[2].x = tmp;
+    tmp = t.r[1].z;
+    t.r[1].z = t.r[2].y;
+    t.r[2].y = tmp;
+    float neg = -1.0f;
+    sV4_B370 p = Scale_B370(Row3_B370(t), neg);
+    p.w = 0.0f;
+    p = Xform_B370(t, p);
+    p.w = 1.0f;
+    t.r[3] = p;
+}
+
+static inline float Frac_B370(float x)
+{
+    return x - (float)(int)x;
+}
+
+static inline void SetTexture_B370(sGfx_B370* gm, int idx, int tex)
+{
+    gm->top->tex[idx] = tex;
+}
+
+static inline int Hash8_B370(int k)
+{
+    return ((k << 5) + k) ^ ((((k >> 8) << 5) + k) >> 8) ^ ((((k >> 16) << 5) + k) >> 16)
+        ^ ((((k >> 24) << 5) + k) >> 24);
+}
+
+// PORT: PS2-only VU0 inline asm (in-place 4x4 matrix multiply m = m * b).
+static inline void MulIn_B370(void* m, const void* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%0)\n"
+        "lqc2      $vf5, 0x10(%0)\n"
+        "lqc2      $vf6, 0x20(%0)\n"
+        "lqc2      $vf7, 0x30(%0)\n"
+        "lqc2      $vf8, 0x0(%1)\n"
+        "lqc2      $vf9, 0x10(%1)\n"
+        "lqc2      $vf10, 0x20(%1)\n"
+        "lqc2      $vf11, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "r"(b)
+        : "memory");
+}
+
+// Multiply m by a rotation of `angle` about `axis`, built in the local matrix r.
+#define ROTATE_B370(m, r, axis, angle)          \
+    {                                           \
+        sM4_B370* mm = (m);                     \
+        float* ax = (axis);                     \
+        float s;                                \
+        float c;                                \
+        func_0031BE50(angle, &s, &c);           \
+        float t = 1.0f - c;                     \
+        float x = ax[0];                        \
+        float y = ax[1];                        \
+        float z = ax[2];                        \
+        float tx = t * x;                       \
+        float ty = t * y;                       \
+        float tz = t * z;                       \
+        float sx = s * x;                       \
+        float sy = s * y;                       \
+        float sz = s * z;                       \
+        r.r[0].x = tx * x + c;                  \
+        r.r[1].x = tx * y + sz;                 \
+        r.r[2].x = tx * z - sy;                 \
+        r.r[0].y = ty * x - sz;                 \
+        r.r[1].y = ty * y + c;                  \
+        r.r[2].y = ty * z + sx;                 \
+        r.r[0].z = tz * x + sy;                 \
+        r.r[1].z = tz * y - sx;                 \
+        r.r[2].z = tz * z + c;                  \
+        r.r[3].x = 0.0f;                        \
+        r.r[3].y = 0.0f;                        \
+        r.r[3].z = 0.0f;                        \
+        r.r[0].w = 0.0f;                        \
+        r.r[1].w = 0.0f;                        \
+        r.r[2].w = 0.0f;                        \
+        r.r[3].w = 1.0f;                        \
+        MulIn_B370(mm, &r);                     \
+    }
+
+struct sPatch_B370 {
+    char* obj;              // 0x0
+    int extra;              // 0x4
+    int kind;               // 0x8
+    short slot;             // 0xC
+    short pad;
+};
+
+struct sMixPatch_B370 {
+    char* obj;              // 0x0
+    int extra;              // 0x4
+    int kind;               // 0x8
+    short slot;             // 0xC
+    short pad;
+    unsigned char types[4]; // 0x10
+};
+
+struct sDefer_B370 {
+    short tex;              // 0x0
+    short tex2;             // 0x2
+    int kind;               // 0x4
+    unsigned int addr;      // 0x8
+    sPatch_B370* patch;     // 0xC
+};
+
+struct sBezMan_B370 {
+    char pad_0x0[0x10];
+    char cache[0x360 - 0x10];       // 0x10
+    sM4_B370 shine;                 // 0x360
+    char pad_0x3A0[0x3E0 - 0x3A0];
+    sM4_B370 fx;                    // 0x3E0
+    sV4_B370 colour;                // 0x420
+    float light[3];                 // 0x430
+    char pad_0x43C[0x458 - 0x43C];
+    int n4;                         // 0x458
+    sPatch_B370 list4[900];         // 0x45C
+    int n6;                         // 0x3C9C
+    sPatch_B370 list6[220];         // 0x3CA0
+    int n8;                         // 0x4A60
+    sPatch_B370 list8[50];          // 0x4A64
+    int nMix;                       // 0x4D84
+    sMixPatch_B370 mix[75];         // 0x4D88
+    int nDefer;                     // 0x5364
+    sDefer_B370 defer[1];           // 0x5368
+};
+
+struct sBucket_B370 {
+    int state;              // 0x0
+    int key;                // 0x4
+    int matrix;             // 0x8
+    int fC;                 // 0xC
+    int f10;                // 0x10
+    int f14;                // 0x14
+    int f18;                // 0x18
+    sBucket_B370* next;     // 0x1C
+};
+
+struct sSortKey_B370 {
+    int key;
+    sBucket_B370* bucket;
+};
+
+struct sDefer2_B370 {
+    char pad_0x0[0x57494];
+    int nBuckets;                   // 0x57494
+    sBucket_B370 buckets[0x820];    // 0x57498
+    char pad_0x67898[0x678A0 - 0x67898];
+    sBucket_B370* hash[257];        // 0x678A0
+    int nKeys;                      // 0x67CA4
+    sSortKey_B370 keys[1];          // 0x67CA8
+};
+
+extern sGfx_B370* D_004A5B80_B370 __asm__("D_004A5B80");
+extern float D_004A4344;
+extern float D_004A434C;
+extern float D_004A4350;
+extern float D_004A4354;
+extern float D_004A4440;
+extern float D_004FF140[4];
+extern float D_004FF150[4];
+extern float D_004FF160[4];
+extern sM4_B370 D_004FF1A0_B370 __asm__("D_004FF1A0");
+extern sM4_B370 D_005049C0;
+extern char* D_0044B9D0[];
+extern "C" void func_0037D968_B370(void* gm) __asm__("func_0037D968");
+extern "C" void func_00374A88(void* cache, int n, void* list, int lod, int view);
+extern "C" void func_00374AE0(void* cache, int n, void* list, int lod, int view);
+extern "C" void func_00374B38(void* cache);
+extern "C" int func_003747A0(void* cache, void* obj, int lod, int view, int normals);
+extern "C" void func_0038C788(void* self, int type, int idx);
+extern "C" void func_0038CA70_B370(void* self, int kind, int sub, void* patch, unsigned int* handle) __asm__("func_0038CA70");
+extern "C" void func_0038CE20_B370(void* self, int sub, void* patch, void* ext, unsigned int* handle) __asm__("func_0038CE20");
+extern "C" void func_0038D968_B370(void* self, unsigned int* handle) __asm__("func_0038D968");
+extern "C" int func_00394ED0_B370(void* dm, void* st, int hash) __asm__("func_00394ED0");
+extern "C" sBucket_B370* func_00395000(void* dm, int state, int key, int hash, int matrix);
+extern "C" int func_00364240_B370(int state, int key) __asm__("func_00364240");
+extern "C" void func_00362978_B370(void* bucket, int start, int end) __asm__("func_00362978");
+
+typedef sM4_B370* (*tGetMat_B370)(void*);
+
+// The DeferMan bucket for (state, key, matrix), created and linked into the hash and sort lists if new.
+static inline sBucket_B370* GetBucket_B370(sDefer2_B370* dm, int state, int key, int matrix)
+{
+    int h = Hash8_B370(state ^ ((short)key | (((key >> 16) + 2) << 16))) & 0xFF;
+    sBucket_B370* b = func_00395000(dm, state, key, h, matrix);
+    if (b != 0) {
+        return b;
+    }
+    sBucket_B370* nb = &dm->buckets[dm->nBuckets++];
+    nb->state = state;
+    nb->key = key;
+    nb->matrix = matrix;
+    nb->fC = 0;
+    nb->f14 = 0;
+    nb->f18 = 0;
+    b = nb;
+    int sk = func_00364240_B370(state, key);
+    b->next = dm->hash[h];
+    dm->hash[h] = b;
+    dm->keys[dm->nKeys].key = sk;
+    dm->keys[dm->nKeys++].bucket = b;
+    return b;
+}
+
+// PORT: uncached (0x30000000) packet pointers held in int; VU0 inline asm.
+static inline void Render_B370(sBezMan_B370* self)
+{
+    sGfx_B370* gm = D_004A5B80_B370;
+    self->nDefer = 0;
+    unsigned int* cursor = &gm->cursor;
+    gm->top->f0 &= ~0xC;
+    gm->top->f0 |= 0x30;
+    sDefer2_B370* dm = (sDefer2_B370*)gm->dm;
+    if (gm->matValid == 0) {
+        func_0037D968_B370(gm);
+    }
+    int matrix = *(int*)((char*)dm + 0x69CC0);
+    sM4_B370 view = *((tGetMat_B370)gm->vtable[35].fn)((char*)gm + gm->vtable[35].delta);
+    int viewIdx = gm->view;
+    sM4_B370 t = view;
+    OrthoInverse_B370(t);
+    sV4_B370 cam = t.r[3];
+
+    {
+    float s1, c1, s2, c2;
+    float ay = cam.y * D_004A4440;
+    float ax = cam.x * D_004A4440;
+    ay = Frac_B370(ay * 0.15915494f) * 6.2831855f;
+    ax = Frac_B370(ax * 0.15915494f) * 6.2831855f;
+    func_0031BE50(ay, &s1, &c1);
+    func_0031BE50(ax, &s2, &c2);
+    sM4_B370 a;
+    a.r[0].x = 1.0f; a.r[1].x = 0.0f; a.r[2].x = 0.0f; a.r[3].x = 0.0f;
+    a.r[0].y = 0.0f; a.r[1].y = s1; a.r[2].y = -c1; a.r[3].y = 0.0f;
+    a.r[0].z = 0.0f; a.r[1].z = c1; a.r[2].z = s1; a.r[3].z = 0.0f;
+    a.r[0].w = 0.0f; a.r[1].w = 0.0f; a.r[2].w = 0.0f; a.r[3].w = 1.0f;
+    sM4_B370 b;
+    float nc2 = -c2;
+    b.r[0].x = s2; b.r[1].x = 0.0f; b.r[2].x = c2; b.r[3].x = 0.0f;
+    b.r[0].y = 0.0f; b.r[1].y = 1.0f; b.r[2].y = 0.0f; b.r[3].y = 0.0f;
+    b.r[0].z = nc2; b.r[1].z = 0.0f; b.r[2].z = s2; b.r[3].z = 0.0f;
+    b.r[0].w = 0.0f; b.r[1].w = 0.0f; b.r[2].w = 0.0f; b.r[3].w = 1.0f;
+    sM4_B370 rot = a * b;
+    sM4_B370 shine = D_005049C0 * rot;
+    self->shine = shine;
+    }
+
+    float ry = cam.y * D_004A4344;
+    float rx = cam.x * D_004A4344;
+    float rz = cam.z * D_004A4344;
+    ry = Frac_B370(ry * 0.15915494f) * 6.2831855f;
+    rx = Frac_B370(rx * 0.15915494f) * 6.2831855f;
+    rz = Frac_B370(rz * 0.15915494f) * 6.2831855f;
+    float s3, c3, s4, c4, s5, c5;
+    func_0031BE50(ry, &s3, &c3);
+    func_0031BE50(rx, &s4, &c4);
+    func_0031BE50(rz, &s5, &c5);
+    self->fx = D_004FF1A0_B370;
+    {
+        sM4_B370 r;
+        ROTATE_B370(&self->fx, r, D_004FF140, ry)
+        ROTATE_B370(&self->fx, r, D_004FF150, rx)
+        ROTATE_B370(&self->fx, r, D_004FF160, rz)
+    }
+
+    sV4_B370 col;
+    col.x = 128.0f;
+    col.y = 128.0f;
+    col.z = 128.0f;
+    col.w = 128.0f;
+    *(cQuad_B370*)((char*)self + 0x420) = *(cQuad_B370*)&col;
+    *(float*)((char*)self + 0x430) = D_004A434C;
+    *(float*)((char*)self + 0x434) = D_004A4350;
+    *(float*)((char*)self + 0x438) = D_004A4354;
+
+    gm->top[1] = gm->top[0];
+    sRS_B370* st = gm->top;
+    gm->top = st + 1;
+    st[1].f8 = (st[1].f8 & ~0x3E0) | 0x40;
+    gm->top->f4 &= ~3;
+    gm->top->f8 &= 0xE00003FF;
+    gm->top->f4 = (gm->top->f4 & 0xFE7FFFFF) | 0x800000;
+    gm->top->f4 &= 0xFFCFFFFF;
+    gm->top->f4 = (gm->top->f4 & 0xFFF00FFF) | 0x14000;
+    gm->top->f4 = (gm->top->f4 & ~0x7C) | 4;
+    gm->top->f4 = (gm->top->f4 & ~0xF80) | 0x400;
+    func_00374A88(self->cache, self->n4, self->list4, 0, viewIdx);
+    func_00374A88(self->cache, self->n6, self->list6, 1, viewIdx);
+    func_00374A88(self->cache, self->n8, self->list8, 2, viewIdx);
+    func_00374AE0(self->cache, self->nMix, self->mix, 2, viewIdx);
+    if (viewIdx == 0) {
+        func_00374B38(self->cache);
+    }
+    gm->top->f0 = (gm->top->f0 & ~0x3C0) | 0x40;
+    gm->top->fC &= 0xC0000000;
+    gm->top->f8 = (gm->top->f8 & ~0x1F) | (*(int*)((char*)dm + 0x69CC4) & 0x1F);
+    sRS_B370* s = gm->top;
+    int base = func_00394ED0_B370(dm, s, Hash8_B370(s->f0 ^ s->f4 ^ s->f8 ^ s->fC) & 0xFF);
+    for (int i = 0; i < self->n8; i++) {
+        sPatch_B370* e = &self->list8[i];
+        char* obj = e->obj;
+        if (e->slot < 0) {
+            e->slot = func_003747A0(self->cache, obj, 2, viewIdx, (*(int*)(obj + 0xC) & 0x600000) != 0);
+            if (e->slot >= 0) {
+                func_0038C788(self, 2, e->slot);
+            }
+        }
+        func_0038CA70_B370(self, 2, e->slot, e, cursor);
+    }
+    for (int i = 0; i < self->n6; i++) {
+        sPatch_B370* e = &self->list6[i];
+        char* obj = e->obj;
+        if (e->slot < 0) {
+            e->slot = func_003747A0(self->cache, obj, 1, viewIdx, (*(int*)(obj + 0xC) & 0x600000) != 0);
+            if (e->slot >= 0) {
+                func_0038C788(self, 1, e->slot);
+            }
+        }
+        func_0038CA70_B370(self, 1, e->slot, e, cursor);
+    }
+    for (int i = 0; i < self->n4; i++) {
+        sPatch_B370* e = &self->list4[i];
+        char* obj = e->obj;
+        if (e->slot < 0) {
+            e->slot = func_003747A0(self->cache, obj, 0, viewIdx, 0);
+            if (e->slot >= 0) {
+                func_0038C788(self, 0, e->slot);
+            }
+        }
+        func_0038CA70_B370(self, 0, e->slot, e, cursor);
+    }
+    gm->top->f0 = (gm->top->f0 & ~0x3C0) | 0x80;
+    gm->top->fC &= 0xC0000000;
+    for (int i = 0; i < self->nMix; i++) {
+        sMixPatch_B370* e = &self->mix[i];
+        char* obj = e->obj;
+        if (e->slot < 0) {
+            e->slot = func_003747A0(self->cache, obj, 2, viewIdx, (*(int*)(obj + 0xC) & 0x600000) != 0);
+            if (e->slot >= 0) {
+                func_0038C788(self, 2, e->slot);
+            }
+        }
+        func_0038CE20_B370(self, e->slot, e, e->types, cursor);
+    }
+    if (self->nDefer != 0) {
+        int key = *(int*)&self->defer[0].tex;
+        SetTexture_B370(gm, 0, self->defer[0].tex);
+        SetTexture_B370(gm, 1, self->defer[0].tex2);
+        gm->top->f0 &= ~0xC;
+        gm->top->f0 |= 0x30;
+        sBucket_B370* cur = GetBucket_B370(dm, base, key, matrix);
+        unsigned int start = *cursor;
+        unsigned long* p = (unsigned long*)(start | 0x30000000);
+        int j;
+        for (j = 0; j < self->nDefer; j++) {
+            sDefer_B370* d = &self->defer[j];
+            int k2 = *(int*)&d->tex;
+            if (k2 != key) {
+                unsigned int end = (unsigned int)p & 0x0FFFFFFF;
+                *cursor = end;
+                func_00362978_B370(cur, start, end);
+                *cursor += 0x10;
+                start = *cursor;
+                p = (unsigned long*)(start | 0x30000000);
+                SetTexture_B370(gm, 0, d->tex);
+                SetTexture_B370(gm, 1, d->tex2);
+                cur = GetBucket_B370(dm, base, k2, matrix);
+                key = k2;
+            }
+            p[0] = ((unsigned long)d->addr << 32) | 0x50000000;
+            p[1] = 0;
+            p[2] = 0x10000001;
+            p[3] = 0;
+            char* tbl = D_0044B9D0[d->kind];
+            int extra = d->patch->extra;
+            p[4] = 0;
+            p[5] = (unsigned long)(*(int*)(tbl + extra * 8 + 0x10) | 0x14000000) << 32;
+            p += 6;
+        }
+        unsigned int end = (unsigned int)p & 0x0FFFFFFF;
+        *cursor = end;
+        func_00362978_B370(cur, start, end);
+        *cursor += 0x10;
+    }
+    gm->top--;
+    SetTexture_B370(gm, 0, -1);
+    SetTexture_B370(gm, 1, -1);
+    gm->top->f0 &= ~0x3C0;
+    gm->top->fC &= 0xC0000000;
+    func_0038D968_B370(self, cursor);
+}
+
+extern "C" void func_0038B370(sBezMan_B370* self)
+{
+    Render_B370(self);
+}
+#endif
 
 INCLUDE_ASM("render/bezierman", func_0038C590);
 
