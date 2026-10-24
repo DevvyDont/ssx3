@@ -3384,7 +3384,342 @@ extern "C" int func_001635F0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_001635F8);
+#ifdef SKIP_ASM
+struct sVec_1635F8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sVE_1635F8 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+extern sVec_1635F8 D_004FF160_v1635F8 __asm__("D_004FF160");
+extern int D_004A1288;
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sVec_1635F8 Sub_1635F8(const sVec_1635F8& a, const sVec_1635F8& b)
+{
+    sVec_1635F8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec_1635F8 Add_1635F8(const sVec_1635F8& a, const sVec_1635F8& b)
+{
+    sVec_1635F8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sVec_1635F8 Scale_1635F8(const sVec_1635F8& v, float s)
+{
+    sVec_1635F8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place v *= s).
+static inline void ScaleEq_1635F8(sVec_1635F8& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_1635F8(const sVec_1635F8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// 0 below lo, 1 above hi, linear in between.
+static inline float Ramp_1635F8(const float& x, float lo, float hi)
+{
+    if (lo <= x) {
+        if (x <= hi) {
+            return (x - lo) / (hi - lo);
+        }
+        return 1.0f;
+    }
+    return 0.0f;
+}
+
+// Walks x toward limit by one 60 Hz frame.
+static inline void Approach_1635F8(float& x, float limit)
+{
+    if (limit - 0.01666666753590107f <= x) {
+        x = limit;
+    } else {
+        x = (x + 0.01666666753590107f) <? limit;
+    }
+}
+
+static inline float Lerp_1635F8(float a, float b, float t)
+{
+    return t * b + (1.0f - t) * a;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place v += b).
+static inline void AddEq_1635F8(sVec_1635F8& v, const sVec_1635F8& b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "+m"(v)
+        : "m"(b)
+        : "memory");
+}
+
+static inline int CallI_1635F8(char* self, int slot)
+{
+    char* o = *(char**)(self + 0x30);
+    sVE_1635F8* e = &(*(sVE_1635F8**)o)[slot];
+    return ((int (*)(void*))e->fn)(o + e->delta);
+}
+
+static inline float CallF_1635F8(char* self, int slot)
+{
+    char* o = *(char**)(self + 0x30);
+    sVE_1635F8* e = &(*(sVE_1635F8**)o)[slot];
+    return ((float (*)(void*))e->fn)(o + e->delta);
+}
+
+#define S_1635F8 ((char*)self)
+#define I_1635F8 ((char*)info)
+// Builds and evaluates the chase camera's jump/landing curves (splines at +0x304..+0x328).
+extern "C" void func_001635F8(void* self, void* info, float a, float b, float c, float d)
+{
+    float dist = Length_1635F8(Sub_1635F8(*(sVec_1635F8*)(S_1635F8 + 0x20), *(sVec_1635F8*)(S_1635F8 + 0x40)));
+    if (*(int*)(I_1635F8 + 0x60) != 0 && *(int*)(S_1635F8 + 0x2D0) == 0) {
+        float start = 0.0f;
+        if (--*(int*)(S_1635F8 + 0x2C4) > 0 && CallI_1635F8(S_1635F8, 19)) {
+            start = (float)(16 - *(int*)(S_1635F8 + 0x2C4)) * 0.01666666753590107f;
+            *(int*)(S_1635F8 + 0x2C4) = 0;
+        }
+        if (*(int*)(S_1635F8 + 0x2C4) == 14) {
+            *(float*)(S_1635F8 + 0x218) = 0.01666666753590107f;
+            float k = Ramp_1635F8(CallF_1635F8(S_1635F8, 21), 300.0f, 500.0f);
+            float h = c * a * k;
+            *(float*)(S_1635F8 + 0x228) = k;
+            if (0.0f < h) {
+                void* sa = S_1635F8 + 0x31C;
+                void* sb = S_1635F8 + 0x328;
+                func_0031D700_2(sa, 13);
+                func_0031D7E0(sa, 0.0f, 0.0f);
+                func_0031D7E0(sa, 0.33000001311302185f, h * -121.1346664428711f);
+                func_0031D7E0(sa, 0.6600000262260437f, h * -217.7401123046875f);
+                func_0031D7E0(sa, 0.998885452747345f, h * -254.97467041015625f);
+                func_0031D7E0(sa, 1.3300000429153442f, h * -250.5922088623047f);
+                func_0031D7E0(sa, 1.659999966621399f, h * -193.38156127929688f);
+                func_0031D7E0(sa, 2.0f, h * -63.02951431274414f);
+                func_0031D7E0(sa, 2.3299999237060547f, h * 110.80419158935547f);
+                func_0031D7E0(sa, 2.6600000858306885f, h * 307.46771240234375f);
+                func_0031D7E0(sa, 3.0f, h * 496.44952392578125f);
+                func_0031D7E0(sa, 3.3299999237060547f, h * 689.6500854492188f);
+                func_0031D7E0(sa, 3.6600000858306885f, h * 820.5333862304688f);
+                func_0031D7E0(sa, 4.0f, h * 849.3922119140625f);
+                func_0031D700_2(sb, 13);
+                func_0031D7E0(sb, 0.0f, 0.0f);
+                func_0031D7E0(sb, 0.33000001311302185f, h * -22.06365966796875f);
+                func_0031D7E0(sb, 0.6600000262260437f, h * -34.630374908447266f);
+                func_0031D7E0(sb, 1.0f, h * 13.823330879211426f);
+                func_0031D7E0(sb, 1.3290001153945923f, h * 92.12850952148438f);
+                func_0031D7E0(sb, 1.659500002861023f, h * 213.1912384033203f);
+                func_0031D7E0(sb, 2.0000672340393066f, h * 383.46197509765625f);
+                func_0031D7E0(sb, 2.333711624145508f, h * 624.2830200195312f);
+                func_0031D7E0(sb, 2.6603856086730957f, h * 813.0820922851562f);
+                func_0031D7E0(sb, 3.0f, h * 977.65869140625f);
+                func_0031D7E0(sb, 3.3299999237060547f, h * 1070.9466552734375f);
+                func_0031D7E0(sb, 3.659675359725952f, h * 1104.7698974609375f);
+                func_0031D7E0(sb, 4.0f, h * 1131.4307861328125f);
+                *(float*)(S_1635F8 + 0x200) = 4.0f;
+                *(int*)(S_1635F8 + 0x2E8) = 1;
+                *(float*)(S_1635F8 + 0x1F8) = 1.0f;
+                *(float*)(S_1635F8 + 0x1FC) = 1.0f;
+                *(int*)(S_1635F8 + 0x2E4) = 0;
+            }
+        }
+        if (*(int*)(S_1635F8 + 0x2C4) == 0) {
+            *(float*)(S_1635F8 + 0x1F4) = start;
+            float len = CallF_1635F8(S_1635F8, 12);
+            float sx = len * 0.25f;
+            float k;
+            if (1.7f <= len) {
+                if (len <= 2.8f) {
+                    float t = (len - 1.7f) / (2.8f - 1.7f);
+                    float t2 = t * t;
+                    k = t2 * 3.0f - (t + t) * t2;
+                    if (k > 1.0f) {
+                        k = 1.0f;
+                    }
+                } else {
+                    k = 1.0f;
+                }
+            } else {
+                k = 0.0f;
+            }
+            float h = k * c * *(float*)(S_1635F8 + 0x228);
+            if (0.0f < h) {
+                void* sc = S_1635F8 + 0x304;
+                void* sd = S_1635F8 + 0x310;
+                func_0031D700_2(sc, 13);
+                func_0031D7E0(sc, 0.0f, 0.0f);
+                func_0031D7E0(sc, sx * 0.33000001311302185f, h * -121.1346664428711f);
+                func_0031D7E0(sc, sx * 0.6600000262260437f, h * -217.7401123046875f);
+                func_0031D7E0(sc, sx * 0.998885452747345f, h * -254.97467041015625f);
+                func_0031D7E0(sc, sx * 1.3300000429153442f, h * -250.5922088623047f);
+                func_0031D7E0(sc, sx * 1.659999966621399f, h * -193.38156127929688f);
+                func_0031D7E0(sc, sx * 2.0f, h * -63.02951431274414f);
+                func_0031D7E0(sc, sx * 2.3299999237060547f, h * 110.80419158935547f);
+                func_0031D7E0(sc, sx * 2.6600000858306885f, h * 307.46771240234375f);
+                func_0031D7E0(sc, sx * 3.0f, h * 496.44952392578125f);
+                func_0031D7E0(sc, sx * 3.3299999237060547f, h * 689.6500854492188f);
+                func_0031D7E0(sc, sx * 3.6600000858306885f, h * 820.5333862304688f);
+                func_0031D7E0(sc, sx * 4.0f, h * 849.3922119140625f);
+                func_0031D700_2(sd, 13);
+                func_0031D7E0(sd, 0.0f, 0.0f);
+                func_0031D7E0(sd, sx * 0.33000001311302185f, h * -22.06365966796875f);
+                func_0031D7E0(sd, sx * 0.6600000262260437f, h * -34.630374908447266f);
+                func_0031D7E0(sd, sx * 1.0f, h * 13.823330879211426f);
+                func_0031D7E0(sd, sx * 1.3290001153945923f, h * 92.12850952148438f);
+                func_0031D7E0(sd, sx * 1.659500002861023f, h * 213.1912384033203f);
+                func_0031D7E0(sd, sx * 2.0000672340393066f, h * 383.46197509765625f);
+                func_0031D7E0(sd, sx * 2.333711624145508f, h * 624.2830200195312f);
+                func_0031D7E0(sd, sx * 2.6603856086730957f, h * 813.0820922851562f);
+                func_0031D7E0(sd, sx * 3.0f, h * 977.65869140625f);
+                func_0031D7E0(sd, sx * 3.3299999237060547f, h * 1070.9466552734375f);
+                func_0031D7E0(sd, sx * 3.659675359725952f, h * 1104.7698974609375f);
+                func_0031D7E0(sd, sx * 4.0f, h * 1131.4307861328125f);
+                *(int*)(S_1635F8 + 0x2E0) = 1;
+                *(float*)(S_1635F8 + 0x1F8) = 1.0f;
+                *(float*)(S_1635F8 + 0x1FC) = 1.0f;
+                *(float*)(S_1635F8 + 0x200) = len;
+                *(int*)(S_1635F8 + 0x2E4) = 0;
+            }
+        }
+    }
+    if (*(int*)(S_1635F8 + 0x2E8) != 0) {
+        if (4.0f - 0.01666666753590107f <= *(float*)(S_1635F8 + 0x218)) {
+            *(float*)(S_1635F8 + 0x218) = 4.0f;
+        } else {
+            *(float*)(S_1635F8 + 0x218) = (*(float*)(S_1635F8 + 0x218) + 0.01666666753590107f) <? 4.0f;
+        }
+        float yb = *(float*)(S_1635F8 + 0x1F8) * func_0031DEE0(S_1635F8 + 0x328, *(float*)(S_1635F8 + 0x1FC) * *(float*)(S_1635F8 + 0x218));
+        float ya = *(float*)(S_1635F8 + 0x1F8) * func_0031DEE0(S_1635F8 + 0x31C, *(float*)(S_1635F8 + 0x1FC) * *(float*)(S_1635F8 + 0x218));
+        *(float*)(S_1635F8 + 0x220) = yb;
+        *(float*)(S_1635F8 + 0x21C) = ya;
+    }
+    if (*(int*)(S_1635F8 + 0x2E0) != 0) {
+        Approach_1635F8(*(float*)(S_1635F8 + 0x1F4), *(float*)(S_1635F8 + 0x200));
+        float yd = *(float*)(S_1635F8 + 0x1F8) * func_0031DEE0(S_1635F8 + 0x310, *(float*)(S_1635F8 + 0x1FC) * *(float*)(S_1635F8 + 0x1F4));
+        float yc = *(float*)(S_1635F8 + 0x1F8) * func_0031DEE0(S_1635F8 + 0x304, *(float*)(S_1635F8 + 0x1FC) * *(float*)(S_1635F8 + 0x1F4));
+        *(float*)(S_1635F8 + 0x210) = yd;
+        *(float*)(S_1635F8 + 0x20C) = yc;
+        D_004A1288 = 1;
+        // PORT: spline pointers kept in int globals.
+        D_004A4DD8 = (int)(S_1635F8 + 0x310);
+        D_004A4DDC = (int)(S_1635F8 + 0x304);
+    } else {
+        D_004A1288 = 0;
+        D_004A4DD8 = 0;
+        D_004A4DDC = 0;
+    }
+    if (*(int*)(I_1635F8 + 0x60) == 0) {
+        if (*(int*)(S_1635F8 + 0x2E4) == 0) {
+            *(float*)(S_1635F8 + 0x224) = Lerp_1635F8(0.93f, d, Ramp_1635F8(*(float*)(S_1635F8 + 0x218), 1.2f, 2.2f));
+            float v = CallF_1635F8(S_1635F8, 23);
+            float cur = *(float*)(S_1635F8 + 0x224);
+            float up = cur + (1.0f - cur) * 0.5f;
+            float r = Ramp_1635F8(v, 1.05f, 1.4f);
+            *(float*)(S_1635F8 + 0x224) = Lerp_1635F8(*(float*)(S_1635F8 + 0x224), up, r);
+        }
+        *(int*)(S_1635F8 + 0x2E0) = 0;
+        *(int*)(S_1635F8 + 0x2E4) = 1;
+        *(int*)(S_1635F8 + 0x2E8) = 0;
+    }
+    if (*(int*)(S_1635F8 + 0x2E4) != 0) {
+        float m = *(float*)(S_1635F8 + 0x224);
+        *(float*)(S_1635F8 + 0x20C) *= m;
+        *(float*)(S_1635F8 + 0x210) *= m;
+        *(float*)(S_1635F8 + 0x21C) *= m;
+        *(float*)(S_1635F8 + 0x220) *= m;
+    }
+    float w;
+    if (*(int*)(S_1635F8 + 0x2E0) != 0) {
+        w = (*(float*)(S_1635F8 + 0x1F4) / b) <? 1.0f;
+    } else {
+        w = 0.0f;
+    }
+    float scale = Length_1635F8(Sub_1635F8(*(sVec_1635F8*)(S_1635F8 + 0x20), *(sVec_1635F8*)(S_1635F8 + 0x40))) *
+                  0.0033333334140479565f;
+    float ue = Lerp_1635F8(scale * *(float*)(S_1635F8 + 0x21C), scale * *(float*)(S_1635F8 + 0x20C), w);
+    float ul = Lerp_1635F8(scale * *(float*)(S_1635F8 + 0x220), scale * *(float*)(S_1635F8 + 0x210), w);
+    AddEq_1635F8(*(sVec_1635F8*)(S_1635F8 + 0x20), Scale_1635F8(D_004FF160_v1635F8, ue));
+    AddEq_1635F8(*(sVec_1635F8*)(S_1635F8 + 0x40), Scale_1635F8(D_004FF160_v1635F8, ul));
+    func_00168150(self);
+    sVec_1635F8 off = Sub_1635F8(*(sVec_1635F8*)(S_1635F8 + 0x20), *(sVec_1635F8*)(S_1635F8 + 0x40));
+    ScaleEq_1635F8(off, (dist >? 50.0f) / Length_1635F8(off));
+    *(sVec_1635F8*)(S_1635F8 + 0x40) = Sub_1635F8(*(sVec_1635F8*)(S_1635F8 + 0x20), off);
+}
+#undef S_1635F8
+#undef I_1635F8
+#endif
 
 INCLUDE_ASM("camera/camera", func_001641C0);
 
@@ -3545,7 +3880,454 @@ extern "C" int func_00164870(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00164878);
+#ifdef SKIP_ASM
+struct sVec_164878 {
+    float x, y, z, w;
+    sVec_164878() {}
+    sVec_164878(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sVE_164878 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+extern sVec_164878 D_004FF160_v164878 __asm__("D_004FF160");
+extern int D_004A128C;
+// PORT: func_0031D738 takes (spline, knot count, x, y); its mangled name says (void*, float, float).
+void func_0031D738_ivff(void* spline, int n, float x, float y) __asm__("func_0031D738__FPvff");
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sVec_164878 Sub_164878(const sVec_164878& a, const sVec_164878& b)
+{
+    sVec_164878 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec_164878 Add_164878(const sVec_164878& a, const sVec_164878& b)
+{
+    sVec_164878 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place v += b).
+static inline void AddEq_164878(sVec_164878& v, const sVec_164878& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (in-place v -= b).
+static inline void SubEq_164878(sVec_164878& v, const sVec_164878& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sVec_164878 Scale_164878(const sVec_164878& v, float s)
+{
+    sVec_164878 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place v *= s).
+static inline void ScaleEq_164878(sVec_164878& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (in-place v /= s).
+static inline void DivEq_164878(sVec_164878& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (dot product).
+static inline float Dot_164878(const sVec_164878& a, const sVec_164878& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_164878(const sVec_164878& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sVec_164878 Cross_164878(const sVec_164878& a, const sVec_164878& b)
+{
+    sVec_164878 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (rotate v by quaternion q).
+static inline sVec_164878 Rot_164878(const sVec_164878& q, const sVec_164878& v)
+{
+    sVec_164878 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float Sqrt_164878(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline void Normalize_164878(sVec_164878& v)
+{
+    DivEq_164878(v, Length_164878(v));
+}
+
+// The part of v along n.
+static inline sVec_164878 Project_164878(const sVec_164878& v, const sVec_164878& n)
+{
+    return Scale_164878(n, Dot_164878(v, n) / Dot_164878(n, n));
+}
+
+struct sQuat_164878 {
+    float x, y, z, w;
+    sQuat_164878() {}
+    sQuat_164878(float ax, float ay, float az, float aw)
+    {
+        w = aw;
+        x = ax;
+        y = ay;
+        z = az;
+    }
+} __attribute__((aligned(16)));
+
+static inline sQuat_164878 Quat_164878(float x, float y, float z, float w)
+{
+    sQuat_164878 r(x, y, z, w);
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (rotate v by quaternion q).
+static inline sVec_164878 RotQ_164878(const sQuat_164878& q, const sVec_164878& v)
+{
+    sVec_164878 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: g++ `<?` / `>?` operators.
+static inline float Clamp_164878(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+// 3t^2 - 2t^3, capped at 1.
+static inline float Smooth_164878(float t)
+{
+    float t2 = t * t;
+    float s = t2 * 3.0f - (t2 + t2) * t;
+    if (s > 1.0f) {
+        s = 1.0f;
+    }
+    return s;
+}
+
+#define MAX_164878(a, b) ((b) <= (a) ? (a) : (b))
+
+static inline int CallI_164878(char* self, int slot)
+{
+    char* o = *(char**)(self + 0x30);
+    sVE_164878* e = &(*(sVE_164878**)o)[slot];
+    return ((int (*)(void*))e->fn)(o + e->delta);
+}
+
+static inline float CallF_164878(char* self, int slot)
+{
+    char* o = *(char**)(self + 0x30);
+    sVE_164878* e = &(*(sVE_164878**)o)[slot];
+    return ((float (*)(void*))e->fn)(o + e->delta);
+}
+
+static inline sVec_164878* CallV_164878(char* self, int slot)
+{
+    char* o = *(char**)(self + 0x30);
+    sVE_164878* e = &(*(sVE_164878**)o)[slot];
+    return ((sVec_164878* (*)(void*))e->fn)(o + e->delta);
+}
+
+#define S_164878 ((char*)self)
+#define I_164878 ((char*)info)
+#define V_164878(off) (*(sVec_164878*)(S_164878 + (off)))
+#define F_164878(off) (*(float*)(S_164878 + (off)))
+// Air swing for drops: swings the eye around the rider while airborne (spline +0x334), then blends back.
+extern "C" void func_00164878(void* self, void* info, float blendOut)
+{
+    D_004A128C = 0;
+    sVec_164878 off0 = Sub_164878(V_164878(0x20), V_164878(0x40));
+    sVec_164878 eye0 = V_164878(0x40);
+    if (*(int*)(S_164878 + 0x2D0) != 0) {
+        if (*(int*)(S_164878 + 0x2D8) == 0) {
+            F_164878(0x22C) += 0.01666666753590107f;
+            if (CallI_164878(S_164878, 19)) {
+                V_164878(0x110) = Sub_164878(V_164878(0x20), V_164878(0x40));
+                float dist = Length_164878(V_164878(0x110));
+                float* dur = &F_164878(0x230);
+                *dur = MAX_164878(CallF_164878(S_164878, 12) - F_164878(0x22C), 2.299999952316284f);
+                F_164878(0x23C) = blendOut;
+                F_164878(0x234) = 0.0f;
+                sVec_164878* up = CallV_164878(S_164878, 16);
+                sVec_164878 side = Cross_164878(D_004FF160_v164878, *up);
+                Normalize_164878(side);
+                if (Dot_164878(side, *(sVec_164878*)(I_164878 + 0x20)) < 0.0f) {
+                    ScaleEq_164878(side, -1.0f);
+                }
+                ScaleEq_164878(side, dist / Length_164878(side));
+                V_164878(0x120) = Sub_164878(V_164878(0x110), Scale_164878(Project_164878(V_164878(0x110), *up), 2.0f));
+                V_164878(0x120).z = -V_164878(0x120).z;
+                if (Dot_164878(V_164878(0x120), V_164878(0x120)) <= 0.0f) {
+                    V_164878(0x120) = side;
+                }
+                ScaleEq_164878(V_164878(0x120), 0.800000011920929f);
+                AddEq_164878(V_164878(0x120), Scale_164878(side, 0.20000000298023224f));
+                ScaleEq_164878(V_164878(0x120), dist / Length_164878(V_164878(0x120)));
+                V_164878(0x150) = Project_164878(V_164878(0x120), *up);
+                sVec_164878 lat = Sub_164878(V_164878(0x120), V_164878(0x150));
+                if (Dot_164878(lat, lat) < 40000.0f) {
+                    lat.z = 0.0f;
+                    float l = Length_164878(lat);
+                    if (1.0f < l) {
+                        ScaleEq_164878(lat, 200.0f / l);
+                        AddEq_164878(V_164878(0x120), lat);
+                        SubEq_164878(V_164878(0x120), Scale_164878(D_004FF160_v164878, 100.0f));
+                    }
+                }
+                V_164878(0x130) = Cross_164878(V_164878(0x110), V_164878(0x120));
+                Normalize_164878(V_164878(0x130));
+                float ang;
+                float len = Dot_164878(V_164878(0x110), V_164878(0x110)) * Dot_164878(V_164878(0x120), V_164878(0x120));
+                len = Sqrt_164878(len);
+                if (len < 0.0010000000474974513f) {
+                    ang = 0.0f;
+                } else {
+                    float c = Dot_164878(V_164878(0x110), V_164878(0x120)) / len;
+                    if (-1.0f <= c) {
+                        c = c <? 1.0f;
+                    } else {
+                        c = -1.0f;
+                    }
+                    ang = 1.5707963705062866f - func_0031C128(c);
+                }
+                F_164878(0x238) = ang;
+                void* spl = S_164878 + 0x334;
+                func_0031D738_ivff(spl, 9, 0.0f, 0.0f);
+                func_0031D7E0(spl, 0.0f, 0.0f);
+                func_0031D7E0(spl, 0.125f, 0.0639725923538208f);
+                func_0031D7E0(spl, 0.25f, 0.30785250663757324f);
+                func_0031D7E0(spl, 0.375f, 0.5528385043144226f);
+                func_0031D7E0(spl, 0.5f, 0.6577425003051758f);
+                func_0031D7E0(spl, 0.625f, 0.728873610496521f);
+                func_0031D7E0(spl, 0.75f, 0.827086865901947f);
+                func_0031D7E0(spl, 0.875f, 0.9414384365081787f);
+                func_0031D7E0(spl, 1.0f, 1.0f);
+                *(int*)(S_164878 + 0x2D8) = 1;
+            }
+        }
+        if (*(int*)(S_164878 + 0x2D8) != 0) {
+            F_164878(0x234) += 0.01666666753590107f;
+            if (F_164878(0x234) < F_164878(0x230)) {
+                float t = F_164878(0x234) / F_164878(0x230);
+                D_004A128C = 1;
+                // PORT: spline pointer kept in an int global.
+                D_004A4DE0 = (int)(S_164878 + 0x334);
+                float s = func_0031DEE0(S_164878 + 0x334, t);
+                float sn, cs;
+                func_0031BE50(&sn, &cs, s * F_164878(0x238) * 0.5f);
+                sQuat_164878 q = Quat_164878(sn * V_164878(0x130).x, sn * V_164878(0x130).y, sn * V_164878(0x130).z, cs);
+                V_164878(0x140) = RotQ_164878(q, V_164878(0x110));
+                V_164878(0x160) = Scale_164878(V_164878(0x150), s);
+            }
+            float k = (F_164878(0x234) / (F_164878(0x230) * 0.30000001192092896f)) <? 1.0f >? 0.0f;
+            k = Smooth_164878(k);
+            V_164878(0x20) = Add_164878(Scale_164878(V_164878(0x20), 1.0f - k), Scale_164878(*(sVec_164878*)(I_164878 + 0x10), k));
+            V_164878(0x40) = Add_164878(Sub_164878(V_164878(0x20), V_164878(0x140)), V_164878(0x160));
+        }
+    } else if (0.0f < F_164878(0x23C)) {
+        float bt = (F_164878(0x23C) - 0.01666666753590107f) >? 0.0f;
+        float s = bt / blendOut;
+        F_164878(0x23C) = bt;
+        s = Smooth_164878(s);
+        sVec_164878 eye = V_164878(0x20);
+        V_164878(0x20) = Add_164878(Scale_164878(V_164878(0x20), 1.0f - s), Scale_164878(*(sVec_164878*)(I_164878 + 0x10), s));
+        V_164878(0x40) = Add_164878(Scale_164878(V_164878(0x40), 1.0f - s),
+                                    Scale_164878(Add_164878(Sub_164878(*(sVec_164878*)(I_164878 + 0x10), V_164878(0x140)), V_164878(0x160)), s));
+        V_164878(0x170) = Sub_164878(V_164878(0x20), V_164878(0x40));
+        V_164878(0x180) = Sub_164878(V_164878(0x20), eye);
+        F_164878(0x244) = F_164878(0x240) = F_164878(0x23C);
+    }
+    if (*(int*)(S_164878 + 0x2D0) != 0 && 0.0f < F_164878(0x240) && 0.0f < F_164878(0x244)) {
+        float bt = (F_164878(0x240) - 0.01666666753590107f) >? 0.0f;
+        float s = bt / F_164878(0x244);
+        F_164878(0x240) = bt;
+        s = Smooth_164878(s);
+        sVec_164878 d = Sub_164878(V_164878(0x20), V_164878(0x40));
+        sVec_164878 dd = Add_164878(Scale_164878(V_164878(0x170), s), Scale_164878(d, 1.0f - s));
+        AddEq_164878(V_164878(0x20), Scale_164878(V_164878(0x180), s));
+        V_164878(0x40) = Sub_164878(V_164878(0x20), dd);
+    }
+    sVec_164878 cur = Sub_164878(V_164878(0x20), V_164878(0x40));
+    float lmin = Length_164878(off0) * 0.6000000238418579f;
+    float l = Length_164878(cur);
+    if (l < lmin) {
+        if (1.0f < l) {
+            ScaleEq_164878(cur, lmin / l);
+            V_164878(0x40) = Sub_164878(V_164878(0x20), cur);
+        } else {
+            V_164878(0x40) = eye0;
+        }
+    }
+    func_00168150(self);
+}
+#undef S_164878
+#undef I_164878
+#undef V_164878
+#undef F_164878
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00165540);

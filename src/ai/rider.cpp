@@ -1084,7 +1084,222 @@ extern "C" void func_001200D0(cRider* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00120378);
+#ifdef SKIP_ASM
+struct sV_120378 {
+    float x, y, z, w;
+    sV_120378() {}
+    sV_120378(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+// One head/upper-body look controller (three of them from cRider+0x940).
+struct sLook_120378 {
+    int enabled;
+    char pad04[0xC];
+    sV_120378 rest;      // 0x10 offset quaternion (unk_320 == 0)
+    sV_120378 restAlt;   // 0x20 offset quaternion (unk_320 != 0)
+};
+
+int func_0011FEE8(void*);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" int func_001298C8();
+int func_00312AA0(void*, int);
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sV_120378 Sub_120378(const sV_120378& a, const sV_120378& b)
+{
+    sV_120378 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place v += b).
+static inline void AddEq_120378(sV_120378& v, const sV_120378& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_120378(const sV_120378& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (dot product).
+static inline float Dot_120378(const sV_120378& a, const sV_120378& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sV_120378 QuatMul_120378(const t4Vector& a, const sV_120378& b)
+{
+    sV_120378 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: abs.s
+static inline float Abs_120378(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// Rotation-matrix rows of a unit quaternion.
+static inline sV_120378 Front_120378(const sV_120378& q)
+{
+    return sV_120378(1.0f - (q.y * q.y + q.z * q.z) * 2.0f, (q.x * q.y + q.w * q.z) * 2.0f, (q.x * q.z - q.w * q.y) * 2.0f, 0.0f);
+}
+
+static inline sV_120378 Side_120378(const sV_120378& q)
+{
+    return sV_120378((q.y * q.x - q.w * q.z) * 2.0f, 1.0f - (q.z * q.z + q.x * q.x) * 2.0f, (q.y * q.z + q.w * q.x) * 2.0f, 0.0f);
+}
+
+static inline sV_120378 Up_120378(const sV_120378& q)
+{
+    return sV_120378((q.x * q.z + q.w * q.y) * 2.0f, (q.z * q.y - q.w * q.x) * 2.0f, 1.0f - (q.x * q.x + q.y * q.y) * 2.0f, 0.0f);
+}
+
+// PORT: g++ `<?` operator.
+static inline float Clamp_120378(float v, float lo, float hi)
+{
+    if (v >= lo) {
+        return v <? hi;
+    }
+    return lo;
+}
+
+// Picks the look anim (base + 0..6) for one controller from where v points in the bone's frame.
+#define LOOK_120378(layer, bone, look, base)                                                        \
+    if ((look)->enabled) {                                                                          \
+        int cur = func_00312AA0(self->mRiderAnim, layer);                                           \
+        int anim;                                                                                   \
+        if (still) {                                                                                \
+            anim = (base);                                                                          \
+        } else {                                                                                    \
+            if (self->unk_320) {                                                                    \
+                q = QuatMul_120378(*(t4Vector*)((char*)self->mAnimModel->bones + ((bone) << 5) + 0x10), (look)->restAlt);             \
+            } else {                                                                                \
+                q = QuatMul_120378(*(t4Vector*)((char*)self->mAnimModel->bones + ((bone) << 5) + 0x10), (look)->rest);                \
+            }                                                                                       \
+            float fwd = Dot_120378(v, Front_120378(q));                                             \
+            float up = Dot_120378(v, Up_120378(q));                                                 \
+            if (upLimit < Abs_120378(up) && Abs_120378(fwd) < Abs_120378(up)) {                     \
+                if (0.0f < up) {                                                                    \
+                    anim = (base) + 1;                                                              \
+                } else {                                                                            \
+                    anim = (base) + 2;                                                              \
+                }                                                                                   \
+            } else if (sideLimit < Abs_120378(fwd)) {                                               \
+                if (fwd < 0.0f) {                                                                   \
+                    anim = (base) + 4;                                                              \
+                } else {                                                                            \
+                    anim = (base) + 3;                                                              \
+                }                                                                                   \
+            } else {                                                                                \
+                anim = (base) + 5;                                                                  \
+                if (Dot_120378(v, Side_120378(q)) < 0.0f) {                                         \
+                    anim = (base) + 6;                                                              \
+                }                                                                                   \
+            }                                                                                       \
+        }                                                                                           \
+        if (anim != cur) {                                                                          \
+            cRiderAnimBase_play(self->mRiderAnim, anim, 0, -1.0f);                                  \
+        }                                                                                           \
+    }
+
+// Sets the look-layer anim speed from the rider's speed and (on its frame) picks the head/body look anims.
+extern "C" void func_00120378(void* vself)
+{
+    cRider* self = (cRider*)vself;
+    float sideLimit = 416.66668701171875f;
+    float upLimit = 888.888916015625f;
+    sV_120378 v = Sub_120378(*(sV_120378*)&self->mVelocity, *(sV_120378*)&self->unk_3D0);
+    float speed = Length_120378(v);
+    float rate = Clamp_120378(speed / 1666.666748046875f, 0.5f, 2.0f);
+    if (func_00311B20(self->mRiderAnim, 3)) {
+        *(float*)(func_00311B20(self->mRiderAnim, 3) + 0x90) = rate;
+    }
+    if (func_00311B20(self->mRiderAnim, 4)) {
+        *(float*)(func_00311B20(self->mRiderAnim, 4) + 0x90) = rate;
+    }
+    if (func_00311B20(self->mRiderAnim, 5)) {
+        *(float*)(func_00311B20(self->mRiderAnim, 5) + 0x90) = rate;
+    }
+    if (func_001298C8() % 6 == self->mAIIndex) {
+        int still = speed <= 138.88888549804688f;
+        if (func_0011FEE8(self) == 11) {
+            still = 0;
+            AddEq_120378(v, sV_120378(0.0f, 0.0f, 1000.0f, 0.0f));
+        }
+        sV_120378 q;
+        LOOK_120378(3, self->mBoneHead, (sLook_120378*)((char*)self + 0x940), 0x19B)
+        LOOK_120378(4, *(int*)((char*)self + 0x8AC), (sLook_120378*)((char*)self + 0x970), 0x1A2)
+        LOOK_120378(5, self->mBoneHips, (sLook_120378*)((char*)self + 0x9A0), 0x1A9)
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00120D58);
@@ -4059,7 +4274,202 @@ extern "C" void func_001278E8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00127998);
+#ifdef SKIP_ASM
+int func_0011FEE8(void*);
+extern "C" float func_00320BF0(void* pad, int axis);
+extern "C" void func_0026D178(void* cache, void* input);
+
+// One frame of pad input packed for the rider's current state (func_0011FEE8); each state has its own layout.
+// Buttons are 1 bit, analog values are 0..31 in 6 bits.
+union sRiderInput_127998 {
+    struct {
+        unsigned pad0 : 12;
+        unsigned b12 : 1, b13 : 1, b14 : 1, b15 : 1, b16 : 1, b17 : 1, b18 : 1, b19 : 1;
+        unsigned a20 : 6, a26 : 6;
+        unsigned w0 : 6, w6 : 6;
+    } s0;
+    struct {
+        unsigned pad0 : 12;
+        unsigned b12 : 1, b13 : 1, b14 : 1, b15 : 1, b16 : 1, b17 : 1;
+        unsigned a18 : 6, a24 : 6;
+        unsigned : 0;
+        unsigned w0 : 6, w6 : 6;
+    } s1;
+    struct {
+        unsigned pad0 : 12;
+        unsigned b12 : 1, b13 : 1, b14 : 1;
+        unsigned a15 : 6, a21 : 6;
+        unsigned : 0;
+        unsigned w0 : 6, w6 : 6;
+    } s2;
+    struct {
+        unsigned pad0 : 12;
+        unsigned b12 : 1, b13 : 1, b14 : 1, b15 : 1;
+        unsigned v16 : 8;
+        unsigned a24 : 6;
+        unsigned : 0;
+        unsigned w0 : 6, w6 : 6, w12 : 6;
+        int t18 : 2;
+    } s4;
+    struct {
+        unsigned pad0 : 12;
+        unsigned a12 : 6;
+    } s6;
+    struct {
+        unsigned pad0 : 12;
+        unsigned b12 : 1, b13 : 1, b14 : 1, b15 : 1, b16 : 1;
+        unsigned v17 : 8;
+        unsigned a25 : 6;
+        unsigned : 0;
+        unsigned w0 : 6, w6 : 6;
+    } s7;
+    struct {
+        unsigned pad0 : 12;
+        unsigned b12 : 1, b13 : 1;
+        unsigned a14 : 6;
+    } s11;
+    struct {
+        unsigned pad0 : 12;
+        unsigned b12 : 1, b13 : 1, b14 : 1;
+        unsigned v15 : 8;
+        unsigned a23 : 6;
+    } s12;
+};
+
+#define PAD_127998 (*(void**)(self + 0xDF0))
+
+// Reads the pad into the input record for the rider's state, and records it for replays.
+extern "C" void func_00127998(char* self, sRiderInput_127998* in)
+{
+    func_003E6448(in, 0, 8);
+    switch (func_0011FEE8(*(void**)(self + 0x18))) {
+    case 0: {
+        float k = 31.0f;
+        in->s0.b12 = func_00320C48(PAD_127998, 0x2E);
+        in->s0.b13 = func_00320C48(PAD_127998, 0x19);
+        in->s0.b14 = func_00320C48(PAD_127998, 0x11);
+        in->s0.b15 = func_00320C48(PAD_127998, 0x12);
+        in->s0.b16 = func_00320C48(PAD_127998, 0x13);
+        in->s0.b17 = func_00320C48(PAD_127998, 0x14);
+        in->s0.b18 = func_00320C48(PAD_127998, 5);
+        in->s0.b19 = func_00320C48(PAD_127998, 6);
+        in->s0.a20 = (int)(func_00320BF0(PAD_127998, 0) * k);
+        in->s0.a26 = (int)(func_00320BF0(PAD_127998, 1) * k);
+        in->s0.w0 = (int)(func_00320BF0(PAD_127998, 2) * k);
+        in->s0.w6 = (int)(func_00320BF0(PAD_127998, 3) * k);
+        break;
+    }
+    case 11:
+        in->s11.b12 = func_00320C48(PAD_127998, 0x2E);
+        in->s11.b13 = func_00320C48(PAD_127998, 0x19);
+        in->s11.a14 = (int)(func_00320BF0(PAD_127998, 0x18) * 31.0f);
+        break;
+    case 1: {
+        float k = 31.0f;
+        in->s1.b12 = func_00320C48(PAD_127998, 0x2E);
+        in->s1.b13 = func_00320C48(PAD_127998, 0x13);
+        in->s1.b14 = func_00320C48(PAD_127998, 0x14);
+        in->s1.b16 = func_00320C48(PAD_127998, 0x11);
+        in->s1.b15 = func_00320C48(PAD_127998, 0x12);
+        in->s1.b17 = func_00320C48(PAD_127998, 0x16);
+        in->s1.a24 = (int)(func_00320BF0(PAD_127998, 0x17) * k);
+        in->s1.a18 = (int)(func_00320BF0(PAD_127998, 0) * k);
+        in->s1.w0 = (int)(func_00320BF0(PAD_127998, 3) * k);
+        in->s1.w6 = (int)(func_00320BF0(PAD_127998, 4) * k);
+        break;
+    }
+    case 6:
+        in->s6.a12 = (int)(func_00320BF0(PAD_127998, 0x1A) * 31.0f);
+        break;
+    case 7: {
+        float k = 31.0f;
+        in->s7.b12 = func_00320C48(PAD_127998, 0x2E);
+        in->s7.b13 = func_00320C48(PAD_127998, 0x11);
+        in->s7.b14 = func_00320C48(PAD_127998, 0x12);
+        in->s7.b15 = func_00320C48(PAD_127998, 0x13);
+        in->s7.b16 = func_00320C48(PAD_127998, 0x14);
+        in->s7.v17 = func_00127848(self);
+        in->s7.a25 = (int)(func_00320BF0(PAD_127998, 0x17) * k);
+        in->s7.w0 = (int)(func_00320BF0(PAD_127998, 0xD) * k);
+        in->s7.w6 = (int)(func_00320BF0(PAD_127998, 3) * k);
+        break;
+    }
+    case 12:
+        in->s12.b12 = func_00320C48(PAD_127998, 0x2E);
+        in->s12.b13 = func_00320C48(PAD_127998, 0x13);
+        in->s12.b14 = func_00320C48(PAD_127998, 0x14);
+        in->s12.v15 = func_00127848(self);
+        in->s12.a23 = (int)(func_00320BF0(PAD_127998, 0x17) * 31.0f);
+        break;
+    case 2: {
+        float k = 31.0f;
+        in->s2.b12 = func_00320C48(PAD_127998, 0x2E);
+        in->s2.b13 = func_00320C48(PAD_127998, 0x12);
+        in->s2.b14 = func_00320C48(PAD_127998, 0x14);
+        in->s2.a15 = (int)(func_00320BF0(PAD_127998, 8) * k);
+        in->s2.a21 = (int)(func_00320BF0(PAD_127998, 9) * k);
+        in->s2.w0 = (int)(func_00320BF0(PAD_127998, 7) * k);
+        in->s2.w6 = (int)(func_00320BF0(PAD_127998, 0x17) * k);
+        break;
+    }
+    case 3: {
+        float k = 31.0f;
+        in->s2.b12 = func_00320C48(PAD_127998, 0x2E);
+        in->s2.b13 = func_00320C48(PAD_127998, 0x13);
+        in->s2.b14 = func_00320C48(PAD_127998, 0x14);
+        in->s2.a15 = (int)(func_00320BF0(PAD_127998, 0) * k);
+        in->s2.a21 = (int)(func_00320BF0(PAD_127998, 0x17) * k);
+        break;
+    }
+    case 4: {
+        float k = 31.0f;
+        in->s4.b12 = func_00320C48(PAD_127998, 0x2E);
+        in->s4.b13 = func_00320C48(PAD_127998, 0x19);
+        in->s4.b14 = func_00320C48(PAD_127998, 5);
+        in->s4.b15 = func_00320C48(PAD_127998, 6);
+        in->s4.v16 = func_001276F0(self);
+        in->s4.a24 = (int)(func_00320BF0(PAD_127998, 0) * k);
+        in->s4.w0 = (int)(func_00320BF0(PAD_127998, 1) * k);
+        break;
+    }
+    case 5: {
+        float k = 31.0f;
+        in->s4.b12 = func_00320C48(PAD_127998, 0x2E);
+        in->s4.b13 = func_00320C48(PAD_127998, 0x19);
+        in->s4.b14 = func_00320C48(PAD_127998, 0x15);
+        in->s4.b15 = func_00320C48(PAD_127998, 0xC);
+        in->s4.v16 = func_001276F0(self);
+        in->s4.a24 = (int)(func_00320BF0(PAD_127998, 0xE) * k);
+        in->s4.w0 = (int)(func_00320BF0(PAD_127998, 0xF) * k);
+        in->s4.w12 = (int)(func_00320BF0(PAD_127998, 0xB) * k);
+        in->s4.w6 = (int)(func_00320BF0(PAD_127998, 0xA) * k);
+        float v = func_00320BF0(PAD_127998, 3);
+        int t;
+        if (-0.5f <= v) {
+            t = 0.5f < v;
+        } else {
+            t = -1;
+        }
+        in->s4.t18 = t;
+        break;
+    }
+    case 8:
+        in->s11.b12 = func_00320C48(PAD_127998, 0x2E);
+        in->s11.b13 = func_00320C48(PAD_127998, 0x10);
+        break;
+    case 10:
+        in->s6.a12 = (int)(func_00320BF0(PAD_127998, 0) * 31.0f);
+        break;
+    case 13:
+        break;
+    }
+    if (*(void**)(self + 0xDF8)) {
+        func_0026D178(*(void**)(self + 0xDF8), in);
+    }
+}
+#endif
 
 extern "C" void* func_00111AC0(void* self);
 
