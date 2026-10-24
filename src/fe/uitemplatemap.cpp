@@ -1021,7 +1021,297 @@ extern "C" int func_00204FF0(void* self, int peak)
 
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupPeakGoals);
 
+//100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_showEventPath);
+#ifdef SKIP_ASM
+extern "C" int func_004165A8(const char* a, const char* b);
+extern int D_004A25A4;
+extern char D_004A2560[];
+extern char D_004714B0[];
+extern char D_004714C0[];
+extern char D_004714D0[];
+extern char D_004714E0[];
+extern char D_004714F0[];
+extern char D_00471500[];
+extern char D_00471510[];
+extern char D_00471520[];
+extern char D_00471530[];
+extern char D_00471548[];
+extern char D_00471558[];
+extern char D_00471568[];
+extern char D_00471580[];
+extern char D_00471590[];
+extern char D_004715A0[];
+extern char* D_004713A8[];
+extern char* D_00471420[];
+extern char* D_00471488[];
+extern char* D_004714A0[];
+extern char* D_004A26A8[];
+extern char* D_004A26B0[];
+extern char* D_004A26B8[];
+extern char* D_004A26C0[];
+extern char* D_004A26C8[];
+extern char D_00478225[][0x6C];
+extern char D_00478735[][0x6C];
+extern char D_004783D5[][0x6C];
+extern char D_00478951[][0x6C];
+extern char D_00478585[][0x6C];
+extern char D_00478B6D[][0x6C];
+
+struct sNameList2_206690 {
+    char* s[2];
+};
+struct sNameList3_206690 {
+    char* s[3];
+};
+struct sNameList5_206690 {
+    char* s[5];
+};
+struct sNameList6_206690 {
+    char* s[6];
+};
+
+// Recolours the map's event-path objects for the event or peak called `name`: objects on the
+// path get col0, the rest col1. The name lists are local copies of constant tables.
+extern "C" void cUITemplate_MAP_showEventPath(void* tmpl, char* name)
+{
+    sMapTmpl_200700* self = (sMapTmpl_200700*)tmpl;
+    sColor_202828 col0;
+    col0.a = 1.0f;
+    col0.r = 0.8901961445808411f;
+    col0.g = 0.16470588743686676f;
+    col0.b = 0.03529411926865578f;
+    sColor_202828 col1;
+    col1.a = 1.0f;
+    col1.r = 0.8705883026123047f;
+    col1.g = 0.5176470875740051f;
+    col1.b = 0.13333334028720856f;
+    sNameList6_206690 A = *(sNameList6_206690*)D_004713A8;
+    sNameList6_206690 B = *(sNameList6_206690*)D_00471420;
+    sNameList5_206690 C = *(sNameList5_206690*)D_00471488;
+    sNameList3_206690 D = *(sNameList3_206690*)D_004714A0;
+    sNameList2_206690 E = *(sNameList2_206690*)D_004A26A8;
+    sNameList2_206690 F = *(sNameList2_206690*)D_004A26B0;
+    sNameList2_206690 G = *(sNameList2_206690*)D_004A26B8;
+    sNameList2_206690 H = *(sNameList2_206690*)D_004A26C0;
+    sNameList2_206690 I = *(sNameList2_206690*)D_004A26C8;
+    cUIPic_202828* obj;
+
+
+    if (cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name)) != 0
+        || func_004165A8(name, D_004A2560) == 0) {
+        switch (D_004A25A4) {
+        case 0:
+            for (int i = 0; i < 6; i++) {
+                obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(A.s[i]));
+                if (obj != 0) {
+                    if (func_004165A8(A.s[i], name) == 0) {
+                        obj->v11(&col0);
+                    } else {
+                        obj->v11(&col1);
+                    }
+                }
+            }
+            break;
+        case 1:
+            for (int i = 0; i < 6; i++) {
+                obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(B.s[i]));
+                if (obj != 0) {
+                    if (func_004165A8(B.s[i], name) == 0) {
+                        obj->v11(&col0);
+                    } else {
+                        obj->v11(&col1);
+                    }
+                }
+            }
+            break;
+        case 2:
+            for (int i = 0; i < 5; i++) {
+                obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(C.s[i]));
+                if (obj != 0) {
+                    if (func_004165A8(C.s[i], name) == 0) {
+                        obj->v11(&col0);
+                    } else {
+                        obj->v11(&col1);
+                    }
+                }
+            }
+            break;
+        }
+    } else if (func_004165A8(name, D_004714B0) == 0) {
+        for (int i = 0; i < 6; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(A.s[i]));
+            if (obj != 0) {
+                obj->v11(&col1);
+                for (int j = 0; j < 3; j++) {
+                    if (func_004165A8(A.s[i], D.s[j]) == 0) {
+                        obj->v11(&col0);
+                    }
+                }
+            }
+        }
+    } else if (func_004165A8(name, D_004714C0) == 0) {
+        for (int i = 0; i < 6; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(A.s[i]));
+            if (obj != 0) {
+                obj->v11(&col1);
+                for (int j = 0; j < 2; j++) {
+                    if (func_004165A8(A.s[i], E.s[j]) == 0) {
+                        obj->v11(&col0);
+                    }
+                }
+            }
+        }
+    } else if (func_004165A8(name, D_004714D0) == 0) {
+        for (int i = 0; i < 6; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(B.s[i]));
+            if (obj != 0) {
+                obj->v11(&col1);
+                for (int j = 0; j < 2; j++) {
+                    if (func_004165A8(B.s[i], F.s[j]) == 0) {
+                        obj->v11(&col0);
+                    }
+                }
+            }
+        }
+    } else if (func_004165A8(name, D_004714E0) == 0) {
+        for (int i = 0; i < 6; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(B.s[i]));
+            if (obj != 0) {
+                obj->v11(&col1);
+                for (int j = 0; j < 2; j++) {
+                    if (func_004165A8(B.s[i], G.s[j]) == 0) {
+                        obj->v11(&col0);
+                    }
+                }
+            }
+        }
+    } else if (func_004165A8(name, D_004714F0) == 0) {
+        for (int i = 0; i < 5; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(C.s[i]));
+            if (obj != 0) {
+                obj->v11(&col1);
+                for (int j = 0; j < 2; j++) {
+                    if (func_004165A8(C.s[i], H.s[j]) == 0) {
+                        obj->v11(&col0);
+                    }
+                }
+            }
+        }
+    } else if (func_004165A8(name, D_00471500) == 0) {
+        for (int i = 0; i < 5; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(C.s[i]));
+            if (obj != 0) {
+                obj->v11(&col1);
+                for (int j = 0; j < 2; j++) {
+                    if (func_004165A8(C.s[i], I.s[j]) == 0) {
+                        obj->v11(&col0);
+                    }
+                }
+            }
+        }
+    } else if (func_004165A8(name, D_00471510) == 0) {
+        for (int i = 0; i < 6; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(A.s[i]));
+            if (obj != 0) {
+                obj->v11(&col1);
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478225[i]));
+            if (obj != 0) {
+                obj->v11(&col0);
+            }
+        }
+    } else if (func_004165A8(name, D_00471520) == 0) {
+        for (int i = 0; i < 6; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(A.s[i]));
+            if (obj != 0) {
+                obj->v11(&col1);
+            }
+        }
+        for (int i = 0; i < 4; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478735[i]));
+            if (obj != 0) {
+                obj->v11(&col0);
+            }
+        }
+    } else if (func_004165A8(name, D_00471530) == 0) {
+        for (int i = 0; i < 6; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(A.s[i]));
+            if (obj != 0) {
+                obj->v11(&col0);
+            }
+        }
+    } else if (func_004165A8(name, D_00471548) == 0) {
+        for (int i = 0; i < 6; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(B.s[i]));
+            if (obj != 0) {
+                obj->v11(&col1);
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004783D5[i]));
+            if (obj != 0) {
+                obj->v11(&col0);
+            }
+        }
+    } else if (func_004165A8(name, D_00471558) == 0) {
+        for (int i = 0; i < 6; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(B.s[i]));
+            if (obj != 0) {
+                obj->v11(&col1);
+            }
+        }
+        for (int i = 0; i < 4; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478951[i]));
+            if (obj != 0) {
+                obj->v11(&col0);
+            }
+        }
+    } else if (func_004165A8(name, D_00471568) == 0) {
+        for (int i = 0; i < 6; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(B.s[i]));
+            if (obj != 0) {
+                obj->v11(&col0);
+            }
+        }
+    } else if (func_004165A8(name, D_00471580) == 0) {
+        for (int i = 0; i < 5; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(C.s[i]));
+            if (obj != 0) {
+                obj->v11(&col1);
+            }
+        }
+        for (int i = 0; i < 2; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478585[i]));
+            if (obj != 0) {
+                obj->v11(&col0);
+            }
+        }
+    } else if (func_004165A8(name, D_00471590) == 0) {
+        for (int i = 0; i < 5; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(C.s[i]));
+            if (obj != 0) {
+                obj->v11(&col1);
+            }
+        }
+        for (int i = 0; i < 4; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478B6D[i]));
+            if (obj != 0) {
+                obj->v11(&col0);
+            }
+        }
+    } else if (func_004165A8(name, D_004715A0) == 0) {
+        for (int i = 0; i < 5; i++) {
+            obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(C.s[i]));
+            if (obj != 0) {
+                obj->v11(&col0);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/uitemplatemap", func_00207430);
 

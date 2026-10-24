@@ -701,7 +701,271 @@ extern "C" void func_0016E1D8(sCamEvt_E1D8* evt, char* rider)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016E560);
+#ifdef SKIP_ASM
+struct sCtmV3_E560 {
+    float x, y, z;
+    sCtmV3_E560() {}
+    sCtmV3_E560(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+};
+
+inline sCtmV3_E560 operator-(const sCtmV3_E560& a)
+{
+    return sCtmV3_E560(-a.x, -a.y, -a.z);
+}
+
+struct sCtmV_E560 {
+    float x, y, z, w;
+    sCtmV_E560() {}
+    sCtmV_E560(const sCtmV3_E560& v, float aw) : x(v.x), y(v.y), z(v.z), w(aw) {}
+    sCtmV_E560(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sCtmM_E560 {
+    float m[4][4];
+    sCtmM_E560() {}
+    // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+    sCtmM_E560(const sCtmM_E560& s)
+    {
+        __asm__ __volatile__(
+            ".set noreorder\n"
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            ".set reorder\n"
+            :
+            : "r"(this), "r"(&s)
+            : "memory");
+    }
+    // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+    sCtmM_E560& operator=(const sCtmM_E560& s)
+    {
+        __asm__ __volatile__(
+            ".set noreorder\n"
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            ".set reorder\n"
+            :
+            : "r"(this), "r"(&s)
+            : "memory");
+        return *this;
+    }
+} __attribute__((aligned(16)));
+
+extern sCtmM_E560 D_004FF1A0_E560 __asm__("D_004FF1A0");
+extern sCtmV_E560 D_004FF140_E560 __asm__("D_004FF140");
+extern sCtmV_E560 D_004FF150_E560 __asm__("D_004FF150");
+extern sCtmV_E560 D_004FF160_E560 __asm__("D_004FF160");
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
+static inline void ctmMulMtx_E560(sCtmM_E560* dst, const sCtmM_E560* a, const sCtmM_E560* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(a), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
+static inline void ctmTransMtx_E560(sCtmM_E560* m, const sCtmV_E560& v)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf4, 0x0(%0)\n"
+        "lqc2         $vf5, 0x10(%0)\n"
+        "lqc2         $vf6, 0x20(%0)\n"
+        "lqc2         $vf7, 0x30(%0)\n"
+        "lqc2         $vf8, %1\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "m"(v)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (scale the rows of m by v: dst.row[i] = m.row[i] * v[i]).
+static inline sCtmM_E560 ctmScaleMtx_E560(const sCtmM_E560* m, const sCtmV_E560& v)
+{
+    sCtmM_E560 d;
+    sCtmM_E560* dst = &d;
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf1, %2\n"
+        "lqc2         $vf4, 0x0(%1)\n"
+        "lqc2         $vf5, 0x10(%1)\n"
+        "lqc2         $vf6, 0x20(%1)\n"
+        "lqc2         $vf7, 0x30(%1)\n"
+        "vmulx.xyzw   $vf8, $vf4, $vf1x\n"
+        "vmuly.xyzw   $vf9, $vf5, $vf1y\n"
+        "vmulz.xyzw   $vf10, $vf6, $vf1z\n"
+        "vmulw.xyzw   $vf11, $vf7, $vf1w\n"
+        "sqc2         $vf8, 0x0(%0)\n"
+        "sqc2         $vf9, 0x10(%0)\n"
+        "sqc2         $vf10, 0x20(%0)\n"
+        "sqc2         $vf11, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(m), "m"(v)
+        : "memory");
+    return d;
+}
+
+// PORT: PS2-only VU0 inline asm (out = m * v).
+static inline sCtmV_E560 ctmApplyMtx_E560(const sCtmM_E560* m, const sCtmV_E560& v)
+{
+    sCtmV_E560 out;
+    __asm__(
+        ".set noreorder\n"
+        "lqc2         $vf8, %2\n"
+        "lqc2         $vf4, 0x0(%1)\n"
+        "lqc2         $vf5, 0x10(%1)\n"
+        "lqc2         $vf6, 0x20(%1)\n"
+        "lqc2         $vf7, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        ".set reorder\n"
+        : "=m"(out)
+        : "r"(m), "m"(v)
+        : "memory");
+    return out;
+}
+
+static inline void ctmRotAxis_E560(sCtmM_E560* m, const sCtmV_E560& axis, float angle)
+{
+    float s;
+    float c;
+    float one = 1.0f;
+    func_0031BE50(&s, &c, angle);
+    sCtmM_E560 r;
+    float t = one - c;
+    float x = axis.x;
+    float y = axis.y;
+    float z = axis.z;
+    float tx = t * x;
+    float ty = t * y;
+    float tz = t * z;
+    float sx = s * x;
+    float sy = s * y;
+    float sz = s * z;
+    r.m[0][0] = tx * x + c;
+    r.m[1][0] = tx * y + sz;
+    r.m[2][0] = tx * z - sy;
+    r.m[0][1] = ty * x - sz;
+    r.m[1][1] = ty * y + c;
+    r.m[2][1] = ty * z + sx;
+    r.m[0][2] = tz * x + sy;
+    r.m[1][2] = tz * y - sx;
+    r.m[2][2] = tz * z + c;
+    r.m[3][0] = 0.0f;
+    r.m[3][1] = 0.0f;
+    r.m[3][2] = 0.0f;
+    r.m[0][3] = 0.0f;
+    r.m[1][3] = 0.0f;
+    r.m[2][3] = 0.0f;
+    r.m[3][3] = one;
+    ctmMulMtx_E560(m, m, &r);
+}
+
+
+// PORT: PS2-only VU0 inline asm (normalize xyzw with vrsqrt).
+static inline sCtmV_E560 ctmNormalize_E560(const sCtmV_E560& v)
+{
+    sCtmV_E560 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// Pushes *p out to the surface of the trigger's ellipsoid when it lies inside: into trigger space
+// (inverse of func_00170240's transform), normalize, and back to world space.
+extern "C" void func_0016E560(char* src, sCtmV_E560* p)
+{
+    sCtmM_E560 m(D_004FF1A0_E560);
+    float one = 1.0f;
+    m = ctmScaleMtx_E560(&m, sCtmV_E560(one / *(float*)(src + 0x18), one / *(float*)(src + 0x1C), one / *(float*)(src + 0x20), one));
+    ctmRotAxis_E560(&m, D_004FF160_E560, -*(float*)(src + 0xC));
+    ctmRotAxis_E560(&m, D_004FF150_E560, -*(float*)(src + 0x14));
+    ctmRotAxis_E560(&m, D_004FF140_E560, -*(float*)(src + 0x10));
+    ctmTransMtx_E560(&m, sCtmV_E560(-*(sCtmV3_E560*)(src + 0x0), one));
+    sCtmV_E560 v = ctmApplyMtx_E560(&m, *p);
+    v.w = 0.0f;
+    if (v.x * v.x + v.y * v.y + v.z * v.z < one) {
+        return;
+    }
+    v = ctmNormalize_E560(v);
+    v.w = one;
+    m = D_004FF1A0_E560;
+    ctmTransMtx_E560(&m, sCtmV_E560(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
+    ctmRotAxis_E560(&m, D_004FF140_E560, *(float*)(src + 0x10));
+    ctmRotAxis_E560(&m, D_004FF150_E560, *(float*)(src + 0x14));
+    ctmRotAxis_E560(&m, D_004FF160_E560, *(float*)(src + 0xC));
+    m = ctmScaleMtx_E560(&m, sCtmV_E560(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
+    *p = ctmApplyMtx_E560(&m, v);
+    p->w = one;
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016F068);
 
