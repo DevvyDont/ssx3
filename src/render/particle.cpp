@@ -6606,9 +6606,9 @@ extern "C" void func_00423DD0(int sema);
 extern "C" void func_003825F8(void* self)
 {
     int t = ++*(int*)((char*)self + 0x5ABC);
-    if (*(int*)((char*)self + 0x5A8C) == 4) {
+    if (*(volatile int*)((char*)self + 0x5A8C) == 4) {
         if (t >= *(int*)((char*)self + 0x5AB8)) {
-            *(int*)((char*)self + 0x5A8C) = 5;
+            *(volatile int*)((char*)self + 0x5A8C) = 5;
             *(int*)((char*)self + 0x5ABC) = 0;
             func_00423DD0(*(int*)((char*)self + 0x5AC8));
         }
@@ -6672,7 +6672,7 @@ INCLUDE_ASM("render/particle", func_00382730);
 #ifdef SKIP_ASM
 extern "C" int func_00382730(void* self)
 {
-    return *(unsigned int*)((char*)self + 0x5a8c) == 0;
+    return *(volatile unsigned int*)((char*)self + 0x5a8c) == 0;
 }
 #endif
 
