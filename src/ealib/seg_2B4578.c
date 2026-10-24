@@ -4912,7 +4912,26 @@ void func_003C09B8(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C0A60);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_003C4978_0A60(int, int, unsigned int, int) __asm__("func_003C4978");
+extern int D_0050A94C_0A60[] __asm__("D_0050A94C");
+extern char D_0050AD00_0A60[] __asm__("D_0050AD00");
+
+void func_003C0A60(void) {
+    char *b = D_0050AD00_0A60;
+    func_003C4978_0A60(*(int *)(b + 0x1B38), D_0050A94C_0A60[0], *(unsigned short *)(b + 0x1AAE) >> 4, 0x10000);
+    *(volatile int *)0x1000D010 = *(int *)(b + 0x1B1C);
+    *(volatile int *)0x1000D080 = *(int *)(b + 0x1B20);
+    *(volatile int *)0x1000D020 = *(int *)(b + 0x1B24);
+    *(volatile int *)0x1000D410 = *(int *)(b + 0x1B28);
+    *(volatile int *)0x1000D430 = *(int *)(b + 0x1B2C);
+    *(volatile int *)0x1000D480 = *(int *)(b + 0x1B30);
+    *(volatile int *)0x1000D420 = *(int *)(b + 0x1B34);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C0B10);
 
