@@ -7962,7 +7962,109 @@ void func_003C8148(signed char arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C8158);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Par_8158 { int a, b, c, d, e, f, one, id, flag, g, result; };
+struct Obj_8158 { int pad0; int x4; char pad8[0x10]; short x18; signed char x1A; };
+struct Ent_8158 {
+    char active;
+    char pad1[0x3F];
+    int x40;
+    int result;
+    struct Obj_8158 *obj;
+    struct Obj_8158 *strm;
+    int x50;
+    int pad54;
+    int x58;
+    int x5C;
+};
+struct G_8158 {
+    char pad[0x18];
+    void (*fn[6][3])(struct Obj_8158 *, struct Par_8158 *);
+    int size[6][3];
+    char pad2[0x1DC - 0xA8];
+    struct Ent_8158 *ents;
+};
+extern struct G_8158 D_00515B40_8158 __asm__("D_00515B40");
+extern unsigned char D_0050AA62_8158 __asm__("D_0050AA62");
+extern struct Obj_8158 *f_5C60_8158(int) __asm__("func_003B5C60");
+extern void f_8F48_8158(int *, struct Obj_8158 *) __asm__("func_003C8F48");
+extern void f_B280_8158(struct Obj_8158 *, int, int) __asm__("func_003CB280");
+
+void func_003C8158(int id, int fmt, int ch, int a, int b, int strm, int c, int d,
+                   int e, int f, int u10, int u11, int g, int prio) {
+    struct Par_8158 p;
+    struct Ent_8158 *ent;
+    int n, k;
+
+    ent = &D_00515B40_8158.ents[id];
+    ent->x40 = 0;
+    ent->obj = 0;
+    ent->x50 = 0;
+    ent->x58 = 0;
+    ent->x5C = 0;
+    ent->strm = 0;
+    p.one = 1;
+    p.result = 0;
+    n = -1;
+    if (fmt == 8) {
+        n = 0;
+    } else if (fmt == 10) {
+        n = 1;
+    } else if (fmt == 4) {
+        n = 2;
+    } else if (fmt == 22) {
+        n = 3;
+    } else if (fmt == 16) {
+        n = 4;
+    } else if (fmt == 23) {
+        n = 5;
+    }
+    if (ch == 1) {
+        k = 0;
+        if (f >= 1) {
+            k = 1;
+        }
+    } else {
+        k = 2;
+        if (ch != 0) {
+            k = 0;
+        }
+    }
+    if (D_00515B40_8158.fn[n][k] != 0) {
+        ent->obj = f_5C60_8158(D_00515B40_8158.size[n][k]);
+        p.a = a;
+        p.b = b;
+        p.c = c;
+        p.g = g;
+        p.d = d;
+        p.e = e;
+        p.f = f;
+        p.flag = D_0050AA62_8158;
+        p.id = id;
+        ent->obj->x4 = 0;
+        ent->obj->x18 = 0xF0;
+        ent->obj->x1A = prio;
+        D_00515B40_8158.fn[n][k](ent->obj, &p);
+        ent->result = p.result;
+        f_8F48_8158(&ent->x40, ent->obj);
+    }
+    if (strm != 0) {
+        if (ch != 0) {
+            id = -1;
+        }
+        ent->strm = f_5C60_8158(0x1828);
+        ent->strm->x4 = 0;
+        ent->strm->x18 = 0xC8;
+        ent->strm->x1A = prio;
+        f_B280_8158(ent->strm, strm, id);
+        f_8F48_8158(&ent->x40, ent->strm);
+    }
+    ent->active = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C83A0);

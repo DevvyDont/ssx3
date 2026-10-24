@@ -4173,7 +4173,198 @@ extern "C" void func_0029AB08(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029AB40);
+#ifdef SKIP_ASM
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+extern "C" int func_00288AE0(void* self);
+extern "C" void* func_0028B1C8();
+extern "C" void* func_0028B1D8();
+extern "C" int func_00270280(void* p);
+// PORT: func_002ADCA0 returns int; the unit declares it void elsewhere.
+extern "C" int func_002ADCA0_AB40(void*, int, long, int, int, int, int, int) __asm__("func_002ADCA0");
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern signed char D_00535C11[];
+extern int D_004A2A50;
+
+struct sSndKey8_AB40 {
+    long v;
+} __attribute__((packed));
+extern const sSndKey8_AB40 D_004A36C0_AB40[] __asm__("D_004A36C0");
+
+#define SND_AB40_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_AB40_MAX(a, b) ((a) > (b) ? (a) : (b))
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ffloor_AB40(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+struct sMon_AB40 {
+    char pad0[4];
+    float f4;
+    float f8;
+};
+struct sMon1B0_AB40 {
+    char pad[0x3A8];
+    sMon_AB40 m;
+};
+struct sMon790_AB40 {
+    char pad[0x1B0];
+    sMon1B0_AB40* p1B0;
+};
+struct sRider_AB40 {
+    char pad0[0x2F0];
+    float f2F0;
+    char pad2F4[0x470 - 0x2F4];
+    float f470;
+    char pad474[0x790 - 0x474];
+    sMon790_AB40* p790;
+    char pad794[0x870 - 0x794];
+    int f870;
+    int f874;
+    int f878;
+    int f87C;
+};
+
+struct sSndAB40Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSndAB40E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSndAB40Sub {
+    char pad0[4];
+    sSndAB40Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSndAB40Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSndAB40E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSndAB40Mgr {
+    char pad0[0x1D8];
+    sSndAB40Sub sub;         // 0x1D8
+};
+struct sSndAB40Sys {
+    sSndAB40Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSndAB40Mgr** p118;      // 0x118
+    char pad11C[0x5FE0 - 0x11C];
+    int arr1[2];             // 0x5FE0
+    unsigned short arr2[2];  // 0x5FE8
+    int arr3[2];             // 0x5FEC
+};
+
+static inline int sndAB40Add(void* vself, int a, int b, int type)
+{
+    sSndAB40Sys* self = (sSndAB40Sys*)vself;
+    sSndAB40Mgr* m = self->mgr;
+    sSndAB40Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSndAB40Mgr* m2 = *self->p118;
+    sSndAB40Sub* s2 = &m2->sub;
+    s2->vals[m2->sub.cur] = 0x7F;
+    s2->ch[m2->sub.cur].vol = SND_AB40_MAX(0, SND_AB40_MIN(s2->vals[s2->cur], 0x7F));
+    sSndAB40Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, type, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    return func_002906B8(self);
+}
+
+// PORT: 64-bit long sound key; PS2-only FPU asm
+extern "C" void func_0029AB40(void* vself)
+{
+    sSndAB40Sys* self = (sSndAB40Sys*)vself;
+    char* base = (char*)vself;
+    if (func_00288AE0(self) != 0) return;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    int n = 1;
+    if (D_00535C11[0] == 2) n = 2;
+    for (int i = 0; i < n; i++) {
+        sRider_AB40* r0 = *(sRider_AB40**)((char*)func_0028B1D8() + (i << 2) + 0x28);
+        bool ok = r0->f874 && r0->f87C;
+        if (!ok) continue;
+        sRider_AB40* rider = *(sRider_AB40**)((char*)func_0028B1D8() + (i << 2) + 0x28);
+        sMon1B0_AB40* mon = rider->p790->p1B0;
+        sMon_AB40* mp = mon ? &mon->m : 0;
+        int v = (int)ffloor_AB40(mp->f8 / mp->f4 * 10.0f);
+        if (self->arr1[i] < v && v > 0) {
+            void* sub = &(*self->p118)->sub;
+            int h = (int)func_00287968(self, 9, 0);
+            func_002ADCA0_AB40(sub, 0x96, D_004A36C0_AB40[0].v, h, 0, 0x65, 0x7F, self->arr2[rider->f870]);
+            self->arr2[rider->f870] += 0x100;
+        }
+        self->arr1[i] = v;
+        int w = (int)ffloor_AB40(rider->f2F0 * 2.0f);
+        if (w > 0) {
+            if (w == self->arr3[i] - 1) {
+                if (w >= 13) {
+                } else if ((w & 1) && w >= 5) {
+                } else {
+                    int c = 1;
+                    int pos = rider->f470 >= 0.0f;
+                    if (pos) c = 0;
+                    if ((D_004A2A50 & 1) || func_00270280(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) c = 0;
+                    if (*(int*)((char*)func_0028B1C8() + 0x214) != 4) c = 0;
+                    if (c) {
+                        sndAB40Add(self, 0, 0x68, 9);
+                    }
+                }
+            }
+        }
+        self->arr3[i] = w;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029B0E0);
