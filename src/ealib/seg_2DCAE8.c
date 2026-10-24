@@ -4158,7 +4158,40 @@ void func_003E3AD8(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3B00);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern int D_00519C40_3B00[] __asm__("D_00519C40");
+extern int func_00401DF8_3B00(int, int, int, int *) __asm__("func_00401DF8");
+extern void func_004013E8_3B00(int) __asm__("func_004013E8");
+void func_003E3B00(void) {
+    int *q = &D_00519C40_3B00[8];
+    int *p = D_00519C40_3B00;
+    int arg;
+    int ok;
+    int i;
+    if (p[0] & 1) {
+        arg = p[15];
+    } else {
+        arg = q[5];
+    }
+    ok = 0;
+    for (i = 0; i < 3; i++) {
+        if (func_00401DF8_3B00(q[3], q[4], arg, &D_00519C40_3B00[7]) != 0) {
+            D_00519C40_3B00[0] |= 2;
+            ok = 1;
+            break;
+        }
+        func_003E35B0(i + 1);
+        func_004013E8_3B00(0);
+    }
+    if (!ok) {
+        D_00519C40_3B00[0] |= 6;
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3BE0);
 

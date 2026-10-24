@@ -7568,7 +7568,30 @@ unsigned int func_003C6DE0(int id, int r, int *len, int *flag) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7010);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7080);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct Q_7080 { char pad[0x54]; void (*f54)(int, int); void (*f58)(int, int, int); int f5C; };
+struct Ev_7080 { unsigned short type; unsigned short id; int val; };
+struct G_7080 { int count; struct Ev_7080 ev[0x60]; struct Q_7080 *q[1]; };
+extern struct G_7080 D_005157B8_7080 __asm__("D_005157B8");
+
+void func_003C7080(void) {
+    int i;
+    for (i = 0; i < D_005157B8_7080.count; i++) {
+        struct Ev_7080 *ev = &D_005157B8_7080.ev[i];
+        struct Q_7080 *q = D_005157B8_7080.q[ev->id];
+        if (ev->type == 0) {
+            q->f58(ev->id, ev->val, q->f5C);
+        } else {
+            q->f54(ev->val, q->f5C);
+        }
+    }
+    D_005157B8_7080.count = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7138);
@@ -11566,7 +11589,50 @@ done:
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D0D70);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct E_0D70 { char b0; unsigned char b1; unsigned char b2; };
+struct G_0D70 { char pad[0x58]; struct E_0D70 *list[24]; };
+struct T_0D70 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+extern unsigned char D_0044F42C_0D70 __asm__("D_0044F42C");
+extern int D_0044F430_0D70 __asm__("D_0044F430");
+extern struct G_0D70 *D_0044F420_0D70 __asm__("D_0044F420");
+extern struct T_0D70 D_00517610_0D70[] __asm__("D_00517610");
+extern int func_003D5450_0D70(int) __asm__("func_003D5450");
+
+static inline unsigned int has_0D70(unsigned int a, unsigned int b) { return a & b; }
+
+int func_003D0D70(unsigned int mask, unsigned int val) {
+    int i, j;
+    if (D_0044F42C_0D70 == 0 || D_0044F430_0D70 != 0 || func_003D5450_0D70(-1) == 0) {
+        return -18;
+    }
+    if (val < 0x80) {
+        for (i = 0; i < 4; i++) {
+            unsigned int v;
+            if (D_00517610_0D70[i].f34 == 0) continue;
+            v = D_00517610_0D70[i].f30;
+            if (has_0D70(v & 0xF0000000, mask) == 0) continue;
+            if (has_0D70(v & 0x0F000000, mask) == 0) continue;
+            if (func_003D5450_0D70(i & 0xFF) == 0) continue;
+            for (j = 0; j < 24; j++) {
+                struct E_0D70 *e = D_0044F420_0D70->list[j];
+                if (e != 0) {
+                    unsigned char t = e->b1;
+                    e->b1 = val;
+                    e->b2 = t;
+                }
+            }
+        }
+    }
+    D_0044F430_0D70 = 0;
+    D_0044F420_0D70 = 0;
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D0ED0);
@@ -11752,7 +11818,47 @@ done:
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D1470);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct E_1470 { char pad[0x36]; short h36; char pad2[0x1C]; int f54; };
+struct G_1470 { char pad[0x58]; struct E_1470 *list[24]; };
+extern unsigned char D_0044F42C_1470 __asm__("D_0044F42C");
+extern int D_0044F430_1470 __asm__("D_0044F430");
+extern struct G_1470 *D_0044F420_1470 __asm__("D_0044F420");
+struct T_1470 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+extern struct T_1470 D_00517610_1470[] __asm__("D_00517610");
+extern int func_003D5450_1470(int) __asm__("func_003D5450");
+extern void func_002AF838_1470(int) __asm__("func_002AF838");
+
+static inline unsigned int has_1470(unsigned int a, unsigned int b) { return a & b; }
+
+void func_003D1470(unsigned int mask) {
+    int i, j;
+    if (D_0044F42C_1470 == 0) return;
+    if (D_0044F430_1470 != 0) return;
+    if (func_003D5450_1470(-1) == 0) return;
+    for (i = 0; i < 4; i++) {
+        unsigned int v;
+        if (D_00517610_1470[i].f34 == 0) continue;
+        v = D_00517610_1470[i].f30;
+        if (has_1470(v & 0xF0000000, mask) == 0) continue;
+        if (has_1470(v & 0x0F000000, mask) == 0) continue;
+        if (func_003D5450_1470(i) == 0) continue;
+        for (j = 0; j < 24; j++) {
+            struct E_1470 *e = D_0044F420_1470->list[j];
+            if (e != 0) {
+                func_002AF838_1470(e->f54);
+                e->h36 = -1;
+            }
+        }
+    }
+    D_0044F420_1470 = 0;
+    D_0044F430_1470 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D15C8);
@@ -13259,11 +13365,131 @@ void func_003D54E8(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5508);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// Same walk as func_003D1038: clamps val to 0..100 and applies it to every voice
+// in mask through func_003D62C8.
+struct G_5508 { char pad[0x58]; void *list[24]; };
+struct T_5508 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+extern unsigned char D_0044F42C_5508 __asm__("D_0044F42C");
+extern signed char D_0044F42E_5508 __asm__("D_0044F42E");
+extern int D_0044F430_5508 __asm__("D_0044F430");
+extern struct G_5508 *D_0044F420_5508 __asm__("D_0044F420");
+extern struct T_5508 D_00517610_5508[] __asm__("D_00517610");
+extern int func_003D5450_5508(int) __asm__("func_003D5450");
+extern void func_003D62C8_5508(void *, int) __asm__("func_003D62C8");
 
+static inline unsigned int has_5508(unsigned int a, unsigned int b) { return a & b; }
+
+void func_003D5508(unsigned int mask, signed char val) {
+    int i, j;
+    if (D_0044F42C_5508 == 0) return;
+    if (D_0044F430_5508 != 0) return;
+    if (func_003D5450_5508(-1) == 0) return;
+    if (val > 100) val = 100;
+    if (val < 0) val = 0;
+    if (mask == 0xFFFFFFFF) D_0044F42E_5508 = val;
+    for (i = 0; i < 4; i++) {
+        unsigned int v;
+        if (D_00517610_5508[i].f34 == 0) continue;
+        v = D_00517610_5508[i].f30;
+        if (has_5508(v & 0xF0000000, mask) == 0) continue;
+        if (has_5508(v & 0x0F000000, mask) == 0) continue;
+        if (func_003D5450_5508(i) == 0) continue;
+        for (j = 0; j < 24; j++) {
+            void *e = D_0044F420_5508->list[j];
+            if (e != 0 && (((mask >> j) ^ 1) & 1) == 0) {
+                func_003D62C8_5508(e, val);
+            }
+        }
+    }
+    D_0044F430_5508 = 0;
+    D_0044F420_5508 = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5698);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct G_5698 { char pad[0x18]; int f18; char pad2[0x58 - 0x1C]; void *list[24]; };
+struct T_5698 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+extern unsigned char D_0044F42C_5698 __asm__("D_0044F42C");
+extern int D_0044F430_5698 __asm__("D_0044F430");
+extern struct G_5698 *D_0044F420_5698 __asm__("D_0044F420");
+extern struct T_5698 D_00517610_5698[] __asm__("D_00517610");
+extern int func_003D5450_5698(int) __asm__("func_003D5450");
+extern void func_003D6318_5698(void *, int, int, int) __asm__("func_003D6318");
 
+static inline unsigned int has_5698(unsigned int a, unsigned int b) { return a & b; }
+
+void func_003D5698(unsigned int mask, int a, int b) {
+    int i, j;
+    if (D_0044F42C_5698 == 0) return;
+    if (D_0044F430_5698 != 0) return;
+    if (func_003D5450_5698(-1) == 0) return;
+    for (i = 0; i < 4; i++) {
+        unsigned int v;
+        if (D_00517610_5698[i].f34 == 0) continue;
+        v = D_00517610_5698[i].f30;
+        if (has_5698(v & 0xF0000000, mask) == 0) continue;
+        if (has_5698(v & 0x0F000000, mask) == 0) continue;
+        if (func_003D5450_5698(i) == 0) continue;
+        for (j = 0; j < 24; j++) {
+            void *e = D_0044F420_5698->list[j];
+            if (e != 0 && (((mask >> j) ^ 1) & 1) == 0) {
+                func_003D6318_5698(e, a, b, D_0044F420_5698->f18);
+            }
+        }
+    }
+    D_0044F430_5698 = 0;
+    D_0044F420_5698 = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5800);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct G_5800 { char pad[0x18]; int f18; char pad2[0x58 - 0x1C]; void *list[24]; };
+struct T_5800 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+extern unsigned char D_0044F42C_5800 __asm__("D_0044F42C");
+extern int D_0044F430_5800 __asm__("D_0044F430");
+extern struct G_5800 *D_0044F420_5800 __asm__("D_0044F420");
+extern struct T_5800 D_00517610_5800[] __asm__("D_00517610");
+extern int func_003D5450_5800(int) __asm__("func_003D5450");
+extern void func_003D6360_5800(void *, int, int, int) __asm__("func_003D6360");
+
+static inline unsigned int has_5800(unsigned int a, unsigned int b) { return a & b; }
+
+void func_003D5800(unsigned int mask, int a, int b) {
+    int i, j;
+    if (D_0044F42C_5800 == 0) return;
+    if (D_0044F430_5800 != 0) return;
+    if (func_003D5450_5800(-1) == 0) return;
+    for (i = 0; i < 4; i++) {
+        unsigned int v;
+        if (D_00517610_5800[i].f34 == 0) continue;
+        v = D_00517610_5800[i].f30;
+        if (has_5800(v & 0xF0000000, mask) == 0) continue;
+        if (has_5800(v & 0x0F000000, mask) == 0) continue;
+        if (func_003D5450_5800(i) == 0) continue;
+        for (j = 0; j < 24; j++) {
+            void *e = D_0044F420_5800->list[j];
+            if (e != 0 && (((mask >> j) ^ 1) & 1) == 0) {
+                func_003D6360_5800(e, a, b, D_0044F420_5800->f18);
+            }
+        }
+    }
+    D_0044F430_5800 = 0;
+    D_0044F420_5800 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5968);
