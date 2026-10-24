@@ -2356,7 +2356,337 @@ extern "C" void func_0024E7C8(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/debugmenu", func_0024E8D8);
+#ifdef SKIP_ASM
+struct sV4_E8D8 {
+    float x, y, z, w;
+    sV4_E8D8(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+    // Class-scope placement new: the unit's global one is defined later (func_00250CB0).
+    void* operator new(unsigned int, void* p) { return p; }
+} __attribute__((aligned(16)));
+
+struct sSlot_E8D8 {
+    unsigned a : 8;
+    unsigned b : 24;
+    int c;
+    sSlot_E8D8(int n) { a = n; b = n; }
+    void* operator new(unsigned int, void* p) { return p; }
+};
+
+extern "C" void func_002CA280(void* p, int flags);
+extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void* cRenderTogglesMenu_cRenderTogglesMenu(void* self);
+extern "C" void func_0024D710(void* self, int flags);
+extern "C" void* cVisualEffectsTestMenu_cVisualEffectsTestMenu(void* self);
+extern "C" void func_0024D998(void* self, int flags);
+extern "C" void* cLightGlowMenu_cLightGlowMenu(void* self);
+extern "C" void func_0024DAB8(void* self, int flags);
+extern "C" void* cPlantsMenu_cPlantsMenu(void* self);
+extern "C" void* cDepthFogMenu_cDepthFogMenu(void* self);
+extern "C" void func_0024DC68(void* self, int flags);
+extern "C" void* cHeightFogMenu_cHeightFogMenu(void* self);
+extern "C" void* cDetailSystemMenu_cDetailSystemMenu(void* self);
+extern "C" void* cScreenTintMenu_cScreenTintMenu(void* self);
+extern "C" void func_0024DD70(void* self, int flags);
+extern "C" void* cShadowMenu_cShadowMenu(void* self);
+extern "C" void* cSnowSurfaceMenu_cSnowSurfaceMenu(void* self);
+extern "C" void* cBoardTrailMenu_cBoardTrailMenu(void* self);
+extern "C" void func_0024DFA0(void* self, int flags);
+extern "C" void* cFlagsMenu_cFlagsMenu(void* self);
+extern "C" void* cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(void* self);
+extern "C" void func_0024E0F8(void* self, int flags);
+extern "C" void* cSnowfallTogglesMenu_cSnowfallTogglesMenu(void* self);
+extern "C" void func_0024E200(void* self, int flags);
+extern "C" void* cSplashTogglesMenu_cSplashTogglesMenu(void* self);
+extern "C" void func_0024E388(void* self, int flags);
+extern "C" void* cTubeMenu_cTubeMenu(void* self);
+extern "C" void* cPathArrowMenu_cPathArrowMenu(void* self);
+extern "C" void func_0024E7C8(void* self, int flags);
+
+// cPlantsMenu's destructor, inlined here (no out-of-line copy is called).
+static inline void cPlantsMenu_dtor(void* self)
+{
+    func_002CA280((char*)self + 0x398, 2);
+    func_002CA280((char*)self + 0x364, 2);
+    func_002CA280((char*)self + 0x330, 2);
+    func_002CA280((char*)self + 0x2FC, 2);
+    func_002CA280((char*)self + 0x2C8, 2);
+    func_002CA280((char*)self + 0x298, 2);
+    func_002CA280((char*)self + 0x264, 2);
+    func_002CA280((char*)self + 0x230, 2);
+    func_002CA280((char*)self + 0x1FC, 2);
+    func_002CA280((char*)self + 0x1C8, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, 2);
+}
+
+// cHeightFogMenu's destructor, inlined here (no out-of-line copy is called).
+static inline void cHeightFogMenu_dtor(void* self)
+{
+    func_002CA280((char*)self + 0x1C8, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, 2);
+}
+
+// cDetailSystemMenu's destructor, inlined here (no out-of-line copy is called).
+static inline void cDetailSystemMenu_dtor(void* self)
+{
+    func_002CA280((char*)self + 0x334, 2);
+    func_002CA280((char*)self + 0x300, 2);
+    func_002CA280((char*)self + 0x2CC, 2);
+    func_002CA280((char*)self + 0x298, 2);
+    func_002CA280((char*)self + 0x264, 2);
+    func_002CA280((char*)self + 0x230, 2);
+    func_002CA280((char*)self + 0x1FC, 2);
+    func_002CA280((char*)self + 0x1C8, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, 2);
+}
+
+// cShadowMenu's destructor, inlined here (no out-of-line copy is called).
+static inline void cShadowMenu_dtor(void* self)
+{
+    func_002CA280((char*)self + 0x2FC, 2);
+    func_002CA280((char*)self + 0x2C8, 2);
+    func_002CA280((char*)self + 0x294, 2);
+    func_002CA280((char*)self + 0x260, 2);
+    func_002CA280((char*)self + 0x22C, 2);
+    func_002CA280((char*)self + 0x1F8, 2);
+    func_002CA280((char*)self + 0x1C4, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, 2);
+}
+
+// cSnowSurfaceMenu's destructor, inlined here (no out-of-line copy is called).
+static inline void cSnowSurfaceMenu_dtor(void* self)
+{
+    func_002CA280((char*)self + 0x294, 2);
+    func_002CA280((char*)self + 0x260, 2);
+    func_002CA280((char*)self + 0x22C, 2);
+    func_002CA280((char*)self + 0x1F8, 2);
+    func_002CA280((char*)self + 0x1C4, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, 2);
+}
+
+// cFlagsMenu's destructor, inlined here (no out-of-line copy is called).
+static inline void cFlagsMenu_dtor(void* self)
+{
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, 2);
+}
+
+// cTubeMenu's destructor, inlined here (no out-of-line copy is called).
+static inline void cTubeMenu_dtor(void* self)
+{
+    func_002CA280((char*)self + 0x25C, 2);
+    func_002CA280((char*)self + 0x22C, 2);
+    func_002CA280((char*)self + 0x1FC, 2);
+    func_002CA280((char*)self + 0x1C8, 2);
+    func_002CA280((char*)self + 0x194, 2);
+    func_002CA280((char*)self + 0x164, 2);
+    func_002CA280((char*)self + 0x14C, 2);
+    func_002CA280((char*)self + 0x130, 2);
+    func_002CAA80(self, 2);
+}
+
+extern sV4_E8D8 D_004C9560;
+extern sV4_E8D8 D_004C9570;
+extern sV4_E8D8 D_004C9580;
+extern sV4_E8D8 D_004C9590;
+extern sV4_E8D8 D_004C95A0;
+extern sV4_E8D8 D_004C95B0;
+extern sV4_E8D8 D_004C95C0;
+extern sV4_E8D8 D_004C95D0;
+extern sV4_E8D8 D_004C95E0;
+extern sV4_E8D8 D_004C95F0;
+extern sV4_E8D8 D_004C9600;
+extern sV4_E8D8 D_004C9610;
+extern sV4_E8D8 D_004C9620;
+extern sV4_E8D8 D_004C9630;
+extern sV4_E8D8 D_004C9640;
+extern sV4_E8D8 D_004C9650;
+extern sV4_E8D8 D_004C9660;
+extern sV4_E8D8 D_004C9670;
+extern sV4_E8D8 D_004C9680;
+extern sV4_E8D8 D_004C9690;
+extern sV4_E8D8 D_004C96A0;
+extern sV4_E8D8 D_004C96B0;
+extern sV4_E8D8 D_004C96C0;
+extern sV4_E8D8 D_004C96D0;
+extern sV4_E8D8 D_004C96E0;
+extern sV4_E8D8 D_004C96F0;
+extern sV4_E8D8 D_004C9700;
+extern sV4_E8D8 D_004C9710;
+extern sV4_E8D8 D_004C9720;
+extern sV4_E8D8 D_004C9730;
+extern sV4_E8D8 D_004C9740;
+extern sV4_E8D8 D_004C9750;
+extern sV4_E8D8 D_004C9760;
+extern sV4_E8D8 D_004C9770;
+extern sV4_E8D8 D_004C9780;
+extern sV4_E8D8 D_004C9790;
+extern sV4_E8D8 D_004C97A0;
+extern sV4_E8D8 D_004C97B0;
+extern sV4_E8D8 D_004C97C0;
+extern sV4_E8D8 D_004C97D0;
+extern sV4_E8D8 D_004C97E0;
+extern sV4_E8D8 D_004C97F0;
+extern sV4_E8D8 D_004C9800;
+extern sV4_E8D8 D_004C9810;
+extern sV4_E8D8 D_004C9820;
+extern sV4_E8D8 D_004C9830;
+extern sV4_E8D8 D_004C9840;
+extern sV4_E8D8 D_004C9850;
+extern sV4_E8D8 D_004C9860;
+extern sV4_E8D8 D_004C9870;
+extern sV4_E8D8 D_004C9880;
+extern sV4_E8D8 D_004C9890;
+extern sV4_E8D8 D_004C98A0;
+extern sV4_E8D8 D_004C98B0;
+extern sV4_E8D8 D_004C98C0;
+extern sV4_E8D8 D_004C98D0;
+extern char D_004C98E0[], D_004CA328[], D_004CA7C0[], D_004CAEF8[], D_004CB2C8[], D_004CBBE8[], D_004CBDE8[], D_004CC150[], D_004CCAB0[], D_004CCDE0[], D_004CD0A8[], D_004CD678[], D_004CD840[], D_004CDC88[], D_004CECA8[], D_004D11F0[], D_004D1480[];
+extern int D_004A4FE8;
+extern int D_004A4FEC;
+extern sSlot_E8D8 D_004A4FF0, D_004A4FF8, D_004A5000, D_004A5008, D_004A5010, D_004A5018, D_004A5020, D_004A5028, D_004A5030, D_004A5038, D_004A5040, D_004A5048, D_004A5050, D_004A5058;
+
+// PORT: the unit declares func_0024E8D8 as void*(int, int); it returns nothing.
+extern "C" void func_0024E8D8_impl(int init, int prio) __asm__("func_0024E8D8");
+extern "C" void func_0024E8D8_impl(int init, int prio)
+{
+    if (prio == 0xFFFF) {
+        if (init != 0) {
+            new (&D_004C9560) sV4_E8D8(1.0f, 1.0f, 1.0f, 0.5f);
+            new (&D_004C9570) sV4_E8D8(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
+            new (&D_004C9580) sV4_E8D8(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
+            new (&D_004C9590) sV4_E8D8(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
+            new (&D_004C95A0) sV4_E8D8(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
+            new (&D_004C95B0) sV4_E8D8(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
+            new (&D_004C95C0) sV4_E8D8(0.4411740005016327f, 0.41388601064682007f, 0.3211260139942169f, 0.4398239850997925f);
+            new (&D_004C95D0) sV4_E8D8(0.500997006893158f, 0.24849599599838257f, 1.0f, 1.0f);
+            new (&D_004C95E0) sV4_E8D8(0.27687299251556396f, 0.6395620107650757f, 0.13423900306224823f, 0.0f);
+            new (&D_004C95F0) sV4_E8D8(0.8936439752578735f, 0.5263469815254211f, 0.5051450133323669f, 0.8687300086021423f);
+            new (&D_004C9600) sV4_E8D8(1.0f, 1.0f, 1.0f, 1.0f);
+            new (&D_004C9610) sV4_E8D8(1.0f, 0.0f, 0.0f, 0.0f);
+            new (&D_004C9620) sV4_E8D8(1.0f, 0.550000011920929f, 0.5350000262260437f, 0.550000011920929f);
+            new (&D_004C9630) sV4_E8D8(1.0f, 1.0f, 1.0f, 1.0f);
+            new (&D_004C9640) sV4_E8D8(1.0f, 1.0f, 1.0f, 1.0f);
+            new (&D_004C9650) sV4_E8D8(1.0f, 0.0f, 0.0f, 0.0f);
+            new (&D_004C9660) sV4_E8D8(1.0f, 0.0f, 0.0f, 0.0f);
+            new (&D_004C9670) sV4_E8D8(1.0f, 1.0f, 1.0f, 1.0f);
+            new (&D_004C9680) sV4_E8D8(1.0f, 0.5f, 1.0f, 0.5f);
+            new (&D_004C9690) sV4_E8D8(1.0f, 0.5f, 1.0f, 0.5f);
+            new (&D_004C96A0) sV4_E8D8(1.0f, 0.5f, 1.0f, 0.5f);
+            new (&D_004C96B0) sV4_E8D8(1.0f, 0.7828119993209839f, 0.06171900033950806f, 0.03984399884939194f);
+            new (&D_004C96C0) sV4_E8D8(1.0f, 1.0f, 0.7988259792327881f, 0.0f);
+            new (&D_004C96D0) sV4_E8D8(0.9886710047721863f, 0.9230499863624573f, 0.34311699867248535f, 0.0f);
+            new (&D_004C96E0) sV4_E8D8(1.0f, 1.0f, 1.0f, 1.0f);
+            new (&D_004C96F0) sV4_E8D8(1.0f, 1.0f, 0.7976430058479309f, 0.0f);
+            new (&D_004C9700) sV4_E8D8(1.0f, 0.9222670197486877f, 0.34179699420928955f, 0.0f);
+            new (&D_004C9710) sV4_E8D8(1.0f, 0.7847639918327332f, 0.06054700165987015f, 0.04062499850988388f);
+            new (&D_004C9720) sV4_E8D8(1.0f, 0.800000011920929f, 0.44999998807907104f, 1.0f);
+            new (&D_004C9730) sV4_E8D8(1.0f, 0.3281260132789612f, 1.0f, 0.3539060056209564f);
+            new (&D_004C9740) sV4_E8D8(1.0f, 1.0f, 1.0f, 1.0f);
+            new (&D_004C9750) sV4_E8D8(1.0f, 1.0f, 1.0f, 1.0f);
+            new (&D_004C9760) sV4_E8D8(1.0f, 0.8613290190696716f, 0.38124799728393555f, 0.0f);
+            new (&D_004C9770) sV4_E8D8(1.0f, 1.0f, 1.0f, 1.0f);
+            new (&D_004C9780) sV4_E8D8(1.0f, 0.3244380056858063f, 1.0f, 0.0f);
+            new (&D_004C9790) sV4_E8D8(1.0f, 1.0f, 1.0f, 1.0f);
+            new (&D_004C97A0) sV4_E8D8(1.0f, 1.0f, 0.0f, 0.0f);
+            new (&D_004C97B0) sV4_E8D8(0.7007060050964355f, 0.0f, 0.0f, 0.0f);
+            new (&D_004C97C0) sV4_E8D8(1.0f, 0.7828530073165894f, 0.06140600144863129f, 0.04146299883723259f);
+            new (&D_004C97D0) sV4_E8D8(1.0f, 0.32487601041793823f, 1.0f, 0.35280099511146545f);
+            new (&D_004C97E0) sV4_E8D8(1.0f, 1.0f, 0.7977359890937805f, 0.0f);
+            new (&D_004C97F0) sV4_E8D8(1.0f, 0.4937489926815033f, 1.0f, 0.49179700016975403f);
+            new (&D_004C9800) sV4_E8D8(1.0f, 1.0f, 1.0f, 1.0f);
+            new (&D_004C9810) sV4_E8D8(1.0f, 0.800000011920929f, 1.0f, 0.800000011920929f);
+            new (&D_004C9820) sV4_E8D8(1.0f, 1.0f, 0.0f, 0.0f);
+            new (&D_004C9830) sV4_E8D8(1.0f, 1.0f, 0.0f, 0.0f);
+            new (&D_004C9840) sV4_E8D8(1.0f, 1.0f, 0.0f, 0.0f);
+            new (&D_004C9850) sV4_E8D8(1.0f, 0.3273420035839081f, 1.0f, 0.35390499234199524f);
+            new (&D_004C9860) sV4_E8D8(1.0f, 1.0f, 0.061000000685453415f, 0.039000000804662704f);
+            new (&D_004C9870) sV4_E8D8(1.0f, 1.0f, 0.7999979853630066f, 0.0f);
+            new (&D_004C9880) sV4_E8D8(1.0f, 0.9589840173721313f, 0.6143789887428284f, 0.0f);
+            new (&D_004C9890) sV4_E8D8(1.0f, 0.9285150170326233f, 0.3399839997291565f, 0.0f);
+            new (&D_004C98A0) sV4_E8D8(1.0f, 0.8738250136375427f, 0.24931700527668f, 0.017578000202775f);
+            new (&D_004C98B0) sV4_E8D8(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
+            new (&D_004C98C0) sV4_E8D8(1.0f, 0.0f, 1.0f, 0.0f);
+            new (&D_004C98D0) sV4_E8D8(1.0f, 1.0f, 0.0f, 0.0f);
+            D_004A4FEC = 0;
+            D_004A4FE8 = 0;
+            new (&D_004A4FF0) sSlot_E8D8(0);
+            new (&D_004A4FF8) sSlot_E8D8(1);
+            new (&D_004A5000) sSlot_E8D8(2);
+            new (&D_004A5008) sSlot_E8D8(3);
+            new (&D_004A5010) sSlot_E8D8(4);
+            new (&D_004A5018) sSlot_E8D8(5);
+            new (&D_004A5020) sSlot_E8D8(6);
+            new (&D_004A5028) sSlot_E8D8(7);
+            new (&D_004A5030) sSlot_E8D8(8);
+            new (&D_004A5038) sSlot_E8D8(9);
+            new (&D_004A5040) sSlot_E8D8(10);
+            new (&D_004A5048) sSlot_E8D8(11);
+            new (&D_004A5050) sSlot_E8D8(12);
+            new (&D_004A5058) sSlot_E8D8(13);
+            cRenderTogglesMenu_cRenderTogglesMenu(D_004C98E0);
+            cVisualEffectsTestMenu_cVisualEffectsTestMenu(D_004CA328);
+            cLightGlowMenu_cLightGlowMenu(D_004CA7C0);
+            cPlantsMenu_cPlantsMenu(D_004CAEF8);
+            cDepthFogMenu_cDepthFogMenu(D_004CB2C8);
+            cHeightFogMenu_cHeightFogMenu(D_004CBBE8);
+            cDetailSystemMenu_cDetailSystemMenu(D_004CBDE8);
+            cScreenTintMenu_cScreenTintMenu(D_004CC150);
+            cShadowMenu_cShadowMenu(D_004CCAB0);
+            cSnowSurfaceMenu_cSnowSurfaceMenu(D_004CCDE0);
+            cBoardTrailMenu_cBoardTrailMenu(D_004CD0A8);
+            cFlagsMenu_cFlagsMenu(D_004CD678);
+            cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(D_004CD840);
+            cSnowfallTogglesMenu_cSnowfallTogglesMenu(D_004CDC88);
+            cSplashTogglesMenu_cSplashTogglesMenu(D_004CECA8);
+            cTubeMenu_cTubeMenu(D_004D11F0);
+            cPathArrowMenu_cPathArrowMenu(D_004D1480);
+        } else {
+            func_0024E7C8(D_004D1480, 2);
+            cTubeMenu_dtor(D_004D11F0);
+            func_0024E388(D_004CECA8, 2);
+            func_0024E200(D_004CDC88, 2);
+            func_0024E0F8(D_004CD840, 2);
+            cFlagsMenu_dtor(D_004CD678);
+            func_0024DFA0(D_004CD0A8, 2);
+            cSnowSurfaceMenu_dtor(D_004CCDE0);
+            cShadowMenu_dtor(D_004CCAB0);
+            func_0024DD70(D_004CC150, 2);
+            cDetailSystemMenu_dtor(D_004CBDE8);
+            cHeightFogMenu_dtor(D_004CBBE8);
+            func_0024DC68(D_004CB2C8, 2);
+            cPlantsMenu_dtor(D_004CAEF8);
+            func_0024DAB8(D_004CA7C0, 2);
+            func_0024D998(D_004CA328, 2);
+            func_0024D710(D_004C98E0, 2);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024F6C0);

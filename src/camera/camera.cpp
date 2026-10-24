@@ -4945,7 +4945,204 @@ extern "C" void* func_001673B8(void* self, ...)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_001673F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+inline void* operator new(unsigned int, void* p) { return p; }
+
+struct sColor_1673F8 {
+    float r, g, b, a;
+    sColor_1673F8(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
+};
+
+struct sFlags_1673F8 {
+    unsigned char a;
+    unsigned int b : 24;
+    sFlags_1673F8(int aa, int ab) : a(aa), b(ab) {}
+};
+
+struct sMatrix_1673F8 {
+    float m[4][4];
+    sMatrix_1673F8(const float& m00, const float& m01, const float& m02, const float& m03,
+                   const float& m10, const float& m11, const float& m12, const float& m13,
+                   const float& m20, const float& m21, const float& m22, const float& m23,
+                   const float& m30, const float& m31, const float& m32, const float& m33)
+    {
+        m[0][0] = m00; m[1][0] = m10; m[2][0] = m20; m[3][0] = m30;
+        m[0][1] = m01; m[1][1] = m11; m[2][1] = m21; m[3][1] = m31;
+        m[0][2] = m02; m[1][2] = m12; m[2][2] = m22; m[3][2] = m32;
+        m[0][3] = m03; m[1][3] = m13; m[2][3] = m23; m[3][3] = m33;
+    }
+};
+
+extern sColor_1673F8 D_004C5020;
+extern sColor_1673F8 D_004C5030;
+extern sColor_1673F8 D_004C5040;
+extern sColor_1673F8 D_004C5050;
+extern sColor_1673F8 D_004C5060;
+extern sColor_1673F8 D_004C5070;
+extern sColor_1673F8 D_004C5080;
+extern sColor_1673F8 D_004C5090;
+extern sColor_1673F8 D_004C50A0;
+extern sColor_1673F8 D_004C50B0;
+extern sColor_1673F8 D_004C50C0;
+extern sColor_1673F8 D_004C50D0;
+extern sColor_1673F8 D_004C50E0;
+extern sColor_1673F8 D_004C50F0;
+extern sColor_1673F8 D_004C5100;
+extern sColor_1673F8 D_004C5110;
+extern sColor_1673F8 D_004C5120;
+extern sColor_1673F8 D_004C5130;
+extern sColor_1673F8 D_004C5140;
+extern sColor_1673F8 D_004C5150;
+extern sColor_1673F8 D_004C5160;
+extern sColor_1673F8 D_004C5170;
+extern sColor_1673F8 D_004C5180;
+extern sColor_1673F8 D_004C5190;
+extern sColor_1673F8 D_004C51A0;
+extern sColor_1673F8 D_004C51B0;
+extern sColor_1673F8 D_004C51C0;
+extern sColor_1673F8 D_004C51D0;
+extern sColor_1673F8 D_004C51E0;
+extern sColor_1673F8 D_004C51F0;
+extern sColor_1673F8 D_004C5200;
+extern sColor_1673F8 D_004C5210;
+extern sColor_1673F8 D_004C5220;
+extern sColor_1673F8 D_004C5230;
+extern sColor_1673F8 D_004C5240;
+extern sColor_1673F8 D_004C5250;
+extern sColor_1673F8 D_004C5260;
+extern sColor_1673F8 D_004C5270;
+extern sColor_1673F8 D_004C5280;
+extern sColor_1673F8 D_004C5290;
+extern sColor_1673F8 D_004C52A0;
+extern sColor_1673F8 D_004C52B0;
+extern sColor_1673F8 D_004C52C0;
+extern sColor_1673F8 D_004C52D0;
+extern sColor_1673F8 D_004C52E0;
+extern sColor_1673F8 D_004C52F0;
+extern sColor_1673F8 D_004C5300;
+extern sColor_1673F8 D_004C5310;
+extern sColor_1673F8 D_004C5320;
+extern sColor_1673F8 D_004C5330;
+extern sColor_1673F8 D_004C5340;
+extern sColor_1673F8 D_004C5350;
+extern sColor_1673F8 D_004C5360;
+extern sColor_1673F8 D_004C5370;
+extern sColor_1673F8 D_004C5380;
+extern sColor_1673F8 D_004C5390;
+extern int D_004A4D40;
+extern int D_004A4D44;
+extern sFlags_1673F8 D_004A4D48;
+extern sFlags_1673F8 D_004A4D50;
+extern sFlags_1673F8 D_004A4D58;
+extern sFlags_1673F8 D_004A4D60;
+extern sFlags_1673F8 D_004A4D68;
+extern sFlags_1673F8 D_004A4D70;
+extern sFlags_1673F8 D_004A4D78;
+extern sFlags_1673F8 D_004A4D80;
+extern sFlags_1673F8 D_004A4D88;
+extern sFlags_1673F8 D_004A4D90;
+extern sFlags_1673F8 D_004A4D98;
+extern sFlags_1673F8 D_004A4DA0;
+extern sFlags_1673F8 D_004A4DA8;
+extern sFlags_1673F8 D_004A4DB0;
+extern sMatrix_1673F8 D_004C53A0;
+extern sFlags_1673F8 D_004A4DC0;
+extern int D_004A4DD0[2];
+
+extern "C" void func_0015E2A8(void);
+
+// The unit declares func_001673F8 later as returning void*; bind this body by asm label.
+extern "C" void func_001673F8_impl(int initialize, int priority) __asm__("func_001673F8");
+
+extern "C" void func_001673F8_impl(int initialize, int priority)
+{
+    if (priority == 0xFFFF && initialize != 0) {
+        new (&D_004C5020) sColor_1673F8(1.0f, 1.0f, 1.0f, 0.5f);
+        new (&D_004C5030) sColor_1673F8(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
+        new (&D_004C5040) sColor_1673F8(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
+        new (&D_004C5050) sColor_1673F8(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
+        new (&D_004C5060) sColor_1673F8(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
+        new (&D_004C5070) sColor_1673F8(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
+        new (&D_004C5080) sColor_1673F8(0.4411740005016327f, 0.41388601064682007f, 0.3211260139942169f, 0.4398239850997925f);
+        new (&D_004C5090) sColor_1673F8(0.500997006893158f, 0.24849599599838257f, 1.0f, 1.0f);
+        new (&D_004C50A0) sColor_1673F8(0.27687299251556396f, 0.6395620107650757f, 0.13423900306224823f, 0.0f);
+        new (&D_004C50B0) sColor_1673F8(0.8936439752578735f, 0.5263469815254211f, 0.5051450133323669f, 0.8687300086021423f);
+        new (&D_004C50C0) sColor_1673F8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004C50D0) sColor_1673F8(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004C50E0) sColor_1673F8(1.0f, 0.550000011920929f, 0.5350000262260437f, 0.550000011920929f);
+        new (&D_004C50F0) sColor_1673F8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004C5100) sColor_1673F8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004C5110) sColor_1673F8(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004C5120) sColor_1673F8(1.0f, 0.0f, 0.0f, 0.0f);
+        new (&D_004C5130) sColor_1673F8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004C5140) sColor_1673F8(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004C5150) sColor_1673F8(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004C5160) sColor_1673F8(1.0f, 0.5f, 1.0f, 0.5f);
+        new (&D_004C5170) sColor_1673F8(1.0f, 0.7828119993209839f, 0.06171900033950806f, 0.03984399884939194f);
+        new (&D_004C5180) sColor_1673F8(1.0f, 1.0f, 0.7988259792327881f, 0.0f);
+        new (&D_004C5190) sColor_1673F8(0.9886710047721863f, 0.9230499863624573f, 0.34311699867248535f, 0.0f);
+        new (&D_004C51A0) sColor_1673F8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004C51B0) sColor_1673F8(1.0f, 1.0f, 0.7976430058479309f, 0.0f);
+        new (&D_004C51C0) sColor_1673F8(1.0f, 0.9222670197486877f, 0.34179699420928955f, 0.0f);
+        new (&D_004C51D0) sColor_1673F8(1.0f, 0.7847639918327332f, 0.06054700165987015f, 0.04062499850988388f);
+        new (&D_004C51E0) sColor_1673F8(1.0f, 0.800000011920929f, 0.44999998807907104f, 1.0f);
+        new (&D_004C51F0) sColor_1673F8(1.0f, 0.3281260132789612f, 1.0f, 0.3539060056209564f);
+        new (&D_004C5200) sColor_1673F8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004C5210) sColor_1673F8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004C5220) sColor_1673F8(1.0f, 0.8613290190696716f, 0.38124799728393555f, 0.0f);
+        new (&D_004C5230) sColor_1673F8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004C5240) sColor_1673F8(1.0f, 0.3244380056858063f, 1.0f, 0.0f);
+        new (&D_004C5250) sColor_1673F8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004C5260) sColor_1673F8(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004C5270) sColor_1673F8(0.7007060050964355f, 0.0f, 0.0f, 0.0f);
+        new (&D_004C5280) sColor_1673F8(1.0f, 0.7828530073165894f, 0.06140600144863129f, 0.04146299883723259f);
+        new (&D_004C5290) sColor_1673F8(1.0f, 0.32487601041793823f, 1.0f, 0.35280099511146545f);
+        new (&D_004C52A0) sColor_1673F8(1.0f, 1.0f, 0.7977359890937805f, 0.0f);
+        new (&D_004C52B0) sColor_1673F8(1.0f, 0.4937489926815033f, 1.0f, 0.49179700016975403f);
+        new (&D_004C52C0) sColor_1673F8(1.0f, 1.0f, 1.0f, 1.0f);
+        new (&D_004C52D0) sColor_1673F8(1.0f, 0.800000011920929f, 1.0f, 0.800000011920929f);
+        new (&D_004C52E0) sColor_1673F8(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004C52F0) sColor_1673F8(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004C5300) sColor_1673F8(1.0f, 1.0f, 0.0f, 0.0f);
+        new (&D_004C5310) sColor_1673F8(1.0f, 0.3273420035839081f, 1.0f, 0.35390499234199524f);
+        new (&D_004C5320) sColor_1673F8(1.0f, 1.0f, 0.061000000685453415f, 0.039000000804662704f);
+        new (&D_004C5330) sColor_1673F8(1.0f, 1.0f, 0.7999979853630066f, 0.0f);
+        new (&D_004C5340) sColor_1673F8(1.0f, 0.9589840173721313f, 0.6143789887428284f, 0.0f);
+        new (&D_004C5350) sColor_1673F8(1.0f, 0.9285150170326233f, 0.3399839997291565f, 0.0f);
+        new (&D_004C5360) sColor_1673F8(1.0f, 0.8738250136375427f, 0.24931700527668f, 0.017578000202775f);
+        new (&D_004C5370) sColor_1673F8(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
+        new (&D_004C5380) sColor_1673F8(1.0f, 0.0f, 1.0f, 0.0f);
+        new (&D_004C5390) sColor_1673F8(1.0f, 1.0f, 0.0f, 0.0f);
+        D_004A4D44 = 0;
+        D_004A4D40 = 0;
+        new (&D_004A4D48) sFlags_1673F8(0, 0);
+        new (&D_004A4D50) sFlags_1673F8(1, 1);
+        new (&D_004A4D58) sFlags_1673F8(2, 2);
+        new (&D_004A4D60) sFlags_1673F8(3, 3);
+        new (&D_004A4D68) sFlags_1673F8(4, 4);
+        new (&D_004A4D70) sFlags_1673F8(5, 5);
+        new (&D_004A4D78) sFlags_1673F8(6, 6);
+        new (&D_004A4D80) sFlags_1673F8(7, 7);
+        new (&D_004A4D88) sFlags_1673F8(8, 8);
+        new (&D_004A4D90) sFlags_1673F8(9, 9);
+        new (&D_004A4D98) sFlags_1673F8(10, 10);
+        new (&D_004A4DA0) sFlags_1673F8(11, 11);
+        new (&D_004A4DA8) sFlags_1673F8(12, 12);
+        new (&D_004A4DB0) sFlags_1673F8(13, 13);
+        new (&D_004C53A0) sMatrix_1673F8(0.0f, 0.0f, 1.0f, 0.0f,
+                                         -1.0f, 0.0f, 0.0f, 0.0f,
+                                         0.0f, 1.0f, 0.0f, 0.0f,
+                                         0.0f, 0.0f, 0.0f, 1.0f);
+        func_0015E2A8();
+        new (&D_004A4DC0) sFlags_1673F8(-1, -1);
+        D_004A4DD0[0] = 0x3D;
+        D_004A4DD0[1] = 0x3D;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00167D88);

@@ -9859,7 +9859,168 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CBC58);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CBEC8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CC070);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Hdr_C070 {
+    unsigned char b0;
+    unsigned char b1;
+    unsigned char ver;
+    unsigned char b3;
+    int f4;
+    int cnt[6];
+    int len[6];
+};
+struct G_C070 {
+    char pad00[0x5];
+    unsigned char n;
+};
+extern struct Hdr_C070 *D_00515D40;
+extern void **D_00515D44;
+extern void **D_00515D48;
+extern unsigned char *D_00515D4C;
+extern unsigned char *D_00515D50;
+extern int D_00515D58;
+extern int D_00515D80_C070[] __asm__("D_00515D80");
+extern struct Hdr_C070 D_005175C0_C070 __asm__("D_005175C0");
+extern unsigned char *D_005175F8;
+extern unsigned char *D_005175FC;
+extern int D_00517600;
+extern int D_0044E848[];
+extern int D_0044E870_C070[] __asm__("D_0044E870");
+extern struct G_C070 D_00515B40_C070 __asm__("D_00515B40");
+extern void *f_5C60_C070(int) __asm__("func_003B5C60");
+extern void *memset(void *, int, unsigned int) __asm__("func_00416210");
+extern int f_72F8_C070(void *, int) __asm__("func_003C72F8");
+extern int f_EE88_C070(void *) __asm__("func_003CEE88");
+extern void f_EED0_C070(void *, int *) __asm__("func_003CEED0");
+extern void f_A9D8_C070(void *, int *) __asm__("func_003CA9D8");
+extern int f_EFB0_C070(void *) __asm__("func_003CEFB0");
+extern void f_EFF8_C070(void *, int *) __asm__("func_003CEFF8");
+extern int f_F128_C070(void *) __asm__("func_003CF128");
+extern void f_F158_C070(void *, int *) __asm__("func_003CF158");
+extern int f_F2C0_C070(void *) __asm__("func_003CF2C0");
+extern int f_F498_C070(void *) __asm__("func_003CF498");
+extern void f_F4D0_C070(void *, int *) __asm__("func_003CF4D0");
+extern int f_F6F8_C070(void *) __asm__("func_003CF6F8");
+extern int f_F7B0_C070(void *) __asm__("func_003CF7B0");
+extern int f_F998_C070(void *) __asm__("func_003CF998");
+extern void f_F9D8_C070(void *, int *) __asm__("func_003CF9D8");
+
+void func_003CC070(int rate) {
+    int i;
+    int last;
+    int count;
+    unsigned char *p;
+    unsigned char *link;
+    void *obj;
+    int params[4];
+
+    D_00515D40 = &D_005175C0_C070;
+    D_00515D48 = f_5C60_C070(0x1C);
+    memset(D_00515D48, 0, 0x1C);
+    last = D_00515D58 - 1;
+    D_00515D4C = D_005175F8;
+    D_00515D50 = D_005175FC;
+    count = f_72F8_C070(&D_00515D40->cnt[last], 4);
+    D_00515D44 = f_5C60_C070(count * 4);
+    p = D_00515D4C;
+    for (i = 0; i < count; i++) {
+        D_00515D44[i] = f_5C60_C070(D_0044E848[*p]);
+        memset(D_00515D44[i], 0, D_0044E848[*p]);
+        memset(params, 0, 0x10);
+        switch (*p) {
+        case 0:
+            f_F7B0_C070(D_00515D44[i]);
+            break;
+        case 1:
+            obj = D_00515D44[i];
+            params[0] = f_72F8_C070(p + 4, 2) << 8;
+            params[1] = rate << 8;
+            params[2] = f_72F8_C070(p + 6, 2);
+            func_003CA870(obj);
+            func_003CA8A0(obj, params);
+            break;
+        case 2:
+            obj = D_00515D44[i];
+            params[0] = f_72F8_C070(p + 2, 2) << 8;
+            params[1] = rate << 8;
+            f_EE88_C070(obj);
+            f_EED0_C070(obj, params);
+            break;
+        case 3:
+            obj = D_00515D44[i];
+            params[0] = f_72F8_C070(p + 2, 2) << 8;
+            params[1] = rate << 8;
+            func_003CA990(obj);
+            f_A9D8_C070(obj, params);
+            break;
+        case 4:
+            obj = D_00515D44[i];
+            params[0] = f_72F8_C070(p + 4, 2) << 8;
+            params[1] = f_72F8_C070(p + 6, 2) << 8;
+            params[2] = rate << 8;
+            f_EFB0_C070(obj);
+            f_EFF8_C070(obj, params);
+            break;
+        case 5:
+            obj = D_00515D44[i];
+            params[0] = f_72F8_C070(p + 2, 2) << 8;
+            params[1] = rate << 8;
+            params[2] = f_72F8_C070(p + 4, 2) << 8;
+            params[3] = f_72F8_C070(p + 6, 2);
+            f_F498_C070(obj);
+            f_F4D0_C070(obj, params);
+            break;
+        case 6:
+            obj = D_00515D44[i];
+            params[0] = f_72F8_C070(p + 2, 2);
+            f_F128_C070(obj);
+            f_F158_C070(obj, params);
+            break;
+        case 7:
+            obj = D_00515D44[i];
+            params[0] = f_72F8_C070(p + 2, 2);
+            params[1] = rate << 8;
+            params[2] = f_72F8_C070(p + 4, 2) << 8;
+            f_F998_C070(obj);
+            f_F9D8_C070(obj, params);
+            break;
+        case 8:
+            f_F2C0_C070(D_00515D44[i]);
+            break;
+        case 9:
+            f_F6F8_C070(D_00515D44[i]);
+            break;
+        }
+        if (p[1] != 0) {
+            if (p[0] == 9 && D_00515D40->ver >= 11) {
+                unsigned char ch = p[1];
+                D_00515D48[func_003CBC20(D_00515D58, D_00515B40_C070.n, ch & 0xF)] = D_00515D44[i];
+                D_00515D48[func_003CBC20(D_00515D58, D_00515B40_C070.n, ch >> 4)] = D_00515D44[i];
+            } else {
+                D_00515D48[func_003CBC20(D_00515D58, D_00515B40_C070.n, p[1])] = D_00515D44[i];
+            }
+        }
+        p += D_0044E870_C070[*p];
+    }
+    link = D_00515D50;
+    for (i = 0; i < f_72F8_C070(&D_00515D40->len[last], 4); i++) {
+        func_003C90C0(D_00515D44[f_72F8_C070(link, 4)], D_00515D44[f_72F8_C070(link + 4, 4)], link[8], link[9]);
+        link += 12;
+    }
+    D_00515D80_C070[0x1800 / 4] = 3000;
+    memset(D_00515D80_C070, 0, 0x800);
+    p = D_00515D4C;
+    D_00517600 = 0;
+    while (*p != 0) {
+        unsigned char c = *p;
+        D_00517600++;
+        p += D_0044E870_C070[c];
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003CC630);

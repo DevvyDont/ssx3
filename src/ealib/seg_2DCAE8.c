@@ -4162,7 +4162,90 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3B00);
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3BE0);
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3D78);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_003E6574_3D78(void *, void *, int) __asm__("func_003E6574");
+extern int func_004008A0_3D78(void *) __asm__("func_004008A0");
+extern void func_00400A78_3D78(int, void *, int) __asm__("func_00400A78");
+extern int func_004013E8_3D78(int) __asm__("func_004013E8");
+extern int func_00401718_3D78(int) __asm__("func_00401718");
+extern void func_00401BF0_3D78(int) __asm__("func_00401BF0");
+extern int func_00401DF8_3D78(int, int, void *, void *) __asm__("func_00401DF8");
+extern int func_00402300_3D78(void) __asm__("func_00402300");
+extern void func_00402450_3D78(int) __asm__("func_00402450");
+extern void func_00423DC0_3D78(int) __asm__("func_00423DC0");
+
+struct CdReq_3D78 { int left; int f4; int f8; int lba; int count; char *buf; };
+struct CdState_3D78 {
+    int flags;
+    int f4;
+    int f8;
+    int fC;
+    char pad10[0x1C - 0x10];
+    char mode[4];
+    struct CdReq_3D78 req;
+    char pad38[0x3C - 0x38];
+    char *buf;
+};
+
+extern struct CdState_3D78 D_00519C40_3D78 __asm__("D_00519C40");
+extern int D_00450C58[];
+extern char D_0051A480[];
+
+int func_003E3D78(void) {
+    struct CdReq_3D78 req;
+    int tries;
+    int busy;
+
+    tries = 0;
+    func_004008A0_3D78(0);
+    func_003E6574_3D78(&req, &D_00519C40_3D78.req, 0x18);
+    do {
+        tries++;
+        while (func_00401718_3D78(0) == 0) {
+            func_003E35B0(0x1C20);
+            while (func_00401718_3D78(5) == 0) {
+                func_003E35B0(0x1C20);
+            }
+        }
+        func_00402450_3D78(D_00450C58[2]);
+        func_003E35B0(tries * 0x1E0);
+        while (func_00401DF8_3D78(0x10, 1, D_00519C40_3D78.buf, D_00519C40_3D78.mode) == 0) {
+            func_003E35B0(tries * 0x1E0);
+        }
+        do {
+            busy = func_004013E8_3D78(1);
+            func_003E35B0(tries * 0x1E0);
+        } while (busy != 0);
+        if (func_00402300_3D78() == 0 && req.count > 0) {
+            do {
+                func_00401BF0_3D78(0);
+                while (func_00401DF8_3D78(req.lba, 1, (D_00519C40_3D78.flags & 1) ? D_00519C40_3D78.buf : req.buf, D_00519C40_3D78.mode) == 0) {
+                    func_003E35B0(tries * 0x1E0);
+                }
+                do {
+                    busy = func_004013E8_3D78(1);
+                    func_003E35B0(tries * 0x1E0);
+                } while (busy != 0);
+                if (func_00402300_3D78() != 0) {
+                    func_003E35B0(0x1C20);
+                    break;
+                }
+                req.lba++;
+                req.count--;
+                req.buf += 0x800;
+                req.left -= 0x800;
+            } while (req.count > 0);
+        }
+    } while (func_00402300_3D78() != 0);
+    func_00400A78_3D78(0xB, D_0051A480, 0x800);
+    func_004008A0_3D78(func_003E3AD8);
+    func_00423DC0_3D78(D_00519C40_3D78.fC);
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4000);
@@ -4181,7 +4264,205 @@ int func_003E4000(void) {
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4040);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_003E6448_4040(void *, int, int) __asm__("func_003E6448");
+extern int func_00401718_4040(int) __asm__("func_00401718");
+extern void func_00402450_4040(int) __asm__("func_00402450");
+extern int func_00401BF0_4040(int) __asm__("func_00401BF0");
+extern int func_00402268_4040(void) __asm__("func_00402268");
+extern int func_00401FD8_4040(void *) __asm__("func_00401FD8");
+extern void func_00424020_4040(int) __asm__("func_00424020");
+extern void func_003E6220_4040(void *, int) __asm__("func_003E6220");
+extern char *func_004162D0_4040(char *, char *) __asm__("func_004162D0");
+extern int func_00416B18_4040(char *, char *, int) __asm__("func_00416B18");
+extern int func_003E39A8_4040(void *, void *, unsigned int, int) __asm__("func_003E39A8");
+extern int func_00423DA0_4040(void *) __asm__("func_00423DA0");
+extern int func_00423BA0_4040(void *) __asm__("func_00423BA0");
+extern int func_00423BC0_4040(int, int) __asm__("func_00423BC0");
+extern void func_00400A78_4040(int, void *, int) __asm__("func_00400A78");
+extern int func_004008A0_4040(void *) __asm__("func_004008A0");
+extern void func_003E3BE0_4040(void) __asm__("func_003E3BE0");
+extern void func_003E3AD8_4040(void) __asm__("func_003E3AD8");
+extern void func_003E4000_4040(void) __asm__("func_003E4000");
+extern int strlen(char *);
+
+/* ISO 9660 directory record (byte-packed) */
+struct IsoDirRec_4040 {
+    signed char len;
+    signed char ext_len;
+    unsigned int lba;
+    unsigned int lba_be;
+    unsigned int size;
+    unsigned int size_be;
+    char date[7];
+    unsigned char flags;
+    char unit_size;
+    char gap;
+    short vol;
+    short vol_be;
+    signed char name_len;
+    char name[1];
+} __attribute__((packed));
+
+struct IsoPvd_4040 {
+    char pad[0x9C];
+    struct IsoDirRec_4040 root;
+} __attribute__((packed));
+
+struct IsoEntry_4040 { char path[0x100]; unsigned int lba; unsigned int size; };
+struct EmbFile_4040 { char *name; unsigned int lba; unsigned int size; char *path; };
+struct Alloc_4040 {
+    int f0;
+    void *(*alloc)(char *, int, int);
+    void (*free)(void *);
+    char pad[0x20 - 0xC];
+    struct EmbFile_4040 *files;
+};
+struct CdCfg_4040 { char *root; int namelen; int mmode; };
+struct CdState_4040 {
+    int flags;
+    unsigned int count;
+    int tid;
+    int sema;
+    int state;
+    int cached;
+    int sorted;
+    unsigned char mode[4];
+    int left;
+    int rest;
+    int ofs;
+    int lba;
+    int nsect;
+    char *buf;
+    void *files;
+    char *sector;
+};
+struct ThreadParam_4040 { int status; void (*func)(void); void *stack; int stackSize; void *gpReg; int initPriority; int currentPriority; unsigned int attr; unsigned int option; };
+struct SemaParam_4040 { int count; int max_count; int init_count; int wait_threads; unsigned int attr; unsigned int option; };
+
+extern struct CdState_4040 D_00519C40_4040 __asm__("D_00519C40");
+extern struct Alloc_4040 D_00450C10_4040 __asm__("D_00450C10");
+extern struct CdCfg_4040 D_00450C58_4040 __asm__("D_00450C58");
+extern struct IsoEntry_4040 *D_00450C68;
+extern unsigned int D_00450C6C;
+extern int D_00450C70;
+extern char D_00495DE0[];
+extern char D_00495DF0[];
+extern char D_00519C80[];
+extern char D_0051A480[];
+extern char D_0051AC80[];
+extern char D_0051EC80[];
+extern int D_004A30F0;
+extern struct IsoDirRec_4040 *func_003E3618_4040(void) __asm__("func_003E3618");
+extern void func_003E3758_4040(unsigned int, unsigned int) __asm__("func_003E3758");
+
+unsigned int func_003E4040(unsigned int n, void *files) {
+    struct ThreadParam_4040 tp;
+    struct SemaParam_4040 sp;
+    char toc[0x1000];
+    char path[0x100];
+    char name[0x10];
+    int ok;
+    struct EmbFile_4040 *e;
+    struct IsoEntry_4040 *t;
+    char *q;
+    struct IsoPvd_4040 *pvd;
+    struct IsoDirRec_4040 *rec;
+
+    ok = 0;
+    func_003E6448_4040(&D_00519C40_4040, 0, 0x40);
+    func_003E6448_4040(files, 0, (D_00450C58_4040.namelen + 0xC) * n);
+    if (func_00401718_4040(0) == 0) {
+        return 0;
+    }
+    func_00402450_4040(D_00450C58_4040.mmode);
+    func_00401BF0_4040(0);
+    if (func_00402268_4040() == 0x12 || func_00402268_4040() == 0x14) {
+        ok = 1;
+    }
+    if (!ok) {
+        return 0;
+    }
+    func_00401BF0_4040(0);
+    func_00401FD8_4040(toc);
+    D_00519C40_4040.mode[1] = 1;
+    D_00519C40_4040.lba = 0x10;
+    D_00519C40_4040.mode[0] = 0;
+    D_00519C40_4040.mode[2] = 0;
+    func_00424020_4040(0);
+    D_00450C68 = D_00450C10_4040.alloc(D_00495DE0, n * 0x108, 0);
+    func_003E6220_4040(D_00450C68, n * 0x108);
+    if (D_00450C10_4040.files != 0) {
+        e = D_00450C10_4040.files;
+        t = D_00450C68;
+        while (*e->name != 0) {
+            strcpy(path, e->path + 7);
+            for (q = path; *q != 0; q++) {
+                if (*q == '\\') {
+                    *q = '/';
+                }
+            }
+            strcpy(name, e->name);
+            name[strlen(e->name) - 2] = 0;
+            func_004162D0_4040(path, name);
+            strcpy(t->path, path);
+            t->lba = e->lba;
+            t->size = e->size;
+            D_00450C6C++;
+            t++;
+            e++;
+        }
+    } else {
+        pvd = (struct IsoPvd_4040 *)func_003E3618_4040();
+        D_0051EC80[1] = 0;
+        D_0051EC80[0] = '/';
+        if (*D_00450C58_4040.root != 0) {
+            D_00519C40_4040.lba = pvd->root.lba;
+            for (rec = func_003E3618_4040(); (char *)rec <= D_00519C80 + 0x800; rec = (struct IsoDirRec_4040 *)((char *)rec + rec->len)) {
+                if (func_00416B18_4040(rec->name, D_00450C58_4040.root, rec->name_len) == 0) {
+                    func_004162D0_4040(D_0051EC80, D_00450C58_4040.root);
+                    func_004162D0_4040(D_0051EC80, D_00495DF0);
+                    func_003E3758_4040(rec->lba, (rec->size + 0x7FF) >> 11);
+                    break;
+                }
+            }
+        } else {
+            func_003E3758_4040(pvd->root.lba, (pvd->root.size + 0x7FF) >> 11);
+        }
+    }
+    if (n < D_00450C6C) {
+        D_00450C10_4040.free(D_00450C68);
+        D_00450C68 = 0;
+        D_00450C6C = 0;
+        return 0;
+    }
+    D_00519C40_4040.files = files;
+    D_00519C40_4040.count = D_00450C6C;
+    D_00519C40_4040.sorted = func_003E39A8_4040(D_00450C68, files, D_00450C6C, D_00450C70);
+    D_00450C10_4040.free(D_00450C68);
+    D_00450C6C = 0;
+    sp.init_count = 0;
+    sp.max_count = 0x20;
+    D_00450C68 = 0;
+    D_00519C40_4040.sema = func_00423DA0_4040(&sp);
+    tp.func = func_003E3BE0_4040;
+    tp.stack = D_0051AC80;
+    tp.gpReg = &D_004A30F0;
+    tp.stackSize = 0x4000;
+    tp.initPriority = 0xC;
+    tp.option = 0;
+    D_00519C40_4040.tid = func_00423BA0_4040(&tp);
+    func_00423BC0_4040(D_00519C40_4040.tid, 0);
+    func_00400A78_4040(0xB, D_0051A480, 0x800);
+    func_004008A0_4040(func_003E3AD8_4040);
+    D_00519C40_4040.sector = D_00519C80;
+    SYNCTASK_add(func_003E4000_4040, 0, 0);
+    return D_00519C40_4040.count;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E44B0);

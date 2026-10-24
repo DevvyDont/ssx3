@@ -739,7 +739,132 @@ extern "C" void func_002EADD0(sTrail_2EADD0* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EB198);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// Render state record (20 bytes) on the render context's state stack.
+struct sRS_B198 {
+    int f0;         // bits 2..3 = 3 here
+    int f4;         // bits 0..1, 2..6, 12..19, 20..21, 22, 23..24
+    int f8;         // bits 5..9, 10..28
+    int fC;
+    short tex;      // 0x10
+    short pad;
+};
+
+struct sRctxVE_B198 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, void*, int);
+};
+
+struct sRctx_B198 {
+    char pad_0x0[0xE84];
+    sRS_B198* top;              // 0xE84
+    char pad_0xE88[0x1048 - 0xE88];
+    int curTex;                 // 0x1048
+    char pad_0x104C[0x10D8 - 0x104C];
+    sRctxVE_B198* vtable;       // 0x10D8
+};
+
+extern sRctx_B198* D_004A289C_B198 __asm__("D_004A289C");
+extern sRS_B198 D_00501420_B198 __asm__("D_00501420");
+
+// One strip vertex: texture coords, 0..255 colour (alpha 0..128), position.
+struct sTrailVtx_B198 {
+    float s;                    // 0x00
+    float t;                    // 0x04
+    float q;                    // 0x08
+    int pad;                    // 0x0C
+    int r;                      // 0x10
+    int g;                      // 0x14
+    int b;                      // 0x18
+    int a;                      // 0x1C
+    sV4_2EADD0 pos;             // 0x20
+    sTrailVtx_B198() {}
+};
+
+struct sTrailCol_B198 {
+    float a;
+    float r;
+    float g;
+    float b;
+};
+
+static inline void push_B198(sRctx_B198* ctx)
+{
+    ctx->top[1] = ctx->top[0];
+    ctx->top++;
+}
+
+static inline void addVtx_B198(sTrailVtx_B198* v, const sTrailCol_B198& c, float s, float t, const sV4_2EADD0& pos)
+{
+    v->r = (int)(c.r * 255.0f);
+    v->g = (int)(c.g * 255.0f);
+    v->b = (int)(c.b * 255.0f);
+    v->a = (int)(c.a * 128.0f);
+    v->q = 1.0f;
+    v->pos = pos;
+    v->s = s;
+    v->t = t;
+}
+
+extern "C" void func_002EB198(sTrail_2EADD0* self)
+{
+    if (self->count < 2) {
+        return;
+    }
+    push_B198(D_004A289C_B198);
+    *D_004A289C_B198->top = D_00501420_B198;
+    int tex = D_004A289C_B198->curTex;
+    *(short*)((char*)D_004A289C_B198->top + 0x10) = tex;
+    D_004A289C_B198->top->f0 |= 0xC;
+    D_004A289C_B198->top->f4 &= 0xFE7FFFFF;
+    D_004A289C_B198->top->f4 &= 0xFFCFFFFF;
+    D_004A289C_B198->top->f4 = (D_004A289C_B198->top->f4 & 0xFFF00FFF) | 0x14000;
+    D_004A289C_B198->top->f4 = (D_004A289C_B198->top->f4 & ~3) | 2;
+    D_004A289C_B198->top->f8 &= 0xE00003FF;
+    D_004A289C_B198->top->f8 = (D_004A289C_B198->top->f8 & ~0x3E0) | 0xE0;
+    D_004A289C_B198->top->f4 = (D_004A289C_B198->top->f4 & ~0x7C) | 0x1C;
+    D_004A289C_B198->top->f4 = (D_004A289C_B198->top->f4 & 0xFFBFFFFF) | 0x400000;
+
+    sTrailVtx_B198 verts[4][7];
+    int counts[4];
+    for (int k = 3; k >= 0; k--) {
+        counts[k] = 0;
+    }
+    sTrailCol_B198 col;
+    col.a = 1.0f;
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 1.0f;
+    addVtx_B198(&verts[1][counts[1]++], col, 0.5f, 0.0f, self->f0);
+    addVtx_B198(&verts[3][counts[3]++], col, 0.5f, 0.0f, self->e0);
+    for (int i = 0; i < self->count; i++) {
+        int m = (self->cur + i) % 3;
+        col.a = 0.5f;
+        col.r = 0.5f;
+        col.g = 0.5f;
+        col.b = 0.5f;
+        float t = 1.0f - (float)i / (float)(self->count - 1);
+        addVtx_B198(&verts[0][counts[0]++], col, 0.0f, t, self->slots[m].v[0]);
+        addVtx_B198(&verts[0][counts[0]++], col, 1.0f, t, self->slots[m].v[1]);
+        addVtx_B198(&verts[1][counts[1]++], col, 1.0f, t, self->slots[m].v[1]);
+        addVtx_B198(&verts[1][counts[1]++], col, 0.0f, t, self->slots[m].v[2]);
+        addVtx_B198(&verts[2][counts[2]++], col, 0.0f, t, self->slots[m].v[2]);
+        addVtx_B198(&verts[2][counts[2]++], col, 1.0f, t, self->slots[m].v[3]);
+        addVtx_B198(&verts[3][counts[3]++], col, 1.0f, t, self->slots[m].v[3]);
+        addVtx_B198(&verts[3][counts[3]++], col, 0.0f, t, self->slots[m].v[0]);
+    }
+    for (int k = 0; k < 4; k++) {
+        sRctx_B198* ctx = D_004A289C_B198;
+        sRctxVE_B198* vt = ctx->vtable;
+        vt[71].fn((char*)ctx + vt[71].delta, counts[k], verts[k], 0);
+    }
+    D_004A289C_B198->top--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EB8F0);
