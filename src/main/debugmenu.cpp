@@ -1111,7 +1111,10 @@ extern char D_004A2D90[];
 extern char D_004A2D98[];
 extern int D_004A457C;
 extern int D_004A45C8;
-extern int D_004A45CC;
+struct sShadowOpt_cBoardTrailMenu {
+    int fba;
+};
+extern sShadowOpt_cBoardTrailMenu D_004A45CC;
 extern int D_004A45D0;
 extern float D_004A4580;
 extern float D_004A4584;
@@ -1158,7 +1161,7 @@ extern "C" void* cBoardTrailMenu_cBoardTrailMenu(void* self)
     cFloatMenuItem_ctor((char*)self + 0x4D4, 17, &D_004A45C0, -10.0f, 10.0f, D_0047EB48);
     cFloatMenuItem_ctor((char*)self + 0x508, 18, &D_004A45C4, -10.0f, 10.0f, D_0047EB60);
     cIntMenuItem_cIntMenuItem((char*)self + 0x53C, 19, &D_004A45C8, 0, 0x40, D_0047EB78);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x56C, 20, &D_004A45CC, 0, 0x1, D_0047EB90);
+    cIntMenuItem_cIntMenuItem((char*)self + 0x56C, 20, &D_004A45CC.fba, 0, 0x1, D_0047EB90);
     cIntMenuItem_cIntMenuItem((char*)self + 0x59C, 21, &D_004A45D0, 0, 0x1, D_0047EBA8);
     cMenu_addItem(self, (char*)self + 0x130, -1);
     cMenu_addItem(self, (char*)self + 0x14C, -1);

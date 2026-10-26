@@ -1158,7 +1158,10 @@ struct sRSMan_002EFF98 {
 };
 extern char D_00487DA0[];
 extern sRSEntry_002EFF98* D_004A5B80;
-extern int D_004A45D4;
+struct sShadowCfg_002EFF98 {
+    int texIndex;
+};
+extern sShadowCfg_002EFF98 D_004A45D4;
 extern int D_004A443C;
 extern void* D_004A3B78;
 
@@ -1182,7 +1185,7 @@ extern "C" void* func_002EFF98(sRSMan_002EFF98* self)
     self->f[14] = 0;
     self->f[15] = 0;
     self->f[16] = 0;
-    D_004A45D4 = 0x37;
+    D_004A45D4.texIndex = 0x37;
     D_004A443C = 0x30;
     D_004A3B78 = self;
     sRSEntry_002EFF98* e = D_004A5B80;
