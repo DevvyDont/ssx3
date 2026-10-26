@@ -167,9 +167,1002 @@ extern "C" void func_0020A8F8(int mode)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020AB50);
+#ifdef SKIP_ASM
+// Dialog/state factory: builds the UI state for `type` (the cases inline the state constructors over
+// the cUIState base ctor func_0039E2A0) and pushes it on the front-end state stack.
+// PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+int GetHashValue32(char* str);
+extern "C" void* cUIStateStack_getCurrentState(void* stack);
+extern "C" void* func_0039E2A0(void* self, void* mgr);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void* func_001FDBF0(void* self, void* mgr, int type);
+extern "C" void* func_001FE968(void* self, void* mgr, int type);
+extern "C" void* func_001E3C00(void* self, void* mgr, int type);
+extern "C" void* func_00211088(void* self, void* mgr, int type, int a3);
+extern "C" void* func_00212138(void* self, void* mgr, int type);
+extern "C" void func_001F7548(void* self);
+extern "C" void func_001F7738(void* self);
+extern "C" void func_002006B8(void* self);
+struct sDlgSlot_AB50 {
+    int v[2];
+    sDlgSlot_AB50() {}
+};
 
+inline void* operator new[](unsigned int, void* p) { return p; }
+extern void* D_004A28A8;
+extern unsigned short D_004A2088[];
+extern char D_00471A30[];
+extern char D_0046E340[];
+extern char D_00472108[];
+extern char D_004725C8[];
+extern char D_004726A0[];
+extern char D_00472778[];
+extern char D_00472850[];
+extern char D_00472AB0[];
+extern char D_00472B88[];
+extern char D_00472C60[];
+extern char D_00472D38[];
+extern char D_00472E10[];
+extern char D_00472EE8[];
+extern char D_00472FC0[];
+extern char D_00473098[];
+extern char D_00473248[];
+extern char D_00473320[];
+extern char D_004733F8[];
+extern char D_004734D0[];
+extern char D_004735B0[];
+extern char D_00473688[];
+extern char D_00473760[];
+extern char D_00473C50[];
+extern char D_00473D28[];
+extern char D_00473E00[];
+extern char D_00473ED8[];
+extern char D_00473FB0[];
+extern char D_00474088[];
+extern char D_004744C0[];
+extern char D_00474598[];
+extern char D_00474670[];
+extern char D_00474748[];
+extern char D_00474820[];
+extern char D_004748F8[];
+extern char D_004749D0[];
+extern char D_00474AA8[];
+extern char D_00474B80[];
+extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
+
+extern "C" void func_0020AB50(int type)
+{
+    char* result = 0;
+    char* mgr = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
+    if (type == 0x1) {
+        char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00473098;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC4) = 0;
+        result = p;
+    }
+    if (type == 0x2) {
+        char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472FC0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC4) = 0;
+        result = p;
+    }
+    if (type == 0x3) {
+        char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472EE8;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC4) = 0;
+        result = p;
+    }
+    if (type == 0x4) {
+        char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472E10;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC4) = 0;
+        result = p;
+    }
+    if (type == 0x5) {
+        char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472D38;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC4) = 0;
+        result = p;
+    }
+    if (type == 0x6) {
+        char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472C60;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC4) = 0;
+        result = p;
+    }
+    if (type == 0x7) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472B88;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x8) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472850;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x9) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472778;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0xA) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474088;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0xB) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00473FB0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0xC) {
+        char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(void**)(p + 0x8) = D_00473E00;
+        *(int*)(p + 0xA0) = 0x1;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC) = GetHashValue32(D_0046E340);
+        result = p;
+    }
+    if (type == 0xD) {
+        char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(void**)(p + 0x8) = D_00473D28;
+        *(int*)(p + 0xA0) = 0x1;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC) = GetHashValue32(D_0046E340);
+        result = p;
+    }
+    if (type == 0xE) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474B80;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0xF) {
+        char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004734D0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x10) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472108;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x11) {
+        char* p = (char*)operator new(0xB8, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474AA8;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x12) {
+        result = (char*)func_001FDBF0(operator new(0x274, D_00471A30, 0, 0), mgr, 0x12);
+    }
+    if (type == 0x13) {
+        result = (char*)func_001FE968(operator new(0x274, D_00471A30, 0, 0), mgr, 0x13);
+    }
+    if (type == 0x14) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004725C8;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x15) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004726A0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x16) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00473ED8;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x17) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004749D0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0x9C) = 0;
+        result = p;
+    }
+    if (type == 0x18) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004748F8;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x9C) = 0x1;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x19) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474820;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x9C) = 0x2;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x1A) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474748;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x9C) = 0x3;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x1B) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474670;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x9C) = 0x4;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x1C) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474598;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x9C) = 0x5;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x1D) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00473688;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        func_001F7548(p);
+        result = p;
+    }
+    if (type == 0x1E) {
+        char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004735B0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        func_001F7738(p);
+        result = p;
+    }
+    if (type == 0x1F) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00473760;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x20) {
+        char* p = (char*)operator new(0x1D4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(void**)(p + 0x8) = D_00473320;
+        new (p + 0x9C) sDlgSlot_AB50[8];
+        result = p;
+    }
+    if (type == 0x21) {
+        char* p = (char*)operator new(0x390, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004733F8;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        func_002006B8(p + 0x9C);
+        result = p;
+    }
+    if (type == 0x22) {
+        result = (char*)func_001E3C00(operator new(0x180, D_00471A30, 0, 0), mgr, 0x22);
+    }
+    if (type == 0x23) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00473C50;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x24) {
+        result = (char*)func_00211088(operator new(0x27C, D_00471A30, 0, 0), mgr, 0x24, 0x2A);
+    }
+    if (type == 0x25) {
+        result = (char*)func_00212138(operator new(0x234, D_00471A30, 0, 0), mgr, 0x25);
+    }
+    if (type == 0x26) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004744C0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x9C) = 0x6;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x27) {
+        char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472AB0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0xA0) = 0x1;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0x9C) = 0;
+        result = p;
+    }
+    if (type == 0x28) {
+        char* p = (char*)operator new(0xE4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(int*)(p + 0x98) = type;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(void**)(p + 0x8) = D_00473248;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+
+    *(int*)(result + 0x1C) = (*(int*)(result + 0x1C) & ~0x3F00) | 0x100;
+    cUIStateStack_pushSpecial(mgr + 0x18, result, 0, 0);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020BAB8);
+#ifdef SKIP_ASM
+// Dialog/state factory: builds the UI state for `type` (the cases inline the state constructors over
+// the cUIState base ctor func_0039E2A0) and pushes it on the front-end state stack.
+// PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+int GetHashValue32(char* str);
+extern "C" void* cUIStateStack_getCurrentState(void* stack);
+extern "C" void* func_0039E2A0(void* self, void* mgr);
+extern "C" void func_0039F290(void* list, void* item);
+extern "C" void* func_001FDBF0(void* self, void* mgr, int type);
+extern "C" void* func_001FE968(void* self, void* mgr, int type);
+extern "C" void* func_001E3C00(void* self, void* mgr, int type);
+extern "C" void* func_00211088(void* self, void* mgr, int type, int a3);
+extern "C" void* func_00212138(void* self, void* mgr, int type);
+extern "C" void func_001F7548(void* self);
+extern "C" void func_001F7738(void* self);
+extern "C" void func_002006B8(void* self);
+struct sDlgSlot_BAB8 {
+    int v[2];
+    sDlgSlot_BAB8() {}
+};
+
+extern void* D_004A28A8;
+extern unsigned short D_004A2088[];
+extern char D_00471A30[];
+extern char D_0046E340[];
+extern char D_00472108[];
+extern char D_004725C8[];
+extern char D_004726A0[];
+extern char D_00472778[];
+extern char D_00472850[];
+extern char D_00472AB0[];
+extern char D_00472B88[];
+extern char D_00472C60[];
+extern char D_00472D38[];
+extern char D_00472E10[];
+extern char D_00472EE8[];
+extern char D_00472FC0[];
+extern char D_00473098[];
+extern char D_00473248[];
+extern char D_00473320[];
+extern char D_004733F8[];
+extern char D_004734D0[];
+extern char D_004735B0[];
+extern char D_00473688[];
+extern char D_00473760[];
+extern char D_00473C50[];
+extern char D_00473D28[];
+extern char D_00473E00[];
+extern char D_00473ED8[];
+extern char D_00473FB0[];
+extern char D_00474088[];
+extern char D_004744C0[];
+extern char D_00474598[];
+extern char D_00474670[];
+extern char D_00474748[];
+extern char D_00474820[];
+extern char D_004748F8[];
+extern char D_004749D0[];
+extern char D_00474AA8[];
+extern char D_00474B80[];
+
+extern "C" void func_0020BAB8(int type)
+{
+    char* result = 0;
+    char* mgr = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
+    int cur = (int)cUIStateStack_getCurrentState(mgr + 0x18);
+    if (type == 0x1) {
+        char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00473098;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC4) = 0;
+        result = p;
+    }
+    if (type == 0x2) {
+        char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472FC0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC4) = 0;
+        result = p;
+    }
+    if (type == 0x3) {
+        char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472EE8;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC4) = 0;
+        result = p;
+    }
+    if (type == 0x4) {
+        char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472E10;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC4) = 0;
+        result = p;
+    }
+    if (type == 0x5) {
+        char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472D38;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC4) = 0;
+        result = p;
+    }
+    if (type == 0x6) {
+        char* p = (char*)operator new(0x114, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472C60;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC4) = 0;
+        result = p;
+    }
+    if (type == 0x7) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472B88;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x8) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472850;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x9) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472778;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0xA) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474088;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0xB) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00473FB0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0xC) {
+        char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(void**)(p + 0x8) = D_00473E00;
+        *(int*)(p + 0xA0) = 0x1;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC) = GetHashValue32(D_0046E340);
+        result = p;
+    }
+    if (type == 0xD) {
+        char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(void**)(p + 0x8) = D_00473D28;
+        *(int*)(p + 0xA0) = 0x1;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0xC) = GetHashValue32(D_0046E340);
+        result = p;
+    }
+    if (type == 0xE) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474B80;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0xF) {
+        char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004734D0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x10) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472108;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x11) {
+        char* p = (char*)operator new(0xB8, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474AA8;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x12) {
+        result = (char*)func_001FDBF0(operator new(0x274, D_00471A30, 0, 0), mgr, 0x12);
+    }
+    if (type == 0x13) {
+        result = (char*)func_001FE968(operator new(0x274, D_00471A30, 0, 0), mgr, 0x13);
+    }
+    if (type == 0x14) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004725C8;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x15) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004726A0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x16) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00473ED8;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x17) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004749D0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0x9C) = 0;
+        result = p;
+    }
+    if (type == 0x18) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004748F8;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x9C) = 0x1;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x19) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474820;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x9C) = 0x2;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x1A) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474748;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x9C) = 0x3;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x1B) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474670;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x9C) = 0x4;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x1C) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00474598;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x9C) = 0x5;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x1D) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00473688;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        func_001F7548(p);
+        result = p;
+    }
+    if (type == 0x1E) {
+        char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004735B0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        func_001F7738(p);
+        result = p;
+    }
+    if (type == 0x1F) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00473760;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x20) {
+        char* p = (char*)operator new(0x1D4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(void**)(p + 0x8) = D_00473320;
+        new (p + 0x9C) sDlgSlot_BAB8[8];
+        result = p;
+    }
+    if (type == 0x21) {
+        char* p = (char*)operator new(0x390, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004733F8;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        func_002006B8(p + 0x9C);
+        result = p;
+    }
+    if (type == 0x22) {
+        result = (char*)func_001E3C00(operator new(0x180, D_00471A30, 0, 0), mgr, 0x22);
+    }
+    if (type == 0x23) {
+        char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00473C50;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x24) {
+        result = (char*)func_00211088(operator new(0x27C, D_00471A30, 0, 0), mgr, 0x24, 0x2A);
+    }
+    if (type == 0x25) {
+        result = (char*)func_00212138(operator new(0x234, D_00471A30, 0, 0), mgr, 0x25);
+    }
+    if (type == 0x26) {
+        char* p = (char*)operator new(0xA0, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_004744C0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0x9C) = 0x6;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+    if (type == 0x27) {
+        char* p = (char*)operator new(0xA4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(void**)(p + 0x8) = D_00472AB0;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(int*)(p + 0xA0) = 0x1;
+        *(int*)(p + 0x98) = type;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        *(int*)(p + 0x9C) = 0;
+        result = p;
+    }
+    if (type == 0x28) {
+        char* p = (char*)operator new(0xE4, D_00471A30, 0, 0);
+        func_0039E2A0(p, mgr);
+        *(int*)(p + 0x98) = type;
+        *(unsigned short*)(p + 0x58) = D_004A2088[0];
+        *(void**)(p + 0x8) = D_00473248;
+        *(int*)(p + 0x48) = 0;
+        *(int*)(p + 0x4C) = 0;
+        *(int*)(p + 0x54) = 0;
+        result = p;
+    }
+
+    *(int*)(result + 0x20) = cur;
+    func_0039F290(mgr + 0x18, result);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020CA10);
