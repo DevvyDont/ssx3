@@ -692,7 +692,181 @@ extern "C" void func_002D8948(void)
 
 INCLUDE_ASM("visualfx/avalanche", func_002D8A00);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", func_002D8EA8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_002D8A00(void* node);
+extern "C" void func_00371688(void* p, int a);
+extern char* D_004A28A8;
+extern int D_004A3A54;
+extern int D_004A3A58;
+
+struct sAvVec4_D8EA8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sAvVert_D8EA8 {
+    sAvVec4_D8EA8 uv;           // 0x0
+    int r, g, b, a;             // 0x10
+    sAvVec4_D8EA8 pos;          // 0x20
+};
+extern sAvVert_D8EA8 D_vtx_D8EA8[] __asm__("D_004EDB70");
+
+struct sAvPair_D8EA8 { float v; char* node; };
+struct sAvGroup_D8EA8 {
+    int f0;
+    void* nodes;                // 0x4
+    void* next;                 // 0x8
+    unsigned short nPairs;      // 0xC
+    unsigned short nIdx;        // 0xE
+    sAvPair_D8EA8 pairs[32];    // 0x10
+};
+
+struct sAvActive_D8EA8 {
+    char pad0[0xD0];
+    char fx[0x2E0 - 0xD0];      // 0xD0
+    char* data;                 // 0x2E0
+    sAvActive_D8EA8* next;      // 0x2E4
+};
+
+struct sAvSlot_D8EA8 {
+    sAvGroup_D8EA8* group;      // 0x0
+    sAvActive_D8EA8* active;    // 0x4
+    char pad8[0x18 - 0x8];
+    float limit;                // 0x18
+};
+
+struct sRState_D8EA8 {
+    int f0;
+    unsigned int f4;
+};
+
+class cRCtx_D8EA8 {
+public:
+    char pad[0xE84];
+    sRState_D8EA8* top;         // 0xE84
+    char padE88[0x10D8 - 0xE88];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71();
+    virtual void v72();
+    virtual void drawLines(int n, sAvVert_D8EA8* v, int f);
+};
+extern cRCtx_D8EA8* D_ctx_D8EA8 __asm__("D_004A5B80");
+
+class cRiderPos_D8EA8 {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual sAvVec4_D8EA8* getPos();
+};
+
+extern "C" void func_002D8EA8(void* slotv)
+{
+    sAvSlot_D8EA8* slot = (sAvSlot_D8EA8*)slotv;
+    cRCtx_D8EA8* ctx = D_ctx_D8EA8;
+    if (slot->group == 0)
+        return;
+    int i = 0;
+    for (sAvActive_D8EA8* n = slot->active; n != 0; n = n->next, i++) {
+        if (n->data) {
+            if (i < D_004A3A58)
+                func_002D8A00(n);
+            if (D_004A3A54 && ((unsigned char*)n->data)[0xF2])
+                func_00371688(n->fx, 7);
+        }
+    }
+    if (D_004A3A58 == 0)
+        return;
+    for (int j = 0; j < slot->group->nPairs; j++) {
+        sAvVec4_D8EA8 p = *(sAvVec4_D8EA8*)(slot->group->pairs[j].node + 0x40);
+        D_vtx_D8EA8[2 * j].pos = p;
+        D_vtx_D8EA8[2 * j].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
+        D_vtx_D8EA8[2 * j].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
+        char* rider = *(char**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x28);
+        D_vtx_D8EA8[2 * j + 1].pos = *((cRiderPos_D8EA8*)(rider + 0x6C0))->getPos();
+        D_vtx_D8EA8[2 * j + 1].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
+        D_vtx_D8EA8[2 * j + 1].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
+    }
+    sRState_D8EA8* top = ctx->top;
+    unsigned int w = top->f4;
+    top->f4 = (w & 0xFE7FFFFF) | 0x1000000;
+    int saved = (w & 0x1800000) >> 23;
+    ctx->drawLines(slot->group->nPairs, D_vtx_D8EA8, 0);
+    ctx->top->f4 = (ctx->top->f4 & 0xFE7FFFFF) | ((saved << 23) & 0x1800000);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", func_002D9130);
