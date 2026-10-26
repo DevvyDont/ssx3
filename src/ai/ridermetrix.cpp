@@ -693,7 +693,428 @@ extern "C" void func_00117C28(sMetrix17C28* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_00117FE0);
+#ifdef SKIP_ASM
+extern "C" void func_00117AE8(void* self, int a, const char* b, float c, int d);
+extern "C" void func_00117B88(void* self, int type, int value, int arg, float duration);
+extern "C" int func_00119310(void* self, int points);
+int func_0011FEE8(void* rider);
+extern "C" int func_001298C8();
+extern "C" float func_0031C040(float a);
+extern "C" float func_0012F118(void* p, int* fail);
+extern "C" float func_001360C8(void* p, int* fail);
+extern "C" float func_00135F70(void* p, int* fail);
+extern "C" float func_00136100(void* p);
+extern "C" float func_00136168(void* p);
+extern "C" int func_00150960(void* iface, int a);
+extern "C" void func_0029A7D8(void* audio, void* rider, int points);
+extern "C" void func_0029B0E0(void* audio, void* rider);
+extern "C" void func_0029B3C0(void* audio, void* rider);
+extern "C" void func_00299638(void* audio, void* rider);
+extern "C" void func_002997B8(void* audio, void* rider);
+extern char D_00457820[];
+extern char D_00457830[];
+extern char D_00457840[];
+extern char D_00457850[];
+extern char D_00457860[];
+
+struct sSlot_117FE0 {
+    int type;               // 0x0
+    float total;            // 0x4
+    float value;            // 0x8
+    int fC;                 // 0xC
+    int f10;                // 0x10
+    int f14;                // 0x14
+    char pad[0x9C - 0x18];
+};
+
+struct sRiderSub_117FE0 {
+    char pad[0x2C0];
+    int state;              // 0x2C0
+    char pad2C4[0x330 - 0x2C4];
+    float f330;             // 0x330
+};
+
+struct sVE_117FE0 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sRider_117FE0 {
+    char pad[0x2F0];
+    float f2F0;             // 0x2F0
+    int f2F4;               // 0x2F4
+    float f2F8;             // 0x2F8
+    char pad2FC[8];
+    int f304;               // 0x304
+    char pad308[0x6C0 - 0x308];
+    char obj6C0[0x77C - 0x6C0]; // 0x6C0: embedded object, vtable pointer first
+    sRiderSub_117FE0* sub;  // 0x77C
+};
+
+struct sMetrix_117FE0 {
+    char pad[0x14];
+    float f14;              // 0x14
+    char pad18[4];
+    float f1C;              // 0x1C
+    char pad20[0x34];
+    int f54;                // 0x54
+    char pad58[4];
+    int f5C;                // 0x5C
+    char pad60[0x24];
+    int f84;                // 0x84
+    char pad88[0x14];
+    int f9C;                // 0x9C
+    int fA0;                // 0xA0
+    float fA4;              // 0xA4
+    char padA8[0xF0];
+    int f198;               // 0x198
+    char pad19C[0x10];
+    sRider_117FE0* rider;   // 0x1AC
+    sSlot_117FE0* slots;    // 0x1B0
+};
+
+static inline bool slotFree_117FE0(const sSlot_117FE0* s)
+{
+    return s->type == 0x34;
+}
+
+static inline float approach_117FE0(float target, float cur, float step)
+{
+    float r;
+    if (target + step < cur)
+        r = cur - step;
+    else if (cur < target - step)
+        r = cur + step;
+    else
+        r = target;
+    return r;
+}
+
+static inline bool subStateIs_117FE0(sRiderSub_117FE0* s, int st)
+{
+    return s->state == st;
+}
+
+// PORT: abs.s helper.
+static inline float abs_117FE0(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// Same function as func_001171A8(slot, type, value, arg, f): the float travels in $f12 either way.
+extern "C" void func_001171A8(void* self, int type, int value, int arg, float f);
+extern "C" void func_001171A8_f(void* slot, int type, int value, float f, int arg) __asm__("func_001171A8");
+
+// PORT: float to int to float in FPU registers.
+static inline float trunc_117FE0(float x)
+{
+    float r;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" void func_00117FE0(void* vself)
+{
+    sMetrix_117FE0* self = (sMetrix_117FE0*)vself;
+    if (self->slots == 0)
+        return;
+    int pts = func_00117948(self);
+    if (pts > 0) {
+        func_00117B88(self, 1, pts, func_00119310(self, pts), -1.0f);
+        func_0029A7D8(func_0028B180(), self->rider, pts);
+    }
+    if (func_0011FEE8(self->rider) == 8 && !subStateIs_117FE0(self->rider->sub, 3))
+        func_001171A8_f(&self->slots[11], 11, 0, self->rider->sub->f330 <? 1.0f, 0);
+    else
+        func_001179E0(self, 11);
+    func_001179E0(self, 0x10);
+    func_001179E0(self, 0x11);
+    func_001179E0(self, 0x12);
+    func_001179E0(self, 0x13);
+    func_001179E0(self, 0x14);
+    func_001179E0(self, 0x15);
+    func_001179E0(self, 0x16);
+    func_001179E0(self, 0x17);
+    if (func_0011FEE8(self->rider) != 2 && func_0011FEE8(self->rider) != 5) {
+        func_001179E0(self, 0xC);
+        func_001179E0(self, 0xD);
+        func_001179E0(self, 0xF);
+        func_001179E0(self, 0xE);
+    } else {
+        int fail = 0;
+        float angle;
+        if (func_0011FEE8(self->rider) == 2)
+            angle = func_0012F118((char*)self->rider->sub + 0x1F0, &fail);
+        else
+            angle = func_001360C8((char*)self->rider->sub + 0x230, &fail);
+        if (fail != 0) {
+            func_001179E0(self, 0xD);
+        } else {
+            float a = angle * 0.15915493667125702f + func_0031C040((float)func_001298C8() * 0.10471976548433304f) * 0.029999999329447746f;
+            if (a < 0.0f)
+                a += 1.0f;
+            if (!slotFree_117FE0(&self->slots[13])) {
+                float cur = self->slots[13].value / self->slots[13].total;
+                float d = cur - a;
+                if (d > 0.5f) {
+                    a = approach_117FE0(a, cur - 1.0f, 0.03333333507180214f);
+                    if (a < 0.0f)
+                        a += 1.0f;
+                } else if (d < -0.5f) {
+                    a = approach_117FE0(a, cur + 1.0f, 0.03333333507180214f);
+                    if (a > 1.0f)
+                        a -= 1.0f;
+                } else {
+                    a = approach_117FE0(a, cur, 0.03333333507180214f);
+                }
+            }
+            func_001171A8_f(&self->slots[13], 0xD, 0, a, 0);
+        }
+        if (func_0011FEE8(self->rider) == 2) {
+            if (fail != 0)
+                func_001179E0(self, 0xC);
+            else
+                func_00117B88(self, 0xC, 0, 0, -1.0f);
+        } else {
+            int fail2 = 0;
+            float yaw = func_00135F70((char*)self->rider->sub + 0x230, &fail2);
+            if (fail2 != 0) {
+                func_001179E0(self, 0xC);
+                func_001179E0(self, 0xD);
+                func_001179E0(self, 0xF);
+                func_001179E0(self, 0xE);
+            } else {
+                func_00117B88(self, 0xC, 0, 0, -1.0f);
+                int s1 = 0x34;
+                int s2 = 0x34;
+                int s3 = 0x34;
+                int s4 = 0x34;
+                int main;
+                                if (abs_117FE0(yaw) > 2.7488937377929688f) {
+                    main = 0x10;
+                } else if (yaw > 1.9634956121444702f) {
+                    main = 0x17;
+                    s1 = 0x15;
+                    s2 = 0x16;
+                    s3 = 0x11;
+                    s4 = 0x10;
+                } else if (yaw > 1.1780973672866821f) {
+                    main = 0x16;
+                } else if (yaw > 0.39269912242889404f) {
+                    main = 0x15;
+                    s1 = 0x17;
+                    s2 = 0x16;
+                    s3 = 0x13;
+                    s4 = 0x14;
+                } else if (yaw < -1.9634956121444702f) {
+                    main = 0x11;
+                    s1 = 0x13;
+                    s2 = 0x12;
+                    s3 = 0x17;
+                    s4 = 0x10;
+                } else if (yaw < -1.1780973672866821f) {
+                    main = 0x12;
+                } else if (yaw < -0.39269912242889404f) {
+                    main = 0x13;
+                    s1 = 0x11;
+                    s2 = 0x12;
+                    s3 = 0x15;
+                    s4 = 0x14;
+                } else {
+                    main = 0x14;
+                }
+                float w1 = func_00136100((char*)self->rider->sub + 0x230);
+                float w2 = func_00136168((char*)self->rider->sub + 0x230);
+                func_001171A8_f(&self->slots[main], main, 0, 1.0f, 0);
+                if (s1 != 0x34)
+                    func_001171A8_f(&self->slots[s1], s1, 0, w1, 1);
+                if (s2 != 0x34)
+                    func_001171A8_f(&self->slots[s2], s2, 0, w1, 1);
+                if (s3 != 0x34)
+                    func_001171A8_f(&self->slots[s3], s3, 0, w2, 2);
+                if (s4 != 0x34)
+                    func_001171A8_f(&self->slots[s4], s4, 0, w2, 2);
+                int prev = 0;
+                if (!slotFree_117FE0(&self->slots[14]))
+                    prev = self->slots[14].fC;
+                int kind = 0;
+                if (fail == 0) {
+                    float diff = yaw - angle;
+                    float t = diff * 0.15915493667125702f + 0.5f;
+                    float fl = trunc_117FE0(t);
+                    if (t < fl)
+                        fl -= 1.0f;
+                    diff -= fl * 6.2831854820251465f;
+                    float m = 0.0f;
+                    float ad = abs_117FE0(diff);
+                    if (ad > 2.7488937377929688f) {
+                        func_00117AE8(self, 0xE, D_00457820, -1.0f, 1);
+                        kind = 1;
+                        if (abs_117FE0(yaw) > 2.7488937377929688f || abs_117FE0(yaw) < 0.39269912242889404f) {
+                            m = 1.0f;
+                        } else {
+                            m = 2.0f;
+                            if (abs_117FE0(yaw) > 1.1780973672866821f && abs_117FE0(yaw) < 1.9634956121444702f)
+                                m = 5.0f;
+                        }
+                    } else if (ad > 1.1780973672866821f) {
+                        float p = diff * yaw;
+                        if ((p > 0.0f && abs_117FE0(yaw) > 1.5707964897155762f) || (p < 0.0f && abs_117FE0(yaw) < 1.5707964897155762f)) {
+                            if (w2 > 0.10000000149011612f) {
+                                func_00117AE8(self, 0xE, D_00457830, -1.0f, 2);
+                                m = 3.0f;
+                                kind = 2;
+                            }
+                        } else if (w1 > 0.10000000149011612f) {
+                            func_00117AE8(self, 0xE, D_00457840, -1.0f, 3);
+                            m = 2.0f;
+                            kind = 3;
+                        }
+                    } else if (ad > 0.39269912242889404f) {
+                        float aa = abs_117FE0(angle);
+                        if (aa < 0.7853982448577881f || aa > 2.3561947345733643f) {
+                            func_00117AE8(self, 0xE, D_00457850, -1.0f, 4);
+                            m = 1.0f;
+                            kind = 4;
+                        } else {
+                            m = 2.0f;
+                            func_00117AE8(self, 0xE, D_00457860, -1.0f, 5);
+                            kind = 5;
+                        }
+                    }
+                    if (m == 0.0f) {
+                        func_001179E0(self, 0xF);
+                        func_001179E0(self, 0xE);
+                    } else {
+                        func_00117B88(self, 0xF, (int)m, 0, -1.0f);
+                        self->f1C += m * 0.0008333333535119891f;
+                        if (kind != prev) {
+                            int x = func_00117908(self);
+                            int v = self->f84 + x;
+                            func_001171A8_f(&self->slots[2], 2, v, 0.0f, x);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    float v5;
+    if (slotFree_117FE0(&self->slots[5])) {
+        v5 = self->rider->f2F8;
+    } else {
+        float b = self->rider->f2F8;
+        float target;
+        if (self->rider->f304 != 3)
+            target = b + self->f14;
+        else
+            target = b;
+        v5 = approach_117FE0(target <? 1.0f, self->slots[5].value / self->slots[5].total, 0.01666666753590107f);
+    }
+    float v6;
+    if (slotFree_117FE0(&self->slots[6]))
+        v6 = self->rider->f2F8;
+    else
+        v6 = approach_117FE0(self->rider->f2F8, self->slots[6].value / self->slots[6].total, 0.01666666753590107f);
+    func_001171A8_f(&self->slots[5], 5, 0, v5, 0);
+    func_001171A8_f(&self->slots[6], 6, 0, v6, 0);
+    if (self->rider->f2F4 == 0) {
+        func_001179E0(self, 8);
+    } else {
+        if (slotFree_117FE0(&self->slots[8]))
+            func_001171A8_f(&self->slots[8], 8, 0, 0.0f, 0);
+        int n = self->rider->f2F4;
+        if (n >= 11)
+            n = 10;
+        int lvl = n - 1;
+        float cur = self->slots[8].value / self->slots[8].total;
+        float f = approach_117FE0((float)lvl * 0.1111111119389534f <? 1.0f, cur, 0.0066666672937572f);
+        func_001171A8(&self->slots[8], 8, 0, lvl, f);
+    }
+    int n2 = self->rider->f2F4;
+    if (n2 >= 11)
+        n2 = 10;
+    int left = 10 - n2;
+    if ((self->f5C != 0 || self->f54 != 0) && left > 0) {
+        int k = self->f54;
+        if (self->f5C != 0)
+            k++;
+        if (left < k)
+            k = left;
+        if (slotFree_117FE0(&self->slots[10])) {
+            func_001171A8_f(&self->slots[10], 10, 0, 0.0f, 0);
+            func_0029B0E0(func_0028B180(), self->rider);
+        }
+        float cur = self->slots[10].value / self->slots[10].total;
+        float f = approach_117FE0((float)k * 0.1111111119389534f <? 1.0f, cur, 0.01666666753590107f);
+        func_001171A8_f(&self->slots[10], 10, 0, f, k);
+    } else {
+        if (!slotFree_117FE0(&self->slots[10]))
+            func_0029B3C0(func_0028B180(), self->rider);
+        func_001179E0(self, 10);
+    }
+    if (slotFree_117FE0(&self->slots[9])) {
+        if (self->rider->f2F0 > 0.0f) {
+            func_001171A8_f(&self->slots[9], 9, 0, 0.0f, 0);
+            func_00299638(func_0028B180(), self->rider);
+        }
+    } else {
+        float cur = self->slots[9].value / self->slots[9].total;
+        if (cur == 1.0f && self->rider->f2F0 == 0.0f) {
+            func_001179E0(self, 9);
+            func_002997B8(func_0028B180(), self->rider);
+        } else {
+            func_001171A8_f(&self->slots[9], 9, 0, approach_117FE0(1.0f - self->rider->f2F0 * 0.05000000074505806f, cur, 0.01666666753590107f), self->rider->f2F4 > 11 ? 11 : self->rider->f2F4);
+        }
+    }
+    func_001171A8_f(&self->slots[7], 7, self->f198, 0.0f, 0);
+    sSlot_117FE0* s = &self->slots[3];
+    if (!slotFree_117FE0(s)) {
+        int want = self->fA0;
+        int have = self->slots[3].f14;
+        float cur = self->slots[3].value / self->slots[3].total;
+        int v;
+        if (want + 0x46 < have)
+            v = have - 0x46;
+        else if (have < want - 0x46)
+            v = have + 0x46;
+        else
+            v = want;
+        func_001171A8_f(s, 3, v, approach_117FE0(1.0f, cur, 0.01666666753590107f), self->f9C);
+        if (self->fA4 < 0.0f)
+            self->slots[3].f10 = 4;
+        else
+            self->slots[3].f10 = (int)(self->fA4 * 3.266666889190674f);
+    }
+    int x = func_00117908(self);
+    sSlot_117FE0* s2 = &self->slots[2];
+    int val = self->f84 + x;
+    if (!slotFree_117FE0(s2)) {
+        float f;
+        if (self->slots[2].f14 - self->slots[2].fC == self->f84)
+            f = approach_117FE0(1.0f, self->slots[2].value / self->slots[2].total, 0.01666666753590107f);
+        else
+            f = 0.0f;
+        func_001171A8_f(s2, 2, val, f, x);
+    } else if (val > 0) {
+        func_001171A8_f(s2, 2, val, 0.0f, x);
+    }
+    void* stats = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    char* obj = (char*)self->rider + 0x6C0;
+    sVE_117FE0* vt = *(sVE_117FE0**)obj;
+    int n25 = func_00150960(stats, vt[7].fn(obj + vt[7].delta));
+    func_001171A8_f(&self->slots[0x19], 0x19, n25, 0.0f, 0);
+    if (!slotFree_117FE0(&self->slots[4])) {
+        int have = self->slots[4].f14;
+        float cur = self->slots[4].value / self->slots[4].total;
+        func_001171A8_f(&self->slots[4], 4, have, approach_117FE0(1.0f, cur, 0.01666666753590107f), 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_00118FF8);
