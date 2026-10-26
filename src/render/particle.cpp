@@ -3264,7 +3264,209 @@ void cGfx_7A10::EndFrame_impl()
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00377CF0);
+#ifdef SKIP_ASM
+// PORT: 128-bit GPR quadword (TImode); the PC port needs a 16-byte struct.
+typedef int cQuad_7CF0 __attribute__((mode(TI)));
+
+struct sV_7CF0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat_7CF0 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+struct sRS_7CF0 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sEnt_7CF0 {
+    sRS_7CF0 rs;                    // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sRing_7CF0 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sEnt_7CF0 ents[1];              // 0x80
+};
+
+struct sGfx_7CF0 {
+    char pad_0x0[0xE84];
+    sRS_7CF0* top;                  // 0xE84
+    char pad_0xE88[0x18F0 - 0xE88];
+    sRing_7CF0* ring;               // 0x18F0
+    char pad_0x18F4[0x5A00 - 0x18F4];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x6AF0 - 0x5A04];
+    sMat_7CF0 projMtx;              // 0x6AF0
+    sMat_7CF0 clipMtx;              // 0x6B30
+    float minX;                     // 0x6B70
+    float minY;                     // 0x6B74
+    float maxZ;                     // 0x6B78
+    float field_0x6B7C;
+    float maxX;                     // 0x6B80
+    float maxY;                     // 0x6B84
+    float minZ;                     // 0x6B88
+    float field_0x6B8C;
+    int clipValid;                  // 0x6B90
+};
+
+// PORT: PS2-only VU0 inline asm (matrix * vector).
+static inline sV_7CF0 mtxApply_7CF0(sMat_7CF0* m, const sV_7CF0& v)
+{
+    sV_7CF0 out;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf8, %1\n"
+        "lqc2      $vf4, 0x0(%2)\n"
+        "lqc2      $vf5, 0x10(%2)\n"
+        "lqc2      $vf6, 0x20(%2)\n"
+        "lqc2      $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        ".set pop\n"
+        : "=m"(out)
+        : "m"(v), "r"(m)
+        : "memory");
+    return out;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sV_7CF0 Add_7CF0(const sV_7CF0& a, const sV_7CF0& b)
+{
+    sV_7CF0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV_7CF0 Sub_7CF0(const sV_7CF0& a, const sV_7CF0& b)
+{
+    sV_7CF0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// Guard-band outcode of a projected point (as func_0037DBE8).
+static inline int ClipCode_7CF0(sGfx_7CF0* self, const sV_7CF0& v)
+{
+    int code = 0;
+    if (v.x < self->minX) {
+        code |= 2;
+    }
+    if (self->maxX < v.x) {
+        code |= 1;
+    }
+    if (v.y < self->minY) {
+        code |= 8;
+    }
+    if (self->maxY < v.y) {
+        code |= 4;
+    }
+    if (v.w < 0.0f) {
+        code ^= 0x2F;
+    } else {
+        if (v.z > self->maxZ) {
+            code |= 0x20;
+        }
+        if (v.z < self->minZ) {
+            code |= 0x10;
+        }
+    }
+    return code;
+}
+
+// PORT: uncached (0x30000000) pointers held in int.
+// Emits one screen-aligned sprite (GS SPRITE, ST + RGBAQ + two XYZ2) centred on pos.
+extern "C" void func_00377CF0(sGfx_7CF0* self, sV_7CF0* pos, float* size, int* uv0, int* uv1, float* col)
+{
+    if (self->clipValid == 0) {
+        func_0037D968(self);
+    }
+    sV_7CF0 c = mtxApply_7CF0(&self->clipMtx, *pos);
+    float sw = size[0];
+    float sh = size[1];
+    float w = 1.0f / c.w;
+    float sx = self->projMtx.m[0][0] * sw;
+    float sy = self->projMtx.m[1][1] * sh;
+    c.x *= w;
+    c.y *= w;
+    c.w = w;
+    sV_7CF0 s;
+    s.x = sx * w;
+    s.y = sy * w;
+    s.z = 0.0f;
+    s.w = 0.0f;
+    sV_7CF0 lo = Sub_7CF0(c, s);
+    sV_7CF0 hi = Add_7CF0(c, s);
+    if (ClipCode_7CF0(self, lo) & ClipCode_7CF0(self, hi)) {
+        return;
+    }
+
+    float q = 1.0f;
+    unsigned int buf = self->bufAddr;
+    unsigned long* p = (unsigned long*)(buf | 0x30000000);
+    *(cQuad_7CF0*)p = 0x10000005;
+    p[2] = 0;
+    p[3] = (unsigned long)0x50000004 << 32;
+    p[4] = ((unsigned long)0x64000000 << 32) | 0x8001;
+    p[5] = 0x525120;
+    p[6] = 0x5E;
+    p[7] = (unsigned long)uv0[0] | ((unsigned long)uv0[1] << 32);
+    p[8] = (unsigned long)(int)(col[1] * 128.0f) | ((unsigned long)(int)(col[2] * 128.0f) << 8) |
+           ((unsigned long)(int)(col[3] * 128.0f) << 16) | ((unsigned long)(int)(col[0] * 128.0f) << 24) |
+           ((unsigned long)*(unsigned int*)&q << 32);
+    p[9] = (unsigned long)(int)lo.x | ((unsigned long)(int)lo.y << 16) | ((unsigned long)(int)(lo.z * lo.w) << 32);
+    p[10] = (unsigned long)uv1[0] | ((unsigned long)uv1[1] << 32);
+    p[11] = (unsigned long)(int)hi.x | ((unsigned long)(int)hi.y << 16) | ((unsigned long)(int)(hi.z * hi.w) << 32);
+    p += 12;
+    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+    self->bufAddr = next;
+    sRing_7CF0* ring = self->ring;
+    sRS_7CF0* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sEnt_7CF0* e = (sEnt_7CF0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->bufAddr += 0x10;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003781A0);
@@ -7093,7 +7295,178 @@ extern "C" int func_00383770(void *arg0, int arg1, int arg2, int arg3, int arg4,
 #endif
 INCLUDE_ASM("render/particle", func_00383808);
 
+//100%
 INCLUDE_ASM("render/particle", func_00383A10);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// Clips the segment p[0]-p[1] (projected points, v[] their vertices) against the six
+// guard-band planes; codes[] are the outcodes from func_00381AD0 (0x20/0x10 depth, 8/4 y, 2/1 x).
+// The clipped end replaces the outside point; returns 0 when the segment is fully outside.
+struct sClipPt_3A10 {
+    float x, y, z, w;
+};
+
+struct sClipVtx_3A10 {
+    float s, t, pad0, pad1;         // 0x00
+    unsigned int c[4];              // 0x10 rgba
+    float pos[4];                   // 0x20
+};
+
+struct sClipCtx_3A10 {
+    char pad_0x0[0x6B70];
+    float xmin;                     // 0x6B70
+    float ymin;                     // 0x6B74
+    float zfar;                     // 0x6B78
+    float wfar;                     // 0x6B7C
+    float xmax;                     // 0x6B80
+    float ymax;                     // 0x6B84
+    float znear;                    // 0x6B88
+    float wnear;                    // 0x6B8C
+};
+
+extern "C" int func_00383A10_impl(sClipCtx_3A10* self, sClipVtx_3A10* v, sClipPt_3A10* p, int* codes) __asm__("func_00383A10");
+
+extern "C" int func_00383A10_impl(sClipCtx_3A10* self, sClipVtx_3A10* v, sClipPt_3A10* p, int* codes)
+{
+    int c = codes[0] | codes[1];
+
+    if (c & 0x20) {
+        float w0 = p[0].w;
+        float K = self->wfar;
+        float t = (w0 - K) / (w0 - p[1].w);
+        int k = (codes[0] & 0x20) == 0;
+        float dx = t * (p[0].x - p[1].x);
+        float dy = t * (p[0].y - p[1].y);
+        float tv = t * p[1].w / K;
+        p[k].x = p[0].x - dx;
+        p[k].y = p[0].y - dy;
+        p[k].z = self->zfar;
+        p[k].w = self->wfar;
+        v[k].s = v[0].s + tv * (v[1].s - v[0].s);
+        v[k].t = v[0].t + tv * (v[1].t - v[0].t);
+        *(int*)&v[k].c[0] = (int)((float)v[0].c[0] + tv * (float)(v[1].c[0] - v[0].c[0]));
+        *(int*)&v[k].c[1] = (int)((float)v[0].c[1] + tv * (float)(v[1].c[1] - v[0].c[1]));
+        *(int*)&v[k].c[2] = (int)((float)v[0].c[2] + tv * (float)(v[1].c[2] - v[0].c[2]));
+        *(int*)&v[k].c[3] = (int)((float)v[0].c[3] + tv * (float)(v[1].c[3] - v[0].c[3]));
+        codes[k] = 0;
+        if (p[k].x < self->xmin) codes[k] |= 2;
+        if (p[k].x > self->xmax) codes[k] |= 1;
+        if (p[k].y < self->ymin) codes[k] |= 8;
+        if (p[k].y > self->ymax) codes[k] |= 4;
+        if (codes[0] & codes[1]) return 0;
+        c = codes[0] | codes[1];
+    }
+    if (c & 0x10) {
+        float w0 = p[0].w;
+        float K = self->wnear;
+        float t = (w0 - K) / (w0 - p[1].w);
+        int k = (codes[0] & 0x10) == 0;
+        float dx = t * (p[0].x - p[1].x);
+        float dy = t * (p[0].y - p[1].y);
+        float tv = t * p[1].w / K;
+        p[k].x = p[0].x - dx;
+        p[k].y = p[0].y - dy;
+        p[k].z = self->znear;
+        p[k].w = self->wnear;
+        v[k].s = v[0].s + tv * (v[1].s - v[0].s);
+        v[k].t = v[0].t + tv * (v[1].t - v[0].t);
+        *(int*)&v[k].c[0] = (int)((float)v[0].c[0] + tv * (float)(v[1].c[0] - v[0].c[0]));
+        *(int*)&v[k].c[1] = (int)((float)v[0].c[1] + tv * (float)(v[1].c[1] - v[0].c[1]));
+        *(int*)&v[k].c[2] = (int)((float)v[0].c[2] + tv * (float)(v[1].c[2] - v[0].c[2]));
+        *(int*)&v[k].c[3] = (int)((float)v[0].c[3] + tv * (float)(v[1].c[3] - v[0].c[3]));
+        codes[k] = 0;
+        if (p[k].x < self->xmin) codes[k] |= 2;
+        if (p[k].x > self->xmax) codes[k] |= 1;
+        if (p[k].y < self->ymin) codes[k] |= 8;
+        if (p[k].y > self->ymax) codes[k] |= 4;
+        if (codes[0] & codes[1]) return 0;
+        c = codes[0] | codes[1];
+    }
+    if (c & 8) {
+        float t = (p[0].y - self->ymin) / (p[0].y - p[1].y);
+        int k = (codes[0] & 8) == 0;
+        float dx = t * (p[0].x - p[1].x);
+        float dz = t * (p[0].z - p[1].z);
+        float dw = t * (p[0].w - p[1].w);
+        p[k].x = p[0].x - dx;
+        p[k].y = self->ymin;
+        p[k].z = p[0].z - dz;
+        p[k].w = p[0].w - dw;
+        v[k].s = v[0].s + t * (v[1].s - v[0].s);
+        v[k].t = v[0].t + t * (v[1].t - v[0].t);
+        *(int*)&v[k].c[0] = (int)((float)v[0].c[0] + t * (float)(v[1].c[0] - v[0].c[0]));
+        *(int*)&v[k].c[1] = (int)((float)v[0].c[1] + t * (float)(v[1].c[1] - v[0].c[1]));
+        *(int*)&v[k].c[2] = (int)((float)v[0].c[2] + t * (float)(v[1].c[2] - v[0].c[2]));
+        *(int*)&v[k].c[3] = (int)((float)v[0].c[3] + t * (float)(v[1].c[3] - v[0].c[3]));
+        codes[k] = 0;
+        if (p[k].x < self->xmin) codes[k] |= 2;
+        if (p[k].x > self->xmax) codes[k] |= 1;
+        if (codes[0] & codes[1]) return 0;
+        c = codes[0] | codes[1];
+    }
+    if (c & 4) {
+        float t = (p[0].y - self->ymax) / (p[0].y - p[1].y);
+        int k = (codes[0] & 4) == 0;
+        float dx = t * (p[0].x - p[1].x);
+        float dz = t * (p[0].z - p[1].z);
+        float dw = t * (p[0].w - p[1].w);
+        p[k].x = p[0].x - dx;
+        p[k].y = self->ymax;
+        p[k].z = p[0].z - dz;
+        p[k].w = p[0].w - dw;
+        v[k].s = v[0].s + t * (v[1].s - v[0].s);
+        v[k].t = v[0].t + t * (v[1].t - v[0].t);
+        *(int*)&v[k].c[0] = (int)((float)v[0].c[0] + t * (float)(v[1].c[0] - v[0].c[0]));
+        *(int*)&v[k].c[1] = (int)((float)v[0].c[1] + t * (float)(v[1].c[1] - v[0].c[1]));
+        *(int*)&v[k].c[2] = (int)((float)v[0].c[2] + t * (float)(v[1].c[2] - v[0].c[2]));
+        *(int*)&v[k].c[3] = (int)((float)v[0].c[3] + t * (float)(v[1].c[3] - v[0].c[3]));
+        codes[k] = 0;
+        if (p[k].x < self->xmin) codes[k] |= 2;
+        if (p[k].x > self->xmax) codes[k] |= 1;
+        if (codes[0] & codes[1]) return 0;
+        c = codes[0] | codes[1];
+    }
+    if (c & 2) {
+        float K = self->xmin;
+        float t = (p[0].x - K) / (p[0].x - p[1].x);
+        int k = (codes[0] & 2) == 0;
+        float dy = t * (p[0].y - p[1].y);
+        float dz = t * (p[0].z - p[1].z);
+        float dw = t * (p[0].w - p[1].w);
+        p[k].x = K;
+        p[k].y = p[0].y - dy;
+        p[k].z = p[0].z - dz;
+        p[k].w = p[0].w - dw;
+        v[k].s = v[0].s + t * (v[1].s - v[0].s);
+        v[k].t = v[0].t + t * (v[1].t - v[0].t);
+        *(int*)&v[k].c[0] = (int)((float)v[0].c[0] + t * (float)(v[1].c[0] - v[0].c[0]));
+        *(int*)&v[k].c[1] = (int)((float)v[0].c[1] + t * (float)(v[1].c[1] - v[0].c[1]));
+        *(int*)&v[k].c[2] = (int)((float)v[0].c[2] + t * (float)(v[1].c[2] - v[0].c[2]));
+        *(int*)&v[k].c[3] = (int)((float)v[0].c[3] + t * (float)(v[1].c[3] - v[0].c[3]));
+        codes[k] = 0;
+    }
+    if (c & 1) {
+        float K = self->xmax;
+        float t = (p[0].x - K) / (p[0].x - p[1].x);
+        int k = (codes[0] & 1) == 0;
+        float dy = t * (p[0].y - p[1].y);
+        float dz = t * (p[0].z - p[1].z);
+        float dw = t * (p[0].w - p[1].w);
+        p[k].x = K;
+        p[k].y = p[0].y - dy;
+        p[k].z = p[0].z - dz;
+        p[k].w = p[0].w - dw;
+        v[k].s = v[0].s + t * (v[1].s - v[0].s);
+        v[k].t = v[0].t + t * (v[1].t - v[0].t);
+        *(int*)&v[k].c[0] = (int)((float)v[0].c[0] + t * (float)(v[1].c[0] - v[0].c[0]));
+        *(int*)&v[k].c[1] = (int)((float)v[0].c[1] + t * (float)(v[1].c[1] - v[0].c[1]));
+        *(int*)&v[k].c[2] = (int)((float)v[0].c[2] + t * (float)(v[1].c[2] - v[0].c[2]));
+        *(int*)&v[k].c[3] = (int)((float)v[0].c[3] + t * (float)(v[1].c[3] - v[0].c[3]));
+        codes[k] = 0;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00384D98);
@@ -7871,7 +8244,331 @@ extern "C" void func_00386DD0(void* self, sPartStrip_6DD0* strips, int n, void* 
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00386E78);
+#ifdef SKIP_ASM
+// PS2GraphicsMan::DrawShadowVolume (REF structs/render.md slot 89): multi-pass destination-alpha
+// shadow. Each pass builds a DMA CNT packet in the uncached scratch buffer: optional VIF FLUSH,
+// a DIRECT GIF A+D block setting FRAME/ZBUF/TEST/FBA, an optional UNPACK of the guard band,
+// then draws the strips through func_00386D10 / func_00386DD0.
+// PORT: uncached (0x30000000) packet pointers held in int; ulong is 64-bit (GIF/VIF words).
+
+struct sRS_6E78 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short pad;
+};
+
+struct sVEnt_6E78 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sQ_6E78 {
+    int w[4];
+} __attribute__((aligned(16)));
+
+struct sV_6E78 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sEnt_6E78 {
+    sRS_6E78 rs;                    // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+
+struct sRing_6E78 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sEnt_6E78 ents[1];              // 0x80
+};
+
+struct sGfx_6E78 {
+    char pad_0x0[0xE84];
+    sRS_6E78* top;                  // 0xE84
+    char pad_0xE88[0xF50 - 0xE88];
+    int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
+    sVEnt_6E78* vtable;             // 0x10D8
+    char pad_0x10DC[0x18F0 - 0x10DC];
+    sRing_6E78* ring;               // 0x18F0
+    char pad_0x18F4[0x5840 - 0x18F4];
+    sV_6E78 guard0;                 // 0x5840
+    sV_6E78 guard1;                 // 0x5850
+    char pad_0x5860[0x5A00 - 0x5860];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x5A80 - 0x5A04];
+    unsigned int zbp;               // 0x5A80
+    unsigned int fbp;               // 0x5A84
+    char pad_0x5A88[0x6B90 - 0x5A88];
+    int texReady;                   // 0x6B90
+};
+
+struct sPkt_6E78 {
+    ulong* cur;                     // 0x00 next free quad
+    ulong* dma;                     // 0x04 open DMA tag
+    ulong* vif;                     // 0x08 open VIF code quad
+    ulong* gif;                     // 0x0C open GIF tag
+    int pad_0x10[2];
+    int cl;                         // 0x18
+    int wl;                         // 0x1C
+    int fmt;                        // 0x20
+    int addr;                       // 0x24
+    int flg;                        // 0x28
+    unsigned int state;             // 0x2C
+};
+
+struct sShadowCfg_6E78 {
+    int texIndex;
+};
+extern sShadowCfg_6E78 D_004A45D4;
+struct sShadowOpt_6E78 {
+    int fba;
+};
+extern sShadowOpt_6E78 D_004A45CC;
+extern int D_004A5B84;
+extern sRS_6E78 D_00501420_rs6E78 __asm__("D_00501420");
+
+static inline void DmaBegin_6E78(sPkt_6E78* pkt, unsigned int addr)
+{
+    ulong* p = (ulong*)(addr | 0x30000000);
+    pkt->state = 0;
+    pkt->dma = p;
+    pkt->cur = p + 2;
+    pkt->cl = 1;
+    pkt->wl = 1;
+    pkt->fmt = 0xC;
+    pkt->addr = 0;
+}
+
+static inline void Flush_6E78(sPkt_6E78* pkt)
+{
+    pkt->cur[0] = 0;
+    pkt->cur[1] = (ulong)0x11000000 << 32;
+    pkt->cur += 2;
+}
+
+static inline void GifBegin_6E78(sPkt_6E78* pkt)
+{
+    pkt->state = 6;
+    ulong* p = pkt->cur;
+    pkt->vif = p;
+    pkt->gif = p + 2;
+    pkt->cur = p + 4;
+}
+
+static inline void AddReg_6E78(sPkt_6E78* pkt, ulong data, ulong reg)
+{
+    pkt->cur[0] = data;
+    pkt->cur[1] = reg;
+    pkt->cur += 2;
+}
+
+static inline void GifEnd_6E78(sPkt_6E78* pkt)
+{
+    pkt->state &= ~4;
+    pkt->gif[0] = (ulong)(((int)pkt->cur - (int)pkt->gif - 16) / 16 | 0x8000) | ((ulong)1 << 60);
+    pkt->gif[1] = 0xE;
+}
+
+static inline void DirectEnd_6E78(sPkt_6E78* pkt)
+{
+    int size = (int)pkt->cur - (int)pkt->vif;
+    pkt->vif[0] = 0;
+    pkt->vif[1] = (ulong)(unsigned int)(((size - 16) / 16 & 0xFF) | 0x50000000) << 32;
+    pkt->state = 0;
+}
+
+static inline void UnpackBegin_6E78(sPkt_6E78* pkt)
+{
+    pkt->state = 1;
+    ulong* p = pkt->cur;
+    pkt->addr = 4;
+    pkt->vif = p;
+    pkt->cur = p + 2;
+    pkt->flg = 0;
+}
+
+static inline void AddQuad_6E78(sPkt_6E78* pkt, const sV_6E78& q)
+{
+    *(sV_6E78*)pkt->cur = q;
+    pkt->cur += 2;
+}
+
+static inline void UnpackEnd_6E78(sPkt_6E78* pkt)
+{
+    pkt->state = 0;
+    int size = (int)pkt->cur - (int)pkt->vif;
+    pkt->vif[0] = (ulong)0x01000101 << 32;
+    int num = (size - 16) / 16 & 0xFF;
+    ulong* dst = pkt->vif + 1;
+    *dst = (ulong)(pkt->addr | (pkt->flg ? 0x8000 : 0) | num << 16 | 0x6C000000) << 32;
+}
+
+static inline void DmaEnd_6E78(sPkt_6E78* pkt, sGfx_6E78* self)
+{
+    pkt->dma[0] = ((pkt->cur - pkt->dma) / 2 - 1) | 0x10000000;
+    pkt->dma[1] = 0;
+    ulong* p = pkt->cur;
+    pkt->cur = 0;
+    self->bufAddr = (unsigned int)p & 0x0FFFFFFF;
+}
+
+extern "C" void func_00386E78(sGfx_6E78* self, sPartStrip_6D10* strips, int n)
+{
+    *self->top = D_00501420_rs6E78;
+    self->top->f8 = (self->top->f8 & ~0x3E0) | 0x60;
+    self->top->f0 = (self->top->f0 & ~0x3C0) | 0xC0;
+    self->top->fC &= 0xC0000000;
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    self->top->f4 = (self->top->f4 & ~0x400000) | 0x400000;
+    self->top->f4 = (self->top->f4 & ~0x1800000) | 0x1000000;
+    self->top->f4 &= ~0x300000;
+    self->top->f4 &= ~0xFF000;
+    self->top->f4 = (self->top->f4 & ~0x7C) | 0x14;
+    int tex = self->texIds[D_004A45D4.texIndex];
+    self->top->tex = tex;
+
+    sVEnt_6E78* vt = self->vtable;
+    int width = vt[10].fn((char*)self + vt[10].delta);
+    sPkt_6E78* pkt = (sPkt_6E78*)D_004A5B84;
+    unsigned int fbp = self->fbp;
+    unsigned int zbp = self->zbp;
+    unsigned int start = self->bufAddr;
+    func_003E6448(pkt, 0, 0x30);
+
+    // pass 1: alpha-only FRAME, ZBUF masked, TEST ztst always; guard band
+    {
+        ulong* p = (ulong*)(self->bufAddr | 0x30000000);
+        pkt->dma = p;
+        pkt->cur = p + 2;
+        pkt->cl = 1;
+        pkt->wl = 1;
+        pkt->fmt = 0xC;
+        pkt->addr = 0;
+    }
+    GifBegin_6E78(pkt);
+    AddReg_6E78(pkt, (ulong)fbp | ((ulong)(width / 64) << 16) | ((ulong)0xFFFFFF << 32), 0x4C);
+    AddReg_6E78(pkt, (ulong)(zbp | 0x1000000) | ((ulong)1 << 32), 0x4E);
+    AddReg_6E78(pkt, 0x30000, 0x47);
+    GifEnd_6E78(pkt);
+    DirectEnd_6E78(pkt);
+    UnpackBegin_6E78(pkt);
+    AddQuad_6E78(pkt, self->guard0);
+    AddQuad_6E78(pkt, self->guard1);
+    UnpackEnd_6E78(pkt);
+    DmaEnd_6E78(pkt, self);
+    func_00386D10(self, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
+
+    // pass 2: TEST ztst gequal, FBA on
+    DmaBegin_6E78(pkt, self->bufAddr);
+    Flush_6E78(pkt);
+    GifBegin_6E78(pkt);
+    AddReg_6E78(pkt, 0x50000, 0x47);
+    AddReg_6E78(pkt, 1, 0x4A);
+    GifEnd_6E78(pkt);
+    DirectEnd_6E78(pkt);
+    DmaEnd_6E78(pkt, self);
+    func_00386D10(self, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
+
+    // pass 3: ZBUF unmasked, destination-alpha test, FBA off; guard band without depth
+    DmaBegin_6E78(pkt, self->bufAddr);
+    Flush_6E78(pkt);
+    GifBegin_6E78(pkt);
+    AddReg_6E78(pkt, (ulong)(zbp | 0x1000000), 0x4E);
+    AddReg_6E78(pkt, 0x3C000, 0x47);
+    AddReg_6E78(pkt, 0, 0x4A);
+    GifEnd_6E78(pkt);
+    DirectEnd_6E78(pkt);
+    UnpackBegin_6E78(pkt);
+    {
+        sV_6E78 g0;
+        sV_6E78 g1;
+        g0.x = self->guard0.x;
+        g0.y = self->guard0.y;
+        g0.z = 0.0f;
+        g0.w = self->guard0.w;
+        g1.x = self->guard1.x;
+        g1.y = self->guard1.y;
+        g1.z = 0.0f;
+        g1.w = self->guard1.w;
+        AddQuad_6E78(pkt, g0);
+        AddQuad_6E78(pkt, g1);
+    }
+    UnpackEnd_6E78(pkt);
+    DmaEnd_6E78(pkt, self);
+    func_00386D10(self, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
+
+    // pass 4: full FRAME, TEST ztst gequal, FBA if enabled; then the edges
+    DmaBegin_6E78(pkt, self->bufAddr);
+    Flush_6E78(pkt);
+    GifBegin_6E78(pkt);
+    AddReg_6E78(pkt, (ulong)fbp | ((ulong)(width / 64) << 16), 0x4C);
+    AddReg_6E78(pkt, 0x50000, 0x47);
+    if (D_004A45CC.fba) {
+        AddReg_6E78(pkt, 1, 0x4A);
+    }
+    GifEnd_6E78(pkt);
+    DirectEnd_6E78(pkt);
+    UnpackBegin_6E78(pkt);
+    AddQuad_6E78(pkt, self->guard0);
+    AddQuad_6E78(pkt, self->guard1);
+    UnpackEnd_6E78(pkt);
+    DmaEnd_6E78(pkt, self);
+    func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, (void*)2, 0, (void*)1);
+    func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, 0, (void*)3, (void*)1);
+    func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, (void*)3, (void*)4, (void*)1);
+    func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, (void*)4, (void*)1, (void*)1);
+    func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, (void*)1, (void*)5, (void*)1);
+
+    if (D_004A45CC.fba) {
+        DmaBegin_6E78(pkt, self->bufAddr);
+        Flush_6E78(pkt);
+        GifBegin_6E78(pkt);
+        AddReg_6E78(pkt, 0x54000, 0x47);
+        AddReg_6E78(pkt, 0, 0x4A);
+        GifEnd_6E78(pkt);
+        DirectEnd_6E78(pkt);
+        DmaEnd_6E78(pkt, self);
+        func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, 0, (void*)1, (void*)1);
+
+        DmaBegin_6E78(pkt, self->bufAddr);
+        Flush_6E78(pkt);
+        GifBegin_6E78(pkt);
+        AddReg_6E78(pkt, 0x50000, 0x47);
+        GifEnd_6E78(pkt);
+        DirectEnd_6E78(pkt);
+        DmaEnd_6E78(pkt, self);
+    }
+
+    sRing_6E78* ring = self->ring;
+    unsigned int next = self->bufAddr;
+    sRS_6E78* rs = self->top;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sEnt_6E78* e = (sEnt_6E78*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = start;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+    self->bufAddr += 0x10;
+    self->top->f0 &= ~0x3C0;
+    self->top->fC &= 0xC0000000;
+    *self->top = D_00501420_rs6E78;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00387EC0);
 
@@ -7953,7 +8650,151 @@ extern "C" void func_003883B8(sPtGfx_83B8* self, void* a1, int n, void* a3, void
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_003885E0);
+#ifdef SKIP_ASM
+struct sVtx_85E0 {
+    unsigned long q[6];
+} __attribute__((aligned(16)));
+
+struct sPtGfx_85E0 {
+    char pad_0x0[0x5A00];
+    unsigned int bufAddr;           // 0x5A00
+};
+
+extern int D_004A43B0;
+extern char D_3A00[];
+extern char D_3A08[];
+
+// VIF UNPACK V4-32 code: VU address, qword count, FLG bit.
+static inline unsigned int Unpack_85E0(int addr, int num, int flg, unsigned int cmd)
+{
+    return addr | ((num << 16) | (flg << 15)) | cmd;
+}
+
+// The unit declares func_003885E0 with void* parameters (caller func_003883B8); bind the real types.
+extern "C" void func_003885E0_impl(sPtGfx_85E0* self, sVtx_85E0** strips, int start, int ring, int count, int i0, int i1,
+                                   float t, float dt) __asm__("func_003885E0");
+
+// PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit VIF/GIF words are `ulong`.
+// Emits the board-wake strip pair i0/i1 as VU1 batches of at most 36 vertices (ring buffer of `ring` entries).
+void func_003885E0_impl(sPtGfx_85E0* self, sVtx_85E0** strips, int start, int ring, int count, int i0, int i1, float t,
+                        float dt)
+{
+    unsigned int prog = (unsigned int)(D_004A43B0 ? D_3A00 : D_3A08) >> 3;
+    int prim = 0x5C;
+    unsigned long regs = 0x412;
+    int first = 1;
+    unsigned long* p = (unsigned long*)(self->bufAddr | 0x30000000);
+    D_004A43B0 = 0;
+    while (count != 0) {
+        int n = count < 0x25 ? count : 0x24;
+        int a = ring - start;
+        if (n < a) {
+            a = n;
+        }
+        int k = 1;
+        int b = n - a;
+        if (b < 0) {
+            b = 0;
+        }
+        if (first) {
+            k = start;
+            a--;
+            start++;
+        }
+        unsigned int unpack = 0x6C000000;
+        p[0] = 0x10000003;
+        p[1] = 0;
+        p[2] = (unsigned long)0x01000101 << 32;
+        p[3] = (unsigned long)Unpack_85E0(0, 2, 1, unpack) << 32;
+        p[4] = (unsigned long)(n * 2) | ((unsigned long)1 << 15) | ((unsigned long)1 << 46) | ((unsigned long)prim << 47) |
+               ((unsigned long)3 << 60);
+        p[5] = regs;
+        p[6] = (unsigned long)(n * 3) | ((unsigned long)n << 32);
+        p[7] = (unsigned long)*(unsigned int*)&dt | ((unsigned long)*(unsigned int*)&t << 32);
+        p += 8;
+        int addr = 2;
+        if (k >= 0) {
+            p[0] = 0x10000004;
+            p[1] = 0;
+            p[2] = (unsigned long)0x01000101 << 32;
+            p[3] = (unsigned long)Unpack_85E0(addr, 3, 1, unpack) << 32;
+            addr += 3;
+            p += 4;
+            *(sVtx_85E0*)p = strips[i0][k];
+            p += 6;
+        }
+        if (a != 0) {
+            int m = a * 3;
+            p[0] = 0x10000001;
+            p[1] = 0;
+            p[2] = (unsigned long)0x01000101 << 32;
+            p[3] = (unsigned long)Unpack_85E0(addr, m, 1, unpack) << 32;
+            addr += m;
+            p[4] = (unsigned long)(m | 0x30000000) | ((unsigned long)(unsigned int)&strips[i0][start] << 32);
+            p[5] = 0;
+            p += 6;
+        }
+        if (b != 0) {
+            int m = b * 3;
+            p[0] = 0x10000001;
+            p[1] = 0;
+            p[2] = (unsigned long)0x01000101 << 32;
+            p[3] = (unsigned long)Unpack_85E0(addr, m, 1, unpack) << 32;
+            addr += m;
+            p[4] = (unsigned long)(m | 0x30000000) | ((unsigned long)(unsigned int)strips[i0] << 32);
+            p[5] = 0;
+            p += 6;
+        }
+        if (k >= 0) {
+            p[0] = 0x10000004;
+            p[1] = 0;
+            p[2] = (unsigned long)0x01000101 << 32;
+            p[3] = (unsigned long)Unpack_85E0(addr, 3, 1, unpack) << 32;
+            addr += 3;
+            p += 4;
+            *(sVtx_85E0*)p = strips[i1][k];
+            p += 6;
+        }
+        if (a != 0) {
+            int m = a * 3;
+            p[0] = 0x10000001;
+            p[1] = 0;
+            p[2] = (unsigned long)0x01000101 << 32;
+            p[3] = (unsigned long)Unpack_85E0(addr, m, 1, unpack) << 32;
+            addr += m;
+            p[4] = (unsigned long)(m | 0x30000000) | ((unsigned long)(unsigned int)&strips[i1][start] << 32);
+            p[5] = 0;
+            p += 6;
+        }
+        if (b != 0) {
+            int m = b * 3;
+            p[0] = 0x10000001;
+            p[1] = 0;
+            p[2] = (unsigned long)0x01000101 << 32;
+            p[3] = (unsigned long)Unpack_85E0(addr, m, 1, unpack) << 32;
+            addr += m;
+            p[4] = (unsigned long)(m | 0x30000000) | ((unsigned long)(unsigned int)strips[i1] << 32);
+            p[5] = 0;
+            p += 6;
+        }
+        p[0] = 0x10000001;
+        p[1] = 0;
+        p[2] = 0;
+        p[3] = (unsigned long)(prog | 0x14000000) << 32;
+        p += 4;
+        count -= n;
+        t += dt * (float)n;
+        if (count > 0) {
+            start = (start + n - 1) % ring;
+            count++;
+            first = 0;
+        }
+    }
+    self->bufAddr = (unsigned int)p & 0x0FFFFFFF;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_003889F0);
 

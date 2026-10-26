@@ -1205,7 +1205,131 @@ extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, i
 
 INCLUDE_ASM("render/bezierman", func_0038D168);
 
+//100%
 INCLUDE_ASM("render/bezierman", func_0038D448);
+#ifdef SKIP_ASM
+struct sRS_D448 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short tex2;
+};
+struct sEnt_D448 {
+    sRS_D448 rs;                    // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+struct sRing_D448 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sEnt_D448 ents[1];              // 0x80
+};
+struct sMat_D448 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+// Projector light (PS2GraphicsMan AddLight record, 0xA0 bytes).
+struct sLight_D448 {
+    float color[4];                 // 0x00
+    sMat_D448 mat0;                 // 0x10
+    sMat_D448 mat;                  // 0x50
+    float f90;                      // 0x90
+    int tex;                        // 0x94
+    char pad_0x98[8];
+} __attribute__((aligned(16)));
+struct sGfx_D448 {
+    char pad_0x0[0xE84];
+    sRS_D448* top;                  // 0xE84
+    char pad_0xE88[0x13EC - 0xE88];
+    unsigned int nLights;           // 0x13EC
+    sLight_D448 lights[1];          // 0x13F0
+    char pad_0x1490[0x18F0 - 0x1490];
+    sRing_D448* ring;               // 0x18F0
+};
+struct sPatch_D448 {
+    void* obj;
+    int extra;
+};
+struct sTex_D448 {
+    int addr;
+    int pad;
+};
+extern sGfx_D448* D_004A5B80_D448 __asm__("D_004A5B80");
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void CopyMat_D448(void* d, const void* s)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(s)
+        : "memory");
+}
+
+static inline int Tex_D448(sLight_D448* l)
+{
+    return l->tex;
+}
+
+static inline void QueueRecord_D448(sGfx_D448* gfx, unsigned int buf, unsigned int next, int flag)
+{
+    sRing_D448* ring = gfx->ring;
+    sRS_D448* rs = gfx->top;
+    if (ring->count < 0xA28) {
+        int lyr = *(int*)((char*)ring + 0x69CC4) & 0x1F;
+        rs->f8 = (rs->f8 & ~0x1F) | lyr;
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sEnt_D448* e = (sEnt_D448*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = flag;
+    }
+}
+
+// PORT: uncached (0x30000000) pointers held in int; PS2-only VU0 asm.
+// One projector pass per light whose bit is set in mask: UNPACK the light matrix, then MSCAL the patch program.
+extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int mask, unsigned int* handle)
+{
+    sGfx_D448* gfx = D_004A5B80_D448;
+    sTex_D448* t = (sTex_D448*)tbl;
+    int extra = ((sPatch_D448*)patch)->extra;
+    unsigned int i;
+    for (i = 0; i < gfx->nLights; i++) {
+        sLight_D448* l = &gfx->lights[i];
+        if ((mask >> i) & 1) {
+            unsigned int buf = *handle;
+            gfx->top->tex2 = Tex_D448(l);
+            long* p = (long*)(buf | 0x30000000);
+            gfx->top->f0 = (gfx->top->f0 & ~0x30) | 0x30;
+            p[0] = 0x10000006;
+            p[1] = 0;
+            p[2] = 0x20000000;
+            p[3] = (long)0x6C048080 << 32;
+            CopyMat_D448(p + 4, &l->mat);
+            p[12] = 0;
+            p[13] = (long)(t[extra + 6].addr | 0x14000000) << 32;
+            p += 14;
+            unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+            *handle = next;
+            QueueRecord_D448(gfx, buf, next, 1);
+            *handle += 0x10;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/bezierman", func_0038D638);
