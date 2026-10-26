@@ -5846,7 +5846,45 @@ void func_003C3500(unsigned a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C35F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct G_35F8 {
+    char pad0[0x2A];
+    unsigned short u2A;
+    char pad1[0x42 - 0x2C];
+    unsigned char b42;
+    char pad2[0x1F8 - 0x43];
+    short s1F8;
+    short pad3;
+    int w1FC;
+};
+extern struct G_35F8 D_0050A8E8_35F8 __asm__("D_0050A8E8");
+extern short D_0050AAF4_35F8 __asm__("D_0050AAF4");
+extern short D_0050AB08_35F8 __asm__("D_0050AB08");
+extern int D_00515B50_35F8 __asm__("D_00515B50");
+extern void func_003CC630(int, unsigned char *);
+extern void func_003CC848_35F8(void) __asm__("func_003CC848");
+
+void func_003C35F8(int a) {
+    func_003B58A0();
+    if (a == 8) {
+        func_003C3500(D_0050AB08_35F8);
+    } else if (a == 0x100) {
+        func_003C3450(D_0050AAF4_35F8);
+    } else if (a == 4) {
+        if (D_0050A8E8_35F8.s1F8 != 1 || D_0050A8E8_35F8.b42 != 0) {
+            if (D_0050A8E8_35F8.b42 == 0) D_00515B50_35F8 = 0;
+            func_003CC848_35F8();
+        } else {
+            func_003CC630(D_0050A8E8_35F8.u2A, (unsigned char *)D_0050A8E8_35F8.w1FC);
+        }
+    }
+    func_003B58D8();
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C36A8);
