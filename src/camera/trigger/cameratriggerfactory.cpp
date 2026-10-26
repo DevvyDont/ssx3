@@ -1367,7 +1367,208 @@ extern "C" void* func_00174808(void* self, ...)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174848);
+#ifdef SKIP_ASM
+// Camera-trigger octree query (REF crates/ssx3-game/src/game/camera/trigger/cameratriggerfactory.rs,
+// "CollectOctreeTriggersInBox"): adds the node's triggers, then visits the eight children whose
+// cell (grown by 0.2) overlaps the box; children wholly inside take the plain subtree walk.
+struct sVEnt_4848 {
+    short delta;
+    short index;
+    int (*fn)(void*, ...);
+};
+
+struct sOctNode_4848 {
+    sOctNode_4848* child[8];        // 0x00
+    char pad_0x20[0x8];
+    char* list;                     // 0x28 trigger entries
+};
+
+struct sCell_4848 {
+    int level;
+    int u;
+    int v;
+    int w;
+};
+
+struct sBox_4848 {
+    float minx, miny, minz, pad0;
+    float maxx, maxy, maxz, pad1;
+};
+
+extern "C" void* func_0016C6B0(void*, void*);
+extern "C" void cActiveTriggerList_add(void*, void*);
+extern "C" void func_00176890(void* node, void* ctx);
+
+static inline void WalkList_4848(char* e, void* ctx)
+{
+    for (; e != 0; e = *(char**)e) {
+        if (*(int*)(e + 8) == 4) {
+            char* trig = *(char**)(e + 0xC);
+            char* sub = *(char**)((char*)ctx + 4) + 0x6C0;
+            char* bound = *(char**)(trig + 8);
+            sVEnt_4848* cvt = *(sVEnt_4848**)sub;
+            sVEnt_4848* bvt = *(sVEnt_4848**)(bound + 0x24);
+            char* bthis = bound + bvt[7].delta;
+            int r = cvt[5].fn(sub + cvt[5].delta);
+            if (bvt[7].fn(bthis, r)) {
+                void* f = func_0016C6B0(*(void**)ctx, trig);
+                if (f) {
+                    *(int*)((char*)f + 0xC) = 1;
+                } else {
+                    cActiveTriggerList_add(*(void**)ctx, trig);
+                }
+            }
+        }
+    }
+}
+
+static inline void Subtree_4848(sOctNode_4848* node, void* ctx)
+{
+    WalkList_4848(node->list, ctx);
+    if (node->child[0]) func_00176890(node->child[0], ctx);
+    if (node->child[1]) func_00176890(node->child[1], ctx);
+    if (node->child[2]) func_00176890(node->child[2], ctx);
+    if (node->child[3]) func_00176890(node->child[3], ctx);
+    if (node->child[4]) func_00176890(node->child[4], ctx);
+    if (node->child[5]) func_00176890(node->child[5], ctx);
+    if (node->child[6]) func_00176890(node->child[6], ctx);
+    if (node->child[7]) func_00176890(node->child[7], ctx);
+}
+
+extern "C" void func_00174848(int a0, void* ctx1, void* ctx2, sBox_4848* box, sOctNode_4848* node, sCell_4848* cell)
+{
+    sCell_4848 c;
+    sOctNode_4848* ch;
+
+    WalkList_4848(node->list, ctx1);
+    if (cell->level == 0xB) {
+        return;
+    }
+    int bits = (cell->level + 0x7E) << 23;
+    float size = *(float*)&bits;
+    c.level = cell->level - 1;
+    c.u = cell->u * 2;
+    c.v = cell->v * 2;
+    c.w = cell->w * 2;
+
+    float ulo0 = ((float)c.u - 0.2f) * size;
+    float uhi0 = ((float)(c.u + 1) + 0.2f) * size;
+    int fu0 = 0;
+    if (box->minx < uhi0 && ulo0 < box->maxx) fu0 = 1;
+    float ulo1 = ((float)(c.u + 1) - 0.2f) * size;
+    float uhi1 = ((float)(c.u + 2) + 0.2f) * size;
+    int fu1 = 0;
+    if (box->minx < uhi1 && ulo1 < box->maxx) fu1 = 1;
+    if (!fu0 && !fu1) return;
+
+    float vlo0 = ((float)c.v - 0.2f) * size;
+    float vhi0 = ((float)(c.v + 1) + 0.2f) * size;
+    int fv0 = 0;
+    if (box->miny < vhi0 && vlo0 < box->maxy) fv0 = 1;
+    float vlo1 = ((float)(c.v + 1) - 0.2f) * size;
+    float vhi1 = ((float)(c.v + 2) + 0.2f) * size;
+    int fv1 = 0;
+    if (box->miny < vhi1 && vlo1 < box->maxy) fv1 = 1;
+    if (!fv0 && !fv1) return;
+
+    float wlo0 = ((float)c.w - 0.2f) * size;
+    float whi0 = ((float)(c.w + 1) + 0.2f) * size;
+    int fw0 = 0;
+    if (box->minz < whi0 && wlo0 < box->maxz) fw0 = 1;
+    float wlo1 = ((float)(c.w + 1) - 0.2f) * size;
+    float whi1 = ((float)(c.w + 2) + 0.2f) * size;
+    int fw1 = 0;
+    if (box->minz < whi1 && wlo1 < box->maxz) fw1 = 1;
+    if (!fw0 && !fw1) return;
+
+    int iu0 = 0;
+    if (box->minx < ulo0 && uhi0 < box->maxx) iu0 = 1;
+    int iu1 = 0;
+    if (box->minx < ulo1 && uhi1 < box->maxx) iu1 = 1;
+    int iv0 = 0;
+    if (box->miny < vlo0 && vhi0 < box->maxy) iv0 = 1;
+    int iv1 = 0;
+    if (box->miny < vlo1 && vhi1 < box->maxy) iv1 = 1;
+    int iw0 = 0;
+    if (box->minz < wlo0 && whi0 < box->maxz) iw0 = 1;
+    int iw1 = 0;
+    if (box->minz < wlo1 && whi1 < box->maxz) iw1 = 1;
+
+    ch = node->child[0];
+    if (ch != 0 && fu0 && fv0 && fw0) {
+        if (iu0 && iv0 && iw0) {
+            Subtree_4848(ch, ctx2);
+        } else {
+            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+        }
+    }
+    c.w++;
+    ch = node->child[1];
+    if (ch != 0 && fu0 && fv0 && fw1) {
+        if (iu0 && iv0 && iw1) {
+            Subtree_4848(ch, ctx2);
+        } else {
+            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+        }
+    }
+    c.v++;
+    ch = node->child[3];
+    if (ch != 0 && fu0 && fv1 && fw1) {
+        if (iu0 && iv1 && iw1) {
+            Subtree_4848(ch, ctx2);
+        } else {
+            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+        }
+    }
+    c.w--;
+    ch = node->child[2];
+    if (ch != 0 && fu0 && fv1 && fw0) {
+        if (iu0 && iv1 && iw0) {
+            Subtree_4848(ch, ctx2);
+        } else {
+            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+        }
+    }
+    c.u++;
+    ch = node->child[6];
+    if (ch != 0 && fu1 && fv1 && fw0) {
+        if (iu1 && iv1 && iw0) {
+            Subtree_4848(ch, ctx2);
+        } else {
+            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+        }
+    }
+    c.w++;
+    ch = node->child[7];
+    if (ch != 0 && fu1 && fv1 && fw1) {
+        if (iu1 && iv1 && iw1) {
+            Subtree_4848(ch, ctx2);
+        } else {
+            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+        }
+    }
+    c.v--;
+    ch = node->child[5];
+    if (ch != 0 && fu1 && fv0 && fw1) {
+        if (iu1 && iv0 && iw1) {
+            Subtree_4848(ch, ctx2);
+        } else {
+            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+        }
+    }
+    c.w--;
+    ch = node->child[4];
+    if (ch != 0 && fu1 && fv0 && fw0) {
+        if (iu1 && iv0 && iw0) {
+            Subtree_4848(ch, ctx2);
+        } else {
+            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00175A20);
 
