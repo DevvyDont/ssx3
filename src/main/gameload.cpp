@@ -154,7 +154,210 @@ extern "C" void cGame_loadTrack(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gameload", func_0022FA98);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void cBE_setState(int state);
+extern "C" void cCameraTriggerMan_cleanupOnExit(void* self);
+extern "C" void cCameraTriggerMan_purge(void* self);
+extern "C" void func_001A3C50(void* p);
+extern "C" void func_00278A98(void* p);
+extern "C" void func_00397B70(void* p, int flags);
+extern "C" void func_002370A0(void* p, int flags);
+extern "C" void func_002EA820(void* p);
+void func_002C3FA0(void* p);
+void operator_delete(int* p);
+extern "C" void func_0026AF00(void* p);
+extern "C" void func_00334850(void* p);
+extern "C" void func_002CC048(void* p, int flags);
+extern "C" void func_00354C98(void* mgr, int a);
+extern "C" void func_00354B38(void* mgr);
+extern "C" void func_00229278(void* p, int flags);
+extern "C" void func_00343B28(void* p, int flags);
+extern "C" void func_00357A00(void* p, int flags);
+extern "C" void func_0026C588(void* p, int flags);
+extern "C" void func_00351120(void* p, int flags);
+extern "C" void func_002ECFA0(void);
+extern "C" void func_0022E730(void* p, int flags);
+extern "C" void func_0026F088(void* p, int flags);
+extern "C" void func_0022CD18(void* p, int flags);
+extern "C" void func_002DBEE0(void* p, int flags);
+extern "C" void func_002F5230(void* p, int flags);
+extern "C" void func_003A6740(void* p, int flags);
+extern "C" void func_00242518(void* p, int flags);
+struct cBigFile;
+void cBigFile__cBigFile(cBigFile* self, int flags);
+extern "C" void func_003916C0(void* p, int flags);
+extern "C" void func_0036A020(void* p);
+extern "C" void func_0038ADB0(void* p);
+extern "C" void func_002B6AE0(void* p, int flags);
+extern "C" void func_002B68D0(void* a);
+extern "C" void func_00286A80(void* p);
+extern "C" void func_00286C00(void* p);
+extern "C" void func_00278590(void* p);
+extern "C" void func_0036A290(void);
+
+extern void* D_004A28A8;
+extern void* D_004A28A4;
+extern void* D_004A289C;
+extern void* D_004A52D4;
+extern void* D_004A3500;
+extern int D_004A2A54;
+extern char* D_004A5B64;
+extern char D_004D33A0[];
+extern char D_005047F8[];
+// The unit declares D_004A5988 later as sGp2898 (8 bytes); bind a small-data alias here.
+extern char D_004A5988_gl __asm__("D_004A5988");
+
+// g++ 2.95 vtable entry: this-adjust, index, function.
+struct sVEnt_FA98 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+struct sVEnt0_FA98 {
+    short delta;
+    short index;
+    void (*fn)(void*);
+};
+
+struct sVEnt1_FA98 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+// Deletes an object through its virtual destructor (vtable pointer at vptr, slot entry at ent).
+static inline void VDelete_FA98(char* p, int vptr, int ent)
+{
+    if (p != 0) {
+        sVEnt_FA98* e = (sVEnt_FA98*)(*(char**)(p + vptr) + ent);
+        e->fn(p + e->delta, 3);
+    }
+}
+
+// 0xAC-byte record copied out of each rider before the game is torn down.
+struct sRec_FA98 {
+    int w[43];
+};
+
+// Results block saved across the game teardown (the unit declares it later as int[]).
+struct sGameRes_FA98 {
+    int active;
+    int ready;
+    int which;
+    char pad[0x330 - 0xC];
+    sRec_FA98 rec[2];
+};
+extern sGameRes_FA98 D_00534B30_s __asm__("D_00534B30");
+extern sRec_FA98 D_00534F0C_FA98 __asm__("D_00534F0C");
+
+// Pointer array member with an inline indexer.
+struct sPtrArr_FA98 {
+    char* e[1];
+    char* at(int i) { return e[i]; }
+};
+
+static inline char* GetRider_FA98(int i)
+{
+    return ((sPtrArr_FA98*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x28))->at(i);
+}
+
+struct sElem14_FA98 {
+    int v[5];
+    ~sElem14_FA98() {}
+};
+
+struct sObj20_FA98 {
+    sElem14_FA98 e[8];
+};
+
+extern "C" void func_0022FA98(char* self)
+{
+    cBE_setState(0);
+    char* iface = (char*)cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B30_s.active != 0 && D_00534B30_s.ready != 0) {
+        int which = D_00534B30_s.which;
+        int other = which != 0;
+        D_00534B30_s.rec[0] = *(sRec_FA98*)(*(char**)(GetRider_FA98(which == 0) + 0x790) + 0xFC);
+        D_00534F0C_FA98 = *(sRec_FA98*)(*(char**)(GetRider_FA98(other) + 0x790) + 0xFC);
+        sVEnt0_FA98* e = (sVEnt0_FA98*)(*(char**)(iface + 0xC) + 8);
+        e->fn(iface + e->delta);
+    }
+    cCameraTriggerMan_cleanupOnExit(D_004C5830);
+    {
+        char* be = (char*)D_004A289C;
+        sVEnt0_FA98* e = (sVEnt0_FA98*)(*(char**)(be + 0x10D8) + 0x98);
+        e->fn(be + e->delta);
+    }
+    func_001A3C50(*(void**)((char*)D_004A28A8 + 0x11C));
+    func_00278A98(D_004A28A4);
+    if (*(void**)(self + 0x48) != 0) func_00397B70(*(void**)(self + 0x48), 3);
+    if (*(void**)(self + 0x7C) != 0) func_002370A0(*(void**)(self + 0x7C), 3);
+    func_002EA820(*(void**)(self + 0x64));
+    func_002C3FA0(*(void**)(self + 0x44));
+    operator_delete(*(int**)(self + 0x44));
+    VDelete_FA98(*(char**)(self + 0x14), 0xC, 8);
+    VDelete_FA98(*(char**)(self + 0x18), 0x4, 8);
+    VDelete_FA98(*(char**)(self + 0x1C), 0x649C, 8);
+    func_0026AF00(D_004D33A0);
+    func_00334850(*(void**)(self + 0x20));
+    if (*(void**)(self + 0xA4) != 0) func_002CC048(*(void**)(self + 0xA4), 3);
+    void* bm = &D_004A5988_gl;
+    func_00354C98(bm, 1);
+    func_00354B38(bm);
+    VDelete_FA98(*(char**)(self + 0x30), 0x494, 8);
+    if (*(void**)(self + 0x38) != 0) func_00229278(*(void**)(self + 0x38), 3);
+    if (*(void**)(self + 0x3C) != 0) func_00343B28(*(void**)(self + 0x3C), 3);
+    if (*(void**)(self + 0x40) != 0) func_00357A00(*(void**)(self + 0x40), 3);
+    if (*(void**)(self + 0x34) != 0) func_0026C588(*(void**)(self + 0x34), 3);
+    if (*(void**)(self + 0x88) != 0) func_00351120(*(void**)(self + 0x88), 3);
+    cCameraTriggerMan_purge(D_004C5830);
+    func_002ECFA0();
+    if (*(void**)(self + 0x84) != 0) func_0022E730(*(void**)(self + 0x84), 3);
+    VDelete_FA98(*(char**)(self + 0xC), 0xCC, 8);
+    if (*(void**)(self + 0x28) != 0) func_0026F088(*(void**)(self + 0x28), 3);
+    VDelete_FA98(*(char**)(self + 0x98), 0x0, 8);
+    if (*(void**)(self + 0x78) != 0) func_0022CD18(*(void**)(self + 0x78), 3);
+    if (*(void**)(self + 0x2C) != 0) func_002DBEE0(*(void**)(self + 0x2C), 3);
+    if (*(void**)(self + 0x90) != 0) func_002F5230(*(void**)(self + 0x90), 3);
+    if (*(void**)(self + 0x10) != 0) func_003A6740(*(void**)(self + 0x10), 3);
+    if (*(void**)(self + 0x8C) != 0) func_00242518(*(void**)(self + 0x8C), 3);
+    if (*(cBigFile**)(self + 0xA8) != 0) cBigFile__cBigFile(*(cBigFile**)(self + 0xA8), 3);
+    operator_delete(*(int**)(self + 0x94));
+    if (*(void**)(self + 0x24) != 0) func_003916C0(*(void**)(self + 0x24), 3);
+    {
+        sObj20_FA98* o = *(sObj20_FA98**)(self + 0x20);
+        if (o != 0) {
+            o->~sObj20_FA98();
+            operator_delete((int*)o);
+        }
+    }
+    {
+        char* be = (char*)D_004A289C;
+        sVEnt0_FA98* e = (sVEnt0_FA98*)(*(char**)(be + 0x10D8) + 0x388);
+        e->fn(be + e->delta);
+    }
+    {
+        char* be = (char*)D_004A289C;
+        sVEnt1_FA98* e = (sVEnt1_FA98*)(*(char**)(be + 0x10D8) + 0x190);
+        e->fn(be + e->delta, *(void**)(self + 0x220));
+    }
+    func_0036A020(D_004A289C);
+    func_0038ADB0(D_005047F8);
+    *(void**)((char*)D_004A28A8 + 0x84) = 0;
+    if (*(void**)(self + 0x4C) != 0) func_002B6AE0(*(void**)(self + 0x4C), 3);
+    func_002B68D0(D_004A52D4);
+    func_00286A80(D_004A3500);
+    func_00286C00(D_004A3500);
+    func_00278590(D_004A28A4);
+    func_0036A290();
+    D_004A2A54 = 0;
+    *(int*)(D_004A5B64 + 0x34) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gameload", func_00230050);
