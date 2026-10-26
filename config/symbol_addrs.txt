@@ -956,3 +956,11 @@ D_005157B8 = 0x005157B8; // size:0x8
 D_00515B40 = 0x00515B40; // size:0x10
 // camera/camera: int[2] (func_00161950 / func_00161EF0 index it); D_004A4DD4 was element 1 (func_001673F8).
 D_004A4DD0 = 0x004A4DD0; // size:0x8
+// .sdata 8-byte objects copied with ldl/ldr; splat named the ldl half (+7) separately (2026-10-26).
+// D_004A53D0: {int, int} pair (func_002BC9B0, func_002BE1F8; func_002C0B70 zeroes both words).
+D_004A53D0 = 0x004A53D0; // size:0x8
+D_004A4EC0 = 0x004A4EC0; // size:0x8
+D_004A4EA8 = 0x004A4EA8; // size:0x8
+D_004A2ED8 = 0x004A2ED8; // size:0x8
+// visualfx/avalanche: debug line vertices, 0x20 each (func_002D6410, func_002D8EA8); D_004EDB90 was element 1.
+D_004EDB70 = 0x004EDB70; // size:0xC00
