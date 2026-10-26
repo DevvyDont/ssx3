@@ -1419,7 +1419,35 @@ extern "C" void *func_003AF010(void *arg0) {
     return arg0;
 }
 #endif
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003AF020);
+#ifdef SKIP_ASM
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+extern char D_00495260[];
+extern void (*D_00509434_AF020[])(void*) __asm__("D_00509434");
+struct sElem_AF020 {
+    char pad[0x34];
+    // PORT: the constructor is func_003B0340, defined later in this unit as a C function.
+    sElem_AF020() __asm__("func_003B0340");
+    ~sElem_AF020() {}
+    void* operator new[](unsigned int size) { return D_00509430_ADEC8.alloc(D_00495260, size, 0, 0, D_00509430_ADEC8.flags); }
+    void operator delete[](void* p) { D_00509430_ADEC8.free(p); }
+};
+struct sArr_AF020 {
+    sElem_AF020* arr;
+    int n;
+};
+
+extern "C" void func_003AF020(sArr_AF020* self, int flags)
+{
+    if (self->arr) {
+        delete[] self->arr;
+        self->arr = 0;
+    }
+    self->n = 0;
+    if (flags & 1) D_00509434_AF020[0](self);
+}
+#endif
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AF0C8);
 #ifdef SKIP_ASM

@@ -11684,7 +11684,49 @@ int func_003D0ED0(unsigned int mask, int val) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D1038);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+struct E_1038 { char pad[3]; unsigned char b3; char pad2[0x50]; int f54; };
+struct G_1038 { char pad[0x58]; struct E_1038 *list[24]; };
+struct T_1038 { char pad[0x30]; unsigned int f30; int f34; char pad2[0x928 - 0x38]; };
+extern unsigned char D_0044F42C_1038 __asm__("D_0044F42C");
+extern unsigned char D_0044F42D_1038 __asm__("D_0044F42D");
+extern int D_0044F430_1038 __asm__("D_0044F430");
+extern struct G_1038 *D_0044F420_1038 __asm__("D_0044F420");
+extern struct T_1038 D_00517610_1038[] __asm__("D_00517610");
+extern int func_003D5450_1038(int) __asm__("func_003D5450");
+extern void func_002AF7A0_1038(int, int) __asm__("func_002AF7A0");
+
+static inline unsigned int has_1038(unsigned int a, unsigned int b) { return a & b; }
+
+void func_003D1038(unsigned int mask, unsigned char val) {
+    int i, j;
+    if (D_0044F42C_1038 == 0) return;
+    if (D_0044F430_1038 != 0) return;
+    if (func_003D5450_1038(-1) == 0) return;
+    if (mask == 0xFFFFFFFF) D_0044F42D_1038 = val;
+    for (i = 0; i < 4; i++) {
+        unsigned int v;
+        if (D_00517610_1038[i].f34 == 0) continue;
+        v = D_00517610_1038[i].f30;
+        if (has_1038(v & 0xF0000000, mask) == 0) continue;
+        if (has_1038(v & 0x0F000000, mask) == 0) continue;
+        if (func_003D5450_1038(i & 0xFF) == 0) continue;
+        for (j = 0; j < 24; j++) {
+            struct E_1038 *e = D_0044F420_1038->list[j];
+            if (e != 0 && (((mask >> j) ^ 1) & 1) == 0) {
+                func_002AF7A0_1038(e->f54, val);
+                e->b3 = val;
+            }
+        }
+    }
+    D_0044F430_1038 = 0;
+    D_0044F420_1038 = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D11B8);
@@ -11926,7 +11968,80 @@ int func_003D16E0(int arg0) {
 void func_003D16E8(void) {
 }
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D16F0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
+// Same walk as func_003D1038: allocates a voice for program prog in each bank
+// matching mask and registers it in the 16-entry list of every bank sharing the
+// top mask bits. Returns 0, -8 (none registered), -13 (full/bad prog) or -18.
+struct H_16F0 { int f0; int f4; int f8; };
+struct E_16F0 { int w0; int w4; int w8; unsigned int wC; };
+struct Hdr_16F0 { char pad[0xF]; unsigned char bF; };
+struct G_16F0 { char pad[0x34]; struct Hdr_16F0 *hdr; char pad2[0x40 - 0x38]; short *idx; };
+struct T_16F0 { char pad[0x30]; unsigned int f30; int f34; char pad2[0xDC - 0x38]; struct H_16F0 *list[16]; char pad3[0x91C - 0x11C]; int n; char pad4[0x928 - 0x920]; };
+extern unsigned char D_0044F42C_16F0 __asm__("D_0044F42C");
+extern int D_0044F430_16F0 __asm__("D_0044F430");
+extern struct G_16F0 *D_0044F420_16F0 __asm__("D_0044F420");
+extern struct T_16F0 D_00517610_16F0[] __asm__("D_00517610");
+extern int func_003D5450_16F0(int) __asm__("func_003D5450");
+extern struct H_16F0 *func_003D2068_16F0(struct E_16F0 *) __asm__("PATHI_copyevent");
+extern int func_002AF370_16F0(void) __asm__("func_002AF370");
+
+static inline unsigned int has_16F0(unsigned int a, unsigned int b) { return a & b; }
+
+int func_003D16F0(unsigned int mask, short prog) {
+    int r = 0;
+    unsigned int bit;
+    unsigned int i;
+    if (D_0044F42C_16F0 == 0 || D_0044F430_16F0 != 0 || func_003D5450_16F0(-1) == 0) {
+        return -18;
+    }
+    bit = 0x1000000 << ((prog & 0xF00) >> 8);
+    prog &= 0xFF;
+    for (i = 0; i < 4; i++) {
+        unsigned int v;
+        struct Hdr_16F0 *hdr;
+        struct E_16F0 *e;
+        struct H_16F0 *h;
+        unsigned int top;
+        int k, err;
+        if (D_00517610_16F0[i].f34 == 0) continue;
+        v = D_00517610_16F0[i].f30;
+        if (has_16F0(v, bit) == 0) continue;
+        if (has_16F0(v & 0x0F000000, mask) == 0) continue;
+        if (has_16F0(v & 0xF0000000, mask) == 0) continue;
+        if (func_003D5450_16F0(i & 0xFF) == 0) continue;
+        hdr = D_0044F420_16F0->hdr;
+        if (prog >= hdr->bF) { r = -13; break; }
+        e = (struct E_16F0 *)((char *)hdr + D_0044F420_16F0->idx[prog] * 4);
+        if (e->wC & 0x20000000) continue;
+        err = -8;
+        e = (struct E_16F0 *)func_003D2068_16F0(e);
+        top = D_00517610_16F0[i].f30;
+        top &= 0xFF000000;
+        for (k = 0; k < 4; k++) {
+            int n;
+            if (D_00517610_16F0[k].f34 == 0) continue;
+            if ((D_00517610_16F0[k].f30 & top) != top) continue;
+            n = D_00517610_16F0[k].n;
+            if (n >= 16) { r = -13; goto next; }
+            err = 0;
+            h = (struct H_16F0 *)e;
+            h->f0 = h->f8 = func_002AF370_16F0();
+            D_00517610_16F0[k].list[n] = h;
+            n++;
+            D_00517610_16F0[k].n = n;
+        }
+        r = err;
+    next:;
+    }
+    D_0044F430_16F0 = 0;
+    D_0044F420_16F0 = 0;
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D1940);
