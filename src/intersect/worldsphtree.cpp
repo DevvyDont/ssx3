@@ -687,9 +687,277 @@ extern "C" void func_00331450(sQuery_331450* self, sBox_3309D8* box)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00331E90);
+#ifdef SKIP_ASM
+struct sTree_340C20;
+extern "C" void func_00340C20(sTree_340C20* tree, sCtx_3309D8* ctx);
+extern "C" void func_0033A3D8(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* vbox, void* vnode, void* vcell);
 
+struct sObj_331E90 {
+    sObj_331E90* next;
+    char pad04[0x154];
+    float bmin[3];              // 0x158
+    float bmax[3];              // 0x164
+};
+
+struct sTree_331E90 {
+    sTree_331E90* child[8];
+    int pad20;
+    sObj_331E90* objs;          // 0x24
+};
+
+struct sCell_331E90 {
+    int level;
+    int x, y, z;
+    sTree_331E90* tree;
+};
+
+struct sGrid_331E90 {
+    sCell_331E90 cells[8];
+    int unkA0;
+};
+
+struct sQuery_331E90 {
+    sGrid_331E90* grid;             // 0x0
+    int unk04;                      // 0x4
+    int count;                      // 0x8
+    sNode_3309D8* items[0x40];      // 0xC
+    int ntris;                      // 0x10C
+    sNode_3309D8* tris[0x40];       // 0x110
+    unsigned int nobjs;             // 0x210
+};
+
+struct sCtx2_331E90 {
+    sCtx_3309D8 nodes;
+    sCtx_3309D8 objs;
+};
+
+static inline int overlapObj_331E90(const sBox_3309D8* b, const sObj_331E90* n)
+{
+    int r = 0;
+    if (b->min[0] <= n->bmax[0] && b->max[0] >= n->bmin[0] &&
+        b->min[1] <= n->bmax[1] && b->max[1] >= n->bmin[1] &&
+        b->min[2] <= n->bmax[2] && b->max[2] >= n->bmin[2]) {
+        r = 1;
+    }
+    return r;
+}
+
+static inline void collect_331E90(sTree_331E90* tree, sCtx_3309D8* ctx)
+{
+    func_003309D8(ctx, tree);
+    sCtx_3309D8* q = (sCtx_3309D8*)((char*)ctx + 0x10);
+    for (sObj_331E90* p = tree->objs; p != 0; p = p->next) {
+        if (overlapObj_331E90(q->box, p)) {
+            int* cnt = q->count;
+            int n = *cnt;
+            q->list[n] = (sNode_3309D8*)p;
+            *cnt = n + 1;
+        }
+    }
+    if (tree->child[0] != 0) func_00340C20((sTree_340C20*)tree->child[0], ctx);
+    if (tree->child[1] != 0) func_00340C20((sTree_340C20*)tree->child[1], ctx);
+    if (tree->child[2] != 0) func_00340C20((sTree_340C20*)tree->child[2], ctx);
+    if (tree->child[3] != 0) func_00340C20((sTree_340C20*)tree->child[3], ctx);
+    if (tree->child[4] != 0) func_00340C20((sTree_340C20*)tree->child[4], ctx);
+    if (tree->child[5] != 0) func_00340C20((sTree_340C20*)tree->child[5], ctx);
+    if (tree->child[6] != 0) func_00340C20((sTree_340C20*)tree->child[6], ctx);
+    if (tree->child[7] != 0) func_00340C20((sTree_340C20*)tree->child[7], ctx);
+}
+
+struct sTag_331E90 {
+};
+
+static inline void queryCell_331E90(sGrid_331E90* grid, int i, sBox_3309D8* box, sCtx_3309D8* ctx)
+{
+    sCell_331E90* cell = &grid->cells[i];
+    if (grid->cells[i].tree != 0) {
+        sTree_331E90* tree = cell->tree;
+        sTag_331E90 tag;
+        char* flag = (char*)&tag;
+        int r = func_00328360(cell, box);
+        if (r == 0) {
+            collect_331E90(tree, ctx);
+        } else if (r == 2) {
+            func_0033A3D8(flag, ctx, ctx, box, tree, cell);
+        }
+    }
+}
+
+extern "C" void func_00331E90(sQuery_331E90* self, sBox_3309D8* box)
+{
+    sCtx2_331E90 ctx;
+    self->unk04 = self->grid->unkA0;
+    ctx.nodes.list = self->items;
+    ctx.nodes.count = &self->count;
+    ctx.nodes.pad08 = 0x40;
+    ctx.nodes.box = box;
+    ctx.objs.list = self->tris;
+    ctx.objs.count = &self->ntris;
+    ctx.objs.pad08 = 0x40;
+    ctx.objs.box = box;
+    sCtx_3309D8* objs = &ctx.objs;
+    self->count = 0;
+    *objs->count = 0;
+    sGrid_331E90* grid = self->grid;
+    sCtx_3309D8* pctx = &ctx.nodes;
+    queryCell_331E90(grid, 0, box, pctx);
+    queryCell_331E90(grid, 1, box, pctx);
+    queryCell_331E90(grid, 2, box, pctx);
+    queryCell_331E90(grid, 3, box, pctx);
+    queryCell_331E90(grid, 4, box, pctx);
+    queryCell_331E90(grid, 5, box, pctx);
+    queryCell_331E90(grid, 6, box, pctx);
+    queryCell_331E90(grid, 7, box, pctx);
+    self->nobjs = 0xFFFFFFFF;
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00332DB8);
+#ifdef SKIP_ASM
+struct sTree_340DC0;
+struct sCtx_340DC0;
+extern "C" void func_00340DC0(sTree_340DC0* self, sCtx_340DC0* ctx);
+extern "C" void func_0033B748(char* flag, sCtx_340DC0* ctx, sCtx_340DC0* ctx2, void* vbox, void* vnode, void* vcell);
+
+struct sObj_332DB8 {
+    sObj_332DB8* next;
+    char pad04[0x154];
+    float bmin[3];              // 0x158
+    float bmax[3];              // 0x164
+};
+
+struct sTree_332DB8 {
+    sTree_332DB8* child[8];
+    void* nodes;                // 0x20
+    sObj_332DB8* objs;          // 0x24
+    void** all;                 // 0x28
+};
+
+struct sCell_332DB8 {
+    int level;
+    int x, y, z;
+    sTree_332DB8* tree;
+};
+
+struct sGrid_332DB8 {
+    sCell_332DB8 cells[8];
+    int unkA0;
+};
+
+struct sQuery_332DB8 {
+    sGrid_332DB8* grid;             // 0x0
+    int unk04;                      // 0x4
+    int count;                      // 0x8
+    sNode_3309D8* items[0x40];      // 0xC
+    int ntris;                      // 0x10C
+    sNode_3309D8* tris[0x40];       // 0x110
+    int nobjs;                      // 0x210
+    sNode_3309D8* objs[0x200];      // 0x214
+};
+
+struct sCtx3_332DB8 {
+    sCtx_3309D8 nodes;
+    sCtx_3309D8 objs;
+    sCtx_3309D8 all;
+};
+
+struct sTag_332DB8 {
+};
+
+static inline int overlapObj_332DB8(const sBox_3309D8* b, const sObj_332DB8* n)
+{
+    int r = 0;
+    if (b->min[0] <= n->bmax[0] && b->max[0] >= n->bmin[0] &&
+        b->min[1] <= n->bmax[1] && b->max[1] >= n->bmin[1] &&
+        b->min[2] <= n->bmax[2] && b->max[2] >= n->bmin[2]) {
+        r = 1;
+    }
+    return r;
+}
+
+static inline void add_332DB8(sCtx_3309D8* s, void* p)
+{
+    int* cnt = s->count;
+    int n = *cnt;
+    s->list[n] = (sNode_3309D8*)p;
+    *cnt = n + 1;
+}
+
+static inline void collect_332DB8(sTree_332DB8* tree, sCtx3_332DB8* ctx)
+{
+    func_003309D8(&ctx->nodes, tree);
+    sCtx_3309D8* s = &ctx->objs;
+    for (sObj_332DB8* p = tree->objs; p != 0; p = p->next) {
+        if (overlapObj_332DB8(s->box, p)) {
+            add_332DB8(s, p);
+        }
+    }
+    s = &ctx->all;
+    for (void** q = tree->all; q != 0; q = (void**)*q) {
+        add_332DB8(s, q);
+    }
+    if (tree->child[0]) func_00340DC0((sTree_340DC0*)tree->child[0], (sCtx_340DC0*)ctx);
+    if (tree->child[1]) func_00340DC0((sTree_340DC0*)tree->child[1], (sCtx_340DC0*)ctx);
+    if (tree->child[2]) func_00340DC0((sTree_340DC0*)tree->child[2], (sCtx_340DC0*)ctx);
+    if (tree->child[3]) func_00340DC0((sTree_340DC0*)tree->child[3], (sCtx_340DC0*)ctx);
+    if (tree->child[4]) func_00340DC0((sTree_340DC0*)tree->child[4], (sCtx_340DC0*)ctx);
+    if (tree->child[5]) func_00340DC0((sTree_340DC0*)tree->child[5], (sCtx_340DC0*)ctx);
+    if (tree->child[6]) func_00340DC0((sTree_340DC0*)tree->child[6], (sCtx_340DC0*)ctx);
+    if (tree->child[7]) func_00340DC0((sTree_340DC0*)tree->child[7], (sCtx_340DC0*)ctx);
+}
+
+static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, sBox_3309D8* box, sCtx3_332DB8* ctx)
+{
+    sCell_332DB8* cell = &grid->cells[i];
+    if (grid->cells[i].tree != 0) {
+        sTree_332DB8* tree = cell->tree;
+        sTag_332DB8 tag;
+        char* flag = (char*)&tag;
+        int r = func_00328360(cell, box);
+        if (r == 0) {
+            collect_332DB8(tree, ctx);
+        } else if (r == 2) {
+            func_0033B748(flag, (sCtx_340DC0*)ctx, (sCtx_340DC0*)ctx, box, tree, cell);
+        }
+    }
+}
+
+extern "C" void func_00332DB8(sQuery_332DB8* self, sBox_3309D8* box)
+{
+    sCtx3_332DB8 ctx;
+    self->unk04 = self->grid->unkA0;
+    ctx.nodes.list = self->items;
+    ctx.nodes.count = &self->count;
+    ctx.nodes.pad08 = 0x40;
+    ctx.nodes.box = box;
+    ctx.objs.list = self->tris;
+    ctx.objs.count = &self->ntris;
+    ctx.objs.pad08 = 0x40;
+    ctx.objs.box = box;
+    sCtx_3309D8* objs = &ctx.objs;
+    self->count = 0;
+    *objs->count = 0;
+    ctx.all.list = self->objs;
+    ctx.all.count = &self->nobjs;
+    ctx.all.pad08 = 0x200;
+    ctx.all.box = box;
+    sCtx_3309D8* all = &ctx.all;
+    *all->count = 0;
+    sGrid_332DB8* grid = self->grid;
+    sCtx3_332DB8* pctx = &ctx;
+    queryCell_332DB8(grid, 0, box, pctx);
+    queryCell_332DB8(grid, 1, box, pctx);
+    queryCell_332DB8(grid, 2, box, pctx);
+    queryCell_332DB8(grid, 3, box, pctx);
+    queryCell_332DB8(grid, 4, box, pctx);
+    queryCell_332DB8(grid, 5, box, pctx);
+    queryCell_332DB8(grid, 6, box, pctx);
+    queryCell_332DB8(grid, 7, box, pctx);
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00333EF8);
@@ -1950,7 +2218,118 @@ extern "C" float func_003378C0(void* self, char* q, sHit_003378C0* out, int a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00337A48);
+#ifdef SKIP_ASM
+struct sTree_3411B8;
+struct sQuery_3411B8;
+extern "C" void func_003411B8(sTree_3411B8* tree, sQuery_3411B8* q);
+
+struct sQry_337A48 {
+    sWsVec4* pos;               // 0x00
+    int a7;                     // 0x04
+    int mask;                   // 0x08
+    int* cnt;                   // 0x0C
+    float* dist;                // 0x10
+    sBox_00334680* box;         // 0x14
+};
+
+struct sOct_337A48 {
+    sOct_337A48* child[8];
+    int pad20[2];
+    char* objs;                 // 0x28
+};
+
+struct sCell_337A48 {
+    int level;
+    int x, y, z;
+    sOct_337A48* tree;
+};
+
+struct sGrid_337A48 {
+    sCell_337A48 cells[8];
+};
+
+struct sTag_337A48 {
+};
+
+extern "C" void func_0033ED60(char* flag, sQry_337A48* q, sQry_337A48* q2, sBox_00334680* box, void* tree, void* cell);
+
+static inline void collect_337A48(sOct_337A48* tree, sQry_337A48* q)
+{
+    for (char* o = tree->objs; o != 0; o = *(char**)o) {
+        int type = *(int*)(o + 8);
+        if (type == 2) {
+            func_0035C698(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+        } else if (type == 3) {
+            func_00348290(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+        } else if (type == 1) {
+            if (*(int*)(*(char**)(o + 0x68) + 0x1C) & q->mask) {
+                func_00335128(o, q->box, q->pos, q->cnt, q->dist, q->a7);
+            }
+        }
+    }
+    if (tree->child[0] != 0) func_003411B8((sTree_3411B8*)tree->child[0], (sQuery_3411B8*)q);
+    if (tree->child[1] != 0) func_003411B8((sTree_3411B8*)tree->child[1], (sQuery_3411B8*)q);
+    if (tree->child[2] != 0) func_003411B8((sTree_3411B8*)tree->child[2], (sQuery_3411B8*)q);
+    if (tree->child[3] != 0) func_003411B8((sTree_3411B8*)tree->child[3], (sQuery_3411B8*)q);
+    if (tree->child[4] != 0) func_003411B8((sTree_3411B8*)tree->child[4], (sQuery_3411B8*)q);
+    if (tree->child[5] != 0) func_003411B8((sTree_3411B8*)tree->child[5], (sQuery_3411B8*)q);
+    if (tree->child[6] != 0) func_003411B8((sTree_3411B8*)tree->child[6], (sQuery_3411B8*)q);
+    if (tree->child[7] != 0) func_003411B8((sTree_3411B8*)tree->child[7], (sQuery_3411B8*)q);
+}
+
+static inline void queryCell_337A48(sGrid_337A48* grid, int i, sBox_00334680* box, sQry_337A48* q)
+{
+    sCell_337A48* cell = &grid->cells[i];
+    if (grid->cells[i].tree != 0) {
+        sOct_337A48* tree = cell->tree;
+        sTag_337A48 tag;
+        char* flag = (char*)&tag;
+        int r = func_00328360(cell, box);
+        if (r == 0) {
+            collect_337A48(tree, q);
+        } else if (r == 2) {
+            func_0033ED60(flag, q, q, box, tree, cell);
+        }
+    }
+}
+
+extern "C" int func_00337A48(sGrid_337A48* grid, sWsVec4* pos, int a2, int mask, float r)
+{
+    sBox_00334680 box;
+    sWsVec4 ext;
+    sQry_337A48 q;
+    int cnt;
+    float dist;
+    box.min = *pos;
+    box.max = *pos;
+    ext.x = r;
+    ext.y = r;
+    ext.z = r;
+    ext.w = 0.0f;
+    wsSubEq_334680(box.min, ext);
+    wsAddEq_334680(box.max, ext);
+    sBox_00334680* pbox = &box;
+    q.pos = pos;
+    q.a7 = a2;
+    q.mask = mask;
+    q.cnt = &cnt;
+    q.dist = &dist;
+    q.box = pbox;
+    dist = 0.0f;
+    cnt = 0;
+    queryCell_337A48(grid, 0, pbox, &q);
+    queryCell_337A48(grid, 1, pbox, &q);
+    queryCell_337A48(grid, 2, pbox, &q);
+    queryCell_337A48(grid, 3, pbox, &q);
+    queryCell_337A48(grid, 4, pbox, &q);
+    queryCell_337A48(grid, 5, pbox, &q);
+    queryCell_337A48(grid, 6, pbox, &q);
+    queryCell_337A48(grid, 7, pbox, &q);
+    return cnt;
+}
+#endif
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_003388E0);
 #ifdef SKIP_ASM
@@ -2081,13 +2460,643 @@ extern "C" void func_00338920(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, v
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00339598);
+#ifdef SKIP_ASM
+struct sCell_339598 {
+    int level;
+    int x, y, z;
+};
 
+extern "C" void func_00339598(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* vbox, void* vnode, void* vcell)
+{
+    sBox_3309D8* box = (sBox_3309D8*)vbox;
+    sOctNode_331450* node = (sOctNode_331450*)vnode;
+    sCell_339598* cell = (sCell_339598*)vcell;
+    void** p;
+    for (p = node->objs; p != 0; p = (void**)*p) {
+        ctx->list[(*ctx->count)++] = (sNode_3309D8*)p;
+    }
+    if (cell->level == 11) {
+        return;
+    }
+    sCell_339598 sub;
+    sub.level = cell->level - 1;
+    sub.x = cell->x * 2;
+    sub.y = cell->y * 2;
+    sub.z = cell->z * 2;
+    int bits = (sub.level + 0x7F) << 23;
+    float s = *(float*)&bits;
+
+    float x0lo = ((float)sub.x - 0.2f) * s;
+    float x0hi = ((float)(sub.x + 1) + 0.2f) * s;
+    int ox0 = 0;
+    if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
+    float x1lo = ((float)(sub.x + 1) - 0.2f) * s;
+    float x1hi = ((float)(sub.x + 2) + 0.2f) * s;
+    int ox1 = 0;
+    if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
+    if (!ox0 && !ox1) {
+        return;
+    }
+    float y0lo = ((float)sub.y - 0.2f) * s;
+    float y0hi = ((float)(sub.y + 1) + 0.2f) * s;
+    int oy0 = 0;
+    if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
+    float y1lo = ((float)(sub.y + 1) - 0.2f) * s;
+    float y1hi = ((float)(sub.y + 2) + 0.2f) * s;
+    int oy1 = 0;
+    if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
+    if (!oy0 && !oy1) {
+        return;
+    }
+    float z0lo = ((float)sub.z - 0.2f) * s;
+    float z0hi = ((float)(sub.z + 1) + 0.2f) * s;
+    int oz0 = 0;
+    if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
+    float z1lo = ((float)(sub.z + 1) - 0.2f) * s;
+    float z1hi = ((float)(sub.z + 2) + 0.2f) * s;
+    int oz1 = 0;
+    if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
+    if (!oz0 && !oz1) {
+        return;
+    }
+    int cx0 = 0;
+    if (box->min[0] < x0lo && x0hi < box->max[0]) cx0 = 1;
+    int cx1 = 0;
+    if (box->min[0] < x1lo && x1hi < box->max[0]) cx1 = 1;
+    int cy0 = 0;
+    if (box->min[1] < y0lo && y0hi < box->max[1]) cy0 = 1;
+    int cy1 = 0;
+    if (box->min[1] < y1lo && y1hi < box->max[1]) cy1 = 1;
+    int cz0 = 0;
+    if (box->min[2] < z0lo && z0hi < box->max[2]) cz0 = 1;
+    int cz1 = 0;
+    if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
+
+    sOctNode_331450* c;
+    c = (sOctNode_331450*)node->child[0];
+    if (c && ox0 && oy0 && oz0) {
+        if (cx0 && cy0 && cz0) collect_331450(c, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.z++;
+    c = (sOctNode_331450*)node->child[1];
+    if (c && ox0 && oy0 && oz1) {
+        if (cx0 && cy0 && cz1) collect_331450(c, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.y++;
+    c = (sOctNode_331450*)node->child[3];
+    if (c && ox0 && oy1 && oz1) {
+        if (cx0 && cy1 && cz1) collect_331450(c, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.z--;
+    c = (sOctNode_331450*)node->child[2];
+    if (c && ox0 && oy1 && oz0) {
+        if (cx0 && cy1 && cz0) collect_331450(c, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.x++;
+    c = (sOctNode_331450*)node->child[6];
+    if (c && ox1 && oy1 && oz0) {
+        if (cx1 && cy1 && cz0) collect_331450(c, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.z++;
+    c = (sOctNode_331450*)node->child[7];
+    if (c && ox1 && oy1 && oz1) {
+        if (cx1 && cy1 && cz1) collect_331450(c, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.y--;
+    c = (sOctNode_331450*)node->child[5];
+    if (c && ox1 && oy0 && oz1) {
+        if (cx1 && cy0 && cz1) collect_331450(c, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.z--;
+    c = (sOctNode_331450*)node->child[4];
+    if (c && ox1 && oy0 && oz0) {
+        if (cx1 && cy0 && cz0) collect_331450(c, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_0033A3D8);
+#ifdef SKIP_ASM
+struct sTree_340C20;
+extern "C" void func_00340C20(sTree_340C20* tree, sCtx_3309D8* ctx);
 
+struct sObj_33A3D8 {
+    sObj_33A3D8* next;
+    char pad04[0x154];
+    float bmin[3];              // 0x158
+    float bmax[3];              // 0x164
+};
+
+struct sTree_33A3D8 {
+    sTree_33A3D8* child[8];
+    int pad20;
+    sObj_33A3D8* objs;          // 0x24
+};
+
+static inline int overlapObj_33A3D8(const sBox_3309D8* b, const sObj_33A3D8* n)
+{
+    int r = 0;
+    if (b->min[0] <= n->bmax[0] && b->max[0] >= n->bmin[0] &&
+        b->min[1] <= n->bmax[1] && b->max[1] >= n->bmin[1] &&
+        b->min[2] <= n->bmax[2] && b->max[2] >= n->bmin[2]) {
+        r = 1;
+    }
+    return r;
+}
+
+static inline void collectObjs_33A3D8(sTree_33A3D8* tree, sCtx_3309D8* ctx)
+{
+    func_003309D8(ctx, tree);
+    sCtx_3309D8* q = (sCtx_3309D8*)((char*)ctx + 0x10);
+    for (sObj_33A3D8* p = tree->objs; p != 0; p = p->next) {
+        if (overlapObj_33A3D8(q->box, p)) {
+            int* cnt = q->count;
+            int n = *cnt;
+            q->list[n] = (sNode_3309D8*)p;
+            *cnt = n + 1;
+        }
+    }
+}
+
+static inline void collect_33A3D8(sTree_33A3D8* tree, sCtx_3309D8* ctx)
+{
+    collectObjs_33A3D8(tree, ctx);
+    if (tree->child[0] != 0) func_00340C20((sTree_340C20*)tree->child[0], ctx);
+    if (tree->child[1] != 0) func_00340C20((sTree_340C20*)tree->child[1], ctx);
+    if (tree->child[2] != 0) func_00340C20((sTree_340C20*)tree->child[2], ctx);
+    if (tree->child[3] != 0) func_00340C20((sTree_340C20*)tree->child[3], ctx);
+    if (tree->child[4] != 0) func_00340C20((sTree_340C20*)tree->child[4], ctx);
+    if (tree->child[5] != 0) func_00340C20((sTree_340C20*)tree->child[5], ctx);
+    if (tree->child[6] != 0) func_00340C20((sTree_340C20*)tree->child[6], ctx);
+    if (tree->child[7] != 0) func_00340C20((sTree_340C20*)tree->child[7], ctx);
+}
+
+struct sCell_33A3D8 {
+    int level;
+    int x, y, z;
+};
+
+extern "C" void func_0033A3D8(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* vbox, void* vnode, void* vcell)
+{
+    sBox_3309D8* box = (sBox_3309D8*)vbox;
+    sTree_33A3D8* node = (sTree_33A3D8*)vnode;
+    sCell_33A3D8* cell = (sCell_33A3D8*)vcell;
+    collectObjs_33A3D8(node, ctx);
+    if (cell->level == 11) {
+        return;
+    }
+    sCell_33A3D8 sub;
+    sub.level = cell->level - 1;
+    sub.x = cell->x * 2;
+    sub.y = cell->y * 2;
+    sub.z = cell->z * 2;
+    int bits = (sub.level + 0x7F) << 23;
+    float s = *(float*)&bits;
+
+    float x0lo = ((float)sub.x - 0.2f) * s;
+    float x0hi = ((float)(sub.x + 1) + 0.2f) * s;
+    int ox0 = 0;
+    if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
+    float x1lo = ((float)(sub.x + 1) - 0.2f) * s;
+    float x1hi = ((float)(sub.x + 2) + 0.2f) * s;
+    int ox1 = 0;
+    if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
+    if (!ox0 && !ox1) {
+        return;
+    }
+    float y0lo = ((float)sub.y - 0.2f) * s;
+    float y0hi = ((float)(sub.y + 1) + 0.2f) * s;
+    int oy0 = 0;
+    if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
+    float y1lo = ((float)(sub.y + 1) - 0.2f) * s;
+    float y1hi = ((float)(sub.y + 2) + 0.2f) * s;
+    int oy1 = 0;
+    if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
+    if (!oy0 && !oy1) {
+        return;
+    }
+    float z0lo = ((float)sub.z - 0.2f) * s;
+    float z0hi = ((float)(sub.z + 1) + 0.2f) * s;
+    int oz0 = 0;
+    if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
+    float z1lo = ((float)(sub.z + 1) - 0.2f) * s;
+    float z1hi = ((float)(sub.z + 2) + 0.2f) * s;
+    int oz1 = 0;
+    if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
+    if (!oz0 && !oz1) {
+        return;
+    }
+    int cx0 = 0;
+    if (box->min[0] < x0lo && x0hi < box->max[0]) cx0 = 1;
+    int cx1 = 0;
+    if (box->min[0] < x1lo && x1hi < box->max[0]) cx1 = 1;
+    int cy0 = 0;
+    if (box->min[1] < y0lo && y0hi < box->max[1]) cy0 = 1;
+    int cy1 = 0;
+    if (box->min[1] < y1lo && y1hi < box->max[1]) cy1 = 1;
+    int cz0 = 0;
+    if (box->min[2] < z0lo && z0hi < box->max[2]) cz0 = 1;
+    int cz1 = 0;
+    if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
+
+    sTree_33A3D8* c;
+    c = node->child[0];
+    if (c && ox0 && oy0 && oz0) {
+        if (cx0 && cy0 && cz0) collect_33A3D8(c, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.z++;
+    c = node->child[1];
+    if (c && ox0 && oy0 && oz1) {
+        if (cx0 && cy0 && cz1) collect_33A3D8(c, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.y++;
+    c = node->child[3];
+    if (c && ox0 && oy1 && oz1) {
+        if (cx0 && cy1 && cz1) collect_33A3D8(c, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.z--;
+    c = node->child[2];
+    if (c && ox0 && oy1 && oz0) {
+        if (cx0 && cy1 && cz0) collect_33A3D8(c, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.x++;
+    c = node->child[6];
+    if (c && ox1 && oy1 && oz0) {
+        if (cx1 && cy1 && cz0) collect_33A3D8(c, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.z++;
+    c = node->child[7];
+    if (c && ox1 && oy1 && oz1) {
+        if (cx1 && cy1 && cz1) collect_33A3D8(c, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.y--;
+    c = node->child[5];
+    if (c && ox1 && oy0 && oz1) {
+        if (cx1 && cy0 && cz1) collect_33A3D8(c, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.z--;
+    c = node->child[4];
+    if (c && ox1 && oy0 && oz0) {
+        if (cx1 && cy0 && cz0) collect_33A3D8(c, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_0033B748);
+#ifdef SKIP_ASM
+struct sBox_33B748 {
+    float min[4];
+    float max[4];
+};
 
+struct sSub_33B748 {
+    void** list;
+    int* count;
+    int pad08;
+    sBox_33B748* box;
+};
+
+struct sCtx_33B748 {
+    sSub_33B748 nodes;
+    sSub_33B748 objs;
+    sSub_33B748 all;
+};
+
+struct sObjNode_33B748 {
+    sObjNode_33B748* next;
+    int pad04[85];
+    float bmin[3];
+    float bmax[3];
+};
+
+struct sTree_33B748 {
+    sTree_33B748* child[8];
+    void* nodes;
+    sObjNode_33B748* objs;
+    void** all;
+};
+
+struct sCell_33B748 {
+    int level;
+    int x, y, z;
+};
+
+// PORT: alias; the unit defines func_00340DC0 later with its own struct types.
+extern "C" void func_00340DC0_33B748(sTree_33B748* self, sCtx_33B748* ctx) __asm__("func_00340DC0");
+
+static inline void add_33B748(sSub_33B748* s, void* p)
+{
+    int* cnt = s->count;
+    int n = *cnt;
+    s->list[n] = p;
+    *cnt = n + 1;
+}
+
+static inline int overlap_33B748(const sBox_33B748* b, const sObjNode_33B748* n)
+{
+    int r = 0;
+    if (b->min[0] <= n->bmax[0] && b->max[0] >= n->bmin[0] &&
+        b->min[1] <= n->bmax[1] && b->max[1] >= n->bmin[1] &&
+        b->min[2] <= n->bmax[2] && b->max[2] >= n->bmin[2]) {
+        r = 1;
+    }
+    return r;
+}
+
+static inline void visit_33B748(sTree_33B748* self, sCtx_33B748* ctx)
+{
+    func_003309D8((sCtx_3309D8*)ctx, self);
+    sSub_33B748* s = &ctx->objs;
+    for (sObjNode_33B748* p = self->objs; p != 0; p = p->next) {
+        if (overlap_33B748(s->box, p)) {
+            add_33B748(s, p);
+        }
+    }
+    s = &ctx->all;
+    for (void** q = self->all; q != 0; q = (void**)*q) {
+        add_33B748(s, q);
+    }
+}
+
+static inline void collect_33B748(sTree_33B748* self, sCtx_33B748* ctx)
+{
+    visit_33B748(self, ctx);
+    if (self->child[0]) func_00340DC0_33B748(self->child[0], ctx);
+    if (self->child[1]) func_00340DC0_33B748(self->child[1], ctx);
+    if (self->child[2]) func_00340DC0_33B748(self->child[2], ctx);
+    if (self->child[3]) func_00340DC0_33B748(self->child[3], ctx);
+    if (self->child[4]) func_00340DC0_33B748(self->child[4], ctx);
+    if (self->child[5]) func_00340DC0_33B748(self->child[5], ctx);
+    if (self->child[6]) func_00340DC0_33B748(self->child[6], ctx);
+    if (self->child[7]) func_00340DC0_33B748(self->child[7], ctx);
+}
+
+struct sCtx_340DC0;
+
+// Declared as func_00332DB8 (its caller) declares it; sCtx_340DC0 has sCtx_33B748's layout.
+extern "C" void func_0033B748(char* flag, sCtx_340DC0* vctx, sCtx_340DC0* vctx2, void* vbox, void* vnode, void* vcell)
+{
+    sCtx_33B748* ctx = (sCtx_33B748*)vctx;
+    sCtx_33B748* ctx2 = (sCtx_33B748*)vctx2;
+    sBox_3309D8* box = (sBox_3309D8*)vbox;
+    sTree_33B748* node = (sTree_33B748*)vnode;
+    sCell_33B748* cell = (sCell_33B748*)vcell;
+    visit_33B748(node, ctx);
+    if (cell->level == 11) {
+        return;
+    }
+    sCell_33B748 sub;
+    sub.level = cell->level - 1;
+    sub.x = cell->x * 2;
+    sub.y = cell->y * 2;
+    sub.z = cell->z * 2;
+    int bits = (sub.level + 0x7F) << 23;
+    float s = *(float*)&bits;
+
+    float x0lo = ((float)sub.x - 0.2f) * s;
+    float x0hi = ((float)(sub.x + 1) + 0.2f) * s;
+    int ox0 = 0;
+    if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
+    float x1lo = ((float)(sub.x + 1) - 0.2f) * s;
+    float x1hi = ((float)(sub.x + 2) + 0.2f) * s;
+    int ox1 = 0;
+    if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
+    if (!ox0 && !ox1) {
+        return;
+    }
+    float y0lo = ((float)sub.y - 0.2f) * s;
+    float y0hi = ((float)(sub.y + 1) + 0.2f) * s;
+    int oy0 = 0;
+    if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
+    float y1lo = ((float)(sub.y + 1) - 0.2f) * s;
+    float y1hi = ((float)(sub.y + 2) + 0.2f) * s;
+    int oy1 = 0;
+    if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
+    if (!oy0 && !oy1) {
+        return;
+    }
+    float z0lo = ((float)sub.z - 0.2f) * s;
+    float z0hi = ((float)(sub.z + 1) + 0.2f) * s;
+    int oz0 = 0;
+    if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
+    float z1lo = ((float)(sub.z + 1) - 0.2f) * s;
+    float z1hi = ((float)(sub.z + 2) + 0.2f) * s;
+    int oz1 = 0;
+    if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
+    if (!oz0 && !oz1) {
+        return;
+    }
+    int cx0 = 0;
+    if (box->min[0] < x0lo && x0hi < box->max[0]) cx0 = 1;
+    int cx1 = 0;
+    if (box->min[0] < x1lo && x1hi < box->max[0]) cx1 = 1;
+    int cy0 = 0;
+    if (box->min[1] < y0lo && y0hi < box->max[1]) cy0 = 1;
+    int cy1 = 0;
+    if (box->min[1] < y1lo && y1hi < box->max[1]) cy1 = 1;
+    int cz0 = 0;
+    if (box->min[2] < z0lo && z0hi < box->max[2]) cz0 = 1;
+    int cz1 = 0;
+    if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
+
+    sTree_33B748* c;
+    c = node->child[0];
+    if (c && ox0 && oy0 && oz0) {
+        if (cx0 && cy0 && cz0) collect_33B748(c, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.z++;
+    c = node->child[1];
+    if (c && ox0 && oy0 && oz1) {
+        if (cx0 && cy0 && cz1) collect_33B748(c, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.y++;
+    c = node->child[3];
+    if (c && ox0 && oy1 && oz1) {
+        if (cx0 && cy1 && cz1) collect_33B748(c, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.z--;
+    c = node->child[2];
+    if (c && ox0 && oy1 && oz0) {
+        if (cx0 && cy1 && cz0) collect_33B748(c, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.x++;
+    c = node->child[6];
+    if (c && ox1 && oy1 && oz0) {
+        if (cx1 && cy1 && cz0) collect_33B748(c, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.z++;
+    c = node->child[7];
+    if (c && ox1 && oy1 && oz1) {
+        if (cx1 && cy1 && cz1) collect_33B748(c, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.y--;
+    c = node->child[5];
+    if (c && ox1 && oy0 && oz1) {
+        if (cx1 && cy0 && cz1) collect_33B748(c, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.z--;
+    c = node->child[4];
+    if (c && ox1 && oy0 && oz0) {
+        if (cx1 && cy0 && cz0) collect_33B748(c, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_0033CCF8);
+#ifdef SKIP_ASM
+struct sCell_33CCF8 {
+    int level;
+    int x, y, z;
+};
+
+extern "C" void func_0033CCF8(char* flag, sCtx_335960* ctx, sCtx_335960* ctx2, void* vbox, void* vnode, void* vcell)
+{
+    sBox_3309D8* box = (sBox_3309D8*)vbox;
+    sOct_335D78* node = (sOct_335D78*)vnode;
+    sCell_33CCF8* cell = (sCell_33CCF8*)vcell;
+    void** p;
+    for (p = (void**)node->listA; p != 0; p = (void**)*p) {
+        func_00335960(ctx, p);
+    }
+    for (p = (void**)node->listB; p != 0; p = (void**)*p) {
+        func_00335B90(ctx, p);
+    }
+    if (cell->level == 11) {
+        return;
+    }
+    sCell_33CCF8 sub;
+    sub.level = cell->level - 1;
+    sub.x = cell->x * 2;
+    sub.y = cell->y * 2;
+    sub.z = cell->z * 2;
+    int bits = (sub.level + 0x7F) << 23;
+    float s = *(float*)&bits;
+
+    float x0lo = ((float)sub.x - 0.2f) * s;
+    float x0hi = ((float)(sub.x + 1) + 0.2f) * s;
+    int ox0 = 0;
+    if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
+    float x1lo = ((float)(sub.x + 1) - 0.2f) * s;
+    float x1hi = ((float)(sub.x + 2) + 0.2f) * s;
+    int ox1 = 0;
+    if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
+    if (!ox0 && !ox1) {
+        return;
+    }
+    float y0lo = ((float)sub.y - 0.2f) * s;
+    float y0hi = ((float)(sub.y + 1) + 0.2f) * s;
+    int oy0 = 0;
+    if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
+    float y1lo = ((float)(sub.y + 1) - 0.2f) * s;
+    float y1hi = ((float)(sub.y + 2) + 0.2f) * s;
+    int oy1 = 0;
+    if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
+    if (!oy0 && !oy1) {
+        return;
+    }
+    float z0lo = ((float)sub.z - 0.2f) * s;
+    float z0hi = ((float)(sub.z + 1) + 0.2f) * s;
+    int oz0 = 0;
+    if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
+    float z1lo = ((float)(sub.z + 1) - 0.2f) * s;
+    float z1hi = ((float)(sub.z + 2) + 0.2f) * s;
+    int oz1 = 0;
+    if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
+    if (!oz0 && !oz1) {
+        return;
+    }
+    int cx0 = 0;
+    if (box->min[0] < x0lo && x0hi < box->max[0]) cx0 = 1;
+    int cx1 = 0;
+    if (box->min[0] < x1lo && x1hi < box->max[0]) cx1 = 1;
+    int cy0 = 0;
+    if (box->min[1] < y0lo && y0hi < box->max[1]) cy0 = 1;
+    int cy1 = 0;
+    if (box->min[1] < y1lo && y1hi < box->max[1]) cy1 = 1;
+    int cz0 = 0;
+    if (box->min[2] < z0lo && z0hi < box->max[2]) cz0 = 1;
+    int cz1 = 0;
+    if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
+
+    sOct_335D78* c;
+    c = (sOct_335D78*)node->child[0];
+    if (c && ox0 && oy0 && oz0) {
+        if (cx0 && cy0 && cz0) collect_335D78(c, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.z++;
+    c = (sOct_335D78*)node->child[1];
+    if (c && ox0 && oy0 && oz1) {
+        if (cx0 && cy0 && cz1) collect_335D78(c, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.y++;
+    c = (sOct_335D78*)node->child[3];
+    if (c && ox0 && oy1 && oz1) {
+        if (cx0 && cy1 && cz1) collect_335D78(c, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.z--;
+    c = (sOct_335D78*)node->child[2];
+    if (c && ox0 && oy1 && oz0) {
+        if (cx0 && cy1 && cz0) collect_335D78(c, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.x++;
+    c = (sOct_335D78*)node->child[6];
+    if (c && ox1 && oy1 && oz0) {
+        if (cx1 && cy1 && cz0) collect_335D78(c, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.z++;
+    c = (sOct_335D78*)node->child[7];
+    if (c && ox1 && oy1 && oz1) {
+        if (cx1 && cy1 && cz1) collect_335D78(c, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.y--;
+    c = (sOct_335D78*)node->child[5];
+    if (c && ox1 && oy0 && oz1) {
+        if (cx1 && cy0 && cz1) collect_335D78(c, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    }
+    sub.z--;
+    c = (sOct_335D78*)node->child[4];
+    if (c && ox1 && oy0 && oz0) {
+        if (cx1 && cy0 && cz0) collect_335D78(c, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_0033DBE8);
@@ -2373,7 +3382,179 @@ extern "C" void func_0033DFD8(char* flag, sCtx_336D40* ctx, sCtx_336D40* ctx2, v
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_0033ED60);
+#ifdef SKIP_ASM
+struct sQuery_33ED60 {
+    sWsVec4* pos;               // 0x00
+    int a7;                     // 0x04
+    int mask;                   // 0x08
+    int* cnt;                   // 0x0C
+    float* dist;                // 0x10
+    sBox_00334680* box;         // 0x14
+};
+
+struct sCell_33ED60 {
+    int level;
+    int x, y, z;
+};
+
+struct sOct_33ED60 {
+    sOct_33ED60* child[8];
+    int pad20[2];
+    char* objs;                 // 0x28
+};
+
+// PORT: alias; the unit defines func_003411B8 later with its own struct types.
+extern "C" void func_003411B8_33ED60(sOct_33ED60* tree, sQuery_33ED60* q) __asm__("func_003411B8");
+
+static inline void objs_33ED60(char* o, sQuery_33ED60* q)
+{
+    for (; o != 0; o = *(char**)o) {
+        int type = *(int*)(o + 8);
+        if (type == 2) {
+            func_0035C698(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+        } else if (type == 3) {
+            func_00348290(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+        } else if (type == 1) {
+            if (*(int*)(*(char**)(o + 0x68) + 0x1C) & q->mask) {
+                func_00335128(o, q->box, q->pos, q->cnt, q->dist, q->a7);
+            }
+        }
+    }
+}
+
+static inline void collect_33ED60(sOct_33ED60* node, sQuery_33ED60* q)
+{
+    objs_33ED60(node->objs, q);
+    if (node->child[0] != 0) func_003411B8_33ED60(node->child[0], q);
+    if (node->child[1] != 0) func_003411B8_33ED60(node->child[1], q);
+    if (node->child[2] != 0) func_003411B8_33ED60(node->child[2], q);
+    if (node->child[3] != 0) func_003411B8_33ED60(node->child[3], q);
+    if (node->child[4] != 0) func_003411B8_33ED60(node->child[4], q);
+    if (node->child[5] != 0) func_003411B8_33ED60(node->child[5], q);
+    if (node->child[6] != 0) func_003411B8_33ED60(node->child[6], q);
+    if (node->child[7] != 0) func_003411B8_33ED60(node->child[7], q);
+}
+
+struct sQry_337A48;
+
+// Declared as func_00337A48 (its caller) declares it; sQry_337A48 has sQuery_33ED60's layout.
+extern "C" void func_0033ED60(char* flag, sQry_337A48* vctx, sQry_337A48* vctx2, sBox_00334680* vbox, void* vnode, void* vcell)
+{
+    sQuery_33ED60* ctx = (sQuery_33ED60*)vctx;
+    sQuery_33ED60* ctx2 = (sQuery_33ED60*)vctx2;
+    sBox_3309D8* box = (sBox_3309D8*)vbox;
+    sOct_33ED60* node = (sOct_33ED60*)vnode;
+    sCell_33ED60* cell = (sCell_33ED60*)vcell;
+    objs_33ED60(node->objs, ctx);
+    if (cell->level == 11) {
+        return;
+    }
+    sCell_33ED60 sub;
+    sub.level = cell->level - 1;
+    sub.x = cell->x * 2;
+    sub.y = cell->y * 2;
+    sub.z = cell->z * 2;
+    int bits = (sub.level + 0x7F) << 23;
+    float s = *(float*)&bits;
+
+    float x0lo = ((float)sub.x - 0.2f) * s;
+    float x0hi = ((float)(sub.x + 1) + 0.2f) * s;
+    int ox0 = 0;
+    if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
+    float x1lo = ((float)(sub.x + 1) - 0.2f) * s;
+    float x1hi = ((float)(sub.x + 2) + 0.2f) * s;
+    int ox1 = 0;
+    if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
+    if (!ox0 && !ox1) {
+        return;
+    }
+    float y0lo = ((float)sub.y - 0.2f) * s;
+    float y0hi = ((float)(sub.y + 1) + 0.2f) * s;
+    int oy0 = 0;
+    if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
+    float y1lo = ((float)(sub.y + 1) - 0.2f) * s;
+    float y1hi = ((float)(sub.y + 2) + 0.2f) * s;
+    int oy1 = 0;
+    if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
+    if (!oy0 && !oy1) {
+        return;
+    }
+    float z0lo = ((float)sub.z - 0.2f) * s;
+    float z0hi = ((float)(sub.z + 1) + 0.2f) * s;
+    int oz0 = 0;
+    if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
+    float z1lo = ((float)(sub.z + 1) - 0.2f) * s;
+    float z1hi = ((float)(sub.z + 2) + 0.2f) * s;
+    int oz1 = 0;
+    if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
+    if (!oz0 && !oz1) {
+        return;
+    }
+    int cx0 = 0;
+    if (box->min[0] < x0lo && x0hi < box->max[0]) cx0 = 1;
+    int cx1 = 0;
+    if (box->min[0] < x1lo && x1hi < box->max[0]) cx1 = 1;
+    int cy0 = 0;
+    if (box->min[1] < y0lo && y0hi < box->max[1]) cy0 = 1;
+    int cy1 = 0;
+    if (box->min[1] < y1lo && y1hi < box->max[1]) cy1 = 1;
+    int cz0 = 0;
+    if (box->min[2] < z0lo && z0hi < box->max[2]) cz0 = 1;
+    int cz1 = 0;
+    if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
+
+    sOct_33ED60* c;
+    c = node->child[0];
+    if (c && ox0 && oy0 && oz0) {
+        if (cx0 && cy0 && cz0) collect_33ED60(c, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.z++;
+    c = node->child[1];
+    if (c && ox0 && oy0 && oz1) {
+        if (cx0 && cy0 && cz1) collect_33ED60(c, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.y++;
+    c = node->child[3];
+    if (c && ox0 && oy1 && oz1) {
+        if (cx0 && cy1 && cz1) collect_33ED60(c, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.z--;
+    c = node->child[2];
+    if (c && ox0 && oy1 && oz0) {
+        if (cx0 && cy1 && cz0) collect_33ED60(c, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.x++;
+    c = node->child[6];
+    if (c && ox1 && oy1 && oz0) {
+        if (cx1 && cy1 && cz0) collect_33ED60(c, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.z++;
+    c = node->child[7];
+    if (c && ox1 && oy1 && oz1) {
+        if (cx1 && cy1 && cz1) collect_33ED60(c, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.y--;
+    c = node->child[5];
+    if (c && ox1 && oy0 && oz1) {
+        if (cx1 && cy0 && cz1) collect_33ED60(c, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    }
+    sub.z--;
+    c = node->child[4];
+    if (c && ox1 && oy0 && oz0) {
+        if (cx1 && cy0 && cz0) collect_33ED60(c, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_003400D8);
