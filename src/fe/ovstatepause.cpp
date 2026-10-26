@@ -1,7 +1,316 @@
 #include "common.h"
 #include "ai/rider.h"
 
+//100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onCreateScreen);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
+extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void func_0020A380(void* self);
+extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int idx);
+extern "C" int func_0039A768(void* box, int key, unsigned char* out);
+extern "C" void func_0039A7A8(void* box, unsigned char sel);
+extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, ...);
+extern "C" void func_003A0E90(void* obj, unsigned short* s);
+extern "C" void* func_0028B180();
+extern "C" void func_00287410(void* snd, int v);
+extern "C" void func_00287488(void* snd, int v);
+extern "C" void func_00287520(void* snd, int v);
+extern "C" void func_00287558(void* snd, int v);
+extern "C" void func_002875D0(void* snd, int v);
+extern "C" void func_00266F90(void* self, int* a, int* b);
+extern "C" void func_00266E88(void* self);
+extern "C" void func_00266E30(void* self);
+extern void* D_004A28A8;
+extern int D_00534B30[];
+extern void* D_004A33F4;
+extern char D_0046F8D8[];
+extern char D_0046F8E8[];
+extern char D_0046F8F8[];
+extern char D_0046F910[];
+extern char D_0046F920[];
+extern char D_0046F930[];
+extern char D_0046F940[];
+extern char D_0046F950[];
+extern char D_0046F960[];
+extern char D_0046F970[];
+extern char D_0046F980[];
+extern char D_0046F990[];
+extern char D_0046F9A0[];
+extern char D_0046F9B0[];
+extern char D_004A2498[];
+extern char D_004A24A0[];
+extern char D_004A24A8[];
+extern char D_004A24B0[];
+extern char D_004A24B8[];
+extern char D_004A24C0[];
+extern char D_004A24C8[];
+extern char D_004A24D0[];
+extern char D_004A24D8[];
+
+// The pause-options settings word (same layout as func_001FA238's view).
+struct sOptions_PO {
+    unsigned int f0 : 4;
+    unsigned int f4 : 4;
+    unsigned int f8 : 4;
+    unsigned int pad12 : 4;
+    int f16 : 1;
+    int f17 : 1;
+    unsigned int pad18 : 12;
+    unsigned int f30 : 2;
+    int data[0x288 / 4 - 1];
+};
+
+// The options interface's view of the same word (unsigned flag bits).
+struct sOptionsU_PO {
+    unsigned int f0 : 4;
+    unsigned int f4 : 4;
+    unsigned int f8 : 4;
+    unsigned int pad12 : 4;
+    unsigned int f16 : 1;
+    unsigned int f17 : 1;
+    unsigned int pad18 : 12;
+    unsigned int f30 : 2;
+    int data[0x288 / 4 - 1];
+};
+// PORT: D_00535610 is viewed with different types across the program; view bound by asm label
+extern sOptions_PO D_00535610_PO __asm__("D_00535610");
+
+struct cBEOptionInterface_PO {
+    // PORT: reinterprets the settings global with unsigned flag bits
+    sOptionsU_PO getOptions() { return *(sOptionsU_PO*)&D_00535610_PO; }
+};
+
+static inline sOptions_PO Cfg_PO()
+{
+    return D_00535610_PO;
+}
+
+struct sSlider_PO {
+    char pad[0x74];
+    int value;
+    int max;
+};
+
+struct sColor_PO {
+    float r, g, b, a;
+};
+extern sColor_PO D_004C66C8_PO __asm__("D_004C66C8");
+
+class cUIObj_PO {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void setEnabled(int v);
+    virtual void setVisible(int v);
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void setHighlight(int v);
+};
+
+struct sVE_PO {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+// Looks up a localized string by the hash of its name.
+static inline unsigned short* getString_PO(char* name)
+{
+    char* loc = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVE_PO* vt = *(sVE_PO**)(loc + 4);
+    char* thisp = loc + vt[4].delta;
+    return vt[4].fn(thisp, GetHashValue32(name));
+}
+
+static inline void* find_PO(void* self, char* name)
+{
+    return cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+}
+
+struct sText_PO {
+    unsigned short buf[0x140];
+    operator unsigned short*() { return buf; }
+};
+
+static inline void setFormatted_PO(void* obj, char* name, int n)
+{
+    sText_PO text;
+    unsigned short* s = getString_PO(name);
+    if (s != 0) {
+        func_002C26D0(text, s, n);
+        func_003A0E90(obj, text);
+    }
+}
+
+static inline char* riders_PO()
+{
+    return *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+}
+
+extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
+{
+    unsigned char sel;
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046F8D8), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    func_0020A380(self);
+    cBEOptionInterface_PO* iface = (cBEOptionInterface_PO*)cBE_getInterface_Fv(cBE_getBE(), 4);
+    {
+        void* w = find_PO(self, D_004A2498);
+        if (w != 0) {
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F8E8), 0);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F8F8), 1);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F910), 2);
+            if (func_0039A768(w, iface->getOptions().f30, &sel))
+                func_0039A7A8(w, sel);
+        }
+    }
+    {
+        void* w = find_PO(self, D_004A24A0);
+        if (w != 0) {
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F920), 0x3C);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F930), 0x3D);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F940), 0x3E);
+            char* r = *(char**)(riders_PO() + 4);
+            if (func_0039A768(w, *(int*)(*(char**)(r + 0xA8) + 0x18), &sel))
+                func_0039A7A8(w, sel);
+            void* t = find_PO(self, D_0046F950);
+            if (t != 0) {
+                setFormatted_PO(t, D_0046F960, 1);
+            }
+        }
+    }
+    {
+        void* w = find_PO(self, D_004A24A8);
+        if (w != 0) {
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F920), 0x3C);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F930), 0x3D);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F940), 0x3E);
+            char* rs = riders_PO();
+            if (*(unsigned int*)(rs + 0x10) >= 2) {
+                char* r = *(char**)(rs + 8);
+                if (func_0039A768(w, *(int*)(*(char**)(r + 0xA8) + 0x18), &sel))
+                    func_0039A7A8(w, sel);
+            }
+            void* t = find_PO(self, D_0046F970);
+            if (t != 0) {
+                setFormatted_PO(t, D_0046F960, 2);
+            }
+        }
+    }
+    {
+        sSlider_PO* w = (sSlider_PO*)find_PO(self, D_004A24B0);
+        if (w != 0) {
+            w->max = 12;
+            w->value = iface->getOptions().f0;
+            func_00287410(func_0028B180(), Cfg_PO().f0);
+        }
+    }
+    {
+        sSlider_PO* w = (sSlider_PO*)find_PO(self, D_004A24B8);
+        if (w != 0) {
+            w->max = 12;
+            w->value = iface->getOptions().f8;
+            func_00287488(func_0028B180(), Cfg_PO().f8);
+        }
+    }
+    {
+        sSlider_PO* w = (sSlider_PO*)find_PO(self, D_004A24C0);
+        if (w != 0) {
+            w->max = 12;
+            w->value = iface->getOptions().f4;
+            func_00287520(func_0028B180(), Cfg_PO().f4);
+        }
+    }
+    {
+        void* w = find_PO(self, D_004A24C8);
+        if (w != 0) {
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F980), 0);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F990), 1);
+            unsigned char sel2;
+            if (func_0039A768(w, iface->getOptions().f17, &sel2))
+                func_0039A7A8(w, sel2);
+            func_00287558(func_0028B180(), Cfg_PO().f17 != 0);
+        }
+    }
+    {
+        void* w = find_PO(self, D_004A24D0);
+        if (w != 0) {
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F980), 0);
+            cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F990), 1);
+            unsigned char sel3;
+            if (func_0039A768(w, iface->getOptions().f16, &sel3))
+                func_0039A7A8(w, sel3);
+            func_002875D0(func_0028B180(), Cfg_PO().f16 != 0);
+        }
+    }
+    cUIObj_PO* o = (cUIObj_PO*)find_PO(self, D_0046F9A0);
+    if (o != 0) {
+        o->setVisible(0);
+        o->setEnabled(1);
+    }
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B30[0] != 0) {
+        cUIObj_PO* a = (cUIObj_PO*)find_PO(self, D_0046F9A0);
+        cUIObj_PO* b = (cUIObj_PO*)find_PO(self, D_004A24D8);
+        cUIObj_PO* c = (cUIObj_PO*)find_PO(self, D_0046F9B0);
+        if (a != 0 && b != 0 && c != 0) {
+            a->setVisible(1);
+            a->setEnabled(0);
+            b->setVisible(1);
+            b->setEnabled(0);
+            c->setVisible(1);
+            c->setEnabled(0);
+            ((sSlider_PO*)c)->max = 10;
+            int level;
+            int max;
+            func_00266F90(D_004A33F4, &level, &max);
+            ((sSlider_PO*)c)->value = level / 10;
+            if (level < 10) {
+                func_00266E88(D_004A33F4);
+            } else {
+                func_00266E30(D_004A33F4);
+            }
+        }
+    } else {
+        cUIObj_PO* d = (cUIObj_PO*)find_PO(self, D_004A24D8);
+        if (d != 0) {
+            d->setHighlight(1);
+            *(sColor_PO*)((char*)d + 0x88) = D_004C66C8_PO;
+            d->setEnabled(1);
+            d->setVisible(0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FA100);
