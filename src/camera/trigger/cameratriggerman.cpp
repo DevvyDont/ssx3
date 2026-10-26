@@ -571,7 +571,165 @@ extern "C" int func_0016D260(sCamTrigStack* self, int key, int* changed, int* ou
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D320);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void func_0016C678(void* list);
+extern "C" void* func_0016C6B0(void* list, void* key);
+extern "C" void* func_0016C6E0(void* list, int key);
+extern "C" void cActiveTriggerList_add(void* list, void* item);
+extern "C" void* func_0016C778(void* list, void* node);
+extern "C" void func_00176890(void* node, void* ctx);
+extern "C" void func_00174848(char* hit, void* ctx, void* ctx2, void* box, void* node, void* root);
+extern "C" int func_00328360(void* root, void* box);
+// PORT: the unit defines func_0016E1D8 later with typed params; bind this call by asm label.
+extern "C" void func_0016E1D8_D320(void* evt, char* rider) __asm__("func_0016E1D8");
+
+struct sVEnt_D320 {
+    short delta;
+    short index;
+    int (*fn)(void*, ...);
+};
+
+struct sCtx_D320 {
+    void* list;
+    char* rider;
+};
+
+struct sQuad_D320 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sBox_D320 {
+    sQuad_D320 min;
+    sQuad_D320 max;
+};
+
+struct sRoot_D320 {
+    int level;
+    int x, y, z;
+    void* node;
+};
+
+static inline void walk_D320(void* node, sCtx_D320* ctx)
+{
+    char* e;
+    for (e = *(char**)((char*)node + 0x28); e != 0; e = *(char**)e) {
+        if (*(int*)(e + 8) == 4) {
+            char* trig = *(char**)(e + 0xC);
+            char* sub = ctx->rider + 0x6C0;
+            char* bound = *(char**)(trig + 8);
+            sVEnt_D320* cvt = *(sVEnt_D320**)sub;
+            sVEnt_D320* bvt = *(sVEnt_D320**)(bound + 0x24);
+            char* bthis = bound + bvt[7].delta;
+            int r = cvt[5].fn(sub + cvt[5].delta);
+            if (bvt[7].fn(bthis, r)) {
+                void* f = func_0016C6B0(ctx->list, trig);
+                if (f) {
+                    *(int*)((char*)f + 0xC) = 1;
+                } else {
+                    cActiveTriggerList_add(ctx->list, trig);
+                }
+            }
+        }
+    }
+    if (*(void**)((char*)node + 0x0)) func_00176890(*(void**)((char*)node + 0x0), ctx);
+    if (*(void**)((char*)node + 0x4)) func_00176890(*(void**)((char*)node + 0x4), ctx);
+    if (*(void**)((char*)node + 0x8)) func_00176890(*(void**)((char*)node + 0x8), ctx);
+    if (*(void**)((char*)node + 0xC)) func_00176890(*(void**)((char*)node + 0xC), ctx);
+    if (*(void**)((char*)node + 0x10)) func_00176890(*(void**)((char*)node + 0x10), ctx);
+    if (*(void**)((char*)node + 0x14)) func_00176890(*(void**)((char*)node + 0x14), ctx);
+    if (*(void**)((char*)node + 0x18)) func_00176890(*(void**)((char*)node + 0x18), ctx);
+    if (*(void**)((char*)node + 0x1C)) func_00176890(*(void**)((char*)node + 0x1C), ctx);
+}
+
+static inline void collect_D320(sRoot_D320* r, char* hits, int k, sCtx_D320* ctx, sBox_D320* box)
+{
+    void* node = r->node;
+    char* hit = hits + k;
+    int c = func_00328360(r, box);
+    if (c == 0) {
+        walk_D320(node, ctx);
+    } else if (c == 2) {
+        func_00174848(hit, ctx, ctx, box, node, r);
+    }
+}
+
+static inline sQuad_D320* getPos_D320(char* sub)
+{
+    sVEnt_D320* vt = *(sVEnt_D320**)sub;
+    return (sQuad_D320*)vt[5].fn(sub + vt[5].delta);
+}
+
+static inline int active_D320(char* rider)
+{
+    return *(int*)(rider + 0x874) != 0 && *(int*)(rider + 0x87C) != 0;
+}
+
+extern "C" void func_0016D320(char* self, char* rider)
+{
+    if (active_D320(rider)) {
+        int idx = *(int*)(rider + 0x870);
+        func_0016C678(self + 0x14 + idx * 4);
+        sCtx_D320 ctx;
+        sRoot_D320* w = *(sRoot_D320**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20);
+        ctx.list = (char*)(idx * 4 + (int)self) + 0x14;
+        ctx.rider = rider;
+        char* sub = rider + 0x6C0;
+        sQuad_D320* p0 = getPos_D320(sub);
+        sQuad_D320* p1 = getPos_D320(sub);
+        sBox_D320 box;
+        box.min = *p0;
+        box.max = *p1;
+        // PORT: eight 1-byte hit flags kept in one 8-byte slot (relies on sizeof(long) == 8).
+        long hits;
+        sCtx_D320* pc = &ctx;
+        sRoot_D320* r0 = &w[0];
+        if (w[0].node) collect_D320(r0, (char*)&hits, 0, pc, &box);
+        sRoot_D320* r1 = &w[1];
+        if (w[1].node) collect_D320(r1, (char*)&hits, 1, pc, &box);
+        sRoot_D320* r2 = &w[2];
+        if (w[2].node) collect_D320(r2, (char*)&hits, 2, pc, &box);
+        sRoot_D320* r3 = &w[3];
+        if (w[3].node) collect_D320(r3, (char*)&hits, 3, pc, &box);
+        sRoot_D320* r4 = &w[4];
+        if (w[4].node) collect_D320(r4, (char*)&hits, 4, pc, &box);
+        sRoot_D320* r5 = &w[5];
+        if (w[5].node) collect_D320(r5, (char*)&hits, 5, pc, &box);
+        sRoot_D320* r6 = &w[6];
+        if (w[6].node) collect_D320(r6, (char*)&hits, 6, pc, &box);
+        sRoot_D320* r7 = &w[7];
+        if (w[7].node) collect_D320(r7, (char*)&hits, 7, pc, &box);
+
+        int changed;
+        int top;
+        char* n = *(char**)((char*)(idx * 4 + (int)self) + 0x14);
+        while (n != 0) {
+            if (*(int*)(n + 0xC) == 0) {
+                char* t = *(char**)n;
+                if (func_0016D260((sCamTrigStack*)(self + (idx * 32 + 0x1C)), *(int*)t, &changed, &top)) {
+                    func_0016E1D8_D320(*(void**)(t + 0x10), rider);
+                } else if (changed) {
+                    char* f = (char*)func_0016C6E0(self + (idx * 4 + 0x14), top);
+                    if (f) {
+                        func_0016E1D8_D320(*(void**)(f + 0xC), rider);
+                    }
+                }
+                n = (char*)func_0016C778(self + (idx * 4 + 0x14), n);
+            } else {
+                n = *(char**)(n + 4);
+            }
+        }
+        for (char* m = *(char**)((char*)(idx * 4 + (int)self) + 0x14); m != 0; m = *(char**)(m + 4)) {
+            if (*(int*)(m + 8)) {
+                func_0016D238(self + (idx * 32 + 0x1C), **(int**)m);
+                func_0016E1D8_D320(*(void**)(*(char**)m + 0xC), rider);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016E1D8);
