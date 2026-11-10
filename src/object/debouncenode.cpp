@@ -1135,7 +1135,207 @@ extern "C" void func_00344368(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_003443A8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
+struct sTrackWorld51C0;
+extern "C" sTrackWorld51C0** func_002D1BD8();
+extern "C" void func_003513D0(void* self);
+extern "C" void func_003612C0(void* self);
+extern "C" void func_00351398(void* self, void* src);
+extern "C" void func_003E6448(void* p, int v, int n);
+extern char D_0048E758[];
+extern char D_0048E768[];
+extern void* D_00490AD0[];
+extern void* D_00490AF0[];
+
+struct sDbVEntry_43A8 {
+    short delta;
+    short index;
+    void (*fn)(void*, float);
+};
+
+struct sDbMesh_43A8 {
+    char pad_0x0[0x84];
+    void** vtable;                  // 0x84
+    char pad_0x88[0x48];
+    sDbMesh_43A8()
+    {
+        vtable = D_00490AF0;
+        func_003513D0(this);
+        vtable = D_00490AD0;
+        func_003612C0(this);
+    }
+    void operator delete[](void* p, unsigned int size);
+};
+
+struct sDbPad_43A8 {
+    char data[0x40];
+    sDbPad_43A8() {}
+};
+
+struct sDbEntry_43A8 {
+    int pad_0x0[2];
+    void* src;                      // 0x8
+    int pad_0xC;
+};
+
+struct sDbDef_43A8 {
+    int pad_0x0;
+    int count;                      // 0x4
+    sDbEntry_43A8* entries;         // 0x8
+    int pad_0xC[2];
+    float period;                   // 0x14
+};
+
+struct sDbItem_43A8 {
+    char pad_0x0[0xC];
+    int fC;                         // 0xC
+    char* data;                     // 0x10
+};
+
+struct sDbList_43A8 {
+    int count;                      // 0x0
+    sDbItem_43A8* items[1];         // 0x4
+};
+
+struct sDbModel_43A8 {
+    char pad_0x0[0x80];
+    sDbDef_43A8* def;               // 0x80
+    char pad_0x84[0x10];
+    sDbList_43A8* list;             // 0x94
+};
+
+struct sDbSlot_43A8 {
+    unsigned short value;           // 0x0
+    short ids[3];                   // 0x2
+    int f8;
+    int fC;
+    int f10;
+};
+
+static inline sDbModel_43A8* refToPtr_43A8(unsigned int p)
+{
+    return (sDbModel_43A8*)(p << 2);
+}
+
+struct sDbModelSet_43A8 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;             // 0x1C
+
+    sDbModel_43A8* lookup(unsigned int idx)
+    {
+        unsigned int p = refs[idx] >> 8;
+        if (p == 0) {
+            return 0;
+        }
+        return refToPtr_43A8(p);
+    }
+};
+
+struct sDbWorld_43A8 {
+    char pad_0x0[0x8];
+    sDbModelSet_43A8** sets;        // 0x8
+};
+
+struct sDbModelRef_43A8 {
+    unsigned int id;
+
+    sDbModel_43A8* get()
+    {
+        sDbModelSet_43A8* set = (*(sDbWorld_43A8**)func_002D1BD8())->sets[id & 0xFF];
+        if (set == 0) {
+            return 0;
+        }
+        return set->lookup(id >> 8);
+    }
+};
+
+struct sDbOwner_43A8 {
+    int field_0x0;
+    sDbModelRef_43A8 model;         // 0x4
+    char pad_0x8[0x104];
+    int nActive;                    // 0x10C
+    int count;                      // 0x110
+    int first;                      // 0x114
+    int total;                      // 0x118
+    sDbSlot_43A8* ptrs[8];          // 0x11C
+    sDbSlot_43A8 slots[8];          // 0x13C
+    float time;                     // 0x1DC
+    float period;                   // 0x1E0
+    float step;                     // 0x1E4
+    sDbPad_43A8* buf;               // 0x1E8
+    sDbMesh_43A8* meshes;           // 0x1EC
+    sDbDef_43A8* def;               // 0x1F0
+};
+
+extern "C" void func_00344AA0_43A8(void* self) __asm__("func_00344AA0");
+
+
+
+extern "C" void func_003443A8_impl(sDbOwner_43A8* self) __asm__("func_003443A8");
+extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
+{
+    sDbModel_43A8* m = self->model.get();
+    int i;
+    self->def = m->def;
+    self->period = self->def->period;
+    sDbPad_43A8*& buf = self->buf;
+    buf = new (D_0048E758, 0x20000000, 0) sDbPad_43A8[self->def->count];
+    sDbEntry_43A8* e = self->def->entries;
+    self->nActive = 0;
+    for (i = 0; i < self->def->count; i++, e++) {
+        if (e->src != 0)
+            self->nActive++;
+    }
+    if (self->nActive != 0) {
+        sDbMesh_43A8*& meshes = self->meshes;
+        meshes = new (D_0048E768, 0x20000000, 0) sDbMesh_43A8[self->nActive];
+    } else {
+        self->meshes = 0;
+    }
+    e = self->def->entries;
+    int k = 0;
+    for (i = 0; i < self->def->count; i++, e++) {
+        if (e->src != 0) {
+            func_00351398(&self->meshes[k++], e->src);
+        }
+    }
+    for (i = 0; i < self->nActive; i++) {
+        sDbMesh_43A8* p = (sDbMesh_43A8*)(i * 0xD0 + (int)self->meshes);
+        ((sDbVEntry_43A8*)p->vtable)[2].fn((char*)p + ((sDbVEntry_43A8*)p->vtable)[2].delta, self->time);
+    }
+    func_00344AA0_43A8(self);
+    self->first = 0;
+    self->count = m->list->count;
+    for (i = 0; i < self->count; i++) {
+        char* d = m->list->items[i]->data;
+        if (d != 0) {
+            self->first = *(int*)d;
+            break;
+        }
+    }
+    func_003E6448(&self->total, 0, 0xC4);
+    self->total = self->count;
+    for (i = 0; i < self->count; i++) {
+        sDbItem_43A8* item = m->list->items[i];
+        if (item->data != 0) {
+            self->ptrs[i] = &self->slots[i];
+            self->ptrs[i]->fC = item->fC;
+            short* p = (short*)self->slots;
+            for (int j = 1; j < 4; j++) {
+                p[j] = -1;
+            }
+            self->slots[i].value = *(unsigned short*)(item->data + 4);
+        } else {
+            self->ptrs[i] = (sDbSlot_43A8*)item;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00344730);
@@ -1316,7 +1516,220 @@ extern "C" void func_003449F0(void* elem)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00344AA0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sTrackWorld51C0;
+extern "C" sTrackWorld51C0** func_002D1BD8();
+
+struct sDbV4_4AA0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sDbMat_4AA0 {
+    sDbV4_4AA0 r[4];
+};
+
+struct sDbPart_4AA0 {
+    int parent;             // 0x0
+    int pad4;
+    int animated;           // 0x8
+    sDbMat_4AA0* mat;       // 0xC
+};
+
+struct sDbModelInfo_4AA0 {
+    int pad0;
+    int count;              // 0x4
+    sDbPart_4AA0* parts;    // 0x8
+};
+
+struct sDbInst_4AA0 {
+    char pad_0x00[0x84];
+    float scale;            // 0x84
+};
+
+static inline sDbInst_4AA0* refToPtr_4AA0(unsigned int p)
+{
+    return (sDbInst_4AA0*)(p << 2);
+}
+
+struct sDbModelSet_4AA0 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+
+    sDbInst_4AA0* lookup(unsigned int idx)
+    {
+        unsigned int p = refs[idx] >> 8;
+        if (p == 0) {
+            return 0;
+        }
+        return refToPtr_4AA0(p);
+    }
+};
+
+struct sDbWorld_4AA0 {
+    char pad_0x0[0x8];
+    sDbModelSet_4AA0** sets;    // 0x8
+};
+
+struct sDbModelRef_4AA0 {
+    unsigned int id;
+
+    sDbInst_4AA0* get()
+    {
+        sDbModelSet_4AA0* set = (*(sDbWorld_4AA0**)func_002D1BD8())->sets[id & 0xFF];
+        if (set == 0) {
+            return 0;
+        }
+        return set->lookup(id >> 8);
+    }
+};
+
+struct sDbItem_4AA0 {
+    char pad_0x00[0x90];
+    sDbMat_4AA0 mat;        // 0x90
+};
+
+struct sDbAnim_4AA0 {
+    int pad0;
+    sDbModelRef_4AA0 model;     // 0x4
+    char pad_0x8[0x1E0];
+    sDbMat_4AA0* mats;          // 0x1E8
+    sDbItem_4AA0* items;        // 0x1EC
+    sDbModelInfo_4AA0* info;    // 0x1F0
+};
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
+static inline void vu0MulMat_4AA0(sDbMat_4AA0* d, const sDbMat_4AA0* a, const sDbMat_4AA0* b)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(a), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+static inline void vu0CopyMat_4AA0(sDbMat_4AA0* d, const sDbMat_4AA0* s)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(s)
+        : "memory");
+}
+
+static inline sDbV4_4AA0 row_4AA0(const sDbMat_4AA0* m, int i)
+{
+    return m->r[i];
+}
+
+static inline void mulv_4AA0(sDbV4_4AA0& r, const sDbV4_4AA0& a, const sDbV4_4AA0& b)
+{
+    r.x = a.x * b.x;
+    r.y = a.y * b.y;
+    r.z = a.z * b.z;
+    r.w = a.w * b.w;
+}
+
+// Builds a part matrix: dst = parent * (local with its translation row scaled by s).
+static inline void partMat_4AA0(sDbMat_4AA0* dst, const sDbMat_4AA0* parentMat, const sDbMat_4AA0* m, const sDbV4_4AA0& s)
+{
+    sDbMat_4AA0 l;
+    l.r[0] = row_4AA0(m, 0);
+    l.r[1] = row_4AA0(m, 1);
+    l.r[2] = row_4AA0(m, 2);
+    sDbV4_4AA0 t;
+    sDbV4_4AA0 r3 = m->r[3];
+    mulv_4AA0(t, r3, s);
+    l.r[3] = t;
+    sDbMat_4AA0 tt;
+    vu0MulMat_4AA0(&tt, parentMat, &l);
+    vu0CopyMat_4AA0(dst, &tt);
+}
+
+// Scales the translation row of m by s.
+static inline void scaleTrans_4AA0(sDbMat_4AA0* m, const sDbV4_4AA0& s)
+{
+    sDbV4_4AA0 t;
+    sDbV4_4AA0 r3 = m->r[3];
+    mulv_4AA0(t, r3, s);
+    m->r[3] = t;
+}
+
+// Rebuilds the world matrix of every part; animated parts take their local matrix from the next animation item.
+extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self) __asm__("func_00344AA0");
+extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self)
+{
+    sDbPart_4AA0* p = self->info->parts;
+    float k = self->model.get()->scale;
+    sDbV4_4AA0 s;
+    s.x = k;
+    s.y = k;
+    s.z = k;
+    s.w = 1.0f;
+    int n = 0;
+    for (int i = 0; i < self->info->count; i++, p++) {
+        int parent = p->parent;
+        if (p->animated != 0) {
+            if (parent != -1) {
+                // PORT: pointer arithmetic done in int (gives the target's offset-first addu).
+                sDbMat_4AA0* local = &((sDbItem_4AA0*)(n++ * (int)sizeof(sDbItem_4AA0) + (int)self->items))->mat;
+                sDbMat_4AA0 t2;
+                partMat_4AA0(&t2, &self->mats[parent], local, s);
+                vu0CopyMat_4AA0(&self->mats[i], &t2);
+            } else {
+                vu0CopyMat_4AA0(&self->mats[i], &self->items[n++].mat);
+                scaleTrans_4AA0(&self->mats[i], s);
+            }
+        } else {
+            if (parent != -1) {
+                sDbMat_4AA0 t2;
+                partMat_4AA0(&t2, &self->mats[parent], p->mat, s);
+                vu0CopyMat_4AA0(&self->mats[i], &t2);
+            } else {
+                vu0CopyMat_4AA0(&self->mats[i], p->mat);
+                scaleTrans_4AA0(&self->mats[i], s);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00344E18);

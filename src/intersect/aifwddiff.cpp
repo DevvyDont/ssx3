@@ -125,7 +125,47 @@ extern "C" void func_00327AC0(sFwdDiffList* list, sFwdDiffLink* n)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327B30);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sCacheNode_7B30 {
+    unsigned int key;
+    sCacheNode_7B30* lruNext;
+    sCacheNode_7B30* lruPrev;
+    sCacheNode_7B30* next;
+};
+
+struct sCache_7B30 {
+    int pad0;
+    sCacheNode_7B30* lru;
+    sCacheNode_7B30** buckets;
+    unsigned int count;
+};
+
+static inline int less_7B30(unsigned int a, unsigned int b) { return a < b; }
+
+extern "C" void func_00327B30_7B30(sCache_7B30* self, sCacheNode_7B30* node) __asm__("func_00327B30");
+extern "C" void func_00327B30_7B30(sCache_7B30* self, sCacheNode_7B30* node)
+{
+    unsigned int key = node->key;
+    if (key == 0xFFFFFFFF)
+        return;
+    sCacheNode_7B30** link = &self->buckets[key % self->count];
+    if (*link == 0)
+        return;
+    sCacheNode_7B30* n = *link;
+    while (n != 0 && !less_7B30(key, n->key)) {
+        if (n->key == key) {
+            *link = n->next;
+            return;
+        }
+        link = &(*link)->next;
+        n = *link;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327BB0);
@@ -418,7 +458,96 @@ extern "C" void func_00328170(void *arg0) {
     func_003281D0(arg0, (*(int *)((char*)((*(void **)((char*)(arg0) + (0x98)))) + (0xC))), (char*)arg0 + 0x80, 0, 0);
 }
 #endif
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_003281D0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sVec4_281D0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sLevel_281D0 {
+    float scale;   // 0x0
+    float child;   // 0x4
+    int stride;    // 0x8
+};
+struct sGrid_281D0 {
+    char pad0[0x8];
+    int pad8;
+    char padC[0x14];
+    sLevel_281D0* levels; // 0x20
+    char pad24[4];
+    unsigned char* bits;  // 0x28
+};
+struct sAI_281D0 {
+    sVec4_281D0 dirs[8];   // 0x0
+    char pad80[0x10];
+    float unit;            // 0x90
+    char pad94[4];
+    sGrid_281D0* grid;     // 0x98
+};
+struct sVE87_281D0 { short delta; short index; void (*fn)(void*, float, void*, void*, int); };
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline void vu0Scale_281D0(sVec4_281D0& r, const sVec4_281D0& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline void vu0Add_281D0(sVec4_281D0& r, const sVec4_281D0& a, const sVec4_281D0& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+extern char* D_004A5B80;
+
+extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off) __asm__("func_003281D0");
+extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off)
+{
+    if (level < end) {
+        float s = *(float*)((char*)self->grid->levels + level * 12 + 0x10);
+        for (int i = 0; i < 8; i++) {
+            if ((self->grid->bits[off] >> i) & 1) {
+                sVec4_281D0 sum;
+                sVec4_281D0 d;
+                sVec4_281D0 t;
+                vu0Scale_281D0(t, self->dirs[i], s);
+                d = t;
+                vu0Add_281D0(t, *pos, d);
+                sum = t;
+                int st = self->grid->levels[level].stride;
+                func_281D0(self, end, &sum, level + 1, (i + 1) * st + off);
+            }
+        }
+    } else {
+        char* w = D_004A5B80;
+        sVE87_281D0* vt = &(*(sVE87_281D0**)(w + 0x10D8))[87];
+        char* thisp = w + vt->delta;
+        sVec4_281D0 v;
+        float f = self->grid->levels[level].scale * self->unit;
+        v.x = 1.0f;
+        v.y = 0.0f;
+        v.z = 1.0f;
+        v.w = 0.0f;
+        vt->fn(thisp, f, pos, &v, 4);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/aifwddiff", func_00328360);
@@ -860,5 +989,95 @@ extern "C" void func_003291E0(sRoot_8C20 (*roots)[2][2], int idx, sItem_00328660
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00329590);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sVec4_29590 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+extern sVec4_29590 D_004FF140;
+extern sVec4_29590 D_004FF150;
+extern sVec4_29590 D_004FF160;
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4_29590 vu0Scale_29590(const sVec4_29590& v, float s)
+{
+    sVec4_29590 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(v), "f"(s));
+    return r;
+}
+
+extern "C" int func_00329590(float m, sVec4_29590* mn, sVec4_29590* mx, sVec4_29590* p, sVec4_29590* hp, sVec4_29590* nrm, float* t)
+{
+    *t = 1e30f;
+    if (mn->y <= p->y && p->y <= mx->y && p->z >= mn->z && p->z <= mx->z) {
+        float d1 = (p->x - mn->x) + m;
+        float d2 = (mx->x - p->x) + m;
+        if (0.0f <= d1 && 0.0f <= d2) {
+            if (d1 < *t) {
+                *hp = *p;
+                hp->x = mn->x;
+                *t = d1;
+                sVec4_29590 n = vu0Scale_29590(D_004FF140, -1.0f);
+                *nrm = n;
+            }
+            if (d2 < *t) {
+                *hp = *p;
+                hp->x = mx->x;
+                *t = d2;
+                *nrm = D_004FF140;
+            }
+        }
+    }
+    if (p->x >= mn->x && p->x <= mx->x && p->z >= mn->z && p->z <= mx->z) {
+        float d1 = (p->y - mn->y) + m;
+        float d2 = (mx->y - p->y) + m;
+        if (0.0f <= d1 && 0.0f <= d2) {
+            if (d1 < *t) {
+                *hp = *p;
+                hp->y = mn->y;
+                *t = d1;
+                sVec4_29590 n = vu0Scale_29590(D_004FF150, -1.0f);
+                *nrm = n;
+            }
+            if (d2 < *t) {
+                *hp = *p;
+                hp->y = mx->y;
+                *t = d2;
+                *nrm = D_004FF150;
+            }
+        }
+    }
+    if (p->y >= mn->y && p->y <= mx->y && p->x >= mn->x && p->x <= mx->x) {
+        float d1 = (p->z - mn->z) + m;
+        float d2 = (mx->z - p->z) + m;
+        if (0.0f <= d1 && 0.0f <= d2) {
+            if (d1 < *t) {
+                *hp = *p;
+                hp->z = mn->z;
+                *t = d1;
+                sVec4_29590 n = vu0Scale_29590(D_004FF160, -1.0f);
+                *nrm = n;
+            }
+            if (d2 < *t) {
+                *hp = *p;
+                hp->z = mx->z;
+                *t = d2;
+                *nrm = D_004FF160;
+            }
+        }
+    }
+    return *t != 1e30f;
+}
+#endif
 

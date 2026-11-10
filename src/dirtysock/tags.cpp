@@ -212,7 +212,44 @@ extern "C" unsigned char* func_003EB8B8(char* record)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldDelete);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" unsigned char* cDirtysock_tag_TagFieldFind(char* record, char* name);
+
+extern "C" int cDirtysock_tag_TagFieldDelete(unsigned char* record, char* name)
+{
+    unsigned char* p = cDirtysock_tag_TagFieldFind((char*)record, name);
+    unsigned char* dst;
+    unsigned char* src;
+    if (p == 0) {
+        return -1;
+    }
+    dst = p;
+    while (dst != record && dst[-1] > ' ') {
+        dst--;
+    }
+    src = p;
+    while (*src >= ' ') {
+        src++;
+    }
+    while ((unsigned int)(*src - 1) < 0x1FU) {
+        src++;
+    }
+    int c = *src;
+    if (c != 0) {
+        do {
+            *dst = c;
+            src++;
+            c = *src;
+            dst++;
+        } while (c != 0);
+    }
+    *dst = 0;
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", func_003EB9E8);
@@ -530,7 +567,129 @@ extern "C" int cDirtysock_tag_TagFieldSetBinary(char* record, int len, char* nam
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetStructure);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// Tables are const (read-only): lets the scheduler hoist the table loads above the byte stores.
+extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
+extern const unsigned char kHexHi[] __asm__("D_00495FC0");
+extern const unsigned char kHexLo[] __asm__("D_004960C0");
+extern const unsigned char kSafe[] __asm__("D_004964C0");
+
+extern "C" int cDirtysock_tag_TagFieldSetStructure(char* record, int len, char* name, const char* buffer, int size, const char* tmpl)
+{
+    char temp[2560];
+    const char* buf = buffer;
+    const char* limit;
+    char* out;
+    int count;
+    unsigned int val;
+    int c;
+    const unsigned char* str;
+
+    val = 0;
+    if (size < 0) {
+        limit = buf + 65536;
+    } else {
+        limit = buf + size;
+    }
+    out = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
+    while (*tmpl != 0) {
+        char t;
+        if (*tmpl == '#') {
+            for (++tmpl; (*tmpl != 0) && (*tmpl++ != '='); ) {
+            }
+        }
+        c = (unsigned char)*tmpl;
+        for (count = 0; (unsigned int)(c - 48) < 10; c = (unsigned char)*tmpl) {
+            tmpl++;
+            count = count * 10 + (c & 15);
+        }
+        c = 0;
+        str = 0;
+        if (*tmpl == 'a') {
+            if (count != 0) {
+                buf += count;
+            } else {
+                buf += 1;
+            }
+        }
+        t = (char)*(unsigned char*)tmpl;
+        if (t == 'b') {
+            val = *(const unsigned char*)buf;
+            c = 2;
+            buf += 1;
+        }
+        if (t == 'w') {
+            val = *(const unsigned short*)buf;
+            c = 4;
+            buf += 2;
+        }
+        if (t == 'l') {
+            val = *(const unsigned int*)buf;
+            c = 8;
+            buf += 4;
+        }
+        if (t == 's') {
+            str = (const unsigned char*)buf;
+            buf += count;
+        }
+        if (limit < buf) {
+            break;
+        }
+        if (c > 0) {
+            char* p;
+            char* q;
+            if (val > 0xFFFF0000U) {
+                val = -val;
+                *out++ = '-';
+            }
+            p = out + c;
+            q = p;
+            *p = 0;
+            for (; val != 0; val >>= 4) {
+                *--q = kHexLo[val & 15];
+            }
+            if (!(out != q)) {
+                out = p;
+            } else {
+                while (*q != 0) {
+                    *out++ = *q++;
+                }
+                *out++ = ',';
+            }
+        }
+        if (str != 0) {
+            while (*str != 0) {
+                val = *str++;
+                if (!(kSafe[val] == 0)) {
+                    *out++ = val;
+                } else {
+                    *out++ = '%';
+                    *out++ = kHexHi[val];
+                    *out++ = kHexLo[val];
+                }
+            }
+            *out++ = ',';
+        }
+        ++tmpl;
+        if (*tmpl == '*') {
+            --tmpl;
+        }
+    }
+    if (out[-1] == ',') {
+        do {
+            out--;
+        } while (out[-1] == ',');
+        *out = 0;
+    } else {
+        *out = 0;
+    }
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+}
+#endif
 
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetCrypt);
 

@@ -215,7 +215,63 @@ extern "C" void func_00329B40(sSphereTreeNode* s, sSphereVec4* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_00329B90);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
+static inline sSphereVec4 mtxMulVec_9B90(sSphereVec4* m, sSphereVec4* v)
+{
+    sSphereVec4 r;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2         $vf8, %1\n"
+        "lqc2         $vf4, 0x0(%2)\n"
+        "lqc2         $vf5, 0x10(%2)\n"
+        "lqc2         $vf6, 0x20(%2)\n"
+        "lqc2         $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(*v), "r"(m)
+        : "memory");
+    return r;
+}
+
+struct sScale_9B90 {
+    float x, y, z, w;
+    sScale_9B90(float s) { x = s; y = s; z = s; w = 1.0f; }
+};
+
+struct sProd_9B90 : sSphereVec4 {
+    sProd_9B90(const sSphereVec4& a, const sScale_9B90& b)
+    {
+        x = a.x * b.x;
+        y = a.y * b.y;
+        z = a.z * b.z;
+        w = a.w * b.w;
+    }
+};
+
+// PORT: callers declare the matrix as sSphereMtx*.
+extern "C" void func_00329B90_impl(sSphereTreeNode* s, sSphereVec4* m, float scale) __asm__("func_00329B90");
+
+extern "C" void func_00329B90_impl(sSphereTreeNode* s, sSphereVec4* m, float scale)
+{
+    sScale_9B90 sc(scale);
+    s->center = sProd_9B90(mtxMulVec_9B90(m, &s->center), sc);
+    s->radius = s->radius * scale;
+    for (int i = 0; i < s->count; i++) {
+        s->children[i].pos = sProd_9B90(mtxMulVec_9B90(m, &s->children[i].pos), sc);
+        s->children[i].radius = s->children[i].radius * scale;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_00329CE0);
@@ -340,7 +396,142 @@ extern "C" void func_00329DC8(void* tree, sVec4_2F650* mnp, sVec4_2F650* mxp)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_00329F98);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sElem_9F98 {
+    sSphereVec4 pos;    // 0x00
+    float r;            // 0x10
+    char pad_0x14[0xC];
+};
+
+struct sNode_9F98 {
+    char pad_0x00[0x10];
+    sSphereVec4 pos;    // 0x10
+    float r;            // 0x20
+    char pad_0x24[0x8];
+    int count;          // 0x2C
+    sElem_9F98 e[1];    // 0x30
+};
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sSphereVec4 Sub_9F98(const sSphereVec4& a, const sSphereVec4& b)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sSphereVec4 Scale_9F98(const sSphereVec4& v, float s)
+{
+    sSphereVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_9F98(const sSphereVec4& a, const sSphereVec4& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v / |v|).
+static inline sSphereVec4 Normalize_9F98(const sSphereVec4& v)
+{
+    sSphereVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float Sqrt_9F98(float v)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(v));
+    return r;
+}
+
+extern "C" int func_00329F98(sNode_9F98* a, sNode_9F98* b, sSphereVec4* outA, sSphereVec4* outB)
+{
+    sSphereVec4 d;
+    float sum;
+    float ss;
+    float dd;
+    sum = b->r + a->r;
+    d = Sub_9F98(b->pos, a->pos);
+    ss = sum * sum;
+    dd = Dot_9F98(d, d);
+    if (ss < dd)
+        return 0;
+    for (int i = 0; i < a->count; i++) {
+        sum = b->r + a->e[i].r;
+        d = Sub_9F98(b->pos, a->e[i].pos);
+        ss = sum * sum;
+        dd = Dot_9F98(d, d);
+        if (ss < dd)
+            continue;
+        for (int j = 0; j < b->count; j++) {
+            sum = b->e[j].r + a->e[i].r;
+            d = Sub_9F98(b->e[j].pos, a->e[i].pos);
+            ss = sum * sum;
+            dd = Dot_9F98(d, d);
+            if (!(ss < dd)) {
+                sSphereVec4 n = Normalize_9F98(d);
+                float f = sum - Sqrt_9F98(dd);
+                *outA = Scale_9F98(n, f);
+                *outB = Sub_9F98(a->e[i].pos, Scale_9F98(n, a->e[i].r - f));
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032A1C0);
@@ -852,7 +1043,272 @@ extern "C" int func_0032B6A8(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSp
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032B6E0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sCell_B6E0 {
+    sSphereVec4 n[2];   // 0x00 triangle normals (1e10 = not computed, 1e11 = degenerate)
+    sSphereVec4 lo;     // 0x20 bounds (lo.x 1e10 = not computed)
+    sSphereVec4 hi;     // 0x30
+};
+
+struct sPatch_B6E0 {
+    char pad_0x00[0x10];
+    sSphereVec4 verts[10][10];  // 0x0010
+    sCell_B6E0 fine[9][9];      // 0x0650
+    sCell_B6E0 coarse[3][3];    // 0x1A90
+};
+
+struct sVE_B6E0 {
+    short delta;
+    short pad;
+    union {
+        int (*test)(void* self, void* a, void* b, void* c, sSphereVec4* n, void* d, void* e, void* f);
+        void (*uv)(void* self, void* obj, float* u, float* v, void* d, void* e, void* f);
+    };
+};
+
+struct sQuery_B6E0 {
+    int type;           // 0x00
+    int pad_0x04;
+    int facing;         // 0x08
+    int pad_0x0C;
+    sSphereVec4 dir;    // 0x10
+    sSphereVec4 hi;     // 0x20
+    sSphereVec4 lo;     // 0x30
+    char pad_0x40[0x10];
+    sVE_B6E0* vt;       // 0x50
+};
+
+struct sHitCache_B6E0 {
+    void* obj;              // 0x00
+    unsigned short u;       // 0x04
+    unsigned short v;       // 0x06
+    int tri;                // 0x08
+    int type;               // 0x0C
+};
+
+// PORT: PS2-only VU0 inline asm (bounds of four points).
+static inline void Bounds_B6E0(sCell_B6E0* c, const sSphereVec4& a, const sSphereVec4& b,
+                               const sSphereVec4& d, const sSphereVec4& e)
+{
+    __asm__(
+        "lqc2      $vf2, %2\n"
+        "lqc2      $vf3, %3\n"
+        "lqc2      $vf4, %4\n"
+        "lqc2      $vf5, %5\n"
+        "vmax.xyzw $vf6, $vf2, $vf3\n"
+        "vmini.xyzw $vf7, $vf2, $vf3\n"
+        "vmax.xyzw $vf8, $vf4, $vf5\n"
+        "vmini.xyzw $vf9, $vf4, $vf5\n"
+        "vmax.xyzw $vf6, $vf6, $vf8\n"
+        "vmini.xyzw $vf7, $vf7, $vf9\n"
+        "sqc2      $vf6, %0\n"
+        "sqc2      $vf7, %1\n"
+        : "=m"(c->hi), "=m"(c->lo)
+        : "m"(a), "m"(b), "m"(d), "m"(e));
+}
+
+// PORT: PS2-only VU0 inline asm (unit normal of triangle a b c; returns 1/|n|).
+static inline float TriNormal_B6E0(sSphereVec4& n, const sSphereVec4& a, const sSphereVec4& b,
+                                  const sSphereVec4& c)
+{
+    union { int i; float f; } inv;
+    __asm__(
+        "lqc2      $vf2, %2\n"
+        "lqc2      $vf3, %3\n"
+        "lqc2      $vf4, %4\n"
+        "vsub.xyzw $vf5, $vf2, $vf3\n"
+        "vsub.xyzw $vf6, $vf3, $vf4\n"
+        "vopmula.xyz ACC, $vf5, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf5\n"
+        "vsub.w    $vf7, $vf7, $vf7\n"
+        "vaddw.x   $vf8, $vf0, $vf0w\n"
+        "vmul.xyzw $vf9, $vf7, $vf7\n"
+        "vadday.x  ACC, $vf9, $vf9y\n"
+        "vmaddaz.x ACC, $vf8, $vf9z\n"
+        "vmaddw.x  $vf9, $vf8, $vf9w\n"
+        "vrsqrt    Q, $vf0w, $vf9x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf7, Q\n"
+        "vaddw.x   $vf10, $vf0, $vf0w\n"
+        "vmulq.xyzw $vf10, $vf10, Q\n"
+        "qmfc2.ni  %1, $vf10\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(n), "=r"(inv.i)
+        : "m"(a), "m"(b), "m"(c));
+    return inv.f;
+}
+
+// does the cell's bounding box overlap the query box?
+static inline int Overlap_B6E0(const sCell_B6E0* c, const sQuery_B6E0* q)
+{
+    return q->hi.x > c->lo.x && q->lo.x < c->hi.x
+        && q->hi.y > c->lo.y && q->lo.y < c->hi.y
+        && q->hi.z > c->lo.z && q->lo.z < c->hi.z;
+}
+
+// the cell's k-th triangle normal, built on first use (99999997952 marks a degenerate triangle)
+static inline sSphereVec4& CellNormal_B6E0(sCell_B6E0* cell, int k, const sSphereVec4& a,
+                                           const sSphereVec4& b, const sSphereVec4& c)
+{
+    if (cell->n[k].x == 10000000000.0f) {
+        if (TriNormal_B6E0(cell->n[k], a, b, c) > 10.0f)
+            cell->n[k].x = 99999997952.0f;
+    }
+    return cell->n[k];
+}
+
+// query against a 9x9-cell terrain patch (coarse 3x3 cells for type 0): tries the cached cell first,
+// then every cell whose bounds overlap the query box; returns the hit cell's uv in uvOut
+extern "C" int func_0032B6E0_typed(sQuery_B6E0* q, void* obj, sPatch_B6E0* patch, void* a3, void* a4,
+                                   void* a5, float* uvOut, sHitCache_B6E0* cache) __asm__("func_0032B6E0");
+extern "C" int func_0032B6E0_typed(sQuery_B6E0* q, void* obj, sPatch_B6E0* patch, void* a3, void* a4,
+                                   void* a5, float* uvOut, sHitCache_B6E0* cache)
+{
+    // the cached cell's row is scaled by its own step variable: the binary keeps it in a
+    // second register next to step and multiplies only the row index by it
+    int rowStep;
+    int step;
+    int n;
+    int skip;
+    float scale;
+    float half;
+    sCell_B6E0* cell;
+    if (q->type == 0) {
+        step = 3;
+        rowStep = 3;
+        skip = 21;
+        n = 3;
+        scale = 1.0f / 3.0f;
+        half = 1.0f / 6.0f;
+        cell = patch->coarse[0];
+    } else {
+        step = 1;
+        rowStep = 1;
+        skip = 1;
+        n = 9;
+        scale = 1.0f / 9.0f;
+        half = 1.0f / 18.0f;
+        cell = patch->fine[0];
+    }
+    if (cache != 0 && cache->obj == obj && cache->type == q->type) {
+        sCell_B6E0* c;
+        if (cache->type == 0)
+            c = &patch->coarse[cache->u][cache->v];
+        else
+            c = &patch->fine[cache->u][cache->v];
+        sSphereVec4* p00 = &patch->verts[cache->u * rowStep][cache->v * step];
+        sSphereVec4* p10 = p00 + step * 10;
+        sSphereVec4* p01 = p00 + step;
+        sSphereVec4* p11 = p10 + step;
+        if (c->lo.x == 10000000000.0f)
+            Bounds_B6E0(c, *p00, *p10, *p01, *p11);
+        if (cache->tri) {
+            sSphereVec4& n0 = CellNormal_B6E0(c, 0, *p11, *p10, *p01);
+            if (n0.x != 99999997952.0f && (!q->facing || Dot_A1C0(n0, q->dir) <= 0.8f)) {
+                sVE_B6E0* vt = q->vt;
+                if (vt[4].test((char*)q + vt[4].delta, p11, p10, p01, &n0, a3, a4, a5)) {
+                    float s = cache->u * scale + half;
+                    float t = cache->v * scale + half;
+                    if (q->type == 2) {
+                        sVE_B6E0* vt = q->vt;
+                        vt[8].uv((char*)q + vt[8].delta, obj, &s, &t, a3, a4, a5);
+                    }
+                    uvOut[0] = s;
+                    uvOut[1] = t;
+                    return 1;
+                }
+            }
+        } else {
+            sSphereVec4& n1 = CellNormal_B6E0(c, 1, *p01, *p10, *p00);
+            if (n1.x != 99999997952.0f && (!q->facing || Dot_A1C0(n1, q->dir) <= 0.8f)) {
+                sVE_B6E0* vt = q->vt;
+                if (vt[4].test((char*)q + vt[4].delta, p01, p10, p00, &n1, a3, a4, a5)) {
+                    float s = cache->u * scale + half;
+                    float t = cache->v * scale + half;
+                    if (q->type == 2) {
+                        sVE_B6E0* vt = q->vt;
+                        vt[8].uv((char*)q + vt[8].delta, obj, &s, &t, a3, a4, a5);
+                    }
+                    uvOut[0] = s;
+                    uvOut[1] = t;
+                    return 1;
+                }
+            }
+        }
+        cache->obj = 0;
+        cache->u = 0;
+        cache->v = 0;
+        cache->tri = 0;
+        cache->type = 0;
+    }
+    sSphereVec4* p00 = patch->verts[0];
+    for (int u = 0; u < n; u++) {
+        sSphereVec4* p10 = p00 + step * 10;
+        sSphereVec4* p01 = p00 + step;
+        sSphereVec4* p11 = p10 + step;
+        for (int v = 0; v < n; v++) {
+            if (cell->lo.x == 10000000000.0f)
+                Bounds_B6E0(cell, *p00, *p10, *p01, *p11);
+            if (Overlap_B6E0(cell, q)) {
+                sSphereVec4& n0 = CellNormal_B6E0(cell, 0, *p11, *p10, *p01);
+                if (n0.x != 99999997952.0f && (!q->facing || Dot_A1C0(n0, q->dir) <= 0.8f)) {
+                    sVE_B6E0* vt = q->vt;
+                    if (vt[4].test((char*)q + vt[4].delta, p11, p10, p01, &n0, a3, a4, a5)) {
+                        float s = u * scale + half;
+                        float t = v * scale + half;
+                        if (q->type == 2) {
+                            sVE_B6E0* vt = q->vt;
+                            vt[8].uv((char*)q + vt[8].delta, obj, &s, &t, a3, a4, a5);
+                        }
+                        uvOut[0] = s;
+                        uvOut[1] = t;
+                        if (cache) {
+                            cache->obj = obj;
+                            cache->u = u;
+                            cache->v = v;
+                            cache->tri = 1;
+                            cache->type = q->type;
+                        }
+                        return 1;
+                    }
+                }
+                sSphereVec4& n1 = CellNormal_B6E0(cell, 1, *p01, *p10, *p00);
+                if (n1.x != 99999997952.0f && (!q->facing || Dot_A1C0(n1, q->dir) <= 0.8f)) {
+                    sVE_B6E0* vt = q->vt;
+                    if (vt[4].test((char*)q + vt[4].delta, p01, p10, p00, &n1, a3, a4, a5)) {
+                        float s = u * scale + half;
+                        float t = v * scale + half;
+                        if (q->type == 2) {
+                            sVE_B6E0* vt = q->vt;
+                            vt[8].uv((char*)q + vt[8].delta, obj, &s, &t, a3, a4, a5);
+                        }
+                        uvOut[0] = s;
+                        uvOut[1] = t;
+                        if (cache) {
+                            cache->obj = obj;
+                            cache->u = u;
+                            cache->v = v;
+                            cache->tri = 0;
+                            cache->type = q->type;
+                        }
+                        return 1;
+                    }
+                }
+            }
+            p00 += step;
+            p10 += step;
+            p01 += step;
+            p11 += step;
+            cell++;
+        }
+        p00 += skip;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C0F8);
@@ -1154,7 +1610,74 @@ extern "C" void func_0032C630(void* self, void* v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C648);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
+static inline sSphereVec4 mtxMulVec_C648(sSphereVec4* m, const sSphereVec4& v)
+{
+    sSphereVec4 r;
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2         $vf8, %1\n"
+        "lqc2         $vf4, 0x0(%2)\n"
+        "lqc2         $vf5, 0x10(%2)\n"
+        "lqc2         $vf6, 0x20(%2)\n"
+        "lqc2         $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        ".set pop\n"
+        : "=m"(r)
+        : "m"(v), "r"(m)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sSphereVec4 scale_C648(const sSphereVec4& v, float s)
+{
+    sSphereVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+struct sVec3_C648 {
+    float x, y, z;
+    sVec3_C648(float a, float b, float c) { x = a; y = b; z = c; }
+};
+
+struct sVec4_C648 : sSphereVec4 {
+    sVec4_C648(const sVec3_C648& v, const float& ww) { x = v.x; y = v.y; z = v.z; w = ww; }
+};
+
+extern sSphereVec4 D_004FF640[8];
+
+extern "C" void func_0032C648(void* self, sSphereVec4* m, float scale)
+{
+    sSphereVec4* pos = (sSphereVec4*)self;
+    sSphereVec4* neg = (sSphereVec4*)((char*)self + 0x70);
+    for (int i = 0; i < 4; i++) {
+        pos[i] = mtxMulVec_C648(m, scale_C648(D_004FF640[i], scale));
+        neg[-i] = scale_C648(pos[i], -1.0f);
+    }
+    float* n = *(float**)((char*)self + 0x98);
+    *(sSphereVec4*)((char*)self + 0x80) = mtxMulVec_C648(m, sVec4_C648(sVec3_C648(n[5] * scale, n[6] * scale, n[7] * scale), 1.0f));
+    *(float*)((char*)self + 0x90) = scale;
+}
+#endif
 
 INCLUDE_ASM("intersect/riderspheretree", func_0032C770);
 
@@ -2478,7 +3001,37 @@ extern "C" int func_0032E4D0(void* self, sSphereVec4* p, sSphereVec4* b, sSphere
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032E5E8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sVE_E5E8 {
+    short delta;
+    short pad;
+    int (*fn)(void* self, void* a, void* b, void* c, sSphereVec4* v, void* d, void* e, void* f);
+};
+
+struct sCapsuleV_E5E8 {
+    char pad_0x00[0x50];
+    sVE_E5E8* vt; // 0x50
+    char pad_0x54[0x1C];
+    sSphereVec4 dir; // 0x70
+};
+
+extern "C" int func_0032E5E8(sCapsuleV_E5E8* self, void* a, void* b, void* c, sSphereVec4* v, void* d, void* e, void* f)
+{
+    float dp = vu0Dot_E4D0(self->dir, *v);
+    sVE_E5E8* vt;
+    if (dp < 0.0f) {
+        vt = self->vt;
+        char* t = (char*)self + vt[4].delta;
+        sSphereVec4 n = vu0Scale_E4D0(*v, -1.0f);
+        return vt[4].fn(t, a, b, c, &n, d, e, f);
+    }
+    vt = self->vt;
+    return vt[4].fn((char*)self + vt[4].delta, a, b, c, v, d, e, f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032E688__FPv);
@@ -3382,7 +3935,30 @@ extern "C" float func_003300F8(sSphereVec4* a, sSphereVec4* b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_00330128);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: callers use this as a by-value struct return (hidden out pointer in $4).
+sSphereVec4 func_00330128_def(sSphereVec4* a, sSphereVec4* b, sSphereVec4* p) __asm__("func_00330128");
+
+sSphereVec4 func_00330128_def(sSphereVec4* a, sSphereVec4* b, sSphereVec4* p)
+{
+    sSphereVec4 d = Sub_CDB0(*p, *a);
+    sSphereVec4 e = Sub_CDB0(*b, *a);
+    sSphereVec4 n = Normalize_CDB0(e);
+    float t = Dot_CDB0(n, d);
+    float len = sphereLength_32FDB0(e);
+    if (t <= 0.0f) {
+        return *a;
+    } else if (len <= t) {
+        return *b;
+    } else {
+        sSphereVec4 r = Add_CDB0(*a, Scale_CDB0(n, t));
+        return r;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/riderspheretree", func_00330250);

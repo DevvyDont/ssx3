@@ -88,7 +88,90 @@ extern "C" void cFont_linkFont(void* vself, void* vdata, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_003919E8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+void cMemMan_free(void*);
+
+class sFontGfx_19E8 {
+public:
+    char pad_0x0[0x10D8];
+    virtual void v1(int);
+    virtual void v2(int);
+    virtual void v3(int);
+    virtual void v4(int);
+    virtual void v5(int);
+    virtual void v6(int);
+    virtual void v7(int);
+    virtual void v8(int);
+    virtual void v9(int);
+    virtual void v10(int);
+    virtual void v11(int);
+    virtual void v12(int);
+    virtual void v13(int);
+    virtual void v14(int);
+    virtual void v15(int);
+    virtual void v16(int);
+    virtual void v17(int);
+    virtual void v18(int);
+    virtual void v19(int);
+    virtual void v20(int);
+    virtual void v21(int);
+    virtual void v22(int);
+    virtual void v23(int);
+    virtual void v24(int);
+    virtual void v25(int);
+    virtual void v26(int);
+    virtual void v27(int);
+    virtual void v28(int);
+    virtual void v29(int);
+    virtual void v30(int);
+    virtual void v31(int);
+    virtual void v32(int);
+    virtual void v33(int);
+    virtual void v34(int);
+    virtual void v35(int);
+    virtual void v36(int);
+    virtual void v37(int);
+    virtual void v38(int);
+    virtual void v39(int);
+    virtual void v40(int);
+    virtual void v41(int);
+    virtual void v42(int);
+    virtual void v43(int);
+    virtual void v44(int);
+    virtual void v45(int);
+    virtual void v46(int);
+    virtual void v47(int);
+    virtual void v48(int);
+    virtual void v49(int);
+    virtual void v50(int);
+};
+
+extern sFontGfx_19E8* D_004A5B80_19E8 __asm__("D_004A5B80");
+
+struct sFont_19E8 {
+    int f0;
+    void* pix;          // 0x4
+    char pad_0x8[0x58];
+    int handle;         // 0x60
+};
+
+extern "C" void func_003919E8(sFont_19E8* self)
+{
+    if (self->pix != 0) {
+        cMemMan_free(self->pix);
+    }
+    self->pix = 0;
+    self->f0 = 0;
+    sFontGfx_19E8* g = D_004A5B80_19E8;
+    if (self->handle >= 0) {
+        g->v50(self->handle);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", cFont_downloadTexture);
@@ -982,7 +1065,69 @@ extern "C" void func_00392E60(void *arg0, int arg1, int arg2, int arg3, int arg4
     *(int *)arg0 = cur + 0x10;
 }
 #endif
+//100%
 INCLUDE_ASM("render/font", func_00392E98);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sFontPkt_2E98 {
+    char* cur;       // 0x00
+    int pad04;
+    char* start;     // 0x08
+    int pad0C[3];
+    int w;           // 0x18
+    int h;           // 0x1C
+    int mode;        // 0x20
+    int flagY;       // 0x24
+    int flagX;       // 0x28
+    int done;        // 0x2C
+};
+
+static inline long packWord_2E98(int y, int n, int x, int mode, int mask)
+{
+    return (long)(y | ((n << 16) | (x ? mask : 0)) | ((mode | 0x60) << 24)) << 32;
+}
+
+extern "C" void func_00392E98(sFontPkt_2E98* self, int a1)
+{
+    int n;
+    int t = a1;
+    if (t < 0) {
+        n = self->cur - self->start - 16;
+        switch (self->mode) {
+        case 8:
+            n /= 12;
+            break;
+        case 9:
+            n /= 6;
+            break;
+        case 10:
+            n /= 3;
+            break;
+        case 12:
+            n /= 16;
+            break;
+        case 4: case 13:
+            n /= 8;
+            break;
+        case 0: case 5: case 14:
+            n /= 4;
+            break;
+        case 1: case 6: case 15:
+            n /= 2;
+            break;
+        }
+        // PORT: g++ `<?` / `>?` (min/max) operators, removed in GCC 4.3.
+        n = n / (self->w <? self->h) * (self->w >? self->h);
+    } else {
+        n = t;
+    }
+    n &= 0xFF;
+    self->done = 0;
+    *(long*)self->start = (long)(self->w | (self->h << 8) | 0x1000000) << 32;
+    long* q = (long*)(self->start + 8);
+    *q = packWord_2E98(self->flagY, n, self->flagX, self->mode, 0x8000);
+}
+#endif
 //100%
 INCLUDE_ASM("render/font", func_00393008);
 #ifdef SKIP_ASM
@@ -2491,7 +2636,50 @@ extern "C" sGlyphEntry* func_00394ED0(sGlyphCache* self, sGlyphKey* key, unsigne
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00395000);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sNode5000 {
+    int k0;
+    int k4;
+    int k8;
+    int padC[2];
+    int busy;
+    int pad18;
+    sNode5000* next;
+};
+
+struct sCache5000 {
+    char pad0[0x678A0];
+    sNode5000* buckets[256];
+};
+
+extern "C" sNode5000* func_00395000(sCache5000* self, int a, int b, unsigned char hash, int c)
+{
+    sNode5000** pp = &self->buckets[hash];
+    while (*pp != 0) {
+        sNode5000* e;
+        int hit = 0;
+        if ((*pp)->busy == 0) {
+            int t = (*pp)->k4 == b && (*pp)->k8 == c && (*pp)->k0 == a;
+            if (t) hit = 1;
+        }
+        e = *pp;
+        if (hit) {
+            if ((*pp) == self->buckets[hash]) {
+                return e;
+            }
+            *pp = e->next;
+            e->next = self->buckets[hash];
+            self->buckets[hash] = e;
+            return e;
+        }
+        pp = &e->next;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_003950C0);
@@ -4835,7 +5023,60 @@ extern "C" void func_00396B40(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/font", func_00396C30);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern char D_80[];
+extern char D_70[];
+
+struct sMtx_6C30 {
+    float m[16];
+};
+
+struct sMtxList_6C30 {
+    int count;
+    int* index;
+};
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void vu0CopyMtx_6C30(void* dst, const void* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// Emits a DMA chain that uploads count 4x4 matrices (selected by index) and then a closing tag.
+extern "C" void func_00396C30(void* self, sMtxList_6C30* list, sMtx_6C30* mats, unsigned long** cur)
+{
+    int n = list->count;
+    int* idx = list->index;
+    unsigned long* p = *cur;
+    p[0] = (n << 2) | 0x10000002;
+    p[2] = (unsigned long)0x8000 << 45;
+    p[3] = ((unsigned long)(unsigned int)((n << 18) | 0x6C000011) << 32) | 0x1000101;
+    p[1] = 0;
+    p += 4;
+    for (int i = 0; i < n; i++) {
+        vu0CopyMtx_6C30(p, &mats[idx[i]]);
+        p += 8;
+    }
+    p[0] = ((unsigned long)n << 32) | 0x600103FF;
+    p[1] = (unsigned long)(((unsigned int)D_80 >> 3) | 0x14000000) | ((unsigned long)(((unsigned int)D_70 >> 3) | 0x14000000) << 32);
+    p += 2;
+    *cur = p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/font", func_00396D30);

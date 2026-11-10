@@ -305,7 +305,106 @@ unsigned short *func_003DC068(unsigned short *dst, int val, int prec) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DC148);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern unsigned short *f068_C148(unsigned short *, double, int) __asm__("func_003DC068");
+extern unsigned short *f038_C148(unsigned short *, int, int, unsigned short *) __asm__("func_003DC038");
+extern unsigned short *fBFD8_C148(unsigned short *, unsigned int, int, unsigned short *) __asm__("func_003DBFD8");
+extern int f608_C148(double) __asm__("func_00412608");
+extern unsigned int f6A0_C148(double) __asm__("func_004126A0");
+extern int f500_C148(double, double) __asm__("func_00412500");
+extern int ulen_C148(unsigned short *) __asm__("USTR_length");
+extern void ucopy_C148(unsigned short *, unsigned short *) __asm__("USTR_copy");
+
+/* fill char ch in front of the text at p until it is width chars long */
+#define PAD_LEFT_C148(p, ch, width) \
+    { \
+        unsigned short c_ = (ch); \
+        int n_ = ulen_C148(p); \
+        if (n_ < (width)) { \
+            n_ = (width) - n_; \
+            do { \
+                *--(p) = c_; \
+            } while (--n_ != 0); \
+        } \
+    }
+
+/* append char ch at q until the length n reaches width; n becomes width */
+#define PAD_RIGHT_C148(q, ch, n, width) \
+    { \
+        unsigned short c_ = (ch); \
+        if ((n) < (width)) { \
+            (n) = (width) - (n); \
+            do { \
+                *(q)++ = c_; \
+            } while (--(n) != 0); \
+            (n) = (width); \
+        } \
+    }
+
+int func_003DC148_impl(unsigned short **pp, double val, int base, unsigned int flags, int width, int prec, unsigned short *digits) __asm__("func_003DC148");
+int func_003DC148_impl(unsigned short **pp, double val, int base, unsigned int flags, int width, int prec, unsigned short *digits) {
+    unsigned short *out = *pp;
+    unsigned short buf[128];
+    unsigned short *p = &buf[127];
+    int len;
+    *p = 0;
+    if (flags & 0x40) {
+        // the 0x80 / 0x100 / default arms are identical in the release build, but the binary keeps the
+        // two tests and three separate call copies (the prototype likely differed in a debug-only detail)
+        if (flags & 0x80) {
+            p = f068_C148(p, val, prec);
+        } else if (flags & 0x100) {
+            p = f068_C148(p, val, prec);
+        } else {
+            p = f068_C148(p, val, prec);
+        }
+    } else if (flags & 0x20) {
+        p = fBFD8_C148(p, f6A0_C148(val), base, digits);
+    } else {
+        p = f038_C148(p, f608_C148(val), base, digits);
+    }
+    if ((flags & 0x18) == 8) {
+        PAD_LEFT_C148(p, 0x30, width);
+    }
+    if (base == 10 && !(flags & 0x20)) {
+        if (f500_C148(val, 0.0) < 0) {
+            *--p = 0x2D;
+        }
+        if (f500_C148(val, 0.0) > 0 && (flags & 1)) {
+            *--p = 0x2B;
+        }
+        if (f500_C148(val, 0.0) == 0 && (flags & 1)) {
+            *--p = 0x20;
+        }
+        if (f500_C148(val, 0.0) >= 0 && (flags & 5) == 4) {
+            *--p = 0x20;
+        }
+    }
+    if (base == 8 && (flags & 2)) {
+        *--p = 0x30;
+    }
+    if (base == 16 && (flags & 2)) {
+        *--p = 0x78;
+        *--p = 0x30;
+    }
+    if (!(flags & 0x10)) {
+        PAD_LEFT_C148(p, (flags & 8) ? 0x30 : 0x20, width);
+    }
+    len = ulen_C148(p);
+    ucopy_C148(out, p);
+    out += len;
+    if (flags & 0x10) {
+        PAD_RIGHT_C148(out, 0x20, len, width);
+    }
+    *pp = out;
+    return len;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", USTR_vsprintf);
@@ -5711,7 +5810,72 @@ void func_003E6428(int a, int b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6448);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+void func_003E6448_memset(char *p, int c, int n) __asm__("func_003E6448");
+void func_003E6448_memset(char *p, int c, int n) {
+    if (n > 0 && ((int)p & 1)) {
+        *p = c;
+        n--;
+        p++;
+    }
+    if (n >= 2 && ((int)p & 2)) {
+        *(short *)p = c;
+        n -= 2;
+        p += 2;
+    }
+    if (n >= 4 && ((int)p & 4)) {
+        *(int *)p = c;
+        n -= 4;
+        p += 4;
+    }
+    if (n >= 64) {
+        long d;
+        int *q = (int *)&d;
+        q[1] = c;
+        q[0] = c;
+        do {
+            ((long *)p)[0] = d;
+            n -= 64;
+            ((long *)p)[1] = d;
+            ((long *)p)[2] = d;
+            ((long *)p)[3] = d;
+            ((long *)p)[4] = d;
+            ((long *)p)[5] = d;
+            ((long *)p)[6] = d;
+            ((long *)p)[7] = d;
+            p += 64;
+        } while (n >= 64);
+    }
+    if (n >= 16) {
+        do {
+            ((int *)p)[0] = c;
+            n -= 16;
+            ((int *)p)[1] = c;
+            ((int *)p)[2] = c;
+            ((int *)p)[3] = c;
+            p += 16;
+        } while (n >= 16);
+    }
+    while (n >= 4) {
+        *(int *)p = c;
+        n -= 4;
+        p += 4;
+    }
+    if (n >= 2) {
+        *(short *)p = c;
+        n -= 2;
+        p += 2;
+    }
+    if (n > 0) {
+        *p = c;
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6574);
 
@@ -5810,7 +5974,58 @@ int func_003E6A70(char *arg0, short **arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6B10);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003F4EA0(int, int *);
+extern int func_003F4DE8(void);
+extern int func_003F4C98_6B10(int *, int, int) __asm__("func_003F4C98");
+extern int func_003F4C68_6B10(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
+extern void *func_0041605C_6B10(short *, int, int) __asm__("func_0041605C");
+extern int D_0051EEB8_6B10[] __asm__("D_0051EEB8");
+
+int func_003E6B10_impl(char *self, short *out, int n) __asm__("func_003E6B10");
+int func_003E6B10_impl(char *self, short *out, int n) {
+    int loc;
+    int ret = 0;
+    int h;
+
+    if (*(int *)(self + 0x164) < 0) {
+        h = func_003F4EA0(*(int *)(self + 0x16C), &loc);
+        if (h >= 0) {
+            if (h != *(int *)(self + 0x15C)) {
+                *(int *)(self + 0x160) = 0x10;
+                *(int *)(self + 0x15C) = h;
+                *(int *)(self + 0x164) = loc + 0x10;
+            }
+        }
+    }
+    if (*(int *)(self + 0x160) < *(int *)(self + 0x164)) {
+        if (n == 1) {
+            func_003E6A70(self, &out);
+            ret = *out;
+            *(int *)(self + 0x160) += ret;
+        } else {
+            int rem = *(int *)(self + 0x164) - *(int *)(self + 0x160);
+            if (n >= rem) {
+                ret = rem;
+                func_0041605C_6B10(out, ((*(int *)(self + 0x16C) + *(int *)(self + 0x160)) & 0x0FFFFFFF) | 0x20000000, ret);
+                *(int *)(self + 0x160) = *(int *)(self + 0x164);
+            }
+        }
+    }
+    if (*(int *)(self + 0x160) == *(int *)(self + 0x164)) {
+        *(int *)(self + 0x160) = 0;
+        *(int *)(self + 0x164) = -1;
+        *(int *)(self + 0x170) = func_003F4DE8();
+        func_003F4C98_6B10(D_0051EEB8_6B10, 0x676D6C6B, 0x72656376);
+        func_003F4C68_6B10(D_0051EEB8_6B10, 1, *(int *)self, *(int *)(self + 0x16C), 0, 0, 0, 0, 0, 0);
+    }
+    return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6C80);
@@ -7097,9 +7312,138 @@ void func_003E8FD0(void *out, int *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E9160);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern void *func_002591E8_9160(int) __asm__("func_002591E8");
+extern void func_00259210_9160(void *) __asm__("func_00259210");
+extern void func_00416210_9160(void *, int, int) __asm__("func_00416210");
+extern int *func_003EE560_9160(int, int) __asm__("func_003EE560");
+extern int func_003EE550_9160(int) __asm__("func_003EE550");
+extern int func_003EED08_9160(int, void *) __asm__("func_003EED08");
+extern void *func_003EE480_9160(int, int) __asm__("func_003EE480");
+extern char D_004A48F8_9160[] __asm__("D_004A48F8") __attribute__((aligned(8)));
 
+int func_003E9160(char *self, int limit) {
+    int b = *(int *)(self + 0x33C);
+    int a = *(int *)(self + 0x338);
+    int k, sum, res;
+    short *hist;
+    short *p;
+    int *e;
+    if (a == 0 || b == 0) {
+        return -1;
+    }
+    k = 0;
+    hist = (short *)func_002591E8_9160(0x4000);
+    func_00416210_9160(hist, 0, 0x4000);
+    while ((e = func_003EE560_9160(b, k)) != 0) {
+        if ((unsigned)(e[0] - 1) >= 0x1FFF) {
+            e[0] = 500;
+            __builtin_memcpy(e + 2, D_004A48F8_9160, 6);
+        }
+        k++;
+        hist[e[0]]++;
+    }
+    sum = 1;
+    k = 0x1FFF;
+    p = hist + 0x1FFF;
+    do {
+        res = *p;
+        *p = sum;
+        sum += res;
+        if (sum > limit) {
+            int cnt = func_003EE550_9160(b);
+            if (cnt >= sum) {
+                int i = 0;
+                while ((e = func_003EE560_9160(b, i)) != 0) {
+                    if (e[0] <= k) {
+                        e[0] = 0;
+                    }
+                    i++;
+                }
+            }
+            break;
+        }
+        k--;
+        p--;
+    } while (k >= 0);
+    res = 0;
+    k = 0;
+    while ((e = func_003EE560_9160(b, k)) != 0) {
+        if (e[0] > 0) {
+            res++;
+            e[1] = hist[e[0]];
+        }
+        k++;
+    }
+    k = 0;
+    while ((e = func_003EE560_9160(b, k)) != 0) {
+        if (e[0] == 0) {
+            func_00259210_9160(func_003EE480_9160(b, func_003EED08_9160(a, e + 2)));
+        } else {
+            k++;
+        }
+    }
+    func_00259210_9160(hist);
+    return res;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E9378);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct N_9378 { int f0; int f4; unsigned int f8; int fC; int f10; int f14; int f18; char name[1]; };
+extern char D_004A4888_9378[] __asm__("D_004A4888");
+extern int func_003EE620_9378(int) __asm__("func_003EE620");
+extern int func_003EE600(int, int);
+extern int func_003EE558_9378(int) __asm__("func_003EE558");
+extern struct N_9378 *func_003EE560_9378(int, int) __asm__("func_003EE560");
+extern int strlen(const char *);
+extern int func_00416B18(const char *, const char *, int);
+
+int func_003E9378_impl(char *self, int limit, unsigned int mask, unsigned int val, char *name, int def) __asm__("func_003E9378");
+int func_003E9378_impl(char *self, int limit, unsigned int mask, unsigned int val, char *name, int def) {
+    int i;
+    int best = -1;
+    int minv = 999;
+    int mini = def;
+
+    if (name == 0) {
+        name = D_004A4888_9378;
+    }
+    if (*(int *)(self + 0x310) != 0) {
+    i = 0;
+    func_003EE600(*(int *)(self + 0x314), func_003EE620_9378(*(int *)(self + 0x314)));
+    for (; i < func_003EE558_9378(*(int *)(self + 0x314)); i++) {
+        struct N_9378 *n = func_003EE560_9378(*(int *)(self + 0x314), i);
+        int r;
+        if ((n->f8 & mask) != val) continue;
+        if (func_00416B18(n->name, name, strlen(name)) != 0) continue;
+        r = n->f10 * 100 / n->fC;
+        if (r < limit) {
+            if (best < r) {
+                def = i;
+                best = r;
+            }
+        }
+        if (r < minv) {
+            minv = r;
+            mini = i;
+        }
+    }
+    if (best < 0) {
+        best = minv;
+        def = mini;
+    }
+    }
+    return def;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E94F0);

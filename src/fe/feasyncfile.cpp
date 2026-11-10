@@ -3364,7 +3364,73 @@ extern "C" void* func_001A8500_impl(void* self, void* engine, void* owner)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001A85D0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_001DB718(void* self);
+extern "C" void func_0039E390(void* self, int flags);
+void operator_delete(int*);
+
+struct cObj_1A85D0 {
+    int pad;
+    virtual ~cObj_1A85D0();
+};
+
+struct sNode1A85D0 {
+    sNode1A85D0* next;
+    sNode1A85D0* prev;
+    cObj_1A85D0* data;
+};
+
+struct sIter1A85D0 {
+    sNode1A85D0* node;
+    sIter1A85D0(sNode1A85D0* x) : node(x) {}
+    sIter1A85D0(const sIter1A85D0& x) : node(x.node) {}
+    cObj_1A85D0*& operator*() const { return node->data; }
+};
+
+struct sList1A85D0 {
+    int alloc;
+    sNode1A85D0* node;
+    sIter1A85D0 begin() { return node->next; }
+    cObj_1A85D0*& front() { return *begin(); }
+    sIter1A85D0 erase(sIter1A85D0 pos)
+    {
+        sNode1A85D0* next = pos.node->next;
+        sNode1A85D0* prev = pos.node->prev;
+        prev->next = next;
+        next->prev = prev;
+        operator_delete((int*)pos.node);
+        return sIter1A85D0(next);
+    }
+    void pop_front() { erase(begin()); }
+    sNode1A85D0* first() { return node->next; }
+};
+
+extern "C" void f_1A85D0(char* self, int flags) __asm__("func_001A85D0");
+extern "C" void f_1A85D0(char* self, int flags)
+{
+    *(void**)(self + 8) = (void*)D_0046B808;
+    while (((sList1A85D0*)(self + 0x6C8))->first() != *(sNode1A85D0**)(self + 0x6CC)) {
+        cObj_1A85D0* d = ((sList1A85D0*)(self + 0x6C8))->front();
+        ((sList1A85D0*)(self + 0x6C8))->pop_front();
+        if (d) {
+            delete d;
+        }
+    }
+    if (*(void**)(self + 0x6B8)) {
+        cMemMan_free(*(void**)(self + 0x6B8));
+        *(void**)(self + 0x6B8) = 0;
+    }
+    sList1A85D0* l = (sList1A85D0*)(self + 0x6C8);
+    func_001DB718(l);
+    operator_delete((int*)l->node);
+    cBXString__cBXString(self + 0x6C0, 2);
+    func_0039E390(self, flags);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A86E8);
@@ -12856,7 +12922,23 @@ int func_001B6078(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B6080);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_001B6080(void* self, int a1, unsigned int key)
+{
+    int r = 0x101;
+    if (key < 2) {
+        if (*(int*)((char*)self + 0x6D4) > 1) {
+            r = 0x101;
+        } else {
+            return 0;
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B60A8);
@@ -22140,7 +22222,83 @@ extern "C" int func_001C32B8(cFEVObj_001C32B8* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001C3310);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct cUIText;
+extern "C" int func_0025F338(void* self);
+extern "C" char* func_0025F388(void* self, int idx, int* a, int* b);
+extern "C" void func_001C4F58(void* self, char* buf, int v);
+extern char D_00465D90[];
+extern char D_00465DA0[];
+extern char D_00465DB0[];
+extern char D_004A1390_s __asm__("D_004A1390");
+extern char D_004A1C20[];
+
+extern "C" void func_001C3310(void* self_)
+{
+    char* self = (char*)self_;
+    char name[32];
+    char txt[64];
+    int v0;
+    int v1;
+    if (*(void**)(self + 0x40) != 0) {
+        int n = func_0025F338(D_004A3028);
+        char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00465D50));
+        if (obj != 0) {
+            if (*(unsigned char*)(obj + 0x96) != n) {
+                func_0039B760(obj, n);
+                if (n == 0) {
+                    func_0039B760(obj, 1);
+                }
+            }
+        }
+        int idx = *(int*)(self + 0x6E8);
+        if (n >= 11) {
+            if (n - idx <= 10 - 1) {
+                idx = n - 10;
+            }
+        }
+        int i;
+        int* pb;
+        int* pa;
+        pa = &v0;
+        pb = &v1;
+        for (i = 0; i < 10; i++, idx++) {
+            sprintf(name, D_00465D90, i);
+            cUIText* t0 = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
+            sprintf(name, D_00465DA0, i);
+            cUIText* t1 = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
+            sprintf(name, D_00465DB0, i);
+            cUIText* t2 = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
+            char* e = func_0025F388(D_004A3028, idx, pa, pb);
+            if (e != 0 && n > 0) {
+                if (t2 != 0) {
+                    if (*(int*)(self + 0x6EC) != 0) {
+                        func_001C4F58(self, txt, v0);
+                    } else {
+                        sprintf(txt, D_004A12C0, v0);
+                    }
+                    cUIText_setAsciiString(t2, txt);
+                }
+                if (t0 != 0) {
+                    cUIText_setAsciiString(t0, e + 8);
+                }
+                if (t1 != 0) {
+                    sprintf(txt, D_004A1C20, *(int*)(e + 4));
+                    cUIText_setAsciiString(t1, txt);
+                }
+            } else {
+                cUIText_setAsciiString(t1, &D_004A1390_s);
+                cUIText_setAsciiString(t2, &D_004A1390_s);
+                cUIText_setAsciiString(t0, &D_004A1390_s);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C3570);

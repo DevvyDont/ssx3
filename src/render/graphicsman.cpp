@@ -207,7 +207,77 @@ extern "C" void func_0036A020(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036A048);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sV4_A048 {
+    float x, y, z, w;
+    sV4_A048() {}
+    sV4_A048(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sBezVert_A048 {
+    float st[4];                    // 0x00
+    int rgba[4];                    // 0x10
+    sV4_A048 pos;                   // 0x20
+};
+
+struct sGmVE_A048 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, sBezVert_A048*, int);
+};
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix times vector).
+static inline sV4_A048 vu0MtxMul_A048(const sV4_A048* m, const sV4_A048& v)
+{
+    sV4_A048 r;
+    __asm__(
+        "lqc2         $vf8, %1\n"
+        "lqc2         $vf4, %2\n"
+        "lqc2         $vf5, %3\n"
+        "lqc2         $vf6, %4\n"
+        "lqc2         $vf7, %5\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        : "=m"(r)
+        : "m"(v), "m"(m[0]), "m"(m[1]), "m"(m[2]), "m"(m[3])
+        : "memory");
+    return r;
+}
+
+// Evaluates the cubic (t^3, t^2, t, 1) * m at n evenly spaced t in [0, 1] and draws the points as one strip.
+extern "C" void func_0036A048(void* self, sV4_A048* m, float* color, int n)
+{
+    float step = 1.0f / ((float)n - 1.0f);
+    int c0 = (int)(color[1] * 128.0f);
+    int c1 = (int)(color[2] * 128.0f);
+    int c2 = (int)(color[3] * 128.0f);
+    int c3 = (int)(color[0] * 128.0f);
+    float t = 0.0f;
+    sV4_A048 pos;
+    sBezVert_A048 verts[20];
+    for (int i = 0; i < n; i++) {
+        float t2 = t * t;
+        pos = vu0MtxMul_A048(m, sV4_A048(t * t2, t2, t, 1.0f));
+        verts[i].st[0] = 0.0f;
+        verts[i].st[1] = 0.0f;
+        verts[i].st[2] = 1.0f;
+        verts[i].rgba[0] = c0;
+        verts[i].rgba[1] = c1;
+        verts[i].rgba[2] = c2;
+        verts[i].rgba[3] = c3;
+        verts[i].pos = pos;
+        t += step;
+    }
+    sGmVE_A048* vt = *(sGmVE_A048**)((char*)self + 0x10D8);
+    vt[73].fn((char*)self + vt[73].delta, n, verts, 0);
+}
+#endif
 
 extern "C" void* func_0036A1C0(int);
 
@@ -1409,7 +1479,139 @@ extern "C" void func_0036D400(float* seed)
 
 INCLUDE_ASM("render/graphicsman", func_0036D428);
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036D500);
+#ifdef SKIP_ASM
+// PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sGmBox_D500 {
+    sGfxVec4 min;               // 0x00
+    sGfxVec4 max;               // 0x10
+};
+
+struct sGmEmit_D500 {
+    int count;                  // 0x00
+    int f04;                    // 0x04
+    float time;                 // 0x08
+    float step;                 // 0x0C
+    float f10;                  // 0x10
+    float f14;                  // 0x14
+    float f18;                  // 0x18
+    float f1C;                  // 0x1C
+    char pad_0x20[0x40];
+    sGfxVec4 v60;               // 0x60
+    sGfxVec4 v70;               // 0x70
+    sGfxVec4 v80;               // 0x80
+    sGfxVec4 v90;               // 0x90
+    sGfxVec4 vA0;               // 0xA0
+    sGfxVec4 vB0;               // 0xB0
+    sGfxVec4 vC0;               // 0xC0
+    sGfxVec4 vD0;               // 0xD0
+    sGfxVec4 vE0;               // 0xE0
+};
+
+static inline void boxAdd_D500(sGmBox_D500& b, const sGfxVec4& p)
+{
+    if (p.x < b.min.x) b.min.x = p.x;
+    if (p.y < b.min.y) b.min.y = p.y;
+    if (p.z < b.min.z) b.min.z = p.z;
+    if (p.x > b.max.x) b.max.x = p.x;
+    if (p.y > b.max.y) b.max.y = p.y;
+    if (p.z > b.max.z) b.max.z = p.z;
+}
+
+static inline void boxInit_D500(sGmBox_D500& b, const sGfxVec4& p)
+{
+    b.min = b.max = p;
+}
+
+// Grows box b by the four extreme trajectory points at time t: start corner + v * t + d * drag(td),
+// drag(t) = t * (DRAG_A * t + DRAG_B).
+#define ADD_TRAJECTORY_D500(b, start, v, d1, d2, t, td) \
+    { \
+        float g = (td) * ((td) * DRAG_A_D500 + DRAG_B_D500); \
+        boxAdd_D500(b, vu0AddGM(vu0AddGM(start.min, vu0ScaleGM(v, t)), vu0ScaleGM(d1, g))); \
+        boxAdd_D500(b, vu0AddGM(vu0AddGM(start.min, vu0ScaleGM(v, t)), vu0ScaleGM(d2, g))); \
+        boxAdd_D500(b, vu0AddGM(vu0AddGM(start.max, vu0ScaleGM(v, t)), vu0ScaleGM(d1, g))); \
+        boxAdd_D500(b, vu0AddGM(vu0AddGM(start.max, vu0ScaleGM(v, t)), vu0ScaleGM(d2, g))); \
+    }
+
+#define DRAG_TMAX_D500 2.7f
+#define DRAG_A_D500 0.113f
+#define DRAG_B_D500 (-0.73f)
+
+// Time at which the trajectory along one axis turns (d/dt = 0), v = velocity, b = velocity-box bound.
+#define TURN_TIME_D500(v, b) (((v) / ((b) - (v)) - DRAG_B_D500) * (1.0f / (2.0f * DRAG_A_D500)))
+
+// Bounding box of every particle the emitter can produce over its lifetime.
+extern "C" void func_0036D500_D500(sGmEmit_D500* e, sGmBox_D500* out) __asm__("func_0036D500");
+extern "C" void func_0036D500_D500(sGmEmit_D500* e, sGmBox_D500* out)
+{
+    float lifeA = e->f1C + e->f14;
+    float lifeB = e->f1C + e->f14 * 2.0f;
+    float life = lifeA > lifeB ? lifeA : lifeB;
+
+    // spawn positions: B0 + C0 * r1 + D0 * r2 (+ E0 * count), r in [1, 2]
+    boxInit_D500(*out, vu0AddGM(vu0AddGM(e->vB0, e->vC0), e->vD0));
+    boxAdd_D500(*out, vu0AddGM(vu0AddGM(e->vB0, vu0ScaleGM(e->vC0, 2.0f)), e->vD0));
+    boxAdd_D500(*out, vu0AddGM(vu0AddGM(e->vB0, e->vC0), vu0ScaleGM(e->vD0, 2.0f)));
+    boxAdd_D500(*out, vu0AddGM(vu0AddGM(e->vB0, vu0ScaleGM(e->vC0, 2.0f)), vu0ScaleGM(e->vD0, 2.0f)));
+    boxAdd_D500(*out, vu0AddGM(vu0AddGM(vu0AddGM(e->vB0, vu0ScaleGM(e->vC0, 2.0f)), e->vD0), vu0ScaleGM(e->vE0, (float)e->count)));
+    boxAdd_D500(*out, vu0AddGM(vu0AddGM(vu0AddGM(e->vB0, e->vC0), vu0ScaleGM(e->vD0, 2.0f)), vu0ScaleGM(e->vE0, (float)e->count)));
+    boxAdd_D500(*out, vu0AddGM(vu0AddGM(vu0AddGM(e->vB0, vu0ScaleGM(e->vC0, 2.0f)), vu0ScaleGM(e->vD0, 2.0f)), vu0ScaleGM(e->vE0, (float)e->count)));
+
+    sGmBox_D500 start = *out;
+
+    // velocities: 70 + 80 * r1 + 90 * r2 + A0 * r3, r in [1, 2]
+    sGmBox_D500 vel;
+    boxInit_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, e->v80), e->v90), e->vA0));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, vu0ScaleGM(e->v80, 2.0f)), e->v90), e->vA0));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, e->v80), vu0ScaleGM(e->v90, 2.0f)), e->vA0));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, e->v80), e->v90), vu0ScaleGM(e->vA0, 2.0f)));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, vu0ScaleGM(e->v80, 2.0f)), vu0ScaleGM(e->v90, 2.0f)), e->vA0));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, vu0ScaleGM(e->v80, 2.0f)), e->v90), vu0ScaleGM(e->vA0, 2.0f)));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, e->v80), vu0ScaleGM(e->v90, 2.0f)), vu0ScaleGM(e->vA0, 2.0f)));
+    boxAdd_D500(vel, vu0AddGM(vu0AddGM(vu0AddGM(e->v70, vu0ScaleGM(e->v80, 2.0f)), vu0ScaleGM(e->v90, 2.0f)), vu0ScaleGM(e->vA0, 2.0f)));
+
+    sGfxVec4 d1 = vu0SubGM(e->v60, vel.max);
+    sGfxVec4 d2 = vu0SubGM(e->v60, vel.min);
+
+    ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, life, life <? DRAG_TMAX_D500);
+
+    float tx0 = TURN_TIME_D500(e->v60.x, vel.min.x);
+    float tx1 = TURN_TIME_D500(e->v60.x, vel.max.x);
+    float ty0 = TURN_TIME_D500(e->v60.y, vel.min.y);
+    float ty1 = TURN_TIME_D500(e->v60.y, vel.max.y);
+    float tz0 = TURN_TIME_D500(e->v60.z, vel.min.z);
+    float tz1 = TURN_TIME_D500(e->v60.z, vel.max.z);
+
+    if (tx0 > 0.0f) {
+        tx0 = tx0 <? DRAG_TMAX_D500;
+        ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, tx0, tx0);
+    }
+    if (tx1 > 0.0f) {
+        tx1 = tx1 <? DRAG_TMAX_D500;
+        ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, tx1, tx1);
+    }
+    if (ty0 > 0.0f) {
+        ty0 = ty0 <? DRAG_TMAX_D500;
+        ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, ty0, ty0);
+    }
+    if (ty1 > 0.0f) {
+        ty1 = ty1 <? DRAG_TMAX_D500;
+        ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, ty1, ty1);
+    }
+    if (tz0 > 0.0f) {
+        tz0 = tz0 <? DRAG_TMAX_D500;
+        ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, tz0, tz0);
+    }
+    if (tz1 > 0.0f) {
+        tz1 = tz1 <? DRAG_TMAX_D500;
+        ADD_TRAJECTORY_D500(*out, start, e->v60, d1, d2, tz1, tz1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_00370018);

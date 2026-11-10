@@ -4840,7 +4840,19 @@ extern "C" void func_00261408(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00261460);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" long f_261460(void* p) __asm__("func_00261460");
+extern "C" long f_261460(void* p)
+{
+    char* s = (char*)p;
+    return *(int*)(s + 0xC8) != 0 && (*(int*)(s + 0xD8) ^ 1) != 0 && *(int*)(s + 0xE0) != 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00261490);

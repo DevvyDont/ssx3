@@ -128,7 +128,42 @@ extern "C" void func_00270238(void* self, void* node)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00270280);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sS270280 {
+    int state;
+    char pad4[0x3CC - 4];
+    int f3CC;
+    char pad3D0[0x484 - 0x3D0];
+    int f484;
+    char pad488[0x604 - 0x488];
+    int f604;
+};
+extern "C" int func_00270280(sS270280* self)
+{
+    int r = 0;
+    switch (self->state) {
+    case 0: case 2: case 10: case 11: case 12: case 13: case 14: case 15:
+        break;
+    case 1:
+    case 7:
+        if (self->f604 == 0)
+            r = 1;
+        if (self->f484 >= self->f3CC)
+            r = 1;
+        break;
+    case 4:
+        r = self->f484 >= self->f3CC;
+        break;
+    case 3: case 5: case 6: case 8: case 9:
+        r = 1;
+        break;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_002702F8);
@@ -582,7 +617,35 @@ extern "C" void func_00270AB0(void* self, int key, int bit)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00270B88);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_0026E6E0_3(void* slot, void* rider, int src) __asm__("func_0026E6E0");
+
+struct sRcSlotB88 {
+    char pad[0xB0];
+    int busy;
+    bool isFree() { return busy == 0; }
+};
+
+struct sRcSlotsB88 {
+    int state;
+    char pad_0x004[0x3B4 - 4];
+    void* rider;
+    char pad_0x3B8[0x494 - 0x3B8];
+    sRcSlotB88 slots[1];
+};
+
+extern "C" void func_00270B88(void* p, int playerId, int id)
+{
+    sRcSlotsB88* self = (sRcSlotsB88*)p;
+    if (self->state == 0 && self->slots[playerId].isFree()) {
+        func_0026E6E0_3(&self->slots[playerId], self->rider, id);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00270BD8);
@@ -660,7 +723,43 @@ extern "C" sReplayCacheNode2* func_00270C58(void* self, int i, sReplayCacheNode2
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00270CE8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_0026E838_s(void* self, int id, int mode) __asm__("func_0026E838");
+extern "C" void func_0026E800(void* p);
+void func_0026E7F8(void* self);
+
+struct sRcSlotCE8 {
+    char pad[0xB0];
+    sReplayCacheNode2* node;
+    bool isActive() { return node != 0; }
+    sReplayCacheNode2* getNode() { return node; }
+};
+
+struct sRcSlotsCE8 {
+    char pad[0x494];
+    sRcSlotCE8 slots[1];
+};
+
+extern "C" void func_00270CE8(void* p, int playerId, int id, int positive)
+{
+    sRcSlotsCE8* self = (sRcSlotsCE8*)p;
+    if (self->slots[playerId].isActive()) {
+        if (func_0026E838_s(&self->slots[playerId], id, positive)) {
+            if (!(func_00270BD8(self, playerId, positive) < func_00270C40(self, positive))) {
+                sReplayCacheNode2* n = func_00270C58(self, playerId, self->slots[playerId].getNode(), positive);
+                n->mask &= ~(1 << playerId);
+            }
+        } else {
+            func_0026E800(&self->slots[playerId]);
+        }
+        func_0026E7F8(&self->slots[playerId]);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00270DE0);
@@ -1657,7 +1756,24 @@ extern "C" void func_00272550(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00272570);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" float func_00272570(float* p, float t)
+{
+    float r;
+    if (t != 0.0f) {
+        r = p[0];
+        r = r * t + p[1];
+        r = r * t + p[2];
+        r = r * t + p[3];
+    } else {
+        r = p[3];
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_002725B8);
@@ -3356,7 +3472,59 @@ extern "C" unsigned char func_002743D8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_002743E8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sInfo2743E8 {
+    char pad0[2];
+    unsigned char count;
+    unsigned char b3;
+};
+class cA2743E8 {
+public:
+    int pad0;
+    virtual void a1();
+    virtual void a2();
+    virtual bool a3(float t, float dt, int* out);
+};
+struct sSelf2743E8;
+class cB2743E8 {
+public:
+    virtual void b1();
+    virtual void b2();
+    virtual void b3(sSelf2743E8* s, float t, unsigned char b, int flags);
+    virtual void b4(sSelf2743E8* s, float t, float dt, unsigned char b, int flags);
+};
+struct sSelf2743E8 {
+    char pad0[0x1C];
+    sInfo2743E8* info;
+    char pad20[4];
+    cA2743E8** objs;
+    char pad28[4];
+    cB2743E8* sink;
+};
+
+extern "C" int func_002743E8(void* p, float t, float dt)
+{
+    sSelf2743E8* self = (sSelf2743E8*)p;
+    int flags = 0;
+    bool any = false;
+    for (int i = 0; i < self->info->count; i++) {
+        int out = 0;
+        any = self->objs[i]->a3(t, dt, &out) | any;
+        flags |= out;
+    }
+    cB2743E8* s = self->sink;
+    if (s != 0) {
+        if (flags != 0) {
+            s->b3(self, t, self->info->b3, flags);
+        }
+        self->sink->b4(self, t, dt, self->info->b3, flags);
+    }
+    return any;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274518);

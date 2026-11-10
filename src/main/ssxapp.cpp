@@ -1845,7 +1845,212 @@ extern "C" void func_00229820(void* self, unsigned int handle, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_00229910);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sV3_229910 {
+    float x, y, z;
+    sV3_229910() {}
+};
+
+struct sV4_229910 {
+    float x, y, z, w;
+    sV4_229910() {}
+    sV4_229910(const sV3_229910& v, const float& d) : x(v.x), y(v.y), z(v.z), w(d) {}
+} __attribute__((aligned(16)));
+
+struct sV2_229910 {
+    float u, v;
+    sV2_229910() {}
+};
+
+struct sHTable_229910 {
+    char pad[0x1C];
+    unsigned int* entries;      // 0x1C
+};
+
+struct sHMgr_229910 {
+    char pad[0x8];
+    sHTable_229910** tables;    // 0x8
+};
+
+extern sHMgr_229910** D_004A47B8_229910 __asm__("D_004A47B8");
+
+struct sModel_229910 {
+    char pad[0x10];
+    sV4_229910 mat[4];          // 0x10
+};
+
+struct sVEntry_229910 {
+    short delta;
+    short index;
+    void (*fn)(void*, sModel_229910*, int, sV3_229910*, sV2_229910*, sV4_229910*);
+};
+
+struct sGfx_229910 {
+    char pad[0x10D8];
+    sVEntry_229910* vt;         // 0x10D8
+};
+
+extern sGfx_229910* D_004A5B80_229910 __asm__("D_004A5B80");
+
+static inline sModel_229910* refToPtr_229910(unsigned int p)
+{
+    return (sModel_229910*)(p << 2);
+}
+
+static inline sModel_229910* lookup_229910(sHTable_229910* t, unsigned int idx)
+{
+    unsigned int p = t->entries[idx] >> 8;
+    if (p == 0) {
+        return 0;
+    }
+    return refToPtr_229910(p);
+}
+
+struct tResourceID_229910 {
+    struct {
+        unsigned int m_uiSectionID : 8;
+        unsigned int m_uiUID : 24;
+    } m_bfRID;
+};
+
+static inline sModel_229910* HandleToModel_229910(tResourceID_229910 RID)
+{
+    sHTable_229910* t = (*D_004A47B8_229910)->tables[RID.m_bfRID.m_uiSectionID];
+    if (t == 0) {
+        return 0;
+    }
+    return lookup_229910(t, RID.m_bfRID.m_uiUID);
+}
+
+// PORT: PS2-only VU0 inline asm (matrix * vector).
+static inline sV4_229910 MulMV_229910(const sV4_229910* m, const sV4_229910& v)
+{
+    sV4_229910 r;
+    __asm__(
+        "lqc2      $vf8, %1\n"
+        "lqc2      $vf4, 0x0(%2)\n"
+        "lqc2      $vf5, 0x10(%2)\n"
+        "lqc2      $vf6, 0x20(%2)\n"
+        "lqc2      $vf7, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "m"(v), "r"(m)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sV4_229910 Sub_229910(const sV4_229910& a, const sV4_229910& b)
+{
+    sV4_229910 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sV4_229910 Add_229910(const sV4_229910& a, const sV4_229910& b)
+{
+    sV4_229910 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void AddTo_229910(sV4_229910& a, const sV4_229910& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sV4_229910 Scale_229910(const sV4_229910& v, float s)
+{
+    sV4_229910 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+struct sCrowdSlot_229910 {
+    sV4_229910 pos;             // 0x00
+    sV4_229910 dx;              // 0x10
+    sV4_229910 dy;              // 0x20
+    int delay;                  // 0x30
+    char pad_0x34[0xC];
+};
+
+struct sCrowd_229910 {
+    int pad0;
+    int* anim;                          // 0x4
+    tResourceID_229910 ids[128];              // 0x8
+    char pad_0x208[0x8];
+    sCrowdSlot_229910 slots[128];       // 0x210
+};
+
+// PORT: callers declare func_00229910 as (void*, int, int); defined under an asm label.
+extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_229910 RID) __asm__("func_00229910");
+
+// Places crowd quad index on the model behind RID: corner points from the renderer, then base/width/height.
+extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_229910 RID)
+{
+    self->ids[index] = RID;
+    sV4_229910 pts[4];
+    sV3_229910 pos[4];
+    sV2_229910 uv[4];
+    sV4_229910 col[4];
+    sGfx_229910* g = D_004A5B80_229910;
+    sModel_229910* m = HandleToModel_229910(RID);
+    sVEntry_229910* vt = g->vt;
+    vt[97].fn((char*)g + vt[97].delta, m, 0, pos, uv, col);
+    for (int i = 0; i < 4; i++) {
+        pts[i] = MulMV_229910(m->mat, sV4_229910(pos[i], 1.0f));
+    }
+    self->slots[index].pos = Add_229910(pts[0], Scale_229910(Sub_229910(pts[3], pts[0]), 0.5f));
+    self->slots[index].dx = Scale_229910(Sub_229910(pts[2], pts[0]), 0.45f);
+    self->slots[index].dy = Scale_229910(Sub_229910(pts[1], pts[0]), 0.45f);
+    sV4_229910 up;
+    up.x = 0.0f;
+    up.y = 0.0f;
+    up.z = 150.0f;
+    up.w = 0.0f;
+    AddTo_229910(self->slots[index].pos, up);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229B90);
@@ -2362,7 +2567,110 @@ extern "C" void func_0022A4A8(sWorld_22A4A8* self, sItem_22A4A8* items, int n)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_0022A5A0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sVisNode_A5A0 {
+    sVisNode_A5A0* next;    // 0x00
+    int pad_0x4;
+    unsigned int flags;     // 0x08
+    char pad_0xC[0x44];
+    int sphere[4];          // 0x50
+    char pad_0x60[0x1D];
+    unsigned char slot;     // 0x7D
+    short path;             // 0x7E
+};
+
+struct sVisSrc_A5A0 {
+    char pad_0x0[0x20];
+    sVisNode_A5A0* head;    // 0x20
+};
+
+struct sVisList_A5A0 {
+    sVisSrc_A5A0* src;
+    int vuFrustum;
+};
+
+struct sVisSlot_A5A0 {
+    int f0;
+    int type;
+};
+
+struct sVisCam_A5A0 {
+    char pad_0x0[0x20];
+    sVisSlot_A5A0 slots[(0x3F0 - 0x20) / 8];  // 0x20
+    struct {
+        int kind;
+        char pad[0x14];
+    } paths[1];                     // 0x3F0
+};
+
+struct sVisOwner_A5A0 {
+    char pad_0x0[0x90];
+    sVisCam_A5A0** cam;             // 0x90
+    char pad_0x94[0x209C - 0x94];
+    int count;                      // 0x209C
+    sVisNode_A5A0* nodes[1];        // 0x20A0
+};
+
+// PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
+// version of the microprogram at 0xEF0 (sphere vs frustum test; 2 = outside).
+static inline int visSphereTest_A5A0(int* sphere, int frustum)
+{
+    int r;
+    __asm__ __volatile__(
+        "lqc2      $vf22, 0x0(%1)\n"
+        "ctc2.ni   %2, $vi14\n"
+        "vcallms   0xEF0\n"
+        "cfc2.i    %0, $vi1\n"
+        : "=&r"(r)
+        : "r"(sphere), "r"(frustum));
+    return r;
+}
+
+static inline bool IsT6_A5A0(sVisCam_A5A0* c, int i)
+{
+    return c->slots[i].type == 6;
+}
+
+// Path-bound nodes are usable when unassigned (slot 0xFF) or when their slot is a type-6 camera slot on a kind-3 path.
+static inline int visOnPath_A5A0(sVisCam_A5A0* cam, sVisNode_A5A0* n)
+{
+    if (n->slot == 0xFF)
+        return 1;
+    if (IsT6_A5A0(cam, n->slot))
+        return cam->paths[n->path].kind == 3;
+    return 0;
+}
+
+static inline int visUsable_A5A0(sVisOwner_A5A0* self, sVisNode_A5A0* n)
+{
+    if ((n->flags & 3) != 3)
+        return 0;
+    return visOnPath_A5A0(*self->cam, n);
+}
+
+extern "C" void func_0022A5A0(void* self_, void* list_, int count)
+{
+    sVisOwner_A5A0* self = (sVisOwner_A5A0*)self_;
+    sVisList_A5A0* list = (sVisList_A5A0*)list_;
+    for (; count > 0; count--, list++) {
+        sVisNode_A5A0* n = list->src->head;
+        while (n != 0) {
+
+                int frustum = list->vuFrustum;
+                if (visUsable_A5A0(self, n)) {
+                    if (frustum == 0 || visSphereTest_A5A0(n->sphere, frustum) != 2) {
+                        self->nodes[self->count++] = n;
+                    }
+                }
+                n = n->next;
+
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_0022A698);
@@ -2666,5 +2974,474 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* a2, void* a3,
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/ssxapp", func_0022B008);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_0022E8B8(void* views);
+extern "C" int func_0022E920(void* views);
+extern "C" int func_00231D60(void* self);
+extern "C" void func_0022C830(void* self);
+extern "C" void func_0036A1E8();
+extern "C" void func_0031B6C8(void* m);
+extern "C" void func_00230640(void* self);
+extern "C" void func_00229BA8(void* p);
+extern "C" void func_00344138(void* p);
+extern "C" void func_00357C50(void* p);
+extern "C" void cGame_renderModels(void* self, void* world);
+extern "C" void cGame_renderFogVolumes(void* self, void* world);
+extern "C" void cGame_renderLightHalos(void* self, void* world, int view);
+extern "C" void cGame_renderPatches(void* self, void* world);
+extern "C" int func_002CC098(void* menu);
+extern "C" void func_002CC350(void* menu);
+extern "C" void func_00397DF8(void* p);
+void func_0030B4B8(void* p);
+void func_002789C0(void* p);
+extern "C" void func_001F31E0(void* p);
+extern "C" void func_00285BF8(void* snd, float dt, int a2);
+extern "C" void func_002B5D78(void* p);
+extern void* D_004A52D4;
+
+struct sV4_22B008 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat_22B008 {
+    sV4_22B008 row[4];
+};
+
+struct sRect_22B008 {
+    float x, y, w, h;
+};
+
+struct sBox_22B008 {
+    sV4_22B008 min;
+    sV4_22B008 max;
+};
+
+struct sScale_22B008 {
+    float x, y;
+    sScale_22B008(float ax, float ay) : x(ax), y(ay) {}
+};
+
+struct sColor_22B008 {
+    float r, g, b, a;
+    sColor_22B008(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
+};
+
+struct sDrawState_22B008 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+};
+
+extern sDrawState_22B008 D_00501420_22B008 __asm__("D_00501420");
+extern sMat_22B008 D_004FF1A0_22B008 __asm__("D_004FF1A0");
+
+class cGfx_22B008 {
+public:
+    char pad_0x0[0x24];
+    int cur;                        // 0x24
+    char pad_0x28[0x44 - 0x28];
+    int f44;                        // 0x44
+    char pad_0x48[0x270 - 0x48];
+    int f270;                       // 0x270
+    int view;                       // 0x274
+    char pad_0x278[0xE84 - 0x278];
+    sDrawState_22B008* top;         // 0xE84
+    char pad_0xE88[0xF50 - 0xE88];
+    int tbl[(0x10A8 - 0xF50) / 4];  // 0xF50
+    int f10A8;                      // 0x10A8
+    int f10AC;                      // 0x10AC
+    char pad_0x10B0[0x10D8 - 0x10B0];
+    // vptr at 0x10D8; slot N at vtable offset N*8
+    virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04();
+    virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08();
+    virtual void v09();
+    virtual unsigned int v10();
+    virtual unsigned int v11();
+    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
+    virtual void v16();
+    virtual int v17();
+    virtual void v18(); virtual void v19();
+    virtual void v20();
+    virtual void v21(); virtual void v22();
+    virtual void v23(float x, float y, float w, float h, int a);
+    virtual void v24(sRect_22B008* r, int a);
+    virtual void v25(float fov, float nearClip, float farClip);
+    virtual void v26(float a, float b, float c, float d, float e, float f, int g, int h);
+    virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30();
+    virtual void v31(); virtual void v32(); virtual void v33();
+    virtual void v34(sMat_22B008* m);
+    virtual void v35(); virtual void v36(); virtual void v37(); virtual void v38();
+    virtual void v39(); virtual void v40(); virtual void v41(); virtual void v42();
+    virtual sMat_22B008 v43();
+    virtual void v44(); virtual void v45(); virtual void v46(); virtual void v47();
+    virtual void v48(); virtual void v49(); virtual void v50(); virtual void v51();
+    virtual void v52(); virtual void v53(); virtual void v54(); virtual void v55();
+    virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59();
+    virtual void v60(); virtual void v61(); virtual void v62(); virtual void v63();
+    virtual void v64(); virtual void v65();
+    virtual void v66();
+    virtual void v67(); virtual void v68(); virtual void v69(); virtual void v70();
+    virtual void v71(); virtual void v72(); virtual void v73(); virtual void v74();
+    virtual void v75(); virtual void v76(); virtual void v77(); virtual void v78();
+    virtual void v79(); virtual void v80(); virtual void v81(); virtual void v82();
+    virtual void v83(); virtual void v84(); virtual void v85(); virtual void v86();
+    virtual void v87(); virtual void v88(); virtual void v89(); virtual void v90();
+    virtual void v91(); virtual void v92(); virtual void v93(); virtual void v94();
+    virtual void v95(); virtual void v96(); virtual void v97(); virtual void v98();
+    virtual void v99(); virtual void v100(); virtual void v101(); virtual void v102();
+    virtual void v103(); virtual void v104(); virtual void v105(); virtual void v106();
+    virtual void v107(); virtual void v108(); virtual void v109(); virtual void v110();
+    virtual void v111(); virtual void v112(); virtual void v113(); virtual void v114();
+    virtual void v115();
+    virtual void v116(int view);
+};
+
+extern cGfx_22B008* D_004A289C_22B008 __asm__("D_004A289C");
+
+static inline int CurLayer_22B008(cGfx_22B008* g)
+{
+    return g->tbl[g->cur];
+}
+
+struct sCam_22B008 {
+    float fov;              // 0x0
+    float nearClip;         // 0x4
+    float farClip;          // 0x8
+    char pad_0xC[0x40 - 0xC];
+    sMat_22B008 mat;        // 0x40
+};
+
+struct sViewMan_22B008 {
+    unsigned int count;         // 0x0
+    sCam_22B008* cams[3];       // 0x4
+    unsigned int views;         // 0x10
+    unsigned int cur;           // 0x14
+    sRect_22B008 rects[2];      // 0x18
+};
+
+class cRenderer_22B008 {
+public:
+    char pad_0x0[0xC];
+    virtual void v01(); virtual void v02(); virtual void v03();
+    virtual void v04();
+};
+
+class cScene_22B008 {
+public:
+    char pad_0x0[0xCC];
+    virtual void v01(); virtual void v02(); virtual void v03();
+    virtual void v04();
+};
+
+struct sVELoader_22B008 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+struct sVEView_22B008 {
+    short delta;
+    short index;
+    void (*fn)(void*, float, float, float, float, int);
+};
+
+struct sLoader_22B008 {
+    sVELoader_22B008* vt;       // 0x0
+};
+
+struct sHud_22B008 {
+    char pad_0x0[0x28];
+    sScale_22B008 scale;        // 0x28
+    float f30;                  // 0x30
+    float f34;                  // 0x34
+    float f38;                  // 0x38
+    float f3C;                  // 0x3C
+    sColor_22B008 color;        // 0x40
+};
+
+struct sRenderTarget_22B008 {
+    char pad_0x0[0x6490];
+    unsigned int views;         // 0x6490
+};
+
+struct sWorld_22B008 {
+    char data[0x81D0];
+} __attribute__((aligned(16)));
+
+struct sGame_22B008 {
+    char pad_0x0[0xC];
+    cScene_22B008* scene;           // 0xC
+    int f10;                        // 0x10
+    cRenderer_22B008* renderer;     // 0x14
+    char pad_0x18[0x1C - 0x18];
+    sRenderTarget_22B008* target;   // 0x1C
+    sCfg_22ADD8* cfg;               // 0x20
+    sHud_22B008* hud;               // 0x24
+    char pad_0x28[0x30 - 0x28];
+    void* f30;                      // 0x30
+    char pad_0x34[0x38 - 0x34];
+    void* f38;                      // 0x38
+    void* f3C;                      // 0x3C
+    void* f40;                      // 0x40
+    char pad_0x44[0x48 - 0x44];
+    void* f48;                      // 0x48
+    char pad_0x4C[0x84 - 0x4C];
+    sViewMan_22B008* views;         // 0x84
+    char pad_0x88[0x8C - 0x88];
+    void* f8C;                      // 0x8C
+    char pad_0x90[0x94 - 0x90];
+    void* f94;                      // 0x94
+    sLoader_22B008* loader;         // 0x98
+    int f9C;                        // 0x9C
+    int fA0;                        // 0xA0
+    void* menu;                     // 0xA4
+    char pad_0xA8[0xAC - 0xA8];
+    int frames;                     // 0xAC
+};
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy through vf1..vf4).
+static inline void MatCopy_22B008(sMat_22B008* dst, const sMat_22B008* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        "1:\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sV4_22B008 operator+(const sV4_22B008& a, const sV4_22B008& b)
+{
+    sV4_22B008 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV4_22B008 operator-(const sV4_22B008& a, const sV4_22B008& b)
+{
+    sV4_22B008 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_22B008 operator*(const sV4_22B008& v, float s)
+{
+    sV4_22B008 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// Grows the box to contain c.
+static inline void Grow_22B008(sBox_22B008& b, const sV4_22B008& c)
+{
+    if (c.x < b.min.x)
+        b.min.x = c.x;
+    if (c.y < b.min.y)
+        b.min.y = c.y;
+    if (c.z < b.min.z)
+        b.min.z = c.z;
+    if (c.x > b.max.x)
+        b.max.x = c.x;
+    if (c.y > b.max.y)
+        b.max.y = c.y;
+    if (c.z > b.max.z)
+        b.max.z = c.z;
+}
+
+static inline int IsReady_22B008(sGame_22B008* self)
+{
+    func_0022E8B8(self->views);
+    if (self->f9C != 0) {
+        return 0;
+    }
+    if (func_0022E920(self->views) == 0) {
+        self->f9C = 1;
+        self->fA0 = 1;
+        return 0;
+    }
+    return 1;
+}
+
+extern "C" int func_0022B008(sGame_22B008* self)
+{
+    if (D_004A289C_22B008->v17() == 0) {
+        return 0;
+    }
+    D_004A289C_22B008->v116(-1);
+    {
+        sLoader_22B008* l = self->loader;
+        sVELoader_22B008* vt = l->vt;
+        char* thisp = (char*)l + vt[2].delta;
+        int (**pfn)(void*, int) = &vt[2].fn;
+        if ((*pfn)(thisp, IsReady_22B008(self)) == 0) {
+            return 1;
+        }
+    }
+    if (func_00231D60(self) != 0) {
+        return 1;
+    }
+    if (*(int*)((char*)D_004A28A4 + 0x504) != 0) {
+        func_0022C830(self);
+        return 1;
+    }
+    func_0036A1E8();
+    cGfx_22B008* g = D_004A289C_22B008;
+    g->f10A8 = g->tbl[g->cur];
+    g->f10AC = g->tbl[g->f44];
+    self->target->views = self->views->views;
+    g->f270 = self->views->views;
+    sWorld_22B008* world = 0;
+    for (unsigned int i = 0; i < self->views->views; i++) {
+        D_004A289C_22B008->view = i;
+        D_004A289C_22B008->v66();
+        self->views->cur = i;
+        sCam_22B008* cam = self->views->cams[self->views->cur];
+        D_004A289C_22B008->v24(&self->views->rects[i], 1);
+        D_004A289C_22B008->v34(&cam->mat);
+        D_004A289C_22B008->v25(cam->fov, 1.0f, cam->farClip);
+        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & 0xFE7FFFFF) | 0x800000;
+        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & 0xFFCFFFFF) | 0x300000;
+        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & 0xFFF00FFF) | 0xD000;
+        self->renderer->v04();
+        D_004A289C_22B008->v25(cam->fov, cam->nearClip, cam->farClip);
+        D_004A289C_22B008->v116(i);
+        D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x80;
+        *(short*)((char*)D_004A289C_22B008->top + 0x12) = CurLayer_22B008(D_004A289C_22B008);
+        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & ~0xF80) | 0x380;
+        D_004A289C_22B008->top->f0 |= 0x30;
+        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & 0xFE7FFFFF) | 0x800000;
+        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & 0xFFCFFFFF) | 0x300000;
+        D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & 0xFFF00FFF) | 0xD000;
+        D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x80;
+        sBox_22B008 box;
+        sMat_22B008 view = D_004A289C_22B008->v43();
+        float nearClip = cam->nearClip;
+        float farClip = cam->farClip;
+        sMat_22B008 inv;
+        MatCopy_22B008(&inv, &view);
+        func_0031B6C8(&inv);
+        sMat_22B008 m = inv;
+        sBox_22B008& bounds = box;
+        const sV4_22B008& right = m.row[0];
+        const sV4_22B008& up = m.row[1];
+        const sV4_22B008& front = m.row[2];
+        const sV4_22B008& pos = m.row[3];
+        sV4_22B008 c;
+        c = (pos - front + right + up) * nearClip;
+        c.w = 1.0f;
+        bounds.min = c;
+        bounds.max = c;
+        c = (pos - front + right - up) * nearClip;
+        c.w = 1.0f;
+        Grow_22B008(bounds, c);
+        c = (pos - front - right + up) * nearClip;
+        c.w = 1.0f;
+        Grow_22B008(bounds, c);
+        c = (pos - front - right - up) * nearClip;
+        c.w = 1.0f;
+        Grow_22B008(bounds, c);
+        c = (pos + front - right - up) * farClip;
+        c.w = 1.0f;
+        Grow_22B008(bounds, c);
+        c = (pos + front - right + up) * farClip;
+        c.w = 1.0f;
+        Grow_22B008(bounds, c);
+        c = (pos + front + right - up) * farClip;
+        c.w = 1.0f;
+        Grow_22B008(bounds, c);
+        c = (pos + front + right + up) * farClip;
+        c.w = 1.0f;
+        Grow_22B008(bounds, c);
+        sWorld_22B008 worldData;
+        world = &worldData;
+        func_0022ADD8((char*)world, self->cfg, self->f8C, &box, self->f10);
+        func_00230640(self);
+        func_00229BA8(self->f38);
+        func_00344138(self->f3C);
+        func_00357C50(self->f40);
+        D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x80;
+        self->scene->v04();
+        cGame_renderModels(self, world);
+        cGame_renderFogVolumes(self, world);
+        cGame_renderLightHalos(self, world, i);
+        D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x40;
+        cGame_renderPatches(self, world);
+    }
+    {
+        sVEView_22B008* vt = *(sVEView_22B008**)((char*)D_004A289C_22B008 + 0x10D8);
+        char* thisp = (char*)D_004A289C_22B008 + vt[23].delta;
+        void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
+        (*pfn)(thisp, 0.0f, 0.0f, (float)D_004A289C_22B008->v10(), (float)D_004A289C_22B008->v11(), 1);
+    }
+    D_004A289C_22B008->v26(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 0, 0);
+    D_004A289C_22B008->v34(&D_004FF1A0_22B008);
+    D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x300;
+    D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & ~0x7C) | 0x14;
+    sHud_22B008* hud = self->hud;
+    hud->f38 = hud->f30 * 0.8f;
+    hud->f3C = hud->f34 * 0.8f;
+    self->hud->scale = sScale_22B008(2.0f, 2.0f);
+    self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
+    if (func_002CC098(self->menu) != 0) {
+        func_002CC350(self->menu);
+        self->hud->scale = sScale_22B008(2.0f, 2.0f);
+        self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
+    }
+    *D_004A289C_22B008->top = D_00501420_22B008;
+    D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x300;
+    D_004A289C_22B008->top->f4 = (D_004A289C_22B008->top->f4 & ~0x7C) | 0x14;
+    self->hud->scale = sScale_22B008(2.0f, 2.0f);
+    self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
+    if (D_004A4540 == 0) {
+        self->hud->scale = sScale_22B008(0.0f, 0.0f);
+        func_00397DF8(self->f48);
+        func_0030B4B8(self->f30);
+    }
+    func_002789C0(D_004A28A4);
+    func_001F31E0(self->f94);
+    D_004A289C_22B008->v20();
+    func_00285BF8(D_004A3500, (float)self->frames * (1.0f / 60.0f), 1);
+    func_002B5D78(D_004A52D4);
+    self->frames = 0;
+    return 1;
+}
+#endif
 

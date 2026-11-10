@@ -4736,7 +4736,113 @@ void* func_0037D090(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037D0B0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sTexSrc_D0B0 {
+    int f0;                         // 0x0: low byte = type, upper 24 bits = offset
+    short s4;                       // 0x4
+    short s6;                       // 0x6
+    char pad8[4];
+    unsigned int fC;                // 0xC
+};
+
+struct sVE_D0B0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, void*, int, int, unsigned int, int, int, void*, int);
+};
+
+struct sGfxView_D0B0 {
+    char pad[0x10D8];
+    sVE_D0B0* vt;                   // 0x10D8
+};
+
+extern char D_004A4390[];
+void* operator_new_D0B0(unsigned int, char*, unsigned int, int) __asm__("operator_new__FUi");
+extern "C" int func_003E6188(void* dst, void* src, int n);
+extern "C" unsigned int func_003B47F8(void* src, void* dst);
+extern "C" void* func_002523A8(void* p);
+
+extern "C" void func_0037D0B0(void* selfp, int a1, void* objp, int a3)
+{
+    sGfxView_D0B0* self = (sGfxView_D0B0*)selfp;
+    sTexSrc_D0B0* obj = (sTexSrc_D0B0*)objp;
+    int mode = 0;
+    char* extra = 0;
+    int flagB = 0;
+    unsigned int type = *(unsigned char*)obj;
+    switch (type) {
+    case 1: {
+        mode = 0xB;
+        int w = obj->f0 >> 8;
+        flagB = 1;
+        char* sub = w ? (char*)obj + w : 0;
+        int hi = obj->fC & 0x2000;
+        if (hi) mode = 0xC;
+        if (((sTexSrc_D0B0*)sub)->fC & 0x1000)
+            extra = sub + *(int*)(sub + 0x10);
+        else
+            extra = sub + 0x10;
+        break;
+    }
+    case 2: {
+        mode = 9;
+        int w = obj->f0 >> 8;
+        flagB = 1;
+        char* sub = w ? (char*)obj + w : 0;
+        int hi = obj->fC & 0x2000;
+        if (hi) mode = 0xA;
+        if (((sTexSrc_D0B0*)sub)->fC & 0x1000)
+            extra = sub + *(int*)(sub + 0x10);
+        else
+            extra = sub + 0x10;
+        break;
+    }
+    case 3:
+        mode = 2;
+        break;
+    case 5:
+        mode = 0;
+        break;
+    }
+    int allocated = 0;
+    char* tmp = 0;
+    char* p10 = (char*)obj + 0x10;
+    unsigned int fC;
+    char* data;
+    unsigned char* ob = (unsigned char*)obj;
+    if (ob[0x10] == 0x10 && ob[0x11] == 0xFB) {
+        unsigned int size = (ob[0x12] << 16 | ob[0x13] << 8 | ob[0x14]) + 0x10;
+        allocated = 1;
+        tmp = (char*)operator_new_D0B0(size, D_004A4390, 0x80000100, 0);
+        func_003E6188(tmp, obj, 0x10);
+        char* payload = tmp + 0x10;
+        func_003B47F8(p10, payload);
+        *(unsigned char*)tmp &= 0x7F;
+        if (((sTexSrc_D0B0*)tmp)->fC & 0x1000) {
+            data = tmp + *(int*)(tmp + 0x10);
+            fC = obj->fC;
+        } else {
+            data = tmp + 0x10;
+            fC = obj->fC;
+        }
+    } else {
+        if (obj->fC & 0x1000)
+            data = (char*)obj + *(int*)((char*)obj + 0x10);
+        else
+            data = p10;
+        fC = obj->fC;
+    }
+    sVE_D0B0* e = &self->vt[0x188 / 8];
+    e->fn((char*)self + e->delta, a1, data, obj->s4, obj->s6, fC >> 28, mode, flagB, extra, a3);
+    if (allocated) {
+        func_002523A8(tmp);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037D318);
@@ -4906,7 +5012,48 @@ extern "C" int func_0037D450(sPtGfx_D450* self)
 
 extern "C" void* func_00367CD0(int);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037D668);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sPtGfx_D668 {
+    char pad_0x0[0x5A3C];
+    unsigned int psm;               // 0x5A3C
+    char pad_0x5A40[0x10];
+    unsigned int fbw;               // 0x5A50
+    char pad_0x5A54[0x30];
+    unsigned int fbp;               // 0x5A84
+};
+
+extern "C" void func_0037D668(sPtGfx_D668* self, ulong** pp, int a2, int mode)
+{
+    ulong* p = *pp;
+    switch (mode) {
+    case 0:
+        p[1] = ((ulong)0x50000001 << 32) | 0x11000000;
+        p[2] = ((ulong)0x10000000 << 32) | 0x8001;
+        p[3] = 0xE;
+        p[0] = 0;
+        p[4] = (ulong)self->fbp | ((ulong)self->fbw << 16) | ((ulong)self->psm << 24) | ((ulong)a2 << 32);
+        p[5] = 0x4C;
+        break;
+    case 1:
+        p[1] = ((ulong)0x50000002 << 32) | 0x11000000;
+        p[2] = ((ulong)0x10000000 << 32) | 0x8001;
+        p[3] = 0xE;
+        p[0] = 0;
+        p[4] = (ulong)self->fbp | ((ulong)self->fbw << 16) | ((ulong)self->psm << 24) | ((ulong)a2 << 32);
+        p[5] = 0x4D;
+        break;
+    default:
+        *pp = p;
+        return;
+    }
+    p += 6;
+    *pp = p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037D738__FPv);
@@ -8185,7 +8332,106 @@ void func_003866E0(void* self, int a1, int a2)
 
 INCLUDE_ASM("render/particle", func_003866F0);
 
+//100%
 INCLUDE_ASM("render/particle", func_00386BD0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sBlendMtx_6BD0 {
+    float m[16];
+} __attribute__((aligned(16)));
+
+struct sBlendLink_6BD0 {
+    short w;
+    unsigned char idx;
+    unsigned char pad;
+};
+
+struct sBlendEnt_6BD0 {
+    int count;
+    sBlendLink_6BD0* links;
+    int pad;
+};
+
+// PORT: PS2-only VU0 inline asm (set the I register).
+static inline void setI_6BD0(int bits)
+{
+    __asm__ volatile("ctc2.ni    %0, $vi21\n" : : "r"(bits) : "$21");
+}
+
+// PORT: PS2-only VU0 inline asm (first weighted matrix, kept in vf1-vf4).
+static inline void blendFirst_6BD0(const sBlendMtx_6BD0* m, int w)
+{
+    __asm__ volatile(
+        "qmtc2.ni   %4, $vf5\n"
+        "vitof0.x   $vf5, $vf5\n"
+        "lqc2       $vf1, %0\n"
+        "lqc2       $vf2, %1\n"
+        "vmuli.x    $vf5, $vf5, I\n"
+        "lqc2       $vf3, %2\n"
+        "lqc2       $vf4, %3\n"
+        "vmulx.xyzw $vf1, $vf1, $vf5x\n"
+        "vmulx.xyzw $vf2, $vf2, $vf5x\n"
+        "vmulx.xyzw $vf3, $vf3, $vf5x\n"
+        "vmulx.xyzw $vf4, $vf4, $vf5x\n"
+        : : "m"(m->m[0]), "m"(m->m[4]), "m"(m->m[8]), "m"(m->m[12]), "r"(w));
+}
+
+// PORT: PS2-only VU0 inline asm (accumulate next weighted matrix into vf1-vf4).
+static inline void blendAdd_6BD0(const sBlendMtx_6BD0* m, int w)
+{
+    __asm__ volatile(
+        "qmtc2.ni   %4, $vf5\n"
+        "vitof0.x   $vf5, $vf5\n"
+        "lqc2       $vf6, %0\n"
+        "lqc2       $vf7, %1\n"
+        "vmuli.x    $vf5, $vf5, I\n"
+        "lqc2       $vf8, %2\n"
+        "lqc2       $vf9, %3\n"
+        "vmulaw.xyzw ACC, $vf1, $vf0w\n"
+        "vmaddx.xyzw $vf1, $vf6, $vf5x\n"
+        "vmulaw.xyzw ACC, $vf2, $vf0w\n"
+        "vmaddx.xyzw $vf2, $vf7, $vf5x\n"
+        "vmulaw.xyzw ACC, $vf3, $vf0w\n"
+        "vmaddx.xyzw $vf3, $vf8, $vf5x\n"
+        "vmulaw.xyzw ACC, $vf4, $vf0w\n"
+        "vmaddx.xyzw $vf4, $vf9, $vf5x\n"
+        : : "m"(m->m[0]), "m"(m->m[4]), "m"(m->m[8]), "m"(m->m[12]), "r"(w));
+}
+
+// PORT: PS2-only VU0 inline asm (store vf1-vf4).
+static inline void blendStore_6BD0(sBlendMtx_6BD0* d)
+{
+    __asm__ volatile(
+        "sqc2       $vf1, %0\n"
+        "sqc2       $vf2, %1\n"
+        "sqc2       $vf3, %2\n"
+        "sqc2       $vf4, %3\n"
+        : "=m"(d->m[0]), "=m"(d->m[4]), "=m"(d->m[8]), "=m"(d->m[12]));
+}
+
+extern "C" void func_00386BD0(char* self, sBlendMtx_6BD0* mats, int unused, sBlendEnt_6BD0* ents, int n, sBlendMtx_6BD0* out)
+{
+    if (out == 0) {
+        out = *(sBlendMtx_6BD0**)(self + 0x13E8);
+    }
+    setI_6BD0(0x3C23D70A);
+    int i;
+    for (i = 0; i < n; i++) {
+        sBlendMtx_6BD0* dst = out++;
+        sBlendEnt_6BD0* e = &ents[i];
+        sBlendLink_6BD0* l = e->links;
+        blendFirst_6BD0((sBlendMtx_6BD0*)((char*)mats + (l->idx << 6)), l->w);
+        int cnt = e->count;
+        l++;
+        int k;
+        for (k = 1; k < cnt; k++) {
+            blendAdd_6BD0((sBlendMtx_6BD0*)((char*)mats + (l->idx << 6)), l->w);
+            l++;
+        }
+        blendStore_6BD0(dst);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00386CF0);
@@ -8570,7 +8816,167 @@ extern "C" void func_00386E78(sGfx_6E78* self, sPartStrip_6D10* strips, int n)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00387EC0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sPtGfx_7EC0 {
+    char pad_0x0[0x5A00];
+    unsigned int bufAddr;           // 0x5A00
+};
+
+struct sPair_7EC0 {
+    int a;
+    int b;
+};
+
+struct sVtx_7EC0 {
+    sGifQuad q[3];                // 0x30 bytes
+};
+
+extern int D_004A43A0;
+extern sPair_7EC0 D_004A43A8[];
+extern char D_3A00[];
+extern char D_3A08[];
+
+// PORT: uncached (0x30000000) GIF/DMA packet pointers; 64-bit GS words are `ulong`.
+void func_00387EC0_impl(sPtGfx_7EC0* self, sVtx_7EC0** tbl, int start, int n, int ia, int ib, int flag, float fa, float fb) __asm__("func_00387EC0");
+void func_00387EC0_impl(sPtGfx_7EC0* self, sVtx_7EC0** tbl, int start, int n, int ia, int ib, int flag, float fa, float fb)
+{
+    unsigned int addr = (D_004A43A0 ? (unsigned int)D_3A00 : (unsigned int)D_3A08) >> 3;
+    int a;
+    long b;
+    D_004A43A0 = 0;
+    if (flag) {
+        a = 0x5C;
+        b = 0x412;
+    } else {
+        a = 4;
+        b = 0x41F;
+    }
+    unsigned long* p = (unsigned long*)(self->bufAddr | 0x30000000);
+    if (n != 0) {
+        do {
+            unsigned long prim = ((unsigned long)a << 47) | ((unsigned long)0x8000 << 31);
+            int c = n < 0x25 ? n : 0x24;
+            int lim = 0x36 - start;
+            int m = c < lim ? c : lim;
+            int r = c - m;
+            sPair_7EC0 q = D_004A43A8[0];
+            if (r < 0) {
+                r = 0;
+            }
+            if (n <= c) {
+                q.a = (start + c - 2) % 0x36;
+                q.b = (start + c - 1) % 0x36;
+                if (r >= 2) {
+                    r -= 2;
+                } else {
+                    int m2 = m - 2;
+                    m = m2 + r;
+                    r = 0;
+                }
+            }
+            unsigned int unpackCmd = 0x6C000000;
+            p[0] = 0x10000003;
+            p[3] = (unsigned long)0xD805 << 47;
+            p[4] = (unsigned long)((c * 2) | 0x8000) | prim | ((unsigned long)0xC000 << 46);
+            p[6] = (long)(c * 3) | ((long)c << 32);
+            p[7] = *(unsigned int*)&fb | ((unsigned long)*(unsigned int*)&fa << 32);
+            p[1] = 0;
+            p[2] = (unsigned long)0x1000101 << 32;
+            p[5] = b;
+            p += 8;
+            unsigned int t = 2;
+            if (m != 0) {
+                p[0] = 0x10000001;
+                p[1] = 0;
+                p[2] = (unsigned long)0x1000101 << 32;
+                int m3 = m * 3;
+                unsigned int hm = (m3 << 16) | 0x8000;
+                p[3] = (unsigned long)((t | hm) | unpackCmd) << 32;
+                p[4] = (unsigned long)(m3 | 0x30000000) | ((unsigned long)(unsigned int)((int)tbl[ia] + start * 0x30) << 32);
+                p[5] = 0;
+                t = m3 + 2;
+                p += 6;
+            }
+            if (r != 0) {
+                p[0] = 0x10000001;
+                p[1] = 0;
+                p[2] = (unsigned long)0x1000101 << 32;
+                int r3 = r * 3;
+                unsigned int hr = (r3 << 16) | 0x8000;
+                p[3] = (unsigned long)((t | hr) | unpackCmd) << 32;
+                p[4] = (unsigned long)(r3 | 0x30000000) | ((unsigned long)(unsigned int)tbl[ia] << 32);
+                p[5] = 0;
+                t += r3;
+                p += 6;
+            }
+            if (q.a >= 0) {
+                p[0] = 0x10000007;
+                p[1] = 0;
+                p[2] = (unsigned long)0x1000101 << 32;
+                unsigned int lo = t | 0x68000;
+                p[3] = (unsigned long)(lo | unpackCmd) << 32;
+                t += 6;
+                p += 4;
+                *(sVtx_7EC0*)p = tbl[ia][q.a];
+                p += 6;
+                *(sVtx_7EC0*)p = tbl[ia][q.b];
+                p += 6;
+            }
+            if (m != 0) {
+                p[0] = 0x10000001;
+                p[1] = 0;
+                p[2] = (unsigned long)0x1000101 << 32;
+                int m3 = m * 3;
+                unsigned int hm = (m3 << 16) | 0x8000;
+                p[3] = (unsigned long)((t | hm) | unpackCmd) << 32;
+                p[4] = (unsigned long)(m3 | 0x30000000) | ((unsigned long)(unsigned int)((int)tbl[ib] + start * 0x30) << 32);
+                p[5] = 0;
+                t += m3;
+                p += 6;
+            }
+            if (r != 0) {
+                p[0] = 0x10000001;
+                p[1] = 0;
+                p[2] = (unsigned long)0x1000101 << 32;
+                int r3 = r * 3;
+                unsigned int hr = (r3 << 16) | 0x8000;
+                p[3] = (unsigned long)((t | hr) | unpackCmd) << 32;
+                p[4] = (unsigned long)(r3 | 0x30000000) | ((unsigned long)(unsigned int)tbl[ib] << 32);
+                p[5] = 0;
+                t += r3;
+                p += 6;
+            }
+            if (q.a >= 0) {
+                p[0] = 0x10000007;
+                p[1] = 0;
+                p[2] = (unsigned long)0x1000101 << 32;
+                unsigned int lo2 = t | 0x68000;
+                p[3] = (unsigned long)(lo2 | unpackCmd) << 32;
+                p += 4;
+                *(sVtx_7EC0*)p = tbl[ib][q.a];
+                p += 6;
+                *(sVtx_7EC0*)p = tbl[ib][q.b];
+                p += 6;
+            }
+            p[0] = 0x10000001;
+            p[1] = 0;
+            p[2] = 0;
+            p[3] = (unsigned long)(addr | 0x14000000) << 32;
+            p += 4;
+            fa += fb * (float)c;
+            n -= c;
+            if (n > 0) {
+                n += 1;
+                start = (start + c - 1) % 0x36;
+            }
+        } while (n != 0);
+    }
+    self->bufAddr = (unsigned int)p & 0x0FFFFFFF;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003883B8);

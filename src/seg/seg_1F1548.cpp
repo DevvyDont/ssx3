@@ -1160,9 +1160,236 @@ extern "C" void func_002F2D70_2D70(sPart_2D70* p, const sV2_2D70& pos, int n)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F3030);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int D_004A3AFC;
+struct sTun_3030 {
+    float v;
+};
+extern sTun_3030 D_004A4288_3030 __asm__("D_004A4288");
+extern sTun_3030 D_004A42EC_3030 __asm__("D_004A42EC");
+extern sTun_3030 D_004A42F0_3030 __asm__("D_004A42F0");
+extern sTun_3030 D_004A42F4_3030 __asm__("D_004A42F4");
+extern sTun_3030 D_004A42F8_3030 __asm__("D_004A42F8");
+extern sTun_3030 D_004A42FC_3030 __asm__("D_004A42FC");
+extern sTun_3030 D_004A4300_3030 __asm__("D_004A4300");
+extern sTun_3030 D_004A4304_3030 __asm__("D_004A4304");
+extern sTun_3030 D_004A4308_3030 __asm__("D_004A4308");
+extern sTun_3030 D_004A430C_3030 __asm__("D_004A430C");
+extern sTun_3030 D_004A4310_3030 __asm__("D_004A4310");
+extern sTun_3030 D_004A4314_3030 __asm__("D_004A4314");
+extern sTun_3030 D_004A55B8_3030 __asm__("D_004A55B8");
+extern sTun_3030 D_004A55BC_3030 __asm__("D_004A55BC");
 
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float sqrtf_3030(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+struct sV2_3030 {
+    float x, y;
+    sV2_3030() {}
+    sV2_3030(float ax, float ay) : x(ax), y(ay) {}
+    sV2_3030(const sV2_3030& o) : x(o.x), y(o.y) {}
+    float Length() const { return sqrtf_3030(x * x + y * y); }
+};
+
+struct sPart_3030 {
+    int dead;
+    int active;
+    sV2_3030 pos;
+    sV2_3030 size;
+    sV2_3030 vel;
+    float age;
+    float life;
+    char pad28[0x40 - 0x28];
+    float f40;
+    float f44;
+    float f48;
+};
+
+static inline float randf_3030()
+{
+    D_004A3AFC = ((D_004A3AFC * 0x18FCD + 0xE9507C) & 0x7FFFFF) | 0x3F800000;
+    return *(float*)&D_004A3AFC - 1.0f;
+}
+
+static inline float randRange_3030(float lo, float hi)
+{
+    return lo + (hi - lo) * randf_3030();
+}
+
+static inline float clamp_3030(float v, float lo, float hi)
+{
+    return (v >= lo) ? (v <? hi) : lo; // PORT: g++ <? operator
+}
+
+static inline sV2_3030 operator*(const sV2_3030& a, float s)
+{
+    return sV2_3030(a.x * s, a.y * s);
+}
+
+static inline float Length2_3030(const float& x, const float& y)
+{
+    return sqrtf_3030(x * x + y * y);
+}
+
+static inline sV2_3030 Normalize_3030(const sV2_3030& v)
+{
+    float len = v.Length();
+    if (len != 0.0f) {
+        float inv = 1.0f / len;
+        return sV2_3030(v.x * inv, v.y * inv);
+    }
+    return v;
+}
+
+static inline void addRand_3030(float& v, float lo, float hi)
+{
+    v += randRange_3030(lo, hi);
+}
+
+extern "C" void func_002F3030_3030(sPart_3030* p, float t) __asm__("func_002F3030");
+extern "C" void func_002F3030_3030(sPart_3030* p, float t)
+{
+    p->f40 -= 0.016666667f;
+    p->age += 0.016666667f;
+    if (p->f40 < 0.0f) {
+        p->f40 = randRange_3030(D_004A42FC_3030.v, D_004A4300_3030.v);
+        p->f44 = randRange_3030(D_004A42EC_3030.v, D_004A42F0_3030.v);
+        p->f48 = randRange_3030(D_004A42F4_3030.v, D_004A42F8_3030.v);
+    }
+    p->vel.x += p->f44;
+    p->vel.y += p->f48;
+    sV2_3030 dir = Normalize_3030(sV2_3030(p->pos.x - D_004A55B8_3030.v, p->pos.y - D_004A55BC_3030.v));
+    float k = clamp_3030((t - D_004A4288_3030.v) / (120.0f - D_004A4288_3030.v), 0.0f, 1.0f);
+    {
+        sV2_3030 a = dir * k * randRange_3030(D_004A430C_3030.v, D_004A4310_3030.v);
+        p->vel.x += a.x;
+        p->vel.y += a.y;
+    }
+    float speed = Length2_3030(p->vel.x, p->vel.y);
+    addRand_3030(p->size.x, D_004A4304_3030.v, D_004A4308_3030.v);
+    addRand_3030(p->size.y, D_004A4304_3030.v, D_004A4308_3030.v);
+    float maxSpeed = D_004A4314_3030.v;
+    if (speed > maxSpeed) {
+        sV2_3030& v = p->vel;
+        v = (speed != 0.0f ? sV2_3030(p->vel.x * (1.0f / speed), p->vel.y * (1.0f / speed)) : v) * maxSpeed;
+    }
+    p->pos.x += p->vel.x;
+    p->pos.y += p->vel.y;
+    if (p->age >= p->life || p->pos.x + p->size.x <= 0.0f || 640.0f <= p->pos.x - p->size.x
+        || p->pos.y + p->size.y <= 0.0f || 480.0f <= p->pos.y - p->size.y) {
+        p->active = 0;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F3418);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sV2_3418 {
+    float x, y;
+};
+struct sV3_3418 {
+    float x, y, z;
+};
+struct sV4_3418 {
+    float x, y, z, w;
+};
+struct sPos_3418 {
+    float x, y, z, w;
+    float u, v;
+    sPos_3418(float ax, float ay, const float& az = 0.0f, const float& aw = 1.0f) {
+        u = ax;
+        v = ay;
+        x = ax;
+        y = ay;
+        w = aw;
+        z = az;
+    }
+};
+
+class cGfx_3418 {
+public:
+    char pad[0x10D8];
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
+    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
+    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
+    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
+    virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23();
+    virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27();
+    virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31();
+    virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35();
+    virtual void v36(); virtual void v37(); virtual void v38(); virtual void v39();
+    virtual void v40(); virtual void v41(); virtual void v42(); virtual void v43();
+    virtual void v44(); virtual void v45(); virtual void v46(); virtual void v47();
+    virtual void v48(); virtual void v49(); virtual void v50(); virtual void v51();
+    virtual void v52(); virtual void v53(); virtual void v54(); virtual void v55();
+    virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59();
+    virtual void v60(); virtual void v61(); virtual void v62(); virtual void v63();
+    virtual void v64(); virtual void v65(); virtual void v66(); virtual void v67();
+    virtual void v68(); virtual void v69(); virtual void v70(); virtual void v71();
+    virtual void v72(); virtual void v73(); virtual void v74(); virtual void v75();
+    virtual void v76(); virtual void v77();
+    virtual void DrawX(float, const sPos_3418&, const sV3_3418&, const sV2_3418&, const sV2_3418&, const sV4_3418&, int);
+};
+
+struct sWorld_3418 {
+    char pad[0xE84];
+    char* fE84;
+    char pad2[0x105C - 0xE88];
+    int f105C;
+    int GetFB() { return f105C; }
+};
+
+struct sEm_3418 {
+    int f0, f4;
+    float f8, fC;
+    sV3_3418 f10;
+    float pad1C_;
+    float f20, f24;
+    sV4_3418 col;
+    float f38, f3C;
+};
+
+extern sWorld_3418* D_004A289C_3418 __asm__("D_004A289C");
+extern cGfx_3418* D_004A5B80_3418 __asm__("D_004A5B80");
+extern float D_004A5510_3418 __asm__("D_004A5510");
+extern float D_004A5514_3418 __asm__("D_004A5514");
+extern int D_004A5518_3418 __asm__("D_004A5518");
+extern float D_004A5520_3418 __asm__("D_004A5520");
+extern float D_004A5524_3418 __asm__("D_004A5524");
+extern int D_004A5528_3418 __asm__("D_004A5528");
+
+extern "C" void func_002F3418(sEm_3418* self, const sV2_3418* off)
+{
+    if (D_004A5518_3418 == 0) {
+        D_004A5510_3418 = 0.0f;
+        D_004A5518_3418 = 1;
+        D_004A5514_3418 = 0.0f;
+    }
+    if (D_004A5528_3418 == 0) {
+        D_004A5528_3418 = 1;
+        D_004A5520_3418 = 1.0f;
+        D_004A5524_3418 = 1.0f;
+    }
+    float r = self->f20 / self->f24;
+    sV4_3418 col = self->col;
+    r = 1.0f - r * r;
+    col.x *= r;
+    *(short*)(D_004A289C_3418->fE84 + 0x10) = D_004A289C_3418->GetFB();
+    D_004A5B80_3418->DrawX((self->f38 + self->f20 / self->f24 * self->f3C) * 0.01745329424738884f, sPos_3418(self->f8 + off->x, self->fC + off->y), self->f10, *(sV2_3418*)&D_004A5510_3418, *(sV2_3418*)&D_004A5520_3418, col, 1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F3550);
