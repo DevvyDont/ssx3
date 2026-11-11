@@ -631,3 +631,6 @@ rom:0x2C5458 reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xCC8
 // visualfx/lensfx func_002ED490: D_004FA3A8 is D_004FA370+0x38 (slot 0's second vec4).
 rom:0x1EEA38 reloc:MIPS_HI16 symbol:D_004FA370 addend:0x38
 rom:0x1EEA40 reloc:MIPS_LO16 symbol:D_004FA370 addend:0x38
+// ealib/seg_2B4578 func_003CD2B0: D_0044EBF0 is D_0044EBE8+0x8 (the .val field of the 12-byte table; its only use).
+rom:0x2CE354 reloc:MIPS_HI16 symbol:D_0044EBE8 addend:0x8
+rom:0x2CE358 reloc:MIPS_LO16 symbol:D_0044EBE8 addend:0x8
