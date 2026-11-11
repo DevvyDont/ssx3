@@ -162,7 +162,44 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B3CD8);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3D00);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3D40);
+#ifdef SKIP_ASM
+void *func_003B3D40(int *arg0) {
+    int *temp_4;
+    int *var_5;
+    int temp_2;
+    int var_2;
+    unsigned short var_2_2;
+    void *var_6;
+
+    var_5 = arg0;
+    var_6 = 0;
+    if (var_5 != 0) {
+        if (*(unsigned char *)var_5 == 0x69) {
+            var_6 = (char *)var_5 + 0x10;
+            var_2_2 = *(unsigned short *)((char *)var_5 + 6);
+            goto block_10;
+        } else {
+loop_5:
+            var_2 = *var_5;
+            temp_2 = var_2 >> 8;
+            temp_4 = (temp_2 != 0) ? (int *)((char *)var_5 + temp_2) : 0;
+            var_5 = temp_4;
+            if (temp_4 != 0) {
+                if (*(unsigned char *)temp_4 != 0x69) {
+                    goto loop_5;
+                }
+                var_2_2 = *(unsigned short *)((char *)temp_4 + 6);
+                var_6 = (char *)temp_4 + 0x10;
+block_10:
+                if (!(var_2_2 & 0x10)) var_6 = 0;
+            }
+        }
+    }
+    return var_6;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3DA8);
