@@ -8671,7 +8671,79 @@ extern "C" int func_002A1E20(void* self, unsigned int x)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A1E68);
+#ifdef SKIP_ASM
+extern int D_00536730[];
+
+extern "C" int func_002A1E68(void *self, void *obj)
+{
+    int r;
+    int v;
+
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (D_00535C11[0] == 2) {
+        if (func_002A4078(self) != 0) {
+            v = *(int *)((char *)obj + 0xEC);
+            if (v == 0) {
+                r = 1;
+            } else if (v == 1) {
+                r = 2;
+            } else if (v == 2) {
+                r = 4;
+            } else if (v == 3) {
+                r = 8;
+            } else {
+                r = (v == 4) ? 0x10 : 0x200;
+            }
+        } else {
+            v = *(int *)((char *)obj + 0xEC);
+            r = (v == 0) ? 1 : 2;
+        }
+        return r;
+    } else {
+        // Retail selects on a condition the compiler had folded to 1 (`li 1; movn` in case 5): a local flag that is
+        // constant here, e.g. a feature toggle. Evaluating `mode != 2` instead gives a run-time xori (99.00).
+        int notTwo = 1;
+        switch (D_00536730[0]) {
+        case 0:
+            r = 1;
+            break;
+        case 1:
+            r = 2;
+            break;
+        case 2:
+            r = 4;
+            break;
+        case 3:
+            r = 8;
+            break;
+        case 4:
+            r = 0x10;
+            break;
+        case 5:
+            r = notTwo ? 0x200 : 0x20;
+            break;
+        case 6:
+            r = 0x40;
+            break;
+        case 7:
+            r = 0x80;
+            break;
+        case 8:
+            r = 0x100;
+            break;
+        case 9:
+            r = 0x200;
+            break;
+        default:
+            r = 0;
+            break;
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A1FA0);

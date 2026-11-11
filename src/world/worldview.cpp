@@ -187,7 +187,33 @@ int func_003A9AB0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003A9AC0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int func_003A8618(void* self, int a1);
+extern void func_003A9BB8_9AC0(void* self, int sec, int box, int* ok) __asm__("func_003A9BB8");
+
+extern "C" int func_003A9AC0(void* vself, int box)
+{
+    char* self = (char*)vself;
+    char* cur = *(char**)(self + 8);
+    int ok;
+    unsigned i;
+    int off = *(int*)(cur + 0x18);
+    off *= 0x44;
+    if (*(unsigned short*)(off + *(int*)(self + 0x10)) != 0) {
+        if (func_003A8618(*(void**)self, *(int*)(cur + 0x18)) == 0)
+            return 0;
+    }
+    ok = 1;
+    for (i = 0; i < ((cWorldView*)self)->mSections->mNumSections; i++) {
+        if (*(int*)(self + 0x14 + i * 8) == 6)
+            func_003A9BB8_9AC0(self, *(int*)(*(char**)(self + 8) + i * 0x58 + 0x1C), box, &ok);
+    }
+    return ok;
+}
+#endif
 //100%
 INCLUDE_ASM("world/worldview", func_003A9BB8);
 #ifdef SKIP_ASM
