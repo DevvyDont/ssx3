@@ -13999,7 +13999,69 @@ void func_003CD260(B_D260 *b, int k) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CD2B0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Hc_D2B0 { int next; int bits; float val; };
+extern unsigned char D_0044E9E8_D2B0[][256] __asm__("D_0044E9E8");
+extern struct Hc_D2B0 D_0044EBE8_D2B0[] __asm__("D_0044EBE8");
+extern int f_D1F8_D2B0(char *, int) __asm__("func_003CD1F8");
+extern void f_D260_D2B0(char *, int) __asm__("func_003CD260");
+
+void func_003CD2B0_impl(char *bs, int flag, float *out, int stride) __asm__("func_003CD2B0");
+void func_003CD2B0_impl(char *bs, int flag, float *out, int stride) {
+    int state, pos, sym, n, i, p;
+
+    if (flag != 0) {
+        state = 0;
+        pos = 0;
+        do {
+        sym = D_0044E9E8_D2B0[state][*(int *)(bs + 4) & 0xFF];
+        state = (D_0044EBE8_D2B0 + sym)->next;
+        f_D260_D2B0(bs, D_0044EBE8_D2B0[sym].bits);
+        if (sym >= 4) {
+            out[pos] = D_0044EBE8_D2B0[sym].val;
+            pos += stride;
+        } else if (sym >= 2) {
+            n = f_D1F8_D2B0(bs, 6) + 7;
+            if (stride * n + pos > 0x6C) {
+                n = (0x6C - pos) / stride;
+            }
+            for (i = 0; i < n; i++) {
+                out[pos] = 0.0f;
+                pos += stride;
+            }
+        } else {
+            i = 7;
+            while (f_D1F8_D2B0(bs, 1) == 1) {
+                i++;
+            }
+            if (f_D1F8_D2B0(bs, 1) == 1) {
+                out[pos] = (float)i;
+            } else {
+                out[pos] = (float)-i;
+            }
+            pos += stride;
+        }
+        } while (pos < 0x6C);
+    } else {
+        for (i = 0; i < 0x6C; i += stride) {
+            pos = *(int *)(bs + 4) & 3;
+            if (pos == 1) {
+                out[i] = -2.0f;
+                f_D260_D2B0(bs, 2);
+            } else if (pos == 3) {
+                out[i] = 2.0f;
+                f_D260_D2B0(bs, 2);
+            } else {
+                out[i] = 0.0f;
+                f_D260_D2B0(bs, 1);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CD518);

@@ -563,7 +563,236 @@ extern "C" void func_001009E0(char* self, sPad_09E0* pad)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00100B90);
+#ifdef SKIP_ASM
+struct sV4_0B90 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sPad_0B90 {
+    unsigned int pad0 : 20;
+    int b20 : 6;
+    unsigned int pad26 : 6;
+    int w0 : 6;
+};
+
+struct sRec_0B90 {
+    int active;
+    int pad4;
+    float dist;
+    float angle;
+    char pad10[0x24 - 0x10];
+};
+
+class cObj_0B90;
+typedef void (cObj_0B90::*Fn_0B90)();
+extern "C" Fn_0B90 D_0043CF20_0B90[4] __asm__("D_0043CF20");
+
+class cAI_0B90 {
+public:
+    virtual void vm1();
+    virtual sV4_0B90* GetVel();
+    virtual void v2();
+    virtual void v3();
+    virtual sV4_0B90* GetPos();
+    virtual void v5();
+    virtual void v6();
+    virtual int Busy();
+};
+
+class cRiderBase_0B90 {
+public:
+    char pad[0x6C0];
+};
+
+class cRider_0B90 : public cRiderBase_0B90, public cAI_0B90 {
+};
+
+struct sRiders_0B90 {
+    char pad[0x28];
+    cRider_0B90* riders[1];
+};
+
+struct sGame_0B90 {
+    char pad[0xC];
+    sRiders_0B90* list;
+};
+
+struct sWorld_0B90 {
+    char pad[0x84];
+    sGame_0B90* game;
+};
+
+struct sCtl_0B90 {
+    float speed;
+    char pad4[0x80 - 4];
+    int target;
+};
+
+extern sWorld_0B90* D_004A28A8_0B90 __asm__("D_004A28A8");
+
+extern "C" void func_00100610_0B90(sV4_0B90*, void*) __asm__("func_00100610");
+extern "C" float func_00100348_0B90(void*, sV4_0B90*) __asm__("func_00100348");
+extern "C" void func_0010C140_0B90(void*, void*) __asm__("func_0010C140");
+extern "C" void func_0010C0A8_0B90(void*, void*) __asm__("func_0010C0A8");
+extern "C" int func_0010B980_0B90(char* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6) __asm__("func_0010B980");
+extern "C" int func_0010BD10_0B90(char* self, int* out) __asm__("func_0010BD10");
+extern "C" float func_0031C228(float);
+extern "C" void func_00112A50(void*, int);
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_0B90(const sV4_0B90& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only FPU asm (absolute value).
+static inline float Abs_0B90(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2-only FPU asm (float -> int -> float truncation).
+static inline float Trunc_0B90(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    return t;
+}
+
+static inline float Floor_0B90(float x)
+{
+    float t = Trunc_0B90(x);
+    if (x < t)
+        t -= 1.0f;
+    return t;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sV4_0B90 Norm_0B90(const sV4_0B90& v)
+{
+    sV4_0B90 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sV4_0B90 Add_0B90(const sV4_0B90& a, const sV4_0B90& b)
+{
+    sV4_0B90 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_0B90 Scale_0B90(const sV4_0B90& v, float s)
+{
+    sV4_0B90 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+static inline sRec_0B90* Rec_0B90(char* self) { return &((sRec_0B90*)*(char**)(self + 0x18))[*(int*)(self + 0xE70)]; }
+
+extern "C" void func_00100B90(char* self, sPad_0B90* pad)
+{
+    int below, o3, o4, o5, o6;
+    int z;
+    sRec_0B90* rec = Rec_0B90(self);
+    sRiders_0B90* list = D_004A28A8_0B90->game->list;
+    sCtl_0B90* ctl = (sCtl_0B90*)(self + 0xDF0);
+    cRider_0B90* tgt = list->riders[ctl->target];
+    float diff = rec->angle - *(float*)(*(char**)(self + 0x18) + 0x4CC);
+    float ang = diff - Floor_0B90(diff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+    float mySpd = Len_0B90(*(sV4_0B90*)(*(char**)(self + 0x18) + 0x1E0));
+    float absAng = Abs_0B90(ang);
+    // Angle thresholds: 90, 50 and 15 degrees in radians.
+    float behindAng = 1.5707964897155762f;
+    float wideAng = 0.8726646900177002f;
+    float narrowAng = 0.2617994248867035f;
+    float hisSpd = Len_0B90(*tgt->GetVel());
+    float steer;
+    if (absAng > behindAng) {
+        sV4_0B90 v;
+        func_00100610_0B90(&v, self);
+        steer = func_00100348_0B90(self, &v);
+        if (Rec_0B90(self)->dist > 200.0f && hisSpd < mySpd)
+            pad->w0 = 0x1F;
+    } else {
+        sV4_0B90 v = Norm_0B90(*tgt->GetVel());
+        sV4_0B90 w = Add_0B90(*tgt->GetPos(), Scale_0B90(v, 300.0f));
+        if (absAng < wideAng) {
+            if (absAng < narrowAng)
+                func_0010C140_0B90(self, pad);
+            else
+                func_0010C0A8_0B90(self, pad);
+        } else if (mySpd < hisSpd) {
+            func_0010C0A8_0B90(self, pad);
+        } else if (hisSpd < mySpd) {
+            pad->w0 = 0x1F;
+        }
+        steer = func_00100348_0B90(self, &w);
+    }
+    pad->b20 = (int)(steer * 31.0f);
+    z = 1;
+    ctl = (sCtl_0B90*)(self + 0xDF0);
+    if (func_0010B980_0B90(self, &ctl->speed, &below, &o3, &o4, &o5, &o6)) {
+        *(int*)(self + 0xE70) = -1;
+        *(Fn_0B90*)(self + 0xF44) = D_0043CF20_0B90[0];
+        *(short*)(self + 0xF38) = 0;
+    } else if (!func_0010BD10_0B90(self, &z)) {
+        *(Fn_0B90*)(self + 0xF44) = D_0043CF20_0B90[1];
+        *(short*)(self + 0xF38) = 1;
+    } else if (!z && !list->riders[ctl->target]->Busy()) {
+        *(Fn_0B90*)(self + 0xF44) = D_0043CF20_0B90[2];
+        *(short*)(self + 0xF38) = 2;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", func_00100F88);

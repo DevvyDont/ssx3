@@ -3038,7 +3038,118 @@ int func_00289DE0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/ssxAudio", func_00289DF0);
+#ifdef SKIP_ASM
+extern "C" int func_003DFAF0(int h);
+extern "C" int ASYNCFILE_release(int h, int a, int b);
+extern "C" void func_0028A298(void* self);
+
+struct sRing289DF0 {
+    int size;
+    int* data;
+    int head;
+    int tail;
+};
+
+struct sAsyncVt289DF0 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, int, int, char*, int, int);
+};
+
+struct sAsync289DF0 {
+    int handle;            // 0x0
+    int busy;              // 0x4
+    int slot;              // 0x8
+    char names[6][0x40];   // 0xC
+    char pad18C[0x18C - 0xC - 6 * 0x40];
+    sRing289DF0 q18C;      // 0x18C
+    sRing289DF0 q19C;      // 0x19C
+    sRing289DF0 q1AC;      // 0x1AC
+    sRing289DF0 q1BC;      // 0x1BC
+    int pad1CC[2];
+    // vptr at 0x1D4
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05(int id, int a, int mode, char* name, int b, int c);
+};
+
+extern "C" void func_00289DF0(void* self, int flush)
+{
+    sAsync289DF0* s = (sAsync289DF0*)self;
+    int id = -1;
+    {
+        sRing289DF0* q = &s->q18C;
+        if (s->q18C.head != s->q18C.tail) {
+            int v = q->data[q->tail];
+            if (++s->q18C.tail >= s->q18C.size)
+                s->q18C.tail = 0;
+            id = v;
+        }
+    }
+    int slot;
+    {
+        sRing289DF0* q = &s->q19C;
+        if (s->q19C.head == s->q19C.tail) {
+            slot = -1;
+        } else {
+            int v = q->data[q->tail];
+            if (++s->q19C.tail >= s->q19C.size)
+                s->q19C.tail = 0;
+            slot = v;
+        }
+    }
+    int kind;
+    {
+        sRing289DF0* q = &s->q1AC;
+        if (s->q1AC.head == s->q1AC.tail) {
+            kind = -1;
+        } else {
+            int v = q->data[q->tail];
+            if (++s->q1AC.tail >= s->q1AC.size)
+                s->q1AC.tail = 0;
+            kind = v;
+        }
+    }
+    {
+        sRing289DF0* q = &s->q1BC;
+        if (s->q1BC.head != s->q1BC.tail) {
+            int v = q->data[q->tail];
+            if (++s->q1BC.tail >= s->q1BC.size)
+                s->q1BC.tail = 0;
+        }
+    }
+    if (s->busy) {
+        switch (kind) {
+        case 0:
+        case 2: {
+            int r = func_003DFAF0(s->handle);
+            ASYNCFILE_release(s->handle, 0, 0);
+            s->v05(id, -1, r == 1 ? 1 : 2, s->names[slot], 0, 0);
+            s->busy = 0;
+            break;
+        }
+        case 1: {
+            int r = func_003DFAF0(s->handle);
+            ASYNCFILE_release(s->handle, 0, 0);
+            s->v05(id, -1, r == 1 ? 1 : 2, s->names[slot], 0, 0);
+            s->busy = 0;
+            break;
+        }
+        }
+    }
+    if (flush) {
+        s->q18C.tail = s->q18C.head;
+        s->q19C.tail = s->q19C.head;
+        s->q1AC.tail = s->q1AC.head;
+        s->q1BC.tail = s->q1BC.head;
+    }
+    func_0028A298(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_0028A058);
