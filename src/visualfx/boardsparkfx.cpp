@@ -239,7 +239,28 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(cBoardSparkFX* self, int inChrg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardsparkfx", func_002DA8E8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/boardsparkfx_classes.h"
+
+cVbDtor002DA8E8::~cVbDtor002DA8E8()
+{
+    delete m20;
+    operator_delete((int*)m24);
+    operator_delete((int*)m28);
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor002DA8E8; expose it under the address-derived name.
+__asm__(".globl func_002DA8E8\n.type func_002DA8E8,@function\nfunc_002DA8E8 = _$_15cVbDtor002DA8E8\n.size func_002DA8E8,0x18C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor002DA8E8$13cRiderVbC_bsf = D_00488CB0\n"
+        "_vt$15cVbDtor002DA8E8$14cRiderVbBC_bsf = D_00459B90\n"
+        "_vt$15cVbDtor002DA8E8$12cRiderVb_bsf = D_00488CF8\n"
+        "_$_12cRiderVb_bsf = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardsparkfx", func_002DAA78);

@@ -85,7 +85,27 @@ extern "C" void* cBoardWakeFX_cBoardWakeFX(void* self, int inChrg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DCDA0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/boardwakefx_classes.h"
+
+cVbDtor002DCDA0::~cVbDtor002DCDA0()
+{
+    if (m0C != 0) cMemMan_free(m0C);
+    if (m10 != 0) cMemMan_free(m10);
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor002DCDA0; expose it under the address-derived name.
+__asm__(".globl func_002DCDA0\n.type func_002DCDA0,@function\nfunc_002DCDA0 = _$_15cVbDtor002DCDA0\n.size func_002DCDA0,0x184\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor002DCDA0$13cRiderVbC_bwf = D_00488DA8\n"
+        "_vt$15cVbDtor002DCDA0$14cRiderVbBC_bwf = D_00459B90\n"
+        "_vt$15cVbDtor002DCDA0$12cRiderVb_bwf = D_00488DF0\n"
+        "_$_12cRiderVb_bwf = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DCF28);
@@ -682,7 +702,28 @@ extern "C" void func_002DE398(char* self, sWakeVecE398* out)
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002DE4A8);
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DF1C8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/boardwakefx_classes.h"
+
+cVbDtor002DF1C8::~cVbDtor002DF1C8()
+{
+    delete[] m28;
+    if (m2C != 0) cMemMan_free(m2C);
+    if (m7C != 0) cMemMan_free(m7C);
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor002DF1C8; expose it under the address-derived name.
+__asm__(".globl func_002DF1C8\n.type func_002DF1C8,@function\nfunc_002DF1C8 = _$_15cVbDtor002DF1C8\n.size func_002DF1C8,0x1E8\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor002DF1C8$13cRiderVbC_bwf = D_00488360\n"
+        "_vt$15cVbDtor002DF1C8$14cRiderVbBC_bwf = D_00459B90\n"
+        "_vt$15cVbDtor002DF1C8$12cRiderVb_bwf = D_004883A8\n"
+        "_$_12cRiderVb_bwf = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DF3B0);
@@ -2295,7 +2336,25 @@ extern "C" void* func_002E3680(void* self, int inChrg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E37D0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/boardwakefx_classes.h"
+
+cVbDtor002E37D0::~cVbDtor002E37D0()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor002E37D0; expose it under the address-derived name.
+__asm__(".globl func_002E37D0\n.type func_002E37D0,@function\nfunc_002E37D0 = _$_15cVbDtor002E37D0\n.size func_002E37D0,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor002E37D0$13cRiderVbC_bwf = D_004889C8\n"
+        "_vt$15cVbDtor002E37D0$14cRiderVbBC_bwf = D_00459B90\n"
+        "_vt$15cVbDtor002E37D0$12cRiderVb_bwf = D_00488A10\n"
+        "_$_12cRiderVb_bwf = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3930);
@@ -3795,7 +3854,27 @@ extern "C" void* func_002E6320(void* self, int inChrg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E64C0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/boardwakefx_classes.h"
+
+cVbDtor002E64C0::~cVbDtor002E64C0()
+{
+    if (m3AC != 0) cMemMan_free(m3AC);
+    func_0037C720(D_004A289C, 0.0f);
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor002E64C0; expose it under the address-derived name.
+__asm__(".globl func_002E64C0\n.type func_002E64C0,@function\nfunc_002E64C0 = _$_15cVbDtor002E64C0\n.size func_002E64C0,0x17C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor002E64C0$13cRiderVbC_bwf = D_00488550\n"
+        "_vt$15cVbDtor002E64C0$14cRiderVbBC_bwf = D_00459B90\n"
+        "_vt$15cVbDtor002E64C0$12cRiderVb_bwf = D_00488598\n"
+        "_$_12cRiderVb_bwf = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E6640);

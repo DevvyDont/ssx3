@@ -85,7 +85,26 @@ extern "C" void* cBoardTrailFX_initialize(cBoardTrailFX* self, int inChrg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002E83F0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/boardtrailfx_classes.h"
+
+cVbDtor002E83F0::~cVbDtor002E83F0()
+{
+    if (m10 != 0) cMemMan_free(m10);
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor002E83F0; expose it under the address-derived name.
+__asm__(".globl func_002E83F0\n.type func_002E83F0,@function\nfunc_002E83F0 = _$_15cVbDtor002E83F0\n.size func_002E83F0,0x170\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor002E83F0$13cRiderVbC_btf = D_00488BB8\n"
+        "_vt$15cVbDtor002E83F0$14cRiderVbBC_btf = D_00459B90\n"
+        "_vt$15cVbDtor002E83F0$12cRiderVb_btf = D_00488C00\n"
+        "_$_12cRiderVb_btf = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002E8560);
@@ -1217,9 +1236,48 @@ extern "C" void func_002EAA28(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EAAE0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/boardtrailfx_classes.h"
 
+cBtf_2EAAE0::cBtf_2EAAE0()
+{
+    func_002EADC0_AAE0(this);
+}
+
+// PORT: cRiderVb_btf stands in for cRider; its constructor is the retail cRider_cRider.
+__asm__("__12cRiderVb_btf = cRider_cRider\n");
+
+// PORT: the compiler names this ctor __11cBtf_2EAAE0i; expose it under the address-derived name.
+__asm__(".globl func_002EAAE0\n.type func_002EAAE0,@function\nfunc_002EAAE0 = __11cBtf_2EAAE0i\n.size func_002EAAE0,0x180\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$11cBtf_2EAAE0$13cRiderVbC_btf = D_00488458\n"
+        "_vt$11cBtf_2EAAE0$14cRiderVbBC_btf = D_00459B90\n"
+        "_vt$11cBtf_2EAAE0$12cRiderVb_btf = D_004884A0\n");
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EAC60);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/boardtrailfx_classes.h"
+
+cVbDtor002EAC60::~cVbDtor002EAC60()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor002EAC60; expose it under the address-derived name.
+__asm__(".globl func_002EAC60\n.type func_002EAC60,@function\nfunc_002EAC60 = _$_15cVbDtor002EAC60\n.size func_002EAC60,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor002EAC60$13cRiderVbC_btf = D_00488458\n"
+        "_vt$15cVbDtor002EAC60$14cRiderVbBC_btf = D_00459B90\n"
+        "_vt$15cVbDtor002EAC60$12cRiderVb_btf = D_004884A0\n"
+        "_$_12cRiderVb_btf = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EADC0__FPv);

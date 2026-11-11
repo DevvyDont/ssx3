@@ -5548,7 +5548,84 @@ extern "C" void func_00108F88(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00108FA8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "seg/seg_1218_classes.h"
+
+// Compiler-generated: the composite's parts are destroyed in reverse order (the out-of-line part destructors
+// are called, the others are inlined), then the cRider virtual base when this is the most-derived object.
+// Needs -fno-rtti for this unit: the retail vtables carry no typeinfo pointer, and every level here stores
+// cRider's own 0x6D0 vtable (D_00459B90), which g++ only shares between classes without RTTI.
+cRiderE_108C80::~cRiderE_108C80()
+{
+}
+
+// PORT: the compiler names these dtors _$_<len><Class>; map them to the address-derived names.
+__asm__(".globl func_00108FA8\n.type func_00108FA8,@function\nfunc_00108FA8 = _$_14cRiderE_108C80\n.size func_00108FA8,0x17C0\n");
+
+__asm__("_$_12cRiderVb_s12 = func_0011B978\n"
+        "_$_15cCompPart02_s12 = func_00136AD0\n"
+        "_$_15cCompPart20_s12 = func_002DCDA0\n"
+        "_$_15cCompPart21_s12 = func_002DA8E8\n"
+        "_$_15cCompPart22_s12 = func_002E83F0\n"
+        "_$_15cCompPart23_s12 = func_002E64C0\n"
+        "_$_15cCompPart24_s12 = func_002EAC60\n"
+        "_$_15cCompPart25_s12 = func_002EF530\n"
+        "_$_15cCompPart26_s12 = func_002D4A70\n"
+        "_$_15cCompPart27_s12 = func_002E37D0\n"
+        "_$_15cCompPart28_s12 = func_002DF1C8\n"
+        "_$_15cCompPart29_s12 = func_002F0FE8\n"
+        "_$_15cCompPart30_s12 = func_002F6388\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$14cRiderE_108C80 = D_004585F0\n"
+        "_vt$14cRiderE_108C80$13cRiderVbC_s12 = D_00458618\n"
+        "_vt$14cRiderE_108C80$12cRiderVb_s12 = D_00458660\n"
+        "_vt$9cComp_s12 = D_00458710\n"
+        "_vt$9cComp_s12$13cRiderVbC_s12 = D_00458738\n"
+        "_vt$14cRiderVbB0_s12 = D_00459B90\n"
+        "_vt$9cComp_s12$12cRiderVb_s12 = D_00458780\n"
+        "_vt$15cCompPart19_s12$13cRiderVbC_s12 = D_00458928\n"
+        "_vt$15cCompPart19_s12$12cRiderVb_s12 = D_00458970\n"
+        "_vt$15cCompPart18_s12$13cRiderVbC_s12 = D_00458D08\n"
+        "_vt$15cCompPart18_s12$12cRiderVb_s12 = D_00458D50\n"
+        "_vt$15cCompPart17_s12$13cRiderVbC_s12 = D_00458830\n"
+        "_vt$15cCompPart17_s12$12cRiderVb_s12 = D_00458878\n"
+        "_vt$15cCompPart16_s12$13cRiderVbC_s12 = D_00458B18\n"
+        "_vt$15cCompPart16_s12$12cRiderVb_s12 = D_00458B60\n"
+        "_vt$15cCompPart15_s12$13cRiderVbC_s12 = D_00458A20\n"
+        "_vt$15cCompPart15_s12$12cRiderVb_s12 = D_00458A68\n"
+        "_vt$15cCompPart14_s12$13cRiderVbC_s12 = D_00458C10\n"
+        "_vt$15cCompPart14_s12$12cRiderVb_s12 = D_00458C58\n"
+        "_vt$15cCompPart13_s12$13cRiderVbC_s12 = D_00458E00\n"
+        "_vt$15cCompPart13_s12$12cRiderVb_s12 = D_00458E48\n"
+        "_vt$15cCompPart12_s12$13cRiderVbC_s12 = D_00458EF8\n"
+        "_vt$15cCompPart12_s12$12cRiderVb_s12 = D_00458F40\n"
+        "_vt$15cCompPart11_s12$13cRiderVbC_s12 = D_00458FF0\n"
+        "_vt$15cCompPart11_s12$12cRiderVb_s12 = D_00459038\n"
+        "_vt$15cCompPart10_s12$13cRiderVbC_s12 = D_004590E8\n"
+        "_vt$15cCompPart10_s12$12cRiderVb_s12 = D_00459130\n"
+        "_vt$15cCompPart09_s12$13cRiderVbC_s12 = D_004591E0\n"
+        "_vt$15cCompPart09_s12$12cRiderVb_s12 = D_00459228\n"
+        "_vt$15cCompPart08_s12$13cRiderVbC_s12 = D_004592D8\n"
+        "_vt$15cCompPart08_s12$12cRiderVb_s12 = D_00459320\n"
+        "_vt$15cCompPart07_s12$13cRiderVbC_s12 = D_004593D0\n"
+        "_vt$15cCompPart07_s12$12cRiderVb_s12 = D_00459418\n"
+        "_vt$15cCompPart06_s12$13cRiderVbC_s12 = D_004594C8\n"
+        "_vt$15cCompPart06_s12$12cRiderVb_s12 = D_00459510\n"
+        "_vt$15cCompPart05_s12$13cRiderVbC_s12 = D_004595C0\n"
+        "_vt$15cCompPart05_s12$12cRiderVb_s12 = D_00459608\n"
+        "_vt$15cCompPart04_s12$13cRiderVbC_s12 = D_004598A8\n"
+        "_vt$15cCompPart04_s12$12cRiderVb_s12 = D_004598F0\n"
+        "_vt$15cCompPart03_s12$13cRiderVbC_s12 = D_004596B8\n"
+        "_vt$15cCompPart03_s12$12cRiderVb_s12 = D_00459700\n"
+        "_vt$15cCompPart01_s12$13cRiderVbC_s12 = D_004599A0\n"
+        "_vt$15cCompPart01_s12$12cRiderVb_s12 = D_004599E8\n"
+        "_vt$15cCompPart00_s12$13cRiderVbC_s12 = D_00459A98\n"
+        "_vt$15cCompPart00_s12$12cRiderVb_s12 = D_00459AE0\n");
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_0010A768);

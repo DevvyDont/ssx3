@@ -760,7 +760,25 @@ extern "C" void* func_002F6238(void* self, int inChrg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6388);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/worldlightman_classes.h"
+
+cVbDtor002F6388::~cVbDtor002F6388()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor002F6388; expose it under the address-derived name.
+__asm__(".globl func_002F6388\n.type func_002F6388,@function\nfunc_002F6388 = _$_15cVbDtor002F6388\n.size func_002F6388,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor002F6388$13cRiderVbC_wlm = D_004886E0\n"
+        "_vt$15cVbDtor002F6388$14cRiderVbBC_wlm = D_00459B90\n"
+        "_vt$15cVbDtor002F6388$12cRiderVb_wlm = D_00488728\n"
+        "_$_12cRiderVb_wlm = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F64E8__FPv);

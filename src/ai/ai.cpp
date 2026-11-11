@@ -8767,5 +8767,25 @@ extern "C" void* func_00136980(void* self, int inChrg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00136AD0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/ai_classes.h"
+
+cVbDtor00136AD0::~cVbDtor00136AD0()
+{
+    delete m44;
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00136AD0; expose it under the address-derived name.
+__asm__(".globl func_00136AD0\n.type func_00136AD0,@function\nfunc_00136AD0 = _$_15cVbDtor00136AD0\n.size func_00136AD0,0x170\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00136AD0$12cRiderVbC_ai = D_004597B0\n"
+        "_vt$15cVbDtor00136AD0$13cRiderVbBC_ai = D_00459B90\n"
+        "_vt$15cVbDtor00136AD0$11cRiderVb_ai = D_004597F8\n"
+        "_$_17cVbMember00136AD0 = func_00329970\n"
+        "_$_11cRiderVb_ai = func_0011B978\n");
+#endif
 

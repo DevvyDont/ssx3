@@ -739,9 +739,49 @@ extern "C" void func_002EF378(const char* name)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF3B0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/renderstateman_classes.h"
 
+cRsm_2EF3B0::cRsm_2EF3B0()
+{
+    cRsmItem_2EF3B0** slot = &items;
+    *slot = new (D_00487B78, 0, 0) cRsmItem_2EF3B0[25];
+    func_002EF6A0_F3B0(this);
+}
+
+// PORT: the compiler names this ctor __11cRsm_2EF3B0i; expose it under the address-derived name.
+__asm__(".globl func_002EF3B0\n.type func_002EF3B0,@function\nfunc_002EF3B0 = __11cRsm_2EF3B0i\n.size func_002EF3B0,0x180\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("__12cRiderVb_rsm = cRider_cRider\n"
+        "_vt$11cRsm_2EF3B0$13cRiderVbC_rsm = D_004888D0\n"
+        "_vt$11cRsm_2EF3B0$14cRiderVbBC_rsm = D_00459B90\n"
+        "_vt$11cRsm_2EF3B0$12cRiderVb_rsm = D_00488918\n");
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF530);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/renderstateman_classes.h"
+
+cVbDtor002EF530::~cVbDtor002EF530()
+{
+    if (m04 != 0) cMemMan_free(m04);
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor002EF530; expose it under the address-derived name.
+__asm__(".globl func_002EF530\n.type func_002EF530,@function\nfunc_002EF530 = _$_15cVbDtor002EF530\n.size func_002EF530,0x170\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor002EF530$13cRiderVbC_rsm = D_004888D0\n"
+        "_vt$15cVbDtor002EF530$14cRiderVbBC_rsm = D_00459B90\n"
+        "_vt$15cVbDtor002EF530$12cRiderVb_rsm = D_00488918\n"
+        "_$_12cRiderVb_rsm = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF6A0);

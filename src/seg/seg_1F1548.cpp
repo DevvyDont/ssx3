@@ -313,9 +313,46 @@ extern "C" void func_002F0CD0(sMgr_0CD0* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F0E88);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "seg/seg_1F1548_classes.h"
 
+cSeg_2F0E88::cSeg_2F0E88()
+{
+    func_002F1148_0E88(this);
+}
+
+// PORT: the compiler names this ctor __11cSeg_2F0E88i; expose it under the address-derived name.
+__asm__(".globl func_002F0E88\n.type func_002F0E88,@function\nfunc_002F0E88 = __11cSeg_2F0E88i\n.size func_002F0E88,0x160\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("__12cRiderVb_s1f = cRider_cRider\n"
+        "_vt$11cSeg_2F0E88$13cRiderVbC_s1f = D_004887D8\n"
+        "_vt$11cSeg_2F0E88$14cRiderVbBC_s1f = D_00459B90\n"
+        "_vt$11cSeg_2F0E88$12cRiderVb_s1f = D_00488820\n");
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F0FE8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "seg/seg_1F1548_classes.h"
+
+cVbDtor002F0FE8::~cVbDtor002F0FE8()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor002F0FE8; expose it under the address-derived name.
+__asm__(".globl func_002F0FE8\n.type func_002F0FE8,@function\nfunc_002F0FE8 = _$_15cVbDtor002F0FE8\n.size func_002F0FE8,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor002F0FE8$13cRiderVbC_s1f = D_004887D8\n"
+        "_vt$15cVbDtor002F0FE8$14cRiderVbBC_s1f = D_00459B90\n"
+        "_vt$15cVbDtor002F0FE8$12cRiderVb_s1f = D_00488820\n"
+        "_$_12cRiderVb_s1f = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1148);

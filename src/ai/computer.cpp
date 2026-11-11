@@ -2198,7 +2198,79 @@ extern "C" int func_0010FC30(sAi0010FC30* self, int team)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010FCD8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/computer_classes.h"
+
+cComp_cmp::cComp_cmp()
+{
+    mRiderHandler = this;
+    fDE0 = 6;
+    fDE4 = 14;
+}
+
+// PORT: the compiler names these constructors __<len><Class>[i]; map them to the address-derived names.
+__asm__(".globl func_0010FCD8\n.type func_0010FCD8,@function\nfunc_0010FCD8 = __9cComp_cmpi\n.size func_0010FCD8,0x15DC\n");
+
+__asm__("__12cRiderVb_cmp = cRider_cRider\n"
+        "__15cCompPart00_cmpi = func_0013C650\n"
+        "__15cCompPart02_cmpi = func_00136980\n"
+        "__15cCompPart05_cmpi = func_00141480\n"
+        "__15cCompPart14_cmpi = func_00142388\n"
+        "__15cCompPart20_cmpi = cBoardWakeFX_cBoardWakeFX\n"
+        "__15cCompPart21_cmpi = cBoardSparkFX_cBoardSparkFX\n"
+        "__15cCompPart22_cmpi = cBoardTrailFX_initialize\n"
+        "__15cCompPart23_cmpi = func_002E6320\n"
+        "__15cCompPart24_cmpi = func_002EAAE0\n"
+        "__15cCompPart25_cmpi = func_002EF3B0\n"
+        "__15cCompPart26_cmpi = cAngerFX_cAngerFX\n"
+        "__15cCompPart27_cmpi = func_002E3680\n"
+        "__15cCompPart28_cmpi = func_002DE4A8\n"
+        "__15cCompPart29_cmpi = func_002F0E88\n"
+        "__15cCompPart30_cmpi = func_002F6238\n");
+
+// PORT: vtables this TU does not emit (their key functions are elsewhere), under their retail names.
+__asm__("_vt$14cRiderVbB0_cmp = D_00459B90\n"
+        "_vt$9cComp_cmp = D_00458710\n"
+        "_vt$9cComp_cmp$12cRiderVb_cmp = D_00458780\n"
+        "_vt$9cComp_cmp$13cRiderVbC_cmp = D_00458738\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cCompPart01_cmp$13cRiderVbC_cmp = D_004599A0\n"
+        "_vt$15cCompPart01_cmp$12cRiderVb_cmp = D_004599E8\n"
+        "_vt$15cCompPart03_cmp$13cRiderVbC_cmp = D_004596B8\n"
+        "_vt$15cCompPart03_cmp$12cRiderVb_cmp = D_00459700\n"
+        "_vt$15cCompPart04_cmp$13cRiderVbC_cmp = D_004598A8\n"
+        "_vt$15cCompPart04_cmp$12cRiderVb_cmp = D_004598F0\n"
+        "_vt$15cCompPart06_cmp$13cRiderVbC_cmp = D_004594C8\n"
+        "_vt$15cCompPart06_cmp$12cRiderVb_cmp = D_00459510\n"
+        "_vt$15cCompPart07_cmp$13cRiderVbC_cmp = D_004593D0\n"
+        "_vt$15cCompPart07_cmp$12cRiderVb_cmp = D_00459418\n"
+        "_vt$15cCompPart08_cmp$13cRiderVbC_cmp = D_004592D8\n"
+        "_vt$15cCompPart08_cmp$12cRiderVb_cmp = D_00459320\n"
+        "_vt$15cCompPart09_cmp$13cRiderVbC_cmp = D_004591E0\n"
+        "_vt$15cCompPart09_cmp$12cRiderVb_cmp = D_00459228\n"
+        "_vt$15cCompPart10_cmp$13cRiderVbC_cmp = D_004590E8\n"
+        "_vt$15cCompPart10_cmp$12cRiderVb_cmp = D_00459130\n"
+        "_vt$15cCompPart11_cmp$13cRiderVbC_cmp = D_00458FF0\n"
+        "_vt$15cCompPart11_cmp$12cRiderVb_cmp = D_00459038\n"
+        "_vt$15cCompPart12_cmp$13cRiderVbC_cmp = D_00458EF8\n"
+        "_vt$15cCompPart12_cmp$12cRiderVb_cmp = D_00458F40\n"
+        "_vt$15cCompPart13_cmp$13cRiderVbC_cmp = D_00458E00\n"
+        "_vt$15cCompPart13_cmp$12cRiderVb_cmp = D_00458E48\n"
+        "_vt$15cCompPart15_cmp$13cRiderVbC_cmp = D_00458A20\n"
+        "_vt$15cCompPart15_cmp$12cRiderVb_cmp = D_00458A68\n"
+        "_vt$15cCompPart16_cmp$13cRiderVbC_cmp = D_00458B18\n"
+        "_vt$15cCompPart16_cmp$12cRiderVb_cmp = D_00458B60\n"
+        "_vt$15cCompPart17_cmp$13cRiderVbC_cmp = D_00458830\n"
+        "_vt$15cCompPart17_cmp$12cRiderVb_cmp = D_00458878\n"
+        "_vt$15cCompPart18_cmp$13cRiderVbC_cmp = D_00458D08\n"
+        "_vt$15cCompPart18_cmp$12cRiderVb_cmp = D_00458D50\n"
+        "_vt$15cCompPart19_cmp$13cRiderVbC_cmp = D_00458928\n"
+        "_vt$15cCompPart19_cmp$12cRiderVb_cmp = D_00458970\n");
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_001112B8);

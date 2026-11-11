@@ -1,9 +1,49 @@
 #include "common.h"
 #include "ai/rider.h"
 
+//100%
 INCLUDE_ASM("visualfx/angerfx", cAngerFX_cAngerFX);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/angerfx_classes.h"
 
+cAngerFX_ang::cAngerFX_ang()
+{
+    cAngerPart_ang** slot = &parts;
+    *slot = new (D_00487518, 0, 0) cAngerPart_ang[2];
+    func_002D4BE0_erFX(this);
+}
+
+// PORT: the compiler names this ctor __12cAngerFX_angi; expose it under the address-derived name.
+__asm__(".globl cAngerFX_cAngerFX\n.type cAngerFX_cAngerFX,@function\ncAngerFX_cAngerFX = __12cAngerFX_angi\n.size cAngerFX_cAngerFX,0x180\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("__12cRiderVb_agf = cRider_cRider\n"
+        "_vt$12cAngerFX_ang$13cRiderVbC_agf = D_00488AC0\n"
+        "_vt$12cAngerFX_ang$14cRiderVbBC_agf = D_00459B90\n"
+        "_vt$12cAngerFX_ang$12cRiderVb_agf = D_00488B08\n");
+#endif
+
+//100%
 INCLUDE_ASM("visualfx/angerfx", func_002D4A70);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "visualfx/angerfx_classes.h"
+
+cVbDtor002D4A70::~cVbDtor002D4A70()
+{
+    if (m04 != 0) cMemMan_free(m04);
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor002D4A70; expose it under the address-derived name.
+__asm__(".globl func_002D4A70\n.type func_002D4A70,@function\nfunc_002D4A70 = _$_15cVbDtor002D4A70\n.size func_002D4A70,0x170\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor002D4A70$13cRiderVbC_agf = D_00488AC0\n"
+        "_vt$15cVbDtor002D4A70$14cRiderVbBC_agf = D_00459B90\n"
+        "_vt$15cVbDtor002D4A70$12cRiderVb_agf = D_00488B08\n"
+        "_$_12cRiderVb_agf = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/angerfx", func_002D4BE0);
