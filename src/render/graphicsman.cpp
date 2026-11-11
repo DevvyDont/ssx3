@@ -1639,7 +1639,73 @@ extern "C" void func_0036D400(float* seed)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036D428);
+#ifdef SKIP_ASM
+struct sGmVec4_D428 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sGmAnim_D428 {
+    int frames;             // 0x0
+    int field_0x4;          // 0x4
+    float time;             // 0x8
+    float step;             // 0xC
+    char pad_0x10[0x28];
+    float seeds[10];        // 0x38
+    char pad_0x60[0x50];
+    sGmVec4_D428 pos;       // 0xB0
+    char pad_0xc0[0x20];
+    sGmVec4_D428 vel;       // 0xE0
+};
+
+extern "C" void func_0036D3E8(void* self, float val);
+// PORT: func_0036D400 returns the new seed in $f0 (float); the unit defines it as void, so the
+// float-returning view binds to the same symbol through an asm label. The unused call_value result
+// is what keeps $f0 busy at the loop-exit test (product in $f1), so jump2 does not cross-jump the
+// duplicated exit test.
+extern "C" float func_0036D400_f(float* seed) __asm__("func_0036D400");
+
+// PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (a += b, 4 floats).
+static inline void gmVecAddEq_D428(sGmVec4_D428& a, const sGmVec4_D428& b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+extern "C" void func_0036D428_impl(sGmAnim_D428* self, float dt) __asm__("func_0036D428");
+extern "C" void func_0036D428_impl(sGmAnim_D428* self, float dt)
+{
+    func_0036D3E8(self, dt);
+    for (;;) {
+        float step = self->step;
+        float time = self->time;
+        if (!((float)self->frames * step < time)) {
+            break;
+        }
+        self->time = time - step;
+        gmVecAddEq_D428(self->pos, self->vel);
+        func_0036D400_f(&self->seeds[0]);
+        func_0036D400_f(&self->seeds[1]);
+        func_0036D400_f(&self->seeds[2]);
+        func_0036D400_f(&self->seeds[3]);
+        func_0036D400_f(&self->seeds[4]);
+        func_0036D400_f(&self->seeds[6]);
+        func_0036D400_f(&self->seeds[7]);
+        func_0036D400_f(&self->seeds[8]);
+        func_0036D400_f(&self->seeds[9]);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036D500);
