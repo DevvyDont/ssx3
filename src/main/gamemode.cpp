@@ -1222,7 +1222,33 @@ extern "C" void func_00239D88(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamemode", func_00239EC8);
+#ifdef SKIP_ASM
+extern "C" void func_00239EC8(void* self, int idx)
+{
+    sRace_239230* race = Race_239230();
+    sStats_239230 st = *(sStats_239230*)((char*)race->riders[idx]->mMetrix + 0xFC);
+    bool dnf = Rider_239230(idx)->mDidNotFinish != 0;
+    if (dnf) {
+        D_00536640[idx] = 0;
+        D_005366A8[idx] = 1;
+    } else {
+        D_00536640[idx] = st.time;
+        D_005366A8[idx] = 0;
+    }
+    bool over = func_0012A250(race) != 0;
+    if (over) {
+        sGM_239230* gm = (sGM_239230*)D_004A2C70;
+        gm->f84 = 1;
+        gm->f9C = 1;
+        func_00238B70(gm, 2);
+        if (D_00536730[idx] > 0) {
+            Rider_239230(idx)->unk_100 = 0;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamemode", func_0023A070);

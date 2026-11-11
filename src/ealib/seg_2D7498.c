@@ -3153,7 +3153,64 @@ void func_003DB790(int seed) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DB838);
+#ifdef SKIP_ASM
+int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *o) {
+    unsigned char *p;
+    unsigned char *next;
+    int n, stride, i, scale, start, cnt;
+    int res = 0;
+    int done = 0;
+    int end = 0;
+
+    o->start = -1;
+    o->len = 0;
+    o->n = 0;
+    o->col[0] = 0xFF;
+    o->col[1] = 0xFF;
+    o->col[2] = 0xFF;
+    o->col[3] = 0xFF;
+    if (idx < shp[5]) {
+        p = shp + 0xC;
+        n = shp[4] & 0xF;
+        stride = n + 2;
+        o->n = n;
+        p += idx * stride;
+        for (i = 0; i < n; i++) {
+            o->col[i] = p[i + 2];
+        }
+        if (p[0] & 0x80) {
+            idx = p[1];
+            p = shp + 0xC;
+            p += idx * stride;
+        }
+        next = p + stride;
+        idx++;
+        scale = (shp[7] + 1) << 8;
+        start = (p[0] << 8) + p[1];
+        start *= scale;
+        o->start = start;
+        cnt = shp[5];
+        while (done == 0) {
+            if (idx >= cnt) {
+                done = 1;
+                end = *(unsigned short *)(shp + 8) * scale;
+            } else if (next[0] & 0x80) {
+                next += stride;
+                idx++;
+            } else {
+                done = 1;
+                end = (next[0] << 8) + next[1];
+                end *= scale;
+            }
+        }
+        o->len = end - start;
+        res = 1;
+    }
+    return res;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DB978);

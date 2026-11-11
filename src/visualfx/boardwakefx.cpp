@@ -2569,7 +2569,81 @@ void* func_002E3110(void* self)
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3130);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3338);
+#ifdef SKIP_ASM
+extern "C" void func_002E2B00(void* part, void* owner);
+extern "C" void func_002F4DB8(void* emit, void* owner, int idx);
+
+struct sWkRect3338 { float x, y, w, h; };
+struct sWkVec3338 { float x, y, z, w; } __attribute__((aligned(16)));
+struct sWkMtx3338 { sWkVec3338 row[4]; };
+struct sWkPart3338 { char data[0x30]; };
+struct sWkEmit3338 { char data[0x210]; };
+struct sWkFx3338 {
+    sWkRect3338 view;           // 0x0
+    sWkMtx3338 mtx;             // 0x10
+    float f50, f54, f58;        // 0x50
+    int pad5C;
+    int count[2];               // 0x60
+    sWkPart3338 parts[2][0x100];// 0x68
+    char pad6068[0x6070 - 0x6068];
+    sWkEmit3338 emit[2];        // 0x6070
+};
+
+struct sWkVtR3338 { short delta; short index; void (*fn)(sWkRect3338*, void*); };
+struct sWkVtM3338 { short delta; short index; sWkMtx3338* (*fn)(void*); };
+struct sWkVtP3338 { short delta; short index; void (*fn)(void*, float*, float*, float*); };
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void vu0CopyMatrix3338(sWkMtx3338* dst, sWkMtx3338* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+extern "C" void func_002E3338(void* vself, int idx)
+{
+    sWkFx3338* self = (sWkFx3338*)vself;
+    char* ctx = D_004A5B80;
+    sWkRect3338 r;
+    {
+        sWkVtR3338* vt = *(sWkVtR3338**)(ctx + 0x10D8);
+        vt[28].fn(&r, ctx + vt[28].delta);
+    }
+    self->view = r;
+    {
+        sWkVtM3338* vt = *(sWkVtM3338**)(ctx + 0x10D8);
+        vu0CopyMatrix3338(&self->mtx, vt[35].fn(ctx + vt[35].delta));
+    }
+    int i = 0;
+    {
+        sWkVtP3338* vt = *(sWkVtP3338**)(ctx + 0x10D8);
+        vt[30].fn(ctx + vt[30].delta, &self->f50, &self->f54, &self->f58);
+    }
+    sWkEmit3338* em = self->emit;
+    func_002F4DB8(&em[idx], self, idx);
+    if (i < self->count[idx]) {
+        sWkPart3338(*pp)[0x100] = self->parts;
+        sWkPart3338* p = pp[idx];
+        do {
+            func_002E2B00(p, self);
+            i++;
+            p++;
+        } while (i < self->count[idx]);
+    }
+}
+#endif
 
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3478);
 
