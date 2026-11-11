@@ -32,7 +32,7 @@ struct sBankMonitorCD08 {
     char* vbase;                // 0x0
     char pad_0x4[0x8D8 - 0x4];
     void** vtbl;                // 0x8D8
-    int f8DC;                   // 0x8DC
+    volatile int f8DC;          // 0x8DC
     int f8E0;                   // 0x8E0
     int f8E4;                   // 0x8E4
     int f8E8;                   // 0x8E8
@@ -145,6 +145,93 @@ extern "C" int func_002ACF60(void* self, int n)
     }
     return -1;
 }
+#endif
+
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+class cController;
+class cBankMonitorInstance;
+// Sound callback: a g++ 2.95 pointer to member function (8 bytes), as cSndPlayOpts::OPTS_Callback takes it
+// (same type as sound/soundsys).
+typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, float);
+extern const sSndCallback D_004A37D8[];
+extern const sSndCallback D_004A37E0[];
+struct sSndVtSlot {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sBmQuad {
+    int w[4];
+} __attribute__((aligned(16)));
+
+// One entry of cSndPlayOpts' option stack (mCurrent[], 0x18 bytes); byte 0 seeds mBaseVol.
+struct sSndOptsRec {
+    signed char vol;
+    char pad1[3];
+    int f4[5];
+};
+
+// One cSndPlayOpts mDelay[] entry (reset to 100 / 0 / 90 / 50 on every push).
+struct sSndOptsDelay {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+
+// cSndPlayOpts (prototype class, as in sound/soundsys): the play-option stack; push = cur++ and copy def into
+// ch[cur]. Field names follow sound/soundsys (ch = mCurrent, vals = mBaseVol, p70 = mDelay, ...).
+struct cSndPlayOpts {
+    char* vbase;                // 0x00 virtual-base pointer
+    sSndOptsRec def;            // 0x04
+    volatile int cur;           // 0x1C
+    sSndOptsRec* ch;            // 0x20
+    sBmQuad* tgt[4];            // 0x24
+    int* p34;                   // 0x34
+    int* vals;                  // 0x38
+    int* p3C;                   // 0x3C
+    sSndCallback callbacks[4];  // 0x40
+    int* p60;                   // 0x60
+    int* p64;                   // 0x64
+    float* p68;                 // 0x68
+    float* p6C;                 // 0x6C
+    sSndOptsDelay* p70;         // 0x70
+    int* p74;                   // 0x74
+    int* p78;                   // 0x78
+    int* p7C;                   // 0x7C
+    int* p80;                   // 0x80
+    int* p84;                   // 0x84
+};
+
+// One of a sound player's 48 monitored-sound slots (0x2C bytes).
+struct sBmSlot {
+    char pad00[0xC];
+    sSndCallback callback;      // 0x0C
+    char pad14[0x18 - 0x14];
+    int f18;                    // 0x18
+    int f1C;                    // 0x1C
+    int f20;                    // 0x20
+    int f24;                    // 0x24
+    int f28;                    // 0x28
+};
+
+// Sound player: a cSndPlayOpts (0x88 bytes) plus 48 monitored-sound slots; virtual base at 0x8DC.
+struct sSndPlayer : public cSndPlayOpts {
+    volatile int f88;           // 0x88
+    int f8C;                    // 0x8C
+    volatile int busy;          // 0x90
+    char pad_0x94[0x4];
+    sBmSlot slots[48];          // 0x98
+    void** vtbl;                // 0x8D8
+    char vb[0x4];               // 0x8DC
+};
+
+// cBankManager as this unit sees it (as in sound/soundsys): only its sound player at 0x1D8 is used here.
+struct cBankManager {
+    char pad0[0x1D8];
+    sSndPlayer sub;             // 0x1D8
+};
 #endif
 
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Create);
@@ -600,7 +687,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002ADC10);
 extern "C" void func_002ADC10(void* self)
 {
     if (*(int*)((char*)self + 0x94) == 0) {
-        *(int*)((char*)self + 0x88) += 1;
+        *(volatile int*)((char*)self + 0x88) += 1;
     }
 }
 #endif
@@ -2459,89 +2546,6 @@ INCLUDE_ASM("sound/bankmonitor", func_002B04D8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-class cController;
-class cBankMonitorInstance;
-// Sound callback: a g++ 2.95 pointer to member function (8 bytes), as cSndPlayOpts::OPTS_Callback takes it
-// (same type as sound/soundsys).
-typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, float);
-extern const sSndCallback D_004A37D8[];
-extern const sSndCallback D_004A37E0[];
-struct sSndVtSlot {
-    short delta;
-    short index;
-    void* fn;
-};
-struct sBmQuad {
-    int w[4];
-} __attribute__((aligned(16)));
-
-// One entry of cSndPlayOpts' option stack (mCurrent[], 0x18 bytes); byte 0 seeds mBaseVol.
-struct sSndOptsRec {
-    signed char vol;
-    char pad1[3];
-    int f4[5];
-};
-
-// One cSndPlayOpts mDelay[] entry (reset to 100 / 0 / 90 / 50 on every push).
-struct sSndOptsDelay {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-};
-
-// cSndPlayOpts (prototype class, as in sound/soundsys): the play-option stack; push = cur++ and copy def into
-// ch[cur]. Field names follow sound/soundsys (ch = mCurrent, vals = mBaseVol, p70 = mDelay, ...).
-struct cSndPlayOpts {
-    char* vbase;                // 0x00 virtual-base pointer
-    sSndOptsRec def;            // 0x04
-    volatile int cur;           // 0x1C
-    sSndOptsRec* ch;            // 0x20
-    sBmQuad* tgt[4];            // 0x24
-    int* p34;                   // 0x34
-    int* vals;                  // 0x38
-    int* p3C;                   // 0x3C
-    sSndCallback callbacks[4];  // 0x40
-    int* p60;                   // 0x60
-    int* p64;                   // 0x64
-    float* p68;                 // 0x68
-    float* p6C;                 // 0x6C
-    sSndOptsDelay* p70;         // 0x70
-    int* p74;                   // 0x74
-    int* p78;                   // 0x78
-    int* p7C;                   // 0x7C
-    int* p80;                   // 0x80
-    int* p84;                   // 0x84
-};
-
-// One of a sound player's 48 monitored-sound slots (0x2C bytes).
-struct sBmSlot {
-    char pad00[0xC];
-    sSndCallback callback;      // 0x0C
-    char pad14[0x18 - 0x14];
-    int f18;                    // 0x18
-    int f1C;                    // 0x1C
-    int f20;                    // 0x20
-    int f24;                    // 0x24
-    int f28;                    // 0x28
-};
-
-// Sound player: a cSndPlayOpts (0x88 bytes) plus 48 monitored-sound slots; virtual base at 0x8DC.
-struct sSndPlayer : public cSndPlayOpts {
-    int f88;                    // 0x88
-    int f8C;                    // 0x8C
-    int busy;          // 0x90
-    char pad_0x94[0x4];
-    sBmSlot slots[48];          // 0x98
-    void** vtbl;                // 0x8D8
-    char vb[0x4];               // 0x8DC
-};
-
-// cBankManager as this unit sees it (as in sound/soundsys): only its sound player at 0x1D8 is used here.
-struct cBankManager {
-    char pad0[0x1D8];
-    sSndPlayer sub;             // 0x1D8
-};
 // A bank list (func_002AFA68 ctor / func_002AFB38 dtor): its voices and up to 500 loaded streams.
 extern char D_004A36E0[];
 extern char D_004A3590[];

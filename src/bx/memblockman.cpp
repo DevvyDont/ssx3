@@ -867,7 +867,7 @@ extern "C" void func_00423DD0(int);
 extern "C" void func_0031ABD0(void)
 {
     char* app = (char*)func_00317520();
-    if (*(int*)(app + 0x4038) == 0) {
+    if (*(volatile int*)(app + 0x4038) == 0) {
         func_00423DD0(*(int*)(app + 0x4034));
     }
 }

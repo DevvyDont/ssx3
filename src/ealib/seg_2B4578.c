@@ -793,14 +793,14 @@ struct sA8E8 {
     struct sA8E8Cfg saved;
     signed char f174;               /* also D_0050AA5C */
     char f175;
-    unsigned char f176;    /* lock depth */
+    volatile unsigned char f176;    /* lock depth */
     signed char f177;
     signed char f178;
     signed char f179;
     unsigned char f17A;             /* also D_0050AA62 */
     char pad17B[0x17E - 0x17B];
     short f17E;                     /* number of channels (f1F0) */
-    unsigned int f180;     /* tick */
+    volatile unsigned int f180;     /* tick */
     void (*f184[6])(void);          /* f177 entries */
     void (*f19C[6])(void);          /* f178 entries */
     struct sA8E8Node *f1B4;
@@ -824,8 +824,8 @@ struct sA8E8 {
     unsigned short f2E0[6][6];      /* also D_0050ABC8: row n - 1 = n channel angles */
     void (*f328)(void);             /* sound thread hooks: before / after a tick */
     void (*f32C)(void);
-    unsigned int f330;
-    unsigned short f334;
+    volatile unsigned int f330;
+    volatile unsigned short f334;
 };
 extern struct sA8E8 D_0050A8E8;
 extern struct sA8E8Cfg D_0050A908;      /* D_0050A8E8.setup.cfg */
@@ -990,7 +990,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B58A0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void (*D_0044C46C[])(void);
-extern char D_0050A8E8_58A0[] __asm__("D_0050A8E8");
+extern volatile char D_0050A8E8_58A0[] __asm__("D_0050A8E8");
 
 void func_003B58A0(void) {
     D_0044C46C[0]();
@@ -1586,16 +1586,16 @@ void func_003B68B8(char *p) {
     int i = 0;
     char *q = p + 0x104;
     int *f = (int*)(p + 0x114);
-    *(int *)(p + 4) = func_003C6760(*(int *)(p + 8), (int)(p + 0x14), (int)(p + 0x1C), (int)(p + 0xEC));
+    *(volatile int *)(p + 4) = func_003C6760(*(volatile int *)(p + 8), (int)(p + 0x14), (int)(p + 0x1C), (int)(p + 0xEC));
     do {
         if (*f != 0) {
-            func_003B8CC8(*(int *)(p + 4), (int)q);
+            func_003B8CC8(*(volatile int *)(p + 4), (int)q);
         }
         q += 0x18;
         i++;
         f += 6;
     } while (i == 0);
-    *(char *)(p + 0x10) = 1;
+    *(volatile char *)(p + 0x10) = 1;
 }
 #endif
 
@@ -1737,12 +1737,12 @@ struct sA0A0Node {                  /* 0x28: a queued stream request */
     struct sA0A0Node *f00;          /* next */
     int f04;
     int f08;
-    int f0C;               /* handle */
+    volatile int f0C;               /* handle */
     unsigned int f10;
     unsigned int f14;
     unsigned int f18;
     unsigned int f1C;
-    int f20;
+    volatile int f20;
     unsigned char f24;
     char pad25[0x28 - 0x25];
 };
@@ -1781,11 +1781,11 @@ struct sA0A0Trk {                   /* 0x18 */
 };
 struct sA0A0Strm {                  /* 0x138 */
     int f00;                        /* handle */
-    int f04;               /* voice */
-    int f08;               /* queue (D_005157B8.f304) */
-    int f0C;
-    signed char f10;       /* state */
-    unsigned char f11;
+    volatile int f04;               /* voice */
+    volatile int f08;               /* queue (D_005157B8.f304) */
+    volatile int f0C;
+    volatile signed char f10;       /* state */
+    volatile unsigned char f11;
     char pad12[0x14 - 0x12];
     struct sA0A0Fmt f14;            /* current */
     struct sA0A0Fmt f18;            /* next */
@@ -1882,7 +1882,7 @@ char *func_003B7A70(int arg0) {
     t = func_003B6A38_7A70(arg0 & 0xFF);
     if (t == 0) return 0;
     for (v = *(char **)(t + 0x11C); v != 0; v = *(char **)v) {
-        if (*(int *)(v + 0xC) == arg0) break;
+        if (*(volatile int *)(v + 0xC) == arg0) break;
     }
     return v;
 }
@@ -2018,7 +2018,7 @@ int func_003B7D80(int arg0, int arg1) {
     temp_2 = func_003B7A70_7D80(arg0);
     if (temp_2 != 0) {
         var_18 = 0;
-        *(int *)(temp_2 + 0x20) = (short)arg1;
+        *(volatile int *)(temp_2 + 0x20) = (short)arg1;
     }
     func_003B58D8();
     return var_18;
@@ -2063,7 +2063,7 @@ int *func_003B6A38_func_003B7E70(void) __asm__("func_003B6A38");
 void func_003B85F0_func_003B7E70(int, int) __asm__("func_003B85F0");
 
 int func_003B7E70(int arg0, int arg1) {
-    int *p;
+    volatile int *p;
 
     p = func_003B6A38_func_003B7E70();
     if (p == 0) {
@@ -2096,7 +2096,7 @@ int func_003B7EB0(int h, int a, int b) {
     char *p = func_003B6A38_7E70(h);
     if (p == 0) return -8;
     p[0xEC] = b;
-    func_003B8530_7EB0(*(int *)(p + 4), a / 10, b);
+    func_003B8530_7EB0(*(volatile int *)(p + 4), a / 10, b);
     return 0;
 }
 #endif
@@ -2137,7 +2137,7 @@ int *func_003B6A38_func_003B8010(void) __asm__("func_003B6A38");
 void func_003B8700_func_003B8010(int, int) __asm__("func_003B8700");
 
 int func_003B8010(int arg0, int arg1) {
-    int *p;
+    volatile int *p;
 
     p = func_003B6A38_func_003B8010();
     if (p == 0) {
@@ -2160,7 +2160,7 @@ int *func_003B6A38_func_003B80A0(void) __asm__("func_003B6A38");
 void func_003B8978_func_003B80A0(int, int) __asm__("func_003B8978");
 
 int func_003B80A0(int arg0, int arg1) {
-    int *p;
+    volatile int *p;
 
     p = func_003B6A38_func_003B80A0();
     if (p == 0) {
@@ -2181,7 +2181,7 @@ int *func_003B6A38_func_003B80E0(void) __asm__("func_003B6A38");
 void func_003B8838_func_003B80E0(int, int) __asm__("func_003B8838");
 
 int func_003B80E0(int arg0, int arg1) {
-    int *p;
+    volatile int *p;
 
     p = func_003B6A38_func_003B80E0();
     if (p == 0) {
@@ -3714,7 +3714,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BA550);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_A550 { int f0; char pad[0x22]; unsigned char f26; unsigned char f27; char pad2[4]; int f2C; char pad3[0x69 - 0x30]; signed char f69; char pad4[0x8C - 0x6A]; };
-struct G_A550 { char pad[0x17E]; short cnt; int f180; char pad2[0x1F0 - 0x184]; struct E_A550 *tab; };
+struct G_A550 { char pad[0x17E]; short cnt; volatile int f180; char pad2[0x1F0 - 0x184]; struct E_A550 *tab; };
 extern struct G_A550 D_0050A8E8_A550 __asm__("D_0050A8E8");
 void func_003BA550(int i, unsigned char u) {
     struct E_A550 *e = &D_0050A8E8_A550.tab[i];
@@ -7966,10 +7966,10 @@ struct sAD00 {
     struct sAD00Spu *fCB0;          /* also D_0050B9B0 */
     int *fCB4;
     void *fCB8;
-    int fCBC;              /* last transfer id */
-    unsigned char fCC0;    /* queued transfers */
-    unsigned char fCC1;    /* selected transfer */
-    unsigned char fCC2;    /* transfer running */
+    volatile int fCBC;              /* last transfer id */
+    volatile unsigned char fCC0;    /* queued transfers */
+    volatile unsigned char fCC1;    /* selected transfer */
+    volatile unsigned char fCC2;    /* transfer running */
     char padCC3;
     int fCC4;                       /* tick of the last transfer */
     struct sAD00Xfer fCC8[28];
@@ -8000,9 +8000,9 @@ struct sAD00 {
     int f1B04;
     int f1B08;
     int f1B0C;
-    int f1B10;             /* lock: semaphore, owner thread, depth */
-    int f1B14;
-    int f1B18;
+    volatile int f1B10;             /* lock: semaphore, owner thread, depth */
+    volatile int f1B14;
+    volatile int f1B18;
     int f1B1C[7];                   /* saved SPU2 DMA registers */
     int f1B38;
 };
@@ -9257,12 +9257,12 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C6C28);
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6C98);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Inner_6C98 { char pad[0x48]; int a; int b; };
+struct Inner_6C98 { char pad[0x48]; volatile int a; volatile int b; };
 struct S_6C98 { char pad[0x304]; struct Inner_6C98 *p[1]; };
 extern struct S_6C98 D_005157B8_6C98 __asm__("D_005157B8");
 int func_003C6C98(int i) {
     struct Inner_6C98 *q = (&D_005157B8_6C98)[0].p[i];
-    int b = q->b; int a = q->a; return a + b;
+    return q->a + q->b;
 }
 #endif
 

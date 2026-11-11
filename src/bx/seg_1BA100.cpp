@@ -27,7 +27,7 @@ extern "C" int func_002B9140(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9150);
 #ifdef SKIP_ASM
 extern "C" int func_002B9150(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x20))) + ((*(int *)((char*)(arg0) + (0x1C))) * 0x18);
+    return (*(int *)((char*)(arg0) + (0x20))) + ((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x18);
 }
 #endif
 
@@ -35,7 +35,7 @@ extern "C" int func_002B9150(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9168);
 #ifdef SKIP_ASM
 extern "C" int func_002B9168(void *p) {
-    return *(int*)((char*)p + (*(int*)((char*)p + 0x1C) << 2) + 0x24);
+    return *(int*)((char*)p + (*(volatile int*)((char*)p + 0x1C) << 2) + 0x24);
 }
 #endif
 
@@ -43,7 +43,7 @@ extern "C" int func_002B9168(void *p) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9180);
 #ifdef SKIP_ASM
 extern "C" int func_002B9180(void *p) {
-    return (*(int**)((char*)p + 0x34))[*(int*)((char*)p + 0x1C)];
+    return (*(int**)((char*)p + 0x34))[*(volatile int*)((char*)p + 0x1C)];
 }
 #endif
 
@@ -51,7 +51,7 @@ extern "C" int func_002B9180(void *p) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9198);
 #ifdef SKIP_ASM
 extern "C" int func_002B9198(void *p) {
-    return (*(int**)((char*)p + 0x38))[*(int*)((char*)p + 0x1C)];
+    return (*(int**)((char*)p + 0x38))[*(volatile int*)((char*)p + 0x1C)];
 }
 #endif
 
@@ -59,7 +59,7 @@ extern "C" int func_002B9198(void *p) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B91B0);
 #ifdef SKIP_ASM
 extern "C" int func_002B91B0(void *p) {
-    return (*(int**)((char*)p + 0x3C))[*(int*)((char*)p + 0x1C)];
+    return (*(int**)((char*)p + 0x3C))[*(volatile int*)((char*)p + 0x1C)];
 }
 #endif
 
@@ -82,7 +82,7 @@ struct sSndOptsQuad { int a, b, c, d; };
 struct sSndPlayOpts {
     int pad0;
     sSndOptsRec cur;                    // 0x04
-    int idx;                   // 0x1C
+    volatile int idx;                   // 0x1C
     sSndOptsRec* recs;                  // 0x20
     int arr24[4];
     int* p34;
@@ -112,7 +112,7 @@ extern "C" sSndCallback func_002B91C8(sSndPlayOpts* s) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9208);
 #ifdef SKIP_ASM
 extern "C" unsigned short func_002B9208(void *arg0) {
-    return (*(unsigned short *)((char*)((((*(int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (8)));
+    return (*(unsigned short *)((char*)((((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (8)));
 }
 #endif
 
@@ -120,7 +120,7 @@ extern "C" unsigned short func_002B9208(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9228);
 #ifdef SKIP_ASM
 extern "C" short func_002B9228(void *arg0) {
-    return (*(short *)((char*)((((*(int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (0xA)));
+    return (*(short *)((char*)((((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (0xA)));
 }
 #endif
 
@@ -128,7 +128,7 @@ extern "C" short func_002B9228(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9248);
 #ifdef SKIP_ASM
 extern "C" int func_002B9248(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x70))) + ((*(int *)((char*)(arg0) + (0x1C))) * 0x10);
+    return (*(int *)((char*)(arg0) + (0x70))) + ((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x10);
 }
 #endif
 
@@ -136,7 +136,7 @@ extern "C" int func_002B9248(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9260);
 #ifdef SKIP_ASM
 extern "C" int func_002B9260(void *p) {
-    return (*(int**)((char*)p + 0x60))[*(int*)((char*)p + 0x1C)];
+    return (*(int**)((char*)p + 0x60))[*(volatile int*)((char*)p + 0x1C)];
 }
 #endif
 
@@ -144,7 +144,7 @@ extern "C" int func_002B9260(void *p) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9278);
 #ifdef SKIP_ASM
 extern "C" int func_002B9278(void *p) {
-    return (*(int**)((char*)p + 0x64))[*(int*)((char*)p + 0x1C)];
+    return (*(int**)((char*)p + 0x64))[*(volatile int*)((char*)p + 0x1C)];
 }
 #endif
 
@@ -152,7 +152,7 @@ extern "C" int func_002B9278(void *p) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9290);
 #ifdef SKIP_ASM
 extern "C" float func_002B9290(void *p) {
-    return (*(float**)((char*)p + 0x68))[*(int*)((char*)p + 0x1C)];
+    return (*(float**)((char*)p + 0x68))[*(volatile int*)((char*)p + 0x1C)];
 }
 #endif
 
@@ -160,7 +160,7 @@ extern "C" float func_002B9290(void *p) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B92A8);
 #ifdef SKIP_ASM
 extern "C" float func_002B92A8(void *p) {
-    return (*(float**)((char*)p + 0x6C))[*(int*)((char*)p + 0x1C)];
+    return (*(float**)((char*)p + 0x6C))[*(volatile int*)((char*)p + 0x1C)];
 }
 #endif
 
@@ -168,7 +168,7 @@ extern "C" float func_002B92A8(void *p) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B92C0);
 #ifdef SKIP_ASM
 extern "C" int func_002B92C0(void *p) {
-    return (*(int**)((char*)p + 0x74))[*(int*)((char*)p + 0x1C)];
+    return (*(int**)((char*)p + 0x74))[*(volatile int*)((char*)p + 0x1C)];
 }
 #endif
 
@@ -176,7 +176,7 @@ extern "C" int func_002B92C0(void *p) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B92D8);
 #ifdef SKIP_ASM
 extern "C" int func_002B92D8(void *p) {
-    return (*(int**)((char*)p + 0x78))[*(int*)((char*)p + 0x1C)];
+    return (*(int**)((char*)p + 0x78))[*(volatile int*)((char*)p + 0x1C)];
 }
 #endif
 
@@ -184,7 +184,7 @@ extern "C" int func_002B92D8(void *p) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B92F0);
 #ifdef SKIP_ASM
 extern "C" int func_002B92F0(void *p) {
-    return (*(int**)((char*)p + 0x7C))[*(int*)((char*)p + 0x1C)];
+    return (*(int**)((char*)p + 0x7C))[*(volatile int*)((char*)p + 0x1C)];
 }
 #endif
 
@@ -192,7 +192,7 @@ extern "C" int func_002B92F0(void *p) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9308);
 #ifdef SKIP_ASM
 extern "C" int func_002B9308(void *p) {
-    return (*(int**)((char*)p + 0x80))[*(int*)((char*)p + 0x1C)];
+    return (*(int**)((char*)p + 0x80))[*(volatile int*)((char*)p + 0x1C)];
 }
 #endif
 
@@ -200,7 +200,7 @@ extern "C" int func_002B9308(void *p) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9320);
 #ifdef SKIP_ASM
 extern "C" int func_002B9320(void *p) {
-    return (*(int**)((char*)p + 0x84))[*(int*)((char*)p + 0x1C)];
+    return (*(int**)((char*)p + 0x84))[*(volatile int*)((char*)p + 0x1C)];
 }
 #endif
 
@@ -210,7 +210,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9338);
 extern "C" void func_003BA020(int);
 
 extern "C" void func_002B9338(void *arg0) {
-    func_003BA020((*(int *)((char*)(arg0) + (0x20))) + ((*(int *)((char*)(arg0) + (0x1C))) * 0x18));
+    func_003BA020((*(int *)((char*)(arg0) + (0x20))) + ((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x18));
 }
 #endif
 
@@ -219,7 +219,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9368);
 #ifdef SKIP_ASM
 struct S9368 { int a[6]; };
 extern "C" void func_002B9368(void *self) {
-    *(S9368*)((char*)self + 4) = *(S9368*)((char*)(*(int*)((char*)self + 0x20)) + *(int*)((char*)self + 0x1C) * 0x18);
+    *(S9368*)((char*)self + 4) = *(S9368*)((char*)(*(int*)((char*)self + 0x20)) + *(volatile int*)((char*)self + 0x1C) * 0x18);
 }
 #endif
 
@@ -338,7 +338,7 @@ extern "C" void func_002B97B8(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B97D0);
 #ifdef SKIP_ASM
 extern "C" void func_002B97D0(void *arg0, signed char arg1) {
-    (*(signed char *)((char*)((((*(int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (2))) = arg1;
+    (*(signed char *)((char*)((((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (2))) = arg1;
 }
 #endif
 
@@ -346,7 +346,7 @@ extern "C" void func_002B97D0(void *arg0, signed char arg1) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B97F0);
 #ifdef SKIP_ASM
 extern "C" void func_002B97F0(void *arg0, signed char arg1) {
-    (*(signed char *)((char*)((((*(int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (3))) = arg1;
+    (*(signed char *)((char*)((((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (3))) = arg1;
 }
 #endif
 
@@ -396,7 +396,7 @@ extern "C" void func_002B99E8(Obj_99E8* p, int n) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9B48);
 #ifdef SKIP_ASM
 extern "C" void func_002B9B48(void *arg0, signed char arg1) {
-    (*(signed char *)((char*)((((*(int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (1))) = arg1;
+    (*(signed char *)((char*)((((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (1))) = arg1;
 }
 #endif
 
@@ -404,7 +404,7 @@ extern "C" void func_002B9B48(void *arg0, signed char arg1) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9B68);
 #ifdef SKIP_ASM
 extern "C" void func_002B9B68(void *arg0, short arg1) {
-    (*(short *)((char*)((((*(int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (0xC))) = arg1;
+    (*(short *)((char*)((((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (0xC))) = arg1;
 }
 #endif
 
@@ -412,7 +412,7 @@ extern "C" void func_002B9B68(void *arg0, short arg1) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9B88);
 #ifdef SKIP_ASM
 extern "C" void func_002B9B88(void *arg0, int arg1) {
-    (*(int *)((char*)((((*(int *)((char*)(arg0) + (0x1C))) * 0x10) + (*(int *)((char*)(arg0) + (0x70))))) + (4))) = arg1;
+    (*(int *)((char*)((((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x10) + (*(int *)((char*)(arg0) + (0x70))))) + (4))) = arg1;
 }
 #endif
 
@@ -421,7 +421,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9BA0);
 #ifdef SKIP_ASM
 struct E_9BA0 { int v[4]; };
 extern "C" void func_002B9BA0(void *p, int v) {
-    (*(E_9BA0**)((char*)p + 0x70))[*(int*)((char*)p + 0x1C)].v[0] = v;
+    (*(E_9BA0**)((char*)p + 0x70))[*(volatile int*)((char*)p + 0x1C)].v[0] = v;
 }
 #endif
 
@@ -429,7 +429,7 @@ extern "C" void func_002B9BA0(void *p, int v) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9BB8);
 #ifdef SKIP_ASM
 extern "C" void func_002B9BB8(void *arg0, int arg1) {
-    (*(int *)((char*)((((*(int *)((char*)(arg0) + (0x1C))) * 0x10) + (*(int *)((char*)(arg0) + (0x70))))) + (8))) = arg1;
+    (*(int *)((char*)((((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x10) + (*(int *)((char*)(arg0) + (0x70))))) + (8))) = arg1;
 }
 #endif
 
@@ -437,7 +437,7 @@ extern "C" void func_002B9BB8(void *arg0, int arg1) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9BD0);
 #ifdef SKIP_ASM
 extern "C" void func_002B9BD0(void *arg0, int arg1) {
-    (*(int *)((char*)((((*(int *)((char*)(arg0) + (0x1C))) * 0x10) + (*(int *)((char*)(arg0) + (0x70))))) + (0xC))) = arg1;
+    (*(int *)((char*)((((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x10) + (*(int *)((char*)(arg0) + (0x70))))) + (0xC))) = arg1;
 }
 #endif
 
@@ -445,7 +445,7 @@ extern "C" void func_002B9BD0(void *arg0, int arg1) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9BE8);
 #ifdef SKIP_ASM
 extern "C" void func_002B9BE8(void *arg0, short arg1) {
-    (*(short *)((char*)((((*(int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (8))) = arg1;
+    (*(short *)((char*)((((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (8))) = arg1;
 }
 #endif
 
@@ -453,7 +453,7 @@ extern "C" void func_002B9BE8(void *arg0, short arg1) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9C08);
 #ifdef SKIP_ASM
 extern "C" void func_002B9C08(void *arg0, short arg1) {
-    (*(short *)((char*)((((*(int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (0xA))) = arg1;
+    (*(short *)((char*)((((*(volatile int *)((char*)(arg0) + (0x1C))) * 0x18) + (*(int *)((char*)(arg0) + (0x20))))) + (0xA))) = arg1;
 }
 #endif
 
@@ -461,7 +461,7 @@ extern "C" void func_002B9C08(void *arg0, short arg1) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9C28);
 #ifdef SKIP_ASM
 extern "C" void func_002B9C28(void *p, int v) {
-    *(int*)((char*)p + (*(int*)((char*)p + 0x1C) << 2) + 0x24) = v;
+    *(int*)((char*)p + (*(volatile int*)((char*)p + 0x1C) << 2) + 0x24) = v;
 }
 #endif
 
@@ -470,7 +470,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9C40);
 #ifdef SKIP_ASM
 extern "C" void func_002B9C40(void *arg0) {
     int *base = *(int **)((char *)arg0 + 0x34);
-    base[*(int *)((char *)arg0 + 0x1C)] = 1;
+    base[*(volatile int *)((char *)arg0 + 0x1C)] = 1;
 }
 #endif
 
@@ -478,7 +478,7 @@ extern "C" void func_002B9C40(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9C60);
 #ifdef SKIP_ASM
 extern "C" void func_002B9C60(void *p, int v) {
-    (*(int**)((char*)p + 0x64))[*(int*)((char*)p + 0x1C)] = v;
+    (*(int**)((char*)p + 0x64))[*(volatile int*)((char*)p + 0x1C)] = v;
 }
 #endif
 
@@ -487,7 +487,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9C78);
 #ifdef SKIP_ASM
 extern "C" void func_002B9C78(void *self, int v) {
     int t = (v <= 0xFFFF) ? v : 0xFFFF;
-    *(short*)((char*)(*(int*)((char*)self + 0x1C) * 0x18 + *(int*)((char*)self + 0x20)) + 0x14) = (t <= -1) ? 0 : t;
+    *(short*)((char*)(*(volatile int*)((char*)self + 0x1C) * 0x18 + *(int*)((char*)self + 0x20)) + 0x14) = (t <= -1) ? 0 : t;
 }
 #endif
 
@@ -495,7 +495,7 @@ extern "C" void func_002B9C78(void *self, int v) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9CB0);
 #ifdef SKIP_ASM
 extern "C" void func_002B9CB0(void *p, int v) {
-    (*(int**)((char*)p + 0x60))[*(int*)((char*)p + 0x1C)] = v;
+    (*(int**)((char*)p + 0x60))[*(volatile int*)((char*)p + 0x1C)] = v;
 }
 #endif
 
@@ -503,7 +503,7 @@ extern "C" void func_002B9CB0(void *p, int v) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9CC8);
 #ifdef SKIP_ASM
 extern "C" void func_002B9CC8(void *p, int v) {
-    (*(int**)((char*)p + 0x3C))[*(int*)((char*)p + 0x1C)] = v;
+    (*(int**)((char*)p + 0x3C))[*(volatile int*)((char*)p + 0x1C)] = v;
 }
 #endif
 
@@ -512,7 +512,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9CE0);
 #ifdef SKIP_ASM
 struct V8_9CE0 { int a, b; };
 extern "C" void func_002B9CE0(char *arg0, V8_9CE0 arg1) {
-    V8_9CE0 *d = (V8_9CE0 *)(arg0 + *(int *)(arg0 + 0x1C) * 8);
+    V8_9CE0 *d = (V8_9CE0 *)(arg0 + *(volatile int *)(arg0 + 0x1C) * 8);
     d[8] = arg1;
 }
 #endif
@@ -521,7 +521,7 @@ extern "C" void func_002B9CE0(char *arg0, V8_9CE0 arg1) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9D10);
 #ifdef SKIP_ASM
 extern "C" void func_002B9D10(void *p, int v) {
-    (*(int**)((char*)p + 0x74))[*(int*)((char*)p + 0x1C)] = v;
+    (*(int**)((char*)p + 0x74))[*(volatile int*)((char*)p + 0x1C)] = v;
 }
 #endif
 
@@ -529,7 +529,7 @@ extern "C" void func_002B9D10(void *p, int v) {
 INCLUDE_ASM("bx/seg_1BA100", func_002B9D28);
 #ifdef SKIP_ASM
 extern "C" void func_002B9D28(void *p, int v) {
-    (*(int**)((char*)p + 0x78))[*(int*)((char*)p + 0x1C)] = v;
+    (*(int**)((char*)p + 0x78))[*(volatile int*)((char*)p + 0x1C)] = v;
 }
 #endif
 
@@ -538,7 +538,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9D40);
 #ifdef SKIP_ASM
 extern "C" void func_002B9D40(void *arg0, int arg1) {
     int *base = *(int **)((char *)arg0 + 0x7C);
-    base[*(int *)((char *)arg0 + 0x1C)] = arg1;
+    base[*(volatile int *)((char *)arg0 + 0x1C)] = arg1;
 }
 #endif
 
@@ -547,7 +547,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9D58);
 #ifdef SKIP_ASM
 extern "C" void func_002B9D58(void *arg0, int arg1) {
     int *base = *(int **)((char *)arg0 + 0x80);
-    base[*(int *)((char *)arg0 + 0x1C)] = arg1;
+    base[*(volatile int *)((char *)arg0 + 0x1C)] = arg1;
 }
 #endif
 
@@ -556,7 +556,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9D70);
 #ifdef SKIP_ASM
 extern "C" void func_002B9D70(void *arg0, int arg1) {
     int *base = *(int **)((char *)arg0 + 0x84);
-    base[*(int *)((char *)arg0 + 0x1C)] = arg1;
+    base[*(volatile int *)((char *)arg0 + 0x1C)] = arg1;
 }
 #endif
 
@@ -593,7 +593,7 @@ extern "C" float func_002B9DB8(void *arg0) {
     int temp_2;
     int temp_3;
 
-    temp_2 = (*(int *)((char*)(arg0) + (0x88)));
+    temp_2 = (*(volatile int *)((char*)(arg0) + (0x88)));
     temp_3 = (*(int *)((char*)(arg0) + (0x8C)));
     (*(int *)((char*)(arg0) + (0x8C))) = temp_2;
     return (float) (temp_2 - temp_3) * 0.01f;

@@ -975,29 +975,32 @@ extern char D_00525F20[];
 extern int func_003F4C98(char *, int, int);
 extern int func_003F4C68(char *, int, int, int, int, int, int, int, int, int);
 extern int func_00424698(int, int);
+/* Network session handle (0x9C bytes, created by func_003F5478). The receive callback func_003F5A50 (an RPC
+   completion) writes f8 / fC / f10, so they are volatile in every accessor. */
+struct sSess { int f0; int f4; volatile int f8; volatile int fC; volatile int f10; int f14; unsigned char *f18; };
 typedef struct { unsigned short family; unsigned short port; int addr; int z8; int zC; } SA5638;
-int func_003F5638(int *self, unsigned addr, int port) {
+int func_003F5638(struct sSess *self, unsigned addr, int port) {
     unsigned v;
-    if (((SA5638 *)self[1])->family != 0) return -1;
-    ((SA5638 *)self[1])->family = 2;
-    ((SA5638 *)self[1])->port = 0;
-    ((SA5638 *)self[1])->addr = 0;
-    ((SA5638 *)self[1])->z8 = 0;
-    ((SA5638 *)self[1])->zC = 0;
-    ((unsigned char *)self[1])[2] = port >> 8;
-    ((unsigned char *)self[1])[3] = port;
+    if (((SA5638 *)self->f4)->family != 0) return -1;
+    ((SA5638 *)self->f4)->family = 2;
+    ((SA5638 *)self->f4)->port = 0;
+    ((SA5638 *)self->f4)->addr = 0;
+    ((SA5638 *)self->f4)->z8 = 0;
+    ((SA5638 *)self->f4)->zC = 0;
+    ((unsigned char *)self->f4)[2] = port >> 8;
+    ((unsigned char *)self->f4)[3] = port;
     v = addr;
-    ((unsigned char *)self[1])[7] = v;
+    ((unsigned char *)self->f4)[7] = v;
     v >>= 8;
-    ((unsigned char *)self[1])[6] = v;
+    ((unsigned char *)self->f4)[6] = v;
     v >>= 8;
-    ((unsigned char *)self[1])[5] = v;
+    ((unsigned char *)self->f4)[5] = v;
     v >>= 8;
-    ((unsigned char *)self[1])[4] = v;
-    func_00424698(self[1], self[1] + 0x20);
+    ((unsigned char *)self->f4)[4] = v;
+    func_00424698(self->f4, self->f4 + 0x20);
     func_003F4C98(D_00525F20, 'sess', 'conn');
-    func_003F4C68(D_00525F20, 0, self[0], 0, self[1], 0x10, 0, 0, 0, 0);
-    self[4] = 0;
+    func_003F4C68(D_00525F20, 0, self->f0, 0, self->f4, 0x10, 0, 0, 0, 0);
+    self->f10 = 0;
     return 0;
 }
 #endif
@@ -1010,11 +1013,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5738);
 extern char D_00525F30[];
 extern int func_003F4C98(char *, int, int);
 extern void func_00416210b(int, int, int) __asm__("func_00416210");
-int func_003F5738(int *self) {
+int func_003F5738(struct sSess *self) {
     func_003F4C98(D_00525F30, 'sess', 'disc');
-    func_003F4C68(D_00525F30, 0, self[0], 0, 0, 0, 0, 0, 0, 0);
-    func_00416210b(self[1], 0, 0x20);
-    self[4] = 0;
+    func_003F4C68(D_00525F30, 0, self->f0, 0, 0, 0, 0, 0, 0, 0);
+    func_00416210b(self->f4, 0, 0x20);
+    self->f10 = 0;
     return 0;
 }
 #endif
@@ -1025,25 +1028,24 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F57C8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 typedef struct { unsigned char b[0x18]; } B57C8;
-typedef struct { int f0; B57C8 *f4; int f8; int fC; int f10; } S57C8;
 extern char D_00525F40[];
 extern int func_003F4C98(char *, int, int);
 extern int c57_4C68(char *, int, int, int, int, int, B57C8 *, int, int, int) __asm__("func_003F4C68");
-int func_003F57C8_impl(S57C8 *self, int key) __asm__("func_003F57C8");
-int func_003F57C8_impl(S57C8 *self, int key) {
+int func_003F57C8_impl(struct sSess *self, int key) __asm__("func_003F57C8");
+int func_003F57C8_impl(struct sSess *self, int key) {
     func_003F4C98(D_00525F40, 'sess', 'stat');
-    c57_4C68(D_00525F40, 0, self->f0, 0, 0, 0, self->f4, 0x20, 1, 0);
+    c57_4C68(D_00525F40, 0, self->f0, 0, 0, 0, (B57C8 *)self->f4, 0x20, 1, 0);
     if (key == 'port') {
-        return (self->f4->b[2] << 8) | self->f4->b[3];
+        return (((B57C8 *)self->f4)->b[2] << 8) | ((B57C8 *)self->f4)->b[3];
     }
     if (key == 'addr') {
-        return (((self->f4->b[4] << 8 | self->f4->b[5]) << 8 | self->f4->b[6]) << 8) | self->f4->b[7];
+        return (((((B57C8 *)self->f4)->b[4] << 8 | ((B57C8 *)self->f4)->b[5]) << 8 | ((B57C8 *)self->f4)->b[6]) << 8) | ((B57C8 *)self->f4)->b[7];
     }
     if (key == 'ladr') {
-        return (((self->f4->b[0x14] << 8 | self->f4->b[0x15]) << 8 | self->f4->b[0x16]) << 8) | self->f4->b[0x17];
+        return (((((B57C8 *)self->f4)->b[0x14] << 8 | ((B57C8 *)self->f4)->b[0x15]) << 8 | ((B57C8 *)self->f4)->b[0x16]) << 8) | ((B57C8 *)self->f4)->b[0x17];
     }
     if (key == 'lprt') {
-        return (self->f4->b[0x12] << 8) | self->f4->b[0x13];
+        return (((B57C8 *)self->f4)->b[0x12] << 8) | ((B57C8 *)self->f4)->b[0x13];
     }
     if (key == 'ibuf') {
         return self->f10;

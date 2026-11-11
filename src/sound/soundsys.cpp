@@ -2369,7 +2369,7 @@ extern "C" void func_00295208(void* vself)
         if (h != 0 && func_002AD550(*self->mgr + 0x1D8, h, 1) == 0) continue;
         char* mgr = *self->mgr;
         char* bank = mgr + 0x1D8;
-        if (*(int*)(mgr + 0x260) < t) {
+        if (*(volatile int*)(mgr + 0x260) < t) {
             sndRingPush_5208(self, e);
             sndRingPush_5208(self, h);
             sndRingPush_5208(self, t);
@@ -2555,7 +2555,7 @@ extern "C" void func_00296088(void* self, char* rider, char* evt, int idx)
     if (ids[idx] != 0) q = &ids[idx];
     int r = func_002B5F60(D_004A52D4, evt, *q, rider, v);
     if (r < 0) return;
-    func_00295628(self, evt, r, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 1000, 0, idx);
+    func_00295628(self, evt, r, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 1000, 0, idx);
 }
 #endif
 
@@ -3324,7 +3324,7 @@ extern "C" void func_002974A0(void* self, char* evt, int n)
     sSnd74A0Mgr* m5 = *sys->p118;
     m5->sub.p78[m5->sub.cur] = pri;
     int h = func_002906B8(self);
-    func_00295628(self, evt, h, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
+    func_00295628(self, evt, h, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
 }
 #endif
 
@@ -3677,7 +3677,7 @@ extern "C" void func_00298138(void* self, void* obj, void* obj2)
         return;
     }
     int h = snd8138AddVoice(self, obj, 0, 0x5A, 5);
-    func_00295628(self, (void*)5, h, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
+    func_00295628(self, (void*)5, h, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
 }
 #endif
 
@@ -3851,7 +3851,7 @@ void func_00298488_8488(void* self, sSs8488Rider* a, sSs8488Rider* b)
     sVec4_8488 sum = vu0Add_8488(*a->v02(), *b->v02());
     int c = (int)func_00290C10(1, (float)(int)vu0Length_8488(sum));
     int h = snd8488Add(self, a, 0, 0x36, c);
-    func_00295628(self, (void*)7, h, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 0x32, 0, 0);
+    func_00295628(self, (void*)7, h, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 0x32, 0, 0);
 }
 #endif
 
@@ -3959,7 +3959,7 @@ extern "C" void func_002989A8(void* self, void* obj)
         return;
     }
     int h = snd89A8AddVoice(self, obj, 0, 0x36, 5);
-    func_00295628(self, (void*)6, h, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
+    func_00295628(self, (void*)6, h, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
 }
 #endif
 
@@ -4649,7 +4649,7 @@ extern "C" void func_00299E28(void* self, void* obj, void* a, void* b, int lim, 
     }
     if (n == 0 && func_00295028(self, 1, 0) == 0 && func_00288AE0(self) == 0) {
         int h = snd9E28AddVoice(self, 0, 0x6D, 9);
-        func_00295628(self, (void*)1, h, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 200, 0, 0);
+        func_00295628(self, (void*)1, h, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 200, 0, 0);
     }
     if (n < lim) {
         if (a != 0) {
@@ -6075,7 +6075,7 @@ extern "C" void func_0029C7B0(void* vself)
             ((sSs7B0Obj*)(base + 0x118))->v04(0x25);
         }
     }
-    func_00295950(vself, 0, *(int*)(**(char***)(base + 0x118) + 0x260) + 0x32, 0);
+    func_00295950(vself, 0, *(volatile int*)(**(char***)(base + 0x118) + 0x260) + 0x32, 0);
     *(int*)(base + 0x5824) = **(int**)(D_004A28A8 + 0xC0);
 }
 #endif
@@ -7607,7 +7607,7 @@ extern "C" void func_0029F660(void* vself, void* vrider, int a, int b)
         (*self->p118)->sub.p84[(*self->p118)->sub.cur] = rider->mViewIndex;
     }
     int h = func_002906B8(self);
-    func_00295628(self, (void*)3, h, *(int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
+    func_00295628(self, (void*)3, h, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
 }
 #endif
 

@@ -812,7 +812,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DCFC0);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct H_CFC0 { unsigned int v; };
 typedef struct Ent_CFC0 {
-    int f0, f4, busy, fC;
+    int f0, f4;
+    volatile int busy;
+    int fC;
     int prio;
     char pad[0x18];
     struct Ent_CFC0 *next;
@@ -887,6 +889,77 @@ void func_003DD148(struct H_D148 h) {
         }
     }
 }
+#endif
+
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_00519AB0: the file system's command manager (func_003DCC88 sets it up). Layout from every use in this unit;
+   field names are their offsets. Several fields are also reached through their own splat symbols (declared
+   below), which the functions that address them directly must keep using. */
+struct sFsHd {                      /* 0x110: an open file (D_00519AB0.f2C[], func_003DE800 hands one out) */
+    int f00;                        /* handle, or the archive's sFsNode */
+    int f04;                        /* size */
+    int f08;                        /* offset in the archive */
+    int f0C;
+    char f10[0x100];                /* name */
+};
+struct sFsCmdId {
+    unsigned int id : 20;
+    unsigned int type : 4;
+    unsigned int idx : 8;           /* index in D_00519AB0.f28 */
+};
+struct sFsCmd {                     /* 0x30: a command (D_00519AB0.f28[], func_003DE670 hands one out) */
+    union {
+        unsigned int w;
+        struct sFsCmdId b;
+    } f00;                          /* the handle */
+    int f04;                        /* aborted */
+    volatile int f08;               /* status */
+    int f0C;                        /* error */
+    int f10;                        /* priority */
+    int f14;                        /* callback argument */
+    int f18;
+    int f1C;
+    int f20;
+    struct sFsHd *f24;
+    void (*f28)(int, int, int);     /* completion callback */
+    struct sFsCmd *f2C;             /* next in the queue */
+};
+struct sFsNode {                    /* 0x18: an open archive (D_00519AB0.f34 list) */
+    int f00;                        /* data */
+    int f04;                        /* size */
+    int f08;
+    struct sFsHd *f0C;
+    struct sFsCmd *f10;
+    struct sFsNode *f14;            /* next */
+};
+struct sAB0 {
+    int f00;                        /* number of commands */
+    int f04;                        /* number of open files */
+    int f08;                        /* highest priority run (also D_00519AB8) */
+    int f0C;                        /* commands queued */
+    int f10;               /* callback depth */
+    int f14[4];                     /* mutex (also D_00519AC4) */
+    struct sFsCmd *f24;             /* running */
+    struct sFsCmd *f28;             /* commands (also D_00519AD8) */
+    struct sFsHd *f2C;              /* open files */
+    struct sFsCmd *f30;             /* queue */
+    struct sFsNode *f34;            /* archives (also D_00519AE4) */
+    int f38;                        /* (also D_00519AE8) */
+};
+extern struct sAB0 D_00519AB0;
+extern int D_00519AB8;                          /* D_00519AB0.f08 */
+struct sAB0Lock {                   /* D_00519AB0 from the mutex on (D_00519AC4) */
+    int f00[4];                     /* the mutex */
+    struct sFsCmd *f10;
+    struct sFsCmd *f14;
+    struct sFsHd *f18;
+    struct sFsCmd *f1C;             /* the queue (D_00519AB0.f30) */
+    struct sFsNode *f20;
+    int f24;
+};
+extern struct sAB0Lock D_00519AC4;
+extern struct sFsNode *D_00519AE4;              /* D_00519AB0.f34 */
 #endif
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DD1D8);
@@ -1030,73 +1103,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DD5A0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00519AB0: the file system's command manager (func_003DCC88 sets it up). Layout from every use in this unit;
-   field names are their offsets. Several fields are also reached through their own splat symbols (declared
-   below), which the functions that address them directly must keep using. */
-struct sFsHd {                      /* 0x110: an open file (D_00519AB0.f2C[], func_003DE800 hands one out) */
-    int f00;                        /* handle, or the archive's sFsNode */
-    int f04;                        /* size */
-    int f08;                        /* offset in the archive */
-    int f0C;
-    char f10[0x100];                /* name */
-};
-struct sFsCmdId {
-    unsigned int id : 20;
-    unsigned int type : 4;
-    unsigned int idx : 8;           /* index in D_00519AB0.f28 */
-};
-struct sFsCmd {                     /* 0x30: a command (D_00519AB0.f28[], func_003DE670 hands one out) */
-    union {
-        unsigned int w;
-        struct sFsCmdId b;
-    } f00;                          /* the handle */
-    int f04;                        /* aborted */
-    int f08;               /* status */
-    int f0C;                        /* error */
-    int f10;                        /* priority */
-    int f14;                        /* callback argument */
-    int f18;
-    int f1C;
-    int f20;
-    struct sFsHd *f24;
-    void (*f28)(int, int, int);     /* completion callback */
-    struct sFsCmd *f2C;             /* next in the queue */
-};
-struct sFsNode {                    /* 0x18: an open archive (D_00519AB0.f34 list) */
-    int f00;                        /* data */
-    int f04;                        /* size */
-    int f08;
-    struct sFsHd *f0C;
-    struct sFsCmd *f10;
-    struct sFsNode *f14;            /* next */
-};
-struct sAB0 {
-    int f00;                        /* number of commands */
-    int f04;                        /* number of open files */
-    int f08;                        /* highest priority run (also D_00519AB8) */
-    int f0C;                        /* commands queued */
-    int f10;               /* callback depth */
-    int f14[4];                     /* mutex (also D_00519AC4) */
-    struct sFsCmd *f24;             /* running */
-    struct sFsCmd *f28;             /* commands (also D_00519AD8) */
-    struct sFsHd *f2C;              /* open files */
-    struct sFsCmd *f30;             /* queue */
-    struct sFsNode *f34;            /* archives (also D_00519AE4) */
-    int f38;                        /* (also D_00519AE8) */
-};
-extern struct sAB0 D_00519AB0;
-extern int D_00519AB8;                          /* D_00519AB0.f08 */
-struct sAB0Lock {                   /* D_00519AB0 from the mutex on (D_00519AC4) */
-    int f00[4];                     /* the mutex */
-    struct sFsCmd *f10;
-    struct sFsCmd *f14;
-    struct sFsHd *f18;
-    struct sFsCmd *f1C;             /* the queue (D_00519AB0.f30) */
-    struct sFsNode *f20;
-    int f24;
-};
-extern struct sAB0Lock D_00519AC4;
-extern struct sFsNode *D_00519AE4;              /* D_00519AB0.f34 */
 typedef struct { unsigned int pad0 : 20; unsigned int f : 4; unsigned int pad1 : 8; int a; int b; int c; int d; int e; int f1; int g; int h; } C_D5A0;
 extern C_D5A0 *func_003DE670_D5A0(void) __asm__("func_003DE670");
 extern void func_003DE668_D5A0(C_D5A0 *) __asm__("func_003DE668");
@@ -1197,7 +1203,7 @@ int func_003DD7E0(int *arg0, int arg1, int arg2) {
     temp_2[0] = (temp_2[0] & 0xFF0FFFFF) | 0x600000;
     if (arg0 != 0) {
         temp_2[6] = arg0[1];
-        temp_2[2] = 1;
+        *(volatile int *)&temp_2[2] = 1;
     } else {
         temp_2[3] = 6;
         func_003DE668_D7E0(temp_2);
@@ -1370,7 +1376,7 @@ void func_003DDC00(int arg0, int arg1, int arg2) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DDC30);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct { unsigned int pad0 : 20; unsigned int f : 4; unsigned int pad1 : 8; int a; int b; int c; int d; int e; } R_DC30;
+typedef struct { unsigned int pad0 : 20; unsigned int f : 4; unsigned int pad1 : 8; int a; volatile int b; int c; int d; int e; } R_DC30;
 typedef struct N_DC30 { int f0; int pad4[2]; char *key; int pad10; struct N_DC30 *next; } N_DC30;
 typedef struct { char *owner; int pad4; int f8; char pad[0x110 - 0xC]; } E_DC30;
 typedef struct { int f0; int count; char pad8[0x2C - 8]; E_DC30 *arr; int pad30; N_DC30 *head; } G_DC30;
@@ -2144,7 +2150,7 @@ void releaserequest(char *arg0) {
             D_00450C18_0C18[0](temp_4);
         }
     }
-    *(int *)(arg0 + 0x1C) = 0;
+    *(volatile int *)(arg0 + 0x1C) = 0;
     *(int *)arg0 = *(unsigned char *)arg0;
     queueadd_rr(D_00519BF8_9BF8, arg0);
 }
@@ -2165,7 +2171,7 @@ void func_003DF028(void *arg0) {
     int temp_18;
 
     MUTEX_lock_F028(D_00519C08_F028);
-    (*(int *)((char*)(arg0) + (0x1C))) = 0;
+    (*(volatile int *)((char*)(arg0) + (0x1C))) = 0;
     temp_16 = (*(int *)((char*)(arg0) + (0x10)));
     temp_19 = (*(int (**)(int))((char*)(arg0) + (0x18)));
     temp_18 = (*(int *)((char*)(arg0) + (0xC)));
@@ -2178,6 +2184,28 @@ void func_003DF028(void *arg0) {
         temp_19((*(int *)((char*)(arg0) + (0))));
     }
 }
+#endif
+
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sReq {                       /* 0x30, a file request (D_00450C34[], D_00519BF0 of them) */
+    int f00;                        /* id: sequence << 8 | index */
+    struct sReq *f04;               /* next free */
+    int f08;
+    int f0C;
+    int f10;
+    unsigned int f14;
+    void (*f18)(int);               /* done callback (func_003DF8E8) */
+    volatile int f1C;               /* busy */
+    int f20;
+    int f24;
+    int f28;
+    int f2C;
+};
+extern struct sReq *D_00450C34;
+struct sReqQueue { struct sReq *f00; struct sReq *f04; };  /* head, tail */
+extern struct sReqQueue D_00519BF8;             /* free requests */
+extern char D_00519C08[];                       /* request list mutex */
 #endif
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF0B8);
@@ -2281,7 +2309,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF488);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-typedef struct E_F488 { int id; struct E_F488 *next; int pad[5]; int f1C; int pad2[4]; } E_F488;
+typedef struct E_F488 { int id; struct E_F488 *next; int pad[5]; volatile int f1C; int pad2[4]; } E_F488;
 extern E_F488 *D_00450C34_F488 __asm__("D_00450C34");
 extern E_F488 *(*D_00450C14_F488)(char *, int, int) __asm__("D_00450C14");
 extern int D_00519BF0_F488 __asm__("D_00519BF0");
@@ -2425,7 +2453,7 @@ void func_003DF8E8_impl(int h, void (*fn)(int)) {
         return;
     }
     MUTEX_lock(D_00519C08_9C08);
-    done = *(int *)(e + 0x1C) == 0;
+    done = *(volatile int *)(e + 0x1C) == 0;
     *(void (**)(int))(e + 0x18) = fn;
     MUTEX_unlock_F8E8(D_00519C08_9C08);
     if (done) {
@@ -2439,24 +2467,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF980);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sReq {                       /* 0x30, a file request (D_00450C34[], D_00519BF0 of them) */
-    int f00;                        /* id: sequence << 8 | index */
-    struct sReq *f04;               /* next free */
-    int f08;
-    int f0C;
-    int f10;
-    unsigned int f14;
-    void (*f18)(int);               /* done callback (func_003DF8E8) */
-    int f1C;               /* busy */
-    int f20;
-    int f24;
-    int f28;
-    int f2C;
-};
-extern struct sReq *D_00450C34;
-struct sReqQueue { struct sReq *f00; struct sReq *f04; };  /* head, tail */
-extern struct sReqQueue D_00519BF8;             /* free requests */
-extern char D_00519C08[];                       /* request list mutex */
 extern void mlock_F980(char *) __asm__("MUTEX_lock");
 extern void munlock_F980(char *) __asm__("MUTEX_unlock");
 
@@ -2492,7 +2502,7 @@ int func_003DFAF0(int a0) {
     mlock_FAF0(D_9C08_FAF0);
     v18 = 0;
     t = fEF70_FAF0(a0);
-    if (t != 0 && ((v19 = *(int *)(t + 0x1C), v20 = *(int *)(t + 0x10), v18 = *(int *)(t + 0xC), v19 != 0) || v18 == 0)) {
+    if (t != 0 && ((v19 = *(volatile int *)(t + 0x1C), v20 = *(int *)(t + 0x10), v18 = *(int *)(t + 0xC), v19 != 0) || v18 == 0)) {
         *(int *)(t + 0x10) = 1;
     }
     munlock_FAF0(D_9C08_FAF0);
@@ -2574,7 +2584,7 @@ void func_003DFC48(char *arg0, int arg1) {
     lim = *(int *)(arg0 + 0x44);
     if (old >= lim && nw < lim) {
         *(int *)(arg0 + 0x48) = 1;
-        if (*(int *)(arg0 + 0x38) == 1) {
+        if (*(volatile int *)(arg0 + 0x38) == 1) {
             func_003DCFC0_FC48(*(int *)(arg0 + 0x174), *(int *)(arg0 + 0x40));
         }
     }
@@ -2921,7 +2931,7 @@ void *func_003E06D8(int nslots, int nq, int nreq, char *mem, int size) {
     *(int *)(mem + 0x2C) = data;
     *(int *)(mem + 0x30) = data;
     *(char **)(mem + 0x34) = mem + size;
-    *(int *)(mem + 0x38) = 0;
+    *(volatile int *)(mem + 0x38) = 0;
     *(int *)(mem + 0x3C) = 0x96;
     *(int *)(mem + 0x40) = 0x32;
     *(int *)(mem + 0x44) = 0;
@@ -2989,7 +2999,7 @@ void func_003E0948(int a0, int a1, int a2, int a3, int a4) {
     if (fFBD0_0948(a0, &sp0, &sp4) == 0 && a1 > 0) {
         int t = *(int *)(sp0 + 0x20);
         if (t >= a1 && (a1 != t || (a2 | a3) == 0) && (a4 > 0 || a4 == -1 || a4 == -2)
-            && *(int *)(sp0 + 0x28) >= a4 && *(int *)(sp0 + 0x38) == 0) {
+            && *(int *)(sp0 + 0x28) >= a4 && *(volatile int *)(sp0 + 0x38) == 0) {
             struct T_0948 *p = &(*(struct T_0948 **)(sp0 + 0x1C))[a1 - 1];
             p->a = a2;
             p->b = a3;
@@ -3010,7 +3020,7 @@ extern void f_SYNC_0A28(int) __asm__("SYNCTASK_run");
 extern void f_5398_0A28(int) __asm__("func_003E5398");
 extern void f_56E0_0A28(void *) __asm__("func_003E56E0");
 extern void f_ECA0_0A28(int, int) __asm__("func_003DECA0");
-struct S_0A28 { int w0; char pad[0x34]; int w38; char pad2[0x130]; int w16C; };
+struct S_0A28 { int w0; char pad[0x34]; volatile int w38; char pad2[0x130]; int w16C; };
 
 void func_003E0A28(int arg0) {
     struct S_0A28 *sp0;
@@ -3069,7 +3079,7 @@ void func_003E0B28(int a0, int a1) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E0B98);
 #ifdef SKIP_ASM
-typedef struct { char pad[0x38]; int s38; int pad3C; int f40; char pad44[4]; int f48; char pad4C[0x128]; int f174; } O_0B98;
+typedef struct { char pad[0x38]; volatile int s38; int pad3C; int f40; char pad44[4]; int f48; char pad4C[0x128]; int f174; } O_0B98;
 extern void func_003DCFC0(int, int);
 
 void func_003E0B98(int arg0, int arg1) {
@@ -3152,9 +3162,9 @@ int func_003E0C88(int a0, char *name, int x, int y) {
     *(int *)(node + 0x11C) = y;
     func_003DFD58_0C88(l.p, node);
     MUTEX_lock_0C88(l.p + 4);
-    old = *(int *)(l.p + 0x38);
+    old = *(volatile int *)(l.p + 0x38);
     if (old == 0) {
-        *(int *)(l.p + 0x38) = 1;
+        *(volatile int *)(l.p + 0x38) = 1;
     }
     MUTEX_unlock_0C88(l.p + 4);
     if (old == 0) {
@@ -3205,8 +3215,8 @@ int func_003E0D80(int h, int *p, int n, int key) {
     *(int *)(o + 0x10) = 1;
     func_003DFD58_0D80(a, o);
     MUTEX_lock_0D80(a + 4);
-    f = *(int *)(a + 0x38);
-    if (f == 0) *(int *)(a + 0x38) = 1;
+    f = *(volatile int *)(a + 0x38);
+    if (f == 0) *(volatile int *)(a + 0x38) = 1;
     MUTEX_unlock_0D80(a + 4);
     if (f == 0) func_003E0270_0D80(a, 0);
     return *(int *)o;
@@ -3367,8 +3377,8 @@ void func_003E13E8(int a0, unsigned int a1) {
         *(int *)a1 = -2;
         fFC48_13E8(sp0, *(int *)(a1 + 4));
         fMLK_13E8(sp0 + 4);
-        t = *(int *)(sp0 + 0x38);
-        if (t == 2) *(int *)(sp0 + 0x38) = 1;
+        t = *(volatile int *)(sp0 + 0x38);
+        if (t == 2) *(volatile int *)(sp0 + 0x38) = 1;
         fMUL_13E8(sp0 + 4);
         if (t == 2) {
             if (*(int *)(sp0 + 0x48) != 0) f03D0_13E8(sp0, *(int *)(sp0 + 0x40));
@@ -5328,7 +5338,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4EE8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450DE8_4EE8[] __asm__("D_00450DE8");
 extern int D_00450DEC_4EE8[] __asm__("D_00450DEC");
-extern int D_00450DCC_4EE8[] __asm__("D_00450DCC");
+extern volatile int D_00450DCC_4EE8[] __asm__("D_00450DCC");
 
 // Resets the timer state.
 void func_003E4EE8(void) {
@@ -5867,7 +5877,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_add);
 struct T_STA { int fn; int mode; int due; int fC; };
 extern struct T_STA D_0051ED98_STA[16] __asm__("D_0051ED98");
 extern int D_00450E00_STA __asm__("D_00450E00");
-extern int D_00450DD0_STA __asm__("D_00450DD0");
+extern volatile int D_00450DD0_STA __asm__("D_00450DD0");
 
 void SYNCTASK_add_impl(int fn, int mode, int delay) __asm__("SYNCTASK_add");
 void SYNCTASK_add_impl(int fn, int mode, int delay) {
