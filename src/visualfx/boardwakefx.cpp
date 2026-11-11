@@ -3829,7 +3829,269 @@ extern "C" void func_002E6640(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E66B8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline t4Vector vu0Scale(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0Length(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline t4Vector vu0Sub(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void vu0AddEq(t4Vector& a, const t4Vector& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+int func_0011FE98(void*);
+
+
+struct sSeg_66B8 {
+    t4Vector a;             // 0x00
+    t4Vector b;             // 0x10
+};
+
+struct sWake_66B8 {
+    char* rider;            // 0x000 (virtual base)
+    float f4;               // 0x004
+    float f8;               // 0x008
+    float fC;               // 0x00C
+    float phase;            // 0x010
+    int f14;                // 0x014
+    int f18;                // 0x018
+    char pad1C[0x398 - 0x1C];
+    int tex;                // 0x398
+    int head;               // 0x39C
+    int count;              // 0x3A0
+    int max;                // 0x3A4
+    int air;                // 0x3A8
+    sSeg_66B8* segs;        // 0x3AC
+    float& Width() { return fC; }
+};
+
+extern int D_004A4700;
+extern int D_004A4730;
+extern int D_004A4734;
+extern int D_004A4738;
+extern "C" void func_002E6C08_66B8(sWake_66B8* self) __asm__("func_002E6C08");
+
+// PORT: <? and >? (g++ min/max operators)
+static inline float Clamp_66B8(float v, float lo, float hi)
+{
+    if (v >= lo) return v <? hi;
+    return lo;
+}
+
+static inline float Max_66B8(float a, float b)
+{
+    return a >? b;
+}
+
+static inline int Approach_66B8(int x, int target, int step)
+{
+    if (target + step < x) {
+        return x - step;
+    }
+    if (x < target - step) {
+        return x + step;
+    }
+    return target;
+}
+
+
+
+
+
+// PORT: PS2-only VU0 inline asm (a -= b).
+static inline void SubEq_66B8(t4Vector& a, const t4Vector& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+
+static inline t4Vector BonePos_66B8(char* o, int off)
+{
+    return ((t4Vector*)(*(char**)(*(char**)(o + 0x780) + 0x30) + (*(int*)(o + off) << 6)))[3];
+}
+
+static inline void Trail_66B8(sWake_66B8* self, const t4Vector& pos, int on, float k, float speed)
+{
+    if (on) {
+        int prev = self->head;
+        self->head++;
+        self->head %= 20;
+        if (self->count < self->max) {
+            self->count++;
+        }
+        self->segs[self->head] = self->segs[prev];
+        t4Vector d = vu0Scale(pos, 1.4f);
+        for (int i = 0; i < 20; i++) {
+            SubEq_66B8(self->segs[i].a, d);
+            vu0AddEq(self->segs[i].b, d);
+        }
+    } else {
+        self->count = Approach_66B8(self->count, 0, 1);
+    }
+    if (self->count > 0) {
+        char* o = self->rider;
+        t4Vector a = BonePos_66B8(o, 0x89C);
+        t4Vector b = BonePos_66B8(o, 0x8B0);
+        t4Vector c = BonePos_66B8(o, 0x8B8);
+        if (vu0Dot(b, pos) < vu0Dot(c, pos)) {
+            self->segs[self->head].a = vu0Sub(b, vu0Scale(a, 0.7f));
+            self->segs[self->head].b = vu0Sub(c, vu0Scale(a, 0.7f));
+        } else {
+            self->segs[self->head].a = vu0Sub(c, vu0Scale(a, 0.7f));
+            self->segs[self->head].b = vu0Sub(b, vu0Scale(a, 0.7f));
+        }
+        self->phase -= k * (speed * 0.016666668f);
+        if (self->phase < 0.0f) {
+            self->phase += 1.0f;
+        }
+        if (1.0f < self->phase) {
+            self->phase -= 1.0f;
+        }
+    }
+}
+
+extern "C" void func_002E66B8(sWake_66B8* self)
+{
+    int air = func_0011FE98(self->rider) == 1;
+    int on = 0;
+    if (!air) {
+        char* r = self->rider;
+        if (0.0f < *(float*)(r + 0x2FC) || 0.0f < *(float*)(r + 0x2E8)) {
+            on = 1;
+        }
+    }
+    if (self->air != 0 && !air) {
+        self->count = 0;
+        self->f18 = 0;
+        self->f14 = 0;
+    }
+    self->air = air;
+    char* r = self->rider;
+    float k = 0.002f;
+    int type = *(int*)(r + 0x2F4);
+    if (type == 11) {
+        k = 0.01f;
+        self->tex = 61;
+    } else if (0.01f < *(float*)(r + 0x2E8) || D_004A4730 != 0) {
+        k = 0.01f;
+        self->tex = 60;
+    } else if (type >= 10 || D_004A4734 != 0) {
+        k = 0.01f;
+        self->tex = 59;
+    } else if (type >= 5 || D_004A4738 != 0) {
+        k = 0.005f;
+        self->tex = 58;
+    } else {
+        self->tex = 57;
+    }
+    r = self->rider;
+    float speed = vu0Length(*(t4Vector*)(r + 0x1E0));
+    if (on) {
+        float c = Clamp_66B8(Max_66B8(*(float*)(r + 0x2E8), *(float*)(r + 0x2FC)), 0.0f, 1.0f);
+        self->f4 = (c * 400.0f + 400.0f) * (speed / 3333.3335f);
+        self->Width() = (*(int*)(r + 0x2F4) == 11) ? 50.0f : c * 9.0f + 6.0f;
+        self->f8 = 1.0f;
+    } else {
+        self->f4 *= 0.95f;
+        self->f8 *= 0.95f;
+        self->Width() *= 0.95f;
+    }
+    if (D_004A4700 != 0) {
+        t4Vector pos = *(t4Vector*)(self->rider + 0x1A0);
+        Trail_66B8(self, pos, on, k, speed);
+    }
+    func_002E6C08_66B8(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E6C08);

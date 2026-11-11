@@ -1513,9 +1513,275 @@ extern "C" void func_0023A4F0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamemode", func_0023A668);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// The game-mode manager (cGameModeMan, 0xA0 bytes; cGameModeMan_getGM creates it). D_004A2C6C owns it and
+// D_004A2C70_A668 is the pointer the handlers read it through. iNumberAI is the prototype's name (assert
+// `iRider < (pManager->iNumberAI+1)` in func_0023A760); mode indexes the handler table D_00536668.
+struct cGameModeMan {
+    int f0;             // 0x00 current heat (1..3)
+    int mode;           // 0x04
+    int type;           // 0x08
+    int net;            // 0x0C
+    int iNumberAI;      // 0x10
+    int f14;            // 0x14
+    int a18[10];        // 0x18 rider character IDs
+    int a40[10];        // 0x40
+    int f68;            // 0x68
+    int f6C;            // 0x6C
+    int f70;            // 0x70
+    int f74;            // 0x74
+    int f78;            // 0x78
+    int f7C;            // 0x7C
+    int f80;            // 0x80
+    int f84;            // 0x84
+    int f88;            // 0x88
+    int f8C;            // 0x8C
+    int f90;            // 0x90
+    int f94;            // 0x94
+    int f98;            // 0x98
+    int f9C;            // 0x9C
+};
 
+extern cGameModeMan* D_004A2C70_A668 __asm__("D_004A2C70");
+
+// Game-mode handler base (cGameModeHandler): the handlers in D_00536668 are its subclasses.
+class cGameModeHandler {
+public:
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+};
+
+// The race handler (cGMRaceHandler, vtable D_0047CF38, 0xD0 bytes).
+struct cGMRaceHandler : public cGameModeHandler {
+    int f4;                     // 0x04
+    int f8;                     // 0x08
+    int fC;                     // 0x0C
+    int rows[3][6];             // 0x10 line-up per heat: the player's character, then the others
+    int tbl[3][10];             // 0x58 times per heat and rider
+};
+
+extern "C" void* cBE_getBE();
+
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+
+extern "C" int func_00146E98(void* iface, int a1);
+
+int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
+
+extern "C" int func_00147410(void* iface, int player);
+
+extern "C" void func_0023A668_A668(cGMRaceHandler* self) __asm__("func_0023A668");
+extern "C" void func_0023A668_A668(cGMRaceHandler* self)
+{
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+    int id = func_00146E98(iface, 0);
+    int ch = cBENewPlayerInterface_getRiderCharID(iface, id);
+    int r = func_00147410(iface, id);
+    int k = D_004A2C70_A668->f0 - 1;
+    if (k < 0) k = 0;
+    for (int i = 0; i < 6; i++) {
+        int v = self->rows[k][i];
+        if (v >= 10) {
+            D_004A2C70_A668->a40[i] = v;
+            v = ch;
+        } else {
+            D_004A2C70_A668->a40[i] = 0;
+        }
+        D_004A2C70_A668->a18[i] = v;
+        if (i == id) D_004A2C70_A668->a40[i] = r;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/gamemode", func_0023A760);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type).
+// Virtual calls in this unit go through these by hand.
+template <class F> struct sVEntry {
+    short delta;
+    short index;
+    F* fn;
+};
+
+// The game-mode manager (cGameModeMan, 0xA0 bytes; cGameModeMan_getGM creates it). D_004A2C6C owns it and
+// D_004A2C70_A760 is the pointer the handlers read it through. iNumberAI is the prototype's name (assert
+// `iRider < (pManager->iNumberAI+1)` in func_0023A760); mode indexes the handler table D_00536668.
+extern cGameModeMan* D_004A2C70_A760 __asm__("D_004A2C70");
+
+// The race (seg/seg_1FBE38 layout): riders by being index at 0x28; each player holds its rider at +0x18.
+struct sRacePlayer {
+    char pad_0x0[0x18];
+    cRider* rider;              // 0x18
+};
+
+struct sRace {
+    char pad_0x0[0x8];
+    unsigned int f8;            // 0x08
+    int fC;                     // 0x0C race clock (ticks)
+    char pad_0x10[0x10];
+    int f20;                    // 0x20
+    int f24;                    // 0x24
+    cRider* riders[6];          // 0x28
+    sRacePlayer* players[12];   // 0x40
+    sRacePlayer* players2[3];   // 0x70
+    int numPlayers;             // 0x7C
+    int f80;                    // 0x80 last rider index
+};
+
+struct sGame {
+    char pad_0x0[0xC];
+    sRace* race;                // 0xC
+    char pad_0x10[0x18];
+    int* f28;                   // 0x28
+};
+
+// The game singleton (D_004A28A8_A760).
+struct sApp {
+    char pad_0x0[0x78];
+    void* f78;                  // 0x78
+    char pad_0x7C[0x8];
+    sGame* game;                // 0x84
+};
+
+extern sApp* D_004A28A8_A760 __asm__("D_004A28A8");
+
+// Race settings (D_00535BC8_A760; ai/ai's sRaceSettings). D_00535C04 / D_00535C11 / D_00535C12 are splat
+// symbols for its fields at 0x3C / 0x49 / 0x4A.
+struct sRaceSettings {
+    char pad[0x49];
+    signed char f49;            // 0x49
+};
+
+extern sRaceSettings D_00535BC8_A760 __asm__("D_00535BC8");
+
+// Game-mode handler base (cGameModeHandler): the handlers in D_00536668 are its subclasses.
+// The race handler (cGMRaceHandler, vtable D_0047CF38, 0xD0 bytes).
+static inline sRace* GetRace()
+{
+    return D_004A28A8_A760->game->race;
+}
+
+static inline int Finished(cRider* r)
+{
+    return r->mFinishTime >= 0.0f;
+}
+
+extern "C" void* cBE_getBE();
+
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+
+extern int D_00536730[];
+
+extern unsigned int D_00536640[];
+
+extern int D_005366A8[];
+
+extern "C" int func_0012A250(void* race);
+
+extern "C" int func_00146E98(void* iface, int a1);
+
+extern "C" void func_00147D20(void* iface, int a1);
+
+extern "C" void func_00147E18(void* iface, int a1);
+
+extern "C" int func_00122D78(void* self);
+
+extern "C" void func_00238BF8_A760(void* self, int n) __asm__("func_00238BF8");
+
+static inline int vcall_23A760(char* obj, int slot)
+{
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
+    return vt[slot].fn(obj + vt[slot].delta);
+}
+
+// cGMRaceHandler slot 7: records rider idx's heat time, ranks the heat and moves the heat state on.
+extern "C" void func_0023A760(cGMRaceHandler* self, int idx)
+{
+    void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    int n = func_00146E98(player, 0);
+    int heat = D_004A2C70_A760->f0 - 1;
+    sRace* rc = GetRace();
+    if (func_0012A250(rc) == 0 || vcall_23A760((char*)GetRace()->riders[idx] + 0x6C0, 9) == 0) {
+        int tick = rc->riders[idx]->mFinishTick;
+        if (GetRace()->riders[idx]->mDidNotFinish) {
+            self->tbl[heat][idx] = 360000;
+            D_005366A8[idx] = 1;
+        } else {
+            self->tbl[heat][idx] = tick;
+            D_005366A8[idx] = 0;
+        }
+    }
+    if (func_0012A250(rc) == 0) {
+        return;
+    }
+    if (vcall_23A760((char*)GetRace()->riders[idx] + 0x6C0, 8) == 0) {
+        return;
+    }
+    for (int i = 0; i < D_004A2C70_A760->iNumberAI + 1; i++) {
+        if (!Finished(rc->riders[i])) {
+            self->tbl[heat][i] = func_00122D78(rc->riders[i]);
+        }
+        D_00536640[i] = self->tbl[heat][i];
+    }
+    func_00238BF8_A760(D_004A2C70_A760, 10);
+    cGameModeMan* gm = D_004A2C70_A760;
+    gm->f74 = gm->f70;
+    if (D_00536730[n] < 3) {
+        gm->f70 = gm->f0 + 1;
+        GetRace()->riders[idx]->unk_100 = 1;
+        if (gm->f0 == 3) {
+            gm->f84 = 1;
+            gm->f70 = 3;
+        }
+        if (D_00535BC8_A760.f49 == 0) {
+            if (D_00536730[n] == 0) {
+                if ((D_004A2C70_A760->f0 < 2 && D_00536640[1] - D_00536640[0] > 600) ||
+                    (D_004A2C70_A760->f0 == 2 && D_00536640[1] - D_00536640[0] > 300) ||
+                    (D_004A2C70_A760->f0 == 3 && D_00536640[1] - D_00536640[0] > 180)) {
+                    func_00147D20(player, 1);
+                }
+            }
+            if (D_004A2C70_A760->f0 == 3) {
+                D_004A2C70_A760->f70 = 0;
+                D_004A2C70_A760->f74 = 0;
+            }
+        }
+    } else {
+        gm->f70 = gm->f0;
+        self->f8 = 1;
+        self->fC = 1;
+        GetRace()->riders[idx]->unk_100 = 0;
+        if (D_00535BC8_A760.f49 == 0) {
+            if (D_004A2C70_A760->f0 < 2 ||
+                (D_004A2C70_A760->f0 == 2 && D_00536730[n] >= 4) ||
+                (D_004A2C70_A760->f0 == 3 && D_00536730[n] == 5)) {
+                func_00147E18(player, 1);
+            }
+        }
+    }
+    if (D_004A2C70_A760->f0 == 3) {
+        D_004A2C70_A760->f9C = 1;
+    }
+    int place = D_00536730[n];
+    if (place == 0)
+        GetRace()->players[0]->rider->unk_2F8 = 0.699999988079071f;
+    else if (place == 1)
+        GetRace()->players[0]->rider->unk_2F8 = 0.3499999940395355f;
+    else
+        GetRace()->players[0]->rider->unk_2F8 = 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamemode", func_0023AC10__FPv);

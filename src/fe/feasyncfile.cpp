@@ -11850,7 +11850,66 @@ extern "C" void func_001B43A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B4470);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int D_004A1B80;
+
+extern "C" void func_001B47C0_4470(void* self, int a1) __asm__("func_001B47C0");
+
+extern cFEVObj_001B3F78* D_004A1B78;
+
+extern "C" void func_001B4FA0_4470(void* self, int err) __asm__("func_001B4FA0");
+
+extern "C" void func_001B4470(void* self_)
+{
+    char* self = (char*)self_;
+    int k;
+    int e;
+    if (((cFEVObj_001B43A8*)D_004A1B78)->v53() == 0) {
+        k = D_004A1B80;
+        if (k == 0) {
+            D_004A1B80 = 1;
+            func_001B47C0_4470(self, 2);
+            *(int*)(self + 0x708) = 2;
+        } else {
+            e = *(int*)(self + 0x70C);
+            *(int*)(self + 0x708) = 0;
+            if (e != 1) {
+                D_004A1B80 = (k + 1) % 2;
+                func_001B4FA0_4470(self, e);
+            } else {
+                func_001B5068(self, -1);
+                func_001B4888(self, 0x840, 2, -1);
+            }
+        }
+    } else {
+        if (((cFEVObj_001B43A8*)D_004A1B78)->v55() == 0) {
+            k = D_004A1B80;
+                if (k == 0) {
+                *(int*)(self + 0x70C) = -200;
+                D_004A1B80 = 1;
+                func_001B47C0_4470(self, 2);
+                *(int*)(self + 0x708) = 2;
+            } else {
+                e = *(int*)(self + 0x70C);
+                *(int*)(self + 0x708) = 0;
+                if (e != 1) {
+                    D_004A1B80 = (k + 1) % 2;
+                    func_001B4FA0_4470(self, e);
+                } else {
+                    func_001B4888(self, 0x841, 0x14, 1);
+                }
+                func_001B5068(self, -1);
+            }
+        } else {
+            *(int*)(self + 0x708) = 4;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B45E8);
@@ -14439,7 +14498,179 @@ extern "C" void func_001B7CB8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B7E40);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
+template <class F> struct sVEntry {
+    short delta;
+    short index;
+    F* fn;
+};
+
+int GetHashValue32(char* str);
+
+extern char D_00461618[];
+
+extern void* D_004A28A8;
+
+extern char D_004A12C0[];
+
+extern char D_0045F7E0[];
+
+extern char D_0045DC90[];
+
+extern char D_0045DCD8[];
+
+extern int* D_004A33D0;
+
+extern char D_004642E0[];
+
+extern "C" int func_00265CB0(void* p);
+
+extern "C" int func_00265D68(void* p);
+
+extern char D_004644D8[];
+
+extern char D_004644F0[];
+
+// func_002C26D0 is a varargs formatter (dst, fmt, ...); the plain declaration above is a 3-arg view.
+extern "C" void func_002C26D0_v(void* dst, int fmt, ...) __asm__("func_002C26D0");
+
+// func_002C2718 is a varargs formatter (buf, fmt, ...); the plain declaration above is a 3-arg view.
+extern "C" void func_002C2718_v(char* buf, const char* fmt, ...) __asm__("func_002C2718");
+
+extern "C" void func_001B8238_7E40(char* self) __asm__("func_001B8238");
+extern "C" void func_001B83C0_7E40(char* self) __asm__("func_001B83C0");
+extern char D_004644A8[];
+extern char D_004644C0[];
+extern char D_00464508[];
+
+static inline int Loc_B7E40(char* name)
+{
+    char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(obj + 4);
+    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+}
+
+static inline bool IsMode_001B7E40(int m)
+{
+    return *D_004A33D0 == m;
+}
+
+struct sFEState_001B7E40 {
+    char pad0[0x6D8];
+    int f6D8;           // 0x6D8
+    int f6DC;           // 0x6DC
+    char pad6E0[0x702 - 0x6E0];
+    char text[0xB04 - 0x702]; // 0x702
+    int fB04;           // 0xB04
+};
+
+extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode) __asm__("func_001B7E40");
+
+extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
+{
+    char buf[0x20];
+    char* cur = 0;
+    int h2 = 0;
+    int flag = 1;
+    int h1 = GetHashValue32(D_00461618);
+    func_002C2718_v(buf, D_004A12C0, 1);
+    switch (mode) {
+    case 2:
+        if (self->fB04 == 0) {
+            if (func_00265CB0(D_004A33D0)) {
+                func_002C26D0_v(self->text, Loc_B7E40(D_0045DC90), buf);
+            } else {
+                func_001B8238_7E40((char*)self);
+            }
+        } else {
+            func_001B83C0_7E40((char*)self);
+        }
+        flag = 0;
+        h1 = GetHashValue32(D_0045DCD8);
+        h2 = GetHashValue32(D_0045F7E0);
+        cur = self->text;
+        break;
+    case 3:
+        func_002C26D0_v(self->text, Loc_B7E40(D_004644A8), buf, 0x11);
+        flag = 0;
+        h1 = GetHashValue32(D_0045DCD8);
+        h2 = GetHashValue32(D_0045F7E0);
+        cur = self->text;
+        break;
+    case 5:
+        if (self->f6DC == 3) {
+            flag = 0;
+            int a = Loc_B7E40(D_004642E0);
+            int b = Loc_B7E40(D_004644C0);
+            func_002C26D0_v(self->text, b, a, buf);
+        } else {
+            func_001B83C0_7E40((char*)self);
+        }
+        h1 = GetHashValue32(D_0045DCD8);
+        h2 = GetHashValue32(D_0045F7E0);
+        cur = self->text;
+        break;
+    case 1:
+    case 4:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+    case 19:
+    case 20:
+    case 21:
+    case 22:
+    case 23:
+    case 24:
+        func_001B83C0_7E40((char*)self);
+        h1 = GetHashValue32(D_0045DCD8);
+        h2 = GetHashValue32(D_0045F7E0);
+        cur = self->text;
+        break;
+    case 0:
+        if (IsMode_001B7E40(0x16)) {
+            if (func_00265D68(D_004A33D0)) {
+                func_002C26D0_v(self->text, Loc_B7E40(D_004644D8), buf);
+            } else {
+                func_002C26D0_v(self->text, Loc_B7E40(D_004644F0), buf);
+            }
+            h1 = GetHashValue32(D_0045DCD8);
+            h2 = GetHashValue32(D_0045F7E0);
+            cur = self->text;
+        }
+        break;
+    }
+    if (flag && self->f6D8 != 0) {
+        func_002C26D0_v(self->text, Loc_B7E40(D_00464508), buf);
+        h1 = GetHashValue32(D_0045DCD8);
+        h2 = GetHashValue32(D_0045F7E0);
+        cur = self->text;
+    }
+    int r = -1;
+    if (h2 == 0)
+        r = 0;
+    if (self->f6DC == 0x17) {
+        h2 = 0;
+        h1 = GetHashValue32(D_0045F7E0);
+    }
+    func_001B7650(self, r, 0, h1, h2, 0, (int)cur);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B8238);

@@ -1421,7 +1421,430 @@ extern "C" void func_00334850(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00334888);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+// ---- Shared declarations: one type per real thing, used by the functions below ----
+
+// g++ 2.95 vtable entry with an untyped function slot (cast at the call).
+struct sWsVtSlot { short delta; short index; void* fn; };
+
+// A polymorphic world object as the list walkers see it (vtable pointer at 0xC).
+struct sWsVObj {
+    int pad00[3];
+    sWsVtSlot* vt;
+};
+
+// Constant vector table (0x004FF120; 00341388 also reads it through its ctor vector type).
+extern t4Vector D_004FF120_4888[] __asm__("D_004FF120");
+
+struct t4Vector;
+
+// 4x4 matrix with an empty ctor and a VU0 copy (through vf1..vf4).
+struct sWsMat_4888 {
+    t4Vector row[4];
+    sWsMat_4888() {}
+    // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+    sWsMat_4888(const sWsMat_4888& s)
+    {
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            :
+            : "r"(this), "r"(&s)
+            : "memory");
+    }
+};
+
+// A bone of an instance's skeleton (16 bytes): parent index, collision mesh, local matrix.
+struct sWsBone_4888 {
+    int parent;         // 0x0
+    char* mesh;         // 0x4
+    int pad08;
+    sWsMat_4888* mat;   // 0xC
+};
+
+struct sWsBoneTbl_4888 {
+    int pad00;
+    int count;              // 0x4
+    sWsBone_4888* bones;    // 0x8
+};
+
+// Per-bone part record of an instance definition (12 bytes).
+struct sWsPart_4888 {
+    char pad00[0xA];
+    short id;           // 0xA
+};
+
+struct sWsInstDef_4888 {
+    int type;                   // 0x0
+    int pad04[3];
+    sWsPart_4888 parts[1];      // 0x10
+};
+
+// A world instance: collision object, world matrix, skeleton, scale, definition.
+struct sWsInst_4888 {
+    char pad00[0xC];
+    sWsVObj* obj;               // 0xC
+    sWsMat_4888 mat;            // 0x10
+    char pad50[0x30];
+    sWsBoneTbl_4888* tbl;       // 0x80
+    float scale;                // 0x84
+    sWsInstDef_4888* def;       // 0x88
+};
+
+// A triangle hit record (0x80 bytes; empty ctor).
+struct sWsHit_4888 {
+    t4Vector pos;       // 0x00
+    t4Vector nrm;       // 0x10
+    t4Vector v20;       // 0x20
+    t4Vector v30;       // 0x30
+    float dist;         // 0x40
+    int type;           // 0x44
+    void* tri;          // 0x48
+    int id;             // 0x4C
+    void* inst;         // 0x50
+    void* obj;          // 0x54
+    int f58;            // 0x58
+    int bone;           // 0x5C
+    int pad60[8];
+    sWsHit_4888() {}
+} __attribute__((aligned(16)));
+
+// The query object (vtable at 0x50).
+struct sWsQuery_4888 {
+    char pad00[0x50];
+    sWsVtSlot* vt;              // 0x50
+};
+
+typedef int (*Test_4888)(void*);
+typedef int (*Query_4888)(void*, void*, void*, int, int);
+typedef sWsMat_4888* (*GetMat_4888)(void*, void*);
+typedef void (*SetXf_4888)(void*, float, sWsMat_4888*);
+typedef void (*Reset_4888)(void*);
+typedef int (*Tris_4888)(void*, void*, void*, sWsHit_4888*, int);
+typedef int (*Hit_4888)(void*, void*, void*);
+typedef int (*Mesh_4888)(void*, void*, sWsHit_4888*, int);
+
+extern void* D_004A47B8;
+void* func_003A6CC8_4888(void* self, void* a1) __asm__("func_003A6CC8__FPvT0");
+void* func_003A6CD8_4888(void* self, void* a1) __asm__("func_003A6CD8__FPvT0");
+extern "C" void* func_003A6CE8(void* self, int a1);
+void* func_003A6D00_4888(void* self, int a1) __asm__("func_003A6D00__FPvi");
+// PORT: callers pass the hit capacity as a fifth argument the function never reads.
+extern "C" int func_0032C0F8_cap(void* self, void* mesh, int flag, sWsHit_4888* out, int cap) __asm__("func_0032C0F8");
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
+static inline void vu0MulMat_4888(sWsMat_4888* d, const sWsMat_4888* a, const sWsMat_4888* b)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(a), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+static inline void vu0CopyMat_4888(sWsMat_4888* d, const sWsMat_4888* s)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector * matrix, row-vector convention).
+static inline t4Vector vu0MtxMul_4888(const sWsMat_4888* m, const t4Vector& v)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2         $vf8, %1\n"
+        "lqc2         $vf4, 0x0(%2)\n"
+        "lqc2         $vf5, 0x10(%2)\n"
+        "lqc2         $vf6, 0x20(%2)\n"
+        "lqc2         $vf7, 0x30(%2)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        : "=m"(r)
+        : "m"(v), "r"(m)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (d = v * s).
+static inline void vu0ScaleVector_4888(t4Vector& d, const t4Vector& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(d), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+}
+
+// d = v * s
+static inline void ScaleTo_4888(t4Vector& d, const t4Vector& v, float s)
+{
+    vu0ScaleVector_4888(d, v, s);
+}
+
+// v * s
+static inline t4Vector Scale_4888(const t4Vector& v, float s)
+{
+    t4Vector r;
+    ScaleTo_4888(r, v, s);
+    return r;
+}
+
+// A vector built from four floats.
+struct sVecK_4888 : public t4Vector {
+    sVecK_4888(float ax, float ay, float az, float aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+};
+
+// Component-wise product.
+static inline sVecK_4888 MulVec_4888(const t4Vector& a, const t4Vector& b)
+{
+    return sVecK_4888(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
+}
+
+static inline t4Vector Row_4888(const sWsMat_4888& m, int i)
+{
+    return m.row[i];
+}
+
+// In-place inverse of a rigid transform: transpose the rotation, rotate the negated translation back.
+static inline void InvertOrtho_4888(sWsMat_4888& m)
+{
+    float f;
+    f = m.row[0].y;
+    m.row[0].y = m.row[1].x;
+    m.row[1].x = f;
+    f = m.row[0].z;
+    m.row[0].z = m.row[2].x;
+    m.row[2].x = f;
+    f = m.row[1].z;
+    m.row[1].z = m.row[2].y;
+    m.row[2].y = f;
+    t4Vector v = Scale_4888(Row_4888(m, 3), -1.0f);
+    v.w = 0.0f;
+    v = vu0MtxMul_4888(&m, v);
+    v.w = 1.0f;
+    m.row[3] = v;
+}
+
+// Part record i of an instance definition.
+static inline sWsPart_4888* GetPart_4888(sWsInstDef_4888* def, int i)
+{
+    return &def->parts[i];
+}
+
+// Collects the triangle hits of instance `node` against query q into buf (mode 1: unnamed parts only, mode 2: named
+// parts only); bone matrices come from the instance's animated object or are built here from the skeleton.
+extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf, int cap, int mode) __asm__("func_00334888");
+extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf, int cap, int mode)
+{
+    if (node->obj != 0) {
+        sWsVtSlot* vt = node->obj->vt;
+        if (((Test_4888)vt[38].fn)((char*)node->obj + vt[38].delta)) {
+            sWsVtSlot* vt2 = node->obj->vt;
+            return ((Query_4888)vt2[39].fn)((char*)node->obj + vt2[39].delta, q, buf, cap, mode);
+        }
+    }
+    int type = node->def->type;
+    if (type != 3 && type != 1 && type != 2)
+        return 0;
+    sWsVObj* obj = node->obj;
+    sWsMat_4888 mats[24];
+    sWsMat_4888* pMat = &node->mat;
+    int useLocal = 1;
+    sWsMat_4888* boneMats = mats;
+    if (obj != 0) {
+        sWsVtSlot* vt = obj->vt;
+        if (((Test_4888)vt[26].fn)((char*)obj + vt[26].delta)) {
+            useLocal = 0;
+            sWsVtSlot* vt2 = obj->vt;
+            boneMats = ((GetMat_4888)vt2[28].fn)((char*)obj + vt2[28].delta, node);
+        } else {
+            sWsVtSlot* vt2 = obj->vt;
+            pMat = ((GetMat_4888)vt2[25].fn)((char*)obj + vt2[25].delta, node);
+        }
+    }
+    sWsBoneTbl_4888* tbl = node->tbl;
+    sWsBone_4888* bone = tbl->bones;
+    float s = node->scale;
+    t4Vector scl;
+    scl.x = s;
+    scl.y = s;
+    scl.z = s;
+    scl.w = 1.0f;
+    int n = 0;
+    sWsMat_4888* m = boneMats;
+    for (int i = 0, k = 0; i < tbl->count; i++, bone++, m++) {
+        if (useLocal) {
+            int parent = bone->parent;
+            if (parent != -1) {
+                sWsMat_4888 t2;
+                sWsMat_4888 a;
+                t4Vector res;
+                t4Vector r3;
+                sWsMat_4888* lm = bone->mat;
+                res = lm->row[0];
+                a.row[0] = res;
+                res = lm->row[1];
+                a.row[1] = res;
+                res = lm->row[2];
+                a.row[2] = res;
+                r3 = lm->row[3];
+                res.x = r3.x * scl.x;
+                res.y = r3.y * scl.y;
+                res.z = r3.z * scl.z;
+                res.w = r3.w * scl.w;
+                a.row[3] = res;
+                sWsMat_4888 t;
+                sWsMat_4888* pt2 = &t2;
+                sWsMat_4888* pt = &t;
+                vu0MulMat_4888(pt, &mats[parent], &a);
+                vu0CopyMat_4888(pt2, pt);
+                vu0CopyMat_4888(&mats[i], pt2);
+            } else {
+                sWsMat_4888 t2;
+                sWsMat_4888 a;
+                t4Vector res;
+                t4Vector r3;
+                sWsMat_4888* lm = bone->mat;
+                res = lm->row[0];
+                a.row[0] = res;
+                res = lm->row[1];
+                a.row[1] = res;
+                res = lm->row[2];
+                a.row[2] = res;
+                r3 = lm->row[3];
+                res.x = r3.x * scl.x;
+                res.y = r3.y * scl.y;
+                res.z = r3.z * scl.z;
+                res.w = r3.w * scl.w;
+                a.row[3] = res;
+                sWsMat_4888 t;
+                sWsMat_4888* pt2 = &t2;
+                sWsMat_4888* pt = &t;
+                vu0MulMat_4888(pt, pMat, &a);
+                vu0CopyMat_4888(pt2, pt);
+                vu0CopyMat_4888(&mats[i], pt2);
+            }
+        }
+        if (bone->mesh == 0)
+            continue;
+        if (mode == 2) {
+            if (GetPart_4888(node->def, i)->id == -1) {
+                if (type != 2)
+                    k++;
+                continue;
+            }
+        } else if (mode == 1) {
+            if (GetPart_4888(node->def, i)->id != -1) {
+                if (type != 2)
+                    k++;
+                continue;
+            }
+        }
+        sWsHit_4888 ii[64];
+        sWsMat_4888 inv = *m;
+        InvertOrtho_4888(inv);
+        int inum = 0;
+        void* tri = 0;
+        ((SetXf_4888)q->vt[1].fn)((char*)q + q->vt[1].delta, 1.0f / node->scale, &inv);
+        if (type == 2) {
+            inum = ((Tris_4888)q->vt[7].fn)((char*)q + q->vt[7].delta, bone->mesh, bone->mesh + 0xC, ii, 64);
+        } else {
+            if (((Hit_4888)q->vt[9].fn)((char*)q + q->vt[9].delta, bone->mesh, bone->mesh + 0xC)) {
+                if (type == 3) {
+                    tri = func_003A6CE8(func_003A6CD8_4888(D_004A47B8, node), k);
+                    inum = ((Mesh_4888)q->vt[6].fn)((char*)q + q->vt[6].delta, tri, ii, 64);
+                } else {
+                    inum = func_0032C0F8_cap(q, func_003A6D00_4888(func_003A6CC8_4888(D_004A47B8, node), k),
+                                             *(int*)(bone->mesh + 0x18) & 1, ii, 64);
+                }
+            }
+            k++;
+        }
+        ((Reset_4888)q->vt[2].fn)((char*)q + q->vt[2].delta);
+        for (int j = 0; j < inum; j++) {
+            ii[j].nrm = vu0MtxMul_4888(m, ii[j].nrm);
+            buf[n] = ii[j];
+            buf[n].pos = vu0MtxMul_4888(m, MulVec_4888(buf[n].pos, scl));
+            buf[n].type = 1;
+            buf[n].inst = node;
+            buf[n].bone = i;
+            buf[n].id = -1;
+            buf[n].tri = tri;
+            buf[n].v20 = *D_004FF120_4888;
+            buf[n].v30 = *D_004FF120_4888;
+            buf[n].obj = 0;
+            if (GetPart_4888(node->def, i)->id != -1)
+                buf[n].id = GetPart_4888(node->def, i)->id;
+            n++;
+        }
+    }
+    return n;
+}
+#endif
 
 INCLUDE_ASM("intersect/worldsphtree", func_00335128);
 
@@ -5086,7 +5509,183 @@ extern "C" float func_003424D0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00342538);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// ---- Shared declarations: one type per real thing, used by the functions below ----
+
+// g++ 2.95 vtable entry with an untyped function slot (cast at the call).
+struct sVec4_342538 {
+    float x, y, z, w;
+    sVec4_342538() {}
+} __attribute__((aligned(16)));
+
+typedef char* (*GetMat_342538)(void*, int);
+
+struct sBodyTbl_342538 { char pad00[8]; char* ents; };
+struct sBodyInf_342538 { char pad00[0x80]; sBodyTbl_342538* tbl; };
+struct sSub_342538 { char pad00[0x18]; sBodyInf_342538* inf; };
+
+struct sSelf_342538 {
+    float sum;                      // 0x00
+    char pad04[4];
+    float dir;                      // 0x08
+    char pad0C[0x20];
+    int mask;                       // 0x2C
+    char pad30[0x2C];
+    sBodyInf_342538* inf;            // 0x5C
+};
+
+struct sObj_342538 {
+    sVec4_342538 pos;               // 0x00
+    char pad10[0x4C];
+    int idx;                        // 0x5C
+};
+
+extern sVec4_342538 D_004FF150_342538[] __asm__("D_004FF150");
+
+// PORT: PS2-only VU0 inline asm (vector length via vsqrt).
+static inline float vu0Length_342538(const sVec4_342538& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline void vu0Sub_342538(sVec4_342538& r, const sVec4_342538& a, const sVec4_342538& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline void vu0Scale_342538(sVec4_342538& r, const sVec4_342538& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (matrix times vector).
+static inline void vu0Xform_342538(sVec4_342538& r, const sVec4_342538& v, const char* m)
+{
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "o"(v)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (cross product xyz).
+static inline void vu0Cross_342538(sVec4_342538& r, const sVec4_342538& a, const sVec4_342538& b)
+{
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_342538(const sVec4_342538& a, const sVec4_342538& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+extern "C" void func_00342538(sSelf_342538* self, sObj_342538* o, sVec4_342538* p)
+{
+    int idx = o->idx;
+    if (idx >= 0) {
+        sSub_342538* sub = (sSub_342538*)((char*)self + 0x44);
+        char* ents = sub->inf->tbl->ents;
+        if (*(int*)(ents + idx * 16 + 8) != 0) {
+            sWsVtSlot* vt = *(sWsVtSlot**)((char*)self + 0x50);
+            char* m = ((GetMat_342538)vt[29].fn)((char*)sub + vt[29].delta, idx);
+            char* m2 = m;
+            if (vu0Length_342538(*p) > 100.0f) {
+                sVec4_342538 d;
+                sVec4_342538 a;
+                sVec4_342538 t;
+                sVec4_342538 u;
+                a = *(sVec4_342538*)(m + 0x30);
+                vu0Sub_342538(t, o->pos, a);
+                d = t;
+                if (self->dir < 0.0f) {
+                    vu0Scale_342538(t, d, -1.0f);
+                    a = t;
+                    d = t;
+                }
+                if ((self->mask >> o->idx) & 1) {
+                    vu0Scale_342538(t, d, -1.0f);
+                    a = t;
+                    d = t;
+                }
+                vu0Xform_342538(t, D_004FF150_342538[0], m2);
+                a = t;
+                vu0Cross_342538(u, d, *p);
+                t = u;
+                self->sum += vu0Dot_342538(a, t);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00342718);
@@ -5272,7 +5871,90 @@ extern "C" void func_003429E0(void* self, cMover_3429E0* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00342A88);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+// Interface of a moving object (getVelocity / setVelocity at slots 2 and 4).
+class cWsMover {
+public:
+    virtual void v01();
+    virtual t4Vector* getVelocity();
+    virtual void v03();
+    virtual void setVelocity(t4Vector* v);
+};
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline t4Vector vu0Scale(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+extern "C" float func_002D1C70();
+
+struct t4Vector;
+
+
+
+static inline void setVel_342A88(cWsMover* o, t4Vector* v)
+{
+    o->setVelocity(v);
+}
+
+struct sPlane_342A88 {
+    t4Vector n;
+    float d;
+    float k;
+};
+
+struct sSelf_342A88 {
+    char pad[0x10];
+    sPlane_342A88 plane;
+};
+
+extern "C" void func_00342A88(sSelf_342A88* self, cWsMover* obj)
+{
+    float d = self->plane.d - vu0Dot(*obj->getVelocity(), self->plane.n);
+    if (d > 0.0f) {
+        // PORT: takes the address of a temporary (g++ 2.95 accepts it).
+        sPlane_342A88* pl = &self->plane;
+        setVel_342A88(obj, &vu0Scale(vu0Scale(vu0Scale(pl->n, d), pl->k), func_002D1C70()));
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00342B80);

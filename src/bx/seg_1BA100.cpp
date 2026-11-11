@@ -63,7 +63,50 @@ extern "C" int func_002B91B0(void *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B91C8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+class cController;
+class cBankMonitorInstance;
+// Sound callback: a g++ 2.95 pointer to member function (8 bytes), as cSndPlayOpts::OPTS_Callback takes it.
+typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, float);
+
+// One 0x18-byte option record of cSndPlayOpts' option stack.
+struct sSndOptsRec { signed char v; char pad[0x17]; };
+
+// Per-level four-int record at cSndPlayOpts+0x70 (reset to 100, 0, 90, 50).
+struct sSndOptsQuad { int a, b, c, d; };
+
+// cSndPlayOpts (prototype class name): the current option record plus per-level arrays indexed by the stack depth idx.
+struct sSndPlayOpts {
+    int pad0;
+    sSndOptsRec cur;                    // 0x04
+    int idx;                   // 0x1C
+    sSndOptsRec* recs;                  // 0x20
+    int arr24[4];
+    int* p34;
+    int* vals;                          // 0x38
+    int* p3C;
+    sSndCallback callbacks[4];          // 0x40
+    int* p60;
+    int* p64;
+    int* p68;
+    int* p6C;
+    sSndOptsQuad* q70;
+    int* p74;
+    int* p78;
+    int* p7C;
+    int* p80;
+    int* p84;
+};
+
+
+// cSndPlayOpts::OPTS_GetCallback (prototype name)
+extern "C" sSndCallback func_002B91C8(sSndPlayOpts* s) {
+    return s->callbacks[s->idx];
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9208);

@@ -363,7 +363,37 @@ extern "C" void* func_0014ADD8(void* self, int rider, int a2)
     return func_0014ADA8(self, profile, ch, a2);
 }
 #endif
+//100%
 INCLUDE_ASM("be/belibrary", func_0014AE28);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// One character's flag table inside a profile record: D_004A6CA8 is
+// [profile][character] of these (0x9B50 = 10 * 0xF88).
+struct sBEFlagEntryPC {
+    short id;
+    unsigned short flags;
+};
+
+struct sBEProfileChar {
+    char pad_0x000[0x288];
+    short* index;                       // 0x288
+    int count;                          // 0x28C
+    sBEFlagEntryPC entries[0x20D];      // 0x290
+    char pad_0xAC4[0xF88 - 0xAC4];
+
+    int getCount() { return count; }
+    sBEFlagEntryPC* getEntries() { return entries; }
+};
+
+extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("D_004A6CA8");
+
+extern "C" void* func_0014AE28(void* self, int a1, int a2, int* out)
+{
+    *out = D_004A6CA8_pc[a1][a2].getCount();
+    return D_004A6CA8_pc[a1][a2].getEntries();
+}
+#endif
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/belibrary", func_0014AE60);
 #ifdef SKIP_ASM
@@ -522,8 +552,53 @@ extern "C" void func_0014B1B0(void* self, int rider, int b, int c)
     func_00152368((char*)D_004A6CA8 + profile * 0x9b50 + ch * 0xf88, b, c);
 }
 #endif
+//100%
 INCLUDE_ASM("be/belibrary", func_0014B218);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// One character's flag table inside a profile record: D_004A6CA8 is
+// [profile][character] of these (0x9B50 = 10 * 0xF88).
+extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("D_004A6CA8");
+
+extern "C" int func_0014B218(void* self, int a1, int a2, unsigned int mask, sBEFlagEntryPC* out)
+{
+    int count = D_004A6CA8_pc[a1][a2].getCount();
+    sBEFlagEntryPC* e = D_004A6CA8_pc[a1][a2].getEntries();
+    int n = 0;
+    int i;
+    for (i = 0; i < count; i++, e++) {
+        if ((e->flags & mask) == mask) {
+            *out++ = *e;
+            n++;
+        }
+    }
+    return n;
+}
+#endif
+//100%
 INCLUDE_ASM("be/belibrary", func_0014B290);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// One character's flag table inside a profile record: D_004A6CA8 is
+// [profile][character] of these (0x9B50 = 10 * 0xF88).
+extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("D_004A6CA8");
+
+extern "C" int func_0014B290(void* self, int a1, int a2, unsigned int mask)
+{
+    int count = D_004A6CA8_pc[a1][a2].getCount();
+    sBEFlagEntryPC* e = D_004A6CA8_pc[a1][a2].getEntries();
+    int n = 0;
+    int i;
+    for (i = 0; i < count; i++, e++) {
+        if ((e->flags & mask) == mask) {
+            n++;
+        }
+    }
+    return n;
+}
+#endif
 //100%
 INCLUDE_ASM("be/belibrary", func_0014B2F8);
 #ifdef SKIP_ASM

@@ -495,7 +495,65 @@ extern "C" void func_00232930(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_update);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+void cAppMan_setNextModule(cAppMan* self, unsigned int module);
+
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+
+extern "C" void func_00231F80(void* fade);
+
+extern "C" void* func_00231CD0_r(void* self) __asm__("func_00231CD0");
+
+extern void* D_004A28A8;
+
+extern char D_004A2AB8[];
+extern void* D_0047D740[];
+
+struct sModule_232A00 {
+    void** vt;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    int f18;
+};
+
+// Same shape as func_00232930 (see the note there): exceptions enabled for this unit, `tmp` reused.
+extern "C" void cPreFELoadScreen_update(void* self)
+{
+    int tmp;
+    func_00231F80(*(void**)((char*)D_004A28A8 + 0xA4));
+    tmp = *(int*)((char*)self + 4) != 0;
+    if (tmp) {
+        float* f = (float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4);
+        *f -= 0.0833333358168602f;
+        if (*f < 0.0f) {
+            *f = 0.0f;
+        }
+    } else {
+        float* f = (float*)(*(char**)((char*)D_004A28A8 + 0xA4) + 4);
+        *f += 0.0833333358168602f;
+        if (*f > 1.0f) {
+            *f = 1.0f;
+        }
+    }
+    if (*(int*)((char*)D_004A28A8 + 4) == 0) {
+        sModule_232A00* m = (sModule_232A00*)cMemMan_alloc(0x1C, D_004A2AB8, 0x100, 0);
+        func_00231CD0_r(m);
+        tmp = (unsigned int)m;
+        m->vt = D_0047D740;
+        m->fC = 0;
+        m->f10 = 0;
+        m->f14 = 0;
+        cAppMan_setNextModule((cAppMan*)D_004A28A8, tmp);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232AE0);

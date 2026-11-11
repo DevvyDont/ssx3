@@ -289,7 +289,55 @@ extern "C" int func_0026C998(void* self, int a1)
     return 0;
 }
 #endif
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026C9F0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+
+extern int D_004A3410;
+
+struct sPbMan_26CFE8;
+
+extern "C" int func_0026CFE8_C9F0(sPbMan_26CFE8* self, int key) __asm__("func_0026CFE8");
+
+extern "C" int func_003DF690(char* path, int flags);
+extern char* D_004A3414;
+extern char D_004A3430[];
+
+struct sPbEntry_26C9F0 { int id; int used; int pad; };
+struct sPb_26C9F0 {
+    char pad0[8];
+    char name[0x50];
+    int entries;                // 0x58 (pointer held as int)
+    char pad5C[0x18];
+    int cur;                    // 0x74
+    int handle;                 // 0x78
+};
+
+extern "C" int func_0026C9F0(void* self_, int key)
+{
+    sPb_26C9F0* self = (sPb_26C9F0*)self_;
+    char path[0x100];
+    int idx = func_0026CFE8_C9F0((sPbMan_26CFE8*)self, key);
+    if (idx >= 0) {
+        sPbEntry_26C9F0* entry = (sPbEntry_26C9F0*)(idx * 0xC + self->entries);
+        if (entry->used != 0)
+            return 1;
+        self->cur = idx;
+        self->handle = -1;
+        int num = D_004A3410;
+        sprintf(path, D_004A3414, D_004A3430, num, self->name, entry->id);
+        int h = func_003DF690(path, 0x100);
+        self->handle = h;
+        if (h >= 0)
+            return 1;
+        self->handle = -1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026CA90);

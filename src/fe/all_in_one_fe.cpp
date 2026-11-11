@@ -757,7 +757,267 @@ extern "C" void func_0021D160(float x, float y, int c, int d, ...) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021D1A0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
+template <class F> struct sVEntry {
+    short delta;
+    short index;
+    F* fn;
+};
+
+// EA's 2-float vector (prototype name, e.g. setTileUV__7cUIIconG8t2Vector).
+struct t2Vector {
+    float x, y;
+};
+
+// Vertex position of the HUD sprite quads: 16-byte aligned, with an empty default ctor (vertex arrays get a vec_new
+// loop) and the (x, y, z, const float& w) ctor the quad builders use.
+struct sVtxPos {
+    float x, y, z, w;
+    sVtxPos() {}
+    sVtxPos(float ax, float ay, float az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
+    void setZW(float az, float aw) { z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+// One vertex as the render context's slot-71 draw call takes it: UV + q, integer colour, position.
+struct sHudVertex {
+    float u, v, q, pad;
+    int g, b, a, r;
+    sVtxPos pos;
+};
+
+// The render context D_004A289C_D1A0 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot 71
+// draws a vertex list).
+struct sRenderCtx {
+    char pad[0xE84];
+    char* e84;              // 0xE84
+};
+
+extern sRenderCtx* D_004A289C_D1A0 __asm__("D_004A289C");
+
+// A HUD sprite: texture id and UV rectangle.
+struct sHudSprite {
+    int tex;                // 0x0
+    int pad[2];
+    float v0;               // 0xC
+    float u0;               // 0x10
+    float u1;               // 0x14
+    float v1;               // 0x18
+};
+
+// Gauge layout: segment scale and number of middle segments.
+struct sGaugeBar {
+    float scale;
+    int count;
+};
+
+static inline int texOf(sHudSprite* s)
+{
+    return s->tex;
+}
+
+static inline void setTex(sHudSprite* s)
+{
+    *(short*)(D_004A289C_D1A0->e84 + 0x10) = texOf(s);
+}
+
+static inline void setUV(sHudVertex* v, sHudSprite* s)
+{
+    v[0].u = s->u0;
+    v[0].v = s->v0;
+    v[1].u = s->u1;
+    v[1].v = s->v0;
+    v[2].u = s->u0;
+    v[2].v = s->v1;
+    v[3].u = s->u1;
+    v[3].v = s->v1;
+}
+
+static inline void setPos(sHudVertex* v, float x0, float y0, float x1, float y1)
+{
+    v[0].pos.x = x0;
+    v[0].pos.y = y0;
+    v[1].pos.x = x1;
+    v[1].pos.y = y0;
+    v[2].pos.x = x0;
+    v[2].pos.y = y1;
+    v[3].pos.x = x1;
+    v[3].pos.y = y1;
+}
+
+static inline void drawQuad(sHudVertex* v)
+{
+    char* ctx = (char*)D_004A289C_D1A0;
+    sVEntry<void(void*, int, sHudVertex*, int)>* vt = *(sVEntry<void(void*, int, sHudVertex*, int)>**)(ctx + 0x10D8);
+    vt[71].fn(ctx + vt[71].delta, 4, v, 0);
+}
+
+extern "C" void func_001E91F8(void*, void*);
+
+extern "C" void func_001E9220(void*, void*, int);
+
+void func_001E9290(void*, void*);
+
+extern "C" void func_001F10F8(void*, void*, void*, void*, void*, int, int, int);
+
+// Vertical gauge from three sprites (cap, repeated middle, base), filled from the bottom by `fill`.
+extern "C" void func_0021D1A0(float fill, float sx, float sy, char* self, char* elems, signed char sel, int idx,
+                              sGaugeBar* bar, float* col, int x, float* rect)
+{
+    t2Vector a;
+    t2Vector p;
+    t2Vector size;
+    t2Vector sc;
+    t2Vector one;
+    sHudSprite** sprites = (sHudSprite**)(self + (idx * 0xC + 0x4FC));
+    char* e = elems + sel * 0x24;
+    func_001E91F8(e, &a);
+    func_001E9220(e, &size, 0);
+    func_001E9290(e, &sc);
+    sc.x *= sx;
+    sc.y *= sy;
+    size.x *= sc.x;
+    size.y *= sc.y;
+    sc.y *= bar->scale;
+    one.x = 1.0f;
+    one.y = 1.0f;
+    func_001F10F8(self, &p, &a, &size, &one, e[0x20], e[0x21], x);
+    int* w = (int*)(D_004A289C_D1A0->e84 + 8);
+    *w = (*w & ~0x3E0) | ((e[0x22] << 5) & 0x3E0);
+    sHudVertex vtx[4];
+    sHudVertex* verts = vtx;
+    for (int i = 0; i < 4; i++) {
+        int r = (int)(col[0] * 128.0f);
+        int g = (int)(col[1] * 128.0f);
+        int b = (int)(col[2] * 128.0f);
+        int a = (int)(col[3] * 128.0f);
+        vtx[i].r = r;
+        vtx[i].g = g;
+        vtx[i].b = b;
+        vtx[i].a = a;
+        vtx[i].q = 1.0f;
+        vtx[i].pos.setZW(0.0f, 1.0f);
+    }
+    if (fill == 1.0f) {
+        if (rect != 0) {
+            rect[0] = p.x;
+            rect[1] = p.y;
+            rect[2] = size.x;
+            rect[3] = size.y;
+        }
+        p.y += size.y;
+        {
+            sHudSprite* s = sprites[2];
+            setTex(s);
+            float h = sc.y * 23.0f;
+            setUV(vtx, s);
+            setPos(vtx, p.x, p.y - h, p.x + size.x, p.y);
+            drawQuad(verts);
+            p.y -= h;
+        }
+        {
+            sHudSprite* s = sprites[1];
+            setTex(s);
+            float h = sc.y * 23.0f;
+            setUV(vtx, s);
+            for (int i = 0; i < bar->count; i++) {
+                setPos(vtx, p.x, p.y - h, p.x + size.x, p.y);
+                drawQuad(verts);
+                p.y -= h;
+            }
+        }
+        {
+            sHudSprite* s = sprites[0];
+            setTex(s);
+            setUV(vtx, s);
+            setPos(vtx, p.x, p.y - sc.y * 31.0f, p.x + size.x, p.y);
+            drawQuad(verts);
+        }
+    } else {
+        float bottom = p.y + size.y;
+        float top = p.y + size.y * (1.0f - fill);
+        if (rect != 0) {
+            rect[0] = p.x;
+            rect[3] = bottom - top;
+            rect[2] = size.x;
+            rect[1] = top;
+        }
+        {
+            sHudSprite* s = sprites[2];
+            float h = sc.y * 23.0f;
+            float y = bottom - h;
+            float tv = s->v0;
+            int clipped = y <= top;
+            if (clipped) {
+                tv = tv + (s->v1 - tv) * (top - y) / h;
+                y = top;
+            }
+            setTex(s);
+            vtx[0].u = s->u0;
+            vtx[0].v = tv;
+            vtx[1].u = s->u1;
+            vtx[1].v = tv;
+            vtx[2].u = s->u0;
+            vtx[2].v = s->v1;
+            vtx[3].u = s->u1;
+            vtx[3].v = s->v1;
+            setPos(vtx, p.x, y, p.x + size.x, bottom);
+            drawQuad(verts);
+            bottom = y;
+            if (clipped)
+                return;
+        }
+        {
+            sHudSprite* s = sprites[1];
+            float h = sc.y * 23.0f;
+            setTex(s);
+            setUV(vtx, s);
+            for (int i = 0; i < bar->count; i++) {
+                float y = bottom - h;
+                int last = y <= top;
+                if (last) {
+                    float tv = s->v0 + (s->v1 - s->v0) * (top - y) / h;
+                    vtx[0].v = tv;
+                    vtx[1].v = tv;
+                    y = top;
+                }
+                setPos(vtx, p.x, y, p.x + size.x, bottom);
+                drawQuad(verts);
+                bottom = y;
+                if (last)
+                    return;
+            }
+        }
+        {
+            sHudSprite* s = sprites[0];
+            float h = sc.y * 31.0f;
+            float y = bottom - h;
+            float tv = s->v0;
+            int clipped = y <= top;
+            if (clipped) {
+                tv = tv + (s->v1 - tv) * (top - y) / h;
+                y = top;
+            }
+            setTex(s);
+            vtx[0].u = s->u0;
+            vtx[0].v = tv;
+            vtx[1].u = s->u1;
+            vtx[1].v = tv;
+            vtx[2].u = s->u0;
+            vtx[2].v = s->v1;
+            vtx[3].u = s->u1;
+            vtx[3].v = s->v1;
+            setPos(vtx, p.x, y, p.x + size.x, bottom);
+            drawQuad(verts);
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_0021D9A0);
 
