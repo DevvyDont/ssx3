@@ -603,3 +603,31 @@ rom:0x2C30D8 reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xC80
 // func_003C38E0: D_0050AB22 is D_0050AB20+0x2 (its only use).
 rom:0x2C4D7C reloc:MIPS_HI16 symbol:D_0050AB20 addend:0x2
 rom:0x2C4D88 reloc:MIPS_LO16 symbol:D_0050AB20 addend:0x2
+
+// Config round 3 (agent cfg_1, verified per function in a scratch target object before applying).
+// seg/seg_2F41F8 func_003F5000: the ThreadParam gp is `_gp` (0x4A30F0, also the "CPAT" string, so name it per row only).
+rom:0x2F6360 reloc:MIPS_HI16 symbol:_gp
+rom:0x2F6364 reloc:MIPS_LO16 symbol:_gp
+// fe/festatecharequipdetail func_0019BFE8: two unpaired %lo uses of $23 = %hi(D_004FF140) (raw -0xEC0).
+rom:0x9D3FC reloc:MIPS_LO16 symbol:D_004FF140
+rom:0x9D6E0 reloc:MIPS_LO16 symbol:D_004FF140
+// be/beintaggression func_00155E58: D_004A7869/786A/786B are D_004A6CA8+0xBC1/0xBC2/0xBC3 (no other users).
+rom:0x56EE4 reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC3
+rom:0x56EE8 reloc:MIPS_LO16 symbol:D_004A6CA8 addend:0xBC3
+rom:0x56F04 reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC1
+rom:0x56F08 reloc:MIPS_LO16 symbol:D_004A6CA8 addend:0xBC1
+rom:0x56F64 reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC1
+rom:0x56F7C reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC1
+rom:0x56F88 reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC1
+rom:0x57000 reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC1
+rom:0x57008 reloc:MIPS_LO16 symbol:D_004A6CA8 addend:0xBC1
+rom:0x5700C reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC3
+rom:0x57014 reloc:MIPS_LO16 symbol:D_004A6CA8 addend:0xBC3
+rom:0x57038 reloc:MIPS_HI16 symbol:D_004A6CA8 addend:0xBC2
+rom:0x57040 reloc:MIPS_LO16 symbol:D_004A6CA8 addend:0xBC2
+// ealib/seg_2B4578 func_003C4450: D_0050B9C8 is D_0050AD00+0xCC8 (the transfer queue fCC8; its only use).
+rom:0x2C5454 reloc:MIPS_HI16 symbol:D_0050AD00 addend:0xCC8
+rom:0x2C5458 reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xCC8
+// visualfx/lensfx func_002ED490: D_004FA3A8 is D_004FA370+0x38 (slot 0's second vec4).
+rom:0x1EEA38 reloc:MIPS_HI16 symbol:D_004FA370 addend:0x38
+rom:0x1EEA40 reloc:MIPS_LO16 symbol:D_004FA370 addend:0x38
