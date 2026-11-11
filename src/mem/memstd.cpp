@@ -168,7 +168,45 @@ extern "C" int func_00251A80(void)
 #endif
 INCLUDE_ASM("mem/memstd", func_00251AC0);
 INCLUDE_ASM("mem/memstd", func_00251B50);
+//100%
 INCLUDE_ASM("mem/memstd", func_00251BB0);
+#ifdef SKIP_ASM
+struct sMemNode_251BB0 {
+    unsigned short tag;
+    unsigned short flags;
+    int size;
+    sMemNode_251BB0* next;
+};
+
+struct sMemClass_251BB0 {
+    char pad0[0x8];
+    sMemNode_251BB0* first;     // 0x8
+};
+
+// Finds the block whose data area (node + 0x10, size bytes) holds addr, searching the node list of each
+// of the 64 memory classes; returns its data pointer, or 0 if not found or the block is flagged (0xC000).
+extern "C" void* func_00251BB0(unsigned int addr)
+{
+    int i;
+    for (i = 0; i < 0x40; i++) {
+        sMemClass_251BB0* cls = (sMemClass_251BB0*)D_004D2438[i & 0x3F];
+        if (cls != 0) {
+            sMemNode_251BB0* n = cls->first;
+            unsigned int data;
+            while (1) {
+                n = n->next;
+                if (n == 0) break;
+                data = (unsigned int)n + 0x10;
+                if (addr >= data && addr < data + n->size) break;
+            }
+            if (n != 0 && !(n->flags & 0xC000)) {
+                return (void*)data;
+            }
+        }
+    }
+    return 0;
+}
+#endif
 //100%
 INCLUDE_ASM("mem/memstd", func_00251C38);
 #ifdef SKIP_ASM

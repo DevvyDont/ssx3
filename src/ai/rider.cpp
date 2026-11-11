@@ -694,7 +694,420 @@ extern "C" int func_0011D640(cRider* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011D660);
+#ifdef SKIP_ASM
+// Places the rider at pos facing dir (xy), optionally dropping it onto the ground below
+// (drop >= 0: probe from 200 above to 7000 below), and resets its motion state and animation.
+extern "C" float func_0031C228(float x);
+extern "C" float func_0031C128(float x);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void cRider_updateOrientationImplicit(cRider* self);
+extern "C" void func_00311A50(void* anim);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" void func_00312598(void* anim, int a1);
+extern "C" void func_0011EB60(cRider* self, float value);
+extern "C" void func_0011EB98(void* self);
+extern "C" void* func_003103F0(void* obj);
+extern "C" void func_0011E150(cRider* self, int a1);
+extern "C" void func_00332DB8(void*, void*);
+extern "C" void func_00122088(cRider*);
+extern "C" void func_002105B0(int);
+extern void* D_004A28A8;
+
+// The unit declares these later with their own vector types; bind them by asm label.
+extern const t4Vector D_004FF120_D660 __asm__("D_004FF120");
+extern const t4Vector D_004FF130_D660 __asm__("D_004FF130");
+extern const t4Vector D_004FF160_D660 __asm__("D_004FF160");
+
+struct sRay_D660 {
+    char data[0xB0];
+} __attribute__((aligned(16)));
+
+struct sHit_D660 {
+    t4Vector pos;       // 0x00
+    t4Vector normal;    // 0x10
+    char pad20[0x60];
+} __attribute__((aligned(16)));
+
+void func_0032E100_D660(sRay_D660* ray, const t4Vector& a, const t4Vector& b, int n, float t) __asm__("func_0032E100");
+extern float func_00336850_D660(void* coll, sRay_D660* ray, sHit_D660* hit, int flags) __asm__("func_00336850");
+
+struct sVE_D660 { short delta; short index; void (*fn)(void*); };
+
+// Quaternion; the ctor stores w, then y, x, z (that order reproduces the retail store schedule).
+struct sQuat_D660
+{
+    float x, y, z, w;
+    sQuat_D660() {}
+    sQuat_D660(float ax, float ay, float az, float aw) { w = aw; y = ay; x = ax; z = az; }
+} __attribute__((aligned(16)));
+
+// Non-POD by-value vector (user copy ctor => passed by invisible reference).
+struct sVecP_D660 {
+    float x, y, z, w;
+    sVecP_D660(const t4Vector& v) { *(t4Vector*)this = v; }
+    sVecP_D660(const sVecP_D660& v) { *(t4Vector*)this = *(const t4Vector*)&v; }
+} __attribute__((aligned(16)));
+
+static inline float Atan2_D660(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f)
+            return y;
+        if (y >= 0.0f)
+            return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float a = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f)
+            a += 3.1415927410125732f;
+        else
+            a -= 3.1415927410125732f;
+    }
+    return a;
+}
+
+static inline sQuat_D660 AxisAngle_D660(const t4Vector& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return sQuat_D660(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+static inline sQuat_D660 AxisAngleL_D660(const t4Vector& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    sQuat_D660 q;
+    q.w = c;
+    q.x = s * axis.x;
+    q.y = s * axis.y;
+    q.z = s * axis.z;
+    return q;
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline t4Vector Scale_D660(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline t4Vector Add_D660(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void AddEq_D660(t4Vector& a, const t4Vector& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline t4Vector Sub_D660(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_D660(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline float DotV_D660(t4Vector a, const t4Vector& b)
+{
+    return Dot_D660(a, b);
+}
+
+static inline t4Vector SubV_D660(sVecP_D660 a, const t4Vector& b)
+{
+    return Sub_D660(*(t4Vector*)&a, b);
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline t4Vector Cross_D660(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector length).
+static inline float Length_D660(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
+static inline void DivEq_D660(t4Vector& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s));
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline t4Vector Normalize_D660(const t4Vector& v)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline t4Vector QuatMul_D660(const sQuat_D660& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline void ClearCache_D660(char* c)
+{
+    *(int*)(c + 0x0) = 0;
+    *(short*)(c + 0x4) = 0;
+    *(short*)(c + 0x6) = 0;
+    *(int*)(c + 0x8) = 0;
+    *(int*)(c + 0xC) = 0;
+}
+
+static inline void InitChannel_D660(cRider* self, int i, float v, float z)
+{
+    self->mSlewed[i].target = v;
+    self->mSlewed[i].cur = v;
+    self->mSlewed[i].rate = z;
+}
+
+// PORT: the unit declares func_0011D660(void*, sVec4_0011DE60*, ..., int, float) later; bind the cRider* view by asm label.
+// drop is declared before anim: the order of the parameter copies follows it (ABI-identical: f12 and a3 either way).
+extern "C" void func_0011D660_impl(cRider* self, const t4Vector* pos, const float* dir, float drop, int anim) __asm__("func_0011D660");
+extern "C" void func_0011D660_impl(cRider* self, const t4Vector* pos, const float* dir, float drop, int anim)
+{
+    ClearCache_D660((char*)self->mLineHint);
+    ClearCache_D660((char*)self->mWallHint);
+    t4Vector p = *pos;
+    t4Vector n = D_004FF160_D660;
+    float angle = Atan2_D660(dir[1], dir[0]);
+    self->mVisitedIds = 0xFFFFFFFF;
+    if (drop >= 0.0f)
+    {
+        t4Vector lo = Add_D660(*pos, Scale_D660(D_004FF160_D660, -7000.0f));
+        t4Vector hi = Add_D660(*pos, Scale_D660(D_004FF160_D660, 200.0f));
+        sHit_D660 hit;
+        sRay_D660 ray;
+        func_0032E100_D660(&ray, lo, hi, 2, 0.9791666865348816f);
+        if (func_00336850_D660(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), &ray, &hit, 0) >= 0.0f)
+        {
+            p = hit.pos;
+            n = hit.normal;
+        }
+        AddEq_D660(p, Scale_D660(D_004FF160_D660, drop));
+    }
+    self->mPosition = p;
+    *(sQuat_D660*)&self->mRotation = AxisAngle_D660(D_004FF160_D660, angle - 1.5707963705062866f);
+    self->mUseRootPoseOverride = 0;
+    t4Vector axis = Cross_D660(D_004FF160_D660, n);
+    float len = Length_D660(axis);
+    if (len > 0.0010000000474974513f)
+    {
+        DivEq_D660(axis, len);
+        // PORT: g++ minimum operator.
+        sQuat_D660 q = AxisAngleL_D660(axis, func_0031C128(len <? 1.0f));
+        self->mRotation = QuatMul_D660(q, self->mRotation);
+    }
+    cRider_updateOrientationImplicit(self);
+    self->mGroundNormal = n;
+    self->unk_3D0 = D_004FF120_D660;
+    self->mGroundForward = Normalize_D660(SubV_D660(self->mMatrix.row[1], Scale_D660(self->mGroundNormal, DotV_D660(self->mMatrix.row[1], self->mGroundNormal))));
+    self->mGroundSide = Cross_D660(self->mGroundNormal, self->mGroundForward);
+    self->mVelocity = D_004FF120_D660;
+    self->mGroundContactPoint = self->mPosition;
+    self->mSurfaceType = 0;
+    self->unk_454 = 0.0f;
+    self->mImpulse = D_004FF120_D660;
+    self->mImpactAccum = 0.0f;
+    self->mImpactAccum2 = 0.0f;
+    InitChannel_D660(self, 0, 0.0f, 0.0f);
+    InitChannel_D660(self, 1, 0.0f, 0.0f);
+    InitChannel_D660(self, 2, 0.0f, 0.0f);
+    InitChannel_D660(self, 3, 0.0f, 0.0f);
+    InitChannel_D660(self, 4, 0.0f, 0.0f);
+    InitChannel_D660(self, 5, 0.0f, 0.0f);
+    InitChannel_D660(self, 6, 0.0f, 0.0f);
+    InitChannel_D660(self, 7, 0.0f, 0.0f);
+    InitChannel_D660(self, 8, 0.0f, 0.0f);
+    InitChannel_D660(self, 9, 1.0f, 0.0f);
+    InitChannel_D660(self, 10, 0.0f, 0.0f);
+    InitChannel_D660(self, 11, 0.0f, 0.0f);
+    InitChannel_D660(self, 12, 0.0f, 0.0f);
+    InitChannel_D660(self, 13, 0.0f, 0.0f);
+    InitChannel_D660(self, 14, 0.0f, 0.0f);
+    InitChannel_D660(self, 15, 0.0f, 0.0f);
+    InitChannel_D660(self, 16, 0.0f, 0.0f);
+    InitChannel_D660(self, 17, 0.0f, 0.0f);
+    InitChannel_D660(self, 18, 0.0f, 0.0f);
+    self->mSpinRate = 0.0f;
+    self->mFlipRate = 0.0f;
+    self->mBoostStrength = 0.0f;
+    self->mTimeScale = 1.0f;
+    self->unk_318 = 1.0f;
+    self->unk_31C = 0.0f;
+    self->mRailStyle = 0;
+    self->unk_32C = 0;
+    self->mPressType = 0;
+    self->mAttackDir = D_004FF120_D660;
+    self->mAttackBlend = 0.0f;
+    self->mHudMsgExpire = -1;
+    self->mHudMsgId = 0;
+    self->unk_35C = 0.0f;
+    self->unk_320 = self->mNaturalStance;
+    func_00311A50(self->mRiderAnim);
+    *(int*)((char*)self->mRiderAnim + 0x18) = self->unk_320;
+    float yaw = 0.0f;
+    if (self->unk_320 != 0)
+        yaw = 3.1415927410125732f;
+    char* ra = (char*)self->mRiderAnim;
+    *(t4Vector*)(ra + 0x30) = D_004FF130_D660;
+    *(sQuat_D660*)(ra + 0x40) = AxisAngle_D660(D_004FF160_D660, -yaw);
+    cRiderAnimBase_play(self->mRiderAnim, anim, 0, -1.0f);
+    func_00312598(self->mRiderAnim, 0);
+    func_0011EB60(self, 1.0f);
+    func_0011EB98(self);
+    func_003103F0(self->mAnimModel);
+    func_0011E150(self, 0);
+    func_00332DB8(self->mOverlapList, &self->mBoundsMin);
+    func_00122088(self);
+    func_002105B0(self->mAIIndex);
+    sVE_D660* vt = *(sVE_D660**)&self->mVtbl;
+    vt[kRiderVt_vibrationReset].fn((char*)self + vt[kRiderVt_vibrationReset].delta);
+    if ((unsigned int)self->mViewIndex < 2)
+    {
+        char* views = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+        if (views != 0)
+        {
+            char* h = *(char**)(*(char**)(views + (self->mViewIndex << 2) + 4) + 0xA8);
+            sVE_D660* hv = *(sVE_D660**)(h + 0x14);
+            hv[4].fn(h + hv[4].delta);
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_0011DD98);

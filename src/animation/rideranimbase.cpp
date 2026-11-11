@@ -337,7 +337,153 @@ extern "C" void func_00311E88(char* self, int i, float v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("animation/rideranimbase", func_00311F00);
+#ifdef SKIP_ASM
+extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
+struct cAnimSequence;
+void cAnimSequence_fadeWeight(cAnimSequence* self, float weight, float target);
+extern "C" void func_003145F8(void* seq, void* node);
+extern "C" char* func_00314518(cAnimSequencer* seq, int anim, unsigned int h, float t);
+extern "C" char* func_00314588(cAnimSequencer* seq, int anim, unsigned int h, float t);
+extern "C" void func_00313AD8(void* node, int key);
+extern "C" void func_00313BA8(void* node, int key);
+extern "C" void func_00313A20(void* node, float v);
+extern "C" void func_00313A70(void* node, int key, float t);
+extern "C" void func_00313C50(void* node, int i, int anim);
+extern "C" void func_00313CF0(void* node, int i, float t);
+extern "C" void func_00313D28(void* node, int i, float speed);
+extern char** D_004A3DF8;
+
+// A sequence node: three tracks, then the clip state (raw offsets from func_00311F00's uses).
+struct sSeqTrack_1F00 {
+    int id;           // 0x00
+    int anim;         // 0x04
+    float time;       // 0x08
+    char pad0C[0x8];
+    float speed;      // 0x14
+    int active;       // 0x18
+};
+
+struct sSeqNode_1F00 {
+    sSeqTrack_1F00 tracks[3]; // 0x00
+    char pad54[0xC];
+    sRabQuad32 xform;         // 0x60
+    int m80;                  // 0x80
+    int m84;                  // 0x84
+    long m88;                 // 0x88 PORT: 64-bit long (sd)
+    float m90;                // 0x90
+    float weight;             // 0x94
+    float targetWeight;       // 0x98
+    char pad9C[0x8];
+    float blendIn;            // 0xA4
+};
+
+// Element i of a quaternion/vector (x, y, z, w), by reference (an operator[]-style accessor).
+static inline const float& rabQuatElem_1F00(const sRabQuat_00311B48& q, int i)
+{
+    return (&q.x)[i];
+}
+
+static inline bool rabVecEq_1F00(const sRabQuat_00311B48& a, const sRabQuat_00311B48& b)
+{
+    return rabQuatElem_1F00(a, 0) == rabQuatElem_1F00(b, 0) && rabQuatElem_1F00(a, 1) == rabQuatElem_1F00(b, 1)
+        && rabQuatElem_1F00(a, 2) == rabQuatElem_1F00(b, 2) && rabQuatElem_1F00(a, 3) == rabQuatElem_1F00(b, 3);
+}
+
+static inline bool rabXformEq_1F00(const sRabXform_00311B48& a, const sRabXform_00311B48& b)
+{
+    return rabVecEq_1F00(a.rot, b.rot) && rabVecEq_1F00(a.pos, b.pos);
+}
+
+// Starts anim (packed clip id h) on sequencer vseq, blending over `blend` seconds. A sequence already
+// playing the same thing (same anim, flags and offset transform) hands over its tracks and weight.
+extern "C" int func_00311F00(void* vself, void* vseq, int anim, int a3, int a4, int a5, float blend)
+{
+    sRiderAnimBase* self = (sRiderAnimBase*)vself;
+    cAnimSequencer* seq = (cAnimSequencer*)vseq;
+    char* node;
+    if (blend == 0.0f)
+        func_00314668(seq);
+    if (cAIAnimEventMap_getBlendInTime(anim)[1] == 2)
+    {
+        node = func_00314588(seq, anim, a3, 0.0f);
+    }
+    else
+    {
+        node = func_00314518(seq, anim, a3, 0.0f);
+        if (cAIAnimEventMap_getBlendInTime(anim)[1] == 0 || cAIAnimEventMap_getBlendInTime(anim)[2] != 0)
+            func_00313AD8(node, 0x3F);
+    }
+    sSeqNode_1F00* nd = (sSeqNode_1F00*)node;
+    nd->m80 = self->m18;
+    nd->xform = self->m30;
+    nd->m88 = self->m20;
+    nd->m90 = self->m1C;
+    nd->weight = nd->targetWeight = 1.0f;
+    nd->blendIn = ((float*)cAIAnimEventMap_getBlendInTime(anim))[6];
+    nd->m84 = a5;
+    // PORT: (int) address arithmetic for the clip header (index-first addu).
+    int n = *(unsigned short*)((char*)(((unsigned int)a3 >> 8) * 0x14 + *(int*)(*(char**)((char*)D_004A3DF8 + (((unsigned int)a3 & 0xFF) << 2)) + 0x8)) + 0x12);
+    for (int i = 0; i < n; i++)
+    {
+        char* bank = *(char**)((char*)D_004A3DF8 + (((unsigned int)a3 & 0xFF) << 2));
+        char* clip = (char*)(((unsigned int)a3 >> 8) * 0x14 + *(int*)(bank + 0x8));
+        unsigned short* keys = *(unsigned short**)(bank + 0x10);
+        func_00313A70(node, i, keys[(*(unsigned short*)(clip + 0x10) + i) * 2] * 0.03333333507180214f);
+    }
+    if (seq->mCount == 1)
+    {
+        float t = ((float*)cAIAnimEventMap_getBlendInTime(anim))[5];
+        if (t != 0.0f)
+        {
+            nd->weight = nd->targetWeight = 0.0f;
+            cAnimSequence_fadeWeight((cAnimSequence*)node, 1.0f, t);
+        }
+    }
+    else if (blend != 0.0f)
+    {
+        sSeqNode_1F00* match = 0;
+        for (int i = 1; i < seq->mCount; i++)
+        {
+            sSeqNode_1F00* other = (sSeqNode_1F00*)cAnimSequencer_getSequence(seq, i);
+            func_00313BA8(other, 0x3F);
+            func_00313A20(other, blend);
+            int type = cAIAnimEventMap_getBlendInTime(anim)[1];
+            bool ok = other->tracks[0].anim == nd->tracks[0].anim || (type != 0 && type != 2 && type != 1);
+            if (ok && other->tracks[0].id == nd->tracks[0].id && other->m88 == nd->m88
+                && other->m80 == nd->m80)
+            {
+                if (rabXformEq_1F00(*(sRabXform_00311B48*)&other->xform, *(sRabXform_00311B48*)&nd->xform))
+                    match = other;
+            }
+        }
+        if (match != 0 && a4 == 0)
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                if (match->tracks[k].active != 0)
+                {
+                    func_00313C50(node, k, match->tracks[k].anim);
+                    func_00313CF0(node, k, match->tracks[k].time);
+                    func_00313D28(node, k, match->tracks[k].speed);
+                }
+            }
+            nd->weight = nd->targetWeight = match->weight;
+            if (match->weight < 1.0f)
+                cAnimSequence_fadeWeight((cAnimSequence*)node, 1.0f, blend * (1.0f - match->weight));
+            func_003145F8(seq, match);
+        }
+        else
+        {
+            nd->targetWeight = 0.0f;
+            nd->weight = 0.0f;
+            cAnimSequence_fadeWeight((cAnimSequence*)node, 1.0f, blend);
+        }
+    }
+    return anim;
+}
+#endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_003123C0);
