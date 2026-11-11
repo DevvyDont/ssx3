@@ -215,7 +215,77 @@ void* func_002CA4A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CA4C8);
+#ifdef SKIP_ASM
+extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+
+struct sRect_2CA4C8 { float x, y, w, h; };
+struct sVec2_2CA4C8 {
+    float x, y;
+};
+
+static inline char* font_2CA4C8(char* item)
+{
+    return *(char**)(*(char**)(*(char**)item + 0x124) + 0x58);
+}
+
+static inline float width_2CA4C8(char* item, const char* s)
+{
+    char* f = font_2CA4C8(item);
+    return func_00391FB0(f, s, 0, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+}
+
+static inline float widthOr0_2CA4C8(char* item, const char* s)
+{
+    float w;
+    if (s)
+        w = width_2CA4C8(item, s);
+    else
+        w = 0.0f;
+    return w;
+}
+
+#define MAXF_2CA4C8(a, b) ((a) > (b) ? (a) : (b))
+
+// PORT: the unit's callers declare func_002CA4C8 as (void*, void*, int, int, void*) returning void;
+// the body returns an sRect by value (hidden return pointer) from (item, left, center, right). Bound by asm label.
+extern "C" sRect_2CA4C8 func_002CA4C8_impl(char* item, const char* left, const char* center, const char* right) __asm__("func_002CA4C8");
+
+extern "C" sRect_2CA4C8 func_002CA4C8_impl(char* item, const char* left, const char* center, const char* right)
+{
+    sRect_2CA4C8 r;
+    sVec2_2CA4C8 sc;
+    float zero = 0.0f;
+    r.y = zero;
+    r.x = zero;
+    char* f = font_2CA4C8(item);
+    float h = (float)*(int*)(f + 0x14) * *(float*)(f + 0x34);
+    float sx = *(float*)(f + 0x38) / *(float*)(f + 0x30);
+    float sy = *(float*)(f + 0x3C) / *(float*)(f + 0x34);
+    sc.x = sx;
+    sc.y = sy;
+    r.h = h * sy;
+    if (left && center && right) {
+        r.w = width_2CA4C8(item, center) + MAXF_2CA4C8(width_2CA4C8(item, left), width_2CA4C8(item, right)) * 2.0f + 32.0f;
+    } else {
+        float w = widthOr0_2CA4C8(item, left);
+        if (center) {
+            w += width_2CA4C8(item, center);
+        }
+        if (right) {
+            w += width_2CA4C8(item, right);
+        }
+        r.w = w;
+        if ((left && (center || right)) || (center && right)) {
+            r.w += 16.0f;
+        }
+    }
+    r.h += 12.0f;
+    r.w = (r.w >? 100.0f) + 32.0f;
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CA768);

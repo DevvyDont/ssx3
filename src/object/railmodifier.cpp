@@ -1501,7 +1501,96 @@ extern "C" char* func_0035DA70(char* self, char* a1, char* a2, char* a3)
 
 INCLUDE_ASM("object/railmodifier", func_0035DDE8);
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_0035DF70);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void* D_004913F8[];
+extern void* D_0048F080[];
+void* func_0035CFE8(void* self);
+extern "C" void func_0032C508(void* self);
+extern void* func_002D1BD8_DF70() __asm__("func_002D1BD8");
+void* func_003A6CD8(void* a, void* b);
+extern "C" void* func_003A6CE8(void* a, int b);
+extern "C" void func_0032C648(void* self, void* m, float scale);
+extern "C" void func_0035E248(void* self);
+
+
+
+class cStreamDF70 {
+public:
+    virtual void v01(void* buf, int size);
+    virtual void v02(void* buf, int size);
+    virtual int v03();
+};
+
+struct sRmMat33DF70 {
+    float m[9];
+};
+
+struct sRmMat44DF70 {
+    sRmVec4 r[4];
+};
+
+struct sRmSrcDF70 {
+    char pad_0x00[0x2C];
+    float x, y, z;          // 0x2C
+    char pad_0x38[0x5C - 0x38];
+    sRmMat33DF70 rot;       // 0x5C
+};
+
+struct sRailDF70 {
+    void** vt;              // 0x00
+    char data[0x28];        // 0x04
+    char pad_0x2C[0x4];
+    char body[0xA0];        // 0x30
+    int id;                 // 0xD0
+    char pad_0xD4[0xC];
+    char mover[0x98];       // 0xE0
+    sRmSrcDF70* src;        // 0x178
+    char pad_0x17C[0x240 - 0x17C];
+    sRmMat44DF70 xf;        // 0x240
+    sRmMat33DF70 rot;       // 0x280
+    char pad_0x2A4[0xC];
+    sRmVec4 off;            // 0x2B0
+};
+
+extern "C" sRailDF70* func_0035DF70(sRailDF70* self, cStreamDF70* stream)
+{
+    self->vt = D_004913F8;
+    func_0035CFE8(self->body);
+    self->vt = D_0048F080;
+    func_0032C508(self->mover);
+    func_0035DA38(self->body, (func_0035DA38_cObj*)stream);
+    stream->v02(self->data, 0x28);
+    self->id = stream->v03();
+    void* r = func_003A6CE8(func_003A6CD8(func_002D1BD8_DF70(), (void*)self->id), 0);
+    func_00327CC8(self->mover, r);
+    sRmSrcDF70* src = self->src;
+    sRmVec4 off;
+    off.x = src->x;
+    off.y = src->y;
+    off.z = src->z;
+    off.w = 0.0f;
+    self->off = off;
+    self->rot = src->rot;
+    self->rot.m[0] *= 0.5f;
+    self->rot.m[1] *= 0.5f;
+    self->rot.m[2] *= 0.5f;
+    self->rot.m[3] *= 0.5f;
+    self->rot.m[4] *= 0.5f;
+    self->rot.m[5] *= 0.5f;
+    self->rot.m[6] *= 0.5f;
+    self->rot.m[7] *= 0.5f;
+    self->rot.m[8] *= 0.5f;
+    sXf_DA70 x = func_0035E770_DA70(self);
+    QuatPosToMtx_DA70(&self->xf, x.quat, x.pos);
+    func_0032C648(self->mover, &self->xf, 1.0f);
+    func_0035E248(self);
+    func_0035D288((sRmBody*)self->body);
+    return self;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_0035E1E0);

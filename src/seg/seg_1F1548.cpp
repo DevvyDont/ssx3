@@ -1627,7 +1627,138 @@ extern "C" void func_002F39C8(void *arg0) {
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F39E0);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1F1548", func_002F3E28);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int D_004A424C;
+extern int D_004A4250;
+extern int D_004A3B60;
+extern void* D_004A28A8;
+extern char D_004FF1A0[];
+
+struct sV2_3E28 {
+    float x, y;
+    sV2_3E28() {}
+    sV2_3E28(const sV2_3E28& o) : x(o.x), y(o.y) {}
+    sV2_3E28& operator=(const sV2_3E28& o)
+    {
+        x = o.x;
+        y = o.y;
+        return *this;
+    }
+};
+
+struct sGsState_3E28 {
+    unsigned int w0;
+    unsigned int f4_0 : 2;
+    unsigned int f4_2 : 10;
+    unsigned int f4_12 : 8;
+    unsigned int f4_20 : 2;
+    unsigned int f4_22 : 1;
+    unsigned int f4_23 : 2;
+    unsigned int f4_25 : 7;
+    unsigned int f8_0 : 5;
+    unsigned int f8_5 : 5;
+    unsigned int f8_10 : 19;
+    unsigned int f8_29 : 3;
+    unsigned int wC;
+    unsigned int w10;
+};
+
+extern sGsState_3E28 D_00501420;
+
+static inline void SetF22_3E28(sGsState_3E28* s, int v)
+{
+    s->f4_22 = v;
+}
+
+class cGfx_3E28 {
+public:
+    char pad[0xE84];
+    sGsState_3E28* stateTop;
+    char pad2[0x10D8 - 0xE88];
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
+    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
+    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
+    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
+    virtual void BeginScene();
+    virtual void EndScene();
+    virtual void v22(); virtual void v23(); virtual void v24();
+    virtual void SetViewport(float, float, float, float, int, int, float, float);
+    virtual void v26();
+    virtual sV2_3E28 GetScreenSize();
+    virtual void v28(); virtual void v29();
+    virtual void Begin2D();
+    virtual void End2D();
+    virtual void v32();
+    virtual void SetTexture(void*);
+};
+
+extern cGfx_3E28* D_004A5B80;
+
+struct sBase_3E28 {
+    int pad[3];
+};
+
+struct sVBase_3E28 : sBase_3E28 {
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
+    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
+    virtual void v12(); virtual void Reset();
+};
+
+struct sEmitter_3E28 : sVBase_3E28 {
+    int idx;
+    int nSmoke;
+    int nParts;
+    char smoke[30][0x3C];
+    char parts[30][0x4C];
+};
+
+extern "C" void func_002F2C30(void*, sV2_3E28*);
+extern void func_002F3418_3E28(void*, sV2_3E28*) __asm__("func_002F3418");
+
+extern "C" void func_002F3E28(sEmitter_3E28* self)
+{
+    if (D_004A424C == 0)
+        return;
+    if (D_004A4250 == 0)
+        return;
+    if (self->idx != *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x14))
+        return;
+    if (D_004A3B60) {
+        self->Reset();
+        return;
+    }
+    cGfx_3E28* g = D_004A5B80;
+    int i = 0;
+    g->BeginScene();
+    const sV2_3E28& screen = g->GetScreenSize();
+    sV2_3E28 scr = screen;
+    g->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
+    g->Begin2D();
+    g->SetTexture(D_004FF1A0);
+    g->stateTop[1] = g->stateTop[0];
+    g->stateTop++;
+    *g->stateTop = D_00501420;
+    g->stateTop->f8_5 = 8;
+    g->stateTop->f4_23 = 2;
+    g->stateTop->f4_20 = 0;
+    g->stateTop->f4_12 = 0;
+    g->stateTop->f4_0 = 0;
+    g->stateTop->f8_10 = 0;
+    SetF22_3E28(g->stateTop, 1);
+    for (i = 0; i < self->nSmoke; i++)
+        func_002F2C30(self->smoke[i], &scr);
+    for (i = 0; i < self->nParts; i++)
+        func_002F3418_3E28(self->parts[i], &scr);
+    g->stateTop--;
+    g->End2D();
+    g->EndScene();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F4118);

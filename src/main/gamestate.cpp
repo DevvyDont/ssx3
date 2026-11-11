@@ -994,7 +994,163 @@ extern "C" void func_00236250(void* self, int mode)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_00236418);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" int* func_00144BC0(void* iface);
+extern "C" void func_001F36C0(void* a, int b);
+extern "C" void func_0020AB50(int state);
+extern "C" void func_0022CEA8(void* self, int a, int b);
+extern "C" void func_00231250(void* self, int a, int b, int refresh);
+extern "C" void func_00233AA0(void* self);
+void func_00278DE8(void* self, int a);
+extern "C" int func_00279148(void* self, int a, int b);
+extern "C" int func_00279220(void* a, int b);
+extern "C" void func_0027A860(void* a, int b, int c);
+extern void* D_004A28A8;
+extern void* D_004A28A4;
+extern int D_004A2594;
+extern int D_004A2A54;
+extern int D_004A2A50;
+extern int D_005366E8[];
+extern int D_004428F0[];
+extern int D_004428F8[];
+extern signed char D_00535C10[];
+extern signed char D_00535C11[];
+
+struct sIface_6418 {
+    char pad0[0x10];
+    int f10;
+};
+
+struct sRace_6418 {
+    char pad0[0x1C8];
+    int f1C8;
+};
+
+struct sGS_6418 {
+    int f0;
+    int f4;
+    int f8;             // 0x08
+    int fC;
+    int state;          // 0x10
+    int mode;           // 0x14
+    int f18;            // 0x18
+    int f1C;            // 0x1C
+};
+
+static inline void push2_6418()
+{
+    D_005366E8[++D_004A2A54] = 2;
+    D_004A2A50 = D_004428F8[0];
+}
+
+static inline int atLeast_6418(int n)
+{
+    return n >= 0x11;
+}
+
+static inline int isOne_6418(int m)
+{
+    return m == 1;
+}
+
+static inline void pop_6418()
+{
+    D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+}
+
+extern "C" void func_00236418(void* self)
+{
+    // Retail builds `flag` as a copy of a register holding 1, then `movn flag, zero, (D != 4)`: a condition the compiler
+    // folded to the constant 1 (a local flag, e.g. a feature toggle). A literal 1 gives a run-time sltiu instead (96.81).
+    int one = 1;
+    int ns;
+    switch (*(int*)((char*)self + 0x10)) {
+    case 0: {
+        int r = func_00279220(D_004A28A4, 1);
+        if (!(r == 4 || r == 5 || r == 0))
+            return;
+        int m = *(int*)((char*)self + 0x14);
+        if (m == 0) {
+            func_0020AB50(0x1F);
+            push2_6418();
+            *(int*)((char*)self + 0x8) = 0;
+        } else if (m == 2) {
+            int flag = 0;
+            if (atLeast_6418(*func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0))))
+                flag = one && D_00535C10[0] == 4;
+            if (flag)
+                D_004A2594 = 3;
+            else
+                D_004A2594 = 4;
+            func_0020AB50(0x21);
+            push2_6418();
+            *(int*)((char*)self + 0x8) = 0;
+        }
+        ns = 1;
+        break;
+    }
+    case 1:
+        if (*(int*)((char*)self + 0x8) == 0)
+            return;
+        func_00278DE8(D_004A28A4, 0x1E);
+        if (!isOne_6418(*(int*)((char*)self + 0x14)))
+            pop_6418();
+        if (*(int*)((char*)self + 0x14) == 0) {
+            ns = 2;
+            break;
+        }
+        {
+            int a = *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0));
+            int b = *(int*)((char*)self + 0x18);
+            int c1 = (unsigned)(a - 0xE) < 3;
+            int c2 = (unsigned)(b - 0xE) < 3;
+            if (b == a && !c2) {
+                *(int*)((char*)self + 0x10) = 3;
+                ((sIface_6418*)cBE_getInterface_Fv(cBE_getBE(), 0xA))->f10 = one;
+                func_00231250(*(void**)((char*)D_004A28A8 + 0x84), 0xF, 0, 0);
+                return;
+            }
+            if (c2 && D_00535C11[0] == 0)
+                *(int*)((char*)self + 0x8) = 0;
+            func_0027A860(D_004A28A4, !c2 && !c1, 1);
+            ns = 2;
+        }
+        break;
+    case 2:
+        if (*(int*)((char*)self + 0x14) != 0) {
+            int r = func_00279148(D_004A28A4, 1, 0);
+            if (r == 0xE || r == 0x14) {
+                if (*(int*)((char*)self + 0x8) == 0) {
+                    if (*(int*)((char*)self + 0x1C) != 0)
+                        return;
+                    *(int*)((char*)self + 0x1C) = one;
+                    *(int*)((char*)self + 0x8) = one;
+                    return;
+                }
+                *(int*)((char*)self + 0x1C) = 0;
+                ((sRace_6418*)*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x78))->f1C8 = one;
+                func_0022CEA8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x78), *(int*)((char*)self + 0x18), 7);
+                ns = 3;
+                break;
+            }
+            if (r == 0xD || r == 0x13)
+                func_001F36C0(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x94), 0);
+            return;
+        }
+        func_00233AA0(self);
+        ns = 3;
+        break;
+    default:
+        return;
+    }
+    *(int*)((char*)self + 0x10) = ns;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamestate", func_00236728);
