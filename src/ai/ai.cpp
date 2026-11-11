@@ -7684,7 +7684,296 @@ extern "C" void func_00134CB0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00134DD0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// 16-byte vector with inline constructors (a non-POD sibling of t4Vector); stores x, y, z, w.
+struct sVec4 : t4Vector
+{
+    sVec4() {}
+    sVec4(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+// A bone transform read through sVec4 (cAnimModel::bones entries, 0x20 bytes): position, rotation quaternion.
+struct sXf
+{
+    sVec4 pos;
+    sVec4 rot;
+};
+extern t4Vector D_004FF130_4DD0 __asm__("D_004FF130");
+extern t4Vector D_004FF140;
+extern t4Vector D_004FF150;
+extern t4Vector D_004FF160_4DD0 __asm__("D_004FF160");
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sVec4 QuatMul_12E010_4DD0(const sVec4& a, const sVec4& b)
+{
+    sVec4 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sVec4 Sub_12E010_4DD0(const sVec4& a, const t4Vector& b)
+{
+    sVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
+static inline sVec4 Rot_12E010_4DD0(const sVec4& q, const sVec4& v)
+{
+    sVec4 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4 Scale_12E010_4DD0(const sVec4& v, float s)
+{
+    sVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+extern "C" float func_00135180(void* self);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+// PORT: PS2-only VU0 inline asm (vector times scalar, constant vector through a register).
+static inline sVec4 ScaleO_134DD0(const t4Vector& v, float s)
+{
+    sVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b, constant b through a register).
+static inline sVec4 SubO_134DD0(const sVec4& a, const t4Vector& b)
+{
+    sVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "o"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (dst = a - b).
+static inline void SubTo_134DD0(sVec4& dst, const sVec4& a, const sVec4& b)
+{
+    sVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    dst = r;
+}
+
+// PORT: PS2-only VU0 inline asm (dst = normalize via rsqrt).
+static inline void NormTo_134DD0(sVec4& dst, const sVec4& v)
+{
+    sVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    dst = r;
+}
+
+// PORT: PS2-only VU0 inline asm (dst += b).
+static inline void AddTo_134DD0(sVec4& dst, const sVec4& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (dst += b, label before a call).
+static inline void AddToL_134DD0(sVec4& dst, const sVec4& b)
+{
+    __asm__(
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set reorder\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec4 Norm_134DD0(const sVec4& v)
+{
+    sVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+static inline sVec4 AxisAngleB_134DD0(const sVec4& axis, float angle) return r
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    r.w = c;
+    r.x = s * axis.x;
+    r.y = s * axis.y;
+    r.z = s * axis.z;
+}
+
+static inline void SetAA_134DD0(sVec4& q, const t4Vector& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    q.x = s * axis.x;
+    q.y = s * axis.y;
+    q.z = s * axis.z;
+    q.w = c;
+}
+
+static inline sVec4 AxisAngle2_134DD0(const t4Vector& axis, float angle)
+{
+    sVec4 q;
+    SetAA_134DD0(q, axis, angle);
+    return q;
+}
+
+// rot *= q (quaternion product). Declared to return the quaternion by value but has no return statement (the
+// classic forgotten return); the callers ignore the result, and that ignored by-value result is the unwritten
+// 16-byte temp the retail frame keeps during both rotations.
+static inline sVec4 operator*=(sVec4& a, const sVec4& b)
+{
+    a = QuatMul_12E010_4DD0(a, b);
+}
+
+extern "C" void func_00134DD0_x(void* self, sXf* xf) __asm__("func_00134DD0");
+extern "C" void func_00134DD0_x(void* self, sXf* xf)
+{
+    char* rd = *(char**)((char*)self + 0x58);
+    char* trk = *(char**)(rd + 0x780);
+    sVec4* n = (sVec4*)((*(int*)(rd + 0x89C) << 4) + *(int*)(trk + 0x24));
+    float a1 = -(*(float*)((char*)self + 0x20) + *(float*)((char*)self + 0x28));
+    float a2 = *(float*)((char*)self + 0x24) + *(float*)((char*)self + 0x2C);
+    sVec4 d = SubO_134DD0(sVec4(n->x * *(float*)(trk + 0x140), n->y * *(float*)(trk + 0x144),
+                                              n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C)),
+                                 D_004FF130_4DD0);
+    {
+        sVec4 v = Rot_12E010_4DD0(xf->rot, d);
+        AddToL_134DD0(xf->pos, v);
+        xf->rot *= AxisAngle2_134DD0(D_004FF160_4DD0, a1);
+    }
+    float cur = func_00135180(self);
+    float old = *(float*)((char*)self + 0x40);
+    float delta = __builtin_fabsf(old - cur) * 0.03333333507180214f;
+    float nv;
+    if (cur + delta < old)
+        nv = old - delta;
+    else if (old < cur - delta)
+        nv = old + delta;
+    else
+        nv = cur;
+    *(float*)((char*)self + 0x40) = nv;
+    sVec4 ax = Norm_134DD0(Sub_12E010_4DD0(ScaleO_134DD0(D_004FF150, nv),
+                                             ScaleO_134DD0(D_004FF140, 1.0f - *(float*)((char*)self + 0x40))));
+    {
+        sVec4 q3;
+        q3 = AxisAngleB_134DD0(ax, a2);
+        xf->rot *= q3;
+    }
+    sVec4 w = Scale_12E010_4DD0(d, -1.0f);
+    sVec4 u = Rot_12E010_4DD0(xf->rot, w);
+    AddTo_134DD0(xf->pos, u);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_00135180);
