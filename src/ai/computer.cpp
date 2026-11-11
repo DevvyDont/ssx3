@@ -2147,7 +2147,73 @@ extern "C" void func_0010F878(sComputer_0010F878* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_0010F998);
+#ifdef SKIP_ASM
+struct sAI_0010F998 { char pad[0x28]; cRider* riders[19]; int mode; int count; };
+extern "C" int func_0012A180(void* self);
+extern "C" void* func_0028B180();
+extern "C" void func_00299E28(void* mgr, void* rider, void* next, void* prev, int oldPos, int newPos);
+extern "C" void func_003E6328(int n, int* keys, int* idx);
+float func_00113128(void* self);
+
+extern "C" void func_0010F998(void* p)
+{
+    sAI_0010F998* self = (sAI_0010F998*)p;
+    if (self->mode == 0)
+        return;
+    if (func_0012A180(self) == 0)
+        return;
+    int idx[8];
+    int keys[8];
+    int i;
+    for (i = 0; i < self->count; i++)
+    {
+        idx[i] = i;
+        cRider* r = self->riders[i];
+        switch (self->mode)
+        {
+        case 1:
+            if (r->mIsActor)
+                keys[i] = 0xFFFF;
+            else
+            {
+                int far = r->mFinishTime >= 10.0f;
+                if (far)
+                    keys[i] = -(int)(func_00113128(r) + (float)(r->unk_0EC * 20));
+                else
+                    keys[i] = -(int)(func_00113128(r) + (float)(r->unk_0EC * 20));
+            }
+            break;
+        case 2:
+            if (r->mIsActor)
+                keys[i] = -0xFFFF;
+            else
+                keys[i] = *(int*)((char*)r->mMetrix + 0x198);
+            break;
+        }
+    }
+    // Re-read count into a local: GCSE makes this load redundant with the loop-test
+    // loads and leaves a copy (a0 = v0) after each of them.
+    int n = self->count;
+    func_003E6328(n, keys, idx);
+    int j;
+    for (j = 0; j < self->count; j++)
+    {
+        if (self->riders[idx[j]]->unk_0EC != j)
+        {
+            cRider* next = 0;
+            cRider* prev = 0;
+            if (j > 0)
+                prev = self->riders[idx[j - 1]];
+            if (j < self->count - 1)
+                next = self->riders[idx[j + 1]];
+            func_00299E28(func_0028B180(), self->riders[idx[j]], next, prev, self->riders[idx[j]]->unk_0EC, j);
+        }
+        self->riders[idx[j]]->unk_0EC = j;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_0010FBF0);

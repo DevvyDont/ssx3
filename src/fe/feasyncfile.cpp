@@ -10031,7 +10031,69 @@ extern "C" void func_001B1808(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B1A08);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+extern char D_004639D0[];
+extern char D_004639E0[];
+extern char D_00463830[];
+
+struct sColor1B1A08 {
+    float r, g, b, a;
+    sColor1B1A08(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
+};
+
+class cFEVObj_001B1A08 {
+public:
+    int field_0x0;
+    int field_0x4;
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11(const sColor1B1A08& c);
+};
+
+// Packed flags word at 0x14 of the UI text object: bits 8..12 hold a 5-bit size.
+struct sText1B1A08 {
+    char pad[0x14];
+    unsigned int f0 : 8;
+    unsigned int size : 5;
+};
+
+extern "C" void func_001B1A08(void* self, int up, int highlight)
+{
+    if (*(void**)((char*)self + 0x40) != 0) {
+        sText1B1A08* t;
+        if (highlight != 0) {
+            t = (sText1B1A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004639D0));
+            cFEVObj_001B1A08* o = (cFEVObj_001B1A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463830));
+            o->v11(sColor1B1A08(1.0f, 0.0f, 0.0f, 0.0f));
+        } else {
+            t = (sText1B1A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004639E0));
+        }
+        // Step the text's 5-bit size field up or down by 2 (wraps within the field).
+        if (t != 0) {
+            int v = t->size;
+            if (up != 0) {
+                t->size = v + 2;
+            } else {
+                t->size = v - 2;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B1B10);
