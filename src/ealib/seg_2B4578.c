@@ -7806,7 +7806,321 @@ int func_003C1980(void) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C19A8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C1B80);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm (EE di/ei interrupt mask); needs a C fallback off-PS2.
+typedef struct {
+    char pad0[0x8];
+    unsigned long f8;
+    char pad10[0x3];
+    unsigned char f13;
+} P_1B80;
+typedef struct { int h; int pad4; int f8; int padC; } V_1B80;
+typedef struct {
+    char pad0[0xC80];
+    char fC80[0x24];
+    int fCA4;
+    char padCA8[0xCB0 - 0xCA8];
+    P_1B80 *fCB0;
+    char padCB4[0xE8C - 0xCB4];
+    V_1B80 v[1];
+    char padE9C[0x1A9A - 0xE9C];
+    short f1A9A;
+    unsigned short f1A9C;
+    char pad1A9E[0x1AA0 - 0x1A9E];
+    int f1AA0;
+    int f1AA4;
+    int f1AA8;
+    char pad1AAC;
+    unsigned char f1AAD;
+    unsigned short f1AAE;
+    short f1AB0;
+    char pad1AB2[0x1AD4 - 0x1AB2];
+    int f1AD4;
+    int f1AD8;
+    int f1ADC;
+    int f1AE0;
+    int f1AE4;
+    int f1AE8;
+    int f1AEC;
+    int f1AF0;
+    char pad1AF4[0x1AF8 - 0x1AF4];
+    int f1AF8;
+    int f1AFC;
+    char pad1B00[0x1B38 - 0x1B00];
+    int f1B38;
+} S_1B80;
+typedef struct {
+    char pad0[0x28];
+    unsigned short f28;
+    unsigned short f2A;
+    unsigned short f2C;
+    unsigned char f2E;
+    unsigned char f2F;
+    char pad30[0x34 - 0x30];
+    float f34;
+    char pad38[0x3F - 0x38];
+    unsigned char f3F;
+    char pad40;
+    unsigned char f41;
+    char pad42;
+    unsigned char f43;
+    char pad44[0x47 - 0x44];
+    unsigned char f47;
+    unsigned char f48;
+    unsigned char f49;
+    unsigned char f4A;
+    char pad4B;
+    unsigned char f4C;
+    char pad4D;
+    unsigned short f4E[(0x64 - 0x4E) / 2];
+    int f64;
+    unsigned int f68;
+    char *f6C;
+    char pad70[0x1C4 - 0x70];
+    float f1C4;
+} C_1B80;
+typedef struct { int f0; int f4; int f8; } R_1B80;
+typedef struct { int f0; void *f4; void *f8; int fC; void *f10; int f14; char pad18[0x20 - 0x18]; int f20; } T_1B80;
+typedef struct {
+    int f0;
+    void *f4;
+    int f8;
+    unsigned short fC;
+    unsigned short fE;
+    unsigned char f10;
+    unsigned char f11;
+    unsigned char f12;
+    unsigned char f13;
+} K_1B80;
+typedef struct { char pad[0x1098]; int f1098; } B_1B80;
+typedef struct { char pad[2]; short f2; } M_1B80;
+typedef struct {
+    int f0;
+    unsigned char f4;
+    unsigned char f5;
+    unsigned char f6;
+    void *f8;
+} L_1B80;
+
+extern S_1B80 D_0050AD00_1B80 __asm__("D_0050AD00");
+extern C_1B80 D_0050A8E8_1B80 __asm__("D_0050A8E8");
+extern R_1B80 D_0050ACB0_1B80 __asm__("D_0050ACB0");
+extern T_1B80 D_0050AC80_1B80 __asm__("D_0050AC80");
+extern K_1B80 D_0050ACC8_1B80 __asm__("D_0050ACC8");
+extern B_1B80 D_0050B740_1B80 __asm__("D_0050B740");
+extern int (*D_0050C840_1B80)(int, int, int *, int *) __asm__("D_0050C840");
+extern int (*D_0050C844_1B80)(int, int, int) __asm__("D_0050C844");
+extern int D_0044DD40_1B80 __asm__("D_0044DD40");
+extern int D_00512B20_1B80 __asm__("D_00512B20");
+extern unsigned int D_00515D24_1B80 __asm__("D_00515D24");
+extern char D_00495830_1B80[] __asm__("D_00495830");
+extern char D_00495840_1B80[] __asm__("D_00495840");
+extern char D_00495870_1B80[] __asm__("D_00495870");
+extern char D_00495880_1B80[] __asm__("D_00495880");
+extern char D_004A30F0_1B80[] __asm__("D_004A30F0");
+extern char D_0050CB20_1B80[] __asm__("D_0050CB20");
+extern char D_0050C880_1B80[] __asm__("D_0050C880");
+extern char D_0050C900_1B80[] __asm__("D_0050C900");
+
+extern void func_003B58A0_1B80(void) __asm__("func_003B58A0");
+extern void func_003B58D8_1B80(void) __asm__("func_003B58D8");
+extern int func_003B5C60_1B80(int) __asm__("func_003B5C60");
+extern void func_003C0B10_1B80(int, void *, int) __asm__("func_003C0B10");
+extern void func_003C15D8_1B80(char *, char *) __asm__("func_003C15D8");
+extern void func_003C1638_1B80(int) __asm__("func_003C1638");
+extern void func_003C35F8_1B80(int) __asm__("func_003C35F8");
+extern void func_003C36C8_1B80(int, int) __asm__("func_003C36C8");
+extern void func_003C7480_1B80(void) __asm__("func_003C7480");
+extern void func_003C7D00_1B80(L_1B80 *) __asm__("func_003C7D00");
+extern M_1B80 *func_003FDAA0_1B80(void) __asm__("func_003FDAA0");
+extern void *func_00416210_1B80(int, int, int) __asm__("func_00416210");
+extern int func_00423A80_1B80(int, void *, int) __asm__("func_00423A80");
+extern int func_00423BA0_1B80(T_1B80 *) __asm__("func_00423BA0");
+extern void func_00423BC0_1B80(int, int) __asm__("func_00423BC0");
+extern int func_00423C30_1B80(int, int) __asm__("func_00423C30");
+extern int func_00423C90_1B80(void) __asm__("func_00423C90");
+extern int func_00423DA0_1B80(R_1B80 *) __asm__("func_00423DA0");
+extern void func_00424880_1B80(int) __asm__("func_00424880");
+extern void func_004248E8_1B80(int) __asm__("func_004248E8");
+extern void func_00425FF0_1B80(void *, int) __asm__("func_00425FF0");
+extern void func_00426020_1B80(int, void *, void *) __asm__("func_00426020");
+extern void func_00426408_1B80(int) __asm__("func_00426408");
+extern int func_00426B48_1B80(void *, int, int) __asm__("func_00426B48");
+extern void func_0042AB18_1B80(void) __asm__("func_0042AB18");
+extern int func_0042ABA0_1B80(int) __asm__("func_0042ABA0");
+extern int func_0042BA68_1B80(char *, int, int) __asm__("func_0042BA68");
+extern char func_003C0BE8_1B80[] __asm__("func_003C0BE8");
+extern char func_003C1578_1B80[] __asm__("func_003C1578");
+extern char func_003C1980_1B80[] __asm__("func_003C1980");
+extern char func_003C19A8_1B80[] __asm__("func_003C19A8");
+
+int func_003C1B80(void) {
+    char path[0x80];
+    L_1B80 st;
+    int size0;
+    int size1;
+    int hz;
+    int t;
+    int size;
+    unsigned int base;
+    unsigned int i;
+    int stat;
+
+    D_0050AD00_1B80.f1AAE = 0;
+    func_003B58A0_1B80();
+    D_0050AD00_1B80.f1AA0 = func_003B5C60_1B80(D_0050A8E8_1B80.f28 * 4);
+    hz = D_0050A8E8_1B80.f2A;
+    if (hz == 24000) {
+        D_0050AD00_1B80.f1AB0 = 0x100;
+    } else if (hz == 36000) {
+        D_0050AD00_1B80.f1AB0 = 0x180;
+    } else {
+        D_0050AD00_1B80.f1AB0 = 0x200;
+    }
+    func_003C1638_1B80(hz);
+    D_0050AD00_1B80.fCB0->f8 = 0xFFFFFFFFFFFFUL;
+    if (D_0050A8E8_1B80.f49 & 2) {
+        if (D_0050A8E8_1B80.f47 == 5) {
+            D_0050C840_1B80(2, D_0050A8E8_1B80.f4A, &size0, &size1);
+        } else {
+            D_0050C840_1B80(1, D_0050A8E8_1B80.f4A, &size0, &size1);
+        }
+        if (D_0050A8E8_1B80.f64 != 0 && size1 < (int)D_0050A8E8_1B80.f68) {
+            t = func_003B5C60_1B80(size0);
+            D_0050AD00_1B80.f1AF8 = t;
+            D_0050AD00_1B80.f1AFC = D_0050A8E8_1B80.f64;
+            D_0050AD00_1B80.f1AAE = size1;
+        } else {
+            D_0050AD00_1B80.f1AF8 = func_003B5C60_1B80(size0 + size1);
+            D_0050AD00_1B80.f1AFC = D_0050AD00_1B80.f1AF8 + size0;
+        }
+        if (D_0050A8E8_1B80.f47 == 5) {
+            D_0050C844_1B80(2, D_0050A8E8_1B80.f4A, D_0050AD00_1B80.f1AF8);
+        } else {
+            D_0050C844_1B80(1, D_0050A8E8_1B80.f4A, D_0050AD00_1B80.f1AF8);
+        }
+        size = ((D_0050A8E8_1B80.f47 + D_0050A8E8_1B80.f48) << 10) + 0x40;
+        D_0050AD00_1B80.f1AD4 = func_003B5C60_1B80(size);
+        func_00416210_1B80(D_0050AD00_1B80.f1AD4, 0, size);
+        base = ((unsigned int)(D_0050AD00_1B80.f1AD4 + 0x3F) >> 6) << 6;
+        D_0050AD00_1B80.f1AD8 = base;
+        if (D_0050A8E8_1B80.f47 == 4) {
+            D_0050AD00_1B80.f1AE0 = base;
+            D_0050AD00_1B80.f1ADC = base + 0xC00;
+            D_0050AD00_1B80.f1AE4 = base + 0x800;
+            D_0050AD00_1B80.f1AE8 = base + 0x400;
+        } else {
+            D_0050AD00_1B80.f1ADC = base;
+            D_0050AD00_1B80.f1AE0 = base + 0x1000;
+            D_0050AD00_1B80.f1AE4 = base + 0x400;
+            D_0050AD00_1B80.f1AE8 = base + 0xC00;
+            D_0050AD00_1B80.f1AEC = base + 0x800;
+            D_0050AD00_1B80.f1AF0 = base + 0x1400;
+        }
+    }
+    func_003C36C8_1B80(0, 8);
+    D_0050AD00_1B80.fCB0->f13 = D_0050A8E8_1B80.f41;
+    D_0050AD00_1B80.f1A9A = 0x141;
+    D_0050AD00_1B80.f1A9C = 0x8000;
+    func_003B58D8_1B80();
+    D_0050ACB0_1B80.f4 = 1;
+    D_0050ACB0_1B80.f8 = 0;
+    D_0050AD00_1B80.f1AA4 = func_00423DA0_1B80(&D_0050ACB0_1B80);
+    if (D_0044DD40_1B80 == 0) {
+        func_00426408_1B80(0);
+        func_0042AB18_1B80();
+    }
+    if (D_0050A8E8_1B80.f3F != 0 && D_0044DD40_1B80 == 0) {
+        path[0] = 0;
+        func_003C15D8_1B80(path, D_0050A8E8_1B80.f6C);
+        func_003C15D8_1B80(path, D_00495830_1B80);
+        if (func_0042BA68_1B80(path, 0, 0) < 0 && func_0042BA68_1B80(D_00495840_1B80, 0, 0) < 0) {
+            return -1;
+        }
+        path[0] = 0;
+        func_003C15D8_1B80(path, D_0050A8E8_1B80.f6C);
+        func_003C15D8_1B80(path, D_00495870_1B80);
+        if (func_0042BA68_1B80(path, 0, 0) < 0 && func_0042BA68_1B80(D_00495880_1B80, 0, 0) < 0) {
+            return -1;
+        }
+    }
+    for (i = 0; i < 1; i++) {
+        D_0050AD00_1B80.v[i].h = func_0042ABA0_1B80(0x1000);
+        D_0050AD00_1B80.v[i].f8 = 0;
+    }
+    D_0050AC80_1B80.f4 = func_003C19A8_1B80;
+    D_0050AC80_1B80.f8 = D_0050CB20_1B80;
+    D_0050AC80_1B80.fC = 0x6000;
+    D_0050AC80_1B80.f14 = 6;
+    D_0050AC80_1B80.f10 = D_004A30F0_1B80;
+    D_0050AC80_1B80.f20 = 0;
+    D_00512B20_1B80 = func_00423BA0_1B80(&D_0050AC80_1B80);
+    func_00423BC0_1B80(D_00512B20_1B80, 0);
+    func_00423C30_1B80(func_00423C90_1B80(), 100);
+    func_003C35F8_1B80(8);
+    func_003C35F8_1B80(4);
+    for (i = 0; i < D_0050A8E8_1B80.f4C; i++) {
+        if (D_0050A8E8_1B80.f4E[i] & 4) {
+            st.f5 = D_0050A8E8_1B80.f47 + D_0050A8E8_1B80.f48;
+            st.f4 = D_0050A8E8_1B80.f2E;
+            st.f0 = D_0050A8E8_1B80.f2A;
+            st.f8 = func_003C0BE8_1B80;
+            st.f6 = 0;
+            func_003C7D00_1B80(&st);
+            break;
+        }
+    }
+    if (D_0050A8E8_1B80.f64 != 0 && D_0050A8E8_1B80.f68 - D_00515D24_1B80 > D_0050AD00_1B80.f1AAE) {
+        D_0050AD00_1B80.f1AAE = D_0050A8E8_1B80.f68 - D_00515D24_1B80;
+    }
+    if (D_0050AD00_1B80.f1AAE != 0) {
+        func_003B58A0_1B80();
+        D_0050AD00_1B80.f1B38 = func_003B5C60_1B80(D_0050AD00_1B80.f1AAE + 0x10);
+        func_003B58D8_1B80();
+    }
+    if (D_0044DD40_1B80 == 0) {
+        do {
+            __asm__ volatile("di\n\tsync.p\n\tmfc0 %0, $12" : "=r"(stat));
+        } while (stat & 0x10000);
+        func_00425FF0_1B80(D_0050C880_1B80, 0x10);
+        func_00426020_1B80(1, func_003C1578_1B80, D_0050C900_1B80);
+        __asm__ volatile("ei");
+        do {
+            if (func_00426B48_1B80(D_0050AD00_1B80.fC80, 0x534E44, 0) < 0) {
+                return -1;
+            }
+        } while (D_0050AD00_1B80.fCA4 == 0);
+    }
+    if (D_0050A8E8_1B80.f34 == -1.0f) {
+        D_0050A8E8_1B80.f1C4 = (func_003FDAA0_1B80()->f2 == 2) ? 16.683349609375f : 20.0f;
+        func_00424880_1B80(2);
+        D_0050AD00_1B80.f1AA8 = func_00423A80_1B80(2, func_003C1980_1B80, 0);
+        func_004248E8_1B80(2);
+    } else {
+        D_0050A8E8_1B80.f1C4 = 10.666666984558105f;
+        D_0050AD00_1B80.f1AA8 = -1;
+    }
+    D_0050ACC8_1B80.f0 = 0x80303;
+    D_0050ACC8_1B80.f4 = &D_0050B740_1B80;
+    D_0050ACC8_1B80.f8 = D_0050B740_1B80.f1098;
+    D_0050ACC8_1B80.f10 = D_0050A8E8_1B80.f47;
+    D_0050ACC8_1B80.f11 = D_0050A8E8_1B80.f48;
+    D_0050ACC8_1B80.f12 = D_0050A8E8_1B80.f2F;
+    D_0050ACC8_1B80.fC = D_0050A8E8_1B80.f2A;
+    D_0050ACC8_1B80.fE = D_0050A8E8_1B80.f2C;
+    if (D_0050A8E8_1B80.f47 >= 4) {
+        D_0050ACC8_1B80.f13 = D_0050A8E8_1B80.f43;
+    } else {
+        D_0050ACC8_1B80.f13 = 0;
+    }
+    func_003C0B10_1B80(0, &D_0050ACC8_1B80, 0x14);
+    D_0050AD00_1B80.f1AAD = D_0044DD40_1B80 = 1;
+    func_003C7480_1B80();
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C2268);
