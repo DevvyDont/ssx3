@@ -2338,7 +2338,32 @@ int func_003F72F8(int a, int *b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F7328);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+/* D_004A4BC4: the network account session (0x14C bytes, func_003F6C70). cur / saved are the current and the saved
+   phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
+extern struct sNetAcct *D_004A4BC4;
+
+extern int f7A60c(int, int) __asm__("func_003F7A60");
+int func_003F7328_impl(int *a, int *b) __asm__("func_003F7328");
+int func_003F7328_impl(int *a, int *b) {
+    int ret;
+    if (D_004A4BC4->cur.mode == 9) {
+        *a = 1;
+        switch (D_004A4BC4->st) {
+        case 0: ret = f7A60c(0, 1); break;
+        case 1: case 2: ret = f7A60c(1, 1); break;
+        case 3: ret = f7A60c(8, 1); break;
+        default: ret = 0xC; *b = ret; *a = 0; break;
+        }
+    } else {
+        ret = 0xC; *b = ret; *a = 0;
+    }
+    return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F73A8);
