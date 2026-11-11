@@ -52,6 +52,12 @@ COMMON_CFLAGS = "-O2"
 UNIT_CFLAGS = {
     "ealib/seg_2B4578": "-G0",
     "ealib/seg_2DCAE8": "-G0",
+    # Built without RTTI: retail vtable headers are {delta, 0} and every cRider-derived class shares cRider's +0x6D0
+    # sub-vtable D_00459B90, which g++ 2.95 only does with -fno-rtti (func_00142A50; whole unit unchanged, 2026-11-08).
+    "ai/control/handplantcontrol": "-fno-rtti",
+    "seg/seg_1218": "-fno-rtti",  # same evidence (null typeinfo in D_004585F0/D_00458710; func_00108FA8)
+    "ai/rider": "-fno-rtti",  # same evidence (null typeinfo in D_00458338/D_00458360/D_00459BD0; func_00125EB8)
+    "ai/computer": "-fno-rtti",  # same evidence (the cComp constructor func_0010FCD8 stores the shared D_00459B90 sub-vtable)
 }
 # Fork-only: per-unit compiler. EA's embedded $gp module (ealib/seg_2D7498, 0x3D6498-0x3DBAE8) was built with an
 # older SN build, ee-gcc 2.95.3-114 (its non-leaf functions save ra with sq; 107 and 114 reproduce all 48 landed
