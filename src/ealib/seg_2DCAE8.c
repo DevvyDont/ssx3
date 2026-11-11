@@ -611,7 +611,41 @@ void func_003DC9F8(char *dst, const char *fmt, ...) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DCA40);
+#ifdef SKIP_ASM
+void func_003DCA40(short *dst, char *src) {
+    while (*src != 0) {
+        int ok = 0;
+        int val = 0;
+        int i;
+        int d;
+        if (src[0] == '\\' && src[1] == 'x') {
+            ok = 1;
+            for (i = 0; i < 4 && src[i + 2] != 0; i++) {
+                if (src[i + 2] >= '0' && src[i + 2] <= '9') {
+                    d = (unsigned char)src[i + 2] - '0';
+                } else if (src[i + 2] >= 'a' && src[i + 2] <= 'f') {
+                    d = (unsigned char)src[i + 2] - 'a' + 10;
+                } else {
+                    ok = 0;
+                    goto out;
+                }
+                val = (val << 4) + d;
+            }
+        }
+out:
+        if (ok) {
+            *dst++ = val;
+            src += 6;
+        } else {
+            *dst++ = (unsigned char)*src;
+            src++;
+        }
+    }
+    *dst = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DCB20);
