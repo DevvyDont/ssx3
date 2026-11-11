@@ -2052,7 +2052,80 @@ int func_003F6EE0(int *out) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F6F68);
+#ifdef SKIP_ASM
+/* D_004A4BC4: the network account session (0x14C bytes, func_003F6C70). cur / saved are the current and the saved
+   phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
+extern struct sNetAcct *D_004A4BC4;
+extern int func_003F7D98(void);
+typedef struct { unsigned char b[0x18]; } B6F68;
+int func_003F6F68(int *out) {
+    int t0;
+    int st;
+    int t8;
+    int r;
+    r = 0;
+    *out = 0;
+    if (out == 0) r = 7;
+    if (D_004A4BC4->cur.mode >= 9) {
+        if (D_004A4BC4->cur.mode == 0xA) r = 0xC;
+        else r = 0xD;
+    }
+    if (r == 0) {
+        switch (D_004A4BC4->cur.fEC) {
+        case 4:
+            *(B6F68 *)&D_004A4BC4->saved.fEC = *(B6F68 *)&D_004A4BC4->cur.fEC;
+            D_004A4BC4->cur.fEC = 0;
+            *out = 1;
+            break;
+        case 0:
+            r = ((int (*)(void))D_004A4BC4->cur.fF0)();
+            if (r == 0) {
+                *(B6F68 *)&D_004A4BC4->saved.fEC = *(B6F68 *)&D_004A4BC4->cur.fEC;
+                D_004A4BC4->cur.fEC = 1;
+                *out = 1;
+            } else {
+                *(B6F68 *)&D_004A4BC4->saved.fEC = *(B6F68 *)&D_004A4BC4->cur.fEC;
+                D_004A4BC4->cur.fEC = 2;
+                ((int (*)(int *))D_004A4BC4->cur.fDC)(&t0);
+                func_003F7D98();
+            }
+            break;
+        case 1:
+            r = ((int (*)(int *))D_004A4BC4->cur.fF4)(&st);
+            if (r == 0) {
+                *out = 1;
+                if (st == 2) {
+                    *out = 2;
+                    func_003F7D98();
+                }
+            } else {
+                *(B6F68 *)&D_004A4BC4->saved.fEC = *(B6F68 *)&D_004A4BC4->cur.fEC;
+                D_004A4BC4->cur.fEC = 2;
+                ((int (*)(int *))D_004A4BC4->cur.fDC)(&t8);
+                func_003F7D98();
+            }
+            break;
+        case 2:
+            r = ((int (*)(void))D_004A4BC4->cur.fF8)();
+            break;
+        case 5:
+            r = 0x10;
+            break;
+        default:
+            r = 0x11;
+            break;
+        }
+    }
+    if (r == 0) {
+        if (*out == 2) ((void (*)(int *, int *))D_004A4BC4->cur.fE0)(out, &r);
+    } else {
+        ((void (*)(int *, int *))D_004A4BC4->cur.fE4)(out, &r);
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F71B8);
@@ -3392,13 +3465,234 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8C30);
 int func_003F8C30(int a0) { return a0; }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F8C38);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *D_004A4BD8;
+/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *D_004A4BDC;
+extern void f86F0(int) __asm__("func_003F86F0");
+extern int func_003F85C0(unsigned short v, int dir);
+extern int func_003F8710(void);
+extern int func_003F87B0(int a, int *out);
+extern char *func_003FA7A0(char *dst, int unused, char *src);
+extern void fA818(char *, char *, int, char *) __asm__("func_003FA818");
+int func_003F8C38(int a, int *out, int *c) {
+    int op;
+    int slot;
+    char buf[0x50];
+    if (out == 0) return 0x12;
+    if (c == 0) return 0x12;
+    op = D_004A4BD8->op;
+    if (op != 3 && op != 6) return 0x12;
+    *out = 1;
+    switch ((unsigned)D_004A4BD8->st) {
+    case 1:
+        if (a == 0) {
+            func_003FA7A0(buf, (int)D_004A4BDC->f50, D_004A4BD8->body.name);
+            D_004A4BD8->st = 2;
+            ((void (*)(char *, int))D_004A4BDC->f04)(buf, D_004A4BD8->body.slot);
+            break;
+        }
+        if (a != 3) {
+            *out = 2;
+            return a;
+        }
+        if (D_004A4BD8->op == 3) {
+            slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->f6C);
+            D_004A4BD8->body.slot = slot;
+            if (slot != -1) {
+                D_004A4BD8->st = 1;
+                D_004A4BDC->f10(slot);
+                return 0;
+            }
+        }
+        *out = 2;
+        return a;
+    case 2:
+        if (a == 0) {
+            if (*c == 1) {
+                fA818((char *)D_004A4BD8->body.pad08, (char *)&D_004A4BD8->body.pad08[8], (int)D_004A4BDC->f50, D_004A4BD8->body.name);
+                D_004A4BD8->st = 0x16;
+                ((void (*)(int *, int *, int, int))D_004A4BDC->f18)(D_004A4BD8->body.pad08, &D_004A4BD8->body.pad08[8], D_004A4BD8->body.slot, 3);
+                break;
+            }
+            if (*c == 0) {
+                f86F0(4);
+                D_004A4BD8->st = 0x1A;
+                D_004A4BDC->f14(D_004A4BD8->body.slot);
+                break;
+            }
+            *out = 2;
+            return 0xA;
+        }
+        f86F0(a);
+        return func_003F87B0(D_004A4BD8->body.slot, out);
+    case 0x16:
+        if (a == 0) {
+            if (*c >= 0) {
+                D_004A4BD8->body.port = *c;
+                *out = 2;
+                return 0;
+            }
+            D_004A4BD8->body.port = *c;
+            *out = 2;
+            return 0xA;
+        }
+        f86F0(a);
+        return func_003F87B0(D_004A4BD8->body.slot, out);
+    case 0x1A:
+        if (a == 0) {
+            if (D_004A4BD8->op == 4 || D_004A4BD8->op == 6) {
+                *out = 2;
+                return func_003F8710();
+            }
+            if (func_003F8710() == 0) {
+                *out = 2;
+                break;
+            }
+            slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->f6C);
+            D_004A4BD8->body.slot = slot;
+            if (slot != -1) {
+                D_004A4BD8->st = 1;
+                D_004A4BDC->f10(slot);
+                return 0;
+            }
+            *out = 2;
+            return func_003F8710();
+        }
+        *out = 2;
+        return a;
+    default:
+        *out = 2;
+        return 0x12;
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F8EF8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *D_004A4BD8;
 
+extern void f86F0(int) __asm__("func_003F86F0");
+int func_003F8EF8(int a, int *out, int *c) {
+    int op;
+    if (out == 0) return 0x12;
+    if (c == 0) return 0x12;
+    op = D_004A4BD8->op;
+    if (op != 8 && op != 0xA && op != 9) return 0x12;
+    *out = 1;
+    switch ((unsigned)D_004A4BD8->st) {
+    case 0x1B:
+        if (a == 0) {
+            *out = 2;
+            return 0;
+        }
+        f86F0(a);
+        return func_003F8720((int)&D_004A4BD8->body, out);
+    case 0x1C:
+    case 0x1D:
+        if (a == 0) {
+            if (D_004A4BD8->f70 == *c) {
+                *out = 2;
+                return 0;
+            }
+            *out = 2;
+            return 0xA;
+        }
+        f86F0(a);
+        return func_003F8720((int)&D_004A4BD8->body, out);
+    }
+    *out = 2;
+    return 0x12;
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F8FF0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *D_004A4BD8;
+/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *D_004A4BDC;
 
+extern void f86F0(int) __asm__("func_003F86F0");
+int func_003F8FF0(int a, int *out, int c) {
+    if (out == 0) return 0x12;
+    if (c == 0) return 0x12;
+    if (D_004A4BD8->op != 7) return 0x12;
+    *out = 1;
+    switch ((unsigned)D_004A4BD8->st) {
+    case 0x18:
+        if (a == 0) {
+            D_004A4BD8->st = 0x19;
+            D_004A4BDC->f1C(D_004A4BD8->body.port);
+            break;
+        }
+        f86F0(a);
+        return func_003F8768((int)&D_004A4BD8->body, out);
+    case 0x19:
+        if (a == 0) {
+            D_004A4BD8->st = 0x1A;
+            D_004A4BDC->f14(D_004A4BD8->body.slot);
+            break;
+        }
+        f86F0(a);
+        return func_003F87B0(D_004A4BD8->body.slot, out);
+    case 0x1A:
+        if (a == 0) {
+            *out = 2;
+            return 0;
+        }
+        *out = 2;
+        return a;
+    default:
+        *out = 2;
+        return 0x12;
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F9130);
+#ifdef SKIP_ASM
+/* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
+extern struct sMcReq *D_004A4BD8;
+
+/* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
+extern struct sMcDrv *D_004A4BDC;
+
+extern int func_003F8710(void);
+int func_003F9130(int a, int *out, int c) {
+    if (out == 0 || c == 0 || (unsigned)(D_004A4BD8->op - 0xB) > 2) return 0x12;
+    *out = 1;
+    switch ((unsigned)D_004A4BD8->st) {
+    case 0x18:
+        D_004A4BD8->st = 0x19;
+        D_004A4BDC->f1C(D_004A4BD8->body.port);
+        break;
+    case 0x19:
+        D_004A4BD8->st = 0x1A;
+        D_004A4BDC->f14(D_004A4BD8->body.slot);
+        break;
+    case 0x1A:
+        *out = 2;
+        return func_003F8710();
+    default:
+        *out = 2;
+        return 0x12;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F9208);
@@ -3949,7 +4243,50 @@ void func_003FA380(char *src, unsigned short *dst) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003FA4F0);
+#ifdef SKIP_ASM
+/* Shift-JIS full-width -> ASCII: the inverse of func_003FA380 (same 33-byte punctuation table). */
+void func_003FA4F0(unsigned short *src, char *dst) {
+    T_A380 tbl = D_004973B0;
+    unsigned char i = 0;
+    unsigned short c = *src++;
+    while (c != 0) {
+        c = (c >> 8) | ((c & 0xFF) << 8 & 0xFF00);
+        if ((c & 0x8100) == 0x8100) {
+            char j;
+            c &= 0xFF;
+            for (j = 0; j < 33; j++) {
+                if (tbl.b[j] == c) {
+                    c = j;
+                    if (c >= 0x1D) {
+                        dst[i++] = c + 0x7B;
+                    } else if (c >= 0x17) {
+                        dst[i++] = c + 0x5B;
+                    } else if (c >= 0x10) {
+                        dst[i++] = c + 0x3A;
+                    } else {
+                        dst[i++] = c + 0x20;
+                    }
+                    break;
+                }
+            }
+        } else if ((c & 0x8200) == 0x8200) {
+            if ((unsigned short)(c - 0x8281) < 0x1A) {
+                dst[i++] = c - 0x20;
+            } else if ((unsigned short)(c - 0x8260) < 0x1A) {
+                dst[i++] = c - 0x1F;
+            } else if ((unsigned short)(c - 0x824F) < 10) {
+                dst[i++] = c - 0x1F;
+            }
+        } else {
+            break;
+        }
+        c = *src++;
+    }
+    dst[i] = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003FA6A8);
