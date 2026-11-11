@@ -5033,7 +5033,350 @@ extern "C" sMenuRect_2D0D48* func_002D0D48(sMenuRect_2D0D48* ret, char* item)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002D0EF8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
+
+
+// Menu rectangles (item extents, text boxes): position and size.
+struct sRect {
+    float x, y, w, h;
+};
+
+// Menu colours, alpha first (cARGBMenuItem); the font colour at font + 0x40.
+struct sColor {
+    float a, r, g, b;
+};
+
+// One entry of the render-state stack (0x14 bytes); f8 holds 5-bit fields that are read through masks, f10 an id
+// (-1 = none).
+struct sRenderState {
+    int f0;
+    unsigned int f4_0 : 2;
+    unsigned int f4_2 : 5;
+    unsigned int f4_7 : 25;
+    int f8;
+    int fC;
+    short f10;
+};
+
+// The render context (D_004A289C_0EF8): render-state stack top at 0xE84, vtable pointer at 0x10D8.
+class cRenderCtx {
+public:
+    char pad0[0xE84];
+    sRenderState* top;          // 0xE84
+    char pad1[0x10D8 - 0xE88];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71(int n, void* verts, int flags);
+    virtual void v72();
+    virtual void v73(int n, void* verts, int flags);
+};
+
+extern cRenderCtx* D_004A289C_0EF8 __asm__("D_004A289C");
+
+// 16-byte vector for the menu's vertices (built with the constructor or with Set).
+struct sVec4 {
+    float x, y, z, w;
+    sVec4() {}
+    sVec4(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+    void Set(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+// The same vertex with the position as a plain aligned float[4] (filled through casts).
+struct sVtxF {
+    float u, v, q;
+    int pad;
+    int r, g, b, a;
+    float pos[4] __attribute__((aligned(16)));
+    sVtxF() {}
+};
+
+extern "C" void func_00391CB0(void* self, float x, float y, const char* str);
+
+extern func_002CA988_sVec3 D_004D53A0;
+
+extern func_002CA988_sVec3 D_004D53B0;
+
+// (prototype from their definition at line 858)
+extern "C" void func_002CB350_0EF8(func_002CB350_sVtx* v, float* r, float* t) __asm__("func_002CB350");
+
+// A point of the graph (cGraphMenuItem's point list).
+struct sGraphPt_D0EF8 {
+    float x, y;
+};
+
+// cGraphMenuItem: a menu item that plots a point list in a box at the right of its row.
+struct cGraphMenuItem_D0EF8 {
+    void* owner;                // 0x00
+    char pad04[0x10];
+    char* label;                // 0x14
+    int count;                  // 0x18
+    char pad1C[0x8];
+    int cur;                    // 0x24
+    sGraphPt_D0EF8* pts;        // 0x28
+    float minX;                 // 0x2C
+    float maxY;                 // 0x30
+    float maxX;                 // 0x34
+    float minY;                 // 0x38
+    char pad3C[0x4];
+    int showCur;                // 0x40
+};
+
+// cBXString as a value class (one pointer); the operators are the game's out-of-line functions.
+// PORT: asm labels are not accepted on destructors, so the dtor forwards to the out-of-line one (in-charge flag 2).
+struct cBXStr_D0EF8;
+extern "C" void cBXString_dtor_D0EF8(cBXStr_D0EF8* self, int flags) __asm__("cBXString__cBXString");
+struct cBXStr_D0EF8 {
+    char* str;
+    cBXStr_D0EF8(const cBXStr_D0EF8& o) : str(o.str) {}
+    ~cBXStr_D0EF8() { cBXString_dtor_D0EF8(this, 2); }
+};
+// Formats a value for display (func_002CDFD8 returns a cBXString by value).
+cBXStr_D0EF8 FormatValue_D0EF8(float v) __asm__("func_002CDFD8");
+cBXStr_D0EF8 operator+(const cBXStr_D0EF8& a, const char* b) __asm__("func_00318630");
+cBXStr_D0EF8 operator+(const cBXStr_D0EF8& a, const cBXStr_D0EF8& b) __asm__("func_003185C8");
+extern char D_004A39F0[];
+extern sColor D_004D53C0;
+extern sColor D_004D53D0;
+extern sColor D_004D53E0;
+// The focused-row style passed to the menu's frame draw is the line colour of the graph's axis.
+extern sColor D_004D5380_c __asm__("D_004D5380");
+extern cRenderCtx* D_004A5B80;
+
+// The font scale (font + 0x28), built from references like sVec4_2D0008: with the unit's by-value sVec2 the
+// second store keeps the temporary's address in a register (the target stores both straight to the frame).
+struct sVec2r_D0EF8 {
+    float x, y;
+    sVec2r_D0EF8(const float& ax, const float& ay) : x(ax), y(ay) {}
+};
+
+// Screen position of a graph point (scale and offset map the value range onto the graph box).
+static inline float GraphX_D0EF8(const sGraphPt_D0EF8& pt, float scale, float offset)
+{
+    return pt.x * scale + offset;
+}
+
+static inline float GraphY_D0EF8(const sGraphPt_D0EF8& pt, float scale, float offset)
+{
+    return pt.y * scale + offset;
+}
+
+static inline int GetDepth_D0EF8(sRenderState* rs)
+{
+    return (unsigned int)(rs->f8 & 0x3E0) >> 5;
+}
+
+// Puts the render state's 5-bit depth field `layer` steps above `base` (at most 31).
+static inline void SetDepth_D0EF8(sRenderState* rs, int base, int layer)
+{
+    int d = base + layer;
+    if (d > 31) d = 31;
+    rs->f8 = (rs->f8 & ~0x3E0) | ((d << 5) & 0x3E0);
+}
+
+// cGraphMenuItem::Draw (vtable slot 4): label, optional "x, y" readout of the current point, then the graph box
+// with its zero line, the polyline and a marker on the current point, each one depth layer higher.
+extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
+{
+    int focused = self == func_002CBF30(self->owner);
+    {
+        char* menu = (char*)self->owner;
+        sVEntry<void(void*, float*, int)>* vt = *(sVEntry<void(void*, float*, int)>**)(menu + 0x12C);
+        vt[9].fn(menu + vt[9].delta, rect, focused);
+    }
+    char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
+    float lineH = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
+    func_002CA988_sVec3* col = self == func_002CBF30(self->owner) ? &D_004D53A0 : &D_004D53B0;
+    sColor c;
+    c.a = 1.0f;
+    c.r = col->x;
+    c.g = col->y;
+    c.b = col->z;
+    *(sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = c;
+    *(sVec2r_D0EF8*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2r_D0EF8(2.0f, 2.0f);
+    func_00391CB0(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, self->label);
+    if (self->showCur && focused) {
+        cBXStr_D0EF8 str = FormatValue_D0EF8(self->pts[self->cur].x) + D_004A39F0 + FormatValue_D0EF8(self->pts[self->cur].y);
+        func_00391CB0(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 32.0f, rect[1] + 12.0f - 1.0f + lineH, str.str);
+    }
+    float h;
+    if (focused && self->showCur) {
+        h = rect[3] - 24.0f;
+    } else {
+        h = rect[3] - 12.0f;
+    }
+    sRect gr;
+    gr.w = 100.0f;
+    gr.h = h;
+    gr.y = rect[1] + (rect[3] - h) * 0.5f;
+    gr.x = rect[0] + rect[2] - 16.0f - gr.w;
+    int old = GetDepth_D0EF8(D_004A289C_0EF8->top);
+    sVtxF v[4];
+    int i;
+    for (i = 0; i < 4; i++) {
+        v[i].a = (int)(D_004D53C0.a * 128.0f);
+        v[i].r = (int)(D_004D53C0.r * 128.0f);
+        v[i].g = (int)(D_004D53C0.g * 128.0f);
+        v[i].b = (int)(D_004D53C0.b * 128.0f);
+        v[i].q = 1.0f;
+    }
+    D_004A289C_0EF8->top->f10 = -1;
+    {
+        float t[4];
+        t[0] = 0.0f;
+        t[1] = 0.0f;
+        t[2] = 1.0f;
+        t[3] = 1.0f;
+        func_002CB350_0EF8((func_002CB350_sVtx*)v, &gr.x, t);
+    }
+    float sx = gr.w / (self->maxX - self->minX);
+    float sy = gr.h / (self->maxY - self->minY);
+    float ox = gr.x - self->minX * sx;
+    float oy = gr.y - self->minY * sy;
+    if ((self->maxY >= 0.0f) != (self->minY > 0.0f)) {
+        SetDepth_D0EF8(D_004A289C_0EF8->top, old, 1);
+        for (i = 0; i < 2; i++) {
+            v[i].a = (int)(D_004D5380_c.a * 128.0f);
+            v[i].r = (int)(D_004D5380_c.r * 128.0f);
+            v[i].g = (int)(D_004D5380_c.g * 128.0f);
+            v[i].b = (int)(D_004D5380_c.b * 128.0f);
+        }
+        sVec4 p;
+        p.x = gr.x;
+        p.y = oy;
+        p.z = 0.0f;
+        p.w = 1.0f;
+        *(sVec4*)v[0].pos = p;
+        p.x = gr.x + gr.w;
+        p.y = oy;
+        p.z = 0.0f;
+        p.w = 1.0f;
+        *(sVec4*)v[1].pos = p;
+        D_004A5B80->v73(2, v, 0);
+    }
+    SetDepth_D0EF8(D_004A289C_0EF8->top, old, 2);
+    for (i = 0; i < 2; i++) {
+        v[i].a = (int)(D_004D53D0.a * 128.0f);
+        v[i].r = (int)(D_004D53D0.r * 128.0f);
+        v[i].g = (int)(D_004D53D0.g * 128.0f);
+        v[i].b = (int)(D_004D53D0.b * 128.0f);
+    }
+    for (i = 1; i < self->count; i++) {
+        float x0 = GraphX_D0EF8(self->pts[i - 1], sx, ox);
+        float y0 = GraphY_D0EF8(self->pts[i - 1], sy, oy);
+        float x1 = GraphX_D0EF8(self->pts[i], sx, ox);
+        float y1 = GraphY_D0EF8(self->pts[i], sy, oy);
+        sVec4 p;
+        p.x = x0;
+        p.y = y0;
+        p.z = 0.0f;
+        p.w = 1.0f;
+        *(sVec4*)v[0].pos = p;
+        p.x = x1;
+        p.y = y1;
+        p.z = 0.0f;
+        p.w = 1.0f;
+        *(sVec4*)v[1].pos = p;
+        D_004A5B80->v73(2, v, 0);
+    }
+    if (self->showCur) {
+        SetDepth_D0EF8(D_004A289C_0EF8->top, old, 3);
+        for (i = 0; i < 4; i++) {
+            v[i].a = (int)(D_004D53E0.a * 128.0f);
+            v[i].r = (int)(D_004D53E0.r * 128.0f);
+            v[i].g = (int)(D_004D53E0.g * 128.0f);
+            v[i].b = (int)(D_004D53E0.b * 128.0f);
+        }
+        float r[4];
+        float tt[4];
+        float px = GraphX_D0EF8(self->pts[self->cur], sx, ox);
+        float py = GraphY_D0EF8(self->pts[self->cur], sy, oy);
+        r[0] = px - 2.0f;
+        r[1] = py - 2.0f;
+        r[2] = 5.0f;
+        r[3] = 5.0f;
+        tt[0] = 0.0f;
+        tt[1] = 0.0f;
+        tt[2] = 1.0f;
+        tt[3] = 1.0f;
+        func_002CB350_0EF8((func_002CB350_sVtx*)v, r, tt);
+    }
+    // Restore the depth the item started with.
+    D_004A289C_0EF8->top->f8 = (D_004A289C_0EF8->top->f8 & ~0x3E0) | ((old << 5) & 0x3E0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002D1740);
