@@ -325,9 +325,152 @@ int func_003B3DA8(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3E40);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+typedef struct { unsigned int fmt : 8; unsigned int size : 24; short w; short h; char pad8[4]; int flags; } SH_3E40;
+extern int func_003B39D8_3E40(SH_3E40 *) __asm__("func_003B39D8");
+extern int func_003B4218_3E40(int, int, int, int, int) __asm__("func_003B4218");
 
+int func_003B3E40(SH_3E40 *shp, int x, int y, int level) {
+    int w, h, bpp, off, i, r, px, py;
+
+    px = x;
+    py = y;
+    off = 0;
+    w = shp->w;
+    h = shp->h;
+    bpp = func_003B39D8_3E40(shp);
+    if (bpp == 15) {
+        bpp = 16;
+    }
+    if (shp->fmt == 0x60) {
+        bpp = 64;
+    }
+    if (shp->fmt == 0x60) {
+        w = (w + 3) >> 2;
+        h = (h + 3) >> 2;
+    }
+    for (i = 0; i < level; i++) {
+        off = (off + 15) & ~15;
+        off += w * h * bpp;
+        if (w >= 2) {
+            w >>= 1;
+        }
+        if (h >= 2) {
+            h >>= 1;
+        }
+    }
+    if (shp->fmt == 0x60) {
+        px = x / 4;
+        py = y / 4;
+    }
+    if ((shp->fmt == 0x20 || shp->fmt == 0x21) && (shp->flags & 0x2000)) {
+        r = px;
+        if ((unsigned int)((px & 0x1F) - 8) <= 15) {
+            r = px ^ 0x18;
+        }
+        if (shp->fmt == 0x21) {
+            r <<= 5;
+        } else if (shp->fmt == 0x20) {
+            r <<= 4;
+        }
+        return r;
+    } else if (shp->flags & 0x2000) {
+        r = func_003B4218_3E40(px, py, w, h, bpp);
+    } else {
+        r = py * ((w * bpp + 15) & ~15) + px * bpp;
+    }
+    return r + off;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4010);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Img_4010 {
+    unsigned char fmt;
+    char pad01[3];
+    short w;
+    short h;
+    char pad08[4];
+    int flags;
+    int off;
+};
+extern int func_003B39D8_4010(struct Img_4010 *img) __asm__("func_003B39D8");
+extern int func_003B4218_4010(int x, int y, int w, int h, int bpp) __asm__("func_003B4218");
+
+char *func_003B4010(struct Img_4010 *img, int x, int y, int mip) {
+    char *data;
+    int w;
+    int h;
+    int bpp;
+    int off;
+    int i;
+    int px;
+    int py;
+    int pos;
+    int ofs;
+
+    if (img->flags & 0x1000) {
+        data = (char *)img + img->off;
+    } else {
+        data = (char *)img + 0x10;
+    }
+    w = img->w;
+    h = img->h;
+    px = x;
+    py = y;
+    bpp = func_003B39D8_4010(img);
+    if (bpp == 15) {
+        bpp = 16;
+    }
+    off = 0;
+    if (img->fmt == 0x60) {
+        bpp = 64;
+    }
+    if (img->fmt == 0x60) {
+        w = (w + 3) >> 2;
+        h = (h + 3) >> 2;
+    }
+    for (i = 0; i < mip; i++) {
+        off = (off + 15) & ~15;
+        off += w * h * bpp;
+        if (w >= 2) {
+            w >>= 1;
+        }
+        if (h >= 2) {
+            h >>= 1;
+        }
+    }
+    if (img->fmt == 0x60) {
+        px = x / 4;
+        py = y / 4;
+    }
+    if ((img->fmt == 0x20 || img->fmt == 0x21) && (img->flags & 0x2000)) {
+        pos = px;
+        if ((unsigned int)((pos & 0x1F) - 8) < 16) {
+            pos ^= 0x18;
+        }
+        if (img->fmt == 0x21) {
+            pos <<= 5;
+        } else if (img->fmt == 0x20) {
+            pos <<= 4;
+        }
+        ofs = pos;
+    } else {
+        if (img->flags & 0x2000) {
+            pos = func_003B4218_4010(px, py, w, h, bpp);
+        } else {
+            pos = py * ((w * bpp + 15) & ~15) + px * bpp;
+        }
+        ofs = pos + off;
+    }
+    return data + (ofs >> 3);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B4218);

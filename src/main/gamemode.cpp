@@ -979,7 +979,27 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamemode", func_002398E8);
+#ifdef SKIP_ASM
+extern char* D_004A2C70;
+extern void* D_004A28A8;
+
+extern "C" int func_002398E8(void* self, int a1, int secs)
+{
+    char* m = D_004A2C70;
+    if (*(int*)(m + 8) == 1) {
+        unsigned int limit = *(unsigned int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 8);
+        unsigned int t = *(unsigned int*)(m + 0x78) + secs * 60;
+        *(unsigned int*)(m + 0x78) = t;
+        if (t < limit) {
+            return 0;
+        }
+        return 1;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamemode", func_00239938);
