@@ -5597,7 +5597,74 @@ extern "C" void func_00281A50(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281AC8);
+#ifdef SKIP_ASM
+extern "C" void func_0027D688(char* self, void* anim);
+int func_00282F80(void* self);
+
+struct sSseAnim1AC8 {
+    char pad_0x0[0xC];
+    int id;                 // 0xC
+    char pad_0x10[0x4];
+};
+
+struct sSseRig1AC8 {
+    char pad_0x0[0x8];
+    int busy;               // 0x8
+    char pad_0xC[0x8];
+    sSseAnim1AC8* cur;      // 0x14
+};
+
+struct sSseEngine1AC8 {
+    char pad_0x0[0x1C];
+    sSseAnim1AC8 anims[9];  // 0x1C
+    char pad_0xD0[0x0];
+    sSseRig1AC8* rigs[2];   // 0xD0
+    char pad_0xD8[0x4];
+    int chans[1];           // 0xDC
+};
+
+extern "C" void func_00281AC8(void* selfp, int ch, int anim)
+{
+    sSseEngine1AC8* self = (sSseEngine1AC8*)selfp;
+    int slot = self->chans[ch];
+    if (slot < 0) {
+        if (anim == 9) {
+            return;
+        }
+        for (int i = 0; i < 2; i++) {
+            sSseRig1AC8* r = self->rigs[i];
+            if (r != 0 && r->busy <= 0) {
+                slot = i;
+                break;
+            }
+        }
+        if (slot < 0) {
+            return;
+        }
+    }
+    if (anim == 9) {
+        func_0027D688((char*)self->rigs[slot], 0);
+        self->chans[ch] = -1;
+        return;
+    }
+    sSseAnim1AC8* cur = self->rigs[slot]->cur;
+    if (cur == 0 || cur->id != anim) {
+        int j = 0;
+        for (sSseAnim1AC8* a = self->anims; ; a++, j++) {
+            if (j >= 9) {
+                return;
+            }
+            if (func_00282F80(a) != 0 && a->id == anim) {
+                func_0027D688((char*)self->rigs[slot], a);
+                break;
+            }
+        }
+    }
+    self->chans[ch] = slot;
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281C40);

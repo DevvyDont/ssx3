@@ -247,7 +247,51 @@ extern "C" int func_00153688(void* self, int profile, int character, int owner)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00153708);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int cBELibrary_getRiderIndex(int);
+extern "C" int cBEMissionInterface_getCurrentCollectForPeak(void* self, int rider, int owner);
+extern void* D_004A28A8;
+extern char D_004A6CAC[];
+
+// View of D_0043D950[].owner (offset 0x54); splat labels that address D_0043D9A4.
+struct sMissionOwnerView_00153708
+{
+    int owner;
+    char pad_0x04[0x60];
+};
+extern sMissionOwnerView_00153708 D_0043D9A4_v153708[] __asm__("D_0043D9A4");
+
+extern "C" int func_00153708(void* self, int profile, int character, int owner)
+{
+    if (*(void**)((char*)D_004A28A8 + 0x84) != 0)
+        return cBEMissionInterface_getCurrentCollectForPeak(self, cBELibrary_getRiderIndex(profile), owner);
+    int sum = 0;
+    int off = profile * 0x9B50 + character * 0xF88;
+    for (int i = 0; i < 1; i++)
+    {
+        for (int j = 0; j < 22; j++)
+        {
+            if (D_0043D9A4_v153708[j].owner == owner)
+            {
+                char* p = D_004A6CAC + (i * 12 + (j * 12 + off));
+                char* q = p + 4;
+                int n = 0;
+                for (int b = 0; b < 64; b++)
+                {
+                    unsigned int w = *(unsigned int*)(q + ((b / 32) << 2));
+                    if (w & (1 << (b % 32)))
+                        n++;
+                }
+                sum += n;
+            }
+        }
+    }
+    return sum;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_00153858);
