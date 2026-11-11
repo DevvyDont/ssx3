@@ -249,9 +249,115 @@ unsigned func_003FD2B8(int *p, unsigned n) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FDDC8", func_003FD2F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// (prototype from their definition at line 207)
+struct sShdr* func_003FD210_D2F8(int* p, char* name) __asm__("func_003FD210");
 
+struct sHiEnt { unsigned int idx; unsigned int val; };
+extern int func_003FD6E0_D2F8(int*, int, char*) __asm__("func_003FD6E0");
+void func_003FD2F8(int oi, char* n1, char* n2, int ci) {
+    int* o = (int*)oi;
+    int* ctx = (int*)ci;
+    char tmp[0x100];
+    struct sHiEnt hi[31];
+    struct sShdr* tsec;
+    struct sShdr* rsec;
+    tsec = func_003FD210_D2F8(o, n1);
+    rsec = func_003FD210_D2F8(o, n2);
+    if (tsec != 0 && rsec != 0) {
+        unsigned int cnt = 0;
+        unsigned int n = (unsigned int)rsec->size >> 3;
+        unsigned int* ent = (unsigned int*)(o[0] + rsec->offset);
+        unsigned int* data = (unsigned int*)(o[0] + tsec->offset);
+        unsigned int i;
+        for (i = 0; i < n; i++, ent += 2) {
+            unsigned int idx = ent[0] >> 2;
+            unsigned int type = ent[1] & 0xFF;
+            unsigned int val = data[idx];
+            unsigned int sym = func_003FD6E0_D2F8(o, ent[1] >> 8, tmp);
+            if (sym >= (unsigned int)ctx[1] && sym < (unsigned int)ctx[1] + ctx[0]) {
+                sym = *(unsigned int*)(sym - ctx[1] + ctx[2]);
+            }
+            switch (type) {
+            case 2:
+                val += sym;
+                data[idx] = val;
+                break;
+            case 4:
+                val += sym >> 2;
+                data[idx] = val;
+                break;
+            case 5:
+                if (cnt < 31) {
+                    hi[cnt].idx = idx;
+                    hi[cnt].val = val;
+                    cnt++;
+                }
+                break;
+            case 6: {
+                unsigned int j;
+                unsigned int carry;
+                sym += ((hi[0].val & 0xFFFF) << 16) + (short)val;
+                data[idx] = (val & 0xFFFF0000) | (sym & 0xFFFF);
+                carry = (sym & 0x8000) != 0;
+                for (j = 0; j < cnt; j++) {
+                    data[hi[j].idx] = (hi[j].val & 0xFFFF0000) | ((sym >> 16) + carry);
+                }
+                cnt = 0;
+                break;
+            }
+            }
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_2FDDC8", func_003FD558);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// (prototype from their definition at line 207)
+struct sShdr* func_003FD210_D558(int* p, char* name) __asm__("func_003FD210");
+
+extern char D_004975F0[];
+extern char D_004975F8[];
+extern char D_00497600[];
+extern int func_003FD1D8_D558(int*) __asm__("func_003FD1D8");
+int func_003FD558(int* o, int imgi, int x) {
+    int* img = (int*)imgi;
+    int ok = 0;
+    struct sShdr* s1;
+    struct sShdr* s2;
+    struct sShdr* s3;
+    if (func_003FD1D8_D558(img)) {
+        if (img[4] == 0x80001) {
+            o[1] = x;
+            o[0] = (int)img;
+            ok = 1;
+            s1 = func_003FD210_D558(o, D_004975F0);
+            s2 = func_003FD210_D558(o, D_004975F8);
+            s3 = func_003FD210_D558(o, D_00497600);
+            if (s1) {
+                o[2] = (int)img + s1->offset;
+                o[3] = s1->size;
+            }
+            if (s3) {
+                o[8] = (int)img + s3->offset;
+            }
+            if (s2) {
+                o[5] = (unsigned int)s2->size >> 4;
+                o[4] = (int)img + s2->offset;
+            }
+        }
+    }
+    return ok;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_2FDDC8", func_003FD660);
@@ -293,4 +399,29 @@ int func_003FD6E0(int* p, int idx, char* dst) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FDDC8", func_003FD758);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_004165A8(const char*, const char*);
+extern unsigned func_003FD2B8_D758(int* p, unsigned n) __asm__("func_003FD2B8");
+int func_003FD758(int* p, char* name) {
+    int r = 0;
+    char* symtab = (char*)p[4];
+    if (symtab) {
+        if (p[8]) {
+            struct sSym* sym = (struct sSym*)symtab;
+            unsigned int i;
+            for (i = 0; i < (unsigned int)p[5]; i++) {
+                if (func_004165A8((char*)(p[8] + sym->name), name) == 0) {
+                    r = p[0] + func_003FD2B8_D758(p, sym->shndx) + sym->val;
+                    break;
+                }
+                sym++;
+            }
+        }
+    }
+    return r;
+}
+#endif

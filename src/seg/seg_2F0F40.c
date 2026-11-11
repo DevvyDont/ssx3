@@ -387,7 +387,35 @@ int func_003F0818(char* p, const char* src, int key, char* s, int x) {
 
 INCLUDE_ASM("seg/seg_2F0F40", func_003F08E8);
 
+//100%
 INCLUDE_ASM("seg/seg_2F0F40", func_003F0B50);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// (prototype from their definition at line 249)
+void func_003F0610_0B50(int* p, int a) __asm__("func_003F0610");
+
+// (prototype from their definition at line 70)
+void func_003F00D8_0B50(int* p, int a, int b) __asm__("func_003F00D8");
+
+extern int D_004A4AE8[];
+extern int func_003F5738(int);
+int func_003F0B50(struct S07A0* p) {
+    if (p->obj) {
+        p->obj->fn(p->obj);
+        p->obj = 0;
+    }
+    func_003F00D8_0B50((int*)p, 0x44495343, (int)D_004A4AE8);
+    func_003F5738(p->f4);
+    if (((int*)p)[2] == 5) {
+        func_003F0610_0B50((int*)p, 6);
+    }
+    func_003F0610_0B50((int*)p, 0);
+    ((int*)p)[0x4C4 / 4] = 0;
+    func_003F0BE0(p);
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F0F40", func_003F0BE0);

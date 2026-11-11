@@ -307,7 +307,56 @@ int func_003EE600(int* p, int inc) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE620);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// (prototype from their definition at line 90)
+int func_003EE1B0_E620(int* p, int** a, int** b) __asm__("func_003EE1B0");
+
+typedef int (*func_003EE620_cb)(int, int, int);
+extern void func_003EF210(int*, int, int, int, void*);
+int func_003EE620(int* p) {
+    int* a;
+    int* b;
+    int* r;
+    if (p[2] + p[3] == 0) {
+        return 0;
+    }
+    if (p[2] == 0) {
+        p[3] = 0;
+        return 1;
+    }
+    a = (int*)p[16];
+    b = a + p[6];
+    r = a;
+    if (a != b) {
+        do {
+            if (!p[9] || ((func_003EE620_cb)p[9])(p[8], p[7], *(int*)*r) > 0) {
+                *a++ = *r;
+            } else {
+                *b++ = *r;
+            }
+            r++;
+        } while (r != (int*)p[16] + p[6]);
+    }
+    p[5] = a - (int*)p[16];
+    r = (int*)p[16] + p[6];
+    if (r != b) {
+        do {
+            *a++ = *r++;
+        } while (r != b);
+    }
+    p[6] = a - (int*)p[16];
+    if (p[12]) {
+        func_003EF210(p, p[16], p[5], 4, func_003EE1B0_E620);
+    }
+    p[2] = 0;
+    p[3] = 0;
+    return 2;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE768);
