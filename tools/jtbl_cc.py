@@ -55,6 +55,40 @@ def retail_tables() -> dict[str, list[int]]:
     return out
 
 
+@lru_cache(maxsize=None)
+def retail_table_tails() -> dict[str, list[list[int]]]:
+    """jtbl_X -> the word lists of the labels that directly follow it (address-contiguous, `.word`-only, not jtbl_).
+
+    splat starts a new label wherever some .data word points into a table (a false pointer: e.g. code embedded in
+    .data), so a retail table can be split as jtbl_X (one entry) + D_Y (the rest). repoint() extends a table that is
+    shorter than ours into these, one label at a time, and only as far as ours reaches."""
+    word = re.compile(r"/\* [0-9A-F]+ ([0-9A-F]{8}) [0-9A-F]{8} \*/ \.word (?:0x([0-9A-Fa-f]+)|\.L([0-9A-Fa-f]{8})\b)")
+    out = {}
+    for f in (ROOT / "asm/data").glob("*.s"):
+        text = f.read_text(errors="replace")
+        if "dlabel jtbl_" not in text:
+            continue
+        labels = []  # (name, start, words) for labels whose every data line is a .word
+        for name, body in re.findall(r"dlabel (\S+)\n(.*?)enddlabel \1", text, re.S):
+            lines = [l for l in body.splitlines() if l.strip()]
+            hits = [word.search(l) for l in lines]
+            if not lines or not all(hits):
+                labels.append((name, None, None))
+                continue
+            labels.append((name, int(hits[0].group(1), 16), [int(m.group(2) or m.group(3), 16) for m in hits]))
+        for i, (name, start, words) in enumerate(labels):
+            if not name.startswith("jtbl_") or start is None:
+                continue
+            tails, end = [], start + 4 * len(words)
+            for nxt, nstart, nwords in labels[i + 1:]:
+                if nxt.startswith("jtbl_") or nstart != end:
+                    break
+                tails.append(nwords)
+                end += 4 * len(nwords)
+            out[name] = tails
+    return out
+
+
 def retail_func(unit: str, func: str) -> tuple[int, list[str]] | None:
     """(start address, jtbl_* names in order of first reference) from the function's retail asm."""
     p = ROOT / "asm/nonmatchings" / unit / f"{func}.s"
@@ -255,6 +289,13 @@ def repoint(text: str, unit: str, assemble) -> tuple[str, list[str]]:
             label, entries = t.group(1), re.findall(r"\$L\d+", t.group(2))
             ours = [syms.get(e, -1) - syms[func] for e in entries]
             words = retail_tables().get(name)
+            if words is not None and len(words) < len(ours):
+                words = list(words)
+                for tail in retail_table_tails().get(name, []):
+                    words += tail
+                    if len(words) >= len(ours):
+                        log.append(f"{func}: {name} continues past splat label(s) to {len(words)} words")
+                        break
             if words is None or len(words) < len(ours):
                 log.append(f"{func}: {name} missing or shorter than {label}; left local")
                 continue
