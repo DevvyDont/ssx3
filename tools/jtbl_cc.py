@@ -187,7 +187,7 @@ def retail_strings() -> dict[str, bytes]:
     up to the first directive that isn't plain data (splat writes some strings as words, e.g. D_00470678)."""
     out = {}
     item = re.compile(r'^\s+/\* [0-9A-F]+ [0-9A-F]{8}(?: [0-9A-F]+)? \*/ \.(asciz|ascii|word|short|half|byte) (.*)$')
-    for f in (ROOT / "asm/data").glob("*.rodata.s"):
+    for f in [*(ROOT / "asm/data").glob("*.rodata.s"), *(ROOT / "asm/data").glob("*.sdata.s")]:
         for name, block in re.findall(r"dlabel (D_[0-9A-F]{8})\n(.*?)enddlabel \1", f.read_text(errors="replace"), re.S):
             data = b""
             for line in block.split("\n"):
@@ -212,6 +212,14 @@ def retail_strings() -> dict[str, bytes]:
             if data:
                 out[name] = data
     return out
+
+
+@lru_cache(maxsize=None)
+def sdata_names() -> frozenset:
+    out = set()
+    for f in (ROOT / "asm/data").glob("*.sdata.s"):
+        out.update(re.findall(r"dlabel (D_[0-9A-F]{8})", f.read_text(errors="replace")))
+    return frozenset(out)
 
 
 def _same_string(ours: bytes, retail: bytes) -> bool:
@@ -244,13 +252,15 @@ def repoint_strings(text: str, unit: str) -> tuple[str, list[str]]:
         p = ROOT / "asm/nonmatchings" / unit / f"{func}.s"
         if not p.exists():
             continue
-        refs = [s for s in dict.fromkeys(re.findall(r"%(?:hi|lo)\((D_[0-9A-F]{8})\)", p.read_text(errors="replace")))
+        refs = [s for s in dict.fromkeys(x if isinstance(x, str) else (x[0] or x[1]) for x in re.findall(r"%(?:hi|lo)\((D_[0-9A-F]{8})\)|\s\((D_[0-9A-F]{8})\) /\* gp_rel", p.read_text(errors="replace")))
                 if s in strings]
         for label in labels:
             hit = next((s for s in refs if _same_string(defs[label], strings[s])), None)
             if hit is None:
                 continue
             body = re.sub(re.escape(label) + r"\b", hit, body)
+            if hit in sdata_names() and len(defs[label]) <= 8:
+                body = f"\t.extern\t{hit}, {len(defs[label])}\n" + body
             log.append(f"{func}: {label} -> {hit} ({defs[label][:24]!r})")
         text = text[:a] + body + text[b:]
     # Drop the definitions nothing references any more (the linker keeps C objects' .rodata, as for the tables).
