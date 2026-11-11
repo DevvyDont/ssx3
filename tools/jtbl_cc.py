@@ -21,6 +21,14 @@ the plain `-c` compile gives (the driver also compiles to assembly and assembles
 
 Also usable as a library by wrappers that already compile via -S (tools/gen/hybrid_cc.py in the workspace):
 repoint(asm_text, unit, assemble) -> (new_asm_text, log lines).
+
+8-byte literals get the same treatment: g++ writes a soft-float double constant as `li.d $N, value`, which gas builds
+with `lui $at` + `ld` from the object's own .rodata. Retail names the unit's pool entry (`ld $N, %lo(D_x)($at)`),
+and splat moved that pool into the shared rodata segment. Each `li.d` whose value is the k-th not-yet-used
+`ld ... %lo(D_x)` of the function's retail asm with that value becomes `lui $at, %hi(D_x)` + `ld $N, %lo(D_x)($at)`:
+the same two instructions, relocated to the retail entry. Values the retail code didn't load from memory are left alone. String literals
+(`$LCn: .ascii "..."`) likewise: a function's references to one are renamed to the retail D_x it addresses whose
+`.asciz` bytes are the same.
 """
 import re
 import subprocess
@@ -85,12 +93,119 @@ def functions(text: str):
             yield m.group(1), m.start(), e.end()
 
 
+@lru_cache(maxsize=None)
+def retail_dwords() -> dict[str, int]:
+    """D_x -> 64-bit value of its first two words, for rodata entries splat wrote as two raw words."""
+    out = {}
+    word = r"\s+/\* [0-9A-F]+ [0-9A-F]{8} [0-9A-F]{8} \*/ \.word 0x([0-9A-Fa-f]+)\n"
+    for f in (ROOT / "asm/data").glob("*.rodata.s"):
+        for name, lo, hi in re.findall(r"dlabel (D_[0-9A-F]{8})\n" + word + word, f.read_text(errors="replace")):
+            out[name] = int(hi, 16) << 32 | int(lo, 16)
+    return out
+
+
+LI_D = re.compile(r"^(\s*)li\.d\s+(\$\d+),\s*(\S+)\s*$", re.M)
+
+
+def repoint_literals(text: str, unit: str) -> tuple[str, list[str]]:
+    """`li.d $N, value` -> `ld $N, D_x` where the retail function loads that value from pool entry D_x."""
+    import struct
+    if not LI_D.search(text):
+        return text, []
+    log = []
+    for func, a, b in reversed(list(functions(text))):
+        body = text[a:b]
+        if not LI_D.search(body):
+            continue
+        p = ROOT / "asm/nonmatchings" / unit / f"{func}.s"
+        if not p.exists():
+            continue
+        vals = retail_dwords()
+        refs = [s for s in re.findall(r"\bld\s+\$\d+, %lo\((D_[0-9A-F]{8})\)", p.read_text(errors="replace")) if s in vals]
+        used = set()
+
+        def sub(m):
+            bits = struct.unpack("<Q", struct.pack("<d", float(m.group(3))))[0]
+            k = next((i for i, s in enumerate(refs) if i not in used and vals[s] == bits), None)
+            if k is None:
+                return m.group(0)
+            used.add(k)
+            log.append(f"{func}: li.d {m.group(3)} -> {refs[k]}")
+            # spelled out: gas's own `ld $N, sym` macro builds the address in $N, li.d (and retail) use $at
+            ind = m.group(1)
+            return (f"{ind}.set\tnoat\t# was li.d {m.group(3)}\n{ind}lui\t$1,%hi({refs[k]})\n"
+                    f"{ind}ld\t{m.group(2)},%lo({refs[k]})($1)\n{ind}.set\tat")
+
+        text = text[:a] + LI_D.sub(sub, body) + text[b:]
+    return text, log
+
+
+def _unescape(s: str) -> bytes | None:
+    try:
+        return s.encode("latin1").decode("unicode_escape").encode("latin1")
+    except (UnicodeError, ValueError):
+        return None
+
+
+@lru_cache(maxsize=None)
+def retail_strings() -> dict[str, bytes]:
+    """D_x -> the NUL-terminated string at its start, for rodata entries splat wrote as `.asciz`."""
+    out = {}
+    for f in (ROOT / "asm/data").glob("*.rodata.s"):
+        for name, s in re.findall(r'dlabel (D_[0-9A-F]{8})\n\s+/\* [0-9A-F]+ [0-9A-F]{8} \*/ \.asciz "((?:[^"\\]|\\.)*)"',
+                                  f.read_text(errors="replace")):
+            b = _unescape(s)
+            if b is not None:
+                out[name] = b + b"\0"
+    return out
+
+
+STR_DEF = re.compile(r'^(\$LC\d+):\s*\n((?:\s*\.ascii\s+"(?:[^"\\]|\\.)*"\s*\n)+)', re.M)
+
+
+def repoint_strings(text: str, unit: str) -> tuple[str, list[str]]:
+    """References to a string literal `$LCn` -> the retail D_x with the same bytes that the function names.
+
+    Like the tables: the original unit had its own string pool, splat moved it into the shared rodata segment
+    and names each string the retail code addresses. Our copy stays in the object's .rdata (never linked).
+    """
+    defs = {}
+    for m in STR_DEF.finditer(text):
+        parts = [_unescape(s) for s in re.findall(r'\.ascii\s+"((?:[^"\\]|\\.)*)"', m.group(2))]
+        if all(x is not None for x in parts):
+            defs[m.group(1)] = b"".join(parts)
+    if not defs:
+        return text, []
+    strings = retail_strings()
+    log = []
+    for func, a, b in reversed(list(functions(text))):
+        body = text[a:b]
+        labels = [l for l in dict.fromkeys(re.findall(r"\$LC\d+\b", body)) if l in defs]
+        if not labels:
+            continue
+        p = ROOT / "asm/nonmatchings" / unit / f"{func}.s"
+        if not p.exists():
+            continue
+        refs = [s for s in dict.fromkeys(re.findall(r"%(?:hi|lo)\((D_[0-9A-F]{8})\)", p.read_text(errors="replace")))
+                if s in strings]
+        for label in labels:
+            hit = next((s for s in refs if strings[s] == defs[label]), None)
+            if hit is None:
+                continue
+            body = re.sub(re.escape(label) + r"\b", hit, body)
+            log.append(f"{func}: {label} -> {hit} ({defs[label][:24]!r})")
+        text = text[:a] + body + text[b:]
+    return text, log
+
+
 def repoint(text: str, unit: str, assemble) -> tuple[str, list[str]]:
     """assemble(asm_text, extra_flags) -> object Path. Returns the rewritten assembly and a log."""
+    text, log = repoint_literals(text, unit)
+    text, slog = repoint_strings(text, unit)
+    log += slog
     if not TABLE.search(text):
-        return text, []
+        return text, log
     syms = local_symbols(assemble(text, ["-Wa,-L"]))
-    log = []
     for func, a, b in reversed(list(functions(text))):  # back to front: earlier spans stay valid
         body = text[a:b]
         tables = list(TABLE.finditer(body))
