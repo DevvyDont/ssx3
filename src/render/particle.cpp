@@ -10012,7 +10012,139 @@ void func_003866E0(void* self, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_003866F0);
+#ifdef SKIP_ASM
+extern "C" int func_003696C8(void* self, const char* name);
+extern "C" int func_00416B18(const char* a, const char* b, int n);
+extern "C" void cGraphicsMan_AddBlendedMatrix(void* gfx, void* m);
+extern "C" int func_00369A78(void* m, void* slot, int a, int b, int c);
+extern char D_004A4398[];
+
+struct sKey_66F0 {
+    int v;
+    int d;
+};
+
+struct sTrack_66F0 {
+    sKey_66F0* keys;
+    int n;
+};
+
+struct sBone_66F0 {
+    int flags;
+    int name;
+    short env;
+    short alpha;
+    int ntracks;
+    sTrack_66F0* tracks;
+};
+
+struct sBlend_66F0 {
+    int n;
+    unsigned char* w;
+    int idx;
+};
+
+struct sRef_66F0 {
+    int n;
+    int* idx;
+};
+
+struct sSlot_66F0 {
+    int n;
+    unsigned char* w;
+    int idx;
+};
+
+struct sMdl_66F0 {
+    char pad0[0x18];
+    int o18;
+    char pad1c[4];
+    int o20;
+    char pad24[0xC];
+    int o30;
+    int o34;
+    sBlend_66F0* blends;
+    sRef_66F0* refs;
+    int x40;
+    short nblends;
+    short nrefs;
+    short nbones;
+    short nmats;
+};
+
+extern "C" void func_003866F0(void* gfx, sMdl_66F0* m, char* base, int* tbl, int* count, sSlot_66F0* slots, int x)
+{
+    m->blends = (sBlend_66F0*)(base + m->o34);
+    m->refs = (sRef_66F0*)(base + m->o30);
+    char* mats = base + m->o18;
+    sBone_66F0* bones = (sBone_66F0*)(base + m->o20);
+    m->x40 = x;
+    for (int i = 0; i < m->nrefs; i++)
+        m->refs[i].idx = (int*)(base + (int)m->refs[i].idx);
+    for (int i = 0; i < m->nbones; i++) {
+        bones[i].tracks = (sTrack_66F0*)(base + (int)bones[i].tracks);
+        for (int j = 0; j < bones[i].ntracks; j++) {
+            bones[i].tracks[j].keys = (sKey_66F0*)(base + (int)bones[i].tracks[j].keys);
+            for (int k = 0; k < bones[i].tracks[j].n; k++) {
+                bones[i].tracks[j].keys[k].v = (int)base + bones[i].tracks[j].keys[k].v;
+                bones[i].tracks[j].keys[k].d += bones[i].tracks[j].keys[k].v;
+            }
+        }
+        char* s = base + bones[i].name * 32;
+        char* t = s + 0x10;
+        if (s[0x10])
+            bones[i].alpha = (int)(*(float*)(s + 0x14) * 128.0f);
+        else
+            bones[i].alpha = 0;
+        if (func_00416B18(s, D_004A4398, 4) == 0 || (s[0] == 'e' && s[1] == 'a'))
+            bones[i].flags |= 0x8000;
+        int env = 0;
+        if (t[0] != 0) {
+            if (t[0] == 'e' && t[1] == 'n' && t[2] == 'v') {
+                unsigned char c = t[3];
+                if ((unsigned)(c - '0') < 10)
+                    env = (char)c - '0';
+            }
+        }
+        bones[i].name = func_003696C8(gfx, s);
+        bones[i].env = env;
+    }
+    for (int i = 0; i < m->nmats; i++) {
+        short* mt = (short*)(mats + i * 0x50);
+        if (mt[9] >= 0)
+            mt[9] = tbl[mt[8]] + mt[9];
+    }
+    for (int i = 0; i < m->nblends; i++) {
+        sBlend_66F0* b = &m->blends[i];
+        b->w = (unsigned char*)(base + (int)b->w);
+        for (int j = 0; j < b->n; j++)
+            b->w[j * 4 + 2] += tbl[b->w[j * 4 + 3]];
+        cGraphicsMan_AddBlendedMatrix(gfx, b);
+        for (int k = 0;; k++) {
+            if (k == *count) {
+                slots[*count].n = b->n;
+                slots[*count].w = b->w;
+                slots[*count].idx = *count;
+                b->idx = *count;
+                (*count)++;
+                goto next;
+            }
+            if (func_00369A78(b, &slots[k], 0, 0, 0)) {
+                b->idx = k;
+                goto next;
+            }
+        }
+    next:;
+    }
+    for (int i = 0; i < m->nrefs; i++) {
+        sRef_66F0* r = &m->refs[i];
+        for (int j = 0; j < r->n; j++)
+            r->idx[j] = m->blends[r->idx[j]].idx;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00386BD0);

@@ -2220,7 +2220,52 @@ extern "C" void cScreenPopup_createConfirmationPopup(void* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", func_001C9CD0);
+#ifdef SKIP_ASM
+extern char D_004A1C50[];
+extern char D_004A1C58[];
+extern char D_004A15E0[];
+
+struct sUIObj_C9CD0 {
+    char pad_0x0[0x14];
+    int flags; // 0x14: bits 8..12 = layer (out-of-line copies: func_003A4B60 get, func_003A4B70 set)
+    int getLayer() { return ((unsigned int)flags >> 8) & 0x1F; }
+    void setLayer(int l) { flags = (flags & ~0x1F00) | ((l & 0x1F) << 8); }
+};
+
+extern "C" void func_001C9CD0(void* self, int v)
+{
+    char* s = (char*)self;
+    sUIObj_C9CD0* o;
+    // NOTE: one `layer` local shared by every block (hand-repeated code); a per-block temp
+    // gives different registers.
+    int layer;
+#define ADD_LAYER(e) o = (e); if (o) { layer = o->getLayer(); o->setLayer(layer + v); }
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x48));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x4C));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x50));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x54));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x58));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x5C));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x60));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x64));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x68));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x74));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x7C));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x78));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x80));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x84));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x8C));
+    ADD_LAYER((sUIObj_C9CD0*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004A1C50)));
+    ADD_LAYER((sUIObj_C9CD0*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004A1C58)));
+    ADD_LAYER((sUIObj_C9CD0*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_004A15E0)));
+    for (int i = 0; i < 5; i++) {
+        ADD_LAYER(((sUIObj_C9CD0**)(s + 0x90))[i]);
+    }
+#undef ADD_LAYER
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CA0F0);

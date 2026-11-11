@@ -671,7 +671,98 @@ extern "C" void func_001D32E0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D3340);
+#ifdef SKIP_ASM
+extern "C" int func_001CED90(int player, int charId, int mountain, int peak, int i);
+
+struct sPeakEvent_3340 {
+    signed char track;          // widget list selector; < 0 ends the peak's list
+    signed char kind;
+};
+extern sPeakEvent_3340 D_0045AAD8[][4][5];
+
+class cWidget_3340 {
+public:
+    int pad0, pad4;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void show(int on);
+};
+
+struct sLodge_3340 {
+    char pad0[0x44];
+    signed char player;         // 0x44
+    char pad45[0x58 - 0x45];
+    cWidget_3340* a[5];         // 0x58
+    cWidget_3340* b[3];         // 0x6C
+    cWidget_3340* c[3];         // 0x78
+    cWidget_3340* d[3];         // 0x84
+    cWidget_3340* e[3];         // 0x90
+    cWidget_3340* f[3];         // 0x9C
+    int colOn;                  // 0xA8
+    int colOff;                 // 0xAC
+    int charId;                 // 0xB0
+};
+
+static inline void wColour_3340(cWidget_3340* w, int col)
+{
+    *(int*)((char*)w + 0x7C) = col;
+    *(int*)((char*)w + 0x78) = -1;
+}
+
+// Colour widget n of list `arr` by the event state, show it, advance n.
+#define WSET_3340(arr, n)                                   \
+    {                                                       \
+        if (st < 4)                                         \
+            wColour_3340(self->arr[n], self->colOn);        \
+        else                                                \
+            wColour_3340(self->arr[n], self->colOff);       \
+        self->arr[n++]->show(1);                            \
+    }
+
+extern "C" void func_001D3340(void* p)
+{
+    sLodge_3340* self = (sLodge_3340*)p;
+    int n0 = 0;
+    int n1 = 0;
+    int n2 = 0;
+    int n3 = 0;
+    int n4 = 0;
+    int n5 = 0;
+    for (int mountain = 0; mountain < 3; mountain++) {
+        for (int peak = 0; peak < 4; peak++) {
+            if (peak == 2 || peak == 3)
+                continue;
+            for (int i = 0; i < 5; i++) {
+                int track = D_0045AAD8[mountain][peak][i].track;
+                if (track < 0)
+                    break;
+                unsigned int st = func_001CED90(self->player, self->charId, mountain, peak, i);
+                if (track == 0) {
+                    WSET_3340(a, n0);
+                } else if (track == 1) {
+                    WSET_3340(b, n1);
+                } else if (track == 2) {
+                    WSET_3340(e, n2);
+                } else if (track == 3) {
+                    WSET_3340(f, n3);
+                } else if (track == 4) {
+                    WSET_3340(c, n4);
+                } else if (track == 5) {
+                    WSET_3340(d, n5);
+                }
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D3780);
