@@ -920,6 +920,13 @@ D_004A52E0 = 0x004A52E0; // size:0x8
 // ai/rider: an 8-byte config struct read directly (its lw fills a jal delay slot in func_0010EB30, so it is its
 // own small symbol, not D_004A4C00+8).
 D_004A4C08 = 0x004A4C08; // size:0x8
+// Two function-local static-init guards in different units, not one 8-byte object: ai/rider func_00122898 tests
+// D_004A4C00, ai/control/handplantcontrol func_0013AF28 tests D_004A4C04.
+D_004A4C00 = 0x004A4C00; // size:0x4
+D_004A4C04 = 0x004A4C04; // size:0x4
+// fe/all_in_one_fe: a 9-entry table of 0x24-byte records that only func_0021E1B0 uses; its constant entries 6 and 7
+// (D_00477F30+0xD8 / +0xFC) were split off as D_00478008 / D_0047802C.
+D_00477F30 = 0x00477F30; // size:0x144
 // ui/uitext: an 8-byte object read with ldl/ldr (cUIText_render2D's `ldl D+7`); D_004A5A64 / D_004A5A67 were inside it.
 D_004A5A60 = 0x004A5A60; // size:0x8
 // sound/icepick/worldtriggermanager: an 8-byte static object (func_002B8818's static init); D_004A5264 was its second word.
