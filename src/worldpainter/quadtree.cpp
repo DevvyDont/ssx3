@@ -3594,5 +3594,50 @@ extern "C" int func_002C6DE0(func_002C6DE0_sMap* self, unsigned int key)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6E98);
+#ifdef SKIP_ASM
+extern "C" void* FILE_load(const char* name, int flags);
+extern "C" unsigned int func_003DB9D8(void* p, int a);
+extern "C" int func_00416B18(const void* a, const void* b, int n);
+// PORT: func_002C6DC0 is declared (void*) but called with a second argument; bound by asm label
+void* func_002C6DC0_2(void* self, int v) __asm__("func_002C6DC0__FPv");
+extern char D_004A3978[];
+
+struct func_002C6E98_sEnt {
+    int f0;
+    int f4;
+};
+struct func_002C6E98_sChunk {
+    int id;
+    int size;
+};
+struct func_002C6E98_sFile {
+    char kind;
+    func_002C6E98_sChunk* data;
+    int count;
+    func_002C6E98_sChunk* hdr;
+    func_002C6E98_sEnt* ents;
+};
+
+extern "C" void func_002C6E98(func_002C6E98_sFile* self, const char* name, char kind)
+{
+    unsigned int i;
+    int size;
+    self->kind = kind;
+    self->data = (func_002C6E98_sChunk*)FILE_load(name, 0);
+    self->count = func_003DB9D8(self->data, 2);
+    size = self->data->size;
+    self->hdr = (func_002C6E98_sChunk*)((char*)self->data + size);
+    if (func_00416B18(self->hdr, D_004A3978, 4) != 0) {
+        self->hdr = 0;
+        return;
+    }
+    size = self->hdr->size;
+    self->ents = (func_002C6E98_sEnt*)((char*)self->hdr + size);
+    for (i = 0; i < self->count; i++) {
+        self->ents[i].f4 = (int)func_002C6DC0_2(self, self->ents[i].f4);
+    }
+}
+#endif
 

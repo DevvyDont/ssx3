@@ -4864,7 +4864,279 @@ extern "C" int func_002808D8(void* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002808E8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_0027CC28(void* self, void* out);
+int func_0027C070(void* self);
+// PORT: the unit declares func_0027A688 with no parameters; this caller passes the engine in $a0.
+int func_0027A688_08E8(void* engine) __asm__("func_0027A688");
+extern "C" int* func_00144BC0(void* iface);
+extern "C" int func_0022E098(void* mgr, int id);
+extern "C" void func_00309E50(void* mgr, int a, int b);
+extern "C" void* func_0028B180();
+extern "C" void func_0028E8C0(void* self, int id, int a2);
+extern "C" void func_002A19D8(void* self, int id);
+extern "C" void func_002AD5F0(void* bank, int id, int a, float f);
+void func_00281000(void* self, int a1, void* a2, void* a3);
+extern "C" int func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern void* D_004A28A4;
+extern char* D_004A28A8;
+extern void* D_004A3DD8;
+extern int D_004A3B60;
+// The "no link" hash: a const global with a dynamic initializer (set by the scripter's static init).
+extern const int D_004A525C; // const with a dynamic initializer: set once by __sti__all_in_one_scripter_cpp (= GetHashValue32(D_004825F8))
+
+struct sWtEnt_08E8 {
+    signed char b0;
+    char pad1[3];
+    int f4[5];
+};
+
+struct sWtPair_08E8 {
+    int a;
+    int b;
+};
+
+struct sWtV16_08E8 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+
+struct sWtSub_08E8 {
+    int f0;
+    sWtEnt_08E8 cfg;         // 0x04
+    volatile int cur;        // 0x1C
+    sWtEnt_08E8* ents;       // 0x20
+    int arr24[4];            // 0x24
+    int* p34;                // 0x34
+    int* p38;                // 0x38
+    int* p3C;                // 0x3C
+    sWtPair_08E8 arr40[4];   // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sWtV16_08E8* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+
+struct sWtTrack_08E8 {
+    char pad0[0x1D8];
+    sWtSub_08E8 sub;         // 0x1D8
+};
+
+struct sWtSnd_08E8 {
+    sWtTrack_08E8* track;    // 0x0
+    int* types;              // 0x4
+    int* args;               // 0x8
+    char pad[0x10C];
+    sWtTrack_08E8** cur;     // 0x118
+};
+
+struct sSfxEnt_08E8 {
+    int id;                  // 0x0
+    int when;                // 0x4
+    char pad8[0xC - 0x8];
+    int slot;                // 0xC
+    char pad10[0x1C - 0x10];
+    signed char* vol;        // 0x1C
+    sSfxEnt_08E8* next;      // 0x20
+};
+
+struct sSeLink_08E8 {
+    int a;
+    int* b;
+};
+
+struct sSeCmd_08E8 {
+    int id;
+    int pad;
+};
+
+// Filled by func_0027CC28.
+struct sSeInfo_08E8 {
+    int nLinks;                 // 0x00
+    sSeLink_08E8* links;        // 0x04
+    int nStops;                 // 0x08
+    sSeCmd_08E8* stops;         // 0x0C
+    int nCmds;                  // 0x10
+    sSeCmd_08E8* cmds;          // 0x14
+    int pad18;
+    sSfxEnt_08E8* sfx;          // 0x1C
+    int pad20;
+    int active;                 // 0x24
+    int pad28[2];
+};
+
+struct sSePair_08E8 {
+    int a;
+    int b;
+};
+
+struct sSeSound_08E8 {
+    int id;
+    int count;
+    int target;
+};
+
+struct sSeEngine_08E8 {
+    char pad_0x0[0x1C];
+    sSePair_08E8 pairs[(0xBC - 0x1C) / 8];   // 0x1C
+    sSeSound_08E8 sounds[4];    // 0xBC
+    int pairCount;              // 0xEC
+    int field_0xF0;             // 0xF0
+    int field_0xF4;             // 0xF4
+};
+
+#define MIN_08E8(a, b) ((a) < (b) ? (a) : (b))
+#define MAX_08E8(a, b) ((a) < (b) ? (b) : (a))
+
+extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int unused, float when, int flags)
+{
+    sSeInfo_08E8 info;
+    func_0027CC28(obj, &info);
+    void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
+    int owner;
+    if (*(signed char*)func_0027C070(*(void**)((char*)obj + 8)) != 0) {
+        owner = func_0027A688_08E8(D_004A28A4);
+    } else {
+        void* mgr = *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x78);
+        owner = func_0022E098(mgr, *func_00144BC0(iface0));
+    }
+    int i;
+    for (i = 0; i < info.nLinks; i++) {
+        sSeLink_08E8* l = &info.links[i];
+        func_00309E50(D_004A3DD8, owner, l->a);
+        int id = *l->b;
+        if (id != D_004A525C) {
+            int found = 0;
+            int j;
+            for (j = 0; j < self->pairCount; j++) {
+                if (id == self->pairs[j].a && owner == self->pairs[j].b) {
+                    found = 1;
+                    break;
+                }
+            }
+            if (!found) {
+                self->pairs[self->pairCount].a = id;
+                self->pairs[self->pairCount].b = owner;
+                self->pairCount++;
+            }
+        }
+    }
+    if (flags & 8) {
+        D_004A3B60 = 0;
+    }
+    if (flags & 4) {
+        D_004A3B60 = 1;
+    }
+    sWtSnd_08E8* snd = (sWtSnd_08E8*)func_0028B180();
+    for (i = 0; i < info.nStops; i++) {
+        sSeCmd_08E8* c = &info.stops[i];
+        int id = c->id;
+        if (id != 0xFF) {
+            func_0028E8C0(snd, id, 0);
+        }
+    }
+    for (i = 0; i < info.nCmds; i++) {
+        sSeCmd_08E8* c = &info.cmds[i];
+        int id = c->id;
+        if (id != 0x11) {
+            if (id == 0x10) {
+                self->field_0xF4 = 1;
+            } else {
+                func_002A19D8(snd, id);
+                self->field_0xF0 = 1;
+            }
+        }
+    }
+    if (flags & 2) {
+        for (i = 0; i < 4; i++) {
+            if (self->sounds[i].id >= 0) {
+                self->sounds[i].count = 1;
+            }
+        }
+        for (sSfxEnt_08E8* e = info.sfx; e != 0; e = e->next) {
+            self->sounds[e->slot].count = 0;
+        }
+    }
+    if (flags & 1) {
+        for (sSfxEnt_08E8* e = info.sfx; e != 0; e = e->next) {
+            if ((float)e->when < when)
+                break;
+            int slot = e->slot;
+            int play = 1;
+            if (self->sounds[slot].id >= 0) {
+                play = 0;
+                if (self->sounds[slot].target != e->id) {
+                    func_002AD5F0((char*)*snd->cur + 0x1D8, self->sounds[slot].id, 1, 0.0f);
+                    play = 1;
+                }
+            }
+            if (play) {
+                int a, type;
+                func_00281000(self, e->id, &a, &type);
+                int tp = type;
+                int ar = a;
+                sWtTrack_08E8* t = snd->track;
+                sWtSub_08E8* sb = &t->sub;
+                t->sub.cur++;
+                sb->ents[t->sub.cur] = sb->cfg;
+                t->sub.arr24[t->sub.cur] = 0;
+                sb->p34[t->sub.cur] = 0;
+                sb->p38[t->sub.cur] = sb->ents[t->sub.cur].b0;
+                sb->p3C[t->sub.cur] = 0;
+                func_00416210((char*)sb + t->sub.cur * 8 + 0x40, 0, 8);
+                sb->p60[t->sub.cur] = 0;
+                sb->p64[t->sub.cur] = 0;
+                sb->p68[t->sub.cur] = 0;
+                sb->p6C[t->sub.cur] = 0;
+                sb->p70[t->sub.cur].f4 = 0;
+                sb->p70[t->sub.cur].f0 = 100;
+                sb->p70[t->sub.cur].f8 = 90;
+                sb->p70[t->sub.cur].fC = 50;
+                sb->p74[t->sub.cur] = 0;
+                sb->p80[t->sub.cur] = 0;
+                sb->p84[t->sub.cur] = 0;
+                sb->p78[t->sub.cur] = 0x7F;
+                sb->p7C[t->sub.cur] = 1;
+                snd->types[snd->track->sub.cur] = tp;
+                snd->args[snd->track->sub.cur] = ar;
+                {
+                    sWtTrack_08E8* t2 = *snd->cur;
+                    sWtSub_08E8* s2 = &t2->sub;
+                    s2->p38[t2->sub.cur] = *e->vol;
+                    s2->ents[t2->sub.cur].b0 = MAX_08E8(MIN_08E8(s2->p38[s2->cur], 0x7F), 0);
+                }
+                {
+                    sWtTrack_08E8** pt = snd->cur;
+                    int h = func_00287968(snd, 4, 0);
+                    (*pt)->sub.p3C[(*pt)->sub.cur] = h;
+                }
+                {
+                    sWtTrack_08E8* t3 = *snd->cur;
+                    t3->sub.p64[t3->sub.cur] = 0;
+                }
+                self->sounds[slot].id = func_002906B8(snd);
+                self->sounds[slot].target = e->id;
+                self->sounds[slot].count = 0;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281000__FPviT0T0);

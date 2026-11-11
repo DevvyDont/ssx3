@@ -227,7 +227,49 @@ extern "C" void func_00200AF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/uitemplatemap", func_00200B50);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+int cBELibrary_getCharacterID(int);
+int cBERewardInterface_getTrackMedal(void* self, int player, int charID, int mode, int track);
+// PORT: the unit declares func_00146A70 as returning int; its result is negated as a bool here.
+bool func_00146A70_b(void* iface, int player, int charID, int x) __asm__("func_00146A70");
+
+// The unit's sPeakGoal (0x6C bytes), defined further down; only the leading fields are read here.
+struct sMapEvent_0B50 { int track; int f4; int kind; int rest[0x6C / 4 - 3]; };
+
+// PORT: the unit declares func_00200B50(void*, sPeakGoal*, int) further down; the goal is really taken by value
+// (the callee copies it), so this definition binds the by-value form to the symbol. Each kind returns through its
+// own call; g++ merges the two identical tails.
+extern "C" int func_00200B50_byval(void* self, sMapEvent_0B50 ev, int peak) __asm__("func_00200B50");
+extern "C" int func_00200B50_byval(void* self, sMapEvent_0B50 ev, int peak)
+{
+    void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
+    void* rw = cBE_getInterface_Fv(cBE_getBE(), 13);
+    int cid = cBELibrary_getCharacterID(0);
+    if (ev.track == 0x17)
+        return 0;
+    if (ev.kind == 4) {
+        int x = 6;
+        if (peak == 1)
+            x = 7;
+        if (peak == 2)
+            x = 8;
+        return !func_00146A70_b(np, 0, cBELibrary_getCharacterID(0), x);
+    } else if (ev.kind == 5) {
+        int x = 9;
+        if (peak == 1)
+            x = 10;
+        if (peak == 2)
+            x = 11;
+        return !func_00146A70_b(np, 0, cBELibrary_getCharacterID(0), x);
+    }
+    return cBERewardInterface_getTrackMedal(rw, 0, cid, ev.kind, ev.track) != -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/uitemplatemap", func_00200D00);

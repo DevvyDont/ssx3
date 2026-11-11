@@ -98,7 +98,186 @@ extern "C" void func_001CF238(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festaterewards", func_001CF270);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct cUIScreen;
+unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
+extern "C" void func_0039F400(void* self, void* a1);
+extern char D_0045DC60[];
+
+// g++ 2.95 vtable entries: this-adjust, index, function.
+struct sVEi_F270 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sVEii_F270 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+struct sVEv_F270 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+struct sVEr_F270 {
+    short delta;
+    short index;
+    void* (*fn)(void*, void*, int);
+};
+struct sSnd_F270 {
+    sVEv_F270* vt;
+};
+// $gp-relative default sound player (the unit declares it later as sDefObj_1FF0).
+extern sSnd_F270 D_004A5A58_F270 __asm__("D_004A5A58");
+
+static inline int Test_F270(char* o, int slot)
+{
+    sVEi_F270* vt = *(sVEi_F270**)(o + 8);
+    return vt[slot].fn(o + vt[slot].delta);
+}
+
+static inline int Call_F270(char* o, int slot, int a)
+{
+    sVEii_F270* vt = *(sVEii_F270**)(o + 8);
+    return vt[slot].fn(o + vt[slot].delta, a);
+}
+
+static inline void CallV_F270(char* o, int slot, int a)
+{
+    sVEv_F270* vt = *(sVEv_F270**)(o + 8);
+    vt[slot].fn(o + vt[slot].delta, a);
+}
+
+static inline void Play_F270(sSnd_F270* snd, int id)
+{
+    snd->vt[2].fn((char*)snd + snd->vt[2].delta, id);
+}
+
+struct sGallery_F270 {
+    char pad0[0x924];
+    char* cells[4][8]; // 0x924
+};
+
+// Reward gallery input: back out, accept the highlighted reward, or move the cursor around the grid.
+extern "C" int func_001CF270(char* self, char* in)
+{
+    sSnd_F270* snd = &D_004A5A58_F270;
+    if (*(sSnd_F270**)(*(char**)(self + 0x10) + 0x14) != 0) {
+        snd = *(sSnd_F270**)(*(char**)(self + 0x10) + 0x14);
+    }
+    if (Test_F270(in, 6)) {
+        Play_F270(snd, 3);
+        int i;
+        for (i = 0; i < 4; i++) {
+            int j;
+            for (j = 0; j < 8; j++) {
+                char* w = ((sGallery_F270*)self)->cells[i][j];
+                if (w != 0) {
+                    sVEv_F270* vt = *(sVEv_F270**)(w + 8);
+                    vt[9].fn(w + vt[9].delta, 0);
+                }
+            }
+        }
+        cUIScreen_playFrame(*(void**)(self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_0045DC60)), 1);
+        char* mgr = **(char***)(self + 0x10);
+        sVEr_F270* vt = *(sVEr_F270**)(mgr + 4);
+        void* r = vt[5].fn(mgr + vt[5].delta, self, *(int*)(self + 0x8F0) >= 0);
+        func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+        return 1;
+    }
+    char* cur = *(char**)(self + 0x8FC);
+    int curIdx = 0;
+    if (cur != 0) {
+        curIdx = *(int*)(cur + 0x18);
+    }
+    int changed = 0;
+    int row = curIdx / *(int*)(self + 0x5C);
+    int col = curIdx % *(int*)(self + 0x5C);
+    int scroll = *(int*)(self + 0x64);
+    if (Test_F270(in, 5)) {
+        int idx = *(int*)(self + 0x64) * *(int*)(self + 0x5C) + curIdx;
+        if (*(int*)(self + 0x68) > 0) {
+            if (Call_F270(self, 38, idx)) {
+                if (*(int*)(self + 0x4C) != 8) {
+                    Play_F270(snd, 6);
+                    CallV_F270(self, 31, idx);
+                } else {
+                    Play_F270(snd, 4);
+                }
+            } else {
+                if (*(int*)(self + 0x8F0) >= 0) {
+                    int item = Call_F270(self, 34, idx);
+                    int kind = *(int*)(self + 0x8F0);
+                    if (kind == Call_F270(self, 36, item) && Call_F270(self, 35, item) <= *(int*)(self + 0x54)) {
+                        Play_F270(snd, 6);
+                        CallV_F270(self, 32, idx);
+                    } else {
+                        Play_F270(snd, 4);
+                    }
+                } else {
+                    Play_F270(snd, 4);
+                }
+            }
+            return 1;
+        }
+        Play_F270(snd, 4);
+        return 1;
+    } else {
+        if (Test_F270(in, 19)) {
+            col--;
+            if (col < 0) col = *(int*)(self + 0x5C) - 1;
+            changed = 1;
+        } else if (Test_F270(in, 20)) {
+            col++;
+            if (col >= *(int*)(self + 0x5C) || (*(int*)(self + 0x64) + row) * *(int*)(self + 0x5C) + col >= *(int*)(self + 0x68)) col = 0;
+            changed = 1;
+        } else if (Test_F270(in, 17)) {
+            row--;
+            if (row < 0) row = *(int*)(self + 0x58) - 1;
+            changed = 1;
+        } else if (Test_F270(in, 18)) {
+            row++;
+            if (row >= *(int*)(self + 0x58) || *(int*)(self + 0x60) < *(int*)(self + 0x64) + row) row = 0;
+            changed = 1;
+        } else if (Test_F270(in, 27)) {
+            scroll -= *(int*)(self + 0x58);
+            if (scroll < 0) scroll = (*(int*)(self + 0x60) - 1) / *(int*)(self + 0x58) * *(int*)(self + 0x58);
+            changed = 1;
+        } else if (Test_F270(in, 25)) {
+            changed = 1;
+            scroll += *(int*)(self + 0x58);
+            if (scroll >= *(int*)(self + 0x60)) scroll = 0;
+        }
+        if (changed) {
+        int cols = *(int*)(self + 0x5C);
+        int local = row * cols + col;
+        int idx = local + scroll * cols;
+        if (idx >= *(int*)(self + 0x68)) idx = *(int*)(self + 0x68) - 1;
+        local = idx - scroll * cols;
+        if (curIdx != local || scroll != *(int*)(self + 0x64)) {
+            *(int*)(self + 0x64) = scroll;
+            *(char**)(self + 0x8FC) = ((sGallery_F270*)self)->cells[local / cols][local % cols];
+            sVEi_F270* svt = *(sVEi_F270**)(self + 8);
+            svt[40].fn(self + svt[40].delta);
+            Call_F270(self, 33, idx);
+            if (Test_F270(in, 17) || Test_F270(in, 18)) {
+                Play_F270(snd, 2);
+            } else {
+                Play_F270(snd, 1);
+            }
+            return 1;
+        }
+        Play_F270(snd, 4);
+        return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onWidgetCreate);
