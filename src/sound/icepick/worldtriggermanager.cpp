@@ -1686,7 +1686,22 @@ extern "C" void func_002B77C0(sTriggerIdSlot120* self, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7848);
+#ifdef SKIP_ASM
+extern "C" void func_002B7908(void* self, const sV4_75D0* pos, int k, int id);
+
+// Refresh slot k's trigger list for pos, then fire every live trigger id in it.
+extern "C" void func_002B7848(sTriggerIdSlot120* self, const sV4_75D0* pos, int k)
+{
+    func_002B75D0((sWtm_75D0*)&self[k], pos);
+    for (int i = 0; i < self[k].count; i++) {
+        if (getTriggerId(&self[k], i) != 0) {
+            func_002B7908(self, pos, k, getTriggerId(&self[k], i));
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B7908);
 

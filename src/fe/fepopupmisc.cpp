@@ -7437,13 +7437,18 @@ extern "C" void func_001E8160(void* self, void* a1, int a2)
 //88.13% - logic verified correct; GCC allocates v0 to the comparison
 // constant and v1 to the result, the target does the reverse. No source
 // shape tried (temp local, early return, nested ternary) flips it.
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E81B0);
 #ifdef SKIP_ASM
-extern "C" int func_001E81B0(void* self, int a1, int a2)
+extern "C" int func_001E81B0(void* self, int a1, int key)
 {
     int r = 0;
-    if (a2 == 6) {
-        r = *(int*)((char*)self + 0xa0) != 0 ? 0x101 : 0;
+    if (key == 6) {
+        if (*(int*)((char*)self + 0xa0) == 0) {
+            r = 0;
+        } else {
+            return 0x101;
+        }
     }
     return r;
 }
@@ -7648,7 +7653,22 @@ extern "C" void func_001E8880(void* self, void* a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E88D0);
+#ifdef SKIP_ASM
+extern "C" int func_001E88D0(void* self, int a1, int key)
+{
+    int r = 0;
+    if (key == 6) {
+        if (*(int*)((char*)self + 0xa0) == 0) {
+            r = 0;
+        } else {
+            return 0x101;
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E88F0);

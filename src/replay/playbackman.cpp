@@ -536,7 +536,75 @@ extern "C" void func_0026CDF8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/playbackman", func_0026CE50);
+#ifdef SKIP_ASM
+extern "C" void func_00321298(void* self, int n, float* vals);
+
+struct sPbBuf_26CE50 {
+    int f0;
+    int size;       // 0x4
+    int pos;        // 0x8
+    int end;        // 0xC
+    unsigned char data[1];  // 0x10
+};
+
+// Axis table at self+0x64.
+struct sPbAxisItem_26CE50 {
+    float value;
+    char pad4[0x18];
+};
+
+struct sPbAxes_26CE50 {
+    int count;
+    sPbAxisItem_26CE50 items[1];    // 0x4, stride 0x1C
+};
+
+// Replay channel step: mode 1 plays back one packed frame of axis values, mode 3 records one.
+// Returns 1 when the buffer is exhausted (or full), 0 otherwise.
+extern "C" int func_0026CE50(void* self)
+{
+    float vals[24];
+    if (*(int*)((char*)self + 0x70) == 1) {
+        sPbBuf_26CE50* buf = *(sPbBuf_26CE50**)((char*)self + 0x4);
+        if (buf->pos < buf->end) {
+            unsigned char* p = &buf->data[buf->pos];
+            int n = *p++;
+            for (int i = 0; i < n; i++)
+                vals[i] = *p++ * 0.003921568859368563f;
+            (*(sPbBuf_26CE50**)((char*)self + 0x4))->pos += 1 + n;
+            func_00321298(*(void**)((char*)self + 0x68), n, vals);
+            return 0;
+        } else {
+            return 1;
+        }
+    } else if (*(int*)((char*)self + 0x70) == 3) {
+        sPbBuf_26CE50* buf = *(sPbBuf_26CE50**)((char*)self + 0x4);
+        if (buf->pos < buf->size - 0x18) {
+            unsigned char* p = &buf->data[buf->pos];
+            int n = (*(sPbAxes_26CE50**)((char*)self + 0x64))->count;
+            *p++ = n;
+            for (int i = 0; i < n; i++) {
+                sPbAxes_26CE50* axes = *(sPbAxes_26CE50**)((char*)self + 0x64);
+                float v;
+                if (i < axes->count)
+                    v = axes->items[i].value;
+                else
+                    v = 0.0f;
+                *p = (int)(v * 255.0f);
+                vals[i] = *p++ * 0.003921568859368563f;
+            }
+            (*(sPbBuf_26CE50**)((char*)self + 0x4))->pos += 1 + n;
+            (*(sPbBuf_26CE50**)((char*)self + 0x4))->end += 1 + n;
+            func_00321298(*(void**)((char*)self + 0x68), n, vals);
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026CFE8);

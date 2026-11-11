@@ -215,7 +215,18 @@ extern "C" void func_0031E0E0(void* self)
     }
 }
 #endif
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031E190);
+#ifdef SKIP_ASM
+// Number of spline segments (flags.count, bits 11..18); the empty loop is a stripped debug walk.
+static inline int cCubicSpline_getCount(sCubicSpline* s) { return s->flags.count; }
+
+extern "C" void func_0031E190(sCubicSpline* self)
+{
+    for (int i = 0; i < cCubicSpline_getCount(self); i++) {
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031E1D8);
