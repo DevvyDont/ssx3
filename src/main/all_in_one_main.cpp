@@ -67,7 +67,32 @@ extern "C" void *func_001DB2B0(char *arg0, int *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/all_in_one_main", func_001DB330);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_002CA388(void* item, int enable);
+
+// Separate inline accessor: its own `i * 0x24` (not CSE'd with the call's address).
+static inline void setItemData_B330(char* row, int value) { *(int*)(row + 0x17C) = value; }
+
+extern "C" void func_001DB330_impl(char *self, char *src) __asm__("func_001DB330");
+extern "C" void func_001DB330_impl(char *self, char *src) {
+    int i = 0;
+    int next;
+    while (i < *(int*)(src + 0x6C) - 1) {
+        next = i + 1;
+        setItemData_B330(self + i * 0x24, *(int*)(src + next * 4 + 0x70));
+        func_002CA388(self + (i * 0x24 + 0x168), 1);
+        *(int*)(self + i * 0x24 + 0x170) = next;
+        i = next;
+    }
+    while (i < 4) {
+        func_002CA388(self + i * 0x24 + 0x168, 0);
+        i++;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/all_in_one_main", func_001DB418);

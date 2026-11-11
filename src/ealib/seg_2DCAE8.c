@@ -7075,7 +7075,46 @@ void func_003E6690(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E66F0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char *RpcAlloc_66F0(int) __asm__("RpcAlloc");
+extern void func_003F4C68_66F0(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
+extern int func_003F4C98_66F0(int *, int, int) __asm__("func_003F4C98");
+extern void func_003F4E80_66F0(int, int) __asm__("func_003F4E80");
+extern void func_00416210_66F0(char *, int, int) __asm__("func_00416210");
+
+/* One RPC block: a 0x180-byte header followed by three 64-byte-aligned buffers (n bytes, 0x150 bytes, 4 bytes).
+   `buf` is advanced in place, so the 0x158 store is not forwarded to the first call (it reloads the field). */
+char *func_003E66F0(int arg0, int arg1, int n) {
+    int sp10[4];
+    int size;
+    int buf;
+    char *p;
+    size = n + 0x394;
+    p = RpcAlloc_66F0(size);
+    func_00416210_66F0(p, 0, size);
+    buf = (int)(p + 0x1BF) & ~0x3F;
+    *(int *)(p + 0x16C) = buf;
+    *(int *)(p + 4) = -1;
+    *(int *)(p + 0x168) = n;
+    buf += n;
+    buf += 0x3F;
+    buf &= ~0x3F;
+    *(int *)(p + 0x174) = n;
+    *(int *)(p + 0x158) = buf;
+    buf += 0x18F;
+    buf &= ~0x3F;
+    *(int *)(p + 0x17C) = buf;
+    func_003F4E80_66F0(*(int *)(p + 0x158), 0x150);
+    func_003F4E80_66F0(*(int *)(p + 0x16C), *(int *)(p + 0x168));
+    func_003F4E80_66F0(*(int *)(p + 0x17C), 4);
+    func_003F4C98_66F0(sp10, 0x676D6C6B, 0x63726561);
+    func_003F4C68_66F0(sp10, 1, arg0, n, (int)(p + 0x17C), 4, 0, 0, 1, (int)p);
+    return p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E67F8);

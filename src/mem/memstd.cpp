@@ -1230,7 +1230,58 @@ extern "C" void func_00253460(void* self, int v)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_002534A8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sMemAllocFuncs_2534A8 {
+    void* (*alloc)(void*, int, int, int, int);
+    void* (*free)(void*);
+    int field_0x8;
+};
+// Typed view of the allocator table (the unit defines sMemAllocFuncs later).
+extern sMemAllocFuncs_2534A8 D_00509430_2534A8 __asm__("D_00509430");
+extern char D_004A2E98[];
+extern "C" void* func_003ADE08(void* mem, int a1, int a2, char* name, int a4, int a5, int a6);
+extern "C" void* func_003ADDC0(void* mem, int a1, int a2, int a3, int a4);
+
+struct sMemCfg_2534A8 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    int f18;
+    int f1C;
+    int f20;
+};
+
+extern "C" int func_002534A8_impl(void* self, sMemCfg_2534A8* cfg) __asm__("func_002534A8");
+extern "C" int func_002534A8_impl(void* self, sMemCfg_2534A8* cfg)
+{
+    func_002535F8(self);
+    int b = 1;
+    *(sMemCfg_2534A8*)((char*)self + 0x14) = *cfg;
+    int a = 0;
+    if (*(int*)((char*)self + 0x24) != 0) {
+        a = 1;
+    }
+    if (*(int*)((char*)self + 0x1C) != 0) {
+        b = 0;
+    }
+    *(float*)((char*)self + 0x10) = *(float*)((char*)self + 0x34);
+    char* name = *(char**)((char*)self + 0x18);
+    if (name != 0 && *name != 0) {
+        void* mem = D_00509430_2534A8.alloc(D_004A2E98, 0x78, 0, 0, D_00509430_2534A8.field_0x8);
+        *(void**)((char*)self + 0x38) = func_003ADE08(mem, *(int*)((char*)self + 0x14), 0x60000, *(char**)((char*)self + 0x18), 0x20000, a, b);
+    } else {
+        void* mem = D_00509430_2534A8.alloc(D_004A2E98, 0x78, 0, 0, D_00509430_2534A8.field_0x8);
+        *(void**)((char*)self + 0x38) = func_003ADDC0(mem, *(int*)((char*)self + 0x14), 0x80000, a, b);
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_002535F8);

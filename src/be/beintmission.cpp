@@ -328,7 +328,61 @@ extern "C" void func_001539A8(void* self, int rider, int idx, sBits8_1539A8* src
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintmission", func_00153B00);
+#ifdef SKIP_ASM
+int cBELibrary_getProfileIndex(int);
+int cBELibrary_getCharacterID(int);
+extern int D_005305B0_3B00[] __asm__("D_005305B0");
+
+struct sEconRecord_00153B00
+{
+    int id;
+    signed char count; // 0x4
+    char pad_0x05[0x7];
+};
+
+// One character's economy block (0xF88 bytes); 10 per profile (0x9B50).
+struct sEconChar_00153B00
+{
+    sEconRecord_00153B00 records[22];
+    char pad[0xF88 - 22 * 12];
+};
+extern sEconChar_00153B00 D_004A6CA8_econ153B00[][10] __asm__("D_004A6CA8");
+
+// Bit-set view of the same records, based at D_004A6CAC (record + 4).
+struct sEconBits_00153B00
+{
+    int pad;
+    unsigned int bits[2];
+};
+struct sEconBitsChar_00153B00
+{
+    sEconBits_00153B00 recs[22][1];
+    char pad[0xF88 - 22 * 12];
+};
+extern sEconBitsChar_00153B00 D_004A6CAC_bits153B00[][10] __asm__("D_004A6CAC");
+
+extern "C" void func_00153B00(void* self, int rider, int bit, int idx)
+{
+    int profile = cBELibrary_getProfileIndex(rider);
+    int c = cBELibrary_getCharacterID(rider);
+    int off = profile * 0x9B50 + c * 0xF88 + D_005305B0_3B00[16] * 12;
+    // PORT: address accumulated in an int (base symbol unknown to alias analysis).
+    int addr = idx * 12 + off;
+    addr += (int)D_004A6CAC_bits153B00;
+    addr += 4;
+    addr += (bit / 32) * 4;
+    *(unsigned int*)addr |= 1 << bit;
+    int n = 0;
+    for (int b = 0; b < 64; b++)
+    {
+        if (D_004A6CAC_bits153B00[profile][c].recs[D_005305B0_3B00[16]][idx].bits[b / 32] & (1 << b))
+            n++;
+    }
+    D_004A6CA8_econ153B00[profile][c].records[idx + D_005305B0_3B00[16]].count = n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintmission", func_00153C88);
