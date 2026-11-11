@@ -1460,7 +1460,71 @@ extern "C" void func_0017F2D0(void* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/debugfe", func_0017F500);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern char* D_004A289C;
+extern void* D_004A28AC;
+extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z);
+
+struct sRS_17F500 {
+    unsigned int w0;
+    unsigned int w1;
+    unsigned int w2;
+    unsigned int w3;
+    short tex;
+};
+
+struct sV2_17F500 {
+    float x, y;
+    sV2_17F500() {}
+    sV2_17F500(float ax, float ay) : x(ax), y(ay) {}
+};
+
+static inline sV2_17F500 operator*(const sV2_17F500& a, float s) { return sV2_17F500(a.x * s, a.y * s); }
+static inline sV2_17F500 operator-(const sVec2_17F2D0& a, const sV2_17F500& b);
+static inline sV2_17F500 operator+(const sVec2_17F2D0& a, const sV2_17F500& b);
+static inline sV2_17F500 operator-(const sVec2_17F2D0& a, const sV2_17F500& b) { return sV2_17F500(a.x - b.x, a.y - b.y); }
+static inline sV2_17F500 operator+(const sVec2_17F2D0& a, const sV2_17F500& b) { return sV2_17F500(a.x + b.x, a.y + b.y); }
+
+struct sCol_17F500 {
+    float a, r, g, b;
+    sCol_17F500(float aa, const float& ar, float ag, float ab) : a(aa), r(ar), g(ag), b(ab) {}
+};
+
+// The quad routine takes its corners and colour by reference (pointers on the EE).
+void func_0038EC40_r(void* self, const sV2_17F500& p0, const sV2_17F500& p1, const sCol_17F500& c, float z) __asm__("func_0038EC40");
+
+static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned int v)
+{
+    sRS_17F500* top = *(sRS_17F500**)(m + 0xE84);
+    top->w1 = (top->w1 & ~mask) | ((v << shift) & mask);
+}
+
+
+extern "C" void func_0017F500(void* p_, int tex)
+{
+    sFirefly_17F2D0* self = (sFirefly_17F2D0*)p_;
+    char* m = D_004A289C;
+    set1_17F500(m, 0x1800000, 23, 2);
+    set1_17F500(m, 0x300000, 20, 3);
+    set1_17F500(m, 0xFF000, 12, 0xD);
+    set1_17F500(m, 0x7C, 2, 5);
+    set1_17F500(m, 0x400000, 22, 1);
+    sV2_17F500 size(6.0f, 6.0f);
+    (*(sRS_17F500**)(m + 0xE84))->tex = tex;
+    for (int i = 1; i < 64; i++) {
+        sVec2_17F2D0& pt = self->trail[(self->head + i) % 64];
+        float t = (float)i * 0.015625f;
+        func_0038EC40_r(D_004A28AC, pt - size * 0.5f, pt + size * 0.5f, sCol_17F500(t * t * 0.15f, 0.5f, t * 0.2f + 0.3f, t * (t * 0.5f)), 0.0f);
+    }
+    // Head marker colour; named locals (not literals) so the inlined ctor stores sp-relative (CHEATSHEET).
+    float hi = 0.5f;
+    float lo = 0.25f;
+    func_0038EC40_r(D_004A28AC, self->trail[self->head] - size, self->trail[self->head] + size, sCol_17F500(hi, lo, lo, hi), 0.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017F7B8);
