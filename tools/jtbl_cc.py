@@ -195,6 +195,13 @@ def repoint_strings(text: str, unit: str) -> tuple[str, list[str]]:
             body = re.sub(re.escape(label) + r"\b", hit, body)
             log.append(f"{func}: {label} -> {hit} ({defs[label][:24]!r})")
         text = text[:a] + body + text[b:]
+    # Drop the definitions nothing references any more (the linker keeps C objects' .rodata, as for the tables).
+    for label in defs:
+        if re.search(re.escape(label) + r"\b(?!:)", text):
+            continue
+        text = re.sub(r'^(?:\s*\.align\s+\d+\s*\n)?' + re.escape(label) + r':\s*\n(?:\s*\.ascii\s+"(?:[^"\\]|\\.)*"\s*\n)+',
+                      "", text, flags=re.M)
+    text = re.sub(r"^\s*\.rdata\s*\n(?=\s*\.text\s*\n)", "", text, flags=re.M)
     return text, log
 
 
