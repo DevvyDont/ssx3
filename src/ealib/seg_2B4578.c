@@ -8767,7 +8767,60 @@ void func_003C43C0(int arg0, int arg1, int arg2, int arg3) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4450);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3); loop rewritten without the D_0050B9C8 inner label (cfg_1).
+extern struct sA8E8 D_0050A8E8;
+
+extern struct sAD00 D_0050AD00;
+
+struct Dst_4450 { char b0; char pad1[0xF]; int f10; int f14; int f18; int f1C; unsigned short h20; short h22; };
+extern struct Dst_4450 D_00515780_4450 __asm__("D_00515780");
+extern void func_003C43C0(int, int, int, int);
+extern void func_004261B0(int, void *, int, int, int, int);
+extern void f61F0_4450(int, void *, int, int, int, int) __asm__("func_004261F0");
+
+void func_003C4450(int arg0) {
+    int cnt = 0;
+    unsigned best = 0xFFFFFFFF;
+    unsigned char pri = 0;
+    int i;
+    struct sAD00Xfer *p;
+    for (i = 0; i < 0x1C; i++) {
+        struct sAD00Xfer *e = &D_0050AD00.fCC8[i];
+        if (e->key != 0) {
+            cnt++;
+            if (pri < e->f0E) {
+                D_0050AD00.fCC1 = i;
+                best = e->key;
+                pri = e->f0E;
+            } else if (e->f0E == pri && e->key < best) {
+                D_0050AD00.fCC1 = i;
+                best = e->key;
+            }
+            if (cnt >= (signed char)D_0050AD00.fCC0) break;
+        }
+    }
+    p = &D_0050AD00.fCC8[(signed char)D_0050AD00.fCC1];
+    D_0050AD00.fCC4 = D_0050A8E8.f180;
+    func_003C43C0(p->f04, D_0050AD00.fE88[0].f04, p->f0C, arg0);
+    D_0050AD00.fCC2 = 1;
+    D_00515780_4450.b0 = 0x30;
+    D_00515780_4450.f10 = 1;
+    D_00515780_4450.f14 = p->key;
+    D_00515780_4450.f18 = D_0050AD00.fE88[0].f04;
+    D_00515780_4450.f1C = p->f08;
+    D_00515780_4450.h20 = p->f0C;
+    D_00515780_4450.h22 = p->f0E;
+    if (arg0 != 0) {
+        f61F0_4450(0, &D_00515780_4450, 0x30, 0, 0, 0);
+        return;
+    }
+    func_004261B0(0, &D_00515780_4450, 0x30, 0, 0, 0);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C45E8);
