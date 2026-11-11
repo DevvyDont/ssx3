@@ -1,115 +1,1025 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EDF50);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern unsigned char D_004963C0[];
+int func_003EDF50(char *a, char *b) {
+    unsigned qa, qb;
+    unsigned ca, cb;
+    if (a == 0 || *a == 0) return -1;
+    if (*a == '"' || *a == '\'') {
+        qa = *(unsigned char *)a;
+        a++;
+    } else {
+        qa = 0;
+    }
+    if (*b == '"' || *b == '\'') {
+        qb = *(unsigned char *)b;
+        b++;
+    } else {
+        qb = 0;
+    }
+    do {
+        ca = D_004963C0[(int)*a];
+        a++;
+        if (ca == qa || (ca < 0x20 && qa == 0)) ca = 0;
+        cb = D_004963C0[(int)*b];
+        b++;
+        if (cb == qb || (cb < 0x20 && qb == 0)) cb = 0;
+    } while (ca == cb && ca != 0);
+    return ca - cb;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE028);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int* func_002591E8(int);
+extern void func_00416210(void*, int, int);
+extern void func_0041605C(void*, void*, int);
+extern void func_00259210(void*);
+int func_003EE028(int* p) {
+    int k;
+    int bytes;
+    int* q;
+    int* r;
+    int* t;
+    if (p[1] <= 0) {
+        k = p[0] > 0 ? p[0] : 1;
+    } else if (p[0] == 0) {
+        k = p[6] * 100 / p[1];
+    } else {
+        k = (p[0] + p[6] * 100 / p[1]) / 2;
+    }
+    k = k > 1 ? k : 2;
+    k += 2;
+    bytes = k * 4;
+    q = func_002591E8(bytes);
+    if (!q) {
+        return 0;
+    }
+    func_00416210(q, 0, bytes);
+    k = 1;
+    q[0] = p[15];
+    *(unsigned*)(bytes + (int)q - 4) = 0xFFFFFFFF;
+    p[15] = (int)q;
+    if (q[1] == 0) {
+        r = q + 1;
+        do {
+            *r = p[14];
+            p[14] = (int)r;
+            r++;
+            k++;
+        } while (*r == 0);
+    }
+    p[4] += k - 1;
+    t = func_002591E8((p[6] + p[4]) * 8);
+    if (p[16]) {
+        func_0041605C(t, (void*)p[16], p[6] * 4);
+        func_00259210((void*)p[16]);
+    }
+    p[16] = (int)t;
+    return k - 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE1B0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EE1B0(int* p, int** a, int** b) {
+    return ((int (*)(int, int, int, int))p[12])(p[11], p[10], **a, **b);
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE1E8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int* func_002591E8(int);
+extern void func_00416210(void*, int, int);
+extern int func_003EE028(int*);
+int* func_003EE1E8(int a, int b, int c) {
+    int* p = func_002591E8(0x44);
+    func_00416210(p, 0, 0x44);
+    p[0] = a;
+    func_003EE028(p);
+    p[0] = b;
+    p[1] = c;
+    return p;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE260);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern void func_00259210(void*);
+void func_003EE260(int* p) {
+    if (p[15]) {
+        do {
+            int* q = (int*)p[15];
+            p[15] = *q;
+            func_00259210(q);
+        } while (p[15]);
+    }
+    func_00259210((void*)p[16]);
+    func_00259210(p);
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE2B8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+void func_003EE2B8(int* p) {
+    int i;
+    for (i = 0; i < p[6]; i++) {
+        int* item = ((int**)p[16])[i];
+        item[0] = p[14];
+        p[14] = (int)item;
+    }
+    p[2] = 1;
+    p[4] += p[6];
+    p[6] = 0;
+    p[5] = 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE320);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+typedef int (*func_003EE320_cb)(int, int, int);
+int* func_003EE320(int* p, int a) {
+    int* n;
+    if (!p[14] && func_003EE028(p) <= 0) {
+        return 0;
+    }
+    n = (int*)p[14];
+    p[14] = *n;
+    *n = a;
+    ((int*)p[16])[p[6]] = (int)n;
+    p[6]++;
+    p[4]--;
+    if (!p[9] || ((func_003EE320_cb)p[9])(p[8], p[7], *n) > 0) {
+        p[2]++;
+    }
+    return n;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE3E0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+typedef int (*func_003EE3E0_cb)(int, int, int);
+void func_003EE3E0(int* p, int* a, int b) {
+    if (!p[9] || ((func_003EE3E0_cb)p[9])(p[8], p[7], *a) > 0 || ((func_003EE3E0_cb)p[9])(p[8], p[7], b) > 0) {
+        p[2]++;
+    }
+    *a = b;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE468);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EE468(int a, int* p) {
+    return p ? *p : 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE480);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EE480(int* p, int* item) {
+    int i;
+    int v;
+    for (i = 0; i < p[6]; i++) {
+        if (((int*)p[16])[i] == (int)item) {
+            break;
+        }
+    }
+    if (i == p[6]) {
+        return 0;
+    }
+    if (i < p[5]) {
+        p[5]--;
+        p[2]++;
+    }
+    p[6]--;
+    for (; i < p[6]; i++) {
+        ((int*)p[16])[i] = ((int*)p[16])[i + 1];
+    }
+    v = *item;
+    *item = p[14];
+    p[14] = (int)item;
+    p[4]++;
+    return v;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE550);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EE550(int* p) {
+    return p[6];
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE558);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EE558(int* p) {
+    return p[5];
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE560);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EE560(int* p, int i) {
+    if (!p || i < 0 || i >= p[6]) {
+        return 0;
+    }
+    return **(int**)(p[16] + i * 4);
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE5A0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+void func_003EE5A0(int* p, int a, int b, int c) {
+    if (p[6] > 0) {
+        p[2] = 1;
+    }
+    p[11] = a;
+    p[10] = b;
+    p[12] = c;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE5C0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+void func_003EE5C0(int* p, int a, int b, int c) {
+    if (p[6] > 0) {
+        p[2] = 1;
+    }
+    p[8] = a;
+    p[7] = b;
+    p[9] = c;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE5E0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EE5E0(int* p, int inc) {
+    if (inc) {
+        p[2]++;
+    }
+    return p[2] > 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE600);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EE600(int* p, int inc) {
+    if (inc) {
+        p[3]++;
+    }
+    return p[3] > 0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE620);
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE768);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+void func_003EE768(int* p, int v) {
+    p[13] = v;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE770);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EE770(int* p) {
+    return p[13];
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE778);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int* func_002591E8(int);
+extern void* func_00416210_p(void*, int, int) __asm__("func_00416210");
+extern int func_003EE900(int*, int);
+extern int func_003EEAB8();
+int* func_003EE778(int n, int m) {
+    int cnt = n > 0 ? n : 1;
+    int nb = m > 15 ? m : 16;
+    int* p;
+    p = func_002591E8(0x24);
+    func_00416210_p(p, 0, 0x24);
+    p[4] = nb;
+    p[5] = (int)func_002591E8(nb * 4);
+    func_00416210_p((void*)p[5], 0, p[4] * 4);
+    p[8] = (int)func_003EEAB8;
+    if (cnt > 0) {
+        func_003EE900(p, cnt);
+    }
+    return p;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE820);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern void func_00259210(void*);
+void func_003EE820(int* p) {
+    if (p[6]) {
+        do {
+            int* q = (int*)p[6];
+            p[6] = *q;
+            func_00259210(q);
+        } while (p[6]);
+    }
+    func_00259210((void*)p[5]);
+    func_00259210(p);
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE878);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+void func_003EE878(int* p, int v) {
+    p[8] = v;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE880);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+void func_003EE880(int* p) {
+    int i;
+    p[0] = 0;
+    for (i = 0; i < p[4]; i++) {
+        int* n;
+        while ((n = ((int**)p[5])[i]) != 0) {
+            ((int**)p[5])[i] = (int*)n[0];
+            n[0] = p[7];
+            p[7] = (int)n;
+        }
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE900);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int* func_002591E8(int);
+int func_003EE900(int* p, int n) {
+    int g = n > 0;
+    int cnt = 1;
+    int size;
+    int* mem;
+    int* item;
+    int* end;
+    if (g) {
+        cnt = n;
+    }
+    cnt++;
+    size = cnt * 12;
+    mem = func_002591E8(size);
+    if (!mem) {
+        return -1;
+    }
+    mem[0] = p[6];
+    p[6] = (int)mem;
+    item = mem + 3;
+    end = (int*)((char*)mem + size);
+    while (item != end) {
+        item[0] = p[7];
+        p[7] = (int)item;
+        item += 3;
+    }
+    return cnt - 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EE9A0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EE9A0(int* p) {
+    int* n;
+    int** slot;
+    if (!p[0]) {
+        return 0;
+    }
+    if (!((int**)p[5])[p[1]]) {
+        do {
+            p[1] = (p[1] + 1) % p[4];
+        } while (!((int**)p[5])[p[1]]);
+    }
+    slot = (int**)(p[1] * 4 + p[5]);
+    n = *slot;
+    *slot = (int*)n[0];
+    n[0] = p[7];
+    p[7] = (int)n;
+    p[0]--;
+    return n[1];
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EEA48);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EEA48(int* p, int key) {
+    char* s = (char*)key;
+    int h = 0;
+    while (*s) {
+        if (*s > 32) {
+            h = h * 131 + (*s & 0x5F);
+        }
+        s++;
+    }
+    h &= 0x7FFFFFFF;
+    return h % p[4];
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EEAB8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern unsigned char D_00496A58[];
+int func_003EEAB8(unsigned char* a, unsigned char* b) {
+    int c1, c2, d;
+    do {
+        do {
+            c1 = D_00496A58[*a++];
+        } while (c1 == 1);
+        do {
+            c2 = D_00496A58[*b++];
+        } while (c2 == 1);
+        d = c1 - c2;
+        if (d != 0) {
+            return d;
+        }
+    } while (c1 != 0);
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EEB30);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003EEA48(int*, int);
+extern int func_003EE900(int*, int);
+int func_003EEB30(int* p, int a, int b) {
+    int h = func_003EEA48(p, a);
+    int* n;
+    if (!p[7] && func_003EE900(p, (p[0] * 3 + 10) / 2) <= 0) {
+        return -1;
+    }
+    n = (int*)p[7];
+    p[7] = *n;
+    n[2] = a;
+    n[1] = b;
+    n[0] = ((int*)p[5])[h];
+    ((int*)p[5])[h] = (int)n;
+    p[0]++;
+    return 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EEBF8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003EEA48(int*, int);
+int func_003EEBF8(int* p, int key, int val) {
+    int* n = ((int**)p[5])[func_003EEA48(p, key)];
+    while (n) {
+        if (!((int (*)(int, int))p[8])(n[2], key)) {
+            int old = n[1];
+            n[1] = val;
+            return old;
+        }
+        n = (int*)n[0];
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EEC88);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003EEA48(int*, int);
+int func_003EEC88(int* p, int key) {
+    int* n = ((int**)p[5])[func_003EEA48(p, key)];
+    while (n) {
+        if (!((int (*)(int, int))p[8])(n[2], key)) {
+            return n[1];
+        }
+        n = (int*)n[0];
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EED08);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003EEA48(int*, int);
+int func_003EED08(int* p, int key) {
+    int* n;
+    int* prev = &((int*)p[5])[func_003EEA48(p, key)];
+    for (;;) {
+        n = (int*)*prev;
+        if (!n) {
+            return 0;
+        }
+        if (!((int (*)(int, int))p[8])(n[2], key)) {
+            break;
+        }
+        prev = (int*)*prev;
+    }
+    *prev = n[0];
+    n[0] = p[7];
+    p[7] = (int)n;
+    p[0]--;
+    return n[1];
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EEDA0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003EE900(int*, int);
+int func_003EEDA0(int* p, int a, int b) {
+    int h;
+    int* n;
+    h = (a < 0 ? -a : a) % p[4];
+    if (!p[7] && func_003EE900(p, (p[0] * 3 + 10) / 2) <= 0) {
+        return -1;
+    }
+    n = (int*)p[7];
+    p[7] = *n;
+    n[2] = a;
+    n[1] = b;
+    n[0] = ((int*)p[5])[h];
+    ((int*)p[5])[h] = (int)n;
+    p[0]++;
+    return 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EEE80);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EEE80(int* p, int key, int val) {
+    int k = key >= 0 ? key : -key;
+    int* n = ((int**)p[5])[k % p[4]];
+    while (n) {
+        if (n[2] == key) {
+            int old = n[1];
+            n[1] = val;
+            return old;
+        }
+        n = (int*)n[0];
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EEEE8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EEEE8(int* p, int key) {
+    int k = key >= 0 ? key : -key;
+    int* n = ((int**)p[5])[k % p[4]];
+    while (n) {
+        if (n[2] == key) {
+            return n[1];
+        }
+        n = (int*)n[0];
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EEF40);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EEF40(int* p, int key) {
+    int k = key >= 0 ? key : -key;
+    int* prev = &((int*)p[5])[k % p[4]];
+    int* n;
+    for (;;) {
+        n = (int*)*prev;
+        if (!n) {
+            return 0;
+        }
+        if (n[2] == key) {
+            break;
+        }
+        prev = n;
+    }
+    *prev = n[0];
+    n[0] = p[7];
+    p[7] = (int)n;
+    p[0]--;
+    return n[1];
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EEFB8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+void func_003EEFB8(int* p) {
+    p[2] = 0;
+    p[3] = 0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2EEF50", func_003EEFC8);
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF088);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EF088(void) {
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF090);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+typedef struct {
+    unsigned char stat;
+    unsigned char second;
+    unsigned char minute;
+    unsigned char hour;
+    unsigned char pad;
+    unsigned char day;
+    unsigned char month;
+    unsigned char year;
+} func_003EF090_clock;
+extern int D_004A4A94;
+extern void func_0040BFD8(void*);
+extern void func_0040BFE0(void*);
+#define BCD(x) (((x) >> 4) * 10 + ((x) & 0xF))
+int func_003EF090(void) {
+    func_003EF090_clock c;
+    int a;
+    int b;
+    if (D_004A4A94 == -1) {
+        *(long*)&c = 0;
+        c.day = 2;
+        c.month = 1;
+        c.year = 1;
+        func_0040BFD8(&c);
+        a = BCD(c.day) * 86400 + BCD(c.hour) * 3600 + BCD(c.minute) * 60 + BCD(c.second);
+        *(long*)&c = 0;
+        c.day = 2;
+        c.month = 1;
+        c.year = 1;
+        func_0040BFE0(&c);
+        b = BCD(c.day) * 86400 + BCD(c.hour) * 3600 + BCD(c.minute) * 60 + BCD(c.second);
+        D_004A4A94 = b - a;
+    }
+    return D_004A4A94;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF210);
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF600);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EF600(unsigned char x) {
+    int n;
+    for (n = 1; n < 7 && (x & 0x80); n++) {
+        x <<= 1;
+    }
+    return n;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF640);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EF640(unsigned short* out, char* src) {
+    unsigned char* in = (unsigned char*)src;
+    int n;
+    if (!(in[0] & 0x80)) {
+        n = 1;
+        *out = in[0];
+    } else if ((in[0] & 0xE0) == 0xC0) {
+        n = 2;
+        *out = ((in[0] & ~0xE0) << 6) | (in[1] & ~0xC0);
+    } else if ((in[0] & 0xF0) == 0xE0) {
+        n = 3;
+        *out = ((in[0] & ~0xF0) << 12) | ((in[1] & ~0xC0) << 6) | (in[2] & ~0xC0);
+    } else {
+        n = func_003EF600(in[0]);
+    }
+    return n;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF6F8);
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF770);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EF770(unsigned char* dst, unsigned int* e, unsigned short c, signed char ch) {
+    int found = 0;
+    unsigned char* d0 = dst;
+    for (; e[1]; e += 3) {
+        if (c < e[0]) {
+            continue;
+        }
+        if (e[1] < c) {
+            continue;
+        }
+        {
+            unsigned char b;
+            c = c - *(unsigned short*)e;
+            b = ((unsigned char*)e[2])[c];
+            if (b != 0xFF) {
+                *dst = b;
+            } else if (ch) {
+                *dst = ch;
+            } else {
+                *dst = b;
+            }
+            dst++;
+            found = 1;
+            break;
+        }
+    }
+    if (!found && ch) {
+        *dst++ = ch;
+    }
+    return dst - d0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF808);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003EF828(char*, int, char*, signed char);
+void func_003EF808(int a, int b, int c) {
+    func_003EF828((char*)a, b, (char*)c, 0);
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF828);
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF940);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003EF600(unsigned char);
+int func_003EF940(char* s) {
+    int i = 0;
+    int count = 0;
+    if (s[0]) {
+        do {
+            if (s[i] & 0x80) {
+                i += func_003EF600(s[i]);
+            } else {
+                i++;
+            }
+            count++;
+        } while (s[i]);
+    }
+    return count;
+}
+#endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF9B8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003EF6F8(char*, int);
+int func_003EF9B8(char* dst, int size, unsigned short* src) {
+    int i = 0;
+    int lim = size - 2;
+    if (*src && lim > 0) {
+        do {
+            i += func_003EF6F8(dst + i, *src++);
+        } while (*src && i < lim);
+    }
+    dst[i] = 0;
+    return i + 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EFA48);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003EF640(unsigned short*, char*);
+int func_003EFA48(unsigned short* dst, int size, char* src) {
+    int di = 0;
+    int si = 0;
+    int lim = size - 1;
+    if (*src && lim > 0) {
+        do {
+            int r = func_003EF640(dst + di, src + si);
+            si += r;
+            if (r <= 3) {
+                di++;
+            }
+        } while (src[si] && di < lim);
+    }
+    dst[di] = 0;
+    return di + 1;
+}
+#endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_2EEF50", func_003EFAF8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003EF6F8(char*, int);
+int func_003EFAF8(char* dst, int size, char* src, unsigned short* tbl) {
+    int i = 0;
+    int lim = size - 2;
+    if (*src && lim > 0) {
+        do {
+            unsigned short* e = &tbl[(unsigned char)*src++];
+            i += func_003EF6F8(dst + i, *e);
+        } while (*src && i < lim);
+    }
+    dst[i] = 0;
+    return i + 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EFBA0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003EF640(unsigned short*, char*);
+extern int func_003EF770(unsigned char*, unsigned int*, unsigned short, signed char);
+int func_003EFBA0(unsigned char* dst, int size, char* src, signed char ch, unsigned int* e) {
+    int di = 0;
+    int si = 0;
+    int lim = size - 1;
+    if (*src && lim > 0) {
+        unsigned short c;
+        do {
+            si += func_003EF640(&c, src + si);
+            di += func_003EF770(dst + di, e, c, ch);
+        } while (src[si] && di < lim);
+    }
+    dst[di] = 0;
+    return di + 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EFC68);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+char* func_003EFC68(char* s, int* out) {
+    int v = 0;
+    int c;
+    for (;; s++) {
+        if ((unsigned char)(*(unsigned char*)s - '0') < 10 || (unsigned char)(*(unsigned char*)s - 'a') < 6 || (unsigned char)(*(unsigned char*)s - 'A') < 6) {
+            c = *s;
+            if (c >= ':') {
+                c = (char)(c + 9);
+            }
+            v = (v << 4) | (c & 0xF);
+            continue;
+        }
+        break;
+    }
+    *out = v;
+    return s;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2EEF50", func_003EFCD8);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_2EEF50", func_003EFD30);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern unsigned int func_003EFCD8(unsigned int, unsigned int*, unsigned int*);
+extern void func_003F30F0(void*);
+extern void func_003F3128(void*, unsigned int, int);
+extern void func_003F31F8(void*, int, int);
+extern unsigned int D_004A4A98;
+extern unsigned int D_004A4A9C;
+void func_003EFD30(unsigned int a, int b, int c, int d) {
+    char buf[96];
+    unsigned int lo, hi;
+    unsigned int orig;
+    func_003F30F0(buf);
+    orig = a;
+    func_003F3128(buf, orig, b);
+    if (orig) {
+        do {
+            a = func_003EFCD8(a, &lo, &hi);
+            if (!lo || !hi) {
+                break;
+            }
+            if (lo >= D_004A4A98 && hi < D_004A4A9C && lo < hi) {
+                func_003F3128(buf, lo, hi - lo);
+            }
+        } while (a);
+    }
+    func_003F3128(buf, orig, b);
+    func_003F31F8(buf, c, d);
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EFE20);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sE { int key; short code; short pad; char* name; };
+extern struct sE D_004512D8[];
+extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
+short func_003EFE20(void* self, int key, short* list, int n, char* x, int y) {
+    int i, j;
+    if (D_004512D8[0].key) {
+        for (i = 0; D_004512D8[i].key; i++) {
+            if (D_004512D8[i].key == key) {
+                for (j = 0; j < n; j++) {
+                    if (list[j] == D_004512D8[i].code) {
+                        cDirtysock_tag_TagFieldDupl(x, y, D_004512D8[i].name);
+                        return D_004512D8[i].code;
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EFED0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_004186C8(char* dst, const char* fmt, char* ap);
+void func_003EFED0(int* p, const char* fmt, ...) {
+    char buf[0x1000];
+    char* ap;
+    ap = (char*)__builtin_next_arg()
+         - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
+    func_004186C8(buf, fmt, ap);
+    if (p[322]) {
+        ((void (*)(int, char*))p[322])(p[321], buf);
+    }
+}
+#endif
