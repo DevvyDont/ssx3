@@ -532,7 +532,15 @@ segments:
       
       - [0x2ec198, cpp, dirtysock/tags]
       
-      - [0x2eef50, asm]
+      # Library tail of .text (0x3EDF50-0x42E590), split as in peak3project's fork. The units built with SN 2.95.3
+      # are C units here; the Sony SDK / libgcc / libstdc++ area (ee-gcc 2.9-ee-991111), newlib (assembled with SN's
+      # Ps2EeAs) and the hand-written syscall stubs stay asm (2026-11-10).
+      - [0x2eef50, c, seg/seg_2EEF50]   # 0x3EDF50: $gp small-data users (default flags)
+      - [0x2f0f40, c, seg/seg_2F0F40]   # 0x3EFF40: absolute small-data users (-G0)
+      - [0x2f41f8, c, seg/seg_2F41F8]   # 0x3F31F8: dense $gp module (default flags)
+      - [0x2fddc8, c, seg/seg_2FDDC8]   # 0x3FCDC8: SN 2.95.3 (sq register saves)
+      - [0x2fe810, asm]                 # 0x3FD810-0x42E020: ee-gcc 2.9 SDK area, libgcc/libstdc++, newlib, syscall stubs
+      - [0x32f020, c, seg/seg_32F020]   # 0x42E020: SN 2.95.3, -G0
       
       # --- .vutext
       - [0x32f590, textbin, vutext]

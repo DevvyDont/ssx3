@@ -58,6 +58,10 @@ UNIT_CFLAGS = {
     "seg/seg_1218": "-fno-rtti",  # same evidence (null typeinfo in D_004585F0/D_00458710; func_00108FA8)
     "ai/rider": "-fno-rtti",  # same evidence (null typeinfo in D_00458338/D_00458360/D_00459BD0; func_00125EB8)
     "ai/computer": "-fno-rtti",  # same evidence (the cComp constructor func_0010FCD8 stores the shared D_00459B90 sub-vtable)
+    # Library tail C units (split 2026-11-10, as in peak3project's fork): these reach .sdata/.sbss globals with lui/%lo
+    # and never via $gp.
+    "seg/seg_2F0F40": "-G0",
+    "seg/seg_32F020": "-G0",
 }
 # Fork-only: per-unit compiler. EA's embedded $gp module (ealib/seg_2D7498, 0x3D6498-0x3DBAE8) was built with an
 # older SN build, ee-gcc 2.95.3-114 (its non-leaf functions save ra with sq; 107 and 114 reproduce all 48 landed

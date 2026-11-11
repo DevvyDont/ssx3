@@ -975,3 +975,20 @@ D_004891B0 = 0x004891B0; // size:0x3CC
 // addresses (as in peak3's fork).
 D_20000020 = 0x20000020; // ignore:true
 D_20000140 = 0x20000140; // ignore:true
+// Constants and offsets that splat paired into symbols (lui/addiu), not addresses: delay-loop counts (0xFFFF, 0xFFFFF,
+// 0xFFFFFF) in the SDK and runtime units, uncached (0x20000000 / kseg1 0xA0000000) and scratchpad (0x70000000) addresses
+// written as constants, and struct offsets added to a pointer. As in peak3project's fork (2026-11-10).
+D_B4008 = 0x000B4008; // ignore:true
+D_C328 = 0x0000C328; // ignore:true
+D_FFFFF = 0x000FFFFF; // ignore:true
+D_FFFF = 0x0000FFFF; // ignore:true
+D_C2AB = 0x0000C2AB; // ignore:true
+D_20000010 = 0x20000010; // ignore:true
+D_20000050 = 0x20000050; // ignore:true
+D_20000400 = 0x20000400; // ignore:true
+D_20000800 = 0x20000800; // ignore:true
+D_E0002000 = 0xE0002000; // ignore:true
+D_FFFFFF = 0x00FFFFFF; // ignore:true
+D_70000080 = 0x70000080; // ignore:true
+D_70000090 = 0x70000090; // ignore:true
+D_A0000040 = 0xA0000040; // ignore:true
