@@ -165,7 +165,57 @@ extern "C" void func_003EB588(unsigned char* d, unsigned char sep)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldFind);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern unsigned char D_004963C0[];
+
+extern "C" const unsigned char* cDirtysock_tag_TagFieldFind_impl(const unsigned char* pRecord, const unsigned char* pName) __asm__("cDirtysock_tag_TagFieldFind");
+extern "C" const unsigned char* cDirtysock_tag_TagFieldFind_impl(const unsigned char* pRecord, const unsigned char* pName)
+{
+    const unsigned char* pTerm;
+    const unsigned char* pData;
+    const unsigned char* pRec;
+    const unsigned char* pNam;
+
+    if ((pRecord == 0) || (*pRecord == 0)) {
+        return 0;
+    }
+    if ((pName == 0) || (*pName == 0)) {
+        return 0;
+    }
+
+    for (pTerm = pName; *pTerm != 0; ++pTerm)
+        ;
+    --pTerm;
+
+    pData = pRecord;
+    for (;;) {
+        if (*pData == 0) {
+            return 0;
+        }
+        if ((*pData == '=') || (*pData == ':')) {
+            if ((pData[1] < ' ') && (pData[-1] <= ' ')) {
+                break;
+            }
+            pRec = pData - 1;
+            pNam = pTerm;
+            while ((pRec >= pRecord) && (D_004963C0[*pRec] == D_004963C0[*pNam])) {
+                if (pNam == pName) {
+                    if ((pRec == pRecord) || (pRec[-1] <= ' ')) {
+                        return pData + ((pData[1] == ' ') ? 2 : 1);
+                    }
+                }
+                pRec--;
+                pNam--;
+            }
+        }
+        ++pData;
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", func_003EB840);
