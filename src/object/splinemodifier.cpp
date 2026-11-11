@@ -1424,7 +1424,296 @@ extern "C" int func_0035ABF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/splinemodifier", func_0035AC20);
+#ifdef SKIP_ASM
+struct sSmVec4_AC20 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sSmMat_AC20 {
+    sSmVec4_AC20 r[4];
+    sSmMat_AC20() {}
+    void setAxisRot(const sSmVec4_AC20& axis, float angle);
+    void setCols(const float& a00, const float& a10, const float& a20, const float& a30,
+                 const float& a01, const float& a11, const float& a21, const float& a31,
+                 const float& a02, const float& a12, const float& a22, const float& a32,
+                 const float& a03, const float& a13, const float& a23, const float& a33);
+    // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+    sSmMat_AC20(const sSmMat_AC20& o)
+    {
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            :
+            : "r"(this), "r"(&o)
+            : "memory");
+    }
+    // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+    sSmMat_AC20& operator=(const sSmMat_AC20& o)
+    {
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            :
+            : "r"(this), "r"(&o)
+            : "memory");
+        return *this;
+    }
+} __attribute__((aligned(16)));
+
+extern sSmVec4_AC20 D_004FF160_AC20 __asm__("D_004FF160");
+extern void func_00345248_AC20(void* out, sSmVec4_AC20* pos, sSmVec4_AC20* dir, sSmVec4_AC20* c, float t) __asm__("func_00345248");
+extern "C" float func_0031C228(float);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+// PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
+static inline float Sqrt_AC20(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize).
+static inline sSmVec4_AC20 vu0Normalize_AC20(const sSmVec4_AC20& v)
+{
+    sSmVec4_AC20 r;
+    __asm__(
+        "lqc2       $vf3, %1\n"
+        "vaddw.x    $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw  $vf4, $vf3, $vf3\n"
+        "vadday.x   ACC, $vf4, $vf4y\n"
+        "vmaddaz.x  ACC, $vf6, $vf4z\n"
+        "vmaddw.x   $vf4, $vf6, $vf4w\n"
+        "vrsqrt     Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2       $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * matrix).
+static inline sSmMat_AC20 mulMat_AC20(const sSmMat_AC20& a, const sSmMat_AC20& b)
+{
+    sSmMat_AC20 r;
+    __asm__ __volatile__(
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "lqc2      $vf8, 0x0(%2)\n"
+        "lqc2      $vf9, 0x10(%2)\n"
+        "lqc2      $vf10, 0x20(%2)\n"
+        "lqc2      $vf11, 0x30(%2)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        :
+        : "r"(&r), "r"(&a), "r"(&b)
+        : "memory");
+    return r;
+}
+
+static inline float atan2_AC20(float y, float x)
+{
+    if (x == 0.0f) {
+        if (y == 0.0f)
+            return y;
+        if (0.0f <= y)
+            return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f) {
+        if (0.0f < y)
+            r += 3.1415927410125732f;
+        else
+            r -= 3.1415927410125732f;
+    }
+    return r;
+}
+
+// Fills the matrix column by column.
+inline void sSmMat_AC20::setCols(const float& a00, const float& a10, const float& a20, const float& a30,
+                                 const float& a01, const float& a11, const float& a21, const float& a31,
+                                 const float& a02, const float& a12, const float& a22, const float& a32,
+                                 const float& a03, const float& a13, const float& a23, const float& a33)
+{
+    r[0].x = a00;
+    r[1].x = a10;
+    r[2].x = a20;
+    r[3].x = a30;
+    r[0].y = a01;
+    r[1].y = a11;
+    r[2].y = a21;
+    r[3].y = a31;
+    r[0].z = a02;
+    r[1].z = a12;
+    r[2].z = a22;
+    r[3].z = a32;
+    r[0].w = a03;
+    r[1].w = a13;
+    r[2].w = a23;
+    r[3].w = a33;
+}
+
+inline void sSmMat_AC20::setAxisRot(const sSmVec4_AC20& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle);
+    float t = 1.0f - c;
+    float x = axis.x;
+    float y = axis.y;
+    float z = axis.z;
+    float tx = t * x;
+    float ty = t * y;
+    float tz = t * z;
+    float sx = s * x;
+    float sy = s * y;
+    float sz = s * z;
+    setCols(tx * x + c, tx * y + sz, tx * z - sy, 0.0f,
+            ty * x - sz, ty * y + c, ty * z + sx, 0.0f,
+            tz * x + sy, tz * y - sx, tz * z + c, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+
+
+struct sSplinePt_AC20 {
+    sSmVec4_AC20 pos;       // 0x00
+    sSmVec4_AC20 dir;       // 0x10
+    sSmVec4_AC20 f20;       // 0x20
+    char pad_0x30[0x20];
+    float f50;              // 0x50
+    float f54;              // 0x54
+    char pad_0x58[0x8];
+};
+
+struct sSplineInst_AC20 {
+    char pad_0x0[0x10];
+    sSmMat_AC20 mat;        // 0x10
+};
+
+struct cMultiSplineModifier_AC20 {
+    void** vtable;                  // 0x0
+    int count;                      // 0x4
+    int mode;                       // 0x8
+    float angle;                    // 0xC
+    float pos;                      // 0x10
+    char pad_0x14[0x1C];
+    int dirty;                      // 0x30
+    char pad_0x34[0x8];
+    sSplinePt_AC20* points;         // 0x3C
+    void* tmpl;                     // 0x40
+    sSplineInst_AC20** insts;       // 0x44
+    char follow[0xC];               // 0x48
+    float length;                   // 0x54
+};
+
+extern "C" void* func_0035AC20(void* p)
+{
+    cMultiSplineModifier_AC20* self = (cMultiSplineModifier_AC20*)p;
+    float t[256];
+    sSmMat_AC20 rot;
+    sSmVec4_AC20 ang;
+    int i;
+    float step = self->length / (float)self->count;
+    t[0] = self->pos;
+    for (int k = 1; k < self->count; k++) {
+        t[k] = t[k - 1] + step;
+    }
+    char* sub = (char*)self + 0x4;
+    for (int k = 0; k < self->count; k++) {
+        if (t[k] < 0.0f) {
+            t[k] = t[k] + self->length;
+        } else if (t[k] >= self->length) {
+            t[k] = t[k] - self->length;
+        }
+    }
+    if (self->angle != 0.0f) {
+        rot.setAxisRot(D_004FF160_AC20, *(float*)(sub + 0x8));
+    }
+    sSplinePt_AC20* pt = self->points;
+    for (i = 0; i < self->count; i++, pt++) {
+        float rx = 0.0f;
+        float ry = rx;
+        float rz = rx;
+        func_00345248_AC20((char*)self + 0x48, &pt->pos, &pt->dir, &pt->f20, t[i]);
+        pt->f50 = pt->dir.x * pt->dir.x;
+        pt->f54 = pt->dir.y * pt->dir.y;
+        if (self->mode == 2 || self->mode == 3) {
+            rz -= atan2_AC20(pt->dir.y, pt->dir.x);
+        }
+        if (self->mode == 1 || self->mode == 3) {
+            ry += atan2_AC20(pt->dir.z, Sqrt_AC20(pt->f50 + pt->f54));
+        }
+        ang.x = rx;
+        ang.y = ry;
+        ang.z = rz;
+        sSplineInst_AC20* node = self->insts[i];
+        float sx, cx, sy, cy, sz, cz;
+        func_0031BE50(&sx, &cx, ang.x);
+        sSmMat_AC20* m = &node->mat;
+        func_0031BE50(&sy, &cy, ang.y);
+        func_0031BE50(&sz, &cz, ang.z);
+        float sxsy = sx * sy;
+        float cxsz = cx * sz;
+        node->mat.r[0].x = cy * cz;
+        node->mat.r[0].y = -cy * sz;
+        node->mat.r[0].z = sy;
+        node->mat.r[0].w = 0.0f;
+        node->mat.r[1].x = sxsy * cz + cxsz;
+        node->mat.r[1].y = cx * cz - sxsy * sz;
+        node->mat.r[1].z = -sx * cy;
+        node->mat.r[1].w = 0.0f;
+        node->mat.r[2].x = sx * sz - cx * sy * cz;
+        node->mat.r[2].y = cxsz * sy + sx * cz;
+        node->mat.r[2].z = cx * cy;
+        node->mat.r[2].w = 0.0f;
+        node->mat.r[3].x = pt->pos.x;
+        node->mat.r[3].y = pt->pos.y;
+        node->mat.r[3].z = pt->pos.z;
+        node->mat.r[3].w = 1.0f;
+        if (self->angle != 0.0f) {
+            *m = mulMat_AC20(*m, rot);
+        }
+    }
+    self->dirty = 0;
+}
+#endif
 
 INCLUDE_ASM("object/splinemodifier", func_0035B200);
 
