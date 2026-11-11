@@ -2832,7 +2832,217 @@ extern "C" void func_0022A770(sVisOwner_A770* self, sVisList_A770* list, int cou
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/ssxapp", func_0022A830);
+#ifdef SKIP_ASM
+extern char D_948[];
+extern char D_00442130[];
+
+struct sVisCtx_A830 {
+    char* owner;    // 0x0
+    char* inst;     // 0x4
+    int mask;       // 0x8
+    int inside;     // 0xC
+};
+
+struct sVisCell_A830 {
+    int level;      // 0x0
+    int x;          // 0x4
+    int y;          // 0x8
+    int z;          // 0xC
+};
+
+struct sVisNode_A830 {
+    sVisNode_A830* child[8];
+};
+
+struct sVisEntry_A830 {
+    sVisNode_A830* node;
+    int mask;
+};
+
+struct sVisOwner_A830 {
+    char pad_0x0[0x94];
+    int countIn;                    // 0x94
+    sVisEntry_A830 in[0x200];       // 0x98
+    int countPart;                  // 0x1098
+    sVisEntry_A830 part[0x200];     // 0x109C
+};
+
+struct sQ_A830 {
+    float x, y, z, w;
+    sQ_A830() {}
+    sQ_A830(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+static inline float cellScale_A830(int level)
+{
+    union { int i; float f; } s;
+    s.i = (level + 127) << 23;
+    return s.f;
+}
+
+// PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallmsr/cfc2); the PC port needs a C
+// version of the microprogram at D_948 (sphere vs frustum plane test).
+static inline int sphereTest_A830(char* inst, int* mask, sQ_A830* sphere)
+{
+    int res = 1;
+    for (int i = 0; i < *(int*)(inst + 0x10C); i++) {
+        int bit = 1 << i;
+        if (*mask & bit) {
+            sQ_A830* m = (sQ_A830*)(*(char**)(inst + 8 + i * 8) + 0x50);
+            int r;
+            __asm__ __volatile__(
+                "lqc2      $vf1, %1\n"
+                "lqc2      $vf2, %2\n"
+                "lqc2      $vf3, %3\n"
+                "lqc2      $vf4, %4\n"
+                "lqc2      $vf5, %5\n"
+                "lqc2      $vf6, %6\n"
+                "ctc2.ni   %7, $vi27\n"
+                "vnop\n"
+                "vnop\n"
+                "vcallmsr  $vi27\n"
+                "cfc2.i    %0, $vi1\n"
+                : "=r"(r)
+                : "m"(m[0]), "m"(m[1]), "m"(m[2]), "m"(m[3]), "m"(m[4]), "m"(*sphere), "r"((int)D_948 >> 3)
+                : "memory");
+            if (r == 0)
+                return 0;
+            if (r == 2)
+                res = 2;
+            else
+                *mask &= ~bit;
+        }
+    }
+    return res;
+}
+
+static inline void boxResult_A830(int* r)
+{
+    int out, part;
+    __asm__ __volatile__(
+        "cfc2.i    %0, $vi1\n"
+        "cfc2.ni   %1, $vi2\n"
+        : "=r"(part), "=r"(out));
+    if (out != 0)
+        *r = 1;
+    else if (part != 0)
+        *r = 2;
+    else
+        *r = 0;
+}
+
+extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
+{
+    sVisCtx_A830* ctx = (sVisCtx_A830*)vctx;
+    sVisNode_A830* node = (sVisNode_A830*)vnode;
+    sVisCell_A830* cfg = (sVisCell_A830*)vcfg;
+    int vec[4] __attribute__((aligned(16)));
+    sQ_A830 sphere;
+    int mask = ctx->mask;
+    int r;
+    if (ctx->inside != 0) {
+        r = 0;
+        if (mask != 0)
+            { sQ_A830 t; float s = cellScale_A830(cfg->level); t.w = s * 1.2124354839324951f; t.x = ((float)cfg->x + 0.5f) * s; t.y = ((float)cfg->y + 0.5f) * s; t.z = ((float)cfg->z + 0.5f) * s; sphere = t; }
+    } else {
+        vec[0] = cfg->x;
+        vec[1] = cfg->y;
+        vec[2] = cfg->z;
+        vec[3] = (cfg->level + 127) << 23;
+        // PORT: PS2-only VU0 microprogram call (box vs frustum test at 0x570).
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%0)\n"
+            "lqc2      $vf2, 0x0(%1)\n"
+            "lqc2      $vf3, 0x10(%1)\n"
+            "vitof0.xyz $vf1, $vf1\n"
+            "lqc2      $vf10, 0x0(%2)\n"
+            "lqc2      $vf11, 0x10(%2)\n"
+            "lqc2      $vf12, 0x20(%2)\n"
+            "lqc2      $vf13, 0x30(%2)\n"
+            "vmulaw.xyz ACC, $vf1, $vf1w\n"
+            "vmaddw.xyz $vf15, $vf2, $vf1w\n"
+            "vmulaw.xyz ACC, $vf1, $vf1w\n"
+            "vmaddw.xyz $vf16, $vf3, $vf1w\n"
+            "vcallms   0x570\n"
+            :
+            : "r"(vec), "r"(D_00442130), "r"(ctx->owner + 0x10)
+            : "memory");
+        if (mask != 0)
+            { sQ_A830 t; float s = cellScale_A830(cfg->level); t.w = s * 1.2124354839324951f; t.x = ((float)cfg->x + 0.5f) * s; t.y = ((float)cfg->y + 0.5f) * s; t.z = ((float)cfg->z + 0.5f) * s; sphere = t; }
+        boxResult_A830(&r);
+    }
+    bool out_ = r == 1;
+    if (out_)
+        return;
+    if (mask != 0 && sphereTest_A830(ctx->inst, &mask, &sphere) == 0)
+        return;
+    if (r == 0) {
+        ((sVisOwner_A830*)ctx->owner)->in[((sVisOwner_A830*)ctx->owner)->countIn].node = node;
+        ((sVisOwner_A830*)ctx->owner)->in[((sVisOwner_A830*)ctx->owner)->countIn].mask = mask;
+        ((sVisOwner_A830*)ctx->owner)->countIn++;
+        sVisCtx_A830 c;
+        c.inside = 1;
+        c.owner = ctx->owner;
+        c.inst = ctx->inst;
+        c.mask = mask;
+        if (cfg->level != 11) {
+            sVisCell_A830 n;
+            n.level = cfg->level - 1;
+            n.x = cfg->x * 2;
+            n.y = cfg->y * 2;
+            n.z = cfg->z * 2;
+            if (node->child[0]) func_0022A830(&c, node->child[0], &n);
+            n.x++;
+            if (node->child[4]) func_0022A830(&c, node->child[4], &n);
+            n.y++;
+            if (node->child[6]) func_0022A830(&c, node->child[6], &n);
+            n.x--;
+            if (node->child[2]) func_0022A830(&c, node->child[2], &n);
+            n.z++;
+            if (node->child[3]) func_0022A830(&c, node->child[3], &n);
+            n.x++;
+            if (node->child[7]) func_0022A830(&c, node->child[7], &n);
+            n.y--;
+            if (node->child[5]) func_0022A830(&c, node->child[5], &n);
+            n.x--;
+            if (node->child[1]) func_0022A830(&c, node->child[1], &n);
+        }
+    } else if (r == 2) {
+        ((sVisOwner_A830*)ctx->owner)->part[((sVisOwner_A830*)ctx->owner)->countPart].node = node;
+        ((sVisOwner_A830*)ctx->owner)->part[((sVisOwner_A830*)ctx->owner)->countPart].mask = mask;
+        ((sVisOwner_A830*)ctx->owner)->countPart++;
+        sVisCtx_A830 c;
+        c.inside = 0;
+        c.owner = ctx->owner;
+        c.inst = ctx->inst;
+        c.mask = mask;
+        if (cfg->level != 11) {
+            sVisCell_A830 n;
+            n.level = cfg->level - 1;
+            n.x = cfg->x * 2;
+            n.y = cfg->y * 2;
+            n.z = cfg->z * 2;
+            if (node->child[0]) func_0022A830(&c, node->child[0], &n);
+            n.x++;
+            if (node->child[4]) func_0022A830(&c, node->child[4], &n);
+            n.y++;
+            if (node->child[6]) func_0022A830(&c, node->child[6], &n);
+            n.x--;
+            if (node->child[2]) func_0022A830(&c, node->child[2], &n);
+            n.z++;
+            if (node->child[3]) func_0022A830(&c, node->child[3], &n);
+            n.x++;
+            if (node->child[7]) func_0022A830(&c, node->child[7], &n);
+            n.y--;
+            if (node->child[5]) func_0022A830(&c, node->child[5], &n);
+            n.x--;
+            if (node->child[1]) func_0022A830(&c, node->child[1], &n);
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/ssxapp", func_0022ADD8);
