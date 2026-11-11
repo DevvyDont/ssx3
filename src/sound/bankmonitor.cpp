@@ -1434,7 +1434,84 @@ extern "C" void func_002AE768(unsigned int idx, int a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE7A8);
+#ifdef SKIP_ASM
+struct sBankEnt_2AE7A8 { int f0; int f4; int f8; };
+extern "C" int func_002AE230(int a, int b);
+// PORT: the unit defines func_002AF370 as void; its body returns __fixunssfsi's result.
+unsigned int func_002AF370_r(void) __asm__("func_002AF370");
+extern "C" int func_002AF6C0(int idx, int v);
+extern "C" void func_003B58A0(void);
+extern "C" void func_003B58D8(void);
+extern "C" int func_003B6820(int h, int id, void* desc);
+extern "C" int func_003B78D8(int h, int a, int b, unsigned int t);
+// PORT: the unit declares func_003B78F8 as void; the caller leaves $v0 live (int return).
+int func_003B78F8_r(int) __asm__("func_003B78F8");
+extern "C" int func_003B7E10(int h, int a, int b, unsigned int t);
+
+extern "C" int func_002AE7A8(int idx, int a1, int a2, unsigned int key, int a4, signed char vol, int a6, int a7)
+{
+    int h = -1;
+    // NOTE: retail rematerialises `li v0,1` right before each 0x65 store (after unrelated loads):
+    // a function-scope local set early whose pseudo gets no callee-saved register (all nine are taken),
+    // so reload re-creates the constant at each use.
+    signed char dirty = 1;
+    char* m = (char*)D_004D3E98[idx];
+    if (vol >= 0)
+    {
+        *(signed char*)(m + 0x30) = vol;
+        func_002AF6C0(idx, vol);
+    }
+    int r;
+    if (*(signed char*)(m + 0x64) != 0)
+    {
+        if (a6 <= h)
+            a6 = 0;
+        int s = func_002AE230(idx, key >> 16);
+        if (s >= 0)
+            h = D_004D3EF8[s].f4;
+        if (h < 0)
+            return -1;
+        *(int*)(m + 4) = (key & 0xFFFF) + a6 - 1;
+        func_003B58A0();
+        r = func_003B6820(h, *(int*)(m + 4), m + 0x30);
+        func_003B58D8();
+        D_004D3EF8[s].f24 = func_002AF370_r();
+        *(int*)(m + 0) = h;
+        (*(sBankEnt_2AE7A8**)(m + 0x6C))[0].f4 = r;
+        (*(sBankEnt_2AE7A8**)(m + 0x6C))[0].f0 = a4;
+        *(signed char*)(m + 0x65) = dirty;
+    }
+    else
+    {
+        unsigned int t = key << 7;
+        int j;
+        if (a7)
+        {
+            func_003B78F8_r(*(int*)(m + 0));
+            for (j = *(signed char*)(m + 0x66) - 1; j > 0; j--)
+            {
+                (*(sBankEnt_2AE7A8**)(m + 0x6C))[j - 1].f4 = -1;
+                (*(sBankEnt_2AE7A8**)(m + 0x6C))[j - 1].f0 = -1;
+            }
+        }
+        if (*(int*)(m + 0x28) && t < *(unsigned int*)(m + 0x2C))
+            r = func_003B7E10(*(int*)(m + 0), a1, *(int*)(m + 0x28), t);
+        else
+            r = func_003B78D8(*(int*)(m + 0), a1, a2, t);
+        if (r >= 0)
+        {
+            for (j = *(signed char*)(m + 0x66) - 1; j > 0; j--)
+                (*(sBankEnt_2AE7A8**)(m + 0x6C))[j] = (*(sBankEnt_2AE7A8**)(m + 0x6C))[j - 1];
+            (*(sBankEnt_2AE7A8**)(m + 0x6C))[0].f4 = r;
+            (*(sBankEnt_2AE7A8**)(m + 0x6C))[0].f0 = a4;
+        }
+        *(signed char*)(m + 0x65) = dirty;
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE9F8);
@@ -3451,7 +3528,88 @@ void* func_002B1758(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1780);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_002AA870(void* self, int idx, int heap, char* mem, int size, int n, int m);
+extern "C" int func_002AB128(void* self, int idx);
+
+struct sEntry_1780 {
+    signed char kind;
+    char pad[0x17];
+};
+struct sQuad_1780 {
+    int a;
+    int b;
+    int c;
+    int d;
+};
+// Same layout as sStack_A910 (streamsys) / sStack_C430 (bankmanager): a cSndPlayOpts-style state stack.
+struct sStack_1780 {
+    int field_0x0;                  // 0x1D8
+    sEntry_1780 cur;                // 0x1DC
+    volatile int depth;             // 0x1F4
+    sEntry_1780* entries;           // 0x1F8
+    int flags[4];                   // 0x1FC
+    int* a34;
+    int* a38;
+    int* a3C;
+    char a40[4][8];
+    int* a60;
+    int* a64;
+    int* a68;
+    int* a6C;
+    sQuad_1780* a70;
+    int* a74;
+    int* a78;
+    int* a7C;
+    int* a80;
+    int* a84;
+};
+struct sMgr_1780 {
+    char pad_0x0[0x1D8];
+    sStack_1780 st;                 // 0x1D8
+};
+
+// The stream system: *D_004A37EC is the system object, whose first word points at the manager.
+extern sMgr_1780*** D_004A37EC_1780 __asm__("D_004A37EC");
+
+// Pushes a state, makes stream instance 2 from `entry`, then pops the state again.
+extern "C" int func_002B1780(sEntry_1780* entry, int n, int m, char* mem, int size)
+{
+    sMgr_1780* mg = **D_004A37EC_1780;
+    sStack_1780* st = &mg->st;
+    mg->st.depth++;
+    st->entries[mg->st.depth] = mg->st.cur;
+    mg->st.flags[mg->st.depth] = 0;
+    st->a34[mg->st.depth] = 0;
+    st->a38[mg->st.depth] = st->entries[mg->st.depth].kind;
+    st->a3C[mg->st.depth] = 0;
+    func_00416210((char*)st + mg->st.depth * 8 + 0x40, 0, 8);
+    st->a60[mg->st.depth] = 0;
+    st->a64[mg->st.depth] = 0;
+    st->a68[mg->st.depth] = 0;
+    st->a6C[mg->st.depth] = 0;
+    st->a70[mg->st.depth].b = 0;
+    st->a70[mg->st.depth].a = 100;
+    st->a70[mg->st.depth].c = 90;
+    st->a70[mg->st.depth].d = 50;
+    st->a74[mg->st.depth] = 0;
+    st->a80[mg->st.depth] = 0;
+    st->a84[mg->st.depth] = 0;
+    st->a78[mg->st.depth] = 127;
+    st->a7C[mg->st.depth] = 1;
+    {
+        sMgr_1780* m2 = **D_004A37EC_1780;
+        int off = m2->st.depth * (int)sizeof(sEntry_1780);
+        *(sEntry_1780*)((char*)m2->st.entries + off) = *entry;
+    }
+    func_002AA870(*D_004A37EC_1780, 2, 0, mem, size, n, m);
+    (**D_004A37EC_1780)->st.depth--;
+    return func_002AB128(*D_004A37EC_1780, 2);
+}
+#endif
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1A70);
 #ifdef SKIP_ASM

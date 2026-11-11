@@ -2264,7 +2264,185 @@ extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F4DB8);
+#ifdef SKIP_ASM
+extern "C" int func_002EE220(int);
+extern "C" float func_002EE070(int);
+extern "C" float func_002EE0B8(int);
+extern "C" void func_0031BE50(float, float*, float*);
+
+struct sV4_4DB8 {
+    float x, y, z, w;
+    sV4_4DB8() {}
+    sV4_4DB8(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sRect_4DB8 {
+    float x, y, w, h;
+};
+
+struct sCam_4DB8 {
+    sRect_4DB8 vp;
+    sV4_4DB8 m[4];
+    char pad50[8];
+    float farClip;
+    void MulVec(sV4_4DB8* out, const sV4_4DB8& v) const
+    {
+        *out = v;
+        out->x = v.x * m[0].x + v.y * m[0].y + v.z * m[0].z + v.w * m[0].w;
+        out->y = v.x * m[1].x + v.y * m[1].y + v.z * m[1].z + v.w * m[1].w;
+        out->z = v.x * m[2].x + v.y * m[2].y + v.z * m[2].z + v.w * m[2].w;
+        out->w = v.x * m[3].x + v.y * m[3].y + v.z * m[3].z + v.w * m[3].w;
+    }
+};
+
+struct sSun_4DB8 {
+    sRect_4DB8 rect;
+    sRect_4DB8 clip;
+    float f20;
+    float depth;
+    char pad28[4];
+    unsigned short visible;
+    unsigned short onScreen;
+    char pad30[0x1F0 - 0x30];
+    sV4_4DB8 screen;
+    char pad200[4];
+    float intensity;
+};
+
+class cGfx_4DB8 {
+public:
+    char pad[0x10D8];
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
+    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
+    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
+    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
+    virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23();
+    virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27();
+    virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31();
+    virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35();
+    virtual void v36(); virtual void v37(); virtual void v38(); virtual void v39();
+    virtual void v40(); virtual void v41(); virtual void v42(); virtual void v43();
+    virtual void v44(); virtual void v45(); virtual void v46(); virtual void v47();
+    virtual void v48(); virtual void v49(); virtual void v50(); virtual void v51();
+    virtual void v52(); virtual void v53(); virtual void v54(); virtual void v55();
+    virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59();
+    virtual void v60(); virtual void v61(); virtual void v62(); virtual void v63();
+    virtual void v64(); virtual void v65(); virtual void v66(); virtual void v67();
+    virtual void v68(); virtual void v69(); virtual void v70(); virtual void v71();
+    virtual void v72(); virtual void v73(); virtual void v74(); virtual void v75();
+    virtual void v76(); virtual void v77(); virtual void v78(); virtual void v79();
+    virtual void v80(); virtual void v81(); virtual void v82(); virtual void v83();
+    virtual void v84(); virtual void v85(); virtual void v86(); virtual void v87();
+    virtual void v88(); virtual void v89();
+    virtual int IsCulled(const sV4_4DB8&);
+    virtual sV4_4DB8 Project(const sV4_4DB8&);
+};
+
+extern cGfx_4DB8* D_004A5B80_4DB8 __asm__("D_004A5B80");
+
+// PORT: PS2-only VU0 inline asm (in-place vector * scalar).
+static inline void ScaleEq_4DB8(sV4_4DB8& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(v), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector add).
+static inline void AddEq_4DB8(sV4_4DB8& a, const sV4_4DB8& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+static inline float clamp_4DB8(float v, float lo, float hi)
+{
+    return (v >= lo) ? (v <? hi) : lo; // PORT: g++ <? operator
+}
+
+extern "C" void func_002F4DB8(sSun_4DB8* self, sCam_4DB8* cam, int flag)
+{
+    cGfx_4DB8* g = D_004A5B80_4DB8;
+    if (func_002EE220(6) == -1) {
+        self->visible = 0;
+        self->onScreen = 0;
+        return;
+    }
+    float dist = cam->farClip - 500.0f;
+    int id = !flag ? 6 : 7;
+    float a = func_002EE0B8(id) * 0.01745329424738884f;
+    float b = func_002EE070(id) * 0.01745329424738884f;
+    float sa, ca, sb, cb;
+    if (a == 0.0f && b == 0.0f) {
+        func_0031BE50(1.8675024509429932f, &sa, &ca);
+        func_0031BE50(0.27925270795822144f, &sb, &cb);
+    } else {
+        func_0031BE50(a, &sa, &ca);
+        func_0031BE50(b, &sb, &cb);
+    }
+    sV4_4DB8 dir;
+    sV4_4DB8 sun;
+    {
+        // PORT: PS2-only VU0 inline asm (dir = row 3 of the view matrix * -1; written out in place:
+        // an inline helper's parameter/frame pseudo keeps &temp in an s-reg up to the Project call).
+        sV4_4DB8 v = cam->m[3];
+        sV4_4DB8 r;
+        int t;
+        __asm__(
+            "mfc1      %1, %3\n"
+            "lqc2      $vf4, %2\n"
+            "qmtc2.ni  %1, $vf3\n"
+            "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+            "sqc2      $vf5, %0\n"
+            : "=m"(r), "=&r"(t)
+            : "m"(v), "f"(-1.0f)
+            : "memory");
+        dir = r;
+    }
+    cam->MulVec(&sun, dir);
+    dir = sun;
+    dir.w = 1.0f;
+    sun.x = ca * cb;
+    sun.y = sa * cb;
+    sun.z = sb;
+    sun.w = 0.0f;
+    ScaleEq_4DB8(sun, dist);
+    AddEq_4DB8(sun, dir);
+    if (g->IsCulled(sun)) {
+        self->visible = 0;
+        self->onScreen = 0;
+        self->intensity = 0.0f;
+        return;
+    }
+    self->visible = 1;
+    self->onScreen = 1;
+    self->screen = g->Project(sun);
+    self->rect.x = self->screen.x - 8.0f;
+    self->rect.y = self->screen.y - 8.0f;
+    self->rect.w = 16.0f;
+    self->rect.h = 16.0f;
+    self->clip = self->rect;
+    self->clip.x = clamp_4DB8(self->clip.x, 0.0f, cam->vp.x + cam->vp.w - 16.0f);
+    self->clip.y = clamp_4DB8(self->clip.y, 0.0f, cam->vp.x + cam->vp.h - 16.0f);
+    self->depth = self->screen.z;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F5148);

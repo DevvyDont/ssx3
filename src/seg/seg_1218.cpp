@@ -6075,7 +6075,105 @@ extern "C" void func_0010B0E8(char* self, float t)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010B250);
+#ifdef SKIP_ASM
+struct sPad_B250 {
+    unsigned int pad0 : 12;
+    unsigned int b12 : 1;
+    unsigned int pad13 : 1;
+    unsigned int b14 : 1;
+    unsigned int pad15 : 1;
+    unsigned int b16 : 8;
+    int b24 : 6;
+    unsigned int pad30 : 2;
+    int w0 : 6;
+    unsigned int pad6 : 6;
+    int w12 : 6;
+};
+
+// Pad stick setter (an inline accessor: the value is expanded before the field mask).
+static inline void SetW12_B250(sPad_B250* pad, int v)
+{
+    pad->w12 = v;
+}
+
+int AIrand();
+extern "C" int func_00311AE8(void*, int);
+extern "C" void func_0010B0E8(char*, float);
+extern "C" int func_0010CAD8(char*, float);
+
+// Returns -1 only when no trick is queued, and has no value otherwise (the caller ignores it): the retail
+// tail keeps `lw E0C; li v0,-1` with no branch. The noop `v0 = -1` return arm survives reload as a USE,
+// so jump2 only deletes the branch after sched2 and the compare loads stay.
+extern "C" int func_0010B250(char* self, sPad_B250* pad)
+{
+    char* obj = *(char**)(*(char**)(self + 0x18) + 0x788);
+    int t = *(int*)(obj + 0xAC);
+    int ok = 0;
+    if (t == 1 || t == 3)
+        ok = 1;
+    float gap;
+    if (ok) {
+        gap = *(float*)(obj + 0x98) - *(float*)(obj + 0xA0);
+        if (gap > 15.0f)
+            (*(int*)(*(char**)(self + 0x18) + 0x484))++;
+        else
+            *(int*)(*(char**)(self + 0x18) + 0x484) = 0;
+    } else {
+        gap = 100.0f;
+        *(int*)(*(char**)(self + 0x18) + 0x484) = 0;
+    }
+    if (*(int*)(*(char**)(self + 0x18) + 0x484) >= 31) {
+        *(int*)(*(char**)(self + 0x18) + 0x484) = 0;
+        pad->b12 = 1;
+    } else {
+        if (*(int*)(self + 0xE14) == 0) {
+            func_0010B0E8(self, gap);
+            if (*(float*)(self + 0xE34) <= 0.0f)
+                *(float*)(self + 0xE34) = 15.0f;
+            if (*(int*)(self + 0xE18)) {
+                *(float*)(self + 0xE34) = gap;
+                *(int*)(self + 0xE18) = 0;
+            } else if (*(int*)(self + 0xE0C) == -1 && gap > 0.5f && gap < *(float*)(self + 0xE34) &&
+                       func_00311AE8(*(void**)(*(char**)(self + 0x18) + 0x784), 2) != 0x14) {
+                *(int*)(self + 0xE0C) = func_0010CAD8(self, gap);
+            } else {
+                int stop = 0;
+                if (*(int*)(self + 0xE20) && gap < 1.0f)
+                    stop = 1;
+                if (stop) {
+                    *(int*)(self + 0xE28) = 0;
+                    *(int*)(self + 0xE0C) = -1;
+                } else if (gap <= *(float*)(self + 0xE2C) + 0.30000001192092896f ||
+                           (*(float*)(self + 0xE30) - gap > 2.0f && *(int*)(self + 0xE24) == 0)) {
+                    *(int*)(self + 0xE28) = 0;
+                    *(int*)(self + 0xE0C) = -1;
+                    *(int*)(self + 0xE24) = 0;
+                }
+            }
+        } else if (*(float*)(self + 0xE3C) == 0.0f && *(int*)(self + 0xE0C) == -1) {
+            *(int*)(self + 0xE0C) = (unsigned int)AIrand() % 15;
+            if (AIrand() & 1)
+                *(int*)(self + 0xE28) = 1;
+        }
+        float* ctl = (float*)(self + 0xDF0);
+        pad->b24 = (int)(ctl[0x12] * 31.0f);
+        pad->w0 = (int)(ctl[0x13] * 31.0f);
+        pad->b16 = *(int*)(self + 0xE0C);
+        if (*(int*)(self + 0xE24))
+            pad->b14 = 1;
+        else if (*(int*)(self + 0xE28))
+            pad->b14 = 1;
+        else
+            pad->b14 = 0;
+        if (*(int*)(self + 0xE20) == 1)
+            SetW12_B250(pad, -0x1F);
+        if (*(int*)(self + 0xE0C) == -1)
+            return -1;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", func_0010B590);
