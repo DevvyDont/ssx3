@@ -1576,7 +1576,228 @@ extern "C" void* func_00173678(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001736E0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
+
+
+// 2-float vector (the horizontal part of a direction, for pitch = atan2(z, |xy|)).
+
+
+extern t4Vector D_004FF160_36E0 __asm__("D_004FF160");
+
+extern "C" float func_0031C228(float x);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+// PORT: PS2-only VU0 inline asm (d += b).
+static inline void AddEq_1736E0(t4Vector& d, const t4Vector& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(d)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (d = v * s).
+static inline void ScaleTo_1736E0(t4Vector& d, const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(v), "f"(s)
+        : "memory");
+    d = r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline t4Vector Sub_1736E0(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b); g++ named-return-value extension.
+static inline t4Vector SubN_1736E0(const t4Vector& a, const t4Vector& b) return r
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_1736E0(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float Sqrt_1736E0(float x)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2-only inline asm (float absolute value).
+static inline float Abs_1736E0(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float ffloor_1736E0(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+static inline float Len2_1736E0(const sVec2& v)
+{
+    return Sqrt_1736E0(v.x * v.x + v.y * v.y);
+}
+
+static inline float Atan2_1736E0(float y, float x)
+{
+    if (x == 0.0f) {
+        if (y == 0.0f)
+            return y;
+        if (y >= 0.0f)
+            return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float a = func_0031C228(y / x);
+    if (x < 0.0f) {
+        if (y > 0.0f)
+            a += 3.1415927410125732f;
+        else
+            a -= 3.1415927410125732f;
+    }
+    return a;
+}
+
+static inline float Wrap_1736E0(float v)
+{
+    return v - ffloor_1736E0(v * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+}
+
+extern "C" void func_001736E0(char* self)
+{
+    t4Vector a, b, c;
+    char* o = *(char**)(self + 0x30);
+    sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[1];
+    ((void (*)(void*, void*))e->fn)(&a, o + e->delta);
+    o = *(char**)(self + 0x30);
+    e = &(*(sVEntry<t4Vector(void*)>**)o)[3];
+    ((void (*)(void*, void*))e->fn)(&b, o + e->delta);
+    o = *(char**)(self + 0x30);
+    e = &(*(sVEntry<t4Vector(void*)>**)o)[4];
+    ((void (*)(void*, void*))e->fn)(&c, o + e->delta);
+    {
+        t4Vector t;
+        ScaleTo_1736E0(t, D_004FF160_36E0, *(float*)(self + 0x6C));
+        AddEq_1736E0(a, t);
+        ScaleTo_1736E0(t, c, *(float*)(self + 0x74));
+        AddEq_1736E0(a, t);
+    }
+    *(t4Vector*)(self + 0x20) = a;
+    t4Vector d = Sub_1736E0(a, *(t4Vector*)(self + 0x40));
+    float yawD = Atan2_1736E0(d.y, d.x);
+    float yawC = Atan2_1736E0(c.y, c.x);
+    float diff = Wrap_1736E0(yawC) - yawD;
+    float wd = Wrap_1736E0(diff);
+    float len3 = Length_1736E0(d);
+    float dd = *(float*)(self + 0x70) - len3;
+    float yawN = yawD + wd * *(float*)(self + 0x5C) * 0.01666666753590107f;
+    float dist;
+    if (Abs_1736E0(dd) > 5000.0f) {
+        dist = len3 + dd;
+    } else {
+        float k = Length_1736E0(b) * 0.007199999410659075f + 8.0f;
+        float x;
+        if (k >= 20.0f) {
+            x = dd * k * 0.01666666753590107f;
+        } else {
+            x = dd * 0.3333333432674408f;
+        }
+        dist = len3 + x;
+    }
+    float pitchD = Atan2_1736E0(-d.z, Len2_1736E0(sVec2(d.x, d.y)));
+    float pitchC = Atan2_1736E0(c.z, Len2_1736E0(sVec2(c.x, c.y)));
+    float tp = pitchC * -*(float*)(self + 0x58) + *(float*)(self + 0x78) * 0.01745329424738884f;
+    float pitchN = pitchD + (Wrap_1736E0(tp) - pitchD) * *(float*)(self + 0x60) * 0.01666666753590107f;
+    t4Vector dir;
+    t4Vector n;
+    float sc0, sc1, sc2, sc3;
+    func_0031BE50(&sc0, &sc1, yawN);
+    func_0031BE50(&sc2, &sc3, pitchN);
+    dir.x = sc3 * sc1;
+    dir.y = sc3 * sc0;
+    dir.z = -sc2;
+    dir.w = 0.0f;
+    {
+        t4Vector t;
+        ScaleTo_1736E0(t, dir, dist);
+        n = SubN_1736E0(a, t);
+    }
+    *(t4Vector*)(self + 0x40) = n;
+    n = SubN_1736E0(a, *(t4Vector*)(self + 0x40));
+    float yawE = Atan2_1736E0(n.y, n.x);
+    float oy = *(float*)(self + 0x50);
+    *(float*)(self + 0x50) = oy + Wrap_1736E0(yawE - oy) * *(float*)(self + 0x64) * 0.01666666753590107f;
+    float pitchE = Atan2_1736E0(n.z, Len2_1736E0(sVec2(n.x, n.y)));
+    float op = *(float*)(self + 0x54);
+    *(float*)(self + 0x54) = op + (pitchE - op) * *(float*)(self + 0x68) * 0.01666666753590107f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00173E40);
@@ -1761,9 +1982,352 @@ void* func_001741D8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174200);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
 
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
+
+
+// 2-float vector (the horizontal part of a direction, for pitch = atan2(z, |xy|)).
+
+
+extern t4Vector D_004FF160_4200 __asm__("D_004FF160");
+
+extern "C" float func_0031C228(float x);
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline t4Vector Add_174200(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (d = a + b).
+static inline void AddTo_174200(t4Vector& d, const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    d = r;
+}
+
+// PORT: PS2-only VU0 inline asm (d = v * s).
+static inline void ScaleTo_174200(t4Vector& d, const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(v), "f"(s)
+        : "memory");
+    d = r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline t4Vector Sub_174200(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline t4Vector Scale_174200(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float Sqrt_174200(float x)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline float Len2_174200(const sVec2& v)
+{
+    return Sqrt_174200(v.x * v.x + v.y * v.y);
+}
+
+static inline float Atan2_174200(float y, float x)
+{
+    if (x == 0.0f) {
+        if (y == 0.0f)
+            return y;
+        if (y >= 0.0f)
+            return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float a = func_0031C228(y / x);
+    if (x < 0.0f) {
+        if (y > 0.0f)
+            a += 3.1415927410125732f;
+        else
+            a -= 3.1415927410125732f;
+    }
+    return a;
+}
+
+extern "C" void func_00174200(char* self)
+{
+    char* act = *(char**)(self + 0x80);
+    *(float*)(self + 0x70) = *(float*)(act + 0x10);
+    *(float*)(self + 0x6C) = *(float*)(act + 0x18);
+    *(float*)(self + 0x78) = *(float*)(act + 0x1C);
+    *(float*)(self + 0x00) = *(float*)(act + 0x14);
+    *(float*)(self + 0x74) = *(float*)(act + 0x20);
+    t4Vector p;
+    if (*(int*)(act + 0x24) == 1) {
+        p.x = *(float*)(act + 0x28);
+        p.y = *(float*)(act + 0x2C);
+        p.z = *(float*)(act + 0x30);
+        p.w = 1.0f;
+    } else {
+        t4Vector c, a, t, b;
+        char* o = *(char**)(self + 0x30);
+        sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[1];
+        ((void (*)(void*, void*))e->fn)(&a, o + e->delta);
+        float k = *(float*)(self + 0x74);
+        o = *(char**)(self + 0x30);
+        e = &(*(sVEntry<t4Vector(void*)>**)o)[4];
+        ((void (*)(void*, void*))e->fn)(&b, o + e->delta);
+        ScaleTo_174200(t, b, k);
+        AddTo_174200(c, a, t);
+        t4Vector t2;
+        ScaleTo_174200(t2, D_004FF160_4200, *(float*)(self + 0x6C));
+        AddTo_174200(p, c, t2);
+    }
+    *(t4Vector*)(self + 0x20) = p;
+    {
+        char* o = *(char**)(*(char**)(self + 0x80) + 8);
+        sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)(o + 0x24))[6];
+        ((void (*)(void*, void*))e->fn)(o + e->delta, self + 0x40);
+    }
+    t4Vector d = Sub_174200(p, *(t4Vector*)(self + 0x40));
+    *(float*)(self + 0x50) = Atan2_174200(d.y, d.x);
+    *(float*)(self + 0x54) = Atan2_174200(d.z, Len2_174200(sVec2(d.x, d.y)));
+}
+#endif
+
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001744B0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
+
+
+// 2-float vector (the horizontal part of a direction, for pitch = atan2(z, |xy|)).
+
+
+extern t4Vector D_004FF160_44B0 __asm__("D_004FF160");
+
+extern "C" float func_0031C228(float x);
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline t4Vector Add_1744B0(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (d = a + b).
+static inline void AddTo_1744B0(t4Vector& d, const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    d = r;
+}
+
+// PORT: PS2-only VU0 inline asm (d = v * s).
+static inline void ScaleTo_1744B0(t4Vector& d, const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(v), "f"(s)
+        : "memory");
+    d = r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline t4Vector Sub_1744B0(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline t4Vector Scale_1744B0(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: sqrt.s (sqrtf without errno check)
+static inline float Sqrt_1744B0(float x)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline float Len2_1744B0(const sVec2& v)
+{
+    return Sqrt_1744B0(v.x * v.x + v.y * v.y);
+}
+
+static inline float Atan2_1744B0(float y, float x)
+{
+    if (x == 0.0f) {
+        if (y == 0.0f)
+            return y;
+        if (y >= 0.0f)
+            return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float a = func_0031C228(y / x);
+    if (x < 0.0f) {
+        if (y > 0.0f)
+            a += 3.1415927410125732f;
+        else
+            a -= 3.1415927410125732f;
+    }
+    return a;
+}
+
+extern "C" void func_001732E8(void* self, long a1);
+
+extern "C" void func_001744B0(char* self, long a1)
+{
+    {
+        char* o = *(char**)(*(char**)(self + 0x30) + 4) + 0x6C0;
+        sVEntry<long(void*)>* e = &(*(sVEntry<long(void*)>**)o)[7];
+        if (e->fn(o + e->delta) != a1)
+            return;
+    }
+    char* act = *(char**)(self + 0x80);
+    t4Vector p;
+    if (*(int*)(act + 0x24) == 1) {
+        p.x = *(float*)(act + 0x28);
+        p.y = *(float*)(act + 0x2C);
+        p.z = *(float*)(act + 0x30);
+        p.w = 1.0f;
+    } else {
+        t4Vector c, a, t, b;
+        char* o = *(char**)(self + 0x30);
+        sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[1];
+        ((void (*)(void*, void*))e->fn)(&a, o + e->delta);
+        float k = *(float*)(self + 0x74);
+        o = *(char**)(self + 0x30);
+        e = &(*(sVEntry<t4Vector(void*)>**)o)[4];
+        ((void (*)(void*, void*))e->fn)(&b, o + e->delta);
+        ScaleTo_1744B0(t, b, k);
+        AddTo_1744B0(c, a, t);
+        t4Vector t2;
+        ScaleTo_1744B0(t2, D_004FF160_44B0, *(float*)(self + 0x6C));
+        AddTo_1744B0(p, c, t2);
+    }
+    char* act2 = *(char**)(self + 0x80);
+    *(float*)(self + 0x70) = *(float*)(act2 + 0x10);
+    *(float*)(self + 0x6C) = *(float*)(act2 + 0x18);
+    *(float*)(self + 0x78) = *(float*)(act2 + 0x1C);
+    *(float*)(self + 0x00) = *(float*)(act2 + 0x14);
+    *(float*)(self + 0x74) = *(float*)(act2 + 0x20);
+    func_001732E8(self, a1);
+    {
+        char* o = *(char**)(*(char**)(self + 0x80) + 8);
+        sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)(o + 0x24))[6];
+        ((void (*)(void*, void*))e->fn)(o + e->delta, self + 0x40);
+    }
+    t4Vector d = Sub_1744B0(p, *(t4Vector*)(self + 0x40));
+    *(float*)(self + 0x50) = Atan2_1744B0(d.y, d.x);
+    *(float*)(self + 0x54) = Atan2_1744B0(d.z, Len2_1744B0(sVec2(d.x, d.y)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001747A0);
@@ -3542,7 +4106,161 @@ extern "C" sVec_00177EF8 func_00177EF8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177FC0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
+
+
+extern t4Vector D_004FF160_7FC0 __asm__("D_004FF160");
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline t4Vector ctScale_00177EF8_7FC0(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline t4Vector ctAdd_00177EF8_7FC0(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// (prototype from their definition at line 4013)
+extern "C" t4Vector func_00177EF8_7FC0(void* self) __asm__("func_00177EF8");
+
+int func_0011FE98_7FC0(void*) __asm__("func_0011FE98__FPv");
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline t4Vector ctSub_7FC0(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float ctLength_7FC0(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector *= 1/len).
+static inline void ctDivEq_7FC0(t4Vector& v, float len)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(v), "=&r"(t)
+        : "m"(v), "f"(len));
+}
+
+static inline t4Vector* ctGetA_7FC0(void* self)
+{
+    char* o = *(char**)((char*)self + 0x30);
+    sVEntry<t4Vector*(void*)>* e = &(*(sVEntry<t4Vector*(void*)>**)o)[10];
+    return e->fn(o + e->delta);
+}
+
+static inline t4Vector ctGetC_7FC0(void* self)
+{
+    char* o = *(char**)((char*)self + 0x30);
+    sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[4];
+    return e->fn(o + e->delta);
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar, vector by address).
+static inline t4Vector ctScaleP_7FC0(const t4Vector* v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(*v), "f"(s)
+        : "memory");
+    return r;
+}
+
+extern "C" t4Vector func_00177FC0(void* self, const t4Vector& in)
+{
+    t4Vector dir;
+    if (func_0011FE98_7FC0(*(void**)(*(char**)((char*)self + 0x30) + 4)) == 5)
+        dir = *ctGetA_7FC0(self);
+    else
+        dir = in;
+    float len = ctLength_7FC0(dir);
+    if (len < 0.009999999776482582f)
+        dir = ctGetC_7FC0(self);
+    else
+        ctDivEq_7FC0(dir, len);
+    t4Vector v = ctAdd_00177EF8_7FC0(ctScale_00177EF8_7FC0(*(t4Vector*)((char*)self + 0x390), 0.9599999785423279f), ctScale_00177EF8_7FC0(dir, 0.04000002145767212f));
+    len = ctLength_7FC0(v);
+    if (len < 0.019999999552965164f)
+        v = dir;
+    else
+        ctDivEq_7FC0(v, len);
+    *(t4Vector*)((char*)self + 0x390) = v;
+    t4Vector r = ctSub_7FC0(ctAdd_00177EF8_7FC0(func_00177EF8_7FC0(self), ctScaleP_7FC0(&D_004FF160_7FC0, 30.0f)), ctScale_00177EF8_7FC0(v, 250.0f));
+    return r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178208);
@@ -3720,7 +4438,107 @@ extern "C" void func_00178208_v(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001783E0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
+
+
+extern t4Vector D_004FF160_83E0 __asm__("D_004FF160");
+
+// A being: the script/AI-facing interface of a rider, at rider + 0x6C0 (seg/seg_1FBE38; slot order of the
+// prototype's vtable _vt$6cBeing).
+struct tInstanceRecord;
+
+class cBeing {
+public:
+    virtual ~cBeing();
+    virtual const t4Vector* getVelocity() const;
+    virtual int isIntersecting(tInstanceRecord* rec) const;
+    virtual void applyBoost(const t4Vector& impulse);
+    virtual const t4Vector* getPosition() const;
+    virtual const t4Matrix* getTransform() const;
+    virtual int getAIIndex() const;
+    virtual bool isHuman() const;
+    virtual bool isComputer() const;
+    virtual void transport(const t4Matrix& m);
+    virtual void resetToPath();
+    virtual void initForMission(const t4Matrix& m);
+};
+
+// A camera algorithm (cCameraAlgorithm, camera/camera): the vptr follows the base's own data at 0x10; slots by
+// position.
+class cCameraAlgorithm {
+public:
+    char pad_0x00[0xC];
+    int type;                   // 0xC
+    virtual void v01();
+    virtual void v02();
+    virtual void v03(int on);
+    virtual void v04();
+    virtual void v05();
+};
+
+extern "C" void func_00166550(void* self, float a, float b);
+
+extern "C" void f_166C60_1783E0(void* self, long id) __asm__("func_00166C60");
+extern "C" t4Vector f_177FC0_1783E0(void* self, const t4Vector& v) __asm__("func_00177FC0");
+extern "C" t4Vector f_177EF8_1783E0(void* self) __asm__("func_00177EF8");
+
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline t4Vector Add_1783E0(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (*v * s).
+static inline t4Vector ScaleP_1783E0(const t4Vector* v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(*v), "f"(s)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_001783E0(cCameraAlgorithm* self, long id)
+{
+    char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
+    if (id == ((cBeing*)(rider + 0x6C0))->getAIIndex()) {
+        char* o = *(char**)((char*)self + 0x30);
+        sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[4];
+        *(t4Vector*)((char*)self + 0x390) = e->fn(o + e->delta);
+        o = *(char**)((char*)self + 0x30);
+        e = &(*(sVEntry<t4Vector(void*)>**)o)[3];
+        *(t4Vector*)((char*)self + 0x40) = f_177FC0_1783E0(self, e->fn(o + e->delta));
+        *(t4Vector*)((char*)self + 0x20) = Add_1783E0(f_177EF8_1783E0(self), ScaleP_1783E0(&D_004FF160_83E0, 37.0f));
+        f_166C60_1783E0(self, id);
+        func_00166550(self, 559.7440185546875f, 300.0f);
+        self->v05();
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178520);
@@ -3894,7 +4712,64 @@ extern "C" sVec4_1785F0 func_001785F0_impl(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00178758);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
+
+
+extern t4Vector D_004FF160_8758 __asm__("D_004FF160");
+
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline t4Vector Add_178758(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (*v * s).
+static inline t4Vector ScaleP_178758(const t4Vector* v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(*v), "f"(s)
+        : "memory");
+    return r;
+}
+
+static inline t4Vector CallA_178758(char* self)
+{
+    char* o = *(char**)(self + 0x30);
+    sVEntry<t4Vector(void*)>* e = &(*(sVEntry<t4Vector(void*)>**)o)[1];
+    return e->fn(o + e->delta);
+}
+
+extern "C" t4Vector f_178758(char* self) __asm__("func_00178758");
+extern "C" t4Vector f_178758(char* self)
+{
+    return Add_178758(CallA_178758(self), ScaleP_178758(&D_004FF160_8758, -100.0f));
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001787E0);

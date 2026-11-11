@@ -3489,9 +3489,211 @@ extern "C" int func_001231A8(cRider* self)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_00123210);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
 
+extern t4Vector D_004FF140;
+
+// 16-byte vectors with inline constructors (non-POD siblings of t4Vector). The classes differ only in the order
+// their 4-float constructor stores the components; that order decides the float-register allocation of every
+// caller (merging them changes code), so they are kept apart.
+// sVec4 stores x, y, z, w.
+extern "C" void func_00270970(int a, int b);
+extern "C" void func_00125038(cRider* self);
+extern "C" void func_00111890(void* self);
+extern "C" void func_002F1A00(void* a);
+extern "C" void func_00119368(void* metrix, int flag);
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+
+void func_0011D660_3210(void* self, sVec4* a, sVec4* b, int n, float t) __asm__("func_0011D660");
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix times vector).
+static inline sVec4 MatMulV_3210(const char* m, const t4Vector& v)
+{
+    sVec4 r;
+    __asm__(
+        "lqc2       $vf8, %2\n"
+        "lqc2       $vf4, 0x0(%1)\n"
+        "lqc2       $vf5, 0x10(%1)\n"
+        "lqc2       $vf6, 0x20(%1)\n"
+        "lqc2       $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2       $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "o"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sVec4 Scale_3210(const sVec4& v, float s)
+{
+    sVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void AddEq_3210(sVec4& a, const sVec4& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_3210(const sVec4& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+
+// Inline wrapper: the vector addresses reach func_0011D660 through inline parameters,
+// so they are not CSE'd with the if-chain's temporaries (the target recomputes sp+0x20).
+static inline void SetPath_3210(void* self, sVec4* p, sVec4* d)
+{
+    func_0011D660_3210(self, p, d, 5, 0.0f);
+}
+
+extern "C" void func_00123210_v(cRider* self, char* m) __asm__("func_00123210");
+
+extern "C" void func_00123210_v(cRider* self, char* m)
+{
+    func_00270970(*(int*)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28), self->mAIIndex);
+    sVec4 pos = *(sVec4*)(m + 0x30);
+    sVec4 off(0.0f, 0.0f, 0.0f, 0.0f);
+    int i = self->mAIIndex;
+    if (i == 0) {
+        off = sVec4(2.0f, 0.0f, 0.0f, 0.0f);
+    } else if (i == 1) {
+        off = sVec4(1.0f, 0.0f, 0.0f, 0.0f);
+    } else if (i == 2) {
+        off = sVec4(2.0f, -2.0f, 0.0f, 0.0f);
+    } else if (i == 3) {
+        off = sVec4(2.0f, 2.0f, 0.0f, 0.0f);
+    } else if (i == 4) {
+        off = sVec4(1.0f, -2.0f, 0.0f, 0.0f);
+    } else if (i == 5) {
+        off = sVec4(2.0f, 1.0f, 0.0f, 0.0f);
+    }
+    off = Scale_3210(MatMulV_3210(m, off), 100.0f);
+    AddEq_3210(pos, off);
+    sVec4 dir = MatMulV_3210(m, D_004FF140);
+    func_00119368(self->mMetrix, 1);
+    func_0011FE78_impl(self, 0);
+    func_0011FEC8_impl(self, 0);
+    func_00125038(self);
+    char* sub = (char*)&self->mVtbl;
+    sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
+    char* obj = *(char**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x4) + 0xA0);
+    sVEntry<void(void*, int)>* vtB = *(sVEntry<void(void*, int)>**)(obj + 0x14);
+    char* objB = obj + vtB[3].delta;
+    vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
+    float len = Length_3210(*(sVec4*)&self->mVelocity);
+    SetPath_3210(self, &pos, &dir);
+    self->mVelocity = Scale_3210(sVec4(*(sVec4*)&self->mMatrix.row[1]), len);
+    func_00111890(self->mRiderHandler);
+    func_002F1A00(self->mAttachedEmitterFX);
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_001234D0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
+
+extern t4Vector D_004FF140;
+extern "C" void func_00270970(int a, int b);
+extern "C" void func_00125038(cRider* self);
+extern "C" void func_002F1A00(void* a);
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+
+void func_0011D660_34D0(void* self, t4Vector* a, t4Vector* b, int n, float t) __asm__("func_0011D660");
+
+// PORT: PS2-only VU0 macro-mode asm (4x4 matrix times vector).
+// PORT: g++ named-return-value extension.
+static inline t4Vector MatMulV_34D0(const char* m, const t4Vector& v) return r
+{
+    __asm__(
+        "lqc2       $vf8, %2\n"
+        "lqc2       $vf4, 0x0(%1)\n"
+        "lqc2       $vf5, 0x10(%1)\n"
+        "lqc2       $vf6, 0x20(%1)\n"
+        "lqc2       $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2       $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "o"(v)
+        : "memory");
+}
+
+
+extern "C" void func_001234D0(cRider* self, char* m)
+{
+    t4Vector pos;
+    t4Vector dir;
+    func_00270970(*(int*)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28), self->mAIIndex);
+    pos = *(t4Vector*)(m + 0x30);
+    dir = MatMulV_34D0(m, D_004FF140);
+    func_00119368(self->mMetrix, 1);
+    func_0011FE78_impl(self, 3);
+    func_0011FEC8_impl(self, 0xD);
+    func_0011D660_34D0(self, &pos, &dir, 5, 0.0f);
+    *(int*)((char*)self->mRiderHandler + 0x290) = 2;
+    func_0011FEC8_impl(self, 6);
+    func_00125038(self);
+    func_00111890(self->mRiderHandler);
+    func_002F1A00(self->mAttachedEmitterFX);
+    if ((unsigned int)self->mViewIndex < 2) {
+        char* obj = *(char**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + (self->mViewIndex << 2) + 4) + 0xA8);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(obj + 0x14);
+        vt[4].fn(obj + vt[4].delta);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_001235F8);
