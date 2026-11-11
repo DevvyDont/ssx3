@@ -1911,7 +1911,84 @@ extern "C" void func_0011EB98_impl(cRider* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011F3D8);
+#ifdef SKIP_ASM
+// Two-bone IK: moves bone chain[2] (end effector) toward target (blended by blend), then bends the
+// chain[1] joint and swings the chain[0] root so the end reaches it. Uses the unit's sVec4W / sXf_EB98
+// helpers (func_0011EB98, this function's caller).
+extern "C" sVec4W func_0031BCB0(const sVec4W& a, const sVec4W& b, float t);
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec4W Normalize_F3D8(const sVec4W& v)
+{
+    sVec4W r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: g++ `<?` (min) operator.
+static inline float Clamp_F3D8(float v, float lo, float hi)
+{
+    return lo <= v ? (v <? hi) : lo;
+}
+
+// Point v of transform x's local space, in x's parent space.
+static inline sVec4W XformPoint_F3D8(const sXf_EB98& x, const sVec4& v)
+{
+    return Add_EB98(Rot_EB98(x.rot, Sub_EB98(*(const sVec4W*)&v, D_004FF130)), x.pos);
+}
+
+extern "C" void func_0011F3D8_impl(cRider* self, int* chain, sXf_EB98* target, float blend) __asm__("func_0011F3D8");
+extern "C" void func_0011F3D8_impl(cRider* self, int* chain, sXf_EB98* target, float blend)
+{
+    sXf_EB98* end = (sXf_EB98*)&self->mAnimModel->bones[chain[2]];
+    if (blend == 1.0f) {
+        *end = *target;
+    } else {
+        end->pos = Add_EB98(end->pos, Scale_EB98(Sub_EB98(target->pos, end->pos), blend));
+        end->rot = func_0031BCB0(end->rot, target->rot, blend);
+    }
+    cAnimModel* am = self->mAnimModel;
+    sAnimModelBone* bones = am->bones;
+    float a = sVec4W(am->localPos[chain[1]].x * am->unk_140.x, am->localPos[chain[1]].y * am->unk_140.y,
+                     am->localPos[chain[1]].z * am->unk_140.z, am->localPos[chain[1]].w * am->unk_140.w).x;
+    sXf_EB98* mid = (sXf_EB98*)&bones[chain[1]];
+    float b = sVec4W(am->localPos[chain[2]].x * am->unk_140.x, am->localPos[chain[2]].y * am->unk_140.y,
+                     am->localPos[chain[2]].z * am->unk_140.z, am->localPos[chain[2]].w * am->unk_140.w).x;
+    sXf_EB98* root = (sXf_EB98*)&bones[chain[0]];
+    sVec4W d = Sub_EB98(end->pos, root->pos);
+    float ang = func_0031C128(Clamp_F3D8((Dot_EB98(d, d) - a * a - b * b) * 0.5f / (a * b), -1.0f, 1.0f));
+    sXf_EB98 local;
+    // x-first sVec4 here (the store order shows it); local.pos itself is an sVec4W.
+    (t4Vector&)local.pos = sVec4(a, 0.0f, 0.0f, 1.0f);
+    local.rot = AxisAngle_EB98(*(sVec4W*)&D_004FF160, ang - 1.5707963705062866f);
+    sXf_EB98 t1 = Combine_EB98(*root, local);
+    sVec4W dir = Sub_EB98(XformPoint_F3D8(t1, sVec4(b, 0.0f, 0.0f, 1.0f)), root->pos);
+    sVec4W axis = Cross_EB98(Normalize_F3D8(dir), Normalize_F3D8(d));
+    float len = Length_EB98(axis);
+    if (len > 9.999999747378752e-06f) {
+        DivEq_EB98(axis, len);
+        sVec4W q;
+        q = AxisAngle_EB98(axis, func_0031C128(len));
+        root->rot = QuatMul_EB98(q, root->rot);
+    }
+    *mid = Combine_EB98(*root, local);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", cRider_doLeanPoseAdjust);

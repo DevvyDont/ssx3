@@ -435,7 +435,160 @@ extern "C" void func_002C8CF8(HuffState_8CF8* s)
 
 INCLUDE_ASM("seg/seg_1C9348", func_002C8E48);
 
+//100%
 INCLUDE_ASM("seg/seg_1C9348", func_002C9A48);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct HS_9A48 {
+    signed char used[256];          // 0x0000
+    int clue[0x300];                // 0x0100: nonzero = slot usable as a run clue
+    unsigned int dlen[17];          // 0x0D00 (1-based)
+    unsigned int len[252];          // 0x0D44
+    char pad_0x1134[0x2564 - 0x1134];
+    unsigned int bitnum[256];       // 0x2564
+    unsigned int code[0x112];       // 0x2964
+};
+
+struct HS2_9A48 {
+    char pad_0x0[0x2DB0];
+    unsigned char* src;             // 0x2DB0
+    unsigned char* srcend;          // 0x2DB4
+    char pad_0x2DB8[8];
+    unsigned int ndlen;             // 0x2DC0
+    unsigned int norder;            // 0x2DC4
+    int pad_0x2DC8;
+    unsigned int cur;               // 0x2DCC
+    unsigned int dbase;             // 0x2DD0
+    unsigned int mode;              // 0x2DD4
+    int delta;                      // 0x2DD8
+    int dmin;                       // 0x2DDC
+    int dmax;                       // 0x2DE0
+    int pad_0x2DE4[2];
+    unsigned int order[256];        // 0x2DEC
+};
+
+extern "C" void huffBits_9A48(void* s, void* out, unsigned int code, unsigned int len) __asm__("func_002C8600");
+extern "C" void huffNum_9A48(void* s, void* out, unsigned int v) __asm__("func_002C8A78");
+extern "C" void huffSym_9A48(void* s, void* out, unsigned int sym) __asm__("func_002C8CA8");
+
+// Huffman pack: writes the clue byte, code-length counts and the move-to-front symbol order, then
+// codes src..srcend with literals, clue-coded runs and delta codes, and ends with an end code.
+// Locals are reused the way the original does (run doubles as the MTF cursor, last holds the order
+// value, k is also the "coded as delta" flag, d becomes the delta code index); the register
+// allocation depends on that reuse.
+extern "C" void func_002C9A48(void* vs, void* out, int a)
+{
+    HS_9A48* s = (HS_9A48*)vs;
+    HS2_9A48* t = (HS2_9A48*)vs;
+    unsigned int i;
+    unsigned int k;
+    unsigned int q;
+    unsigned int rem;
+    unsigned int run;
+    unsigned int last;
+    unsigned int mode;
+    unsigned char* p;
+
+    huffBits_9A48(s, out, t->cur, 8);
+    for (i = 1; i <= t->ndlen; i++)
+        huffNum_9A48(s, out, s->dlen[i]);
+    for (i = 0; i < 256; i++)
+        s->used[i] = 0;
+    run = 0xFF;
+    for (i = 0; i < t->norder; i++) {
+        int n = -1;
+        last = t->order[i];
+        do {
+            run = (run + 1) & 0xFF;
+            if (!s->used[run])
+                n++;
+        } while (last != run);
+        s->used[run] = 1;
+        huffNum_9A48(s, out, n);
+    }
+    mode = t->mode;
+    if (mode == 0)
+        t->cur = 32000;
+    p = t->src;
+    last = 0x100;
+    while (p < t->srcend) {
+        i = *p++;
+        if (i == last) {
+            unsigned char* lim = p + 30000;
+            if (t->srcend < lim)
+                lim = t->srcend;
+            run = 0;
+            mode = t->mode;
+            if (p < lim) {
+                do {
+                    i = *p++;
+                    run++;
+                } while (i == last && p < lim);
+            }
+            unsigned int cost1 = run * s->bitnum[last];
+            unsigned int cost2 = 32000;
+            unsigned int cost3 = 32000;
+            if (mode != 0) {
+                if (s->clue[t->cur] != 0) {
+                    cost2 = 20;
+                    if (run < 252)
+                        cost2 = s->bitnum[t->cur] + 3 + s->len[run] * 2;
+                }
+                if (mode >= 2) {
+                    rem = run;
+                    cost3 = 0;
+                    for (k = mode - 1; k != 0; k--) {
+                        if (s->clue[t->cur + k] != 0) {
+                            q = rem / k;
+                            rem -= q * k;
+                            cost3 += q * s->bitnum[t->cur + k];
+                        }
+                    }
+                    if (rem != 0)
+                        cost3 = 32000;
+                }
+            }
+            if (cost1 <= cost2 && cost1 <= cost3) {
+                while (run--)
+                    huffSym_9A48(s, out, last);
+            } else if (cost2 < cost3) {
+                huffBits_9A48(s, out, s->code[t->cur], s->bitnum[t->cur]);
+                huffNum_9A48(s, out, run);
+            } else {
+                rem = run;
+                for (k = mode - 1; k != 0; k--) {
+                    if (s->clue[t->cur + k] != 0) {
+                        q = rem / k;
+                        rem -= q * k;
+                        while (q--)
+                            huffSym_9A48(s, out, t->cur + k);
+                    }
+                }
+            }
+        }
+        k = 0;
+        if (t->delta != 0) {
+            int d = i - last;
+            if (d <= t->dmax && d >= t->dmin) {
+                d = (d - 1) * 2 + t->dbase;
+                if (i < last)
+                    d = ((last - i) - 1) * 2 + t->dbase + 1;
+                if (s->bitnum[d] < s->bitnum[i]) {
+                    huffBits_9A48(s, out, s->code[d], s->bitnum[d]);
+                    k = 1;
+                }
+            }
+        }
+        last = i;
+        if (!k)
+            huffSym_9A48(s, out, i);
+    }
+    huffBits_9A48(s, out, s->code[t->cur], s->bitnum[t->cur]);
+    huffNum_9A48(s, out, 0);
+    huffBits_9A48(s, out, 2, 2);
+    huffBits_9A48(s, out, 0, 7);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1C9348", func_002C9F60);
