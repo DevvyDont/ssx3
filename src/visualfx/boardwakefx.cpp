@@ -2780,7 +2780,348 @@ extern "C" void func_002E39D8(sWkCol39D8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3AF8);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern int D_00534B30[];
+extern signed char D_00535C12[];
+
+struct sVtx_3AF8 {
+    float s, t, q, pad;
+    int r, g, b, a;
+    t4Vector pos;
+    sVtx_3AF8() {}
+};
+
+struct sWkColor_3AF8 {
+    float a, r, g, b;
+};
+
+struct sWake_3AF8 {
+    cRider* rider;              // 0x0
+    float phase;                // 0x4
+    float c0[4];                // 0x8
+    float c1[4];                // 0x18
+    sWkColor_3AF8 color;        // 0x28
+};
+
+extern sRsState_2868 D_00501420_3AF8 __asm__("D_00501420");
+
+// Render context (D_004A289C): state stack at 0xE84, vtable at 0x10D8.
+struct sRCtx_3AF8 {
+    char pad[0xE84];
+    sRsState_2868* top;         // 0xE84
+    char padE88[0xFFC - 0xE88];
+    int tex;                    // 0xFFC
+    char pad1000[0x10D8 - 0x1000];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual float* v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71(int n, sVtx_3AF8* v, int a);
+};
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline t4Vector Scale_3AF8(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline t4Vector Add_3AF8(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline t4Vector Sub_3AF8(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline void Set4_3AF8(t4Vector& v, float x, float y, float z, float w)
+{
+    v.x = x;
+    v.y = y;
+    v.z = z;
+    v.w = w;
+}
+
+static inline void rsSetA_3AF8(sRCtx_3AF8* ctx, int mask, int shift, int v)
+{
+    ctx->top->flagsA = (ctx->top->flagsA & ~mask) | ((v << shift) & mask);
+}
+
+static inline void rsSetB_3AF8(sRCtx_3AF8* ctx, int mask, int shift, int v)
+{
+    ctx->top->flagsB = (ctx->top->flagsB & ~mask) | ((v << shift) & mask);
+}
+
+static inline int rsTex_3AF8(sRCtx_3AF8* ctx)
+{
+    return ctx->tex;
+}
+
+static inline int IsHuman_3AF8(cRider* rider)
+{
+    char* obj = (char*)&rider->mVtbl;
+    sWkVt39D8* vt = *(sWkVt39D8**)obj;
+    return vt[kRiderVt_isHuman].fn(obj + vt[kRiderVt_isHuman].delta);
+}
+
+static inline int ShouldDraw_3AF8(sWake_3AF8* self)
+{
+    int vis = 0;
+    if (*(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 0x7C) >= 2) {
+        if (IsHuman_3AF8(self->rider)) {
+            char* views = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+            if (*(unsigned int*)(views + 0x10) >= 2) {
+                vis = *(int*)(views + 0x14) != self->rider->mViewIndex;
+            }
+        }
+        cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+        if (D_00534B30[0] != 0) {
+            vis = self->rider->mIsLocal == 0;
+        }
+    } else if (!IsHuman_3AF8(self->rider)) {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        if ((unsigned int)(D_00535C12[0] - 4) < 2) {
+            int mode = *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x78) + 0x1BC);
+            if ((unsigned int)(mode - 14) < 3) vis = 1;
+        }
+    }
+    if (self->rider->mIsInNIS) {
+        vis = 0;
+    }
+    return vis;
+}
+
+extern "C" void func_002E3AF8(sWake_3AF8* self)
+{
+    if (!ShouldDraw_3AF8(self)) {
+        return;
+    }
+    {
+        sRCtx_3AF8* c = (sRCtx_3AF8*)D_004A289C;
+        c->top[1] = c->top[0];
+        c->top++;
+    }
+    *((sRCtx_3AF8*)D_004A289C)->top = D_00501420_3AF8;
+    {
+        sRCtx_3AF8* c = (sRCtx_3AF8*)D_004A289C;
+        rsSetA_3AF8(c, 0x400000, 22, 1);
+        rsSetA_3AF8(c, 0x7C, 2, 7);
+        rsSetA_3AF8(c, 0x3, 0, 2);
+        rsSetB_3AF8(c, 0x1FFFFC00, 10, 0);
+        rsSetB_3AF8(c, 0x3E0, 5, 7);
+        *(short*)((char*)c->top + 0x10) = rsTex_3AF8(c);
+    }
+    float* m = ((sRCtx_3AF8*)D_004A289C)->v35();
+    t4Vector side;
+    Set4_3AF8(side, m[0], m[4], m[8], 0.0f);
+    t4Vector up;
+    Set4_3AF8(up, m[1], m[5], m[9], 0.0f);
+    t4Vector pos = *(t4Vector*)((char*)self->rider->mAnimModel->unk_030 + (self->rider->mBoneHead << 6) + 0x30);
+    const t4Vector* base = &pos;
+    t4Vector p0 = Add_3AF8(*base, Scale_3AF8(up, 20260.0f));
+    t4Vector p1 = Add_3AF8(*base, Scale_3AF8(up, 20130.0f));
+    t4Vector p2 = Add_3AF8(*base, Scale_3AF8(up, 130.0f));
+    t4Vector off = Scale_3AF8(side, 85.0f);
+    sWkColor_3AF8 fade;
+    fade.a = 0.0f;
+    fade.r = self->color.r;
+    fade.g = self->color.g;
+    fade.b = self->color.b;
+    sVtx_3AF8 v[8];
+    {
+        t4Vector p = Sub_3AF8(*base, off);
+        v[0].r = (int)(fade.r * 255.0f);
+        v[0].g = (int)(fade.g * 255.0f);
+        v[0].b = (int)(fade.b * 255.0f);
+        v[0].a = (int)(fade.a * 128.0f);
+        v[0].q = 1.0f;
+        v[0].pos = p;
+        v[0].s = 0.0f;
+        v[0].t = 1.0f;
+    }
+    {
+        t4Vector p = Add_3AF8(*base, off);
+        v[1].r = (int)(fade.r * 255.0f);
+        v[1].g = (int)(fade.g * 255.0f);
+        v[1].b = (int)(fade.b * 255.0f);
+        v[1].a = (int)(fade.a * 128.0f);
+        v[1].q = 1.0f;
+        v[1].pos = p;
+        v[1].s = 1.0f;
+        v[1].t = 1.0f;
+    }
+    {
+        t4Vector p = Sub_3AF8(p2, off);
+        v[2].r = (int)(self->color.r * 255.0f);
+        v[2].g = (int)(self->color.g * 255.0f);
+        v[2].b = (int)(self->color.b * 255.0f);
+        v[2].a = (int)(self->color.a * 128.0f);
+        v[2].q = 1.0f;
+        v[2].pos = p;
+        v[2].s = 0.0f;
+        v[2].t = 0.0f;
+    }
+    {
+        t4Vector p = Add_3AF8(p2, off);
+        v[3].r = (int)(self->color.r * 255.0f);
+        v[3].g = (int)(self->color.g * 255.0f);
+        v[3].b = (int)(self->color.b * 255.0f);
+        v[3].a = (int)(self->color.a * 128.0f);
+        v[3].q = 1.0f;
+        v[3].pos = p;
+        v[3].s = 1.0f;
+        v[3].t = 0.0f;
+    }
+    {
+        t4Vector p = Sub_3AF8(p1, off);
+        v[4].r = (int)(self->color.r * 255.0f);
+        v[4].g = (int)(self->color.g * 255.0f);
+        v[4].b = (int)(self->color.b * 255.0f);
+        v[4].a = (int)(self->color.a * 128.0f);
+        v[4].q = 1.0f;
+        v[4].pos = p;
+        v[4].s = 0.0f;
+        v[4].t = 1.0f;
+    }
+    {
+        t4Vector p = Add_3AF8(p1, off);
+        v[5].r = (int)(self->color.r * 255.0f);
+        v[5].g = (int)(self->color.g * 255.0f);
+        v[5].b = (int)(self->color.b * 255.0f);
+        v[5].a = (int)(self->color.a * 128.0f);
+        v[5].q = 1.0f;
+        v[5].pos = p;
+        v[5].s = 1.0f;
+        v[5].t = 1.0f;
+    }
+    {
+        t4Vector p = Sub_3AF8(p0, off);
+        v[6].r = (int)(fade.r * 255.0f);
+        v[6].g = (int)(fade.g * 255.0f);
+        v[6].b = (int)(fade.b * 255.0f);
+        v[6].a = (int)(fade.a * 128.0f);
+        v[6].q = 1.0f;
+        v[6].pos = p;
+        v[6].s = 0.0f;
+        v[6].t = 0.0f;
+    }
+    {
+        t4Vector p = Add_3AF8(p0, off);
+        v[7].r = (int)(fade.r * 255.0f);
+        v[7].g = (int)(fade.g * 255.0f);
+        v[7].b = (int)(fade.b * 255.0f);
+        v[7].a = (int)(fade.a * 128.0f);
+        v[7].q = 1.0f;
+        v[7].pos = p;
+        v[7].s = 1.0f;
+        v[7].t = 0.0f;
+    }
+    ((sRCtx_3AF8*)D_004A289C)->v71(8, v, 0);
+    *(char**)(D_004A289C + 0xE84) -= 0x14;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4228);
