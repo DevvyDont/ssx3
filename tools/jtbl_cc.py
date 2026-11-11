@@ -149,15 +149,39 @@ def _unescape(s: str) -> bytes | None:
 
 @lru_cache(maxsize=None)
 def retail_strings() -> dict[str, bytes]:
-    """D_x -> the NUL-terminated string at its start, for rodata entries splat wrote as `.asciz`."""
+    """D_x -> the leading bytes of its rodata entry: `.asciz`/`.ascii` text and raw `.word`/`.short`/`.byte` values,
+    up to the first directive that isn't plain data (splat writes some strings as words, e.g. D_00470678)."""
     out = {}
+    item = re.compile(r'^\s+/\* [0-9A-F]+ [0-9A-F]{8}(?: [0-9A-F]+)? \*/ \.(asciz|ascii|word|short|half|byte) (.*)$')
     for f in (ROOT / "asm/data").glob("*.rodata.s"):
-        for name, s in re.findall(r'dlabel (D_[0-9A-F]{8})\n\s+/\* [0-9A-F]+ [0-9A-F]{8} \*/ \.asciz "((?:[^"\\]|\\.)*)"',
-                                  f.read_text(errors="replace")):
-            b = _unescape(s)
-            if b is not None:
-                out[name] = b + b"\0"
+        for name, block in re.findall(r"dlabel (D_[0-9A-F]{8})\n(.*?)enddlabel \1", f.read_text(errors="replace"), re.S):
+            data = b""
+            for line in block.split("\n"):
+                m = item.match(line)
+                if not m:
+                    if line.strip() and not line.strip().startswith("/*"):
+                        break
+                    continue
+                kind, arg = m.groups()
+                if kind in ("asciz", "ascii"):
+                    sm = re.fullmatch(r'"((?:[^"\\]|\\.)*)"\s*', arg)
+                    b = _unescape(sm.group(1)) if sm else None
+                    if b is None:
+                        break
+                    data += b + (b"\0" if kind == "asciz" else b"")
+                    continue
+                vm = re.fullmatch(r"0x([0-9A-Fa-f]+)\s*", arg)
+                if not vm:
+                    break
+                size = {"word": 4, "short": 2, "half": 2, "byte": 1}[kind]
+                data += int(vm.group(1), 16).to_bytes(size, "little")
+            if data:
+                out[name] = data
     return out
+
+
+def _same_string(ours: bytes, retail: bytes) -> bool:
+    return retail[:len(ours)] == ours and not retail[len(ours):].strip(b"\0")
 
 
 STR_DEF = re.compile(r'^(\$LC\d+):\s*\n((?:\s*\.ascii\s+"(?:[^"\\]|\\.)*"\s*\n)+)', re.M)
@@ -189,7 +213,7 @@ def repoint_strings(text: str, unit: str) -> tuple[str, list[str]]:
         refs = [s for s in dict.fromkeys(re.findall(r"%(?:hi|lo)\((D_[0-9A-F]{8})\)", p.read_text(errors="replace")))
                 if s in strings]
         for label in labels:
-            hit = next((s for s in refs if strings[s] == defs[label]), None)
+            hit = next((s for s in refs if _same_string(defs[label], strings[s])), None)
             if hit is None:
                 continue
             body = re.sub(re.escape(label) + r"\b", hit, body)
