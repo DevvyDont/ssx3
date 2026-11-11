@@ -258,7 +258,237 @@ extern "C" int func_00200D00(void* self, int kind, int x)
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupMenus);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// A UI widget as cUIScreen_getObjectByHashName returns it: vptr at 0x8. Slot names from the prototype's
+// _vt$8cUIThing (as in fe/feasyncfile); the other slots are known only by position.
+class cUIThing {
+public:
+    char pad[0x8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void setEnabled(int on);
+    virtual void setFocus(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
+};
+
+struct cUIText;
+
+int GetHashValue32(char* str);
+
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+
+extern unsigned int D_004A2594;
+
+extern "C" void* cBE_getBE();
+
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+
+extern char D_004706C8[];
+
+// One 0x6C-byte goal entry of the per-peak goal tables (race: 4 per peak, freestyle: 5 per peak,
+// freeride: 8 per peak).
+struct sPeakGoal {
+    int track;          // 0x00
+    int f04;
+    int kind;           // 0x08
+    int f0C;
+    int useTrackName;   // 0x10
+    char name[0x1E];    // 0x14
+    char help[0x23];    // 0x32 help-text key (func_00207430)
+    char path[0x17];    // 0x55
+};
+
+extern sPeakGoal D_004781D0_enus[3][4] __asm__("D_004781D0");
+
+extern sPeakGoal D_004786E0_enus[3][5] __asm__("D_004786E0");
+
+extern sPeakGoal D_00478D38_enus[3][8] __asm__("D_00478D38");
+
+extern "C" void func_00208438_enus(void* self, void* obj, int on) __asm__("func_00208438");
+extern "C" int func_00200B50(void* self, sPeakGoal* loc, int peak);
+extern "C" int func_00200D00_enus(void* self, int kind, int x) __asm__("func_00200D00");
+extern "C" int func_004165A8(const char*, const char*);
+extern "C" const char* func_00144C60_enus(void* iface, int id) __asm__("func_00144C60");
+extern "C" unsigned short* func_002C2540_enus(unsigned short* dst, const char* s) __asm__("func_002C2540");
+extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" unsigned short* func_001FD190(int kind);
+extern "C" void func_003A0E90_enus(void* text, unsigned short* s) __asm__("func_003A0E90");
+void cUIText_setAsciiString(cUIText* text, const char* s);
+extern "C" char* strcpy(char* d, const char* s);
+extern char D_004A25E0[];
+extern char D_004A25E8[];
+extern char D_004A25F0[];
+extern char D_00470610[];
+extern char D_00470620[];
+extern char D_00470630[];
+extern char D_00470648[];
+extern char D_00470660[];
+extern char D_004A2560[];
+extern char D_004A2590[];
+extern char D_004706B8[];
+extern char D_004C8B58[];
+
+// A menu entry widget: cUIThing plus its menu index at 0x18; slot 11 sets the text colour.
+class cUIObj_Menus : public cUIThing {
+public:
+    int f0C;
+    int f10;
+    int f14;
+    int idx;            // 0x18
+    void setIndex(int i) { idx = i; }
+    virtual void v10();
+    virtual void setColor(char* col);
+};
+
+// The MAP template as this function sees it.
+struct sMapTmpl_200DE8 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    int f18;
+    int f1C;
+    int available[3][3][8];     // 0x20  [peak][mode][event]
+    int f140[3][3][8];          // 0x140
+    char pad260[0x2E8 - 0x260];
+    void* screen;               // 0x2E8
+};
+
+// Location entries with track 0x17 have no event: no availability colour or text, the widget is made static.
+static inline int hasEvent(int track) { return track != 0x17; }
+
+extern "C" void cUITemplate_MAP_setupMenus(void* tmpl)
+{
+    sMapTmpl_200DE8* self = (sMapTmpl_200DE8*)tmpl;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    cUIObj_Menus* o;
+    o = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A25E0));
+    if (o != 0) {
+        o->setIndex(2);
+        func_00208438_enus(self, o, self->fC);
+    }
+    o = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A25E8));
+    if (o != 0) {
+        o->setIndex(1);
+        func_00208438_enus(self, o, self->f8);
+    }
+    o = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A25F0));
+    if (o != 0) {
+        o->setIndex(0);
+        func_00208438_enus(self, o, self->f4);
+    }
+    o = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00470610));
+    if (o != 0) {
+        o->setIndex(3);
+        func_00208438_enus(self, o, 0);
+    }
+    char buf[32];
+    for (int i = 0; i < 3; i++) {
+        sprintf(buf, D_00470620, i + 1);
+        o = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(buf));
+        o->setIndex(0);
+        func_00208438_enus(self, o, self->f10);
+        sprintf(buf, D_00470630, i + 1);
+        o = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(buf));
+        o->setIndex(1);
+        func_00208438_enus(self, o, self->f14);
+        sprintf(buf, D_00470648, i + 1);
+        o = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(buf));
+        o->setIndex(2);
+        func_00208438_enus(self, o, self->f18);
+        if (D_004A2594 < 2) {
+            o->setStatic(1);
+            o->setVisible(0);
+        }
+        sprintf(buf, D_00470660, i + 1);
+        o = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(buf));
+        o->setIndex(3);
+        func_00208438_enus(self, o, self->f1C);
+        if (D_004A2594 < 2) {
+            o->setStatic(1);
+            o->setVisible(0);
+        }
+    }
+    for (int peak = 0; peak < 3; peak++) {
+        for (int mode = 0; mode < 3; mode++) {
+            int count;
+            char fmt[24];
+            if (mode == 0) {
+                count = 4;
+                strcpy(fmt, "Peak%dRaceLoc%d");
+            } else if (mode == 1) {
+                count = 5;
+                strcpy(fmt, "Peak%dFreestyleLoc%d");
+            } else {
+                count = 8;
+                strcpy(fmt, "Peak%dFreerideLoc%d");
+            }
+            for (int j = 0; j < count; j++) {
+                sPeakGoal g = D_004781D0_enus[peak][j];
+                if (mode == 1)
+                    g = D_004786E0_enus[peak][j];
+                if (mode == 2)
+                    g = D_00478D38_enus[peak][j];
+                if (mode == 0 || mode == 1)
+                    self->f140[peak][mode][j] = func_00200B50(self, &g, peak);
+                sprintf(buf, fmt, peak + 1, j);
+                o = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(buf));
+                if (D_004A2594 < 2 && g.f0C != 0) {
+                    self->available[peak][mode][j] = 0;
+                    if (o != 0) {
+                        o->setVisible(0);
+                        o->setStatic(1);
+                    }
+                } else {
+                    self->available[peak][mode][j] = func_00200D00_enus(self, g.kind, peak) ^ 1;
+                }
+                if (hasEvent(g.track))
+                    func_00208438_enus(self, o, self->available[peak][mode][j]);
+                if (hasEvent(g.track)) {
+                    if (g.useTrackName == 1) {
+                        cUIText_setAsciiString((cUIText*)o, func_00144C60_enus(iface, g.track));
+                    } else if (func_004165A8(g.name, D_004A2560)) {
+                        cUIText_setAsciiString((cUIText*)o, g.name);
+                    } else if (g.kind == 4) {
+                        unsigned short text[200];
+                        unsigned short wfmt[24];
+                        func_002C2540_enus(wfmt, D_004A2590);
+                        func_002C26D0(text, wfmt, func_00144C60_enus(iface, g.track));
+                        func_003A0E90_enus(o, text);
+                    } else {
+                        func_003A0E90_enus(o, func_001FD190(g.kind));
+                    }
+                    o->setIndex(j);
+                } else if (o != 0) {
+                    o->setStatic(1);
+                }
+            }
+        }
+    }
+    o = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004706B8));
+    if (o != 0) {
+        o->setIndex(0);
+        o->setColor(D_004C8B58);
+    }
+    o = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004706C8));
+    if (o != 0) {
+        o->setIndex(1);
+        o->setColor(D_004C8B58);
+    }
+}
+#endif
 
 struct cUITemplate_MAP {
     char pad_0x00[0x10];
@@ -992,20 +1222,6 @@ template <class F> struct sVEntry {
 
 // A UI widget as cUIScreen_getObjectByHashName returns it: vptr at 0x8. Slot names from the prototype's
 // _vt$8cUIThing (as in fe/feasyncfile); the other slots are known only by position.
-class cUIThing {
-public:
-    char pad[0x8];
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void setEnabled(int on);
-    virtual void setFocus(int on);
-    virtual void setStatic(int on);
-    virtual void setVisible(int on);
-};
-
 struct cUIText;
 
 int GetHashValue32(char* str);
@@ -1031,17 +1247,6 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 // One 0x6C-byte goal entry of the per-peak goal tables (race: 4 per peak, freestyle: 5 per peak,
 // freeride: 8 per peak).
-struct sPeakGoal {
-    int track;          // 0x00
-    int f04;
-    int kind;           // 0x08
-    int f0C;
-    int useTrackName;   // 0x10
-    char name[0x1E];    // 0x14
-    char help[0x23];    // 0x32 help-text key (func_00207430)
-    char path[0x17];    // 0x55
-};
-
 extern sPeakGoal D_004781D0_Info[3][4] __asm__("D_004781D0");
 
 extern sPeakGoal D_004786E0_Info[3][5] __asm__("D_004786E0");
