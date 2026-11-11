@@ -893,7 +893,35 @@ extern "C" int func_002B6550(void* self, int type, int* a, int* b, int* c, int a
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B65B0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" char* strcpy(char* dst, const char* src);
+// NOTE: func_002B6628 is a `return 0` stub; this caller leaves idx/out live in a1/a2 at the call,
+// so the original most likely passed them through (the stub ignores them).
+int func_002B6628_3(void* self, int idx, char* out) __asm__("func_002B6628__FPv");
+
+struct sWorldTriggerInfo8 {
+    int type;
+    char* data;
+};
+
+extern "C" int func_002B65B0(void* self, int idx, char* out)
+{
+    if (idx < *(int*)((char*)self + 0x340)) {
+        sWorldTriggerInfo8* list = *(sWorldTriggerInfo8**)((char*)self + 0x33C);
+        if (list[idx].type == 3) {
+            strcpy(out, list[idx].data + 0x10);
+            return 1;
+        }
+        if (list[idx].type == 4) {
+            return func_002B6628_3(self, idx, out);
+        }
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6628__FPv);
