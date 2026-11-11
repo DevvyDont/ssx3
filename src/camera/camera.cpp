@@ -243,7 +243,191 @@ void* func_0015E030(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015E050);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+// A transform as position + rotation quaternion, returned by value (func_0031B748 builds one from a matrix).
+struct sXf {
+    t4Vector pos;
+    t4Vector rot;
+};
+
+extern t4Matrix D_004C53A0_E050 __asm__("D_004C53A0");
+
+struct sObj_E050 {
+    char pad[0x390];
+} __attribute__((aligned(16)));
+
+extern "C" void* func_00176D68(void* self);
+extern "C" void func_00166640(void* self, int a1);
+extern "C" void func_00166F90(void* self);
+extern "C" sXf func_001673A0_E050(void* a1) __asm__("func_001673A0");
+void func_00176DA8_E050(void* self, int flags) __asm__("func_00176DA8__FPv");
+
+// PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+static inline void vu0CopyMtx_E050(t4Matrix* dst, const t4Matrix* src)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (unit quaternion -> 3x3 rotation, row 3 = (0,0,0,1)).
+static inline void vu0QuatToMtx_E050(t4Matrix* m, const t4Vector* q)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2       $vf4, 0x0(%1)\n"
+        "vaddw.xyz  $vf1, $vf0, $vf0w\n"
+        "vadd.xyz   $vf5, $vf4, $vf4\n"
+        "vsub.w     $vf10, $vf10, $vf10\n"
+        "vsub.w     $vf11, $vf11, $vf11\n"
+        "vsub.w     $vf12, $vf12, $vf12\n"
+        "vmul.xyz   $vf6, $vf5, $vf4\n"
+        "vmulw.xyz  $vf7, $vf5, $vf4w\n"
+        "vopmula.xyz ACC, $vf5, $vf4\n"
+        "vmadd.xyz  $vf8, $vf0, $vf0\n"
+        "vsubay.x   ACC, $vf1, $vf6y\n"
+        "vmsubz.x   $vf10, $vf1, $vf6z\n"
+        "vsubaz.y   ACC, $vf1, $vf6z\n"
+        "vmsubx.y   $vf11, $vf1, $vf6x\n"
+        "vsubax.z   ACC, $vf1, $vf6x\n"
+        "vmsuby.z   $vf12, $vf1, $vf6y\n"
+        "vaddaz.y   ACC, $vf0, $vf8z\n"
+        "vmaddz.y   $vf10, $vf1, $vf7z\n"
+        "vaddax.z   ACC, $vf0, $vf8x\n"
+        "vmaddx.z   $vf11, $vf1, $vf7x\n"
+        "vaddax.y   ACC, $vf0, $vf8x\n"
+        "vmsubx.y   $vf12, $vf1, $vf7x\n"
+        "vadday.z   ACC, $vf0, $vf8y\n"
+        "vmsuby.z   $vf10, $vf1, $vf7y\n"
+        "vaddaz.x   ACC, $vf0, $vf8z\n"
+        "vmsubz.x   $vf11, $vf1, $vf7z\n"
+        "vadday.x   ACC, $vf0, $vf8y\n"
+        "vmaddy.x   $vf12, $vf1, $vf7y\n"
+        "sqc2       $vf0, 0x30(%0)\n"
+        "sqc2       $vf10, 0x0(%0)\n"
+        "sqc2       $vf11, 0x10(%0)\n"
+        "sqc2       $vf12, 0x20(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "r"(q)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply in place, m = m * b).
+static inline void vu0MulEqMtx_E050(t4Matrix* m, const t4Matrix* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%0)\n"
+        "lqc2      $vf5, 0x10(%0)\n"
+        "lqc2      $vf6, 0x20(%0)\n"
+        "lqc2      $vf7, 0x30(%0)\n"
+        "lqc2      $vf8, 0x0(%1)\n"
+        "lqc2      $vf9, 0x10(%1)\n"
+        "lqc2      $vf10, 0x20(%1)\n"
+        "lqc2      $vf11, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
+static inline void vu0TransMtx_E050(t4Matrix* m, const t4Vector& v)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf4, 0x0(%0)\n"
+        "lqc2         $vf5, 0x10(%0)\n"
+        "lqc2         $vf6, 0x20(%0)\n"
+        "lqc2         $vf7, 0x30(%0)\n"
+        "lqc2         $vf8, %1\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "m"(v)
+        : "memory");
+}
+
+extern "C" void func_0015E050_impl(char* self, char* a1, char* a2) __asm__("func_0015E050");
+extern "C" void func_0015E050_impl(char* self, char* a1, char* a2)
+{
+    sObj_E050 o;
+    func_00176D68(&o);
+    *(cQuad128*)((char*)&o + 0x20) = *(cQuad128*)a2;
+    *(cQuad128*)((char*)&o + 0x40) = *(cQuad128*)a1;
+    *(float*)((char*)&o + 0x4C) = 1.0f;
+    *(float*)((char*)&o + 0x2C) = 1.0f;
+    func_00166640(&o, 1);
+    func_00166F90(&o);
+    sXf out = func_001673A0_E050(&o);
+    t4Vector* q = (t4Vector*)(self + 0x30);
+    t4Matrix* m = (t4Matrix*)(self + 0x40);
+    *(sXf*)(self + 0x20) = out;
+    vu0CopyMtx_E050(m, &D_004C53A0_E050);
+    t4Matrix rot;
+    vu0QuatToMtx_E050(&rot, q);
+    vu0MulEqMtx_E050(m, &rot);
+    t4Vector p;
+    p.x = *(float*)(self + 0x20);
+    p.y = *(float*)(self + 0x24);
+    p.z = *(float*)(self + 0x28);
+    out.rot.x = -p.x;
+    out.rot.y = -p.y;
+    out.rot.z = -p.z;
+    out.pos.x = -p.x;
+    out.pos.y = -p.y;
+    out.pos.z = -p.z;
+    out.pos.w = 1.0f;
+    vu0TransMtx_E050(m, out.pos);
+    out.pos.x = *(float*)(self + 0x48);
+    out.pos.y = *(float*)(self + 0x58);
+    out.pos.z = *(float*)(self + 0x68);
+    out.pos.w = 0.0f;
+    *(t4Vector*)(self + 0x80) = out.pos;
+    func_00176DA8_E050(&o, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_0015E2A8);
@@ -333,7 +517,98 @@ extern "C" void func_0015E360(char* self, int type, float amount, float dist)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015E460);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
+template <class F> struct sVEntry {
+    short delta;
+    short index;
+    F* fn;
+};
+
+// The camera base matrix (set up by func_001673F8), followed by the camera-shake tuning
+// table: one entry per shake type, reset by func_0015E2A8, plus each type's selector in D_004C5430.
+struct sCamShake {
+    float base;     // passed to func_001656B0_E460 / func_00165938
+    float spread;
+    float weight;   // scales the requested amount
+    float range;    // distance at which the shake fades out
+};
+
+extern sCamShake D_004C53E0_E460[5] __asm__("D_004C53E0");
+
+extern int D_004C5430[5];
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_15E460(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+extern int D_004A2A50;
+extern "C" void func_00165938(char* self, int flag, int sel, float base, float spread, float r);
+extern "C" void func_001656B0_E460(char* self, float base, float spread, float r) __asm__("func_001656B0");
+extern "C" void func_0015E360_E460(char* self, int type, float amount, float dist) __asm__("func_0015E360");
+
+extern "C" void func_0015E460(char* self)
+{
+    char* tgt = *(char**)(*(char**)(self + 0xA8) + 0x20);
+    sVEntry<float(void*)>* vf = *(sVEntry<float(void*)>**)tgt;
+    float spd = vf[0x11].fn(tgt + vf[0x11].delta);
+    if (((D_004A2A50 & 1) ^ 1) != 0 && spd > 0.10000000149011612f) {
+        sVEntry<t4Vector(void*)>* vv = *(sVEntry<t4Vector(void*)>**)tgt;
+        t4Vector v = vv[3].fn(tgt + vv[3].delta);
+        float a = Length_15E460(v) * 0.035999998450279236f;
+        float k;
+        if (60.0f <= a) {
+            if (a <= 120.0f)
+                k = (a - 60.0f) / 60.0f;
+            else
+                k = 1.0f;
+        } else {
+            k = 0.0f;
+        }
+        if (spd > 0.699999988079071f)
+            func_0015E360_E460(self, 3, k, 0.0f);
+        else if (spd > 0.4000000059604645f)
+            func_0015E360_E460(self, 2, k, 0.0f);
+        else
+            func_0015E360_E460(self, 1, k, 0.0f);
+    }
+    int idx = *(int*)(self + 0x450);
+    float f21 = D_004C53E0_E460[idx].base;
+    float f22 = D_004C53E0_E460[idx].spread;
+    int sel = D_004C5430[idx];
+    char* p = self + 0xC0;
+    float t = *(float*)(self + 0x454);
+    if (*(int*)(self + 0x458) != 0 && *(int*)(self + 0x45C) == 0)
+        func_001656B0_E460(p, f21, f22, t);
+    func_00165938(p, *(int*)(self + 0x458), sel, f21, f22, t);
+    *(int*)(self + 0x45C) = *(int*)(self + 0x458);
+    *(int*)(self + 0x458) = 0;
+    *(int*)(self + 0x454) = 0;
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_0015E668);
 
@@ -655,7 +930,85 @@ int func_0015F770(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015F780);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+extern "C" float func_0031C128(float x);
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline t4Vector Scale_15F780(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_15F780(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
+static inline float Sqrt_15F780(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern "C" float func_0015F780(void* self)
+{
+    char* o = *(char**)((char*)*(void**)((char*)self + 4) + 0x788);
+    t4Vector a = *(t4Vector*)(o + 0x20);
+    t4Vector b = *(t4Vector*)(o + 0x10);
+    int ok = 0;
+    if (Dot_15F780(a, a) > 0.0f) {
+        if (Dot_15F780(b, b) > 0.0f)
+            ok = 1;
+    }
+    if (ok) {
+        t4Vector n = Scale_15F780(b, -1.0f);
+        float l = Sqrt_15F780(Dot_15F780(a, a) * Dot_15F780(n, n));
+        if (l < 0.0010000000474974513f)
+            return 0.0f;
+        float q = Dot_15F780(a, n) / l;
+        float c;
+        if (q >= -1.0f)
+            c = q <? 1.0f;
+        else
+            c = -1.0f;
+        return 1.5707963705062866f - func_0031C128(c);
+    }
+    return 0.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_0015F908__FPv);
@@ -3222,7 +3575,130 @@ extern "C" void func_00162C78_impl(char* self, sInfo_162C78* info)
 
 INCLUDE_ASM("camera/camera", func_00163010);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00163158);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+extern t4Vector D_004FF160_3158 __asm__("D_004FF160");
+
+extern "C" void* func_00168150(void* self);
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline t4Vector Sub_163158(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__ volatile(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add into destination).
+static inline void AddTo_163158(t4Vector& r, const t4Vector& a, const t4Vector& b)
+{
+    __asm__ volatile(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline t4Vector Scale_163158(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__ volatile(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector times scalar).
+static inline void ScaleEq_163158(t4Vector& v, float s)
+{
+    int t;
+    __asm__ volatile(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline t4Vector Cross_163158(const t4Vector* a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__ volatile(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "o"(*a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_163158(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__ volatile(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+extern "C" void func_00163158(void* self_, void* info, float a, float b)
+{
+    char* self = (char*)self_;
+    float zero = 0.0f;
+    t4Vector d = Sub_163158(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
+    t4Vector c = Cross_163158(&D_004FF160_3158, d);
+    float len = Length_163158(c);
+    if (len > zero) {
+        ScaleEq_163158(c, a * Length_163158(d) / len);
+        AddTo_163158(*(t4Vector*)(self + 0x40), *(t4Vector*)(self + 0x40), c);
+        t4Vector t = Scale_163158(c, b);
+        AddTo_163158(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x20), t);
+    }
+    func_00168150(self);
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00163270);
 
@@ -4503,7 +4979,217 @@ extern "C" void func_001656B0(char* self, float base, float spread, float r)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00165938);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+// 16-byte vector with inline constructors (a non-POD sibling of t4Vector, as in ai/ai); stores x, y, z, w.
+struct sVec4 : t4Vector
+{
+    sVec4() {}
+    sVec4(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+    sVec4& operator+=(const sVec4& b);
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector add, in place).
+inline sVec4& sVec4::operator+=(const sVec4& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(*this)
+        : "m"(*this), "m"(b)
+        : "memory");
+    return *this;
+}
+
+int BXrand();
+
+// Uniform float in [0, 1) built from the random mantissa bits.
+static inline float randf_165938()
+{
+    union {
+        int i;
+        float f;
+    } u;
+    u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+    return u.f - 1.0f;
+}
+
+static inline float RandRange_165938(float lo, float hi)
+{
+    return lo + (hi - lo) * randf_165938();
+}
+
+// Smooth (3t^2 - 2t^3) ramp: 0 below lo, 1 above hi, in between eased on t = x / hi
+// (the callers always start the ramp at lo = 0).
+static inline float SmoothStep_165938(float lo, float hi, float x)
+{
+    if (x >= lo) {
+        if (x <= hi) {
+            float t = x / hi;
+            float sq = t * t;
+            float e = 3.0f * sq - 2.0f * t * sq;
+            if (e > 1.0f) {
+                e = 1.0f;
+            }
+            return e;
+        }
+        return 1.0f;
+    }
+    return 0.0f;
+}
+
+static inline float Lerp_165938(const float& a, const float& b, float k)
+{
+    return k * b + (1.0f - k) * a;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sVec4 Sub_165938(const sVec4& a, const sVec4& b)
+{
+    sVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_165938(const sVec4& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec4 Scale_165938(const sVec4& v, float s)
+{
+    sVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// Camera shake update: re-rolls each axis's target when its timer runs out, eases between the
+// previous and new targets and adds the result (scaled by the fade-out and distance) to the position.
+extern "C" void func_00165938(char* self, int flag, int sel, float base, float spread, float r)
+{
+    if (flag) {
+        *(float*)(self + 0x2B4) = 0.0f;
+    } else if (*(int*)(self + 0x2EC)) {
+        *(float*)(self + 0x2B4) = 2.0f;
+    }
+    *(int*)(self + 0x2EC) = flag;
+    if (*(float*)(self + 0x2B4) > 0.0f) {
+        // PORT: g++ `>?` (max) operator.
+        *(float*)(self + 0x2B4) = (*(float*)(self + 0x2B4) - 0.01666666753590107f) >? 0.0f;
+    }
+    float scale;
+    if (*(float*)(self + 0x2B4) > 0.0f) {
+        scale = *(float*)(self + 0x2B4) * 0.5f;
+    } else {
+        scale = 1.0f;
+    }
+    if (!flag && !(*(float*)(self + 0x2B4) > 0.0f)) {
+        return;
+    }
+    *(float*)(self + 0x278) += 0.01666666753590107f;
+    *(float*)(self + 0x27C) += 0.01666666753590107f;
+    *(float*)(self + 0x280) += 0.01666666753590107f;
+    if (*(float*)(self + 0x278) > *(float*)(self + 0x254)) {
+        *(float*)(self + 0x254) = base + spread * randf_165938();
+        *(float*)(self + 0x26C) = *(float*)(self + 0x260);
+        *(float*)(self + 0x260) = RandRange_165938(-r, r);
+        *(float*)(self + 0x278) -= *(float*)(self + 0x254);
+    }
+    if (*(float*)(self + 0x27C) > *(float*)(self + 0x258)) {
+        *(float*)(self + 0x258) = base + spread * randf_165938();
+        *(float*)(self + 0x270) = *(float*)(self + 0x264);
+        *(float*)(self + 0x264) = RandRange_165938(-r, r);
+        *(float*)(self + 0x27C) -= *(float*)(self + 0x258);
+    }
+    float rz = r * 1.600000023841858f;
+    if (*(float*)(self + 0x280) > *(float*)(self + 0x25C)) {
+        *(float*)(self + 0x25C) = base + spread * randf_165938();
+        *(float*)(self + 0x274) = *(float*)(self + 0x268);
+        *(float*)(self + 0x268) = RandRange_165938(-rz, rz);
+        *(float*)(self + 0x280) -= *(float*)(self + 0x25C);
+    }
+    rz *= 0.5f;
+    float base2 = base * 0.5f;
+    float spread2 = spread * 0.5f;
+    float r2 = r * 0.5f;
+    if (*(float*)(self + 0x2A8) > *(float*)(self + 0x284)) {
+        *(float*)(self + 0x284) = base2 + spread2 * randf_165938();
+        *(float*)(self + 0x29C) = *(float*)(self + 0x290);
+        *(float*)(self + 0x290) = RandRange_165938(-r2, r2);
+        *(float*)(self + 0x2A8) -= *(float*)(self + 0x284);
+    }
+    if (*(float*)(self + 0x2AC) > *(float*)(self + 0x288)) {
+        *(float*)(self + 0x288) = base2 + spread2 * randf_165938();
+        *(float*)(self + 0x2A0) = *(float*)(self + 0x294);
+        *(float*)(self + 0x294) = RandRange_165938(-r2, r2);
+        *(float*)(self + 0x2AC) -= *(float*)(self + 0x288);
+    }
+    if (*(float*)(self + 0x2B0) > *(float*)(self + 0x28C)) {
+        *(float*)(self + 0x28C) = base2 + spread2 * randf_165938();
+        *(float*)(self + 0x2A4) = *(float*)(self + 0x298);
+        *(float*)(self + 0x298) = RandRange_165938(-rz, rz);
+        *(float*)(self + 0x2B0) -= *(float*)(self + 0x28C);
+    }
+    float k0 = SmoothStep_165938(0.0f, *(float*)(self + 0x254), *(float*)(self + 0x278));
+    float k1 = SmoothStep_165938(0.0f, *(float*)(self + 0x258), *(float*)(self + 0x27C));
+    float k2 = SmoothStep_165938(0.0f, *(float*)(self + 0x25C), *(float*)(self + 0x280));
+    float k3 = SmoothStep_165938(0.0f, *(float*)(self + 0x284), *(float*)(self + 0x2A8));
+    float k4 = SmoothStep_165938(0.0f, *(float*)(self + 0x288), *(float*)(self + 0x2AC));
+    float k5 = SmoothStep_165938(0.0f, *(float*)(self + 0x28C), *(float*)(self + 0x2B0));
+    float x = Lerp_165938(*(float*)(self + 0x26C), *(float*)(self + 0x260), k0);
+    float y = Lerp_165938(*(float*)(self + 0x270), *(float*)(self + 0x264), k1);
+    float z = Lerp_165938(*(float*)(self + 0x274), *(float*)(self + 0x268), k2);
+    x += Lerp_165938(*(float*)(self + 0x29C), *(float*)(self + 0x290), k3);
+    y += Lerp_165938(*(float*)(self + 0x2A0), *(float*)(self + 0x294), k4);
+    z += Lerp_165938(*(float*)(self + 0x2A4), *(float*)(self + 0x298), k5);
+    float amp;
+    if (sel && Length_165938(Sub_165938(*(sVec4*)(self + 0x20), *(sVec4*)(self + 0x40))) <= 150.0f) {
+        amp = Length_165938(Sub_165938(*(sVec4*)(self + 0x20), *(sVec4*)(self + 0x40))) * 0.1f;
+    } else {
+        amp = 15.0f;
+    }
+    *(sVec4*)(self + 0x20) += Scale_165938(sVec4(x, y, z, 0.0f), scale * amp);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00166228);
@@ -4698,7 +5384,137 @@ void* func_00166530(void* self)
 
 INCLUDE_ASM("camera/camera", func_00166550);
 
+//100%
 INCLUDE_ASM("camera/camera", func_00166640);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+extern t4Vector D_004FF140;
+
+extern t4Vector D_004FF150;
+
+extern "C" float func_0031C228(float x);
+extern "C" float func_0031C128(float x);
+
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline t4Vector Sub_166640(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_166640(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_166640(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product, second vector through an address register).
+static inline float DotP_166640(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "o"(b));
+    return r;
+}
+
+// PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
+static inline float Sqrt_166640(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline float Angle_166640(const t4Vector& a, const t4Vector& b)
+{
+    float l = Sqrt_166640(Dot_166640(a, a) * Dot_166640(b, b));
+    if (l < 0.0010000000474974513f)
+        return 0.0f;
+    float c = Dot_166640(a, b) / l;
+    c = (c >= -1.0f) ? (c <? 1.0f) : -1.0f;
+    return 1.5707963705062866f - func_0031C128(c);
+}
+
+extern "C" void func_00166640_def(char* self) __asm__("func_00166640");
+extern "C" void func_00166640_def(char* self)
+{
+    const t4Vector& off0 = Sub_166640(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
+    t4Vector off = off0;
+    float* p = (float*)(self + 0x50);
+    float z = off.z;
+    off.z = 0.0f;
+    float len = Length_166640(off);
+    *(float*)(self + 0x54) = -func_0031C228(z / len);
+    if (0.0f < len) {
+        float r;
+        if (0.0f < DotP_166640(off, D_004FF150)) {
+            r = Angle_166640(off, D_004FF140);
+        } else {
+            r = 6.2831854820251465f - Angle_166640(off, D_004FF140);
+        }
+        *p = r;
+    } else {
+        *p = 0.0f;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_001668B8);
@@ -5789,7 +6605,165 @@ void func_00168330(void* self, void* other)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00168338);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+
+extern t4Vector D_004FF160_8338 __asm__("D_004FF160");
+
+// The per-frame camera input record (0x70 bytes) that func_00162568_8338 fills from the target for the chase algorithms.
+struct sCamInfo {
+    t4Vector f00;               // 0x00
+    t4Vector pos;               // 0x10
+    t4Vector dir;               // 0x20
+    t4Vector out;               // 0x30: written back by func_00162C78
+    int mode;                   // 0x40
+    float speed;                // 0x44: length of dir
+    char pad48[4];
+    float f4C;                  // 0x4C
+    float f50;                  // 0x50
+    float f54;                  // 0x54
+    int f58;                    // 0x58
+    int f5C;                    // 0x5C
+    int f60;                    // 0x60
+    int f64;                    // 0x64
+};
+
+extern "C" void func_00162568_8338(void* self, sCamInfo* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h) __asm__("func_00162568");
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline t4Vector cmScale_001607E0_8338(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline t4Vector cmAdd_001607E0_8338(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector at pointer times scalar).
+static inline t4Vector cmScaleP_1848(const t4Vector* v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(*v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline t4Vector cmSub_168150(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float cmLength_168150(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+
+// PORT: PS2-only VU0 inline asm (in-place vector times scalar).
+static inline void cmScaleEq_8338(t4Vector& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+extern "C" void func_00168338_v(char* self) __asm__("func_00168338");
+
+extern "C" void func_00168338_v(char* self)
+{
+    sCamInfo info;
+    func_00162568_8338(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+                  0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
+                  0.6000000238418579f);
+    *(t4Vector*)(self + 0x20) = cmAdd_001607E0_8338(info.pos, cmScaleP_1848(&D_004FF160_8338, 2.3602666854858398f));
+    t4Vector d = cmSub_168150(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
+    float len = cmLength_168150(d);
+    if (len > 0.0f) {
+        cmScaleEq_8338(d, 180.19183349609375f / len);
+        t4Vector e = cmSub_168150(*(t4Vector*)(self + 0x20), d);
+        float t;
+        if (len >= 188.07302856445312f) {
+            if (len <= 775.4580078125f) {
+                t = (len - 188.07302856445312f) / 587.385009765625f;
+            } else {
+                t = 1.0f;
+            }
+        } else {
+            t = 0.0f;
+        }
+        float f = (1.0f - t) * 0.9916903972625732f + t * 0.8601375222206116f;
+        *(t4Vector*)(self + 0x40) = cmAdd_001607E0_8338(cmScale_001607E0_8338(*(t4Vector*)(self + 0x40), f), cmScale_001607E0_8338(e, 1.0f - f));
+    }
+}
+#endif
 
 INCLUDE_ASM("camera/camera", func_00168508);
 

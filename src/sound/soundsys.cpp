@@ -1850,7 +1850,44 @@ extern "C" void func_00293B90(void) {
     func_00293948();
 }
 #endif
+//100%
 INCLUDE_ASM("sound/soundsys", func_00293BB0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// g++ 2.95 vtable entry (this-adjust delta, index, function) for a method taking only self, returning int.
+struct sSndVtI { short delta; short index; int (*fn)(void*); };
+
+static inline float* sndLevels5990(void* self) { return (float*)((char*)self + 0x5990); }
+extern const func_00290B58_sCurve D_00482C68;
+extern const func_00290B58_sCurve D_00482C90;
+
+extern "C" void func_00293BB0(void* self, cRider* rider, int* volume, int* pitch)
+{
+    float pressure = rider->mAudioPressure;
+    float level = rider->mAudioEdging + rider->mAudioBraking;
+    char* obj = (char*)&rider->mVtbl;
+    sSndVtI* vt = *(sSndVtI**)obj;
+    int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
+    float prev = *(float*)((char*)sndLevels5990(self) + (idx << 2));
+    float d = prev - level;
+    if (__builtin_fabsf(d) > 0.1f) {
+        if (level < prev) {
+            level = prev - d * 0.5f;
+        } else if (prev < level) {
+            level = prev + (level - prev) * 0.125f;
+        }
+    }
+    func_00290B58_sCurve c1 = D_00482C68;
+    *(float*)((char*)sndLevels5990(self) + (idx << 2)) = level;
+    func_00290B58_sCurve c2 = D_00482C90;
+    *volume = (int)func_00290B58(&c1, level);
+    *pitch = (int)(func_00290B58(&c2, pressure) * 4096.0f);
+    float speed = rider->mAudioSpeed;
+    if (speed < 0.1f) {
+        *volume = (int)((float)*volume * speed * 10.0f);
+    }
+}
+#endif
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00293DC0);
 #ifdef SKIP_ASM
@@ -2283,7 +2320,73 @@ extern "C" int func_00295028(void* vself, int a, int b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_00295208);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// (this unit's own sSnd5028Sys / sSnd5028Ring stand in for their cSSXAudio ring; helpers renamed for this function)
+static inline int sndRingCount_5208(sSnd5028Sys* s)
+{
+    return (s->ring.head - s->ring.tail + s->ring.cap) % s->ring.cap;
+}
+static inline int sndRingEmpty_5208(sSnd5028Sys* s)
+{
+    return s->ring.head == s->ring.tail;
+}
+static inline int sndRingFull_5208(sSnd5028Sys* s)
+{
+    return (s->ring.head + 1) % s->ring.cap == s->ring.tail;
+}
+static inline int sndRingPop_5208(sSnd5028Sys* s)
+{
+    sSnd5028Ring* r = &s->ring;
+    if (sndRingEmpty_5208(s)) return -1;
+    int v = r->data[r->tail];
+    if (++s->ring.tail >= s->ring.cap) s->ring.tail = 0;
+    return v;
+}
+static inline void sndRingPush_5208(sSnd5028Sys* s, int v)
+{
+    sSnd5028Ring* r = &s->ring;
+    if (sndRingFull_5208(s)) return;
+    r->data[r->head] = v;
+    if (++s->ring.head >= s->ring.cap) s->ring.head = 0;
+}
+
+// Ages the queue of pending one-shot sounds (records of 5: event, handle, end time, stop flag, index): finished
+// sounds are dropped, timed-out ones are stopped if flagged, the others go back into the queue.
+extern "C" void func_00295208(void* vself)
+{
+    sSnd5028Sys* self = (sSnd5028Sys*)vself;
+    int n = sndRingCount_5208(self) / 5;
+    for (int i = 0; i < n; i++) {
+        int e = sndRingPop_5208(self);
+        int h = sndRingPop_5208(self);
+        int t = sndRingPop_5208(self);
+        int stop = sndRingPop_5208(self);
+        int idx = sndRingPop_5208(self);
+        if (h < 0) continue;
+        if (h != 0 && func_002AD550(*self->mgr + 0x1D8, h, 1) == 0) continue;
+        char* mgr = *self->mgr;
+        char* bank = mgr + 0x1D8;
+        if (*(int*)(mgr + 0x260) < t) {
+            sndRingPush_5208(self, e);
+            sndRingPush_5208(self, h);
+            sndRingPush_5208(self, t);
+            sndRingPush_5208(self, stop);
+            sndRingPush_5208(self, idx);
+        } else if (t == -1) {
+            sndRingPush_5208(self, e);
+            sndRingPush_5208(self, h);
+            sndRingPush_5208(self, t);
+            sndRingPush_5208(self, stop);
+            sndRingPush_5208(self, idx);
+        } else if (stop != 0) {
+            func_002AD5F0(bank, h, 1, 0.0f);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_00295628);
@@ -2510,9 +2613,410 @@ extern "C" void func_00296308(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_00296310);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+class cController;
+class cBankMonitorInstance;
+// Sound callback: a g++ 2.95 pointer to member function (8 bytes), as cSndPlayOpts::OPTS_Callback takes it.
+typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, float);
+struct sSndOptsRec {
+    signed char vol;
+    char pad1[0xB];
+    unsigned short fC;       // 0x0C
+    char padE[0xA];
+};
 
+// One cSndPlayOpts mDelay[] entry (reset to 100 / 0 / 90 / 50 on every push).
+struct sSndOptsDelay {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+
+#define SND_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_MAX(a, b) ((a) > (b) ? (a) : (b))
+#define SND_OPTS_MAX(a, b) ((a) >= (b) ? (a) : (b))
+
+// cSndPlayOpts (prototype class): the play-option stack; push = cur++ and copy def into mCurrent[cur]. The
+// allocation tags of its ctor (sound/ps2soundman) name the arrays: ch = mCurrent, p34 = mPosStatic,
+// vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
+// p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
+struct cSndPlayOpts {
+    void* vbase;             // 0x00 virtual-base pointer
+    sSndOptsRec def;         // 0x04
+    volatile int cur;        // 0x1C
+    sSndOptsRec* ch;         // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    sSndCallback callbacks[4]; // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSndOptsDelay* p70;      // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+    void setVal(int i, int v) {
+        vals[i] = v;
+    }
+    // mCurrent[i].vol = the current base volume clamped to 0..127
+    void update(int i) {
+        ch[i].vol = SND_OPTS_MAX(SND_MIN(vals[cur], 0x7F), 0);
+    }
+};
+
+// cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
+struct cBankManager {
+    char pad0[0x1D8];
+    cSndPlayOpts sub;        // 0x1D8
+};
+
+struct sSndOwner {
+    char pad0[0x80];
+    char* rider;             // 0x80
+};
+// handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
+extern "C" void* func_002A4BA8(void* self);
+struct sSndList5 {
+    char pad0[0x18];
+    sSndList5() { func_002A4BA8(this); }
+};
+struct sSndRandSlot {
+    sSndList5 a;
+    sSndList5 b;
+    sSndList5 c;
+    float f48;
+    float f4C;
+    int f50;
+    void* operator new[](unsigned int, void* p) { return p; }
+};
+struct sSndPair {
+    int a;
+    int b;
+};
+struct cBankSys {
+    cBankManager* mgr;       // 0x0
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    void* vptr;              // 0xC
+};
+struct sSndSys8140 : public cBankSys {
+    sSndPair* e10;           // 0x10
+};
+struct sSndSys69A0 : public sSndSys8140 {
+    int f14;                 // 0x14
+    int f18;                 // 0x18
+    sSndRandSlot ent[3];     // 0x1C
+};
+
+struct sSndQuad2 {
+    t4Vector a;
+    t4Vector b;
+};
+struct cSSXAudio : public sSndSys69A0 {
+    cBankManager** p118;     // 0x118
+    char pad11C[0x597C - 0x11C];
+    sSnd5028Ring ring;       // 0x597C
+    char pad598C[0x59E0 - 0x598C];
+    int handle59E0;          // 0x59E0
+    int count59E4;           // 0x59E4
+    char pad59E8[0x5FB8 - 0x59E8];
+    int handle5FB8;          // 0x5FB8
+    char pad5FBC[0x5FE0 - 0x5FBC];
+    int f5FE0[2];            // 0x5FE0
+    unsigned short f5FE8[2]; // 0x5FE8
+    int f5FEC[2];            // 0x5FEC
+    int handle5FF4;          // 0x5FF4
+    char pad5FF8[0x6030 - 0x5FF8];
+    int slots[3];            // 0x6030
+    char pad603C[0x6040 - 0x603C];
+    int users;               // 0x6040
+    char pad6044[0x6050 - 0x6044];
+    sSndQuad2 xf;            // 0x6050 rider transform pair (func_002DA1C0 output)
+    int idx;                 // 0x6070 rider index (cBeing::getAIIndex)
+};
+
+// cSSXAudio's pending one-shot queue (an int ring of 5-word records).
+static inline int sndRingCount(cSSXAudio* s)
+{
+    return (s->ring.head - s->ring.tail + s->ring.cap) % s->ring.cap;
+}
+static inline int sndRingEmpty(cSSXAudio* s)
+{
+    return s->ring.head == s->ring.tail;
+}
+static inline int sndRingGet(cSSXAudio* s, int i)
+{
+    if (sndRingEmpty(s) || i >= sndRingCount(s)) return -1;
+    sSnd5028Ring* r = &s->ring;
+    return r->data[(s->ring.tail + i) % s->ring.cap];
+}
+static inline int sndRingFull(cSSXAudio* s)
+{
+    return (s->ring.head + 1) % s->ring.cap == s->ring.tail;
+}
+static inline int sndRingPop(cSSXAudio* s)
+{
+    sSnd5028Ring* r = &s->ring;
+    if (sndRingEmpty(s)) return -1;
+    int v = r->data[r->tail];
+    if (++s->ring.tail >= s->ring.cap) s->ring.tail = 0;
+    return v;
+}
+static inline void sndRingPush(cSSXAudio* s, int v)
+{
+    sSnd5028Ring* r = &s->ring;
+    if (sndRingFull(s)) return;
+    r->data[r->head] = v;
+    if (++s->ring.head >= s->ring.cap) s->ring.head = 0;
+}
+
+// cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
+static inline void OPTS_Callback(cBankManager* m, sSndCallback cb)
+{
+    cSndPlayOpts* s = &m->sub;
+    s->callbacks[m->sub.cur] = cb;
+}
+
+// Callees declared by several functions below.
+extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
+static inline int sndVCall(char* o, int slot)
+{
+    sSndVtI* vt = *(sSndVtI**)o;
+    return vt[slot].fn(o + vt[slot].delta);
+}
+
+extern "C" {
+void* func_00416210(void* dst, int c, int n);
+void* func_00287968(void* self, int a1, int a2);
+int func_002906B8(void* self);
+int func_00288A20(void* self, void* obj);
+int func_00288AE0(void* self);
+int func_00288B40(void* self, int which, float f);
+unsigned int func_002ADF60(void* rng);
+
+}
+
+static inline int vcall_6310(char* o, int slot)
+{
+    struct sSndVtI* vt = *(struct sSndVtI**)o;
+    return vt[slot].fn(o + vt[slot].delta);
+}
+
+static inline void optsVol_6310(struct cBankManager* m, int v)
+{
+    struct cSndPlayOpts* o = &m->sub;
+    o->vals[m->sub.cur] = v;
+    o->ch[m->sub.cur].vol = SND_MAX(0, SND_MIN(o->vals[o->cur], 0x7F));
+}
+
+static inline void sfxBegin_6310(struct cSSXAudio* self, int a, int b)
+{
+    struct cBankManager* m = self->mgr;
+    struct cSndPlayOpts* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+}
+
+extern func_00290B58_sCurve D_00482DA0;
+extern "C" void func_00296310(void* vself, char* obj)
+{
+    struct cSSXAudio* self = (struct cSSXAudio*)vself;
+    if (vcall_6310(obj + 0x6C0, 9) != 0 || *(int*)(obj + 0x87C) == 0) {
+        if (func_00288B40(self, vcall_6310(obj + 0x6C0, 5), 100.0f) < 0) {
+            return;
+        }
+    }
+    struct func_00290B58_sCurve curve = D_00482DA0;
+    int vol = (int)func_00290B58(&curve, *(float*)(obj + 0x770));
+    int a = 0;
+    int b;
+    if (vol > 0x7F) {
+        vol = 0x7F;
+    }
+    if (vol < 0) {
+        vol = 0;
+    }
+    int st = *(int*)(obj + 0x438);
+    if (st == 2)
+        goto state23;
+    if (st == 3) {
+state23:
+        a = 10;
+        b = 9;
+    } else {
+        b = (func_002ADF60((*self->p118)->sub.vbase) & 0x7FFF) * 3 / 0x7FFF + 0x30;
+    }
+    int flag = 0;
+    int ok = *(int*)(obj + 0x874) && *(int*)(obj + 0x87C);
+    if (ok) {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        if (D_00535C11[0] == 2) {
+            flag = func_00288AE0(self) == 0;
+        }
+    }
+    sfxBegin_6310(self, a, b);
+    optsVol_6310(*self->p118, vol);
+    struct cBankManager** pp = self->p118;
+    int r = (int)func_00287968(self, 5, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    {
+        struct cBankManager* m2 = *self->p118;
+        m2->sub.tgt[m2->sub.cur] = obj + 0x110;
+    }
+    {
+        struct cBankManager** pq = self->p118;
+        int q = func_00288A20(self, obj);
+        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+    }
+    if (flag) {
+        (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
+        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)(obj + 0x870);
+    }
+    func_002906B8(self);
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_00296868);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+class cController;
+class cBankMonitorInstance;
+// Sound callback: a g++ 2.95 pointer to member function (8 bytes), as cSndPlayOpts::OPTS_Callback takes it.
+typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, float);
+// One cSndPlayOpts mDelay[] entry (reset to 100 / 0 / 90 / 50 on every push).
+#define SND_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_MAX(a, b) ((a) > (b) ? (a) : (b))
+#define SND_OPTS_MAX(a, b) ((a) >= (b) ? (a) : (b))
+
+// cSndPlayOpts (prototype class): the play-option stack; push = cur++ and copy def into mCurrent[cur]. The
+// allocation tags of its ctor (sound/ps2soundman) name the arrays: ch = mCurrent, p34 = mPosStatic,
+// vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
+// p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
+// cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
+// handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
+extern "C" void* func_002A4BA8(void* self);
+// cSSXAudio's pending one-shot queue (an int ring of 5-word records).
+// cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
+// Callees declared by several functions below.
+extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
+extern "C" int func_00288B40(void* self, int which, float f);
+extern "C" unsigned int func_002ADF60(void* rng);
+
+extern sSndCallback D_004A36B0_cb[] __asm__("D_004A36B0");
+extern func_00290B58_sCurve D_00482DA0;
+// Board slide sound of an owner's rider: started once per rider, volume from the speed curve.
+extern "C" void func_00296868(void* vself, sSndOwner* t)
+{
+    cSSXAudio* self = (cSSXAudio*)vself;
+    if (*(int*)(t->rider + 0x774) >= 0) {
+        return;
+    }
+    if (sndVCall(t->rider + 0x6C0, 9) != 0 || *(int*)(t->rider + 0x87C) == 0) {
+        if (func_00288B40(self, sndVCall(t->rider + 0x6C0, 5), 100.0f) < 0) {
+            return;
+        }
+    }
+    func_00290B58_sCurve curve = D_00482DA0;
+    int vol = (int)func_00290B58(&curve, *(float*)(t->rider + 0x770));
+    int b = 0x33;
+    if (vol > 0x7F) {
+        vol = 0x7F;
+    }
+    if (vol < 0) {
+        vol = 0;
+    }
+    int flag = 0;
+    bool ok = *(int*)(t->rider + 0x874) && *(int*)(t->rider + 0x87C);
+    if (ok) {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        if (D_00535C11[0] == 2) {
+            flag = func_00288AE0(self) == 0;
+        }
+    }
+    cBankManager* m = self->mgr;
+    cSndPlayOpts* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = 0;
+    self->a8[self->mgr->sub.cur] = b;
+    cBankManager* m3 = *self->p118;
+    cSndPlayOpts* s3 = &m3->sub;
+    s3->vals[m3->sub.cur] = vol;
+    s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+    cBankManager** pp = self->p118;
+    int r = (int)func_00287968(self, 5, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    {
+        cBankManager* m2 = *self->p118;
+        m2->sub.tgt[m2->sub.cur] = t->rider + 0x110;
+    }
+    {
+        cBankManager** pq = self->p118;
+        int q = func_00288A20(self, t ? t->rider : 0);
+        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+    }
+    {
+        cBankManager* m2 = *self->p118;
+        m2->sub.p60[m2->sub.cur] = (int)t;
+    }
+    OPTS_Callback(*self->p118, D_004A36B0_cb[0]);
+    (*self->p118)->sub.p7C[(*self->p118)->sub.cur] = 0;
+    if (flag) {
+        (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
+        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)(t->rider + 0x870);
+    }
+    *(int*)(t->rider + 0x774) = func_002906B8(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_00296E18);
@@ -2537,7 +3041,118 @@ extern "C" void func_00296E20(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_00296E80);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+class cController;
+class cBankMonitorInstance;
+// Sound callback: a g++ 2.95 pointer to member function (8 bytes), as cSndPlayOpts::OPTS_Callback takes it.
+typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, float);
+// One cSndPlayOpts mDelay[] entry (reset to 100 / 0 / 90 / 50 on every push).
+#define SND_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_MAX(a, b) ((a) > (b) ? (a) : (b))
+#define SND_OPTS_MAX(a, b) ((a) >= (b) ? (a) : (b))
+
+// cSndPlayOpts (prototype class): the play-option stack; push = cur++ and copy def into mCurrent[cur]. The
+// allocation tags of its ctor (sound/ps2soundman) name the arrays: ch = mCurrent, p34 = mPosStatic,
+// vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
+// p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
+// cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
+// handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
+extern "C" void* func_002A4BA8(void* self);
+// cSSXAudio's pending one-shot queue (an int ring of 5-word records).
+// cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
+// Callees declared by several functions below.
+extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
+extern "C" int func_00288B40(void* self, int which, float f);
+extern "C" unsigned int func_002ADF60(void* rng);
+
+extern sSndCallback D_004A36B8_cb[] __asm__("D_004A36B8");
+extern func_00290B58_sCurve D_00482DA0;
+// Board slide sound of an owner's rider: started once per rider, volume from the speed curve.
+extern "C" void func_00296E80(void* vself, sSndOwner* t)
+{
+    cSSXAudio* self = (cSSXAudio*)vself;
+    if (*(int*)(t->rider + 0x778) >= 0) {
+        return;
+    }
+    if (sndVCall(t->rider + 0x6C0, 9) != 0 || *(int*)(t->rider + 0x87C) == 0) {
+        if (func_00288B40(self, sndVCall(t->rider + 0x6C0, 5), 100.0f) < 0) {
+            return;
+        }
+    }
+    func_00290B58_sCurve curve = D_00482DA0;
+    int vol = (int)func_00290B58(&curve, *(float*)(t->rider + 0x770));
+    int b = 0x34;
+    if (vol > 0x7F) {
+        vol = 0x7F;
+    }
+    if (vol < 0) {
+        vol = 0;
+    }
+    int flag = 0;
+    bool ok = *(int*)(t->rider + 0x874) && *(int*)(t->rider + 0x87C);
+    if (ok) {
+        cBE_getInterface_Fv(cBE_getBE(), 0);
+        if (D_00535C11[0] == 2) {
+            flag = func_00288AE0(self) == 0;
+        }
+    }
+    cBankManager* m = self->mgr;
+    cSndPlayOpts* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = 0;
+    self->a8[self->mgr->sub.cur] = b;
+    cBankManager* m3 = *self->p118;
+    cSndPlayOpts* s3 = &m3->sub;
+    s3->vals[m3->sub.cur] = vol;
+    s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+    cBankManager** pp = self->p118;
+    int r = (int)func_00287968(self, 5, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    {
+        cBankManager* m2 = *self->p118;
+        m2->sub.tgt[m2->sub.cur] = t->rider + 0x110;
+    }
+    {
+        cBankManager** pq = self->p118;
+        int q = func_00288A20(self, t ? t->rider : 0);
+        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+    }
+    {
+        cBankManager* m2 = *self->p118;
+        m2->sub.p60[m2->sub.cur] = (int)t;
+    }
+    OPTS_Callback(*self->p118, D_004A36B8_cb[0]);
+    (*self->p118)->sub.p7C[(*self->p118)->sub.cur] = 0;
+    if (flag) {
+        (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
+        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)(t->rider + 0x870);
+    }
+    *(int*)(t->rider + 0x778) = func_002906B8(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_00297430);
@@ -2713,7 +3328,158 @@ extern "C" void func_002974A0(void* self, char* evt, int n)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_00297950);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+class cController;
+class cBankMonitorInstance;
+// Sound callback: a g++ 2.95 pointer to member function (8 bytes), as cSndPlayOpts::OPTS_Callback takes it.
+typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, float);
+// One cSndPlayOpts mDelay[] entry (reset to 100 / 0 / 90 / 50 on every push).
+#define SND_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_MAX(a, b) ((a) > (b) ? (a) : (b))
+#define SND_OPTS_MAX(a, b) ((a) >= (b) ? (a) : (b))
+
+// cSndPlayOpts (prototype class): the play-option stack; push = cur++ and copy def into mCurrent[cur]. The
+// allocation tags of its ctor (sound/ps2soundman) name the arrays: ch = mCurrent, p34 = mPosStatic,
+// vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
+// p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
+// cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
+// handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
+extern "C" void* func_002A4BA8(void* self);
+// cSSXAudio's pending one-shot queue (an int ring of 5-word records).
+// cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
+// Callees declared by several functions below.
+extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
+// g++ 2.95 vtable entry for a variadic method returning char*.
+struct sSndVtVar { short delta; short index; char* (*fn)(void*, ...); };
+static inline void sndPushVoice(void* vself, int a, int b)
+{
+    cBankSys* self = (cBankSys*)vself;
+    cBankManager* m = self->mgr;
+    cSndPlayOpts* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+}
+
+extern "C" int* func_00144BC0(void* p);
+extern "C" void* func_0028B1E8();
+
+static inline int snd7950Commit(void* vself, void* tgt, float f, int pri)
+{
+    cSSXAudio* self = (cSSXAudio*)vself;
+    (*self->p118)->sub.tgt[(*self->p118)->sub.cur] = tgt;
+    func_002A9988(&(*self->p118)->sub, f, -1.0f);
+    (*self->p118)->sub.p78[(*self->p118)->sub.cur] = pri;
+    return func_002906B8(self);
+}
+
+extern "C" void func_00297950(cSSXAudio* self, char* obj, int type, int id)
+{
+    if (type == 0)
+        return;
+    if (type == 0x66) {
+        if (*func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0)
+            return;
+    }
+    if (*(int*)((char*)self + 0x62A8) >= 0)
+        return;
+    if (*(int*)(obj + 0xC) == 0)
+        return;
+    char* sl;
+    int i;
+    for (i = 0; i < 30; i++) {
+        if (*(int*)((char*)self + i * 0x30 + 0x5A00) == 1 && *(char**)((char*)self + i * 0x30 + 0x5A04) == obj &&
+            *(int*)((char*)self + i * 0x30 + 0x5A20) == type) {
+            func_002AD5F0((char*)*(char**)self->p118 + 0x1D8, *(int*)((char*)self + i * 0x30 + 0x5A24), 1, 0.0f);
+            *(int*)((char*)self + i * 0x30 + 0x5A00) = 0;
+            break;
+        }
+    }
+    for (i = 0; i < 30; i++) {
+        if (*(int*)((char*)self + i * 0x30 + 0x5A00) == 0) {
+            *(int*)((char*)self + i * 0x30 + 0x5A00) = 1;
+            break;
+        }
+    }
+    if (i == 30)
+        return;
+    sl = (char*)self + i * 0x30;
+    *(char**)(sl + 0x5A04) = obj;
+    if (id == -1) {
+        char* inner = *(char**)(obj + 0xC);
+        sSndVtVar* vt = *(sSndVtVar**)(inner + 0xC);
+        sSndVec4 p;
+        p = *(sSndVec4*)(vt[24].fn(inner + vt[24].delta) + 0x30);
+        *(sSndVec4*)(sl + 0x5A10) = p;
+    } else {
+        char* inner = *(char**)(obj + 0xC);
+        sSndVtVar* vt = *(sSndVtVar**)(inner + 0xC);
+        if (vt[26].fn(inner + vt[26].delta) != 0) {
+            char* o = *(char**)(obj + 0xC);
+            sSndVtVar* vt2 = *(sSndVtVar**)(o + 0xC);
+            sSndVec4 p;
+            p = *(sSndVec4*)(vt2[29].fn(o + vt2[29].delta, id) + 0x30);
+            *(sSndVec4*)(sl + 0x5A10) = p;
+        } else {
+            sSndVec4 p;
+            p = *(sSndVec4*)(obj + 0x40);
+            *(sSndVec4*)(sl + 0x5A10) = p;
+        }
+    }
+    *(int*)((char*)self + i * 0x30 + 0x5A08) = id;
+    int a;
+    int b;
+    if (type < 100) {
+        a = 2;
+        b = type;
+    } else if (type < 150) {
+        a = 8;
+        b = type - 100;
+    } else if (type < 200) {
+        a = 9;
+        b = type - 150;
+    } else {
+        a = 4;
+        b = type - 200;
+    }
+    float f = 300.0f;
+    int pri = 0x50;
+    *(int*)((char*)self + i * 0x30 + 0x5A20) = type;
+    if (type == 0xC9) {
+        if (*func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)) == 8) {
+            f = 400.0f;
+            pri = 0x32;
+        }
+    }
+    sndPushVoice(self, a, b);
+    cBankManager** pp = self->p118;
+    int r = (int)func_00287968(self, 5, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    *(int*)((char*)self + i * 0x30 + 0x5A24) = snd7950Commit(self, (char*)self + i * 0x30 + 0x5A10, f, pri);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_00297EB8);
@@ -3503,7 +4269,55 @@ extern "C" void func_00299368(sSnd9368Sys* self, char* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_00299638);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sSndKey8_9638 {
+    long v;
+} __attribute__((packed));
+// 64-bit key views of two of the handlers: the key stays in a saved register across calls.
+extern sSndKey8_9638 D_004A36A8_key[] __asm__("D_004A36A8");
+extern "C" void func_002ADDE0_key(void* bank, long id) __asm__("func_002ADDE0");
+extern sSndKey8_9638 D_004A3678_key[] __asm__("D_004A3678");
+extern "C" int func_002ADCA0_key(void*, int, long, int, int, int, int, int) __asm__("func_002ADCA0");
+extern "C" void func_002A3C00(void* self, void* obj, int flags);
+
+// PORT: 64-bit long sound keys
+// Plays the landing thud for a rider that is airborne-and-dropping, sets its board effect and restarts the ambient loop.
+extern "C" void func_00299638(void* self, char* obj)
+{
+    if (func_00288AE0(self) != 0) {
+        return;
+    }
+    bool ok = *(int*)(obj + 0x874) && *(int*)(obj + 0x87C);
+    if (!ok) {
+        return;
+    }
+    bool up = 0.0f <= *(float*)(obj + 0x470);
+    if (up) {
+        return;
+    }
+    char* p = **(char***)((char*)self + 0x118) + 0x1D8;
+    sSndKey8_9638* key = D_004A3678_key;
+    int r = (int)func_00287968(self, 9, 0);
+    func_002ADCA0_key(p, 400, key->v, r, 0, 0x6B, 0x7F, 0);
+    int m = *(int*)(obj + 0x2F4);
+    if (m == 10) {
+        func_002A3C00(self, obj, 0x10);
+    } else if (m >= 5) {
+        func_002A3C00(self, obj, 0x8);
+    } else {
+        func_002A3C00(self, obj, 0x4);
+    }
+    long id = D_004A36A8_key[0].v;
+    func_002ADDE0_key(**(char***)((char*)self + 0x118) + 0x1D8, id);
+    if (*(int*)((char*)self + 0x59E4) != 0) {
+        return;
+    }
+    func_002ADCA0_key(**(char***)((char*)self + 0x118) + 0x1D8, 3000, id, (int)obj, 0, 0, 0, 0);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002997B8);
@@ -5875,9 +6689,156 @@ extern "C" void func_0029DC48(void* self, void* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029DEF0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+class cController;
+class cBankMonitorInstance;
+// Sound callback: a g++ 2.95 pointer to member function (8 bytes), as cSndPlayOpts::OPTS_Callback takes it.
+typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, float);
+// One cSndPlayOpts mDelay[] entry (reset to 100 / 0 / 90 / 50 on every push).
+#define SND_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_MAX(a, b) ((a) > (b) ? (a) : (b))
+#define SND_OPTS_MAX(a, b) ((a) >= (b) ? (a) : (b))
 
+// cSndPlayOpts (prototype class): the play-option stack; push = cur++ and copy def into mCurrent[cur]. The
+// allocation tags of its ctor (sound/ps2soundman) name the arrays: ch = mCurrent, p34 = mPosStatic,
+// vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
+// p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
+// cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
+// handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
+extern "C" void* func_002A4BA8(void* self);
+// cSSXAudio's pending one-shot queue (an int ring of 5-word records).
+// cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
+// Callees declared by several functions below.
+extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
+// g++ 2.95 vtable entry for a method taking (self, int).
+struct sSndVtVI { short delta; short index; void (*fn)(void*, int); };
+
+// g++ 2.95 vtable entry for a method taking (self, sSndCallback).
+struct sSndVtCb { short delta; short index; void (*fn)(void*, sSndCallback); };
+static inline void sndBeginVoice(cSSXAudio* self, int a, int b)
+{
+    cBankManager* m = self->mgr;
+    cSndPlayOpts* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+}
+
+extern "C" int func_0029E438(void* self, void* blk);
+struct sQDEF0 {
+    int w[4];
+} __attribute__((aligned(16)));
+struct sV3DEF0 {
+    float x, y, z;
+};
+struct sOutDEF0 {
+    sQDEF0 q[2];
+};
+extern "C" void func_002DA1C0_c(sOutDEF0* out, sV3DEF0* in) __asm__("func_002DA1C0");
+
+extern sSndCallback D_004A36D0_cb[] __asm__("D_004A36D0");
+// Grind/ride loop sound: reference-counted start (pushes the voice at the rider's position) and stop.
+extern "C" void func_0029DEF0(void* vself, int on)
+{
+    cSSXAudio* self = (cSSXAudio*)vself;
+    if (on != 0) {
+        if (++self->users == 1) {
+            int id = -1;
+            if (func_00288AE0(self) != 0) {
+                id = 0;
+            }
+            char* obj = (char*)func_00285D98(self, id);
+            self->idx = sndVCall(obj + 0x6C0, 7);
+            {
+                sV3DEF0* p = (sV3DEF0*)sndVCall(obj + 0x6C0, 5);
+                sOutDEF0 out;
+                sV3DEF0 pos;
+                pos.x = p->x;
+                pos.y = p->y;
+                pos.z = p->z;
+                func_002DA1C0_c(&out, &pos);
+                *(sOutDEF0*)&self->xf = out;
+            }
+            sndBeginVoice(self, 8, 2);
+            cBankManager** p0 = self->p118;
+            int v = func_0029E438(self, (char*)&self->xf);
+            cBankManager* m3 = *p0;
+            cSndPlayOpts* s3 = &m3->sub;
+            s3->vals[m3->sub.cur] = v;
+            s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+            cBankManager** pp = self->p118;
+            int r = (int)func_00287968(self, 5, 0);
+            (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+            {
+                cBankManager* m2 = *self->p118;
+                m2->sub.tgt[m2->sub.cur] = &self->xf;
+            }
+            func_002A9988(&(*self->p118)->sub, 100.0f, -1.0f);
+            OPTS_Callback(*self->p118, D_004A36D0_cb[0]);
+            {
+                cBankManager** pq = self->p118;
+                int q = func_00288A20(self, obj);
+                (*pq)->sub.p64[(*pq)->sub.cur] = q;
+            }
+            (*self->p118)->sub.p74[(*self->p118)->sub.cur] = 1;
+            self->handle5FF4 = func_002906B8(self);
+        }
+    } else {
+        if (--self->users == 0) {
+            func_002AD5F0(&(*self->p118)->sub, self->handle5FF4, 1, 2.0f);
+            cBankManager* mg = *self->p118;
+            sSndVtCb* vt = *(sSndVtCb**)((char*)mg + 0xAB0);
+            char* sub = (char*)&mg->sub;
+            vt[3].fn(sub + vt[3].delta, D_004A36D0_cb[0]);
+            for (int i = 2; i >= 0; i--) {
+                self->slots[i] = -1;
+            }
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029E438);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// Converts the sound's volume (percent attenuation at 0x14, gain at 0x10) to a 0..127 level.
+extern "C" int func_0029E438(void* self, void* snd_)
+{
+    char* snd = (char*)snd_;
+    float f = (100.0f - *(float*)(snd + 0x14) * 0.01f) * 1.27f * *(float*)(snd + 0x10);
+    int n = (int)(f * 8.466667f);
+    if (n > 127)
+        n = 127;
+    if (n < 0)
+        n = 0;
+    f = n;
+    return (int)f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029E4A0);
@@ -9606,7 +10567,335 @@ extern "C" void func_002A4E38(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A4E88);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+class cController;
+class cBankMonitorInstance;
+// Sound callback: a g++ 2.95 pointer to member function (8 bytes), as cSndPlayOpts::OPTS_Callback takes it.
+typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, float);
+// One cSndPlayOpts mDelay[] entry (reset to 100 / 0 / 90 / 50 on every push).
+#define SND_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_MAX(a, b) ((a) > (b) ? (a) : (b))
+#define SND_OPTS_MAX(a, b) ((a) >= (b) ? (a) : (b))
+
+// cSndPlayOpts (prototype class): the play-option stack; push = cur++ and copy def into mCurrent[cur]. The
+// allocation tags of its ctor (sound/ps2soundman) name the arrays: ch = mCurrent, p34 = mPosStatic,
+// vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
+// p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
+// cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
+// handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
+extern "C" void* func_002A4BA8(void* self);
+extern sSndSys69A0* D_004A36F8_c __asm__("D_004A36F8");
+extern sSndCallback D_004A3700_cb[] __asm__("D_004A3700");
+extern "C" void func_002A8450_c(sSndSys8140* self, int a, int b) __asm__("func_002A8450");
+extern "C" int func_002A86B8_c(sSndSys8140* self) __asm__("func_002A86B8");
+// cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
+// A crowd position vector (16-byte aligned, empty ctor, component access by index).
+struct sCrowdVec {
+    float x, y, z, w;
+    sCrowdVec() {}
+    float& operator[](int i) { return (&x)[i]; }
+} __attribute__((aligned(16)));
+
+// cBankSys::SFX_Begin as the crowd code uses it: pushes a voice (cSndPlayOpts push + the a4 / a8 values) with
+// its mCloseOnEnd value as a parameter (the target keeps that 1 in a spilled pseudo that reload rematerialises
+// after the mDelay stores; with a literal it is a fresh li).
+static inline void crowdBegin(void* vself, int a, int b, int closeOnEnd)
+{
+    cBankSys* self = (cBankSys*)vself;
+    cBankManager* m = self->mgr;
+    cSndPlayOpts* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = closeOnEnd;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+}
+
+// The crowd sound object (sound/crowdsys.cpp in the prototype; member names from its asserts where known).
+struct sCrowdGrp4E88 {
+    int key;                 // 0x00
+    int handle;              // 0x04
+    int cnt;                 // 0x08
+    int pad0C;
+    sCrowdVec vec;            // 0x10
+    int idx;                 // 0x20
+    char pad24[0xC];
+};
+struct sCrowdSlot4E88 {
+    sCrowdVec* pCrowdObjectPos; // 0x00
+    int v4;                  // 0x04
+    sCrowdGrp4E88* grp;      // 0x08
+};
+struct sCrowd4E88 {
+    int mViewPort;           // 0x000
+    char pad4[0xC];
+    sCrowdVec vec10;          // 0x010
+    sCrowdSlot4E88 slots[15]; // 0x020
+    int count;               // 0x0D4
+    int fD8;                 // 0x0D8
+    char padDC[4];
+    sCrowdGrp4E88 groups[3]; // 0x0E0
+    int mode;                // 0x170
+    int handle;              // 0x174
+    int vol;                 // 0x178
+    int f17C;                // 0x17C
+    int state;               // 0x180
+    char pad184[8];
+    int f18C;                // 0x18C
+};
+// The voice func_002AD550 hands back (only its volume is set here).
+struct sCrowdVoice {
+    char pad0[0x64];
+    int vol;                 // 0x64
+};
+struct sCrowdVt4E88 { short delta; short index; int (*fn)(void*, int, int*, int*); };
+extern "C" int func_002A4CA0(sSndRandList* list);
+
+// func_002A4E88 is declared with a void* parameter further down (the crowd update loop).
+void func_002A4E88_c(sCrowd4E88* self) __asm__("func_002A4E88");
+void func_002A4E88_c(sCrowd4E88* self)
+{
+    if (self->count == 0) {
+        return;
+    }
+    int k = 0;
+    int bonus = 0;
+    sCrowdVec mean;
+    mean[0] = 0;
+    mean[1] = 0;
+    mean[2] = 0;
+    mean[3] = 0;
+    sCrowdVec chanPos[3];
+    int chanDist[3];
+    int chanSum[3];
+    int i;
+    for (i = 0; i < 3; i++) {
+        chanPos[i][0] = 0;
+        chanPos[i][1] = 0;
+        chanPos[i][2] = 0;
+        chanPos[i][3] = 0;
+        chanDist[i] = 0;
+        chanSum[i] = 0;
+    }
+    sCrowdSlot4E88* pCurrCrowdObjectInfo;
+    sCrowdGrp4E88* pCurrAmbientInfo;
+    do {
+        pCurrCrowdObjectInfo = &self->slots[k];
+        pCurrAmbientInfo = pCurrCrowdObjectInfo->grp;
+        k++;
+        if (pCurrCrowdObjectInfo->pCrowdObjectPos != 0) {
+            break;
+        }
+    } while (k < 15);
+    mean = *pCurrCrowdObjectInfo->pCrowdObjectPos;
+    int best = pCurrCrowdObjectInfo->v4;
+    chanPos[pCurrAmbientInfo->idx] = mean;
+    chanDist[pCurrAmbientInfo->idx] = pCurrCrowdObjectInfo->v4;
+    for (i = 1; i < self->count; i++) {
+        do {
+            pCurrCrowdObjectInfo = &self->slots[k];
+            pCurrAmbientInfo = pCurrCrowdObjectInfo->grp;
+            k++;
+            if (pCurrCrowdObjectInfo->pCrowdObjectPos != 0) {
+                break;
+            }
+        } while (k < 15);
+        float w = (float)pCurrCrowdObjectInfo->v4 / (float)(best + pCurrCrowdObjectInfo->v4);
+        mean[0] += ((*pCurrCrowdObjectInfo->pCrowdObjectPos)[0] - mean[0]) * w;
+        mean[1] += ((*pCurrCrowdObjectInfo->pCrowdObjectPos)[1] - mean[1]) * w;
+        mean[2] += ((*pCurrCrowdObjectInfo->pCrowdObjectPos)[2] - mean[2]) * w;
+        if (best < pCurrCrowdObjectInfo->v4) {
+            bonus += best >> 2;
+            best = pCurrCrowdObjectInfo->v4;
+        } else {
+            bonus += pCurrCrowdObjectInfo->v4 >> 2;
+        }
+        if (self->mode >= 2) {
+            w = (float)pCurrCrowdObjectInfo->v4 / (float)(chanDist[pCurrAmbientInfo->idx] + pCurrCrowdObjectInfo->v4);
+            chanPos[pCurrAmbientInfo->idx][0] += ((*pCurrCrowdObjectInfo->pCrowdObjectPos)[0] - chanPos[pCurrAmbientInfo->idx][0]) * w;
+            chanPos[pCurrAmbientInfo->idx][1] += ((*pCurrCrowdObjectInfo->pCrowdObjectPos)[1] - chanPos[pCurrAmbientInfo->idx][1]) * w;
+            chanPos[pCurrAmbientInfo->idx][2] += ((*pCurrCrowdObjectInfo->pCrowdObjectPos)[2] - chanPos[pCurrAmbientInfo->idx][2]) * w;
+            if (chanDist[pCurrAmbientInfo->idx] < pCurrCrowdObjectInfo->v4) {
+                chanSum[pCurrAmbientInfo->idx] += chanDist[pCurrAmbientInfo->idx] >> 2;
+                chanDist[pCurrAmbientInfo->idx] = pCurrCrowdObjectInfo->v4;
+            } else {
+                chanSum[pCurrAmbientInfo->idx] += pCurrCrowdObjectInfo->v4 >> 2;
+            }
+        }
+    }
+    best += bonus;
+    if (self->mode == 1) {
+        if (pCurrAmbientInfo->handle >= 0) {
+            sCrowdVec* pos = &pCurrAmbientInfo->vec;
+            pCurrAmbientInfo->vec = mean;
+            sCrowdVoice* h = (sCrowdVoice*)func_002AD550(&D_004A36F8_c->mgr->sub, pCurrAmbientInfo->handle, 1);
+            if (h == 0) {
+                crowdBegin(D_004A36F8_c, self->fD8, pCurrAmbientInfo->key, 1);
+                {
+                    cBankManager* m2 = D_004A36F8_c->mgr;
+                    m2->sub.tgt[m2->sub.cur] = pos;
+                }
+                {
+                    cBankManager* m2 = D_004A36F8_c->mgr;
+                    cSndPlayOpts* ss = &m2->sub;
+                    ss->vals[m2->sub.cur] = best;
+                    ss->ch[m2->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
+                }
+                {
+                    cBankManager* m2 = D_004A36F8_c->mgr;
+                    m2->sub.p3C[m2->sub.cur] = self->f17C;
+                }
+                {
+                    cBankManager* m2 = D_004A36F8_c->mgr;
+                    m2->sub.p74[m2->sub.cur] = 1;
+                }
+                OPTS_Callback(D_004A36F8_c->mgr, D_004A3700_cb[0]);
+                {
+                    cBankManager* m2 = D_004A36F8_c->mgr;
+                    m2->sub.p60[m2->sub.cur] = (int)self;
+                }
+                {
+                    cBankManager* m2 = D_004A36F8_c->mgr;
+                    m2->sub.p7C[m2->sub.cur] = 0;
+                }
+                {
+                    cBankManager* m2 = D_004A36F8_c->mgr;
+                    m2->sub.p64[m2->sub.cur] = self->mViewPort;
+                }
+                pCurrAmbientInfo->handle = func_002906B8(D_004A36F8_c);
+            } else {
+                h->vol = best;
+            }
+        }
+    } else {
+        for (i = 0; i < 3; i++) {
+            pCurrAmbientInfo = &self->groups[i];
+            if (pCurrAmbientInfo->cnt != 0 && pCurrAmbientInfo->handle >= 0) {
+                sCrowdVec* pos = &pCurrAmbientInfo->vec;
+                pCurrAmbientInfo->vec = chanPos[pCurrAmbientInfo->idx];
+                sCrowdVoice* h = (sCrowdVoice*)func_002AD550(&D_004A36F8_c->mgr->sub, pCurrAmbientInfo->handle, 1);
+                if (h == 0) {
+                    crowdBegin(D_004A36F8_c, self->fD8, pCurrAmbientInfo->key, 1);
+                    {
+                        cBankManager* m2 = D_004A36F8_c->mgr;
+                        m2->sub.tgt[m2->sub.cur] = pos;
+                    }
+                    {
+                        cBankManager* m2 = D_004A36F8_c->mgr;
+                        cSndPlayOpts* ss = &m2->sub;
+                        ss->vals[m2->sub.cur] = chanDist[pCurrAmbientInfo->idx] + chanSum[pCurrAmbientInfo->idx];
+                        ss->ch[m2->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
+                    }
+                    {
+                        cBankManager* m2 = D_004A36F8_c->mgr;
+                        m2->sub.p3C[m2->sub.cur] = self->f17C;
+                    }
+                    {
+                        cBankManager* m2 = D_004A36F8_c->mgr;
+                        m2->sub.p74[m2->sub.cur] = 1;
+                    }
+                    {
+                        cBankManager* m2 = D_004A36F8_c->mgr;
+                        m2->sub.p64[m2->sub.cur] = self->mViewPort;
+                    }
+                    OPTS_Callback(D_004A36F8_c->mgr, D_004A3700_cb[0]);
+                    {
+                        cBankManager* m2 = D_004A36F8_c->mgr;
+                        m2->sub.p60[m2->sub.cur] = (int)self;
+                    }
+                    {
+                        cBankManager* m2 = D_004A36F8_c->mgr;
+                        m2->sub.p7C[m2->sub.cur] = 0;
+                    }
+                    pCurrAmbientInfo->handle = func_002906B8(D_004A36F8_c);
+                } else {
+                    h->vol = chanDist[pCurrAmbientInfo->idx] + chanSum[pCurrAmbientInfo->idx];
+                }
+            }
+        }
+    }
+    int outA = 0x1000;
+    int outB = 0x1000;
+    if (self->state != 0) {
+        cBankSys* sys = D_004A36F8_c;
+        sCrowdVt4E88* vt = (sCrowdVt4E88*)sys->vptr;
+        int r = vt[2].fn((char*)sys + vt[2].delta, self->mViewPort, &outA, &outB);
+        if (r == 1 || r == 2) {
+            self->f18C = r;
+        }
+        if (self->state == 1 && r != 3) {
+            func_002A6848(self);
+            int e = func_002A4CA0((sSndRandList*)&D_004A36F8_c->ent[r].c);
+            if (e != 0) {
+                func_002A8450_c(D_004A36F8_c, self->fD8, e);
+                {
+                    cBankManager* m2 = D_004A36F8_c->mgr;
+                    m2->sub.tgt[m2->sub.cur] = &self->vec10;
+                }
+                {
+                    cBankManager* m2 = D_004A36F8_c->mgr;
+                    cSndPlayOpts* ss = &m2->sub;
+                    ss->vals[m2->sub.cur] = best * outB >> 12;
+                    ss->ch[m2->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
+                }
+                {
+                    cBankManager* m2 = D_004A36F8_c->mgr;
+                    m2->sub.p3C[m2->sub.cur] = self->f17C;
+                }
+                {
+                    cBankManager* m2 = D_004A36F8_c->mgr;
+                    m2->sub.p74[m2->sub.cur] = 1;
+                }
+                {
+                    cBankManager* m2 = D_004A36F8_c->mgr;
+                    m2->sub.p64[m2->sub.cur] = self->mViewPort;
+                }
+                self->handle = func_002A86B8_c(D_004A36F8_c);
+                if (self->handle >= 0) {
+                    self->state = 2;
+                }
+            }
+        }
+    }
+    if (self->handle >= 0) {
+        sCrowdVoice* h = (sCrowdVoice*)func_002AD550(&D_004A36F8_c->mgr->sub, self->handle, 2);
+        if (h == 0) {
+            func_002A6848(self);
+            self->f18C = 0;
+        } else {
+            int v = best;
+            if (self->state == 2) {
+                func_002ABE78(h, outA);
+                v = best * outB >> 12;
+            }
+            h->vol = v;
+        }
+    }
+    self->vol = best;
+    self->vec10 = mean;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A5CD8);
@@ -10955,7 +12244,28 @@ extern "C" char* func_002A7CF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A7DA0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" char* func_002A7DA0_t(void* self) __asm__("func_002A7DA0");
+extern "C" char* func_002A7DA0_t(void* self)
+{
+    int n = 0;
+    func_002A78F8_r(self);
+    while (**(signed char**)((char*)self + 0x8) != 0 && **(signed char**)((char*)self + 0x8) != ' ' &&
+           **(signed char**)((char*)self + 0x8) != '\t' && **(signed char**)((char*)self + 0x8) != '\n' &&
+           **(signed char**)((char*)self + 0x8) != '\r') {
+        char* dst = (char*)self + 0xC;
+        dst[n] = func_002A78E0(self);
+        n++;
+    }
+    char* buf = (char*)self + 0xC;
+    buf[n] = 0;
+    return buf;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A7E60);

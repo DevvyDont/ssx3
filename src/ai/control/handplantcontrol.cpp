@@ -66,7 +66,212 @@ extern "C" void func_00139178(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001391A8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+extern t4Vector D_004FF120_91A8 __asm__("D_004FF120");
+extern t4Vector D_004FF160_91A8 __asm__("D_004FF160");
+extern "C" void cRider_updateOrientationImplicit(void*);
+extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
+extern "C" void func_00113648(void* ap, void* pos, void* vel, float dt);
+extern "C" void func_00121AA0(void* rider, void* a, void* b, float x, float y);
+extern "C" int func_00139548(void* self);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+struct sQ_91A8 {
+    float x, y, z, w;
+    sQ_91A8() {}
+    sQ_91A8(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
+} __attribute__((aligned(16)));
+
+
+struct sHP_91A8 {
+    sQ_91A8 start;   // 0x00
+    sQ_91A8 vel;     // 0x10
+    sQ_91A8 v20;     // 0x20
+    sQ_91A8 target;  // 0x30
+    sQ_91A8 v40;     // 0x40
+    sQ_91A8 lpos;    // 0x50
+    sQ_91A8 lvel;    // 0x60
+    sQ_91A8 axis;    // 0x70
+    float spin;      // 0x80
+    float dur;       // 0x84
+    float time;      // 0x88
+    char pad8C[0x14];
+    char* rider;     // 0xA0
+};
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sQ_91A8 vu0Sub_91A8(const sQ_91A8& a, const sQ_91A8& b)
+{
+    sQ_91A8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sQ_91A8 vu0Add_91A8(const sQ_91A8& a, const sQ_91A8& b)
+{
+    sQ_91A8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sQ_91A8 vu0ScaleP_91A8(const sQ_91A8* v, float s)
+{
+    sQ_91A8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(*v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sQ_91A8 vu0Scale_91A8(const sQ_91A8& v, float s)
+{
+    sQ_91A8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_91A8(const sQ_91A8& a, const sQ_91A8& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sQ_91A8 QuatMul_91A8(const sQ_91A8& a, const sQ_91A8& b)
+{
+    sQ_91A8 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline sQ_91A8 AxisAngle_91A8(const sQ_91A8& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return sQ_91A8(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+static inline int eq_91A8(sHP_91A8* a, const sQ_91A8& b)
+{
+    return a->vel.x == b.x && a->vel.y == b.y && a->vel.z == b.z && a->vel.w == b.w;
+}
+
+static inline int landed_91A8(char* ap)
+{
+    int st = *(int*)(ap + 0xAC);
+    int ok = 0;
+    if (st == 1 || st == 3) ok = 1;
+    return ok;
+}
+
+extern "C" void func_001391A8(sHP_91A8* self)
+{
+    float step = *(float*)(self->rider + 0x300) * 0.01666666753590107f;
+    self->time += step;
+    if (self->time <= self->dur) {
+        float u = self->time / self->dur;
+        *(sQ_91A8*)(self->rider + 0x110) =
+            vu0Add_91A8(vu0Scale_91A8(vu0Sub_91A8(self->start, self->target), u * (u - 2.0f)), self->start);
+        *(float*)(self->rider + 0x11C) = 1.0f;
+        sQ_91A8 q;
+        {
+            float s, c;
+            func_0031BE50(&s, &c, self->spin * step * 0.5f);
+            q = sQ_91A8(s * self->axis.x, s * self->axis.y, s * self->axis.z, c);
+        }
+        *(sQ_91A8*)(self->rider + 0x120) = QuatMul_91A8(q, *(sQ_91A8*)(self->rider + 0x120));
+    } else {
+        *(sQ_91A8*)(self->rider + 0x110) = self->target;
+        *(sQ_91A8*)(self->rider + 0x1E0) = (const sQ_91A8&)D_004FF120_91A8;
+        if (eq_91A8(self, (const sQ_91A8&)D_004FF120_91A8)) {
+            if (func_00139548(self)) {
+                self->lpos = vu0Add_91A8(self->target, vu0ScaleP_91A8((const sQ_91A8*)&D_004FF160_91A8, 5.0f));
+                self->lvel = self->vel;
+                cAirPredictor_startLaunchIntoAir(*(void**)(self->rider + 0x788), &self->lpos, &self->lvel,
+                                                 3333.33349609375f);
+                for (int i = 0; i < 8 || !landed_91A8(*(char**)(self->rider + 0x788)); i++)
+                    func_00113648(*(void**)(self->rider + 0x788), &self->lpos, &self->lvel, 0.01666666753590107f);
+            }
+        } else {
+            if (landed_91A8(*(char**)(self->rider + 0x788))) {
+                char* ap = *(char**)(self->rider + 0x788);
+                if (0.0f < vu0Dot_91A8(*(sQ_91A8*)(ap + 0x20), self->vel))
+                    func_00121AA0(self->rider, ap + 0x20, ap + 0x10, *(float*)(self->rider + 0x300) + *(float*)(self->rider + 0x300),
+                                  *(float*)(self->rider + 0x300) * 6.632251739501953f);
+            } else {
+                func_00113648(*(void**)(self->rider + 0x788), &self->lpos, &self->lvel, 0.01666666753590107f);
+            }
+        }
+    }
+    cRider_updateOrientationImplicit(self->rider);
+}
+#endif
 
 extern "C" void* func_0011E150(int, int);
 
@@ -79,7 +284,216 @@ void* func_00139528(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00139548);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+extern t4Vector D_004FF120_9548 __asm__("D_004FF120");
+extern t4Vector D_004FF160_9548 __asm__("D_004FF160");
+
+struct sHP_9548 {
+    char pad0[0x10];
+    float fx, fy, fz, fw; // 0x10
+    t4Vector v20;     // 0x20
+    t4Vector pad30;   // 0x30
+    t4Vector v40;     // 0x40
+    char pad50[0x3C];
+    float m8C;       // 0x8C
+    int m90;         // 0x90
+    char pad94[0xC];
+    char* rider;     // 0xA0
+};
+
+static inline int neq_9548(sHP_9548* a, const t4Vector& b)
+{
+    return a->fx != b.x || a->fy != b.y || a->fz != b.z || a->fw != b.w;
+}
+
+// PORT: PS2-only VU0 inline asm (dst = a x b, w = 0).
+static inline void vu0CrossTo_9548(t4Vector& dst, const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "o"(a), "o"(b)
+        : "memory");
+    dst = r;
+}
+
+// PORT: PS2-only VU0 inline asm (dst = normalized v via rsqrt).
+static inline void vu0NormTo_9548(t4Vector& dst, const t4Vector& v)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    dst = r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_9548(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (dst = v * s).
+static inline void vu0ScaleTo_9548(t4Vector& dst, const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    dst = r;
+}
+
+// PORT: PS2-only VU0 inline asm (v *= s).
+static inline void vu0ScaleEq_9548(t4Vector& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(v), "=&r"(t)
+        : "m"(v), "f"(s));
+}
+
+// PORT: PS2-only VU0 inline asm (dst = a - b).
+static inline void vu0SubTo_9548(t4Vector& dst, const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    dst = r;
+}
+
+extern "C" int func_00139548_x(sHP_9548* s) __asm__("func_00139548");
+extern "C" int func_00139548_x(sHP_9548* s)
+{
+    if (neq_9548(s, D_004FF120_9548))
+        return 1;
+    int kind = *(int*)(s->rider + 0x32C);
+    t4Vector n;
+    if (kind == 3) {
+        t4Vector c;
+        vu0CrossTo_9548(c, D_004FF160_9548, s->v20);
+        vu0NormTo_9548(n, c);
+        float a = s->m8C * 0.699999988079071f;
+        float k = 2.0f;
+        if (s->m90 != 0)
+            k = 15.0f;
+        float d = vu0Dot_9548(s->v40, n);
+        float f = k * 27.77777862548828f;
+        if (d < 0.0f)
+            f = -f;
+        t4Vector u;
+        vu0ScaleTo_9548(u, s->v20, a);
+        t4Vector v;
+        vu0ScaleTo_9548(v, n, f);
+        vu0SubTo_9548(c, u, v);
+        *(t4Vector*)&s->fx = c;
+        float z = 0.0f;
+        if (s->m90 != 0)
+            z = 10.0f;
+        *(float*)((char*)s + 0x18) = z * 27.77777862548828f;
+        return 1;
+    }
+    if (kind == 4) {
+        t4Vector c;
+        vu0CrossTo_9548(c, s->v20, D_004FF160_9548);
+        vu0NormTo_9548(n, c);
+        float z = 0.0f;
+        float d = vu0Dot_9548(n, s->v40);
+        if (d < z)
+            vu0ScaleEq_9548(n, -1.0f);
+        float k = 5.0f;
+        if (s->m90 != 0)
+            k = 15.0f;
+        float g = 27.77777862548828f;
+        vu0ScaleTo_9548(c, n, k * g);
+        *(t4Vector*)&s->fx = c;
+        if (s->m90 != 0)
+            z = 5.0f;
+        k = z * g;
+        *(float*)((char*)s + 0x18) = k;
+        return 1;
+    }
+    if (kind == 5) {
+        t4Vector c;
+        vu0CrossTo_9548(c, s->v20, D_004FF160_9548);
+        vu0NormTo_9548(n, c);
+        float z = 0.0f;
+        float d = vu0Dot_9548(n, s->v40);
+        if (z < d)
+            vu0ScaleEq_9548(n, -1.0f);
+        float k = 5.0f;
+        if (s->m90 != 0)
+            k = 15.0f;
+        float g = 27.77777862548828f;
+        vu0ScaleTo_9548(c, n, k * g);
+        *(t4Vector*)&s->fx = c;
+        if (s->m90 != 0)
+            z = 5.0f;
+        k = z * g;
+        *(float*)((char*)s + 0x18) = k;
+        return 1;
+    }
+    if (kind == 6) {
+        vu0ScaleTo_9548(n, s->v20, 833.3333740234375f);
+        *(t4Vector*)&s->fx = n;
+        *(float*)((char*)s + 0x18) += 416.66668701171875f;
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00139970);
@@ -926,7 +1340,148 @@ extern "C" void func_0013ADC0(char* self, sVec4HP* p)
 
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013AF28);
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013BD80);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+extern t4Vector D_004FF160_BD80 __asm__("D_004FF160");
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline t4Vector vu0Scale_BD80(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector times scalar).
+static inline void vu0ScaleEq_BD80(t4Vector& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s));
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline t4Vector vu0Sub_BD80(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "o"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_BD80(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline t4Vector vu0Normalize_BD80(const t4Vector& v)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline t4Vector vu0Cross_BD80(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
+static inline float absf_BD80(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline t4Vector up_BD80(char* p) { return *(t4Vector*)(*(char**)(p + 0x50) + 0x1C0); }
+
+// PORT: the unit declares func_0013BD80 earlier as returning sVec4HP; same symbol.
+extern "C" t4Vector func_0013BD80_BD80(char* p, const t4Vector& n) __asm__("func_0013BD80");
+extern "C" t4Vector func_0013BD80_BD80(char* p, const t4Vector& n)
+{
+    float s, c;
+    func_0031BE50(&s, &c, *(float*)(p + 0x10));
+    bool steep = absf_BD80(n.z) > 0.92f;
+    t4Vector r;
+    if (!steep) {
+        r = vu0Normalize_BD80(vu0Sub_BD80(D_004FF160_BD80, vu0Scale_BD80(n, n.z)));
+        if (vu0Dot_BD80(r, up_BD80(p)) < 0.0f)
+            vu0ScaleEq_BD80(r, -1.0f);
+    } else {
+        t4Vector a = vu0Normalize_BD80(vu0Cross_BD80(up_BD80(p), n));
+        t4Vector b = vu0Cross_BD80(n, a);
+        r = vu0Sub_BD80(vu0Scale_BD80(b, c), vu0Scale_BD80(a, s));
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013BFA8);

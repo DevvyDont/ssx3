@@ -1086,7 +1086,289 @@ extern "C" void func_00101A28(sList_1A28* list, sNode_1A28* node, int recurse)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00101B60);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline t4Vector Sub_1B60(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline t4Vector Add_1B60(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_1B60(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+extern "C" int func_001298C8();
+struct sNashTree;
+struct sGame_1B60 {
+    char pad_0x0[0xC];
+    void* race;                 // 0xC
+    char pad_0x10[0x10];
+    sNashTree* nash;            // 0x20: the world's nash cell tree
+};
+// The game singleton (D_004A28A8).
+struct sApp_1B60 {
+    char pad_0x0[0x84];
+    sGame_1B60* game;           // 0x84
+};
+extern sApp_1B60* D_004A28A8_1B60 __asm__("D_004A28A8");
+// ai/focusbox.cpp: the focus box update (prototype asserts: NumFocusInstances, numfocusinstances <
+// arraysize(focusinstances), numunfocusinstances < arraysize(unfocusinstances)).
+// nash::CellKey: a cell's level (log2 of its size) and integer coordinates.
+struct sNashKey {
+    int level;
+    int x;
+    int y;
+    int z;
+};
+
+// One root of the nash cell tree: its key and its cell (nash::Cell = sNode_1A28: eight children, then the
+// instance list).
+struct sNashRoot {
+    sNashKey key;
+    sNode_1A28* cell;
+};
+
+struct sNashTree {
+    sNashRoot roots[8];
+};
+
+// An axis-aligned focus box (the empty ctor leaves the dead `li 5; li -1` of g++'s array-ctor loop).
+struct sFocusBox {
+    t4Vector min;
+    t4Vector max;
+    sFocusBox() {}
+};
+
+// An instance record in a cell's list (tInstanceRecord): 0x100 = in focus, 0x200 = the focus pass parity.
+struct tFocusRec {
+    tFocusRec* next;
+    int f4;
+    unsigned int flags;
+};
+
+// The instances func_00101A28 collects.
+struct sFocusList {
+    int n;
+    tFocusRec* items[512];
+};
+
+// One focus instance: the position it follows and that position at the last update.
+struct sFocusInst {
+    const t4Vector* pos;
+    int pad[3];
+    t4Vector last;
+};
+
+struct sFocusBoxes {
+    int NumFocusInstances;              // 0x0
+    int pad4[3];
+    sFocusInst inst[6];                 // 0x10
+    int lastTime;                       // 0xD0
+    int parity;                         // 0xD4
+    int numInstances;                   // 0xD8
+    tFocusRec* instances[512];          // 0xDC
+};
+
+struct InstanceCompare {
+};
+
+extern t4Vector D_004A61E0;
+extern "C" void func_00101A28_1B60(sFocusList* list, const sNode_1A28* node, int recurse) __asm__("func_00101A28");
+extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void func_0013FAD8(tFocusRec** first, tFocusRec** last, tFocusRec** out, const InstanceCompare& cmp);
+extern "C" void func_0030A460(int, tFocusRec*);
+extern "C" void func_0030A3A0(int, tFocusRec*);
+
+struct FocusCallback;
+// Retail's out-of-line copy of FocusCallback::operator() (matched in ai/control/handplantcontrol); the
+// recursion inside the inline operator goes to it.
+extern "C" void func_00144368_1B60(const FocusCallback* cb, const sNode_1A28* cell, const sNashKey* key) __asm__("func_00144368");
+
+// FocusCallback: collects the instances of every cell that touches one of the focus boxes.
+struct FocusCallback {
+    sFocusList* list;
+    sFocusBox* boxes;
+    int count;
+
+    void operator()(const sNode_1A28& cell, const sNashKey& key) const
+    {
+        int i = 0;
+        for (;;) {
+            if (i == count) {
+                return;
+            }
+            union { int i; float f; } u;
+            u.i = (key.level + 0x7F) << 23;
+            float s = u.f;
+            int ok = 0;
+            if (((float)key.x - 0.2f) * s <= boxes[i].max.x && ((float)key.y - 0.2f) * s <= boxes[i].max.y && ((float)key.z - 0.2f) * s <= boxes[i].max.z
+                && boxes[i].min.x <= ((float)(key.x + 1) + 0.2f) * s && boxes[i].min.y <= ((float)(key.y + 1) + 0.2f) * s && boxes[i].min.z <= ((float)(key.z + 1) + 0.2f) * s) {
+                ok = 1;
+            }
+            if (ok) {
+                goto found;
+            }
+            i++;
+        }
+    found:
+        int leaf = key.level < 14;
+        func_00101A28_1B60(list, &cell, leaf);
+        if (leaf) {
+            return;
+        }
+        if (key.level == 11) {
+            return;
+        }
+        sNashKey k;
+        k.level = key.level - 1;
+        k.x = key.x * 2;
+        k.y = key.y * 2;
+        k.z = key.z * 2;
+        if (cell.kids[0]) func_00144368_1B60(this, cell.kids[0], &k);
+        k.x++;
+        if (cell.kids[4]) func_00144368_1B60(this, cell.kids[4], &k);
+        k.y++;
+        if (cell.kids[6]) func_00144368_1B60(this, cell.kids[6], &k);
+        k.x--;
+        if (cell.kids[2]) func_00144368_1B60(this, cell.kids[2], &k);
+        k.z++;
+        if (cell.kids[3]) func_00144368_1B60(this, cell.kids[3], &k);
+        k.x++;
+        if (cell.kids[7]) func_00144368_1B60(this, cell.kids[7], &k);
+        k.y--;
+        if (cell.kids[5]) func_00144368_1B60(this, cell.kids[5], &k);
+        k.x--;
+        if (cell.kids[1]) func_00144368_1B60(this, cell.kids[1], &k);
+    }
+};
+
+// Visit root k of the tree (same shape as intersect/worldsphtree's visit helpers: the root's address is
+// taken before the test).
+static inline void Visit(const FocusCallback& cb, const sNashTree* tree, int k)
+{
+    const sNashRoot* r = &tree->roots[k];
+    if (tree->roots[k].cell) {
+        cb(*r->cell, r->key);
+    }
+}
+
+extern "C" void func_00101B60(sFocusBoxes* self)
+{
+    sFocusList list;
+    list.n = 0;
+    int moved = 0;
+    sFocusBox boxes[6];
+    for (int i = 0; i < self->NumFocusInstances; i++) {
+        t4Vector p = *self->inst[i].pos;
+        boxes[i].min = Sub_1B60(p, D_004A61E0);
+        boxes[i].max = Add_1B60(p, D_004A61E0);
+        if (Len_1B60(Sub_1B60(self->inst[i].last, p)) >= 2000.0f) {
+            moved = 1;
+        }
+    }
+    if (!moved && self->lastTime >= 0 && func_001298C8() - self->lastTime < 20) {
+        return;
+    }
+    if (self->NumFocusInstances != 0) {
+        sNashTree* tree = D_004A28A8_1B60->game->nash;
+        FocusCallback cb;
+        cb.list = &list;
+        cb.boxes = boxes;
+        cb.count = self->NumFocusInstances;
+        Visit(cb, tree, 0);
+        Visit(cb, tree, 1);
+        Visit(cb, tree, 2);
+        Visit(cb, tree, 3);
+        Visit(cb, tree, 4);
+        Visit(cb, tree, 5);
+        Visit(cb, tree, 6);
+        Visit(cb, tree, 7);
+    }
+    self->lastTime = func_001298C8();
+    for (int i = 0; i < self->NumFocusInstances; i++) {
+        t4Vector p = *self->inst[i].pos;
+        self->inst[i].last = p;
+    }
+    tFocusRec* focusinstances[256];
+    tFocusRec* unfocusinstances[256];
+    int numfocusinstances = 0;
+    int numunfocusinstances = 0;
+    self->parity ^= 1;
+    for (int i = 0; i < list.n; i++) {
+        tFocusRec* r = list.items[i];
+        if (!(r->flags & 0x100)) {
+            focusinstances[numfocusinstances++] = r;
+            r->flags |= 0x100;
+        }
+        if (self->parity) {
+            r->flags &= ~0x200;
+        } else {
+            r->flags |= 0x200;
+        }
+    }
+    for (int i = 0; i < self->numInstances; i++) {
+        tFocusRec* r = self->instances[i];
+        if (((r->flags & 0x200) == 0) != self->parity) {
+            unfocusinstances[numunfocusinstances++] = r;
+            r->flags &= ~0x100;
+        }
+    }
+    self->numInstances = list.n;
+    func_003E6574(self->instances, list.items, list.n << 2);
+    tFocusRec* sorted[256];
+    if (numunfocusinstances) {
+        func_0013FAD8(unfocusinstances, unfocusinstances + numunfocusinstances, sorted, InstanceCompare());
+        for (int i = 0; i < numunfocusinstances; i++) {
+            func_0030A460(D_004A3DD8, sorted[i]);
+        }
+    }
+    if (numfocusinstances) {
+        func_0013FAD8(focusinstances, focusinstances + numfocusinstances, sorted, InstanceCompare());
+        for (int i = 0; i < numfocusinstances; i++) {
+            func_0030A3A0(D_004A3DD8, sorted[i]);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_001032C0);
@@ -3336,7 +3618,38 @@ extern "C" void func_00105D98_impl(cRider* self, sInfo_5D98* info, int id)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00106538);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void AddEq_6538(t4Vector& a, const t4Vector& b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+extern "C" void func_00329B40(void* p, const t4Vector* d);
+// PORT: the unit declares func_00106538(void*, const t4Vector&) for its callers; same symbol.
+extern "C" void func_00106538_6538(char* self, const t4Vector* d) __asm__("func_00106538");
+
+extern "C" void func_00106538_6538(char* self, const t4Vector* d)
+{
+    AddEq_6538(*(t4Vector*)(self + 0x110), *d);
+    AddEq_6538(*(t4Vector*)(self + 0x9D0), *d);
+    func_00329B40(*(void**)(self + 0xAA0), d);
+    AddEq_6538(*(t4Vector*)(self + 0x400), *d);
+    AddEq_6538(*(t4Vector*)(self + 0x410), *d);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_001065B0);
@@ -4140,7 +4453,256 @@ extern "C" int func_00106F78_impl(cRider* self)
 
 INCLUDE_ASM("seg/seg_1218", func_00107578);
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_00107888);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_7888(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline t4Vector Scale_7888(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline t4Vector Sub_7888(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline t4Vector Norm_7888(const t4Vector& v)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline t4Vector Add_7888(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_7888(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+extern "C" char* func_00311B20(void*, int);
+extern "C" int func_001298C8();
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_C258(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_00106538_m2537(void* rider, const t4Vector& v) __asm__("func_00106538");
+// The race (seg/seg_1FBE38 layout): riders by being index at 0x28.
+struct cRider_1218;
+struct sRace_7888 {
+    char pad_0x0[0x28];
+    cRider_1218* riders[1];     // 0x28
+};
+struct sGame_7888 {
+    char pad_0x0[0xC];
+    sRace_7888* race;           // 0xC
+};
+// The game singleton (D_004A28A8).
+struct sApp_7888 {
+    char pad_0x0[0x84];
+    sGame_7888* game;           // 0x84
+};
+extern sApp_7888* D_004A28A8_7888 __asm__("D_004A28A8");
+// Rider-rider collisions: for every other active rider, push the two apart when their sphere trees touch
+// (and exchange momentum along the contact), then shove the other rider when this one runs into it.
+
+// A rider's per-rider record (indexed by the other rider's AI index): set flag and the frame counters of the
+// last contact, momentum exchange and shove.
+struct sRec_7888 {
+    int active;         // 0x00
+    char pad4[0xC];
+    int lastExchange;   // 0x10
+    int lastContact;    // 0x14
+    int lastShove;      // 0x18
+    char pad1C[0x24 - 0x1C];
+};
+
+extern "C" float cRider_getMass(cRider* self);
+extern "C" int func_00329F98(void* a, void* b, t4Vector* dir, t4Vector* pos);
+extern "C" float func_00149038(void* iface, int index, int column);
+extern "C" void func_00107E70_7888(cRider* self, cRider* other, t4Vector* n, int flag, float speed) __asm__("func_00107E70");
+
+// PORT: PS2-only VU0 inline asm (a -= b).
+static inline void SubEq_7888(t4Vector& a, const t4Vector& b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(a)
+        : "m"(a), "m"(b));
+}
+
+// PORT: PS2-only VU0 inline asm (vector divided by scalar).
+static inline t4Vector Div_7888(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// Vector times scalar.
+static inline t4Vector operator*(const t4Vector& v, float s) { return Scale_7888(v, s); }
+
+static inline sRec_7888* Rec_7888(cRider* r, int idx) { return &((sRec_7888*)r)[idx]; }
+
+extern "C" void func_00107888(cRider* self)
+{
+    int busy = 0;
+    float mass = cRider_getMass(self);
+    if (func_00311AE8(self->mRiderAnim, 1) != 0xD ||
+        func_001446A0(func_00311B20(self->mRiderAnim, 1) + 0xB0, 1) ||
+        !func_001446A0(func_00311B20(self->mRiderAnim, 1) + 0xB0, 0))
+        busy = 1;
+    for (int i = 0; i < 6; i++) {
+        if (!Rec_7888(self, i)->active)
+            continue;
+        cRider* other = (cRider*)D_004A28A8_7888->game->race->riders[i];
+        if (other->mIsActor != 0)
+            continue;
+        sRec_7888* orec = Rec_7888(other, self->mAIIndex);
+        if (orec->lastContact < func_001298C8()) {
+            sRec_7888* srec = Rec_7888(self, other->mAIIndex);
+            srec->lastContact = func_001298C8();
+            orec->lastContact = func_001298C8();
+            t4Vector dir;
+            t4Vector pos;
+            if (func_00329F98(self->mSphereTree, other->mSphereTree, &dir, &pos)) {
+                float omass = cRider_getMass(other);
+                t4Vector a = dir * -0.550000011920929f;
+                t4Vector b = dir * 0.550000011920929f;
+                if (func_001231A8(self))
+                    SubEq_7888(a, Scale_7888(self->mGroundNormal, Dot_7888(a, self->mGroundNormal)));
+                if (func_001231A8(other))
+                    SubEq_7888(b, Scale_7888(other->mGroundNormal, Dot_7888(b, other->mGroundNormal)));
+                func_00106538_m2537(self, a);
+                func_00106538_m2537(other, b);
+                if (srec->lastExchange < func_001298C8() - 3) {
+                    t4Vector n = Norm_7888(dir);
+                    float t = (Dot_7888(other->mVelocity, n) - Dot_7888(self->mVelocity, n)) / (mass + omass);
+                    func_00107E70_7888(self, other, &n, 0, omass * t);
+                    func_00107E70_7888(other, self, &n, 0, -mass * t);
+                    srec->lastExchange = func_001298C8();
+                    orec->lastExchange = func_001298C8();
+                }
+            }
+        }
+        if (busy)
+            continue;
+        if (orec->lastShove >= func_001298C8() - 3)
+            continue;
+        if (func_00311AE8(other->mRiderAnim, 1) == 3 &&
+            func_001446A0(func_00311B20(other->mRiderAnim, 1) + 0xB0, 0) &&
+            !func_001446A0(func_00311B20(other->mRiderAnim, 1) + 0xB0, 1))
+            continue;
+        t4Vector d = Sub_7888(other->mPosition, self->mPosition);
+        float len = Len_7888(d);
+        if (len > 150.0f)
+            continue;
+        if (len < 0.001f)
+            continue;
+        t4Vector n = Div_7888(d, len);
+        if (!(Dot_7888(n, self->mAttackDir) > 0.0f))
+            continue;
+        float attr = func_00149038(cBE_getInterface_C258(cBE_getBE(), 3), self->mAIIndex, self->mStatsIndex);
+        float spd = Len_7888(self->mVelocity);
+        float k = (attr * 3.0001144409179688f + 1.0f) * (self->mAttackBlend + 0.5f) * 599.9739990234375f;
+        if (0.001f < spd)
+            n = Add_7888(Scale_7888(n, 0.5f), Scale_7888(self->mVelocity, 0.5f / spd));
+        func_00107E70_7888(other, self, &n, 1, k);
+        orec->lastShove = func_001298C8();
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00107E70);

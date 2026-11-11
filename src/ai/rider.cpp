@@ -550,7 +550,137 @@ extern "C" void cRider_initOnce(cRider* self, int immediate)
 
 INCLUDE_ASM("ai/rider", func_0011C298);
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011D390);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
+// sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
+template <class F> struct sVEntry {
+    short delta;
+    short index;
+    F* fn;
+};
+extern void* D_004A28A8;
+extern signed char D_00535BC8[];
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
+void* cBE_getInterface_11D390(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// func_00117540 (cRiderMetrix reset) takes only the metrix; its $5 is left over from the store above.
+extern "C" void func_00117540(void* metrix);
+extern "C" void func_00311A50(void* anim);
+extern "C" bool func_0014EF70(void* iface, int riderIndex);
+extern "C" void func_00112180(void* rider, int v);
+extern "C" int func_00145C38(void* iface, int index);
+extern "C" int* func_00144BC0(void* iface);
+extern "C" void func_0011DD98(cRider* self);
+extern "C" void func_00119E38(void* p, int flip, int c);
+extern "C" void func_0011DE60(cRider* self, int a1, int a2);
+extern "C" void func_0011DF18(cRider* self, int notify);
+extern "C" void func_00120D58(cRider* self);
+extern "C" void func_00111890(void* self);
+extern "C" void func_00125038(cRider* self);
+// PORT: prototype mismatch. The unit defines func_0011FEC8/func_0011FE78 with one
+// param, but their bodies forward $5 to func_00111538/func_001112B8 (int arg).
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+
+
+void func_0011D390_impl(cRider* self) __asm__("func_0011D390");
+void func_0011D390_impl(cRider* self)
+{
+    if (self->mLoadStep == 7)
+    {
+        *(int*)((char*)self->mRiderHandler + 0xDE0) = 3;
+        *(int*)((char*)self->mRiderHandler + 0xDE4) = 0xD;
+        self->mRubberBandBehind = 0;
+        self->mRubberBandAhead = 0;
+        self->unk_0D8 = -1;
+        func_00117540(self->mMetrix);
+        func_00311A50(self->mRiderAnim);
+        self->mNaturalStance = func_0014EF70(cBE_getInterface_11D390(cBE_getBE(), 2), self->mAIIndex);
+        func_00112180(self, 1);
+        void* iface = cBE_getInterface_11D390(cBE_getBE(), 0);
+        // PORT: the gotos reproduce the shared compare chain (mode 4, 5, 6) that two different entry conditions fall into.
+        if (func_00145C38(cBE_getInterface_11D390(cBE_getBE(), 1), self->mAIIndex) != 0
+            && D_00535BC8[0x49] == 0 && *func_00144BC0(iface) == 0xE)
+        {
+            if (D_00535BC8[0x48] == 4)
+            {
+                func_0011DD98(self);
+                func_0011FE78_impl(self, 1);
+                func_0011FEC8_impl(self, 4);
+                func_00119E38(self->mMetrix, 0, 0);
+                goto done;
+            }
+            goto m5;
+        }
+        if (D_00535BC8[0x48] == 4)
+            goto bb;
+    m5:
+        if (D_00535BC8[0x48] == 5)
+            goto bb;
+        if (D_00535BC8[0x48] == 6)
+        {
+        bb:
+            int v = *func_00144BC0(iface);
+            switch (v)
+            {
+            case 17:
+            case 18:
+            case 19:
+            case 20:
+            case 21:
+                func_0011DE60(self, 0, 2);
+                func_0011DF18(self, 0);
+                break;
+            case 14:
+            case 15:
+            case 16:
+                func_0011DE60(self, self->mAIIndex, 1);
+                func_0011DF18(self, 0);
+                break;
+            default:
+                func_0011DE60(self, 1, 2);
+                func_0011DF18(self, 0);
+                break;
+            }
+        }
+        else
+        {
+            func_0011FE78_impl(self, 3);
+            func_0011FEC8_impl(self, 6);
+        }
+    done:
+        if (D_00535BC8[0x49] != 0)
+            func_00120D58(self);
+        self->mFinishTime = -1.0f;
+        self->unk_3FC = 0;
+        self->mUberTimer = 0;
+        self->mUberLevel = 0;
+        self->mDidNotFinish = 0;
+        self->mStartTick = *(int*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC) + 8);
+        self->mFinishTick = 0;
+        self->mPenaltyTicks = 0;
+        self->mOverlapCount = 0;
+        self->mPowerUpBoostTimer = 0;
+        self->mPowerUpTrickTimer = 0;
+        self->unk_5A0 = 0;
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)self + 0x6C0);
+        vt[kRiderVt_vibrationReset].fn((char*)self + vt[kRiderVt_vibrationReset].delta);
+        func_00111890(self->mRiderHandler);
+        self->unk_5A4 = 0;
+        self->unk_5A8 = 0;
+        self->unk_5AC = 0;
+        self->mHasRival = 0;
+        self->mLastShoveFrame = 0;
+        self->mRivalIndex = -1;
+        self->unk_100 = 1;
+        func_00125038(self);
+        self->unk_5B0 = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_0011D640);
@@ -836,7 +966,121 @@ extern "C" void cRider_updateOrientationImplicit(cRider* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011E150);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+// 16-byte vectors with inline constructors (non-POD siblings of t4Vector). The classes differ only in the order
+// their 4-float constructor stores the components; that order decides the float-register allocation of every
+// caller (merging them changes code), so they are kept apart.
+// sVec4 stores x, y, z, w.
+struct sVec4 : t4Vector {
+    sVec4() {}
+    sVec4(float ax, float ay, float az, float aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline sVec4 Scale_E150(const sVec4& v, float s)
+{
+    sVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec4 Add_E150(const sVec4& a, const sVec4& b)
+{
+    sVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4 Sub_E150(const sVec4& a, const sVec4& b)
+{
+    sVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+struct sBox_E150 {
+    sVec4 min;
+    sVec4 max;
+};
+
+static inline void SetMin_E150(float& m, float v)
+{
+    if (v < m)
+        m = v;
+}
+
+static inline void SetMax_E150(float& m, float v)
+{
+    if (v > m)
+        m = v;
+}
+
+// Grows the box to contain c.
+static inline void Grow_E150(sBox_E150& b, const sVec4& c)
+{
+    SetMin_E150(b.min.x, c.x);
+    SetMin_E150(b.min.y, c.y);
+    SetMin_E150(b.min.z, c.z);
+    SetMax_E150(b.max.x, c.x);
+    SetMax_E150(b.max.y, c.y);
+    SetMax_E150(b.max.z, c.z);
+}
+
+extern "C" void func_0011E150_impl(cRider* self, sVec4* pin) __asm__("func_0011E150");
+extern "C" void func_0011E150_impl(cRider* self, sVec4* pin)
+{
+    sVec4 up = *(sVec4*)&self->mMatrix.row[2];
+    sVec4 side = *(sVec4*)&self->mMatrix.row[0];
+    sVec4 front = *(sVec4*)&self->mMatrix.row[1];
+    sVec4* p = pin ? pin : (sVec4*)&self->mPosition;
+    *(sVec4*)&self->mBoundsMin = *(sVec4*)&self->mBoundsMax = *p;
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Add_E150(Add_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Add_E150(Add_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Sub_E150(Add_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Sub_E150(Add_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Add_E150(Sub_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Add_E150(Sub_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Sub_E150(Sub_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
+    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Sub_E150(Sub_E150(*p, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
+    *(sVec4*)&self->mBoundSphere = *p;
+    self->mBoundSphere.w = 250.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_0011EB60);
@@ -851,7 +1095,408 @@ extern "C" void func_0011EB60(cRider* self, float value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_0011EB98);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+// 16-byte vectors with inline constructors (non-POD siblings of t4Vector). The classes differ only in the order
+// their 4-float constructor stores the components; that order decides the float-register allocation of every
+// caller (merging them changes code), so they are kept apart.
+// sVec4 stores x, y, z, w.
+// sVec4W stores w first, then x, y, z.
+struct sVec4W : t4Vector {
+    sVec4W() {}
+    sVec4W(float ax, float ay, float az, float aw)
+    {
+        w = aw;
+        x = ax;
+        y = ay;
+        z = az;
+    }
+} __attribute__((aligned(16)));
+extern t4Vector D_004FF130;
+extern t4Vector D_004FF160;
+extern t4Vector D_004FF220;
+extern "C" void func_00134DD0(void* self, void* xf);
+extern "C" void cRider_doLeanPoseAdjust(void* self, void* xf);
+extern "C" void func_00310200(cAnimModel* self, void* roots);
+extern "C" void func_0011F3D8(void* self, void* obj, void* xf, float t);
+extern "C" void func_00106828(void* self);
+extern "C" float func_0031C128(float x);
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+int func_0011FEE8(void* self);
+
+struct sXf_EB98 {
+    sVec4W pos;
+    sVec4W rot;
+};
+
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline sVec4W Scale_EB98(const t4Vector& v, float s)
+{
+    sVec4W r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec4W Add_EB98(const sVec4W& a, const sVec4W& b)
+{
+    sVec4W r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector add).
+static inline void AddTo_EB98(sVec4W& a, const sVec4W& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+// vector += vector through VU0. Declared to return the vector by value (as if for chaining) but there is no return
+// statement: g++ 2.95 accepts it, every caller ignores the result, and the ignored by-value result is the unwritten
+// 16-byte call temp the retail frame (and the July 2003 prototype's) has at 0x70.
+static inline sVec4W operator+=(sVec4W& a, const sVec4W& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4W Sub_EB98(const sVec4W& a, const t4Vector& b)
+{
+    sVec4W r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "o"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sVec4W Cross_EB98(const sVec4W& a, const sVec4W& b)
+{
+    sVec4W r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector length).
+static inline float Length_EB98(const sVec4W& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_EB98(const sVec4W& a, const sVec4W& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector / scalar via vdiv).
+static inline void DivEq_EB98(sVec4W& r, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(r), "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (v /= s, then the 4-component dot product of a and b).
+static inline float DivDot_EB98(sVec4W& v, float s, const sVec4W& a, const sVec4W& b)
+{
+    float r;
+    int t, u;
+    __asm__(
+        "mfc1      %3, %6\n"
+        "qmtc2.ni  %3, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %4\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        "lqc2      $vf3, %7\n"
+        "lqc2      $vf5, %8\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %2, $vf4\n"
+        "mtc1      %2, %1\n"
+        : "=m"(v), "=f"(r), "=&r"(t), "=&r"(u)
+        : "m"(v), "m"(v), "f"(s), "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sVec4W QuatMul_EB98(const sVec4W& a, const sVec4W& b)
+{
+    sVec4W r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
+static inline sVec4W Rot_EB98(const sVec4W& q, const sVec4W& v)
+{
+    sVec4W r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion + position to a 4x4 matrix).
+static inline void QuatToMat_EB98(void* dst, const sVec4W* q, const sVec4W* p)
+{
+    __asm__ __volatile__(
+        "lqc2       $vf4, 0(%1)\n"
+        "lqc2       $vf3, 0(%2)\n"
+        "vaddw.xyz  $vf1, $vf0, $vf0w\n"
+        "vadd.xyz   $vf5, $vf4, $vf4\n"
+        "vsub.w     $vf10, $vf10, $vf10\n"
+        "vsub.w     $vf11, $vf11, $vf11\n"
+        "vsub.w     $vf12, $vf12, $vf12\n"
+        "vmul.xyz   $vf6, $vf5, $vf4\n"
+        "vmulw.xyz  $vf7, $vf5, $vf4w\n"
+        "vopmula.xyz ACC, $vf5, $vf4\n"
+        "vmadd.xyz  $vf8, $vf0, $vf0\n"
+        "vsubay.x   ACC, $vf1, $vf6y\n"
+        "vmsubz.x   $vf10, $vf1, $vf6z\n"
+        "vsubaz.y   ACC, $vf1, $vf6z\n"
+        "vmsubx.y   $vf11, $vf1, $vf6x\n"
+        "vsubax.z   ACC, $vf1, $vf6x\n"
+        "vmsuby.z   $vf12, $vf1, $vf6y\n"
+        "vaddaz.y   ACC, $vf0, $vf8z\n"
+        "vmaddz.y   $vf10, $vf1, $vf7z\n"
+        "vaddax.z   ACC, $vf0, $vf8x\n"
+        "vmaddx.z   $vf11, $vf1, $vf7x\n"
+        "vaddax.y   ACC, $vf0, $vf8x\n"
+        "vmsubx.y   $vf12, $vf1, $vf7x\n"
+        "vadday.z   ACC, $vf0, $vf8y\n"
+        "vmsuby.z   $vf10, $vf1, $vf7y\n"
+        "vaddaz.x   ACC, $vf0, $vf8z\n"
+        "vmsubz.x   $vf11, $vf1, $vf7z\n"
+        "vadday.x   ACC, $vf0, $vf8y\n"
+        "vmaddy.x   $vf12, $vf1, $vf7y\n"
+        "sqc2       $vf3, 0x30(%0)\n"
+        "sqc2       $vf10, 0x0(%0)\n"
+        "sqc2       $vf11, 0x10(%0)\n"
+        "sqc2       $vf12, 0x20(%0)\n"
+        :
+        : "r"(dst), "r"(q), "r"(p)
+        : "memory");
+}
+
+static inline sVec4W AxisAngle_EB98(const sVec4W& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return sVec4W(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+static inline float Min_EB98(float a, float b)
+{
+    return a <? b;
+}
+
+// Child transform = parent transform a composed with local transform b.
+static inline sXf_EB98 Combine_EB98(const sXf_EB98& a, const sXf_EB98& b)
+{
+    sXf_EB98 r;
+    r.rot = QuatMul_EB98(a.rot, b.rot);
+    r.pos = Add_EB98(Rot_EB98(a.rot, Sub_EB98(b.pos, D_004FF130)), a.pos);
+    return r;
+}
+
+extern "C" void func_0011EB98_impl(cRider* self) __asm__("func_0011EB98");
+extern "C" void func_0011EB98_impl(cRider* self)
+{
+    sXf_EB98 xf;
+    xf.pos = *(sVec4W*)&self->mPosition;
+    xf.rot = *(sVec4W*)&self->mRotation;
+    if (func_0011FEE8(self) == 5)
+        func_00134DD0((char*)self->mRiderHandler + 0x230, &xf);
+    cRider_doLeanPoseAdjust(self, &xf);
+    sXf_EB98 ab[2];
+    ab[1] = xf;
+    ab[0] = xf;
+    if (func_0011FEE8(self) != 13 && self->mSlewed[18].cur != 0.0f)
+    {
+        sVec4W s = Scale_EB98(D_004FF160, self->mSlewed[18].cur);
+        ab[0].pos += Rot_EB98(ab[0].rot, s);
+    }
+    if (self->mUseRootPoseOverride != 0)
+    {
+        self->mAnimModel->localPos[self->mBoneBoardRoot] = D_004FF130;
+        self->mAnimModel->localRot[self->mBoneBoardRoot] = D_004FF220;
+        self->mAnimModel->localPos[self->mBoneBoardChild] = D_004FF130;
+        self->mAnimModel->localRot[self->mBoneBoardChild] = D_004FF220;
+        ab[1].pos = *(sVec4W*)&self->mRootPoseOverridePos;
+        ab[1].rot = *(sVec4W*)&self->unk_140[0];
+    }
+    func_00310200(self->mAnimModel, ab);
+    if (self->mSlewed[17].cur != 0.0f)
+    {
+        sXf_EB98* b1 = (sXf_EB98*)(self->mAnimModel->bones + self->mBoneBoardRoot);
+        float qx = b1->rot.x, qy = b1->rot.y, qz = b1->rot.z, qw = b1->rot.w;
+        sVec4W ax;
+        ax.w = 0.0f;
+        ax.x = 1.0f - 2.0f * (qy * qy + qz * qz);
+        ax.y = 2.0f * (qx * qy + qw * qz);
+        ax.z = 2.0f * (qx * qz - qw * qy);
+        sVec4W c = Cross_EB98(*(sVec4W*)&self->unk_390, ax);
+        float len = Length_EB98(c);
+        if (len > 9.99999993922529e-09f)
+        {
+            float d = DivDot_EB98(c, len, *(sVec4W*)&self->unk_390, ax);
+            float m = Min_EB98(len, 1.0f);
+            sVec4W q;
+            if (d < 0.0f)
+                q = AxisAngle_EB98(c, (func_0031C128(m) - 1.5707963705062866f) * self->mSlewed[17].cur);
+            else
+                q = AxisAngle_EB98(c, (1.5707963705062866f - func_0031C128(m)) * self->mSlewed[17].cur);
+            b1->rot = QuatMul_EB98(q, b1->rot);
+        }
+        if (0.0f < *(float*)((char*)self + 0x31C))
+            AddTo_EB98(b1->pos, Scale_EB98(Scale_EB98(*(sVec4W*)&self->mGroundNormal, *(float*)((char*)self + 0x31C)), self->mSlewed[17].cur));
+        {
+            cAnimModel* am = self->mAnimModel;
+            sXf_EB98 local;
+            local.pos = sVec4W(am->localPos[self->mBoneBoardChild].x * am->unk_140.x, am->localPos[self->mBoneBoardChild].y * am->unk_140.y, am->localPos[self->mBoneBoardChild].z * am->unk_140.z, am->localPos[self->mBoneBoardChild].w * am->unk_140.w);
+            sVec4W* lr = (sVec4W*)&am->localRot[self->mBoneBoardChild];
+            local.rot = *lr;
+            sXf_EB98* bn = (sXf_EB98*)&am->bones[self->mBoneBoardChild];
+            *bn = Combine_EB98(*b1, local);
+        }
+    }
+    if (func_0011FEE8(self) != 13 && self->unk_318 != 0.0f)
+    {
+        sXf_EB98* bb = (sXf_EB98*)(self->mAnimModel->bones + self->mBoneBoardChild);
+        {
+            sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)((char*)self + 0x8F0));
+            func_0011F3D8(self, (char*)self + 0x8E0, &xx, self->unk_318);
+        }
+        {
+            sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)((char*)self + 0x920));
+            func_0011F3D8(self, (char*)self + 0x910, &xx, self->unk_318);
+        }
+    }
+    QuatToMat_EB98((char*)self + 0x160, &xf.rot, &xf.pos);
+    func_00106828(self);
+}
+#endif
 
 INCLUDE_ASM("ai/rider", func_0011F3D8);
 
@@ -1803,7 +2448,182 @@ extern "C" void func_00121950(cRider* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00121AA0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+// 16-byte vectors with inline constructors (non-POD siblings of t4Vector). The classes differ only in the order
+// their 4-float constructor stores the components; that order decides the float-register allocation of every
+// caller (merging them changes code), so they are kept apart.
+// sVec4 stores x, y, z, w.
+// sVec4W stores w first, then x, y, z.
+extern t4Vector D_004FF120_1AA0 __asm__("D_004FF120");
+extern t4Vector D_004FF140;
+extern "C" void func_0031BB30(void* q, const void* a, const void* b);
+extern "C" float func_0031C128(float x);
+extern "C" float func_0031BF60(float x);
+
+
+// PORT: PS2-only VU0 macro-mode asm (rotate v by the conjugate of quaternion q).
+static inline sVec4 QuatRot_1AA0(const sVec4W& q, const sVec4& v)
+{
+    sVec4 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vsub.w     $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmsubaw.xyz ACC, $vf6, $vf4w\n"
+        "vmsubaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sVec4W QuatMul_1AA0(const sVec4W& a, const sVec4W& b)
+{
+    sVec4W r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector divided by scalar).
+static inline sVec4 Div_1AA0(const sVec4& v, float s)
+{
+    sVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+static inline sVec4W AxisAngle_1AA0(const t4Vector& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return sVec4W(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+// q = rotation(axis, angle) * q. Declared to return the quaternion by value but has no return statement (the classic
+// forgotten return); the caller ignores the result, and that ignored by-value result is the unwritten 16-byte temp the
+// retail frame keeps during the heading rotation. The final rotation below is written out instead (99.19 with this helper).
+static inline sVec4W Rotate_1AA0(sVec4W& q, const sVec4& axis, float angle)
+{
+    q = QuatMul_1AA0(AxisAngle_1AA0(axis, angle), q);
+}
+
+static inline float Atan2_1AA0(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f)
+            return y;
+        float a = -1.5707963705062866f;
+        if (y >= 0.0f)
+            a = 1.5707963705062866f;
+        return a;
+    }
+    float a = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f)
+            a += 3.1415927410125732f;
+        else
+            a -= 3.1415927410125732f;
+    }
+    return a;
+}
+
+static inline float Acos_1AA0(float x)
+{
+    return 1.5707963705062866f - func_0031C128(x);
+}
+
+#define ROT_1AA0 (*(sVec4W*)&self->mRotation)
+
+static inline sVec4W Conj_1AA0(cRider* self)
+{
+    sVec4W r(-ROT_1AA0.x, -ROT_1AA0.y, -ROT_1AA0.z, ROT_1AA0.w);
+    return r;
+}
+
+static inline int neq_1AA0(const sVec4* a, const t4Vector& b)
+{
+    return a->x != b.x || a->y != b.y || a->z != b.z || a->w != b.w;
+}
+
+extern "C" void func_00121AA0(cRider* self, const sVec4* up, const sVec4* fwd, float rate, float maxRate)
+{
+    sVec4W q = ROT_1AA0;
+    {
+        sVec4 cur(2.0f * (ROT_1AA0.z * ROT_1AA0.x + ROT_1AA0.w * ROT_1AA0.y), 2.0f * (ROT_1AA0.z * ROT_1AA0.y - ROT_1AA0.w * ROT_1AA0.x),
+                    1.0f - 2.0f * (ROT_1AA0.x * ROT_1AA0.x + ROT_1AA0.y * ROT_1AA0.y), 0.0f);
+        func_0031BB30(&q, &cur, up);
+    }
+    if (neq_1AA0(fwd, D_004FF120_1AA0)) {
+        sVec4 v = QuatRot_1AA0(q, *fwd);
+        float heading = -Atan2_1AA0(v.x, v.y);
+        Rotate_1AA0(q, *up, heading);
+    }
+    sVec4W d = QuatMul_1AA0(q, Conj_1AA0(self));
+    float angle;
+    t4Vector axis;
+    if (0.0f < d.w) {
+        angle = 2.0f * Acos_1AA0(d.w <? 1.0f);
+        if (9.999999747378752e-06f <= angle) {
+            axis = Div_1AA0(sVec4(d.x, d.y, d.z, 0.0f), func_0031BF60(angle * 0.5f));
+            goto have_axis;
+        }
+    } else {
+        angle = 2.0f * Acos_1AA0(-(d.w >? -1.0f));
+        if (9.999999747378752e-06f <= angle) {
+            axis = Div_1AA0(sVec4(d.x, d.y, d.z, 0.0f), func_0031BF60(angle * -0.5f));
+            goto have_axis;
+        }
+    }
+    axis = D_004FF140;
+have_axis:
+    angle = (maxRate <? angle * rate) * 0.01666666753590107f;
+    d = AxisAngle_1AA0(axis, angle);
+    ROT_1AA0 = QuatMul_1AA0(d, ROT_1AA0);
+    cRider_updateOrientationImplicit(self);
+}
+#undef ROT_1AA0
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00121F30);

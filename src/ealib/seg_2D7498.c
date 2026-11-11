@@ -1628,11 +1628,320 @@ void func_003D8CB0(struct H_8CB0 *h, unsigned char *out) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D8E58);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern unsigned char **D_004A4824_8E58 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
+struct sShapeInfo { int len; int start; int n; unsigned char col[4]; };
+int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *out);
+struct sSel { short x; short y; unsigned char start; unsigned char len; unsigned char cur; unsigned char flag; };
+struct sSelSet { struct sSel ent[12]; unsigned char n; unsigned char ntbl; unsigned char tbl[200]; };
+struct sTblEnt { unsigned short a; unsigned short b; };
+struct sLayer { char pad[4]; unsigned char cnt; unsigned char n5; unsigned char n6; char pad7; unsigned char list[1]; };
+struct sCond { unsigned short id; unsigned char idx; unsigned char mode; signed char n; char pad5[3]; unsigned char a[8]; unsigned char b[4]; unsigned int m[4]; };
 
+int func_003D8E58(struct sSelSet *h, struct sLayer *l) {
+    struct sShapeInfo o;
+    int ok = 1;
+    int i;
+    int i0;
+    int j;
+    int cnt;
+    int redo;
+    int n;
+    int *tab;
+    unsigned char *lp;
+    struct sCond *c;
+    int bv;
+    int v;
+
+    tab = (int *)((unsigned char *)l + ((((l->cnt >> 2) + 3) & 0x7C) + 8) + l->n6 * 4);
+    for (i0 = 0; i0 < l->n5; i0++) {
+        tab[i0] = 0;
+    }
+    for (i = 11; i >= 0; i--) {
+        h->ent[i].flag = 0;
+    }
+    cnt = l->cnt >> 2;
+    do {
+        redo = 1;
+        i = 0;
+        if (cnt != 0) {
+            lp = (unsigned char *)l + 8;
+            do {
+                if (h->ent[i].flag == 0) {
+                    h->ent[i].flag = 1;
+                    c = (struct sCond *)((int *)l + lp[i]);
+                    n = c->n;
+                    if (!func_003DB838(D_004A4824_8E58[h->ent[i].x], h->tbl[h->ent[i].cur], &o)) {
+                        ok = 0;
+                        goto out;
+                    }
+                    for (j = 0; j < n; j++) {
+                        bv = c->b[j];
+                        if (bv == 0xFF) continue;
+                        if (!(bv & 0x80)) continue;
+                        bv &= 0x7F;
+                        if (c->a[j] == 0xFF) {
+                            v = tab[bv];
+                            if (v == 0) {
+                                h->ent[i].flag = 0;
+                                redo = 0;
+                                continue;
+                            }
+                            if (!((v >> o.col[j]) & 1)) {
+                                ok = 0;
+                                goto out;
+                            }
+                        } else if (c->a[j] == 0xFE) {
+                            tab[bv] = 1 << o.col[j];
+                        }
+                    }
+                }
+                i++;
+            } while (i < cnt);
+        }
+    } while (!redo);
+out:
+    return ok;
+}
+#endif
+
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2D7498", func_003D9088);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *out);
+extern int func_003DB3B8(unsigned char a, unsigned char b, unsigned char *p);
+extern int func_003D6D50(unsigned short arg0);
+extern int func_003D6DB8(unsigned short arg0, unsigned short arg1);
+extern int func_003D6CF8(int arg0, unsigned int arg1);
+extern int func_003D88C8(struct sSelSet *, unsigned char *, struct sSel *, struct sCond *, struct sTblEnt *);
 
+
+static __inline__ int modeOk_9088(void *arg0, int arg1) {
+    int temp_3;
+
+    temp_3 = (*(unsigned char *)((char*)(arg0) + (4))) & 3;
+    if (((temp_3 == 1) && (arg1 == 2)) || ((temp_3 == 2) && (arg1 != temp_3))) {
+        return 1;
+    }
+    return temp_3 == 0;
+}
+
+static __inline__ void clear_9088(unsigned char *arg0) {
+    int *q;
+    int i;
+    q = (int *)(arg0 + ((((arg0[4] >> 2) + 3) & 0x7C) + 8) + (arg0[6] * 4));
+    for (i = 0; i < arg0[5]; i++) {
+        q[i] = 0;
+    }
+}
+
+static __inline__ int check_9088(unsigned char *h, struct sCond *s) {
+    int ok = 1;
+    int i;
+    int *tab;
+    int n = s->n;
+    int b;
+    for (i = 0; i < n; i++) {
+        if (s->a[i] == 0xFF) {
+            b = s->b[i];
+            if (b != 0xFF && (b & 0x80)) {
+                tab = (int *)(h + ((((h[4] >> 2) + 3) & 0xFFFFFFFC) + 8) + ((h[6] * 4 + 3) & 0xFFFFFFFC));
+                if (tab != 0) {
+                    b &= 0x7F;
+                    if (tab[b] == 0) {
+                        ok = 0;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return ok;
+}
+
+static __inline__ int resolve_9088(struct sCond *p, struct sTblEnt *tbl, struct sSel *out) {
+    unsigned short v = p->id;
+    unsigned int mode = p->mode;
+    unsigned int idx = p->idx;
+    int r;
+    out->y = -1;
+    out->x = -1;
+    switch (mode) {
+    case 0:
+        out->x = func_003D6D50(v);
+        break;
+    case 1:
+        if (idx >= 20) {
+            out->x = -1;
+        } else {
+            out->x = func_003D6DB8(v, tbl[idx].a);
+        }
+        break;
+    case 2: {
+        struct sTblEnt *e;
+        int t = func_003D6D50(v);
+        e = (struct sTblEnt *)(idx * 4 + (int)tbl);
+        if (func_003D6CF8(t, *(int *)e) != 0) {
+            out->y = e->a;
+        } else {
+            t = -1;
+        }
+        out->x = t;
+        break;
+    }
+    }
+    r = out->x;
+    if (r <= -1)
+        return 0;
+    return 1;
+}
+
+int func_003D9088(struct sSelSet *self, unsigned char *hdr, struct sTblEnt *tbl, int a, int b, int mode) {
+    int ret = 1;
+    int all;
+    int tries = 200;
+    int n = hdr[4] >> 2;
+    unsigned char *lp;
+    int i;
+
+    if (n >= 13 || !modeOk_9088(hdr, mode) || !func_003DB3B8(a, b, hdr)) {
+        ret = 0;
+    } else {
+        clear_9088(hdr);
+        self->n = n;
+        do {
+            all = 1;
+            tries--;
+            i = 0;
+            if (n != 0) {
+                lp = hdr + 8;
+                do {
+                    struct sSel *slot = &self->ent[i];
+                    struct sCond *e = (struct sCond *)(hdr + lp[i] * 4);
+                    if (!check_9088(hdr, e)) {
+                        all = 0;
+                    } else if (slot->flag == 0) {
+                        int r;
+                        slot->start = self->ntbl;
+                        if (!resolve_9088(e, tbl, slot)) {
+                            ret = 0;
+                            goto out;
+                        }
+                        r = func_003D88C8(self, hdr, slot, e, tbl);
+                        if (r == 0) {
+                            ret = 0;
+                            goto out;
+                        }
+                        slot->len = r;
+                        slot->flag = 1;
+                    }
+                    i++;
+                } while (i < n);
+            }
+        } while (!all && tries > 0);
+        if (tries == 0) {
+            ret = 0;
+        }
+    }
+out:
+    return ret;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D93C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern unsigned char **D_004A4824_93C0 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
+extern int D_004A4838_93C0 __asm__("D_004A4838");
+int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *out);
+/* Combination search: reset every entry, then advance the odometer until the usage
+   percentage fits under `thr` and the constraints (func_003D8E58) hold, or the odometer
+   wraps. The helpers are the inline bodies of func_003DA910 (usage percent) and
+   func_003DAC20 (next combination); the retail TU keeps their out-of-line copies at the
+   end of the file. */
+
+/* same body as func_003DA910 */
+static inline int usage_93C0(unsigned char *a0, struct sSelSet *h) {
+    struct sShapeInfo o;
+    int total = 0;
+    int i;
+    int r;
+    int cnt = a0[4] >> 2;
+
+    for (i = 0; i < cnt; i++) {
+        if (func_003DB838(D_004A4824_93C0[h->ent[i].x], h->tbl[h->ent[i].cur], &o)) {
+            total += o.len;
+        }
+    }
+    r = 0;
+    if (D_004A4838_93C0 != 0) {
+        r = total * 100 / D_004A4838_93C0;
+    }
+    return r;
+}
+
+/* same body as func_003DAC20 */
+static inline int next_93C0(unsigned char *h, struct sSel *e) {
+    int wrap = 0;
+    int done = 0;
+    int i = (h[4] >> 2) - 1;
+    struct sSel *p = &e[i];
+    int t = p->len;
+    int limit = p->start + t;
+    do {
+        if (++p->cur < limit) {
+            done = 1;
+        } else {
+            p->cur = p->start;
+            if (--i < 0) {
+                done = 1;
+                wrap = 1;
+            }
+            p = &e[i];
+            t = p->len;
+            limit = p->start + t;
+        }
+    } while (!done);
+    return wrap;
+}
+
+int func_003D93C0(struct sLayer *l, struct sSelSet *h, int thr) {
+    int ok = 0;
+    int of = 0;
+    int i;
+    int n;
+    int pct;
+
+    n = l->cnt >> 2;
+    for (i = 0; i < n; i++) {
+        h->ent[i].cur = h->ent[i].start;
+    }
+    do {
+        ok = 1;
+        pct = 0;
+        if (thr != 0) {
+            pct = usage_93C0((unsigned char *)l, h);
+            if (thr < pct) ok = 0;
+        }
+        if (ok) {
+            if (l->n5 != 0) {
+                if (func_003D8E58(h, l) == 0) ok = 0;
+            }
+        }
+        if (!ok) {
+            of = next_93C0((unsigned char *)l, h->ent);
+        }
+    } while (!of && !ok);
+    return ok;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2D7498", func_003D95B8);
@@ -1719,7 +2028,99 @@ end:
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D9830);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern unsigned char **D_004A4824_9830 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
+extern int D_004A4830_9830 __asm__("D_004A4830");
+extern int D_004A4838_9830 __asm__("D_004A4838");
+struct sKey4 { unsigned char b[4]; };
+struct sFF90Msg { int id; int start; int len; struct sKey4 k; int f10; int f14; int f18; };
+struct sFF90 {
+    int (*f00)(struct sFF90Msg *);                  /* func_003D9830 */
+    int (*f04)(unsigned char *, int, int, int);     /* func_003DB208 */
+    void (*f08)(void *, int, int, int);             /* func_003DAE48, func_003DB040 */
+    int (*f0C)(struct sKey4 *);                     /* func_003D7EC8 */
+    int (*f10)(int, void *);                        /* func_003DA418 */
+    int f14;
+};
+struct sFFA8 { int f00; int f04; int (*f08)(); int f0C; };
+extern struct sFF90 D_0044FF90_9830 __asm__("D_0044FF90");
+struct s0700Q { short x; short idx; unsigned short y; short d; };
+extern struct s0700Q D_0045070C_9830[] __asm__("D_0045070C");
+int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *out);
+
+static __inline__ void clearBit_9830(unsigned char *s, int bit) {
+    int n = s[4] & 0xF;
+    int q = bit / 8;
+    unsigned char *p = s + ((s[5] * (n + 2) + 0xF) & 0x3FFC) + n * 4 + (q + 1);
+    *p &= ~(1 << (bit - q * 8));
+}
+
+int func_003D9830(unsigned char *h, struct sKey4 *k, int a2) {
+    struct sShapeInfo o;
+    struct sFF90Msg m;
+    int w30;
+    int w34;
+    int sum;
+    int cnt;
+    int n;
+    int r;
+    int st;
+    int t;
+    int x;
+    int y;
+    struct s0700Q *e;
+    unsigned char *s;
+
+    sum = 0;
+    r = 0;
+    w34 = 0;
+    if (D_0044FF90_9830.f00 != 0) {
+        func_003D8330(k->b, &w30);
+        func_003D81F0(k->b, &w34);
+        n = h[4] >> 2;
+        if (n != 0) {
+            cnt = n;
+            e = D_0045070C_9830 + a2;
+            do {
+                x = e->x;
+                s = D_004A4824_9830[x];
+                y = e->y;
+                if ((s[4] & 0x80) && D_004A4830_9830 != 0) {
+                    clearBit_9830(s, y);
+                }
+                if (func_003DB838(s, y, &o)) {
+                    t = *(unsigned short *)(s + 8) * ((s[7] + 1) << 8);
+                    st = o.start;
+                    if (e->idx != -1) {
+                        st = e->idx * t + st;
+                    }
+                    m.start = st;
+                    m.id = x;
+                    sum += o.len;
+                    m.len = o.len;
+                    m.k = *k;
+                    m.f18 = w30;
+                    m.f10 = w34;
+                    m.f14 = *(unsigned short *)(s + 2);
+                    D_0044FF90_9830.f00(&m);
+                    func_003D6EE8(s, y);
+                }
+                cnt--;
+                e++;
+            } while (cnt != 0);
+        }
+        r = 0;
+        if (D_004A4838_9830 != 0) {
+            r = sum * 100 / D_004A4838_9830;
+        }
+    }
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D9A40);
@@ -2319,7 +2720,54 @@ void func_003DACE8(void *a0, struct H_ACE8 *h, struct L_ACE8 *l) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DAE48);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern unsigned char **D_004A4824_AE48 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
+extern struct sFF90 D_0044FF90_AE48 __asm__("D_0044FF90");
+struct s0710 { unsigned short y; short pad[3]; };
+extern struct s0700Q D_0045070C_AE48[] __asm__("D_0045070C");
+extern struct s0710 D_00450710_AE48[] __asm__("D_00450710");
+int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *out);
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int func_003DB3E0_AE48(int, int) __asm__("func_003DB3E0");
+
+void func_003DAE48(void *a0, int a1, struct sLayer *l, int a3) {
+    struct sShapeInfo o;
+    int out;
+    int i;
+    int j;
+    int cnt;
+    unsigned char *tbl;
+    unsigned char *shp;
+    unsigned char b;
+    int h;
+    unsigned yy;
+    long m;
+
+    if (D_0044FF90_AE48.f08 != 0) {
+        func_003D8330(a0, &out);
+        cnt = l->cnt >> 2;
+        for (i = 0; i < cnt; i++) {
+            tbl = (unsigned char *)l + l->list[i] * 4 + 0xC;
+            for (j = 0; j < 4; j++) {
+                b = tbl[j];
+                if (b != 0xFF) {
+                    h = func_003DB3E0_AE48(a1, b);
+                    yy = D_00450710_AE48[i + a3].y;
+                    shp = D_004A4824_AE48[D_0045070C_AE48[i + a3].x];
+                    if (func_003DB838(shp, yy, &o)) {
+                        m = 1 << o.col[j];
+                        D_0044FF90_AE48.f08(a0, h, (int)m, out);
+                    }
+                }
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DAFD0);

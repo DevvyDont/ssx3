@@ -1424,7 +1424,284 @@ extern "C" void* func_00372B30(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00372B78);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+extern "C" void func_003E6448(void* dst, int c, int n);
+// cBezierCache (render/beziercache.cpp): per patch order (4x4, 6x6, 8x8 control points) a record cache with a free
+// list, point / uv grids, a normal cache with its own free list, and the cubic basis tables.
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+
+struct sBzRec_2B78 {
+    int f0;
+    int f4;
+    int f8;                     // -1 = free
+};
+
+struct sBzV3_2B78 {
+    float x, y, z;
+    sBzV3_2B78() {}
+};
+
+struct sBzV2_2B78 {
+    float u, v;
+    sBzV2_2B78() {}
+};
+
+struct sBzPts4_2B78 { sBzV3_2B78 p[4][4]; };
+struct sBzPts6_2B78 { sBzV3_2B78 p[6][6]; };
+struct sBzPts8_2B78 { sBzV3_2B78 p[8][8]; };
+struct sBzUV4_2B78 { sBzV2_2B78 p[4][4]; };
+struct sBzUV6_2B78 { sBzV2_2B78 p[6][6]; };
+struct sBzUV8_2B78 { sBzV2_2B78 p[8][8]; };
+
+struct sBzCache_2B78 {
+    int cacheSize[3];               // 0x000
+    sBzRec_2B78* m4x4CacheRecord;   // 0x00C
+    sBzRec_2B78* m6x6CacheRecord;   // 0x010
+    sBzRec_2B78* m8x8CacheRecord;   // 0x014
+    sBzRec_2B78* records[3];        // 0x018
+    int* freeBuf4;                  // 0x024
+    int* freeBuf6;                  // 0x028
+    int* freeBuf8;                  // 0x02C
+    int* freeList[3];               // 0x030
+    int freeListSP[3];              // 0x03C
+    sBzPts4_2B78* pts4;             // 0x048
+    sBzPts6_2B78* pts6;             // 0x04C
+    sBzPts8_2B78* pts8;             // 0x050
+    sBzUV4_2B78* uvA4;              // 0x054
+    sBzUV6_2B78* uvA6;              // 0x058
+    sBzUV8_2B78* uvA8;              // 0x05C
+    sBzUV4_2B78* uvB4;              // 0x060
+    sBzUV6_2B78* uvB6;              // 0x064
+    sBzUV8_2B78* uvB8;              // 0x068
+    int pad06C;
+    t4Vector basis4[4];             // 0x070
+    t4Vector basis6[6];             // 0x0B0
+    t4Vector basis8[8];             // 0x110
+    t4Vector* basis[3];             // 0x190
+    int order[3];                   // 0x19C
+    int nrmCacheSize[3];            // 0x1A8
+    sBzPts4_2B78* nrm4;             // 0x1B4
+    sBzPts6_2B78* nrm6;             // 0x1B8
+    sBzPts8_2B78* nrm8;             // 0x1BC
+    int* nrmFreeBuf4;               // 0x1C0
+    int* nrmFreeBuf6;               // 0x1C4
+    int* nrmFreeBuf8;               // 0x1C8
+    int* nrmFreeList[3];            // 0x1CC
+    int nrmFreeListSP[3];           // 0x1D8
+    int pad1E4[3];
+    t4Vector dbasis4[4];            // 0x1F0
+    t4Vector dbasis6[6];            // 0x230
+    t4Vector dbasis8[8];            // 0x290
+    t4Vector* dbasis[3];            // 0x310
+};
+
+extern char D_00492728[];
+extern char D_00492738[];
+extern char D_00492748[];
+extern char D_00492758[];
+extern char D_00492768[];
+extern char D_00492778[];
+extern char D_00492788[];
+extern char D_00492798[];
+extern char D_004927A8[];
+extern char D_004927B8[];
+extern char D_004927C8[];
+extern char D_004927D8[];
+extern char D_004927E8[];
+extern char D_004927F8[];
+extern char D_00492808[];
+extern char D_00492818[];
+extern char D_00492828[];
+extern char D_00492838[];
+extern char D_00492848[];
+extern char D_00492858[];
+extern char D_00492868[];
+
+extern "C" void func_00372B78(sBzCache_2B78* self, int n4, int n6, int n8, int nn4, int nn6, int nn8)
+{
+    int i, k;
+    float t;
+
+    self->cacheSize[0] = n4;
+    self->cacheSize[1] = n6;
+    self->cacheSize[2] = n8;
+    self->m4x4CacheRecord = new (D_00492728, 0, 0) sBzRec_2B78[n4];
+    self->m6x6CacheRecord = new (D_00492738, 0, 0) sBzRec_2B78[n6];
+    self->m8x8CacheRecord = new (D_00492748, 0, 0) sBzRec_2B78[n8];
+    self->records[0] = self->m4x4CacheRecord;
+    self->records[1] = self->m6x6CacheRecord;
+    self->records[2] = self->m8x8CacheRecord;
+    func_003E6448(self->m4x4CacheRecord, 0, n4 * sizeof(sBzRec_2B78));
+    func_003E6448(self->m6x6CacheRecord, 0, n6 * sizeof(sBzRec_2B78));
+    func_003E6448(self->m8x8CacheRecord, 0, n8 * sizeof(sBzRec_2B78));
+
+    self->freeBuf4 = new (D_00492758, 0, 0) int[n4];
+    self->freeBuf6 = new (D_00492768, 0, 0) int[n6];
+    self->freeBuf8 = new (D_00492778, 0, 0) int[n8];
+    self->freeList[0] = self->freeBuf4;
+    self->freeList[1] = self->freeBuf6;
+    self->freeList[2] = self->freeBuf8;
+    self->freeListSP[0] = 0;
+    self->freeListSP[1] = 0;
+    self->freeListSP[2] = 0;
+    for (i = 0; i < n4; i++)
+        self->freeList[0][self->freeListSP[0]++] = i;
+    for (i = 0; i < n6; i++)
+        self->freeList[1][self->freeListSP[1]++] = i;
+    for (i = 0; i < n8; i++)
+        self->freeList[2][self->freeListSP[2]++] = i;
+
+    {
+        sBzPts4_2B78*& r = self->pts4;
+        r = new (D_00492788, 0, 0) sBzPts4_2B78[n4];
+    }
+    {
+        sBzPts6_2B78*& r = self->pts6;
+        r = new (D_00492798, 0, 0) sBzPts6_2B78[n6];
+    }
+    {
+        sBzPts8_2B78*& r = self->pts8;
+        r = new (D_004927A8, 0, 0) sBzPts8_2B78[n8];
+    }
+    {
+        sBzUV4_2B78*& r = self->uvA4;
+        r = new (D_004927B8, 0, 0) sBzUV4_2B78[n4];
+    }
+    {
+        sBzUV6_2B78*& r = self->uvA6;
+        r = new (D_004927C8, 0, 0) sBzUV6_2B78[n6];
+    }
+    {
+        sBzUV8_2B78*& r = self->uvA8;
+        r = new (D_004927D8, 0, 0) sBzUV8_2B78[n8];
+    }
+    {
+        sBzUV4_2B78*& r = self->uvB4;
+        r = new (D_004927E8, 0, 0) sBzUV4_2B78[n4];
+    }
+    {
+        sBzUV6_2B78*& r = self->uvB6;
+        r = new (D_004927F8, 0, 0) sBzUV6_2B78[n6];
+    }
+    {
+        sBzUV8_2B78*& r = self->uvB8;
+        r = new (D_00492808, 0, 0) sBzUV8_2B78[n8];
+    }
+
+    for (i = 0; i < 4; i++) {
+        t4Vector b;
+        t = i * 0.33333334f;
+        b.x = t * t * t;
+        b.y = t * t;
+        b.z = t;
+        b.w = 1.0f;
+        self->basis4[i] = b;
+    }
+    for (i = 0; i < 6; i++) {
+        t4Vector b;
+        t = i * 0.2f;
+        b.x = t * t * t;
+        b.y = t * t;
+        b.z = t;
+        b.w = 1.0f;
+        self->basis6[i] = b;
+    }
+    for (i = 0; i < 8; i++) {
+        t4Vector b;
+        t = i * 0.14285715f;
+        b.x = t * t * t;
+        b.y = t * t;
+        b.z = t;
+        b.w = 1.0f;
+        self->basis8[i] = b;
+    }
+    self->basis[0] = self->basis4;
+    self->basis[1] = self->basis6;
+    self->basis[2] = self->basis8;
+    self->order[0] = 4;
+    self->order[1] = 6;
+    self->order[2] = 8;
+    self->nrmCacheSize[0] = nn4;
+    self->nrmCacheSize[1] = nn6;
+    self->nrmCacheSize[2] = nn8;
+
+    for (k = 0; k < 3; k++) {
+        int j;
+        for (j = 0; j < self->cacheSize[k]; j++)
+            self->records[k][j].f8 = -1;
+    }
+
+    if (nn4 > 0)
+        {
+        sBzPts4_2B78*& r = self->nrm4;
+        r = new (D_00492818, 0, 0) sBzPts4_2B78[nn4];
+    }
+    if (nn6 > 0)
+        {
+        sBzPts6_2B78*& r = self->nrm6;
+        r = new (D_00492828, 0, 0) sBzPts6_2B78[nn6];
+    }
+    if (nn8 > 0)
+        {
+        sBzPts8_2B78*& r = self->nrm8;
+        r = new (D_00492838, 0, 0) sBzPts8_2B78[nn8];
+    }
+    if (nn4 > 0)
+        self->nrmFreeBuf4 = new (D_00492848, 0, 0) int[nn4];
+    if (nn6 > 0)
+        self->nrmFreeBuf6 = new (D_00492858, 0, 0) int[nn6];
+    if (nn8 > 0)
+        self->nrmFreeBuf8 = new (D_00492868, 0, 0) int[nn8];
+    self->nrmFreeList[0] = self->nrmFreeBuf4;
+    self->nrmFreeList[1] = self->nrmFreeBuf6;
+    self->nrmFreeList[2] = self->nrmFreeBuf8;
+    self->nrmFreeListSP[0] = 0;
+    self->nrmFreeListSP[1] = 0;
+    self->nrmFreeListSP[2] = 0;
+    for (i = 0; i < nn4; i++)
+        self->nrmFreeList[0][self->nrmFreeListSP[0]++] = i;
+    for (i = 0; i < nn6; i++)
+        self->nrmFreeList[1][self->nrmFreeListSP[1]++] = i;
+    for (i = 0; i < nn8; i++)
+        self->nrmFreeList[2][self->nrmFreeListSP[2]++] = i;
+
+    for (i = 0; i < 4; i++) {
+        t4Vector b;
+        t = i * 0.33333334f;
+        b.x = t * (t * 3.0f);
+        b.y = t + t;
+        b.z = 1.0f;
+        b.w = 0.0f;
+        self->dbasis4[i] = b;
+    }
+    for (i = 0; i < 6; i++) {
+        t4Vector b;
+        t = i * 0.2f;
+        b.x = t * (t * 3.0f);
+        b.y = t + t;
+        b.z = 1.0f;
+        b.w = 0.0f;
+        self->dbasis6[i] = b;
+    }
+    for (i = 0; i < 8; i++) {
+        t4Vector b;
+        t = i * 0.14285715f;
+        b.x = t * (t * 3.0f);
+        b.y = t + t;
+        b.z = 1.0f;
+        b.w = 0.0f;
+        self->dbasis8[i] = b;
+    }
+    self->dbasis[0] = self->dbasis4;
+    self->dbasis[1] = self->dbasis6;
+    self->dbasis[2] = self->dbasis8;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_003737D0);
@@ -3677,7 +3954,258 @@ extern "C" void func_003781A0(sGfx_81A0* self, sV_81A0* pos, float* size, int* u
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00378808);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+struct sPtRenderState {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short pad;
+};
+
+// One 0x80-byte entry of the graphics manager's draw ring (ring at 0x18F0): its render state, packet buffer, link
+// and sort key.
+struct sPtRingEnt {
+    sPtRenderState rs;       // 0x00
+    unsigned int buf;        // 0x14
+    unsigned int next;       // 0x18
+    short key;               // 0x1C
+    short flag;              // 0x1E
+    char pad_0x20[0x60];
+};
+
+// The graphics manager draw ring (cPS2GraphicsMan + 0x18F0): entry count, then the 0x80-byte entries from 0x80.
+struct sPtRing {
+    int count;               // 0x0
+    char pad_0x4[0x7C];
+    sPtRingEnt ents[1];      // 0x80
+};
+
+union uPtFloatBits {
+    float f;
+    int i;
+};
+
+typedef int cQuad128_CF0 __attribute__((mode(TI)));
+
+// PORT: PS2-only VU0 inline asm (vector subtract); the PC port needs a C fallback.
+static inline sPt7278 Sub_CF0(const sPt7278& a, const sPt7278& b)
+{
+    sPt7278 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline int Bits_CF0(float f)
+{
+    uPtFloatBits u;
+    u.f = f;
+    return u.i;
+}
+struct sGlyph8808 {
+    unsigned short code;    // 0x0
+    unsigned char w;        // 0x2
+    unsigned char h;        // 0x3
+    unsigned short u;       // 0x4
+    unsigned short v;       // 0x6
+    signed char adv;        // 0x8
+    signed char xoff;       // 0x9
+    signed char yoff;       // 0xA
+    char pad;
+};
+
+struct sFontRes8808 {
+    int count;              // 0x0
+    sGlyph8808* table;      // 0x4
+    sGlyph8808* def;        // 0x8
+    int first;              // 0xC
+    int last;               // 0x10
+};
+
+struct sView8808 {
+    char pad_0x0[0x20];
+    int mode;               // 0x20
+    char pad_0x24[0x230 - 0x24];
+};
+
+struct sGfx8808 {
+    char pad_0x0[0xE84];
+    sPtRenderState* top;            // 0xE84
+    char pad_0xE88[0x10DC - 0xE88];
+    int curView;                    // 0x10DC
+    char pad_0x10E0[0x18F0 - 0x10E0];
+    sPtRing* ring;                  // 0x18F0
+    char pad_0x18F4[0x5A00 - 0x18F4];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x6AF0 - 0x5A04];
+    float f6AF0;                    // 0x6AF0
+    char pad_0x6AF4[0x6B04 - 0x6AF4];
+    float f6B04;                    // 0x6B04
+    char pad_0x6B08[0x6B18 - 0x6B08];
+    float f6B18;                    // 0x6B18
+    char pad_0x6B1C[0x6B20 - 0x6B1C];
+    float f6B20;                    // 0x6B20
+    float f6B24;                    // 0x6B24
+    float f6B28;                    // 0x6B28
+    char pad_0x6B2C[0x6B30 - 0x6B2C];
+    sMat7278 m6B30;                // 0x6B30
+    char pad_0x6B70[0x6B90 - 0x6B70];
+    int texReady;                   // 0x6B90
+    char pad_0x6B94[0x6D20 - 0x6B94];
+    sView8808 views[1];             // 0x6D20
+};
+
+// Homogeneous position (w given) with a const-reference ctor: its stores, w included, go straight to the stack
+// slot, where the by-value sPt7278 ctor keeps `this` in a register for a constant w.
+struct sPtPos8808 : sPt7278 {
+    sPtPos8808(const float& ax, const float& ay, const float& az, const float& aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+};
+
+// Stores a two-float pair (uv, half size); both values are computed before either store.
+static inline void Set2_8808(float* d, float a, float b)
+{
+    d[0] = a;
+    d[1] = b;
+}
+
+// Glyph lookup: direct index for [first, last], binary search above, default glyph if not found.
+static inline sGlyph8808* Find8808(sFontRes8808* f, int c)
+{
+    if (c < f->first)
+        return 0;
+    if (c <= f->last)
+        return f->table + c - f->first;
+    int lo = f->last - f->first;
+    int hi = f->count;
+    do {
+        int mid = (lo + hi) >> 1;
+        sGlyph8808* p = f->table + mid;
+        if (c == p->code)
+            return p;
+        if (c < p->code)
+            hi = mid;
+        else
+            lo = mid + 1;
+    } while (lo < hi);
+    return f->def;
+}
+
+// PORT: PS2-only GS packet build and VU0 inline asm; uncached (0x30000000) pointers.
+extern "C" void func_00378808(sGfx8808* self, sFontRes8808* font, char* s, float* color,
+                              float x, float y, float sx, float sy, float su, float sv, float z)
+{
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    unsigned int buf = self->bufAddr;
+    unsigned long* p = (unsigned long*)(buf | 0x30000000);
+    unsigned long* q = p + 10;
+    int nloop = 0;
+    if (self->views[self->curView].mode != 0) {
+        float vz = self->f6B18 * z + self->f6B28;
+        sPt7278 a;
+        sPt7278 b;
+        a.z = vz;
+        a.w = 1.0f;
+        b.z = vz;
+        b.w = 1.0f;
+        for (; *s; s++) {
+            sGlyph8808* g = Find8808(font, (unsigned char)*s);
+            if (g) {
+                nloop++;
+                float uv0[2];
+                float uv1[2];
+                Set2_8808(uv0, g->u * su, g->v * sv);
+                Set2_8808(uv1, (g->u + g->w) * su, (g->v + g->h) * sv);
+                a.x = (x + g->xoff * sx) * self->f6AF0 + self->f6B20;
+                a.y = (y + g->yoff * sy) * self->f6B04 + self->f6B24;
+                b.x = a.x + g->w * sx * self->f6AF0;
+                b.y = a.y + g->h * sy * self->f6B04;
+                q[0] = Bits_CF0(uv0[0]) | ((long)Bits_CF0(uv0[1]) << 32);
+                q[1] = (int)a.x | ((long)(int)a.y << 16) | ((long)(int)a.z << 32);
+                q[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
+                q[3] = (int)b.x | ((long)(int)b.y << 16) | ((long)(int)b.z << 32);
+                q += 4;
+                x += g->adv * sx;
+            }
+        }
+    } else {
+        for (; *s; s++) {
+            sGlyph8808* g = Find8808(font, (unsigned char)*s);
+            if (g) {
+                nloop++;
+                float uv0[2];
+                float uv1[2];
+                float size[2];
+                Set2_8808(uv0, g->u * su, g->v * sv);
+                Set2_8808(uv1, (g->u + g->w) * su, (g->v + g->h) * sv);
+                Set2_8808(size, g->w * sx * 0.5f, g->h * sy * 0.5f);
+                sPtPos8808 pos(x + g->xoff * sx + size[0], y + g->yoff * sy + size[1], z, 1.0f);
+                sPt7278 v = MulMat7278(&self->m6B30, pos);
+                float inv = 1.0f / v.w;
+                v.x *= inv;
+                v.y *= inv;
+                float dx = self->f6AF0 * size[0] * inv;
+                v.w = inv;
+                float dy = self->f6B04 * size[1] * inv;
+                sPt7278 d(dx, dy, 0.0f, 0.0f);
+                sPt7278 a = Sub_CF0(v, d);
+                sPt7278 b = Add7278(v, d);
+                q[0] = Bits_CF0(uv0[0]) | ((long)Bits_CF0(uv0[1]) << 32);
+                q[1] = (int)a.x | ((long)(int)a.y << 16) | ((long)(int)(a.z * a.w) << 32);
+                q[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
+                q[3] = (int)b.x | ((long)(int)b.y << 16) | ((long)(int)(b.z * b.w) << 32);
+                q += 4;
+                x += g->adv * sx;
+            }
+        }
+    }
+    p[0] = (nloop * 2 + 4) | 0x10000000;
+    p[1] = 0;
+    p[2] = 0;
+    p[3] = (unsigned long)((nloop * 2 + 3) | 0x50000000U) << 32;
+    p[4] = 0x2400000000000001UL;
+    p[5] = 0x10;
+    p[6] = 0x56;
+    p[7] = (long)(int)(color[1] * 204.0f) | ((long)(int)(color[2] * 204.0f) << 8) |
+           ((long)(int)(color[3] * 204.0f) << 16) | ((long)(int)(color[0] * 128.0f) << 24) |
+           ((long)Bits_CF0(1.0f) << 32);
+    p[8] = (unsigned long)(nloop | 0x8000) | ((unsigned long)0x8800 << 47);
+    p[9] = 0x5252;
+    unsigned int next = (unsigned int)q & 0x0FFFFFFF;
+    sPtRing* ring = self->ring;
+    sPtRenderState* rs = self->top;
+    self->bufAddr = next + 0x10;
+    if (ring->count < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sPtRingEnt* e = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = 0;
+    }
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00379028);
 
@@ -3931,7 +4459,396 @@ extern "C" sPartEmitter_A540* func_0037A540(void* a0, void* a1, void* a2, unsign
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0037A610);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+// One 0x80-byte entry of the graphics manager's draw ring (ring at 0x18F0): its render state, packet buffer, link
+// and sort key.
+// The graphics manager draw ring (cPS2GraphicsMan + 0x18F0): entry count, then the 0x80-byte entries from 0x80.
+struct sPtQuadF {
+    float v[4];
+} __attribute__((aligned(16)));
+extern char D_80[];
+extern char D_70[];
+extern char D_398[];
+extern int D_004A4510;
+extern int D_004A4530;
+
+// The render-state record as this function sees it: bit-field words (f0 bits 4..5, 6..9 mode, 20..27 alpha; f4 test,
+// layer, blend, ...; f8 bits 0..4 key, 10..28 depth; fC address) and two texture ids.
+struct sRS_A610 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short tex2;
+};
+
+struct sPtVtVF_A610 {
+    short delta;
+    short index;
+    void (*fn)(void*, float);
+};
+
+// One matrix list of a model chunk: count + bone indices.
+struct sMtxList_A610 {
+    int count;
+    int* index;
+};
+
+// A DMA reference: packet address + data (each data block starts with its qword count).
+struct sDmaRef_A610 {
+    unsigned int addr;
+    unsigned short* data;
+};
+
+struct sSub_A610 {
+    sDmaRef_A610* refs;
+    int count;
+};
+
+struct sChunk_A610 {
+    unsigned int flags;         // 0x0
+    int tex;                    // 0x4
+    short texSlot;              // 0x8
+    unsigned char alpha;        // 0xA
+    char pad_0xB;
+    int numSubs;                // 0xC
+    sSub_A610* subs;            // 0x10
+};
+
+struct sMdl_A610 {
+    char pad_0x0[0x20];
+    int chunkOfs;               // 0x20
+    char pad_0x24[0x3C - 0x24];
+    sMtxList_A610* lists;       // 0x3C
+    float* lodW;                // 0x40
+    char pad_0x44[0x4];
+    short numChunks;            // 0x48
+    char pad_0x4A[0x50 - 0x4A];
+    short numLods;              // 0x50
+};
+
+struct sGfx_A610 {
+    char pad_0x0[0xE84];
+    sRS_A610* top;                  // 0xE84
+    char pad_0xE88[0x10B0 - 0xE88];
+    int texSlots[(0x10D8 - 0x10B0) / 4];   // 0x10B0
+    sPtVtVF_A610* vtable;                // 0x10D8
+    char pad_0x10DC[0x13E8 - 0x10DC];
+    t4Matrix* bones;                // 0x13E8
+    char pad_0x13EC[0x18F0 - 0x13EC];
+    sPtRing* ring;                  // 0x18F0
+    char pad_0x18F4[0x58A0 - 0x18F4];
+    sMat7278 m58A0;                // 0x58A0
+    char pad_0x58E0[0x5920 - 0x58E0];
+    sPtQuadF q5920;                 // 0x5920
+    char pad_0x5930[0x5A00 - 0x5930];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x6B90 - 0x5A04];
+    int texReady;                   // 0x6B90
+};
+
+extern "C" void func_0037CBC8_A610(void* self, int tex, int mode) __asm__("func_0037CBC8__FPv");
+
+// PORT: PS2-only VU0 inline asm (matrix * vector, clamp, depth read back from vi1).
+static inline int Depth_A610(sGfx_A610* self, t4Vector v)
+{
+    long r;
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    __asm__ __volatile__(
+        "lqc2      $vf5, %1\n"
+        "lqc2      $vf10, %2\n"
+        "lqc2      $vf1, 0x0(%3)\n"
+        "lqc2      $vf2, 0x10(%3)\n"
+        "lqc2      $vf3, 0x20(%3)\n"
+        "lqc2      $vf4, 0x30(%3)\n"
+        "vmulax.xyzw ACC, $vf1, $vf10x\n"
+        "vmadday.xyzw ACC, $vf2, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf3, $vf10z\n"
+        "vmaddw.xyzw $vf11, $vf4, $vf10w\n"
+        "vmulw.w    $vf11, $vf11, $vf5w\n"
+        "vmaxx.w    $vf11, $vf11, $vf0x\n"
+        "vminix.w   $vf11, $vf11, $vf5x\n"
+        "vftoi0.xyzw $vf11, $vf11\n"
+        "vmtir      $vi1, $vf11w\n"
+        "cfc2.ni    %0, $vi1\n"
+        : "=&r"(r)
+        : "m"(self->q5920), "m"(v), "r"(&self->m58A0)
+        : "memory");
+    return (int)r;
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void CopyMtx_A610(void* dst, const void* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// Inline copy of func_00396C30: uploads the list's matrices and calls the skinning program.
+static inline void UploadMtx_A610(sMtxList_A610* list, t4Matrix* mats, unsigned long** cur)
+{
+    int n = list->count;
+    int* idx = list->index;
+    unsigned long* p = *cur;
+    p[0] = (n * 4 + 2) | 0x10000000;
+    p[1] = 0;
+    p[2] = (unsigned long)0x8000 << 45;
+    p[3] = ((unsigned long)(unsigned int)((n << 18) | 0x6C000011) << 32) | 0x1000101;
+    p += 4;
+    for (int i = 0; i < n; i++) {
+        CopyMtx_A610(p, &mats[idx[i]]);
+        p += 8;
+    }
+    p[0] = ((unsigned long)n << 32) | 0x600103FF;
+    p[1] = (unsigned long)(((unsigned int)D_80 >> 3) | 0x14000000) | ((unsigned long)(((unsigned int)D_70 >> 3) | 0x14000000) << 32);
+    p += 2;
+    *cur = p;
+}
+
+// Sets the width-bit field at shift in a render-state word.
+static inline void SetField_A610(int& w, int shift, int width, int v)
+{
+    int mask = ((1 << width) - 1) << shift;
+    w = (w & ~mask) | ((v << shift) & mask);
+}
+
+static inline void SetTest_A610(sGfx_A610* self)
+{
+    if (D_004A4530 == 0) {
+        SetField_A610(self->top->f4, 7, 5, 0x11);
+    } else {
+        SetField_A610(self->top->f4, 7, 5, 3);
+    }
+}
+
+static inline void SetTex_A610(sGfx_A610* self, int t)
+{
+    self->top->tex = t;
+}
+
+static inline void SetTex2_A610(sGfx_A610* self, int t)
+{
+    self->top->tex2 = t;
+}
+
+#define MIN_A610(a, b) ((a) < (b) ? (a) : (b))
+
+// PORT: PS2-only DMA/VIF packet build; uncached (0x30000000) pointers held in int.
+extern "C" void func_0037A610(sGfx_A610* self, sMdl_A610* mdl, char* base, int shadow)
+{
+    if (D_004A4510 == 0) {
+        self->top[1] = *self->top;
+        self->top++;
+        self->vtable[124].fn((char*)self + self->vtable[124].delta, 1.0f);
+        if (self->texReady == 0) {
+            func_0037D968(self);
+        }
+        int matIdx = 0;
+        sChunk_A610* chunk = (sChunk_A610*)(base + mdl->chunkOfs);
+        t4Matrix* bones = self->bones;
+        SetTex2_A610(self, self->texSlots[chunk->texSlot]);
+        SetField_A610(self->top->f0, 4, 2, 3);
+        int z = MIN_A610(0x400, Depth_A610(self, bones->row[3]) + 0x10);
+        if (shadow) {
+            SetField_A610(self->top->f0, 20, 8, 0);
+            SetField_A610(self->top->f4, 2, 5, 7);
+            SetTest_A610(self);
+            SetField_A610(self->top->f4, 0, 2, 2);
+            SetField_A610(self->top->f8, 10, 19, z);
+            SetField_A610(self->top->f4, 23, 2, 1);
+            SetField_A610(self->top->f4, 20, 2, 0);
+            SetField_A610(self->top->f4, 12, 8, 0x14);
+        }
+        for (int i = 0; i < mdl->numChunks; i++) {
+            func_0037CBC8_A610(self, chunk->tex, 3);
+            SetTex_A610(self, chunk->tex);
+            if (!shadow) {
+                if (chunk->flags & 0x8000) {
+                    SetField_A610(self->top->f4, 2, 5, 5);
+                    SetField_A610(self->top->f0, 20, 8, chunk->alpha);
+                    SetField_A610(self->top->f4, 7, 5, 0xC);
+                    SetField_A610(self->top->f4, 0, 2, 2);
+                    SetField_A610(self->top->f8, 10, 19, z);
+                    SetField_A610(self->top->f4, 23, 2, 1);
+                    SetField_A610(self->top->f4, 20, 2, 3);
+                    SetField_A610(self->top->f4, 12, 8, 0x5C);
+                } else {
+                    SetField_A610(self->top->f4, 2, 5, 1);
+                    SetField_A610(self->top->f0, 20, 8, 0);
+                    SetTest_A610(self);
+                    SetField_A610(self->top->f4, 0, 2, 0);
+                    SetField_A610(self->top->f8, 10, 19, 0);
+                    SetField_A610(self->top->f4, 23, 2, 1);
+                    SetField_A610(self->top->f4, 20, 2, 0);
+                    SetField_A610(self->top->f4, 12, 8, 0x14);
+                }
+            }
+            if (chunk->flags & 1) {
+                unsigned int buf = self->bufAddr;
+                unsigned long* p = (unsigned long*)(buf | 0x30000000);
+                sMtxList_A610* list = &mdl->lists[matIdx];
+                sSub_A610* send = chunk->subs + chunk->numSubs;
+                for (sSub_A610* s = chunk->subs; s != send; list++, s++) {
+                    UploadMtx_A610(list, bones, &p);
+                    p[0] = ((unsigned long)s->refs->addr << 32) | 0x50000000;
+                    p[1] = 0;
+                    p += 2;
+                }
+                unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+                sPtRing* ring = self->ring;
+                self->bufAddr = next;
+                sRS_A610* rs = self->top;
+                if (ring->count < 0xA28) {
+                    rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+                    int key = *(int*)((char*)ring + 0x69CC0);
+                    sPtRingEnt* e = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+                    *(sRS_A610*)&e->rs = *rs;
+                    e->buf = buf;
+                    e->next = next;
+                    e->key = key;
+                    e->flag = 0;
+                }
+                self->bufAddr += 0x10;
+            } else if (chunk->flags & 0x100) {
+                unsigned int buf = self->bufAddr;
+                unsigned int prog = (unsigned int)D_398 >> 3;
+                unsigned long* p = (unsigned long*)(buf | 0x30000000);
+                int nlod = mdl->numLods;
+                float* w = mdl->lodW;
+                int found = 0;
+                for (int j = 0; j < nlod; j++) {
+                    if (w[j] > 0.01f) {
+                        found = 1;
+                        break;
+                    }
+                }
+                if (found) {
+                    // scale stays a variable: the target rematerialises its bits per branch arm and carries them in a register
+                    // into the second element (a literal folds into one 64-bit constant).
+                    float scale = 12800.0f;
+                    sMtxList_A610* list = &mdl->lists[matIdx];
+                    sSub_A610* send = chunk->subs + chunk->numSubs;
+                    for (sSub_A610* s = chunk->subs; s != send; list++, s++) {
+                        UploadMtx_A610(list, bones, &p);
+                        int n = s->count;
+                        sDmaRef_A610* r = s->refs;
+                        int even = (n & 1) == 0;
+                        for (int k = 0; k < n; k += 2, r++) {
+                            unsigned short* d1 = r->data;
+                            p[0] = ((unsigned long)r->addr << 32) | 0x50000000;
+                            p[1] = 0;
+                            p[2] = ((unsigned long)(unsigned int)d1 << 32) | 0x50000001;
+                            p[3] = 0;
+                            p[4] = (unsigned long)0x640180B4 << 32;
+                            if (w[0] < 0.0f) {
+                                p[5] = (unsigned long)*(int*)&scale << 32;
+                            } else {
+                                p[5] = (long)*(int*)&w[0] | ((unsigned long)*(int*)&scale << 32);
+                            }
+                            p += 6;
+                            if (even || k < n - 1) {
+                                r++;
+                            }
+                            unsigned short* d2 = r->data;
+                            p[0] = ((unsigned long)r->addr << 32) | 0x50000000;
+                            p[1] = 0;
+                            p[2] = ((unsigned long)(unsigned int)d2 << 32) | 0x50000001;
+                            p[3] = 0;
+                            p[4] = ((unsigned long)0x640180B4 << 32) | 0x11000000;
+                            if (w[0] < 0.0f) {
+                                p[5] = (unsigned long)*(int*)&scale << 32;
+                            } else {
+                                p[5] = (long)*(int*)&w[0] | ((unsigned long)*(int*)&scale << 32);
+                            }
+                            p += 6;
+                            for (int j = 1; j < nlod; j++) {
+                                d1 += (*d1 + 1) * 8;
+                                d2 += (*d2 + 1) * 8;
+                                if (w[j] > 0.01f) {
+                                    p[0] = ((unsigned long)(unsigned int)d1 << 32) | 0x50000001;
+                                    p[1] = 0;
+                                    p[2] = (unsigned long)0x640180B4 << 32;
+                                    p[3] = (long)*(int*)&w[j] | ((unsigned long)*(int*)&scale << 32);
+                                    p[4] = ((unsigned long)(unsigned int)d2 << 32) | 0x50000001;
+                                    p[5] = 0;
+                                    p[6] = (unsigned long)0x640180B4 << 32;
+                                    p[7] = (long)*(int*)&w[j] | ((unsigned long)*(int*)&scale << 32);
+                                    p += 8;
+                                }
+                            }
+                            p[0] = 0x10000001;
+                            p[1] = 0;
+                            p[2] = ((unsigned long)(prog | 0x14000000) << 32) | 0x11000000;
+                            p[3] = ((unsigned long)(prog | 0x14000000) << 32) | 0x11000000;
+                            p += 4;
+                        }
+                    }
+                } else {
+                    sMtxList_A610* list = &mdl->lists[matIdx];
+                    sSub_A610* send = chunk->subs + chunk->numSubs;
+                    for (sSub_A610* s = chunk->subs; s != send; list++, s++) {
+                        UploadMtx_A610(list, bones, &p);
+                        sDmaRef_A610* r = s->refs;
+                        sDmaRef_A610* end = r + s->count;
+                        p[0] = ((unsigned long)r->addr << 32) | 0x50000000;
+                        p[1] = 0;
+                        p += 2;
+                        for (r++; r != end; r++) {
+                            p[0] = ((unsigned long)r->addr << 32) | 0x50000001;
+                            p[1] = 0;
+                            p[2] = (unsigned long)0x11000000 << 32;
+                            p[3] = (unsigned long)(prog | 0x14000000) << 32;
+                            p += 4;
+                        }
+                        p[0] = 0x10000001;
+                        p[1] = 0;
+                        p[2] = (unsigned long)0x11000000 << 32;
+                        p[3] = (unsigned long)(prog | 0x14000000) << 32;
+                        p += 4;
+                    }
+                }
+                unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+                sPtRing* ring = self->ring;
+                self->bufAddr = next;
+                sRS_A610* rs = self->top;
+                if (ring->count < 0xA28) {
+                    rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+                    int key = *(int*)((char*)ring + 0x69CC0);
+                    sPtRingEnt* e = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+                    *(sRS_A610*)&e->rs = *rs;
+                    e->buf = buf;
+                    e->next = next;
+                    e->key = key;
+                    e->flag = 0;
+                }
+                self->bufAddr += 0x10;
+            }
+            matIdx += chunk->numSubs;
+            chunk++;
+        }
+        self->top--;
+        SetField_A610(self->top->f0, 6, 4, 0);
+        SetField_A610(self->top->fC, 0, 30, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037B548);
@@ -6014,7 +6931,243 @@ extern "C" void func_003807A0(sPtGfx_07A0* self, sTrail_07A0* obj)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00380CE0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+// One 0x80-byte entry of the graphics manager's draw ring (ring at 0x18F0): its render state, packet buffer, link
+// and sort key.
+// The graphics manager draw ring (cPS2GraphicsMan + 0x18F0): entry count, then the 0x80-byte entries from 0x80.
+// 4x4 float matrix (POD, 16-byte aligned).
+struct sPtMatrix {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+// 4x4 float matrix with an empty ctor and a VU0 copy ctor (copies go through vf1..vf4).
+struct sPtMatrixV {
+    float m[4][4];
+    sPtMatrixV() {}
+    // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+    sPtMatrixV(const sPtMatrixV& s)
+    {
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            :
+            : "r"(this), "r"(&s)
+            : "memory");
+    }
+} __attribute__((aligned(16)));
+
+// One 128-bit GIF / DMA packet quadword (four unsigned words, 16-byte aligned).
+struct sPtVtVP {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+struct sPtSegHdr {
+    int seg;
+    int step;
+    float fstep;
+    float v;
+} __attribute__((aligned(16)));
+
+extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
+extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
+extern "C" void func_003E6448(void* dst, int c, int n);
+extern int D_004A4474;
+extern int D_004A44FC;
+struct cPS2GraphicsMan {
+    char pad_0x0[0xE84];
+    sPtRenderState* top;            // 0xE84
+    char pad_0xE88[0xF50 - 0xE88];
+    int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
+    sPtVtVP* vtable;                // 0x10D8
+    char pad_0x10DC[0x18F0 - 0x10DC];
+    sPtRing* ring;                  // 0x18F0
+    void* texset;                   // 0x18F4
+    char pad_0x18F8[0x5860 - 0x18F8];
+    sPtMatrixV m5860;               // 0x5860
+    char pad_0x58A0[0x5900 - 0x58A0];
+    unsigned short scX;             // 0x5900
+    unsigned short scY;             // 0x5902
+    unsigned short scW;             // 0x5904
+    unsigned short scH;             // 0x5906
+    char pad_0x5908[0x5A00 - 0x5908];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x5A28 - 0x5A04];
+    unsigned int pendBuf;           // 0x5A28
+    unsigned long* pend;            // 0x5A2C
+    unsigned int width;             // 0x5A30
+    unsigned int height;            // 0x5A34
+    char pad_0x5A38[0x4];
+    unsigned int psm;               // 0x5A3C
+    char pad_0x5A40[0x5A50 - 0x5A40];
+    unsigned int fbw;               // 0x5A50
+    char pad_0x5A54[0x5A84 - 0x5A54];
+    unsigned int fbp;               // 0x5A84
+    char pad_0x5A88[0x6AF0 - 0x5A88];
+    float f6AF0;                    // 0x6AF0
+    char pad_0x6AF4[0x6B04 - 0x6AF4];
+    float f6B04;                    // 0x6B04
+    char pad_0x6B08[0x6B30 - 0x6B08];
+    sPtMatrix m6B30;                // 0x6B30
+    float xmin;                     // 0x6B70
+    float ymin;                     // 0x6B74
+    float zmin;                     // 0x6B78
+    float wmin;                     // 0x6B7C
+    float xmax;                     // 0x6B80
+    float ymax;                     // 0x6B84
+    float zmax;                     // 0x6B88
+    float wmax;                     // 0x6B8C
+    int texReady;                   // 0x6B90
+};
+// Copies n packet quadwords to *pp and advances it.
+static inline void CopyQuads(unsigned long** pp, const void* srcp, int n)
+{
+    const sGifQuad* src = (const sGifQuad*)srcp;
+    sGifQuad* d = (sGifQuad*)*pp;
+    sGifQuad* end = d + n;
+    while (d != end) {
+        *d++ = *src++;
+    }
+    *pp = (unsigned long*)d;
+}
+static inline int wrapIndex(int i, int start, int m)
+{
+    return (i + start) % m;
+}
+
+struct sCol_0CE0 {
+    char b[4];
+    sCol_0CE0() {}
+};
+
+struct sTrail_0CE0 {
+    char pad_0x0[0x20];
+    sGifQuad q[0x15];             // 0x20
+    float scale;                    // 0x170 (unused here)
+    char pad_0x174[4];
+    int count;                      // 0x178
+    int head;                       // 0x17C
+    char pad_0x180[0x20];
+    sGifQuad* posA;               // 0x1A0
+    sGifQuad* posB;               // 0x1A4
+    char pad_0x1A8[0x200 - 0x1A8];
+    int alt;                        // 0x200
+    sCol_0CE0* cols;                // 0x204
+};
+
+extern char D_A00[];
+extern char D_F10[];
+
+// PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
+extern "C" void func_00380CE0(cPS2GraphicsMan* self, sTrail_0CE0* obj)
+{
+    if (D_004A44FC != 0)
+        return;
+    self->top->f0 = (self->top->f0 & ~0x3C0) | 0x100;
+    self->top->fC &= 0xC0000000;
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    int n = obj->count;
+    sPtSegHdr hdr;
+    int done = 0;
+    hdr.step = *(int*)((char*)obj + 0x20) / n;
+    hdr.fstep = (float)hdr.step;
+    int nb = n / 43 + 1;
+    unsigned int prog = (unsigned int)(obj->alt != 0 ? D_F10 : D_A00) >> 3;
+    for (int i = 0; i < nb; i++) {
+        unsigned int buf = self->bufAddr;
+        unsigned long* p = func_0038F460(D_004A4474, buf, -1, 0);
+        p[0] = 0x1000007C;
+        p[1] = 0;
+        p[2] = 0;
+        p[3] = (unsigned long)0xD8DD << 47;
+        hdr.v = hdr.fstep * (float)(i * 43) * *(float*)((char*)obj + 0x2C);
+        int seg = obj->count - done;
+        if (seg >= 0x2C)
+            seg = 0x2B;
+        hdr.seg = seg;
+        p += 4;
+        CopyQuads(&p, obj->q, 0x15);
+        CopyQuads(&p, &hdr, 1);
+        int wrap = obj->head + 1;
+        int m = obj->count;
+        int s = (done + wrap) % m;
+        done += hdr.seg;
+        int over = s + hdr.seg - m;
+        if (over < 0)
+            over = 0;
+        int first = s + hdr.seg - s;
+        if (m - s < first)
+            first = m - s;
+        int pad = 0x2B - first - over;
+        sGifQuad* lastA;
+        sGifQuad* lastB;
+        sCol_0CE0* lastC;
+        if (done < m) {
+            int e = wrapIndex(done, wrap, m);
+            lastA = obj->posA + e;
+            lastB = obj->posB + e;
+            lastC = obj->cols + e;
+        } else {
+            int e = wrapIndex(done - 1, wrap, m);
+            lastA = obj->posA + e;
+            lastB = obj->posB + e;
+            lastC = obj->cols + e;
+        }
+        CopyQuads(&p, obj->posA + s, first);
+        if (over > 0)
+            CopyQuads(&p, obj->posA, over);
+        CopyQuads(&p, lastA, 1);
+        p = (unsigned long*)((sGifQuad*)p + pad);
+        CopyQuads(&p, obj->posB + s, first);
+        if (over > 0)
+            CopyQuads(&p, obj->posB, over);
+        CopyQuads(&p, lastB, 1);
+        p = (unsigned long*)((sGifQuad*)p + pad);
+        p[0] = 0;
+        p[1] = (unsigned long)0x6E2CC06E << 32;
+        p += 2;
+        sCol_0CE0 cols[44];
+        func_003E6574(cols, obj->cols + s, first * 4);
+        if (over > 0)
+            func_003E6574(cols + first, obj->cols, over * 4);
+        cols[first + over] = *lastC;
+        CopyQuads(&p, cols, 11);
+        p[0] = (unsigned long)(prog | 0x14000000) << 32;
+        p[1] = (unsigned long)0x8800 << 45;
+        p += 2;
+        unsigned int next = func_0038F668(D_004A4474, p, 4);
+        self->bufAddr = next;
+        sPtRing* ring = self->ring;
+        sPtRenderState* rs = self->top;
+        if (ring->count < 0xA28) {
+            rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+            int key = *(int*)((char*)ring + 0x69CC0);
+            sPtRingEnt* e = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+            e->rs = *rs;
+            e->buf = buf;
+            e->next = next;
+            e->key = key;
+            e->flag = 0;
+        }
+        self->bufAddr += 0x10;
+    }
+    self->top->f0 &= ~0x3C0;
+    self->top->fC &= 0xC0000000;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00381310);

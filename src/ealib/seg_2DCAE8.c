@@ -1025,7 +1025,105 @@ int func_003DD4E8(char *arg0, int arg1, int arg2, int arg3) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DD5A0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_00519AB0: the file system's command manager (func_003DCC88 sets it up). Layout from every use in this unit;
+   field names are their offsets. Several fields are also reached through their own splat symbols (declared
+   below), which the functions that address them directly must keep using. */
+struct sFsHd {                      /* 0x110: an open file (D_00519AB0.f2C[], func_003DE800 hands one out) */
+    int f00;                        /* handle, or the archive's sFsNode */
+    int f04;                        /* size */
+    int f08;                        /* offset in the archive */
+    int f0C;
+    char f10[0x100];                /* name */
+};
+struct sFsCmdId {
+    unsigned int id : 20;
+    unsigned int type : 4;
+    unsigned int idx : 8;           /* index in D_00519AB0.f28 */
+};
+struct sFsCmd {                     /* 0x30: a command (D_00519AB0.f28[], func_003DE670 hands one out) */
+    union {
+        unsigned int w;
+        struct sFsCmdId b;
+    } f00;                          /* the handle */
+    int f04;                        /* aborted */
+    int f08;               /* status */
+    int f0C;                        /* error */
+    int f10;                        /* priority */
+    int f14;                        /* callback argument */
+    int f18;
+    int f1C;
+    int f20;
+    struct sFsHd *f24;
+    void (*f28)(int, int, int);     /* completion callback */
+    struct sFsCmd *f2C;             /* next in the queue */
+};
+struct sFsNode {                    /* 0x18: an open archive (D_00519AB0.f34 list) */
+    int f00;                        /* data */
+    int f04;                        /* size */
+    int f08;
+    struct sFsHd *f0C;
+    struct sFsCmd *f10;
+    struct sFsNode *f14;            /* next */
+};
+struct sAB0 {
+    int f00;                        /* number of commands */
+    int f04;                        /* number of open files */
+    int f08;                        /* highest priority run (also D_00519AB8) */
+    int f0C;                        /* commands queued */
+    int f10;               /* callback depth */
+    int f14[4];                     /* mutex (also D_00519AC4) */
+    struct sFsCmd *f24;             /* running */
+    struct sFsCmd *f28;             /* commands (also D_00519AD8) */
+    struct sFsHd *f2C;              /* open files */
+    struct sFsCmd *f30;             /* queue */
+    struct sFsNode *f34;            /* archives (also D_00519AE4) */
+    int f38;                        /* (also D_00519AE8) */
+};
+extern struct sAB0 D_00519AB0;
+extern int D_00519AB8;                          /* D_00519AB0.f08 */
+struct sAB0Lock {                   /* D_00519AB0 from the mutex on (D_00519AC4) */
+    int f00[4];                     /* the mutex */
+    struct sFsCmd *f10;
+    struct sFsCmd *f14;
+    struct sFsHd *f18;
+    struct sFsCmd *f1C;             /* the queue (D_00519AB0.f30) */
+    struct sFsNode *f20;
+    int f24;
+};
+extern struct sAB0Lock D_00519AC4;
+extern struct sFsNode *D_00519AE4;              /* D_00519AB0.f34 */
+typedef struct { unsigned int pad0 : 20; unsigned int f : 4; unsigned int pad1 : 8; int a; int b; int c; int d; int e; int f1; int g; int h; } C_D5A0;
+extern C_D5A0 *func_003DE670_D5A0(void) __asm__("func_003DE670");
+extern void func_003DE668_D5A0(C_D5A0 *) __asm__("func_003DE668");
+extern void iFILESYS_ExecCommand_D5A0(C_D5A0 *) __asm__("iFILESYS_ExecCommand");
+
+int func_003DD5A0_impl(int arg0, int arg1, int arg2) __asm__("func_003DD5A0");
+int func_003DD5A0_impl(int arg0, int arg1, int arg2) {
+    C_D5A0 *c;
+    struct sFsNode *n;
+
+    c = func_003DE670_D5A0();
+    n = D_00519AE4;
+    c->f = 3;
+    *(int*)((char*)c + 0x10) = arg1;
+    *(int*)((char*)c + 0x14) = arg2;
+    *(int*)((char*)c + 0x24) = arg0;
+    for (; n != 0; n = n->f14) {
+        if ((int)n->f0C == arg0) {
+            *(int*)((char*)c + 0xC) = 3;
+            func_003DE668_D5A0(c);
+            break;
+        }
+    }
+    iFILESYS_ExecCommand_D5A0(c);
+    return *(int*)c;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DD648);
@@ -1124,7 +1222,69 @@ int func_003DD878(int a0, int a1, int a2) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DD8E8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_00450C10: the file system's settings (0x24 bytes: func_003DE928 hands out a copy, func_003DE9B8 takes one).
+   Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
+struct sC10File { char *name; int a; int b; char *path; };   /* built-in file table entry (f20) */
+struct sC10 {
+    int f00;                        /* size */
+    void *(*f04)(char *, int, int); /* alloc (name, size, flags) */
+    int (*f08)(void *);             /* free */
+    int f0C;
+    int f10;
+    int f14;
+    char *f18;                      /* also D_00450C58.f00 */
+    char *f1C;                      /* also D_00450C50 */
+    struct sC10File *f20;
+};
+extern struct sC10 D_00450C10;
+extern void *(*D_00450C14)(char *, int, int);   /* D_00450C10.f04 */
+extern int (*D_00450C18)(void *);               /* D_00450C10.f08 */
+/* D_00519AB0: the file system's command manager (func_003DCC88 sets it up). Layout from every use in this unit;
+   field names are their offsets. Several fields are also reached through their own splat symbols (declared
+   below), which the functions that address them directly must keep using. */
+extern struct sAB0 D_00519AB0;
+extern int D_00519AB8;                          /* D_00519AB0.f08 */
+extern struct sAB0Lock D_00519AC4;
+extern int func_003DD310_D8E8(int) __asm__("func_003DD310");
+extern int BIG_typeofheader_D8E8(int) __asm__("BIG_typeofheader");
+extern int BIG_sizeofheader_D8E8(int) __asm__("BIG_sizeofheader");
+extern char D_00495D68_D8E8[] __asm__("D_00495D68");
+extern void iFILESYS_ExecCommand_D8E8(void *) __asm__("iFILESYS_ExecCommand");
+extern char func_003DD8E8_D8E8[] __asm__("func_003DD8E8");
+
+void func_003DD8E8(int a0, int a1, struct sFsNode *s) {
+    int n, k;
+    struct sFsHd *t;
+    struct sC10 *fs;
+    struct sFsCmd *e = &D_00519AB0.f28[((unsigned char *)&a0)[3]];
+    t = e->f24;
+    k = e->f10;
+    s->f0C = t;
+    s->f10->f24 = t;
+    func_003DD310_D8E8(a0);
+    if (BIG_typeofheader_D8E8(s->f00) == 0) {
+        D_00450C18((void *)s->f00);
+    }
+    n = BIG_sizeofheader_D8E8(s->f00);
+    if (s->f04 < n) {
+        fs = &D_00450C10;
+        fs->f08((void *)s->f00);
+        s->f04 = n;
+        s->f00 = (int)fs->f04(D_00495D68_D8E8, n, s->f08);
+        a0 = func_003DD648(s->f0C, 0, s->f00, n, k, s);
+        func_003DCF70(a0, func_003DD8E8_D8E8);
+    } else {
+        s->f14 = D_00519AB0.f34;
+        D_00519AB0.f34 = s;
+        iFILESYS_ExecCommand_D8E8(s->f10);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DDA10);
@@ -1345,7 +1505,165 @@ void func_003DDF80(char *dst) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", iFILESYS_ExecCommand);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_00519AB0: the file system's command manager (func_003DCC88 sets it up). Layout from every use in this unit;
+   field names are their offsets. Several fields are also reached through their own splat symbols (declared
+   below), which the functions that address them directly must keep using. */
+extern struct sAB0 D_00519AB0;
+extern int D_00519AB8;                          /* D_00519AB0.f08 */
+extern struct sAB0Lock D_00519AC4;
+extern void MUTEX_lock_FX(void *) __asm__("MUTEX_lock");
+extern void MUTEX_unlock_FX(void *) __asm__("MUTEX_unlock");
+extern char *strchr_FX(char *, int) __asm__("strchr");
+extern int func_003E3208_FX(char *, int, void *) __asm__("func_003E3208");
+extern int func_003E34E8_FX(int) __asm__("func_003E34E8");
+extern int func_003E3538_FX(int) __asm__("func_003E3538");
+extern int func_003E32F8_FX(int) __asm__("func_003E32F8");
+extern int func_003E3350_FX(int, int, int, int) __asm__("func_003E3350");
+extern int func_003E3478_FX(int, int, int, int) __asm__("func_003E3478");
+extern int func_004165A8_FX(char *, char *) __asm__("func_004165A8");
+extern int BIG_locateentryz_FX(int, char *, int, int *, int *) __asm__("BIG_locateentryz");
+extern void func_003DE8C0_FX(void *) __asm__("func_003DE8C0");
+extern void iFILESYS_CommandCompleteCallback_FX(int) __asm__("iFILESYS_CommandCompleteCallback");
+
+void iFILESYS_ExecCommand_impl(struct sFsCmd *c) __asm__("iFILESYS_ExecCommand");
+void iFILESYS_ExecCommand_impl(struct sFsCmd *c) {
+    char path[256];
+    char file[256];
+    int off;
+    int x;
+    struct sFsNode *n;
+    struct sFsHd *hd;
+    int mode;
+    int found;
+    MUTEX_lock_FX(D_00519AC4.f00);
+    if (c != 0) {
+        struct sFsCmd *prev = 0;
+        c->f2C = D_00519AC4.f1C;
+        while (c->f2C != 0 && !(c->f10 < c->f2C->f10)) {
+            prev = c->f2C;
+            c->f2C = prev->f2C;
+        }
+        if (prev != 0) {
+            prev->f2C = c;
+        } else {
+            D_00519AB0.f30 = c;
+        }
+        D_00519AB0.f0C++;
+    }
+    if (D_00519AB0.f24 != 0 || D_00519AB0.f10 != 0) {
+        MUTEX_unlock_FX(D_00519AB0.f14);
+        return;
+    }
+    c = D_00519AB0.f30;
+    if (c != 0 && c->f10 <= D_00519AB0.f08) {
+        D_00519AB0.f30 = c->f2C;
+        D_00519AB0.f0C--;
+    } else {
+        c = 0;
+    }
+    D_00519AB0.f24 = c;
+    MUTEX_unlock_FX(D_00519AB0.f14);
+    if (c == 0) return;
+    if (c->f04 != 0) {
+        iFILESYS_CommandCompleteCallback_FX(0);
+        return;
+    }
+    switch ((c->f00.w >> 20) & 0xF) {
+    case 2:
+    case 8:
+        file[0] = 0;
+        if (strchr_FX(c->f24->f10, '|')) {
+            if (*c->f24->f10 == '|') {
+                mode = 2;
+            } else {
+                int len;
+                char *bar = strchr_FX(c->f24->f10, '|');
+                mode = 4;
+                len = bar - c->f24->f10;
+                path[0] = 0;
+                strncpy(path, c->f24->f10, len);
+                path[len] = 0;
+            }
+            strcpy(file, strchr_FX(c->f24->f10, '|') + 1);
+        } else {
+            mode = 1;
+            if (c->f18 & 1) {
+                mode = 3;
+                strcpy(file, c->f24->f10);
+            }
+        }
+        found = 0;
+        if ((mode & 1) && func_003E3208_FX(c->f24->f10, c->f18, c->f24)) {
+            found = 1;
+            if (((c->f00.w >> 20) & 0xF) == 8) {
+                func_003E32F8_FX(c->f24->f00);
+            } else {
+                c->f24->f04 = func_003E34E8_FX(c->f24->f00);
+                c->f24->f0C = func_003E3538_FX(c->f24->f00);
+            }
+        }
+        if (!found && (mode & 6)) {
+            for (n = D_00519AB0.f34; n != 0 && !found; n = n->f14) {
+                if ((mode & 4) && func_004165A8_FX(n->f0C->f10, path)) continue;
+                if (BIG_locateentryz_FX(n->f00, file, 0, &x, &off)) {
+                    found = 1;
+                    c->f24->f00 = (int)n;
+                    c->f24->f04 = off;
+                    c->f24->f08 = x;
+                }
+            }
+        }
+        if (((c->f00.w >> 20) & 0xF) == 8) {
+            func_003DE8C0_FX(c->f24);
+            c->f18 = found;
+        }
+        iFILESYS_CommandCompleteCallback_FX(found);
+        break;
+    case 3:
+        c->f0C = 1;
+        hd = c->f24;
+        if (hd != 0) {
+            if (hd->f08 == 0) {
+                c->f0C = func_003E32F8_FX(hd->f00);
+            } else {
+                c->f0C = 0;
+            }
+            func_003DE8C0_FX(c->f24);
+            c->f24 = 0;
+        }
+        iFILESYS_CommandCompleteCallback_FX(c->f0C == 0);
+        break;
+    case 4:
+        if (c->f1C > 0) {
+            if (c->f24->f08 != 0) {
+                func_003E3350_FX(((struct sFsNode *)c->f24->f00)->f0C->f00, c->f20, c->f24->f08 + c->f18, c->f1C);
+            } else {
+                func_003E3350_FX(c->f24->f00, c->f20, c->f18, c->f1C);
+            }
+        } else {
+            iFILESYS_CommandCompleteCallback_FX(1);
+        }
+        break;
+    case 5:
+        func_003E3478_FX(c->f24->f00, c->f20, c->f18, c->f1C);
+        break;
+    case 6:
+        c->f18 = c->f24->f04;
+        iFILESYS_CommandCompleteCallback_FX(1);
+        break;
+    case 7:
+    case 9:
+    case 10:
+        iFILESYS_CommandCompleteCallback_FX(c->f0C == 0);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", iFILESYS_CommandCompleteCallback);
@@ -2116,7 +2434,42 @@ void func_003DF8E8_impl(int h, void (*fn)(int)) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF980);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sReq {                       /* 0x30, a file request (D_00450C34[], D_00519BF0 of them) */
+    int f00;                        /* id: sequence << 8 | index */
+    struct sReq *f04;               /* next free */
+    int f08;
+    int f0C;
+    int f10;
+    unsigned int f14;
+    void (*f18)(int);               /* done callback (func_003DF8E8) */
+    int f1C;               /* busy */
+    int f20;
+    int f24;
+    int f28;
+    int f2C;
+};
+extern struct sReq *D_00450C34;
+struct sReqQueue { struct sReq *f00; struct sReq *f04; };  /* head, tail */
+extern struct sReqQueue D_00519BF8;             /* free requests */
+extern char D_00519C08[];                       /* request list mutex */
+extern void mlock_F980(char *) __asm__("MUTEX_lock");
+extern void munlock_F980(char *) __asm__("MUTEX_unlock");
+
+int func_003DF980(int h) {
+    struct sReq *e;
+    int r;
+    mlock_F980(D_00519C08);
+    e = func_003DEF70(h);
+    r = e ? e->f1C == 0 : -1;
+    munlock_F980(D_00519C08);
+    return r;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2DCAE8", ASYNCFILE_release);
 
@@ -3461,7 +3814,58 @@ int func_003E1D00(int arg0, int arg1, int arg2, int arg3) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1D68);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_00450C10: the file system's settings (0x24 bytes: func_003DE928 hands out a copy, func_003DE9B8 takes one).
+   Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
+/* built-in file table entry (f20) */
+extern struct sC10 D_00450C10;
+extern int func_003DEBF0(int, int, int, void *);
+
+extern int func_003DECA0(int a, int b);
+extern int BIG_typeofheader_1D68(char *) __asm__("BIG_typeofheader");
+extern int BIG_sizeofheader_1D68(char *) __asm__("BIG_sizeofheader");
+extern void func_003E6574_1D68(char *, char *, int) __asm__("func_003E6574");
+
+
+int func_003E1D68(int a, int *b) {
+    int sp0;
+    if (func_003DEBF0(b[0], 1, a, &sp0)) {
+        char *hdr = D_00450C10.f04((char *)b[0], 0xA90, b[2]);
+        if (hdr) {
+            func_003DEC60(sp0, 0, (int)hdr, 0xA90, a - 1);
+            if (BIG_typeofheader_1D68(hdr) == 0) {
+                D_00450C10.f08(hdr);
+                func_003DECA0(sp0, a - 1);
+                return 0;
+            }
+            {
+                int size = BIG_sizeofheader_1D68(hdr);
+                if (size > 0xA90) {
+                    char *buf = D_00450C10.f04((char *)b[0], size, b[2]);
+                    if (buf == 0) {
+                        D_00450C10.f08(hdr);
+                        func_003DECA0(sp0, a - 1);
+                        return 0;
+                    }
+                    func_003E6574_1D68(buf, hdr, 0xA90);
+                    D_00450C10.f08(hdr);
+                    hdr = buf;
+                    func_003DEC60(sp0, 0xA90, (int)(hdr + 0xA90), size - 0xA90, a - 1);
+                }
+            }
+            func_003DECA0(sp0, a - 1);
+            return (int)hdr;
+        }
+        func_003DECA0(sp0, a - 1);
+        return 0;
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1EC8);
@@ -3964,7 +4368,59 @@ void func_003E3020(int arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3098);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_00450C10: the file system's settings (0x24 bytes: func_003DE928 hands out a copy, func_003DE9B8 takes one).
+   Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
+/* built-in file table entry (f20) */
+extern struct sC10 D_00450C10;
+extern char *D_00450C50;
+extern char D_00519AF0[0x100];                  /* the current directory */
+extern char *strchr_3098(char *, int) __asm__("strchr");
+extern int strlen_3098(char *) __asm__("strlen");
+extern int func_00416B18_3098(char *, char *, int) __asm__("func_00416B18");
+extern char *func_004162D0(char *, char *);
+extern char *D_00450C3C;
+extern int D_00450C44;
+
+void func_003E3098_i(char *path, char *out, int *kind) __asm__("func_003E3098");
+void func_003E3098_i(char *path, char *out, int *kind) {
+    int k;
+    out[0] = 0;
+    k = D_00450C44;
+    if (strchr_3098(path, 0x3A) != 0) {
+        int n = strlen_3098(D_00450C50);
+        if (func_00416B18_3098(path, D_00450C3C, 3) == 0) {
+            k = 1;
+            path += 3;
+        } else if (func_00416B18_3098(path, D_00450C50, n) == 0) {
+            path += n;
+            k = 2;
+        } else {
+            if (D_00450C44 == 1) return;
+            if (path[2] != 0x3A) return;
+        }
+    }
+    if (k == 2) {
+        func_004162D0(out, D_00450C50);
+    }
+    if (path[0] != 0x5C && path[0] != 0x2F && path[0] != 0x7E) {
+        func_004162D0(out, D_00519AF0);
+    }
+    func_004162D0(out, path);
+    for (; *out != 0; out++) {
+        if (*out == 0x5C) {
+            *out = 0x2F;
+        }
+    }
+    if (kind != 0) {
+        *kind = k;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3208);
@@ -4292,7 +4748,95 @@ void func_003E3B00(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3BE0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sC40Mode {                   /* the CD read mode handed to func_00401DF8 */
+    unsigned char f00;
+    unsigned char f01;
+    unsigned char f02;
+    unsigned char f03;
+};
+struct sC40Read {                   /* the read in progress */
+    int f00;                        /* bytes in this step */
+    int f04;                        /* bytes left */
+    int f08;
+    int f0C;                        /* sector */
+    int f10;                        /* sectors in this step */
+    int f14;                        /* destination */
+    char *f18;                      /* the file table (also D_00519C78) */
+    int *f1C;                       /* sector buffer (D_00519C80) */
+};
+struct sC40 {                       /* 0x40, D_00519C40: the CD file system */
+    int f00;                        /* flags */
+    int f04;                        /* number of files */
+    int f08;                        /* reader thread */
+    int f0C;                        /* semaphore (also D_00519C4C) */
+    int f10;
+    int f14;
+    int f18;
+    struct sC40Mode f1C;
+    struct sC40Read f20;
+};
+extern struct sC40 D_00519C40;
+extern void func_003E3B00_3BE0(void) __asm__("func_003E3B00");
+extern int func_00402300_3618(void) __asm__("func_00402300");
+extern void func_003E6574_2190(int, int, int) __asm__("func_003E6574");
+extern void iFILESYS_CommandCompleteCallback_33B0(int) __asm__("iFILESYS_CommandCompleteCallback");
+
+void func_003E3BE0_impl(void) __asm__("func_003E3BE0");
+void func_003E3BE0_impl(void) {
+    struct sC40Read *s = &D_00519C40.f20;
+
+    while (1) {
+        int fl;
+        func_00423DE0(D_00519C40.f0C);
+        if (func_00402300_3618() != 0 || (D_00519C40.f00 & 8)) {
+            fl = D_00519C40.f00 & ~8;
+            D_00519C40.f00 = fl;
+            if (fl & 2) {
+                if (--D_00519C40.f10 > 0) {
+                    func_003E3B00_3BE0();
+                } else {
+                    D_00519C40.f00 = fl | 4;
+                }
+            }
+            continue;
+        }
+        if (D_00519C40.f00 & 1) {
+            D_00519C40.f00 &= ~1;
+            D_00519C40.f14 = s->f0C;
+            func_003E6574_2190(s->f14, (int)D_00519C40.f20.f1C + s->f08, s->f00);
+        }
+        if (s->f04 > 0) {
+            s->f14 += s->f00;
+            s->f08 = 0;
+            s->f0C += s->f10;
+            if (s->f04 < 0x800) {
+                s->f00 = s->f04;
+                D_00519C40.f00 |= 1;
+                s->f10 = 1;
+            } else if ((s->f14 & 0x3F) != 0) {
+                s->f00 = 0x800;
+                D_00519C40.f00 |= 1;
+                s->f10 = 1;
+            } else {
+                int k = s->f04 & -0x800;
+                D_00519C40.f00 &= ~1;
+                s->f10 = k >> 11;
+                s->f00 = k;
+            }
+            s->f04 -= s->f00;
+            func_003E3B00_3BE0();
+        } else {
+            D_00519C40.f00 &= ~2;
+            iFILESYS_CommandCompleteCallback_33B0(1);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3D78);
@@ -4721,7 +5265,21 @@ void func_003E4A30(int a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4AA0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern void (*D_00450C78[64])(void);     /* exit handlers (func_003E49B8 runs them) */
+void func_003E4AA0(void (*a)(void)) {
+    int i;
+    for (i = 0; i < 0x40; i++) {
+        if (D_00450C78[i] == a) {
+            D_00450C78[i] = 0;
+            break;
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4AF0);
 
@@ -5419,7 +5977,54 @@ void func_003E5AA8(int idx, int val) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5B60);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int D_00451008;                          /* debug output set up (func_003E5B60) */
+struct sDbgChan {                   /* 8 bytes, D_00450E08[64]: a debug message channel */
+    int f00;
+    unsigned int on : 1;
+    unsigned int f04b1 : 1;
+    unsigned int pad : 30;
+};
+struct sDbgOut {                    /* 12 bytes, D_00451250[8]: a debug output */
+    int f00;
+    void (*f04)(int, char *);
+    unsigned int on : 1;
+    unsigned int pad : 31;
+};
+extern struct sDbgChan D_00450E08[];
+extern struct sDbgOut D_00451250_5B60[] __asm__("D_00451250");
+extern void func_003E5EF8(int, int);
+extern void func_003E5DC8(int, int);
+
+void func_003E5B60(void) {
+    int i;
+    if (D_00451008 == 0) {
+        D_00451008 = 1;
+        for (i = 0; i < 8; i++) {
+            D_00451250_5B60[i].on = 0;
+        }
+        for (i = 0; i < 64; i++) {
+            struct sDbgChan *e = &D_00450E08[i];
+            e->on = 0;
+        }
+        for (i = 4; i < 8; i++) {
+            D_00451250_5B60[i].f00 = 0;
+            D_00451250_5B60[i].f04 = 0;
+        }
+        for (i = 14; i < 64; i++) {
+            struct sDbgChan *e = &D_00450E08[i];
+            e->f00 = 0;
+            e->f04b1 = 0;
+        }
+        func_003E5EF8(2, 1);
+        func_003E5DC8(2, 1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5C60);

@@ -4500,11 +4500,158 @@ extern "C" V3_2490 func_00302490(int n, Ent_2490 *e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00302680);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct cLunoValue {
+    int word0;
+    int word1;
+    int type;
+};
+extern cLunoValue D_004C9098;
+struct sBindArg_1FBE38 { int idx; int val; int pad; int type; };
+struct sBindEnd_1FBE38 {};  // empty trailing member of a defaults record; value-init copies its byte through a stack temp
+extern "C" void func_003E6574(void*, void*, int);
+int* func_00226610(void*);
+extern "C" void* func_003578A8(void*, int, void*, void*, void*);
+#define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
+        vp = rec; \
+        func_003E6574(vp, defaults, size); \
+        sBindArg_1FBE38* p_ = args; \
+        for (int i_ = 0; i_ < n; i_++, p_++) { \
+            int k_ = p_->idx; \
+            int* d_ = (int*)((k_ << 2) + (int)vp); \
+            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+                *(float*)d_ = (float)p_->val; \
+            else \
+                *d_ = p_->val; \
+        } \
+    } while (0)
+#define BIND_SET_RESULT_1FBE38(ret, value) do { \
+        int r_ = (value); \
+        (ret)->type = 1; \
+        *func_00226610(ret) = r_; \
+    } while (0)
 
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int D_004A3CD0_2680[2] __asm__("D_004A3CD0");
+extern "C" int func_00303D90(unsigned);
+extern int D_004A5740_2680 __asm__("D_004A5740");
+extern int D_004A5738_2680 __asm__("D_004A5738");
+extern sBindEnd_1FBE38 D_004A573C_2680 __asm__("D_004A573C");
+extern "C" cLunoValue* func_00302680(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
+    if (D_004A5740_2680 == 0) {
+        // NOTE: guarded static-local init (defaults record = { int, sBindEnd_1FBE38 }).
+        D_004A5738_2680 = -1;
+        D_004A573C_2680 = sBindEnd_1FBE38();
+        D_004A5740_2680 = 1;
+    }
+    int v[4];
+    int* vp;
+    BIND_UNPACK_ARGS_1FBE38(vp, v, &D_004A5738_2680, 8, D_004A3CD0_2680, n, e);
+    BIND_SET_RESULT_1FBE38(ret, func_00303D90(vp[0]));
+    return ret;
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00302778);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern cLunoValue D_004C9098;
+// empty trailing member of a defaults record; value-init copies its byte through a stack temp
+extern "C" void func_003E6574(void*, void*, int);
+int* func_00226610(void*);
+extern "C" void* func_003578A8(void*, int, void*, void*, void*);
+#define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
+        vp = rec; \
+        func_003E6574(vp, defaults, size); \
+        sBindArg_1FBE38* p_ = args; \
+        for (int i_ = 0; i_ < n; i_++, p_++) { \
+            int k_ = p_->idx; \
+            int* d_ = (int*)((k_ << 2) + (int)vp); \
+            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+                *(float*)d_ = (float)p_->val; \
+            else \
+                *d_ = p_->val; \
+        } \
+    } while (0)
+#define BIND_SET_RESULT_1FBE38(ret, value) do { \
+        int r_ = (value); \
+        (ret)->type = 1; \
+        *func_00226610(ret) = r_; \
+    } while (0)
 
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int D_004A3CD8_2778[2] __asm__("D_004A3CD8");
+extern "C" int func_00303DF8(unsigned);
+extern int D_004A5750_2778 __asm__("D_004A5750");
+extern int D_004A5748_2778 __asm__("D_004A5748");
+extern sBindEnd_1FBE38 D_004A574C_2778 __asm__("D_004A574C");
+extern "C" cLunoValue* func_00302778(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
+    if (D_004A5750_2778 == 0) {
+        // NOTE: guarded static-local init (defaults record = { int, sBindEnd_1FBE38 }).
+        D_004A5748_2778 = -1;
+        D_004A574C_2778 = sBindEnd_1FBE38();
+        D_004A5750_2778 = 1;
+    }
+    int v[4];
+    int* vp;
+    BIND_UNPACK_ARGS_1FBE38(vp, v, &D_004A5748_2778, 8, D_004A3CD8_2778, n, e);
+    BIND_SET_RESULT_1FBE38(ret, func_00303DF8(vp[0]));
+    return ret;
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00302870);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern cLunoValue D_004C9098;
+// empty trailing member of a defaults record; value-init copies its byte through a stack temp
+extern "C" void func_003E6574(void*, void*, int);
+int* func_00226610(void*);
+extern "C" void* func_003578A8(void*, int, void*, void*, void*);
+#define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
+        vp = rec; \
+        func_003E6574(vp, defaults, size); \
+        sBindArg_1FBE38* p_ = args; \
+        for (int i_ = 0; i_ < n; i_++, p_++) { \
+            int k_ = p_->idx; \
+            int* d_ = (int*)((k_ << 2) + (int)vp); \
+            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+                *(float*)d_ = (float)p_->val; \
+            else \
+                *d_ = p_->val; \
+        } \
+    } while (0)
+#define BIND_SET_RESULT_1FBE38(ret, value) do { \
+        int r_ = (value); \
+        (ret)->type = 1; \
+        *func_00226610(ret) = r_; \
+    } while (0)
+
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern int D_004A3CE0_2870[2] __asm__("D_004A3CE0");
+extern "C" int func_00303E60(unsigned);
+extern int D_004A5760_2870 __asm__("D_004A5760");
+extern int D_004A5758_2870 __asm__("D_004A5758");
+extern sBindEnd_1FBE38 D_004A575C_2870 __asm__("D_004A575C");
+extern "C" cLunoValue* func_00302870(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
+    if (D_004A5760_2870 == 0) {
+        // NOTE: guarded static-local init (defaults record = { int, sBindEnd_1FBE38 }).
+        D_004A5758_2870 = -1;
+        D_004A575C_2870 = sBindEnd_1FBE38();
+        D_004A5760_2870 = 1;
+    }
+    int v[4];
+    int* vp;
+    BIND_UNPACK_ARGS_1FBE38(vp, v, &D_004A5758_2870, 8, D_004A3CE0_2870, n, e);
+    BIND_SET_RESULT_1FBE38(ret, func_00303E60(vp[0]));
+    return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00302968);
@@ -4936,7 +5083,39 @@ extern "C" void* func_00303380(void* self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00303430);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct cWScriptMan {
+    int being;              // 0x0: index of the current being (rider)
+    char pad_0x4[0x28C];
+    char* f290;             // 0x290: object of the reference id -1
+    void* f294;             // 0x294
+    int f298;               // 0x298
+    char pad_0x29C[0x8];
+    char* f2A4;             // 0x2A4
+};
+extern cWScriptMan* D_004A3DD8;
+// A being: the script/AI-facing interface of a rider. Slot order of the prototype's vtable _vt$6cBeing; parameter
+// types from its mangled names (applyBoost__6cBeingRC8t4Vector, transport__6cBeingRC8t4Matrix, ...).
+extern "C" void* func_003578A8(void*, int, void*, void*, void*);
+// Int result setter taking the value by const reference; the by-value macro form lets jump1 hoist the -1 arm.
+static inline void setInt_3430(cLunoValue* r, const unsigned& v) {
+    r->type = 1;
+    *func_00226610(r) = v;
+}
+extern "C" cLunoValue* func_00303430(cLunoValue* ret) {
+    char *p = D_004A3DD8->f290;
+    unsigned v;
+    if (p)
+        v = *(unsigned*)(p + 0x78);
+    else
+        v = 0xFFFFFFFF;
+    setInt_3430(ret, v);
+    return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00303490);
@@ -5513,7 +5692,101 @@ extern "C" R12_4210 func_00304210(int n, Ent_4210* e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00304320);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern cLunoValue D_004C9098;
+// Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
+// and the slot; refs[slot] >> 8 is the object address >> 2.
+struct sRefSet {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+};
+struct sRefWorld {
+    char pad_0x0[0x8];
+    sRefSet** sets;         // 0x8
+};
+extern sRefWorld** D_004A47B8;
+// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
+extern cWScriptMan* D_004A3DD8;
+// empty trailing member of a defaults record; value-init copies its byte through a stack temp
+extern "C" void func_003E6574(void*, void*, int);
+int* func_00226610(void*);
+#define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
+        vp = rec; \
+        func_003E6574(vp, defaults, size); \
+        sBindArg_1FBE38* p_ = args; \
+        for (int i_ = 0; i_ < n; i_++, p_++) { \
+            int k_ = p_->idx; \
+            int* d_ = (int*)((k_ << 2) + (int)vp); \
+            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+                *(float*)d_ = (float)p_->val; \
+            else \
+                *d_ = p_->val; \
+        } \
+    } while (0)
+#define BIND_SET_RESULT_1FBE38(ret, value) do { \
+        int r_ = (value); \
+        (ret)->type = 1; \
+        *func_00226610(ret) = r_; \
+    } while (0)
+
+static inline char *refToPtr_1FBE38(unsigned i) { return (char*)(i << 2); }
+static inline char *refToObj_1FBE38(unsigned i) { if (i == 0) return 0; return refToPtr_1FBE38(i); }
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern unsigned D_004A57F0_4320 __asm__("D_004A57F0");
+extern sBindEnd_1FBE38 D_004A57F4_4320 __asm__("D_004A57F4");
+extern int D_004A57F8_4320 __asm__("D_004A57F8");
+extern int D_004A3D58_4320[2] __asm__("D_004A3D58");
+// Inline accessor of the current script process (wscript/wscriptman func_0030D2D8 is its out-of-line copy). Calling it
+// at each use gives the shared copy of the pointer the target keeps (lw; move) instead of one cached local.
+static inline cWScriptMan *curProcess_4320() { return D_004A3DD8; }
+void func_0030B508(void*, int, void*);
+extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* e) {
+    if (D_004A57F8_4320 == 0) {
+        D_004A57F0_4320 = 0xFFFFFFFF;
+        D_004A57F8_4320 = 1;
+        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
+        D_004A57F4_4320 = sBindEnd_1FBE38();
+    }
+    unsigned buf64[2];
+    unsigned* buf = buf64;
+    buf64[0] = 0xFFFFFFFF;
+    func_003E6574(buf, &D_004A57F0_4320, 8);
+    sBindArg_1FBE38* x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_004A3D58_4320[idx];
+        unsigned* d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    int gv = curProcess_4320()->being;
+    unsigned id = buf[0];
+    char *obj;
+    if (~id == 0) {
+        obj = curProcess_4320()->f290;
+    } else {
+        sRefSet *s = (*D_004A47B8)->sets[id & 0xFF];
+        unsigned i;
+        char *r;
+        if (!s)
+            r = 0;
+        else {
+            i = s->refs[id >> 8] >> 8;
+            char *t = refToObj_1FBE38(i);
+            r = t;
+        }
+        obj = r;
+    }
+    if (obj)
+        func_0030B508(curProcess_4320(), gv, obj);
+    return D_004C9098;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_003044A8);
@@ -5921,7 +6194,282 @@ extern "C" R12_4FF0 func_00304FF0(int n, Ent_4FF0* e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_003050F0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "bx/math3d.h"
+extern cLunoValue D_004C9098;
+// Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
+// and the slot; refs[slot] >> 8 is the object address >> 2.
+extern sRefWorld** D_004A47B8;
+// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
+extern cWScriptMan* D_004A3DD8;
+struct tInstanceRecord;
+class cBeing {
+public:
+    virtual ~cBeing();
+    virtual const t4Vector* getVelocity() const;
+    virtual int isIntersecting(tInstanceRecord* rec) const;
+    virtual void applyBoost(const t4Vector& impulse);
+    virtual const t4Vector* getPosition() const;
+    virtual const t4Matrix* getTransform() const;
+    virtual int getAIIndex() const;
+    virtual bool isHuman() const;
+    virtual bool isComputer() const;
+    virtual void transport(const t4Matrix& m);
+    virtual void resetToPath();
+    virtual void initForMission(const t4Matrix& m);
+};
+// The scene node of a world object (the object holds it at +0xC): the prototype's cObjNode / cTypeObjNode /
+// cInstanceNode family. Slot 1 is the virtual destructor; isType (10) and isMoveNode (16) are named as in the
+// prototype's _vt$13cInstanceNode; the other slots are known only by position.
+struct cInstanceNode_1FBE38 {
+    int p0, p1, p2;
+    virtual ~cInstanceNode_1FBE38();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual int isType(int type) const;
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual int isMoveNode();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual t4Matrix* v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual float v30();
+    virtual int v31();
+    virtual int v32(float);
+    virtual void v33();
+    virtual void v34(int);
+    virtual void v35();
+    virtual void v36(int, float);
+    virtual void v37();
+};
+// A plain (not 16-byte aligned) 4-float vector built in place for the node calls that take a vector pointer.
+struct sVec4_1FBE38 { float x, y, z, w; sVec4_1FBE38(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
+// A rider as these bindings see it (include/ai/rider.h has the flat layout): its cBeing base sits at 0x6C0, after the
+// rider's own data, so converting between cRider_1FBE38* and cBeing* adds/subtracts 0x6C0 with a null check.
+struct cRiderData_1FBE38 {
+    char pad_0x0[0x3FC];
+    int unk_3FC;                // 0x3FC (cRider::unk_3FC)
+    char pad_0x400[0x2C0];
+};
+struct sRiderHandler_1FBE38 {
+    char pad_0x0[0xD4];
+    unsigned int fD4;           // 0xD4
+};
+class cRider_1FBE38 : public cRiderData_1FBE38, public cBeing {
+public:
+    char pad_0x6C4[0xB8];
+    sRiderHandler_1FBE38* mRiderHandler;    // 0x77C (cRider::mRiderHandler)
+    char pad_0x780[0xF0];
+    int mViewIndex;             // 0x870 (cRider::mViewIndex)
+    int mIsHuman;               // 0x874
+    int mIsActor;               // 0x878
+    int mIsLocal;               // 0x87C
+};
+// The race (main/gamemode.cpp layout): riders by being index at 0x28; each player holds its rider at +0x18.
+struct sRacePlayer {
+    char pad_0x0[0x18];
+    cRider_1FBE38* rider;       // 0x18
+};
+struct sRace {
+    char pad_0x0[0x28];
+    cRider_1FBE38* riders[6];   // 0x28
+    sRacePlayer* players[12];   // 0x40
+    sRacePlayer* players2[3];   // 0x70
+    int numPlayers;             // 0x7C
+    char pad_0x80[0x8];
+    int numPlayers2;            // 0x88
+    char pad_0x8C[0x1C];
+    void* fA8;                  // 0xA8
+};
+// The game's cameras (camera/camera.cpp); one per view, indexed by cRider::mViewIndex.
+struct sCameras {
+    int f0;                     // 0x0
+    char* cam[1];               // 0x4
+};
+struct sGame {
+    char pad_0x0[0xC];
+    sRace* race;                // 0xC
+    char pad_0x10[0x18];
+    void* f28;                  // 0x28
+    char pad_0x2C[0x4C];
+    char* f78;                  // 0x78
+    char pad_0x7C[0x8];
+    sCameras* cameras;          // 0x84
+};
+// The game singleton (D_004A28A8).
+struct sApp {
+    char pad_0x0[0x14];
+    float f14;                  // 0x14
+    char pad_0x18[0x60];
+    void* f78;                  // 0x78
+    char pad_0x7C[0x8];
+    sGame* game;                // 0x84
+    char pad_0x88[0x38];
+    int fC0;                    // 0xC0
+};
+extern sApp* D_004A28A8;
+extern char* D_004A28A4;
+extern void* D_004A4028;
+// One script argument as the VM passes it to a binding: the slot index in the defaults record, then the value
+// (cLunoValue layout: value word, second word, type).
+// empty trailing member of a defaults record; value-init copies its byte through a stack temp
+extern "C" void func_003E6574(void*, void*, int);
+int* func_00226610(void*);
+#define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
+        vp = rec; \
+        func_003E6574(vp, defaults, size); \
+        sBindArg_1FBE38* p_ = args; \
+        for (int i_ = 0; i_ < n; i_++, p_++) { \
+            int k_ = p_->idx; \
+            int* d_ = (int*)((k_ << 2) + (int)vp); \
+            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+                *(float*)d_ = (float)p_->val; \
+            else \
+                *d_ = p_->val; \
+        } \
+    } while (0)
+#define BIND_SET_RESULT_1FBE38(ret, value) do { \
+        int r_ = (value); \
+        (ret)->type = 1; \
+        *func_00226610(ret) = r_; \
+    } while (0)
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline t4Vector vSub_1FBE38(const t4Vector &a, const t4Vector &b) {
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vLen_1FBE38(const t4Vector &v) {
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+// True when the race slot (-1 = none) holds a rider that is not computer-controlled.
+// Defaults record of this camera-shake binding; keyword indexes the shake keyword table (the prototype asserts
+// dp->Index < kNumCameraShakeKeywords).
+struct Rec_50F0 { int keyword; int useObj; unsigned id; float scale; sBindEnd_1FBE38 f; };
+extern Rec_50F0 D_004FBD40_50F0 __asm__("D_004FBD40");
+extern int D_004A583C;
+extern const int D_00446690[];
+extern int D_004A3BD8[2];  // shake type per camera-shake keyword
+extern "C" void func_0015E360(char* cam, int type, float amount, float dist);
+// Translation row of a transform (by value).
+static inline t4Vector trans_50F0(const t4Matrix *m) { return m->row[3]; }
+extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
+    if (D_004A583C == 0) {
+        D_004FBD40_50F0.keyword = 0;
+        D_004FBD40_50F0.useObj = 1;
+        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
+        D_004FBD40_50F0.f = sBindEnd_1FBE38();
+        D_004FBD40_50F0.scale = 1.0f;
+        D_004FBD40_50F0.id = 0xFFFFFFFF;
+        D_004A583C = 1;
+    }
+    Rec_50F0 rec;
+    Rec_50F0 *buf = &rec;
+    rec.id = 0xFFFFFFFF;
+    func_003E6574(buf, &D_004FBD40_50F0, 0x14);
+    sBindArg_1FBE38 *x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int idx = x->idx;
+        int t = D_00446690[idx];
+        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != t && t == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    char *obj = 0;
+    if (buf->useObj) {
+        unsigned id = buf->id;
+        if (~id == 0) {
+            obj = D_004A3DD8->f290;
+        } else {
+            sRefSet *s = (*D_004A47B8)->sets[id & 0xFF];
+            char *r;
+            if (!s)
+                r = 0;
+            else
+                r = refToObj_1FBE38(s->refs[id >> 8] >> 8);
+            obj = r;
+        }
+    }
+    int being = D_004A3DD8->being;
+    float scale = buf->scale;
+    int keyword = buf->keyword;
+    if (keyword == 0) {
+        sGame *game = D_004A28A8->game;
+        int np = game->race->numPlayers;
+        if (obj) {
+            for (int i = 0; i < np; i++) {
+                const t4Vector *rp = game->race->players[i]->rider->getPosition();
+                cInstanceNode_1FBE38 *node = *(cInstanceNode_1FBE38**)(obj + 0xC);
+                t4Matrix *m = node ? node->v24() : (t4Matrix*)(obj + 0x10);
+                t4Vector d = vSub_1FBE38(*rp, trans_50F0(m));
+                float dist = vLen_1FBE38(d);
+                cRider_1FBE38 *r = game->race->players[i]->rider;
+                int view = r->mViewIndex;
+                if (r->mIsLocal)
+                    func_0015E360(game->cameras->cam[view], D_004A3BD8[keyword], 1.0f, dist * scale);
+            }
+        } else {
+            for (int i = 0; i < np; i++) {
+                if (game->race->players[i]->rider->getAIIndex() == being) {
+                    cRider_1FBE38 *r = game->race->players[i]->rider;
+                    int view = r->mViewIndex;
+                    if (r->mIsLocal)
+                        func_0015E360(game->cameras->cam[view], D_004A3BD8[keyword], 1.0f, 0.0f);
+                    break;
+                }
+            }
+        }
+    }
+    return D_004C9098;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00305478);
@@ -6105,7 +6653,95 @@ extern "C" V3_57C0 func_003057C0(int n, Ent_57C0 *e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_003059A0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern cLunoValue D_004C9098;
+// Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
+// and the slot; refs[slot] >> 8 is the object address >> 2.
+extern sRefWorld** D_004A47B8;
+// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
+extern cWScriptMan* D_004A3DD8;
+// empty trailing member of a defaults record; value-init copies its byte through a stack temp
+extern "C" void func_003E6574(void*, void*, int);
+int* func_00226610(void*);
+#define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
+        vp = rec; \
+        func_003E6574(vp, defaults, size); \
+        sBindArg_1FBE38* p_ = args; \
+        for (int i_ = 0; i_ < n; i_++, p_++) { \
+            int k_ = p_->idx; \
+            int* d_ = (int*)((k_ << 2) + (int)vp); \
+            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+                *(float*)d_ = (float)p_->val; \
+            else \
+                *d_ = p_->val; \
+        } \
+    } while (0)
+#define BIND_SET_RESULT_1FBE38(ret, value) do { \
+        int r_ = (value); \
+        (ret)->type = 1; \
+        *func_00226610(ret) = r_; \
+    } while (0)
+
+struct Rec_59A0 { int head; unsigned id[8]; int cnt[8]; float f0[8]; float f1[8]; float f2[8]; float f3[8]; sBindEnd_1FBE38 f; };
+extern Rec_59A0 D_004FBD90_59A0 __asm__("D_004FBD90");
+extern const int D_004466D8_59A0[] __asm__("D_004466D8");
+extern int D_004A5858_59A0 __asm__("D_004A5858");
+static inline char *conv_59A0(unsigned i) { return i ? refToPtr_1FBE38(i) : 0; }
+extern "C" void cAvalanche_addAvalancheNode(int, void*, float, float, float, float, int);
+extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* e) {
+    if (D_004A5858_59A0 == 0) {
+        D_004FBD90_59A0.head = 0;
+        D_004FBD90_59A0.id[7] = D_004FBD90_59A0.id[6] = D_004FBD90_59A0.id[5] = D_004FBD90_59A0.id[4] = D_004FBD90_59A0.id[3] = D_004FBD90_59A0.id[2] = D_004FBD90_59A0.id[1] = D_004FBD90_59A0.id[0] = 0xFFFFFFFF;
+        D_004FBD90_59A0.cnt[7] = D_004FBD90_59A0.cnt[6] = D_004FBD90_59A0.cnt[5] = D_004FBD90_59A0.cnt[4] = D_004FBD90_59A0.cnt[3] = D_004FBD90_59A0.cnt[2] = D_004FBD90_59A0.cnt[1] = D_004FBD90_59A0.cnt[0] = 0;
+        D_004FBD90_59A0.f0[7] = D_004FBD90_59A0.f0[6] = D_004FBD90_59A0.f0[5] = D_004FBD90_59A0.f0[4] = D_004FBD90_59A0.f0[3] = D_004FBD90_59A0.f0[2] = D_004FBD90_59A0.f0[1] = D_004FBD90_59A0.f0[0] = 10.0f;
+        D_004FBD90_59A0.f1[7] = D_004FBD90_59A0.f1[6] = D_004FBD90_59A0.f1[5] = D_004FBD90_59A0.f1[4] = D_004FBD90_59A0.f1[3] = D_004FBD90_59A0.f1[2] = D_004FBD90_59A0.f1[1] = D_004FBD90_59A0.f1[0] = 0.0f;
+        D_004FBD90_59A0.f2[7] = D_004FBD90_59A0.f2[6] = D_004FBD90_59A0.f2[5] = D_004FBD90_59A0.f2[4] = D_004FBD90_59A0.f2[3] = D_004FBD90_59A0.f2[2] = D_004FBD90_59A0.f2[1] = D_004FBD90_59A0.f2[0] = 3.0f;
+        D_004FBD90_59A0.f3[7] = D_004FBD90_59A0.f3[6] = D_004FBD90_59A0.f3[5] = D_004FBD90_59A0.f3[4] = D_004FBD90_59A0.f3[3] = D_004FBD90_59A0.f3[2] = D_004FBD90_59A0.f3[1] = D_004FBD90_59A0.f3[0] = 1.0f;
+        D_004A5858_59A0 = 1;
+        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
+        D_004FBD90_59A0.f = sBindEnd_1FBE38();
+    }
+    Rec_59A0 rec;
+    Rec_59A0* vp = &rec;
+    rec.id[7] = rec.id[6] = rec.id[5] = rec.id[4] = rec.id[3] = rec.id[2] = rec.id[1] = rec.id[0] = 0xFFFFFFFF;
+    func_003E6574(vp, &D_004FBD90_59A0, 0xC8);
+    sBindArg_1FBE38* x = e;
+    for (int i = 0; i < n; i++, x++) {
+        int k = x->idx;
+        int* d = (int*)((k << 2) + (int)vp);
+        if (x->type != D_004466D8_59A0[k] && D_004466D8_59A0[k] == 2)
+            *(float*)d = (float)x->val;
+        else
+            *d = x->val;
+    }
+    int head = vp->head;
+    int* cp = vp->cnt;
+    float* f3 = vp->f3;
+    float* f2 = vp->f2;
+    float* f1 = vp->f1;
+    float* f0 = vp->f0;
+    for (int i = 0; i < 8; i++) {
+        unsigned id = vp->id[i];
+        if (id != 0xFFFFFFFF) {
+            sRefSet *s = (*D_004A47B8)->sets[id & 0xFF];
+            char *r;
+            if (!s)
+                r = 0;
+            else {
+                unsigned j = s->refs[id >> 8] >> 8;
+                r = conv_59A0(j);
+            }
+            cAvalanche_addAvalancheNode(head, r, *f0, *f1, *f2, *f3, *cp);
+        }
+        cp++; f3++; f2++; f1++; f0++;
+    }
+    return D_004C9098;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00305C88);
@@ -6333,7 +6969,86 @@ extern "C" V3_5F40 func_00305F40(int n, Ent_5F40 *e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1FBE38", func_003061B0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern cLunoValue D_004C9098;
+// Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
+// and the slot; refs[slot] >> 8 is the object address >> 2.
+extern sRefWorld** D_004A47B8;
+// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
+extern cWScriptMan* D_004A3DD8;
+// empty trailing member of a defaults record; value-init copies its byte through a stack temp
+extern "C" void func_003E6574(void*, void*, int);
+int* func_00226610(void*);
+#define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
+        vp = rec; \
+        func_003E6574(vp, defaults, size); \
+        sBindArg_1FBE38* p_ = args; \
+        for (int i_ = 0; i_ < n; i_++, p_++) { \
+            int k_ = p_->idx; \
+            int* d_ = (int*)((k_ << 2) + (int)vp); \
+            if (p_->type != (types)[k_] && (types)[k_] == 2) \
+                *(float*)d_ = (float)p_->val; \
+            else \
+                *d_ = p_->val; \
+        } \
+    } while (0)
+#define BIND_SET_RESULT_1FBE38(ret, value) do { \
+        int r_ = (value); \
+        (ret)->type = 1; \
+        *func_00226610(ret) = r_; \
+    } while (0)
+
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+
+extern int D_004A3DA8_61B0[2] __asm__("D_004A3DA8");
+extern int D_005308D0_61B0[] __asm__("D_005308D0");
+extern int D_004A5888_61B0 __asm__("D_004A5888");
+extern int D_004A5880_61B0 __asm__("D_004A5880");
+extern sBindEnd_1FBE38 D_004A5884_61B0 __asm__("D_004A5884");
+extern "C" cLunoValue* func_003061B0(cLunoValue* ret, int n, sBindArg_1FBE38 *e) {
+    if (D_004A5888_61B0 == 0) {
+        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
+        D_004A5880_61B0 = 0;
+        D_004A5884_61B0 = sBindEnd_1FBE38();
+        D_004A5888_61B0 = 1;
+    }
+    int v[4];
+    int *vp;
+    BIND_UNPACK_ARGS_1FBE38(vp, v, &D_004A5880_61B0, 8, D_004A3DA8_61B0, n, e);
+    int r;
+    switch (vp[0]) {
+    case 0: {
+        int flags = D_005308D0_61B0[0] >> 6;
+        r = 0;
+        if ((flags & 1) == 0)
+            r++;
+        break;
+    }
+    case 1: {
+        int flags = D_005308D0_61B0[0] >> 8;
+        r = 0;
+        if ((flags & 1) == 0)
+            r++;
+        break;
+    }
+    case 2: {
+        int flags = D_005308D0_61B0[0] >> 7;
+        r = 0;
+        if ((flags & 1) == 0)
+            r++;
+        break;
+    }
+    default:
+        r = 1;
+        break;
+    }
+    BIND_SET_RESULT_1FBE38(ret, r);
+    return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00306300);
