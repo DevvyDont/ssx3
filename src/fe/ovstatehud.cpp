@@ -316,7 +316,182 @@ extern "C" void func_001E9540(void* self, unsigned short* str, int a2, sVec2f* p
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatehud", func_001E95A0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_00391E30_95A0(void* self, float x, float y, void* m) __asm__("func_00391E30");
+extern char* D_004A289C;
+
+struct sCol_E95A0 {
+    float a, r, g, b;
+};
+
+struct sSize_E95A0 {
+    float x, y;
+};
+
+struct sFont_E95A0 {
+    char pad[0x30];
+    float baseW;            // 0x30
+    float baseH;            // 0x34
+    float scaleW;           // 0x38
+    float scaleH;           // 0x3C
+    sCol_E95A0 color;       // 0x40
+    sCol_E95A0 shadow;      // 0x50
+};
+
+struct sHudEntry_E95A0 {
+    float w;
+    void* p;
+};
+
+struct sHudImg_E95A0 {
+    int f0;
+    int f4;
+    int tex;                // 0x08
+    float w;                // 0x0C
+    float h;                // 0x10
+    float u0;               // 0x14
+    float v0;               // 0x18
+    float u1;               // 0x1C
+    float v1;               // 0x20
+};
+
+struct sHudLine_E95A0 {
+    float w;                // 0x00
+    float h;                // 0x04
+    sFont_E95A0* font;      // 0x08
+    float lineH;            // 0x0C
+    float sx;               // 0x10
+    float sy;               // 0x14
+    int count;              // 0x18
+    sHudEntry_E95A0 entries[1]; // 0x1C
+};
+
+struct sPos_E95A0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sHudVert_E95A0 {
+    float u, v, q, f0C;     // 0x00
+    int r, g, b, a;         // 0x10
+    sPos_E95A0 pos;         // 0x20
+    sHudVert_E95A0() {}
+};
+
+static inline int texOf_E95A0(sHudImg_E95A0* i) { return i->tex; }
+
+struct sVEnt_E95A0 { short delta; short index; void (*fn)(void*, int, sHudVert_E95A0*, int); };
+
+static inline void setScale_E95A0(sFont_E95A0* f, const sSize_E95A0& s)
+{
+    f->scaleW = f->baseW * s.x;
+    f->scaleH = f->baseH * s.y;
+}
+
+extern "C" void func_001E95A0(sHudLine_E95A0* self, float* pos, float* scale, sCol_E95A0* color, int alignX, int alignY)
+{
+    if (self->count == 0) {
+        return;
+    }
+    float alpha = color->a;
+    sCol_E95A0 saved = self->font->shadow;
+    sCol_E95A0 shadow = saved;
+    sSize_E95A0 sz;
+    float sx0 = scale[0];
+    sz.x = self->sx * sx0;
+    sz.y = self->sy * scale[1];
+    shadow.a *= alpha;
+    setScale_E95A0(self->font, sz);
+    self->font->color = *color;
+    self->font->shadow = shadow;
+    if (alignX == 0) {
+        float s = scale[0];
+        pos[0] -= self->w * s * 0.5f;
+    } else if (alignX > 0) {
+        float s = scale[0];
+        pos[0] -= self->w * s;
+    }
+    if (alignY == 0) {
+        float s = scale[1];
+        pos[1] -= self->h * s * 0.5f;
+    } else if (alignY > 0) {
+        float s = scale[1];
+        pos[1] -= self->h * s;
+    }
+    float lineOff = self->lineH * scale[1];
+    float yc = pos[1] + self->h * scale[1] * 0.5f;
+    sHudVert_E95A0 v[4];
+    for (int i = 0; i < 4; i++) {
+        v[i].a = (int)(color->a * 128.0f);
+        v[i].r = (int)(color->r * 128.0f);
+        v[i].g = (int)(color->g * 128.0f);
+        v[i].b = (int)(color->b * 128.0f);
+        v[i].q = 1.0f;
+    }
+    sHudEntry_E95A0* e = self->entries;
+    for (int i = 0; i < self->count; i++, e++) {
+        if (!(i & 1)) {
+            unsigned short* str = (unsigned short*)e->p;
+            if (*str != 0) {
+                func_00391E30_95A0(self->font, pos[0], pos[1] + lineOff, str);
+                float sx = scale[0];
+                pos[0] += e->w * sx;
+            }
+        } else {
+            sHudImg_E95A0* img = (sHudImg_E95A0*)e->p;
+            sSize_E95A0 wh;
+            float w = img->w * scale[0];
+            float h = img->h * scale[1];
+            wh.x = w;
+            wh.y = h;
+            float x0 = pos[0];
+            float x1 = x0 + wh.x;
+            float y0 = yc - wh.y * 0.5f;
+            float y1 = y0 + wh.y;
+            v[0].u = img->u0;
+            v[0].v = img->v0;
+            v[1].u = img->u1;
+            v[1].v = img->v0;
+            v[2].u = img->u0;
+            v[2].v = img->v1;
+            v[3].u = img->u1;
+            v[3].v = img->v1;
+            sPos_E95A0 p;
+            p.x = x0;
+            p.y = y0;
+            p.z = 0.0f;
+            p.w = 1.0f;
+            v[0].pos = p;
+            p.x = x1;
+            p.y = y0;
+            p.z = 0.0f;
+            p.w = 1.0f;
+            v[1].pos = p;
+            p.x = x0;
+            p.y = y1;
+            p.z = 0.0f;
+            p.w = 1.0f;
+            v[2].pos = p;
+            p.x = x1;
+            p.y = y1;
+            p.z = 0.0f;
+            p.w = 1.0f;
+            v[3].pos = p;
+            *(short*)(*(char**)(D_004A289C + 0xE84) + 0x10) = texOf_E95A0(img);
+            sVEnt_E95A0* vt = *(sVEnt_E95A0**)(D_004A289C + 0x10D8);
+            vt[71].fn(D_004A289C + vt[71].delta, 4, v, 0);
+            pos[0] += wh.x;
+        }
+    }
+    self->font->shadow = saved;
+    sSize_E95A0 one;
+    one.x = 1.0f;
+    one.y = 1.0f;
+    setScale_E95A0(self->font, one);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E9A30);
