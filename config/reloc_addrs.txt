@@ -592,3 +592,14 @@ rom:0x2DF750 reloc:MIPS_LO16 symbol:D_00519AB0 addend:0x14
 // ealib/seg_2DCAE8 func_003E95C8 (tools/gen/reloc_from_diff.py)
 rom:0x2EB60C reloc:MIPS_HI16 symbol:D_004A49F0
 rom:0x2EB668 reloc:MIPS_HI16 symbol:D_004A49F0
+
+// ealib/seg_2B4578: D_0050B980 is D_0050AD00+0xC80, an inner address of the driver state (our C builds it as
+// &D_0050AD00 + 0xC80; func_003C0B10 has its own lui for it). Splat named it from these two functions' uses only.
+rom:0x2C1B50 reloc:MIPS_HI16 symbol:D_0050AD00 addend:0xC80
+rom:0x2C1B68 reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xC80
+rom:0x2C1B8C reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xC80
+rom:0x2C30D4 reloc:MIPS_HI16 symbol:D_0050AD00 addend:0xC80
+rom:0x2C30D8 reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xC80
+// func_003C38E0: D_0050AB22 is D_0050AB20+0x2 (its only use).
+rom:0x2C4D7C reloc:MIPS_HI16 symbol:D_0050AB20 addend:0x2
+rom:0x2C4D88 reloc:MIPS_LO16 symbol:D_0050AB20 addend:0x2
