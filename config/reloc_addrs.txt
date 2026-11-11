@@ -571,3 +571,13 @@ rom:0xDD7A4 reloc:MIPS_LO16 symbol:D_004C67F8
 rom:0xDD814 reloc:MIPS_LO16 symbol:D_004C67F8
 rom:0xDD828 reloc:MIPS_LO16 symbol:D_004C6818
 rom:0xDD83C reloc:MIPS_LO16 symbol:D_004C6818
+
+// ai/rider func_00125EB8: two vtable addresses built as raw lui/addiu pairs split by spills (the same vtables
+// func_00142A50 references with relocations): 0x460000-0x78C8 = D_00458738, 0x460000-0x7880 = D_00458780.
+rom:0x26F0C reloc:MIPS_HI16 symbol:D_00458738
+rom:0x26F14 reloc:MIPS_HI16 symbol:D_00458780
+rom:0x270EC reloc:MIPS_LO16 symbol:D_00458738
+rom:0x27134 reloc:MIPS_LO16 symbol:D_00458780
+rom:0x271E8 reloc:MIPS_LO16 symbol:D_00458738
+rom:0x271EC reloc:MIPS_LO16 symbol:D_00458780
+rom:0x27250 reloc:MIPS_LO16 symbol:D_00458780
