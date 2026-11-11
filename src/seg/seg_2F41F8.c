@@ -1004,7 +1004,140 @@ int func_003F4F40(void) {
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_2F41F8", func_003F5000);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+/* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
+   back with the same key; c[] holds the completion callback (fn 0 = none, 1 = store f14 and wake th). */
+extern struct sSifQueue D_0051F0C0;
+
+extern int D_004A4BB0;
+extern char D_00523F00[];   /* the queue thread's stack (0x2000 bytes) */
+extern int _gp;   /* the linker-script $gp value (0x4A30F0, D_004A30F0); gas never addresses _gp off $gp */
+
+/* What func_003F5000 DMAs to the IOP buffer's first 0x40 bytes: per region, its IOP start / end and EE address. */
+struct sSifHdr_5000 { int f0; int f4; int v[14]; };
+struct sSemaParam_5000 { int count; int max_count; int init_count; int wait_threads; unsigned int attr; unsigned int option; };
+struct sThreadParam_5000 { int status; void (*func)(void); void *stack; int stackSize; void *gpReg; int initPriority; int currentPriority; unsigned int attr; unsigned int option; };
+
+extern void f5000_6210(void *, int, int) __asm__("func_00416210");
+/* func_004261B0 (sceSifSendCmd) returns its packet id; the unit declares it void. */
+extern int f5000_61B0(int, void *, int, int, int, int) __asm__("func_004261B0");
+extern int func_0042ABA0(int);
+extern int func_00424140(int);
+extern void func_00425D38(void);
+extern int func_00423DA0(struct sSemaParam_5000 *);
+extern int func_00423BA0(struct sThreadParam_5000 *);
+extern int func_00423A90(int, void (*)(void), int, void *);
+extern int func_004248E8(int);
+extern void func_00423BC0(int, void *);
+extern void func_003F4410(void);
+
+int func_003F5000(void) {
+    struct sSifQueue *g = &D_0051F0C0;
+    struct sSifHdr_5000 hdr;
+    struct sSifDma_4528 dma;
+    struct sSemaParam_5000 sema;
+    struct sThreadParam_5000 tp;
+    int iop;
+    int size;
+    int id;
+
+    if (func_003F4F40() == 0) return -1;
+    f5000_6210(g, 0, 0x4E40);
+    *(int *)&g->buf[0x4D80] = 0x10;
+    *(int *)&g->buf[0x4D84] = 0x7FFFFFFF;
+    g->beg = (struct sSifEnt *)(((int)&g->buf[0] & 0xFFFFFFF) | 0x20000000);
+    g->end = (struct sSifEnt *)(((int)&g->buf[0x800] & 0xFFFFFFF) | 0x20000000);
+    g->a = (struct sSifReq *)(((int)&g->buf[0x800] & 0xFFFFFFF) | 0x20000000);
+    g->pad4D98[0] = ((int)&g->buf[0xA00] & 0xFFFFFFF) | 0x20000000;
+    g->b = (struct sSifRes *)(((int)&g->buf[0xA00] & 0xFFFFFFF) | 0x20000000);
+    g->pad4DA4[0] = ((int)&g->buf[0xC00] & 0xFFFFFFF) | 0x20000000;
+    g->base2 = ((int)&g->buf[0xC00] & 0xFFFFFFF) | 0x20000000;
+    g->pad4DB0 = ((int)&g->buf[0x4C00] & 0xFFFFFFF) | 0x20000000;
+    g->pad4DB8[0] = (int)&g->buf[0x4C00];
+    g->pad4DB8[1] = (int)&g->buf[0x4C40];
+    g->c = (struct sSifCb *)&g->buf[0x4C40];
+    g->pad4DC8[0] = (int)&g->buf[0x4D40];
+    size = 0x40;
+    size += (g->end - g->beg) * sizeof(struct sSifEnt);
+    size += ((struct sSifReq *)g->pad4D98[0] - g->a) * sizeof(struct sSifReq);
+    size += ((struct sSifRes *)g->pad4DA4[0] - g->b) * sizeof(struct sSifRes);
+    size += g->pad4DB0 - g->base2;
+    size += ((int *)g->pad4DB8[1] - (int *)g->pad4DB8[0]) * sizeof(int);
+    g->pad4DB8[2] = func_0042ABA0(size);
+    if (g->pad4DB8[2] == 0) return -2;
+    iop = (g->pad4DB8[2] & 0xFFFFFFF) | 0xA0000000;
+    g->pad4DB8[2] = iop;
+    hdr.f0 = *(int *)&g->buf[0x4D80];
+    hdr.f4 = *(int *)&g->buf[0x4D84];
+    hdr.v[0] = iop + 0x40;
+    hdr.v[1] = hdr.v[0] + (g->end - g->beg) * sizeof(struct sSifEnt);
+    hdr.v[2] = (int)g->beg;
+    hdr.v[3] = hdr.v[1];
+    hdr.v[4] = hdr.v[3] + ((struct sSifReq *)g->pad4D98[0] - g->a) * sizeof(struct sSifReq);
+    hdr.v[5] = (int)g->a;
+    hdr.v[6] = hdr.v[4];
+    hdr.v[7] = hdr.v[6] + ((struct sSifRes *)g->pad4DA4[0] - g->b) * sizeof(struct sSifRes);
+    hdr.v[8] = (int)g->b;
+    hdr.v[9] = hdr.v[7];
+    hdr.v[10] = hdr.v[9] + (g->pad4DB0 - g->base2);
+    hdr.v[11] = g->base2;
+    hdr.v[12] = hdr.v[10];
+    hdr.v[13] = hdr.v[12] + ((int *)g->pad4DB8[1] - (int *)g->pad4DB8[0]) * sizeof(int);
+    g->pad4D90 = hdr.v[0];
+    g->pad4D98[1] = hdr.v[3];
+    g->pad4DA4[1] = hdr.v[6];
+    g->base1 = hdr.v[9];
+    func_00424020(0);
+    dma.data = (int)&hdr;
+    dma.addr = g->pad4DB8[2];
+    dma.size = 0x40;
+    dma.mode = 0;
+    id = func_00424160(&dma, 1);
+    if (id == 0) return -3;
+    while (func_00424140(id) >= 0) {
+    }
+    dma.data = (int)g->a;
+    dma.addr = g->pad4D98[1];
+    dma.size = 0x200;
+    dma.mode = 0;
+    id = func_00424160(&dma, 1);
+    if (id == 0) return -4;
+    while (func_00424140(id) >= 0) {
+    }
+    func_00425D38();
+    D_00451340.w = g->pad4DB8[2];
+    func_00424020(0);
+    f5000_61B0(1, &D_00451340, D_00451340.b, 0, 0, 0);
+    g->pad4DC8[1] = 1;
+    g->cnt = ((struct sSifReq *)g->pad4D98[0] - g->a);
+    g->tail = 1;
+    g->head = 1;
+    g->pad4DE4 = g->pad4DB0 - g->base2;
+    f5000_6210(&sema, 0, sizeof(sema));
+    sema.init_count = 1;
+    sema.max_count = 1;
+    sema.option = 0;
+    g->sema = func_00423DA0(&sema);
+    g->h4DEC = -1;
+    g->h4DF0 = -1;
+    tp.func = func_003F44F8;
+    tp.initPriority = 0xA;
+    tp.stack = D_00523F00;
+    tp.stackSize = 0x2000;
+    tp.gpReg = &_gp;
+    tp.option = 0;
+    g->h4DE8 = func_00423BA0(&tp);
+    if (g->h4DE8 <= 0) return -5;
+    g->h4DF4 = func_00423A90(2, func_003F4410, -1, g);
+    func_004248E8(2);
+    func_00423BC0(g->h4DE8, g);
+    D_004A4BB0 = 1;
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F53F8);
