@@ -17243,7 +17243,33 @@ int func_003D5290(unsigned arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D5330);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// D_00517610: an array of 0x928-byte records (the unit's other views read f30/f34 too).
+struct E_5330 { char pad00[0x30]; unsigned int f30; int f34; char pad38[0x20]; int w[24]; char padB8[0x928 - 0xB8]; };
+extern struct E_5330 D_00517610_5330[] __asm__("D_00517610");
+
+int func_003D5330(unsigned int mask) {
+    int n = 0;
+    int i;
+    int j;
+    for (i = 0; i < 4; i++) {
+        if (mask & (0x1000000 << i)) {
+            if (D_00517610_5330[i].f34 != 0) {
+                for (j = 0; j < 24; j++) {
+                    if (D_00517610_5330[i].w[j] != 0) {
+                        n++;
+                    }
+                }
+            }
+        }
+    }
+    return n;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003D53B8);
