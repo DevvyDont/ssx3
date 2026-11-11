@@ -447,7 +447,271 @@ extern "C" void func_003475A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexbridgenode", func_003475D8);
+#ifdef SKIP_ASM
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void* func_002D1BE0();
+// PORT: the unit declares func_003291E0 with sBox00348058 (defined later); bound by asm label.
+extern "C" void func_003291E0_75D8(void* world, int type, int id, void* box, void* old) __asm__("func_003291E0");
+
+struct sV4_75D8 {
+    float x, y, z, w;
+    float X() const { return x; }
+    float Y() const { return y; }
+    float Z() const { return z; }
+} __attribute__((aligned(16)));
+
+struct sV3_75D8 {
+    float x, y, z;
+    sV3_75D8() {}
+    sV3_75D8& operator=(const sV4_75D8& v)
+    {
+        x = v.x;
+        y = v.y;
+        z = v.z;
+        return *this;
+    }
+};
+
+struct sMat_75D8 {
+    sV4_75D8 row[4];
+};
+
+struct sBox_75D8 {
+    sV4_75D8 min;
+    sV4_75D8 max;
+};
+
+struct sVE_75D8 {
+    short delta;
+    short index;
+    void* (*fn)(...);
+};
+
+struct sFlexNode_75D8 {
+    sV4_75D8 pos;           // 0x00
+    char pad_0x10[0x10];
+    float angle;            // 0x20
+    char pad_0x24[0x50 - 0x24];
+};
+
+struct sVEV_75D8 {
+    short delta;
+    short index;
+    void (*fn)(...);
+};
+
+struct sFlexMesh_75D8 {
+    char pad_0x00[0x4];
+    sVEV_75D8* vt;          // 0x04
+};
+
+struct sFlexBridge_75D8 {
+    char pad_0x00[0xC];
+    sVE_75D8* vt;           // 0x0C
+    char pad_0x10[0x8];
+    int def;                // 0x18
+    char pad_0x1C[0x4];
+    sV4_75D8 side;          // 0x20
+    sV4_75D8 up;            // 0x30
+    char pad_0x40[0x10];
+    int count;              // 0x50
+    char pad_0x54[0x74 - 0x54];
+    sFlexNode_75D8* nodes;  // 0x74
+    sFlexMesh_75D8* mesh;   // 0x78
+    sV4_75D8* pts;          // 0x7C
+    sV4_75D8* normals;      // 0x80
+    char pad_0x84[0x90 - 0x84];
+    sBox_75D8 box;          // 0x90
+};
+
+extern sV4_75D8 D_004FF160;
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_75D8(const sV4_75D8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sV4_75D8 Scale_75D8(const sV4_75D8& v, float s)
+{
+    sV4_75D8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sV4_75D8 Add_75D8(const sV4_75D8& a, const sV4_75D8& b)
+{
+    sV4_75D8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sV4_75D8 Sub_75D8(const sV4_75D8& a, const sV4_75D8& b)
+{
+    sV4_75D8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sV4_75D8 Cross_75D8(const sV4_75D8& a, const sV4_75D8& b)
+{
+    sV4_75D8 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sV4_75D8 Normalize_75D8(const sV4_75D8& v)
+{
+    sV4_75D8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
+static inline sV4_75D8 MulMat_75D8(const sMat_75D8* m, const sV4_75D8& v)
+{
+    sV4_75D8 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+// Re-poses the bridge strip from its nodes: two rows of points (node pos +/- the rotated
+// side/up offsets), per-triangle normals, the transformed bounding box and the mesh update.
+extern "C" void func_003475D8(void* vself)
+{
+    sFlexBridge_75D8* self = (sFlexBridge_75D8*)vself;
+    int n = self->count;
+    sV4_75D8 a = Scale_75D8(D_004FF160, Length_75D8(self->up));
+    sV4_75D8 b = Scale_75D8(D_004FF160, Length_75D8(self->side));
+    int nverts = n * 2;
+    int ntris = (n - 1) * 2;
+    sFlexNode_75D8* node = self->nodes;
+    int i;
+    for (i = 0; i < n; i++) {
+        float s, c;
+        func_0031BE50(&s, &c, node->angle);
+        self->pts[i] = Add_75D8(Add_75D8(node->pos, Scale_75D8(self->up, c)), Scale_75D8(a, s));
+        self->pts[n + i] = Sub_75D8(Add_75D8(node->pos, Scale_75D8(self->side, c)), Scale_75D8(b, s));
+        node++;
+    }
+    int k;
+    int j = 0;
+    for (k = 0; k < ntris; k += 2) {
+        self->normals[k] = Normalize_75D8(Cross_75D8(Sub_75D8(self->pts[n + j + 1], self->pts[j]), Sub_75D8(self->pts[n + j], self->pts[j])));
+        self->normals[k + 1] = Normalize_75D8(Cross_75D8(Sub_75D8(self->pts[j + 1], self->pts[j]), Sub_75D8(self->pts[n + j + 1], self->pts[j])));
+        j++;
+    }
+    sBox_75D8* box = &self->box;
+    sV3_75D8 pos[32];
+    float minX = 1e10f, minY = 1e10f, minZ = 1e10f;
+    float maxX = -1e10f, maxY = -1e10f, maxZ = -1e10f;
+    sMat_75D8* m = (sMat_75D8*)self->vt[24].fn((char*)self + self->vt[24].delta);
+    for (int v = 0; v < nverts; v++) {
+        pos[v] = self->pts[v];
+        sV4_75D8 w = MulMat_75D8(m, self->pts[v]);
+        minX = w.X() < minX ? w.X() : minX;
+        maxX = maxX < w.X() ? w.X() : maxX;
+        minY = w.Y() < minY ? w.Y() : minY;
+        maxY = maxY < w.Y() ? w.Y() : maxY;
+        minZ = w.Z() < minZ ? w.Z() : minZ;
+        maxZ = maxZ < w.Z() ? w.Z() : maxZ;
+    }
+    sBox_75D8 old = self->box;
+    sV4_75D8 e;
+    e.x = minX;
+    e.y = minY;
+    e.z = minZ;
+    e.w = 1.0f;
+    self->box.min = e;
+    e.x = maxX;
+    e.y = maxY;
+    e.z = maxZ;
+    self->box.max = e;
+    int id = self->def;
+    func_003291E0_75D8(func_002D1BE0(), 0, id, box, &old);
+    self->mesh->vt[3].fn((char*)self->mesh + self->mesh->vt[3].delta, pos);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexbridgenode", func_00347B80);
