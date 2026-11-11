@@ -541,7 +541,10 @@ segments:
       - [0x2fddc8, c, seg/seg_2FDDC8]   # 0x3FCDC8: SN 2.95.3 (sq register saves)
       - [0x2fe810, asm]                 # 0x3FD810-0x42E020: ee-gcc 2.9 SDK area, libgcc/libstdc++, newlib, syscall stubs
       - [0x32f020, c, seg/seg_32F020]   # 0x42E020: SN 2.95.3, -G0
-      
+      # 0x42E588: two zero words of alignment padding (the VU microcode below starts 16-byte aligned), not code.
+      # As a pad the linker fills them, so func_0042E508 can be C without fake nops.
+      - [0x32f588, pad]
+
       # --- .vutext
       - [0x32f590, textbin, vutext]
 
