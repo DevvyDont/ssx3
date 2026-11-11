@@ -964,3 +964,14 @@ D_004A4EA8 = 0x004A4EA8; // size:0x8
 D_004A2ED8 = 0x004A2ED8; // size:0x8
 // visualfx/avalanche: debug line vertices, 0x20 each (func_002D6410, func_002D8EA8); D_004EDB90 was element 1.
 D_004EDB70 = 0x004EDB70; // size:0xC00
+// fe/ovstatetrophy: two tables whose entries splat named separately (func_0020EDA0 / func_0020FB40 index them;
+// D_004C8BD0 / D_004C8BD8 and D_004C8C98 / D_004C8CA8 were inside). Sizes from big14_2 (2026-10-24) and peak3's fork.
+D_004C8BC8 = 0x004C8BC8; // size:0x90
+D_004C8C58 = 0x004C8C58; // size:0xB0
+// seg/seg_1DCD10: gFXShape, 12-byte { char Name[8]; int tex; } entries (func_002DBD10); the +8 field reference is
+// D_004891B0 + 0x8, not a separate symbol (size from peak3's fork, 2026-11-10).
+D_004891B0 = 0x004891B0; // size:0x3CC
+// ealib/seg_2DCAE8 func_003E6878: +0x20 / +0x140 offsets added to a 0x20000000 (uncached) pointer in copy loops, not
+// addresses (as in peak3's fork).
+D_20000020 = 0x20000020; // ignore:true
+D_20000140 = 0x20000140; // ignore:true

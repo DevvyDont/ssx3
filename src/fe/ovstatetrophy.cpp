@@ -167,7 +167,8 @@ INCLUDE_ASM("fe/ovstatetrophy", func_0020EC18);
 #ifdef SKIP_ASM
 extern int D_004A2764;
 extern int D_004A2768;
-extern float D_004C8CA0[];
+// D_004C8C58 is the 11-entry texture table (size 0xB0); this float sits at +0x48 inside it.
+extern float D_004C8C58_f[] __asm__("D_004C8C58");
 
 struct sVec2_20EC18 {
     float x, y;
@@ -195,7 +196,7 @@ extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r)
     } else {
         h = 30.0f;
     }
-    float m = D_004C8CA0[0];
+    float m = D_004C8C58_f[0x48 / 4];
     ((sTrophyBox_20EC18*)self)->pos = sVec2_20EC18(r->x + r->w * 0.5f, (r->y + r->h) - h);
     ((sTrophyBox_20EC18*)self)->top = r->y;
     ((sTrophyBox_20EC18*)self)->bottom = r->y + r->h - h - m;
