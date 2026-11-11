@@ -4148,11 +4148,69 @@ extern "C" int func_00140D78(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D80);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor00140D80::~cVbDtor00140D80()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00140D80; expose it under the address-derived name.
+__asm__(".globl func_00140D80\n.type func_00140D80,@function\nfunc_00140D80 = _$_15cVbDtor00140D80\n.size func_00140D80,0x15C\n");
+
+// PORT: cRiderVb_hpc's dtor is cRider's (func_0011B978).
+__asm__("_$_12cRiderVb_hpc = func_0011B978\n");
+
+// PORT: cRiderVbB0_hpc's vtable is not emitted here (key function b01 elsewhere): retail D_00459B90.
+__asm__("_vt$14cRiderVbB0_hpc = D_00459B90\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00140D80$13cRiderVbC_hpc = D_00459A98\n"
+        "_vt$15cVbDtor00140D80$12cRiderVb_hpc = D_00459AE0\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140EE0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor00140EE0::~cVbDtor00140EE0()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00140EE0; expose it under the address-derived name.
+__asm__(".globl func_00140EE0\n.type func_00140EE0,@function\nfunc_00140EE0 = _$_15cVbDtor00140EE0\n.size func_00140EE0,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00140EE0$13cRiderVbC_hpc = D_004599A0\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor00140EE0$12cRiderVb_hpc = D_004599E8\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00141040);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
+
+cVbDtor00141040::~cVbDtor00141040()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00141040; expose it under the address-derived name.
+__asm__(".globl func_00141040\n.type func_00141040,@function\nfunc_00141040 = _$_15cVbDtor00141040\n.size func_00141040,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00141040$13cRiderVbC_hpc = D_004598A8\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor00141040$12cRiderVb_hpc = D_004598F0\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001411A0);
@@ -4183,9 +4241,45 @@ extern "C" int func_001411B8(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001411C0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cHandPlant11C0::~cHandPlant11C0()
+{
+}
+
+// PORT: the compiler names this dtor _$_14cHandPlant11C0; expose it under the address-derived name.
+__asm__(".globl func_001411C0\n.type func_001411C0,@function\nfunc_001411C0 = _$_14cHandPlant11C0\n.size func_001411C0,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$14cHandPlant11C0$13cRiderVbC_hpc = D_004596B8\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$14cHandPlant11C0$12cRiderVb_hpc = D_00459700\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00141320);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
+
+cVbDtor00141320::~cVbDtor00141320()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00141320; expose it under the address-derived name.
+__asm__(".globl func_00141320\n.type func_00141320,@function\nfunc_00141320 = _$_15cVbDtor00141320\n.size func_00141320,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00141320$13cRiderVbC_hpc = D_004595C0\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor00141320$12cRiderVb_hpc = D_00459608\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00141480);
@@ -4229,25 +4323,205 @@ extern "C" void* func_00141480(void* self, int inChrg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001415C8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor001415C8::~cVbDtor001415C8()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor001415C8; expose it under the address-derived name.
+__asm__(".globl func_001415C8\n.type func_001415C8,@function\nfunc_001415C8 = _$_15cVbDtor001415C8\n.size func_001415C8,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor001415C8$13cRiderVbC_hpc = D_004594C8\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor001415C8$12cRiderVb_hpc = D_00459510\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00141728);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor00141728::~cVbDtor00141728()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00141728; expose it under the address-derived name.
+__asm__(".globl func_00141728\n.type func_00141728,@function\nfunc_00141728 = _$_15cVbDtor00141728\n.size func_00141728,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00141728$13cRiderVbC_hpc = D_004593D0\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor00141728$12cRiderVb_hpc = D_00459418\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00141888);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor00141888::~cVbDtor00141888()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00141888; expose it under the address-derived name.
+__asm__(".globl func_00141888\n.type func_00141888,@function\nfunc_00141888 = _$_15cVbDtor00141888\n.size func_00141888,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00141888$13cRiderVbC_hpc = D_004592D8\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor00141888$12cRiderVb_hpc = D_00459320\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001419E8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor001419E8::~cVbDtor001419E8()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor001419E8; expose it under the address-derived name.
+__asm__(".globl func_001419E8\n.type func_001419E8,@function\nfunc_001419E8 = _$_15cVbDtor001419E8\n.size func_001419E8,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor001419E8$13cRiderVbC_hpc = D_004591E0\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor001419E8$12cRiderVb_hpc = D_00459228\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00141B48);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor00141B48::~cVbDtor00141B48()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00141B48; expose it under the address-derived name.
+__asm__(".globl func_00141B48\n.type func_00141B48,@function\nfunc_00141B48 = _$_15cVbDtor00141B48\n.size func_00141B48,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00141B48$13cRiderVbC_hpc = D_004590E8\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor00141B48$12cRiderVb_hpc = D_00459130\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00141CA8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor00141CA8::~cVbDtor00141CA8()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00141CA8; expose it under the address-derived name.
+__asm__(".globl func_00141CA8\n.type func_00141CA8,@function\nfunc_00141CA8 = _$_15cVbDtor00141CA8\n.size func_00141CA8,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00141CA8$13cRiderVbC_hpc = D_00458FF0\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor00141CA8$12cRiderVb_hpc = D_00459038\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00141E08);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor00141E08::~cVbDtor00141E08()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00141E08; expose it under the address-derived name.
+__asm__(".globl func_00141E08\n.type func_00141E08,@function\nfunc_00141E08 = _$_15cVbDtor00141E08\n.size func_00141E08,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00141E08$13cRiderVbC_hpc = D_00458EF8\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor00141E08$12cRiderVb_hpc = D_00458F40\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00141F68);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor00141F68::~cVbDtor00141F68()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00141F68; expose it under the address-derived name.
+__asm__(".globl func_00141F68\n.type func_00141F68,@function\nfunc_00141F68 = _$_15cVbDtor00141F68\n.size func_00141F68,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00141F68$13cRiderVbC_hpc = D_00458E00\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor00141F68$12cRiderVb_hpc = D_00458E48\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001420C8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor001420C8::~cVbDtor001420C8()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor001420C8; expose it under the address-derived name.
+__asm__(".globl func_001420C8\n.type func_001420C8,@function\nfunc_001420C8 = _$_15cVbDtor001420C8\n.size func_001420C8,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor001420C8$13cRiderVbC_hpc = D_00458D08\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor001420C8$12cRiderVb_hpc = D_00458D50\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00142228);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
+
+cVbDtor00142228::~cVbDtor00142228()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00142228; expose it under the address-derived name.
+__asm__(".globl func_00142228\n.type func_00142228,@function\nfunc_00142228 = _$_15cVbDtor00142228\n.size func_00142228,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00142228$13cRiderVbC_hpc = D_00458C10\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor00142228$12cRiderVb_hpc = D_00458C58\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00142388);
@@ -4291,15 +4565,156 @@ extern "C" void* func_00142388(void* self, int inChrg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001424D0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor001424D0::~cVbDtor001424D0()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor001424D0; expose it under the address-derived name.
+__asm__(".globl func_001424D0\n.type func_001424D0,@function\nfunc_001424D0 = _$_15cVbDtor001424D0\n.size func_001424D0,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor001424D0$13cRiderVbC_hpc = D_00458B18\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor001424D0$12cRiderVb_hpc = D_00458B60\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00142630);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor00142630::~cVbDtor00142630()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00142630; expose it under the address-derived name.
+__asm__(".globl func_00142630\n.type func_00142630,@function\nfunc_00142630 = _$_15cVbDtor00142630\n.size func_00142630,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00142630$13cRiderVbC_hpc = D_00458A20\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor00142630$12cRiderVb_hpc = D_00458A68\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00142790);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor00142790::~cVbDtor00142790()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00142790; expose it under the address-derived name.
+__asm__(".globl func_00142790\n.type func_00142790,@function\nfunc_00142790 = _$_15cVbDtor00142790\n.size func_00142790,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00142790$13cRiderVbC_hpc = D_00458928\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor00142790$12cRiderVb_hpc = D_00458970\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001428F0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
 
+cVbDtor001428F0::~cVbDtor001428F0()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor001428F0; expose it under the address-derived name.
+__asm__(".globl func_001428F0\n.type func_001428F0,@function\nfunc_001428F0 = _$_15cVbDtor001428F0\n.size func_001428F0,0x15C\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor001428F0$13cRiderVbC_hpc = D_00458830\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$15cVbDtor001428F0$12cRiderVb_hpc = D_00458878\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
+
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00142A50);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
+
+cVbDtor00142A50::~cVbDtor00142A50()
+{
+}
+
+// PORT: the compiler names this dtor _$_15cVbDtor00142A50; expose it under the address-derived name.
+__asm__(".globl func_00142A50\n.type func_00142A50,@function\nfunc_00142A50 = _$_15cVbDtor00142A50\n.size func_00142A50,0x15A0\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$15cVbDtor00142A50 = D_00458710\n"
+        "_vt$15cVbDtor00142A50$13cRiderVbC_hpc = D_00458738\n"
+        "_vt$15cVbDtor00142A50$12cRiderVb_hpc = D_00458780\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_$_15cVbDtor002F6388 = func_002F6388\n"
+        "_$_15cVbDtor002F0FE8 = func_002F0FE8\n"
+        "_$_15cVbDtor002DF1C8 = func_002DF1C8\n"
+        "_$_15cVbDtor002E37D0 = func_002E37D0\n"
+        "_$_15cVbDtor002D4A70 = func_002D4A70\n"
+        "_$_15cVbDtor002EF530 = func_002EF530\n"
+        "_$_15cVbDtor002EAC60 = func_002EAC60\n"
+        "_$_15cVbDtor002E64C0 = func_002E64C0\n"
+        "_$_15cVbDtor002E83F0 = func_002E83F0\n"
+        "_$_15cVbDtor002DA8E8 = func_002DA8E8\n"
+        "_$_15cVbDtor002DCDA0 = func_002DCDA0\n"
+        "_vt$13cVbIn00142790$13cRiderVbC_hpc = D_00458928\n"
+        "_vt$13cVbIn00142790$12cRiderVb_hpc = D_00458970\n"
+        "_vt$13cVbIn001420C8$13cRiderVbC_hpc = D_00458D08\n"
+        "_vt$13cVbIn001420C8$12cRiderVb_hpc = D_00458D50\n"
+        "_vt$13cVbIn001428F0$13cRiderVbC_hpc = D_00458830\n"
+        "_vt$13cVbIn001428F0$12cRiderVb_hpc = D_00458878\n"
+        "_vt$13cVbIn001424D0$13cRiderVbC_hpc = D_00458B18\n"
+        "_vt$13cVbIn001424D0$12cRiderVb_hpc = D_00458B60\n"
+        "_vt$13cVbIn00142630$13cRiderVbC_hpc = D_00458A20\n"
+        "_vt$13cVbIn00142630$12cRiderVb_hpc = D_00458A68\n"
+        "_vt$13cVbIn00142228$13cRiderVbC_hpc = D_00458C10\n"
+        "_vt$13cVbIn00142228$12cRiderVb_hpc = D_00458C58\n"
+        "_vt$13cVbIn00141F68$13cRiderVbC_hpc = D_00458E00\n"
+        "_vt$13cVbIn00141F68$12cRiderVb_hpc = D_00458E48\n"
+        "_vt$13cVbIn00141E08$13cRiderVbC_hpc = D_00458EF8\n"
+        "_vt$13cVbIn00141E08$12cRiderVb_hpc = D_00458F40\n"
+        "_vt$13cVbIn00141CA8$13cRiderVbC_hpc = D_00458FF0\n"
+        "_vt$13cVbIn00141CA8$12cRiderVb_hpc = D_00459038\n"
+        "_vt$13cVbIn00141B48$13cRiderVbC_hpc = D_004590E8\n"
+        "_vt$13cVbIn00141B48$12cRiderVb_hpc = D_00459130\n"
+        "_vt$13cVbIn001419E8$13cRiderVbC_hpc = D_004591E0\n"
+        "_vt$13cVbIn001419E8$12cRiderVb_hpc = D_00459228\n"
+        "_vt$13cVbIn00141888$13cRiderVbC_hpc = D_004592D8\n"
+        "_vt$13cVbIn00141888$12cRiderVb_hpc = D_00459320\n"
+        "_vt$13cVbIn00141728$13cRiderVbC_hpc = D_004593D0\n"
+        "_vt$13cVbIn00141728$12cRiderVb_hpc = D_00459418\n"
+        "_vt$13cVbIn001415C8$13cRiderVbC_hpc = D_004594C8\n"
+        "_vt$13cVbIn001415C8$12cRiderVb_hpc = D_00459510\n"
+        "_vt$13cVbIn00141320$13cRiderVbC_hpc = D_004595C0\n"
+        "_vt$13cVbIn00141320$12cRiderVb_hpc = D_00459608\n"
+        "_vt$13cVbIn00141040$13cRiderVbC_hpc = D_004598A8\n"
+        "_vt$13cVbIn00141040$12cRiderVb_hpc = D_004598F0\n"
+        "_vt$13cVbIn001411C0$13cRiderVbC_hpc = D_004596B8\n"
+        "_vt$13cVbIn001411C0$12cRiderVb_hpc = D_00459700\n"
+        "_$_15cVbDtor00136AD0 = func_00136AD0\n"
+        "_vt$13cVbIn00140EE0$13cRiderVbC_hpc = D_004599A0\n"
+        "_vt$13cVbIn00140EE0$12cRiderVb_hpc = D_004599E8\n"
+        "_vt$13cVbIn00140D80$13cRiderVbC_hpc = D_00459A98\n"
+        "_vt$13cVbIn00140D80$12cRiderVb_hpc = D_00459AE0\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00143FF0);
@@ -4842,7 +5257,27 @@ float func_001446E8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446F8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/control/handplantcontrol_classes.h"
+
+cHpD_1446F8::~cHpD_1446F8()
+{
+}
+
+// PORT: the compiler names this dtor _$_11cHpD_1446F8; expose it under the address-derived name.
+__asm__(".globl func_001446F8\n.type func_001446F8,@function\nfunc_001446F8 = _$_11cHpD_1446F8\n.size func_001446F8,0x1B0\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$12cHpD1_1446F8 = D_00458338\n"
+        "_vt$11cHpD_1446F8$13cRiderVbC_hpc = D_00458240\n"
+        "_vt$14cRiderVbB0_hpc = D_00459B90\n"
+        "_vt$11cHpD_1446F8$12cRiderVb_hpc = D_00458288\n"
+        "_$_12cHpD1_1446F8 = func_00125EB8\n"
+        "_$_12cRiderVb_hpc = func_0011B978\n");
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001448A8);
