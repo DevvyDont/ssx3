@@ -5382,7 +5382,82 @@ extern "C" void* func_00125C70(char* self, int inChrg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00125EB8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "ai/rider_classes.h"
+
+cRider_125EB8::~cRider_125EB8()
+{
+    func_002700D8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28), mDF8);
+}
+
+// PORT: the compiler names this dtor _$_13cRider_125EB8; expose it under the address-derived name.
+__asm__(".globl func_00125EB8\n.type func_00125EB8,@function\nfunc_00125EB8 = _$_13cRider_125EB8\n.size func_00125EB8,0x1838\n");
+
+// PORT: the out-of-line destructors called here, under their address-derived names (as seg/seg_1218 does).
+__asm__("_$_14cRiderVb_rider = func_0011B978\n"
+        "_$_15cVbDtor00136AD0 = func_00136AD0\n"
+        "_$_15cVbDtor002DCDA0 = func_002DCDA0\n"
+        "_$_15cVbDtor002DA8E8 = func_002DA8E8\n"
+        "_$_15cVbDtor002E83F0 = func_002E83F0\n"
+        "_$_15cVbDtor002E64C0 = func_002E64C0\n"
+        "_$_15cVbDtor002EAC60 = func_002EAC60\n"
+        "_$_15cVbDtor002EF530 = func_002EF530\n"
+        "_$_15cVbDtor002D4A70 = func_002D4A70\n"
+        "_$_15cVbDtor002E37D0 = func_002E37D0\n"
+        "_$_15cVbDtor002DF1C8 = func_002DF1C8\n"
+        "_$_15cVbDtor002F0FE8 = func_002F0FE8\n"
+        "_$_15cVbDtor002F6388 = func_002F6388\n");
+
+// PORT: the retail names of the vtables and dtors g++ references here.
+__asm__("_vt$13cRider_125EB8 = D_00458338\n"
+        "_vt$13cRider_125EB8$15cRiderVbC_rider = D_00458360\n"
+        "_vt$13cRider_125EB8$14cRiderVb_rider = D_004583A8\n"
+        "_vt$17cRiderBase_125EB8 = D_00458710\n"
+        "_vt$16cRiderVbB0_rider = D_00459B90\n"
+        "_vt$16cVbPart3A0_rider$15cRiderVbC_rider = D_00458928\n"
+        "_vt$16cVbPart3A0_rider$14cRiderVb_rider = D_00458970\n"
+        "_vt$16cVbPart390_rider$15cRiderVbC_rider = D_00458D08\n"
+        "_vt$16cVbPart390_rider$14cRiderVb_rider = D_00458D50\n"
+        "_vt$16cVbPart370_rider$15cRiderVbC_rider = D_00458830\n"
+        "_vt$16cVbPart370_rider$14cRiderVb_rider = D_00458878\n"
+        "_vt$16cVbPart360_rider$15cRiderVbC_rider = D_00458B18\n"
+        "_vt$16cVbPart360_rider$14cRiderVb_rider = D_00458B60\n"
+        "_vt$16cVbPart350_rider$15cRiderVbC_rider = D_00458A20\n"
+        "_vt$16cVbPart350_rider$14cRiderVb_rider = D_00458A68\n"
+        "_vt$16cVbPart2C0_rider$14cRiderVb_rider = D_00458C58\n"
+        "_vt$16cVbPart2C0_rider$15cRiderVbC_rider = D_00458C10\n"
+        "_vt$16cVbPart2B0_rider$14cRiderVb_rider = D_00458E48\n"
+        "_vt$16cVbPart2B0_rider$15cRiderVbC_rider = D_00458E00\n"
+        "_vt$16cVbPart290_rider$14cRiderVb_rider = D_00458F40\n"
+        "_vt$16cVbPart290_rider$15cRiderVbC_rider = D_00458EF8\n"
+        "_vt$16cVbPart230_rider$15cRiderVbC_rider = D_00458FF0\n"
+        "_vt$16cVbPart230_rider$14cRiderVb_rider = D_00459038\n"
+        "_vt$16cVbPart210_rider$15cRiderVbC_rider = D_004590E8\n"
+        "_vt$16cVbPart210_rider$14cRiderVb_rider = D_00459130\n"
+        "_vt$16cVbPart200_rider$15cRiderVbC_rider = D_004591E0\n"
+        "_vt$16cVbPart200_rider$14cRiderVb_rider = D_00459228\n"
+        "_vt$16cVbPart1F0_rider$15cRiderVbC_rider = D_004592D8\n"
+        "_vt$16cVbPart1F0_rider$14cRiderVb_rider = D_00459320\n"
+        "_vt$16cVbPart1D0_rider$15cRiderVbC_rider = D_004593D0\n"
+        "_vt$16cVbPart1D0_rider$14cRiderVb_rider = D_00459418\n"
+        "_vt$16cVbPart1C0_rider$15cRiderVbC_rider = D_004594C8\n"
+        "_vt$16cVbPart1C0_rider$14cRiderVb_rider = D_00459510\n"
+        "_vt$16cVbPart110_rider$15cRiderVbC_rider = D_004595C0\n"
+        "_vt$16cVbPart110_rider$14cRiderVb_rider = D_00459608\n"
+        "_vt$16cVbPart0B0_rider$15cRiderVbC_rider = D_004598A8\n"
+        "_vt$16cVbPart0B0_rider$14cRiderVb_rider = D_004598F0\n"
+        "_vt$16cVbPart0A0_rider$15cRiderVbC_rider = D_004596B8\n"
+        "_vt$16cVbPart0A0_rider$14cRiderVb_rider = D_00459700\n"
+        "_vt$16cVbPart020_rider$15cRiderVbC_rider = D_004599A0\n"
+        "_vt$16cVbPart020_rider$14cRiderVb_rider = D_004599E8\n"
+        "_vt$16cVbPart000_rider$15cRiderVbC_rider = D_00459A98\n"
+        "_vt$16cVbPart000_rider$14cRiderVb_rider = D_00459AE0\n"
+        "_vt$17cRiderBase_125EB8$15cRiderVbC_rider = D_00458738\n"
+        "_vt$17cRiderBase_125EB8$14cRiderVb_rider = D_00458780\n");
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_001276F0);
