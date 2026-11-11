@@ -1,6 +1,115 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_unpack);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+typedef struct SHAPE_3578 {
+    int w0;
+    short w;
+    short h;
+    int x8;
+    unsigned int wC;
+} SHAPE_3578;
+#define TYPE_3578(s) (*(unsigned char *)(s))
+#define NEXT_3578(s) (((s)->w0 >> 8) ? (SHAPE_3578 *)((char *)(s) + ((s)->w0 >> 8)) : 0)
+extern void *(*D_0044C450_3578)(char *, int, int) __asm__("D_0044C450");
+extern char D_004956E0_3578[] __asm__("D_004956E0");
+extern char D_004956E8_3578[] __asm__("D_004956E8");
+extern int f_4478_3578(SHAPE_3578 *) __asm__("func_003B4478");
+extern int f_3BB0_3578(SHAPE_3578 *) __asm__("func_003B3BB0");
+extern void memcpy_3578(void *, void *, int) __asm__("func_003E6574");
+// func_003B47F8 returns func_003B4740's decoded length (int).
+extern int f_47F8_3578(void *, void *) __asm__("func_003B47F8");
+extern SHAPE_3578 *f_4690_3578(SHAPE_3578 *) __asm__("func_003B4690");
+extern char *f_4010_3578(SHAPE_3578 *, int, int, int) __asm__("func_003B4010");
+extern void f_33B0_3578(char *, char *, int, int, int) __asm__("func_003B33B0");
+extern void SHAPE_cloneat_3578(void *, SHAPE_3578 *) __asm__("SHAPE_cloneat");
+
+SHAPE_3578 *SHAPE_unpack(SHAPE_3578 *shape) {
+    SHAPE_3578 hdr;
+    SHAPE_3578 *old;
+    int clonelen;
+    int size;
+    int fmt;
+    int w;
+    int h;
+    int w2;
+    int h2;
+    short rw;
+    short rh;
+    int i;
+    char *a;
+
+    old = shape;
+    clonelen = 0;
+    size = 0;
+    if (shape == 0) {
+        return 0;
+    }
+    if (NEXT_3578(shape)) {
+        clonelen = f_4478_3578(NEXT_3578(shape));
+    }
+    if (TYPE_3578(shape) & 0x80) {
+        hdr = *old;
+        TYPE_3578(&hdr) &= 0x7F;
+        size = f_3BB0_3578(&hdr);
+        shape = D_0044C450_3578(D_004956E0_3578, size + clonelen, 0);
+        memcpy_3578(shape, old, 16);
+        f_47F8_3578(old + 1, shape + 1);
+        TYPE_3578(shape) &= 0x7F;
+    } else {
+        fmt = 0;
+        if (TYPE_3578(shape) == 0x60) {
+            fmt = 1;
+        } else if (TYPE_3578(shape) == 0x61) {
+            fmt = 3;
+        } else if (TYPE_3578(shape) == 0x62) {
+            fmt = 5;
+        }
+        if (fmt) {
+            hdr = *old;
+            rw = hdr.w % 4;
+            rh = hdr.h % 4;
+            w = hdr.w;
+            h = hdr.h;
+            if (rw) {
+                w += 4 - rw;
+            }
+            if (rh) {
+                h += 4 - rh;
+            }
+            hdr.w = w;
+            hdr.h = h;
+            TYPE_3578(&hdr) = 5;
+            size = f_3BB0_3578(&hdr);
+            shape = D_0044C450_3578(D_004956E8_3578, size + clonelen, 0);
+            memcpy_3578(shape, old, 16);
+            TYPE_3578(shape) = 5;
+            shape->w = w;
+            shape->h = h;
+            for (i = 0, w2 = w, h2 = h; i < (int)(shape->wC >> 28) + 1; i++) {
+                a = f_4010_3578(old, 0, 0, i);
+                f_33B0_3578(a, f_4010_3578(shape, 0, 0, i), w2, h2, fmt);
+                if (w2 >= 2) {
+                    w2 >>= 1;
+                }
+                if (h2 >= 2) {
+                    h2 >>= 1;
+                }
+            }
+        } else {
+            clonelen = 0;
+            shape = f_4690_3578(shape);
+        }
+    }
+    if (clonelen) {
+        shape->w0 = TYPE_3578(shape) | (size << 8);
+        SHAPE_cloneat_3578((char *)shape + size, NEXT_3578(old));
+    }
+    return shape;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B38B8);

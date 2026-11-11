@@ -2312,7 +2312,153 @@ extern "C" void func_0030BEE8(void* self, cWScriptListHead* list, func_0030BEE8_
 }
 #endif
 
+//100%
 INCLUDE_ASM("wscript/wscriptman", func_0030BFC0);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+
+struct sRefSet_BFC0 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+};
+struct sRefWorld_BFC0 {
+    char pad_0x0[0x8];
+    sRefSet_BFC0** sets;    // 0x8
+};
+extern sRefWorld_BFC0** D_004A47B8_BFC0 __asm__("D_004A47B8");
+
+static inline void* refToPtr_BFC0(unsigned int p)
+{
+    return (void*)(p << 2);
+}
+
+static inline void* toObj_BFC0(unsigned int p)
+{
+    if (p == 0)
+        return 0;
+    return refToPtr_BFC0(p);
+}
+
+static inline void* lookup_BFC0(unsigned int id)
+{
+    sRefSet_BFC0* set = (*D_004A47B8_BFC0)->sets[id & 0xFF];
+    if (set == 0) {
+        return 0;
+    }
+    return toObj_BFC0(set->refs[id >> 8] >> 8);
+}
+
+struct sVec4_BFC0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (vector length).
+static inline float vu0Length_BFC0(const sVec4_BFC0& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec4_BFC0 vu0Sub_BFC0(const sVec4_BFC0& a, const sVec4_BFC0& b)
+{
+    sVec4_BFC0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+static inline sVec4_BFC0 pos_BFC0(void* p)
+{
+    return *(sVec4_BFC0*)((char*)p + 0x40);
+}
+
+struct sAi_BFC0 {
+    char pad0[0x28];
+    char* riders[20];
+};
+
+struct sVE_BFC0 {
+    short delta;
+    short index;
+    int (*fn)(void*, void*);
+};
+
+struct sVEp_BFC0 {
+    short delta;
+    short index;
+    sVec4_BFC0* (*fn)(void*);
+};
+
+extern "C" int func_0030BFC0(int* who, unsigned int id0, unsigned int id1, unsigned int id2)
+{
+    void* p0 = 0;
+    void* p1 = 0;
+    void* p2 = 0;
+    if (~id0 != 0) {
+        void* t = lookup_BFC0(id0);
+        p0 = t;
+    }
+    if (~id1 != 0) {
+        void* t = lookup_BFC0(id1);
+        p1 = t;
+    }
+    if (~id2 != 0) {
+        void* t = lookup_BFC0(id2);
+        p2 = t;
+    }
+    char* rider = ((sAi_BFC0*)*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC))->riders[*who];
+    char* obj = rider + 0x6C0;
+    sVE_BFC0* vt = *(sVE_BFC0**)obj;
+    if (vt[3].fn(obj + vt[3].delta, p1) != 0) {
+        return 1;
+    }
+    sVEp_BFC0* vtp = *(sVEp_BFC0**)obj;
+    sVec4_BFC0* pos = vtp[5].fn(obj + vtp[5].delta);
+    float d;
+    float seg;
+    if (p0 != 0) {
+        d = vu0Length_BFC0(vu0Sub_BFC0(*pos, pos_BFC0(p0)));
+        seg = vu0Length_BFC0(vu0Sub_BFC0(pos_BFC0(p1), pos_BFC0(p0))) * 1.1f;
+    } else {
+        d = vu0Length_BFC0(vu0Sub_BFC0(*pos, pos_BFC0(p1)));
+        seg = vu0Length_BFC0(vu0Sub_BFC0(pos_BFC0(p2), pos_BFC0(p1))) * 1.5f;
+    }
+    if (d <= seg) {
+        return 0;
+    }
+    if (p2 != 0) {
+        d = vu0Length_BFC0(vu0Sub_BFC0(*pos, pos_BFC0(p1)));
+        seg = vu0Length_BFC0(vu0Sub_BFC0(pos_BFC0(p2), pos_BFC0(p1))) * 1.1f;
+    } else {
+        d = vu0Length_BFC0(vu0Sub_BFC0(*pos, pos_BFC0(p1)));
+        seg = vu0Length_BFC0(vu0Sub_BFC0(pos_BFC0(p1), pos_BFC0(p0))) * 1.5f;
+    }
+    if (d <= seg) {
+        return 0;
+    }
+    return -1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C390);
