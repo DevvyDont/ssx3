@@ -1328,7 +1328,81 @@ extern "C" void func_00271708(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00271758);
+#ifdef SKIP_ASM
+extern "C" int func_0026D558(void* self, char** pp);
+extern "C" int func_0026D678(void* self, char** pp);
+void func_0026E5C0(void* self);
+extern "C" void func_0026E5D0(void* list, void* node);
+extern char* D_004A28A8;
+
+struct sRcSave1758 {
+    int field_0x0;
+    int frameCount;         // 0x4
+    int f8;                 // 0x8
+    int fC;                 // 0xC
+    int f10;                // 0x10
+    int f14;                // 0x14
+    int streamCount;        // 0x18
+};
+
+struct sReplayCache1758 {
+    int state;                  // 0x0
+    char pad_0x4[0x14];
+    int field_0x18;             // 0x18
+    char pad_0x1C[0x3B0 - 0x1C];
+    char frames[0xC];           // 0x3B0
+    char pad_0x3BC[0x3C8 - 0x3BC];
+    int field_0x3C8;            // 0x3C8
+    int field_0x3CC;            // 0x3CC
+    void* tail;                 // 0x3D0
+    char pad_0x3D4[0x484 - 0x3D4];
+    int pos;                    // 0x484
+    char pad_0x488[0x4];
+    void* streams[(0x608 - 0x48C) / 4]; // 0x48C
+    int field_0x608;            // 0x608
+    char pad_0x60C[0x4];
+    int field_0x610;            // 0x610
+    char pad_0x614[0x4];
+    int field_0x618;            // 0x618
+};
+
+struct sRcGs1758 { char pad_0x0[0xC]; sRcWorld_0730* world; };
+struct sRcGame1758 { char pad_0x0[0x84]; sRcGs1758* gs; };
+extern "C" int func_00271758(sReplayCache1758* self, char* buf)
+{
+    sRcSave1758* data = (sRcSave1758*)buf;
+    char** pp = &buf;
+    if (data->streamCount != ((sRcGame1758*)D_004A28A8)->gs->world->numRiders) {
+        return 0;
+    }
+    {
+        self->field_0x608 = 1;
+        self->field_0x18 = data->f8;
+        self->field_0x610 = data->fC != 0;
+        self->field_0x3C8 = data->f10;
+        self->field_0x3CC = data->f14;
+        self->tail = 0;
+        self->pos = 0;
+        func_0026E5C0(self->frames);
+        *pp = (char*)data + 0x28;
+        for (int i = 0; i < data->frameCount; i++) {
+            void* node = func_00270130(self);
+            func_0026D678(node, pp);
+            func_0026E5D0(self->frames, node);
+        }
+        for (int i = 0; i < data->streamCount; i++) {
+            if (self->streams[i] != 0) {
+                func_0026D558(self->streams[i], pp);
+            }
+        }
+        self->state = 8;
+        self->field_0x618 = 1;
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_002718A8);
