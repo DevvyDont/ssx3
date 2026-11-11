@@ -32,7 +32,103 @@ void* func_002D1CF0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/objectinterface", func_002D1D10);
+#ifdef SKIP_ASM
+struct sRState_1D10 {
+    int f0;                     // 0x00
+    int flagsA;                 // 0x04
+    int flagsB;                 // 0x08
+    int fC;                     // 0x0C
+    short f10;                  // 0x10
+    short f12;                  // 0x12
+};
+
+static inline void setA_1D10(sRState_1D10* r, int v, int mask, int shift)
+{
+    r->flagsA = (r->flagsA & ~(mask << shift)) | ((v << shift) & (mask << shift));
+}
+
+static inline void setB_1D10(sRState_1D10* r, int v, int mask, int shift)
+{
+    r->flagsB = (r->flagsB & ~(mask << shift)) | ((v << shift) & (mask << shift));
+}
+
+// 2D vector (8 bytes, BLKmode: its temporaries share 16-byte frame slots that combine when freed).
+// The ctor takes const float&: a by-value float ctor folds the 1.0f into the inlined
+// stores, which then fail to validate and leave the uv1 temp addressed through a register.
+struct sVec2_1D10 {
+    float x, y;
+    sVec2_1D10(const float& ax, const float& ay) : x(ax), y(ay) {}
+};
+
+struct sCol_1D10 {
+    float a, r, g, b;
+};
+
+struct sVE_1D10 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+typedef int (*IsHiddenFn_1D10)(void*, void*);
+typedef void (*DrawFn_1D10)(void*, void*, const sVec2_1D10&, const sVec2_1D10&, const sVec2_1D10&, const sCol_1D10*);
+typedef void (*DrawRotFn_1D10)(void*, float, void*, const sVec2_1D10&, const sVec2_1D10&, const sVec2_1D10&, const sCol_1D10*, int);
+
+struct sRCtx_1D10 {
+    char pad[0xE84];
+    sRState_1D10* top;          // 0xE84
+    char padE88[0xF50 - 0xE88];
+    int texs[0x40];             // 0xF50
+    char pad1050[0x10D8 - 0x1050];
+    sVE_1D10* vt;               // 0x10D8
+};
+
+static inline int tex_1D10(sRCtx_1D10* c, int i)
+{
+    return c->texs[i];
+}
+
+extern sRCtx_1D10* D_004A289C;
+extern sRCtx_1D10* D_004A5B80;
+extern sRState_1D10 D_00501420;
+
+extern "C" void func_002D1D10(void* obj, float* src, int kind, float size, float angle)
+{
+    sRCtx_1D10* g = D_004A289C;
+    if (((IsHiddenFn_1D10)g->vt[91].fn)((char*)g + g->vt[91].delta, obj) != 0) {
+        return;
+    }
+    sCol_1D10 col;
+    col.a = src[3];
+    col.r = src[0];
+    col.g = src[1];
+    col.b = src[2];
+    sRCtx_1D10* ctx = D_004A5B80;
+    ctx->top[1] = ctx->top[0];
+    ctx->top++;
+    *ctx->top = D_00501420;
+    setA_1D10(ctx->top, 1, 1, 22);
+    setA_1D10(ctx->top, 0, 3, 0);
+    setB_1D10(ctx->top, 0, 0x7FFFF, 10);
+    setA_1D10(ctx->top, 7, 0x1F, 2);
+    setB_1D10(ctx->top, 8, 0x1F, 5);
+    setA_1D10(ctx->top, 1, 3, 23);
+    setA_1D10(ctx->top, 0, 3, 20);
+    setA_1D10(ctx->top, 0x14, 0xFF, 12);
+    ctx->top->f10 = tex_1D10(ctx, kind + 0x25);
+    if (angle != 0.0f) {
+        ((DrawRotFn_1D10)ctx->vt[79].fn)((char*)ctx + ctx->vt[79].delta, angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
+        if (kind == 1 || kind == 4) {
+            ((DrawRotFn_1D10)ctx->vt[79].fn)((char*)ctx + ctx->vt[79].delta, -angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
+        }
+    } else {
+        ((DrawFn_1D10)ctx->vt[78].fn)((char*)ctx + ctx->vt[78].delta, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col);
+    }
+    ctx->top--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D2058);
