@@ -186,7 +186,358 @@ extern "C" void func_002DCF28(sWakeDCF28* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DD0B8);
+#ifdef SKIP_ASM
+struct sWakeElemD0B8 {
+    t4Vector pts[5];            // 0x00
+    t4Vector dir;               // 0x50
+    float width;                // 0x60
+    float age;                  // 0x64
+    char pad68[0x8];            // 0x68
+};
+
+struct sWakeRingD0B8 {
+    char pad0[0x20];            // 0x00
+    t4Vector pos;               // 0x20
+};
+
+struct sWakeSurfD0B8 {
+    char pad0[0x48];            // 0x00
+    float f48;                  // 0x48
+    float f4C;                  // 0x4C
+    char pad50[0x34];           // 0x50
+    int i84;                    // 0x84
+    char pad88[0x28];           // 0x88
+};
+
+struct sWakeD0B8 {
+    cRider* rider;              // 0x00
+    int count;                  // 0x04
+    int head;                   // 0x08
+    sWakeElemD0B8* elems;       // 0x0C
+    sWakeRingD0B8* rings[5];    // 0x10
+    float vals[5];              // 0x24
+    float phase;                // 0x38
+    int active;                 // 0x3C
+    int frame;                  // 0x40
+    char pad44[0xC];            // 0x44
+    t4Vector v50;               // 0x50
+    t4Vector v60;               // 0x60
+    t4Vector v70;               // 0x70
+    t4Vector v80;               // 0x80
+    float f90;                  // 0x90
+    float f94;                  // 0x94
+    char pad98[0x8];            // 0x98
+    t4Vector col;               // 0xA0
+    int fB0;                    // 0xB0
+    int n;                      // 0xB4
+    int max;                    // 0xB8
+    float life;                 // 0xBC
+};
+
+struct sWakeParamsD0B8 {
+    float strength;
+    float grip;
+};
+
+extern void* D_004A28A8;
+int func_0011FE98(void*);
+extern "C" void func_002DE058_D0B8(void* self, void* surf, t4Vector* pos) __asm__("func_002DE058");
+extern "C" void func_002DDD30_D0B8(void* self, t4Vector* pos, t4Vector* fwd, float width) __asm__("func_002DDD30");
+
+#define WAKE_MIN_D0B8(a, b) ((a) < (b) ? (a) : (b))
+#define WAKE_MAX_D0B8(a, b) ((a) >= (b) ? (a) : (b))
+
+// PORT: PS2-only inline asm (float absolute value).
+static inline float wakeAbsD0B8(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline t4Vector wakeScaleD0B8(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline t4Vector wakeAddD0B8(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline t4Vector wakeSubD0B8(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void wakeAddEqD0B8(t4Vector& a, const t4Vector& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline t4Vector wakeCrossD0B8(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float wakeLenD0B8(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v / |v| via vrsqrt).
+static inline t4Vector wakeNormD0B8(const t4Vector& v)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float wakeDotD0B8(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: g++ minimum operator (<?).
+static inline float wakeClampD0B8(float v, float lo, float hi)
+{
+    float r;
+    if (v >= lo) {
+        r = v <? hi;
+    } else {
+        r = lo;
+    }
+    return r;
+}
+
+static inline t4Vector wakeRow34D0B8(cRider* r, int k)
+{
+    return *(t4Vector*)((char*)r->mAnimModel->unk_034 + (r->mBoneBoardChild << 6) + k * 16);
+}
+
+static inline t4Vector wakeRowD0B8(cRider* r, int k)
+{
+    return *(t4Vector*)((char*)r->mAnimModel->unk_030 + (r->mBoneBoardChild << 6) + k * 16);
+}
+
+static inline float wakeMaxSpeedD0B8()
+{
+    return 1666.666748046875f;
+}
+
+static inline float wakeMinStrengthD0B8()
+{
+    return 416.66668701171875f;
+}
+
+// PORT: g++ minimum/maximum operators (<?, >?).
+extern "C" void func_002DD0B8(sWakeD0B8* self)
+{
+    sWakeSurfD0B8* surf = (sWakeSurfD0B8*)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x44) + self->rider->mSurfaceType * 0xB0);
+    int i;
+    for (i = 0; i < self->count; i++) {
+        int idx = (self->head + i) % self->max;
+        sWakeElemD0B8* e = &self->elems[idx];
+        e->age += 0.01666666753590107f;
+        if (self->life < e->age) {
+            self->count = i;
+            goto done;
+        }
+        float grow = ((1.0f - ((e->age * 20.0f) <? 1.0f)) * e->width + 1.0f) * 0.01666666753590107f;
+        float fade = (1.0f - e->age * 3.3333332538604736f) >? 0.0f;
+        t4Vector v = wakeScaleD0B8(wakeScaleD0B8(e->dir, fade), 0.01666666753590107f);
+        wakeAddEqD0B8(self->rings[0][idx].pos, v);
+        for (int j = 1; j < self->n; j++) {
+            wakeAddEqD0B8(self->rings[j][idx].pos, wakeAddD0B8(wakeScaleD0B8(e->pts[j], grow), v));
+            e->pts[j].z += self->vals[j];
+        }
+    }
+done:
+    float lean = -self->rider->mSlewed[0].cur;
+    float k = 1.0f - wakeAbsD0B8(self->rider->mSlewed[3].cur);
+    t4Vector normal = self->rider->mGroundNormal;
+    float amt = wakeAbsD0B8(lean) * k;
+    t4Vector side;
+    t4Vector fwd;
+    sWakeParamsD0B8 p;
+    fwd = wakeRow34D0B8(self->rider, 0);
+    if (self->rider->unk_320 != 0) {
+        fwd = wakeScaleD0B8(fwd, -1.0f);
+    }
+    t4Vector right = wakeCrossD0B8(fwd, normal);
+    side = lean < 0.0f ? wakeScaleD0B8(right, -1.0f) : right;
+    float speed = WAKE_MAX_D0B8(WAKE_MIN_D0B8(wakeMaxSpeedD0B8(), wakeLenD0B8(self->rider->mVelocity)), 0.0f);
+    p.grip = surf->f48;
+    float sign = 1.0f;
+    if (self->rider->unk_320 != 0) {
+        sign = -1.0f;
+    }
+    float off = wakeAbsD0B8(self->rider->mSlewed[2].cur) * 118.0f + -40.0f;
+    t4Vector pos = wakeAddD0B8(
+        wakeAddD0B8(wakeRowD0B8(self->rider, 3), wakeScaleD0B8(wakeScaleD0B8(wakeRowD0B8(self->rider, 0), off), sign)),
+        wakeScaleD0B8(wakeScaleD0B8(wakeScaleD0B8(wakeRowD0B8(self->rider, 2), 15.0f), lean < 0.0f ? -1.0f : 1.0f), sign));
+    t4Vector dirn = wakeNormD0B8(self->rider->mVelocity);
+    float bal = (wakeAbsD0B8(wakeDotD0B8(self->rider->mGroundSide, dirn)) * 0.8f + amt * 0.5f) <? 1.0f;
+    float a = wakeClampD0B8(bal + bal, 0.0f, 0.25f);
+    float b = 0.0f;
+    if (555.5555419921875f < speed) {
+        b = wakeClampD0B8((bal - 0.25f) * 2.7f, 0.0f, 0.35f);
+    }
+    float width = 0.0f;
+    if (surf->i84 != 0 && 1111.111083984375f < speed) {
+        width = wakeClampD0B8((bal - 0.54f) * 35.0f, 0.0f, 4.5f);
+    }
+    p.strength = speed * (a + b) * surf->f4C;
+    int ok = 1;
+    if (func_0011FE98(self->rider) != 0 || wakeAbsD0B8(self->rider->mSlewed[11].cur) > 0.15f ||
+        wakeMinStrengthD0B8() > p.strength || amt < 0.15f || p.grip < 0.05f) {
+        p.strength = 0.0f;
+        ok = 0;
+    }
+    if (self->active != 0) {
+        if (self->fB0 != 0 ? lean < 0.0f : lean > 0.0f) {
+            p.strength = 0.0f;
+            self->f90 = 0.0f;
+        }
+        if (func_0011FE98(self->rider) == 0) {
+            self->v60 = wakeAddD0B8(wakeScaleD0B8(self->v60, 0.8f), wakeScaleD0B8(normal, 0.19999998807907104f));
+            self->v70 = wakeAddD0B8(wakeScaleD0B8(self->v70, 0.8f), wakeScaleD0B8(side, 0.19999998807907104f));
+            self->v80 = wakeAddD0B8(wakeScaleD0B8(self->v80, 0.8f), wakeScaleD0B8(fwd, 0.19999998807907104f));
+            self->f94 = self->f94 * 0.7f + p.grip * 0.3f;
+            self->f90 = self->f90 * 0.8f + p.strength * 0.19999998807907104f;
+            if (self->f94 > 0.05f && self->f90 > 55.55555725097656f) {
+                if (wakeLenD0B8(wakeSubD0B8(pos, self->v50)) > 50.0f) {
+                    func_002DE058_D0B8(self, surf, &pos);
+                    self->v50 = pos;
+                }
+                func_002DDD30_D0B8(self, &pos, &fwd, width);
+            } else {
+                self->f94 = 0.0f;
+                self->active = 0;
+                func_002DDD30_D0B8(self, &pos, &fwd, self->f94);
+            }
+        } else {
+            self->f94 = 0.0f;
+            self->active = 0;
+            func_002DDD30_D0B8(self, &pos, &fwd, self->f94);
+        }
+    } else if (ok) {
+        self->f90 = 0.0f;
+        width = self->f90;
+        self->v80 = fwd;
+        self->v70 = side;
+        self->v60 = normal;
+        self->v50 = pos;
+        self->frame = 0;
+        self->fB0 = width < lean;
+        self->f94 = width;
+        func_002DE058_D0B8(self, surf, &pos);
+        func_002DDD30_D0B8(self, &pos, &fwd, width);
+        self->f94 = p.grip;
+        func_002DE058_D0B8(self, surf, &pos);
+        func_002DDD30_D0B8(self, &pos, &fwd, width);
+        self->active = 1;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DDAB8);
