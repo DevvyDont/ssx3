@@ -727,7 +727,33 @@ void func_003EEFB8(int* p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EEFC8);
+#ifdef SKIP_ASM
+int func_003EEFC8(int* p, int* key) {
+    int* n;
+    if (p[0] == 0) {
+        return 0;
+    }
+    if (p[3] == 0) {
+        for (; p[2] < p[4]; p[2]++) {
+            if (((int*)p[5])[p[2]]) {
+                break;
+            }
+        }
+        if (p[2] >= p[4]) {
+            return 0;
+        }
+        p[3] = ((int*)p[5])[p[2]++];
+    }
+    n = (int*)p[3];
+    p[3] = n[0];
+    if (key) {
+        *key = n[2];
+    }
+    return n[1];
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF088);
@@ -818,7 +844,28 @@ int func_003EF640(unsigned short* out, char* src) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF6F8);
+#ifdef SKIP_ASM
+int func_003EF6F8(char* dst, int ch) {
+    unsigned short c = ch;
+    int n;
+    if (c < 0x80) {
+        dst[0] = c;
+        n = 1;
+    } else if (c < 0x800) {
+        n = 2;
+        dst[0] = (c >> 6) | 0xC0;
+        dst[1] = (c & 0x3F) | 0x80;
+    } else {
+        n = 3;
+        dst[0] = (c >> 12) | 0xE0;
+        dst[1] = ((c >> 6) & 0x3F) | 0x80;
+        dst[2] = (c & 0x3F) | 0x80;
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF770);
