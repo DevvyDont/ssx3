@@ -350,7 +350,17 @@ extern "C" void func_002B97F0(void *arg0, signed char arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9810);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#define MIN_9810(a,b) ((a) < (b) ? (a) : (b))
+#define MAX_9810(a,b) ((a) < (b) ? (b) : (a))
+extern "C" void func_002B9810(sSndPlayOpts *p, int v) {
+    p->vals[p->idx] = v;
+    p->recs[p->idx].v = MAX_9810(MIN_9810(p->vals[p->idx], 127), 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B98A8);
@@ -584,7 +594,15 @@ extern "C" int func_002B9DA0(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9DA8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// volatile keeps the load out of the jr delay slot, as in the target.
+extern "C" int func_002B9DA8(void *arg0) {
+    return (*(volatile int *)((char*)(arg0) + (0x88)));
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002B9DB8);
@@ -886,11 +904,125 @@ extern "C" void func_002BA208(Arg_A208* arg, int v) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BA448);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// cSoundSys (its vtable is _vt$12cSndPlayOpts$9cSoundSys): the cSndPlayOpts part sits at 0x1D8.
+struct sSoundSysView { char pad[0x1D8]; sSndPlayOpts sub; };
 
+// An object holding the sound system and two per-level int arrays.
+struct sSndOptsUser { sSoundSysView* o; int* vals; int* vals2; };
+
+extern "C" void* func_00416210(void*, int, unsigned int);
+
+extern "C" void func_002BA448(sSndOptsUser* arg, int v, int v2) {
+    sSoundSysView* o = arg->o;
+    sSndPlayOpts* p = &o->sub;
+    o->sub.idx++;
+    p->recs[o->sub.idx] = o->sub.cur;
+    o->sub.arr24[o->sub.idx] = 0;
+    p->p34[o->sub.idx] = 0;
+    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
+    p->p3C[o->sub.idx] = 0;
+    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
+    p->p60[o->sub.idx] = 0;
+    p->p64[o->sub.idx] = 0;
+    p->p68[o->sub.idx] = 0;
+    p->p6C[o->sub.idx] = 0;
+    p->q70[o->sub.idx].b = 0;
+    p->q70[o->sub.idx].a = 100;
+    p->q70[o->sub.idx].c = 90;
+    p->q70[o->sub.idx].d = 50;
+    p->p74[o->sub.idx] = 0;
+    p->p80[o->sub.idx] = 0;
+    p->p84[o->sub.idx] = 0;
+    p->p78[o->sub.idx] = 127;
+    p->p7C[o->sub.idx] = 1;
+    arg->vals[arg->o->sub.idx] = v;
+    arg->vals2[arg->o->sub.idx] = v2;
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BA6B0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_00416210(void*, int, unsigned int);
 
+extern "C" int func_002906B8(void*);
+extern "C" void func_002BA6B0(sSndOptsUser* arg, int v, int v2) {
+    sSoundSysView* o = arg->o;
+    sSndPlayOpts* p = &o->sub;
+    o->sub.idx++;
+    p->recs[o->sub.idx] = o->sub.cur;
+    o->sub.arr24[o->sub.idx] = 0;
+    p->p34[o->sub.idx] = 0;
+    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
+    p->p3C[o->sub.idx] = 0;
+    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
+    p->p60[o->sub.idx] = 0;
+    p->p64[o->sub.idx] = 0;
+    p->p68[o->sub.idx] = 0;
+    p->p6C[o->sub.idx] = 0;
+    p->q70[o->sub.idx].b = 0;
+    p->q70[o->sub.idx].a = 100;
+    p->q70[o->sub.idx].c = 90;
+    p->q70[o->sub.idx].d = 50;
+    p->p74[o->sub.idx] = 0;
+    p->p80[o->sub.idx] = 0;
+    p->p84[o->sub.idx] = 0;
+    p->p78[o->sub.idx] = 127;
+    p->p7C[o->sub.idx] = 1;
+    arg->vals[arg->o->sub.idx] = v;
+    arg->vals2[arg->o->sub.idx] = v2;
+    func_002906B8(arg);
+}
+#endif
+
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BA920);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_00416210(void*, int, unsigned int);
+
+#define MIN_A920(a,b) ((a) < (b) ? (a) : (b))
+#define MAX_A920(a,b) ((a) < (b) ? (b) : (a))
+extern "C" int func_002906B8(void*);
+extern "C" void func_002BA920(sSndOptsUser* arg, int v, int v2, int v3) {
+    sSoundSysView* o = arg->o;
+    sSndPlayOpts* p = &o->sub;
+    o->sub.idx++;
+    p->recs[o->sub.idx] = o->sub.cur;
+    o->sub.arr24[o->sub.idx] = 0;
+    p->p34[o->sub.idx] = 0;
+    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
+    p->p3C[o->sub.idx] = 0;
+    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
+    p->p60[o->sub.idx] = 0;
+    p->p64[o->sub.idx] = 0;
+    p->p68[o->sub.idx] = 0;
+    p->p6C[o->sub.idx] = 0;
+    p->q70[o->sub.idx].b = 0;
+    p->q70[o->sub.idx].a = 100;
+    p->q70[o->sub.idx].c = 90;
+    p->q70[o->sub.idx].d = 50;
+    p->p74[o->sub.idx] = 0;
+    p->p80[o->sub.idx] = 0;
+    p->p84[o->sub.idx] = 0;
+    p->p78[o->sub.idx] = 127;
+    p->p7C[o->sub.idx] = 1;
+    arg->vals[arg->o->sub.idx] = v;
+    arg->vals2[arg->o->sub.idx] = v2;
+    {
+        sSoundSysView* o2 = arg->o;
+        sSndPlayOpts* p2 = &o2->sub;
+        p2->vals[o2->sub.idx] = v3;
+        p2->recs[o2->sub.idx].v = MAX_A920(MIN_A920(p2->vals[p2->idx], 127), 0);
+    }
+    func_002906B8(arg);
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAC30);

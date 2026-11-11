@@ -962,7 +962,36 @@ extern struct sAB0Lock D_00519AC4;
 extern struct sFsNode *D_00519AE4;              /* D_00519AB0.f34 */
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DD1D8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003E5440(char *);
+extern void func_003E5398(int);
+extern int SYNCTASK_run(int);
+
+static inline int hValid_D1D8(int h) {
+    return h != 0 && ((h & 0xFFFFF) == (D_00519AB0.f28[((unsigned char *)&h)[3]].f00.w & 0xFFFFF));
+}
+
+int func_003DD1D8(int h) {
+    struct sFsCmd *e = &D_00519AB0.f28[((unsigned char *)&h)[3]];
+    if (!hValid_D1D8(h)) {
+        return -3;
+    }
+    while (e->f08 == 0) {
+        if (func_003E5440(0) != 0) {
+            SYNCTASK_run(0);
+        } else {
+            func_003E5398(1);
+        }
+        if (!hValid_D1D8(h)) {
+            return -3;
+        }
+    }
+    return e->f08;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DD310);
@@ -1893,9 +1922,77 @@ int func_003DE9B8(int *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DEA48);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct S_EA48 { volatile int e, a, b, d, r, n; int c; int (*fn)(int, int, int, int, int, void *); int h; };
+extern int func_003DD310_EA48(int) __asm__("func_003DD310");
+extern char func_003DEA48_EA48[] __asm__("func_003DEA48");
 
+void func_003DEA48(int a, int mode, struct S_EA48 *s) {
+    int n = func_003DD310_EA48(a);
+    s->h = 0;
+    if (mode == 1) {
+        s->b += n;
+        s->c += n;
+        s->r += n;
+        if (n < s->n) {
+            s->d = 0;
+        } else {
+            s->d -= n;
+        }
+        if (s->d <= 0) {
+            return;
+        }
+        if (s->d > 0x8000) {
+            s->n = 0x8000;
+        } else {
+            s->n = s->d;
+        }
+        s->h = s->fn(s->a, s->b, s->c, s->n, s->e, s);
+        if (s->h != 0) {
+            func_003DCF70(s->h, func_003DEA48_EA48);
+            return;
+        }
+    }
+    s->d = 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DEB50);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern void func_003DCF70_EB50(int, void (*)(void)) __asm__("func_003DCF70");
+extern int func_003DD1D8(int);
+extern void func_003DEA48_EB50(void) __asm__("func_003DEA48");
+
+int func_003DEB50(int a, int b, int c, int d, int e, int (*fn)(int, int, int, int, int, void *)) {
+    struct S_EA48 s;
+    s.e = e;
+    s.a = a;
+    s.b = b;
+    s.d = d;
+    s.r = 0;
+    s.n = d;
+    s.c = c;
+    s.fn = fn;
+    if (s.n > 0x8000) {
+        s.n = 0x8000;
+    }
+    s.h = fn(a, b, s.c, s.n, e, &s);
+    if (s.h) {
+        func_003DCF70_EB50(s.h, func_003DEA48_EB50);
+        do {
+            func_003DD1D8(s.h);
+        } while (s.d || s.h);
+    }
+    return s.r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DEBF0);
@@ -2208,7 +2305,20 @@ extern struct sReqQueue D_00519BF8;             /* free requests */
 extern char D_00519C08[];                       /* request list mutex */
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF0B8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern void func_003DD310_F0B8(int) __asm__("func_003DD310");
+
+/* Callback (third argument is the stream); later code takes its address as void (*)(void *). */
+void func_003DF0B8_impl(int arg0, int arg1, struct sReq *s) __asm__("func_003DF0B8");
+void func_003DF0B8_impl(int arg0, int arg1, struct sReq *s) {
+    func_003DD310_F0B8(s->f1C);
+    func_003DF028(s);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF0F0);
@@ -2274,7 +2384,43 @@ void func_003DF1E0(int a, int b, char *s) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF2C0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int func_003DD310_F2C0(int) __asm__("func_003DD310");
+extern int func_003DD7E0_F2C0(int, int, void *) __asm__("func_003DD7E0");
+extern char func_003DF0B8_F2C0[] __asm__("func_003DF0B8");
+extern char func_003DF0F0_F2C0[] __asm__("func_003DF0F0");
+extern char func_003DF1E0_F2C0[] __asm__("func_003DF1E0");
+
+void func_003DF2C0(int a, int b, struct sReq *s) {
+    int n = func_003DD310_F2C0(s->f1C);
+    s->f20 = n;
+    if (n == 0) {
+        func_003DF028(s);
+        return;
+    }
+    if (s->f10 != 0) {
+        s->f1C = func_003DD5A0(n, 0x63, s);
+        if (s->f1C != 0) {
+            func_003DCF70(s->f1C, func_003DF0B8_F2C0);
+        }
+    } else if (s->f14 == 0) {
+        int m = s->f28;
+        s->f1C = func_003DD648(n, s->f24, s->f2C, m <= 0x8000 ? m : 0x8000, 0x63, s);
+        if (s->f1C != 0) {
+            func_003DCF70(s->f1C, func_003DF0F0_F2C0);
+        }
+    } else {
+        s->f1C = func_003DD7E0_F2C0(n, 0x63, s);
+        if (s->f1C != 0) {
+            func_003DCF70(s->f1C, func_003DF1E0_F2C0);
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF3C0);
@@ -2338,7 +2484,39 @@ void func_003DF488(int n, int x) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF570);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int D_00519BF0;
+extern int func_003DFAF0(int);
+extern int func_003E5440(char *);
+extern void func_003E5398(int);
+extern int SYNCTASK_run(int);
+extern void func_003E56E0_F570(char *) __asm__("func_003E56E0");
+
+void func_003DF570(void) {
+    if (D_00450C34 != 0) {
+        int i;
+        for (i = 0; i < D_00519BF0; i++) {
+            func_003DFAF0(D_00450C34[i].f00);
+        }
+        for (;;) {
+            int busy = 0;
+            for (i = 0; i < D_00519BF0; i++) {
+                if (D_00450C34[i].f1C != 0) busy = 1;
+            }
+            if (!busy) break;
+            if (func_003E5440(0) != 0) SYNCTASK_run(0);
+            func_003E5398(0);
+        }
+        D_00450C10.f08(D_00450C34);
+        func_003E56E0_F570(D_00519C08);
+        D_00450C34 = 0;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF690);
@@ -2481,7 +2659,45 @@ int func_003DF980(int h) {
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", ASYNCFILE_release);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern void MUTEX_unlock_AR(void *) __asm__("MUTEX_unlock");
+extern int func_003DD1D8(int);
+
+int ASYNCFILE_release(int h, int *a, int *b);
+int ASYNCFILE_release(int h, int *a, int *b) {
+    struct sReq *f;
+    int busy = 0;
+    MUTEX_lock(D_00519C08);
+    f = func_003DEF70(h);
+    if (f != 0) {
+        busy = f->f10;
+        if (busy == 0) {
+            f->f0C = 1;
+        }
+    }
+    MUTEX_unlock_AR(D_00519C08);
+    if (f == 0 || busy != 0) {
+        return -1;
+    }
+    while (f->f1C != 0) {
+        func_003DD1D8(f->f1C);
+    }
+    if (f->f10 != 0) {
+        if (a != 0) *a = 0;
+        if (b != 0) *b = 0;
+        releaserequest(f);
+        return -1;
+    }
+    if (a != 0) *a = f->f2C - f->f08;
+    if (b != 0) *b = f->f08;
+    releaserequest(f);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DFAF0);
@@ -2872,9 +3088,204 @@ void func_003E0170(int a, int b, char *s) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E0270);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern void MUTEX_unlock_0270(void *) __asm__("MUTEX_unlock");
+extern int func_004165A8_0270(char *, char *) __asm__("func_004165A8");
+extern char *strcpy_0270(char *, char *) __asm__("strcpy");
+extern int func_003DD4E8_0270(char *, int, int, void *) __asm__("func_003DD4E8");
+extern void cb_00D8_0270(void) __asm__("func_003E00D8");
+extern void cb_0118_0270(void) __asm__("func_003E0118");
+extern void func_003E03D0_0270(char *, int) __asm__("func_003E03D0");
 
+void func_003E0270(char *self, int arg1) {
+    char *job;
+    int none;
+    int tk;
+    job = 0;
+    MUTEX_lock(self + 4);
+    if (*(char **)(self + 0x60) == 0) {
+        none = 1;
+    } else {
+        char *cur = *(char **)(self + 0x60);
+        none = 0;
+        if (*(int *)(cur + 4) != 1) {
+            if (*(int *)(cur + 0xC) == 0) {
+                none = 1;
+            } else {
+                *(int *)(self + 0x60) = *(int *)(cur + 0xC);
+            }
+        }
+    }
+    if (none) {
+        *(volatile int *)(self + 0x38) = 0;
+    } else {
+        job = *(char **)(self + 0x60);
+        tk = *(int *)(self + 0x54);
+        *(int *)(job + 4) = 2;
+        *(int *)(job + 0x120) = tk;
+    }
+    MUTEX_unlock_0270(self + 4);
+    if (!none) {
+        *(int *)(self + 0x58) = *(int *)(self + 0x54);
+        if (*(int *)(job + 0x10) == 1) {
+            *(int *)(self + 0x170) = 0;
+        } else {
+            char *nm = self + 0x6C;
+            int h;
+            *(int *)(self + 0x170) = *(int *)(job + 0x118);
+            if (func_004165A8_0270(job + 0x14, nm) != 0) {
+                strcpy_0270(nm, job + 0x14);
+                if (*(int *)(self + 0x16C) == 0) {
+                    h = func_003DD4E8_0270(nm, 1, arg1, self);
+                    *(int *)(self + 0x174) = h;
+                    if (h != 0) {
+                        func_003DCF70(h, cb_00D8_0270);
+                    }
+                } else {
+                    h = func_003DD5A0(*(int *)(self + 0x16C), arg1, self);
+                    *(int *)(self + 0x174) = h;
+                    if (h != 0) {
+                        func_003DCF70(h, cb_0118_0270);
+                    }
+                }
+                return;
+            }
+        }
+        func_003E03D0_0270(self, arg1);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E03D0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct Q_03D0 { int f0; int f4; char pad8[0xC - 0x8]; struct Q_03D0 *fC; int f10; char pad14[0x114 - 0x14]; char *f114; int f118; char pad11C[0x120 - 0x11C]; int f120; };
+struct S_03D0 {
+    int f0;
+    char f4[0x2C - 0x4];
+    char *f2C;
+    char *f30;
+    char *f34;
+    volatile int f38;
+    int f3C;
+    int f40;
+    char pad44[0x50 - 0x44];
+    char *f50;
+    char *f54;
+    char *f58;
+    struct Q_03D0 *f5C;
+    struct Q_03D0 *f60;
+    char pad64[0x16C - 0x64];
+    int f16C;
+    int f170;
+    int f174;
+    int f178;
+    int f17C;
+};
+extern void MUTEX_lock(void *);
+extern void MUTEX_unlock_03D0(void *) __asm__("MUTEX_unlock");
+extern int func_003DFC08(unsigned int, unsigned int, unsigned int);
+extern void func_003DFE18_03D0(struct S_03D0 *, struct Q_03D0 *) __asm__("func_003DFE18");
+extern void func_003E6574_03D0(char *, char *, int) __asm__("func_003E6574");
+extern void func_003E0170_03D0(int, int, struct S_03D0 *) __asm__("func_003E0170");
+extern int func_003DD648_03D0(int, int, char *, int, int, struct S_03D0 *) __asm__("func_003DD648");
+extern void func_003DCF70_03D0(int, void (*)(int, int, struct S_03D0 *)) __asm__("func_003DCF70");
+
+void func_003E03D0(struct S_03D0 *self, int arg1) {
+    int *p;
+    char *rd;
+    char *wr;
+    int avail;
+    struct Q_03D0 *cur;
+
+    while (self->f50 != self->f54) {
+        p = (int *)self->f50;
+        if (*p == -1) {
+            self->f50 = self->f30;
+        } else if (*p == -2) {
+            self->f50 = (char *)p + p[1];
+        } else {
+            break;
+        }
+    }
+    MUTEX_lock(self->f4);
+    for (;;) {
+        struct Q_03D0 *n = self->f5C;
+        struct Q_03D0 *q = n->fC;
+        if (q == 0 || q->f4 == 1 || func_003DFC08((unsigned int)self->f50, (unsigned int)self->f58, q->f120 - 1)) {
+            break;
+        }
+        func_003DFE18_03D0(self, n);
+    }
+    MUTEX_unlock_03D0(self->f4);
+    rd = self->f50;
+    wr = self->f58;
+    if (wr < rd) {
+        avail = rd - wr - 0x41;
+    } else {
+        int used;
+        avail = self->f34 - wr - 0x40;
+        if (avail >= self->f17C) {
+            goto fill;
+        }
+        used = wr - self->f54;
+        if (self->f60->f10 == 1) {
+            if (rd - self->f30 < used + 1) {
+                self->f38 = 2;
+                return;
+            }
+        } else if (rd - self->f30 - 0x40 < used + 1) {
+            self->f38 = 2;
+            return;
+        }
+        if ((used & 0x3F) == 0 || self->f60->f10 == 1) {
+            self->f30 = self->f2C;
+        } else {
+            self->f30 = self->f2C - (used % 0x40 - 0x40);
+        }
+        func_003E6574_03D0(self->f30, self->f54, used);
+        p = (int *)self->f54;
+        p[0] = -1;
+        p[1] = 8;
+        self->f54 = self->f30;
+        self->f58 = self->f30 + used;
+        if (*(int *)self->f50 == -1) {
+            self->f50 = self->f30;
+            avail = self->f34 - self->f58 - 0x40;
+        } else {
+            avail = self->f50 - self->f58 - 1;
+        }
+    }
+    if (avail < self->f17C) {
+        self->f38 = 2;
+        return;
+    }
+fill:
+    cur = self->f60;
+    if (cur->f10 == 1) {
+        if (cur->f118 < self->f170 + avail) {
+            self->f178 = cur->f118 - self->f170;
+        } else {
+            self->f178 = avail;
+        }
+        func_003E6574_03D0(self->f58, cur->f114, self->f178);
+        cur->f114 += self->f178;
+        func_003E0170_03D0(0, 0, self);
+    } else {
+        self->f178 = self->f17C;
+        self->f174 = func_003DD648_03D0(self->f16C, self->f170, self->f58, self->f17C, arg1, self);
+        if (self->f174 != 0) {
+            func_003DCF70_03D0(self->f174, func_003E0170_03D0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E06B0);
@@ -3403,9 +3814,34 @@ int func_003E14C8(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E14F8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
 
+int func_003E14F8(int arg0) {
+    int loc[2];
+
+    if (func_003DFBD0(arg0, &loc[0], &loc[1]) != 0) {
+        return 0;
+    }
+    return *(volatile int *)((char*)loc[0] + 0x38);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1530);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003E1530(int arg0) {
+    int loc[2];
+
+    if (func_003DFBD0(arg0, &loc[0], &loc[1]) != 0) {
+        return 0;
+    }
+    return *(volatile int *)((char*)loc[0] + 0x38) == 0 && *(int *)((char*)loc[1] + 8) == 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1580);
@@ -4507,9 +4943,57 @@ int func_003E32F8(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3350);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct S_3350 { int a, b, c, d, e; };
+extern volatile struct S_3350 D_00519C20_3350 __asm__("D_00519C20");
+extern int func_003E4648(int);
 
+int func_003E3350(int arg0, int arg1, int arg2, int arg3) {
+    int lo = arg0 & 0xFFFFFF;
+    if ((arg0 >> 24) == 1) {
+        return func_003E4648(lo);
+    }
+    D_00519C20_3350.a = 1;
+    D_00519C20_3350.b = lo;
+    D_00519C20_3350.c = arg1;
+    D_00519C20_3350.d = arg2;
+    D_00519C20_3350.e = arg3;
+    return 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E33B0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern int D_00450C40_33B0 __asm__("D_00450C40");
+extern int D_00450C4C_33B0 __asm__("D_00450C4C");
+extern int func_004283A0_33B0(int, int, int) __asm__("func_004283A0");
+extern void iFILESYS_CommandCompleteCallback_33B0(int) __asm__("iFILESYS_CommandCompleteCallback");
+
+int func_003E33B0_i(void) __asm__("func_003E33B0");
+int func_003E33B0_i(void) {
+    int r;
+    int ok;
+    if (D_00519C20_3350.a != 0) {
+        if (D_00450C40_33B0 != D_00519C20_3350.b || D_00450C4C_33B0 != D_00519C20_3350.d) {
+            func_00428168(D_00519C20_3350.b, D_00519C20_3350.d, 0);
+        }
+        r = func_004283A0_33B0(D_00519C20_3350.b, D_00519C20_3350.c, D_00519C20_3350.e);
+        ok = r == D_00519C20_3350.e;
+        D_00450C40_33B0 = D_00519C20_3350.b;
+        D_00450C4C_33B0 = D_00519C20_3350.d + D_00519C20_3350.e;
+        D_00519C20_3350.a = 0;
+        iFILESYS_CommandCompleteCallback_33B0(ok);
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3478);
@@ -5316,7 +5800,17 @@ void func_003E4D68(void) {
 
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4DB8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4E98);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern volatile int D_00450DCC;
+
+int func_003E4E98(void)
+{
+    return D_00450DCC;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4EA8);
@@ -5928,7 +6422,37 @@ void SYNCTASK_del(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_run);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sSyncTask {                  /* 16 bytes, D_0051ED98[16]: a task SYNCTASK_run calls when it is due */
+    int (*f00)(int, int);
+    int f04;                        /* period */
+    int f08;                        /* due time (D_00450DD0) */
+    int f0C;                        /* running */
+};
+extern struct sSyncTask D_0051ED98[16];
+extern int D_00450E04_5928 __asm__("D_00450E04");
+
+int SYNCTASK_run(int arg) {
+    int i;
+    int r = 0;
+
+    D_00450E04_5928 = D_00450DD0_STA;
+    for (i = 0; i < 16; i++) {
+        int (*fn)(int, int) = D_0051ED98[i].f00;
+        if (fn != 0 && D_00450DD0_STA >= D_0051ED98[i].f08 && D_0051ED98[i].f0C == 0) {
+            D_0051ED98[i].f0C = 1;
+            r |= fn(arg, D_00450DD0_STA - D_0051ED98[i].f08);
+            D_0051ED98[i].f0C = 0;
+            D_0051ED98[i].f08 = D_00450DD0_STA + D_0051ED98[i].f04;
+        }
+    }
+    return r;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5A10);
@@ -6950,9 +7474,70 @@ int func_003E7450_impl(char *o, int a, int b, int c) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E74E8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct S_7500 { volatile int f0; volatile int f4; int f8; int fC; char *f10; };   /* f0 length, f4 busy: set by this RPC callback */
 
+int func_003E74E8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, struct S_7500 *out)
+{
+    out->f0 = a7;
+    out->f4 = 0;
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7500);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+typedef struct { char b[4]; } U4_7500;
+extern int D_0051EEE8_7500[] __asm__("D_0051EEE8");
+extern void func_004247D8_7500(char *, char *) __asm__("func_004247D8");
+extern void func_0041605C_7500(char *, char *, int) __asm__("func_0041605C");
+extern int func_003F4C98_7500(int *, int, int) __asm__("func_003F4C98");
+extern void func_003F4C68_7500(int *, int, int, int, int, int, char *, int, void *, void *) __asm__("func_003F4C68");
+extern char func_003E74E8_7500[] __asm__("func_003E74E8");
+
+int func_003E7500_impl(struct S_7500 *self, char *buf, int *a2, int *a3) __asm__("func_003E7500");
+int func_003E7500_impl(struct S_7500 *self, char *buf, int *a2, int *a3) {
+    int res = 0;
+
+    if (self->f0 > 0) {
+        *(U4_7500 *)&res = *(U4_7500 *)self->f10;
+        if (a3 != 0) {
+            *a3 = res;
+            *(U4_7500 *)(a3 + 1) = *(U4_7500 *)(self->f10 + 4);
+            *(U4_7500 *)(a3 + 2) = *(U4_7500 *)(self->f10 + 8);
+            *(U4_7500 *)(a3 + 3) = *(U4_7500 *)(self->f10 + 12);
+        }
+        if (a2 != 0) {
+            if (self->f0 - 0x10 < *a2) {
+                *a2 = self->f0 - 0x10;
+            }
+            func_0041605C_7500(buf, self->f10 + 0x10, *a2);
+        }
+        self->f0 = 0;
+        self->f8 = 0;
+    }
+    if (self->f4 == 0 && self->f0 <= 0) {
+        if (self->f8 != 0) {
+            if (func_003F4DE8() - self->f8 < 6) return res;
+        }
+        self->f8 = func_003F4DE8();
+        self->f4 = 1;
+        if (self->f0 == 0) {
+            func_004247D8_7500(self->f10, self->f10 + 0x7FF);
+            self->f0 = -1;
+        }
+        func_003F4C98_7500(D_0051EEE8_7500, 0x70696E67, 0x72657370);
+        func_003F4C68_7500(D_0051EEE8_7500, 1, self->fC, 0, 0, 0, self->f10, 0x800, func_003E74E8_7500, self);
+    }
+    return res;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E76A8);

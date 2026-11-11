@@ -1098,11 +1098,101 @@ int func_003F5910(int *self, int a, int b, char *str, int len) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F5A50);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* A network session (func_003F5A70 / func_003F5C38 read from its receive buffer f18). */
 
+int func_003F5A50_cb(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int len, struct sSess *self) __asm__("func_003F5A50");
+int func_003F5A50_cb(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int len, struct sSess *self) {
+    self->f10 = len;
+    self->fC = 0;
+    self->f8 = 0;
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F5A70);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* A network session (func_003F5A70 / func_003F5C38 read from its receive buffer f18). */
 
+extern char D_00525F60[];
+extern char D_004A4BB8[];
+extern int func_003F4C98(char *, int, int);
+extern void a70_47D8(unsigned char *, unsigned char *) __asm__("func_004247D8");
+extern int a70_4C68(char *, int, int, int, int, int, unsigned char *, int, int, int) __asm__("func_003F4C68");
+extern int func_003F5A50(void);
+int func_003F5A70(struct sSess *self, unsigned *o1, unsigned *o2, char **o3) {
+    int n;
+    if (self->fC >= self->f10) {
+        if (self->f8 == 0 && self->fC >= self->f10) {
+            self->f8 = 1;
+            if (self->f10 > 0) {
+                a70_47D8(self->f18, self->f18 + self->f14 - 1);
+                self->f10 = 0;
+                self->fC = self->f10;
+            }
+            func_003F4C98(D_00525F60, 'sess', 'recv');
+            a70_4C68(D_00525F60, 0, self->f0, 0, 0, 0, self->f18, self->f14, (int)func_003F5A50, (int)self);
+        }
+        return -1;
+    } else {
+        unsigned char *e = self->f18 + self->fC;
+        char *u = (char *)(self->f18 + self->fC) + 0xC;
+        n = e[8] << 24 | e[9] << 16 | e[10] << 8 | e[11];
+        n -= 0xC;
+        if (n < 1) u = D_004A4BB8;
+        else u[n - 1] = 0;
+        if (o1) *o1 = e[0] << 24 | e[1] << 16 | e[2] << 8 | e[3];
+        if (o2) *o2 = e[4] << 24 | e[5] << 16 | e[6] << 8 | e[7];
+        if (o3) *o3 = u;
+        return n;
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F5C38);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* A network session (func_003F5A70 / func_003F5C38 read from its receive buffer f18). */
+
+extern char D_00525F70[];
+extern int c38_5A70(struct sSess *, int, int, int) __asm__("func_003F5A70");
+extern void c38_605C(char *, void *, int) __asm__("func_0041605C");
+extern void c38_47D8(unsigned char *, unsigned char *) __asm__("func_004247D8");
+extern int func_003F4C98(char *, int, int);
+extern int c38_4C68(char *, int, int, int, int, int, unsigned char *, int, int, int) __asm__("func_003F4C68");
+extern int func_003F5A50(void);
+int func_003F5C38_impl(struct sSess *self, int a, int b, char *buf, int max) __asm__("func_003F5C38");
+int func_003F5C38_impl(struct sSess *self, int a, int b, char *buf, int max) {
+    int t;
+    int n = c38_5A70(self, a, b, 0);
+    if (n >= 0) {
+        if (n < max) max = n;
+        if (buf) c38_605C(buf, self->f18 + self->fC + 0xC, max);
+        t = self->fC + 0xC;
+        self->fC = t + n;
+        if (self->fC >= self->f10 && self->f8 == 0 && self->fC >= self->f10) {
+            self->f8 = 1;
+            if (self->f10 > 0) {
+                c38_47D8(self->f18, self->f18 + self->f14 - 1);
+                self->f10 = 0;
+                self->fC = self->f10;
+            }
+            func_003F4C98(D_00525F70, 'sess', 'recv');
+            c38_4C68(D_00525F70, 0, self->f0, 0, 0, 0, self->f18, self->f14, (int)func_003F5A50, (int)self);
+        }
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F5D88);

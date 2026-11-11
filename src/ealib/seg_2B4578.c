@@ -842,7 +842,91 @@ int func_003B4FC0_impl(struct sA8E8Setup *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5158);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+extern struct sA8E8 D_0050A8E8;
+extern char D_0044E180;
+extern void func_00416210_5158(void *, int, int) __asm__("func_00416210");
+void func_003B5BD0_5158(struct sA8E8Heap *a0, int a1) __asm__("func_003B5BD0");
+int func_003B4DD8_5158(struct sA8E8Setup *out) __asm__("func_003B4DD8");
+int func_003B4FC0_impl(struct sA8E8Setup *p) __asm__("func_003B4FC0");
+void func_003BC588(int arg0);
+void func_003C3300(void);
+void func_003B58A0(void);
+void func_003B58D8(void);
+extern void *func_003B5C60_5158(int) __asm__("func_003B5C60");
+extern int func_003C1B80(void);
+extern void func_003C2268_5320() __asm__("func_003C2268");
+extern void func_003C3358();
+extern void func_003BC0B0(void);
+
+int func_003B5158_impl(void *buf, int size, int arg2) __asm__("func_003B5158");
+
+/* arg2 is passed by the caller (func_003C5B80 forwards its own argument) but not used here. */
+int func_003B5158_impl(void *buf, int size, int arg2) {
+    int r;
+    D_0044E180 = 'S';
+    if (D_0050A8E8.f174 != 0) return 0;
+    func_00416210_5158(buf, 0, size);
+    func_003B5BD0_5158(buf, size);
+    if (D_0050A8E8.f17E == 0) {
+        r = func_003B4DD8_5158(&D_0050A8E8.setup);
+        if (r < 0) return r;
+        func_003B4FC0_impl(&D_0050A8E8.setup);
+    }
+    func_003BC588(D_0050A8E8.setup.cfg.f04);
+    func_003C3300();
+    D_0050A8E8.f174 = 1;
+    func_003B58A0();
+    D_0050A8E8.f1F0 = func_003B5C60_5158(D_0050A8E8.f17E * 0x8C);
+    D_0050A8E8.f1F4 = func_003B5C60_5158(D_0050A8E8.setup.cfg.f08 << 4);
+    func_003B58D8();
+    D_0050A8E8.f330 = 0;
+    D_0050A8E8.f175 = 0x7F;
+    D_0050A8E8.f180 = 0;
+    D_0050A8E8.f179 = 0;
+    D_0050A8E8.f177 = 0;
+    D_0050A8E8.f178 = 0;
+    r = func_003C1B80();
+    if (r < 0) {
+        func_003C2268_5320();
+        func_003C3358();
+        D_0050A8E8.f174 = 0;
+        return r;
+    }
+    if (D_0050A8E8.setup.cfg.f27 == 2) {
+        D_0050A8E8.f2E0[1][0] = 0xC000;
+        D_0050A8E8.f2E0[1][1] = 0x4000;
+    } else {
+        D_0050A8E8.f2E0[1][0] = 0xE000;
+        D_0050A8E8.f2E0[1][1] = 0x2000;
+    }
+    D_0050A8E8.f2E0[2][0] = D_0050A8E8.setup.cfg.f58[2][2];
+    D_0050A8E8.f2E0[2][1] = D_0050A8E8.setup.cfg.f58[2][0];
+    D_0050A8E8.f2E0[2][2] = D_0050A8E8.setup.cfg.f58[2][1];
+    D_0050A8E8.f2E0[3][0] = 0xE000;
+    D_0050A8E8.f2E0[3][1] = 0x2000;
+    D_0050A8E8.f2E0[3][2] = 0xA000;
+    D_0050A8E8.f2E0[3][3] = 0x6000;
+    D_0050A8E8.f2E0[4][0] = 0xE000;
+    D_0050A8E8.f2E0[4][1] = 0;
+    D_0050A8E8.f2E0[4][2] = 0x2000;
+    D_0050A8E8.f2E0[4][3] = 0xA000;
+    D_0050A8E8.f2E0[4][4] = 0x6000;
+    D_0050A8E8.f2E0[5][0] = 0xE000;
+    D_0050A8E8.f2E0[5][1] = 0;
+    D_0050A8E8.f2E0[5][2] = 0x2000;
+    D_0050A8E8.f2E0[5][3] = 0xA000;
+    D_0050A8E8.f2E0[5][4] = 0x6000;
+    D_0050A8E8.f2E0[5][5] = 0;
+    func_003BC0B0();
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5320);
@@ -961,9 +1045,119 @@ void func_003B54E0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5540);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
 
+extern struct sA8E8 D_0050A8E8;
+extern void func_003B55F0_5540(void) __asm__("func_003B55F0");
+
+void func_003B5540(unsigned arg0) {
+    unsigned lim;
+    if (D_0050A8E8.f174 != 0) {
+        if ((int)arg0 != (short)D_0050A8E8.f334) {
+            D_0050A8E8.f334 = arg0;
+            D_0050A8E8.f180 = 0;
+            D_0050A8E8.f330 = 0;
+        }
+        D_0050A8E8.f330++;
+        lim = D_0050A8E8.f330 * 100 / arg0;
+        while (lim >= D_0050A8E8.f180) {
+            func_003B55F0_5540();
+        }
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B55F0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+extern struct sA8E8 D_0050A8E8;
+extern void func_003C2438(void);
+extern void f_89E0_55F0(int) __asm__("func_003B89E0");
+extern void f_A7B0_55F0(int) __asm__("func_003BA7B0");
+extern void f_25E0_55F0(int) __asm__("func_003C25E0");
+extern void f_2A50_55F0(int) __asm__("func_003C2A50");
+
+void func_003B55F0(void) {
+    int i;
+    int dirty;
+    struct sA8E8Chan *e;
+    struct sA8E8Env *q;
+
+    D_0050A8E8.f180++;
+    func_003C2438();
+    for (i = 0; i < D_0050A8E8.f177; i++) {
+        D_0050A8E8.f184[i]();
+    }
+    for (i = 0; i < D_0050A8E8.f17E; i++) {
+        e = &D_0050A8E8.f1F0[i];
+        if (e->f69 != 1 || e->f00 < 0) {
+            continue;
+        }
+        if (e->f7C != 0) {
+            if (++e->f68 >= e->f66) {
+                e->f68 = 0;
+            }
+            e->f86 = 0;
+            func_003BA938(i);
+            f_25E0_55F0(i);
+        }
+        dirty = 0;
+        if (e->f78 != 0) {
+            dirty = 1;
+            if (++e->f67 >= e->f65) {
+                e->f67 = 0;
+            }
+        }
+        if (e->f30 != 0) {
+            e->f38 += e->f30;
+            dirty = 1;
+            if (e->f30 < 0) {
+                if (e->f38 <= e->f34) {
+                    e->f38 = e->f34;
+                    e->f30 = 0;
+                }
+            } else if (e->f38 >= e->f34) {
+                e->f38 = e->f34;
+                e->f30 = 0;
+            }
+            if (e->f38 < 0) {
+                f_89E0_55F0(e->f00);
+                continue;
+            }
+        }
+        e->f44--;
+        if (e->f3C != 0) {
+            e->f40 += e->f3C;
+            dirty = 1;
+        }
+        if (e->f44 == 0) {
+            if (++e->f5D >= e->f5C) {
+                f_89E0_55F0(e->f00);
+                continue;
+            }
+            q = &e->f6C[e->f5D];
+            e->f44 = q->f00;
+            if (e->f44 < 0) {
+                e->f44 = 0x7FFFFFFF;
+            }
+            e->f3C = ((q->f04 << 16) - e->f40) / e->f44;
+        }
+        if (dirty) {
+            f_A7B0_55F0(i);
+            if (e->f00 >= 0) {
+                f_2A50_55F0(i);
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5860);
@@ -998,7 +1192,20 @@ void func_003B58A0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B58D8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+extern struct sA8E8 D_0050A8E8;
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void (*D_0044C470_58D8[])(void) __asm__("D_0044C470");
+
+void func_003B58D8(void) {
+    D_0050A8E8.f176--;
+    D_0044C470_58D8[0]();
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5910);
@@ -1819,9 +2026,97 @@ int func_003B7080(int arg0, int *arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B70F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
 
+extern unsigned int f_14C8_70F8(int) __asm__("func_003E14C8");
+extern int f_14F8_70F8(int) __asm__("func_003E14F8");
+int func_003B70F8(struct sA0A0Strm *self) {
+    struct sA0A0Node *t = self->f134;
+    if (t == 0) {
+        return 0;
+    }
+    if (t->f10 == 0) {
+        return 0;
+    }
+    if (t->f20 < 0) {
+        return 1;
+    }
+    if (t->f20 != 0) {
+        unsigned int u = f_14C8_70F8(self->f00);
+        if (u > 4000000) u = 4000000;
+        if (u * 1000 / t->f10 >= t->f20) {
+            t->f20 = 0;
+            return 0;
+        }
+        if (f_14F8_70F8(self->f00) == 2) {
+            t->f20 = 0;
+            return 0;
+        }
+        if (self->f128.f08 > 0) return 1;
+        if (f_14F8_70F8(self->f00) == 0) {
+            t->f20 = 0;
+            return 0;
+        }
+        return 1;
+    }
+    return 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B71D8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+extern struct sA8E8 D_0050A8E8;
+
+extern struct sA0A0Strm *D_0050A0A0_71D8[32] __asm__("D_0050A0A0");
+extern int func_003C6C98(int);
+extern int func_003C6CE8(int);
+extern int func_003C6C28(int);
+extern int *func_003E12E0(int);
+
+void func_003B71D8(void) {
+    int i = 0;
+    struct sA0A0Strm *p;
+    int n;
+    int r;
+    int *q;
+    func_003B58A0();
+    for (; i < D_0050A8E8.setup.cfg.f26; i++) {
+        p = D_0050A0A0_71D8[i];
+        if (p == 0 || p->f11C.f08 == 0) continue;
+        if (p->f10 == 2) {
+            if (func_003C6C98(p->f08) > 0) continue;
+            p->f14 = p->f18;
+            __builtin_memcpy(&p->f1C, &p->f84, sizeof(p->f1C));
+            p->f84.f18[0] = 0;
+            func_003C6CE8(p->f08);
+            func_003B68B8(p);
+        }
+        if (func_003B70F8(p) == 0) {
+            if (p->f10 == 1) {
+                n = func_003C6C28(p->f08);
+                if (n <= 0) continue;
+            } else {
+                n = 8;
+            }
+            r = 0;
+            do {
+                n--;
+                q = func_003E12E0(p->f00);
+                if (q != 0) r = func_003B7080(i, q);
+            } while (r != 0 && n > 0);
+        }
+    }
+    func_003B58D8();
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7410);
@@ -1845,7 +2140,49 @@ int func_003B7410(void) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7450);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B76E8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+extern int f_0C88_76E8(int, int, int, int) __asm__("func_003E0C88");
+extern int f_0D80_76E8(int, int, int, int) __asm__("func_003E0D80");
+extern struct sA0A0Node *f_62E8_76E8(struct sA0A0List *) __asm__("func_003C62E8");
+extern void f_6210_76E8(void *, int, int) __asm__("func_00416210");
+extern void f_62B8_76E8(struct sA0A0List *, struct sA0A0Node *) __asm__("func_003C62B8");
+
+int func_003B76E8_76E8(int, int, int, int, int) __asm__("func_003B76E8");
+extern struct sA0A0Strm *func_003B6A38_76E8(int) __asm__("func_003B6A38");
+int func_003B76E8_76E8(int a0, int a1, int a2, int a3, int a4) {
+    struct sA0A0Strm *o = func_003B6A38_76E8(a0);
+    struct sA0A0Node *s;
+    int r;
+    if (o == 0) return -8;
+    if (o->f128.f08 == 0) return -13;
+    if (a4 == 0) {
+        r = f_0C88_76E8(o->f00, a2, a3, 0x6C454353);
+    } else if (a4 == 1) {
+        r = f_0D80_76E8(o->f00, a2, 0, 0x6C454353);
+    } else {
+        r = a3;
+    }
+    if (r == 0) return -1;
+    func_003B58A0();
+    a4 = (int)f_62E8_76E8(&o->f128);
+    s = (struct sA0A0Node *)a4;
+    f_6210_76E8(s, 0, 0x28);
+    f_62B8_76E8(&o->f11C, s);
+    s->f08 = r;
+    o->f0C += 0x100;
+    if (o->f0C < 0) o->f0C = 0;
+    s->f0C = o->f0C | a0;
+    s->f20 = a1;
+    o = (struct sA0A0Strm *)s->f0C;
+    func_003B58D8();
+    return (int)o;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7818);
@@ -1855,7 +2192,43 @@ void func_003B7818(int a, int b, int c, int d, int e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7838);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+extern void (*D_0050AAD4)(void);        /* D_0050A8E8.f1EC */
+
+extern struct sA0A0Strm *D_0050A0A0_7838[32] __asm__("D_0050A0A0");
+extern int func_003B7410(void);
+extern int func_003B78F8(int);
+extern void func_003C6040_7838(void (*)(void)) __asm__("func_003C6040");
+extern int func_003C6DA0(int);
+extern void func_003E0A28(int);
+
+extern void func_003B71D8_7838(void) __asm__("func_003B71D8");
+extern struct sA0A0Strm *func_003B6A38_7838(int) __asm__("func_003B6A38");
+int func_003B7838_7838(int) __asm__("func_003B7838");
+int func_003B7838_7838(int h) {
+    struct sA0A0Strm *o = func_003B6A38_7838(h);
+    int w;
+    signed char c;
+    if (o == 0) return -8;
+    func_003B78F8(h);
+    if (func_003B7410() == 1) {
+        func_003C6040_7838(func_003B71D8_7838);
+        D_0050AAD4 = 0;
+    }
+    func_003C6DA0(o->f08);
+    w = o->f00;
+    c = o->f11;
+    D_0050A0A0_7838[h] = 0;
+    if (c == 0)
+        func_003E0A28(w);
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B78D8);
@@ -1867,7 +2240,61 @@ void func_003B78D8(int a, int b, int c, int d) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B78F8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+extern int func_003C6CE8(int);
+extern void f_1110_78F8(int) __asm__("func_003E1110");
+extern void f_5E98_78F8(int) __asm__("func_003B5E98");
+extern struct sA0A0Node *f_62E8_78F8(struct sA0A0List *) __asm__("func_003C62E8");
+extern void func_003C6288(void *, void *);
+extern void f_6210_78F8(void *, int, int) __asm__("func_00416210");
+
+int func_003B78F8(int arg0) {
+    struct sA0A0Strm *o;
+    struct sA0A0Node *s;
+    int i;
+    func_003B58A0();
+    o = func_003B6A38(arg0);
+    if (o == 0) {
+        func_003B58D8();
+        return -8;
+    }
+    if (o->f04 >= 0) {
+        func_003C6CE8(o->f08);
+    }
+    o->f04 = -1;
+    if (o->f11 == 0) {
+        f_1110_78F8(o->f00);
+    }
+    if (o->f84.f18[0] != 0) {
+        i = 0;
+        if (o->f18.b[2] != 0) {
+            int *p = &o->f84.f18[0];
+            do {
+                i++;
+                f_5E98_78F8(*p++);
+            } while (i < o->f18.b[2]);
+        }
+    }
+    do {
+        s = f_62E8_78F8(&o->f11C);
+        if (s == 0) break;
+        func_003C6288(&o->f128, s);
+    } while (1);
+    o->f134 = 0;
+    o->f10 = 0;
+    f_6210_78F8(&o->f14, 0, 4);
+    f_6210_78F8(&o->f18, 0, 4);
+    f_6210_78F8(&o->f1C, 0, 0x68);
+    f_6210_78F8(&o->f84, 0, 0x68);
+    func_003B58D8();
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7A70);
@@ -2101,9 +2528,50 @@ int func_003B7EB0(int h, int a, int b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7F18);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
 
+int func_003B86C0_7F18(int) __asm__("func_003B86C0");
+
+int func_003B7F18(int h) {
+    struct sA0A0Strm *p;
+    int r;
+
+    p = func_003B6A38(h);
+    if (p == 0) {
+        return -8;
+    }
+    r = func_003B86C0_7F18(p->f04);
+    if (r < 0) {
+        r = p->fEC.f00;
+    }
+    return r;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7F60);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+int func_003B8C00(int, int, int);
+
+int func_003B7F60(int arg0, int arg1, int arg2) {
+    struct sA0A0Strm *p;
+
+    p = func_003B6A38(arg0);
+    if (p == 0) {
+        return -8;
+    }
+    p->fEC.f08 = arg1;
+    p->fEC.f0A = arg2;
+    func_003B8C00(p->f04, arg1, arg2);
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7FB8);
@@ -2150,7 +2618,25 @@ int func_003B8010(int arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8050);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+
+
+int func_003B8050(int arg0, int arg1, int arg2) {
+    struct sA0A0Strm *p;
+
+    p = func_003B6A38(arg0);
+    if (p == 0) {
+        return -8;
+    }
+    p->fEC.f05 = arg2;
+    func_003B88C8(p->f04, arg1, arg2);
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B80A0);
@@ -7352,13 +7838,203 @@ void func_003C3250(int arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3300);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
+   queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
+   their offsets. */
+struct sAD00Voice { int key; int val; };
 
+struct sAD00SpuVoice {              /* 8 bytes, sAD00Spu.f20[] */
+    int key;
+    short pitch;
+    signed char l;
+    signed char r;
+};
+
+struct sAD00SpuChan {               /* 16 bytes, sAD00Spu.f1A0[] */
+    int key;
+    short pitch;
+    signed char vol[6];
+    signed char f0C[4];
+};
+
+struct sAD00Spu {                   /* 0x2A0, block 3 of the shared buffer (D_0050AD00.fCB0) */
+    long f00;                       /* voice on bits */
+    unsigned long f08;
+    char f10;
+    char f11;
+    char f12;
+    unsigned char f13;
+    short f14;
+    short f16;
+    char pad18[0x20 - 0x18];
+    struct sAD00SpuVoice f20[48];
+    struct sAD00SpuChan f1A0[16];
+};
+
+struct sAD00Xfer {                  /* 16 bytes, D_0050AD00.fCC8[] (also D_0050B9C8) */
+    unsigned int key;
+    int f04;
+    int f08;
+    unsigned short f0C;
+    unsigned char f0E;
+    char pad0F;
+};
+
+struct sAD00Spk {                   /* 0x20, D_0050AD00.fE98[] (also D_0050BB98) */
+    float f00[6];
+    unsigned int f18;
+    short f1C;
+    short f1E;
+};
+
+struct sAD00Seg { unsigned short a; unsigned short b; };
+
+struct sAD00Port { int f00; int f04; int pad08[2]; };   /* 16 bytes, D_0050AD00.fE88[] */
+
+struct sAD00 {
+    char f000[0x83C];               /* RPC send buffer */
+    struct sAD00Voice f83C[48];
+    struct sAD00Voice f9BC[16];
+    char padA3C[0xC80 - 0xA3C];
+    char fC80[0x30];                /* RPC client data */
+    struct sAD00Spu *fCB0;          /* also D_0050B9B0 */
+    int *fCB4;
+    void *fCB8;
+    volatile int fCBC;              /* last transfer id */
+    volatile unsigned char fCC0;    /* queued transfers */
+    volatile unsigned char fCC1;    /* selected transfer */
+    volatile unsigned char fCC2;    /* transfer running */
+    char padCC3;
+    int fCC4;                       /* tick of the last transfer */
+    struct sAD00Xfer fCC8[28];
+    struct sAD00Port fE88[1];
+    struct sAD00Spk fE98[96];
+    unsigned short f1A98;           /* number of f1AA0 segments */
+    unsigned short f1A9A;
+    unsigned short f1A9C;
+    unsigned short f1A9E;
+    struct sAD00Seg *f1AA0;
+    int f1AA4;
+    int f1AA8;
+    char f1AAC;
+    unsigned char f1AAD;
+    unsigned short f1AAE;
+    char pad1AB0[0x1AB2 - 0x1AB0];
+    unsigned short f1AB2;           /* fill offset while func_003C1638 lays out f1AB4 */
+    char *f1AB4;
+    int f1AB8;
+    void *f1ABC[6];
+    int f1AD4;
+    int f1AD8;
+    char pad1ADC[0x1AF4 - 0x1ADC];
+    void *f1AF4;
+    int f1AF8;
+    char pad1AFC[0x1B00 - 0x1AFC];
+    void *f1B00;
+    int f1B04;
+    int f1B08;
+    int f1B0C;
+    volatile int f1B10;             /* lock: semaphore, owner thread, depth */
+    volatile int f1B14;
+    volatile int f1B18;
+    int f1B1C[7];                   /* saved SPU2 DMA registers */
+    int f1B38;
+};
+
+extern struct sAD00 D_0050AD00;
+
+extern int D_0050ACE0_3300[] __asm__("D_0050ACE0");
+extern int func_00423DA0_3300(int *) __asm__("func_00423DA0");
+
+void func_003C3300(void) {
+    D_0050ACE0_3300[1] = 0x14;
+    D_0050AD00.f1B14 = -1;
+    D_0050ACE0_3300[2] = 1;
+    D_0050AD00.f1B18 = 0;
+    D_0050AD00.f1B10 = func_00423DA0_3300(D_0050ACE0_3300);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3358);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
+   queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
+   their offsets. */
+/* 16 bytes, D_0050AD00.fE88[] */
 
+extern struct sAD00 D_0050AD00;
+
+extern void func_00423DB0(int);
+
+void func_003C3358(void) {
+    func_00423DB0(D_0050AD00.f1B10);
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3380);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
+   queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
+   their offsets. */
+/* 16 bytes, D_0050AD00.fE88[] */
 
+extern struct sAD00 D_0050AD00;
+
+extern int func_00423C90(void);
+extern void func_00423DE0(int);
+
+/* Recursive lock (pairs with func_003C33E0). The owner's re-entry bumps the count and returns early; jump2
+   cross-jumps the two count increments into one copy, and the return label left behind keeps the epilogue
+   restores below the final store, as in the target. */
+void func_003C3380(void) {
+    int r = func_00423C90();
+    if (D_0050AD00.f1B14 == r) {
+        D_0050AD00.f1B18++;
+        return;
+    }
+    func_00423DE0(D_0050AD00.f1B10);
+    D_0050AD00.f1B14 = r;
+    D_0050AD00.f1B18++;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C33E0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
+   queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
+   their offsets. */
+/* 16 bytes, D_0050AD00.fE88[] */
+
+extern struct sAD00 D_0050AD00;
+
+extern int func_00423C90(void);
+extern void func_00423DC0(int);
+
+void func_003C33E0(void) {
+    int r = func_00423C90();
+    if (D_0050AD00.f1B14 == r) {
+        D_0050AD00.f1B18--;
+        if (D_0050AD00.f1B18 == 0) {
+            D_0050AD00.f1B14 = -1;
+        }
+    }
+    if (D_0050AD00.f1B18 <= 0) {
+        func_00423DC0(D_0050AD00.f1B10);
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C3450);
@@ -7766,9 +8442,106 @@ void func_003C43C0(int arg0, int arg1, int arg2, int arg3) {
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4450);
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C45E8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: PS2-only COP0 (disable / enable interrupts, pipeline sync, read the Status register).
+#define DI_2B45() __asm__ volatile("di")
 
+#define EI_2B45() __asm__ volatile("ei")
+
+#define SYNCP_2B45() __asm__ volatile("sync.p")
+
+#define MFC0_STATUS_2B45(v) __asm__ volatile("mfc0 %0, $12" : "=r"(v))
+
+/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
+   queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
+   their offsets. */
+/* 16 bytes, D_0050AD00.fE88[] */
+
+extern struct sAD00 D_0050AD00;
+
+extern void func_003C4450(int);
+
+void func_003C45E8(int arg0) {
+    int s;
+    if (arg0 == 0) {
+        do {
+            DI_2B45();
+            SYNCP_2B45();
+            MFC0_STATUS_2B45(s);
+        } while (s & 0x10000);
+    }
+    if (D_0050AD00.fCC2 == 0 && (signed char)D_0050AD00.fCC0 > 0) {
+        func_003C4450(arg0);
+    }
+    if (arg0 == 0) {
+        EI_2B45();
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4668);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: PS2-only COP0 (disable / enable interrupts, pipeline sync, read the Status register).
+#define DI_2B45() __asm__ volatile("di")
+
+#define EI_2B45() __asm__ volatile("ei")
+
+#define SYNCP_2B45() __asm__ volatile("sync.p")
+
+#define MFC0_STATUS_2B45(v) __asm__ volatile("mfc0 %0, $12" : "=r"(v))
+
+/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
+   queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
+   their offsets. */
+/* 16 bytes, D_0050AD00.fE88[] */
+
+extern struct sAD00 D_0050AD00;
+
+extern void func_003C45E8_4668(int) __asm__("func_003C45E8");
+extern void func_003C43C0_4668(int, int, int, int) __asm__("func_003C43C0");
+int func_003C4668(int op, int a, int b, int size, int d) {
+    int s, i;
+    if (size & 0x3F) {
+        size += 0x40;
+        size &= 0xFFFFFFC0;
+    }
+    do {
+        DI_2B45();
+        SYNCP_2B45();
+        MFC0_STATUS_2B45(s);
+    } while (s & 0x10000);
+    D_0050AD00.fCBC++;
+    if (D_0050AD00.fCBC == 0) {
+        D_0050AD00.fCBC = 1;
+    }
+    if (op == 0x100) {
+        func_003C43C0_4668(a, b, size, 0);
+        EI_2B45();
+        return D_0050AD00.fCBC;
+    }
+    for (i = 0; i < 28; i++) {
+        struct sAD00Xfer *e = &D_0050AD00.fCC8[i];
+        if (e->key == 0) {
+            D_0050AD00.fCC0++;
+            e->key = D_0050AD00.fCBC;
+            e->f04 = a;
+            e->f08 = b;
+            e->f0C = size;
+            e->f0E = d;
+            EI_2B45();
+            func_003C45E8_4668(0);
+            return D_0050AD00.fCBC;
+        }
+    }
+    EI_2B45();
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4788);
@@ -7800,9 +8573,66 @@ int func_003C4788_4788(int a0, int a1, int a2, int a3, int a4) {
 }
 #endif
 
+//100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4898);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
 
+extern struct sA8E8 D_0050A8E8;
+
+/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
+   queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
+   their offsets. */
+/* 16 bytes, D_0050AD00.fE88[] */
+
+extern struct sAD00 D_0050AD00;
+
+extern void func_003C4450(int);
+
+int func_003C4898_4898(int) __asm__("func_003C4898");
+int func_003C4898_4898(int key) {
+    int i;
+    if ((signed char)D_0050AD00.fCC0 <= 0) return 1;
+    for (i = 0; i < 28; i++) {
+        if (D_0050AD00.fCC8[i].key == key) {
+            if (D_0050AD00.fCC4 + 500 < D_0050A8E8.f180) {
+                func_003C4450(0);
+            }
+            return 0;
+        }
+    }
+    return 1;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4918);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
+   queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
+   their offsets. */
+/* 16 bytes, D_0050AD00.fE88[] */
+
+extern struct sAD00 D_0050AD00;
+
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_003C45E8(int);
+
+void func_003C4918(int key) {
+    int i;
+    for (i = 0; i < 28; i++) {
+        if (D_0050AD00.fCC8[i].key == key) {
+            D_0050AD00.fCC2 = 0;
+            D_0050AD00.fCC0--;
+            D_0050AD00.fCC8[i].key = 0;
+            func_003C45E8(1);
+            return;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C4978);
@@ -7907,105 +8737,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C4E50);
 /* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
    their offsets. */
-struct sAD00Voice { int key; int val; };
-
-struct sAD00SpuVoice {              /* 8 bytes, sAD00Spu.f20[] */
-    int key;
-    short pitch;
-    signed char l;
-    signed char r;
-};
-
-struct sAD00SpuChan {               /* 16 bytes, sAD00Spu.f1A0[] */
-    int key;
-    short pitch;
-    signed char vol[6];
-    signed char f0C[4];
-};
-
-struct sAD00Spu {                   /* 0x2A0, block 3 of the shared buffer (D_0050AD00.fCB0) */
-    long f00;                       /* voice on bits */
-    unsigned long f08;
-    char f10;
-    char f11;
-    char f12;
-    unsigned char f13;
-    short f14;
-    short f16;
-    char pad18[0x20 - 0x18];
-    struct sAD00SpuVoice f20[48];
-    struct sAD00SpuChan f1A0[16];
-};
-
-struct sAD00Xfer {                  /* 16 bytes, D_0050AD00.fCC8[] (also D_0050B9C8) */
-    unsigned int key;
-    int f04;
-    int f08;
-    unsigned short f0C;
-    unsigned char f0E;
-    char pad0F;
-};
-
-struct sAD00Spk {                   /* 0x20, D_0050AD00.fE98[] (also D_0050BB98) */
-    float f00[6];
-    unsigned int f18;
-    short f1C;
-    short f1E;
-};
-
-struct sAD00Seg { unsigned short a; unsigned short b; };
-
-struct sAD00Port { int f00; int f04; int pad08[2]; };   /* 16 bytes, D_0050AD00.fE88[] */
-
-struct sAD00 {
-    char f000[0x83C];               /* RPC send buffer */
-    struct sAD00Voice f83C[48];
-    struct sAD00Voice f9BC[16];
-    char padA3C[0xC80 - 0xA3C];
-    char fC80[0x30];                /* RPC client data */
-    struct sAD00Spu *fCB0;          /* also D_0050B9B0 */
-    int *fCB4;
-    void *fCB8;
-    volatile int fCBC;              /* last transfer id */
-    volatile unsigned char fCC0;    /* queued transfers */
-    volatile unsigned char fCC1;    /* selected transfer */
-    volatile unsigned char fCC2;    /* transfer running */
-    char padCC3;
-    int fCC4;                       /* tick of the last transfer */
-    struct sAD00Xfer fCC8[28];
-    struct sAD00Port fE88[1];
-    struct sAD00Spk fE98[96];
-    unsigned short f1A98;           /* number of f1AA0 segments */
-    unsigned short f1A9A;
-    unsigned short f1A9C;
-    unsigned short f1A9E;
-    struct sAD00Seg *f1AA0;
-    int f1AA4;
-    int f1AA8;
-    char f1AAC;
-    unsigned char f1AAD;
-    unsigned short f1AAE;
-    char pad1AB0[0x1AB2 - 0x1AB0];
-    unsigned short f1AB2;           /* fill offset while func_003C1638 lays out f1AB4 */
-    char *f1AB4;
-    int f1AB8;
-    void *f1ABC[6];
-    int f1AD4;
-    int f1AD8;
-    char pad1ADC[0x1AF4 - 0x1ADC];
-    void *f1AF4;
-    int f1AF8;
-    char pad1AFC[0x1B00 - 0x1AFC];
-    void *f1B00;
-    int f1B04;
-    int f1B08;
-    int f1B0C;
-    volatile int f1B10;             /* lock: semaphore, owner thread, depth */
-    volatile int f1B14;
-    volatile int f1B18;
-    int f1B1C[7];                   /* saved SPU2 DMA registers */
-    int f1B38;
-};
+/* 16 bytes, D_0050AD00.fE88[] */
 
 extern struct sAD00 D_0050AD00;
 
@@ -9249,9 +9981,120 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C6620);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6760);
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6AB8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_005157B8: the stream queues (a pending-callback list, then one queue per stream). Layout from every use in
+   this unit; field names are their offsets. */
+struct s7B8Rec {                    /* 0x20, s7B8Queue.f7C[] */
+    int f00;                        /* sequence number */
+    int len : 31;
+    int flag : 1;
+    unsigned int f08[6];            /* one per reader */
+};
 
+struct s7B8Queue {
+    volatile int f00;               /* voice */
+    volatile int f04;               /* records written */
+    volatile unsigned int f08;
+    volatile unsigned int f0C;
+    volatile unsigned int f10[6];   /* per reader: records read */
+    volatile short f28[6];          /* per reader: read index */
+    volatile short f34[6];          /* per reader: records pending */
+    volatile short f40;             /* number of records */
+    volatile unsigned char f42;
+    char pad43;
+    volatile short f44;
+    volatile short f46;             /* write index */
+    volatile int f48;
+    volatile int f4C;
+    int f50;
+    void (*f54)(int, int);
+    void (*f58)(int, int, int);
+    int f5C;
+    char pad60[0x62 - 0x60];
+    unsigned char f62;              /* number of readers */
+    char pad63;
+    int f64[6];
+    struct s7B8Rec f7C[1];
+};
+
+struct s7B8Event {                  /* 8 bytes: a callback to run (f00 == 0: f58, else f54) */
+    unsigned short f00;
+    unsigned short f02;             /* queue */
+    int f04;
+};
+
+struct s7B8 {
+    int f000;                       /* number of f004 entries */
+    struct s7B8Event f004[0x60];
+    struct s7B8Queue *f304[32];
+};
+
+extern struct s7B8 D_005157B8;
+
+/* 97.69: only missing "move $5,$2" copy of lbu result before loop (n vs r pseudo); volatile f48/f46/f4/f40/a[] needed */
+struct A_6AB8 { char pad0[4]; unsigned int sz : 31; unsigned int flag : 1; char pad8[4]; int w[6]; };
+
+int func_003C6AB8(int arg0, struct A_6AB8 *arg1)
+{
+  struct s7B8Queue *s = D_005157B8.f304[arg0];
+  struct s7B8Rec *e;
+  int i;
+  int r;
+  for (i = 0; i < s->f62; i++)
+  {
+    if (s->f34[i] >= s->f40 - 1)
+    {
+      r = -13;
+      goto done;
+    }
+  }
+
+  e = &s->f7C[s->f46];
+  e->len = arg1->sz;
+  e->flag = arg1->flag;
+  e->f00 = s->f04;
+  for (i = 0; i < s->f62; i++)
+  {
+    e->f08[i] = arg1->w[i];
+    s->f34[i] += 1;
+  }
+
+  s->f48 += arg1->sz;
+  r = s->f04;
+  s->f04 = s->f04 + 1;
+  s->f46 = s->f46 + 1;
+  if (s->f46 >= s->f40)
+  {
+    s->f46 = 0;
+  }
+  done:
+  return r;
+
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6C28);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_005157B8: the stream queues (a pending-callback list, then one queue per stream). Layout from every use in
+   this unit; field names are their offsets. */
+extern struct s7B8 D_005157B8;
+
+int func_003C6C28(int arg0) {
+    struct s7B8Queue *e = D_005157B8.f304[arg0];
+    int m = 0;
+    int i;
+    for (i = 0; i < e->f62; i++) {
+        if (!(e->f34[i] < m))
+            m = e->f34[i];
+    }
+    return e->f40 - m - 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6C98);
@@ -9266,7 +10109,18 @@ int func_003C6C98(int i) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6CC0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_005157B8: the stream queues (a pending-callback list, then one queue per stream). Layout from every use in
+   this unit; field names are their offsets. */
+extern struct s7B8 D_005157B8;
+
+int func_003C6CC0(int i) {
+    return D_005157B8.f304[i]->f4C;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6CE0);
@@ -9276,7 +10130,37 @@ int func_003C6CE0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6CE8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_005157B8: the stream queues (a pending-callback list, then one queue per stream). Layout from every use in
+   this unit; field names are their offsets. */
+extern struct s7B8 D_005157B8;
+
+extern void func_003B5E98();
+
+extern void f_89E0_6CE8(int) __asm__("func_003B89E0");
+extern void func_003C7080(void);
+extern int f_6CE0_6CE8(int, int, int) __asm__("func_003C6CE0");
+
+int func_003C6CE8(int arg0) {
+    struct s7B8Queue *e = D_005157B8.f304[arg0];
+    int i = 0;
+
+    f_89E0_6CE8(e->f00);
+    func_003C7080();
+    f_6CE0_6CE8(arg0, 0, 0x7FFFFFFF);
+    e->f00 = -1;
+
+    for (; i < e->f62; i++) {
+        if (e->f64[i]) func_003B5E98(e->f64[i]);
+
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6DA0);
@@ -9381,7 +10265,30 @@ unsigned int func_003C6DE0(int id, int r, int *len, int *flag) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7010);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+/* D_005157B8: the stream queues (a pending-callback list, then one queue per stream). Layout from every use in
+   this unit; field names are their offsets. */
+extern struct s7B8 D_005157B8;
+
+void func_003C7010(int id, int b, int c)
+{
+    struct s7B8Queue* o = D_005157B8.f304[id];
+    if (b == (signed char)o->f42) {
+
+        o->f4C -= c;
+        if (o->f58) {
+            struct s7B8Event* e = &D_005157B8.f004[D_005157B8.f000];
+            e->f04 = c;
+            e->f02 = id;
+            e->f00 = 0;
+            D_005157B8.f000++;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7080);
@@ -13038,7 +13945,29 @@ int func_003CE1B0(int arg0, int idx, int arg2, int arg3, int arg4, int arg5, A6_
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE378);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+extern struct sA8E8 D_0050A8E8;
+
+/* D_005157B8: the stream queues (a pending-callback list, then one queue per stream). Layout from every use in
+   this unit; field names are their offsets. */
+extern struct s7B8 D_005157B8;
+
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+int func_003BA6E8_E378(int arg0) __asm__("func_003BA6E8");
+
+int func_003CE378(int key) {
+    int i;
+    for (i = 0; i < D_0050A8E8.setup.cfg.f26; i++) {
+        struct s7B8Queue *q = D_005157B8.f304[i];
+        if (q != 0 && func_003BA6E8_E378(q->f00) == key) return i;
+    }
+    return -1;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE410);
 

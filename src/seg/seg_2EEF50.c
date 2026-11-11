@@ -867,7 +867,33 @@ void func_003EF808(int a, int b, int c) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF828);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+int func_003EF828(char* dst, int max, char* src, signed char ch) {
+    int i = 0;
+    int j = 0;
+    while (!(src[i] & 0x80) && src[i]) {
+        i++;
+    }
+    if (src[i]) {
+        j = i;
+        while (src[i] && j < max) {
+            if (src[i] & 0x80) {
+                i += func_003EF600(src[i]);
+                if (ch) {
+                    dst[j++] = ch;
+                }
+            } else {
+                dst[j++] = src[i++];
+            }
+        }
+        dst[j++] = 0;
+    }
+    return j;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF940);
@@ -996,7 +1022,20 @@ char* func_003EFC68(char* s, int* out) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2EEF50", func_003EFCD8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+char* func_003EFCD8_p(char* s, int* lo, int* hi) __asm__("func_003EFCD8");
+char* func_003EFCD8_p(char* s, int* lo, int* hi) {
+    s = func_003EFC68(s, lo);
+    if (*s++ != ':') return 0;
+    s = func_003EFC68(s, hi);
+    if (*s == ',') s++;
+    return s;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_2EEF50", func_003EFD30);

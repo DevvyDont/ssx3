@@ -234,7 +234,121 @@ struct cBankManager {
 };
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Create);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void* func_002AB9E0(void* self);
+
+// One of a bank monitor's 64 voices (0xC0 bytes).
+struct sBmVoice {
+    int kind;                   // 0x00 (1 / 2: which sound system plays it)
+    int id;                     // 0x04
+    int valid;                  // 0x08
+    int handle;                 // 0x0C
+    char pad10[0x58 - 0x10];
+    int f58;                    // 0x58
+    float value;                // 0x5C
+    int f60;                    // 0x60
+    int vol;                    // 0x64
+    sBmQuad* tgt;               // 0x68
+    int f6C;                    // 0x6C
+    sBmQuad tgtCopy;            // 0x70
+    int f80;                    // 0x80
+    int f84;                    // 0x84
+    float f88;                  // 0x88
+    float f8C;                  // 0x8C
+    float f90;                  // 0x90
+    int f94;                    // 0x94
+    int f98;                    // 0x98
+    int f9C;                    // 0x9C
+    int fA0;                    // 0xA0
+    int fA4;                    // 0xA4
+    sSndCallback callback;      // 0xA8
+    char padB0[0xC0 - 0xB0];
+    sBmVoice() { func_002AB9E0(this); }
+    void operator delete[](void* p, unsigned int size);
+};
+
+// cBankMonitor: a sound player (cSndPlayOpts part at 0x0, player part up to 0x8DC) plus 64 voices;
+// virtual base at 0x8F0.
+struct cBankMonitor : public cSndPlayOpts {
+    char pad88[0x8D8 - 0x88];
+    void** vtbl;                // 0x8D8
+    volatile int busy;          // 0x8DC
+    int f8E0;                   // 0x8E0
+    int f8E4;                   // 0x8E4
+    int f8E8;                   // 0x8E8
+    sBmVoice* voices;           // 0x8EC
+    char vb[0x4];               // 0x8F0
+};
+extern "C" void func_002ABB38(void*);
+extern "C" void bxLogPrint(const char* fmt, ...);
+extern "C" int func_002ACF60(void* self, int n);
+extern "C" void func_002ABD48(void* voice, void* mon);
+extern "C" void func_003B89E0(int h);
+extern "C" int func_003B9920(int h);
+extern char D_00483250[];
+
+// cSndPlayOpts::OPTS_GetCallback (prototype name; out-of-line copy in bx is func_002B91C8)
+static inline sSndCallback OPTS_GetCallback_Create(cBankMonitor* s)
+{
+    return s->callbacks[s->cur];
+}
+
+static inline void setCallback_Create(sBmVoice* v, sSndCallback k)
+{
+    v->callback = k;
+}
+
+extern "C" sBmVoice* cBankMonitor_BANKMONITOR_Create(cBankMonitor* self, int id, int vol, int kind)
+{
+    sBmVoice* v = 0;
+    self->busy++;
+    int idx = func_002ACF60(self, self->busy);
+    if (idx >= 0) {
+        v = &self->voices[idx];
+        func_002ABB38(v);
+        v->kind = kind;
+        v->id = id;
+        v->f60 = self->p3C[self->cur];
+        v->vol = vol;
+        v->tgt = self->tgt[self->cur];
+        setCallback_Create(v, OPTS_GetCallback_Create(self));
+        v->f80 = self->p60[self->cur];
+        v->f84 = self->p64[self->cur];
+        if (self->p34[self->cur] != 0) {
+            v->tgtCopy = *v->tgt;
+            v->tgt = &v->tgtCopy;
+        }
+        v->f88 = self->p68[self->cur];
+        v->f8C = self->p6C[self->cur];
+        v->f94 = self->p74[self->cur];
+        v->f98 = self->p78[self->cur];
+        int f9C = self->p7C[self->cur];
+        if (v->f58 == 0)
+            v->f9C = f9C;
+        v->f90 = -1.0f;
+        v->fA0 = self->p80[self->cur];
+        v->fA4 = self->p84[self->cur];
+        if (self->tgt[self->cur] != 0)
+            func_002ABD48(v, self);
+        v->valid = id >= 0;
+    } else {
+        bxLogPrint(D_00483250);
+        switch (kind) {
+        case 1:
+            func_003B89E0(id);
+            break;
+        case 2:
+            func_003B9920(id);
+            break;
+        }
+    }
+    self->busy--;
+    return v;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AD2A8);
@@ -708,7 +822,27 @@ extern "C" int func_002ADC30(void* self, int n)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADCA0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" int func_002ADC30(void* self, int n);
+
+void func_002AD888_cb(void* self, int a1, sSndCallback cb, int b, int c, int d, int e, int f) __asm__("func_002AD888");
+
+extern "C" int func_002ADCA0_pl(sSndPlayer* self, int a1, sSndCallback cb, int b, int c, int d, int e, int f) __asm__("func_002ADCA0");
+extern "C" int func_002ADCA0_pl(sSndPlayer* self, int a1, sSndCallback cb, int b, int c, int d, int e, int f)
+{
+    self->busy = self->busy + 1;
+    int idx = func_002ADC30(self, self->busy);
+    if (idx >= 0) {
+        func_002AD888_cb((char*)self + 0x98 + idx * 0x2C, a1, cb, b, c, d, e, f);
+    }
+    self->busy = self->busy - 1;
+    return idx;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADD78);
