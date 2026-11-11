@@ -1530,7 +1530,65 @@ int func_003D8540(int arg0, int *arg1) {
 
 INCLUDE_ASM("ealib/seg_2D7498", func_003D8598);
 
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D85C8);
+#ifdef SKIP_ASM
+struct K_85C8 { unsigned char b[4]; };
+struct Rule_85C8 { int pad0; signed char n; unsigned char pad5[3]; unsigned char k[8]; unsigned char c[4]; int m[4]; };
+int func_003D83B8(unsigned char *arg0, unsigned char **arg1);
+
+int func_003D85C8(unsigned char *obj, struct Rule_85C8 *rule, unsigned char *tbl, unsigned char *vals) {
+    int ok = 1;
+    int n = rule->n;
+    int i;
+
+    if (n >= 5) {
+        ok = 0;
+    } else {
+        for (i = 0; i < n; i++) {
+            unsigned int v = vals[i];
+            unsigned int mask;
+            int k;
+            int *mp;
+            ok = 0;
+            if (v < 32) {
+                mask = 1 << v;
+                k = rule->k[i];
+                mp = &rule->m[i];
+                if (mask & *mp) {
+                    if (k == 0 || k == 0xFE) {
+                        ok = 1;
+                    } else if (k == 0xFF) {
+                        unsigned int c = rule->c[i];
+                        if (c & 0x80) {
+                            unsigned char *p;
+                            c &= 0x7F;
+                            p = obj + ((((obj[4] >> 2) + 3) & 0xFFFFFFFC) + 8) + ((obj[6] * 4 + 3) & 0xFFFFFFFC);
+                            ok = 0;
+                            if (mask & ((int *)p)[c]) ok = 1;
+                        } else {
+                            struct K_85C8 key;
+                            unsigned char *res;
+                            key = *(struct K_85C8 *)tbl;
+                            if (func_003D83B8((unsigned char *)&key, &res)) {
+                                ok = 0;
+                                if (v == res[c]) ok = 1;
+                            }
+                        }
+                    } else {
+                        ok = 0;
+                        if (mask & ((int *)tbl)[k]) ok = 1;
+                    }
+                }
+            } else {
+                break;
+            }
+            if (!ok) break;
+        }
+    }
+    return ok;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D8780);

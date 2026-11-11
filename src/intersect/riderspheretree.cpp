@@ -2925,7 +2925,26 @@ extern "C" int func_0032E288(sRiderCapsule_E100* self, sSphereVec4* mn, sSphereV
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032E398);
+#ifdef SKIP_ASM
+// Componentwise product a * b; the base ctor takes the four products as arguments.
+struct sSphereProd_E398 : sSphereV4_E100 {
+    sSphereProd_E398(const sSphereVec4& a, const sSphereVec4& b)
+        : sSphereV4_E100(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w)
+    {
+    }
+};
+
+// Transforms the capsule's base segment (p0b, dirb) by a matrix and a uniform scale (w kept at 1).
+extern "C" void func_0032E398(sRiderCapsule_E100* self, sSphereVec4* m, float scale)
+{
+    sSphereV4_E100 sc(scale, scale, scale, 1.0f);
+    self->p0 = sSphereProd_E398(mtxMulVec_9B90(m, &self->p0b), sc);
+    self->dir = sSphereProd_E398(mtxMulVec_9B90(m, &self->dirb), sc);
+    self->f4 = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032E4B8);

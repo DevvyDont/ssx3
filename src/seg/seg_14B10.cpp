@@ -1257,7 +1257,100 @@ extern "C" void func_00115B58(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_00115D48);
+#ifdef SKIP_ASM
+unsigned int AIrand();
+
+// PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
+static inline float Floor_5D48(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+// Wraps an angle into [-pi, pi).
+static inline float Wrap_5D48(float x)
+{
+    return x - Floor_5D48(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+}
+
+static inline t4Vector GetFront_5D48(cRider* r)
+{
+    return r->mMatrix.row[1];
+}
+
+// Plays a glance animation towards a nearby rider (sRiderPair mDistance/mAngle).
+extern "C" void func_00115D48(cRider* self)
+{
+    if (func_00311AE8(self->mRiderAnim, 1) != 0) {
+        self->unk_35C = 0.0f;
+        return;
+    }
+    self->unk_35C += 0.01666666753590107f;
+    if (self->unk_35C < 1.0f)
+        return;
+
+    float heading = Atan2_58B8(GetFront_5D48(self).y, GetFront_5D48(self).x);
+    int i;
+
+    if ((int)(AIrand() % 100) < 90) {
+        float glance = 1.047197699546814f;
+        float behind = 2.3561947345733643f;
+        for (i = 0; i < 6; i++) {
+            if (self->mRelations[i].mValid != 0 && self->mRelations[i].mAggressive != 0) {
+                if (self->mRelations[i].unk_20 + 600 <= func_001298C8()) {
+                    float diff = Wrap_5D48(self->mRelations[i].mAngle - heading);
+                    if (self->mRelations[i].mDistance < 1000.0f) {
+                        float ad = __builtin_fabsf(diff);
+                        if (ad > glance) {
+                            self->mRelations[i].unk_20 = func_001298C8();
+                            // PORT: 64-bit long
+                            *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
+                            if (ad > behind) {
+                                cRiderAnimBase_play(self->mRiderAnim, 0x13F, 0, -1.0f);
+                            } else {
+                                int left = diff < 0.0f;
+                                if (left == self->unk_320)
+                                    cRiderAnimBase_play(self->mRiderAnim, 0x141, 0, -1.0f);
+                                else
+                                    cRiderAnimBase_play(self->mRiderAnim, 0x140, 0, -1.0f);
+                            }
+                            *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if ((int)(AIrand() % 100) < 100) {
+        float wide = 2.094395399093628f;
+        for (i = 0; i < 6; i++) {
+            if (self->mRelations[i].mValid != 0) {
+                float diff = Wrap_5D48(self->mRelations[i].mAngle - heading);
+                if (self->mRelations[i].mDistance < 1000.0f) {
+                    if (__builtin_fabsf(diff) > wide) {
+                        *(long*)((char*)self->mRiderAnim + 0x20) = self->mHeadBoneMask;
+                        int left = diff < 0.0f;
+                        if (left == self->unk_320)
+                            cRiderAnimBase_play(self->mRiderAnim, 0x13D, 0, -1.0f);
+                        else
+                            cRiderAnimBase_play(self->mRiderAnim, 0x13C, 0, -1.0f);
+                        *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00116120);

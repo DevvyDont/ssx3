@@ -1,6 +1,93 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetCreate);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern char D_004A1830[];
+extern char D_004A1838[];
+extern char D_004A1840[];
+extern char D_004A1848[];
+extern char D_00460420[];
+extern char D_00460430[];
+extern char D_00460440[];
+extern char D_00460450[];
+extern char D_00460460[];
+
+static inline void SetText_6540(void* w, int text)
+{
+    *(int*)((char*)w + 0x78) = -1;
+    *(int*)((char*)w + 0x7C) = text;
+}
+
+extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
+{
+    int id = *(int*)((char*)w + 0x38);
+    if (id == GetHashValue32(D_004A1830))
+    {
+        *(void**)((char*)self + 0x4C) = w;
+        if (*(int*)((char*)self + 0x78) == 0)
+            SetText_6540(w, *(int*)((char*)self + 0x5C));
+        else
+            SetText_6540(w, *(int*)((char*)self + 0x60));
+    }
+    else if (id == GetHashValue32(D_004A1838))
+    {
+        *(void**)((char*)self + 0x54) = w;
+        if (*(int*)((char*)self + 0x78) == 2)
+            SetText_6540(w, *(int*)((char*)self + 0x5C));
+        else
+            SetText_6540(w, *(int*)((char*)self + 0x60));
+    }
+    else if (id == GetHashValue32(D_004A1840))
+    {
+        *(void**)((char*)self + 0x50) = w;
+        if (*(int*)((char*)self + 0x78) == 1)
+            SetText_6540(w, *(int*)((char*)self + 0x5C));
+        else
+            SetText_6540(w, *(int*)((char*)self + 0x60));
+    }
+    else if (id == GetHashValue32(D_004A1840))
+    {
+        *(void**)((char*)self + 0x50) = w;
+        if (*(int*)((char*)self + 0x78) == 1)
+            SetText_6540(w, *(int*)((char*)self + 0x5C));
+        else
+            SetText_6540(w, *(int*)((char*)self + 0x60));
+    }
+    else if (id == GetHashValue32(D_004A1848))
+    {
+        *(void**)((char*)self + 0x58) = w;
+        if (*(int*)((char*)self + 0x78) == 3)
+            SetText_6540(w, *(int*)((char*)self + 0x5C));
+        else
+            SetText_6540(w, *(int*)((char*)self + 0x60));
+    }
+    else if (id == GetHashValue32(D_00460420))
+    {
+        *(int*)((char*)w + 0x18) = 0;
+    }
+    else if (id == GetHashValue32(D_00460430))
+    {
+        *(int*)((char*)w + 0x18) = 2;
+    }
+    else if (id == GetHashValue32(D_00460440))
+    {
+        *(void**)((char*)self + 0x68) = w;
+        *(int*)((char*)w + 0x18) = 1;
+    }
+    else if (id == GetHashValue32(D_00460450))
+    {
+        *(void**)((char*)self + 0x64) = w;
+        *(int*)((char*)w + 0x18) = 4;
+    }
+    else if (id == GetHashValue32(D_00460460))
+    {
+        *(void**)((char*)self + 0x6C) = w;
+        *(int*)((char*)w + 0x18) = 3;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetEvent);

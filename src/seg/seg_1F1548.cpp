@@ -1080,7 +1080,152 @@ extern "C" void func_002F2598_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598*
 
 INCLUDE_ASM("seg/seg_1F1548", func_002F2810);
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2C30);
+#ifdef SKIP_ASM
+struct sVec2_2C30 {
+    float x, y;
+    sVec2_2C30() {}
+    sVec2_2C30(float ax, float ay) : x(ax), y(ay) {}
+};
+
+struct sVec4_2C30 {
+    float x, y, z, w;
+    sVec4_2C30() {}
+    sVec4_2C30(const sVec2_2C30& v, const float& az, const float& aw) : x(v.x), y(v.y), z(az), w(aw) {}
+};
+
+class cRender_2C30 {
+public:
+    char pad[0x10D8];
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71();
+    virtual void v72();
+    virtual void v73();
+    virtual void v74();
+    virtual void v75();
+    virtual void v76();
+    virtual void v77();
+    virtual void DrawSprite(const sVec4_2C30& pos, void* tex, void* a, void* b, sVec4_2C30* col, int n, float ang);
+};
+
+extern int D_004A54F0;
+extern int D_004A54F4;
+extern int D_004A54F8;
+extern float D_004A5500;
+extern float D_004A5504;
+extern int D_004A5508;
+extern char* D_004A289C;
+// PORT: the unit declares D_004A5B80 later as cGfx_3E28*; this view is bound by asm label.
+extern cRender_2C30* D_004A5B80_2C30 __asm__("D_004A5B80");
+
+static inline void setId_2C30(char* p, int v)
+{
+    *(short*)(p + 0x10) = v;
+}
+
+static inline float lerp_2C30(float a, float d, float t)
+{
+    t *= d;
+    return a + t;
+}
+
+// PORT: the unit declares func_002F2C30 later as (void*, sV2_3E28*); typed body bound by asm label.
+extern "C" void func_002F2C30_impl(char* obj, sVec2_2C30* off) __asm__("func_002F2C30");
+extern "C" void func_002F2C30_impl(char* obj, sVec2_2C30* off)
+{
+    if (!D_004A54F8) {
+        D_004A54F0 = 0;
+        D_004A54F8 = 1;
+        D_004A54F4 = 0;
+    }
+    if (!D_004A5508) {
+        D_004A5508 = 1;
+        D_004A5500 = 1.0f;
+        D_004A5504 = 1.0f;
+    }
+    // The life ratio time/duration is written out twice (fade, then rotation);
+    // CSE turns the second division into the mov.s copy retail has.
+    float fade = *(float*)(obj + 0x1C) / *(float*)(obj + 0x20);
+    sVec4_2C30 c = *(sVec4_2C30*)(obj + 0x24);
+    fade = 1.0f - fade * fade;
+    c.x *= fade;
+    float ang = lerp_2C30(*(float*)(obj + 0x34), *(float*)(obj + 0x38), *(float*)(obj + 0x1C) / *(float*)(obj + 0x20));
+    int id = *(int*)(D_004A289C + 0x1058);
+    setId_2C30(*(char**)(D_004A289C + 0xE84), id);
+    D_004A5B80_2C30->DrawSprite(sVec4_2C30(sVec2_2C30(*(float*)(obj + 4) + off->x, *(float*)(obj + 8) + off->y), 0.0f, 1.0f), obj + 0xC, &D_004A54F0, &D_004A5500, &c, 1, ang * 0.01745329424738884f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2D60);
