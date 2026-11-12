@@ -2522,7 +2522,76 @@ extern "C" void func_0011B2C0(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ridermetrix", func_0011B3F8);
+#ifdef SKIP_ASM
+extern "C" float func_001494C0(void* iface, int a1, int a2);
+int func_0011FE98(void* self);
+extern float D_004A6310[2][3][4][2];
+
+// cRider::updateTerminalVelocity (On Tour name; pairing unverified, structure fits the retail asm)
+extern "C" void func_0011B3F8(char* self)
+{
+    float speedAttribute = func_001494C0(cBE_getInterface(cBE_getBE(), 3), *(int*)(self + 0x86C), *(int*)(self + 0xB34));
+    // NOTE: the retail code adds and subtracts 1.0 (likely an inlined bx range helper).
+    speedAttribute = speedAttribute + 1.0f - 1.0f;
+    char* surfPropCache = *(char**)((char*)D_004A28A8 + 0x84);
+    char* snow = *(char**)(surfPropCache + 0x44) + *(int*)(self + 0x438) * 0xB0;
+    const int motionState = func_0011FE98(self);
+    const float surfaceProperty = (motionState == 0) ? *(float*)(snow + 4) : 1.0f;
+    const bool fasterThanPacked = 0.0f < surfaceProperty;
+    const int lowSurfaceIndex = fasterThanPacked ? 1 : 0;
+    const float surfaceFactor = fasterThanPacked ? surfaceProperty : surfaceProperty + 1.0f;
+    float s = *(float*)(self + 0x2FC);
+    int boostFactor = 0;
+    if (0.1f <= s) {
+        boostFactor = 1;
+        if (0.4f <= s) {
+            boostFactor = 3;
+            if (s < 0.8f) {
+                boostFactor = 2;
+            }
+        }
+    }
+    const float crouchFactor = (motionState == 0) ? *(float*)(self + 0x220) : 1.0f;
+    float speeds[2];
+    float newTerminalVelocity;
+    float historyFactor;
+    int i;
+    for (i = 0; i < 2; i++) {
+        const float lowTucLowSurface = D_004A6310[i][lowSurfaceIndex][boostFactor][0];
+        const float hiTucLowSurface = D_004A6310[i][lowSurfaceIndex][boostFactor][1];
+        const float lowTucHiSurface = D_004A6310[i][lowSurfaceIndex + 1][boostFactor][0];
+        const float hiTucHiSurface = D_004A6310[i][lowSurfaceIndex + 1][boostFactor][1];
+        const float lowTucLowSurfaceArea = (1.0f - surfaceFactor) * (1.0f - crouchFactor);
+        const float lowTucHiSurfaceArea = surfaceFactor * (1.0f - crouchFactor);
+        const float hiTucLowSurfaceArea = (1.0f - surfaceFactor) * crouchFactor;
+        const float hiTucHiSurfaceArea = surfaceFactor * crouchFactor;
+        speeds[i] = lowTucLowSurfaceArea * lowTucLowSurface + lowTucHiSurfaceArea * lowTucHiSurface
+                  + hiTucLowSurfaceArea * hiTucLowSurface + hiTucHiSurfaceArea * hiTucHiSurface;
+    }
+    if (motionState == 1) {
+        newTerminalVelocity = 3333.33349609375f;
+    } else {
+        newTerminalVelocity = (speedAttribute * speeds[1] + (1.0f - speedAttribute) * speeds[0]) * 27.77777862548828f;
+        *(int*)(self + 0x5A0) = 0;
+        historyFactor = 0.8999999761581421f;
+        if (*(int*)(self + 0x320) != *(int*)(self + 0x324)) {
+            if (*(float*)(self + 0x2FC) <= 0.0f) {
+                newTerminalVelocity *= 0.9800000190734863f;
+            }
+        }
+        if (newTerminalVelocity < *(float*)(self + 0x2E4)) {
+            historyFactor = 0.9700000286102295f;
+        }
+        newTerminalVelocity = (1.0f - historyFactor) * newTerminalVelocity + historyFactor * *(float*)(self + 0x2E4);
+    }
+    *(float*)(self + 0x2E4) = newTerminalVelocity;
+    if (*(int*)(self + 0x2F4) >= 11 && 0.0f < *(float*)(self + 0x2FC)) {
+        *(float*)(self + 0x2E4) = MAX(*(float*)(self + 0x30C), newTerminalVelocity);
+    }
+}
+#endif
 
 extern "C" void* func_0041AA88(void* self);
 

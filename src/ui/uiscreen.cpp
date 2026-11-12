@@ -188,7 +188,71 @@ void cUIScreen_jumpToFrame(void* self, unsigned short frame)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_playFrame);
+#ifdef SKIP_ASM
+struct cList;
+struct cListNode;
+void cList_addToEnd(cList*, cListNode*);
+// PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" void* cUIScreen_getPrimaryThread(void* self);
+void cUIThread_deleteThread(void* self);
+extern char D_00493E10[];
+extern void* D_004946A0[];
+
+// cUIThread (On Tour member names): a cListNode (prev, next, vptr) plus frame state.
+struct cUIThread_C870 {
+    cUIThread_C870* mpPrev;             // 0x00
+    cUIThread_C870* mpNext;             // 0x04
+    void** vt;                          // 0x08
+    unsigned short mCurrentFrameNumber; // 0x0C
+    unsigned short mLastFrameNumber;    // 0x0E
+    unsigned short mStopFrameNumber;    // 0x10
+    signed char mFrameIncrement;        // 0x12
+    unsigned int mIsActive : 1;         // 0x10 bit 24
+    unsigned int mIsPrimary : 1;        // 0x10 bit 25
+
+    void setCurrentFrameNumber(unsigned short v) { mCurrentFrameNumber = v; }
+    void setLastFrameNumber(unsigned short v) { mLastFrameNumber = v; }
+    void setStopFrameNumber(unsigned short v) { mStopFrameNumber = v; }
+    void setFrameIncrement(signed char v) { mFrameIncrement = v; }
+    void setActive(bool b) { mIsActive = b; }
+    void setPrimary(bool b) { mIsPrimary = b; }
+};
+
+// PORT: the unit declares cUIScreen_playFrame as void; the body returns the new thread. Bound by asm label.
+void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType) __asm__("cUIScreen_playFrame");
+
+// cUIScreen::playFrame (On Tour name): starts a new thread at frame; a primary thread replaces the old one.
+void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType)
+{
+    if (ThreadType == 0) {
+        void* pPrimary = cUIScreen_getPrimaryThread(self);
+        if (pPrimary != 0) {
+            cUIThread_deleteThread(pPrimary);
+        }
+    }
+    cUIThread_C870* pNewThread = new (D_00493E10, 0x100, 0) cUIThread_C870;
+    // inlined cUIThread ctor: direct member stores (the target writes these twice: the
+    // second pair goes through the setters, whose promoted int params keep separate constants)
+    pNewThread->mStopFrameNumber = 0xFFFF;
+    pNewThread->mFrameIncrement = 1;
+    pNewThread->mIsActive = 0;
+    pNewThread->mIsPrimary = 0;
+    pNewThread->setFrameIncrement(1);
+    pNewThread->setStopFrameNumber(0xFFFF);
+    pNewThread->vt = D_004946A0;
+    pNewThread->setCurrentFrameNumber(frame);
+    pNewThread->setLastFrameNumber(0xFFFF);
+    pNewThread->mpNext = pNewThread;
+    pNewThread->mpPrev = pNewThread;
+    pNewThread->setActive(true);
+    pNewThread->setPrimary(ThreadType == 0);
+    cList_addToEnd((cList*)((char*)self + 0x18), (cListNode*)pNewThread);
+    return pNewThread;
+}
+#endif
 
 INCLUDE_ASM("ui/uiscreen", cUIScreen_playFrameByThread);
 
