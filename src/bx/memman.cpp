@@ -22,7 +22,31 @@ void* operator_new2(int size)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/memman", cMemMan_alloc);
+#ifdef SKIP_ASM
+extern void* D_00538B00[16];
+extern "C" void MUTEX_lock(void* mutex);
+extern "C" void MUTEX_unlock(void* mutex);
+extern "C" void* func_00319A90(unsigned int size, unsigned int align, int flags, int top);
+
+// On Tour: operator new(unsigned int size, const char* name, int type, int headersize); its debug build keeps this
+// branchless mask arithmetic statement by statement. The unit declares (int, const char*, unsigned int, int).
+extern "C" void* cMemMan_alloc(int size, const char* name, unsigned int type, int headersize)
+{
+    int alignbits = (type & 0x0F000000) >> 24;
+    int alignmask = (int)((type & 0x400) << 21) >> 31;
+    int align = alignmask & 0x80;
+    align |= (alignmask + 1) << (((size - 16) >> 31) + 4);
+    alignmask = (alignbits - 1) >> 31;
+    align &= alignmask;
+    align |= (4 << alignbits) & ~alignmask;
+    MUTEX_lock(D_00538B00);
+    void* p = func_00319A90(size, align, type, headersize);
+    MUTEX_unlock(D_00538B00);
+    return p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/memman", operator_new__FUi);

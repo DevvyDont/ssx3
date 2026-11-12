@@ -1499,7 +1499,157 @@ extern "C" char* cRollerModifier_cRollerModifier(char* self, char* a1, char* a2,
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_Collision);
+#ifdef SKIP_ASM
+struct sRmV4_35DDE8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// tCollideInfo (On Tour name)
+struct sRmPath_35DDE8 {
+    char pad_0x0[0x10];
+    sRmV4_35DDE8 dir;   // 0x10
+    sRmV4_35DDE8 up;    // 0x20
+    float len;          // 0x30
+};
+
+// PORT: PS2-only VU0 inline asm (a + b), by value.
+static inline sRmV4_35DDE8 vu0AddR_35DDE8(const sRmV4_35DDE8& a, const sRmV4_35DDE8& b)
+{
+    sRmV4_35DDE8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v / s), by value.
+static inline sRmV4_35DDE8 vu0DivR_35DDE8(const sRmV4_35DDE8& v, float s)
+{
+    sRmV4_35DDE8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+
+// PORT: PS2-only VU0 inline asm (v * s), by value.
+static inline sRmV4_35DDE8 vu0ScaleR_35DDE8(const sRmV4_35DDE8& v, float s)
+{
+    sRmV4_35DDE8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_35DDE8(const sRmV4_35DDE8& a, const sRmV4_35DDE8& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+struct sV4K_35DDE8 : public sRmV4_35DDE8 {
+    sV4K_35DDE8(float ax, float ay, float az, float aw)
+    {
+        x = ax;
+        y = ay;
+        z = az;
+        w = aw;
+    }
+};
+
+struct cRigidBody_DDE8 {
+    char pad_0x00[0x20];
+    sRmV4_35DDE8 P;         // 0x20
+    sRmV4_35DDE8 L;         // 0x30
+    float InvM;             // 0x40
+    char pad_0x44[0x3C];
+    sRmV4_35DDE8 V;         // 0x80
+    sRmV4_35DDE8 W;         // 0x90
+    float getInvM() const { return InvM; }
+    void setW(const sRmV4_35DDE8& w) __asm__("func_0035CFF0");
+};
+
+struct cTransformModifier_DDE8 {
+    void* vptr;             // 0x00
+};
+
+struct cRollerNodeState_DDE8 {
+    float mKineticEnergy;   // 0x04 in cRollerModifier
+    float mMass;            // 0x08
+    float mElast;           // 0x0C
+    float ViscousDrag;      // 0x10
+    float ContactElastic;   // 0x14
+    float ContactFriction;  // 0x18
+    float StopContactSpeed; // 0x1C
+    float Life;             // 0x20
+    float Radius;           // 0x24
+    float HitFrequency;     // 0x28
+};
+
+// On Tour (debug DWARF): cRollerModifier : cTransformModifier (+0), cRollerNodeState (+4), cRigidBody (+0x30).
+struct cRollerModifier_DDE8 : public cTransformModifier_DDE8, public cRollerNodeState_DDE8, public cRigidBody_DDE8 {
+    // On Tour has this as cRigidBody::setV; in SSX 3 the P/V stores are this-relative while InvM goes
+    // through the cRigidBody base pointer, so here it lives in the derived class.
+    void setV(const sRmV4_35DDE8& v)
+    {
+        P = vu0DivR_35DDE8(v, getInvM());
+        V = v;
+    }
+    void Collision(const sRmPath_35DDE8* tc) __asm__("cRollerModifier_Collision");
+};
+
+// PORT: the unit declares cRollerModifier_Collision(void*) for its caller; this is the method (On Tour: cRollerModifier::Collision).
+void cRollerModifier_DDE8::Collision(const sRmPath_35DDE8* tc)
+{
+    float addZ = 5000.0f / mMass + 100.0f;
+    HitFrequency = 0.0f;
+    if (addZ > 600.0f) {
+        addZ = 600.0f;
+    }
+    setV(vu0AddR_35DDE8(vu0DivR_35DDE8(vu0ScaleR_35DDE8(tc->dir, tc->len), 2.0f),
+                        sV4K_35DDE8(0.0f, 0.0f, addZ, 0.0f)));
+    setW(vu0ScaleR_35DDE8(tc->up, 10.0f));
+    mKineticEnergy = vu0Dot_35DDE8(V, P) + vu0Dot_35DDE8(W, L);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035DF70);

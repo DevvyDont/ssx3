@@ -2022,7 +2022,69 @@ extern "C" void func_001C94B0(void* self, void* text, void* strp, void* outp)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_getMessageLineWrapSize);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// cScreenPopup::getMessageLineWrapSize(cUIText*, const char*, t3Vector&) (On Tour signature and locals).
+struct t3Vector_9648 { float x, y, z; };
+struct sVEntry_9648 {
+    short delta;
+    short index;
+    void (*fn)(void*, t3Vector_9648*);
+};
+extern "C" void* cUIText_getFont(void* self);
+extern "C" float func_00392BA8(void* font, int c);  // cFont::charAdvance(char) const
+extern "C" int strlen(const char* s);
+extern "C" char* strcpy(char* dst, const char* src);
+void cMemMan_free(void* ptr);
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern char D_004660F8[];
+
+extern "C" void cScreenPopup_getMessageLineWrapSize(void* self, void* pText, const char* pString, void* pvSize)
+{
+    t3Vector_9648& vSize = *(t3Vector_9648*)pvSize;
+    *(int*)((char*)pText + 0x14) |= 0x80;
+    void* pFont = cUIText_getFont(pText);
+    if (pFont == 0)
+        return;
+    int length = strlen(pString);
+    char* pTempString = new (D_004660F8, 0x100, 0) char[length + 1];
+    strcpy(pTempString, pString);
+    int j = 0;
+    float Pixels = 0.0f;
+    bool bFound = false;
+    t3Vector_9648 vScale;
+    t3Vector_9648 vTextSize;
+    sVEntry_9648* vt = *(sVEntry_9648**)((char*)pText + 8);
+    vt[20].fn((char*)pText + vt[20].delta, &vTextSize);
+    vScale = *(t3Vector_9648*)((char*)pText + 0x50);
+    while (pTempString[j] != 0) {
+        char char1 = pTempString[j];
+        char char2 = pTempString[j + 1];
+        if (char1 == '\\' && char2 == '\\') {
+            Pixels = 0.0f;
+            j += 2;
+        } else if (char1 == '\r') {
+            Pixels = 0.0f;
+            j++;
+        } else {
+            float advance = func_00392BA8(pFont, pTempString[j]) * vScale.x;
+            Pixels += advance;
+            if (vTextSize.x < Pixels) {
+                bFound = true;
+                vSize.x = Pixels - advance;
+                break;
+            }
+            j++;
+        }
+    }
+    if (!bFound)
+        vSize.x = Pixels;
+    if (pTempString != 0)
+        cMemMan_free(pTempString);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", func_001C97E0);

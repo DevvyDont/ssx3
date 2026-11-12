@@ -1775,7 +1775,83 @@ extern "C" void func_002BB6B8(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB6E0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// cWorldPainterMan::render() (On Tour name and locals): draws the active painter layer's quad tree.
+#define MIN_B6E0(a, b) ((a) < (b) ? (a) : (b))
+#define MAX_B6E0(a, b) ((a) > (b) ? (a) : (b))
+struct sDrawState_B6E0 { int m[5]; };
+struct cGraphicsMan_B6E0 { char pad[0xE84]; sDrawState_B6E0* m_pCurrentDrawState; };
+struct tBxVertex_B6E0 {
+    tBxVertex_B6E0() {}
+    float x, y, z, w;
+    int r, g, b, a;
+    int pad[4];
+};
+// t4Vector with On Tour's t4vect accessors (x() ... w() return float&); the ctor stores through them.
+struct t4Vector_B6E0 { float m_x, m_y, m_z, m_w;
+    float& x() { return m_x; } float& y() { return m_y; } float& z() { return m_z; } float& w() { return m_w; }
+    t4Vector_B6E0() {}
+    t4Vector_B6E0(float ix, float iy, float iz, float iw) { x() = ix; y() = iy; z() = iz; w() = iw; } } __attribute__((aligned(16)));
+struct cQuadTree_B6E0 { float scale; float minx; float miny; char pad0C[8]; unsigned short root; char pad16[10]; char* nodes; };
+struct tWPLayer_B6E0 { cQuadTree_B6E0* tree; };
+struct tWPHeader_B6E0 { int pad0; int numLayers; tWPLayer_B6E0* layers[1]; };
+struct cWorldPainterSection_B6E0 { int pad0; int pad4; tWPHeader_B6E0* m_pWPHeader; };
+struct cWorldPainterMan_B6E0 { unsigned int m_uiNumSections; cWorldPainterSection_B6E0* m_pCache; };
+
+extern int D_004A44B4;   // cVisualEffectsTest::m_Enable
+extern int D_004A3860;   // cWorldPainterMan::m_iCurrSection
+extern int D_004A44B8;   // cVisualEffectsTest::m_LayerId
+static inline int layerId_B6E0() { return D_004A44B8; }
+extern cGraphicsMan_B6E0* D_004A5B80;
+extern sDrawState_B6E0 D_00501420;  // sDrawState::s_defaultDrawState
+// cWorldPainterMan::render(cQuadTree*, const tQuadTreeNode*, tBxVertex*, t4Vector&, t4Vector&)
+extern "C" void func_002BB928_B6E0(cWorldPainterMan_B6E0*, cQuadTree_B6E0*, char*, tBxVertex_B6E0*, t4Vector_B6E0*, t4Vector_B6E0*) __asm__("func_002BB928");
+
+extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) __asm__("func_002BB6E0");
+extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) {
+    if (D_004A44B4) {
+        cWorldPainterSection_B6E0* section = &self->m_pCache[D_004A3860];
+        if (section) {
+            tWPLayer_B6E0** layers = section->m_pWPHeader->layers;
+            if (layers) {
+                tWPLayer_B6E0* layer = layers[MIN_B6E0(MAX_B6E0(layerId_B6E0(), 0), section->m_pWPHeader->numLayers - 1)];
+                if (layer) {
+                    cQuadTree_B6E0* tree = layer->tree;
+                    if (tree) {
+                        cGraphicsMan_B6E0* GrMan = D_004A5B80;
+                        // PushDrawState + SetDefaultDrawState
+                        GrMan->m_pCurrentDrawState[1] = GrMan->m_pCurrentDrawState[0];
+                        GrMan->m_pCurrentDrawState++;
+                        *GrMan->m_pCurrentDrawState = D_00501420;
+                        tBxVertex_B6E0 vertlist[5];
+                        tBxVertex_B6E0* v;
+                        int i;
+                        for (i = 0; i < 5; i++) {
+                            v = &vertlist[i];
+                            v->a = 255;
+                            v->r = 0;
+                            v->g = 255;
+                            v->b = 0;
+                            v->z = 1.0f;
+                            v->w = 0;
+                            v->x = 0;
+                            v->y = 0;
+                        }
+                        t4Vector_B6E0 mincorner((float)(int)tree->minx, (float)(int)tree->miny, 0.0f, 1.0f);
+                        t4Vector_B6E0 maxcorner((float)(int)(32768.0f / tree->scale + tree->minx),
+                                                (float)(int)(32768.0f / tree->scale + tree->miny), 0.0f, 1.0f);
+                        func_002BB928_B6E0(self, tree, tree->nodes + tree->root * 8, vertlist, &mincorner, &maxcorner);
+                        GrMan->m_pCurrentDrawState--;  // PopDrawState
+                    }
+                }
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB928);
