@@ -5280,7 +5280,358 @@ extern "C" void func_001242B0_impl(cRider* self, void* p)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/rider", func_00124788);
+#ifdef SKIP_ASM
+// On Tour: tAnimID (bitfields SourceID:8, AnimID:24; ctor tAnimID(int s, int i)).
+struct tAnimID {
+    unsigned int SourceID : 8;
+    unsigned int AnimID : 24;
+    tAnimID(int s, int i) { AnimID = i; SourceID = s; }
+};
+
+void func_00280520(void* self, int id, void* outA, void* outB);
+extern "C" void cRiderAnimBase_getAIAnimFrame(void* buf, void* anim, int id, tAnimID a3, float t);
+extern "C" void func_0030ECD8(void* xf, void* model, void* buf, int a3);
+extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, void* xf);
+extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float heading);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" void cRider_updateOrientationImplicit(cRider* self);
+extern "C" float func_00115AB0(cRider* self);
+extern "C" float func_00115B08(void* self);
+extern "C" void func_003129E0(void* anim, int id, tAnimID animId, float t);
+extern "C" char* func_00311B20(void*, int);
+extern "C" void func_00313CF0(void* p, int a1, float t);
+extern "C" void func_00312598(void* anim, int a1);
+extern "C" void func_001241C0(cRider* self, sQuat_001241C0* out, float rx, float ry, float rz);
+extern "C" void func_0011EB60(cRider* self, float value);
+extern "C" void func_0011EB98(void* self);
+extern "C" int func_001446A0(void* self, int a1);
+extern "C" int func_001446B8(void* self, int a1);
+extern "C" void func_00144670(void* self, int a1);
+extern "C" void func_0030E9E0(void* model, int i, int channel);
+extern "C" void func_0030EA80(void* model, int i, int channel);
+struct sQ_124788;
+extern "C" void func_0011E150_4788(cRider* self, sQ_124788* p) __asm__("func_0011E150");
+extern void func_00106828_4788(cRider* self) __asm__("func_00106828");
+
+struct sQ_124788
+{
+    float x, y, z, w;
+    sQ_124788() {}
+    sQ_124788(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+} __attribute__((aligned(16)));
+
+extern sQ_124788 D_004FF130_124788 __asm__("D_004FF130");
+
+struct sXf_124788
+{
+    sQ_124788 pos;
+    sQ_124788 rot;
+};
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sQ_124788 QuatMul_124788(const sQ_124788& a, const sQ_124788& b)
+{
+    sQ_124788 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sQ_124788 Sub_124788(const sQ_124788& a, const sQ_124788& b)
+{
+    sQ_124788 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sQ_124788 Add_124788(const sQ_124788& a, const sQ_124788& b)
+{
+    sQ_124788 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void AddEq_124788(sQ_124788& dst, sQ_124788 b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b));
+}
+
+// PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
+static inline sQ_124788 Rot_124788(const sQ_124788& q, const sQ_124788& v)
+{
+    sQ_124788 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sQ_124788 Scale_124788(const sQ_124788& v, float s)
+{
+    sQ_124788 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 macro-mode asm (4x4 matrix times vector).
+static inline sQ_124788 MatMulV_124788(const char* m, const sQ_124788& v)
+{
+    sQ_124788 r;
+    __asm__(
+        "lqc2       $vf8, %2\n"
+        "lqc2       $vf4, 0x0(%1)\n"
+        "lqc2       $vf5, 0x10(%1)\n"
+        "lqc2       $vf6, 0x20(%1)\n"
+        "lqc2       $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2       $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+static inline sQ_124788 Conj_124788(const sXf_124788& p)
+{
+    sQ_124788 r;
+    r.w = p.rot.w;
+    r.x = p.rot.x;
+    r.y = p.rot.y;
+    r.z = p.rot.z;
+    r.x = -r.x;
+    r.y = -r.y;
+    r.z = -r.z;
+    return r;
+}
+
+static inline sXf_124788 Invert_124788(const sXf_124788& a)
+{
+    sXf_124788 r;
+    r.rot = Conj_124788(a);
+    r.pos = Add_124788(Scale_124788(Rot_124788(r.rot, Sub_124788(a.pos, D_004FF130_124788)), -1.0f), D_004FF130_124788);
+    return r;
+}
+
+static inline sXf_124788 Combine_124788(const sXf_124788& a, const sXf_124788& b)
+{
+    sXf_124788 r;
+    r.rot = QuatMul_124788(a.rot, b.rot);
+    r.pos = Add_124788(Rot_124788(a.rot, Sub_124788(b.pos, D_004FF130_124788)), a.pos);
+    return r;
+}
+
+static inline sQ_124788 GetFront_124788(cRider* r)
+{
+    return *(sQ_124788*)&r->mMatrix.row[1];
+}
+
+struct sAnimFlags_124788 {
+    signed char heading;    // 0x0
+    signed char root;       // 0x1
+    signed char drift;      // 0x2
+};
+
+struct sAnimInfo_124788 {
+    int name;                       // 0x00
+    int frame;                      // 0x04
+    char pad08[0x8];
+    float rate;                     // 0x10
+    float speed;                    // 0x14
+    unsigned int start;             // 0x18
+    sAnimFlags_124788* flags;       // 0x1C
+};
+
+struct sAnimEvent_124788 {
+    int active;                     // 0x00
+    sAnimInfo_124788* info;         // 0x04
+    char pad08[0x10];
+    float pos[3];                   // 0x18
+    float ang[3];                   // 0x24 degrees
+};
+
+// The unit declares func_00124788(void*, void*, float, float, int); bind the typed definition by asm label.
+extern "C" void func_00124788_typed(cRider* self, sAnimEvent_124788* pFrameInfo, float currFrame, float frameDelta, int eventBits) __asm__("func_00124788");
+extern "C" void func_00124788_typed(cRider* self, sAnimEvent_124788* pFrameInfo, float currFrame, float frameDelta, int eventBits)
+{
+    if (eventBits & 1) {
+        if (pFrameInfo->active == 0) {
+            return;
+        }
+        sAnimInfo_124788* pCurrMainAnim = pFrameInfo->info;
+        sAnimFlags_124788* pCurrMainAnimCustom = pCurrMainAnim->flags;
+        if ((float)pCurrMainAnim->frame != currFrame) {
+            return;
+        }
+        float startTime = pCurrMainAnim->rate * 0.01666666753590107f;
+        int animID;
+        int sourceID;
+        func_00280520(&self->mScriptObjRiderVtbl, pCurrMainAnim->name, &animID, &sourceID);
+        tAnimID animInfo(sourceID, animID);
+        if (pCurrMainAnimCustom->root != 0) {
+            char buf[0x50];
+            cRiderAnimBase_getAIAnimFrame(buf, self->mRiderAnim, 0x1B0, animInfo, startTime);
+            sXf_124788 a;
+            func_0030ECD8(&a, self->mAnimModel, buf, 0);
+            cAnimModel* trk = self->mAnimModel;
+            sQ_124788* n = (sQ_124788*)((self->mBoneHips << 4) + (int)trk->localPos);
+            sXf_124788 node;
+            node.pos = sQ_124788(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
+                                 n->z * trk->unk_140.z, n->w * trk->unk_140.w);
+            node.rot = *(sQ_124788*)((char*)self->mAnimModel->localRot + (self->mBoneHips << 4));
+            sXf_124788 y = Combine_124788(node, Invert_124788(a));
+            sXf_124788* rx = (sXf_124788*)&self->mPosition;
+            *rx = Combine_124788(*rx, y);
+            cRider_updateOrientationImplicit(self);
+            sXf_124788 w = Invert_124788(y);
+            cRiderAnimBase_changeOrientationOffset(self->mRiderAnim, &w);
+        }
+        if (pCurrMainAnimCustom->drift != 0) {
+            float s = func_00115AB0(self);
+            self->mSlewed[18].target = s;
+            self->mSlewed[18].rate = 0;
+            self->mSlewed[18].cur = s;
+            AddEq_124788(*(sQ_124788*)&self->mPosition, Scale_124788(GetFront_124788(self), func_00115B08(self)));
+            cRider_updateOrientationImplicit(self);
+        }
+        int isFlipped = pCurrMainAnimCustom->heading != 0;
+        if (isFlipped != self->unk_2D8) {
+            float h = 0.0f;
+            if (isFlipped) {
+                h = 3.1415927410125732f;
+            }
+            cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, h);
+            self->unk_2D8 = isFlipped;
+        }
+        float start = pCurrMainAnim->start;
+        *(float*)((char*)self->mRiderAnim + 0x1C) = pCurrMainAnim->speed;
+        func_003129E0(self->mRiderAnim, 0x1B0, animInfo, start * 0.01666666753590107f);
+        func_00313CF0(func_00311B20(self->mRiderAnim, 2), 0, startTime);
+        func_00312598(self->mRiderAnim, 0);
+        *(float*)((char*)self->mRiderAnim + 0x1C) = 1.0f;
+    } else if ((eventBits & 2) && pFrameInfo->active == 0) {
+        cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
+    }
+    sQ_124788 oldStart = *(sQ_124788*)&self->unk_AE0;
+    *(sQ_124788*)&self->unk_AE0 = sQ_124788(pFrameInfo->pos[0], pFrameInfo->pos[1], pFrameInfo->pos[2], 1.0f);
+    float a0 = self->unk_AF0;
+    float a1 = self->unk_AF4;
+    float a2 = self->unk_AF8;
+    sQ_124788 oldPos = *(sQ_124788*)&self->mPosition;
+    self->unk_AF0 = pFrameInfo->ang[0] * 0.01745329424738884f;
+    self->unk_AF4 = pFrameInfo->ang[1] * 0.01745329424738884f;
+    self->unk_AF8 = pFrameInfo->ang[2] * 0.01745329424738884f;
+    AddEq_124788(*(sQ_124788*)&self->mPosition,
+                 MatMulV_124788((char*)&self->mScriptMatrix, Sub_124788(*(sQ_124788*)&self->unk_AE0, oldStart)));
+    sQ_124788 q = Sub_124788(*(sQ_124788*)&self->mPosition, oldPos);
+    *(sQ_124788*)&self->mVelocity = q;
+    func_001241C0(self, (sQuat_001241C0*)&q, self->unk_AF8 - a2, self->unk_AF4 - a1, self->unk_AF0 - a0);
+    *(sQ_124788*)&self->mRotation = QuatMul_124788(q, *(sQ_124788*)&self->mRotation);
+    cRider_updateOrientationImplicit(self);
+    sQ_124788* bone = (sQ_124788*)&self->mAnimModel->bones[self->mBoneBoardRoot].pos;
+    sQ_124788 before = *bone;
+    func_0011EB60(self, frameDelta);
+    func_0011EB98(self);
+    if (self->unk_AFC != 0) {
+        *(sQ_124788*)&self->mVelocity = Sub_124788(*bone, before);
+    }
+    if (frameDelta > 0.0f) {
+        self->mVelocity.x = self->mVelocity.x / frameDelta;
+        self->mVelocity.y = self->mVelocity.y / frameDelta;
+        self->mVelocity.z = self->mVelocity.z / frameDelta;
+    }
+    char* ch = func_00311B20(self->mRiderAnim, 2) + 0xB0;
+    int on = 0;
+    if (func_001446A0(ch, 0) != 0) {
+        on = func_001446B8(ch, 0) != 0;
+    }
+    if (on) {
+        func_0030E9E0(self->mAnimModel, 0xB, 0);
+        func_00144670(ch, 0);
+    } else {
+        int on2 = 0;
+        if (func_001446A0(ch, 1) != 0) {
+            on2 = func_001446B8(ch, 1) != 0;
+        }
+        if (on2) {
+            func_0030EA80(self->mAnimModel, 0xB, 0);
+            func_00144670(ch, 1);
+        }
+    }
+    sQ_124788 p = *(sQ_124788*)((char*)self->mAnimModel->bones + (self->mBoneHips << 5));
+    p.z = self->mPosition.z;
+    func_0011E150_4788(self, &p);
+    func_00106828_4788(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/rider", func_00125038);

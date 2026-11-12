@@ -737,7 +737,63 @@ extern "C" void func_00328660(sNode_00328660* node, int idx, sItem_00328660* ite
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/aifwddiff", func_00328808);
+#ifdef SKIP_ASM
+extern "C" void func_00328808(sNode_003284B8* node, int type, sItem_00328660* item, sCell_00328660* oldkey,
+                              sCell_00328660* newkey, sCell_00328660* mykey)
+{
+    if (newkey->level == mykey->level) {
+        func_003284B8(node, type, (sItem_003284B8*)item, (sCell_003284B8*)oldkey, (sCell_003284B8*)mykey);
+        ((sList_00328660*)&node->lists[type])->push(item);
+        return;
+    }
+    if (oldkey->level == mykey->level) {
+        node->lists[type].remove((sItem_003284B8*)item);
+        func_00328660((sNode_00328660*)node, type, item, newkey, mykey);
+        return;
+    }
+    int olds = mykey->level - oldkey->level - 1;
+    int oldcx = (oldkey->x >> olds) - mykey->x * 2;
+    int oldcy = (oldkey->y >> olds) - mykey->y * 2;
+    int oldcz = (oldkey->z >> olds) - mykey->z * 2;
+    int news = mykey->level - newkey->level - 1;
+    int newcx = (newkey->x >> news) - mykey->x * 2;
+    int newcy = (newkey->y >> news) - mykey->y * 2;
+    int newcz = (newkey->z >> news) - mykey->z * 2;
+    if (oldcx == newcx && oldcy == newcy && oldcz == newcz) {
+        sCell_00328660 childkey;
+        childkey.level = mykey->level - 1;
+        childkey.x = mykey->x * 2 + newcx;
+        childkey.y = mykey->y * 2 + newcy;
+        childkey.z = mykey->z * 2 + newcz;
+        sNode_003284B8*& child = node->child[newcx][newcy][newcz];
+        func_00328808(child, type, item, oldkey, newkey, &childkey);
+        return;
+    }
+    sCell_00328660 oldchildkey;
+    oldchildkey.level = mykey->level - 1;
+    oldchildkey.x = mykey->x * 2 + oldcx;
+    oldchildkey.y = mykey->y * 2 + oldcy;
+    oldchildkey.z = mykey->z * 2 + oldcz;
+    sNode_003284B8*& oldchild = node->child[oldcx][oldcy][oldcz];
+    func_003284B8(oldchild, type, (sItem_003284B8*)item, (sCell_003284B8*)oldkey, (sCell_003284B8*)&oldchildkey);
+    if (oldchild->empty()) {
+        operator_delete((int*)oldchild);
+        oldchild = 0;
+    }
+    sCell_00328660 newchildkey;
+    newchildkey.level = mykey->level - 1;
+    newchildkey.x = mykey->x * 2 + newcx;
+    newchildkey.y = mykey->y * 2 + newcy;
+    newchildkey.z = mykey->z * 2 + newcz;
+    sNode_003284B8*& newchild = node->child[newcx][newcy][newcz];
+    if (newchild == 0) {
+        newchild = (sNode_003284B8*)new (D_004A3FC0, 0x20000000, 0) sNode_00328660;
+    }
+    func_00328660((sNode_00328660*)newchild, type, item, newkey, &newchildkey);
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/aifwddiff", func_00328C20);

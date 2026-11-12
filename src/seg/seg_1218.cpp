@@ -6632,7 +6632,122 @@ extern "C" int func_0010BC98(char* self) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_0010BD10);
+#ifdef SKIP_ASM
+struct sV4_BD10
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sRec_BD10
+{
+    int active;
+    int pad4;
+    float dist;
+    float angle;
+    char pad10[0x24 - 0x10];
+};
+
+// The object at cComputer+0x18 (On Tour reads the same fields through its first member).
+struct sRiderT_BD10
+{
+    sRec_BD10 targets[6];       // 0x000
+    char padD8[0x1B0 - 0xD8];
+    sV4_BD10 fwd;               // 0x1B0
+    char pad1C0[0x4C8 - 0x1C0];
+    float pathDist;             // 0x4C8
+};
+
+extern "C" int func_0010D9E8(char* self, int i);
+extern "C" float func_0031C040(float);
+extern "C" float func_0031C228(float);
+
+// PORT: PS2-only FPU asm (absolute value).
+static inline float Abs_BD10(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2-only FPU asm (float -> int -> float truncation).
+static inline float Trunc_BD10(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    return t;
+}
+
+static inline float Floor_BD10(float x)
+{
+    float t = Trunc_BD10(x);
+    if (x < t)
+        t -= 1.0f;
+    return t;
+}
+
+static inline float Atan2_BD10(float y, float x)
+{
+    if (x == 0.0f) {
+        if (y == 0.0f)
+            return y;
+        if (y >= 0.0f)
+            return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f) {
+        if (y > 0.0f)
+            r += 3.1415927410125732f;
+        else
+            r -= 3.1415927410125732f;
+    }
+    return r;
+}
+
+static inline sV4_BD10 Fwd_BD10(sRiderT_BD10* o) { return o->fwd; }
+
+
+// On Tour: bool cComputer::checkForTargets(bool& isAttack); retail stores a word through isAttack.
+extern "C" int func_0010BD10(char* self, int* isAttack)
+{
+    const float kAIMaxTargetDist = 700.0f;
+    const float kAIMaxPathWanderDist = 600.0f;
+    if (*(int*)(self + 0xE70) >= 0) {
+        if ((*(sRiderT_BD10**)(self + 0x18))->targets[*(int*)(self + 0xE70)].dist > kAIMaxTargetDist * 1.5f
+            || (*(sRiderT_BD10**)(self + 0x18))->pathDist > kAIMaxPathWanderDist)
+            *(int*)(self + 0xE70) = -1;
+    }
+    if (*(int*)(self + 0xE70) < 0 && (*(sRiderT_BD10**)(self + 0x18))->pathDist < kAIMaxPathWanderDist * 0.9f
+        && func_001298C8() % 12 == 0) {
+        float bestScore = 10000000000.0f;
+        float aScore;
+        int shouldAttack;
+        int i;
+        for (i = 0; i < 6; i++) {
+            if ((*(sRiderT_BD10**)(self + 0x18))->targets[i].active == 0)
+                continue;
+            aScore = (*(sRiderT_BD10**)(self + 0x18))->targets[i].dist;
+            if (aScore > kAIMaxTargetDist)
+                continue;
+            shouldAttack = func_0010D9E8(self, i);
+            float del = (*(sRiderT_BD10**)(self + 0x18))->targets[i].angle - Atan2_BD10(Fwd_BD10(*(sRiderT_BD10**)(self + 0x18)).y, Fwd_BD10(*(sRiderT_BD10**)(self + 0x18)).x);
+            float c = func_0031C040(del - Floor_BD10(del * 0.15915493667125702f + 0.5f) * 6.2831854820251465f);
+            if (shouldAttack)
+                aScore *= Abs_BD10(c) + 1.0f;
+            else
+                aScore *= 1.0f - c;
+            if (aScore <= bestScore) {
+                *(int*)(self + 0xE70) = i;
+                bestScore = aScore;
+                *isAttack = shouldAttack;
+            }
+        }
+    }
+    return *(int*)(self + 0xE70) >= 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_0010BFA8);

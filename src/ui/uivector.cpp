@@ -12,7 +12,100 @@ struct sUIVectorFlags {
     bool bit6 : 1;
 };
 
+//100%
 INCLUDE_ASM("ui/uivector", cUIVector_setUIData);
+#ifdef SKIP_ASM
+extern "C" void cUIThing_setUIData(void* self, void* data);
+extern char D_004940C8[];
+extern char D_004940D8[];
+extern char D_004940E8[];
+extern char D_004940F8[];
+
+// On Tour: tAttrVector.
+struct sUIVecFlags_34C0 {
+    unsigned int mFill : 1;
+    unsigned int mLoop : 1;
+    unsigned int mNumTriangles : 15;
+    unsigned int mNumVertices : 15;
+};
+
+// PORT: tagged array new (operator_new__FUi) as member operators; element ctors are empty.
+struct sUIVec16_34C0 {
+    float x, y, z, w;
+    sUIVec16_34C0() {}
+    void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+};
+
+struct sUIVec3_34C0 {
+    float x, y, z;
+    sUIVec3_34C0() {}
+    void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+};
+
+struct sUIVec3b_34C0 {
+    float x, y, z;
+    sUIVec3b_34C0() {}
+    void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+};
+
+struct sUIVec48_34C0 {
+    char data[0x30];
+    sUIVec48_34C0() {}
+    void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+};
+
+// The unit declares D_004FF0D8 later as a plain vec3; bind this view by asm label.
+extern sUIVec3_34C0 D_004FF0D8_34C0 __asm__("D_004FF0D8");
+
+// On Tour: tUIVector (a tUIBaseObject header, then the counts; triangle data follows).
+struct sUIVecData_34C0 {
+    char pad0[0x20];
+    char mNumVertices;          // 0x20
+    char mNumTriangles;         // 0x21
+    char mFlags;                // 0x22
+    char mPad;                  // 0x23
+};
+
+struct sUIVector_34C0 {
+    char pad0[0x74];
+    sUIVecFlags_34C0 flags;     // 0x74
+    void* extra;                // 0x78
+    sUIVec16_34C0* a;           // 0x7C
+    sUIVec3_34C0* b;            // 0x80
+    sUIVec3b_34C0* c;           // 0x84
+    char pad88[4];
+    sUIVec48_34C0* d;           // 0x8C
+};
+
+extern "C" void cUIVector_setUIData(void* p, void* pUIBase)
+{
+    sUIVector_34C0* self = (sUIVector_34C0*)p;
+    cUIThing_setUIData(self, pUIBase);
+    sUIVecData_34C0* pIYFVector = (sUIVecData_34C0*)pUIBase;
+    self->flags.mFill = pIYFVector->mFlags & 1;
+    self->flags.mLoop = pIYFVector->mFlags & 2;
+    self->flags.mNumTriangles = pIYFVector->mNumTriangles;
+    if (self->flags.mNumTriangles)
+        self->extra = (unsigned char*)(pIYFVector + 1);
+    self->flags.mNumVertices = pIYFVector->mNumVertices;
+    if (pIYFVector->mNumVertices)
+    {
+        sUIVec16_34C0** pa = &self->a;
+        *pa = new (D_004940C8, 0x100, 0) sUIVec16_34C0[pIYFVector->mNumVertices];
+        sUIVec3_34C0** pb = &self->b;
+        *pb = new (D_004940D8, 0x100, 0) sUIVec3_34C0[pIYFVector->mNumVertices];
+        sUIVec3b_34C0** pc = &self->c;
+        *pc = new (D_004940E8, 0x100, 0) sUIVec3b_34C0[pIYFVector->mNumVertices];
+        for (int i = 0; i < pIYFVector->mNumVertices; i++)
+            self->b[i] = D_004FF0D8_34C0;
+    }
+    if (!self->flags.mFill)
+    {
+        sUIVec48_34C0** pd = &self->d;
+        *pd = new (D_004940F8, 0x100, 0) sUIVec48_34C0[self->flags.mNumVertices];
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uivector", cUIVector_setChannelData);
