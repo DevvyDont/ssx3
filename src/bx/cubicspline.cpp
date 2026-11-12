@@ -947,7 +947,7 @@ struct sMChunk_31F018
     sMChunk_31F018* bk;          // 0xC
 };
 
-extern "C" void func_003E6574(void* d, void* s, int n);
+extern "C" void MEM_copy(void* d, void* s, int n);
 
 extern "C" void* func_0031F018(void* ms, void* oldmem, unsigned int bytes)
 {
@@ -1014,7 +1014,7 @@ extern "C" void* func_0031F018(void* ms, void* oldmem, unsigned int bytes)
             unsigned int* dp = (unsigned int*)newmem;
             unsigned int ncopies = copysize / 4;
             if (ncopies > 9) {
-                func_003E6574(dp, sp, copysize);
+                MEM_copy(dp, sp, copysize);
             } else {
                 dp[0] = sp[0];
                 dp[1] = sp[1];
@@ -1227,7 +1227,7 @@ extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsign
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031F718);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
 // dlmalloc 2.7 cALLOc()
 extern "C" void* func_0031F718(void* ms, unsigned int n, unsigned int elem_size)
@@ -1241,7 +1241,7 @@ extern "C" void* func_0031F718(void* ms, unsigned int n, unsigned int elem_size)
             unsigned int nclears = clearsize >> 2;
             unsigned int* d = (unsigned int*)mem;
             if (nclears > 9) {
-                func_003E6448(d, 0, clearsize);
+                MEM_fill(d, 0, clearsize);
             } else {
                 d[0] = 0;
                 d[1] = 0;
@@ -1260,7 +1260,7 @@ extern "C" void* func_0031F718(void* ms, unsigned int n, unsigned int elem_size)
                 }
             }
         } else {
-            func_003E6448(mem, 0, (csz & ~3U) - 8);
+            MEM_fill(mem, 0, (csz & ~3U) - 8);
         }
     }
     return mem;
@@ -1310,7 +1310,7 @@ struct sMChunk_31F858
     unsigned int size;           // 0x4
 };
 
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
 extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks)
 {
@@ -1365,7 +1365,7 @@ extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, in
     remainder_size = *(unsigned int*)((char*)mem - 4) & ~3;
 
     if (opts & 2)
-        func_003E6448(mem, 0, remainder_size - 4 - array_size);
+        MEM_fill(mem, 0, remainder_size - 4 - array_size);
 
     if (marray == 0) {
         array_chunk = (sMChunk_31F858*)((char*)p + contents_size);
@@ -1655,7 +1655,7 @@ void func_0031FF38(void* self, int flags)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FF60);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
 extern "C" void func_0031FF60(void* self, unsigned int base, unsigned int size)
 {
@@ -1663,7 +1663,7 @@ extern "C" void func_0031FF60(void* self, unsigned int base, unsigned int size)
     *(unsigned int*)((char*)self + 0x4) = start;
     *(unsigned int*)((char*)self + 0x0) = start;
     *(unsigned int*)((char*)self + 0xC) = (size - (start - base)) & 0xFFFFFFF0;
-    func_003E6448((void*)start, 0, 0x378);
+    MEM_fill((void*)start, 0, 0x378);
     *(unsigned int*)((char*)self + 0x4) += 0x380;
     *(unsigned int*)((char*)self + 0xC) -= 0x380;
     *(unsigned int*)((char*)self + 0x8) = *(unsigned int*)((char*)self + 0x4);

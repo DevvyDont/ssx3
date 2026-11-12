@@ -117,13 +117,13 @@ extern "C" void func_002701A0(void* self)
 INCLUDE_ASM("replay/replaycache", func_00270238);
 #ifdef SKIP_ASM
 extern "C" void func_0026E608(void* list, void* node);
-extern "C" void func_0026D628(void* node);
+extern "C" void cReplayFrame_clearFrame(void* node);
 extern "C" void func_0026E5D0(void* list, void* node);
 
 extern "C" void func_00270238(void* self, void* node)
 {
     func_0026E608((char*)self + 0x3B0, node);
-    func_0026D628(node);
+    cReplayFrame_clearFrame(node);
     func_0026E5D0((char*)self + 0x3BC, node);
 }
 #endif
@@ -240,7 +240,7 @@ extern "C" void func_001620D0(void* self);
 extern "C" void cGameViewMan_updateAll(void* list);
 void* func_0026E448_2(void* self, int pos) __asm__("func_0026E448__FPv");
 extern char* D_004A28A8;
-void func_0026F4A0(void* self, int arg);
+void cReplay_setReplayState(void* self, int arg);
 
 struct sRcVEntry03F0 {
     short delta;
@@ -292,7 +292,7 @@ extern "C" void func_002703F0(sReplay002703F0* self, int reset)
             cGameViewMan_updateAll(list);
         } else {
             self->pos = self->end;
-            func_0026F4A0(self, 3);
+            cReplay_setReplayState(self, 3);
         }
     } else {
         self->pos++;
@@ -387,14 +387,14 @@ extern "C" void func_00270658(void* self)
 INCLUDE_ASM("replay/replaycache", func_00270670);
 #ifdef SKIP_ASM
 extern "C" void func_0026F980(void* self);
-extern "C" void func_001173B8(void* p);
+extern "C" void cRiderMetrix_resetHUDfx(void* p);
 extern char* D_004A28A8;
 
 extern "C" void func_00270670(void* self)
 {
     if (*(int*)((char*)self + 0x620) != 0) {
         func_0026F980(self);
-        func_001173B8(*(void**)(*(char**)(*(char**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x40) + 0x18) + 0x790));
+        cRiderMetrix_resetHUDfx(*(void**)(*(char**)(*(char**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x40) + 0x18) + 0x790));
     }
 }
 #endif
@@ -403,18 +403,18 @@ extern "C" void func_00270670(void* self)
 INCLUDE_ASM("replay/replaycache", func_002706B8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void func_0026F4A0_cpp(void* self, int arg) __asm__("func_0026F4A0__FPvi");
+void cReplay_setReplayState_cpp(void* self, int arg) __asm__("cReplay_setReplayState__FPvi");
 
 extern "C" void func_002706B8(void* self)
 {
     if (*(int*)((char*)self + 0x61C) == 0 && *(int*)self != 9) {
-        func_0026F4A0_cpp(self, 9);
+        cReplay_setReplayState_cpp(self, 9);
     }
 }
 #endif
 
 extern "C" void func_0026F980(void* self);
-void func_0026F4A0(void* self, int arg);
+void cReplay_setReplayState(void* self, int arg);
 
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_stopAutoReplay__FPv);
@@ -424,7 +424,7 @@ void cReplay_stopAutoReplay(void* self)
     if (*(int*)((char*)self + 0x61C) != 0) {
         func_0026F980(self);
     }
-    func_0026F4A0(self, 0xD);
+    cReplay_setReplayState(self, 0xD);
 }
 #endif
 
@@ -835,14 +835,14 @@ void* func_00270ED8(void* self)
 }
 #endif
 
-extern "C" void* func_0026F228(void* self);
+extern "C" void* cReplay_reset(void* self);
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00270EF8__FPv);
 #ifdef SKIP_ASM
 void* func_00270EF8(void* self)
 {
-    return func_0026F228(self);
+    return cReplay_reset(self);
 }
 #endif
 
@@ -893,7 +893,7 @@ extern "C" void* func_00270F78(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00270FC0);
 #ifdef SKIP_ASM
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 
 struct sRcStream0FC0 {
     char pad_0x000[0x644];
@@ -910,7 +910,7 @@ extern "C" void func_00270FC0(sRcStream0FC0* self)
             int space = 0x4000 - self->used;
             int n = space < self->left ? space : self->left;
             if (n > 0) {
-                func_003E6574(self->dst, self->src, n);
+                MEM_copy(self->dst, self->src, n);
                 self->dst += n;
                 self->src += n;
                 self->left -= n;
@@ -1271,13 +1271,13 @@ extern "C" void func_00271510(sReplayCache1510* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00271620);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" void* cBE_getBE();
 extern "C" int func_0014E048(void* be);
 
 extern "C" void func_00271620(void* self)
 {
-    func_003E6448(*(void**)((char*)self + 0x640), 0, 0xC800);
+    MEM_fill(*(void**)((char*)self + 0x640), 0, 0xC800);
     int used = func_0014E048(cBE_getBE()) + *(int*)((char*)self + 0x678);
     *(int*)((char*)self + 0x67C) = 0x7FFF8 - used;
     *(int*)((char*)self + 0x638) += 1;
@@ -1317,12 +1317,12 @@ void* func_002716F0(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00271708);
 #ifdef SKIP_ASM
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" void func_00271058(void* self, signed char* data, int size);
 
 extern "C" void func_00271708(void* self)
 {
-    func_003E6574(*(void**)((char*)self + 0x640), (char*)self + 0x680, 8);
+    MEM_copy(*(void**)((char*)self + 0x640), (char*)self + 0x680, 8);
     func_00271058(self, *(signed char**)((char*)self + 0x640), 8);
     *(int*)((char*)self + 0x638) += 1;
 }
@@ -1614,7 +1614,7 @@ extern "C" void func_00272288(int* self)
 {
     self[0] = -1;
     self[0xB0 / 4] = 0;
-    func_003E6448(self + 1, 0, 0xAC);
+    MEM_fill(self + 1, 0, 0xAC);
 }
 #endif
 
@@ -1952,7 +1952,7 @@ extern "C" int func_002726A8(sRcTrack25F0* self, float t)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272788);
+INCLUDE_ASM("replay/replaycache", cInSeq_cInSeq);
 #ifdef SKIP_ASM
 extern "C" void* func_00274518(void* self);
 // PORT: array new[] with a heap argument; same symbol as the unit's func_002724C8(void*).
@@ -1977,7 +1977,7 @@ struct sRcPool2788 {
     int used;                   // 0x1C
 };
 
-extern "C" sRcPool2788* func_00272788(sRcPool2788* self, void* a1, void* a2, unsigned int count, int tag)
+extern "C" sRcPool2788* cInSeq_cInSeq(sRcPool2788* self, void* a1, void* a2, unsigned int count, int tag)
 {
     func_002722E0(self->heap, a1, a2);
     self->tag = tag;
@@ -2000,12 +2000,12 @@ extern "C" sRcPool2788* func_00272788(sRcPool2788* self, void* a1, void* a2, uns
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002728D0);
+INCLUDE_ASM("replay/replaycache", cInSeq__cInSeq);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
 // Deleting-destructor tail: free self when bit 0 of the g++ 2.95 in-charge flag is set.
-extern "C" void func_002728D0(int* self, int flags)
+extern "C" void cInSeq__cInSeq(int* self, int flags)
 {
     if (flags & 1) {
         operator_delete(self);
@@ -4207,189 +4207,189 @@ extern "C" int func_002751A0(sRcAnim51A0* self, float time, float prev, float sp
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002752F0__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetValue__FPv);
 #ifdef SKIP_ASM
-void* func_002752F0(void* self)
+void* cScriptPlayerChannelSpline_GetValue(void* self)
 {
     return (char*)self + 0x1C;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002752F8__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetCustom__FPv);
 #ifdef SKIP_ASM
-int func_002752F8(void* self)
+int cScriptPlayerChannelSpline_GetCustom(void* self)
 {
     return *(int*)((char*)self + 0x20);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275300__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetNextKeyFrame__FPv);
 #ifdef SKIP_ASM
-int func_00275300(void* self)
+int cScriptPlayerChannelSpline_GetNextKeyFrame(void* self)
 {
     return -0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275308__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetType__FPv);
 #ifdef SKIP_ASM
-int func_00275308(void* self)
+int cScriptPlayerChannelSpline_GetType(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275310__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetOwner__FPv);
 #ifdef SKIP_ASM
-int func_00275310(void* self)
+int cScriptPlayerChannelSpline_GetOwner(void* self)
 {
     return *(int*)((char*)self + 0xC);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275318__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_IsPlaying__FPv);
 #ifdef SKIP_ASM
-int func_00275318(void* self)
+int cScriptPlayerChannelSpline_IsPlaying(void* self)
 {
     return (*(int*)((char*)self + 0x8) != 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275328__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetValue__FPv);
 #ifdef SKIP_ASM
-void* func_00275328(void* self)
+void* cScriptPlayerChannelBlock_GetValue(void* self)
 {
     return (char*)self + 0x28;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275330__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetCustom__FPv);
 #ifdef SKIP_ASM
-int func_00275330(void* self)
+int cScriptPlayerChannelBlock_GetCustom(void* self)
 {
     return *(int*)((char*)self + 0x24);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275338__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetType__FPv);
 #ifdef SKIP_ASM
-int func_00275338(void* self)
+int cScriptPlayerChannelBlock_GetType(void* self)
 {
     return 0x2;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275340__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetOwner__FPv);
 #ifdef SKIP_ASM
-int func_00275340(void* self)
+int cScriptPlayerChannelBlock_GetOwner(void* self)
 {
     return *(int*)((char*)self + 0xC);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275348__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_IsPlaying__FPv);
 #ifdef SKIP_ASM
-int func_00275348(void* self)
+int cScriptPlayerChannelBlock_IsPlaying(void* self)
 {
     return (*(int*)((char*)self + 0x8) != 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275358__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetValue__FPv);
 #ifdef SKIP_ASM
-void* func_00275358(void* self)
+void* cScriptPlayerChannelEvent_GetValue(void* self)
 {
     return (char*)self + 0x20;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275360__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetCustom__FPv);
 #ifdef SKIP_ASM
-int func_00275360(void* self)
+int cScriptPlayerChannelEvent_GetCustom(void* self)
 {
     return *(int*)((char*)self + 0x1C);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275368__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetType__FPv);
 #ifdef SKIP_ASM
-int func_00275368(void* self)
+int cScriptPlayerChannelEvent_GetType(void* self)
 {
     return 0x3;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275370__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetOwner__FPv);
 #ifdef SKIP_ASM
-int func_00275370(void* self)
+int cScriptPlayerChannelEvent_GetOwner(void* self)
 {
     return *(int*)((char*)self + 0xC);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275378__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_IsPlaying__FPv);
 #ifdef SKIP_ASM
-int func_00275378(void* self)
+int cScriptPlayerChannelEvent_IsPlaying(void* self)
 {
     return (*(int*)((char*)self + 0x8) != 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275388__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetValue__FPv);
 #ifdef SKIP_ASM
-void* func_00275388(void* self)
+void* cScriptPlayerChannelObject_GetValue(void* self)
 {
     return (char*)self + 0x24;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275390__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetCustom__FPv);
 #ifdef SKIP_ASM
-int func_00275390(void* self)
+int cScriptPlayerChannelObject_GetCustom(void* self)
 {
     return *(int*)((char*)self + 0x20);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00275398__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetType__FPv);
 #ifdef SKIP_ASM
-int func_00275398(void* self)
+int cScriptPlayerChannelObject_GetType(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002753A0__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetOwner__FPv);
 #ifdef SKIP_ASM
-int func_002753A0(void* self)
+int cScriptPlayerChannelObject_GetOwner(void* self)
 {
     return *(int*)((char*)self + 0xC);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002753A8__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_IsPlaying__FPv);
 #ifdef SKIP_ASM
-int func_002753A8(void* self)
+int cScriptPlayerChannelObject_IsPlaying(void* self)
 {
     return (*(int*)((char*)self + 0x8) != 0);
 }

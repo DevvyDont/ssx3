@@ -19,14 +19,14 @@ extern "C" void cFEStateTrophyRoom_onCreateScreen(void* self)
 }
 #endif
 
-extern "C" void* func_0039E4C0(void* self);
+extern "C" void* cUIState_onGainFocus(void* self);
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D43D0__FPv);
 #ifdef SKIP_ASM
 void* func_001D43D0(void* self)
 {
-    return func_0039E4C0(self);
+    return cUIState_onGainFocus(self);
 }
 #endif
 
@@ -154,7 +154,7 @@ struct sVEntry001D4698 {
     short index;
     void* (*fn)(void*, void*, int);
 };
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void func_001D47A0(void* self, int index);
 extern "C" void func_001D4890(void* self, int index);
 
@@ -187,7 +187,7 @@ extern "C" void func_001D4698(void* self, void* item, int msg)
         sVEntry001D4698* vt = *(sVEntry001D4698**)((char*)obj + 4);
         void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)self + 0x54));
         if (r != 0) {
-            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -221,7 +221,7 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D47A0);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00157BF0(void* self, int rider, int a, int b, int c);
+extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" int func_001CED90(int rider, int a, int b, int c, int index);
 
 class cTrophyWidget_47A0 {
@@ -247,7 +247,7 @@ extern "C" void func_001D47A0(void* self, int index)
     v = -1;
     {
         if (index == 0) {
-            if (func_00157BF0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
+            if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
                               *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x54),
                               *(int*)((char*)self + 0x58)) != 0) {
                 v = *(int*)((char*)self + 0x60);
@@ -624,7 +624,7 @@ struct sVEntry001D4EA8 {
     short index;
     void* (*fn)(void*, void*, int);
 };
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 
 extern "C" void func_001D4EA8(void* self, void* item, unsigned int msg)
 {
@@ -638,7 +638,7 @@ extern "C" void func_001D4EA8(void* self, void* item, unsigned int msg)
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
         void* r = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
-        func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         break;
     }
     case 6: {
@@ -646,7 +646,7 @@ extern "C" void func_001D4EA8(void* self, void* item, unsigned int msg)
         sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
         void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (r != 0) {
-            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -922,7 +922,7 @@ extern "C" int func_001D5460(void* self, int a1, unsigned int key)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5488);
 #ifdef SKIP_ASM
-extern "C" void* func_00227F80(void* app);
+extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: func_00152948__FPv ignores its argument; this caller passes none.
@@ -936,7 +936,7 @@ extern "C" void func_0023D5A8(void* app);
 extern "C" void func_00241D40(void* app, int a, char* buf, int n);
 extern "C" void func_00241AA0(char* buf, int n);
 extern "C" void func_002C2540(char* buf, char* s);
-extern "C" void func_002C26D0(void* dst, char* a, char* b, char* c);
+extern "C" void sprintf1(void* dst, char* a, char* b, char* c);
 extern void* D_004A28A8;
 extern void* D_004A2028;
 extern char D_004A14C8[];
@@ -989,7 +989,7 @@ extern "C" void func_001D5488(void* self_, int mode)
     D_004A2028 = self;
     *(int*)(self + 0x1C0) = 0;
     *(int*)(self + 0x214) = 0;
-    char* app = (char*)func_00227F80(gapp);
+    char* app = (char*)cSSXApp_getMCManager(gapp);
     *(void**)(app + 0x0) = func_001D59A0_a5488;
     *(void**)(app + 0x18) = func_001D5DF0_a5488;
     *(void**)(app + 0x8) = func_001D5F38_a5488;
@@ -1093,7 +1093,7 @@ extern "C" void func_001D5488(void* self_, int mode)
     func_00241D40(app, *(int*)(app + 0xB4), b0, 0x100);
     func_002C2540(b2, D_004A14C8);
     func_00241AA0(b1, 0x100);
-    func_002C26D0(self + 0x11C, b2, b1, b0);
+    sprintf1(self + 0x11C, b2, b1, b0);
 }
 #endif
 
@@ -1107,8 +1107,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cMemMan_free(void* p);
 extern "C" void func_00152700(void* iface);
 extern "C" void func_00152728(void* iface);
-extern "C" void func_0020A430(void* self);
-extern "C" void* func_00227F80(void* app);
+extern "C" void cOVState_onDestroyScreen(void* self);
+extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_0023C860(void* self);
 extern "C" void func_0023D5E8(void* self);
 extern "C" void func_002410A0(void* self);
@@ -1123,7 +1123,7 @@ extern "C" void func_001D58B8(void* self)
         *(int*)((char*)self + 0x228) = 0;
     }
     func_00152700(iface);
-    char* app = (char*)func_00227F80(D_004A28A8);
+    char* app = (char*)cSSXApp_getMCManager(D_004A28A8);
     if (*(int*)(app + 0x434) != 0) {
         func_002410A0(app);
         func_0023D5E8(app);
@@ -1137,14 +1137,14 @@ extern "C" void func_001D58B8(void* self)
         *(int*)((char*)self + 0x1D4) = 0;
         *(int*)((char*)self + 0x1D0) = 0;
     }
-    func_0020A430(self);
+    cOVState_onDestroyScreen(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D59A0);
 #ifdef SKIP_ASM
-extern "C" void* func_00227F80(void* app);
+extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_002412A0(void* app);
@@ -1158,7 +1158,7 @@ extern "C" void func_00241D40(void* app, int a, char* buf, int n);
 extern "C" void func_00241AA0(char* buf, int n);
 // PORT: the unit declares func_002C2540 as void; it returns dst (bound by asm label so the call is a call_value).
 extern "C" unsigned short* func_002C2540_59A0(char* buf, const char* s) __asm__("func_002C2540");
-extern "C" void func_002C26D0_59A0(char* dst, char* fmt, char* a, char* b, int n) __asm__("func_002C26D0");
+extern "C" void sprintf1_59A0(char* dst, char* fmt, char* a, char* b, int n) __asm__("sprintf1");
 extern "C" void func_00241000(void* app, char* name, int a, int b);
 extern "C" void func_00241E18(void* app, char* buf, int n);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -1182,7 +1182,7 @@ extern "C" void func_001D59A0(void)
     char slot[0x200];
     char fmt1[0x200];
     char fmt2[0x200];
-    char* app = (char*)func_00227F80(D_004A28A8);
+    char* app = (char*)cSSXApp_getMCManager(D_004A28A8);
     int mode = *(int*)((char*)D_004A2028 + 0x1BC);
     if (mode == 2) {
         func_002412A0(app);
@@ -1196,17 +1196,17 @@ extern "C" void func_001D59A0(void)
         func_00241D40(app, 0, name, 0x41);
         func_002C2540_59A0(fmt1, D_004677A8);
         func_00241AA0(slot, 0x100);
-        func_002C26D0_59A0(title, fmt1, slot, name, *(int*)(app + 0xF8) + 1);
+        sprintf1_59A0(title, fmt1, slot, name, *(int*)(app + 0xF8) + 1);
         func_00241000(app, title, *(int*)((char*)D_004A2028 + 0x1D4), size);
     } else {
-        char* app2 = (char*)func_00227F80(D_004A28A8);
+        char* app2 = (char*)cSSXApp_getMCManager(D_004A28A8);
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
         int a = func_00152950(iface, *(int*)((char*)D_004A2028 + 0x1CC));
         int b = func_00152BA8();
         func_00241D40(app2, 1, name, 0x41);
         func_002C2540_59A0(fmt2, D_004677A8);
         func_00241AA0(slot, 0x100);
-        func_002C26D0_59A0(title, fmt2, slot, name, *(int*)(app2 + 0xF8) + 1);
+        sprintf1_59A0(title, fmt2, slot, name, *(int*)(app2 + 0xF8) + 1);
         func_00241000(app2, title, a, b);
     }
     char* fe = (char*)D_004A2028;
@@ -1233,7 +1233,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00152728(void* iface);
-extern "C" void* func_00227F80(void* app);
+extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int func_0014E048(void* be);
 void* func_0014E0C0(void* self, int a1);
 extern "C" void func_00241200(void* self, char* a, int n);
@@ -1283,7 +1283,7 @@ extern "C" int func_001D5C28(int size)
         if (size > 0x4000) {
             size = 0x4000;
         }
-        func_00241200(func_00227F80(D_004A28A8), D_004A2028_tr->cur, size);
+        func_00241200(cSSXApp_getMCManager(D_004A28A8), D_004A2028_tr->cur, size);
         D_004A2028_tr->cur += size;
     }
     return 1;
@@ -1295,7 +1295,7 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D5D78);
 #ifdef SKIP_ASM
 extern void* D_004A2028;
 extern void* D_004A28A8;
-extern "C" void* func_00227F80(void* app);
+extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int func_002710A8(void* self, int* a, int* b);
 extern "C" void func_00241138(void* self, int a, int b);
 
@@ -1309,7 +1309,7 @@ extern "C" int func_001D5D78(int key)
 {
     int out;
     if (((sFEMemCard_5D78*)D_004A2028)->mode == 1) {
-        void* r = func_00227F80(D_004A28A8);
+        void* r = cSSXApp_getMCManager(D_004A28A8);
         if (func_002710A8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28), &out, &key) != 0) {
             func_00241138(r, out, key);
             return 1;
@@ -1327,7 +1327,7 @@ extern void* D_004A28A8;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_00227F80(void* app);
+extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int func_0014E048(void* be);
 // PORT: func_00152948__FPv ignores its argument; this caller passes none.
 int func_00152948_r() __asm__("func_00152948__FPv");
@@ -1363,7 +1363,7 @@ extern "C" void cFEMemCard_createReadBuffer(sTrophyRoom_001D5DF0* self, int size
 extern "C" void func_001D5DF0()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
-    sMoviePlayer_001D5DF0* app = (sMoviePlayer_001D5DF0*)func_00227F80(D_004A28A8);
+    sMoviePlayer_001D5DF0* app = (sMoviePlayer_001D5DF0*)cSSXApp_getMCManager(D_004A28A8);
     sTrophyRoom_001D5DF0* g = D_004A2028_tr5;
     g->f1B0 = 1;
     g->f1B4 = 0;
@@ -1492,7 +1492,7 @@ extern "C" int func_00287670(void* opt);
 extern "C" int func_002876A0(void* opt);
 extern "C" int func_002876D0(void* opt);
 extern "C" void func_00286200(void* opt);
-extern "C" void func_00284C28();
+extern "C" void SSXAUDIO_DeInit();
 extern "C" void SSXAUDIO_Init(int lang);
 extern "C" void func_00287410(void* opt, int v);
 extern "C" void func_00287488(void* opt, int v);
@@ -1550,7 +1550,7 @@ extern "C" void func_001D64C0(unsigned int mode)
         int y = *(int*)((char*)func_0028B180() + 0x62B4);
         int z = *(int*)((char*)func_0028B180() + 0x534);
         func_00286200(func_0028B180());
-        func_00284C28();
+        SSXAUDIO_DeInit();
         SSXAUDIO_Init(lang);
         func_00287410(func_0028B180(), (int)a);
         func_00287488(func_0028B180(), (int)b);

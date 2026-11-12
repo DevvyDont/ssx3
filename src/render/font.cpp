@@ -178,8 +178,8 @@ INCLUDE_ASM("render/font", cFont_downloadTexture);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_003E6448(void* dst, int c, int n);
-extern "C" void func_003E6574(void* dst, const void* src, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
+extern "C" void MEM_copy(void* dst, const void* src, int n);
 extern char D_00492F40[];
 extern char D_00492F50[];
 void cMemMan_free(void*);
@@ -223,14 +223,14 @@ extern "C" void cFont_downloadTexture(char* self, sFontTexHdr* img)
     *(sFontUV*)(self + 0x20) = uv;
     unsigned char* pix = (unsigned char*)operator_new_tag((img->w * p2) >> 1, D_00492F40, 0x100, 0);
     unsigned char* pal = (unsigned char*)operator_new_tag(0x40, D_00492F50, 0x100, 0);
-    func_003E6448(pix, 0, (img->w * p2) >> 1);
-    func_003E6448(pal, 0, 0x40);
+    MEM_fill(pix, 0, (img->w * p2) >> 1);
+    MEM_fill(pal, 0, 0x40);
     char* src;
     if (img->flags & 0x1000)
         src = (char*)img + img->offset;
     else
         src = (char*)img + 0x10;
-    func_003E6574(pix, src, (img->w * img->h) >> 1);
+    MEM_copy(pix, src, (img->w * img->h) >> 1);
     int i;
     signed char* p;
     for (i = 0, p = (signed char*)pal; i < 16; i++) {
@@ -2391,9 +2391,9 @@ extern "C" int func_00394C40(void) {
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394C48__FPv);
+INCLUDE_ASM("render/font", cLightMan_CreateAmbient__FPv);
 #ifdef SKIP_ASM
-void func_00394C48(void* self)
+void cLightMan_CreateAmbient(void* self)
 {
 }
 #endif
@@ -2425,9 +2425,9 @@ void func_00394C60(void* self)
 extern "C" void* func_0038AE28(void* self);
 
 //100%
-INCLUDE_ASM("render/font", func_00394C68__FPv);
+INCLUDE_ASM("render/font", cPS2LightMan__cPS2LightMan__FPv);
 #ifdef SKIP_ASM
-void* func_00394C68(void* self)
+void* cPS2LightMan__cPS2LightMan(void* self)
 {
     return func_0038AE28(self);
 }
@@ -2459,11 +2459,11 @@ extern "C" void func_00394C98(void* self, int n)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394CE8);
+INCLUDE_ASM("render/font", cPS2LightMan_Purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
-extern "C" void func_00394CE8(void* self)
+extern "C" void cPS2LightMan_Purge(void* self)
 {
     void* p = *(void**)((char*)self + 0x4);
     if (p != 0) {
@@ -2473,9 +2473,9 @@ extern "C" void func_00394CE8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394D10__FPv);
+INCLUDE_ASM("render/font", cPS2LightMan_ResetDynamicLights__FPv);
 #ifdef SKIP_ASM
-void func_00394D10(void* self)
+void cPS2LightMan_ResetDynamicLights(void* self)
 {
     *(int*)((char*)self + 0xC) = 0;
 }
@@ -2491,9 +2491,9 @@ extern "C" char* func_00394D18(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394D30__FPv);
+INCLUDE_ASM("render/font", cPS2LightMan_SetAmbient__FPv);
 #ifdef SKIP_ASM
-void func_00394D30(void* self)
+void cPS2LightMan_SetAmbient(void* self)
 {
 }
 #endif

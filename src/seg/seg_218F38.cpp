@@ -16,7 +16,7 @@ extern "C" int BXFILE_exists(const char *name) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_218F38", func_00317F60);
+INCLUDE_ASM("seg/seg_218F38", BXFILE_sizez);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sFileInfo_7F60 {
@@ -25,7 +25,7 @@ struct sFileInfo_7F60 {
 };
 extern "C" int FILESYS_bypassqueuefileinfo_7F60(const char *, int, sFileInfo_7F60 *) __asm__("FILESYS_bypassqueuefileinfo");
 
-extern "C" int func_00317F60(const char *name) {
+extern "C" int BXFILE_sizez(const char *name) {
     sFileInfo_7F60 info;
     info.size = 0;
     bool ne = FILESYS_bypassqueuefileinfo_7F60(name, 1, &info) != 1;
@@ -36,7 +36,7 @@ extern "C" int func_00317F60(const char *name) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_218F38", func_00317F98);
+INCLUDE_ASM("seg/seg_218F38", BXFILE_size);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sFileInfo_7F98 {
@@ -45,7 +45,7 @@ struct sFileInfo_7F98 {
 };
 extern "C" int FILESYS_bypassqueuefileinfo_7F98(const char *, int, sFileInfo_7F98 *) __asm__("FILESYS_bypassqueuefileinfo");
 
-extern "C" int func_00317F98(const char *name) {
+extern "C" int BXFILE_size(const char *name) {
     sFileInfo_7F98 info;
     info.size = 0;
     FILESYS_bypassqueuefileinfo_7F98(name, 1, &info);

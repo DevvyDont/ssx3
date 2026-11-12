@@ -5,14 +5,14 @@ INCLUDE_ASM("input/inputmap", cInputMap_init);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_003E6448(void* dst, unsigned int value, int size);
+extern "C" void MEM_fill(void* dst, unsigned int value, int size);
 extern char D_0048DD00[];
 
 extern "C" void cInputMap_init(void* self, int count)
 {
     *(int*)((char*)self + 0x0) = count;
     *(void**)((char*)self + 0x4) = operator_new_tag(count * 4, D_0048DD00, 0, 0);
-    func_003E6448(*(void**)((char*)self + 0x4), 0xFFFFFFFF, *(int*)((char*)self + 0x0) * 4);
+    MEM_fill(*(void**)((char*)self + 0x4), 0xFFFFFFFF, *(int*)((char*)self + 0x0) * 4);
     *(int*)((char*)self + 0x14) = 0;
     *(int*)((char*)self + 0xC) = 0;
     *(int*)((char*)self + 0x10) = 0;
@@ -59,12 +59,12 @@ extern "C" void func_00320D50(void* self, const char* path)
 INCLUDE_ASM("input/inputmap", cInputMap_loadMapFile);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00321428(void* self, void* a1, void* a2);
+extern "C" void* cInputMapParser_cInputMapParser(void* self, void* a1, void* a2);
 extern char D_0048DD10[];
 
 extern "C" void cInputMap_loadMapFile(void* self, void* a1, void* a2)
 {
-    *(void**)((char*)self + 0x8) = func_00321428(cMemMan_alloc(0x109EC, D_0048DD10, 0x100, 0), a1, a2);
+    *(void**)((char*)self + 0x8) = cInputMapParser_cInputMapParser(cMemMan_alloc(0x109EC, D_0048DD10, 0x100, 0), a1, a2);
 }
 #endif
 
@@ -72,7 +72,7 @@ extern "C" void cInputMap_loadMapFile(void* self, void* a1, void* a2)
 INCLUDE_ASM("input/inputmap", cInputMap_compileMap);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int cInputMapParser_compileStatement(void* parser, char* src, int* dst, int room, int a4);
@@ -93,7 +93,7 @@ extern "C" void cInputMap_compileMap(sInputMap_0E18* self, int idx, char* src)
         int newCap = self->cap + 0x400;
         int* buf = (int*)operator_new_tag(newCap * 4, D_0048DD20, 0x100, 0);
         if (self->code != 0) {
-            func_003E6574(buf, self->code, self->cap * 4);
+            MEM_copy(buf, self->code, self->cap * 4);
             if (self->code != 0) {
                 cMemMan_free(self->code);
             }
@@ -113,7 +113,7 @@ INCLUDE_ASM("input/inputmap", cInputMap_purgeMapFile);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void operator_delete(int* p);
 void cMemMan_free(void* p);
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 extern char D_0048DD30[];
 
 extern "C" void cInputMap_purgeMapFile(void* self)
@@ -123,7 +123,7 @@ extern "C" void cInputMap_purgeMapFile(void* self)
     }
     *(int**)((char*)self + 0x8) = 0;
     void* p = operator_new_tag(*(int*)((char*)self + 0x10) << 2, D_0048DD30, 0, 0);
-    func_003E6574(p, *(void**)((char*)self + 0x14), *(int*)((char*)self + 0x10) << 2);
+    MEM_copy(p, *(void**)((char*)self + 0x14), *(int*)((char*)self + 0x10) << 2);
     if (*(void**)((char*)self + 0x14) != 0) {
         cMemMan_free(*(void**)((char*)self + 0x14));
     }
@@ -133,12 +133,12 @@ extern "C" void cInputMap_purgeMapFile(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", func_00320FA8);
+INCLUDE_ASM("input/inputmap", cInputMap_getValue);
 #ifdef SKIP_ASM
 void* func_00325250(void* self);
 extern "C" float func_00325450(void* parser, void* a1, void* a2);
 
-extern "C" float func_00320FA8(void* self, void* a1, int a2)
+extern "C" float cInputMap_getValue(void* self, void* a1, int a2)
 {
     char parser[0x190];
     func_00325250(parser);
@@ -177,12 +177,12 @@ extern "C" float func_00321010(void* self, void* a1, int a2, int a3, float f0, f
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", func_00321108);
+INCLUDE_ASM("input/inputmap", cInputMap_getState);
 #ifdef SKIP_ASM
 void* func_00325250(void* self);
 extern "C" float func_00325450(void* parser, void* a1, void* a2);
 
-extern "C" int func_00321108(void* self, void* a1, int a2)
+extern "C" int cInputMap_getState(void* self, void* a1, int a2)
 {
     char parser[0x190];
     func_00325250(parser);
@@ -240,7 +240,7 @@ struct sBtnSet_00321298 {
 extern "C" void func_00321298(sBtnSet_00321298* self, int n, float* vals)
 {
     if (self->count < n) {
-        func_003E6448(&self->b[self->count], 0, (n - self->count) * sizeof(sBtn_00321298));
+        MEM_fill(&self->b[self->count], 0, (n - self->count) * sizeof(sBtn_00321298));
     }
     self->count = n;
     for (int i = 0; i < n; i++) {
@@ -288,10 +288,10 @@ extern "C" void func_00321298(sBtnSet_00321298* self, int n, float* vals)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", func_00321428);
+INCLUDE_ASM("input/inputmap", cInputMapParser_cInputMapParser);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_00323098(void* self);
+extern "C" void cInputMapParser_parseFile(void* self);
 
 struct sMapNode_1428 {
     int f0;
@@ -319,7 +319,7 @@ struct sMapData_1428 {
 };
 
 // Initialises a compiled input map: id stack 63..1 and the node free list.
-extern "C" void* func_00321428(void* vself, void* a1, void* a2)
+extern "C" void* cInputMapParser_cInputMapParser(void* vself, void* a1, void* a2)
 {
     sMapData_1428* self = (sMapData_1428*)vself;
     self->f4 = a2;
@@ -339,17 +339,17 @@ extern "C" void* func_00321428(void* vself, void* a1, void* a2)
         self->nodes[j - 1].next = &self->nodes[j];
     }
     self->nodes[0x7FF].next = 0;
-    func_00323098(self);
+    cInputMapParser_parseFile(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", func_00321500);
+INCLUDE_ASM("input/inputmap", cInputMapParser_error);
 #ifdef SKIP_ASM
 // PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
-typedef char* func_00321500_va_list;
-#define func_00321500_va_start(ap)                                       \
+typedef char* cInputMapParser_error_va_list;
+#define cInputMapParser_error_va_start(ap)                                       \
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
@@ -357,22 +357,22 @@ extern "C" int sprintf(char* dst, const char* fmt, ...);
 extern "C" int func_004186C8(char* dst, const char* fmt, char* ap);
 extern char D_0048DD40[];
 
-extern "C" void func_00321500(void* self, const char* fmt, ...)
+extern "C" void cInputMapParser_error(void* self, const char* fmt, ...)
 {
     char buf[0x400];
-    func_00321500_va_list ap;
-    func_00321500_va_start(ap);
+    cInputMapParser_error_va_list ap;
+    cInputMapParser_error_va_start(ap);
     func_004186C8(buf + sprintf(buf, D_0048DD40, (char*)self + 0xC, *(int*)((char*)self + 0x8C)), fmt, ap);
     *(int*)((char*)self + 0x94) = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", func_00321590);
+INCLUDE_ASM("input/inputmap", cInputMapParser_skipPastSemicolon);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(void* self);
 
-extern "C" void func_00321590(void* self)
+extern "C" void cInputMapParser_skipPastSemicolon(void* self)
 {
     while (*(int*)((char*)self + 0x98) != 5 && *(int*)((char*)self + 0x98) != 0) {
         cInputMapParser_readToken(self);
@@ -396,7 +396,7 @@ extern "C" void* func_003215F8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", func_00321638);
+INCLUDE_ASM("input/inputmap", cInputMapParser_freeParseNode);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sMapNode_1638 {
@@ -407,7 +407,7 @@ struct sMapNode_1638 {
 };
 
 // Frees an expression node and its children back onto the map's node free list.
-extern "C" void func_00321638(void* self, sMapNode_1638* node)
+extern "C" void cInputMapParser_freeParseNode(void* self, sMapNode_1638* node)
 {
     if (node == 0) {
         return;
@@ -416,18 +416,18 @@ extern "C" void func_00321638(void* self, sMapNode_1638* node)
     case 18: case 19:
     case 24: case 25: case 26: case 27: case 28:
     case 29: case 30: case 31: case 32: case 33:
-        func_00321638(self, node->a);
+        cInputMapParser_freeParseNode(self, node->a);
         break;
     case 6: case 7: case 8: case 9: case 10: case 11:
     case 12: case 13: case 14: case 15: case 16: case 17:
     case 20: case 21:
-        func_00321638(self, node->a);
-        func_00321638(self, node->b);
+        cInputMapParser_freeParseNode(self, node->a);
+        cInputMapParser_freeParseNode(self, node->b);
         break;
     case 5:
-        func_00321638(self, node->a);
-        func_00321638(self, node->b);
-        func_00321638(self, node->c);
+        cInputMapParser_freeParseNode(self, node->a);
+        cInputMapParser_freeParseNode(self, node->b);
+        cInputMapParser_freeParseNode(self, node->c);
         break;
     case 0: case 1: case 2: case 3: case 4:
     case 22: case 23:
@@ -439,12 +439,12 @@ extern "C" void func_00321638(void* self, sMapNode_1638* node)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", func_003216E8);
+INCLUDE_ASM("input/inputmap", cInputMapParser_lookupButtonName);
 #ifdef SKIP_ASM
 extern "C" int func_0041AB78(const char* a, const char* b, int n);
 extern char D_004A3EF0[];
 
-extern "C" int func_003216E8(void* self, char* name)
+extern "C" int cInputMapParser_lookupButtonName(void* self, char* name)
 {
     if (func_0041AB78(name, D_004A3EF0, 6) != 0) {
         return -1;

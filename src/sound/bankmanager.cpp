@@ -39,7 +39,7 @@ extern "C" void* cBankInstance_AllocMem(void* self, int size, int extra, int tag
 INCLUDE_ASM("sound/bankmanager", func_0028B650);
 #ifdef SKIP_ASM
 extern "C" void func_0028B528(void*);
-extern "C" void* func_002523A8(void* self);
+extern "C" void* MEM_free(void* self);
 extern char* D_004A3614;
 
 class cSndStream_B650 {
@@ -60,7 +60,7 @@ extern "C" void func_0028B650(void* self)
             (**(cSndStream_B650***)(D_004A3614 + 0x1D8))->stop(*(int*)((char*)self + 0xC));
             *(int*)((char*)self + 0xC) = -1;
         }
-        func_002523A8(*(void**)((char*)self + 0x10));
+        MEM_free(*(void**)((char*)self + 0x10));
         *(int*)((char*)self + 0x10) = 0;
         *(int*)((char*)self + 0x14) = 0;
         *(int*)((char*)self + 0x8) = 0;
@@ -273,7 +273,7 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_cBankManager);
 extern "C" void* cBankMonitor_cBankMonitor(void* self, int a1, int heap);
 extern "C" void* func_0028A058(void* self);
 extern "C" void* func_0028B248(void* self);
-extern "C" void* func_002ADE88(void* self, int heap);
+extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char* D_004A3614;
@@ -313,7 +313,7 @@ extern "C" sBankManager* cBankManager_cBankManager(sBankManager* self, int embed
 {
     if (embedded) {
         self->monitor = self->embedded;
-        func_002ADE88(self->embedded, heap);
+        cSoundSys_cSoundSys(self->embedded, heap);
     }
     func_0028A058(self);
     cBankMonitor_cBankMonitor(&self->monitor, 0, heap);
@@ -344,7 +344,7 @@ void operator_delete(int* ptr);
 extern "C" void func_0028A148(void* self, int flags);
 extern "C" void func_0028B278(void* self, int flags);
 extern "C" void func_002ACE40(void* self, int flags);
-extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern char* D_004A3614;
 extern void* D_00483B48[];
 extern void* D_00483AD8[];
@@ -399,7 +399,7 @@ extern "C" void func_0028BB10(sBankManagerBB10* self, int flags)
     func_002ACE40(&self->monitor, 0);
     func_0028A148(self, 0);
     if (flags & 2) {
-        func_002ADEE8(self->monitor, 0);
+        cSoundSys__cSoundSys(self->monitor, 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1105,7 +1105,7 @@ extern "C" void func_0028CDF8(char* self)
 INCLUDE_ASM("sound/bankmanager", func_0028CF98);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_00285D98(void* self, int which);
 extern "C" int func_00288AE0(void* self);
 extern "C" void* func_0028B1E8();
@@ -1147,7 +1147,7 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
     *(int*)((char*)self + 0x623C) = 0;
     *(int*)((char*)self + 0x6240) = 0;
     if (*(int*)((char*)self + 0x608C) == 2) {
-        int t = type == -1 ? func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0))) : type;
+        int t = type == -1 ? func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0))) : type;
         if (t == 1) {
             bmLoad_CF98(self, D_00482A38, 8, 0x65);
         } else if (t == 2) {
@@ -1162,10 +1162,10 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
         func_002B3C28(mon, 0x7F);
         return;
     }
-    sBmInfo_CF98 info = *(sBmInfo_CF98*)func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0));
+    sBmInfo_CF98 info = *(sBmInfo_CF98*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
     char* mon = (char*)self + 0x118;
     if (info.f0 >= 0x11 && a2 == 0 && a4 == 0 && func_002A42C8(self) == 0) {
-        int t = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+        int t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
         if (t == 1) {
             bmLoad_CF98(self, D_004A3630, 1, 1);
         } else if (t == 2) {
@@ -1381,7 +1381,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028D8A0);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4318(void* self);
 extern "C" int func_002A4368(void* self);
 extern "C" int func_002A40E0(void* self, int id);
@@ -1391,7 +1391,7 @@ extern "C" int func_002A4238(void* self, int id);
 
 extern "C" int func_0028D8A0(void* self)
 {
-    int id = *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0));
+    int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
     int r;
     if (func_002A4318(self)) {
         r = 0;
@@ -1534,7 +1534,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028E100);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* func_00287968(void* self, int a1, int a2);
 extern "C" void* func_0028B1E8();
 extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
@@ -1591,7 +1591,7 @@ extern "C" void func_0028E100(char* self)
             int t;
             id = *(int*)(self + 0x6284);
             if (id == 0x17) {
-                t = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+                t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             } else {
                 t = func_002A1E20(self, id);
                 *(int*)(self + 0x6284) = 0x17;
@@ -1644,7 +1644,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028E548);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* func_0028B1E8();
 extern "C" int func_002A1E20(void* self, int id);
 extern "C" int func_002A40E0(void* self, int id);
@@ -1671,7 +1671,7 @@ extern "C" int func_0028E548(char* self, char* ev)
         func_002B1758(mon, 0);
         if (func_002A42C8(self) == 0) {
             *(int*)(self + 0x576C) = 1;
-            int t = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             if (t == 1) {
                 *(int*)(self + 0x577C) = t;
                 *(int*)(self + 0x5780) = 2;
@@ -1698,7 +1698,7 @@ extern "C" int func_0028E548(char* self, char* ev)
             func_002B1758(self + 0x5560, 0);
         }
         if (func_002A42C8(self) == 0 && cBENewPlayerInterface_isPeakLocked1(cBE_getInterface_Fv(cBE_getBE(), 1), 0, 1) != 0) {
-            int id = *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0));
+            int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0));
             int t = func_002A1E20(self, id);
             if (t == 1) {
                 int lock = ((sLocks_E548*)(self + 0x579C))->v[id];
@@ -1720,7 +1720,7 @@ extern "C" int func_0028E548(char* self, char* ev)
         *(int*)(self + 0x5784) = 1;
         *(int*)(self + 0x5774) = 1;
         *(int*)(self + 0x5778) = func_002B4908(self + 0x118);
-        if (func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0))) == 2)
+        if (func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0))) == 2)
             *(int*)(self + 0x57D8) = 0;
         else
             *(int*)(self + 0x57DC) = 0;
@@ -1814,7 +1814,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
             if (func_0028D960(self)) {
                 // NOTE: the target keeps this 1 in $s1 across five calls (a named local, not a literal).
                 int wantType = 1;
-                int t = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+                int t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
                 if (*(int*)(self + 0x62B8) == 0) {
                     func_002B3D48(self + 0x118, 2.0f);
                 }
@@ -2169,7 +2169,7 @@ extern char D_004A3660[];
 extern char* D_004A28A8;
 extern "C" void func_002B35A0(void* monitor);
 extern "C" float func_00287930(void* self, int a, int b);
-extern "C" cUiObj_F478* func_0039F9D8(void* list, int hash);
+extern "C" cUiObj_F478* cUIStateStack_findState(void* list, int hash);
 
 extern "C" void func_0028F478(void* self)
 {
@@ -2181,7 +2181,7 @@ extern "C" void func_0028F478(void* self)
             if (owner != 0) {
                 void* list = owner + 0x18;
                 if (list != 0) {
-                    cUiObj_F478* obj = func_0039F9D8(list, GetHashValue32(D_004A3660));
+                    cUiObj_F478* obj = cUIStateStack_findState(list, GetHashValue32(D_004A3660));
                     if (obj != 0) {
                         obj->v24(5, 0);
                     }
@@ -2212,7 +2212,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028F558);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void func_0028EF90(void* self);
 
 extern "C" void func_0028F558(void* self, int id)
@@ -2220,7 +2220,7 @@ extern "C" void func_0028F558(void* self, int id)
     *(int*)((char*)self + 0x6284) = id;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (iface != 0) {
-        if (*func_00144BC0(iface) == *(int*)((char*)self + 0x6284)) {
+        if (*cBENewRaceInterface_getLocation(iface) == *(int*)((char*)self + 0x6284)) {
             func_0028EF90(self);
         }
     }

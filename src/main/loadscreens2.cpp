@@ -8,7 +8,7 @@ INCLUDE_ASM("main/loadscreens2", func_00232510);
 
 INCLUDE_ASM("main/loadscreens2", func_00232538);
 
-INCLUDE_ASM("main/loadscreens2", func_00232568);
+INCLUDE_ASM("main/loadscreens2", cInitLoadScreen_load);
 
 INCLUDE_ASM("main/loadscreens2", func_00232588);
 
@@ -20,7 +20,7 @@ INCLUDE_ASM("main/loadscreens2", func_00232710);
 
 INCLUDE_ASM("main/loadscreens2", func_00232718);
 
-INCLUDE_ASM("main/loadscreens2", func_00232720);
+INCLUDE_ASM("main/loadscreens2", cPreGameLoadScreen_cPreGameLoadScreen);
 
 INCLUDE_ASM("main/loadscreens2", func_00232738);
 

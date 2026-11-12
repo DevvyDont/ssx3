@@ -65,7 +65,7 @@ struct Tag_B060 { char c; Tag_B060() {} Tag_B060(const Tag_B060 &o) : c(o.c) {} 
 extern unsigned D_B060[] __asm__("D_004FB390");
 extern int D_004A55C0;
 extern const int D_00445E70[];
-extern "C" void* func_003E6574_B060(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_B060(void*, void*, int) __asm__("MEM_copy");
 struct Ent_B060 { int idx; int val; int pad; int type; };
 extern "C" V3_B060 func_002FB060(int n, Ent_B060 *e) {
     if (D_004A55C0 == 0) {
@@ -86,7 +86,7 @@ extern "C" V3_B060 func_002FB060(int n, Ent_B060 *e) {
     unsigned buf64[11];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_B060(buf, D_B060, 44);
+    MEM_copy_B060(buf, D_B060, 44);
     Ent_B060 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -142,7 +142,7 @@ struct Tag_B270 { char c; Tag_B270() {} Tag_B270(const Tag_B270 &o) : c(o.c) {} 
 extern unsigned D_B270[] __asm__("D_004FB3C0");
 extern int D_004A55C4;
 extern const int D_00445E98[];
-extern "C" void* func_003E6574_B270(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_B270(void*, void*, int) __asm__("MEM_copy");
 struct Ent_B270 { int idx; int val; int pad; int type; };
 extern "C" V3_B270 func_002FB270(int n, Ent_B270 *e) {
     if (D_004A55C4 == 0) {
@@ -167,7 +167,7 @@ extern "C" V3_B270 func_002FB270(int n, Ent_B270 *e) {
     unsigned buf64[15];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_B270(buf, D_B270, 60);
+    MEM_copy_B270(buf, D_B270, 60);
     Ent_B270 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -223,7 +223,7 @@ struct Tag_B498 { char c; Tag_B498() {} Tag_B498(const Tag_B498 &o) : c(o.c) {} 
 extern unsigned D_B498[] __asm__("D_004FB400");
 extern int D_004A55C8;
 extern const int D_00445ED0[];
-extern "C" void* func_003E6574_B498(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_B498(void*, void*, int) __asm__("MEM_copy");
 struct Ent_B498 { int idx; int val; int pad; int type; };
 extern "C" V3_B498 func_002FB498(int n, Ent_B498 *e) {
     if (D_004A55C8 == 0) {
@@ -244,7 +244,7 @@ extern "C" V3_B498 func_002FB498(int n, Ent_B498 *e) {
     unsigned buf64[11];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_B498(buf, D_B498, 44);
+    MEM_copy_B498(buf, D_B498, 44);
     Ent_B498 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -300,7 +300,7 @@ struct Tag_B6B8 { char c; Tag_B6B8() {} Tag_B6B8(const Tag_B6B8 &o) : c(o.c) {} 
 extern unsigned D_B6B8[] __asm__("D_004FB430");
 extern int D_004A55CC;
 extern const int D_00445EF8[];
-extern "C" void* func_003E6574_B6B8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_B6B8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_B6B8 { int idx; int val; int pad; int type; };
 extern "C" V3_B6B8 func_002FB6B8(int n, Ent_B6B8 *e) {
     if (D_004A55CC == 0) {
@@ -324,7 +324,7 @@ extern "C" V3_B6B8 func_002FB6B8(int n, Ent_B6B8 *e) {
     unsigned buf64[13];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_B6B8(buf, D_B6B8, 52);
+    MEM_copy_B6B8(buf, D_B6B8, 52);
     Ent_B6B8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -380,7 +380,7 @@ struct Tag_B8D0 { char c; Tag_B8D0() {} Tag_B8D0(const Tag_B8D0 &o) : c(o.c) {} 
 extern unsigned D_B8D0[] __asm__("D_004FB468");
 extern int D_004A55D0;
 extern int D_004A3BE0_B8D0[2] __asm__("D_004A3BE0");
-extern "C" void* func_003E6574_B8D0(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_B8D0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_B8D0 { int idx; int val; int pad; int type; };
 extern "C" V3_B8D0 func_002FB8D0(int n, Ent_B8D0 *e) {
     if (D_004A55D0 == 0) {
@@ -393,7 +393,7 @@ extern "C" V3_B8D0 func_002FB8D0(int n, Ent_B8D0 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_B8D0(buf, D_B8D0, 12);
+    MEM_copy_B8D0(buf, D_B8D0, 12);
     Ent_B8D0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -449,7 +449,7 @@ struct Tag_BAB0 { char c; Tag_BAB0() {} Tag_BAB0(const Tag_BAB0 &o) : c(o.c) {} 
 extern unsigned D_BAB0[] __asm__("D_004FB478");
 extern int D_004A55D4;
 extern const int D_00445F28[];
-extern "C" void* func_003E6574_BAB0(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_BAB0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_BAB0 { int idx; int val; int pad; int type; };
 extern "C" V3_BAB0 func_002FBAB0(int n, Ent_BAB0 *e) {
     if (D_004A55D4 == 0) {
@@ -467,7 +467,7 @@ extern "C" V3_BAB0 func_002FBAB0(int n, Ent_BAB0 *e) {
     unsigned buf64[8];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_BAB0(buf, D_BAB0, 32);
+    MEM_copy_BAB0(buf, D_BAB0, 32);
     Ent_BAB0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -523,7 +523,7 @@ struct Tag_BCB8 { char c; Tag_BCB8() {} Tag_BCB8(const Tag_BCB8 &o) : c(o.c) {} 
 extern unsigned D_BCB8[] __asm__("D_004FB498");
 extern int D_004A55D8;
 extern const int D_00445F48[];
-extern "C" void* func_003E6574_BCB8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_BCB8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_BCB8 { int idx; int val; int pad; int type; };
 extern "C" V3_BCB8 func_002FBCB8(int n, Ent_BCB8 *e) {
     if (D_004A55D8 == 0) {
@@ -544,7 +544,7 @@ extern "C" V3_BCB8 func_002FBCB8(int n, Ent_BCB8 *e) {
     unsigned buf64[11];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_BCB8(buf, D_BCB8, 44);
+    MEM_copy_BCB8(buf, D_BCB8, 44);
     Ent_BCB8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -600,7 +600,7 @@ struct Tag_BEC8 { char c; Tag_BEC8() {} Tag_BEC8(const Tag_BEC8 &o) : c(o.c) {} 
 extern unsigned D_BEC8[] __asm__("D_004FB4C8");
 extern int D_004A55DC;
 extern const int D_00445F70[];
-extern "C" void* func_003E6574_BEC8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_BEC8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_BEC8 { int idx; int val; int pad; int type; };
 extern "C" V3_BEC8 func_002FBEC8(int n, Ent_BEC8 *e) {
     if (D_004A55DC == 0) {
@@ -620,7 +620,7 @@ extern "C" V3_BEC8 func_002FBEC8(int n, Ent_BEC8 *e) {
     unsigned buf64[9];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_BEC8(buf, D_BEC8, 36);
+    MEM_copy_BEC8(buf, D_BEC8, 36);
     Ent_BEC8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -676,7 +676,7 @@ struct Tag_C0D0 { char c; Tag_C0D0() {} Tag_C0D0(const Tag_C0D0 &o) : c(o.c) {} 
 extern unsigned D_C0D0[] __asm__("D_004FB4F0");
 extern int D_004A55E0;
 extern const int D_00445F90[];
-extern "C" void* func_003E6574_C0D0(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_C0D0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_C0D0 { int idx; int val; int pad; int type; };
 extern "C" V3_C0D0 func_002FC0D0(int n, Ent_C0D0 *e) {
     if (D_004A55E0 == 0) {
@@ -690,7 +690,7 @@ extern "C" V3_C0D0 func_002FC0D0(int n, Ent_C0D0 *e) {
     unsigned buf64[4];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_C0D0(buf, D_C0D0, 16);
+    MEM_copy_C0D0(buf, D_C0D0, 16);
     Ent_C0D0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -800,7 +800,7 @@ struct Tag_C420 { char c; Tag_C420() {} Tag_C420(const Tag_C420 &o) : c(o.c) {} 
 extern unsigned D_C420[] __asm__("D_004FB500");
 extern int D_004A55E4;
 extern int D_004A3C00;
-extern "C" void* func_003E6574_C420(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_C420(void*, void*, int) __asm__("MEM_copy");
 struct Ent_C420 { int idx; int val; int pad; int type; };
 extern "C" V3_C420 func_002FC420(int n, Ent_C420 *e) {
     if (D_004A55E4 == 0) {
@@ -812,7 +812,7 @@ extern "C" V3_C420 func_002FC420(int n, Ent_C420 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_C420(buf, D_C420, 12);
+    MEM_copy_C420(buf, D_C420, 12);
     Ent_C420 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -850,7 +850,7 @@ extern "C" V3_C420 func_002FC420(int n, Ent_C420 *e) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FC5D8);
+INCLUDE_ASM("seg/seg_1FBE38", MakeDeadFadeFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_C5D8 __asm__("D_004A3DD8");
@@ -867,9 +867,9 @@ struct Tag_C5D8 { char c; Tag_C5D8() {} Tag_C5D8(const Tag_C5D8 &o) : c(o.c) {} 
 extern unsigned D_C5D8[] __asm__("D_004FB510");
 extern int D_004A55E8;
 extern const int D_00445FA0[];
-extern "C" void* func_003E6574_C5D8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_C5D8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_C5D8 { int idx; int val; int pad; int type; };
-extern "C" V3_C5D8 func_002FC5D8(int n, Ent_C5D8 *e) {
+extern "C" V3_C5D8 MakeDeadFadeFunc(int n, Ent_C5D8 *e) {
     if (D_004A55E8 == 0) {
         D_C5D8[0] = 0xFFFFFFFF;
         ((int*)D_C5D8)[1] = 0;
@@ -882,7 +882,7 @@ extern "C" V3_C5D8 func_002FC5D8(int n, Ent_C5D8 *e) {
     unsigned buf64[5];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_C5D8(buf, D_C5D8, 20);
+    MEM_copy_C5D8(buf, D_C5D8, 20);
     Ent_C5D8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -938,7 +938,7 @@ struct Tag_C7D0 { char c; Tag_C7D0() {} Tag_C7D0(const Tag_C7D0 &o) : c(o.c) {} 
 extern unsigned D_C7D0[] __asm__("D_004FB528");
 extern int D_004A55EC;
 extern const int D_00445FB0[];
-extern "C" void* func_003E6574_C7D0(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_C7D0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_C7D0 { int idx; int val; int pad; int type; };
 extern "C" V3_C7D0 func_002FC7D0(int n, Ent_C7D0 *e) {
     if (D_004A55EC == 0) {
@@ -953,7 +953,7 @@ extern "C" V3_C7D0 func_002FC7D0(int n, Ent_C7D0 *e) {
     unsigned buf64[5];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_C7D0(buf, D_C7D0, 20);
+    MEM_copy_C7D0(buf, D_C7D0, 20);
     Ent_C7D0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -1009,7 +1009,7 @@ struct Tag_C9C8 { char c; Tag_C9C8() {} Tag_C9C8(const Tag_C9C8 &o) : c(o.c) {} 
 extern unsigned D_C9C8[] __asm__("D_004FB540");
 extern int D_004A55F0;
 extern const int D_00445FC0[];
-extern "C" void* func_003E6574_C9C8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_C9C8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_C9C8 { int idx; int val; int pad; int type; };
 extern "C" V3_C9C8 func_002FC9C8(int n, Ent_C9C8 *e) {
     if (D_004A55F0 == 0) {
@@ -1047,7 +1047,7 @@ extern "C" V3_C9C8 func_002FC9C8(int n, Ent_C9C8 *e) {
     unsigned buf64[27];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_C9C8(buf, D_C9C8, 108);
+    MEM_copy_C9C8(buf, D_C9C8, 108);
     Ent_C9C8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -1097,7 +1097,7 @@ struct Tag_CC20 { char c; Tag_CC20() {} Tag_CC20(const Tag_CC20 &o) : c(o.c) {} 
 extern unsigned D_CC20[] __asm__("D_004FB5B0");
 extern int D_004A55F4;
 extern const int D_00446028[];
-extern "C" void* func_003E6574_CC20(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_CC20(void*, void*, int) __asm__("MEM_copy");
 struct Ent_CC20 { int idx; int val; int pad; int type; };
 extern "C" int checkActiveNode(void*, int, void*);
 #define ASSERT_CC20(c) do { } while (0)
@@ -1114,7 +1114,7 @@ extern "C" V3_CC20* func_002FCC20(V3_CC20* ret, int n, Ent_CC20 *e) {
     unsigned buf64[4];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_CC20(buf, D_CC20, 16);
+    MEM_copy_CC20(buf, D_CC20, 16);
     Ent_CC20 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -1152,7 +1152,7 @@ extern "C" V3_CC20* func_002FCC20(V3_CC20* ret, int n, Ent_CC20 *e) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FCDC8);
+INCLUDE_ASM("seg/seg_1FBE38", MakeFlexBridgeFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_CDC8 __asm__("D_004A3DD8");
@@ -1161,7 +1161,7 @@ static inline char *refToPtr_CDC8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_CDC8(unsigned i) { if (i == 0) return 0; return refToPtr_CDC8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void* cMemMan_alloc(int, void*, int, int);
-extern "C" void func_00346350_CDC8(void*, int, void*, void*) __asm__("func_00346350");
+extern "C" void cFlexBridgeNode_cFlexBridgeNode_CDC8(void*, int, void*, void*) __asm__("cFlexBridgeNode_cFlexBridgeNode");
 extern char D_004896F8_CDC8[] __asm__("D_004896F8");
 struct V3_CDC8 { float x, y, z; };
 extern V3_CDC8 D_004C9098_CDC8 __asm__("D_004C9098");
@@ -1169,9 +1169,9 @@ struct Tag_CDC8 { char c; Tag_CDC8() {} Tag_CDC8(const Tag_CDC8 &o) : c(o.c) {} 
 extern unsigned D_CDC8[] __asm__("D_004FB5C0");
 extern int D_004A55F8;
 extern const int D_00446038[];
-extern "C" void* func_003E6574_CDC8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_CDC8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_CDC8 { int idx; int val; int pad; int type; };
-extern "C" V3_CDC8 func_002FCDC8(int n, Ent_CDC8 *e) {
+extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *e) {
     if (D_004A55F8 == 0) {
         *(float*)&D_CDC8[0] = 500.0f;
         *(float*)&D_CDC8[1] = 1.0f;
@@ -1189,7 +1189,7 @@ extern "C" V3_CDC8 func_002FCDC8(int n, Ent_CDC8 *e) {
     unsigned buf64[10];
     unsigned *buf = buf64;
     buf64[8] = 0xFFFFFFFF;
-    func_003E6574_CDC8(buf, D_CDC8, 40);
+    MEM_copy_CDC8(buf, D_CDC8, 40);
     Ent_CDC8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -1222,7 +1222,7 @@ extern "C" V3_CDC8 func_002FCDC8(int n, Ent_CDC8 *e) {
     void *p = *(void**)(obj + 0xC);
     if (p && checkActiveNode(p, 5, buf))
         return D_004C9098_CDC8;
-    func_00346350_CDC8(cMemMan_alloc(0xB0, D_004896F8_CDC8, 0x20000000, 0), 1, obj, buf);
+    cFlexBridgeNode_cFlexBridgeNode_CDC8(cMemMan_alloc(0xB0, D_004896F8_CDC8, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_CDC8;
 }
 #endif
@@ -1245,7 +1245,7 @@ struct Tag_CFF0 { char c; Tag_CFF0() {} Tag_CFF0(const Tag_CFF0 &o) : c(o.c) {} 
 extern unsigned D_CFF0[] __asm__("D_004FB5E8");
 extern int D_004A55FC;
 extern const int D_00446060[];
-extern "C" void* func_003E6574_CFF0(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_CFF0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_CFF0 { int idx; int val; int pad; int type; };
 extern "C" V3_CFF0 func_002FCFF0(int n, Ent_CFF0 *e) {
     if (D_004A55FC == 0) {
@@ -1273,7 +1273,7 @@ extern "C" V3_CFF0 func_002FCFF0(int n, Ent_CFF0 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     buf64[13] = 0xFFFFFFFF;
-    func_003E6574_CFF0(buf, D_CFF0, 64);
+    MEM_copy_CFF0(buf, D_CFF0, 64);
     Ent_CFF0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -1312,13 +1312,13 @@ extern "C" V3_CFF0 func_002FCFF0(int n, Ent_CFF0 *e) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FD250);
+INCLUDE_ASM("seg/seg_1FBE38", AddRollerFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_D250 __asm__("D_004A3DD8");
 extern char **D_004A47B8_D250 __asm__("D_004A47B8");
 extern char *D_004A28A8_D250 __asm__("D_004A28A8");
-extern "C" void func_00355DB8_D250(void*, void*, int, int) __asm__("func_00355DB8");
+extern "C" void cMoveNode_addRoller_D250(void*, void*, int, int) __asm__("cMoveNode_addRoller");
 struct O_D250 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_D250 { float x, y, z; };
 extern V3_D250 D_004C9098_D250 __asm__("D_004C9098");
@@ -1326,9 +1326,9 @@ struct Tag_D250 { char c; Tag_D250() {} Tag_D250(const Tag_D250 &o) : c(o.c) {} 
 extern unsigned D_D250[] __asm__("D_004FB628");
 extern int D_004A5600;
 extern const int D_004460A0[];
-extern "C" void* func_003E6574_D250(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_D250(void*, void*, int) __asm__("MEM_copy");
 struct Ent_D250 { int idx; int val; int pad; int type; };
-extern "C" V3_D250 func_002FD250(int n, Ent_D250 *e) {
+extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *e) {
     if (D_004A5600 == 0) {
         D_D250[0] = 0xFFFFFFFF;
         *(float*)&D_D250[1] = 1.0f;
@@ -1341,7 +1341,7 @@ extern "C" V3_D250 func_002FD250(int n, Ent_D250 *e) {
     unsigned buf64[5];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_D250(buf, D_D250, 20);
+    MEM_copy_D250(buf, D_D250, 20);
     Ent_D250 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -1367,7 +1367,7 @@ extern "C" V3_D250 func_002FD250(int n, Ent_D250 *e) {
     O_D250 *p = *(O_D250**)(obj + 0xC);
     if (p) {
         if (p->v16())
-            func_00355DB8_D250(p, buf, *(int*)(D_004A3DD8_D250 + 0x298), *(int*)(D_004A3DD8_D250 + 0x294));
+            cMoveNode_addRoller_D250(p, buf, *(int*)(D_004A3DD8_D250 + 0x298), *(int*)(D_004A3DD8_D250 + 0x294));
     }
     return D_004C9098_D250;
 }
@@ -1393,7 +1393,7 @@ struct Tag_D420 { char c; Tag_D420() {} Tag_D420(const Tag_D420 &o) : c(o.c) {} 
 extern unsigned D_D420[] __asm__("D_004FB640");
 extern int D_004A5604;
 extern const int D_004460B0[];
-extern "C" void* func_003E6574_D420(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_D420(void*, void*, int) __asm__("MEM_copy");
 struct Ent_D420 { int idx; int val; int pad; int type; };
 extern "C" V3_D420 func_002FD420(int n, Ent_D420 *e) {
     if (D_004A5604 == 0) {
@@ -1459,7 +1459,7 @@ extern "C" V3_D420 func_002FD420(int n, Ent_D420 *e) {
     }
     unsigned *buf = (unsigned*)cMemMan_alloc(0xE0, D_00489718_D420, 0x20000000, 0);
     buf[54] = 0xFFFFFFFF;
-    func_003E6574_D420(buf, D_D420, 0xE0);
+    MEM_copy_D420(buf, D_D420, 0xE0);
     Ent_D420 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -1567,7 +1567,7 @@ struct Tag_D758 { char c; Tag_D758() {} Tag_D758(const Tag_D758 &o) : c(o.c) {} 
 extern unsigned D_D758[] __asm__("D_004FB720");
 extern int D_004A5608;
 extern const int D_00446190[];
-extern "C" void* func_003E6574_D758(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_D758(void*, void*, int) __asm__("MEM_copy");
 struct Ent_D758 { int idx; int val; int pad; int type; };
 extern "C" V3_D758 func_002FD758(int n, Ent_D758 *e) {
     if (D_004A5608 == 0) {
@@ -1584,7 +1584,7 @@ extern "C" V3_D758 func_002FD758(int n, Ent_D758 *e) {
     unsigned buf64[6];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_D758(buf, D_D758, 24);
+    MEM_copy_D758(buf, D_D758, 24);
     Ent_D758 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -1641,7 +1641,7 @@ struct Tag_D9F8 { char c; Tag_D9F8() {} Tag_D9F8(const Tag_D9F8 &o) : c(o.c) {} 
 extern unsigned D_D9F8[] __asm__("D_004FB738");
 extern int D_004A560C;
 extern const int D_004461A8[];
-extern "C" void* func_003E6574_D9F8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_D9F8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_D9F8 { int idx; int val; int pad; int type; };
 extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *e) {
     if (D_004A560C == 0) {
@@ -1660,7 +1660,7 @@ extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
-    func_003E6574_D9F8(buf, D_D9F8, 28);
+    MEM_copy_D9F8(buf, D_D9F8, 28);
     Ent_D9F8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -1729,7 +1729,7 @@ struct Tag_DC60 { char c; Tag_DC60() {} Tag_DC60(const Tag_DC60 &o) : c(o.c) {} 
 extern unsigned D_DC60[] __asm__("D_004FB758");
 extern int D_004A5610;
 extern const int D_004461C0[];
-extern "C" void* func_003E6574_DC60(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_DC60(void*, void*, int) __asm__("MEM_copy");
 struct Ent_DC60 { int idx; int val; int pad; int type; };
 extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *e) {
     if (D_004A5610 == 0) {
@@ -1748,7 +1748,7 @@ extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
-    func_003E6574_DC60(buf, D_DC60, 28);
+    MEM_copy_DC60(buf, D_DC60, 28);
     Ent_DC60 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -1800,13 +1800,13 @@ extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *e) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FDED0);
+INCLUDE_ASM("seg/seg_1FBE38", AddSplineFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_DED0 __asm__("D_004A3DD8");
 extern char **D_004A47B8_DED0 __asm__("D_004A47B8");
 extern char *D_004A28A8_DED0 __asm__("D_004A28A8");
-extern "C" void func_00355AD0_DED0(void*, void*) __asm__("func_00355AD0");
+extern "C" void cMoveNode_addSpline1_DED0(void*, void*) __asm__("cMoveNode_addSpline1");
 struct O_DED0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_DED0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_DED0(unsigned i) { if (i == 0) return 0; return refToPtr_DED0(i); }
@@ -1816,9 +1816,9 @@ struct Tag_DED0 { char c; Tag_DED0() {} Tag_DED0(const Tag_DED0 &o) : c(o.c) {} 
 extern unsigned D_DED0[] __asm__("D_004FB778");
 extern int D_004A5614;
 extern const int D_004461D8[];
-extern "C" void* func_003E6574_DED0(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_DED0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_DED0 { int idx; int val; int pad; int type; };
-extern "C" V3_DED0 func_002FDED0(int n, Ent_DED0 *e) {
+extern "C" V3_DED0 AddSplineFunc(int n, Ent_DED0 *e) {
     if (D_004A5614 == 0) {
         D_DED0[0] = 0xFFFFFFFF;
         D_DED0[1] = 0xFFFFFFFF;
@@ -1840,7 +1840,7 @@ extern "C" V3_DED0 func_002FDED0(int n, Ent_DED0 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
-    func_003E6574_DED0(buf, D_DED0, 48);
+    MEM_copy_DED0(buf, D_DED0, 48);
     Ent_DED0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -1872,7 +1872,7 @@ extern "C" V3_DED0 func_002FDED0(int n, Ent_DED0 *e) {
         O_DED0 *p = *(O_DED0**)(obj + 0xC);
         if (p) {
             if (p->v16())
-                func_00355AD0_DED0(p, buf);
+                cMoveNode_addSpline1_DED0(p, buf);
         }
     }
     return D_004C9098_DED0;
@@ -1880,7 +1880,7 @@ extern "C" V3_DED0 func_002FDED0(int n, Ent_DED0 *e) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FE0C0);
+INCLUDE_ASM("seg/seg_1FBE38", AddMultiSplineFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E0C0 __asm__("D_004A3DD8");
@@ -1896,9 +1896,9 @@ struct Tag_E0C0 { char c; Tag_E0C0() {} Tag_E0C0(const Tag_E0C0 &o) : c(o.c) {} 
 extern unsigned D_E0C0[] __asm__("D_004FB7A8");
 extern int D_004A5618;
 extern const int D_00446208[];
-extern "C" void* func_003E6574_E0C0(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_E0C0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_E0C0 { int idx; int val; int pad; int type; };
-extern "C" V3_E0C0 func_002FE0C0(int n, Ent_E0C0 *e) {
+extern "C" V3_E0C0 AddMultiSplineFunc(int n, Ent_E0C0 *e) {
     if (D_004A5618 == 0) {
         D_E0C0[0] = 0xFFFFFFFF;
         D_E0C0[1] = 0xFFFFFFFF;
@@ -1921,7 +1921,7 @@ extern "C" V3_E0C0 func_002FE0C0(int n, Ent_E0C0 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
-    func_003E6574_E0C0(buf, D_E0C0, 52);
+    MEM_copy_E0C0(buf, D_E0C0, 52);
     Ent_E0C0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -1975,7 +1975,7 @@ struct Tag_E2C0 { char c; Tag_E2C0() {} Tag_E2C0(const Tag_E2C0 &o) : c(o.c) {} 
 extern unsigned D_E2C0[] __asm__("D_004FB7E0");
 extern int D_004A561C;
 extern const int D_00446238[];
-extern "C" void* func_003E6574_E2C0(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_E2C0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_E2C0 { int idx; int val; int pad; int type; };
 extern "C" V3_E2C0 func_002FE2C0(int n, Ent_E2C0 *e) {
     if (D_004A561C == 0) {
@@ -1999,7 +1999,7 @@ extern "C" V3_E2C0 func_002FE2C0(int n, Ent_E2C0 *e) {
     unsigned buf64[13];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_E2C0(buf, D_E2C0, 52);
+    MEM_copy_E2C0(buf, D_E2C0, 52);
     Ent_E2C0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -2046,7 +2046,7 @@ struct Tag_E4A8 { char c; Tag_E4A8() {} Tag_E4A8(const Tag_E4A8 &o) : c(o.c) {} 
 extern unsigned D_E4A8[] __asm__("D_004FB818");
 extern int D_004A5620;
 extern const int D_00446268[];
-extern "C" void* func_003E6574_E4A8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_E4A8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_E4A8 { int idx; int val; int pad; int type; };
 extern "C" V3_E4A8 func_002FE4A8(int n, Ent_E4A8 *e) {
     if (D_004A5620 == 0) {
@@ -2061,7 +2061,7 @@ extern "C" V3_E4A8 func_002FE4A8(int n, Ent_E4A8 *e) {
     unsigned buf64[6];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_E4A8(buf, D_E4A8, 24);
+    MEM_copy_E4A8(buf, D_E4A8, 24);
     Ent_E4A8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -2108,7 +2108,7 @@ struct Tag_E668 { char c; Tag_E668() {} Tag_E668(const Tag_E668 &o) : c(o.c) {} 
 extern unsigned D_E668[] __asm__("D_004FB830");
 extern int D_004A5624;
 extern const int D_00446280[];
-extern "C" void* func_003E6574_E668(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_E668(void*, void*, int) __asm__("MEM_copy");
 struct Ent_E668 { int idx; int val; int pad; int type; };
 extern "C" V3_E668 func_002FE668(int n, Ent_E668 *e) {
     if (D_004A5624 == 0) {
@@ -2128,7 +2128,7 @@ extern "C" V3_E668 func_002FE668(int n, Ent_E668 *e) {
     unsigned buf64[9];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_E668(buf, D_E668, 36);
+    MEM_copy_E668(buf, D_E668, 36);
     Ent_E668 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -2239,7 +2239,7 @@ struct Tag_E840 { char c; Tag_E840() {} Tag_E840(const Tag_E840 &o) : c(o.c) {} 
 extern unsigned D_E840[] __asm__("D_004FB858");
 extern int D_004A5628;
 extern const int D_004462A0[];
-extern "C" void* func_003E6574_E840(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_E840(void*, void*, int) __asm__("MEM_copy");
 struct Ent_E840 { int idx; int val; int pad; int type; };
 extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *e) {
     if (D_004A5628 == 0) {
@@ -2305,7 +2305,7 @@ extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *e) {
     }
     unsigned *buf = (unsigned*)cMemMan_alloc(0xE0, D_00489740_E840, 0x20000000, 0);
     buf[54] = 0xFFFFFFFF;
-    func_003E6574_E840(buf, D_E840, 0xE0);
+    MEM_copy_E840(buf, D_E840, 0xE0);
     Ent_E840 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -2377,7 +2377,7 @@ struct Tag_EE98 { char c; Tag_EE98() {} Tag_EE98(const Tag_EE98 &o) : c(o.c) {} 
 extern unsigned D_EE98[] __asm__("D_004FB938");
 extern int D_004A562C;
 extern const int D_00446380[];
-extern "C" void* func_003E6574_EE98(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_EE98(void*, void*, int) __asm__("MEM_copy");
 struct Ent_EE98 { int idx; int val; int pad; int type; };
 extern "C" V3_EE98 func_002FEE98(int n, Ent_EE98 *e) {
     if (D_004A562C == 0) {
@@ -2447,7 +2447,7 @@ extern "C" V3_EE98 func_002FEE98(int n, Ent_EE98 *e) {
     }
     unsigned *buf = (unsigned*)cMemMan_alloc(0xF0, D_00489750_EE98, 0x20000000, 0);
     buf[54] = 0xFFFFFFFF;
-    func_003E6574_EE98(buf, D_EE98, 0xF0);
+    MEM_copy_EE98(buf, D_EE98, 0xF0);
     Ent_EE98 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -2485,13 +2485,13 @@ extern "C" V3_EE98 func_002FEE98(int n, Ent_EE98 *e) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FF1C8);
+INCLUDE_ASM("seg/seg_1FBE38", AddRailFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_F1C8 __asm__("D_004A3DD8");
 extern char **D_004A47B8_F1C8 __asm__("D_004A47B8");
 extern char *D_004A28A8_F1C8 __asm__("D_004A28A8");
-extern "C" void func_00355E38_F1C8(void*, void*) __asm__("func_00355E38");
+extern "C" void cMoveNode_addRail_F1C8(void*, void*) __asm__("cMoveNode_addRail");
 struct O_F1C8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_F1C8 { float x, y, z; };
 extern V3_F1C8 D_004C9098_F1C8 __asm__("D_004C9098");
@@ -2499,9 +2499,9 @@ struct Tag_F1C8 { char c; Tag_F1C8() {} Tag_F1C8(const Tag_F1C8 &o) : c(o.c) {} 
 extern unsigned D_F1C8[] __asm__("D_004FBA28");
 extern int D_004A5630;
 extern const int D_00446470[];
-extern "C" void* func_003E6574_F1C8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_F1C8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_F1C8 { int idx; int val; int pad; int type; };
-extern "C" V3_F1C8 func_002FF1C8(int n, Ent_F1C8 *e) {
+extern "C" V3_F1C8 AddRailFunc(int n, Ent_F1C8 *e) {
     if (D_004A5630 == 0) {
         D_F1C8[0] = 0xFFFFFFFF;
         D_F1C8[1] = 0xFFFFFFFF;
@@ -2513,7 +2513,7 @@ extern "C" V3_F1C8 func_002FF1C8(int n, Ent_F1C8 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
-    func_003E6574_F1C8(buf, D_F1C8, 16);
+    MEM_copy_F1C8(buf, D_F1C8, 16);
     Ent_F1C8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -2542,7 +2542,7 @@ extern "C" V3_F1C8 func_002FF1C8(int n, Ent_F1C8 *e) {
         O_F1C8 *p = *(O_F1C8**)(obj + 0xC);
         if (p) {
             if (p->v16())
-                func_00355E38_F1C8(p, buf);
+                cMoveNode_addRail_F1C8(p, buf);
         }
     }
     return D_004C9098_F1C8;
@@ -2567,7 +2567,7 @@ struct Tag_F390 { char c; Tag_F390() {} Tag_F390(const Tag_F390 &o) : c(o.c) {} 
 extern unsigned D_F390[] __asm__("D_004FBA38");
 extern int D_004A5634;
 extern const int D_00446480[];
-extern "C" void* func_003E6574_F390(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_F390(void*, void*, int) __asm__("MEM_copy");
 struct Ent_F390 { int idx; int val; int pad; int type; };
 extern "C" V3_F390 func_002FF390(int n, Ent_F390 *e) {
     if (D_004A5634 == 0) {
@@ -2607,7 +2607,7 @@ extern "C" V3_F390 func_002FF390(int n, Ent_F390 *e) {
     buf64[6] = 0xFFFFFFFF;
     buf64[7] = 0xFFFFFFFF;
     buf64[8] = 0xFFFFFFFF;
-    func_003E6574_F390(buf, D_F390, 88);
+    MEM_copy_F390(buf, D_F390, 88);
     Ent_F390 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -2663,7 +2663,7 @@ struct Tag_F5E8 { char c; Tag_F5E8() {} Tag_F5E8(const Tag_F5E8 &o) : c(o.c) {} 
 extern unsigned D_F5E8[] __asm__("D_004FBA90");
 extern int D_004A5638;
 extern const int D_004464D8[];
-extern "C" void* func_003E6574_F5E8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_F5E8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_F5E8 { int idx; int val; int pad; int type; };
 extern "C" V3_F5E8 func_002FF5E8(int n, Ent_F5E8 *e) {
     if (D_004A5638 == 0) {
@@ -2703,7 +2703,7 @@ extern "C" V3_F5E8 func_002FF5E8(int n, Ent_F5E8 *e) {
     buf64[6] = 0xFFFFFFFF;
     buf64[7] = 0xFFFFFFFF;
     buf64[8] = 0xFFFFFFFF;
-    func_003E6574_F5E8(buf, D_F5E8, 88);
+    MEM_copy_F5E8(buf, D_F5E8, 88);
     Ent_F5E8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -2746,7 +2746,7 @@ extern "C" V3_F5E8 func_002FF5E8(int n, Ent_F5E8 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FF850);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_F850 { char c; Flag_F850() {} Flag_F850(const Flag_F850& o) : c(o.c) {} };
 struct Ent_F850 { int idx; int val; int pad; int kind; };
@@ -2771,7 +2771,7 @@ extern "C" R12_F850 func_002FF850(int n, Ent_F850* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004FBAE8_F850, 16);
+    MEM_copy(vp, &D_004FBAE8_F850, 16);
     Ent_F850* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -2814,7 +2814,7 @@ struct Tag_F9A8 { char c; Tag_F9A8() {} Tag_F9A8(const Tag_F9A8 &o) : c(o.c) {} 
 extern unsigned D_F9A8[] __asm__("D_004FBAF8");
 extern int D_004A5640;
 extern const int D_00446540[];
-extern "C" void* func_003E6574_F9A8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_F9A8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_F9A8 { int idx; int val; int pad; int type; };
 extern "C" V3_F9A8 func_002FF9A8(int n, Ent_F9A8 *e) {
     if (D_004A5640 == 0) {
@@ -2827,7 +2827,7 @@ extern "C" V3_F9A8 func_002FF9A8(int n, Ent_F9A8 *e) {
     unsigned buf64[4];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_F9A8(buf, D_F9A8, 16);
+    MEM_copy_F9A8(buf, D_F9A8, 16);
     Ent_F9A8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -2865,7 +2865,7 @@ extern char D_004A3C18_FB50[] __asm__("D_004A3C18");
 struct O_FB50 { int p0, p1, p2; virtual void v01(int); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); };
 struct V3_FB50 { float x, y, z; };
 extern V3_FB50 D_004C9098_FB50 __asm__("D_004C9098");
-extern "C" void* func_003E6574_FB50(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_FB50(void*, void*, int) __asm__("MEM_copy");
 struct Ent_FB50 { int idx; int val; int pad; int type; };
 extern "C" V3_FB50 func_002FFB50(int n, Ent_FB50 *e) {
     if (D_004A5650_FB50 == 0) {
@@ -2877,7 +2877,7 @@ extern "C" V3_FB50 func_002FFB50(int n, Ent_FB50 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_FB50(buf, &D_004A5648_FB50, 8);
+    MEM_copy_FB50(buf, &D_004A5648_FB50, 8);
     Ent_FB50 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -2943,7 +2943,7 @@ extern unsigned D_FD58 __asm__("D_004A5658");
 extern Tag_FD58 D_004A565C;
 extern int D_004A5660;
 extern int D_004A3C20;
-extern "C" void* func_003E6574_FD58(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_FD58(void*, void*, int) __asm__("MEM_copy");
 struct Ent_FD58 { int idx; int val; int pad; int type; };
 extern "C" V3_FD58 func_002FFD58(int n, Ent_FD58 *e) {
     if (D_004A5660 == 0) {
@@ -2954,7 +2954,7 @@ extern "C" V3_FD58 func_002FFD58(int n, Ent_FD58 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_FD58(buf, &D_FD58, 8);
+    MEM_copy_FD58(buf, &D_FD58, 8);
     Ent_FD58 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -2994,7 +2994,7 @@ struct Tag_FF00 { char c; Tag_FF00() {} Tag_FF00(const Tag_FF00 &o) : c(o.c) {} 
 extern unsigned D_FF00[] __asm__("D_004FBB08");
 extern int D_004A5664;
 extern int D_004A3C28;
-extern "C" void* func_003E6574_FF00(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_FF00(void*, void*, int) __asm__("MEM_copy");
 struct Ent_FF00 { int idx; int val; int pad; int type; };
 extern "C" V3_FF00 func_002FFF00(int n, Ent_FF00 *e) {
     if (D_004A5664 == 0) {
@@ -3006,7 +3006,7 @@ extern "C" V3_FF00 func_002FFF00(int n, Ent_FF00 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_FF00(buf, D_FF00, 12);
+    MEM_copy_FF00(buf, D_FF00, 12);
     Ent_FF00 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -3059,7 +3059,7 @@ struct Tag_00A8 { char c; Tag_00A8() {} Tag_00A8(const Tag_00A8 &o) : c(o.c) {} 
 extern unsigned D_00A8[] __asm__("D_004FBB18");
 extern int D_004A5668;
 extern const int D_00446550[];
-extern "C" void* func_003E6574_00A8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_00A8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_00A8 { int idx; int val; int pad; int type; };
 extern "C" V3_00A8 func_003000A8(int n, Ent_00A8 *e) {
     if (D_004A5668 == 0) {
@@ -3072,7 +3072,7 @@ extern "C" V3_00A8 func_003000A8(int n, Ent_00A8 *e) {
     unsigned buf64[4];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_00A8(buf, D_00A8, 16);
+    MEM_copy_00A8(buf, D_00A8, 16);
     Ent_00A8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -3126,7 +3126,7 @@ struct Tag_0260 { char c; Tag_0260() {} Tag_0260(const Tag_0260 &o) : c(o.c) {} 
 extern unsigned D_0260[] __asm__("D_004FBB28");
 extern int D_004A566C;
 extern const int D_00446560[];
-extern "C" void* func_003E6574_0260(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_0260(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0260 { int idx; int val; int pad; int type; };
 extern "C" V3_0260 func_00300260(int n, Ent_0260 *e) {
     if (D_004A566C == 0) {
@@ -3139,7 +3139,7 @@ extern "C" V3_0260 func_00300260(int n, Ent_0260 *e) {
     unsigned buf64[4];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_0260(buf, D_0260, 16);
+    MEM_copy_0260(buf, D_0260, 16);
     Ent_0260 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -3190,7 +3190,7 @@ struct Tag_0418 { char c; Tag_0418() {} Tag_0418(const Tag_0418 &o) : c(o.c) {} 
 extern unsigned D_0418[] __asm__("D_004FBB38");
 extern int D_004A5670;
 extern int D_004A3C30;
-extern "C" void* func_003E6574_0418(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_0418(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0418 { int idx; int val; int pad; int type; };
 extern "C" V3_0418 func_00300418(int n, Ent_0418 *e) {
     if (D_004A5670 == 0) {
@@ -3202,7 +3202,7 @@ extern "C" V3_0418 func_00300418(int n, Ent_0418 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_0418(buf, D_0418, 12);
+    MEM_copy_0418(buf, D_0418, 12);
     Ent_0418 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -3251,7 +3251,7 @@ extern unsigned D_05E8 __asm__("D_004A5678");
 extern Tag_05E8 D_004A567C;
 extern int D_004A5680;
 extern int D_004A3C38;
-extern "C" void* func_003E6574_05E8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_05E8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_05E8 { int idx; int val; int pad; int type; };
 extern "C" V3_05E8 func_003005E8(int n, Ent_05E8 *e) {
     if (D_004A5680 == 0) {
@@ -3262,7 +3262,7 @@ extern "C" V3_05E8 func_003005E8(int n, Ent_05E8 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_05E8(buf, &D_05E8, 8);
+    MEM_copy_05E8(buf, &D_05E8, 8);
     Ent_05E8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -3312,7 +3312,7 @@ static inline char *refToPtr_0770(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0770(unsigned i) { if (i == 0) return 0; return refToPtr_0770(i); }
 struct V3_0770 { float x, y, z; };
 extern V3_0770 D_004C9098_0770 __asm__("D_004C9098");
-extern "C" void* func_003E6574_0770(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_0770(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0770 { int idx; int val; int pad; int type; };
 extern "C" V3_0770 func_00300770(int n, Ent_0770 *e) {
     if (D_004A5690_0770 == 0) {
@@ -3324,7 +3324,7 @@ extern "C" V3_0770 func_00300770(int n, Ent_0770 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_0770(buf, &D_004A5688_0770, 8);
+    MEM_copy_0770(buf, &D_004A5688_0770, 8);
     Ent_0770 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -3384,7 +3384,7 @@ static inline char *refToPtr_0948(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0948(unsigned i) { if (i == 0) return 0; return refToPtr_0948(i); }
 struct V3_0948 { float x, y, z; };
 extern V3_0948 D_004C9098_0948 __asm__("D_004C9098");
-extern "C" void* func_003E6574_0948(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_0948(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0948 { int idx; int val; int pad; int type; };
 extern "C" V3_0948 func_00300948(int n, Ent_0948 *e) {
     if (D_004A56A0_0948 == 0) {
@@ -3396,7 +3396,7 @@ extern "C" V3_0948 func_00300948(int n, Ent_0948 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_0948(buf, &D_004A5698_0948, 8);
+    MEM_copy_0948(buf, &D_004A5698_0948, 8);
     Ent_0948 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -3441,7 +3441,7 @@ extern "C" V3_0948 func_00300948(int n, Ent_0948 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00300B20);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_0B20 { char c; Flag_0B20() {} Flag_0B20(const Flag_0B20& o) : c(o.c) {} };
 struct Ent_0B20 { int idx; int val; int pad; int kind; };
@@ -3464,7 +3464,7 @@ extern "C" R12_0B20 func_00300B20(int n, Ent_0B20* e) {
     unsigned v[4] __attribute__((aligned(16)));
     unsigned* vp = v;
     vp[0] = 0xFFFFFFFFu;
-    func_003E6574(vp, &D_004FBB48_0B20, 12);
+    MEM_copy(vp, &D_004FBB48_0B20, 12);
     Ent_0B20* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -3500,7 +3500,7 @@ struct Tag_0C78 { char c; Tag_0C78() {} Tag_0C78(const Tag_0C78 &o) : c(o.c) {} 
 extern unsigned D_0C78[] __asm__("D_004FBB58");
 extern int D_004A56A8;
 extern int D_004A3C58;
-extern "C" void* func_003E6574_0C78(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_0C78(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0C78 { int idx; int val; int pad; int type; };
 extern "C" V3_0C78 func_00300C78(int n, Ent_0C78 *e) {
     if (D_004A56A8 == 0) {
@@ -3511,7 +3511,7 @@ extern "C" V3_0C78 func_00300C78(int n, Ent_0C78 *e) {
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
-    func_003E6574_0C78(buf, D_0C78, 12);
+    MEM_copy_0C78(buf, D_0C78, 12);
     Ent_0C78 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -3544,7 +3544,7 @@ extern "C" V3_0C78 func_00300C78(int n, Ent_0C78 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00300E28);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 struct Ent_0E28 { int idx; int val; int pad; int kind; };
 struct R12_0E28 { int a; int b; int c; };
 extern R12_0E28 D_004C9098_0E28 __asm__("D_004C9098");
@@ -3566,7 +3566,7 @@ extern "C" R12_0E28 func_00300E28(int n, Ent_0E28* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004FBB68_0E28, 12);
+    MEM_copy(vp, &D_004FBB68_0E28, 12);
     Ent_0E28* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -3594,7 +3594,7 @@ struct Tag_0F50 { char c; Tag_0F50() {} Tag_0F50(const Tag_0F50 &o) : c(o.c) {} 
 extern unsigned D_0F50[] __asm__("D_004FBB78");
 extern int D_56B0_0F50 __asm__("D_004A56B0");
 extern const int D_00446570_0F50[] __asm__("D_00446570");
-extern "C" void* func_003E6574_0F50(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_0F50(void*, void*, int) __asm__("MEM_copy");
 extern "C" void func_0030BAC8_0F50(void*, unsigned, unsigned*, int) __asm__("func_0030BAC8");
 struct Ent_0F50 { int idx; int val; int pad; int type; };
 extern "C" V3_0F50 func_00300F50(int n, Ent_0F50 *e) {
@@ -3646,7 +3646,7 @@ extern "C" V3_0F50 func_00300F50(int n, Ent_0F50 *e) {
     buf64[18] = 0xFFFFFFFF;
     buf64[19] = 0xFFFFFFFF;
     buf64[20] = 0xFFFFFFFF;
-    func_003E6574_0F50(buf, D_0F50, 0x58);
+    MEM_copy_0F50(buf, D_0F50, 0x58);
     Ent_0F50 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -3667,12 +3667,12 @@ extern "C" V3_0F50 func_00300F50(int n, Ent_0F50 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00301120);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_1120 { char c; Flag_1120() {} Flag_1120(const Flag_1120& o) : c(o.c) {} };
 struct Ent_1120 { int idx; int val; int pad; int kind; };
 extern int D_004A3C68_1120[2] __asm__("D_004A3C68");
-extern "C" int func_0030B9A0_1120(char*, int, unsigned, unsigned) __asm__("func_0030B9A0");
+extern "C" int cWScriptMan_collect_1120(char*, int, unsigned, unsigned) __asm__("cWScriptMan_collect");
 extern char *D_004A3DD8_1120 __asm__("D_004A3DD8");
 extern char *D_004A28A8_1120 __asm__("D_004A28A8");
 extern int D_004A56B4_1120 __asm__("D_004A56B4");
@@ -3704,7 +3704,7 @@ extern "C" void* func_00301120(void* self, int n, Ent_1120* e) {
         unsigned v[4] __attribute__((aligned(16)));
         unsigned* vp = v;
         v[1] = 0xFFFFFFFF;
-        func_003E6574(vp, &D_004FBBD0_1120, 12);
+        MEM_copy(vp, &D_004FBBD0_1120, 12);
         Ent_1120* p = e;
         for (int i = 0; i < n; i++, p++) {
             int k = p->idx;
@@ -3720,7 +3720,7 @@ extern "C" void* func_00301120(void* self, int n, Ent_1120* e) {
                 vp[1] = *(int*)(*(char**)(D_004A3DD8_1120 + 0x290) + 0x78);
             unsigned b1 = vp[1];
             unsigned b0 = vp[0];
-            func_0030B9A0_1120(D_004A3DD8_1120, slot, b0, b1);
+            cWScriptMan_collect_1120(D_004A3DD8_1120, slot, b0, b1);
             *(int*)((char*)self + 8) = 1;
             *func_00226610(self) = 1;
             return self;
@@ -3736,7 +3736,7 @@ extern "C" void* func_00301120(void* self, int n, Ent_1120* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_003012F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_12F0 { char c; Flag_12F0() {} Flag_12F0(const Flag_12F0& o) : c(o.c) {} };
 struct Ent_12F0 { int idx; int val; int pad; int kind; };
@@ -3744,7 +3744,7 @@ struct R12_12F0 { int a; int b; int c; };
 extern R12_12F0 D_004C9098_12F0 __asm__("D_004C9098");
 
 extern int D_004A3C70_12F0[2] __asm__("D_004A3C70");
-extern "C" int func_0030A868_12F0(int, unsigned, int, int) __asm__("func_0030A868");
+extern "C" int cWScriptMan_doMissionCmd_12F0(int, unsigned, int, int) __asm__("cWScriptMan_doMissionCmd");
 extern int D_004A3DD8_12F0 __asm__("D_004A3DD8");
 extern int D_004A56B8_12F0 __asm__("D_004A56B8");
 struct T12_12F0 { unsigned a; int b; Flag_12F0 f; };
@@ -3759,7 +3759,7 @@ extern "C" void* func_003012F0(void* self, int n, Ent_12F0* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004FBBE0_12F0, 12);
+    MEM_copy(vp, &D_004FBBE0_12F0, 12);
     Ent_12F0* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -3771,7 +3771,7 @@ extern "C" void* func_003012F0(void* self, int n, Ent_12F0* e) {
     }
     unsigned x = vp[0];
     if (x != 0xFFFFFFFFu) {
-        int r = func_0030A868_12F0(D_004A3DD8_12F0, x, vp[1], -1);
+        int r = cWScriptMan_doMissionCmd_12F0(D_004A3DD8_12F0, x, vp[1], -1);
         *(int*)((char*)self + 8) = 1;
         *func_00226610(self) = r;
     } else {
@@ -3787,7 +3787,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00301440);
 INCLUDE_ASM("seg/seg_1FBE38", func_00301560);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_1560 { char c; Flag_1560() {} Flag_1560(const Flag_1560& o) : c(o.c) {} };
 struct Ent_1560 { int idx; int val; int pad; int kind; };
@@ -3809,7 +3809,7 @@ extern "C" void* func_00301560(void* self, int n, Ent_1560* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A56C0_1560, 8);
+    MEM_copy(vp, &D_004A56C0_1560, 8);
     Ent_1560* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -3857,7 +3857,7 @@ extern unsigned D_1680 __asm__("D_004A56D0");
 extern Tag_1680 D_004A56D4;
 extern int D_004A56D8;
 extern int D_004A3C88;
-extern "C" void* func_003E6574_1680(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_1680(void*, void*, int) __asm__("MEM_copy");
 struct Ent_1680 { int idx; int val; int pad; int type; };
 extern "C" V3_1680* func_00301680(V3_1680 *ret, int n, Ent_1680 *e) {
     if (D_004A56D8 == 0) {
@@ -3868,7 +3868,7 @@ extern "C" V3_1680* func_00301680(V3_1680 *ret, int n, Ent_1680 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_1680(buf, &D_1680, 8);
+    MEM_copy_1680(buf, &D_1680, 8);
     Ent_1680 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -3923,7 +3923,7 @@ extern unsigned D_1830 __asm__("D_004A56E0");
 extern Tag_1830 D_004A56E4;
 extern int D_004A56E8;
 extern int D_004A3C90;
-extern "C" void* func_003E6574_1830(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_1830(void*, void*, int) __asm__("MEM_copy");
 struct Ent_1830 { int idx; int val; int pad; int type; };
 extern "C" V3_1830* func_00301830(V3_1830 *ret, int n, Ent_1830 *e) {
     if (D_004A56E8 == 0) {
@@ -3934,7 +3934,7 @@ extern "C" V3_1830* func_00301830(V3_1830 *ret, int n, Ent_1830 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_1830(buf, &D_1830, 8);
+    MEM_copy_1830(buf, &D_1830, 8);
     Ent_1830 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -3990,7 +3990,7 @@ struct Tag_19C8 { char c; Tag_19C8() {} Tag_19C8(const Tag_19C8 &o) : c(o.c) {} 
 extern unsigned D_19C8[] __asm__("D_004FBC00");
 extern int D_004A56EC;
 extern int D_004A3C98;
-extern "C" void* func_003E6574_19C8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_19C8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_19C8 { int idx; int val; int pad; int type; };
 extern "C" V3_19C8* func_003019C8(V3_19C8 *ret, int n, Ent_19C8 *e) {
     if (D_004A56EC == 0) {
@@ -4002,7 +4002,7 @@ extern "C" V3_19C8* func_003019C8(V3_19C8 *ret, int n, Ent_19C8 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_19C8(buf, D_19C8, 12);
+    MEM_copy_19C8(buf, D_19C8, 12);
     Ent_19C8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -4053,7 +4053,7 @@ extern Flag_1B88 D_004A56F4_1B88 __asm__("D_004A56F4");
 extern int D_004A56F8_1B88 __asm__("D_004A56F8");
 extern int D_004A3CA0_1B88[2] __asm__("D_004A3CA0");
 extern int D_004A3DD8_1B88 __asm__("D_004A3DD8");
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 extern "C" void func_0030A6D8(int, int);
 int* func_00226610(void*);
 
@@ -4068,7 +4068,7 @@ extern "C" void* func_00301B88(void* self, int n, Ent_1B88* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A56F0_1B88, 8);
+    MEM_copy(vp, &D_004A56F0_1B88, 8);
     Ent_1B88* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -4095,7 +4095,7 @@ extern Flag_1C80 D_004A5704_1C80 __asm__("D_004A5704");
 extern int D_004A5708_1C80 __asm__("D_004A5708");
 extern int D_004A3CA8_1C80[2] __asm__("D_004A3CA8");
 extern int D_004A3DD8_1C80 __asm__("D_004A3DD8");
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 extern "C" void func_0030A700(int, int);
 int* func_00226610(void*);
 
@@ -4110,7 +4110,7 @@ extern "C" void* func_00301C80(void* self, int n, Ent_1C80* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A5700_1C80, 8);
+    MEM_copy(vp, &D_004A5700_1C80, 8);
     Ent_1C80* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -4146,7 +4146,7 @@ static inline char *refToPtr_1D78(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_1D78(unsigned i) { if (i == 0) return 0; return refToPtr_1D78(i); }
 struct V3_1D78 { float x, y, z; };
 extern V3_1D78 D_004C9098_1D78 __asm__("D_004C9098");
-extern "C" void* func_003E6574_1D78(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_1D78(void*, void*, int) __asm__("MEM_copy");
 struct Chk_1D78 { virtual void v01(); virtual void v02(); virtual int v03(char*); };
 int* func_00226610_1D78(void*) __asm__("func_00226610__FPv");
 struct Ent_1D78 { int idx; int val; int pad; int type; };
@@ -4160,7 +4160,7 @@ extern "C" void* func_00301D78(void* self, int n, Ent_1D78 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_1D78(buf, &D_004A5710_1D78, 8);
+    MEM_copy_1D78(buf, &D_004A5710_1D78, 8);
     Ent_1D78 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -4217,7 +4217,7 @@ extern int D_004A5720_1F48 __asm__("D_004A5720");
 extern Flag_1F48 D_004A5724_1F48 __asm__("D_004A5724");
 extern int D_004A5728_1F48 __asm__("D_004A5728");
 extern int D_004A3CB8_1F48[2] __asm__("D_004A3CB8");
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 extern "C" void func_00303D88_1F48(int) __asm__("func_00303D88");
 
 struct Ent_1F48 { int idx; int val; int pad; int kind; };
@@ -4233,7 +4233,7 @@ extern "C" R12_1F48 func_00301F48(int n, Ent_1F48* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A5720_1F48, 8);
+    MEM_copy(vp, &D_004A5720_1F48, 8);
     Ent_1F48* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -4256,7 +4256,7 @@ extern int *D_004A3DD8_2048 __asm__("D_004A3DD8");
 extern char *D_004A28A8_2048 __asm__("D_004A28A8");
 extern int D_00445E40_2048[] __asm__("D_00445E40");
 extern "C" void func_0030B7F8_2048(int*, int) __asm__("func_0030B7F8");
-extern "C" void func_0022D6C8_2048(int, int) __asm__("func_0022D6C8");
+extern "C" void cSectionMan_eventbegin_2048(int, int) __asm__("cSectionMan_eventbegin");
 struct Sh_2048 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual int v09(); };
 struct V3_2048 { float x, y, z; };
 extern V3_2048 D_004C9098_2048 __asm__("D_004C9098");
@@ -4264,7 +4264,7 @@ struct Tag_2048 { char c; Tag_2048() {} Tag_2048(const Tag_2048 &o) : c(o.c) {} 
 extern unsigned D_2048[] __asm__("D_004FBC10");
 extern int D_004A572C;
 extern int D_004A3CC0;
-extern "C" void* func_003E6574_2048(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_2048(void*, void*, int) __asm__("MEM_copy");
 struct Ent_2048 { int idx; int val; int pad; int type; };
 extern "C" V3_2048 func_00302048(int n, Ent_2048 *e) {
     if (D_004A572C == 0) {
@@ -4275,7 +4275,7 @@ extern "C" V3_2048 func_00302048(int n, Ent_2048 *e) {
     }
     unsigned buf64[3];
     unsigned *buf = buf64;
-    func_003E6574_2048(buf, D_2048, 12);
+    MEM_copy_2048(buf, D_2048, 12);
     Ent_2048 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -4309,7 +4309,7 @@ extern "C" V3_2048 func_00302048(int n, Ent_2048 *e) {
         if (b1 == 0) {
             if (v16 != 1)
                 func_0030B7F8_2048(D_004A3DD8_2048, id);
-            func_0022D6C8_2048(w, v16);
+            cSectionMan_eventbegin_2048(w, v16);
         }
     }
     return D_004C9098_2048;
@@ -4321,7 +4321,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00302210);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_003E6574_2210(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_2210(void*, void*, int) __asm__("MEM_copy");
 struct Flag_2210 { char c; Flag_2210() {} Flag_2210(const Flag_2210& o) : c(o.c) {} };
 struct Defaults_2210 { int v[3]; Flag_2210 flag; };
 extern Defaults_2210 D_004FBC20_2210 __asm__("D_004FBC20");
@@ -4362,7 +4362,7 @@ extern "C" V3_2210 func_00302210(int n, Ent_2210* e)
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574_2210(vp, &D_004FBC20_2210, 0x10);
+    MEM_copy_2210(vp, &D_004FBC20_2210, 0x10);
     Ent_2210* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -4433,7 +4433,7 @@ struct T12_2490 { unsigned a; int b; Tag_2490 f; };
 extern T12_2490 D_4FBC30_2490 __asm__("D_004FBC30");
 extern int D_5734_2490 __asm__("D_004A5734");
 extern int D_3CC8_2490 __asm__("D_004A3CC8");
-extern "C" void* func_003E6574_2490(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_2490(void*, void*, int) __asm__("MEM_copy");
 extern "C" void func_00353228_2490(char*) __asm__("func_00353228");
 extern "C" void func_00353278_2490(char*) __asm__("func_00353278");
 struct Ent_2490 { int idx; int val; int pad; int type; };
@@ -4448,7 +4448,7 @@ extern "C" V3_2490 func_00302490(int n, Ent_2490 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_2490(buf, &D_4FBC30_2490, 12);
+    MEM_copy_2490(buf, &D_4FBC30_2490, 12);
     Ent_2490 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -4512,12 +4512,12 @@ struct cLunoValue {
 extern cLunoValue D_004C9098;
 struct sBindArg_1FBE38 { int idx; int val; int pad; int type; };
 struct sBindEnd_1FBE38 {};  // empty trailing member of a defaults record; value-init copies its byte through a stack temp
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 extern "C" void* func_003578A8(void*, int, void*, void*, void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
-        func_003E6574(vp, defaults, size); \
+        MEM_copy(vp, defaults, size); \
         sBindArg_1FBE38* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
@@ -4561,12 +4561,12 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00302778);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern cLunoValue D_004C9098;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 extern "C" void* func_003578A8(void*, int, void*, void*, void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
-        func_003E6574(vp, defaults, size); \
+        MEM_copy(vp, defaults, size); \
         sBindArg_1FBE38* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
@@ -4610,12 +4610,12 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00302870);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern cLunoValue D_004C9098;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 extern "C" void* func_003578A8(void*, int, void*, void*, void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
-        func_003E6574(vp, defaults, size); \
+        MEM_copy(vp, defaults, size); \
         sBindArg_1FBE38* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
@@ -4657,7 +4657,7 @@ extern "C" cLunoValue* func_00302870(cLunoValue* ret, int n, sBindArg_1FBE38* e)
 INCLUDE_ASM("seg/seg_1FBE38", func_00302968);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_2968 { char c; Flag_2968() {} Flag_2968(const Flag_2968& o) : c(o.c) {} };
 struct Ent_2968 { int idx; int val; int pad; int kind; };
@@ -4680,7 +4680,7 @@ extern "C" R12_2968 func_00302968(int n, Ent_2968* e) {
     unsigned v[4] __attribute__((aligned(16)));
     unsigned* vp = v;
     vp[0] = 0xFFFFFFFFu;
-    func_003E6574(vp, &D_004A5768_2968, 8);
+    MEM_copy(vp, &D_004A5768_2968, 8);
     Ent_2968* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -4709,7 +4709,7 @@ extern "C" R12_2968 func_00302968(int n, Ent_2968* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00302AC0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_2AC0 { char c; Flag_2AC0() {} Flag_2AC0(const Flag_2AC0& o) : c(o.c) {} };
 struct Ent_2AC0 { int idx; int val; int pad; int kind; };
@@ -4732,7 +4732,7 @@ extern "C" R12_2AC0 func_00302AC0(int n, Ent_2AC0* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004FBC40_2AC0, 12);
+    MEM_copy(vp, &D_004FBC40_2AC0, 12);
     Ent_2AC0* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -4751,7 +4751,7 @@ extern "C" R12_2AC0 func_00302AC0(int n, Ent_2AC0* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00302BD8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_2BD8 { char c; Flag_2BD8() {} Flag_2BD8(const Flag_2BD8& o) : c(o.c) {} };
 struct Ent_2BD8 { int idx; int val; int pad; int kind; };
@@ -4759,7 +4759,7 @@ struct R12_2BD8 { int a; int b; int c; };
 extern R12_2BD8 D_004C9098_2BD8 __asm__("D_004C9098");
 
 extern int D_004A3CF8_2BD8[2] __asm__("D_004A3CF8");
-extern "C" void func_0030A868(int, int, int, int);
+extern "C" void cWScriptMan_doMissionCmd(int, int, int, int);
 extern int D_004A3DD8_2BD8 __asm__("D_004A3DD8");
 extern int D_004A5780_2BD8 __asm__("D_004A5780");
 extern unsigned D_004A5778_2BD8 __asm__("D_004A5778");
@@ -4773,7 +4773,7 @@ extern "C" R12_2BD8 func_00302BD8(int n, Ent_2BD8* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A5778_2BD8, 8);
+    MEM_copy(vp, &D_004A5778_2BD8, 8);
     Ent_2BD8* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -4783,7 +4783,7 @@ extern "C" R12_2BD8 func_00302BD8(int n, Ent_2BD8* e) {
         else
             *d = p->val;
     }
-    func_0030A868(D_004A3DD8_2BD8, vp[0], 0, -1);
+    cWScriptMan_doMissionCmd(D_004A3DD8_2BD8, vp[0], 0, -1);
     return D_004C9098_2BD8;
 }
 #endif
@@ -4792,7 +4792,7 @@ extern "C" R12_2BD8 func_00302BD8(int n, Ent_2BD8* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00302CE8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_2CE8 { char c; Flag_2CE8() {} Flag_2CE8(const Flag_2CE8& o) : c(o.c) {} };
 struct Ent_2CE8 { int idx; int val; int pad; int kind; };
@@ -4814,7 +4814,7 @@ extern "C" R12_2CE8 func_00302CE8(int n, Ent_2CE8* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A5788_2CE8, 8);
+    MEM_copy(vp, &D_004A5788_2CE8, 8);
     Ent_2CE8* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -4833,7 +4833,7 @@ extern "C" R12_2CE8 func_00302CE8(int n, Ent_2CE8* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00302DF0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_2DF0 { char c; Flag_2DF0() {} Flag_2DF0(const Flag_2DF0& o) : c(o.c) {} };
 struct Ent_2DF0 { int idx; int val; int pad; int kind; };
@@ -4855,7 +4855,7 @@ extern "C" R12_2DF0 func_00302DF0(int n, Ent_2DF0* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A5798_2DF0, 8);
+    MEM_copy(vp, &D_004A5798_2DF0, 8);
     Ent_2DF0* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -4875,7 +4875,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00302EF8);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_2EF8 { char c; Flag_2EF8() {} Flag_2EF8(const Flag_2EF8& o) : c(o.c) {} };
 struct Ent_2EF8 { int idx; int val; int pad; int kind; };
@@ -4900,7 +4900,7 @@ extern "C" void* func_00302EF8(void* self, int n, Ent_2EF8* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A57A8_2EF8, 8);
+    MEM_copy(vp, &D_004A57A8_2EF8, 8);
     Ent_2EF8* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -4965,7 +4965,7 @@ struct Tag_3130 { char c; Tag_3130() {} Tag_3130(const Tag_3130 &o) : c(o.c) {} 
 extern unsigned D_3130[] __asm__("D_004FBC50");
 extern int D_004A57B4;
 extern int D_004A3D18;
-extern "C" void* func_003E6574_3130(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_3130(void*, void*, int) __asm__("MEM_copy");
 struct Ent_3130 { int idx; int val; int pad; int type; };
 extern "C" V3_3130* func_00303130(V3_3130 *ret, int n, Ent_3130 *e) {
     if (D_004A57B4 == 0) {
@@ -4977,7 +4977,7 @@ extern "C" V3_3130* func_00303130(V3_3130 *ret, int n, Ent_3130 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_3130(buf, D_3130, 12);
+    MEM_copy_3130(buf, D_3130, 12);
     Ent_3130 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -5168,7 +5168,7 @@ extern "C" void* func_003034F8(void* self) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00303598);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_3598 { char c; Flag_3598() {} Flag_3598(const Flag_3598& o) : c(o.c) {} };
 struct Ent_3598 { int idx; int val; int pad; int kind; };
@@ -5191,7 +5191,7 @@ extern "C" void* func_00303598(void* self, int n, Ent_3598* e) {
     }
     float v[4] __attribute__((aligned(16)));
     float* vp = v;
-    func_003E6574(vp, &D_004FBC60_3598, 12);
+    MEM_copy(vp, &D_004FBC60_3598, 12);
     Ent_3598* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -5217,7 +5217,7 @@ extern int D_004A57C0_36B0 __asm__("D_004A57C0");
 extern Flag_36B0 D_004A57C4_36B0 __asm__("D_004A57C4");
 extern int D_004A57C8_36B0 __asm__("D_004A57C8");
 extern int D_004A3D28_36B0[2] __asm__("D_004A3D28");
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 extern "C" int func_0030AF08(int*, int, int);
 extern int* D_004A3DD8_36B0 __asm__("D_004A3DD8");
 int* func_00226610(void*);
@@ -5233,7 +5233,7 @@ extern "C" void* func_003036B0(void* self, int n, Ent_36B0* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A57C0_36B0, 8);
+    MEM_copy(vp, &D_004A57C0_36B0, 8);
     Ent_36B0* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -5255,7 +5255,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003037B0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_37B0 { char c; Flag_37B0() {} Flag_37B0(const Flag_37B0& o) : c(o.c) {} };
 extern int D_004A57D0_37B0 __asm__("D_004A57D0");
@@ -5278,7 +5278,7 @@ extern "C" void* func_003037B0(void* self, int n, Ent_37B0* e)
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A57D0_37B0, 8);
+    MEM_copy(vp, &D_004A57D0_37B0, 8);
     Ent_37B0* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -5337,7 +5337,7 @@ struct Tag_39F0 { char c; Tag_39F0() {} Tag_39F0(const Tag_39F0 &o) : c(o.c) {} 
 extern unsigned D_39F0[] __asm__("D_004FBC70");
 extern int D_004A57DC;
 extern int D_004A3D38;
-extern "C" void* func_003E6574_39F0(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_39F0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_39F0 { int idx; int val; int pad; int type; };
 extern "C" V3_39F0 func_003039F0(int n, Ent_39F0 *e) {
     if (D_004A57DC == 0) {
@@ -5349,7 +5349,7 @@ extern "C" V3_39F0 func_003039F0(int n, Ent_39F0 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_39F0(buf, D_39F0, 12);
+    MEM_copy_39F0(buf, D_39F0, 12);
     Ent_39F0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -5398,7 +5398,7 @@ struct T20_3BA0 { unsigned a; int b; int c; int d; Tag_3BA0 f; };
 extern T20_3BA0 D_4FBC80_3BA0 __asm__("D_004FBC80");
 extern int D_57E0_3BA0 __asm__("D_004A57E0");
 extern const int D_004465D8_3BA0[] __asm__("D_004465D8");
-extern "C" void* func_003E6574_3BA0(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_3BA0(void*, void*, int) __asm__("MEM_copy");
 extern "C" void func_00229820_3BA0(int, unsigned, int, int) __asm__("func_00229820");
 extern "C" void func_00229788_3BA0(int, unsigned, int, int) __asm__("func_00229788");
 extern "C" void func_002297D8_3BA0(int, unsigned, int, int) __asm__("func_002297D8");
@@ -5416,7 +5416,7 @@ extern "C" V3_3BA0 func_00303BA0(int n, Ent_3BA0 *e) {
     unsigned buf64[5];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_3BA0(buf, &D_4FBC80_3BA0, 0x14);
+    MEM_copy_3BA0(buf, &D_4FBC80_3BA0, 0x14);
     Ent_3BA0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -5570,7 +5570,7 @@ extern "C" V3_3F80 func_00303F80(void) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00303FF0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_3FF0 { char c; Flag_3FF0() {} Flag_3FF0(const Flag_3FF0& o) : c(o.c) {} };
 struct Ent_3FF0 { int idx; int val; int pad; int kind; };
@@ -5593,7 +5593,7 @@ extern "C" R12_3FF0 func_00303FF0(int n, Ent_3FF0* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004FBC98_3FF0, 12);
+    MEM_copy(vp, &D_004FBC98_3FF0, 12);
     Ent_3FF0* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -5612,7 +5612,7 @@ extern "C" R12_3FF0 func_00303FF0(int n, Ent_3FF0* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00304100);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_4100 { char c; Flag_4100() {} Flag_4100(const Flag_4100& o) : c(o.c) {} };
 struct Ent_4100 { int idx; int val; int pad; int kind; };
@@ -5635,7 +5635,7 @@ extern "C" R12_4100 func_00304100(int n, Ent_4100* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004FBCA8_4100, 12);
+    MEM_copy(vp, &D_004FBCA8_4100, 12);
     Ent_4100* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -5654,7 +5654,7 @@ extern "C" R12_4100 func_00304100(int n, Ent_4100* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00304210);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_4210 { char c; Flag_4210() {} Flag_4210(const Flag_4210& o) : c(o.c) {} };
 struct Ent_4210 { int idx; int val; int pad; int kind; };
@@ -5677,7 +5677,7 @@ extern "C" R12_4210 func_00304210(int n, Ent_4210* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004FBCB8_4210, 12);
+    MEM_copy(vp, &D_004FBCB8_4210, 12);
     Ent_4210* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -5711,11 +5711,11 @@ extern sRefWorld** D_004A47B8;
 // The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
 extern cWScriptMan* D_004A3DD8;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
-        func_003E6574(vp, defaults, size); \
+        MEM_copy(vp, defaults, size); \
         sBindArg_1FBE38* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
@@ -5753,7 +5753,7 @@ extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* e) {
     unsigned buf64[2];
     unsigned* buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574(buf, &D_004A57F0_4320, 8);
+    MEM_copy(buf, &D_004A57F0_4320, 8);
     sBindArg_1FBE38* x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -5792,7 +5792,7 @@ extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_003044A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_44A8 { char c; Flag_44A8() {} Flag_44A8(const Flag_44A8& o) : c(o.c) {} };
 struct Ent_44A8 { int idx; int val; int pad; int kind; };
@@ -5815,7 +5815,7 @@ extern "C" R12_44A8 func_003044A8(int n, Ent_44A8* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A5800_44A8, 8);
+    MEM_copy(vp, &D_004A5800_44A8, 8);
     Ent_44A8* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -5849,7 +5849,7 @@ struct Rec_45B8 {
 extern Rec_45B8 D_4FBCC8_45B8 __asm__("D_004FBCC8");
 extern int D_580C_45B8 __asm__("D_004A580C");
 extern const int D_00446650_45B8[] __asm__("D_00446650");
-extern "C" void* func_003E6574_45B8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_45B8(void*, void*, int) __asm__("MEM_copy");
 struct BF_45B8 {
     unsigned long f0 : 3; unsigned long f1 : 4; unsigned long f2 : 3; unsigned long f3 : 2;
     unsigned long f4 : 4; unsigned long f5 : 3; unsigned long f6 : 3; unsigned long f7 : 6;
@@ -5883,7 +5883,7 @@ extern "C" V3_45B8 func_003045B8(int n, Ent_45B8 *e) {
     }
     Rec_45B8 rec;
     Rec_45B8 *buf = &rec;
-    func_003E6574_45B8(buf, &D_4FBCC8_45B8, 0x44);
+    MEM_copy_45B8(buf, &D_4FBCC8_45B8, 0x44);
     BF_45B8 bf;
     Ent_45B8 *x = e;
     for (int i = 0; i < n; i++, x++) {
@@ -5932,7 +5932,7 @@ struct Tag_4980 { char c; Tag_4980() {} Tag_4980(const Tag_4980 &o) : c(o.c) {} 
 extern unsigned D_4980[] __asm__("D_004FBD10");
 extern int D_004A5810;
 extern int D_004A3D68;
-extern "C" void* func_003E6574_4980(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_4980(void*, void*, int) __asm__("MEM_copy");
 struct Ent_4980 { int idx; int val; int pad; int type; };
 extern "C" V3_4980 func_00304980(int n, Ent_4980 *e) {
     if (D_004A5810 == 0) {
@@ -5944,7 +5944,7 @@ extern "C" V3_4980 func_00304980(int n, Ent_4980 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_4980(buf, D_4980, 12);
+    MEM_copy_4980(buf, D_4980, 12);
     Ent_4980 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -5980,7 +5980,7 @@ extern "C" V3_4980 func_00304980(int n, Ent_4980 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00304B38);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_4B38 { char c; Flag_4B38() {} Flag_4B38(const Flag_4B38& o) : c(o.c) {} };
 struct Ent_4B38 { int idx; int val; int pad; int kind; };
@@ -6003,7 +6003,7 @@ extern "C" R12_4B38 func_00304B38(int n, Ent_4B38* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A5818_4B38, 8);
+    MEM_copy(vp, &D_004A5818_4B38, 8);
     Ent_4B38* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -6023,7 +6023,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00304C50);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* func_00226618(void*);
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 struct Tag_4C50 { char c; Tag_4C50() {} Tag_4C50(const Tag_4C50 &o) : c(o.c) {} };
 struct Ent_4C50 { int idx; int val; int pad; int type; };
 extern char *D_004A3DD8_4C50 __asm__("D_004A3DD8");
@@ -6049,7 +6049,7 @@ extern "C" void* func_00304C50(void* self, int n, Ent_4C50 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574(buf, &D_5828_4C50, 8);
+    MEM_copy(buf, &D_5828_4C50, 8);
     Ent_4C50 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -6111,7 +6111,7 @@ struct Tag_4E38 { char c; Tag_4E38() {} Tag_4E38(const Tag_4E38 &o) : c(o.c) {} 
 extern unsigned D_4E38[] __asm__("D_004FBD20");
 extern int D_004A5834;
 extern int D_004A3D80;
-extern "C" void* func_003E6574_4E38(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_4E38(void*, void*, int) __asm__("MEM_copy");
 struct Ent_4E38 { int idx; int val; int pad; int type; };
 extern "C" V3_4E38 func_00304E38(int n, Ent_4E38 *e) {
     if (D_004A5834 == 0) {
@@ -6123,7 +6123,7 @@ extern "C" V3_4E38 func_00304E38(int n, Ent_4E38 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    func_003E6574_4E38(buf, D_4E38, 12);
+    MEM_copy_4E38(buf, D_4E38, 12);
     Ent_4E38 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -6161,7 +6161,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00304FF0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A5838_4FF0 __asm__("D_004A5838");
 extern int D_004A3D88_4FF0[2] __asm__("D_004A3D88");
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 
 struct Flag_4FF0 { char c; Flag_4FF0() {} Flag_4FF0(const Flag_4FF0& o) : c(o.c) {} };
 struct Ent_4FF0 { int idx; int val; int pad; int kind; };
@@ -6180,7 +6180,7 @@ extern "C" R12_4FF0 func_00304FF0(int n, Ent_4FF0* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004FBD30_4FF0, 12);
+    MEM_copy(vp, &D_004FBD30_4FF0, 12);
     Ent_4FF0* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -6335,11 +6335,11 @@ extern void* D_004A4028;
 // One script argument as the VM passes it to a binding: the slot index in the defaults record, then the value
 // (cLunoValue layout: value word, second word, type).
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
-        func_003E6574(vp, defaults, size); \
+        MEM_copy(vp, defaults, size); \
         sBindArg_1FBE38* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
@@ -6411,7 +6411,7 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
     Rec_50F0 rec;
     Rec_50F0 *buf = &rec;
     rec.id = 0xFFFFFFFF;
-    func_003E6574(buf, &D_004FBD40_50F0, 0x14);
+    MEM_copy(buf, &D_004FBD40_50F0, 0x14);
     sBindArg_1FBE38 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -6485,7 +6485,7 @@ struct Rec_5478 { unsigned id; float a; float b; Tag_5478 f; };
 extern Rec_5478 D_4FBD58_5478 __asm__("D_004FBD58");
 extern int D_5840_5478 __asm__("D_004A5840");
 extern const int D_004466A0_5478[] __asm__("D_004466A0");
-extern "C" void* func_003E6574_5478(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_5478(void*, void*, int) __asm__("MEM_copy");
 extern "C" void func_003559F8_5478(O_5478*, void*, float, float) __asm__("func_003559F8");
 struct Ent_5478 { int idx; int val; int pad; int type; };
 extern "C" V3_5478 func_00305478(int n, Ent_5478 *e) {
@@ -6500,7 +6500,7 @@ extern "C" V3_5478 func_00305478(int n, Ent_5478 *e) {
     Rec_5478 rec;
     Rec_5478 *buf = &rec;
     rec.id = 0xFFFFFFFF;
-    func_003E6574_5478(buf, &D_4FBD58_5478, 0x10);
+    MEM_copy_5478(buf, &D_4FBD58_5478, 0x10);
     Ent_5478 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -6549,7 +6549,7 @@ extern unsigned D_5660 __asm__("D_004A5848");
 extern Tag_5660 D_004A584C;
 extern int D_004A5850;
 extern int D_004A3D90;
-extern "C" void* func_003E6574_5660(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_5660(void*, void*, int) __asm__("MEM_copy");
 struct Ent_5660 { int idx; int val; int pad; int type; };
 extern "C" V3_5660 func_00305660(int n, Ent_5660 *e) {
     if (D_004A5850 == 0) {
@@ -6560,7 +6560,7 @@ extern "C" V3_5660 func_00305660(int n, Ent_5660 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_5660(buf, &D_5660, 8);
+    MEM_copy_5660(buf, &D_5660, 8);
     Ent_5660 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -6598,7 +6598,7 @@ struct Rec_57C0 { unsigned id; int a; int b; float c; float d; float e; float g;
 extern Rec_57C0 D_4FBD68_57C0 __asm__("D_004FBD68");
 extern int D_5854_57C0 __asm__("D_004A5854");
 extern const int D_004466B0_57C0[] __asm__("D_004466B0");
-extern "C" void* func_003E6574_57C0(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_57C0(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cMoveNode_addHalo_57C0(void*, void*) __asm__("cMoveNode_addHalo");
 struct Ent_57C0 { int idx; int val; int pad; int type; };
 extern "C" V3_57C0 func_003057C0(int n, Ent_57C0 *e) {
@@ -6619,7 +6619,7 @@ extern "C" V3_57C0 func_003057C0(int n, Ent_57C0 *e) {
     Rec_57C0 rec;
     Rec_57C0 *buf = &rec;
     rec.id = 0xFFFFFFFF;
-    func_003E6574_57C0(buf, &D_4FBD68_57C0, 0x28);
+    MEM_copy_57C0(buf, &D_4FBD68_57C0, 0x28);
     Ent_57C0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -6665,11 +6665,11 @@ extern sRefWorld** D_004A47B8;
 // The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
 extern cWScriptMan* D_004A3DD8;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
-        func_003E6574(vp, defaults, size); \
+        MEM_copy(vp, defaults, size); \
         sBindArg_1FBE38* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
@@ -6708,7 +6708,7 @@ extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* e) {
     Rec_59A0 rec;
     Rec_59A0* vp = &rec;
     rec.id[7] = rec.id[6] = rec.id[5] = rec.id[4] = rec.id[3] = rec.id[2] = rec.id[1] = rec.id[0] = 0xFFFFFFFF;
-    func_003E6574(vp, &D_004FBD90_59A0, 0xC8);
+    MEM_copy(vp, &D_004FBD90_59A0, 0xC8);
     sBindArg_1FBE38* x = e;
     for (int i = 0; i < n; i++, x++) {
         int k = x->idx;
@@ -6747,7 +6747,7 @@ extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00305C88);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_5C88 { char c; Flag_5C88() {} Flag_5C88(const Flag_5C88& o) : c(o.c) {} };
 struct Ent_5C88 { int idx; int val; int pad; int kind; };
@@ -6769,7 +6769,7 @@ extern "C" R12_5C88 func_00305C88(int n, Ent_5C88* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004A5860_5C88, 8);
+    MEM_copy(vp, &D_004A5860_5C88, 8);
     Ent_5C88* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -6804,7 +6804,7 @@ extern unsigned D_5D90 __asm__("D_004A5870");
 extern Tag_5D90 D_004A5874;
 extern int D_004A5878;
 extern int D_004A3DA0;
-extern "C" void* func_003E6574_5D90(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_5D90(void*, void*, int) __asm__("MEM_copy");
 struct Ent_5D90 { int idx; int val; int pad; int type; };
 extern "C" V3_5D90 func_00305D90(int n, Ent_5D90 *e) {
     if (D_004A5878 == 0) {
@@ -6815,7 +6815,7 @@ extern "C" V3_5D90 func_00305D90(int n, Ent_5D90 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_5D90(buf, &D_5D90, 8);
+    MEM_copy_5D90(buf, &D_5D90, 8);
     Ent_5D90 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -6872,7 +6872,7 @@ struct Rec_5F40 {
 extern Rec_5F40 D_4FBE58_5F40 __asm__("D_004FBE58");
 extern int D_587C_5F40 __asm__("D_004A587C");
 extern const int D_004467A0_5F40[] __asm__("D_004467A0");
-extern "C" void* func_003E6574_5F40(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_5F40(void*, void*, int) __asm__("MEM_copy");
 extern "C" void func_002D9538_5F40(char*, Rec_5F40*) __asm__("func_002D9538");
 static inline char *refToPtr_5F40(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_5F40(unsigned i) { if (i == 0) return 0; return refToPtr_5F40(i); }
@@ -6944,7 +6944,7 @@ extern "C" V3_5F40 func_00305F40(int n, Ent_5F40 *e) {
     Rec_5F40 rec;
     Rec_5F40 *buf = &rec;
     rec.id = 0xFFFFFFFF;
-    func_003E6574_5F40(buf, &D_4FBE58_5F40, 0xE0);
+    MEM_copy_5F40(buf, &D_4FBE58_5F40, 0xE0);
     Ent_5F40 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -6980,11 +6980,11 @@ extern sRefWorld** D_004A47B8;
 // The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
 extern cWScriptMan* D_004A3DD8;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 #define BIND_UNPACK_ARGS_1FBE38(vp, rec, defaults, size, types, n, args) do { \
         vp = rec; \
-        func_003E6574(vp, defaults, size); \
+        MEM_copy(vp, defaults, size); \
         sBindArg_1FBE38* p_ = args; \
         for (int i_ = 0; i_ < n; i_++, p_++) { \
             int k_ = p_->idx; \
@@ -7054,7 +7054,7 @@ extern "C" cLunoValue* func_003061B0(cLunoValue* ret, int n, sBindArg_1FBE38 *e)
 INCLUDE_ASM("seg/seg_1FBE38", func_00306300);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_6300 { char c; Flag_6300() {} Flag_6300(const Flag_6300& o) : c(o.c) {} };
 struct Ent_6300 { int idx; int val; int pad; int kind; };
@@ -7079,7 +7079,7 @@ extern "C" R12_6300 func_00306300(int n, Ent_6300* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004FBF38_6300, 12);
+    MEM_copy(vp, &D_004FBF38_6300, 12);
     Ent_6300* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -7112,7 +7112,7 @@ struct Tag_6438 { char c; Tag_6438() {} Tag_6438(const Tag_6438 &o) : c(o.c) {} 
 extern unsigned D_6438[] __asm__("D_004FBF48");
 extern int D_004A5890;
 extern const int D_00446880[];
-extern "C" void* func_003E6574_6438(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_6438(void*, void*, int) __asm__("MEM_copy");
 struct Ent_6438 { int idx; int val; int pad; int type; };
 extern "C" V3_6438 func_00306438(int n, Ent_6438 *e) {
     if (D_004A5890 == 0) {
@@ -7125,7 +7125,7 @@ extern "C" V3_6438 func_00306438(int n, Ent_6438 *e) {
     unsigned buf64[4];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_6438(buf, D_6438, 16);
+    MEM_copy_6438(buf, D_6438, 16);
     Ent_6438 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -7184,7 +7184,7 @@ extern unsigned D_65E8 __asm__("D_004A5898");
 extern Tag_65E8 D_004A589C;
 extern int D_004A58A0;
 extern int D_004A3DB8;
-extern "C" void* func_003E6574_65E8(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_65E8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_65E8 { int idx; int val; int pad; int type; };
 extern "C" V3_65E8 func_003065E8(int n, Ent_65E8 *e) {
     if (D_004A58A0 == 0) {
@@ -7195,7 +7195,7 @@ extern "C" V3_65E8 func_003065E8(int n, Ent_65E8 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_65E8(buf, &D_65E8, 8);
+    MEM_copy_65E8(buf, &D_65E8, 8);
     Ent_65E8 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -7239,7 +7239,7 @@ struct Tag_6770 { char c; Tag_6770() {} Tag_6770(const Tag_6770 &o) : c(o.c) {} 
 extern unsigned D_6770[] __asm__("D_004FBF58");
 extern int D_004A58A4;
 extern int D_004A3DC0;
-extern "C" void* func_003E6574_6770(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_6770(void*, void*, int) __asm__("MEM_copy");
 struct Ent_6770 { int idx; int val; int pad; int type; };
 extern "C" V3_6770 func_00306770(int n, Ent_6770 *e) {
     if (D_004A58A4 == 0) {
@@ -7251,7 +7251,7 @@ extern "C" V3_6770 func_00306770(int n, Ent_6770 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_6770(buf, D_6770, 12);
+    MEM_copy_6770(buf, D_6770, 12);
     Ent_6770 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -7300,7 +7300,7 @@ extern unsigned D_6908 __asm__("D_004A58A8");
 extern Tag_6908 D_004A58AC;
 extern int D_004A58B0;
 extern int D_004A3DC8;
-extern "C" void* func_003E6574_6908(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_6908(void*, void*, int) __asm__("MEM_copy");
 struct Ent_6908 { int idx; int val; int pad; int type; };
 extern "C" V3_6908 func_00306908(int n, Ent_6908 *e) {
     if (D_004A58B0 == 0) {
@@ -7311,7 +7311,7 @@ extern "C" V3_6908 func_00306908(int n, Ent_6908 *e) {
     unsigned buf64[2];
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
-    func_003E6574_6908(buf, &D_6908, 8);
+    MEM_copy_6908(buf, &D_6908, 8);
     Ent_6908 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -7359,7 +7359,7 @@ struct Rec_6A90 {
 extern Rec_6A90 D_4FBF68_6A90 __asm__("D_004FBF68");
 extern int D_58B4_6A90 __asm__("D_004A58B4");
 extern const int D_00446890_6A90[] __asm__("D_00446890");
-extern "C" void* func_003E6574_6A90(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_6A90(void*, void*, int) __asm__("MEM_copy");
 extern int D_004A4028_6A90 __asm__("D_004A4028");
 extern "C" void func_00357A78_6A90(int, int, Rec_6A90*, int) __asm__("func_00357A78");
 struct Ent_6A90 { int idx; int val; int pad; int type; };
@@ -7430,7 +7430,7 @@ extern "C" V3_6A90 func_00306A90(int n, Ent_6A90 *e) {
     }
     Rec_6A90 rec;
     Rec_6A90 *buf = &rec;
-    func_003E6574_6A90(buf, &D_4FBF68_6A90, 0xE4);
+    MEM_copy_6A90(buf, &D_4FBF68_6A90, 0xE4);
     Ent_6A90 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -7462,7 +7462,7 @@ struct Tag_6CB0 { char c; Tag_6CB0() {} Tag_6CB0(const Tag_6CB0 &o) : c(o.c) {} 
 extern unsigned D_6CB0[] __asm__("D_004FC050");
 extern int D_004A58B8;
 extern const int D_00446970[];
-extern "C" void* func_003E6574_6CB0(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_6CB0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_6CB0 { int idx; int val; int pad; int type; };
 extern "C" V3_6CB0 func_00306CB0(int n, Ent_6CB0 *e) {
     if (D_004A58B8 == 0) {
@@ -7475,7 +7475,7 @@ extern "C" V3_6CB0 func_00306CB0(int n, Ent_6CB0 *e) {
     unsigned buf64[4];
     unsigned *buf = buf64;
     buf64[1] = 0xFFFFFFFF;
-    func_003E6574_6CB0(buf, D_6CB0, 16);
+    MEM_copy_6CB0(buf, D_6CB0, 16);
     Ent_6CB0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -7527,7 +7527,7 @@ struct Tag_6E68 { char c; Tag_6E68() {} Tag_6E68(const Tag_6E68 &o) : c(o.c) {} 
 extern unsigned D_6E68[] __asm__("D_004FC060");
 extern int D_004A58BC;
 extern const int D_00446980[];
-extern "C" void* func_003E6574_6E68(void*, void*, int) __asm__("func_003E6574");
+extern "C" void* MEM_copy_6E68(void*, void*, int) __asm__("MEM_copy");
 struct Ent_6E68 { int idx; int val; int pad; int type; };
 extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *e) {
     if (D_004A58BC == 0) {
@@ -7542,7 +7542,7 @@ extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *e) {
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
     buf64[2] = 0xFFFFFFFF;
-    func_003E6574_6E68(buf, D_6E68, 16);
+    MEM_copy_6E68(buf, D_6E68, 16);
     Ent_6E68 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -7580,7 +7580,7 @@ extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00307020);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574(void*, void*, int);
+extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
 struct Flag_7020 { char c; Flag_7020() {} Flag_7020(const Flag_7020& o) : c(o.c) {} };
 struct Ent_7020 { int idx; int val; int pad; int kind; };
@@ -7602,7 +7602,7 @@ extern "C" void* func_00307020(void* self, int n, Ent_7020* e) {
     }
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
-    func_003E6574(vp, &D_004FC070_7020, 12);
+    MEM_copy(vp, &D_004FC070_7020, 12);
     Ent_7020* p = e;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
@@ -7620,19 +7620,19 @@ extern "C" void* func_00307020(void* self, int n, Ent_7020* e) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00307128);
+INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_cWScriptMission);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_00489A30_7128[] __asm__("D_00489A30");
 extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a1, int a2);
-extern "C" int func_00309B70_7128(int, int) __asm__("func_00309B70");
-extern "C" void* func_00307128(void* self, void* man, int a1, char* a2, int a3) {
+extern "C" int cWScriptMan_getScriptCode_7128(int, int) __asm__("cWScriptMan_getScriptCode");
+extern "C" void* cWScriptMission_cWScriptMission(void* self, void* man, int a1, char* a2, int a3) {
     cWScriptProcess_cWScriptProcess(self, man, a1, (int)a2);
     *(void**)((char*)self + 0x5C) = D_00489A30_7128;
     *(int*)((char*)self + 0x60) = *(int*)(a2 + 0x50);
     *(int*)((char*)self + 0x64) = a3;
     for (int i = 0; i < 4; i++)
-        ((int*)((char*)self + 0x68))[i] = func_00309B70_7128(*(int*)((char*)self + 0x10), ((int*)(a2 + 0x40))[i]);
+        ((int*)((char*)self + 0x68))[i] = cWScriptMan_getScriptCode_7128(*(int*)((char*)self + 0x10), ((int*)(a2 + 0x40))[i]);
     return self;
 }
 #endif
@@ -7642,10 +7642,10 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003071C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_00489A30_71C8[] __asm__("D_00489A30");
-extern "C" void func_00307738_71C8(void*) __asm__("func_00307738");
+extern "C" void cWScriptProcess__cWScriptProcess_71C8(void*) __asm__("cWScriptProcess__cWScriptProcess");
 extern "C" void func_003071C8(void* self) {
     *(void**)((char*)self + 0x5C) = D_00489A30_71C8;
-    func_00307738_71C8(self);
+    cWScriptProcess__cWScriptProcess_71C8(self);
 }
 #endif
 
@@ -7655,11 +7655,11 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003071F0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A28A8_71F0 __asm__("D_004A28A8");
 void func_0010F2B8_71F0(void*) __asm__("func_0010F2B8__FPv");
-extern "C" void func_00307C40_71F0(void*) __asm__("func_00307C40");
+extern "C" void cWScriptProcess_processStart_71F0(void*) __asm__("cWScriptProcess_processStart");
 struct Tab_71F0 { char pad[0x28]; void *arr[1]; };
 extern "C" void func_003071F0(void* self) {
     func_0010F2B8_71F0((*(Tab_71F0**)(*(char**)(D_004A28A8_71F0 + 0x84) + 0xC))->arr[**(int**)((char*)self + 0x10)]);
-    func_00307C40_71F0(self);
+    cWScriptProcess_processStart_71F0(self);
 }
 #endif
 
@@ -7698,22 +7698,22 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern char* D_004A28A8_7308 __asm__("D_004A28A8");
-extern "C" int func_00153D78(void* missions, int id);
+extern "C" int cBEMissionInterface_isMissionCompleted(void* missions, int id);
 extern "C" void func_00154160(void* missions, int id, int done);
 extern "C" int func_00153FA0(void* missions, int id);
 extern "C" int func_001511B0(void* econ, int reward);
 extern "C" int func_00144C98(void* iface);
 extern "C" void func_0010F2D8(void* rider, int player, int money);
-extern "C" unsigned int func_00153FD8(void* missions, int id);
+extern "C" unsigned int cBEMissionInterface_getNextMissionID(void* missions, int id);
 extern "C" void func_001541D0(void* missions, int id, int active);
-extern "C" void func_0030AC98(int, void *, int);
+extern "C" void cWScriptMan_runScriptCode(int, void *, int);
 extern "C" int func_00153E28(void* missions, int id);
 extern "C" void func_00154010(void* missions, int id, int a);
 extern "C" void func_00154080(void* missions, int id, int a);
 extern "C" void func_00308DB8(int script);
 extern "C" void func_00309B00(int script, void* self);
-extern "C" void func_0026F228(void* replay);
-extern "C" void func_0026F7B8(void* replay);
+extern "C" void cReplay_reset(void* replay);
+extern "C" void cReplay_startRace(void* replay);
 
 struct sGame_7308 {
     char pad_0x0[0x28];
@@ -7725,7 +7725,7 @@ extern "C" void func_00307308(char* self)
 {
     int money = 0;
     void* missions = cBE_getInterface_Fv(cBE_getBE(), 0xA);
-    if (func_00153D78(missions, *(int*)(self + 0x20)) == 0) {
+    if (cBEMissionInterface_isMissionCompleted(missions, *(int*)(self + 0x20)) == 0) {
         func_00154160(missions, *(int*)(self + 0x20), 1);
         int reward = func_00153FA0(missions, *(int*)(self + 0x20));
         money = func_001511B0(cBE_getInterface_Fv(cBE_getBE(), 0xB), reward);
@@ -7733,11 +7733,11 @@ extern "C" void func_00307308(char* self)
     int pl = func_00144C98(cBE_getInterface_Fv(cBE_getBE(), 0));
     sGame_7308* game = *(sGame_7308**)(*(char**)(D_004A28A8_7308 + 0x84) + 0xC);
     func_0010F2D8(game->riders[**(int**)(self + 0x10)], pl, money);
-    unsigned int next = func_00153FD8(missions, *(int*)(self + 0x20));
+    unsigned int next = cBEMissionInterface_getNextMissionID(missions, *(int*)(self + 0x20));
     if (next != 0xFFFFFFFF) {
         func_001541D0(missions, *(int*)(self + 0x20), 0);
         if (*(int*)(self + 0x6C) != 0) {
-            func_0030AC98(*(int*)(self + 0x10), self, *(int*)(self + 0x6C));
+            cWScriptMan_runScriptCode(*(int*)(self + 0x10), self, *(int*)(self + 0x6C));
         }
         if (func_00153E28(missions, next) != 0) {
             func_00154010(missions, next, 0);
@@ -7745,12 +7745,12 @@ extern "C" void func_00307308(char* self)
             func_001541D0(missions, next, 1);
         }
     } else if (*(int*)(self + 0x6C) != 0) {
-        func_0030AC98(*(int*)(self + 0x10), self, *(int*)(self + 0x6C));
+        cWScriptMan_runScriptCode(*(int*)(self + 0x10), self, *(int*)(self + 0x6C));
     }
     func_00308DB8(*(int*)(self + 0x10));
     func_00309B00(*(int*)(self + 0x10), self);
-    func_0026F228(*(void**)(*(char**)(D_004A28A8_7308 + 0x84) + 0x28));
-    func_0026F7B8(*(void**)(*(char**)(D_004A28A8_7308 + 0x84) + 0x28));
+    cReplay_reset(*(void**)(*(char**)(D_004A28A8_7308 + 0x84) + 0x28));
+    cReplay_startRace(*(void**)(*(char**)(D_004A28A8_7308 + 0x84) + 0x28));
 }
 #endif
 
@@ -7760,36 +7760,36 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003074C0);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" int cBE_getBE_74C0(void) __asm__("cBE_getBE");
 int cBE_getInterface_Fv_74C0(int be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00153E80_74C0(int, int) __asm__("func_00153E80");
+extern "C" int cBEMissionInterface_isMissionAvailable_74C0(int, int) __asm__("cBEMissionInterface_isMissionAvailable");
 extern "C" void func_001540F0_74C0(int, int, int) __asm__("func_001540F0");
-extern "C" void func_00307D78_74C0(void*) __asm__("func_00307D78");
-extern "C" void func_0030AC98(int, void *, int);
+extern "C" void cWScriptProcess_end_74C0(void*) __asm__("cWScriptProcess_end");
+extern "C" void cWScriptMan_runScriptCode(int, void *, int);
 struct P_74C0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); };
 extern "C" void func_003074C0(P_74C0* self) {
     int iface = cBE_getInterface_Fv_74C0(cBE_getBE_74C0(), 10);
-    if (!func_00153E80_74C0(iface, *(int*)((char*)self + 0x20)))
+    if (!cBEMissionInterface_isMissionAvailable_74C0(iface, *(int*)((char*)self + 0x20)))
         func_001540F0_74C0(iface, *(int*)((char*)self + 0x20), 1);
     int h = *(int*)((char*)self + 0x70);
     if (h)
-        func_0030AC98(*(int*)((char*)self + 0x10), self, h);
+        cWScriptMan_runScriptCode(*(int*)((char*)self + 0x10), self, h);
     else
         self->v20();
     if (self->state == 2)
-        func_00307D78_74C0(self);
+        cWScriptProcess_end_74C0(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", func_00307568);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(int, void *, int);
+extern "C" void cWScriptMan_runScriptCode(int, void *, int);
 
 extern "C" void func_00307568(void *arg0) {
     int temp_6;
 
     temp_6 = (*(int *)((char*)(arg0) + (0x74)));
     if (temp_6 != 0) {
-        func_0030AC98((*(int *)((char*)(arg0) + (0x10))), arg0, temp_6);
+        cWScriptMan_runScriptCode((*(int *)((char*)(arg0) + (0x10))), arg0, temp_6);
     }
 }
 #endif

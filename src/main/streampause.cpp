@@ -203,13 +203,13 @@ extern "C" void func_00242EB8(int init, int prio)
 #endif
 
 //100%
-INCLUDE_ASM("main/streampause", func_00243838);
+INCLUDE_ASM("main/streampause", cGame__cGame);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* D_0047D6E8[];
 extern void* D_0046D970[];
 
-extern "C" void func_00243838(void* self, int flags)
+extern "C" void cGame__cGame(void* self, int flags)
 {
     void** m = D_0047D6E8;
     *(void***)((char*)self + 0x0) = D_0046D970;

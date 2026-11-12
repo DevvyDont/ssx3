@@ -164,7 +164,7 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367440);
 extern "C" void cPSPGraphicsMan_NewBindTexID(void* self, int id);
 extern "C" int func_00366CE0(void* heap, int size, int idx, int other, int a4, int a5);
 extern "C" void func_00366E90(void* self, void* tex);
-extern "C" void* func_003E6574(void*, void*, int);
+extern "C" void* MEM_copy(void*, void*, int);
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 // PORT: operator_new__FUi is the game's tagged allocator (size, tag, flags, d); bound by asm label
 void* operator_new_7440(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -335,7 +335,7 @@ extern "C" int func_00367440(void* self, int a1, void* a2, int a3, int a4, int a
         if (*(int*)(t + 0x0) != 0) {
             void* p = operator_new_7440(size, name, *(int*)(s + 0x1F58) | 0x05000000, 0);
             *(void**)(t + 0x1C) = p;
-            func_003E6574(p, data, size);
+            MEM_copy(p, data, size);
         } else {
             *(void**)(t + 0x1C) = data;
         }
@@ -350,7 +350,7 @@ extern "C" int func_00367440(void* self, int a1, void* a2, int a3, int a4, int a
         if (*(int*)(t + 0x0) != 0) {
             void* p = operator_new_7440(0x400, name, *(int*)(s + 0x1F58) | 0x05000000, 0);
             *(void**)(t + 0x20) = p;
-            func_003E6574(p, clut, entries * esz);
+            MEM_copy(p, clut, entries * esz);
         } else {
             *(void**)(t + 0x20) = clut;
         }
@@ -503,7 +503,7 @@ extern "C" int func_00367CD0(void* self, int a, int b, int c)
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00367D20);
 #ifdef SKIP_ASM
-extern "C" void* func_003E6574(void*, void*, int);
+extern "C" void* MEM_copy(void*, void*, int);
 extern "C" void func_00369098(void* self, int idx);
 
 extern "C" void func_00367D20(void* self, int idx, void* data, int a3, int a4, int a5, int a6,
@@ -512,10 +512,10 @@ extern "C" void func_00367D20(void* self, int idx, void* data, int a3, int a4, i
     char* e = *(char**)((char*)self + (idx << 2) + 8);
     if (upload != 0) {
         if (data != 0) {
-            func_003E6574(*(void**)(e + 0x1C), data, *(int*)(e + 0x10));
+            MEM_copy(*(void**)(e + 0x1C), data, *(int*)(e + 0x10));
         }
         if (clut != 0) {
-            func_003E6574(*(void**)(e + 0x20), clut, 4 << *(int*)(e + 0x18));
+            MEM_copy(*(void**)(e + 0x20), clut, 4 << *(int*)(e + 0x18));
         }
     }
     func_00369098(self, idx);
@@ -1086,7 +1086,7 @@ extern "C" void func_003691B0(sGfxTexTable* self, int idx, int tfx)
 INCLUDE_ASM("render/ps2graphicsman", func_003691F8);
 #ifdef SKIP_ASM
 extern "C" void func_00416210(void* dst, int c, int n);
-extern "C" void func_003E6448(void* dst, unsigned int value, int size);
+extern "C" void MEM_fill(void* dst, unsigned int value, int size);
 extern void* D_004A5B80;
 extern void* D_00493950[];
 
@@ -1189,7 +1189,7 @@ extern "C" void* func_003691F8(char* self)
     *(sRS_691F8**)(self + 0xE84) = (sRS_691F8*)(self + 0xE88);
     *(sKey8_691F8*)self = D_004A5960[0];
     *(int*)(self + 0x8) = 0;
-    func_003E6448(self + 0xF50, 0xFFFFFFFF, 0x158);
+    MEM_fill(self + 0xF50, 0xFFFFFFFF, 0x158);
     *(int*)(self + 0x270) = 1;
     *(int*)(self + 0x26C) = 0;
     *(int*)(self + 0x274) = 0;
@@ -1243,12 +1243,12 @@ extern "C" void func_00369610(void* self, int* mask)
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00369690);
 #ifdef SKIP_ASM
-extern "C" void* func_003E6574(void*, void*, int);
+extern "C" void* MEM_copy(void*, void*, int);
 
 extern "C" void func_00369690(void* self, int count, void* src)
 {
     *(int*)((char*)self + 0xE80) = count;
-    func_003E6574((char*)self + 0x280, src, count * 0xC);
+    MEM_copy((char*)self + 0x280, src, count * 0xC);
 }
 #endif
 
@@ -1256,7 +1256,7 @@ extern "C" void func_00369690(void* self, int count, void* src)
 INCLUDE_ASM("render/ps2graphicsman", func_003696C8);
 #ifdef SKIP_ASM
 extern "C" int func_004165A8(const void* a, const void* b);
-extern "C" void* func_003B3900(void* src, const char* name);
+extern "C" void* SHAPE_locatez(void* src, const char* name);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char D_004A41A0[];
 
@@ -1298,7 +1298,7 @@ extern "C" int func_003696C8(void* self_, const char* name)
     }
     strcpy(self->ents[self->count].name, buf);
     for (int j = 0; j < self->numSrc; j++) {
-        void* r = func_003B3900(self->src[j], self->ents[self->count].name);
+        void* r = SHAPE_locatez(self->src[j], self->ents[self->count].name);
         if (r != 0) {
             sVE_96C8* vt = *(sVE_96C8**)((char*)self + 0x10D8);
             self->ents[self->count].handle = vt[46].fn((char*)self + vt[46].delta, r, D_004A41A0, 0, 1, -1);

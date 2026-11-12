@@ -33,8 +33,8 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_cCommSystem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void ccs_5698(void *) __asm__("func_003E5698");
-extern "C" void ccs_6448(void *, int, int) __asm__("func_003E6448");
+extern "C" void ccs_5698(void *) __asm__("MUTEX_create");
+extern "C" void ccs_6448(void *, int, int) __asm__("MEM_fill");
 extern "C" void *ccs_new(unsigned int, void *, unsigned int, int) __asm__("operator_new__FUi");
 extern "C" void ccs_3B18(void *) __asm__("func_003F3B18");
 extern char D_00480310[];
@@ -556,7 +556,7 @@ INCLUDE_ASM("seg/seg_156860", func_002562D0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sKey_62D0 { int a; int b; };
 extern sKey_62D0 D_004A2ED8;
-extern "C" void func_003E6448_62D0(void *, int, int) __asm__("func_003E6448");
+extern "C" void MEM_fill_62D0(void *, int, int) __asm__("MEM_fill");
 extern "C" char *func_003F3F78();
 extern "C" void func_003FD0D8(void *);
 extern "C" char *strcpy(char *, const char *);
@@ -564,7 +564,7 @@ extern "C" char *strcpy(char *, const char *);
 extern "C" void func_002562D0(int *self)
 {
     self[7] = 0;
-    func_003E6448_62D0(self + 9, 0, 0xA0);
+    MEM_fill_62D0(self + 9, 0, 0xA0);
     self[0x1B] = self[3];
     self[0x1C] = self[4];
     self[0x24] = 0;
@@ -636,7 +636,7 @@ extern "C" void func_002563F8(char* self)
 INCLUDE_ASM("seg/seg_156860", func_00256460);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_003DF980_6460(int) __asm__("func_003DF980");
+extern "C" int ASYNCFILE_getstatus_6460(int) __asm__("ASYNCFILE_getstatus");
 extern "C" void ASYNCFILE_release_6460(int, int, void *) __asm__("ASYNCFILE_release");
 extern "C" int func_003FCFD8_6460(int, int) __asm__("func_003FCFD8");
 extern "C" void *operator_new__FUi_6460(unsigned int, char *, int, int) __asm__("operator_new__FUi");
@@ -645,7 +645,7 @@ extern char D_00480428[];
 extern char D_00480438[];
 
 extern "C" void func_00256460(char *self) {
-    if (func_003DF980_6460(*(int *)(self + 0x18)) == 1) {
+    if (ASYNCFILE_getstatus_6460(*(int *)(self + 0x18)) == 1) {
         *(int *)(self + 8) = 0;
         ASYNCFILE_release_6460(*(int *)(self + 0x18), 0, self + 8);
         int a = *(int *)(self + 4);
@@ -666,13 +666,13 @@ extern "C" void func_00256460(char *self) {
 INCLUDE_ASM("seg/seg_156860", func_00256510);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_003DF980_6510(int) __asm__("func_003DF980");
+extern "C" int ASYNCFILE_getstatus_6510(int) __asm__("ASYNCFILE_getstatus");
 extern "C" void ASYNCFILE_release_6510(int, int, void *) __asm__("ASYNCFILE_release");
 struct K6510 { unsigned char b[4]; };
 extern K6510 D_004A2EE8[];
 
 extern "C" void func_00256510(char *self) {
-    if (func_003DF980_6510(*(int *)(self + 0x18)) == 1) {
+    if (ASYNCFILE_getstatus_6510(*(int *)(self + 0x18)) == 1) {
         *(int *)(self + 0x10) = 0;
         ASYNCFILE_release_6510(*(int *)(self + 0x18), 0, self + 0x10);
         unsigned char *d = *(unsigned char **)(self + 0xC);
@@ -697,14 +697,14 @@ INCLUDE_ASM("seg/seg_156860", func_002565E0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_003FD100_65E0(int) __asm__("func_003FD100");
-extern "C" void func_003E6448_65E0(char *, int, int) __asm__("func_003E6448");
+extern "C" void MEM_fill_65E0(char *, int, int) __asm__("MEM_fill");
 extern "C" int func_003FD128_65E0(char *) __asm__("func_003FD128");
 extern "C" void USTR_copy_65E0(char *, char *) __asm__("USTR_copy");
 
 extern "C" void func_002565E0(char *self) {
     if (func_003FD100_65E0(*(int *)(self + 0x14)) == 0) {
         char *p = self + 0xC4;
-        func_003E6448_65E0(p, 0, 0x38C);
+        MEM_fill_65E0(p, 0, 0x38C);
         char *b = self + 0x650;
         char *c = self + 0x850;
         int r = func_003FD128_65E0(p);
@@ -761,7 +761,7 @@ extern "C" void func_002566E8(void *arg0, int arg1) {
 INCLUDE_ASM("seg/seg_156860", func_00256730);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003E6574_6730(char *, char *, int) __asm__("func_003E6574");
+extern "C" void MEM_copy_6730(char *, char *, int) __asm__("MEM_copy");
 extern "C" int func_003E6B10_6730(int, char *, int) __asm__("func_003E6B10");
 
 extern "C" unsigned char func_00256730(char *self, char *dst, int maxlen) {
@@ -771,7 +771,7 @@ extern "C" unsigned char func_00256730(char *self, char *dst, int maxlen) {
             if (buf[2] == 5) {
                 if (buf[3] != 0 && maxlen >= (int)buf[3]) {
                     unsigned char n = buf[3];
-                    func_003E6574_6730(dst, (char *)buf + 4, n);
+                    MEM_copy_6730(dst, (char *)buf + 4, n);
                     return buf[3];
                 }
             } else {
@@ -787,8 +787,8 @@ extern "C" unsigned char func_00256730(char *self, char *dst, int maxlen) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_002567E0);
 #ifdef SKIP_ASM
-extern "C" void func_003E6574(char *, int, int);
-extern "C" int func_003E6C80(int, void *, int);
+extern "C" void MEM_copy(char *, int, int);
+extern "C" int NetGameLinkSend(int, void *, int);
 
 extern "C" int func_002567E0(char *self, int a1, int len) {
     char buf[0x108];
@@ -798,8 +798,8 @@ extern "C" int func_002567E0(char *self, int a1, int len) {
     if (len > 0) {
         buf[2] = 5;
         buf[3] = len;
-        func_003E6574(buf + 4, a1, len);
-        return t < func_003E6C80(*(int *)(self + 0x1C), buf, 1);
+        MEM_copy(buf + 4, a1, len);
+        return t < NetGameLinkSend(*(int *)(self + 0x1C), buf, 1);
     }
     return 0;
 }
@@ -1033,7 +1033,7 @@ INCLUDE_ASM("seg/seg_156860", func_00256C78);
 void* cBE_getInterface_6C78(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int func_0014E2C0(void* iface);
 extern "C" void func_00257038_6C78(void* self, int mode) __asm__("func_00257038");
-extern "C" void func_003E6448_6C78(void* p, int c, int n) __asm__("func_003E6448");
+extern "C" void MEM_fill_6C78(void* p, int c, int n) __asm__("MEM_fill");
 extern "C" int func_003E7340();
 
 struct sGcQueue_6C78 {
@@ -1211,17 +1211,17 @@ extern "C" int func_00256C78(int vself, int port, int b)
         sGcQueue_6C78* q = &self->q[i];
         q->wr = 0;
         q->rd = 0;
-        func_003E6448_6C78(q->slots, 0, sizeof(q->slots));
+        MEM_fill_6C78(q->slots, 0, sizeof(q->slots));
     }
     self->q[4].wr = 0;
     self->q[4].rd = 0;
-    func_003E6448_6C78(self->q[4].slots, 0, sizeof(self->q[4].slots));
+    MEM_fill_6C78(self->q[4].slots, 0, sizeof(self->q[4].slots));
     self->unk_400 = 0;
     self->unk_404 = 0;
     self->unk_408 = -1;
     self->unk_40C = -1;
-    func_003E6448_6C78(self->unk_410, 0, sizeof(self->unk_410));
-    func_003E6448_6C78(self->unk_500, 0, sizeof(self->unk_500));
+    MEM_fill_6C78(self->unk_410, 0, sizeof(self->unk_410));
+    MEM_fill_6C78(self->unk_500, 0, sizeof(self->unk_500));
     self->unk_140 = func_003E7340();
     return (int)self;
 }
@@ -1696,7 +1696,7 @@ INCLUDE_ASM("seg/seg_156860", func_002579C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" char *cUIStateStack_getCurrentState_79C8(char *) __asm__("cUIStateStack_getCurrentState");
-extern "C" void func_0020AB50_79C8(int) __asm__("func_0020AB50");
+extern "C" void cOVStateManager_triggerOverlay_79C8(int) __asm__("cOVStateManager_triggerOverlay");
 extern void *D_004A28A8;
 extern int D_004A2A50;
 extern int D_004A2A54;
@@ -1711,7 +1711,7 @@ extern "C" void func_002579C8(char *self) {
             int n = *(int *)(self + 8) - 1;
             *(int *)(self + 8) = n;
             if (n <= 0) {
-                func_0020AB50_79C8(0x27);
+                cOVStateManager_triggerOverlay_79C8(0x27);
                 int idx = D_004A2A54 + 1;
                 D_005366E8[idx] = 0xD;
                 D_004A2A50 = D_00442924[0];
@@ -1804,7 +1804,7 @@ struct Conn_7BD8 {
 extern "C" void func_00257CD8(Conn_7BD8* c);
 extern "C" void func_002581B8(void *arg0, int *arg1);
 extern "C" void func_00258870(void *, int, int);
-extern "C" void func_003E6574_7BD8(void* dst, const void* src, int n) __asm__("func_003E6574");
+extern "C" void MEM_copy_7BD8(void* dst, const void* src, int n) __asm__("MEM_copy");
 
 // PORT: the unit declares this as (void*, int, int, int); dst is a pointer passed as int
 extern "C" int func_00257BD8(void* self, int ch, int dst, int unused)
@@ -1816,7 +1816,7 @@ extern "C" int func_00257BD8(void* self, int ch, int dst, int unused)
     if (q->rd != q->wr) {
         Packet_7BD8* p = q->slots[q->rd++ % 32];
         int len = p->size - 4;
-        func_003E6574_7BD8((void*)dst, p->data, len);
+        MEM_copy_7BD8((void*)dst, p->data, len);
         func_002581B8(c, (int*)p);
         if (ch == 0) {
             c->unk5C = 0;
@@ -1916,7 +1916,7 @@ struct Packet_7E98 {
 
 extern "C" int func_00255E00_7E98(int sys, int port, Packet_7E98* p, int size) __asm__("func_00255E00");
 extern "C" Packet_7E98* func_00258188_7E98(char* self) __asm__("func_00258188");
-extern "C" void func_003E6574_7E98(void* dst, const void* src, int n) __asm__("func_003E6574");
+extern "C" void MEM_copy_7E98(void* dst, const void* src, int n) __asm__("MEM_copy");
 extern "C" void func_00257DC0(char *self);
 extern int D_004A2EB8;
 
@@ -1935,13 +1935,13 @@ extern "C" int func_00257E98_impl(char* self, int type, const void* data, int le
     pkt.type = type;
     pkt.size = len + 4;
     pkt.flags = 0;
-    func_003E6574_7E98(pkt.data, data, len);
+    MEM_copy_7E98(pkt.data, data, len);
     if (*(int*)(self + 0x368) == *(int*)(self + 0x364)) {
         if (func_00255E00_7E98(D_004A2EB8, *(int*)(self + 0x6C), &pkt, pkt.size)) return 1;
     }
     {
         Packet_7E98* p = func_00258188_7E98(self);
-        func_003E6574_7E98(p, &pkt, pkt.size);
+        MEM_copy_7E98(p, &pkt, pkt.size);
         ((Conn_7E98*)self)->slots[(*(int*)(self + 0x364))++ % 32] = p;
     }
     return 1;
@@ -2248,7 +2248,7 @@ extern "C" void func_0014EA90(void* iface);
 extern "C" void func_0014F898();
 extern "C" void func_0014E2C8_8448(void* iface, int which, void* buf) __asm__("func_0014E2C8");
 extern "C" void func_0014E5C8_8448(void* iface, int which, void* buf) __asm__("func_0014E5C8");
-extern "C" void func_003E6448_8448(char* p, int c, int n) __asm__("func_003E6448");
+extern "C" void MEM_fill_8448(char* p, int c, int n) __asm__("MEM_fill");
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 extern "C" void* cBE_getBE();
 extern "C" int func_00147318(void* iface, int a1);
@@ -2282,14 +2282,14 @@ extern "C" void cGameComm_syncGame(char* self)
     *(void**)(self + 0x3EC) = operator_new_8448(*(unsigned int*)(self + 0x3F0), D_004805B8, 0x100, 0);
     func_0014E9F8(iface);
     if (ggHost_8448(D_00534B30) != 0) {
-        func_003E6448_8448(self + 0xF0, 0, 0x10);
+        MEM_fill_8448(self + 0xF0, 0, 0x10);
         strncpy(self + 0xF0, D_004805C8, 0xF);
         *(int*)(self + 0xEC) = *(int*)((char*)D_004A2EB8 + 0x2C);
         func_0014E2C8_8448(iface, 0, *(void**)(self + 0x3EC));
         func_0014E5C8_8448(iface, 0, *(void**)(self + 0x3EC));
     } else {
         func_0014F898();
-        func_003E6448_8448(self + 0x104, 0, 0x10);
+        MEM_fill_8448(self + 0x104, 0, 0x10);
         strncpy(self + 0x104, D_004805C8, 0xF);
         *(int*)(self + 0x100) = *(int*)((char*)D_004A2EB8 + 0x2C);
         func_0014E2C8_8448(iface, 1, *(void**)(self + 0x3EC));

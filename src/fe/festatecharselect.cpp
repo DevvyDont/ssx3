@@ -53,7 +53,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_0019E538(void* self, int a1);
-void* func_0039E4A0(void* self);
+void* cUIState_onDestroyScreen(void* self);
 
 extern "C" void func_00181238(void* self)
 {
@@ -62,7 +62,7 @@ extern "C" void func_00181238(void* self)
     if (mgr != 0 && D_00535C11[0] != 0) {
         func_0019E538(func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     }
-    func_0039E4A0(self);
+    cUIState_onDestroyScreen(self);
 }
 #endif
 
@@ -98,7 +98,7 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_00181EF0(void* self);
-extern "C" void func_0039E4C0(void* self, int a1);
+extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern void* D_004A28A8;
 extern signed char D_00440F68[];
 extern char D_004A1398[];
@@ -119,7 +119,7 @@ extern "C" void func_00181308(void* self, int a1)
     char* r = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)((char*)self + 0x44));
     *(int*)(r + 0xCCC) = 0;
     func_00181EF0(self);
-    func_0039E4C0(self, a1);
+    cUIState_onGainFocus(self, a1);
 }
 #endif
 
@@ -323,7 +323,7 @@ extern "C" void func_00181BD0(void* self, int index, signed char charID);
 extern "C" void func_001472C8(void* iface, int rider, int idx);
 extern "C" void func_00147448(void* iface, int rider, int id);
 extern "C" void func_001474A8(void* iface, int rider, int id);
-extern "C" void func_0039F400(void* stack, void* state);
+extern "C" void cUIStateStack_push(void* stack, void* state);
 extern void* D_004A28A8;
 extern signed char D_00440F68[];
 extern char D_0045D698[];
@@ -413,7 +413,7 @@ extern "C" void func_001817E8(sCharSel_17E8* self, sObj_17E8* widget, int event)
         func_001A1CB8(*(void**)self->engine, self->rider, mask);
         void* st = (*(cStateFactory_17E8**)self->engine)->onSelect(self, widget->id);
         if (st != 0)
-            func_0039F400(self->engine + 0x18, st);
+            cUIStateStack_push(self->engine + 0x18, st);
         func_0019E538(riderSlot_17E8(self), 0);
         self->dirty = 0;
         break;
@@ -421,7 +421,7 @@ extern "C" void func_001817E8(sCharSel_17E8* self, sObj_17E8* widget, int event)
     case 6: {
         void* st = (*(cStateFactory_17E8**)self->engine)->onBack(self, widget->id);
         if (st != 0) {
-            func_0039F400(self->engine + 0x18, st);
+            cUIStateStack_push(self->engine + 0x18, st);
             func_0019E538(riderSlot_17E8(self), 0);
             self->dirty = 0;
         }
@@ -463,7 +463,7 @@ extern "C" void func_001817E8(sCharSel_17E8* self, sObj_17E8* widget, int event)
         func_001472C8(iface, self->rider, self->player);
         refresh_17E8(iface);
         void* st = func_0018ECA0(cMemMan_alloc(0x280, D_0045D6A8, 0x100, 0), self->engine, 2, 1 << self->player);
-        func_0039F400(self->engine + 0x18, st);
+        cUIStateStack_push(self->engine + 0x18, st);
         char* top = *(char**)self->engine;
         if (top != 0)
             *(int*)(top + 0xC) = 9;
@@ -676,7 +676,7 @@ extern char D_0045D7B0[];
 extern char D_004A1408[];
 extern char* D_00440FA0[];
 extern char D_004C66B8[];
-extern "C" void func_0039B760(void* w, unsigned char n);
+extern "C" void cUIMenu_setScrollableMenu(void* w, unsigned char n);
 
 struct sCWVt_2460 { short delta; short index; void (*fn)(void*, int); };
 struct sCWVtP_2460 { short delta; short index; void (*fn)(void*, void*); };
@@ -720,7 +720,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetCreate(sCheat_2460* self, sCW_24
         self->f6C = w;
         w->id18 = 0;
         self->f6C->b0 = 0;
-        if (self->count >= 6) func_0039B760(self->f6C, self->count);
+        if (self->count >= 6) cUIMenu_setScrollableMenu(self->f6C, self->count);
         return;
     }
     if (h == GetHashValue32(D_0045D790)) {

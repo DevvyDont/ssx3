@@ -4,11 +4,11 @@ INCLUDE_ASM("fe/ovstatelodge2", cFEStateLodge_onCreateScreen);
 
 INCLUDE_ASM("fe/ovstatelodge2", cFEStateLodge_onWidgetCreate);
 
-INCLUDE_ASM("fe/ovstatelodge2", func_001F3A38);
+INCLUDE_ASM("fe/ovstatelodge2", cFEStateLodge_onWidgetEvent);
 
-INCLUDE_ASM("fe/ovstatelodge2", func_001F3CC8);
+INCLUDE_ASM("fe/ovstatelodge2", cFEStateLodge_onWidgetMenu);
 
-INCLUDE_ASM("fe/ovstatelodge2", func_001F3CF0);
+INCLUDE_ASM("fe/ovstatelodge2", cFEStateLodge_onPopupEvent);
 
 INCLUDE_ASM("fe/ovstatelodge2", func_001F3FF8);
 

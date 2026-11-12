@@ -8,10 +8,10 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int USTR_length(unsigned short* s);
 void cMemMan_free(void* p);
-extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, int n);
-extern "C" void func_003A0E90(void* text, void* p);
-// func_00198AF0 formats a money amount; the unit declares its parameter as void*.
-extern "C" const char* func_00198AF0_amount(int amount) __asm__("func_00198AF0");
+extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
+extern "C" void cUIText_setUnicodeString(void* text, void* p);
+// getDollarString formats a money amount; the unit declares its parameter as void*.
+extern "C" const char* getDollarString_amount(int amount) __asm__("getDollarString");
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char* D_004A28A8;
 extern char D_00460470[];
@@ -124,9 +124,9 @@ extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, sWidget_
         unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(D_004605D8));
         int len = USTR_length(fmt) + 5;
         unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, D_00460470, 0x100, 0);
-        func_002C26D0(buf, fmt, countBits_6F98(self->done));
+        sprintf1(buf, fmt, countBits_6F98(self->done));
         self->w1E4 = w;
-        func_003A0E90(w, buf);
+        cUIText_setUnicodeString(w, buf);
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -152,7 +152,7 @@ extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, sWidget_
         }
     } else if (hash == GetHashValue32(D_00460610)) {
         self->w1E0 = w;
-        cUIText_setAsciiString((cUIText*)self->w1E0, func_00198AF0_amount(self->count));
+        cUIText_setAsciiString((cUIText*)self->w1E0, getDollarString_amount(self->count));
         if (self->f16C == 0) {
             show_6F98(w, 0);
         }
@@ -211,9 +211,9 @@ INCLUDE_ASM("fe/messagecenter", func_00197500);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00197CA0(void* self);
-extern "C" void func_00198118(void* self);
-extern "C" void func_00198988_7500(void* self, int idx) __asm__("func_00198988");
+extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(void* self);
+extern "C" void cFEStateRequestLine_updatePlayListCounter(void* self);
+extern "C" void cFEStateRequestLine_showBuyPopup_7500(void* self, int idx) __asm__("cFEStateRequestLine_showBuyPopup");
 extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* self, int idx);
 extern "C" void cFEStateRequestLine_updateHelpText(void* self, int idx);
 extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int idx);
@@ -225,8 +225,8 @@ extern "C" void* func_0028B180();
 extern "C" void func_0028C2D0(void* p, unsigned long m);
 extern "C" void func_0039F190(void* list, int a);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00195FF0(void* mem, void* engine, int a, int b);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* engine, int a, int b);
+extern "C" void cUIStateStack_push(void* list, void* item);
 int func_00198AE8(void* self, int idx) __asm__("func_00198AE8__FPv");
 extern char* D_004A28A8;
 extern const char D_00460650[];
@@ -291,7 +291,7 @@ extern "C" void func_00197500(void* p, void* item, unsigned int msg)
         if (!isSet_7500(self->sel, idx)) {
             if (self->f16C != 0) {
                 if (self->limit >= func_00198AE8(self, idx) || countSel_7500(self) < 6) {
-                    func_00198988_7500(self, idx);
+                    cFEStateRequestLine_showBuyPopup_7500(self, idx);
                 }
             }
         } else {
@@ -303,8 +303,8 @@ extern "C" void func_00197500(void* p, void* item, unsigned int msg)
                 } else {
                     self->done = done | ((unsigned long)1 << idx);
                 }
-                func_00197CA0(self);
-                func_00198118(self);
+                cFEStateRequestLine_updatePlayListCheckMarks(self);
+                cFEStateRequestLine_updatePlayListCounter(self);
             }
         }
         cFEStateRequestLine_updateButtonsText(self, idx);
@@ -324,9 +324,9 @@ extern "C" void func_00197500(void* p, void* item, unsigned int msg)
         if (*(int*)(D_004A28A8 + 0x84) != 0) {
             func_0039F190(self->engine + 0x18, 1);
         } else {
-            void* r = func_00195FF0(cMemMan_alloc(0x80, D_00460650, 0, 0), self->engine, self->player, self->f16C);
+            void* r = cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, D_00460650, 0, 0), self->engine, self->player, self->f16C);
             if (r != 0) {
-                func_0039F400(self->engine + 0x18, r);
+                cUIStateStack_push(self->engine + 0x18, r);
             }
         }
         break;
@@ -352,7 +352,7 @@ extern char* D_004A28A8;
 
 extern "C" void* func_0028B180();
 
-extern "C" void func_00197B88_77D0(void* self) __asm__("func_00197B88");
+extern "C" void cFEStateRequestLine_updatePlayList_77D0(void* self) __asm__("cFEStateRequestLine_updatePlayList");
 
 extern "C" void func_00197E70_77D0(void* self) __asm__("func_00197E70");
 extern "C" void func_0028CF98(void* p, int a, int b, long c, int d);
@@ -407,7 +407,7 @@ extern "C" int func_001977D0(void* p, void* item, unsigned int msg, int k)
     }
     case 4:
         self->top = k;
-        func_00197B88_77D0(self);
+        cFEStateRequestLine_updatePlayList_77D0(self);
         break;
     }
     return 0x101;
@@ -418,10 +418,10 @@ extern "C" int func_001977D0(void* p, void* item, unsigned int msg, int k)
 INCLUDE_ASM("fe/messagecenter", func_001979D8);
 #ifdef SKIP_ASM
 extern "C" void func_001988D8(void* self, int idx);
-extern "C" void func_00197B88(void* self);
+extern "C" void cFEStateRequestLine_updatePlayList(void* self);
 extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* self, int a1);
-extern "C" void func_001985B0(void* self);
-extern "C" void func_001985F0(void* self);
+extern "C" void cFEStateRequestLine_updateCash(void* self);
+extern "C" void cFEStateRequestLine_updateFreeSongMarkers(void* self);
 extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int a1);
 extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
 
@@ -451,10 +451,10 @@ extern "C" void func_001979D8(sMsgCenter_979D8* self, void* item, int msg)
         if (*(int*)((char*)item + 0xC) == 7 && *(int*)((char*)item + 0x6C) != 0) {
             int song = self->list[self->top + *(int*)(*(char**)(self->menu + 0xA0) + 0x18)];
             func_001988D8(self, song);
-            func_00197B88(self);
+            cFEStateRequestLine_updatePlayList(self);
             cFEStateRequestLine_updateHilightedSongInfo(self, song);
-            func_001985B0(self);
-            func_001985F0(self);
+            cFEStateRequestLine_updateCash(self);
+            cFEStateRequestLine_updateFreeSongMarkers(self);
             cFEStateRequestLine_updateButtonsText(self, song);
             cFEStateRequestLine_updateHelpText(self, song);
         }
@@ -495,28 +495,28 @@ extern "C" void func_00197AD8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197B88);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updatePlayList);
 #ifdef SKIP_ASM
-extern "C" void func_00197BC8(void* self);
-extern "C" void func_00197CA0(void* self);
-extern "C" void func_00197DB8(void* self);
-extern "C" void func_00198118(void* self);
+extern "C" void cFEStateRequestLine_updatePlayListSongTitles(void* self);
+extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(void* self);
+extern "C" void cFEStateRequestLine_updatePlayListArrows(void* self);
+extern "C" void cFEStateRequestLine_updatePlayListCounter(void* self);
 
-extern "C" void func_00197B88(void* self)
+extern "C" void cFEStateRequestLine_updatePlayList(void* self)
 {
-    func_00197BC8(self);
-    func_00197CA0(self);
-    func_00197DB8(self);
-    func_00198118(self);
+    cFEStateRequestLine_updatePlayListSongTitles(self);
+    cFEStateRequestLine_updatePlayListCheckMarks(self);
+    cFEStateRequestLine_updatePlayListArrows(self);
+    cFEStateRequestLine_updatePlayListCounter(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197BC8);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updatePlayListSongTitles);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" void* func_00198A88(void* self, int i);
+extern "C" void* cFEStateRequestLine_getSongTitle(void* self, int i);
 
 class cMsgWidget_97BC8 {
 public:
@@ -541,7 +541,7 @@ struct sMsgCenter_97BC8 {
     cMsgWidget_97BC8* texts[8]; // 0x174
 };
 
-extern "C" void func_00197BC8(void* self)
+extern "C" void cFEStateRequestLine_updatePlayListSongTitles(void* self)
 {
     sMsgCenter_97BC8* s = (sMsgCenter_97BC8*)self;
     int i;
@@ -550,7 +550,7 @@ extern "C" void func_00197BC8(void* self)
         if (idx < s->count) {
             int id = s->list[idx];
             s->texts[i]->show(1);
-            cUIText_setAsciiString((cUIText*)s->texts[i], (const char*)func_00198A88(self, id));
+            cUIText_setAsciiString((cUIText*)s->texts[i], (const char*)cFEStateRequestLine_getSongTitle(self, id));
         } else {
             s->texts[i]->show(0);
         }
@@ -559,7 +559,7 @@ extern "C" void func_00197BC8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197CA0);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updatePlayListCheckMarks);
 #ifdef SKIP_ASM
 class cMsgWidget_97CA0 {
 public:
@@ -612,7 +612,7 @@ static inline void setVisible_97CA0(cMsgWidget_97CA0* w, int v)
     w->show(v);
 }
 
-extern "C" void func_00197CA0(void* self)
+extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(void* self)
 {
     sMsgCenter_97CA0* s = (sMsgCenter_97CA0*)self;
     int i;
@@ -635,7 +635,7 @@ extern "C" void func_00197CA0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197DB8);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updatePlayListArrows);
 #ifdef SKIP_ASM
 class cMsgWidget_97DB8 {
 public:
@@ -651,7 +651,7 @@ public:
     virtual void show(int on);
 };
 
-extern "C" void func_00197DB8(void* self)
+extern "C" void cFEStateRequestLine_updatePlayListArrows(void* self)
 {
     if (*(int*)((char*)self + 0x150) == 0) {
         (*(cMsgWidget_97DB8**)((char*)self + 0x1EC))->show(0);
@@ -673,8 +673,8 @@ int GetHashValue32(char* str);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" int strlen(const char* s);
 void cMemMan_free(void* p);
-extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, int n);
-extern "C" void func_003A0E90(void* text, void* p);
+extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
+extern "C" void cUIText_setUnicodeString(void* text, void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* func_0028B180();
 extern "C" void* func_002B40F0(void* self, int i);
@@ -728,8 +728,8 @@ extern "C" void func_00197E70(void* vself)
             int len = USTR_length(fmt) + strlen(name) + 1;
             unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, D_00460470, 0x100, 0);
             // PORT: the format argument is a string pointer passed through an int parameter
-            func_002C26D0(buf, fmt, (int)name);
-            func_003A0E90(self->title, buf);
+            sprintf1(buf, fmt, (int)name);
+            cUIText_setUnicodeString(self->title, buf);
             if (buf != 0) {
                 cMemMan_free(buf);
             }
@@ -744,8 +744,8 @@ extern "C" void func_00197E70(void* vself)
             int len = USTR_length(fmt) + strlen(artist) + 1;
             unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, D_00460470, 0x100, 0);
             // PORT: the format argument is a string pointer passed through an int parameter
-            func_002C26D0(buf, fmt, (int)artist);
-            func_003A0E90(self->artist, buf);
+            sprintf1(buf, fmt, (int)artist);
+            cUIText_setUnicodeString(self->artist, buf);
             if (buf != 0) {
                 cMemMan_free(buf);
             }
@@ -760,13 +760,13 @@ extern "C" void func_00197E70(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198118);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updatePlayListCounter);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int USTR_length(unsigned short* s);
 void cMemMan_free(void* p);
-extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, int n);
-extern "C" void func_003A0E90(void* text, void* p);
+extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
+extern "C" void cUIText_setUnicodeString(void* text, void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_004605D8[];
 extern char D_00460688[];
@@ -786,7 +786,7 @@ struct sMsgCenter_00198118 {
     void* text;     // 0x1E4
 };
 
-extern "C" void func_00198118(void* p)
+extern "C" void cFEStateRequestLine_updatePlayListCounter(void* p)
 {
     sMsgCenter_00198118* self = (sMsgCenter_00198118*)p;
     char* db = *(char**)(D_004A28A8 + 0x8C);
@@ -798,8 +798,8 @@ extern "C" void func_00198118(void* p)
     for (j = 0; j < 64; j++) {
         n += (int)((self->mask >> j) & 1);
     }
-    func_002C26D0(buf, fmt, n);
-    func_003A0E90(self->text, buf);
+    sprintf1(buf, fmt, n);
+    cUIText_setUnicodeString(self->text, buf);
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -980,22 +980,22 @@ extern "C" void cFEStateRequestLine_updateButtonsText(void* p, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_001985B0);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateCash);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" const char* func_00198AF0(void* a0);
+extern "C" const char* getDollarString(void* a0);
 
-extern "C" void func_001985B0(void* self)
+extern "C" void cFEStateRequestLine_updateCash(void* self)
 {
     if (*(cUIText**)((char*)self + 0x1E0) != 0) {
-        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x1E0), func_00198AF0(*(void**)((char*)self + 0x168)));
+        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x1E0), getDollarString(*(void**)((char*)self + 0x168)));
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_001985F0);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateFreeSongMarkers);
 #ifdef SKIP_ASM
 class cMsgWidget_985F0 {
 public:
@@ -1021,7 +1021,7 @@ struct sMsgCenter_985F0 {
     cMsgWidget_985F0* icons[6]; // 0x1BC
 };
 
-extern "C" void func_001985F0(void* self)
+extern "C" void cFEStateRequestLine_updateFreeSongMarkers(void* self)
 {
     sMsgCenter_985F0* s = (sMsgCenter_985F0*)self;
     int n = 0;
@@ -1049,13 +1049,13 @@ int GetHashValue32(char* str);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" int strlen(const char* s);
 void cMemMan_free(void* p);
-extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, int n);
-extern "C" void func_003A0E90(void* text, void* p);
+extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
+extern "C" void cUIText_setUnicodeString(void* text, void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* func_00198AB8(void* self, int i);
 // PORT: func_00198AE8__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
 int func_00198AE8_2(void* self, int idx) __asm__("func_00198AE8__FPv");
-extern "C" const char* func_00198AF0(void* a0);
+extern "C" const char* getDollarString(void* a0);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
@@ -1108,9 +1108,9 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* vself, int idx
         int len = USTR_length(fmt) + strlen(name) + 1;
         unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, D_00460688, 0x100, 0);
         // PORT: the format argument is a string pointer passed through an int parameter
-        func_002C26D0(buf, fmt, (int)name);
+        sprintf1(buf, fmt, (int)name);
         self->title->show(1);
-        func_003A0E90(self->title, buf);
+        cUIText_setUnicodeString(self->title, buf);
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -1134,7 +1134,7 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* vself, int idx
             self->icon->show(1);
         }
     } else {
-        cUIText_setAsciiString(self->info, func_00198AF0((void*)func_00198AE8_2(self, idx)));
+        cUIText_setAsciiString(self->info, getDollarString((void*)func_00198AE8_2(self, idx)));
         if (self->enabled) {
             self->icon->show(1);
         }
@@ -1179,16 +1179,16 @@ extern "C" void func_001988D8(void* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198988);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_showBuyPopup);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001CABA8(void* self, void* engine, void* owner, signed char idx);
-extern "C" void* func_00198A88(void* self, int i);
+extern "C" void* cFEStateRequestLine_getSongTitle(void* self, int i);
 // PORT: func_00198AE8__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
 int func_00198AE8_2(void* self, int idx) __asm__("func_00198AE8__FPv");
 extern "C" void cBuyPopupInfo_initBuySong(int* self, int a1, int a2, int a3);
 extern "C" void cBuyPopupInfo_initBuySongByCredit(void* self, int song, int credit);
-extern "C" void func_0039F290(void* stack, void* state);
+extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern char D_00460790[];
 
 // PORT: 64-bit `long` mask (8 bytes on EE, 4 on Windows); use uint64_t off-PS2.
@@ -1202,31 +1202,31 @@ struct sMsgCenter_98988 {
     int price;          // 0x168
 };
 
-extern "C" void func_00198988(sMsgCenter_98988* self, int idx)
+extern "C" void cFEStateRequestLine_showBuyPopup(sMsgCenter_98988* self, int idx)
 {
     char* popup = (char*)func_001CABA8(cMemMan_alloc(0x70, D_00460790, 0, 0), self->engine, self, self->rider);
     int n = 0;
     for (int i = 0; i < 64; i++) {
         n += (int)((self->mask >> i) & 1);
     }
-    int song = (int)func_00198A88(self, idx);
+    int song = (int)cFEStateRequestLine_getSongTitle(self, idx);
     if (n >= 6) {
         int cost = func_00198AE8_2(self, idx);
         cBuyPopupInfo_initBuySong((int*)(popup + 0x48), song, cost, self->price);
     } else {
         cBuyPopupInfo_initBuySongByCredit(popup + 0x48, song, 6 - n);
     }
-    func_0039F290(self->engine + 0x18, popup);
+    cUIStateStack_pushPopup(self->engine + 0x18, popup);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198A88);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongTitle);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void* func_002B40F0(void* self, int i);
 
-extern "C" void* func_00198A88(void* self, int i)
+extern "C" void* cFEStateRequestLine_getSongTitle(void* self, int i)
 {
     return func_002B40F0((char*)func_0028B180() + 0x118, i);
 }
@@ -1254,7 +1254,7 @@ int func_00198AE8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198AF0);
+INCLUDE_ASM("fe/messagecenter", getDollarString);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
@@ -1277,7 +1277,7 @@ struct cBEOptionInterface_8AF0 {
 };
 
 // Formats a money amount with the currency sign and thousands separator chosen in the options.
-extern "C" const char* func_00198AF0(void* amount_)
+extern "C" const char* getDollarString(void* amount_)
 {
     // PORT: callers in this unit declare the amount parameter as void*.
     int amount = (int)amount_;

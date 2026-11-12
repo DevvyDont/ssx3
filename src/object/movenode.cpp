@@ -45,27 +45,27 @@ void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003553C0);
+INCLUDE_ASM("object/movenode", cMoveNode__cMoveNode);
 #ifdef SKIP_ASM
 extern char D_00491028[];
-extern "C" void func_003567E0(void* self);
-extern "C" void func_00352AE8(void* block, int flags);
-extern "C" void func_0034FBF0(void* self, int flags);
+extern "C" void cMoveNode_restoreOverlapSystem(void* self);
+extern "C" void tModifierBlock__tModifierBlock(void* block, int flags);
+extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
-extern "C" void func_003553C0(void* self, int flags)
+extern "C" void cMoveNode__cMoveNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_00491028;
-    func_003567E0(self);
+    cMoveNode_restoreOverlapSystem(self);
     void* block = *(void**)((char*)self + 0x1C);
     if (block != 0) {
-        func_00352AE8(block, 3);
+        tModifierBlock__tModifierBlock(block, 3);
     }
-    func_0034FBF0(self, flags);
+    cInstanceNode__cInstanceNode(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355420);
+INCLUDE_ASM("object/movenode", cMoveNode_shouldRebound);
 #ifdef SKIP_ASM
 struct sMoveNodeVEntryI {
     short delta;
@@ -73,7 +73,7 @@ struct sMoveNodeVEntryI {
     int (*fn)(void*);
 };
 
-extern "C" int func_00355420(void* self)
+extern "C" int cMoveNode_shouldRebound(void* self)
 {
     void* block = *(void**)((char*)self + 0x1C);
     if (block == 0) {
@@ -109,7 +109,7 @@ void cMoveNode_addModifierBlock(cMoveNode* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003554B0);
+INCLUDE_ASM("object/movenode", cMoveNode_addTransformModifier);
 #ifdef SKIP_ASM
 struct sMoveNodeVEntryV54B0 {
     short delta;
@@ -119,7 +119,7 @@ struct sMoveNodeVEntryV54B0 {
 
 extern "C" void func_003530D0(void* block);
 
-extern "C" void func_003554B0(cMoveNode* self, void* mod)
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod)
 {
     sMoveNodeVEntryV54B0* e = &(*(sMoveNodeVEntryV54B0**)((char*)self + 0xC))[49];
     e->fn((char*)self + e->delta);
@@ -200,26 +200,26 @@ void cMoveNode_addEffectModifier(cMoveNode* self, void* effect)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003556A8);
+INCLUDE_ASM("object/movenode", cMoveNode_addRailModifier);
 #ifdef SKIP_ASM
-extern "C" void func_0035B670(void* list, void* item);
+extern "C" void cRailLink_add(void* list, void* item);
 
-extern "C" void func_003556A8(cMoveNode* self, void* item)
+extern "C" void cMoveNode_addRailModifier(cMoveNode* self, void* item)
 {
     if (self->field_0x1C == 0) {
         cMoveNode_addModifierBlock(self);
     }
-    func_0035B670((char*)self->field_0x1C + 0x1C, item);
+    cRailLink_add((char*)self->field_0x1C + 0x1C, item);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003556F8);
+INCLUDE_ASM("object/movenode", cMoveNode_preUpdateModifierBlock);
 #ifdef SKIP_ASM
 extern "C" void func_00352C70(void* block);
 extern "C" int func_00352E50(void* block);
 
-extern "C" void func_003556F8(cMoveNode* self)
+extern "C" void cMoveNode_preUpdateModifierBlock(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
         func_00352C70(self->field_0x1C);
@@ -231,20 +231,20 @@ extern "C" void func_003556F8(cMoveNode* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355748);
+INCLUDE_ASM("object/movenode", cMoveNode_postUpdateModifierBlock);
 #ifdef SKIP_ASM
-extern "C" void func_00352D20(void*);
+extern "C" void tModifierBlock_postUpdate(void*);
 
-extern "C" void func_00355748(cMoveNode* self)
+extern "C" void cMoveNode_postUpdateModifierBlock(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
-        func_00352D20(self->field_0x1C);
+        tModifierBlock_postUpdate(self->field_0x1C);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355770);
+INCLUDE_ASM("object/movenode", cMoveNode_onCollide);
 #ifdef SKIP_ASM
 extern char* D_004A5B64;
 extern "C" int func_002D1B30(int);
@@ -269,7 +269,7 @@ struct cMN_355770_VEnt {
     int (*fn)(void*, int);
 };
 
-extern "C" void func_00355770(cMoveNode* self, int a1, int a2, int a3)
+extern "C" void cMoveNode_onCollide(cMoveNode* self, int a1, int a2, int a3)
 {
     cMN_355770_Obj** p = (cMN_355770_Obj**)self->field_0x1C;
     if (p != 0) {
@@ -291,11 +291,11 @@ extern "C" void func_00355770(cMoveNode* self, int a1, int a2, int a3)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355858);
+INCLUDE_ASM("object/movenode", cMoveNode_setDebounce);
 #ifdef SKIP_ASM
 extern char* D_004A5B64;
 
-extern "C" void func_00355858(void* self, float secs)
+extern "C" void cMoveNode_setDebounce(void* self, float secs)
 {
     *(int*)((char*)self + 0x20) = (int)((float)*(int*)(D_004A5B64 + 0x10) * secs);
 }
@@ -334,11 +334,11 @@ INCLUDE_ASM("object/movenode", func_003558B8);
 struct sMoveQuad;
 extern char D_0048E8F0[];
 extern "C" void* func_00356EB8(void* self, sMoveQuad* pos);
-extern "C" void func_003554B0(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_003558B8(cMoveNode* self, sMoveQuad* pos)
 {
-    func_003554B0(self, func_00356EB8(cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), pos));
+    cMoveNode_addTransformModifier(self, func_00356EB8(cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), pos));
 }
 #endif
 
@@ -347,11 +347,11 @@ INCLUDE_ASM("object/movenode", func_00355918);
 #ifdef SKIP_ASM
 extern char D_0048E8F0[];
 extern "C" void* func_00356F10(void* mem, void* desc);
-extern "C" void func_003554B0(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_00355918(cMoveNode* self, void* desc)
 {
-    func_003554B0(self, func_00356F10(cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), desc));
+    cMoveNode_addTransformModifier(self, func_00356F10(cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), desc));
 }
 #endif
 
@@ -361,11 +361,11 @@ INCLUDE_ASM("object/movenode", func_00355978);
 struct sMoveQuad;
 extern char D_0048E8E0[];
 extern "C" void* func_00357038(void* self, void* a1, void* a2, sMoveQuad* pos);
-extern "C" void func_003554B0(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_00355978(cMoveNode* self, void* a1, void* a2, sMoveQuad* pos)
 {
-    func_003554B0(self, func_00357038(cMemMan_alloc(0xB0, D_0048E8E0, 0x20000000, 0), a1, a2, pos));
+    cMoveNode_addTransformModifier(self, func_00357038(cMemMan_alloc(0xB0, D_0048E8E0, 0x20000000, 0), a1, a2, pos));
 }
 #endif
 
@@ -374,11 +374,11 @@ INCLUDE_ASM("object/movenode", func_003559F8);
 #ifdef SKIP_ASM
 extern char D_0048E918[];
 extern "C" void* func_003572E0(void* self, void* owner, void* a2, float f0, float f1);
-extern "C" void func_003554B0(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_003559F8(cMoveNode* self, void* a1, float f0, float f1)
 {
-    func_003554B0(self, func_003572E0(cMemMan_alloc(0xB0, D_0048E918, 0x20000000, 0),
+    cMoveNode_addTransformModifier(self, func_003572E0(cMemMan_alloc(0xB0, D_0048E918, 0x20000000, 0),
                                       *(void**)((char*)self + 0x18), a1, f0, f1));
 }
 #endif
@@ -389,26 +389,26 @@ INCLUDE_ASM("object/movenode", func_00355A78);
 extern int D_004A3AC4;
 extern char D_0048E928[];
 extern "C" void* func_00357750(void* self, void* src);
-extern "C" void func_003554B0(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_00355A78(cMoveNode* self)
 {
     if (D_004A3AC4 == 0) {
-        func_003554B0(self, func_00357750(cMemMan_alloc(0x90, D_0048E928, 0x20000000, 0), *(void**)((char*)self + 0x18)));
+        cMoveNode_addTransformModifier(self, func_00357750(cMemMan_alloc(0x90, D_0048E928, 0x20000000, 0), *(void**)((char*)self + 0x18)));
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355AD0);
+INCLUDE_ASM("object/movenode", cMoveNode_addSpline1);
 #ifdef SKIP_ASM
 extern char D_0048E8D0[];
-extern "C" void* func_00359460(void* mem, void* desc);
-extern "C" void func_003554B0(cMoveNode* self, void* mod);
+extern "C" void* cSplineModifier_cSplineModifier1(void* mem, void* desc);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
-extern "C" void func_00355AD0(cMoveNode* self, void* desc)
+extern "C" void cMoveNode_addSpline1(cMoveNode* self, void* desc)
 {
-    func_003554B0(self, func_00359460(cMemMan_alloc(0xF0, D_0048E8D0, 0x20000000, 0), desc));
+    cMoveNode_addTransformModifier(self, cSplineModifier_cSplineModifier1(cMemMan_alloc(0xF0, D_0048E8D0, 0x20000000, 0), desc));
 }
 #endif
 
@@ -416,12 +416,12 @@ extern "C" void func_00355AD0(cMoveNode* self, void* desc)
 INCLUDE_ASM("object/movenode", cMoveNode_addSpline);
 #ifdef SKIP_ASM
 extern char D_0048E9E8[];
-extern "C" void* func_00359F88(void* mem, void* desc, void* owner);
-extern "C" void func_003554B0(cMoveNode* self, void* mod);
+extern "C" void* cMultiSplineModifier_cMultiSplineModifier(void* mem, void* desc, void* owner);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void cMoveNode_addSpline(cMoveNode* self, void* desc)
 {
-    func_003554B0(self, func_00359F88(cMemMan_alloc(0x58, D_0048E9E8, 0x20000000, 0), desc,
+    cMoveNode_addTransformModifier(self, cMultiSplineModifier_cMultiSplineModifier(cMemMan_alloc(0x58, D_0048E9E8, 0x20000000, 0), desc,
                                       *(void**)((char*)self + 0x18)));
 }
 #endif
@@ -497,33 +497,33 @@ extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int in
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355DB8);
+INCLUDE_ASM("object/movenode", cMoveNode_addRoller);
 #ifdef SKIP_ASM
 extern char D_0048E908[];
-extern "C" void* func_0035DA70(void* mem, void* a1, void* a2, void* a3);
-extern "C" void func_003554B0(cMoveNode* self, void* mod);
+extern "C" void* cRollerModifier_cRollerModifier(void* mem, void* a1, void* a2, void* a3);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
-extern "C" void func_00355DB8(cMoveNode* self, void* a1, void* a2, void* a3)
+extern "C" void cMoveNode_addRoller(cMoveNode* self, void* a1, void* a2, void* a3)
 {
-    func_003554B0(self, func_0035DA70(cMemMan_alloc(0x2D0, D_0048E908, 0x20000000, 0), a1, a2, a3));
+    cMoveNode_addTransformModifier(self, cRollerModifier_cRollerModifier(cMemMan_alloc(0x2D0, D_0048E908, 0x20000000, 0), a1, a2, a3));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355E38);
+INCLUDE_ASM("object/movenode", cMoveNode_addRail);
 #ifdef SKIP_ASM
 extern char D_0048E9B8[];
-extern "C" int func_00353418(void* self, int id);
-extern "C" void* func_0035B708(void* mem, void* desc, void* owner);
-extern "C" void func_003556A8(cMoveNode* self, void* item);
+extern "C" int tModifierBlock_findRail(void* self, int id);
+extern "C" void* cRailModifier_cRailModifier(void* mem, void* desc, void* owner);
+extern "C" void cMoveNode_addRailModifier(cMoveNode* self, void* item);
 
-extern "C" void func_00355E38(cMoveNode* self, void* desc)
+extern "C" void cMoveNode_addRail(cMoveNode* self, void* desc)
 {
     void* block = self->field_0x1C;
-    if (block != 0 && func_00353418(block, *(int*)((char*)desc + 0x4)) != 0) {
+    if (block != 0 && tModifierBlock_findRail(block, *(int*)((char*)desc + 0x4)) != 0) {
         return;
     }
-    func_003556A8(self, func_0035B708(cMemMan_alloc(0x90, D_0048E9B8, 0x20000000, 0), desc,
+    cMoveNode_addRailModifier(self, cRailModifier_cRailModifier(cMemMan_alloc(0x90, D_0048E9B8, 0x20000000, 0), desc,
                                       *(void**)((char*)self + 0x18)));
 }
 #endif
@@ -636,7 +636,7 @@ extern "C" void func_00356020(cMoveNode* self, cMoveNode* other)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356078);
+INCLUDE_ASM("object/movenode", cMoveNode_getRootTransform);
 #ifdef SKIP_ASM
 struct sMnVEntryP_6078 {
     short delta;
@@ -649,7 +649,7 @@ static inline void* VCall18_6078(char*& o)
     sMnVEntryP_6078* vt = *(sMnVEntryP_6078**)o;
     return vt[18].fn(o + vt[18].delta);
 }
-extern "C" void* func_00356078(char* self)
+extern "C" void* cMoveNode_getRootTransform(char* self)
 {
     char** h = *(char***)(self + 0x1C);
     char* o = h ? *h : 0;
@@ -660,7 +660,7 @@ extern "C" void* func_00356078(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003560C0);
+INCLUDE_ASM("object/movenode", cMoveNode_getInstAnimMats);
 #ifdef SKIP_ASM
 struct sMnVEntryI2_60C0 {
     short delta;
@@ -672,14 +672,14 @@ struct sMnVEntryI_60C0 {
     short index;
     int (*fn)(void*);
 };
-// Taking the object by reference matches the target's register allocation (see func_00356078).
+// Taking the object by reference matches the target's register allocation (see cMoveNode_getRootTransform).
 static inline int VCall23_60C0(char*& o, int a)
 {
     sMnVEntryI2_60C0* vt = *(sMnVEntryI2_60C0**)o;
     return vt[23].fn(o + vt[23].delta, a);
 }
 // Asks the modifier object (slot 23, passing a through), then falls back to the node's own slot 27.
-extern "C" int func_003560C0(char* self, int a)
+extern "C" int cMoveNode_getInstAnimMats(char* self, int a)
 {
     char** h = *(char***)(self + 0x1C);
     char* o = h ? *h : 0;
@@ -693,21 +693,21 @@ extern "C" int func_003560C0(char* self, int a)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356128);
+INCLUDE_ASM("object/movenode", cMoveNode_getRootTransform1);
 #ifdef SKIP_ASM
 struct sMnVEntryP_6128 {
     short delta;
     short index;
     void* (*fn)(void*);
 };
-// Taking the object by reference matches the target's register allocation (see func_00356078).
+// Taking the object by reference matches the target's register allocation (see cMoveNode_getRootTransform).
 static inline void* VCall_6128(char*& o, int i)
 {
     sMnVEntryP_6128* vt = *(sMnVEntryP_6128**)o;
     return vt[i].fn(o + vt[i].delta);
 }
 // Returns the modifier object's slot-19 value, else its slot-18 value; without one, the node's object position.
-extern "C" void* func_00356128(char* self)
+extern "C" void* cMoveNode_getRootTransform1(char* self)
 {
     char** h = *(char***)(self + 0x1C);
     char* o = h ? *h : 0;
@@ -721,11 +721,11 @@ extern "C" void* func_00356128(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356198);
+INCLUDE_ASM("object/movenode", cMoveNode_update);
 #ifdef SKIP_ASM
-int func_0034FCE0(void* self);
-extern "C" int func_00352ED0(void* block);
-extern "C" void func_00352F08(void* block);
+int cInstanceNode_runOnLoseFocusScript(void* self);
+extern "C" int tModifierBlock_isComplete(void* block);
+extern "C" void tModifierBlock_clearComplete(void* block);
 
 struct sMnVEntryI_356198 {
     short delta;
@@ -743,7 +743,7 @@ struct sMnVEntryVi_356198 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_00356198(void* selfv)
+extern "C" void cMoveNode_update(void* selfv)
 {
     cMoveNode* self = (cMoveNode*)selfv;
     char* s = (char*)selfv;
@@ -753,18 +753,18 @@ extern "C" void func_00356198(void* selfv)
     sMnVEntryI_356198* vi = *(sMnVEntryI_356198**)(s + 0xC);
     if (vi[20].fn(s + vi[20].delta) != 0) {
         sMnVEntryI_356198* vi2 = *(sMnVEntryI_356198**)(s + 0xC);
-        if (vi2[23].fn(s + vi2[23].delta) <= 0 && func_0034FCE0(self) == 0) {
+        if (vi2[23].fn(s + vi2[23].delta) <= 0 && cInstanceNode_runOnLoseFocusScript(self) == 0) {
             sMnVEntryV_356198* vv = *(sMnVEntryV_356198**)(s + 0xC);
             vv[35].fn(s + vv[35].delta);
             return;
         }
     }
-    func_003556F8(self);
+    cMoveNode_preUpdateModifierBlock(self);
     sMnVEntryI_356198* vi3 = *(sMnVEntryI_356198**)(s + 0xC);
     if (vi3[15].fn(s + vi3[15].delta) != 0) {
-        func_00355748(self);
-        if (self->field_0x1C != 0 && func_00352ED0(self->field_0x1C) != 0) {
-            func_00352F08(self->field_0x1C);
+        cMoveNode_postUpdateModifierBlock(self);
+        if (self->field_0x1C != 0 && tModifierBlock_isComplete(self->field_0x1C) != 0) {
+            tModifierBlock_clearComplete(self->field_0x1C);
             sMnVEntryVi_356198* vw = *(sMnVEntryVi_356198**)(s + 0xC);
             vw[34].fn(s + vw[34].delta, 1);
         }
@@ -773,7 +773,7 @@ extern "C" void func_00356198(void* selfv)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356298);
+INCLUDE_ASM("object/movenode", cMoveNode_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMoveQuad;
@@ -991,7 +991,7 @@ static inline int Visible_6298(sMnCam_6298* cam, sMnObj_6298* obj)
     return 0;
 }
 
-extern "C" void func_00356298(cMnNode_6298* self)
+extern "C" void cMoveNode_render(cMnNode_6298* self)
 {
     sMnCam_6298* cam = *D_004A47B8_6298;
     sMnObj_6298* obj = OBJ_6298(self);
@@ -1070,10 +1070,10 @@ extern "C" void func_00356298(cMnNode_6298* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356608);
+INCLUDE_ASM("object/movenode", cMoveNode_renderModel);
 #ifdef SKIP_ASM
-// Draws the node with a caller-supplied texture and flags (visibility, rotation and light as in func_00356298).
-extern "C" void func_00356608(cMnNode_6298* self, void* tex, int flags)
+// Draws the node with a caller-supplied texture and flags (visibility, rotation and light as in cMoveNode_render).
+extern "C" void cMoveNode_renderModel(cMnNode_6298* self, void* tex, int flags)
 {
     sMnCam_6298* cam = *D_004A47B8_6298;
     sMnObj_6298* obj = OBJ_6298(self);
@@ -1127,7 +1127,7 @@ extern "C" void cMoveNode_setupOverlapSystem(void* self_)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003567E0);
+INCLUDE_ASM("object/movenode", cMoveNode_restoreOverlapSystem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 #include "common.h"
@@ -1141,22 +1141,22 @@ struct sMnBox_67E0 {
     sMnVec4_67E0 min, max;
 };
 
-extern "C" sMnBox_67E0* func_00352B88_67E0(void* mb) __asm__("func_00352B88");
-extern "C" void* func_002D1BE0(void);
-extern "C" void func_003291E0_67E0(void* mgr, int a, void* obj, sMnBox_67E0* box, sMnBox_67E0* old) __asm__("func_003291E0");
+extern "C" sMnBox_67E0* tModifierBlock_getBoundBox_67E0(void* mb) __asm__("tModifierBlock_getBoundBox");
+extern "C" void* cObjectInterface_getNash(void);
+extern "C" void nash_Nash_movenode_67E0(void* mgr, int a, void* obj, sMnBox_67E0* box, sMnBox_67E0* old) __asm__("nash_Nash_movenode");
 
 // Sets the modifier block's bound box from the node's own extents (self->18 + 0x60) and re-files it.
-extern "C" void func_003567E0(void* vself)
+extern "C" void cMoveNode_restoreOverlapSystem(void* vself)
 {
     char* self = (char*)vself;
     char** h = *(char***)(self + 0x1C);
     char* blk = h ? *h : 0;
-    // Binding a reference to the object matches the target register allocation (see func_00356078).
+    // Binding a reference to the object matches the target register allocation (see cMoveNode_getRootTransform).
     char*& o = blk;
     if (o == 0)
         return;
     sMnBox_67E0 box;
-    sMnBox_67E0 old = *func_00352B88_67E0(*(void**)(self + 0x1C));
+    sMnBox_67E0 old = *tModifierBlock_getBoundBox_67E0(*(void**)(self + 0x1C));
     char* n = *(char**)(self + 0x18);
     sMnVec4_67E0 v;
     v.x = *(float*)(n + 0x60);
@@ -1170,12 +1170,12 @@ extern "C" void func_003567E0(void* vself)
     box.max = v;
     tModifierBlock_setBoundBox_K(*(tModifierBlock**)(self + 0x1C), &box);
     void* obj = *(void**)(self + 0x18);
-    func_003291E0_67E0(func_002D1BE0(), 0, obj, &box, &old);
+    nash_Nash_movenode_67E0(cObjectInterface_getNash(), 0, obj, &box, &old);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003568B0);
+INCLUDE_ASM("object/movenode", cMoveNode_updateOverlapSystem);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sMnVec4_68B0 {
@@ -1197,10 +1197,10 @@ struct sMnVEnt_68B0 {
     void (*fn)(void*);
 };
 
-extern "C" sMnBox_68B0* func_00352B88_68B0(void* mb) __asm__("func_00352B88");
+extern "C" sMnBox_68B0* tModifierBlock_getBoundBox_68B0(void* mb) __asm__("tModifierBlock_getBoundBox");
 extern "C" float func_00352BF8(void* mb);
-extern "C" void* func_002D1BE0(void);
-extern "C" void func_003291E0(void* mgr, int a, void* obj, sMnBox_68B0* box, sMnBox_68B0* old);
+extern "C" void* cObjectInterface_getNash(void);
+extern "C" void nash_Nash_movenode(void* mgr, int a, void* obj, sMnBox_68B0* box, sMnBox_68B0* old);
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline void vu0Sub_68B0(sMnVec4_68B0& out, const sMnVec4_68B0& a, const sMnVec4_68B0& b)
@@ -1246,14 +1246,14 @@ static inline void VCall24_68B0(char*& o)
 }
 
 // Refits the modifier block's bound box around the node's position (radius from the block) and re-files it.
-extern "C" void func_003568B0(char* self)
+extern "C" void cMoveNode_updateOverlapSystem(char* self)
 {
     char** h = *(char***)(self + 0x1C);
     char* o = h ? *h : 0;
     if (o == 0)
         return;
     sMnBox_68B0 box;
-    sMnBox_68B0 old = *func_00352B88_68B0(*(void**)(self + 0x1C));
+    sMnBox_68B0 old = *tModifierBlock_getBoundBox_68B0(*(void**)(self + 0x1C));
     float r = func_00352BF8(*(void**)(self + 0x1C));
     sMnVec4_68B0 rv;
     rv.w = 0.0f;
@@ -1267,41 +1267,41 @@ extern "C" void func_003568B0(char* self)
     box.max = v;
     tModifierBlock_setBoundBox_K(*(tModifierBlock**)(self + 0x1C), &box);
     void* obj = *(void**)(self + 0x18);
-    func_003291E0(func_002D1BE0(), 0, obj, &box, &old);
+    nash_Nash_movenode(cObjectInterface_getNash(), 0, obj, &box, &old);
     VCall24_68B0(o);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003569D0);
+INCLUDE_ASM("object/movenode", cMoveNode_hasBoundBox);
 #ifdef SKIP_ASM
-extern "C" int func_00352B88(void*);
+extern "C" int tModifierBlock_getBoundBox(void*);
 
-extern "C" int func_003569D0(cMoveNode* self)
+extern "C" int cMoveNode_hasBoundBox(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
-        return func_00352B88(self->field_0x1C) != 0;
+        return tModifierBlock_getBoundBox(self->field_0x1C) != 0;
     }
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356A00);
+INCLUDE_ASM("object/movenode", cMoveNode_getBoundBox);
 #ifdef SKIP_ASM
-extern "C" int func_00352B88(void*);
+extern "C" int tModifierBlock_getBoundBox(void*);
 
-extern "C" int func_00356A00(cMoveNode* self)
+extern "C" int cMoveNode_getBoundBox(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
-        return func_00352B88(self->field_0x1C);
+        return tModifierBlock_getBoundBox(self->field_0x1C);
     }
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356A28);
+INCLUDE_ASM("object/movenode", cMoveNode_hasIntersect);
 #ifdef SKIP_ASM
 struct sMoveNodeVEntryA28 {
     short delta;
@@ -1309,7 +1309,7 @@ struct sMoveNodeVEntryA28 {
     int (*fn)(void*);
 };
 
-extern "C" int func_00356A28(void* self)
+extern "C" int cMoveNode_hasIntersect(void* self)
 {
     void* block = *(void**)((char*)self + 0x1C);
     if (block == 0) {
@@ -1325,7 +1325,7 @@ extern "C" int func_00356A28(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356A70);
+INCLUDE_ASM("object/movenode", cMoveNode_intersect);
 #ifdef SKIP_ASM
 struct sMoveNodeVEntryA70 {
     short delta;
@@ -1333,7 +1333,7 @@ struct sMoveNodeVEntryA70 {
     int (*fn)(void*, int, int, int, int);
 };
 
-extern "C" int func_00356A70(void* self, int a, int b, int c, int d)
+extern "C" int cMoveNode_intersect(void* self, int a, int b, int c, int d)
 {
     void* block = *(void**)((char*)self + 0x1C);
     if (block == 0) {
@@ -1349,37 +1349,37 @@ extern "C" int func_00356A70(void* self, int a, int b, int c, int d)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356AB8);
+INCLUDE_ASM("object/movenode", cMoveNode_applyForce);
 #ifdef SKIP_ASM
-extern "C" void func_00353020(void*);
+extern "C" void tModifierBlock_applyForce(void*);
 
-extern "C" void func_00356AB8(cMoveNode* self)
+extern "C" void cMoveNode_applyForce(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
-        func_00353020(self->field_0x1C);
+        tModifierBlock_applyForce(self->field_0x1C);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356AE0);
+INCLUDE_ASM("object/movenode", cMoveNode_updateIntersectInfo);
 #ifdef SKIP_ASM
-extern "C" void func_00353098(void*);
+extern "C" void tModifierBlock_updateIntersectInfo(void*);
 
-extern "C" void func_00356AE0(cMoveNode* self)
+extern "C" void cMoveNode_updateIntersectInfo(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
-        func_00353098(self->field_0x1C);
+        tModifierBlock_updateIntersectInfo(self->field_0x1C);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356B08);
+INCLUDE_ASM("object/movenode", cMoveNode_signal);
 #ifdef SKIP_ASM
 extern "C" void func_00352F40(void*);
 
-extern "C" void func_00356B08(cMoveNode* self)
+extern "C" void cMoveNode_signal(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
         func_00352F40(self->field_0x1C);
@@ -1388,7 +1388,7 @@ extern "C" void func_00356B08(cMoveNode* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356B30);
+INCLUDE_ASM("object/movenode", cMoveNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sSerVEntry_56B30 {
     short delta;
@@ -1396,16 +1396,16 @@ struct sSerVEntry_56B30 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0034FE90(void* self, void* stream);
-extern "C" void func_00353448(void* block, void* stream);
+extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
+extern "C" void tModifierBlock_writeToReplayFrame(void* block, void* stream);
 
-// PORT: the unit declares func_00356B30 as `void* (void*)` for its callers; the body writes
+// PORT: the unit declares cMoveNode_writeToReplayFrame as `void* (void*)` for its callers; the body writes
 // to the stream in a1, so the 2-arg body is bound by asm label.
-void func_00356B30_2(void* self, void* stream) __asm__("func_00356B30");
+void cMoveNode_writeToReplayFrame_2(void* self, void* stream) __asm__("cMoveNode_writeToReplayFrame");
 
-void func_00356B30_2(void* self, void* stream)
+void cMoveNode_writeToReplayFrame_2(void* self, void* stream)
 {
-    func_0034FE90(self, stream);
+    cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_56B30* e = &(*(sSerVEntry_56B30**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x20, 4);
     e = &(*(sSerVEntry_56B30**)stream)[1];
@@ -1417,13 +1417,13 @@ void func_00356B30_2(void* self, void* stream)
     e->fn((char*)stream + e->delta, &flag, 4);
     void* block = *(void**)((char*)self + 0x1C);
     if (block != 0) {
-        func_00353448(block, stream);
+        tModifierBlock_writeToReplayFrame(block, stream);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356BF0);
+INCLUDE_ASM("object/movenode", cMoveNode_hasFocusCount);
 #ifdef SKIP_ASM
 struct sMnVEntryI_6BF0 {
     short delta;
@@ -1436,7 +1436,7 @@ static inline int VCall_6BF0(char* o, int i)
     return vt[i].fn(o + vt[i].delta);
 }
 // Does the modifier object's virtual slot 26 report state 2?
-extern "C" int func_00356BF0(char* self)
+extern "C" int cMoveNode_hasFocusCount(char* self)
 {
     char** h = *(char***)(self + 0x1C);
     if (h != 0) {
@@ -1449,7 +1449,7 @@ extern "C" int func_00356BF0(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356C48);
+INCLUDE_ASM("object/movenode", cMoveNode_incFocusCount);
 #ifdef SKIP_ASM
 struct sMnVEntryI6C48 {
     short delta;
@@ -1461,7 +1461,7 @@ struct sMnVEntryI6C48 {
 // the original declaration it was compiled against must have had two parameters.
 int func_0035AAD0_2(void* self, void* a1) __asm__("func_0035AAD0__FPv");
 
-extern "C" int func_00356C48(cMoveNode* self, void* a1)
+extern "C" int cMoveNode_incFocusCount(cMoveNode* self, void* a1)
 {
     void* block = self->field_0x1C;
     if (block != 0) {
@@ -1479,7 +1479,7 @@ extern "C" int func_00356C48(cMoveNode* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356CC8);
+INCLUDE_ASM("object/movenode", cMoveNode_decFocusCount);
 #ifdef SKIP_ASM
 struct sMnVEntryI6CC8 {
     short delta;
@@ -1491,7 +1491,7 @@ struct sMnVEntryI6CC8 {
 // the original declaration it was compiled against must have had two parameters.
 int func_0035AAE0_2(void* self, void* a1) __asm__("func_0035AAE0__FPv");
 
-extern "C" int func_00356CC8(cMoveNode* self, void* a1)
+extern "C" int cMoveNode_decFocusCount(cMoveNode* self, void* a1)
 {
     void* block = self->field_0x1C;
     if (block != 0) {
@@ -1509,9 +1509,9 @@ extern "C" int func_00356CC8(cMoveNode* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356D48);
+INCLUDE_ASM("object/movenode", cMoveNode_getFocusCount);
 #ifdef SKIP_ASM
-extern "C" int func_00356D48(void* self)
+extern "C" int cMoveNode_getFocusCount(void* self)
 {
     void* block = *(void**)((char*)self + 0x1C);
     if (block == 0) {
@@ -1570,14 +1570,14 @@ extern "C" void* func_00356E60(void* self)
 }
 #endif
 
-extern "C" void* func_00356B30(void* self);
+extern "C" void* cMoveNode_writeToReplayFrame(void* self);
 
 //99.29%
 INCLUDE_ASM("object/movenode", func_00356E98__FPv);
 #ifdef SKIP_ASM
 void* func_00356E98(void* self)
 {
-    return func_00356B30(self);
+    return cMoveNode_writeToReplayFrame(self);
 }
 #endif
 
@@ -2111,7 +2111,7 @@ struct sMnVEntryI7660 {
     int (*fn)(void*);
 };
 
-extern "C" void* func_002D1B08(int id);
+extern "C" void* cObjectInterface_getNumBeings(int id);
 
 extern "C" int func_00357660(void* self, int id)
 {
@@ -2122,7 +2122,7 @@ extern "C" int func_00357660(void* self, int id)
         }
         return 0;
     }
-    void* obj = func_002D1B08(id);
+    void* obj = cObjectInterface_getNumBeings(id);
     sMnVEntryI7660* vt = *(sMnVEntryI7660**)obj;
     if (vt[8].fn((char*)obj + vt[8].delta) != 0) {
         *(int*)((char*)self + 0x44) = id;
@@ -2274,12 +2274,12 @@ extern "C" void* func_003578A8(cMoveNode* self, void* a1, void* a2, void* partic
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00357918);
+INCLUDE_ASM("object/movenode", cParticleNode_cParticleNode);
 #ifdef SKIP_ASM
 extern "C" void* cMoveNode_cMoveNode(void* self);
 extern void* D_0048EE60[];
 
-extern "C" void* func_00357918(void* self)
+extern "C" void* cParticleNode_cParticleNode(void* self)
 {
     cMoveNode_cMoveNode(self);
     *(void***)((char*)self + 0xC) = D_0048EE60;
@@ -2296,11 +2296,11 @@ struct sMnDtorVEntry7950 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_00356198(void* self);
+extern "C" void cMoveNode_update(void* self);
 
 extern "C" void func_00357950(void* self)
 {
-    func_00356198(self);
+    cMoveNode_update(self);
     void* mb = *(void**)((char*)self + 0x1C);
     if (mb != 0 && *(int*)((char*)mb + 0x10) != 0) {
         return;
@@ -2313,11 +2313,11 @@ extern "C" void func_00357950(void* self)
 #endif
 
 //99.29%
-INCLUDE_ASM("object/movenode", func_003579A8__FPv);
+INCLUDE_ASM("object/movenode", cParticleNode_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
-void* func_003579A8(void* self)
+void* cParticleNode_writeToReplayFrame(void* self)
 {
-    return func_00356B30(self);
+    return cMoveNode_writeToReplayFrame(self);
 }
 #endif
 
@@ -2433,37 +2433,37 @@ extern "C" void func_00357B90(void** self, void* arg)
 //100%
 INCLUDE_ASM("object/movenode", func_00357BF8);
 #ifdef SKIP_ASM
-extern "C" void func_00358120(void* p);
+extern "C" void cMultiParticle_update(void* p);
 
 extern "C" void func_00357BF8(void** self)
 {
     int i;
     for (i = 0; i < 4; i++) {
         if (self[i] != 0) {
-            func_00358120(self[i]);
+            cMultiParticle_update(self[i]);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357C50);
+INCLUDE_ASM("object/movenode", cMultiParticleMan_render);
 #ifdef SKIP_ASM
-extern "C" void func_00358260(void* p);
+extern "C" void cMultiParticle_render(void* p);
 
-extern "C" void func_00357C50(void** self)
+extern "C" void cMultiParticleMan_render(void** self)
 {
     int i;
     for (i = 0; i < 4; i++) {
         if (self[i] != 0) {
-            func_00358260(self[i]);
+            cMultiParticle_render(self[i]);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357CA8);
+INCLUDE_ASM("object/movenode", cMultiParticleMan_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sMnVEntrySer7CA8 {
     short delta;
@@ -2471,9 +2471,9 @@ struct sMnVEntrySer7CA8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00358380(void* obj, void* stream);
+extern "C" void cMultiParticle_writeToReplayFrame(void* obj, void* stream);
 
-extern "C" void func_00357CA8(void** self, void* stream)
+extern "C" void cMultiParticleMan_writeToReplayFrame(void** self, void* stream)
 {
     int i;
     for (i = 0; i < 4; i++) {
@@ -2481,7 +2481,7 @@ extern "C" void func_00357CA8(void** self, void* stream)
         sMnVEntrySer7CA8* e = &(*(sMnVEntrySer7CA8**)stream)[1];
         e->fn((char*)stream + e->delta, &has, 4);
         if (has) {
-            func_00358380(self[i], stream);
+            cMultiParticle_writeToReplayFrame(self[i], stream);
         }
     }
 }
@@ -2552,7 +2552,7 @@ struct sMultiPart_7DD8 {
 };
 
 extern char D_0048EA10[];
-extern "C" void func_003E6574(void* dst, const void* src, int n);
+extern "C" void MEM_copy(void* dst, const void* src, int n);
 extern "C" void cMultiParticle_setupMultiParticle(void* self);
 
 extern "C" void* func_00357DD8(void* mem, void* a1, void* a2)
@@ -2562,7 +2562,7 @@ extern "C" void* func_00357DD8(void* mem, void* a1, void* a2)
     self->field_0x4 = 0;
     void* buf = cMemMan_alloc(0xD8, D_0048EA10, 0x20000000, 0);
     self->data = buf;
-    func_003E6574(buf, a1, 0xD8);
+    MEM_copy(buf, a1, 0xD8);
     cMultiParticle_setupMultiParticle(self);
     sPartDesc_7DD8* d = self->desc;
     self->a = d->a;

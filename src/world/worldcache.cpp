@@ -242,17 +242,17 @@ extern "C" char* func_003A7878(sWCPool_7878* self, int size, unsigned int flags)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", func_003A7A20);
+INCLUDE_ASM("world/worldcache", cWorldMemoryMan_cWorldMemoryMan);
 #ifdef SKIP_ASM
-struct func_003A7A20_sCfg {
+struct cWorldMemoryMan_cWorldMemoryMan_sCfg {
     int id;
     int size;
     int count;
 };
-extern func_003A7A20_sCfg D_0044C1E0[];
+extern cWorldMemoryMan_cWorldMemoryMan_sCfg D_0044C1E0[];
 extern "C" void cWorldBlockAllocator_init(void* self, int size, int count);
 
-extern "C" void* func_003A7A20(void* self)
+extern "C" void* cWorldMemoryMan_cWorldMemoryMan(void* self)
 {
     cWorldBlockAllocator_init(self, D_0044C1E0[0].size, D_0044C1E0[0].count);
     cWorldBlockAllocator_init((char*)self + 0x14, D_0044C1E0[1].size, D_0044C1E0[1].count);
@@ -425,15 +425,15 @@ extern "C" void func_003A7D80(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7DD0);
+INCLUDE_ASM("world/worldcache", cWorldCache_cWorldCache);
 #ifdef SKIP_ASM
-extern "C" void func_003A8F80(void* self);
+extern "C" void cWorldView_cWorldView(void* self);
 extern "C" void cStreamMan_cStreamMan(void* self);
 extern char* D_004A5B64;
 
-extern "C" void* func_003A7DD0(void* self)
+extern "C" void* cWorldCache_cWorldCache(void* self)
 {
-    func_003A8F80((char*)self + 0x10);
+    cWorldView_cWorldView((char*)self + 0x10);
     cStreamMan_cStreamMan((char*)self + 0x300);
     char* app = D_004A5B64;
     *(int*)((char*)self + 0x0) = 0;
@@ -448,18 +448,18 @@ extern "C" void* func_003A7DD0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7E38);
+INCLUDE_ASM("world/worldcache", cWorldCache__cWorldCache);
 #ifdef SKIP_ASM
 void operator_delete(int*);
-extern "C" void func_003A7E98(void* self);
-extern "C" void func_003A6E20(void* p, int flags);
-extern "C" void func_003A8FB8(void* p, int flags);
+extern "C" void cWorldCache_purge(void* self);
+extern "C" void cStreamMan__cStreamMan(void* p, int flags);
+extern "C" void cWorldView__cWorldView(void* p, int flags);
 
-extern "C" void func_003A7E38(int* self, int flags)
+extern "C" void cWorldCache__cWorldCache(int* self, int flags)
 {
-    func_003A7E98(self);
-    func_003A6E20((char*)self + 0x300, 2);
-    func_003A8FB8((char*)self + 0x10, 2);
+    cWorldCache_purge(self);
+    cStreamMan__cStreamMan((char*)self + 0x300, 2);
+    cWorldView__cWorldView((char*)self + 0x10, 2);
     if (flags & 1) {
         operator_delete(self);
     }
@@ -467,7 +467,7 @@ extern "C" void func_003A7E38(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7E98);
+INCLUDE_ASM("world/worldcache", cWorldCache_purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void func_003A8330(void* self);
@@ -475,38 +475,38 @@ extern "C" int func_003A9890(void* view, int i);
 extern "C" void func_003A8230(void* self, int i);
 extern "C" void func_003A7D80(int* self, int flags);
 
-struct func_003A7E98_sVEntry {
+struct cWorldCache_purge_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, int);
 };
 
-struct func_003A7E98_sObj {
+struct cWorldCache_purge_sObj {
     int f0;
     int f4;
-    func_003A7E98_sVEntry* vt;
+    cWorldCache_purge_sVEntry* vt;
 };
 
-struct func_003A7E98_sHdr {
+struct cWorldCache_purge_sHdr {
     int f0;
     int f4;
     unsigned int count;
 };
 
-struct func_003A7E98_sCache {
-    func_003A7E98_sHdr* hdr;
+struct cWorldCache_purge_sCache {
+    cWorldCache_purge_sHdr* hdr;
     int* f04;
     void* f08;
     func_003A7AA8_sElem* f0C;
     char view[0x3D8];
-    func_003A7E98_sObj* obj;
+    cWorldCache_purge_sObj* obj;
 };
 
-extern "C" void func_003A7E98(void* p)
+extern "C" void cWorldCache_purge(void* p)
 {
-    func_003A7E98_sCache* self = (func_003A7E98_sCache*)p;
+    cWorldCache_purge_sCache* self = (cWorldCache_purge_sCache*)p;
     func_003A8330(self);
-    func_003A7E98_sObj* o = self->obj;
+    cWorldCache_purge_sObj* o = self->obj;
     if (o != 0) {
         o->vt[1].fn((char*)o + o->vt[1].delta, 3);
     }
@@ -534,13 +534,13 @@ extern "C" void func_003A7E98(void* p)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A7F90);
+INCLUDE_ASM("world/worldcache", cWorldCache_reset);
 #ifdef SKIP_ASM
-extern "C" void func_003A7E98(void* self);
+extern "C" void cWorldCache_purge(void* self);
 
-extern "C" void func_003A7F90(void* self)
+extern "C" void cWorldCache_reset(void* self)
 {
-    func_003A7E98(self);
+    cWorldCache_purge(self);
     *(int*)((char*)self + 0x0) = 0;
     *(int*)((char*)self + 0x3EC) = 0;
     *(int*)((char*)self + 0x3E8) = 0;
@@ -553,16 +553,16 @@ INCLUDE_ASM("world/worldcache", cWorldCache_init);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_003A7A20(void* self);
+extern "C" void* cWorldMemoryMan_cWorldMemoryMan(void* self);
 extern "C" void* cWorldCacheTable_cWorldCacheTable(void* self, void* data);
 extern "C" void* FILE_load(const char* name, int flags);
-extern "C" void* func_003AAD98(void);
-extern "C" int func_003A6E98(void* self, const char* name, void* owner);
-// PORT: the unit defines func_003A9000(sWorldCacheMap*, sWCHdr*, int id); this caller passes the cache in the
+extern "C" void* cChunkResolve_construct(void);
+extern "C" int cStreamMan_init(void* self, const char* name, void* owner);
+// PORT: the unit defines cWorldView_init(sWorldCacheMap*, sWCHdr*, int id); this caller passes the cache in the
 // third argument. Bound by asm label with pointer parameters.
-extern "C" int func_003A9000_p(void* self, void* data, void* owner) __asm__("func_003A9000");
-struct func_003A82C8_sCache;
-extern "C" void func_003A82C8(func_003A82C8_sCache* self);
+extern "C" int cWorldView_init_p(void* self, void* data, void* owner) __asm__("cWorldView_init");
+struct cWorldCache_initPageMap_sCache;
+extern "C" void cWorldCache_initPageMap(cWorldCache_initPageMap_sCache* self);
 extern char D_00494E30[];
 extern char D_00494E40[];
 extern char D_00494E50[];
@@ -585,7 +585,7 @@ struct sVE_7FC0 { short delta; short index; void (*fn)(void*, int); };
 
 extern "C" int cWorldCache_init(void* self, const char* name, int arg)
 {
-    *(void**)((char*)self + 0xC) = func_003A7A20(cMemMan_alloc(0x13C, D_00494E30, 0, 0));
+    *(void**)((char*)self + 0xC) = cWorldMemoryMan_cWorldMemoryMan(cMemMan_alloc(0x13C, D_00494E30, 0, 0));
     sBXStr_7FC0 path;
     sBXStr_7FC0 full;
     sBXStr_7FC0 base;
@@ -601,16 +601,16 @@ extern "C" int cWorldCache_init(void* self, const char* name, int arg)
     *(void***)((char*)self + 0x8) = (void**)operator_new_tag(*(int*)(*(char**)self + 0x8) * 4, D_00494E50, 0, 0);
     for (unsigned int i = 0; i < *(unsigned int*)(*(char**)self + 0x8); i++)
         (*(void***)((char*)self + 0x8))[i] = 0;
-    char* x = (char*)func_003AAD98();
+    char* x = (char*)cChunkResolve_construct();
     *(char**)((char*)self + 0x3E8) = x;
     sVE_7FC0* vt = *(sVE_7FC0**)(x + 8);
     vt[2].fn(x + vt[2].delta, arg);
-    if (func_003A6E98((char*)self + 0x300, name, self) == 0)
+    if (cStreamMan_init((char*)self + 0x300, name, self) == 0)
         return 0;
-    int r = func_003A9000_p((char*)self + 0x10, *(void**)self, self);
+    int r = cWorldView_init_p((char*)self + 0x10, *(void**)self, self);
     if (r == 0)
         return 0;
-    func_003A82C8((func_003A82C8_sCache*)self);
+    cWorldCache_initPageMap((cWorldCache_initPageMap_sCache*)self);
     return r;
 }
 #endif
@@ -649,26 +649,26 @@ extern "C" void func_003A8230(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8290);
+INCLUDE_ASM("world/worldcache", cWorldCache_update);
 #ifdef SKIP_ASM
-extern "C" void func_003A9258(void* p);
+extern "C" void cWorldView_update(void* p);
 extern "C" void cWorldCache_updatePages(void* self);
 extern "C" void func_003A7098(void* p);
 
-extern "C" void func_003A8290(void* self)
+extern "C" void cWorldCache_update(void* self)
 {
-    func_003A9258((char*)self + 0x10);
+    cWorldView_update((char*)self + 0x10);
     cWorldCache_updatePages(self);
     func_003A7098((char*)self + 0x300);
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A82C8);
+INCLUDE_ASM("world/worldcache", cWorldCache_initPageMap);
 #ifdef SKIP_ASM
 int func_003A9AB0(void*);
 
-struct func_003A82C8_sEntry {
+struct cWorldCache_initPageMap_sEntry {
     int a;
     int b;
     int c;
@@ -677,13 +677,13 @@ struct func_003A82C8_sEntry {
     int f;
 };
 
-struct func_003A82C8_sCache {
+struct cWorldCache_initPageMap_sCache {
     char pad[0x3EC];
     unsigned int count;   // 0x3EC
-    func_003A82C8_sEntry entries[1]; // 0x3F0
+    cWorldCache_initPageMap_sEntry entries[1]; // 0x3F0
 };
 
-extern "C" void func_003A82C8(func_003A82C8_sCache* self)
+extern "C" void cWorldCache_initPageMap(cWorldCache_initPageMap_sCache* self)
 {
     unsigned int i;
     self->count = func_003A9AB0((char*)self + 0x10);
@@ -1374,7 +1374,7 @@ extern "C" void func_003A8F10(char** self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8F80);
+INCLUDE_ASM("world/worldcache", cWorldView_cWorldView);
 #ifdef SKIP_ASM
 inline void* operator new[](unsigned int, void* p) { return p; }
 // The cache's leading two-entry member array has an empty constructor; the
@@ -1386,8 +1386,8 @@ struct sCacheHead_3A8F80 {
 extern "C" void func_003A9188_8F80(void* self) __asm__("func_003A9188");
 
 // PORT: the unit declares this as void(void*); defined under an asm label with its real type
-extern "C" void* func_003A8F80_impl(void* self) __asm__("func_003A8F80");
-extern "C" void* func_003A8F80_impl(void* self)
+extern "C" void* cWorldView_cWorldView_impl(void* self) __asm__("cWorldView_cWorldView");
+extern "C" void* cWorldView_cWorldView_impl(void* self)
 {
     new (self) sCacheHead_3A8F80[2];
     func_003A9188_8F80(self);
@@ -1396,14 +1396,14 @@ extern "C" void* func_003A8F80_impl(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A8FB8);
+INCLUDE_ASM("world/worldcache", cWorldView__cWorldView);
 #ifdef SKIP_ASM
 void operator_delete(int*);
-void func_003A9180(void* self);
+void cWorldView_purge(void* self);
 
-extern "C" void func_003A8FB8(void* self, int flags)
+extern "C" void cWorldView__cWorldView(void* self, int flags)
 {
-    func_003A9180(self);
+    cWorldView_purge(self);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1411,7 +1411,7 @@ extern "C" void func_003A8FB8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A9000);
+INCLUDE_ASM("world/worldcache", cWorldView_init);
 #ifdef SKIP_ASM
 struct sWCQuad {
     float v[4];
@@ -1462,7 +1462,7 @@ struct sWorldCacheMap {
 };
 
 // PORT: offsets in the loaded data are rewritten in place as pointers (pointer in int)
-extern "C" int func_003A9000(sWorldCacheMap* self, sWCHdr* hdr, int id)
+extern "C" int cWorldView_init(sWorldCacheMap* self, sWCHdr* hdr, int id)
 {
     unsigned int i;
 
@@ -1506,9 +1506,9 @@ extern "C" int func_003A9000(sWorldCacheMap* self, sWCHdr* hdr, int id)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A9180__FPv);
+INCLUDE_ASM("world/worldcache", cWorldView_purge__FPv);
 #ifdef SKIP_ASM
-void func_003A9180(void* self)
+void cWorldView_purge(void* self)
 {
 }
 #endif
@@ -1572,7 +1572,7 @@ extern "C" void func_003A9188(func_003A9188_sCache* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", func_003A9258);
+INCLUDE_ASM("world/worldcache", cWorldView_update);
 #ifdef SKIP_ASM
 extern "C" int func_00416B18(const char* a, const char* b, int n);
 struct func_003A9558_sNode;
@@ -1622,7 +1622,7 @@ struct sVE_9258 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_003A9258(void* p)
+extern "C" void cWorldView_update(void* p)
 {
     sWCLoader_9258* self = (sWCLoader_9258*)p;
     if (self->info == 0)

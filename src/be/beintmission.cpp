@@ -70,7 +70,7 @@ extern "C" int func_00153350(void* self, int start)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153390);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getTotalCollectForPeak);
 #ifdef SKIP_ASM
 struct sMissionEntry_0043D950
 {
@@ -82,7 +82,7 @@ struct sMissionEntry_0043D950
 extern sMissionEntry_0043D950 D_0043D950[];
 extern signed char D_0043FA70[];
 
-extern "C" int func_00153390(void* self, int owner)
+extern "C" int cBEMissionInterface_getTotalCollectForPeak(void* self, int owner)
 {
     int sum = 0;
     for (int i = 0; i < 1; i++)
@@ -248,7 +248,7 @@ extern "C" int func_00153688(void* self, int profile, int character, int owner)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153708);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForPeakByChar);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getRiderIndex(int);
@@ -264,7 +264,7 @@ struct sMissionOwnerView_00153708
 };
 extern sMissionOwnerView_00153708 D_0043D9A4_v153708[] __asm__("D_0043D9A4");
 
-extern "C" int func_00153708(void* self, int profile, int character, int owner)
+extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* self, int profile, int character, int owner)
 {
     if (*(void**)((char*)D_004A28A8 + 0x84) != 0)
         return cBEMissionInterface_getCurrentCollectForPeak(self, cBELibrary_getRiderIndex(profile), owner);
@@ -429,7 +429,7 @@ extern "C" void func_00153B00(void* self, int rider, int bit, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153C88);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionName);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMissionDefView_00153C88
@@ -452,7 +452,7 @@ public:
     virtual void v4(int a);
 };
 
-extern "C" void func_00153C88(void* self, int id)
+extern "C" void cBEMissionInterface_getMissionName(void* self, int id)
 {
     int i = func_00154240(self, id);
     ((cMissionObj_00153C88*)*(void**)((char*)D_004A28A8 + 0x8C))->v4(D_0043EE10_v00153C88[i].f4);
@@ -492,7 +492,7 @@ extern "C" void func_00153CD8(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153D28);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionLongDesc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMissionDefView_00153D28
@@ -517,7 +517,7 @@ public:
     virtual void v4(int a);
 };
 
-extern "C" void func_00153D28(void* self, int id)
+extern "C" void cBEMissionInterface_getMissionLongDesc(void* self, int id)
 {
     int i = func_00154240(self, id);
     ((cMissionObj_00153D28*)*(void**)((char*)D_004A28A8 + 0x8C))->v4(D_0043EE10_v00153D28[i].fC);
@@ -525,12 +525,12 @@ extern "C" void func_00153D28(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153D78);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_isMissionCompleted);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
-extern "C" int func_00153D78(void* self, int id)
+extern "C" int cBEMissionInterface_isMissionCompleted(void* self, int id)
 {
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
@@ -573,12 +573,12 @@ extern "C" int func_00153E28(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153E80);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_isMissionAvailable);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
-extern "C" int func_00153E80(void* self, int id)
+extern "C" int cBEMissionInterface_isMissionAvailable(void* self, int id)
 {
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
@@ -677,7 +677,7 @@ extern "C" short func_00153FA0(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153FD8);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNextMissionID);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit's sMissionDef_0043EE10 is defined later (with func_00154240) and lacks
@@ -686,7 +686,7 @@ extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("D_0043EE10");
 
 extern "C" int func_00154240(void* self, int id);
 
-extern "C" int func_00153FD8(void* self, int id)
+extern "C" int cBEMissionInterface_getNextMissionID(void* self, int id)
 {
     int i = func_00154240(self, id);
     return D_0043EE10_view[i].field_0x1C;
@@ -799,23 +799,23 @@ extern "C" int func_00154240(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154278);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberMissions);
 #ifdef SKIP_ASM
-extern "C" int func_001542A0(void* self, int group);
+extern "C" int cBEMissionInterface_getNumberMissionsOnTrack(void* self, int group);
 extern int D_005305F0[];
 
-extern "C" int func_00154278(void* self)
+extern "C" int cBEMissionInterface_getNumberMissions(void* self)
 {
-    return func_001542A0(self, D_005305F0[0]);
+    return cBEMissionInterface_getNumberMissionsOnTrack(self, D_005305F0[0]);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001542A0);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberMissionsOnTrack);
 #ifdef SKIP_ASM
 extern sMissionDef_0043EE10 D_0043EE10[];
 
-extern "C" int func_001542A0(void* self, int group)
+extern "C" int cBEMissionInterface_getNumberMissionsOnTrack(void* self, int group)
 {
     int n = 0;
     for (int i = 0; i < 88; i++) {
@@ -830,7 +830,7 @@ extern "C" int func_001542A0(void* self, int group)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintmission", func_001542E0);
 #ifdef SKIP_ASM
-extern "C" int func_00153D78(void* self, int id);
+extern "C" int cBEMissionInterface_isMissionCompleted(void* self, int id);
 
 extern "C" int func_001542E0(void* self, int group)
 {
@@ -839,7 +839,7 @@ extern "C" int func_001542E0(void* self, int group)
     {
         if (D_0043EE10[i].group == group)
         {
-            if (func_00153D78(self, D_0043EE10[i].id))
+            if (cBEMissionInterface_isMissionCompleted(self, D_0043EE10[i].id))
                 n++;
         }
     }
@@ -848,7 +848,7 @@ extern "C" int func_001542E0(void* self, int group)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154368);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberMissionsOnPeak);
 #ifdef SKIP_ASM
 // One 0x24-byte entry of the mission table at D_0043EE10.
 struct sMissionDef_00154368
@@ -862,7 +862,7 @@ struct sMissionDef_00154368
 extern sMissionEntry_0043D950 D_0043D950[];
 extern sMissionDef_00154368 D_0043EE10_00154368[] __asm__("D_0043EE10");
 
-extern "C" int func_00154368(void* self, int owner)
+extern "C" int cBEMissionInterface_getNumberMissionsOnPeak(void* self, int owner)
 {
     int n = 0;
     for (int i = 0; i < 88; i++)
@@ -883,11 +883,11 @@ extern "C" int func_00154368(void* self, int owner)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001543E0);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberCompletedMissionsOnPeak);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Counts missions of an owner's groups that func_00153D78 reports as done.
-extern "C" int func_001543E0(void* self, int owner)
+// Counts missions of an owner's groups that cBEMissionInterface_isMissionCompleted reports as done.
+extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeak(void* self, int owner)
 {
     int n = 0;
     for (int i = 0; i < 88; i++)
@@ -898,7 +898,7 @@ extern "C" int func_001543E0(void* self, int owner)
             {
                 if (D_0043D950[j].owner == owner)
                 {
-                    if (func_00153D78(self, D_0043EE10[i].id))
+                    if (cBEMissionInterface_isMissionCompleted(self, D_0043EE10[i].id))
                         n++;
                 }
             }
@@ -909,10 +909,10 @@ extern "C" int func_001543E0(void* self, int owner)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintmission", func_001544D0);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_001543E0(void* self, int owner);
+extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeak(void* self, int owner);
 
 // View of D_0043D950[].owner (offset 0x54); splat labels that address D_0043D9A4.
 struct sMissionOwnerView_001544D0
@@ -931,11 +931,11 @@ struct sEconFlags_001544D0
 };
 extern sEconFlags_001544D0 D_004A6CA8_flags[][10] __asm__("D_004A6CA8");
 
-extern "C" int func_001544D0(void* self, int profile, int character, int owner)
+extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* self, int profile, int character, int owner)
 {
     if (*(void**)((char*)D_004A28A8 + 0x84) != 0)
     {
-        return func_001543E0(self, owner);
+        return cBEMissionInterface_getNumberCompletedMissionsOnPeak(self, owner);
     }
     int n = 0;
     for (int i = 0; i < 88; i++)
@@ -982,7 +982,7 @@ extern "C" int func_001545B0(void* self, int index, int group)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001545F8);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberSessionsOnTrack);
 #ifdef SKIP_ASM
 struct sMissionEntry {
     int id;              // 0x00
@@ -993,7 +993,7 @@ struct sMissionEntry {
 
 extern sMissionEntry D_00440770[];
 
-extern "C" int func_001545F8(void* self, int id)
+extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* self, int id)
 {
     for (int i = 0; i < 22; i++) {
         if (D_00440770[i].id == id) {
@@ -1035,9 +1035,9 @@ extern "C" sMissionEntry func_00154678(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154760);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getPictureFileName);
 #ifdef SKIP_ASM
-extern "C" void* func_00154760(void* self, int id)
+extern "C" void* cBEMissionInterface_getPictureFileName(void* self, int id)
 {
     for (int i = 0; i < 22; i++) {
         if (D_00440770[i].id == id) {

@@ -105,7 +105,7 @@ extern "C" void* func_003457C8(void* p, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345828);
+INCLUDE_ASM("object/effectlink", cEffectModifier__cEffectModifier);
 #ifdef SKIP_ASM
 extern int D_004A3FF4;
 extern void* D_004912F8[];
@@ -118,7 +118,7 @@ struct sEffectLinkObj_5828 {
     int value;         // 0xC
 };
 
-extern "C" void func_00345828(void* self, int flags)
+extern "C" void cEffectModifier__cEffectModifier(void* self, int flags)
 {
     sEffectLinkObj_5828* o = (sEffectLinkObj_5828*)self;
     o->vt = D_004912F8;
@@ -132,7 +132,7 @@ extern "C" void func_00345828(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345890);
+INCLUDE_ASM("object/effectlink", cEffectModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sEffVEntry {
     short delta;
@@ -140,7 +140,7 @@ struct sEffVEntry {
     void (*fn)(void*, void*);
 };
 
-extern "C" void func_00345890(void* self, void* obj)
+extern "C" void cEffectModifier_writeToReplayFrame(void* self, void* obj)
 {
     sEffVEntry* vt = *(sEffVEntry**)obj;
     vt[5].fn((char*)obj + vt[5].delta, *(void**)((char*)self + 0xC));
@@ -249,15 +249,15 @@ extern "C" void* func_003459A8(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345AD0);
+INCLUDE_ASM("object/effectlink", cParticleModifier__cParticleModifier);
 #ifdef SKIP_ASM
 extern int D_004A3FF8;
 extern void* D_004912B0[];
 void operator_delete(int*);
 extern "C" void func_00370758(int* self, int flags);
-extern "C" void func_00345828(void* self, int flags);
+extern "C" void cEffectModifier__cEffectModifier(void* self, int flags);
 
-extern "C" void func_00345AD0(void* self, int flags)
+extern "C" void cParticleModifier__cParticleModifier(void* self, int flags)
 {
     char* s = (char*)self;
     *(void***)(s + 0x8) = D_004912B0;
@@ -267,24 +267,24 @@ extern "C" void func_00345AD0(void* self, int flags)
     }
     D_004A3FF8--;
     func_00370758((int*)(s + 0x50), 2);
-    func_00345828(self, flags);
+    cEffectModifier__cEffectModifier(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345B40);
+INCLUDE_ASM("object/effectlink", cParticleModifier_update);
 #ifdef SKIP_ASM
-extern "C" void func_00370788(void* self, float dt);
+extern "C" void cStaticEmitter_update(void* self, float dt);
 
-extern "C" void func_00345B40(void* self)
+extern "C" void cParticleModifier_update(void* self)
 {
     char* s = (char*)self;
     if (*(int*)(s + 0x1E4) == 0) {
         void* t = s + 0x50;
         if (*(float*)(s + 0x50) < 0.0f) {
-            func_00370788(t, 0.01666666753590107f);
+            cStaticEmitter_update(t, 0.01666666753590107f);
         } else {
-            func_00370788(t, 0.01666666753590107f);
+            cStaticEmitter_update(t, 0.01666666753590107f);
             if (*(float*)(s + 0x50) <= 0.0f) {
                 *(int*)(s + 0x1E4) = 1;
             }
@@ -294,20 +294,20 @@ extern "C" void func_00345B40(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345BC8);
+INCLUDE_ASM("object/effectlink", cParticleModifier_render);
 #ifdef SKIP_ASM
-extern "C" void func_003708C0(void*);
+extern "C" void cStaticEmitter_render1(void*);
 
-extern "C" void func_00345BC8(void* self)
+extern "C" void cParticleModifier_render(void* self)
 {
     if (*(int*)((char*)self + 0x1E4) == 0) {
-        func_003708C0((char*)self + 0x50);
+        cStaticEmitter_render1((char*)self + 0x50);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/effectlink", func_00345BF0);
+INCLUDE_ASM("object/effectlink", cParticleModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sEffectLinkVEntry5BF0 {
     short delta;
@@ -315,11 +315,11 @@ struct sEffectLinkVEntry5BF0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00370AA8(void* self, void* stream);
+extern "C" void cStaticEmitter_writeToReplayFrame(void* self, void* stream);
 
-extern "C" void func_00345BF0(void* self, void* stream)
+extern "C" void cParticleModifier_writeToReplayFrame(void* self, void* stream)
 {
-    func_00345890(self, stream);
+    cEffectModifier_writeToReplayFrame(self, stream);
     sEffectLinkVEntry5BF0* e = &(*(sEffectLinkVEntry5BF0**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x1E4, 4);
     if (*(int*)((char*)self + 0x1E4) == 0) {
@@ -327,7 +327,7 @@ extern "C" void func_00345BF0(void* self, void* stream)
         e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x1E0), 0xD8);
         e = &(*(sEffectLinkVEntry5BF0**)stream)[1];
         e->fn((char*)stream + e->delta, (char*)self + 0x10, 0x40);
-        func_00370AA8((char*)self + 0x50, stream);
+        cStaticEmitter_writeToReplayFrame((char*)self + 0x50, stream);
     }
 }
 #endif
@@ -437,15 +437,15 @@ extern "C" sEff00345C90* func_00345D80(sEff00345C90* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345E88);
+INCLUDE_ASM("object/effectlink", cDynamicParticleModifier__cDynamicParticleModifier);
 #ifdef SKIP_ASM
 extern int D_004A3FFC;
 extern void* D_00491268[];
 void operator_delete(int*);
-extern "C" void func_00370C08(void* self, int flags);
-extern "C" void func_00345828(void* self, int flags);
+extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags);
+extern "C" void cEffectModifier__cEffectModifier(void* self, int flags);
 
-extern "C" void func_00345E88(void* self, int flags)
+extern "C" void cDynamicParticleModifier__cDynamicParticleModifier(void* self, int flags)
 {
     char* s = (char*)self;
     *(void***)(s + 0x8) = D_00491268;
@@ -454,8 +454,8 @@ extern "C" void func_00345E88(void* self, int flags)
         operator_delete(buf);
     }
     D_004A3FFC--;
-    func_00370C08(s + 0x60, 2);
-    func_00345828(self, flags);
+    cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(s + 0x60, 2);
+    cEffectModifier__cEffectModifier(self, flags);
 }
 #endif
 
@@ -518,13 +518,13 @@ extern "C" void func_00345EF8(sEffectLink5EF8* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00345F90);
+INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_update);
 #ifdef SKIP_ASM
 struct sEffectLink5EF8;
 extern "C" void func_00345EF8(sEffectLink5EF8* self);
 extern "C" void func_003710D0(void* sub, void* a, void* b, int flag, float dt);
 
-extern "C" void func_00345F90(void* self)
+extern "C" void cDynamicParticleModifier_update(void* self)
 {
     char* s = (char*)self;
     if (*(int*)(s + 0x18) != 0) {
@@ -553,23 +553,23 @@ extern "C" void func_00345F90(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346060__FPv);
+INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_fadeEffect__FPv);
 #ifdef SKIP_ASM
-void func_00346060(void* self)
+void cDynamicParticleModifier_fadeEffect(void* self)
 {
     *(int*)((char*)self + 0x14) = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346070);
+INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_render);
 #ifdef SKIP_ASM
-extern "C" void func_00371380(void*, int);
+extern "C" void cDynamicEmitter_render(void*, int);
 
-extern "C" void func_00346070(void* self)
+extern "C" void cDynamicParticleModifier_render(void* self)
 {
     if (*(int*)((char*)self + 0x18) == 0) {
-        func_00371380((char*)self + 0x60, 7);
+        cDynamicEmitter_render((char*)self + 0x60, 7);
     }
 }
 #endif
@@ -587,7 +587,7 @@ extern "C" void func_003712B8(void* self, void* stream);
 
 extern "C" void func_003460A0(void* self, void* stream)
 {
-    func_00345890(self, stream);
+    cEffectModifier_writeToReplayFrame(self, stream);
     sEffectLinkVEntry60A0* e = &(*(sEffectLinkVEntry60A0**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x10, 0x50);
     if (*(int*)((char*)self + 0x18) == 0) {
@@ -674,30 +674,30 @@ extern "C" void* func_003461C0(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346228);
+INCLUDE_ASM("object/effectlink", cHaloModifier__cHaloModifier);
 #ifdef SKIP_ASM
 extern int D_004A4000;
 extern void* D_00491220[];
-extern "C" void func_00345828(void* self, int flags);
+extern "C" void cEffectModifier__cEffectModifier(void* self, int flags);
 
 struct sEffectLinkObj_6228 {
     cEffectLink link;  // 0x0
     void** vt;         // 0x8
 };
 
-extern "C" void func_00346228(void* self, int flags)
+extern "C" void cHaloModifier__cHaloModifier(void* self, int flags)
 {
     ((sEffectLinkObj_6228*)self)->vt = D_00491220;
     D_004A4000--;
-    func_00345828(self, flags);
+    cEffectModifier__cEffectModifier(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346258);
+INCLUDE_ASM("object/effectlink", cHaloModifier_update);
 #ifdef SKIP_ASM
 // Advance a rotation angle (degrees) by an integer step, wrapping to 0 at +/-360.
-extern "C" void func_00346258(void* self)
+extern "C" void cHaloModifier_update(void* self)
 {
     float a = *(float*)((char*)self + 0x30) + (float)*(int*)((char*)self + 0x2c);
     *(float*)((char*)self + 0x30) = a;
@@ -708,7 +708,7 @@ extern "C" void func_00346258(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_003462A0);
+INCLUDE_ASM("object/effectlink", cHaloModifier_render);
 #ifdef SKIP_ASM
 struct sEffVec4_62A0 {
     float x, y, z, w;
@@ -721,7 +721,7 @@ struct sEffMtx_62A0 {
 extern "C" void func_0034FED8(void* a, int b, sEffMtx_62A0* out);
 extern "C" void func_002D1D10(sEffVec4_62A0* pos, void* p, int n, float a, float b);
 
-extern "C" void func_003462A0(void* self)
+extern "C" void cHaloModifier_render(void* self)
 {
     sEffMtx_62A0 m;
     void* p = (char*)self + 0x10;
@@ -741,18 +741,18 @@ struct sEffectLinkVEntry {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00345890(void* self, void* stream);
+extern "C" void cEffectModifier_writeToReplayFrame(void* self, void* stream);
 
 extern "C" void func_00346300(void* self, void* stream)
 {
-    func_00345890(self, stream);
+    cEffectModifier_writeToReplayFrame(self, stream);
     sEffectLinkVEntry* vt = *(sEffectLinkVEntry**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x10, 0x30);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346350);
+INCLUDE_ASM("object/effectlink", cFlexBridgeNode_cFlexBridgeNode);
 #ifdef SKIP_ASM
 struct sEffV3_346350 {
     float x, y, z;
@@ -776,10 +776,10 @@ struct sEffVE_346350 {
 extern "C" void* func_0034FB00(void* self, int a1, int a2, int a3);
 void func_00353DA8(void* self);
 extern "C" void func_00353E08(void* self, int a1, float len);
-extern "C" void func_00346D38(void* self);
+extern "C" void cFlexBridgeNode_initSpringNodes(void* self);
 extern char* D_004A5B80;
 extern "C" void cFlexBridgeNode_setupGrid(void* self);
-extern "C" void func_003475D8(void*);
+extern "C" void cFlexBridgeNode_updateGrid(void*);
 extern void* D_00490270[];
 
 // PORT: SN sqrt.s asm helper (PS2 FPU).
@@ -800,7 +800,7 @@ struct sEffFlags_346350 {
     unsigned int b6 : 1;
 };
 
-extern "C" void* func_00346350(void* self, int a1, int a2, int a3)
+extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int a1, int a2, int a3)
 {
     func_0034FB00(self, a1, 5, a2);
     *(void***)((char*)self + 0xC) = D_00490270;
@@ -818,8 +818,8 @@ extern "C" void* func_00346350(void* self, int a1, int a2, int a3)
     d.z = pts[1].z - pts[0].z;
     func_00353E08((char*)self + 0x50, a3, sqrtf_346350(d.x * d.x + d.y * d.y + d.z * d.z));
     cFlexBridgeNode_setupGrid(self);
-    func_00346D38(self);
-    func_003475D8(self);
+    cFlexBridgeNode_initSpringNodes(self);
+    cFlexBridgeNode_updateGrid(self);
     unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
     *f = (*f & 0xFFFFFFFD) | 4;
     f = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
@@ -829,12 +829,12 @@ extern "C" void* func_00346350(void* self, int a1, int a2, int a3)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_003464E0);
+INCLUDE_ASM("object/effectlink", cFlexBridgeNode_cFlexBridgeNode1);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
 extern "C" void* func_00353E80(void* self, void* stream);
 extern "C" void cFlexBridgeNode_setupGrid(void* self);
-extern "C" void func_003475D8(void*);
+extern "C" void cFlexBridgeNode_updateGrid(void*);
 extern void* D_00490270[];
 
 struct sEffectLinkVEntry64E0 {
@@ -843,7 +843,7 @@ struct sEffectLinkVEntry64E0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void* func_003464E0(void* self, void* a1, void* stream)
+extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(void* self, void* a1, void* stream)
 {
     void* p = (char*)self + 0x20;
     cInstanceNode_cInstanceNode(self, a1, stream);
@@ -852,19 +852,19 @@ extern "C" void* func_003464E0(void* self, void* a1, void* stream)
     cFlexBridgeNode_setupGrid(self);
     sEffectLinkVEntry64E0* e = &(*(sEffectLinkVEntry64E0**)stream)[2];
     e->fn((char*)stream + e->delta, p, 0x30);
-    func_003475D8(self);
+    cFlexBridgeNode_updateGrid(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346568);
+INCLUDE_ASM("object/effectlink", cFlexBridgeNode__cFlexBridgeNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cMemMan_free(void* ptr);
-extern "C" void* func_002D1BE0();
-extern "C" void func_00353DB8(void* self, int flags);
-extern "C" void func_0034FBF0(void* self, int flags);
+extern "C" void* cObjectInterface_getNash();
+extern "C" void cSpring__cSpring(void* self, int flags);
+extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 struct sVec4_346568 {
     float x, y, z, w;
@@ -881,7 +881,7 @@ struct sInst_346568 {
     float max[3];
 };
 
-extern "C" void func_003291E0(void* world, int type, void* id, sBox_346568* box, sBox_346568* old);
+extern "C" void nash_Nash_movenode(void* world, int type, void* id, sBox_346568* box, sBox_346568* old);
 
 struct sRVEntry_346568 {
     short delta;
@@ -894,7 +894,7 @@ struct sRCtx_346568 {
 };
 extern sRCtx_346568* D_004A5B80_346568 __asm__("D_004A5B80");
 
-extern "C" void func_00346568(char* self, int flags)
+extern "C" void cFlexBridgeNode__cFlexBridgeNode(char* self, int flags)
 {
     *(void***)(self + 0xC) = D_00490270;
     if (*(void**)(self + 0x84) != 0) {
@@ -921,9 +921,9 @@ extern "C" void func_00346568(char* self, int flags)
     t.z = inst->max[2];
     t.w = 1.0f;
     *(sVec4_346568*)(self + 0xA0) = t;
-    func_003291E0(func_002D1BE0(), 0, inst, box, &old);
-    func_00353DB8(self + 0x50, 2);
-    func_0034FBF0(self, flags);
+    nash_Nash_movenode(cObjectInterface_getNash(), 0, inst, box, &old);
+    cSpring__cSpring(self + 0x50, 2);
+    cInstanceNode__cInstanceNode(self, flags);
 }
 #endif
 

@@ -24,12 +24,12 @@ extern "C" void* cWScriptMan_addProcess(void* self, int a1, int a2, int front)
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess1);
 #ifdef SKIP_ASM
 extern char D_00489918[];
-extern "C" void* func_00307128(void* self, void* man, int a1, int a2, int a3);
+extern "C" void* cWScriptMission_cWScriptMission(void* self, void* man, int a1, int a2, int a3);
 int func_0030B2C0(void* self, void* a1);
 
 extern "C" void* cWScriptMan_addProcess1(void* self, int a1, int a2, int a3, int front)
 {
-    void* p = func_00307128(cMemMan_alloc(0x78, D_00489918, 0x20000000, 0), self, a1, a2, a3);
+    void* p = cWScriptMission_cWScriptMission(cMemMan_alloc(0x78, D_00489918, 0x20000000, 0), self, a1, a2, a3);
     if (front != 0) {
         func_0030B2C0((char*)self + 0x2BC, p);
     } else {
@@ -51,24 +51,24 @@ public:
 };
 
 extern "C" void* func_0030B320_a(void* self, int id) __asm__("func_0030B320");
-extern "C" int func_0030B2D0_a(void* self, void* node) __asm__("func_0030B2D0");
+extern "C" int cProcessList_removeProcess_a(void* self, void* node) __asm__("cProcessList_removeProcess");
 
 extern "C" void func_00309618(char* self, int id) {
     cWSObj_309618* obj = (cWSObj_309618*)func_0030B320_a(self + 0x2B8, id);
     if (obj != 0) {
-        func_0030B2D0_a(self + 0x2B8, obj);
+        cProcessList_removeProcess_a(self + 0x2B8, obj);
         obj->v00(3);
         return;
     }
     obj = (cWSObj_309618*)func_0030B320_a(self + 0x2BC, id);
     if (obj != 0) {
-        func_0030B2D0_a(self + 0x2BC, obj);
+        cProcessList_removeProcess_a(self + 0x2BC, obj);
         obj->v00(3);
         return;
     }
     obj = (cWSObj_309618*)func_0030B320_a(self + 0x2B4, id);
     if (obj != 0) {
-        func_0030B2D0_a(self + 0x2B4, obj);
+        cProcessList_removeProcess_a(self + 0x2B4, obj);
         obj->v00(3);
     }
 }
@@ -77,11 +77,11 @@ extern "C" void func_00309618(char* self, int id) {
 INCLUDE_ASM("wscript/wscriptman", func_003096F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_0030B2D0_vv(void* self, void* node) __asm__("func_0030B2D0");
+extern "C" int cProcessList_removeProcess_vv(void* self, void* node) __asm__("cProcessList_removeProcess");
 extern "C" void func_003096F0(char* self, void* node) {
-    if (func_0030B2D0_vv(self + 0x2B8, node) == 0 &&
-        func_0030B2D0_vv(self + 0x2B4, node) == 0) {
-        func_0030B2D0_vv(self + 0x2BC, node);
+    if (cProcessList_removeProcess_vv(self + 0x2B8, node) == 0 &&
+        cProcessList_removeProcess_vv(self + 0x2B4, node) == 0) {
+        cProcessList_removeProcess_vv(self + 0x2BC, node);
     }
 }
 #endif
@@ -213,34 +213,34 @@ extern "C" void func_003099F8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_00309A60);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_processStart);
 #ifdef SKIP_ASM
 struct cWScriptListHead;
 struct cWScriptListNode;
-extern "C" int func_0030B2D0(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
 int func_0030B260(void* self, void* a1);
 
-extern "C" void func_00309A60(void* self, cWScriptListNode* node)
+extern "C" void cWScriptMan_processStart(void* self, cWScriptListNode* node)
 {
-    func_0030B2D0((cWScriptListHead*)((char*)self + 0x2B4), node);
+    cProcessList_removeProcess((cWScriptListHead*)((char*)self + 0x2B4), node);
     func_0030B260((char*)self + 0x2B8, node);
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_00309AA0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_processEnd);
 #ifdef SKIP_ASM
 struct cWScriptListHead;
 struct cWScriptListNode;
-extern "C" int func_0030B2D0(cWScriptListHead* self, cWScriptListNode* node);
-extern "C" int func_0030B428(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode* node);
 int func_0030B260(void* self, void* a1);
 
-extern "C" void func_00309AA0(void* self, cWScriptListNode* node)
+extern "C" void cWScriptMan_processEnd(void* self, cWScriptListNode* node)
 {
     cWScriptListHead* list = (cWScriptListHead*)((char*)self + 0x2B8);
-    if (func_0030B428(list, node) != 0) {
-        func_0030B2D0(list, node);
+    if (cProcessList_findProcess(list, node) != 0) {
+        cProcessList_removeProcess(list, node);
         func_0030B260((char*)self + 0x2B4, node);
     }
 }
@@ -250,14 +250,14 @@ extern "C" void func_00309AA0(void* self, cWScriptListNode* node)
 INCLUDE_ASM("wscript/wscriptman", func_00309B00);
 #ifdef SKIP_ASM
 int func_0030B260(void* self, void* a1);
-extern "C" int func_0030B2D0(cWScriptListHead* self, cWScriptListNode* node);
-extern "C" int func_0030B428(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode* node);
 
 extern "C" void func_00309B00(void* self, cWScriptListNode* node)
 {
     cWScriptListHead* list = (cWScriptListHead*)((char*)self + 0x2B8);
-    if (func_0030B428(list, node) != 0) {
-        func_0030B2D0(list, node);
+    if (cProcessList_findProcess(list, node) != 0) {
+        cProcessList_removeProcess(list, node);
         func_0030B260((char*)self + 0x2B4, node);
     }
     *(unsigned int*)((char*)self + 0x2A0) = 0xFFFFFFFF;
@@ -265,15 +265,15 @@ extern "C" void func_00309B00(void* self, cWScriptListNode* node)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_00309B70);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getScriptCode);
 #ifdef SKIP_ASM
 extern "C" int func_003A6D18(void*, int*);
 
-static inline bool func_00309B70_valid(int id) { return id != -1; }
+static inline bool cWScriptMan_getScriptCode_valid(int id) { return id != -1; }
 
-extern "C" int func_00309B70(void* self, int id)
+extern "C" int cWScriptMan_getScriptCode(void* self, int id)
 {
-    if (func_00309B70_valid(id)) {
+    if (cWScriptMan_getScriptCode_valid(id)) {
         return func_003A6D18(*(void**)((char*)self + 0x28C), &id);
     }
     return 0;
@@ -363,7 +363,7 @@ struct sLunoCall_9C88 {
 void func_00226600(void* self, int a1, int a2);
 extern "C" void* func_002224A8(void* self);
 extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
-extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(func_00309DD0_sValue* self, int flags);
 extern "C" void func_00309C88(void* self, int* handle)
 {
     sLunoValue_9C88 arg;
@@ -375,7 +375,7 @@ extern "C" void func_00309C88(void* self, int* handle)
     void* table = *(void**)((char*)self + (*(unsigned char*)handle << 2) + 0x3CC);
     func_002224A8(&call);
     func_002224B8(&call, &arg, table, &ret);
-    func_00225B90((func_00309DD0_sValue*)&ret, 2);
+    luno_cLunoVar__cLunoVar((func_00309DD0_sValue*)&ret, 2);
 }
 #endif
 
@@ -396,7 +396,7 @@ struct func_00309D20_sCall {
 void func_00226600(void* self, int a1, int a2);
 extern "C" void* func_002224A8(void* self);
 extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
-extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(func_00309DD0_sValue* self, int flags);
 
 extern "C" void func_00309D20(void* self, int* handle, int id)
 {
@@ -412,7 +412,7 @@ extern "C" void func_00309D20(void* self, int* handle, int id)
     func_002224A8(&call);
     func_002224B8(&call, &arg, table, &ret);
     *(int*)((char*)self + 0x290) = saved;
-    func_00225B90((func_00309DD0_sValue*)&ret, 2);
+    luno_cLunoVar__cLunoVar((func_00309DD0_sValue*)&ret, 2);
 }
 #endif
 
@@ -428,7 +428,7 @@ struct func_00309DD0_sValue {
 
 void* func_00226620(void* self);
 extern "C" func_00309DD0_sValue* func_00225248(void* table, func_00309DD0_sValue* key);
-extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(func_00309DD0_sValue* self, int flags);
 
 extern "C" int func_00309DD0(void* self, int idx, int value)
 {
@@ -440,7 +440,7 @@ extern "C" int func_00309DD0(void* self, int idx, int value)
         key.type = 3;
         *(int*)func_00226620(&key) = value;
         int r = func_00225248(*slot, &key)->type == 5;
-        func_00225B90(&key, 2);
+        luno_cLunoVar__cLunoVar(&key, 2);
         return r;
     }
     return 0;
@@ -476,13 +476,13 @@ extern "C" void func_00309E50(void* self, int idx, int value)
     func_00309E50_sCall call;
     func_002224A8(&call);
     func_002224B8(&call, &arg, *slot, &ret);
-    func_00225B90(&ret, 2);
-    func_00225B90(&key, 2);
+    luno_cLunoVar__cLunoVar(&ret, 2);
+    luno_cLunoVar__cLunoVar(&key, 2);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("wscript/wscriptman", func_00309F18);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_runGlobalScripts);
 #ifdef SKIP_ASM
 struct cWorldView;
 int cWorldView_getNumSections(cWorldView* view);
@@ -519,7 +519,7 @@ struct sWSMan9F18 {
 struct cWScriptIdTable;
 extern "C" void func_0030C390(cWScriptIdTable* self);
 extern "C" void func_00309C88(void* self, int* idx);
-extern "C" void func_002D9B40(void);
+extern "C" void cAvalanche_reset(void);
 extern "C" int func_003A6BA8(void* world, int i);
 extern "C" int* func_003A6BD8(void* world, int i);
 
@@ -528,12 +528,12 @@ static inline bool wsIsType3_9F18(sWSSection9F18* s)
     return s->type == 3;
 }
 
-extern "C" void func_00309F18(sWSMan9F18* self)
+extern "C" void cWScriptMan_runGlobalScripts(sWSMan9F18* self)
 {
     int i;
     int saved;
     int n;
-    func_002D9B40();
+    cAvalanche_reset();
     {
         int k;
         for (k = 0; k < 1; k++) {
@@ -596,9 +596,9 @@ struct sVEF_30A060 {
 void func_00226600(void* self, int a1, int a2);
 extern "C" void* func_002224A8(void* self);
 extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
-extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
-extern "C" void* func_00224DA0(void* mem, int a1);
-extern "C" void func_00224DF0(void* obj, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(func_00309DD0_sValue* self, int flags);
+extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
+extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_00309C88(void* self, int* idx);
 extern "C" int func_003A6B78(void* world, int id, int flag);
@@ -656,12 +656,12 @@ extern "C" void func_0030A060(void* self, void* a1, void* a2, void* obj)
                 if (table != 0) {
                     func_002224B8(&call, &arg, table, &ret);
                 } else {
-                    table = func_00224DA0(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
+                    table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
                     func_002224B8(&call, &arg, table, &ret);
                     if (table != 0)
-                        func_00224DF0(table, 3);
+                        luno_cLunoTable__cLunoTable(table, 3);
                 }
-                func_00225B90((func_00309DD0_sValue*)&ret, 2);
+                luno_cLunoVar__cLunoVar((func_00309DD0_sValue*)&ret, 2);
             }
         }
     }
@@ -981,7 +981,7 @@ extern "C" void func_0030A700(void* self)
 INCLUDE_ASM("wscript/wscriptman", func_0030A728);
 #ifdef SKIP_ASM
 extern "C" void* func_0030B320(void* self, int id);
-extern "C" void func_00307D78(void* obj);
+extern "C" void cWScriptProcess_end(void* obj);
 extern "C" void func_00307E10(void* obj);
 
 extern "C" void func_0030A728(void* self, unsigned int id, int kind)
@@ -1017,7 +1017,7 @@ extern "C" void func_0030A728(void* self, unsigned int id, int kind)
             obj = func_0030B320((char*)self + 0x2B8, id);
         }
         if (obj != 0) {
-            func_00307D78(obj);
+            cWScriptProcess_end(obj);
         }
         break;
     }
@@ -1025,7 +1025,7 @@ extern "C" void func_0030A728(void* self, unsigned int id, int kind)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030A868);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doMissionCmd);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1035,12 +1035,12 @@ extern "C" void func_0030A728(void* self, unsigned int id, int kind);
 extern "C" void func_0030C7C0_a(void* queue, unsigned int id, int kind, int ctx) __asm__("func_0030C7C0");
 extern "C" void* func_0030AEB8(void* self);
 extern "C" int func_0030B8C0(void* self);
-extern "C" int func_00153D78(void* iface, unsigned int id);
+extern "C" int cBEMissionInterface_isMissionCompleted(void* iface, unsigned int id);
 extern "C" int func_00153DD0(void* iface, unsigned int id);
 extern "C" int func_00153E28(void* iface, unsigned int id);
-extern "C" int func_00153E80(void* iface, unsigned int id);
+extern "C" int cBEMissionInterface_isMissionAvailable(void* iface, unsigned int id);
 extern "C" int func_00153ED8(void* iface, unsigned int id);
-extern "C" int func_00153FD8(void* iface, unsigned int id);
+extern "C" int cBEMissionInterface_getNextMissionID(void* iface, unsigned int id);
 extern "C" void* func_0028B180();
 extern "C" void func_0029D6E0(void* p, unsigned int id);
 extern "C" void func_0029DBB0(void* p, int a1);
@@ -1078,7 +1078,7 @@ public:
 // PORT: the unit defines func_0030B388 later with its own class type
 extern "C" cWSObj_30A868* func_0030B388_a(void* self, unsigned int id) __asm__("func_0030B388");
 
-extern "C" int func_0030A868(char* self, unsigned int id, unsigned int cmd, int ctx)
+extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned int cmd, int ctx)
 {
     int force = 0;
     if (cmd == 15 || cmd == 19) {
@@ -1213,7 +1213,7 @@ extern "C" int func_0030A868(char* self, unsigned int id, unsigned int cmd, int 
                 break;
             }
         }
-        result = func_00153FD8(iface, id) == -1;
+        result = cBEMissionInterface_getNextMissionID(iface, id) == -1;
         break;
     case 14:
         if (id == 0xFFFFFFFF) {
@@ -1224,7 +1224,7 @@ extern "C" int func_0030A868(char* self, unsigned int id, unsigned int cmd, int 
                 break;
             }
         }
-        result = func_00153E80(iface, id) != 0;
+        result = cBEMissionInterface_isMissionAvailable(iface, id) != 0;
         break;
     case 15:
         if (id == 0xFFFFFFFF) {
@@ -1235,7 +1235,7 @@ extern "C" int func_0030A868(char* self, unsigned int id, unsigned int cmd, int 
                 break;
             }
         }
-        result = func_00153D78(iface, id) != 0;
+        result = cBEMissionInterface_isMissionCompleted(iface, id) != 0;
         break;
     }
     *(int*)self = saved;
@@ -1244,32 +1244,32 @@ extern "C" int func_0030A868(char* self, unsigned int id, unsigned int cmd, int 
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030AC98);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_runScriptCode);
 #ifdef SKIP_ASM
 struct func_00309DD0_sValue;
 void func_00226600(void* self, int a1, int a2);
 extern "C" void* func_002224A8(void* self);
 extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
-extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
-extern "C" void* func_00224DA0(void* mem, int a1);
-extern "C" void func_00224DF0(void* obj, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(func_00309DD0_sValue* self, int flags);
+extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
+extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern char D_004898D8[];
 
 // cLunoValue: { word0, word1, type }
-struct func_0030AC98_sValue {
+struct cWScriptMan_runScriptCode_sValue {
     int word0;
     int word1;
     int type;
 };
-struct func_0030AC98_sCall {
+struct cWScriptMan_runScriptCode_sCall {
     int pad[4];
 };
 
-extern "C" void func_0030AC98(void* self, void* obj, int a2)
+extern "C" void cWScriptMan_runScriptCode(void* self, void* obj, int a2)
 {
-    func_0030AC98_sValue arg;
-    func_0030AC98_sValue ret;
-    func_0030AC98_sCall call;
+    cWScriptMan_runScriptCode_sValue arg;
+    cWScriptMan_runScriptCode_sValue ret;
+    cWScriptMan_runScriptCode_sCall call;
     int savedId;
     void* savedObj = *(void**)((char*)self + 0x2A4);
     *(void**)((char*)self + 0x2A4) = obj;
@@ -1282,15 +1282,15 @@ extern "C" void func_0030AC98(void* self, void* obj, int a2)
     if (table != 0) {
         func_002224B8(&call, &arg, table, &ret);
     } else {
-        table = func_00224DA0(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
+        table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
         func_002224B8(&call, &arg, table, &ret);
         if (table != 0) {
-            func_00224DF0(table, 3);
+            luno_cLunoTable__cLunoTable(table, 3);
         }
     }
     *(void**)((char*)self + 0x2A4) = savedObj;
     *(int*)((char*)self + 0x290) = savedId;
-    func_00225B90((func_00309DD0_sValue*)&ret, 2);
+    luno_cLunoVar__cLunoVar((func_00309DD0_sValue*)&ret, 2);
 }
 #endif
 
@@ -1301,9 +1301,9 @@ struct func_00309DD0_sValue;
 void func_00226600(void* self, int a1, int a2);
 extern "C" void* func_002224A8(void* self);
 extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
-extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
-extern "C" void* func_00224DA0(void* mem, int a1);
-extern "C" void func_00224DF0(void* obj, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(func_00309DD0_sValue* self, int flags);
+extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
+extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern char D_004898D8[];
 
 // cLunoValue: { word0, word1, type }
@@ -1333,15 +1333,15 @@ extern "C" void func_0030ADA8(void* self, void* obj, int a2)
     if (table != 0) {
         func_002224B8(&call, &arg, table, &ret);
     } else {
-        table = func_00224DA0(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
+        table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
         func_002224B8(&call, &arg, table, &ret);
         if (table != 0) {
-            func_00224DF0(table, 3);
+            luno_cLunoTable__cLunoTable(table, 3);
         }
     }
     *(void**)((char*)self + 0x2A8) = savedObj;
     *(int*)((char*)self + 0x290) = savedId;
-    func_00225B90((func_00309DD0_sValue*)&ret, 2);
+    luno_cLunoVar__cLunoVar((func_00309DD0_sValue*)&ret, 2);
 }
 #endif
 
@@ -1467,7 +1467,7 @@ extern "C" void func_0030B068(func_0030B068_cNode** self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B0E8);
+INCLUDE_ASM("wscript/wscriptman", cProcessList_unloadSection);
 #ifdef SKIP_ASM
 struct sVE_B0E8 {
     short delta;
@@ -1492,7 +1492,7 @@ static inline void destroy_B0E8(sNode_B0E8* n)
 }
 
 // Deletes the leading run of nodes with the given key, then the run after the new head.
-extern "C" void func_0030B0E8(sNode_B0E8** head, int key)
+extern "C" void cProcessList_unloadSection(sNode_B0E8** head, int key)
 {
     if (*head == 0) {
         return;
@@ -1618,9 +1618,9 @@ int func_0030B2C0(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B2D0);
+INCLUDE_ASM("wscript/wscriptman", cProcessList_removeProcess);
 #ifdef SKIP_ASM
-extern "C" int func_0030B2D0(cWScriptListHead* self, cWScriptListNode* node)
+extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node)
 {
     if (node == self->head) {
         self->head = node->next;
@@ -1707,9 +1707,9 @@ extern "C" void func_0030B3F0(void* self, int name)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B428);
+INCLUDE_ASM("wscript/wscriptman", cProcessList_findProcess);
 #ifdef SKIP_ASM
-extern "C" int func_0030B428(cWScriptListHead* self, cWScriptListNode* node)
+extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode* node)
 {
     cWScriptListNode* p;
     for (p = (cWScriptListNode*)self->head; p != 0; p = (cWScriptListNode*)p->next) {
@@ -1816,12 +1816,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B540);
 #ifdef SKIP_ASM
 extern char* D_004A28A8;
 extern "C" void func_0026CDF8(void* p);
-extern "C" void func_0026F228(void* p);
+extern "C" void cReplay_reset(void* p);
 
 extern "C" void func_0030B540(void* self)
 {
     func_0026CDF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
-    func_0026F228(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    cReplay_reset(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
     *(int*)((char*)self + 0x2AC) = 1;
     *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
 }
@@ -1833,7 +1833,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B590);
 extern "C" int func_0026CAF8(void*, int);
 extern "C" int func_0030B590(char* self) {
     func_0026CDF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
-    func_0026F228(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    cReplay_reset(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
     if (func_0026CAF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34), *(int*)(self + 0x2A0)) != 0) {
         *(int*)(self + 0x2AC) = 5;
         *(int*)(self + 0x2B0) = *(int*)(self + 0x2A0);
@@ -1862,16 +1862,16 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B658);
 extern char* D_004A28A8;
 extern "C" void func_0026CDF8(void* p);
 void func_0026CBB0(void* self);
-extern "C" void func_0026F228(void* p);
-extern "C" void func_0026F7B8(int* self);
+extern "C" void cReplay_reset(void* p);
+extern "C" void cReplay_startRace(int* self);
 extern "C" void func_001235F8(void* self);
 
 extern "C" void func_0030B658(void* self)
 {
     func_0026CDF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
     func_0026CBB0(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
-    func_0026F228(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
-    func_0026F7B8(*(int**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    cReplay_reset(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    cReplay_startRace(*(int**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
     char* riders = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
     func_001235F8(*(void**)(riders + (*(int*)self << 2) + 0x28));
     *(int*)((char*)self + 0x2AC) = 3;
@@ -1885,14 +1885,14 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B6F8);
 #ifdef SKIP_ASM
 extern char* D_004A28A8;
 extern "C" void func_0026CDF8(void* p);
-extern "C" void func_0026F228(void* p);
-extern "C" void func_0026F7B8(int* self);
+extern "C" void cReplay_reset(void* p);
+extern "C" void cReplay_startRace(int* self);
 
 extern "C" void func_0030B6F8(void* self)
 {
     func_0026CDF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
-    func_0026F228(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
-    func_0026F7B8(*(int**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    cReplay_reset(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    cReplay_startRace(*(int**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
     *(int*)((char*)self + 0x2AC) = 2;
     *(int*)((char*)self + 0x2B0) = *(int*)((char*)self + 0x2A0);
 }
@@ -1904,16 +1904,16 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B758);
 extern char* D_004A28A8;
 extern "C" void func_0026CDF8(void* p);
 void func_0026CBB0(void* self);
-extern "C" void func_0026F228(void* p);
-extern "C" void func_0026F7B8(int* self);
+extern "C" void cReplay_reset(void* p);
+extern "C" void cReplay_startRace(int* self);
 extern "C" void func_001235F8(void* self);
 
 extern "C" void func_0030B758(void* self)
 {
     func_0026CDF8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
     func_0026CBB0(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34));
-    func_0026F228(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
-    func_0026F7B8(*(int**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    cReplay_reset(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
+    cReplay_startRace(*(int**)(*(char**)(D_004A28A8 + 0x84) + 0x28));
     char* riders = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC);
     func_001235F8(*(void**)(riders + (*(int*)self << 2) + 0x28));
     *(int*)((char*)self + 0x2AC) = 4;
@@ -1925,7 +1925,7 @@ extern "C" void func_0030B758(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030B7F8);
 #ifdef SKIP_ASM
-extern "C" void func_00307D78(void* obj);
+extern "C" void cWScriptProcess_end(void* obj);
 extern "C" void func_0030C790(void* self);
 
 extern "C" void func_0030B7F8(void* self)
@@ -1934,7 +1934,7 @@ extern "C" void func_0030B7F8(void* self)
     if (id != 0xFFFFFFFF) {
         func_0030B388_cObj* obj = func_0030B388((char*)self + 0x2B8, id);
         if (obj != 0) {
-            func_00307D78(obj);
+            cWScriptProcess_end(obj);
         }
         *(int*)((char*)self + 0x2AC) = 0;
         *(unsigned int*)((char*)self + 0x2B0) = 0xFFFFFFFF;
@@ -2020,7 +2020,7 @@ extern "C" void func_0030B928(void* self, unsigned int id, int arg)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B9A0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_collect);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
@@ -2031,7 +2031,7 @@ extern "C" void* func_0028B180();
 extern "C" void func_0029CED8(void*, int, void*, float);
 extern "C" int func_00144C98(void* iface);
 extern "C" int func_00151178(void* self, int level);
-extern "C" void func_0010F338(void* rider, int level, int a2);
+extern "C" void cRider_flagEventAddCollectible(void* rider, int level, int a2);
 extern char* D_004A28A8;
 
 struct sWSSlot_B9A0 {
@@ -2039,7 +2039,7 @@ struct sWSSlot_B9A0 {
     char pad[0x10C - 4];
 };
 
-extern "C" void func_0030B9A0(void* self, int rider, int id, int a3)
+extern "C" void cWScriptMan_collect(void* self, int rider, int id, int a3)
 {
     sWSSlot_B9A0* slots = (sWSSlot_B9A0*)((char*)self + 0x2C0);
     int i;
@@ -2051,7 +2051,7 @@ extern "C" void func_0030B9A0(void* self, int rider, int id, int a3)
             void* i11 = cBE_getInterface_Fv(cBE_getBE(), 0xB);
             int lvl = func_00144C98(i0);
             int v = func_00151178(i11, lvl);
-            func_0010F338(*(void**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + (rider << 2) + 0x28), lvl, v);
+            cRider_flagEventAddCollectible(*(void**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + (rider << 2) + 0x28), lvl, v);
             return;
         }
     }
@@ -2236,7 +2236,7 @@ extern "C" int func_0030C700(void* a, func_0030C700_cObj* obj);
 class func_0030BEE8_cStream;
 extern "C" void func_0030BEE8(void* self, cWScriptListHead* list, func_0030BEE8_cStream* stream);
 extern "C" void func_00224F68(void* obj);
-extern "C" void func_002259A8(void* obj, cStream_30BD20* stream, int a2);
+extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, cStream_30BD20* stream, int a2);
 
 extern "C" void func_0030BD20(sWSMan_30BD20* self, cStream_30BD20* stream)
 {
@@ -2272,7 +2272,7 @@ extern "C" void func_0030BD20(sWSMan_30BD20* self, cStream_30BD20* stream)
         int id;
         stream->Read(&id, 4);
         int r = func_003ACA38(*(void**)(self->world + 4), id);
-        func_002259A8(self->objs[id], stream, r);
+        luno_cLunoTable_readFromReplayFrame(self->objs[id], stream, r);
     }
     *(int*)((char*)self + 0x290) = 0;
     *(int*)((char*)self + 0x294) = 0;
@@ -2294,7 +2294,7 @@ public:
 
 extern "C" void func_00308118(void* proc, func_0030BEE8_cStream* stream);
 extern "C" void func_0030B270(cWScriptListHead* self, cWScriptListNode* node);
-extern "C" int func_0030B2D0(cWScriptListHead* self, cWScriptListNode* node);
+extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
 
 extern "C" void func_0030BEE8(void* self, cWScriptListHead* list, func_0030BEE8_cStream* stream)
 {
@@ -2305,7 +2305,7 @@ extern "C" void func_0030BEE8(void* self, cWScriptListHead* list, func_0030BEE8_
     for (; i < n; i++) {
         stream->Read(&id, 4);
         cWScriptListNode* node = (cWScriptListNode*)func_0030B320((char*)self + 0x2B4, id);
-        func_0030B2D0((cWScriptListHead*)((char*)self + 0x2B4), node);
+        cProcessList_removeProcess((cWScriptListHead*)((char*)self + 0x2B4), node);
         func_00308118(node, stream);
         func_0030B270(list, node);
     }
@@ -2668,26 +2668,26 @@ extern "C" void* func_0030C738(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C760);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void MEM_fill(void* dst, int value, int size);
 
 extern "C" void func_0030C760(void* self)
 {
     *(int*)self = 0;
     *(int*)((char*)self + 4) = 0;
-    func_003E6448((char*)self + 8, 0, 0xC0);
+    MEM_fill((char*)self + 8, 0, 0xC0);
 }
 #endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030C790);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void MEM_fill(void* dst, int value, int size);
 
 extern "C" void func_0030C790(void* self)
 {
     *(int*)self = 0;
     *(int*)((char*)self + 4) = 0;
-    func_003E6448((char*)self + 8, 0, 0xC0);
+    MEM_fill((char*)self + 8, 0, 0xC0);
 }
 #endif
 
@@ -3422,9 +3422,9 @@ extern "C" int func_0030D3D0(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D3D8__FPv);
+INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_isMission__FPv);
 #ifdef SKIP_ASM
-int func_0030D3D8(void* self)
+int cWScriptProcess_isMission(void* self)
 {
     return 0;
 }
@@ -3434,11 +3434,11 @@ int func_0030D3D8(void* self)
 INCLUDE_ASM("wscript/wscriptman", func_0030D3E0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0030AC98_a1(void* self) __asm__("func_0030AC98");
+extern "C" void cWScriptMan_runScriptCode_a1(void* self) __asm__("cWScriptMan_runScriptCode");
 
 extern "C" void func_0030D3E0(char* self)
 {
-    func_0030AC98_a1(*(void**)(self + 0x10));
+    cWScriptMan_runScriptCode_a1(*(void**)(self + 0x10));
 }
 #endif
 //100%
@@ -3454,13 +3454,13 @@ extern "C" void func_0030D400(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D420);
+INCLUDE_ASM("wscript/wscriptman", cWScriptTask__cWScriptTask);
 #ifdef SKIP_ASM
 extern void* D_00489AE0[];
 void operator_delete(int* ptr);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_0030D420(void* self, int flags)
+extern "C" void cWScriptTask__cWScriptTask(void* self, int flags)
 {
     *(void***)((char*)self + 0x40) = D_00489AE0;
     if (flags & 1) {
@@ -3499,9 +3499,9 @@ extern "C" int func_0030D478(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D480__FPv);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMission_isMission__FPv);
 #ifdef SKIP_ASM
-int func_0030D480(void* self)
+int cWScriptMission_isMission(void* self)
 {
     return 0x1;
 }
@@ -3567,7 +3567,7 @@ extern "C" void* func_0030D4B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D540);
+INCLUDE_ASM("wscript/wscriptman", cAnimModel__cAnimModel);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 void cMemMan_free(void* p);
@@ -3643,7 +3643,7 @@ static inline sWSGfx_D540* GetGfx_D540()
     return D_004A5B80;
 }
 
-extern "C" void func_0030D540(sWSMan_D540* self, int flags)
+extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
 {
     sWSGfx_D540* gfx = GetGfx_D540();
     int i;
@@ -3723,7 +3723,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D840);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void MEM_fill(void* dst, int value, int size);
 extern char D_00489C70[];
 
 struct func_0030D840_sPool {
@@ -3740,7 +3740,7 @@ extern "C" void func_0030D840(func_0030D840_sPool* self, int count, int a2)
     self->field_0x4 = a2;
     self->count = count;
     self->items = operator_new_tag(count * 0x58, D_00489C70, 0, 0);
-    func_003E6448(self->items, 0, self->count * 0x58);
+    MEM_fill(self->items, 0, self->count * 0x58);
     self->field_0x8 = 0;
     self->field_0x60 = 0;
 }

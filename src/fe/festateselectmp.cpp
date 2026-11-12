@@ -48,7 +48,7 @@ struct sVEntry001A3160 {
     short index;
     void* (*fn)(void*, void*, int);
 };
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 
 extern "C" void func_001A3160(void* self, void* item, int msg)
 {
@@ -61,7 +61,7 @@ extern "C" void func_001A3160(void* self, void* item, int msg)
         sVEntry001A3160* vt = *(sVEntry001A3160**)((char*)obj + 4);
         void* r = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
         if (r != 0) {
-            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -70,7 +70,7 @@ extern "C" void func_001A3160(void* self, void* item, int msg)
         sVEntry001A3160* vt = *(sVEntry001A3160**)((char*)obj + 4);
         void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (r != 0) {
-            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         }
         break;
     }

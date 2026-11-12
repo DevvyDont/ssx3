@@ -39,7 +39,7 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146D98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getLastHub(void* iface, int a1);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char D_0046EDC0[];
@@ -84,7 +84,7 @@ extern "C" void cFEStateLodge_onWidgetCreate(void* self, void* w)
         vt = *(sWVt_3840**)((char*)w + 8);
         vt[9].fn((char*)w + vt[9].delta, 0);
     } else if (h == GetHashValue32(D_0046EE50)) {
-        int lvl = func_00146D98(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
+        int lvl = cBENewPlayerInterface_getLastHub(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
         if (lvl >= 17) {
             if (lvl < 19) {
                 cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_0046EE60));
@@ -101,16 +101,16 @@ extern "C" void cFEStateLodge_onWidgetCreate(void* self, void* w)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F3A38);
+INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001D99C8(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
+extern "C" void* cFEPopupConfirm_cFEPopupConfirm(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
 extern "C" void* func_0018ECA0(void* self, void* engine, int a2, unsigned char mask);
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
 extern void* D_004A28A8;
@@ -133,7 +133,7 @@ struct sVE_1F3A38p {
     void* (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001F3A38(char* self, char* w, int event)
+extern "C" void cFEStateLodge_onWidgetEvent(char* self, char* w, int event)
 {
     if (w == 0) {
         return;
@@ -150,9 +150,9 @@ extern "C" void func_001F3A38(char* self, char* w, int event)
         sVE_1F3A38s* vt = *(sVE_1F3A38s**)(mgr + 4);
         unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046EEA8));
         void* p = cMemMan_alloc(0xBFC, D_0046EEC0, 0x100, 0);
-        void* o = func_001D99C8(p, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
+        void* o = cFEPopupConfirm_cFEPopupConfirm(p, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
         *(int*)(self + 0x50) = 0x10;
-        func_0039F290(*(char**)(self + 0x10) + 0x18, o);
+        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, o);
         return;
     }
     int k = *(int*)(w + 0x18);
@@ -161,16 +161,16 @@ extern "C" void func_001F3A38(char* self, char* w, int event)
         sVE_1F3A38s* vt = *(sVE_1F3A38s**)(mgr + 4);
         unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046EED0));
         void* p = cMemMan_alloc(0xBFC, D_0046EEC0, 0x100, 0);
-        void* o = func_001D99C8(p, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
+        void* o = cFEPopupConfirm_cFEPopupConfirm(p, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
         *(int*)(self + 0x50) = k;
-        func_0039F290(*(char**)(self + 0x10) + 0x18, o);
+        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, o);
         return;
     }
     if (k == 8) {
         *(int*)(**(char***)(self + 0x10) + 0xC) = 0x27;
         void* p = cMemMan_alloc(0x280, D_0046EEF0, 0, 0);
         void* o = func_0018ECA0(p, *(void**)(self + 0x10), 3, 1 << *(signed char*)(self + 0x14));
-        func_0039F400(*(char**)(self + 0x10) + 0x18, o);
+        cUIStateStack_push(*(char**)(self + 0x10) + 0x18, o);
         return;
     }
     cUIScreen_playFrame(*(void**)(self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_0046E050)), 1);
@@ -178,16 +178,16 @@ extern "C" void func_001F3A38(char* self, char* w, int event)
     sVE_1F3A38p* vt = *(sVE_1F3A38p**)(obj + 4);
     void* r = vt[4].fn(obj + vt[4].delta, self, *(int*)(w + 0x18));
     if (r != 0) {
-        func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+        cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F3CC8);
+INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onWidgetMenu);
 #ifdef SKIP_ASM
 // Key filter: keys 7, 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001F3CC8(void* self, int a1, unsigned int key)
+extern "C" int cFEStateLodge_onWidgetMenu(void* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -202,13 +202,13 @@ extern "C" int func_001F3CC8(void* self, int a1, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F3CF0);
+INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001D99C8(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
+extern "C" void* cFEPopupConfirm_cFEPopupConfirm(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
 extern "C" void* func_0018ECA0(void* self, void* engine, int a2, unsigned char mask);
 extern "C" void func_0039F190(void* list, int a1);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void func_0039F4C0(void* list, void* item);
 extern "C" void cUIStateStack_pushSpecial(void* list, void* item, int a2, int a3);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -239,7 +239,7 @@ struct sVE_1F3CF0o {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001F3CF0(char* self, char* msg, unsigned int id)
+extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int id)
 {
     switch (id) {
     case 0xF:
@@ -302,9 +302,9 @@ extern "C" void func_001F3CF0(char* self, char* msg, unsigned int id)
             sVE_1F3CF0s* vt = *(sVE_1F3CF0s**)(mgr + 4);
             unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046EF08));
             void* p = cMemMan_alloc(0xBFC, D_0046EEC0, 0x100, 0);
-            void* o = func_001D99C8(p, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
+            void* o = cFEPopupConfirm_cFEPopupConfirm(p, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
             *(int*)(self + 0x50) = 0x11;
-            func_0039F290(*(char**)(self + 0x10) + 0x18, o);
+            cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, o);
             break;
         }
         }
@@ -421,7 +421,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void* func_0014EEC8(void* self, int player, int index);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
@@ -453,7 +453,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetCreate(void* self, void* w)
         *(int*)((char*)w + 0x18) = 15;
     } else if (h == GetHashValue32(D_0046EFC0)) {
         void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
-        signed char cid = cBENewPlayerInterface_getRiderCharID(np, func_00146E98(np, 0));
+        signed char cid = cBENewPlayerInterface_getRiderCharID(np, cBENewPlayerInterface_getHumanRider(np, 0));
         cUIText_setAsciiString((cUIText*)w, (const char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), cid, 0));
     }
 }
@@ -505,13 +505,13 @@ extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, unsigned char a4);
 extern "C" void func_001CD088(void* self, int a1);
-extern "C" void func_001CE3C8(void* self, int key, int a2, int a3);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int key, int a2, int a3);
 extern "C" void func_001CE408(void* self, int a1);
-extern "C" void func_001CB418(void* self, const char* str);
-extern "C" const char* func_00147170(void* iface, int player);
+extern "C" void cKeyboardPopup_setInputText(void* self, const char* str);
+extern "C" const char* cBENewPlayerInterface_getPlayerName(void* iface, int player);
 extern "C" void* func_00182220(void* self, void* engine, void* owner, int player, int charID);
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" int func_001577A0(void* self, int a1, int a2);
 int cBENewPlayerInterface_getPlayerCharID(void* self, int player);
@@ -545,21 +545,21 @@ extern "C" void func_001F4400(char* self, char* w, int event)
             *(char*)(o + 0x44) = 0;
             *(int*)(o + 0x140) = 0x37;
             func_001CD088(o, 8);
-            func_001CE3C8(o, 0x4B, 1, 2);
+            cKeyboardPopup_setIncludeKey(o, 0x4B, 1, 2);
             *(int*)(o + 0x58) = 1;
             func_001CE408(o, 1);
-            func_001CE3C8(o, 0xE, 0, 2);
-            func_001CE3C8(o, 0x27, 0, 2);
-            func_001CE3C8(o, 0x28, 0, 2);
-            func_001CE3C8(o, 0x34, 0, 2);
-            func_001CE3C8(o, 0x1A, 0, 2);
-            func_001CE3C8(o, 0x19, 0, 2);
-            func_001CE3C8(o, 0x35, 0, 2);
-            func_001CE3C8(o, 0x40, 0, 2);
-            func_001CE3C8(o, 0x41, 0, 2);
-            func_001CE3C8(o, 0x42, 0, 2);
-            func_0039F290(*(char**)(self + 0x10) + 0x18, o);
-            func_001CB418(o, func_00147170(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44)));
+            cKeyboardPopup_setIncludeKey(o, 0xE, 0, 2);
+            cKeyboardPopup_setIncludeKey(o, 0x27, 0, 2);
+            cKeyboardPopup_setIncludeKey(o, 0x28, 0, 2);
+            cKeyboardPopup_setIncludeKey(o, 0x34, 0, 2);
+            cKeyboardPopup_setIncludeKey(o, 0x1A, 0, 2);
+            cKeyboardPopup_setIncludeKey(o, 0x19, 0, 2);
+            cKeyboardPopup_setIncludeKey(o, 0x35, 0, 2);
+            cKeyboardPopup_setIncludeKey(o, 0x40, 0, 2);
+            cKeyboardPopup_setIncludeKey(o, 0x41, 0, 2);
+            cKeyboardPopup_setIncludeKey(o, 0x42, 0, 2);
+            cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, o);
+            cKeyboardPopup_setInputText(o, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44)));
             return;
         }
         if (k == 11) {
@@ -567,7 +567,7 @@ extern "C" void func_001F4400(char* self, char* w, int event)
             if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)(self + 0x44), id) > 0) {
                 void* p = cMemMan_alloc(0x1E4, D_0046EFE0, 0, 0);
                 void* o = func_00182220(p, *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), id);
-                func_0039F290(*(char**)(self + 0x10) + 0x18, o);
+                cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, o);
             }
             return;
         }
@@ -576,7 +576,7 @@ extern "C" void func_001F4400(char* self, char* w, int event)
         sVE_1F4400* vt = *(sVE_1F4400**)(obj + 4);
         void* r = vt[4].fn(obj + vt[4].delta, self, *(int*)(w + 0x18));
         if (r != 0) {
-            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -585,7 +585,7 @@ extern "C" void func_001F4400(char* self, char* w, int event)
         sVE_1F4400* vt = *(sVE_1F4400**)(obj + 4);
         void* r = vt[5].fn(obj + vt[5].delta, self, 0);
         if (r != 0) {
-            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -602,7 +602,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned char func_001A1CD0_4728(void* p, int a1) __asm__("func_001A1CD0");
 extern "C" int func_00148158_4728(void* iface, int a1, int stat) __asm__("func_00148158");
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern void* D_00473908[];
 extern const int D_004780B0[];
 
@@ -624,7 +624,7 @@ extern "C" void* func_001F4728(void* p, int a1)
     *(signed char*)(s + 0x44) = 0;
     *(unsigned char*)(s + 0x15) = func_001A1CD0_4728(**(void***)(s + 0x10), 0);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
-    func_003E6448(s + 0x84, 0, 0x1C);
+    MEM_fill(s + 0x84, 0, 0x1C);
     for (int i = 0; i < 7; i++) {
         self->base[i] = func_00148158_4728(iface, 0, D_004780B0[i]);
         self->level[i] = (signed char)(func_00148158_4728(iface, 0, D_004780B0[i]) / 5);

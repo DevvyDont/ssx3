@@ -107,7 +107,7 @@ extern "C" void func_0028BF78(void* audio, int a1);
 extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void func_0039F190(void* stack, int a1);
-extern "C" void func_0039F400(void* stack, void* state);
+extern "C" void cUIStateStack_push(void* stack, void* state);
 extern void* D_004A28A8;
 extern char D_00460470[];
 extern char D_00460488[];
@@ -221,7 +221,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(self->owner + 0x18, popup, 0, 0);
         } else {
-            func_0039F400(self->owner + 0x18, popup);
+            cUIStateStack_push(self->owner + 0x18, popup);
         }
         break;
     }
@@ -232,7 +232,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
         } else {
             void* r = vcall_AOWE(self, 5, w);
             if (r != 0)
-                func_0039F400(self->owner + 0x18, r);
+                cUIStateStack_push(self->owner + 0x18, r);
         }
         break;
     case 1: {
@@ -296,9 +296,9 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateaudiooptions", func_00196B08);
+INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int func_00196B08(void* self, int a1, int a2, int a3)
+extern "C" int cFEStateAudioOptions_onWidgetMenu(void* self, int a1, int a2, int a3)
 {
     if (a2 == 6 && (a3 == 2 || a3 == 3 || a3 == 4)) {
         if (a3 == 2 && *(int*)((char*)self + 0x7C) == 0) {
@@ -328,9 +328,9 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 int GetHashValue32(char* str);
-extern "C" void func_003E6448(void* p, int c, int n);
+extern "C" void MEM_fill(void* p, int c, int n);
 extern "C" int func_00398380(void* list, int hash);
-extern "C" int func_00150928(void* iface, int idx, int ch);
+extern "C" int cBEEconInterface_getMoney(void* iface, int idx, int ch);
 // PORT: 64-bit results (long is 8 bytes on the EE).
 extern "C" long func_00158728(void* iface, int idx, int ch);
 extern "C" long func_00158750(void* iface, int idx, int ch);
@@ -389,7 +389,7 @@ extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
     *(signed char*)((char*)self + 0x44) = idx;
     if (**(void***)((char*)self + 0x10) != 0)
         *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
-    func_003E6448(self->buf, 0, 0x100);
+    MEM_fill(self->buf, 0, 0x100);
     self->f14C = 0;
     self->f150 = 0;
     self->f170 = 0;
@@ -429,7 +429,7 @@ extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
         self->f20C = Find_196B90(mgr, GetHashValue32(D_0045DA58));
     }
     *(int*)((char*)self + 0x48) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
-    self->f168 = func_00150928(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
+    self->f168 = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
     void* ifc = cBE_getInterface_Fv(cBE_getBE(), 0xD);
     self->f160 = func_00158728(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
     self->f158 = func_00158750(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
@@ -440,13 +440,13 @@ extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateaudiooptions", func_00196DB0);
+INCLUDE_ASM("fe/festateaudiooptions", cFEStateRequestLine_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_0039B760(void* self, int a1);
-extern "C" void* func_0039F9D8(void* self, int id);
+extern "C" void cUIMenu_setScrollableMenu(void* self, int a1);
+extern "C" void* cUIStateStack_findState(void* self, int id);
 extern void* D_004A28A8;
 extern char D_004A18A8[];
 extern char D_004A18B0[];
@@ -458,13 +458,13 @@ struct sVEntry00196DB0 {
     int (*fn)(void*, int, int);
 };
 
-extern "C" void func_00196DB0(void* self)
+extern "C" void cFEStateRequestLine_onCreateScreen(void* self)
 {
     char* name = D_004A18B0;
     if (*(void**)((char*)D_004A28A8 + 0x84) != 0) {
         name = D_00460578;
         void* list = *(char**)((char*)self + 0x10) + 0x18;
-        char* obj = (char*)func_0039F9D8(list, GetHashValue32(D_004A18A8));
+        char* obj = (char*)cUIStateStack_findState(list, GetHashValue32(D_004A18A8));
         if (obj != 0) {
             sVEntry00196DB0* vt = *(sVEntry00196DB0**)(obj + 8);
             vt[24].fn(obj + vt[24].delta, 3, 0);
@@ -475,7 +475,7 @@ extern "C" void func_00196DB0(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0039B760(*(void**)((char*)self + 0x170), *(unsigned char*)((char*)self + 0x14C));
+    cUIMenu_setScrollableMenu(*(void**)((char*)self + 0x170), *(unsigned char*)((char*)self + 0x14C));
 }
 #endif
 
@@ -489,38 +489,38 @@ struct sVEntry00196E80 {
 };
 
 int GetHashValue32(char* str);
-void* func_0039E4A0(void* self);
-extern "C" void* func_0039F9D8(void* self, int id);
+void* cUIState_onDestroyScreen(void* self);
+extern "C" void* cUIStateStack_findState(void* self, int id);
 extern char D_004A18A8[];
 extern void* D_004A28A8;
 
 extern "C" void func_00196E80(void* self)
 {
     if (*(int*)((char*)D_004A28A8 + 0x84) != 0) {
-        void* obj = func_0039F9D8(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
+        void* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
         if (obj != 0) {
             sVEntry00196E80* e = &(*(sVEntry00196E80**)((char*)obj + 8))[24];
             e->fn((char*)obj + e->delta, 4, 0);
         }
     }
-    func_0039E4A0(self);
+    cUIState_onDestroyScreen(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festateaudiooptions", func_00196F00);
 #ifdef SKIP_ASM
-extern "C" void func_00186518(void* self);
-extern "C" void func_00197B88(void* self);
+extern "C" void cFEState_onGainFocus(void* self);
+extern "C" void cFEStateRequestLine_updatePlayList(void* self);
 extern "C" void func_00197E70(void* self);
 extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int a1);
 extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
 
 extern "C" void func_00196F00(void* self)
 {
-    func_00186518(self);
+    cFEState_onGainFocus(self);
     *(int*)((char*)self + 0x150) = 0;
-    func_00197B88(self);
+    cFEStateRequestLine_updatePlayList(self);
     func_00197E70(self);
     cFEStateRequestLine_updateButtonsText(self, 0);
     cFEStateRequestLine_updateHelpText(self, 0);
@@ -530,14 +530,14 @@ extern "C" void func_00196F00(void* self)
 //100%
 INCLUDE_ASM("fe/festateaudiooptions", func_00196F50);
 #ifdef SKIP_ASM
-extern "C" void func_00197DB8(void* self);
+extern "C" void cFEStateRequestLine_updatePlayListArrows(void* self);
 extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int a1);
 extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
 
 extern "C" int func_00196F50(void* self, int a1)
 {
     if (a1 != 0) {
-        func_00197DB8(self);
+        cFEStateRequestLine_updatePlayListArrows(self);
         cFEStateRequestLine_updateButtonsText(self, 0);
         cFEStateRequestLine_updateHelpText(self, 0);
     }

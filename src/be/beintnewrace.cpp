@@ -142,18 +142,18 @@ extern "C" void func_00144B20(void* self, const char* name)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144BC0);
+INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocation);
 #ifdef SKIP_ASM
-extern "C" void* func_00144BC0()
+extern "C" void* cBENewRaceInterface_getLocation()
 {
     return (char*)&D_0043D950[0] + D_00535C08.value * 0x64;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144BE0);
+INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationID);
 #ifdef SKIP_ASM
-extern "C" int func_00144BE0()
+extern "C" int cBENewRaceInterface_getLocationID()
 {
     return D_00535C08.value;
 }
@@ -190,18 +190,18 @@ extern "C" void* func_00144C30(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144C48);
+INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationFile);
 #ifdef SKIP_ASM
-extern "C" void* func_00144C48(void* self, int a1)
+extern "C" void* cBENewRaceInterface_getLocationFile(void* self, int a1)
 {
     return (char*)&D_0043D984 + a1 * 0x64;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144C60);
+INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationName);
 #ifdef SKIP_ASM
-extern "C" void* func_00144C60(void* self, int a1)
+extern "C" void* cBENewRaceInterface_getLocationName(void* self, int a1)
 {
     return (char*)&D_0043D954 + a1 * 0x64;
 }
@@ -284,9 +284,9 @@ extern "C" int func_00144D50(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnewrace", func_00144D70__FPvii);
+INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_assignPlayer__FPvii);
 #ifdef SKIP_ASM
-void* func_00144D70(void* self, int a1, int a2)
+void* cBENewRaceInterface_assignPlayer(void* self, int a1, int a2)
 {
     *(int*)((char*)(void*)&D_00535BC8 + a1 * 4) = a2;
     *(int*)((char*)((char*)(void*)&D_00535BC8 + a2 * 4) + 0x18) = a1;
@@ -685,12 +685,12 @@ INCLUDE_ASM("be/beintnewrace", func_00145750);
 #ifdef SKIP_ASM
 void* cBENewPlayerInterface_getThis();
 signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
-extern "C" int func_00146E98(void* self, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* self, int a1);
 
 extern "C" int func_00145750(void* self)
 {
     void* players = cBENewPlayerInterface_getThis();
-    int c = cBENewPlayerInterface_getRiderCharID(players, func_00146E98(cBENewPlayerInterface_getThis(), 0));
+    int c = cBENewPlayerInterface_getRiderCharID(players, cBENewPlayerInterface_getHumanRider(cBENewPlayerInterface_getThis(), 0));
     switch (func_00144C78(self, D_00535C08.value))
     {
     case 0:

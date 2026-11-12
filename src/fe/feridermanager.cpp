@@ -191,14 +191,14 @@ struct sVE_EBA0 {
     short index;
     void (*fn)(void*, int);
 };
-extern "C" void func_0030D540(void* p, int flags);
+extern "C" void cAnimModel__cAnimModel(void* p, int flags);
 extern "C" void func_0019EC68(void* self);
 
 extern "C" void func_0019EBA0(void* self)
 {
     void* p = *(void**)((char*)self + 0x8);
     if (p != 0) {
-        func_0030D540(p, 3);
+        cAnimModel__cAnimModel(p, 3);
     }
     char* o = *(char**)((char*)self + 0xC);
     if (o != 0) {
@@ -1011,7 +1011,7 @@ extern "C" int func_0019F878(sRiderTable_F878* self, const char* name)
 INCLUDE_ASM("fe/feridermanager", func_0019F908);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern "C" void func_003B3D00(void* pkg, int i, char* name);
+extern "C" void SHAPE_name(void* pkg, int i, char* name);
 extern "C" char* strcpy(char* dst, const char* src);
 extern void* D_004A289C;
 extern char D_004A19A8[];
@@ -1051,7 +1051,7 @@ extern "C" void func_0019F908(sRiderTable_F878* self, sPkg_F908* pkg, int replac
         char name[8];
         *(sName2_F908*)name = *(sName2_F908*)D_004A19A8;
         func_00416210(name + 2, 0, 6);
-        func_003B3D00(pkg, i, name);
+        SHAPE_name(pkg, i, name);
         int id = func_0019F878(self, name);
         if (id >= 0) {
             if (replace) {
@@ -1229,7 +1229,7 @@ extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" int func_0019E238(void* mgr, int bank, int i);
 extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern void* D_004A28A8;
 extern void* D_004A1968;
 
@@ -1265,7 +1265,7 @@ extern "C" int func_0019FD58(int* self)
     }
     if (ok) {
         int used[256];
-        func_003E6448(used, 0, sizeof(used));
+        MEM_fill(used, 0, sizeof(used));
         for (int i = 0; i < n; i++) {
             sItemFD58* it = &list->items[i];
             int r = func_0019CCE8(D_004A1968, self[1], it->id);

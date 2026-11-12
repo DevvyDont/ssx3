@@ -487,7 +487,7 @@ extern "C" void* func_003AA2D8(void* self)
 //100%
 INCLUDE_ASM("world/worldview", func_003AA2F0);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
 struct func_003AA2F0_sEntry {
     float dist;
@@ -529,7 +529,7 @@ func_003AA2F0_sView* func_003AA2F0_impl(func_003AA2F0_sView* self)
     }
     func_003AA2F0_sState* s = &D_00508F50;
     self->state = s;
-    func_003E6448(s, 0, sizeof(func_003AA2F0_sState));
+    MEM_fill(s, 0, sizeof(func_003AA2F0_sState));
     D_00508F58[0] = 0xFFFFFFFF;
     s->f0C = -1;
     D_00508F50.f00 = 0;
@@ -546,9 +546,9 @@ func_003AA2F0_sView* func_003AA2F0_impl(func_003AA2F0_sView* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA3F0);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveModel);
 #ifdef SKIP_ASM
-class func_003AA3F0_cObj {
+class cChunkResolve_resolveModel_cObj {
 public:
     char pad00[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -561,7 +561,7 @@ public:
 };
 
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003AA3F0(func_003AA3F0_cObj* self, void* a1)
+extern "C" int cChunkResolve_resolveModel(cChunkResolve_resolveModel_cObj* self, void* a1)
 {
     *(int*)((char*)a1 + 0x8) += (int)a1;
     *(int*)((char*)a1 + 0xC) += (int)a1;
@@ -865,12 +865,12 @@ extern "C" int func_003AA8D8(void* self, void* a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AA8F0);
+INCLUDE_ASM("world/worldview", cChunkResolve_resolveInstance);
 #ifdef SKIP_ASM
 static inline char *refToPtr_A8F0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_A8F0(unsigned i) { if (i == 0) return 0; return refToPtr_A8F0(i); }
 // Resolves the node's object handle (0x80) to its object pointer and caches the object's 0xC field.
-extern "C" int func_003AA8F0(char** self, char* node)
+extern "C" int cChunkResolve_resolveInstance(char** self, char* node)
 {
     unsigned id = *(unsigned*)(node + 0x80);
     char *s = (*(char***)(**(char***)self + 8))[id & 0xFF];
@@ -1116,14 +1116,14 @@ extern "C" float func_003AACE0(void* self, void* p, float arg)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldview", func_003AAD98);
+INCLUDE_ASM("world/worldview", cChunkResolve_construct);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_003AA2F0(void* self);
 extern char D_00494F70[];
 extern void* D_00495090[];
 
-extern "C" void* func_003AAD98()
+extern "C" void* cChunkResolve_construct()
 {
     void* p = cMemMan_alloc(0x14, D_00494F70, 0, 0);
     func_003AA2F0(p);
@@ -1133,14 +1133,14 @@ extern "C" void* func_003AAD98()
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AADE8);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve__cPS2ChunkResolve);
 #ifdef SKIP_ASM
 void func_003AAE60(void*);
 void operator_delete(int*);
 extern void* D_00495090[];
 extern void* D_00495150[];
 
-extern "C" void func_003AADE8(int* self, int flags)
+extern "C" void cPS2ChunkResolve__cPS2ChunkResolve(int* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_00495090;
     func_003AAE60(self);
@@ -1174,7 +1174,7 @@ void func_003AAE60(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AAE68);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve_resolve);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct sVEntry_AE68 {
@@ -1256,7 +1256,7 @@ static inline void insert_AE68(void* self, int type, char* obj, int off)
 #define CALL1_AE68(self, off, obj) \
     ((tMsg1_AE68)VT_AE68(self, off)->fn)((char*)(self) + VT_AE68(self, off)->delta, obj)
 
-extern "C" void* func_003AAE68(void* self, int msg, unsigned int arg, char* obj)
+extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int arg, char* obj)
 {
     switch (msg) {
     case 1:
@@ -1384,7 +1384,7 @@ extern "C" void* func_0028B180();
 extern "C" void* func_0028B1C8();
 extern "C" void func_002B6B30(void* p, void* data, unsigned int param);
 extern "C" void func_002BB5A8(void* entry);
-extern "C" void func_002D9B40();
+extern "C" void cAvalanche_reset();
 extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
 extern "C" void func_00328F28(void* out, const void* box);
 extern "C" void* func_003AD198();
@@ -1561,7 +1561,7 @@ extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param,
         func_0012A490(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC), param);
         break;
     case 22:
-        func_002D9B40();
+        cAvalanche_reset();
         break;
     }
     return data;
@@ -1949,11 +1949,11 @@ extern "C" void* func_003AC508(void* self, void* a1, func_003AC358_sList* list, 
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AC7C8);
+INCLUDE_ASM("world/worldview", cWScriptCache_cWScriptCache);
 #ifdef SKIP_ASM
 extern "C" void cWScriptCache_init(void* self, int a1);
 
-extern "C" void* func_003AC7C8(void* self, int a1)
+extern "C" void* cWScriptCache_cWScriptCache(void* self, int a1)
 {
     *(int*)((char*)self + 0x0) = a1;
     *(int*)((char*)self + 0x4) = 0;

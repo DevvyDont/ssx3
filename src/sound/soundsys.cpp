@@ -4,7 +4,7 @@
 //100%
 INCLUDE_ASM("sound/soundsys", cBankSys_cBankSys);
 #ifdef SKIP_ASM
-extern "C" void* func_002ADE88(void* self, int heap);
+extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -36,7 +36,7 @@ extern "C" char* cBankSys_cBankSys(char* self, int embedded, int count, int heap
         char* mon = self + 0x10;
         *(char**)self = self + 0x18;
         *(char**)(self + 0x1F0) = mon;
-        func_002ADE88(mon, heap);
+        cSoundSys_cSoundSys(mon, heap);
         cBankManager_cBankManager(*(void**)self, 0, count, heap);
     }
     *(const void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483A60_bs;
@@ -68,7 +68,7 @@ INCLUDE_ASM("sound/soundsys", func_0028FEA0);
 void cMemMan_free(void*);
 void operator_delete(int*);
 extern "C" void func_0028BB10(void* self, int flags);
-extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 
 struct sSndDtVtEnt {
     short delta;
@@ -112,7 +112,7 @@ extern "C" void func_0028FEA0(char* self, int flags)
     D_004A3664 = 0;
     if (flags & 2) {
         func_0028BB10(*(void**)self, 0);
-        func_002ADEE8(*(void**)(*(char**)self + 0x1D8), 0);
+        cSoundSys__cSoundSys(*(void**)(*(char**)self + 0x1D8), 0);
     }
     if (flags & 1) operator_delete((int*)self);
 }
@@ -3283,14 +3283,14 @@ static inline void snd74A0AddVoice(void* vself, int a, int b, int type)
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_00295028(void* self, int a, int b);
 extern "C" void func_00295628(void* self, void* evt, int h, int t, int a, int idx);
 
 extern "C" void func_002974A0(void* self, char* evt, int n)
 {
     if (n == 0) return;
-    if (n == 0x66 && *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0) return;
+    if (n == 0x66 && *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0) return;
     if (*(int*)((char*)self + 0x62A8) >= 0) return;
     if (func_00295028(self, (int)evt, 0) != 0) return;
     int pri = 0x50;
@@ -3383,7 +3383,7 @@ static inline void sndPushVoice(void* vself, int a, int b)
     self->a8[self->mgr->sub.cur] = b;
 }
 
-extern "C" int* func_00144BC0(void* p);
+extern "C" int* cBENewRaceInterface_getLocation(void* p);
 extern "C" void* func_0028B1E8();
 
 static inline int snd7950Commit(void* vself, void* tgt, float f, int pri)
@@ -3400,7 +3400,7 @@ extern "C" void func_00297950(cSSXAudio* self, char* obj, int type, int id)
     if (type == 0)
         return;
     if (type == 0x66) {
-        if (*func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0)
+        if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0)
             return;
     }
     if (*(int*)((char*)self + 0x62A8) >= 0)
@@ -3468,7 +3468,7 @@ extern "C" void func_00297950(cSSXAudio* self, char* obj, int type, int id)
     int pri = 0x50;
     *(int*)((char*)self + i * 0x30 + 0x5A20) = type;
     if (type == 0xC9) {
-        if (*func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)) == 8) {
+        if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)) == 8) {
             f = 400.0f;
             pri = 0x32;
         }
@@ -7616,7 +7616,7 @@ INCLUDE_ASM("sound/soundsys", func_0029FCC8);
 #ifdef SKIP_ASM
 extern "C" int func_002A3FE8(void* self);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* func_0028B1E8();
 extern "C" int func_00288B40(void* self, int which, float f);
 extern "C" int func_002B0E28(void* self, int i);
@@ -7675,7 +7675,7 @@ extern "C" void func_0029FCC8(void* self, void* vrider)
     if (func_002B0E28(snd, 0) == 0) return;
     int r = func_0029F330_i(rider);
     if (func_00288B40(self, rider->v05(), D_004A36D8) < 0) return;
-    int sel = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+    int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
     if (sel == 1) {
         if (func_002B1458(snd, 0, 0x2084, (int)rider, func_00123128(rider), 0, 0, zero) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 0x2084), 2, r, 3);
@@ -7698,7 +7698,7 @@ INCLUDE_ASM("sound/soundsys", func_0029FF80);
 extern "C" int func_0029F0A0(void* self);
 extern "C" int func_00288AE0(void* self);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* func_0028B1E8();
 extern "C" int func_00288B40(void* self, int which, float f);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
@@ -7745,7 +7745,7 @@ extern "C" void func_0029FF80(void* self, sSsFF80Rider* rider, int alt)
     int r = func_0029F330_i(rider);
     if (func_00288B40(self, rider->v05(), D_004A36D8) < 0) return;
     if (alt != 0) {
-        int sel = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+        int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
         if (sel == 1) {
             if (func_002B1458((char*)self + 0x5560, 0, 0x2090, (int)rider, func_00123128(rider), 0, 0, 0.0f) != 0) {
                 D_004A482C(func_003D8008(1, 0, 0x2090), 1, r);
@@ -7760,7 +7760,7 @@ extern "C" void func_0029FF80(void* self, sSsFF80Rider* rider, int alt)
             }
         }
     } else {
-        int sel = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+        int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
         if (sel == 1) {
             if (func_002B1458((char*)self + 0x5560, 0, 0x2082, (int)rider, func_00123128(rider), 0, 0, 0.0f) != 0) {
                 D_004A482C(func_003D8008(1, 0, 0x2082), 1, r);
@@ -7784,7 +7784,7 @@ INCLUDE_ASM("sound/soundsys", func_002A02D8);
 extern "C" int func_002A3F90(void* self);
 extern "C" int func_002A4040(void* self);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* func_0028B1E8();
 extern "C" int func_00288B40(void* self, int which, float f);
 extern "C" int func_002B0E28(void* self, int i);
@@ -7839,7 +7839,7 @@ extern "C" void func_002A02D8(void* self, sSs02D8Rider* rider)
         mode = 3;
     }
     if (func_00288B40(self, rider->v05(), D_004A36D8) < 0) return;
-    int sel = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+    int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
     if (sel == 1) {
         if (func_002B1458((char*)self + 0x5560, 0, 0x2088, (int)rider, func_00123128(rider), 0, 0, 0.0f) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 0x2088), 2, r, mode);
@@ -8781,7 +8781,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -8792,7 +8792,7 @@ extern "C" void func_002A2018(void* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 0x20C8, 0, 0xA, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 0x20C8), 2, r, m);
         }
     }
@@ -8808,7 +8808,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -8819,7 +8819,7 @@ extern "C" void func_002A20D0(void* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 0x20C9, 0, 0xA, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 0x20C9), 2, r, m);
         }
     }
@@ -8838,7 +8838,7 @@ int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -8850,7 +8850,7 @@ extern "C" void func_002A2188(void* self)
         if (func_002B1458((char*)self + 0x5560, 0, 0x20CA, 0, 0xA, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int a = func_002A1D48_r(self, *(void**)((char*)func_0028B1D8() + 0x28));
-            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             D_004A482C_5(func_003D8008(1, 0, 0x20CA), 3, r, a, m);
         }
     }
@@ -8866,7 +8866,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -8877,7 +8877,7 @@ extern "C" void func_002A2260(void* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 0x20E7, 0, 0xA, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 0x20E7), 2, r, m);
         }
     }
@@ -8893,7 +8893,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -8904,7 +8904,7 @@ extern "C" void func_002A2318(void* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 0x20E8, 0, 0xA, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 0x20E8), 2, r, m);
         }
     }
@@ -8920,7 +8920,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -8933,7 +8933,7 @@ extern "C" void func_002A23D0(void* self, int mode)
             int r = func_0029F198(self);
             int m;
             if (mode == -1) {
-                m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+                m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             } else {
                 m = func_002A1E20(self, mode);
             }
@@ -8976,7 +8976,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1BD8(void* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -8987,7 +8987,7 @@ extern "C" void func_002A2568(void* self, int a1)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 0x20CC, 0, 0xA, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1BD8(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)), a1);
+            int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)), a1);
             D_004A482C_5(func_003D8008(1, 0, 0x20CC), 3, r, m, 3);
         }
     }
@@ -9003,7 +9003,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -9014,7 +9014,7 @@ extern "C" void func_002A2638(void* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 0x20BA, 0, 0xA, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 0x20BA), 2, r, m);
         }
     }
@@ -9117,7 +9117,7 @@ int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -9129,7 +9129,7 @@ extern "C" void func_002A2938(void* self)
         if (func_002B1458((char*)self + 0x5560, 0, 0x2102, 0, 0xA, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int a = func_002A1D48_r(self, *(void**)((char*)func_0028B1D8() + 0x28));
-            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             D_004A482C_5(func_003D8008(1, 0, 0x2102), 3, r, a, m);
         }
     }
@@ -9173,7 +9173,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -9184,7 +9184,7 @@ extern "C" void func_002A2AD0(void* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 0x212B, 0, 0xA, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 0x212B), 2, r, m);
         }
     }
@@ -9224,7 +9224,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1BD8(void* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -9235,7 +9235,7 @@ extern "C" void func_002A2C30(void* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 0x212D, 0, 0xA, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1BD8(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
+            int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
             D_004A482C_4(func_003D8008(1, 0, 0x212D), 2, r, m);
         }
     }
@@ -9304,10 +9304,10 @@ extern "C" void func_002A2260(void* self);
 extern "C" void func_002A2318(void* self);
 extern "C" void func_002A20D0(void* self);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* func_0028B1E8();
 extern "C" unsigned int func_002ADF60(void* rng);
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 // PORT: declared signed char elsewhere; the caller here sign-extends an int result itself.
 int cBENewPlayerInterface_getRiderCharID_i(void* self, int riderIndex) __asm__("cBENewPlayerInterface_getRiderCharID__FPvi");
 int cBERewardInterface_getTrackMedal(void* self, int a1, int ch, int a3, int track);
@@ -9343,8 +9343,8 @@ extern "C" void func_002A2E50(void* vself, int bonus)
                 left = n;
                 int track = 0xE;
                 void* players = cBE_getInterface_Fv(cBE_getBE(), 1);
-                signed char ch = cBENewPlayerInterface_getRiderCharID_i(players, func_00146E98(players, 0));
-                int sel = func_002A1E20(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+                signed char ch = cBENewPlayerInterface_getRiderCharID_i(players, cBENewPlayerInterface_getHumanRider(players, 0));
+                int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
                 if (sel != 1) {
                     track = sel == 2 ? 0xF : 0x10;
                 }
@@ -9505,7 +9505,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1BD8(void* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -9517,7 +9517,7 @@ extern "C" void func_002A3400(void* self)
     if (func_00288AE0(self) != 0) return;
     if (func_002B1458((char*)self + 0x5560, 0, 0x20C3, 0, 0xB, 0, 0, 0.0f) == 0) return;
     int r = func_0029F198(self);
-    int m = func_002A1BD8(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
+    int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
     D_004A482C_4(func_003D8008(1, 0, 0x20C3), 2, r, m);
 }
 #endif
@@ -9666,7 +9666,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A1BD8(void* self, int a, int b);
 extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
@@ -9677,7 +9677,7 @@ extern "C" void func_002A39E0(void* self)
     if (func_0029F128(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 0x20BB, 0, 0xB, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1BD8(self, *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
+            int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
             D_004A482C_4(func_003D8008(1, 0, 0x20BB), 2, r, m);
         }
     }
@@ -9836,12 +9836,12 @@ INCLUDE_ASM("sound/soundsys", func_002A3F90);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A3FD8(void* self, unsigned int a1);
 
 extern "C" int func_002A3F90(void* self)
 {
-    return func_002A3FD8(self, *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0)));
+    return func_002A3FD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
 }
 #endif
 
@@ -9860,12 +9860,12 @@ INCLUDE_ASM("sound/soundsys", func_002A3FE8);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4030(void* self, unsigned int a1);
 
 extern "C" int func_002A3FE8(void* self)
 {
-    return func_002A4030(self, *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0)));
+    return func_002A4030(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
 }
 #endif
 
@@ -9899,13 +9899,13 @@ INCLUDE_ASM("sound/soundsys", func_002A4078);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A40E0(void* self, unsigned int a1);
 extern signed char D_00535C10[];
 
 extern "C" int func_002A4078(void* self)
 {
-    if (func_002A40E0(self, *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
+    if (func_002A40E0(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return 1;
     }
     if (D_00535C10[0] == 0) {
@@ -9930,13 +9930,13 @@ INCLUDE_ASM("sound/soundsys", func_002A40E8);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4158(void* self, unsigned int a1);
 extern signed char D_00535C10[];
 
 extern "C" int func_002A40E8(void* self)
 {
-    if (func_002A4158(self, *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
+    if (func_002A4158(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return 1;
     }
     if (D_00535C10[0] == 1) {
@@ -9965,13 +9965,13 @@ INCLUDE_ASM("sound/soundsys", func_002A4168);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A41C8(void* self, unsigned int a1);
 extern signed char D_00535C10[];
 
 extern "C" int func_002A4168(void* self)
 {
-    if (func_002A41C8(self, *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
+    if (func_002A41C8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return 1;
     }
     return D_00535C10[0] == 2;
@@ -9993,13 +9993,13 @@ INCLUDE_ASM("sound/soundsys", func_002A41D8);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4238(void* self, unsigned int a1);
 extern signed char D_00535C10[];
 
 extern "C" int func_002A41D8(void* self)
 {
-    if (func_002A4238(self, *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
+    if (func_002A4238(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return 1;
     }
     return D_00535C10[0] == 3;
@@ -10252,7 +10252,7 @@ extern char* D_004A28A8;
 extern "C" void* func_0028B1E8();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 
 extern "C" void func_002A4660(void* self, int a1, int a2, int a3, int a4)
 {
@@ -10263,7 +10263,7 @@ extern "C" void func_002A4660(void* self, int a1, int a2, int a3, int a4)
             *(int*)((char*)self + 0x57FC) = 1;
         }
         *(int*)((char*)self + 0x5800) = a1;
-        *(int*)((char*)self + 0x5810) = *func_00144BC0(cBE_getInterface_Fv(func_0028B1E8(), 0));
+        *(int*)((char*)self + 0x5810) = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0));
     }
     *(int*)((char*)self + 0x5804) += a2;
     *(int*)((char*)self + 0x5808) += a3;
@@ -10276,11 +10276,11 @@ INCLUDE_ASM("sound/soundsys", func_002A4718);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void*);
+extern "C" int* cBENewRaceInterface_getLocation(void*);
 
 extern "C" int func_002A4718(void* self)
 {
-    int id = *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0));
+    int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
     int cur = *(int*)((char*)self + 0x5814);
     if (id == cur || cur == 0x17) {
         return 0;
@@ -10507,11 +10507,11 @@ struct sSndHandleList5 {
     int count;
     int items[5];
 };
-extern "C" int func_003E1908(int a, int b);
+extern "C" int FILE_loadz(int a, int b);
 
 extern "C" int func_002A4C28(sSndHandleList5* list, int a, int b)
 {
-    if (list->count >= 5 || (list->items[list->count] = func_003E1908(a, b), list->items[list->count] == 0)) {
+    if (list->count >= 5 || (list->items[list->count] = FILE_loadz(a, b), list->items[list->count] == 0)) {
         return 0;
     }
     list->count++;
@@ -11497,9 +11497,9 @@ extern "C" void func_002A68B0(char* self, char* obj, float dt) {
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A69A0);
 #ifdef SKIP_ASM
-extern "C" void* func_002ADE88(void* self, int heap);
+extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
-extern "C" char* func_002A8140(char* self, int embedded, int count, int heap);
+extern "C" char* cController_cController(char* self, int embedded, int count, int heap);
 extern "C" void* func_002A4BA8(void* self);
 
 struct sSnd69VtEnt {
@@ -11541,10 +11541,10 @@ extern "C" char* func_002A69A0(char* self, int embedded, int count, int unused, 
         char* mon = self + 0x118;
         *(char**)self = self + 0x120;
         *(char**)(self + 0x2F8) = mon;
-        func_002ADE88(mon, heap);
+        cSoundSys_cSoundSys(mon, heap);
         cBankManager_cBankManager(*(void**)self, 0, count, heap);
     }
-    func_002A8140(self, 0, count, heap);
+    cController_cController(self, 0, count, heap);
     *(const void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483818_69;
     *(void**)(*(char**)self + 0xAB0) = D_00483B48;
     *(const void**)(*(char**)self + 0x1D4) = &D_00483838_69;
@@ -11573,7 +11573,7 @@ extern "C" char* func_002A69A0(char* self, int embedded, int count, int unused, 
 INCLUDE_ASM("sound/soundsys", func_002A6B50);
 #ifdef SKIP_ASM
 extern "C" void func_0028BB10(void* self, int flags);
-extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 void operator_delete(int*);
 extern "C" void func_002A4BE0(void* self, int flags);
 struct sSsMgr6F38;
@@ -11630,7 +11630,7 @@ extern "C" void func_002A6B50(char* self, int flags)
     func_002A82D8(self, 0);
     if (flags & 2) {
         func_0028BB10(*(void**)self, 0);
-        func_002ADEE8(*(void**)(*(char**)self + 0x1D8), 0);
+        cSoundSys__cSoundSys(*(void**)(*(char**)self + 0x1D8), 0);
     }
     if (flags & 1) operator_delete((int*)self);
 }
@@ -12081,7 +12081,7 @@ extern "C" int func_002A77C8(void* self, int i)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A77F8);
 #ifdef SKIP_ASM
-extern "C" int func_00317F98(const char* name);
+extern "C" int BXFILE_size(const char* name);
 extern "C" int func_003E1B68(const char* name, void* buf, int size);
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -12096,7 +12096,7 @@ extern "C" sSndFileBuf* func_002A77F8(sSndFileBuf* self, const char* name, int f
 {
     self->data = 0;
     self->cur = 0;
-    self->size = func_00317F98(name);
+    self->size = BXFILE_size(name);
     if (self->size != 0) {
         self->data = (char*)operator_new_tag(self->size + 1, name, flags, 0);
         func_003E1B68(name, self->data, self->size + 1);
@@ -12486,9 +12486,9 @@ extern "C" int func_002A80D8(void* self, const char* name, int* out)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A8140);
+INCLUDE_ASM("sound/soundsys", cController_cController);
 #ifdef SKIP_ASM
-extern "C" void* func_002ADE88(void* self, int heap);
+extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
 extern "C" char* cBankSys_cBankSys(char* self, int embedded, int count, int heap);
 extern "C" void func_003B97D8();
@@ -12515,13 +12515,13 @@ extern const sSndCtVt7 D_00483A10_ct __asm__("D_00483A10");
 extern int D_004A3744;
 
 // PORT: hand-expanded g++ 2.95 virtual-base ctor (vtable upcast-offset fixup on stack copies).
-extern "C" char* func_002A8140(char* self, int embedded, int count, int heap)
+extern "C" char* cController_cController(char* self, int embedded, int count, int heap)
 {
     if (embedded) {
         char* mon = self + 0x14;
         *(char**)self = self + 0x1C;
         *(char**)(self + 0x1F4) = mon;
-        func_002ADE88(mon, heap);
+        cSoundSys_cSoundSys(mon, heap);
         cBankManager_cBankManager(*(void**)self, 0, count, heap);
     }
     cBankSys_cBankSys(self, 0, count, heap);
@@ -12554,7 +12554,7 @@ INCLUDE_ASM("sound/soundsys", func_002A82D8);
 void cMemMan_free(void*);
 void operator_delete(int*);
 extern "C" void func_0028BB10(void* self, int flags);
-extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern "C" void func_0028FEA0(char* self, int flags);
 extern "C" void func_003B9880();
 
@@ -12601,7 +12601,7 @@ extern "C" void func_002A82D8(char* self, int flags)
     func_0028FEA0(self, 0);
     if (flags & 2) {
         func_0028BB10(*(void**)self, 0);
-        func_002ADEE8(*(void**)(*(char**)self + 0x1D8), 0);
+        cSoundSys__cSoundSys(*(void**)(*(char**)self + 0x1D8), 0);
     }
     if (flags & 1) operator_delete((int*)self);
 }

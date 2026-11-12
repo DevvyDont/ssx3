@@ -237,12 +237,12 @@ extern "C" void func_00113E48(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00113E50);
+INCLUDE_ASM("seg/seg_14B10", cShutdownHandler_OnGainState);
 #ifdef SKIP_ASM
-extern "C" void func_0012B090(int);
+extern "C" void cAI_shutdown(int);
 
-extern "C" void func_00113E50(int arg0, int arg1) {
-    func_0012B090(arg1);
+extern "C" void cShutdownHandler_OnGainState(int arg0, int arg1) {
+    cAI_shutdown(arg1);
 }
 #endif
 
@@ -1353,18 +1353,18 @@ extern "C" void func_00115D48(cRider* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00116120);
+INCLUDE_ASM("seg/seg_14B10", cRider_checkForReset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cRiderMetrix_evAutoResetSurface(void *);
-extern "C" void func_0011FE78_6120(void *, int) __asm__("func_0011FE78__FPv");
+extern "C" void cRider_setMotionState_6120(void *, int) __asm__("cRider_setMotionState__FPv");
 extern "C" void func_0011FEC8_6120(void *, int) __asm__("func_0011FEC8__FPv");
 extern "C" int func_0028B180();
 extern "C" void func_0029A220(int, void *);
 extern "C" void func_00270970(int, int);
 extern void *D_004A28A8;
 
-extern "C" int func_00116120(char *self, int arg1, int arg2) {
+extern "C" int cRider_checkForReset(char *self, int arg1, int arg2) {
     if (arg1 != 0 || arg2 != 0) {
         *(int *)(self + 0x2E8) = 0;
         *(int *)(self + 0x2EC) = 0;
@@ -1372,7 +1372,7 @@ extern "C" int func_00116120(char *self, int arg1, int arg2) {
             cRiderMetrix_evAutoResetSurface(*(void **)(self + 0x790));
         *(int *)(*(char **)(self + 0x77C) + 0x350) = (arg2 != 0);
         func_0011FEC8_6120(self, 9);
-        func_0011FE78_6120(self, 3);
+        cRider_setMotionState_6120(self, 3);
         func_0029A220(func_0028B180(), self);
         func_00270970(*(int *)(*(char **)((char *)D_004A28A8 + 0x84) + 0x28), *(int *)(self + 0x86C));
         return 1;
@@ -1705,7 +1705,7 @@ extern "C" void gGenTrickName_desc(char* out, sTrickDesc* t, int)
 INCLUDE_ASM("seg/seg_14B10", gGenMonsterTrickReqName);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_003E6448(void* p, int c, int n);
+extern "C" void MEM_fill(void* p, int c, int n);
 
 // Packed trick id (64-bit EE `long` bitfields).
 struct sTrickBits_6E10 {
@@ -1751,7 +1751,7 @@ extern "C" void gGenMonsterTrickReqName(char* buf, int trick, int size)
     for (int i = 0; i < 0x18; i++, r++) {
         if (r->trick == trick) {
             sTrickId_6E10 id;
-            func_003E6448(&id, 0, 8);
+            MEM_fill(&id, 0, 8);
             id.b.kind = r->kind;
             id.b.dir = r->dir;
             id.b.spin = r->spin;
@@ -1796,9 +1796,9 @@ extern "C" void func_00116FB8(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00117008);
+INCLUDE_ASM("seg/seg_14B10", cHUDFX_copyDispStr);
 #ifdef SKIP_ASM
-extern "C" void func_00117008(char *arg0, signed char *arg1) {
+extern "C" void cHUDFX_copyDispStr(char *arg0, signed char *arg1) {
     signed char *s = arg1;
     unsigned char *d = (unsigned char*)(arg0 + 0x18);
     if (s != 0) {
@@ -1813,12 +1813,12 @@ extern "C" void func_00117008(char *arg0, signed char *arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00117048);
+INCLUDE_ASM("seg/seg_14B10", cHUDFX_set);
 #ifdef SKIP_ASM
-extern "C" void func_00117008(char *, signed char *);
+extern "C" void cHUDFX_copyDispStr(char *, signed char *);
 
-extern "C" void func_00117048(char *arg0, int arg1, signed char *arg2, int arg3, float fparg0) {
-    func_00117008(arg0, arg2);
+extern "C" void cHUDFX_set(char *arg0, int arg1, signed char *arg2, int arg3, float fparg0) {
+    cHUDFX_copyDispStr(arg0, arg2);
     *(int *)(arg0 + 0) = arg1;
     *(float *)(arg0 + 4) = fparg0;
     *(int *)(arg0 + 0xC) = arg3;
@@ -1828,17 +1828,17 @@ extern "C" void func_00117048(char *arg0, int arg1, signed char *arg2, int arg3,
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_001170A8);
+INCLUDE_ASM("seg/seg_14B10", cHUDFX_set1);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_00117008(char *, signed char *);
+extern "C" void cHUDFX_copyDispStr(char *, signed char *);
 extern signed char D_004A5E20[];
 extern char D_004A1070[];
 
-// Variant of func_00117048 that names the entry from a number (formatted into a shared buffer).
-extern "C" void func_001170A8(char *arg0, int arg1, int arg2, float fparg0, int arg3) {
+// Variant of cHUDFX_set that names the entry from a number (formatted into a shared buffer).
+extern "C" void cHUDFX_set1(char *arg0, int arg1, int arg2, float fparg0, int arg3) {
     sprintf((char*)D_004A5E20, D_004A1070, arg2);
-    func_00117008(arg0, D_004A5E20);
+    cHUDFX_copyDispStr(arg0, D_004A5E20);
     *(int *)(arg0 + 0x14) = arg2;
     *(int *)(arg0 + 0) = arg1;
     *(float *)(arg0 + 4) = fparg0;
@@ -1850,10 +1850,10 @@ extern "C" void func_001170A8(char *arg0, int arg1, int arg2, float fparg0, int 
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00117138);
 #ifdef SKIP_ASM
-extern "C" void func_00117008(char *, signed char *);
+extern "C" void cHUDFX_copyDispStr(char *, signed char *);
 
 extern "C" void func_00117138(char *arg0, int arg1, signed char *arg2, int arg3, float fparg0) {
-    func_00117008(arg0, arg2);
+    cHUDFX_copyDispStr(arg0, arg2);
     *(int *)(arg0 + 0) = arg1;
     *(int *)(arg0 + 0xC) = arg3;
     *(float *)(arg0 + 8) = -fparg0;
@@ -1866,14 +1866,14 @@ extern "C" void func_00117138(char *arg0, int arg1, signed char *arg2, int arg3,
 INCLUDE_ASM("seg/seg_14B10", func_001171A8);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_00117008(char *, signed char *);
+extern "C" void cHUDFX_copyDispStr(char *, signed char *);
 extern signed char D_004A5E20[];
 extern char D_004A1070[];
 
 // Variant of func_00117138 that names the entry from a number (formatted into a shared buffer).
 extern "C" void func_001171A8(char *arg0, int arg1, int arg2, float fparg0, int arg3) {
     sprintf((char*)D_004A5E20, D_004A1070, arg2);
-    func_00117008(arg0, D_004A5E20);
+    cHUDFX_copyDispStr(arg0, D_004A5E20);
     *(int *)(arg0 + 0x14) = arg2;
     *(int *)(arg0 + 0) = arg1;
     *(float *)(arg0 + 8) = -fparg0;
@@ -1883,17 +1883,17 @@ extern "C" void func_001171A8(char *arg0, int arg1, int arg2, float fparg0, int 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00117248);
+INCLUDE_ASM("seg/seg_14B10", cRiderMetrix_cRiderMetrix);
 #ifdef SKIP_ASM
-extern "C" void func_00117540(void *);
+extern "C" void cRiderMetrix_reset(void *);
 
-extern "C" void *func_00117248(void *arg0) {
+extern "C" void *cRiderMetrix_cRiderMetrix(void *arg0) {
     *(int *)((char*)arg0 + 0x1AC) = 0;
     *(int *)((char*)arg0 + 0x1B0) = 0;
     *(int *)((char*)arg0 + 0x1B4) = 0;
     *(int *)((char*)arg0 + 0x1C8) = 0;
     *(float *)((char*)arg0 + 0x1C4) = 1.0f;
-    func_00117540(arg0);
+    cRiderMetrix_reset(arg0);
     return arg0;
 }
 #endif

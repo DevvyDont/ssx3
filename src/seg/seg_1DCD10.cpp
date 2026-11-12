@@ -64,8 +64,8 @@ public:
 };
 extern Mgr_BD10 *D_BD10 __asm__("D_004A5B80");
 extern "C" int FILE_load(char*, int);
-extern "C" long func_003B3900(int, char*);
-extern "C" void func_002523A8(int);
+extern "C" long SHAPE_locatez(int, char*);
+extern "C" void MEM_free(int);
 extern char D_00487918[];
 extern char D_00487938[];
 struct sFXShape_BD10 { char name[8]; int tex; };
@@ -91,7 +91,7 @@ extern "C" int func_002DBD10(int a0, long a1) {
     for (int k = 0; k < 0x51; k++) {
         r = 0;
         for (int i = 0; i < n; i++) {
-            r = func_003B3900(files[i], gFXShape_BD10[k].name);
+            r = SHAPE_locatez(files[i], gFXShape_BD10[k].name);
             if (r != 0)
                 break;
         }
@@ -101,7 +101,7 @@ extern "C" int func_002DBD10(int a0, long a1) {
         m->SetEffectTexMap(k, v);
     }
     for (int i = 0; i < n; i++)
-        func_002523A8(files[i]);
+        MEM_free(files[i]);
     for (int i = 0; i < 10; i++)
         m->dst[i] = m->GetEffectTexMap(0x47 + i);
     return a0;

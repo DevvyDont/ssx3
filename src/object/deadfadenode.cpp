@@ -6,7 +6,7 @@ INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_cDeadFadeNode);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_0034FB00(void* self, int a1, int type, void* a3);
 extern "C" float func_002D1C70();
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 extern char D_00491980[];
 extern char D_0048E8A8[];
 
@@ -187,7 +187,7 @@ extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* s
     *pm = new (D_0048E8A8, 0x20000000, 0) sDfMatElem_0750[model->count];
     if (other != 0 && ((DfBoolFn_0750)other->vt[26].fn)((char*)other + other->vt[26].delta)) {
         sDfMat_0750* src = ((DfMatFn_0750)other->vt[27].fn)((char*)other + other->vt[27].delta);
-        func_003E6574(self->mats, src, model->count << 6);
+        MEM_copy(self->mats, src, model->count << 6);
     } else {
         sDfMat_0750* base = &self->inst->world;
         if (other != 0) {
@@ -243,7 +243,7 @@ INCLUDE_ASM("object/deadfadenode", func_00350BE0);
 #ifdef SKIP_ASM
 extern char D_00491980[];
 void cMemMan_free(void*);
-extern "C" void func_0034FBF0(void* self, int flags);
+extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 extern "C" void func_00350BE0(void* self, int flags)
 {
@@ -252,7 +252,7 @@ extern "C" void func_00350BE0(void* self, int flags)
     if (p != 0) {
         cMemMan_free(p);
     }
-    func_0034FBF0(self, flags);
+    cInstanceNode__cInstanceNode(self, flags);
 }
 #endif
 
@@ -418,14 +418,14 @@ extern "C" void func_00350CB8(char* self)
 }
 #endif
 
-extern "C" void* func_0034FE90(void* self);
+extern "C" void* cInstanceNode_writeToReplayFrame(void* self);
 
 //100%
 INCLUDE_ASM("object/deadfadenode", func_00350E70__FPv);
 #ifdef SKIP_ASM
 void* func_00350E70(void* self)
 {
-    return func_0034FE90(self);
+    return cInstanceNode_writeToReplayFrame(self);
 }
 #endif
 
@@ -466,7 +466,7 @@ INCLUDE_ASM("object/deadfadenode", func_00350F40__FPv);
 #ifdef SKIP_ASM
 void* func_00350F40(void* self)
 {
-    return func_0034FE90(self);
+    return cInstanceNode_writeToReplayFrame(self);
 }
 #endif
 
@@ -507,7 +507,7 @@ INCLUDE_ASM("object/deadfadenode", func_00351010__FPv);
 #ifdef SKIP_ASM
 void* func_00351010(void* self)
 {
-    return func_0034FE90(self);
+    return cInstanceNode_writeToReplayFrame(self);
 }
 #endif
 

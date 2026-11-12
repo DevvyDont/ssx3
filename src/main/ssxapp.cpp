@@ -4,7 +4,7 @@
 INCLUDE_ASM("main/ssxapp", cSSXApp_cSSXApp);
 #ifdef SKIP_ASM
 extern "C" void* cAppMan_cAppMan(void* self);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern int D_004A3E90;
 extern void* D_0047D9C8[];
 
@@ -60,9 +60,9 @@ extern "C" cSSXApp00226830* cSSXApp_cSSXApp(cSSXApp00226830* self)
     self->f70 = 0;
     self->f60 = 1;
     self->f64 = 1;
-    func_003E6448(self->fA8, 0, 8);
-    func_003E6448(self->fB8, 0, 8);
-    func_003E6448(self->fB0, 0, 8);
+    MEM_fill(self->fA8, 0, 8);
+    MEM_fill(self->fB8, 0, 8);
+    MEM_fill(self->fB0, 0, 8);
     return self;
 }
 #endif
@@ -120,7 +120,7 @@ extern char D_00479A90[];
 extern char D_00479AA0[];
 extern char D_0047AB40[];
 extern char D_004A28B0[];
-extern "C" void* func_002C7440();
+extern "C" void* cConsoleConfig_construct();
 extern "C" void* func_00375A08();
 void cLightMan_construct();
 void cBezierMan_construct();
@@ -128,8 +128,8 @@ extern "C" void cSSXApp_parseCommandLine(char* self, int argc, char** argv);
 extern "C" void* SHAPE_locate(const char* name, void* list);
 extern "C" void func_00369FF8(void* gfx);
 void* func_00232328(void* p);
-extern "C" void* func_001A3590(void* p);
-extern "C" void func_001A3648(void* p);
+extern "C" void* cFEAsyncManager_cFEAsyncManager(void* p);
+extern "C" void cFEAsyncManager_Init(void* p);
 extern "C" void* cGameModeMan_getGM();
 struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
@@ -141,7 +141,7 @@ typedef void* (*LoadFn_6900)(char*, void*, const char*, int, int, int);
 extern "C" void cSSXApp_init(char* self, int argc, char** argv)
 {
     D_004A28A8 = self;
-    *(void**)(self + 0x9C) = func_002C7440();
+    *(void**)(self + 0x9C) = cConsoleConfig_construct();
     cPlayerMgr_6900* volatile pm = (cPlayerMgr_6900*)cMemMan_alloc(0x2EFC, D_00479A40, 0, 0);
     func_00326A28(pm);
     D_004A28A0 = pm;
@@ -174,16 +174,16 @@ extern "C" void cSSXApp_init(char* self, int argc, char** argv)
     *(sTint_6900**)(self + 0xA4) = new (D_00479A80, 0, 0) sTint_6900;
     cAppMan_setNextModule((cAppMan*)self, (unsigned int)func_00232328(cMemMan_alloc(0xC, D_00479A90, 0x100, 0)));
     *(void**)(self + 0xC0) = cGameModeMan_getGM();
-    void* m = func_001A3590(cMemMan_alloc(0x590, D_00479AA0, 0, 0));
+    void* m = cFEAsyncManager_cFEAsyncManager(cMemMan_alloc(0x590, D_00479AA0, 0, 0));
     *(void**)(self + 0x11C) = m;
-    func_001A3648(m);
+    cFEAsyncManager_Init(m);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_loadInputMap);
 #ifdef SKIP_ASM
-extern "C" void* func_00325F48(void* buf, const char* path, int* outSize);
+extern "C" void* cInputPreProcessor_loadFileSize(void* buf, const char* path, int* outSize);
 extern "C" void cInputMap_init(void* self, int count);
 extern "C" void cInputMap_loadMapFile(void* self, void* data, int size);
 extern "C" void cInputMap_compileMap(void* self, int idx, char* src);
@@ -407,7 +407,7 @@ extern "C" int cSSXApp_loadInputMap(void* self, const char* path)
 {
     sParseBuf_226B60 buf;
     int size;
-    void* data = func_00325F48(&buf, path, &size);
+    void* data = cInputPreProcessor_loadFileSize(&buf, path, &size);
     void* map = cMemMan_alloc(0x18, D_00479AB0, 0, 0);
     cInputMap_init(map, 0xCD);
     cInputMap_loadMapFile(map, data, size);
@@ -711,7 +711,7 @@ extern "C" void cSSXApp_parseCommandLine(char* self, int argc, char** argv)
 }
 #endif
 
-extern "C" int func_00326C60(void* mgr);
+extern "C" int cPadCache_flush(void* mgr);
 extern void* D_004A28A0;
 
 //99.9%
@@ -720,7 +720,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_flush__Fv);
 int cSSXApp_flush()
 {
     if (D_004A28A0 != 0) {
-        return func_00326C60(D_004A28A0);
+        return cPadCache_flush(D_004A28A0);
     }
     return 0;
 }
@@ -760,7 +760,7 @@ extern "C" int cSSXApp_preUpdate(void* self)
 }
 #endif
 
-extern "C" void func_00326B88(void* mgr);
+extern "C" void cPadCache_cacheInput(void* mgr);
 
 //99.89%
 INCLUDE_ASM("main/ssxapp", cSSXApp_timerCallback__Fv);
@@ -768,7 +768,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_timerCallback__Fv);
 void cSSXApp_timerCallback()
 {
     if (D_004A28A0 != 0) {
-        func_00326B88(D_004A28A0);
+        cPadCache_cacheInput(D_004A28A0);
     }
 }
 #endif
@@ -776,9 +776,9 @@ void cSSXApp_timerCallback()
 void* cMCOverlayManager_getManager();
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00227F80);
+INCLUDE_ASM("main/ssxapp", cSSXApp_getMCManager);
 #ifdef SKIP_ASM
-extern "C" void* func_00227F80()
+extern "C" void* cSSXApp_getMCManager()
 {
     return cMCOverlayManager_getManager();
 }
@@ -800,14 +800,14 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_purge);
 void operator_delete(int* p);
 extern "C" void func_00398438(void* p);
 extern "C" void func_00326A68(void* p);
-extern "C" void func_00278308(void* p);
+extern "C" void cSSXScriptEngine_DeInitOnce(void* p);
 extern "C" void func_003DEDC0(void* handle, int arg);
-// PORT: func_002B4B48 is declared (void*) but never reads it; this caller passes nothing.
-extern "C" void func_002B4B48_noarg() __asm__("func_002B4B48");
-extern "C" void func_00284C28();
-extern "C" void func_0014DD98(void* p);
+// PORT: WORLDTRIGGERMANAGER_DeInit is declared (void*) but never reads it; this caller passes nothing.
+extern "C" void WORLDTRIGGERMANAGER_DeInit_noarg() __asm__("WORLDTRIGGERMANAGER_DeInit");
+extern "C" void SSXAUDIO_DeInit();
+extern "C" void cBE_purgeBE(void* p);
 extern "C" void func_002380E8(void* p);
-extern "C" void func_001A35E8(void* p, int flags);
+extern "C" void cFEAsyncManager__cFEAsyncManager(void* p, int flags);
 extern void* D_004A28A0;
 extern void* D_004A28A4;
 extern void* D_004A28A8;
@@ -866,7 +866,7 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
     func_00326A68(mgr);
     operator_delete(mgr);
     if (D_004A28A4) {
-        func_00278308(D_004A28A4);
+        cSSXScriptEngine_DeInitOnce(D_004A28A4);
         char* o = (char*)D_004A28A4;
         if (o) {
             sVEPurge* vt = *(sVEPurge**)(o + 0x2A8);
@@ -895,15 +895,15 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
         }
     }
     if (self->f118) func_003DEDC0(self->f118, 100);
-    func_002B4B48_noarg();
-    func_00284C28();
+    WORLDTRIGGERMANAGER_DeInit_noarg();
+    SSXAUDIO_DeInit();
     if (self->fD4) func_003DEDC0(self->fD4, 100);
     if (self->fD8) func_003DEDC0(self->fD8, 100);
     if (self->fDC) func_003DEDC0(self->fDC, 100);
     if (self->fE0) func_003DEDC0(self->fE0, 100);
-    if (self->f78) func_0014DD98(self->f78);
+    if (self->f78) cBE_purgeBE(self->f78);
     func_002380E8(self->fC0);
-    if (self->f11C) func_001A35E8(self->f11C, 3);
+    if (self->f11C) cFEAsyncManager__cFEAsyncManager(self->f11C, 3);
     {
         char* m = self->f9C;
         if (m) {
@@ -919,7 +919,7 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
 INCLUDE_ASM("main/ssxapp", cSSXApp_startGameLoad);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_0022E968(void* self);
+extern "C" void* cGame_cGame(void* self);
 struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cGameModeMan_getGM();
@@ -927,7 +927,7 @@ extern char D_0047A808[];
 
 extern "C" void cSSXApp_startGameLoad(void* self)
 {
-    void* m = func_0022E968(cMemMan_alloc(0x22C, D_0047A808, 0, 0));
+    void* m = cGame_cGame(cMemMan_alloc(0x22C, D_0047A808, 0, 0));
     *(void**)((char*)self + 0x84) = m;
     cAppMan_setNextModule((cAppMan*)self, (unsigned int)m);
     *(void**)((char*)self + 0xC0) = cGameModeMan_getGM();
@@ -935,14 +935,14 @@ extern "C" void cSSXApp_startGameLoad(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00228238);
+INCLUDE_ASM("main/ssxapp", cSSXApp_startFELoad);
 #ifdef SKIP_ASM
 extern int D_004A203C;
 extern char D_0047A818[];
 extern "C" void* func_001A1CE8(void* p);
 extern "C" void* func_0017F7B8(void* p);
 
-extern "C" void func_00228238(void* self)
+extern "C" void cSSXApp_startFELoad(void* self)
 {
     D_004A203C = 0;
     if (*(int*)((char*)self + 0x60) != 0) {
@@ -964,8 +964,8 @@ extern "C" void initOnline();
 extern "C" int BXFILE_exists(const char* name);
 extern "C" int func_003DED50(const char* name, int a1, int a2, void* out);
 extern "C" void func_00256188();
-extern "C" void* func_00277F20(void* self);
-extern "C" void func_00278210(void* self);
+extern "C" void* cSSXScriptEngine_cSSXScriptEngine(void* self);
+extern "C" void cSSXScriptEngine_InitOnce(void* self);
 extern "C" int cSSXApp_loadInputMap(void* self, const char* name);
 void func_00244400(void* self, int a1);
 void func_00244408(void* self, int a1);
@@ -975,13 +975,13 @@ extern "C" void cUIFontInterface_loadFonts(void* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// PORT: func_00228C08 receives self here; the unit defines it later with no parameters.
-extern "C" void func_00228C08_self(void* self) __asm__("func_00228C08");
+// PORT: cSSXApp_activateBEOptions receives self here; the unit defines it later with no parameters.
+extern "C" void cSSXApp_activateBEOptions_self(void* self) __asm__("cSSXApp_activateBEOptions");
 extern "C" void cSSXApp_initLocale(void* self);
-extern "C" void func_00311870();
+extern "C" void cRiderAnimBase_initAIAnimEventMap();
 extern "C" void* func_00314D98(void* self);
-extern "C" void func_00314DD8(void* self);
-extern "C" void* func_00311048(void* self);
+extern "C" void cGameAnimMap_initMap(void* self);
+extern "C" void* cAnimDataBase_cAnimDataBase(void* self);
 extern "C" void* func_0028B180();
 extern "C" int func_00289D08(void* self, unsigned char a1);
 extern "C" void SSXAUDIO_Init(int a);
@@ -1097,9 +1097,9 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
         func_003DED50(D_00442100[i], 0, 100, &self->fEC[i]);
     }
     func_003DED50(D_004A29CC, 0, 100, &self->f118);
-    void* sm = func_00277F20(cMemMan_alloc(0xA50, D_0047A8D0, 0, 0));
+    void* sm = cSSXScriptEngine_cSSXScriptEngine(cMemMan_alloc(0xA50, D_0047A8D0, 0, 0));
     D_004A28A4 = sm;
-    func_00278210(sm);
+    cSSXScriptEngine_InitOnce(sm);
     self->fB8[0] = cSSXApp_loadInputMap(self, D_0047A8E0);
     self->fB8[1] = cSSXApp_loadInputMap(self, D_0047A8F8);
     for (int j = 0; j < 2; j++) {
@@ -1111,12 +1111,12 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     func_003984B0(self->f88, 1, D_0047A940, GetHashValue32(D_004A29E0));
     cUIFontInterface_loadFonts(self->f88);
     self->f78 = cBE_getBE();
-    func_00228C08_self(self);
+    cSSXApp_activateBEOptions_self(self);
     cSSXApp_initLocale(self);
-    func_00311870();
+    cRiderAnimBase_initAIAnimEventMap();
     self->f94 = func_00314D98(cMemMan_alloc(0x1848, D_0047A958, 0, 0));
-    func_00314DD8(self->f94);
-    self->f90 = func_00311048(cMemMan_alloc(0x3FC, D_0047A968, 0, 0));
+    cGameAnimMap_initMap(self->f94);
+    self->f90 = cAnimDataBase_cAnimDataBase(cMemMan_alloc(0x3FC, D_0047A968, 0, 0));
     cBE_getInterface_Fv(cBE_getBE(), 4);
     SSXAUDIO_Init(func_00289D08(func_0028B180(), D_00535610_82D0.output));
     func_0031A6B8();
@@ -1139,7 +1139,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_initLocale);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_00195880(void* self);
+extern "C" void* cFELocale_cFELocale(void* self);
 extern "C" void func_00195B70(void* self);
 extern char D_0047A978[];
 
@@ -1165,7 +1165,7 @@ static inline int optLanguage_228A78(sOptions_228A78 o)
 extern "C" void cSSXApp_initLocale(void* self)
 {
     if (*(void**)((char*)self + 0x8C) == 0) {
-        *(void**)((char*)self + 0x8C) = func_00195880(cMemMan_alloc(0xC0, D_0047A978, 0, 0));
+        *(void**)((char*)self + 0x8C) = cFELocale_cFELocale(cMemMan_alloc(0xC0, D_0047A978, 0, 0));
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
     char* loc = *(char**)((char*)self + 0x8C);
@@ -1177,8 +1177,8 @@ extern "C" void cSSXApp_initLocale(void* self)
 }
 #endif
 
-extern "C" void func_002B4B48(void* self);
-extern "C" void func_00284C28();
+extern "C" void WORLDTRIGGERMANAGER_DeInit(void* self);
+extern "C" void SSXAUDIO_DeInit();
 extern "C" void cAppMan_loadexecpurge(void* self);
 
 struct sExecPurgeVTable {
@@ -1200,8 +1200,8 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_loadexecpurge__FPv);
 #ifdef SKIP_ASM
 void cSSXApp_loadexecpurge(void* self)
 {
-    func_002B4B48(self);
-    func_00284C28();
+    WORLDTRIGGERMANAGER_DeInit(self);
+    SSXAUDIO_DeInit();
     cAppMan_loadexecpurge(self);
     sExecPurgeVTable* vt = D_004A5B80->vtable;
     vt->fn((char*)D_004A5B80 + vt->field_0x3B8);
@@ -1209,7 +1209,7 @@ void cSSXApp_loadexecpurge(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00228C08);
+INCLUDE_ASM("main/ssxapp", cSSXApp_activateBEOptions);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sOptions_228C08 {
@@ -1282,7 +1282,7 @@ struct sVE_228C08 {
 
 extern cGfx_228C08* D_004A5B80_228C08 __asm__("D_004A5B80");
 
-extern "C" void func_00228C08()
+extern "C" void cSSXApp_activateBEOptions()
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (GetOptions_228C08().mode) {
@@ -1484,7 +1484,7 @@ extern "C" void func_00229278(void* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxapp", func_002292E0);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 unsigned int BXrand();
 
 struct sCrowdSlot_2292E0 {
@@ -1510,13 +1510,13 @@ extern "C" void func_002292E0(void* self)
     sCrowd_2292E0* c = (sCrowd_2292E0*)self;
     int i;
     c->count = 0;
-    func_003E6448(c->slots, 0, 0x2000);
+    MEM_fill(c->slots, 0, 0x2000);
     for (i = 0; i < 128; i++) {
         c->ids[i] = 0xFFFFFFFF;
         c->slots[i].delay = BXrand() % 300 + 300;
     }
     c->count2 = 0;
-    func_003E6448(c->rest, 0, 0x500);
+    MEM_fill(c->rest, 0, 0x500);
 }
 #endif
 
@@ -3197,7 +3197,7 @@ extern "C" void func_0031B6C8(void* m);
 extern "C" void func_00230640(void* self);
 extern "C" void func_00229BA8(void* p);
 extern "C" void func_00344138(void* p);
-extern "C" void func_00357C50(void* p);
+extern "C" void cMultiParticleMan_render(void* p);
 extern "C" void cGame_renderModels(void* self, void* world);
 extern "C" void cGame_renderFogVolumes(void* self, void* world);
 extern "C" void cGame_renderLightHalos(void* self, void* world, int view);
@@ -3607,7 +3607,7 @@ extern "C" int func_0022B008(sGame_22B008* self)
         func_00230640(self);
         func_00229BA8(self->f38);
         func_00344138(self->f3C);
-        func_00357C50(self->f40);
+        cMultiParticleMan_render(self->f40);
         D_004A289C_22B008->top->f8 = (D_004A289C_22B008->top->f8 & ~0x3E0) | 0x80;
         self->scene->v04();
         cGame_renderModels(self, world);

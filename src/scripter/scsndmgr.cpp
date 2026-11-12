@@ -43,13 +43,13 @@ INCLUDE_ASM("scripter/scsndmgr", func_00283518);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" void func_00283658(void* self);
+extern "C" void cScriptSoundBankManager_UnlinkBanksAll(void* self);
 extern char D_00482240[];
 
 extern "C" void func_00283518(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_00482240;
-    func_00283658(self);
+    cScriptSoundBankManager_UnlinkBanksAll(self);
     void* p = *(void**)((char*)self + 0x8);
     if (p != 0) {
         cMemMan_free(p);
@@ -61,7 +61,7 @@ extern "C" void func_00283518(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scsndmgr", func_00283580);
+INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_LinkBank);
 #ifdef SKIP_ASM
 struct sSndEntry;
 struct sSndList;
@@ -70,7 +70,7 @@ extern "C" sSndEntry* func_00283760(sSndList* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028BE60(void* bank, int handle, void* data, int b);
 
-extern "C" int func_00283580(sSndList* self, int id, void* data, int b)
+extern "C" int cScriptSoundBankManager_LinkBank(sSndList* self, int id, void* data, int b)
 {
     char* e = (char*)func_002836D8(self, id);
     if (e == 0) {
@@ -107,7 +107,7 @@ extern "C" void func_00283610(sSndList* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scsndmgr", func_00283658);
+INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_UnlinkBanksAll);
 #ifdef SKIP_ASM
 struct sDmEntry283658 {
     char pad_0x00[0x8];
@@ -128,7 +128,7 @@ struct sDmTable283658 {
     sDmVEntry283658* vt;
 };
 
-extern "C" void func_00283658(void* self_)
+extern "C" void cScriptSoundBankManager_UnlinkBanksAll(void* self_)
 {
     sDmTable283658* self = (sDmTable283658*)self_;
     int i;
@@ -195,11 +195,11 @@ extern "C" sSndEntry* func_00283760(sSndList* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scsndmgr", func_00283798);
+INCLUDE_ASM("scripter/scsndmgr", cVidEngine_cVidEngine);
 #ifdef SKIP_ASM
 extern char D_00482228[];
 
-extern "C" void* func_00283798(void* self)
+extern "C" void* cVidEngine_cVidEngine(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
     *(int*)((char*)self + 0x4) = 0;
@@ -216,13 +216,13 @@ extern "C" void* func_00283798(void* self)
 INCLUDE_ASM("scripter/scsndmgr", func_002837C8);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void func_00283818(void* self);
+extern "C" void cVidEngine_ResetVideoEngine(void* self);
 extern char D_00482228[];
 
 extern "C" void func_002837C8(void* self, int flags)
 {
     *(void**)((char*)self + 0x18) = D_00482228;
-    func_00283818(self);
+    cVidEngine_ResetVideoEngine(self);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -230,7 +230,7 @@ extern "C" void func_002837C8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scsndmgr", func_00283818);
+INCLUDE_ASM("scripter/scsndmgr", cVidEngine_ResetVideoEngine);
 #ifdef SKIP_ASM
 extern "C" void func_00253418(void* p, int flags);
 extern "C" void* func_0028B180();
@@ -289,7 +289,7 @@ public:
 
 extern cWorld_3818* D_004A289C;
 
-extern "C" void func_00283818(void* self)
+extern "C" void cVidEngine_ResetVideoEngine(void* self)
 {
     char* s = (char*)self;
     if (*(void**)(s + 0x0) != 0) {

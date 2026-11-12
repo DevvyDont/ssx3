@@ -228,7 +228,7 @@ extern "C" void func_0039A8D8(void* self, int count)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A928);
+INCLUDE_ASM("ui/uilistbox", cUIMenu_setFocus);
 #ifdef SKIP_ASM
 struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
@@ -252,7 +252,7 @@ struct sUIFlags39A928 {
     unsigned int active : 1;
 };
 
-extern "C" void func_0039A928(char* self, int on)
+extern "C" void cUIMenu_setFocus(char* self, int on)
 {
     ((sUIFlags39A928*)(self + 0x14))->active = on != 0;
     if (on) {
@@ -303,26 +303,26 @@ extern "C" void func_0039A928(char* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039AAC0);
+INCLUDE_ASM("ui/uilistbox", cUIMenu_setUIData);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FE00(void* self);
-extern "C" char func_003979C0(void*);
-extern "C" void func_0039AB00(void* self, char a1);
+extern "C" void* cUIThing_setUIData(void* self);
+extern "C" char cList_size(void*);
+extern "C" void cUIMenu_setInputMap(void* self, char a1);
 
-extern "C" void func_0039AAC0(void* self)
+extern "C" void cUIMenu_setUIData(void* self)
 {
-    func_0039FE00(self);
-    char v = func_003979C0((char*)self + 0x74);
+    cUIThing_setUIData(self);
+    char v = cList_size((char*)self + 0x74);
     *(char*)((char*)self + 0x97) = v;
     *(char*)((char*)self + 0x96) = v;
-    func_0039AB00(self, 0);
+    cUIMenu_setInputMap(self, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039AB00);
+INCLUDE_ASM("ui/uilistbox", cUIMenu_setInputMap);
 #ifdef SKIP_ASM
-extern "C" void func_0039AB00(void* self, char a1)
+extern "C" void cUIMenu_setInputMap(void* self, char a1)
 {
     if (a1 == 0) {
         *(char*)((char*)self + 0x91) = 0;
@@ -339,13 +339,13 @@ extern "C" void func_0039AB00(void* self, char a1)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039AB50);
+INCLUDE_ASM("ui/uilistbox", cUIMenu_getNext);
 #ifdef SKIP_ASM
 extern "C" void* func_00397870(void* list, unsigned char i);
 
 struct sUIVtAB50 { short delta; short index; int (*fn)(void*, void*, int, int); };
 
-extern "C" unsigned char func_0039AB50(void* self)
+extern "C" unsigned char cUIMenu_getNext(void* self)
 {
     unsigned char i = *(unsigned char*)((char*)self + 0x95) + 1;
     unsigned char n = *(unsigned char*)((char*)self + 0x96);

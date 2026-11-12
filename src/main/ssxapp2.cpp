@@ -18,21 +18,21 @@ INCLUDE_ASM("main/ssxapp2", func_00243C00);
 
 INCLUDE_ASM("main/ssxapp2", func_00243C80);
 
-INCLUDE_ASM("main/ssxapp2", func_00243CB0);
+INCLUDE_ASM("main/ssxapp2", cGameState_preloadInit);
 
-INCLUDE_ASM("main/ssxapp2", func_00243CB8);
+INCLUDE_ASM("main/ssxapp2", cGameState_preloadUpdate);
 
-INCLUDE_ASM("main/ssxapp2", func_00243CC0);
+INCLUDE_ASM("main/ssxapp2", cGameState_preloadCancel);
 
 INCLUDE_ASM("main/ssxapp2", func_00243CC8);
 
 INCLUDE_ASM("main/ssxapp2", func_00243CD0);
 
-INCLUDE_ASM("main/ssxapp2", func_00243CD8);
+INCLUDE_ASM("main/ssxapp2", cGameState_loseFocus);
 
-INCLUDE_ASM("main/ssxapp2", func_00243CE0);
+INCLUDE_ASM("main/ssxapp2", cGameState_isPreloadComplete);
 
-INCLUDE_ASM("main/ssxapp2", func_00243CE8);
+INCLUDE_ASM("main/ssxapp2", cGameState_onWidgetEvent);
 
 INCLUDE_ASM("main/ssxapp2", func_00243CF0);
 
@@ -42,19 +42,19 @@ INCLUDE_ASM("main/ssxapp2", func_00243D88);
 
 INCLUDE_ASM("main/ssxapp2", func_00243DB8);
 
-INCLUDE_ASM("main/ssxapp2", func_00243E20);
+INCLUDE_ASM("main/ssxapp2", cGFEventStartState__cGFEventStartState);
 
-INCLUDE_ASM("main/ssxapp2", func_00243E50);
+INCLUDE_ASM("main/ssxapp2", cGFGateState__cGFGateState);
 
 INCLUDE_ASM("main/ssxapp2", func_00243EB8);
 
-INCLUDE_ASM("main/ssxapp2", func_00243F20);
+INCLUDE_ASM("main/ssxapp2", cGFTrackStartState__cGFTrackStartState);
 
-INCLUDE_ASM("main/ssxapp2", func_00243F50);
+INCLUDE_ASM("main/ssxapp2", cGFNextHeatState__cGFNextHeatState);
 
-INCLUDE_ASM("main/ssxapp2", func_00243FC0);
+INCLUDE_ASM("main/ssxapp2", cGFSessionTeleportState__cGFSessionTeleportState);
 
-INCLUDE_ASM("main/ssxapp2", func_00244028);
+INCLUDE_ASM("main/ssxapp2", cGFUserSelectState__cGFUserSelectState);
 
 INCLUDE_ASM("main/ssxapp2", func_00244060);
 
@@ -62,9 +62,9 @@ INCLUDE_ASM("main/ssxapp2", func_00244090);
 
 INCLUDE_ASM("main/ssxapp2", func_002440F8);
 
-INCLUDE_ASM("main/ssxapp2", func_00244160);
+INCLUDE_ASM("main/ssxapp2", cGFPodiumState__cGFPodiumState);
 
-INCLUDE_ASM("main/ssxapp2", func_002441C8);
+INCLUDE_ASM("main/ssxapp2", cGFReplayStartState__cGFReplayStartState);
 
 INCLUDE_ASM("main/ssxapp2", func_00244240);
 
@@ -140,11 +140,11 @@ INCLUDE_ASM("main/ssxapp2", func_00244948);
 
 INCLUDE_ASM("main/ssxapp2", func_00244978);
 
-INCLUDE_ASM("main/ssxapp2", func_002449A8);
+INCLUDE_ASM("main/ssxapp2", cSSXStatsObjNode__cSSXStatsObjNode);
 
-INCLUDE_ASM("main/ssxapp2", func_002449F8);
+INCLUDE_ASM("main/ssxapp2", cSSXStatsObjNode_update);
 
-INCLUDE_ASM("main/ssxapp2", func_00244A18);
+INCLUDE_ASM("main/ssxapp2", cSSXStatsObjNode_render);
 
 INCLUDE_ASM("main/ssxapp2", func_00245228);
 

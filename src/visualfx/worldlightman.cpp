@@ -777,7 +777,7 @@ __asm__(".globl func_002F6388\n.type func_002F6388,@function\nfunc_002F6388 = _$
 __asm__("_vt$15cVbDtor002F6388$13cRiderVbC_wlm = D_004886E0\n"
         "_vt$15cVbDtor002F6388$14cRiderVbBC_wlm = D_00459B90\n"
         "_vt$15cVbDtor002F6388$12cRiderVb_wlm = D_00488728\n"
-        "_$_12cRiderVb_wlm = func_0011B978\n");
+        "_$_12cRiderVb_wlm = cRider__cRider\n");
 #endif
 
 //100%
@@ -1289,7 +1289,7 @@ struct sWlAvElem {
     sWlAvElem() {}
 };
 extern "C" void* func_003714B8(void* self);
-extern "C" void func_002D56B0(void* self, int flags);
+extern "C" void tActiveAvalancheNode__tActiveAvalancheNode(void* self, int flags);
 struct sWlFx {
     char pad[0xD0];
     char emitter[0x2F0 - 0xD0];
@@ -1654,7 +1654,7 @@ void sti_002F6B88(int init, int prio)
                 if (D_004EE770 != D_004FA370_end) {
                     do {
                         p--;
-                        func_002D56B0(p, 0);
+                        tActiveAvalancheNode__tActiveAvalancheNode(p, 0);
                     } while (p != D_004EE770);
                 }
             }
@@ -1748,10 +1748,10 @@ extern "C" void func_002F7B00(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B08);
 #ifdef SKIP_ASM
-extern "C" void func_002E8560();
+extern "C" void cBoardTrailFX_reset();
 
 extern "C" void func_002F7B08(void) {
-    func_002E8560();
+    cBoardTrailFX_reset();
 }
 #endif
 //100%
@@ -1881,9 +1881,9 @@ void func_002F7C28(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7C30__FPv);
+INCLUDE_ASM("visualfx/worldlightman", cVisualEffect_deferredRender__FPv);
 #ifdef SKIP_ASM
-void func_002F7C30(void* self)
+void cVisualEffect_deferredRender(void* self)
 {
 }
 #endif
@@ -2192,10 +2192,10 @@ extern "C" int *func_002F7E60(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E70);
 #ifdef SKIP_ASM
-extern "C" void func_002D9B40();
+extern "C" void cAvalanche_reset();
 
 extern "C" void func_002F7E70(void) {
-    func_002D9B40();
+    cAvalanche_reset();
 }
 #endif
 //100%
@@ -2399,12 +2399,12 @@ extern "C" void func_002F8000(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8030);
+INCLUDE_ASM("visualfx/worldlightman", cFade_TObj__cFade_TObj);
 #ifdef SKIP_ASM
 extern void* D_004880E0[];
 extern "C" void func_002E4D30(void* p);
 
-extern "C" void func_002F8030(void* self, int flags)
+extern "C" void cFade_TObj__cFade_TObj(void* self, int flags)
 {
     *(void***)self = D_004880E0;
     if (flags & 1) {
@@ -2431,12 +2431,12 @@ extern "C" void* func_002F8060(void* self, sLightVec_002F8060 v)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F80D8);
+INCLUDE_ASM("visualfx/worldlightman", cWipe_TObj__cWipe_TObj);
 #ifdef SKIP_ASM
 extern void* D_004880E0[];
 extern "C" void func_002E4D30(void* p);
 
-extern "C" void func_002F80D8(void* self, int flags)
+extern "C" void cWipe_TObj__cWipe_TObj(void* self, int flags)
 {
     *(void***)self = D_004880E0;
     if (flags & 1) {
@@ -2446,12 +2446,12 @@ extern "C" void func_002F80D8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8108);
+INCLUDE_ASM("visualfx/worldlightman", cCircle_TObj__cCircle_TObj);
 #ifdef SKIP_ASM
 extern void* D_004880E0[];
 extern "C" void func_002E4D30(void* p);
 
-extern "C" void func_002F8108(void* self, int flags)
+extern "C" void cCircle_TObj__cCircle_TObj(void* self, int flags)
 {
     *(void***)self = D_004880E0;
     if (flags & 1) {
@@ -2476,9 +2476,9 @@ extern "C" void func_002F8138(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8168__FPv);
+INCLUDE_ASM("visualfx/worldlightman", cSnowFall_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
-void func_002F8168(void* self)
+void cSnowFall_writeToReplayFrame(void* self)
 {
 }
 #endif
@@ -2509,14 +2509,14 @@ extern "C" void func_002F8188(void* self, int flags)
 }
 #endif
 
-extern "C" void* func_003546C8(void* self);
+extern "C" void* cObjNode__cObjNode(void* self);
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F81B8__FPv);
+INCLUDE_ASM("visualfx/worldlightman", cCutSceneTransitionMan__cCutSceneTransitionMan__FPv);
 #ifdef SKIP_ASM
-void* func_002F81B8(void* self)
+void* cCutSceneTransitionMan__cCutSceneTransitionMan(void* self)
 {
-    return func_003546C8(self);
+    return cObjNode__cObjNode(self);
 }
 #endif
 

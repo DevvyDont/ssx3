@@ -2061,11 +2061,11 @@ extern "C" void func_00370758(int* self, int flags)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/graphicsman", func_00370788);
+INCLUDE_ASM("render/graphicsman", cStaticEmitter_update);
 #ifdef SKIP_ASM
 extern "C" void func_0036D428(void* self, float val);
 
-extern "C" void func_00370788(char* self, float dt)
+extern "C" void cStaticEmitter_update(char* self, float dt)
 {
     float t = *(float*)(self + 0x0);
     if (t == 0.0f) {
@@ -2090,7 +2090,7 @@ extern "C" void func_00370788(char* self, float dt)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370888);
+INCLUDE_ASM("render/graphicsman", cStaticEmitter_render);
 #ifdef SKIP_ASM
 struct sGmQuad {
     float v[4];
@@ -2101,18 +2101,18 @@ struct sGmQuad2 {
     sGmQuad b;
 };
 
-extern "C" void func_003708C0(void* self);
+extern "C" void cStaticEmitter_render1(void* self);
 
-extern "C" void func_00370888(void* self, const sGmQuad2* m, const sGmQuad* v)
+extern "C" void cStaticEmitter_render(void* self, const sGmQuad2* m, const sGmQuad* v)
 {
     *(sGmQuad2*)((char*)self + 0x160) = *m;
     *(sGmQuad*)((char*)self + 0xC0) = *v;
-    func_003708C0(self);
+    cStaticEmitter_render1(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_003708C0);
+INCLUDE_ASM("render/graphicsman", cStaticEmitter_render1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sGfxRS_708C0 {
@@ -2161,7 +2161,7 @@ static inline int GetTexId_708C0(int i)
     return D_004A5B80_708C0->texIds[i];
 }
 
-extern "C" void func_003708C0(void* selfp)
+extern "C" void cStaticEmitter_render1(void* selfp)
 {
     char* self = (char*)selfp;
     sGfxCtx_708C0* g = D_004A5B80_708C0;
@@ -2191,7 +2191,7 @@ extern "C" void func_003708C0(void* selfp)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370AA8);
+INCLUDE_ASM("render/graphicsman", cStaticEmitter_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sGmSerVEntry {
     short delta;
@@ -2209,7 +2209,7 @@ struct sGmSer12 {
     int c;
 };
 
-extern "C" void func_00370AA8(void* self, sGmSerObj* out)
+extern "C" void cStaticEmitter_writeToReplayFrame(void* self, sGmSerObj* out)
 {
     sGmSer12 buf;
     buf.a = *(float*)((char*)self + 0x0);
@@ -2297,13 +2297,13 @@ extern "C" sGmView_0B60* func_00370B60(sGmView_0B60* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370C08);
+INCLUDE_ASM("render/graphicsman", cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter);
 #ifdef SKIP_ASM
 extern "C" void func_00370CF8(void* self, int flag);
 void operator_delete(int* ptr);
 extern void* D_00493118[];
 
-extern "C" void func_00370C08(void* self, int flags)
+extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags)
 {
     *(void***)((char*)self + 0x1F8) = D_00493118;
     func_00370CF8(self, 1);

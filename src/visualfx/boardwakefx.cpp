@@ -104,7 +104,7 @@ __asm__(".globl func_002DCDA0\n.type func_002DCDA0,@function\nfunc_002DCDA0 = _$
 __asm__("_vt$15cVbDtor002DCDA0$13cRiderVbC_bwf = D_00488DA8\n"
         "_vt$15cVbDtor002DCDA0$14cRiderVbBC_bwf = D_00459B90\n"
         "_vt$15cVbDtor002DCDA0$12cRiderVb_bwf = D_00488DF0\n"
-        "_$_12cRiderVb_bwf = func_0011B978\n");
+        "_$_12cRiderVb_bwf = cRider__cRider\n");
 #endif
 
 //100%
@@ -1073,7 +1073,7 @@ __asm__(".globl func_002DF1C8\n.type func_002DF1C8,@function\nfunc_002DF1C8 = _$
 __asm__("_vt$15cVbDtor002DF1C8$13cRiderVbC_bwf = D_00488360\n"
         "_vt$15cVbDtor002DF1C8$14cRiderVbBC_bwf = D_00459B90\n"
         "_vt$15cVbDtor002DF1C8$12cRiderVb_bwf = D_004883A8\n"
-        "_$_12cRiderVb_bwf = func_0011B978\n");
+        "_$_12cRiderVb_bwf = cRider__cRider\n");
 #endif
 
 //100%
@@ -2386,7 +2386,7 @@ extern "C" void func_002E2868(sWake_2868* self, int idx)
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2B00);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2E18);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_cLensFxMan);
 #ifdef SKIP_ASM
 struct sBWVEntry2E18 {
     short delta;
@@ -2412,7 +2412,7 @@ void* func_002E3110(void* self);
 extern "C" void func_002F4380(void* self);
 
 // PORT: hand-written g++ 2.95 member-array construction loops (vptr at 0x649C).
-extern "C" void* func_002E2E18(void* self)
+extern "C" void* cLensFxMan_cLensFxMan(void* self)
 {
     *(void***)((char*)self + 0x649C) = D_004886B0;
     {
@@ -2778,7 +2778,7 @@ __asm__(".globl func_002E37D0\n.type func_002E37D0,@function\nfunc_002E37D0 = _$
 __asm__("_vt$15cVbDtor002E37D0$13cRiderVbC_bwf = D_004889C8\n"
         "_vt$15cVbDtor002E37D0$14cRiderVbBC_bwf = D_00459B90\n"
         "_vt$15cVbDtor002E37D0$12cRiderVb_bwf = D_00488A10\n"
-        "_$_12cRiderVb_bwf = func_0011B978\n");
+        "_$_12cRiderVb_bwf = cRider__cRider\n");
 #endif
 
 //100%
@@ -3200,7 +3200,7 @@ extern "C" void func_002E3AF8(sWake_3AF8* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4228);
 #ifdef SKIP_ASM
-extern "C" void* func_00354648(void* self, void* a1);
+extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 extern "C" void* func_00282CD0(void* self);
 extern "C" void func_00283298(void* self);
 extern "C" void func_002E4CB0(void);
@@ -3209,7 +3209,7 @@ extern void* D_00488158[];
 
 extern "C" void* func_002E4228(void* self, void* a1, int a2)
 {
-    func_00354648(self, a1);
+    cObjNode_cObjNode1(self, a1);
     func_00282CD0((char*)self + 0x10);
     *(int*)((char*)self + 0x74) = a2;
     *(int*)((char*)self + 0x40) = 0;
@@ -3233,7 +3233,7 @@ extern "C" void* func_002E4228(void* self, void* a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E42D0);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan__cTransitionMan);
 #ifdef SKIP_ASM
 struct sBWVEntry1 {
     short delta;
@@ -3243,11 +3243,11 @@ struct sBWVEntry1 {
 
 extern char* D_004A5B80;
 extern "C" void func_002E4578(void* self);
-extern "C" void func_002832D8(void* self);
+extern "C" void cScriptObject_DeInitScriptObject(void* self);
 extern "C" void func_00283228(void* self, int flags);
-extern "C" void func_003546C8(void* self, int flags);
+extern "C" void cObjNode__cObjNode(void* self, int flags);
 
-extern "C" void func_002E42D0(void* self, int flags)
+extern "C" void cTransitionMan__cTransitionMan(void* self, int flags)
 {
     *(void***)((char*)self + 0x1C) = D_00488100;
     *(void***)((char*)self + 0xC) = D_00488158;
@@ -3259,9 +3259,9 @@ extern "C" void func_002E42D0(void* self, int flags)
         e->fn(obj + e->delta, (char*)self + 0x68);
         *(int*)((char*)self + 0x7C) = 0;
     }
-    func_002832D8(m);
+    cScriptObject_DeInitScriptObject(m);
     func_00283228(m, 0);
-    func_003546C8(self, flags);
+    cObjNode__cObjNode(self, flags);
 }
 #endif
 
@@ -4229,7 +4229,7 @@ extern "C" void func_002E55D8(int* p, sMat_6008* m, float x, float y, float z)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E5920);
+INCLUDE_ASM("visualfx/boardwakefx", cSnowFall_cSnowFall);
 #ifdef SKIP_ASM
 extern void* D_00487FD8[];
 extern "C" void func_00319CC8(void);
@@ -4251,9 +4251,9 @@ struct sWake5920 {
     sVec5920 v[2];              // 0x40
 };
 
-extern "C" void* func_002E5920(sWake5920* self, void* a1)
+extern "C" void* cSnowFall_cSnowFall(sWake5920* self, void* a1)
 {
-    func_00354648(self, a1);
+    cObjNode_cObjNode1(self, a1);
     self->vtbl = D_00487FD8;
     new (self->v) sVec5920[2];
     func_00319CC8();
@@ -4283,14 +4283,14 @@ extern "C" void* func_002E5920(sWake5920* self, void* a1)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E5D18);
+INCLUDE_ASM("visualfx/boardwakefx", cSnowFall__cSnowFall);
 #ifdef SKIP_ASM
 extern void* D_00487FD8[];
 extern "C" void func_00319CC8(void);
 extern "C" void func_002E4F28(int* self, int flags);
-extern "C" void func_003546C8(void* self, int flags);
+extern "C" void cObjNode__cObjNode(void* self, int flags);
 
-extern "C" void func_002E5D18(void* self, int flags)
+extern "C" void cSnowFall__cSnowFall(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = D_00487FD8;
     func_00319CC8();
@@ -4302,7 +4302,7 @@ extern "C" void func_002E5D18(void* self, int flags)
         }
     }
     func_00319CC8();
-    func_003546C8(self, flags);
+    cObjNode__cObjNode(self, flags);
 }
 #endif
 
@@ -4549,11 +4549,11 @@ extern "C" void func_002E6008(sWakeFx_6008* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E62C8);
+INCLUDE_ASM("visualfx/boardwakefx", cSnowFall_readFromReplayFrame);
 #ifdef SKIP_ASM
 void func_002E4F10(void*);
 
-extern "C" void func_002E62C8(void* self)
+extern "C" void cSnowFall_readFromReplayFrame(void* self)
 {
     int i;
     void** p = (void**)((char*)self + 0x10);
@@ -4566,7 +4566,7 @@ extern "C" void func_002E62C8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E6320);
+INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_cSpeedBoostFX);
 #ifdef SKIP_ASM
 extern const sVt9_3680 D_00488550;
 extern const sVt22_3680 D_00488598;
@@ -4588,7 +4588,7 @@ struct sWakePt_6320 {
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x3B0): vtable copies with delta fixups when not in charge.
-extern "C" void* func_002E6320(void* self, int inChrg)
+extern "C" void* cSpeedBoostFX_cSpeedBoostFX(void* self, int inChrg)
 {
     sVt9_3680 t1;
     sVt22_3680 t2;
@@ -4639,7 +4639,7 @@ __asm__(".globl func_002E64C0\n.type func_002E64C0,@function\nfunc_002E64C0 = _$
 __asm__("_vt$15cVbDtor002E64C0$13cRiderVbC_bwf = D_00488550\n"
         "_vt$15cVbDtor002E64C0$14cRiderVbBC_bwf = D_00459B90\n"
         "_vt$15cVbDtor002E64C0$12cRiderVb_bwf = D_00488598\n"
-        "_$_12cRiderVb_bwf = func_0011B978\n");
+        "_$_12cRiderVb_bwf = cRider__cRider\n");
 #endif
 
 //100%

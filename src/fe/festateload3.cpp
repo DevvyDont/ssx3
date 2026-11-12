@@ -12,7 +12,7 @@ INCLUDE_ASM("fe/festateload3", func_002339F8);
 
 INCLUDE_ASM("fe/festateload3", func_00233A70);
 
-INCLUDE_ASM("fe/festateload3", func_00233AA0);
+INCLUDE_ASM("fe/festateload3", cGameState_gotoNextState);
 
 INCLUDE_ASM("fe/festateload3", func_00233AF0);
 
@@ -44,11 +44,11 @@ INCLUDE_ASM("fe/festateload3", func_00234120);
 
 INCLUDE_ASM("fe/festateload3", func_00234188);
 
-INCLUDE_ASM("fe/festateload3", func_002341D0);
+INCLUDE_ASM("fe/festateload3", cGFEventStartState_gainFocus);
 
-INCLUDE_ASM("fe/festateload3", func_002343B0);
+INCLUDE_ASM("fe/festateload3", cGFEventStartState_update);
 
-INCLUDE_ASM("fe/festateload3", func_00234750);
+INCLUDE_ASM("fe/festateload3", cGFEventStartState_loseFocus);
 
 INCLUDE_ASM("fe/festateload3", func_00234910);
 

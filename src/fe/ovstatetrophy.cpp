@@ -22,7 +22,7 @@ extern "C" void cOVStateTrophy_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_0020E9A0);
 #ifdef SKIP_ASM
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 
 struct sColor_20E9A0 {
     float r, g, b, a;
@@ -65,7 +65,7 @@ extern "C" void func_0020E9A0(void* self, cUIObj_20E9A0* item, int msg)
             sVEntry_20E9A0* vt = *(sVEntry_20E9A0**)((char*)obj + 4);
             r = vt[4].fn((char*)obj + vt[4].delta, self, 1);
         }
-        func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         break;
     }
     case 6: {
@@ -73,7 +73,7 @@ extern "C" void func_0020E9A0(void* self, cUIObj_20E9A0* item, int msg)
         sVEntry_20E9A0* vt = *(sVEntry_20E9A0**)((char*)obj + 4);
         void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (r != 0) {
-            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -1477,7 +1477,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 void cUIText_setAsciiString(cUIText* text, const char* s);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void func_003A1310(void* self, int a1);
 extern void* D_004A28A8;
 extern char D_00471CE8[];
@@ -1525,7 +1525,7 @@ extern "C" void func_00210940(void* self)
         *(sRect_210940*)((char*)e + 0xA8) = D_004C8D08;
         *(char**)((char*)e + 0xB8) = a;
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
 }
 #endif
 
@@ -1612,14 +1612,14 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210D20);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A2EEC;
 extern char* D_net210D20 __asm__("D_004A2EEC");
-extern "C" void* func_0020E900(void* self);
+extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void* func_0039F698(void* list);
 extern "C" int func_00258160(int a, char* name, int len);
 extern "C" void func_00210BD8(void* self, char* name, int a);
 
 extern "C" void func_00210D20(void* self)
 {
-    func_0020E900(self);
+    cOVState_onUpdate(self);
     char* p = D_net210D20;
     if (p != 0) {
         int ok = *(int*)(p + 0x68) == 0 || *(int*)(p + 0x64) == 0;
@@ -1655,8 +1655,8 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210DF0);
 #ifdef SKIP_ASM
 extern int D_004A2EEC;
 extern char D_004A2560[];
-extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
-extern "C" void func_0020A6A8(void* self);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
+extern "C" void cOVState_onWidgetEvent(void* self);
 extern "C" void func_00258C50(int a, char* name);
 // PORT: func_0039F190 returns the last node it touched; bound with its value return.
 void* func_0039F190_r(void* list, int a1) __asm__("func_0039F190");
@@ -1678,7 +1678,7 @@ extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
         if (*(int*)((char*)self + 0xE0) == 0) {
             // PORT: func_00210F40's unit definition takes these string pointers as int.
             func_00210F40(self, 0, (int)D_004A2560, (int)D_004A2560, 0, 0, 0x3D);
-            func_001CE3C8(*(void**)((char*)self + 0xE0), 0x4B, 1, 2);
+            cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 0x4B, 1, 2);
         }
         break;
     case 0xD: {
@@ -1694,7 +1694,7 @@ extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
         break;
     }
     default:
-        func_0020A6A8(self);
+        cOVState_onWidgetEvent(self);
         break;
     }
 }
@@ -1705,13 +1705,13 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210F40);
 #ifdef SKIP_ASM
 extern "C" void func_00210FA0(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_001CCF00(void* p, int a);
-extern "C" void func_001CB418(void* p, int a);
+extern "C" void cKeyboardPopup_setInputText(void* p, int a);
 
 extern "C" void func_00210F40(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
 {
     func_00210FA0(self, a1, a4, a5, a6);
     func_001CCF00(*(void**)((char*)self + 0xE0), a2);
-    func_001CB418(*(void**)((char*)self + 0xE0), a3);
+    cKeyboardPopup_setInputText(*(void**)((char*)self + 0xE0), a3);
 }
 #endif
 
@@ -1720,9 +1720,9 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210FA0);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001CB030(void* mem, void* engine, void* owner, int a3, int a4);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void func_001CD088(void* self, int v);
-extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_001CE468(void* self, int v);
 extern char D_0046EFD0[];
 
@@ -1730,11 +1730,11 @@ extern "C" void func_00210FA0(void* self, int a1, int a2, int a3, int a4)
 {
     void* w = func_001CB030(cMemMan_alloc(0x444, D_0046EFD0, 0x100, 0), *(void**)((char*)self + 0x10), self, a2, 0xF);
     *(void**)((char*)self + 0xE0) = w;
-    func_0039F290((char*)*(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, w);
+    cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, w);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x18) = a3;
     func_001CD088(*(void**)((char*)self + 0xE0), a4);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x43C) = 0;
-    func_001CE3C8(*(void**)((char*)self + 0xE0), 0x4B, 1, 2);
+    cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 0x4B, 1, 2);
     func_001CE468(*(void**)((char*)self + 0xE0), 1);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x440) = 1;
     *(int*)((char*)self + 0xDC) = a1;

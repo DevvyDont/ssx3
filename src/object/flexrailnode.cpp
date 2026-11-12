@@ -22,7 +22,7 @@ struct sHashNode_8B90 {
 };
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002D1BE0();
+extern "C" void* cObjectInterface_getNash();
 extern "C" void func_00328F28(sHashKey_8B90* out, void* box);
 extern "C" void func_00328C20(sHashCell_8B90* cell, int type, sHashNode_8B90* node, sHashKey_8B90* key);
 extern const char D_0048E808[];
@@ -33,7 +33,7 @@ extern "C" void cFlexRailNode_addSpaceHash(void* self)
     n->owner = self;
     n->type = 3;
     *(sHashNode_8B90**)((char*)self + 0x54) = n;
-    sHashCell_8B90* cell = (sHashCell_8B90*)func_002D1BE0();
+    sHashCell_8B90* cell = (sHashCell_8B90*)cObjectInterface_getNash();
     sHashNode_8B90* node = *(sHashNode_8B90**)((char*)self + 0x54);
     sHashKey_8B90 key;
     func_00328F28(&key, (char*)self + 0x30);
@@ -76,7 +76,7 @@ static inline int octEmpty_8C48(sOctCell_8C48* o)
 
 extern "C" void func_00348C48(void* self)
 {
-    sHashCellR_8C48* cell = (sHashCellR_8C48*)func_002D1BE0();
+    sHashCellR_8C48* cell = (sHashCellR_8C48*)cObjectInterface_getNash();
     sHashNode_8B90* node = *(sHashNode_8B90**)((char*)self + 0x54);
     (*(int*)((char*)cell + 0xA0))++;
     sHashKey_8B90 key;
@@ -1339,12 +1339,12 @@ extern "C" void* func_0034ADD8(void* self, void* a1, void* node, void* src)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AE68);
+INCLUDE_ASM("object/flexrailnode", cFlagNode_cFlagNode);
 #ifdef SKIP_ASM
 extern "C" void cInstanceNode_cInstanceNode(void* self);
 extern char D_0048FC10[];
 
-extern "C" void* func_0034AE68(void* self)
+extern "C" void* cFlagNode_cFlagNode(void* self)
 {
     cInstanceNode_cInstanceNode(self);
     *(void**)((char*)self + 0xC) = D_0048FC10;
@@ -1358,24 +1358,24 @@ INCLUDE_ASM("object/flexrailnode", func_0034AEA0);
 extern char D_0048FC10[];
 extern "C" void* func_002D1CB0(void);
 extern "C" void func_0034C600(void* set, void* arg);
-extern "C" void func_0034FBF0(void* self, int flags);
+extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 extern "C" void func_0034AEA0(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0048FC10;
     func_0034C600(func_002D1CB0(), *(void**)((char*)self + 0x18));
-    func_0034FBF0(self, flags);
+    cInstanceNode__cInstanceNode(self, flags);
 }
 #endif
 
-extern "C" void* func_0034FE90(void* self);
+extern "C" void* cInstanceNode_writeToReplayFrame(void* self);
 
 //100%
 INCLUDE_ASM("object/flexrailnode", func_0034AEF8__FPv);
 #ifdef SKIP_ASM
 void* func_0034AEF8(void* self)
 {
-    return func_0034FE90(self);
+    return cInstanceNode_writeToReplayFrame(self);
 }
 #endif
 

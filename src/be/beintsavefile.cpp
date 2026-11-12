@@ -162,7 +162,7 @@ cBEIface_2950* cBENewPlayerInterface_getThis_2950() __asm__("cBENewPlayerInterfa
 cBEIface_2950* cBEBAGTInterface_getThis_2950() __asm__("cBEBAGTInterface_getThis__Fv");
 cBEIface_2950* cBEMissionInterface_getThis_2950() __asm__("cBEMissionInterface_getThis__Fv");
 cBEIface_2950* cBEScoreInterface_getThis_2950() __asm__("cBEScoreInterface_getThis__Fv");
-cBEIface_2950* func_00147F78_2950() __asm__("func_00147F78");
+cBEIface_2950* cBEStatInterface_getThis_2950() __asm__("cBEStatInterface_getThis");
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 struct sProfSub_2950 { char pad[0xF88]; };
 struct sProfile_2950 { sProfSub_2950 sub[10]; };
@@ -192,7 +192,7 @@ extern "C" void* func_00152950(void* self, int idx)
     o->v2();
     o = cBEScoreInterface_getThis_2950();
     o->v2();
-    o = func_00147F78_2950();
+    o = cBEStatInterface_getThis_2950();
     o->v2();
     int crc = func_003E62D0(D_004A1220, size - 4, 0xFBEA);
     __builtin_memcpy(p, &crc, 4);
@@ -222,7 +222,7 @@ cBEIface_2BB0* cBEOptionInterface_getThis();
 cBEIface_2BB0* cBEScoreInterface_getThis();
 cBEIface_2BB0* cBENewPlayerInterface_getThis();
 extern "C" void cSSXApp_initLocale(void* app);
-extern "C" void func_00228C08(void* app);
+extern "C" void cSSXApp_activateBEOptions(void* app);
 extern void* D_004A28A8;
 
 // Restores the save block written by func_00152758 after checking its CRC; returns 0 when the CRC is wrong.
@@ -253,7 +253,7 @@ extern "C" int func_00152BB0(void* self, char* buf)
     o = cBENewPlayerInterface_getThis();
     o->onLoad();
     cSSXApp_initLocale(D_004A28A8);
-    func_00228C08(D_004A28A8);
+    cSSXApp_activateBEOptions(D_004A28A8);
     return 1;
 }
 #endif
@@ -263,7 +263,7 @@ INCLUDE_ASM("be/beintsavefile", func_00152DE0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-cBEIface_2BB0* func_00147F78_2DE0() __asm__("func_00147F78");
+cBEIface_2BB0* cBEStatInterface_getThis_2DE0() __asm__("cBEStatInterface_getThis");
 cBEIface_2BB0* cBEBAGTInterface_getThis_2DE0() __asm__("cBEBAGTInterface_getThis__Fv");
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 extern "C" void func_001515B8(void* p);
@@ -294,7 +294,7 @@ extern "C" int func_00152DE0(void* self, char* buf, int idx)
     p += sizeof(sProfile_2DE0);
     D_00535B31[idx].f = *p;
     cBENewPlayerInterface_getThis()->onLoad();
-    func_00147F78_2DE0()->onLoad();
+    cBEStatInterface_getThis_2DE0()->onLoad();
     cBEBAGTInterface_getThis_2DE0()->onLoad();
     for (int i = 0; i < 10; i++) {
         D_004A6CA8_2DE0[idx].sub[i].keep = keep[i];

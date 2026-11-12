@@ -152,9 +152,9 @@ extern "C" void func_0022E298(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("main/sectionman", func_0022E348);
+INCLUDE_ASM("main/sectionman", cSectionMan_getNextActiveEvent);
 #ifdef SKIP_ASM
-extern "C" int func_0022E348(void* self, void* a1)
+extern "C" int cSectionMan_getNextActiveEvent(void* self, void* a1)
 {
     if (a1 != 0) {
         return *(int*)((char*)a1 + 0x4);

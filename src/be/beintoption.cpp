@@ -247,7 +247,7 @@ extern "C" char* func_0014F6A8(void* self, int i)
 INCLUDE_ASM("be/beintoption", func_0014F6E8);
 #ifdef SKIP_ASM
 extern void* D_004A28A8;
-extern "C" void func_003DCB20(char* dst, void* src);
+extern "C" void USTR_strcpyW(char* dst, void* src);
 
 struct sVEntry_0014F6E8
 {
@@ -263,7 +263,7 @@ extern "C" void func_0014F6E8(void* self, int i)
     char* o2 = obj + vt[4].delta;
     int h = cBEOptionInterface_getDefaultQuickKeyMessageHashValue(self, i);
     void* text = vt[4].fn(o2, h);
-    func_003DCB20(D_00535617[i], text);
+    USTR_strcpyW(D_00535617[i], text);
 }
 #endif
 

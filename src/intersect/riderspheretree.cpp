@@ -46,11 +46,11 @@ extern "C" void* func_00329938(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_00329970);
+INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree__cRiderSphereTree);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern "C" void func_00329970(void* self, int flags)
+extern "C" void cRiderSphereTree__cRiderSphereTree(void* self, int flags)
 {
     if (flags & 1) {
         operator_delete((int*)self);
@@ -118,7 +118,7 @@ struct sSphereNode_9A28 {
     char children[1];    // 0x30
 };
 
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 
 extern "C" sSphereNode_9A28* func_00329A28(sSphereNode_9A28* self, sSphereNode_9A28* src)
 {
@@ -128,7 +128,7 @@ extern "C" sSphereNode_9A28* func_00329A28(sSphereNode_9A28* self, sSphereNode_9
     self->user = src->user;
     self->count = src->count;
     self->parent = src->parent;
-    func_003E6574(self->children, src->children, self->count << 5);
+    MEM_copy(self->children, src->children, self->count << 5);
     return self;
 }
 #endif
@@ -216,7 +216,7 @@ extern "C" void func_00329B40(sSphereTreeNode* s, sSphereVec4* v)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_00329B90);
+INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_ApplyTransform);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
@@ -259,9 +259,9 @@ struct sProd_9B90 : sSphereVec4 {
 };
 
 // PORT: callers declare the matrix as sSphereMtx*.
-extern "C" void func_00329B90_impl(sSphereTreeNode* s, sSphereVec4* m, float scale) __asm__("func_00329B90");
+extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* s, sSphereVec4* m, float scale) __asm__("cRiderSphereTree_ApplyTransform");
 
-extern "C" void func_00329B90_impl(sSphereTreeNode* s, sSphereVec4* m, float scale)
+extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* s, sSphereVec4* m, float scale)
 {
     sScale_9B90 sc(scale);
     s->center = sProd_9B90(mtxMulVec_9B90(m, &s->center), sc);
@@ -1680,7 +1680,7 @@ extern "C" void func_0032C648(void* self, sSphereVec4* m, float scale)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032C770);
+INCLUDE_ASM("intersect/riderspheretree", SphereTree_TransformRel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -1692,9 +1692,9 @@ struct sOct_C770 {
 
 struct sSc_C770 { float x, y, z, w; };
 
-extern "C" void func_0032C770_i(sOct_C770* self, sSphereVec4* m, float scale) __asm__("func_0032C770");
+extern "C" void SphereTree_TransformRel_i(sOct_C770* self, sSphereVec4* m, float scale) __asm__("SphereTree_TransformRel");
 
-extern "C" void func_0032C770_i(sOct_C770* self, sSphereVec4* m, float scale)
+extern "C" void SphereTree_TransformRel_i(sOct_C770* self, sSphereVec4* m, float scale)
 {
     for (int i = 0; i < 4; i++) {
         self->dirs[i] = Scale_B2B8(mtxMulVec_9B90(m, &self->dirs[i]), scale);
@@ -2623,7 +2623,7 @@ extern "C" void func_0032DB40(void* vself, void* vdir)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032DC10);
+INCLUDE_ASM("intersect/riderspheretree", SphereTree_initCache);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label as a placement operator new[].
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -2640,7 +2640,7 @@ extern int D_004A3FE8;
 
 // Allocates the two decompression caches; each buffer holds a full octree of the given depth
 // (1 + 8 + 64 + ... nodes).
-extern "C" void func_0032DC10(int nSmall, int smallDepth, int nBig, int threshold)
+extern "C" void SphereTree_initCache(int nSmall, int smallDepth, int nBig, int threshold)
 {
     int smallSize = 0;
     int bigSize = 0;
@@ -3551,14 +3551,14 @@ extern "C" sRiderSphere_2F650* func_0032F650(sRiderSphere_2F650* self, void* tre
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/riderspheretree", func_0032F708);
 #ifdef SKIP_ASM
-extern "C" void func_00329970(void* p, int flags);
+extern "C" void cRiderSphereTree__cRiderSphereTree(void* p, int flags);
 void operator_delete(int* ptr);
 extern void* D_0048E590[];
 
 extern "C" void func_0032F708(void* self, int flags)
 {
     *(void***)((char*)self + 0x50) = D_0048E590;
-    func_00329970((char*)self + 0x70, 2);
+    cRiderSphereTree__cRiderSphereTree((char*)self + 0x70, 2);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3630,14 +3630,14 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032F840);
 struct sSphereNode_9A28;
 struct sSphereMtx;
 extern "C" sSphereNode_9A28* func_00329A28(sSphereNode_9A28* self, sSphereNode_9A28* src);
-extern "C" void func_00329B90(sSphereTreeNode* s, sSphereMtx* m, float scale);
+extern "C" void cRiderSphereTree_ApplyTransform(sSphereTreeNode* s, sSphereMtx* m, float scale);
 
 extern "C" void func_0032F840(void* self, sSphereMtx* m, float scale)
 {
     sSphereTreeNode* node = (sSphereTreeNode*)((char*)self + 0x70);
     func_00329A28((sSphereNode_9A28*)node, *(sSphereNode_9A28**)((char*)self + 0x60));
     *(sSphereTreeNode**)((char*)self + 0x60) = node;
-    func_00329B90(node, m, scale);
+    cRiderSphereTree_ApplyTransform(node, m, scale);
     *(int*)((char*)self + 0x4) = 1;
 }
 #endif
@@ -3655,9 +3655,9 @@ int func_0032F8B0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032F8C0);
+INCLUDE_ASM("intersect/riderspheretree", cWorldRider_GetIdealParam);
 #ifdef SKIP_ASM
-extern "C" float func_0032F8C0(void* self)
+extern "C" float cWorldRider_GetIdealParam(void* self)
 {
     if (*(int*)self == 0) {
         return -1.0f;

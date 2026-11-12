@@ -31,7 +31,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_0015D698(void* self);
 extern "C" void* func_00176D68(void* self);
 extern "C" void* cManualCameraController_cManualCameraController(void* self, void* cam);
-extern "C" void* func_001619A8(void* self, int idx, int a);
+extern "C" void* cChaseCameraController_cChaseCameraController(void* self, int idx, int a);
 extern "C" void* cScriptCameraController_cScriptCameraController(void* self, int idx, void* cam);
 extern void* D_0045B888[];
 extern const char D_0045B748[];
@@ -47,7 +47,7 @@ extern "C" void* cCamera_cCamera(void* self, int idx)
     *(void***)((char*)self + 0x90) = D_0045B888;
     func_00176D68((char*)self + 0xC0);
     *(void**)((char*)self + 0xA4) = cManualCameraController_cManualCameraController(cMemMan_alloc(0x20, D_0045B748, 0, 0), self);
-    *(void**)((char*)self + 0xA8) = func_001619A8(cMemMan_alloc(0x44, D_0045B760, 0, 0), idx, (int)self);
+    *(void**)((char*)self + 0xA8) = cChaseCameraController_cChaseCameraController(cMemMan_alloc(0x44, D_0045B760, 0, 0), idx, (int)self);
     *(void**)((char*)self + 0xAC) = cScriptCameraController_cScriptCameraController(cMemMan_alloc(0x20, D_0045B778, 0, 0), idx, self);
     *(int*)((char*)self + 0xB0) = -1;
     *(int*)((char*)self + 0xB4) = 0;
@@ -104,7 +104,7 @@ INCLUDE_ASM("camera/camera", cCamera_init);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_0015CF80(void* self, int msg);
+extern "C" void cManualCameraController_setCurrentAlgorithmType(void* self, int msg);
 extern "C" void func_00161A60(void* self, int* p);
 struct sCam162060;
 extern "C" void func_00162060(sCam162060* self, int mode, int arg, float blend);
@@ -168,7 +168,7 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int idx, float a, float b, fl
     self->index = idx;
     self->f460 = 0;
     self->manual->viewport = ((sApp_15DE60*)D_004A28A8)->viewports[0];
-    func_0015CF80(self->manual, 0x51);
+    cManualCameraController_setCurrentAlgorithmType(self->manual, 0x51);
     self->chase->viewport = ((sApp_15DE60*)D_004A28A8)->viewports[idx];
     sRiderRef_15DE60* p = (sRiderRef_15DE60*)operator new(8, D_0045B790, 0, 0);
     p->vt = D_0045B7A8;
@@ -696,11 +696,11 @@ INCLUDE_ASM("camera/camera", func_0015EE00);
 //100%
 INCLUDE_ASM("camera/camera", func_0015F568);
 #ifdef SKIP_ASM
-extern "C" void* func_0011FF48(void* dst, void* self);
+extern "C" void* cRider_getHipPosition(void* dst, void* self);
 
 extern "C" void* func_0015F568(void* self, void* a1)
 {
-    func_0011FF48(self, *(void**)((char*)a1 + 0x4));
+    cRider_getHipPosition(self, *(void**)((char*)a1 + 0x4));
     return self;
 }
 #endif
@@ -1038,7 +1038,7 @@ void* func_0015F928(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_0015F938);
+INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_cBasicCameraAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045BDE0[];
 extern void* D_0045BD78[];
@@ -1046,7 +1046,7 @@ extern void* D_0045BD78[];
 extern cQuad128 D_004FF130;
 extern "C" float func_00167E30(void* self);
 
-extern "C" void* func_0015F938(void* self)
+extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(void* self)
 {
     *(void***)((char*)self + 0x10) = D_0045BDE0;
     *(float*)self = func_00167E30(self);
@@ -1217,14 +1217,14 @@ extern "C" sPair_15F9B8 func_0015F9B8(char* src)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/camera", func_0015FD08);
+INCLUDE_ASM("camera/camera", cManualCameraAlgorithm_cManualCameraAlgorithm);
 #ifdef SKIP_ASM
-extern "C" void* func_0015F938(void* self);
+extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(void* self);
 extern void* D_0045BD10[];
 
-extern "C" void* func_0015FD08(void* self)
+extern "C" void* cManualCameraAlgorithm_cManualCameraAlgorithm(void* self)
 {
-    func_0015F938(self);
+    cBasicCameraAlgorithm_cBasicCameraAlgorithm(self);
     *(int*)((char*)self + 0xC) = 0x51;
     *(void***)((char*)self + 0x10) = D_0045BD10;
     return self;
@@ -1243,8 +1243,8 @@ void func_0015FD48(void* self)
 INCLUDE_ASM("camera/camera", func_0015FD50);
 #ifdef SKIP_ASM
 extern void* D_004A28A8;
-// PORT: func_00320BF0 returns a float (input axis value, $f0).
-extern "C" float func_00320BF0(int pad, int axis);
+// PORT: cInput_getValue returns a float (input axis value, $f0).
+extern "C" float cInput_getValue(int pad, int axis);
 extern "C" float func_0031BF60(float x);
 extern "C" float func_0031C040(float x);
 
@@ -1331,11 +1331,11 @@ static inline float ffloor_0015FD50(float x)
 extern "C" void func_0015FD50(sFreeCam_0015FD50* self)
 {
     int pad = *(int*)(*(char**)(*(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84) + 0x4) + 0xA4) + 0xC);
-    float speed = func_00320BF0(pad, 0x34);
-    float ry = func_00320BF0(pad, 0x31);
-    float rx = func_00320BF0(pad, 0x30);
-    float mf = func_00320BF0(pad, 0x32);
-    float ms = func_00320BF0(pad, 0x33);
+    float speed = cInput_getValue(pad, 0x34);
+    float ry = cInput_getValue(pad, 0x31);
+    float rx = cInput_getValue(pad, 0x30);
+    float mf = cInput_getValue(pad, 0x32);
+    float ms = cInput_getValue(pad, 0x33);
     float rs = speed >? 2.0f;
     float pitch = fcClamp_0015FD50(self->pitch + rs * (ry * 0.6283185482025146f) * 0.01666666753590107f,
                                    -1.5707963705062866f, 1.5707963705062866f);
@@ -1353,14 +1353,14 @@ extern "C" void func_0015FD50(sFreeCam_0015FD50* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/camera", func_0015FFB0);
+INCLUDE_ASM("camera/camera", cEditorCameraAlgorithm_cEditorCameraAlgorithm);
 #ifdef SKIP_ASM
-extern "C" void* func_0015F938(void* self);
+extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(void* self);
 extern void* D_0045BCA8[];
 
-extern "C" void* func_0015FFB0(void* self)
+extern "C" void* cEditorCameraAlgorithm_cEditorCameraAlgorithm(void* self)
 {
-    func_0015F938(self);
+    cBasicCameraAlgorithm_cBasicCameraAlgorithm(self);
     *(int*)((char*)self + 0xC) = 0x50;
     *(void***)((char*)self + 0x10) = D_0045BCA8;
     return self;
@@ -1640,7 +1640,7 @@ void func_001604B0(void* self, void* other)
 INCLUDE_ASM("camera/camera", func_001604B8);
 #ifdef SKIP_ASM
 extern void* D_004A28A8;
-extern "C" float func_00320BF0(int pad, int axis);
+extern "C" float cInput_getValue(int pad, int axis);
 extern "C" void func_00162568(void* self, struct sCamInfo_001607E0* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 extern "C" void func_001668B8(void* self, void* out);
@@ -1766,9 +1766,9 @@ extern "C" void func_001604B8(char* self)
                   0.6000000238418579f);
     sGame_1604B8* g = (sGame_1604B8*)D_004A28A8;
     int pad = g->pads[*(int*)(*(char**)(g->f84 + 0x28) + 0x28)];
-    float ax = func_00320BF0(pad, 0xBE);
-    float ay = func_00320BF0(pad, 0xBF);
-    float az = -func_00320BF0(pad, 0xC0);
+    float ax = cInput_getValue(pad, 0xBE);
+    float ay = cInput_getValue(pad, 0xBF);
+    float az = -cInput_getValue(pad, 0xC0);
     ax *= Abs_1604B8(ax);
     ay *= Abs_1604B8(ay);
     az *= Abs_1604B8(az);
@@ -2754,9 +2754,9 @@ extern "C" void func_00161848_v(char* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00161950);
+INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_HardReset);
 #ifdef SKIP_ASM
-struct func_00161950_flags {
+struct cChaseCameraController_switchCamera_HardReset_flags {
     unsigned int b0 : 1;
     unsigned int b1 : 1;
     unsigned int b2 : 1;
@@ -2764,11 +2764,11 @@ struct func_00161950_flags {
 
 extern int D_004A4DD0[2];
 
-extern "C" void func_00161950(void* self, int i)
+extern "C" void cChaseCameraController_switchCamera_HardReset(void* self, int i)
 {
     *(int*)((char*)self + 0x1C) = 0x3D;
     *(int*)((char*)self + 0x38) = 0;
-    ((func_00161950_flags*)((char*)self + 0x30))->b1 = 0; ((func_00161950_flags*)((char*)self + 0x30))->b0 = 0; ((func_00161950_flags*)((char*)self + 0x30))->b2 = 0;
+    ((cChaseCameraController_switchCamera_HardReset_flags*)((char*)self + 0x30))->b1 = 0; ((cChaseCameraController_switchCamera_HardReset_flags*)((char*)self + 0x30))->b0 = 0; ((cChaseCameraController_switchCamera_HardReset_flags*)((char*)self + 0x30))->b2 = 0;
     *(int*)((char*)self + 0x3C) = 0;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x2C) = 0x3D;
@@ -2779,20 +2779,20 @@ extern "C" void func_00161950(void* self, int i)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/camera", func_001619A8);
+INCLUDE_ASM("camera/camera", cChaseCameraController_cChaseCameraController);
 #ifdef SKIP_ASM
 extern void* D_0045B908[];
 extern "C" void* cCameraController_cCameraController(void* self, int a);
-extern "C" void func_00161950(void* self, int idx);
+extern "C" void cChaseCameraController_switchCamera_HardReset(void* self, int idx);
 
-extern "C" void* func_001619A8(void* self, int idx, int a)
+extern "C" void* cChaseCameraController_cChaseCameraController(void* self, int idx, int a)
 {
     cCameraController_cCameraController(self, a);
     *(void***)((char*)self + 0x14) = D_0045B908;
     *(int*)((char*)self + 0x0) = 2;
     *(int*)((char*)self + 0x4) = 1;
     *(int*)((char*)self + 0x20) = 0;
-    func_00161950(self, idx);
+    cChaseCameraController_switchCamera_HardReset(self, idx);
     return self;
 }
 #endif
@@ -2802,13 +2802,13 @@ INCLUDE_ASM("camera/camera", func_00161A10);
 #ifdef SKIP_ASM
 extern void* D_0045B908[];
 void operator_delete(int* ptr);
-extern "C" void func_0015CC10(void* self, int flags);
+extern "C" void cCameraController__cCameraController(void* self, int flags);
 
 extern "C" void func_00161A10(void* self, int flags)
 {
     *(void***)((char*)self + 0x14) = D_0045B908;
     operator_delete(*(int**)((char*)self + 0x20));
-    func_0015CC10(self, flags);
+    cCameraController__cCameraController(self, flags);
 }
 #endif
 
@@ -2899,7 +2899,7 @@ extern "C" void func_00161AB0(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00161BB8);
+INCLUDE_ASM("camera/camera", cChaseCameraController_update);
 #ifdef SKIP_ASM
 struct sCam162060;
 extern "C" void func_00162060(sCam162060* self, int mode, int arg, float blend);
@@ -2970,7 +2970,7 @@ static inline int InRace_161BB8(int* st)
     return *st && *st < 10;
 }
 
-extern "C" void func_00161BB8(char* self)
+extern "C" void cChaseCameraController_update(char* self)
 {
     if ((D_004A2A50 & 1) == 0) {
         func_00161AB0(self);
@@ -7613,9 +7613,9 @@ extern "C" void func_00167F70(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167FA0);
+INCLUDE_ASM("camera/camera", cChaseAlgorithm_getTargetPos);
 #ifdef SKIP_ASM
-extern "C" void* func_00167FA0(void* self, void* a1)
+extern "C" void* cChaseAlgorithm_getTargetPos(void* self, void* a1)
 {
     *(cQuad128*)self = *(cQuad128*)((char*)a1 + 0x20);
     return self;
@@ -7623,18 +7623,18 @@ extern "C" void* func_00167FA0(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167FB0__FPv);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_shouldSnapOnUpdate__FPv);
 #ifdef SKIP_ASM
-int func_00167FB0(void* self)
+int cLookAtChaseAlgorithm_shouldSnapOnUpdate(void* self)
 {
     return *(int*)((char*)self + 0x2F0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167FB8__FPv);
+INCLUDE_ASM("camera/camera", cCameraController_update__FPv);
 #ifdef SKIP_ASM
-void func_00167FB8(void* self)
+void cCameraController_update(void* self)
 {
 }
 #endif
@@ -7739,13 +7739,13 @@ extern "C" int func_00168028(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00168030);
+INCLUDE_ASM("camera/camera", cSimpleCamera__cSimpleCamera);
 #ifdef SKIP_ASM
 extern void* D_0045B8B0[];
 void operator_delete(int* ptr);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_00168030(void* self, int flags)
+extern "C" void cSimpleCamera__cSimpleCamera(void* self, int flags)
 {
     *(void***)((char*)self + 0x90) = D_0045B8B0;
     if (flags & 1) {

@@ -262,8 +262,8 @@ int GetHashValue32(char*);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" sWSMEntry4520* func_0014FF90(void* iface, int player, int slot, void* out);
-extern "C" int func_00150928(void* iface, int player, int charID);
-extern "C" const char* func_00198AF0(int id);
+extern "C" int cBEEconInterface_getMoney(void* iface, int player, int charID);
+extern "C" const char* getDollarString(int id);
 
 extern "C" void func_00184520(sWSMission4520* self)
 {
@@ -274,12 +274,12 @@ extern "C" void func_00184520(sWSMission4520* self)
     void* screen = cList_first((cList*)self->list);
     cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D9B8));
     if (t != 0) {
-        cUIText_setAsciiString(t, func_00198AF0(tbl[a].id));
+        cUIText_setAsciiString(t, getDollarString(tbl[a].id));
     }
     cUIText* t2 = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_0045D9C8));
     if (t2 != 0) {
         signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->player);
-        cUIText_setAsciiString(t2, func_00198AF0(func_00150928(cBE_getInterface_Fv(cBE_getBE(), 0xB), self->player, cid)));
+        cUIText_setAsciiString(t2, getDollarString(cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), self->player, cid)));
     }
 }
 #endif

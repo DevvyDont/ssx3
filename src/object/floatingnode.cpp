@@ -24,11 +24,11 @@ void cFloatingNode_initInfo(cFloatingNode* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034EF08);
+INCLUDE_ASM("object/floatingnode", cFloatingNode_purgeInfo);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern "C" void func_0034EF08(cFloatingNode* self)
+extern "C" void cFloatingNode_purgeInfo(cFloatingNode* self)
 {
     if (self->field_0x78 != 0) {
         operator_delete((int*)self->field_0x78);
@@ -38,12 +38,12 @@ extern "C" void func_0034EF08(cFloatingNode* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034EF40);
+INCLUDE_ASM("object/floatingnode", cFloatingNode_updateOverlapSystem);
 #ifdef SKIP_ASM
 struct sBox_F048;
-extern "C" void* func_002D1BE0();
-extern "C" void func_003291E0(void* world, int type, void* id, sBox_F048* box, sBox_F048* old);
-extern "C" void func_003568B0(void* self);
+extern "C" void* cObjectInterface_getNash();
+extern "C" void nash_Nash_movenode(void* world, int type, void* id, sBox_F048* box, sBox_F048* old);
+extern "C" void cMoveNode_updateOverlapSystem(void* self);
 
 struct sFlVec4_34EF40 {
     float x, y, z, w;
@@ -101,7 +101,7 @@ static inline sFlVec4_34EF40 nodePos_34EF40(char* self)
     return *(sFlVec4_34EF40*)(vt[24].fn(self + vt[24].delta) + 0x30);
 }
 
-extern "C" void func_0034EF40(char* self)
+extern "C" void cFloatingNode_updateOverlapSystem(char* self)
 {
     sFlInfo_34EF40* info = *(sFlInfo_34EF40**)(self + 0x78);
     if (info != 0) {
@@ -117,15 +117,15 @@ extern "C" void func_0034EF40(char* self)
         nb.max = vu0Add_34EF40(nodePos_34EF40(self), ext);
         (*(sFlInfo_34EF40**)(self + 0x78))->box = nb;
         void* id = *(void**)(self + 0x18);
-        func_003291E0(func_002D1BE0(), 0, id, (sBox_F048*)&nb, (sBox_F048*)&old);
+        nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (sBox_F048*)&nb, (sBox_F048*)&old);
     } else {
-        func_003568B0(self);
+        cMoveNode_updateOverlapSystem(self);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034F048);
+INCLUDE_ASM("object/floatingnode", cFloatingNode_restoreOverlapSystem);
 #ifdef SKIP_ASM
 struct sVec4_F048 {
     float x, y, z, w;
@@ -142,11 +142,11 @@ struct sInst_F048 {
     float max[3];   // 0x6C
 };
 
-extern "C" void* func_002D1BE0();
-extern "C" void func_003291E0(void* world, int type, void* id, sBox_F048* box, sBox_F048* old);
-extern "C" void func_003567E0(void* self);
+extern "C" void* cObjectInterface_getNash();
+extern "C" void nash_Nash_movenode(void* world, int type, void* id, sBox_F048* box, sBox_F048* old);
+extern "C" void cMoveNode_restoreOverlapSystem(void* self);
 
-extern "C" void func_0034F048(cFloatingNode* self)
+extern "C" void cFloatingNode_restoreOverlapSystem(cFloatingNode* self)
 {
     sBox_F048* info = (sBox_F048*)self->field_0x78;
     if (info != 0) {
@@ -165,16 +165,16 @@ extern "C" void func_0034F048(cFloatingNode* self)
         nb.max = t;
         *info = nb;
         void* id = *(void**)((char*)self + 0x18);
-        func_003291E0(func_002D1BE0(), 0, id, &nb, &old);
-        func_0034EF08(self);
+        nash_Nash_movenode(cObjectInterface_getNash(), 0, id, &nb, &old);
+        cFloatingNode_purgeInfo(self);
     } else {
-        func_003567E0(self);
+        cMoveNode_restoreOverlapSystem(self);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034F120);
+INCLUDE_ASM("object/floatingnode", cFloatingNode_makeAnimMats);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle); // sincos
 
@@ -205,7 +205,7 @@ struct sSkel_F120 {
     sBone_F120* bones;  // 0x8
 };
 
-// The tilt angles are read through a view of the spring block at +0x2C (see func_0034F930).
+// The tilt angles are read through a view of the spring block at +0x2C (see cFloatingNode_updateNode).
 struct sFloatTilt_F120 {
     char pad0[0x28];
     float pos2;         // 0x54
@@ -307,7 +307,7 @@ static inline void Pose_F120(sMat_F120* dst, const sMat_F120* parent, const sMat
 }
 
 // Poses a floating object's skeleton: the root bob/tilt transform, then each bone under its parent.
-extern "C" void func_0034F120(sFloatingNode_F120* self, sMat_F120* mat, sMat_F120* out)
+extern "C" void cFloatingNode_makeAnimMats(sFloatingNode_F120* self, sMat_F120* mat, sMat_F120* out)
 {
     sMat_F120 m;
     sQuad_F120 base = mat->row[3];
@@ -368,7 +368,7 @@ extern "C" void func_0034F120(sFloatingNode_F120* self, sMat_F120* mat, sMat_F12
 #endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034F600);
+INCLUDE_ASM("object/floatingnode", cFloatingNode_applyForce);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sV4_F600 {
@@ -473,7 +473,7 @@ struct sFloat_F600 {
     float f70;
 };
 
-extern "C" void func_0034F600(sFloat_F600* self, sV4_F600* a, sV4_F600* b)
+extern "C" void cFloatingNode_applyForce(sFloat_F600* self, sV4_F600* a, sV4_F600* b)
 {
     sFlVE_F600* vt = self->vt;
     sV4_F600* m = vt[24].fn((char*)self + vt[24].delta);
@@ -488,7 +488,7 @@ extern "C" void func_0034F600(sFloat_F600* self, sV4_F600* a, sV4_F600* b)
 #endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034F790);
+INCLUDE_ASM("object/floatingnode", cFloatingNode_updateIntersectInfo);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sV4_F790 {
@@ -499,7 +499,7 @@ struct sV4_F790 {
 
 extern sV4_F790 D_004FF140_F790[] __asm__("D_004FF140");
 extern sV4_F790 D_004FF150_F790[] __asm__("D_004FF150");
-extern "C" void func_00356AE0(void* self, void* a);
+extern "C" void cMoveNode_updateIntersectInfo(void* self, void* a);
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline sV4_F790 vu0Sub_F790(const sV4_F790& a, const sV4_F790& b)
@@ -624,9 +624,9 @@ struct sFloat_F790 {
     sFlVE_F790* vt;     // 0x0C
 };
 
-extern "C" void func_0034F790(sFloat_F790* self, sV4_F790* a)
+extern "C" void cFloatingNode_updateIntersectInfo(sFloat_F790* self, sV4_F790* a)
 {
-    func_00356AE0(self, a);
+    cMoveNode_updateIntersectInfo(self, a);
     sFlVE_F790* vt = self->vt;
     sV4_F790* m = vt[24].fn((char*)self + vt[24].delta);
     sFlBase_F790* b = (sFlBase_F790*)((char*)self + 0x2C);
@@ -640,7 +640,7 @@ extern "C" void func_0034F790(sFloat_F790* self, sV4_F790* a)
 #endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034F930);
+INCLUDE_ASM("object/floatingnode", cFloatingNode_updateNode);
 #ifdef SKIP_ASM
 extern char* D_004A5B64;
 
@@ -678,7 +678,7 @@ struct sFloatingNode_34F930 {
 
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // Steps the float spring (bob height plus two tilt axes) by one frame.
-extern "C" int func_0034F930(sFloatingNode_34F930* self)
+extern "C" int cFloatingNode_updateNode(sFloatingNode_34F930* self)
 {
     float dt = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
     float a1 = -self->k * (self->pos1 - self->rest1) + self->gain * self->in1 + -self->damp * self->vel1;
@@ -704,7 +704,7 @@ extern "C" int func_0034F930(sFloatingNode_34F930* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034FA88);
+INCLUDE_ASM("object/floatingnode", cFloatingNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sFloatingVEntryFA88 {
     short delta;
@@ -712,12 +712,12 @@ struct sFloatingVEntryFA88 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00356B30(void* self, void* stream);
+extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
 
-extern "C" void func_0034FA88(cFloatingNode* self, void* stream)
+extern "C" void cFloatingNode_writeToReplayFrame(cFloatingNode* self, void* stream)
 {
     int has;
-    func_00356B30(self, stream);
+    cMoveNode_writeToReplayFrame(self, stream);
     has = self->field_0x78 != 0;
     sFloatingVEntryFA88* e = &(*(sFloatingVEntryFA88**)stream)[1];
     e->fn((char*)stream + e->delta, &has, 4);

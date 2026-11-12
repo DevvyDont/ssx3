@@ -325,11 +325,11 @@ extern "C" int func_00149778(void* self, int rider, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_00149860);
+INCLUDE_ASM("be/beintstat", cBELibrary_cBELibrary);
 #ifdef SKIP_ASM
 extern "C" void func_00149BB8();
-extern "C" void* func_0014EDD8();
-extern "C" void* func_00147F78(void);
+extern "C" void* cBECharacterInterface_getThis();
+extern "C" void* cBEStatInterface_getThis(void);
 extern "C" void* func_0014ABE0();
 void* cBENewRaceInterface_getThis();
 void* cBENewPlayerInterface_getThis();
@@ -350,14 +350,14 @@ struct sStatDefaults_149860
 extern sStatDefaults_149860 D_00535C18;
 extern sStatDefaults_149860 D_0043FB28;
 
-extern "C" void* func_00149860(void* self)
+extern "C" void* cBELibrary_cBELibrary(void* self)
 {
     func_00149BB8();
     D_00535C18 = D_0043FB28;
     cBENewRaceInterface_getThis();
     cBENewPlayerInterface_getThis();
-    func_0014EDD8();
-    func_00147F78();
+    cBECharacterInterface_getThis();
+    cBEStatInterface_getThis();
     cBEOptionInterface_getThis();
     cBESaveInterface_getThis();
     cBEBAGTInterface_getThis();
@@ -373,7 +373,7 @@ extern "C" void* func_00149860(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintstat", func_001499A8);
+INCLUDE_ASM("be/beintstat", cBELibrary__cBELibrary);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void func_00153050(void);
@@ -391,7 +391,7 @@ extern int* D_004A1248;
 extern int* D_004A124C;
 extern int* D_004A1264;
 
-extern "C" void func_001499A8(void* self, int flags)
+extern "C" void cBELibrary__cBELibrary(void* self, int flags)
 {
     operator_delete(D_004A11B4);
     D_004A11B4 = 0;
@@ -429,10 +429,10 @@ extern "C" void func_001499A8(void* self, int flags)
 INCLUDE_ASM("be/beintstat", func_00149A88);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern "C" void* func_002C2580(char* buf, int id);
+extern "C" void* strcpy2(char* buf, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_001567B8(void* p, int v);
-extern "C" void* func_00147F78(void);
+extern "C" void* cBEStatInterface_getThis(void);
 int GetHashValue32(char*);
 void* cBENewPlayerInterface_getThis();
 void* cBEBAGTInterface_getThis();
@@ -472,11 +472,11 @@ extern "C" void func_00149A88(void* self, signed char idx)
     e->c11 = 4;
     char* o = *(char**)(D_004A28A8 + 0x8C);
     sVEntry_149A88* vt = *(sVEntry_149A88**)(o + 4);
-    func_002C2580(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0045A268)));
+    strcpy2(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0045A268)));
     sprintf((char*)e, buf, idx + 1);
     func_001567B8(D_004A6CA8 + idx * 0x9B50, 1);
     vreset_149A88((char*)cBENewPlayerInterface_getThis());
-    vreset_149A88((char*)func_00147F78());
+    vreset_149A88((char*)cBEStatInterface_getThis());
     vreset_149A88((char*)cBEBAGTInterface_getThis());
 }
 #endif

@@ -59,19 +59,19 @@ extern "C" void cUIMenu_setSelected(char* self, char* item, int play)
 }
 #endif
 
-INCLUDE_ASM("ui/uimenu", func_0039AE98);
+INCLUDE_ASM("ui/uimenu", cUIMenu_onInputChangeItem);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ui/uimenu", func_0039B000);
+INCLUDE_ASM("ui/uimenu", cUIMenu_onInput);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_00397870_i(void*, int) __asm__("func_00397870");
 void* func_0039FF50(void* self);
 extern "C" int func_003A0318(void* self, int a);
 extern char D_004A5A58[4];
-extern "C" unsigned char func_0039AB50(void* self);
+extern "C" unsigned char cUIMenu_getNext(void* self);
 extern "C" unsigned char func_0039AC48(void* self);
-extern "C" int func_0039AE98(void* self, unsigned char old);
+extern "C" int cUIMenu_onInputChangeItem(void* self, unsigned char old);
 
 struct sVE_B000 { short delta; short index; int (*fn)(void*, ...); };
 struct sVEv_B000 { short delta; short index; void (*fn)(void*, ...); };
@@ -120,7 +120,7 @@ static inline void playEvent_B000(char* thing, int which)
 
 // 2D menu input: the focused child gets the input first; then up/down/left/right move the selection
 // (by row or by column), the paging slots move the focus between items, accept notifies.
-extern "C" int func_0039B000(char* self, void* in)
+extern "C" int cUIMenu_onInput(char* self, void* in)
 {
     if (((*(int*)(self + 0x14) >> 5) & 1) || *(char**)(self + 0xA0) == 0) {
         return 0;
@@ -152,8 +152,8 @@ extern "C" int func_0039B000(char* self, void* in)
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        *(unsigned char*)(self + 0x95) = func_0039AB50(self);
-        int moved = func_0039AE98(self, old);
+        *(unsigned char*)(self + 0x95) = cUIMenu_getNext(self);
+        int moved = cUIMenu_onInputChangeItem(self, old);
         if (!bit_B000(self, 0x90, 3)) {
             if (moved) {
                 result = 1;
@@ -176,7 +176,7 @@ extern "C" int func_0039B000(char* self, void* in)
             }
         }
         *(unsigned char*)(self + 0x95) = func_0039AC48(self);
-        int moved = func_0039AE98(self, old);
+        int moved = cUIMenu_onInputChangeItem(self, old);
         if (!bit_B000(self, 0x90, 3)) {
             if (moved) {
                 result = 1;
@@ -252,7 +252,7 @@ extern "C" int func_0039B000(char* self, void* in)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039B6A0);
+INCLUDE_ASM("ui/uimenu", cUIMenu_render2D);
 #ifdef SKIP_ASM
 struct cList;
 struct cListNode;
@@ -260,13 +260,13 @@ void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 extern "C" void func_0039DA20(void* p, unsigned char a, unsigned char b, unsigned char c);
 
-struct func_0039B6A0_sVEntry {
+struct cUIMenu_render2D_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, float, float);
 };
 
-extern "C" void func_0039B6A0(void* self, float x, float y)
+extern "C" void cUIMenu_render2D(void* self, float x, float y)
 {
     void* p = *(void**)((char*)self + 0x9C);
     if (p != 0) {
@@ -276,7 +276,7 @@ extern "C" void func_0039B6A0(void* self, float x, float y)
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
-                func_0039B6A0_sVEntry* vt = *(func_0039B6A0_sVEntry**)((char*)n + 8);
+                cUIMenu_render2D_sVEntry* vt = *(cUIMenu_render2D_sVEntry**)((char*)n + 8);
                 vt[0x11].fn((char*)n + vt[0x11].delta, *(float*)((char*)self + 0x44) + x, *(float*)((char*)self + 0x48) + y);
             }
             n = *(void**)((char*)n + 4);
@@ -286,16 +286,16 @@ extern "C" void func_0039B6A0(void* self, float x, float y)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039B760);
+INCLUDE_ASM("ui/uimenu", cUIMenu_setScrollableMenu);
 #ifdef SKIP_ASM
-extern "C" char func_003979C0(void*);
+extern "C" char cList_size(void*);
 
-extern "C" void func_0039B760(void* self, char a1)
+extern "C" void cUIMenu_setScrollableMenu(void* self, char a1)
 {
     *(char*)((char*)self + 0x95) = 0;
     *(char*)((char*)self + 0x96) = a1;
     *(int*)((char*)self + 0x90) |= 4;
-    *(char*)((char*)self + 0x97) = func_003979C0((char*)self + 0x74);
+    *(char*)((char*)self + 0x97) = cList_size((char*)self + 0x74);
     *(char*)((char*)self + 0x98) = 0;
 }
 #endif
@@ -411,21 +411,21 @@ extern "C" void cUIMenu_setSelectedByIndex(char* self, unsigned char idx)
 }
 #endif
 
-extern "C" void* func_0039FE00(void* self);
+extern "C" void* cUIThing_setUIData(void* self);
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BAB0__FPv);
+INCLUDE_ASM("ui/uimenu", cUIPair_setUIData__FPv);
 #ifdef SKIP_ASM
-void* func_0039BAB0(void* self)
+void* cUIPair_setUIData(void* self)
 {
-    return func_0039FE00(self);
+    return cUIThing_setUIData(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BAD0);
+INCLUDE_ASM("ui/uimenu", cUIPair_setActive);
 #ifdef SKIP_ASM
-class func_0039BAD0_cVirt {
+class cUIPair_setActive_cVirt {
 public:
     char pad[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -435,20 +435,20 @@ public:
     virtual void v04(int);
 };
 
-struct func_0039BAD0_s {
+struct cUIPair_setActive_s {
     char pad0[0x14];
     unsigned int b0 : 1;
     unsigned int b1 : 1;
     char pad18[0x78 - 0x18];
-    func_0039BAD0_cVirt* a;
-    func_0039BAD0_cVirt* b;
+    cUIPair_setActive_cVirt* a;
+    cUIPair_setActive_cVirt* b;
 };
 
-extern "C" void func_0039BAD0(func_0039BAD0_s* self, int on)
+extern "C" void cUIPair_setActive(cUIPair_setActive_s* self, int on)
 {
     self->b1 = (on != 0);
     self->a->v04(on);
-    func_0039BAD0_cVirt* b = self->b;
+    cUIPair_setActive_cVirt* b = self->b;
     if (b != 0) {
         b->v04(on);
     }
@@ -456,53 +456,53 @@ extern "C" void func_0039BAD0(func_0039BAD0_s* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BB50);
+INCLUDE_ASM("ui/uimenu", cUIPair_setVisible);
 #ifdef SKIP_ASM
-struct func_0039BB50_sFlags {
+struct cUIPair_setVisible_sFlags {
     unsigned int pad0 : 6;
     unsigned int on : 1;
 };
 
-struct func_0039BB50_sVEntry {
+struct cUIPair_setVisible_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, int);
 };
 
-extern "C" void func_0039BB50(void* self, int on)
+extern "C" void cUIPair_setVisible(void* self, int on)
 {
-    ((func_0039BB50_sFlags*)((char*)self + 0x14))->on = (on != 0);
+    ((cUIPair_setVisible_sFlags*)((char*)self + 0x14))->on = (on != 0);
     void* a = *(void**)((char*)self + 0x78);
     if (a != 0) {
-        func_0039BB50_sVEntry* vt = *(func_0039BB50_sVEntry**)((char*)a + 8);
+        cUIPair_setVisible_sVEntry* vt = *(cUIPair_setVisible_sVEntry**)((char*)a + 8);
         vt[9].fn((char*)a + vt[9].delta, on);
     }
     void* b = *(void**)((char*)self + 0x7C);
     if (b != 0) {
-        func_0039BB50_sVEntry* vt = *(func_0039BB50_sVEntry**)((char*)b + 8);
+        cUIPair_setVisible_sVEntry* vt = *(cUIPair_setVisible_sVEntry**)((char*)b + 8);
         vt[9].fn((char*)b + vt[9].delta, on);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BBD8);
+INCLUDE_ASM("ui/uimenu", cUIPair_setFocus);
 #ifdef SKIP_ASM
 struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
-struct func_0039BBD8_sVEntryA {
+struct cUIPair_setFocus_sVEntryA {
     short delta;
     short index;
     void (*fn)(void*, int);
 };
-struct func_0039BBD8_sVEntryB {
+struct cUIPair_setFocus_sVEntryB {
     short delta;
     short index;
     void (*fn)(void*, void*, int);
 };
-struct func_0039BBD8_sFlags {
+struct cUIPair_setFocus_sFlags {
     unsigned int b0 : 1;
     unsigned int b1 : 1;
     unsigned int b2 : 1;
@@ -510,12 +510,12 @@ struct func_0039BBD8_sFlags {
     unsigned int on : 1;
 };
 
-extern "C" void func_0039BBD8(char* self, int on)
+extern "C" void cUIPair_setFocus(char* self, int on)
 {
-    ((func_0039BBD8_sFlags*)(self + 0x14))->on = on != 0;
+    ((cUIPair_setFocus_sFlags*)(self + 0x14))->on = on != 0;
     char* a = *(char**)(self + 0x78);
     if (a != 0) {
-        func_0039BBD8_sVEntryA* va = *(func_0039BBD8_sVEntryA**)(a + 8);
+        cUIPair_setFocus_sVEntryA* va = *(cUIPair_setFocus_sVEntryA**)(a + 8);
         va[7].fn(a + va[7].delta, on);
     }
     char* b = *(char**)(self + 0x7C);
@@ -531,10 +531,10 @@ extern "C" void func_0039BBD8(char* self, int on)
             }
         }
         char* c = *(char**)(self + 0x7C);
-        func_0039BBD8_sVEntryA* vc = *(func_0039BBD8_sVEntryA**)(c + 8);
+        cUIPair_setFocus_sVEntryA* vc = *(cUIPair_setFocus_sVEntryA**)(c + 8);
         vc[7].fn(c + vc[7].delta, 1);
         char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
-        func_0039BBD8_sVEntryB* vo = *(func_0039BBD8_sVEntryB**)(o + 8);
+        cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(o + 8);
         vo[19].fn(o + vo[19].delta, *(void**)(self + 0x7C), 1);
     } else {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)b, 1);
@@ -545,60 +545,60 @@ extern "C" void func_0039BBD8(char* self, int on)
             }
         }
         char* c = *(char**)(self + 0x7C);
-        func_0039BBD8_sVEntryA* vc = *(func_0039BBD8_sVEntryA**)(c + 8);
+        cUIPair_setFocus_sVEntryA* vc = *(cUIPair_setFocus_sVEntryA**)(c + 8);
         vc[7].fn(c + vc[7].delta, 0);
         char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
-        func_0039BBD8_sVEntryB* vo = *(func_0039BBD8_sVEntryB**)(o + 8);
+        cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(o + 8);
         vo[19].fn(o + vo[19].delta, *(void**)(self + 0x7C), 2);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BD38);
+INCLUDE_ASM("ui/uimenu", cUIPair_traverseFlat);
 #ifdef SKIP_ASM
-class func_0039BD38_cVirt {
+class cUIPair_traverseFlat_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
     virtual int v02(void*);
 };
 
-extern "C" int func_0039BD38(void* a, func_0039BD38_cVirt* obj)
+extern "C" int cUIPair_traverseFlat(void* a, cUIPair_traverseFlat_cVirt* obj)
 {
     return obj->v02(a);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BD68);
+INCLUDE_ASM("ui/uimenu", cUIPair_traverseRecurse);
 #ifdef SKIP_ASM
-class func_0039BD68_cPred {
+class cUIPair_traverseRecurse_cPred {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
     virtual int v02(void*);
 };
 
-class func_0039BD68_cNode {
+class cUIPair_traverseRecurse_cNode {
 public:
     char pad[0x8];
     // vptr at 0x8
     virtual void v01();
     virtual void v02();
-    virtual void* v03(func_0039BD68_cPred*);
+    virtual void* v03(cUIPair_traverseRecurse_cPred*);
 };
 
-extern "C" void* func_0039BD68(void* self, func_0039BD68_cPred* pred)
+extern "C" void* cUIPair_traverseRecurse(void* self, cUIPair_traverseRecurse_cPred* pred)
 {
     if (pred->v02(self)) {
         return self;
     }
-    func_0039BD68_cNode* child = *(func_0039BD68_cNode**)((char*)self + 0x78);
+    cUIPair_traverseRecurse_cNode* child = *(cUIPair_traverseRecurse_cNode**)((char*)self + 0x78);
     if (child != 0 && child->v03(pred) != 0) {
         return *(void**)((char*)self + 0x78);
     }
-    func_0039BD68_cNode* next = *(func_0039BD68_cNode**)((char*)self + 0x7C);
+    cUIPair_traverseRecurse_cNode* next = *(cUIPair_traverseRecurse_cNode**)((char*)self + 0x7C);
     if (next != 0) {
         return next->v03(pred);
     }
@@ -607,9 +607,9 @@ extern "C" void* func_0039BD68(void* self, func_0039BD68_cPred* pred)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BE10);
+INCLUDE_ASM("ui/uimenu", cUIPair_updateLocale);
 #ifdef SKIP_ASM
-class func_0039BE10_cVirt {
+class cUIPair_updateLocale_cVirt {
 public:
     char pad[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -631,13 +631,13 @@ public:
     virtual void v16();
 };
 
-extern "C" void func_0039BE10(void* self)
+extern "C" void cUIPair_updateLocale(void* self)
 {
-    func_0039BE10_cVirt* a = *(func_0039BE10_cVirt**)((char*)self + 0x78);
+    cUIPair_updateLocale_cVirt* a = *(cUIPair_updateLocale_cVirt**)((char*)self + 0x78);
     if (a != 0) {
         a->v16();
     }
-    func_0039BE10_cVirt* b = *(func_0039BE10_cVirt**)((char*)self + 0x7C);
+    cUIPair_updateLocale_cVirt* b = *(cUIPair_updateLocale_cVirt**)((char*)self + 0x7C);
     if (b != 0) {
         b->v16();
     }
@@ -645,32 +645,32 @@ extern "C" void func_0039BE10(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BE70);
+INCLUDE_ASM("ui/uimenu", cUIPair_destroyPair);
 #ifdef SKIP_ASM
-class func_0039BE70_cVirt {
+class cUIPair_destroyPair_cVirt {
 public:
     char pad[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
     virtual void v01(int);
 };
 
-extern "C" void func_0039BE70(void* self)
+extern "C" void cUIPair_destroyPair(void* self)
 {
-    func_0039BE70_cVirt* a = *(func_0039BE70_cVirt**)((char*)self + 0x78);
+    cUIPair_destroyPair_cVirt* a = *(cUIPair_destroyPair_cVirt**)((char*)self + 0x78);
     if (a != 0) {
         a->v01(3);
-        *(func_0039BE70_cVirt**)((char*)self + 0x78) = 0;
+        *(cUIPair_destroyPair_cVirt**)((char*)self + 0x78) = 0;
     }
-    func_0039BE70_cVirt* b = *(func_0039BE70_cVirt**)((char*)self + 0x7C);
+    cUIPair_destroyPair_cVirt* b = *(cUIPair_destroyPair_cVirt**)((char*)self + 0x7C);
     if (b != 0) {
         b->v01(3);
-        *(func_0039BE70_cVirt**)((char*)self + 0x7C) = 0;
+        *(cUIPair_destroyPair_cVirt**)((char*)self + 0x7C) = 0;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039BED8);
+INCLUDE_ASM("ui/uimenu", cUIPair_onInput);
 #ifdef SKIP_ASM
 struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
@@ -704,7 +704,7 @@ static inline int focusMove_BED8(char* self, int dir)
 
 // Menu input: up/down move the selection (with transition frames and wrap events), accept notifies, else
 // the sub-handler gets the input.
-extern "C" int func_0039BED8(char* self, void* in)
+extern "C" int cUIPair_onInput(char* self, void* in)
 {
     int result = 0;
     char* listener = D_004A5A58;
@@ -765,35 +765,35 @@ extern "C" int func_0039BED8(char* self, void* in)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C130);
+INCLUDE_ASM("ui/uimenu", cUIPair_render2D);
 #ifdef SKIP_ASM
-struct func_0039C130_sVEntry {
+struct cUIPair_render2D_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, float, float);
 };
 
-extern "C" void func_0039C130(void* self, float x, float y)
+extern "C" void cUIPair_render2D(void* self, float x, float y)
 {
     void* a = *(void**)((char*)self + 0x78);
     if (a != 0) {
-        func_0039C130_sVEntry* e = &(*(func_0039C130_sVEntry**)((char*)a + 8))[17];
+        cUIPair_render2D_sVEntry* e = &(*(cUIPair_render2D_sVEntry**)((char*)a + 8))[17];
         e->fn((char*)a + e->delta, x + *(float*)((char*)self + 0x44), y + *(float*)((char*)self + 0x48));
     }
     void* b = *(void**)((char*)self + 0x7C);
     if (b != 0) {
-        func_0039C130_sVEntry* e = &(*(func_0039C130_sVEntry**)((char*)b + 8))[17];
+        cUIPair_render2D_sVEntry* e = &(*(cUIPair_render2D_sVEntry**)((char*)b + 8))[17];
         e->fn((char*)b + e->delta, x + *(float*)((char*)self + 0x44), y + *(float*)((char*)self + 0x48));
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C1C8);
+INCLUDE_ASM("ui/uimenu", cUIPair_update);
 #ifdef SKIP_ASM
-extern "C" void func_003A0000(void* self, unsigned short ev);
+extern "C" void cUIThing_update(void* self, unsigned short ev);
 
-class func_0039C1C8_cVirt {
+class cUIPair_update_cVirt {
 public:
     char pad[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -818,14 +818,14 @@ public:
     virtual void v19(unsigned short);
 };
 
-extern "C" void func_0039C1C8(void* self, unsigned short ev)
+extern "C" void cUIPair_update(void* self, unsigned short ev)
 {
-    func_003A0000(self, ev);
-    func_0039C1C8_cVirt* a = *(func_0039C1C8_cVirt**)((char*)self + 0x78);
+    cUIThing_update(self, ev);
+    cUIPair_update_cVirt* a = *(cUIPair_update_cVirt**)((char*)self + 0x78);
     if (a != 0) {
         a->v19(ev);
     }
-    func_0039C1C8_cVirt* b = *(func_0039C1C8_cVirt**)((char*)self + 0x7C);
+    cUIPair_update_cVirt* b = *(cUIPair_update_cVirt**)((char*)self + 0x7C);
     if (b != 0) {
         b->v19(ev);
     }
@@ -833,95 +833,95 @@ extern "C" void func_0039C1C8(void* self, unsigned short ev)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C240);
+INCLUDE_ASM("ui/uimenu", cUIProgress__cUIProgress);
 #ifdef SKIP_ASM
-extern "C" void func_0039FC48(void* self, int flags);
+extern "C" void cUIThing__cUIThing(void* self, int flags);
 extern void* D_00494408[];
 
-struct func_0039C240_sVEntry {
+struct cUIProgress__cUIProgress_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, int);
 };
 
-extern "C" void func_0039C240(void* self, int flags)
+extern "C" void cUIProgress__cUIProgress(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_00494408;
     void* a = *(void**)((char*)self + 0x74);
     if (a != 0) {
-        func_0039C240_sVEntry* vt = *(func_0039C240_sVEntry**)((char*)a + 8);
+        cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)a + 8);
         vt[1].fn((char*)a + vt[1].delta, 3);
     }
     void* b = *(void**)((char*)self + 0x78);
     if (b != 0) {
-        func_0039C240_sVEntry* vt = *(func_0039C240_sVEntry**)((char*)b + 8);
+        cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)b + 8);
         vt[1].fn((char*)b + vt[1].delta, 3);
     }
-    func_0039FC48(self, flags);
+    cUIThing__cUIThing(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C2C8);
+INCLUDE_ASM("ui/uimenu", cUIProgress_setUIData);
 #ifdef SKIP_ASM
-extern "C" void func_0039C2C8(void* self)
+extern "C" void cUIProgress_setUIData(void* self)
 {
-    func_0039FE00(self);
+    cUIThing_setUIData(self);
     *(int*)((char*)self + 0x80) = 10;
     *(int*)((char*)self + 0x84) = 100;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C300);
+INCLUDE_ASM("ui/uimenu", cUIProgress_render2D);
 #ifdef SKIP_ASM
-struct func_0039C300_sVEntry {
+struct cUIProgress_render2D_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, float, float);
 };
 
-extern "C" void func_0039C300(void* self, float x, float y)
+extern "C" void cUIProgress_render2D(void* self, float x, float y)
 {
     void* a = *(void**)((char*)self + 0x74);
     if (a != 0 && *(void**)((char*)self + 0x78) != 0) {
         float px = x + *(float*)((char*)self + 0x44);
         float py = y + *(float*)((char*)self + 0x48);
-        func_0039C300_sVEntry* vt = *(func_0039C300_sVEntry**)((char*)a + 8);
+        cUIProgress_render2D_sVEntry* vt = *(cUIProgress_render2D_sVEntry**)((char*)a + 8);
         vt[17].fn((char*)a + vt[17].delta, px, py);
         void* b = *(void**)((char*)self + 0x78);
-        func_0039C300_sVEntry* vt2 = *(func_0039C300_sVEntry**)((char*)b + 8);
+        cUIProgress_render2D_sVEntry* vt2 = *(cUIProgress_render2D_sVEntry**)((char*)b + 8);
         vt2[17].fn((char*)b + vt2[17].delta, px, py);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C398);
+INCLUDE_ASM("ui/uimenu", cUIProgress_update);
 #ifdef SKIP_ASM
-extern "C" void func_003975E0(void* anim, void* thing, unsigned char flags, unsigned short ev);
-extern "C" void func_003974B0(void* anim, unsigned char flags);
+extern "C" void cUIAnimation_updateThing(void* anim, void* thing, unsigned char flags, unsigned short ev);
+extern "C" void cUIAnimation_updateFrame(void* anim, unsigned char flags);
 
-struct func_0039C398_sVEntry {
+struct cUIProgress_update_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, unsigned short);
 };
 
-extern "C" void func_0039C398(void* self, unsigned short ev)
+extern "C" void cUIProgress_update(void* self, unsigned short ev)
 {
     if (*(void**)((char*)self + 0xC) != 0) {
-        func_003975E0(*(void**)((char*)self + 0xC), self, *(unsigned char*)((char*)self + 0x10), ev);
-        func_003974B0(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
+        cUIAnimation_updateThing(*(void**)((char*)self + 0xC), self, *(unsigned char*)((char*)self + 0x10), ev);
+        cUIAnimation_updateFrame(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
     }
     void* a = *(void**)((char*)self + 0x78);
     if (a != 0) {
-        func_0039C398_sVEntry* vt = *(func_0039C398_sVEntry**)((char*)a + 8);
+        cUIProgress_update_sVEntry* vt = *(cUIProgress_update_sVEntry**)((char*)a + 8);
         vt[19].fn((char*)a + vt[19].delta, ev);
     }
     void* b = *(void**)((char*)self + 0x74);
     if (b != 0) {
-        func_0039C398_sVEntry* vt = *(func_0039C398_sVEntry**)((char*)b + 8);
+        cUIProgress_update_sVEntry* vt = *(cUIProgress_update_sVEntry**)((char*)b + 8);
         vt[19].fn((char*)b + vt[19].delta, ev);
     }
 }

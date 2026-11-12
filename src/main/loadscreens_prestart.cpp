@@ -131,12 +131,12 @@ extern "C" void func_00232538(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232568);
+INCLUDE_ASM("main/loadscreens_prestart", cInitLoadScreen_load);
 #ifdef SKIP_ASM
 extern "C" void cSSXApp_initload(void* app);
 extern void* D_004A28A8;
 
-extern "C" void func_00232568(void)
+extern "C" void cInitLoadScreen_load(void)
 {
     cSSXApp_initload(D_004A28A8);
 }
@@ -259,9 +259,9 @@ void func_00232718(void* self)
 extern void* D_0047D8A8[];
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232720__FPv);
+INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen_cPreGameLoadScreen__FPv);
 #ifdef SKIP_ASM
-void* func_00232720(void* self)
+void* cPreGameLoadScreen_cPreGameLoadScreen(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
     *(int*)self = (int)(void*)D_0047D8A8;
@@ -631,7 +631,7 @@ extern "C" void* func_00397B08(void* p);
 extern "C" int cUIEngine_loadFile(void* ui, const char* name);
 extern "C" void* func_00186A08(void* p, void* ui);
 extern "C" void* func_0039E2A0(void* self, void* engine);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern void* D_004A289C;
 extern void* D_004A28A8;
 extern char D_0047B698[];
@@ -681,12 +681,12 @@ extern "C" void func_00232B28(void* self)
     int mode = *(int*)((char*)self + 0x18);
     if (mode == 0) {
         void* item = func_00186A08(operator new(0x248, D_0047B978, 0, 0), *(void**)((char*)self + 0xC));
-        func_0039F400(*(char**)((char*)self + 0xC) + 0x18, item);
+        cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, item);
     } else if (mode == 2) {
         void* p = operator new(0x48, D_0047BA00, 0, 0);
         func_0039E2A0(p, *(void**)((char*)self + 0xC));
         *(void**)((char*)p + 8) = D_0047CA18;
-        func_0039F400(*(char**)((char*)self + 0xC) + 0x18, p);
+        cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, p);
     }
 }
 #endif
@@ -729,14 +729,14 @@ extern "C" void func_00232C98(void* self)
 }
 #endif
 
-extern "C" void* func_00231CF0(void* self);
+extern "C" void* cFadeScreen_loseFocus(void* self);
 
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232CF8__FPv);
 #ifdef SKIP_ASM
 void* func_00232CF8(void* self)
 {
-    return func_00231CF0(self);
+    return cFadeScreen_loseFocus(self);
 }
 #endif
 
@@ -852,7 +852,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void* func_00397B08(void* p);
 extern "C" int cUIEngine_loadFile(void* ui, const char* name);
 extern "C" void* func_0039E2A0(void* self, void* engine);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 // PORT: cGameLoadScreen_loadTexture takes (self) but this caller passes (self, 0).
 extern "C" void cGameLoadScreen_loadTexture_2E20(void* self, int a1) __asm__("cGameLoadScreen_loadTexture");
 extern void* D_004A289C;
@@ -979,7 +979,7 @@ other:
         }
     }
 done:
-    func_0039F400(*(char**)((char*)self + 0xC) + 0x18, item);
+    cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, item);
 }
 #endif
 
@@ -998,7 +998,7 @@ struct cBigFile {
 cBigFile* cBigFile_cBigFile1_3048(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
 void cBigFile__cBigFile(cBigFile* self, int flags);
 void cMemMan_free(void*);
-extern "C" int func_00144BE0(void* self);
+extern "C" int cBENewRaceInterface_getLocationID(void* self);
 extern "C" char* func_003E2190(const char* name, int flags);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern signed char D_00535C11[];
@@ -1046,7 +1046,7 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
         cBigFile__cBigFile(&bf, 2);
     } else {
         cBigFile_cBigFile1_3048(&bf, D_0047BDB0, 0x100);
-        signed char n = func_00144BE0(fe);
+        signed char n = cBENewRaceInterface_getLocationID(fe);
         if (n > 16)
             n = 0;
         sprintf(name, D_004A2C30, D_00442950[n]);

@@ -42,17 +42,17 @@ __asm__(".globl func_002D4A70\n.type func_002D4A70,@function\nfunc_002D4A70 = _$
 __asm__("_vt$15cVbDtor002D4A70$13cRiderVbC_agf = D_00488AC0\n"
         "_vt$15cVbDtor002D4A70$14cRiderVbBC_agf = D_00459B90\n"
         "_vt$15cVbDtor002D4A70$12cRiderVb_agf = D_00488B08\n"
-        "_$_12cRiderVb_agf = func_0011B978\n");
+        "_$_12cRiderVb_agf = cRider__cRider\n");
 #endif
 
 //100%
 INCLUDE_ASM("visualfx/angerfx", func_002D4BE0);
 #ifdef SKIP_ASM
-extern "C" void* func_003E6448(void* dst, int c, int n);
+extern "C" void* MEM_fill(void* dst, int c, int n);
 
 extern "C" void func_002D4BE0(void* self)
 {
-    func_003E6448(*(void**)((char*)self + 4), 0, 0x58);
+    MEM_fill(*(void**)((char*)self + 4), 0, 0x58);
 }
 #endif
 
@@ -246,16 +246,16 @@ extern "C" void func_002D5658(unsigned char* p, float r, float g, float b, float
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D56B0);
+INCLUDE_ASM("visualfx/angerfx", tActiveAvalancheNode__tActiveAvalancheNode);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void func_003715B0(void* p, int a1);
-extern "C" void func_003714F8(void* p, int a1);
+extern "C" void cDynamicColourEmitter_purge(void* p, int a1);
+extern "C" void cDynamicColourEmitter__cDynamicColourEmitter(void* p, int a1);
 
-extern "C" void func_002D56B0(int* self, int flags)
+extern "C" void tActiveAvalancheNode__tActiveAvalancheNode(int* self, int flags)
 {
-    func_003715B0((char*)self + 0xD0, 1);
-    func_003714F8((char*)self + 0xD0, 2);
+    cDynamicColourEmitter_purge((char*)self + 0xD0, 1);
+    cDynamicColourEmitter__cDynamicColourEmitter((char*)self + 0xD0, 2);
     if (flags & 1) {
         operator_delete(self);
     }

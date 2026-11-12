@@ -6,7 +6,7 @@ INCLUDE_ASM("worldpainter/worldpainterman2", func_002C0B70);
 
 INCLUDE_ASM("worldpainter/worldpainterman2", func_002C1458);
 
-INCLUDE_ASM("worldpainter/worldpainterman2", func_002C1460);
+INCLUDE_ASM("worldpainter/worldpainterman2", tWorldPainterQuery__tWorldPainterQuery);
 
 INCLUDE_ASM("worldpainter/worldpainterman2", func_002C1490);
 

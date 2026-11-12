@@ -49,13 +49,13 @@ INCLUDE_ASM("scripter/scanimmgr", func_00275498);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" void func_00275698(void* self);
+extern "C" void cScriptAnimBankManager_UnlinkBanksAll(void* self);
 extern char D_004825D8[];
 
 extern "C" void func_00275498(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_004825D8;
-    func_00275698(self);
+    cScriptAnimBankManager_UnlinkBanksAll(self);
     void* p = *(void**)((char*)self + 0x8);
     if (p != 0) {
         cMemMan_free(p);
@@ -166,7 +166,7 @@ extern "C" void func_00275650(sAnimList* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", func_00275698);
+INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_UnlinkBanksAll);
 #ifdef SKIP_ASM
 struct sDmEntry275698 {
     char pad_0x00[0x8];
@@ -187,7 +187,7 @@ struct sDmTable275698 {
     sDmVEntry275698* vt;
 };
 
-extern "C" void func_00275698(void* self_)
+extern "C" void cScriptAnimBankManager_UnlinkBanksAll(void* self_)
 {
     sDmTable275698* self = (sDmTable275698*)self_;
     int i;

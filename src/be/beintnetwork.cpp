@@ -385,13 +385,13 @@ extern "C" void func_0014ECA0(void* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EDD8);
+INCLUDE_ASM("be/beintnetwork", cBECharacterInterface_getThis);
 #ifdef SKIP_ASM
 extern const char D_0045A280[];
 extern void* D_0045AD38[16];
 extern void* D_004A1208;
 
-extern "C" void* func_0014EDD8(void)
+extern "C" void* cBECharacterInterface_getThis(void)
 {
     if (D_004A1208 == 0) {
         cBENetworkInterface* mem = (cBENetworkInterface*)cMemMan_alloc(0x10, D_0045A280, 0, 0);
@@ -422,11 +422,11 @@ extern "C" void* func_0014EE28(void* self, int rider)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EE58);
+INCLUDE_ASM("be/beintnetwork", cBECharacterInterface_getShortName);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 signed char cBELibrary_getCharacterID(int index);
-extern "C" signed char func_0014A0B0(int index);
+extern "C" signed char cBELibrary_getCheatCharacterID(int index);
 
 struct sNetEntry8_0014EE58
 {
@@ -441,10 +441,10 @@ struct sNetEntry88_0014EE58
 extern sNetEntry8_0014EE58 D_0043FA38_0014EE58[] __asm__("D_0043FA38");
 extern sNetEntry88_0014EE58 D_00530990_0014EE58[] __asm__("D_00530990");
 
-extern "C" void* func_0014EE58(void* self, int rider)
+extern "C" void* cBECharacterInterface_getShortName(void* self, int rider)
 {
     int c = cBELibrary_getCharacterID(rider);
-    int index = func_0014A0B0(rider);
+    int index = cBELibrary_getCheatCharacterID(rider);
     if (index >= 10 && index < 30) {
         return &D_0043FA38_0014EE58[index];
     }

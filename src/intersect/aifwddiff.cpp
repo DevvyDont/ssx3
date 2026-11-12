@@ -280,7 +280,7 @@ extern "C" sFwdDiff_27CC8* func_00327CC8(sFwdDiff_27CC8* self, sFwdDiff_27CC8* s
 //100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327DA8);
 #ifdef SKIP_ASM
-extern "C" void func_003E6574(void* dst, void* src, int n);
+extern "C" void MEM_copy(void* dst, void* src, int n);
 
 extern "C" int func_00327DA8(sFwdDiff_27CC8* self, char* buf, int a2)
 {
@@ -293,14 +293,14 @@ extern "C" int func_00327DA8(sFwdDiff_27CC8* self, char* buf, int a2)
     self->blk.d[4] = 1;
     int len0;
     int len1;
-    func_003E6574(&len0, buf, 4);
-    func_003E6574(&len1, buf + 4, 4);
-    func_003E6574((char*)self->blkp + 0x8, buf + 0x8, 4);
-    func_003E6574((char*)self->blkp + 0xC, buf + 0xC, 4);
-    func_003E6574((char*)self->blkp + 0x14, buf + 0x10, 0xC);
-    func_003E6574((char*)self->blkp + 0x2C, buf + 0x1C, 0xC);
-    func_003E6574((char*)self->blkp + 0x38, buf + 0x28, 0x24);
-    func_003E6574((char*)self->blkp + 0x5C, buf + 0x4C, 0x24);
+    MEM_copy(&len0, buf, 4);
+    MEM_copy(&len1, buf + 4, 4);
+    MEM_copy((char*)self->blkp + 0x8, buf + 0x8, 4);
+    MEM_copy((char*)self->blkp + 0xC, buf + 0xC, 4);
+    MEM_copy((char*)self->blkp + 0x14, buf + 0x10, 0xC);
+    MEM_copy((char*)self->blkp + 0x2C, buf + 0x1C, 0xC);
+    MEM_copy((char*)self->blkp + 0x38, buf + 0x28, 0x24);
+    MEM_copy((char*)self->blkp + 0x5C, buf + 0x4C, 0x24);
     char* p = buf + 0x70;
     *(char**)((char*)self->blkp + 0x20) = p;
     p += (*(int*)((char*)self->blkp + 0xC) + 1) * 0xC;
@@ -687,7 +687,7 @@ INCLUDE_ASM("intersect/aifwddiff", func_00328660);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc is the game's operator new(size, tag, flags, align).
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_003E6448(void* p, int v, int n);
+extern "C" void MEM_fill(void* p, int v, int n);
 extern char D_004A3FC0[];
 
 struct sItem_00328660 {
@@ -708,7 +708,7 @@ struct sList_00328660 {
 struct sNode_00328660 {
     sNode_00328660* child[2][2][2];     // 0x00
     sList_00328660 lists[3];            // 0x20
-    sNode_00328660() { func_003E6448(child, 0, sizeof(child)); }
+    sNode_00328660() { MEM_fill(child, 0, sizeof(child)); }
 };
 struct sCell_00328660 {
     int level;
@@ -751,7 +751,7 @@ struct sNode_8C20 {
         int dx = cc.x - pc.x * 2;
         int dy = cc.y - pc.y * 2;
         int dz = cc.z - pc.z * 2;
-        func_003E6448(child, 0, sizeof(child));
+        MEM_fill(child, 0, sizeof(child));
         child[dx][dy][dz] = c;
     }
 };
@@ -789,7 +789,7 @@ extern "C" void func_00328C20(sRoot_8C20* root, int idx, sItem_00328660* item, s
     if (root->node == 0) {
         root->cell = *cell;
         sNode_8C20* n = new (D_004A3FC0, 0x20000000, 0) sNode_8C20;
-        func_003E6448(n->child, 0, sizeof(n->child));
+        MEM_fill(n->child, 0, sizeof(n->child));
         *pn = n;
         root->node->lists[idx].push(item);
         return;
@@ -933,7 +933,7 @@ extern "C" void func_00328F28(sCell_8F28* c, sBox_8F28* b)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("intersect/aifwddiff", func_003291E0);
+INCLUDE_ASM("intersect/aifwddiff", nash_Nash_movenode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00328808_91E0(sNode_003284B8* node, int idx, sItem_00328660* item, sCell_00328660* from,
@@ -964,7 +964,7 @@ static inline void Move_91E0(sRoot_8C20* root, int idx, sItem_00328660* item, sC
     }
 }
 
-extern "C" void func_003291E0(sRoot_8C20 (*roots)[2][2], int idx, sItem_00328660* item, sBox_8F28* box,
+extern "C" void nash_Nash_movenode(sRoot_8C20 (*roots)[2][2], int idx, sItem_00328660* item, sBox_8F28* box,
                               sBox_8F28* oldBox)
 {
     sCell_8F28 oc;

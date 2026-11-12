@@ -4,8 +4,8 @@
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_cBankMonitor);
 #ifdef SKIP_ASM
 struct sSndPlayerD9C8;
-extern "C" sSndPlayerD9C8* func_002AD9C8(sSndPlayerD9C8* self, int inchrg, int heap);
-extern "C" void* func_002ADE88(void* self, int a);
+extern "C" sSndPlayerD9C8* cMonitor_cMonitor(sSndPlayerD9C8* self, int inchrg, int heap);
+extern "C" void* cSoundSys_cSoundSys(void* self, int a);
 extern "C" void* func_002AB9E0(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -44,9 +44,9 @@ extern "C" sBankMonitorCD08* cBankMonitor_cBankMonitor(sBankMonitorCD08* self, i
 {
     if (inchrg) {
         self->vbase = self->vb;
-        func_002ADE88(self->vb, heap);
+        cSoundSys_cSoundSys(self->vb, heap);
     }
-    func_002AD9C8((sSndPlayerD9C8*)self, 0, heap);
+    cMonitor_cMonitor((sSndPlayerD9C8*)self, 0, heap);
     *(const sBmVtblCD08**)(self->vbase + 4) = &D_00483B88;
     if (!inchrg) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
@@ -74,7 +74,7 @@ void operator_delete(int* ptr);
 extern "C" void func_002ABA18(void* self, int flags);
 struct sSndPlayerDAC8;
 extern "C" void func_002ADAC8(sSndPlayerDAC8* self, int flags);
-extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern void* D_00483B48[];
 
 struct sBmVEntryE40 {
@@ -121,7 +121,7 @@ extern "C" void func_002ACE40(sBankMonitorE40* self, int flags)
     }
     func_002ADAC8((sSndPlayerDAC8*)self, 0);
     if (flags & 2) {
-        func_002ADEE8(self->vbase, 0);
+        cSoundSys__cSoundSys(self->vbase, 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -718,7 +718,7 @@ extern "C" void func_002AD998()
 }
 #endif
 
-INCLUDE_ASM("sound/bankmonitor", func_002AD9C8);
+INCLUDE_ASM("sound/bankmonitor", cMonitor_cMonitor);
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADAC8);
@@ -726,7 +726,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002ADAC8);
 void operator_delete(int* ptr);
 extern "C" void func_003B5948(int id);
 extern "C" void func_002A97C0(void* self, int flags);
-extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern void* D_00483BA8[];
 
 struct sBmVEntryDAC8 {
@@ -775,7 +775,7 @@ extern "C" void func_002ADAC8(sSndPlayerDAC8* self, int flags)
     }
     func_002A97C0(self, 0);
     if (flags & 2) {
-        func_002ADEE8(self->vbase, 0);
+        cSoundSys__cSoundSys(self->vbase, 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -915,32 +915,32 @@ void func_002ADDE0_impl(void* self, sBmKeyDDE0 key)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002ADE88);
+INCLUDE_ASM("sound/bankmonitor", cSoundSys_cSoundSys);
 #ifdef SKIP_ASM
-class func_002ADE88_cObj {
+class cSoundSys_cSoundSys_cObj {
 public:
     virtual void v01(int a);
 };
 
-extern "C" func_002ADE88_cObj* func_002A8FA0();
+extern "C" cSoundSys_cSoundSys_cObj* func_002A8FA0();
 extern char D_00483C00[];
 extern void* D_004A377C;
 
-extern "C" void* func_002ADE88(void* self, int a)
+extern "C" void* cSoundSys_cSoundSys(void* self, int a)
 {
     *(void**)((char*)self + 0x4) = D_00483C00;
     D_004A377C = self;
-    func_002ADE88_cObj* obj = func_002A8FA0();
-    *(func_002ADE88_cObj**)self = obj;
+    cSoundSys_cSoundSys_cObj* obj = func_002A8FA0();
+    *(cSoundSys_cSoundSys_cObj**)self = obj;
     obj->v01(a);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002ADEE8);
+INCLUDE_ASM("sound/bankmonitor", cSoundSys__cSoundSys);
 #ifdef SKIP_ASM
-class func_002ADEE8_cObj {
+class cSoundSys__cSoundSys_cObj {
 public:
     virtual void v01();
     virtual void v02();
@@ -951,10 +951,10 @@ void operator_delete(int* ptr);
 extern char D_00483C00[];
 extern void* D_004A377C;
 
-extern "C" void func_002ADEE8(void* self, int flags)
+extern "C" void cSoundSys__cSoundSys(void* self, int flags)
 {
     *(void**)((char*)self + 0x4) = D_00483C00;
-    (*(func_002ADEE8_cObj**)self)->v03(flags);
+    (*(cSoundSys__cSoundSys_cObj**)self)->v03(flags);
     operator_delete(*(int**)self);
     D_004A377C = 0;
     if (flags & 1) {
@@ -1013,7 +1013,7 @@ int func_002ADFB0(int self)
 }
 #endif
 
-extern "C" void* func_002523A8(void* self);
+extern "C" void* MEM_free(void* self);
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADFC8);
@@ -1036,7 +1036,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002AE000__FPv);
 #ifdef SKIP_ASM
 void* func_002AE000(void* self)
 {
-    return func_002523A8(self);
+    return MEM_free(self);
 }
 #endif
 
@@ -2252,7 +2252,7 @@ extern "C" void func_002AF900(int* self, int flags)
 {
     func_003D6CA0(*(void**)self);
     if (*(int*)((char*)self + 0x48) != 0) {
-        func_002523A8(*(void**)((char*)self + 0x44));
+        MEM_free(*(void**)((char*)self + 0x44));
     }
     if (flags & 1) {
         operator_delete(self);
@@ -2410,11 +2410,11 @@ extern "C" void func_002AFB38(void* selfp, int flags)
     for (i = 0; i < self->voiceCount; i++) {
         for (int j = 0; j < 2; j++) {
             if (self->pairs[i].p[j] != 0) {
-                func_002523A8(self->pairs[i].p[j]);
+                MEM_free(self->pairs[i].p[j]);
             }
         }
         if (self->voices[i].active != 0) {
-            func_002523A8(self->voices[i].handle);
+            MEM_free(self->voices[i].handle);
             self->voices[i].active = 0;
             self->voices[i].handle = 0;
         }
@@ -2522,7 +2522,7 @@ struct sBankList {
 };
 extern char D_004A36E0[];
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern "C" void* func_003E1908(const char* name, int flags);
+extern "C" void* FILE_loadz(const char* name, int flags);
 extern "C" void* func_003E2DF0(void* big, char* name);
 extern "C" int func_003E2EE0(void* big);
 extern "C" void func_003D66C0(void* h, int a);
@@ -2539,7 +2539,7 @@ extern "C" int func_002AFD40(void* selfp, int a, char* name, int b, int c)
     int sel = 0;
     if (!a)
         sel++;
-    self->pairs[self->voiceCount].p[sel] = func_003E1908(name, 0);
+    self->pairs[self->voiceCount].p[sel] = FILE_loadz(name, 0);
     if (self->pairs[self->voiceCount].p[sel] != 0) {
         buf[0] = 0;
         if (a != 0) {
@@ -2559,7 +2559,7 @@ extern "C" int func_002AFD40(void* selfp, int a, char* name, int b, int c)
             self->voices[self->voiceCount].handle = func_003E2DF0(self->pairs[self->voiceCount].p[sel], p);
             self->voices[self->voiceCount].active = 0;
             if (self->voices[self->voiceCount].handle == 0) {
-                func_002523A8(self->pairs[self->voiceCount].p[sel]);
+                MEM_free(self->pairs[self->voiceCount].p[sel]);
                 self->pairs[self->voiceCount].p[sel] = 0;
                 return 0;
             }
@@ -2584,7 +2584,7 @@ extern "C" int func_002AFD40(void* selfp, int a, char* name, int b, int c)
         }
     } else {
         sprintf(name, D_004832C0, (char*)self + 0x6C);
-        self->voices[self->voiceCount].handle = func_003E1908(name, 0);
+        self->voices[self->voiceCount].handle = FILE_loadz(name, 0);
         if (self->voices[self->voiceCount].handle == 0)
             return 0;
         self->voices[self->voiceCount].active = 1;
@@ -2906,7 +2906,7 @@ extern "C" char* func_002B07F8(char* self, int inchrg, int a2, int a3, int heap)
         *(char**)(self + 0xC98) = self + 0x1C8;
         *(char**)self = vb2;
         *(char**)(self + 0x3A0) = vb;
-        func_002ADE88(vb, heap);
+        cSoundSys_cSoundSys(vb, heap);
         cBankManager_cBankManager(*(void**)(self + 0xC98), 0, a2, heap);
         cStreamSys_cStreamSys(*(void**)self, 0, a2, a3, heap);
     }
@@ -2950,7 +2950,7 @@ void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void func_0028BB10(void* self, int flags);
 extern "C" void func_002AA648(void* self, int flags);
-extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern char* D_004A37B4;
 extern void* D_00483870[];
 extern void* D_00483B48[];
@@ -2995,7 +2995,7 @@ extern "C" void func_002B0AE8(char* self, int flags)
     if (flags & 2) {
         func_002AA648(*(void**)self, 0);
         func_0028BB10(**(void***)self, 0);
-        func_002ADEE8(*(void**)(**(char***)self + 0x1D8), 0);
+        cSoundSys__cSoundSys(*(void**)(**(char***)self + 0x1D8), 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -3069,7 +3069,7 @@ extern "C" void func_002B0DA0(void* self)
         (*(void***)((char*)self + 0x4))[i] = 0;
     }
     func_003D67F8();
-    func_002523A8(*(void**)((char*)self + 0x8));
+    MEM_free(*(void**)((char*)self + 0x8));
     *(void**)((char*)self + 0x8) = 0;
 }
 #endif
@@ -4415,7 +4415,7 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         *(char**)(self + 0x5F20) = self + 0x5450;
         *(char**)self = vb2;
         *(char**)(self + 0x5628) = vb;
-        func_002ADE88(vb, heap);
+        cSoundSys_cSoundSys(vb, heap);
         cBankManager_cBankManager(*(void**)(self + 0x5F20), 0, a2, heap);
         cStreamSys_cStreamSys(*(void**)self, 0, a2, a3, heap);
     }
@@ -4582,7 +4582,7 @@ void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void func_0028BB10(void* self, int flags);
 extern "C" void func_002AA648(void* self, int flags);
-extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern "C" void func_002B1F78(void* self, int flags);
 extern void*** D_004A37EC;
 extern void* D_004838F8[];
@@ -4640,7 +4640,7 @@ extern "C" void func_002B3398(char* self, int flags)
     if (flags & 2) {
         func_002AA648(*(void**)self, 0);
         func_0028BB10(**(void***)self, 0);
-        func_002ADEE8(*(void**)(**(char***)self + 0x1D8), 0);
+        cSoundSys__cSoundSys(*(void**)(**(char***)self + 0x1D8), 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -5732,7 +5732,7 @@ extern "C" void func_002B4A08(void* self, int a1)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B4A20);
 #ifdef SKIP_ASM
-extern "C" void func_003DFAF0(void* f);
+extern "C" void ASYNCFILE_cancel(void* f);
 extern "C" void ASYNCFILE_release(void* f, int a, int b);
 extern "C" void* func_003DF748(void* name, void* buf, int size);
 extern "C" void func_003E1B68(void* name, void* buf, int size);
@@ -5740,7 +5740,7 @@ extern "C" void func_003E1B68(void* name, void* buf, int size);
 extern "C" void func_002B4A20(void* self, void* name, int sync)
 {
     if (*(void**)((char*)self + 0x5438) != 0) {
-        func_003DFAF0(*(void**)((char*)self + 0x5438));
+        ASYNCFILE_cancel(*(void**)((char*)self + 0x5438));
         ASYNCFILE_release(*(void**)((char*)self + 0x5438), 0, 0);
     }
     if (sync == 0) {
@@ -5754,7 +5754,7 @@ extern "C" void func_002B4A20(void* self, void* name, int sync)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B4AA0);
 #ifdef SKIP_ASM
-extern "C" int func_003DF980(void*);
+extern "C" int ASYNCFILE_getstatus(void*);
 
 extern "C" int func_002B4AA0(void* self, int force)
 {
@@ -5763,7 +5763,7 @@ extern "C" int func_002B4AA0(void* self, int force)
         return 1;
     }
     p = *(void**)((char*)self + 0x5438);
-    if (p != 0 && func_003DF980(p) == 1) {
+    if (p != 0 && ASYNCFILE_getstatus(p) == 1) {
         return 1;
     }
     return 0;

@@ -188,12 +188,12 @@ extern "C" void cFEStateMountainRoom_onCreateScreen(void* self)
 INCLUDE_ASM("fe/ovstatelodge", func_001D2A90);
 #ifdef SKIP_ASM
 extern "C" void func_001D3340(void* self);
-extern "C" void func_00186518(void* self, int a1);
+extern "C" void cFEState_onGainFocus(void* self, int a1);
 
 extern "C" void func_001D2A90(void* self, int a1)
 {
     func_001D3340(self);
-    func_00186518(self, a1);
+    cFEState_onGainFocus(self, a1);
 }
 #endif
 
@@ -463,7 +463,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
 extern "C" void func_001D32E0_MR(void* self) __asm__("func_001D32E0");
-extern "C" void func_0039F400_MR(void* list, void* item) __asm__("func_0039F400");
+extern "C" void cUIStateStack_push_MR(void* list, void* item) __asm__("cUIStateStack_push");
 extern char D_00467450[];
 extern char D_00467460[];
 extern char D_00467478[];
@@ -506,7 +506,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned
         }
         sFactory_MR* f = **(sFactory_MR***)(self + 0x10);
         void* s = f->vt[4].fn((char*)f + f->vt[4].delta, self, idx - 1);
-        func_0039F400_MR(*(char**)(self + 0x10) + 0x18, s);
+        cUIStateStack_push_MR(*(char**)(self + 0x10) + 0x18, s);
         break;
     }
     case 6: {
@@ -515,7 +515,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned
         if (s == 0) {
             break;
         }
-        func_0039F400_MR(*(char**)(self + 0x10) + 0x18, s);
+        cUIStateStack_push_MR(*(char**)(self + 0x10) + 0x18, s);
         break;
     }
     case 1: {
@@ -841,7 +841,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* func_00156A90(void* self, int a1, int a2);
-extern "C" int func_00157BF0(void* self, int rider, int a, int b, int c);
+extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" int func_00398380(void* self, int id);
 extern char D_00466E60[];
 extern char D_00467658[];
@@ -922,7 +922,7 @@ extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* 
     for (int i = 0; i < 4; i++) {
         if (h == GetHashValue32(D_004415F0[i])) {
             self->slots[i] = w;
-            if (func_00157BF0(iface, self->player, self->charID, self->mode, i)) {
+            if (cBERewardInterface_isTrophyOwned(iface, self->player, self->charID, self->mode, i)) {
                 char* info = func_00156A90(iface, self->mode, i);
                 char* eng = self->engine;
                 int hash = GetHashValue32(*(char**)(info + 8));
@@ -981,14 +981,14 @@ extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* 
 }
 #endif
 
-extern "C" void* func_0039E4C0(void* self);
+extern "C" void* cUIState_onGainFocus(void* self);
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", func_001D3C60__FPv);
 #ifdef SKIP_ASM
 void* func_001D3C60(void* self)
 {
-    return func_0039E4C0(self);
+    return cUIState_onGainFocus(self);
 }
 #endif
 
@@ -998,10 +998,10 @@ INCLUDE_ASM("fe/ovstatelodge", func_001D3C80);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00157BF0(void* self, int rider, int a, int b, int c);
+extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int id);
 extern "C" void func_001D3F80(void* self, int id);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 
 struct sVEntA_001D3C80 { short delta; short index; void* (*fn)(void*, void*, int); };
 struct sVEntB_001D3C80 { short delta; short index; void (*fn)(void*, int); };
@@ -1014,12 +1014,12 @@ extern "C" void func_001D3C80(void* self, void* item, unsigned int key)
     }
     switch (key) {
     case 5:
-        if (func_00157BF0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
+        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
                           *(int*)((char*)self + 0xDC), *(int*)((char*)self + 0xE0), *(int*)((char*)item + 0x18)) != 0) {
             void* obj = **(void***)((char*)self + 0x10);
             sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
             void* r = vt[4].fn((char*)obj + vt[4].delta, self, (*(int*)((char*)self + 0xE0) << 16) | *(int*)((char*)item + 0x18));
-            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         }
         break;
     case 6: {
@@ -1034,7 +1034,7 @@ extern "C" void func_001D3C80(void* self, void* item, unsigned int key)
         sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
         void* r = vt[5].fn((char*)obj + vt[5].delta, self, id);
         if (r != 0) {
-            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -1052,7 +1052,7 @@ INCLUDE_ASM("fe/ovstatelodge", func_001D3E08);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00157BF0(void* self, int rider, int a, int b, int c);
+extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" void* func_00397870(void* list, int id);
 
 extern "C" int func_001D3E08(void* self, void* item, unsigned int key, int id)
@@ -1066,7 +1066,7 @@ extern "C" int func_001D3E08(void* self, void* item, unsigned int key, int id)
     case 6: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
         void* e = func_00397870((char*)item + 0x74, id);
-        if (func_00157BF0(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xDC),
+        if (cBERewardInterface_isTrophyOwned(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xDC),
                           *(int*)((char*)self + 0xE0), *(int*)((char*)e + 0x18)) == 0) {
             return 0x10;
         }
@@ -1084,7 +1084,7 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00157BF0(void* self, int rider, int a, int b, int c);
+extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern char D_00467688[];
@@ -1107,7 +1107,7 @@ public:
 extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int index)
 {
     if (*(void**)((char*)self + 0xD0) != 0) {
-        if (func_00157BF0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
+        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
                           *(int*)((char*)self + 0xDC), *(int*)((char*)self + 0xE0), index) != 0) {
             cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0xD0), GetHashValue32(D_00467688));
         } else {

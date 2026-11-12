@@ -219,7 +219,7 @@ INCLUDE_ASM("fe/festatestore", func_00184B70);
 #ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" void func_001A0570(void* self, int a1, int a2);
-void* func_0039E4A0(void* self);
+void* cUIState_onDestroyScreen(void* self);
 
 extern "C" void func_00184B70(void* self)
 {
@@ -227,7 +227,7 @@ extern "C" void func_00184B70(void* self)
     if (mgr != 0) {
         func_001A0570(mgr + 0xB0, *(signed char*)((char*)self + 0x44), 0);
     }
-    func_0039E4A0(self);
+    cUIState_onDestroyScreen(self);
 }
 #endif
 
@@ -260,7 +260,7 @@ struct sObj00184BE0 {
 };
 
 extern "C" void func_00183B08(void* self);
-extern "C" void func_0039E4C0(void* self, int a1);
+extern "C" void cUIState_onGainFocus(void* self, int a1);
 
 extern "C" void func_00184BE0(void* self, int a1)
 {
@@ -274,7 +274,7 @@ extern "C" void func_00184BE0(void* self, int a1)
     if (o != 0) {
         o->vt[7].fn((char*)o + o->vt[7].delta, 0);
     }
-    func_0039E4C0(self, a1);
+    cUIState_onGainFocus(self, a1);
 }
 #endif
 
@@ -283,7 +283,7 @@ INCLUDE_ASM("fe/festatestore", func_00184C60);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void* func_001A0548(void* self, int idx);
-extern "C" void func_00311A50(void* anim);
+extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 extern "C" void func_0039E510(void* self);
 extern void* D_004A28A8;
@@ -348,7 +348,7 @@ extern "C" void func_00184C60(char* self)
             *(int*)(rider + 0xCCC) = 1;
             void* anim = *(void**)(rider + 0xC);
             if (anim != 0) {
-                func_00311A50(anim);
+                cRiderAnimBase_reset(anim);
                 cRiderAnimBase_play(anim, 0x1B4, 0, -1.0f);
             }
             sQuat_184C60 pos;
@@ -525,15 +525,15 @@ struct sTrick_185268;
 extern "C" sTrick_185268* func_0014FF90(void* iface, int rider, int a, int* out);
 extern "C" int func_0014FFB8(void* iface, int rider, int a, int b);
 extern "C" int func_00150048(void* iface, int rider, int a, int b);
-extern "C" int func_00150928(void* iface, int a1, int charID);
+extern "C" int cBEEconInterface_getMoney(void* iface, int a1, int charID);
 extern "C" void func_00183B08(void* self);
 extern "C" void func_00183C08(void* self);
 extern "C" void func_00184520(void* self);
 extern "C" void func_00184780(void* self, int on);
 extern "C" void* func_001A0548(void* self, int idx);
 extern "C" void* func_001CABA8(void* mem, void* owner, void* state, int a3);
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern void* D_004A28A8;
 extern signed char D_00535C11[];
 extern char D_004A14A8[];
@@ -610,7 +610,7 @@ static inline void Back_185268(char* self)
     sVE_185268* vt = *(sVE_185268**)(mgr + 4);
     void* r = ((void* (*)(void*, void*, int))vt[5].fn)(mgr + vt[5].delta, self, 0);
     if (r != 0)
-        func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+        cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
 }
 
 extern "C" void func_00185268(char* self, char* item, int msg)
@@ -650,14 +650,14 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                         sVE_185268* vt = *(sVE_185268**)(player + 0xC);
                         ((void (*)(void*))vt[2].fn)(player + vt[2].delta);
                     }
-                    int points = func_00150928(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)(self + 0x44), charID);
+                    int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)(self + 0x44), charID);
                     int n;
                     sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
                     int trick = func_00116938(tbl[bi].id);
                     if (points >= tbl[bi].cost) {
                         void* popup = func_001CABA8(cMemMan_alloc(0x70, D_0045DAD8, 0x100, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44));
                         cUIStateBuyPopup_initBuyTrick(popup, trick, tbl[bi].cost, points);
-                        func_0039F290(*(char**)(self + 0x10) + 0x18, popup);
+                        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, popup);
                     } else {
                         PlaySound_185268(self, 4);
                     }
@@ -733,7 +733,7 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                             sVE_185268* vt = *(sVE_185268**)(player + 0xC);
                             ((void (*)(void*))vt[2].fn)(player + vt[2].delta);
                         }
-                        int points = func_00150928(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)(self + 0x44), charID);
+                        int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)(self + 0x44), charID);
                         int n;
                         sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
                         if (points >= tbl[bi].cost)

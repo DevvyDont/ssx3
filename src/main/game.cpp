@@ -567,11 +567,11 @@ extern "C" void func_0022D668(void* self, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022D6C8);
+INCLUDE_ASM("main/game", cSectionMan_eventbegin);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cBE_setState(int state);
-extern "C" void func_0012B180(void* p);
+extern "C" void cAI_resetRidersStatTotals(void* p);
 extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode);
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event);
 extern "C" void cGameModeMan_initGameMode(void* self, unsigned int type);
@@ -590,7 +590,7 @@ static inline bool Is_22D6C8(int m, int v)
     return m == v;
 }
 
-extern "C" void func_0022D6C8(char* self, int mode)
+extern "C" void cSectionMan_eventbegin(char* self, int mode)
 {
     char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
     int skip = D_00535BC8[0x49] != 0 || !Is_22D6C8(D_00535BC8[0x48], 4) || (unsigned int)(*(int*)(self + 0x1BC) - 14) < 3 || mode == 1;
@@ -601,7 +601,7 @@ extern "C" void func_0022D6C8(char* self, int mode)
     if (*(int*)(*(char**)((char*)D_004A28A8 + 0x84) + 0x214) != 4) {
         return;
     }
-    func_0012B180(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
+    cAI_resetRidersStatTotals(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC));
     char* g = (char*)D_004A28A8;
     *(int*)(*(char**)(*(char**)(g + 0x84) + 0xC) + 0xC) = 0;
     if ((unsigned int)(*(int*)(*(char**)(*(char**)(g + 0x84) + 0x78) + 0x1BC) - 14) < 3) {
@@ -642,7 +642,7 @@ extern "C" void func_0022D6C8(char* self, int mode)
 #endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022D8D8);
+INCLUDE_ASM("main/game", cSectionMan_update);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 struct cWorldView;
@@ -653,14 +653,14 @@ int cWorldView_isSectionLoaded(cWorldView* view, int section);
 extern "C" void* func_00144D38(void* iface, int i);
 extern "C" int func_00144D50(void* iface, int i);
 extern "C" void func_0022DE58(void* self, int v);
-extern "C" void func_0022DE98(void* self);
+extern "C" void cSectionMan_skySwap(void* self);
 extern "C" void func_0022DF50(void* self);
 void* func_0022DFD0(void* self);
 extern "C" void func_0022DFF0(void* self);
-extern "C" int* func_0022E348(void* self, int* node);
+extern "C" int* cSectionMan_getNextActiveEvent(void* self, int* node);
 extern "C" void func_0022E360(void* self, int* prev, int* node);
 extern "C" void func_00230338(void* game, int section);
-extern "C" void func_00230360(void* game, int section);
+extern "C" void cGame_sectionUnloading(void* game, int section);
 extern "C" void func_003A7058(void* p, int v);
 extern "C" int func_003A9890(cWorldView* view, int section);
 extern "C" int func_003A98C8(cWorldView* view, int section, float f);
@@ -678,13 +678,13 @@ static inline cWorldView* gameWorldView_22D8D8(void* self)
     return (cWorldView*)(*(char**)*(char**)(*(char**)((char*)self + 0x1B0) + 0x10) + 0x10);
 }
 
-extern "C" void func_0022D8D8(void* self)
+extern "C" void cSectionMan_update(void* self)
 {
     char buf[0x100];
     if (*(int*)((char*)self + 0x1A8) != 0) {
-        func_0022DE98(self);
+        cSectionMan_skySwap(self);
     }
-    int* node = func_0022E348(self, 0);
+    int* node = cSectionMan_getNextActiveEvent(self, 0);
     int* prev = 0;
     if (node == 0 && *(int*)((char*)self + 0x1B4) == 0) {
         return;
@@ -709,7 +709,7 @@ extern "C" void func_0022D8D8(void* self)
         case 5:
             if (func_003A9958(gameWorldView_22D8D8(self), section)) {
                 D_00442168[idx].field_0x8 = 7;
-                func_00230360(*(void**)((char*)self + 0x1B0), section);
+                cGame_sectionUnloading(*(void**)((char*)self + 0x1B0), section);
             }
             busy = 1;
             break;
@@ -749,7 +749,7 @@ extern "C" void func_0022D8D8(void* self)
                 func_0022DE58(self, idx);
             }
             if (*(int*)((char*)self + 0x1A8) != 0) {
-                func_0022DE98(self);
+                cSectionMan_skySwap(self);
             }
             remove = 1;
             break;
@@ -762,12 +762,12 @@ extern "C" void func_0022D8D8(void* self)
             node = prev;
         }
         prev = node;
-        node = func_0022E348(self, prev);
+        node = cSectionMan_getNextActiveEvent(self, prev);
     }
     if (!busy && pending) {
-        int* n = func_0022E348(self, 0);
+        int* n = cSectionMan_getNextActiveEvent(self, 0);
         char* fmt = cWorldView_getNumSections_u(gameWorldView_22D8D8(self)) >= 2 ? D_0047B470 : D_0047B480;
-        for (; n != 0; n = func_0022E348(self, n)) {
+        for (; n != 0; n = cSectionMan_getNextActiveEvent(self, n)) {
             int idx = *n;
             int section = D_00442168[idx].field_0x4;
             sprintf(buf, D_004A2A18, fmt, func_00144D38(iface, idx));
@@ -851,13 +851,13 @@ extern "C" void func_0022DE58(void* self, int v)
 #endif
 
 //100%
-INCLUDE_ASM("main/game", func_0022DE98);
+INCLUDE_ASM("main/game", cSectionMan_skySwap);
 #ifdef SKIP_ASM
 extern "C" void func_0022D598(void* self, int id);
 void func_00353D98(void* self);
 extern "C" void func_00353CF0(void* self, int id);
 
-extern "C" void func_0022DE98(void* self)
+extern "C" void cSectionMan_skySwap(void* self)
 {
     if (*(int*)((char*)self + 0x1A8) == 0) {
         return;
@@ -936,14 +936,14 @@ public:
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void* iface);
+extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cSectionMan_setSky(void* self, int sky);
 extern "C" void func_00231250(void* gm, int state, int a, int b);
 extern void* D_004A28A8;
 
 extern "C" void func_0022DFF0(void* self)
 {
-    cSectionMan_setSky(self, *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0)));
+    cSectionMan_setSky(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
     if (*(int*)((char*)self + 0x1CC) != 0) {
         *(int*)((char*)self + 0x1CC) = 0;
         (*(cRace22DFF0**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC))->v05(3);

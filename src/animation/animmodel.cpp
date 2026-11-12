@@ -8,7 +8,7 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_addModelPartLOD);
 // as operator new[] so the new-expressions below compute their destination before the call.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00489C80[];
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
 extern "C" void cAnimModel_addModelPartLOD(cAnimModel* self, int lod, char* part, int index)
 {
@@ -23,7 +23,7 @@ extern "C" void cAnimModel_addModelPartLOD(cAnimModel* self, int lod, char* part
     }
     for (int k = 0; k < 4; k++) {
         self->parts[self->numParts].lods[k].refs = new (D_00489C80, 0, 0) sAnimModelLodRef[self->numLodRefs];
-        func_003E6448(self->parts[self->numParts].lods[k].refs, 0, self->numLodRefs << 4);
+        MEM_fill(self->parts[self->numParts].lods[k].refs, 0, self->numLodRefs << 4);
     }
     self->parts[self->numParts].id = *(signed char*)(part + 0x52);
     self->parts[self->numParts].lods[lod].used = 1;
@@ -932,7 +932,7 @@ extern "C" void func_00310EE0(cAnimModel* self, cAmStream* s)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310F18);
+INCLUDE_ASM("animation/animmodel", gGenCacheBucket);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi is the game's tagged allocator (size, tag, flags, d); bound by asm label
 // as operator new[] so the new-expressions below compute their destination before the call.
@@ -957,7 +957,7 @@ struct sAnimNode_310F18
 extern sAnimNode_310F18* D_004FE7A0_310F18[] __asm__("D_004FE7A0");
 extern sAnimNode_310F18* D_004FE860_310F18[] __asm__("D_004FE860");
 
-extern "C" sAnimNode_310F18* func_00310F18(int bank, int n)
+extern "C" sAnimNode_310F18* gGenCacheBucket(int bank, int n)
 {
     D_004FE7A0_310F18[bank] = new (D_00489D50, 0x20000000, 0) sAnimNode_310F18[20];
     for (int i = 0; i < 20; i++)
@@ -974,19 +974,19 @@ extern "C" sAnimNode_310F18* func_00310F18(int bank, int n)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00311048);
+INCLUDE_ASM("animation/animmodel", cAnimDataBase_cAnimDataBase);
 #ifdef SKIP_ASM
 extern void* D_004A3DF8;
 extern "C" void func_00416210(void* dst, int c, int n);
-// PORT: prototype mismatch. func_003110D0 is defined later in the unit as (void), but this
+// PORT: prototype mismatch. cAnimDataBase_initChanCache is defined later in the unit as (void), but this
 // caller passes the model in $4.
-void func_003110D0_1(void* self) __asm__("func_003110D0");
+void cAnimDataBase_initChanCache_1(void* self) __asm__("cAnimDataBase_initChanCache");
 
-extern "C" void* func_00311048(void* self)
+extern "C" void* cAnimDataBase_cAnimDataBase(void* self)
 {
     D_004A3DF8 = self;
     func_00416210(self, 0, 0x3FC);
-    func_003110D0_1(self);
+    cAnimDataBase_initChanCache_1(self);
     return self;
 }
 #endif
@@ -1011,12 +1011,12 @@ extern "C" void func_00311088(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_003110D0);
+INCLUDE_ASM("animation/animmodel", cAnimDataBase_initChanCache);
 #ifdef SKIP_ASM
 extern int D_004FE7A0[];
 extern int D_004FE860[];
 
-extern "C" void func_003110D0(void)
+extern "C" void cAnimDataBase_initChanCache(void)
 {
     for (int i = 0; i < 48; i++)
     {
@@ -1134,7 +1134,7 @@ extern "C" void func_003112C8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00311318);
+INCLUDE_ASM("animation/animmodel", cAdfDataSource_getFramePartData);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -1170,12 +1170,12 @@ struct sModelAM {
 };
 extern sNodeAM* D_pool_AM[] __asm__("D_004FE7A0");
 extern sNodeAM* D_head_AM[] __asm__("D_004FE860");
-sNodeAM* func_00310F18_AM(int kind, long n) __asm__("func_00310F18");
-extern "C" void func_003130A8(void* dst, void* src, int len);
+sNodeAM* gGenCacheBucket_AM(int kind, long n) __asm__("gGenCacheBucket");
+extern "C" void dcmpInitFrameAccessor(void* dst, void* src, int len);
 extern "C" void func_00312C20(void* node, float t, void* a, long b, void* c);
 
-void func_00311318_AM(sModelAM* self, void* p2, unsigned int* p3, int p4, void* p5, long p6) __asm__("func_00311318");
-void func_00311318_AM(sModelAM* self, void* p2, unsigned int* p3, int p4, void* p5, long p6)
+void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* p2, unsigned int* p3, int p4, void* p5, long p6) __asm__("cAdfDataSource_getFramePartData");
+void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* p2, unsigned int* p3, int p4, void* p5, long p6)
 {
     float t = *(float*)(p3 + 1) * 30.0f;
     sSeqAM* seq = (sSeqAM*)(self->seqs + (p3[0] >> 8) * 0x14);
@@ -1219,7 +1219,7 @@ void func_00311318_AM(sModelAM* self, void* p2, unsigned int* p3, int p4, void* 
         int slot;
         node = D_head_AM[kind];
         if (node == 0) {
-            node = func_00310F18_AM(kind, v);
+            node = gGenCacheBucket_AM(kind, v);
         } else if (node->owner != 0) {
             slot = node->owner->slot;
             node->owner->slot = 0xFF;
@@ -1231,7 +1231,7 @@ have_slot:
         node->owner = ent;
         D_head_AM[kind] = node->next;
         char* np = (char*)node + 4;
-        func_003130A8(np, self->data + ent->off, ent->len);
+        dcmpInitFrameAccessor(np, self->data + ent->off, ent->len);
         func_00312C20(np, t, p5, p6, p2);
     }
 }

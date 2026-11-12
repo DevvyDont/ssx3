@@ -5,9 +5,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Load);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-// PORT: func_0027B268 is defined with six params; this caller passes a seventh (0) in $t2.
-extern "C" void func_0027B268_7(void* self, int i, const char* name, int flags, int key, int* buf, int x)
-    __asm__("func_0027B268");
+// PORT: cSSXScriptEngine_SyncLoadScriptBank is defined with six params; this caller passes a seventh (0) in $t2.
+extern "C" void cSSXScriptEngine_SyncLoadScriptBank_7(void* self, int i, const char* name, int flags, int key, int* buf, int x)
+    __asm__("cSSXScriptEngine_SyncLoadScriptBank");
 extern "C" void func_00283298(void* rig);
 extern const char* D_004A349C;
 extern char D_00481BD8[];
@@ -63,7 +63,7 @@ extern "C" void cSSXScriptEngine_Load(sSse278358* self)
     }
     self->links[9].next = 0;
     self->freeLink = self->links;
-    func_0027B268_7(self, 0, D_004A349C, 0, -1, 0, 0);
+    cSSXScriptEngine_SyncLoadScriptBank_7(self, 0, D_004A349C, 0, -1, 0, 0);
     for (int i = 0; i < 2; i++)
         func_00283298(self->rigs[i]);
     func_00283298(self->rigC);
@@ -85,18 +85,18 @@ extern "C" void cSSXScriptEngine_Load(sSse278358* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00278590);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
-extern "C" void func_00275B08(void* self);
+extern "C" void cDataManager_DetachAll(void* self);
 extern "C" void func_00275D90(int* self, int flags);
-extern "C" void func_00278A98(void* self);
-extern "C" void func_00278CD8(void* self);
-extern "C" void func_0027B410(void* self, int idx);
-extern "C" void func_0027BF90(void* self);
-extern "C" void func_002823F0(void* self);
-extern "C" void func_002832D8(void* self);
-extern "C" void func_00283818(void* p);
+extern "C" void cSSXScriptEngine_ForceEndScriptsAll(void* self);
+extern "C" void cSSXScriptEngine_PurgeTrack(void* self);
+extern "C" void cSSXScriptEngine_PurgeScriptBank(void* self, int idx);
+extern "C" void cSSXScriptEngine_ClearNISPlayListState(void* self);
+extern "C" void cBXScriptEngine_ReleaseRequestAll(void* self);
+extern "C" void cScriptObject_DeInitScriptObject(void* self);
+extern "C" void cVidEngine_ResetVideoEngine(void* p);
 extern "C" void func_002EF368(int);
 
 struct sSseObj8590 {
@@ -119,21 +119,21 @@ struct sSseEngine8590 {
     char rigD[0x1C];                // 0x938
 };
 
-extern "C" void func_00278590(sSseEngine8590* self)
+extern "C" void cSSXScriptEngine_Purge(sSseEngine8590* self)
 {
-    func_00278A98(self);
-    func_002823F0(self);
+    cSSXScriptEngine_ForceEndScriptsAll(self);
+    cBXScriptEngine_ReleaseRequestAll(self);
     for (int i = 0; i < 2; i++) {
-        func_002832D8(self->rigs[i]);
+        cScriptObject_DeInitScriptObject(self->rigs[i]);
     }
-    func_002832D8(self->rigC);
-    func_002832D8(self->rigD);
-    func_00278CD8(self);
+    cScriptObject_DeInitScriptObject(self->rigC);
+    cScriptObject_DeInitScriptObject(self->rigD);
+    cSSXScriptEngine_PurgeTrack(self);
     for (int i = 0; i < 10; i++) {
-        func_0027B410(self, i);
+        cSSXScriptEngine_PurgeScriptBank(self, i);
     }
-    func_00275B08(self->anims);
-    func_00283818(self->snd);
+    cDataManager_DetachAll(self->anims);
+    cVidEngine_ResetVideoEngine(self->snd);
     if (self->objsA != 0) {
         sSseObj8590* q = self->objsA + ((int*)self->objsA)[-4];
         while (self->objsA != q) {
@@ -154,7 +154,7 @@ extern "C" void func_00278590(sSseEngine8590* self)
         cMemMan_free((char*)self->objsB - 0x10);
     }
     func_002EF368(0);
-    func_0027BF90(self);
+    cSSXScriptEngine_ClearNISPlayListState(self);
     self->objsA = 0;
     self->buf = 0;
     self->field_0x548 = 0;
@@ -181,7 +181,7 @@ void func_00278718(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00278720);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char* D_004A28A8;
@@ -198,12 +198,12 @@ extern "C" int func_00277060(sSsxScriptRider* r);
 extern "C" int func_00276B98_i(void* r) __asm__("func_00276B98");
 extern "C" void func_00276F48(void* r);
 extern "C" int func_00277298(void* r);
-extern "C" void func_0027BF90(void* self);
-void* func_00320C48(void* self, int a1);
+extern "C" void cSSXScriptEngine_ClearNISPlayListState(void* self);
+void* cInput_getState(void* self, int a1);
 int GetHashValue32(char*);
-extern "C" void* func_0039F9D8(void* list, int hash);
+extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern "C" void func_001F36C0(void*, int);
-extern "C" void func_001F36D8(void*, int);
+extern "C" void cBXLoadIndicator_Hide(void*, int);
 
 struct sSseObj8720 {
     char data[0xCC];
@@ -229,7 +229,7 @@ struct sSse8720 {
     char fx[0x10];                  // 0x92C
 };
 
-extern "C" void func_00278720(sSse8720* self)
+extern "C" void cSSXScriptEngine_Update(sSse8720* self)
 {
     for (int i = 0; i < 2; i++)
         func_00276CC8(&self->objsA[i]);
@@ -250,7 +250,7 @@ extern "C" void func_00278720(sSse8720* self)
             for (int j = 0; j < n; j++)
             {
                 void* obj = *(void**)(lvl->riders[j] + 0xDF0);
-                if (**(int**)obj != 0 && self->delay == 0 && func_00320C48(obj, 0x6F))
+                if (**(int**)obj != 0 && self->delay == 0 && cInput_getState(obj, 0x6F))
                 {
                     func_00276F48(r);
                     goto done;
@@ -259,13 +259,13 @@ extern "C" void func_00278720(sSse8720* self)
         }
     done:
         if (func_00276B98_i(r) != 3)
-            func_0027BF90(self);
-        if (func_0039F9D8(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0x48) + 0x18, GetHashValue32(D_004A34A0)))
+            cSSXScriptEngine_ClearNISPlayListState(self);
+        if (cUIStateStack_findState(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0x48) + 0x18, GetHashValue32(D_004A34A0)))
         {
             if (func_00277298(r))
                 func_001F36C0(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x94), 1);
             else
-                func_001F36D8(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x94), 1);
+                cBXLoadIndicator_Hide(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x94), 1);
         }
     }
     if (self->delay > 0)
@@ -277,9 +277,9 @@ extern "C" void func_00278720(sSse8720* self)
 INCLUDE_ASM("scripter/ssxscriptengine", func_00278918);
 #ifdef SKIP_ASM
 struct sScrRelocOwner6B0;
-extern "C" int func_003DF980(void*);
+extern "C" int ASYNCFILE_getstatus(void*);
 extern "C" void func_0027B6B0(sScrRelocOwner6B0* self, void* file);
-extern "C" void func_0027B5D8(void* self, void* file);
+extern "C" void cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(void* self, void* file);
 
 struct sScrSlot8918 {
     void* file;
@@ -290,14 +290,14 @@ extern "C" void func_00278918(void* self)
 {
     if (*(int*)((char*)self + 0x620) == 0) return;
     void* f = *(void**)((char*)self + 0x538);
-    if (f != 0 && func_003DF980(f) != 0) {
+    if (f != 0 && ASYNCFILE_getstatus(f) != 0) {
         func_0027B6B0((sScrRelocOwner6B0*)self, *(void**)((char*)self + 0x538));
     }
     sScrSlot8918* slots = (sScrSlot8918*)((char*)self + 0x630);
     for (int i = 0; i < 10; i++) {
         void* p = slots[i].file;
-        if (p != 0 && func_003DF980(p) != 0) {
-            func_0027B5D8(self, p);
+        if (p != 0 && ASYNCFILE_getstatus(p) != 0) {
+            cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(self, p);
         }
     }
 }
@@ -315,15 +315,15 @@ void* func_002789C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002789E0);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Restart);
 #ifdef SKIP_ASM
-extern "C" void func_002790F8(void* self);
-extern "C" void func_00279488(void* self);
+extern "C" void cSSXScriptEngine_ResetNISListAll(void* self);
+extern "C" void cSSXScriptEngine_ResetIdleListAll(void* self);
 
-extern "C" void func_002789E0(void* self)
+extern "C" void cSSXScriptEngine_Restart(void* self)
 {
-    func_002790F8(self);
-    func_00279488(self);
+    cSSXScriptEngine_ResetNISListAll(self);
+    cSSXScriptEngine_ResetIdleListAll(self);
 }
 #endif
 
@@ -352,17 +352,17 @@ extern "C" void func_00278A58(void* self, int key)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00278A98);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ForceEndScriptsAll);
 #ifdef SKIP_ASM
-extern "C" void func_002790F8(void* self);
-extern "C" void func_00279488(void* self);
-extern "C" void func_00282390(void* self);
+extern "C" void cSSXScriptEngine_ResetNISListAll(void* self);
+extern "C" void cSSXScriptEngine_ResetIdleListAll(void* self);
+extern "C" void cBXScriptEngine_StopScriptAll(void* self);
 
-extern "C" void func_00278A98(void* self)
+extern "C" void cSSXScriptEngine_ForceEndScriptsAll(void* self)
 {
-    func_002790F8(self);
-    func_00279488(self);
-    func_00282390(self);
+    cSSXScriptEngine_ResetNISListAll(self);
+    cSSXScriptEngine_ResetIdleListAll(self);
+    cBXScriptEngine_StopScriptAll(self);
 }
 #endif
 
@@ -405,13 +405,13 @@ extern "C" int func_00278AD0(void* self, int key)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00278B98);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AsyncLoadTrack);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* func_00144BC0(void* iface);
+extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 
 // Minimal view of cBXString; the members are bound to the game's (unmangled) symbols.
 // PORT: asm labels are not accepted on destructors, so the dtor forwards to the out-of-line one (in-charge flag 2).
@@ -435,9 +435,9 @@ extern const char D_00481C38[];
 extern const char D_004A34C0[];
 
 // Loads the current profile's script file (counting it if found), then queues the profile's second script.
-extern "C" void func_00278B98(char* self)
+extern "C" void cSSXScriptEngine_AsyncLoadTrack(char* self)
 {
-    sBXStr_8B98 name((char*)func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x34);
+    sBXStr_8B98 name((char*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x34);
     sBXStr_8B98 path = D_00481C08 + name + D_004A34B8;
     void* h = func_003DF690_8B98(path.p, 0);
     *(void**)(self + 0x538) = h;
@@ -450,23 +450,23 @@ extern "C" void func_00278B98(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00278CD8);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_PurgeTrack);
 #ifdef SKIP_ASM
-extern "C" void func_003DFAF0(void* file);
+extern "C" void ASYNCFILE_cancel(void* file);
 extern "C" int ASYNCFILE_release(void* file, int a, int b);
-extern "C" void* func_002523A8(void* self);
-extern "C" void func_0027B410(void* self, int idx);
+extern "C" void* MEM_free(void* self);
+extern "C" void cSSXScriptEngine_PurgeScriptBank(void* self, int idx);
 
-extern "C" void func_00278CD8(void* self)
+extern "C" void cSSXScriptEngine_PurgeTrack(void* self)
 {
     if (*(void**)((char*)self + 0x538) != 0) {
-        func_003DFAF0(*(void**)((char*)self + 0x538));
+        ASYNCFILE_cancel(*(void**)((char*)self + 0x538));
         ASYNCFILE_release(*(void**)((char*)self + 0x538), 0, 0);
         *(int*)((char*)self + 0x620) -= 1;
     }
-    func_0027B410(self, 1);
+    cSSXScriptEngine_PurgeScriptBank(self, 1);
     if (*(void**)((char*)self + 0x53C) != 0) {
-        func_002523A8(*(void**)((char*)self + 0x53C));
+        MEM_free(*(void**)((char*)self + 0x53C));
     }
     *(void**)((char*)self + 0x538) = 0;
     *(void**)((char*)self + 0x53C) = 0;
@@ -659,30 +659,30 @@ extern "C" void func_00279070(void* self, int i, int a, int b)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002790A0);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ResetNISList);
 #ifdef SKIP_ASM
 extern "C" void func_00276868(void* self, int a1);
-extern "C" void func_0027BF90(void* self);
+extern "C" void cSSXScriptEngine_ClearNISPlayListState(void* self);
 
-extern "C" void func_002790A0(void* self, int i)
+extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i)
 {
     func_00276868(*(char**)((char*)self + 0x54C) + i * 0xCC, 1);
     if (*(int*)((char*)self + 0x550) == i) {
-        func_0027BF90(self);
+        cSSXScriptEngine_ClearNISPlayListState(self);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/ssxscriptengine", func_002790F8);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ResetNISListAll);
 #ifdef SKIP_ASM
-extern "C" void func_002790A0(void*, int);
+extern "C" void cSSXScriptEngine_ResetNISList(void*, int);
 
-extern "C" void func_002790F8(void* self)
+extern "C" void cSSXScriptEngine_ResetNISListAll(void* self)
 {
     int i;
     for (i = 0; i < 2; i++) {
-        func_002790A0(self, i);
+        cSSXScriptEngine_ResetNISList(self, i);
     }
 }
 #endif
@@ -766,17 +766,17 @@ extern "C" void func_00279270(void *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00279298);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsActiveNISInTransition);
 #ifdef SKIP_ASM
-int func_002772B8(void*);
+int tNISList_IsInTransition(void*);
 
-extern "C" int func_00279298(void* self)
+extern "C" int cSSXScriptEngine_IsActiveNISInTransition(void* self)
 {
     int i = *(int*)((char*)self + 0x550);
     if (i == 2) {
         return 0;
     }
-    return func_002772B8(*(char**)((char*)self + 0x54C) + i * 0xCC);
+    return tNISList_IsInTransition(*(char**)((char*)self + 0x54C) + i * 0xCC);
 }
 #endif
 
@@ -863,11 +863,11 @@ extern "C" void func_00279458(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00279488);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ResetIdleListAll);
 #ifdef SKIP_ASM
 extern "C" void func_00276868(void* self, int a1);
 
-extern "C" void func_00279488(void* self)
+extern "C" void cSSXScriptEngine_ResetIdleListAll(void* self)
 {
     for (int i = 0; i < 2; i++) {
         func_00276868(&(*(sSsxScriptRider**)((char*)self + 0x624))[i], 1);
@@ -997,7 +997,7 @@ extern "C" int func_002797A0(void* self, int category)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002797C8);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnDataUnavailable);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 struct sScriptEng0628;
@@ -1006,7 +1006,7 @@ extern "C" void func_0027B370(void* self, int slot, const char* name, int flags,
 extern const char D_00481C68[];
 extern const char D_00481C78[];
 
-extern "C" int func_002797C8(void* self, int key)
+extern "C" int cSSXScriptEngine_OnDataUnavailable(void* self, int key)
 {
     char buf[128];
     sprintf(buf, D_00481C68, D_00481C78, key);
@@ -1016,45 +1016,45 @@ extern "C" int func_002797C8(void* self, int key)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00279840);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnPendingDataCancelled);
 #ifdef SKIP_ASM
-extern "C" int func_0027B578(void* self, int a1, int a2);
+extern "C" int cSSXScriptEngine_GetBankNumberByDataIdentifier(void* self, int a1, int a2);
 extern "C" void func_0027B4B8(void* self, int idx, int a);
 
-extern "C" void func_00279840(void* self, int a1)
+extern "C" void cSSXScriptEngine_OnPendingDataCancelled(void* self, int a1)
 {
-    func_0027B4B8(self, func_0027B578(self, a1, 2), a1);
+    func_0027B4B8(self, cSSXScriptEngine_GetBankNumberByDataIdentifier(self, a1, 2), a1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00279888);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnScriptDataReleased);
 #ifdef SKIP_ASM
-extern "C" int func_0027B578(void* self, int a1, int a2);
-extern "C" void func_0027B410(void* self, int idx);
+extern "C" int cSSXScriptEngine_GetBankNumberByDataIdentifier(void* self, int a1, int a2);
+extern "C" void cSSXScriptEngine_PurgeScriptBank(void* self, int idx);
 
-extern "C" void func_00279888(void* self, int a1)
+extern "C" void cSSXScriptEngine_OnScriptDataReleased(void* self, int a1)
 {
-    int idx = func_0027B578(self, a1, 2);
+    int idx = cSSXScriptEngine_GetBankNumberByDataIdentifier(self, a1, 2);
     if (idx >= 0) {
-        func_0027B410(self, idx);
+        cSSXScriptEngine_PurgeScriptBank(self, idx);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002798C0);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnAttachData);
 #ifdef SKIP_ASM
 extern "C" int func_00416B18(const char* a, const char* b, int n);
 void* func_0027C078(void* self);
 extern "C" void func_00282150(void* self, void* data, int a2);
 extern "C" void cScriptAnimBankManager_LinkBank(void* mgr, int bank, void* data);
-extern "C" void func_00283580(void* mgr, int bank, void* data, int a3);
+extern "C" void cScriptSoundBankManager_LinkBank(void* mgr, int bank, void* data, int a3);
 extern char D_004A34C8[];
 extern char D_004A34D0[];
 extern char D_004A34D8[];
 
-extern "C" void func_002798C0(char* self, const char* ext, void* data, int a3, int* kind, int* bank)
+extern "C" void cSSXScriptEngine_OnAttachData(char* self, const char* ext, void* data, int a3, int* kind, int* bank)
 {
     if (func_00416B18(D_004A34C8, ext, 3) == 0) {
         char* h = (char*)func_0027C078(data);
@@ -1068,7 +1068,7 @@ extern "C" void func_002798C0(char* self, const char* ext, void* data, int a3, i
     } else if (func_00416B18(D_004A34D8, ext, 3) == 0) {
         *kind = 2;
         *bank = *(int*)(self + 0xA48);
-        func_00283580(self + 0xA38, *(int*)(self + 0xA48), data, a3);
+        cScriptSoundBankManager_LinkBank(self + 0xA38, *(int*)(self + 0xA48), data, a3);
     }
 }
 #endif
@@ -1696,7 +1696,7 @@ extern "C" int func_0027A688()
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027A6B0);
 #ifdef SKIP_ASM
 extern "C" void func_002829D0(void* self, void* a1);
-extern "C" void func_002772C0(void* self, int a1, void* obj);
+extern "C" void tNISList_OnScriptPlay(void* self, int a1, void* obj);
 int func_00282BE0(void* self, void* a1);
 
 extern "C" void func_0027A6B0(void* self, void* a1)
@@ -1704,7 +1704,7 @@ extern "C" void func_0027A6B0(void* self, void* a1)
     func_002829D0(self, a1);
     int r = *(int*)((char*)self + 0x550);
     if (r != 2) {
-        func_002772C0(*(char**)((char*)self + 0x54C) + r * 0xCC, func_00282BE0(self, a1), a1);
+        tNISList_OnScriptPlay(*(char**)((char*)self + 0x54C) + r * 0xCC, func_00282BE0(self, a1), a1);
     }
 }
 #endif
@@ -1837,13 +1837,13 @@ extern "C" bool func_0027A9F0(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027AA80);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsInTransportSequence);
 #ifdef SKIP_ASM
 // PORT: the unit defines func_00279148 as void, but it returns func_00276998's
 // int result (a tail call); bind an int-returning form to the symbol.
 int func_00279148_int(void* self, int i, int a) __asm__("func_00279148");
 
-extern "C" int func_0027AA80(void* self)
+extern "C" int cSSXScriptEngine_IsInTransportSequence(void* self)
 {
     if (*(int*)((char*)self + 0x550) != 1) {
         return 0;
@@ -1904,12 +1904,12 @@ extern "C" void func_0027AAF8(void* self, int state)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027AC60);
 #ifdef SKIP_ASM
-extern "C" int* func_00144BC0(void* iface);
+extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" int func_00146150(void* self, int index, int kind, int flag);
 extern "C" void func_00146320(void* self, int index, int kind, int flag, int value);
 extern "C" int func_001464D0(void* self, int index, int rc, int kind, int flag);
-extern "C" int func_00146E98(void* iface, int idx);
-extern "C" signed char func_0014A0B0(int index);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
+extern "C" signed char cBELibrary_getCheatCharacterID(int index);
 int cBENewPlayerInterface_getRiderCharID(void* self, int index);
 
 struct sScGame_AC60 {
@@ -2015,7 +2015,7 @@ done:
         int k = tbl.v[best];
         if (best == 0) {
             k = 9;
-            int c = func_0014A0B0(Call_AC60(list->riders[ids[0]], 7));
+            int c = cBELibrary_getCheatCharacterID(Call_AC60(list->riders[ids[0]], 7));
             if ((unsigned)(c - 10) < 11 || c == 0x1C) {
                 k = 10;
             }
@@ -2029,11 +2029,11 @@ done:
         return;
     }
     void* players = cBE_getInterface_Fv(cBE_getBE(), 1);
-    sScBlk_AC60 blk = *(sScBlk_AC60*)func_00144BC0(econ);
+    sScBlk_AC60 blk = *(sScBlk_AC60*)cBENewRaceInterface_getLocation(econ);
     int first = mode == 0;
-    int idx = func_00146E98(players, 0);
+    int idx = cBENewPlayerInterface_getHumanRider(players, 0);
     int r = func_00146150(players, idx, blk.kind, first);
-    if ((unsigned)(func_0014A0B0(idx) - 10) < 11) {
+    if ((unsigned)(cBELibrary_getCheatCharacterID(idx) - 10) < 11) {
         return;
     }
     int rc = cBENewPlayerInterface_getRiderCharID(players, idx);
@@ -2139,12 +2139,12 @@ extern "C" int* cSSXScriptEngine_GetScriptFromCategory(void* p, int cat)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027B268);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_SyncLoadScriptBank);
 #ifdef SKIP_ASM
-void func_00277F08(void* slot);
+void tSSXScriptBankInfo_Clear(void* slot);
 extern "C" int func_00275920(void* self, const char* name, int* data, int size);
-extern "C" int func_00317F98(const char* name);
-extern "C" int* func_003E1908(const char* name, int flags);
+extern "C" int BXFILE_size(const char* name);
+extern "C" int* FILE_loadz(const char* name, int flags);
 extern "C" int func_003E1BB8(const char* name, int* buf, int a2);
 
 struct sSeSlotB268 {
@@ -2154,7 +2154,7 @@ struct sSeSlotB268 {
     int temp;       // 0xC
 };
 
-extern "C" void func_0027B268(char* self, int i, const char* name, int flags, int key, int* buf)
+extern "C" void cSSXScriptEngine_SyncLoadScriptBank(char* self, int i, const char* name, int flags, int key, int* buf)
 {
     sSeSlotB268* s = (sSeSlotB268*)(self + (i * 0x10 + 0x628));
     if (s->handle != 0) {
@@ -2169,15 +2169,15 @@ extern "C" void func_0027B268(char* self, int i, const char* name, int flags, in
             data = buf;
         }
     } else {
-        data = func_003E1908(name, flags);
+        data = FILE_loadz(name, flags);
         if (data == 0) {
-            func_00277F08(s);
+            tSSXScriptBankInfo_Clear(s);
             return;
         }
-        size = func_00317F98(name);
+        size = BXFILE_size(name);
     }
     if (data == 0) {
-        func_00277F08(s);
+        tSSXScriptBankInfo_Clear(s);
         return;
     }
     *(int*)(self + 0xA48) = i;
@@ -2195,7 +2195,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027B370);
 #ifdef SKIP_ASM
 extern "C" void* func_003DF748(const char* name, int a, int b);
 extern "C" void* func_003DF690(const char* name, int flags, int b);
-void func_00277F08(void* slot);
+void tSSXScriptBankInfo_Clear(void* slot);
 
 extern "C" void func_0027B370(void* self, int i, const char* name, int flags, int key, int a, int b)
 {
@@ -2212,53 +2212,53 @@ extern "C" void func_0027B370(void* self, int i, const char* name, int flags, in
         *(int*)((char*)self + 0x620) += 1;
     }
     if (*(void**)(slot + 0x8) == 0) {
-        func_00277F08(slot);
+        tSSXScriptBankInfo_Clear(slot);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027B410);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_PurgeScriptBank);
 #ifdef SKIP_ASM
-extern "C" void func_003DFAF0(void* file);
+extern "C" void ASYNCFILE_cancel(void* file);
 extern "C" int ASYNCFILE_release(void* file, int a, int b);
-void func_00277F08(void* slot);
+void tSSXScriptBankInfo_Clear(void* slot);
 void cMemMan_free(void*);
-extern "C" void* func_00275A20(void* self, int key);
+extern "C" void* cDataManager_DetachData(void* self, int key);
 
-extern "C" void func_0027B410(void* self, int i)
+extern "C" void cSSXScriptEngine_PurgeScriptBank(void* self, int i)
 {
     char* slot = (char*)self + (i * 16 + 0x628);
     int key = *(int*)slot;
     if (key != 0) {
-        void* p = func_00275A20((char*)self + 0x51C, key);
+        void* p = cDataManager_DetachData((char*)self + 0x51C, key);
         if (*(int*)(slot + 0xC) != 0 && p != 0) {
             cMemMan_free(p);
         }
     } else if (*(void**)(slot + 0x8) != 0) {
-        func_003DFAF0(*(void**)(slot + 0x8));
+        ASYNCFILE_cancel(*(void**)(slot + 0x8));
         ASYNCFILE_release(*(void**)(slot + 0x8), 0, 0);
         *(int*)((char*)self + 0x620) -= 1;
     }
-    func_00277F08(slot);
+    tSSXScriptBankInfo_Clear(slot);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027B4B8);
 #ifdef SKIP_ASM
-extern "C" void func_003DFAF0(void* file);
+extern "C" void ASYNCFILE_cancel(void* file);
 extern "C" int ASYNCFILE_release(void* file, int a, int b);
-void func_00277F08(void* slot);
+void tSSXScriptBankInfo_Clear(void* slot);
 
 extern "C" void func_0027B4B8(void* self, int i, int a)
 {
     char* slot = (char*)self + (i * 16 + 0x628);
     if (*(void**)(slot + 0x8) != 0) {
-        func_003DFAF0(*(void**)(slot + 0x8));
+        ASYNCFILE_cancel(*(void**)(slot + 0x8));
         ASYNCFILE_release(*(void**)(slot + 0x8), 0, 0);
         *(int*)((char*)self + 0x620) -= 1;
-        func_00277F08(slot);
+        tSSXScriptBankInfo_Clear(slot);
     }
 }
 #endif
@@ -2298,7 +2298,7 @@ extern "C" int func_0027B528(sScriptEng0628* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027B578);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetBankNumberByDataIdentifier);
 #ifdef SKIP_ASM
 static inline int IsFree27B578(int* key)
 {
@@ -2306,7 +2306,7 @@ static inline int IsFree27B578(int* key)
 }
 
 // Finds the next used entry (from `start`) whose key matches; returns its index or -1.
-extern "C" int func_0027B578(void* self, int key, int start)
+extern "C" int cSSXScriptEngine_GetBankNumberByDataIdentifier(void* self, int key, int start)
 {
     for (int i = start; i < 10; i++) {
         int* k = (int*)((char*)self + (i * 16 + 0x62C));
@@ -2319,17 +2319,17 @@ extern "C" int func_0027B578(void* self, int key, int start)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027B5D8);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete);
 #ifdef SKIP_ASM
 // PORT: the unit declares ASYNCFILE_release(void*, int, int); this caller passes
 // out-pointers, so bind a pointer-typed alias by asm label.
 extern "C" int ASYNCFILE_release_out(void* file, int** data, int* size) __asm__("ASYNCFILE_release");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-void func_00277F08(void* slot);
+void tSSXScriptBankInfo_Clear(void* slot);
 extern "C" int func_00275920(void* self, const char* name, int* data, int size);
 extern const char D_00481EB0[];
 
-extern "C" void func_0027B5D8(void* self, void* file)
+extern "C" void cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(void* self, void* file)
 {
     char buf[128];
     struct {
@@ -2342,7 +2342,7 @@ extern "C" void func_0027B5D8(void* self, void* file)
             ASYNCFILE_release_out(file, &r.data, &r.size);
             *(int*)((char*)self + 0x620) -= 1;
             if (r.size == 0) {
-                func_00277F08(s);
+                tSSXScriptBankInfo_Clear(s);
                 return;
             }
             sprintf(buf, D_00481EB0, s->b);
@@ -2546,7 +2546,7 @@ extern "C" void func_0027B948(void* self, char* obj, sVec4_27B948* pos, int* rol
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027BB08);
 #ifdef SKIP_ASM
 extern "C" float func_0031C128(float x);
-extern "C" int* func_00144BC0(void* iface);
+extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern int D_00482660[];
 extern char** D_004A47B8;
 
@@ -2654,7 +2654,7 @@ extern "C" void func_0027BB08(char* self, int slot, sVec_27BB08* pos, int* flag,
                               const sVec_27BB08* off)
 {
     if (cat == 0x32) {
-        int k = *func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0));
+        int k = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
         cat = D_00482660[k];
     }
     int* tbl = *(int**)(self + (cat << 2) + 0x558);
@@ -2807,13 +2807,13 @@ extern "C" int func_0027BF50(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027BF90);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ClearNISPlayListState);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void func_0028E888(void*);
 extern "C" void func_002EF368(int);
 
-extern "C" void func_0027BF90(void* self)
+extern "C" void cSSXScriptEngine_ClearNISPlayListState(void* self)
 {
     if (*(int*)((char*)self + 0x550) != 2) {
         *(int*)((char*)self + 0x550) = 2;
@@ -2825,17 +2825,17 @@ extern "C" void func_0027BF90(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027BFD0);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_cScriptObjGS);
 #ifdef SKIP_ASM
-void func_00282F60(void*);
-void* func_00283200(void*, int);
+void cScriptEntity_cScriptEntity(void*);
+void* cScriptObject_cScriptObject(void*, int);
 extern void* D_00482318[];
 extern void* D_004822E0[];
 
-extern "C" void* func_0027BFD0(void* self)
+extern "C" void* cScriptObjGS_cScriptObjGS(void* self)
 {
-    func_00282F60(self);
-    func_00283200((char*)self + 0xC, 4);
+    cScriptEntity_cScriptEntity(self);
+    cScriptObject_cScriptObject((char*)self + 0xC, 4);
     *(void***)((char*)self + 0x18) = D_00482318;
     *(void***)self = D_004822E0;
     return self;
@@ -3334,7 +3334,7 @@ extern "C" void* func_0027CDD0(void* self_)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027CE58);
 #ifdef SKIP_ASM
-extern "C" void func_0027D050(void* self);
+extern "C" void cScriptDatabaseObject_RemoveObjectAll(void* self);
 void operator_delete(int*);
 extern char D_00482528[];
 extern void* D_004A34DC;
@@ -3342,7 +3342,7 @@ extern void* D_004A34DC;
 extern "C" void func_0027CE58(void* self, int flags)
 {
     *(void**)((char*)self + 0x2A8) = D_00482528;
-    func_0027D050(self);
+    cScriptDatabaseObject_RemoveObjectAll(self);
     D_004A34DC = 0;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -3429,7 +3429,7 @@ extern "C" int func_0027CF88(void* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D050);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_RemoveObjectAll);
 #ifdef SKIP_ASM
 struct sVEntry0027D050 {
     short delta;
@@ -3437,7 +3437,7 @@ struct sVEntry0027D050 {
     int (*fn)(void*, int);
 };
 
-extern "C" void func_0027D050(void* self)
+extern "C" void cScriptDatabaseObject_RemoveObjectAll(void* self)
 {
     int i;
     for (i = 0; i < 20; i++) {
@@ -3783,7 +3783,7 @@ extern "C" int func_0027D578(sScriptEng0050* self, int key, int* out, int max)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D5E8);
 #ifdef SKIP_ASM
-void* func_00283200(void*, int);
+void* cScriptObject_cScriptObject(void*, int);
 extern char D_004820B8[];
 extern char D_004FF1A0[];
 
@@ -3791,7 +3791,7 @@ extern char D_004FF1A0[];
 // the PC port needs a plain 64-byte copy.
 extern "C" void* func_0027D5E8(void* self, int a1)
 {
-    func_00283200(self, 1);
+    cScriptObject_cScriptObject(self, 1);
     *(void**)((char*)self + 0xC) = D_004820B8;
     *(int*)((char*)self + 0x20) = -1;
     *(int*)((char*)self + 0x10) = 0;
@@ -3932,7 +3932,7 @@ extern "C" void func_0027D820(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D850);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_OnStartObjectUse);
 #ifdef SKIP_ASM
 void func_00283430(void* self);
 extern "C" void func_0027D970(void* self, int a1);
@@ -3940,7 +3940,7 @@ extern "C" void cScriptCameraController_addCamera(void* ctrl, void* script);
 extern "C" void func_0015DFD8(void* self, int mode);
 extern char* D_004A28A8;
 
-extern "C" void func_0027D850(void* self)
+extern "C" void cScriptObjCamera_OnStartObjectUse(void* self)
 {
     func_00283430(self);
     if (*(void**)(D_004A28A8 + 0x84) != 0) {
@@ -4280,8 +4280,8 @@ extern "C" void func_0027D970_SE(sScrCam_SE* self, sScrCam_SE* cam)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027F968);
 #ifdef SKIP_ASM
-void func_00282F60(void*);
-void* func_00283200(void*, int);
+void cScriptEntity_cScriptEntity(void*);
+void* cScriptObject_cScriptObject(void*, int);
 extern char D_00481FD8[];
 extern char D_00482018[];
 extern char D_004FF1A0[];
@@ -4290,8 +4290,8 @@ extern char D_004FF1A0[];
 // the PC port needs a plain 64-byte copy.
 extern "C" void* func_0027F968(void* self)
 {
-    func_00282F60(self);
-    func_00283200((char*)self + 0xC, 3);
+    cScriptEntity_cScriptEntity(self);
+    cScriptObject_cScriptObject((char*)self + 0xC, 3);
     *(void**)((char*)self + 0x18) = D_00482018;
     *(void**)((char*)self + 0x0) = D_00481FD8;
     *(int*)((char*)self + 0x1C) = 0;
@@ -4671,10 +4671,10 @@ extern "C" int func_00280560(void* self, void* rider, int id, int a3)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002805B8);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_cScriptObjEvent);
 #ifdef SKIP_ASM
-void func_00282F60(void*);
-void* func_00283200(void*, int);
+void cScriptEntity_cScriptEntity(void*);
+void* cScriptObject_cScriptObject(void*, int);
 extern void* D_00482298[];
 extern void* D_00482260[];
 
@@ -4693,10 +4693,10 @@ struct sScrObj05B8 {
     int field_0xF8;
 };
 
-extern "C" void* func_002805B8(sScrObj05B8* self)
+extern "C" void* cScriptObjEvent_cScriptObjEvent(sScrObj05B8* self)
 {
-    func_00282F60(self);
-    func_00283200((char*)self + 0xC, 5);
+    cScriptEntity_cScriptEntity(self);
+    cScriptObject_cScriptObject((char*)self + 0xC, 5);
     *(void***)((char*)self + 0x18) = D_00482298;
     *(void***)self = D_00482260;
     self->field_0xEC = 0;
@@ -4874,7 +4874,7 @@ extern "C" void func_0027CC28(void* self, void* out);
 int func_0027C070(void* self);
 // PORT: the unit declares func_0027A688 with no parameters; this caller passes the engine in $a0.
 int func_0027A688_08E8(void* engine) __asm__("func_0027A688");
-extern "C" int* func_00144BC0(void* iface);
+extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" int func_0022E098(void* mgr, int id);
 extern "C" void func_00309E50(void* mgr, int a, int b);
 extern "C" void* func_0028B180();
@@ -5013,7 +5013,7 @@ extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int unused, float
         owner = func_0027A688_08E8(D_004A28A4);
     } else {
         void* mgr = *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x78);
-        owner = func_0022E098(mgr, *func_00144BC0(iface0));
+        owner = func_0022E098(mgr, *cBENewRaceInterface_getLocation(iface0));
     }
     int i;
     for (i = 0; i < info.nLinks; i++) {
@@ -5762,15 +5762,15 @@ extern "C" void func_00281C68(void* self, int* info, float t)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00281E80);
+INCLUDE_ASM("scripter/ssxscriptengine", cBXScriptEngine_cBXScriptEngine);
 #ifdef SKIP_ASM
 extern "C" void* func_0027CDD0(void* self);
-extern "C" void func_002828B8(void* self);
+extern "C" void cBXScriptEngine_ResetInstVars(void* self);
 extern char D_00482450[];
 extern char D_004824B8[];
 extern void* D_004A34E8;
 
-extern "C" void* func_00281E80(void* self)
+extern "C" void* cBXScriptEngine_cBXScriptEngine(void* self)
 {
     func_0027CDD0(self);
     *(void**)((char*)self + 0x2AC) = D_00482450;
@@ -5778,25 +5778,25 @@ extern "C" void* func_00281E80(void* self)
     D_004A34E8 = self;
     *(int*)((char*)self + 0x2B0) = 0;
     *(int*)((char*)self + 0x2B4) = 0;
-    func_002828B8(self);
+    cBXScriptEngine_ResetInstVars(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00281ED8);
+INCLUDE_ASM("scripter/ssxscriptengine", cBXScriptEngine__cBXScriptEngine);
 #ifdef SKIP_ASM
 extern "C" void func_0027CE58(void* self, int flags);
-extern "C" void func_00282020(void* self);
+extern "C" void cBXScriptEngine_PurgeBXEngine(void* self);
 extern char D_00482450[];
 extern char D_004824B8[];
 extern void* D_004A34E8;
 
-extern "C" void func_00281ED8(void* self, int flags)
+extern "C" void cBXScriptEngine__cBXScriptEngine(void* self, int flags)
 {
     *(void**)((char*)self + 0x2AC) = D_00482450;
     *(void**)((char*)self + 0x2A8) = D_004824B8;
-    func_00282020(self);
+    cBXScriptEngine_PurgeBXEngine(self);
     D_004A34E8 = 0;
     func_0027CE58(self, flags);
 }

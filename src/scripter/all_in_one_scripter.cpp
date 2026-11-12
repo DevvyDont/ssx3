@@ -521,11 +521,11 @@ extern "C" int func_00284AA0(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AA8);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjTransition__cScriptObjTransition);
 #ifdef SKIP_ASM
 extern "C" void func_00283228();
 
-extern "C" void func_00284AA8(void) {
+extern "C" void cScriptObjTransition__cScriptObjTransition(void) {
     func_00283228();
 }
 #endif
@@ -547,17 +547,17 @@ extern "C" int func_00284AD0(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AD8);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjTransition_GetNumScriptEntities);
 #ifdef SKIP_ASM
-extern "C" int func_00284AD8(void) {
+extern "C" int cScriptObjTransition_GetNumScriptEntities(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AE0);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjTransition_GetScriptEntity);
 #ifdef SKIP_ASM
-extern "C" int func_00284AE0(void) {
+extern "C" int cScriptObjTransition_GetScriptEntity(void) {
     return 0;
 }
 #endif
@@ -582,9 +582,9 @@ extern "C" void func_00284AE8(void *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B50);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetNumScriptEntities);
 #ifdef SKIP_ASM
-extern "C" int func_00284B50(void) {
+extern "C" int cScriptObjRider_GetNumScriptEntities(void) {
     return 1;
 }
 #endif

@@ -27,11 +27,11 @@ void* cBEEconInterface_getThis()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150928);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_getMoney);
 #ifdef SKIP_ASM
 extern int D_004A6CA8[];
 
-extern "C" int func_00150928(void* self, int a, int b)
+extern "C" int cBEEconInterface_getMoney(void* self, int a, int b)
 {
     if (a >= 2) {
         return 0;
@@ -81,12 +81,12 @@ int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001509F8);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_getTotalMoneyEarned1);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern "C" int func_001509F8(void* self, int rider)
+extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider)
 {
     int a = cBELibrary_getProfileIndex(rider);
     int b = cBELibrary_getCharacterID(rider);
@@ -217,7 +217,7 @@ public:
     virtual void v1();
     virtual void v2();
 };
-extern "C" cBEIface_0C20* func_00147F78();
+extern "C" cBEIface_0C20* cBEStatInterface_getThis();
 int func_00150E50(void* self, int a1);
 extern "C" int func_00150C20(void* self, int arg1, int arg2, unsigned int arg3) {
     signed char *p;
@@ -260,7 +260,7 @@ extern "C" int func_00150C20(void* self, int arg1, int arg2, unsigned int arg3) 
         sEconRec_0C20* r = (sEconRec_0C20*)((arg2 * 0xF88 + arg1 * 0x9B50) + (char*)D_004A6CA8);
         r->unk_AC4 = r->unk_AC4 - cost;
         *p = (unsigned char)*p + 1;
-        func_00147F78()->v2();
+        cBEStatInterface_getThis()->v2();
         return 1;
     }
 }

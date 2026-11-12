@@ -52,7 +52,7 @@ extern unsigned char D_004A2468;
 
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cOVStateManager_addPDATemplate();
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int idx);
@@ -91,7 +91,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* arg0)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVStateManager_addPDATemplate();
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     func_00416210(name, 0, 2);
     for (int i = 0; i < 8; i++) {
         name[0] = '0' + i;
@@ -145,7 +145,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* arg0)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8448);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onGainTransition);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -158,7 +158,7 @@ struct sVec3_001F8448 {
 };
 struct sVEnt_001F8448 { short delta; short index; void (*fn)(void*, int); };
 
-extern "C" int func_001F8448(void* self)
+extern "C" int cOVTemplate_PauseMenu_onGainTransition(void* self)
 {
     char buf[64];
     if (*(int*)((char*)self + 0xD4) != 0) {
@@ -192,12 +192,12 @@ extern "C" int func_001F8448(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F85C0);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onGainFocus);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_0039E4C0(void* self, int a1);
+extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern unsigned char D_004A2468;
 extern char D_004A2138[];
 extern char D_004C8AE8[];
@@ -213,7 +213,7 @@ static inline void setColor_001F85C0(char* obj, void* c)
     vt[11].fn(obj + vt[11].delta, c);
 }
 
-extern "C" void func_001F85C0(void* self, int a1)
+extern "C" void cOVTemplate_PauseMenu_onGainFocus(void* self, int a1)
 {
     char buf[32];
     char* obj;
@@ -241,20 +241,20 @@ extern "C" void func_001F85C0(void* self, int a1)
         sel++;
         i++;
     }
-    func_0039E4C0(self, a1);
+    cUIState_onGainFocus(self, a1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8720__FPv);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void func_001F8720(void* self)
+void cOVTemplate_PauseMenu_onLoseFocus(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8728);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onUpdate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
@@ -263,9 +263,9 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 class cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" int func_001E3408(void);
-extern "C" void func_0020E900(void* self);
+extern "C" void cOVState_onUpdate(void* self);
 extern "C" void func_00258790(void* self, int a1);
-extern "C" void func_0020D190(void);
+extern "C" void cOVStateManager_removePDATemplate(void);
 // func_0039F190 returns its last list node in $v0; the unit declares it void.
 void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
 extern char* D_004A2EEC;
@@ -279,7 +279,7 @@ extern char D_0046F850[];
 struct sColor_1F8728 { float r, g, b, a; };
 struct sVEnt_1F8728 { short delta; short index; void (*fn)(void*, void*); };
 
-extern "C" void func_001F8728(void* self)
+extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
 {
     int st = *(int*)((char*)self + 0x110);
     if ((st == 1 || st == 2 || st == 4) && func_001E3408() > 0)
@@ -305,7 +305,7 @@ extern "C" void func_001F8728(void* self)
             vt[11].fn(o + vt[11].delta, &c);
         }
     }
-    func_0020E900(self);
+    cOVState_onUpdate(self);
     char* g = D_004A2EEC;
     if (g == 0)
         return;
@@ -321,28 +321,28 @@ extern "C" void func_001F8728(void* self)
     int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0xC0), GetHashValue32(D_0046F850));
     cUIScreen_playFrame(*(void**)((char*)self + 0xC0), frame, 1);
     *(int*)((char*)self + 0xD0) = 1;
-    func_0020D190();
+    cOVStateManager_removePDATemplate();
     func_0039F190_r(*(char**)((char*)self + 0x10) + 0x18, 1);
     D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 #endif
 
-extern "C" void* func_0020A430(void*);
+extern "C" void* cOVState_onDestroyScreen(void*);
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F88E8__FPv);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
-void* func_001F88E8(void* self)
+void* cOVTemplate_PauseMenu_onDestroyScreen(void* self)
 {
     *(int*)((char*)self + 0xc4) = 0;
-    return func_0020A430(self);
+    return cOVState_onDestroyScreen(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8908);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int func_001F8908(void* self, int a1, unsigned int a2)
+extern "C" int cOVTemplate_PauseMenu_onWidgetMenu(void* self, int a1, unsigned int a2)
 {
     switch (a2) {
     case 8:
@@ -370,14 +370,14 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void func_00258790(void* self, int a1);
-extern "C" void func_0020D190(void);
+extern "C" void cOVStateManager_removePDATemplate(void);
 // func_0039F190 returns its last list node in $v0; the unit declares it void.
 void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
-extern "C" void func_0020AB50(int cmd);
-extern "C" void* func_00195FF0(void* mem, void* owner, int a2, int a3);
+extern "C" void cOVStateManager_triggerOverlay(int cmd);
+extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* owner, int a2, int a3);
 extern "C" void* func_0028B180();
 extern "C" void func_00289BB8(void* audio);
-extern "C" void func_001F8DF8(void* self, int idx, int on);
+extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(void* self, int idx, int on);
 extern char* D_004A2EEC;
 extern int D_004A2A50;
 extern int D_004A2A54;
@@ -463,57 +463,57 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
         switch (w->idx) {
         case 1:
             stopReplay_PMWE();
-            func_0020D190();
+            cOVStateManager_removePDATemplate();
             func_0039F190_r(self->owner + 0x18, 1);
             D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
             func_00289BB8(func_0028B180());
             break;
         case 2:
             D_004A2708 = 1;
-            func_0020AB50(0x17);
+            cOVStateManager_triggerOverlay(0x17);
             break;
         case 3:
-            func_0020AB50(7);
+            cOVStateManager_triggerOverlay(7);
             break;
         case 4: {
             char* owner = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
-            char* popup = (char*)func_00195FF0(cMemMan_alloc(0x80, D_0046F860, 0, 0), owner, 0, 0);
+            char* popup = (char*)cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, D_0046F860, 0, 0), owner, 0, 0);
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(owner + 0x18, popup, 0, 0);
             break;
         }
         case 5:
         case 13:
-            func_0020AB50(0x18);
+            cOVStateManager_triggerOverlay(0x18);
             break;
         case 6:
-            func_0020AB50(0x1C);
+            cOVStateManager_triggerOverlay(0x1C);
             break;
         case 7:
-            func_0020AB50(0x19);
+            cOVStateManager_triggerOverlay(0x19);
             break;
         case 8:
-            func_0020AB50(0x1A);
+            cOVStateManager_triggerOverlay(0x1A);
             break;
         case 9:
-            func_0020AB50(0x1B);
+            cOVStateManager_triggerOverlay(0x1B);
             break;
         case 10:
-            func_0020AB50(0x20);
+            cOVStateManager_triggerOverlay(0x20);
             break;
         case 11:
             D_004A2594 = 2;
-            func_0020AB50(0x21);
+            cOVStateManager_triggerOverlay(0x21);
             break;
         case 12:
-            func_0020AB50(0x22);
+            cOVStateManager_triggerOverlay(0x22);
             break;
         }
         break;
     }
     case 6:
         stopReplay_PMWE();
-        func_0020D190();
+        cOVStateManager_removePDATemplate();
         D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
         func_0039F190_r(self->owner + 0x18, 1);
         func_00289BB8(func_0028B180());
@@ -525,7 +525,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
             else
                 setColor_PMWE(w, D_004C8AE8);
             if (self->busy == 0)
-                func_001F8DF8(self, w->idx, 1);
+                cOVTemplate_PauseMenu_setPDAIconColor(self, w->idx, 1);
         }
         cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A2480));
         if (text != 0)
@@ -540,7 +540,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
         else
             setColor_PMWE(w, D_004C8B08);
         if (self->busy == 0)
-            func_001F8DF8(self, w->idx, 0);
+            cOVTemplate_PauseMenu_setPDAIconColor(self, w->idx, 0);
         break;
     case 3:
     case 4:
@@ -552,16 +552,16 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8DF0__FPv);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onInputBegin__FPv);
 #ifdef SKIP_ASM
-int func_001F8DF0(void* self)
+int cOVTemplate_PauseMenu_onInputBegin(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8DF8);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_setPDAIconColor);
 #ifdef SKIP_ASM
 struct cUIScreen;
 int GetHashValue32(char* str);
@@ -572,7 +572,7 @@ extern char* D_00441C30[];
 extern char D_004A2488[];
 extern char D_004A2490[];
 
-extern "C" void func_001F8DF8(void* self, int idx, int on)
+extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(void* self, int idx, int on)
 {
     char buf[64];
     if (on) {

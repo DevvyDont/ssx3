@@ -2610,7 +2610,7 @@ INCLUDE_ASM("bx/bxstringctor", func_0026ADF0);
 #ifdef SKIP_ASM
 // PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
 void func_0026BA68_2(void* dst, void* src) __asm__("func_0026BA68");
-extern "C" int func_0026B410(void* self, char* p);
+extern "C" int cPathSys_loadAIPaths(void* self, char* p);
 extern "C" int cPathSys_resolvePaths(void* self, char* p);
 extern "C" int func_0026B7D8(void* self, char* p);
 extern "C" void func_0026B880(void* self, char* p);
@@ -2624,7 +2624,7 @@ extern "C" void func_0026ADF0(void* self)
     *(int*)((char*)self + 0x0) = 0;
     func_0026BA68_2(&header, p);
     p += 4;
-    p += func_0026B410(self, p);
+    p += cPathSys_loadAIPaths(self, p);
     p += cPathSys_resolvePaths(self, p);
     p += func_0026B7D8(self, p);
     func_0026B880(self, p);
@@ -2639,7 +2639,7 @@ extern "C" void func_0026ADA8(void* self, int arg1);
 extern "C" int func_003E22F0(int, int);
 // PORT: func_0026BA68 takes (dst, src); the unit declares it with one arg
 void func_0026BA68_3(void* dst, void* src) __asm__("func_0026BA68");
-extern "C" int func_0026B410(void* self, char* p);
+extern "C" int cPathSys_loadAIPaths(void* self, char* p);
 extern "C" int cPathSys_resolvePaths(void* self, char* p);
 
 extern "C" void func_0026AE70(void* self, int arg1)
@@ -2656,7 +2656,7 @@ extern "C" void func_0026AE70(void* self, int arg1)
     *(char**)((char*)self + 0x48) = p;
     func_0026BA68_3(&header, p);
     p += 4;
-    p += func_0026B410(self, p);
+    p += cPathSys_loadAIPaths(self, p);
     cPathSys_resolvePaths(self, p);
 }
 #endif

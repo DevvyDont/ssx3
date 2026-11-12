@@ -269,8 +269,8 @@ extern "C" int func_003B6098(void* sema, int a1);
 extern "C" int func_003B6300(int id);
 extern "C" int func_003B6528(int id);
 extern "C" int f_6548_AAF8(void* data, int id) __asm__("func_003B6548");
-extern "C" int func_003DF980(int handle);
-extern "C" void func_003E6574(void* dst, void* src, int n);
+extern "C" int ASYNCFILE_getstatus(int handle);
+extern "C" void MEM_copy(void* dst, void* src, int n);
 extern "C" int ASYNCFILE_release(int handle, int* buf, int* size);
 extern "C" void func_0028A298(void* self);
 
@@ -322,7 +322,7 @@ extern "C" void func_0028AAF8(void* self)
     switch (kind) {
     case 0:
     case 2:
-        switch (func_003DF980(s->result)) {
+        switch (ASYNCFILE_getstatus(s->result)) {
         case 0:
             break;
         case 1: {
@@ -353,7 +353,7 @@ extern "C" void func_0028AAF8(void* self)
                         }
                     }
                     int r = (*pf)(thisp, a, n, c);
-                    func_003E6574((void*)r, (void*)buf, size);
+                    MEM_copy((void*)r, (void*)buf, size);
                     func_003B6098(s, r);
                     sVE_AAF8* vt2 = s->vt;
                     char* thisp2 = (char*)s + vt2[5].delta;
@@ -471,7 +471,7 @@ extern "C" void func_0028AAF8(void* self)
         }
         break;
     case 1:
-        switch (func_003DF980(s->result)) {
+        switch (ASYNCFILE_getstatus(s->result)) {
         case 0:
             break;
         case 1: {
@@ -776,7 +776,7 @@ INCLUDE_ASM("sound/asyncsys", func_0028B320);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void* FILE_loadsizez(const char* name, int* size, int align);
-extern "C" void* func_002523A8(void* self);
+extern "C" void* MEM_free(void* self);
 extern "C" void* func_00252FA0(void* a0, int a1, int a2);
 extern "C" void func_0028B2D0(void* self);
 extern "C" void func_0028B528(void* self);
@@ -837,7 +837,7 @@ extern "C" void func_0028B320(void* self, const char* file, int align)
             void* m = func_00252FA0((void*)file, h, 0);
             *(void**)((char*)self + 0x10) = m;
             func_003B6548(m, *(int*)((char*)self + 0x4));
-            func_002523A8(data);
+            MEM_free(data);
             *(int*)((char*)self + 0x14) = h;
         }
         *(int*)self = 1;
@@ -852,7 +852,7 @@ extern "C" void func_0028B320(void* self, const char* file, int align)
         break;
     default:
         if (*(int*)((char*)self + 0x8) != 1) {
-            func_002523A8(data);
+            MEM_free(data);
         }
         *(int*)self = 0;
         break;
@@ -866,7 +866,7 @@ extern "C" void func_0028B320(void* self, const char* file, int align)
 INCLUDE_ASM("sound/asyncsys", func_0028B528);
 #ifdef SKIP_ASM
 extern "C" int func_003B6300(int id);
-extern "C" void* func_002523A8(void* self);
+extern "C" void* MEM_free(void* self);
 
 extern "C" void func_0028B528(void* self)
 {
@@ -875,7 +875,7 @@ extern "C" void func_0028B528(void* self)
         func_003B6300(*(int*)((char*)self + 0x4));
         *(int*)((char*)self + 0x4) = -1;
         if (*(int*)((char*)self + 0x8) == 0) {
-            func_002523A8(*(void**)((char*)self + 0x10));
+            MEM_free(*(void**)((char*)self + 0x10));
             *(int*)((char*)self + 0x10) = 0;
             *(int*)((char*)self + 0x14) = 0;
         }

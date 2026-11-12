@@ -34,7 +34,7 @@ struct cLunoTableRef {
 void operator_delete(int* ptr);
 void cMemMan_free(void* ptr);
 extern "C" void func_00224F30(cLunoTableRef* ref);
-extern "C" void func_00224DF0(cLunoTableRef* ref, int flags);
+extern "C" void luno_cLunoTable__cLunoTable(cLunoTableRef* ref, int flags);
 
 //100%
 INCLUDE_ASM("luno/lunovm", luno_cLunoVM_execute);
@@ -72,7 +72,7 @@ public:
     cLunoVar& get(const cLunoVar& key) __asm__("func_00225248");
     ~cLunoTab();
 };
-__asm__("_$_8cLunoTab = func_00224DF0");
+__asm__("_$_8cLunoTab = luno_cLunoTable__cLunoTable");
 
 void cMemMan_free(void* ptr);
 
@@ -379,7 +379,7 @@ public:
 
     static void operator delete[](void* p) { cMemMan_free(p); }
 };
-__asm__("_$_8cLunoVar = func_00225B90");
+__asm__("_$_8cLunoVar = luno_cLunoVar__cLunoVar");
 
 // Binary arithmetic (operator+ is also emitted out of line as func_00226628).
 static inline cLunoVar lunoAdd(const cLunoVar& a, const cLunoVar& b)
@@ -497,8 +497,8 @@ struct cLunoArg {
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 // PORT: the game's operator new is cMemMan_alloc(size, tag, flags, 0); bound by asm label
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-// PORT: the table handle constructor with a size (func_00224DA0) is bound by asm label.
-extern "C++" cLunoTab* lunoNewTable(cLunoTab* self, int size) __asm__("func_00224DA0");
+// PORT: the table handle constructor with a size (luno_cLunoTable_cLunoTable) is bound by asm label.
+extern "C++" cLunoTab* lunoNewTable(cLunoTab* self, int size) __asm__("luno_cLunoTable_cLunoTable");
 extern "C" int func_002224A0(void);
 extern char D_00479790[];
 extern char D_004797A0[];
@@ -829,11 +829,11 @@ extern "C" void func_00224D00(cLunoTable* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224DA0);
+INCLUDE_ASM("luno/lunovm", luno_cLunoTable_cLunoTable);
 #ifdef SKIP_ASM
 extern "C" void luno_cLunoTable_constructTable(cLunoTableRef* self);
 
-extern "C" cLunoTableRef* func_00224DA0(cLunoTableRef* self)
+extern "C" cLunoTableRef* luno_cLunoTable_cLunoTable(cLunoTableRef* self)
 {
     self->table = 0;
     luno_cLunoTable_constructTable(self);
@@ -855,9 +855,9 @@ extern "C" void **func_00224DD0(void **arg0, void **arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224DF0);
+INCLUDE_ASM("luno/lunovm", luno_cLunoTable__cLunoTable);
 #ifdef SKIP_ASM
-extern "C" void func_00224DF0(cLunoTableRef* self, int flags)
+extern "C" void luno_cLunoTable__cLunoTable(cLunoTableRef* self, int flags)
 {
     if (--self->table->refCount == 0) {
         func_00224F30(self);
@@ -988,7 +988,7 @@ extern "C" cLunoTableRef* func_00225068(cLunoTableRef* self, cLunoTableRef* othe
 //100%
 INCLUDE_ASM("luno/lunovm", func_002250E0);
 #ifdef SKIP_ASM
-extern "C" void func_00225B90(cLunoValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags);
 extern cLunoValue D_004C9098;
 void* func_00226620(void* self);
 
@@ -1026,7 +1026,7 @@ extern "C" cLunoValue* func_002250E0(cLunoTableRef* self, unsigned int arg1)
             key.type = 3;
             *(int*)func_00226620(&key) = arg1;
             int eq = lunoKeyEquals_50E0(&n->key, &key);
-            func_00225B90(&key, 2);
+            luno_cLunoVar__cLunoVar(&key, 2);
             if (eq) {
                 return &n->value;
             }
@@ -1111,7 +1111,7 @@ struct cLunoNode_set {
     {                                                                      \
         cLunoValue* d = &(D);                                              \
         if ((D).type == 4) {                                               \
-            func_00224DF0((cLunoTableRef*)d, 2);                           \
+            luno_cLunoTable__cLunoTable((cLunoTableRef*)d, 2);                           \
         }                                                                  \
         d->type = 0;                                                       \
         (D).word0 = 0;                                                     \
@@ -1165,7 +1165,7 @@ extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoV
             {
                 cLunoValue* d = &n->value;
                 if (n->value.type == 4) {
-                    func_00224DF0((cLunoTableRef*)d, 2);
+                    luno_cLunoTable__cLunoTable((cLunoTableRef*)d, 2);
                 }
                 d->type = 0;
                 // Expanded Clear(); the do/while(0) is the original macro's wrapper (changes scheduling).
@@ -1256,9 +1256,9 @@ extern "C" void func_002257E0(void* vself, sVEntry00224C00** stream, int base)
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_002259A8);
+INCLUDE_ASM("luno/lunovm", luno_cLunoTable_readFromReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_00225B90(cLunoValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags);
 extern "C" void func_00225CA0(cLunoValue* self, sVEntry00224C00** stream, int base);
 extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoValue* val);
 
@@ -1280,7 +1280,7 @@ struct cLunoNode_9A8 {
     void operator delete[](void* p, unsigned int size);
 };
 
-extern "C" void func_002259A8(cLunoTableRef* self, sVEntry00224C00** stream, int base)
+extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry00224C00** stream, int base)
 {
     if (self->table->nodes != 0) {
         cLunoTableEntry* p = self->table->nodes + *(int*)((char*)self->table->nodes - 0x10);
@@ -1306,19 +1306,19 @@ extern "C" void func_002259A8(cLunoTableRef* self, sVEntry00224C00** stream, int
         val.word0 = 0;
         func_00225CA0(&val, stream, base);
         luno_cLunoTable_set(self, &key, &val);
-        func_00225B90(&val, 2);
-        func_00225B90(&key, 2);
+        luno_cLunoVar__cLunoVar(&val, 2);
+        luno_cLunoVar__cLunoVar(&key, 2);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00225B90);
+INCLUDE_ASM("luno/lunovm", luno_cLunoVar__cLunoVar);
 #ifdef SKIP_ASM
-extern "C" void func_00225B90(cLunoValue* self, int flags)
+extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags)
 {
     if (self->type == 4) {
-        func_00224DF0((cLunoTableRef*)self, 2);
+        luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
     }
     self->type = 0;
     if (flags & 1) {
@@ -1354,15 +1354,15 @@ struct sLunoPair_225CA0 {
     int word1;
 };
 
-// PORT: func_00224DA0 forwards a size argument to constructTable (unit declares 1 arg).
-extern "C++" cLunoTableRef* func_00224DA0_sz(cLunoTableRef* self, int size) __asm__("func_00224DA0");
+// PORT: luno_cLunoTable_cLunoTable forwards a size argument to constructTable (unit declares 1 arg).
+extern "C++" cLunoTableRef* luno_cLunoTable_cLunoTable_sz(cLunoTableRef* self, int size) __asm__("luno_cLunoTable_cLunoTable");
 // Non-POD (user copy ctor) so the local is BLKmode and shares the block-scoped slot.
 struct cLunoRefTmp_225CA0 {
     cLunoTable* table;
     cLunoRefTmp_225CA0() {}
     cLunoRefTmp_225CA0(const cLunoRefTmp_225CA0&);
 };
-extern "C" void func_002259A8(cLunoTableRef* self, sVEntry00224C00** stream, int base);
+extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry00224C00** stream, int base);
 
 static inline int lunoReadInt_225CA0(sVEntry00224C00** stream)
 {
@@ -1380,7 +1380,7 @@ extern "C" void func_00225CA0(cLunoValue* self, sVEntry00224C00** stream, int ba
         tmp.word1 = 0;
         func_00224C78(&tmp, (sVEntry00224C78**)stream, base);
         if (self->type == 4) {
-            func_00224DF0((cLunoTableRef*)self, 2);
+            luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
         }
         self->type = 0;
         self->word0 = 0;
@@ -1388,16 +1388,16 @@ extern "C" void func_00225CA0(cLunoValue* self, sVEntry00224C00** stream, int ba
         self->type = type;
     } else if (type == 4) {
         cLunoRefTmp_225CA0 ref;
-        func_00224DA0_sz((cLunoTableRef*)&ref, 0x20);
-        func_002259A8((cLunoTableRef*)&ref, stream, base);
+        luno_cLunoTable_cLunoTable_sz((cLunoTableRef*)&ref, 0x20);
+        luno_cLunoTable_readFromReplayFrame((cLunoTableRef*)&ref, stream, base);
         if (self->type == type) {
-            func_00224DF0((cLunoTableRef*)self, 2);
+            luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
         }
         self->type = 0;
         self->word0 = 0;
         func_00225068((cLunoTableRef*)self, (cLunoTableRef*)&ref);
         self->type = type;
-        func_00224DF0((cLunoTableRef*)&ref, 2);
+        luno_cLunoTable__cLunoTable((cLunoTableRef*)&ref, 2);
     } else {
         self->type = type;
         (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 4);
@@ -1416,7 +1416,7 @@ struct sV4_5DE8 {
 } __attribute__((aligned(16)));
 
 extern char D_004C8D18[], D_004C8D28[], D_004C8D38[], D_004C8D48[], D_004C8D58[], D_004C8D68[], D_004C8D78[], D_004C8D88[], D_004C8D98[], D_004C8DA8[], D_004C8DB8[], D_004C8DC8[], D_004C8DD8[], D_004C8DE8[], D_004C8DF8[], D_004C8E08[], D_004C8E18[], D_004C8E28[], D_004C8E38[], D_004C8E48[], D_004C8E58[], D_004C8E68[], D_004C8E78[], D_004C8E88[], D_004C8E98[], D_004C8EA8[], D_004C8EB8[], D_004C8EC8[], D_004C8ED8[], D_004C8EE8[], D_004C8EF8[], D_004C8F08[], D_004C8F18[], D_004C8F28[], D_004C8F38[], D_004C8F48[], D_004C8F58[], D_004C8F68[], D_004C8F78[], D_004C8F88[], D_004C8F98[], D_004C8FA8[], D_004C8FB8[], D_004C8FC8[], D_004C8FD8[], D_004C8FE8[], D_004C8FF8[], D_004C9008[], D_004C9018[], D_004C9028[], D_004C9038[], D_004C9048[], D_004C9058[], D_004C9068[], D_004C9078[], D_004C9088[];
-extern "C" void func_00225B90(cLunoValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags);
 
 // PORT: the unit declares func_00225DE8 as void*(int, int); it returns nothing.
 extern "C" void func_00225DE8_impl(int initialize, int priority) __asm__("func_00225DE8");
@@ -1483,7 +1483,7 @@ extern "C" void func_00225DE8_impl(int initialize, int priority)
             D_004C9098.type = 0;
             D_004C9098.word0 = 0;
         } else {
-            func_00225B90(&D_004C9098, 2);
+            luno_cLunoVar__cLunoVar(&D_004C9098, 2);
         }
     }
 }
@@ -1584,8 +1584,8 @@ extern "C" void func_00226768(void* self, int flags)
         sVEntry00226768* vt = *(sVEntry00226768**)((char*)obj + 0x1C);
         vt[1].fn((char*)obj + vt[1].delta, 3);
     }
-    func_00225B90((cLunoValue*)((char*)self + 0xC), 2);
-    func_00225B90((cLunoValue*)self, 2);
+    luno_cLunoVar__cLunoVar((cLunoValue*)((char*)self + 0xC), 2);
+    luno_cLunoVar__cLunoVar((cLunoValue*)self, 2);
     if (flags & 1) {
         operator_delete((int*)self);
     }

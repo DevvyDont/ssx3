@@ -6,7 +6,7 @@ INCLUDE_ASM("main/loadscreens", cBackgroundMan_loadImages);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* ptr);
-extern "C" void* func_003E1908(const char* name, int flags);
+extern "C" void* FILE_loadz(const char* name, int flags);
 extern "C" void* SHAPE_unpack(void* shape);
 extern char D_0045CE30[];
 extern char D_004A12A0[];
@@ -43,7 +43,7 @@ struct sBgMan_17ACC8 {
 
 extern "C" int cBackgroundMan_loadImages(sBgMan_17ACC8* self)
 {
-    sBgFile_17ACC8* file = (sBgFile_17ACC8*)func_003E1908(D_0045CE30, 0x100);
+    sBgFile_17ACC8* file = (sBgFile_17ACC8*)FILE_loadz(D_0045CE30, 0x100);
     if (file == 0) {
         return 0;
     }
@@ -221,7 +221,7 @@ extern "C" void func_0017AE00(sBgMan_AE00* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens", func_0017B1B0);
+INCLUDE_ASM("main/loadscreens", cDebugMenuScreen_cDebugMenuScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -326,7 +326,7 @@ struct sLS_B1B0 {
 };
 
 // Load-screen constructor: sets up the race/player interfaces, picks the active entry and the sound entry.
-extern "C" sLS_B1B0* func_0017B1B0(sLS_B1B0* self)
+extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
 {
     self->vt = D_0046D798;
     func_0017ABC8(self->bg);
@@ -423,11 +423,11 @@ extern "C" void func_00289520(void* snd, void* entry);
 extern sNet_B1B0 D_00534B30;
 
 struct cAppMan;
-int func_00320C48(void* pad, int button);
-extern "C" float func_00320BF0(void* pad, int axis);
+int cInput_getState(void* pad, int button);
+extern "C" float cInput_getValue(void* pad, int axis);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* func_00232738(void* self);
-void* func_00232720(void* self);
+void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void func_0017D0A8(sLS_B1B0* self);
 extern "C" int func_0017D1B8(sLS_B1B0* self, int quick, int mode, int event);
@@ -549,16 +549,16 @@ static inline int bgCount_B4E0(sBgMan_17ACC8* bg)
 
 extern "C" void func_0017B4E0(sLS_B1B0* self)
 {
-    if (func_00320C48(D_004A28A8_b4->input, 0x65)) {
+    if (cInput_getState(D_004A28A8_b4->input, 0x65)) {
         func_0017D0A8(self);
         if (self->f8C1C == 14) {
             D_004A28A8_b4->f60 = 1;
             cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)func_00232738(cMemMan_alloc(8, D_0045CE48, 0x100, 0)));
         } else {
-            cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)func_00232720(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
+            cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
         }
     }
-    int dir = (int)func_00320BF0(D_004A28A8_b4->input, 0x3D);
+    int dir = (int)cInput_getValue(D_004A28A8_b4->input, 0x3D);
     if (dir == 0 && self->f8C30 == -1) {
         self->f8C1C = (self->f8C1C + 15 - 1) % 15;
         if (self->f8C1C == 13) {

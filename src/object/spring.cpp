@@ -54,7 +54,7 @@ extern "C" void cSpring_setupNodes(sSpring_53EF0* s)
 #endif
 
 //100%
-INCLUDE_ASM("object/spring", func_00353FC0);
+INCLUDE_ASM("object/spring", cSpring_update);
 #ifdef SKIP_ASM
 struct sSpVec_53FC0 {
     float x, y, z, w;
@@ -220,7 +220,7 @@ static inline float spLength_53FC0(const sSpVec_53FC0& v)
     return r;
 }
 
-extern "C" void func_00353FC0(sSpring_53FC0* self)
+extern "C" void cSpring_update(sSpring_53FC0* self)
 {
     sSpVec_53FC0 g(0.0f, 0.0f, -980.0f, 0.0f);
     float dt = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
@@ -281,7 +281,7 @@ extern "C" void func_003545D8(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/spring", func_00354648);
+INCLUDE_ASM("object/spring", cObjNode_cObjNode1);
 #ifdef SKIP_ASM
 extern "C" void cBucketMan_add(void* mgr, void* node, void* param);
 extern void* D_00491F00[16];
@@ -292,7 +292,7 @@ struct cObjNode {
     void* field_0xC;
 };
 
-extern "C" cObjNode* func_00354648(cObjNode* self, void* param2)
+extern "C" cObjNode* cObjNode_cObjNode1(cObjNode* self, void* param2)
 {
     self->field_0xC = D_00491F00;
     cBucketMan_add(&D_004A5988, self, param2);

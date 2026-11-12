@@ -462,9 +462,9 @@ extern "C" void func_0034C378(void* elem, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034C428);
+INCLUDE_ASM("object/flagset", cFlagManager_cFlagManager);
 #ifdef SKIP_ASM
-extern "C" void* func_00354648(void* self, void* a1);
+extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 extern "C" void* func_0034AF38(void* self);
 extern void* D_0048FB80[];
 
@@ -482,11 +482,11 @@ struct sFlagSet_C428 {
     sFlagSetElem_C428 elems[15];    // 0x20
 };
 
-extern "C" sFlagSet_C428* func_0034C428(sFlagSet_C428* self, void* a1)
+extern "C" sFlagSet_C428* cFlagManager_cFlagManager(sFlagSet_C428* self, void* a1)
 {
     int i;
     sFlagSetElem_C428* p = self->elems;
-    func_00354648(self, a1);
+    cObjNode_cObjNode1(self, a1);
     self->vtable = D_0048FB80;
     for (i = 14; i != -1; i--, p++) {
         func_0034AF38(p);
@@ -502,7 +502,7 @@ extern "C" sFlagSet_C428* func_0034C428(sFlagSet_C428* self, void* a1)
 //100%
 INCLUDE_ASM("object/flagset", func_0034C4B8);
 #ifdef SKIP_ASM
-extern "C" void func_003546C8(void* self, int flags);
+extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern void* D_0048FB80[];
 
 struct sFlagSetVEntry_C4B8 {
@@ -533,7 +533,7 @@ extern "C" void func_0034C4B8(sFlagSet_C4B8* self, int flags)
             p->vt[1].fn((char*)p + p->vt[1].delta, 0);
         }
     }
-    func_003546C8(self, flags);
+    cObjNode__cObjNode(self, flags);
 }
 #endif
 
@@ -806,7 +806,7 @@ INCLUDE_ASM("object/flagset", func_0034CB80);
 #ifdef SKIP_ASM
 extern char* D_004A5B80;
 extern void* D_0048FA00[];
-extern "C" void func_0034FBF0(void* self, int flags);
+extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 struct sFlagSetVEntryCB80 {
     short delta;
@@ -824,12 +824,12 @@ extern "C" void func_0034CB80(void* self, int flags)
         sFlagSetVEntryCB80* vt = *(sFlagSetVEntryCB80**)(mgr + 0x10D8);
         vt[77].fn(mgr + vt[77].delta, h);
     }
-    func_0034FBF0(self, flags);
+    cInstanceNode__cInstanceNode(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034CBE8);
+INCLUDE_ASM("object/flagset", cFenceNode_cFenceNode);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
 extern "C" void func_0034D1E8(void* self);
@@ -847,7 +847,7 @@ struct sFlagElem_CBE8 {
     void* operator new[](unsigned int, void* p) { return p; }
 };
 
-extern "C" void* func_0034CBE8(void* self, void* a1, void* stream)
+extern "C" void* cFenceNode_cFenceNode(void* self, void* a1, void* stream)
 {
     cInstanceNode_cInstanceNode(self, a1, stream);
     *(unsigned int*)((char*)self + 0x1C) = 0xFFFFFFFF;
@@ -1366,11 +1366,11 @@ struct sSerVEntry_0034D960 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0034FE90(void* self, void* stream);
+extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
 extern "C" void func_0034D960(void* self, void* stream)
 {
-    func_0034FE90(self, stream);
+    cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_0034D960* vt = *(sSerVEntry_0034D960**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0x24);
 }
@@ -1484,7 +1484,7 @@ struct sFlagOwner_DBA8 {
 
 void cMemMan_free(void*);
 void operator_delete(int*);
-extern "C" void func_003553C0(void* self, int flags);
+extern "C" void cMoveNode__cMoveNode(void* self, int flags);
 extern void* D_00490CC8[];
 
 extern "C" void func_0034DBA8(sFlagOwner_DBA8* self, int flags)
@@ -1505,7 +1505,7 @@ extern "C" void func_0034DBA8(sFlagOwner_DBA8* self, int flags)
     if (self->buf != 0) {
         cMemMan_free(self->buf);
     }
-    func_003553C0(self->node, 0);
+    cMoveNode__cMoveNode(self->node, 0);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1547,7 +1547,7 @@ extern "C" void func_0034DC90(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034DD18);
+INCLUDE_ASM("object/flagset", cAnimNode_makeAnimMats);
 #ifdef SKIP_ASM
 extern "C" void* func_0034E320(void* self, int i);
 
@@ -1671,7 +1671,7 @@ struct sFsModel_DD18 {
 };
 
 // Builds the world matrix of every bone: root or parent * (bone matrix with its translation scaled).
-extern "C" void func_0034DD18(void* self, void* vroot, sFsMtx_DD18* out)
+extern "C" void cAnimNode_makeAnimMats(void* self, void* vroot, sFsMtx_DD18* out)
 {
     sFsMtx_DD18* root = (sFsMtx_DD18*)vroot;
     sFsModel_DD18* model = *(sFsModel_DD18**)((char*)self + 0x2C);
@@ -1761,12 +1761,12 @@ struct sSerVEntry_0034E3D8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00356B30(void* self, void* stream);
+extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
 
 extern "C" void func_0034E3D8(void* self, void* stream)
 {
     int dummy;
-    func_00356B30((char*)self + 0x14, stream);
+    cMoveNode_writeToReplayFrame((char*)self + 0x14, stream);
     sSerVEntry_0034E3D8* e = &(*(sSerVEntry_0034E3D8**)stream)[1];
     e->fn((char*)stream + e->delta, self, 0x14);
     e = &(*(sSerVEntry_0034E3D8**)stream)[1];

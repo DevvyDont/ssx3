@@ -49,9 +49,9 @@ extern "C" void func_0021C6D8(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021C700);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_allowPauseMenu);
 #ifdef SKIP_ASM
-extern "C" int func_0021C700(void *arg0) {
+extern "C" int cOVState_allowPauseMenu(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x4C)));
 }
 #endif
@@ -129,10 +129,10 @@ extern "C" void *func_0021C7C0(void *arg0, int arg1, int arg2) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021C828);
 #ifdef SKIP_ASM
-extern "C" void func_0020E900();
+extern "C" void cOVState_onUpdate();
 
 extern "C" void func_0021C828(void) {
-    func_0020E900();
+    cOVState_onUpdate();
 }
 #endif
 
@@ -150,13 +150,13 @@ extern "C" void func_0021C848(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021C870);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_REPLAY__cOVState_REPLAY);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
-extern "C" void func_0021C870(void *arg0) {
+extern "C" void cOVState_REPLAY__cOVState_REPLAY(void *arg0) {
     *(char **)((char*)arg0 + 8) = D_00474E08;
     func_0039E390_a(arg0);
 }
@@ -300,11 +300,11 @@ extern "C" void func_0021CA60(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CA88);
+INCLUDE_ASM("fe/all_in_one_fe", cPDATemplate__cPDATemplate);
 #ifdef SKIP_ASM
 extern "C" void func_0039E390();
 
-extern "C" void func_0021CA88(void) {
+extern "C" void cPDATemplate__cPDATemplate(void) {
     func_0039E390();
 }
 #endif
@@ -433,13 +433,13 @@ extern "C" void *func_0021CBA0(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CC40);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P__cOVStateHUD1P);
 #ifdef SKIP_ASM
 extern "C" void func_0020EB08(void *, int);
 extern "C" void func_0039E390(void *, int);
 extern char D_00474160[];
 
-extern "C" void func_0021CC40(void *arg0, int arg1) {
+extern "C" void cOVStateHUD1P__cOVStateHUD1P(void *arg0, int arg1) {
     (*(char **)((char*)(arg0) + (8))) = D_00474160;
     if ((char*)arg0 + 0x48 != 0) {
         char *p = (char*)arg0 + 0x48 + 0x118;
@@ -1854,13 +1854,13 @@ extern "C" void* func_00220D38(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00220D70);
+INCLUDE_ASM("fe/all_in_one_fe", cFEStateLodge__cFEStateLodge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_0046D0D0[];
 
-extern "C" void func_00220D70(void *arg0) {
+extern "C" void cFEStateLodge__cFEStateLodge(void *arg0) {
     *(char **)((char*)arg0 + 8) = D_0046D0D0;
     func_0039E390_a(arg0);
 }
@@ -1945,13 +1945,13 @@ extern "C" void func_00220E90(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00220EB8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_ENTERLODGE__cOVState_ENTERLODGE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
-extern "C" void func_00220EB8(void *arg0) {
+extern "C" void cOVState_ENTERLODGE__cOVState_ENTERLODGE(void *arg0) {
     *(char **)((char*)arg0 + 8) = D_00474E08;
     func_0039E390_a(arg0);
 }
@@ -2028,13 +2028,13 @@ extern "C" void *func_00220FA8(void *arg0, int arg1, int arg2) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221018);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
-extern "C" void func_00221018(void *arg0) {
+extern "C" void cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START(void *arg0) {
     *(char **)((char*)arg0 + 8) = D_00474E08;
     func_0039E390_a(arg0);
 }
@@ -3290,7 +3290,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002224B8);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 struct LV_24B8;
-extern "C" void func_00224DF0_24B8(LV_24B8*, int) __asm__("func_00224DF0");
+extern "C" void luno_cLunoTable__cLunoTable_24B8(LV_24B8*, int) __asm__("luno_cLunoTable__cLunoTable");
 extern "C" void func_00225068_24B8(LV_24B8*, const LV_24B8*) __asm__("func_00225068");
 extern "C" void luno_cLunoVM_execute_24B8(LV_24B8**, char**, int) __asm__("luno_cLunoVM_execute");
 extern char D_00479780[];
@@ -3301,7 +3301,7 @@ struct LV_24B8 {
     int type;
     LV_24B8() { type = 0; u.i = 0; }
     ~LV_24B8() {}
-    void Release() { if (type == 4) func_00224DF0_24B8(this, 2); }
+    void Release() { if (type == 4) luno_cLunoTable__cLunoTable_24B8(this, 2); }
     void Clear() { type = 0; u.i = 0; }
     void SetTable(const LV_24B8* src) {
         Release();
@@ -3334,7 +3334,7 @@ extern "C" void func_002224B8(LV_24B8** out, char** state, LV_24B8* a, int c) {
     LV_24B8* b = &D_004C9098;
     LV_24B8* p = *out;
     LV_24B8* q = &p[1];
-    if (p[1].type == 4) func_00224DF0_24B8(q, 2);
+    if (p[1].type == 4) luno_cLunoTable__cLunoTable_24B8(q, 2);
     q->type = 0;
     p[1].u.i = 0;
     if (b->type == 4) {
@@ -3355,7 +3355,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00222648);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 struct LV_2648;
-extern "C" void func_00224DF0_2648(LV_2648*, int) __asm__("func_00224DF0");
+extern "C" void luno_cLunoTable__cLunoTable_2648(LV_2648*, int) __asm__("luno_cLunoTable__cLunoTable");
 extern "C" void func_00225068_2648(LV_2648*, const LV_2648*) __asm__("func_00225068");
 extern "C" void luno_cLunoVM_execute_2648(LV_2648**, char**, int) __asm__("luno_cLunoVM_execute");
 extern char D_00479780[];
@@ -3366,7 +3366,7 @@ struct LV_2648 {
     int type;
     LV_2648() { type = 0; u.i = 0; }
     ~LV_2648() {}
-    void Release() { if (type == 4) func_00224DF0_2648(this, 2); }
+    void Release() { if (type == 4) luno_cLunoTable__cLunoTable_2648(this, 2); }
     void Clear() { type = 0; u.i = 0; }
     void SetTable(const LV_2648* src) {
         Release();
@@ -3396,7 +3396,7 @@ extern "C" void func_00222648(LV_2648** out, char** state, LV_2648* a, LV_2648* 
     arr[0].SetTable(a);
     LV_2648* p = *out;
     LV_2648* q = &p[1];
-    if (p[1].type == 4) func_00224DF0_2648(q, 2);
+    if (p[1].type == 4) luno_cLunoTable__cLunoTable_2648(q, 2);
     q->type = 0;
     p[1].u.i = 0;
     if (b->type == 4) {

@@ -4,7 +4,7 @@
 INCLUDE_ASM("seg/seg_1F1548", cPSPVisualEffectsMan_cPSPVisualEffectsMan);
 #ifdef SKIP_ASM
 extern "C" void *cMemMan_alloc(int, const char *, int, int);
-extern "C" void* func_002EFF98(void*);
+extern "C" void* cVisualEffectsMan_cVisualEffectsMan(void*);
 extern "C" void* func_00372AA0(void*);
 void* func_003759E8(void*);
 extern char D_00487D28[];
@@ -48,7 +48,7 @@ struct sMgr_0548 {
 
 extern "C" sMgr_0548* cPSPVisualEffectsMan_cPSPVisualEffectsMan(sMgr_0548* self)
 {
-    func_002EFF98(self);
+    cVisualEffectsMan_cVisualEffectsMan(self);
     self->vptr = D_00487D28;
     { void* p = cMemMan_alloc(4, D_00487BB8, 0, 0); *(char**)p = D_004931A8; self->objs[0] = p; }
     { void* p = cMemMan_alloc(4, D_00487BC8, 0, 0); *(char**)p = D_00492FD0; self->objs[1] = p; }
@@ -351,7 +351,7 @@ __asm__(".globl func_002F0FE8\n.type func_002F0FE8,@function\nfunc_002F0FE8 = _$
 __asm__("_vt$15cVbDtor002F0FE8$13cRiderVbC_s1f = D_004887D8\n"
         "_vt$15cVbDtor002F0FE8$14cRiderVbBC_s1f = D_00459B90\n"
         "_vt$15cVbDtor002F0FE8$12cRiderVb_s1f = D_00488820\n"
-        "_$_12cRiderVb_s1f = func_0011B978\n");
+        "_$_12cRiderVb_s1f = cRider__cRider\n");
 #endif
 
 //100%
@@ -634,12 +634,12 @@ extern "C" void *func_002F1768(void *arg0) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F17A8);
 #ifdef SKIP_ASM
-extern "C" void func_00370C08(void *);
+extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void *);
 extern char D_004881E8[];
 
 extern "C" void func_002F17A8(void *arg0) {
     *(char **)((char*)arg0 + 0x1F8) = D_004881E8;
-    func_00370C08(arg0);
+    cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(arg0);
 }
 #endif
 
@@ -788,7 +788,7 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F1A08);
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2088);
 #ifdef SKIP_ASM
-extern "C" void func_00371380(void* obj, int level);
+extern "C" void cDynamicEmitter_render(void* obj, int level);
 
 struct sRiderInfo_2088 {
     char pad[0xB18];
@@ -817,7 +817,7 @@ extern "C" void func_002F2088(sOwner_2088* self)
                 level = (self->b->fC2C < 0) ? 0x16 : self->b->fC2C + 1;
             sRiderInfo_2088* r = self->b;
             if ((self->a != 0 && self->a->fB18 != 0) || (r != 0 && r->fCC8 != 0))
-                func_00371380(self->items[i], level);
+                cDynamicEmitter_render(self->items[i], level);
         }
     }
 }
@@ -1574,19 +1574,19 @@ extern "C" void func_002F3418(sEm_3418* self, const sV2_3418* off)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F3550);
+INCLUDE_ASM("seg/seg_1F1548", cSplashManager_cSplashManager);
 #ifdef SKIP_ASM
-extern "C" void* func_00354648(void* self, void* a1);
+extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 extern "C" int* func_002F2588(int* arg0);
 extern "C" void* func_002F2D60(void* arg0);
 extern "C" void func_002F39C8(void* arg0);
 extern char D_00488230[];
 
 // Particle emitter constructor: builds the two 30-entry element pools and resets the emitter state.
-extern "C" void* func_002F3550(void* p, void* a1, int a2)
+extern "C" void* cSplashManager_cSplashManager(void* p, void* a1, int a2)
 {
     char* self = (char*)p;
-    func_00354648(self, a1);
+    cObjNode_cObjNode1(self, a1);
     *(int*)(self + 0x10) = a2;
     *(int*)(self + 0x14) = 0;
     *(char**)(self + 0xC) = D_00488230;
@@ -1622,14 +1622,14 @@ extern "C" void* func_002F3550(void* p, void* a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F3618);
+INCLUDE_ASM("seg/seg_1F1548", cSplashManager__cSplashManager);
 #ifdef SKIP_ASM
-extern "C" void func_003546C8(void *);
+extern "C" void cObjNode__cObjNode(void *);
 extern char D_00488230[];
 
-extern "C" void func_002F3618(void *arg0) {
+extern "C" void cSplashManager__cSplashManager(void *arg0) {
     *(char **)((char*)arg0 + 0xC) = D_00488230;
-    func_003546C8(arg0);
+    cObjNode__cObjNode(arg0);
 }
 #endif
 
@@ -1770,10 +1770,10 @@ extern "C" void func_002F39C8(void *arg0) {
 }
 #endif
 
-INCLUDE_ASM("seg/seg_1F1548", func_002F39E0);
+INCLUDE_ASM("seg/seg_1F1548", cSplashManager_update);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1F1548", func_002F3E28);
+INCLUDE_ASM("seg/seg_1F1548", cSplashManager_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A424C;
@@ -1865,7 +1865,7 @@ struct sEmitter_3E28 : sVBase_3E28 {
 extern "C" void func_002F2C30(void*, sV2_3E28*);
 extern void func_002F3418_3E28(void*, sV2_3E28*) __asm__("func_002F3418");
 
-extern "C" void func_002F3E28(sEmitter_3E28* self)
+extern "C" void cSplashManager_render(sEmitter_3E28* self)
 {
     if (D_004A424C == 0)
         return;
@@ -2601,7 +2601,7 @@ extern "C" void func_002F5148(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F5180);
+INCLUDE_ASM("seg/seg_1F1548", cWorldLightMan_cWorldLightMan);
 #ifdef SKIP_ASM
 extern "C" void cWorldLightMan_initLightCache(void *);
 struct cWorldPainterManArg;
@@ -2611,7 +2611,7 @@ extern void *D_004A28A8;
 struct A5180 { unsigned int v; char pad[0x3C]; A5180() { v = 0xFFFFFFFF; } };
 struct B5180 { unsigned int v; char pad[0x17C]; B5180() { v = 0xFFFFFFFF; } };
 
-extern "C" void *func_002F5180(void *arg0, int arg1) {
+extern "C" void *cWorldLightMan_cWorldLightMan(void *arg0, int arg1) {
     new ((char*)arg0 + 0x10) A5180[8];
     new ((char*)arg0 + 0x210) B5180[32];
     *(int *)arg0 = arg1;

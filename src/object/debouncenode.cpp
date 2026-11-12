@@ -82,14 +82,14 @@ extern "C" void func_00342DD8(void* self)
 }
 #endif
 
-extern "C" void* func_00356B08(void* self);
+extern "C" void* cMoveNode_signal(void* self);
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_00342E78__FPv);
 #ifdef SKIP_ASM
 void* func_00342E78(void* self)
 {
-    return func_00356B08(self);
+    return cMoveNode_signal(self);
 }
 #endif
 
@@ -140,11 +140,11 @@ struct sDebounceVEntry2FA8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00356B30(void* self, void* stream);
+extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
 
 extern "C" void func_00342FA8(void* self, void* stream)
 {
-    func_00356B30(self, stream);
+    cMoveNode_writeToReplayFrame(self, stream);
     sDebounceVEntry2FA8* e = &(*(sDebounceVEntry2FA8**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x2C, 4);
     e = &(*(sDebounceVEntry2FA8**)stream)[1];
@@ -673,11 +673,11 @@ struct sDebounceVEntry {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0034FE90(void* self, void* stream);
+extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
 extern "C" void func_00343718(void* self, void* stream)
 {
-    func_0034FE90(self, stream);
+    cInstanceNode_writeToReplayFrame(self, stream);
     sDebounceVEntry* vt = *(sDebounceVEntry**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0x2C);
 }
@@ -700,7 +700,7 @@ extern "C" void* func_00343768(void* self, void* a1, void* a2, void* a3)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003437C0);
+INCLUDE_ASM("object/debouncenode", cCounterNode_cCounterNode);
 #ifdef SKIP_ASM
 struct sDebounceVEntry37C0 {
     short delta;
@@ -711,7 +711,7 @@ struct sDebounceVEntry37C0 {
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void*, void*);
 extern char D_004903F0[];
 
-extern "C" void* func_003437C0(void* self, void* unused, void* stream)
+extern "C" void* cCounterNode_cCounterNode(void* self, void* unused, void* stream)
 {
     cInstanceNode_cInstanceNode(self, unused, stream);
     *(void**)((char*)self + 0xC) = D_004903F0;
@@ -815,11 +815,11 @@ struct sDebounceVEntryA18 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0034FE90(void* self, void* stream);
+extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
 extern "C" void func_00343A18(void* self, void* stream)
 {
-    func_0034FE90(self, stream);
+    cInstanceNode_writeToReplayFrame(self, stream);
     sDebounceVEntryA18* vt = *(sDebounceVEntryA18**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0x8);
 }
@@ -1146,7 +1146,7 @@ extern "C" sTrackWorld51C0** func_002D1BD8();
 extern "C" void func_003513D0(void* self);
 extern "C" void func_003612C0(void* self);
 extern "C" void func_00351398(void* self, void* src);
-extern "C" void func_003E6448(void* p, int v, int n);
+extern "C" void MEM_fill(void* p, int v, int n);
 extern char D_0048E758[];
 extern char D_0048E768[];
 extern void* D_00490AD0[];
@@ -1318,7 +1318,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
             break;
         }
     }
-    func_003E6448(&self->total, 0, 0xC4);
+    MEM_fill(&self->total, 0, 0xC4);
     self->total = self->count;
     for (i = 0; i < self->count; i++) {
         sDbItem_43A8* item = m->list->items[i];

@@ -191,7 +191,7 @@ public:
 class cComp_s12 : public cCompPart00_s12, public cCompPart01_s12, public cCompPart02_s12, public cCompPart03_s12, public cCompPart04_s12, public cCompPart05_s12, public cCompPart06_s12, public cCompPart07_s12, public cCompPart08_s12, public cCompPart09_s12, public cCompPart10_s12, public cCompPart11_s12, public cCompPart12_s12, public cCompPart13_s12, public cCompPart14_s12, public cCompPart15_s12, public cCompPart16_s12, public cCompPart17_s12, public cCompPart18_s12, public cCompPart19_s12, public cCompPart20_s12, public cCompPart21_s12, public cCompPart22_s12, public cCompPart23_s12, public cCompPart24_s12, public cCompPart25_s12, public cCompPart26_s12, public cCompPart27_s12, public cCompPart28_s12, public cCompPart29_s12, public cCompPart30_s12 {
 public:
     char tail[0xC4];
-    // PORT: func_0010FCD8 constructs this part (fields up to 0xDE8 and the vptr at 0xDE8)
+    // PORT: cRiderHandler_cRiderHandler constructs this part (fields up to 0xDE8 and the vptr at 0xDE8)
     cComp_s12();
     ~cComp_s12() {}
     // Own vtable (D_00458710): a pure slot, then func_00111AC0 and func_00111D98.

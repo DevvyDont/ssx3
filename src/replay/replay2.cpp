@@ -138,9 +138,9 @@ INCLUDE_ASM("replay/replay2", func_00272680);
 
 INCLUDE_ASM("replay/replay2", func_002726A8);
 
-INCLUDE_ASM("replay/replay2", func_00272788);
+INCLUDE_ASM("replay/replay2", cInSeq_cInSeq);
 
-INCLUDE_ASM("replay/replay2", func_002728D0);
+INCLUDE_ASM("replay/replay2", cInSeq__cInSeq);
 
 INCLUDE_ASM("replay/replay2", func_002728F8);
 
@@ -272,45 +272,45 @@ INCLUDE_ASM("replay/replay2", func_00274DE0);
 
 INCLUDE_ASM("replay/replay2", func_002751A0);
 
-INCLUDE_ASM("replay/replay2", func_002752F0);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelSpline_GetValue);
 
-INCLUDE_ASM("replay/replay2", func_002752F8);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelSpline_GetCustom);
 
-INCLUDE_ASM("replay/replay2", func_00275300);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelSpline_GetNextKeyFrame);
 
-INCLUDE_ASM("replay/replay2", func_00275308);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelSpline_GetType);
 
-INCLUDE_ASM("replay/replay2", func_00275310);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelSpline_GetOwner);
 
-INCLUDE_ASM("replay/replay2", func_00275318);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelSpline_IsPlaying);
 
-INCLUDE_ASM("replay/replay2", func_00275328);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelBlock_GetValue);
 
-INCLUDE_ASM("replay/replay2", func_00275330);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelBlock_GetCustom);
 
-INCLUDE_ASM("replay/replay2", func_00275338);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelBlock_GetType);
 
-INCLUDE_ASM("replay/replay2", func_00275340);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelBlock_GetOwner);
 
-INCLUDE_ASM("replay/replay2", func_00275348);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelBlock_IsPlaying);
 
-INCLUDE_ASM("replay/replay2", func_00275358);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelEvent_GetValue);
 
-INCLUDE_ASM("replay/replay2", func_00275360);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelEvent_GetCustom);
 
-INCLUDE_ASM("replay/replay2", func_00275368);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelEvent_GetType);
 
-INCLUDE_ASM("replay/replay2", func_00275370);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelEvent_GetOwner);
 
-INCLUDE_ASM("replay/replay2", func_00275378);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelEvent_IsPlaying);
 
-INCLUDE_ASM("replay/replay2", func_00275388);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelObject_GetValue);
 
-INCLUDE_ASM("replay/replay2", func_00275390);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelObject_GetCustom);
 
-INCLUDE_ASM("replay/replay2", func_00275398);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelObject_GetType);
 
-INCLUDE_ASM("replay/replay2", func_002753A0);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelObject_GetOwner);
 
-INCLUDE_ASM("replay/replay2", func_002753A8);
+INCLUDE_ASM("replay/replay2", cScriptPlayerChannelObject_IsPlaying);
 

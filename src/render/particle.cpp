@@ -347,7 +347,7 @@ extern "C" void func_00371318(void* self, cStream00371318* stream)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00371380);
+INCLUDE_ASM("render/particle", cDynamicEmitter_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPtRS1380 {
@@ -390,7 +390,7 @@ struct sPtObj1380 {
     sPtRS1380 rs;           // 0x1E4
 };
 
-extern "C" void func_00371380(sPtObj1380* self, int blend)
+extern "C" void cDynamicEmitter_render(sPtObj1380* self, int blend)
 {
     if (self->field_0x174 == 0) {
         return;
@@ -432,17 +432,17 @@ extern "C" void* func_003714B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_003714F8);
+INCLUDE_ASM("render/particle", cDynamicColourEmitter__cDynamicColourEmitter);
 #ifdef SKIP_ASM
 extern void* D_004930D0[];
-extern "C" void func_003715B0(void* self, int a1);
-extern "C" void func_00370C08(void* self, int flags);
+extern "C" void cDynamicColourEmitter_purge(void* self, int a1);
+extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags);
 
-extern "C" void func_003714F8(void* self, int flags)
+extern "C" void cDynamicColourEmitter__cDynamicColourEmitter(void* self, int flags)
 {
     *(void***)((char*)self + 0x1F8) = D_004930D0;
-    func_003715B0(self, 0);
-    func_00370C08(self, flags);
+    cDynamicColourEmitter_purge(self, 0);
+    cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(self, flags);
 }
 #endif
 
@@ -467,12 +467,12 @@ extern "C" void cDynamicColourEmitter_Allocate(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/particle", func_003715B0);
+INCLUDE_ASM("render/particle", cDynamicColourEmitter_purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 extern "C" void func_00370CF8(void* self, int a1);
 
-extern "C" void func_003715B0(void* self, int a1)
+extern "C" void cDynamicColourEmitter_purge(void* self, int a1)
 {
     void* p = *(void**)((char*)self + 0x204);
     if (p != 0) {
@@ -905,7 +905,7 @@ INCLUDE_ASM("render/particle", func_00372198);
 // Walks a DMA chain, rebasing REF tag addresses onto the chain start; returns the address past the RET tag.
 
 
-extern "C" void* func_003E6574(void*, void*, int);
+extern "C" void* MEM_copy(void*, void*, int);
 
 extern "C" void func_00372198(char* buf, int addrA, int addrB, int addrC)
 {
@@ -931,7 +931,7 @@ extern "C" void func_00372198(char* buf, int addrA, int addrB, int addrC)
         case 1: {
             int size = qwc << 4;
             src += 0x10;
-            func_003E6574(dst, src, size);
+            MEM_copy(dst, src, size);
             src += size;
             dst += size;
             count += qwc;
@@ -962,7 +962,7 @@ extern "C" void func_00372198(char* buf, int addrA, int addrB, int addrC)
             }
             break;
         case 6:
-            func_003E6574(dst, src, (qwc + 1) * 0x10);
+            MEM_copy(dst, src, (qwc + 1) * 0x10);
             src += 0x10;
             dst += 0x10;
             src += qwc * 0x10;
@@ -982,7 +982,7 @@ INCLUDE_ASM("render/particle", func_00372348);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Repacks a DMA chain in place: copies CNT payloads, blanks REF tags to addrA/addrB, rebases a REF to addrC, stops after RET.
-extern "C" void* func_003E6574(void*, void*, int);
+extern "C" void* MEM_copy(void*, void*, int);
 
 extern "C" void func_00372348(char* buf, int addrA, int addrB, int addrC)
 {
@@ -1008,7 +1008,7 @@ extern "C" void func_00372348(char* buf, int addrA, int addrB, int addrC)
         case 1: {
             int size = qwc << 4;
             src += 0x10;
-            func_003E6574(dst, src, size);
+            MEM_copy(dst, src, size);
             src += size;
             dst += size;
             count += qwc;
@@ -1041,7 +1041,7 @@ extern "C" void func_00372348(char* buf, int addrA, int addrB, int addrC)
                 hdr[1] = 0;
                 count = 0;
             }
-            func_003E6574(dst, src, (qwc + 1) * 0x10);
+            MEM_copy(dst, src, (qwc + 1) * 0x10);
             src += 0x10;
             dst += 0x10;
             src += qwc * 0x10;
@@ -1430,7 +1430,7 @@ INCLUDE_ASM("render/particle", func_00372B78);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 // cBezierCache (render/beziercache.cpp): per patch order (4x4, 6x6, 8x8 control points) a record cache with a free
 // list, point / uv grids, a normal cache with its own free list, and the cubic basis tables.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -1536,9 +1536,9 @@ extern "C" void func_00372B78(sBzCache_2B78* self, int n4, int n6, int n8, int n
     self->records[0] = self->m4x4CacheRecord;
     self->records[1] = self->m6x6CacheRecord;
     self->records[2] = self->m8x8CacheRecord;
-    func_003E6448(self->m4x4CacheRecord, 0, n4 * sizeof(sBzRec_2B78));
-    func_003E6448(self->m6x6CacheRecord, 0, n6 * sizeof(sBzRec_2B78));
-    func_003E6448(self->m8x8CacheRecord, 0, n8 * sizeof(sBzRec_2B78));
+    MEM_fill(self->m4x4CacheRecord, 0, n4 * sizeof(sBzRec_2B78));
+    MEM_fill(self->m6x6CacheRecord, 0, n6 * sizeof(sBzRec_2B78));
+    MEM_fill(self->m8x8CacheRecord, 0, n8 * sizeof(sBzRec_2B78));
 
     self->freeBuf4 = new (D_00492758, 0, 0) int[n4];
     self->freeBuf6 = new (D_00492768, 0, 0) int[n6];
@@ -1768,7 +1768,7 @@ struct sPtPools39D0 {
     int freeCountB[3];              // 0x1D8
 };
 
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
 extern "C" void func_003739D0(sPtPools39D0* self)
 {
@@ -1776,9 +1776,9 @@ extern "C" void func_003739D0(sPtPools39D0* self)
     int n1 = self->cnt[1];
     int n2 = self->cnt[2];
     int size = 0xC;
-    func_003E6448(self->elems[0], 0, n0 * size);
-    func_003E6448(self->elems[1], 0, n1 * size);
-    func_003E6448(self->elems[2], 0, n2 * size);
+    MEM_fill(self->elems[0], 0, n0 * size);
+    MEM_fill(self->elems[1], 0, n1 * size);
+    MEM_fill(self->elems[2], 0, n2 * size);
     self->freeCount[0] = 0;
     self->freeCount[1] = 0;
     self->freeCount[2] = 0;
@@ -5677,24 +5677,24 @@ extern "C" float func_0037C770(void* self)
 //100%
 INCLUDE_ASM("render/particle", func_0037C7C0);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 void func_00366FE0(void* p, int a1);
 
 extern "C" void func_0037C7C0(void* self, int a1)
 {
-    func_003E6448((char*)self + 0x3838, 0, 0x1F40);
+    MEM_fill((char*)self + 0x3838, 0, 0x1F40);
     func_00366FE0(*(void**)((char*)self + 0x18F4), a1);
 }
 #endif
 
-extern "C" void* func_003E6574(void*, void*, int);
+extern "C" void* MEM_copy(void*, void*, int);
 
 //100%
 INCLUDE_ASM("render/particle", func_0037C808__FPv);
 #ifdef SKIP_ASM
 void* func_0037C808(void* self)
 {
-    return func_003E6574((char*)self + 0x18f8, (char*)self + 0x3838, 0x1f40);
+    return MEM_copy((char*)self + 0x18f8, (char*)self + 0x3838, 0x1f40);
 }
 #endif
 
@@ -6133,9 +6133,9 @@ struct sGfxView_D0B0 {
 
 extern char D_004A4390[];
 void* operator_new_D0B0(unsigned int, char*, unsigned int, int) __asm__("operator_new__FUi");
-extern "C" int func_003E6188(void* dst, void* src, int n);
+extern "C" int MEM_move(void* dst, void* src, int n);
 extern "C" unsigned int func_003B47F8(void* src, void* dst);
-extern "C" void* func_002523A8(void* p);
+extern "C" void* MEM_free(void* p);
 
 extern "C" void func_0037D0B0(void* selfp, int a1, void* objp, int a3)
 {
@@ -6189,7 +6189,7 @@ extern "C" void func_0037D0B0(void* selfp, int a1, void* objp, int a3)
         unsigned int size = (ob[0x12] << 16 | ob[0x13] << 8 | ob[0x14]) + 0x10;
         allocated = 1;
         tmp = (char*)operator_new_D0B0(size, D_004A4390, 0x80000100, 0);
-        func_003E6188(tmp, obj, 0x10);
+        MEM_move(tmp, obj, 0x10);
         char* payload = tmp + 0x10;
         func_003B47F8(p10, payload);
         *(unsigned char*)tmp &= 0x7F;
@@ -6210,7 +6210,7 @@ extern "C" void func_0037D0B0(void* selfp, int a1, void* objp, int a3)
     sVE_D0B0* e = &self->vt[0x188 / 8];
     e->fn((char*)self + e->delta, a1, data, obj->s4, obj->s6, fC >> 28, mode, flagB, extra, a3);
     if (allocated) {
-        func_002523A8(tmp);
+        MEM_free(tmp);
     }
 }
 #endif
@@ -7436,7 +7436,7 @@ struct sPtSegHdr {
 
 extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
 extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern int D_004A4474;
 extern int D_004A44FC;
 struct cPS2GraphicsMan {
@@ -7594,9 +7594,9 @@ extern "C" void func_00380CE0(cPS2GraphicsMan* self, sTrail_0CE0* obj)
         p[1] = (unsigned long)0x6E2CC06E << 32;
         p += 2;
         sCol_0CE0 cols[44];
-        func_003E6574(cols, obj->cols + s, first * 4);
+        MEM_copy(cols, obj->cols + s, first * 4);
         if (over > 0)
-            func_003E6574(cols + first, obj->cols, over * 4);
+            MEM_copy(cols + first, obj->cols, over * 4);
         cols[first + over] = *lastC;
         CopyQuads(&p, cols, 11);
         p[0] = (unsigned long)(prog | 0x14000000) << 32;
@@ -10504,7 +10504,7 @@ extern "C" void func_00386E78(sGfx_6E78* self, sPartStrip_6D10* strips, int n)
     unsigned int fbp = self->fbp;
     unsigned int zbp = self->zbp;
     unsigned int start = self->bufAddr;
-    func_003E6448(pkt, 0, 0x30);
+    MEM_fill(pkt, 0, 0x30);
 
     // pass 1: alpha-only FRAME, ZBUF masked, TEST ztst always; guard band
     {
@@ -10845,7 +10845,7 @@ extern "C" void func_003883B8(sPtGfx_83B8* self, void* a1, int n, void* a3, void
         func_0037D968(self);
     }
     unsigned int buf = self->bufAddr;
-    func_003E6448((void*)D_004A5B84, 0, 0x30);
+    MEM_fill((void*)D_004A5B84, 0, 0x30);
     int i;
     for (i = 0; i < n - 1; i++) {
         func_003885E0(self, a1, a3, a4, a5, i, i + 1, f0, f1);

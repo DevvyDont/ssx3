@@ -38,23 +38,23 @@ extern "C" int func_0039FFA0(cUIThing* self, signed char idx)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0000);
+INCLUDE_ASM("ui/uithing", cUIThing_update);
 #ifdef SKIP_ASM
-extern "C" void func_003975E0(void*, void*, unsigned char, unsigned short);
-extern "C" void func_003974B0(void*, unsigned char);
+extern "C" void cUIAnimation_updateThing(void*, void*, unsigned char, unsigned short);
+extern "C" void cUIAnimation_updateFrame(void*, unsigned char);
 
-extern "C" void func_003A0000(void* self, unsigned short ev)
+extern "C" void cUIThing_update(void* self, unsigned short ev)
 {
     void* a = *(void**)((char*)self + 0xC);
     if (a != 0) {
-        func_003975E0(a, self, *(unsigned char*)((char*)self + 0x10), ev);
-        func_003974B0(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
+        cUIAnimation_updateThing(a, self, *(unsigned char*)((char*)self + 0x10), ev);
+        cUIAnimation_updateFrame(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0048);
+INCLUDE_ASM("ui/uithing", cUIThing_setChannelData);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sUIThing0048 {
@@ -82,7 +82,7 @@ struct sUIThing0048 {
 };
 
 // Sets one animatable property (position, rotation, scale, colour, frame...) from a keyframe value.
-extern "C" void func_003A0048(sUIThing0048* self, unsigned short key, float v)
+extern "C" void cUIThing_setChannelData(sUIThing0048* self, unsigned short key, float v)
 {
     switch (key) {
     case 0:
@@ -132,9 +132,9 @@ extern "C" void func_003A0048(sUIThing0048* self, unsigned short key, float v)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0158);
+INCLUDE_ASM("ui/uithing", cUIThing_setChannelDataKCP);
 #ifdef SKIP_ASM
-extern "C" void func_003A0158(void *vself, unsigned int count, short *p)
+extern "C" void cUIThing_setChannelDataKCP(void *vself, unsigned int count, short *p)
 {
     char *self = (char *)vself;
     unsigned int i = 0;
@@ -286,8 +286,8 @@ INCLUDE_ASM("ui/uithing", func_003A03F0);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText*, int);
-// PORT: func_0039FE00 really takes (self, data); other units declare it with one argument.
-void* func_0039FE00_2(void* self, void* data) __asm__("func_0039FE00");
+// PORT: cUIThing_setUIData really takes (self, data); other units declare it with one argument.
+void* cUIThing_setUIData_2(void* self, void* data) __asm__("cUIThing_setUIData");
 
 struct sUIColor03F0 {
     float r, g, b, a;
@@ -315,7 +315,7 @@ struct sUIData03F0 {
 
 extern "C" void func_003A03F0(sUIThing03F0* self, sUIData03F0* data)
 {
-    func_0039FE00_2(self, data);
+    cUIThing_setUIData_2(self, data);
     self->mode = data->mode & 3;
     self->vt[23].fn((char*)self + self->vt[23].delta, data->vis & 1);
     cUIText_setUnicodeStringByID((cUIText*)self, data->textId);
@@ -328,9 +328,9 @@ extern "C" void func_003A03F0(sUIThing03F0* self, sUIData03F0* data)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A04F0);
+INCLUDE_ASM("ui/uithing", cUIText_getFont);
 #ifdef SKIP_ASM
-extern "C" int func_003A04F0(void* self)
+extern "C" int cUIText_getFont(void* self)
 {
     void* p = *(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x5c) + 0xd0) + 0x10);
     if (p != 0) {
@@ -341,18 +341,18 @@ extern "C" int func_003A04F0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0528);
+INCLUDE_ASM("ui/uithing", cUIText_updateLocale);
 #ifdef SKIP_ASM
-extern "C" void func_003A0D00(void* self, unsigned short* str);
+extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
 extern "C" void cUIText_setUnicodeStringPrivate(void* self, unsigned short* str);
 
-struct func_003A0528_sVEntry {
+struct cUIText_updateLocale_sVEntry {
     short delta;
     short index;
     void* fn;
 };
 
-extern "C" void func_003A0528(void* self)
+extern "C" void cUIText_updateLocale(void* self)
 {
     int id = *(int*)((char*)self + 0xB0);
     if (id != 0) {
@@ -361,17 +361,17 @@ extern "C" void func_003A0528(void* self)
         void* c = *(void**)((char*)b + 0x10);
         char* loc = *(char**)((char*)c + 0x10);
         if (loc != 0) {
-            func_003A0528_sVEntry* vt = *(func_003A0528_sVEntry**)(loc + 4);
+            cUIText_updateLocale_sVEntry* vt = *(cUIText_updateLocale_sVEntry**)(loc + 4);
             unsigned short* str = ((unsigned short* (*)(void*, int))vt[4].fn)(loc + vt[4].delta, id);
             if (str != 0) {
                 int f14 = *(int*)((char*)self + 0x14) >> 7;
                 if ((f14 & 1) || ((*(int*)((char*)self + 0x74) >> 6) & 1)) {
-                    func_003A0D00(self, str);
+                    cUIText_setUnicodeStringWrap(self, str);
                 } else {
                     cUIText_setUnicodeStringPrivate(self, str);
                 }
             }
-            func_003A0528_sVEntry* vt2 = *(func_003A0528_sVEntry**)((char*)self + 8);
+            cUIText_updateLocale_sVEntry* vt2 = *(cUIText_updateLocale_sVEntry**)((char*)self + 8);
             ((void (*)(void*, int))vt2[5].fn)((char*)self + vt2[5].delta, 1);
         }
     }

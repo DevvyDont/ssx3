@@ -7,7 +7,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVStateManager_addPDATemplate();
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern char D_0046F4D0[];
 
 extern "C" void cOVState_ENTERLODGE_onCreateScreen(void* self)
@@ -19,20 +19,20 @@ extern "C" void cOVState_ENTERLODGE_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVStateManager_addPDATemplate();
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7210);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onGainFocus);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A23E0[];
 extern char D_004A23E8[];
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_0039E4C0(void* self, void* a1);
+extern "C" void cUIState_onGainFocus(void* self, void* a1);
 
-extern "C" void func_001F7210(void* self, void* a1)
+extern "C" void cOVState_ENTERLODGE_onGainFocus(void* self, void* a1)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A23E0));
     if (obj != 0) {
@@ -42,27 +42,27 @@ extern "C" void func_001F7210(void* self, void* a1)
     if (obj != 0) {
         *(int*)((char*)obj + 0x18) = 1;
     }
-    func_0039E4C0(self, a1);
+    cUIState_onGainFocus(self, a1);
 }
 #endif
 
-extern "C" void* func_0020A430(void*);
+extern "C" void* cOVState_onDestroyScreen(void*);
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7298__FPv);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
-void* func_001F7298(void* self)
+void* cOVState_ENTERLODGE_onDestroyScreen(void* self)
 {
     *(int*)((char*)self + 0x50) = 0;
-    return func_0020A430(self);
+    return cOVState_onDestroyScreen(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F72B8);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onWidgetMenu);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001F72B8(void* self, int a1, unsigned int key)
+extern "C" int cOVState_ENTERLODGE_onWidgetMenu(void* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -77,7 +77,7 @@ extern "C" int func_001F72B8(void* self, int a1, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F72E0);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onWidgetEvent);
 #ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern int D_004A19C4;
@@ -99,7 +99,7 @@ struct sSelf001F72E0 {
     int done;
 };
 
-extern "C" void func_001F72E0(sSelf001F72E0* self, void* widget, int msg)
+extern "C" void cOVState_ENTERLODGE_onWidgetEvent(sSelf001F72E0* self, void* widget, int msg)
 {
     if (widget != 0) {
         switch (msg) {
@@ -135,7 +135,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern char D_0046F4E0[];
 
 extern "C" void cOVState_BIGCHALLENGE_START_onCreateScreen(void* self)
@@ -146,7 +146,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
 }
 #endif
 
@@ -158,10 +158,10 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void* func_00153C88(void* iface, int id);
-extern "C" void* func_00153D28(void* iface, int id);
-extern "C" void func_003A0E90(void* text, void* str);
-extern "C" void func_003A0D00(void* text, void* str);
+extern "C" void* cBEMissionInterface_getMissionName(void* iface, int id);
+extern "C" void* cBEMissionInterface_getMissionLongDesc(void* iface, int id);
+extern "C" void cUIText_setUnicodeString(void* text, void* str);
+extern "C" void cUIText_setUnicodeStringWrap(void* text, void* str);
 extern char D_0046F4F0[];
 extern char D_004A23F0[];
 
@@ -171,11 +171,11 @@ extern "C" int cOVState_BIGCHALLENGE_START_onGainTransition(void* self, int gain
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xA);
         void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046F4F0));
         if (obj) {
-            func_003A0E90(obj, func_00153C88(iface, *(int*)((char*)self + 0x9C)));
+            cUIText_setUnicodeString(obj, cBEMissionInterface_getMissionName(iface, *(int*)((char*)self + 0x9C)));
         }
         obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A23F0));
         if (obj) {
-            func_003A0D00(obj, func_00153D28(iface, *(int*)((char*)self + 0x9C)));
+            cUIText_setUnicodeStringWrap(obj, cBEMissionInterface_getMissionLongDesc(iface, *(int*)((char*)self + 0x9C)));
         }
     }
     return 0;
@@ -183,13 +183,13 @@ extern "C" int cOVState_BIGCHALLENGE_START_onGainTransition(void* self, int gain
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F74E0);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A23E0[];
 extern char D_004A23E8[];
 
-extern "C" void func_001F74E0(void* self, void* item)
+extern "C" void cOVState_BIGCHALLENGE_START_onWidgetCreate(void* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(D_004A23E0)) {
@@ -221,16 +221,16 @@ extern "C" void func_001F7548(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7590);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int func_001F7590(void* self, int a1, int a2)
+extern "C" int cOVState_BIGCHALLENGE_START_onWidgetMenu(void* self, int a1, int a2)
 {
     return a2 == 6 ? 0x101 : 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F75A0);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 void func_0029D6D0(void* self);
@@ -250,7 +250,7 @@ struct sMgr_75A0 {
     int f2A0;
 };
 
-extern "C" void func_001F75A0(void* self, void* item, int msg)
+extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {
         return;
@@ -285,7 +285,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", func_001F76B8);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern char D_0046F500[];
 
 extern "C" void func_001F76B8(void* self)
@@ -299,7 +299,7 @@ extern "C" void func_001F76B8(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
 }
 #endif
 
@@ -354,7 +354,7 @@ extern "C" int func_001F77F0(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7800);
 #ifdef SKIP_ASM
-extern "C" void func_0020AB50(int id);
+extern "C" void cOVStateManager_triggerOverlay(int id);
 // PORT: func_0039F190 returns the last node; the unit declares it void.
 void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
 struct cUIScreen;
@@ -378,7 +378,7 @@ extern "C" void func_001F7800(void* self, void* item, int msg)
             return;
         }
         if (v == 2) {
-            func_0020AB50(0x1D);
+            cOVStateManager_triggerOverlay(0x1D);
             return;
         }
         break;
@@ -420,14 +420,14 @@ extern "C" char* func_00155190(void* iface, int i);
 extern "C" char* func_00155208(void* iface, int i);
 extern "C" int func_001FD190();
 extern "C" char* func_0020A1A8(char* s);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void* p, int id);
-extern "C" void func_002C2508(void* str, int a1);
+extern "C" void strcpy1(void* str, int a1);
 extern "C" void func_002C2540(void* str, const char* s);
-// PORT: func_002C26D0 is a varargs formatter (dst, fmt, ...)
-extern "C" void func_002C26D0_1F7958(void* dst, void* fmt, ...) __asm__("func_002C26D0");
-extern "C" void func_003A0E90(void* text, void* str);
+// PORT: sprintf1 is a varargs formatter (dst, fmt, ...)
+extern "C" void sprintf1_1F7958(void* dst, void* fmt, ...) __asm__("sprintf1");
+extern "C" void cUIText_setUnicodeString(void* text, void* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern void* D_004A28A8;
 extern int D_004A2700;
@@ -488,7 +488,7 @@ extern "C" void func_001F7958(char* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     full = 1;
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* stats = cBE_getInterface_Fv(cBE_getBE(), 8);
     signed char* g = (signed char*)D_00535BC8;
@@ -496,11 +496,11 @@ extern "C" void func_001F7958(char* self)
     int mode = g[0x48];
     switch (ev) {
     case 6 ... 11:
-        func_002C2508(wtext, func_001FD190());
+        strcpy1(wtext, func_001FD190());
         break;
     case 5:
         func_002C2540(wfmt, D_0046F520);
-        func_002C26D0_1F7958(wtext, wfmt, func_00144BF0(race));
+        sprintf1_1F7958(wtext, wfmt, func_00144BF0(race));
         break;
     default: {
         int name = 0;
@@ -520,11 +520,11 @@ extern "C" void func_001F7958(char* self)
             break;
         }
         func_002C2540(wfmt, D_004A2400);
-        func_002C26D0_1F7958(wtext, wfmt, func_00144BF0(race), name);
+        sprintf1_1F7958(wtext, wfmt, func_00144BF0(race), name);
         break;
     }
     }
-    func_003A0E90(cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F530)), wtext);
+    cUIText_setUnicodeString(cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F530)), wtext);
     signed char* g2 = (signed char*)D_00535BC8;
     int m = g2[0x48];
     if (m == 0 || m == 5) {
@@ -604,12 +604,12 @@ extern "C" void cOVState_TOPTIMES_onWidgetCreate(void* self, cUIText* w)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7F08);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0039E4C0(void* self, void* a1);
+extern "C" void cUIState_onGainFocus(void* self, void* a1);
 extern "C" void func_0020A6F0(void* self, const char* name, const char* ext);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern signed char D_00535C11[];
@@ -632,9 +632,9 @@ static inline void LoadRider1F7F08(void* self, int n)
     func_0020A6F0(self, name, D_0046E4E8);
 }
 
-extern "C" void func_001F7F08(void* self, void* a1)
+extern "C" void cOVState_TOPTIMES_onGainFocus(void* self, void* a1)
 {
-    func_0039E4C0(self, a1);
+    cUIState_onGainFocus(self, a1);
     char* prof = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int id = *(int*)(prof + 0x18);
@@ -651,16 +651,16 @@ extern "C" void func_001F7F08(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F80C8);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int func_001F80C8(void* self, int a1, int a2)
+extern "C" int cOVState_TOPTIMES_onWidgetMenu(void* self, int a1, int a2)
 {
     return a2 == 6 ? 0x101 : 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F80D8);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onWidgetEvent);
 #ifdef SKIP_ASM
 struct sVEntry_001F80D8 {
     short delta;
@@ -668,7 +668,7 @@ struct sVEntry_001F80D8 {
     void (*fn)(void*);
 };
 
-extern "C" void func_001F80D8(void* self, void* a1, int a2)
+extern "C" void cOVState_TOPTIMES_onWidgetEvent(void* self, void* a1, int a2)
 {
     if (a1 != 0) {
         if (a2 == 5) {
@@ -683,7 +683,7 @@ extern "C" void func_001F80D8(void* self, void* a1, int a2)
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F8118);
 #ifdef SKIP_ASM
 extern int D_004A26FC;
-extern "C" void func_0020AB50(int id);
+extern "C" void cOVStateManager_triggerOverlay(int id);
 
 extern "C" void func_001F8118(void* self, void* a1)
 {
@@ -696,7 +696,7 @@ extern "C" void func_001F8118(void* self, void* a1)
             break;
         case 1:
             *(int*)((char*)self + 0xA0) = v;
-            func_0020AB50(0x13);
+            cOVStateManager_triggerOverlay(0x13);
             break;
         }
     }

@@ -32,8 +32,8 @@ INCLUDE_ASM("be/bestate", func_001530E0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 void* cBENewRaceInterface_getThis();
 void* cBENewPlayerInterface_getThis();
-extern "C" void* func_0014EDD8();
-extern "C" void* func_00147F78();
+extern "C" void* cBECharacterInterface_getThis();
+extern "C" void* cBEStatInterface_getThis();
 void* cBEOptionInterface_getThis();
 void* cBEBAGTInterface_getThis();
 void* cBENetworkInterface_getThis();
@@ -54,9 +54,9 @@ extern "C" void* func_001530E0(void* self, int kind)
     case 1:
         return cBENewPlayerInterface_getThis();
     case 2:
-        return func_0014EDD8();
+        return cBECharacterInterface_getThis();
     case 3:
-        return func_00147F78();
+        return cBEStatInterface_getThis();
     case 4:
         return cBEOptionInterface_getThis();
     case 6:

@@ -28,22 +28,22 @@ extern "C" void* cUIAnimationBank_getAnimationByHashName(unsigned int** self, in
 #endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_003971C8);
+INCLUDE_ASM("ui/uianimation", cUIAnimationChannel_evalAtFrameFloat);
 #ifdef SKIP_ASM
-struct func_003971C8_sKey {
+struct cUIAnimationChannel_evalAtFrameFloat_sKey {
     unsigned short dt;
     short value;
 };
 
-struct func_003971C8_sAnim {
+struct cUIAnimationChannel_evalAtFrameFloat_sAnim {
     char pad[6];
     unsigned short count;
-    func_003971C8_sKey keys[1];
+    cUIAnimationChannel_evalAtFrameFloat_sKey keys[1];
 };
 
-extern "C" float func_003971C8(func_003971C8_sAnim** self, int t)
+extern "C" float cUIAnimationChannel_evalAtFrameFloat(cUIAnimationChannel_evalAtFrameFloat_sAnim** self, int t)
 {
-    func_003971C8_sAnim* a = *self;
+    cUIAnimationChannel_evalAtFrameFloat_sAnim* a = *self;
     if (a == 0) {
         return 0.0f;
     }
@@ -52,7 +52,7 @@ extern "C" float func_003971C8(func_003971C8_sAnim** self, int t)
     float prevV = a->keys[0].value;
     int accT = 0;
     float v = 0.0f;
-    func_003971C8_sKey* k = &a->keys[1];
+    cUIAnimationChannel_evalAtFrameFloat_sKey* k = &a->keys[1];
     for (i = 1; i < a->count; i++, k++) {
         int dt = k->dt;
         accT += dt;
@@ -68,9 +68,9 @@ extern "C" float func_003971C8(func_003971C8_sAnim** self, int t)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_00397278);
+INCLUDE_ASM("ui/uianimation", cUIAnimationChannel_getAnimChanType);
 #ifdef SKIP_ASM
-extern "C" unsigned short func_00397278(void* self)
+extern "C" unsigned short cUIAnimationChannel_getAnimChanType(void* self)
 {
     void* p = *(void**)self;
     if (p != 0) {
@@ -168,9 +168,9 @@ extern "C" short func_00397458(void **arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_00397468);
+INCLUDE_ASM("ui/uianimation", cUIAnimation_start);
 #ifdef SKIP_ASM
-extern "C" void func_00397468(void* self, int mode, unsigned short v)
+extern "C" void cUIAnimation_start(void* self, int mode, unsigned short v)
 {
     mode &= 7;
     if (mode == 0) {
@@ -187,24 +187,24 @@ extern "C" void func_00397468(void* self, int mode, unsigned short v)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_003974B0);
+INCLUDE_ASM("ui/uianimation", cUIAnimation_updateFrame);
 #ifdef SKIP_ASM
-struct func_003974B0_sData {
+struct cUIAnimation_updateFrame_sData {
     short pad0;
     unsigned short count;
 };
 
-struct func_003974B0_sAnim {
-    func_003974B0_sData* data;
+struct cUIAnimation_updateFrame_sAnim {
+    cUIAnimation_updateFrame_sData* data;
     char pad4[6];
     short frame;
     short padc;
     signed char dir;
 };
 
-extern "C" void func_003974B0(func_003974B0_sAnim* self, unsigned char flags)
+extern "C" void cUIAnimation_updateFrame(cUIAnimation_updateFrame_sAnim* self, unsigned char flags)
 {
-    func_003974B0_sData* data = self->data;
+    cUIAnimation_updateFrame_sData* data = self->data;
     int mode;
     if (data == 0) {
         return;
@@ -257,7 +257,7 @@ extern "C" void func_003974B0(func_003974B0_sAnim* self, unsigned char flags)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_003975E0);
+INCLUDE_ASM("ui/uianimation", cUIAnimation_updateThing);
 #ifdef SKIP_ASM
 struct sUIAnimVt75E0 { short delta; short index; void (*fn)(void*, int, float); };
 struct sUIAnimHdr75E0 { short f0; unsigned short nframes; unsigned int ntracks; };
@@ -269,7 +269,7 @@ struct sUIAnim75E0 {
     unsigned short start;       // 0xC
 };
 
-extern "C" void func_003975E0(sUIAnim75E0* self, char* obj, int mode, unsigned short t)
+extern "C" void cUIAnimation_updateThing(sUIAnim75E0* self, char* obj, int mode, unsigned short t)
 {
     unsigned short frame = self->frame;
     if ((mode & 7) == 0 && self->start != 0xFFFF) {
@@ -281,9 +281,9 @@ extern "C" void func_003975E0(sUIAnim75E0* self, char* obj, int mode, unsigned s
     if (self->cur == frame) return;
     if (frame < self->hdr->nframes) {
         for (unsigned int i = 0; i < self->hdr->ntracks; i++) {
-            float v = func_003971C8((func_003971C8_sAnim**)(self->tracks + (i << 2)), frame);
+            float v = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)(self->tracks + (i << 2)), frame);
             sUIAnimVt75E0* vt = *(sUIAnimVt75E0**)(obj + 8);
-            vt[12].fn(obj + vt[12].delta, func_00397278(self->tracks + (i << 2)), v);
+            vt[12].fn(obj + vt[12].delta, cUIAnimationChannel_getAnimChanType(self->tracks + (i << 2)), v);
         }
     }
     self->cur = frame;

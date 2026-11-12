@@ -13,7 +13,7 @@ extern int* D_004A1250;
 extern char D_004A1200[];
 extern char D_0045A638[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00149860(void* mem);
+extern "C" void* cBELibrary_cBELibrary(void* mem);
 void* cBEPreRaceState_getState(void* self);
 void* cBERaceState_getState(void* self);
 void* cBEPostRaceState_getState(void* self);
@@ -33,7 +33,7 @@ extern "C" void* cBE_getBE()
     if (D_004A11EC == 0)
     {
         D_004A11EC = (int*)cMemMan_alloc(4, D_004A1200, 0, 0);
-        D_004A11F8 = func_00149860(cMemMan_alloc(1, D_0045A638, 0, 0));
+        D_004A11F8 = cBELibrary_cBELibrary(cMemMan_alloc(1, D_0045A638, 0, 0));
         D_005308A8[0] = (sBEInterface*)cBEPreRaceState_getState((void*)0);
         D_005308A8[1] = (sBEInterface*)cBERaceState_getState((void*)1);
         D_005308A8[2] = (sBEInterface*)cBEPostRaceState_getState((void*)2);
@@ -92,7 +92,7 @@ void* cBE_getInterface_impl(void* be, int kind)
 #endif
 
 //100%
-INCLUDE_ASM("be/be", func_0014DD98);
+INCLUDE_ASM("be/be", cBE_purgeBE);
 #ifdef SKIP_ASM
 class cBEStateV_0014DD98
 {
@@ -104,13 +104,13 @@ public:
 extern void* D_004A11F8;
 extern int* D_004A11EC;
 extern int D_004A11F0;
-extern "C" void func_001499A8(void* p, int a);
+extern "C" void cBELibrary__cBELibrary(void* p, int a);
 void operator_delete(int* ptr);
 
-extern "C" void func_0014DD98(void)
+extern "C" void cBE_purgeBE(void)
 {
     if (D_004A11F8)
-        func_001499A8(D_004A11F8, 3);
+        cBELibrary__cBELibrary(D_004A11F8, 3);
     ((cBEStateV_0014DD98*)D_005308A8[0])->shutdown();
     ((cBEStateV_0014DD98*)D_005308A8[1])->shutdown();
     ((cBEStateV_0014DD98*)D_005308A8[2])->shutdown();

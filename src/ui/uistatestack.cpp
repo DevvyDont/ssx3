@@ -26,7 +26,7 @@ extern "C" void cUIStateStack_pushExplicit(void* self, cUIStateStack_pushExplici
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F290);
+INCLUDE_ASM("ui/uistatestack", cUIStateStack_pushPopup);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct cList;
@@ -34,7 +34,7 @@ void* cList_first(cList*);
 struct cListNode;
 void cList_addToFront(cList*, cListNode*);
 
-struct func_0039F290_sState {
+struct cUIStateStack_pushPopup_sState {
     char pad0[0x1C];
     unsigned int b0 : 1;
     unsigned int level : 2;
@@ -42,26 +42,26 @@ struct func_0039F290_sState {
     unsigned int b4 : 1;
     unsigned int b5 : 1;
     unsigned int rest : 26;
-    func_0039F290_sState* parent;   // 0x20
+    cUIStateStack_pushPopup_sState* parent;   // 0x20
 };
 
 // A state gets covered by a newly pushed one: it is no longer on top and sits one level deeper.
-static inline void func_0039F290_cover(func_0039F290_sState* st)
+static inline void cUIStateStack_pushPopup_cover(cUIStateStack_pushPopup_sState* st)
 {
     st->b5 = 0;
     st->level = st->level + 1;
 }
 
 // Pushes a state, covering its parent if it has one, else the current top of the stack.
-extern "C" void func_0039F290(cList* self, func_0039F290_sState* st)
+extern "C" void cUIStateStack_pushPopup(cList* self, cUIStateStack_pushPopup_sState* st)
 {
-    func_0039F290_sState* top = st->parent;
+    cUIStateStack_pushPopup_sState* top = st->parent;
     if (top != 0) {
-        func_0039F290_cover(top);
+        cUIStateStack_pushPopup_cover(top);
     } else {
-        top = (func_0039F290_sState*)cList_first(self);
+        top = (cUIStateStack_pushPopup_sState*)cList_first(self);
         if (top != 0) {
-            func_0039F290_cover(top);
+            cUIStateStack_pushPopup_cover(top);
         }
     }
     st->b0 = 1;
@@ -111,14 +111,14 @@ extern "C" void cUIStateStack_pushSpecial(cList* self, cUIStateStack_sState* st,
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F400);
+INCLUDE_ASM("ui/uistatestack", cUIStateStack_push);
 #ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList*);
 struct cListNode;
 void cList_addToFront(cList*, cListNode*);
 
-struct func_0039F400_sState {
+struct cUIStateStack_push_sState {
     char pad0[0x1C];
     unsigned int b0 : 1;
     unsigned int b1 : 1;
@@ -131,15 +131,15 @@ struct func_0039F400_sState {
     unsigned int id : 6;
 };
 
-static inline int func_0039F400_stateId(func_0039F400_sState* s) { return s->id; }
+static inline int cUIStateStack_push_stateId(cUIStateStack_push_sState* s) { return s->id; }
 
-extern "C" void func_0039F400(cList* self, func_0039F400_sState* st)
+extern "C" void cUIStateStack_push(cList* self, cUIStateStack_push_sState* st)
 {
     int covered = 0;
-    func_0039F400_sState* top = (func_0039F400_sState*)cList_first(self);
+    cUIStateStack_push_sState* top = (cUIStateStack_push_sState*)cList_first(self);
     if (top != 0) {
         int f = *(int*)((char*)top + 0x1C);
-        if (((f >> 5) & 1) && ((f >> 6) & 1) == 0 && func_0039F400_stateId(top) < 6) {
+        if (((f >> 5) & 1) && ((f >> 6) & 1) == 0 && cUIStateStack_push_stateId(top) < 6) {
             covered = 1;
             top->id = 6;
             top->b7 = 1;
@@ -467,12 +467,12 @@ extern "C" void func_0039F8C8(cList* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F9D8);
+INCLUDE_ASM("ui/uistatestack", cUIStateStack_findState);
 #ifdef SKIP_ASM
 struct cListNode;
 int cListNode_isSentinel(cListNode*);
 
-extern "C" void* func_0039F9D8(void* self, int id)
+extern "C" void* cUIStateStack_findState(void* self, int id)
 {
     char* n = (char*)cList_first((cList*)self);
     if (n != 0) {
@@ -628,23 +628,23 @@ extern "C" func_0039FB30_sUIObj* func_0039FB30(func_0039FB30_sUIObj* self, int a
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FC48);
+INCLUDE_ASM("ui/uistatestack", cUIThing__cUIThing);
 #ifdef SKIP_ASM
 extern "C" void func_003A4868(void* self);
 void operator_delete(int* ptr);
 extern void* D_00494CC0[];
 
-class func_0039FC48_cVirt {
+class cUIThing__cUIThing_cVirt {
 public:
     char pad[0x10];
     // vptr at 0x10; slot N at vtable offset N*8
     virtual void v01(int);
 };
 
-extern "C" void func_0039FC48(void* self, int flags)
+extern "C" void cUIThing__cUIThing(void* self, int flags)
 {
     *(void**)((char*)self + 0x8) = D_00494BD8;
-    func_0039FC48_cVirt* o = *(func_0039FC48_cVirt**)((char*)self + 0xC);
+    cUIThing__cUIThing_cVirt* o = *(cUIThing__cUIThing_cVirt**)((char*)self + 0xC);
     if (o != 0) {
         o->v01(3);
     }
@@ -657,24 +657,24 @@ extern "C" void func_0039FC48(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FCC8);
+INCLUDE_ASM("ui/uistatestack", cUIThing_playAnimation);
 #ifdef SKIP_ASM
-extern "C" void func_0039FD38(void* self);
-extern "C" void func_00397468(void* self, int mode, unsigned short v);
+extern "C" void cUIThing_deleteAnimation(void* self);
+extern "C" void cUIAnimation_start(void* self, int mode, unsigned short v);
 
-extern "C" void func_0039FCC8(void* self, void* anim, unsigned char mode, unsigned short v)
+extern "C" void cUIThing_playAnimation(void* self, void* anim, unsigned char mode, unsigned short v)
 {
     if (*(void**)((char*)self + 0xC) != anim) {
-        func_0039FD38(self);
+        cUIThing_deleteAnimation(self);
     }
     *(unsigned char*)((char*)self + 0x10) = mode;
     *(void**)((char*)self + 0xC) = anim;
-    func_00397468(anim, *(unsigned char*)((char*)self + 0x10), v);
+    cUIAnimation_start(anim, *(unsigned char*)((char*)self + 0x10), v);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FD38);
+INCLUDE_ASM("ui/uistatestack", cUIThing_deleteAnimation);
 #ifdef SKIP_ASM
 struct sVEntry39FD38 {
     short delta;
@@ -682,7 +682,7 @@ struct sVEntry39FD38 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_0039FD38(void* self)
+extern "C" void cUIThing_deleteAnimation(void* self)
 {
     void* obj = *(void**)((char*)self + 0xC);
     if (obj != 0) {
@@ -726,7 +726,7 @@ extern "C" int func_0039FDD8(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FE00);
+INCLUDE_ASM("ui/uistatestack", cUIThing_setUIData);
 #ifdef SKIP_ASM
 struct sStateDef39FE00 {
     int f0;
@@ -759,7 +759,7 @@ struct sState39FE00 {
 };
 
 // Initialises a UI state from its definition record (id, layer, flags) and points it at the following data.
-extern "C" void func_0039FE00(sState39FE00* self, sStateDef39FE00* def)
+extern "C" void cUIThing_setUIData(sState39FE00* self, sStateDef39FE00* def)
 {
     self->id = def->id;
     self->layer = def->layer;
@@ -819,9 +819,9 @@ int func_0039FF50(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FF60);
+INCLUDE_ASM("ui/uistatestack", cUIThing_getObjectByHashName);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FF60(void* self, int a1)
+extern "C" void* cUIThing_getObjectByHashName(void* self, int a1)
 {
     return *(int*)((char*)self + 0x38) == a1 ? self : 0;
 }

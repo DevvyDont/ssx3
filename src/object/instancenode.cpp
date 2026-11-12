@@ -23,13 +23,13 @@ extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/instancenode", func_0034FBF0);
+INCLUDE_ASM("object/instancenode", cInstanceNode__cInstanceNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0034FC80(void* self, void* a1);
-extern void* func_00354920_dtor(void* self, int flags) __asm__("func_00354920__FPv");
+extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
 
-extern "C" void func_0034FBF0(void* self, int flags)
+extern "C" void cInstanceNode__cInstanceNode(void* self, int flags)
 {
     *(void***)((char*)self + 0xc) = (void**)D_00491C80;
     func_0034FC80(self, *(void**)((char*)self + 0x18));
@@ -40,7 +40,7 @@ extern "C" void func_0034FBF0(void* self, int flags)
         *(int*)(o + 8) = v | (v >> 16);
     }
     *(int*)(*(char**)((char*)self + 0x18) + 8) |= 2;
-    func_00354920_dtor(self, flags);
+    cSortObjNode__cSortObjNode_dtor(self, flags);
 }
 #endif
 
@@ -87,19 +87,19 @@ void* func_0034FCC0(void* self)
 }
 #endif
 
-extern "C" void* func_002D1A30(int);
+extern "C" void* cObjectInterface_runOnLoseFocusScript(int);
 
 //100%
-INCLUDE_ASM("object/instancenode", func_0034FCE0__FPv);
+INCLUDE_ASM("object/instancenode", cInstanceNode_runOnLoseFocusScript__FPv);
 #ifdef SKIP_ASM
-void* func_0034FCE0(void* self)
+void* cInstanceNode_runOnLoseFocusScript(void* self)
 {
-    return func_002D1A30(*(int*)((char*)self + 0x18));
+    return cObjectInterface_runOnLoseFocusScript(*(int*)((char*)self + 0x18));
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/instancenode", func_0034FD00);
+INCLUDE_ASM("object/instancenode", cInstanceNode_expire);
 #ifdef SKIP_ASM
 struct sInstNodeVEntryFD00 {
     short delta;
@@ -107,7 +107,7 @@ struct sInstNodeVEntryFD00 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_0034FD00(void* self, int a1)
+extern "C" void cInstanceNode_expire(void* self, int a1)
 {
     if (a1 != 0) {
         if (func_0034FCC0(self) != 0) return;
@@ -127,7 +127,7 @@ extern "C" void func_0034FD00(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("object/instancenode", func_0034FD90);
+INCLUDE_ASM("object/instancenode", cInstanceNode_loseFocus);
 #ifdef SKIP_ASM
 struct sInstNodeVEntryFD90 {
     short delta;
@@ -135,7 +135,7 @@ struct sInstNodeVEntryFD90 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_0034FD90(void* self)
+extern "C" void cInstanceNode_loseFocus(void* self)
 {
     int* f = (int*)(*(char**)((char*)self + 0x18) + 0x8);
     *f &= 0xFFFF0000;
@@ -186,7 +186,7 @@ extern "C" void func_0034FE28(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/instancenode", func_0034FE90);
+INCLUDE_ASM("object/instancenode", cInstanceNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sInstNodeVEntry {
     short delta;
@@ -194,11 +194,11 @@ struct sInstNodeVEntry {
     void (*fn)(void*, void*);
 };
 
-extern "C" void func_00354980(void* self, void* stream);
+extern "C" void cSortObjNode_writeToReplayFrame(void* self, void* stream);
 
-extern "C" void func_0034FE90(void* self, void* stream)
+extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream)
 {
-    func_00354980(self, stream);
+    cSortObjNode_writeToReplayFrame(self, stream);
     sInstNodeVEntry* vt = *(sInstNodeVEntry**)stream;
     vt[6].fn((char*)stream + vt[6].delta, self);
 }
@@ -207,7 +207,7 @@ extern "C" void func_0034FE90(void* self, void* stream)
 INCLUDE_ASM("object/instancenode", func_0034FED8);
 
 //100%
-INCLUDE_ASM("object/instancenode", func_00350288);
+INCLUDE_ASM("object/instancenode", cInstanceNode_makeAnimMats);
 #ifdef SKIP_ASM
 struct sInMat44_0288 {
     float m[4][4];
@@ -306,7 +306,7 @@ static inline void buildBone_0288(sInMat44_0288* d, const sInMat44_0288* parent,
     vu0CopyMat_0288(d, &t);
 }
 
-extern "C" void func_00350288(void* self, sInMat44_0288* parent, sInMat44_0288* out)
+extern "C" void cInstanceNode_makeAnimMats(void* self, sInMat44_0288* parent, sInMat44_0288* out)
 {
     char* o = *(char**)((char*)self + 0x18);
     sInSkel_0288* sk = *(sInSkel_0288**)(o + 0x80);

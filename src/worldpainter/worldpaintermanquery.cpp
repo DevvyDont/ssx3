@@ -234,13 +234,13 @@ void func_002C1458(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1460);
+INCLUDE_ASM("worldpainter/worldpaintermanquery", tWorldPainterQuery__tWorldPainterQuery);
 #ifdef SKIP_ASM
 extern void* D_00485D30[];
 void operator_delete(int* ptr);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_002C1460(void* self, int flags)
+extern "C" void tWorldPainterQuery__tWorldPainterQuery(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = D_00485D30;
     if (flags & 1) {

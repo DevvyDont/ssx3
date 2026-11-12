@@ -8,15 +8,15 @@ INCLUDE_ASM("main/game2", func_0022FA98);
 
 INCLUDE_ASM("main/game2", func_00230050);
 
-INCLUDE_ASM("main/game2", func_002300F0);
+INCLUDE_ASM("main/game2", cGame_resetWorld);
 
-INCLUDE_ASM("main/game2", func_00230180);
+INCLUDE_ASM("main/game2", cGame_partialRestart);
 
 INCLUDE_ASM("main/game2", cGame_restart);
 
 INCLUDE_ASM("main/game2", func_00230338);
 
-INCLUDE_ASM("main/game2", func_00230360);
+INCLUDE_ASM("main/game2", cGame_sectionUnloading);
 
 INCLUDE_ASM("main/game2", func_00230430);
 
@@ -58,7 +58,7 @@ INCLUDE_ASM("main/game2", func_00231CB0);
 
 INCLUDE_ASM("main/game2", func_00231CD0);
 
-INCLUDE_ASM("main/game2", func_00231CF0);
+INCLUDE_ASM("main/game2", cFadeScreen_loseFocus);
 
 INCLUDE_ASM("main/game2", func_00231D18);
 

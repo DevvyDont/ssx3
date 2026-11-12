@@ -396,9 +396,9 @@ extern "C" void func_00314050(void* node, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_003142E8__FPv);
+INCLUDE_ASM("animation/animsequencer", cAnimSequencer_init__FPv);
 #ifdef SKIP_ASM
-void func_003142E8(void* self)
+void cAnimSequencer_init(void* self)
 {
     *(int*)self = 0;
     *(void**)((char*)self + 0x4) = 0;
@@ -644,7 +644,7 @@ extern "C" void func_003145F8(sSequencer_003145F8* self, sSeqNode_003145F8* node
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314668);
+INCLUDE_ASM("animation/animsequencer", cAnimSequencer_expireAll);
 #ifdef SKIP_ASM
 struct sSeqNode_00314668 {
     char pad_0x00[0xC8];
@@ -656,7 +656,7 @@ struct sSequencer_00314668 {
     sSeqNode_00314668* mFirstSequence; // 0x4
 };
 
-extern "C" void func_00314668(sSequencer_00314668* self)
+extern "C" void cAnimSequencer_expireAll(sSequencer_00314668* self)
 {
     while (self->mFirstSequence != 0)
     {
@@ -785,7 +785,7 @@ INCLUDE_ASM("animation/animsequencer", func_00314880);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void func_00314050(void* node, void* stream);
 extern const char D_0048A5C0[];
 
@@ -813,7 +813,7 @@ extern "C" void func_00314880(void* self, void* stream)
     for (int i = 0; i < n; i++)
     {
         sSeqNode_314880* node = new (D_0048A5C0, 0x20000000, 0) sSeqNode_314880;
-        func_003E6448(node, 0, 0xD0);
+        MEM_fill(node, 0, 0xD0);
         func_00314050(node, stream);
         func_00314368((sSequencer_00314368*)self, (sSeqNode_00314368*)node);
     }
@@ -961,7 +961,7 @@ extern "C" char* func_00314B70(char* self, const char* name) {
 #endif
 
 //100%
-INCLUDE_ASM("animation/animsequencer", func_00314C00);
+INCLUDE_ASM("animation/animsequencer", cMdfArchive_getModelPart);
 #ifdef SKIP_ASM
 extern "C" int func_0041AA88(const char* a, const char* b);
 extern "C" void* cMdfArchive_getModelPartByIndex(void* self, int index);
@@ -981,7 +981,7 @@ struct sMdfArchive {
     sMdfPart60* parts;  // 0x8
 };
 
-extern "C" void* func_00314C00(sMdfArchive* self, const char* name)
+extern "C" void* cMdfArchive_getModelPart(sMdfArchive* self, const char* name)
 {
     for (int i = 0; i < self->header->count; i++)
     {

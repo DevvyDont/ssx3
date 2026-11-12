@@ -4,9 +4,9 @@
 INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_initialize);
 #ifdef SKIP_ASM
 extern "C" void* cRider_cRider(void* self);
-extern "C" void func_003E6448(void* p, int c, int n);
-struct func_002E8560_sTrail;
-extern "C" void func_002E8560(func_002E8560_sTrail* self);
+extern "C" void MEM_fill(void* p, int c, int n);
+struct cBoardTrailFX_reset_sTrail;
+extern "C" void cBoardTrailFX_reset(cBoardTrailFX_reset_sTrail* self);
 extern char D_00459B90[];
 extern char D_00487B20[];
 
@@ -79,8 +79,8 @@ extern "C" void* cBoardTrailFX_initialize(cBoardTrailFX* self, int inChrg)
         s[i] = self->strip[0] + i * 54;
     }
     self->fC = 0;
-    func_003E6448(self->strip[0], 0, 0x3CC0);
-    func_002E8560((func_002E8560_sTrail*)self);
+    MEM_fill(self->strip[0], 0, 0x3CC0);
+    cBoardTrailFX_reset((cBoardTrailFX_reset_sTrail*)self);
     return self;
 }
 #endif
@@ -103,22 +103,22 @@ __asm__(".globl func_002E83F0\n.type func_002E83F0,@function\nfunc_002E83F0 = _$
 __asm__("_vt$15cVbDtor002E83F0$13cRiderVbC_btf = D_00488BB8\n"
         "_vt$15cVbDtor002E83F0$14cRiderVbBC_btf = D_00459B90\n"
         "_vt$15cVbDtor002E83F0$12cRiderVb_btf = D_00488C00\n"
-        "_$_12cRiderVb_btf = func_0011B978\n");
+        "_$_12cRiderVb_btf = cRider__cRider\n");
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002E8560);
+INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_reset);
 #ifdef SKIP_ASM
-struct func_002E8560_sVec4 {
+struct cBoardTrailFX_reset_sVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct func_002E8560_sVtx {
+struct cBoardTrailFX_reset_sVtx {
     float x, y, z;
     char pad[0x24];
 };
 
-struct func_002E8560_sTrail {
+struct cBoardTrailFX_reset_sTrail {
     int f0;
     float f4;
     float f8;
@@ -138,19 +138,19 @@ struct func_002E8560_sTrail {
     int fA0;
     int fA4;
     char padA8[8];
-    func_002E8560_sVec4 colB0;
-    func_002E8560_sVec4 colC0;
-    func_002E8560_sVec4 colD0;
+    cBoardTrailFX_reset_sVec4 colB0;
+    cBoardTrailFX_reset_sVec4 colC0;
+    cBoardTrailFX_reset_sVec4 colD0;
     int fE0;
 };
 
-extern func_002E8560_sVec4 D_004FF130;
-extern func_002E8560_sVec4 D_004FF120;
+extern cBoardTrailFX_reset_sVec4 D_004FF130;
+extern cBoardTrailFX_reset_sVec4 D_004FF120;
 extern float D_004A45B0;
 extern float D_004A45B4;
 extern float D_004A45B8;
 
-extern "C" void func_002E8560(func_002E8560_sTrail* self)
+extern "C" void cBoardTrailFX_reset(cBoardTrailFX_reset_sTrail* self)
 {
     self->f94 = 2;
     self->f90 = 0;
@@ -981,19 +981,19 @@ extern "C" void func_002EA538(char** trails, int n)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA670);
+INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_cCutSceneTransitionMan);
 #ifdef SKIP_ASM
 extern void* D_00487F30[];
-extern "C" void* func_00354648(void* self);
-extern "C" void func_002EAA28(void* self);
+extern "C" void* cObjNode_cObjNode1(void* self);
+extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self);
 
-extern "C" void* func_002EA670(void* self)
+extern "C" void* cCutSceneTransitionMan_cCutSceneTransitionMan(void* self)
 {
-    func_00354648(self);
+    cObjNode_cObjNode1(self);
     *(void***)((char*)self + 0xC) = D_00487F30;
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x1C) = 0;
-    func_002EAA28(self);
+    cCutSceneTransitionMan_FindTVParameters(self);
     return self;
 }
 #endif
@@ -1001,7 +1001,7 @@ extern "C" void* func_002EA670(void* self)
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA6B8);
 #ifdef SKIP_ASM
-extern "C" void func_002EAA28(void* self);
+extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self);
 
 struct func_002EA6B8_sFade {
     char pad[0x10];
@@ -1014,7 +1014,7 @@ extern "C" void func_002EA6B8(func_002EA6B8_sFade* self, float dur)
 {
     switch (self->state) {
     case 0:
-        func_002EAA28(self);
+        cCutSceneTransitionMan_FindTVParameters(self);
         self->dur = dur;
         self->t = 0.0f;
         break;
@@ -1099,7 +1099,7 @@ extern char* D_004A5B80;
 extern "C" void func_002EA860(void* self)
 {
     if (*(int*)((char*)self + 0x10) == 0) {
-        func_002EAA28(self);
+        cCutSceneTransitionMan_FindTVParameters(self);
     }
     char* obj = D_004A5B80;
     *(int*)((char*)self + 0x10) = 1;
@@ -1129,7 +1129,7 @@ extern "C" void func_002EA8B8(void* self, int up)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA900);
+INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_002EA820(void* self);
@@ -1157,7 +1157,7 @@ struct sFade_A900 {
 extern char* D_004A5B64_A900 __asm__("D_004A5B64");
 extern char* D_004A5B80_A900 __asm__("D_004A5B80");
 
-extern "C" void func_002EA900(sFade_A900* self)
+extern "C" void cCutSceneTransitionMan_update(sFade_A900* self)
 {
     if (self->done != 0)
         return;
@@ -1188,7 +1188,7 @@ extern "C" void func_002EA900(sFade_A900* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EAA28);
+INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_FindTVParameters);
 #ifdef SKIP_ASM
 struct sBTState {
     int mode;
@@ -1212,7 +1212,7 @@ struct sBTVEntryGet {
 
 extern char* D_004A5B80;
 
-extern "C" void func_002EAA28(void* self)
+extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self)
 {
     sBTFx* s = (sBTFx*)self;
     char* obj = D_004A5B80;
@@ -1276,7 +1276,7 @@ __asm__(".globl func_002EAC60\n.type func_002EAC60,@function\nfunc_002EAC60 = _$
 __asm__("_vt$15cVbDtor002EAC60$13cRiderVbC_btf = D_00488458\n"
         "_vt$15cVbDtor002EAC60$14cRiderVbBC_btf = D_00459B90\n"
         "_vt$15cVbDtor002EAC60$12cRiderVb_btf = D_004884A0\n"
-        "_$_12cRiderVb_btf = func_0011B978\n");
+        "_$_12cRiderVb_btf = cRider__cRider\n");
 #endif
 
 //100%

@@ -31,10 +31,10 @@ extern "C" void* cScriptCameraController_cScriptCameraController(void* self, voi
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_001690D0);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController__cScriptCameraController);
 #ifdef SKIP_ASM
-extern "C" void func_002832D8(void* p);
-extern "C" void func_0015CC10(void* self, int flags);
+extern "C" void cScriptObject_DeInitScriptObject(void* p);
+extern "C" void cCameraController__cCameraController(void* self, int flags);
 void cMemMan_free(void* p);
 extern void* D_0045C428[];
 
@@ -45,17 +45,17 @@ public:
     virtual ~cScrCamScriptK2();
 };
 
-extern "C" void func_001690D0(void* self, int flags)
+extern "C" void cScriptCameraController__cScriptCameraController(void* self, int flags)
 {
     int i;
     *(void***)((char*)self + 0x14) = D_0045C428;
     for (i = 0; i < 2; i++) {
-        func_002832D8((*(cScrCamScriptK2***)((char*)self + 0x1C))[i]);
+        cScriptObject_DeInitScriptObject((*(cScrCamScriptK2***)((char*)self + 0x1C))[i]);
         delete (*(cScrCamScriptK2***)((char*)self + 0x1C))[i];
     }
     if (*(void**)((char*)self + 0x1C) != 0)
         cMemMan_free(*(void**)((char*)self + 0x1C));
-    func_0015CC10(self, flags);
+    cCameraController__cCameraController(self, flags);
 }
 #endif
 
@@ -148,7 +148,7 @@ extern "C" void func_00169340(void* self, void* algo)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169368);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // func_001694B0 returns a pointer (the unit declares it int); bind a pointer-returning alias.
@@ -174,7 +174,7 @@ struct sScrAlgoNodeK2 {
     sScrAlgoNodeK2* next;   // 0x14
 };
 
-extern "C" void func_00169368(void* self)
+extern "C" void cScriptCameraController_update(void* self)
 {
     sScrAlgoNodeK2* n = **(sScrAlgoNodeK2***)((char*)self + 0x8);
     while (n != 0) {

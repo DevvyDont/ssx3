@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_001549A8(void* self);
+extern "C" void cBEScoreInterface_cBEScoreInterface(void* self);
 extern const char D_0045A858[];
 extern void* D_004A1248;
 
@@ -18,14 +18,14 @@ struct cBEScoreInterface {
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_getThis__Fv);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_001549A8 as returning void; the body returns self.
-void* func_001549A8_impl(void* self) __asm__("func_001549A8");
+// PORT: the unit declares cBEScoreInterface_cBEScoreInterface as returning void; the body returns self.
+void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInterface_cBEScoreInterface");
 
 void* cBEScoreInterface_getThis()
 {
     if (D_004A1248 == 0) {
         void* mem = cMemMan_alloc(0x230, D_0045A858, 0, 0);
-        cBEScoreInterface* s = (cBEScoreInterface*)func_001549A8_impl(mem);
+        cBEScoreInterface* s = (cBEScoreInterface*)cBEScoreInterface_cBEScoreInterface_impl(mem);
         D_004A1248 = s;
         s->field_0x8 = 0;
         s->field_0x10 = 0;
@@ -38,16 +38,16 @@ void* cBEScoreInterface_getThis()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001549A8);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_cBEScoreInterface);
 #ifdef SKIP_ASM
 extern "C" void func_001549E8(void* self);
 extern void* D_0045ACA8[];
 
-// PORT: the unit declares func_001549A8 as returning void (used by getThis);
+// PORT: the unit declares cBEScoreInterface_cBEScoreInterface as returning void (used by getThis);
 // the body returns self, so it is bound to the symbol with an asm label.
-void* func_001549A8_impl(void* self) __asm__("func_001549A8");
+void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInterface_cBEScoreInterface");
 
-void* func_001549A8_impl(void* self)
+void* cBEScoreInterface_cBEScoreInterface_impl(void* self)
 {
     *(void***)((char*)self + 0xC) = D_0045ACA8;
     func_001549E8(self);
@@ -66,7 +66,7 @@ void func_001549E0(void* self)
 //100%
 INCLUDE_ASM("be/beintscore", func_001549E8);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void MEM_fill(void* dst, int value, int size);
 
 struct sScoreSlot_001549E8 {
     char pad_0x00[0xAC];
@@ -89,7 +89,7 @@ extern "C" void func_001549E8(void* p)
     self->b = 0;
     self->c = -1;
     self->d = -1;
-    func_003E6448(self->slots, 0, sizeof(self->slots));
+    MEM_fill(self->slots, 0, sizeof(self->slots));
     for (int i = 1; i >= 0; i--)
     {
         self->slots[i].last = -1;
@@ -124,7 +124,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" bool func_001557E0(void* self, int rider);
-extern "C" char* func_00147170(void* self, int idx);
+extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx);
 extern "C" char* strcpy(char* dst, const char* src);
 
 struct sProfileChar_154AB8 { char data[0xF88]; };
@@ -209,7 +209,7 @@ extern "C" void func_00154AB8(sScore_154AB8* self, int rider, sRaceStats_154AB8*
                         t[j] = t[j - 1];
                     t[i].charID = charID;
                     t[i].value = score;
-                    strcpy(t[i].name, func_00147170(cBE_getInterface_Fv(cBE_getBE(), 1), rider));
+                    strcpy(t[i].name, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), rider));
                     self->rank[profile] = i;
                     if (D_00535BC8_154AB8.numHumans >= 2) {
                         if (self->rank[1 - profile] >= i) {

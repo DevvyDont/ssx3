@@ -5,7 +5,7 @@ INCLUDE_ASM("be/bedbreward", cBERewardDB_init);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" int func_00317F60(int file);
+extern "C" int BXFILE_sizez(int file);
 extern "C" void func_003E1BB8(int file, void* data, int size);
 extern void func_0015A818_s(void* self, void* data) __asm__("func_0015A818");
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
@@ -17,7 +17,7 @@ extern "C" void cBERewardDB_init(int* self, int a1)
 {
     if (a1 == 0)
     {
-        int size = func_00317F60(D_004A1270);
+        int size = BXFILE_sizez(D_004A1270);
         void* data = operator_new_tag(size, D_0045AB78, 0, 0);
         func_003E1BB8(D_004A1270, data, size);
         func_0015A818_s(self, data);
@@ -166,7 +166,7 @@ extern "C" void* func_0015AFE8(void* self, ...)
 }
 #endif
 
-INCLUDE_ASM("be/bedbreward", func_0015B028);
+INCLUDE_ASM("be/bedbreward", __sti__all_in_one_be_cpp);
 
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015BB00__FPv);
@@ -185,17 +185,17 @@ void func_0015BB08(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/bedbreward", func_0015BB10__FPv);
+INCLUDE_ASM("be/bedbreward", cBEInterface_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
-void func_0015BB10(void* self)
+void cBEInterface_writeToReplayFrame(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/bedbreward", func_0015BB18__FPv);
+INCLUDE_ASM("be/bedbreward", cBEInterface_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
-void func_0015BB18(void* self)
+void cBEInterface_readFromReplayFrame(void* self)
 {
 }
 #endif
@@ -780,13 +780,13 @@ extern "C" void* func_0015C210(void* self)
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C228);
 #ifdef SKIP_ASM
-// func_003E6448 looks like memset(dst, value, size).
-extern "C" void* func_003E6448(void* dst, int value, int size);
+// MEM_fill looks like memset(dst, value, size).
+extern "C" void* MEM_fill(void* dst, int value, int size);
 extern char D_005308B8[];
 
 extern "C" void func_0015C228()
 {
-    func_003E6448(D_005308B8, 0, 0x20);
+    MEM_fill(D_005308B8, 0, 0x20);
 }
 #endif
 
@@ -1329,12 +1329,12 @@ extern "C" void* func_0015C818(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/bedbreward", func_0015C830);
+INCLUDE_ASM("be/bedbreward", cBEPreRaceState_purgeState);
 #ifdef SKIP_ASM
 extern int* D_004A1258;
 void operator_delete(int* ptr);
 
-extern "C" void func_0015C830(void)
+extern "C" void cBEPreRaceState_purgeState(void)
 {
     operator_delete(D_004A1258);
     D_004A1258 = 0;
@@ -1354,12 +1354,12 @@ extern "C" void* func_0015C858(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/bedbreward", func_0015C870);
+INCLUDE_ASM("be/bedbreward", cBERaceState_purgeState);
 #ifdef SKIP_ASM
 extern int* D_004A122C;
 void operator_delete(int* ptr);
 
-extern "C" void func_0015C870(void)
+extern "C" void cBERaceState_purgeState(void)
 {
     operator_delete(D_004A122C);
     D_004A122C = 0;
@@ -1379,19 +1379,19 @@ extern "C" void* func_0015C898(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/bedbreward", func_0015C8B0);
+INCLUDE_ASM("be/bedbreward", cBEPostRaceState_purgeState);
 #ifdef SKIP_ASM
 extern int* D_004A1254;
 void operator_delete(int* ptr);
 
-extern "C" void func_0015C8B0(void)
+extern "C" void cBEPostRaceState_purgeState(void)
 {
     operator_delete(D_004A1254);
     D_004A1254 = 0;
 }
 #endif
 
-extern "C" void* func_0015B028(int, int);
+extern "C" void* __sti__all_in_one_be_cpp(int, int);
 
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C8D8);
@@ -1410,25 +1410,25 @@ INCLUDE_ASM("be/bedbreward", func_0015C8F0__FPv);
 #ifdef SKIP_ASM
 void* func_0015C8F0(void* self)
 {
-    return func_0015B028(1, 0xffff);
+    return __sti__all_in_one_be_cpp(1, 0xffff);
 }
 #endif
 
-extern "C" void* func_0015B028(int, int);
+extern "C" void* __sti__all_in_one_be_cpp(int, int);
 
 //99.38%
 INCLUDE_ASM("be/bedbreward", func_0015C910__FPv);
 #ifdef SKIP_ASM
 void* func_0015C910(void* self)
 {
-    return func_0015B028(0, 0xffff);
+    return __sti__all_in_one_be_cpp(0, 0xffff);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/bedbreward", func_0015C930__FPv);
+INCLUDE_ASM("be/bedbreward", cCameraAlgoList_cCameraAlgoList__FPv);
 #ifdef SKIP_ASM
-void* func_0015C930(void* self)
+void* cCameraAlgoList_cCameraAlgoList(void* self)
 {
     int t0 = 0;
     *(int*)self = t0;
@@ -1438,12 +1438,12 @@ void* func_0015C930(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/bedbreward", func_0015C940);
+INCLUDE_ASM("be/bedbreward", cCameraAlgoList__cCameraAlgoList);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void func_0015CB08(void* self);
 
-extern "C" void func_0015C940(int* self, int flags)
+extern "C" void cCameraAlgoList__cCameraAlgoList(int* self, int flags)
 {
     func_0015CB08(self);
     if (flags & 1)

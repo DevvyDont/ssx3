@@ -5,7 +5,7 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_cDataManager);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-void func_00275CD0(void* self, void* node);
+void cDataManager_AddToEmptyInstanceList(void* self, void* node);
 extern char D_004825A0[];
 extern const char D_00481AB8[];
 
@@ -27,7 +27,7 @@ extern "C" cDataManager5828* cDataManager_cDataManager(cDataManager5828* self, i
     self->nodes = (sDataNode5828*)operator_new_tag(count * sizeof(sDataNode5828), D_00481AB8, flags, 0);
     self->field_0x8 = 0;
     for (int i = 0; i < count; i++) {
-        func_00275CD0(self, &self->nodes[i]);
+        cDataManager_AddToEmptyInstanceList(self, &self->nodes[i]);
     }
     return self;
 }
@@ -99,9 +99,9 @@ extern "C" sDmNode5920* func_00275920(void* self, int a1, void* data, int size)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275A20);
+INCLUDE_ASM("scripter/datamanager", cDataManager_DetachData);
 #ifdef SKIP_ASM
-void func_00275CD0(void* self, void* node);
+void cDataManager_AddToEmptyInstanceList(void* self, void* node);
 
 struct sDmNode5A20 {
     int a;              // 0x0
@@ -125,10 +125,10 @@ public:
     virtual void v05(int key, int c, int a, int b);
 };
 
-// PORT: the unit declares func_00275A20 as returning void; it really returns the entry's key.
-int func_00275A20_impl(cDataManager5A20* self, sDmNode5A20* entry) __asm__("func_00275A20");
+// PORT: the unit declares cDataManager_DetachData as returning void; it really returns the entry's key.
+int cDataManager_DetachData_impl(cDataManager5A20* self, sDmNode5A20* entry) __asm__("cDataManager_DetachData");
 
-int func_00275A20_impl(cDataManager5A20* self, sDmNode5A20* entry)
+int cDataManager_DetachData_impl(cDataManager5A20* self, sDmNode5A20* entry)
 {
     sDmNode5A20* first = entry->next;
     if (first != 0) {
@@ -136,7 +136,7 @@ int func_00275A20_impl(cDataManager5A20* self, sDmNode5A20* entry)
         do {
             sDmNode5A20* next = n->next;
             self->v03(n->key, n->c, n->a, n->b);
-            func_00275CD0(self, n);
+            cDataManager_AddToEmptyInstanceList(self, n);
             n = next;
         } while (n != 0);
         self->v05(entry->key, entry->c, entry->a, entry->b);
@@ -144,15 +144,15 @@ int func_00275A20_impl(cDataManager5A20* self, sDmNode5A20* entry)
         self->v03(entry->key, entry->c, entry->a, entry->b);
     }
     int key = entry->key;
-    func_00275CD0(self, entry);
+    cDataManager_AddToEmptyInstanceList(self, entry);
     return key;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/datamanager", func_00275B08);
+INCLUDE_ASM("scripter/datamanager", cDataManager_DetachAll);
 #ifdef SKIP_ASM
-extern "C" void func_00275A20(void* self, void* entry);
+extern "C" void cDataManager_DetachData(void* self, void* entry);
 
 struct sDmEntry275B08 {
     char pad_0x00[0x10];
@@ -165,12 +165,12 @@ struct sDmTable275B08 {
     sDmEntry275B08* entries;
 };
 
-extern "C" void func_00275B08(sDmTable275B08* self)
+extern "C" void cDataManager_DetachAll(sDmTable275B08* self)
 {
     int i;
     for (i = 0; i < self->count; i++) {
         if (self->entries[i].used != 0) {
-            func_00275A20(self, &self->entries[i]);
+            cDataManager_DetachData(self, &self->entries[i]);
         }
     }
 }
@@ -248,9 +248,9 @@ extern "C" sDmNode5B98* func_00275B98(void* self, char* big, sDmNode5B98* prev)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275CD0__FPvT0);
+INCLUDE_ASM("scripter/datamanager", cDataManager_AddToEmptyInstanceList__FPvT0);
 #ifdef SKIP_ASM
-void func_00275CD0(void* self, void* node)
+void cDataManager_AddToEmptyInstanceList(void* self, void* node)
 {
     *(int*)((char*)node + 0x8) = 0;
     *(int*)((char*)node + 0xc) = 0;
@@ -323,7 +323,7 @@ INCLUDE_ASM("scripter/datamanager", func_00275DD8);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_002776E0(void* self);
 extern "C" void* func_00282BF0(void* self, int a1);
 int func_00283C58(void* self);
@@ -365,7 +365,7 @@ extern "C" int func_00275DD8(char* self, int a1, int a2)
     if (*(int*)(self + 0xBC) >= none) {
         return 1;
     }
-    *(int*)(self + 0xBC) = func_00277450(self, func_00283D28_count(list) - 1, 0);
+    *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, func_00283D28_count(list) - 1, 0);
     if (*(int*)(self + 0xA4) == 3) {
         int ok = *(int*)((char*)func_00282BF0(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
         if (ok)
@@ -379,7 +379,7 @@ extern "C" int func_00275DD8(char* self, int a1, int a2)
 INCLUDE_ASM("scripter/datamanager", func_00275ED0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_002776E0(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" int func_002797A0(void* eng, int a1, int a2, int a3, int a4);
@@ -429,7 +429,7 @@ extern "C" int func_00275ED0(char* self, int a1, int a2, int lookup, int a4, int
     if (*(int*)(self + 0xBC) >= 0) {
         return 1;
     }
-    *(int*)(self + 0xBC) = func_00277450(self, func_00283D28_count(list) - 1, 0);
+    *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, func_00283D28_count(list) - 1, 0);
     if (*(int*)(self + 0xA4) == 3) {
         int ok;
         if (func_00277DD8(self, func_00283D70(list, 0)) == 0) {
@@ -449,7 +449,7 @@ extern "C" int func_00275ED0(char* self, int a1, int a2, int lookup, int a4, int
 INCLUDE_ASM("scripter/datamanager", func_00276048);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_002776E0(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" void* func_00282BF0(void* self, int a1);
@@ -484,7 +484,7 @@ extern "C" int func_00276048(char* self, int a1, int a2, int a3, int a4, int a5)
         cmd.a5 = a5;
         func_00283C80(list, &cmd);
         if (*(int*)(self + 0xA4) != 0 && *(int*)(self + 0xBC) < 0) {
-        *(int*)(self + 0xBC) = func_00277450(self, func_00283D28_count(list) - 1, 0);
+        *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, func_00283D28_count(list) - 1, 0);
         if (*(int*)(self + 0xA4) == 3) {
             int ok;
             if (func_00277DD8(self, func_00283D70(list, 0)) == 0) {
@@ -510,7 +510,7 @@ INCLUDE_ASM("scripter/datamanager", func_00276198);
 extern "C" int func_00283C80(void* list, void* cmd);
 extern "C" int func_00283DC0(void* self, void* out);
 extern "C" void func_00276868(void* self, int a1);
-extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 // The unit declares func_00283D28 as returning void*, but it returns the list's count.
 int func_00283D28_count(void* list) __asm__("func_00283D28");
 
@@ -527,7 +527,7 @@ extern "C" int func_00276198(void* self, void* other)
         }
         func_00276868(other, 1);
         if (*(int*)((char*)self + 0xA4) != 0 && *(int*)((char*)self + 0xBC) < 0) {
-            *(int*)((char*)self + 0xBC) = func_00277450(self, n, 0);
+            *(int*)((char*)self + 0xBC) = tNISList_SetupNextScript(self, n, 0);
         }
     }
     return 1;
@@ -538,7 +538,7 @@ extern "C" int func_00276198(void* self, void* other)
 INCLUDE_ASM("scripter/datamanager", func_00276270);
 #ifdef SKIP_ASM
 extern "C" void func_00276868(void* self, int a1);
-extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_00277598(void* self, int index);
 extern "C" void func_00277778(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
@@ -559,7 +559,7 @@ extern "C" int func_00276270(char* self, int a1)
     if (func_00283D28(list) == 0) {
         return 0;
     }
-    int idx = func_00277450(self, 0, 0);
+    int idx = tNISList_SetupNextScript(self, 0, 0);
     if (idx < 0) {
         func_00276868(self, 1);
         return *(int*)(self + 0xA4);
@@ -579,7 +579,7 @@ extern "C" int func_00276270(char* self, int a1)
             *(int*)(self + 0xA4) = 2;
         }
     }
-    *(int*)(self + 0xBC) = func_00277450(self, idx + 1, 0);
+    *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, idx + 1, 0);
     return *(int*)(self + 0xA4);
 }
 #endif
@@ -610,7 +610,7 @@ extern "C" void func_002E4540(void* snd, int a1, int h, int a3, float t);
 extern "C" void func_002E4578(void* p);
 extern "C" void func_002EA6B8(void* gm, float t);
 extern "C" void func_002EA860(void* gm);
-extern "C" void* func_0039F9D8(void* table, int hash);
+extern "C" void* cUIStateStack_findState(void* table, int hash);
 
 struct sDmVEntry_6388 {
     short delta;
@@ -668,7 +668,7 @@ int func_00276388_impl(char* self, int fade, int notify)
     sDmItem_6388* item = (sDmItem_6388*)func_00283D70(self + 0xC, 0);
     dm->state = 3;
     char* table = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x48) + 0x18;
-    char* o = (char*)func_0039F9D8(table, GetHashValue32(D_004A34A0));
+    char* o = (char*)cUIStateStack_findState(table, GetHashValue32(D_004A34A0));
     if (o != 0) {
         sDmVEntry_6388* e = &(*(sDmVEntry_6388**)(o + 0x8))[24];
         e->fn(o + e->delta, 0, 0);
@@ -752,7 +752,7 @@ INCLUDE_ASM("scripter/datamanager", func_002766D0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00276270(char* self, int a1);
 extern "C" void func_00276868(void* self, int a1);
-extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_00277598(void* self, int index);
 extern "C" void func_00277800(void* self);
 // The unit declares func_00277980 as void; it returns whether it handled the update.
@@ -760,7 +760,7 @@ extern "C" int func_00277980_r(void* self) __asm__("func_00277980");
 extern "C" void* func_00277C08(void*, int, int);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" int func_00282540(void* self, int id);
-extern "C" void func_00283818(void* p);
+extern "C" void cVidEngine_ResetVideoEngine(void* p);
 extern "C" void* func_00283D70(void* list, int i);
 // The unit declares func_00283D28 as returning void*, but it returns the list's count.
 int func_00283D28_count(void* list) __asm__("func_00283D28");
@@ -813,14 +813,14 @@ extern "C" int func_002766D0(sSeq_66D0* self, int delta, int force)
         if (func_00277DD8(self, it) == 0) {
             func_00282540(self->owner, it->handle);
         } else if (it->handle != 0) {
-            func_00283818(self->owner + 0x500);
+            cVidEngine_ResetVideoEngine(self->owner + 0x500);
         }
         it->handle = -1;
         self->cur = -1;
         if (self->fA8) {
             func_00277C08(self, 0, 1);
         }
-        self->cur = func_00277450(self, pos, 0);
+        self->cur = tNISList_SetupNextScript(self, pos, 0);
     }
     if (self->fA8 == 0) {
         if (force == 0 || func_00277980_r(self) == 0) {
@@ -846,7 +846,7 @@ int GetHashValue32(char* s);
 void* func_00230698(void* self, int a1);
 extern "C" void func_002E4578(void* p);
 extern "C" void func_002EA820(void* p);
-extern "C" void* func_0039F9D8(void* table, int hash);
+extern "C" void* cUIStateStack_findState(void* table, int hash);
 extern "C" void func_00277598(void* self, int index);
 extern "C" void* func_00277C08(void*, int, int);
 
@@ -875,7 +875,7 @@ extern "C" void func_00276868(void* p, int a1)
             }
         }
         char* table = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x48) + 0x18;
-        char* o = (char*)func_0039F9D8(table, GetHashValue32(D_004A34A0));
+        char* o = (char*)cUIStateStack_findState(table, GetHashValue32(D_004A34A0));
         if (o != 0) {
             sDmVEntry6868* e = &(*(sDmVEntry6868**)(o + 0x8))[24];
             e->fn(o + e->delta, 1, 0);
@@ -1135,11 +1135,11 @@ extern "C" void func_00276CC8(char* self)
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00276F48);
 #ifdef SKIP_ASM
-extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_00277800(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" int func_00282540(void* self, int id);
-extern "C" void func_00283818(void* p);
+extern "C" void cVidEngine_ResetVideoEngine(void* p);
 extern "C" void* func_00283D70(void* list, int i);
 
 extern "C" void func_00276F48(char* self)
@@ -1157,17 +1157,17 @@ extern "C" void func_00276F48(char* self)
     }
     *(int*)(self + 0xC8) = 1;
     if (*(int*)(self + 0xBC) < 0) {
-        func_00277450(self, 1, 1);
+        tNISList_SetupNextScript(self, 1, 1);
         return;
     }
-    int idx = func_00277450(self, *(int*)(self + 0xBC), 1);
+    int idx = tNISList_SetupNextScript(self, *(int*)(self + 0xBC), 1);
     if (idx != *(int*)(self + 0xBC)) {
         char* e2 = (char*)func_00283D70(list, *(int*)(self + 0xBC));
         if (func_00277DD8(self, e2) == 0) {
             func_00282540(*(void**)self, *(int*)(e2 + 0xC));
             *(int*)(e2 + 0xC) = -1;
         } else if (*(int*)(e2 + 0xC) >= 0) {
-            func_00283818(*(char**)self + 0x500);
+            cVidEngine_ResetVideoEngine(*(char**)self + 0x500);
         }
         *(int*)(self + 0xBC) = idx;
     }
@@ -1291,23 +1291,23 @@ extern "C" int func_00277298(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002772B8__FPv);
+INCLUDE_ASM("scripter/datamanager", tNISList_IsInTransition__FPv);
 #ifdef SKIP_ASM
-int func_002772B8(void* self)
+int tNISList_IsInTransition(void* self)
 {
     return *(int*)((char*)self + 0xB0);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/datamanager", func_002772C0);
+INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptPlay);
 #ifdef SKIP_ASM
 extern "C" int func_002771C8(void* self, void* obj);
 char* func_0027C070(void* obj);
 extern "C" void func_002EF378(int a0);
 extern char D_004A34A8[];
 
-extern "C" void func_002772C0(void* self, int a1, void* obj)
+extern "C" void tNISList_OnScriptPlay(void* self, int a1, void* obj)
 {
     if (func_002771C8(self, obj) != 0) {
         char* name = func_0027C070(obj);
@@ -1375,7 +1375,7 @@ extern "C" void func_00277400(void* self, int a1, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277450);
+INCLUDE_ASM("scripter/datamanager", tNISList_SetupNextScript);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -1397,7 +1397,7 @@ struct sDmEnt7450 {
     int c;      // 0x18
 };
 
-extern "C" int func_00277450(void* vself, int index, int skipFlagged)
+extern "C" int tNISList_SetupNextScript(void* vself, int index, int skipFlagged)
 {
     char* self = (char*)vself;
     int count = func_00283D28_count(self + 0xC);
@@ -1436,7 +1436,7 @@ struct sDmEnt7DE8;
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key);
 extern "C" int func_00282540(void* self, int id);
-extern "C" void func_00283818(void* p);
+extern "C" void cVidEngine_ResetVideoEngine(void* p);
 extern "C" int func_00283BB8(void* self);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00283DA0(void* self);
@@ -1486,7 +1486,7 @@ extern "C" void func_00277598(void* selfp, int n)
                         vt[4].fn(sys + vt[4].delta, snd);
                     }
                 }
-                func_00283818(*(char**)self + 0x500);
+                cVidEngine_ResetVideoEngine(*(char**)self + 0x500);
             }
         }
         func_00283DC0(self + 0xC, 0);
@@ -1565,7 +1565,7 @@ INCLUDE_ASM("scripter/datamanager", func_00277838);
 #ifdef SKIP_ASM
 void* func_00230698(void* self, int a1);
 extern "C" void func_00276868(void* self, int a1);
-extern "C" int func_00277450(void* self, int index, int a2);
+extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_00277598(void* self, int index);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" void func_00279720(void* self, int val, int key, int b, int c);
@@ -1608,7 +1608,7 @@ extern "C" void func_00277838(void* selfp)
         if (*(int*)(self + 0xB0) != 0) {
             *(int*)(self + 0xAC) = 1;
         }
-        *(int*)(self + 0xBC) = func_00277450(self, 1, 0);
+        *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, 1, 0);
     } else {
         int wasOn = *(int*)(self + 0xB0);
         func_00276868(self, 0);
@@ -1867,9 +1867,9 @@ extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277F08__FPv);
+INCLUDE_ASM("scripter/datamanager", tSSXScriptBankInfo_Clear__FPv);
 #ifdef SKIP_ASM
-void func_00277F08(void* self)
+void tSSXScriptBankInfo_Clear(void* self)
 {
     *(int*)self = 0;
     *(int*)((char*)self + 0x4) = -1;
@@ -1879,13 +1879,13 @@ void func_00277F08(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277F20);
+INCLUDE_ASM("scripter/datamanager", cSSXScriptEngine_cSSXScriptEngine);
 #ifdef SKIP_ASM
-extern "C" void func_00281E80(void* self);
-extern "C" void func_00283798(void* self);
+extern "C" void cBXScriptEngine_cBXScriptEngine(void* self);
+extern "C" void cVidEngine_cVidEngine(void* self);
 extern "C" void func_00281018(void* self);
-extern "C" void func_0027BFD0(void* self);
-extern "C" void func_002805B8(void* self);
+extern "C" void cScriptObjGS_cScriptObjGS(void* self);
+extern "C" void cScriptObjEvent_cScriptObjEvent(void* self);
 extern "C" void cScriptAnimBankManager_cScriptAnimBankManager(void* self, int flags, int a2, int a3);
 extern "C" void cScriptSoundBankManager_cScriptSoundBankManager(void* self, int flags, int a2, int a3);
 void func_00281160(void* self, int i);
@@ -1930,18 +1930,18 @@ struct sScriptMgr_7F20 {
     int fA48;                   // 0xA48
 };
 
-extern "C" sScriptMgr_7F20* func_00277F20(sScriptMgr_7F20* self)
+extern "C" sScriptMgr_7F20* cSSXScriptEngine_cSSXScriptEngine(sScriptMgr_7F20* self)
 {
-    func_00281E80(self);
-    func_00283798((char*)self + 0x500);
+    cBXScriptEngine_cBXScriptEngine(self);
+    cVidEngine_cVidEngine((char*)self + 0x500);
     cDataManager_cDataManager((cDataManager5828*)((char*)self + 0x51C), 0, 0x100);
     self->vt2AC = D_00482100;
     self->vt518 = D_004821A0;
     self->vt528 = D_00482168;
     self->vt2A8 = D_004821B8;
     new ((char*)self + 0x6D0) sScriptSlot_7F20[2];
-    func_0027BFD0((char*)self + 0x910);
-    func_002805B8((char*)self + 0x92C);
+    cScriptObjGS_cScriptObjGS((char*)self + 0x910);
+    cScriptObjEvent_cScriptObjEvent((char*)self + 0x92C);
     cScriptAnimBankManager_cScriptAnimBankManager((char*)self + 0xA28, 0, 10, 0xF0);
     cScriptSoundBankManager_cScriptSoundBankManager((char*)self + 0xA38, 0, 10, 0x11);
     self->f52C = 0;
@@ -1964,7 +1964,7 @@ extern "C" sScriptMgr_7F20* func_00277F20(sScriptMgr_7F20* self)
         self->ids[i] = 0;
     }
     for (i = 0; i < 10; i++) {
-        func_00277F08(self->cues[i]);
+        tSSXScriptBankInfo_Clear(self->cues[i]);
     }
     for (i = 0; i < 2; i++) {
         func_00281160(self->slots[i], i);
@@ -1974,19 +1974,19 @@ extern "C" sScriptMgr_7F20* func_00277F20(sScriptMgr_7F20* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002780B8);
+INCLUDE_ASM("scripter/datamanager", cSSXScriptEngine__cSSXScriptEngine);
 #ifdef SKIP_ASM
 extern void* D_00482260[];
 extern void* D_00482298[];
 extern void* D_004822E0[];
 extern void* D_00482318[];
-extern "C" void func_00278308(void* self);
+extern "C" void cSSXScriptEngine_DeInitOnce(void* self);
 extern "C" void func_00283518(void* self, int flags);
 extern "C" void func_00275498(void* self, int flags);
 extern "C" void func_00283228(void* self, int flags);
 extern "C" void func_002758C0(void* self, int flags);
 extern "C" void func_002837C8(void* self, int flags);
-extern "C" void func_00281ED8(void* self, int flags);
+extern "C" void cBXScriptEngine__cBXScriptEngine(void* self, int flags);
 
 struct sVE_780B8 {
     short delta;
@@ -2001,14 +2001,14 @@ struct sSlot_780B8 {
 };
 
 // Script manager destructor: members in reverse order, then the base.
-extern "C" void func_002780B8(char* self, int flags)
+extern "C" void cSSXScriptEngine__cSSXScriptEngine(char* self, int flags)
 {
     *(void***)(self + 0x2AC) = D_00482100;
     *(void***)(self + 0x518) = D_004821A0;
     *(void***)(self + 0x528) = D_00482168;
     *(void***)(self + 0x2A8) = D_004821B8;
     if (*(int*)(self + 0x52C) != 0) {
-        func_00278308(self);
+        cSSXScriptEngine_DeInitOnce(self);
     }
     D_004A34B0 = 0;
     func_00283518(self + 0xA38, 2);
@@ -2031,14 +2031,14 @@ extern "C" void func_002780B8(char* self, int flags)
     }
     func_002758C0(self + 0x51C, 0);
     func_002837C8(self + 0x500, 0);
-    func_00281ED8(self, flags);
+    cBXScriptEngine__cBXScriptEngine(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00278210);
+INCLUDE_ASM("scripter/datamanager", cSSXScriptEngine_InitOnce);
 #ifdef SKIP_ASM
-extern "C" void* func_003E1908(const char* name, int flags);
+extern "C" void* FILE_loadz(const char* name, int flags);
 extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int a2, int size);
 extern char* D_004A3494;
 extern char* D_004A3498;
@@ -2061,12 +2061,12 @@ struct sDmEngine8210 {
 };
 
 // PORT: script offsets are rebased into pointers held in int.
-extern "C" void func_00278210(sDmEngine8210* self)
+extern "C" void cSSXScriptEngine_InitOnce(sDmEngine8210* self)
 {
-    int* hdr = (int*)func_003E1908(D_004A3494, 0);
+    int* hdr = (int*)FILE_loadz(D_004A3494, 0);
     self->hdr = hdr;
     self->scripts = (sDmScript8210*)(hdr + 1);
-    char* base = (char*)func_003E1908(D_004A3498, 0);
+    char* base = (char*)FILE_loadz(D_004A3498, 0);
     self->base = base;
     if (base != 0) {
         for (int i = 0; i < *self->hdr; i++) {
@@ -2084,17 +2084,17 @@ extern "C" void func_00278210(sDmEngine8210* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00278308);
+INCLUDE_ASM("scripter/datamanager", cSSXScriptEngine_DeInitOnce);
 #ifdef SKIP_ASM
-extern "C" void func_00282020(void* self);
-extern "C" void* func_002523A8(void* self);
+extern "C" void cBXScriptEngine_PurgeBXEngine(void* self);
+extern "C" void* MEM_free(void* self);
 
-extern "C" void func_00278308(void* self)
+extern "C" void cSSXScriptEngine_DeInitOnce(void* self)
 {
-    func_00282020(self);
-    func_002523A8(*(void**)((char*)self + 0x52C));
+    cBXScriptEngine_PurgeBXEngine(self);
+    MEM_free(*(void**)((char*)self + 0x52C));
     if (*(void**)((char*)self + 0x534) != 0) {
-        func_002523A8(*(void**)((char*)self + 0x534));
+        MEM_free(*(void**)((char*)self + 0x534));
     }
     *(int*)((char*)self + 0x52C) = 0;
     *(int*)((char*)self + 0x530) = 0;

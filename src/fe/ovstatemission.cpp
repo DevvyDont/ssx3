@@ -45,7 +45,7 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" char* func_0039A708(void* self);
-extern "C" void func_0039E4C0(void* self, int a1);
+extern "C" void cUIState_onGainFocus(void* self, int a1);
 void func_001A34A8(void* self);
 extern char D_004A19E8[];
 
@@ -59,7 +59,7 @@ extern "C" void func_001A3308(void* self, int a1)
         }
     }
     func_001A34A8(self);
-    func_0039E4C0(self, a1);
+    cUIState_onGainFocus(self, a1);
 }
 #endif
 
@@ -71,7 +71,7 @@ int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" char* func_0039A708(void* self);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 void func_001A34A8(void* self);
 
 struct sVEntry_33A0 {
@@ -91,7 +91,7 @@ extern "C" void func_001A33A0(void* self, void* item, unsigned int msg)
         sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
         void* r = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
         if (r != 0) {
-            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -100,7 +100,7 @@ extern "C" void func_001A33A0(void* self, void* item, unsigned int msg)
         sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
         void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (r != 0) {
-            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -146,7 +146,7 @@ extern "C" int cBENewPlayerInterface_isPeakLocked1(void*, int, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146E98(void*, int);
+extern "C" int cBENewPlayerInterface_getHumanRider(void*, int);
 
 extern "C" unsigned int func_001A34B8(void)
 {
@@ -154,7 +154,7 @@ extern "C" unsigned int func_001A34B8(void)
     unsigned char best = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     for (i = 0; i < 2; i++) {
-        int h = func_00146E98(iface, i != 0);
+        int h = cBENewPlayerInterface_getHumanRider(iface, i != 0);
         unsigned char cnt = 0;
         signed char j;
         for (j = 1; j < 3; j++) {
@@ -169,13 +169,13 @@ extern "C" unsigned int func_001A34B8(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A3590);
+INCLUDE_ASM("fe/ovstatemission", cFEAsyncManager_cFEAsyncManager);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(char* name);
 extern "C" void func_003DED50(char* name, int a1, int a2, void* out);
 extern char D_00461418[];
 
-extern "C" void* func_001A3590(void* self)
+extern "C" void* cFEAsyncManager_cFEAsyncManager(void* self)
 {
     if (BXFILE_exists(D_00461418) != 0) {
         func_003DED50(D_00461418, 0, 0x64, (char*)self + 0x58C);
@@ -185,14 +185,14 @@ extern "C" void* func_001A3590(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A35E8);
+INCLUDE_ASM("fe/ovstatemission", cFEAsyncManager__cFEAsyncManager);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(char* name);
 extern "C" void func_003DEDC0(void* handle, int arg);
 void operator_delete(int* p);
 extern char D_00461418[];
 
-extern "C" void func_001A35E8(void* self, int flags)
+extern "C" void cFEAsyncManager__cFEAsyncManager(void* self, int flags)
 {
     if (BXFILE_exists(D_00461418) != 0) {
         func_003DEDC0(*(void**)((char*)self + 0x58C), 0x64);
@@ -204,7 +204,7 @@ extern "C" void func_001A35E8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A3648);
+INCLUDE_ASM("fe/ovstatemission", cFEAsyncManager_Init);
 #ifdef SKIP_ASM
 struct sMissionSlot {
     char name[0x100];
@@ -219,7 +219,7 @@ struct sMissionSlot {
 
 extern unsigned char D_004A1408[];
 
-extern "C" void func_001A3648(sMissionSlot* self)
+extern "C" void cFEAsyncManager_Init(sMissionSlot* self)
 {
     int i;
     for (i = 0; i < 5; i++) {

@@ -50,7 +50,7 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onGainFocus);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_003A1F18(void* self, int id);
-extern "C" void func_00186518(void* self, void* a1);
+extern "C" void cFEState_onGainFocus(void* self, void* a1);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char D_0045DBC0[];
 extern char D_0045DBD0[];
@@ -147,7 +147,7 @@ extern "C" void cFEStateCredits_onGainFocus(void* self, void* a1)
             func_003A1F18(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         }
     }
-    func_00186518(self, a1);
+    cFEState_onGainFocus(self, a1);
 }
 #endif
 
@@ -375,7 +375,7 @@ struct sVEntry001864B0 {
     short index;
     void* (*fn)(void*, void*, int);
 };
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 
 extern "C" void func_001864B0(void* self, void* item, int msg)
 {
@@ -384,14 +384,14 @@ extern "C" void func_001864B0(void* self, void* item, int msg)
         sVEntry001864B0* vt = *(sVEntry001864B0**)((char*)obj + 4);
         void* r = vt[5].fn((char*)obj + vt[5].delta, self, 0x24);
         if (r != 0) {
-            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_00186518);
+INCLUDE_ASM("fe/festatecredits", cFEState_onGainFocus);
 #ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList* list);
@@ -400,7 +400,7 @@ extern char D_004A1398[];
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" signed char func_001A06F0(void* self, int a1);
-extern "C" void func_0039E4C0(void* self, void* a1);
+extern "C" void cUIState_onGainFocus(void* self, void* a1);
 // NOTE: placeholder for the object at $gp+0x1D90 (no symbol in the target)
 struct sFlowState_865A8 {
     signed char count;
@@ -408,7 +408,7 @@ struct sFlowState_865A8 {
 };
 extern sFlowState_865A8 D_004A4E80;
 
-extern "C" void func_00186518(void* self, void* a1)
+extern "C" void cFEState_onGainFocus(void* self, void* a1)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
     if (screen != 0) {
@@ -417,7 +417,7 @@ extern "C" void func_00186518(void* self, void* a1)
             cUIMenu_setSelectedByIndex(menu, func_001A06F0(&D_004A4E80, *(signed char*)((char*)self + 0xC)));
         }
     }
-    func_0039E4C0(self, a1);
+    cUIState_onGainFocus(self, a1);
 }
 #endif
 

@@ -113,12 +113,12 @@ extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
 INCLUDE_ASM("fe/festatecharsetup", func_00182C08);
 #ifdef SKIP_ASM
 extern "C" void func_001831D0(void* self, int a1);
-void* func_0039E4A0(void* self);
+void* cUIState_onDestroyScreen(void* self);
 
 extern "C" void func_00182C08(void* self)
 {
     func_001831D0(self, 0);
-    func_0039E4A0(self);
+    cUIState_onDestroyScreen(self);
 }
 #endif
 
@@ -150,7 +150,7 @@ INCLUDE_ASM("fe/festatecharsetup", func_00182C80);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001887A0(void* self, void* engine, int reset);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void func_001831D0(void* self, int a1);
 extern char D_0045D698[];
 
@@ -177,7 +177,7 @@ extern "C" void func_00182C80(void* self, void* item, unsigned int event)
         sVEntryK182C80* vt = *(sVEntryK182C80**)(o + 4);
         void* r = vt[4].fn(o + vt[4].delta, self, *(int*)((char*)item + 0x18));
         if (r != 0)
-            func_0039F400(*(char**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, r);
         func_001831D0(self, 0);
         break;
     }
@@ -186,7 +186,7 @@ extern "C" void func_00182C80(void* self, void* item, unsigned int event)
         sVEntryK182C80* vt = *(sVEntryK182C80**)(o + 4);
         void* r = vt[5].fn(o + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (r != 0) {
-            func_0039F400(*(char**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, r);
             func_001831D0(self, 0);
         }
         break;
@@ -251,7 +251,7 @@ INCLUDE_ASM("fe/festatecharsetup", func_00182EC0);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void* func_001A0548(void* self, int idx);
-extern "C" void func_00311A50(void* anim);
+extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 extern "C" void func_001A0358(void* rider);
 extern "C" void func_0019E538(void* self, int a1);
@@ -347,7 +347,7 @@ extern "C" void func_00182EC0(void* self_)
         if (*(int*)(self + 0x48) != 0) {
             void* anim = *(void**)(rider + 0xC);
             if (anim != 0) {
-                func_00311A50(anim);
+                cRiderAnimBase_reset(anim);
                 cRiderAnimBase_play(anim, 0x1B3, 0, -1.0f);
             }
             *(int*)(rider + 0xCCC) = 0;

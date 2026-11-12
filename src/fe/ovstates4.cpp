@@ -2,23 +2,23 @@
 
 INCLUDE_ASM("fe/ovstates4", cOVTemplate_PauseMenu_onCreateScreen);
 
-INCLUDE_ASM("fe/ovstates4", func_001F8448);
+INCLUDE_ASM("fe/ovstates4", cOVTemplate_PauseMenu_onGainTransition);
 
-INCLUDE_ASM("fe/ovstates4", func_001F85C0);
+INCLUDE_ASM("fe/ovstates4", cOVTemplate_PauseMenu_onGainFocus);
 
-INCLUDE_ASM("fe/ovstates4", func_001F8720);
+INCLUDE_ASM("fe/ovstates4", cOVTemplate_PauseMenu_onLoseFocus);
 
-INCLUDE_ASM("fe/ovstates4", func_001F8728);
+INCLUDE_ASM("fe/ovstates4", cOVTemplate_PauseMenu_onUpdate);
 
-INCLUDE_ASM("fe/ovstates4", func_001F88E8);
+INCLUDE_ASM("fe/ovstates4", cOVTemplate_PauseMenu_onDestroyScreen);
 
-INCLUDE_ASM("fe/ovstates4", func_001F8908);
+INCLUDE_ASM("fe/ovstates4", cOVTemplate_PauseMenu_onWidgetMenu);
 
 INCLUDE_ASM("fe/ovstates4", cOVTemplate_PauseMenu_onWidgetEvent);
 
-INCLUDE_ASM("fe/ovstates4", func_001F8DF0);
+INCLUDE_ASM("fe/ovstates4", cOVTemplate_PauseMenu_onInputBegin);
 
-INCLUDE_ASM("fe/ovstates4", func_001F8DF8);
+INCLUDE_ASM("fe/ovstates4", cOVTemplate_PauseMenu_setPDAIconColor);
 
 INCLUDE_ASM("fe/ovstates4", func_001F8EE0);
 

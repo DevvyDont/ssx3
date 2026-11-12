@@ -19,7 +19,7 @@ rom:0x51D64 reloc:MIPS_LO16 symbol:D_004A6CA8
 rom:0x51D88 reloc:MIPS_LO16 symbol:D_004A6CA8
 // ealib/seg_2DCAE8 iFILESYS_ExecCommand: `addiu $2, $20, %lo(D_00519AB0)` (siblings at rom 0x2DF028, 0x2DF0A4 are paired).
 rom:0x2DF24C reloc:MIPS_LO16 symbol:D_00519AB0
-// main/game func_0022D8D8: `addiu $2/$4, $19, %lo(D_00442168)` (sibling at rom 0x12E9D4 is paired).
+// main/game cSectionMan_update: `addiu $2/$4, $19, %lo(D_00442168)` (sibling at rom 0x12E9D4 is paired).
 rom:0x12EA04 reloc:MIPS_LO16 symbol:D_00442168
 rom:0x12EA48 reloc:MIPS_LO16 symbol:D_00442168
 rom:0x12EA98 reloc:MIPS_LO16 symbol:D_00442168
@@ -38,7 +38,7 @@ rom:0xFEA00 reloc:MIPS_HI16 symbol:D_00470048
 // Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
 // main/game func_0022D598 (tools/gen/reloc_from_diff.py)
 rom:0x12E608 reloc:MIPS_LO16 symbol:D_00442168
-// fe/messagecenter func_00198AF0 (tools/gen/reloc_from_diff.py)
+// fe/messagecenter getDollarString (tools/gen/reloc_from_diff.py)
 rom:0x99B40 reloc:MIPS_HI16 symbol:D_004C6310
 rom:0x99B44 reloc:MIPS_HI16 symbol:D_004A12C0
 // object/splinemodifier func_0035BD70 (tools/gen/reloc_from_diff.py)
@@ -156,7 +156,7 @@ rom:0x20DE44 reloc:MIPS_HI16 symbol:D_004FC310
 rom:0x20DEA8 reloc:MIPS_LO16 symbol:D_004FC310
 rom:0x20E0D0 reloc:MIPS_LO16 symbol:D_004FC3F0
 
-// main/debugmenu func_00250CB0 and scripter/all_in_one_scripter __sti__all_in_one_scripter_cpp (static-init functions):
+// main/debugmenu __sti__aivisualeffectsmenu_cpp and scripter/all_in_one_scripter __sti__all_in_one_scripter_cpp (static-init functions):
 // splat left %hi/%lo halves of their D_004D1Bxx-D_004D3Axx stores unpaired.
 rom:0x15219C reloc:MIPS_HI16 symbol:D_004D1B28
 rom:0x1521C0 reloc:MIPS_LO16 symbol:D_004D1B28
@@ -306,7 +306,7 @@ rom:0x16D1A4 reloc:MIPS_LO16 symbol:D_004D32B8
 rom:0x16D25C reloc:MIPS_HI16 symbol:D_004D32F8
 rom:0x16D28C reloc:MIPS_LO16 symbol:D_004D32F8
 rom:0x16D324 reloc:MIPS_LO16 symbol:D_004D3378
-// fe/ovstatepause func_001FA238 (tools/gen/reloc_from_diff.py)
+// fe/ovstatepause cOVState_PAUSE_OPTIONS_onWidgetEvent (tools/gen/reloc_from_diff.py)
 rom:0xFB3A8 reloc:MIPS_HI16 symbol:D_00534B30
 rom:0xFB458 reloc:MIPS_HI16 symbol:D_00534B30
 rom:0xFB55C reloc:MIPS_HI16 symbol:D_00534B30
@@ -400,14 +400,14 @@ rom:0x28C008 reloc:MIPS_HI16 symbol:D_005049C0 addend:0x40
 rom:0x28C010 reloc:MIPS_LO16 symbol:D_005049C0 addend:0x40
 rom:0x28C078 reloc:MIPS_HI16 symbol:D_005049C0 addend:0x1C0
 rom:0x28C080 reloc:MIPS_LO16 symbol:D_005049C0 addend:0x1C0
-// fe/ovstatepause func_001FFD08 (tools/gen/reloc_from_diff.py)
+// fe/ovstatepause cOVState_REWARDS_updateMenu (tools/gen/reloc_from_diff.py)
 rom:0x100D38 reloc:MIPS_HI16 symbol:D_004A2570
 rom:0x100D40 reloc:MIPS_HI16 symbol:D_004A2578
 rom:0x100E4C reloc:MIPS_LO16 symbol:D_004A2570
 rom:0x100E88 reloc:MIPS_LO16 symbol:D_004A2570
 rom:0x100ED0 reloc:MIPS_LO16 symbol:D_004A2578
 rom:0x100F0C reloc:MIPS_LO16 symbol:D_004A2578
-// main/debugmenu func_0024E8D8 (tools/gen/reloc_from_diff.py)
+// main/debugmenu __sti__visualeffectsmenu_cpp (tools/gen/reloc_from_diff.py)
 rom:0x14FAD4 reloc:MIPS_HI16 symbol:D_004C9630
 rom:0x14FB1C reloc:MIPS_LO16 symbol:D_004C9630
 rom:0x14FB4C reloc:MIPS_HI16 symbol:D_004C97F0

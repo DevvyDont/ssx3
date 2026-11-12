@@ -1969,7 +1969,7 @@ extern "C" void* func_00391508(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_003915E8);
+INCLUDE_ASM("render/lightman", cFont_cFont);
 #ifdef SKIP_ASM
 struct sLmVec2_15E8 {
     float x, y;
@@ -2008,9 +2008,9 @@ struct sLmLight_15E8 {
     unsigned char b64;      // 0x64
 };
 
-extern "C" void func_00391708(void* self, const char* name, int flags);
+extern "C" void cFont_loadFont(void* self, const char* name, int flags);
 
-extern "C" sLmLight_15E8* func_003915E8(sLmLight_15E8* self, const char* name, int flags)
+extern "C" sLmLight_15E8* cFont_cFont(sLmLight_15E8* self, const char* name, int flags)
 {
     self->field_0x8 = 0;
     self->v28 = sLmVec2_15E8(0.0f, 0.0f);
@@ -2026,7 +2026,7 @@ extern "C" sLmLight_15E8* func_003915E8(sLmLight_15E8* self, const char* name, i
     }
     self->v50 = sLmVec4_15E8(1.0f, 0.0f, 0.0f, 0.0f);
     self->b64 = 0;
-    func_00391708(self, name, flags);
+    cFont_loadFont(self, name, flags);
     return self;
 }
 #endif
@@ -2047,7 +2047,7 @@ extern "C" void func_003916C0(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00391708);
+INCLUDE_ASM("render/lightman", cFont_loadFont);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* FILE_load(const char* name, int flags);
@@ -2055,7 +2055,7 @@ extern "C" void cFont_linkFont(void* self, void* data, int flags);
 void cMemMan_free(void*);
 extern const char D_00492F30[];
 
-extern "C" void func_00391708(void* self, const char* name, int flags)
+extern "C" void cFont_loadFont(void* self, const char* name, int flags)
 {
     void* data;
 

@@ -91,7 +91,7 @@ INCLUDE_ASM("sound/streamsys", func_002A9DF0);
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" int func_003B7838(int h);
-extern "C" void* func_002523A8(void* self);
+extern "C" void* MEM_free(void* self);
 
 extern "C" void func_002A9DF0(void* self, int flags)
 {
@@ -102,7 +102,7 @@ extern "C" void func_002A9DF0(void* self, int flags)
         }
     }
     if (*(void**)((char*)self + 0x74) != 0) {
-        func_002523A8(*(void**)((char*)self + 0x74));
+        MEM_free(*(void**)((char*)self + 0x74));
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -506,7 +506,7 @@ extern "C" int func_002AA448(void *arg0, int arg1) {
 INCLUDE_ASM("sound/streamsys", cStreamSys_cStreamSys);
 #ifdef SKIP_ASM
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
-extern "C" void* func_002ADE88(void* self, int heap);
+extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char D_00483218[];
@@ -539,7 +539,7 @@ extern "C" sStreamSysA490* cStreamSys_cStreamSys(sStreamSysA490* self, int inchr
     if (inchrg) {
         self->vbase = self->vb;
         *(char**)(self->vb + 0x1D8) = self->vb2;
-        func_002ADE88(self->vb2, heap);
+        cSoundSys_cSoundSys(self->vb2, heap);
         cBankManager_cBankManager(self->vbase, 0, banks, heap);
     }
     *(const sSsVtblAA490**)(*(char**)(self->vbase + 0x1D8) + 4) = &D_00483998;
@@ -573,7 +573,7 @@ void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void func_0028BB10(void* self, int flags);
 extern "C" void func_002A9DF0(void* e, int a1);
-extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern void* D_00483B48[];
 
 struct sSsVEntryA648 {
@@ -621,7 +621,7 @@ extern "C" void func_002AA648(void* p, int flags)
     }
     if (flags & 2) {
         func_0028BB10(*(void**)self, 0);
-        func_002ADEE8(*(void**)(*(char**)self + 0x1D8), 0);
+        cSoundSys__cSoundSys(*(void**)(*(char**)self + 0x1D8), 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1077,7 +1077,7 @@ extern "C" int func_002AB1C8(void* self, int idx, int arg2)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AB200);
 #ifdef SKIP_ASM
-extern "C" void* func_002ADE88(void* self, int heap);
+extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
 extern "C" void* func_002A69A0(void* self, int embedded, int a2, int a3, int heap);
 extern "C" void* func_002B28C0(void* self, int embedded, int a2, int a3, int heap);
@@ -1113,7 +1113,7 @@ extern "C" char* func_002AB200(char* self, int embedded, int a2, int a3, int hea
         *(char**)(self + 0x0) = self + 0x5730;
         *(char**)(self + 0x5908) = self + 0x5728;
         *(char**)(self + 0x118) = self + 0x6200;
-        func_002ADE88(self + 0x5728, heap);
+        cSoundSys_cSoundSys(self + 0x5728, heap);
         cBankManager_cBankManager(*(void**)(self + 0x6200), 0, a2, heap);
         cStreamSys_cStreamSys(*(sStreamSysA490**)(self + 0x5560), 0, a2, a3, heap);
     }
@@ -1154,7 +1154,7 @@ void operator_delete(int* ptr);
 extern "C" void func_0028BB10(void* self, int flags);
 extern "C" void func_002A6B50(void* self, int flags);
 extern "C" void func_002AA648(void* self, int flags);
-extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern "C" void func_002B0AE8(char* self, int flags);
 extern "C" void func_002B3398(char* self, int flags);
 extern void* D_004838F8[];
@@ -1212,7 +1212,7 @@ extern "C" void func_002AB478(char* self, int flags)
     if (flags & 2) {
         func_002AA648(*(void**)(self + 0x118), 0);
         func_0028BB10(**(void***)(self + 0x118), 0);
-        func_002ADEE8(*(void**)(**(char***)(self + 0x118) + 0x1D8), 0);
+        cSoundSys__cSoundSys(*(void**)(**(char***)(self + 0x118) + 0x1D8), 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);

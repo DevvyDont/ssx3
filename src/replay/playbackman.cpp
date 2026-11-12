@@ -101,10 +101,10 @@ extern "C" void func_0026C588(void* self, int flags)
 //100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_update);
 #ifdef SKIP_ASM
-extern "C" int func_003DF980(int handle);
+extern "C" int ASYNCFILE_getstatus(int handle);
 extern "C" int ASYNCFILE_release(int handle, void** data, int* size);
-extern "C" void func_002523A8(void* p);
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_free(void* p);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 extern const char D_00481560[];
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -125,7 +125,7 @@ struct cPlaybackMan_C5F8 {
 
 extern "C" void cPlaybackMan_update(cPlaybackMan_C5F8* self)
 {
-    if (self->handle >= 0 && func_003DF980(self->handle) == 1) {
+    if (self->handle >= 0 && ASYNCFILE_getstatus(self->handle) == 1) {
         void* data = 0;
         int size = 0;
         ASYNCFILE_release(self->handle, &data, &size);
@@ -134,8 +134,8 @@ extern "C" void cPlaybackMan_update(cPlaybackMan_C5F8* self)
             sPlaybackEntry_C5F8* e = (sPlaybackEntry_C5F8*)(self->cur * 12 + (int)self->entries);
             e->buf = operator_new_tag(size, D_00481560, 0x20000000, 0);
             self->entries[self->cur].size = size;
-            func_003E6574(self->entries[self->cur].buf, data, size);
-            func_002523A8(data);
+            MEM_copy(self->entries[self->cur].buf, data, size);
+            MEM_free(data);
         }
         self->handle = -1;
     }
@@ -152,10 +152,10 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_0026D628(void* self);
+extern "C" void cReplayFrame_clearFrame(void* self);
 extern "C" void func_0026E950(void* self, void* buf, int a2);
-extern "C" void func_003E6448(void* dst, int c, int n);
-extern "C" int func_00154278(void* iface);
+extern "C" void MEM_fill(void* dst, int c, int n);
+extern "C" int cBEMissionInterface_getNumberMissions(void* iface);
 extern "C" unsigned int func_00154588(void* iface, int i);
 extern char D_00481570[];
 extern char D_00481580[];
@@ -190,11 +190,11 @@ extern "C" void cPlaybackMan_initLocation(cPlaybackMan_C6E8* self, const char* n
     self->cur = -1;
     self->handle = -1;
     self->field_0x4C = operator_new_tag(0x14000, D_00481570, 0, 0);
-    func_0026D628((char*)self + 0x14);
+    cReplayFrame_clearFrame((char*)self + 0x14);
     func_0026E950((char*)self + 0x14, self->field_0x4C, 0);
     unsigned int* hdr = (unsigned int*)cMemMan_alloc(0x1C22C, D_00481580, 0, 0);
     self->hdr = hdr;
-    func_003E6448(hdr, 0, 0x1C22C);
+    MEM_fill(hdr, 0, 0x1C22C);
     int n = self->count;
     hdr[0] = 0xDBAC0101;
     hdr[1] = 0x1C200;
@@ -205,7 +205,7 @@ extern "C" void cPlaybackMan_initLocation(cPlaybackMan_C6E8* self, const char* n
         ((sPbEntry_C6E8*)(i * 12 + (int)self->entries))->size = 0;
     }
     void* iface = cBE_getInterface_C6E8(cBE_getBE(), 10);
-    self->count2 = func_00154278(iface);
+    self->count2 = cBEMissionInterface_getNumberMissions(iface);
     for (int j = 0; j < self->count2; j++)
         ((sPbEntry_C6E8*)(j * 12 + (int)self->entries))->id = func_00154588(iface, j);
 }
@@ -215,7 +215,7 @@ extern "C" void cPlaybackMan_initLocation(cPlaybackMan_C6E8* self, const char* n
 INCLUDE_ASM("replay/playbackman", func_0026C898);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
-extern "C" void func_003DFAF0(int handle);
+extern "C" void ASYNCFILE_cancel(int handle);
 
 struct sPbEntryC898 {
     int field_0x0;
@@ -243,7 +243,7 @@ extern "C" void func_0026C898(void* p)
 {
     cPlaybackManC898* self = (cPlaybackManC898*)p;
     if (self->handle != -1) {
-        func_003DFAF0(self->handle);
+        ASYNCFILE_cancel(self->handle);
         self->handle = -1;
     }
     if (self->entries != 0) {
@@ -340,19 +340,19 @@ extern "C" int func_0026C9F0(void* self_, int key)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026CA90);
+INCLUDE_ASM("replay/playbackman", cPlaybackMan_restart);
 #ifdef SKIP_ASM
 extern "C" void func_0026CDF8(void* self);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
-extern "C" void func_0026CA90(void* self)
+extern "C" void cPlaybackMan_restart(void* self)
 {
     func_0026CDF8(self);
     unsigned int* buf = *(unsigned int**)((char*)self + 0x4);
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x70) = 0;
     if (buf != 0) {
-        func_003E6448(buf, 0, 0x1C22C);
+        MEM_fill(buf, 0, 0x1C22C);
         buf[0] = 0xDBAC0101;
         buf[1] = 0x1C200;
     }
@@ -426,14 +426,14 @@ extern "C" void func_0026CBB8(void* self)
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026CC18);
 #ifdef SKIP_ASM
-// PORT: func_0026DBD0 is declared in this unit with one parameter, but it passes a
+// PORT: cReplay_restoreFrame1 is declared in this unit with one parameter, but it passes a
 // second one ($5) through to cReplay_restoreFrame; bind the 2-arg form to the symbol.
-extern "C" void func_0026DBD0_2(void* replay, void* frame) __asm__("func_0026DBD0");
+extern "C" void cReplay_restoreFrame1_2(void* replay, void* frame) __asm__("cReplay_restoreFrame1");
 
 extern "C" void* func_0026CC18(void* self)
 {
     if (*(int*)((char*)self + 0x10)) {
-        func_0026DBD0_2(*(void**)(*(char**)((char*)self + 0x5C) + 0x28), (char*)self + 0x14);
+        cReplay_restoreFrame1_2(*(void**)(*(char**)((char*)self + 0x5C) + 0x28), (char*)self + 0x14);
     }
 }
 #endif
@@ -442,9 +442,9 @@ extern "C" void* func_0026CC18(void* self)
 INCLUDE_ASM("replay/playbackman", func_0026CC48);
 #ifdef SKIP_ASM
 extern "C" void cAI_purgeMissionRiders(void*);
-extern "C" void func_00128AC0(void* self);
+extern "C" void cAI_reinitMissionRiders(void* self);
 extern "C" void func_0015EDC8(void* self, int value);
-void func_0026F4A0(void* self, int val);
+void cReplay_setReplayState(void* self, int val);
 extern "C" void func_0026CBB8(void* self);
 void func_00317908(void* self);
 
@@ -452,10 +452,10 @@ extern "C" void func_0026CC48(void* self)
 {
     if (*(int*)((char*)self + 0x70) == 0 && *(int*)(*(char**)((char*)self + 0x4) + 0xC) > 0) {
         cAI_purgeMissionRiders(*(void**)((char*)self + 0x60));
-        func_00128AC0(*(void**)((char*)self + 0x60));
+        cAI_reinitMissionRiders(*(void**)((char*)self + 0x60));
         void* fp = *(void**)(*(char**)((char*)self + 0x5C) + 0x28);
         *(int*)((char*)fp + 0x4) = *(int*)fp;
-        func_0026F4A0(fp, 14);
+        cReplay_setReplayState(fp, 14);
         func_0026CBB8(self);
         *(int*)(*(char**)((char*)self + 0x4) + 0x8) = 0;
         func_00317908(*(char**)((char*)self + 0x4) + 0x1C214);
@@ -472,17 +472,17 @@ extern "C" void func_0026CC48(void* self)
 INCLUDE_ASM("replay/playbackman", func_0026CD20);
 #ifdef SKIP_ASM
 extern "C" void cAI_purgeMissionRiders(void*);
-extern "C" void func_00128AC0(void* self);
+extern "C" void cAI_reinitMissionRiders(void* self);
 extern "C" void func_0015EDC8(void* self, int value);
-void func_0026F4A0(void* self, int val);
+void cReplay_setReplayState(void* self, int val);
 
 extern "C" void func_0026CD20(void* self)
 {
     if (*(int*)((char*)self + 0x70) == 1) {
         cAI_purgeMissionRiders(*(void**)((char*)self + 0x60));
-        func_00128AC0(*(void**)((char*)self + 0x60));
+        cAI_reinitMissionRiders(*(void**)((char*)self + 0x60));
         void* fp = *(void**)(*(char**)((char*)self + 0x5C) + 0x28);
-        func_0026F4A0(fp, *(int*)((char*)fp + 0x4));
+        cReplay_setReplayState(fp, *(int*)((char*)fp + 0x4));
         func_0026CC18(self);
         *(int*)((char*)self + 0x70) = 0;
         int v = *(int*)(*(char**)((char*)self + 0x60) + 0x28);
@@ -631,7 +631,7 @@ extern "C" int func_0026CFE8(void *self, int id)
 INCLUDE_ASM("replay/playbackman", func_0026D020);
 #ifdef SKIP_ASM
 extern "C" int func_002C85A0(void* src, int a, int dst);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
 extern "C" int func_0026D020(void* self, int idx)
 {
@@ -642,7 +642,7 @@ extern "C" int func_0026D020(void* self, int idx)
         return 1;
     }
     char* buf = *(char**)((char*)self + 4);
-    func_003E6448(buf, 0, 0x1C22C);
+    MEM_fill(buf, 0, 0x1C22C);
     *(int*)(buf + 0) = 0xDBAC0101;
     *(int*)(buf + 4) = 0x1C200;
     return 0;
@@ -871,11 +871,11 @@ struct sPbStream_D420 {
     sPbChunk_D420* chunks;  // 0xC
 };
 
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
 extern "C" int func_0026D420(sPbStream_D420* self, sPbChunk_D420* out)
 {
-    func_003E6448(out, 0, 8);
+    MEM_fill(out, 0, 8);
     if (self->index >= self->count) {
         return 0;
     }
@@ -928,7 +928,7 @@ extern "C" int func_0026D4D8(sPlaybackStream* self, unsigned int pos)
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026D558);
 #ifdef SKIP_ASM
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" int func_002C85A0(void* src, int a, int dst);
 
 extern "C" int func_0026D558(void* self, char** pp)
@@ -938,10 +938,10 @@ extern "C" int func_0026D558(void* self, char** pp)
         int value;
     } hdr;
     int size;
-    func_003E6574(&hdr, *pp, 8);
+    MEM_copy(&hdr, *pp, 8);
     *pp += 8;
     *(int*)self = hdr.value;
-    func_003E6574(&size, *pp, 4);
+    MEM_copy(&size, *pp, 4);
     *pp += 4;
     func_002C85A0(*pp, 0, *(int*)((char*)self + 0xC));
     *pp += size;
@@ -953,20 +953,20 @@ extern "C" int func_0026D558(void* self, char** pp)
 INCLUDE_ASM("replay/playbackman", func_0026D5E8);
 #ifdef SKIP_ASM
 void* func_0026E8E0(void* self);
-extern "C" void func_0026D628(void* self);
+extern "C" void cReplayFrame_clearFrame(void* self);
 extern void* D_00481850[];
 
 extern "C" void* func_0026D5E8(void* self)
 {
     func_0026E8E0(self);
     *(void***)self = D_00481850;
-    func_0026D628(self);
+    cReplayFrame_clearFrame(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D628);
+INCLUDE_ASM("replay/playbackman", cReplayFrame_clearFrame);
 #ifdef SKIP_ASM
 struct sPlaybackKey {
     short a;
@@ -974,7 +974,7 @@ struct sPlaybackKey {
     char c;
 };
 
-extern "C" void func_0026D628(void* self)
+extern "C" void cReplayFrame_clearFrame(void* self)
 {
     sPlaybackKey k;
     k.a = 0;
@@ -1026,7 +1026,7 @@ struct sPbFrame_D678 {
     int field_0x34;         // 0x34
 };
 
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" int func_0026EAB8(void* self, char** pp, void* src);
 // PORT: func_0026ED88 is an empty (void*) stub, but this caller passes a second
 // argument; bind the 2-arg form to the symbol.
@@ -1037,7 +1037,7 @@ extern "C" int func_0026D678(sPbFrame_D678* self, char** pp)
     sPbHeader_D678 h;
     char* p = *pp;
     *pp = p + 0x28;
-    func_003E6574(&h, p, 0x28);
+    MEM_copy(&h, p, 0x28);
     self->field_0x10 = h.field_0x4;
     self->field_0x30 = h.field_0x8;
     self->field_0x34 = h.field_0xc;
@@ -1080,7 +1080,7 @@ struct sPbBytes4D760 {
 };
 
 extern "C" void* func_00270130(void* self);
-extern "C" void func_0026D818(void* self, void* out);
+extern "C" void cReplay_saveFrame(void* self, void* out);
 // PORT: func_0026ED88 is an empty (void*) stub, but this caller passes a second
 // argument; bind the 2-arg form to the symbol.
 void func_0026ED88_2(void* self, int a) __asm__("func_0026ED88__FPv");
@@ -1089,7 +1089,7 @@ extern "C" void* func_0026D760(void* self, sPbBytes4D760* src)
 {
     void* out = func_00270130(self);
     *(sPbBytes4D760*)((char*)out + 0x1C) = *src;
-    func_0026D818(self, out);
+    cReplay_saveFrame(self, out);
     *(int*)((char*)out + 0x30) = *(int*)((char*)self + 0x3C8);
     func_0026ED88_2(out, 0);
     return out;
@@ -1103,18 +1103,18 @@ struct sPbBytes4 {
     char b[4];
 };
 
-extern "C" void func_0026D818(void* self, void* out);
+extern "C" void cReplay_saveFrame(void* self, void* out);
 
 extern "C" void func_0026D7D0(void* self, void* out, sPbBytes4* src)
 {
     *(sPbBytes4*)((char*)out + 0x1C) = *src;
-    func_0026D818(self, out);
+    cReplay_saveFrame(self, out);
     *(int*)((char*)out + 0x30) = *(int*)((char*)self + 0x3C8);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D818);
+INCLUDE_ASM("replay/playbackman", cReplay_saveFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cPbStream {
@@ -1163,7 +1163,7 @@ extern "C" void func_002D9CB0(cPbStream* s);
 extern "C" void func_0030BB10(void* self, cPbStream* s);
 extern "C" void func_00229E20(void* self, cPbStream* s);
 extern "C" void func_003441A8(void* self, cPbStream* s);
-extern "C" void func_00357CA8(void* self, cPbStream* s);
+extern "C" void cMultiParticleMan_writeToReplayFrame(void* self, cPbStream* s);
 extern "C" void func_0026D988(void* self, cPbStream* s, int a);
 extern "C" void func_0026DA88(void* self, cPbStream* s);
 extern "C" void func_00103480(void* self, cPbStream* s);
@@ -1181,7 +1181,7 @@ static inline cPbWorld* pbWorld(cPbObjSys* o)
     return *(cPbWorld**)((char*)o + 0xC);
 }
 
-extern "C" void func_0026D818(void* self, void* stream)
+extern "C" void cReplay_saveFrame(void* self, void* stream)
 {
     cPbStream* out = (cPbStream*)stream;
     sPbTime t;
@@ -1200,7 +1200,7 @@ extern "C" void func_0026D818(void* self, void* stream)
     func_0030BB10(D_004A3DD8, out);
     func_00229E20(D_004A2A00_D818, out);
     func_003441A8(D_004A3FF0, out);
-    func_00357CA8(D_004A4028, out);
+    cMultiParticleMan_writeToReplayFrame(D_004A4028, out);
     func_0026D988(self, out, 1);
     func_0026DA88(self, out);
     func_00103480(*(void**)((char*)pbWorld(D_004A28A8_D818->objs) + 0xA4), out);
@@ -1301,21 +1301,21 @@ INCLUDE_ASM("replay/playbackman", func_0026DB88);
 // PORT: cReplayFramePtr_getFrameBlock is mangled with no parameters (__Fv) but is
 // called here with (frame, 1); bind the 2-arg form to the symbol.
 void cReplayFramePtr_getFrameBlock_2(void* frame, int n) __asm__("cReplayFramePtr_getFrameBlock__Fv");
-extern "C" void func_0026DBD0_2(void* replay, void* frame) __asm__("func_0026DBD0");
+extern "C" void cReplay_restoreFrame1_2(void* replay, void* frame) __asm__("cReplay_restoreFrame1");
 
 extern "C" void func_0026DB88(void* self, void* frame)
 {
     cReplayFramePtr_getFrameBlock_2(frame, 1);
-    func_0026DBD0_2(self, frame);
+    cReplay_restoreFrame1_2(self, frame);
 }
 #endif
 
 extern "C" void cReplay_restoreFrame(void*);
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026DBD0);
+INCLUDE_ASM("replay/playbackman", cReplay_restoreFrame1);
 #ifdef SKIP_ASM
-extern "C" void func_0026DBD0(void* self)
+extern "C" void cReplay_restoreFrame1(void* self)
 {
     cReplay_restoreFrame(self);
 }

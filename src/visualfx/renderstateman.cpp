@@ -740,7 +740,7 @@ extern "C" void func_002EF378(const char* name)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF3B0);
+INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_cAirStreamerFX);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/renderstateman_classes.h"
@@ -753,7 +753,7 @@ cRsm_2EF3B0::cRsm_2EF3B0()
 }
 
 // PORT: the compiler names this ctor __11cRsm_2EF3B0i; expose it under the address-derived name.
-__asm__(".globl func_002EF3B0\n.type func_002EF3B0,@function\nfunc_002EF3B0 = __11cRsm_2EF3B0i\n.size func_002EF3B0,0x180\n");
+__asm__(".globl cAirStreamerFX_cAirStreamerFX\n.type cAirStreamerFX_cAirStreamerFX,@function\ncAirStreamerFX_cAirStreamerFX = __11cRsm_2EF3B0i\n.size cAirStreamerFX_cAirStreamerFX,0x180\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("__12cRiderVb_rsm = cRider_cRider\n"
@@ -780,7 +780,7 @@ __asm__(".globl func_002EF530\n.type func_002EF530,@function\nfunc_002EF530 = _$
 __asm__("_vt$15cVbDtor002EF530$13cRiderVbC_rsm = D_004888D0\n"
         "_vt$15cVbDtor002EF530$14cRiderVbBC_rsm = D_00459B90\n"
         "_vt$15cVbDtor002EF530$12cRiderVb_rsm = D_00488918\n"
-        "_$_12cRiderVb_rsm = func_0011B978\n");
+        "_$_12cRiderVb_rsm = cRider__cRider\n");
 #endif
 
 //100%
@@ -1184,7 +1184,7 @@ extern "C" int func_002EFF90(void) {
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EFF98);
+INCLUDE_ASM("visualfx/renderstateman", cVisualEffectsMan_cVisualEffectsMan);
 #ifdef SKIP_ASM
 struct sRSEntry_002EFF98 {
     int f0;
@@ -1205,7 +1205,7 @@ extern sShadowCfg_002EFF98 D_004A45D4;
 extern int D_004A443C;
 extern void* D_004A3B78;
 
-extern "C" void* func_002EFF98(sRSMan_002EFF98* self)
+extern "C" void* cVisualEffectsMan_cVisualEffectsMan(sRSMan_002EFF98* self)
 {
     self->vt = D_00487DA0;
     self->f[0] = 0;
@@ -1507,13 +1507,13 @@ extern "C" void func_002F04E0(func_002F04B0_cObj** self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002F0510);
+INCLUDE_ASM("visualfx/renderstateman", cVisualEffectsMan_construct);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cPSPVisualEffectsMan_cPSPVisualEffectsMan(void* self);
 extern char D_00487BA0[];
 
-extern "C" void* func_002F0510(void)
+extern "C" void* cVisualEffectsMan_construct(void)
 {
     return cPSPVisualEffectsMan_cPSPVisualEffectsMan(cMemMan_alloc(0x48, D_00487BA0, 0, 0));
 }

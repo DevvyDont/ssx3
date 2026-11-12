@@ -5,8 +5,8 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_cRiderAnimBase);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-void func_003142E8(void* self);
-extern "C" void func_00311A50(void* self);
+void cAnimSequencer_init(void* self);
+extern "C" void cRiderAnimBase_reset(void* self);
 extern char D_0048D7D8[];
 extern const char D_0048A4E0[];
 
@@ -17,9 +17,9 @@ extern "C" void* cRiderAnimBase_cRiderAnimBase(void* self)
     *(void**)((char*)self + 0x50) = operator_new_tag(0x30, D_0048A4E0, 0, 0);
     for (int i = 0; i < 6; i++)
     {
-        func_003142E8(*(char**)((char*)self + 0x50) + (i << 3));
+        cAnimSequencer_init(*(char**)((char*)self + 0x50) + (i << 3));
     }
-    func_00311A50(self);
+    cRiderAnimBase_reset(self);
     return self;
 }
 #endif
@@ -29,7 +29,7 @@ INCLUDE_ASM("animation/rideranimbase", func_00311958);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int* p);
-extern "C" void func_00314668(void* self);
+extern "C" void cAnimSequencer_expireAll(void* self);
 extern char D_0048D7D8[];
 
 extern "C" void func_00311958(void* self, int flags)
@@ -37,7 +37,7 @@ extern "C" void func_00311958(void* self, int flags)
     *(void**)((char*)self + 0x58) = D_0048D7D8;
     for (int i = 0; i < 6; i++)
     {
-        func_00314668(*(char**)((char*)self + 0x50) + (i << 3));
+        cAnimSequencer_expireAll(*(char**)((char*)self + 0x50) + (i << 3));
     }
     void* p = *(void**)((char*)self + 0x50);
     if (p)
@@ -80,9 +80,9 @@ extern "C" const char* func_00311A30(void* self, int anim)
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00311A50);
+INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_reset);
 #ifdef SKIP_ASM
-extern "C" void func_00314668(void* self);
+extern "C" void cAnimSequencer_expireAll(void* self);
 
 struct sRabQuad32 {
     int w[8];
@@ -100,12 +100,12 @@ struct sRiderAnimBase {
     char* mSequencers;  // 0x50
 };
 
-extern "C" void func_00311A50(void* p)
+extern "C" void cRiderAnimBase_reset(void* p)
 {
     sRiderAnimBase* self = (sRiderAnimBase*)p;
     for (int i = 0; i < 6; i++)
     {
-        func_00314668(self->mSequencers + (i << 3));
+        cAnimSequencer_expireAll(self->mSequencers + (i << 3));
         self->mAnims[i] = 0x1B6;
     }
     //START
@@ -318,7 +318,7 @@ INCLUDE_ASM("animation/rideranimbase", func_00311E38);
 // Resets sequencer i and marks its slot empty (0x1B6 = no anim, see func_00311AE8).
 extern "C" void func_00311E38(sRiderAnimBase* self, int i)
 {
-    func_00314668(self->mSequencers + (i << 3));
+    cAnimSequencer_expireAll(self->mSequencers + (i << 3));
     self->mAnims[i] = 0x1B6;
 }
 #endif
@@ -404,7 +404,7 @@ extern "C" int func_00311F00(void* vself, void* vseq, int anim, int a3, int a4, 
     cAnimSequencer* seq = (cAnimSequencer*)vseq;
     char* node;
     if (blend == 0.0f)
-        func_00314668(seq);
+        cAnimSequencer_expireAll(seq);
     if (cAIAnimEventMap_getBlendInTime(anim)[1] == 2)
     {
         node = func_00314588(seq, anim, a3, 0.0f);
@@ -581,7 +581,7 @@ extern "C" void func_00312598(void* p, int a1)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/rideranimbase", func_00312660);
+INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimFrame);
 #ifdef SKIP_ASM
 extern "C" int func_00311F00(void* self, void* seq, int anim, int a3, int a4, int a5, float blend);
 extern "C" void func_00313CF0(void* node, int i, float t);
@@ -602,11 +602,11 @@ struct sAnimState_00312660
 } __attribute__((aligned(16)));
 
 // Samples anim at time t on a scratch sequencer and returns the first resulting state.
-extern "C" sAnimState_00312660 func_00312660(char* self, int anim, int h, float t)
+extern "C" sAnimState_00312660 cRiderAnimBase_getAIAnimFrame(char* self, int anim, int h, float t)
 {
     sAnimState_00312660 states[0x40];
     cAnimSequencer seq;
-    func_003142E8(&seq);
+    cAnimSequencer_init(&seq);
     if (h == D_004A5950)
     {
         sVEntry00312660* vt = *(sVEntry00312660**)(self + 0x58);
@@ -615,7 +615,7 @@ extern "C" sAnimState_00312660 func_00312660(char* self, int anim, int h, float 
     func_00311F00(self, &seq, anim, h, 1, 0, 0.0f);
     func_00313CF0(cAnimSequencer_getSequence(&seq, 0), 0, t);
     func_00314418(&seq, (sAnimState_00312598*)states, 0x40);
-    func_00314668(&seq);
+    cAnimSequencer_expireAll(&seq);
     return states[0];
 }
 #endif
@@ -805,7 +805,7 @@ extern "C" void func_00312BD0(void* self, void* unused, void* rider, int anim)
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00312C20);
 #ifdef SKIP_ASM
-// Packed animation channel table (built by func_003130A8, sampled here).
+// Packed animation channel table (built by dcmpInitFrameAccessor, sampled here).
 struct sRabChannel {
     int type;      // 0x0
     float v4;      // 0x4
@@ -958,7 +958,7 @@ extern "C" void func_00312C20(sRabChannelSet* self, int first, int count, float 
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_003130A8);
+INCLUDE_ASM("animation/rideranimbase", dcmpInitFrameAccessor);
 #ifdef SKIP_ASM
 // PORT: reinterprets packed 24-bit float bits
 static inline float bitsToFloat_003130A8(int x)
@@ -984,7 +984,7 @@ static inline void setType_003130A8(sRabChannelSet* self, sRabChannel* ch, int t
     ch->type = type;
 }
 
-extern "C" void func_003130A8(sRabChannelSet* self, unsigned char* data, int frames)
+extern "C" void dcmpInitFrameAccessor(sRabChannelSet* self, unsigned char* data, int frames)
 {
     unsigned char* p = data;
     int n = *p;

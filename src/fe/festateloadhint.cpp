@@ -66,16 +66,16 @@ extern char D_004A2BC8[];
 extern char D_004A2BD0[];
 extern void* D_004A5B64;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" int func_002C27C0(char* buf, const char* fmt, ...);
-extern "C" void func_003A0E90(void* obj, char* text);
+extern "C" int sprintf2(char* buf, const char* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
 extern "C" int func_00245AE0(void* self)
 {
     char buf[200];
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
-        func_002C27C0(buf, D_004A2BD0, (int)*(float*)((char*)D_004A5B64 + 0x38));
-        func_003A0E90(obj, buf);
+        sprintf2(buf, D_004A2BD0, (int)*(float*)((char*)D_004A5B64 + 0x38));
+        cUIText_setUnicodeString(obj, buf);
     }
     return 0;
 }
@@ -147,16 +147,16 @@ extern char D_004A2BC8[];
 extern char D_004A2BD0[];
 extern void* D_004A5B64;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" int func_002C27C0(char* buf, const char* fmt, ...);
-extern "C" void func_003A0E90(void* obj, char* text);
+extern "C" int sprintf2(char* buf, const char* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
 extern "C" int func_00245C60(void* self)
 {
     char buf[200];
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
-        func_002C27C0(buf, D_004A2BD0, (int)*(float*)((char*)D_004A5B64 + 0x38));
-        func_003A0E90(obj, buf);
+        sprintf2(buf, D_004A2BD0, (int)*(float*)((char*)D_004A5B64 + 0x38));
+        cUIText_setUnicodeString(obj, buf);
     }
     return 0;
 }
@@ -228,16 +228,16 @@ extern char D_004A2BC8[];
 extern char D_004A2BD0[];
 extern void* D_004A5B64;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" int func_002C27C0(char* buf, const char* fmt, ...);
-extern "C" void func_003A0E90(void* obj, char* text);
+extern "C" int sprintf2(char* buf, const char* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
 extern "C" int func_00245DC0(void* self)
 {
     char buf[200];
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
-        func_002C27C0(buf, D_004A2BD0, (int)*(float*)((char*)D_004A5B64 + 0x38));
-        func_003A0E90(obj, buf);
+        sprintf2(buf, D_004A2BD0, (int)*(float*)((char*)D_004A5B64 + 0x38));
+        cUIText_setUnicodeString(obj, buf);
     }
     return 0;
 }
@@ -434,7 +434,7 @@ INCLUDE_ASM("fe/festateloadhint", func_002461E0);
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_00186A08(void* self, void* engine);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern char D_004A2AC8[];
 extern char D_0047B978[];
 
@@ -445,7 +445,7 @@ extern "C" void func_002461E0(void* self, void* item, int msg)
             int hash = *(int*)((char*)item + 0x38);
             if (hash == GetHashValue32(D_004A2AC8)) {
                 void* state = func_00186A08(cMemMan_alloc(0x248, D_0047B978, 0, 0), *(void**)((char*)self + 0x10));
-                func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, state);
+                cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, state);
             }
         }
     }
@@ -497,7 +497,7 @@ static inline int Loc_246278(char* key)
 static inline void Fmt_246278(char* buf, char* fmt, char* key, void* iface)
 {
     int str = Loc_246278(key);
-    func_002C27C0(buf, fmt, str, func_00144BF0(iface));
+    sprintf2(buf, fmt, str, func_00144BF0(iface));
 }
 
 struct sVEntryV_246278 {
@@ -536,7 +536,7 @@ extern "C" void func_00246278(void* self, char* obj)
             Fmt_246278(buf, fmt, D_0047BA78, iface);
             break;
         }
-        func_003A0E90(obj, buf);
+        cUIText_setUnicodeString(obj, buf);
         return;
     }
     switch (D_00535C10[0]) {
@@ -568,13 +568,13 @@ extern "C" void func_00246278(void* self, char* obj)
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_002464E8);
 #ifdef SKIP_ASM
-extern "C" int func_00144BE0(void* iface);
+extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" int func_00144D18(void* iface, int idx);
-extern "C" int func_00146E98(void* iface, int a1);
-extern "C" const char* func_0014EE58(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
+extern "C" const char* cBECharacterInterface_getShortName(void* iface, int a1);
 extern "C" int func_00148950(void* iface, int id);
-extern "C" void* func_002C2508(void* dst, void* src);
-extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void* strcpy1(void* dst, void* src);
+extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern signed char D_00535BC8[];
 extern char D_0047BB70[];
 extern char D_0047BB80[];
@@ -648,7 +648,7 @@ static inline void Activate_2464E8(char* obj)
 static inline void Fmt_2464E8(char* buf, char* fmt, char* key, void* iface)
 {
     void* str = Loc_2464E8(key);
-    func_002C27C0(buf, fmt, str, func_00144BF0(iface));
+    sprintf2(buf, fmt, str, func_00144BF0(iface));
 }
 
 extern "C" void func_002464E8(void* self, char* obj)
@@ -673,7 +673,7 @@ extern "C" void func_002464E8(void* self, char* obj)
             Fmt_2464E8(buf, fmt, D_0047BA78, iface);
             break;
         }
-        func_003A0E90(obj, buf);
+        cUIText_setUnicodeString(obj, buf);
         return;
     }
     switch (D_00535BC8[0x48]) {
@@ -721,7 +721,7 @@ extern "C" void func_002464E8(void* self, char* obj)
     case 7:
         break;
     }
-    switch (func_00144D18(iface, func_00144BE0(iface))) {
+    switch (func_00144D18(iface, cBENewRaceInterface_getLocationID(iface))) {
     case 0:
         if (IsId_2464E8(obj, D_004A2C00)) { Activate_2464E8(obj); return; }
         break;
@@ -733,25 +733,25 @@ extern "C" void func_002464E8(void* self, char* obj)
         break;
     }
     if (IsId_2464E8(obj, D_0047BC18)) {
-        func_002C2508(fmtA, Loc_2464E8(D_0047BC30));
-        func_002C26D0((unsigned short*)buf, fmtA, tB.v[func_00144BE0(iface)]);
-        func_003A0E90(obj, buf);
+        strcpy1(fmtA, Loc_2464E8(D_0047BC30));
+        sprintf1((unsigned short*)buf, fmtA, tB.v[cBENewRaceInterface_getLocationID(iface)]);
+        cUIText_setUnicodeString(obj, buf);
     } else if (IsId_2464E8(obj, D_0047BC48)) {
-        func_002C2508(fmtB, Loc_2464E8(D_0047BC30));
-        func_002C26D0((unsigned short*)buf, fmtB, tA.v[func_00144BE0(iface)]);
-        func_003A0E90(obj, buf);
+        strcpy1(fmtB, Loc_2464E8(D_0047BC30));
+        sprintf1((unsigned short*)buf, fmtB, tA.v[cBENewRaceInterface_getLocationID(iface)]);
+        cUIText_setUnicodeString(obj, buf);
     } else if (IsId_2464E8(obj, D_0047BC60)) {
         void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
-        cUIText_setAsciiString((cUIText*)obj, func_0014EE58(iface2, func_00146E98(iface1, 0)));
+        cUIText_setAsciiString((cUIText*)obj, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
     } else if (IsId_2464E8(obj, D_0047BC70)) {
         void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
-        func_002C2508(fmtA, Loc_2464E8(D_0047BC80));
-        int v = func_00148950(iface3, func_00146E98(iface1, 0));
-        int idx = func_00146E98(iface1, 0);
-        func_002C26D0((unsigned short*)buf, fmtA, D_005308B8[idx].b1 ? 1 : v);
-        func_003A0E90(obj, buf);
+        strcpy1(fmtA, Loc_2464E8(D_0047BC80));
+        int v = func_00148950(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0));
+        int idx = cBENewPlayerInterface_getHumanRider(iface1, 0);
+        sprintf1((unsigned short*)buf, fmtA, D_005308B8[idx].b1 ? 1 : v);
+        cUIText_setUnicodeString(obj, buf);
     } else if (IsId_2464E8(obj, D_004A2C08)) {
         char* p = *(char**)((char*)self + 0x48);
         if (p != 0) {
@@ -788,7 +788,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
-extern "C" void func_003A0E90(void* obj, char* text);
+extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
 extern "C" void* cBE_getBE();
 
@@ -801,13 +801,13 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
 
 extern char* D_004A28A8;
 
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 
 extern "C" int func_00148950(void* iface, int id);
 
-extern "C" void* func_002C2508(void* dst, void* src);
+extern "C" void* strcpy1(void* dst, void* src);
 
-extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 
 extern char D_0047BC80[];
 
@@ -890,7 +890,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
     cGameModeMan_getGM();
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
-    char* st = func_00155270(iface8, func_00146E98(iface1, player != 0));
+    char* st = func_00155270(iface8, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(rankNumName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, D_004A2C28, sizeof("%d"));
@@ -904,20 +904,20 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
         if (D_00534B30[0] != 0 && D_00534B30[1] != 0) {
             rank = 8;
         } else {
-            rank = func_00148950(iface3, func_00146E98(iface1, player != 0));
+            rank = func_00148950(iface3, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
         }
         unsigned short fmtw[50];
         unsigned short text[100];
         char* o = *(char**)(D_004A28A8 + 0x8C);
         sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(o + 4);
-        func_002C2508(fmtw, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0047BC80)));
-        func_002C26D0(text, fmtw, rank);
-        func_003A0E90(obj, (char*)text);
+        strcpy1(fmtw, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0047BC80)));
+        sprintf1(text, fmtw, rank);
+        cUIText_setUnicodeString(obj, (char*)text);
     }
     obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(timeName.c));
     if (obj != 0) {
         if (D_00535C10[0] == 0 || D_00535C10[0] == 5) {
-            int i = func_00146E98(iface1, player != 0);
+            int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
             unsigned int t = func_004139F8((float)D_00536640[i] * (1.0f / 60.0f));
             char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2C58));
             if (o != 0) {
@@ -925,7 +925,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
             }
             strcpy(buf, func_0020A1A8(t));
         } else {
-            int i = func_00146E98(iface1, player != 0);
+            int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
             unsigned int score = D_00536640[i];
             char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2C60));
             if (o != 0) {
@@ -994,14 +994,14 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" char* func_00155270(void* iface, int a1);
-extern "C" const char* func_0014EE58(void* iface, int a1);
+extern "C" const char* cBECharacterInterface_getShortName(void* iface, int a1);
 extern "C" int func_00148950(void* iface, int id);
 extern "C" void func_002C2540(void* dst, const char* s);
-extern "C" void* func_002C2508(void* dst, void* src);
-extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
-extern "C" void func_003A0E90(void* obj, char* text);
+extern "C" void* strcpy1(void* dst, void* src);
+extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 extern "C" double func_00413AF8(float f);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* D_004A28A8;
@@ -1031,38 +1031,38 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
     void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
-    char* st = func_00155270(iface8, func_00146E98(iface1, 0));
+    char* st = func_00155270(iface8, cBENewPlayerInterface_getHumanRider(iface1, 0));
     unsigned short text[0x18];
     unsigned short fmtw[0x20];
     if (wHash_7AB0(w) == GetHashValue32(D_0047BEC8)) {
-        func_002C2540(text, func_0014EE58(iface2, func_00146E98(iface1, 0)));
-        func_003A0E90(widget, (char*)text);
+        func_002C2540(text, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
+        cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(w) == GetHashValue32(D_0047BED8)) {
         char* o = *(char**)(D_004A28A8 + 0x8C);
         sVEnt_7AB0* vt = *(sVEnt_7AB0**)(o + 4);
-        func_002C2508(fmtw, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0047BC80)));
-        func_002C26D0(text, fmtw, func_00148950(iface3, func_00146E98(iface1, 0)));
-        func_003A0E90(widget, (char*)text);
+        strcpy1(fmtw, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0047BC80)));
+        sprintf1(text, fmtw, func_00148950(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0)));
+        cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(w) == GetHashValue32(D_0047BEE8)) {
         func_002C2540(fmtw, D_004A2C28);
-        func_002C26D0(text, fmtw, *(int*)(st + 0x2C));
-        func_003A0E90(widget, (char*)text);
+        sprintf1(text, fmtw, *(int*)(st + 0x2C));
+        cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF00)) {
         func_002C2540(fmtw, D_004A2C28);
-        func_002C26D0(text, fmtw, *(int*)(st + 0x28));
-        func_003A0E90(widget, (char*)text);
+        sprintf1(text, fmtw, *(int*)(st + 0x28));
+        cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF18)) {
         func_002C2540(fmtw, D_004A2C28);
-        func_002C26D0(text, fmtw, *(int*)(st + 0x18));
-        func_003A0E90(widget, (char*)text);
+        sprintf1(text, fmtw, *(int*)(st + 0x18));
+        cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF30)) {
         func_002C2540(fmtw, D_004A2C28);
-        func_002C26D0(text, fmtw, *(int*)(st + 0x20));
-        func_003A0E90(widget, (char*)text);
+        sprintf1(text, fmtw, *(int*)(st + 0x20));
+        cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF48)) {
         func_002C2540(fmtw, D_004A2C28);
-        func_002C26D0(text, fmtw, *(int*)(st + 0xC));
-        func_003A0E90(widget, (char*)text);
+        sprintf1(text, fmtw, *(int*)(st + 0xC));
+        cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF60)) {
         int t = (int)*(float*)(st + 0x48);
         int min = t / 60;
@@ -1074,8 +1074,8 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
         cUIText_setAsciiString((cUIText*)widget, buf);
     } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF88)) {
         func_002C2540(fmtw, D_004A2C28);
-        func_002C26D0(text, fmtw, *(int*)(st + 0x88));
-        func_003A0E90(widget, (char*)text);
+        sprintf1(text, fmtw, *(int*)(st + 0x88));
+        cUIText_setUnicodeString(widget, (char*)text);
     }
 }
 #endif

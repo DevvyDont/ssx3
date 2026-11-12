@@ -32,8 +32,8 @@ INCLUDE_ASM("be/beprepoststate", func_00156390);
 // From peak3project's fork (github.com/peak3project/ssx3).
 void* cBENewRaceInterface_getThis();
 void* cBENewPlayerInterface_getThis();
-extern "C" void* func_0014EDD8();
-extern "C" void* func_00147F78();
+extern "C" void* cBECharacterInterface_getThis();
+extern "C" void* cBEStatInterface_getThis();
 void* cBEOptionInterface_getThis();
 void* cBESaveInterface_getThis();
 void* cBENetworkInterface_getThis();
@@ -53,9 +53,9 @@ extern "C" void* func_00156390(void* self, int kind)
     case 1:
         return cBENewPlayerInterface_getThis();
     case 2:
-        return func_0014EDD8();
+        return cBECharacterInterface_getThis();
     case 3:
-        return func_00147F78();
+        return cBEStatInterface_getThis();
     case 4:
         return cBEOptionInterface_getThis();
     case 5:
@@ -179,8 +179,8 @@ INCLUDE_ASM("be/beprepoststate", func_001565C8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 void* cBENewRaceInterface_getThis();
 void* cBENewPlayerInterface_getThis();
-extern "C" void* func_0014EDD8();
-extern "C" void* func_00147F78();
+extern "C" void* cBECharacterInterface_getThis();
+extern "C" void* cBEStatInterface_getThis();
 void* cBEOptionInterface_getThis();
 void* cBESaveInterface_getThis();
 void* cBENetworkInterface_getThis();
@@ -200,9 +200,9 @@ extern "C" void* func_001565C8(void* self, int kind)
     case 1:
         return cBENewPlayerInterface_getThis();
     case 2:
-        return func_0014EDD8();
+        return cBECharacterInterface_getThis();
     case 3:
-        return func_00147F78();
+        return cBEStatInterface_getThis();
     case 4:
         return cBEOptionInterface_getThis();
     case 5:
@@ -337,7 +337,7 @@ extern "C" void func_00156810(void* self)
 //100%
 INCLUDE_ASM("be/beprepoststate", func_00156858);
 #ifdef SKIP_ASM
-extern "C" void func_003E6574(void* dst, void* src, int n);
+extern "C" void MEM_copy(void* dst, void* src, int n);
 extern int D_004A11E8;
 
 struct sEnt_156858
@@ -358,7 +358,7 @@ extern "C" void func_00156858(char* dst, char* src)
     for (i = 0; i < 10; i++) {
         char* d = dst + i * 0xF88;
         short* index = ((sProfile_156858*)d)->index;
-        func_003E6574(d, src + i * 0xF88, 0xF88);
+        MEM_copy(d, src + i * 0xF88, 0xF88);
         ((sProfile_156858*)d)->index = index;
         int j;
         for (j = 0; j < D_004A11E8; j++)
@@ -377,27 +377,27 @@ extern "C" void func_00156858(char* dst, char* src)
 //100%
 INCLUDE_ASM("be/beprepoststate", func_00156950);
 #ifdef SKIP_ASM
-extern "C" void func_003E6574(void* dst, void* src, int n);
+extern "C" void MEM_copy(void* dst, void* src, int n);
 extern signed char D_004A125C;
 extern char D_004C4090[];
 
 extern "C" void func_00156950(char* base, int idx)
 {
     D_004A125C = idx;
-    func_003E6574(D_004C4090, base + idx * 0xF88, 0xF88);
+    MEM_copy(D_004C4090, base + idx * 0xF88, 0xF88);
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beprepoststate", func_00156988);
 #ifdef SKIP_ASM
-extern "C" void func_003E6574(void* dst, void* src, int n);
+extern "C" void MEM_copy(void* dst, void* src, int n);
 extern signed char D_004A125C;
 extern char D_004C4090[];
 
 extern "C" void func_00156988(char* base)
 {
-    func_003E6574(base + D_004A125C * 0xF88, D_004C4090, 0xF88);
+    MEM_copy(base + D_004A125C * 0xF88, D_004C4090, 0xF88);
 }
 #endif
 

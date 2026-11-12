@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 
 struct sInstanceStruct {
     char pad_0x00[0x8];
@@ -15,7 +15,7 @@ INCLUDE_ASM("object/instanceman", cInstanceMan_copyInstance__FPvP15sInstanceStru
 void cInstanceMan_copyInstance(void* self, sInstanceStruct* a, void* b)
 {
     void* saved = a->field_0x78;
-    func_003E6574(a, b, 0xA0);
+    MEM_copy(a, b, 0xA0);
     a->field_0x78 = saved;
     a->field_0x8 |= 0x2000;
 }
@@ -95,12 +95,12 @@ extern "C" void func_00351398(void* self, float* src)
 //100%
 INCLUDE_ASM("object/instanceman", func_003513D0);
 #ifdef SKIP_ASM
-extern "C" void* func_003E6448(void* dst, int value, int size);
+extern "C" void* MEM_fill(void* dst, int value, int size);
 
 extern "C" void func_003513D0(void* self)
 {
-    func_003E6448(self, 0, 0x40);
-    func_003E6448((char*)self + 0x44, 0, 0x40);
+    MEM_fill(self, 0, 0x40);
+    MEM_fill((char*)self + 0x44, 0, 0x40);
     *(int*)((char*)self + 0x40) = 0;
 }
 #endif
@@ -772,7 +772,7 @@ extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352168);
+INCLUDE_ASM("object/instanceman", cMeshAnimNode_cMeshAnimNode);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
 extern void* D_0048F6D8[];
@@ -790,7 +790,7 @@ struct sInstElem2168 {
     sInstElem2168() {}
 };
 
-extern "C" void* func_00352168(void* self, void* a1, void* stream)
+extern "C" void* cMeshAnimNode_cMeshAnimNode(void* self, void* a1, void* stream)
 {
     cInstanceNode_cInstanceNode(self, a1, stream);
     *(void***)((char*)self + 0xC) = D_0048F6D8;
@@ -806,7 +806,7 @@ extern "C" void* func_00352168(void* self, void* a1, void* stream)
 #endif
 
 extern void* D_0048F6D8[];
-extern "C" void* func_0034FBF0(void*);
+extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
 INCLUDE_ASM("object/instanceman", func_00352208__FPv);
@@ -814,7 +814,7 @@ INCLUDE_ASM("object/instanceman", func_00352208__FPv);
 void* func_00352208(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_0048F6D8;
-    return func_0034FBF0(self);
+    return cInstanceNode__cInstanceNode(self);
 }
 #endif
 
@@ -1122,11 +1122,11 @@ struct sSerVEntry_00352A58 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0034FE90(void* self, void* stream);
+extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
 extern "C" void func_00352A58(void* self, void* stream)
 {
-    func_0034FE90(self, stream);
+    cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_00352A58* vt = *(sSerVEntry_00352A58**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0xC);
 }

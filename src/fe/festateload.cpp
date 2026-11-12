@@ -41,39 +41,39 @@ void* func_00186708(void* self)
 }
 #endif
 
-extern "C" void* func_00200A70(void*);
+extern "C" void* cUITemplate_MAP_onGainTransition(void*);
 
 //100%
 INCLUDE_ASM("fe/festateload", func_00186728__FPv);
 #ifdef SKIP_ASM
 void* func_00186728(void* self)
 {
-    return func_00200A70((char*)self + 0x48);
+    return cUITemplate_MAP_onGainTransition((char*)self + 0x48);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festateload", func_00186748);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E4C0(void* self);
-extern "C" void func_00200AC0(void* tmpl);
+extern "C" void* cUIState_onGainFocus(void* self);
+extern "C" void cUITemplate_MAP_onGainFocus(void* tmpl);
 
 extern "C" void func_00186748(void* self)
 {
-    func_0039E4C0(self);
-    func_00200AC0((char*)self + 0x48);
+    cUIState_onGainFocus(self);
+    cUITemplate_MAP_onGainFocus((char*)self + 0x48);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festateload", func_00186778);
 #ifdef SKIP_ASM
-void* func_0039E4A0(void* self);
+void* cUIState_onDestroyScreen(void* self);
 extern "C" void func_00200AF0(void* tmpl);
 
 extern "C" void func_00186778(void* self)
 {
-    func_0039E4A0(self);
+    cUIState_onDestroyScreen(self);
     func_00200AF0((char*)self + 0x48);
 }
 #endif
@@ -85,9 +85,9 @@ int GetHashValue32(char* str);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" int func_002018A8(void* tmpl, void* obj, int msg);
+extern "C" int cUITemplate_MAP_onWidgetEvent(void* tmpl, void* obj, int msg);
 extern "C" void func_0039F190(void* list, int a1);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern int D_004A1A70;
 
 static inline int IsQuick1867A8() { return D_004A1A70 == 1; }
@@ -150,14 +150,14 @@ static inline void Opened1867A8(void* self, void* item)
             c->v24(1, 0);
         }
         PlayIntro1867A8(self);
-        func_0039F400(*(char**)((char*)self + 0x10) + 0x18, item);
+        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, item);
     }
 }
 
 extern "C" void func_001867A8(void* self, void* obj, int msg)
 {
     if (msg == 5) {
-        if (func_002018A8((char*)self + 0x48, obj, 5) == 1) {
+        if (cUITemplate_MAP_onWidgetEvent((char*)self + 0x48, obj, 5) == 1) {
             if (IsQuick1867A8()) {
                 PlayIntro1867A8(self);
                 func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
@@ -167,7 +167,7 @@ extern "C" void func_001867A8(void* self, void* obj, int msg)
             }
         }
     } else if (msg == 6) {
-        if (func_002018A8((char*)self + 0x48, obj, 6) == 1) {
+        if (cUITemplate_MAP_onWidgetEvent((char*)self + 0x48, obj, 6) == 1) {
             if (IsQuick1867A8()) {
                 PlayIntro1867A8(self);
                 func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
@@ -177,7 +177,7 @@ extern "C" void func_001867A8(void* self, void* obj, int msg)
             }
         }
     } else {
-        func_002018A8((char*)self + 0x48, obj, msg);
+        cUITemplate_MAP_onWidgetEvent((char*)self + 0x48, obj, msg);
     }
 }
 #endif
@@ -210,14 +210,14 @@ extern "C" void func_00186978(void* self)
 //100%
 INCLUDE_ASM("fe/festateload", func_00186998);
 #ifdef SKIP_ASM
-extern "C" void func_00202770(void* self, int a1);
-// PORT: func_0039E508__FPv is called with (self, a1) here; bind the 2-arg form to that symbol.
-void func_0039E508_2(void* self, int a1) __asm__("func_0039E508__FPv");
+extern "C" void cUITemplate_MAP_onInputAlways(void* self, int a1);
+// PORT: cUIState_onInputAlways__FPv is called with (self, a1) here; bind the 2-arg form to that symbol.
+void cUIState_onInputAlways_2(void* self, int a1) __asm__("cUIState_onInputAlways__FPv");
 
 extern "C" void func_00186998(void* self, int a1)
 {
-    func_00202770((char*)self + 0x48, a1);
-    func_0039E508_2(self, a1);
+    cUITemplate_MAP_onInputAlways((char*)self + 0x48, a1);
+    cUIState_onInputAlways_2(self, a1);
 }
 #endif
 
@@ -239,7 +239,7 @@ INCLUDE_ASM("fe/festateload", func_00186A08);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001D53B0(void* self, void* a1, int a2);
-extern "C" void* func_00227F80(void* p);
+extern "C" void* cSSXApp_getMCManager(void* p);
 extern void* D_004A28A8;
 extern void* D_0046B570[];
 // D_004A14B8 holds the active load state (the unit declares it as int elsewhere).
@@ -316,7 +316,7 @@ extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* e
     self->f19C = 0x1A;
     self->f22C = -1;
     self->f238 = -1;
-    sMemCardK186A08* mc = (sMemCardK186A08*)func_00227F80(D_004A28A8);
+    sMemCardK186A08* mc = (sMemCardK186A08*)cSSXApp_getMCManager(D_004A28A8);
     mc->f12C = one;
     mc->f124 = one;
     mc->f120 = one;

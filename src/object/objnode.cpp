@@ -21,15 +21,15 @@ cObjNode* cObjNode_cObjNode(cObjNode* self, void* param2)
 #endif
 
 //100%
-INCLUDE_ASM("object/objnode", func_003546C8);
+INCLUDE_ASM("object/objnode", cObjNode__cObjNode);
 #ifdef SKIP_ASM
-extern "C" void func_00354E48(void* mgr, void* node);
+extern "C" void cBucketMan_remove(void* mgr, void* node);
 void operator_delete(int*);
 
-extern "C" void func_003546C8(void* self, int flags)
+extern "C" void cObjNode__cObjNode(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = D_00491F00;
-    func_00354E48(&D_004A5988, self);
+    cBucketMan_remove(&D_004A5988, self);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -41,11 +41,11 @@ INCLUDE_ASM("object/objnode", func_00354720);
 #ifdef SKIP_ASM
 extern void* D_00491E80[];
 extern int D_0044AFF0[];
-extern "C" void* func_00354648(void* self, void* a1);
+extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 
 extern "C" void* func_00354720(void* self, void* a1, int type)
 {
-    func_00354648(self, a1);
+    cObjNode_cObjNode1(self, a1);
     *(void***)((char*)self + 0xC) = D_00491E80;
     *(short*)((char*)self + 0x10) = type;
     *(short*)((char*)self + 0x12) = 0;
@@ -80,21 +80,21 @@ extern "C" void* cTypeObjNode_cTypeObjNode(void* self, void* a, void* stream)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/objnode", func_00354808);
+INCLUDE_ASM("object/objnode", cTypeObjNode__cTypeObjNode);
 #ifdef SKIP_ASM
-extern "C" void func_003546C8(void* self, int flags);
+extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern void* D_00491E80[];
 extern int D_0044AFF0[];
 
-// PORT: the unit declares func_00354808(void*), but this is a deleting
+// PORT: the unit declares cTypeObjNode__cTypeObjNode(void*), but this is a deleting
 // destructor taking (self, flags); the real body is bound by asm label.
-void func_00354808_impl(void* self, int flags) __asm__("func_00354808");
+void cTypeObjNode__cTypeObjNode_impl(void* self, int flags) __asm__("cTypeObjNode__cTypeObjNode");
 
-void func_00354808_impl(void* self, int flags)
+void cTypeObjNode__cTypeObjNode_impl(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = D_00491E80;
     D_0044AFF0[*(short*)((char*)self + 0x10)]--;
-    func_003546C8(self, flags);
+    cObjNode__cObjNode(self, flags);
 }
 #endif
 
@@ -148,15 +148,15 @@ extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a, void* stream)
 #endif
 
 extern void* D_00491E00[];
-extern "C" void* func_00354808(void*);
+extern "C" void* cTypeObjNode__cTypeObjNode(void*);
 
 //99.5%
-INCLUDE_ASM("object/objnode", func_00354920__FPv);
+INCLUDE_ASM("object/objnode", cSortObjNode__cSortObjNode__FPv);
 #ifdef SKIP_ASM
-void* func_00354920(void* self)
+void* cSortObjNode__cSortObjNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_00491E00;
-    return func_00354808(self);
+    return cTypeObjNode__cTypeObjNode(self);
 }
 #endif
 
@@ -176,9 +176,9 @@ extern "C" void func_00354948(void* self, func_00354948_cObj* obj)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/objnode", func_00354980);
+INCLUDE_ASM("object/objnode", cSortObjNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_00354980(void* self, func_00354948_cObj* obj)
+extern "C" void cSortObjNode_writeToReplayFrame(void* self, func_00354948_cObj* obj)
 {
     func_00354948(self, obj);
     obj->v01((char*)self + 0x14, 4);

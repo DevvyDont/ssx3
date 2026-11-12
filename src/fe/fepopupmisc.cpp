@@ -1691,7 +1691,7 @@ extern "C" void cFEPopupSelectMultiplayerMode_onCreateScreen(void* self)
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void func_0039B760(void* self, int a1);
+extern "C" void cUIMenu_setScrollableMenu(void* self, int a1);
 extern char D_00460020[];
 extern char D_004A13A0[];
 extern char D_004A14F8[];
@@ -1701,7 +1701,7 @@ extern "C" void cFEPopupSelectMultiplayerMode_onWidgetCreate(void* self, void* i
     int h1 = *(int*)((char*)item + 0x38);
     if (h1 == GetHashValue32(D_00460020)) {
         *(int*)((char*)item + 0x14) |= 1;
-        func_0039B760(item, 2);
+        cUIMenu_setScrollableMenu(item, 2);
         *(int*)((char*)item + 0x14) |= 0x80;
         return;
     }
@@ -1813,9 +1813,9 @@ extern "C" void* func_001E0510(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0548__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions__cFEStateAudioOptions__FPv);
 #ifdef SKIP_ASM
-void* func_001E0548(void* self)
+void* cFEStateAudioOptions__cFEStateAudioOptions(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
     return func_0039E390(self);
@@ -1844,9 +1844,9 @@ extern "C" void* func_001E0578(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E05B0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine__cFEStateRequestLine__FPv);
 #ifdef SKIP_ASM
-void* func_001E05B0(void* self)
+void* cFEStateRequestLine__cFEStateRequestLine(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
     return func_0039E390(self);
@@ -3295,9 +3295,9 @@ int func_001E1290(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1298__FPvi);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_setPadNum__FPvi);
 #ifdef SKIP_ASM
-void func_001E1298(void* self, int val)
+void cUIInput_setPadNum(void* self, int val)
 {
     *(char*)((char*)self + 0x4) = (char)val;
 }
@@ -3420,7 +3420,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E1550);
 extern void* D_004A28A8;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E2FE0(int a, unsigned char b);
@@ -3435,7 +3435,7 @@ extern "C" void func_001E1550(void)
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-        int ch = cBENewPlayerInterface_getRiderCharID(iface, func_00146E98(iface, 0));
+        int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
         if (func_001E3A30((void*)1) == 0) {
             if (func_001464D0(iface, 0, ch, 0, 1) == 0 && func_00145EF0(iface, 0, 0xE, 4) == 0) {
                 func_001E3A78(1, 1);
@@ -3571,7 +3571,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E1C10);
 extern void* D_004A28A8;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E2FE0(int a, unsigned char b);
@@ -3591,7 +3591,7 @@ extern "C" void func_001E1C10(int which)
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-        int ch = cBENewPlayerInterface_getRiderCharID(iface, func_00146E98(iface, 0));
+        int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
         int id;
         switch (which) {
         case 0: {
@@ -4008,7 +4008,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2648);
 extern void* D_004A28A8;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
@@ -4023,7 +4023,7 @@ extern "C" void func_001E2648_impl(int which, int flag)
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-        int ch = cBENewPlayerInterface_getRiderCharID(iface, func_00146E98(iface, 0));
+        int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
         switch (which) {
         case 0xE:
             if (func_001E3A30((void*)0x16) != 0) {
@@ -4099,7 +4099,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2828);
 extern void* D_004A28A8;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
@@ -4114,7 +4114,7 @@ extern "C" void func_001E2828_impl(int which, int flag)
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-        int ch = cBENewPlayerInterface_getRiderCharID(iface, func_00146E98(iface, 0));
+        int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
         switch (which) {
         case 0xE:
             if (func_001E3A30((void*)0x19) != 0) {
@@ -4191,7 +4191,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2A08);
 extern void* D_004A28A8;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E2B38(int charID);
 extern "C" int func_001E3A30(void* self);
@@ -4214,7 +4214,7 @@ extern "C" void func_001E2A08(int charID, int level)
     if (busy)
         return;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-    if (cBENewPlayerInterface_getRiderCharID(iface, func_00146E98(iface, 0)) == charID)
+    if (cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0)) == charID)
         return;
     int id = func_001E2B38(charID);
     sEntry14_2A08* e = &D_00441630_2A08[id];
@@ -4484,7 +4484,7 @@ extern void* D_004A28A8;
 extern char D_004A20D0[];
 extern "C" void func_001E31B8(int idx);
 extern "C" unsigned char func_001E3100(int i);
-extern "C" void* func_0039F9D8(void* list, int hash);
+extern "C" void* cUIStateStack_findState(void* list, int hash);
 
 struct sPopupListEntry_2FE0 {
     int id;
@@ -4525,7 +4525,7 @@ extern "C" void func_001E2FE0(int id, unsigned char flag)
     t->mask &= ~(1 << t->count);
     char* o = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
     if (o != 0) {
-        char* obj = (char*)func_0039F9D8(o + 0x18, GetHashValue32(D_004A20D0));
+        char* obj = (char*)cUIStateStack_findState(o + 0x18, GetHashValue32(D_004A20D0));
         if (obj != 0) {
             sVEntryK1E2FE0* vt = *(sVEntryK1E2FE0**)(obj + 8);
             vt[24].fn(obj + vt[24].delta, 8, 0);
@@ -4870,8 +4870,8 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
-extern "C" int func_001509F8(void* self, int rider);
-int func_001588B0(void* self, int a1);
+extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider);
+int cBERewardInterface_getEarningsTarget(void* self, int a1);
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
@@ -4883,13 +4883,13 @@ extern "C" void func_001E3760(int rider, int amt)
         void* rew = cBE_getInterface_Fv(cBE_getBE(), 0xD);
         void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
         if (cBENewPlayerInterface_isPeakLocked1(pl, 0, 1)) {
-            if ((unsigned)(func_001509F8(econ, 0) + amt) >= (unsigned)func_001588B0(rew, 0) && func_001E3A30((void*)0x34) == 0) {
+            if ((unsigned)(cBEEconInterface_getTotalMoneyEarned1(econ, 0) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 0) && func_001E3A30((void*)0x34) == 0) {
                 func_001E3A78(0x34, 1);
                 func_001E2FE0(0xF7, 0);
             }
         }
         if (cBENewPlayerInterface_isPeakLocked1(pl, rider, 2)) {
-            if ((unsigned)(func_001509F8(econ, rider) + amt) >= (unsigned)func_001588B0(rew, 1) && func_001E3A30((void*)0x35) == 0) {
+            if ((unsigned)(cBEEconInterface_getTotalMoneyEarned1(econ, rider) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 1) && func_001E3A30((void*)0x35) == 0) {
                 func_001E3A78(0x35, 1);
                 func_001E2FE0(0xF8, 0);
             }
@@ -4904,10 +4904,10 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E38B8);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak);
-extern "C" int func_00157BF0(void* self, int rider, int a, int b, int c);
+extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
@@ -4917,15 +4917,15 @@ extern "C" void func_001E38B8(int player)
     if (player == 0) {
         void* stats = cBE_getInterface_Fv(cBE_getBE(), 0xD);
         void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
-        int charID = cBENewPlayerInterface_getRiderCharID(np, func_00146E98(np, 0));
+        int charID = cBENewPlayerInterface_getRiderCharID(np, cBENewPlayerInterface_getHumanRider(np, 0));
         if (cBENewPlayerInterface_isPeakLocked1(np, player, 1)) {
-            if (func_00157BF0(stats, player, charID, 0, 2) && func_001E3A30((void*)0x36) == 0) {
+            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 0, 2) && func_001E3A30((void*)0x36) == 0) {
                 func_001E3A78(0x36, 1);
                 func_001E2FE0(0xF9, 0);
             }
         }
         if (cBENewPlayerInterface_isPeakLocked1(np, player, 2)) {
-            if (func_00157BF0(stats, player, charID, 1, 2) && func_001E3A30((void*)0x37) == 0) {
+            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 1, 2) && func_001E3A30((void*)0x37) == 0) {
                 func_001E3A78(0x37, 1);
                 func_001E2FE0(0xFA, 0);
             }
@@ -5099,7 +5099,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3D58);
 #ifdef SKIP_ASM
 // PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cOVStateManager_addPDATemplate();
 extern "C" void func_001E48B0(void*);
 extern "C" void func_001E4758(void*);
@@ -5115,7 +5115,7 @@ extern "C" void func_001E3D58(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     int mode = *(int*)((char*)self + 0x18);
     if (mode == 0) {
         goto add;
@@ -5127,7 +5127,7 @@ extern "C" void func_001E3D58(void* self)
     *(int*)((char*)self + 0x174) = 0;
     int n = func_001E33E8_noarg();
     n += func_001E2BB8(4, 1);
-    func_0039B760(*(void**)((char*)self + 0x144), (unsigned char)n);
+    cUIMenu_setScrollableMenu(*(void**)((char*)self + 0x144), (unsigned char)n);
     func_001E48B0(self);
     func_001E4758(self);
     func_001E4458(self);
@@ -5140,8 +5140,8 @@ extern "C" void func_001E3D58(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E3E30);
 #ifdef SKIP_ASM
 extern "C" void func_001E3A78(int a, int b);
-extern "C" void func_0020D190(void);
-extern "C" void func_0020A430(void* self);
+extern "C" void cOVStateManager_removePDATemplate(void);
+extern "C" void cOVState_onDestroyScreen(void* self);
 extern int D_004A2A54;
 extern int D_004A2A50;
 extern int D_005366E8[];
@@ -5152,14 +5152,14 @@ extern "C" void func_001E3E30(void* self)
     int s = *(int*)((char*)self + 0x18);
     if (s == 1) {
         func_001E3A78(7, 0);
-        func_0020D190();
+        cOVStateManager_removePDATemplate();
         D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
     } else if (s == 0) {
         func_001E3A78(7, 1);
-        func_0020D190();
+        cOVStateManager_removePDATemplate();
         D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
     }
-    func_0020A430(self);
+    cOVState_onDestroyScreen(self);
 }
 #endif
 
@@ -5586,8 +5586,8 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E4758);
 #ifdef SKIP_ASM
 // PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
-extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
-extern "C" void func_003A0E90(void* text, void* p);
+extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern void* D_004A28A8;
 extern char D_0046E0A8[];
 extern char D_0046E0C0[];
@@ -5605,15 +5605,15 @@ extern "C" void func_001E4758(void* self)
         char* o = *(char**)((char*)D_004A28A8 + 0x8C);
         sVEntry001E4758* vt = *(sVEntry001E4758**)(o + 4);
         unsigned short* fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0046E0A8));
-        func_002C26D0(buf, fmt, func_001E33E8_noarg());
-        func_003A0E90(*(void**)((char*)self + 0x13C), buf);
+        sprintf1(buf, fmt, func_001E33E8_noarg());
+        cUIText_setUnicodeString(*(void**)((char*)self + 0x13C), buf);
     }
     if (*(void**)((char*)self + 0x140) != 0) {
         char* o = *(char**)((char*)D_004A28A8 + 0x8C);
         sVEntry001E4758* vt = *(sVEntry001E4758**)(o + 4);
         unsigned short* fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0046E0C0));
-        func_002C26D0(buf, fmt, func_001E3408());
-        func_003A0E90(*(void**)((char*)self + 0x140), buf);
+        sprintf1(buf, fmt, func_001E3408());
+        cUIText_setUnicodeString(*(void**)((char*)self + 0x140), buf);
     }
 }
 #endif
@@ -5669,7 +5669,7 @@ extern "C" int func_001E3650_48B0(int idx) __asm__("func_001E3650");
 extern "C" void func_001E4C78_48B0(void* self, int idx, int row, int a3, int a4) __asm__("func_001E4C78");
 extern "C" int func_001E2C80_48B0(int kind, int idx, int local) __asm__("func_001E2C80");
 extern "C" int func_001E4B80_48B0(void* self, int entry) __asm__("func_001E4B80");
-extern "C" void func_0039B760_48B0(void* menu, unsigned char n) __asm__("func_0039B760");
+extern "C" void cUIMenu_setScrollableMenu_48B0(void* menu, unsigned char n) __asm__("cUIMenu_setScrollableMenu");
 extern int D_004A20C4;
 extern char D_0046E0D0[];
 extern char D_0046E0E0[];
@@ -5755,7 +5755,7 @@ extern "C" void func_001E48B0(void* selfp)
         }
     }
     unsigned char keep = self->menu[0x95];
-    func_0039B760_48B0(self->menu, sel);
+    cUIMenu_setScrollableMenu_48B0(self->menu, sel);
     self->menu[0x95] = keep;
     unsigned char s = self->scroll;
     self->menu[0x98] = s;
@@ -6010,7 +6010,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E50C8);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001E51D0(void* self, void* a1, void* owner, int a3, int a4);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_0046E240[];
 
 extern "C" void func_001E50C8(void* self, int a1, int a2)
@@ -6019,7 +6019,7 @@ extern "C" void func_001E50C8(void* self, int a1, int a2)
     void* a = *(void**)((char*)self + 0x17C);
     void* b = *(void**)((char*)a + 0xD0);
     void* c = *(void**)((char*)b + 0x10);
-    func_0039F290((char*)c + 0x18, item);
+    cUIStateStack_pushPopup((char*)c + 0x18, item);
 }
 #endif
 
@@ -6231,8 +6231,8 @@ extern "C" void func_001E5428(void* self)
             char* mgr = *(char**)((char*)D_004A28A8 + 0x8C);
             sVEntryS1E5428* vt = *(sVEntryS1E5428**)(mgr + 4);
             unsigned short* fmt = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0046E2D0));
-            func_002C26D0(buf, fmt, func_001E2DC0(*(int*)((char*)self + 0x68)));
-            func_003A0E90(*(void**)((char*)self + 0x4C), buf);
+            sprintf1(buf, fmt, func_001E2DC0(*(int*)((char*)self + 0x68)));
+            cUIText_setUnicodeString(*(void**)((char*)self + 0x4C), buf);
         } else {
             char buf[0x30];
             sprintf(buf, D_004A2138, *(int*)((char*)self + 0x6C));
@@ -6493,28 +6493,28 @@ extern "C" unsigned char func_001E5AA0(void* self, int idx)
 
 INCLUDE_ASM("fe/fepopupmisc", func_001E5B80);
 
-extern "C" void* func_0020E900(void* self);
+extern "C" void* cOVState_onUpdate(void* self);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E64A8__FPv);
 #ifdef SKIP_ASM
 void* func_001E64A8(void* self)
 {
-    return func_0020E900(self);
+    return cOVState_onUpdate(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E64C8);
 #ifdef SKIP_ASM
-// func_0039E4C0 returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
-void func_0039E4C0_v(void* self) __asm__("func_0039E4C0");
+// cUIState_onGainFocus returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
+void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_0020A6F0(void* self, char* text, char* name);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern void* D_004A28A8;
@@ -6526,11 +6526,11 @@ extern char D_0046E500[];
 extern "C" void func_001E64C8(void* self)
 {
     char buf[32];
-    func_0039E4C0_v(self);
+    cUIState_onGainFocus_v(self);
     int* p = *(int**)((char*)D_004A28A8 + 0xC0);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     int x = *p;
-    int n = D_00536730[func_00146E98(iface, 0)] + 1;
+    int n = D_00536730[cBENewPlayerInterface_getHumanRider(iface, 0)] + 1;
     if (n >= 7) {
         n = 6;
     }
@@ -6596,7 +6596,7 @@ extern char D_0046E520[];
 extern char D_0046E378[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 
 extern "C" void func_001E6668(void* self)
 {
@@ -6611,7 +6611,7 @@ extern "C" void func_001E6668(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     *(int*)((char*)self + 0x9C) = 1;
 }
 #endif
@@ -6644,15 +6644,15 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern void* D_004A28A8;
 
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 
 extern signed char D_00535BC8[];
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
-extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 
-extern "C" void func_003A0E90(void* text, void* p);
+extern "C" void cUIText_setUnicodeString(void* text, void* p);
 
 void cUIText_setAsciiString(cUIText* text, const char* str);
 
@@ -6675,11 +6675,11 @@ void cUIText_setUnicodeStringByID(cUIText* t, int id);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" unsigned short* func_002C2540(void* dst, const char* s);
-extern "C" void func_002C27C0(void* dst, const char* fmt, ...);
+extern "C" void sprintf2(void* dst, const char* fmt, ...);
 extern "C" const char* func_00144BF0(void* iface);
 extern "C" char* func_00146F88(void* iface, int idx);
 extern "C" char* func_0014EEC8(void* iface, int id, int a2);
-extern "C" void func_003A0D00(void* text, unsigned short* str);
+extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);
 extern "C" void func_00399730(void* obj, int hash);
 extern int D_00536708[];
 extern int D_005366A8[];
@@ -6796,11 +6796,11 @@ extern "C" int func_001E6718(void* self)
         // argument (loaded in the else arm only) does not.
         char* titleFmt = D_004A2140;
         if (track == 6) {
-            func_002C27C0(title, D_0046E558, name);
+            sprintf2(title, D_0046E558, name);
         } else {
-            func_002C27C0(title, titleFmt, name, str);
+            sprintf2(title, titleFmt, name, str);
         }
-        func_003A0E90(t, title);
+        cUIText_setUnicodeString(t, title);
         t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2148));
         if (players == 2) {
             cUIText_setUnicodeStringByID(t, GetHashValue32(D_0046E568));
@@ -6837,10 +6837,10 @@ extern "C" int func_001E6718(void* self)
         } else if (players == 2) {
             count = 2;
         }
-        int pl0 = func_00146E98(player, 0);
+        int pl0 = cBENewPlayerInterface_getHumanRider(player, 0);
         int pl1;
         int done = 0;
-        pl1 = func_00146E98(player, 1);
+        pl1 = cBENewPlayerInterface_getHumanRider(player, 1);
         char buf[48];
         char text[0x70];
         for (int i = 0; i < 6; i++) {
@@ -6940,8 +6940,8 @@ extern "C" int func_001E6718(void* self)
                 }
                 unsigned short msg[200];
                 unsigned short* msgFmt = Loc1E6718(D_0046E788);
-                func_002C26D0(msg, msgFmt, (unsigned short*)text);
-                func_003A0D00(t, msg);
+                sprintf1(msg, msgFmt, (unsigned short*)text);
+                cUIText_setUnicodeStringWrap(t, msg);
             }
         }
         if (done && players != 2 && players != 1) {
@@ -7052,14 +7052,14 @@ extern "C" void func_001E7558(void* self, void* menu)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E75D0);
 #ifdef SKIP_ASM
-// func_0039E4C0 returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
-void func_0039E4C0_v(void* self) __asm__("func_0039E4C0");
+// cUIState_onGainFocus returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
+void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_0020A6F0(void* self, char* text, char* name);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -7088,7 +7088,7 @@ extern "C" void func_001E75D0(void* self)
 {
     char buf[32];
     int second = 0;
-    func_0039E4C0_v(self);
+    cUIState_onGainFocus_v(self);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int mode = D_00535BC8[0x49];
@@ -7102,15 +7102,15 @@ extern "C" void func_001E75D0(void* self)
         }
     }
     if (first) {
-        sprintf(buf, D_004A2170, D_00536730[func_00146E98(player, 0)] + 1);
+        sprintf(buf, D_004A2170, D_00536730[cBENewPlayerInterface_getHumanRider(player, 0)] + 1);
         func_0020A6F0(self, buf, D_0046E4E8);
-        sprintf(buf, D_0046E638, D_00536730[func_00146E98(player, 0)] + 1);
+        sprintf(buf, D_0046E638, D_00536730[cBENewPlayerInterface_getHumanRider(player, 0)] + 1);
         func_0020A6F0(self, buf, D_0046E4E8);
     }
     if (second) {
-        sprintf(buf, D_004A2170, D_00536730[func_00146E98(player, 1)] + 1);
+        sprintf(buf, D_004A2170, D_00536730[cBENewPlayerInterface_getHumanRider(player, 1)] + 1);
         func_0020A6F0(self, buf, D_0046E4E8);
-        sprintf(buf, D_0046E638, D_00536730[func_00146E98(player, 1)] + 1);
+        sprintf(buf, D_0046E638, D_00536730[cBENewPlayerInterface_getHumanRider(player, 1)] + 1);
         func_0020A6F0(self, buf, D_0046E4E8);
     }
     cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
@@ -7161,7 +7161,7 @@ extern char D_0046E7E8[];
 
 extern "C" void func_001E7928(void* self)
 {
-    func_0020E900(self);
+    cOVState_onUpdate(self);
     if (D_004A2EEC != 0) {
         if (*D_004A2EEC != 0) {
             if (func_0020A4E0(self) != 0) {
@@ -7197,7 +7197,7 @@ extern "C" void func_001E7928(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E7AA8);
 #ifdef SKIP_ASM
-extern "C" void func_0020AB50(int state);
+extern "C" void cOVStateManager_triggerOverlay(int state);
 extern int D_00534B30[];
 extern int* D_004A2EEC;
 
@@ -7219,7 +7219,7 @@ extern "C" int func_001E7AA8(void* self, void* a1)
     if (D_00534B30[0] != 0 && D_004A2EEC != 0 && *D_004A2EEC != 0) {
         sVEntry001E7AA8* vt = *(sVEntry001E7AA8**)((char*)a1 + 8);
         if (vt[27].fn((char*)a1 + vt[27].delta) != 0) {
-            func_0020AB50(0x28);
+            cOVStateManager_triggerOverlay(0x28);
         }
     }
     return 0;
@@ -7260,10 +7260,10 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 void cUIText_setAsciiString(cUIText* text, const char* str);
@@ -7316,7 +7316,7 @@ extern "C" void func_001E7BB0(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     *(int*)((char*)self + 0x9C) = 0;
     char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E818));
     if (obj != 0) {
@@ -7327,7 +7327,7 @@ extern "C" void func_001E7BB0(void* self)
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     char* iface8 = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
     char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xD);
-    int pl = func_00146E98(iface1, 0);
+    int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
     int mode = *p;
     int sel = D_00536730[pl];
     cUIState_hideObjSafe(self, D_0046E828);
@@ -7393,20 +7393,20 @@ extern "C" void func_001E7BB0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8098);
 #ifdef SKIP_ASM
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_0039F840(void* list);
 extern "C" void func_00231320(void* self);
 
 extern "C" void func_001E8098(void* self)
 {
     float limit = 3.0f;
-    int idx = func_00146E98(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
+    int idx = cBENewPlayerInterface_getHumanRider(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
     char* riders = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
     char* rider = *(char**)(riders + (idx << 2) + 0x28);
     if (*(int*)(rider + 0x480) != 0) {
         limit = 1.0f;
     }
-    func_0020E900(self);
+    cOVState_onUpdate(self);
     *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
     if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
         func_0039F840(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48) + 0x18);
@@ -7475,9 +7475,9 @@ extern "C" int func_001E81D0(void* self, int a1)
 INCLUDE_ASM("fe/fepopupmisc", func_001E8200);
 #ifdef SKIP_ASM
 // Wide-string copy; returns dst.
-extern "C" unsigned short* func_002C2508(unsigned short* dst, const unsigned short* src);
-extern "C" void func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
-extern "C" void func_003A0E90(void* text, void* p);
+extern "C" unsigned short* strcpy1(unsigned short* dst, const unsigned short* src);
+extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern char D_0046E898[];
 extern char D_004A21A8[];
 
@@ -7512,7 +7512,7 @@ extern "C" void func_001E8200(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     *(int*)((char*)self + 0x9C) = 0;
     char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E818));
     if (obj != 0) {
@@ -7543,7 +7543,7 @@ extern "C" void func_001E8200(void* self)
             break;
         }
     }
-    int pl = func_00146E98(iface1, 0);
+    int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
     int sel = D_00536730[pl];
     if (*(int*)(ifaceD + 0x14) == 0 && (mode == 3 || D_00535BC8[0x4A] == 4 || D_00535BC8[0x4A] == 5)) {
         D_004A213C = 1;
@@ -7584,9 +7584,9 @@ extern "C" void func_001E8200(void* self)
     o = (cUIObj_8200*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E868));
     char* loc = *(char**)((char*)D_004A28A8 + 0x8C);
     sVEntry8200* vt = *(sVEntry8200**)(loc + 4);
-    func_002C2508(fmt, vt[4].fn(loc + vt[4].delta, GetHashValue32(D_0046E898)));
-    func_002C26D0(text, fmt, *(unsigned int*)((char*)D_00536640 + off));
-    func_003A0E90(o, text);
+    strcpy1(fmt, vt[4].fn(loc + vt[4].delta, GetHashValue32(D_0046E898)));
+    sprintf1(text, fmt, *(unsigned int*)((char*)D_00536640 + off));
+    cUIText_setUnicodeString(o, text);
     o = (cUIObj_8200*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E878));
     int vis = 0;
     if (*(int*)(iface8 + 0x18) >= 0 || *(int*)(iface8 + 0x1C) >= 0) {
@@ -7612,20 +7612,20 @@ extern "C" void func_001E8200(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E87B8);
 #ifdef SKIP_ASM
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_0039F840(void* list);
 extern "C" void func_00231320(void* self);
 
 extern "C" void func_001E87B8(void* self)
 {
     float limit = 3.0f;
-    int idx = func_00146E98(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
+    int idx = cBENewPlayerInterface_getHumanRider(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
     char* riders = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
     char* rider = *(char**)(riders + (idx << 2) + 0x28);
     if (*(int*)(rider + 0x480) != 0) {
         limit = 1.0f;
     }
-    func_0020E900(self);
+    cOVState_onUpdate(self);
     *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
     if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
         func_0039F840(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48) + 0x18);
@@ -7696,16 +7696,16 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146E98(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" int func_004139F8(float f);
 extern "C" char* func_0020A1A8(int v);
 extern "C" void* func_001FD190(int v);
-extern "C" void func_003A0E90(void* text, void* p);
+extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern void* D_004A28A8;
 extern signed char D_00535C12[];
@@ -7766,18 +7766,18 @@ extern "C" void func_001E8920(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     char* p = *(char**)((char*)D_004A28A8 + 0xC0);
     int trk = D_00535C12[0];
-    int pl = func_00146E98(iface1, 0);
+    int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
     cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A21B0));
     cUIText_setUnicodeStringByID(t, GetHashValue32(D_0046E5F0));
     t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A21B8));
     if (trk < 12) {
         if (trk >= 6) {
-            func_003A0E90(t, func_001FD190(trk));
+            cUIText_setUnicodeString(t, func_001FD190(trk));
         }
     }
     cUIText* a = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E8C8));
@@ -7851,7 +7851,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E8E70__FPv);
 #ifdef SKIP_ASM
 void* func_001E8E70(void* self)
 {
-    return func_0020E900(self);
+    return cOVState_onUpdate(self);
 }
 #endif
 
@@ -7892,13 +7892,13 @@ extern "C" void func_001E8EA8(void* self, void* a1, int a2)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8ED0);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E4C0(void* self);
+extern "C" void* cUIState_onGainFocus(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
 
 extern "C" void func_001E8ED0(void* self)
 {
-    func_0039E4C0(self);
+    cUIState_onGainFocus(self);
     func_00294F78(func_0028B180(), 0xE);
 }
 #endif
@@ -7911,7 +7911,7 @@ extern char D_0046E9C0[];
 extern char D_0046E378[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 void func_001E8FC0(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
@@ -7930,7 +7930,7 @@ extern "C" void func_001E8F00(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     func_001E8FC0(self);
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     func_00294F78(func_0028B180(), 0xE);
 }
 #endif

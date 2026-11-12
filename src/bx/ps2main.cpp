@@ -26,15 +26,15 @@ extern "C" void func_003E6690(int a);
 extern "C" void func_003E4AF0(int hz);
 extern "C" int func_003DE928(void* cfg);
 extern "C" int func_003DE9B8(void* cfg);
-extern "C" void func_003DCBD8(int a, int b, int c);
-extern "C" void func_003DF488(int a, int b);
+extern "C" void FILESYS_init(int a, int b, int c);
+extern "C" void ASYNCFILE_init(int a, int b);
 extern "C" void func_003E4000(void);
 extern "C" void func_0031AD20(void);
 extern "C" void SYNCTASK_del(void (*fn)(void));
 extern "C" void SYNCTASK_add(void (*fn)(void), int a, int b);
 extern "C" void func_003DDE78(void* p);
 extern "C" void func_00252FA0(void);
-extern "C" void func_002523A8(void);
+extern "C" void MEM_free(void);
 
 struct sIoCfg_SysInit {
     int size;               // 0x0
@@ -70,11 +70,11 @@ extern "C" void systemInit(void)
     cfg.size = 0x24;
     func_003DE928(&cfg);
     cfg.fnA = func_00252FA0;
-    cfg.fnB = func_002523A8;
+    cfg.fnB = MEM_free;
     cfg.mode = 2;
     func_003DE9B8(&cfg);
-    func_003DCBD8(0x30, 500, 0x20);
-    func_003DF488(0x10, 0);
+    FILESYS_init(0x30, 500, 0x20);
+    ASYNCFILE_init(0x10, 0);
     SYNCTASK_del(func_003E4000);
     SYNCTASK_add(func_0031AD20, 0, 0);
     func_003DDE78(D_004A3ED8);

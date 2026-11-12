@@ -3,7 +3,7 @@
 //100%
 INCLUDE_ASM("ui/uitext", cUIText_render2D);
 #ifdef SKIP_ASM
-extern "C" void* func_003A04F0(void* self);
+extern "C" void* cUIText_getFont(void* self);
 extern "C" float func_00392BA8(void* font, int ch);
 // The unit declares these with the string as int; bind pointer-typed views.
 extern "C" float func_003921F0_s(void* font, unsigned short* str, void* out, int flags, float sx, float sy) __asm__("func_003921F0");
@@ -91,7 +91,7 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
     }
     int* ov = *(int**)(*(char**)(*(char**)(self->owner + 0xD0) + 0x10) + 0x10);
     if (ov != 0 && ((*ov >> 27) & 1)) {
-        sFont_05E8* font = (sFont_05E8*)func_003A04F0(self);
+        sFont_05E8* font = (sFont_05E8*)cUIText_getFont(self);
         if (font == 0) {
             return;
         }
@@ -107,7 +107,7 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
     if (self->str == 0) {
         return;
     }
-    sFont_05E8* font = (sFont_05E8*)func_003A04F0(self);
+    sFont_05E8* font = (sFont_05E8*)cUIText_getFont(self);
     if (font == 0) {
         return;
     }
@@ -220,9 +220,9 @@ extern "C" char cUIText_getNumTextLines_(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A0C00);
+INCLUDE_ASM("ui/uitext", cUIText_getAsciiString);
 #ifdef SKIP_ASM
-extern "C" int func_003A0C00(void* self)
+extern "C" int cUIText_getAsciiString(void* self)
 {
     if (((*(int*)((char*)self + 0x74) >> 3) & 1) == 0) {
         return *(int*)((char*)self + 0xb4);
@@ -232,9 +232,9 @@ extern "C" int func_003A0C00(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A0C28);
+INCLUDE_ASM("ui/uitext", cUIText_getUnicodeString);
 #ifdef SKIP_ASM
-extern "C" int func_003A0C28(void* self)
+extern "C" int cUIText_getUnicodeString(void* self)
 {
     if (((*(int*)((char*)self + 0x74) >> 3) & 1) != 0) {
         return *(int*)((char*)self + 0xb4);
@@ -318,9 +318,9 @@ extern "C" void cUIText_setAsciiStringPrivate(void* self, const char* str)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A0D00);
+INCLUDE_ASM("ui/uitext", cUIText_setUnicodeStringWrap);
 #ifdef SKIP_ASM
-extern "C" void* func_003A04F0(void* self);
+extern "C" void* cUIText_getFont(void* self);
 extern "C" float func_00392C60(void* font, unsigned short ch);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
@@ -331,10 +331,10 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern char D_00494078[];
 extern unsigned short D_004A47A8;
 
-extern "C" void func_003A0D00(void* self, unsigned short* str)
+extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str)
 {
     ((cUIText_3A0C70*)self)->v05(1);
-    void* font = func_003A04F0(self);
+    void* font = cUIText_getFont(self);
     if (font == 0) {
         return;
     }
@@ -371,11 +371,11 @@ extern "C" void func_003A0D00(void* self, unsigned short* str)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A0E90);
+INCLUDE_ASM("ui/uitext", cUIText_setUnicodeString);
 #ifdef SKIP_ASM
 extern "C" void cUIText_setUnicodeStringPrivate(void* self, const unsigned short* str);
 
-extern "C" void func_003A0E90(void* self, const unsigned short* str)
+extern "C" void cUIText_setUnicodeString(void* self, const unsigned short* str)
 {
     *(int*)((char*)self + 0xB0) = 0;
     cUIText_setUnicodeStringPrivate(self, str);
@@ -451,7 +451,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id)
 //100%
 INCLUDE_ASM("ui/uitext", func_003A1030);
 #ifdef SKIP_ASM
-extern "C" void* func_003A04F0(void* self);
+extern "C" void* cUIText_getFont(void* self);
 extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
 
 struct func_003A1030_sVec3 {
@@ -480,7 +480,7 @@ extern "C" void func_003A1030(void* self, func_003A1030_sVec3* out)
         func_003A1030_sVEntry* vt = *(func_003A1030_sVEntry**)((char*)self + 8);
         vt[16].fn((char*)self + vt[16].delta);
     }
-    void* font = func_003A04F0(self);
+    void* font = cUIText_getFont(self);
     int str = *(int*)((char*)self + 0xB4);
     if (str != 0 && font != 0) {
         func_003A1030_sRect r;
@@ -542,8 +542,8 @@ extern "C" void* func_003A1148(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("ui/uitext", func_003A11B8);
 #ifdef SKIP_ASM
-// PORT: func_0039FE00 really takes (self, data); other units declare it with one argument.
-void* func_0039FE00_2(void* self, void* data) __asm__("func_0039FE00");
+// PORT: cUIThing_setUIData really takes (self, data); other units declare it with one argument.
+void* cUIThing_setUIData_2(void* self, void* data) __asm__("cUIThing_setUIData");
 // PORT: called with only self here (the unit declares two arguments).
 void func_003A18C0_1(void* self) __asm__("func_003A18C0");
 extern "C" void func_003A1F18(void* self, int id);
@@ -574,7 +574,7 @@ struct sUIData11B8 {
 
 extern "C" void func_003A11B8(sUIText11B8* self, sUIData11B8* data)
 {
-    func_0039FE00_2(self, data);
+    cUIThing_setUIData_2(self, data);
     self->mode = data->mode & 3;
     self->vt[23].fn((char*)self + self->vt[23].delta, data->vis & 1);
     if (data->textId != 0) {
@@ -902,14 +902,14 @@ extern "C" void func_003A18C0(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1958);
+INCLUDE_ASM("ui/uitext", cUITextScroll_allocLine);
 #ifdef SKIP_ASM
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_004940A8[];
 
-extern "C" int func_003A1958(void* self)
+extern "C" int cUITextScroll_allocLine(void* self)
 {
     unsigned short old = *(unsigned short*)((char*)self + 0xC8);
     *(unsigned short*)((char*)self + 0xC8) = old + 1;
@@ -995,7 +995,7 @@ extern "C" void func_003A19F8(void* self, char* str)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uitext", cUITextScroll_addUnicodeString);
 #ifdef SKIP_ASM
-extern "C" int func_003A1958(void* self);
+extern "C" int cUITextScroll_allocLine(void* self);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
@@ -1004,7 +1004,7 @@ extern char D_004940B8[];
 
 extern "C" void cUITextScroll_addUnicodeString(void* self, unsigned short* str)
 {
-    int idx = func_003A1958(self);
+    int idx = cUITextScroll_allocLine(self);
     unsigned short* copy = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_004940B8, 0x100, 0);
     USTR_copy(copy, str);
     (*(unsigned short***)((char*)self + 0xBC))[idx] = copy;
@@ -1764,12 +1764,12 @@ extern "C" func_003A3280_s* func_003A3280(func_003A3280_s* self, int a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A32F0);
+INCLUDE_ASM("ui/uitext", cUIVector__cUIVector);
 #ifdef SKIP_ASM
-extern "C" void func_0039FC48(void* self, int flags);
+extern "C" void cUIThing__cUIThing(void* self, int flags);
 extern void* D_004941B8[];
 
-extern "C" void func_003A32F0(void* self, int flags)
+extern "C" void cUIVector__cUIVector(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_004941B8;
     if (*(void**)((char*)self + 0x7C) != 0) {
@@ -1787,26 +1787,26 @@ extern "C" void func_003A32F0(void* self, int flags)
     if (*(void**)((char*)self + 0x8C) != 0) {
         cMemMan_free(*(void**)((char*)self + 0x8C));
     }
-    func_0039FC48(self, flags);
+    cUIThing__cUIThing(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A3398);
+INCLUDE_ASM("ui/uitext", cUIVector_setColour);
 #ifdef SKIP_ASM
-struct func_003A3398_sColor {
+struct cUIVector_setColour_sColor {
     float r;
     float g;
     float b;
     float a;
 };
 
-extern "C" void func_003A3398(void* self, func_003A3398_sColor* c)
+extern "C" void cUIVector_setColour(void* self, cUIVector_setColour_sColor* c)
 {
-    func_003A3398_sColor tmp = *c;
+    cUIVector_setColour_sColor tmp = *c;
     unsigned int i;
-    *(func_003A3398_sColor*)((char*)self + 0x1C) = *c;
-    if (*(func_003A3398_sColor**)((char*)self + 0x7C) == 0) {
+    *(cUIVector_setColour_sColor*)((char*)self + 0x1C) = *c;
+    if (*(cUIVector_setColour_sColor**)((char*)self + 0x7C) == 0) {
         return;
     }
     tmp.r = (int)(c->r * 255.0f);
@@ -1814,7 +1814,7 @@ extern "C" void func_003A3398(void* self, func_003A3398_sColor* c)
     tmp.b = (int)(c->b * 255.0f);
     tmp.a = (int)(c->a * 255.0f);
     for (i = 0; i < *(unsigned int*)((char*)self + 0x74) >> 17; i++) {
-        (*(func_003A3398_sColor**)((char*)self + 0x7C))[i] = tmp;
+        (*(cUIVector_setColour_sColor**)((char*)self + 0x7C))[i] = tmp;
     }
 }
 #endif

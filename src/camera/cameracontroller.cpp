@@ -6,12 +6,12 @@ INCLUDE_ASM("camera/cameracontroller", cCameraController_cCameraController);
 extern void* D_0045B938[];
 extern char D_0045B220[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-void* func_0015C930(void* self);
+void* cCameraAlgoList_cCameraAlgoList(void* self);
 
 extern "C" void* cCameraController_cCameraController(void* self, int a1)
 {
     *(void***)((char*)self + 0x14) = D_0045B938;
-    *(void**)((char*)self + 0x8) = func_0015C930(cMemMan_alloc(8, D_0045B220, 0x20000000, 0));
+    *(void**)((char*)self + 0x8) = cCameraAlgoList_cCameraAlgoList(cMemMan_alloc(8, D_0045B220, 0x20000000, 0));
     *(int*)((char*)self + 0x10) = a1;
     *(int*)((char*)self + 0xC) = 0;
     *(int*)((char*)self + 0x0) = 0;
@@ -21,18 +21,18 @@ extern "C" void* cCameraController_cCameraController(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameracontroller", func_0015CC10);
+INCLUDE_ASM("camera/cameracontroller", cCameraController__cCameraController);
 #ifdef SKIP_ASM
 extern void* D_0045B938[];
-extern "C" void func_0015C940(void* p, int mode);
+extern "C" void cCameraAlgoList__cCameraAlgoList(void* p, int mode);
 void operator_delete(int* ptr);
 
-extern "C" void func_0015CC10(void* self, int flags)
+extern "C" void cCameraController__cCameraController(void* self, int flags)
 {
     *(void***)((char*)self + 0x14) = D_0045B938;
     void* p = *(void**)((char*)self + 0x8);
     if (p != 0) {
-        func_0015C940(p, 3);
+        cCameraAlgoList__cCameraAlgoList(p, 3);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -125,18 +125,18 @@ extern char D_0045B230[];
 extern char D_0045B240[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cCameraController_cCameraController(void* self, int a1);
-extern "C" void* func_0015FD08(void* self);
-extern "C" void* func_0015FFB0(void* self);
-extern "C" void func_0015CF80(void* self, int msg);
+extern "C" void* cManualCameraAlgorithm_cManualCameraAlgorithm(void* self);
+extern "C" void* cEditorCameraAlgorithm_cEditorCameraAlgorithm(void* self);
+extern "C" void cManualCameraController_setCurrentAlgorithmType(void* self, int msg);
 
 extern "C" void* cManualCameraController_cManualCameraController(void* self, int a1)
 {
     cCameraController_cCameraController(self, a1);
     *(void***)((char*)self + 0x14) = D_0045B8D8;
     *(int*)((char*)self + 0x0) = 1;
-    *(void**)((char*)self + 0x18) = func_0015FD08(cMemMan_alloc(0x40, D_0045B230, 0x20000000, 0));
-    *(void**)((char*)self + 0x1C) = func_0015FFB0(cMemMan_alloc(0x40, D_0045B240, 0x20000000, 0));
-    func_0015CF80(self, 0x51);
+    *(void**)((char*)self + 0x18) = cManualCameraAlgorithm_cManualCameraAlgorithm(cMemMan_alloc(0x40, D_0045B230, 0x20000000, 0));
+    *(void**)((char*)self + 0x1C) = cEditorCameraAlgorithm_cEditorCameraAlgorithm(cMemMan_alloc(0x40, D_0045B240, 0x20000000, 0));
+    cManualCameraController_setCurrentAlgorithmType(self, 0x51);
     return self;
 }
 #endif
@@ -145,7 +145,7 @@ extern "C" void* cManualCameraController_cManualCameraController(void* self, int
 INCLUDE_ASM("camera/cameracontroller", func_0015CE10);
 #ifdef SKIP_ASM
 extern void* D_0045B8D8[];
-extern "C" void func_0015CC10(void* self, int flags);
+extern "C" void cCameraController__cCameraController(void* self, int flags);
 
 struct sCamCtrlVEDtor {
     short delta;
@@ -166,7 +166,7 @@ extern "C" void func_0015CE10(void* self, int flags)
         sCamCtrlVEDtor* vt = *(sCamCtrlVEDtor**)(b + 0x10);
         vt[1].fn(b + vt[1].delta, 3);
     }
-    func_0015CC10(self, flags);
+    cCameraController__cCameraController(self, flags);
 }
 #endif
 
@@ -227,11 +227,11 @@ extern "C" void func_0015CF28(void* self, int a, int b)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/cameracontroller", func_0015CF80);
+INCLUDE_ASM("camera/cameracontroller", cManualCameraController_setCurrentAlgorithmType);
 #ifdef SKIP_ASM
 extern "C" void func_0015CF28(void* self, int a, int b);
 
-extern "C" void func_0015CF80(void* self, int msg)
+extern "C" void cManualCameraController_setCurrentAlgorithmType(void* self, int msg)
 {
     switch (msg) {
     case 0x50:

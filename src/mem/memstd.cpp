@@ -6,9 +6,9 @@ INCLUDE_ASM("mem/memstd", MEMCLASS_create);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: debugmenu defines MEM_initblock with a short flags parameter; this caller passes the int unconverted.
 extern "C" void* MEM_initblock(void* self, const char* name, int size, int hdr, int flags, void* prev, void* next);
-extern "C" void* func_003E6448(void* dst, int value, int size);
+extern "C" void* MEM_fill(void* dst, int value, int size);
 extern "C" char* strcpy(char* dst, const char* src);
-extern "C" int func_003E5698(void* sema);
+extern "C" int MUTEX_create(void* sema);
 extern char D_004A2E38[];
 extern char D_004A2E40[];
 extern void* D_004D2438[];
@@ -60,7 +60,7 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int f28,
     sprintf(buf, D_004A2E40, name);
     MEM_initblock(end, buf, 0, hdr, flags | 0x8100, blk, 0);
     D_004D2438[id & 0x3F] = cls;
-    func_003E6448(cls, 0, 0x50);
+    MEM_fill(cls, 0, 0x50);
     strcpy(cls->name, name);
     *(char**)(mem + 0x1C) = end;
     *(char**)(mem + 0x18) = mem;
@@ -98,7 +98,7 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int f28,
     blk->tag = 0x4246;
     blk->flags |= 0x4000;
     if (lock) {
-        func_003E5698(cls->sema);
+        MUTEX_create(cls->sema);
         cls->locked = 1;
     }
     return blk->size;
@@ -119,7 +119,7 @@ extern "C" int func_00251998(int id)
         if (cls->locked != 0) {
             func_003E56E0(cls->sema);
         }
-        func_003E6448(cls, 0, 0x50);
+        MEM_fill(cls, 0, 0x50);
         *slot = 0;
         r = 1;
     }
@@ -129,7 +129,7 @@ extern "C" int func_00251998(int id)
 //100%
 INCLUDE_ASM("mem/memstd", func_00251A08);
 #ifdef SKIP_ASM
-extern "C" void* func_002523A8(void* self);
+extern "C" void* MEM_free(void* self);
 struct sMemNode_251A08 {
     unsigned short tag;
     unsigned short flags;
@@ -148,7 +148,7 @@ extern "C" void* func_00251A08(int id)
     void* r = (void*)1;
     for (sMemNode_251A08* n = cls->first; n != 0 && r != 0; n = n->next) {
         if (!(n->flags & 0xC000)) {
-            r = func_002523A8((char*)n + 0x10);
+            r = MEM_free((char*)n + 0x10);
         }
     }
     return r;
@@ -268,11 +268,11 @@ extern "C" void func_00251D00(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00251D08);
+INCLUDE_ASM("mem/memstd", MEM_initadr);
 #ifdef SKIP_ASM
 extern char D_004A2E48[];
 
-extern "C" int func_00251D08(char* mem, int size)
+extern "C" int MEM_initadr(char* mem, int size)
 {
     return MEMCLASS_create(0, D_004A2E48, mem, size, 0x40, 0x80, 0, 0, 0, 1);
 }
@@ -366,7 +366,7 @@ typedef char* func_00251F68_va_list;
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
 extern "C" int func_004186C8(char* dst, const char* fmt, char* ap);
-extern "C" void func_003E5D30(int, char*);
+extern "C" void PRINT_string(int, char*);
 
 extern "C" void func_00251F68(const char* fmt, ...)
 {
@@ -374,7 +374,7 @@ extern "C" void func_00251F68(const char* fmt, ...)
     func_00251F68_va_list ap;
     func_00251F68_va_start(ap);
     func_004186C8(buf, fmt, ap);
-    func_003E5D30(2, buf);
+    PRINT_string(2, buf);
 }
 #endif
 
@@ -558,11 +558,11 @@ extern "C" int func_002523A0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002523A8);
+INCLUDE_ASM("mem/memstd", MEM_free);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
-extern "C" void* func_002523A8(void* self)
+extern "C" void* MEM_free(void* self)
 {
     if (self != 0) {
         cMemMan_free(self);
@@ -789,7 +789,7 @@ extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void* MEM_initblock(void* self, const char* name, int size, int hdr, int flags, void* prev, void* next);
 extern "C" int func_00252960(int unused, int id);
-extern "C" void func_003E6188(void* a, void* b);
+extern "C" void MEM_move(void* a, void* b);
 
 struct sMemNode_252718 {
     unsigned short tag;         // 0x0
@@ -862,7 +862,7 @@ extern "C" void* func_00252718(void* mem, int size)
         want = avail;
         size = avail - hdr;
     }
-    func_003E6188((char*)mem + size, (char*)mem + blk->size);
+    MEM_move((char*)mem + size, (char*)mem + blk->size);
     blk->size = size;
     if (avail - want > 0x40) {
         nb = (sMemNode_252718*)((char*)mem + (want + 0x10));
@@ -1611,14 +1611,14 @@ void* func_00253AD0_impl(void* a0, int a1, int align, int a3, int a4)
 }
 #endif
 
-extern "C" void* func_002523A8(void* self);
+extern "C" void* MEM_free(void* self);
 
 //99.29%
 INCLUDE_ASM("mem/memstd", func_00253AF8__FPv);
 #ifdef SKIP_ASM
 void* func_00253AF8(void* self)
 {
-    return func_002523A8(self);
+    return MEM_free(self);
 }
 #endif
 

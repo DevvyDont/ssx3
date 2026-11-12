@@ -41,13 +41,13 @@ extern "C" void cMultiParticle_setupMultiParticle(sMultiParticle* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00358120);
+INCLUDE_ASM("object/multiparticle", cMultiParticle_update);
 #ifdef SKIP_ASM
-extern "C" void func_00370788(void* self, float dt);
+extern "C" void cStaticEmitter_update(void* self, float dt);
 
-extern "C" void func_00358120(void* self)
+extern "C" void cMultiParticle_update(void* self)
 {
-    func_00370788(*(void**)((char*)self + 0x10), 0.01666666753590107f);
+    cStaticEmitter_update(*(void**)((char*)self + 0x10), 0.01666666753590107f);
 }
 #endif
 
@@ -130,7 +130,7 @@ extern "C" void func_003581F0(sMoveList_81F0* self, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00358260);
+INCLUDE_ASM("object/multiparticle", cMultiParticle_render);
 #ifdef SKIP_ASM
 struct sMPVec4 {
     float x, y, z, w;
@@ -152,7 +152,7 @@ struct sMPWorld {
 };
 
 extern "C" sMPWorld** func_002D1BD8();
-extern "C" void func_00370888(void* desc, sMPBox* box, const sMPVec4& center);
+extern "C" void cStaticEmitter_render(void* desc, sMPBox* box, const sMPVec4& center);
 
 static inline void* refToPtr58260(unsigned int p)
 {
@@ -225,7 +225,7 @@ struct sMultiPart58260 {
     sMPVec4 center;         // 0x40
 };
 
-extern "C" void func_00358260(sMultiPart58260* self)
+extern "C" void cMultiParticle_render(sMultiPart58260* self)
 {
     for (int i = 0; i < self->count; i++) {
         sMPModel* m = (sMPModel*)self->refs[i].get(*func_002D1BD8());
@@ -233,14 +233,14 @@ extern "C" void func_00358260(sMultiPart58260* self)
             sMPBox b = self->box;
             vu0AddTo58260(b.min, m->pos);
             vu0AddTo58260(b.max, m->pos);
-            func_00370888(self->desc, &b, vu0Add58260(m->getPos(), self->center));
+            cStaticEmitter_render(self->desc, &b, vu0Add58260(m->getPos(), self->center));
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00358380);
+INCLUDE_ASM("object/multiparticle", cMultiParticle_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sSerVEntry_58380 {
     short delta;
@@ -256,9 +256,9 @@ struct sMultiPart_58380 {
     void* desc;             // 0x10
 };
 
-extern "C" void func_00370AA8(void* desc, void* stream);
+extern "C" void cStaticEmitter_writeToReplayFrame(void* desc, void* stream);
 
-extern "C" void func_00358380(sMultiPart_58380* self, void* stream)
+extern "C" void cMultiParticle_writeToReplayFrame(sMultiPart_58380* self, void* stream)
 {
     sSerVEntry_58380* e = &(*(sSerVEntry_58380**)stream)[1];
     e->fn((char*)stream + e->delta, self, 4);
@@ -266,7 +266,7 @@ extern "C" void func_00358380(sMultiPart_58380* self, void* stream)
     e->fn((char*)stream + e->delta, &self->count, 4);
     e = &(*(sSerVEntry_58380**)stream)[1];
     e->fn((char*)stream + e->delta, self->data, 0xD8);
-    func_00370AA8(self->desc, stream);
+    cStaticEmitter_writeToReplayFrame(self->desc, stream);
     e = &(*(sSerVEntry_58380**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x40, 0x10);
     e = &(*(sSerVEntry_58380**)stream)[1];
@@ -339,20 +339,20 @@ extern "C" void* func_003584F0(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00358588);
+INCLUDE_ASM("object/multiparticle", cRailManNode_cRailManNode);
 #ifdef SKIP_ASM
 extern void* D_004A4040;
 extern void* D_0048EDE0[];
 extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a1, void* stream);
 extern "C" void func_00358780(void* self, int idx);
 
-class func_00358588_cStream {
+class cRailManNode_cRailManNode_cStream {
 public:
     virtual void v01();
     virtual void v02(void* buf, int size);
 };
 
-extern "C" void* func_00358588(void* self, void* a1, func_00358588_cStream* stream)
+extern "C" void* cRailManNode_cRailManNode(void* self, void* a1, cRailManNode_cRailManNode_cStream* stream)
 {
     char* s = (char*)self;
     int i;
@@ -375,15 +375,15 @@ extern "C" void* func_00358588(void* self, void* a1, func_00358588_cStream* stre
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00358668);
+INCLUDE_ASM("object/multiparticle", cRailManNode__cRailManNode);
 #ifdef SKIP_ASM
 extern void* D_004A4040;
 extern void* D_0048EDE0[];
 extern "C" void func_00358998(void* self, int idx);
-// PORT: func_00354920__FPv is the ObjNode deleting dtor; it takes (self, flags).
-extern void* func_00354920_dtor(void* self, int flags) __asm__("func_00354920__FPv");
+// PORT: cSortObjNode__cSortObjNode__FPv is the ObjNode deleting dtor; it takes (self, flags).
+extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
 
-extern "C" void func_00358668(void* self, int flags)
+extern "C" void cRailManNode__cRailManNode(void* self, int flags)
 {
     char* s = (char*)self;
     int i;
@@ -394,7 +394,7 @@ extern "C" void func_00358668(void* self, int flags)
         }
     }
     D_004A4040 = 0;
-    func_00354920_dtor(self, flags);
+    cSortObjNode__cSortObjNode_dtor(self, flags);
 }
 #endif
 
@@ -477,7 +477,7 @@ struct sMpMgr_8780 {
 };
 
 extern "C" sMpMgr_8780** func_002D1BD8_8780(void) __asm__("func_002D1BD8");
-extern "C" char* func_002D1BE0(void);
+extern "C" char* cObjectInterface_getNash(void);
 extern "C" void func_00328F28(void* out, const void* box);
 extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
 void operator_delete(int*);
@@ -547,7 +547,7 @@ extern "C" void func_00358780(void* self, int idx)
         box.max.y = *(float*)(node + 0x7C);
         box.max.z = *(float*)(node + 0x80);
         box.max.w = 1.0f;
-        remove_8780(func_002D1BE0(), node, &box);
+        remove_8780(cObjectInterface_getNash(), node, &box);
         node = *(char**)(node + 0x64);
     }
 }
@@ -587,7 +587,7 @@ struct sMpMgr_8998 {
 };
 
 extern "C" sMpMgr_8998** func_002D1BD8_8998(void) __asm__("func_002D1BD8");
-extern "C" char* func_002D1BE0(void);
+extern "C" char* cObjectInterface_getNash(void);
 extern "C" void func_00328F28(void* out, const void* box);
 extern "C" void func_00328C20(void* root, int idx, void* item, const void* target);
 
@@ -650,7 +650,7 @@ extern "C" void func_00358998(void* self, int idx)
         box.max.y = *(float*)(node + 0x7C);
         box.max.z = *(float*)(node + 0x80);
         box.max.w = 1.0f;
-        insert_8998(func_002D1BE0(), node, &box);
+        insert_8998(cObjectInterface_getNash(), node, &box);
         node = *(char**)(node + 0x64);
     }
     ((unsigned int*)((char*)self + 0x18))[idx] = 0xFFFFFFFF;
@@ -717,7 +717,7 @@ found:
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00358C30);
+INCLUDE_ASM("object/multiparticle", cRailManNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sSerVEntry_00358C30 {
     short delta;
@@ -725,11 +725,11 @@ struct sSerVEntry_00358C30 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00354980(void* self, void* stream);
+extern "C" void cSortObjNode_writeToReplayFrame(void* self, void* stream);
 
-extern "C" void func_00358C30(void* self, void* stream)
+extern "C" void cRailManNode_writeToReplayFrame(void* self, void* stream)
 {
-    func_00354980(self, stream);
+    cSortObjNode_writeToReplayFrame(self, stream);
     sSerVEntry_00358C30* vt = *(sSerVEntry_00358C30**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x18, 0x200);
 }
@@ -738,9 +738,9 @@ extern "C" void func_00358C30(void* self, void* stream)
 INCLUDE_ASM("object/multiparticle", func_00358C80);
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00358DB0);
+INCLUDE_ASM("object/multiparticle", cAnimComboNode_cAnimComboNode);
 #ifdef SKIP_ASM
-extern "C" void* func_00341C80(void* self, void* a, void* stream);
+extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, void* a, void* stream);
 extern "C" void func_00359030(void* self);
 extern char D_0048EC28[];
 extern char D_0048EA20[];
@@ -757,11 +757,11 @@ struct sParticle_8DB0 {
     sParticle_8DB0() {}
 };
 
-extern "C" void* func_00358DB0(void* self, void* a1, void* stream)
+extern "C" void* cAnimComboNode_cAnimComboNode(void* self, void* a1, void* stream)
 {
     char* s = (char*)self;
     sParticle_8DB0** pp = (sParticle_8DB0**)(s + 0x84);
-    func_00341C80(s + 0x18, a1, stream);
+    cAnimObjectNode_cAnimObjectNode(s + 0x18, a1, stream);
     *(void**)(s + 0x54) = D_0048EC28;
     sStreamVE_8DB0* vt = *(sStreamVE_8DB0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self, 0x18);
@@ -847,11 +847,11 @@ struct sMpQuad {
 } __attribute__((aligned(16)));
 
 extern sMpQuad D_004FF120;
-extern "C" void func_00356AE0(void* self, void* out);
+extern "C" void cMoveNode_updateIntersectInfo(void* self, void* out);
 
 extern "C" void func_00358F90(void* self, void* out)
 {
-    func_00356AE0((char*)self + 0x48, out);
+    cMoveNode_updateIntersectInfo((char*)self + 0x48, out);
     *(sMpQuad*)((char*)out + 0x20) = D_004FF120;
     *(sMpQuad*)((char*)out + 0x30) = D_004FF120;
 }
@@ -960,14 +960,14 @@ extern "C" void func_00359030(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_003590C8);
+INCLUDE_ASM("object/multiparticle", cAnimComboNode_loseFocus);
 #ifdef SKIP_ASM
-extern "C" void func_0034FD90(void*);
+extern "C" void cInstanceNode_loseFocus(void*);
 
-extern "C" void func_003590C8(void* self)
+extern "C" void cAnimComboNode_loseFocus(void* self)
 {
     if (*(signed char*)((char*)self + 0x15) == 0) {
-        func_0034FD90((char*)self + 0x48);
+        cInstanceNode_loseFocus((char*)self + 0x48);
     }
 }
 #endif
@@ -1085,7 +1085,7 @@ extern "C" void* func_00359228(void* self, int a, int b, int c)
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00359270);
+INCLUDE_ASM("object/multiparticle", cAnimDeltaNode_cAnimDeltaNode);
 #ifdef SKIP_ASM
 struct sVEntry00359270 {
     short delta;
@@ -1093,12 +1093,12 @@ struct sVEntry00359270 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void* func_00341C80(void* self, void* a, void* stream);
+extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, void* a, void* stream);
 extern void* D_0048EA70[];
 
-extern "C" void* func_00359270(void* self, void* a, void* stream)
+extern "C" void* cAnimDeltaNode_cAnimDeltaNode(void* self, void* a, void* stream)
 {
-    func_00341C80(self, a, stream);
+    cAnimObjectNode_cAnimObjectNode(self, a, stream);
     *(void***)((char*)self + 0x3C) = D_0048EA70;
     sVEntry00359270* vt = *(sVEntry00359270**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x6C, 4);
@@ -1195,14 +1195,14 @@ extern "C" void func_00359410(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00359460);
+INCLUDE_ASM("object/multiparticle", cSplineModifier_cSplineModifier1);
 #ifdef SKIP_ASM
 extern char D_0048F250[];
 extern "C" void func_003451C0(void* ref, int id);
-extern "C" void func_00359688(void* self, float v);
+extern "C" void cSplineModifier_setSpeed(void* self, float v);
 float AIrandf(float lo, float hi);
 
-extern "C" void* func_00359460(char* self, char* desc)
+extern "C" void* cSplineModifier_cSplineModifier1(char* self, char* desc)
 {
     *(void**)self = D_0048F250;
     *(unsigned int*)(self + 0xD8) = 0xFFFFFFFF;
@@ -1216,7 +1216,7 @@ extern "C" void* func_00359460(char* self, char* desc)
     *(float*)(self + 0x40) = *(float*)(desc + 0x24) * 100.0f;
     *(float*)(self + 0x44) = *(float*)(desc + 0x28);
     func_003451C0(self + 0xD8, *(int*)(desc + 0x4));
-    func_00359688(self, *(float*)(desc + 0x10));
+    cSplineModifier_setSpeed(self, *(float*)(desc + 0x10));
     if (*(float*)(desc + 0x10) >= 0.0f) {
         *(float*)(self + 0x3C) = 0.0f;
     } else {

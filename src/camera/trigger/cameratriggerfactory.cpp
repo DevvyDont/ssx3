@@ -3087,45 +3087,45 @@ extern "C" int func_00176438(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176440__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_pos__FPv);
 #ifdef SKIP_ASM
-void* func_00176440(void* self)
+void* cCTObject_pos(void* self)
 {
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176448__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_heading__FPv);
 #ifdef SKIP_ASM
-void* func_00176448(void* self)
+void* cCTObject_heading(void* self)
 {
     return (char*)self + 0xC;
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176450__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_pitch__FPv);
 #ifdef SKIP_ASM
-void* func_00176450(void* self)
+void* cCTObject_pitch(void* self)
 {
     return (char*)self + 0x10;
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176458__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_roll__FPv);
 #ifdef SKIP_ASM
-void* func_00176458(void* self)
+void* cCTObject_roll(void* self)
 {
     return (char*)self + 0x14;
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176460__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_scale__FPv);
 #ifdef SKIP_ASM
-void* func_00176460(void* self)
+void* cCTObject_scale(void* self)
 {
     return (char*)self + 0x18;
 }
@@ -3220,13 +3220,13 @@ extern "C" int func_00176800(int arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176808);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTBoundObjPoint_limitPoint);
 #ifdef SKIP_ASM
 struct sVec4A16 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern "C" void func_00176808(float* v, sVec4A16* out)
+extern "C" void cCTBoundObjPoint_limitPoint(float* v, sVec4A16* out)
 {
     sVec4A16 t;
     t.x = v[0];
@@ -5780,7 +5780,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A378);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void* FILE_loadsizez(const char* name, int* size, int align);
 extern "C" void func_00318350(void* self, const char* s, int len);
-extern "C" void* func_002523A8(void* self);
+extern "C" void* MEM_free(void* self);
 extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: alias; the unit defines func_0017A830 later with a typed self (sCamMgr_A830*).
 extern "C" int func_0017A830_17A378(void* selfp, char* name, char* tag) __asm__("func_0017A830");
@@ -5872,7 +5872,7 @@ extern "C" void func_0017A378(void* selfp, const char* file)
         }
         cBXString__cBXString(&str, 2);
     }
-    func_002523A8(buf);
+    MEM_free(buf);
 }
 #endif
 

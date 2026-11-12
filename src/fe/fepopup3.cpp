@@ -154,9 +154,9 @@ INCLUDE_ASM("fe/fepopup3", func_001E0500);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0508);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0548);
+INCLUDE_ASM("fe/fepopup3", cFEStateAudioOptions__cFEStateAudioOptions);
 
-INCLUDE_ASM("fe/fepopup3", func_001E05B0);
+INCLUDE_ASM("fe/fepopup3", cFEStateRequestLine__cFEStateRequestLine);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0740);
 
@@ -352,7 +352,7 @@ INCLUDE_ASM("fe/fepopup3", func_001E1288);
 
 INCLUDE_ASM("fe/fepopup3", func_001E1290);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1298);
+INCLUDE_ASM("fe/fepopup3", cUIInput_setPadNum);
 
 INCLUDE_ASM("fe/fepopup3", func_001E12A0);
 

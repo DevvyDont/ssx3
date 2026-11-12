@@ -16,14 +16,14 @@ typedef struct SHAPE_3578 {
 extern void *(*D_0044C450_3578)(char *, int, int) __asm__("D_0044C450");
 extern char D_004956E0_3578[] __asm__("D_004956E0");
 extern char D_004956E8_3578[] __asm__("D_004956E8");
-extern int f_4478_3578(SHAPE_3578 *) __asm__("func_003B4478");
-extern int f_3BB0_3578(SHAPE_3578 *) __asm__("func_003B3BB0");
-extern void memcpy_3578(void *, void *, int) __asm__("func_003E6574");
+extern int f_4478_3578(SHAPE_3578 *) __asm__("SHAPE_clonesize");
+extern int f_3BB0_3578(SHAPE_3578 *) __asm__("SHAPE_size");
+extern void memcpy_3578(void *, void *, int) __asm__("MEM_copy");
 // func_003B47F8 returns func_003B4740's decoded length (int).
 extern int f_47F8_3578(void *, void *) __asm__("func_003B47F8");
-extern SHAPE_3578 *f_4690_3578(SHAPE_3578 *) __asm__("func_003B4690");
+extern SHAPE_3578 *f_4690_3578(SHAPE_3578 *) __asm__("SHAPE_clone");
 extern char *f_4010_3578(SHAPE_3578 *, int, int, int) __asm__("func_003B4010");
-extern void f_33B0_3578(char *, char *, int, int, int) __asm__("func_003B33B0");
+extern void f_33B0_3578(char *, char *, int, int, int) __asm__("undxtpack");
 extern void SHAPE_cloneat_3578(void *, SHAPE_3578 *) __asm__("SHAPE_cloneat");
 
 SHAPE_3578 *SHAPE_unpack(SHAPE_3578 *shape) {
@@ -136,17 +136,17 @@ int func_003B38B8(int arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B3900);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_locatez);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *f_3A10_3900(char *) __asm__("func_003B3A10");
-extern void f_3D00_3900(char *, int, void *) __asm__("func_003B3D00");
+extern char *f_3A10_3900(char *) __asm__("SHAPE_longname");
+extern void f_3D00_3900(char *, int, void *) __asm__("SHAPE_name");
 extern int f_65A8_3900(void *, int) __asm__("func_004165A8");
 struct B_3900 { int pad; char c; };
 struct H_3900 { char pad[8]; int n; char pad2[8]; struct { int off; int x; } t[1]; };
 
-char *func_003B3900_3900(struct H_3900 *, int) __asm__("func_003B3900");
-char *func_003B3900_3900(struct H_3900 *arg0, int arg1) {
+char *SHAPE_locatez_3900(struct H_3900 *, int) __asm__("SHAPE_locatez");
+char *SHAPE_locatez_3900(struct H_3900 *arg0, int arg1) {
     int i;
     int n = arg0->n;
     struct B_3900 buf;
@@ -168,38 +168,38 @@ char *func_003B3900_3900(struct H_3900 *arg0, int arg1) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_locate);
 #ifdef SKIP_ASM
-extern void func_003B3900();
+extern void SHAPE_locatez();
 
 void SHAPE_locate(void) {
-    func_003B3900();
+    SHAPE_locatez();
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B39D8);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_depth);
 #ifdef SKIP_ASM
 extern unsigned char D_0044C3D0[];
 
-unsigned char func_003B39D8(unsigned char *arg0) {
+unsigned char SHAPE_depth(unsigned char *arg0) {
     return D_0044C3D0[*arg0 & 0x7F];
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B39F8);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_depth1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned char D_0044C3D0_39F8[128] __asm__("D_0044C3D0");
 
-unsigned char func_003B39F8(int arg0) {
+unsigned char SHAPE_depth1(int arg0) {
     return D_0044C3D0_39F8[arg0 & 0x7F];
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B3A10);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_longname);
 #ifdef SKIP_ASM
-unsigned char *func_003B3A10(unsigned char *p) {
+unsigned char *SHAPE_longname(unsigned char *p) {
     while (p) {
         int off;
         unsigned char *n;
@@ -217,14 +217,14 @@ unsigned char *func_003B3A10(unsigned char *p) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3A50);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B3BB0);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_size);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003B3A50_3BB0(unsigned char, short, short, unsigned int, int) __asm__("func_003B3A50");
 extern int func_003B4D00_3BB0(char *, int *) __asm__("func_003B4D00");
 extern int strlen_3BB0(char *) __asm__("strlen");
 
-int func_003B3BB0(char *p) {
+int SHAPE_size(char *p) {
     int sp0;
     int r = 0;
     int w;
@@ -269,7 +269,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B3CCC);
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3CD8);
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B3D00);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_name);
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3D40);
@@ -311,9 +311,9 @@ block_10:
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B3DA8);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_type);
 #ifdef SKIP_ASM
-int func_003B3DA8(int arg0) {
+int SHAPE_type(int arg0) {
     int r = 0;
     switch (arg0) {
     case 4: r = 1; break;
@@ -330,7 +330,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B3E40);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { unsigned int fmt : 8; unsigned int size : 24; short w; short h; char pad8[4]; int flags; } SH_3E40;
-extern int func_003B39D8_3E40(SH_3E40 *) __asm__("func_003B39D8");
+extern int SHAPE_depth_3E40(SH_3E40 *) __asm__("SHAPE_depth");
 extern int func_003B4218_3E40(int, int, int, int, int) __asm__("func_003B4218");
 
 int func_003B3E40(SH_3E40 *shp, int x, int y, int level) {
@@ -341,7 +341,7 @@ int func_003B3E40(SH_3E40 *shp, int x, int y, int level) {
     off = 0;
     w = shp->w;
     h = shp->h;
-    bpp = func_003B39D8_3E40(shp);
+    bpp = SHAPE_depth_3E40(shp);
     if (bpp == 15) {
         bpp = 16;
     }
@@ -399,7 +399,7 @@ struct Img_4010 {
     int flags;
     int off;
 };
-extern int func_003B39D8_4010(struct Img_4010 *img) __asm__("func_003B39D8");
+extern int SHAPE_depth_4010(struct Img_4010 *img) __asm__("SHAPE_depth");
 extern int func_003B4218_4010(int x, int y, int w, int h, int bpp) __asm__("func_003B4218");
 
 char *func_003B4010(struct Img_4010 *img, int x, int y, int mip) {
@@ -423,7 +423,7 @@ char *func_003B4010(struct Img_4010 *img, int x, int y, int mip) {
     h = img->h;
     px = x;
     py = y;
-    bpp = func_003B39D8_4010(img);
+    bpp = SHAPE_depth_4010(img);
     if (bpp == 15) {
         bpp = 16;
     }
@@ -546,23 +546,23 @@ void func_003B4458(int arg0, int arg1, int arg2) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4478);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_clonesize);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int func_003B3BB0_4478(unsigned char *) __asm__("func_003B3BB0");
-extern int func_003B4708_4478(int) __asm__("func_003B4708");
+extern int SHAPE_size_4478(unsigned char *) __asm__("SHAPE_size");
+extern int SHAPE_isclut_4478(int) __asm__("SHAPE_isclut");
 
-int func_003B4478(unsigned char *p) {
+int SHAPE_clonesize(unsigned char *p) {
     int size = 0;
     int pad = (((int)p + 15) & ~15) - (int)p;
 
     if (p) {
         do {
-            int n = func_003B3BB0_4478(p);
+            int n = SHAPE_size_4478(p);
             int off;
             if (size) {
-                if (func_003B4708_4478(*p)) {
+                if (SHAPE_isclut_4478(*p)) {
                     int a = (size - pad + 0x1F) & ~0xF;
                     int t = pad - 0x10;
                     size = a + t;
@@ -583,9 +583,9 @@ int func_003B4478(unsigned char *p) {
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_cloneat);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003B3BB0_neat(char *) __asm__("func_003B3BB0");
-extern int func_003B4708_neat(int) __asm__("func_003B4708");
-extern void func_003E6188_neat(char *, char *, int) __asm__("func_003E6188");
+extern int SHAPE_size_neat(char *) __asm__("SHAPE_size");
+extern int SHAPE_isclut_neat(int) __asm__("SHAPE_isclut");
+extern void MEM_move_neat(char *, char *, int) __asm__("MEM_move");
 extern int sprintf_neat(char *, char *, ...) __asm__("sprintf");
 extern char D_004957B8_neat[] __asm__("D_004957B8");
 
@@ -603,9 +603,9 @@ void SHAPE_cloneat(char *dst, char *src) {
         mask = -16;
         a22 = align - 0x10;
         do {
-            size = func_003B3BB0_neat(p);
+            size = SHAPE_size_neat(p);
             if (off != 0) {
-                if (func_003B4708_neat(*(unsigned char *)p) != 0) {
+                if (SHAPE_isclut_neat(*(unsigned char *)p) != 0) {
                     off = (((off - align) + 0x1F) & mask) + a22;
                 } else {
                     off = (((off - align) + 0xF) & mask) + align;
@@ -618,7 +618,7 @@ void SHAPE_cloneat(char *dst, char *src) {
             }
             *(int *)prev = *(unsigned char *)prev;
             if (size != 0) {
-                func_003E6188_neat(prev, p, size);
+                MEM_move_neat(prev, p, size);
                 if (*(unsigned char *)prev == 0x69 && size >= 0x15) {
                     sprintf_neat(prev + 0x10, D_004957B8_neat, *(short *)(prev + 4));
                 }
@@ -634,18 +634,18 @@ void SHAPE_cloneat(char *dst, char *src) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4690);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_clone);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003B4478_4690(int) __asm__("func_003B4478");
-extern void *func_003B3A10_4690(int) __asm__("func_003B3A10");
+extern int SHAPE_clonesize_4690(int) __asm__("SHAPE_clonesize");
+extern void *SHAPE_longname_4690(int) __asm__("SHAPE_longname");
 extern void SHAPE_cloneat_4690(void *, int) __asm__("SHAPE_cloneat");
 extern void *(*D_0044C454_4690)(void *, int, int, int, int) __asm__("D_0044C454");
 
-void *func_003B4690(int arg0) {
-    int sz = func_003B4478_4690(arg0);
-    void *r = D_0044C454_4690(func_003B3A10_4690(arg0), sz, 0, 0x10, 0x400);
+void *SHAPE_clone(int arg0) {
+    int sz = SHAPE_clonesize_4690(arg0);
+    void *r = D_0044C454_4690(SHAPE_longname_4690(arg0), sz, 0, 0x10, 0x400);
 
     SHAPE_cloneat_4690(r, arg0);
     return r;
@@ -653,9 +653,9 @@ void *func_003B4690(int arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4708);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_isclut);
 #ifdef SKIP_ASM
-int func_003B4708(int arg0) {
+int SHAPE_isclut(int arg0) {
     int var_5;
 
     var_5 = 0;

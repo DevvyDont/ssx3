@@ -18,14 +18,14 @@ void WORLDTRIGGERMANAGER_Init()
 #endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4B48);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", WORLDTRIGGERMANAGER_DeInit);
 #ifdef SKIP_ASM
-extern "C" void func_002B5988(char** self, int flags);
+extern "C" void cWorldTriggerManager__cWorldTriggerManager(char** self, int flags);
 
-extern "C" void func_002B4B48()
+extern "C" void WORLDTRIGGERMANAGER_DeInit()
 {
     if (D_004A52D4 != 0) {
-        func_002B5988((char**)D_004A52D4, 3);
+        cWorldTriggerManager__cWorldTriggerManager((char**)D_004A52D4, 3);
     }
     D_004A52D4 = 0;
 }
@@ -445,12 +445,12 @@ extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5988);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager__cWorldTriggerManager);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 
-extern "C" void func_002B5988(char** self, int flags)
+extern "C" void cWorldTriggerManager__cWorldTriggerManager(char** self, int flags)
 {
     char* base = *self;
     if (base != 0) {
@@ -520,7 +520,7 @@ int cWorldTriggerManager_LoadTriggerInfo_impl(void* self)
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5B40);
 #ifdef SKIP_ASM
 extern "C" void cMemMan_free__FPv(int);
-extern "C" void func_002523A8(int);
+extern "C" void MEM_free(int);
 
 extern "C" void func_002B5B40(void *arg0) {
     int temp_4;
@@ -528,7 +528,7 @@ extern "C" void func_002B5B40(void *arg0) {
 
     temp_4 = (*(int *)((char*)(arg0) + (0x338)));
     if (temp_4 != 0) {
-        func_002523A8(temp_4);
+        MEM_free(temp_4);
         temp_4_2 = (*(int *)((char*)(arg0) + (0x33C)));
         (*(int *)((char*)(arg0) + (0x338))) = 0;
         if (temp_4_2 != 0) {

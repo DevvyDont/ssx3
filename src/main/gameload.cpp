@@ -35,17 +35,17 @@ extern "C" sBXStr_F6B0* func_00318630(sBXStr_F6B0* self, sBXStr_F6B0* a, const c
 extern "C" sBXStr_F6B0* func_003186D0(sBXStr_F6B0* self, const char* str, sBXStr_F6B0* b);
 extern "C" void cBXString__cBXString(sBXStr_F6B0* self, int flags);
 extern "C" sBXStr_F6B0* cBXString_operatorE(sBXStr_F6B0* self, sBXStr_F6B0* o);
-extern "C" char* func_00144BC0(void* iface);
+extern "C" char* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cBigFile_open(void* bf, const char* name, int flags);
-extern "C" void func_003A6AE0(void* a, const char* name, void* b);
+extern "C" void cWorld_load(void* a, const char* name, void* b);
 void* func_00353AC0(void* p);
 extern "C" void* func_0022CCE8(void* p, void* game);
 extern "C" void func_002C2F18(void* p);
 extern "C" void* func_002B6AA0(void* p, int a);
-extern "C" void func_00334800(void* p);
+extern "C" void cBXNash_initTheAIFwdDiffCache(void* p);
 extern "C" void func_0022D088(void* p, int id, int a);
 extern "C" int func_0022D278(void* p, int id);
-extern "C" void func_0022D8D8(void* p);
+extern "C" void cSectionMan_update(void* p);
 void func_003A6928(void* p);
 extern "C" void func_003E5398(int a);
 // PORT: func_0016CA10__FPv also receives the path string (passed through in $5)
@@ -88,14 +88,14 @@ extern "C" void cGame_loadTrack(char* self)
     if (D_004A11B8 != 0) {
         sBXStr_F6B0 a;
         sBXStr_F6B0 b;
-        func_003186D0(&a, D_0047B480, (cBXString_cBXString2(&b, func_00144BC0(iface) + 0x44), &b));
+        func_003186D0(&a, D_0047B480, (cBXString_cBXString2(&b, cBENewRaceInterface_getLocation(iface) + 0x44), &b));
         cBXString_operatorE(&name, &a);
         cBXString__cBXString(&a, 2);
         cBXString__cBXString(&b, 2);
     } else {
         sBXStr_F6B0 a;
         sBXStr_F6B0 b;
-        func_003186D0(&a, D_0047B480, (cBXString_cBXString2(&b, func_00144BC0(iface) + 0x34), &b));
+        func_003186D0(&a, D_0047B480, (cBXString_cBXString2(&b, cBENewRaceInterface_getLocation(iface) + 0x34), &b));
         cBXString_operatorE(&name, &a);
         cBXString__cBXString(&a, 2);
         cBXString__cBXString(&b, 2);
@@ -108,29 +108,29 @@ extern "C" void cGame_loadTrack(char* self)
     }
     sTbl_F6B0*& tbl = *(sTbl_F6B0**)(self + 0x44);
     char*& ent = *(char**)(self + 0x18);
-    func_003A6AE0(*(void**)(self + 0x10), name.p, *(void**)(self + 0x20));
+    cWorld_load(*(void**)(self + 0x10), name.p, *(void**)(self + 0x20));
     *(void**)(self + 0x14) = func_00353AC0(cMemMan_alloc(0x18, D_004A2A98, 0, 0));
     *(void**)(self + 0x78) = func_0022CCE8(cMemMan_alloc(0x1D4, D_0047B728, 0, 0), self);
     tbl = new (D_0047B738, 0, 0) sTbl_F6B0;
     func_002C2F18(*(void**)(self + 0x44));
     *(void**)(self + 0x4C) = func_002B6AA0(cMemMan_alloc(0x250, D_0047B748, 0, 0), 0);
-    func_00334800(*(void**)(self + 0x20));
+    cBXNash_initTheAIFwdDiffCache(*(void**)(self + 0x20));
     sBXStr_F6B0 dir;
     dir.p = D_004A3E90;
     *(int*)(**(char***)(self + 0x10) + 0x3D4) = 0;
     {
         sBXStr_F6B0 a;
         sBXStr_F6B0 b;
-        func_003186D0(&a, D_0047B480, (cBXString_cBXString2(&b, func_00144BC0(iface) + 0x34), &b));
+        func_003186D0(&a, D_0047B480, (cBXString_cBXString2(&b, cBENewRaceInterface_getLocation(iface) + 0x34), &b));
         cBXString_operatorE(&dir, &a);
         cBXString__cBXString(&a, 2);
         cBXString__cBXString(&b, 2);
     }
-    int id = *(int*)func_00144BC0(iface);
+    int id = *(int*)cBENewRaceInterface_getLocation(iface);
     func_0022D088(*(void**)(self + 0x78), id, 0);
     *(int*)(*(char**)(self + 0x78) + 0x1A4) = 1;
     while (!func_0022D278(*(void**)(self + 0x78), id)) {
-        func_0022D8D8(*(void**)(self + 0x78));
+        cSectionMan_update(*(void**)(self + 0x78));
         func_003A6928(*(void**)(self + 0x10));
         func_003E5398(0);
     }
@@ -162,7 +162,7 @@ extern "C" void cBE_setState(int state);
 extern "C" void cCameraTriggerMan_cleanupOnExit(void* self);
 extern "C" void cCameraTriggerMan_purge(void* self);
 extern "C" void func_001A3C50(void* p);
-extern "C" void func_00278A98(void* p);
+extern "C" void cSSXScriptEngine_ForceEndScriptsAll(void* p);
 extern "C" void func_00397B70(void* p, int flags);
 extern "C" void func_002370A0(void* p, int flags);
 extern "C" void func_002EA820(void* p);
@@ -171,7 +171,7 @@ void operator_delete(int* p);
 extern "C" void func_0026AF00(void* p);
 extern "C" void func_00334850(void* p);
 extern "C" void func_002CC048(void* p, int flags);
-extern "C" void func_00354C98(void* mgr, int a);
+extern "C" void cBucketMan_mergeBucket(void* mgr, int a);
 extern "C" void func_00354B38(void* mgr);
 extern "C" void func_00229278(void* p, int flags);
 extern "C" void func_00343B28(void* p, int flags);
@@ -184,7 +184,7 @@ extern "C" void func_0026F088(void* p, int flags);
 extern "C" void func_0022CD18(void* p, int flags);
 extern "C" void func_002DBEE0(void* p, int flags);
 extern "C" void func_002F5230(void* p, int flags);
-extern "C" void func_003A6740(void* p, int flags);
+extern "C" void cWorld__cWorld(void* p, int flags);
 extern "C" void func_00242518(void* p, int flags);
 struct cBigFile;
 void cBigFile__cBigFile(cBigFile* self, int flags);
@@ -195,7 +195,7 @@ extern "C" void func_002B6AE0(void* p, int flags);
 extern "C" void func_002B68D0(void* a);
 extern "C" void func_00286A80(void* p);
 extern "C" void func_00286C00(void* p);
-extern "C" void func_00278590(void* p);
+extern "C" void cSSXScriptEngine_Purge(void* p);
 extern "C" void func_0036A290(void);
 
 extern void* D_004A28A8;
@@ -293,7 +293,7 @@ extern "C" void func_0022FA98(char* self)
         e->fn(be + e->delta);
     }
     func_001A3C50(*(void**)((char*)D_004A28A8 + 0x11C));
-    func_00278A98(D_004A28A4);
+    cSSXScriptEngine_ForceEndScriptsAll(D_004A28A4);
     if (*(void**)(self + 0x48) != 0) func_00397B70(*(void**)(self + 0x48), 3);
     if (*(void**)(self + 0x7C) != 0) func_002370A0(*(void**)(self + 0x7C), 3);
     func_002EA820(*(void**)(self + 0x64));
@@ -306,7 +306,7 @@ extern "C" void func_0022FA98(char* self)
     func_00334850(*(void**)(self + 0x20));
     if (*(void**)(self + 0xA4) != 0) func_002CC048(*(void**)(self + 0xA4), 3);
     void* bm = &D_004A5988_gl;
-    func_00354C98(bm, 1);
+    cBucketMan_mergeBucket(bm, 1);
     func_00354B38(bm);
     VDelete_FA98(*(char**)(self + 0x30), 0x494, 8);
     if (*(void**)(self + 0x38) != 0) func_00229278(*(void**)(self + 0x38), 3);
@@ -323,7 +323,7 @@ extern "C" void func_0022FA98(char* self)
     if (*(void**)(self + 0x78) != 0) func_0022CD18(*(void**)(self + 0x78), 3);
     if (*(void**)(self + 0x2C) != 0) func_002DBEE0(*(void**)(self + 0x2C), 3);
     if (*(void**)(self + 0x90) != 0) func_002F5230(*(void**)(self + 0x90), 3);
-    if (*(void**)(self + 0x10) != 0) func_003A6740(*(void**)(self + 0x10), 3);
+    if (*(void**)(self + 0x10) != 0) cWorld__cWorld(*(void**)(self + 0x10), 3);
     if (*(void**)(self + 0x8C) != 0) func_00242518(*(void**)(self + 0x8C), 3);
     if (*(cBigFile**)(self + 0xA8) != 0) cBigFile__cBigFile(*(cBigFile**)(self + 0xA8), 3);
     operator_delete(*(int**)(self + 0x94));
@@ -352,7 +352,7 @@ extern "C" void func_0022FA98(char* self)
     func_002B68D0(D_004A52D4);
     func_00286A80(D_004A3500);
     func_00286C00(D_004A3500);
-    func_00278590(D_004A28A4);
+    cSSXScriptEngine_Purge(D_004A28A4);
     func_0036A290();
     D_004A2A54 = 0;
     *(int*)(D_004A5B64 + 0x34) = 0;
@@ -387,7 +387,7 @@ extern "C" void func_00195D50(void* a);
 extern "C" void func_001F30D8(void* a);
 void func_00278710(void* a);
 extern "C" void func_00369FF8(void* a);
-extern "C" void func_003A67E0(void* a);
+extern "C" void cWorld_init(void* a);
 extern "C" void func_002B68D0(void* a);
 extern "C" void func_002867E8(void* a);
 extern void* D_004A28A8;
@@ -411,7 +411,7 @@ extern "C" void func_00230050(void* self)
     D_004A4248->v17();
     D_004A4248->v04();
     func_00369FF8(D_004A289C);
-    func_003A67E0(*(void**)((char*)self + 0x10));
+    cWorld_init(*(void**)((char*)self + 0x10));
     func_002B68D0(D_004A52D4);
     func_002867E8(D_004A3500);
     D_004A4324 = 1;
@@ -421,49 +421,49 @@ extern "C" void func_00230050(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_002300F0);
+INCLUDE_ASM("main/gameload", cGame_resetWorld);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0026CA90(void* a);
-extern "C" void func_00309030(void* a);
-extern "C" void func_00354C98(void* mgr, int a);
+extern "C" void cPlaybackMan_restart(void* a);
+extern "C" void cWScriptMan_initMissions(void* a);
+extern "C" void cBucketMan_mergeBucket(void* mgr, int a);
 extern "C" void cBucketMan_purgeBucket(void* self, int index);
-extern "C" void func_00103358(void* a);
-extern "C" void func_002D9B40(void);
+extern "C" void cFocusMan_reset(void* a);
+extern "C" void cAvalanche_reset(void);
 extern "C" void cWorld_resetMap(void* world);
-extern "C" void func_00309F18(void* a);
-extern "C" void func_00308C60(void* a);
+extern "C" void cWScriptMan_runGlobalScripts(void* a);
+extern "C" void cWScriptMan_setupMissions(void* a);
 extern void* D_004A3DD8;
 // The unit declares D_004A5988 later as sGp2898 (8 bytes); bind a small-data alias here.
 extern char D_004A5988_bm __asm__("D_004A5988");
 
-extern "C" void func_002300F0(void* self)
+extern "C" void cGame_resetWorld(void* self)
 {
     void* bm = &D_004A5988_bm;
-    func_0026CA90(*(void**)((char*)self + 0x34));
-    func_00309030(*(void**)((char*)self + 0x30));
-    func_00354C98(bm, 1);
+    cPlaybackMan_restart(*(void**)((char*)self + 0x34));
+    cWScriptMan_initMissions(*(void**)((char*)self + 0x30));
+    cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 8);
-    func_00103358(*(void**)(*(char**)((char*)self + 0xC) + 0xA4));
-    func_002D9B40();
+    cFocusMan_reset(*(void**)(*(char**)((char*)self + 0xC) + 0xA4));
+    cAvalanche_reset();
     cWorld_resetMap(*(void**)((char*)self + 0x10));
-    func_00309F18(D_004A3DD8);
-    func_00308C60(*(void**)((char*)self + 0x30));
+    cWScriptMan_runGlobalScripts(D_004A3DD8);
+    cWScriptMan_setupMissions(*(void**)((char*)self + 0x30));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230180);
+INCLUDE_ASM("main/gameload", cGame_partialRestart);
 #ifdef SKIP_ASM
-extern "C" void func_0022E7C8(void* self);
-extern "C" void func_0026F228(void* self);
-extern "C" void func_002789E0(void* self);
+extern "C" void cGameViewMan_snapAll(void* self);
+extern "C" void cReplay_reset(void* self);
+extern "C" void cSSXScriptEngine_Restart(void* self);
 extern "C" void func_0015DB58(void);
 extern "C" void func_00229498(void* self);
 extern "C" void func_00343BC0(void* self);
 extern "C" void func_00357B38(void* self);
-extern "C" void* func_0039F9D8(void* list, int hash);
+extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern "C" void func_00287108(void* self);
 extern "C" void* func_0028B180(void);
 int GetHashValue32(char* s);
@@ -480,34 +480,34 @@ struct sVEntry_230180b {
     int (*fn)(void*, int, int);
 };
 
-extern "C" void func_00230180(void* self)
+extern "C" void cGame_partialRestart(void* self)
 {
     void* bm = &D_004A5988_bm;
-    func_0026CA90(*(void**)((char*)self + 0x34));
-    func_00309030(*(void**)((char*)self + 0x30));
-    func_00354C98(bm, 1);
+    cPlaybackMan_restart(*(void**)((char*)self + 0x34));
+    cWScriptMan_initMissions(*(void**)((char*)self + 0x30));
+    cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 8);
     char* o = *(char**)((char*)self + 0xC);
     sVEntry_230180a* vt = *(sVEntry_230180a**)(o + 0xCC);
     vt[5].fn(o + vt[5].delta, 3);
-    func_002D9B40();
-    func_0022E7C8(*(void**)((char*)self + 0x84));
+    cAvalanche_reset();
+    cGameViewMan_snapAll(*(void**)((char*)self + 0x84));
     cWorld_resetMap(*(void**)((char*)self + 0x10));
-    func_0026F228(*(void**)((char*)self + 0x28));
-    func_002789E0(D_004A28A4);
+    cReplay_reset(*(void**)((char*)self + 0x28));
+    cSSXScriptEngine_Restart(D_004A28A4);
     func_0015DB58();
     func_00229498(*(void**)((char*)self + 0x38));
     func_00343BC0(*(void**)((char*)self + 0x3C));
     func_00357B38(*(void**)((char*)self + 0x40));
     void* list = *(char**)((char*)self + 0x48) + 0x18;
-    char* r = (char*)func_0039F9D8(list, GetHashValue32(D_004A2AB0));
+    char* r = (char*)cUIStateStack_findState(list, GetHashValue32(D_004A2AB0));
     if (r != 0) {
         sVEntry_230180b* vt2 = *(sVEntry_230180b**)(r + 8);
         vt2[24].fn(r + vt2[24].delta, 7, 0);
     }
-    func_00309F18(D_004A3DD8);
-    func_00308C60(*(void**)((char*)self + 0x30));
+    cWScriptMan_runGlobalScripts(D_004A3DD8);
+    cWScriptMan_setupMissions(*(void**)((char*)self + 0x30));
     func_00287108(func_0028B180());
 }
 #endif
@@ -515,7 +515,7 @@ extern "C" void func_00230180(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/gameload", cGame_restart);
 #ifdef SKIP_ASM
-extern "C" void func_00230180(void* self);
+extern "C" void cGame_partialRestart(void* self);
 extern "C" void cGameModeMan_restartHeat(void* gm);
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
 extern "C" void* func_0028B180(void);
@@ -534,7 +534,7 @@ static inline char* rider_2302A8(void* game, int i)
 
 extern "C" void cGame_restart(void* self)
 {
-    func_00230180(self);
+    cGame_partialRestart(self);
     cGameModeMan_restartHeat(*(void**)((char*)D_004A28A8 + 0xC0));
     int i;
     for (i = 0; i < numRiders_2302A8(self); i++) {
@@ -561,7 +561,7 @@ extern "C" void func_00230338(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230360);
+INCLUDE_ASM("main/gameload", cGame_sectionUnloading);
 #ifdef SKIP_ASM
 extern "C" void func_00358700(int kind);
 extern "C" void func_00229408(void* self, int id);
@@ -569,19 +569,19 @@ extern "C" void func_00343C08(void* self, int arg);
 extern "C" void func_00357B90(void* self, int arg);
 extern "C" void func_003551A8(void* self, int index, int key);
 extern "C" void func_00103308(void* p, int arg);
-extern "C" void func_00308FE0(void* self, int i);
+extern "C" void cWScriptMan_unloadSection(void* self, int i);
 extern void* D_004A2A00;
 extern void* D_004A3FF0;
 extern void* D_004A4028;
 
-extern "C" void func_00230360(void* self, int id)
+extern "C" void cGame_sectionUnloading(void* self, int id)
 {
     void* bm = &D_004A5988_bm;
     func_00358700(id);
     func_00229408(D_004A2A00, id);
     func_00343C08(D_004A3FF0, id);
     func_00357B90(D_004A4028, id);
-    func_00354C98(bm, 1);
+    cBucketMan_mergeBucket(bm, 1);
     func_003551A8(bm, 1, id);
     func_003551A8(bm, 8, id);
     void* p = *(void**)((char*)self + 0xC);
@@ -592,7 +592,7 @@ extern "C" void func_00230360(void* self, int id)
             func_00103308(*(void**)(*(char**)((char*)self + 0xC) + 0xA4), 0x80);
         }
     }
-    func_00308FE0(*(void**)((char*)self + 0x30), id);
+    cWScriptMan_unloadSection(*(void**)((char*)self + 0x30), id);
 }
 #endif
 
@@ -643,7 +643,7 @@ void cReplay_stopAutoReplay(void* self);
 extern "C" void func_00258AE0(void* p);
 extern "C" void func_00266DF8(void* p);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-void* func_00232720(void* self);
+void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void* func_00232738(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern void* D_004A2EEC;
@@ -662,7 +662,7 @@ extern "C" void cGame_exit(void* self, int toFrontEnd)
         func_00266DF8(D_004A33F4);
     }
     if (toFrontEnd != 0) {
-        cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232720(cMemMan_alloc(8, D_0047B770, 0x100, 0)));
+        cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0047B770, 0x100, 0)));
     } else {
         cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232738(cMemMan_alloc(8, D_0047B788, 0x100, 0)));
     }
@@ -768,9 +768,9 @@ extern "C" void func_0020CFD0(void);
 extern "C" int func_002CC098(void* p);
 extern "C" void func_002CC0C0(void* p);
 extern "C" int* func_0030C870(void* p);
-extern "C" void func_0020AB50(int id);
+extern "C" void cOVStateManager_triggerOverlay(int id);
 extern "C" void func_0029CED8(void* p, int a, int b, float c);
-extern "C" void func_0030A868(void* p, int a, int b, int c);
+extern "C" void cWScriptMan_doMissionCmd(void* p, int a, int b, int c);
 extern "C" void func_00398038(void* p);
 extern "C" void func_0030C820(void* p);
 extern "C" void func_0029ED18(void* p);
@@ -799,7 +799,7 @@ extern "C" void func_00357BF8(void* p);
 extern "C" void func_002B7848(void* p, void* q, int i);
 void func_00237948(void* p);
 extern "C" void func_003F42A0(void);
-extern "C" void func_001A39F0(void* p);
+extern "C" void cFEAsyncManager_Update(void* p);
 extern "C" void func_001E1458(void);
 extern "C" void func_001F3188(void* p);
 
@@ -937,7 +937,7 @@ static inline int updatePause_2306B8(cGame_2306B8* self)
         cGameViewMan_updateAll(self->mGameViewMan);
         if (*(int*)(self->f78 + 0x1D0) == 0) {
             func_00230F40(self);
-            func_0022D8D8(self->f78);
+            cSectionMan_update(self->f78);
         }
         if (self->f9C == 0 && func_0022E920(self->mGameViewMan) == 0) {
             self->fA0 = 1;
@@ -957,7 +957,7 @@ static inline int updatePause_2306B8(cGame_2306B8* self)
     self->f9C = 0;
     self->fA0 = 0;
     func_003A6928(self->f10);
-    func_0022D8D8(self->f78);
+    cSectionMan_update(self->f78);
     return 1;
 }
 
@@ -969,15 +969,15 @@ static inline int updateState_2306B8(cGame_2306B8* self)
         if (*(int*)(q + 0x1C4) != *(int*)(q + 0x1C8)) {
             int* e = func_0030C870(list);
             if (e[1] == 8) {
-                func_0020AB50(0x1D);
+                cOVStateManager_triggerOverlay(0x1D);
                 pushState_2306B8(3);
                 func_0029CED8(func_0028B180(), 4, 0, 1.0f);
                 return 0;
             }
             if (e[1] == 9) {
-                func_0030A868(self->f30, e[0], 5, e[2]);
-                if (func_0039F9D8(self->f48 + 0x18, GetHashValue32(D_0047B798)) == 0) {
-                    func_0020AB50(0x1E);
+                cWScriptMan_doMissionCmd(self->f30, e[0], 5, e[2]);
+                if (cUIStateStack_findState(self->f48 + 0x18, GetHashValue32(D_0047B798)) == 0) {
+                    cOVStateManager_triggerOverlay(0x1E);
                     pushState_2306B8(3);
                     func_00398038(self->f48);
                 } else {
@@ -988,7 +988,7 @@ static inline int updateState_2306B8(cGame_2306B8* self)
         }
     }
     if (~D_004A20CC != 0) {
-        func_0020AB50(0x22);
+        cOVStateManager_triggerOverlay(0x22);
         pushState_2306B8(12);
         D_004A20CC = 0xFFFFFFFF;
         func_0029ED18(func_0028B180());
@@ -1052,7 +1052,7 @@ extern "C" void func_002306B8(cGame_2306B8* self)
             if (self->f7C == 0 || func_00237950(self->f7C) != 0) {
                 if (self->f214 == 3) {
                     func_00230F40(self);
-                    func_00354C98(&D_004A5988, 1);
+                    cBucketMan_mergeBucket(&D_004A5988, 1);
                 } else {
                     func_00230F40(self);
                 }
@@ -1099,7 +1099,7 @@ extern "C" void func_002306B8(cGame_2306B8* self)
                 func_002294C8(self->f38);
                 func_003440C8(self->f3C);
                 func_00357BF8(self->f40);
-                func_00354C98(&D_004A5988, 1);
+                cBucketMan_mergeBucket(&D_004A5988, 1);
             } else {
                 func_00354F98(&D_004A5988, 5);
                 if (!(D_004A2A50 & 4)) {
@@ -1137,7 +1137,7 @@ extern "C" void func_002306B8(cGame_2306B8* self)
         func_003F42A0();
     }
     if (*(void**)((char*)D_004A28A8 + 0x11C) != 0) {
-        func_001A39F0(*(void**)((char*)D_004A28A8 + 0x11C));
+        cFEAsyncManager_Update(*(void**)((char*)D_004A28A8 + 0x11C));
     }
     func_001E1458();
     func_001F3188(self->f94);
@@ -1155,7 +1155,7 @@ extern "C" void func_00230E90(void) {
 //100%
 INCLUDE_ASM("main/gameload", func_00230E98);
 #ifdef SKIP_ASM
-extern "C" int func_00231CF0(void* self);
+extern "C" int cFadeScreen_loseFocus(void* self);
 void func_00278718(void* self);
 void func_001F3170(void* self);
 
@@ -1196,7 +1196,7 @@ extern "C" int func_00230E98(void* self)
     if (vt[3].fn((char*)obj + vt[3].delta) == 0) {
         return 0;
     }
-    if (func_00231CF0(self) == 0) {
+    if (cFadeScreen_loseFocus(self) == 0) {
         return 0;
     }
     cMgr00230E98* mgr = (cMgr00230E98*)D_004A289C;
@@ -1476,13 +1476,13 @@ extern "C" int func_002312D8(void* self)
 //100%
 INCLUDE_ASM("main/gameload", func_00231320);
 #ifdef SKIP_ASM
-extern "C" void func_00233AA0(void* p);
+extern "C" void cGameState_gotoNextState(void* p);
 
 extern "C" void func_00231320(void* self)
 {
     void* p = *(void**)((char*)self + 0x200);
     if (p != 0) {
-        func_00233AA0(p);
+        cGameState_gotoNextState(p);
     }
 }
 #endif
@@ -1765,7 +1765,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00147290(void* iface, int i);
 extern "C" int func_00231AB8(void* self);
-int func_00320C48(void* obj, int a1);
+int cInput_getState(void* obj, int a1);
 
 static inline void** PlayerObj_1840(int p)
 {
@@ -1802,7 +1802,7 @@ extern "C" int func_00231840(char* self)
         if (!IsReady_1840(o)) {
             mask = 1 << p;
         } else if (D_004A2E9C == 0) {
-            if (func_00320C48(o, 0x3C)) {
+            if (cInput_getState(o, 0x3C)) {
                 sel = p;
             }
         }
@@ -1816,7 +1816,7 @@ extern "C" int func_00231840(char* self)
                 if (!IsReady_1840(o)) {
                     mask |= 1 << p;
                 } else if (sel < 0 && D_004A2E9C == 0) {
-                    if (func_00320C48(o, 0x3C)) {
+                    if (cInput_getState(o, 0x3C)) {
                         sel = p;
                     }
                 }
@@ -1922,13 +1922,13 @@ extern "C" void func_00231B50(void* self, int value) {
 //100%
 INCLUDE_ASM("main/gameload", func_00231C70);
 #ifdef SKIP_ASM
-extern "C" int func_00231CF0(void* self);
+extern "C" int cFadeScreen_loseFocus(void* self);
 extern char* D_004A5B64;
 
 extern "C" int func_00231C70(void* self)
 {
     if (*(float*)(D_004A5B64 + 0x38) == 100.0f) {
-        return func_00231CF0(self);
+        return cFadeScreen_loseFocus(self);
     }
     return 0;
 }
@@ -1960,9 +1960,9 @@ extern "C" void* func_00231CD0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231CF0);
+INCLUDE_ASM("main/gameload", cFadeScreen_loseFocus);
 #ifdef SKIP_ASM
-extern "C" int func_00231CF0(void* self)
+extern "C" int cFadeScreen_loseFocus(void* self)
 {
     *(int*)((char*)self + 8) = 1;
     return *(float*)((char*)self + 4) >= 0.20000000298023224f;

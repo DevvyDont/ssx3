@@ -51,7 +51,7 @@ tModifierBlock* tModifierBlock_tModifierBlock(tModifierBlock* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352AE8);
+INCLUDE_ASM("object/modifierblock", tModifierBlock__tModifierBlock);
 #ifdef SKIP_ASM
 extern "C" void func_003530D0(tModifierBlock* self);
 extern "C" void func_00353118(tModifierBlock* self);
@@ -63,7 +63,7 @@ extern "C" void func_0035B6D0(void* self);
 extern "C" void func_00345760(void* self);
 void operator_delete(int* ptr);
 
-extern "C" void func_00352AE8(tModifierBlock* self, int flags)
+extern "C" void tModifierBlock__tModifierBlock(tModifierBlock* self, int flags)
 {
     func_003530D0(self);
     func_00353118(self);
@@ -82,7 +82,7 @@ extern "C" void func_00352AE8(tModifierBlock* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352B88);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_getBoundBox);
 #ifdef SKIP_ASM
 struct sMbVEntryI {
     short delta;
@@ -90,7 +90,7 @@ struct sMbVEntryI {
     int (*fn)(void*);
 };
 
-extern "C" int func_00352B88(tModifierBlock* self)
+extern "C" int tModifierBlock_getBoundBox(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
     if (node != 0) {
@@ -207,7 +207,7 @@ extern "C" void func_00352C70(tModifierBlock* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352D20);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_postUpdate);
 #ifdef SKIP_ASM
 struct sMbVEntryV2D20 {
     short delta;
@@ -221,7 +221,7 @@ struct sMbLink2D20 {
     sMbVEntryV2D20* vt;     // 0x8
 };
 
-extern "C" void func_00352D20(tModifierBlock* self)
+extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
 {
     sMbLink2D20* h = *(sMbLink2D20**)&self->field_0x10;
     if (h != 0) {
@@ -315,9 +315,9 @@ extern "C" void func_00352E98(tModifierBlock* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352ED0);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_isComplete);
 #ifdef SKIP_ASM
-extern "C" int func_00352ED0(tModifierBlock* self)
+extern "C" int tModifierBlock_isComplete(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
     if (node != 0) {
@@ -329,7 +329,7 @@ extern "C" int func_00352ED0(tModifierBlock* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00352F08);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_clearComplete);
 #ifdef SKIP_ASM
 struct sMbVEntryV {
     short delta;
@@ -337,7 +337,7 @@ struct sMbVEntryV {
     void (*fn)(void*);
 };
 
-extern "C" void func_00352F08(tModifierBlock* self)
+extern "C" void tModifierBlock_clearComplete(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
     if (node != 0) {
@@ -400,7 +400,7 @@ extern "C" void func_00352F40(tModifierBlock* self, int id, float v)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353020);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_applyForce);
 #ifdef SKIP_ASM
 struct sMbVEntryP3020 {
     short delta;
@@ -414,7 +414,7 @@ struct sMbVEntryVII3020 {
     void (*fn)(void*, int, int);
 };
 
-extern "C" void func_00353020(tModifierBlock* self, int a1, int a2)
+extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int a1, int a2)
 {
     sBoundBoxNode* node = self->node;
     void* obj;
@@ -432,9 +432,9 @@ extern "C" void func_00353020(tModifierBlock* self, int a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353098);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_updateIntersectInfo);
 #ifdef SKIP_ASM
-extern "C" void func_00353098(tModifierBlock* self, void* arg)
+extern "C" void tModifierBlock_updateIntersectInfo(tModifierBlock* self, void* arg)
 {
     sBoundBoxNode* node = self->node;
     if (node != 0) {
@@ -677,7 +677,7 @@ extern "C" void func_00353398(void* self, void* list)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353418);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_findRail);
 #ifdef SKIP_ASM
 struct sModifierLink {
     sModifierLink* next; // 0x0
@@ -685,7 +685,7 @@ struct sModifierLink {
     int id;              // 0x30
 };
 
-extern "C" int func_00353418(void* self, int id)
+extern "C" int tModifierBlock_findRail(void* self, int id)
 {
     sModifierLink* p = *(sModifierLink**)((char*)self + 0x1c);
     while (p != 0) {
@@ -699,7 +699,7 @@ extern "C" int func_00353418(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353448);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_writeToReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void func_0035F688(void* self, void* stream);
 extern "C" void func_0035FD98(void* self, void* stream);
@@ -730,7 +730,7 @@ static inline void VCall1_353448(char* o, int voff, int slot, void* arg)
     e->fn(o + e->delta, arg);
 }
 
-extern "C" void func_00353448(char* self, char* stream)
+extern "C" void tModifierBlock_writeToReplayFrame(char* self, char* stream)
 {
     sHdr_353448 h;
     h.flags = 0;
@@ -824,7 +824,7 @@ struct sMbReplayHdr36D8 {
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cSplineModifier_cSplineModifier(void* self, sMbStream36D8* s);
-extern "C" void* func_0035A118(void* self, sMbStream36D8* s);
+extern "C" void* cMultiSplineModifier_cMultiSplineModifier1(void* self, sMbStream36D8* s);
 extern "C" void* func_00357090(void* self, sMbStream36D8* s);
 extern "C" void* func_00356F68(void* self, sMbStream36D8* s);
 extern "C" void* func_0035DF70(void* self, sMbStream36D8* s);
@@ -836,9 +836,9 @@ extern "C" void* func_00342808(void* self, sMbStream36D8* s);
 extern "C" void* func_003459A8(void* self, sMbStream36D8* s);
 extern "C" void* func_00345D80(void* self, sMbStream36D8* s);
 extern "C" void* func_003461C0(void* self, sMbStream36D8* s);
-extern "C" void* func_0035BA88(void* self, sMbStream36D8* s);
+extern "C" void* cRailModifier_cRailModifier1(void* self, sMbStream36D8* s);
 extern "C" void func_00345720(void* pool, void* item);
-extern "C" void func_0035B690(void* list, void* item);
+extern "C" void cRailLink_append(void* list, void* item);
 
 extern const char D_0048E8D0[];
 extern const char D_0048E8E0[];
@@ -869,7 +869,7 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
         if (hdr.type == 1) {
             *(void**)&self->node = cSplineModifier_cSplineModifier(cMemMan_alloc(0xF0, D_0048E8D0, 0x20000000, 0), stream);
         } else if (hdr.type == 2) {
-            *(void**)&self->node = func_0035A118(cMemMan_alloc(0x58, D_0048E8D0, 0x20000000, 0), stream);
+            *(void**)&self->node = cMultiSplineModifier_cMultiSplineModifier1(cMemMan_alloc(0x58, D_0048E8D0, 0x20000000, 0), stream);
         } else if (hdr.type == 4) {
             *(void**)&self->node = func_00357090(cMemMan_alloc(0xB0, D_0048E8E0, 0x20000000, 0), stream);
         } else if (hdr.type == 3) {
@@ -905,7 +905,7 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
         func_00345720((char*)self + 0x10, p);
     }
     for (i = 0; i < hdr.numB; i++) {
-        func_0035B690((char*)self + 0x1C, func_0035BA88(cMemMan_alloc(0x90, D_0048E9B8, 0x20000000, 0), stream));
+        cRailLink_append((char*)self + 0x1C, cRailModifier_cRailModifier1(cMemMan_alloc(0x90, D_0048E9B8, 0x20000000, 0), stream));
     }
 }
 #endif
@@ -926,20 +926,20 @@ void* func_00353AC0(void* self)
 }
 #endif
 
-extern "C" void* func_003546C8(void*);
+extern "C" void* cObjNode__cObjNode(void*);
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353AE8__FPv);
+INCLUDE_ASM("object/modifierblock", cSkyBox__cSkyBox__FPv);
 #ifdef SKIP_ASM
-void* func_00353AE8(void* self)
+void* cSkyBox__cSkyBox(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_0048F008;
-    return func_003546C8(self);
+    return cObjNode__cObjNode(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353B10);
+INCLUDE_ASM("object/modifierblock", cSkyBox_render);
 #ifdef SKIP_ASM
 // PORT: func_002D1C58 is defined returning void*, but its value is the rider index passed to func_002D1C20(int).
 extern "C" int func_002D1C58_i() __asm__("func_002D1C58");
@@ -1003,7 +1003,7 @@ static inline void SetBlendM_53B10(sRS_53B10* r, int v) { r->blendm = v; }
 static inline void SetZMode_53B10(sRS_53B10* r, int v) { r->zmode = v; }
 static inline void SetAlpha_53B10(sRS_53B10* r, int v) { r->alpha = v; }
 
-extern "C" void func_00353B10(void* self)
+extern "C" void cSkyBox_render(void* self)
 {
     if (D_004A452C != 0)
         return;
@@ -1135,12 +1135,12 @@ void* func_00353DA8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353DB8);
+INCLUDE_ASM("object/modifierblock", cSpring__cSpring);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 
-extern "C" void func_00353DB8(void* self, int flags)
+extern "C" void cSpring__cSpring(void* self, int flags)
 {
     void* p = *(void**)((char*)self + 0x24);
     if (p != 0) {

@@ -60,21 +60,21 @@ extern "C" void cFEAsyncManager_Load1PeakPic(cFEAsyncManager* self, int pic, int
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A37F8);
+INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_LoadLocationPic);
 #ifdef SKIP_ASM
 extern char D_004A1A08[];
 extern char D_004A1A10[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_00154760(void* self, int id);
+extern "C" void* cBEMissionInterface_getPictureFileName(void* self, int id);
 
-extern "C" void func_001A37F8(cFEAsyncManager* self, int id, int slot, int param)
+extern "C" void cFEAsyncManager_LoadLocationPic(cFEAsyncManager* self, int id, int slot, int param)
 {
     if (id >= 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
         sFEPeakPicFiles* files = (sFEPeakPicFiles*)self;
-        sprintf(files->mFiles[slot].mName, D_004A1A08, D_004A1A10, func_00154760(iface, id), D_004A1A00);
+        sprintf(files->mFiles[slot].mName, D_004A1A08, D_004A1A10, cBEMissionInterface_getPictureFileName(iface, id), D_004A1A00);
         files->mFiles[slot].mParam = param;
         cFEAsyncManager_SetFileStatus(self, slot, 1);
     }
@@ -161,7 +161,7 @@ void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A39F0);
+INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_Update);
 #ifdef SKIP_ASM
 struct sFE39F0File {
     char name[0x100];
@@ -200,12 +200,12 @@ int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index);
 void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status);
 extern "C" void cFEAsyncManager_LoadDataFile(cFEAsyncManager* self, int idx);
 extern "C" int ASYNCFILE_release(int handle, void** data, int* size);
-extern "C" int func_003DF980(int handle);
+extern "C" int ASYNCFILE_getstatus(int handle);
 void cMemMan_free(void* p);
 extern char* D_004A289C;
 extern char D_004A1A18[];
 
-extern "C" void func_001A39F0(cFEAsyncManager* self)
+extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
 {
     sFE39F0Files* m = (sFE39F0Files*)self;
     int i;
@@ -235,7 +235,7 @@ extern "C" void func_001A39F0(cFEAsyncManager* self)
             }
         }
         if (cFEAsyncManager_GetFileStatus(self, i) == 2) {
-            if (func_003DF980(m->files[i].handle) == 1) {
+            if (ASYNCFILE_getstatus(m->files[i].handle) == 1) {
                 cFEAsyncManager_SetFileStatus(self, i, 3);
                 ASYNCFILE_release(m->files[i].handle, 0, 0);
                 char* obj = D_004A289C;
@@ -656,7 +656,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A4330);
 int GetHashValue32(char* str);
 extern "C" void func_001A8918(void* self, int a1, int msg);
 extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
-extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -717,8 +717,8 @@ extern "C" void func_001A4330(char* self, sObj_4330* w, int msg)
         func_001A9150(self, 0, GetHashValue32(D_00461540), (int)D_004A1408, 0, 1, 0x10);
         *(int*)(*(char**)(self + 0x69C) + 0x438) = 1;
         *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
-        func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
-        func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+        cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x4B, 1, 2);
+        cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
         break;
     case 5: {
         int idx = *(int*)((char*)w + 0x18);
@@ -1160,7 +1160,7 @@ int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
-extern "C" void func_002C26D0(void* str, int a1, char* buf);
+extern "C" void sprintf1(void* str, int a1, char* buf);
 // PORT: unit declares func_001A8E40 with one arg; the real handler takes (self, id, msg)
 extern "C" void* func_001A8E40_msg(void* self, int id, void* msg) __asm__("func_001A8E40");
 extern void* D_004A28A8;
@@ -1184,7 +1184,7 @@ extern "C" void func_001A4E28(void* self, void* msg)
         int three = 3;
         char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
         sVEntry_001A4E28* vt = *(sVEntry_001A4E28**)(obj + 4);
-        func_002C26D0(buf, vt[4].fn(obj + vt[4].delta, GetHashValue32(D_00461678)), *(char**)((char*)self + 0x6D4));
+        sprintf1(buf, vt[4].fn(obj + vt[4].delta, GetHashValue32(D_00461678)), *(char**)((char*)self + 0x6D4));
         void* p = func_001A9C50(self);
         *(int*)((char*)p + 0xBC) = one;
         char* sub = (char*)p + 0xBC;
@@ -1629,7 +1629,7 @@ extern "C" void* cBXString_cBXString2(void* self, const char* str);
 struct sOwner1A5450;
 extern "C" void func_001A5450(sOwner1A5450* self);
 extern "C" void func_001DB778(void* vec, void** pos, void* const* val);
-extern "C" void func_0039B760(void* self, unsigned char a1);
+extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern void* D_004A3328;
 extern void* D_004A3028;
 extern char D_00461798[];
@@ -1736,7 +1736,7 @@ extern "C" void func_001A5898(void* vself)
         char* list = (char*)cUIScreen_getObjectByHashName(self->mScreen, GetHashValue32(D_00461590));
         int n = self->mNames.mEnd - self->mNames.mBegin;
         if (*(unsigned char*)(list + 0x96) != n) {
-            func_0039B760(list, n);
+            cUIMenu_setScrollableMenu(list, n);
         }
     }
 }
@@ -2074,7 +2074,7 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int func_002624F8(void* self, int id);
 extern "C" const char* func_002625C8(void* self, int idx);
-extern "C" void func_0039B760(void* self, unsigned char a1);
+extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern void* D_004A3328;
 extern void* D_004A3028;
 extern char D_00461590[];
@@ -2144,9 +2144,9 @@ extern "C" void func_001A6978(void* vself)
     cUIText* menu = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00461590));
     if (menu != 0) {
         if (*(unsigned char*)((char*)menu + 0x96) != Size_001A6978(self)) {
-            func_0039B760(menu, Size_001A6978(self));
+            cUIMenu_setScrollableMenu(menu, Size_001A6978(self));
             if (Size_001A6978(self) == 0) {
-                func_0039B760(menu, 1);
+                cUIMenu_setScrollableMenu(menu, 1);
             }
         }
         if (func_001A6070(self, *(unsigned char*)((char*)menu + 0x95)) != 0 && Size_001A6978(self) != 0) {
@@ -2448,13 +2448,13 @@ extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const cha
 extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* tag, int defval);
 extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
 extern "C" void func_001B25E0(const char* src, void* out);
-extern "C" void func_002C2508(void* str, int a1);
+extern "C" void strcpy1(void* str, int a1);
 extern "C" void func_002C2688(void* str, unsigned short* s);
-// PORT: func_002C26D0 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
-extern "C" void func_002C26D0_1A7390(void* str, int fmt, ...) __asm__("func_002C26D0");
+// PORT: sprintf1 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
+extern "C" void sprintf1_1A7390(void* str, int fmt, ...) __asm__("sprintf1");
 extern "C" unsigned short* func_00392680(void* f, const unsigned short* str, unsigned short* dst, int max, float sx, float width);
-extern "C" char* func_003A04F0(void* text);
-extern "C" void func_003A0E90(cUIText* text, char* str);
+extern "C" char* cUIText_getFont(void* text);
+extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
 extern "C" char* func_004162D0(char*, const char*);
 extern "C" char* strcpy(char* dst, const char* src);
@@ -2540,10 +2540,10 @@ extern "C" void func_001A7390(void* self, const char* name, int mode)
         sVEntryP_001A7390* vt = *(sVEntryP_001A7390**)((char*)t1 + 8);
         vt[20].fn((char*)t1 + vt[20].delta, size);
         sVec3_001A7390 scale = *(sVec3_001A7390*)((char*)t1 + 0x50);
-        unsigned short* rest = func_00392680(func_003A04F0(t1), wide, wrapped, 0x30, scale.x, size[0]);
-        func_003A0E90(t1, (char*)wrapped);
+        unsigned short* rest = func_00392680(cUIText_getFont(t1), wide, wrapped, 0x30, scale.x, size[0]);
+        cUIText_setUnicodeString(t1, (char*)wrapped);
         if (rest != 0) {
-            func_003A0E90(t2, (char*)rest);
+            cUIText_setUnicodeString(t2, (char*)rest);
         } else {
             cUIText_setAsciiString(t2, D_004A1390);
         }
@@ -2578,23 +2578,23 @@ extern "C" void func_001A7390(void* self, const char* name, int mode)
         unsigned short wsp[8];
         UIAsciiToUnicode_i(wsp, sp.c);
         func_001B25E0(s1, w1);
-        func_002C2508(out, str);
+        strcpy1(out, str);
         func_002C2688(out, wsp);
         func_002C2688(out, w1);
-        func_003A0E90(t2, (char*)out);
+        cUIText_setUnicodeString(t2, (char*)out);
         break;
     }
     case 8:
-        func_002C26D0_1A7390(out, Loc1A7390(D_00461910), s1);
-        func_003A0E90(t2, (char*)out);
+        sprintf1_1A7390(out, Loc1A7390(D_00461910), s1);
+        cUIText_setUnicodeString(t2, (char*)out);
         break;
     case 7:
-        func_002C26D0_1A7390(out, Loc1A7390(D_00461930), s1);
-        func_003A0E90(t2, (char*)out);
+        sprintf1_1A7390(out, Loc1A7390(D_00461930), s1);
+        cUIText_setUnicodeString(t2, (char*)out);
         break;
     case 9:
-        func_002C26D0_1A7390(out, Loc1A7390(D_00461950), s1);
-        func_003A0E90(t2, (char*)out);
+        sprintf1_1A7390(out, Loc1A7390(D_00461950), s1);
+        cUIText_setUnicodeString(t2, (char*)out);
         break;
     }
 }
@@ -2849,7 +2849,7 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00262690(void* self, int a1, void* a2);
-extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_001CE468(void* self, int v);
 extern "C" void func_001A81F0(void* self);
 extern "C" void func_001A8918(void* self, int a1, int msg);
@@ -2890,7 +2890,7 @@ extern "C" void func_001A7BB8(void* self, int a1, unsigned int msg)
     case 5:
         func_001A9090(self, 0, *(int*)((char*)self + 0x6D0), (int)D_004A1408, 0, 0, 0x3F);
         *(int*)(*(char**)((char*)self + 0x69C) + 0x43C) = 0;
-        func_001CE3C8(*(void**)((char*)self + 0x69C), 0x4B, 1, 2);
+        cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x4B, 1, 2);
         func_001CE468(*(void**)((char*)self + 0x69C), 1);
         *(int*)(*(char**)((char*)self + 0x69C) + 0x438) = 1;
         break;
@@ -3163,9 +3163,9 @@ struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 struct sList1A83D8;
 extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
-// PORT: func_002C26D0 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
-extern "C" void func_002C26D0_1A81F0(void* str, int fmt, ...) __asm__("func_002C26D0");
-extern "C" void func_003A0E90(cUIText* text, char* str);
+// PORT: sprintf1 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
+extern "C" void sprintf1_1A81F0(void* str, int fmt, ...) __asm__("sprintf1");
+extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern "C" void func_003A18C0(void* list);
 extern "C" void func_003A19F8(cUIText* text, char* str);
 extern "C" char* func_004162D0(char*, const char*);
@@ -3229,8 +3229,8 @@ extern "C" void func_001A81F0(void* self)
     if (text != 0 && Count1A81F0((sOwner1A81F0*)self) != 0) {
         sEntry1A81F0* e = ((sOwner1A81F0*)self)->mBegin[0];
         char* who = *(char**)((char*)self + 0x6D0);
-        func_002C26D0_1A81F0(buf, Loc1A81F0(D_00461A28), who, e->desc, D_004A1408);
-        func_003A0E90(text, buf);
+        sprintf1_1A81F0(buf, Loc1A81F0(D_00461A28), who, e->desc, D_004A1408);
+        cUIText_setUnicodeString(text, buf);
         ((cFEVObj_001A81F0*)text)->v09(1);
     }
     cUIText* list = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004619F8));
@@ -3528,13 +3528,13 @@ struct sVE1A87D0 {
     void (*fn)(void*);
 };
 
-extern "C" void func_0039E4C0(void* self, int a1);
+extern "C" void cUIState_onGainFocus(void* self, int a1);
 
 extern "C" void func_001A87D0(void* self, int a1)
 {
     sVE1A87D0* vt = *(sVE1A87D0**)((char*)self + 0x8);
     vt[32].fn((char*)self + vt[32].delta);
-    func_0039E4C0(self, a1);
+    cUIState_onGainFocus(self, a1);
     *(int*)((char*)self + 0x48) = 1;
 }
 #endif
@@ -3653,7 +3653,7 @@ public:
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001D9D48(void* mem, void* a1, void* owner);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00461A70[];
 
 extern "C" void func_001A8918(void* self, int a1, int msg)
@@ -3662,7 +3662,7 @@ extern "C" void func_001A8918(void* self, int a1, int msg)
         void* p = func_001D9D48(cMemMan_alloc(0x140, D_00461A70, 0x100, 0), *(void**)((char*)self + 0x10), self);
         *(int*)((char*)p + 0x50) = 1;
         ((cFEVObj_001A8918*)self)->v25(p);
-        func_0039F290(*(char**)((char*)self + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, p);
     }
 }
 #endif
@@ -4085,13 +4085,13 @@ INCLUDE_ASM("fe/feasyncfile", func_001A9090);
 #ifdef SKIP_ASM
 extern "C" void func_001A91B0(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_001CCF00(void* p, int a);
-extern "C" void func_001CB418(void* p, int a);
+extern "C" void cKeyboardPopup_setInputText(void* p, int a);
 
 extern "C" void func_001A9090(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
 {
     func_001A91B0(self, a1, a4, a5, a6);
     func_001CCF00(*(void**)((char*)self + 0x69C), a2);
-    func_001CB418(*(void**)((char*)self + 0x69C), a3);
+    cKeyboardPopup_setInputText(*(void**)((char*)self + 0x69C), a3);
 }
 #endif
 
@@ -4100,13 +4100,13 @@ INCLUDE_ASM("fe/feasyncfile", func_001A90F0);
 #ifdef SKIP_ASM
 extern "C" void cKeyboardPopup_setStatic(void* popup, int a);
 extern "C" void func_001A91B0(void* self, int a1, int a2, int a3, int a4);
-extern "C" void func_001CB418(void* p, int a);
+extern "C" void cKeyboardPopup_setInputText(void* p, int a);
 
 extern "C" void func_001A90F0(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
 {
     func_001A91B0(self, a1, a4, a5, a6);
     cKeyboardPopup_setStatic(*(void**)((char*)self + 0x69C), a2);
-    func_001CB418(*(void**)((char*)self + 0x69C), a3);
+    cKeyboardPopup_setInputText(*(void**)((char*)self + 0x69C), a3);
 }
 #endif
 
@@ -4114,14 +4114,14 @@ extern "C" void func_001A90F0(void* self, int a1, int a2, int a3, int a4, int a5
 INCLUDE_ASM("fe/feasyncfile", func_001A9150);
 #ifdef SKIP_ASM
 extern "C" void func_001A91B0(void* self, int a1, int a2, int a3, int a4);
-extern "C" void func_001CD020(void* p, int a);
-extern "C" void func_001CB418(void* p, int a);
+extern "C" void cKeyboardPopup_setStatic1(void* p, int a);
+extern "C" void cKeyboardPopup_setInputText(void* p, int a);
 
 extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
 {
     func_001A91B0(self, a1, a4, a5, a6);
-    func_001CD020(*(void**)((char*)self + 0x69C), a2);
-    func_001CB418(*(void**)((char*)self + 0x69C), a3);
+    cKeyboardPopup_setStatic1(*(void**)((char*)self + 0x69C), a2);
+    cKeyboardPopup_setInputText(*(void**)((char*)self + 0x69C), a3);
 }
 #endif
 
@@ -4130,7 +4130,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A91B0);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001CB030(void* mem, void* engine, void* owner, int a3, unsigned char a4);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void func_001CD088(void* self, int v);
 extern char D_0045D8D8[];
 
@@ -4138,7 +4138,7 @@ extern "C" void func_001A91B0(void* self, int a1, int a2, int a3, int a4)
 {
     void* p = func_001CB030(cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0), *(void**)((char*)self + 0x10), self, a2, 0xF);
     *(void**)((char*)self + 0x69C) = p;
-    func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+    cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
     *(int*)((char*)*(void**)((char*)self + 0x69C) + 0x18) = a3;
     func_001CD088(*(void**)((char*)self + 0x69C), a4);
     *(int*)((char*)self + 0x6A4) = a1;
@@ -4692,14 +4692,14 @@ INCLUDE_ASM("fe/feasyncfile", func_001A9B58);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001A3DC8(void* mem, void* engine, void* owner);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern const char D_00461D40[];
 
 extern "C" void func_001A9B58(void* self)
 {
     void* p = func_001A3DC8(cMemMan_alloc(0x6FC, D_00461D40, 0x100, 0), *(void**)((char*)self + 0x10), self);
     *(int*)((char*)p + 0x18) = 0x833;
-    func_0039F290((char*)*(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+    cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
 }
 #endif
 
@@ -4707,19 +4707,19 @@ extern "C" void func_001A9B58(void* self)
 INCLUDE_ASM("fe/feasyncfile", func_001A9BC0);
 #ifdef SKIP_ASM
 extern "C" void* func_0039FAE8(void* list);
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_001C5DD8(void* self);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void cScreenPopup_redrawPopup(void* self);
 
 extern "C" void func_001A9BC0(void* self, void* popup)
 {
     void* top = func_0039FAE8(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18);
     if (*(int*)((char*)popup + 0x2B8) == 0) {
         if (popup != top) {
-            func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, popup);
+            cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, popup);
         }
     } else {
         *(int*)((char*)popup + 0x1C) = (*(int*)((char*)popup + 0x1C) & ~0x3F00) | 0x500;
-        func_001C5DD8(*(void**)((char*)self + 0x6A0));
+        cScreenPopup_redrawPopup(*(void**)((char*)self + 0x6A0));
     }
 }
 #endif
@@ -4760,8 +4760,8 @@ extern "C" int strlen(const char* s);
 void cMemMan_free(void* p);
 // PORT: operator_new__FUi really takes (size, tag, flags, d)
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-// PORT: func_002C27C0 is a printf-style formatter; the unit declares it with four args
-extern "C" void func_002C27C0_1A9CC0(void* dst, const char* fmt, void* a, const char* b, const char* c) __asm__("func_002C27C0");
+// PORT: sprintf2 is a printf-style formatter; the unit declares it with four args
+extern "C" void sprintf2_1A9CC0(void* dst, const char* fmt, void* a, const char* b, const char* c) __asm__("sprintf2");
 extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 int cBXString_FindLastOf(cBXString* self, char ch, int len);
@@ -5034,7 +5034,7 @@ extern "C" void func_001A9CC0(void* self, void** popup, void* owner, void* data)
             }
             void* buf = operator_new_tag(len * 2, D_00462108, 0, 0);
             *(void**)(s + 0x6B8) = buf;
-            func_002C27C0_1A9CC0(buf, fmt, text, who, name);
+            sprintf2_1A9CC0(buf, fmt, text, who, name);
             *(void**)(sub + 8) = *(void**)(s + 0x6B8);
             *(int*)(sub + 4) = 1;
         }
@@ -5737,7 +5737,7 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void func_001C5860(void* self, int a1);
 extern "C" void func_001C5838(void* self, int a1, int a2, int a3);
 void func_001C57C0(void* self, int a1, int a2);
-extern "C" void func_002C26D0(void* str, int a1, char* buf);
+extern "C" void sprintf1(void* str, int a1, char* buf);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern void* D_004A3328;
 extern void* D_004A3028;
@@ -5837,26 +5837,26 @@ extern "C" void func_001AB478(void* self, void* popup, int a1, int a2, int a3)
     }
     if (func_00262360(GetSession_001AB478(), name)) {
         char* buf = (char*)self + 0x49C;
-        func_002C26D0(buf, Text_001AB478(D_004629A0), (char*)name);
+        sprintf1(buf, Text_001AB478(D_004629A0), (char*)name);
         func_001C5838(sub, n, (int)buf, 0);
         func_001C57C0(sub, n, GetHashValue32(D_004629C8));
         n++;
     } else {
         char* buf = (char*)self + 0x49C;
-        func_002C26D0(buf, Text_001AB478(D_004629E8), (char*)name);
+        sprintf1(buf, Text_001AB478(D_004629E8), (char*)name);
         func_001C5838(sub, n, (int)buf, 0);
         func_001C57C0(sub, n, GetHashValue32(D_00462A08));
         n++;
     }
     if (func_002623B0(GetSession_001AB478(), name)) {
         char* buf = (char*)self + 0x59C;
-        func_002C26D0(buf, Text_001AB478(D_00462A20), (char*)name);
+        sprintf1(buf, Text_001AB478(D_00462A20), (char*)name);
         func_001C5838(sub, n, (int)buf, 0);
         func_001C57C0(sub, n, GetHashValue32(D_00462A40));
         n++;
     } else {
         char* buf = (char*)self + 0x59C;
-        func_002C26D0(buf, Text_001AB478(D_00462A58), (char*)name);
+        sprintf1(buf, Text_001AB478(D_00462A58), (char*)name);
         func_001C5838(sub, n, (int)buf, 0);
         func_001C57C0(sub, n, GetHashValue32(D_00462A78));
         n++;
@@ -5880,8 +5880,8 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int func_00262A38(void* self, int a1);
 extern "C" void* func_001A77A0(void* mem, int a1, void* owner, int a3);
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_001CE468(void* self, int v);
 extern void* D_004A3328;
 extern void* D_004A3028;
@@ -5915,11 +5915,11 @@ extern "C" void func_001ABB30(void* p, int a1, void* a2, int a3)
     }
     if (func_00262A38(D_004A3328, a1) != 0) {
         void* obj = func_001A77A0(cMemMan_alloc(0x6FC, D_00462AA8, 0x100, 0), self->f10, self, a1);
-        func_0039F290(*(char**)(*(char**)(self->f40 + 0xD0) + 0x10) + 0x18, obj);
+        cUIStateStack_pushPopup(*(char**)(*(char**)(self->f40 + 0xD0) + 0x10) + 0x18, obj);
     } else {
         func_001A9090(self, 0, a1, (int)D_004A1408, 0, 2, 0x3F);
         *(int*)(self->f69C + 0x43C) = 0;
-        func_001CE3C8(self->f69C, 0x4B, 1, 2);
+        cKeyboardPopup_setIncludeKey(self->f69C, 0x4B, 1, 2);
         func_001CE468(self->f69C, 1);
         *(int*)(self->f69C + 0x438) = 1;
     }
@@ -5971,8 +5971,8 @@ extern "C" int func_00263128(void* self, const char* name);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001AFE08(void* self, int a1, int a2, const char* name);
 extern void* func_001ADDD0_BCD0(void* self, int a1, int a2) __asm__("func_001ADDD0");
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -6003,9 +6003,9 @@ extern "C" void func_001ABCD0(void* self, int a1, void* a2, int a3, int a4)
         } else {
             *(int*)((char*)p + 0x18) = 0x801;
         }
-        func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
     } else {
-        func_003E6448(D_005308B8, 0, 0x20);
+        MEM_fill(D_005308B8, 0, 0x20);
         char* g = (char*)D_004A3028;
         D_004A4E88_v[1] = 4;
         char s[4];
@@ -6018,7 +6018,7 @@ extern "C" void func_001ABCD0(void* self, int a1, void* a2, int a3, int a4)
         } else {
             *(int*)((char*)p + 0x18) = 0x800;
         }
-        func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
     }
 }
 #endif
@@ -6400,10 +6400,10 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void func_001A8918(void* self, int a1, int msg);
 extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
-extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
 extern void* D_004A3028;
 extern char D_00461618[];
@@ -6487,8 +6487,8 @@ extern "C" void func_001AC5C0(char* self, void* a1, unsigned int msg)
             int v = *(int*)((char*)D_004A3028 + 0x48);
             func_001A9150(self, (int)obj, GetHashValue32(D_00462CE8), v, 0, 6, 0x10);
             *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
-            func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
-            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+            cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x4B, 1, 2);
+            cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
             break;
         }
         case 1: {
@@ -6498,7 +6498,7 @@ extern "C" void func_001AC5C0(char* self, void* a1, unsigned int msg)
             }
             int v = *(int*)((char*)D_004A3028 + 0x4C);
             func_001A9150(self, (int)obj, GetHashValue32(D_00462D00), v, 1, 7, 0x10);
-            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+            cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
             break;
         }
         }
@@ -6506,7 +6506,7 @@ extern "C" void func_001AC5C0(char* self, void* a1, unsigned int msg)
     case 6: {
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)(self + 0x10), self, 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
-        func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)(self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)(self + 0x40) + 0xD0) + 0x10) + 0x18, p);
         break;
     }
     case 13:
@@ -6683,7 +6683,7 @@ extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void* func_001AD130(void* self, int a1);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern void* D_004A3028;
 extern char D_00462D10[];
 extern const char D_00462D68[];
@@ -6696,7 +6696,7 @@ extern "C" void func_001ACCD0(void* self, void* a1, int kind)
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 1,
                                 *(int*)((char*)D_004A3028 + 0x48), *(int*)((char*)D_004A3028 + 0x4C));
         *(int*)((char*)p + 0x18) = 0x82C;
-        func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
         break;
     }
     case 16:
@@ -7073,8 +7073,8 @@ extern "C" void func_001AD5E8(void* selfp, void* a1, int a2)
         if (idx >= *(int*)((char*)D_004A3028 + 0x6C)) {
             func_001A9150(self, (int)a1, GetHashValue32(D_00462E58), (int)D_004A1408, 0, -1, 0xC);
             *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
-            func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
-            func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+            cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x4B, 1, 2);
+            cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
             *(int*)(self + 0x6D0) = 0;
         } else {
             func_0025CD28(D_004A3028, idx);
@@ -7096,7 +7096,7 @@ extern "C" void func_001AD5E8(void* selfp, void* a1, int a2)
         func_0025B800(D_004A3028);
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)(self + 0x10), self, 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
-        func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)(self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)(self + 0x40) + 0xD0) + 0x10) + 0x18, p);
         break;
     }
     case 8: {
@@ -7199,7 +7199,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001AD930);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
 
 extern "C" void func_001AD930(void* self, void* a1, int a2)
@@ -7208,7 +7208,7 @@ extern "C" void func_001AD930(void* self, void* a1, int a2)
         func_001A97B8(self, a1, 0xF);
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
-        func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
     } else {
         func_001A97B8(self, a1, a2);
     }
@@ -8378,8 +8378,8 @@ struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void func_001AEC60(void* self, int a1);
-extern "C" void func_002C26D0(void* str, int a1, char* buf);
-extern "C" void func_003A0E90(cUIText* text, char* str);
+extern "C" void sprintf1(void* str, int a1, char* buf);
+extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern void* D_004A28A8;
 extern void* D_004A3028;
 extern char D_00463468[];
@@ -8409,8 +8409,8 @@ extern "C" void func_001AF568(void* self)
         char* o = *(char**)((char*)D_004A28A8 + 0x8C);
         sVE_001AF568* vt = *(sVE_001AF568**)(o + 4);
         char* obj = o + vt[4].delta;
-        func_002C26D0(buf, vt[4].fn(obj, GetHashValue32(D_00463480)), name);
-        func_003A0E90(text, buf);
+        sprintf1(buf, vt[4].fn(obj, GetHashValue32(D_00463480)), name);
+        cUIText_setUnicodeString(text, buf);
         char* o2 = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004631C8));
         sVE_001AF568b* vt2 = *(sVE_001AF568b**)(o2 + 8);
         vt2[8].fn(o2 + vt2[8].delta, 1);
@@ -8594,7 +8594,7 @@ extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: func_002C2718 is a varargs formatter (buf, fmt, ...); the unit declares a 3-arg view
 extern "C" void func_002C2718_1AFA60(char* buf, const char* fmt, ...) __asm__("func_002C2718");
-extern "C" void func_003A0E90(cUIText* text, char* str);
+extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 // PORT: SN soft-float float->double helper called by name
 extern "C" double func_00413AF8(float f);
 extern "C" void func_0025DD08(void* self, const char* str, int a2);
@@ -8655,13 +8655,13 @@ extern "C" void func_001AFA60(void* screen, char* msg)
     if (t != 0) {
         int name = Loc1AFA60(D_00463550);
         func_002C2718_1AFA60(buf, D_004A1A88, name, *(int*)(msg + 0x18));
-        func_003A0E90(t, buf);
+        cUIText_setUnicodeString(t, buf);
     }
     t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004634F8));
     if (t != 0) {
         int name = Loc1AFA60(D_00463568);
         func_002C2718_1AFA60(buf, D_004A1A88, name, *(int*)(msg + 0x20));
-        func_003A0E90(t, buf);
+        cUIText_setUnicodeString(t, buf);
     }
     t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463508));
     if (t != 0) {
@@ -8675,13 +8675,13 @@ extern "C" void func_001AFA60(void* screen, char* msg)
         }
         int name = Loc1AFA60(D_00463580);
         func_002C2718_1AFA60(buf, D_00463590, name, st->b, st->c, func_00413AF8(pct));
-        func_003A0E90(t, buf);
+        cUIText_setUnicodeString(t, buf);
     }
     t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463520));
     if (t != 0) {
         int name = Loc1AFA60(D_004635A8);
         func_002C2718_1AFA60(buf, D_004A1A88, name, st->d);
-        func_003A0E90(t, buf);
+        cUIText_setUnicodeString(t, buf);
     }
     cBXString__cBXString(&s, 2);
 }
@@ -8745,7 +8745,7 @@ extern "C" void func_0025B800(void* self);
 extern "C" char* func_00263270(void* self, int id);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" int cBENewRaceInterface_setGameMode_FE68(void* iface, int mode) __asm__("cBENewRaceInterface_setGameMode");
 extern "C" void cBENewRaceInterface_setGameEvent_FE68(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
@@ -8825,7 +8825,7 @@ extern "C" void func_001AFE68(char* self)
     if (r == 0)
         return;
     cBXString_cBXString4(D_004A3028_FE68 + 0x8C, r->name);
-    func_003E6448(&D_005308B8_FE68, 0, 0x20);
+    MEM_fill(&D_005308B8_FE68, 0, 0x20);
     D_005308B8_FE68.b6 = r->f18;
     D_005308B8_FE68.b7 = r->f24;
     D_005308B8_FE68.b8 = r->f1C;
@@ -9958,7 +9958,7 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 // PORT: func_002C2718 is a varargs formatter (buf, fmt, ...); the unit declares a 3-arg view
 extern "C" void func_002C2718_1B1808(char* buf, const char* fmt, ...) __asm__("func_002C2718");
-extern "C" void func_003A0E90(cUIText* text, char* str);
+extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern void* D_004A28A8;
 extern void* D_004A3028;
 extern char D_00463108[];
@@ -10017,7 +10017,7 @@ extern "C" void func_001B1808(void* self)
         void* mgr = D_004A3028;
         int name = Loc1B1808(D_00463550);
         func_002C2718_1B1808(buf, D_004A1A88, name, *(int*)((char*)mgr + 0xB8));
-        func_003A0E90((cUIText*)o, buf);
+        cUIText_setUnicodeString((cUIText*)o, buf);
         o->v09(1);
     }
     o = (cFEVObj_001B1808*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004639B8));
@@ -10025,7 +10025,7 @@ extern "C" void func_001B1808(void* self)
         void* mgr = D_004A3028;
         int name = Loc1B1808(D_00463550);
         func_002C2718_1B1808(buf, D_004A1A88, name, *(int*)((char*)mgr + 0xCC));
-        func_003A0E90((cUIText*)o, buf);
+        cUIText_setUnicodeString((cUIText*)o, buf);
         o->v09(1);
     }
 }
@@ -10480,8 +10480,8 @@ extern "C" int func_0025F1B0(void* self);
 extern "C" const char* func_0025DA90_s(void* self) __asm__("func_0025DA90");
 extern "C" int func_0025DA90(void* self);
 extern "C" const char* func_0025F1E0_p(void* self, int idx, int* flag) __asm__("func_0025F1E0");
-extern "C" void func_0039B760(void* self, unsigned char a1);
-extern "C" void func_003A0E90(cUIText* text, char* str);
+extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
+extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 struct sFEObj_001BCB58;
 extern "C" sFEObj_001BCB58* func_001BCB58(sFEObj_001BCB58* self, int a1);
 extern void* D_004A3028;
@@ -10531,7 +10531,7 @@ extern "C" void func_001B2378(void* vself, int a1)
     func_001B3D20(self, -1, 0);
     cUIText* menu = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463A38));
     if (*(unsigned char*)((char*)menu + 0x96) != n) {
-        func_0039B760(menu, n);
+        cUIMenu_setScrollableMenu(menu, n);
     }
     if (n < 7) {
         *(int*)(self + 0x704) = 0;
@@ -10552,7 +10552,7 @@ extern "C" void func_001B2378(void* vself, int a1)
                 if (func_0025DA90(D_004A3028) == 0) {
                     func_001A8A40(self, func_001BCB58((sFEObj_001BCB58*)cMemMan_alloc(0xB84, D_00461B30, 0, 0), *(int*)(self + 0x10)));
                 }
-                func_003A0E90(*(cUIText**)(self + 0x6E8), buf);
+                cUIText_setUnicodeString(*(cUIText**)(self + 0x6E8), buf);
             }
         } else {
             cBXString_cBXString4(&s, D_004A1390);
@@ -10573,7 +10573,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B25E0);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 void UIAsciiToUnicode(unsigned short* dst, const char* src);
-extern "C" void func_002C2508(void* str, int a1);
+extern "C" void strcpy1(void* str, int a1);
 extern "C" void func_002C2540(void* str, const char* s);
 extern "C" void func_002C2688(void* str, unsigned short* s);
 extern "C" int func_004165A8(const char* a, const char* b);
@@ -10621,13 +10621,13 @@ extern "C" void func_001B25E0(const char* src, void* out)
     }
     ext[j] = 0;
     if (func_004165A8(name, D_004A1A60) == 0) {
-        func_002C2508(out, Loc1B25E0(D_00463A78));
+        strcpy1(out, Loc1B25E0(D_00463A78));
     } else if (func_004165A8(name, D_004A1A64) == 0) {
-        func_002C2508(out, Loc1B25E0(D_00463A90));
+        strcpy1(out, Loc1B25E0(D_00463A90));
     } else if (func_004165A8(name, D_004A1A68) == 0) {
-        func_002C2508(out, Loc1B25E0(D_00463AA8));
+        strcpy1(out, Loc1B25E0(D_00463AA8));
     } else if (func_004165A8(name, D_004A1A6C) == 0) {
-        func_002C2508(out, Loc1B25E0(D_00463AC0));
+        strcpy1(out, Loc1B25E0(D_00463AC0));
     } else {
         func_002C2540(out, name);
     }
@@ -10648,9 +10648,9 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int func_0025F1B0(void* self);
 extern "C" void func_0025F288(void* self, int idx, void* info);
-// PORT: func_002C27C0 is a varargs formatter (buf, fmt, ...); the unit declares a 4-arg view later
-extern "C" int func_002C27C0_v(char* buf, const char* fmt, ...) __asm__("func_002C27C0");
-extern "C" void func_003A0E90(cUIText* text, char* str);
+// PORT: sprintf2 is a varargs formatter (buf, fmt, ...); the unit declares a 4-arg view later
+extern "C" int sprintf2_v(char* buf, const char* fmt, ...) __asm__("sprintf2");
+extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 // PORT: SN soft-float float->double helper called by name
 extern "C" double func_00413AF8(float f);
 extern void* D_004A3028;
@@ -10729,8 +10729,8 @@ extern "C" void func_001B27B0(void* vself, int idx)
     cUIText* t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463AE8));
     if (t != 0) {
         if (valid) {
-            func_002C27C0_v(buf, D_004A1B30, Loc1B25E0(D_00463AF8), info.a);
-            func_003A0E90(t, buf);
+            sprintf2_v(buf, D_004A1B30, Loc1B25E0(D_00463AF8), info.a);
+            cUIText_setUnicodeString(t, buf);
         } else {
             cUIText_setAsciiString(t, D_004A1408);
         }
@@ -10738,8 +10738,8 @@ extern "C" void func_001B27B0(void* vself, int idx)
     t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463B10));
     if (t != 0) {
         if (valid) {
-            func_002C27C0_v(buf, D_004A1B34, Loc1B25E0(D_00463568), info.c);
-            func_003A0E90(t, buf);
+            sprintf2_v(buf, D_004A1B34, Loc1B25E0(D_00463568), info.c);
+            cUIText_setUnicodeString(t, buf);
         } else {
             cUIText_setAsciiString(t, D_004A1408);
         }
@@ -10755,8 +10755,8 @@ extern "C" void func_001B27B0(void* vself, int idx)
             } else if (done != 0) {
                 pct = 100.0f;
             }
-            func_002C27C0_v(buf, D_004A1B38, Loc1B25E0(D_00463580), info.b, info.c, func_00413AF8(pct));
-            func_003A0E90(t, buf);
+            sprintf2_v(buf, D_004A1B38, Loc1B25E0(D_00463580), info.b, info.c, func_00413AF8(pct));
+            cUIText_setUnicodeString(t, buf);
         } else {
             cUIText_setAsciiString(t, D_004A1408);
         }
@@ -10764,8 +10764,8 @@ extern "C" void func_001B27B0(void* vself, int idx)
     t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463B30));
     if (t != 0) {
         if (valid) {
-            func_002C27C0_v(buf, D_004A1B3C, Loc1B25E0(D_004635A8), info.d);
-            func_003A0E90(t, buf);
+            sprintf2_v(buf, D_004A1B3C, Loc1B25E0(D_004635A8), info.d);
+            cUIText_setUnicodeString(t, buf);
         } else {
             cUIText_setAsciiString(t, D_004A1408);
         }
@@ -10773,8 +10773,8 @@ extern "C" void func_001B27B0(void* vself, int idx)
     t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463B40));
     if (t != 0) {
         if (valid) {
-            func_002C27C0_v(buf, D_004A1B40, Loc1B25E0(D_00463B58), info.a);
-            func_003A0E90(t, buf);
+            sprintf2_v(buf, D_004A1B40, Loc1B25E0(D_00463B58), info.a);
+            cUIText_setUnicodeString(t, buf);
         } else {
             cUIText_setAsciiString(t, D_004A1408);
         }
@@ -10874,7 +10874,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int func_0025F1B0(void* self);
-extern "C" void func_0039B760(void* self, unsigned char a1);
+extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern void* D_004A3028;
 extern char D_004A1408[];
 extern char D_00463108[];
@@ -10935,9 +10935,9 @@ extern "C" void func_001B2EB8(void* self, cFEVObj_001B2EB8* obj)
         obj->v07(1);
         int n = func_0025F1B0(D_004A3028);
         if (n <= 0) {
-            func_0039B760(obj, 6);
+            cUIMenu_setScrollableMenu(obj, 6);
         } else {
-            func_0039B760(obj, n);
+            cUIMenu_setScrollableMenu(obj, n);
         }
         *(void**)(s + 0x6FC) = obj;
     } else if (id == GetHashValue32(D_00463C80)) {
@@ -11306,7 +11306,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B38D0);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
-extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_001CE468(void* self, int v);
 extern char D_00463DB8[];
 extern char D_004A1408[];
@@ -11319,7 +11319,7 @@ extern "C" int func_001B38D0(void* self, void* obj)
         func_001A9150(self, 0, GetHashValue32(D_00463DB8), (int)D_004A1408, 0, 4, 0x3F);
         *(int*)((char*)*(void**)((char*)self + 0x69C) + 0x43C) = 0;
         func_001CE468(*(void**)((char*)self + 0x69C), 1);
-        func_001CE3C8(*(void**)((char*)self + 0x69C), 0x4B, 1, 2);
+        cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x4B, 1, 2);
         *(int*)((char*)*(void**)((char*)self + 0x69C) + 0x438) = 1;
         return 1;
     }
@@ -11710,13 +11710,13 @@ extern "C" void func_001B40D0(void* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B4168);
 #ifdef SKIP_ASM
-void* func_0039E4A0(void* self);
+void* cUIState_onDestroyScreen(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028FC58(void*);
 
 extern "C" void func_001B4168(void* self)
 {
-    func_0039E4A0(self);
+    cUIState_onDestroyScreen(self);
     func_0028FC58(func_0028B180());
 }
 #endif
@@ -11983,8 +11983,8 @@ extern "C" void func_001B5068(void* self, int a1);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" int* func_002591B8();
 extern "C" void func_002636A8(void* self, void* a1);
-// PORT: func_002C26D0 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
-extern "C" void func_002C26D0_1B45E8(void* str, int fmt, ...) __asm__("func_002C26D0");
+// PORT: sprintf1 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
+extern "C" void sprintf1_1B45E8(void* str, int fmt, ...) __asm__("sprintf1");
 class cFEVObj_001B3F78;
 extern cFEVObj_001B3F78* D_004A1B78;
 extern void* D_004A28A8;
@@ -12074,7 +12074,7 @@ extern "C" void func_001B45E8(void* self)
         char* buf = (char*)self + 0x71C;
         void* p = func_001A9C50(self);
         int name = Loc1B45E8(D_00463F08);
-        func_002C26D0_1B45E8(buf, Loc1B45E8(D_00463F20), D_004A1B80 + 1, name);
+        sprintf1_1B45E8(buf, Loc1B45E8(D_00463F20), D_004A1B80 + 1, name);
         *(char**)((char*)p + 0xC4) = buf;
         *(int*)((char*)p + 0xC0) = 1;
         *(int*)((char*)p + 0xBC) = 1;
@@ -12104,7 +12104,7 @@ int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void func_002C2718(char* buf, const char* fmt, int a2);
-extern "C" void func_002C26D0(void* str, int a1, char* buf);
+extern "C" void sprintf1(void* str, int a1, char* buf);
 extern void* D_004A28A8;
 extern char D_004A12C0[];
 extern char D_00463F58[];
@@ -12123,7 +12123,7 @@ extern "C" void func_001B47C0(void* self, int a1)
     char* o = *(char**)((char*)D_004A28A8 + 0x8C);
     sVE_001B47C0* vt = *(sVE_001B47C0**)(o + 4);
     char* obj = o + vt[4].delta;
-    func_002C26D0(str, vt[4].fn(obj, GetHashValue32(D_00463F58)), buf);
+    sprintf1(str, vt[4].fn(obj, GetHashValue32(D_00463F58)), buf);
     void* p = func_001A9C50(self);
     // stores
     *(int*)((char*)p + 0xBC) = 0;
@@ -12145,8 +12145,8 @@ int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
-// PORT: func_002C26D0 / func_002C2718 are varargs formatters (dst, fmt, ...); the unit declares 3-arg views
-extern "C" void func_002C26D0_1B4888(void* str, int fmt, ...) __asm__("func_002C26D0");
+// PORT: sprintf1 / func_002C2718 are varargs formatters (dst, fmt, ...); the unit declares 3-arg views
+extern "C" void sprintf1_1B4888(void* str, int fmt, ...) __asm__("sprintf1");
 extern "C" void func_002C2718_1B4888(char* buf, const char* fmt, ...) __asm__("func_002C2718");
 extern void* D_004A28A8;
 extern char D_004A12C0[];
@@ -12184,13 +12184,13 @@ extern "C" void func_001B4888(void* self, int a1, int a2, int a3)
             char* dst = (char*)self + 0x71C;
             a3 = 1;
             int name = Loc1B4888(D_00463F08);
-            func_002C26D0_1B4888(dst, Loc1B4888(D_00463F20), a3, name);
+            sprintf1_1B4888(dst, Loc1B4888(D_00463F20), a3, name);
             *(char**)((char*)p + 0xC4) = dst;
             *(int*)((char*)p + 0xC0) = a3;
         } else {
             char* dst = (char*)self + 0x71C;
             int name = Loc1B4888(D_00463F08);
-            func_002C26D0_1B4888(dst, Loc1B4888(D_00463F20), a3 + 1, name);
+            sprintf1_1B4888(dst, Loc1B4888(D_00463F20), a3 + 1, name);
             *(char**)((char*)p + 0xC4) = dst;
             *(int*)((char*)p + 0xC0) = 1;
             flag = 1;
@@ -12199,7 +12199,7 @@ extern "C" void func_001B4888(void* self, int a1, int a2, int a3)
     case 0x14: {
         func_002C2718_1B4888(buf, D_004A12C0, a3 + 1);
         char* dst = (char*)self + 0x71C;
-        func_002C26D0_1B4888(dst, Loc1B4888(D_0045DC90), buf);
+        sprintf1_1B4888(dst, Loc1B4888(D_0045DC90), buf);
         *(char**)((char*)p + 0xC4) = dst;
         *(int*)((char*)p + 0xC0) = 1;
         break;
@@ -12208,7 +12208,7 @@ extern "C" void func_001B4888(void* self, int a1, int a2, int a3)
         func_002C2718_1B4888(buf, D_004A12C0, a3 + 1);
         char* dst = (char*)self + 0x71C;
         int name = Loc1B4888(D_00463F08);
-        func_002C26D0_1B4888(dst, Loc1B4888(D_00463F70), name, buf);
+        sprintf1_1B4888(dst, Loc1B4888(D_00463F70), name, buf);
         *(char**)((char*)p + 0xC4) = dst;
         *(int*)((char*)p + 0xC0) = 1;
         break;
@@ -12521,7 +12521,7 @@ extern "C" void func_0025B800(void* self);
 extern "C" void func_00261408(void* self);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 struct sFEObj_001B6288;
 extern "C" sFEObj_001B6288* func_001B6288(sFEObj_001B6288* self, int a1, int a2);
 extern void* D_004A3328;
@@ -12574,7 +12574,7 @@ extern "C" void func_001B55B0(void* self, void* a1, unsigned int kind)
         if (*(int*)((char*)self + 0x6D8) == 0) {
             char* p = (char*)func_001B6288((sFEObj_001B6288*)cMemMan_alloc(0x700, D_00464080, 0, 0), *(int*)((char*)self + 0x10), (int)self);
             *(int*)(p + 0x18) = 0x81A;
-            func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+            cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
         }
         *(int*)((char*)self + 0x6D8) = 0;
         func_001A97B8(self, a1, 22);
@@ -12653,7 +12653,7 @@ extern "C" void* func_001B6AB8(void* mem, int a1, int a2, int a3, int a4, int a5
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -12717,11 +12717,11 @@ extern "C" void func_001B5830(void* self, void* a1, unsigned int kind)
             void* p = func_001B6AB8(cMemMan_alloc(0x6E8, D_00464098, 0, 0), *(int*)((char*)self + 0x10), (int)self,
                                     *(int*)((char*)self + 0x714), *(int*)((char*)self + 0x718), *(int*)((char*)self + 0x710));
             *(int*)((char*)p + 0x18) = 0x81B;
-            func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+            cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
         } else if (*(int*)((char*)self + 0x6D8) == 0) {
             void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 0, 0, 0);
             *(int*)((char*)p + 0x18) = 0x82C;
-            func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+            cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
         }
         *(int*)((char*)self + 0x700) = 0;
         *(int*)((char*)self + 0x6D8) = 0;
@@ -12950,7 +12950,7 @@ extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void* func_001A9C50(void* self);
 extern "C" int func_001AAF90(void* self, void* msg);
 void func_001C57C0(void* self, int a1, int a2);
-extern "C" void func_002C2508(void* dst, int src);
+extern "C" void strcpy1(void* dst, int src);
 extern "C" void func_0039F190(void* self, int a1);
 // PORT: operator_new__FUi really takes (size, tag, flags, d)
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -13012,7 +13012,7 @@ extern "C" int func_001B5E28(void* self, int id, int a2)
                             USTR_copy(*(void**)((char*)self + 0x704), u);
                         } else {
                             *(void**)((char*)self + 0x704) = operator_new_tag((USTR_length((void*)str) + 1) * 2, D_00460688, 0x100, 0);
-                            func_002C2508(*(void**)((char*)self + 0x704), str);
+                            strcpy1(*(void**)((char*)self + 0x704), str);
                         }
                         int one = 1;
                         void* p = func_001A9C50(self);
@@ -13666,8 +13666,8 @@ int GetHashValue32(char* str);
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" int func_002C24D0(void* p);
-extern "C" void func_003A0D00(void* text, void* str);
+extern "C" int strlen1(void* p);
+extern "C" void cUIText_setUnicodeStringWrap(void* text, void* str);
 extern char D_004A1BC0[];
 extern char D_004A1BC8[];
 extern char D_004642D0[];
@@ -13698,22 +13698,22 @@ static inline void PlayLabel_001B6C98(void* self, char* label)
 extern "C" int func_001B6C98(void* self, int on)
 {
     if (on) {
-        if (func_002C24D0(*(void**)((char*)self + 0x6D4)) == 0) {
+        if (strlen1(*(void**)((char*)self + 0x6D4)) == 0) {
             PlayLabel_001B6C98(self, D_004A1BC0);
             (*(cFEVObj_001B6C98**)((char*)self + 0x6DC))->v09(0);
         } else {
             PlayLabel_001B6C98(self, D_004A1BC8);
-            func_003A0D00(*(void**)((char*)self + 0x6DC), *(void**)((char*)self + 0x6D4));
+            cUIText_setUnicodeStringWrap(*(void**)((char*)self + 0x6DC), *(void**)((char*)self + 0x6D4));
         }
-        if (func_002C24D0(*(void**)((char*)self + 0x6D0)) == 0) {
+        if (strlen1(*(void**)((char*)self + 0x6D0)) == 0) {
             (*(cFEVObj_001B6C98**)((char*)self + 0x6E0))->v09(0);
         } else {
-            func_003A0D00(*(void**)((char*)self + 0x6E0), *(void**)((char*)self + 0x6D0));
+            cUIText_setUnicodeStringWrap(*(void**)((char*)self + 0x6E0), *(void**)((char*)self + 0x6D0));
         }
-        if (func_002C24D0(*(void**)((char*)self + 0x6D8)) == 0) {
+        if (strlen1(*(void**)((char*)self + 0x6D8)) == 0) {
             (*(cFEVObj_001B6C98**)((char*)self + 0x6E4))->v09(0);
         } else {
-            func_003A0D00(*(void**)((char*)self + 0x6E4), *(void**)((char*)self + 0x6D8));
+            cUIText_setUnicodeStringWrap(*(void**)((char*)self + 0x6E4), *(void**)((char*)self + 0x6D8));
         }
         PlayLabel_001B6C98(self, D_004642D0);
     }
@@ -13940,9 +13940,9 @@ void func_00265E00(void* p);
 void func_00265E10(void* p);
 void func_00265E20(void* p);
 void func_00265E30(void* p);
-extern "C" void func_002C2508(void* str, int a1);
-// PORT: func_002C26D0 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
-extern "C" void func_002C26D0_1B70D0(void* str, int fmt, ...) __asm__("func_002C26D0");
+extern "C" void strcpy1(void* str, int a1);
+// PORT: sprintf1 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
+extern "C" void sprintf1_1B70D0(void* str, int fmt, ...) __asm__("sprintf1");
 extern "C" void func_002C2718(char* buf, const char* fmt, int a2);
 extern "C" void func_0039F190(void* self, int a1);
 extern void* D_004A28A8;
@@ -14000,7 +14000,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         char* text = self->text;
         func_00265D08(D_004A33D0);
         func_00265DF0(D_004A33D0);
-        func_002C26D0_1B70D0(text, Loc1B70D0(D_00463F58), buf);
+        sprintf1_1B70D0(text, Loc1B70D0(D_00463F58), buf);
         func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
@@ -14008,7 +14008,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         char* text = self->text;
         func_00265D08(D_004A33D0);
         func_00265DF0(D_004A33D0);
-        func_002C26D0_1B70D0(text, Loc1B70D0(D_00463F58), buf);
+        sprintf1_1B70D0(text, Loc1B70D0(D_00463F58), buf);
         func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
@@ -14017,7 +14017,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         self->f6D8 = 0;
         self->fB04 = 0;
         func_00265D08(D_004A33D0);
-        func_002C26D0_1B70D0(text, Loc1B70D0(D_004642F8), str);
+        sprintf1_1B70D0(text, Loc1B70D0(D_004642F8), str);
         int h1 = GetHashValue32(D_0045DCC8);
         int h2 = GetHashValue32(D_0045FCD8);
         func_001B7650(self, 8, 1, h1, h2, 0, (int)text);
@@ -14032,7 +14032,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         }
         char* text = self->text;
         func_00265E00(D_004A33D0);
-        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464310), buf);
+        sprintf1_1B70D0(text, Loc1B70D0(D_00464310), buf);
         func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
@@ -14040,7 +14040,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         char* text = self->text;
         func_00265D08(D_004A33D0);
         func_00265DF0(D_004A33D0);
-        func_002C26D0_1B70D0(text, Loc1B70D0(D_00463F58), buf);
+        sprintf1_1B70D0(text, Loc1B70D0(D_00463F58), buf);
         func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
@@ -14049,7 +14049,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         self->fB04 = 0;
         self->f6D8 = 0;
         func_00265D08(D_004A33D0);
-        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464330), buf);
+        sprintf1_1B70D0(text, Loc1B70D0(D_00464330), buf);
         int h1 = GetHashValue32(D_0045DCC8);
         int h2 = GetHashValue32(D_0045FCD8);
         func_001B7650(self, 0xE, 1, h1, h2, 0, (int)text);
@@ -14059,7 +14059,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         self->fB04 = 1;
         char* text = self->text;
         func_00265E30(D_004A33D0);
-        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464348), buf);
+        sprintf1_1B70D0(text, Loc1B70D0(D_00464348), buf);
         func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
@@ -14074,7 +14074,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         char* text = self->text;
         func_001B7778_v(self);
         func_00265E10(D_004A33D0);
-        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464310), buf);
+        sprintf1_1B70D0(text, Loc1B70D0(D_00464310), buf);
         func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
@@ -14090,7 +14090,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         char* text = self->text;
         func_00265D08(D_004A33D0);
         func_00265DF0(D_004A33D0);
-        func_002C26D0_1B70D0(text, Loc1B70D0(D_00463F58), buf);
+        sprintf1_1B70D0(text, Loc1B70D0(D_00463F58), buf);
         func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
@@ -14099,7 +14099,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         self->fB04 = 0;
         self->f6D8 = 0;
         func_00265D08(D_004A33D0);
-        func_002C2508(text, Loc1B70D0(D_00464360));
+        strcpy1(text, Loc1B70D0(D_00464360));
         int h1 = GetHashValue32(D_0045DCC8);
         int h2 = GetHashValue32(D_0045FCD8);
         func_001B7650(self, 0x16, 1, h1, h2, 0, (int)text);
@@ -14113,7 +14113,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         }
         char* text = self->text;
         func_00265E20(D_004A33D0);
-        func_002C2508(text, Loc1B70D0(D_00464380));
+        strcpy1(text, Loc1B70D0(D_00464380));
         func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
@@ -14130,7 +14130,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         self->fB04 = 0;
         self->f6D8 = 0;
         func_00265D08(D_004A33D0);
-        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464398), buf);
+        sprintf1_1B70D0(text, Loc1B70D0(D_00464398), buf);
         int h1 = GetHashValue32(D_0045DCC8);
         int h2 = GetHashValue32(D_0045FCD8);
         func_001B7650(self, 0x1A, 1, h1, h2, 0, (int)text);
@@ -14144,7 +14144,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         }
         char* text = self->text;
         func_00265E20(D_004A33D0);
-        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464310), buf);
+        sprintf1_1B70D0(text, Loc1B70D0(D_00464310), buf);
         func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
@@ -14153,7 +14153,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         char* text = self->text;
         func_001B7778_v(self);
         func_00265E10(D_004A33D0);
-        func_002C26D0_1B70D0(text, Loc1B70D0(D_00464310), buf);
+        sprintf1_1B70D0(text, Loc1B70D0(D_00464310), buf);
         func_001B7650(self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
@@ -14599,8 +14599,8 @@ extern char D_004644D8[];
 
 extern char D_004644F0[];
 
-// func_002C26D0 is a varargs formatter (dst, fmt, ...); the plain declaration above is a 3-arg view.
-extern "C" void func_002C26D0_v(void* dst, int fmt, ...) __asm__("func_002C26D0");
+// sprintf1 is a varargs formatter (dst, fmt, ...); the plain declaration above is a 3-arg view.
+extern "C" void sprintf1_v(void* dst, int fmt, ...) __asm__("sprintf1");
 
 // func_002C2718 is a varargs formatter (buf, fmt, ...); the plain declaration above is a 3-arg view.
 extern "C" void func_002C2718_v(char* buf, const char* fmt, ...) __asm__("func_002C2718");
@@ -14646,7 +14646,7 @@ extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
     case 2:
         if (self->fB04 == 0) {
             if (func_00265CB0(D_004A33D0)) {
-                func_002C26D0_v(self->text, Loc_B7E40(D_0045DC90), buf);
+                sprintf1_v(self->text, Loc_B7E40(D_0045DC90), buf);
             } else {
                 func_001B8238_7E40((char*)self);
             }
@@ -14659,7 +14659,7 @@ extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
         cur = self->text;
         break;
     case 3:
-        func_002C26D0_v(self->text, Loc_B7E40(D_004644A8), buf, 0x11);
+        sprintf1_v(self->text, Loc_B7E40(D_004644A8), buf, 0x11);
         flag = 0;
         h1 = GetHashValue32(D_0045DCD8);
         h2 = GetHashValue32(D_0045F7E0);
@@ -14670,7 +14670,7 @@ extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
             flag = 0;
             int a = Loc_B7E40(D_004642E0);
             int b = Loc_B7E40(D_004644C0);
-            func_002C26D0_v(self->text, b, a, buf);
+            sprintf1_v(self->text, b, a, buf);
         } else {
             func_001B83C0_7E40((char*)self);
         }
@@ -14707,9 +14707,9 @@ extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
     case 0:
         if (IsMode_001B7E40(0x16)) {
             if (func_00265D68(D_004A33D0)) {
-                func_002C26D0_v(self->text, Loc_B7E40(D_004644D8), buf);
+                sprintf1_v(self->text, Loc_B7E40(D_004644D8), buf);
             } else {
-                func_002C26D0_v(self->text, Loc_B7E40(D_004644F0), buf);
+                sprintf1_v(self->text, Loc_B7E40(D_004644F0), buf);
             }
             h1 = GetHashValue32(D_0045DCD8);
             h2 = GetHashValue32(D_0045F7E0);
@@ -14718,7 +14718,7 @@ extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
         break;
     }
     if (flag && self->f6D8 != 0) {
-        func_002C26D0_v(self->text, Loc_B7E40(D_00464508), buf);
+        sprintf1_v(self->text, Loc_B7E40(D_00464508), buf);
         h1 = GetHashValue32(D_0045DCD8);
         h2 = GetHashValue32(D_0045F7E0);
         cur = self->text;
@@ -14738,9 +14738,9 @@ extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
 INCLUDE_ASM("fe/feasyncfile", func_001B8238);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// PORT: func_002C2718/func_002C26D0 are varargs formatters; the unit declares fixed-arg views
+// PORT: func_002C2718/sprintf1 are varargs formatters; the unit declares fixed-arg views
 extern "C" void func_002C2718_1B8238(char* buf, const char* fmt, ...) __asm__("func_002C2718");
-extern "C" void func_002C26D0_1B8238(void* dst, int fmt, ...) __asm__("func_002C26D0");
+extern "C" void sprintf1_1B8238(void* dst, int fmt, ...) __asm__("sprintf1");
 extern char D_004A12C0[];
 struct sVEntry_001B8238 {
     short delta;
@@ -14767,19 +14767,19 @@ extern "C" void func_001B8238(char* self)
     case 23: {
         int name = Loc_001B8238(D_004642E0);
         int str = Loc_001B8238(D_00463F20);
-        func_002C26D0_1B8238(self + 0x702, str, 1, name);
+        sprintf1_1B8238(self + 0x702, str, 1, name);
         break;
     }
     case 9:
     case 15:
     case 17: {
         int str = Loc_001B8238(D_00464588);
-        func_002C26D0_1B8238(self + 0x702, str, 1, 0x11);
+        sprintf1_1B8238(self + 0x702, str, 1, 0x11);
         break;
     }
     case 28: {
         int str = Loc_001B8238(D_004644D8);
-        func_002C26D0_1B8238(self + 0x702, str, buf);
+        sprintf1_1B8238(self + 0x702, str, buf);
         break;
     }
     }
@@ -14792,7 +14792,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B83C0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_002C2718_1B83C0(char* buf, const char* fmt, ...) __asm__("func_002C2718");
-extern "C" void func_002C26D0_1B83C0(void* dst, int fmt, ...) __asm__("func_002C26D0");
+extern "C" void sprintf1_1B83C0(void* dst, int fmt, ...) __asm__("sprintf1");
 extern char D_004A12C0[];
 extern char D_00464608[];
 extern char D_00464628[];
@@ -14816,7 +14816,7 @@ static inline int Loc_001B83C0(char* key)
 static inline void SetText_001B83C0(char* self, char* key, char* buf)
 {
     int str = Loc_001B83C0(key);
-    func_002C26D0_1B83C0(self + 0x702, str, buf);
+    sprintf1_1B83C0(self + 0x702, str, buf);
 }
 
 extern "C" void func_001B83C0(char* self)
@@ -15275,9 +15275,9 @@ extern "C" void func_001BA218(void* self);
 extern "C" void func_001BA280(void* self);
 extern "C" void* func_001BA3E0(void* self, int a1);
 extern "C" void* func_001C0418(void* self, int a1);
-extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" int func_0039A738(void* a);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00464780[];
 extern char D_00464790[];
 extern char D_00464768[];
@@ -15326,26 +15326,26 @@ extern "C" void func_001B8C38(char* self, char* w, int msg)
             if (t != 0) {
                 func_001A9150(self, (int)t, GetHashValue32(D_004647B8), *(int*)(*(char**)(self + 0x6D0) + 0x0), 0, 10, 0x10);
                 *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
-                func_001CE3C8(*(void**)(self + 0x69C), 0x4B, 1, 2);
-                func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+                cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x4B, 1, 2);
+                cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
             }
         } else if (NameHash1B8C38(w) == GetHashValue32(D_004647D0)) {
             cUIText* t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00462BA0));
             if (t != 0) {
                 func_001A9150(self, (int)t, GetHashValue32(D_00462D00), *(int*)(*(char**)(self + 0x6D0) + 0x4), 1, 11, 0x10);
-                func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+                cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
             }
         } else if (NameHash1B8C38(w) == GetHashValue32(D_004647E0)) {
             cUIText* t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004647F8));
             if (t != 0) {
                 func_001A9150(self, (int)t, GetHashValue32(D_00464810), *(int*)(*(char**)(self + 0x6D0) + 0x8), 1, 12, 0x10);
-                func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+                cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
             }
         } else if (NameHash1B8C38(w) == GetHashValue32(D_00464828)) {
             cUIText* t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00464838));
             if (t != 0) {
                 func_001A9150(self, (int)t, GetHashValue32(D_00462CD0), *(int*)(*(char**)(self + 0x6D0) + 0xC), 0, 13, 0x32);
-                func_001CE3C8(*(void**)(self + 0x69C), 0x35, 0, 2);
+                cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
             }
         } else if (NameHash1B8C38(w) == GetHashValue32(D_004647A8)) {
             if (func_001BA110(self) != 0) {
@@ -15361,7 +15361,7 @@ extern "C" void func_001B8C38(char* self, char* w, int msg)
         if (*(int*)(self + 0x6EC) != 0) {
             void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)(self + 0x10), self, 0, 0, 0);
             *(int*)((char*)p + 0x18) = 0x832;
-            func_0039F290(*(char**)(*(char**)(*(char**)(self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+            cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)(self + 0x40) + 0xD0) + 0x10) + 0x18, p);
         } else {
             func_001BA218(self);
             func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), *(int*)(self + 0x10)));
@@ -15436,7 +15436,7 @@ extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void* func_001AD130(void* self, int a1);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
 extern const char D_00462D68[];
 
@@ -15448,7 +15448,7 @@ extern "C" void func_001B91C8(void* self, void* a1, int kind)
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 1,
                                 (*(int**)((char*)self + 0x6D0))[0], (*(int**)((char*)self + 0x6D0))[1]);
         *(int*)((char*)p + 0x18) = 0x82C;
-        func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
         break;
     }
     case 16:
@@ -15768,7 +15768,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
 extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
-extern "C" char* func_003A04F0(void* text);
+extern "C" char* cUIText_getFont(void* text);
 extern "C" char* func_004162D0(char*, const char*);
 extern char D_004A1BD0[];
 
@@ -15813,7 +15813,7 @@ public:
 
 static inline void Measure1B9950(cUIText* text, const char* s, sRect1B9950* out)
 {
-    char* f = func_003A04F0(text);
+    char* f = cUIText_getFont(text);
     func_00391FB0(f, s, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
 }
 
@@ -15823,7 +15823,7 @@ extern "C" void func_001B9950(void* self, cUIText* text, char* str)
     sVec3_1B9950 scale = *(sVec3_1B9950*)((char*)text + 0x50);
     sRect1B9950 box;
     ((cFEVObj_001B9950*)text)->v20(&box);
-    char* f = func_003A04F0(text);
+    char* f = cUIText_getFont(text);
     float sx = scale.x;
     float sy = scale.y;
     *(float*)(f + 0x38) = *(float*)(f + 0x30) * sx;
@@ -16613,7 +16613,7 @@ extern "C" void func_00261408(void* self);
 extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
 extern void* D_004A3328;
 extern void* D_004A3028;
@@ -16640,7 +16640,7 @@ extern "C" void func_001BADE8(void* self, void* a1, int a2)
         func_0025B800(D_004A3028);
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
-        func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
     } else {
         func_001A97B8_v(self, a1, a2);
     }
@@ -16760,7 +16760,7 @@ extern "C" void* func_001A9C50(void* self);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025C610(void* self);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern void* D_004A3028;
 extern char D_00462D10[];
 extern char D_00462C70[];
@@ -16774,7 +16774,7 @@ extern "C" void func_001BB158(void* self, void* a1, unsigned int kind)
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 1,
                                 **(int**)((char*)self + 0x6D0), *(int*)(*(char**)((char*)self + 0x6D0) + 4));
         *(int*)((char*)p + 0x18) = 0x82C;
-        func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
         break;
     }
     case 16:
@@ -17357,13 +17357,13 @@ extern "C" void* func_001AD130(void* self, int a1);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" void func_001BC290(void* self);
 extern "C" void func_001BC300(void* self, const char* name);
-extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00260F80();
 extern "C" void func_002613C8(void* self);
 extern "C" void func_00261408(void* self);
 extern "C" int func_00261460(void* self);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern void* D_004A3028;
 extern void* D_004A3328;
 extern char D_004A1408[];
@@ -17402,13 +17402,13 @@ extern "C" void func_001BBF18(void* self, int a1, unsigned int msg)
                 // PORT: string pointer passed through an int parameter (func_001A9150's a3)
                 func_001A9150(self, 0, GetHashValue32(D_00464CC8), (int)D_004A1408, 0, -1, 0x10);
                 *(int*)((char*)*(void**)((char*)self + 0x69C) + 0x58) = 1;
-                func_001CE3C8(*(void**)((char*)self + 0x69C), 0x4B, 1, 2);
-                func_001CE3C8(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
+                cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x4B, 1, 2);
+                cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
             } else {
                 func_001A9150(self, 0, GetHashValue32(D_00464C78), (int)D_004A1408, 0, -1, 0xC);
                 *(int*)((char*)*(void**)((char*)self + 0x69C) + 0x58) = 1;
-                func_001CE3C8(*(void**)((char*)self + 0x69C), 0x4B, 1, 2);
-                func_001CE3C8(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
+                cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x4B, 1, 2);
+                cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
             }
         } else if (*(int*)((char*)self + 0x6D0) != 0) {
             sStrs_001BBF18* s = *(sStrs_001BBF18**)((char*)self + 0x6D8);
@@ -17425,7 +17425,7 @@ extern "C" void func_001BBF18(void* self, int a1, unsigned int msg)
             func_0025B800(D_004A3028);
             void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 0, 0, 0);
             *(int*)((char*)p + 0x18) = 0x832;
-            func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+            cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
         } else {
             func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), *(int*)((char*)self + 0x10)));
         }
@@ -17691,7 +17691,7 @@ extern "C" void func_00261408(void* self);
 extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
 extern void* D_004A3328;
 extern void* D_004A3028;
@@ -17718,7 +17718,7 @@ extern "C" void func_001BC728(void* self, void* a1, int a2)
         func_0025B800(D_004A3028);
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
-        func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
     } else {
         func_001A97B8_v(self, a1, a2);
     }
@@ -17736,7 +17736,7 @@ extern "C" void* func_001A9C50(void* self);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025C610(void* self);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern void* D_004A3028;
 extern char D_00462D10[];
 extern char D_00462C70[];
@@ -17750,7 +17750,7 @@ extern "C" void func_001BC818(void* self, void* a1, int kind)
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 1,
                                 **(int**)((char*)self + 0x6D8), *(int*)(*(char**)((char*)self + 0x6D8) + 4));
         *(int*)((char*)p + 0x18) = 0x82C;
-        func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
         break;
     }
     case 16:
@@ -18045,8 +18045,8 @@ int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_0039AB00(void* self, int a1);
-extern "C" void func_0039B760(void* self, unsigned char a1);
+extern "C" void cUIMenu_setInputMap(void* self, int a1);
+extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern char D_00464DB0[];
 extern char D_00464DC0[];
 extern char D_00464DD0[];
@@ -18098,9 +18098,9 @@ extern "C" void func_001BCE38(void* self, cFEVObj_001BCE38* obj)
         *(void**)(s + 0x6D4) = obj;
     } else if (id == GetHashValue32(D_00464DC0)) {
         *(void**)(s + 0x6D0) = obj;
-        func_0039AB00(obj, 1);
+        cUIMenu_setInputMap(obj, 1);
         (*(cFEVObj_001BCE38**)(s + 0x6D0))->v07(1);
-        func_0039B760(*(void**)(s + 0x6D0), 1);
+        cUIMenu_setScrollableMenu(*(void**)(s + 0x6D0), 1);
         *(int*)(*(char**)(s + 0x6D0) + 0x14) &= ~0x80;
         *(int*)(*(char**)(s + 0x6D0) + 0x14) |= 1;
     } else if (id == GetHashValue32(D_00464DD0)) {
@@ -18253,7 +18253,7 @@ extern "C" void func_001BD1B8(cState_D1B8* self, char* a1, int msg)
         if (a1 == self->backBtn) {
             void* p = func_001BE7D8_D1B8(cMemMan_alloc(0x6E8, D_00464F60, 0, 0), self->engine, self);
             *(int*)((char*)p + 0x18) = 0x823;
-            func_0039F290(*(char**)(*(char**)(self->screen + 0xD0) + 0x10) + 0x18, p);
+            cUIStateStack_pushPopup(*(char**)(*(char**)(self->screen + 0xD0) + 0x10) + 0x18, p);
         }
         for (int i = 0; i < 4; i++) {
             if (a1 == self->btns[i]) {
@@ -18524,7 +18524,7 @@ int GetHashValue32(char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
-extern "C" void func_002C26D0(void* str, int a1, char* buf);
+extern "C" void sprintf1(void* str, int a1, char* buf);
 // PORT: unit declares func_001A8E40 with one arg; the real handler takes (self, id, msg)
 extern "C" void* func_001A8E40_msg(void* self, int id, void* msg) __asm__("func_001A8E40");
 extern void* D_004A28A8;
@@ -18563,7 +18563,7 @@ extern "C" void func_001BD8C8(void* self, int a2)
             char* name = *(char**)((char*)self + 0xB80);
             char* obj = *(char**)((char*)D_004A28A8 + 0x8C);
             sVEntry_001BD8C8* vt = *(sVEntry_001BD8C8**)(obj + 4);
-            func_002C26D0(buf, vt[4].fn(obj + vt[4].delta, GetHashValue32(D_004650B8)), name);
+            sprintf1(buf, vt[4].fn(obj + vt[4].delta, GetHashValue32(D_004650B8)), name);
             void* p = func_001A9C50(self);
             *(char**)((char*)p + 0xC4) = buf;
             *(int*)((char*)p + 0xBC) = 2;
@@ -18701,7 +18701,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001BDD60);
 int GetHashValue32(char* str);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
-extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern char D_004650D0[];
 extern char D_004A1408[];
 
@@ -18711,7 +18711,7 @@ extern "C" void func_001BDD60(void* self, void* a1, int a2)
         func_001A97B8(self, a1, 0xF);
         // PORT: string pointer passed through an int parameter (func_001A9150's a3)
         func_001A9150(self, 0, GetHashValue32(D_004650D0), (int)D_004A1408, 0, 8, 0x3F);
-        func_001CE3C8(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
+        cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
     } else {
         func_001A97B8(self, a1, a2);
     }
@@ -19001,8 +19001,8 @@ extern "C" int func_0025F180(void* self, int idx);
 extern "C" void func_0025D770(void* self, int idx);
 // PORT: func_001BE510 is defined as (self) in this unit, but this caller passes a second arg.
 void func_001BE510_2(void* self, int a1) __asm__("func_001BE510");
-extern "C" void func_002C26D0(void* str, int a1, char* buf);
-extern "C" void func_003A0E90(cUIText* text, char* str);
+extern "C" void sprintf1(void* str, int a1, char* buf);
+extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern void* D_004A3028;
 extern void* D_004A28A8;
 extern char D_004651C8[];
@@ -19067,8 +19067,8 @@ extern "C" void func_001BE3A8(void* p, int id)
         char* o = *(char**)((char*)D_004A28A8 + 0x8C);
         sVE_001BE3A8* vt = *(sVE_001BE3A8**)(o + 4);
         char* obj = o + vt[4].delta;
-        func_002C26D0(buf, vt[4].fn(obj, GetHashValue32(D_004651C8)), 0);
-        func_003A0E90(self->text, buf);
+        sprintf1(buf, vt[4].fn(obj, GetHashValue32(D_004651C8)), 0);
+        cUIText_setUnicodeString(self->text, buf);
         func_001BE510_2(self, -1);
         func_0025D770(D_004A3028, -1);
     }
@@ -19096,8 +19096,8 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int func_0025F1B0(void* self);
 extern "C" const char* func_0025F1E0(void* self, int idx, int a2);
-extern "C" void func_002C26D0(void* str, int a1, char* buf);
-extern "C" void func_003A0E90(cUIText* text, char* str);
+extern "C" void sprintf1(void* str, int a1, char* buf);
+extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern void* D_004A28A8;
 extern void* D_004A3028;
 extern char D_004651C8[];
@@ -19152,8 +19152,8 @@ extern "C" void func_001BE540_2(void* self, int page)
         void* mgr = D_004A3028;
         ((sSelf1BE540*)self)->count = func_0025F1B0(mgr);
         char buf[0x50];
-        func_002C26D0(buf, Loc1BE540(D_004651C8), (char*)((sSelf1BE540*)self)->count);
-        func_003A0E90(((sSelf1BE540*)self)->text, buf);
+        sprintf1(buf, Loc1BE540(D_004651C8), (char*)((sSelf1BE540*)self)->count);
+        cUIText_setUnicodeString(((sSelf1BE540*)self)->text, buf);
         unsigned char n = ((sSelf1BE540*)self)->count;
         *(char*)(((sSelf1BE540*)self)->info + 0x96) = n;
         for (i = 0; i < 10; i++) {
@@ -19329,7 +19329,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void func_001A8918(void* self, int a1, int msg);
 extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern "C" int func_001BEC78(void* self);
-extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" int func_0039A738(void* a);
 extern const char* D_004A1A60;
 extern const char* D_004A1A64;
@@ -19370,11 +19370,11 @@ extern "C" void func_001BEA38(void* self, int a1, unsigned int msg)
         switch (*(int*)(obj + 0x18)) {
         case 1:
             func_001A9150(self, *(int*)((char*)self + 0x6D0), GetHashValue32(D_00465248), *(int*)((char*)self + 0x6DC), 0, 1, 8);
-            func_001CE3C8(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
+            cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
             break;
         case 2:
             func_001A9150(self, *(int*)((char*)self + 0x6D4), GetHashValue32(D_00465260), *(int*)((char*)self + 0x6E4), 0, 2, 8);
-            func_001CE3C8(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
+            cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0x69C), 0x35, 0, 2);
             break;
         case 3:
             if (func_001BEC78(self)) {
@@ -19590,7 +19590,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001BEF60);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
-extern "C" void func_003A0E90(cUIText* text, char* str);
+extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern "C" int strlen(const char* s);
 // PORT: func_002C2718 is a varargs formatter (buf, fmt, ...); the unit declares a 3-arg view
 extern "C" void func_002C2718_1BEF60(unsigned short* buf, const char* fmt, ...) __asm__("func_002C2718");
@@ -19666,7 +19666,7 @@ extern "C" void func_001BEF60(void* self, cFEVObj_001BEF60* t)
         o->mState = 0;
         int s = Loc_001BEF60(D_004652D0);
         func_002C2718_1BEF60(buf, D_004A1BF8, s, D_00536760);
-        func_003A0E90((cUIText*)t, (char*)buf);
+        cUIText_setUnicodeString((cUIText*)t, (char*)buf);
         t->v09(1);
         if (strlen(D_00536760) == 0) {
             t->v25(1);
@@ -19695,7 +19695,7 @@ extern "C" void func_001BEF60(void* self, cFEVObj_001BEF60* t)
         o->mState = 3;
         int s = Loc_001BEF60(D_00462F08);
         func_002C2718_1BEF60(buf, D_004A1BF8, s, D_00536760);
-        func_003A0E90((cUIText*)t, (char*)buf);
+        cUIText_setUnicodeString((cUIText*)t, (char*)buf);
         t->v09(1);
         if (strlen(D_00536760) == 0) {
             t->v25(1);
@@ -20013,8 +20013,8 @@ extern "C" void* func_001B88F0(void* self, int a1, int a2);
 extern "C" void* func_001C0418(void* self, int a1);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025B6D8(void* self, int a1);
-extern "C" void func_002C27C0(void* dst, const char* fmt, int a, int b);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void sprintf2(void* dst, const char* fmt, int a, int b);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern void* D_004A28A8;
 extern void* D_004A3028;
 extern char D_00465348[];
@@ -20063,7 +20063,7 @@ extern "C" void func_001BF758(void* self, void* a1, unsigned int kind)
         case 3: {
             void* o = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 3, 0, 0);
             *(int*)((char*)o + 0x18) = 0x82C;
-            func_0039F290(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, o);
+            cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, o);
             break;
         }
         }
@@ -20082,7 +20082,7 @@ extern "C" void func_001BF758(void* self, void* a1, unsigned int kind)
         void* p = func_001A9C50(self);
         char* sub = (char*)p + 0xBC;
         if (*(void**)((char*)self + 0x6D0) != 0) {
-            func_002C27C0(*(void**)((char*)self + 0x6D0), sep, a, b);
+            sprintf2(*(void**)((char*)self + 0x6D0), sep, a, b);
             *(void**)((char*)p + 0xC4) = *(void**)((char*)self + 0x6D0);
             *(int*)((char*)p + 0xC0) = 1;
         } else {
@@ -20288,7 +20288,7 @@ extern "C" void func_001BFE70(void* self, void* a1, unsigned int a2)
             D_004A4E88 = 1;
             void* p = func_001C0F40_FE70(cMemMan_alloc(0x734, D_004654E0, 0, 0), *(int*)(s + 0x10), self);
             *(int*)((char*)p + 0x18) = 0x82E;
-            func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)(s + 0x40) + 0xD0) + 0x10) + 0x18, p);
+            cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)(s + 0x40) + 0xD0) + 0x10) + 0x18, p);
             break;
         }
         case 2:
@@ -20421,7 +20421,7 @@ void func_00261058(void* self);
 extern "C" void func_001A97B8_v(void* self, void* a1, int a2) __asm__("func_001A97B8");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
 extern void* D_004A3328;
 extern void* D_004A3028;
@@ -20436,7 +20436,7 @@ extern "C" void func_001C0240(void* self, void* a1, int a2)
         func_0025B800(D_004A3028);
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
-        func_0039F290(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
     } else {
         func_001A97B8_v(self, a1, a2);
     }
@@ -20948,7 +20948,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001C0FC0);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern char D_004657E0[];
 extern char D_005308B8[];
 
@@ -20959,7 +20959,7 @@ extern "C" void func_001C0FC0(void* self)
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
-        func_003E6448(D_005308B8, 0, 0x20);
+        MEM_fill(D_005308B8, 0, 0x20);
     }
 }
 #endif
@@ -21862,7 +21862,7 @@ extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" char* func_0014F6A8(void* self, int i);
-extern "C" void func_003DCB20(char* dst, void* src);
+extern "C" void USTR_strcpyW(char* dst, void* src);
 extern "C" void func_001C2578(void* self, void* text, char* str);
 extern void* D_004A28A8;
 extern char D_004A1C08[];
@@ -21893,7 +21893,7 @@ extern "C" void func_001C2468(void* self, int idx)
         sVE_001C2468* vt = *(sVE_001C2468**)(o + 4);
         char* obj = o + vt[4].delta;
         void* str = vt[4].fn(obj, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(iface, idx));
-        func_003DCB20(tmp, str);
+        USTR_strcpyW(tmp, str);
         cBXString_Concat(&s, tmp);
     } else {
         cBXString_Concat(&s, msg);
@@ -21911,7 +21911,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
 extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
-extern "C" char* func_003A04F0(void* text);
+extern "C" char* cUIText_getFont(void* text);
 extern "C" char* func_004162D0(char*, const char*);
 extern char D_004A1BD0[];
 
@@ -21956,7 +21956,7 @@ public:
 
 static inline void Measure1C2578(cUIText* text, const char* s, sRect1C2578* out)
 {
-    char* f = func_003A04F0(text);
+    char* f = cUIText_getFont(text);
     func_00391FB0(f, s, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
 }
 
@@ -21967,7 +21967,7 @@ extern "C" void func_001C2578(void* self, void* vtext, char* str)
     sVec3_1C2578 scale = *(sVec3_1C2578*)((char*)text + 0x50);
     sRect1C2578 box;
     ((cFEVObj_001C2578*)text)->v20(&box);
-    char* f = func_003A04F0(text);
+    char* f = cUIText_getFont(text);
     float sx = scale.x;
     float sy = scale.y;
     *(float*)(f + 0x38) = *(float*)(f + 0x30) * sx;
@@ -22013,8 +22013,8 @@ extern "C" void* func_001A9C50(void* self);
 extern "C" void* func_001C1C50(void* self, int a1);
 extern "C" void func_001C2A18(void* self);
 void func_001C57C0(void* self, int a1, int a2);
-extern "C" void func_001CE3C8(void* self, int i, int v, int mode);
-extern "C" void func_003DCB20(char* dst, void* src);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
+extern "C" void USTR_strcpyW(char* dst, void* src);
 extern void* D_004A28A8;
 extern char D_00465BC0[];
 extern char D_00465BE0[];
@@ -22044,12 +22044,12 @@ extern "C" void func_001C2740(void* self, void* w, int msg)
                 sVE_001C2740* vt = *(sVE_001C2740**)(o + 4);
                 char* obj = o + vt[4].delta;
                 void* str = vt[4].fn(obj, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(iface, idx));
-                func_003DCB20(tmp, str);
+                USTR_strcpyW(tmp, str);
                 func_001A9150(self, 0, GetHashValue32(D_00465BC0), (int)tmp, 0, idx, 0x3F);
             } else {
                 func_001A9150(self, 0, GetHashValue32(D_00465BC0), (int)name, 0, idx, 0x3F);
             }
-            func_001CE3C8(*(void**)(s + 0x69C), 0x4B, 1, 2);
+            cKeyboardPopup_setIncludeKey(*(void**)(s + 0x69C), 0x4B, 1, 2);
         }
         break;
     }
@@ -22348,8 +22348,8 @@ INCLUDE_ASM("fe/feasyncfile", func_001C2F00);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_0039AB00(void* self, int a1);
-extern "C" void func_0039B760(void* self, unsigned char a1);
+extern "C" void cUIMenu_setInputMap(void* self, int a1);
+extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern char D_00465C78[];
 extern char D_00465C88[];
 extern char D_00465C98[];
@@ -22435,9 +22435,9 @@ extern "C" void func_001C2F00(void* self, cFEVObj_001C2F00* obj)
         *(void**)(s + 0x6D8) = obj;
         *(int*)(o + 0x90) |= 8;
     } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D50)) {
-        func_0039B760(obj, 10);
+        cUIMenu_setScrollableMenu(obj, 10);
         *(void**)(s + 0x6DC) = obj;
-        func_0039AB00(obj, 1);
+        cUIMenu_setInputMap(obj, 1);
         (*(cFEVObj_001C2F00**)(s + 0x6DC))->v07(1);
     } else {
         char buf[32];
@@ -22542,9 +22542,9 @@ extern "C" void func_001C3310(void* self_)
         char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00465D50));
         if (obj != 0) {
             if (*(unsigned char*)(obj + 0x96) != n) {
-                func_0039B760(obj, n);
+                cUIMenu_setScrollableMenu(obj, n);
                 if (n == 0) {
-                    func_0039B760(obj, 1);
+                    cUIMenu_setScrollableMenu(obj, 1);
                 }
             }
         }
@@ -23208,7 +23208,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
-extern "C" const char* func_00144C60(void* iface, int id);
+extern "C" const char* cBENewRaceInterface_getLocationName(void* iface, int id);
 extern "C" void func_001C3310(void* self);
 extern "C" void func_001C4B78(void* self, int idx);
 extern "C" void func_0039A670(void* self);
@@ -23245,7 +23245,7 @@ extern "C" void func_001C49C8(void* self)
     for (i = 0; i < 29; i++) {
         sEntry1C49C8 e = D_0046D9B8[i];
         if (e.key == key && e.mode == *(int*)((char*)self + 0x6E0)) {
-            cUIListBox_addEntryByAsciiString(box, func_00144C60(iface, e.name), e.data);
+            cUIListBox_addEntryByAsciiString(box, cBENewRaceInterface_getLocationName(iface, e.name), e.data);
             if (!found) {
                 first = e;
                 found = 1;
@@ -23298,8 +23298,8 @@ extern "C" int func_001C4B98(void* self, void* a1, int a2, int a3)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C4BD8);
 #ifdef SKIP_ASM
-// PORT: func_0039E508__FPv is called with (self, pad) here; bind the 2-arg form to that symbol.
-void func_0039E508_2(void* self, void* pad) __asm__("func_0039E508__FPv");
+// PORT: cUIState_onInputAlways__FPv is called with (self, pad) here; bind the 2-arg form to that symbol.
+void cUIState_onInputAlways_2(void* self, void* pad) __asm__("cUIState_onInputAlways__FPv");
 extern "C" void func_001C4D28(void* self);
 extern "C" void func_001C4E40(void* self);
 
@@ -23317,7 +23317,7 @@ static inline int Pad1C4BD8(char* pad, int slot)
 
 extern "C" void func_001C4BD8(void* self, char* pad)
 {
-    func_0039E508_2(self, pad);
+    cUIState_onInputAlways_2(self, pad);
     if ((Pad1C4BD8(pad, 17) || Pad1C4BD8(pad, 18) || Pad1C4BD8(pad, 20) || Pad1C4BD8(pad, 19)) &&
         *(unsigned int*)((char*)self + 0x6E4) < 3) {
         if (Pad1C4BD8(pad, 17)) {

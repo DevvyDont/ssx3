@@ -15,7 +15,7 @@ struct sUIVectorFlags {
 INCLUDE_ASM("ui/uivector", cUIVector_setUIData);
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A36D0);
+INCLUDE_ASM("ui/uivector", cUIVector_setChannelData);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sV3_36D0 { float x, y, z; };
@@ -36,10 +36,10 @@ struct cUIVector_36D0 {
     char pad84[0x4];
     sUV_36D0* uvs;      // 0x88
 };
-extern "C" void func_003A0048(void* self, unsigned short key, float v);
+extern "C" void cUIThing_setChannelData(void* self, unsigned short key, float v);
 
 // Sets a keyframed property: keys < 0x15 go to the base thing, higher keys address per-vertex position/UV/colour.
-extern "C" void func_003A36D0(cUIVector_36D0* self, unsigned short key, float v)
+extern "C" void cUIVector_setChannelData(cUIVector_36D0* self, unsigned short key, float v)
 {
     if (self->verts == 0) {
         return;
@@ -62,13 +62,13 @@ extern "C" void func_003A36D0(cUIVector_36D0* self, unsigned short key, float v)
         case 8: self->cols[idx].a = v; break;
         }
     } else {
-        func_003A0048(self, key, v);
+        cUIThing_setChannelData(self, key, v);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A3808);
+INCLUDE_ASM("ui/uivector", cUIVector_setChannelDataKCP);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sV3_3808 { float x, y, z; };
@@ -110,7 +110,7 @@ struct sKey_3808 {
 };
 
 // Applies a list of (key, value) pairs: keys < 0x15 set base properties, higher keys address per-vertex data.
-extern "C" void func_003A3808(cUIVector_3808* self, unsigned int n, sKey_3808* keys)
+extern "C" void cUIVector_setChannelDataKCP(cUIVector_3808* self, unsigned int n, sKey_3808* keys)
 {
     if (self->verts == 0) {
         return;
@@ -153,7 +153,7 @@ extern "C" void func_003A3808(cUIVector_3808* self, unsigned int n, sKey_3808* k
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A39F8);
+INCLUDE_ASM("ui/uivector", cUIVector_render2D);
 #ifdef SKIP_ASM
 // PORT: func_004139F8 is libgcc's __fixunssfsi (float -> unsigned); called by its address name.
 extern "C" unsigned int func_004139F8(float f);
@@ -215,7 +215,7 @@ static inline void AddPos_3A39F8(sV4_3A39F8& p, int k, float d)
     p.v[k] += d;
 }
 
-extern "C" void func_003A39F8(char* self, float x, float y)
+extern "C" void cUIVector_render2D(char* self, float x, float y)
 {
     if (*(sV3_3A39F8**)(self + 0x80) == 0)
         return;
@@ -267,35 +267,35 @@ extern "C" void func_003A39F8(char* self, float x, float y)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A3D28);
+INCLUDE_ASM("ui/uivector", cUIVector_update);
 #ifdef SKIP_ASM
-extern "C" void func_003975E0(void*, void*, unsigned char, unsigned short);
-extern "C" void func_003974B0(void*, unsigned char);
+extern "C" void cUIAnimation_updateThing(void*, void*, unsigned char, unsigned short);
+extern "C" void cUIAnimation_updateFrame(void*, unsigned char);
 
-extern "C" void func_003A3D28(void* self, unsigned short ev)
+extern "C" void cUIVector_update(void* self, unsigned short ev)
 {
     void* a = *(void**)((char*)self + 0xC);
     if (a != 0) {
-        func_003975E0(a, self, *(unsigned char*)((char*)self + 0x10), ev);
-        func_003974B0(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
+        cUIAnimation_updateThing(a, self, *(unsigned char*)((char*)self + 0x10), ev);
+        cUIAnimation_updateFrame(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A3D70);
+INCLUDE_ASM("ui/uivector", cUIVector_getSize);
 #ifdef SKIP_ASM
-struct func_003A3D70_sVec3 {
+struct cUIVector_getSize_sVec3 {
     float x;
     float y;
     float z;
 };
 
-extern func_003A3D70_sVec3 D_004FF0D8;
+extern cUIVector_getSize_sVec3 D_004FF0D8;
 
-extern "C" void func_003A3D70(void* self, func_003A3D70_sVec3* out)
+extern "C" void cUIVector_getSize(void* self, cUIVector_getSize_sVec3* out)
 {
-    if (*(func_003A3D70_sVec3**)((char*)self + 0x80) == 0) {
+    if (*(cUIVector_getSize_sVec3**)((char*)self + 0x80) == 0) {
         return;
     }
     *out = D_004FF0D8;
@@ -305,7 +305,7 @@ extern "C" void func_003A3D70(void* self, func_003A3D70_sVec3* out)
     float maxY = -1000.0f;
     unsigned int i;
     for (i = 0; i < *(unsigned int*)((char*)self + 0x74) >> 17; i++) {
-        func_003A3D70_sVec3* p = &(*(func_003A3D70_sVec3**)((char*)self + 0x80))[i];
+        cUIVector_getSize_sVec3* p = &(*(cUIVector_getSize_sVec3**)((char*)self + 0x80))[i];
         if (p->x < minX) {
             minX = p->x;
         }
@@ -325,32 +325,32 @@ extern "C" void func_003A3D70(void* self, func_003A3D70_sVec3* out)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A3E38);
+INCLUDE_ASM("ui/uivector", cUIVector_setSize);
 #ifdef SKIP_ASM
-struct func_003A3E38_sVec3 {
+struct cUIVector_setSize_sVec3 {
     float x;
     float y;
     float z;
 };
 
-struct func_003A3E38_sCount74 {
+struct cUIVector_setSize_sCount74 {
     unsigned int lo : 17;
     unsigned int count : 15;
 };
 
-extern "C" void func_003A3E38(void* self, func_003A3E38_sVec3* off)
+extern "C" void cUIVector_setSize(void* self, cUIVector_setSize_sVec3* off)
 {
-    if (((func_003A3E38_sCount74*)((char*)self + 0x74))->count == 4) {
+    if (((cUIVector_setSize_sCount74*)((char*)self + 0x74))->count == 4) {
         signed char i;
         for (i = 1; i < 4; i++) {
-            (*(func_003A3E38_sVec3**)((char*)self + 0x80))[i] = (*(func_003A3E38_sVec3**)((char*)self + 0x80))[0];
+            (*(cUIVector_setSize_sVec3**)((char*)self + 0x80))[i] = (*(cUIVector_setSize_sVec3**)((char*)self + 0x80))[0];
         }
-        (*(func_003A3E38_sVec3**)((char*)self + 0x80))[1].x += off->x;
-        (*(func_003A3E38_sVec3**)((char*)self + 0x80))[3].y += off->y;
-        (*(func_003A3E38_sVec3**)((char*)self + 0x80))[2].x += off->x;
-        (*(func_003A3E38_sVec3**)((char*)self + 0x80))[2].y += off->y;
+        (*(cUIVector_setSize_sVec3**)((char*)self + 0x80))[1].x += off->x;
+        (*(cUIVector_setSize_sVec3**)((char*)self + 0x80))[3].y += off->y;
+        (*(cUIVector_setSize_sVec3**)((char*)self + 0x80))[2].x += off->x;
+        (*(cUIVector_setSize_sVec3**)((char*)self + 0x80))[2].y += off->y;
     }
-    *(func_003A3E38_sVec3*)((char*)self + 0x60) = *off;
+    *(cUIVector_setSize_sVec3*)((char*)self + 0x60) = *off;
 }
 #endif
 
@@ -538,13 +538,13 @@ extern "C" void func_003A47A0(void *arg0, short arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A47A8);
+INCLUDE_ASM("ui/uivector", cListOperator__cListOperator);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern void* D_00494CE8[];
 
-extern "C" void func_003A47A8(int* self, int flags)
+extern "C" void cListOperator__cListOperator(int* self, int flags)
 {
     *(void***)self = D_00494CE8;
     if (flags & 1) {
@@ -625,16 +625,16 @@ extern "C" void func_003A4868(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4888);
+INCLUDE_ASM("ui/uivector", cList__cList);
 #ifdef SKIP_ASM
-extern "C" void* func_00397948(void*);
+extern "C" void* cList_destroyList(void*);
 extern void* D_00494C98[];
 extern void* D_00494CC0[];
 
-extern "C" void func_003A4888(void* self, int flags)
+extern "C" void cList__cList(void* self, int flags)
 {
     *(void***)((char*)self + 0x18) = D_00494C98;
-    func_00397948(self);
+    cList_destroyList(self);
     *(void***)((char*)self + 0x14) = D_00494CC0;
     func_003A4868((char*)self + 0xC);
     *(void***)((char*)self + 0x8) = D_00494CC0;
@@ -741,54 +741,54 @@ extern "C" int func_003A49D8(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A49E8);
+INCLUDE_ASM("ui/uivector", cUIThing_setActive);
 #ifdef SKIP_ASM
-extern "C" void func_003A49E8(void* self, int enable)
+extern "C" void cUIThing_setActive(void* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit1 = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4A08);
+INCLUDE_ASM("ui/uivector", cUIThing_setCached);
 #ifdef SKIP_ASM
-extern "C" void func_003A4A08(void* self, int enable)
+extern "C" void cUIThing_setCached(void* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit2 = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4A28);
+INCLUDE_ASM("ui/uivector", cUIThing_setEnabled);
 #ifdef SKIP_ASM
-extern "C" void func_003A4A28(void* self, int enable)
+extern "C" void cUIThing_setEnabled(void* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit3 = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4A48);
+INCLUDE_ASM("ui/uivector", cUIThing_setFocus);
 #ifdef SKIP_ASM
-extern "C" void func_003A4A48(void* self, int enable)
+extern "C" void cUIThing_setFocus(void* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit4 = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4A68);
+INCLUDE_ASM("ui/uivector", cUIThing_setStatic);
 #ifdef SKIP_ASM
-extern "C" void func_003A4A68(void* self, int enable)
+extern "C" void cUIThing_setStatic(void* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit5 = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4A88);
+INCLUDE_ASM("ui/uivector", cUIThing_setVisible);
 #ifdef SKIP_ASM
-extern "C" void func_003A4A88(void* self, int enable)
+extern "C" void cUIThing_setVisible(void* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit6 = enable;
 }
@@ -835,7 +835,7 @@ extern "C" void func_003A4AD8(void *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4AF8);
+INCLUDE_ASM("ui/uivector", cUIThing_setColour);
 #ifdef SKIP_ASM
 // 16 bytes, 4-byte aligned (copied with ldl/ldr pairs). Float fields are a guess.
 struct sVec4 {
@@ -845,7 +845,7 @@ struct sVec4 {
     float w;
 };
 
-extern "C" void func_003A4AF8(void* self, sVec4* in)
+extern "C" void cUIThing_setColour(void* self, sVec4* in)
 {
     *(sVec4*)((char*)self + 0x1C) = *in;
 }
@@ -924,34 +924,34 @@ extern "C" int func_003A4BD0(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4BD8__FPv);
+INCLUDE_ASM("ui/uivector", cUIThing_onInput__FPv);
 #ifdef SKIP_ASM
-int func_003A4BD8(void* self)
+int cUIThing_onInput(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4BE0__FPv);
+INCLUDE_ASM("ui/uivector", cUIThing_updateLocale__FPv);
 #ifdef SKIP_ASM
-void func_003A4BE0(void* self)
+void cUIThing_updateLocale(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4BE8__FPv);
+INCLUDE_ASM("ui/uivector", cUIThing_render2D__FPv);
 #ifdef SKIP_ASM
-void func_003A4BE8(void* self)
+void cUIThing_render2D(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4BF0__FPv);
+INCLUDE_ASM("ui/uivector", cUIThing_render3D__FPv);
 #ifdef SKIP_ASM
-void func_003A4BF0(void* self)
+void cUIThing_render3D(void* self)
 {
 }
 #endif
@@ -1015,7 +1015,7 @@ extern "C" int func_003A4C88(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4C90);
+INCLUDE_ASM("ui/uivector", cUIThing_getSize);
 #ifdef SKIP_ASM
 // 12 bytes, 4-byte aligned (copied with ldl/ldr + lw). Float fields are a guess.
 struct sVec3 {
@@ -1024,29 +1024,29 @@ struct sVec3 {
     float z;
 };
 
-extern "C" void func_003A4C90(void* self, sVec3* out)
+extern "C" void cUIThing_getSize(void* self, sVec3* out)
 {
     *out = *(sVec3*)((char*)self + 0x60);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4CB0);
+INCLUDE_ASM("ui/uivector", cUIThing_setSize);
 #ifdef SKIP_ASM
-extern "C" void func_003A4CB0(void* self, sVec3* in)
+extern "C" void cUIThing_setSize(void* self, sVec3* in)
 {
     *(sVec3*)((char*)self + 0x60) = *in;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4CD0);
+INCLUDE_ASM("ui/uivector", cListOpOnInput__cListOpOnInput);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern void* D_00494CE8[];
 
-extern "C" void func_003A4CD0(int* self, int flags)
+extern "C" void cListOpOnInput__cListOpOnInput(int* self, int flags)
 {
     *(void***)self = D_00494CE8;
     if (flags & 1) {
@@ -1056,7 +1056,7 @@ extern "C" void func_003A4CD0(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4D00);
+INCLUDE_ASM("ui/uivector", cListOpOnInput_onListNode);
 #ifdef SKIP_ASM
 struct sVEntry3A4D00 {
     short delta;
@@ -1064,7 +1064,7 @@ struct sVEntry3A4D00 {
     int (*fn)(void*, void*);
 };
 
-extern "C" void* func_003A4D00(void* self, void* obj)
+extern "C" void* cListOpOnInput_onListNode(void* self, void* obj)
 {
     sVEntry3A4D00* vt = *(sVEntry3A4D00**)((char*)obj + 8);
     if (vt[0xF].fn((char*)obj + vt[0xF].delta, *(void**)((char*)self + 4)) == 0) {
@@ -1075,13 +1075,13 @@ extern "C" void* func_003A4D00(void* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4D40);
+INCLUDE_ASM("ui/uivector", cListOpSetFocus__cListOpSetFocus);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern void* D_00494CE8[];
 
-extern "C" void func_003A4D40(int* self, int flags)
+extern "C" void cListOpSetFocus__cListOpSetFocus(int* self, int flags)
 {
     *(void***)self = D_00494CE8;
     if (flags & 1) {
@@ -1091,9 +1091,9 @@ extern "C" void func_003A4D40(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4D70);
+INCLUDE_ASM("ui/uivector", cListOpSetFocus_onListNode);
 #ifdef SKIP_ASM
-class func_003A4D70_cVirt {
+class cListOpSetFocus_onListNode_cVirt {
 public:
     char pad[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -1106,7 +1106,7 @@ public:
     virtual void v07(int);
 };
 
-extern "C" int func_003A4D70(void* self, func_003A4D70_cVirt* obj)
+extern "C" int cListOpSetFocus_onListNode(void* self, cListOpSetFocus_onListNode_cVirt* obj)
 {
     obj->v07(*(int*)((char*)self + 0x4));
     return 0;
@@ -1114,7 +1114,7 @@ extern "C" int func_003A4D70(void* self, func_003A4D70_cVirt* obj)
 #endif
 
 extern void* D_00494AA8[];
-extern "C" void* func_0039FC48(void*);
+extern "C" void* cUIThing__cUIThing(void*);
 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4DA8);
@@ -1187,19 +1187,19 @@ extern "C" void* func_003A4E38(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4E80__FPv);
+INCLUDE_ASM("ui/uivector", cUIIcon__cUIIcon__FPv);
 #ifdef SKIP_ASM
-void* func_003A4E80(void* self)
+void* cUIIcon__cUIIcon(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_00494AA8;
-    return func_0039FC48(self);
+    return cUIThing__cUIThing(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4EA8__FPv);
+INCLUDE_ASM("ui/uivector", cUIIcon_getType__FPv);
 #ifdef SKIP_ASM
-int func_003A4EA8(void* self)
+int cUIIcon_getType(void* self)
 {
     return 0x11;
 }
@@ -1354,35 +1354,35 @@ extern "C" void* func_003A5028(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5068);
+INCLUDE_ASM("ui/uivector", cUIGroup__cUIGroup);
 #ifdef SKIP_ASM
 extern void* D_004949E8[];
 extern void* D_00494C98[];
 extern void* D_00494CC0[];
 // PORT: called here for its side effect only; declared void so the scheduling matches.
-extern "C" void func_00397948_v(void* p) __asm__("func_00397948");
+extern "C" void cList_destroyList_v(void* p) __asm__("cList_destroyList");
 extern "C" void func_003A4868(void* p);
-// PORT: the unit declares func_0039FC48 with one argument; the dtor chain passes the delete flag too.
-extern "C" void func_0039FC48_2(void* self, int flag) __asm__("func_0039FC48");
+// PORT: the unit declares cUIThing__cUIThing with one argument; the dtor chain passes the delete flag too.
+extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cUIThing");
 
 // Destructor: restores the vtables, destroys the two vertex lists, then the base thing.
-extern "C" void func_003A5068(char* self, int flag)
+extern "C" void cUIGroup__cUIGroup(char* self, int flag)
 {
     *(void***)(self + 0x8) = D_004949E8;
     *(void***)(self + 0x8C) = D_00494C98;
-    func_00397948_v(self + 0x74);
+    cList_destroyList_v(self + 0x74);
     *(void***)(self + 0x88) = D_00494CC0;
     func_003A4868(self + 0x80);
     *(void***)(self + 0x7C) = D_00494CC0;
     func_003A4868(self + 0x74);
-    func_0039FC48_2(self, flag);
+    cUIThing__cUIThing_2(self, flag);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A50F8__FPv);
+INCLUDE_ASM("ui/uivector", cUIGroup_getType__FPv);
 #ifdef SKIP_ASM
-int func_003A50F8(void* self)
+int cUIGroup_getType(void* self)
 {
     return 0x10;
 }
@@ -1435,34 +1435,34 @@ extern "C" void func_003A5180(int arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A51A0);
+INCLUDE_ASM("ui/uivector", cUIGroup_traverseFlat);
 #ifdef SKIP_ASM
-class func_003A51A0_cVirt {
+class cUIGroup_traverseFlat_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
     virtual int v02(void*);
 };
 
-extern "C" int func_003A51A0(void* a, func_003A51A0_cVirt* obj)
+extern "C" int cUIGroup_traverseFlat(void* a, cUIGroup_traverseFlat_cVirt* obj)
 {
     return obj->v02(a);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A51D0);
+INCLUDE_ASM("ui/uivector", cUIGroup_traverseRecurse);
 #ifdef SKIP_ASM
-class func_003A51D0_cFunctor {
+class cUIGroup_traverseRecurse_cFunctor {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
     virtual int v02(void*);
 };
 
-extern "C" void* func_00397A68(void* list, func_003A51D0_cFunctor* fn);
+extern "C" void* func_00397A68(void* list, cUIGroup_traverseRecurse_cFunctor* fn);
 
-extern "C" void* func_003A51D0(void* self, func_003A51D0_cFunctor* fn)
+extern "C" void* cUIGroup_traverseRecurse(void* self, cUIGroup_traverseRecurse_cFunctor* fn)
 {
     if (fn->v02(self) != 0) {
         return self;
@@ -1499,35 +1499,35 @@ extern "C" void* func_003A5230(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A52A0);
+INCLUDE_ASM("ui/uivector", cUIMenu__cUIMenu);
 #ifdef SKIP_ASM
 extern void* D_004949E8[];
 extern void* D_00494C98[];
 extern void* D_00494CC0[];
 // PORT: called here for its side effect only; declared void so the scheduling matches.
-extern "C" void func_00397948_v(void* p) __asm__("func_00397948");
+extern "C" void cList_destroyList_v(void* p) __asm__("cList_destroyList");
 extern "C" void func_003A4868(void* p);
-// PORT: the unit declares func_0039FC48 with one argument; the dtor chain passes the delete flag too.
-extern "C" void func_0039FC48_2(void* self, int flag) __asm__("func_0039FC48");
+// PORT: the unit declares cUIThing__cUIThing with one argument; the dtor chain passes the delete flag too.
+extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cUIThing");
 
-// Second destructor variant; same body as func_003A5068.
-extern "C" void func_003A52A0(char* self, int flag)
+// Second destructor variant; same body as cUIGroup__cUIGroup.
+extern "C" void cUIMenu__cUIMenu(char* self, int flag)
 {
     *(void***)(self + 0x8) = D_004949E8;
     *(void***)(self + 0x8C) = D_00494C98;
-    func_00397948_v(self + 0x74);
+    cList_destroyList_v(self + 0x74);
     *(void***)(self + 0x88) = D_00494CC0;
     func_003A4868(self + 0x80);
     *(void***)(self + 0x7C) = D_00494CC0;
     func_003A4868(self + 0x74);
-    func_0039FC48_2(self, flag);
+    cUIThing__cUIThing_2(self, flag);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5330__FPv);
+INCLUDE_ASM("ui/uivector", cUIMenu_getType__FPv);
 #ifdef SKIP_ASM
-int func_003A5330(void* self)
+int cUIMenu_getType(void* self)
 {
     return 0x13;
 }
@@ -1679,26 +1679,26 @@ extern "C" void* func_003A5468(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A54B8);
+INCLUDE_ASM("ui/uivector", cUIPair__cUIPair);
 #ifdef SKIP_ASM
 extern void* D_00494868[];
-extern "C" void func_0039BE70(void* self);
-// PORT: the unit declares func_0039FC48 with one parameter; the real body is a
+extern "C" void cUIPair_destroyPair(void* self);
+// PORT: the unit declares cUIThing__cUIThing with one parameter; the real body is a
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
-extern "C" void* func_0039FC48_dtor(void* self, int flags) __asm__("func_0039FC48");
+extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
 
-extern "C" void func_003A54B8(void* self, int flags)
+extern "C" void cUIPair__cUIPair(void* self, int flags)
 {
     *(void***)((char*)self + 8) = D_00494868;
-    func_0039BE70(self);
-    func_0039FC48_dtor(self, flags);
+    cUIPair_destroyPair(self);
+    cUIThing__cUIThing_dtor(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5500__FPv);
+INCLUDE_ASM("ui/uivector", cUIPair_getType__FPv);
 #ifdef SKIP_ASM
-int func_003A5500(void* self)
+int cUIPair_getType(void* self)
 {
     return 0x15;
 }
@@ -1795,15 +1795,15 @@ INCLUDE_ASM("ui/uivector", func_003A5658);
 #ifdef SKIP_ASM
 extern void* D_00494798[];
 extern "C" void func_0039A670(void* self);
-// PORT: the unit declares func_0039FC48 with one parameter; the real body is a
+// PORT: the unit declares cUIThing__cUIThing with one parameter; the real body is a
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
-extern "C" void* func_0039FC48_dtor(void* self, int flags) __asm__("func_0039FC48");
+extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
 
 extern "C" void func_003A5658(void* self, int flags)
 {
     *(void***)((char*)self + 8) = D_00494798;
     func_0039A670(self);
-    func_0039FC48_dtor(self, flags);
+    cUIThing__cUIThing_dtor(self, flags);
 }
 #endif
 
@@ -2163,9 +2163,9 @@ void func_003A5AA8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5AB0__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_onGainTransition__FPv);
 #ifdef SKIP_ASM
-int func_003A5AB0(void* self)
+int cUIState_onGainTransition(void* self)
 {
     return 0;
 }
@@ -2251,25 +2251,25 @@ extern "C" signed char func_003A5B00(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5B08__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_onPopupEvent__FPv);
 #ifdef SKIP_ASM
-void func_003A5B08(void* self)
+void cUIState_onPopupEvent(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5B10__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
-void func_003A5B10(void* self)
+void cUIState_onWidgetCreate(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5B18__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_onWidgetEvent__FPv);
 #ifdef SKIP_ASM
-void func_003A5B18(void* self)
+void cUIState_onWidgetEvent(void* self)
 {
 }
 #endif
@@ -2302,18 +2302,18 @@ int func_003A5B30(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5B38__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_getData__FPv);
 #ifdef SKIP_ASM
-int func_003A5B38(void* self)
+int cUIState_getData(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5B40__FPv);
+INCLUDE_ASM("ui/uivector", cUIState_handleEvent__FPv);
 #ifdef SKIP_ASM
-int func_003A5B40(void* self)
+int cUIState_handleEvent(void* self)
 {
     return 0;
 }
@@ -2476,19 +2476,19 @@ extern "C" void* func_003A5D60(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5DA8);
+INCLUDE_ASM("ui/uivector", cUIText__cUIText);
 #ifdef SKIP_ASM
 extern void* D_00494588[];
 extern "C" void cUIText_deleteText(void* self);
-// PORT: the unit declares func_0039FC48 with one parameter; the real body is a
+// PORT: the unit declares cUIThing__cUIThing with one parameter; the real body is a
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
-extern "C" void* func_0039FC48_dtor(void* self, int flags) __asm__("func_0039FC48");
+extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
 
-extern "C" void func_003A5DA8(void* self, int flags)
+extern "C" void cUIText__cUIText(void* self, int flags)
 {
     *(void***)((char*)self + 8) = D_00494588;
     cUIText_deleteText(self);
-    func_0039FC48_dtor(self, flags);
+    cUIThing__cUIThing_dtor(self, flags);
 }
 #endif
 
@@ -2773,9 +2773,9 @@ extern "C" void* func_003A6120(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A6168__FPv);
+INCLUDE_ASM("ui/uivector", cUIProgress_getType__FPv);
 #ifdef SKIP_ASM
-int func_003A6168(void* self)
+int cUIProgress_getType(void* self)
 {
     return 0x19;
 }
@@ -2913,23 +2913,23 @@ extern void* D_00494C98[];
 extern void* D_00494CC0[];
 extern "C" void func_003A4868(void* self);
 extern "C" void func_003A18C0(void* self);
-// PORT: the unit declares func_00397948 as returning void*; its body (util/list) is void.
-extern "C" void func_00397948_v(void* self) __asm__("func_00397948");
-// PORT: the unit declares func_0039FC48 with one parameter; the real body is a
+// PORT: the unit declares cList_destroyList as returning void*; its body (util/list) is void.
+extern "C" void cList_destroyList_v(void* self) __asm__("cList_destroyList");
+// PORT: the unit declares cUIThing__cUIThing with one parameter; the real body is a
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
-extern "C" void* func_0039FC48_dtor(void* self, int flags) __asm__("func_0039FC48");
+extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
 
 extern "C" void func_003A62A0(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_00494278;
     func_003A18C0(self);
     *(void***)((char*)self + 0xA4) = D_00494C98;
-    func_00397948_v((char*)self + 0x8C);
+    cList_destroyList_v((char*)self + 0x8C);
     *(void***)((char*)self + 0xA0) = D_00494CC0;
     func_003A4868((char*)self + 0x98);
     *(void***)((char*)self + 0x94) = D_00494CC0;
     func_003A4868((char*)self + 0x8C);
-    func_0039FC48_dtor(self, flags);
+    cUIThing__cUIThing_dtor(self, flags);
 }
 #endif
 
@@ -3116,9 +3116,9 @@ extern "C" void* func_003A64F8(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A6540__FPv);
+INCLUDE_ASM("ui/uivector", cUIVector_getType__FPv);
 #ifdef SKIP_ASM
-int func_003A6540(void* self)
+int cUIVector_getType(void* self)
 {
     return 0x18;
 }

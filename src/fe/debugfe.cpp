@@ -120,13 +120,13 @@ INCLUDE_ASM("fe/debugfe", func_0017D200);
 #ifdef SKIP_ASM
 extern void* D_0046D740[];
 extern char D_0045D060[];
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 extern "C" void* func_002CCDF0(void* self, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 
 extern "C" void* func_0017D200(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D740;
     func_002CCDF0((char*)self + 0x130, D_0045D060);
     cMenu_addItem(self, (char*)self + 0x130, -1);
@@ -224,7 +224,7 @@ INCLUDE_ASM("fe/debugfe", func_0017D3B0);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void func_002CA280(void* self, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 extern "C" void func_001DD0C8(void* self, int flags);
 extern "C" void func_001DCEA0(void* self, int flags);
 extern "C" void func_002CC048(void* self, int flags);
@@ -252,7 +252,7 @@ struct sVE_17D3B0 {
 static inline void dtorA_17D3B0(char* sub)
 {
     func_002CA280(sub + 0x134, 2);
-    func_002CAA80(sub, 2);
+    cMenu__cMenu(sub, 2);
 }
 
 static inline void dtorB_17D3B0(char* sub)
@@ -263,7 +263,7 @@ static inline void dtorB_17D3B0(char* sub)
     func_002CA280(sub + 0x170, 2);
     func_002CA280(sub + 0x154, 2);
     func_002CA280(sub + 0x138, 2);
-    func_002CAA80(sub, 2);
+    cMenu__cMenu(sub, 2);
 }
 
 static inline void dtorC_17D3B0(char* sub)
@@ -272,7 +272,7 @@ static inline void dtorC_17D3B0(char* sub)
     func_002CA280(sub + 0x168, 2);
     func_002CA280(sub + 0x150, 2);
     func_002CA280(sub + 0x134, 2);
-    func_002CAA80(sub, 2);
+    cMenu__cMenu(sub, 2);
 }
 
 static inline void dtorD_17D3B0(char* sub)
@@ -281,7 +281,7 @@ static inline void dtorD_17D3B0(char* sub)
     DTOR_ARR_17D3B0(sub + 0x16C, 24)
     func_002CA280(sub + 0x154, 2);
     func_002CA280(sub + 0x138, 2);
-    func_002CAA80(sub, 2);
+    cMenu__cMenu(sub, 2);
 }
 
 static inline void dtorE_17D3B0(char* sub)
@@ -289,13 +289,13 @@ static inline void dtorE_17D3B0(char* sub)
     DTOR_ARR_17D3B0(sub + 0x168, 12)
     func_002CA280(sub + 0x150, 2);
     func_002CA280(sub + 0x134, 2);
-    func_002CAA80(sub, 2);
+    cMenu__cMenu(sub, 2);
 }
 
 static inline void dtorF_17D3B0(char* sub)
 {
     func_002CA280(sub + 0x130, 2);
-    func_002CAA80(sub, 2);
+    cMenu__cMenu(sub, 2);
 }
 
 extern "C" void func_0017D3B0(char* self, int flags)
@@ -593,7 +593,7 @@ extern "C" void func_0025D800(void* a, int b, int c);
 extern "C" int func_00255D50(void* comm, int ch);
 extern "C" void cGameComm_construct(int ch, int host);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-void* func_00232720(void* mem);
+void* cPreGameLoadScreen_cPreGameLoadScreen(void* mem);
 void cAppMan_setNextModule(cAppMan* app, unsigned int module);
 extern "C" void func_00256038(void* comm, int* info);
 extern "C" void func_00266D58(void* p, int ip);
@@ -733,7 +733,7 @@ extern "C" void func_0017DB18(void* vself)
             if (func_00255D50(D_004A2EB8, self->channel) != 0) {
                 int info[4];
                 cGameComm_construct(self->channel, *(int*)((char*)D_004A3028 + 0xB4));
-                cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232720(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
+                cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
                 func_00256038(D_004A2EB8, info);
                 func_00266D58(D_004A33F4, info[0]);
                 func_00266E30(D_004A33F4);
@@ -1530,7 +1530,7 @@ extern "C" void func_0017F500(void* p_, int tex)
 INCLUDE_ASM("fe/debugfe", func_0017F7B8);
 #ifdef SKIP_ASM
 extern "C" void func_00231CD0(void* self);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern char D_0046D900[];
 
 struct sDbgEntry17F7B8 {
@@ -1561,7 +1561,7 @@ extern "C" void* func_0017F7B8(void* self)
     sDbgList17F7B8* l = (sDbgList17F7B8*)((char*)self + 0x24);
     new (l->e) sDbgEntry17F7B8[64];
     l->n = 0;
-    func_003E6448(l->e, 0, 0x200);
+    MEM_fill(l->e, 0, 0x200);
     return self;
 }
 #endif
@@ -1582,7 +1582,7 @@ extern "C" void func_0017F838(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017F868);
+INCLUDE_ASM("fe/debugfe", cDebugFE_load);
 #ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern char* D_004A289C;
@@ -1597,10 +1597,10 @@ extern char D_004A1340[];
 extern char D_004A1348[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cMemMan_free(void* ptr);
-extern "C" void* func_003915E8(void* self, const char* name, int a2);
-extern "C" int* func_003E1908(const char* name, int flags);
+extern "C" void* cFont_cFont(void* self, const char* name, int a2);
+extern "C" int* FILE_loadz(const char* name, int flags);
 extern "C" int* FILE_load(const char* name, int flags);
-extern "C" void* func_0017B1B0(void* self);
+extern "C" void* cDebugMenuScreen_cDebugMenuScreen(void* self);
 extern "C" void* func_0017D298(char* self);
 
 struct sVEnt_17F868 { short delta; short index; void* fn; };
@@ -1621,17 +1621,17 @@ struct sDebugFE_17F868 {
     int snd20;          // 0x20
 };
 
-extern "C" void func_0017F868(sDebugFE_17F868* self)
+extern "C" void cDebugFE_load(sDebugFE_17F868* self)
 {
     char* m = D_004A289C;
     sVEnt_17F868* vt = *(sVEnt_17F868**)(m + 0x10D8);
     ((Fn1_17F868)vt[44].fn)(m + vt[44].delta, 0);
-    self->font = (char*)func_003915E8(cMemMan_alloc(0x84, D_0045D4B8, 0, 0), D_0045D4C8, 0);
+    self->font = (char*)cFont_cFont(cMemMan_alloc(0x84, D_0045D4B8, 0, 0), D_0045D4C8, 0);
     sVec2_17F868 sc(1.600000023841858f, 1.600000023841858f);
     *(sVec2_17F868*)(self->font + 0x30) = sc;
     *(sVec2_17F868*)(self->font + 0x38) = *(sVec2_17F868*)(self->font + 0x30);
     self->snd1C = -1;
-    int* data = func_003E1908(D_0045D4E0, 0x100);
+    int* data = FILE_loadz(D_0045D4E0, 0x100);
     if (data) {
         char* p = (char*)data + data[5];
         if (p) {
@@ -1651,7 +1651,7 @@ extern "C" void func_0017F868(sDebugFE_17F868* self)
     for (int i = 0; i < 2; i++) {
         self->objs[i] = 0;
     }
-    self->cur = self->objs[0] = func_0017B1B0(cMemMan_alloc(0x8C48, D_0045D510, 0, 0));
+    self->cur = self->objs[0] = cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(0x8C48, D_0045D510, 0, 0));
     self->objs[1] = func_0017D298((char*)cMemMan_alloc(0x1C18, D_0045D520, 0, 0));
     if (*(int*)((char*)D_004A28A8 + 0x74)) {
         self->cur = self->objs[1];
@@ -1685,14 +1685,14 @@ extern "C" void func_0017FA60(void* self)
 }
 #endif
 
-extern "C" void* func_00231CF0(void* self);
+extern "C" void* cFadeScreen_loseFocus(void* self);
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017FAB0__FPv);
 #ifdef SKIP_ASM
 int func_0017FAB0(void* self)
 {
-    return (func_00231CF0(self) != 0);
+    return (cFadeScreen_loseFocus(self) != 0);
 }
 #endif
 
@@ -1862,7 +1862,7 @@ INCLUDE_ASM("fe/debugfe", func_0017FDF0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-void* func_00320C48(int, int) __asm__("func_00320C48__FPvi");
+void* cInput_getState(int, int) __asm__("cInput_getState__FPvi");
 
 extern "C" void func_0017FDF0(void* self, signed char k)
 {
@@ -1877,19 +1877,19 @@ extern "C" void func_0017FDF0(void* self, signed char k)
     case 6: id = 0x78; break;
     case 7: id = 0x79; break;
     }
-    func_00320C48(*(int*)((char*)self + 0x18), id);
+    cInput_getState(*(int*)((char*)self + 0x18), id);
 }
 #endif
 
-// PORT: the real function is C++ void* func_00320C48(void* self, int) (bx/execman); these thunks pass an int handle.
-void* func_00320C48(int, int) __asm__("func_00320C48__FPvi");
+// PORT: the real function is C++ void* cInput_getState(void* self, int) (bx/execman); these thunks pass an int handle.
+void* cInput_getState(int, int) __asm__("cInput_getState__FPvi");
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017FE80__FPv);
 #ifdef SKIP_ASM
 void* func_0017FE80(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x70);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x70);
 }
 #endif
 
@@ -1898,7 +1898,7 @@ INCLUDE_ASM("fe/debugfe", func_0017FEA0__FPv);
 #ifdef SKIP_ASM
 void* func_0017FEA0(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x71);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x71);
 }
 #endif
 
@@ -1907,7 +1907,7 @@ INCLUDE_ASM("fe/debugfe", func_0017FEC0__FPv);
 #ifdef SKIP_ASM
 void* func_0017FEC0(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x7a);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x7a);
 }
 #endif
 
@@ -1916,7 +1916,7 @@ INCLUDE_ASM("fe/debugfe", func_0017FEE0__FPv);
 #ifdef SKIP_ASM
 void* func_0017FEE0(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x7b);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x7b);
 }
 #endif
 
@@ -1925,7 +1925,7 @@ INCLUDE_ASM("fe/debugfe", func_0017FF00__FPv);
 #ifdef SKIP_ASM
 void* func_0017FF00(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x7c);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x7c);
 }
 #endif
 
@@ -1934,7 +1934,7 @@ INCLUDE_ASM("fe/debugfe", func_0017FF20__FPv);
 #ifdef SKIP_ASM
 void* func_0017FF20(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x7d);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x7d);
 }
 #endif
 
@@ -1943,7 +1943,7 @@ INCLUDE_ASM("fe/debugfe", func_0017FF40__FPv);
 #ifdef SKIP_ASM
 void* func_0017FF40(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x97);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x97);
 }
 #endif
 
@@ -1952,7 +1952,7 @@ INCLUDE_ASM("fe/debugfe", func_0017FF60__FPv);
 #ifdef SKIP_ASM
 void* func_0017FF60(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x98);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x98);
 }
 #endif
 
@@ -1961,7 +1961,7 @@ INCLUDE_ASM("fe/debugfe", func_0017FF80__FPv);
 #ifdef SKIP_ASM
 void* func_0017FF80(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x99);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x99);
 }
 #endif
 
@@ -1970,7 +1970,7 @@ INCLUDE_ASM("fe/debugfe", func_0017FFA0__FPv);
 #ifdef SKIP_ASM
 void* func_0017FFA0(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x9a);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x9a);
 }
 #endif
 
@@ -1979,7 +1979,7 @@ INCLUDE_ASM("fe/debugfe", func_0017FFC0__FPv);
 #ifdef SKIP_ASM
 void* func_0017FFC0(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x9b);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x9b);
 }
 #endif
 
@@ -1988,7 +1988,7 @@ INCLUDE_ASM("fe/debugfe", func_0017FFE0__FPv);
 #ifdef SKIP_ASM
 void* func_0017FFE0(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x9c);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x9c);
 }
 #endif
 
@@ -1997,7 +1997,7 @@ INCLUDE_ASM("fe/debugfe", func_00180000__FPv);
 #ifdef SKIP_ASM
 void* func_00180000(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x9d);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x9d);
 }
 #endif
 
@@ -2006,7 +2006,7 @@ INCLUDE_ASM("fe/debugfe", func_00180020__FPv);
 #ifdef SKIP_ASM
 void* func_00180020(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x9e);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x9e);
 }
 #endif
 
@@ -2015,7 +2015,7 @@ INCLUDE_ASM("fe/debugfe", func_00180040__FPv);
 #ifdef SKIP_ASM
 void* func_00180040(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x72);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x72);
 }
 #endif
 
@@ -2024,7 +2024,7 @@ INCLUDE_ASM("fe/debugfe", func_00180060__FPv);
 #ifdef SKIP_ASM
 void* func_00180060(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x73);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x73);
 }
 #endif
 
@@ -2033,7 +2033,7 @@ INCLUDE_ASM("fe/debugfe", func_00180080__FPv);
 #ifdef SKIP_ASM
 void* func_00180080(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x74);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x74);
 }
 #endif
 
@@ -2042,7 +2042,7 @@ INCLUDE_ASM("fe/debugfe", func_001800A0__FPv);
 #ifdef SKIP_ASM
 void* func_001800A0(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x75);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x75);
 }
 #endif
 
@@ -2051,7 +2051,7 @@ INCLUDE_ASM("fe/debugfe", func_001800C0__FPv);
 #ifdef SKIP_ASM
 void* func_001800C0(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x93);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x93);
 }
 #endif
 
@@ -2060,7 +2060,7 @@ INCLUDE_ASM("fe/debugfe", func_001800E0__FPv);
 #ifdef SKIP_ASM
 void* func_001800E0(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x94);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x94);
 }
 #endif
 
@@ -2069,7 +2069,7 @@ INCLUDE_ASM("fe/debugfe", func_00180100__FPv);
 #ifdef SKIP_ASM
 void* func_00180100(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x95);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x95);
 }
 #endif
 
@@ -2078,7 +2078,7 @@ INCLUDE_ASM("fe/debugfe", func_00180120__FPv);
 #ifdef SKIP_ASM
 void* func_00180120(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x96);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x96);
 }
 #endif
 
@@ -2087,7 +2087,7 @@ INCLUDE_ASM("fe/debugfe", func_00180140__FPv);
 #ifdef SKIP_ASM
 void* func_00180140(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x7e);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x7e);
 }
 #endif
 
@@ -2096,7 +2096,7 @@ INCLUDE_ASM("fe/debugfe", func_00180160__FPv);
 #ifdef SKIP_ASM
 void* func_00180160(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x7f);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x7f);
 }
 #endif
 
@@ -2105,7 +2105,7 @@ INCLUDE_ASM("fe/debugfe", func_00180180__FPv);
 #ifdef SKIP_ASM
 void* func_00180180(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x80);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x80);
 }
 #endif
 
@@ -2114,7 +2114,7 @@ INCLUDE_ASM("fe/debugfe", func_001801A0__FPv);
 #ifdef SKIP_ASM
 void* func_001801A0(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x81);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x81);
 }
 #endif
 
@@ -2123,7 +2123,7 @@ INCLUDE_ASM("fe/debugfe", func_001801C0__FPv);
 #ifdef SKIP_ASM
 void* func_001801C0(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x82);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x82);
 }
 #endif
 
@@ -2132,7 +2132,7 @@ INCLUDE_ASM("fe/debugfe", func_001801E0__FPv);
 #ifdef SKIP_ASM
 void* func_001801E0(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x83);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x83);
 }
 #endif
 
@@ -2141,7 +2141,7 @@ INCLUDE_ASM("fe/debugfe", func_00180200__FPv);
 #ifdef SKIP_ASM
 void* func_00180200(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x84);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x84);
 }
 #endif
 
@@ -2150,7 +2150,7 @@ INCLUDE_ASM("fe/debugfe", func_00180220__FPv);
 #ifdef SKIP_ASM
 void* func_00180220(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x85);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x85);
 }
 #endif
 
@@ -2159,7 +2159,7 @@ INCLUDE_ASM("fe/debugfe", func_00180240__FPv);
 #ifdef SKIP_ASM
 void* func_00180240(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x90);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x90);
 }
 #endif
 
@@ -2168,7 +2168,7 @@ INCLUDE_ASM("fe/debugfe", func_00180260__FPv);
 #ifdef SKIP_ASM
 void* func_00180260(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x92);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x92);
 }
 #endif
 
@@ -2177,18 +2177,18 @@ INCLUDE_ASM("fe/debugfe", func_00180280__FPv);
 #ifdef SKIP_ASM
 void* func_00180280(void* self)
 {
-    return func_00320C48(*(int*)((char*)self + 0x18), 0x91);
+    return cInput_getState(*(int*)((char*)self + 0x18), 0x91);
 }
 #endif
 
-extern "C" void* func_00320BF0(int, int);
+extern "C" void* cInput_getValue(int, int);
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_001802A0__FPv);
 #ifdef SKIP_ASM
 void* func_001802A0(void* self)
 {
-    return func_00320BF0(*(int*)((char*)self + 0x18), 0x90);
+    return cInput_getValue(*(int*)((char*)self + 0x18), 0x90);
 }
 #endif
 
@@ -2197,7 +2197,7 @@ INCLUDE_ASM("fe/debugfe", func_001802C0__FPv);
 #ifdef SKIP_ASM
 void* func_001802C0(void* self)
 {
-    return func_00320BF0(*(int*)((char*)self + 0x18), 0x92);
+    return cInput_getValue(*(int*)((char*)self + 0x18), 0x92);
 }
 #endif
 
@@ -2206,7 +2206,7 @@ INCLUDE_ASM("fe/debugfe", func_001802E0__FPv);
 #ifdef SKIP_ASM
 void* func_001802E0(void* self)
 {
-    return func_00320BF0(*(int*)((char*)self + 0x18), 0x91);
+    return cInput_getValue(*(int*)((char*)self + 0x18), 0x91);
 }
 #endif
 
@@ -2216,14 +2216,14 @@ INCLUDE_ASM("fe/debugfe", func_00180300);
 extern "C" int func_00180300(void* self)
 {
     int r = 0;
-    if (func_00320C48(*(int*)((char*)self + 0x18), 0x72) || func_00320C48(*(int*)((char*)self + 0x18), 0x73) ||
-        func_00320C48(*(int*)((char*)self + 0x18), 0x74) || func_00320C48(*(int*)((char*)self + 0x18), 0x75) ||
-        func_00320C48(*(int*)((char*)self + 0x18), 0x76) || func_00320C48(*(int*)((char*)self + 0x18), 0x77) ||
-        func_00320C48(*(int*)((char*)self + 0x18), 0x78) || func_00320C48(*(int*)((char*)self + 0x18), 0x79) ||
-        func_00320C48(*(int*)((char*)self + 0x18), 0x7A) || func_00320C48(*(int*)((char*)self + 0x18), 0x7B) ||
-        func_00320C48(*(int*)((char*)self + 0x18), 0x7D) || func_00320C48(*(int*)((char*)self + 0x18), 0x7C) ||
-        func_00320C48(*(int*)((char*)self + 0x18), 0x90) || func_00320C48(*(int*)((char*)self + 0x18), 0x92) ||
-        func_00320C48(*(int*)((char*)self + 0x18), 0x91) || func_00320C48(*(int*)((char*)self + 0x18), 0x71))
+    if (cInput_getState(*(int*)((char*)self + 0x18), 0x72) || cInput_getState(*(int*)((char*)self + 0x18), 0x73) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 0x74) || cInput_getState(*(int*)((char*)self + 0x18), 0x75) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 0x76) || cInput_getState(*(int*)((char*)self + 0x18), 0x77) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 0x78) || cInput_getState(*(int*)((char*)self + 0x18), 0x79) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 0x7A) || cInput_getState(*(int*)((char*)self + 0x18), 0x7B) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 0x7D) || cInput_getState(*(int*)((char*)self + 0x18), 0x7C) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 0x90) || cInput_getState(*(int*)((char*)self + 0x18), 0x92) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 0x91) || cInput_getState(*(int*)((char*)self + 0x18), 0x71))
         r = 1;
     return r;
 }
@@ -2243,9 +2243,9 @@ extern "C" void func_00180478(void* self, unsigned char idx)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180498);
+INCLUDE_ASM("fe/debugfe", cFEInput_isActive);
 #ifdef SKIP_ASM
-extern "C" int func_00180498(void* self)
+extern "C" int cFEInput_isActive(void* self)
 {
     void* p = *(void**)((char*)self + 0x18);
     if (p != 0) {

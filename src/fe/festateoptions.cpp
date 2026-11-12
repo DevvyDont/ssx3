@@ -68,13 +68,13 @@ int cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001CB030(void* self, void* engine, void* owner, int a3, int a4);
-extern "C" void func_001CB418(void* self, char* s);
+extern "C" void cKeyboardPopup_setInputText(void* self, char* s);
 extern "C" void func_001CCF00(void* self, char* s);
-extern "C" void func_001CE3C8(void* self, int a1, int a2, int a3);
+extern "C" void cKeyboardPopup_setIncludeKey(void* self, int a1, int a2, int a3);
 extern "C" int func_00187D38(void* self);
 extern "C" void func_00188E58(void* self);
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern char D_0045D8D8[];
 extern char D_0045DC60[];
 extern char D_004A1408[];
@@ -124,10 +124,10 @@ extern "C" void func_00188980(sOpt_188980* self, char* widget, unsigned int even
             void* p = cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0);
             void* pop = func_001CB030(p, self->engine, self, 0, self->port);
             self->popup = pop;
-            func_001CB418(pop, D_004A1408);
+            cKeyboardPopup_setInputText(pop, D_004A1408);
             func_001CCF00(self->popup, D_004A1408);
-            func_001CE3C8(self->popup, 0x4B, 1, 2);
-            func_0039F290(self->engine + 0x18, self->popup);
+            cKeyboardPopup_setIncludeKey(self->popup, 0x4B, 1, 2);
+            cUIStateStack_pushPopup(self->engine + 0x18, self->popup);
             break;
         } else if (Is_00188980(*(int*)(widget + 0x38), D_004A1530)) {
             if (D_004A14E0 == 0 && (D_004A14D0 != 0 || D_004A14D4 != 0 || D_004A14DC != 0 || D_004A14D8 != 0)) {
@@ -150,7 +150,7 @@ extern "C" void func_00188980(sOpt_188980* self, char* widget, unsigned int even
             sVE_188980p* vt = *(sVE_188980p**)(obj + 4);
             void* r = vt[4].fn(obj + vt[4].delta, self, *(int*)(widget + 0x18));
             if (r != 0)
-                func_0039F400(self->engine + 0x18, r);
+                cUIStateStack_push(self->engine + 0x18, r);
         }
         break;
     case 6: {
@@ -299,7 +299,7 @@ INCLUDE_ASM("fe/festateoptions", func_00188E58);
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_0045DD68[];
 extern void* D_0046B3D0[];
 extern int D_004A14D0;
@@ -314,7 +314,7 @@ extern "C" void func_00188E58(void* self)
     func_0039E318(p, *(void**)((char*)self + 0x10), self);
     *(void***)(p + 8) = D_0046B3D0;
     *(char*)(p + 0x48) = 0;
-    func_0039F290(*(char**)((char*)self + 0x10) + 0x18, p);
+    cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, p);
     D_004A14D8 = 0;
     D_004A14E0 = 1;
     D_004A14DC = 0;
@@ -506,14 +506,14 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
 }
 #endif
 
-extern "C" void* func_0039E4C0(void* self);
+extern "C" void* cUIState_onGainFocus(void* self);
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_001895F0__FPv);
 #ifdef SKIP_ASM
 void* func_001895F0(void* self)
 {
-    return func_0039E4C0(self);
+    return cUIState_onGainFocus(self);
 }
 #endif
 
@@ -645,13 +645,13 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_00228C08(void* p);
+extern "C" void cSSXApp_activateBEOptions(void* p);
 extern "C" void* func_0028B180();
 extern "C" void func_0029ED90(void* p, int a);
 extern "C" int func_0039A738(void* self);
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern char D_0045DD68[];
 extern char D_0045DF88[];
 extern char D_0045DFA0[];
@@ -725,7 +725,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
         func_0039E318(p, self->engine, self);
         *(void***)(p + 8) = D_0046B3D0;
         p[0x48] = 0;
-        func_0039F290(self->engine + 0x18, p);
+        cUIStateStack_pushPopup(self->engine + 0x18, p);
         break;
     }
     case 5:
@@ -736,13 +736,13 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
             *(int*)(p + 0x4C) = 0;
             *(int*)(p + 0x48) = 0;
             p[0x50] = 0;
-            func_0039F290(self->engine + 0x18, p);
+            cUIStateStack_pushPopup(self->engine + 0x18, p);
         } else if (Is_189980(*(int*)(widget + 0x38), D_004A1528)) {
             char* p = (char*)operator new(0x4C, D_0045DFA0, 0x100, 0);
             func_0039E318(p, self->engine, self);
             *(void***)(p + 8) = D_0046B300;
             *(int*)(p + 0xC) = 0x1B;
-            func_0039F290(self->engine + 0x18, p);
+            cUIStateStack_pushPopup(self->engine + 0x18, p);
         }
         break;
     case 6: {
@@ -750,7 +750,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
             sVE_189980a* vt = *(sVE_189980a**)(iface + 0xC);
             vt[1].fn(iface + vt[1].delta);
         }
-        func_00228C08(D_004A28A8);
+        cSSXApp_activateBEOptions(D_004A28A8);
         {
             char* o = *(char**)((char*)D_004A28A8 + 0x8C);
             sVE_189980b* vt = *(sVE_189980b**)(o + 4);
@@ -761,7 +761,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
         sVE_189980c* vt = *(sVE_189980c**)(eng + 4);
         void* r = vt[5].fn(eng + vt[5].delta, self, *(int*)(widget + 0x18));
         if (r != 0) {
-            func_0039F400(self->engine + 0x18, r);
+            cUIStateStack_push(self->engine + 0x18, r);
         }
         break;
     }
@@ -782,7 +782,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
         if (self->item[2] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[2]])) {
             D_00535610_189980.f20 = *(unsigned char*)(widget + 0x319);
         }
-        func_00228C08(D_004A28A8);
+        cSSXApp_activateBEOptions(D_004A28A8);
         D_004A14D0 = 1;
         break;
     }
@@ -798,7 +798,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_0039A7A8(void* self, int v);
 extern "C" int func_0039A738(void* self);
-extern "C" void func_00228C08(void* p);
+extern "C" void cSSXApp_activateBEOptions(void* p);
 extern char* D_00440FD8[];
 extern void* D_004A28A8;
 extern void* D_004A289C;
@@ -882,7 +882,7 @@ extern "C" void func_00189D60(void* self_)
     char* thisp = g + vt[12].delta;
     void (**pf)(void*, int, int) = &vt[12].fn;
     (*pf)(thisp, iface->getOptions().f6, iface->getOptions().f5);
-    func_00228C08(D_004A28A8);
+    cSSXApp_activateBEOptions(D_004A28A8);
 }
 #endif
 
@@ -1041,7 +1041,7 @@ INCLUDE_ASM("fe/festateoptions", func_0018A870__FPv);
 #ifdef SKIP_ASM
 void* func_0018A870(void* self)
 {
-    return func_0039E4C0(self);
+    return cUIState_onGainFocus(self);
 }
 #endif
 
@@ -1078,8 +1078,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" int func_0039A738(void* self);
 extern "C" void func_0018BEF8(void* self, unsigned int mode);
 extern "C" void* func_0028B180();
@@ -1156,7 +1156,7 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
         func_0039E318(p, self->engine, self);
         *(void***)(p + 8) = D_0046B3D0;
         p[0x48] = 0;
-        func_0039F290(self->engine + 0x18, p);
+        cUIStateStack_pushPopup(self->engine + 0x18, p);
         break;
     }
     case 6: {
@@ -1173,7 +1173,7 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
         sVE_18A8D0c* vt = *(sVE_18A8D0c**)(eng + 4);
         void* r = vt[5].fn(eng + vt[5].delta, self, *(int*)(widget + 0x18));
         if (r != 0)
-            func_0039F400(self->engine + 0x18, r);
+            cUIStateStack_push(self->engine + 0x18, r);
         break;
     }
     case 9:
@@ -1384,7 +1384,7 @@ extern "C" int func_00287670(void* snd);
 extern "C" int func_002876A0(void* snd);
 extern "C" int func_002876D0(void* snd);
 extern "C" void func_00286200(void* snd);
-extern "C" void func_00284C28();
+extern "C" void SSXAUDIO_DeInit();
 extern "C" void SSXAUDIO_Init(int mode);
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
@@ -1433,7 +1433,7 @@ extern "C" void func_0018BEF8(void* self, unsigned int mode)
         int s1 = *(int*)((char*)func_0028B180() + 0x62B4);
         int s2 = *(int*)((char*)func_0028B180() + 0x534);
         func_00286200(func_0028B180());
-        func_00284C28();
+        SSXAUDIO_DeInit();
         SSXAUDIO_Init(m);
         func_00287410(func_0028B180(), (int)a);
         func_00287488(func_0028B180(), (int)b);
@@ -1492,7 +1492,7 @@ INCLUDE_ASM("fe/festateoptions", func_0018C198__FPv);
 #ifdef SKIP_ASM
 void* func_0018C198(void* self)
 {
-    return func_0039E4C0(self);
+    return cUIState_onGainFocus(self);
 }
 #endif
 
@@ -1558,8 +1558,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern char D_0045DD68[];
 extern void* D_0046B3D0[];
 extern int D_004A14D8;
@@ -1603,7 +1603,7 @@ extern "C" void func_0018C2A0(char* self, char* widget, unsigned int event)
         func_0039E318(p, *(void**)(self + 0x10), self);
         *(void***)(p + 8) = D_0046B3D0;
         *(char*)(p + 0x48) = 0;
-        func_0039F290(*(char**)(self + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, p);
         break;
     }
     case 6: {
@@ -1613,7 +1613,7 @@ extern "C" void func_0018C2A0(char* self, char* widget, unsigned int event)
         sVE_18C2A0p* vt2 = *(sVE_18C2A0p**)(obj + 4);
         void* r = vt2[5].fn(obj + vt2[5].delta, self, *(int*)(widget + 0x18));
         if (r != 0) {
-            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -1777,13 +1777,13 @@ extern "C" void cFEStateOptionsController_onCreateScreen(void* self)
 INCLUDE_ASM("fe/festateoptions", func_0018C8B8);
 #ifdef SKIP_ASM
 extern "C" void func_0018D108(void* self, int idx, float x, float y);
-void* func_0039E4A0(void* self);
+void* cUIState_onDestroyScreen(void* self);
 
 extern "C" void* func_0018C8B8(void* self)
 {
     func_0018D108(self, 0, 0.0f, 0.0f);
     func_0018D108(self, 1, 0.0f, 0.0f);
-    return func_0039E4A0(self);
+    return cUIState_onDestroyScreen(self);
 }
 #endif
 
@@ -1863,8 +1863,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" int func_0039A738(void* self);
 extern "C" void func_00147528(void* self, int index, int value);
 extern "C" void func_00147658(void* self, int index, int value);
@@ -1905,7 +1905,7 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
         func_0039E318(p, *(void**)(self + 0x10), self);
         *(void***)(p + 8) = D_0046B3D0;
         *(char*)(p + 0x48) = 0;
-        func_0039F290(*(char**)(self + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, p);
         break;
     }
     case 6: {
@@ -1915,7 +1915,7 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
         sVE_18CA10p* vt2 = *(sVE_18CA10p**)(obj + 4);
         void* r = vt2[5].fn(obj + vt2[5].delta, self, *(int*)(widget + 0x18));
         if (r != 0) {
-            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -2270,7 +2270,7 @@ INCLUDE_ASM("fe/festateoptions", func_0018D460);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0039F190(void* list, int a1);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void func_00147138(void* self, int a1, const char* name);
 extern "C" void func_0014DE28(void* self, int c);
 extern "C" void* func_001A0548(void* self, int a1);
@@ -2330,7 +2330,7 @@ extern "C" void func_0018D460(char* self, char* widget, unsigned int event)
         sVE_18D460p* vt2 = *(sVE_18D460p**)(obj + 4);
         void* x = vt2[4].fn(obj + vt2[4].delta, self, (1 << *(signed char*)(self + 0x48)) | 0x100);
         if (x != 0) {
-            func_0039F400(*(char**)(self + 0x10) + 0x18, x);
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, x);
         }
         int f = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_0045DC60));
         if (f != 0xFFFF) {
@@ -2347,9 +2347,9 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_0039F400(void* list, void* item);
-extern "C" void* func_001D99C8(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
+extern "C" void* cFEPopupConfirm_cFEPopupConfirm(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
 extern void* D_004A28A8;
 extern char D_0045E110[];
 extern char D_0045E130[];
@@ -2387,11 +2387,11 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, 
             sVE_18D648s* vt = *(sVE_18D648s**)(mgr + 4);
             unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(D_0045E110));
             char* p = (char*)operator new(0xBFC, D_0045E130, 0x100, 0);
-            char* o = (char*)func_001D99C8(p, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
+            char* o = (char*)cFEPopupConfirm_cFEPopupConfirm(p, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
             sVE_18D648v* vt2 = *(sVE_18D648v**)(o + 8);
             vt2[25].fn(o + vt2[25].delta, 1);
             *(int*)(o + 0x18) = 0;
-            func_0039F290(*(char**)(self + 0x10) + 0x18, o);
+            cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, o);
         } else {
             if (v > 3) {
                 v |= 1 << *(signed char*)(self + 0x14);
@@ -2400,7 +2400,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, 
             sVE_18D648p* vt = *(sVE_18D648p**)(obj + 4);
             void* r = vt[4].fn(obj + vt[4].delta, self, v);
             if (r != 0) {
-                func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
             }
         }
         break;
@@ -2410,7 +2410,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, 
         sVE_18D648p* vt = *(sVE_18D648p**)(obj + 4);
         void* r = vt[5].fn(obj + vt[5].delta, self, *(int*)(widget + 0x18));
         if (r != 0) {
-            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -2422,7 +2422,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, 
 INCLUDE_ASM("fe/festateoptions", func_0018D7F0);
 #ifdef SKIP_ASM
 extern "C" void* func_001D53B0(void* self, int a1, int a2);
-extern "C" void* func_00227F80(void* app);
+extern "C" void* cSSXApp_getMCManager(void* app);
 extern void* D_0046C228[];
 extern void* D_004A28A8;
 
@@ -2436,7 +2436,7 @@ extern "C" void* func_0018D7F0(void* self, int a1, int a2, int a3, int a4)
     *(int*)((char*)self + 0x234) = 0;
     *(int*)((char*)self + 0x238) = 0;
     if (a3 == 0) {
-        *(int*)((char*)func_00227F80(D_004A28A8) + 0x11C) = 0;
+        *(int*)((char*)cSSXApp_getMCManager(D_004A28A8) + 0x11C) = 0;
     }
     return self;
 }
@@ -2451,7 +2451,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
-extern "C" void func_003A0E90(void* text, char* str);
+extern "C" void cUIText_setUnicodeString(void* text, char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern void* D_004A28A8;
 extern char D_0045E140[];
@@ -2568,7 +2568,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
         o = getObj_DD60(self, D_004A1458);
         o->setVisible(0);
     }
-    func_003A0E90(getObj_DD60(self, D_0045E1C8), title);
+    cUIText_setUnicodeString(getObj_DD60(self, D_0045E1C8), title);
     cUIText_setAsciiString((cUIText*)getObj_DD60(self, D_0045E1D8), D_004A1408);
     cUIText_setAsciiString((cUIText*)getObj_DD60(self, D_0045E1E8), D_004A1408);
     char* slot = getString_DD60(D_0045E200);
@@ -2577,7 +2577,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
         sprintf(buf, D_0045E210, i);
         o = getObj_DD60(self, buf);
         *(int*)((char*)o + 0x18) = i - 1;
-        func_003A0E90(o, slot);
+        cUIText_setUnicodeString(o, slot);
         *(sColor_DD60*)((char*)o + 0x88) = D_004C66C8;
         o->setHighlight(1);
         if (*(int*)((char*)self + 0x1BC) != 1 && i >= 2) {
@@ -2651,12 +2651,12 @@ struct cList0018DDD0 {
     virtual void v53();
     virtual int v54(int a);
 };
-extern "C" void* func_00227F80(void* app);
+extern "C" void* cSSXApp_getMCManager(void* app);
 extern void* D_004A28A8;
 
 extern "C" int func_0018DDD0(void* self, void* widget, unsigned int msg)
 {
-    char* app = (char*)func_00227F80(D_004A28A8);
+    char* app = (char*)cSSXApp_getMCManager(D_004A28A8);
     switch (msg) {
     case 8:
         if (*(int*)((char*)self + 0x22C) != 0 && (*(cList0018DDD0**)(app + 0x434))->v54(*(int*)(app + 0x428)) != 0) {
@@ -2677,10 +2677,10 @@ extern "C" int func_0018DDD0(void* self, void* widget, unsigned int msg)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018DEA0);
 #ifdef SKIP_ASM
-extern "C" void* func_00227F80(void* app);
+extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_0023CAE8(void* app, int a1, int a2);
 extern "C" void func_0023C8F0(void* app, int a1);
-extern "C" void func_0023D570(void* app, int a1);
+extern "C" void cMCOverlayManager_SetAction(void* app, int a1);
 extern void* D_004A28A8;
 
 struct sVE_18DEA0n {
@@ -2797,7 +2797,7 @@ public:
 
 extern "C" void func_0018DEA0(sDevSel_18DEA0* self, char* widget, unsigned int event)
 {
-    char* app = (char*)func_00227F80(D_004A28A8);
+    char* app = (char*)cSSXApp_getMCManager(D_004A28A8);
     switch (event) {
     case 5: {
         if (widget == 0)
@@ -2838,7 +2838,7 @@ extern "C" void func_0018DEA0(sDevSel_18DEA0* self, char* widget, unsigned int e
     }
     case 6: {
         self->f238 = 0;
-        char* a = (char*)func_00227F80(D_004A28A8);
+        char* a = (char*)cSSXApp_getMCManager(D_004A28A8);
         if (self->busy == 1)
             return;
         int s = self->state;
@@ -2859,7 +2859,7 @@ extern "C" void func_0018DEA0(sDevSel_18DEA0* self, char* widget, unsigned int e
             return;
         if (self->f22C == 0)
             return;
-        char* a = (char*)func_00227F80(D_004A28A8);
+        char* a = (char*)cSSXApp_getMCManager(D_004A28A8);
         if ((*(cDev_18DEA0**)(a + 0x434))->v54(*(int*)(a + 0x428)) == 0)
             return;
         int v = *(int*)(widget + 0x18);
@@ -2871,7 +2871,7 @@ extern "C" void func_0018DEA0(sDevSel_18DEA0* self, char* widget, unsigned int e
         if ((*(cDev_18DEA0**)(a + 0x434))->v67(self->slot)) {
             self->busy = s;
             self->state = 4;
-            func_0023D570(a, 0);
+            cMCOverlayManager_SetAction(a, 0);
             sVE_18DEA0v* vt = *(sVE_18DEA0v**)(a + 0x748);
             vt[1].fn(a + vt[1].delta, 0x18);
         }

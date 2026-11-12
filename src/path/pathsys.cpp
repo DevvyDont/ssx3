@@ -42,7 +42,7 @@ extern "C" int cPathSys_resolvePaths(sPathSysB310* self, char* p)
 #endif
 
 //100%
-INCLUDE_ASM("path/pathsys", func_0026B410);
+INCLUDE_ASM("path/pathsys", cPathSys_loadAIPaths);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -66,7 +66,7 @@ struct sPathSysB410 {
     sPathB410* paths;       // 0xC
 };
 
-extern "C" int func_0026B410(sPathSysB410* self, char* p)
+extern "C" int cPathSys_loadAIPaths(sPathSysB410* self, char* p)
 {
     int count;
     sPathB410** slot = &self->paths;
@@ -360,7 +360,7 @@ extern "C" int func_0026B880(sPathSys_B880* self, char* p)
 }
 #endif
 
-extern "C" void* func_003E6574(void*, void*, int);
+extern "C" void* MEM_copy(void*, void*, int);
 
 //100%
 INCLUDE_ASM("path/pathsys", func_0026BA48);
@@ -368,7 +368,7 @@ INCLUDE_ASM("path/pathsys", func_0026BA48);
 extern "C" void func_0026BA48(void* dst, void* src)
 {
     if (dst != src) {
-        func_003E6574(dst, src, 0xc);
+        MEM_copy(dst, src, 0xc);
     }
 }
 #endif
@@ -379,7 +379,7 @@ INCLUDE_ASM("path/pathsys", func_0026BA68);
 extern "C" void func_0026BA68(void* dst, void* src)
 {
     if (dst != src) {
-        func_003E6574(dst, src, 0x4);
+        MEM_copy(dst, src, 0x4);
     }
 }
 #endif
@@ -390,7 +390,7 @@ INCLUDE_ASM("path/pathsys", func_0026BA88);
 extern "C" void func_0026BA88(void* dst, void* src)
 {
     if (dst != src) {
-        func_003E6574(dst, src, 0x4);
+        MEM_copy(dst, src, 0x4);
     }
 }
 #endif

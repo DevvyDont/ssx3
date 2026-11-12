@@ -506,23 +506,23 @@ INCLUDE_ASM("dirtysock/tags2", func_002672C8);
 
 INCLUDE_ASM("dirtysock/tags2", func_00267468);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267DA8);
+INCLUDE_ASM("dirtysock/tags2", cCommChannel_disconnect);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267DC8);
+INCLUDE_ASM("dirtysock/tags2", cCommChannel_update);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267DD0);
+INCLUDE_ASM("dirtysock/tags2", cCommChannel_isConnected);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267DD8);
+INCLUDE_ASM("dirtysock/tags2", cCommChannel_getLatency);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267DE8);
+INCLUDE_ASM("dirtysock/tags2", cCommChannel_getChannelType);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267DF0);
+INCLUDE_ASM("dirtysock/tags2", cCommChannel_readPacket);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267DF8);
+INCLUDE_ASM("dirtysock/tags2", cCommChannel_writePacket);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267E00);
+INCLUDE_ASM("dirtysock/tags2", cDSockChannel_isConnected);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267E10);
+INCLUDE_ASM("dirtysock/tags2", cDSockChannel_getChannelType);
 
 INCLUDE_ASM("dirtysock/tags2", func_00267E18);
 

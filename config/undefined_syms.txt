@@ -5,7 +5,7 @@
    reloc_addrs-only name isn't, so it never appears in undefined_syms_auto.txt. */
 D_0 = 0x0;
 
-/* Static-init table targets named only by config/reloc_addrs.txt (func_00250CB0, __sti__all_in_one_scripter_cpp),
+/* Static-init table targets named only by config/reloc_addrs.txt (__sti__aivisualeffectsmenu_cpp, __sti__all_in_one_scripter_cpp),
    so, like D_0 above, splat never lists them in undefined_syms_auto.txt. */
 D_004D1C68 = 0x4D1C68;
 D_004D37A8 = 0x4D37A8;
@@ -13,7 +13,7 @@ D_004D3AC8 = 0x4D3AC8;
 /* Static-init table targets named only by config/reloc_addrs.txt (func_0035FE10, batch b12 round 2). */
 D_004FFAB0 = 0x4FFAB0;
 D_004FFB00 = 0x4FFB00;
-/* Named only by config/reloc_addrs.txt (2026-10-24): func_001FFD08's D_004A2570 / D_004A2578 and func_001673F8's
+/* Named only by config/reloc_addrs.txt (2026-10-24): cOVState_REWARDS_updateMenu's D_004A2570 / D_004A2578 and func_001673F8's
    D_004C5100. */
 D_004A2570 = 0x4A2570;
 D_004A2578 = 0x4A2578;

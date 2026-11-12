@@ -1020,7 +1020,7 @@ extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir);
 extern "C" int func_00311AE8(void*, int);
 extern "C" void func_00121AA0(void* rider, void* a, void* b, float x, float y);
 void func_00111AA0_137D18(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
-extern "C" int func_00116120(void* rider, int a, int b);
+extern "C" int cRider_checkForReset(void* rider, int a, int b);
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern char* D_004A28A8;
 extern t4Vector D_004FF160;
@@ -1314,7 +1314,7 @@ extern "C" void func_00137D18(void* vself)
         }
         sMat_137D18* ground = &materials_137D18()[hit.material];
         if (ground->f44 != 0 || (hit.tri != 0 && (triFlags_137D18(hit.tri) & 2)))
-            func_00116120(RIDER, 0, 1);
+            cRider_checkForReset(RIDER, 0, 1);
     } else {
         cAirPredictor_startLaunchIntoAir(RIDER->mAirPredictor, &RIDER->mPosition, &RIDER->mVelocity, 3333.33349609375f);
         *(int*)(self + 0x4) = 1;

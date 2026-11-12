@@ -104,7 +104,7 @@ INCLUDE_ASM("fe/festaterewards", func_001CF270);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
-extern "C" void func_0039F400(void* self, void* a1);
+extern "C" void cUIStateStack_push(void* self, void* a1);
 extern char D_0045DC60[];
 
 // g++ 2.95 vtable entries: this-adjust, index, function.
@@ -186,7 +186,7 @@ extern "C" int func_001CF270(char* self, char* in)
         char* mgr = **(char***)(self + 0x10);
         sVEr_F270* vt = *(sVEr_F270**)(mgr + 4);
         void* r = vt[5].fn(mgr + vt[5].delta, self, *(int*)(self + 0x8F0) >= 0);
-        func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+        cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
         return 1;
     }
     char* cur = *(char**)(self + 0x8FC);
@@ -700,7 +700,7 @@ struct cGame001CFFF8 {
 };
 
 extern void* D_004A289C;
-extern "C" void func_003B3D00(void* data, int i, void* entry);
+extern "C" void SHAPE_name(void* data, int i, void* entry);
 struct sEntry001CFFF8 {
     char name[5];
     int handle;
@@ -732,7 +732,7 @@ extern "C" void func_001CFFF8(sSelf001CFFF8* self, sData001CFFF8* data)
     self->count = data->count;
     int i;
     for (i = 0; i < self->count; i++) {
-        func_003B3D00(data, i, &self->entries[i]);
+        SHAPE_name(data, i, &self->entries[i]);
         self->entries[i].name[4] = 0;
         self->entries[i].handle = ((cGame001CFFF8*)D_004A289C)->v46((char*)data + data->tbl[i].off, &self->entries[i], 0, 1, -1);
     }
@@ -907,7 +907,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00157F20(void* iface, int player, int a2, int a3, int a4, int a5);
-extern "C" int func_00150928(void* iface, int a1, int charID);
+extern "C" int cBEEconInterface_getMoney(void* iface, int a1, int charID);
 struct sVE_0320a {
     short delta;
     short index;
@@ -923,7 +923,7 @@ extern "C" void func_001D0320(void* self, int a1)
 {
     func_00157F20(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
                   *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x4C), a1, 1);
-    *(int*)((char*)self + 0x54) = func_00150928(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)((char*)self + 0x44),
+    *(int*)((char*)self + 0x54) = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)((char*)self + 0x44),
                                                 *(int*)((char*)self + 0x50));
     sVE_0320a* vt = *(sVE_0320a**)((char*)self + 8);
     vt[42].fn((char*)self + vt[42].delta);
@@ -944,7 +944,7 @@ extern "C" void* func_001D1AA0(void* self, void* engine, void* owner, int player
 extern "C" void func_001D20D8(void* self, int kind, void* data);
 extern "C" void* func_001D22F0(void* self, void* engine, void* owner, signed char idx);
 extern "C" void func_001D2598(void* self, const char* a, const char* b);
-extern "C" void func_0039F290(void* stack, void* state);
+extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern char D_00466F78[];
 extern char D_004601D8[];
 
@@ -975,7 +975,7 @@ extern "C" void cFEStateRewardGalleryBase_showReward(void* self)
         break;
     }
     if (p != 0) {
-        func_0039F290((char*)*(void**)((char*)self + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup((char*)*(void**)((char*)self + 0x10) + 0x18, p);
     }
 }
 #endif
@@ -986,7 +986,7 @@ INCLUDE_ASM("fe/festaterewards", func_001D0510);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001CABA8(void* self, void* engine, void* owner, signed char idx);
 extern "C" void func_001CAA18(void* self, int a1, int a2, int a3, int a4);
-extern "C" void func_0039F290(void* stack, void* state);
+extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern char D_00460790[];
 struct sVE_0510a {
     short delta;
@@ -1010,7 +1010,7 @@ extern "C" void func_001D0510(void* self)
     sVE_0510b* vt3 = *(sVE_0510b**)((char*)self + 8);
     int b = vt3[35].fn((char*)self + vt3[35].delta, sel);
     func_001CAA18(popup + 0x48, *(int*)((char*)self + 0x4C), a, b, *(int*)((char*)self + 0x54));
-    func_0039F290((char*)*(void**)((char*)self + 0x10) + 0x18, popup);
+    cUIStateStack_pushPopup((char*)*(void**)((char*)self + 0x10) + 0x18, popup);
 }
 #endif
 
@@ -1286,8 +1286,8 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" int func_002C26D0(unsigned short* dst, const unsigned short* fmt, ...);
-extern "C" void func_003A0E90(void* text, void* p);
+extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern char D_00467060[];
 extern char D_004A1EF8[];
 extern char D_004A1F00[];
@@ -1317,8 +1317,8 @@ extern "C" void cFEStateRewardGalleryBase_updatePageNumber(void* self)
             unsigned short buf[100];
             int per = *(int*)((char*)self + 0x58);
             int pages = (*(int*)((char*)self + 0x60) + per - 1) / per;
-            func_002C26D0(buf, fmt, (*(int*)((char*)self + 0x64) + per - 1) / per + 1, pages);
-            func_003A0E90(*(void**)((char*)self + 0x904), buf);
+            sprintf1(buf, fmt, (*(int*)((char*)self + 0x64) + per - 1) / per + 1, pages);
+            cUIText_setUnicodeString(*(void**)((char*)self + 0x904), buf);
             char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1EF8));
             if (o != 0) {
                 sVEK1D0BC8b* vt2 = *(sVEK1D0BC8b**)(o + 8);
@@ -1341,9 +1341,9 @@ INCLUDE_ASM("fe/festaterewards", func_001D0D30);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" const char* func_00198AF0(void* a0);
-// PORT: func_00198AF0 really takes the int value to format; bound by asm label
-extern "C" const char* func_00198AF0_i(int v) __asm__("func_00198AF0");
+extern "C" const char* getDollarString(void* a0);
+// PORT: getDollarString really takes the int value to format; bound by asm label
+extern "C" const char* getDollarString_i(int v) __asm__("getDollarString");
 extern char D_004A1408[];
 
 struct sVEK1D0D30a {
@@ -1390,7 +1390,7 @@ extern "C" void func_001D0D30(void* self)
         if (price > 0) {
             sVEK1D0D30d* vt4 = *(sVEK1D0D30d**)((char*)self + 8);
             if (vt4[38].fn((char*)self + vt4[38].delta, idx) == 0) {
-                cUIText_setAsciiString(*(cUIText**)((char*)self + 0x90C), func_00198AF0_i(price));
+                cUIText_setAsciiString(*(cUIText**)((char*)self + 0x90C), getDollarString_i(price));
                 return;
             }
         }
@@ -1404,12 +1404,12 @@ INCLUDE_ASM("fe/festaterewards", func_001D0E78);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" const char* func_00198AF0(void* a0);
+extern "C" const char* getDollarString(void* a0);
 
 extern "C" void func_001D0E78(void* self)
 {
     if (*(cUIText**)((char*)self + 0x910) != 0) {
-        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x910), func_00198AF0(*(void**)((char*)self + 0x54)));
+        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x910), getDollarString(*(void**)((char*)self + 0x54)));
     }
 }
 #endif
@@ -2453,7 +2453,7 @@ extern "C" void func_001D2198(void* self)
     else
         *(int*)((char*)self + 0x74) = 0;
     sEntry001CFFF8 ent;
-    func_003B3D00(data, 0, &ent);
+    SHAPE_name(data, 0, &ent);
     ent.name[4] = 0;
     *(int*)((char*)self + 0x70) = ((cGame001CFFF8*)D_004A289C)->v46(e, &ent, 0, 1, -1);
     func_0019DC20(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C));

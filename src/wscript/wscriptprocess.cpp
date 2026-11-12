@@ -3,12 +3,12 @@
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_cWScriptProcess);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int value, int size);
-// PORT: func_00309B70 takes (self, id) (wscriptman); the unit declares one int param.
-extern "C" int func_00309B70_2(void* self, int id) __asm__("func_00309B70");
-struct func_00308278_sObj;
-struct func_00308278_sDef;
-extern "C" void func_00308278(func_00308278_sObj* self, void* owner, func_00308278_sDef* def);
+extern "C" void MEM_fill(void* dst, int value, int size);
+// PORT: cWScriptMan_getScriptCode takes (self, id) (wscriptman); the unit declares one int param.
+extern "C" int cWScriptMan_getScriptCode_2(void* self, int id) __asm__("cWScriptMan_getScriptCode");
+struct cWScriptTask_initTask_sObj;
+struct cWScriptTask_initTask_sDef;
+extern "C" void cWScriptTask_initTask(cWScriptTask_initTask_sObj* self, void* owner, cWScriptTask_initTask_sDef* def);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00489B70[];
@@ -32,22 +32,22 @@ struct sDef_307598 {
 extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a2, sDef_307598* def)
 {
     *(void**)((char*)self + 0x5C) = D_00489B70;
-    func_003E6448((char*)self + 0x28, 0, 0xC);
+    MEM_fill((char*)self + 0x28, 0, 0xC);
     *(int*)((char*)self + 0x24) = a2;
     *(void**)((char*)self + 0x10) = man;
     *(int*)((char*)self + 0x20) = def->f0;
     *(int*)((char*)self + 0x1C) = 0;
     for (int i = 0; i < 3; i++)
-        ((int*)((char*)self + 0x28))[i] = func_00309B70_2(*(void**)((char*)self + 0x10), def->a[i]);
+        ((int*)((char*)self + 0x28))[i] = cWScriptMan_getScriptCode_2(*(void**)((char*)self + 0x10), def->a[i]);
     for (int j = 0; j < 10; j++)
-        ((int*)((char*)self + 0x34))[j] = func_00309B70_2(*(void**)((char*)self + 0x10), def->b[j]);
+        ((int*)((char*)self + 0x34))[j] = cWScriptMan_getScriptCode_2(*(void**)((char*)self + 0x10), def->b[j]);
     int n = def->count;
     *(int*)((char*)self + 0x4) = n;
     sElem_307598** pv = (sElem_307598**)((char*)self + 0x14);
     *pv = new (D_00489850, 0x20000000, 0) sElem_307598[n];
     char* ed = def->elemDefs;
     for (int k = 0; k < *(int*)((char*)self + 0x4); k++, ed += 0x38)
-        func_00308278((func_00308278_sObj*)&(*(sElem_307598**)((char*)self + 0x14))[k], self, (func_00308278_sDef*)ed);
+        cWScriptTask_initTask((cWScriptTask_initTask_sObj*)&(*(sElem_307598**)((char*)self + 0x14))[k], self, (cWScriptTask_initTask_sDef*)ed);
     *(int*)((char*)self + 0x0) = 0;
     *(int*)((char*)self + 0x8) = *(int*)((char*)self + 0x4);
     *(int*)((char*)self + 0x18) = 0;
@@ -56,9 +56,9 @@ extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a2, 
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307738);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess__cWScriptProcess);
 #ifdef SKIP_ASM
-class func_00307738_cElem {
+class cWScriptProcess__cWScriptProcess_cElem {
 public:
     char pad00[0x40];
     // vptr at 0x40
@@ -67,11 +67,11 @@ public:
 
 void cMemMan_free(void* p);
 void operator_delete(int* p);
-extern "C" void func_00224DF0(void* obj, int flags);
+extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern char D_00489B70[];
 
 // PORT: array cookie arithmetic through int (pointer in int).
-extern "C" void func_00307738(void* self, int flags)
+extern "C" void cWScriptProcess__cWScriptProcess(void* self, int flags)
 {
     *(void**)((char*)self + 0x5C) = D_00489B70;
     char* arr = *(char**)((char*)self + 0x14);
@@ -79,13 +79,13 @@ extern "C" void func_00307738(void* self, int flags)
         char* p = (char*)(*(int*)(arr - 0x10) * 0x44 + (int)arr);
         while (*(char**)((char*)self + 0x14) != p) {
             p -= 0x44;
-            ((func_00307738_cElem*)p)->v01(0);
+            ((cWScriptProcess__cWScriptProcess_cElem*)p)->v01(0);
         }
         cMemMan_free(*(char**)((char*)self + 0x14) - 0x10);
     }
     void* obj = *(void**)((char*)self + 0x1C);
     if (obj != 0) {
-        func_00224DF0(obj, 3);
+        luno_cLunoTable__cLunoTable(obj, 3);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -253,13 +253,13 @@ extern "C" void func_00307A10(cWScriptProcList* self, int a1)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307A60);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
 extern "C" void func_00307A60(void* self)
 {
     void* script = *(void**)((char*)self + 0x34);
     if (script != 0) {
-        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
     }
 }
 #endif
@@ -267,13 +267,13 @@ extern "C" void func_00307A60(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307A90);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
 extern "C" void func_00307A90(void* self)
 {
     void* script = *(void**)((char*)self + 0x38);
     if (script != 0) {
-        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
     }
 }
 #endif
@@ -281,13 +281,13 @@ extern "C" void func_00307A90(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307AC0);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
 extern "C" void func_00307AC0(void* self)
 {
     void* script = *(void**)((char*)self + 0x3c);
     if (script != 0) {
-        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
     }
 }
 #endif
@@ -295,13 +295,13 @@ extern "C" void func_00307AC0(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307AF0);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
 extern "C" void func_00307AF0(void* self)
 {
     void* script = *(void**)((char*)self + 0x40);
     if (script != 0) {
-        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
     }
 }
 #endif
@@ -309,13 +309,13 @@ extern "C" void func_00307AF0(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307B20);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
 extern "C" void func_00307B20(void* self)
 {
     void* script = *(void**)((char*)self + 0x44);
     if (script != 0) {
-        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
     }
 }
 #endif
@@ -323,13 +323,13 @@ extern "C" void func_00307B20(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307B50);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
 extern "C" void func_00307B50(void* self)
 {
     void* script = *(void**)((char*)self + 0x48);
     if (script != 0) {
-        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
     }
 }
 #endif
@@ -337,13 +337,13 @@ extern "C" void func_00307B50(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307B80);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
 extern "C" void func_00307B80(void* self)
 {
     void* script = *(void**)((char*)self + 0x4c);
     if (script != 0) {
-        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
     }
 }
 #endif
@@ -351,13 +351,13 @@ extern "C" void func_00307B80(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307BB0);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
 extern "C" void func_00307BB0(void* self)
 {
     void* script = *(void**)((char*)self + 0x50);
     if (script != 0) {
-        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
     }
 }
 #endif
@@ -365,13 +365,13 @@ extern "C" void func_00307BB0(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307BE0);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
 extern "C" void func_00307BE0(void* self)
 {
     void* script = *(void**)((char*)self + 0x54);
     if (script != 0) {
-        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
     }
 }
 #endif
@@ -379,21 +379,21 @@ extern "C" void func_00307BE0(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307C10);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
 extern "C" void func_00307C10(void* self)
 {
     void* script = *(void**)((char*)self + 0x58);
     if (script != 0) {
-        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307C40);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_processStart);
 #ifdef SKIP_ASM
-class func_00307C40_cElem {
+class cWScriptProcess_processStart_cElem {
 public:
     char pad00[0x40];
     // vptr at 0x40
@@ -403,13 +403,13 @@ public:
     virtual void v04();
 };
 
-struct func_00307C40_sProc {
+struct cWScriptProcess_processStart_sProc {
     int state;
     int count;
     int cur;
     int pad0C;
     void* man;
-    func_00307C40_cElem* elems;
+    cWScriptProcess_processStart_cElem* elems;
     int pad18;
     void* luno;
     int pad20;
@@ -418,24 +418,24 @@ struct func_00307C40_sProc {
 };
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00224DA0(void* mem, int a1);
-extern "C" void func_00224DF0(void* obj, int flags);
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
-extern "C" void func_00309A60(void* man, void* proc);
+extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
+extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
+extern "C" void cWScriptMan_processStart(void* man, void* proc);
 extern char D_00489888[];
 
-extern "C" void func_00307C40(func_00307C40_sProc* self)
+extern "C" void cWScriptProcess_processStart(cWScriptProcess_processStart_sProc* self)
 {
     if (self->luno != 0) {
-        func_00224DF0(self->luno, 3);
+        luno_cLunoTable__cLunoTable(self->luno, 3);
     }
-    self->luno = func_00224DA0(cMemMan_alloc(4, D_00489888, 0x20000000, 0), 8);
+    self->luno = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_00489888, 0x20000000, 0), 8);
     self->state = 1;
     self->cur = 0;
     if (self->script != 0) {
-        func_0030AC98(self->man, self, self->script);
+        cWScriptMan_runScriptCode(self->man, self, self->script);
     }
-    func_00309A60(self->man, self);
+    cWScriptMan_processStart(self->man, self);
     if (self->cur < self->count) {
         self->elems[self->cur].v04();
     }
@@ -445,13 +445,13 @@ extern "C" void func_00307C40(func_00307C40_sProc* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307D00);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
 extern "C" void func_00307D00(void* self)
 {
     void* script = *(void**)((char*)self + 0x2c);
     if (script != 0) {
-        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
     }
 }
 #endif
@@ -459,40 +459,40 @@ extern "C" void func_00307D00(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00307D30);
 #ifdef SKIP_ASM
-extern "C" void func_0030AC98(void* man, void* proc, void* script);
-extern "C" void func_00307D78(void* self);
+extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
+extern "C" void cWScriptProcess_end(void* self);
 
 extern "C" void func_00307D30(void* self)
 {
     *(int*)self = 3;
     void* script = *(void**)((char*)self + 0x30);
     if (script != 0) {
-        func_0030AC98(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
     }
-    func_00307D78(self);
+    cWScriptProcess_end(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307D78);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_end);
 #ifdef SKIP_ASM
-extern "C" void func_00309AA0(void* man, void* proc);
-extern "C" void func_00224DF0(void* obj, int flags);
+extern "C" void cWScriptMan_processEnd(void* man, void* proc);
+extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 
-extern "C" void func_00307D78(void* self)
+extern "C" void cWScriptProcess_end(void* self)
 {
     *(int*)self = 3;
-    func_00309AA0(*(void**)((char*)self + 0x10), self);
+    cWScriptMan_processEnd(*(void**)((char*)self + 0x10), self);
     void* obj = *(void**)((char*)self + 0x1C);
     if (obj != 0) {
-        func_00224DF0(obj, 3);
+        luno_cLunoTable__cLunoTable(obj, 3);
     }
     *(void**)((char*)self + 0x1C) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00307DC8);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_processComplete);
 #ifdef SKIP_ASM
 int func_0030B898(void* man, void* proc);
 
@@ -502,7 +502,7 @@ struct sVEntry00307DC8 {
     void (*fn)(void*);
 };
 
-extern "C" void func_00307DC8(void* self)
+extern "C" void cWScriptProcess_processComplete(void* self)
 {
     if (func_0030B898(*(void**)((char*)self + 0x10), self) != 0) {
         sVEntry00307DC8* vt = *(sVEntry00307DC8**)((char*)self + 0x5C);
@@ -637,14 +637,14 @@ extern "C" void func_00307F58(func_00307F58_sProc* self, int id)
 }
 #endif
 
-extern "C" void* func_00309B70(int);
+extern "C" void* cWScriptMan_getScriptCode(int);
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308018__FPv);
 #ifdef SKIP_ASM
 void* func_00308018(void* self)
 {
-    return func_00309B70(*(int*)((char*)self + 0x10));
+    return cWScriptMan_getScriptCode(*(int*)((char*)self + 0x10));
 }
 #endif
 
@@ -692,9 +692,9 @@ public:
 extern char* D_004A47B8;
 extern char D_00489888[];
 extern "C" int func_003ACA38(void* map, int id);
-extern "C" void* func_00224DA0(void* mem, int a1);
-extern "C" void func_00224DF0(void* obj, int flags);
-extern "C" void func_002259A8(void* obj, func_00308118_cStream* stream, int a2);
+extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
+extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
+extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, func_00308118_cStream* stream, int a2);
 class func_00308798_cObj;
 extern "C" int func_00308798(void* a, func_00308798_cObj* obj);
 
@@ -703,15 +703,15 @@ extern "C" void func_00308118(void* self, func_00308118_cStream* stream)
     stream->v02(self, 0x10);
     int x = func_003ACA38(*(void**)(D_004A47B8 + 0x4), *(int*)((char*)self + 0x24));
     if (*(void**)((char*)self + 0x1C) != 0) {
-        func_00224DF0(*(void**)((char*)self + 0x1C), 3);
+        luno_cLunoTable__cLunoTable(*(void**)((char*)self + 0x1C), 3);
     }
     *(void**)((char*)self + 0x1C) = 0;
     int has;
     stream->v02(&has, 4);
     if (has) {
-        void* t = func_00224DA0(cMemMan_alloc(4, D_00489888, 0x20000000, 0), 8);
+        void* t = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_00489888, 0x20000000, 0), 8);
         *(void**)((char*)self + 0x1C) = t;
-        func_002259A8(t, stream, x);
+        luno_cLunoTable_readFromReplayFrame(t, stream, x);
     }
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
@@ -723,13 +723,13 @@ extern "C" void func_00308118(void* self, func_00308118_cStream* stream)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308228);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void MEM_fill(void* dst, int value, int size);
 extern void* D_00489AE0[];
 
 extern "C" void* func_00308228(void* self)
 {
     *(void***)((char*)self + 0x40) = D_00489AE0;
-    func_003E6448((char*)self + 8, 0, 0xC);
+    MEM_fill((char*)self + 8, 0, 0xC);
     *(int*)((char*)self + 0x3C) = 0;
     *(int*)((char*)self + 0x4) = 0;
     *(int*)self = 0;
@@ -738,18 +738,18 @@ extern "C" void* func_00308228(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("wscript/wscriptprocess", func_00308278);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_initTask);
 #ifdef SKIP_ASM
 // PORT: func_00308018 is declared (void*) but takes (self, id) and forwards id; bound by asm label
 void* func_00308018_2(void* self, int id) __asm__("func_00308018__FPv");
 
-struct func_00308278_sDef {
+struct cWScriptTask_initTask_sDef {
     int f0;
     int a[3];
     int b[10];
 };
 
-struct func_00308278_sObj {
+struct cWScriptTask_initTask_sObj {
     int f0;
     int f4;
     void* a[3];
@@ -757,7 +757,7 @@ struct func_00308278_sObj {
     void* owner;
 };
 
-extern "C" void func_00308278(func_00308278_sObj* self, void* owner, func_00308278_sDef* def)
+extern "C" void cWScriptTask_initTask(cWScriptTask_initTask_sObj* self, void* owner, cWScriptTask_initTask_sDef* def)
 {
     int i;
     int j;
@@ -1090,7 +1090,7 @@ INCLUDE_ASM("wscript/wscriptprocess", func_003087D0);
 extern "C" void func_0030C738(void* p);
 void func_0030B058(void* p);
 extern "C" void func_0030C390(void* p);
-extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void func_00308988(void* self);
 extern char D_00489C00[];
 extern char* D_004A47B8;
@@ -1119,7 +1119,7 @@ extern "C" void* func_003087D0(void* self)
     }
     func_003087D0_current = self;
     *(char**)((char*)self + 0x28C) = D_004A47B8;
-    func_003E6448((char*)self + 0x3CC, 0, 0xC8);
+    MEM_fill((char*)self + 0x3CC, 0, 0xC8);
     func_00308988(self);
     return self;
 }
@@ -1157,7 +1157,7 @@ extern "C" void func_003088D8(void* self, int flags)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308988);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void func_0030C760(void* p);
 extern "C" void func_00308AA0(void* self);
 
@@ -1189,10 +1189,10 @@ extern "C" void func_00308988(void* self)
     WSP308988_I(0xC) = -1;
     WSP308988_I(0x24) = -1;
     WSP308988_U(0x2C) = 0xFFFFFFFF;
-    func_003E6448((char*)self + 0x38, 0, 8);
+    MEM_fill((char*)self + 0x38, 0, 8);
     func_0030C760((char*)self + 0x1C4);
     WSP308988_I(0x40) = 0;
-    func_003E6448((char*)self + 0x44, 0, 0x180);
+    MEM_fill((char*)self + 0x44, 0, 0x180);
     func_00308AA0(self);
 }
 
@@ -1203,7 +1203,7 @@ extern "C" void func_00308988(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308A48);
 #ifdef SKIP_ASM
-extern "C" void func_00224DF0(void* obj, int flags);
+extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 
 extern "C" void func_00308A48(void* self)
 {
@@ -1211,7 +1211,7 @@ extern "C" void func_00308A48(void* self)
     int i;
     for (i = 0; i < 50; i++) {
         if (objs[i] != 0) {
-            func_00224DF0(objs[i], 3);
+            luno_cLunoTable__cLunoTable(objs[i], 3);
             objs[i] = 0;
         }
     }
@@ -1264,8 +1264,8 @@ void* func_00308B58(void* self)
 INCLUDE_ASM("wscript/wscriptprocess", func_00308B78);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00224DA0(void* mem, int a1);
-extern "C" void func_00224DF0(void* obj, int flags);
+extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
+extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern const char D_004898C8[];
 
 // PORT: the unit declares func_00308B78 as (void* self); the body also takes the slot index
@@ -1275,27 +1275,27 @@ void* func_00308B78_impl(void* self, int i)
     char* base = (char*)self + 0x3CC;
     void** slot = (void**)(base + (i << 2));
     if (*slot != 0) {
-        func_00224DF0(*slot, 3);
+        luno_cLunoTable__cLunoTable(*slot, 3);
     }
-    return *slot = func_00224DA0(cMemMan_alloc(4, D_004898C8, 0x20000000, 0), 0x40);
+    return *slot = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_004898C8, 0x20000000, 0), 0x40);
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308BE0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_activeSection);
 #ifdef SKIP_ASM
-extern "C" int func_003A6C08(void* self, int i);
-extern "C" void* func_003A6C38(void* self, int i);
+extern "C" int cWorld_getNumProcessScripts(void* self, int i);
+extern "C" void* cWorld_getProcessScripts(void* self, int i);
 extern "C" void cWScriptMan_addProcess(void* self, int section, void* def, int flags);
 
-struct func_00308BE0_sDef {
+struct cWScriptMan_activeSection_sDef {
     char pad[0x40];
 };
 
-extern "C" void func_00308BE0(void* self, int section)
+extern "C" void cWScriptMan_activeSection(void* self, int section)
 {
-    int n = func_003A6C08(*(void**)((char*)self + 0x28C), section);
-    func_00308BE0_sDef* defs = (func_00308BE0_sDef*)func_003A6C38(*(void**)((char*)self + 0x28C), section);
+    int n = cWorld_getNumProcessScripts(*(void**)((char*)self + 0x28C), section);
+    cWScriptMan_activeSection_sDef* defs = (cWScriptMan_activeSection_sDef*)cWorld_getProcessScripts(*(void**)((char*)self + 0x28C), section);
     int i;
     for (i = 0; i < n; i++) {
         cWScriptMan_addProcess(self, section, &defs[i], 0);
@@ -1304,7 +1304,7 @@ extern "C" void func_00308BE0(void* self, int section)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308C60);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_setupMissions);
 #ifdef SKIP_ASM
 struct sWSPDef8C60 {
     char pad[0x54];
@@ -1319,7 +1319,7 @@ extern "C" void func_0026C898(void* pb);
 extern "C" int func_003A6C68(void* world, int i);
 extern "C" void* func_003A6C98(void* world, int i);
 extern "C" void cWScriptMan_addProcess1(void* self, int section, void* def, int id, int flags);
-extern "C" char* func_00144BC0(void* iface);
+extern "C" char* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cPlaybackMan_initLocation(void* pb, void* loc);
 extern "C" void func_00308DB8(void* self);
 
@@ -1328,7 +1328,7 @@ static inline void* wsPlayback8C60()
     return *(void**)(*(char**)(D_004A28A8 + 0x84) + 0x34);
 }
 
-extern "C" void func_00308C60(void* self)
+extern "C" void cWScriptMan_setupMissions(void* self)
 {
     void* iface;
     func_0026C898(wsPlayback8C60());
@@ -1344,7 +1344,7 @@ extern "C" void func_00308C60(void* self)
                 cWScriptMan_addProcess1(self, i, &defs[j], (i << 16) + i, 0);
             }
         }
-        cPlaybackMan_initLocation(wsPlayback8C60(), func_00144BC0(iface) + 0x34);
+        cPlaybackMan_initLocation(wsPlayback8C60(), cBENewRaceInterface_getLocation(iface) + 0x34);
     }
     func_00308DB8(self);
 }
@@ -1375,12 +1375,12 @@ struct func_00309DD0_sValue;
 extern const char D_004898D8[];
 extern "C" int func_003A6C68(void* world, int i);
 extern "C" void* func_003A6C98(void* world, int i);
-// PORT: the unit declares func_00309B70 as (int); its body takes (self, id) and returns an int.
-extern "C" int func_00309B70_2(void* self, int id) __asm__("func_00309B70");
+// PORT: the unit declares cWScriptMan_getScriptCode as (int); its body takes (self, id) and returns an int.
+extern "C" int cWScriptMan_getScriptCode_2(void* self, int id) __asm__("cWScriptMan_getScriptCode");
 void func_00226600(void* self, int a1, int a2);
 extern "C" void* func_002224A8(void* self);
 extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
-extern "C" void func_00225B90(func_00309DD0_sValue* self, int flags);
+extern "C" void luno_cLunoVar__cLunoVar(func_00309DD0_sValue* self, int flags);
 
 extern "C" void func_00308DB8(void* self)
 {
@@ -1392,8 +1392,8 @@ extern "C" void func_00308DB8(void* self)
         int j;
         for (j = 0; j < cnt; j++) {
             if (defs[j].f0 != *(int*)((char*)self + 0x2A0)) {
-                void* table = func_00224DA0(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
-                int h = func_00309B70_2(self, defs[j].f4C);
+                void* table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
+                int h = cWScriptMan_getScriptCode_2(self, defs[j].f4C);
                 if (h != 0) {
                     sWSPValue8DB8 arg;
                     sWSPValue8DB8 ret;
@@ -1403,10 +1403,10 @@ extern "C" void func_00308DB8(void* self)
                     ret.word0 = 0;
                     func_002224A8(&call);
                     func_002224B8(&call, &arg, table, &ret);
-                    func_00225B90((func_00309DD0_sValue*)&ret, 2);
+                    luno_cLunoVar__cLunoVar((func_00309DD0_sValue*)&ret, 2);
                 }
                 if (table != 0) {
-                    func_00224DF0(table, 3);
+                    luno_cLunoTable__cLunoTable(table, 3);
                 }
             }
         }
@@ -1433,63 +1433,63 @@ extern "C" void func_00308F38(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308F70);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_purgeSection);
 #ifdef SKIP_ASM
-extern "C" void func_0030B0E8(void* list, int section);
-extern "C" void func_00224DF0(void* obj, int flags);
+extern "C" void cProcessList_unloadSection(void* list, int section);
+extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 
-extern "C" void func_00308F70(void* self, int section)
+extern "C" void cWScriptMan_purgeSection(void* self, int section)
 {
-    func_0030B0E8((char*)self + 0x2B4, section);
-    func_0030B0E8((char*)self + 0x2B8, section);
-    func_0030B0E8((char*)self + 0x2BC, section);
+    cProcessList_unloadSection((char*)self + 0x2B4, section);
+    cProcessList_unloadSection((char*)self + 0x2B8, section);
+    cProcessList_unloadSection((char*)self + 0x2BC, section);
     int off = section << 2;
     char* base = (char*)self + 0x3CC;
     void** slot = (void**)(base + off);
     if (*slot != 0) {
-        func_00224DF0(*slot, 3);
+        luno_cLunoTable__cLunoTable(*slot, 3);
         *slot = 0;
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("wscript/wscriptprocess", func_00308FE0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_unloadSection);
 #ifdef SKIP_ASM
-struct func_00308FE0_sEntry {
+struct cWScriptMan_unloadSection_sEntry {
     char pad[0xC];
 };
 
-extern "C" void func_00308F70(void* self, int i);
+extern "C" void cWScriptMan_purgeSection(void* self, int i);
 extern "C" void func_003ACC90(void* entry);
 
-extern "C" void func_00308FE0(void* self, int i)
+extern "C" void cWScriptMan_unloadSection(void* self, int i)
 {
-    func_00308F70(self, i);
-    func_00308FE0_sEntry* items =
-        *(func_00308FE0_sEntry**)(*(char**)(*(char**)((char*)self + 0x28C) + 4) + 4);
+    cWScriptMan_purgeSection(self, i);
+    cWScriptMan_unloadSection_sEntry* items =
+        *(cWScriptMan_unloadSection_sEntry**)(*(char**)(*(char**)((char*)self + 0x28C) + 4) + 4);
     func_003ACC90(&items[i]);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("wscript/wscriptprocess", func_00309030);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_initMissions);
 #ifdef SKIP_ASM
 struct cWorldView;
 int cWorldView_getNumSections(cWorldView* view);
 extern "C" void func_0030B1B8(void*);
 extern "C" void func_00308988(void* self);
-extern "C" void func_00308BE0(void* self, int section);
-extern "C" void func_00308F70(void* self, int section);
+extern "C" void cWScriptMan_activeSection(void* self, int section);
+extern "C" void cWScriptMan_purgeSection(void* self, int section);
 
-struct func_00309030_sSection {
+struct cWScriptMan_initMissions_sSection {
     short type;
     short pad2;
     int f4;
     int f8;
 };
 
-extern "C" void func_00309030(void* self)
+extern "C" void cWScriptMan_initMissions(void* self)
 {
     int i = 0;
     func_0030B1B8((char*)self + 0x2B8);
@@ -1498,12 +1498,12 @@ extern "C" void func_00309030(void* self)
     func_00308988(self);
     int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
     for (; i < n; i++) {
-        func_00309030_sSection* tbl = *(func_00309030_sSection**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
+        cWScriptMan_initMissions_sSection* tbl = *(cWScriptMan_initMissions_sSection**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
         int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
         if (ok) {
-            func_00308BE0(self, i);
+            cWScriptMan_activeSection(self, i);
         } else {
-            func_00308F70(self, i);
+            cWScriptMan_purgeSection(self, i);
         }
     }
 }
@@ -1514,11 +1514,11 @@ INCLUDE_ASM("wscript/wscriptprocess", func_00309118);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_00308DB8(void* self);
-extern "C" void func_0030A868(void* self, int id, int a2, int a3);
+extern "C" void cWScriptMan_doMissionCmd(void* self, int id, int a2, int a3);
 extern "C" void* func_0028B180();
 extern "C" void func_0029D6E0(void* snd, int a1);
 extern "C" void func_0029DBB0(void* snd, int a1);
-extern "C" void func_0026F7B8(void* p);
+extern "C" void cReplay_startRace(void* p);
 extern "C" void func_0026CC48(void* p);
 extern char* D_004A28A8;
 
@@ -1529,30 +1529,30 @@ extern "C" void func_00309118(void* vself)
     switch (*(int*)(self + 0x2AC)) {
     case 1:
         func_00308DB8(self);
-        func_0030A868(self, *(int*)(self + 0x2B0), 1, 0);
+        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 1, 0);
         func_0029D6E0(func_0028B180(), *(int*)(self + 0x2A0));
-        func_0026F7B8(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
+        cReplay_startRace(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28));
         break;
     case 2:
-        func_0030A868(self, *(int*)(self + 0x2B0), 3, 0);
+        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 3, 0);
         break;
     case 3:
-        func_0030A868(self, *(int*)(self + 0x2B0), 0x12, 0);
+        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 0x12, 0);
         func_00308DB8(self);
         func_0029DBB0(func_0028B180(), 1);
         break;
     case 4:
-        func_0030A868(self, *(int*)(self + 0x2B0), 5, 0);
+        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 5, 0);
         func_00308DB8(self);
         func_0029DBB0(func_0028B180(), 1);
         break;
     case 5:
         func_0026CC48(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x34));
-        func_0030A868(self, *(int*)(self + 0x2B0), 1, 1);
+        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 1, 1);
         func_00308DB8(self);
         break;
     case 6:
-        func_0030A868(self, *(int*)(self + 0x2B0), 0x12, 0);
+        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 0x12, 0);
         func_00308DB8(self);
         break;
     }

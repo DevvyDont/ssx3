@@ -6,7 +6,7 @@ INCLUDE_ASM("main/all_in_one_main", __sti__all_in_one_main_cpp);
 struct cNullMenuItem;
 struct cSpaceMenuItem;
 
-void func_002CAA58(void*);
+void cMenu_cMenu(void*);
 extern "C" void cMenu_addItem(void *, char*, int);
 extern "C" void func_002CCF98(char*, int, int *, int);
 void cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* label);
@@ -27,7 +27,7 @@ extern "C" char* __sti__all_in_one_main_cpp(char* self, int* a, int* b)
     char* item3 = self + 0x18C;
     char* item4 = self + 0x1A4;
     char* item5 = self + 0x1C8;
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(char**)(self + 0x12C) = D_0046D3D0;
     *(int*)(self + 0x130) = *a;
     *(int*)(self + 0x134) = *b;
@@ -50,14 +50,14 @@ extern "C" char* __sti__all_in_one_main_cpp(char* self, int* a, int* b)
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DB2B0);
 #ifdef SKIP_ASM
-void func_002CAA58(void*);
+void cMenu_cMenu(void*);
 extern "C" void func_002CCF98(char*, int, int *, int);
 extern "C" void cMenu_addItem(void *, char*, int);
 extern int D_00467DE0[];
 extern int D_0046D378[];
 
 extern "C" void *func_001DB2B0(char *arg0, int *arg1) {
-    func_002CAA58(arg0);
+    cMenu_cMenu(arg0);
     char *p = arg0 + 0x134;
     *(int **)(arg0 + 0x12C) = D_0046D378;
     *(int *)(arg0 + 0x130) = *arg1;
@@ -1039,12 +1039,12 @@ extern "C" void func_001DC938(void) {
 }
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DC940);
+INCLUDE_ASM("main/all_in_one_main", cDebugScreen__cDebugScreen);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern void* D_0046D948[];
 
-extern "C" void func_001DC940(void *self, int flags) {
+extern "C" void cDebugScreen__cDebugScreen(void *self, int flags) {
     *(void***)((char*)self + 0) = D_0046D948;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1407,7 +1407,7 @@ extern "C" void func_001DCCF8(int *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCD00);
+INCLUDE_ASM("main/all_in_one_main", cDebugMenuScreen__cDebugMenuScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0017ABE0_CD00(void *, int) __asm__("func_0017ABE0");
@@ -1415,7 +1415,7 @@ void operator_delete(int*);
 extern void* D_0046D948[];
 
 
-extern "C" void func_001DCD00(void *self, int flags) {
+extern "C" void cDebugMenuScreen__cDebugMenuScreen(void *self, int flags) {
     func_0017ABE0_CD00((char *)self + 0x8C10, 2);
     *(void ***)self = D_0046D948;
     if (flags & 1) {
@@ -1428,11 +1428,11 @@ extern "C" void func_001DCD00(void *self, int flags) {
 INCLUDE_ASM("main/all_in_one_main", func_001DCD58);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(int, int);
-extern "C" void func_002CAA80(int, int);
+extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DCD58(int arg0, int arg1) {
     func_002CA280(arg0 + 0x130, 2);
-    func_002CAA80(arg0, arg1);
+    cMenu__cMenu(arg0, arg1);
 }
 #endif
 
@@ -1440,7 +1440,7 @@ extern "C" void func_001DCD58(int arg0, int arg1) {
 INCLUDE_ASM("main/all_in_one_main", func_001DCDA0);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(int, int);
-extern "C" void func_002CAA80(int, int);
+extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DCDA0(int arg0, int arg1) {
     func_002CA280(arg0 + 0x1E4, 2);
@@ -1449,7 +1449,7 @@ extern "C" void func_001DCDA0(int arg0, int arg1) {
     func_002CA280(arg0 + 0x168, 2);
     func_002CA280(arg0 + 0x150, 2);
     func_002CA280(arg0 + 0x134, 2);
-    func_002CAA80(arg0, arg1);
+    cMenu__cMenu(arg0, arg1);
 }
 #endif
 
@@ -1457,7 +1457,7 @@ extern "C" void func_001DCDA0(int arg0, int arg1) {
 INCLUDE_ASM("main/all_in_one_main", func_001DCE20);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(int, int);
-extern "C" void func_002CAA80(int, int);
+extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DCE20(int arg0, int arg1) {
     func_002CA280(arg0 + 0x1E4, 2);
@@ -1466,7 +1466,7 @@ extern "C" void func_001DCE20(int arg0, int arg1) {
     func_002CA280(arg0 + 0x168, 2);
     func_002CA280(arg0 + 0x150, 2);
     func_002CA280(arg0 + 0x134, 2);
-    func_002CAA80(arg0, arg1);
+    cMenu__cMenu(arg0, arg1);
 }
 #endif
 
@@ -1474,7 +1474,7 @@ extern "C" void func_001DCE20(int arg0, int arg1) {
 INCLUDE_ASM("main/all_in_one_main", func_001DCEA0);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(int, int);
-extern "C" void func_002CAA80(int, int);
+extern "C" void cMenu__cMenu(int, int);
 
 // PORT: pointers passed as int (unit declares the callees with int parameters)
 static inline void SubMenuB_CEA0(int m)
@@ -1489,7 +1489,7 @@ static inline void SubMenuB_CEA0(int m)
     func_002CA280(m + 0x168, 2);
     func_002CA280(m + 0x150, 2);
     func_002CA280(m + 0x134, 2);
-    func_002CAA80(m, 2);
+    cMenu__cMenu(m, 2);
 }
 
 static inline void SubMenuA_CEA0(int m)
@@ -1501,13 +1501,13 @@ static inline void SubMenuA_CEA0(int m)
     func_002CA280(m + 0x168, 2);
     func_002CA280(m + 0x150, 2);
     func_002CA280(m + 0x134, 2);
-    func_002CAA80(m, 2);
+    cMenu__cMenu(m, 2);
 }
 
 extern "C" void func_001DCEA0(int self, int arg)
 {
     SubMenuA_CEA0(self + 0x130);
-    func_002CAA80(self, arg);
+    cMenu__cMenu(self, arg);
 }
 #endif
 
@@ -1519,7 +1519,7 @@ struct VTab { int a; int b; VEnt dtor; };
 struct Elem { char pad[0x10]; VTab *vt; char pad2[0x24 - 0x14]; };
 struct Obj { char pad[0x168]; Elem elems[4]; };
 extern "C" void func_002CA280(int, int);
-extern "C" void func_002CAA80(int, int);
+extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DCFC8(Obj *self, int flags) {
     if (self->elems != 0) {
@@ -1532,7 +1532,7 @@ extern "C" void func_001DCFC8(Obj *self, int flags) {
     }
     func_002CA280((int)self + 0x150, 2);
     func_002CA280((int)self + 0x134, 2);
-    func_002CAA80((int)self, flags);
+    cMenu__cMenu((int)self, flags);
 }
 #endif
 
@@ -1540,14 +1540,14 @@ extern "C" void func_001DCFC8(Obj *self, int flags) {
 INCLUDE_ASM("main/all_in_one_main", func_001DD060);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(int, int);
-extern "C" void func_002CAA80(int, int);
+extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DD060(int arg0, int arg1) {
     func_002CA280(arg0 + 0x194, 2);
     func_002CA280(arg0 + 0x168, 2);
     func_002CA280(arg0 + 0x150, 2);
     func_002CA280(arg0 + 0x134, 2);
-    func_002CAA80(arg0, arg1);
+    cMenu__cMenu(arg0, arg1);
 }
 #endif
 
@@ -1561,7 +1561,7 @@ struct cMenuPart_DD0C8 {                    // dtor func_002CA280
     char pad[0x18];
     ~cMenuPart_DD0C8();
 };
-struct cMenuBase_DD0C8 {                    // dtor func_002CAA80
+struct cMenuBase_DD0C8 {                    // dtor cMenu__cMenu
     char pad[0x130];
     ~cMenuBase_DD0C8();
 };
@@ -1608,7 +1608,7 @@ cPersonaMenu_DD0C8::~cPersonaMenu_DD0C8()
 }
 // PORT: the compiler names these dtors _$_<len><Class>; map them to the address-derived names.
 __asm__(".globl func_001DD0C8\n.type func_001DD0C8,@function\nfunc_001DD0C8 = _$_18cPersonaMenu_DD0C8\n.size func_001DD0C8,0x18C\n");
-__asm__("_$_15cMenuPart_DD0C8 = func_002CA280\n_$_15cMenuBase_DD0C8 = func_002CAA80\n");
+__asm__("_$_15cMenuPart_DD0C8 = func_002CA280\n_$_15cMenuBase_DD0C8 = cMenu__cMenu\n");
 #endif
 
 //100%
@@ -1630,7 +1630,7 @@ extern "C" void func_001DD258(Obj_D258 *self, int flags) {
     }
     func_002CA280((int)self + 0x150, 2);
     func_002CA280((int)self + 0x134, 2);
-    func_002CAA80((int)self, flags);
+    cMenu__cMenu((int)self, flags);
 }
 #endif
 
@@ -1653,7 +1653,7 @@ extern "C" void func_001DD2F0(Obj_D2F0 *self, int flags) {
     }
     func_002CA280((int)self + 0x154, 2);
     func_002CA280((int)self + 0x138, 2);
-    func_002CAA80((int)self, flags);
+    cMenu__cMenu((int)self, flags);
 }
 #endif
 
@@ -1676,7 +1676,7 @@ extern "C" void func_001DD398(Obj_D398 *self, int flags) {
     func_002CA280((int)self + 0x168, 2);
     func_002CA280((int)self + 0x150, 2);
     func_002CA280((int)self + 0x134, 2);
-    func_002CAA80((int)self, flags);
+    cMenu__cMenu((int)self, flags);
 }
 #endif
 
@@ -1684,7 +1684,7 @@ extern "C" void func_001DD398(Obj_D398 *self, int flags) {
 INCLUDE_ASM("main/all_in_one_main", func_001DD440);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(int, int);
-extern "C" void func_002CAA80(int, int);
+extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DD440(int arg0, int arg1) {
     func_002CA280(arg0 + 0x1C8, 2);
@@ -1693,7 +1693,7 @@ extern "C" void func_001DD440(int arg0, int arg1) {
     func_002CA280(arg0 + 0x170, 2);
     func_002CA280(arg0 + 0x154, 2);
     func_002CA280(arg0 + 0x138, 2);
-    func_002CAA80(arg0, arg1);
+    cMenu__cMenu(arg0, arg1);
 }
 #endif
 
@@ -1701,11 +1701,11 @@ extern "C" void func_001DD440(int arg0, int arg1) {
 INCLUDE_ASM("main/all_in_one_main", func_001DD4C0);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(int, int);
-extern "C" void func_002CAA80(int, int);
+extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DD4C0(int arg0, int arg1) {
     func_002CA280(arg0 + 0x134, 2);
-    func_002CAA80(arg0, arg1);
+    cMenu__cMenu(arg0, arg1);
 }
 #endif
 
@@ -1727,12 +1727,12 @@ extern "C" void *func_001DD508(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD530);
+INCLUDE_ASM("main/all_in_one_main", cFEInput__cFEInput);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern void* D_0046DBA8[];
 
-extern "C" void func_001DD530(void *self, int flags) {
+extern "C" void cFEInput__cFEInput(void *self, int flags) {
     *(void***)((char*)self + 8) = D_0046DBA8;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1784,10 +1784,10 @@ extern "C" unsigned short *func_001DD580(unsigned short *arg0) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD598);
 #ifdef SKIP_ASM
-extern "C" void func_0039C558();
+extern "C" void cUIScreen__cUIScreen();
 
 extern "C" void func_001DD598(void) {
-    func_0039C558();
+    cUIScreen__cUIScreen();
 }
 #endif
 
@@ -2568,13 +2568,13 @@ extern "C" void *func_001DDC48(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDC90);
+INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup__cUIStateBuyPopup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_DDC90(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
-extern "C" void func_001DDC90(void *self) {
+extern "C" void cUIStateBuyPopup__cUIStateBuyPopup(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DDC90(self);
 }
@@ -2815,13 +2815,13 @@ extern "C" void *func_001DDE78(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDEB8);
+INCLUDE_ASM("main/all_in_one_main", cFEPopupConfirm__cFEPopupConfirm);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001C5A90_DEB8(void*) __asm__("func_001C5A90");
 extern void* D_0046C890_DEB8[] __asm__("D_0046C890");
 
-extern "C" void func_001DDEB8(void *self) {
+extern "C" void cFEPopupConfirm__cFEPopupConfirm(void *self) {
     *(void***)((char*)self + 8) = D_0046C890_DEB8;
     func_001C5A90_DEB8(self);
 }
@@ -3127,9 +3127,9 @@ extern "C" S_E288 *func_001DE288(S_E288 *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE2D8);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_onLoseTransition);
 #ifdef SKIP_ASM
-extern "C" int func_001DE2D8(void) {
+extern "C" int cKeyboardPopup_onLoseTransition(void) {
     return 1;
 }
 #endif
@@ -3228,10 +3228,10 @@ extern "C" void func_001DE348(void *arg0, int arg1) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE350);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_001CE3C8_DE350(int, int, int, int) __asm__("func_001CE3C8");
+extern "C" void cKeyboardPopup_setIncludeKey_DE350(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
 extern "C" void func_001DE350(int arg0, int arg1) {
-    func_001CE3C8_DE350(arg0, 0x4B, arg1, 2);
+    cKeyboardPopup_setIncludeKey_DE350(arg0, 0x4B, arg1, 2);
 }
 #endif
 
@@ -3239,10 +3239,10 @@ extern "C" void func_001DE350(int arg0, int arg1) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE378);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_001CE3C8_DE378(int, int, int, int) __asm__("func_001CE3C8");
+extern "C" void cKeyboardPopup_setIncludeKey_DE378(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
 extern "C" void func_001DE378(int arg0, int arg1) {
-    func_001CE3C8_DE378(arg0, 0x1C, arg1, 2);
+    cKeyboardPopup_setIncludeKey_DE378(arg0, 0x1C, arg1, 2);
 }
 #endif
 
@@ -3250,10 +3250,10 @@ extern "C" void func_001DE378(int arg0, int arg1) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE3A0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_001CE3C8_DE3A0(int, int, int, int) __asm__("func_001CE3C8");
+extern "C" void cKeyboardPopup_setIncludeKey_DE3A0(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
 extern "C" void func_001DE3A0(int arg0, int arg1) {
-    func_001CE3C8_DE3A0(arg0, 0x45, arg1, 2);
+    cKeyboardPopup_setIncludeKey_DE3A0(arg0, 0x45, arg1, 2);
 }
 #endif
 
@@ -3261,10 +3261,10 @@ extern "C" void func_001DE3A0(int arg0, int arg1) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE3C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_001CE3C8_DE3C8(int, int, int, int) __asm__("func_001CE3C8");
+extern "C" void cKeyboardPopup_setIncludeKey_DE3C8(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
 extern "C" void func_001DE3C8(int arg0, int arg1) {
-    func_001CE3C8_DE3C8(arg0, 0x4F, arg1, 2);
+    cKeyboardPopup_setIncludeKey_DE3C8(arg0, 0x4F, arg1, 2);
 }
 #endif
 
@@ -3272,10 +3272,10 @@ extern "C" void func_001DE3C8(int arg0, int arg1) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE3F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_001CE3C8_DE3F0(int, int, int, int) __asm__("func_001CE3C8");
+extern "C" void cKeyboardPopup_setIncludeKey_DE3F0(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
 extern "C" void func_001DE3F0(int arg0, int arg1) {
-    func_001CE3C8_DE3F0(arg0, 0x29, arg1, 2);
+    cKeyboardPopup_setIncludeKey_DE3F0(arg0, 0x29, arg1, 2);
 }
 #endif
 
@@ -3283,10 +3283,10 @@ extern "C" void func_001DE3F0(int arg0, int arg1) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE418);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_001CE3C8_DE418(int, int, int, int) __asm__("func_001CE3C8");
+extern "C" void cKeyboardPopup_setIncludeKey_DE418(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
 extern "C" void func_001DE418(int arg0, int arg1) {
-    func_001CE3C8_DE418(arg0, 0x42, arg1, 2);
+    cKeyboardPopup_setIncludeKey_DE418(arg0, 0x42, arg1, 2);
 }
 #endif
 
@@ -3509,13 +3509,13 @@ extern "C" void *func_001DE690(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE6C8);
+INCLUDE_ASM("main/all_in_one_main", cFEStateTitle__cFEStateTitle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_E6C8(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
-extern "C" void* func_001DE6C8(void *self) {
+extern "C" void* cFEStateTitle__cFEStateTitle(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     return func_0039E390_E6C8(self);
 }

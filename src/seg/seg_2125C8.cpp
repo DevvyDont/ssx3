@@ -14,7 +14,7 @@ extern "C" void *cAIAnimEventMap_getBlendInTime(int arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2125C8", func_003115E0);
+INCLUDE_ASM("seg/seg_2125C8", cAIAnimEventMap_initMaps);
 #ifdef SKIP_ASM
 struct Range_15E0 {
     short start;
@@ -32,8 +32,8 @@ struct Groups_15E0 {
 extern Groups_15E0 D_00489D60;
 
 // PORT: the unit declares this as void(int); defined under an asm label with its real type
-extern "C" void func_003115E0_impl(RangeTable_15E0* t) __asm__("func_003115E0");
-extern "C" void func_003115E0_impl(RangeTable_15E0* t)
+extern "C" void cAIAnimEventMap_initMaps_impl(RangeTable_15E0* t) __asm__("cAIAnimEventMap_initMaps");
+extern "C" void cAIAnimEventMap_initMaps_impl(RangeTable_15E0* t)
 {
     Groups_15E0 tab = D_00489D60;
     int prev;
@@ -95,19 +95,19 @@ extern "C" void *func_00311860(void) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_2125C8", func_00311870);
+INCLUDE_ASM("seg/seg_2125C8", cRiderAnimBase_initAIAnimEventMap);
 #ifdef SKIP_ASM
 extern "C" int cMemMan_alloc(int, char *, int, int);
-extern "C" void func_003115E0(int);
+extern "C" void cAIAnimEventMap_initMaps(int);
 extern char D_0048A4D0[];
 extern int D_004A3DFC;
 
-extern "C" void func_00311870(void) {
+extern "C" void cRiderAnimBase_initAIAnimEventMap(void) {
     int temp_2;
 
     temp_2 = cMemMan_alloc(0x6D4, D_0048A4D0, 0, 0);
     D_004A3DFC = temp_2;
-    func_003115E0(temp_2);
+    cAIAnimEventMap_initMaps(temp_2);
 }
 #endif
 

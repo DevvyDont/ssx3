@@ -101,9 +101,9 @@ extern "C" sWSNode* func_00351170(sWSPool* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptcompile", func_003511D0);
+INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan_allocInstance);
 #ifdef SKIP_ASM
-extern "C" sWSNode* func_003511D0(sWSPool* self, unsigned int id)
+extern "C" sWSNode* cInstanceMan_allocInstance(sWSPool* self, unsigned int id)
 {
     sWSNode** link = &self->free;
     sWSNode* p = self->free;

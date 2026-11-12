@@ -17,7 +17,7 @@ void* cLensFxMan_construct()
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EC418);
 #ifdef SKIP_ASM
-extern "C" void func_002E2E18(void* self);
+extern "C" void cLensFxMan_cLensFxMan(void* self);
 extern void* D_00487F00[];
 
 // PORT: asm label because the unit's forward declaration above has C++ linkage;
@@ -25,7 +25,7 @@ extern void* D_00487F00[];
 void* func_002EC418_impl(void* self) __asm__("func_002EC418");
 void* func_002EC418_impl(void* self)
 {
-    func_002E2E18(self);
+    cLensFxMan_cLensFxMan(self);
     *(int*)((char*)self + 0x649c) = (int)(void*)D_00487F00;
     return self;
 }

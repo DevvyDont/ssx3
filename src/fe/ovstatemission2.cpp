@@ -22,7 +22,7 @@ INCLUDE_ASM("fe/ovstatemission2", func_00211B38);
 
 INCLUDE_ASM("fe/ovstatemission2", func_00211BC8);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00212080);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_initGeneral);
 
 INCLUDE_ASM("fe/ovstatemission2", func_00212138);
 
@@ -32,7 +32,7 @@ INCLUDE_ASM("fe/ovstatemission2", func_00212208);
 
 INCLUDE_ASM("fe/ovstatemission2", func_002122E0);
 
-INCLUDE_ASM("fe/ovstatemission2", func_002122E8);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_displayStatus);
 
 INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_displayOn);
 

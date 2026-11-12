@@ -1484,9 +1484,9 @@ extern "C" int func_002BB100(void *arg0, void *arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB130);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_cWorldPainterMan);
 #ifdef SKIP_ASM
-extern "C" void *func_002BB130(void *arg0) {
+extern "C" void *cWorldPainterMan_cWorldPainterMan(void *arg0) {
     (*(int *)((char*)(arg0) + (4))) = 0;
     return arg0;
 }
@@ -1619,17 +1619,17 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB3F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void ASYNCFILE_release_B3F0(int, int *, int *) __asm__("ASYNCFILE_release");
-extern "C" void func_002523A8_B3F0(int) __asm__("func_002523A8");
+extern "C" void MEM_free_B3F0(int) __asm__("MEM_free");
 extern "C" void func_003B47F8_B3F0(int, int) __asm__("func_003B47F8");
 extern "C" int func_003B4818_B3F0(int) __asm__("func_003B4818");
-extern "C" int func_003DF980_B3F0(int) __asm__("func_003DF980");
-extern "C" void func_003E6574_B3F0(int, int, int) __asm__("func_003E6574");
+extern "C" int ASYNCFILE_getstatus_B3F0(int) __asm__("ASYNCFILE_getstatus");
+extern "C" void MEM_copy_B3F0(int, int, int) __asm__("MEM_copy");
 int operator_new_B3F0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
 extern char D_004A3868[];
 extern "C" void func_002BB3F0(void *self_) {
     char *self = (char*)self_;
     short st = *(short*)self;
-    if (st == 1 && func_003DF980_B3F0(*(int*)(self + 4)) == st) {
+    if (st == 1 && ASYNCFILE_getstatus_B3F0(*(int*)(self + 4)) == st) {
         int sp0 = 0;
         int sp4 = 0;
         ASYNCFILE_release_B3F0(*(int*)(self + 4), &sp0, &sp4);
@@ -1643,9 +1643,9 @@ extern "C" void func_002BB3F0(void *self_) {
                 } else {
                     int r = operator_new_B3F0(sp4, D_004A3868, 0x20000000, 0);
                     *(int*)(self + 8) = r;
-                    func_003E6574_B3F0(r, sp0, sp4);
+                    MEM_copy_B3F0(r, sp0, sp4);
                 }
-                func_002523A8_B3F0(sp0);
+                MEM_free_B3F0(sp0);
             }
         }
         *(short*)self = 2;

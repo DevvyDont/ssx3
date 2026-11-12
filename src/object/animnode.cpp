@@ -148,7 +148,7 @@ struct sBody_E698 {
 };
 
 // Takes the body as a second (out) argument, as in multiparticle.cpp.
-extern "C" void func_00356AE0(void* self, sBody_E698* body);
+extern "C" void cMoveNode_updateIntersectInfo(void* self, sBody_E698* body);
 extern "C" void func_0034E798(char* self);
 extern "C" void func_0034E600_E698(void* self, int id, int idx, sVec4_E698* out) __asm__("func_0034E600");
 
@@ -215,7 +215,7 @@ static inline void vu0AddEq_E698(sVec4_E698& a, const sVec4_E698& b)
 // Applies the attached bone's motion delta to the body: vel += delta.pos + (body.pos - bonePos) x delta.rot; angVel += delta.rot.
 extern "C" void func_0034E698(char* self, sBody_E698* body)
 {
-    func_00356AE0(self + 0x14, body);
+    cMoveNode_updateIntersectInfo(self + 0x14, body);
     int bone = body->bone;
     if (bone < 0)
         return;
@@ -476,7 +476,7 @@ extern "C" int func_0034EBA0(sAnimNode_EBA0* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/animnode", func_0034EBE0);
+INCLUDE_ASM("object/animnode", cAnimNode_frameUpdateEvent);
 #ifdef SKIP_ASM
 struct sRange_EBE0 {
     char pad[8];
@@ -485,7 +485,7 @@ struct sRange_EBE0 {
 };
 
 // Is t between the two bounds: [start, end) when start < end, else [end, start).
-extern "C" int func_0034EBE0(sRange_EBE0* self, float t)
+extern "C" int cAnimNode_frameUpdateEvent(sRange_EBE0* self, float t)
 {
     int r = 0;
     if (self->start != 1e10f) {
@@ -600,19 +600,19 @@ extern "C" void* func_0034ED88(void* self, void* a1, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/animnode", func_0034EE68);
+INCLUDE_ASM("object/animnode", cFloatingNode__cFloatingNode);
 #ifdef SKIP_ASM
 extern void* D_0048F858[];
-extern "C" void func_0034F048(void* self);
-extern "C" void func_003553C0(void* self, int flags);
+extern "C" void cFloatingNode_restoreOverlapSystem(void* self);
+extern "C" void cMoveNode__cMoveNode(void* self, int flags);
 void operator_delete(int*);
 
-extern "C" void func_0034EE68(void* self, int flags)
+extern "C" void cFloatingNode__cFloatingNode(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = D_0048F858;
-    func_0034F048(self);
+    cFloatingNode_restoreOverlapSystem(self);
     operator_delete(*(int**)((char*)self + 0x74));
-    func_003553C0(self, flags);
+    cMoveNode__cMoveNode(self, flags);
 }
 #endif
 

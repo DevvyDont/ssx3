@@ -6,7 +6,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetupBXEngine);
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00272788(void* obj, void* buf, int size, int a3, void* out);
+extern "C" void* cInSeq_cInSeq(void* obj, void* buf, int size, int a3, void* out);
 extern char D_00481F48[];
 extern char D_00481F58[];
 extern char D_004A34F0[];
@@ -19,7 +19,7 @@ struct sBXSlot {
 extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int a2, int size)
 {
     *(void**)((char*)self + 0x2BC) = operator_new_tag(size, D_00481F48, 0, 0);
-    *(void**)((char*)self + 0x2B8) = func_00272788(cMemMan_alloc(0x20, D_004A34F0, 0, 0),
+    *(void**)((char*)self + 0x2B8) = cInSeq_cInSeq(cMemMan_alloc(0x20, D_004A34F0, 0, 0),
         *(void**)((char*)self + 0x2BC), size, a2, (char*)self + 0x2AC);
     *(int*)((char*)self + 0x2B4) = count;
     *(sBXSlot**)((char*)self + 0x2B0) = (sBXSlot*)operator_new_tag(count * 8, D_00481F58, 0, 0);
@@ -31,38 +31,38 @@ extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int a2, int
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_00282020);
+INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_PurgeBXEngine);
 #ifdef SKIP_ASM
 struct sScriptEngine282390;
 struct sScriptEngine2823F0;
 struct sScriptEngine2B8;
-extern "C" void func_00282390(sScriptEngine282390* self);
-extern "C" void func_002823F0(sScriptEngine2823F0* self);
-extern "C" void func_002828B8(sScriptEngine2B8* self);
-extern "C" void func_0027D050(void* self);
-extern "C" void func_002728D0(void* obj, int flags);
+extern "C" void cBXScriptEngine_StopScriptAll(sScriptEngine282390* self);
+extern "C" void cBXScriptEngine_ReleaseRequestAll(sScriptEngine2823F0* self);
+extern "C" void cBXScriptEngine_ResetInstVars(sScriptEngine2B8* self);
+extern "C" void cScriptDatabaseObject_RemoveObjectAll(void* self);
+extern "C" void cInSeq__cInSeq(void* obj, int flags);
 void cMemMan_free(void*);
 
-extern "C" void func_00282020(void* self)
+extern "C" void cBXScriptEngine_PurgeBXEngine(void* self)
 {
     if (*(void**)((char*)self + 0x2B0) != 0) {
-        func_00282390((sScriptEngine282390*)self);
-        func_002823F0((sScriptEngine2823F0*)self);
-        func_0027D050(self);
+        cBXScriptEngine_StopScriptAll((sScriptEngine282390*)self);
+        cBXScriptEngine_ReleaseRequestAll((sScriptEngine2823F0*)self);
+        cScriptDatabaseObject_RemoveObjectAll(self);
         if (*(void**)((char*)self + 0x2B0) != 0) {
             cMemMan_free(*(void**)((char*)self + 0x2B0));
         }
         *(void**)((char*)self + 0x2B0) = 0;
         *(int*)((char*)self + 0x2B4) = 0;
         if (*(void**)((char*)self + 0x2B8) != 0) {
-            func_002728D0(*(void**)((char*)self + 0x2B8), 3);
+            cInSeq__cInSeq(*(void**)((char*)self + 0x2B8), 3);
         }
         *(void**)((char*)self + 0x2B8) = 0;
         if (*(void**)((char*)self + 0x2BC) != 0) {
             cMemMan_free(*(void**)((char*)self + 0x2BC));
         }
         *(void**)((char*)self + 0x2BC) = 0;
-        func_002828B8((sScriptEngine2B8*)self);
+        cBXScriptEngine_ResetInstVars((sScriptEngine2B8*)self);
     }
 }
 #endif
@@ -249,7 +249,7 @@ extern "C" void func_00282338(void* self, int a1)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/bxscriptengine", func_00282390);
+INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_StopScriptAll);
 #ifdef SKIP_ASM
 extern "C" void func_00282338(void* self, int id);
 
@@ -265,7 +265,7 @@ struct sScriptEngine282390 {
     sScriptSlot282390 slots[16];
 };
 
-extern "C" void func_00282390(sScriptEngine282390* self)
+extern "C" void cBXScriptEngine_StopScriptAll(sScriptEngine282390* self)
 {
     for (int i = 0; i < 16; i++) {
         sScriptSlot282390* s = &self->slots[i];
@@ -277,7 +277,7 @@ extern "C" void func_00282390(sScriptEngine282390* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_002823F0);
+INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ReleaseRequestAll);
 #ifdef SKIP_ASM
 extern "C" void func_00282540(void* self, int id);
 
@@ -293,7 +293,7 @@ struct sScriptEngine2823F0 {
     sScriptSlot2823F0 slots[16];
 };
 
-extern "C" void func_002823F0(sScriptEngine2823F0* self)
+extern "C" void cBXScriptEngine_ReleaseRequestAll(sScriptEngine2823F0* self)
 {
     for (int i = 0; i < 16; i++) {
         sScriptSlot2823F0* s = &self->slots[i];
@@ -585,7 +585,7 @@ extern "C" int func_00282838(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_002828B8);
+INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ResetInstVars);
 #ifdef SKIP_ASM
 struct sScriptThread2C0 {
     int a;          // 0x00
@@ -605,7 +605,7 @@ struct sScriptEngine2B8 {
     int unk2BC;                     // 0x2BC
     sScriptThread2C0 threads[16];   // 0x2C0
 };
-extern "C" void func_002828B8(sScriptEngine2B8* self)
+extern "C" void cBXScriptEngine_ResetInstVars(sScriptEngine2B8* self)
 {
     int i;
     self->count = 0;
@@ -900,12 +900,12 @@ extern "C" void* func_00282CB0(void* self, int a1)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282CD0);
 #ifdef SKIP_ASM
-void* func_00283200(void* self, int type);
+void* cScriptObject_cScriptObject(void* self, int type);
 extern void* D_00482060[];
 
 extern "C" void* func_00282CD0(void* self)
 {
-    func_00283200(self, 2);
+    cScriptObject_cScriptObject(self, 2);
     *(void***)((char*)self + 0xC) = D_00482060;
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x2C) = 0;
@@ -1049,9 +1049,9 @@ extern "C" void func_00282F30(void* self)
 extern void* D_00482418[];
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_00282F60__FPv);
+INCLUDE_ASM("scripter/bxscriptengine", cScriptEntity_cScriptEntity__FPv);
 #ifdef SKIP_ASM
-void* func_00282F60(void* self)
+void* cScriptEntity_cScriptEntity(void* self)
 {
     *(void***)self = D_00482418;
     *(int*)((char*)self + 0x4) = -1;
@@ -1141,11 +1141,11 @@ extern "C" void func_00283060(void* self)
 INCLUDE_ASM("scripter/bxscriptengine", func_00283088);
 #ifdef SKIP_ASM
 extern void* D_004823E0[];
-void* func_00282F60(void* self);
+void* cScriptEntity_cScriptEntity(void* self);
 
 extern "C" void* func_00283088(void* self)
 {
-    func_00282F60(self);
+    cScriptEntity_cScriptEntity(self);
     *(void***)self = D_004823E0;
     *(int*)((char*)self + 0xC) = 9;
     *(int*)((char*)self + 0x10) = 0;
@@ -1215,9 +1215,9 @@ extern "C" int func_002831B0(void* self, void* arg, int n)
 extern void* D_00482558[];
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_00283200__FPvi);
+INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_cScriptObject__FPvi);
 #ifdef SKIP_ASM
-void* func_00283200(void* self, int a1)
+void* cScriptObject_cScriptObject(void* self, int a1)
 {
     *(void***)((char*)self + 0xc) = D_00482558;
     *(int*)self = a1;
@@ -1230,14 +1230,14 @@ void* func_00283200(void* self, int a1)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00283228);
 #ifdef SKIP_ASM
-extern "C" void func_002832D8(void* self);
+extern "C" void cScriptObject_DeInitScriptObject(void* self);
 void operator_delete(int* ptr);
 
 extern "C" void func_00283228(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = D_00482558;
     if (*(int*)((char*)self + 0x4) != -1 && *(int*)((char*)self + 0x4) != 0) {
-        func_002832D8(self);
+        cScriptObject_DeInitScriptObject(self);
         *(int*)((char*)self + 0x4) = -1;
     }
     if (flags & 1) {
@@ -1264,7 +1264,7 @@ extern "C" void func_00283298(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_002832D8);
+INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_DeInitScriptObject);
 #ifdef SKIP_ASM
 struct sBxsVEntryB {
     short delta;
@@ -1272,7 +1272,7 @@ struct sBxsVEntryB {
     int (*fn)(void*, int);
 };
 
-extern "C" void func_002832D8(void* self)
+extern "C" void cScriptObject_DeInitScriptObject(void* self)
 {
     char* mgr = (char*)func_0027D2E8();
     sBxsVEntryB* vt = *(sBxsVEntryB**)(mgr + 0x2A8);

@@ -8,13 +8,13 @@ extern char D_004FF250[];
 extern unsigned int D_004A3EBC;
 extern unsigned int D_004A3EC0;
 extern int D_004A3EB8;
-extern "C" void func_003E5698(void* mutex);
+extern "C" void MUTEX_create(void* mutex);
 extern "C" void func_0031FF60(void* heap, unsigned int base, unsigned int size);
 extern "C" void cMemBlockMan_initialize(void);
 
 extern "C" void cMemMan_initialize(unsigned int base, unsigned int size)
 {
-    func_003E5698(D_00538B00);
+    MUTEX_create(D_00538B00);
     D_004A3EBC = base;
     D_004A3EC0 = size;
     func_0031FF60(D_004FF250, base, size);

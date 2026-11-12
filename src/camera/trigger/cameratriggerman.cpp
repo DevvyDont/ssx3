@@ -46,7 +46,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CA18);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void operator_delete(int*);
 extern void* D_004A28A8;
-extern "C" void func_0016BF40(void* self);
+extern "C" void cCameraTriggerList_reset(void* self);
 
 struct sCtVec4_CA18 {
     float x, y, z, w;
@@ -136,7 +136,7 @@ extern "C" void func_0016CA18_impl(void* vself)
     }
     cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x1C));
     cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x3C));
-    func_0016BF40(vself);
+    cCameraTriggerList_reset(vself);
     cCamera_resetChaseControllerSwitches();
 }
 #endif

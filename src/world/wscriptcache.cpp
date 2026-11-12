@@ -155,18 +155,18 @@ INCLUDE_ASM("world/wscriptcache", func_003ACAD0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void ASYNCFILE_release_CAD0(int, int *, int *) __asm__("ASYNCFILE_release");
-extern "C" void func_002523A8_CAD0(int) __asm__("func_002523A8");
+extern "C" void MEM_free_CAD0(int) __asm__("MEM_free");
 extern "C" void func_003B47F8_CAD0(int, int) __asm__("func_003B47F8");
 extern "C" int func_003B4818_CAD0(int) __asm__("func_003B4818");
-extern "C" int func_003DF980_CAD0(int) __asm__("func_003DF980");
-extern "C" void func_003E6574_CAD0(int, int, int) __asm__("func_003E6574");
+extern "C" int ASYNCFILE_getstatus_CAD0(int) __asm__("ASYNCFILE_getstatus");
+extern "C" void MEM_copy_CAD0(int, int, int) __asm__("MEM_copy");
 int operator_new_CAD0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
 extern char D_00495080[];
 extern "C" void func_003ACAD0_impl(void *self_) __asm__("func_003ACAD0");
 extern "C" void func_003ACAD0_impl(void *self_) {
     char *self = (char*)self_;
     short st = *(short*)self;
-    if (st == 1 && func_003DF980_CAD0(*(int*)(self + 4)) == st) {
+    if (st == 1 && ASYNCFILE_getstatus_CAD0(*(int*)(self + 4)) == st) {
         int sp0 = 0;
         int sp4 = 0;
         ASYNCFILE_release_CAD0(*(int*)(self + 4), &sp0, &sp4);
@@ -180,9 +180,9 @@ extern "C" void func_003ACAD0_impl(void *self_) {
                 } else {
                     int r = operator_new_CAD0(sp4, D_00495080, 0x20000000, 0);
                     *(int*)(self + 8) = r;
-                    func_003E6574_CAD0(r, sp0, sp4);
+                    MEM_copy_CAD0(r, sp0, sp4);
                 }
-                func_002523A8_CAD0(sp0);
+                MEM_free_CAD0(sp0);
             }
         }
         *(short*)self = 2;
@@ -832,12 +832,12 @@ void sti_003AD290(int init, int prio)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ADC18);
+INCLUDE_ASM("world/wscriptcache", cChunkResolve__cChunkResolve);
 #ifdef SKIP_ASM
 extern void* D_00495150[];
 void operator_delete(int*);
 
-extern "C" void func_003ADC18(void* self, int flags)
+extern "C" void cChunkResolve__cChunkResolve(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_00495150;
     if (flags & 1) {
@@ -1034,7 +1034,7 @@ extern char D_00495218[];
 extern char D_00495230[];
 extern "C" signed char func_003B5440();
 extern "C" void func_003E62B0();
-extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void func_003E0AD8(int h, int a, int b);
 extern "C" int func_003E0D80(int h, int a, int b, int c);
 extern "C" int func_003DF690(int a, int flags);
@@ -1054,7 +1054,7 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
     if (func_003B5440() == 0) {
         a8 = 1;
     }
-    func_003E6448(self, 0, 0x78);
+    MEM_fill(self, 0, 0x78);
     *(int*)(self + 0x18) = a7;
     *(int*)(self + 0x1C) = a8;
     *(int*)(self + 0x20) = 0;
@@ -2499,9 +2499,9 @@ void* func_003B07D8(void* self)
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003B07F8);
 #ifdef SKIP_ASM
-extern "C" void* func_003B2A68(unsigned int w, int h, int bpp, int a3, int a4, int flags, int a6, int a7);
+extern "C" void* SHAPE_create(unsigned int w, int h, int bpp, int a3, int a4, int flags, int a6, int a7);
 extern "C" void* func_003B3D40(void* img);
-extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void MEM_fill(void* dst, int value, int size);
 extern int D_00509438[];
 
 static inline char* func_003B07F8_data(char* p)
@@ -2518,14 +2518,14 @@ extern "C" void* func_003B07F8(void* self, unsigned int w, int h)
     *(int*)((char*)self + 0x8) = 3;
     *(int*)((char*)self + 0xC) = 3;
     *(int*)((char*)self + 0x10) = 0;
-    char* img = (char*)func_003B2A68(w, h, 0x20, 0, 0, D_00509438[0], 0, 0xF0);
+    char* img = (char*)SHAPE_create(w, h, 0x20, 0, 0, D_00509438[0], 0, 0xF0);
     *(char**)((char*)self + 0x4) = img;
     char* hdr = (char*)func_003B3D40(img);
     hdr[4] = 0x32;
     hdr[5] = 0x34;
     hdr[6] = 0x30;
     unsigned int size = ((w >> 4) * h >> 4) << 10;
-    func_003E6448(func_003B07F8_data(*(char**)((char*)self + 0x4)), 0, size);
+    MEM_fill(func_003B07F8_data(*(char**)((char*)self + 0x4)), 0, size);
     **(char**)((char*)self + 0x4) = 5;
     return self;
 }
@@ -2655,7 +2655,7 @@ extern "C" int func_003B0B10(void* self, void* a1, void* a2)
 INCLUDE_ASM("world/wscriptcache", func_003B0B40);
 #ifdef SKIP_ASM
 extern "C" void func_003B06F8(void* req, void* blk);
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" void func_004029D0(void* dst, void* src, int size);
 
 struct func_003B0B40_sBlock {
@@ -2689,7 +2689,7 @@ extern "C" void func_003B0B40(void* a, void* b, void* c)
         i = blk->size;
         total = (i + 7) & ~0xF;
         i -= 8;
-        func_003E6574(self->buf, data, i);
+        MEM_copy(self->buf, data, i);
         for (; i < total + 0x10; i += 4) {
             *(int*)(self->buf + i) = 0;
         }
@@ -3781,43 +3781,43 @@ extern "C" void func_003B2440(void)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003B2528);
+INCLUDE_ASM("world/wscriptcache", SHAPE_bpctobpp);
 #ifdef SKIP_ASM
-struct func_003B2528_sKey {
+struct SHAPE_bpctobpp_sKey {
     char c;
 };
 
-extern "C" char func_003B3DA8(int key);
-extern "C" void func_003B39D8(func_003B2528_sKey* k);
+extern "C" char SHAPE_type(int key);
+extern "C" void SHAPE_depth(SHAPE_bpctobpp_sKey* k);
 
-extern "C" void func_003B2528(int key)
+extern "C" void SHAPE_bpctobpp(int key)
 {
-    func_003B2528_sKey k;
+    SHAPE_bpctobpp_sKey k;
     if (key == 0) {
         key = 0x20;
     }
-    k.c = func_003B3DA8(key);
-    func_003B39D8(&k);
+    k.c = SHAPE_type(key);
+    SHAPE_depth(&k);
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003B2558);
+INCLUDE_ASM("world/wscriptcache", SHAPE_imagesize);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_003B2528 `void`, but it returns func_003B39D8's result
+// PORT: the unit declares SHAPE_bpctobpp `void`, but it returns SHAPE_depth's result
 // (the format's bits per pixel); bound via asm label.
-extern "C" int func_003B2528_bits(int fmt) __asm__("func_003B2528");
+extern "C" int SHAPE_bpctobpp_bits(int fmt) __asm__("SHAPE_bpctobpp");
 
-extern "C" int func_003B2558(int w, int h, int fmt, int maxLevel)
+extern "C" int SHAPE_imagesize(int w, int h, int fmt, int maxLevel)
 {
     int total = 0;
-    int c = func_003B2528_bits(fmt);
+    int c = SHAPE_bpctobpp_bits(fmt);
     int bpp = 0x10;
     if (c != 0xF) bpp = c;
     if (w < 1 || w > 0x10000 || h < 1) return 0;
     if (h > 0x10000) return 0;
     if (w * h > 1000000000) return 0;
-    if (func_003B3DA8(c) == 0) return 0;
+    if (SHAPE_type(c) == 0) return 0;
     int i;
     for (i = 0; i <= maxLevel; i++) {
         int lw = w >> i;
@@ -3833,9 +3833,9 @@ extern "C" int func_003B2558(int w, int h, int fmt, int maxLevel)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003B2688);
+INCLUDE_ASM("world/wscriptcache", GetNumberOfColours);
 #ifdef SKIP_ASM
-extern "C" int func_003B2688(int v)
+extern "C" int GetNumberOfColours(int v)
 {
     switch (v) {
     case 8:
@@ -3849,21 +3849,21 @@ extern "C" int func_003B2688(int v)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003B26B8);
+INCLUDE_ASM("world/wscriptcache", SHAPE_createsize);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_003B2528 `void`, but it returns the format's bits per pixel.
-extern "C" int func_003B2528_bits(int fmt) __asm__("func_003B2528");
-extern "C" int func_003B2558(int w, int h, int fmt, int maxLevel);
+// PORT: the unit declares SHAPE_bpctobpp `void`, but it returns the format's bits per pixel.
+extern "C" int SHAPE_bpctobpp_bits(int fmt) __asm__("SHAPE_bpctobpp");
+extern "C" int SHAPE_imagesize(int w, int h, int fmt, int maxLevel);
 
-extern "C" int func_003B26B8(int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2)
+extern "C" int SHAPE_createsize(int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2)
 {
-    int c = func_003B2528_bits(fmt);
-    int size = func_003B2558(w, h, fmt, maxLevel);
+    int c = SHAPE_bpctobpp_bits(fmt);
+    int size = SHAPE_imagesize(w, h, fmt, maxLevel);
     size += 0x10;
     if (c < 9 && clut != 0) {
         if (clut == 0xF) clut = 0x10;
         if (size != 0) size = (size + 0xF) & ~0xF;
-        int n = func_003B2688(c) * clut / 8 + 0x10;
+        int n = GetNumberOfColours(c) * clut / 8 + 0x10;
         size = ((size + 0xF) & ~0xF) + n;
     }
     if (extra1 != 0) {
@@ -3879,14 +3879,14 @@ extern "C" int func_003B26B8(int w, int h, int fmt, int clut, int maxLevel, int 
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003B27C8);
+INCLUDE_ASM("world/wscriptcache", SHAPE_createat);
 #ifdef SKIP_ASM
-extern "C" char func_003B3DA8(int key);
-extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" char SHAPE_type(int key);
+extern "C" void MEM_fill(void* dst, int value, int size);
 // PORT: memset-like fill called with an unsigned all-ones value here
-extern "C" void func_003E6448_u(void* dst, unsigned int value, int size) __asm__("func_003E6448");
-extern "C" int func_003B2558(int w, int h, int fmt, int maxLevel);
-extern "C" int func_003B2688(int v);
+extern "C" void MEM_fill_u(void* dst, unsigned int value, int size) __asm__("MEM_fill");
+extern "C" int SHAPE_imagesize(int w, int h, int fmt, int maxLevel);
+extern "C" int GetNumberOfColours(int v);
 extern "C" unsigned char func_003B38B8(int clut);
 
 struct sTexHdr_27C8 {
@@ -3912,28 +3912,28 @@ static inline unsigned char* texData_27C8(sTexHdr_27C8* t)
     return (unsigned char*)t + 0x10;
 }
 
-extern "C" void func_003B27C8(void* tex, int w, int h, int fmt, int clut, int levels, int extra1, int extra2)
+extern "C" void SHAPE_createat(void* tex, int w, int h, int fmt, int clut, int levels, int extra1, int extra2)
 {
     sTexHdr_27C8* t = (sTexHdr_27C8*)tex;
     int bpp = 0x20;
     if (fmt != 0) bpp = fmt;
-    char c = func_003B3DA8(bpp);
-    func_003E6448(t, 0, 0x10);
+    char c = SHAPE_type(bpp);
+    MEM_fill(t, 0, 0x10);
     t->type = c;
     t->w = w;
     t->h = h;
     t->levels = levels;
     sTexHdr_27C8* hdr = t;
-    unsigned char* p = (unsigned char*)hdr + (func_003B2558(w, h, bpp, levels) + 0x10);
+    unsigned char* p = (unsigned char*)hdr + (SHAPE_imagesize(w, h, bpp, levels) + 0x10);
     if (bpp < 9 && clut != 0) {
-        int n = func_003B2688(bpp);
+        int n = GetNumberOfColours(bpp);
         unsigned char cfmt = func_003B38B8(clut);
         int off = ((p - (unsigned char*)hdr) + 0xF) & ~0xF;
         p = (unsigned char*)hdr + off;
         int cbits = 0x10;
         if (clut != 0xF) cbits = clut;
         hdr->next = off;
-        func_003E6448(p, 0, 0x10);
+        MEM_fill(p, 0, 0x10);
         ((sTexHdr_27C8*)p)->type = cfmt;
         ((sTexHdr_27C8*)p)->h = 1;
         ((sTexHdr_27C8*)p)->w = n;
@@ -3946,7 +3946,7 @@ extern "C" void func_003B27C8(void* tex, int w, int h, int fmt, int clut, int le
                 pal[i].a = 0xFF;
             }
         } else {
-            func_003E6448_u(texData_27C8((sTexHdr_27C8*)p), 0xFFFFFFFF, n * cbits / 8);
+            MEM_fill_u(texData_27C8((sTexHdr_27C8*)p), 0xFFFFFFFF, n * cbits / 8);
         }
         hdr = (sTexHdr_27C8*)p;
         p += n * cbits / 8 + 0x10;
@@ -3954,14 +3954,14 @@ extern "C" void func_003B27C8(void* tex, int w, int h, int fmt, int clut, int le
     if (extra1 != 0) {
         hdr->next = p - (unsigned char*)hdr;
         hdr = (sTexHdr_27C8*)p;
-        func_003E6448(p, 0, extra1 + 8);
+        MEM_fill(p, 0, extra1 + 8);
         *(int*)(p + 4) = extra1;
         p[0] = 0x6F;
         p += extra1 + 8;
     }
     if (extra2 != 0) {
         hdr->next = p - (unsigned char*)hdr;
-        func_003E6448(p, 0, extra2 + 0x10);
+        MEM_fill(p, 0, extra2 + 0x10);
         p[0] = 0x69;
         *(short*)(p + 6) = 0x10;
         *(int*)(p + 0x10) = 0x455355;
@@ -3970,24 +3970,24 @@ extern "C" void func_003B27C8(void* tex, int w, int h, int fmt, int clut, int le
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/wscriptcache", func_003B2A68);
+INCLUDE_ASM("world/wscriptcache", SHAPE_create);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" int func_003B26B8(int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2);
-extern "C" void func_003B27C8(void* tex, int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2);
+extern "C" int SHAPE_createsize(int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2);
+extern "C" void SHAPE_createat(void* tex, int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2);
 extern void* (*D_0044C454[])(char* name, int size, int a2, int align, int heap);
 extern char D_004956B0[];
 
-extern "C" void* func_003B2A68(unsigned int w, int h, int fmt, int clut, int maxLevel, int heap, int extra1, int extra2)
+extern "C" void* SHAPE_create(unsigned int w, int h, int fmt, int clut, int maxLevel, int heap, int extra1, int extra2)
 {
     char name[16];
     void* tex = 0;
-    int size = func_003B26B8(w, h, fmt, clut, maxLevel, extra1, extra2);
+    int size = SHAPE_createsize(w, h, fmt, clut, maxLevel, extra1, extra2);
     if (size != 0) {
         sprintf(name, D_004956B0, w, h, fmt);
         tex = D_0044C454[0](name, size, 0, 0x10, heap);
         if (tex != 0) {
-            func_003B27C8(tex, w, h, fmt, clut, maxLevel, extra1, extra2);
+            SHAPE_createat(tex, w, h, fmt, clut, maxLevel, extra1, extra2);
         }
     }
     return tex;
@@ -4007,15 +4007,15 @@ extern "C" void func_003B2B68(char* buf)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003B2B90);
+INCLUDE_ASM("world/wscriptcache", decodeAlpha);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Decodes one 4x4 alpha block into the alpha bytes of dst: mode 3 is DXT3 (explicit 4-bit alpha),
 // anything else is DXT5 (two endpoints + 3-bit indices).
 // NOTE: the DXT3 path steps through dst as `unsigned long` (64-bit on the EE), not as 32-bit pixels.
-// PORT: callers declare func_003B2B90 with char* parameters; defined under an asm label.
-extern "C" void func_003B2B90_impl(unsigned long* dst, int stride, unsigned char* src, int mode) __asm__("func_003B2B90");
-extern "C" void func_003B2B90_impl(unsigned long* dst, int stride, unsigned char* src, int mode)
+// PORT: callers declare decodeAlpha with char* parameters; defined under an asm label.
+extern "C" void decodeAlpha_impl(unsigned long* dst, int stride, unsigned char* src, int mode) __asm__("decodeAlpha");
+extern "C" void decodeAlpha_impl(unsigned long* dst, int stride, unsigned char* src, int mode)
 {
     if (mode == 3) {
         for (unsigned int y = 0; y < 4; y++) {
@@ -4078,7 +4078,7 @@ extern "C" void func_003B2B90_impl(unsigned long* dst, int stride, unsigned char
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003B2E78);
+INCLUDE_ASM("world/wscriptcache", decodeRGB);
 #ifdef SKIP_ASM
 // PORT: 64-bit `ulong` palette entries (`long` is 8 bytes on this compiler).
 static inline unsigned short dxtTo1555_2E78(unsigned short c)
@@ -4092,7 +4092,7 @@ static inline unsigned short dxtTo1555_2E78(unsigned short c)
 }
 
 // Decode one DXT1 block into 4 rows of 4 64-bit texels.
-extern "C" void func_003B2E78(char* src, int pitch, char* dst)
+extern "C" void decodeRGB(char* src, int pitch, char* dst)
 {
     ulong pal[4];
     ulong c = *(ulong*)dst;
@@ -4154,10 +4154,10 @@ extern "C" void func_003B2E78(char* src, int pitch, char* dst)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003B3308);
+INCLUDE_ASM("world/wscriptcache", hasAlpha);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` compares (ld); `long` is 8 bytes on this compiler.
-extern "C" int func_003B3308(void* buf, int size, int type)
+extern "C" int hasAlpha(void* buf, int size, int type)
 {
     if (type == 3) {
         unsigned long* p = (unsigned long*)buf;
@@ -4189,24 +4189,24 @@ extern "C" int func_003B3308(void* buf, int size, int type)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/wscriptcache", func_003B33B0);
+INCLUDE_ASM("world/wscriptcache", undxtpack);
 #ifdef SKIP_ASM
-extern "C" int func_003B3308(void* buf, int size, int type);
-extern "C" void func_003B2E78(char* src, int pitch, char* dst);
-extern "C" void func_003B2B90(char* src, int pitch, char* dst, int fmt);
+extern "C" int hasAlpha(void* buf, int size, int type);
+extern "C" void decodeRGB(char* src, int pitch, char* dst);
+extern "C" void decodeAlpha(char* src, int pitch, char* dst, int fmt);
 
 // Compress a w x h image into 4x4 blocks.
-extern "C" void func_003B33B0(void* out, char* src, int w, int h, int fmt)
+extern "C" void undxtpack(void* out, char* src, int w, int h, int fmt)
 {
     char* dst = (char*)out;
     int x, y;
     int n = w * h;
     if (fmt == 3 || fmt == 5) {
-        if (func_003B3308(dst, n, fmt)) {
+        if (hasAlpha(dst, n, fmt)) {
             for (y = 0; y < h; y += 4) {
                 for (x = 0; x < w; x += 4) {
-                    func_003B2E78(src, w * 8, dst + 8);
-                    func_003B2B90(src, w * 8, dst, fmt);
+                    decodeRGB(src, w * 8, dst + 8);
+                    decodeAlpha(src, w * 8, dst, fmt);
                     src += 0x20;
                     dst += 0x10;
                 }
@@ -4215,7 +4215,7 @@ extern "C" void func_003B33B0(void* out, char* src, int w, int h, int fmt)
         } else {
             for (y = 0; y < h; y += 4) {
                 for (x = 0; x < w; x += 4) {
-                    func_003B2E78(src, w * 8, dst + 8);
+                    decodeRGB(src, w * 8, dst + 8);
                     src += 0x20;
                     dst += 0x10;
                 }
@@ -4225,7 +4225,7 @@ extern "C" void func_003B33B0(void* out, char* src, int w, int h, int fmt)
     } else {
         for (y = 0; y < h; y += 4) {
             for (x = 0; x < w; x += 4) {
-                func_003B2E78(src, w * 4, dst);
+                decodeRGB(src, w * 4, dst);
                 src += 0x20;
                 dst += 8;
             }

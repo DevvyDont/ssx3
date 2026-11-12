@@ -263,7 +263,7 @@ extern "C" void func_00195E58(void* self)
 INCLUDE_ASM("util/locale", func_00195EB8);
 #ifdef SKIP_ASM
 extern "C" const char* func_002C6DE0(void* file, int key);
-extern "C" void func_002C27C0(char* dst, const char* src);
+extern "C" void sprintf2(char* dst, const char* src);
 extern char D_004A1390[];
 
 struct func_00195EB8_sLocale {
@@ -287,7 +287,7 @@ extern "C" const char* func_00195EB8(func_00195EB8_sLocale* self, int key)
         }
     }
     char* buf = (char*)self + 0x5A;
-    func_002C27C0(buf, D_004A1390);
+    sprintf2(buf, D_004A1390);
     return buf;
 }
 #endif
@@ -320,13 +320,13 @@ extern "C" void* func_00195F70(void* self, void* arg)
 #endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00195FF0);
+INCLUDE_ASM("util/locale", cFEStateAudioOptions_cFEStateAudioOptions);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
 extern "C" void* func_00398380(void* self, int id);
 extern "C" int func_00158700(void* self, int a1, int a2);
-extern "C" int func_001587B8(void* self, int a1, int a2);
+extern "C" int cBERewardInterface_getNumSongsInPlayList(void* self, int a1, int a2);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -336,7 +336,7 @@ extern void* D_00469448[];
 extern char D_0045DA48[];
 extern char D_0045DA38[];
 
-extern "C" void* func_00195FF0(void* self, void* engine, signed char idx, int a3)
+extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* engine, signed char idx, int a3)
 {
     char* s = (char*)self;
     func_0039E2A0(self, engine);
@@ -364,27 +364,27 @@ extern "C" void* func_00195FF0(void* self, void* engine, signed char idx, int a3
     *(int*)(s + 0x70) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(s + 0x44));
     void* ri = cBE_getInterface_Fv(cBE_getBE(), 0xD);
     *(int*)(s + 0x78) = func_00158700(ri, *(signed char*)(s + 0x44), *(int*)(s + 0x70));
-    *(int*)(s + 0x7C) = func_001587B8(ri, *(signed char*)(s + 0x44), *(int*)(s + 0x70)) > 0;
+    *(int*)(s + 0x7C) = cBERewardInterface_getNumSongsInPlayList(ri, *(signed char*)(s + 0x44), *(int*)(s + 0x70)) > 0;
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00196148);
+INCLUDE_ASM("util/locale", cFEStateAudioOptions_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char*);
 extern char D_004A18A8[];
 extern char* D_004A28A8;
 extern char D_00460400[];
 extern char D_00460410[];
-class func_00196228_cObj;
-extern "C" func_00196228_cObj* func_0039F9D8(void* list, int hash);
+class cFEStateAudioOptions_onDestroyScreen_cObj;
+extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(void* list, int hash);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
 
-class func_00196148_cObj {
+class cFEStateAudioOptions_onCreateScreen_cObj {
 public:
     int f0;
     int f4;
@@ -414,12 +414,12 @@ public:
     virtual int v24(int a, int b);
 };
 
-extern "C" void func_00196148(void* self)
+extern "C" void cFEStateAudioOptions_onCreateScreen(void* self)
 {
     char* name;
     if (*(void**)(D_004A28A8 + 0x84) != 0) {
         name = D_00460400;
-        func_00196148_cObj* obj = (func_00196148_cObj*)func_0039F9D8(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
+        cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
         if (obj != 0) {
             obj->v24(3, 0);
         }
@@ -437,14 +437,14 @@ extern "C" void func_00196148(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00196228);
+INCLUDE_ASM("util/locale", cFEStateAudioOptions_onDestroyScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char*);
-void* func_0039E4A0(void* self);
+void* cUIState_onDestroyScreen(void* self);
 extern char D_004A18A8[];
 extern char* D_004A28A8;
 
-class func_00196228_cObj {
+class cFEStateAudioOptions_onDestroyScreen_cObj {
 public:
     int f0;
     int f4;
@@ -474,44 +474,44 @@ public:
     virtual int v24(int a, int b);
 };
 
-extern "C" func_00196228_cObj* func_0039F9D8(void* list, int hash);
+extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(void* list, int hash);
 
-extern "C" void func_00196228(void* self)
+extern "C" void cFEStateAudioOptions_onDestroyScreen(void* self)
 {
     if (*(void**)(D_004A28A8 + 0x84) != 0) {
-        func_00196228_cObj* obj = func_0039F9D8(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
+        cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
         if (obj != 0) {
             obj->v24(4, 0);
         }
     }
-    func_0039E4A0(self);
+    cUIState_onDestroyScreen(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/locale", func_001962A8);
+INCLUDE_ASM("util/locale", cFEStateAudioOptions_onGainTransition);
 #ifdef SKIP_ASM
-struct func_001962A8_sVEntry {
+struct cFEStateAudioOptions_onGainTransition_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, int);
 };
 
-static inline void func_001962A8_show(char* o, int on)
+static inline void cFEStateAudioOptions_onGainTransition_show(char* o, int on)
 {
-    func_001962A8_sVEntry* vt = *(func_001962A8_sVEntry**)(o + 8);
+    cFEStateAudioOptions_onGainTransition_sVEntry* vt = *(cFEStateAudioOptions_onGainTransition_sVEntry**)(o + 8);
     vt[9].fn(o + vt[9].delta, on);
 }
 
-extern "C" int func_001962A8(void* self, int a1)
+extern "C" int cFEStateAudioOptions_onGainTransition(void* self, int a1)
 {
     if (a1 != 0 && *(int*)((char*)self + 0x7C) == 0) {
-        func_001962A8_show(*(char**)((char*)self + 0x68), 0);
-        func_001962A8_show(*(char**)((char*)self + 0x6C), 0);
-        func_001962A8_show(*(char**)((char*)self + 0x50), 0);
-        func_001962A8_show(*(char**)((char*)self + 0x58), 0);
+        cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x68), 0);
+        cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x6C), 0);
+        cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x50), 0);
+        cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x58), 0);
         if (*(int*)((char*)self + 0x74) == 0) {
-            func_001962A8_show(*(char**)((char*)self + 0x64), 0);
+            cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x64), 0);
         }
     }
     return 0;
@@ -519,56 +519,56 @@ extern "C" int func_001962A8(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00196378);
+INCLUDE_ASM("util/locale", cFEStateAudioOptions_onGainFocus);
 #ifdef SKIP_ASM
-struct func_00196378_sVEntry {
+struct cFEStateAudioOptions_onGainFocus_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, int);
 };
 
-struct func_00196378_sVEntryP {
+struct cFEStateAudioOptions_onGainFocus_sVEntryP {
     short delta;
     short index;
     void (*fn)(void*, void*);
 };
 
 extern char D_004C66D8[];
-extern "C" void func_00186518(void* self, int a1);
+extern "C" void cFEState_onGainFocus(void* self, int a1);
 
-static inline void func_00196378_call(char* o, int slot, int a)
+static inline void cFEStateAudioOptions_onGainFocus_call(char* o, int slot, int a)
 {
-    func_00196378_sVEntry* vt = *(func_00196378_sVEntry**)(o + 8);
+    cFEStateAudioOptions_onGainFocus_sVEntry* vt = *(cFEStateAudioOptions_onGainFocus_sVEntry**)(o + 8);
     vt[slot].fn(o + vt[slot].delta, a);
 }
 
-static inline void func_00196378_callp(char* o, int slot, void* a)
+static inline void cFEStateAudioOptions_onGainFocus_callp(char* o, int slot, void* a)
 {
-    func_00196378_sVEntryP* vt = *(func_00196378_sVEntryP**)(o + 8);
+    cFEStateAudioOptions_onGainFocus_sVEntryP* vt = *(cFEStateAudioOptions_onGainFocus_sVEntryP**)(o + 8);
     vt[slot].fn(o + vt[slot].delta, a);
 }
 
-extern "C" void func_00196378(void* self, int a1)
+extern "C" void cFEStateAudioOptions_onGainFocus(void* self, int a1)
 {
     char* s = (char*)self;
     if (*(int*)(s + 0x7C) == 0) {
-        func_00196378_call(*(char**)(s + 0x68), 9, 1);
-        func_00196378_call(*(char**)(s + 0x50), 9, 1);
-        func_00196378_call(*(char**)(s + 0x64), 9, 1);
-        func_00196378_call(*(char**)(s + 0x6C), 9, 1);
-        func_00196378_call(*(char**)(s + 0x58), 9, 1);
-        func_00196378_call(*(char**)(s + 0x68), 26, 1);
-        func_00196378_call(*(char**)(s + 0x68), 6, 0);
-        func_00196378_callp(*(char**)(s + 0x50), 11, D_004C66D8);
-        func_00196378_call(*(char**)(s + 0x6C), 26, 1);
-        func_00196378_call(*(char**)(s + 0x6C), 6, 0);
-        func_00196378_callp(*(char**)(s + 0x58), 11, D_004C66D8);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x68), 9, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x50), 9, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x64), 9, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x6C), 9, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x58), 9, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x68), 26, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x68), 6, 0);
+        cFEStateAudioOptions_onGainFocus_callp(*(char**)(s + 0x50), 11, D_004C66D8);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x6C), 26, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x6C), 6, 0);
+        cFEStateAudioOptions_onGainFocus_callp(*(char**)(s + 0x58), 11, D_004C66D8);
         if (*(int*)(s + 0x74) == 0) {
-            func_00196378_call(*(char**)(s + 0x64), 26, 1);
-            func_00196378_call(*(char**)(s + 0x64), 6, 0);
+            cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x64), 26, 1);
+            cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x64), 6, 0);
         }
     }
-    func_00186518(self, a1);
+    cFEState_onGainFocus(self, a1);
 }
 #endif
 

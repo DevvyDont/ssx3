@@ -944,24 +944,24 @@ extern "C" void func_002D3D70(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3D90);
+INCLUDE_ASM("seg/seg_1D3510", cExpandMenuItemMenu__cExpandMenuItemMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CAA80();
+extern "C" void cMenu__cMenu();
 
-extern "C" void func_002D3D90(void) {
-    func_002CAA80();
+extern "C" void cExpandMenuItemMenu__cExpandMenuItemMenu(void) {
+    cMenu__cMenu();
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3DB0);
+INCLUDE_ASM("seg/seg_1D3510", cExpandMenuItem__cExpandMenuItem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_002CA280_3DB0(int, int) __asm__("func_002CA280");
-extern "C" void func_002CAA80(int, int);
+extern "C" void cMenu__cMenu(int, int);
 
-extern "C" void func_002D3DB0(int arg0, int arg1) {
-    func_002CAA80(arg0 + 0x18, 2);
+extern "C" void cExpandMenuItem__cExpandMenuItem(int arg0, int arg1) {
+    cMenu__cMenu(arg0 + 0x18, 2);
     func_002CA280_3DB0(arg0, arg1);
 }
 #endif
@@ -985,19 +985,19 @@ extern "C" void func_002D3E18(void *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3E20);
+INCLUDE_ASM("seg/seg_1D3510", cARGBMenuItem__cARGBMenuItem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_002CA280_3E20(int, int) __asm__("func_002CA280");
-extern "C" void func_002CAA80(int, int);
+extern "C" void cMenu__cMenu(int, int);
 
-extern "C" void func_002D3E20(int arg0, int arg1) {
+extern "C" void cARGBMenuItem__cARGBMenuItem(int arg0, int arg1) {
     func_002CA280_3E20(arg0 + 0x640, 2);
     func_002CA280_3E20(arg0 + 0x61C, 2);
     func_002CA280_3E20(arg0 + 0x5F8, 2);
     func_002CA280_3E20(arg0 + 0x5D4, 2);
     func_002CA280_3E20(arg0 + 0x5B0, 2);
-    func_002CAA80(arg0 + 0x18, 2);
+    cMenu__cMenu(arg0 + 0x18, 2);
     func_002CA280_3E20(arg0, arg1);
 }
 #endif
@@ -1029,18 +1029,18 @@ extern "C" void func_002D3EC8(void *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3ED0);
+INCLUDE_ASM("seg/seg_1D3510", cVectorMenuItem__cVectorMenuItem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_002CA280_3ED0(int, int) __asm__("func_002CA280");
-extern "C" void func_002CAA80(int, int);
+extern "C" void cMenu__cMenu(int, int);
 
-extern "C" void func_002D3ED0(int arg0, int arg1) {
+extern "C" void cVectorMenuItem__cVectorMenuItem(int arg0, int arg1) {
     func_002CA280_3ED0(arg0 + 0x654, 2);
     func_002CA280_3ED0(arg0 + 0x620, 2);
     func_002CA280_3ED0(arg0 + 0x5EC, 2);
     func_002CA280_3ED0(arg0 + 0x5B8, 2);
-    func_002CAA80(arg0 + 0x18, 2);
+    cMenu__cMenu(arg0 + 0x18, 2);
     func_002CA280_3ED0(arg0, arg1);
 }
 #endif
@@ -1075,13 +1075,13 @@ extern "C" void func_002D3F70(void *arg0, int arg1) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F78);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(int, int);
-extern "C" void func_002CAA80(int, int);
+extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_002D3F78(int arg0, int arg1) {
     func_002CA280(arg0 + 0x164, 2);
     func_002CA280(arg0 + 0x14C, 2);
     func_002CA280(arg0 + 0x130, 2);
-    func_002CAA80(arg0, arg1);
+    cMenu__cMenu(arg0, arg1);
 }
 #endif
 

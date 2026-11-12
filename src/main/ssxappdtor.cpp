@@ -381,25 +381,25 @@ extern "C" void func_00243C80(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243CB0__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameState_preloadInit__FPv);
 #ifdef SKIP_ASM
-void func_00243CB0(void* self)
+void cGameState_preloadInit(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243CB8__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameState_preloadUpdate__FPv);
 #ifdef SKIP_ASM
-void func_00243CB8(void* self)
+void cGameState_preloadUpdate(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243CC0__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameState_preloadCancel__FPv);
 #ifdef SKIP_ASM
-void func_00243CC0(void* self)
+void cGameState_preloadCancel(void* self)
 {
 }
 #endif
@@ -421,26 +421,26 @@ void func_00243CD0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243CD8__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameState_loseFocus__FPv);
 #ifdef SKIP_ASM
-void func_00243CD8(void* self)
+void cGameState_loseFocus(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243CE0__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameState_isPreloadComplete__FPv);
 #ifdef SKIP_ASM
-int func_00243CE0(void* self)
+int cGameState_isPreloadComplete(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243CE8__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameState_onWidgetEvent__FPv);
 #ifdef SKIP_ASM
-void func_00243CE8(void* self)
+void cGameState_onWidgetEvent(void* self)
 {
 }
 #endif
@@ -546,13 +546,13 @@ extern "C" void *func_00243DE8(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243E20);
+INCLUDE_ASM("main/ssxappdtor", cGFEventStartState__cGFEventStartState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
-extern "C" void func_00243E20(int* self, int flags)
+extern "C" void cGFEventStartState__cGFEventStartState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -562,13 +562,13 @@ extern "C" void func_00243E20(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243E50);
+INCLUDE_ASM("main/ssxappdtor", cGFGateState__cGFGateState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
-extern "C" void func_00243E50(int* self, int flags)
+extern "C" void cGFGateState__cGFGateState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -630,13 +630,13 @@ extern "C" void *func_00243EE8(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243F20);
+INCLUDE_ASM("main/ssxappdtor", cGFTrackStartState__cGFTrackStartState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
-extern "C" void func_00243F20(int* self, int flags)
+extern "C" void cGFTrackStartState__cGFTrackStartState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -646,13 +646,13 @@ extern "C" void func_00243F20(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243F50);
+INCLUDE_ASM("main/ssxappdtor", cGFNextHeatState__cGFNextHeatState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
-extern "C" void func_00243F50(int* self, int flags)
+extern "C" void cGFNextHeatState__cGFNextHeatState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -682,13 +682,13 @@ extern "C" void *func_00243F80(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243FC0);
+INCLUDE_ASM("main/ssxappdtor", cGFSessionTeleportState__cGFSessionTeleportState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
-extern "C" void func_00243FC0(int* self, int flags)
+extern "C" void cGFSessionTeleportState__cGFSessionTeleportState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -716,13 +716,13 @@ extern "C" void *func_00243FF0(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244028);
+INCLUDE_ASM("main/ssxappdtor", cGFUserSelectState__cGFUserSelectState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
-extern "C" void func_00244028(int* self, int flags)
+extern "C" void cGFUserSelectState__cGFUserSelectState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -824,13 +824,13 @@ extern "C" void *func_00244128(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244160);
+INCLUDE_ASM("main/ssxappdtor", cGFPodiumState__cGFPodiumState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
-extern "C" void func_00244160(int* self, int flags)
+extern "C" void cGFPodiumState__cGFPodiumState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -858,13 +858,13 @@ extern "C" void *func_00244190(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002441C8);
+INCLUDE_ASM("main/ssxappdtor", cGFReplayStartState__cGFReplayStartState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
-extern "C" void func_002441C8(int* self, int flags)
+extern "C" void cGFReplayStartState__cGFReplayStartState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -1222,7 +1222,7 @@ void func_00244408(void* self, int val)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244410);
 #ifdef SKIP_ASM
-extern "C" void func_003546C8(void* self, int flags);
+extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern void* D_0047D070[];
 struct sVEntry_func_00244410 {
     short delta;
@@ -1238,7 +1238,7 @@ extern "C" void func_00244410(void* self, int flags)
         sVEntry_func_00244410* vt = *(sVEntry_func_00244410**)((char*)obj + 0x44);
         vt[1].fn((char*)obj + vt[1].delta, 3);
     }
-    func_003546C8(self, flags);
+    cObjNode__cObjNode(self, flags);
 }
 #endif
 
@@ -1620,10 +1620,10 @@ extern "C" int func_002447D8(void *arg0) {
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002447F0);
 #ifdef SKIP_ASM
-extern "C" void func_002C2508(int);
+extern "C" void strcpy1(int);
 
 extern "C" void func_002447F0(int arg0) {
-    func_002C2508(arg0 + 0x276);
+    strcpy1(arg0 + 0x276);
 }
 #endif
 //100%
@@ -1745,7 +1745,7 @@ extern "C" int func_00244888(void *self) {
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002448E0);
 #ifdef SKIP_ASM
-extern "C" void func_003546C8(void* self, int flags);
+extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern void* D_0047CB60[];
 struct sVEntry_func_002448E0 {
     short delta;
@@ -1761,7 +1761,7 @@ extern "C" void func_002448E0(void* self, int flags)
         sVEntry_func_002448E0* vt = *(sVEntry_func_002448E0**)((char*)obj + 0x4);
         vt[1].fn((char*)obj + vt[1].delta, 3);
     }
-    func_003546C8(self, flags);
+    cObjNode__cObjNode(self, flags);
 }
 #endif
 
@@ -1794,25 +1794,25 @@ extern "C" void func_00244978(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002449A8);
+INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode__cSSXStatsObjNode);
 #ifdef SKIP_ASM
-extern "C" void func_003546C8(void* self, int flags);
+extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern void* D_0047CAE8[];
 
-extern "C" void func_002449A8(void* self, int flags)
+extern "C" void cSSXStatsObjNode__cSSXStatsObjNode(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = D_0047CAE8;
     operator_delete(*(int**)((char*)self + 0x10));
-    func_003546C8(self, flags);
+    cObjNode__cObjNode(self, flags);
 }
 #endif
 
 void func_002D21B0(void*);
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002449F8);
+INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode_update);
 #ifdef SKIP_ASM
-extern "C" void func_002449F8(void* self)
+extern "C" void cSSXStatsObjNode_update(void* self)
 {
     func_002D21B0(*(void**)((char*)self + 0x10));
 }
@@ -1821,9 +1821,9 @@ extern "C" void func_002449F8(void* self)
 void func_002D21B8(void*);
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244A18);
+INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode_render);
 #ifdef SKIP_ASM
-extern "C" void func_00244A18(void* self)
+extern "C" void cSSXStatsObjNode_render(void* self)
 {
     func_002D21B8(*(void**)((char*)self + 0x10));
 }
@@ -1842,7 +1842,7 @@ extern "C" void func_00244A38(void) {
 INCLUDE_ASM("main/ssxappdtor", func_00244A40);
 #ifdef SKIP_ASM
 extern "C" void cGameViewMan_updateAll(int);
-extern "C" void func_0022D8D8(void *);
+extern "C" void cSectionMan_update(void *);
 extern "C" void func_0022E8B8(int);
 extern "C" int func_0022E920(int);
 extern "C" void func_00230F40(void *);
@@ -1859,7 +1859,7 @@ extern "C" int func_00244A40(void *self) {
         cGameViewMan_updateAll(*(int *)((char*)self + 0x84));
         if (*(int *)(*(char **)((char*)self + 0x78) + 0x1D0) == 0) {
             func_00230F40(self);
-            func_0022D8D8(*(void **)((char*)self + 0x78));
+            cSectionMan_update(*(void **)((char*)self + 0x78));
         }
         if ((*(int *)((char*)self + 0x9C) == 0) && (func_0022E920(*(int *)((char*)self + 0x84)) == 0)) {
             *(int *)((char*)self + 0xA0) = 1;
@@ -1878,7 +1878,7 @@ extern "C" int func_00244A40(void *self) {
     *(int *)((char*)self + 0x9C) = 0;
     *(int *)((char*)self + 0xA0) = 0;
     func_003A6928(*(void **)((char*)self + 0x10));
-    func_0022D8D8(*(void **)((char*)self + 0x78));
+    cSectionMan_update(*(void **)((char*)self + 0x78));
     return 1;
 }
 #endif
@@ -1894,7 +1894,7 @@ extern "C" int func_00270280(int);
 extern "C" void func_0026F4A8(int);
 extern "C" int func_0026CE50(int);
 extern "C" void func_00354F98(void*, int);
-extern "C" void func_00354C98(void*, int);
+extern "C" void cBucketMan_mergeBucket(void*, int);
 extern "C" void func_00355028(void*, int);
 extern "C" void func_00309270(int);
 extern "C" void func_002294C8(int);
@@ -1918,7 +1918,7 @@ extern "C" void func_00244E60(void* self)
         if (*(int*)(s + 0x214) == 3) {
             obj = D_004A5988;
             func_00230F40(self);
-            func_00354C98(obj, 1);
+            cBucketMan_mergeBucket(obj, 1);
         } else {
             obj = D_004A5988;
             func_00230F40(self);
@@ -1963,7 +1963,7 @@ extern "C" void func_00244E60(void* self)
         func_002294C8(*(int*)(s + 0x38));
         func_003440C8(*(int*)(s + 0x3C));
         func_00357BF8(*(int*)(s + 0x40));
-        func_00354C98(obj, 1);
+        cBucketMan_mergeBucket(obj, 1);
     } else {
         func_00354F98(obj, 5);
         if ((D_004A2A50 & 4) == 0)
@@ -2092,7 +2092,7 @@ INCLUDE_ASM("main/ssxappdtor", func_002452D8);
 // PORT: cMemMan_alloc bound as a placement operator new (gcc then treats the result as unaliased)
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_0039E2A0(void* self, void* owner);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern char D_0047B9C0[];
 extern char D_004A2AC8[];
 extern void* D_0047DA58[];
@@ -2141,11 +2141,11 @@ extern "C" void func_002452D8(void* self, char* msg, int type)
     }
     if (isHash_2452D8(*(int*)(msg + 0x38), D_004A2AC8)) {
         sUIObj_2452D8* o = newUIObj_2452D8(self, 0);
-        func_0039F400(*(char**)((char*)self + 0x10) + 0x18, o);
+        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, o);
         D_004A5B80->vt[8].fn((char*)D_004A5B80 + D_004A5B80->vt[8].delta, 1);
     } else {
         sUIObj_2452D8* o = newUIObj_2452D8(self, 1);
-        func_0039F400(*(char**)((char*)self + 0x10) + 0x18, o);
+        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, o);
     }
 }
 #endif
@@ -2215,16 +2215,16 @@ INCLUDE_ASM("main/ssxappdtor", func_002454F8);
 extern char D_004A2BC8[];
 extern char D_004A2BD0[];
 extern char* D_004A5B64;
-extern "C" void func_002C27C0(char* dst, const char* fmt, ...);
-extern "C" void func_003A0E90(void* text, void* p);
+extern "C" void sprintf2(char* dst, const char* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* text, void* p);
 
 extern "C" int func_002454F8(void* self, int refresh)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
         char buf[0xD0];
-        func_002C27C0(buf, D_004A2BD0, (int)*(float*)(D_004A5B64 + 0x38));
-        func_003A0E90(obj, buf);
+        sprintf2(buf, D_004A2BD0, (int)*(float*)(D_004A5B64 + 0x38));
+        cUIText_setUnicodeString(obj, buf);
     }
     if (refresh != 0) {
         func_00246CF8(self, 0);
@@ -2302,16 +2302,16 @@ INCLUDE_ASM("main/ssxappdtor", func_00245698);
 extern char D_004A2BC8[];
 extern char D_004A2BD0[];
 extern char* D_004A5B64;
-extern "C" void func_002C27C0(char* dst, const char* fmt, ...);
-extern "C" void func_003A0E90(void* text, void* p);
+extern "C" void sprintf2(char* dst, const char* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* text, void* p);
 
 extern "C" int func_00245698(void* self)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
         char buf[0xD0];
-        func_002C27C0(buf, D_004A2BD0, (int)*(float*)(D_004A5B64 + 0x38));
-        func_003A0E90(obj, buf);
+        sprintf2(buf, D_004A2BD0, (int)*(float*)(D_004A5B64 + 0x38));
+        cUIText_setUnicodeString(obj, buf);
     }
     return 0;
 }
@@ -2403,16 +2403,16 @@ INCLUDE_ASM("main/ssxappdtor", func_002458B8);
 extern char D_004A2BC8[];
 extern char D_004A2BD0[];
 extern char* D_004A5B64;
-extern "C" void func_002C27C0(char* dst, const char* fmt, ...);
-extern "C" void func_003A0E90(void* text, void* p);
+extern "C" void sprintf2(char* dst, const char* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* text, void* p);
 
 extern "C" int func_002458B8(void* self)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
         char buf[0xD0];
-        func_002C27C0(buf, D_004A2BD0, (int)*(float*)(D_004A5B64 + 0x38));
-        func_003A0E90(obj, buf);
+        sprintf2(buf, D_004A2BD0, (int)*(float*)(D_004A5B64 + 0x38));
+        cUIText_setUnicodeString(obj, buf);
     }
     return 0;
 }

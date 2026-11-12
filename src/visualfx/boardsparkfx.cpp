@@ -259,7 +259,7 @@ __asm__(".globl func_002DA8E8\n.type func_002DA8E8,@function\nfunc_002DA8E8 = _$
 __asm__("_vt$15cVbDtor002DA8E8$13cRiderVbC_bsf = D_00488CB0\n"
         "_vt$15cVbDtor002DA8E8$14cRiderVbBC_bsf = D_00459B90\n"
         "_vt$15cVbDtor002DA8E8$12cRiderVb_bsf = D_00488CF8\n"
-        "_$_12cRiderVb_bsf = func_0011B978\n");
+        "_$_12cRiderVb_bsf = cRider__cRider\n");
 #endif
 
 //100%

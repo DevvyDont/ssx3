@@ -6,7 +6,7 @@ INCLUDE_ASM("fe/ovstaterewardslist", cOVStateRewardsList_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern char D_004704B8[];
 
 extern "C" void cOVStateRewardsList_onCreateScreen(void* self)
@@ -17,14 +17,14 @@ extern "C" void cOVStateRewardsList_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/ovstaterewardslist", func_00200288);
 #ifdef SKIP_ASM
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 
 struct sColor_200288 {
     float r, g, b, a;
@@ -67,7 +67,7 @@ extern "C" void func_00200288(void* self, cUIObj_200288* item, int msg)
             sVEntry_200288* vt = *(sVEntry_200288**)((char*)obj + 4);
             r = vt[4].fn((char*)obj + vt[4].delta, self, 1);
         }
-        func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         break;
     }
     case 6: {
@@ -75,7 +75,7 @@ extern "C" void func_00200288(void* self, cUIObj_200288* item, int msg)
         sVEntry_200288* vt = *(sVEntry_200288**)((char*)obj + 4);
         void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (r != 0) {
-            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         }
         break;
     }
@@ -112,14 +112,14 @@ INCLUDE_ASM("fe/ovstaterewardslist", func_002006B8);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_00144BC0(void* iface);
+extern "C" void* cBENewRaceInterface_getLocation(void* iface);
 extern unsigned int D_004A2594;
 extern int D_004A25A4;
 
 extern "C" void func_002006B8(void)
 {
     if (D_004A2594 >= 2) {
-        D_004A25A4 = *(int*)((char*)func_00144BC0(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x54);
+        D_004A25A4 = *(int*)((char*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x54);
     }
 }
 #endif

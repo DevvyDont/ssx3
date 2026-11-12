@@ -52,7 +52,7 @@ extern char* D_004A5B80;
 extern char D_004875C0[];
 extern "C" int FILE_load(const char* name, int flags);
 extern "C" char* SHAPE_locate(int file, const char* name);
-extern "C" int func_002523A8(int file);
+extern "C" int MEM_free(int file);
 
 // PORT: the unit declares this as void(); defined under an asm label with its real type
 extern "C" void cCrowdRender2D_init_impl(int* self) __asm__("cCrowdRender2D_init__Fv");
@@ -96,7 +96,7 @@ int cCrowdRender2D_purge(int* param_1)
             vt[0x32].fn(obj + vt[0x32].delta, D_00445D38_B6D0[i].handles[j]);
         }
     }
-    return func_002523A8(*param_1);
+    return MEM_free(*param_1);
 }
 #endif
 

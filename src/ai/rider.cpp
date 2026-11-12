@@ -19,9 +19,9 @@ extern "C" void func_00283298(void* rig);
 extern "C" void* func_0028B180();
 // PORT: func_00289AF0 is declared (void*) but takes (mgr, rider).
 void func_00289AF0_impl(void* mgr, void* rider) __asm__("func_00289AF0__FPv");
-extern "C" void* func_003E6448(void* dst, int value, int size);
+extern "C" void* MEM_fill(void* dst, int value, int size);
 // PORT: memset-like; called as void here.
-extern "C" void func_003E6448_v(void* dst, int value, int size) __asm__("func_003E6448");
+extern "C" void MEM_fill_v(void* dst, int value, int size) __asm__("MEM_fill");
 extern void* D_004A28A8;
 extern void* D_00459C18[];
 extern char D_00459B90[];
@@ -93,7 +93,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->mBoltOnFX = func_002EC9E0(cMemMan_alloc(0xC8, D_00457908, 0, 0), (int)self, (int)self->mAttachedEmitterFX);
     self->mLineHint = cMemMan_alloc(0x10, D_00457920, 0, 0);
     self->mWallHint = cMemMan_alloc(0x10, D_00457938, 0, 0);
-    func_003E6448_v(self->unk_794, 0, 0x20);
+    MEM_fill_v(self->unk_794, 0, 0x20);
     self->mFocusBox = 0;
     self->unk_5B0 = 0;
     self->mIsInNIS = 0;
@@ -136,7 +136,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_0011B978);
+INCLUDE_ASM("ai/rider", cRider__cRider);
 #ifdef SKIP_ASM
 struct sVE_11B978 {
     short delta;
@@ -146,10 +146,10 @@ struct sVE_11B978 {
 extern "C" void* func_0028B180();
 // PORT: func_00289AF8 takes (mgr, rider); the mangled name says one void* param.
 void func_00289AF8_impl(void* mgr, void* rider) __asm__("func_00289AF8__FPv");
-extern "C" void func_002832D8(void* p);
+extern "C" void cScriptObject_DeInitScriptObject(void* p);
 extern "C" void func_00283228(void* p, int flags);
-extern "C" void func_0030D540(void* p, int flags);
-extern "C" void func_00329970(void* p, int flags);
+extern "C" void cAnimModel__cAnimModel(void* p, int flags);
+extern "C" void cRiderSphereTree__cRiderSphereTree(void* p, int flags);
 extern "C" void func_00113170(void* p, int flags);
 extern "C" void func_001033F8(void* a, void* p);
 extern "C" void func_00117290(void* p, int flags);
@@ -169,22 +169,22 @@ static inline void vdel_11B978(char* o, int off)
     vt[1].fn(o + vt[1].delta, 3);
 }
 
-extern "C" void func_0011B978(cRider* self, int flags)
+extern "C" void cRider__cRider(cRider* self, int flags)
 {
     self->mScriptObjectVtbl = D_00459BD0;
     self->mScriptObjRiderVtbl = D_00459B90;
     self->mVtbl = D_00459C18;
     func_00289AF8_impl(func_0028B180(), self);
-    func_002832D8(self->unk_6DC);
+    cScriptObject_DeInitScriptObject(self->unk_6DC);
     char* o = (char*)self->mRiderAnim;
     if (o != 0)
         vdel_11B978(o, 0x58);
     void* p = self->mAnimModel;
     if (p != 0)
-        func_0030D540(p, 3);
+        cAnimModel__cAnimModel(p, 3);
     p = self->mSphereTree;
     if (p != 0)
-        func_00329970(p, 3);
+        cRiderSphereTree__cRiderSphereTree(p, 3);
     operator_delete(self->mTrackPathHint);
     operator_delete(self->mAIPathHint);
     p = self->mAirPredictor;
@@ -235,7 +235,7 @@ extern "C" void cRider_addFocusBox(cRider* self)
 #endif
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00117248(void* mem);
+extern "C" void* cRiderMetrix_cRiderMetrix(void* mem);
 extern "C" void cRiderMetrix_linkToRider(void* metrix);
 extern const char D_00457970[];
 
@@ -248,7 +248,7 @@ extern "C" void cRiderMetrix_linkToRider_impl(void* metrix, cRider* rider) __asm
 void cRider_addRiderMetrix(cRider* self)
 {
     void* mem = cMemMan_alloc(0x1CC, D_00457970, 0, 0);
-    void* metrix = func_00117248(mem);
+    void* metrix = cRiderMetrix_cRiderMetrix(mem);
     self->mMetrix = (cRiderMetrix*)metrix;
     cRiderMetrix_linkToRider_impl(metrix, self);
 }
@@ -261,7 +261,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getCharacterID(int);
-extern "C" int func_0014A0B0(int);
+extern "C" int cBELibrary_getCheatCharacterID(int);
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
 int func_0014D988(void* self, int i);
@@ -295,7 +295,7 @@ extern "C" int func_0011BBE8(void* vself, char** list)
     int n = 0;
     void* iface = cBE_getInterface(cBE_getBE(), 9);
     int ch = cBELibrary_getCharacterID(self->mAIIndex);
-    int other = func_0014A0B0(self->mAIIndex);
+    int other = cBELibrary_getCheatCharacterID(self->mAIIndex);
     void* db = func_0014BDB8_noarg();
     if (other != 0)
     {
@@ -392,7 +392,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 void* func_0011B678(void* self);
 extern "C" void func_00418EF8(void* base, int n, int size, void* (*cmp)(void*));
 extern "C" int func_0014AC30(int c);
-extern "C" int func_0014A0B0(int c);
+extern "C" int cBELibrary_getCheatCharacterID(int c);
 extern "C" int func_0014AC50(int c);
 extern "C" int func_0014B988(void* iface, int b, int a, void* item, char* out);
 
@@ -414,7 +414,7 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
 {
     void* iface = cBE_getInterface(cBE_getBE(), 9);
     int a = func_0014AC30(self->mAIIndex);
-    if (func_0014A0B0(self->mAIIndex)) {
+    if (cBELibrary_getCheatCharacterID(self->mAIIndex)) {
         for (int i = 0; i < n; i++) {
             char* name = *(char**)((char*)list[i] + 0x2C);
             sAnimNameTable_11BE88* t = ((sAnimNameTable_11BE88*)self->mLoadList);
@@ -491,7 +491,7 @@ INCLUDE_ASM("ai/rider", func_0011C138);
 void* func_00314978(void* self);
 void func_00314A18(void* self, int a1);
 extern "C" void func_00314988(int* self, int flags);
-extern "C" void* func_00314C00(void* self, const char* name);
+extern "C" void* cMdfArchive_getModelPart(void* self, const char* name);
 extern "C" int func_0011BBE8(void* self, char** list);
 extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int a3);
 
@@ -515,7 +515,7 @@ extern "C" void func_0011C138(cRider* self, int a1)
             const char* name = ((const char**)(item + 0x18))[j];
             if (name != 0)
             {
-                void* part = func_00314C00(&arc, name);
+                void* part = cMdfArchive_getModelPart(&arc, name);
                 if (part != 0)
                 {
                     cAnimModel_addModelPartLOD(self->mAnimModel, j, part, 0);
@@ -530,25 +530,25 @@ extern "C" void func_0011C138(cRider* self, int a1)
 //100%
 INCLUDE_ASM("ai/rider", cRider_initOnce);
 #ifdef SKIP_ASM
-extern "C" void func_0011C298(void* self);
+extern "C" void cRider_loadRider(void* self);
 extern "C" void THREAD_yieldticks(int ticks);
 
 extern "C" void cRider_initOnce(cRider* self, int immediate)
 {
     if (immediate)
     {
-        func_0011C298(self);
+        cRider_loadRider(self);
         return;
     }
     while (self->mLoadStep != 7)
     {
-        func_0011C298(self);
+        cRider_loadRider(self);
         THREAD_yieldticks(1);
     }
 }
 #endif
 
-INCLUDE_ASM("ai/rider", func_0011C298);
+INCLUDE_ASM("ai/rider", cRider_loadRider);
 
 //100%
 INCLUDE_ASM("ai/rider", func_0011D390);
@@ -566,13 +566,13 @@ extern signed char D_00535BC8[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_11D390(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// func_00117540 (cRiderMetrix reset) takes only the metrix; its $5 is left over from the store above.
-extern "C" void func_00117540(void* metrix);
-extern "C" void func_00311A50(void* anim);
+// cRiderMetrix_reset (cRiderMetrix reset) takes only the metrix; its $5 is left over from the store above.
+extern "C" void cRiderMetrix_reset(void* metrix);
+extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" bool func_0014EF70(void* iface, int riderIndex);
 extern "C" void func_00112180(void* rider, int v);
 extern "C" int func_00145C38(void* iface, int index);
-extern "C" int* func_00144BC0(void* iface);
+extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void func_0011DD98(cRider* self);
 extern "C" void func_00119E38(void* p, int flip, int c);
 extern "C" void func_0011DE60(cRider* self, int a1, int a2);
@@ -580,10 +580,10 @@ extern "C" void func_0011DF18(cRider* self, int notify);
 extern "C" void func_00120D58(cRider* self);
 extern "C" void func_00111890(void* self);
 extern "C" void func_00125038(cRider* self);
-// PORT: prototype mismatch. The unit defines func_0011FEC8/func_0011FE78 with one
-// param, but their bodies forward $5 to func_00111538/func_001112B8 (int arg).
+// PORT: prototype mismatch. The unit defines func_0011FEC8/cRider_setMotionState with one
+// param, but their bodies forward $5 to func_00111538/cRiderHandler__setMotionState (int arg).
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
-void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
 
 void func_0011D390_impl(cRider* self) __asm__("func_0011D390");
@@ -596,19 +596,19 @@ void func_0011D390_impl(cRider* self)
         self->mRubberBandBehind = 0;
         self->mRubberBandAhead = 0;
         self->unk_0D8 = -1;
-        func_00117540(self->mMetrix);
-        func_00311A50(self->mRiderAnim);
+        cRiderMetrix_reset(self->mMetrix);
+        cRiderAnimBase_reset(self->mRiderAnim);
         self->mNaturalStance = func_0014EF70(cBE_getInterface_11D390(cBE_getBE(), 2), self->mAIIndex);
         func_00112180(self, 1);
         void* iface = cBE_getInterface_11D390(cBE_getBE(), 0);
         // PORT: the gotos reproduce the shared compare chain (mode 4, 5, 6) that two different entry conditions fall into.
         if (func_00145C38(cBE_getInterface_11D390(cBE_getBE(), 1), self->mAIIndex) != 0
-            && D_00535BC8[0x49] == 0 && *func_00144BC0(iface) == 0xE)
+            && D_00535BC8[0x49] == 0 && *cBENewRaceInterface_getLocation(iface) == 0xE)
         {
             if (D_00535BC8[0x48] == 4)
             {
                 func_0011DD98(self);
-                func_0011FE78_impl(self, 1);
+                cRider_setMotionState_impl(self, 1);
                 func_0011FEC8_impl(self, 4);
                 func_00119E38(self->mMetrix, 0, 0);
                 goto done;
@@ -623,7 +623,7 @@ void func_0011D390_impl(cRider* self)
         if (D_00535BC8[0x48] == 6)
         {
         bb:
-            int v = *func_00144BC0(iface);
+            int v = *cBENewRaceInterface_getLocation(iface);
             switch (v)
             {
             case 17:
@@ -648,7 +648,7 @@ void func_0011D390_impl(cRider* self)
         }
         else
         {
-            func_0011FE78_impl(self, 3);
+            cRider_setMotionState_impl(self, 3);
             func_0011FEC8_impl(self, 6);
         }
     done:
@@ -703,7 +703,7 @@ extern "C" float func_0031C228(float x);
 extern "C" float func_0031C128(float x);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
-extern "C" void func_00311A50(void* anim);
+extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void func_00312598(void* anim, int a1);
 extern "C" void func_0011EB60(cRider* self, float value);
@@ -1077,7 +1077,7 @@ extern "C" void func_0011D660_impl(cRider* self, const t4Vector* pos, const floa
     self->mHudMsgId = 0;
     self->unk_35C = 0.0f;
     self->unk_320 = self->mNaturalStance;
-    func_00311A50(self->mRiderAnim);
+    cRiderAnimBase_reset(self->mRiderAnim);
     *(int*)((char*)self->mRiderAnim + 0x18) = self->unk_320;
     float yaw = 0.0f;
     if (self->unk_320 != 0)
@@ -1179,10 +1179,10 @@ INCLUDE_ASM("ai/rider", func_0011DE60);
 extern "C" void* func_0026B5E0(void*, int, int);
 extern char D_004D33A0[];
 extern "C" void func_00119368(void* metrix, int flag);
-// PORT: prototype mismatch. The unit defines func_0011FEC8/func_0011FE78 with one
-// param, but their bodies forward $5 to func_00111538/func_001112B8 (int arg).
+// PORT: prototype mismatch. The unit defines func_0011FEC8/cRider_setMotionState with one
+// param, but their bodies forward $5 to func_00111538/cRiderHandler__setMotionState (int arg).
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
-void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
 struct sVec4_0011DE60
 {
@@ -1212,7 +1212,7 @@ extern "C" void func_0011DE60(cRider* self, int a1, int a2)
     dir.w = 1.0f;
     func_00119368(self->mMetrix, 1);
     func_0011FEC8_impl(self, 0);
-    func_0011FE78_impl(self, 0);
+    cRider_setMotionState_impl(self, 0);
     func_0011D660(self, &pos, &dir, 5, 0.0f);
 }
 #endif
@@ -2200,15 +2200,15 @@ extern "C" void cRider_doLeanPoseAdjust_x(char* self, sXf_LP* xf)
 }
 #endif
 
-extern "C" void* func_001112B8(void* obj);
+extern "C" void* cRiderHandler__setMotionState(void* obj);
 
 //100%
-INCLUDE_ASM("ai/rider", func_0011FE78__FPv);
+INCLUDE_ASM("ai/rider", cRider_setMotionState__FPv);
 #ifdef SKIP_ASM
-void* func_0011FE78(void* vself)
+void* cRider_setMotionState(void* vself)
 {
     cRider* self = (cRider*)vself;
-    return func_001112B8(self->mRiderHandler);
+    return cRiderHandler__setMotionState(self->mRiderHandler);
 }
 #endif
 
@@ -2282,7 +2282,7 @@ extern "C" void func_0011FF18(cRider* self, void* out)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_0011FF48);
+INCLUDE_ASM("ai/rider", cRider_getHipPosition);
 #ifdef SKIP_ASM
 // 0x20-byte elements with the quadword at offset 0
 struct sRiderXform {
@@ -2291,7 +2291,7 @@ struct sRiderXform {
 };
 
 // Copies the quadword of the anim model's transform unk_89C into dst.
-extern "C" void* func_0011FF48(void* dst, cRider* self)
+extern "C" void* cRider_getHipPosition(void* dst, cRider* self)
 {
     cAnimModel* q = self->mAnimModel;
     int i = self->mBoneHips;
@@ -2310,7 +2310,7 @@ extern "C" float cBEStatInterface_getCollisionAttrib(void* iface, int character,
 //100%
 INCLUDE_ASM("ai/rider", func_0011FF70);
 #ifdef SKIP_ASM
-// Copies the quadword of the anim model's transform unk_8A8 into dst (sibling of func_0011FF48).
+// Copies the quadword of the anim model's transform unk_8A8 into dst (sibling of cRider_getHipPosition).
 extern "C" void* func_0011FF70(void* dst, cRider* self)
 {
     cAnimModel* q = self->mAnimModel;
@@ -2833,7 +2833,7 @@ extern "C" void func_00121068(cRider* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", func_001210B0);
 #ifdef SKIP_ASM
-extern "C" void func_00116120(void* rider, int a, int b);
+extern "C" void cRider_checkForReset(void* rider, int a, int b);
 extern "C" void func_001200D0(cRider* self);
 extern "C" void func_00120D90(cRider* self);
 
@@ -2863,7 +2863,7 @@ extern "C" void func_001210B0(cRider* self)
     self->mImpactAccum2 *= 0.9783333539962769f;
     if (self->mImpactAccum > 4.5f)
     {
-        func_00116120(self, 0, 2);
+        cRider_checkForReset(self, 0, 2);
     }
     else if (func_0011FE98(self) == 1 ||
              (func_0011FE98(self) == 2 && *(int*)((char*)self->mRiderHandler + 0x30) == 1))
@@ -2874,7 +2874,7 @@ extern "C" void func_001210B0(cRider* self)
             ok = 1;
         obj = (char*)self->mAirPredictor;
         if ((ok && *(float*)(obj + 0x98) - *(float*)(obj + 0xA0) > 45.0f) || self->mImpactAccum2 > 5.0f)
-            func_00116120(self, 0, 2);
+            cRider_checkForReset(self, 0, 2);
     }
     func_001200D0(self);
     func_00120D90(self);
@@ -3489,7 +3489,7 @@ extern "C" void func_002F5B68(void* a, void* q, void* b, void* c, int d);
 extern "C" void func_00122088(cRider* self)
 {
     cQuad128 q;
-    func_0011FF48(&q, self);
+    cRider_getHipPosition(&q, self);
     func_002F5B68(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x90), &q, self->mOverlapList, self->unk_794, 8);
 }
 #endif
@@ -3522,7 +3522,7 @@ struct sPath_20D8 {
 extern "C" void func_00389260(void* p);
 extern "C" void* func_002EDFB8(void* p);
 extern "C" float func_002EEFA8(void* p);
-extern "C" void* func_0011FF48(void* dst, cRider* self);
+extern "C" void* cRider_getHipPosition(void* dst, cRider* self);
 extern "C" void func_00389CB8(void* m, void* q, float f);
 extern "C" void func_0038A6A8(void* m, void* q, void* p);
 extern "C" void func_00389558(void* m, sV3_20D8* v);
@@ -3537,7 +3537,7 @@ extern "C" void func_001220D8(cRider* self)
         sVE_20D8* vt = *(sVE_20D8**)obj;
         *(sXf_20D8*)&self->unk_7C0[0] = *(sXf_20D8*)func_002EDFB8(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta));
     }
-    func_0011FF48(&q, self);
+    cRider_getHipPosition(&q, self);
     char* m = self->unk_7C0;
     {
         char* obj = (char*)&self->mVtbl;
@@ -3753,12 +3753,12 @@ void* func_00122638(void* vself)
 //100%
 INCLUDE_ASM("ai/rider", func_00122658);
 #ifdef SKIP_ASM
-// func_003E6448 looks like memset(dst, value, size).
-extern "C" void* func_003E6448(void* dst, int value, int size);
+// MEM_fill looks like memset(dst, value, size).
+extern "C" void* MEM_fill(void* dst, int value, int size);
 
 extern "C" void func_00122658(cRider* self)
 {
-    func_003E6448(self->unk_794, 0, sizeof(self->unk_794));
+    MEM_fill(self->unk_794, 0, sizeof(self->unk_794));
 }
 #endif
 
@@ -4188,7 +4188,7 @@ extern "C" int func_001231A8(cRider* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/rider", func_00123210);
+INCLUDE_ASM("ai/rider", cRider_transport);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
@@ -4206,7 +4206,7 @@ extern "C" void func_00111890(void* self);
 extern "C" void func_002F1A00(void* a);
 extern "C" void func_00119368(void* metrix, int flag);
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
-void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
 void func_0011D660_3210(void* self, sVec4* a, sVec4* b, int n, float t) __asm__("func_0011D660");
 
@@ -4290,9 +4290,9 @@ static inline void SetPath_3210(void* self, sVec4* p, sVec4* d)
     func_0011D660_3210(self, p, d, 5, 0.0f);
 }
 
-extern "C" void func_00123210_v(cRider* self, char* m) __asm__("func_00123210");
+extern "C" void cRider_transport_v(cRider* self, char* m) __asm__("cRider_transport");
 
-extern "C" void func_00123210_v(cRider* self, char* m)
+extern "C" void cRider_transport_v(cRider* self, char* m)
 {
     func_00270970(*(int*)(*(char**)((char*)D_004A28A8 + 0x84) + 0x28), self->mAIIndex);
     sVec4 pos = *(sVec4*)(m + 0x30);
@@ -4315,7 +4315,7 @@ extern "C" void func_00123210_v(cRider* self, char* m)
     AddEq_3210(pos, off);
     sVec4 dir = MatMulV_3210(m, D_004FF140);
     func_00119368(self->mMetrix, 1);
-    func_0011FE78_impl(self, 0);
+    cRider_setMotionState_impl(self, 0);
     func_0011FEC8_impl(self, 0);
     func_00125038(self);
     char* sub = (char*)&self->mVtbl;
@@ -4344,7 +4344,7 @@ extern "C" void func_00270970(int a, int b);
 extern "C" void func_00125038(cRider* self);
 extern "C" void func_002F1A00(void* a);
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
-void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
 void func_0011D660_34D0(void* self, t4Vector* a, t4Vector* b, int n, float t) __asm__("func_0011D660");
 
@@ -4377,7 +4377,7 @@ extern "C" void func_001234D0(cRider* self, char* m)
     pos = *(t4Vector*)(m + 0x30);
     dir = MatMulV_34D0(m, D_004FF140);
     func_00119368(self->mMetrix, 1);
-    func_0011FE78_impl(self, 3);
+    cRider_setMotionState_impl(self, 3);
     func_0011FEC8_impl(self, 0xD);
     func_0011D660_34D0(self, &pos, &dir, 5, 0.0f);
     *(int*)((char*)self->mRiderHandler + 0x290) = 2;
@@ -4396,16 +4396,16 @@ extern "C" void func_001234D0(cRider* self, char* m)
 //100%
 INCLUDE_ASM("ai/rider", func_001235F8);
 #ifdef SKIP_ASM
-// PORT: prototype mismatch. The unit defines func_0011FEC8/func_0011FE78 with one
-// param, but their bodies forward $5 to func_00111538/func_001112B8 (int arg).
+// PORT: prototype mismatch. The unit defines func_0011FEC8/cRider_setMotionState with one
+// param, but their bodies forward $5 to func_00111538/cRiderHandler__setMotionState (int arg).
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
-void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
+void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
 extern "C" void func_001235F8(cRider* self)
 {
     *(int*)((char*)self->mRiderHandler + 0x350) = 1;
     func_0011FEC8_impl(self, 9);
-    func_0011FE78_impl(self, 3);
+    cRider_setMotionState_impl(self, 3);
     *(int*)((char*)self->mRiderHandler + 0x290) = 0;
 }
 #endif
@@ -4415,8 +4415,8 @@ INCLUDE_ASM("ai/rider", func_00123640);
 #ifdef SKIP_ASM
 extern "C" void func_0027F9F8(void* self);
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
-void func_0011FE78_impl(void* self, int v) __asm__("func_0011FE78__FPv");
-extern "C" void func_00311A50(void* anim);
+void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
+extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 int func_0027C958(void* self);
 extern "C" void func_0027C9B0(int, void*);
@@ -4543,8 +4543,8 @@ extern "C" void func_00123640(cRider* self)
     int buf[12];
     func_0027F9F8(&self->mScriptObjRiderVtbl);
     func_0011FEC8_impl(self, 0xD);
-    func_0011FE78_impl(self, 3);
-    func_00311A50(self->mRiderAnim);
+    cRider_setMotionState_impl(self, 3);
+    cRiderAnimBase_reset(self->mRiderAnim);
     cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
     self->mIsInNIS = 1;
     *(int*)((char*)self + 0x2D8) = *(int*)((char*)self + 0x320);
@@ -5776,7 +5776,7 @@ extern "C" void func_00125B18(void* p, int a, int on)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/rider", func_00125C70);
+INCLUDE_ASM("ai/rider", cPlayer_cPlayer);
 #ifdef SKIP_ASM
 // g++ 2.95 vtable entry (no thunks): {delta, index, fn}. Vtables are double-aligned.
 struct sVtEnt_125C70 {
@@ -5796,12 +5796,12 @@ extern char D_00459B90[];
 extern char D_00458338[];
 extern void* D_004A28A8;
 extern "C" void cRider_cRider(void* self);
-extern "C" void func_0010FCD8(void* self, int inChrg);
+extern "C" void cRiderHandler_cRiderHandler(void* self, int inChrg);
 extern "C" void* cReplay_addCache(void* p);
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xE10): vtable copies with delta fixups when not in charge.
-extern "C" void* func_00125C70(char* self, int inChrg)
+extern "C" void* cPlayer_cPlayer(char* self, int inChrg)
 {
     sVt9_125C70 t1;
     sVt22_125C70 t2;
@@ -5840,7 +5840,7 @@ extern "C" void* func_00125C70(char* self, int inChrg)
         *(void**)(self + 0x18) = vb;
         cRider_cRider(vb);
     }
-    func_0010FCD8(self, 0);
+    cRiderHandler_cRiderHandler(self, 0);
     *(void**)(*(char**)(self + 0x18) + 0x6E8) = (void*)&D_00458360;
     *(void**)(*(char**)(self + 0x18) + 0x6D0) = D_00459B90;
     *(void**)(*(char**)(self + 0x18) + 0x6C0) = (void*)&D_004583A8;
@@ -5887,7 +5887,7 @@ cRider_125EB8::~cRider_125EB8()
 __asm__(".globl func_00125EB8\n.type func_00125EB8,@function\nfunc_00125EB8 = _$_13cRider_125EB8\n.size func_00125EB8,0x1838\n");
 
 // PORT: the out-of-line destructors called here, under their address-derived names (as seg/seg_1218 does).
-__asm__("_$_14cRiderVb_rider = func_0011B978\n"
+__asm__("_$_14cRiderVb_rider = cRider__cRider\n"
         "_$_15cVbDtor00136AD0 = func_00136AD0\n"
         "_$_15cVbDtor002DCDA0 = func_002DCDA0\n"
         "_$_15cVbDtor002DA8E8 = func_002DA8E8\n"
@@ -5952,38 +5952,38 @@ __asm__("_vt$13cRider_125EB8 = D_00458338\n"
 //100%
 INCLUDE_ASM("ai/rider", func_001276F0);
 #ifdef SKIP_ASM
-int func_00320C48(void*, int);
+int cInput_getState(void*, int);
 extern "C" int func_001276F0(char* self)
 {
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x1F))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x1F))
         return 0;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x20))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x20))
         return 1;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x21))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x21))
         return 2;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x22))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x22))
         return 3;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x23))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x23))
         return 4;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x24))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x24))
         return 5;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x25))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x25))
         return 6;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x26))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x26))
         return 7;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x27))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x27))
         return 8;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x28))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x28))
         return 9;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x29))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x29))
         return 10;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x2A))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x2A))
         return 11;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x2B))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x2B))
         return 12;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x2C))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x2C))
         return 13;
-    if (func_00320C48(*(void**)(self + 0xDF0), 0x2D))
+    if (cInput_getState(*(void**)(self + 0xDF0), 0x2D))
         return 14;
     return -1;
 }
@@ -5992,17 +5992,17 @@ extern "C" int func_001276F0(char* self)
 //100%
 INCLUDE_ASM("ai/rider", func_00127848);
 #ifdef SKIP_ASM
-int func_00320C48(void*, int);
+int cInput_getState(void*, int);
 
 extern "C" int func_00127848(void* self)
 {
-    if (func_00320C48(*(void**)((char*)self + 0xDF0), 0x1B))
+    if (cInput_getState(*(void**)((char*)self + 0xDF0), 0x1B))
         return 0;
-    if (func_00320C48(*(void**)((char*)self + 0xDF0), 0x1C))
+    if (cInput_getState(*(void**)((char*)self + 0xDF0), 0x1C))
         return 1;
-    if (func_00320C48(*(void**)((char*)self + 0xDF0), 0x1D))
+    if (cInput_getState(*(void**)((char*)self + 0xDF0), 0x1D))
         return 2;
-    if (func_00320C48(*(void**)((char*)self + 0xDF0), 0x1E))
+    if (cInput_getState(*(void**)((char*)self + 0xDF0), 0x1E))
         return 3;
     return -1;
 }
@@ -6073,7 +6073,7 @@ extern "C" void func_001278E8(void* self)
 INCLUDE_ASM("ai/rider", func_00127998);
 #ifdef SKIP_ASM
 int func_0011FEE8(void*);
-extern "C" float func_00320BF0(void* pad, int axis);
+extern "C" float cInput_getValue(void* pad, int axis);
 extern "C" void func_0026D178(void* cache, void* input);
 
 // One frame of pad input packed for the rider's current state (func_0011FEE8); each state has its own layout.
@@ -6138,109 +6138,109 @@ union sRiderInput_127998 {
 // Reads the pad into the input record for the rider's state, and records it for replays.
 extern "C" void func_00127998(char* self, sRiderInput_127998* in)
 {
-    func_003E6448(in, 0, 8);
+    MEM_fill(in, 0, 8);
     switch (func_0011FEE8(*(void**)(self + 0x18))) {
     case 0: {
         float k = 31.0f;
-        in->s0.b12 = func_00320C48(PAD_127998, 0x2E);
-        in->s0.b13 = func_00320C48(PAD_127998, 0x19);
-        in->s0.b14 = func_00320C48(PAD_127998, 0x11);
-        in->s0.b15 = func_00320C48(PAD_127998, 0x12);
-        in->s0.b16 = func_00320C48(PAD_127998, 0x13);
-        in->s0.b17 = func_00320C48(PAD_127998, 0x14);
-        in->s0.b18 = func_00320C48(PAD_127998, 5);
-        in->s0.b19 = func_00320C48(PAD_127998, 6);
-        in->s0.a20 = (int)(func_00320BF0(PAD_127998, 0) * k);
-        in->s0.a26 = (int)(func_00320BF0(PAD_127998, 1) * k);
-        in->s0.w0 = (int)(func_00320BF0(PAD_127998, 2) * k);
-        in->s0.w6 = (int)(func_00320BF0(PAD_127998, 3) * k);
+        in->s0.b12 = cInput_getState(PAD_127998, 0x2E);
+        in->s0.b13 = cInput_getState(PAD_127998, 0x19);
+        in->s0.b14 = cInput_getState(PAD_127998, 0x11);
+        in->s0.b15 = cInput_getState(PAD_127998, 0x12);
+        in->s0.b16 = cInput_getState(PAD_127998, 0x13);
+        in->s0.b17 = cInput_getState(PAD_127998, 0x14);
+        in->s0.b18 = cInput_getState(PAD_127998, 5);
+        in->s0.b19 = cInput_getState(PAD_127998, 6);
+        in->s0.a20 = (int)(cInput_getValue(PAD_127998, 0) * k);
+        in->s0.a26 = (int)(cInput_getValue(PAD_127998, 1) * k);
+        in->s0.w0 = (int)(cInput_getValue(PAD_127998, 2) * k);
+        in->s0.w6 = (int)(cInput_getValue(PAD_127998, 3) * k);
         break;
     }
     case 11:
-        in->s11.b12 = func_00320C48(PAD_127998, 0x2E);
-        in->s11.b13 = func_00320C48(PAD_127998, 0x19);
-        in->s11.a14 = (int)(func_00320BF0(PAD_127998, 0x18) * 31.0f);
+        in->s11.b12 = cInput_getState(PAD_127998, 0x2E);
+        in->s11.b13 = cInput_getState(PAD_127998, 0x19);
+        in->s11.a14 = (int)(cInput_getValue(PAD_127998, 0x18) * 31.0f);
         break;
     case 1: {
         float k = 31.0f;
-        in->s1.b12 = func_00320C48(PAD_127998, 0x2E);
-        in->s1.b13 = func_00320C48(PAD_127998, 0x13);
-        in->s1.b14 = func_00320C48(PAD_127998, 0x14);
-        in->s1.b16 = func_00320C48(PAD_127998, 0x11);
-        in->s1.b15 = func_00320C48(PAD_127998, 0x12);
-        in->s1.b17 = func_00320C48(PAD_127998, 0x16);
-        in->s1.a24 = (int)(func_00320BF0(PAD_127998, 0x17) * k);
-        in->s1.a18 = (int)(func_00320BF0(PAD_127998, 0) * k);
-        in->s1.w0 = (int)(func_00320BF0(PAD_127998, 3) * k);
-        in->s1.w6 = (int)(func_00320BF0(PAD_127998, 4) * k);
+        in->s1.b12 = cInput_getState(PAD_127998, 0x2E);
+        in->s1.b13 = cInput_getState(PAD_127998, 0x13);
+        in->s1.b14 = cInput_getState(PAD_127998, 0x14);
+        in->s1.b16 = cInput_getState(PAD_127998, 0x11);
+        in->s1.b15 = cInput_getState(PAD_127998, 0x12);
+        in->s1.b17 = cInput_getState(PAD_127998, 0x16);
+        in->s1.a24 = (int)(cInput_getValue(PAD_127998, 0x17) * k);
+        in->s1.a18 = (int)(cInput_getValue(PAD_127998, 0) * k);
+        in->s1.w0 = (int)(cInput_getValue(PAD_127998, 3) * k);
+        in->s1.w6 = (int)(cInput_getValue(PAD_127998, 4) * k);
         break;
     }
     case 6:
-        in->s6.a12 = (int)(func_00320BF0(PAD_127998, 0x1A) * 31.0f);
+        in->s6.a12 = (int)(cInput_getValue(PAD_127998, 0x1A) * 31.0f);
         break;
     case 7: {
         float k = 31.0f;
-        in->s7.b12 = func_00320C48(PAD_127998, 0x2E);
-        in->s7.b13 = func_00320C48(PAD_127998, 0x11);
-        in->s7.b14 = func_00320C48(PAD_127998, 0x12);
-        in->s7.b15 = func_00320C48(PAD_127998, 0x13);
-        in->s7.b16 = func_00320C48(PAD_127998, 0x14);
+        in->s7.b12 = cInput_getState(PAD_127998, 0x2E);
+        in->s7.b13 = cInput_getState(PAD_127998, 0x11);
+        in->s7.b14 = cInput_getState(PAD_127998, 0x12);
+        in->s7.b15 = cInput_getState(PAD_127998, 0x13);
+        in->s7.b16 = cInput_getState(PAD_127998, 0x14);
         in->s7.v17 = func_00127848(self);
-        in->s7.a25 = (int)(func_00320BF0(PAD_127998, 0x17) * k);
-        in->s7.w0 = (int)(func_00320BF0(PAD_127998, 0xD) * k);
-        in->s7.w6 = (int)(func_00320BF0(PAD_127998, 3) * k);
+        in->s7.a25 = (int)(cInput_getValue(PAD_127998, 0x17) * k);
+        in->s7.w0 = (int)(cInput_getValue(PAD_127998, 0xD) * k);
+        in->s7.w6 = (int)(cInput_getValue(PAD_127998, 3) * k);
         break;
     }
     case 12:
-        in->s12.b12 = func_00320C48(PAD_127998, 0x2E);
-        in->s12.b13 = func_00320C48(PAD_127998, 0x13);
-        in->s12.b14 = func_00320C48(PAD_127998, 0x14);
+        in->s12.b12 = cInput_getState(PAD_127998, 0x2E);
+        in->s12.b13 = cInput_getState(PAD_127998, 0x13);
+        in->s12.b14 = cInput_getState(PAD_127998, 0x14);
         in->s12.v15 = func_00127848(self);
-        in->s12.a23 = (int)(func_00320BF0(PAD_127998, 0x17) * 31.0f);
+        in->s12.a23 = (int)(cInput_getValue(PAD_127998, 0x17) * 31.0f);
         break;
     case 2: {
         float k = 31.0f;
-        in->s2.b12 = func_00320C48(PAD_127998, 0x2E);
-        in->s2.b13 = func_00320C48(PAD_127998, 0x12);
-        in->s2.b14 = func_00320C48(PAD_127998, 0x14);
-        in->s2.a15 = (int)(func_00320BF0(PAD_127998, 8) * k);
-        in->s2.a21 = (int)(func_00320BF0(PAD_127998, 9) * k);
-        in->s2.w0 = (int)(func_00320BF0(PAD_127998, 7) * k);
-        in->s2.w6 = (int)(func_00320BF0(PAD_127998, 0x17) * k);
+        in->s2.b12 = cInput_getState(PAD_127998, 0x2E);
+        in->s2.b13 = cInput_getState(PAD_127998, 0x12);
+        in->s2.b14 = cInput_getState(PAD_127998, 0x14);
+        in->s2.a15 = (int)(cInput_getValue(PAD_127998, 8) * k);
+        in->s2.a21 = (int)(cInput_getValue(PAD_127998, 9) * k);
+        in->s2.w0 = (int)(cInput_getValue(PAD_127998, 7) * k);
+        in->s2.w6 = (int)(cInput_getValue(PAD_127998, 0x17) * k);
         break;
     }
     case 3: {
         float k = 31.0f;
-        in->s2.b12 = func_00320C48(PAD_127998, 0x2E);
-        in->s2.b13 = func_00320C48(PAD_127998, 0x13);
-        in->s2.b14 = func_00320C48(PAD_127998, 0x14);
-        in->s2.a15 = (int)(func_00320BF0(PAD_127998, 0) * k);
-        in->s2.a21 = (int)(func_00320BF0(PAD_127998, 0x17) * k);
+        in->s2.b12 = cInput_getState(PAD_127998, 0x2E);
+        in->s2.b13 = cInput_getState(PAD_127998, 0x13);
+        in->s2.b14 = cInput_getState(PAD_127998, 0x14);
+        in->s2.a15 = (int)(cInput_getValue(PAD_127998, 0) * k);
+        in->s2.a21 = (int)(cInput_getValue(PAD_127998, 0x17) * k);
         break;
     }
     case 4: {
         float k = 31.0f;
-        in->s4.b12 = func_00320C48(PAD_127998, 0x2E);
-        in->s4.b13 = func_00320C48(PAD_127998, 0x19);
-        in->s4.b14 = func_00320C48(PAD_127998, 5);
-        in->s4.b15 = func_00320C48(PAD_127998, 6);
+        in->s4.b12 = cInput_getState(PAD_127998, 0x2E);
+        in->s4.b13 = cInput_getState(PAD_127998, 0x19);
+        in->s4.b14 = cInput_getState(PAD_127998, 5);
+        in->s4.b15 = cInput_getState(PAD_127998, 6);
         in->s4.v16 = func_001276F0(self);
-        in->s4.a24 = (int)(func_00320BF0(PAD_127998, 0) * k);
-        in->s4.w0 = (int)(func_00320BF0(PAD_127998, 1) * k);
+        in->s4.a24 = (int)(cInput_getValue(PAD_127998, 0) * k);
+        in->s4.w0 = (int)(cInput_getValue(PAD_127998, 1) * k);
         break;
     }
     case 5: {
         float k = 31.0f;
-        in->s4.b12 = func_00320C48(PAD_127998, 0x2E);
-        in->s4.b13 = func_00320C48(PAD_127998, 0x19);
-        in->s4.b14 = func_00320C48(PAD_127998, 0x15);
-        in->s4.b15 = func_00320C48(PAD_127998, 0xC);
+        in->s4.b12 = cInput_getState(PAD_127998, 0x2E);
+        in->s4.b13 = cInput_getState(PAD_127998, 0x19);
+        in->s4.b14 = cInput_getState(PAD_127998, 0x15);
+        in->s4.b15 = cInput_getState(PAD_127998, 0xC);
         in->s4.v16 = func_001276F0(self);
-        in->s4.a24 = (int)(func_00320BF0(PAD_127998, 0xE) * k);
-        in->s4.w0 = (int)(func_00320BF0(PAD_127998, 0xF) * k);
-        in->s4.w12 = (int)(func_00320BF0(PAD_127998, 0xB) * k);
-        in->s4.w6 = (int)(func_00320BF0(PAD_127998, 0xA) * k);
-        float v = func_00320BF0(PAD_127998, 3);
+        in->s4.a24 = (int)(cInput_getValue(PAD_127998, 0xE) * k);
+        in->s4.w0 = (int)(cInput_getValue(PAD_127998, 0xF) * k);
+        in->s4.w12 = (int)(cInput_getValue(PAD_127998, 0xB) * k);
+        in->s4.w6 = (int)(cInput_getValue(PAD_127998, 0xA) * k);
+        float v = cInput_getValue(PAD_127998, 3);
         int t;
         if (-0.5f <= v) {
             t = 0.5f < v;
@@ -6251,11 +6251,11 @@ extern "C" void func_00127998(char* self, sRiderInput_127998* in)
         break;
     }
     case 8:
-        in->s11.b12 = func_00320C48(PAD_127998, 0x2E);
-        in->s11.b13 = func_00320C48(PAD_127998, 0x10);
+        in->s11.b12 = cInput_getState(PAD_127998, 0x2E);
+        in->s11.b13 = cInput_getState(PAD_127998, 0x10);
         break;
     case 10:
-        in->s6.a12 = (int)(func_00320BF0(PAD_127998, 0) * 31.0f);
+        in->s6.a12 = (int)(cInput_getValue(PAD_127998, 0) * 31.0f);
         break;
     case 13:
         break;

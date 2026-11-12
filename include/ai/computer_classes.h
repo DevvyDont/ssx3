@@ -185,7 +185,7 @@ public:
 class cCompPart23_cmp : virtual public cRiderVb_cmp {
 public:
     char body[0x3AC];
-    cCompPart23_cmp();              // func_002E6320
+    cCompPart23_cmp();              // cSpeedBoostFX_cSpeedBoostFX
     virtual ~cCompPart23_cmp();
 };
 
@@ -199,7 +199,7 @@ public:
 class cCompPart25_cmp : virtual public cRiderVb_cmp {
 public:
     char body[0x1C];
-    cCompPart25_cmp();              // func_002EF3B0
+    cCompPart25_cmp();              // cAirStreamerFX_cAirStreamerFX
     virtual ~cCompPart25_cmp();
 };
 

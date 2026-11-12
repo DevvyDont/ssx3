@@ -62,14 +62,14 @@ extern "C" int func_001955B8(void* self, int a1, unsigned int key)
 }
 #endif
 
-extern "C" void* func_0039E4C0(void* self);
+extern "C" void* cUIState_onGainFocus(void* self);
 
 //100%
 INCLUDE_ASM("fe/festatebonusmaterial", func_001955E0__FPv);
 #ifdef SKIP_ASM
 void* func_001955E0(void* self)
 {
-    return func_0039E4C0(self);
+    return cUIState_onGainFocus(self);
 }
 #endif
 
@@ -79,8 +79,8 @@ INCLUDE_ASM("fe/festatebonusmaterial", func_00195600);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001D22F0(void* self, void* engine, void* owner, signed char idx);
 extern "C" void func_001D2598(void* self, const char* a, const char* b);
-extern "C" void func_0039F290(void* list, void* item);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 extern char D_004601D8[];
 extern const char* D_00441128[];
 
@@ -101,7 +101,7 @@ extern "C" void func_00195600(void* self, void* item, unsigned int event)
         void* p = func_001D22F0(cMemMan_alloc(0x280, D_004601D8, 0, 0), *(void**)((char*)self + 0x10), self,
                                 *(signed char*)((char*)self + 0x44));
         func_001D2598(p, D_00441128[*(int*)((char*)item + 0x18)], 0);
-        func_0039F290(*(char**)((char*)self + 0x10) + 0x18, p);
+        cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, p);
         break;
     }
     case 6: {
@@ -109,7 +109,7 @@ extern "C" void func_00195600(void* self, void* item, unsigned int event)
         sVEntryK195600* vt = *(sVEntryK195600**)(o + 4);
         void* r = vt[5].fn(o + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (r != 0)
-            func_0039F400(*(char**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, r);
         break;
     }
     }

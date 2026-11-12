@@ -6,7 +6,7 @@ INCLUDE_ASM("main/debugmenu", cRenderTogglesMenu_cRenderTogglesMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -112,7 +112,7 @@ extern int D_004A4578;
 
 extern "C" void* cRenderTogglesMenu_cRenderTogglesMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047FCE0;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047DBF8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -222,7 +222,7 @@ INCLUDE_ASM("main/debugmenu", cVisualEffectsTestMenu_cVisualEffectsTestMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -269,7 +269,7 @@ extern int D_004A44B8;
 
 extern "C" void* cVisualEffectsTestMenu_cVisualEffectsTestMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047FC88;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E038);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -319,7 +319,7 @@ INCLUDE_ASM("main/debugmenu", cPlantsMenu_cPlantsMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -356,7 +356,7 @@ extern float D_004A4470;
 
 extern "C" void* cPlantsMenu_cPlantsMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047FC30;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E118);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -396,7 +396,7 @@ INCLUDE_ASM("main/debugmenu", cLightGlowMenu_cLightGlowMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -465,7 +465,7 @@ extern float D_004A4438;
 
 extern "C" void* cLightGlowMenu_cLightGlowMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047FBD8;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E228);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -538,7 +538,7 @@ INCLUDE_ASM("main/debugmenu", cDepthFogMenu_cDepthFogMenu);
 #ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -568,7 +568,7 @@ extern float D_004A433C;
 
 extern "C" void* cDepthFogMenu_cDepthFogMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047FB80;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E460);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -599,7 +599,7 @@ INCLUDE_ASM("main/debugmenu", cHeightFogMenu_cHeightFogMenu);
 #ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -616,7 +616,7 @@ extern float D_004A43BC;
 
 extern "C" void* cHeightFogMenu_cHeightFogMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047FB28;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E4C0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -637,7 +637,7 @@ INCLUDE_ASM("main/debugmenu", cDetailSystemMenu_cDetailSystemMenu);
 #ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -671,7 +671,7 @@ extern float D_004A4364;
 
 extern "C" void* cDetailSystemMenu_cDetailSystemMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047FAD0;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E4F0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -706,7 +706,7 @@ INCLUDE_ASM("main/debugmenu", cShellRendererMenu_cShellRendererMenu);
 #ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -738,7 +738,7 @@ extern int D_004A46D8;
 
 extern "C" void* cShellRendererMenu_cShellRendererMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047FA78;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E5F0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -772,7 +772,7 @@ INCLUDE_ASM("main/debugmenu", cScreenTintMenu_cScreenTintMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -864,7 +864,7 @@ extern float D_004A4674;
 
 extern "C" void* cScreenTintMenu_cScreenTintMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047FA20;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E680);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -959,7 +959,7 @@ INCLUDE_ASM("main/debugmenu", cShadowMenu_cShadowMenu);
 #ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -991,7 +991,7 @@ extern float D_004A41D0;
 
 extern "C" void* cShadowMenu_cShadowMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047F9C8;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E948);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -1024,7 +1024,7 @@ INCLUDE_ASM("main/debugmenu", cSnowSurfaceMenu_cSnowSurfaceMenu);
 #ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -1049,7 +1049,7 @@ extern float D_004A46F4;
 
 extern "C" void* cSnowSurfaceMenu_cSnowSurfaceMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047F970;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047E9C0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -1079,7 +1079,7 @@ INCLUDE_ASM("main/debugmenu", cBoardTrailMenu_cBoardTrailMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -1137,7 +1137,7 @@ extern float D_004A45C4;
 
 extern "C" void* cBoardTrailMenu_cBoardTrailMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047F918;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047EA18);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -1196,7 +1196,7 @@ INCLUDE_ASM("main/debugmenu", cFlagsMenu_cFlagsMenu);
 #ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -1210,7 +1210,7 @@ extern int D_004A4244;
 
 extern "C" void* cFlagsMenu_cFlagsMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047F8C0;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047EBB8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -1230,7 +1230,7 @@ INCLUDE_ASM("main/debugmenu", cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -1273,7 +1273,7 @@ extern int D_004A4738;
 
 extern "C" void* cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047F868;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047EBE8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -1319,7 +1319,7 @@ INCLUDE_ASM("main/debugmenu", cSnowfallTogglesMenu_cSnowfallTogglesMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -1356,7 +1356,7 @@ extern int D_004A4760;
 
 extern "C" void* cSnowfallTogglesMenu_cSnowfallTogglesMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047F810;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047EDA0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -1396,7 +1396,7 @@ INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu_cSplashTogglesMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -1519,7 +1519,7 @@ extern float D_004A4318;
 
 extern "C" void* cSplashTogglesMenu_cSplashTogglesMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047F7B8;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047EEE0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -1646,7 +1646,7 @@ INCLUDE_ASM("main/debugmenu", cTubeMenu_cTubeMenu);
 #ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -1669,7 +1669,7 @@ extern int D_004A41E8;
 
 extern "C" void* cTubeMenu_cTubeMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047F760;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047F4A8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -1697,7 +1697,7 @@ INCLUDE_ASM("main/debugmenu", cPathArrowMenu_cPathArrowMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -1742,7 +1742,7 @@ extern int D_004A4228;
 
 extern "C" void* cPathArrowMenu_cPathArrowMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047F708;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047F4D8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -1790,7 +1790,7 @@ INCLUDE_ASM("main/debugmenu", cVisualEffectsMainMenu_cVisualEffectsMainMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -1837,7 +1837,7 @@ extern char D_004D1480[];
 
 extern "C" void* cVisualEffectsMainMenu_cVisualEffectsMainMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047F6B0;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047F578);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -1879,25 +1879,25 @@ extern "C" void* cVisualEffectsMainMenu_cVisualEffectsMainMenu(void* self)
 }
 #endif
 
-extern "C" void* func_002CBF60(void* self);
+extern "C" void* cMenu_onGainFocus(void* self);
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024D690__FPv);
 #ifdef SKIP_ASM
 void* func_0024D690(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
-extern "C" void* func_002CBFD0(void* self);
+extern "C" void* cMenu_onLoseFocus(void* self);
 
 //100%
 INCLUDE_ASM("main/debugmenu", func_0024D6B0__FPv);
 #ifdef SKIP_ASM
 void* func_0024D6B0(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -1914,7 +1914,7 @@ extern "C" void* func_0024D6D0(void* self, ...)
 INCLUDE_ASM("main/debugmenu", func_0024D710);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024D710(void* self, int flags)
 {
@@ -1967,7 +1967,7 @@ extern "C" void func_0024D710(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -1975,7 +1975,7 @@ extern "C" void func_0024D710(void* self, int flags)
 INCLUDE_ASM("main/debugmenu", func_0024D998);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024D998(void* self, int flags)
 {
@@ -1998,7 +1998,7 @@ extern "C" void func_0024D998(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -2006,7 +2006,7 @@ extern "C" void func_0024D998(void* self, int flags)
 INCLUDE_ASM("main/debugmenu", func_0024DAB8);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024DAB8(void* self, int flags)
 {
@@ -2041,7 +2041,7 @@ extern "C" void func_0024DAB8(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -2049,11 +2049,11 @@ extern "C" void func_0024DAB8(void* self, int flags)
 INCLUDE_ASM("main/debugmenu", func_0024DC68);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 static inline void dtorSubMenuItem_24DC68(void* p)
 {
-    func_002CAA80((char*)p + 0x18, 2);
+    cMenu__cMenu((char*)p + 0x18, 2);
     func_002CA280(p, 2);
 }
 
@@ -2074,7 +2074,7 @@ extern "C" void func_0024DC68(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -2082,7 +2082,7 @@ extern "C" void func_0024DC68(void* self, int flags)
 INCLUDE_ASM("main/debugmenu", func_0024DD70);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024DD70(void* self, int flags)
 {
@@ -2128,7 +2128,7 @@ extern "C" void func_0024DD70(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -2161,7 +2161,7 @@ extern "C" void func_0024DFA0(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -2169,7 +2169,7 @@ extern "C" void func_0024DFA0(void* self, int flags)
 INCLUDE_ASM("main/debugmenu", func_0024E0F8);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024E0F8(void* self, int flags)
 {
@@ -2190,7 +2190,7 @@ extern "C" void func_0024E0F8(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -2199,7 +2199,7 @@ INCLUDE_ASM("main/debugmenu", func_0024E200);
 #ifdef SKIP_ASM
 static inline void dtorSubMenuItem_24E200(void* p)
 {
-    func_002CAA80((char*)p + 0x18, 2);
+    cMenu__cMenu((char*)p + 0x18, 2);
     func_002CA280(p, 2);
 }
 
@@ -2229,23 +2229,23 @@ extern "C" void func_0024E200(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024E388);
+INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu__cSplashTogglesMenu);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 static inline void dtorSubMenuItem_24E388(void* p)
 {
-    func_002CAA80((char*)p + 0x18, 2);
+    cMenu__cMenu((char*)p + 0x18, 2);
     func_002CA280(p, 2);
 }
 
-extern "C" void func_0024E388(void* self, int flags)
+extern "C" void cSplashTogglesMenu__cSplashTogglesMenu(void* self, int flags)
 {
     func_002CA280((char*)self + 0x252C, 2);
     func_002CA280((char*)self + 0x2508, 2);
@@ -2325,7 +2325,7 @@ extern "C" void func_0024E388(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -2333,7 +2333,7 @@ extern "C" void func_0024E388(void* self, int flags)
 INCLUDE_ASM("main/debugmenu", func_0024E7C8);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024E7C8(void* self, int flags)
 {
@@ -2355,17 +2355,17 @@ extern "C" void func_0024E7C8(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024E8D8);
+INCLUDE_ASM("main/debugmenu", __sti__visualeffectsmenu_cpp);
 #ifdef SKIP_ASM
 struct sV4_E8D8 {
     float x, y, z, w;
     sV4_E8D8(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-    // Class-scope placement new: the unit's global one is defined later (func_00250CB0).
+    // Class-scope placement new: the unit's global one is defined later (__sti__aivisualeffectsmenu_cpp).
     void* operator new(unsigned int, void* p) { return p; }
 } __attribute__((aligned(16)));
 
@@ -2378,7 +2378,7 @@ struct sSlot_E8D8 {
 };
 
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 extern "C" void* cRenderTogglesMenu_cRenderTogglesMenu(void* self);
 extern "C" void func_0024D710(void* self, int flags);
 extern "C" void* cVisualEffectsTestMenu_cVisualEffectsTestMenu(void* self);
@@ -2402,7 +2402,7 @@ extern "C" void func_0024E0F8(void* self, int flags);
 extern "C" void* cSnowfallTogglesMenu_cSnowfallTogglesMenu(void* self);
 extern "C" void func_0024E200(void* self, int flags);
 extern "C" void* cSplashTogglesMenu_cSplashTogglesMenu(void* self);
-extern "C" void func_0024E388(void* self, int flags);
+extern "C" void cSplashTogglesMenu__cSplashTogglesMenu(void* self, int flags);
 extern "C" void* cTubeMenu_cTubeMenu(void* self);
 extern "C" void* cPathArrowMenu_cPathArrowMenu(void* self);
 extern "C" void func_0024E7C8(void* self, int flags);
@@ -2424,7 +2424,7 @@ static inline void cPlantsMenu_dtor(void* self)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, 2);
+    cMenu__cMenu(self, 2);
 }
 
 // cHeightFogMenu's destructor, inlined here (no out-of-line copy is called).
@@ -2435,7 +2435,7 @@ static inline void cHeightFogMenu_dtor(void* self)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, 2);
+    cMenu__cMenu(self, 2);
 }
 
 // cDetailSystemMenu's destructor, inlined here (no out-of-line copy is called).
@@ -2453,7 +2453,7 @@ static inline void cDetailSystemMenu_dtor(void* self)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, 2);
+    cMenu__cMenu(self, 2);
 }
 
 // cShadowMenu's destructor, inlined here (no out-of-line copy is called).
@@ -2470,7 +2470,7 @@ static inline void cShadowMenu_dtor(void* self)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, 2);
+    cMenu__cMenu(self, 2);
 }
 
 // cSnowSurfaceMenu's destructor, inlined here (no out-of-line copy is called).
@@ -2485,7 +2485,7 @@ static inline void cSnowSurfaceMenu_dtor(void* self)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, 2);
+    cMenu__cMenu(self, 2);
 }
 
 // cFlagsMenu's destructor, inlined here (no out-of-line copy is called).
@@ -2495,7 +2495,7 @@ static inline void cFlagsMenu_dtor(void* self)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, 2);
+    cMenu__cMenu(self, 2);
 }
 
 // cTubeMenu's destructor, inlined here (no out-of-line copy is called).
@@ -2509,7 +2509,7 @@ static inline void cTubeMenu_dtor(void* self)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, 2);
+    cMenu__cMenu(self, 2);
 }
 
 extern sV4_E8D8 D_004C9560;
@@ -2573,9 +2573,9 @@ extern int D_004A4FE8;
 extern int D_004A4FEC;
 extern sSlot_E8D8 D_004A4FF0, D_004A4FF8, D_004A5000, D_004A5008, D_004A5010, D_004A5018, D_004A5020, D_004A5028, D_004A5030, D_004A5038, D_004A5040, D_004A5048, D_004A5050, D_004A5058;
 
-// PORT: the unit declares func_0024E8D8 as void*(int, int); it returns nothing.
-extern "C" void func_0024E8D8_impl(int init, int prio) __asm__("func_0024E8D8");
-extern "C" void func_0024E8D8_impl(int init, int prio)
+// PORT: the unit declares __sti__visualeffectsmenu_cpp as void*(int, int); it returns nothing.
+extern "C" void __sti__visualeffectsmenu_cpp_impl(int init, int prio) __asm__("__sti__visualeffectsmenu_cpp");
+extern "C" void __sti__visualeffectsmenu_cpp_impl(int init, int prio)
 {
     if (prio == 0xFFFF) {
         if (init != 0) {
@@ -2671,7 +2671,7 @@ extern "C" void func_0024E8D8_impl(int init, int prio)
         } else {
             func_0024E7C8(D_004D1480, 2);
             cTubeMenu_dtor(D_004D11F0);
-            func_0024E388(D_004CECA8, 2);
+            cSplashTogglesMenu__cSplashTogglesMenu(D_004CECA8, 2);
             func_0024E200(D_004CDC88, 2);
             func_0024E0F8(D_004CD840, 2);
             cFlagsMenu_dtor(D_004CD678);
@@ -2695,7 +2695,7 @@ extern "C" void func_0024E8D8_impl(int init, int prio)
 INCLUDE_ASM("main/debugmenu", func_0024F6C0);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024F6C0(void* self, int flags)
 {
@@ -2718,7 +2718,7 @@ extern "C" void func_0024F6C0(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -2727,7 +2727,7 @@ INCLUDE_ASM("main/debugmenu", func_0024F7E0__FPv);
 #ifdef SKIP_ASM
 void* func_0024F7E0(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -2736,7 +2736,7 @@ INCLUDE_ASM("main/debugmenu", func_0024F800__FPv);
 #ifdef SKIP_ASM
 void* func_0024F800(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -2745,7 +2745,7 @@ INCLUDE_ASM("main/debugmenu", func_0024F820__FPv);
 #ifdef SKIP_ASM
 void* func_0024F820(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -2754,7 +2754,7 @@ INCLUDE_ASM("main/debugmenu", func_0024F840__FPv);
 #ifdef SKIP_ASM
 void* func_0024F840(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -2762,7 +2762,7 @@ void* func_0024F840(void* self)
 INCLUDE_ASM("main/debugmenu", func_0024F860);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024F860(void* self, int flags)
 {
@@ -2780,7 +2780,7 @@ extern "C" void func_0024F860(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -2789,7 +2789,7 @@ INCLUDE_ASM("main/debugmenu", func_0024F940__FPv);
 #ifdef SKIP_ASM
 void* func_0024F940(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -2798,7 +2798,7 @@ INCLUDE_ASM("main/debugmenu", func_0024F960__FPv);
 #ifdef SKIP_ASM
 void* func_0024F960(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -2807,7 +2807,7 @@ INCLUDE_ASM("main/debugmenu", func_0024F980__FPv);
 #ifdef SKIP_ASM
 void* func_0024F980(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -2816,7 +2816,7 @@ INCLUDE_ASM("main/debugmenu", func_0024F9A0__FPv);
 #ifdef SKIP_ASM
 void* func_0024F9A0(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -2825,7 +2825,7 @@ INCLUDE_ASM("main/debugmenu", func_0024F9C0__FPv);
 #ifdef SKIP_ASM
 void* func_0024F9C0(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -2834,7 +2834,7 @@ INCLUDE_ASM("main/debugmenu", func_0024F9E0__FPv);
 #ifdef SKIP_ASM
 void* func_0024F9E0(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -2842,7 +2842,7 @@ void* func_0024F9E0(void* self)
 INCLUDE_ASM("main/debugmenu", func_0024FA00);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024FA00(void* self, int flags)
 {
@@ -2851,7 +2851,7 @@ extern "C" void func_0024FA00(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -2860,7 +2860,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FA78__FPv);
 #ifdef SKIP_ASM
 void* func_0024FA78(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -2869,7 +2869,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FA98__FPv);
 #ifdef SKIP_ASM
 void* func_0024FA98(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -2877,7 +2877,7 @@ void* func_0024FA98(void* self)
 INCLUDE_ASM("main/debugmenu", func_0024FAB8);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024FAB8(void* self, int flags)
 {
@@ -2893,7 +2893,7 @@ extern "C" void func_0024FAB8(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -2902,7 +2902,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FB80__FPv);
 #ifdef SKIP_ASM
 void* func_0024FB80(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -2911,7 +2911,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FBA0__FPv);
 #ifdef SKIP_ASM
 void* func_0024FBA0(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -2919,7 +2919,7 @@ void* func_0024FBA0(void* self)
 INCLUDE_ASM("main/debugmenu", func_0024FBC0);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024FBC0(void* self, int flags)
 {
@@ -2934,7 +2934,7 @@ extern "C" void func_0024FBC0(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -2943,7 +2943,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FC80__FPv);
 #ifdef SKIP_ASM
 void* func_0024FC80(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -2952,7 +2952,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FCA0__FPv);
 #ifdef SKIP_ASM
 void* func_0024FCA0(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -2961,7 +2961,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FCC0__FPv);
 #ifdef SKIP_ASM
 void* func_0024FCC0(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -2970,7 +2970,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FCE0__FPv);
 #ifdef SKIP_ASM
 void* func_0024FCE0(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -2978,7 +2978,7 @@ void* func_0024FCE0(void* self)
 INCLUDE_ASM("main/debugmenu", func_0024FD00);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024FD00(void* self, int flags)
 {
@@ -2993,7 +2993,7 @@ extern "C" void func_0024FD00(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -3002,7 +3002,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FDC0__FPv);
 #ifdef SKIP_ASM
 void* func_0024FDC0(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -3011,7 +3011,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FDE0__FPv);
 #ifdef SKIP_ASM
 void* func_0024FDE0(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -3019,7 +3019,7 @@ void* func_0024FDE0(void* self)
 INCLUDE_ASM("main/debugmenu", func_0024FE00);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024FE00(void* self, int flags)
 {
@@ -3032,7 +3032,7 @@ extern "C" void func_0024FE00(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -3041,7 +3041,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FEA8__FPv);
 #ifdef SKIP_ASM
 void* func_0024FEA8(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -3050,7 +3050,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FEC8__FPv);
 #ifdef SKIP_ASM
 void* func_0024FEC8(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -3059,7 +3059,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FEE8__FPv);
 #ifdef SKIP_ASM
 void* func_0024FEE8(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -3068,7 +3068,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FF08__FPv);
 #ifdef SKIP_ASM
 void* func_0024FF08(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -3076,7 +3076,7 @@ void* func_0024FF08(void* self)
 INCLUDE_ASM("main/debugmenu", func_0024FF28);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_0024FF28(void* self, int flags)
 {
@@ -3084,7 +3084,7 @@ extern "C" void func_0024FF28(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -3093,7 +3093,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FF90__FPv);
 #ifdef SKIP_ASM
 void* func_0024FF90(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -3102,7 +3102,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FFB0__FPv);
 #ifdef SKIP_ASM
 void* func_0024FFB0(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -3111,7 +3111,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FFD0__FPv);
 #ifdef SKIP_ASM
 void* func_0024FFD0(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -3120,7 +3120,7 @@ INCLUDE_ASM("main/debugmenu", func_0024FFF0__FPv);
 #ifdef SKIP_ASM
 void* func_0024FFF0(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -3129,7 +3129,7 @@ INCLUDE_ASM("main/debugmenu", func_00250010__FPv);
 #ifdef SKIP_ASM
 void* func_00250010(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -3138,25 +3138,25 @@ INCLUDE_ASM("main/debugmenu", func_00250030__FPv);
 #ifdef SKIP_ASM
 void* func_00250030(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250050__FPv);
+INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_00250050(void* self)
+void* cSplashTogglesMenu_onGainFocus(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250070__FPv);
+INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_00250070(void* self)
+void* cSplashTogglesMenu_onLoseFocus(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -3173,7 +3173,7 @@ extern "C" void func_00250090(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -3182,7 +3182,7 @@ INCLUDE_ASM("main/debugmenu", func_00250128__FPv);
 #ifdef SKIP_ASM
 void* func_00250128(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -3191,7 +3191,7 @@ INCLUDE_ASM("main/debugmenu", func_00250148__FPv);
 #ifdef SKIP_ASM
 void* func_00250148(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -3200,7 +3200,7 @@ INCLUDE_ASM("main/debugmenu", func_00250168__FPv);
 #ifdef SKIP_ASM
 void* func_00250168(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -3209,29 +3209,29 @@ INCLUDE_ASM("main/debugmenu", func_00250188__FPv);
 #ifdef SKIP_ASM
 void* func_00250188(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
-extern "C" void* func_0024E8D8(int, int);
+extern "C" void* __sti__visualeffectsmenu_cpp(int, int);
 
 //99.38%
 INCLUDE_ASM("main/debugmenu", func_002501A8__FPv);
 #ifdef SKIP_ASM
 void* func_002501A8(void* self)
 {
-    return func_0024E8D8(1, 0xffff);
+    return __sti__visualeffectsmenu_cpp(1, 0xffff);
 }
 #endif
 
-extern "C" void* func_0024E8D8(int, int);
+extern "C" void* __sti__visualeffectsmenu_cpp(int, int);
 
 //99.38%
 INCLUDE_ASM("main/debugmenu", func_002501C8__FPv);
 #ifdef SKIP_ASM
 void* func_002501C8(void* self)
 {
-    return func_0024E8D8(0, 0xffff);
+    return __sti__visualeffectsmenu_cpp(0, 0xffff);
 }
 #endif
 
@@ -3241,7 +3241,7 @@ INCLUDE_ASM("main/debugmenu", cAvalancheMenu_cAvalancheMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cIntMenuItem_cIntMenuItem(void* self, int a1, void* var, int a3, int a4, void* text);
@@ -3316,7 +3316,7 @@ extern float D_004A3AAC;
 
 extern "C" void* cAvalancheMenu_cAvalancheMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_00480040;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047FD80);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -3395,7 +3395,7 @@ INCLUDE_ASM("main/debugmenu", cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu)
 #ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
-void* func_002CAA58(void* self);
+void* cMenu_cMenu(void* self);
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
@@ -3407,7 +3407,7 @@ extern char D_0047FFD0[];
 
 extern "C" void* cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu(void* self)
 {
-    func_002CAA58(self);
+    cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0047FFE8;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), D_0047FFB0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)0x28);
@@ -3422,7 +3422,7 @@ INCLUDE_ASM("main/debugmenu", func_00250A60__FPv);
 #ifdef SKIP_ASM
 void* func_00250A60(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -3431,7 +3431,7 @@ INCLUDE_ASM("main/debugmenu", func_00250A80__FPv);
 #ifdef SKIP_ASM
 void* func_00250A80(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -3448,7 +3448,7 @@ extern "C" void* func_00250AA0(void* self, ...)
 INCLUDE_ASM("main/debugmenu", func_00250AE0);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_00250AE0(void* self, int flags)
 {
@@ -3486,12 +3486,12 @@ extern "C" void func_00250AE0(void* self, int flags)
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250CB0);
+INCLUDE_ASM("main/debugmenu", __sti__aivisualeffectsmenu_cpp);
 #ifdef SKIP_ASM
 inline void* operator new(unsigned int, void* p) { return p; }
 
@@ -3516,9 +3516,9 @@ extern int D_004A5060;
 extern int D_004A5064;
 extern sSlot_0CB0 D_004A5068, D_004A5070, D_004A5078, D_004A5080, D_004A5088, D_004A5090, D_004A5098, D_004A50A0, D_004A50A8, D_004A50B0, D_004A50B8, D_004A50C0, D_004A50C8, D_004A50D0;
 
-// PORT: the unit declares func_00250CB0 as void*(int, int); it returns nothing.
-extern "C" void func_00250CB0_impl(int init, int prio) __asm__("func_00250CB0");
-extern "C" void func_00250CB0_impl(int init, int prio)
+// PORT: the unit declares __sti__aivisualeffectsmenu_cpp as void*(int, int); it returns nothing.
+extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio) __asm__("__sti__aivisualeffectsmenu_cpp");
+extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio)
 {
     if (prio == 0xFFFF) {
         if (init != 0) {
@@ -3607,7 +3607,7 @@ INCLUDE_ASM("main/debugmenu", func_002515F0__FPv);
 #ifdef SKIP_ASM
 void* func_002515F0(void* self)
 {
-    return func_002CBF60(self);
+    return cMenu_onGainFocus(self);
 }
 #endif
 
@@ -3616,7 +3616,7 @@ INCLUDE_ASM("main/debugmenu", func_00251610__FPv);
 #ifdef SKIP_ASM
 void* func_00251610(void* self)
 {
-    return func_002CBFD0(self);
+    return cMenu_onLoseFocus(self);
 }
 #endif
 
@@ -3624,36 +3624,36 @@ void* func_00251610(void* self)
 INCLUDE_ASM("main/debugmenu", func_00251630);
 #ifdef SKIP_ASM
 extern "C" void func_002CA280(void* p, int flags);
-extern "C" void func_002CAA80(void* self, int flags);
+extern "C" void cMenu__cMenu(void* self, int flags);
 
 extern "C" void func_00251630(void* self, int flags)
 {
     func_002CA280((char*)self + 0x164, 2);
     func_002CA280((char*)self + 0x14C, 2);
     func_002CA280((char*)self + 0x130, 2);
-    func_002CAA80(self, flags);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
-extern "C" void* func_00250CB0(int, int);
+extern "C" void* __sti__aivisualeffectsmenu_cpp(int, int);
 
 //99.38%
 INCLUDE_ASM("main/debugmenu", func_00251690__FPv);
 #ifdef SKIP_ASM
 void* func_00251690(void* self)
 {
-    return func_00250CB0(1, 0xffff);
+    return __sti__aivisualeffectsmenu_cpp(1, 0xffff);
 }
 #endif
 
-extern "C" void* func_00250CB0(int, int);
+extern "C" void* __sti__aivisualeffectsmenu_cpp(int, int);
 
 //99.38%
 INCLUDE_ASM("main/debugmenu", func_002516B0__FPv);
 #ifdef SKIP_ASM
 void* func_002516B0(void* self)
 {
-    return func_00250CB0(0, 0xffff);
+    return __sti__aivisualeffectsmenu_cpp(0, 0xffff);
 }
 #endif
 
@@ -3675,11 +3675,11 @@ extern "C" void* MEM_initblock(void* self, int p1, void* p2, int p3, short p4, i
 //100%
 INCLUDE_ASM("main/debugmenu", func_002516F0);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int val, int n);
+extern "C" void MEM_fill(void* dst, int val, int n);
 extern char D_004D2438[];
 
 extern "C" void func_002516F0(void)
 {
-    func_003E6448(D_004D2438, 0, 0x100);
+    MEM_fill(D_004D2438, 0, 0x100);
 }
 #endif

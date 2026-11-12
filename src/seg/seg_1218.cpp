@@ -977,9 +977,9 @@ extern "C" void func_00100F88(char* self, sPad_0F88* pad)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00101310);
+INCLUDE_ASM("seg/seg_1218", cDangerMan_cDangerMan);
 #ifdef SKIP_ASM
-extern "C" void func_00101688(void* self);
+extern "C" void cDangerMan_Reset(void* self);
 
 struct sSlotA_101310 {
     char pad[0x18];
@@ -1005,16 +1005,16 @@ public:
 cTable_101310::cTable_101310(void* o)
 {
     owner = o;
-    func_00101688(this);
+    cDangerMan_Reset(this);
 }
 // PORT: the compiler names this ctor __13cTable_101310Pv; expose it under the address-derived name.
-__asm__(".globl func_00101310\n.type func_00101310,@function\nfunc_00101310 = __13cTable_101310Pv\n.size func_00101310,0x94\n");
+__asm__(".globl cDangerMan_cDangerMan\n.type cDangerMan_cDangerMan,@function\ncDangerMan_cDangerMan = __13cTable_101310Pv\n.size cDangerMan_cDangerMan,0x94\n");
 #endif
 
 INCLUDE_ASM("seg/seg_1218", func_001013A8);
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00101688);
+INCLUDE_ASM("seg/seg_1218", cDangerMan_Reset);
 #ifdef SKIP_ASM
 struct sSlotA_101688 {
     int f0;
@@ -1048,7 +1048,7 @@ struct sTable_101688 {
     int fB5C;                   // 0xB5C
 };
 
-extern "C" void func_00101688(void* vself)
+extern "C" void cDangerMan_Reset(void* vself)
 {
     sTable_101688* self = (sTable_101688*)vself;
     int i;
@@ -1442,7 +1442,7 @@ struct InstanceCompare {
 
 extern t4Vector D_004A61E0;
 extern "C" void func_00101A28_1B60(sFocusList* list, const sNode_1A28* node, int recurse) __asm__("func_00101A28");
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" void func_0013FAD8(tFocusRec** first, tFocusRec** last, tFocusRec** out, const InstanceCompare& cmp);
 extern "C" void func_0030A460(int, tFocusRec*);
 extern "C" void func_0030A3A0(int, tFocusRec*);
@@ -1582,7 +1582,7 @@ extern "C" void func_00101B60(sFocusBoxes* self)
         }
     }
     self->numInstances = list.n;
-    func_003E6574(self->instances, list.items, list.n << 2);
+    MEM_copy(self->instances, list.items, list.n << 2);
     tFocusRec* sorted[256];
     if (numunfocusinstances) {
         func_0013FAD8(unfocusinstances, unfocusinstances + numunfocusinstances, sorted, InstanceCompare());
@@ -1650,10 +1650,10 @@ extern "C" void func_00103308(S_3308 *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00103358);
+INCLUDE_ASM("seg/seg_1218", cFocusMan_reset);
 #ifdef SKIP_ASM
 struct S_3358 { char pad[0xD0]; int f_d0; int pad2; int cnt; void *arr[8]; };
-extern "C" void func_00103358(S_3358 *arg0) {
+extern "C" void cFocusMan_reset(S_3358 *arg0) {
     int i;
 
     for (i = 0; i < arg0->cnt; i++) {
@@ -2796,12 +2796,12 @@ public:
     virtual void v0();
     virtual void Read(void* dst, int n);
 };
-extern "C" void func_00314668(void*);
+extern "C" void cAnimSequencer_expireAll(void*);
 extern "C" void func_00314880(void*, cStream_4DE0*);
 extern "C" void func_00104DE0(char* self, cStream_4DE0* s) {
     s->Read(self, 0x50);
     for (int i = 0; i < 6; i++) {
-        func_00314668(*(char**)(self + 0x50) + i * 8);
+        cAnimSequencer_expireAll(*(char**)(self + 0x50) + i * 8);
         func_00314880(*(char**)(self + 0x50) + i * 8, s);
     }
 }
@@ -3596,7 +3596,7 @@ int func_0011FEE8_5D98(void*) __asm__("func_0011FEE8__FPv");
 int func_0011FE98(void*);
 int AIrand();
 extern "C" int func_00311AE8(void*, int);
-extern "C" void func_00116120(void* rider, int a, int b);
+extern "C" void cRider_checkForReset(void* rider, int a, int b);
 extern "C" void func_0010EB30(void* rider, int anim, int a2, int a3, void* info);
 extern "C" void func_00108388(char* self, char* info, int flag);
 // The unit declares this later with its own vector type; bind it by asm label.
@@ -3714,7 +3714,7 @@ extern "C" void func_00105D98_impl(cRider* self, sInfo_5D98* info, int id)
     self->mImpulse = info->off;
     if (id != -1) {
         if (D_004A28A8_5D98->matList->getMat(id)->fatal != 0) {
-            func_00116120(self, 0, 1);
+            cRider_checkForReset(self, 0, 1);
             return;
         }
     }
@@ -4053,7 +4053,7 @@ int func_0011FEE8_57B8(void*) __asm__("func_0011FEE8__FPv");
 int func_0011FE98(void*);
 // PORT: the project names these __FPv (one param); callers pass a state too.
 void func_0011FEC8_57B8(void* self, int v) __asm__("func_0011FEC8__FPv");
-void func_0011FE78_6848(void* self, int v) __asm__("func_0011FE78__FPv");
+void cRider_setMotionState_6848(void* self, int v) __asm__("cRider_setMotionState__FPv");
 extern "C" float func_0031C228(float);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_play(void*, int, int, float);
@@ -4326,7 +4326,7 @@ extern "C" int func_00106848(cRider* self)
         func_0010E098(self, 1, func_00119D40(self->mMetrix, self->unk_320 != self->mNaturalStance, 0, RAIL_STYLE(self), PRESS_TYPE(self)));
     }
     *(int*)(D_004A3500_6848 + 0x598C) = land.mat;
-    func_0011FE78_6848(self, 4);
+    cRider_setMotionState_6848(self, 4);
     int st = func_0011FEE8_57B8(self);
     if (st == 0 || func_0011FEE8_57B8(self) == 4 || func_0011FEE8_57B8(self) == 5 || func_0011FEE8_57B8(self) == 0xB) {
         int fall = 0;
@@ -5632,10 +5632,10 @@ extern "C" int func_00108C28(S_8C28 *arg0, void *arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00108C80);
+INCLUDE_ASM("seg/seg_1218", cComputer_cComputer);
 #ifdef SKIP_ASM
 extern "C" void cRider_cRider(cRider* self);
-extern "C" void* func_0010FCD8(void* self, int inChrg);
+extern "C" void* cRiderHandler_cRiderHandler(void* self, int inChrg);
 // PORT: the unit declares func_00108E88 as (void); this caller passes self.
 extern "C" void func_00108E88_self(void* self) __asm__("func_00108E88");
 
@@ -5650,7 +5650,7 @@ extern char D_004585F0[];
 
 // PORT: g++ 2.95 most-derived constructor of a class deriving virtually from cRider (vbase at +0xF50,
 // vbase pointers in every subobject); the not-in-charge vtable fix-up is written out by hand.
-extern "C" char* func_00108C80(char* self, int inChrg, int actor)
+extern "C" char* cComputer_cComputer(char* self, int inChrg, int actor)
 {
     if (inChrg)
     {
@@ -5688,7 +5688,7 @@ extern "C" char* func_00108C80(char* self, int inChrg, int actor)
         *(cRider**)(self + 0x18) = vb;
         cRider_cRider(vb);
     }
-    func_0010FCD8(self, 0);
+    cRiderHandler_cRiderHandler(self, 0);
     (*(cRider**)(self + 0x18))->mScriptObjectVtbl = (void*)&D_00458618;
     (*(cRider**)(self + 0x18))->mScriptObjRiderVtbl = D_00459B90;
     (*(cRider**)(self + 0x18))->mVtbl = (void*)&D_00458660;
@@ -5724,7 +5724,7 @@ struct sQ_8E88 {
 extern sQ_8E88 D_004FF130_8E88 __asm__("D_004FF130");
 extern "C" void func_0010CAB8(void* self);
 extern "C" void func_0010D170(void* self);
-extern "C" void* func_003E6448_8E88(void* dst, int value, int size) __asm__("func_003E6448");
+extern "C" void* MEM_fill_8E88(void* dst, int value, int size) __asm__("MEM_fill");
 
 // PORT: the unit later declares func_00108E88 without parameters; it takes the rider.
 void func_00108E88_self(char* self) __asm__("func_00108E88");
@@ -5759,9 +5759,9 @@ void func_00108E88_self(char* self)
     *(Fn_8E88b*)(self + 0xF44) = D_0043CF20_8E88b[1];
     *(short*)(self + 0xF38) = 1;
     do {
-        func_003E6448_8E88(self + 0xE7C, 0, 0x3C);
-        func_003E6448_8E88(self + 0xEB8, 0, 0x3C);
-        func_003E6448_8E88(self + 0xEF4, 0, 0x3C);
+        MEM_fill_8E88(self + 0xE7C, 0, 0x3C);
+        MEM_fill_8E88(self + 0xEB8, 0, 0x3C);
+        MEM_fill_8E88(self + 0xEF4, 0, 0x3C);
     } while (0);
     func_0010D170(self);
 }
@@ -5794,7 +5794,7 @@ cRiderE_108C80::~cRiderE_108C80()
 // PORT: the compiler names these dtors _$_<len><Class>; map them to the address-derived names.
 __asm__(".globl func_00108FA8\n.type func_00108FA8,@function\nfunc_00108FA8 = _$_14cRiderE_108C80\n.size func_00108FA8,0x17C0\n");
 
-__asm__("_$_12cRiderVb_s12 = func_0011B978\n"
+__asm__("_$_12cRiderVb_s12 = cRider__cRider\n"
         "_$_15cCompPart02_s12 = func_00136AD0\n"
         "_$_15cCompPart20_s12 = func_002DCDA0\n"
         "_$_15cCompPart21_s12 = func_002DA8E8\n"
@@ -5861,7 +5861,7 @@ INCLUDE_ASM("seg/seg_1218", func_0010A768);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_003E6448(void* dst, int value, int size);
+extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" float func_0010DEF0(void* self);
 extern "C" void func_00120090(void* self, float v);
 int func_0011FEE8_A768(void*) __asm__("func_0011FEE8__FPv");
@@ -5877,7 +5877,7 @@ extern "C" void func_0010AD78_A768(void* self, void* pad) __asm__("func_0010AD78
 // Clears the pad input, updates the rider, then runs the input handler for the rider state.
 extern "C" void func_0010A768(char* self, void* pad)
 {
-    func_003E6448(pad, 0, 8);
+    MEM_fill(pad, 0, 8);
     func_00120090(*(void**)(self + 0x18), func_0010DEF0(self));
     int state = func_0011FEE8_A768(*(void**)(self + 0x18));
     switch (state) {
@@ -6781,10 +6781,10 @@ INCLUDE_ASM("seg/seg_1218", func_0010C258);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_C258(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00144BE0(void* iface);
+extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" int func_0010C258(void* self) {
     if (*(unsigned int*)(*(char**)((char*)self + 0x18) + 0xB2C) & 1) {
-        if (func_00144BE0(cBE_getInterface_C258(cBE_getBE(), 0)) != 0xE) {
+        if (cBENewRaceInterface_getLocationID(cBE_getInterface_C258(cBE_getBE(), 0)) != 0xE) {
             unsigned int r = AIrand();
             float thr = *(float*)((char*)self + 0xDFC) * 100.0f;
             return (float)(r % 100U) < thr;

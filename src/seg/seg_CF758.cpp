@@ -9,11 +9,11 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_CE758(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" const char* func_00144C60(void* iface, int track);
+extern "C" const char* cBENewRaceInterface_getLocationName(void* iface, int track);
 extern "C" void func_002C2540(void* dst, void* src);
-// PORT: func_002C26D0 is a varargs formatter (dst, fmt, ...)
-extern "C" void func_002C26D0_CE758(void* dst, void* fmt, ...) __asm__("func_002C26D0");
-extern "C" void func_003A0E90(cUIText* text, void* str);
+// PORT: sprintf1 is a varargs formatter (dst, fmt, ...)
+extern "C" void sprintf1_CE758(void* dst, void* fmt, ...) __asm__("sprintf1");
+extern "C" void cUIText_setUnicodeString(cUIText* text, void* str);
 extern void* D_004A28A8;
 
 struct sReq_CE758
@@ -80,8 +80,8 @@ extern "C" void setChallengeName(cUIText* text, int peak, int kind, int idx)
         } else if (peak == 2) {
             func_002C2540(fmt, D_00466C20);
         }
-        func_002C26D0_CE758(buf, fmt, Loc_CE758(D_00466C30));
-        func_003A0E90(text, buf);
+        sprintf1_CE758(buf, fmt, Loc_CE758(D_00466C30));
+        cUIText_setUnicodeString(text, buf);
     } else if (type == 5) {
         if (peak == 0) {
             cUIText_setAsciiString(text, D_00466C40);
@@ -103,7 +103,7 @@ extern "C" void setChallengeName(cUIText* text, int peak, int kind, int idx)
     } else if (type == 11) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(D_00466CC8));
     } else {
-        cUIText_setAsciiString(text, func_00144C60(iface, track));
+        cUIText_setAsciiString(text, cBENewRaceInterface_getLocationName(iface, track));
     }
 }
 #endif
@@ -113,15 +113,15 @@ INCLUDE_ASM("seg/seg_CF758", setChallengeStats);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cBEEconInterface_getTotalMoneyEarned(void* econ, int a, int b);
-extern "C" const char* func_00198AF0_price(int price) __asm__("func_00198AF0");
-extern "C" int func_002C27C0(void* buf, const char* fmt, ...);
+extern "C" const char* getDollarString_price(int price) __asm__("getDollarString");
+extern "C" int sprintf2(void* buf, const char* fmt, ...);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: SN soft-float float->double helper called by name
 extern "C" double func_00413AF8(float f);
-extern "C" int func_00153390(void* iface, int peak);
+extern "C" int cBEMissionInterface_getTotalCollectForPeak(void* iface, int peak);
 extern "C" int func_00153688(void* iface, int a, int b, int peak);
-extern "C" int func_00154368(void* iface, int peak);
-extern "C" int func_001544D0(void* iface, int a, int b, int peak);
+extern "C" int cBEMissionInterface_getNumberMissionsOnPeak(void* iface, int peak);
+extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* iface, int a, int b, int peak);
 extern "C" unsigned int func_00158960(void* self, int b, int c, int d, int e);
 extern char D_004A1EE0[];
 extern char D_00466CE0[];
@@ -149,28 +149,28 @@ extern "C" void setChallengeStats(cUIText* text, int a1, int a2, int peak, int k
     if (kind == 3) {
         int money = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_CE758(cBE_getBE(), 0xB), a1, a2);
         int fmt = Loc_CE758(D_00466CE0);
-        func_002C27C0(num, D_004A1EE0, func_00198AF0_price(money));
+        sprintf2(num, D_004A1EE0, getDollarString_price(money));
         if (fmt != 0) {
-            func_002C26D0_CE758(buf, (void*)fmt, num);
-            func_003A0E90(text, buf);
+            sprintf1_CE758(buf, (void*)fmt, num);
+            cUIText_setUnicodeString(text, buf);
         }
     } else if (kind == 2) {
         void* iface = cBE_getInterface_CE758(cBE_getBE(), 0xA);
         if (idx == 0) {
-            int t = func_00153390(iface, peak);
+            int t = cBEMissionInterface_getTotalCollectForPeak(iface, peak);
             int v = func_00153688(iface, a1, a2, peak);
             int fmt = Loc_CE758(D_00466CF8);
             if (fmt != 0) {
-                func_002C26D0_CE758(buf, (void*)fmt, v, t);
-                func_003A0E90(text, buf);
+                sprintf1_CE758(buf, (void*)fmt, v, t);
+                cUIText_setUnicodeString(text, buf);
             }
         } else {
-            int t = func_00154368(iface, peak);
-            int v = func_001544D0(iface, a1, a2, peak);
+            int t = cBEMissionInterface_getNumberMissionsOnPeak(iface, peak);
+            int v = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(iface, a1, a2, peak);
             int fmt = Loc_CE758(D_00466D10);
             if (fmt != 0) {
-                func_002C26D0_CE758(buf, (void*)fmt, v, t);
-                func_003A0E90(text, buf);
+                sprintf1_CE758(buf, (void*)fmt, v, t);
+                cUIText_setUnicodeString(text, buf);
             }
         }
     } else if (kind == 0) {
@@ -182,8 +182,8 @@ extern "C" void setChallengeStats(cUIText* text, int a1, int a2, int peak, int k
         sprintf(num, D_00466D28, func_00413AF8((float)(int)min), func_00413AF8((float)(int)sec));
         int fmt = Loc_CE758(D_00466D38);
         if (fmt != 0) {
-            func_002C26D0_CE758(buf, (void*)fmt, num);
-            func_003A0E90(text, buf);
+            sprintf1_CE758(buf, (void*)fmt, num);
+            cUIText_setUnicodeString(text, buf);
         }
     } else if (kind == 1) {
         int track = D_0045AAD8_CE758[peak][kind][idx].track;
@@ -191,8 +191,8 @@ extern "C" void setChallengeStats(cUIText* text, int a1, int a2, int peak, int k
         int v = func_00158960(reward, a1, a2, type, track);
         int fmt = Loc_CE758(D_00466D50);
         if (fmt != 0) {
-            func_002C26D0_CE758(buf, (void*)fmt, v);
-            func_003A0E90(text, buf);
+            sprintf1_CE758(buf, (void*)fmt, v);
+            cUIText_setUnicodeString(text, buf);
         }
     }
 }
@@ -206,8 +206,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_ED90(void* be, int kind) __asm__("cBE_getInterface__Fv");
 signed char cBERewardInterface_getTrackMedal(void* self, int a, int b, int track, int kind);
 extern "C" int cBERewardInterface_getEarningsMedal(void* self, int a, int b, int kind);
-extern "C" int func_001589B0(void* self, int a, int b, int kind);
-extern "C" int func_00158A50(void* self, int a, int b, int kind);
+extern "C" int cBERewardInterface_getCollectiblesMedal(void* self, int a, int b, int kind);
+extern "C" int cBERewardInterface_getBigChallengesMedal(void* self, int a, int b, int kind);
 struct sReq_ED90
 {
     signed char track;
@@ -222,10 +222,10 @@ extern "C" void func_001CED90(int arg0, int arg1, int arg2, int arg3, int arg4)
     {
         if (arg4 == 0)
         {
-            func_001589B0(r, arg0, arg1, arg2);
+            cBERewardInterface_getCollectiblesMedal(r, arg0, arg1, arg2);
             return;
         }
-        func_00158A50(r, arg0, arg1, arg2);
+        cBERewardInterface_getBigChallengesMedal(r, arg0, arg1, arg2);
         return;
     }
     if (arg3 != 3)
@@ -247,8 +247,8 @@ extern "C" void* func_0039E2A0(void* self, void* parent);
 extern "C" signed char func_001A1CD0(void* mgr, int player);
 signed char cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 int cBELibrary_getRiderIndex(int flag);
-extern "C" int func_00146D98(void* self, int index);
-extern "C" int func_00150928(void* self, int a, int b);
+extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index);
+extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern char D_0046A3C8[];
 
 struct sVEntry_1CEEA0 {
@@ -331,7 +331,7 @@ extern "C" sChallenge_1CEEA0* func_001CEEA0(sChallenge_1CEEA0* self, void* paren
     char* iface = (char*)cBE_getInterface_ED90(cBE_getBE(), 1);
     self->charId = cBENewPlayerInterface_getPlayerCharID(iface, self->player);
     if (rank != 0) {
-        switch (func_00146D98(iface, cBELibrary_getRiderIndex(self->player))) {
+        switch (cBENewPlayerInterface_getLastHub(iface, cBELibrary_getRiderIndex(self->player))) {
         case 17: self->f8F0 = 1; break;
         case 18: self->f8F0 = 1; break;
         case 19: self->f8F0 = 2; break;
@@ -344,7 +344,7 @@ extern "C" sChallenge_1CEEA0* func_001CEEA0(sChallenge_1CEEA0* self, void* paren
     }
     sVEntry_1CEEA0* vt = *(sVEntry_1CEEA0**)(iface + 0xC);
     vt[2].fn(iface + vt[2].delta);
-    self->f54 = func_00150928(cBE_getInterface_ED90(cBE_getBE(), 0xB), self->player, self->charId);
+    self->f54 = cBEEconInterface_getMoney(cBE_getInterface_ED90(cBE_getBE(), 0xB), self->player, self->charId);
     return self;
 }
 #endif

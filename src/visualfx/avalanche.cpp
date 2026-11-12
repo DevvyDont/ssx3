@@ -54,17 +54,17 @@ struct func_002D6378_sElem {
     char pad[0x2F0];
 };
 extern func_002D6378_sElem D_004EE840[];
-extern "C" void func_002D9B40(void* self);
-extern "C" void func_003715B0(void* p, int flags);
+extern "C" void cAvalanche_reset(void* self);
+extern "C" void cDynamicColourEmitter_purge(void* p, int flags);
 void operator_delete(int* ptr);
 
 extern "C" void func_002D6378(int* self, int flags)
 {
     *(void***)self = D_00488648;
-    func_002D9B40(self);
+    cAvalanche_reset(self);
     int i;
     for (i = 0; i < 64; i++) {
-        func_003715B0(&D_004EE840[i], 1);
+        cDynamicColourEmitter_purge(&D_004EE840[i], 1);
     }
     *(void***)self = D_00488680;
     if (flags & 1) {
@@ -290,7 +290,7 @@ struct sAvNodeCA8 {
     sAvDataCA8* data;           // 0x2E0
 };
 
-extern "C" void func_002D7DD8(void* self, int force);
+extern "C" void tActiveAvalancheNode_end(void* self, int force);
 extern "C" void func_003717C0(void* em, void* pos, void* d, void* vel, int alive, float dt);
 extern sAvVec4CA8 D_004FF120_7CA8 __asm__("D_004FF120");
 
@@ -333,13 +333,13 @@ extern "C" int func_002D7CA8(sAvNodeCA8* self, float t)
         return 1;
     }
     if (self->data->type == 2) return 1;
-    func_002D7DD8(self, 0);
+    tActiveAvalancheNode_end(self, 0);
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D7DD8);
+INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_end);
 #ifdef SKIP_ASM
 extern "C" void cDynamicColourEmitter_reset(void* self);
 
@@ -349,7 +349,7 @@ struct sVEntry2D7DD8 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_002D7DD8(void* self, int force)
+extern "C" void tActiveAvalancheNode_end(void* self, int force)
 {
     char* p = *(char**)((char*)self + 0x2E0);
     if (p != 0 && (force != 0 || *(unsigned short*)(p + 0xF0) != 2)) {
@@ -420,7 +420,7 @@ extern "C" void func_002D81B0(void* self)
     if (*(int*)self != 0) {
         char* n = *(char**)((char*)self + 0x4);
         while (n != 0) {
-            func_002D7DD8(n, 1);
+            tActiveAvalancheNode_end(n, 1);
             n = *(char**)(n + 0x2E4);
         }
         *(int*)self = 0;
@@ -434,18 +434,18 @@ extern "C" void func_002D81B0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D8258);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_SaveData);
 #ifdef SKIP_ASM
 extern char D_004A3AD0[];
 extern char D_004A3AD8[];
 extern char D_004A3AE0[];
-extern "C" void func_002D83B8(int, char*);
+extern "C" void cAvalanche_SaveData1(int, char*);
 
-extern "C" void func_002D8258(void)
+extern "C" void cAvalanche_SaveData(void)
 {
-    func_002D83B8(1, D_004A3AD0);
-    func_002D83B8(1, D_004A3AD8);
-    func_002D83B8(0, D_004A3AE0);
+    cAvalanche_SaveData1(1, D_004A3AD0);
+    cAvalanche_SaveData1(1, D_004A3AD8);
+    cAvalanche_SaveData1(0, D_004A3AE0);
 }
 #endif
 
@@ -483,7 +483,7 @@ extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D83B8);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_SaveData1);
 #ifdef SKIP_ASM
 extern void* D_004A3AB0;
 extern int D_004A3A48;
@@ -491,8 +491,8 @@ extern char D_004A3AF0[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00144BE0(void* iface);
-extern "C" char* func_00144C48(void* iface, int i);
+extern "C" int cBENewRaceInterface_getLocationID(void* iface);
+extern "C" char* cBENewRaceInterface_getLocationFile(void* iface, int i);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int func_003DEBF0(char* name, int mode, int prio, int* fd);
 extern "C" void func_003DECA0(int fd, int prio);
@@ -529,7 +529,7 @@ struct sAvGroup_83B8 {
 };
 
 // PORT: func_002D82A0 takes the file handle and offset as void* (ints passed through pointers).
-extern "C" void func_002D83B8(int direct, char* name)
+extern "C" void cAvalanche_SaveData1(int direct, char* name)
 {
     if (D_004A3AB0 == 0) {
         return;
@@ -537,7 +537,7 @@ extern "C" void func_002D83B8(int direct, char* name)
     int off = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     char buf[0x100];
-    sprintf(buf, D_004A3AF0, func_00144C48(iface, func_00144BE0(iface)), name);
+    sprintf(buf, D_004A3AF0, cBENewRaceInterface_getLocationFile(iface, cBENewRaceInterface_getLocationID(iface)), name);
     int fd;
     if (func_003DEBF0(buf, 0x26, 0x64, &fd)) {
         sAvGroup_83B8* g;
@@ -589,7 +589,7 @@ extern "C" void func_002D83B8(int direct, char* name)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D87D0);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_LoadData);
 #ifdef SKIP_ASM
 extern void* D_004A3AB4;
 extern int D_004A3AB8;
@@ -599,20 +599,20 @@ extern int D_004A3A4C;
 extern char D_004A3AD8[];
 // PORT: the read call returns func_003DEB50's result (bytes read); the ealib unit declares it void.
 extern "C" int func_003DEC60_i(int fd, int off, void* data, int size, int prio) __asm__("func_003DEC60");
-extern "C" void func_002D9A80(void);
+extern "C" void cAvalanche_end(void);
 extern "C" void cAvalanche_resolveDataPointers(void);
 
 // Loads the avalanche data file for the current mountain (magic 0x2BEEF00, then the data size) into a fresh buffer.
-extern "C" void func_002D87D0(void)
+extern "C" void cAvalanche_LoadData(void)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     char buf[0x100];
-    sprintf(buf, D_004A3AF0, func_00144C48(iface, func_00144BE0(iface)), D_004A3AD8);
+    sprintf(buf, D_004A3AF0, cBENewRaceInterface_getLocationFile(iface, cBENewRaceInterface_getLocationID(iface)), D_004A3AD8);
     D_004A3ABC = 0;
     D_004A3AC4 = 1;
     int fd;
     if (func_003DEBF0(buf, 1, 0x64, &fd)) {
-        func_002D9A80();
+        cAvalanche_end();
         if (D_004A3AB4 != 0 && D_004A3AB8 != 0) {
             cMemMan_free(D_004A3AB4);
         }
@@ -643,7 +643,7 @@ extern "C" void func_002D87D0(void)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/avalanche", func_002D8948);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_update);
 #ifdef SKIP_ASM
 struct sAvalancheSlot {
     int active;
@@ -657,16 +657,16 @@ extern int D_004A3A7C;
 extern int D_004A3ABC;
 extern int D_004A3AC4;
 extern sAvalancheSlot D_00538938[];
-extern "C" void func_002D96E0(void);
+extern "C" void cAvalanche_calculate(void);
 extern "C" void cAvalanche_resolveDataPointers(void);
 extern "C" int cAvalanche_triggerAvalanche(int a);
 extern "C" void func_002D7EF8(void* self);
 
-extern "C" void func_002D8948(void)
+extern "C" void cAvalanche_update(void)
 {
     if (D_004A3A30 != 0) {
         if (D_004A3A34 != 0) {
-            func_002D96E0();
+            cAvalanche_calculate();
             D_004A3A34 = 0;
             D_004A3AC4 = 0;
         }
@@ -690,13 +690,13 @@ extern "C" void func_002D8948(void)
 }
 #endif
 
-INCLUDE_ASM("visualfx/avalanche", func_002D8A00);
+INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_renderLines);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/avalanche", func_002D8EA8);
+INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_002D8A00(void* node);
+extern "C" void tActiveAvalancheNode_renderLines(void* node);
 extern "C" void func_00371688(void* p, int a);
 extern char* D_004A28A8;
 extern int D_004A3A54;
@@ -832,7 +832,7 @@ public:
     virtual sAvVec4_D8EA8* getPos();
 };
 
-extern "C" void func_002D8EA8(void* slotv)
+extern "C" void tActiveAvalanche_render(void* slotv)
 {
     sAvSlot_D8EA8* slot = (sAvSlot_D8EA8*)slotv;
     cRCtx_D8EA8* ctx = D_ctx_D8EA8;
@@ -842,7 +842,7 @@ extern "C" void func_002D8EA8(void* slotv)
     for (sAvActive_D8EA8* n = slot->active; n != 0; n = n->next, i++) {
         if (n->data) {
             if (i < D_004A3A58)
-                func_002D8A00(n);
+                tActiveAvalancheNode_renderLines(n);
             if (D_004A3A54 && ((unsigned char*)n->data)[0xF2])
                 func_00371688(n->fx, 7);
         }
@@ -869,7 +869,7 @@ extern "C" void func_002D8EA8(void* slotv)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/avalanche", func_002D9130);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_render);
 #ifdef SKIP_ASM
 struct sRState_9130 {
     int f0;
@@ -930,13 +930,13 @@ extern char* D_004A28A8;
 extern sRCtx_9130* D_004A5B80;
 extern int D_004A41EC;
 extern sRState_9130 D_00501420;
-extern "C" void func_002D8EA8(void* slot);
+extern "C" void tActiveAvalanche_render(void* slot);
 
 static inline sCam_9130* getCam_9130() { return *(sCam_9130**)(*(char**)(D_004A28A8 + 0x84) + 0x84); }
 
 static inline void setB5_9130(sRCtx_9130* c, int v) { c->top->b5 = v; }
 
-extern "C" void func_002D9130(void)
+extern "C" void cAvalanche_render(void)
 {
     if ((D_004A3A30 != 0 && D_004A3ABC != 0) || D_004A41EC != 0)
     {
@@ -953,7 +953,7 @@ extern "C" void func_002D9130(void)
         if (D_004A3A30 != 0)
         {
             for (int i = 0; i < 16; i++)
-                func_002D8EA8(&D_00538938[i]);
+                tActiveAvalanche_render(&D_00538938[i]);
         }
         ctx->top--;
     }
@@ -998,11 +998,11 @@ extern "C" void func_002D9538(int id, sAvParams9538* params)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/avalanche", func_002D9660);
+INCLUDE_ASM("visualfx/avalanche", tAvalanche_calculate);
 #ifdef SKIP_ASM
 extern "C" void tAvalancheNode_calculate(void* node, void* self);
 
-extern "C" void func_002D9660(void* self)
+extern "C" void tAvalanche_calculate(void* self)
 {
     void* n = *(void**)((char*)self + 0x4);
     while (n != 0) {
@@ -1027,21 +1027,21 @@ extern "C" void* func_002D96B0(void* self, int id)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/avalanche", func_002D96E0);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_calculate);
 #ifdef SKIP_ASM
-extern "C" void func_002D9A80(void);
-extern "C" void func_002D8258(void);
-extern "C" void func_002D87D0(void);
+extern "C" void cAvalanche_end(void);
+extern "C" void cAvalanche_SaveData(void);
+extern "C" void cAvalanche_LoadData(void);
 extern void* D_004A3AB0;
 
-extern "C" void func_002D96E0(void)
+extern "C" void cAvalanche_calculate(void)
 {
-    func_002D9A80();
+    cAvalanche_end();
     for (void* p = D_004A3AB0; p != 0; p = *(void**)((char*)p + 0x8)) {
-        func_002D9660(p);
+        tAvalanche_calculate(p);
     }
-    func_002D8258();
-    func_002D87D0();
+    cAvalanche_SaveData();
+    cAvalanche_LoadData();
 }
 #endif
 
@@ -1239,27 +1239,27 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D9A80);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_end);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct func_002D9A80_sSlot {
+struct cAvalanche_end_sSlot {
     int active;
     char pad[0x18];
 };
-// Typed view of D_00538938 (func_002D8948 declares it earlier in the unit with its own element type).
-extern func_002D9A80_sSlot D_slots_9A80[] __asm__("D_00538938");
+// Typed view of D_00538938 (cAvalanche_update declares it earlier in the unit with its own element type).
+extern cAvalanche_end_sSlot D_slots_9A80[] __asm__("D_00538938");
 extern int D_004A3AB8;
 void cMemMan_free(void*);
 extern "C" void func_002D81B0(void* self);
 
-static inline void freeSlot_9A80(func_002D9A80_sSlot* s)
+static inline void freeSlot_9A80(cAvalanche_end_sSlot* s)
 {
     if (s->active != 0) {
         func_002D81B0(s);
     }
 }
 
-extern "C" void func_002D9A80(void)
+extern "C" void cAvalanche_end(void)
 {
     int i;
     for (i = 0; i < 16; i++) {
@@ -1280,9 +1280,9 @@ extern "C" void func_002D9A80(void)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D9B40);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_reset);
 #ifdef SKIP_ASM
-extern "C" void func_002D9A80(void);
+extern "C" void cAvalanche_end(void);
 extern "C" void func_00416210(void* dst, int c, int n);
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
@@ -1292,9 +1292,9 @@ extern void* D_004A3AB4;
 extern int D_004A3AB8;
 extern int D_004A3ABC;
 
-extern "C" void func_002D9B40(void* self)
+extern "C" void cAvalanche_reset(void* self)
 {
-    func_002D9A80();
+    cAvalanche_end();
     char* p = (char*)D_004A3AB0;
     while (p != 0) {
         char* cur = p;
@@ -1510,7 +1510,7 @@ extern int D_004A3AC4;
 
 extern "C" void func_002D9FB8(void* data)
 {
-    func_002D9B40(data);
+    cAvalanche_reset(data);
     if (D_004A3AB4 != 0 && D_004A3AB8 != 0) {
         cMemMan_free(D_004A3AB4);
     }

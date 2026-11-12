@@ -121,7 +121,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void* func_003977E8(void* self);
 extern "C" void func_001DD580(void* self);
 extern "C" void cUIScreen_setData(void* self, char* data);
-extern "C" void func_0039E758(void* self, void* node);
+extern "C" void cUIState_addScreen(void* self, void* node);
 extern "C" void cUIScreen_createAllObjects(void* self);
 // PORT: func_0039FB30 really takes (self, a, b); the unit's other caller uses a 1-arg declaration.
 void* func_0039FB30_3(void* self, int a, int b) __asm__("func_0039FB30");
@@ -181,7 +181,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* self, void* owner, unsigned
         screen = s;
     }
     cUIScreen_setData(screen, data);
-    func_0039E758(owner, screen);
+    cUIState_addScreen(owner, screen);
     cUIScreen_createAllObjects(screen);
     return screen;
 }
@@ -417,7 +417,7 @@ extern char D_00493DB0[];
 extern char D_004A4778[];
 extern char* D_004A289C_8138 __asm__("D_004A289C");
 extern "C" sUIFsh8138* func_003E22F0(char* name, int flags);
-extern "C" void func_002523A8(void* p);
+extern "C" void MEM_free(void* p);
 extern "C" void* func_00416210(void* dst, int c, int n);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -441,7 +441,7 @@ extern "C" void cUITextureBank_setData(void* vbank, int id, void* vdata)
             self->texIds[i] = vt[46].fn(D_004A289C_8138 + vt[46].delta, shape, D_004A4778, 0, 1, -1);
         }
     }
-    func_002523A8(fsh);
+    MEM_free(fsh);
     sUITexSrc8138* src = data->e;
     self->data = data;
     int n = data->count;
@@ -581,7 +581,7 @@ extern "C" void func_003984E8(sChunkHdr_3984E8** self, sChunkHdr_3984E8* hdr)
 INCLUDE_ASM("ui/uiengine", cUIFontInterface_loadFonts);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" int func_003915E8(void* mem, int name, int a2);
+extern "C" int cFont_cFont(void* mem, int name, int a2);
 extern char D_004A4780[];
 
 static inline int uiFontNameOf(s3983F0Entry* e)
@@ -593,77 +593,77 @@ extern "C" void cUIFontInterface_loadFonts(s3983F0* self)
 {
     for (int i = 0; i < self->count; i++) {
         signed char j = i;
-        *(int*)((char*)self + j * 12 + 0xC) = func_003915E8(cMemMan_alloc(0x84, D_004A4780, 0, 0), uiFontNameOf(&self->entries[i]), 0);
+        *(int*)((char*)self + j * 12 + 0xC) = cFont_cFont(cMemMan_alloc(0x84, D_004A4780, 0, 0), uiFontNameOf(&self->entries[i]), 0);
     }
 }
 #endif
 
-extern "C" void* func_0039FE00(void* self);
+extern "C" void* cUIThing_setUIData(void* self);
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398618__FPv);
+INCLUDE_ASM("ui/uiengine", cUIGroup_setUIData__FPv);
 #ifdef SKIP_ASM
-void* func_00398618(void* self)
+void* cUIGroup_setUIData(void* self)
 {
-    return func_0039FE00(self);
+    return cUIThing_setUIData(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398638);
+INCLUDE_ASM("ui/uiengine", cUIGroup_setFocus);
 #ifdef SKIP_ASM
 extern void* D_00494B98[];
 extern void* D_00494CE8[];
 
-struct func_00398638_sFunctor {
+struct cUIGroup_setFocus_sFunctor {
     void** vt;
     int arg;
 };
 
-struct func_00398638_sFlags {
+struct cUIGroup_setFocus_sFlags {
     unsigned int pad0 : 4;
     unsigned int on : 1;
 };
 
 // PORT: functor object passed to func_003979F8 (declared later in the unit with its own functor struct).
-int func_003979F8_f(void* list, func_00398638_sFunctor* fn) __asm__("func_003979F8");
+int func_003979F8_f(void* list, cUIGroup_setFocus_sFunctor* fn) __asm__("func_003979F8");
 
-extern "C" void func_00398638(void* self, int on)
+extern "C" void cUIGroup_setFocus(void* self, int on)
 {
-    func_00398638_sFunctor f;
+    cUIGroup_setFocus_sFunctor f;
     f.vt = D_00494CE8;
     f.vt = D_00494B98;
     f.arg = on;
     func_003979F8_f((char*)self + 0x74, &f);
     f.vt = D_00494CE8;
-    ((func_00398638_sFlags*)((char*)self + 0x14))->on = (on != 0);
+    ((cUIGroup_setFocus_sFlags*)((char*)self + 0x14))->on = (on != 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_003986B0);
+INCLUDE_ASM("ui/uiengine", cUIGroup_getObjectByHashName);
 #ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
-extern "C" void* func_0039FF60(void* self, int a1);
+extern "C" void* cUIThing_getObjectByHashName(void* self, int a1);
 
-struct func_003986B0_sVEntry {
+struct cUIGroup_getObjectByHashName_sVEntry {
     short delta;
     short index;
     void* (*fn)(void*, int);
 };
 
-extern "C" void* func_003986B0(void* self, int id)
+extern "C" void* cUIGroup_getObjectByHashName(void* self, int id)
 {
-    if (func_0039FF60(self, id) != 0) {
+    if (cUIThing_getObjectByHashName(self, id) != 0) {
         return self;
     }
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
         do {
-            func_003986B0_sVEntry* e = &(*(func_003986B0_sVEntry**)((char*)n + 8))[14];
+            cUIGroup_getObjectByHashName_sVEntry* e = &(*(cUIGroup_getObjectByHashName_sVEntry**)((char*)n + 8))[14];
             void* r = e->fn((char*)n + e->delta, id);
             if (r != 0) {
                 return r;
@@ -676,25 +676,25 @@ extern "C" void* func_003986B0(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398738);
+INCLUDE_ASM("ui/uiengine", cUIGroup_updateLocale);
 #ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 
-struct func_00398738_sVEntry {
+struct cUIGroup_updateLocale_sVEntry {
     short delta;
     short index;
     void (*fn)(void*);
 };
 
-extern "C" void func_00398738(void* self)
+extern "C" void cUIGroup_updateLocale(void* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
         do {
-            func_00398738_sVEntry* vt = *(func_00398738_sVEntry**)((char*)n + 8);
+            cUIGroup_updateLocale_sVEntry* vt = *(cUIGroup_updateLocale_sVEntry**)((char*)n + 8);
             vt[0x10].fn((char*)n + vt[0x10].delta);
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -703,24 +703,24 @@ extern "C" void func_00398738(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398798);
+INCLUDE_ASM("ui/uiengine", cUIGroup_onInput);
 #ifdef SKIP_ASM
 extern void* D_00494BB8[];
 extern void* D_00494CE8[];
 
-struct func_00398798_sFunctor {
+struct cUIGroup_onInput_sFunctor {
     void** vt;
     int arg;
 };
 
-extern "C" int func_003979F8(void* list, func_00398798_sFunctor* fn);
+extern "C" int func_003979F8(void* list, cUIGroup_onInput_sFunctor* fn);
 
-extern "C" int func_00398798(void* self, int a1)
+extern "C" int cUIGroup_onInput(void* self, int a1)
 {
     if ((*(int*)((char*)self + 0x14) >> 5) & 1) {
         return 0;
     }
-    func_00398798_sFunctor f;
+    cUIGroup_onInput_sFunctor f;
     f.vt = D_00494CE8;
     f.vt = D_00494BB8;
     f.arg = a1;
@@ -731,20 +731,20 @@ extern "C" int func_00398798(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_003987F8);
+INCLUDE_ASM("ui/uiengine", cUIGroup_render3D);
 #ifdef SKIP_ASM
-struct func_003987F8_sVEntry {
+struct cUIGroup_render3D_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, int);
 };
 
-extern "C" void func_003987F8(void* self, int a1)
+extern "C" void cUIGroup_render3D(void* self, int a1)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            func_003987F8_sVEntry* vt = *(func_003987F8_sVEntry**)((char*)n + 8);
+            cUIGroup_render3D_sVEntry* vt = *(cUIGroup_render3D_sVEntry**)((char*)n + 8);
             vt[0x12].fn((char*)n + vt[0x12].delta, a1);
             n = *(void**)((char*)n + 4);
         }
@@ -753,21 +753,21 @@ extern "C" void func_003987F8(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398868);
+INCLUDE_ASM("ui/uiengine", cUIGroup_render2D);
 #ifdef SKIP_ASM
-struct func_00398868_sVEntry {
+struct cUIGroup_render2D_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, float, float);
 };
 
-extern "C" void func_00398868(void* self, float x, float y)
+extern "C" void cUIGroup_render2D(void* self, float x, float y)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
-                func_00398868_sVEntry* vt = *(func_00398868_sVEntry**)((char*)n + 8);
+                cUIGroup_render2D_sVEntry* vt = *(cUIGroup_render2D_sVEntry**)((char*)n + 8);
                 vt[0x11].fn((char*)n + vt[0x11].delta, *(float*)((char*)self + 0x44) + x, *(float*)((char*)self + 0x48) + y);
             }
             n = *(void**)((char*)n + 4);
@@ -777,39 +777,39 @@ extern "C" void func_00398868(void* self, float x, float y)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398910);
+INCLUDE_ASM("ui/uiengine", cUIGroup_update);
 #ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
-extern "C" void func_003A0000(void* self, unsigned short ev);
+extern "C" void cUIThing_update(void* self, unsigned short ev);
 
-struct func_00398910_sVEntry {
+struct cUIGroup_update_sVEntry {
     short delta;
     short index;
     void (*fn)(void*, unsigned short);
 };
 
-extern "C" void func_00398910(void* self, unsigned short ev)
+extern "C" void cUIGroup_update(void* self, unsigned short ev)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            func_00398910_sVEntry* vt = *(func_00398910_sVEntry**)((char*)n + 8);
+            cUIGroup_update_sVEntry* vt = *(cUIGroup_update_sVEntry**)((char*)n + 8);
             vt[19].fn((char*)n + vt[19].delta, ev);
             n = *(void**)((char*)n + 4);
         }
     }
-    func_003A0000(self, ev);
+    cUIThing_update(self, ev);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398998);
+INCLUDE_ASM("ui/uiengine", cUIIcon_setUIData);
 #ifdef SKIP_ASM
-// PORT: func_0039FE00 really takes (self, data) and its result is unused here; the unit declares it with one argument.
-void func_0039FE00_8998(void* self, void* data) __asm__("func_0039FE00");
+// PORT: cUIThing_setUIData really takes (self, data) and its result is unused here; the unit declares it with one argument.
+void cUIThing_setUIData_8998(void* self, void* data) __asm__("cUIThing_setUIData");
 
 struct sUISize8998 {
     float w, h;
@@ -839,9 +839,9 @@ struct sUIData8998 {
 };
 
 // Copies the widget's clip/alignment bits, looks up its item and sets its size (stored in 1/100 units).
-extern "C" void func_00398998(sUIObj8998* self, sUIData8998* data)
+extern "C" void cUIIcon_setUIData(sUIObj8998* self, sUIData8998* data)
 {
-    func_0039FE00_8998(self, data);
+    cUIThing_setUIData_8998(self, data);
     self->clip = data->clip;
     self->align = data->align;
     self->item = func_00398380(*(char**)(*(char**)(self->scene + 0xD0) + 0x10) + 0x58, data->id);
@@ -1192,8 +1192,8 @@ extern "C" func_00399768_sObj* func_00399768(func_00399768_sObj* self)
 //100%
 INCLUDE_ASM("ui/uiengine", func_00399820);
 #ifdef SKIP_ASM
-// PORT: func_0039FE00 really takes (self, data); the unit declares it with one argument.
-void* func_0039FE00_2(void* self, void* data) __asm__("func_0039FE00");
+// PORT: cUIThing_setUIData really takes (self, data); the unit declares it with one argument.
+void* cUIThing_setUIData_2(void* self, void* data) __asm__("cUIThing_setUIData");
 
 struct sUIColor9820 {
     float r, g, b, a;
@@ -1222,7 +1222,7 @@ struct sUIData9820 {
 
 extern "C" void func_00399820(sUIObj9820* self, sUIData9820* data)
 {
-    func_0039FE00_2(self, data);
+    cUIThing_setUIData_2(self, data);
     self->mode = data->mode & 3;
     self->vt[23].fn((char*)self + self->vt[23].delta, data->vis & 1);
     int f = *(int*)((char*)self + 0x74) >> 2;

@@ -192,21 +192,21 @@ void func_00397930(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/list", func_00397948);
+INCLUDE_ASM("util/list", cList_destroyList);
 #ifdef SKIP_ASM
-class func_00397948_cVirt {
+class cList_destroyList_cVirt {
 public:
     void* next;                  // 0x0
-    func_00397948_cVirt* prev;   // 0x4
+    cList_destroyList_cVirt* prev;   // 0x4
     // vptr at 0x8; slot N at vtable offset N*8
     virtual void v01(int);
 };
 
-extern "C" void func_00397948(void* self)
+extern "C" void cList_destroyList(void* self)
 {
-    func_00397948_cVirt* n = *(func_00397948_cVirt**)((char*)self + 0x4);
+    cList_destroyList_cVirt* n = *(cList_destroyList_cVirt**)((char*)self + 0x4);
     while (n->prev != n) {
-        func_00397948_cVirt* p = n->prev;
+        cList_destroyList_cVirt* p = n->prev;
         if (n != 0) {
             n->v01(3);
         }
@@ -217,9 +217,9 @@ extern "C" void func_00397948(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/list", func_003979C0);
+INCLUDE_ASM("util/list", cList_size);
 #ifdef SKIP_ASM
-extern "C" int func_003979C0(cList* list)
+extern "C" int cList_size(cList* list)
 {
     cListNode* node = list->head;
     int count = 0;

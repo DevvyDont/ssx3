@@ -21,7 +21,7 @@ void cCameraTriggerList_init(cCameraTriggerList* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016BF40);
+INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_reset);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 void tCameraTrigger__tCameraTrigger(void* self, int flags);
@@ -49,7 +49,7 @@ struct sTrigList_16BF40
     int count;
 };
 
-extern "C" void func_0016BF40(void* self_)
+extern "C" void cCameraTriggerList_reset(void* self_)
 {
     sTrigList_16BF40* self = (sTrigList_16BF40*)self_;
     for (int i = 0; i < self->count; i++)
@@ -84,12 +84,12 @@ extern "C" void func_0016BF40(void* self_)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C098);
 #ifdef SKIP_ASM
-extern "C" void func_0016BF40(void*);
+extern "C" void cCameraTriggerList_reset(void*);
 void cMemMan_free(void*);
 
 extern "C" void func_0016C098(void** self)
 {
-    func_0016BF40(self);
+    cCameraTriggerList_reset(self);
     if (*self != 0) {
         cMemMan_free(*self);
         *self = 0;
@@ -138,7 +138,7 @@ int cCameraTriggerList_insert(cCameraTriggerList2* list, void* item, int idx)
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_loadFromFile);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(const char* name);
-extern "C" int func_00317F98(const char* name);
+extern "C" int BXFILE_size(const char* name);
 extern "C" void FILE_loadpackat(const char* name, void* buf, int size);
 extern "C" int cCameraTriggerList_loadFromBuffer(void* self, void* buf);
 // PORT: operator_new__FUi takes (size, tag, flags, align) here.
@@ -149,8 +149,8 @@ extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* name)
 {
     if (!BXFILE_exists(name))
         return 1;
-    func_0016BF40(self);
-    int size = func_00317F98(name);
+    cCameraTriggerList_reset(self);
+    int size = BXFILE_size(name);
     void* buf = operator_new_K2(size, D_0045BF30, 0x100, 0);
     FILE_loadpackat(name, buf, size);
     if (buf != 0) {

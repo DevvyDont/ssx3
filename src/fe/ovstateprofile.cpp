@@ -7,8 +7,8 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVStateManager_addPDATemplate();
-extern "C" void func_0020A380(void* self);
-extern "C" void func_00212080(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
+extern "C" void cOVState_PROFILE_initGeneral(void* self);
 extern char D_00471D50[];
 
 extern "C" void cOVState_PROFILE_onCreateScreen(void* self)
@@ -20,8 +20,8 @@ extern "C" void cOVState_PROFILE_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVStateManager_addPDATemplate();
-    func_00212080(self);
-    func_0020A380(self);
+    cOVState_PROFILE_initGeneral(self);
+    cOVState_onCreateScreen(self);
 }
 #endif
 
@@ -50,7 +50,7 @@ INCLUDE_ASM("fe/ovstateprofile", func_00211270);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00211380(void* self);
-extern "C" void* func_00227F80(void* app);
+extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern void* D_004A28A8;
 extern char D_00471D68[];
@@ -190,7 +190,7 @@ extern "C" void func_00211270(void* p)
 {
     cSelf_11270* self = (cSelf_11270*)p;
     if (self->isReady() != 0) {
-        if ((*(cCard_11270**)((char*)func_00227F80(D_004A28A8) + 0x434))->isPresent() != 0) {
+        if ((*(cCard_11270**)((char*)cSSXApp_getMCManager(D_004A28A8) + 0x434))->isPresent() != 0) {
             self->setState(3);
             func_00211380(self);
             return;
@@ -379,11 +379,11 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_001D8240();
 extern "C" void func_00211270(void* self);
-extern "C" int func_001D97E0(void* self, void* mp, int dev, int a3);
+extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* mp, int dev, int a3);
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsigned short* buf, int len);
-extern "C" void func_003A0D00(void* obj, unsigned short* s);
-extern "C" void func_003A0E90(void* obj, unsigned short* s);
-extern "C" void* func_00227F80(void* self);
+extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
+extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
+extern "C" void* cSSXApp_getMCManager(void* self);
 extern void* D_004A28A8;
 extern char D_004700F0[];
 extern char D_00471D68[];
@@ -408,7 +408,7 @@ extern "C" void func_00211380(void* p)
     cState_1380* self = (cState_1380*)p;
     unsigned short buf[0x320];
     char name[0x40];
-    char* mp = (char*)func_00227F80(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
     if (self->v42()) {
         if (!(*(cMCSub_1380**)(mp + 0x434))->v53()) {
             func_001D8240();
@@ -421,19 +421,19 @@ extern "C" void func_00211380(void* p)
     if (self->v42()) {
         cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 0x320);
         int first = 0;
-        func_003A0D00(getObj_1380(self, D_00471D78), buf);
+        cUIText_setUnicodeStringWrap(getObj_1380(self, D_00471D78), buf);
         *(int*)((char*)self + 0x21C) = *(int*)(mp + 0x428);
         self->v43();
         cUIObj_1380* o = getObj_1380(self, D_004700F0);
         *(sCol_1380*)((char*)o + 0x88) = D_004C66C8_1380;
         (*(cMCSub_1380**)(mp + 0x434))->v64(buf);
-        func_003A0E90(o, buf);
+        cUIText_setUnicodeString(o, buf);
         o->v09(0);
         for (int i = 1; i < 7; i++) {
             sprintf(name, D_00471D68, i);
             o = getObj_1380(self, name);
             (*(cMCSub_1380**)(mp + 0x434))->v14(i - 1, (char*)self + 0x234);
-            func_003A0E90(o, (unsigned short*)((char*)self + 0x234));
+            cUIText_setUnicodeString(o, (unsigned short*)((char*)self + 0x234));
             if (!(*(cMCSub_1380**)(mp + 0x434))->v67(i - 1) && !(*(cMCSub_1380**)(mp + 0x434))->v66(i - 1)
                 && (*(cMCSub_1380**)(mp + 0x434))->v55()) {
                 if (!first) {
@@ -456,11 +456,11 @@ extern "C" void func_00211380(void* p)
                 o->v08(1);
             }
         }
-        if (func_001D97E0(self, mp, *(int*)(mp + 0x428), 1) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
             getObj_1380(self, D_00471D90)->v09(0);
         else
             getObj_1380(self, D_00471D90)->v09(1);
-        if (func_001D97E0(self, mp, *(int*)(mp + 0x428), 0) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 0) == -1)
             getObj_1380(self, D_00471DA0)->v09(0);
         else
             getObj_1380(self, D_00471DA0)->v09(1);
@@ -667,11 +667,11 @@ public:
 };
 
 extern void* D_004A28A8;
-extern "C" void* func_00227F80(void* app);
+extern "C" void* cSSXApp_getMCManager(void* app);
 
 extern "C" int func_00211B38(void* self, int a1, unsigned int key)
 {
-    char* mgr = (char*)func_00227F80(D_004A28A8);
+    char* mgr = (char*)cSSXApp_getMCManager(D_004A28A8);
     switch (key) {
     case 6:
     case 8:
@@ -691,24 +691,24 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int GetHashValue32(char* str);
-extern "C" void* func_00227F80(void* app);
+extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int strlen(const char* s);
 extern "C" void func_00147138(void* player, int idx, char* name);
-extern "C" void* func_00147170(void* player, int idx);
+extern "C" void* cBENewPlayerInterface_getPlayerName(void* player, int idx);
 extern "C" void func_0023CAE8(void* app, int a1, int a2);
 extern "C" void* func_001CB030(void* mem, void* engine, void* owner, int a3, int a4);
-extern "C" void func_001CB418(void* kb, void* name);
+extern "C" void cKeyboardPopup_setInputText(void* kb, void* name);
 extern "C" void func_001CD088(void* kb, int a1);
 extern "C" void func_001CD0B0(void* kb, int a1);
-extern "C" void func_001CE3C8(void* kb, int key, int a2, int a3);
+extern "C" void cKeyboardPopup_setIncludeKey(void* kb, int key, int a2, int a3);
 extern "C" void func_001CE408(void* kb, int a1);
 extern "C" void cKeyboardPopup_setStatic(void* kb, void* text);
-extern "C" void func_0023D570(void* mp, int a1);
+extern "C" void cMCOverlayManager_SetAction(void* mp, int a1);
 extern "C" void func_002C2540(void* dst, char* src);
-extern "C" void func_002C2580(char* dst, void* src);
-extern "C" void func_0039F290(void* list, void* item);
+extern "C" void strcpy2(char* dst, void* src);
+extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern void* D_004A28A8;
 extern char D_00471DC0[];
 extern char D_00471DD8[];
@@ -783,17 +783,17 @@ extern "C" void func_00211BC8(void* vself, char* item, int event)
         char buf[0x70];
         char fmt[0x70];
         char* name = self->keyboard + 0x74;
-        func_002C2540((char*)func_00227F80(D_004A28A8) + 0x276, name);
+        func_002C2540((char*)cSSXApp_getMCManager(D_004A28A8) + 0x276, name);
         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         if (strlen(name) != 0) {
             func_00147138(player, self->slot, name);
         } else {
-            func_002C2580(fmt, GetText_K211BC8(D_00471DC0));
+            strcpy2(fmt, GetText_K211BC8(D_00471DC0));
             sprintf(buf, fmt, self->slot + 1);
             func_00147138(player, self->slot, buf);
         }
         VCALLV_K211BC8(player, 0xC, 1));
-        func_0023CAE8(func_00227F80(D_004A28A8), 1, self->slot);
+        func_0023CAE8(cSSXApp_getMCManager(D_004A28A8), 1, self->slot);
         self->f1A8 = 1;
         self->f1DC = 1;
         self->state = 3;
@@ -802,7 +802,7 @@ extern "C" void func_00211BC8(void* vself, char* item, int event)
     case 5: {
         if (item == 0) break;
         if (self->f1A8 != 0) break;
-        char* mp = (char*)func_00227F80(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
         if (self->f214 != 3) break;
         ((sMgrK211BC8*)mp)->fF8 = self->f1C4 = *(int*)(item + 0x18);
         if (self->state == 1) {
@@ -811,32 +811,32 @@ extern "C" void func_00211BC8(void* vself, char* item, int event)
                 self->keyboard = kb;
                 *(int*)(kb + 0x140) = 0x37;
                 func_001CD088(self->keyboard, 8);
-                func_001CE3C8(self->keyboard, 0x4B, 1, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 0x4B, 1, 2);
                 *(int*)(self->keyboard + 0x58) = 1;
                 func_001CE408(self->keyboard, 1);
-                func_001CE3C8(self->keyboard, 0xE, 0, 2);
-                func_001CE3C8(self->keyboard, 0x27, 0, 2);
-                func_001CE3C8(self->keyboard, 0x28, 0, 2);
-                func_001CE3C8(self->keyboard, 0x34, 0, 2);
-                func_001CE3C8(self->keyboard, 0x1A, 0, 2);
-                func_001CE3C8(self->keyboard, 0x19, 0, 2);
-                func_001CE3C8(self->keyboard, 0x35, 0, 2);
-                func_001CE3C8(self->keyboard, 0x40, 0, 2);
-                func_001CE3C8(self->keyboard, 0x41, 0, 2);
-                func_001CE3C8(self->keyboard, 0x42, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 0xE, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 0x27, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 0x28, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 0x34, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 0x1A, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 0x19, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 0x35, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 0x40, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 0x41, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 0x42, 0, 2);
                 func_001CD0B0(self->keyboard, 1);
             }
             cKeyboardPopup_setStatic(self->keyboard, GetText_K211BC8(D_00471DE8));
             *(int*)(self->keyboard + 0x54) = 1;
-            func_001CB418(self->keyboard, func_00147170(cBE_getInterface_Fv(cBE_getBE(), 1), self->slot));
-            func_0039F290(*(char**)(*(char**)(self->screen + 0xD0) + 0x10) + 0x18, self->keyboard);
+            cKeyboardPopup_setInputText(self->keyboard, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->slot));
+            cUIStateStack_pushPopup(*(char**)(*(char**)(self->screen + 0xD0) + 0x10) + 0x18, self->keyboard);
             self->f1A0 = 1;
             self->f19C = 0;
         }
         break;
     }
     case 6: {
-        char* mp = (char*)func_00227F80(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
         if (self->f1A8 != 1) {
             int st = self->state;
             if (st != 6) {
@@ -851,14 +851,14 @@ extern "C" void func_00211BC8(void* vself, char* item, int event)
     }
     case 7:
         if (self->f1A8 != 1 && self->state != 6) {
-            char* mp = (char*)func_00227F80(D_004A28A8);
+            char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
             if (VCALL_K211BC8(*(char**)(mp + 0x434), 0, 54), *(int*)(mp + 0x428)) != 0) {
                 ((sMgrK211BC8*)mp)->fF8 = self->f1C4 = *(int*)(item + 0x18);
                 if (self->state == 1) {
                     if (VCALL_K211BC8(*(char**)(mp + 0x434), 0, 67), self->f1C4) != 0) {
                         self->f1A8 = 1;
                         self->state = 4;
-                        func_0023D570(mp, 0);
+                        cMCOverlayManager_SetAction(mp, 0);
                         VCALLV_K211BC8(mp, 0x748, 1), 0x18);
                     }
                 }
@@ -872,7 +872,7 @@ extern "C" void func_00211BC8(void* vself, char* item, int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00212080);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_initGeneral);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -880,7 +880,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char D_004A2138[];
 extern char D_00471D68[];
 
-extern "C" void func_00212080(void* self)
+extern "C" void cOVState_PROFILE_initGeneral(void* self)
 {
     char buf[16];
     int i;
@@ -918,7 +918,7 @@ INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern char D_00471E28[];
 
 extern "C" void cOVState_AUTOSAVE_onCreateScreen(void* self)
@@ -929,7 +929,7 @@ extern "C" void cOVState_AUTOSAVE_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
 }
 #endif
 
@@ -945,7 +945,7 @@ int func_002122E0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_002122E8);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_displayStatus);
 #ifdef SKIP_ASM
 struct sVEntry002122E8 {
     short delta;
@@ -963,7 +963,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_AUTOSAVE_displayOn(void* self);
 extern char D_00471E38[];
 
-extern "C" void func_002122E8(void* self)
+extern "C" void cOVState_AUTOSAVE_displayStatus(void* self)
 {
     int s = *(int*)((char*)self + 0x1C0);
     if (s != 0 && s != 6) {
@@ -979,11 +979,11 @@ extern "C" void func_002122E8(void* self)
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_displayOn);
 #ifdef SKIP_ASM
 extern void* D_004A28A8;
-extern "C" void* func_00227F80(void* app);
+extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int func_0023C898(void* mp);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
-extern "C" void func_0039FCC8(void* obj, void* anim, int a2, int a3, int a4);
-extern "C" void func_0039FD38(void* obj);
+extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a2, int a3, int a4);
+extern "C" void cUIThing_deleteAnimation(void* obj);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char D_004A2770[];
@@ -1006,7 +1006,7 @@ public:
 
 extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
 {
-    void* mp = func_00227F80(D_004A28A8);
+    void* mp = cSSXApp_getMCManager(D_004A28A8);
     int v = *(int*)((char*)self + 0x1A8);
     if (v == *(int*)((char*)self + 0x230)) {
         return;
@@ -1020,13 +1020,13 @@ extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
         void* bank = *(char**)((char*)self + 0x10) + 0x50;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(D_00471E48));
         if (anim != 0) {
-            func_0039FCC8(obj, anim, 9, 0, 0);
+            cUIThing_playAnimation(obj, anim, 9, 0, 0);
         }
         cUIObj_2360* t = (cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38));
         t->setVisible(1);
         cUIText_setUnicodeStringByID((cUIText*)t, GetHashValue32(D_00471E58));
     } else {
-        func_0039FD38(obj);
+        cUIThing_deleteAnimation(obj);
         ((cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38)))->setVisible(0);
     }
 }
@@ -1063,12 +1063,12 @@ extern "C" void cGame_exit(void* game, int a);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_00194738(void* self, void* mgr);
 extern "C" void* func_001F3700(void* self, void* mgr);
-void* func_00232720(void* self);
+void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void cBENewRaceInterface_setGameMode(void* iface, int mode);
 extern "C" void cBENewRaceInterface_setGameEvent(void* iface, int ev);
-extern "C" int func_00146D98(void* self, int index);
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index);
+extern "C" void cUIStateStack_push(void* list, void* item);
 
 struct sVEnt_00212508 { short delta; short index; void (*fn)(void*); };
 
@@ -1080,20 +1080,20 @@ extern "C" void func_00212508(void* self)
         cGame_exit(*(void**)((char*)D_004A28A8 + 0x84), 0);
     } else if (s == 6) {
         void* m = func_00194738(cMemMan_alloc(0x4C, D_00471E70, 0, 0), *(void**)((char*)self + 0x10));
-        func_0039F400(*(char**)((char*)self + 0x10) + 0x18, m);
+        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, m);
     } else if (s == 7) {
         void* m = func_001F3700(cMemMan_alloc(0x58, D_00471E80, 0, 0), *(void**)((char*)self + 0x10));
-        func_0039F400(*(char**)((char*)self + 0x10) + 0x18, m);
+        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, m);
     } else if (s == 0) {
         void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewRaceInterface_setGameMode(race, 4);
         cBENewRaceInterface_setGameEvent(race, 0xC);
-        D_00535C08[0] = func_00146D98(player, 0);
+        D_00535C08[0] = cBENewPlayerInterface_getLastHub(player, 0);
         D_004A11B8 = 1;
         sVEnt_00212508* vt = *(sVEnt_00212508**)((char*)race + 0xC);
         vt[1].fn((char*)race + vt[1].delta);
-        cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)func_00232720(cMemMan_alloc(8, D_00471E90, 0x100, 0)));
+        cAppMan_setNextModule((cAppMan*)D_004A28A8, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_00471E90, 0x100, 0)));
     }
 }
 #endif

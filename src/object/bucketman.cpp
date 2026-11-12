@@ -67,7 +67,7 @@ extern "C" void cBucketMan_init(cBucketMan* self, int n)
 INCLUDE_ASM("object/bucketman", func_00354B38);
 #ifdef SKIP_ASM
 extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index);
-extern "C" void func_003546C8(void* self, int flags);
+extern "C" void cObjNode__cObjNode(void* self, int flags);
 void cMemMan_free(void*);
 
 extern "C" void func_00354B38(cBucketMan* self)
@@ -81,10 +81,10 @@ extern "C" void func_00354B38(cBucketMan* self)
         char* p = b + ((int*)b)[-4] * 0x44;
         while (self->mBuckets != p) {
             p -= 0x44;
-            func_003546C8(p + 0x34, 2);
-            func_003546C8(p + 0x24, 2);
-            func_003546C8(p + 0x14, 2);
-            func_003546C8(p + 0x4, 2);
+            cObjNode__cObjNode(p + 0x34, 2);
+            cObjNode__cObjNode(p + 0x24, 2);
+            cObjNode__cObjNode(p + 0x14, 2);
+            cObjNode__cObjNode(p + 0x4, 2);
         }
         cMemMan_free(self->mBuckets - 0x10);
     }
@@ -127,7 +127,7 @@ extern "C" void cBucketMan_add(cBucketMan* self, sBucketLink* node, int index)
 #endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354C98);
+INCLUDE_ASM("object/bucketman", cBucketMan_mergeBucket);
 #ifdef SKIP_ASM
 void* cBucketMan_addfirst(cBucketMan* self, int index);
 extern "C" void* func_00354ED0(cBucketMan* self, int index);
@@ -168,7 +168,7 @@ struct sSortLists_4C98 {
 };
 
 // Moves every node of the bucket's pending list into its sorted list.
-extern "C" void func_00354C98(cBucketMan* self, int index)
+extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
 {
     sSortNode_4C98* n = (sSortNode_4C98*)cBucketMan_addfirst(self, index);
     while (n) {
@@ -210,7 +210,7 @@ extern "C" void func_00354C98(cBucketMan* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354E48);
+INCLUDE_ASM("object/bucketman", cBucketMan_remove);
 #ifdef SKIP_ASM
 struct sBucketNode {
     int field_0x0;
@@ -218,7 +218,7 @@ struct sBucketNode {
     sBucketNode* next; // 0x8
 };
 
-extern "C" void func_00354E48(cBucketMan* self, sBucketNode* node)
+extern "C" void cBucketMan_remove(cBucketMan* self, sBucketNode* node)
 {
     if (node->prev != 0 && node->next != 0) {
         node->next->prev = node->prev;
@@ -232,7 +232,7 @@ INCLUDE_ASM("object/bucketman", func_00354E78);
 #ifdef SKIP_ASM
 extern "C" void func_00354E78(cBucketMan* self, sBucketNode* node)
 {
-    func_00354E48(self, node);
+    cBucketMan_remove(self, node);
     node->prev = 0;
     node->next = 0;
 }

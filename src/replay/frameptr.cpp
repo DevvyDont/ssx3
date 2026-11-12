@@ -80,11 +80,11 @@ int func_0026E9C0(void* self)
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026E9D0);
 #ifdef SKIP_ASM
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 
 extern "C" void func_0026E9D0(void* self, void* src, int n)
 {
-    func_003E6574(*(char**)((char*)self + 0x8), src, n);
+    MEM_copy(*(char**)((char*)self + 0x8), src, n);
     *(char**)((char*)self + 0x8) += n;
     *(int*)((char*)self + 0x10) += n;
 }
@@ -93,17 +93,17 @@ extern "C" void func_0026E9D0(void* self, void* src, int n)
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026EA20);
 #ifdef SKIP_ASM
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 
 extern "C" void func_0026EA20(void* self, void* dst, int n)
 {
-    func_003E6574(dst, *(char**)((char*)self + 0xC), n);
+    MEM_copy(dst, *(char**)((char*)self + 0xC), n);
     *(char**)((char*)self + 0xC) += n;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EA68);
+INCLUDE_ASM("replay/frameptr", cReplayFramePtr_peekObjNodeType);
 #ifdef SKIP_ASM
 class cStream26EA68 {
 public:
@@ -113,7 +113,7 @@ public:
 };
 
 // Peek the next frame header's id without consuming it.
-extern "C" short func_0026EA68(cStream26EA68* self)
+extern "C" short cReplayFramePtr_peekObjNodeType(cStream26EA68* self)
 {
     struct {
         short id;
@@ -137,8 +137,8 @@ extern "C" int func_0026EAB8(cReplayFramePtr* self, char** pp, void* src)
         int tag;
         int size;
     } hdr;
-    func_003E6574(&hdr.tag, src, 4);
-    func_003E6574(&hdr.size, *pp, 4);
+    MEM_copy(&hdr.tag, src, 4);
+    MEM_copy(&hdr.size, *pp, 4);
     *pp += 4;
     int n = func_002C85A0(*pp, 0, self->field_0x4);
     *pp += hdr.size;
@@ -452,7 +452,7 @@ INCLUDE_ASM("replay/frameptr", func_0026EFB8);
 extern "C" void* func_0026D5E8(void* self);
 void* func_0026E5A8(void* self);
 extern "C" void* func_00272288(void* self);
-void func_0026F4A0(void* self, int state);
+void cReplay_setReplayState(void* self, int state);
 
 extern "C" void* func_0026EFB8(void* self)
 {
@@ -466,7 +466,7 @@ extern "C" void* func_0026EFB8(void* self)
     for (int i = 1; i != -1; i--, q += 0xB4) {
         func_00272288(q);
     }
-    func_0026F4A0(self, 15);
+    cReplay_setReplayState(self, 15);
     for (int i = 1; i >= 0; i--) {
         int* a = (int*)(0x48C + (char*)self);
         a[i] = 0;
@@ -537,7 +537,7 @@ extern "C" void func_0026F088(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F180);
+INCLUDE_ASM("replay/frameptr", cReplay_init);
 #ifdef SKIP_ASM
 struct sReplayBlock_F180 {
     char data[0x38];
@@ -554,10 +554,10 @@ struct cReplayFramePtr_F180 {
 };
 
 extern "C" void cReplayFramePtr_initBlock(void* self, unsigned int size);
-extern "C" void func_0026F228(void* self);
-void func_0026F4A0(void* self, int state);
+extern "C" void cReplay_reset(void* self);
+void cReplay_setReplayState(void* self, int state);
 
-extern "C" void func_0026F180(cReplayFramePtr_F180* self)
+extern "C" void cReplay_init(cReplayFramePtr_F180* self)
 {
     self->blockSize = 0x14000;
     self->numBlocks = 0xC9800 / self->blockSize;
@@ -567,19 +567,19 @@ extern "C" void func_0026F180(cReplayFramePtr_F180* self)
         cReplayFramePtr_initBlock(&self->blocks[i], self->blockSize);
         i++;
     } while (i < self->numBlocks);
-    func_0026F4A0(self, 10);
-    func_0026F228(self);
+    cReplay_setReplayState(self, 10);
+    cReplay_reset(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F228);
+INCLUDE_ASM("replay/frameptr", cReplay_reset);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 void func_0026D168(void* self);
 void func_0026E5C0(void* self);
 extern "C" void func_0026E5D0(void* list, void* block);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
 struct sFpSlot_F228 {
     int id;
@@ -587,7 +587,7 @@ struct sFpSlot_F228 {
     int fB0;
 };
 
-extern "C" void func_0026F228(void* self)
+extern "C" void cReplay_reset(void* self)
 {
     char* s = (char*)self;
     unsigned int st = *(int*)s - 14;
@@ -599,7 +599,7 @@ extern "C" void func_0026F228(void* self)
     char* l1 = s + 0x3BC;
     int none = -1;
     *(int*)(s + 0x4) = 15;
-    func_0026F4A0(self, 10);
+    cReplay_setReplayState(self, 10);
     *(int*)(s + 0x60C) = 0;
     *(int*)(s + 0x610) = 0;
     *(int*)(s + 0x614) = 0;
@@ -644,7 +644,7 @@ extern "C" void func_0026F228(void* self)
         if (*pp) func_0026D168(*pp);
         e->fB0 = 0;
         e->id = none;
-        func_003E6448(d, 0, 0xAC);
+        MEM_fill(d, 0, 0xAC);
         d += 0xB4;
         pp++;
         e->id = i;
@@ -705,9 +705,9 @@ void func_0026F498(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F4A0__FPvi);
+INCLUDE_ASM("replay/frameptr", cReplay_setReplayState__FPvi);
 #ifdef SKIP_ASM
-void func_0026F4A0(void* self, int val)
+void cReplay_setReplayState(void* self, int val)
 {
     *(int*)((char*)self + 0x0) = val;
 }
@@ -717,7 +717,7 @@ void func_0026F4A0(void* self, int val)
 INCLUDE_ASM("replay/frameptr", func_0026F4A8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_0026F4A0(void* self, int state);
+void cReplay_setReplayState(void* self, int state);
 struct sFrameDesc_F4A8 {
     short type;
     char a;
@@ -735,7 +735,7 @@ extern "C" void func_00270538(void* self);
 extern "C" void func_00270628(void* self);
 extern "C" void func_00270670(void* self);
 extern "C" void func_00270E18(void* self);
-int func_00320C48(void* obj, int id);
+int cInput_getState(void* obj, int id);
 extern char* D_004A28A8;
 struct sApp_F4A8 {
     char pad0[0xB0];
@@ -791,12 +791,12 @@ extern "C" void func_0026F4A8(sReplay_F4A8* self)
         self->timer--;
     self->f604 = 0;
     if (self->f618 == 7)
-        func_0026F4A0(self, 3);
+        cReplay_setReplayState(self, 3);
     if (!(self->state == 3 || self->state == 4))
         self->f20 = 0;
     switch (self->state) {
     case 11:
-        func_0026F4A0(self, 12);
+        cReplay_setReplayState(self, 12);
         return;
     case 2:
         if (self->last < self->frame - 1) {
@@ -807,7 +807,7 @@ extern "C" void func_0026F4A8(sReplay_F4A8* self)
         func_00270670(self);
     case 0:
     case 12:
-        func_0026F4A0(self, 0);
+        cReplay_setReplayState(self, 0);
         self->block = 0;
         if (self->f60C != 0) {
             if (self->f608 != 0)
@@ -816,12 +816,12 @@ extern "C" void func_0026F4A8(sReplay_F4A8* self)
             func_00270E18(self);
             func_00270538(self);
             addFrame_F4A8(self, 1);
-            func_0026F4A0(self, 13);
+            cReplay_setReplayState(self, 13);
             return;
         }
         if (self->f624 != 0) {
             func_0026F8A0_F4A8(self, self->f3D4, 1, 0);
-            func_0026F4A0(self, 2);
+            cReplay_setReplayState(self, 2);
             self->f624 = 0;
             self->f620 = 1;
             return;
@@ -839,14 +839,14 @@ extern "C" void func_0026F4A8(sReplay_F4A8* self)
         return;
     case 3: {
         void* o = D_004A28A8_F4A8->players[self->player];
-        if (o != 0 && func_00320C48(o, 0x6B))
+        if (o != 0 && cInput_getState(o, 0x6B))
             func_0026FB88(self, 0);
         func_0026FE50((char*)self);
         return;
     }
     case 9:
         func_0026F8A0_F4A8(self, 0, 0, 1);
-        func_0026F4A0(self, 1);
+        cReplay_setReplayState(self, 1);
         self->f61C = 1;
         return;
     case 8:
@@ -855,7 +855,7 @@ extern "C" void func_0026F4A8(sReplay_F4A8* self)
     case 5:
     case 6:
     case 7:
-        func_0026F4A0(self, 3);
+        cReplay_setReplayState(self, 3);
         return;
     default:
         func_0026FE50((char*)self);
@@ -867,17 +867,17 @@ extern "C" void func_0026F4A8(sReplay_F4A8* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F7B8);
+INCLUDE_ASM("replay/frameptr", cReplay_startRace);
 #ifdef SKIP_ASM
-void func_0026F4A0(void* self, int state);
+void cReplay_setReplayState(void* self, int state);
 
-extern "C" void func_0026F7B8(int* self)
+extern "C" void cReplay_startRace(int* self)
 {
     int s = *self;
     bool ok = !(s == 14 || s == 15);
     if (ok) {
         if (s == 10) {
-            func_0026F4A0(self, 11);
+            cReplay_setReplayState(self, 11);
         }
     }
 }
@@ -943,7 +943,7 @@ INCLUDE_ASM("replay/frameptr", func_0026F8A0);
 extern "C" void func_0026EE68(void* self);
 extern "C" void func_0026EF30(void* self);
 extern "C" void func_0026F7F8(void* self);
-void func_0026F4A0(void* self, int state);
+void cReplay_setReplayState(void* self, int state);
 extern "C" void func_002702F8(void* self, void* a1);
 extern "C" void func_002703F0(void* self, int a1);
 extern "C" void* func_0028B180();
@@ -966,7 +966,7 @@ extern "C" void func_0026F8A0(cReplayFramePtr_F8A0* self, void* a1, int a2, int 
         if (self->field_0x608 == 0) {
             func_0026F7F8(self);
         }
-        func_0026F4A0(self, 7);
+        cReplay_setReplayState(self, 7);
         self->field_0x618 = 0;
         self->field_0x61c = 0;
         self->field_0x620 = a2;
@@ -989,7 +989,7 @@ INCLUDE_ASM("replay/frameptr", func_0026F980);
 #ifdef SKIP_ASM
 extern "C" void func_0026EEA0(void* self);
 extern "C" void func_0026EF80(void* self);
-void func_0026F4A0(void* self, int state);
+void cReplay_setReplayState(void* self, int state);
 extern "C" void func_0026F850(void* self);
 extern "C" void func_00270628(void* self);
 extern "C" void* func_0028B180();
@@ -1025,9 +1025,9 @@ extern "C" void func_0026F980(cReplayFramePtr_F980* self)
                 func_0026EEA0(self);
             }
             if (self->field_0x60c) {
-                func_0026F4A0(self, 13);
+                cReplay_setReplayState(self, 13);
             } else {
-                func_0026F4A0(self, 0);
+                cReplay_setReplayState(self, 0);
             }
         }
     }
@@ -1052,9 +1052,9 @@ INCLUDE_ASM("replay/frameptr", func_0026FA78);
 #ifdef SKIP_ASM
 extern char* D_004A28A8;
 extern int D_00445438[];
-int func_00320C48(void* pad, int button);
-// PORT: func_00320BF0 returns the input axis value as a float ($f0).
-extern "C" float func_00320BF0(void* pad, int axis);
+int cInput_getState(void* pad, int button);
+// PORT: cInput_getValue returns the input axis value as a float ($f0).
+extern "C" float cInput_getValue(void* pad, int axis);
 extern "C" void cGameViewMan_updateAll(void* list);
 
 static inline bool isStateFA78(int* self, int s)
@@ -1068,14 +1068,14 @@ extern "C" void func_0026FA78(int* self)
         return;
     }
     void* pad = *(void**)(D_004A28A8 + (self[0x28 / 4] << 2) + 0xB0);
-    if (func_00320C48(pad, 0x6C) != 0) {
+    if (cInput_getState(pad, 0x6C) != 0) {
         cGameViewMan_updateAll(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x84));
     }
     if (D_00445438[self[0x630 / 4]] != 0xB) {
         return;
     }
-    if (func_00320BF0(pad, 0x31) != 0.0f || func_00320BF0(pad, 0x30) != 0.0f ||
-        func_00320BF0(pad, 0x32) != 0.0f || func_00320BF0(pad, 0x33) != 0.0f) {
+    if (cInput_getValue(pad, 0x31) != 0.0f || cInput_getValue(pad, 0x30) != 0.0f ||
+        cInput_getValue(pad, 0x32) != 0.0f || cInput_getValue(pad, 0x33) != 0.0f) {
         cGameViewMan_updateAll(*(void**)(*(char**)(D_004A28A8 + 0x84) + 0x84));
     }
 }
@@ -1138,22 +1138,22 @@ extern "C" int func_0026FB88_impl(void* self, int a1)
     int r = 0;
     void* pad = *(void**)(g + (*(int*)(s + 0x28) << 2) + 0xB0);
     if (*(int*)(s + 0x61C) == 0 && *(int*)(s + 0x620) == 0) {
-        if (func_00320C48(pad, 0x6A)) {
+        if (cInput_getState(pad, 0x6A)) {
             *(int*)(s + 0x1C) = 10;
             *(int*)(s + 0x20) = 0;
             if (!isStateFB88(s, 3)) r = 7;
             else r = isIdleFB88(s) ? 0 : 5;
-        } else if (func_00320C48(pad, 0x6B)) {
+        } else if (cInput_getState(pad, 0x6B)) {
             if (*(int*)(s + 0x1C) > 0) *(int*)(s + 0x1C) -= 1;
             *(int*)(s + 0x20) ^= 1;
             if (*(int*)(s + 0x1C) <= 0 && *(int*)(s + 0x20) == 0) {
                 if (!isStateFB88(s, 3)) r = 7;
                 else r = isIdleFB88(s) ? 0 : 5;
             }
-        } else if (func_00320C48(pad, 0x67)) {
+        } else if (cInput_getState(pad, 0x67)) {
             if (!isStateFB88(s, 3)) r = 7;
             else r = isIdleFB88(s) ? 0 : 6;
-        } else if (func_00320C48(pad, 0x66)) {
+        } else if (cInput_getState(pad, 0x66)) {
             if (a1) {
                 func_002305C8(*(void**)(D_004A28A8 + 0x84));
                 *(int*)(s + 0x618) = 8;
@@ -1161,7 +1161,7 @@ extern "C" int func_0026FB88_impl(void* self, int a1)
                 *(int*)(s + 0x618) = 7;
             }
             return 0;
-        } else if (func_00320C48(pad, 0x68)) {
+        } else if (cInput_getState(pad, 0x68)) {
             if (!isStateFB88(s, 3)) r = 7;
             else if (!isIdleFB88(s)) {
                 v->vt[2].fn((char*)v + v->vt[2].delta, 2);
@@ -1169,7 +1169,7 @@ extern "C" int func_0026FB88_impl(void* self, int a1)
             } else {
                 v->vt[2].fn((char*)v + v->vt[2].delta, 4);
             }
-        } else if (func_00320C48(pad, 0x69)) {
+        } else if (cInput_getState(pad, 0x69)) {
             if (isStateFB88(s, 3)) {
                 if (!isIdleNoCamFB88(s)) {
                     v->vt[2].fn((char*)v + v->vt[2].delta, 2);
@@ -1180,7 +1180,7 @@ extern "C" int func_0026FB88_impl(void* self, int a1)
             } else {
                 r = 7;
             }
-        } else if (func_00320C48(pad, 0x6C)) {
+        } else if (cInput_getState(pad, 0x6C)) {
             v->vt[2].fn((char*)v + v->vt[2].delta, 2);
             func_0026ED98(self);
         }
@@ -1217,9 +1217,9 @@ extern "C" void func_0026FE50(char* self)
         redraw = 1;
         func_002703F0(self, 1);
         if (*(int*)(self + 0x484) == 0) {
-            func_0026F4A0(self, 6);
+            cReplay_setReplayState(self, 6);
         } else {
-            func_0026F4A0(self, 5);
+            cReplay_setReplayState(self, 5);
         }
         break;
     case 2:
@@ -1227,9 +1227,9 @@ extern "C" void func_0026FE50(char* self)
         redraw = 1;
         func_002703F0(self, 1);
         if (*(int*)(self + 0x484) == 0) {
-            func_0026F4A0(self, 6);
+            cReplay_setReplayState(self, 6);
         } else {
-            func_0026F4A0(self, 5);
+            cReplay_setReplayState(self, 5);
         }
         break;
     case 3: {
@@ -1246,9 +1246,9 @@ extern "C" void func_0026FE50(char* self)
         }
         func_002703F0(self, 1);
         if (*(int*)(self + 0x484) == 0) {
-            func_0026F4A0(self, 6);
+            cReplay_setReplayState(self, 6);
         } else {
-            func_0026F4A0(self, 5);
+            cReplay_setReplayState(self, 5);
         }
         break;
     }
@@ -1257,22 +1257,22 @@ extern "C" void func_0026FE50(char* self)
         if (*(int*)(*(char**)(self + 0x488) + 0x14) != 0) {
             func_0026E528(self);
             func_002703F0(self, 1);
-            func_0026F4A0(self, 5);
+            cReplay_setReplayState(self, 5);
         }
         break;
     case 5:
         func_002703F0(self, 0);
-        func_0026F4A0(self, 4);
+        cReplay_setReplayState(self, 4);
         break;
     case 6:
         if (*(int*)self == 3) {
-            func_0026F4A0(self, 1);
+            cReplay_setReplayState(self, 1);
         } else {
-            func_0026F4A0(self, 3);
+            cReplay_setReplayState(self, 3);
         }
         break;
     case 7:
-        func_0026F4A0(self, 3);
+        cReplay_setReplayState(self, 3);
         break;
     case 8:
         break;

@@ -45,7 +45,7 @@ INCLUDE_ASM("be/beintcharacter", func_0014EFA8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 signed char cBELibrary_getCharacterID(int index);
-extern "C" int func_0014A0B0(int riderIndex);
+extern "C" int cBELibrary_getCheatCharacterID(int riderIndex);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_EFA8(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_isMissionMan(int riderIndex);
@@ -63,7 +63,7 @@ extern sCharScaleEntry_EFA8 D_00530970_EFA8[] __asm__("D_00530970");
 extern "C" float func_0014EFA8(void* self, int riderIndex)
 {
     int charID = cBELibrary_getCharacterID(riderIndex);
-    int cheat = func_0014A0B0(riderIndex);
+    int cheat = cBELibrary_getCheatCharacterID(riderIndex);
     cBE_getInterface_EFA8(cBE_getBE(), 0);
     if (cheat != 0 && (D_00535C11[0] != 0 || riderIndex != 0)) {
         switch (cheat) {

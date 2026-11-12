@@ -4,7 +4,7 @@
 INCLUDE_ASM("sound/ssxAudio", SSXAUDIO_Init);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" char* func_00284C68(void* mem, int a1, int a2, int a3, int a4);
+extern "C" char* cSSXAudio_cSSXAudio(void* mem, int a1, int a2, int a3, int a4);
 void func_002ADBF0(void*);
 extern const char D_004828B0[];
 extern char* D_004A3500;
@@ -12,16 +12,16 @@ extern char* D_004A3500;
 extern "C" void SSXAUDIO_Init(int a)
 {
     if (D_004A3500 == 0) {
-        D_004A3500 = func_00284C68(cMemMan_alloc(0x7780, D_004828B0, 0x80000400, 0), 1, 0x1C, 3, a);
+        D_004A3500 = cSSXAudio_cSSXAudio(cMemMan_alloc(0x7780, D_004828B0, 0x80000400, 0), 1, 0x1C, 3, a);
     }
     func_002ADBF0(**(char***)(D_004A3500 + 0x118) + 0x1D8);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_00284C28);
+INCLUDE_ASM("sound/ssxAudio", SSXAUDIO_DeInit);
 #ifdef SKIP_ASM
-class func_00284C28_cObj {
+class SSXAUDIO_DeInit_cObj {
 public:
     char data[0x1D4];
     virtual void v01(int flags);
@@ -29,19 +29,19 @@ public:
 
 extern char* D_004A3500;
 
-extern "C" void func_00284C28()
+extern "C" void SSXAUDIO_DeInit()
 {
     if (D_004A3500 != 0) {
-        (**(func_00284C28_cObj***)(D_004A3500 + 0x118))->v01(3);
+        (**(SSXAUDIO_DeInit_cObj***)(D_004A3500 + 0x118))->v01(3);
     }
     D_004A3500 = 0;
 }
 #endif
 
-INCLUDE_ASM("sound/ssxAudio", func_00284C68);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_cSSXAudio);
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_00285210);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio__cSSXAudio);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
@@ -53,7 +53,7 @@ extern "C" void func_003DEDC0(void* h, int a);
 extern "C" void func_002AB478(void* self, int flags);
 extern "C" void func_002AA648(void* self, int flags);
 extern "C" void func_0028BB10(void* self, int flags);
-extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern void* D_00483688[];
 extern void* D_004836B8[];
 extern void* D_004836D8[];
@@ -79,7 +79,7 @@ extern const sSaVtbl7_285210 D_00483728_285210 __asm__("D_00483728");
 #define S_285210 ((char*)self)
 #define BM_285210 (**(char***)(S_285210 + 0x118))
 
-extern "C" void func_00285210(void* self, int flags)
+extern "C" void cSSXAudio__cSSXAudio(void* self, int flags)
 {
     char* p5560 = S_285210 + 0x5560;
     *(void***)(S_285210 + 0x5558) = D_00483688;
@@ -120,7 +120,7 @@ extern "C" void func_00285210(void* self, int flags)
     if (flags & 2) {
         func_002AA648(*(void**)(S_285210 + 0x118), 0);
         func_0028BB10(BM_285210, 0);
-        func_002ADEE8(*(void**)(BM_285210 + 0x1D8), 0);
+        cSoundSys__cSoundSys(*(void**)(BM_285210 + 0x1D8), 0);
     }
     if (flags & 1)
         operator_delete((int*)self);
@@ -130,12 +130,12 @@ extern "C" void func_00285210(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_002854A8);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SetMode);
 #ifdef SKIP_ASM
 // PORT: the target leaves value in $a1 for this call; bind a 2-arg form.
 extern "C" int func_002ADF80_2(void* bank, int a1) __asm__("func_002ADF80");
 
-extern "C" int func_002854A8(void* self, int value)
+extern "C" int cSSXAudio_SetMode(void* self, int value)
 {
     char* s = (char*)self;
     int r = func_002ADF80_2(*(void**)(**(char***)(s + 0x118) + 0x1D8), value);
@@ -1803,7 +1803,7 @@ extern "C" void func_00287F00(void* self, int a1, float f0, float f1)
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_00287FC8);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_LoadMixes);
 #ifdef SKIP_ASM
 // PORT: func_002A77F8 returns a value (the unit declares it void); bound by asm label.
 extern "C" void* func_002A77F8_r(void* self, char* name, int size) __asm__("func_002A77F8");
@@ -1851,7 +1851,7 @@ struct sAudio7FC8 {
     sSfxEntry7FC8 entries[25];      // 0x647C
 };
 
-extern "C" void func_00287FC8(sAudio7FC8* self)
+extern "C" void cSSXAudio_LoadMixes(sAudio7FC8* self)
 {
     sIniParser7FC8 parser;
     int val;
@@ -3041,7 +3041,7 @@ int func_00289DE0(void* self)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289DF0);
 #ifdef SKIP_ASM
-extern "C" int func_003DFAF0(int h);
+extern "C" int ASYNCFILE_cancel(int h);
 extern "C" int ASYNCFILE_release(int h, int a, int b);
 extern "C" void func_0028A298(void* self);
 
@@ -3126,14 +3126,14 @@ extern "C" void func_00289DF0(void* self, int flush)
         switch (kind) {
         case 0:
         case 2: {
-            int r = func_003DFAF0(s->handle);
+            int r = ASYNCFILE_cancel(s->handle);
             ASYNCFILE_release(s->handle, 0, 0);
             s->v05(id, -1, r == 1 ? 1 : 2, s->names[slot], 0, 0);
             s->busy = 0;
             break;
         }
         case 1: {
-            int r = func_003DFAF0(s->handle);
+            int r = ASYNCFILE_cancel(s->handle);
             ASYNCFILE_release(s->handle, 0, 0);
             s->v05(id, -1, r == 1 ? 1 : 2, s->names[slot], 0, 0);
             s->busy = 0;

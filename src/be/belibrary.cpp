@@ -21,9 +21,9 @@ signed char cBELibrary_getCharacterID(int index)
 #endif
 
 //100%
-INCLUDE_ASM("be/belibrary", func_0014A0B0);
+INCLUDE_ASM("be/belibrary", cBELibrary_getCheatCharacterID);
 #ifdef SKIP_ASM
-extern "C" signed char func_0014A0B0(int index)
+extern "C" signed char cBELibrary_getCheatCharacterID(int index)
 {
     int charID = D_005305B0[index];
     signed char* entry = (signed char*)((char*)D_00535B20 + charID * 0x1C);
@@ -143,7 +143,7 @@ cBEIface_14A5E0* cBENewPlayerInterface_getThis();
 cBEIface_14A5E0* cBEBAGTInterface_getThis();
 cBEIface_14A5E0* cBEMissionInterface_getThis();
 cBEIface_14A5E0* cBEScoreInterface_getThis();
-extern "C" cBEIface_14A5E0* func_00147F78(void);
+extern "C" cBEIface_14A5E0* cBEStatInterface_getThis(void);
 
 struct sBlk4C_14A5E0 { char d[0x4C]; };
 struct sBlkA8_14A5E0 { char d[0xA8]; };
@@ -184,7 +184,7 @@ extern "C" void func_0014A5E0(char* p)
     o->onLoad();
     o = cBEScoreInterface_getThis();
     o->onLoad();
-    o = func_00147F78();
+    o = cBEStatInterface_getThis();
     o->onLoad();
 }
 #endif
@@ -298,12 +298,12 @@ extern "C" int func_0014AC70(void* self, int rider, int* outChar)
 INCLUDE_ASM("be/belibrary", func_0014ACB0);
 #ifdef SKIP_ASM
 extern int D_004A6CA8[];
-extern "C" void* func_003E6574(void* dst, void* src, int n);
+extern "C" void* MEM_copy(void* dst, void* src, int n);
 
 extern "C" void func_0014ACB0(void* self, int a1, int a2, void* src)
 {
     char* p = (char*)D_004A6CA8 + a1 * 0x9b50 + a2 * 0xf88;
-    func_003E6574(p + 0x290, src, 0x834);
+    MEM_copy(p + 0x290, src, 0x834);
 }
 #endif
 
@@ -497,7 +497,7 @@ extern "C" int func_0014AFB0(void* self, int a, int b, int idx, int on)
     sProfile_14AFB0* p = (sProfile_14AFB0*)((char*)D_004A6CA8 + a * 0x9b50 + b * 0xf88);
     sFlagEntry_14AFB0 save[0x20D];
 
-    func_003E6574(save, p->entries, 0x834);
+    MEM_copy(save, p->entries, 0x834);
     if (func_00151C90(p, idx, on)) {
         sFlagEntry_14AFB0* e = getEntry_14AFB0(p, idx);
         if (on)
@@ -512,7 +512,7 @@ extern "C" int func_0014AFB0(void* self, int a, int b, int idx, int on)
             }
         }
     }
-    func_003E6574(p->entries, save, 0x834);
+    MEM_copy(p->entries, save, 0x834);
     return 0;
 }
 #endif
@@ -713,7 +713,7 @@ struct sBEGroupTable;
 extern "C" int func_0014D448(sBEGroupTable* self, int g, int key);
 extern "C" void func_00151C48(void* prof, int idx, int on);
 extern "C" void func_00150B48(void* iface, int a, int b, int v);
-extern "C" void func_00150928(void* iface, int a, int b);
+extern "C" void cBEEconInterface_getMoney(void* iface, int a, int b);
 
 struct sBEEntry38_14B560 {
     signed char group;  // 0x0
@@ -759,7 +759,7 @@ extern "C" void func_0014B560(void* self, int a1, int a2, int key, int flag)
     if (flag) {
         func_00150B48(iface, a1, a2, scale10_14B560(e->field_0xE));
     } else {
-        func_00150928(iface, a1, a2);
+        cBEEconInterface_getMoney(iface, a1, a2);
     }
 }
 #endif
@@ -1020,7 +1020,7 @@ extern "C" void func_0014BE38(int arg0, int arg1, int arg2) {
 //100%
 INCLUDE_ASM("be/belibrary", func_0014BE70);
 #ifdef SKIP_ASM
-extern "C" int func_00317F60(const char* name);
+extern "C" int BXFILE_sizez(const char* name);
 extern "C" int func_003E1BB8(const char* name, void* buf, int size);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -1055,7 +1055,7 @@ struct sBELib_14BE70 {
 extern "C" void func_0014BE70(void* vself)
 {
     sBELib_14BE70* self = (sBELib_14BE70*)vself;
-    int size = func_00317F60(D_004A11CC);
+    int size = BXFILE_sizez(D_004A11CC);
     char* buf = new (D_0045A600, 0, 0) char[size];
     self->buf = buf;
     func_003E1BB8(D_004A11CC, buf, size);
@@ -1098,7 +1098,7 @@ extern "C" void func_0014BE70(void* vself)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014C068);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern char D_0045A610[];
 
 struct sBEEnt_14C068 {
@@ -1140,14 +1140,14 @@ extern "C" void func_0014C068(sBELib_14C068* self)
     for (int i = 0; i < 30; i++) {
         self->index[i] = p;
         p += D_004A11E8;
-        func_003E6448(self->index[i], 0, D_004A11E8 * 2);
+        MEM_fill(self->index[i], 0, D_004A11E8 * 2);
     }
     for (int i = 0; i < self->n0; i++) {
         self->index[self->entries[i].type][self->entries[i].slot] = i;
     }
     for (int i = 0; i < 30; i++) {
-        func_003E6448(self->first[i], 0, D_004A11E8 * 2);
-        func_003E6448(self->count[i], 0, D_004A11E8 * 2);
+        MEM_fill(self->first[i], 0, D_004A11E8 * 2);
+        MEM_fill(self->count[i], 0, D_004A11E8 * 2);
     }
     for (int i = 0; i < self->n0; i++) {
         int g = self->entries[i].group;
@@ -1205,7 +1205,7 @@ extern "C" void func_0014C2B0(sBEGroupTable* self)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014C320);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
 struct sBEEntryC_G {
     signed char group; // 0x0
@@ -1226,7 +1226,7 @@ extern "C" void func_0014C320(sBEKeyTableG* self)
 {
     int last = 30;
     int i;
-    func_003E6448(self->groupCount, 0, sizeof(self->groupCount));
+    MEM_fill(self->groupCount, 0, sizeof(self->groupCount));
     for (i = 0; i < self->count; i++) {
         int g = self->entries[i].group;
         self->groupCount[g]++;
@@ -1241,7 +1241,7 @@ extern "C" void func_0014C320(sBEKeyTableG* self)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014C3C8);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
 struct sBEEntry8G {
     signed char group; // 0x0
@@ -1262,8 +1262,8 @@ extern "C" void func_0014C3C8(sBEKeyTableG1* self)
 {
     int last = -1;
     int i;
-    func_003E6448(self->groupCount, 0, sizeof(self->groupCount));
-    func_003E6448(self->groupFirst, 0, sizeof(self->groupFirst));
+    MEM_fill(self->groupCount, 0, sizeof(self->groupCount));
+    MEM_fill(self->groupFirst, 0, sizeof(self->groupFirst));
     for (i = 0; i < self->count; i++) {
         int g = self->entries[i].group;
         self->groupCount[g]++;
@@ -1278,7 +1278,7 @@ extern "C" void func_0014C3C8(sBEKeyTableG1* self)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014C488);
 #ifdef SKIP_ASM
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 
 struct sBEEntry8G2 {
     signed char group; // 0x0
@@ -1299,8 +1299,8 @@ extern "C" void func_0014C488(sBEKeyTableG2* self)
 {
     int last = -1;
     int i;
-    func_003E6448(self->groupCount, 0, sizeof(self->groupCount));
-    func_003E6448(self->groupFirst, 0, sizeof(self->groupFirst));
+    MEM_fill(self->groupCount, 0, sizeof(self->groupCount));
+    MEM_fill(self->groupFirst, 0, sizeof(self->groupFirst));
     for (i = 0; i < self->count; i++) {
         int g = self->entries[i].group;
         self->groupCount[g]++;
@@ -1505,17 +1505,17 @@ extern "C" void func_0014D240(void* self)
     p->f20 = 0;
     p->f24 = 0;
     p->f28 = 0;
-    func_003E6448(p->tab[0], 0, sizeof(p->tab[0]));
-    func_003E6448(p->tab[1], 0, sizeof(p->tab[1]));
-    func_003E6448(p->tab[2], 0, sizeof(p->tab[2]));
-    func_003E6448(p->tab[3], 0, sizeof(p->tab[3]));
-    func_003E6448(p->tab[4], 0, sizeof(p->tab[4]));
-    func_003E6448(p->tab[5], 0, sizeof(p->tab[5]));
-    func_003E6448(p->tab[6], 0, sizeof(p->tab[6]));
-    func_003E6448(p->tab[7], 0, sizeof(p->tab[7]));
-    func_003E6448(p->tab[8], 0, sizeof(p->tab[8]));
-    func_003E6448(p->tab[9], 0, sizeof(p->tab[9]));
-    func_003E6448(p->tab[10], 0, sizeof(p->tab[10]));
+    MEM_fill(p->tab[0], 0, sizeof(p->tab[0]));
+    MEM_fill(p->tab[1], 0, sizeof(p->tab[1]));
+    MEM_fill(p->tab[2], 0, sizeof(p->tab[2]));
+    MEM_fill(p->tab[3], 0, sizeof(p->tab[3]));
+    MEM_fill(p->tab[4], 0, sizeof(p->tab[4]));
+    MEM_fill(p->tab[5], 0, sizeof(p->tab[5]));
+    MEM_fill(p->tab[6], 0, sizeof(p->tab[6]));
+    MEM_fill(p->tab[7], 0, sizeof(p->tab[7]));
+    MEM_fill(p->tab[8], 0, sizeof(p->tab[8]));
+    MEM_fill(p->tab[9], 0, sizeof(p->tab[9]));
+    MEM_fill(p->tab[10], 0, sizeof(p->tab[10]));
     if (p->buf2)
         cMemMan_free(p->buf2);
     p->buf2 = 0;

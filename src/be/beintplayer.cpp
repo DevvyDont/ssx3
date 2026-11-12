@@ -701,13 +701,13 @@ extern "C" void func_00146C10(void* self, int arg1, int arg2, int arg3, int arg4
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00146D98);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getLastHub);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern int D_004A6CA8[];
 
-extern "C" int func_00146D98(void* self, int index)
+extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -737,7 +737,7 @@ extern "C" void func_00146E10(void* self, int index, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00146E98);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getHumanRider);
 #ifdef SKIP_ASM
 int cBENewPlayerInterface_getPlayerID(int index);
 
@@ -749,7 +749,7 @@ struct sPlayerSlot_00146E98
 
 extern sPlayerSlot_00146E98 D_00534FEC[];
 
-extern "C" int func_00146E98(void* self, int second)
+extern "C" int cBENewPlayerInterface_getHumanRider(void* self, int second)
 {
     int n = 0;
     for (int i = 0; i < 6; i++)
@@ -841,12 +841,12 @@ extern "C" void func_00147138(void* self, int a1, const char* name)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147170);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerName);
 #ifdef SKIP_ASM
 extern "C" unsigned int strlen(const char* s);
 int GetHashValue32(char* str);
-extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, int n);
-extern "C" char* func_002C2580(char* dst, unsigned short* src);
+extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
+extern "C" char* strcpy2(char* dst, unsigned short* src);
 extern char D_0045A268[];
 
 struct sVtEntry_00147170 {
@@ -857,7 +857,7 @@ struct sVtEntry_00147170 {
 
 extern char* D_004A28A8;
 
-extern "C" char* func_00147170(void* self, int idx)
+extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx)
 {
     char* name = (char*)&D_00534FE0[idx];
     if (strlen(name) == 0)
@@ -865,8 +865,8 @@ extern "C" char* func_00147170(void* self, int idx)
         unsigned short buf[0x68];
         char* db = *(char**)(D_004A28A8 + 0x8C);
         sVtEntry_00147170* vt = *(sVtEntry_00147170**)(db + 4);
-        func_002C26D0(buf, vt[4].fn(db + vt[4].delta, GetHashValue32(D_0045A268)), idx + 1);
-        func_002C2580(name, buf);
+        sprintf1(buf, vt[4].fn(db + vt[4].delta, GetHashValue32(D_0045A268)), idx + 1);
+        strcpy2(name, buf);
     }
     return name;
 }
@@ -1547,7 +1547,7 @@ extern "C" short func_00147F10(void* self, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147F78);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getThis);
 #ifdef SKIP_ASM
 struct sVTablePlayer_00147F78
 {
@@ -1567,7 +1567,7 @@ extern const char D_0045A280[];
 extern sVTablePlayer_00147F78 D_0045AD68;
 extern void* D_004A11C4;
 
-extern "C" void* func_00147F78(void)
+extern "C" void* cBEStatInterface_getThis(void)
 {
     if (D_004A11C4 == 0) {
         cBEIface_00147F78* mem = (cBEIface_00147F78*)cMemMan_alloc(0x10, D_0045A280, 0, 0);
@@ -1584,7 +1584,7 @@ extern "C" void* func_00147F78(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147FD8);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_submit);
 #ifdef SKIP_ASM
 struct sCtrl7_00147FD8
 {
@@ -1603,7 +1603,7 @@ extern sPlayerSlot_00147FD8 D_004A7887[];
 extern sPlayerSlot_00147FD8 D_004B13D7[];
 extern sPlayerSlot_00147FD8 D_004BAF27[];
 
-extern "C" void func_00147FD8(void)
+extern "C" void cBEStatInterface_submit(void)
 {
     for (int i = 0; i < 10; i++)
     {
@@ -1615,7 +1615,7 @@ extern "C" void func_00147FD8(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148098);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_discard);
 #ifdef SKIP_ASM
 struct sPlayerStatRow;
 extern sPlayerStatRow D_00535538[];
@@ -1623,7 +1623,7 @@ extern sPlayerSlot_00147FD8 D_004A7887[];
 extern sPlayerSlot_00147FD8 D_004B13D7[];
 extern sPlayerSlot_00147FD8 D_004BAF27[];
 
-extern "C" void func_00148098(void)
+extern "C" void cBEStatInterface_discard(void)
 {
     for (int i = 0; i < 10; i++)
     {

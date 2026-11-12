@@ -92,7 +92,7 @@ INCLUDE_ASM("fe/fememcard2", func_001D93E8);
 
 INCLUDE_ASM("fe/fememcard2", cFEMemCard_triggerDisplayState);
 
-INCLUDE_ASM("fe/fememcard2", func_001D97E0);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_checkNextAvailableDevice);
 
 INCLUDE_ASM("fe/fememcard2", func_001D9818);
 
@@ -102,15 +102,15 @@ INCLUDE_ASM("fe/fememcard2", func_001D9880);
 
 INCLUDE_ASM("fe/fememcard2", cFEMemCard_createReadBuffer);
 
-INCLUDE_ASM("fe/fememcard2", func_001D99C8);
+INCLUDE_ASM("fe/fememcard2", cFEPopupConfirm_cFEPopupConfirm);
 
-INCLUDE_ASM("fe/fememcard2", func_001D9A80);
+INCLUDE_ASM("fe/fememcard2", cFEPopupConfirm_initPopup);
 
-INCLUDE_ASM("fe/fememcard2", func_001D9BD0);
+INCLUDE_ASM("fe/fememcard2", cFEPopupConfirm_setButtonText);
 
-INCLUDE_ASM("fe/fememcard2", func_001D9CA8);
+INCLUDE_ASM("fe/fememcard2", cFEPopupConfirm_setMessage);
 
-INCLUDE_ASM("fe/fememcard2", func_001D9D18);
+INCLUDE_ASM("fe/fememcard2", cFEPopupConfirm_setDefaultButton);
 
 INCLUDE_ASM("fe/fememcard2", func_001D9D48);
 

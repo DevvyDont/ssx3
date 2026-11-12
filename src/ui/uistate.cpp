@@ -70,7 +70,7 @@ extern "C" void cUIState_showObjSafe(void* self, char* name)
 INCLUDE_ASM("ui/uistate", func_0039E9D8);
 #ifdef SKIP_ASM
 extern "C" void func_0039F8C8(void* self);
-extern "C" void func_00397948(void*);
+extern "C" void cList_destroyList(void*);
 extern "C" void func_003A4868(void* self);
 void operator_delete(int*);
 extern void* D_00494C98[];
@@ -80,13 +80,13 @@ extern "C" void func_0039E9D8(void* self, int flags)
 {
     func_0039F8C8(self);
     *(void***)((char*)self + 0x34) = D_00494C98;
-    func_00397948((char*)self + 0x1C);
+    cList_destroyList((char*)self + 0x1C);
     *(void***)((char*)self + 0x30) = D_00494CC0;
     func_003A4868((char*)self + 0x28);
     *(void***)((char*)self + 0x24) = D_00494CC0;
     func_003A4868((char*)self + 0x1C);
     *(void***)((char*)self + 0x18) = D_00494C98;
-    func_00397948(self);
+    cList_destroyList(self);
     *(void***)((char*)self + 0x14) = D_00494CC0;
     func_003A4868((char*)self + 0xC);
     *(void***)((char*)self + 0x8) = D_00494CC0;
@@ -222,7 +222,7 @@ void func_0039ECA8(void* self)
 INCLUDE_ASM("ui/uistate", func_0039ECB0);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_0039E868(void* self);
+extern "C" void cUIState_updateScreens(void* self);
 extern "C" void func_0039F7B8(void* self, void* st, int a2, int a3);
 extern "C" void cListNode_removeFromList(void* self);
 extern "C" void* cUIStateStack_getCurrentState(void* self);
@@ -280,7 +280,7 @@ extern "C" int func_0039ECB0(void* self)
                     any = 1;
                     VCALLV_ECB0(n, 4);
                     n->bits.id = 4;
-                    func_0039E868(n);
+                    cUIState_updateScreens(n);
                     if (n->flags & 1) {
                         func_0039ECB0_node* o = n->owner;
                         if (o != 0) {
@@ -293,7 +293,7 @@ extern "C" int func_0039ECB0(void* self)
                         n->bits.id = 3;
                     }
                     n->bits.b4 = 0;
-                    func_0039E868(n);
+                    cUIState_updateScreens(n);
                     break;
                 case 3:
                     if ((n->flags >> 4) & 1) {
@@ -302,18 +302,18 @@ extern "C" int func_0039ECB0(void* self)
                     }
                     VCALLV_ECB0(n, 6, 0);
                     n->bits.id = 5;
-                    func_0039E868(n);
+                    cUIState_updateScreens(n);
                     break;
                 case 5:
                     VCALLV_ECB0(n, 12);
-                    func_0039E868(n);
+                    cUIState_updateScreens(n);
                     break;
                 case 6:
                     if (VCALL_ECB0(n, 10)) {
                         n->bits.id = 7;
                     }
                     n->bits.b4 = 1;
-                    func_0039E868(n);
+                    cUIState_updateScreens(n);
                     break;
                 case 7: {
                     int top;
@@ -379,7 +379,7 @@ extern "C" int func_0039ECB0(void* self)
 INCLUDE_ASM("ui/uistate", func_0039F100);
 #ifdef SKIP_ASM
 extern "C" int func_0039ECB0(void* self);
-extern "C" void func_0039E868(void* self);
+extern "C" void cUIState_updateScreens(void* self);
 
 struct sVEntry39F100 {
     short delta;
@@ -399,7 +399,7 @@ extern "C" void func_0039F100(void* self)
                 sVEntry39F100* vt = *(sVEntry39F100**)((char*)n + 8);
                 vt[0xC].fn((char*)n + vt[0xC].delta);
             }
-            func_0039E868(n);
+            cUIState_updateScreens(n);
             n = *(cListNode**)((char*)n + 4);
         } while (!cListNode_isSentinel(n));
     }

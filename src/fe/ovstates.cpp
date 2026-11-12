@@ -26,7 +26,7 @@ extern "C" void cFEStateTitle_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_001947F8);
+INCLUDE_ASM("fe/ovstates", cFEStateTitle_onGainTransition);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -48,7 +48,7 @@ public:
     virtual void setVisible(int v);
 };
 
-extern "C" int func_001947F8(void* self)
+extern "C" int cFEStateTitle_onGainTransition(void* self)
 {
     if (D_004A17C0 == 0 || --D_004A17C0 == 0) {
         cUIObj_1947F8* o = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DB90));
@@ -66,7 +66,7 @@ extern "C" int func_001947F8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_001948A8);
+INCLUDE_ASM("fe/ovstates", cFEStateTitle_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_0039E510(void* self);
 extern void* D_004A28A8;
@@ -99,7 +99,7 @@ static inline int isActive_1948A8(sList_1948A8* l, int j)
     return 0;
 }
 
-extern "C" void func_001948A8(sSelf_1948A8* self)
+extern "C" void cFEStateTitle_onUpdate(sSelf_1948A8* self)
 {
     func_0039E510(self);
     self->timer += 1;
@@ -138,13 +138,13 @@ void func_00194980(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00194988);
+INCLUDE_ASM("fe/ovstates", cFEStateTitle_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void func_003A0330(void* self, int a1, int a2);
 extern char D_004A17D0[];
 
-extern "C" void func_00194988(void* self, void* item)
+extern "C" void cFEStateTitle_onWidgetCreate(void* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(D_004A17D0)) {
@@ -155,32 +155,32 @@ extern "C" void func_00194988(void* self, void* item)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_001949E0);
+INCLUDE_ASM("fe/ovstates", cFEStateTitle_onWidgetEvent);
 #ifdef SKIP_ASM
-struct sVEntry_func_001949E0 {
+struct sVEntry_cFEStateTitle_onWidgetEvent {
     short delta;
     short index;
     void* (*fn)(void*, void*, int);
 };
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 
-extern "C" void func_001949E0(void* self, void* msg, int type)
+extern "C" void cFEStateTitle_onWidgetEvent(void* self, void* msg, int type)
 {
     if (type == 5) {
         void* obj = **(void***)((char*)self + 0x10);
-        sVEntry_func_001949E0* vt = *(sVEntry_func_001949E0**)((char*)obj + 0x4);
+        sVEntry_cFEStateTitle_onWidgetEvent* vt = *(sVEntry_cFEStateTitle_onWidgetEvent**)((char*)obj + 0x4);
         void* r = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)msg + 0x18));
         if (r != 0) {
-            func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00194A48);
+INCLUDE_ASM("fe/ovstates", cFEStateTitle_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int func_00194A48(void* self, int a1, int a2)
+extern "C" int cFEStateTitle_onWidgetMenu(void* self, int a1, int a2)
 {
     return a2 != 6 ? 0x100 : 0x101;
 }
@@ -208,7 +208,7 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_003E6448(void* p, int v, int n);
+extern "C" void MEM_fill(void* p, int v, int n);
 extern "C" void func_00266CD8();
 extern "C" void func_00261008();
 extern "C" void func_0025B688();
@@ -230,7 +230,7 @@ extern "C" void cFEStateMainMenu_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_003E6448(D_005308B8, 0, 0x20);
+    MEM_fill(D_005308B8, 0, 0x20);
     *(int*)((char*)self + 0x48) = 0;
     *(char*)((char*)self + 0x54) = 0;
     func_00266CD8();
@@ -461,7 +461,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
-extern "C" void func_0039F290(void* stack, void* state);
+extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern "C" void* func_001887A0(void* mem, void* engine, int a2);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern void* D_00469518[];
@@ -551,7 +551,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
             bit <<= *(int*)(self + 0x50);
             *(char*)(popup + 0x15) = bit;
             *(char*)(popup + 0x48) = 0;
-            func_0039F290(*(char**)(self + 0x10) + 0x18, popup);
+            cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, popup);
             *(char**)(self + 0x4C) = item;
             setWidgetHidden_194EB0(self, D_004A17E0);
             setWidgetHidden_194EB0(self, D_004600A0);
@@ -562,14 +562,14 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
         sObj_194EB0* obj = **(sObj_194EB0***)(self + 0x10);
         void* r = ((void* (*)(void*, void*, int))obj->vt[4].fn)((char*)obj + obj->vt[4].delta, self, *(int*)(item + 0x18));
         if (r != 0)
-            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
         break;
     }
     case 6: {
         sObj_194EB0* obj = **(sObj_194EB0***)(self + 0x10);
         void* r = ((void* (*)(void*, void*, int))obj->vt[5].fn)((char*)obj + obj->vt[5].delta, self, *(int*)(item + 0x18));
         if (r != 0)
-            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
         break;
     }
     case 7: {

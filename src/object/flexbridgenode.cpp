@@ -4,8 +4,8 @@
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_setupGrid);
 #ifdef SKIP_ASM
 struct sBox00348058;
-extern "C" void* func_002D1BE0();
-extern "C" void func_003291E0(void* world, int type, int id, sBox00348058* box, sBox00348058* old);
+extern "C" void* cObjectInterface_getNash();
+extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox00348058* box, sBox00348058* old);
 void cMemMan_free(void*);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -171,9 +171,9 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     sGridV4 ext(100.0f, 100.0f, 100.0f, 0.0f);
     gridVecSub(self->box.min, self->box.min, ext);
     gridVecAdd(self->box.max, self->box.max, ext);
-    // PORT: the unit declares func_003291E0's third parameter as int; the def pointer is passed through it
+    // PORT: the unit declares nash_Nash_movenode's third parameter as int; the def pointer is passed through it
     int id = (int)self->def;
-    func_003291E0(func_002D1BE0(), 0, id, (sBox00348058*)&self->box, (sBox00348058*)&old);
+    nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (sBox00348058*)&self->box, (sBox00348058*)&old);
     int v = 0;
     int j = 0;
     for (int k = 0; k < ntris - 1; k += 2) {
@@ -190,7 +190,7 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_00346D38);
+INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_initSpringNodes);
 #ifdef SKIP_ASM
 struct sFlexVec4 {
     float x, y, z, w;
@@ -269,7 +269,7 @@ struct sFlexBridge {
     sFlexVec4* pts;      // 0x7C: 2 * count points
 };
 
-extern "C" void func_00346D38(sFlexBridge* self)
+extern "C" void cFlexBridgeNode_initSpringNodes(sFlexBridge* self)
 {
     int n = self->count;
     sFlexSeg* seg = self->segs;
@@ -282,10 +282,10 @@ extern "C" void func_00346D38(sFlexBridge* self)
 }
 #endif
 
-INCLUDE_ASM("object/flexbridgenode", func_00346E38);
+INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_applyForce);
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_003470D0);
+INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_updateIntersectInfo);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sV4_70D0 {
@@ -414,7 +414,7 @@ struct sFlState_70D0 {
     int idx;            // 0x60
 };
 
-extern "C" void func_003470D0(sFlBridge_70D0* self, sFlState_70D0* p)
+extern "C" void cFlexBridgeNode_updateIntersectInfo(sFlBridge_70D0* self, sFlState_70D0* p)
 {
     int idx = p->idx;
     if (idx >= 0) {
@@ -432,28 +432,28 @@ extern "C" void func_003470D0(sFlBridge_70D0* self, sFlState_70D0* p)
 }
 #endif
 
-INCLUDE_ASM("object/flexbridgenode", func_00347268);
+INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_intersect);
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_003475A8);
+INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_update);
 #ifdef SKIP_ASM
-extern "C" void func_00353FC0(void*);
-extern "C" void func_003475D8(void*);
+extern "C" void cSpring_update(void*);
+extern "C" void cFlexBridgeNode_updateGrid(void*);
 
-extern "C" void func_003475A8(void* self)
+extern "C" void cFlexBridgeNode_update(void* self)
 {
-    func_00353FC0((char*)self + 0x50);
-    func_003475D8(self);
+    cSpring_update((char*)self + 0x50);
+    cFlexBridgeNode_updateGrid(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_003475D8);
+INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_updateGrid);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern "C" void* func_002D1BE0();
-// PORT: the unit declares func_003291E0 with sBox00348058 (defined later); bound by asm label.
-extern "C" void func_003291E0_75D8(void* world, int type, int id, void* box, void* old) __asm__("func_003291E0");
+extern "C" void* cObjectInterface_getNash();
+// PORT: the unit declares nash_Nash_movenode with sBox00348058 (defined later); bound by asm label.
+extern "C" void nash_Nash_movenode_75D8(void* world, int type, int id, void* box, void* old) __asm__("nash_Nash_movenode");
 
 struct sV4_75D8 {
     float x, y, z, w;
@@ -657,7 +657,7 @@ static inline sV4_75D8 MulMat_75D8(const sMat_75D8* m, const sV4_75D8& v)
 
 // Re-poses the bridge strip from its nodes: two rows of points (node pos +/- the rotated
 // side/up offsets), per-triangle normals, the transformed bounding box and the mesh update.
-extern "C" void func_003475D8(void* vself)
+extern "C" void cFlexBridgeNode_updateGrid(void* vself)
 {
     sFlexBridge_75D8* self = (sFlexBridge_75D8*)vself;
     int n = self->count;
@@ -708,13 +708,13 @@ extern "C" void func_003475D8(void* vself)
     e.z = maxZ;
     self->box.max = e;
     int id = self->def;
-    func_003291E0_75D8(func_002D1BE0(), 0, id, box, &old);
+    nash_Nash_movenode_75D8(cObjectInterface_getNash(), 0, id, box, &old);
     self->mesh->vt[3].fn((char*)self->mesh + self->mesh->vt[3].delta, pos);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_00347B80);
+INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_render);
 #ifdef SKIP_ASM
 extern void* D_004A47B8;
 extern char* D_004A5B80;
@@ -762,7 +762,7 @@ struct sVE24_7B80 { short delta; short index; void* (*fn)(void*); };
 #define TOP_7B80(c) (*(sRS_7B80**)((c) + 0xE84))
 
 // Draws the bridge piece's model (through its handler if it has one) unless it is culled or not streamed in.
-extern "C" void func_00347B80(char* self)
+extern "C" void cFlexBridgeNode_render(char* self)
 {
     sModel_7B80* m = *(sModel_7B80**)(self + 0x18);
     if (!IsLoaded_7B80(m)) {
@@ -799,7 +799,7 @@ extern "C" void func_00347B80(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_00347D38);
+INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sFlexBridgeVEntry7D38 {
     short delta;
@@ -807,12 +807,12 @@ struct sFlexBridgeVEntry7D38 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0034FE90(void* self, void* stream);
+extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void func_003545D8(void* p, void* stream);
 
-extern "C" void func_00347D38(void* self, void* stream)
+extern "C" void cFlexBridgeNode_writeToReplayFrame(void* self, void* stream)
 {
-    func_0034FE90(self, stream);
+    cInstanceNode_writeToReplayFrame(self, stream);
     func_003545D8((char*)self + 0x50, stream);
     sFlexBridgeVEntry7D38* vt = *(sFlexBridgeVEntry7D38**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x20, 0x30);
@@ -896,7 +896,7 @@ struct sFlexBridgeVEntry7F90 {
 };
 
 void cMemMan_free(void*);
-extern "C" void func_0034FBF0(void* self, int flags);
+extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 extern char D_004900D0[];
 
 extern "C" void func_00347F90(void* self, int flags)
@@ -911,12 +911,12 @@ extern "C" void func_00347F90(void* self, int flags)
         sFlexBridgeVEntry7F90* vt = *(sFlexBridgeVEntry7F90**)obj;
         vt[1].fn((char*)obj + vt[1].delta, 3);
     }
-    func_0034FBF0(self, flags);
+    cInstanceNode__cInstanceNode(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_00348008);
+INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_update);
 #ifdef SKIP_ASM
 struct sFlexBridgeVEntry8008 {
     short delta;
@@ -924,20 +924,20 @@ struct sFlexBridgeVEntry8008 {
     void (*fn)(void*);
 };
 
-extern "C" void func_00348058(void* self);
+extern "C" void cFlexRailNode_updateSpaceHash(void* self);
 
-extern "C" void func_00348008(void* self)
+extern "C" void cFlexRailNode_update(void* self)
 {
     sFlexBridgeVEntry8008* vt1 = *(sFlexBridgeVEntry8008**)((char*)self + 0xC);
     vt1[47].fn((char*)self + vt1[47].delta);
     sFlexBridgeVEntry8008* vt2 = *(sFlexBridgeVEntry8008**)((char*)self + 0xC);
     vt2[48].fn((char*)self + vt2[48].delta);
-    func_00348058(self);
+    cFlexRailNode_updateSpaceHash(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_00348058);
+INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_updateSpaceHash);
 #ifdef SKIP_ASM
 struct sBox00348058 {
     float min[4];
@@ -959,16 +959,16 @@ struct sObj00348058 {
     int id;
 };
 
-extern "C" void* func_002D1BE0();
-extern "C" void func_003291E0(void* world, int type, int id, sBox00348058* box, sBox00348058* old);
+extern "C" void* cObjectInterface_getNash();
+extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox00348058* box, sBox00348058* old);
 
-extern "C" void func_00348058(void* p)
+extern "C" void cFlexRailNode_updateSpaceHash(void* p)
 {
     sObj00348058* self = (sObj00348058*)p;
     sBox00348058* box = &self->box;
     sBox00348058 old = self->box;
     self->vt[50].fn((char*)self + self->vt[50].delta);
-    func_003291E0(func_002D1BE0(), 2, self->id, box, &old);
+    nash_Nash_movenode(cObjectInterface_getNash(), 2, self->id, box, &old);
 }
 #endif
 
@@ -1073,11 +1073,11 @@ struct sSerVEntry_00348B40 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0034FE90(void* self, void* stream);
+extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
 extern "C" void func_00348B40(void* self, void* stream)
 {
-    func_0034FE90(self, stream);
+    cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_00348B40* vt = *(sSerVEntry_00348B40**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x20, 0x30);
 }

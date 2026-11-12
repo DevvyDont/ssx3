@@ -528,11 +528,11 @@ extern "C" void func_001399A8(void* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001399E0);
+INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
 
-extern "C" void func_001399E0(void* self, int state)
+extern "C" void cAirMotion_gainFocus(void* self, int state)
 {
     *(int*)self = state == 5;
     char* r = *(char**)((char*)self + 0x4);
@@ -696,7 +696,7 @@ extern int D_004A1120;
 extern void* D_004A3DD8;
 extern "C" float func_0013A7B0_9C88(void* self, sHit_139C88* hit) __asm__("func_0013A7B0");
 extern "C" void func_0011E150_9C88(void* rider, int a) __asm__("func_0011E150");
-extern "C" void func_00116120(void* rider, int a, int b);
+extern "C" void cRider_checkForReset(void* rider, int a, int b);
 extern "C" void func_00106538(void* rider, void* v);
 extern "C" void func_00105398(void* rider, int a1);
 extern "C" void func_00105398_p(void* rider, void* v) __asm__("func_00105398");
@@ -719,7 +719,7 @@ extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blen
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int func_0011FEE8(void* rider);
 void func_0011FEC8_9C88(void* rider, int v) __asm__("func_0011FEC8__FPv");
-void func_0011FE78_9C88(void* rider, int v) __asm__("func_0011FE78__FPv");
+void cRider_setMotionState_9C88(void* rider, int v) __asm__("cRider_setMotionState__FPv");
 void func_00113998_9C88(void* ap, void* pos, void* vel) __asm__("func_00113998__FPv");
 int AIrand();
 
@@ -908,7 +908,7 @@ extern "C" void func_00139C88(void* self)
         char* surf = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x44) + hit.surface * 0xB0;
         int fl;
         if (*(int*)(surf + 0x44) != 0 || (hit.obj54 != 0 && (fl = *(short*)(hit.obj54 + 0xA), (fl & 2) != 0))) {
-            func_00116120(RIDER_139C88, 0, 1);
+            cRider_checkForReset(RIDER_139C88, 0, 1);
             return;
         }
         float pen = vu0Dot_139C88(vu0Sub_139C88(hit.pos, V4_139C88(RIDER_139C88, 0x110)), hit.normal) - *(float*)(surf + 0x18);
@@ -1010,7 +1010,7 @@ extern "C" void func_00139C88(void* self)
         } else {
             char* r5 = RIDER_139C88;
             func_0010E910(r5, *(float*)(r5 + 0x378) < 0.699999988079071f, 0, *(int*)(r5 + 0x330), &hit, spd);
-            func_0011FE78_9C88(RIDER_139C88, 0);
+            cRider_setMotionState_9C88(RIDER_139C88, 0);
             if (func_0011FEE8(RIDER_139C88) != 0xC) {
                 if (func_0011FEE8(RIDER_139C88) == 2) {
                     func_00115640(RIDER_139C88);
@@ -1954,8 +1954,8 @@ extern "C" void func_0013C140(void* self);
 extern "C" void func_00294170(void* snd, void* rider);
 int func_0011FEE8(void* rider);
 int func_0011FE98(void* rider);
-// PORT: func_0011FE78 is defined with one parameter but this caller passes (rider, 1).
-void func_0011FE78_impl_BFA8(void* rider, int v) __asm__("func_0011FE78__FPv");
+// PORT: cRider_setMotionState is defined with one parameter but this caller passes (rider, 1).
+void cRider_setMotionState_impl_BFA8(void* rider, int v) __asm__("cRider_setMotionState__FPv");
 extern char* D_004A3500;
 
 struct sTbl_BFA8 {
@@ -2026,7 +2026,7 @@ extern "C" void func_0013BFA8(void* self)
     *(unsigned int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 0xFFFFFFFF;
     func_00107888(RIDER_BFA8);
     if (*(int*)((char*)self + 0x20) != 0 && func_0011FE98(RIDER_BFA8) == 4) {
-        func_0011FE78_impl_BFA8(RIDER_BFA8, 1);
+        cRider_setMotionState_impl_BFA8(RIDER_BFA8, 1);
         func_00294170(D_004A3500, RIDER_BFA8);
     }
     char* r = RIDER_BFA8;
@@ -2351,7 +2351,7 @@ extern "C" void* func_0013C650(void* self, int inChrg)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_0013C7A8);
+INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_gainFocus);
 #ifdef SKIP_ASM
 extern void* D_004A28A8;
 extern "C" int func_001298C8();
@@ -2391,7 +2391,7 @@ struct sHpCtl_13C7A8 {
     char* mRider;
 };
 
-extern "C" void func_0013C7A8(sHpCtl_13C7A8* self)
+extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
 {
     self->m0 = 0;
     char* r = self->mRider;
@@ -2912,12 +2912,12 @@ extern "C" void func_00114298(void* rider, float v);
 extern "C" void func_0011E150_v13F178(void* rider, int a1) __asm__("func_0011E150");
 extern "C" void func_00105398(void* rider, int a1);
 extern "C" void func_00107888(void* rider);
-extern "C" void func_00116120(void* rider, int a, int b);
+extern "C" void cRider_checkForReset(void* rider, int a, int b);
 extern "C" void func_0013F488(void* self);
 extern "C" void func_00294170(void* snd, void* rider);
 int func_0011FE98(void* rider);
-// PORT: func_0011FE78 is defined with one parameter but this caller passes (rider, 1).
-void func_0011FE78_impl_13F178(void* rider, int v) __asm__("func_0011FE78__FPv");
+// PORT: cRider_setMotionState is defined with one parameter but this caller passes (rider, 1).
+void cRider_setMotionState_impl_13F178(void* rider, int v) __asm__("cRider_setMotionState__FPv");
 extern char* D_004A3500;
 extern int D_004A115C;
 extern void* D_004A28A8;
@@ -3046,7 +3046,7 @@ extern "C" void func_0013F178(void* self)
             info.f30 = 0;
             func_0010EB30(RIDER_13F178, 0x168, 0, *(int*)(RIDER_13F178 + 0x438), &info);
         } else if (*(int*)(e + 0x44) != 0 || (fl = *(short*)(r + 0x2D4), (fl & 2) != 0)) {
-            func_00116120(r, 0, 1);
+            cRider_checkForReset(r, 0, 1);
         }
     }
     func_0011E150_v13F178(RIDER_13F178, 0);
@@ -3056,7 +3056,7 @@ extern "C" void func_0013F178(void* self)
     func_00105398(RIDER_13F178, 0);
     func_00107888(RIDER_13F178);
     if (*(int*)((char*)self + 0xC) != 0 && func_0011FE98(RIDER_13F178) == 0) {
-        func_0011FE78_impl_13F178(RIDER_13F178, 1);
+        cRider_setMotionState_impl_13F178(RIDER_13F178, 1);
         func_00294170(D_004A3500, RIDER_13F178);
     }
     char* r = RIDER_13F178;
@@ -3801,13 +3801,13 @@ void sti_0013FB20(int init, int prio)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140680);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing__cBeing);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern void* D_00459CC8[];
 
-extern "C" void func_00140680(int* self, int flags)
+extern "C" void cBeing__cBeing(int* self, int flags)
 {
     *(void***)self = D_00459CC8;
     if (flags & 1) {
@@ -3837,9 +3837,9 @@ int func_001406C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406C8__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_applyBoost__FPv);
 #ifdef SKIP_ASM
-void func_001406C8(void* self)
+void cBeing_applyBoost(void* self)
 {
 }
 #endif
@@ -3892,49 +3892,49 @@ int func_00140700(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140708__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_transport__FPv);
 #ifdef SKIP_ASM
-void func_00140708(void* self)
+void cBeing_transport(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140710__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_resetToPath__FPv);
 #ifdef SKIP_ASM
-void func_00140710(void* self)
+void cBeing_resetToPath(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140718__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_initForMission__FPv);
 #ifdef SKIP_ASM
-void func_00140718(void* self)
+void cBeing_initForMission(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140720__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_flagEventSpeedBoost__FPv);
 #ifdef SKIP_ASM
-void func_00140720(void* self)
+void cBeing_flagEventSpeedBoost(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140728__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_flagEventTrickBoost__FPv);
 #ifdef SKIP_ASM
-void func_00140728(void* self)
+void cBeing_flagEventTrickBoost(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140730__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_flagEventTrickMultiplier__FPv);
 #ifdef SKIP_ASM
-void func_00140730(void* self)
+void cBeing_flagEventTrickMultiplier(void* self)
 {
 }
 #endif
@@ -4460,9 +4460,9 @@ extern "C" int func_00140B78(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140B80__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cRider_getAIIndex__FPv);
 #ifdef SKIP_ASM
-int func_00140B80(void* self)
+int cRider_getAIIndex(void* self)
 {
     return *(int*)((char*)self + 0x86C);
 }
@@ -4505,18 +4505,18 @@ extern "C" void func_00140BB0(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140BC0__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cRider_isHuman__FPv);
 #ifdef SKIP_ASM
-int func_00140BC0(void* self)
+int cRider_isHuman(void* self)
 {
     return *(int*)((char*)self + 0x874);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140BC8);
+INCLUDE_ASM("ai/control/handplantcontrol", cRider_isComputer);
 #ifdef SKIP_ASM
-extern "C" int func_00140BC8(void* self)
+extern "C" int cRider_isComputer(void* self)
 {
     return *(int*)((char*)self + 0x874) ^ 1;
 }
@@ -4840,8 +4840,8 @@ cVbDtor00140D80::~cVbDtor00140D80()
 // PORT: the compiler names this dtor _$_15cVbDtor00140D80; expose it under the address-derived name.
 __asm__(".globl func_00140D80\n.type func_00140D80,@function\nfunc_00140D80 = _$_15cVbDtor00140D80\n.size func_00140D80,0x15C\n");
 
-// PORT: cRiderVb_hpc's dtor is cRider's (func_0011B978).
-__asm__("_$_12cRiderVb_hpc = func_0011B978\n");
+// PORT: cRiderVb_hpc's dtor is cRider's (cRider__cRider).
+__asm__("_$_12cRiderVb_hpc = cRider__cRider\n");
 
 // PORT: cRiderVbB0_hpc's vtable is not emitted here (key function b01 elsewhere): retail D_00459B90.
 __asm__("_vt$14cRiderVbB0_hpc = D_00459B90\n");
@@ -4868,7 +4868,7 @@ __asm__(".globl func_00140EE0\n.type func_00140EE0,@function\nfunc_00140EE0 = _$
 __asm__("_vt$15cVbDtor00140EE0$13cRiderVbC_hpc = D_004599A0\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor00140EE0$12cRiderVb_hpc = D_004599E8\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -4888,7 +4888,7 @@ __asm__(".globl func_00141040\n.type func_00141040,@function\nfunc_00141040 = _$
 __asm__("_vt$15cVbDtor00141040$13cRiderVbC_hpc = D_004598A8\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor00141040$12cRiderVb_hpc = D_004598F0\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -4937,7 +4937,7 @@ __asm__(".globl func_001411C0\n.type func_001411C0,@function\nfunc_001411C0 = _$
 __asm__("_vt$14cHandPlant11C0$13cRiderVbC_hpc = D_004596B8\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$14cHandPlant11C0$12cRiderVb_hpc = D_00459700\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -4957,7 +4957,7 @@ __asm__(".globl func_00141320\n.type func_00141320,@function\nfunc_00141320 = _$
 __asm__("_vt$15cVbDtor00141320$13cRiderVbC_hpc = D_004595C0\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor00141320$12cRiderVb_hpc = D_00459608\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5019,7 +5019,7 @@ __asm__(".globl func_001415C8\n.type func_001415C8,@function\nfunc_001415C8 = _$
 __asm__("_vt$15cVbDtor001415C8$13cRiderVbC_hpc = D_004594C8\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor001415C8$12cRiderVb_hpc = D_00459510\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5039,7 +5039,7 @@ __asm__(".globl func_00141728\n.type func_00141728,@function\nfunc_00141728 = _$
 __asm__("_vt$15cVbDtor00141728$13cRiderVbC_hpc = D_004593D0\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor00141728$12cRiderVb_hpc = D_00459418\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5059,7 +5059,7 @@ __asm__(".globl func_00141888\n.type func_00141888,@function\nfunc_00141888 = _$
 __asm__("_vt$15cVbDtor00141888$13cRiderVbC_hpc = D_004592D8\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor00141888$12cRiderVb_hpc = D_00459320\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5079,7 +5079,7 @@ __asm__(".globl func_001419E8\n.type func_001419E8,@function\nfunc_001419E8 = _$
 __asm__("_vt$15cVbDtor001419E8$13cRiderVbC_hpc = D_004591E0\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor001419E8$12cRiderVb_hpc = D_00459228\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5099,7 +5099,7 @@ __asm__(".globl func_00141B48\n.type func_00141B48,@function\nfunc_00141B48 = _$
 __asm__("_vt$15cVbDtor00141B48$13cRiderVbC_hpc = D_004590E8\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor00141B48$12cRiderVb_hpc = D_00459130\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5119,7 +5119,7 @@ __asm__(".globl func_00141CA8\n.type func_00141CA8,@function\nfunc_00141CA8 = _$
 __asm__("_vt$15cVbDtor00141CA8$13cRiderVbC_hpc = D_00458FF0\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor00141CA8$12cRiderVb_hpc = D_00459038\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5139,7 +5139,7 @@ __asm__(".globl func_00141E08\n.type func_00141E08,@function\nfunc_00141E08 = _$
 __asm__("_vt$15cVbDtor00141E08$13cRiderVbC_hpc = D_00458EF8\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor00141E08$12cRiderVb_hpc = D_00458F40\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5159,7 +5159,7 @@ __asm__(".globl func_00141F68\n.type func_00141F68,@function\nfunc_00141F68 = _$
 __asm__("_vt$15cVbDtor00141F68$13cRiderVbC_hpc = D_00458E00\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor00141F68$12cRiderVb_hpc = D_00458E48\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5179,7 +5179,7 @@ __asm__(".globl func_001420C8\n.type func_001420C8,@function\nfunc_001420C8 = _$
 __asm__("_vt$15cVbDtor001420C8$13cRiderVbC_hpc = D_00458D08\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor001420C8$12cRiderVb_hpc = D_00458D50\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5199,7 +5199,7 @@ __asm__(".globl func_00142228\n.type func_00142228,@function\nfunc_00142228 = _$
 __asm__("_vt$15cVbDtor00142228$13cRiderVbC_hpc = D_00458C10\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor00142228$12cRiderVb_hpc = D_00458C58\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5261,7 +5261,7 @@ __asm__(".globl func_001424D0\n.type func_001424D0,@function\nfunc_001424D0 = _$
 __asm__("_vt$15cVbDtor001424D0$13cRiderVbC_hpc = D_00458B18\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor001424D0$12cRiderVb_hpc = D_00458B60\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5281,7 +5281,7 @@ __asm__(".globl func_00142630\n.type func_00142630,@function\nfunc_00142630 = _$
 __asm__("_vt$15cVbDtor00142630$13cRiderVbC_hpc = D_00458A20\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor00142630$12cRiderVb_hpc = D_00458A68\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5301,7 +5301,7 @@ __asm__(".globl func_00142790\n.type func_00142790,@function\nfunc_00142790 = _$
 __asm__("_vt$15cVbDtor00142790$13cRiderVbC_hpc = D_00458928\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor00142790$12cRiderVb_hpc = D_00458970\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5321,7 +5321,7 @@ __asm__(".globl func_001428F0\n.type func_001428F0,@function\nfunc_001428F0 = _$
 __asm__("_vt$15cVbDtor001428F0$13cRiderVbC_hpc = D_00458830\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$15cVbDtor001428F0$12cRiderVb_hpc = D_00458878\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5392,7 +5392,7 @@ __asm__("_vt$15cVbDtor00142A50 = D_00458710\n"
         "_vt$13cVbIn00140EE0$12cRiderVb_hpc = D_004599E8\n"
         "_vt$13cVbIn00140D80$13cRiderVbC_hpc = D_00459A98\n"
         "_vt$13cVbIn00140D80$12cRiderVb_hpc = D_00459AE0\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%
@@ -5450,9 +5450,9 @@ extern "C" void func_00144040(char* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144068__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cAIStateHandler_OnLoseState__FPv);
 #ifdef SKIP_ASM
-void func_00144068(void* self)
+void cAIStateHandler_OnLoseState(void* self)
 {
 }
 #endif
@@ -5854,9 +5854,9 @@ extern "C" void func_00144368(sTree_144368* self, sNode_144368* node, sKey_14436
 extern "C" void* func_00311958(void* self);
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144610__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cRiderAnim__cRiderAnim__FPv);
 #ifdef SKIP_ASM
-void* func_00144610(void* self)
+void* cRiderAnim__cRiderAnim(void* self)
 {
     return func_00311958(self);
 }
@@ -5937,7 +5937,7 @@ float func_001446E8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001446F8);
+INCLUDE_ASM("ai/control/handplantcontrol", cMissionRider__cMissionRider);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
@@ -5947,7 +5947,7 @@ cHpD_1446F8::~cHpD_1446F8()
 }
 
 // PORT: the compiler names this dtor _$_11cHpD_1446F8; expose it under the address-derived name.
-__asm__(".globl func_001446F8\n.type func_001446F8,@function\nfunc_001446F8 = _$_11cHpD_1446F8\n.size func_001446F8,0x1B0\n");
+__asm__(".globl cMissionRider__cMissionRider\n.type cMissionRider__cMissionRider,@function\ncMissionRider__cMissionRider = _$_11cHpD_1446F8\n.size cMissionRider__cMissionRider,0x1B0\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
 __asm__("_vt$12cHpD1_1446F8 = D_00458338\n"
@@ -5955,7 +5955,7 @@ __asm__("_vt$12cHpD1_1446F8 = D_00458338\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"
         "_vt$11cHpD_1446F8$12cRiderVb_hpc = D_00458288\n"
         "_$_12cHpD1_1446F8 = func_00125EB8\n"
-        "_$_12cRiderVb_hpc = func_0011B978\n");
+        "_$_12cRiderVb_hpc = cRider__cRider\n");
 #endif
 
 //100%

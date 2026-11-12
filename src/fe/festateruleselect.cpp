@@ -195,8 +195,8 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cFEStateRuleSelect_setupMenu(void* self, signed char a1);
-extern "C" void func_0039B760(void* menu, int count);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void cUIMenu_setScrollableMenu(void* menu, int count);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern char D_0045FB10[];
 extern char D_0045FB20[];
 extern char D_004A1398[];
@@ -290,12 +290,12 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
     for (; n >= 0; n--)
         *p-- = 0;
     self->count = count;
-    func_003E6448(D_005308B8, 0, 0x20);
+    MEM_fill(D_005308B8, 0, 0x20);
     cFEStateRuleSelect_setupMenu(self, 0);
     sUIObj_19188* menu = (sUIObj_19188*)find_19188(self, D_004A1398);
     if (menu != 0) {
         menu->flags |= 0x80;
-        func_0039B760(menu, count);
+        cUIMenu_setScrollableMenu(menu, count);
         cUIMenu_setSelectedByIndex(menu, 0);
         cUIText* help = (cUIText*)find_19188(self, D_0045FB20);
         int rule = self->rules[0];
@@ -322,14 +322,14 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
 }
 #endif
 
-extern "C" void* func_0039E4C0(void* self);
+extern "C" void* cUIState_onGainFocus(void* self);
 
 //100%
 INCLUDE_ASM("fe/festateruleselect", func_00191C48__FPv);
 #ifdef SKIP_ASM
 void* func_00191C48(void* self)
 {
-    return func_0039E4C0(self);
+    return cUIState_onGainFocus(self);
 }
 #endif
 
@@ -343,8 +343,8 @@ extern "C" void func_00192088(void* self, int idx, int a2);
 struct sRuleSel_2380;
 extern "C" void func_00192380(sRuleSel_2380* self, void* item);
 extern "C" int func_0039A738(void* self);
-extern "C" void func_0039F400(void* stack, void* state);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void cUIStateStack_push(void* stack, void* state);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern char D_0045D698[];
 extern char D_005308B8[];
 
@@ -373,7 +373,7 @@ extern "C" void func_00191C68(char* self, sMsg_1C68* msg, unsigned int type)
             sVE_1C68* vt = *(sVE_1C68**)(o + 0x4);
             void* st = vt[4].fn(o + vt[4].delta, self, msg->id);
             if (st) {
-                func_0039F400(*(char**)(self + 0x10) + 0x18, st);
+                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, st);
             }
         }
         break;
@@ -382,9 +382,9 @@ extern "C" void func_00191C68(char* self, sMsg_1C68* msg, unsigned int type)
         sVE_1C68* vt = *(sVE_1C68**)(o + 0x4);
         void* st = vt[5].fn(o + vt[5].delta, self, msg->id);
         if (st) {
-            func_0039F400(*(char**)(self + 0x10) + 0x18, st);
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, st);
         }
-        func_003E6448(D_005308B8, 0, 0x20);
+        MEM_fill(D_005308B8, 0, 0x20);
         break;
     }
     case 9: {

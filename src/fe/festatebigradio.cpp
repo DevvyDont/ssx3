@@ -244,8 +244,8 @@ extern char D_004A1798[];
 extern int D_004A1A70;
 extern "C" void func_001A87D0(void* self, int a1);
 extern "C" void func_001927B0(void* p);
-// func_0039E4C0 returns nothing (ends in a void vcall).
-void func_0039E4C0_v(void* self) __asm__("func_0039E4C0");
+// cUIState_onGainFocus returns nothing (ends in a void vcall).
+void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
 
 static inline int isOn00193568()
 {
@@ -260,7 +260,7 @@ extern "C" void func_00193568(void* self, int a1)
         func_001A87D0(self, a1);
         return;
     }
-    func_0039E4C0_v(self);
+    cUIState_onGainFocus_v(self);
     if (*(int*)((char*)self + 0x6F8) != 0 && *(int*)((char*)self + 0x72C) == 0) {
         int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_004A1790));
         if (frame != 0xFFFF) {
@@ -286,8 +286,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* s);
-extern "C" int func_00146E98(void* iface, int a1);
-extern "C" const char* func_0014EE58(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
+extern "C" const char* cBECharacterInterface_getShortName(void* iface, int a1);
 extern char D_004A17A0[];
 extern char D_004A17A8[];
 extern char D_0045FD38[];
@@ -346,11 +346,11 @@ extern "C" void cFEStateBraggingRights_onWidgetCreate(char* self, cUIObj_193650*
     } else if (Is_193650(*(int*)(wp + 0x38), D_0045FD38) || Is_193650(*(int*)(wp + 0x38), D_0045FD48)) {
         void* p1 = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* p2 = cBE_getInterface_Fv(cBE_getBE(), 2);
-        cUIText_setAsciiString((cUIText*)w, func_0014EE58(p2, func_00146E98(p1, 0)));
+        cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(p2, cBENewPlayerInterface_getHumanRider(p1, 0)));
     } else if (Is_193650(*(int*)(wp + 0x38), D_0045FD58) || Is_193650(*(int*)(wp + 0x38), D_0045FD68)) {
         void* p1 = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* p2 = cBE_getInterface_Fv(cBE_getBE(), 2);
-        cUIText_setAsciiString((cUIText*)w, func_0014EE58(p2, func_00146E98(p1, 1)));
+        cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(p2, cBENewPlayerInterface_getHumanRider(p1, 1)));
     } else if (Is_193650(*(int*)(wp + 0x38), D_0045FD78)) {
         *(void**)(self + 0x6D4) = w;
     } else if (Is_193650(*(int*)(wp + 0x38), D_0045FD88)) {
@@ -391,12 +391,12 @@ extern "C" int func_0039A738_38F8(void* item) __asm__("func_0039A738");
 extern "C" void func_00192740_38F8(void* panel, int on) __asm__("func_00192740");
 extern "C" void func_00265688(void* snd);
 extern "C" void func_00265568(void* snd, int slot, int value);
-extern "C" void func_0039F400(void* list, void* obj);
+extern "C" void cUIStateStack_push(void* list, void* obj);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_001A8918(void* self, void* widget);
-extern "C" void func_003E6448(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
 extern char D_0045FD98[];
 extern char D_0045DCC8[];
 extern char D_0045FCD8[];
@@ -454,7 +454,7 @@ extern "C" void func_001938F8(char* self, sWidget_38F8* w, int event)
             break;
         void* r = vcall_38F8(self, 4, w);
         if (r != 0)
-            func_0039F400(*(char**)(self + 0x10) + 0x18, r);
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
         break;
     }
     case 6:
@@ -472,8 +472,8 @@ extern "C" void func_001938F8(char* self, sWidget_38F8* w, int event)
         } else {
             void* r = vcall_38F8(self, 5, w);
             if (r != 0)
-                func_0039F400(*(char**)(self + 0x10) + 0x18, r);
-            func_003E6448(D_005308B8, 0, 0x20);
+                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+            MEM_fill(D_005308B8, 0, 0x20);
         }
         break;
     case 1:

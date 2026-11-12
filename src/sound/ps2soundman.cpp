@@ -5,7 +5,7 @@ INCLUDE_ASM("sound/ps2soundman", cSndPlayOpts_cSndPlayOpts);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_9350(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void* func_002ADE88(void* self, int heap);
+extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void func_003BA020(void* desc);
 extern "C" void* func_00416210(void* dst, int v, int n);
 extern char D_00483178[];
@@ -72,7 +72,7 @@ extern "C" sSndPlayOpts9350* cSndPlayOpts_cSndPlayOpts(sSndPlayOpts9350* self, i
 {
     if (inchrg != 0) {
         self->vbase = (char*)self + 0x88;
-        func_002ADE88((char*)self + 0x88, heap);
+        cSoundSys_cSoundSys((char*)self + 0x88, heap);
     }
     *(const sSmVtbl9350**)(self->vbase + 4) = &D_00483BE0_9350;
     if (inchrg == 0) {
@@ -129,7 +129,7 @@ INCLUDE_ASM("sound/ps2soundman", func_002A97C0);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int* ptr);
-extern "C" void func_002ADEE8(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 
 struct sSmVEntry97C0 {
     short delta;
@@ -175,7 +175,7 @@ extern "C" void func_002A97C0(char* self, int flags)
     if (*(void**)(self + 0x80) != 0) cMemMan_free(*(void**)(self + 0x80));
     if (*(void**)(self + 0x84) != 0) cMemMan_free(*(void**)(self + 0x84));
     if (flags & 2) {
-        func_002ADEE8(*(void**)self, 0);
+        cSoundSys__cSoundSys(*(void**)self, 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);

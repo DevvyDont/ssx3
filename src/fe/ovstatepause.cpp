@@ -11,12 +11,12 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int idx);
 extern "C" int func_0039A768(void* box, int key, unsigned char* out);
 extern "C" void func_0039A7A8(void* box, unsigned char sel);
-extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, ...);
-extern "C" void func_003A0E90(void* obj, unsigned short* s);
+extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" void* func_0028B180();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
@@ -53,7 +53,7 @@ extern char D_004A24C8[];
 extern char D_004A24D0[];
 extern char D_004A24D8[];
 
-// The pause-options settings word (same layout as func_001FA238's view).
+// The pause-options settings word (same layout as cOVState_PAUSE_OPTIONS_onWidgetEvent's view).
 struct sOptions_PO {
     unsigned int f0 : 4;
     unsigned int f4 : 4;
@@ -162,8 +162,8 @@ static inline void setFormatted_PO(void* obj, char* name, int n)
     sText_PO text;
     unsigned short* s = getString_PO(name);
     if (s != 0) {
-        func_002C26D0(text, s, n);
-        func_003A0E90(obj, text);
+        sprintf1(text, s, n);
+        cUIText_setUnicodeString(obj, text);
     }
 }
 
@@ -181,7 +181,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     cBEOptionInterface_PO* iface = (cBEOptionInterface_PO*)cBE_getInterface_Fv(cBE_getBE(), 4);
     {
         void* w = find_PO(self, D_004A2498);
@@ -313,7 +313,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FA100);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -348,7 +348,7 @@ static inline bool isField_FA100(signed char* g, int off, int v)
     return g[off] == v;
 }
 
-extern "C" void func_001FA100(void* self)
+extern "C" void cOVState_PAUSE_OPTIONS_onPreRender2D(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
@@ -376,7 +376,7 @@ extern "C" void func_001FA100(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FA238);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -457,7 +457,7 @@ static inline void* Sound_A238(int slot)
 }
 
 // Pause-options widget handler: msg 5 opens the sub-state, 6 pops, 9 applies a changed setting.
-extern "C" void func_001FA238(void* self, char* obj, unsigned int msg)
+extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsigned int msg)
 {
     if (obj == 0) {
         return;
@@ -523,20 +523,20 @@ extern "C" void func_001FA238(void* self, char* obj, unsigned int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FA9E0);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onUpdate);
 #ifdef SKIP_ASM
 struct cUIScreen;
 int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* func_0020E900(void* self);
+extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void func_0039F190(void* self, int a1);
 extern void* D_004A2EEC;
 extern char D_0046E050[];
 
-extern "C" void func_001FA9E0(void* self)
+extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(void* self)
 {
-    func_0020E900(self);
+    cOVState_onUpdate(self);
     char* p = (char*)D_004A2EEC;
     if (p != 0) {
         int ok = *(int*)(p + 0x68) == 0 || *(int*)(p + 0x64) == 0;
@@ -552,14 +552,14 @@ extern "C" void func_001FA9E0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FAA78);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetMenu);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_00397870(void* list, int index);
 extern char D_004A24E8[];
 
 // Pause-menu key filter: returns 0x100 for keys 8/9 and for key 6 unless the item is D_004A24E8, else 0x101.
-extern "C" int func_001FAA78(void* self, void* menu, unsigned int key, int index)
+extern "C" int cOVState_PAUSE_OPTIONS_onWidgetMenu(void* self, void* menu, unsigned int key, int index)
 {
     switch (key) {
     case 6: {
@@ -577,18 +577,18 @@ extern "C" int func_001FAA78(void* self, void* menu, unsigned int key, int index
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FAAF0);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetListBox);
 #ifdef SKIP_ASM
-extern "C" int func_001FAAF0(void* self, int a1, int a2)
+extern "C" int cOVState_PAUSE_OPTIONS_onWidgetListBox(void* self, int a1, int a2)
 {
     return a2 != 4 ? 0x101 : 0x100;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FAB08);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetPair);
 #ifdef SKIP_ASM
-extern "C" int func_001FAB08(void* self, int a1, int a2)
+extern "C" int cOVState_PAUSE_OPTIONS_onWidgetPair(void* self, int a1, int a2)
 {
     return a2 != 0 ? 0x101 : 0x100;
 }
@@ -603,7 +603,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void func_001FAFF8(void* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible);
 extern "C" void func_002583A8(void* self, int a1, int a2);
@@ -651,7 +651,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
     if (scr != 0) {
         cUIScreen_playFrame(scr, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046F9E0));
     if (t != 0) {
         cUIText_setUnicodeStringByID(t, GetHashValue32(D_0046F9F0));
@@ -751,7 +751,7 @@ INCLUDE_ASM("fe/ovstatepause", func_001FAF10);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void* func_0020E900(void* self);
+extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void func_001FAFF8(void* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(void* self);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self);
@@ -774,7 +774,7 @@ public:
 
 extern "C" void func_001FAF10(void* self)
 {
-    func_0020E900(self);
+    cOVState_onUpdate(self);
     char* p = (char*)D_004A2EEC;
     if (p != 0 && *(int*)((char*)self + 0x9C) != 0) {
         int timedOut = *(int*)(p + 0x138) <= 0 && *(int*)(p + 0x13C) == 0;
@@ -1096,9 +1096,9 @@ INCLUDE_ASM("fe/ovstatepause", func_001FBBD8);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00146E98(void* iface, int idx);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
 extern "C" void func_0020A6F0(void* self, char* text, char* label);
-extern "C" void func_0039E4C0(void* self);
+extern "C" void cUIState_onGainFocus(void* self);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char D_004A2170[];
 extern char D_0046E4E8[];
@@ -1108,13 +1108,13 @@ extern void* D_004A2EEC;
 extern "C" void func_001FBBD8(void* self)
 {
     char buf[32];
-    func_0039E4C0(self);
+    cUIState_onGainFocus(self);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sprintf(buf, D_004A2170, func_00146E98(iface, 0) + 1);
+    sprintf(buf, D_004A2170, cBENewPlayerInterface_getHumanRider(iface, 0) + 1);
     func_0020A6F0(self, buf, D_0046E4E8);
     if (D_00535C11[0] == 2) {
-        sprintf(buf, D_004A2170, func_00146E98(iface, 1) + 1);
+        sprintf(buf, D_004A2170, cBENewPlayerInterface_getHumanRider(iface, 1) + 1);
         func_0020A6F0(self, buf, D_0046E4E8);
     }
     char* p = (char*)D_004A2EEC;
@@ -1143,11 +1143,11 @@ INCLUDE_ASM("fe/ovstatepause", func_001FBCE0);
 #ifdef SKIP_ASM
 extern void* D_004A2EEC;
 extern int D_004A26FC;
-extern "C" void* func_0020E900(void* self);
+extern "C" void* cOVState_onUpdate(void* self);
 
 extern "C" void func_001FBCE0(void* self)
 {
-    func_0020E900(self);
+    cOVState_onUpdate(self);
     char* p = (char*)D_004A2EEC;
     if (p != 0 && *(int*)(p + 0x64) == 0) {
         *(int*)(p + 0x64) = -1;
@@ -1224,7 +1224,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 
-extern "C" int func_00146E98(void* iface, int idx);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
@@ -1232,7 +1232,7 @@ void cUIText_setAsciiString(cUIText* text, const char* s);
 
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 
-extern "C" void func_003A0E90(void* obj, unsigned short* s);
+extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 
 extern char D_0046E378[];
 
@@ -1241,8 +1241,8 @@ extern char D_004A2138[];
 extern "C" void func_0020D1D8(void* self);
 extern "C" char* func_00144BF0(void* iface);
 extern "C" unsigned short* func_002C2540_BD20(unsigned short* dst, char* src) __asm__("func_002C2540");
-extern "C" int func_002C27C0(unsigned short* buf, unsigned short* fmt, ...);
-extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, ...);
+extern "C" int sprintf2(unsigned short* buf, unsigned short* fmt, ...);
+extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
 extern "C" int func_00238590(void* stats, int id, int kind);
 extern "C" char* func_0014EEC8(void* iface, int id, int a2);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
@@ -1351,8 +1351,8 @@ extern "C" void func_001FBD20(void* self)
         str = lookupString_1FBD20(D_0046E3C0);
         break;
     }
-    func_002C27C0(line, D_004A2140, title, str);
-    func_003A0E90(o, line);
+    sprintf2(line, D_004A2140, title, str);
+    cUIText_setUnicodeString(o, line);
     void* text = getObj_1FBD20(self, D_0046FCA0);
     cUIThing* sub = (cUIThing*)getObj_1FBD20(self, D_0046FCB0);
     if (D_00535BC8[0x49] == 0) {
@@ -1361,12 +1361,12 @@ extern "C" void func_001FBD20(void* self)
             cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(D_0046FCD8));
         } else if (mode == 2) {
             int total = func_00238590(stats, D_00536708[2], 0) + func_00238590(stats, D_00536708[2], 1);
-            int n = total - func_00238590(stats, func_00146E98(iface1, 0), 0);
+            int n = total - func_00238590(stats, cBENewPlayerInterface_getHumanRider(iface1, 0), 0);
             if (n > 0) {
                 unsigned short buf[0x320];
                 unsigned short* fmt = lookupString_1FBD20(D_0046FCF0);
-                func_002C26D0(buf, fmt, n);
-                func_003A0E90(text, buf);
+                sprintf1(buf, fmt, n);
+                cUIText_setUnicodeString(text, buf);
             } else {
                 cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(D_0046E468));
             }
@@ -1430,7 +1430,7 @@ extern "C" void func_001FBD20(void* self)
             char name[0x20];
             char num[0x10];
             int id = D_00536708[k];
-            if (id == func_00146E98(iface1, 0)) {
+            if (id == cBENewPlayerInterface_getHumanRider(iface1, 0)) {
                 k++;
                 id = D_00536708[k];
             }
@@ -1462,13 +1462,13 @@ extern "C" void func_001FBD20(void* self)
             }
         }
     }
-    int idx = func_00146E98(iface1, 0);
+    int idx = cBENewPlayerInterface_getHumanRider(iface1, 0);
     o = getObj_1FBD20(self, D_004A2508);
     cUIText_setAsciiString((cUIText*)o, func_0014EEC8(iface2, cBENewPlayerInterface_getRiderCharID(iface1, idx), func_00147410(iface1, idx)));
     o = getObj_1FBD20(self, D_004A2510);
     if (D_00535BC8[0x49] == 0 && mode == 2) {
         char buf[0x10];
-        int score = func_00238590(stats, func_00146E98(iface1, 0), 0);
+        int score = func_00238590(stats, cBENewPlayerInterface_getHumanRider(iface1, 0), 0);
         sprintf(buf, D_004A2138, score);
         cUIText_setAsciiString((cUIText*)o, buf);
     } else {
@@ -1476,7 +1476,7 @@ extern "C" void func_001FBD20(void* self)
     }
     o = getObj_1FBD20(self, D_004A2518);
     if (D_00535BC8[0x49] == 2) {
-        idx = func_00146E98(iface1, 1);
+        idx = cBENewPlayerInterface_getHumanRider(iface1, 1);
         cUIText_setAsciiString((cUIText*)o, func_0014EEC8(iface2, cBENewPlayerInterface_getRiderCharID(iface1, idx), func_00147410(iface1, idx)));
     } else {
         ((cUIThing*)o)->setVisible(0);
@@ -1495,7 +1495,7 @@ extern "C" void func_001FBD20(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FC768);
 #ifdef SKIP_ASM
-extern "C" void func_0039E4C0(void* self);
+extern "C" void cUIState_onGainFocus(void* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1514,7 +1514,7 @@ extern char D_0046FDD8[];
 
 extern "C" void func_001FC768(void* self)
 {
-    func_0039E4C0(self);
+    cUIState_onGainFocus(self);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int* mode = *(int**)((char*)D_004A28A8 + 0xC0);
     func_0020A6F0(self, D_004A2508, D_0046E4E8);
@@ -1548,17 +1548,17 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" char* func_00144BF0(void* iface);
-extern "C" int func_00146E98(void* iface, int idx);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
 extern "C" char* func_00146F88(void* iface, int idx);
-extern "C" char* func_0014EE58(void* iface, int id);
+extern "C" char* cBECharacterInterface_getShortName(void* iface, int id);
 extern "C" void* func_00155130(void* iface, int idx);
 extern "C" char* func_0020A1A8(void* p);
 extern "C" void func_002C2540(unsigned short* dst, char* src);
-extern "C" int func_002C27C0(unsigned short* buf, unsigned short* fmt, ...);
-extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, ...);
-extern "C" void func_003A0E90(void* obj, unsigned short* s);
+extern "C" int sprintf2(unsigned short* buf, unsigned short* fmt, ...);
+extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern void* D_004A28A8;
@@ -1634,7 +1634,7 @@ extern "C" void func_001FC878(void* self)
     scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(D_0046E378), 0);
     if (scr != 0)
         cUIScreen_playFrame(scr, 0, 0);
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     signed char* gs = (signed char*)D_00535BC8;
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1664,15 +1664,15 @@ extern "C" void func_001FC878(void* self)
     }
     unsigned short* lineFmt = D_004A2140;
     if (mode48 == 6)
-        func_002C27C0(line, D_0046E558, title, str);
+        sprintf2(line, D_0046E558, title, str);
     else
-        func_002C27C0(line, lineFmt, title);
-    func_003A0E90(o, line);
+        sprintf2(line, lineFmt, title);
+    cUIText_setUnicodeString(o, line);
     o = getObj_1FC878(self, D_004A2520);
     if (getField_1FC878((signed char*)D_00535BC8, 0x49) == 2)
         cUIText_setAsciiString((cUIText*)o, func_00146F88(iface1, 0));
     else
-        cUIText_setAsciiString((cUIText*)o, func_0014EE58(iface2, func_00146E98(iface1, 0)));
+        cUIText_setAsciiString((cUIText*)o, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
     cUIText* status = (cUIText*)getObj_1FC878(self, D_004A2528);
     if (mode48 >= 1 && mode48 <= 3)
     {
@@ -1694,10 +1694,10 @@ extern "C" void func_001FC878(void* self)
     if (getField_1FC878((signed char*)D_00535BC8, 0x49) == 2)
         strcpy(rider, func_00146F88(iface1, 1));
     else
-        strcpy(rider, func_0014EE58(iface2, func_00146E98(iface1, 1)));
+        strcpy(rider, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 1)));
     unsigned short* fmt = lookupString_1FC878(D_0046FE18);
-    func_002C26D0(label, fmt, rider);
-    func_003A0E90(getObj_1FC878(self, D_004A2540), label);
+    sprintf1(label, fmt, rider);
+    cUIText_setUnicodeString(getObj_1FC878(self, D_004A2540), label);
     if (mode48 >= 2 && mode48 <= 3)
     {
         cUIState_hideObjSafe(self, D_0046FE28);
@@ -1786,11 +1786,11 @@ INCLUDE_ASM("fe/ovstatepause", func_001FD0D8);
 extern void* D_004A2EEC;
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
-extern "C" void func_0039E4C0(void* self);
+extern "C" void cUIState_onGainFocus(void* self);
 
 extern "C" void func_001FD0D8(void* self)
 {
-    func_0039E4C0(self);
+    cUIState_onGainFocus(self);
     char* p = (char*)D_004A2EEC;
     if (p != 0) {
         *(int*)(p + 0x64) = 0x4B0;
@@ -1821,11 +1821,11 @@ INCLUDE_ASM("fe/ovstatepause", func_001FD150);
 #ifdef SKIP_ASM
 extern void* D_004A2EEC;
 extern int D_004A26FC;
-extern "C" void* func_0020E900(void* self);
+extern "C" void* cOVState_onUpdate(void* self);
 
 extern "C" void func_001FD150(void* self)
 {
-    func_0020E900(self);
+    cOVState_onUpdate(self);
     char* p = (char*)D_004A2EEC;
     if (p != 0 && *(int*)(p + 0x64) == 0) {
         *(int*)(p + 0x64) = -1;
@@ -1873,7 +1873,7 @@ INCLUDE_ASM("fe/ovstatepause", func_001FD268);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
 extern char D_0046FF58[];
@@ -1892,7 +1892,7 @@ extern "C" void func_001FD268(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     func_00294F78(func_0028B180(), 0xE);
 }
 #endif
@@ -1902,13 +1902,13 @@ INCLUDE_ASM("fe/ovstatepause", func_001FD320);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getCharacterID(int idx);
-extern "C" int func_00144BE0(void* iface);
+extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" int func_00145750(void* iface);
 extern "C" char* func_0014EEC8(void* iface, int id, int a2);
 extern "C" int func_00146A70(void* iface, int a1, int charId, int item);
 extern "C" int func_00157B08(void* iface, int a1, int a2);
 extern "C" void* func_004139F8(float x);
-extern "C" void func_003A0D00(void* obj, unsigned short* s);
+extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
 // func_002C2540 returns dst (the unit declares it void)
 unsigned short* func_002C2540_r(unsigned short* dst, char* src) __asm__("func_002C2540");
 extern char D_0046E5F0[];
@@ -1967,20 +1967,20 @@ extern "C" int func_001FD320(void* self, void* msg)
         char* stats = *(char**)((char*)D_004A28A8 + 0xC0);
         int mode = getField_1FD320((signed char*)D_00535BC8, 0x4A);
         void* o = getObj_1FD320(self, D_004A2520);
-        cUIText_setAsciiString((cUIText*)o, func_0014EE58(iface2, func_00146E98(iface1, 0)));
+        cUIText_setAsciiString((cUIText*)o, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         o = getObj_1FD320(self, D_004A21B8);
         switch (mode) {
         case 4:
             func_002C2540_r(title, func_00144BF0(iface0));
             func_002C2540_r(fmt, (char*)D_004A2140);
-            func_002C26D0(out, fmt, title, lookupString_1FD320(D_0046E548));
-            func_003A0E90(o, out);
+            sprintf1(out, fmt, title, lookupString_1FD320(D_0046E548));
+            cUIText_setUnicodeString(o, out);
             break;
         case 5:
             func_002C2540_r(title, func_00144BF0(iface0));
             func_002C2540_r(fmt, (char*)D_0046E558);
-            func_002C26D0(out, fmt, title);
-            func_003A0E90(o, out);
+            sprintf1(out, fmt, title);
+            cUIText_setUnicodeString(o, out);
             break;
         case 6:
         case 7:
@@ -1988,7 +1988,7 @@ extern "C" int func_001FD320(void* self, void* msg)
         case 9:
         case 10:
         case 11:
-            func_003A0E90(o, (unsigned short*)func_001FD190(mode));
+            cUIText_setUnicodeString(o, (unsigned short*)func_001FD190(mode));
             break;
         }
         cUIText* statusA = (cUIText*)getObj_1FD320(self, D_004A2528);
@@ -2003,16 +2003,16 @@ extern "C" int func_001FD320(void* self, void* msg)
             lineFmt = lookupString_1FD320(D_0046FF80);
         else
             lineFmt = lookupString_1FD320(D_0046FF98);
-        func_002C26D0(line, lineFmt, name);
-        func_003A0D00(getObj_1FD320(self, D_004A2520), line);
+        sprintf1(line, lineFmt, name);
+        cUIText_setUnicodeStringWrap(getObj_1FD320(self, D_004A2520), line);
         switch (mode) {
         case 4:
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(D_0046FE38));
             cUIText_setUnicodeStringByID(statusB, GetHashValue32(D_0046FFB0));
             if (getField_1FD320((signed char*)D_00535BC8, 0x49) == 1
-                || (func_00144BE0(iface0) == 0xE && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 6))
-                || (func_00144BE0(iface0) == 0xF && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 7))
-                || (func_00144BE0(iface0) == 0x10 && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 8))) {
+                || (cBENewRaceInterface_getLocationID(iface0) == 0xE && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 6))
+                || (cBENewRaceInterface_getLocationID(iface0) == 0xF && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 7))
+                || (cBENewRaceInterface_getLocationID(iface0) == 0x10 && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 8))) {
                 cUIState_hideObjSafe(self, D_004A2530);
                 cUIState_hideObjSafe(self, D_004A2538);
             }
@@ -2022,9 +2022,9 @@ extern "C" int func_001FD320(void* self, void* msg)
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(D_0046FFE0));
             cUIText_setUnicodeStringByID(statusB, GetHashValue32(D_00470000));
             if (getField_1FD320((signed char*)D_00535BC8, 0x49) == 1
-                || (func_00144BE0(iface0) == 0xE && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 9))
-                || (func_00144BE0(iface0) == 0xF && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 10))
-                || (func_00144BE0(iface0) == 0x10 && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 11))) {
+                || (cBENewRaceInterface_getLocationID(iface0) == 0xE && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 9))
+                || (cBENewRaceInterface_getLocationID(iface0) == 0xF && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 10))
+                || (cBENewRaceInterface_getLocationID(iface0) == 0x10 && !func_00146A70(iface1, 0, cBELibrary_getCharacterID(0), 11))) {
                 cUIState_hideObjSafe(self, D_004A2530);
                 cUIState_hideObjSafe(self, D_004A2538);
             }
@@ -2039,8 +2039,8 @@ extern "C" int func_001FD320(void* self, void* msg)
             func_002C2540_r(num, func_0020A1A8(r));
             unsigned short* f = lookupString_1FD320(D_0046E918);
             func_002C2540_r(title, D_004A2550);
-            func_002C26D0(text, title, f, num);
-            func_003A0D00(o, text);
+            sprintf1(text, title, f, num);
+            cUIText_setUnicodeStringWrap(o, text);
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(D_00470018));
             if (mode == 8 || (mode == 7 && !func_00157B08(iface13, 0, 2)) || (mode == 6 && !func_00157B08(iface13, 0, 1)))
                 cUIText_setUnicodeStringByID(statusB, GetHashValue32(D_00470030));
@@ -2054,8 +2054,8 @@ extern "C" int func_001FD320(void* self, void* msg)
             int n = *(int*)(stats + 0x7C);
             unsigned short* f = lookupString_1FD320(D_0046E950);
             func_002C2540_r(title, D_004A2558);
-            func_002C26D0(num, title, f, n);
-            func_003A0D00(getObj_1FD320(self, D_0046FFD0), num);
+            sprintf1(num, title, f, n);
+            cUIText_setUnicodeStringWrap(getObj_1FD320(self, D_0046FFD0), num);
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(D_00470068));
             if (mode == 11 || (mode == 10 && !func_00157B08(iface13, 0, 2)) || (mode == 9 && !func_00157B08(iface13, 0, 1)))
                 cUIText_setUnicodeStringByID(statusB, GetHashValue32(D_00470080));
@@ -2134,7 +2134,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cUIEngine_addScreenByHashName_DC30(void* engine, void* owner, int hash, int a3) __asm__("cUIEngine_addScreenByHashName");
 extern "C" void* cUIScreen_playFrame_DC30(void* self, unsigned short frame, int flag) __asm__("cUIScreen_playFrame");
 extern "C" void* cUIScreen_getObjectByHashName_DC30(void* self, int hash) __asm__("cUIScreen_getObjectByHashName");
-extern "C" void func_0020A380_DC30(void* self) __asm__("func_0020A380");
+extern "C" void cOVState_onCreateScreen_DC30(void* self) __asm__("cOVState_onCreateScreen");
 extern int D_004A2A50;
 extern int D_004A2A54;
 extern int D_005366E8[];
@@ -2200,7 +2200,7 @@ extern "C" void func_001FDC30(char* self)
     }
     D_005366E8[++D_004A2A54] = 2;
     D_004A2A50 = D_004428F0[2];
-    func_0020A380_DC30(self);
+    cOVState_onCreateScreen_DC30(self);
 }
 #endif
 
@@ -2410,11 +2410,11 @@ public:
 };
 
 extern "C" void func_001D8240();
-extern "C" int func_001D97E0(void* self, void* mp, int dev, int a3);
+extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* mp, int dev, int a3);
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsigned short* buf, int len);
-extern "C" void func_003A0D00(void* obj, unsigned short* s);
-extern "C" void func_003A0E90(void* obj, unsigned short* s);
-extern "C" void* func_00227F80(void* self);
+extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
+extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
+extern "C" void* cSSXApp_getMCManager(void* self);
 extern void* D_004A28A8;
 extern char D_004700F0[];
 extern char D_00470130[];
@@ -2432,7 +2432,7 @@ extern "C" void func_001FDF40(cState_DF40* self)
 {
     unsigned short buf[0x320];
     char name[0x40];
-    char* mp = (char*)func_00227F80(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
     if (self->v42()) {
         if (!(*(cMCSub_DF40**)(mp + 0x434))->v53()) {
             func_001D8240();
@@ -2444,10 +2444,10 @@ extern "C" void func_001FDF40(cState_DF40* self)
         int sel = 0;
         self->v43();
         cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 0x320);
-        func_003A0D00(getObj_DF40(self, D_00470130), buf);
+        cUIText_setUnicodeStringWrap(getObj_DF40(self, D_00470130), buf);
         cUIObj_DF40* o = getObj_DF40(self, D_004700F0);
         (*(cMCSub_DF40**)(mp + 0x434))->v64(buf);
-        func_003A0E90(o, buf);
+        cUIText_setUnicodeString(o, buf);
         o->v09(0);
         char* g = *(char**)((char*)D_004A28A8 + 0x8C);
         sVE_DF40* vt = *(sVE_DF40**)(g + 4);
@@ -2457,7 +2457,7 @@ extern "C" void func_001FDF40(cState_DF40* self)
             sprintf(name, D_00470148, i);
             o = getObj_DF40(self, name);
             (*(cMCSub_DF40**)(mp + 0x434))->v14(i - 1, (char*)self + 0x230);
-            func_003A0E90(o, (unsigned short*)((char*)self + 0x230));
+            cUIText_setUnicodeString(o, (unsigned short*)((char*)self + 0x230));
             if (!(*(cMCSub_DF40**)(mp + 0x434))->v67(i - 1) && !(*(cMCSub_DF40**)(mp + 0x434))->v66(i - 1)
                 && (*(cMCSub_DF40**)(mp + 0x434))->v55()) {
                 if (sel == 0) {
@@ -2481,11 +2481,11 @@ extern "C" void func_001FDF40(cState_DF40* self)
                 o->v08(1);
             }
         }
-        if (func_001D97E0(self, mp, *(int*)(mp + 0x428), 1) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
             getObj_DF40(self, D_00470168)->v09(0);
         else
             getObj_DF40(self, D_00470168)->v09(1);
-        if (func_001D97E0(self, mp, *(int*)(mp + 0x428), 0) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 0) == -1)
             getObj_DF40(self, D_00470178)->v09(0);
         else
             getObj_DF40(self, D_00470178)->v09(1);
@@ -2600,11 +2600,11 @@ extern "C" void func_001FE648(void* self, int a1, bool on)
 INCLUDE_ASM("fe/ovstatepause", func_001FE6E8);
 #ifdef SKIP_ASM
 extern void* D_004A28A8;
-extern "C" void* func_00227F80(void* self);
+extern "C" void* cSSXApp_getMCManager(void* self);
 extern "C" void func_0023CAE8(void* self, int a, int b);
 void func_00270ED8(void* self);
-// PORT: the unit declares func_0023D570 as returning void*; this caller ignores the result (void view by asm label).
-extern "C" void func_0023D570_v(void* self, int mode) __asm__("func_0023D570");
+// PORT: the unit declares cMCOverlayManager_SetAction as returning void*; this caller ignores the result (void view by asm label).
+extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMCOverlayManager_SetAction");
 
 class cMovieSub434_1FE6E8 {
 public:
@@ -2696,7 +2696,7 @@ extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
         int one = 1;
         if (*(int*)((char*)self + 0x1C0) == 6)
             return;
-        char* mp = (char*)func_00227F80(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
         int st = *(int*)((char*)self + 0x214);
         if (st != 3)
             return;
@@ -2717,7 +2717,7 @@ extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
     }
     case 6:
     {
-        char* mp = (char*)func_00227F80(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
         if (*(int*)((char*)self + 0x1A8) == 1)
             return;
         int s = *(int*)((char*)self + 0x1C0);
@@ -2734,7 +2734,7 @@ extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
         int one = 1;
         if (*(int*)((char*)self + 0x1C0) == 6)
             return;
-        char* mp = (char*)func_00227F80(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
         if (!(*(cMovieSub434_1FE6E8**)(mp + 0x434))->v54(*(int*)(mp + 0x428)))
             return;
         int v = *(int*)((char*)msg + 0x18);
@@ -2747,7 +2747,7 @@ extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
             return;
         *(int*)((char*)self + 0x1A8) = s;
         *(int*)((char*)self + 0x1C0) = 4;
-        func_0023D570_v(mp, 0);
+        cMCOverlayManager_SetAction_v(mp, 0);
         ((cMoviePlayer_1FE6E8*)mp)->v01(0x18);
         break;
     }
@@ -2798,7 +2798,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* s);
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char D_0046E378[];
 extern char D_0046E9F8[];
@@ -2863,7 +2863,7 @@ extern "C" void func_001FE9A8(char* self)
     void* s2 = cUIEngine_addScreenByHashName(engine_1FE9A8(self), self, GetHashValue32(D_0046E378), 0);
     if (s2 != 0)
         cUIScreen_playFrame(s2, 0, 0);
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
 }
 #endif
 
@@ -3060,11 +3060,11 @@ public:
 };
 
 extern "C" void func_001D8240();
-extern "C" int func_001D97E0(void* self, void* mp, int dev, int a3);
+extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* mp, int dev, int a3);
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsigned short* buf, int len);
-extern "C" void func_003A0D00(void* obj, unsigned short* s);
-extern "C" void func_003A0E90(void* obj, unsigned short* s);
-extern "C" void* func_00227F80(void* self);
+extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
+extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
+extern "C" void* cSSXApp_getMCManager(void* self);
 extern void* D_004A28A8;
 extern char D_004700F0[];
 extern char D_00470130[];
@@ -3082,7 +3082,7 @@ extern "C" void func_001FECA0(cState_ECA0* self)
 {
     unsigned short buf[0x320];
     char name[0x40];
-    char* mp = (char*)func_00227F80(D_004A28A8);
+    char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
     if (self->v42()) {
         if (!(*(cMCSub_ECA0**)(mp + 0x434))->v53()) {
             func_001D8240();
@@ -3093,10 +3093,10 @@ extern "C" void func_001FECA0(cState_ECA0* self)
     if (self->v42()) {
         self->v43();
         cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 0x320);
-        func_003A0D00(getObj_ECA0(self, D_00470130), buf);
+        cUIText_setUnicodeStringWrap(getObj_ECA0(self, D_00470130), buf);
         cUIObj_ECA0* o = getObj_ECA0(self, D_004700F0);
         (*(cMCSub_ECA0**)(mp + 0x434))->v64(buf);
-        func_003A0E90(o, buf);
+        cUIText_setUnicodeString(o, buf);
         o->v09(0);
         char* g = *(char**)((char*)D_004A28A8 + 0x8C);
         sVE_ECA0* vt = *(sVE_ECA0**)(g + 4);
@@ -3105,7 +3105,7 @@ extern "C" void func_001FECA0(cState_ECA0* self)
         sprintf(name, D_00470148, 1);
         o = getObj_ECA0(self, name);
         (*(cMCSub_ECA0**)(mp + 0x434))->v14(0, (char*)self + 0x230);
-        func_003A0E90(o, (unsigned short*)((char*)self + 0x230));
+        cUIText_setUnicodeString(o, (unsigned short*)((char*)self + 0x230));
         if (!(*(cMCSub_ECA0**)(mp + 0x434))->v67(0) && !(*(cMCSub_ECA0**)(mp + 0x434))->v66(0)
             && (*(cMCSub_ECA0**)(mp + 0x434))->v55()) {
             o->v25(0);
@@ -3122,11 +3122,11 @@ extern "C" void func_001FECA0(cState_ECA0* self)
             o->v25(1);
             o->v08(1);
         }
-        if (func_001D97E0(self, mp, *(int*)(mp + 0x428), 1) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
             getObj_ECA0(self, D_00470168)->v09(0);
         else
             getObj_ECA0(self, D_00470168)->v09(1);
-        if (func_001D97E0(self, mp, *(int*)(mp + 0x428), 0) == -1)
+        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 0) == -1)
             getObj_ECA0(self, D_00470178)->v09(0);
         else
             getObj_ECA0(self, D_00470178)->v09(1);
@@ -3239,10 +3239,10 @@ extern "C" void func_001FF310(void* self, int a1, bool on)
 INCLUDE_ASM("fe/ovstatepause", func_001FF3B0);
 #ifdef SKIP_ASM
 extern void* D_004A28A8;
-extern "C" void* func_00227F80(void* self);
+extern "C" void* cSSXApp_getMCManager(void* self);
 extern "C" void func_0023CAE8(void* self, int a, int b);
-// PORT: the unit declares func_0023D570 as returning void*; this caller ignores the result (void view by asm label).
-extern "C" void func_0023D570_v(void* self, int mode) __asm__("func_0023D570");
+// PORT: the unit declares cMCOverlayManager_SetAction as returning void*; this caller ignores the result (void view by asm label).
+extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMCOverlayManager_SetAction");
 
 class cMovieSub434_1FF3B0 {
 public:
@@ -3334,7 +3334,7 @@ extern "C" void func_001FF3B0(void* self, void* msg, unsigned int type)
         int one = 1;
         if (*(int*)((char*)self + 0x1C0) == 6)
             return;
-        char* mp = (char*)func_00227F80(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
         int st = *(int*)((char*)self + 0x214);
         if (st != 3)
             return;
@@ -3350,7 +3350,7 @@ extern "C" void func_001FF3B0(void* self, void* msg, unsigned int type)
     }
     case 6:
     {
-        char* mp = (char*)func_00227F80(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
         if (*(int*)((char*)self + 0x1A8) == 1)
             return;
         int s = *(int*)((char*)self + 0x1C0);
@@ -3367,7 +3367,7 @@ extern "C" void func_001FF3B0(void* self, void* msg, unsigned int type)
         int one = 1;
         if (*(int*)((char*)self + 0x1C0) == 6)
             return;
-        char* mp = (char*)func_00227F80(D_004A28A8);
+        char* mp = (char*)cSSXApp_getMCManager(D_004A28A8);
         if (!(*(cMovieSub434_1FF3B0**)(mp + 0x434))->v54(*(int*)(mp + 0x428)))
             return;
         int v = *(int*)((char*)msg + 0x18);
@@ -3380,7 +3380,7 @@ extern "C" void func_001FF3B0(void* self, void* msg, unsigned int type)
             return;
         *(int*)((char*)self + 0x1A8) = s;
         *(int*)((char*)self + 0x1C0) = 4;
-        func_0023D570_v(mp, 0);
+        cMCOverlayManager_SetAction_v(mp, 0);
         ((cMoviePlayer_1FF3B0*)mp)->v01(0x18);
         break;
     }
@@ -3395,9 +3395,9 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_0020A380(void* self);
-extern "C" void func_001FF7B8(void* self, int a1, int a2);
-extern "C" void func_0039B760(void* self, unsigned char a1);
+extern "C" void cOVState_onCreateScreen(void* self);
+extern "C" void cOVState_REWARDS_checkRewardList(void* self, int a1, int a2);
+extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern char D_004703C8[];
 extern char D_0046E378[];
@@ -3418,14 +3418,14 @@ extern "C" void cOVState_REWARDS_onCreateScreen(void* self)
     if (bg != 0) {
         cUIScreen_playFrame(bg, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     *(int*)((char*)self + 0x9C) = 0;
-    func_001FF7B8(self, 0, -1);
+    cOVState_REWARDS_checkRewardList(self, 0, -1);
     char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E818));
     if (menu != 0) {
         *(int*)(menu + 0x14) &= ~0x80;
         if (*(unsigned char*)(menu + 0x96) < *(int*)((char*)self + 0x9C)) {
-            func_0039B760(menu, *(int*)((char*)self + 0x9C));
+            cUIMenu_setScrollableMenu(menu, *(int*)((char*)self + 0x9C));
         } else {
             *(int*)(menu + 0x90) |= 8;
         }
@@ -3436,49 +3436,49 @@ extern "C" void cOVState_REWARDS_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FF6D0);
+INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onGainFocus);
 #ifdef SKIP_ASM
-extern "C" void func_0039E4C0(void* self);
-extern "C" void func_001FFD08(void* self, int a1);
+extern "C" void cUIState_onGainFocus(void* self);
+extern "C" void cOVState_REWARDS_updateMenu(void* self, int a1);
 
-extern "C" void func_001FF6D0(void* self)
+extern "C" void cOVState_REWARDS_onGainFocus(void* self)
 {
-    func_0039E4C0(self);
-    func_001FFD08(self, 0);
+    cUIState_onGainFocus(self);
+    cOVState_REWARDS_updateMenu(self, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FF700);
+INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onWidgetEvent);
 #ifdef SKIP_ASM
 extern int D_004A26FC;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00158E30(void* iface);
+extern "C" void cBERewardInterface_clearUserAwards(void* iface);
 
-extern "C" void func_001FF700(void* self, void* a1, int key)
+extern "C" void cOVState_REWARDS_onWidgetEvent(void* self, void* a1, int key)
 {
     if (a1 != 0) {
         if (key == 5) {
             D_004A26FC = 1;
-            func_00158E30(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+            cBERewardInterface_clearUserAwards(cBE_getInterface_Fv(cBE_getBE(), 0xD));
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FF748);
+INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onWidgetMenu);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_001FFD08(void* self, int a);
+extern "C" void cOVState_REWARDS_updateMenu(void* self, int a);
 
-extern "C" int func_001FF748(void* self, int id, int event, int arg)
+extern "C" int cOVState_REWARDS_onWidgetMenu(void* self, int id, int event, int arg)
 {
     switch (event) {
     case 4:
-        func_001FFD08(self, arg);
+        cOVState_REWARDS_updateMenu(self, arg);
         return 1;
     case 7: case 8: case 9:
         return 0;
@@ -3494,14 +3494,14 @@ extern "C" int func_001FF748(void* self, int id, int event, int arg)
 }
 #endif
 
-INCLUDE_ASM("fe/ovstatepause", func_001FF7B8);
+INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_checkRewardList);
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FFD08);
+INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_updateMenu);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_001FF7B8_1FFD08(char* self, unsigned short* out, int idx) __asm__("func_001FF7B8");
+extern "C" void cOVState_REWARDS_checkRewardList_1FFD08(char* self, unsigned short* out, int idx) __asm__("cOVState_REWARDS_checkRewardList");
 
 struct sName_1FFD08 {
     char c[2];
@@ -3542,7 +3542,7 @@ public:
     virtual void v25(int on);
 };
 
-extern "C" void func_001FFD08(void* vself, int base)
+extern "C" void cOVState_REWARDS_updateMenu(void* vself, int base)
 {
     char* self = (char*)vself;
     sName_1FFD08 name = *(sName_1FFD08*)D_004A2580;
@@ -3550,10 +3550,10 @@ extern "C" void func_001FFD08(void* vself, int base)
     int i;
     for (i = 0; i < 9; i++) {
         name.c[0] = '0' + i;
-        func_001FF7B8_1FFD08(self, text, i + base);
+        cOVState_REWARDS_checkRewardList_1FFD08(self, text, i + base);
         cUIObj_1FFD08* o = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name.c));
         if (o != 0) {
-            func_003A0E90(o, text);
+            cUIText_setUnicodeString(o, text);
         }
         if (*(int*)(self + 0x9C) < 10) {
             sCol_1FFD08 c;
@@ -3600,16 +3600,16 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" char* func_00144BF0(void* iface);
-extern "C" int func_00146E98(void* iface, int idx);
-extern "C" char* func_0014EE58(void* iface, int id);
+extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
+extern "C" char* cBECharacterInterface_getShortName(void* iface, int id);
 extern "C" int func_001FD190(int id);
-extern "C" void func_002C2508(unsigned short* dst, unsigned short* src);
+extern "C" void strcpy1(unsigned short* dst, unsigned short* src);
 extern "C" void func_002C2540(unsigned short* dst, char* src);
-extern "C" int func_002C27C0(unsigned short* buf, unsigned short* fmt, ...);
+extern "C" int sprintf2(unsigned short* buf, unsigned short* fmt, ...);
 // Called for its side effect here; the unit declares it int-returning.
-void func_002C27C0_void(unsigned short* buf, unsigned short* fmt, ...) __asm__("func_002C27C0");
-extern "C" void func_002C26D0(unsigned short* dst, unsigned short* fmt, ...);
-extern "C" void func_003A0E90(void* obj, unsigned short* s);
+void sprintf2_void(unsigned short* buf, unsigned short* fmt, ...) __asm__("sprintf2");
+extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
+extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern void* D_004A28A8;
 extern char D_00535BC8[];
 extern char D_0046F520[];
@@ -3649,11 +3649,11 @@ extern "C" int cOVState_REWARDS_onGainTransition(void* self)
         int kind = g[0x4A];
         switch (kind) {
         case 6 ... 11:
-            func_002C2508(result, (unsigned short*)func_001FD190(kind));
+            strcpy1(result, (unsigned short*)func_001FD190(kind));
             break;
         case 5:
             func_002C2540(fmt, D_0046F520);
-            func_002C26D0(result, fmt, func_00144BF0(race));
+            sprintf1(result, fmt, func_00144BF0(race));
             break;
         default: {
             unsigned short* label = 0;
@@ -3673,17 +3673,17 @@ extern "C" int cOVState_REWARDS_onGainTransition(void* self)
                 break;
             }
             func_002C2540(fmt, D_004A2400);
-            func_002C26D0(result, fmt, func_00144BF0(race), label);
+            sprintf1(result, fmt, func_00144BF0(race), label);
             break;
         }
         }
-        func_003A0E90(cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00470468)), result);
-        int id = func_00146E98(player, 0);
+        cUIText_setUnicodeString(cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00470468)), result);
+        int id = cBENewPlayerInterface_getHumanRider(player, 0);
         void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2588));
-        func_002C27C0_void(name, D_004A2590, func_0014EE58(board, id));
+        sprintf2_void(name, D_004A2590, cBECharacterInterface_getShortName(board, id));
         unsigned short* text = lookupString_1FFF78(D_00470480);
-        func_002C26D0(reward, text, name);
-        func_003A0E90(obj, reward);
+        sprintf1(reward, text, name);
+        cUIText_setUnicodeString(obj, reward);
     }
     *(int*)((char*)self + 0x48) = 1;
     return 0;

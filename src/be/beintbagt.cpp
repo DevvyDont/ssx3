@@ -300,7 +300,7 @@ INCLUDE_ASM("be/beintbagt", func_00150198);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPad20;
 extern sPad20 D_0045AEB8;
-extern "C" int func_0014A0B0(int rider);
+extern "C" int cBELibrary_getCheatCharacterID(int rider);
 extern "C" int func_0014FEA8(void* self, int rider, int idx, int second);
 
 struct sBagtAnim_150198
@@ -321,7 +321,7 @@ extern sBagtCat_150198 D_0045AEB8_150198[] __asm__("D_0045AEB8");
 
 extern "C" int func_00150198(void* self, int rider, int idx, int second)
 {
-    int ch = func_0014A0B0(rider);
+    int ch = cBELibrary_getCheatCharacterID(rider);
     if (ch != 0)
     switch (ch)
     {
@@ -350,7 +350,7 @@ INCLUDE_ASM("be/beintbagt", func_001502C8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPad20;
 extern sPad20 D_0045AEB8;
-extern "C" int func_0014A0B0(int rider);
+extern "C" int cBELibrary_getCheatCharacterID(int rider);
 extern "C" int func_0014FEA8(void* self, int rider, int idx, int second);
 
 struct sBagtAnim_1502C8
@@ -371,7 +371,7 @@ extern sBagtCat_1502C8 D_0045AEB8_1502C8[] __asm__("D_0045AEB8");
 
 extern "C" int func_001502C8(void* self, int rider, int idx, int second)
 {
-    int ch = func_0014A0B0(rider);
+    int ch = cBELibrary_getCheatCharacterID(rider);
     if (ch != 0)
     switch (ch)
     {
@@ -400,7 +400,7 @@ INCLUDE_ASM("be/beintbagt", func_001503F8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPad20;
 extern sPad20 D_0045AEB8;
-extern "C" int func_0014A0B0(int rider);
+extern "C" int cBELibrary_getCheatCharacterID(int rider);
 extern "C" int func_0014FEA8(void* self, int rider, int idx, int second);
 
 struct sBagtAnim_1503F8
@@ -421,7 +421,7 @@ extern sBagtCat_1503F8 D_0045AEB8_1503F8[] __asm__("D_0045AEB8");
 
 extern "C" int func_001503F8(void* self, int rider, int idx, int second)
 {
-    int ch = func_0014A0B0(rider);
+    int ch = cBELibrary_getCheatCharacterID(rider);
     if (ch != 0)
     switch (ch)
     {
@@ -491,12 +491,12 @@ struct sBagtDef0558 {
     int pad_0x10;
 };
 extern const sBagtDef0558 D_0045AEB8_bagt[] __asm__("D_0045AEB8");
-extern "C" void func_003E6448(void*, int, int);
+extern "C" void MEM_fill(void*, int, int);
 
 extern "C" void func_00150558(int mode, sBagtSlot0558* e)
 {
     int i;
-    func_003E6448(e, 0, 0x5A);
+    MEM_fill(e, 0, 0x5A);
     switch (mode) {
     case 0:
         e[0].a = 1; e[0].b = 3; e[1].a = 0; e[1].b = 2; e[2].a = 0; e[2].b = 2;

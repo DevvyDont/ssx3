@@ -10,13 +10,13 @@
 // What the real class looked like (evidence, not yet modelled):
 //   - Bases: cBeing (primary; its vptr is at 0x6C0, after cBeing's data) and cScriptObjRider
 //     (-> cScriptEntity, cScriptObject), whose vptrs are at 0x6D0 and 0x6E8. Source: the three
-//     vtables the destructor (func_0011B978) installs, _vt$6cRider / $15cScriptObjRider / $13cScriptObject.
-//   - cRider is a *virtual* base of cPlayer (at cPlayer+0xE10, see func_00125C70) and of about 30
+//     vtables the destructor (cRider__cRider) installs, _vt$6cRider / $15cScriptObjRider / $13cScriptObject.
+//   - cRider is a *virtual* base of cPlayer (at cPlayer+0xE10, see cPlayer_cPlayer) and of about 30
 //     rider components (cGroundMotion, cRailslideMotion, cWipeoutMotion, cHandplantMotion, cTrickBoostFX,
 //     cAirStreamerFX, ...): their preview vtables are named _vt$<Component>$6cRider.
 //
 // Field names come from, in order of strength:
-//   [R] a retail accessor body (e.g. func_00140B80 = cRider::getAIIndex: lw v0,0x86C(a0));
+//   [R] a retail accessor body (e.g. cRider_getAIIndex = cRider::getAIIndex: lw v0,0x86C(a0));
 //   [P] a preview-build accessor, carried to retail by tools/layout_xlate.py ("seen" = the offset pair
 //       was observed in aligned preview/retail code; "bracketed" = between two observed pairs with the
 //       same shift) and confirmed by how retail code uses the field;
@@ -38,7 +38,7 @@ class cRiderHandler;
 // Virtual slots of cRider's primary vtable (_vt$6cRider, retail D_00459C18), as used by
 // `vt[k].fn(sub + vt[k].delta)` with sub = &self->mVtbl. Names from the preview vtable.
 enum {
-    kRiderVt_delete = 1,          // deleting destructor (func_0011B978)
+    kRiderVt_delete = 1,          // deleting destructor (cRider__cRider)
     kRiderVt_getVelocity = 2,
     kRiderVt_isIntersecting = 3,
     kRiderVt_applyBoost = 4,      // (const t4Vector* impulse): func_001250A8
@@ -78,7 +78,7 @@ struct sRiderPair {
 
 struct cRider {
     /* 0x000 */ sRiderPair mRelations[6]; // [X] [U] per other rider, by its mAIIndex (func_00107888)
-    /* 0x0D8 */ int unk_0D8; // set to -1, then passed to func_00117540(mMetrix, v) (func_0011D390)
+    /* 0x0D8 */ int unk_0D8; // set to -1, then passed to cRiderMetrix_reset(mMetrix, v) (func_0011D390)
     /* 0x0DC */ float mRubberBandBehind; // [X] cleared on reset (func_0011D390); rubber-band threshold, c.lt.s in func_0010D938, func_0010DEF0
     /* 0x0E0 */ float mRubberBandAhead; // [X] cleared on reset (func_0011D390); rubber-band threshold, c.lt.s in func_0010D990
     /* 0x0E4 */ char unk_0E4[0x8];
@@ -210,9 +210,9 @@ struct cRider {
     /* 0x860 */ void* mOverlapList; // [X]
     /* 0x864 */ void* mLineHint; // [X]
     /* 0x868 */ void* mWallHint; // [X]
-    /* 0x86C */ int mAIIndex; // [R] getAIIndex (func_00140B80); also the character/stat lookup index
+    /* 0x86C */ int mAIIndex; // [R] getAIIndex (cRider_getAIIndex); also the character/stat lookup index
     /* 0x870 */ int mViewIndex; // [P] getViewIndex (bracketed +0x114); < 2 = has a split-screen view
-    /* 0x874 */ int mIsHuman; // [R] isHuman (func_00140BC0); isComputer = !mIsHuman
+    /* 0x874 */ int mIsHuman; // [R] isHuman (cRider_isHuman); isComputer = !mIsHuman
     /* 0x878 */ int mIsActor; // [P] isActor (bracketed +0x114)
     /* 0x87C */ int mIsLocal; // [P] isLocal (bracketed +0x114)
     /* 0x880 */ int mLoadStep; // [X] init state; 7 = initialised (cRider_initOnce)

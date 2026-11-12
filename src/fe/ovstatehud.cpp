@@ -21,7 +21,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0020A380(void* self);
+extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void* func_0028B180();
@@ -47,7 +47,7 @@ extern "C" void cOVStateHiScoreList_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0020A380(self);
+    cOVState_onCreateScreen(self);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     switch (D_00535C10[0]) {
     case 0: case 5:
@@ -81,7 +81,7 @@ struct sObj001E9130 {
     sVEntry001E9130* vt;
 };
 
-extern "C" void func_0039F400(void* list, void* item);
+extern "C" void cUIStateStack_push(void* list, void* item);
 
 extern "C" void func_001E9130(void* self, void* item, int a2)
 {
@@ -91,7 +91,7 @@ extern "C" void func_001E9130(void* self, void* item, int a2)
             sObj001E9130* o = **(sObj001E9130***)((char*)self + 0x10);
             r = o->vt[4].fn((char*)o + o->vt[4].delta, self, 1);
         }
-        func_0039F400((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
     }
 }
 #endif
@@ -305,11 +305,11 @@ extern "C" void func_001E94E0(void* self, char* str, int a2, sVec2f* pos)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/ovstatehud", func_001E9540);
 #ifdef SKIP_ASM
-extern "C" unsigned short* func_002C2508(unsigned short* dst, unsigned short* src);
+extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src);
 extern "C" void func_001E92A8(void* self);
 extern "C" void func_001E9540(void* self, unsigned short* str, int a2, sVec2f* pos)
 {
-    func_002C2508((unsigned short*)((char*)self + 0x4C), str);
+    strcpy1((unsigned short*)((char*)self + 0x4C), str);
     *(int*)((char*)self + 0x8) = a2;
     *(sVec2f*)((char*)self + 0x10) = *pos;
     func_001E92A8(self);
@@ -1026,17 +1026,17 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
 }
 #endif
 
-INCLUDE_ASM("fe/ovstatehud", func_001EA930);
+INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_onUpdate);
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001EC1F0);
+INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_handleEvent);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" unsigned short* func_002C2508(unsigned short* dst, unsigned short* src);
+extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src);
 extern "C" void* func_002B40F0(void* self, int i);
 
 // HUD overlay message handler: flags, counters, the two message strings and the track-name hash.
-extern "C" int func_001EC1F0(char* self, int msg, unsigned short* str)
+extern "C" int cOVStateHUD1P_handleEvent(char* self, int msg, unsigned short* str)
 {
     switch (msg) {
     case 0:
@@ -1059,7 +1059,7 @@ extern "C" int func_001EC1F0(char* self, int msg, unsigned short* str)
     case 12:
         *(unsigned int*)(self + 0x3CC) |= 0x20000;
         *(int*)(self + 0xA44) = 0;
-        func_002C2508((unsigned short*)(self + 0x944), str);
+        strcpy1((unsigned short*)(self + 0x944), str);
         break;
     case 13:
         *(unsigned short*)(self + 0x944) = 0;
@@ -1068,7 +1068,7 @@ extern "C" int func_001EC1F0(char* self, int msg, unsigned short* str)
         break;
     case 14:
         *(unsigned int*)(self + 0x3CC) |= 0x40000;
-        func_002C2508((unsigned short*)(self + 0xA48), str);
+        strcpy1((unsigned short*)(self + 0xA48), str);
         break;
     case 15:
         *(unsigned short*)(self + 0xA48) = 0;
@@ -2186,9 +2186,9 @@ extern "C" void func_001F2DB0(void* self, sFont_001F2DB0* font, sHudElemDef_001F
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F30C0__FPv);
+INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_cBXLoadIndicator__FPv);
 #ifdef SKIP_ASM
-void* func_001F30C0(void* self)
+void* cBXLoadIndicator_cBXLoadIndicator(void* self)
 {
     cOVStateHUDElem* e = (cOVStateHUDElem*)self;
     int t0 = 0;
@@ -2445,9 +2445,9 @@ extern "C" void func_001F36C0(void* self, int bit)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F36D8);
+INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Hide);
 #ifdef SKIP_ASM
-extern "C" void func_001F36D8(void* self, int bit)
+extern "C" void cBXLoadIndicator_Hide(void* self, int bit)
 {
     *(int*)((char*)self + 0x4) &= ~(1 << bit);
     if (*(int*)((char*)self + 0x4) == 0) {

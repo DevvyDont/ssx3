@@ -77,14 +77,14 @@ extern "C" void func_001957D0(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequip", func_00195880);
+INCLUDE_ASM("fe/festatecharequip", cFELocale_cFELocale);
 #ifdef SKIP_ASM
 extern void* D_0046BF98[];
 extern void* D_0046D848[];
 extern "C" void* func_001DCC40(void* p);
 extern "C" void func_00416210(void* dst, int value, int size);
 
-extern "C" void* func_00195880(void* self)
+extern "C" void* cFELocale_cFELocale(void* self)
 {
     *(char*)((char*)self + 0x0) = 0;
     *(char*)((char*)self + 0x1) = 0;

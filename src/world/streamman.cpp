@@ -34,14 +34,14 @@ extern "C" void* cStreamMan_cStreamMan(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A6E20);
+INCLUDE_ASM("world/streamman", cStreamMan__cStreamMan);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void func_003A6ED8(void* self);
 extern "C" void func_003A6F38(void* self);
 
-extern "C" void func_003A6E20(void* self, int flags)
+extern "C" void cStreamMan__cStreamMan(void* self, int flags)
 {
     void* buf = *(void**)((char*)self + 0xCC);
     if (buf != 0 && *(int*)((char*)self + 0xC0) != 0 && *(unsigned char*)((char*)self + 0xBC) == 0xFF) {
@@ -56,13 +56,13 @@ extern "C" void func_003A6E20(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A6E98);
+INCLUDE_ASM("world/streamman", cStreamMan_init);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern const char D_004A47D8[];
 extern const char D_004A47E0[];
 
-extern "C" int func_003A6E98(void* self, const char* name, int id)
+extern "C" int cStreamMan_init(void* self, const char* name, int id)
 {
     *(int*)self = id;
     sprintf((char*)self + 4, D_004A47D8, name, D_004A47E0);
@@ -265,7 +265,7 @@ INCLUDE_ASM("world/streamman", func_003A7238);
 #ifdef SKIP_ASM
 extern "C" unsigned int cWorldCache_addBxStreamDataTest(void* cache, int group, int id, int key, int size);
 extern "C" void func_003A8CD0_s(void* self, int group, int id, unsigned int key, int a4) __asm__("func_003A8CD0");
-extern "C" void func_003E6574(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, void* src, int size);
 extern int D_004A47D0;
 
 struct sStreamMan7238 {
@@ -374,7 +374,7 @@ extern "C" int func_003A7238(void* self_, void* pcount_, void* pdata_)
             self->size -= n;
             if (self->copying != 0)
             {
-                func_003E6574(self->dst, *pdata, n);
+                MEM_copy(self->dst, *pdata, n);
                 self->dst += n;
                 if (self->size == 0)
                 {

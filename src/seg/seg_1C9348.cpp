@@ -120,9 +120,9 @@ extern "C" int func_002C85A0(int a, int b, int c) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C85C0);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_deltabytes);
 #ifdef SKIP_ASM
-extern "C" void func_002C85C0(unsigned char *src, unsigned char *dst, int n) {
+extern "C" void HUFF_deltabytes(unsigned char *src, unsigned char *dst, int n) {
     unsigned char *end = src + n;
     int prev = 0;
     if (src < end) {
@@ -136,7 +136,7 @@ extern "C" void func_002C85C0(unsigned char *src, unsigned char *dst, int n) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C8600);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_writebits);
 #ifdef SKIP_ASM
 struct HuffOut_8600 {
     unsigned char* buf;
@@ -153,12 +153,12 @@ struct HuffState_8600 {
 };
 
 // PORT: the unit declares this with other parameter types; defined under an asm label
-extern "C" void func_002C8600_impl(HuffState_8600* s, HuffOut_8600* out, unsigned int code, unsigned int len) __asm__("func_002C8600");
-extern "C" void func_002C8600_impl(HuffState_8600* s, HuffOut_8600* out, unsigned int code, unsigned int len)
+extern "C" void HUFF_writebits_impl(HuffState_8600* s, HuffOut_8600* out, unsigned int code, unsigned int len) __asm__("HUFF_writebits");
+extern "C" void HUFF_writebits_impl(HuffState_8600* s, HuffOut_8600* out, unsigned int code, unsigned int len)
 {
     if (len > 16) {
-        func_002C8600_impl(s, out, code >> 16, len - 16);
-        func_002C8600_impl(s, out, code, 16);
+        HUFF_writebits_impl(s, out, code >> 16, len - 16);
+        HUFF_writebits_impl(s, out, code, 16);
         return;
     }
     s->bitcount += len;
@@ -174,27 +174,27 @@ extern "C" void func_002C8600_impl(HuffState_8600* s, HuffOut_8600* out, unsigne
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C86F8);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_treechase);
 #ifdef SKIP_ASM
 struct HS_86F8 { char pad[0x1524]; int l[0x208]; int r[0x208]; int a[256]; };
-extern "C" void func_002C86F8(HS_86F8 *self, unsigned i, int d) {
+extern "C" void HUFF_treechase(HS_86F8 *self, unsigned i, int d) {
     if (i < 0x100) {
         self->a[i] = d;
         return;
     }
-    func_002C86F8(self, self->l[i], d + 1);
-    func_002C86F8(self, self->r[i], d + 1);
+    HUFF_treechase(self, self->l[i], d + 1);
+    HUFF_treechase(self, self->r[i], d + 1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C8770);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_maketree);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct HS_8770 { char pad0[0x100]; unsigned freq[256]; char pad1[0x1524 - 0x500]; int l[0x208]; int r[0x208]; int a[256]; char pad2[0x2DC4 - 0x2964]; int count; };
-extern "C" void func_002C86F8_8770(struct HS_8770 *self, unsigned i, int d) __asm__("func_002C86F8");
-extern "C" void func_002C8770(struct HS_8770 *self) {
+extern "C" void HUFF_treechase_8770(struct HS_8770 *self, unsigned i, int d) __asm__("HUFF_treechase");
+extern "C" void HUFF_maketree(struct HS_8770 *self) {
     unsigned w[260];
     unsigned id[260];
     unsigned n = 1;
@@ -251,15 +251,15 @@ extern "C" void func_002C8770(struct HS_8770 *self) {
             node++;
             id[imin] = id[n];
         } while (n >= 3);
-        func_002C86F8_8770(self, node - 1, 0);
+        HUFF_treechase_8770(self, node - 1, 0);
     } else {
-        func_002C86F8_8770(self, id[n - 1], 1);
+        HUFF_treechase_8770(self, id[n - 1], 1);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C8970);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_minrep);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct HS_8970 {
@@ -270,14 +270,14 @@ struct HS_8970 {
     int b[0x11A];           // 0x2964
     int cur;                // 0x2DCC
 };
-extern "C" int func_002C8970(HS_8970* self, unsigned v, unsigned n)
+extern "C" int HUFF_minrep(HS_8970* self, unsigned v, unsigned n)
 {
     int best;
     if (n != 0) {
-        best = func_002C8970(self, v, n - 1);
+        best = HUFF_minrep(self, v, n - 1);
         if (self->used[self->cur + n] != 0) {
             unsigned q = v / n;
-            int c = func_002C8970(self, v - q * n, n - 1) + self->a[self->cur + n] * q;
+            int c = HUFF_minrep(self, v - q * n, n - 1) + self->a[self->cur + n] * q;
             if (c < best) {
                 best = c;
             }
@@ -306,7 +306,7 @@ struct HuffState_8A78 {
 
 struct HuffOut_8A78;
 
-extern "C" void func_002C8600_8A78(HuffState_8A78* s, HuffOut_8A78* out, unsigned int code, unsigned int len) __asm__("func_002C8600");
+extern "C" void HUFF_writebits_8A78(HuffState_8A78* s, HuffOut_8A78* out, unsigned int code, unsigned int len) __asm__("HUFF_writebits");
 
 // PORT: the unit declares this with other parameter types; defined under an asm label
 extern "C" void func_002C8A78_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigned int v) __asm__("func_002C8A78");
@@ -357,8 +357,8 @@ extern "C" void func_002C8A78_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigne
         bits = 18;
         base = 0x100000;
     }
-    func_002C8600_8A78(s, out, 1, bits + 1);
-    func_002C8600_8A78(s, out, v - base, bits + 2);
+    HUFF_writebits_8A78(s, out, 1, bits + 1);
+    HUFF_writebits_8A78(s, out, v - base, bits + 2);
 }
 #endif
 
@@ -367,14 +367,14 @@ INCLUDE_ASM("seg/seg_1C9348", func_002C8C30);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct HS_8C30 { char pad[0x2564]; int a[256]; int b[0x11A]; int cur; };
-extern void func_002C8600_8C30(HS_8C30 *, int, int, int) __asm__("func_002C8600");
+extern void HUFF_writebits_8C30(HS_8C30 *, int, int, int) __asm__("HUFF_writebits");
 extern "C" void func_002C8A78(HS_8C30 *, int, int);
 
 extern "C" void func_002C8C30_impl(HS_8C30 *self, int x, int y) __asm__("func_002C8C30");
 extern "C" void func_002C8C30_impl(HS_8C30 *self, int x, int y) {
-    func_002C8600_8C30(self, x, self->b[self->cur], self->a[self->cur]);
+    HUFF_writebits_8C30(self, x, self->b[self->cur], self->a[self->cur]);
     func_002C8A78(self, x, 0);
-    func_002C8600_8C30(self, x, y, 9);
+    HUFF_writebits_8C30(self, x, y, 9);
 }
 #endif
 
@@ -382,7 +382,7 @@ extern "C" void func_002C8C30_impl(HS_8C30 *self, int x, int y) {
 INCLUDE_ASM("seg/seg_1C9348", func_002C8CA8);
 #ifdef SKIP_ASM
 struct HS_8CA8 { char pad[0x2564]; int a[256]; int b[0x11A]; int cur; };
-extern "C" void func_002C8600(HS_8CA8 *, int, int, int);
+extern "C" void HUFF_writebits(HS_8CA8 *, int, int, int);
 extern "C" void func_002C8C30(HS_8CA8 *, int, int);
 
 extern "C" void func_002C8CA8(HS_8CA8 *self, int x, int idx) {
@@ -390,12 +390,12 @@ extern "C" void func_002C8CA8(HS_8CA8 *self, int x, int idx) {
         func_002C8C30(self, x, idx);
         return;
     }
-    func_002C8600(self, x, self->b[idx], self->a[idx]);
+    HUFF_writebits(self, x, self->b[idx], self->a[idx]);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C8CF8);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_init);
 #ifdef SKIP_ASM
 struct HuffState_8CF8 {
     char pad0[0xD44];
@@ -403,7 +403,7 @@ struct HuffState_8CF8 {
     unsigned int base[252];     // 0x1134
 };
 
-extern "C" void func_002C8CF8(HuffState_8CF8* s)
+extern "C" void HUFF_init(HuffState_8CF8* s)
 {
     unsigned int i;
     for (i = 0; i < 4; i++) {
@@ -433,10 +433,10 @@ extern "C" void func_002C8CF8(HuffState_8CF8* s)
 }
 #endif
 
-INCLUDE_ASM("seg/seg_1C9348", func_002C8E48);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_analysis);
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C9A48);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_pack);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct HS_9A48 {
@@ -467,7 +467,7 @@ struct HS2_9A48 {
     unsigned int order[256];        // 0x2DEC
 };
 
-extern "C" void huffBits_9A48(void* s, void* out, unsigned int code, unsigned int len) __asm__("func_002C8600");
+extern "C" void huffBits_9A48(void* s, void* out, unsigned int code, unsigned int len) __asm__("HUFF_writebits");
 extern "C" void huffNum_9A48(void* s, void* out, unsigned int v) __asm__("func_002C8A78");
 extern "C" void huffSym_9A48(void* s, void* out, unsigned int sym) __asm__("func_002C8CA8");
 
@@ -476,7 +476,7 @@ extern "C" void huffSym_9A48(void* s, void* out, unsigned int sym) __asm__("func
 // Locals are reused the way the original does (run doubles as the MTF cursor, last holds the order
 // value, k is also the "coded as delta" flag, d becomes the delta code index); the register
 // allocation depends on that reuse.
-extern "C" void func_002C9A48(void* vs, void* out, int a)
+extern "C" void HUFF_pack(void* vs, void* out, int a)
 {
     HS_9A48* s = (HS_9A48*)vs;
     HS2_9A48* t = (HS2_9A48*)vs;
@@ -591,7 +591,7 @@ extern "C" void func_002C9A48(void* vs, void* out, int a)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1C9348", func_002C9F60);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_packfile);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct HuffBuf_9F60 {
@@ -612,12 +612,12 @@ struct HuffState_9F60 {
     int remaining;              // 0x2DE8
 };
 
-extern "C" void func_002C8CF8_9F60(HuffState_9F60* s) __asm__("func_002C8CF8");
-extern "C" void func_002C8600_9F60(HuffState_9F60* s, HuffBuf_9F60* out, unsigned int code, unsigned int len) __asm__("func_002C8600");
-extern "C" void func_002C8E48(void* s, int a, int b);
-extern "C" void func_002C9A48(void* s, void* out, int a);
+extern "C" void HUFF_init_9F60(HuffState_9F60* s) __asm__("HUFF_init");
+extern "C" void HUFF_writebits_9F60(HuffState_9F60* s, HuffBuf_9F60* out, unsigned int code, unsigned int len) __asm__("HUFF_writebits");
+extern "C" void HUFF_analysis(void* s, int a, int b);
+extern "C" void HUFF_pack(void* s, void* out, int a);
 
-extern "C" int func_002C9F60(HuffState_9F60* s, HuffBuf_9F60* in, HuffBuf_9F60* out, int len, int mode)
+extern "C" int HUFF_packfile(HuffState_9F60* s, HuffBuf_9F60* in, HuffBuf_9F60* out, int len, int mode)
 {
     unsigned int i;
     unsigned int code;
@@ -627,7 +627,7 @@ extern "C" int func_002C9F60(HuffState_9F60* s, HuffBuf_9F60* in, HuffBuf_9F60* 
     for (i = 1; i < 17; i++) {
         s->mask[i] = s->mask[i - 1] * 2 + 1;
     }
-    func_002C8CF8_9F60(s);
+    HUFF_init_9F60(s);
     s->src = in->buf;
     {
         int n = in->len;
@@ -639,24 +639,24 @@ extern "C" int func_002C9F60(HuffState_9F60* s, HuffBuf_9F60* in, HuffBuf_9F60* 
     s->bitcount = 0;
     s->bitbuf = 0;
     s->nbytes = 0;
-    func_002C8E48(s, 0x39, 0xF);
+    HUFF_analysis(s, 0x39, 0xF);
     if (len == in->len) {
         code = 0;
         if (mode == 0) code = 0x30FB;
         else if (mode == 1) code = 0x32FB;
         else if (mode == 2) code = 0x34FB;
-        func_002C8600_9F60(s, out, code, 16);
-        func_002C8600_9F60(s, out, in->len, 24);
+        HUFF_writebits_9F60(s, out, code, 16);
+        HUFF_writebits_9F60(s, out, in->len, 24);
     } else {
         code = 0;
         if (mode == 0) code = 0x31FB;
         else if (mode == 1) code = 0x33FB;
         else if (mode == 2) code = 0x35FB;
-        func_002C8600_9F60(s, out, code, 16);
-        func_002C8600_9F60(s, out, len, 24);
-        func_002C8600_9F60(s, out, in->len, 24);
+        HUFF_writebits_9F60(s, out, code, 16);
+        HUFF_writebits_9F60(s, out, len, 24);
+        HUFF_writebits_9F60(s, out, in->len, 24);
     }
-    func_002C9A48(s, out, 0x39);
+    HUFF_pack(s, out, 0x39);
     return out->len;
 }
 #endif
@@ -669,8 +669,8 @@ extern "C" void* cMemMan_alloc(int size, const char* name, int flags, int align)
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" void func_002C85C0(unsigned char *src, unsigned char *dst, int n);
-extern "C" int func_002C9F60_A100(void* s, void* in, void* out, int len, int mode) __asm__("func_002C9F60");
+extern "C" void HUFF_deltabytes(unsigned char *src, unsigned char *dst, int n);
+extern "C" int HUFF_packfile_A100(void* s, void* in, void* out, int len, int mode) __asm__("HUFF_packfile");
 extern char D_00486600[];
 extern char D_00486618[];
 
@@ -693,13 +693,13 @@ extern "C" int HUFF_encode(void* src, int len, void* dst, int* opts)
         switch (mode) {
         case 1:
             tmp = operator_new_tag(len, D_00486618, 0x20000000, 0);
-            func_002C85C0((unsigned char*)src, (unsigned char*)tmp, len);
+            HUFF_deltabytes((unsigned char*)src, (unsigned char*)tmp, len);
             in.buf = tmp;
             break;
         case 2:
             tmp = operator_new_tag(len, D_00486618, 0x20000000, 0);
-            func_002C85C0((unsigned char*)src, (unsigned char*)tmp, len);
-            func_002C85C0((unsigned char*)tmp, (unsigned char*)tmp, len);
+            HUFF_deltabytes((unsigned char*)src, (unsigned char*)tmp, len);
+            HUFF_deltabytes((unsigned char*)tmp, (unsigned char*)tmp, len);
             in.buf = tmp;
             break;
         case 0:
@@ -710,7 +710,7 @@ extern "C" int HUFF_encode(void* src, int len, void* dst, int* opts)
         in.len = len;
         out.buf = dst;
         out.len = len;
-        result = func_002C9F60_A100(s, &in, &out, len, mode);
+        result = HUFF_packfile_A100(s, &in, &out, len, mode);
         if (tmp) cMemMan_free(tmp);
         operator_delete((int*)s);
     }

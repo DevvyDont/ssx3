@@ -233,7 +233,7 @@ extern "C" void func_0022E730(sList0022E730* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamerender", func_0022E7C8);
+INCLUDE_ASM("main/gamerender", cGameViewMan_snapAll);
 #ifdef SKIP_ASM
 struct sVEntry_0022E7C8 {
     short delta;
@@ -241,7 +241,7 @@ struct sVEntry_0022E7C8 {
     void (*fn)(void*);
 };
 
-extern "C" void func_0022E7C8(void* self)
+extern "C" void cGameViewMan_snapAll(void* self)
 {
     unsigned int i;
     for (i = 0; i < *(unsigned int*)((char*)self + 0x10); i++) {
@@ -309,7 +309,7 @@ extern "C" int func_0022E920(sRenderList* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamerender", func_0022E968);
+INCLUDE_ASM("main/gamerender", cGame_cGame);
 #ifdef SKIP_ASM
 extern char D_0047D110[];
 extern char D_0047D168[];
@@ -356,7 +356,7 @@ static inline void Init_22E968(char* s, int off, void* vt, int id)
     *(int*)(s + off + 0x0) = id;
 }
 
-extern "C" char* func_0022E968(char* self)
+extern "C" char* cGame_cGame(char* self)
 {
     func_00231CD0(self);
     *(int*)(self + 0xC) = 0;
