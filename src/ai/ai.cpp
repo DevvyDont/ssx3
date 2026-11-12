@@ -6872,7 +6872,179 @@ extern "C" void func_001329B0(sState_29B0* s, sOwner_29B0* o, int flag, float t)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/ai", func_00132A30);
+#ifdef SKIP_ASM
+extern "C" int cRider_checkForReset_2A30(void* rider, int a, int b) __asm__("cRider_checkForReset");
+extern "C" int func_00312AE8(void* self, int i);
+extern "C" char* func_00311B20(void*, int);
+extern "C" void func_0010E098(void*, int, float);
+extern "C" float func_00119BF0(void* self, int a1);
+extern "C" float func_00119C38(void* self);
+extern "C" void func_00132FB8(void* self, int a1, int a2);
+extern "C" void cRider_doLeanPoseAdjust(void* self, void* p);
+extern "C" void cRider_updateOrientationImplicit(void*);
+extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
+extern "C" int func_00106848(void*);
+extern "C" bool func_001446A0(void* self, int bit);
+int func_0011FE98(void* self);
+void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
+void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
+
+struct sPad_2A30 {
+    int flags;
+};
+
+// PORT: PS2-only inline asm (float absolute value)
+static inline float fabs_2A30(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+static inline float clamp_2A30(float x, float lo, float hi)
+{
+    if (x >= lo) {
+        return x <? hi; // PORT: g++ min operator
+    }
+    return lo;
+}
+
+struct sAi_2A30 {
+    float t;      // 0x0
+    float pos;    // 0x4
+    int f8;
+    int fC;
+    int dir;      // 0x10
+    cRider* r;    // 0x14
+};
+
+extern "C" void func_00132A30(sAi_2A30* self, sPad_2A30* in)
+{
+    if (cRider_checkForReset_2A30(self->r, (in->flags >> 12) & 1, 0) != 0) {
+        return;
+    }
+    cRider* r = self->r;
+    int st = r->unk_32C;
+    if (st == 1) {
+        if (func_00312AE8(r->mRiderAnim, 2) == 0) {
+            return;
+        }
+        if ((in->flags & 0x2000) && self->f8 == 0) {
+            self->r->unk_32C = 2;
+            func_0010E098(self->r, 1, func_00119BF0(self->r->mMetrix, 1));
+        } else {
+            self->r->unk_32C = 3;
+            func_0010E098(self->r, 1, func_00119BF0(self->r->mMetrix, 2));
+        }
+        func_00132FB8(self, self->r->unk_32C, self->dir);
+        self->t = 0.0f;
+        return;
+    }
+    if (st == 2) {
+        float dt = r->mTimeScale * 0.01666666753590107f;
+        self->t += dt;
+        if ((in->flags & 0x2000) && __builtin_fabsf(r->mSlewed[8].cur) < 1.0f) {
+            float desBal = ((in->flags << 12) >> 26) * 0.032258063554763794f;
+            if (r->unk_320 != 0) desBal = -desBal;
+            if (self->dir == 1) desBal = -desBal;
+            r->mSlewed[7].target = desBal;
+            r->mSlewed[7].rate = dt * 5.0f;
+            float k = dt * 3.0f;
+            float p = self->pos;
+            float np;
+            if (desBal + k < p) {
+                np = p - k;
+            } else if (p < desBal - k) {
+                np = p + k;
+            } else {
+                np = desBal;
+            }
+            self->pos = np;
+            float desTilt = np;
+            if (np < 0.0f) {
+                desTilt = -1.0f;
+            } else if (np > 0.0f) {
+                desTilt = 1.0f;
+            } else if (self->t > 0.5013384222984314f || self->r->mSlewed[8].cur != 0.0f) {
+                desTilt = 1.0f;
+                if (self->r->mSlewed[8].cur < 0.0f) desTilt = -1.0f;
+            }
+            r = self->r;
+            float weight = self->t * 0.19999131560325623f <? 1.0f; // PORT: g++ min operator
+            float b = 1.0f - weight;
+            float c = fabs_2A30(r->mSlewed[8].cur);
+            r->mSlewed[8].target = desTilt;
+            float cenRate = weight * 4.0f + b;
+            float edgeRate = weight * 5.5f + b * 1.5f;
+            r->mSlewed[8].rate = (edgeRate * c + cenRate * (1.0f - c)) * dt;
+            return;
+        }
+        if (self->fC != 0 && __builtin_fabsf(self->r->mSlewed[8].cur) < 0.25f) {
+            self->r->unk_32C = 6;
+        } else if (self->r->mSlewed[8].cur < -0.05000000074505806f) {
+            self->r->unk_32C = 4;
+        } else {
+            self->r->unk_32C = 5;
+        }
+        cRider_doLeanPoseAdjust(self->r, &self->r->mPosition);
+        cRider_updateOrientationImplicit(self->r);
+        cRider* q1 = self->r;
+        q1->mSlewed[0].target = 0.0f;
+        q1->mSlewed[0].cur = 0.0f;
+        q1->mSlewed[0].rate = 0.0f;
+        cRider* q2 = self->r;
+        q2->mSlewed[2].target = 0.0f;
+        q2->mSlewed[2].cur = 0.0f;
+        q2->mSlewed[2].rate = 0.0f;
+        cRider* q3 = self->r;
+        q3->mSlewed[8].target = 0.0f;
+        q3->mSlewed[8].cur = 0.0f;
+        q3->mSlewed[8].rate = 0.0f;
+        func_00132FB8(self, self->r->unk_32C, self->dir);
+        return;
+    }
+    if (func_0011FE98(r) == 5) {
+        func_0010E098(self->r, 1, func_00119C38(self->r->mMetrix));
+        cRider_setMotionState_impl(self->r, 1);
+    }
+    if (func_001446A0(func_00311B20(self->r->mRiderAnim, 2) + 0xB0, 1)) {
+        if (func_00106848(self->r)) {
+            return;
+        }
+        if (func_0011FE98(self->r) == 0) {
+            cRiderAnimBase_play(self->r->mRiderAnim, 0x3D, 0, -1.0f);
+            func_0011FEC8_impl(self->r, 0);
+            return;
+        }
+    } else {
+        int m = func_0011FE98(self->r);
+        if (m == 1) {
+            int ok = *(int*)((char*)self->r->mAirPredictor + 0xAC) == 1 || *(int*)((char*)self->r->mAirPredictor + 0xAC) == 3;
+            if (ok) {
+                char* q = (char*)self->r->mAirPredictor;
+                float airTimeLeft = *(float*)(q + 0x98) - *(float*)(q + 0xA0);
+                if (airTimeLeft > 0.0f) {
+                    char* seq = func_00311B20(self->r->mRiderAnim, 2);
+                    float animRate = (*(float*)(seq + 0x10) - *(float*)(seq + 0x8)) / airTimeLeft;
+                    *(float*)(seq + 0x90) = clamp_2A30(animRate, 0.5f, 2.0f);
+                }
+            }
+        }
+    }
+    if (func_00312AE8(self->r->mRiderAnim, 2) == 0) {
+        return;
+    }
+    if (func_0011FE98(self->r) == 1) {
+        cRiderAnimBase_play(self->r->mRiderAnim, 0x11F, 0, -1.0f);
+        func_0011FEC8_impl(self->r, 4);
+    } else {
+        cRiderAnimBase_play(self->r->mRiderAnim, 0x3D, 0, -1.0f);
+        func_0011FEC8_impl(self->r, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_00132F98);

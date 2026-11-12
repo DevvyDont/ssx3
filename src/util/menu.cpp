@@ -557,7 +557,121 @@ void func_002CAD50(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("util/menu", func_002CAD58);
+#ifdef SKIP_ASM
+struct sRect_2CAD58 {
+    float x, y, w, h;
+    sRect_2CAD58() {}
+    sRect_2CAD58(float ax, float ay, float aw, float ah) { x = ax; y = ay; w = aw; h = ah; }
+};
+
+class cItem_2CAD58 {
+public:
+    char pad[0x10];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual sRect_2CAD58 getRect();
+    virtual void render(sRect_2CAD58* r);
+};
+
+// cMenuSys (On Tour): getDisplayHeight() is `screen height - mF64` there (272 on PSP, 480 here).
+class cMenuSys_2CAD58 {
+public:
+    char pad[0x64];
+    int f64;                        // 0x64
+    int getDisplayWidth() { return 640; }
+    int getDisplayHeight() { return 480 - f64; }
+};
+
+struct sMenu_2CAD58 {
+    int NumItems;                   // 0x0
+    int FocusItem;                  // 0x4
+    int TopItem;                    // 0x8
+    cItem_2CAD58* Items[70];        // 0xC
+    cMenuSys_2CAD58* MenuSys;       // 0x124
+};
+
+static const float kScreenGapY = 53.0f;
+static const float kArrowWidth = 22.0f;
+static const float kArrowEdgeOffset = 32.0f;
+static const float kArrowHeight = 15.0f;
+
+// PORT: these are declared later in the unit without the self/rect parameters.
+void func_002CB180_s(void* self) __asm__("func_002CB180");
+void func_002CB2F8_s(void* self) __asm__("func_002CB2F8");
+void func_002CB8C8_r(void* self, const sRect_2CAD58& r) __asm__("func_002CB8C8");
+void func_002CBAC8_r(void* self, const sRect_2CAD58& r) __asm__("func_002CBAC8");
+
+// cMenu::render(void) (On Tour name)
+extern "C" void func_002CAD58(sMenu_2CAD58* self)
+{
+    sRect_2CAD58 total;
+    sRect_2CAD58 item[70];
+    int i;
+    total.x = total.y = total.w = total.h = 0.0f;
+    for (i = 0; i < self->NumItems; i++) {
+        if (cMenuItem_isActive(self->Items[i])) {
+            item[i] = self->Items[i]->getRect();
+            total.h += item[i].h;
+            if (item[i].w > total.w) {
+                total.w = item[i].w;
+            }
+        } else {
+            item[i].w = item[i].h = 0.0f;
+        }
+    }
+    total.x = (self->MenuSys->getDisplayWidth() - total.w) * 0.5f;
+    if (total.h > self->MenuSys->f64 + self->MenuSys->getDisplayHeight() - kScreenGapY * 2) {
+        if (self->FocusItem < self->TopItem) {
+            self->TopItem = self->FocusItem;
+        }
+        float th = 0.0f;
+        for (int i = self->TopItem; i <= self->FocusItem; i++) {
+            th += item[i].h;
+        }
+        while (self->TopItem < self->FocusItem && th > self->MenuSys->getDisplayHeight() - kScreenGapY * 2) {
+            th -= item[self->TopItem].h;
+            self->TopItem++;
+        }
+        total.y = kScreenGapY;
+    } else {
+        self->TopItem = 0;
+        total.y = (self->MenuSys->getDisplayHeight() - total.h) * 0.5f;
+    }
+    func_002CB180_s(self);
+    for (i = self->TopItem; i < self->NumItems; i++) {
+        if (cMenuItem_isActive(self->Items[i])) {
+            if (i != self->FocusItem && total.y + item[i].h > self->MenuSys->getDisplayHeight() - kScreenGapY) {
+                break;
+            }
+            item[i].x = total.x;
+            item[i].y = self->MenuSys->f64 + total.y;
+            item[i].w = total.w;
+            total.y += item[i].h;
+            self->Items[i]->render(&item[i]);
+        }
+    }
+    if (self->TopItem) {
+        sRect_2CAD58 up;
+        up.y = self->MenuSys->f64 + kArrowEdgeOffset;
+        up.x = (self->MenuSys->getDisplayWidth() - kArrowWidth) * 0.5f;
+        up.w = kArrowWidth;
+        up.h = kArrowHeight;
+        func_002CB8C8_r(self, up);
+    }
+    if (i != self->NumItems) {
+        sRect_2CAD58 down;
+        down.x = (self->MenuSys->getDisplayWidth() - kArrowWidth) * 0.5f;
+        down.y = self->MenuSys->f64 + self->MenuSys->getDisplayHeight() - kArrowHeight - kArrowEdgeOffset;
+        down.w = kArrowWidth;
+        down.h = kArrowHeight;
+        func_002CBAC8_r(self, down);
+    }
+    func_002CB2F8_s(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002CB180);

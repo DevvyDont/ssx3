@@ -324,7 +324,289 @@ extern "C" void func_002DAA78(void* vself)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardsparkfx", func_002DABC8);
+#ifdef SKIP_ASM
+struct sV4_ABC8 {
+    float x, y, z, w;
+    sV4_ABC8() {}
+    sV4_ABC8(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sCol_ABC8 {
+    float a, r, g, b;
+};
+
+struct sEnt_ABC8 {
+    sCol_ABC8 col;              // 0x00
+    char pad10[0xE0];
+};
+
+struct sEmVE_ABC8 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*, float);
+};
+
+struct sEmitter_ABC8 {
+    char pad0[0x58];
+    float rate;                 // 0x58
+    char pad5C[0x1F8 - 0x5C];
+    sEmVE_ABC8* vt;             // 0x1F8
+};
+
+struct sRiderVE_ABC8 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sSparkFx_ABC8 {
+    char* rider;                // 0x00 (cRider*)
+    char pad04[0xC];
+    sV4_ABC8 pos;               // 0x10
+    sEmitter_ABC8* emitter;     // 0x20
+    void* params;               // 0x24
+    void* gfx;                  // 0x28
+    char pad2C[0x4];
+    sV4_ABC8 pts[3];            // 0x30
+    float size[3];              // 0x60
+    int active;                 // 0x6C
+    int f70;                    // 0x70
+    int f74;                    // 0x74
+    int f78;                    // 0x78
+};
+
+extern char* D_004A5B64;
+extern char* D_004A28A8;
+extern int D_004A472C;
+extern int D_004A4728;
+extern int D_004A3AFC;
+extern sEnt_ABC8 D_004FA398[];
+
+extern "C" void func_0036D428(void* self, float val);
+int func_0011FE98(void* self);
+extern "C" void func_003717C0(void* em, void* pos, void* d, void* vel, int alive, float dt);
+extern "C" void func_0036D318(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d, float t);
+extern "C" void func_0036D1F0(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d);
+extern "C" void func_0036CEF8(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c);
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_ABC8 Scale_ABC8(const sV4_ABC8& v, float s)
+{
+    sV4_ABC8 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar, into r).
+static inline void ScaleTo_ABC8(sV4_ABC8& r, const sV4_ABC8& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sV4_ABC8 Add_ABC8(const sV4_ABC8& a, const sV4_ABC8& b)
+{
+    sV4_ABC8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sV4_ABC8 Sub_ABC8(const sV4_ABC8& a, const sV4_ABC8& b)
+{
+    sV4_ABC8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Len_ABC8(const sV4_ABC8& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: the seed is reinterpreted as a float in [1,2) through memory (type pun).
+static inline float Rand_ABC8()
+{
+    D_004A3AFC = ((D_004A3AFC * 0x18FCD + 0xE9507C) & 0x7FFFFF) | 0x3F800000;
+    return *(float*)&D_004A3AFC - 1.0f;
+}
+
+static inline float RandRange_ABC8(float lo, float range)
+{
+    return Rand_ABC8() * range + lo;
+}
+
+static inline sV4_ABC8 BoneRow_ABC8(char* r, int i)
+{
+    return ((sV4_ABC8*)(*(char**)(*(char**)(r + 0x780) + 0x34) + (*(int*)(r + 0x8A4) << 6)))[i];
+}
+
+static inline sV4_ABC8 RiderSide_ABC8(char* rider)
+{
+    return *(sV4_ABC8*)(rider + 0x1A0);
+}
+
+#define MIN_ABC8(a, b) ((a) < (b) ? (a) : (b))
+
+// cBoardSparkFX::update(void) (On Tour name, unverified pairing; callees fit).
+// Board spark FX update: emitter direction/colour from the rider's motion, then the glow and spark points.
+extern "C" void func_002DABC8(sSparkFx_ABC8* self)
+{
+    char* rider = self->rider;
+    float dt = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+    char* surfaceData = *(char**)(*(char**)(D_004A28A8 + 0x84) + 0x44) + *(int*)(rider + 0x438) * 0xB0;
+    func_0036D428(self->gfx, dt);
+    if (self->active) {
+        sEmitter_ABC8* em = self->emitter;
+        em->vt[3].fn((char*)em + em->vt[3].delta, self->params, em->rate);
+        self->active = 1;
+    }
+    self->f70 = 0;
+    self->f74 = 0;
+    self->f78 = 0;
+    float bspeed = Len_ABC8(*(sV4_ABC8*)(self->rider + 0x1E0));
+    bool fastEnough = 277.77777099609375f < bspeed;
+    bool isRailSlide = func_0011FE98(self->rider) == 4;
+    if (fastEnough) {
+        if (*(int*)(surfaceData + 0x8C)) {
+            self->f70 = 1;
+            if (isRailSlide) {
+                self->f74 = 1;
+            }
+        }
+        if ((isRailSlide && *(int*)(surfaceData + 0x88)) || *(int*)(self->rider + 0x438) == 9) {
+            self->f78 = 1;
+        }
+    }
+    sV4_ABC8 particlePosition = Add_ABC8(*(sV4_ABC8*)(self->rider + 0x460), Scale_ABC8(*(sV4_ABC8*)(self->rider + 0x1E0), 0.009999999776482582f));
+    self->pos = particlePosition;
+    if (self->f78) {
+        float maxChance = 0.6000000238418579f;
+        sV4_ABC8 groundColour;
+        if (*(int*)(self->rider + 0x438) == 9) {
+            sV4_ABC8 c9;
+            c9.x = 0.21559999883174896f;
+            c9.y = 0.18000000715255737f;
+            c9.z = 0.13699999451637268f;
+            c9.w = 1.0f;
+            groundColour = c9;
+            maxChance = 0.10000000149011612f;
+        } else {
+            char* sub = self->rider + 0x6C0;
+            sRiderVE_ABC8* vt = *(sRiderVE_ABC8**)sub;
+            sCol_ABC8 c = D_004FA398[vt[7].fn(sub + vt[7].delta)].col;
+            groundColour = sV4_ABC8(c.r, c.g, c.b, c.a);
+            ScaleTo_ABC8(groundColour, groundColour, 2.0f);
+            groundColour.w = 1.0f;
+        }
+        sV4_ABC8 sideways = Scale_ABC8(Scale_ABC8(RiderSide_ABC8(self->rider), bspeed), 0.25f);
+        sV4_ABC8 particleVelocity = Sub_ABC8(Add_ABC8(Scale_ABC8(*(sV4_ABC8*)(self->rider + 0x1E0), 1.2000000476837158f), sideways),
+                                Scale_ABC8(sideways, Rand_ABC8() * 2.0f));
+        float chance = MIN_ABC8(bspeed / 1666.666748046875f * 0.10000000149011612f, maxChance);
+        bool active = Rand_ABC8() < chance;
+        func_003717C0(self->emitter, &particlePosition, &particleVelocity, &groundColour, active, 0.01666666753590107f);
+    } else {
+        func_003717C0(self->emitter, &particlePosition, 0, 0, 0, 0.01666666753590107f);
+    }
+    if (self->f70) {
+        char* r = self->rider;
+        const sV4_ABC8& side = BoneRow_ABC8(r, 2);
+        const sV4_ABC8& front = BoneRow_ABC8(r, 0);
+        bool uberState = D_004A472C != 0 || D_004A4728 != 0 || 0.0f < *(float*)(r + 0x2F0);
+        if (uberState) {
+            sV4_ABC8 a, b, c, d;
+            a.x = 255.0f; a.y = 0.0f; a.z = 255.0f; a.w = 153.0f;
+            b.x = 255.0f; b.y = 0.0f; b.z = 255.0f; b.w = 102.0f;
+            c.x = 0.0f; c.y = 0.0f; c.z = 0.0f; c.w = 0.0f;
+            d.x = 0.0f; d.y = 0.0f; d.z = 0.0f; d.w = 0.0f;
+            func_0036D318(self->gfx, &a, &b, &c, &d, 0.1940000057220459f);
+        } else {
+            sV4_ABC8 a, b, c, d;
+            a.x = 77.0f; a.y = 77.0f; a.z = 255.0f; a.w = 153.0f;
+            b.x = 255.0f; b.y = 51.0f; b.z = 51.0f; b.w = 102.0f;
+            c.x = 0.0f; c.y = 0.0f; c.z = 0.0f; c.w = 0.0f;
+            d.x = 0.0f; d.y = 0.0f; d.z = 0.0f; d.w = 0.0f;
+            func_0036D318(self->gfx, &a, &b, &c, &d, 0.1940000057220459f);
+        }
+        {
+            sV4_ABC8 a, b, c, d;
+            a.x = 0.0f; a.y = 0.0f; a.z = 400.0f; a.w = 0.0f;
+            b.x = 600.0f; b.y = 0.0f; b.z = 0.0f; b.w = 0.0f;
+            c.x = 0.0f; c.y = 600.0f; c.z = 0.0f; c.w = 0.0f;
+            d.x = 0.0f; d.y = 0.0f; d.z = 600.0f; d.w = 0.0f;
+            func_0036D1F0(self->gfx, &a, &b, &c, &d);
+        }
+        if (isRailSlide) {
+            sV4_ABC8 a = Scale_ABC8(side, 10.0f);
+            sV4_ABC8 b = Scale_ABC8(front, 10.0f);
+            func_0036CEF8(self->gfx, &particlePosition, &a, &b);
+        } else {
+            sV4_ABC8 a = Scale_ABC8(side, 15.0f);
+            sV4_ABC8 b = Scale_ABC8(front, 90.0f);
+            func_0036CEF8(self->gfx, &particlePosition, &a, &b);
+        }
+    }
+    if (self->f74 && 0.699999988079071f < Rand_ABC8()) {
+        for (int i = 0; i < 3; i++) {
+            self->size[i] = RandRange_ABC8(20.0f, 10.0f);
+            self->pts[i] = Add_ABC8(self->pos, sV4_ABC8(RandRange_ABC8(-4.0f, 8.0f), RandRange_ABC8(-4.0f, 8.0f),
+                                                         RandRange_ABC8(-4.0f, 8.0f), 0.0f));
+        }
+    } else {
+        self->f74 = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardsparkfx", func_002DB478);
