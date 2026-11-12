@@ -1733,7 +1733,85 @@ extern "C" void func_003A95C0(void** self, void* node, int* ok)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldcache", func_003A9658);
+#ifdef SKIP_ASM
+struct sWCVec4 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (in-place vector subtract).
+static inline void vu0SubFromWC(sWCVec4& a, const sWCVec4& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector add).
+static inline void vu0AddToWC(sWCVec4& a, const sWCVec4& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+struct tBoundBox_9658 {
+    sWCVec4 mn;
+    sWCVec4 mx;
+    tBoundBox_9658(const sWCVec4& a, const sWCVec4& b) : mn(a), mx(b) {}
+};
+
+struct tStreamFocusInfo_9658 {
+    int pad0;
+    int m_bActive;              // 0x4
+    int m_bFocusUpdate;         // 0x8
+    int padC;
+    sWCVec4 m_v4LoadPos;        // 0x10
+    tBoundBox_9658 m_FocusBox;  // 0x20
+    float m_fLoadRadius;        // 0x40
+    float m_fSafeRadius;        // 0x44
+    float m_fSafeTestRadius;    // 0x48
+    int pad4C;
+};
+
+struct cWorldView_9658 {
+    char pad0[0x240];
+    tStreamFocusInfo_9658 m_StreamFocus[2];  // 0x240
+};
+
+// cWorldView::setFocus
+extern "C" void func_003A9658_impl(cWorldView_9658* self, int id, const sWCVec4& pos, float fRadius) __asm__("func_003A9658");
+extern "C" void func_003A9658_impl(cWorldView_9658* self, int id, const sWCVec4& pos, float fRadius)
+{
+    self->m_StreamFocus[id].m_v4LoadPos = pos;
+    self->m_StreamFocus[id].m_fLoadRadius = fRadius >? 0.0f;
+    self->m_StreamFocus[id].m_FocusBox = tBoundBox_9658(pos, pos);
+    {
+        sWCVec4 ext;
+        ext.x = fRadius;
+        ext.y = fRadius;
+        ext.z = fRadius;
+        ext.w = 0.0f;
+        vu0SubFromWC(self->m_StreamFocus[id].m_FocusBox.mn, ext);
+        vu0AddToWC(self->m_StreamFocus[id].m_FocusBox.mx, ext);
+    }
+    self->m_StreamFocus[id].m_bActive = 1;
+    self->m_StreamFocus[id].m_fSafeRadius = 0.0f;
+    self->m_StreamFocus[id].m_fSafeTestRadius = 0.0f;
+    self->m_StreamFocus[id].m_bFocusUpdate = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/worldcache", func_003A96E0);
