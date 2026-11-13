@@ -4232,7 +4232,128 @@ extern "C" void cKeyboardPopup_updateEdit(void* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_updateViewable);
+#ifdef SKIP_ASM
+// cKeyboardPopup::updateViewable(bool bDropFromRight) (On Tour signature and locals).
+extern "C" char* strncpy(char* dst, const char* src, int n);
+extern "C" void cKeyboardPopup_setScale(void* self, void* obj);
+extern char D_00466530[];  // "EnterValue"
+extern char D_00466540[];  // "ExtendCursorLeft"
+extern char D_00466558[];  // "ExtendCursorRight"
+
+struct tRect_CC8D8 { float x, y, w, h; };
+
+// cFont: Scale at 0x38; textExtent(str, rect, add) forwards the current scale.
+struct cFont_CC8D8 {
+    char pad0[0x38];
+    float ScaleX, ScaleY;
+    float textExtent(const char* str, tRect_CC8D8* rect, bool add)
+    {
+        return func_00391FB0(this, str, rect, add, ScaleX, ScaleY);
+    }
+};
+
+struct sVEntry_CC8D8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int);
+};
+
+class cUIThing_CC8D8 {
+public:
+    int f0;
+    int f4;
+    // vptr at 0x8; slot N at vtable offset N*8
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void setVisible(int on);
+};
+
+struct cKeyboardPopup_CC8D8 {
+    char pad0[0x40];
+    void* mpScreen;                 // 0x40
+    char pad44[0x60 - 0x44];
+    int miMaxCharacters;            // 0x60
+    char pad64[0x74 - 0x64];
+    char mszEditString[64];         // 0x74
+    char mszViewableString[64];     // 0xB4
+    char padF4[0x134 - 0xF4];
+    int miCursorPos;                // 0x134
+    int miViewStart;                // 0x138
+    int miViewEnd;                  // 0x13C
+    char pad140[0x3F4 - 0x140];
+    float mfViewWidth;              // 0x3F4
+    char pad3F8[0x400 - 0x3F8];
+    float mfCursorWidth;            // 0x400
+};
+
+// The body uses the incoming pointer directly (as `this` would be): a
+// separate `self` local leaves a copy in the entry block that changes
+// GCSE's expression numbering.
+extern "C" void cKeyboardPopup_updateViewable(void* self, int bDropFromRight)
+{
+    cUIThing_CC8D8* pCursor;
+    if (strlen(((cKeyboardPopup_CC8D8*)self)->mszEditString) != 0) {
+        float fAllowableLength;
+        void* pText = cUIScreen_getObjectByHashName(((cKeyboardPopup_CC8D8*)self)->mpScreen, GetHashValue32(D_00466530));
+        tRect_CC8D8 rectString;
+        int iCutLength = ((cKeyboardPopup_CC8D8*)self)->miViewEnd - ((cKeyboardPopup_CC8D8*)self)->miViewStart;
+        strncpy(((cKeyboardPopup_CC8D8*)self)->mszViewableString, ((cKeyboardPopup_CC8D8*)self)->mszEditString + ((cKeyboardPopup_CC8D8*)self)->miViewStart, iCutLength);
+        ((cKeyboardPopup_CC8D8*)self)->mszViewableString[iCutLength] = 0;
+        cKeyboardPopup_setScale(self, pText);
+        ((cFont_CC8D8*)cUIText_getFont(pText))->textExtent(((cKeyboardPopup_CC8D8*)self)->mszViewableString, &rectString, false);
+        fAllowableLength = ((cKeyboardPopup_CC8D8*)self)->mfViewWidth;
+        if (((cKeyboardPopup_CC8D8*)self)->miCursorPos == strlen(((cKeyboardPopup_CC8D8*)self)->mszEditString)) {
+            fAllowableLength -= ((cKeyboardPopup_CC8D8*)self)->mfCursorWidth;
+            if (fAllowableLength < rectString.w) {
+                if (bDropFromRight) {
+                    fAllowableLength += ((cKeyboardPopup_CC8D8*)self)->mfCursorWidth;
+                }
+            }
+        }
+        while (fAllowableLength < rectString.w) {
+            if (bDropFromRight) {
+                ((cKeyboardPopup_CC8D8*)self)->miViewEnd -= 1;
+            } else {
+                ((cKeyboardPopup_CC8D8*)self)->miViewStart += 1;
+            }
+            iCutLength = ((cKeyboardPopup_CC8D8*)self)->miViewEnd - ((cKeyboardPopup_CC8D8*)self)->miViewStart;
+            strncpy(((cKeyboardPopup_CC8D8*)self)->mszViewableString, ((cKeyboardPopup_CC8D8*)self)->mszEditString + ((cKeyboardPopup_CC8D8*)self)->miViewStart, iCutLength);
+            ((cKeyboardPopup_CC8D8*)self)->mszViewableString[iCutLength] = 0;
+            cKeyboardPopup_setScale(self, pText);
+            ((cFont_CC8D8*)cUIText_getFont(pText))->textExtent(((cKeyboardPopup_CC8D8*)self)->mszViewableString, &rectString, false);
+        }
+        while (rectString.w < ((cKeyboardPopup_CC8D8*)self)->mfViewWidth - ((cKeyboardPopup_CC8D8*)self)->mfCursorWidth) {
+            if (((cKeyboardPopup_CC8D8*)self)->miViewEnd >= ((cKeyboardPopup_CC8D8*)self)->miMaxCharacters)
+                break;
+            iCutLength = ++((cKeyboardPopup_CC8D8*)self)->miViewEnd - ((cKeyboardPopup_CC8D8*)self)->miViewStart;
+            strncpy(((cKeyboardPopup_CC8D8*)self)->mszViewableString, ((cKeyboardPopup_CC8D8*)self)->mszEditString + ((cKeyboardPopup_CC8D8*)self)->miViewStart, iCutLength);
+            ((cKeyboardPopup_CC8D8*)self)->mszViewableString[iCutLength] = 0;
+            cKeyboardPopup_setScale(self, pText);
+            ((cFont_CC8D8*)cUIText_getFont(pText))->textExtent(((cKeyboardPopup_CC8D8*)self)->mszViewableString, &rectString, false);
+        }
+    } else {
+        ((cKeyboardPopup_CC8D8*)self)->mszViewableString[0] = 0;
+    }
+    pCursor = (cUIThing_CC8D8*)cUIScreen_getObjectByHashName(((cKeyboardPopup_CC8D8*)self)->mpScreen, GetHashValue32(D_00466540));
+    pCursor->setVisible(((cKeyboardPopup_CC8D8*)self)->miViewStart != 0);
+    pCursor = (cUIThing_CC8D8*)cUIScreen_getObjectByHashName(((cKeyboardPopup_CC8D8*)self)->mpScreen, GetHashValue32(D_00466558));
+    if (strlen(((cKeyboardPopup_CC8D8*)self)->mszEditString) != 0) {
+        sVEntry_CC8D8* vt = *(sVEntry_CC8D8**)((char*)pCursor + 8);
+        char* thisp = (char*)pCursor + vt[9].delta;
+        vt[9].fn(thisp, ((cKeyboardPopup_CC8D8*)self)->miViewEnd < (unsigned int)strlen(((cKeyboardPopup_CC8D8*)self)->mszEditString));
+    } else {
+        pCursor->setVisible(0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_updateCursor);

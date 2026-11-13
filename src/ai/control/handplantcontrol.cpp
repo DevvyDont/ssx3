@@ -2444,7 +2444,141 @@ extern "C" float func_0013C878(sHpCtl_13C7A8* self, float* p, float a, float b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013C948);
+#ifdef SKIP_ASM
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBE_getBE();
+extern "C" float func_001493D8(void* self, int rider, int value);
+extern "C" float func_0031C228(float x);
+int func_00312AA0(void* anim, int n);
+
+// PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
+static inline float hpAbs_13C948(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2 FPU float->int->float round trip (truncate) via inline asm.
+static inline float hpTrunc_13C948(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    return t;
+}
+
+static inline float hpFloor_13C948(float x)
+{
+    float t = hpTrunc_13C948(x);
+    if (x < t)
+        t -= 1.0f;
+    return t;
+}
+
+static inline float hpAtan2_13C948(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f)
+            return y;
+        if (y >= 0.0f)
+            return 1.5707963705062866f;
+        return -1.5707963705062866f;
+    }
+    float a = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f)
+            a += 3.1415927410125732f;
+        else
+            a -= 3.1415927410125732f;
+    }
+    return a;
+}
+
+static inline float hpVX_13C948(sVec4HP v) { return v.x; }
+static inline float hpVY_13C948(sVec4HP v) { return v.y; }
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0Length_13C948(const sVec4HP& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+#define RIDER (*(char**)((char*)self + 0x18))
+
+// cGroundMotion::getBoostForce(const tSurfData* snow) (SSX On Tour symbols; the retail state check stands in for
+// !cRider::isOnRaceCourse, and the retail code has no getAccelerationAttrib scale).
+extern "C" float func_0013C948(void* self, char* snow)
+{
+    float slowTerritoryBoostScalar = 1.0f;
+    int inSlowTerritory = *(int*)(RIDER + 0x434) < 17;
+    inSlowTerritory ^= 1;
+    if (inSlowTerritory)
+        slowTerritoryBoostScalar = 0.4999951124191284f;
+    if (*(float*)(RIDER + 0x214) != 0.0f || *(float*)(RIDER + 0x470) >= 0.0f)
+        return 0.0f;
+    float totalBoost = 0.0f;
+    float pathFactor = 0.0f;
+    int fl = *(short*)(RIDER + 0x2D4);
+    if (fl & 0x10)
+    {
+        pathFactor = 1.0f;
+    }
+    else
+    {
+        float kAngleLimit = 1.5707964897155762f;
+        float heading = hpAtan2_13C948(hpVY_13C948(*(sVec4HP*)(RIDER + 0x1B0)), hpVX_13C948(*(sVec4HP*)(RIDER + 0x1B0)));
+        float d = heading - *(float*)(RIDER + 0x4CC);
+        float offPathAngle = hpAbs_13C948(d - hpFloor_13C948(d * 0.15915493667125702f + 0.5f) * 6.2831854820251465f);
+        if (offPathAngle < kAngleLimit)
+            pathFactor = 1.0f - offPathAngle * (1.0f / kAngleLimit);
+    }
+    float backwardsInSpokePenalty = 1.0f;
+    if (pathFactor <= 0.0f && inSlowTerritory)
+        backwardsInSpokePenalty = 0.0f;
+    float boostWarp = *(float*)(RIDER + 0x2FC) * 0.16997130215168f;
+    if (0.0f < *(float*)(RIDER + 0x2E8))
+        boostWarp = pathFactor * 5.5f >? boostWarp;
+    if (0.0f < boostWarp)
+    {
+        float delta = 0.07999998331069946f - hpAbs_13C948(*(float*)(RIDER + 0x1F0));
+        if (0.0f < delta)
+            totalBoost += boostWarp * delta * (1052.7747802734375f * (*(float*)(RIDER + 0x3A8) >= 0.0f ? *(float*)(RIDER + 0x3A8) : 0.0f) + 2350.0f);
+    }
+    float speed = *(float*)(snow + 0x20) * slowTerritoryBoostScalar * 27.77777862548828f - vu0Length_13C948(*(sVec4HP*)(RIDER + 0x1E0));
+    float boostDelta = speed < 1111.111083984375f ? speed : 1111.111083984375f;
+    if (0.0f < boostDelta)
+    {
+        func_001493D8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34));
+        float getGoingFactor = func_00312AA0(*(void**)(RIDER + 0x784), 2) == 0x16 ? 0.20000000298023224f : 0.0f;
+        int st = *(int*)(RIDER + 0x434);
+        if (st == 11 || st == 12 || st == 13)
+            boostDelta *= hpAbs_13C948(*(float*)(RIDER + 0x378));
+        totalBoost += (pathFactor >? getGoingFactor * 1.0004451274871826f) * boostDelta;
+    }
+    return backwardsInSpokePenalty * (*(float*)(snow + 0x24) * totalBoost * slowTerritoryBoostScalar + *(float*)(RIDER + 0x220) * 56.41297912597656f);
+}
+#undef RIDER
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013CCF0);

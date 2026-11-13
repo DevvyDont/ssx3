@@ -916,7 +916,99 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(void* selfp)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupLocalSessionList);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* iface, int id);
+extern "C" int func_0026B598(void* tbl, int kind, int idx);
+extern "C" char* func_0026B5E0(void* tbl, int kind, int idx);
+extern char D_004D33A0[];
+extern char D_00471918[];
+extern char D_00471930[];
+extern char D_00471940[];
+extern char D_00471958[];
+
+struct sMapSt_9970 {
+    char pad_0x0[0xC0];
+    int nSessions;              // 0xC0
+    char pad_0xC4[0xC];
+    cFEObj_96A8* img;           // 0xD0
+    char* screen;               // 0xD4
+    char pad_0xD8[0xC];
+    cFEObj_96A8* markA[8];      // 0xE4
+    cFEObj_96A8* markB[8];      // 0x104
+    sV3_96A8 posB[8];           // 0x124
+};
+
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
+// The inlined cUIIcon ctor: cUIThing(screen, 0), vtable, member at 0x74, two fields.
+struct cUIIcon_9970 {
+    char d[0x88];
+    cUIIcon_9970(char* screen)
+    {
+        func_0039FB30(this, screen, 0);
+        *(void***)((char*)this + 0x8) = D_00494AA8;
+        func_0021CCC8((char*)this + 0x74);
+        *(int*)((char*)this + 0x78) = -1;
+        *(int*)((char*)this + 0x7C) = 0;
+    }
+};
+
+// cUIThing::setPosition(const t3Vector&), inlined.
+struct sIconPos_9970 {
+    char pad_0x0[0x44];
+    sV3_96A8 pos;               // 0x44
+    void setPosition(const sV3_96A8& p) { pos = p; }
+};
+
+extern "C" void cOVState_MAP_setupLocalSessionList(void* selfp)
+{
+    sMapSt_9970* self = (sMapSt_9970*)selfp;
+    void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
+    void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
+    self->nSessions = cBEMissionInterface_getNumberSessionsOnTrack(ifMap, *cBENewRaceInterface_getLocation(ifGame));
+    sV3_96A8 mapPos = ((sFEObjData_96A8*)self->img)->pos;
+    for (int i = 0; i < self->nSessions; i++) {
+        if (func_0026B598(D_004D33A0, 2, i + 1) != 0) {
+        const char* sp = (const char*)func_0026B5E0(D_004D33A0, 2, i + 1);
+        sV3_96A8 spPos = *(sV3_96A8*)(sp + 0x8);
+        sBounds_96A8 pictureRecord;
+        func_00154678(&pictureRecord, ifMap, *cBENewRaceInterface_getLocation(ifGame));
+        unsigned int sessionPoint_x;
+        {
+            float across = Absf_96A8((spPos.x - pictureRecord.minX) / (pictureRecord.maxX - pictureRecord.minX));
+            sessionPoint_x = (int)(across * 356.0f);
+        }
+        unsigned int sessionPoint_y;
+        {
+            float down = Absf_96A8((spPos.y - pictureRecord.minY) / (pictureRecord.maxY - pictureRecord.minY));
+            sessionPoint_y = (int)(down * 266.0f);
+        }
+
+        self->markA[i] = (cFEObj_96A8*)new (D_00471918, 0x20000000, 0) cUIIcon_9970(self->screen);
+        ((sIconPos_9970*)self->markA[i])->setPosition(sV3_96A8((float)(sessionPoint_x + 0xFC) - 5.0f, (float)(sessionPoint_y + 0x61) - 5.0f, mapPos.z));
+        self->markA[i]->SetScale(sV3_96A8(18.0f, 18.0f));
+        func_00399730(self->markA[i], GetHashValue32(D_00471930));
+        self->markA[i]->SetVisible(0);
+        sFEObjData_96A8* da = (sFEObjData_96A8*)self->markA[i];
+        da->flags = (da->flags & ~0x1F00) | 0xB00;
+        cList_addToEnd((cList*)(self->screen + 0xB4), (cListNode*)self->markA[i]);
+
+        self->markB[i] = (cFEObj_96A8*)new (D_00471940, 0x20000000, 0) cUIIcon_9970(self->screen);
+        self->posB[i] = sV3_96A8((float)(sessionPoint_x + 0xFC) - 5.0f, (float)(sessionPoint_y + 0x61) - 5.0f, mapPos.z);
+        ((sIconPos_9970*)self->markB[i])->setPosition(self->posB[i]);
+        self->markB[i]->SetScale(sV3_96A8(18.0f, 18.0f));
+        func_00399730(self->markB[i], GetHashValue32(D_00471958));
+        self->markB[i]->SetVisible(0);
+        sFEObjData_96A8* db = (sFEObjData_96A8*)self->markB[i];
+        db->flags = (db->flags & ~0x1F00) | 0xC00;
+        cList_addToEnd((cList*)(self->screen + 0xB4), (cListNode*)self->markB[i]);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_showIndicators);
