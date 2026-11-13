@@ -1768,7 +1768,143 @@ void func_00254400(void* self, float f0, float f1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("mem/memstd", func_00254410);
+#ifdef SKIP_ASM
+// PORT: the unit's sMemAllocFuncs declares alloc as `void* (*)(int)`; it really
+// takes (tag, size, align, d, flags); view bound by asm label.
+struct sMemAlloc_4410 {
+    void* (*alloc)(const char* tag, int size, int align, int d, int flags);
+    void* (*free)(void* p);
+    int flags;
+};
+extern sMemAlloc_4410 D_00509430_4410 __asm__("D_00509430");
+extern void* D_00480270[];
+extern char D_00480258[];
+extern char D_004A2EA0[];
+extern char D_004A2EA8[];
+extern float D_004A2EB0[];
+extern "C" int func_00254350(int x);
+extern "C" void func_002543F0(void* self, float a, float b, float c);
+void func_00254400(void* self, float f0, float f1);
+// PORT: the project names this func_0037D090__FPv (one arg); this caller passes six.
+void func_0037D090_6(void* ctx, int id, int a, int b, int c, int d) __asm__("func_0037D090__FPv");
+
+struct sVE_4410a {
+    short delta;
+    short index;
+    int (*fn)(void*, char*, char*, int, int, int, int, int, int, int, int, int);
+};
+struct sCtx_4410 {
+    char pad[0x10D8];
+    sVE_4410a* vt;
+};
+// PORT: the unit declares D_004A5B80 with other types; view bound by asm label
+extern sCtx_4410* D_004A5B80_4410 __asm__("D_004A5B80");
+
+struct sVE_4410b {
+    short delta;
+    short index;
+    unsigned int (*fn)(void*);
+};
+
+class cRend_4410 {
+public:
+    char pad[0x10D8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual unsigned int width();
+    virtual unsigned int height();
+};
+
+struct sTile_4410 {
+    int tex;        // 0x0
+    int w;          // 0x4
+    int h;          // 0x8
+    static void* operator new(unsigned int size) { return D_00509430_4410.alloc(D_004A2EA0, size, 0, 0, D_00509430_4410.flags); }
+    sTile_4410(char* pixels, int height)
+    {
+        w = 16;
+        h = height;
+        sCtx_4410* g = D_004A5B80_4410;
+        tex = g->vt[47].fn((char*)g + g->vt[47].delta, pixels, D_004A2EA8, w, h, 0, 0, 0, 0, 0, 0, -1);
+        func_0037D090_6(g, tex, 0, 0, 0, 0);
+    }
+};
+
+struct sTexSheet_4410 {
+    void* owner;            // 0x00
+    void** vt;              // 0x04
+    cRend_4410* rend;       // 0x08
+    int fC;                 // 0x0C
+    char* hdr;              // 0x10
+    sTile_4410** tiles;     // 0x14
+    int count;              // 0x18
+    int cols;               // 0x1C
+    int rows;               // 0x20
+    int heights[6];         // 0x24
+    int f3C;                // 0x3C
+};
+
+// PORT: the unit declares this as (void*, void*, int, int, int); typed body bound by asm label.
+extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res, cRend_4410* rend, int a3) __asm__("func_00254410");
+
+extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res, cRend_4410* rend, int a3)
+{
+    self->owner = owner;
+    self->vt = D_00480270;
+    self->rend = rend;
+    char* hdr = *(char**)(res + 0x4);
+    self->hdr = hdr;
+    char* data;
+    if (*(int*)(hdr + 0xC) & 0x1000) {
+        data = hdr + *(int*)(hdr + 0x10);
+    } else {
+        data = hdr + 0x10;
+    }
+    int w = *(short*)(self->hdr + 4);
+    int h = *(short*)(self->hdr + 6);
+    self->rows = 0;
+    self->cols = w / 16;
+    int rem = h;
+    for (;;) {
+        int p = 1 << func_00254350(rem);
+        if (rem == p) {
+            self->heights[self->rows] = rem;
+            self->rows++;
+            break;
+        }
+        self->heights[self->rows] = p;
+        rem -= self->heights[self->rows++];
+    }
+    self->count = self->cols * self->rows;
+    self->tiles = (sTile_4410**)D_00509430_4410.alloc(D_00480258, self->count * 12, 0, 0, D_00509430_4410.flags);
+    float fh = (float)h;
+    float fw = (float)w;
+    int k = 0;
+    for (int i = 0; i < self->cols; i++) {
+        int y = 0;
+        for (int j = 0; j < self->rows; j++) {
+            self->tiles[k++] = new sTile_4410(data + ((y << 6) + h * (i << 6)), self->heights[j]);
+            y += self->heights[j];
+        }
+    }
+    self->fC = 0;
+    float sw = (float)self->rend->width();
+    float sh = (float)self->rend->height() - fh;
+    func_002543F0(self, (sw - fw) * 0.5f, sh * 0.5f, D_004A2EB0[0]);
+    func_00254400(self, 1.0f, 1.0f);
+    self->f3C = a3;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_002547B8);

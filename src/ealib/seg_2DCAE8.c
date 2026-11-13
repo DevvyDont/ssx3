@@ -5842,7 +5842,90 @@ void func_003E4AA0(void (*a)(void)) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4AF0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void func_003E6690_4AF0(int) __asm__("func_003E6690");
+extern int func_00423A80_4AF0(int, void (*)(void), int) __asm__("func_00423A80");
+extern int func_004248E8_4AF0(int) __asm__("func_004248E8");
+extern void func_003E4A30_4AF0(void (*)(void)) __asm__("func_003E4A30");
+extern void func_003E4DB8_4AF0(void) __asm__("func_003E4DB8");
+extern void func_003E4D68_4AF0(void) __asm__("func_003E4D68");
+
+extern int D_00450DA0;
+extern int D_00450DC8;
+/* tick counter, incremented by the timer interrupt handler (func_003E4DB8) */
+extern volatile int D_00450DCC;
+extern int D_00450DDC;
+extern unsigned short D_00450DE0;
+
+#define T0_COUNT_4AF0 (*(volatile int *)0x10000000)
+#define T0_MODE_4AF0 (*(volatile int *)0x10000010)
+#define T1_COUNT_4AF0 (*(volatile int *)0x10000800)
+#define T1_MODE_4AF0 (*(volatile int *)0x10000810)
+#define T1_COMP_4AF0 (*(volatile int *)0x10000820)
+
+int func_003E4AF0(int hz) {
+    int mode;
+    int count;
+    int tmode;
+    int end;
+    int d;
+
+    if (D_00450DDC != 0) {
+        return D_00450DC8;
+    }
+    if (hz == 0) {
+        hz = 100;
+    }
+    if (hz < 0xC4E) {
+        if (hz < 0xC4) {
+            D_00450DE0 = (hz / 2 + 0x8CA00) / hz;
+            D_00450DC8 = 0x8CA00 / D_00450DE0;
+            mode = 2;
+        } else {
+            D_00450DE0 = (hz / 2 + 0x8CA000) / hz;
+            D_00450DC8 = 0x8CA000 / D_00450DE0;
+            mode = 1;
+        }
+    } else {
+        D_00450DE0 = (hz / 2 + 0x8CA0000) / hz;
+        D_00450DC8 = 0x8CA0000 / D_00450DE0;
+        mode = 0;
+    }
+    T1_COUNT_4AF0 = 0;
+    T1_COMP_4AF0 = D_00450DE0;
+    T1_MODE_4AF0 = mode | 0x180;
+    D_00450DDC = func_00423A80_4AF0(0xA, func_003E4DB8_4AF0, 0);
+    func_004248E8_4AF0(0xA);
+    if (D_00450DA0 == 0) {
+        count = T0_COUNT_4AF0;
+        tmode = T0_MODE_4AF0;
+        T0_MODE_4AF0 = 0x83;
+        end = D_00450DCC + D_00450DC8;
+        if (D_00450DCC < end) {
+            do {
+            } while (D_00450DCC < end);
+        }
+        d = T0_COUNT_4AF0 - count;
+        T0_COUNT_4AF0 = count;
+        T0_COUNT_4AF0 = tmode;
+        if (d < 0) {
+            d += 0x10000;
+        }
+        if ((unsigned int)(d - 0x3D55) < 0x63) {
+            func_003E6690_4AF0(1);
+        } else if ((unsigned int)(d - 0x3CD8) < 0x63) {
+            func_003E6690_4AF0(2);
+        } else if ((unsigned int)(d - 0x7081) < 0xC7F) {
+            func_003E6690_4AF0(3);
+        }
+    }
+    func_003E4A30_4AF0(func_003E4D68_4AF0);
+    return D_00450DC8;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4D68);
