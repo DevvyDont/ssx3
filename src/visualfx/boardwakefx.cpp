@@ -3908,7 +3908,147 @@ extern "C" void func_002E4F28(int* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4F50);
+#ifdef SKIP_ASM
+// cSnowBox::update(const tWorldPainterSnowfallParameters&) (SSX On Tour symbols, all_in_one_visualfx.obj).
+struct cSnowBox_4F50 {
+    int i0;                         // 0x00
+    int mode;                       // 0x04
+    int numFlakes;                  // 0x08
+    float range;                    // 0x0C
+    float windScale;                // 0x10
+    float f14;                      // 0x14
+    float f18;                      // 0x18
+    float fallSpeed;                // 0x1C
+    sWakeVecE398 pos;               // 0x20
+    sWakeVecE398 wind;              // 0x30
+    sWakeVecE398 windPrev;          // 0x40
+    char pad50[0x40];               // 0x50
+    float windTimer;                // 0x90
+    float windTimeTotal;            // 0x94
+    char pad98[0xC];                // 0x98
+    float colour[3];                // 0xA4
+    int firstWind;                  // 0xB0
+};
+
+// tWorldPainterSnowfallParameters (filled by func_002E5DA0).
+struct tWorldPainterSnowfallParameters_4F50 {
+    float f[8];                     // 0x00
+    float c0[4];                    // 0x20
+    float c1[4];                    // 0x30
+};
+
+// t4Vector with EA's 4-float constructor.
+struct t4Vec_4F50 : sWakeVecE398 {
+    t4Vec_4F50(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
+
+extern sWakeVecE398 D_004FF160_4F50 __asm__("D_004FF160");     // t4vect::ZAxis
+extern float D_00504FB8[];                                      // cSinCosTable::gSinCosTable
+
+static inline float FXRand_4F50(float lo, float hi)
+{
+    return lo + (hi - lo) * wakeRandE398();
+}
+
+static inline float deg2rad_4F50(float d)
+{
+    return d * 0.01745329424738884f;
+}
+
+static inline void sincos_4F50(float a, float& s, float& c)
+{
+    int i = (int)(a * 81.4873275756836f) & 0x1FF;
+    s = D_00504FB8[i];
+    c = D_00504FB8[i + 0x80];
+}
+
+static inline void BringIntoRange_4F50(float& v, float range)
+{
+    if (v > range * 0.5f) {
+        float q = v / range;
+        v = (q - (float)(int)q) * range - range;
+    } else if (v < -(range * 0.5f)) {
+        float q = v / range;
+        v = (q - (float)(int)q) * range + range;
+    }
+}
+
+// PORT: PS2-only VU0 inline asm (scalar * vector).
+static inline sWakeVecE398 Scale_4F50(float s, const sWakeVecE398& v)
+{
+    sWakeVecE398 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// The unit declares func_002E4F50(int*, sWakeRec_5DA0*) later; define it through a typed alias.
+extern "C" void func_002E4F50_4F50(cSnowBox_4F50* self, const tWorldPainterSnowfallParameters_4F50* params) __asm__("func_002E4F50");
+extern "C" void func_002E4F50_4F50(cSnowBox_4F50* self, const tWorldPainterSnowfallParameters_4F50* params)
+{
+    switch (self->mode) {
+    case 0:
+        self->f18 = params->c0[0];
+        self->colour[0] = params->c0[1];
+        self->colour[1] = params->c0[2];
+        self->colour[2] = params->c0[3];
+        self->numFlakes = (int)(params->f[0] * 500.0f);
+        self->windScale = params->f[1] * 500.0f;
+        self->f14 = params->f[4];
+        break;
+    case 1:
+        self->f18 = params->c1[0];
+        self->colour[0] = params->c1[1];
+        self->colour[1] = params->c1[2];
+        self->colour[2] = params->c1[3];
+        self->numFlakes = (int)(params->f[2] * 6.0f);
+        self->windScale = params->f[3] * 250.0f;
+        break;
+    }
+    const float kTimeDiff = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+    float windBlend;
+    float x;
+    float y;
+    float z;
+    self->windTimer -= kTimeDiff;
+    if (self->windTimer < 0.0f) {
+        self->windPrev = self->wind;
+        float s;
+        float c;
+        sincos_4F50(deg2rad_4F50(params->f[5]), s, c);
+        t4Vec_4F50 windBaseRotated(self->windScale * c, self->windScale * s, 0.0f, 0.0f);
+        t4Vec_4F50 windBaseFlurries(windBaseRotated.x * (1.0f - params->f[6]) + params->f[6] * FXRand_4F50(-self->windScale, self->windScale),
+                                    windBaseRotated.y * (1.0f - params->f[6]) + params->f[6] * FXRand_4F50(-self->windScale, self->windScale),
+                                    params->f[6] * FXRand_4F50(-self->windScale, self->windScale), 0.0f);
+        self->wind = windBaseFlurries;
+        self->windTimer = self->windTimeTotal = FXRand_4F50(1.0f, 5.0f);
+        if (self->firstWind) {
+            self->windPrev = self->wind;
+            self->firstWind = 0;
+        }
+    }
+    windBlend = self->windTimer / self->windTimeTotal;
+    wakeAddE398(self->pos, wakeScale0EE8(wakeAdd0EE8(wakeScale0EE8(self->wind, 1.0f - windBlend), wakeScale0EE8(self->windPrev, windBlend)), kTimeDiff));
+    wakeAddE398(self->pos, Scale_4F50(self->fallSpeed * params->f[7] * kTimeDiff, D_004FF160_4F50));
+    x = self->pos.x;
+    y = self->pos.y;
+    z = self->pos.z;
+    BringIntoRange_4F50(x, self->range);
+    BringIntoRange_4F50(y, self->range);
+    BringIntoRange_4F50(z, self->range);
+    self->pos = t4Vec_4F50(x, y, z, 1.0f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E5430);

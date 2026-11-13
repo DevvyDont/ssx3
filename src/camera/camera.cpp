@@ -610,7 +610,339 @@ extern "C" void func_0015E460(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015E668);
+#ifdef SKIP_ASM
+// cCamera::updateCamMat(void) (SSX On Tour PSP symbols: all_in_one_camera.obj / camera.cpp).
+#include "bx/math3d.h"
+
+extern "C" void func_0015EE00(void*);                                   // cCamera::avoidGround
+extern void func_0015E460_E668(void*) __asm__("func_0015E460");         // cCamera::applyCameraShake
+extern "C" void func_00166640(void* self, int a1);                      // cLookAtChaseAlgorithm::calcPitchHeading(bool)
+extern "C" void func_00166F90(void* self);                              // cLookAtChaseAlgorithm::calcPose
+extern "C" void func_002ED490(int, float, float, float);                // cRenderStateMan::update
+extern "C" float func_002EE3B8(int);                                    // cRenderStateMan::DrawDistance
+extern t4Vector D_004FF120_E668 __asm__("D_004FF120");                  // t4vect::Zero
+extern t4Vector D_004FF130_E668 __asm__("D_004FF130");                  // t4vect::Origin
+extern t4Matrix D_004C53A0_E668 __asm__("D_004C53A0");                  // CamAxisFlip
+extern float D_004A3B68;                                                // cRenderStateMan::m_farPlane
+
+// EA's quaternion: the ctor takes w first.
+struct tQuaternion_E668 {
+    float x, y, z, w;
+    tQuaternion_E668() {}
+    tQuaternion_E668(const float& aw, const float& ax, const float& ay, const float& az) { w = aw; x = ax; y = ay; z = az; }
+} __attribute__((aligned(16)));
+
+struct tPose_E668 {
+    t4Vector pos;
+    tQuaternion_E668 orient;
+    void setIdentity() { orient = tQuaternion_E668(1.0f, 0.0f, 0.0f, 0.0f); pos = D_004FF130_E668; }
+};
+
+struct t3Vector_E668 {
+    float x, y, z;
+    t3Vector_E668() {}
+    t3Vector_E668(float ax, float ay, float az) { x = ax; y = ay; z = az; }
+    t3Vector_E668(const t4Vector& v) { x = v.x; y = v.y; z = v.z; }
+    t3Vector_E668 operator-() const { return t3Vector_E668(-x, -y, -z); }
+};
+
+// t4Vector with EA's constructors (bx/math3d.h's t4Vector is a POD view).
+struct t4Vec_E668 : t4Vector {
+    t4Vec_E668(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+    t4Vec_E668(const t3Vector_E668& v, const float& aw) { x = v.x; y = v.y; z = v.z; w = aw; }
+};
+
+extern "C" tPose_E668 func_001673A0_E668(void* sub) __asm__("func_001673A0");   // cLookAtChaseAlgorithm::getPose
+
+struct cCameraAlgorithm_E668 {
+    float fov;      // 0x0
+    float nearZ;    // 0x4
+    float farZ;     // 0x8
+    int type;       // 0xC
+    virtual void v0();
+    virtual tPose_E668 getPose();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual t4Vector getTarget();
+};
+
+struct cCameraAlgoListNode_E668 {
+    cCameraAlgorithm_E668* algo;    // 0x0
+    float lensWeight;               // 0x4
+    int pad8;
+    float weight;                   // 0xC
+    int pad10;
+    cCameraAlgoListNode_E668* next; // 0x14
+};
+
+struct cCameraAlgoList_E668 {
+    cCameraAlgoListNode_E668* head;
+    int length;
+};
+
+struct cCameraController_E668 {
+    int pad[2];
+    cCameraAlgoList_E668* list;
+};
+
+struct cCamera_E668 {
+    float fov;                          // 0x0
+    float nearZ;                        // 0x4
+    float farZ;                         // 0x8
+    float maxFov;                       // 0xC
+    float minClip;                      // 0x10
+    float maxClip;                      // 0x14
+    int id;                             // 0x18
+    int pad1C;
+    tPose_E668 pose;                    // 0x20
+    t4Matrix viewMat;                   // 0x40
+    t4Vector viewDir;                   // 0x80
+    int pad90[4];
+    cCameraController_E668* controller; // 0xA0
+    int padA4;
+    cCameraController_E668* prevController; // 0xA8
+    int padAC[5];
+    char lookAtChase[0x20];             // 0xC0 cLookAtChaseAlgorithm
+    t4Vector blendTarget;               // 0xE0
+    char padF0[0x10];
+    t4Vector blendPos;                  // 0x100
+};
+
+// PORT: PS2-only VU0 inline asm (scalar * vector).
+static inline t4Vector operator*(float s, const t4Vector& v)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline t4Vector operator+(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (64-byte matrix copy).
+static inline void CopyMtx_E668(t4Matrix* dst, const t4Matrix* src)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(dst), "r"(src)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix multiply in place, m = m * b).
+static inline void MulEqMtx_E668(t4Matrix* m, const t4Matrix* b)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2      $vf4, 0x0(%0)\n"
+        "lqc2      $vf5, 0x10(%0)\n"
+        "lqc2      $vf6, 0x20(%0)\n"
+        "lqc2      $vf7, 0x30(%0)\n"
+        "lqc2      $vf8, 0x0(%1)\n"
+        "lqc2      $vf9, 0x10(%1)\n"
+        "lqc2      $vf10, 0x20(%1)\n"
+        "lqc2      $vf11, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf9x\n"
+        "vmadday.xyzw ACC, $vf5, $vf9y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf9z\n"
+        "vmaddw.xyzw  $vf13, $vf7, $vf9w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf10x\n"
+        "vmadday.xyzw ACC, $vf5, $vf10y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf10z\n"
+        "vmaddw.xyzw  $vf14, $vf7, $vf10w\n"
+        "vmulax.xyzw  ACC, $vf4, $vf11x\n"
+        "vmadday.xyzw ACC, $vf5, $vf11y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf11z\n"
+        "vmaddw.xyzw  $vf15, $vf7, $vf11w\n"
+        "sqc2      $vf12, 0x0(%0)\n"
+        "sqc2      $vf13, 0x10(%0)\n"
+        "sqc2      $vf14, 0x20(%0)\n"
+        "sqc2      $vf15, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "r"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (unit quaternion -> rotation matrix, row 3 = identity).
+static inline void QuatToMtx_E668(const tQuaternion_E668* q, t4Matrix* m)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2       $vf4, 0x0(%1)\n"
+        "vaddw.xyz  $vf1, $vf0, $vf0w\n"
+        "vadd.xyz   $vf5, $vf4, $vf4\n"
+        "vsub.w     $vf10, $vf10, $vf10\n"
+        "vsub.w     $vf11, $vf11, $vf11\n"
+        "vsub.w     $vf12, $vf12, $vf12\n"
+        "vmul.xyz   $vf6, $vf5, $vf4\n"
+        "vmulw.xyz  $vf7, $vf5, $vf4w\n"
+        "vopmula.xyz ACC, $vf5, $vf4\n"
+        "vmadd.xyz  $vf8, $vf0, $vf0\n"
+        "vsubay.x   ACC, $vf1, $vf6y\n"
+        "vmsubz.x   $vf10, $vf1, $vf6z\n"
+        "vsubaz.y   ACC, $vf1, $vf6z\n"
+        "vmsubx.y   $vf11, $vf1, $vf6x\n"
+        "vsubax.z   ACC, $vf1, $vf6x\n"
+        "vmsuby.z   $vf12, $vf1, $vf6y\n"
+        "vaddaz.y   ACC, $vf0, $vf8z\n"
+        "vmaddz.y   $vf10, $vf1, $vf7z\n"
+        "vaddax.z   ACC, $vf0, $vf8x\n"
+        "vmaddx.z   $vf11, $vf1, $vf7x\n"
+        "vaddax.y   ACC, $vf0, $vf8x\n"
+        "vmsubx.y   $vf12, $vf1, $vf7x\n"
+        "vadday.z   ACC, $vf0, $vf8y\n"
+        "vmsuby.z   $vf10, $vf1, $vf7y\n"
+        "vaddaz.x   ACC, $vf0, $vf8z\n"
+        "vmsubz.x   $vf11, $vf1, $vf7z\n"
+        "vadday.x   ACC, $vf0, $vf8y\n"
+        "vmaddy.x   $vf12, $vf1, $vf7y\n"
+        "sqc2       $vf0, 0x30(%0)\n"
+        "sqc2       $vf10, 0x0(%0)\n"
+        "sqc2       $vf11, 0x10(%0)\n"
+        "sqc2       $vf12, 0x20(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "r"(q)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
+static inline void Translate_E668(t4Matrix* m, const t4Vector& v)
+{
+    __asm__ __volatile__(
+        ".set noreorder\n"
+        "lqc2         $vf4, 0x0(%0)\n"
+        "lqc2         $vf5, 0x10(%0)\n"
+        "lqc2         $vf6, 0x20(%0)\n"
+        "lqc2         $vf7, 0x30(%0)\n"
+        "lqc2         $vf8, %1\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, 0x30(%0)\n"
+        ".set reorder\n"
+        :
+        : "r"(m), "m"(v)
+        : "memory");
+}
+
+static inline float bracket_E668(float lo, float v, float hi)
+{
+    return (lo <= v) ? (v <? hi) : lo; // PORT: g++ <? operator
+}
+
+extern "C" void func_0015E668_E668(cCamera_E668* self) __asm__("func_0015E668");
+extern "C" void func_0015E668_E668(cCamera_E668* self)
+{
+    cCameraAlgoListNode_E668* algoNode;
+    tPose_E668 tempPose;
+    float totalWeight = 0.0f;
+
+    self->pose.setIdentity();
+    algoNode = self->controller->list->head;
+    cCameraAlgorithm_E668* algo = algoNode->algo;
+    bool listLengthOne = self->controller->list->length == 1;
+    if (listLengthOne || algo->type == 0x4A) {
+        self->pose = algo->getPose();
+        if (self->controller == self->prevController) {
+            self->blendPos = self->pose.pos;
+            self->blendTarget = algo->getTarget();
+        }
+    } else {
+        self->blendTarget = D_004FF120_E668;
+        self->blendPos = D_004FF120_E668;
+        for (algoNode = self->controller->list->head; algoNode; algoNode = algoNode->next) {
+            if (algoNode->weight > 0.0001f) {
+                totalWeight += algoNode->weight;
+                float weightFactor = algoNode->weight / totalWeight;
+                tempPose = algoNode->algo->getPose();
+                t4Vector tempPosePos = tempPose.pos;
+                t4Vector tempAlgoPos = self->blendPos;
+                self->blendPos = weightFactor * tempPosePos + (1.0f - weightFactor) * tempAlgoPos;
+                t4Vector algoTargetPos = algoNode->algo->getTarget();
+                t4Vector tempAlgoTargetPos = self->blendTarget;
+                self->blendTarget = weightFactor * algoTargetPos + (1.0f - weightFactor) * tempAlgoTargetPos;
+            }
+        }
+        self->blendPos.w = 1.0f;
+        self->blendTarget.w = 1.0f;
+        func_00166640(self->lookAtChase, 1);
+        func_00166F90(self->lookAtChase);
+        self->pose = func_001673A0_E668(self->lookAtChase);
+    }
+    if (self->controller == self->prevController) {
+        func_0015EE00(self);
+        func_0015E460_E668(self);
+        func_00166640(self->lookAtChase, 0);
+        func_00166F90(self->lookAtChase);
+        self->pose = func_001673A0_E668(self->lookAtChase);
+    }
+    CopyMtx_E668(&self->viewMat, &D_004C53A0_E668);
+    t4Matrix quaternionMat;
+    QuatToMtx_E668(&self->pose.orient, &quaternionMat);
+    MulEqMtx_E668(&self->viewMat, &quaternionMat);
+    Translate_E668(&self->viewMat, t4Vec_E668(-t3Vector_E668(self->pose.pos.x, self->pose.pos.y, self->pose.pos.z), 1.0f));
+    self->viewDir = t4Vec_E668(self->viewMat.row[0].z, self->viewMat.row[1].z, self->viewMat.row[2].z, 0.0f);
+    self->fov = 0.0f;
+    self->nearZ = 0.0f;
+    self->farZ = 0.0f;
+    totalWeight = 0.0f;
+    for (algoNode = self->controller->list->head; algoNode; algoNode = algoNode->next) {
+        if (algoNode->lensWeight != 0.0f) {
+            totalWeight += algoNode->lensWeight;
+            float weightFactor = algoNode->lensWeight / totalWeight;
+            self->fov = weightFactor * algoNode->algo->fov + (1.0f - weightFactor) * self->fov;
+            self->nearZ = weightFactor * algoNode->algo->nearZ + (1.0f - weightFactor) * self->nearZ;
+            self->farZ = weightFactor * algoNode->algo->farZ + (1.0f - weightFactor) * self->farZ;
+        }
+    }
+    func_002ED490(self->id + 6, self->pose.pos.x, self->pose.pos.y, -99999.0f);
+    self->farZ = bracket_E668(self->minClip, self->farZ, func_002EE3B8(self->id + 6));
+    D_004A3B68 = self->farZ;
+    self->fov = bracket_E668(0.0f, self->fov, self->maxFov);
+    self->nearZ = bracket_E668(self->minClip, self->nearZ, self->maxClip);
+    self->farZ = bracket_E668(self->minClip, self->farZ, self->maxClip);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_0015EC98);

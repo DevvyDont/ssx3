@@ -391,7 +391,144 @@ extern "C" void func_0034B9B0(sFlagSetEntry* e)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034BCA0);
+#ifdef SKIP_ASM
+extern float D_00504FB8[];
+
+// Element i of v (x, y, z).
+inline float& elem_BCA0(sFsV3_CM& v, int i) { return (&v.x)[i]; }
+inline const float& elem_BCA0(const sFsV3_CM& v, int i) { return (&v.x)[i]; }
+
+inline sFsV3_CM& operator+=(sFsV3_CM& a, const sFsV3_CM& b)
+{
+    elem_BCA0(a, 0) += elem_BCA0(b, 0);
+    elem_BCA0(a, 1) += elem_BCA0(b, 1);
+    elem_BCA0(a, 2) += elem_BCA0(b, 2);
+    return a;
+}
+
+struct sFlagElem_BCA0 {
+    signed char b0;         // 0x0
+    signed char mode;       // 0x1
+    signed char b2;         // 0x2
+    char pad3[0x11];
+    float amp[4];           // 0x14 (0x1C/0x20: windX/windY in cFlagSet_CreateMesh)
+    float freqX;            // 0x24
+    float freqY;            // 0x28
+    float freqZ0;           // 0x2C
+    float freqZ1;           // 0x30
+    sFsV3_CM a;             // 0x34
+    sFsV3_CM b;             // 0x40
+    float blend;            // 0x4C
+    char pad50[0x14];
+    int cols;               // 0x64
+    int rows;               // 0x68
+    float colScale;         // 0x6C
+    float rowScale;         // 0x70
+    sFsV3_CM* verts;        // 0x74
+    float phase[4];         // 0x78
+};
+
+// cFlagSet::updateGrid(t3Vector* verts) (SSX On Tour symbols). Animates the flag mesh: waves along the columns, then per-vertex ripples, into out[cols * rows].
+extern "C" void func_0034BCA0(void* vself, void* vout)
+{
+    sFlagElem_BCA0* self = (sFlagElem_BCA0*)vself;
+    sFsV3_CM* out = (sFsV3_CM*)vout;
+    int bothHeld = self->b0 != 0 && self->mode != 0;
+    int neitherHeld = self->b0 == 0 && self->mode == 0;
+    float windRatio = self->blend + *(float*)((char*)func_002D1CB0() + 0x10) * (1.0f - self->blend);
+    float aTime[4];
+    float mag[4];
+    int i;
+    for (i = 0; i < 4; i++) {
+        aTime[i] = self->phase[i] * -6.2831854820251465f;
+        mag[i] = self->amp[i] * windRatio;
+    }
+    sFsV3_CM horizontalOffset[10];
+    float fi = 0.0f;
+    float accX = 0.0f;
+    float accY = 0.0f;
+    for (i = 0; i < self->cols; i++) {
+        float iRatioMultiplier = fi / self->colScale;
+        float iRatio = iRatioMultiplier;
+        int idx = i;
+        if (neitherHeld) {
+            iRatioMultiplier = 1.0f;
+        } else if (bothHeld) {
+            if (iRatioMultiplier > 0.5f) {
+                iRatioMultiplier = 1.0f - iRatioMultiplier;
+            }
+        } else if (self->mode == 1) {
+            idx = self->cols - i - 1;
+        }
+        float a = iRatio * 6.2831854820251465f;
+        int n = (int)((aTime[0] + a * self->freqX) * 81.4873275756836f) & 0x1FF;
+        float s = D_00504FB8[n];
+        float c = D_00504FB8[n + 0x80];
+        if (!bothHeld) {
+            accX += mag[0] * iRatioMultiplier * c;
+        }
+        horizontalOffset[idx] = sFsV3_CM(mag[0] * iRatioMultiplier * s, accX, 0.0f);
+        n = (int)((aTime[1] + a * self->freqY) * 81.4873275756836f) & 0x1FF;
+        s = D_00504FB8[n];
+        c = D_00504FB8[n + 0x80];
+        if (!bothHeld) {
+            accY += mag[1] * iRatioMultiplier * c;
+        }
+        horizontalOffset[idx] += sFsV3_CM(mag[1] * iRatioMultiplier * s, accY, 0.0f);
+        sFsV3_CM highWindMovement(self->b.x * iRatioMultiplier * windRatio, self->b.y * iRatioMultiplier * windRatio, self->b.z * iRatioMultiplier * windRatio);
+        sFsV3_CM lowWindMovement(self->a.x * iRatioMultiplier * (1.0f - windRatio), self->a.y * iRatioMultiplier * (1.0f - windRatio), self->a.z * iRatioMultiplier * (1.0f - windRatio));
+        horizontalOffset[idx] += highWindMovement + lowWindMovement;
+        fi += 1.0f;
+    }
+    int vertexIndex = 0;
+    float fj = 0.0f;
+    int j;
+    for (j = 0; j < self->rows; j++) {
+        float fi = 0.0f;
+        int i;
+        for (i = 0; i < self->cols; i++, fi += 1.0f) {
+            float iRatioMultiplier = fi / self->colScale;
+            float jRatio = fj / self->rowScale;
+            float iRatio = iRatioMultiplier;
+            if (bothHeld) {
+                if (iRatioMultiplier > 0.5f) {
+                    iRatioMultiplier = 1.0f - iRatioMultiplier;
+                }
+            } else if (self->mode == 1) {
+                iRatioMultiplier = 1.0f - iRatioMultiplier;
+                iRatio = iRatioMultiplier;
+            } else if (neitherHeld) {
+                iRatioMultiplier = 1.0f;
+            }
+            if (self->b2 && jRatio == 0.0f) {
+                out[vertexIndex] = self->verts[vertexIndex];
+            } else {
+                out[vertexIndex] = self->verts[vertexIndex] + horizontalOffset[i];
+                if (iRatio > 0.0f && mag[2] > 0.01f) {
+                    float tRatio = (iRatio + jRatio) * 0.5f;
+                    float tRatioMultiplier = (iRatioMultiplier + jRatio) * 0.5f;
+                    int n = (int)((aTime[2] + tRatio * (self->freqZ0 * 6.2831854820251465f)) * 81.4873275756836f) & 0x1FF;
+                    float s = D_00504FB8[n];
+                    float c = D_00504FB8[n + 0x80];
+                    out[vertexIndex] += sFsV3_CM(mag[2] * iRatioMultiplier * s, mag[2] * tRatioMultiplier * c, mag[2] * jRatio * s);
+                }
+                if (iRatio > 0.0f && mag[3] > 0.01f) {
+                    float tRatio = (iRatio + jRatio) * 0.5f;
+                    float tRatioMultiplier = (iRatioMultiplier + jRatio) * 0.5f;
+                    int n = (int)((aTime[3] + tRatio * (self->freqZ1 * 6.2831854820251465f)) * 81.4873275756836f) & 0x1FF;
+                    float s = D_00504FB8[n];
+                    float c = D_00504FB8[n + 0x80];
+                    out[vertexIndex] += sFsV3_CM(mag[3] * iRatioMultiplier * s, mag[3] * tRatioMultiplier * c, mag[3] * (1.0f - jRatio) * s);
+                }
+                vertexIndex++;
+            }
+        }
+        fj += 1.0f;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flagset", func_0034C2E0);
@@ -748,7 +885,155 @@ extern "C" void func_0034C898(sFlagSet_C898* self, void* arg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flagset", func_0034C8E8);
+#ifdef SKIP_ASM
+// cFenceNode::cFenceNode(int bucket, tInstanceRecord* pInst, tMakeFenceData* tdata, const tIntersectInfo* info)
+// (SSX On Tour symbols; On Tour passes the force in, retail computes it here like cFenceNode::onCollide).
+struct tMakeFenceData_C8E8 {
+    unsigned int w[4];
+};
+
+struct t3Vector_C8E8 {
+    float x, y, z;
+    t3Vector_C8E8() {}
+    void* operator new[](unsigned int, void* p) { return p; }
+};
+
+struct cFenceNode_C8E8 {
+    char pad0[0xC];
+    void** vtable;              // 0xC
+    char pad10[0x8];
+    char* Instance;             // 0x18 tInstanceRecord* (matrix at +0x10)
+    tMakeFenceData_C8E8 State;  // 0x1C cFenceNodeState (tResourceID first)
+    int field_0x2c;             // 0x2C
+    int field_0x30;             // 0x30
+    int field_0x34;             // 0x34
+    int field_0x38;             // 0x38
+    int field_0x3c;             // 0x3C
+    void* GridMesh;             // 0x40 cGridMesh*
+    t3Vector_C8E8 Verts[16];    // 0x44
+    char* NextInstance;         // 0x104 tInstanceRecord*
+    char* PrevInstance;         // 0x108 tInstanceRecord*
+};
+
+struct sVec4_C8E8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat_C8E8 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
+static inline sVec4_C8E8 MulMat_C8E8(const sMat_C8E8* m, const sVec4_C8E8* v)
+{
+    sVec4_C8E8 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "o"(*v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sVec4_C8E8 Normalize_C8E8(const sVec4_C8E8& v)
+{
+    sVec4_C8E8 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_C8E8(const sVec4_C8E8& a, const sVec4_C8E8& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: SN abs.s asm helper (PS2 FPU).
+static inline float fabs_C8E8(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+extern void* D_0048FA00[];
+extern sVec4_C8E8 D_004FF140;
+extern "C" void* func_0034FB00(void* self, int a1, int type, void* obj);
+extern "C" void func_0034D1E8(void* self);
+extern "C" void func_0034D6F0(void* self, float dt);
+extern "C" void func_0034CC80(char* self, char* obj, int flag);
+
+extern "C" cFenceNode_C8E8* func_0034C8E8(cFenceNode_C8E8* self, int bucket, void* pInst, tMakeFenceData_C8E8* tdata, char* info)
+{
+    float force;
+    func_0034FB00(self, bucket, 9, pInst);
+    self->State.w[0] = 0xFFFFFFFF;
+    self->vtable = D_0048FA00;
+    new (self->Verts) t3Vector_C8E8[16];
+    self->State = *tdata;
+    self->field_0x30 = 0;
+    self->field_0x2c = 0;
+    self->field_0x34 = 0;
+    self->State.w[0] = 0xFFFFFFFF;
+    func_0034D1E8(self);
+    self->field_0x38 = 0;
+    self->field_0x3c = 0;
+    if (self->GridMesh != 0) {
+        sVec4_C8E8 dir = Normalize_C8E8(MulMat_C8E8((sMat_C8E8*)(self->Instance + 0x10), &D_004FF140));
+        float speed = fabs_C8E8(*(float*)(info + 0x30));
+        force = Dot_C8E8(dir, *(sVec4_C8E8*)(info + 0x10));
+        force = speed * (force * 0.0010000000474974513f);
+    } else {
+        force = Dot_C8E8(*(sVec4_C8E8*)(info + 0x20), *(sVec4_C8E8*)(info + 0x10));
+        force = force * 0.0010000000474974513f * fabs_C8E8(*(float*)(info + 0x30));
+    }
+    func_0034D6F0(self, force);
+    if (self->NextInstance != 0)
+        func_0034CC80((char*)self, self->NextInstance, 1);
+    if (self->PrevInstance != 0)
+        func_0034CC80((char*)self, self->PrevInstance, 0);
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flagset", func_0034CAB8);
