@@ -5865,7 +5865,40 @@ void func_003E4D68(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4DB8);
+#ifdef SKIP_ASM
+// PORT: PS2-only (EE timer 1 registers, inline asm).
+/* tmrint: the EE timer 1 compare interrupt (inittmr.c; On Tour's PSP tmrint has the same tick/callback body). */
+extern unsigned short D_00450DE0;               /* compare period */
+extern volatile int D_00450DCC;                 /* ticks */
+extern volatile int D_00450DD0;                 /* libticks */
+extern int D_00450DE4;                          /* bInTimerSubroutine */
+extern void (*D_00450DA8[8])(void);             /* tmrsub */
+
+#define T1_COUNT (*(volatile int *)0x10000800)
+#define T1_MODE (*(volatile int *)0x10000810)
+#define T1_COMP (*(volatile int *)0x10000820)
+
+int func_003E4DB8(void) {
+    int i;
+
+    T1_COMP = D_00450DE0 + T1_COMP - T1_COUNT;
+    T1_COUNT = 0;
+    T1_MODE |= 0x400;
+    D_00450DCC++;
+    D_00450DD0++;
+    for (i = 0; i < 8; i++) {
+        if (D_00450DA8[i]) {
+            D_00450DE4 = 1;
+            D_00450DA8[i]();
+            D_00450DE4 = 0;
+        }
+    }
+    __asm__ volatile("sync.l\n\tei");
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4E98);

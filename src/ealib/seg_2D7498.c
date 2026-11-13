@@ -2253,7 +2253,45 @@ void func_003D9AC8(struct H_9AC8 *h, int id, int a2, unsigned char *a3, int a4, 
 
 INCLUDE_ASM("ealib/seg_2D7498", func_003D9BD8);
 
+//100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D9ED0);
+#ifdef SKIP_ASM
+struct H_9ED0 {
+    char pad[6];
+    unsigned char n6;
+    unsigned char lo : 4;
+    signed char hi : 4;
+};
+struct T_9ED0 {
+    int a, b, c;
+};
+struct B_9ED0 {
+    unsigned char a, b, c;
+};
+int func_003D9ED0(struct H_9ED0 *h, unsigned char *a1, int *masks) {
+    struct T_9ED0 t;
+    int *m;
+    struct B_9ED0 *e;
+    int n, ok, i;
+
+    n = h->hi;
+    ok = 1;
+    if (n != 0) {
+        m = (int *)(a1 + ((((a1[4] >> 2) + 3) & 0xFFFFFFFC) + 8));
+        e = (struct B_9ED0 *)((unsigned char *)h + ((((h->n6 * 2) + 3) & 0xFFFFFFFC) + 0xC) + ((h->lo * 3 + 3) & ~3));
+        for (i = 0; i < n; i++) {
+            t.a = e[i].a;
+            t.b = e[i].b;
+            t.c = e[i].c;
+            if (m[i] != 0 && !(m[i] & masks[t.b])) {
+                ok = 0;
+                break;
+            }
+        }
+    }
+    return ok;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2D7498", func_003D9FB0);
 
