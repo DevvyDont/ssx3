@@ -177,7 +177,95 @@ extern "C" void func_00369CB0(void* self, void* obj, int a2, int a3, int a4)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_00369CF8);
+#ifdef SKIP_ASM
+struct sGmV3_369CF8 {
+    float x, y, z;
+    sGmV3_369CF8() {}
+    sGmV3_369CF8(float a, float b, float c) : x(a), y(b), z(c) {}
+};
+
+struct sGmV4_369CF8 {
+    float x, y, z, w;
+    sGmV4_369CF8() {}
+    sGmV4_369CF8(const sGmV3_369CF8& v, const float& d) : x(v.x), y(v.y), z(v.z), w(d) {}
+} __attribute__((aligned(16)));
+
+static inline sGmV3_369CF8 operator+(const sGmV3_369CF8& a, const sGmV3_369CF8& b)
+{
+    return sGmV3_369CF8(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
+struct sGmUV_369CF8 {
+    float u, v;
+    float x() const { return u; }
+    float y() const { return v; }
+};
+
+struct sGmUVW_369CF8 {
+    float x, y, z, w;
+    sGmUVW_369CF8() {}
+} __attribute__((aligned(16)));
+
+struct sGmVert_369CF8 {
+    sGmUVW_369CF8 uv;       // 0x00
+    int r, g, b, a;         // 0x10
+    sGmV4_369CF8 pos;       // 0x20
+    sGmVert_369CF8() {}
+};
+
+struct sGmVE_369CF8 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, sGmVert_369CF8*, int);
+};
+
+// cGraphicsMan::RenderIndexedTriList(int NumTris, int NumVerts, const unsigned char* Indices,
+//     const t3Vector* P, const t2Vector* UV, const tARGB* Color, const t3Vector& Offset)
+extern "C" void func_00369CF8(char* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* P,
+                              sGmUV_369CF8* UV, sGmV4_369CF8* Color, sGmV3_369CF8* Offset)
+{
+    sGmVert_369CF8 V[3];
+    V[2].uv.z = 1.0f;
+    V[1].uv.z = 1.0f;
+    V[0].uv.z = 1.0f;
+    if (UV) {
+        for (int i = 0; i < NumTris; i++) {
+            for (int j = 0; j < 3; j++) {
+                int Index = Indices[j];
+                V[j].pos = sGmV4_369CF8(P[Index] + *Offset, 1.0f);
+                V[j].a = (int)(Color[Index].x * 0.5f);
+                V[j].r = (int)(Color[Index].y * 0.5f);
+                V[j].g = (int)(Color[Index].z * 0.5f);
+                V[j].b = (int)(Color[Index].w * 0.5f);
+                V[j].uv.x = UV[Index].x();
+                V[j].uv.y = UV[Index].y();
+            }
+            Indices += 3;
+            sGmVE_369CF8* vt = *(sGmVE_369CF8**)(self + 0x10D8);
+            vt[71].fn(self + vt[71].delta, 3, V, 0);
+        }
+    } else {
+        for (int i = 0; i < NumTris; i++) {
+            for (int j = 0; j < 3; j++) {
+                int Index = Indices[j];
+                V[j].pos = sGmV4_369CF8(P[Index] + *Offset, 1.0f);
+                V[j].a = (int)(Color[Index].x * 0.5f);
+                V[j].r = (int)(Color[Index].y * 0.5f);
+                V[j].g = (int)(Color[Index].z * 0.5f);
+                V[j].b = (int)(Color[Index].w * 0.5f);
+                V[j].uv.z = 1.0f;
+                V[j].uv.x = 0.0f;
+                V[j].uv.y = 0.0f;
+            }
+            Indices += 3;
+            sGmVE_369CF8* vt = *(sGmVE_369CF8**)(self + 0x10D8);
+            vt[71].fn(self + vt[71].delta, 3, V, 0);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_00369FF0__FPv);

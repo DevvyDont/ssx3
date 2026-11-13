@@ -1,6 +1,67 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("worldpainter/quadtree", cQuadTree_getFreeNode);
+#ifdef SKIP_ASM
+void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+void cMemMan_free(void*);
+extern "C" void func_0041605C(void* dst, void* src, int n);
+extern char D_00485F98[];
+
+// On Tour: tQuadTreeNode (8 bytes; a free node keeps the next free index in its first short).
+struct tQuadTreeNode {
+    unsigned short m_data[4];
+    void setNext(unsigned short next) { m_data[0] = next; }
+    unsigned short getNext() const { return m_data[0]; }
+};
+
+// On Tour cQuadTree layout (size 0x28).
+struct cQuadTree {
+    float m_scale;                  // 0x00
+    float m_offsetX;                // 0x04
+    float m_offsetY;                // 0x08
+    int m_numUsedNodes;             // 0x0C
+    int m_numNodes;                 // 0x10
+    unsigned short m_root;          // 0x14
+    unsigned short m_pad;           // 0x16
+    char m_defaultNode[8];          // 0x18 tQuadTreeLeafNode
+    tQuadTreeNode* m_nodes;         // 0x20
+    tQuadTreeNode* m_freeNodes;     // 0x24
+};
+
+// PORT: node index computed from pointers cast to unsigned int
+static inline unsigned short getNodeId_17D0(cQuadTree* self, tQuadTreeNode* node)
+{
+    return ((unsigned int)node - (unsigned int)self->m_nodes) >> 3;
+}
+
+// cQuadTree::getFreeNode(void)
+extern "C" unsigned short cQuadTree_getFreeNode(cQuadTree* self)
+{
+    unsigned short ret;
+    if (self->m_freeNodes == self->m_nodes) {
+        tQuadTreeNode* newnodelist = new (D_00485F98, 0, 0) tQuadTreeNode[self->m_numNodes + 1024];
+        if (self->m_nodes != 0) {
+            func_0041605C(newnodelist, self->m_nodes, self->m_numNodes * sizeof(tQuadTreeNode));
+        }
+        int i;
+        for (i = self->m_numNodes; i < self->m_numNodes + 1023; i++) {
+            newnodelist[i].setNext(i + 1);
+        }
+        newnodelist[self->m_numNodes + 1023].setNext(0);
+        self->m_freeNodes = &newnodelist[self->m_numNodes];
+        self->m_numNodes += 1024;
+        if (self->m_nodes != 0) {
+            cMemMan_free(self->m_nodes);
+        }
+        self->m_nodes = newnodelist;
+    }
+    ret = getNodeId_17D0(self, self->m_freeNodes);
+    self->m_freeNodes = &self->m_nodes[self->m_freeNodes->getNext()];
+    self->m_numUsedNodes++;
+    return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C18E8);
