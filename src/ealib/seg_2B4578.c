@@ -1752,7 +1752,86 @@ void func_003B5C40(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5C60);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+/* SNDMEMI_alloc (EA snd library, smemman.c; On Tour's SNDMEMI_allocz minus its debug checks) */
+struct SNDMEMREC_5C60 { unsigned int addr; int size; };
+struct SNDMEMSTATE_5C60 {
+    char *pheap;
+    struct SNDMEMREC_5C60 *r;   /* grows down from endaddr; indexed 0, -1, -2, ... */
+    int heapsize;
+    unsigned int endaddr;
+    int lowmark;
+    int nummallocs;             /* counts down */
+};
+struct sndgs_5C60 { char pad[0x234]; struct SNDMEMSTATE_5C60 *pmem; };
+extern struct sndgs_5C60 sndgs_5C60 __asm__("D_0050A8E8");
+extern void SNDMEMI_constrain_5C60(unsigned int *pfreeaddr, int *pfreespace) __asm__("func_003B5BA0");
+
+void *SNDMEMI_alloc_5C60(int size) __asm__("func_003B5C60");
+void *SNDMEMI_alloc_5C60(int size) {
+    struct SNDMEMREC_5C60 *pcurrec;
+    struct SNDMEMREC_5C60 *pprevrec;
+    void *paddr;
+    unsigned int freeaddr;
+    int freespace;
+    int lowmark;
+    int i = 0;
+    int j;
+
+    size += 15;
+    size &= ~15;
+    if (sndgs_5C60.pmem->nummallocs == 0) {
+        freeaddr = 0;
+        freespace = sndgs_5C60.pmem->endaddr;
+        SNDMEMI_constrain_5C60(&freeaddr, &freespace);
+        if (freespace >= size) goto alloc;
+        else goto fail;
+    } else {
+        for (i = 0; sndgs_5C60.pmem->nummallocs < i; i--) {
+            pcurrec = &sndgs_5C60.pmem->r[i];
+            if (i == 0) {
+                freeaddr = 0;
+                freespace = pcurrec->addr;
+            } else {
+                pprevrec = &sndgs_5C60.pmem->r[i + 1];
+                freeaddr = pprevrec->addr + pprevrec->size;
+                freespace = pcurrec->addr - freeaddr;
+            }
+            SNDMEMI_constrain_5C60(&freeaddr, &freespace);
+            if (freespace >= size) {
+                for (j = sndgs_5C60.pmem->nummallocs; j < i; j++) {
+                    sndgs_5C60.pmem->r[j] = sndgs_5C60.pmem->r[j + 1];
+                }
+                goto alloc;
+            }
+        }
+        pprevrec = &sndgs_5C60.pmem->r[i + 1];
+        freeaddr = pprevrec->addr + pprevrec->size;
+        freespace = sndgs_5C60.pmem->endaddr - freeaddr;
+        SNDMEMI_constrain_5C60(&freeaddr, &freespace);
+        if (freespace < size) {
+            goto fail;
+        }
+    }
+alloc:
+    pcurrec = &sndgs_5C60.pmem->r[i];
+    pcurrec->addr = freeaddr;
+    pcurrec->size = size;
+    sndgs_5C60.pmem->nummallocs--;
+    sndgs_5C60.pmem->endaddr -= sizeof(struct SNDMEMREC_5C60);
+    paddr = sndgs_5C60.pmem->pheap + freeaddr;
+    lowmark = sndgs_5C60.pmem->endaddr - (freeaddr + size);
+    if (lowmark < sndgs_5C60.pmem->lowmark) {
+        sndgs_5C60.pmem->lowmark = lowmark;
+    }
+    return paddr;
+fail:
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5E98);
@@ -4749,7 +4828,254 @@ int func_003BAA00(int h, int *pos) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BAAC0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+/* SNDI_parsetimbre (EA snd library, stpparse.c): PATS tag stream into stc/pstc (0x00-0x2A) and stp/pstp (0x80-0xAD) */
+struct SNDIPATCHHEADER_AAC0 {
+    short masterranddetune;
+    signed char platformver;
+    signed char numchan;
+    short detune;
+    short randdetune;
+    signed char velmin;
+    signed char velmax;
+    signed char keymin;
+    signed char keymax;
+    signed char priority;
+    signed char basekey;
+    signed char releaseenvelope;
+    signed char numenvelopes;
+    signed char bendrange;
+    signed char pan;
+    signed char randpan;
+    unsigned char samplerep;
+    signed char vol;
+    signed char randvol;
+    signed char fxlevel0;
+    signed char numuserdata;
+    unsigned short rendermode;
+    signed char initialenvvol;
+    unsigned char lfovollength;
+    signed char lfovolrand;
+    unsigned char lfopitchlength;
+    unsigned char lfopitchrand;
+    signed char panmult;
+    void *pvoltable;
+    void *pbendtable;
+    void *penvelope;
+    void *plfovol;
+    void *plfopitch;
+    void *puserdata[4];
+    int userdatasize[4];
+    short lfopitchdepth;
+    unsigned short samplerate;
+    int totalframes;
+    int sustainstart;
+    int sustainend;
+    int *paudioramaddr;
+    int sampleoffset[6];
+    int loopoffset[6];
+    void *ptimestretchdata[6];
+    unsigned short timestretchsize[6];
+    unsigned short azimuth[6];
+    void *ptimbre;
+};
+struct SNDTAGINFO_AAC0 {
+    unsigned char *ptag;
+    int tagtype;
+    int tagval;
+    void *tagptr;
+    unsigned int tagsize;
+};
+extern char snddefaultenvelope_AAC0[] __asm__("D_0044C580");
+extern void memset_AAC0(void *, int, int) __asm__("func_00416210");
+extern int SNDI_gettag_AAC0(struct SNDTAGINFO_AAC0 *psti) __asm__("func_003C7388");
+
+int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) __asm__("func_003BAAC0");
+int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) {
+    int stc[43];
+    void *pstc[43];
+    int stp[46];
+    void *pstp[46];
+    int azoffsets[6];
+    struct SNDTAGINFO_AAC0 sti;
+    int moretags;
+    int i;
+
+    memset_AAC0(azoffsets, 0, sizeof(azoffsets));
+    sti.ptag = (unsigned char *)*pptp;
+    pph->ptimbre = *pptp;
+    for (i = 0; i < 43; i++) {
+        pstc[i] = 0;
+    }
+    for (i = 0; i < 46; i++) {
+        pstp[i] = 0;
+    }
+    for (i = 0; i < 6; i++) {
+        pph->ptimestretchdata[i] = 0;
+        pph->timestretchsize[i] = 0;
+    }
+    stc[1] = 0;
+    stc[2] = 0x7F;
+    stc[3] = 0;
+    stc[4] = 0x7F;
+    stc[6] = 0;
+    stc[7] = 0x3C;
+    stc[8] = -1;
+    stc[9] = 1;
+    stc[10] = 0;
+    stc[12] = 0x40;
+    stc[13] = 0;
+    stc[14] = 0x7F;
+    stc[15] = 0;
+    stc[16] = 0;
+    stc[17] = 0;
+    stc[18] = 0;
+    stc[19] = 0;
+    pph->numuserdata = 0;
+    stc[23] = 0;
+    stc[25] = (int)snddefaultenvelope_AAC0;
+    stc[26] = 0;
+    stc[38] = 0;
+    stc[39] = 0;
+    stc[40] = 0;
+    stc[41] = 0;
+    stc[42] = 0;
+    stc[28] = 0x7F;
+    stc[29] = 0;
+    stc[30] = 0;
+    stc[31] = 0;
+    stc[32] = 0;
+    stc[33] = 0;
+    stc[34] = 0;
+    stc[35] = 0;
+    stc[36] = 0;
+    stc[37] = 1;
+    stp[0] = 0;
+    stp[2] = 1;
+    stp[4] = 0x5622;
+    stp[5] = 0;
+    stp[6] = -1;
+    stp[7] = -1;
+    stp[8] = 0;
+    stp[0x1C] = 0;
+    stp[9] = 0;
+    stp[0x1D] = 0;
+    stp[0x14] = 0;
+    stp[0x1E] = 0;
+    stp[0x15] = 0;
+    stp[0x1F] = 0;
+    stp[0x22] = 0;
+    stp[0x26] = 0;
+    stp[0x23] = 0;
+    stp[0x27] = 0;
+    stp[0x20] = 5;
+    stp[0xC] = 8;
+    moretags = 0;
+    while (SNDI_gettag_AAC0(&sti)) {
+        if (sti.tagtype < 43) {
+            stc[sti.tagtype] = sti.tagval;
+            pstc[sti.tagtype] = sti.tagptr;
+            if (sti.tagtype == 0x14) {
+                pph->puserdata[pph->numuserdata] = sti.tagptr;
+                pph->userdatasize[pph->numuserdata] = sti.tagsize;
+                pph->numuserdata++;
+            }
+        } else if (sti.tagtype >= 128 && sti.tagtype < 174) {
+            stp[sti.tagtype - 128] = sti.tagval;
+            pstp[sti.tagtype - 128] = sti.tagptr;
+            if (sti.tagtype == 0x98) {
+                pph->ptimestretchdata[0] = sti.tagptr;
+                pph->timestretchsize[0] = sti.tagsize;
+            } else if (sti.tagtype == 0x99) {
+                pph->ptimestretchdata[1] = sti.tagptr;
+                pph->timestretchsize[1] = sti.tagsize;
+            } else if (sti.tagtype == 0x9A) {
+                pph->ptimestretchdata[2] = sti.tagptr;
+                pph->timestretchsize[2] = sti.tagsize;
+            } else if (sti.tagtype == 0x9B) {
+                pph->ptimestretchdata[3] = sti.tagptr;
+                pph->timestretchsize[3] = sti.tagsize;
+            } else if (sti.tagtype == 0xA4) {
+                pph->ptimestretchdata[4] = sti.tagptr;
+                pph->timestretchsize[4] = sti.tagsize;
+            } else if (sti.tagtype == 0xA5) {
+                pph->ptimestretchdata[5] = sti.tagptr;
+                pph->timestretchsize[5] = sti.tagsize;
+            }
+        } else if (sti.tagtype == 0xFE) {
+            moretags = 1;
+            break;
+        }
+    }
+    pph->velmin = stc[1];
+    pph->velmax = stc[2];
+    pph->keymin = stc[3];
+    pph->keymax = stc[4];
+    pph->priority = stc[6];
+    pph->basekey = stc[7];
+    pph->releaseenvelope = stc[8];
+    pph->numenvelopes = stc[9];
+    pph->bendrange = stc[10];
+    pph->pan = stc[12];
+    pph->randpan = stc[13];
+    pph->vol = stc[14];
+    pph->randvol = stc[15];
+    pph->detune = stc[16];
+    pph->randdetune = stc[17];
+    pph->pvoltable = (char *)pstc[18] + stc[18];
+    pph->fxlevel0 = stc[19];
+    pph->pbendtable = (char *)pstc[23] + stc[23];
+    pph->penvelope = (char *)pstc[25] + stc[25];
+    pph->loopoffset[0] = stc[26];
+    pph->loopoffset[1] = stc[38];
+    pph->loopoffset[2] = stc[39];
+    pph->loopoffset[3] = stc[40];
+    pph->loopoffset[4] = stc[41];
+    pph->loopoffset[5] = stc[42];
+    pph->initialenvvol = stc[28];
+    pph->plfovol = (char *)pstc[29] + stc[29];
+    pph->lfovollength = stc[30];
+    pph->lfovolrand = stc[31];
+    pph->plfopitch = (char *)pstc[32] + stc[32];
+    pph->lfopitchlength = stc[33];
+    pph->lfopitchdepth = stc[34];
+    pph->lfopitchrand = stc[35];
+    pph->masterranddetune = stc[36];
+    pph->panmult = stc[37];
+    pph->platformver = stp[0];
+    pph->numchan = stp[2];
+    pph->samplerep = stp[0x20];
+    pph->samplerate = stp[4];
+    pph->totalframes = stp[5];
+    pph->sustainstart = stp[6];
+    pph->sustainend = stp[7];
+    pph->rendermode = stp[0xC];
+    pph->paudioramaddr = (int *)pstp[0xA];
+    pph->sampleoffset[0] = stp[8];
+    azoffsets[0] = stp[0x1C];
+    pph->sampleoffset[1] = stp[9];
+    azoffsets[1] = stp[0x1D];
+    pph->sampleoffset[2] = stp[0x14];
+    azoffsets[2] = stp[0x1E];
+    pph->sampleoffset[3] = stp[0x15];
+    azoffsets[3] = stp[0x1F];
+    pph->sampleoffset[4] = stp[0x22];
+    azoffsets[4] = stp[0x26];
+    pph->sampleoffset[5] = stp[0x23];
+    azoffsets[5] = stp[0x27];
+    for (i = 0; i < pph->numchan; i++) {
+        if (D_0050A8E8.setup.cfg.f27 == 2 && pph->numchan == 2) {
+            azoffsets[i] = 0;
+        }
+        pph->azimuth[i] = D_0050A8E8.f2E0[pph->numchan - 1][i] + azoffsets[i];
+    }
+    *pptp = sti.ptag;
+    return moretags;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BB0C8);
@@ -13852,7 +14178,79 @@ unsigned char func_003CBC20(int arg0, int arg1, int arg2) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CBC58);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Q_BC58 { int x; int arr[1]; };
+struct Obj_BC58 { int (*fn)(struct Obj_BC58 *, int, int, int, int); };
+struct G_BC58 {
+    char pad0[5];
+    unsigned char n;
+    char pad6[0x14 - 6];
+    int h;
+    char pad18[0xB0 - 0x18];
+    int a;
+    int b;
+    char padB8[0xD0 - 0xB8];
+    int vals[(0x1E0 - 0xD0) / 4];
+    void (*set)(int, int, int, float);
+};
+extern struct G_BC58 D_00515B40_BC58 __asm__("D_00515B40");
+extern char D_00515D80_BC58[] __asm__("D_00515D80");
+extern int D_00515D40_BC58 __asm__("D_00515D40");
+extern int *D_00515D44_BC58 __asm__("D_00515D44");
+extern struct Obj_BC58 **D_00515D48_BC58 __asm__("D_00515D48");
+extern int D_00515D58_BC58 __asm__("D_00515D58");
+extern int D_00517600_BC58 __asm__("D_00517600");
+extern signed char D_0044E164_BC58[][6][6][6] __asm__("D_0044E164");
+extern void *f_6210_BC58(void *, int, int) __asm__("func_00416210");
+extern void f_51E8_BC58(int, void *, int) __asm__("func_003C51E8");
+extern int f_72F8_BC58(int, int) __asm__("func_003C72F8");
+extern void f_F798_BC58(int, void *) __asm__("func_003CF798");
+
+void func_003CBC58(int n) {
+    int done[6];
+    int a, b, i, j;
+    struct Obj_BC58 *obj;
+    signed char *p;
+    signed char *q;
+    char *buf;
+
+    f_6210_BC58(done, 0, 0x18);
+    if (D_00515B40_BC58.h != 0) {
+        f_51E8_BC58(D_00515B40_BC58.h, D_00515D80_BC58, n * 4);
+        f_6210_BC58(D_00515D80_BC58, 0, n * 4);
+        return;
+    }
+    buf = D_00515D80_BC58;
+    a = D_00515B40_BC58.a;
+    b = D_00515B40_BC58.b;
+    if (++*(int *)(buf + 0x1800) >= 3000) {
+        return;
+    }
+    if (f_72F8_BC58((int)&((struct Q_BC58 *)D_00515D40_BC58)->arr[D_00515D58_BC58], 4) != 0) {
+        f_F798_BC58(D_00515D44_BC58[D_00517600_BC58], buf);
+        for (i = 0; i < D_00515B40_BC58.n; i++) {
+            if (done[i] != 0) continue;
+            obj = D_00515D48_BC58[i + 1];
+            if (obj == 0) continue;
+            obj->fn(obj, n, a, b, i + 1);
+            D_00515B40_BC58.set(n, b, D_00515B40_BC58.vals[i], 1.0f);
+            done[i] = 1;
+            q = (signed char *)D_0044E164_BC58[D_00515D58_BC58];
+            p = q + D_00515B40_BC58.n * 0x24 + i * 6;
+            for (j = 0; j < D_00515B40_BC58.n; j++, p++) {
+                if (*p >= 0) {
+                    D_00515B40_BC58.set(n, b, D_00515B40_BC58.vals[*p], 1.0f);
+                    done[*p] = 1;
+                }
+            }
+        }
+    }
+    f_6210_BC58(D_00515D80_BC58, 0, n * 4);
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003CBEC8);
 
