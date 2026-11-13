@@ -3205,7 +3205,70 @@ void func_003B1498_impl(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/wscriptcache", func_003B14F0);
+#ifdef SKIP_ASM
+extern int D_005094F4[];
+extern int D_005094F8[];
+extern void* D_0050950C[];
+extern int D_00509510[];
+extern int D_00509514[];
+extern int D_00509518[];
+extern void* D_0050951C[];
+extern unsigned char D_0044C218[];
+extern unsigned char D_0044C298[];
+extern char D_00495450[];
+void* func_003B2360(void* self);
+extern "C" void func_003B1988(void);
+
+// mpeg2decode's struct layer_data (EA's memory-buffer variant); the unit declares `ld` (D_0050A088).
+struct layer_data {
+    char pad0[0xC];
+    int Bitcnt;                                 // 0x00C
+    int intra_quantizer_matrix[64];             // 0x010
+    int non_intra_quantizer_matrix[64];         // 0x110
+    int chroma_intra_quantizer_matrix[64];      // 0x210
+    int chroma_non_intra_quantizer_matrix[64];  // 0x310
+    void* load_intra_quantizer_matrix;          // 0x410 (the unit's Get_Bits returns void*)
+    void* load_non_intra_quantizer_matrix;      // 0x414
+};
+
+// MPEG2_sequence_header (mpeg2decode getheader.c sequence_header()).
+extern "C" void func_003B14F0(void)
+{
+    int i;
+    int pos;
+
+    pos = ld->Bitcnt;  // mpeg2decode reads it unconditionally; only its VERBOSE trace uses pos
+    D_005094F4[0] = (int)func_003B1300(0xC);
+    D_005094F8[0] = (int)func_003B1300(0xC);
+    D_0050950C[0] = func_003B1300(4);
+    D_00509510[0] = (int)func_003B1300(4);
+    D_00509514[0] = (int)func_003B1300(0x12);
+    func_003B2360(D_00495450);
+    D_00509518[0] = (int)func_003B1300(0xA);
+    D_0050951C[0] = func_003B1300(1);
+    if ((ld->load_intra_quantizer_matrix = func_003B1300(1)) != 0) {
+        for (i = 0; i < 64; i++)
+            ld->intra_quantizer_matrix[D_0044C218[i]] = (int)func_003B1300(8);
+    } else {
+        for (i = 0; i < 64; i++)
+            ld->intra_quantizer_matrix[i] = D_0044C298[i];
+    }
+    if ((ld->load_non_intra_quantizer_matrix = func_003B1300(1)) != 0) {
+        for (i = 0; i < 64; i++)
+            ld->non_intra_quantizer_matrix[D_0044C218[i]] = (int)func_003B1300(8);
+    } else {
+        for (i = 0; i < 64; i++)
+            ld->non_intra_quantizer_matrix[i] = 16;
+    }
+    for (i = 0; i < 64; i++) {
+        ld->chroma_intra_quantizer_matrix[i] = ld->intra_quantizer_matrix[i];
+        ld->chroma_non_intra_quantizer_matrix[i] = ld->non_intra_quantizer_matrix[i];
+    }
+    func_003B1988();
+}
+#endif
 
 //100%
 INCLUDE_ASM("world/wscriptcache", group_of_pictures_header);
