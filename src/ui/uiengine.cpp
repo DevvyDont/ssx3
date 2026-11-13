@@ -551,7 +551,33 @@ extern "C" void func_00398438(s3983F0* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiengine", func_003984B0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// cUIFontInterface::addFontEntry (On Tour): fill font slot `index` (cUIFontEntry::setFileName then
+// setHashName, both inline here) and bump the font count.
+extern "C" void func_003984B0_impl(s3983F0* self, int index, char* pszFontName, unsigned int hashID) __asm__("func_003984B0");
+
+static inline void uiFontSetFileName(s3983F0Entry* e, const char* name)
+{
+    e->unk4 = (int)name;
+}
+
+static inline void uiFontSetHashName(s3983F0Entry* e, unsigned int hash)
+{
+    e->key = hash;
+}
+
+extern "C" void func_003984B0_impl(s3983F0* self, int index, char* pszFontName, unsigned int hashID)
+{
+    if (self->count < 4) {
+        uiFontSetFileName(&self->entries[index], pszFontName);
+        uiFontSetHashName(&self->entries[index], hashID);
+        self->count++;
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uiengine", func_003984E8);

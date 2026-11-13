@@ -214,7 +214,65 @@ unsigned char *SHAPE_longname(unsigned char *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B3A50);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// SHAPE_size (On Tour realgraph shpsize.cpp; this build has no swizzlesize helpers): byte size of a
+// shape of the given type, dimensions and mip count, plus the 16-byte header (0 if empty).
+typedef struct SHAPE_3A50 {
+    unsigned char type;
+    char rest[15];
+} SHAPE_3A50;
+
+extern int SHAPE_depth_3A50(SHAPE_3A50 *) __asm__("SHAPE_depth");
+
+int func_003B3A50(int shptype, int width, int height, unsigned int mipmaps, int swizzled) {
+    unsigned int i;
+    int shpsize;
+    SHAPE_3A50 shp;
+    int bpp;
+    int mipwidth;
+    int mipheight;
+    int bitsPerLine;
+
+    shpsize = 0;
+    shp.type = shptype;
+    bpp = SHAPE_depth_3A50(&shp);
+    if (bpp == 15) {
+        bpp = 16;
+    }
+    if ((shptype == 0x20 || shptype == 0x21) && swizzled) {
+        if ((unsigned int)((width & 0x1F) - 0x10) < 8U) {
+            width = (width & ~0x1F) + 0x18;
+        } else if ((unsigned int)((width & 0x1F) - 8) < 8U) {
+            width += 8;
+        }
+        shpsize = width * bpp / 8;
+    } else {
+        for (i = 0; i <= mipmaps; i++) {
+            mipwidth = width >> i;
+            mipheight = height >> i;
+            if (mipwidth < 1) {
+                mipwidth = 1;
+            }
+            if (mipheight < 1) {
+                mipheight = 1;
+            }
+            if (shptype == 0x60 || shptype == 0x61 || shptype == 0x62) {
+                mipwidth = (mipwidth + 3) & ~3;
+                mipheight = (mipheight + 3) & ~3;
+            }
+            if (shpsize) {
+                shpsize = (shpsize + 15) & ~15;
+            }
+            bitsPerLine = mipwidth * bpp;
+            shpsize += (bitsPerLine + 7) / 8 * mipheight;
+        }
+    }
+    return shpsize ? shpsize + 16 : 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_size);
