@@ -1062,7 +1062,357 @@ extern "C" void func_003480C8(sFlex_3480C8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexbridgenode", func_00348290);
+#ifdef SKIP_ASM
+struct sFbV_8290 {
+    float x, y, z, w;
+    sFbV_8290() {}
+    // t4vect::x()/y()/z()/w() in On Tour (component accessors returning a reference).
+    float& X() { return x; }
+    float& Y() { return y; }
+    float& Z() { return z; }
+    float& W() { return w; }
+} __attribute__((aligned(16)));
+
+// One cubic segment: P(t) = M * (t^3, t^2, t, 1).
+struct sFbM_8290 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+// PORT: PS2-only VU0 inline asm (out = m * v).
+static inline sFbV_8290 fbApply_8290(const sFbM_8290* m, const sFbV_8290& v)
+{
+    sFbV_8290 out;
+    __asm__(
+        "lqc2         $vf8, %2\n"
+        "lqc2         $vf4, 0x0(%1)\n"
+        "lqc2         $vf5, 0x10(%1)\n"
+        "lqc2         $vf6, 0x20(%1)\n"
+        "lqc2         $vf7, 0x30(%1)\n"
+        "vmulax.xyzw  ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw  $vf12, $vf7, $vf8w\n"
+        "sqc2         $vf12, %0\n"
+        : "=m"(out)
+        : "r"(m), "m"(v)
+        : "memory");
+    return out;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sFbV_8290 fbSub_8290(const sFbV_8290& a, const sFbV_8290& b)
+{
+    sFbV_8290 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sFbV_8290 fbAdd_8290(const sFbV_8290& a, const sFbV_8290& b)
+{
+    sFbV_8290 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sFbV_8290 fbScale_8290(const sFbV_8290& v, float s)
+{
+    sFbV_8290 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float fbDot_8290(const sFbV_8290& a, const sFbV_8290& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float fbLength_8290(const sFbV_8290& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sFbV_8290 fbNormalize_8290(const sFbV_8290& v)
+{
+    sFbV_8290 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: abs.s helper (PS2 FPU).
+static inline float fbAbs_8290(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// splineEval / splineSlope (On Tour names): the cubic segment and its derivative at t.
+// On Tour: splineEval_8290(const t4Matrix&, float): the point at t, (t^3, t^2, t, 1) through the coefficient rows.
+static inline sFbV_8290 splineEval_8290(const sFbM_8290& mat, float t)
+{
+    sFbV_8290 v;
+    v.W() = 1.0f;
+    v.Z() = t;
+    v.Y() = t * v.Z();
+    v.X() = t * v.Y();
+    return fbApply_8290(&mat, v);
+}
+
+// On Tour: splineSlope_8290(const t4Matrix&, float): the tangent at t, (3t^2, 2t, 1, 0).
+static inline sFbV_8290 splineSlope_8290(const sFbM_8290& mat, float t)
+{
+    sFbV_8290 v;
+    v.W() = 0.0f;
+    v.Z() = 1.0f;
+    v.Y() = t * 2.0f;
+    v.X() = t * (t * 3.0f);
+    return fbApply_8290(&mat, v);
+}
+
+static inline float bracket_8290(float lo, float x, float hi)
+{
+    float r;
+    if (x >= lo) {
+        r = x <? hi; // PORT: g++ min operator
+    } else {
+        r = lo;
+    }
+    return r;
+}
+
+struct sFbVE_8290 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+
+// Closest-point result written by func_00348290.
+struct sFbHit_8290 {
+    sFbV_8290 pos;      // 0x00
+    sFbV_8290 dir;      // 0x10: unit tangent at the hit
+    sFbV_8290 v20;      // 0x20
+    sFbV_8290 v30;      // 0x30
+    int pad40;
+    int type;           // 0x44
+    int pad48;
+    int surf;           // 0x4C
+    void* obj;          // 0x50
+    int f54;
+    int f58;
+    int f5C;
+    int f60;
+    int seg;            // 0x64
+    float t;            // 0x68
+    float f6C;
+    float f70;
+};
+
+extern sFbV_8290 D_004FF120;
+
+// tIntersectInfo::Init (On Tour name).
+static inline void Init_8290(sFbHit_8290* h)
+{
+    h->type = 2;
+    h->f54 = 0;
+    h->obj = 0;
+    h->f58 = 0;
+    h->f5C = -1;
+    h->f60 = -1;
+    h->seg = -1;
+    h->surf = -1;
+    h->v20 = D_004FF120;
+    h->v30 = D_004FF120;
+    h->t = 0.0f;
+    h->f6C = 0.0f;
+    h->f70 = 0.0f;
+}
+
+// The golden-section brackets per coarse sample (rodata).
+extern float D_0048E7D8[5];
+extern float D_0048E7F0[5];
+
+// Closest point on the bridge's cubic segments to pt: a coarse search over t = k/4, then a
+// golden-section refinement; records the hit in res when it beats *bestDist.
+// cFlexRailNode::splineIntersect (On Tour name): closest point on the segments' cubics to bpos: a coarse
+// search over t = i/4, then a golden-section refinement; records the hit when it beats dist.
+extern "C" void func_00348290(char* self, const sFbV_8290* minBpos, const sFbV_8290* maxBpos, const sFbV_8290* bpos,
+                              unsigned int splineFilterMask, int* hit, float* dist, sFbHit_8290* intInfo)
+{
+    if ((*(unsigned int*)(self + 0x24) & splineFilterMask) == 0) {
+        return;
+    }
+    for (int seg = 0; seg < *(int*)(self + 0x20) - 1; seg++) {
+        int i;
+        sFbV_8290 lastp;
+        const float kTopSplit = 0.6180340051651001f;
+        const float kBottomSplit = 1.0f - kTopSplit;
+        float f0, f1, f2, f3;
+        float x0 = 0.0f;
+        float x3 = 1.0f;
+        sFbV_8290 nextp;
+        sFbV_8290 tmp;
+        const sFbM_8290& mat = (*(sFbM_8290**)(self + 0x50))[seg];
+        lastp = splineEval_8290(mat, x0);
+        float cd = fbLength_8290(fbSub_8290(*bpos, lastp));
+        int ci = 0;
+        for (i = 1; i < 5; i++) {
+            nextp = splineEval_8290(mat, i * 0.25f);
+            tmp = fbSub_8290(nextp, lastp);
+            float r = fbDot_8290(fbSub_8290(*bpos, lastp), tmp) / fbDot_8290(tmp, tmp);
+            r = bracket_8290(0.0f, r, 1.0f);
+            tmp = fbAdd_8290(lastp, fbScale_8290(tmp, r));
+            float d = fbLength_8290(fbSub_8290(*bpos, tmp));
+            if (d < cd) {
+                ci = i;
+                cd = d;
+            }
+            lastp = nextp;
+        }
+        float minx[5];
+        __builtin_memcpy(minx, D_0048E7D8, sizeof(minx));
+        float maxx[5];
+        __builtin_memcpy(maxx, D_0048E7F0, sizeof(maxx));
+        x0 = minx[ci];
+        x3 = maxx[ci];
+        float x1 = x0 + (x3 - x0) * kBottomSplit;
+        float x2 = x0 + (x3 - x0) * kTopSplit;
+        float lastd, lastt;
+        lastp = splineEval_8290(mat, x0);
+        f0 = fbLength_8290(fbSub_8290(lastp, *bpos));
+        lastp = splineEval_8290(mat, x1);
+        f1 = fbLength_8290(fbSub_8290(lastp, *bpos));
+        lastp = splineEval_8290(mat, x2);
+        f2 = fbLength_8290(fbSub_8290(lastp, *bpos));
+        lastp = splineEval_8290(mat, x3);
+        f3 = fbLength_8290(fbSub_8290(lastp, *bpos));
+        lastd = f2;
+        lastt = x2;
+        for (i = 0; i < 24; i++) {
+            if (fbAbs_8290(x3 - x0) <= 0.0005000000237487257f) {
+                break;
+            }
+            if (f2 < f1) {
+                x0 = x1;
+                x1 = x2;
+                x2 = kTopSplit * x1 + kBottomSplit * x3;
+                lastp = splineEval_8290(mat, x2);
+                float tmp = fbLength_8290(fbSub_8290(lastp, *bpos));
+                f0 = f1;
+                f1 = f2;
+                f2 = tmp;
+                lastt = x2;
+                lastd = tmp;
+            } else {
+                x3 = x2;
+                x2 = x1;
+                x1 = kTopSplit * x2 + kBottomSplit * x0;
+                lastp = splineEval_8290(mat, x1);
+                float tmp = fbLength_8290(fbSub_8290(lastp, *bpos));
+                f3 = f2;
+                f2 = f1;
+                f1 = tmp;
+                lastt = x1;
+                lastd = tmp;
+            }
+        }
+        if (*hit == 0 || lastd < *dist) {
+            *hit = 1;
+            *dist = lastd;
+            Init_8290(intInfo);
+            intInfo->pos = lastp;
+            intInfo->dir = fbNormalize_8290(splineSlope_8290(mat, lastt));
+            intInfo->obj = *(void**)(self + 0x18);
+            sFbVE_8290* vt = *(sFbVE_8290**)(self + 0xC);
+            intInfo->f5C = vt[49].fn(self + vt[49].delta, seg);
+            intInfo->seg = seg;
+            intInfo->f58 = 0;
+            intInfo->t = lastt;
+            int mesh = intInfo->f5C;
+            if (mesh <= 0) {
+                mesh = 0;
+            }
+            short* surf = (short*)(*(char**)(*(char**)(self + 0x18) + 0x88) + 0x1A + mesh * 12);
+            if (*surf == -1) {
+                intInfo->surf = 0;
+            } else {
+                intInfo->surf = *surf;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexbridgenode", func_00348B40);

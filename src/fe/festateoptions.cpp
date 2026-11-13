@@ -3016,7 +3016,219 @@ extern "C" void func_0018E478(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festateoptions", func_0018E510);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
+extern "C" void* cSSXApp_getMCManager(void* app);
+extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mgr, int dev, unsigned short* buf, int n);
+extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);
+extern "C" void cUIText_setUnicodeString(void* text, char* str);
+extern "C" void func_001D8240();
+extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* app, int dev, int a3);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern void* D_004A28A8;
+extern char D_0045E1D8[];
+extern char D_0045E1E8[];
+extern char D_0045E210[];
+extern char D_0045E220[];
+extern char D_0045E230[];
+
+// UI widget: data before the vptr (vtable at +8).
+class cUIObj_18E510 {
+public:
+    char pad[0x8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08(int on);
+    virtual void v09(int on);
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25(int on);
+};
+
+// Device-list vtable entries (g++ 2.95 layout: delta, index, function).
+struct sDevVtI_18E510 {
+    short delta;
+    short index;
+    int (*fn)(void*, int);
+};
+struct sDevVt0_18E510 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+struct sDevVtS_18E510 {
+    short delta;
+    short index;
+    void (*fn)(void*, int, char*);
+};
+
+// Virtual calls on the memory-card device list (cMCOverlayManager + 0x434, vptr at +0), slot n.
+#define DEVS_18E510(mc, n, a, b) ((*(sDevVtS_18E510**)*(char**)((mc) + 0x434))[n].fn(*(char**)((mc) + 0x434) + (*(sDevVtS_18E510**)*(char**)((mc) + 0x434))[n].delta, a, b))
+#define DEV0_18E510(mc, n) ((*(sDevVt0_18E510**)*(char**)((mc) + 0x434))[n].fn(*(char**)((mc) + 0x434) + (*(sDevVt0_18E510**)*(char**)((mc) + 0x434))[n].delta))
+#define DEVI_18E510(mc, n, a) ((*(sDevVtI_18E510**)*(char**)((mc) + 0x434))[n].fn(*(char**)((mc) + 0x434) + (*(sDevVtI_18E510**)*(char**)((mc) + 0x434))[n].delta, a))
+
+
+class cStateBase_18E510 {
+public:
+    char pad[0x8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35(int s);
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual int v42();
+    virtual void v43();
+};
+
+struct cState_18E510 : cStateBase_18E510 {
+    char padC[0x40 - 0xC];
+    void* screen;           // 0x40
+    char pad44[0x1BC - 0x44];
+    int mode;               // 0x1BC
+    char pad1C0[0x214 - 0x1C0];
+    int f214;               // 0x214
+    int pad218;
+    int dev;                // 0x21C
+    char pad220[0x22C - 0x220];
+    int f22C;               // 0x22C
+};
+
+// cFEStateOptions*::displayStatus (On Tour: cOVState_SAVEOPTIONS::displayStatus, ovstatereplay.cpp): the memory-card
+// device text, the per-slot "%dmemory card" entries and the arrows.
+extern "C" void func_0018E510(cState_18E510* self)
+{
+    char* pMC = (char*)cSSXApp_getMCManager(D_004A28A8);
+    unsigned short ustrDisplay[0x320];
+    if (self->v42()) {
+        if (DEV0_18E510(pMC, 53) == 0) {
+            func_001D8240();
+        } else if (self->f214 != 3) {
+            self->v35(3);
+        }
+    }
+    if (self->v42()) {
+        char text[0x50];
+        cUIObj_18E510* pText;
+        int bIsNewSet;
+        self->v43();
+        cMCOverlayManager_GetDeviceDisplayString(pMC, *(int*)(pMC + 0x428), ustrDisplay, 0x320);
+        cUIText_setUnicodeStringWrap(cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045E1E8)), ustrDisplay);
+        self->dev = *(int*)(pMC + 0x428);
+        pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045E1D8));
+        pText->v09(0);
+        bIsNewSet = 0;
+        for (int i = 1; i < 5 && (self->mode == 1 || i < 2); i++) {
+            char strObj[60];
+            sprintf(strObj, D_0045E210, i);
+            pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(strObj));
+            DEVS_18E510(pMC, 14, i - 1, text);
+            cUIText_setUnicodeString(pText, text);
+            if (DEVI_18E510(pMC, 67, i - 1) == 0 && DEVI_18E510(pMC, 66, i - 1) == 0
+                && DEV0_18E510(pMC, 55) != 0) {
+                if (self->mode == 1) {
+                    pText->v25(1);
+                    pText->v08(1);
+                } else if (bIsNewSet == 0 && self->f22C != 0) {
+                    bIsNewSet = 1;
+                    pText->v08(0);
+                    pText->v25(0);
+                } else {
+                    pText->v25(1);
+                    pText->v08(1);
+                }
+            } else if (DEVI_18E510(pMC, 54, *(int*)(pMC + 0x428)) != 0) {
+                if (DEVI_18E510(pMC, 66, i - 1) != 0) {
+                    pText->v08(1);
+                    pText->v25(1);
+                } else {
+                    pText->v08(0);
+                    pText->v25(0);
+                }
+            } else {
+                pText->v25(1);
+                pText->v08(1);
+            }
+        }
+        if (cFEMemCard_checkNextAvailableDevice(self, pMC, *(int*)(pMC + 0x428), 1) == -1) {
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045E220)))->v09(0);
+        } else {
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045E220)))->v09(1);
+        }
+        if (cFEMemCard_checkNextAvailableDevice(self, pMC, *(int*)(pMC + 0x428), 0) == -1) {
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045E230)))->v09(0);
+        } else {
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_0045E230)))->v09(1);
+        }
+    }
+    if (self->f214 != 3) {
+        for (int i = 1; i < 5 && (self->mode == 1 || i < 2); ) {
+            char strObj[0x50];
+            sprintf(strObj, D_0045E210, i);
+            i++;
+            cUIObj_18E510* pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(strObj));
+            pText->v25(0);
+            pText->v08(1);
+        }
+    }
+}
+#endif
 
 
 //100%
