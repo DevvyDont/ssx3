@@ -960,7 +960,110 @@ extern "C" void cAvalanche_render(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_addAvalancheNode);
+#ifdef SKIP_ASM
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern char D_00487568[];
+extern char D_00487578[];
+extern void* D_004A3AB0;
+extern char D_00538450[];
+extern int D_004A3AC0;
+extern int D_004A3ABC;
+
+struct sAvNodeD92D0 {
+    char pad0[0xF0];
+    unsigned short type;        // 0xF0
+    unsigned char emit;         // 0xF2
+    unsigned char owned;        // 0xF3
+    sAvNodeD92D0* next;         // 0xF4
+    char* obj;                  // 0xF8
+    char* data;                 // 0xFC
+    float count;                // 0x100
+    float sy;                   // 0x104
+    float sz;                   // 0x108
+    float rate;                 // 0x10C
+    float radius;               // 0x110
+    int f114;                   // 0x114
+    char pad118[0x120 - 0x118];
+};
+struct sAvGroupD92D0 {
+    int id;                     // 0x0
+    sAvNodeD92D0* nodes;        // 0x4
+    sAvGroupD92D0* next;        // 0x8
+    unsigned short nPairs;      // 0xC
+    unsigned short nIdx;        // 0xE
+    char pad10[0x210 - 0x10];
+    // tAvalanche::init(int id) (On Tour declares it; body inlined here). The caller links the new
+    // record in afterwards, overwriting m_next.
+    void init(int inId)
+    {
+        id = inId;
+        next = 0;
+        nPairs = 0;
+        nIdx = 0;
+        nodes = 0;
+    }
+};
+
+// PORT: abs.s via inline asm (as an SDK math-header fabsf would).
+static inline float Abs_D92D0(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+#define AV_MIN_D92D0(a, b) ((a) < (b) ? (a) : (b))
+
+extern "C" void cAvalanche_addAvalancheNode(int id, char* obj, int type, float a, float b, float c, float d)
+{
+    sAvGroupD92D0* g = (sAvGroupD92D0*)D_004A3AB0;
+    while (g != 0 && g->id != id)
+        g = g->next;
+    if (g == 0) {
+        g = new (D_00487568, 0, 0) sAvGroupD92D0;
+        g->init(id);
+        g->next = (sAvGroupD92D0*)D_004A3AB0;
+        D_004A3AB0 = g;
+    }
+    sAvNodeD92D0* n = new (D_00487578, 0, 0) sAvNodeD92D0;
+    n->next = g->nodes;
+    g->nodes = n;
+    n->rate = d;
+    n->count = a * 30.0f;
+    n->sy = b * 30.0f;
+    n->sz = c * 30.0f;
+    n->obj = obj;
+    // The target materialises &n->radius (addiu v1,a0,0x110; swc1 0(v1)): the source bound the field by reference.
+    float& radius = n->radius;
+    radius = AV_MIN_D92D0(AV_MIN_D92D0(Abs_D92D0(*(float*)(obj + 0x6C) - *(float*)(obj + 0x60)),
+                                         Abs_D92D0(*(float*)(obj + 0x70) - *(float*)(obj + 0x64))),
+                             Abs_D92D0(*(float*)(obj + 0x74) - *(float*)(obj + 0x68))) *
+                0.20000000298023224f;
+    n->data = 0;
+    n->owned = 0;
+    switch (type) {
+    case 5:
+        n->type = 2;
+        break;
+    case 2:
+        n->type = 0;
+        break;
+    default:
+        n->type = 1;
+        break;
+    }
+    n->emit = 0;
+    n->f114 = 0;
+    int idx = D_004A3AC0;
+    ((sAvNodeD92D0**)D_00538450)[idx] = n;
+    *(unsigned short*)(n->obj + 0x92) = *(unsigned char*)(n->obj + 0x92);
+    *(unsigned short*)(n->obj + 0x92) |= (idx << 8) | 2;
+    D_004A3AC0 = idx + 1;
+    D_004A3ABC = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/avalanche", func_002D9538);
@@ -1398,7 +1501,39 @@ extern "C" void func_002D9C00(int id, sAvMatrix* out)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/avalanche", func_002D9CB0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct func_002D9CB0_sSlot {
+    int* av;
+    int pad4[5];
+    float t;
+    int isActive() { return av != 0; }
+};
+extern func_002D9CB0_sSlot D_00538938_9CB0[16] __asm__("D_00538938");
+
+struct func_002D9CB0_sSave {
+    int ids[16];
+    float times[16];
+};
+
+class func_002D9CB0_cStream {
+public:
+    // vptr at 0x0; slot N at vtable offset N*8
+    virtual void v01(void* data, int size);
+};
+
+extern "C" void func_002D9CB0(func_002D9CB0_cStream* stream)
+{
+    func_002D9CB0_sSave state;
+    for (int i = 0; i < 16; i++) {
+        state.ids[i] = D_00538938_9CB0[i].isActive() ? *D_00538938_9CB0[i].av : -1;
+        state.times[i] = D_00538938_9CB0[i].isActive() ? D_00538938_9CB0[i].t : 0.0f;
+    }
+    stream->v01(&state, 0x80);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_readFromReplayFrame);

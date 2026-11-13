@@ -356,7 +356,113 @@ extern "C" void func_003A9D60(sWV_9D60* self, int cam)
 }
 #endif
 
+//100%
 INCLUDE_ASM("world/worldview", func_003A9E50);
+#ifdef SKIP_ASM
+// PORT: sqrt.s via inline asm (as an SDK math-header sqrtf would).
+static inline float sqrtf_3A9E50(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+struct t4Vector_3A9E50 {
+    float mX, mY, mZ, mW;
+    float x() const { return mX; }
+    float y() const { return mY; }
+    float z() const { return mZ; }
+};
+
+// cWorldView::getDistanceToBox(const t4Vector& pos, const t4Vector& boxMin, const t4Vector& boxMax)
+extern "C" float func_003A9E50_impl(void* self, const t4Vector_3A9E50& pos, const t4Vector_3A9E50& boxMin,
+                                    const t4Vector_3A9E50& boxMax) __asm__("func_003A9E50");
+
+extern "C" float func_003A9E50_impl(void* self, const t4Vector_3A9E50& pos, const t4Vector_3A9E50& boxMin,
+                                    const t4Vector_3A9E50& boxMax)
+{
+    bool bSpanX = boxMin.x() <= pos.x() && pos.x() <= boxMax.x();
+    bool bSpanY = boxMin.y() <= pos.y() && pos.y() <= boxMax.y();
+    bool bSpanZ = boxMin.z() <= pos.z() && pos.z() <= boxMax.z();
+    if (bSpanX && bSpanY && bSpanZ) {
+        return -1.0f;
+    }
+    float fDist = 0.0f;
+    bool bX = false;
+    bool bY = false;
+    bool bZ = false;
+    bool bSqrt = false;
+    if (bSpanX) {
+        if (bSpanY) {
+            bZ = true;
+        } else if (bSpanZ) {
+            bY = true;
+        } else {
+            bY = true;
+            bZ = true;
+            bSqrt = true;
+        }
+    } else {
+        if (bSpanY) {
+            if (bSpanZ) {
+                bX = true;
+            } else {
+                bX = true;
+                bZ = true;
+                bSqrt = true;
+            }
+        } else {
+            if (bSpanZ) {
+                bX = true;
+                bY = true;
+                bSqrt = true;
+            } else {
+                bX = true;
+                bY = true;
+                bZ = true;
+                bSqrt = true;
+            }
+        }
+    }
+    if (bX) {
+        float fXdist = pos.x() - boxMax.x();
+        if (fXdist < 0.0f) {
+            fXdist = boxMin.x() - pos.x();
+        }
+        if (bSqrt) {
+            fDist += fXdist * fXdist;
+        } else {
+            fDist += fXdist;
+        }
+    }
+    if (bY) {
+        float fYdist = pos.y() - boxMax.y();
+        if (fYdist < 0.0f) {
+            fYdist = boxMin.y() - pos.y();
+        }
+        if (bSqrt) {
+            fDist += fYdist * fYdist;
+        } else {
+            fDist += fYdist;
+        }
+    }
+    if (bZ) {
+        float fZdist = pos.z() - boxMax.z();
+        if (fZdist < 0.0f) {
+            fZdist = boxMin.z() - pos.z();
+        }
+        if (bSqrt) {
+            fDist += fZdist * fZdist;
+        } else {
+            fDist += fZdist;
+        }
+    }
+    if (bSqrt) {
+        fDist = sqrtf_3A9E50(fDist);
+    }
+    return fDist;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldview", func_003AA028);
