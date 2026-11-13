@@ -196,7 +196,86 @@ extern "C" void func_0031D8B0(sCubicSpline* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/cubicspline", func_0031DEE0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sSplFlags_31DEE0 {
+    unsigned int b0 : 1;
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int f3 : 8;
+    unsigned int count : 8;
+    unsigned int cur : 8;
+};
+
+struct sSplSeg_31DEE0 {
+    float a, b, c, d;
+    float t;
+};
+
+struct sSpline_31DEE0 {
+    sSplFlags_31DEE0 flags;
+    float end;
+    sSplSeg_31DEE0* seg;
+};
+
+extern "C" float func_0031D5A8(sSplSeg_31DEE0* seg, float t);
+
+extern "C" float func_0031DEE0_impl(sSpline_31DEE0* s, float t) __asm__("func_0031DEE0");
+extern "C" float func_0031DEE0_impl(sSpline_31DEE0* s, float t)
+{
+    int last = s->flags.count - 1;
+    float* pend;
+    if (last == (int)s->flags.cur) {
+        pend = &s->end;
+    } else {
+        pend = &s->seg[s->flags.cur + 1].t;
+    }
+    sSplSeg_31DEE0* seg = &s->seg[s->flags.cur];
+    if (seg->t <= t && t <= *pend) {
+        return func_0031D5A8(seg, t);
+    }
+    if (t < seg->t) {
+        if (t < s->seg[1].t) {
+            s->flags.cur = 0;
+            return func_0031D5A8(s->seg, t);
+        }
+    } else {
+        if ((int)s->flags.cur == last - 1) {
+            s->flags.cur = last;
+            return func_0031D5A8(&s->seg[last], t);
+        }
+        if (t < s->seg[s->flags.cur + 2].t) {
+            s->flags.cur = s->flags.cur + 1;
+            return func_0031D5A8(&s->seg[s->flags.cur], t);
+        }
+    }
+    int hi = last;
+    int lo = 0;
+    for (;;) {
+        int mid = (hi + lo) / 2;
+        sSplSeg_31DEE0* m = &s->seg[mid];
+        float t0 = m->t;
+        float t1;
+        if (mid < last) {
+            t1 = m[1].t;
+        } else {
+            t1 = s->end;
+        }
+        if (t0 <= t) {
+            if (t <= t1) {
+                s->flags.cur = mid;
+                return func_0031D5A8(m, t);
+            } else {
+                lo = mid + 1;
+            }
+        } else {
+            hi = mid;
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/cubicspline", func_0031E0E0);
@@ -1960,33 +2039,71 @@ void* func_003203B8(void* self)
 }
 #endif
 
-//92.5%
+//100%
 INCLUDE_ASM("bx/cubicspline", func_00320408__FPv);
 #ifdef SKIP_ASM
-void* func_00320408(void* self)
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* func_00319E48_0408(unsigned int size, unsigned int align) __asm__("func_00319E48");
+
+// TMemContainer<TMemBlock<0x100>, 512> (On Tour names): a free list threaded through the blocks.
+struct TMemBlock_0408 {
+    TMemBlock_0408* next;
+    char data[0xFC];
+};
+
+struct TMemContainer_0408 {
+    TMemBlock_0408 m_blockList[512];
+    TMemBlock_0408* m_freeList;
+};
+
+static inline void* reserveBlock_0408(TMemBlock_0408** blockptr)
 {
-    void* node = *(void**)((char*)self + 0x20000);
-    if (node != 0) {
-        void* next = *(void**)node;
-        *(void**)((char*)self + 0x20000) = next;
-        return node;
+    TMemBlock_0408* block = *blockptr;
+    *blockptr = block->next;
+    return block;
+}
+
+void* func_00320408(TMemContainer_0408* self, unsigned int align) __asm__("func_00320408__FPv");
+void* func_00320408(TMemContainer_0408* self, unsigned int align)
+{
+    if (self->m_freeList != 0) {
+        return reserveBlock_0408(&self->m_freeList);
     }
-    return func_00319E48(0x104);
+    return func_00319E48_0408(0x104, align);
 }
 #endif
 
-//92.5%
+//100%
 INCLUDE_ASM("bx/cubicspline", func_00320448__FPv);
 #ifdef SKIP_ASM
-void* func_00320448(void* self)
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void* func_00319E48_0448(unsigned int size, unsigned int align) __asm__("func_00319E48");
+
+// TMemContainer<TMemBlock<0x200>, 256> (On Tour names): a free list threaded through the blocks.
+struct TMemBlock_0448 {
+    TMemBlock_0448* next;
+    char data[0x1FC];
+};
+
+struct TMemContainer_0448 {
+    TMemBlock_0448 m_blockList[256];
+    TMemBlock_0448* m_freeList;
+};
+
+static inline void* reserveBlock_0448(TMemBlock_0448** blockptr)
 {
-    void* node = *(void**)((char*)self + 0x20000);
-    if (node != 0) {
-        void* next = *(void**)node;
-        *(void**)((char*)self + 0x20000) = next;
-        return node;
+    TMemBlock_0448* block = *blockptr;
+    *blockptr = block->next;
+    return block;
+}
+
+void* func_00320448(TMemContainer_0448* self, unsigned int align) __asm__("func_00320448__FPv");
+void* func_00320448(TMemContainer_0448* self, unsigned int align)
+{
+    if (self->m_freeList != 0) {
+        return reserveBlock_0448(&self->m_freeList);
     }
-    return func_00319E48(0x204);
+    return func_00319E48_0448(0x204, align);
 }
 #endif
 

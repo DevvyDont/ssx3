@@ -2597,7 +2597,117 @@ extern "C" void func_00258C50(void *arg0, int arg1) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_156860", func_00258CB0);
+#ifdef SKIP_ASM
+int GetHashValue32(char* s);
+extern "C" void* cUIStateStack_findState(void* mgr, int hash);
+extern "C" void strcpy1(char* dst, const char* src);
+extern void* D_004A28A4;
+extern char D_004A2EF0[];
+extern char D_004805D8[];
+extern char D_004805F8[];
+
+struct sVEntS_8CB0 {
+    short delta;
+    short index;
+    const char* (*fn)(void*, int);
+};
+
+struct sVEntM_8CB0 {
+    short delta;
+    short index;
+    int (*fn)(void*, int, char*);
+};
+
+// The game's online state (D_004A28A4+0x550 == 2: connected).
+static inline int gcOnline_8CB0()
+{
+    return *(int*)((char*)D_004A28A4 + 0x550) == 2;
+}
+
+// Sends message `msg` (with text `arg`) to the UI item through its vtable slot 24.
+static inline void gcSend_8CB0(char* item, int msg, char* arg)
+{
+    sVEntM_8CB0* vt = *(sVEntM_8CB0**)(item + 8);
+    vt[24].fn(item + vt[24].delta, msg, arg);
+}
+
+// Looks up the string table entry for `name` (vtable slot 4 of the global string table at D_004A28A8+0x8C).
+static inline const char* gcString_8CB0(char* name)
+{
+    char* tbl = *(char**)((char*)D_004A28A8 + 0x8C);
+    sVEntS_8CB0* vt = *(sVEntS_8CB0**)(tbl + 4);
+    return vt[4].fn(tbl + vt[4].delta, GetHashValue32(name));
+}
+
+// Drives the connection-status popup: picks its text, then opens (0xE) or closes (0xF) it as the
+// link state changes (self+0x98: 0 closed, 1 shown while connected, 2 shown while waiting).
+extern "C" void func_00258CB0(char* self)
+{
+    char buf[0x100];
+    if (*(int*)(self + 0x84) != 0) {
+        *(int*)(self + 0x60) = 0;
+    }
+    char* ui = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x48);
+    if (ui == 0) {
+        return;
+    }
+    char* item = (char*)cUIStateStack_findState(ui + 0x18, GetHashValue32(D_004A2EF0));
+    if (item == 0) {
+        return;
+    }
+    if (*(int*)(self + 0x78) != 0) {
+        strcpy1(buf, gcString_8CB0(D_004805D8));
+    } else {
+        strcpy1(buf, gcString_8CB0(D_004805F8));
+    }
+    switch (*(int*)(self + 0x98)) {
+    case 0:
+        if (*(int*)(self + 0x74) == 0) {
+            if (*(int*)(self + 0x78) != 0) {
+                int kind = **(int**)(*(char**)((char*)D_004A28A8 + 0x84) + 0xC);
+                if (kind == 4 || kind == 5 || !gcOnline_8CB0()) {
+                    gcSend_8CB0(item, 0xE, buf);
+                    *(int*)(self + 0x98) = 1;
+                }
+            } else if (*(int*)(self + 0x84) != 0) {
+                gcSend_8CB0(item, 0xE, buf);
+                *(int*)(self + 0x98) = 2;
+            }
+        }
+        break;
+    case 2:
+        if (*(int*)(self + 0x74) != 0) {
+            gcSend_8CB0(item, 0xF, 0);
+            *(int*)(self + 0x98) = 0;
+        } else if (*(int*)(self + 0x78) != 0) {
+            gcSend_8CB0(item, 0xE, buf);
+            *(int*)(self + 0x98) = 1;
+        } else if (*(int*)(self + 0x84) == 0) {
+            gcSend_8CB0(item, 0xF, 0);
+            *(int*)(self + 0x98) = 0;
+        } else if (*(int*)(self + 0x3FC) > 0) {
+            gcSend_8CB0(item, 0xF, 0);
+            *(int*)(self + 0x98) = 0;
+        }
+        break;
+    case 1:
+        if (*(int*)(*(char**)((char*)D_004A28A8 + 0x84) + 0x214) == 2 && gcOnline_8CB0()) {
+            gcSend_8CB0(item, 0xF, 0);
+            *(int*)(self + 0x98) = 0;
+        } else if (*(int*)(self + 0x78) == 0 || *(int*)(self + 0x74) != 0) {
+            gcSend_8CB0(item, 0xF, 0);
+            *(int*)(self + 0x98) = 0;
+        }
+        break;
+    default:
+        gcSend_8CB0(item, 0xF, 0);
+        *(int*)(self + 0x98) = 0;
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00258F20);
