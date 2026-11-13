@@ -1111,7 +1111,168 @@ extern "C" void func_00352780(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/instanceman", func_00352810);
+#ifdef SKIP_ASM
+struct sV4_352810 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat_352810 {
+    sV4_352810 r[4];
+    sMat_352810() {}
+} __attribute__((aligned(16)));
+
+// tResourceID: section (8 bits) + unique id (24 bits).
+struct tResourceID_352810 {
+    unsigned int sid : 8;
+    unsigned int uid : 24;
+};
+static inline void initRID_352810(tResourceID_352810* r, unsigned int sid, unsigned int uid)
+{
+    r->sid = sid;
+    r->uid = uid;
+}
+
+// cWorldCacheTable: per stream-data-type resource tables.
+struct sCacheType_352810 {
+    unsigned int* entries;  // +0x4 + type * 8
+    unsigned int count;     // +0x8 + type * 8
+};
+struct cWorldCacheTable_352810 {
+    int f0;
+    sCacheType_352810 type[16];
+};
+struct sCacheInfo_352810 {
+    char pad0[8];
+    unsigned int count;     // 0x8
+};
+struct cWorldCache_352810 {
+    sCacheInfo_352810* info;            // 0x0
+    cWorldCacheTable_352810* global;    // 0x4
+    cWorldCacheTable_352810** tables;   // 0x8
+};
+struct cWorld_352810 {
+    cWorldCache_352810* cache;          // 0x0
+};
+extern cWorld_352810* D_004A47B8_352810 __asm__("D_004A47B8");
+
+static inline bool tableValid_352810(cWorldCacheTable_352810* t, int type, unsigned int uid)
+{
+    if (t->type[type].count < uid) {
+        return false;
+    }
+    return (t->type[type].entries[uid] & 0xFFFFFF00) != 0;
+}
+
+static inline bool cacheValid_352810(cWorldCache_352810* c, int type, tResourceID_352810 rid)
+{
+    unsigned int uiSection = rid.sid;
+    unsigned int uiUID = rid.uid;
+    if (uiSection == 0xFF) {
+        return tableValid_352810(c->global, type, uiUID);
+    }
+    if (uiSection < c->info->count && c->tables[uiSection] != 0) {
+        return tableValid_352810(c->tables[uiSection], type, uiUID);
+    }
+    return false;
+}
+
+struct sVE_352810 { short delta; short index; void (*fn)(void*, void*, void*, void*, void*, int, int, float); };
+struct sRCtx_352810 {
+    char pad0[0x10D8];
+    sVE_352810* vt;         // 0x10D8
+};
+extern sRCtx_352810* D_004A5B80;
+extern char D_004FF1A0_2810[] __asm__("D_004FF1A0");
+
+// cMeshAnimNode (On Tour: cMeshAnimNode::render).
+struct sDebris_352810 {
+    char pad0[0x18];
+    char* model;            // 0x18
+    float timer;            // 0x1C
+    char pad20[4];
+    float fade;             // 0x24
+    char pad28[8];
+    sV4_352810 rot[24];     // 0x30
+    char pad1B0[0x200];
+    sV4_352810 pos[24];     // 0x3B0
+};
+
+// PORT: PS2-only VU0 inline asm (quaternion to rotation matrix, row 3 = (0,0,0,1)).
+static inline void QuatToMat_352810(sMat_352810* d, const sV4_352810& q)
+{
+    __asm__ __volatile__(
+        "lqc2       $vf4, %1\n"
+        "vaddw.xyz  $vf1, $vf0, $vf0w\n"
+        "vadd.xyz   $vf5, $vf4, $vf4\n"
+        "vsub.w     $vf10, $vf10, $vf10\n"
+        "vsub.w     $vf11, $vf11, $vf11\n"
+        "vsub.w     $vf12, $vf12, $vf12\n"
+        "vmul.xyz   $vf6, $vf5, $vf4\n"
+        "vmulw.xyz  $vf7, $vf5, $vf4w\n"
+        "vopmula.xyz ACC, $vf5, $vf4\n"
+        "vmadd.xyz  $vf8, $vf0, $vf0\n"
+        "vsubay.x   ACC, $vf1, $vf6y\n"
+        "vmsubz.x   $vf10, $vf1, $vf6z\n"
+        "vsubaz.y   ACC, $vf1, $vf6z\n"
+        "vmsubx.y   $vf11, $vf1, $vf6x\n"
+        "vsubax.z   ACC, $vf1, $vf6x\n"
+        "vmsuby.z   $vf12, $vf1, $vf6y\n"
+        "vaddaz.y   ACC, $vf0, $vf8z\n"
+        "vmaddz.y   $vf10, $vf1, $vf7z\n"
+        "vaddax.z   ACC, $vf0, $vf8x\n"
+        "vmaddx.z   $vf11, $vf1, $vf7x\n"
+        "vaddax.y   ACC, $vf0, $vf8x\n"
+        "vmsubx.y   $vf12, $vf1, $vf7x\n"
+        "vadday.z   ACC, $vf0, $vf8y\n"
+        "vmsuby.z   $vf10, $vf1, $vf7y\n"
+        "vaddaz.x   ACC, $vf0, $vf8z\n"
+        "vmsubz.x   $vf11, $vf1, $vf7z\n"
+        "vadday.x   ACC, $vf0, $vf8y\n"
+        "vmaddy.x   $vf12, $vf1, $vf7y\n"
+        "sqc2       $vf0, 0x30(%0)\n"
+        "sqc2       $vf10, 0x0(%0)\n"
+        "sqc2       $vf11, 0x10(%0)\n"
+        "sqc2       $vf12, 0x20(%0)\n"
+        :
+        : "r"(d), "m"(q)
+        : "memory");
+}
+
+static inline void setOffset_352810(sMat_352810& m, const sV4_352810& v)
+{
+    m.r[3] = v;
+}
+
+extern "C" void func_00352810(sDebris_352810* self)
+{
+    if (self->timer <= 0.0f) {
+        return;
+    }
+    int numMaterials = *(int*)*(char**)(*(char**)(self->model + 0x80) + 0xC);
+    for (int i = 0; i < numMaterials; i++) {
+        short* pMaterialRecord = ((short**)(*(char**)(self->model + 0x94) + 4))[i];
+        tResourceID_352810 resourceId;
+        initRID_352810(&resourceId, 0xFF, *pMaterialRecord);
+        if (!cacheValid_352810(D_004A47B8_352810->cache, 9, resourceId)) {
+            return;
+        }
+    }
+    sMat_352810 animMats[24];
+    char* pModel = *(char**)(self->model + 0x80);
+    for (int i = 0; i < *(int*)(pModel + 4); i++) {
+        QuatToMat_352810(&animMats[i], self->rot[i]);
+        setOffset_352810(animMats[i], self->pos[i]);
+    }
+    float fade = 1.0f;
+    if (self->fade >= 0.0f && self->timer <= self->fade) {
+        fade = self->timer;
+    }
+    sRCtx_352810* c = D_004A5B80;
+    c->vt[95].fn((char*)c + c->vt[95].delta, self->model, *(void**)(self->model + 0x94), D_004FF1A0_2810, animMats, 0, 0x420, fade);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/instanceman", func_00352A58);
