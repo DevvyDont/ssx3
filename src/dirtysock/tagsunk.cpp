@@ -4185,7 +4185,63 @@ extern "C" void func_0025F478(void* self, int idx, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F4C0);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern int cCommSystem_getSignature_F4C0(void* comm) __asm__("cCommSystem_getSignature");
+extern "C" int cBENewRaceInterface_getLocationID(void* iface);
+extern "C" void* func_0025FB80(void*, int, void*);
+// func_0025FB80 is used as void here (its v0 is only a pass-through of its last call).
+void func_0025FB80_v(void*, int, void*) __asm__("func_0025FB80");
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern void* D_004A28A8;
+extern void* D_004A2EB8;
+extern int D_005308D0[];
+extern int D_00534B34[];
+extern char D_00535BC8[];
+extern char D_004808E0[];
+extern char D_00480610[];
+
+static inline char* Race_25F4C0()
+{
+    return D_00535BC8;
+}
+
+struct sDsStats_25F4C0 {
+    char pad[0xB8];
+    int fB8, fBC, fC0, fC4;
+};
+
+extern "C" void func_0025F4C0_impl(char* self, const char* name, int a2) __asm__("func_0025F4C0");
+extern "C" void func_0025F4C0_impl(char* self, const char* name, int a2)
+{
+    if (*(int*)self == 0)
+        return;
+    *(int*)(self + 0xB4) = 1;
+    cBXString_cBXString4(self + 0x98, name);
+    *(int*)(self + 0xA4) = a2;
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    int locationID = cBENewRaceInterface_getLocationID(cBE_getInterface_Fv(cBE_getBE(), 0));
+    int flags = D_005308D0[0];
+    int event = *(signed char*)(Race_25F4C0() + 0x48);
+    int track = *(signed char*)(Race_25F4C0() + 0x4A);
+    int y = D_00534B34[0];
+    int ai = *(int*)(Race_25F4C0() + 0x3C);
+    bool b6 = (flags & 0x40) != 0;
+    bool b8 = (flags & 0x100) != 0;
+    bool b7 = (flags & 0x80) != 0;
+    char buf[0x40];
+    sprintf(buf, D_004808E0, D_00480610, locationID, event, track, y, b6, b8, ai, b7,
+            cCommSystem_getSignature_F4C0(D_004A2EB8),
+            ((sDsStats_25F4C0*)self)->fBC, ((sDsStats_25F4C0*)self)->fC0, ((sDsStats_25F4C0*)self)->fC4, ((sDsStats_25F4C0*)self)->fB8);
+    func_0025FB80_v(self, *(int*)(self + 0x98), buf);
+    *(int*)self = 0x16;
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F628);

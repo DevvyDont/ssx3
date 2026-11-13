@@ -933,7 +933,54 @@ extern "C" void cOVState_AUTOSAVE_onCreateScreen(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/ovstateprofile", func_00212208);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern "C" void* cSSXApp_getMCManager(void* app);
+extern "C" void func_0023CAE8(void* app, int a1, int a2);
+extern "C" void func_001D8DE0(void* self);
+
+// On Tour: cMCOverlayManager::sdevice (bools are 4 bytes in SSX 3).
+struct sdevice_2208 {
+    int bValid;            // 0x00
+    int bFormatted;        // 0x04
+    int bCorrectEncoding;  // 0x08
+    int bPluggedIn;        // 0x0C
+    int iFreeSpace;        // 0x10
+    int iTotalSpace;       // 0x14
+    unsigned short szName[100];
+};
+struct cMCOverlayManager_2208 {
+    char pad[0x344];
+    sdevice_2208 mDevices[1];   // 0x344
+    int mMaxDevices;            // 0x424
+    int mSelectedDevice;        // 0x428
+};
+
+// cOVState_AUTOSAVE::onUpdate (On Tour name); cFEMemCard fields: 0x1A8 mIsProcessing, 0x1C0 mState,
+// 0x1DC mIsSavePressed, 0x1E4 mIsCancelPressed, 0x1F0 mIsOverwriteOK.
+extern "C" void func_00212208(void* self)
+{
+    cMCOverlayManager_2208* pMC = (cMCOverlayManager_2208*)cSSXApp_getMCManager(D_004A28A8);
+    if (*(int*)((char*)self + 0x1C0) == 1 && !*(int*)((char*)self + 0x1A8)) {
+        func_0023CAE8(pMC, 1, 0);
+        *(int*)((char*)self + 0x1A8) = 1;
+        *(int*)((char*)self + 0x1DC) = 1;
+        *(int*)((char*)self + 0x1F0) = 1;
+        *(int*)((char*)self + 0x1C0) = 3;
+    } else if (*(int*)((char*)self + 0x1C0) == 3) {
+        if (!pMC->mDevices[pMC->mSelectedDevice].bPluggedIn || !pMC->mDevices[pMC->mSelectedDevice].bValid
+            || !pMC->mDevices[pMC->mSelectedDevice].bFormatted) {
+            *(int*)((char*)self + 0x1DC) = 0;
+            *(int*)((char*)self + 0x1E4) = 1;
+            *(int*)((char*)self + 0x1A8) = 0;
+            *(int*)((char*)self + 0x1C0) = 6;
+        }
+    }
+    func_001D8DE0(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/ovstateprofile", func_002122E0__FPv);

@@ -1846,7 +1846,338 @@ extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf,
 }
 #endif
 
+//100%
 INCLUDE_ASM("intersect/worldsphtree", func_00335128);
+#ifdef SKIP_ASM
+// PORT: PS2-only VU0 inline asm throughout; needs C fallbacks off-PS2.
+struct sV_335128
+{
+    float x, y, z, w;
+    sV_335128() {}
+    // t4vect::x()/y()/z()/w() in On Tour (component accessors returning a reference).
+    float& X() { return x; }
+    float& Y() { return y; }
+    float& Z() { return z; }
+    float& W() { return w; }
+} __attribute__((aligned(16)));
+
+extern sV_335128 D_004FF120_335128 __asm__("D_004FF120");
+
+struct sF5_335128 {
+    float v[5];
+};
+// Segment brackets for the golden-section refinement, by nearest sample.
+extern const sF5_335128 D_0048E560_335128 __asm__("D_0048E560");
+extern const sF5_335128 D_0048E578_335128 __asm__("D_0048E578");
+
+// A cubic curve object: coefficient rows at 0x10 (point = M * (t^3, t^2, t, 1)) and a bounding box.
+struct sCurveObj_335128 {
+    char pad00[0x10];
+    sV_335128 m[4];         // 0x10
+    char pad50[0x18];
+    char* owner;            // 0x68 (id at +0x28)
+    float bmin[3];          // 0x6C
+    float bmax[3];          // 0x78
+};
+
+struct sHit_335128 {
+    sV_335128 pos;      // 0x00
+    sV_335128 nrm;      // 0x10
+    sV_335128 v20;      // 0x20
+    sV_335128 v30;      // 0x30
+    float dist;         // 0x40
+    int type;           // 0x44
+    int pad48;
+    int id;             // 0x4C
+    int f50;            // 0x50
+    void* obj;          // 0x54
+    void* f58;          // 0x58
+    int f5C;            // 0x5C
+    int f60;            // 0x60
+    int f64;            // 0x64
+    float t;            // 0x68
+    float u;            // 0x6C
+    float v;            // 0x70
+};
+
+// PORT: PS2-only VU0 macro-mode asm (4x4 matrix times vector).
+static inline sV_335128 MatMulV_335128(const sV_335128* m, const sV_335128& v)
+{
+    sV_335128 r;
+    __asm__(
+        "lqc2       $vf8, %2\n"
+        "lqc2       $vf4, 0x0(%1)\n"
+        "lqc2       $vf5, 0x10(%1)\n"
+        "lqc2       $vf6, 0x20(%1)\n"
+        "lqc2       $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2       $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sV_335128 Sub_335128(const sV_335128& a, const sV_335128& b)
+{
+    sV_335128 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sV_335128 Add_335128(const sV_335128& a, const sV_335128& b)
+{
+    sV_335128 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV_335128 Scale_335128(const sV_335128& v, float s)
+{
+    sV_335128 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector length).
+static inline float Length_335128(const sV_335128& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_335128(const sV_335128& a, const sV_335128& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sV_335128 Normalize_335128(const sV_335128& v)
+{
+    sV_335128 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2 abs.s asm helper; use fabsf on PC.
+static inline float Abs_335128(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: g++ `<?` (min) operator, removed in GCC 4.3.
+static inline float Clamp_335128(float x, float hi)
+{
+    return x >= 0.0f ? (x <? hi) : 0.0f;
+}
+
+// On Tour: splineEval(const t4Matrix& emat, float w): the point at w, (w^3, w^2, w, 1) through the coefficient rows.
+// The components are set through the reference accessors, w first, as On Tour does.
+static inline sV_335128 splineEval_335128(const sV_335128* emat, float w)
+{
+    sV_335128 v;
+    v.W() = 1.0f;
+    v.Z() = w;
+    v.Y() = w * v.Z();
+    v.X() = w * v.Y();
+    return MatMulV_335128(emat, v);
+}
+
+// On Tour: splineSlope(const t4Matrix& emat, float w): the tangent at w, (3w^2, 2w, 1, 0).
+static inline sV_335128 splineSlope_335128(const sV_335128* emat, float w)
+{
+    sV_335128 v;
+    v.W() = 0.0f;
+    v.Z() = 1.0f;
+    v.Y() = w * 2.0f;
+    v.X() = w * (w * 3.0f);
+    return MatMulV_335128(emat, v);
+}
+
+static inline void reset_335128(sHit_335128* h)
+{
+    h->type = 2;
+    h->obj = 0;
+    h->f50 = 0;
+    h->f58 = 0;
+    h->f5C = -1;
+    h->f60 = -1;
+    h->f64 = -1;
+    h->id = -1;
+    h->v20 = D_004FF120_335128;
+    h->v30 = D_004FF120_335128;
+    h->t = 0;
+    h->u = 0;
+    h->v = 0;
+}
+
+// intersect::staticSplineSegmentIntersect (On Tour name): closest point on a spline segment to intersectpos,
+// a coarse 4-segment scan, then a golden-section search.
+// The unit declares func_00335128 with an int last parameter; bind the typed definition by asm label.
+extern "C" void func_00335128_typed(sCurveObj_335128* pSplineSeg, sBox_00334680* box, sV_335128* intersectpos, bool* hit, float* intersectdist, sHit_335128* intersectinfo) __asm__("func_00335128");
+extern "C" void func_00335128_typed(sCurveObj_335128* pSplineSeg, sBox_00334680* box, sV_335128* intersectpos, bool* hit, float* intersectdist, sHit_335128* intersectinfo)
+{
+    if (box->max.x < pSplineSeg->bmin[0] || box->min.x > pSplineSeg->bmax[0] ||
+        box->max.y < pSplineSeg->bmin[1] || box->min.y > pSplineSeg->bmax[1] ||
+        box->max.z < pSplineSeg->bmin[2] || box->min.z > pSplineSeg->bmax[2]) {
+        return;
+    }
+
+    int i;
+    sV_335128 lastp;
+    const float kTopSplit = 0.6180340051651001f;
+    const float kBottomSplit = 1.0f - kTopSplit;
+    float f0, f1, f2, f3;
+    float x0 = 0.0f;
+    float x3 = 1.0f;
+    sV_335128 nextp;
+    sV_335128 tmp;
+    lastp = splineEval_335128(pSplineSeg->m, x0);
+    float cd = Length_335128(Sub_335128(*intersectpos, lastp));
+    int ci = 0;
+    for (i = 1; i < 5; i++) {
+        nextp = splineEval_335128(pSplineSeg->m, i * 0.25f);
+        tmp = Sub_335128(nextp, lastp);
+        float r = Dot_335128(Sub_335128(*intersectpos, lastp), tmp) / Dot_335128(tmp, tmp);
+        r = Clamp_335128(r, 1.0f);
+        tmp = Add_335128(lastp, Scale_335128(tmp, r));
+        float d = Length_335128(Sub_335128(*intersectpos, tmp));
+        if (d < cd) {
+            ci = i;
+            cd = d;
+        }
+        lastp = nextp;
+    }
+    const sF5_335128 minx = D_0048E560_335128;
+    const sF5_335128 maxx = D_0048E578_335128;
+    x0 = minx.v[ci];
+    x3 = maxx.v[ci];
+    float x1 = x0 + (x3 - x0) * kBottomSplit;
+    float x2 = x0 + (x3 - x0) * kTopSplit;
+    lastp = splineEval_335128(pSplineSeg->m, x0);
+    f0 = Length_335128(Sub_335128(lastp, *intersectpos));
+    lastp = splineEval_335128(pSplineSeg->m, x1);
+    f1 = Length_335128(Sub_335128(lastp, *intersectpos));
+    lastp = splineEval_335128(pSplineSeg->m, x2);
+    f2 = Length_335128(Sub_335128(lastp, *intersectpos));
+    lastp = splineEval_335128(pSplineSeg->m, x3);
+    f3 = Length_335128(Sub_335128(lastp, *intersectpos));
+    float lastd = f2;
+    float lastt = x2;
+    for (i = 0; i < 24 && !(Abs_335128(x3 - x0) <= 0.0005000000237487257f); i++) {
+        if (f2 < f1) {
+            x0 = x1;
+            x1 = x2;
+            x2 = x1 * kTopSplit + x3 * kBottomSplit;
+            lastp = splineEval_335128(pSplineSeg->m, x2);
+            float tmp = Length_335128(Sub_335128(lastp, *intersectpos));
+            f0 = f1;
+            f1 = f2;
+            f2 = tmp;
+            lastt = x2;
+            lastd = tmp;
+        } else {
+            x3 = x2;
+            x2 = x1;
+            x1 = x2 * kTopSplit + x0 * kBottomSplit;
+            lastp = splineEval_335128(pSplineSeg->m, x1);
+            float tmp = Length_335128(Sub_335128(lastp, *intersectpos));
+            f3 = f2;
+            f2 = f1;
+            f1 = tmp;
+            lastt = x1;
+            lastd = tmp;
+        }
+    }
+    if (!*hit || lastd < *intersectdist) {
+        *hit = true;
+        *intersectdist = lastd;
+        reset_335128(intersectinfo);
+        intersectinfo->pos = lastp;
+        intersectinfo->nrm = Normalize_335128(splineSlope_335128(pSplineSeg->m, lastt));
+        intersectinfo->id = *(int*)(pSplineSeg->owner + 0x28);
+        intersectinfo->f50 = 0;
+        intersectinfo->f5C = -1;
+        intersectinfo->f58 = pSplineSeg->owner;
+        intersectinfo->t = lastt;
+        intersectinfo->f64 = -1;
+        intersectinfo->obj = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00335960);
