@@ -554,7 +554,416 @@ extern "C" int func_0023D7A8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ManagerLoadSaveUpdate);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// FAKEMATCH: an empty ASSERT macro (`do { } while (0)`) in the isState inline, perhaps EA's compiled-out assert but unconfirmed; plain form 99.28%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+// g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type).
+template <class F> struct sVEntry {
+    short delta;
+    short index;
+    F* fn;
+};
+
+// The overlay manager's 0xE0-byte device records at 0x344 (the unit's sMCDev / sMCOverlayMgr, defined later).
+struct sMCDev_7D8 {
+    int f0;                     // 0x00
+    int f4;                     // 0x04
+    int f8;                     // 0x08
+    int fC;                     // 0x0C
+    int f10;                    // 0x10
+    int f14;                    // 0x14
+    char name[0xE0 - 0x18];     // 0x18
+};
+
+struct sMCOverlayMgr_7D8 {
+    char pad[0x344];
+    sMCDev_7D8 dev[1];          // 0x344
+};
+
+// PORT: the unit declares cMCOverlayManager_GatherDeviceInfo1 as returning void*, but it returns nothing; bind the void body by asm label.
+extern "C" void cMCOverlayManager_GatherDeviceInfo1_v(void* self, int i) __asm__("cMCOverlayManager_GatherDeviceInfo1");
+extern "C" void MEM_fill(void* p, int c, int n);
+extern "C" void cMCOverlayManager_InitiateFileCheck(void* self);
+extern "C" void cMCOverlayManager_checkDevice(void* self, int v);
+extern "C" void cMCOverlayManager_UpdateInitFileCheckWait(void* self);
+void cMCOverlayManager_UpdateInitCardsCheckDone(void* self);
+void cMCOverlayManager_UpdateInitFileCheckDone(void* self);
+extern "C" void cMCOverlayManager_UpdateCheckCardsWait(void* self);
+extern "C" void cMCOverlayManager_UpdateCheckCards(void* self);
+extern "C" void cMCOverlayManager_UpdateNoCardsError(void* self);
+extern "C" void cMCOverlayManager_UpdateCardInvalid(void* self);
+extern "C" void cMCOverlayManager_UpdateReadingCard(void* self);
+extern "C" void cMCOverlayManager_UpdateFormatConfirm(void* self);
+extern "C" void cMCOverlayManager_UpdateFormatProgress(void* self);
+extern "C" void cMCOverlayManager_UpdateFormatFailed(void* self);
+extern "C" void cMCOverlayManager_UpdateSaveCorrupt(char* self);
+extern "C" void cMCOverlayManager_UpdateSaveDone(void* self);
+extern "C" void cMCOverlayManager_UpdateSaveFailed(void* self);
+extern "C" void cMCOverlayManager_UpdateSaveTooBig(void* self);
+extern "C" void cMCOverlayManager_UpdateNoFreeBlocks(void* self);
+extern "C" void cMCOverlayManager_UpdatePreSaveFile(void* self);
+extern "C" void cMCOverlayManager_UpdatePreSaveFileDelete(void* self);
+extern "C" void cMCOverlayManager_UpdateCreateFile(void* self);
+extern "C" void cMCOverlayManager_UpdateSaveFile(void* self);
+extern "C" void cMCOverlayManager_UpdateSaveProgress(char* self);
+extern "C" void cMCOverlayManager_UpdateSave(void* self);
+extern "C" void cMCOverlayManager_UpdateSaveClosing(void* self);
+extern "C" void cMCOverlayManager_UpdateLoadDoneWait(void* self);
+extern "C" void cMCOverlayManager_UpdateLoadDone(void* self);
+extern "C" void cMCOverlayManager_UpdateLoadFailed(void* self);
+extern "C" void cMCOverlayManager_UpdateLoadCorrupt(void* self);
+extern "C" void cMCOverlayManager_UpdateLoadConfirm(void* self);
+extern "C" void cMCOverlayManager_UpdateLoadStart(void* self);
+extern "C" void cMCOverlayManager_UpdateLoadProgress(void* self);
+extern "C" void cMCOverlayManager_UpdateLoad(void* self);
+extern "C" void cMCOverlayManager_UpdateLoadClosing(void* self);
+extern "C" void cMCOverlayManager_UpdateLoadFileNotFound(void* self);
+extern "C" void cMCOverlayManager_UpdateDeleteConfirm(void* self);
+extern "C" void cMCOverlayManager_UpdateDeleteProgress(void* self);
+extern "C" void cMCOverlayManager_UpdateDeleteDoneWait(char* self);
+extern "C" void cMCOverlayManager_UpdateDeleteDone(void* self);
+extern "C" void cMCOverlayManager_UpdateDeleteFailed(void* self);
+extern "C" void cMCOverlayManager_UpdateOverwriteConfirm(void* self);
+extern "C" void cMCOverlayManager_UpdateInitFormatConfirm(void* self);
+extern "C" void cMCOverlayManager_UpdateInitFormatProgress(void* self);
+extern "C" void cMCOverlayManager_UpdateInitFormatFailed(void* self);
+extern "C" void cMCOverlayManager_UpdateInitFormatDone(void* self);
+extern "C" void cMCOverlayManager_UpdateInitDeleteConfirm(void* self);
+extern "C" void cMCOverlayManager_UpdateInitDeleteProgress(char* self);
+extern "C" void cMCOverlayManager_UpdateInitDeleteFailed(void* self);
+extern "C" void cMCOverlayManager_UpdateInitDeleteDone(void* self);
+void* cMCOverlayManager_UpdateCardUnusable(void* self);
+extern "C" void cMCOverlayManager_UpdateCardDamaged(void* self);
+extern "C" void cMCOverlayManager_UpdateFileExists(void* self);
+extern "C" void cMCOverlayManager_UpdateCardChanged(void* self);
+extern "C" void func_00241400(char* self);
+extern "C" void cMCOverlayManager_OnHighlightPrevDevice(char* self);
+
+// The player's decoder at 0x434, called through its vtable slots by hand (re-read for every call).
+#define DEC_7D8(s) (*(char**)((s) + 0x434))
+
+static inline int call0_7D8(char* s, int n)
+{
+    char* o = DEC_7D8(s);
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)o;
+    return vt[n].fn(o + vt[n].delta);
+}
+static inline int callI_7D8(char* s, int n, int a)
+{
+    char* o = DEC_7D8(s);
+    sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)o;
+    return vt[n].fn(o + vt[n].delta, a);
+}
+static inline void callV_7D8(char* s, int n, int a)
+{
+    char* o = DEC_7D8(s);
+    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)o;
+    vt[n].fn(o + vt[n].delta, a);
+}
+static inline void callN_7D8(char* s, int n)
+{
+    char* o = DEC_7D8(s);
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)o;
+    vt[n].fn(o + vt[n].delta);
+}
+static inline int isBusy_7D8(char* s) { return call0_7D8(s, 11); }
+// Release-build assert: compiles to an empty do { } while (0) (its loop notes still shape the code).
+#define ASSERT_7D8(cond) do { } while (0)
+
+static inline bool isState_7D8(char* s, int k)
+{
+    ASSERT_7D8(k > 0);
+    return *(int*)(s + 0x130) == k;
+}
+static inline bool isActive_7D8(char* s)
+{
+    return !(isState_7D8(s, 0x14) || isState_7D8(s, 0x24) || isState_7D8(s, 0x25) || isState_7D8(s, 0x1C) || isState_7D8(s, 0xC));
+}
+static inline bool canLoad_7D8(char* s)
+{
+    return !(isState_7D8(s, 0x14) || isState_7D8(s, 0x24) || isState_7D8(s, 0x25) || isState_7D8(s, 0x1C)
+        || isState_7D8(s, 0xC) || isState_7D8(s, 0x31) || isState_7D8(s, 0x32) || isState_7D8(s, 0x33)
+        || isState_7D8(s, 0x34) || isState_7D8(s, 0x35) || isState_7D8(s, 0x36) || *(int*)(s + 0x430) < 0);
+}
+// Decoder capability tests, written to the player's flag words.
+static inline void canPlay_7D8(char* s, int& out)
+{
+    out = call0_7D8(s, 53) && !callI_7D8(s, 65, *(int*)(s + 0xF8)) && !callI_7D8(s, 66, *(int*)(s + 0xF8));
+}
+static inline void canSkip_7D8(char* s, int& out)
+{
+    out = call0_7D8(s, 55) && call0_7D8(s, 58) && !call0_7D8(s, 51) && !call0_7D8(s, 59)
+        && callI_7D8(s, 67, *(int*)(s + 0xF8)) && !callI_7D8(s, 65, *(int*)(s + 0xF8)) && !callI_7D8(s, 66, *(int*)(s + 0xF8));
+}
+
+extern "C" void cMCOverlayManager_ManagerLoadSaveUpdate(void* self)
+{
+    char* s = (char*)self;
+    if (*(int*)(s + 0x130) == 1)
+        return;
+    *(int*)(s + 0xCC) = 0;
+    *(int*)(s + 0xD0) = 0;
+    *(int*)(s + 0xD4) = 0;
+    *(int*)(s + 0xD8) = 0;
+    callN_7D8(s, 3);
+    if (isBusy_7D8(s) || isActive_7D8(s)) {
+        int st = *(int*)(s + 0x130);
+        if (st == 7 || st == 0x1D) {
+            *(int*)(s + 0xD8) = 1;
+            canPlay_7D8(s, *(int*)(s + 0xCC));
+            canSkip_7D8(s, *(int*)(s + 0xD0));
+            if (*(int*)(s + 0x130) == 0x1D)
+                *(int*)(s + 0xD4) = 0;
+            else
+                *(int*)(s + 0xD4) = callI_7D8(s, 67, *(int*)(s + 0xF8));
+        }
+        if (call0_7D8(s, 63)) {
+            *(int*)(s + 0xC8) = 1;
+            callN_7D8(s, 47);
+        }
+    }
+    if (!isBusy_7D8(s)) {
+        if (canLoad_7D8(s)) {
+            sMCOverlayMgr_7D8* mgr = (sMCOverlayMgr_7D8*)s;
+            int idx = *(int*)(s + 0x430);
+            if (mgr->dev[idx].fC == 0) {
+                if (callI_7D8(s, 52, idx)) {
+                    if (*(int*)(s + 0x430) == *(int*)(s + 0x428)) {
+                        sVEntry<void(void*, int)>* avt = *(sVEntry<void(void*, int)>**)(s + 0x748);
+                        avt[1].fn(s + avt[1].delta, 0x31);
+                    } else {
+                        cMCOverlayManager_GatherDeviceInfo1_v(self, *(int*)(s + 0x430));
+                    }
+                } else {
+                    MEM_fill(&mgr->dev[*(int*)(s + 0x430)], 0, 0xE0);
+                    if (*(int*)(s + 0x428) == *(int*)(s + 0x430) && !(*(int (**)())(s + 0x74))()
+                        && !(*(int (**)())(s + 0x64))() && !(*(int (**)())(s + 0x78))() && !(*(int (**)())(s + 0x68))()
+                        && !(*(int (**)())(s + 0x88))() && *(int*)(s + 0xBC) == 0 && *(int*)(s + 0xC0) == 0
+                        && !(*(int (**)())(s + 0x78))())
+                        func_00241400(s);
+                }
+            } else {
+                if (!callI_7D8(s, 52, idx))
+                    MEM_fill(&mgr->dev[*(int*)(s + 0x430)], 0, 0xE0);
+                else
+                    cMCOverlayManager_GatherDeviceInfo1_v(self, *(int*)(s + 0x430));
+            }
+        }
+    }
+    if (!isBusy_7D8(s)) {
+        if (*(int*)(s + 0x338) != 0) {
+            *(int*)(s + 0x338) = 0;
+            *(int*)(s + 0x33C) = 5;
+        }
+        int st = *(int*)(s + 0x130);
+        if (st == 7 || st == 0x1D) {
+            if ((*(int (**)())(s + 0x7C))()) {
+                int old = *(int*)(s + 0x428);
+                func_00241400(s);
+                if (old != *(int*)(s + 0x428))
+                    cMCOverlayManager_InitiateFileCheck(self);
+            } else if ((*(int (**)())(s + 0x80))()) {
+                int old = *(int*)(s + 0x428);
+                cMCOverlayManager_OnHighlightPrevDevice(s);
+                if (old != *(int*)(s + 0x428))
+                    cMCOverlayManager_InitiateFileCheck(self);
+            }
+        }
+    }
+    int go = 0;
+    int st = *(int*)(s + 0x130);
+    if (st == 7 || st == 0x16 || st == 0x14 || st == 0x1D || st == 4 || st == 0x17 || st == 0x18 || st == 9 || st == 0xA) {
+        (*(int*)(s + 0x33C))--;
+        if (*(int*)(s + 0x338) == 0 && *(int*)(s + 0x33C) <= 0)
+            go = !isBusy_7D8(s);
+    }
+    if (go) {
+        bool changed = false;
+        for (int i = 0; i < cMCOverlayManager_getMaxDevicesSupported(self); i++) {
+            if (callI_7D8(s, 26, i)) {
+                if (*(int*)(s + 0x430) < i || *(int*)(s + 0x430) == cMCOverlayManager_getMaxDevicesSupported(self) - 1) {
+                    *(int*)(s + 0x42C) = i;
+                    *(int*)(s + 0x430) = i;
+                    if (i != *(int*)(s + 0x428)) changed = true; else changed = false;
+                    callV_7D8(s, 5, i);
+                    *(int*)(s + 0x338) = 1;
+                    callV_7D8(s, 27, *(int*)(s + 0x42C));
+                    break;
+                }
+            }
+        }
+        if (changed)
+            cMCOverlayManager_checkDevice(self, *(int*)(s + 0x428));
+    }
+    switch (*(int*)(s + 0x130)) {
+    case 49:
+        cMCOverlayManager_UpdateInitCardsCheck(self);
+        break;
+    case 50:
+        cMCOverlayManager_UpdateInitCardsCheckDone(self);
+        break;
+    case 53:
+        cMCOverlayManager_UpdateInitFileCheckWait(self);
+        break;
+    case 54:
+        cMCOverlayManager_UpdateInitFileCheckDevice(self);
+        break;
+    case 51:
+        cMCOverlayManager_UpdateInitFileCheck(self);
+        break;
+    case 52:
+        cMCOverlayManager_UpdateInitFileCheckDone(self);
+        break;
+    case 2:
+        cMCOverlayManager_UpdateCheckCardsWait(self);
+        break;
+    case 3:
+        cMCOverlayManager_UpdateCheckCards(self);
+        break;
+    case 4:
+        cMCOverlayManager_UpdateNoCardsError(self);
+        break;
+    case 5:
+        cMCOverlayManager_UpdateCardInvalid(self);
+        break;
+    case 6:
+        cMCOverlayManager_UpdateReadingCard(self);
+        break;
+    case 10:
+        cMCOverlayManager_UpdateFormatConfirm(self);
+        break;
+    case 11:
+        cMCOverlayManager_UpdateFormatProgress(self);
+        break;
+    case 12:
+        cMCOverlayManager_UpdateFormatFailed(self);
+        break;
+    case 22:
+        cMCOverlayManager_UpdateSaveCorrupt(s);
+        break;
+    case 19:
+        cMCOverlayManager_UpdateSaveDone(self);
+        break;
+    case 20:
+        cMCOverlayManager_UpdateSaveFailed(self);
+        break;
+    case 21:
+        cMCOverlayManager_UpdateSaveTooBig(self);
+        break;
+    case 23:
+        cMCOverlayManager_UpdateNoFreeBlocks(self);
+        break;
+    case 13:
+        cMCOverlayManager_UpdatePreSaveFile(self);
+        break;
+    case 14:
+        cMCOverlayManager_UpdatePreSaveFileDelete(self);
+        break;
+    case 15:
+        cMCOverlayManager_UpdateCreateFile(self);
+        break;
+    case 16:
+        cMCOverlayManager_UpdateSaveFile(self);
+        break;
+    case 17:
+        cMCOverlayManager_UpdateSaveProgress(s);
+        break;
+    case 7:
+        cMCOverlayManager_UpdateSave(self);
+        break;
+    case 18:
+        cMCOverlayManager_UpdateSaveClosing(self);
+        break;
+    case 34:
+        cMCOverlayManager_UpdateLoadDoneWait(self);
+        break;
+    case 35:
+        cMCOverlayManager_UpdateLoadDone(self);
+        break;
+    case 36:
+        cMCOverlayManager_UpdateLoadFailed(self);
+        break;
+    case 37:
+        cMCOverlayManager_UpdateLoadCorrupt(self);
+        break;
+    case 30:
+        cMCOverlayManager_UpdateLoadConfirm(self);
+        break;
+    case 31:
+        cMCOverlayManager_UpdateLoadStart(self);
+        break;
+    case 32:
+        cMCOverlayManager_UpdateLoadProgress(self);
+        break;
+    case 29:
+        cMCOverlayManager_UpdateLoad(self);
+        break;
+    case 33:
+        cMCOverlayManager_UpdateLoadClosing(self);
+        break;
+    case 38:
+        cMCOverlayManager_UpdateLoadFileNotFound(self);
+        break;
+    case 24:
+        cMCOverlayManager_UpdateDeleteConfirm(self);
+        break;
+    case 25:
+        cMCOverlayManager_UpdateDeleteProgress(self);
+        break;
+    case 26:
+        cMCOverlayManager_UpdateDeleteDoneWait(s);
+        break;
+    case 27:
+        cMCOverlayManager_UpdateDeleteDone(self);
+        break;
+    case 28:
+        cMCOverlayManager_UpdateDeleteFailed(self);
+        break;
+    case 9:
+        cMCOverlayManager_UpdateOverwriteConfirm(self);
+        break;
+    case 39:
+        cMCOverlayManager_UpdateInitFormatConfirm(self);
+        break;
+    case 40:
+        cMCOverlayManager_UpdateInitFormatProgress(self);
+        break;
+    case 41:
+        cMCOverlayManager_UpdateInitFormatFailed(self);
+        break;
+    case 42:
+        cMCOverlayManager_UpdateInitFormatDone(self);
+        break;
+    case 43:
+        cMCOverlayManager_UpdateInitDeleteConfirm(self);
+        break;
+    case 44:
+        cMCOverlayManager_UpdateInitDeleteProgress(s);
+        break;
+    case 45:
+        cMCOverlayManager_UpdateInitDeleteFailed(self);
+        break;
+    case 46:
+        cMCOverlayManager_UpdateInitDeleteDone(self);
+        break;
+    case 47:
+        cMCOverlayManager_UpdateCardUnusable(self);
+        break;
+    case 48:
+        cMCOverlayManager_UpdateCardDamaged(self);
+        break;
+    case 55:
+        cMCOverlayManager_UpdateFileExists(self);
+        break;
+    case 56:
+        cMCOverlayManager_UpdateCardChanged(self);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitCardsCheck);

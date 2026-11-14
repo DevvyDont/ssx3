@@ -8386,7 +8386,136 @@ void func_003C0A60(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C0B10);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// FAKEMATCH: the per-function sAD00 view with volatile fields (the unit's other accessors read them plain); the `volatile int i` busy-wait counter itself is honest (without it the delay loop is deleted, 66.64%). Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+/* D_0050AD00_0B10: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
+   queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
+   their offsets. */
+struct sAD00Voice_0B10 { int key; int val; };
+
+struct sAD00SpuVoice_0B10 {              /* 8 bytes, sAD00Spu_0B10.f20[] */
+    int key;
+    short pitch;
+    signed char l;
+    signed char r;
+};
+
+struct sAD00SpuChan_0B10 {               /* 16 bytes, sAD00Spu_0B10.f1A0[] */
+    int key;
+    short pitch;
+    signed char vol[6];
+    signed char f0C[4];
+};
+
+struct sAD00Spu_0B10 {                   /* 0x2A0, block 3 of the shared buffer (D_0050AD00_0B10.fCB0) */
+    long f00;                       /* voice on bits */
+    unsigned long f08;
+    char f10;
+    char f11;
+    char f12;
+    unsigned char f13;
+    short f14;
+    short f16;
+    char pad18[0x20 - 0x18];
+    struct sAD00SpuVoice_0B10 f20[48];
+    struct sAD00SpuChan_0B10 f1A0[16];
+};
+
+struct sAD00Xfer_0B10 {                  /* 16 bytes, D_0050AD00_0B10.fCC8[] (also D_0050B9C8) */
+    unsigned int key;
+    int f04;
+    int f08;
+    unsigned short f0C;
+    unsigned char f0E;
+    char pad0F;
+};
+
+struct sAD00Spk_0B10 {                   /* 0x20, D_0050AD00_0B10.fE98[] (also D_0050BB98) */
+    float f00[6];
+    unsigned int f18;
+    short f1C;
+    short f1E;
+};
+
+struct sAD00Seg_0B10 { unsigned short a; unsigned short b; };
+
+struct sAD00Port_0B10 { int f00; int f04; int pad08[2]; };   /* 16 bytes, D_0050AD00_0B10.fE88[] */
+
+struct sAD00_0B10 {
+    char f000[0x83C];               /* RPC send buffer */
+    struct sAD00Voice_0B10 f83C[48];
+    struct sAD00Voice_0B10 f9BC[16];
+    char padA3C[0xC80 - 0xA3C];
+    char fC80[0x30];                /* RPC client data */
+    struct sAD00Spu_0B10 *fCB0;          /* also D_0050B9B0 */
+    int *fCB4;
+    void *fCB8;
+    volatile int fCBC;              /* last transfer id */
+    volatile unsigned char fCC0;    /* queued transfers */
+    volatile unsigned char fCC1;    /* selected transfer */
+    volatile unsigned char fCC2;    /* transfer running */
+    char padCC3;
+    int fCC4;                       /* tick of the last transfer */
+    struct sAD00Xfer_0B10 fCC8[28];
+    struct sAD00Port_0B10 fE88[1];
+    struct sAD00Spk_0B10 fE98[96];
+    unsigned short f1A98;           /* number of f1AA0 segments */
+    unsigned short f1A9A;
+    unsigned short f1A9C;
+    unsigned short f1A9E;
+    struct sAD00Seg_0B10 *f1AA0;
+    int f1AA4;
+    int f1AA8;
+    char f1AAC;
+    unsigned char f1AAD;
+    unsigned short f1AAE;
+    char pad1AB0[0x1AB2 - 0x1AB0];
+    unsigned short f1AB2;           /* fill offset while func_003C1638 lays out f1AB4 */
+    char *f1AB4;
+    int f1AB8;
+    void *f1ABC[6];
+    int f1AD4;
+    int f1AD8;
+    char pad1ADC[0x1AF4 - 0x1ADC];
+    void *f1AF4;
+    int f1AF8;
+    char pad1AFC[0x1B00 - 0x1AFC];
+    void *f1B00;
+    int f1B04;
+    int f1B08;
+    int f1B0C;
+    volatile int f1B10;             /* lock: semaphore, owner thread, depth */
+    volatile int f1B14;
+    volatile int f1B18;
+    int f1B1C[7];                   /* saved SPU2 DMA registers */
+    int f1B38;
+};
+
+extern struct sAD00_0B10 D_0050AD00_0B10 __asm__("D_0050AD00");
+
+extern void func_003C51E8(void *, void *, int);
+extern int func_00426F08(void *);
+extern void func_00426D18(void *, int, int, void *, int, int, int, int, int);
+
+void func_003C0B10(int a0, void *a1, int a2) {
+    volatile int i;
+    int two = a0 == 2;
+    if (a2) {
+        func_003C51E8(D_0050AD00_0B10.f000, a1, a2);
+    }
+    while (func_00426F08(D_0050AD00_0B10.fC80)) {
+        for (i = 0; i < 10000; i++) {
+        }
+    }
+    func_00426D18(D_0050AD00_0B10.fC80, a0, two, D_0050AD00_0B10.f000, a2, 0, 0, 0, 0);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C0BE8);

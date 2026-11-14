@@ -899,7 +899,20 @@ int func_003F4A78(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4C68);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// FAKEMATCH: an unused `int unused[12]` gives the 0x60 frame (perhaps a compiled-out debug buffer); plain form 99.50%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern int func_003F4528_4C68(int, int, int, int, int, int, int, int, int, int, int) __asm__("func_003F4528");
+int func_003F4C68_impl(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9) __asm__("func_003F4C68");
+int func_003F4C68_impl(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9) {
+    int unused[12];
+    return func_003F4528_4C68(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a3);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4C98);
