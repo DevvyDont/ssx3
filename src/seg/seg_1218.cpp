@@ -3113,6 +3113,9 @@ extern "C" float func_00104E70(char* self, cScope_4E70* sc, sHit_4E70* out)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1218", func_00105398);
 #ifdef SKIP_ASM
+// FAKEMATCH: the scope object's address goes through a copy `ps` to one call while the destructor gets `&sc`
+// (an inconsistently used address copy); plain `&sc` scores 99.98%. Landed 2026-10-18 from a saved result before
+// this was noticed; marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only).
 struct sV4_5398 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
