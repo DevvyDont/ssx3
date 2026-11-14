@@ -11198,14 +11198,10 @@ int func_003C65F0(int arg0) {
 }
 #endif
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6620);
-
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6760);
-
-//100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003C6AB8);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
+/* EA SNDSAMPLEFORMAT (On Tour DWARF): 4 bytes. */
+typedef struct SNDSAMPLEFORMAT { unsigned short h0; unsigned char n; unsigned char b3; } SNDSAMPLEFORMAT;
+
 /* D_005157B8: the stream queues (a pending-callback list, then one queue per stream). Layout from every use in
    this unit; field names are their offsets. */
 struct s7B8Rec {                    /* 0x20, s7B8Queue.f7C[] */
@@ -11234,9 +11230,7 @@ struct s7B8Queue {
     void (*f54)(int, int);
     void (*f58)(int, int, int);
     int f5C;
-    char pad60[0x62 - 0x60];
-    unsigned char f62;              /* number of readers */
-    char pad63;
+    SNDSAMPLEFORMAT f60;            /* sample format; f60.n = number of readers */
     int f64[6];
     struct s7B8Rec f7C[1];
 };
@@ -11254,6 +11248,16 @@ struct s7B8 {
 };
 
 extern struct s7B8 D_005157B8;
+#endif
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6620);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6760);
+
+//100%
+INCLUDE_ASM("ealib/seg_2B4578", func_003C6AB8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
 
 /* 97.69: only missing "move $5,$2" copy of lbu result before loop (n vs r pseudo); volatile f48/f46/f4/f40/a[] needed */
 struct A_6AB8 { char pad0[4]; unsigned int sz : 31; unsigned int flag : 1; char pad8[4]; int w[6]; };
@@ -11264,7 +11268,7 @@ int func_003C6AB8(int arg0, struct A_6AB8 *arg1)
   struct s7B8Rec *e;
   int i;
   int r;
-  for (i = 0; i < s->f62; i++)
+  for (i = 0; i < s->f60.n; i++)
   {
     if (s->f34[i] >= s->f40 - 1)
     {
@@ -11277,7 +11281,7 @@ int func_003C6AB8(int arg0, struct A_6AB8 *arg1)
   e->len = arg1->sz;
   e->flag = arg1->flag;
   e->f00 = s->f04;
-  for (i = 0; i < s->f62; i++)
+  for (i = 0; i < s->f60.n; i++)
   {
     e->f08[i] = arg1->w[i];
     s->f34[i] += 1;
@@ -11309,7 +11313,7 @@ int func_003C6C28(int arg0) {
     struct s7B8Queue *e = D_005157B8.f304[arg0];
     int m = 0;
     int i;
-    for (i = 0; i < e->f62; i++) {
+    for (i = 0; i < e->f60.n; i++) {
         if (!(e->f34[i] < m))
             m = e->f34[i];
     }
@@ -11375,7 +11379,7 @@ int func_003C6CE8(int arg0) {
     f_6CE0_6CE8(arg0, 0, 0x7FFFFFFF);
     e->f00 = -1;
 
-    for (; i < e->f62; i++) {
+    for (; i < e->f60.n; i++) {
         if (e->f64[i]) func_003B5E98(e->f64[i]);
 
     }
