@@ -2656,7 +2656,53 @@ extern "C" void func_003B1D58(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2AEDC0", sequence_scalable_extension);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// mpeg2decode global.h: the sequence scalable extension's plain int globals
+extern int layer_id __asm__("D_005095DC");
+extern int lower_layer_prediction_horizontal_size __asm__("D_005095E0");
+extern int lower_layer_prediction_vertical_size __asm__("D_005095E4");
+extern int horizontal_subsampling_factor_m __asm__("D_005095E8");
+extern int horizontal_subsampling_factor_n __asm__("D_005095EC");
+extern int vertical_subsampling_factor_m __asm__("D_005095F0");
+extern int vertical_subsampling_factor_n __asm__("D_005095F4");
+extern char D_004954F0[];
+extern char D_00495510[];
+void* func_003B2360(void* self);
+// Get_Bits returning int: with the unit's void* (or mpeg2decode's unsigned int) declaration GCC keeps the
+// globals' %hi parts in s-registers across the calls.
+extern "C" int Get_Bits(int n) __asm__("func_003B1300");
+void func_003B11E8(void* self);
+
+// mpeg2decode getheader.c sequence_scalable_extension(); func_003B1300 = Get_Bits, func_003B2360 = marker_bit,
+// func_003B11E8 = Error.
+extern "C" void sequence_scalable_extension(void)
+{
+    int pos;
+
+    pos = ld->Bitcnt;  // mpeg2decode reads it unconditionally; only its VERBOSE trace uses pos
+
+    /* values (without the +1 offset) of scalable_mode are defined in Table 6-10 of ISO/IEC 13818-2 */
+    ld->scalable_mode = Get_Bits(2) + 1; /* add 1 to make SC_DP != SC_NONE */
+
+    layer_id = Get_Bits(4);
+
+    if (ld->scalable_mode == 2) { /* SC_SPAT */
+        lower_layer_prediction_horizontal_size = Get_Bits(14);
+        func_003B2360(D_004954F0);
+        lower_layer_prediction_vertical_size = Get_Bits(14);
+        horizontal_subsampling_factor_m = Get_Bits(5);
+        horizontal_subsampling_factor_n = Get_Bits(5);
+        vertical_subsampling_factor_m = Get_Bits(5);
+        vertical_subsampling_factor_n = Get_Bits(5);
+    }
+
+    if (ld->scalable_mode == 4) /* SC_TEMP */
+        func_003B11E8(D_00495510);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B1FC8);

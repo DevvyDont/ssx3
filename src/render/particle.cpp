@@ -3214,7 +3214,233 @@ extern "C" void func_00376C28(sPartSys* self, float* a, float* b, float* c)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00376C58);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// 4x4 float matrix (POD, 16-byte aligned).
+struct sPtMatrix_6C58 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+// Four floats as an aligned array (indexed access; same bytes as t4Vector).
+struct sPtQuadF_6C58 {
+    float v[4];
+} __attribute__((aligned(16)));
+
+struct sPtView6C58 {
+    float x, y, w, h;               // 0x00
+    float zNear;                    // 0x10
+    float zFar;                     // 0x14
+    float fov;                      // 0x18
+    float depth;                    // 0x1C
+    int f20;                        // 0x20
+    char pad_0x24[0x230 - 0x24];
+};
+
+struct sPtVtU6C58 {
+    short delta;
+    short index;
+    unsigned (*fn)(void*);
+};
+
+struct sPtGfx6C58 {
+    char pad_0x0[0x10D8];
+    sPtVtU6C58* vtable;             // 0x10D8
+    int curView;                    // 0x10DC
+    char pad_0x10E0[0x57C0 - 0x10E0];
+    sPtMatrix_6C58 m57C0;                // 0x57C0
+    char pad_0x5800[0x5840 - 0x5800];
+    sPtQuadF_6C58 q5840;                 // 0x5840
+    sPtQuadF_6C58 q5850;                 // 0x5850
+    sPtMatrix_6C58 m5860;                // 0x5860
+    char pad_0x58A0[0x58E0 - 0x58A0];
+    sPtQuadF_6C58 q58E0;                 // 0x58E0
+    sPtQuadF_6C58 q58F0;                 // 0x58F0
+    char pad_0x5900[0x8];
+    float fov;                      // 0x5908
+    float zFar;                     // 0x590C
+    float f5910;                    // 0x5910
+    char pad_0x5914[0xC];
+    sPtQuadF_6C58 q5920;                 // 0x5920
+    char pad_0x5930[0x5A40 - 0x5930];
+    int mode;                       // 0x5A40
+    char pad_0x5A44[0x6AF0 - 0x5A44];
+    sPtMatrix_6C58 m6AF0;                // 0x6AF0
+    char pad_0x6B30[0x40];
+    sPtQuadF_6C58 q6B70;                 // 0x6B70
+    sPtQuadF_6C58 q6B80;                 // 0x6B80
+    int texReady;                   // 0x6B90
+    int clampMode;                  // 0x6B94
+    float clampTop;                 // 0x6B98
+    float clampBottom;              // 0x6B9C
+    float scaleX;                   // 0x6BA0
+    float scaleY;                   // 0x6BA4
+    char pad_0x6BA8[0x6D20 - 0x6BA8];
+    sPtView6C58 views[1];           // 0x6D20
+};
+
+// PORT: the unit declares func_0031BE50 as (s, c, angle); its real parameter order is (angle, s, c).
+extern void SinCos_6C58(float angle, float* s, float* c) __asm__("func_0031BE50");
+extern "C" float func_0040D588(float x);
+extern "C" void func_00376938_6C58(void* self, float x, float y, float w, float h) __asm__("func_00376938");
+
+// PORT: SN abs.s asm helper (PS2 FPU).
+static inline float fsAbs_6C58(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// Scales a projection pair by the active letterbox mode's factors.
+static inline void ClampScale6C58(sPtGfx6C58* self, float& x, float& y)
+{
+    int mode = self->clampMode;
+    if (mode < 3) {
+        if (mode >= 0) {
+            x *= self->scaleX;
+            y *= self->scaleY;
+        }
+    }
+}
+
+extern "C" void func_00376C58(sPtGfx6C58* self, float fov, float zNear, float zFar)
+{
+    sPtView6C58* v = &self->views[self->curView];
+    v->f20 = 0;
+    v->zNear = zNear;
+    v->zFar = zFar;
+    v->fov = fov;
+    // PORT: int-arithmetic view address (as in func_00376C10); the typed self->views[i] reads score 94-95%.
+    char* p = (char*)self + self->curView * 0x230;
+    float x = *(float*)(p + 0x6D20);
+    float y = *(float*)(p + 0x6D24);
+    float w = *(float*)(p + 0x6D28);
+    float h = *(float*)(p + 0x6D2C);
+    float zlo, zhi, zscale;
+    if (self->mode == 0x31) {
+        zscale = 16777215.0f;
+        zlo = -8388467.5f;
+        zhi = 8388467.5f;
+    } else {
+        zscale = 65535.0f;
+        zlo = -32767.5f;
+        zhi = 32767.5f;
+    }
+    self->zFar = zFar;
+    self->fov = fov;
+    sPtVtU6C58* e = &self->vtable[11];
+    unsigned height = e->fn((char*)self + e->delta);
+    e = &self->vtable[10];
+    unsigned width = e->fn((char*)self + e->delta);
+    float aspect = (float)height * 1.3333334f / (float)width;
+    float s, c;
+    SinCos_6C58(fov, &s, &c);
+    float sx = (w * 0.5f) / (s / c);
+    float sy = sx * aspect;
+    ClampScale6C58(self, sx, sy);
+    e = &self->vtable[10];
+    float offX = 32768.0f - (float)(e->fn((char*)self + e->delta) * 8);
+    e = &self->vtable[11];
+    float offY = 32768.0f - (float)(e->fn((char*)self + e->delta) * 8);
+    float zA = (-zscale * zNear) / (zFar - zNear);
+    self->m6AF0.m[0][0] = sx * 16.0f;
+    self->m6AF0.m[1][0] = 0.0f;
+    self->m6AF0.m[2][0] = (w * 0.5f + x) * 16.0f + offX;
+    self->m6AF0.m[3][0] = 0.0f;
+    self->m6AF0.m[0][1] = 0.0f;
+    self->m6AF0.m[1][1] = -sy * 16.0f;
+    self->m6AF0.m[2][1] = (h * 0.5f + y) * 16.0f + offY;
+    self->m6AF0.m[3][1] = 0.0f;
+    self->m6AF0.m[0][2] = 0.0f;
+    self->m6AF0.m[1][2] = 0.0f;
+    self->m6AF0.m[2][2] = zA;
+    float zB = -zFar * zA + v->depth;
+    self->m6AF0.m[3][2] = zB;
+    self->m6AF0.m[0][3] = 0.0f;
+    self->m6AF0.m[1][3] = 0.0f;
+    self->m6AF0.m[2][3] = 1.0f;
+    self->m6AF0.m[3][3] = 0.0f;
+    self->q6B70.v[0] = x * 16.0f + offX;
+    self->q6B70.v[1] = y * 16.0f + offY;
+    self->q6B70.v[2] = zA * zNear + zB;
+    self->q6B80.v[0] = (x + w) * 16.0f + offX;
+    self->q6B80.v[1] = (y + h) * 16.0f + offY;
+    self->q6B80.v[2] = zA * zFar + zB;
+    self->q6B70.v[3] = 1.0f / zNear;
+    self->q6B80.v[3] = 1.0f / zFar;
+    self->texReady = 0;
+    float aspect2 = aspect * (w / h);
+    float px = 1.0f / func_0040D588(fov);
+    float py = 1.0f / func_0040D588(fov) * aspect2;
+    ClampScale6C58(self, px, py);
+    e = &self->vtable[10];
+    float sw = (float)e->fn((char*)self + e->delta);
+    float cx = (w * 0.5f - sw * 0.5f) + x;
+    e = &self->vtable[11];
+    float sh = (float)e->fn((char*)self + e->delta);
+    float cy = (h * 0.5f - sh * 0.5f) + y;
+    float zz = (zFar + zNear) / (zFar - zNear);
+    float zw = -(2.0f * zFar * zNear) / (zFar - zNear);
+    self->m5860.m[0][0] = px;
+    self->m5860.m[0][1] = 0.0f;
+    self->m5860.m[0][2] = 0.0f;
+    self->m5860.m[0][3] = 0.0f;
+    self->m5860.m[1][0] = 0.0f;
+    self->m5860.m[1][1] = py;
+    self->m5860.m[1][2] = 0.0f;
+    self->m5860.m[1][3] = 0.0f;
+    self->m5860.m[2][0] = 0.0f;
+    self->m5860.m[2][1] = 0.0f;
+    self->m5860.m[2][2] = zz;
+    self->m5860.m[2][3] = 1.0f;
+    self->m5860.m[3][0] = 0.0f;
+    self->m5860.m[3][1] = 0.0f;
+    self->m5860.m[3][2] = zw;
+    self->m5860.m[3][3] = 0.0f;
+    self->q58E0.v[0] = w * 0.5f;
+    self->q58E0.v[1] = -(h * 0.5f);
+    self->q58E0.v[2] = zlo;
+    self->q58E0.v[3] = 0.0f;
+    self->q58F0.v[0] = cx + 2047.5f;
+    self->q58F0.v[1] = cy + 2047.5f;
+    self->q58F0.v[2] = zhi + v->depth;
+    self->q58F0.v[3] = 0.0f;
+    float gw = 2048.0f - 2.0f * fsAbs_6C58(cx);
+    float gh = 2048.0f - 2.0f * fsAbs_6C58(cy);
+    self->m57C0.m[0][0] = (w / gw) * px;
+    self->m57C0.m[0][1] = 0.0f;
+    self->m57C0.m[0][2] = 0.0f;
+    self->m57C0.m[0][3] = 0.0f;
+    self->m57C0.m[1][0] = 0.0f;
+    self->m57C0.m[1][1] = (h / gh) * py;
+    self->m57C0.m[1][2] = 0.0f;
+    self->m57C0.m[1][3] = 0.0f;
+    self->m57C0.m[2][0] = 0.0f;
+    self->m57C0.m[2][1] = 0.0f;
+    self->m57C0.m[2][2] = zz;
+    self->m57C0.m[2][3] = 1.0f;
+    self->m57C0.m[3][0] = 0.0f;
+    self->m57C0.m[3][1] = 0.0f;
+    self->m57C0.m[3][2] = zw;
+    self->m57C0.m[3][3] = 0.0f;
+    self->q5840.v[0] = gw * 0.5f;
+    self->q5840.v[1] = -(gh * 0.5f);
+    self->q5840.v[2] = zlo;
+    self->q5840.v[3] = 0.0f;
+    self->q5850.v[0] = cx + 2047.5f;
+    self->q5850.v[1] = cy + 2047.5f;
+    self->q5850.v[2] = zhi + v->depth;
+    self->q5850.v[3] = 0.0f;
+    func_00376938_6C58(self, x, y, w, h);
+    self->f5910 = 40000.0f;
+    self->q5920.v[0] = 1023.0f;
+    self->q5920.v[1] = 0.0f;
+    self->q5920.v[2] = 0.0f;
+    self->q5920.v[3] = 1023.0f / 40000.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00377278);
@@ -3355,7 +3581,160 @@ extern "C" void func_00377278(sPtGfx7278* self, sPt7278* pos, float dist)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00377458);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// 4x4 float matrix (POD, 16-byte aligned).
+struct sPtMatrix_7458 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+// Four floats as an aligned array (indexed access; same bytes as t4Vector).
+struct sPtQuadF_7458 {
+    float v[4];
+} __attribute__((aligned(16)));
+
+// PORT: SN abs.s asm helper (PS2 FPU).
+// Depth-buffer range of the current Z format (0x31 = 24-bit Z).
+static inline void ZScale7458(sPtGfx6C58* self, float& zscale)
+{
+    if (self->mode == 0x31) {
+        zscale = 16777215.0f;
+    } else {
+        zscale = 65535.0f;
+    }
+}
+
+// Orthographic counterpart of func_00376C58: view-to-screen, projection and clip matrices for an off-centre box.
+extern "C" void func_00377458(sPtGfx6C58* self, float cx, float cy, float fx, float fy, float zNear, float zFar)
+{
+    sPtView6C58* v = &self->views[self->curView];
+    v->f20 = 1;
+    v->zNear = zNear;
+    v->zFar = zFar;
+    // PORT: int-arithmetic view address, as in the perspective sibling func_00376C58.
+    char* p = (char*)self + self->curView * 0x230;
+    float x = *(float*)(p + 0x6D20);
+    float y = *(float*)(p + 0x6D24);
+    float w = *(float*)(p + 0x6D28);
+    float h = *(float*)(p + 0x6D2C);
+    float zscale;
+    ZScale7458(self, zscale);
+    sPtVtU6C58* e = &self->vtable[10];
+    float offX = 32768.0f - (float)(e->fn((char*)self + e->delta) * 8);
+    e = &self->vtable[11];
+    float offY = 32768.0f - (float)(e->fn((char*)self + e->delta) * 8);
+    float sx = w / fx * 16.0f;
+    float sy = h / fy * 16.0f;
+
+    float zA = -zscale / (zFar - zNear);
+    float zB = -zFar * zA;
+    self->m6AF0.m[0][0] = sx;
+    self->m6AF0.m[1][0] = 0.0f;
+    self->m6AF0.m[2][0] = 0.0f;
+    self->m6AF0.m[3][0] = x * 16.0f - sx * cx + offX;
+    self->m6AF0.m[0][1] = 0.0f;
+    self->m6AF0.m[1][1] = sy;
+    self->m6AF0.m[2][1] = 0.0f;
+    self->m6AF0.m[3][1] = y * 16.0f - sy * cy + offY;
+    self->m6AF0.m[0][2] = 0.0f;
+    self->m6AF0.m[1][2] = 0.0f;
+    self->m6AF0.m[2][2] = zA;
+    self->m6AF0.m[3][2] = zB;
+    self->m6AF0.m[0][3] = 0.0f;
+    self->m6AF0.m[1][3] = 0.0f;
+    self->m6AF0.m[2][3] = 0.0f;
+    self->m6AF0.m[3][3] = 1.0f;
+    self->q6B70.v[0] = x * 16.0f + offX;
+    self->q6B70.v[1] = y * 16.0f + offY;
+    self->q6B70.v[2] = zA * zNear + zB;
+    self->q6B70.v[3] = 1.0f;
+    self->q6B80.v[0] = (x + w) * 16.0f + offX;
+    self->q6B80.v[1] = (y + h) * 16.0f + offY;
+    self->q6B80.v[2] = zA * zFar + zB;
+    self->q6B80.v[3] = 1.0f;
+    self->texReady = 0;
+    float zlo, zhi;
+    if (self->mode == 0x31) {
+        zlo = -8388467.5f;
+        zhi = 8388467.5f;
+    } else {
+        zlo = -32767.5f;
+        zhi = 32767.5f;
+    }
+    float px = 2.0f / fx;
+    float py = 2.0f / fy;
+    e = &self->vtable[10];
+    float sw = (float)e->fn((char*)self + e->delta);
+    float ox = (w * 0.5f - sw * 0.5f) + x;
+    e = &self->vtable[11];
+    float sh = (float)e->fn((char*)self + e->delta);
+    float oy = (h * 0.5f - sh * 0.5f) + y;
+    float zz = 2.0f / (zFar - zNear);
+    float zw = -(zFar + zNear) / (zFar - zNear);
+    self->m5860.m[0][0] = px;
+    self->m5860.m[0][1] = 0.0f;
+    self->m5860.m[0][2] = 0.0f;
+    self->m5860.m[0][3] = 0.0f;
+    self->m5860.m[1][0] = 0.0f;
+    self->m5860.m[1][1] = py;
+    self->m5860.m[1][2] = 0.0f;
+    self->m5860.m[1][3] = 0.0f;
+    self->m5860.m[2][0] = 0.0f;
+    self->m5860.m[2][1] = 0.0f;
+    self->m5860.m[2][2] = zz;
+    self->m5860.m[2][3] = 0.0f;
+    self->m5860.m[3][0] = -1.0f;
+    self->m5860.m[3][1] = -1.0f;
+    self->m5860.m[3][2] = zw;
+    self->m5860.m[3][3] = 1.0f;
+    self->q58E0.v[0] = w * 0.5f;
+    self->q58E0.v[1] = h * 0.5f;
+    self->q58E0.v[2] = zlo;
+    self->q58E0.v[3] = 0.0f;
+    float tx = (ox + 2047.5f) - cx * w / fx;
+    float ty = (oy + 2047.5f) - cy * h / fy;
+    self->q58F0.v[0] = tx;
+    self->q58F0.v[1] = ty;
+    self->q58F0.v[2] = zhi;
+    self->q58F0.v[3] = 0.0f;
+    float gw = 2048.0f - 2.0f * fsAbs_6C58(ox);
+    float gh = 2048.0f - 2.0f * fsAbs_6C58(oy);
+    float gx = w / gw;
+    float gy = h / gh;
+    self->m57C0.m[0][0] = gx * px;
+    self->m57C0.m[0][1] = 0.0f;
+    self->m57C0.m[0][2] = 0.0f;
+    self->m57C0.m[0][3] = 0.0f;
+    self->m57C0.m[1][0] = 0.0f;
+    self->m57C0.m[1][1] = gy * py;
+    self->m57C0.m[1][2] = 0.0f;
+    self->m57C0.m[1][3] = 0.0f;
+    self->m57C0.m[2][0] = 0.0f;
+    self->m57C0.m[2][1] = 0.0f;
+    self->m57C0.m[2][2] = zz;
+    self->m57C0.m[2][3] = 0.0f;
+    self->m57C0.m[3][0] = -gx;
+    self->m57C0.m[3][1] = -gy;
+    self->m57C0.m[3][2] = zw;
+    self->m57C0.m[3][3] = 1.0f;
+    self->q5840.v[0] = gw * 0.5f;
+    self->q5840.v[1] = gh * 0.5f;
+    self->q5840.v[2] = zlo;
+    self->q5840.v[3] = 0.0f;
+    self->q5850.v[0] = tx;
+    self->q5850.v[1] = ty;
+    self->q5850.v[2] = zhi;
+    self->q5850.v[3] = 0.0f;
+    func_00376938(self, x, y, w, h);
+    self->f5910 = 40000.0f;
+    self->q5920.v[0] = 1023.0f;
+    self->q5920.v[1] = 0.0f;
+    self->q5920.v[2] = 0.0f;
+    self->q5920.v[3] = 1023.0f / 40000.0f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00377950);
@@ -9689,7 +10068,86 @@ extern "C" void func_00385530(sPartGrid5530* self, sPartPos5530* pos, sPartCol55
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_003856B8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern "C" void func_00385BA0_uv(void* self, void* dst, int idx, float* src) __asm__("func_00385BA0");
+
+extern "C" void func_00385A38_vt(void* self, void* dst, int idx, float* src) __asm__("func_00385A38");
+
+extern "C" void func_00385AA0_col(void* self, void* dst, int idx, float* src) __asm__("func_00385AA0");
+
+struct sPartRow_56B8 {
+    int cnt;
+    void* verts;                    // 0x4
+    void* uv;                       // 0x8
+    void* colors;                   // 0xC
+};
+
+struct sPartGrid_56B8 {
+    char pad_0x0[0x190];
+    unsigned short width;           // 0x190
+    char pad_0x192[0x1A0 - 0x192];
+    int sel;                        // 0x1A0
+    int done;                       // 0x1A4
+    char pad_0x1A8[0xC];
+    sPartRow_56B8* rows[2];         // 0x1B4
+    int height;                     // 0x1BC
+};
+
+extern "C" void func_003856B8(sPartGrid_56B8* self, float* verts, float* colors, float* uvs)
+{
+    int first = 0;
+    if (self->sel < 0) {
+        self->sel = 0;
+        first = 1;
+    }
+    int z = self->sel == 0;
+    int r;
+    for (r = 0; r < self->height; r++) {
+        sPartRow_56B8* strip = &self->rows[z][r];
+        int i0 = r * self->width;
+        int i1 = i0 + self->width;
+        int idx = 0;
+        for (int c = 0; c < self->width; c++) {
+            func_00385BA0_uv(self, strip->uv, idx, uvs + i0 * 2);
+            func_00385AA0_col(self, strip->colors, idx, colors + i0 * 4);
+            func_00385A38_vt(self, strip->verts, idx, verts + i0 * 3);
+            func_00385BA0_uv(self, strip->uv, idx + 1, uvs + i1 * 2);
+            func_00385AA0_col(self, strip->colors, idx + 1, colors + i1 * 4);
+            func_00385A38_vt(self, strip->verts, idx + 1, verts + i1 * 3);
+            idx += 2;
+            i0++;
+            i1++;
+        }
+    }
+    // First update: fill the other buffer too. The binary has a second copy of the loop sharing the
+    // row counter (one spill slot) and indexing rows[z] with z reset to 0, so it is written out here.
+    if (first) {
+        z = 0;
+        for (r = 0; r < self->height; r++) {
+            sPartRow_56B8* strip = &self->rows[z][r];
+            int i0 = r * self->width;
+            int i1 = i0 + self->width;
+            int idx = 0;
+            for (int c = 0; c < self->width; c++) {
+                func_00385BA0_uv(self, strip->uv, idx, uvs + i0 * 2);
+                func_00385AA0_col(self, strip->colors, idx, colors + i0 * 4);
+                func_00385A38_vt(self, strip->verts, idx, verts + i0 * 3);
+                func_00385BA0_uv(self, strip->uv, idx + 1, uvs + i1 * 2);
+                func_00385AA0_col(self, strip->colors, idx + 1, colors + i1 * 4);
+                func_00385A38_vt(self, strip->verts, idx + 1, verts + i1 * 3);
+                idx += 2;
+                i0++;
+                i1++;
+            }
+        }
+    }
+    self->done = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00385A38);
