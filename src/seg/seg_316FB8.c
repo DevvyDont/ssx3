@@ -3012,11 +3012,9 @@ typedef struct mchunk *mchunkptr;
 extern unsigned D_00454CE8[];
 extern unsigned long D_004550F0;
 extern unsigned long D_004550F8;
-extern unsigned D_00454CF0[];
 #define bin_at(i) ((mchunkptr)((char *)&D_00454CE8[2 * (i) + 2] - 8))
 #define top (bin_at(0)->fd)
 #define last_remainder (bin_at(1))
-#define lr2 ((mchunkptr)D_00454CF0)
 #define binblocks (bin_at(0)->size)
 #define chunk_at_offset(p, s) ((mchunkptr)((char *)(p) + (s)))
 #define chunksize(p) ((p)->size & ~3u)
@@ -3140,7 +3138,337 @@ void func_0041D990_(int ptr, unsigned nb) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041DBF8);
+#ifdef SKIP_ASM
+/* newlib 1.9 libc/stdlib/mallocr.c (mALLOc = _malloc_r) and its macros, verbatim:
+ *
+ * A version of malloc/free/realloc written by Doug Lea and released to the
+ * public domain.  Send questions/comments/complaints/performance data
+ * to dl@cs.oswego.edu
+ * VERSION 2.6.4  Thu Nov 28 07:54:55 1996  Doug Lea  (dl at gee)
+ *
+ * Configuration as the retail code shows: MALLOC_ALIGNMENT 16, SIZE_T_SMALLER_THAN_LONG (EE long is 64-bit),
+ * no HAVE_MMAP. av_ (__malloc_av_) is D_00454CE8, one 0x408-byte object (config/symbol_addrs.txt).
+ */
+typedef mchunkptr mbinptr_0041DBF8;
+#define SIZE_SZ_0041DBF8                (sizeof(unsigned int))
+#define MALLOC_ALIGNMENT_0041DBF8       16
+#define MALLOC_ALIGN_0041DBF8           MALLOC_ALIGNMENT_0041DBF8
+#define MALLOC_ALIGN_MASK_0041DBF8      (MALLOC_ALIGNMENT_0041DBF8 - 1)
+#define MINSIZE_0041DBF8                (sizeof(struct mchunk))
+#define chunk2mem_0041DBF8(p)   ((void*)((char*)(p) + 2*SIZE_SZ_0041DBF8))
+#define request2size_0041DBF8(req) \
+ (((long)((req) + (SIZE_SZ_0041DBF8 + MALLOC_ALIGN_MASK_0041DBF8)) < \
+  (long)(MINSIZE_0041DBF8 + MALLOC_ALIGN_MASK_0041DBF8)) ? ((MINSIZE_0041DBF8 + MALLOC_ALIGN_MASK_0041DBF8) & ~(MALLOC_ALIGN_MASK_0041DBF8)) : \
+   (((req) + (SIZE_SZ_0041DBF8 + MALLOC_ALIGN_MASK_0041DBF8)) & ~(MALLOC_ALIGN_MASK_0041DBF8)))
+#define long_sub_size_t_0041DBF8(x, y) ( (x < y) ? -((long)(y - x)) : (x - y) );
+#define PREV_INUSE_0041DBF8 0x1
+#define SIZE_BITS_0041DBF8 (0x1|0x2)
+#define set_inuse_bit_at_offset_0041DBF8(p, s)\
+ (((mchunkptr)(((char*)(p)) + (s)))->size |= PREV_INUSE_0041DBF8)
+#define chunksize_0041DBF8(p)          ((p)->size & ~(SIZE_BITS_0041DBF8))
+#define set_head_0041DBF8(p, s)        ((p)->size = (s))
+#define set_foot_0041DBF8(p, s)   (((mchunkptr)((char*)(p) + (s)))->prev_size = (s))
+#define av__0041DBF8 D_00454CE8
+#define bin_at_0041DBF8(i)      ((mbinptr_0041DBF8)((char*)&(av__0041DBF8[2*(i) + 2]) - 2*SIZE_SZ_0041DBF8))
+#define next_bin_0041DBF8(b)    ((mbinptr_0041DBF8)((char*)(b) + 2 * sizeof(mbinptr_0041DBF8)))
+#define prev_bin_0041DBF8(b)    ((mbinptr_0041DBF8)((char*)(b) - 2 * sizeof(mbinptr_0041DBF8)))
+#define top_0041DBF8            (bin_at_0041DBF8(0)->fd)
+#define last_remainder_0041DBF8 (bin_at_0041DBF8(1))
+#define first_0041DBF8(b) ((b)->fd)
+#define last_0041DBF8(b)  ((b)->bk)
+#define bin_index_0041DBF8(sz)                                                          \
+(((((unsigned long)(sz)) >> 9) ==    0) ?       (((unsigned long)(sz)) >>  3): \
+ ((((unsigned long)(sz)) >> 9) <=    4) ?  56 + (((unsigned long)(sz)) >>  6): \
+ ((((unsigned long)(sz)) >> 9) <=   20) ?  91 + (((unsigned long)(sz)) >>  9): \
+ ((((unsigned long)(sz)) >> 9) <=   84) ? 110 + (((unsigned long)(sz)) >> 12): \
+ ((((unsigned long)(sz)) >> 9) <=  340) ? 119 + (((unsigned long)(sz)) >> 15): \
+ ((((unsigned long)(sz)) >> 9) <= 1364) ? 124 + (((unsigned long)(sz)) >> 18): \
+                                          126)
+#define MAX_SMALLBIN_SIZE_0041DBF8   512
+#define SMALLBIN_WIDTH_0041DBF8        8
+#define SMALLBIN_WIDTH_BITS_0041DBF8   3
+#define MAX_SMALLBIN_0041DBF8        (MAX_SMALLBIN_SIZE_0041DBF8 / SMALLBIN_WIDTH_0041DBF8) - 1
+#define smallbin_index_0041DBF8(sz)  (((unsigned long)(sz)) >> SMALLBIN_WIDTH_BITS_0041DBF8)
+#define is_small_request_0041DBF8(nb) (nb < MAX_SMALLBIN_SIZE_0041DBF8 - SMALLBIN_WIDTH_0041DBF8)
+#define BINBLOCKWIDTH_0041DBF8     4
+#define binblocks_0041DBF8      (bin_at_0041DBF8(0)->size)
+#define idx2binblock_0041DBF8(ix)    ((unsigned long)1 << (ix / BINBLOCKWIDTH_0041DBF8))
+#define mark_binblock_0041DBF8(ii)   (binblocks_0041DBF8 |= idx2binblock_0041DBF8(ii))
+#define frontlink_0041DBF8(P, S, IDX, BK, FD)                                 \
+{                                                                             \
+  if (S < MAX_SMALLBIN_SIZE_0041DBF8)                                         \
+  {                                                                           \
+    IDX = smallbin_index_0041DBF8(S);                                         \
+    mark_binblock_0041DBF8(IDX);                                              \
+    BK = bin_at_0041DBF8(IDX);                                                \
+    FD = BK->fd;                                                              \
+    P->bk = BK;                                                               \
+    P->fd = FD;                                                               \
+    FD->bk = BK->fd = P;                                                      \
+  }                                                                           \
+  else                                                                        \
+  {                                                                           \
+    IDX = bin_index_0041DBF8(S);                                              \
+    BK = bin_at_0041DBF8(IDX);                                                \
+    FD = BK->fd;                                                              \
+    if (FD == BK) mark_binblock_0041DBF8(IDX);                                \
+    else                                                                      \
+    {                                                                         \
+      while (FD != BK && S < chunksize_0041DBF8(FD)) FD = FD->fd;             \
+      BK = FD->bk;                                                            \
+    }                                                                         \
+    P->bk = BK;                                                               \
+    P->fd = FD;                                                               \
+    FD->bk = BK->fd = P;                                                      \
+  }                                                                           \
+}
+#define unlink_0041DBF8(P, BK, FD)                                            \
+{                                                                             \
+  BK = P->bk;                                                                 \
+  FD = P->fd;                                                                 \
+  FD->bk = BK;                                                                \
+  BK->fd = FD;                                                                \
+}
+#define link_last_remainder_0041DBF8(P)                                       \
+{                                                                             \
+  last_remainder_0041DBF8->fd = last_remainder_0041DBF8->bk =  P;             \
+  P->fd = P->bk = last_remainder_0041DBF8;                                    \
+}
+#define clear_last_remainder_0041DBF8 \
+  (last_remainder_0041DBF8->fd = last_remainder_0041DBF8->bk = last_remainder_0041DBF8)
+#define MALLOC_LOCK_0041DBF8 func_00418CA8(reent_ptr)
+#define MALLOC_UNLOCK_0041DBF8 func_00418D08(reent_ptr)
+extern void g41DBF8_extend_top(int, unsigned int) __asm__("func_0041D990");
+
+/* the unit declares this as int func_0041DBF8(int, int) (malloc, func_004188C0) */
+void *func_0041DBF8_(int, unsigned int) __asm__("func_0041DBF8");
+void *func_0041DBF8_(int reent_ptr, unsigned int bytes)
+{
+  mchunkptr victim;                  /* inspected/selected chunk */
+  unsigned int victim_size;          /* its size */
+  int       idx;                     /* index for bin traversal */
+  mbinptr_0041DBF8 bin;              /* associated bin */
+  mchunkptr remainder;               /* remainder from a split */
+  long      remainder_size;          /* its size */
+  int       remainder_index;         /* its bin index */
+  unsigned long block;               /* block traverser bit */
+  int       startidx;                /* first bin of a traversed block */
+  mchunkptr fwd;                     /* misc temp for linking */
+  mchunkptr bck;                     /* misc temp for linking */
+  mbinptr_0041DBF8 q;                /* misc temp */
+
+  unsigned int nb  = request2size_0041DBF8(bytes);  /* padded request size; */
+
+  MALLOC_LOCK_0041DBF8;
+
+  /* Check for exact match in a bin */
+
+  if (is_small_request_0041DBF8(nb))  /* Faster version for small requests */
+  {
+    idx = smallbin_index_0041DBF8(nb); 
+
+    /* No traversal or size check necessary for small bins.  */
+
+    q = bin_at_0041DBF8(idx);
+    victim = last_0041DBF8(q);
+
+    if (victim != q)
+    {
+      victim_size = chunksize_0041DBF8(victim);
+      unlink_0041DBF8(victim, bck, fwd);
+      set_inuse_bit_at_offset_0041DBF8(victim, victim_size);
+      MALLOC_UNLOCK_0041DBF8;
+      return chunk2mem_0041DBF8(victim);
+    }
+
+    idx += 2; /* Set for bin scan below. We've already scanned 2 bins. */
+
+  }
+  else
+  {
+    idx = bin_index_0041DBF8(nb);
+    bin = bin_at_0041DBF8(idx);
+
+    for (victim = last_0041DBF8(bin); victim != bin; victim = victim->bk)
+    {
+      victim_size = chunksize_0041DBF8(victim);
+      remainder_size = long_sub_size_t_0041DBF8(victim_size, nb);
+      
+      if (remainder_size >= (long)MINSIZE_0041DBF8) /* too big */
+      {
+        --idx; /* adjust to rescan below after checking last remainder */
+        break;   
+      }
+
+      else if (remainder_size >= 0) /* exact fit */
+      {
+        unlink_0041DBF8(victim, bck, fwd);
+        set_inuse_bit_at_offset_0041DBF8(victim, victim_size);
+	MALLOC_UNLOCK_0041DBF8;
+        return chunk2mem_0041DBF8(victim);
+      }
+    }
+
+    ++idx; 
+
+  }
+
+  /* Try to use the last split-off remainder */
+
+  if ( (victim = last_remainder_0041DBF8->fd) != last_remainder_0041DBF8)
+  {
+    victim_size = chunksize_0041DBF8(victim);
+    remainder_size = long_sub_size_t_0041DBF8(victim_size, nb);
+
+    if (remainder_size >= (long)MINSIZE_0041DBF8) /* re-split */
+    {
+      remainder = chunk_at_offset(victim, nb);
+      set_head_0041DBF8(victim, nb | PREV_INUSE_0041DBF8);
+      link_last_remainder_0041DBF8(remainder);
+      set_head_0041DBF8(remainder, remainder_size | PREV_INUSE_0041DBF8);
+      set_foot_0041DBF8(remainder, remainder_size);
+      MALLOC_UNLOCK_0041DBF8;
+      return chunk2mem_0041DBF8(victim);
+    }
+
+    clear_last_remainder_0041DBF8;
+
+    if (remainder_size >= 0)  /* exhaust */
+    {
+      set_inuse_bit_at_offset_0041DBF8(victim, victim_size);
+      MALLOC_UNLOCK_0041DBF8;
+      return chunk2mem_0041DBF8(victim);
+    }
+
+    /* Else place in bin */
+
+    frontlink_0041DBF8(victim, victim_size, remainder_index, bck, fwd);
+  }
+
+  /* 
+     If there are any possibly nonempty big-enough blocks, 
+     search for best fitting chunk by scanning bins in blockwidth units.
+  */
+
+  if ( (block = idx2binblock_0041DBF8(idx)) <= binblocks_0041DBF8)  
+  {
+
+    /* Get to the first marked block */
+
+    if ( (block & binblocks_0041DBF8) == 0) 
+    {
+      /* force to an even block boundary */
+      idx = (idx & ~(BINBLOCKWIDTH_0041DBF8 - 1)) + BINBLOCKWIDTH_0041DBF8;
+      block <<= 1;
+      while ((block & binblocks_0041DBF8) == 0)
+      {
+        idx += BINBLOCKWIDTH_0041DBF8;
+        block <<= 1;
+      }
+    }
+      
+    /* For each possibly nonempty block ... */
+    for (;;)  
+    {
+      startidx = idx;          /* (track incomplete blocks) */
+      q = bin = bin_at_0041DBF8(idx);
+
+      /* For each bin in this block ... */
+      do
+      {
+        /* Find and use first big enough chunk ... */
+
+        for (victim = last_0041DBF8(bin); victim != bin; victim = victim->bk)
+        {
+          victim_size = chunksize_0041DBF8(victim);
+          remainder_size = long_sub_size_t_0041DBF8(victim_size, nb);
+
+          if (remainder_size >= (long)MINSIZE_0041DBF8) /* split */
+          {
+            remainder = chunk_at_offset(victim, nb);
+            set_head_0041DBF8(victim, nb | PREV_INUSE_0041DBF8);
+            unlink_0041DBF8(victim, bck, fwd);
+            link_last_remainder_0041DBF8(remainder);
+            set_head_0041DBF8(remainder, remainder_size | PREV_INUSE_0041DBF8);
+            set_foot_0041DBF8(remainder, remainder_size);
+	    MALLOC_UNLOCK_0041DBF8;
+            return chunk2mem_0041DBF8(victim);
+          }
+
+          else if (remainder_size >= 0)  /* take */
+          {
+            set_inuse_bit_at_offset_0041DBF8(victim, victim_size);
+            unlink_0041DBF8(victim, bck, fwd);
+	    MALLOC_UNLOCK_0041DBF8;
+            return chunk2mem_0041DBF8(victim);
+          }
+
+        }
+
+       bin = next_bin_0041DBF8(bin);
+
+       if (idx < MAX_SMALLBIN_0041DBF8)
+         {
+           bin = next_bin_0041DBF8(bin);
+           ++idx;
+         }
+      } while ((++idx & (BINBLOCKWIDTH_0041DBF8 - 1)) != 0);
+
+      /* Clear out the block bit. */
+
+      do   /* Possibly backtrack to try to clear a partial block */
+      {
+        if ((startidx & (BINBLOCKWIDTH_0041DBF8 - 1)) == 0)
+        {
+          binblocks_0041DBF8 &= ~block;
+          break;
+        }
+        --startidx;
+       q = prev_bin_0041DBF8(q);
+      } while (first_0041DBF8(q) == q);
+
+      /* Get to the next possibly nonempty block */
+
+      if ( (block <<= 1) <= binblocks_0041DBF8 && (block != 0) ) 
+      {
+        while ((block & binblocks_0041DBF8) == 0)
+        {
+          idx += BINBLOCKWIDTH_0041DBF8;
+          block <<= 1;
+        }
+      }
+      else
+        break;
+    }
+  }
+
+
+  /* Try to use top chunk */
+
+  /* Require that there be a remainder, ensuring top always exists  */
+  remainder_size = long_sub_size_t_0041DBF8(chunksize_0041DBF8(top_0041DBF8), nb);
+  if (chunksize_0041DBF8(top_0041DBF8) < nb || remainder_size < (long)MINSIZE_0041DBF8)
+  {
+    /* Try to extend */
+    g41DBF8_extend_top(reent_ptr, nb);
+    remainder_size = long_sub_size_t_0041DBF8(chunksize_0041DBF8(top_0041DBF8), nb);
+    if (chunksize_0041DBF8(top_0041DBF8) < nb || remainder_size < (long)MINSIZE_0041DBF8)
+    {
+      MALLOC_UNLOCK_0041DBF8;
+      return 0; /* propagate failure */
+    }
+  }
+
+  victim = top_0041DBF8;
+  set_head_0041DBF8(victim, nb | PREV_INUSE_0041DBF8);
+  top_0041DBF8 = chunk_at_offset(victim, nb);
+  set_head_0041DBF8(top_0041DBF8, remainder_size | PREV_INUSE_0041DBF8);
+  MALLOC_UNLOCK_0041DBF8;
+  return chunk2mem_0041DBF8(victim);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041E340);
@@ -3194,7 +3522,7 @@ void func_0041E340_(int ptr, void *mem) {
     }
     if (!inuse_bit_at_offset(next, nextsz)) {
         sz += nextsz;
-        if (!islr && next->fd == (lr = lr2)) {
+        if (!islr && next->fd == (lr = last_remainder)) {
             islr = 1;
             link_last_remainder(p);
         } else
