@@ -17,12 +17,12 @@ void func_00411310(int a) {
 INCLUDE_ASM("seg/seg_312310", __fixunssfdi);
 #ifdef SKIP_ASM
 extern double a_411340(double) __asm__("func_00413AF8");
-extern int cmp_411340(double, double) __asm__("func_00412500");
-extern double mul_411340(double, double) __asm__("func_00411FD8");
-extern unsigned dtou_411340(double) __asm__("func_004126A0");
-extern double ltod_411340(long) __asm__("func_00411438");
-extern double add_411340(double, double) __asm__("func_00411F18");
-extern double sub_411340(double, double) __asm__("func_00411F70");
+extern int cmp_411340(double, double) __asm__("dpcmp");
+extern double mul_411340(double, double) __asm__("dpmul");
+extern unsigned dtou_411340(double) __asm__("dptoul");
+extern double ltod_411340(long) __asm__("__floatdidf");
+extern double add_411340(double, double) __asm__("dpadd");
+extern double sub_411340(double, double) __asm__("dpsub");
 unsigned long __fixunssfdi(double a) {
     unsigned long hi;
     double v;
@@ -47,12 +47,12 @@ unsigned long __fixunssfdi(double a) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00411438);
+INCLUDE_ASM("seg/seg_312310", __floatdidf);
 #ifdef SKIP_ASM
 extern double itod_411438(int) __asm__("func_00412550");
-extern double dmul_411438(double, double) __asm__("func_00411FD8");
-extern double dadd_411438(double, double) __asm__("func_00411F18");
-double func_00411438(long a) {
+extern double dmul_411438(double, double) __asm__("dpmul");
+extern double dadd_411438(double, double) __asm__("dpadd");
+double __floatdidf(long a) {
     double hi = itod_411438((int)(a >> 32));
     double lo;
     hi = dmul_411438(hi, 65536.0);
@@ -84,13 +84,13 @@ INCLUDE_ASM("seg/seg_312310", func_00411C38);
 INCLUDE_ASM("seg/seg_312310", func_00411CD8);
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00411F18);
+INCLUDE_ASM("seg/seg_312310", dpadd);
 #ifdef SKIP_ASM
 struct S412778;
 extern void func_00411C38(long *, int *);
 extern struct S412778 *func_00411CD8(int *, int *, int *);
 extern void func_00411B08(struct S412778 *);
-void func_00411F18(long a, long b) {
+void dpadd(long a, long b) {
     int x[8];
     int y[8];
     int z[8];
@@ -101,13 +101,13 @@ void func_00411F18(long a, long b) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00411F70);
+INCLUDE_ASM("seg/seg_312310", dpsub);
 #ifdef SKIP_ASM
 struct S412778;
 extern void func_00411C38(long *, int *);
 extern struct S412778 *func_00411CD8(int *, int *, int *);
 extern void func_00411B08(struct S412778 *);
-void func_00411F70(long a, long b) {
+void dpsub(long a, long b) {
     int x[8];
     int y[8];
     int z[8];
@@ -118,7 +118,7 @@ void func_00411F70(long a, long b) {
 }
 #endif
 
-INCLUDE_ASM("seg/seg_312310", func_00411FD8);
+INCLUDE_ASM("seg/seg_312310", dpmul);
 
 //100%
 INCLUDE_ASM("seg/seg_312310", func_00412280);
@@ -186,11 +186,11 @@ void func_00412280(long x, long y) {
 INCLUDE_ASM("seg/seg_312310", func_004123E8);
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00412500);
+INCLUDE_ASM("seg/seg_312310", dpcmp);
 #ifdef SKIP_ASM
 extern void func_00411C38(long *, int *);
 extern void func_004123E8(int *, int *);
-void func_00412500(long a, long b) {
+void dpcmp(long a, long b) {
     int x[8];
     int y[8];
     func_00411C38(&a, x);
@@ -255,11 +255,11 @@ sat:
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_004126A0);
+INCLUDE_ASM("seg/seg_312310", dptoul);
 #ifdef SKIP_ASM
 extern void func_00411C38(long *, int *);
 struct S4126A0 { unsigned cls; int sign; int exp; int pad; unsigned long frac; };
-unsigned func_004126A0(long a) {
+unsigned dptoul(long a) {
     struct S4126A0 s;
     func_00411C38(&a, (int *)&s);
     if ((s.cls ^ 2) == 0)

@@ -315,8 +315,8 @@ extern unsigned short *f068_C148(unsigned short *, double, int) __asm__("func_00
 extern unsigned short *f038_C148(unsigned short *, int, int, unsigned short *) __asm__("func_003DC038");
 extern unsigned short *fBFD8_C148(unsigned short *, unsigned int, int, unsigned short *) __asm__("func_003DBFD8");
 extern int f608_C148(double) __asm__("func_00412608");
-extern unsigned int f6A0_C148(double) __asm__("func_004126A0");
-extern int f500_C148(double, double) __asm__("func_00412500");
+extern unsigned int f6A0_C148(double) __asm__("dptoul");
+extern int f500_C148(double, double) __asm__("dpcmp");
 extern int ulen_C148(unsigned short *) __asm__("USTR_length");
 extern void ucopy_C148(unsigned short *, unsigned short *) __asm__("USTR_copy");
 

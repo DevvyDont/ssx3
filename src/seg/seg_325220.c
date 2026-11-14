@@ -820,9 +820,9 @@ int f5440(long a0) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_004254D0);
 #ifdef SKIP_ASM
-extern long func_00412500(double, double);
-extern double func_00411F70(double, double);
-extern double func_00411FD8(double, double);
+extern long dpcmp(double, double);
+extern double dpsub(double, double);
+extern double dpmul(double, double);
 extern double func_00412280(double, double);
 extern double func_0042D380_d(double) __asm__("func_0042D380");
 extern double func_00425440_d(double) __asm__("func_00425440");
@@ -832,22 +832,22 @@ extern char D_0049AB88[];
 extern char D_0049AB90[];
 void func_004254D0(double x) {
     int n = 0;
-    if (func_00412500(x, 0.0) < 0) {
-        x = func_00411F70(0.0, x);
+    if (dpcmp(x, 0.0) < 0) {
+        x = dpsub(0.0, x);
         D_00455178(0x2D);
     }
-    if (func_00412500(x, 0.1) < 0) {
-        while (func_00412500(x, 0.1) < 0) {
+    if (dpcmp(x, 0.1) < 0) {
+        while (dpcmp(x, 0.1) < 0) {
             n--;
-            x = func_00411FD8(x, 10.0);
+            x = dpmul(x, 10.0);
         }
-    } else if (func_00412500(x, 1.0) >= 0) {
-        while (func_00412500(x, 1.0) >= 0) {
+    } else if (dpcmp(x, 1.0) >= 0) {
+        while (dpcmp(x, 1.0) >= 0) {
             n++;
             x = func_00412280(x, 10.0);
         }
     }
-    x = func_00411FD8(x, 1000000.0);
+    x = dpmul(x, 1000000.0);
     {
         double r = func_00425440_d(func_0042D380_d(x));
         func_00425C28((int)D_0049AB80, r);
@@ -3471,9 +3471,77 @@ int func_0042B1F8(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042B230);
+#ifdef SKIP_ASM
+extern int func_0042B068(void);
+extern int func_0042B168(void);
+extern void *func_0041605C(void *, void *, int);
+int func_0042B230_i(int a0, int a1, sLfData *a2, int *a3) __asm__("func_0042B230");
+int func_0042B230_i(int a0, int a1, sLfData *a2, int *a3) {
+    int r;
+    if (func_0042B068() < 0) {
+        return 0xFFFF0000;
+    }
+    if (func_0042B168() != 0) {
+        return 0xFFFEFFFC;
+    }
+    D_0052F080.cmd.f0 = a0;
+    if (a2 != 0) {
+        if (a1 >= 0xFD) {
+            *(sLfData *)D_0052F080.cmd.n2 = *a2;
+            D_0052F080.cmd.f4 = 0xFC;
+        } else {
+            func_0041605C(D_0052F080.cmd.n2, a2, a1);
+            D_0052F080.cmd.f4 = a1;
+        }
+    } else {
+        D_0052F080.cmd.f4 = 0;
+    }
+    if (func_00426D18(&D_0052F280, 6, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
+        return 0xFFFEFFFF;
+    }
+    r = D_0052F080.cmd.f0;
+    *a3 = D_0052F080.cmd.f4;
+    return r;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042B438);
+#ifdef SKIP_ASM
+extern int func_0042B068(void);
+extern int func_0042B168(void);
+extern void *func_0041605C(void *, void *, int);
+int func_0042B438_i(int a0, int a1, sLfData *a2, int *a3) __asm__("func_0042B438");
+int func_0042B438_i(int a0, int a1, sLfData *a2, int *a3) {
+    int r;
+    if (func_0042B068() < 0) {
+        return 0xFFFF0000;
+    }
+    if (func_0042B168() != 0) {
+        return 0xFFFEFFFC;
+    }
+    D_0052F080.cmd.f0 = a0;
+    if (a2 != 0) {
+        if (a1 >= 0xFD) {
+            *(sLfData *)D_0052F080.cmd.n2 = *a2;
+            D_0052F080.cmd.f4 = 0xFC;
+        } else {
+            func_0041605C(D_0052F080.cmd.n2, a2, a1);
+            D_0052F080.cmd.f4 = a1;
+        }
+    } else {
+        D_0052F080.cmd.f4 = 0;
+    }
+    if (func_00426D18(&D_0052F280, 7, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
+        return 0xFFFEFFFF;
+    }
+    r = D_0052F080.cmd.f0;
+    *a3 = D_0052F080.cmd.f4;
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042B640);
@@ -3495,13 +3563,26 @@ int func_0042B640(int a0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042B6D0);
 #ifdef SKIP_ASM
 extern int func_0042B068(void);
 extern int func_0042B168(void);
 extern char *strncpy(char *, const char *, int);
-int func_0042B6D0(char *a0); /* peak3 body held: see notes/stuck.md */
-
+int func_0042B6D0(char *a0) {
+    if (func_0042B068() < 0) {
+        return 0xFFFF0000;
+    }
+    if (func_0042B168() != 0) {
+        return 0xFFFEFFFC;
+    }
+    strncpy(D_0052F080.cmd.n1, a0, 0xFC);
+    D_0052F080.cmd.n1[0xFB] = 0;
+    if (func_00426D18(&D_0052F280, 9, 0, &D_0052F080, 0x200, &D_0052F080, 4, 0, 0) < 0) {
+        return 0xFFFEFFFF;
+    }
+    return D_0052F080.cmd.f0;
+}
 #endif
 
 //100%
@@ -3543,7 +3624,44 @@ int func_0042B820(int a0, int a1, int a2, int *a3) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042B840);
+#ifdef SKIP_ASM
+extern int func_0042B068(void);
+extern int func_0042B168(void);
+extern char *strncpy(char *, const char *, int);
+extern void *func_0041605C(void *, void *, int);
+int func_0042B840_i(char *a0, int a1, sLfData *a2, int *a3, int a4) __asm__("func_0042B840");
+int func_0042B840_i(char *a0, int a1, sLfData *a2, int *a3, int a4) {
+    int r;
+    if (func_0042B068() < 0) {
+        return 0xFFFF0000;
+    }
+    if (func_0042B168() != 0) {
+        return 0xFFFEFFFC;
+    }
+    strncpy(D_0052F080.cmd.n1, a0, 0xFC);
+    D_0052F080.cmd.n1[0xFB] = 0;
+    if (a2 != 0) {
+        if (a1 >= 0xFD) {
+            *(sLfData *)D_0052F080.cmd.n2 = *a2;
+            D_0052F080.cmd.f0 = 0xFC;
+        } else {
+            func_0041605C(D_0052F080.cmd.n2, a2, a1);
+            D_0052F080.cmd.f0 = a1;
+        }
+    } else {
+        D_0052F080.cmd.n2[0] = 0;
+        D_0052F080.cmd.f0 = 0;
+    }
+    if (func_00426D18(&D_0052F280, a4, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
+        return 0xFFFEFFFF;
+    }
+    r = D_0052F080.cmd.f0;
+    *a3 = D_0052F080.cmd.f4;
+    return r;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042BA68);
@@ -3564,7 +3682,35 @@ int func_0042BA88(int a0, int a1, int a2, int *a3) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042BAA8);
+#ifdef SKIP_ASM
+extern int func_0042B068(void);
+extern int func_0042B168(void);
+extern char *strncpy(char *, const char *, int);
+int func_0042BAA8_i(char *, char *, int *, int) __asm__("func_0042BAA8");
+int func_0042BAA8_i(char *a0, char *a1, int *a2, int a3) {
+    if (func_0042B068() < 0) {
+        return 0xFFFF0000;
+    }
+    if (func_0042B168() != 0) {
+        return 0xFFFEFFFC;
+    }
+    strncpy(D_0052F080.cmd.n1, a0, 0xFC);
+    D_0052F080.cmd.n1[0xFB] = 0;
+    strncpy(D_0052F080.cmd.n2, a1, 0xFC);
+    D_0052F080.cmd.n2[0xFB] = 0;
+    if (func_00426D18(&D_0052F280, a3, 0, &D_0052F080, 0x200, &D_0052F080, 0x10, 0, 0) < 0) {
+        return 0xFFFEFFFF;
+    }
+    if (D_0052F080.cmd.f0 == 0) {
+        return 0xFFFEFFFD;
+    }
+    a2[0] = D_0052F080.cmd.f0;
+    a2[1] = D_0052F080.cmd.f4;
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042BBB0);
@@ -4354,20 +4500,33 @@ INCLUDE_ASM("seg/seg_325220", func_0042CFC0);
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042D320);
 #ifdef SKIP_ASM
-extern long func_00412500(double, double);
-extern double func_00411F70(double, double);
+extern long dpcmp(double, double);
+extern double dpsub(double, double);
 extern long func_0042D380(double);
 long func_0042D320(double a0) {
-    if (func_00412500(a0, 0.0) < 0)
-        return -func_0042D380(func_00411F70(0.0, a0));
+    if (dpcmp(a0, 0.0) < 0)
+        return -func_0042D380(dpsub(0.0, a0));
     return func_0042D380(a0);
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042D380);
 #ifdef SKIP_ASM
-long func_0042D380(double a); /* peak3 body held: see notes/stuck.md */
-
+long func_0042D380(double a) {
+    unsigned long hi;
+    if (a < 0.0) {
+        return 0;
+    }
+    hi = (unsigned long)(unsigned)(a * 2.3283064365386963e-10) << 32;
+    a = a - (double)hi;
+    if (a < 0.0) {
+        hi -= (unsigned)(0.0 - a);
+    } else {
+        hi += (unsigned)a;
+    }
+    return hi;
+}
 #endif
 
 INCLUDE_ASM("seg/seg_325220", func_0042D470);

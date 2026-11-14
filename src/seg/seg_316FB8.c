@@ -646,12 +646,12 @@ void func_00418E18(int a, int b, int c) {
 INCLUDE_ASM("seg/seg_316FB8", func_00418E68);
 #ifdef SKIP_ASM
 extern int D_00454944;
-extern int func_00412500(int, int);
+extern int dpcmp(int, int);
 extern int func_00421B98(int, int, int, char *, int, int);
 int func_00418E68(int a, int prec, int buf_) {
     char *buf = (char *)buf_;
     char *p = buf;
-    if (func_00412500(a, 0) < 0) {
+    if (dpcmp(a, 0) < 0) {
         *p++ = '-';
         prec--;
     }
@@ -2163,14 +2163,14 @@ INCLUDE_ASM("seg/seg_316FB8", func_00421400);
 INCLUDE_ASM("seg/seg_316FB8", func_004214C0);
 #ifdef SKIP_ASM
 extern double D_0049A8F8[];
-extern double func_00411FD8(double, double);
+extern double dpmul(double, double);
 double func_004214C0(int n) {
     double r = 1.0;
     if (n < 24)
         return D_0049A8F8[n];
     if (n > 0) {
         do {
-            r = func_00411FD8(r, 10.0);
+            r = dpmul(r, 10.0);
         } while (--n > 0);
     }
     return r;
@@ -2281,7 +2281,53 @@ void func_004216E8_(struct R216E8 *ptr, char *buf, double invalue, int ndigit, c
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_004218D8);
+#ifdef SKIP_ASM
+struct R218D8 {
+    int pad0[0x50 / 4];
+    int cvtlen;
+    char *cvtbuf;
+};
+extern struct R218D8 *g218D8_impure __asm__("D_00454944");
+#define REENT218D8 g218D8_impure
+extern char *g218D8_realloc(struct R218D8 *, char *, int) __asm__("func_00421F20");
+extern char *g218D8_dtoa(struct R218D8 *, double, int, int, int *, int *, char **) __asm__("func_00422780");
+char *func_004218D8_(double invalue, int ndigit, int *decpt, int *sign, char *buf) __asm__("func_004218D8");
+char *func_004218D8_(double invalue, int ndigit, int *decpt, int *sign, char *buf) {
+    char *save, *p, *end;
+    int done = 0;
+    int newlen;
+    if (buf == 0) {
+        if (ndigit >= REENT218D8->cvtlen) {
+            newlen = ndigit + 1;
+            buf = g218D8_realloc(REENT218D8, REENT218D8->cvtbuf, newlen);
+            if (buf == 0)
+                return 0;
+            REENT218D8->cvtlen = newlen;
+            REENT218D8->cvtbuf = buf;
+        }
+        buf = REENT218D8->cvtbuf;
+    }
+    save = buf;
+    if (invalue < 1.0 && invalue > -1.0)
+        p = g218D8_dtoa(REENT218D8, invalue, 2, ndigit, decpt, sign, &end);
+    else
+        p = g218D8_dtoa(REENT218D8, invalue, 3, ndigit, decpt, sign, &end);
+    while (p < end) {
+        *buf++ = *p++;
+        done++;
+    }
+    if (done < ndigit) {
+        done = ndigit - done;
+        do {
+            *buf++ = '0';
+        } while (--done);
+    }
+    *buf = 0;
+    return save;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00421A50);

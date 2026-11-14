@@ -2204,3 +2204,16 @@ func_00412860 = 0x00412860; //type:func
 func_00412CD8 = 0x00412CD8; //type:func
 func_00412D58 = 0x00412D58; //type:func
 func_00412DD8 = 0x00412DD8; //type:func
+// libgcc soft-float helpers (seg/seg_312310, ee-gcc 2.9): g++/gcc emit calls to them by these names (confirmed by
+// diffing compiled callers against retail: func_0042D380, func_004218D8), so a compiled caller only matches when the
+// helper carries the name (2026-11-14).
+__floatdidf = 0x00411438; // type:func
+dpadd = 0x00411F18; // type:func
+dpsub = 0x00411F70; // type:func
+dpmul = 0x00411FD8; // type:func
+dpcmp = 0x00412500; // type:func
+dptoul = 0x004126A0; // type:func
+// libmc file-name command block (0x414: port, slot, mode, count, buffer, name[0x400]); D_00527284 was its name field.
+D_00527270 = 0x00527270; // size:0x414
+// loadfile RPC command block (0x200, sent to D_0052F280); D_0052F088 was its second field.
+D_0052F080 = 0x0052F080; // size:0x200

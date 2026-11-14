@@ -3390,13 +3390,35 @@ int func_00409C48(int a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409D10);
 #ifdef SKIP_ASM
 extern int func_00423DF0(int);
 extern void func_00423DC0(int);
 extern char *strncpy(char *, const char *, int);
-int func_00409D10(int a, int b, int s_, int c); /* peak3 body held: see notes/stuck.md */
-
+int func_00409D10(int a, int b, int s_, int c) {
+    char *s = (char *)s_;
+    int r;
+    if (D_005271C0.server == 0)
+        return -100;
+    if (func_00423DF0(D_004533C4) < 0)
+        return -200;
+    if (s == 0 || s[0] == 0) {
+        func_00423DC0(D_004533C4);
+        return -210;
+    }
+    strncpy(D_00527270.name, s, 0x3FF);
+    D_00527270.port = a;
+    D_00527270.mode = c;
+    D_00527270.slot = b;
+    D_00527270.name[0x3FF] = 0;
+    r = func_00426D18(&D_005271C0, 2, 1, &D_00527270, 0x414, D_00528780, 4, 0, 0);
+    if (r == 0)
+        D_004533C0 = 2;
+    else
+        func_00423DC0(D_004533C4);
+    return r;
+}
 #endif
 
 //100%
@@ -3766,13 +3788,34 @@ int func_0040A998(int a, int b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040AA68);
 #ifdef SKIP_ASM
 extern int func_00423DF0(int);
 extern void func_00423DC0(int);
 extern char *strncpy(char *, const char *, int);
-int func_0040AA68(int a, int b, char *s); /* peak3 body held: see notes/stuck.md */
-
+int func_0040AA68(int a, int b, char *s) {
+    int r;
+    if (D_005271C0.server == 0)
+        return -100;
+    if (func_00423DF0(D_004533C4) < 0)
+        return -200;
+    if (s == 0 || s[0] == 0) {
+        func_00423DC0(D_004533C4);
+        return -210;
+    }
+    strncpy(D_00527270.name, s, 0x3FF);
+    D_00527270.port = a;
+    D_00527270.slot = b;
+    D_00527270.name[0x3FF] = 0;
+    D_00527270.mode = 0;
+    r = func_00426D18(&D_005271C0, 15, 1, &D_00527270, 0x414, D_00528780, 4, 0, 0);
+    if (r == 0)
+        D_004533C0 = 15;
+    else
+        func_00423DC0(D_004533C4);
+    return r;
+}
 #endif
 
 //100%
@@ -4768,14 +4811,143 @@ int func_0040C928(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040C980);
 #ifdef SKIP_ASM
 extern int func_0040D010(int);
 extern int func_0040D040(int, unsigned short);
 extern int func_0040D0B0(int, unsigned short *);
 extern int func_0040D118(int, unsigned char, unsigned char, int, unsigned short *, unsigned short *);
-int func_0040C980(void); /* peak3 body held: see notes/stuck.md */
-
+int func_0040C980(void) {
+    sKbData cur;
+    unsigned short tmp[64];
+    unsigned short key;
+    unsigned char *s = D_00529140;
+    sKbData *out = D_00529000.out;
+    sKbPort *e = &D_00529000.port[D_00529000.arg];
+    sKbRepeat *r = &e->rep;
+    int i, j, k;
+    if (s[1] == 0xFF)
+        return -1;
+    if (e->f0C == 1) {
+        out->led = s[0];
+        out->n = s[1];
+        out->mod = s[2];
+        if (out->n == 0)
+            return 0;
+        j = 0;
+        for (i = 0; i < out->n; i++) {
+            if (s[4 + i])
+                out->keys[j++] = s[4 + i];
+        }
+        out->n = j;
+        if (j == 0) {
+            out->keys[0] = 0;
+            out->n = 1;
+        }
+        func_0040D118(D_00529000.arg, out->mod, out->led, out->n, out->keys, out->keys);
+        return 0;
+    }
+    switch (r->state) {
+    case 1:
+        if (r->count >= r->delay) {
+            r->count = 0;
+            func_0040D010(D_00529000.arg);
+            if (r->delay >= 2)
+                func_0040D040(D_00529000.arg, 0);
+            func_0040D040(D_00529000.arg, r->last);
+            if (r->rate >= 2)
+                func_0040D040(D_00529000.arg, 0);
+            r->state = 2;
+        }
+        break;
+    case 2:
+        if (r->count >= r->rate) {
+            r->count = 0;
+            func_0040D040(D_00529000.arg, r->last);
+            if (r->rate >= 2)
+                func_0040D040(D_00529000.arg, 0);
+        }
+        break;
+    case 0:
+        break;
+    }
+    if (s[1] == 0) {
+        if (func_0040D0B0(D_00529000.arg, &key) == 0) {
+            out->n = 1;
+            out->keys[0] = key;
+            out->led = D_00529000.prev.led;
+            out->mod = D_00529000.prev.mod;
+        } else {
+            out->n = 0;
+        }
+        return 0;
+    }
+    if (s[4] == 1) {
+        r->state = 0;
+        out->n = 0;
+        return 0;
+    }
+    cur.led = s[0];
+    cur.n = s[1];
+    cur.mod = s[2];
+    j = 0;
+    for (i = 0; i < cur.n; i++) {
+        if (s[4 + i])
+            cur.keys[j++] = s[4 + i];
+    }
+    cur.n = j;
+    func_0040D010(D_00529000.arg);
+    if (cur.keys[0] == 0 || cur.mod != D_00529000.prev.mod) {
+        out->keys[0] = 0;
+        out->n = 1;
+        r->last = 0;
+        out->led = cur.led;
+        out->mod = cur.mod;
+        r->state = 0;
+    } else {
+        if (D_00529000.prev.keys[0] != 0) {
+            k = 0;
+            for (i = 0; i < cur.n; i++) {
+                for (j = 0; j < D_00529000.prev.n && cur.keys[i] != D_00529000.prev.keys[j]; j++)
+                    ;
+                if (j == D_00529000.prev.n)
+                    out->keys[k++] = cur.keys[i];
+            }
+            out->n = k;
+        } else {
+            for (i = 0; i < cur.n; i++)
+                out->keys[i] = cur.keys[i];
+            out->n = i;
+        }
+        out->led = cur.led;
+        out->mod = cur.mod;
+        func_0040D118(D_00529000.arg, out->mod, out->led, out->n, out->keys, out->keys);
+        if (out->n > 0) {
+            r->last = out->keys[out->n - 1];
+            if (r->delay > 0 && r->rate > 0)
+                r->state = 1;
+        } else {
+            func_0040D118(D_00529000.arg, cur.mod, cur.led, cur.n, cur.keys, tmp);
+            for (i = 0; i < cur.n && tmp[i] != r->last; i++)
+                ;
+            if (i == cur.n) {
+                r->state = 0;
+                out->n = 1;
+                out->keys[0] = 0;
+                out->led = cur.led;
+                out->mod = cur.mod;
+            }
+        }
+    }
+    {
+        unsigned char *src = (unsigned char *)&cur;
+        unsigned char *dst = (unsigned char *)&D_00529008;
+        for (i = 0; i < sizeof(cur); i++)
+            *dst++ = *src++;
+    }
+    return 0;
+}
 #endif
 
 //100%
@@ -5042,8 +5214,8 @@ extern char D_00499070[];
 extern double D_00499680[];
 extern double core_40D610(double) __asm__("func_0040DB58");
 extern int isn_40D610(double) __asm__("func_0040F840");
-extern int cmp_40D610(double, double) __asm__("func_00412500");
-extern double func_00411F70(double, double);
+extern int cmp_40D610(double, double) __asm__("dpcmp");
+extern double dpsub(double, double);
 extern int matherr_40D610(struct E40D610 *) __asm__("func_0040F878");
 extern int *func_00415FB8(void);
 double func_0040D610(double x) {
@@ -5059,7 +5231,7 @@ double func_0040D610(double x) {
     if (ver == 0)
         e.retval = -3.4028234663852886e+38;
     else
-        e.retval = func_00411F70(zero, D_00499680[0]);
+        e.retval = dpsub(zero, D_00499680[0]);
     if (cmp_40D610(x, 0.0) == 0) {
         e.type = 2;
         if (D_00499688[0] == 2)
@@ -5104,10 +5276,10 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040F840);
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040F878);
 #ifdef SKIP_ASM
-extern void func_00412500(long, long);
+extern void dpcmp(long, long);
 int func_0040F878(long *p) {
     long v = p[1];
-    func_00412500(v, v);
+    dpcmp(v, v);
     return 0;
 }
 #endif

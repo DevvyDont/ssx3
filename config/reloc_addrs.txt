@@ -654,3 +654,8 @@ rom:0x2C8DA8 reloc:MIPS_LO16 symbol:D_00515B40 addend:0xA8
 rom:0x2C8E24 reloc:MIPS_LO16 symbol:D_00515B40 addend:0xB0
 rom:0x2C8E70 reloc:MIPS_HI16 symbol:D_00515B40 addend:0xD0
 rom:0x2C8EE4 reloc:MIPS_LO16 symbol:D_00515B40 addend:0xD0
+// Library tail Phase B: %hi halves splat could not pair (the %lo follows a loop or a branch) (2026-11-14).
+rom:0x30DBEC reloc:MIPS_HI16 symbol:D_00529008
+rom:0x32C2C0 reloc:MIPS_HI16 symbol:D_0052F280
+rom:0x32C4C8 reloc:MIPS_HI16 symbol:D_0052F280
+rom:0x32C8E4 reloc:MIPS_HI16 symbol:D_0052F280
