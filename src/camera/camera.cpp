@@ -1023,7 +1023,278 @@ extern "C" void func_0015EDC8(void* self, int value)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_0015EE00);
+#ifdef SKIP_ASM
+struct sVec_EE00 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// Probe hit record filled by func_00336850 (0x80 bytes).
+struct sHit_EE00 {
+    sVec_EE00 pos;      // 0x0
+    sVec_EE00 normal;   // 0x10
+    char pad_0x20[0x60];
+} __attribute__((aligned(16)));
+
+extern sVec_EE00 D_004FF160_vEE00 __asm__("D_004FF160");
+extern sVec_EE00 D_004FF140_vEE00 __asm__("D_004FF140");
+extern void* D_004A28A8;
+// cWorldLine::cWorldLine(const t4Vector&, const t4Vector&, float, tIntPrecision)
+extern "C" void* func_0032E100(void* seg, const sVec_EE00& a, const sVec_EE00& b, float r, int n);
+extern "C" float func_00336850(void* world, void* seg, sHit_EE00* out, int a3);
+extern "C" int func_0015D020(void* self);
+
+static inline const sVec_EE00& Forward_EE00()
+{
+    return D_004FF140_vEE00;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sVec_EE00 Scale_EE00(const sVec_EE00& v, float s)
+{
+    sVec_EE00 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "o"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place v *= s).
+static inline void ScaleEq_EE00(sVec_EE00& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline sVec_EE00 Add_EE00(const sVec_EE00& a, const sVec_EE00& b)
+{
+    sVec_EE00 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place v += a).
+static inline void AddEq_EE00(sVec_EE00& v, const sVec_EE00& a)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v)
+        : "m"(a)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sVec_EE00 Sub_EE00(const sVec_EE00& a, const sVec_EE00& b)
+{
+    sVec_EE00 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline sVec_EE00 Cross_EE00(const sVec_EE00& a, const sVec_EE00& b)
+{
+    sVec_EE00 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_EE00(const sVec_EE00& a, const sVec_EE00& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_EE00(const sVec_EE00& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: sqrt.s via inline asm.
+static inline float Sqrt_EE00(float x)
+{
+    float r;
+    __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: abs.s via inline asm.
+static inline float Abs_EE00(float x)
+{
+    float r;
+    __asm__("abs.s %0, %1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// Third-person follow camera: probes beside the look-at line to raise/lower the camera height
+// (self+0x460), keeps the eye-target distance, then probes eye->target and repositions the target
+// above/behind the eye when it would end up inside geometry.
+// cCamera::avoidGround(void) (SSX On Tour symbols). PORT: g++ `>?` (max) operator.
+extern "C" void func_0015EE00_impl(char* self) __asm__("func_0015EE00");
+extern "C" void func_0015EE00_impl(char* self)
+{
+    sHit_EE00 info;
+    void* nash = *(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20);
+    sVec_EE00 correctedPos = Add_EE00(*(sVec_EE00*)(self + 0x100), Scale_EE00(D_004FF160_vEE00, *(float*)(self + 0x460)));
+    sVec_EE00 look = Sub_EE00(*(sVec_EE00*)(self + 0xE0), correctedPos);
+    float lookLen = Length_EE00(look);
+    sVec_EE00 levelLook = look;
+    levelLook.z = 0.0f;
+    float levelLookLen = Length_EE00(levelLook);
+    float sinSlopeRaw = levelLookLen / Sqrt_EE00(levelLookLen * levelLookLen + lookLen * lookLen);
+    float originalLookLen = Length_EE00(Sub_EE00(*(sVec_EE00*)(self + 0xE0), *(sVec_EE00*)(self + 0x100)));
+    sVec_EE00 testRoot = Add_EE00(*(sVec_EE00*)(self + 0x100), Scale_EE00(D_004FF160_vEE00, *(float*)(self + 0x460)));
+    float slopeScalar = 1.0f / (sinSlopeRaw >? 0.05000000074505806f);
+    float testLen = slopeScalar * 300.0f;
+    sVec_EE00 whisker = Scale_EE00(D_004FF160_vEE00, testLen);
+    float avoidDist = slopeScalar * 50.0f;
+    sVec_EE00 testLow = Sub_EE00(testRoot, whisker);
+    sVec_EE00 testHigh = Add_EE00(testRoot, whisker);
+    sVec_EE00 screenLeft = Cross_EE00(look, D_004FF160_vEE00);
+    float dir = 1.0f;
+    if (Dot_EE00(*(sVec_EE00*)(self + 0x470), screenLeft) > 0.0f)
+        dir = -1.0f;
+    ScaleEq_EE00(screenLeft, dir * 50.0f / Length_EE00(screenLeft));
+    char line[0xB0];
+    func_0032E100(line, Add_EE00(testHigh, screenLeft), Add_EE00(testLow, screenLeft), 0.5f, 2);
+    float param = func_00336850(nash, line, &info, (int)(self + 0x480));
+    if (param > 0.0f) {
+        float normZ = info.normal.z;
+        float move;
+        if (param > 0.5f) {
+            float d = testLen * (param + param - 1.0f);
+            if (normZ > 0.0f) {
+                move = 0.0f;
+                if (d < avoidDist)
+                    move = avoidDist - d;
+                *(float*)(self + 0x460) += move;
+            } else {
+                move = d + avoidDist;
+                if (move > 150.0f)
+                    move = 0.0f;
+                *(float*)(self + 0x460) -= move;
+            }
+        } else {
+            float d = testLen * (1.0f - (param + param));
+            if (normZ > 0.0f) {
+                move = d + avoidDist;
+                if (move > 150.0f)
+                    move = 0.0f;
+                *(float*)(self + 0x460) += move;
+            } else {
+                move = 0.0f;
+                if (d < avoidDist)
+                    move = avoidDist - d;
+                *(float*)(self + 0x460) -= move;
+            }
+        }
+        *(sVec_EE00*)(self + 0x470) = info.normal;
+    }
+    AddEq_EE00(*(sVec_EE00*)(self + 0x100), Scale_EE00(D_004FF160_vEE00, *(float*)(self + 0x460)));
+    sVec_EE00 newLook = Sub_EE00(*(sVec_EE00*)(self + 0xE0), *(sVec_EE00*)(self + 0x100));
+    ScaleEq_EE00(newLook, originalLookLen / Length_EE00(newLook));
+    *(sVec_EE00*)(self + 0x100) = Sub_EE00(*(sVec_EE00*)(self + 0xE0), newLook);
+    *(float*)(self + 0x460) = *(float*)(self + 0x460) * 0.9700000286102295f;
+    if (func_0015D020(*(void**)(self + 0xA8)) != 0) {
+        sVec_EE00 riderPoint = Add_EE00(*(sVec_EE00*)(self + 0xE0), Scale_EE00(D_004FF160_vEE00, 100.0f));
+        sVec_EE00 viewPoint = *(sVec_EE00*)(self + 0x100);
+        char line2[0xB0];
+        func_0032E100(line2, riderPoint, viewPoint, 0.5f, 2);
+        sHit_EE00 info2;
+        if (func_00336850(*(void**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x20), line2, &info2, 0) > 0.0f) {
+            if (*(int*)(self + 0x4A4) != 0)
+                *(sVec_EE00*)(self + 0x100) = Add_EE00(Add_EE00(*(sVec_EE00*)(self + 0xE0), Scale_EE00(D_004FF160_vEE00, 180.0f)), Scale_EE00(Forward_EE00(), 180.0f));
+            else
+                *(sVec_EE00*)(self + 0x100) = *(sVec_EE00*)(self + 0x490);
+            if (*(int*)(self + 0x4A0) == 0)
+                AddEq_EE00(*(sVec_EE00*)(self + 0x100), Scale_EE00(info2.normal, 50.0f));
+            *(int*)(self + 0x4A0) = 1;
+            sVec_EE00 look2 = Sub_EE00(*(sVec_EE00*)(self + 0xE0), *(sVec_EE00*)(self + 0x100));
+            if (Length_EE00(look2) < 2.0f || (Abs_EE00(look2.x) < 1.0f && Abs_EE00(look2.y) < 1.0f))
+                *(sVec_EE00*)(self + 0x100) = Add_EE00(Add_EE00(*(sVec_EE00*)(self + 0xE0), Scale_EE00(D_004FF160_vEE00, 150.0f)), Scale_EE00(Forward_EE00(), 100.0f));
+        } else {
+            *(int*)(self + 0x4A0) = 0;
+        }
+        *(sVec_EE00*)(self + 0x490) = *(sVec_EE00*)(self + 0x100);
+    } else {
+        *(int*)(self + 0x4A0) = 0;
+    }
+    *(int*)(self + 0x4A4) = 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_0015F568);
