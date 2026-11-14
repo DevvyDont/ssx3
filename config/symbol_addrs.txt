@@ -2217,3 +2217,9 @@ dptoul = 0x004126A0; // type:func
 D_00527270 = 0x00527270; // size:0x414
 // loadfile RPC command block (0x200, sent to D_0052F280); D_0052F088 was its second field.
 D_0052F080 = 0x0052F080; // size:0x200
+dpdiv = 0x00412280; // type:func
+litodp = 0x00412550; // type:func
+dptoli = 0x00412608; // type:func
+dptofp = 0x004127A8; // type:func
+fptodp = 0x00413AF8; // type:func
+__fixdfdi = 0x0042D320; // type:func

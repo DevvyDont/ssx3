@@ -16,7 +16,7 @@ void func_00411310(int a) {
 //100%
 INCLUDE_ASM("seg/seg_312310", __fixunssfdi);
 #ifdef SKIP_ASM
-extern double a_411340(double) __asm__("func_00413AF8");
+extern double a_411340(double) __asm__("fptodp");
 extern int cmp_411340(double, double) __asm__("dpcmp");
 extern double mul_411340(double, double) __asm__("dpmul");
 extern unsigned dtou_411340(double) __asm__("dptoul");
@@ -49,7 +49,7 @@ unsigned long __fixunssfdi(double a) {
 //100%
 INCLUDE_ASM("seg/seg_312310", __floatdidf);
 #ifdef SKIP_ASM
-extern double itod_411438(int) __asm__("func_00412550");
+extern double itod_411438(int) __asm__("litodp");
 extern double dmul_411438(double, double) __asm__("dpmul");
 extern double dadd_411438(double, double) __asm__("dpadd");
 double __floatdidf(long a) {
@@ -121,13 +121,13 @@ void dpsub(long a, long b) {
 INCLUDE_ASM("seg/seg_312310", dpmul);
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00412280);
+INCLUDE_ASM("seg/seg_312310", dpdiv);
 #ifdef SKIP_ASM
 struct S412280 { unsigned cls; int sign; int exp; int pad; unsigned long frac; long pad2; };
 extern void unp_80(long *, struct S412280 *) __asm__("func_00411C38");
 extern void pk_80(struct S412280 *) __asm__("func_00411B08");
 extern struct S412280 D_0052ADC0;
-void func_00412280(long x, long y) {
+void dpdiv(long x, long y) {
     struct S412280 a;
     struct S412280 b;
     struct S412280 *r;
@@ -200,11 +200,11 @@ void dpcmp(long a, long b) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00412550);
+INCLUDE_ASM("seg/seg_312310", litodp);
 #ifdef SKIP_ASM
 struct S412550 { unsigned cls; int sign; int exp; int pad; unsigned long frac; };
 extern void pk_412550(struct S412550 *) __asm__("func_00411B08");
-double func_00412550(int x) {
+double litodp(int x) {
     struct S412550 s;
     s.cls = 3;
     s.sign = (unsigned)x >> 31;
@@ -229,11 +229,11 @@ double func_00412550(int x) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00412608);
+INCLUDE_ASM("seg/seg_312310", dptoli);
 #ifdef SKIP_ASM
 extern void func_00411C38(long *, int *);
 struct S412608 { unsigned cls; int sign; int exp; int pad; unsigned long frac; };
-int func_00412608(long a) {
+int dptoli(long a) {
     struct S412608 s;
     int r;
     func_00411C38(&a, (int *)&s);
@@ -310,4 +310,4 @@ void func_00412778(int a, int b, int c, long d) {
 }
 #endif
 
-INCLUDE_ASM("seg/seg_312310", func_004127A8);
+INCLUDE_ASM("seg/seg_312310", dptofp);

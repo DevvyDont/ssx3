@@ -1046,20 +1046,20 @@ void func_00418D48(int a, int b, int c, int d) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00418D68);
 #ifdef SKIP_ASM
-extern int func_00413AF8(void);
+extern int fptodp(void);
 extern void func_00418D48(int, int, int, int);
 void func_00418D68(int a, int b, int c) {
-    func_00418D48(func_00413AF8(), a, b, c);
+    func_00418D48(fptodp(), a, b, c);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00418DB8);
 #ifdef SKIP_ASM
-extern int func_00413AF8(void);
+extern int fptodp(void);
 extern int func_00418E68(int, int, int);
 void func_00418DB8(int a, int b) {
-    func_00418E68(func_00413AF8(), a, b);
+    func_00418E68(fptodp(), a, b);
 }
 #endif
 
@@ -1075,10 +1075,10 @@ void func_00418DF8(int a, int b, int c, int d) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00418E18);
 #ifdef SKIP_ASM
-extern int func_00413AF8(void);
+extern int fptodp(void);
 extern void func_00418DF8(int, int, int, int);
 void func_00418E18(int a, int b, int c) {
-    func_00418DF8(func_00413AF8(), a, b, c);
+    func_00418DF8(fptodp(), a, b, c);
 }
 #endif
 
@@ -1116,9 +1116,9 @@ void func_0041A7E8(int a, int b) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041A818);
 #ifdef SKIP_ASM
-extern void func_004127A8(int);
+extern void dptofp(int);
 void func_0041A818(void) {
-    func_004127A8(((int (*)(void))func_0041A7E8)());
+    dptofp(((int (*)(void))func_0041A7E8)());
 }
 #endif
 
@@ -3163,8 +3163,8 @@ INCLUDE_ASM("seg/seg_316FB8", func_00421400);
  */
 #define Exp_msk1_1400 0x100000
 /* PORT: the soft-float double divide (gcc's dpdiv libcall), called by name: retail's symbol for it is
-   func_00412280 (as in seg_325220's func_00412280(x, 10.0)); on PC this is just da.d / db.d */
-extern double dpdiv_1400(double, double) __asm__("func_00412280");
+   dpdiv (as in seg_325220's dpdiv(x, 10.0)); on PC this is just da.d / db.d */
+extern double dpdiv_1400(double, double) __asm__("dpdiv");
 
 double func_00421400(struct Bigint *a, struct Bigint *b)
 {

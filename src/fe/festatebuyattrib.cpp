@@ -1334,7 +1334,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* cBENewRaceInterface_getLocationName(void* race, int track);
-extern "C" char* func_00413AF8(float v);
+extern "C" char* fptodp(float v);
 extern char D_004A2108[] __attribute__((aligned(8)));
 extern char D_004A2138[];
 extern char D_004A2168[];
@@ -1456,7 +1456,7 @@ extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
         value = best.entry[6].value;
         track = best.entry[6].track;
         if (value > 0) {
-            sprintf(buf, D_0046F450, func_00413AF8((float)value * 0.009999999776482582f));
+            sprintf(buf, D_0046F450, fptodp((float)value * 0.009999999776482582f));
             func_001F6840(self, D_0046F460, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
             func_001F6840(self, D_0046F470, buf);

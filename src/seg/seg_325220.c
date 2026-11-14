@@ -986,7 +986,7 @@ INCLUDE_ASM("seg/seg_325220", func_004254D0);
 extern long dpcmp(double, double);
 extern double dpsub(double, double);
 extern double dpmul(double, double);
-extern double func_00412280(double, double);
+extern double dpdiv(double, double);
 extern double func_0042D380_d(double) __asm__("func_0042D380");
 extern double func_00425440_d(double) __asm__("func_00425440");
 extern void (*D_00455178)(int);
@@ -1007,7 +1007,7 @@ void func_004254D0(double x) {
     } else if (dpcmp(x, 1.0) >= 0) {
         while (dpcmp(x, 1.0) >= 0) {
             n++;
-            x = func_00412280(x, 10.0);
+            x = dpdiv(x, 10.0);
         }
     }
     x = dpmul(x, 1000000.0);
@@ -1032,7 +1032,7 @@ extern long func_0042D470(long, long);
 extern long func_0040FCB0(long, long);
 extern unsigned long func_0042DAD8(unsigned long, unsigned long);
 extern unsigned long func_00411538(unsigned long, unsigned long);
-extern double func_00413AF8(float);
+extern double fptodp(float);
 extern void func_004254D0(double x);
 // printf core: fmt + va_list (8-byte argument slots); 64-bit div/mod go through the soft helpers.
 void func_00425638_f(char *fmt, char *ap) __asm__("func_00425638");
@@ -1197,7 +1197,7 @@ void func_00425638_f(char *fmt, char *ap) {
                 if (f == 0.0f)
                     D_00455178('0');
                 else
-                    func_004254D0(func_00413AF8(f));
+                    func_004254D0(fptodp(f));
                 break;
             case 's':
                 ap += 8;
@@ -5132,12 +5132,12 @@ int func_0042CD98(void); /* peak3 body held: see notes/stuck.md */
 INCLUDE_ASM("seg/seg_325220", func_0042CFC0);
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_0042D320);
+INCLUDE_ASM("seg/seg_325220", __fixdfdi);
 #ifdef SKIP_ASM
 extern long dpcmp(double, double);
 extern double dpsub(double, double);
 extern long func_0042D380(double);
-long func_0042D320(double a0) {
+long __fixdfdi(double a0) {
     if (dpcmp(a0, 0.0) < 0)
         return -func_0042D380(dpsub(0.0, a0));
     return func_0042D380(a0);

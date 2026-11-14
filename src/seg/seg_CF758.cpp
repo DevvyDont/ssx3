@@ -117,7 +117,7 @@ extern "C" const char* getDollarString_price(int price) __asm__("getDollarString
 extern "C" int sprintf2(void* buf, const char* fmt, ...);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: SN soft-float float->double helper called by name
-extern "C" double func_00413AF8(float f);
+extern "C" double fptodp(float f);
 extern "C" int cBEMissionInterface_getTotalCollectForPeak(void* iface, int peak);
 extern "C" int func_00153688(void* iface, int a, int b, int peak);
 extern "C" int cBEMissionInterface_getNumberMissionsOnPeak(void* iface, int peak);
@@ -179,7 +179,7 @@ extern "C" void setChallengeStats(cUIText* text, int a1, int a2, int peak, int k
         unsigned int time = func_00158960(reward, a1, a2, type, track);
         unsigned int min = udiv_CE758(time, 60);
         unsigned int sec = umod_CE758(time, 60);
-        sprintf(num, D_00466D28, func_00413AF8((float)(int)min), func_00413AF8((float)(int)sec));
+        sprintf(num, D_00466D28, fptodp((float)(int)min), fptodp((float)(int)sec));
         int fmt = Loc_CE758(D_00466D38);
         if (fmt != 0) {
             sprintf1_CE758(buf, (void*)fmt, num);

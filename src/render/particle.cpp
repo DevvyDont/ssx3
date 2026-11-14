@@ -6309,11 +6309,11 @@ struct sVEntry0037C8C0 {
     int (*fn)(void*, void*, int, int, int, int, int, int, void*, int, int, int);
 };
 
-extern "C" double func_00413AF8(float f);
+extern "C" double fptodp(float f);
 extern "C" double dlog_C8C0(double) __asm__("func_0040D610");
 extern "C" double dpmul(double, double);
 extern "C" double dpsub(double, double);
-extern "C" int dtoi_C8C0(double) __asm__("func_00412608");
+extern "C" int dtoi_C8C0(double) __asm__("dptoli");
 extern "C" void func_0037D090_C8C0(void* self, int h, int a, int b, int c, int d) __asm__("func_0037D090__FPv");
 
 static inline int clampX_C8C0(int v, int lo, int hi)
@@ -6383,7 +6383,7 @@ extern "C" int func_0037C8C0(char* self, sTexHdr_C8C0* src, int a2, int a3, int 
     sVEntry0037C8C0* vt = *(sVEntry0037C8C0**)(self + 0x10D8);
     int h = vt[47].fn(self + vt[47].delta, data, a2, src->s4, src->s6, flags >> 28, fmt, cls, pal, a3, a4, a5);
     if ((src->fC & 0xF0000000) != 0 && src->s8 != 0) {
-        double d = func_00413AF8(240.0f / ((float)src->s8 * 6.1035156e-05f));
+        double d = fptodp(240.0f / ((float)src->s8 * 6.1035156e-05f));
         d = dlog_C8C0(d);
         d = dpmul(d, 1.4426950408889634);
         d = dpsub(0.0, d);

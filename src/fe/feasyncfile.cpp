@@ -8596,7 +8596,7 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void func_002C2718_1AFA60(char* buf, const char* fmt, ...) __asm__("func_002C2718");
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 // PORT: SN soft-float float->double helper called by name
-extern "C" double func_00413AF8(float f);
+extern "C" double fptodp(float f);
 extern "C" void func_0025DD08(void* self, const char* str, int a2);
 extern void* D_004A28A8;
 extern void* D_004A3028;
@@ -8674,7 +8674,7 @@ extern "C" void func_001AFA60(void* screen, char* msg)
             pct = 100.0f;
         }
         int name = Loc1AFA60(D_00463580);
-        func_002C2718_1AFA60(buf, D_00463590, name, st->b, st->c, func_00413AF8(pct));
+        func_002C2718_1AFA60(buf, D_00463590, name, st->b, st->c, fptodp(pct));
         cUIText_setUnicodeString(t, buf);
     }
     t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463520));
@@ -10652,7 +10652,7 @@ extern "C" void func_0025F288(void* self, int idx, void* info);
 extern "C" int sprintf2_v(char* buf, const char* fmt, ...) __asm__("sprintf2");
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 // PORT: SN soft-float float->double helper called by name
-extern "C" double func_00413AF8(float f);
+extern "C" double fptodp(float f);
 extern void* D_004A3028;
 extern const char* D_004A1B30;
 extern const char* D_004A1B34;
@@ -10755,7 +10755,7 @@ extern "C" void func_001B27B0(void* vself, int idx)
             } else if (done != 0) {
                 pct = 100.0f;
             }
-            sprintf2_v(buf, D_004A1B38, Loc1B25E0(D_00463580), info.b, info.c, func_00413AF8(pct));
+            sprintf2_v(buf, D_004A1B38, Loc1B25E0(D_00463580), info.b, info.c, fptodp(pct));
             cUIText_setUnicodeString(t, buf);
         } else {
             cUIText_setAsciiString(t, D_004A1408);

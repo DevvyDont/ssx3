@@ -984,9 +984,9 @@ struct t3Vector {
     float x, y, z;
 };
 
-extern "C" double func_00413AF8(float f);
+extern "C" double fptodp(float f);
 
-extern "C" float func_004127A8(double d);
+extern "C" float dptofp(double d);
 
 // PORT: SN soft-float helpers called by name (fptodp / dpmul / dptofp); on PC: (float)((double)(...) * 1.05)
 extern "C" double dpmul(double a, double b);
@@ -1001,7 +1001,7 @@ extern "C" void func_001C7620(void* self, t3Vector pos)
         *(float*)(s + 0x27C) = (pos.y + 10.0f) / *(float*)(s + 0x1F8);
         break;
     case 1:
-        *(float*)(s + 0x278) = func_004127A8(dpmul(func_00413AF8((pos.x + 20.0f) / *(float*)(s + 0x218)), 1.05));
+        *(float*)(s + 0x278) = dptofp(dpmul(fptodp((pos.x + 20.0f) / *(float*)(s + 0x218)), 1.05));
         *(float*)(s + 0x27C) = (pos.y + 15.0f) / *(float*)(s + 0x21C);
         break;
     case 2:
@@ -1084,9 +1084,9 @@ INCLUDE_ASM("fe/fepopup", func_001C78C0);
 #ifdef SKIP_ASM
 struct sVec3_78C0 { float x, y, z; };
 // PORT: SN soft-float helpers called by name (fptodp / dpsub / dptofp); on PC: y = (float)((double)(...) - 7.5)
-extern "C" double func_00413AF8(float f);
+extern "C" double fptodp(float f);
 extern "C" double dpsub(double a, double b);
-extern "C" float func_004127A8(double d);
+extern "C" float dptofp(double d);
 
 extern "C" void func_001C78C0(void* self, sVec3_78C0 v, float a, float b)
 {
@@ -1111,7 +1111,7 @@ extern "C" void func_001C78C0(void* self, sVec3_78C0 v, float a, float b)
     case 1:
         if (*(char**)(s + 0x58) != 0) {
             sVec3_78C0 p = *(sVec3_78C0*)(s + 0x23C);
-            y = func_004127A8(dpsub(func_00413AF8(*(float*)(s + 0x1BC) + b + v.y * 0.5f), 7.5));
+            y = dptofp(dpsub(fptodp(*(float*)(s + 0x1BC) + b + v.y * 0.5f), 7.5));
             p.x += a;
             p.y = y;
             *(sVec3_78C0*)(*(char**)(s + 0x58) + 0x44) = p;

@@ -494,7 +494,7 @@ extern "C" int func_00148D08(void* iface, int a, int b);
 extern "C" int func_00148D58(void* iface, int a, int b);
 extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
 extern "C" void func_0039C428(void* bar, int v);
-extern "C" double func_00413AF8(float f);
+extern "C" double fptodp(float f);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern void* D_004A28A8;
@@ -551,7 +551,7 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
             // PORT: g++ minimum/maximum operator
             int c = v >? 0;
             total += v;
-            sprintf(buf, &D_004A13B0, func_00413AF8((float)v * k));
+            sprintf(buf, &D_004A13B0, fptodp((float)v * k));
             t->v09(1);
             cUIText_setAsciiString((cUIText*)t, buf);
             *(int*)(b + 0x80) = 0x37;
@@ -561,7 +561,7 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
     total -= total % 5;
     char* ovr = D_004A13B8;
     cUIText* avg = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D6F0));
-    sprintf(buf, &D_004A13B0, func_00413AF8((float)total * 0.02857142873108387f));
+    sprintf(buf, &D_004A13B0, fptodp((float)total * 0.02857142873108387f));
     cUIText_setAsciiString(avg, buf);
     char* ob = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ovr));
     *(int*)(ob + 0x80) = 0x37;

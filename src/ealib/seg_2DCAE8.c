@@ -314,7 +314,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", output_number);
 extern unsigned short *f068_C148(unsigned short *, double, int) __asm__("func_003DC068");
 extern unsigned short *f038_C148(unsigned short *, int, int, unsigned short *) __asm__("func_003DC038");
 extern unsigned short *fBFD8_C148(unsigned short *, unsigned int, int, unsigned short *) __asm__("func_003DBFD8");
-extern int f608_C148(double) __asm__("func_00412608");
+extern int f608_C148(double) __asm__("dptoli");
 extern unsigned int f6A0_C148(double) __asm__("dptoul");
 extern int f500_C148(double, double) __asm__("dpcmp");
 extern int ulen_C148(unsigned short *) __asm__("USTR_length");
@@ -413,7 +413,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", USTR_vsprintf);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003DBE90(short *arg0, signed char *arg1);
 extern int output_number_C450(unsigned short **, long, int, int, int, int, unsigned short *) __asm__("output_number");
-extern long func_00412550_C450(int) __asm__("func_00412550");
+extern long func_00412550_C450(int) __asm__("litodp");
 extern signed char D_00495BC0_C450[] __asm__("D_00495BC0");
 extern signed char D_00495BD8_C450[] __asm__("D_00495BD8");
 

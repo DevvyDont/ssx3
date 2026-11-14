@@ -287,11 +287,11 @@ void func_00413AC8(int a, int b, int c, int d) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413AF8);
+INCLUDE_ASM("seg/seg_313F58", fptodp);
 #ifdef SKIP_ASM
 extern void func_00413068(float *, int *);
 extern int func_00412778(int, int, int, unsigned long long);
-int func_00413AF8(float x) {
+int fptodp(float x) {
     int o[4];
     float f = x;
     func_00413068(&f, o);

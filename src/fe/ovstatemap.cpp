@@ -1169,7 +1169,7 @@ INCLUDE_ASM("fe/ovstatemap", func_0020A1A8);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: SN soft-float float->double conversion (the source passed floats to sprintf).
-extern "C" double func_00413AF8(float f);
+extern "C" double fptodp(float f);
 extern char D_004C6848[];
 extern char D_004719F0[];
 extern char D_00471A00[];
@@ -1190,11 +1190,11 @@ extern "C" char* func_0020A1A8(int secs)
     switch ((set.flags >> 22) & 7) {
     case 0:
     case 2:
-        sprintf(D_004C6848, D_004719F0, func_00413AF8((float)m), func_00413AF8((float)s));
+        sprintf(D_004C6848, D_004719F0, fptodp((float)m), fptodp((float)s));
         break;
     case 1:
     case 3:
-        sprintf(D_004C6848, D_00471A00, func_00413AF8((float)m), func_00413AF8((float)s));
+        sprintf(D_004C6848, D_00471A00, fptodp((float)m), fptodp((float)s));
         break;
     }
     return D_004C6848;

@@ -15230,9 +15230,9 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CB110);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Sets f24 = v / 4096 clamped to [0.5, 2.0]; the double compares are the soft-float
-// helpers called directly (func_00413AF8 = float->double, dpcmp = double compare).
+// helpers called directly (fptodp = float->double, dpcmp = double compare).
 struct O_B110 { char p[0x24]; float f; };
-extern long fptodp_B110(float) __asm__("func_00413AF8");
+extern long fptodp_B110(float) __asm__("fptodp");
 extern int dpcmp_B110(long, long) __asm__("dpcmp");
 void func_003CB110(struct O_B110 *o, int v) {
     o->f = v * (1.0f / 4096.0f);
@@ -18517,7 +18517,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D2C20);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003D5450_2C20(int) __asm__("func_003D5450");
 extern int func_003D4BB0_2C20(int) __asm__("func_003D4BB0");
-extern double func_00413AF8_2C20(float) __asm__("func_00413AF8");
+extern double func_00413AF8_2C20(float) __asm__("fptodp");
 extern double func_00411F18_2C20(double, double) __asm__("dpadd");
 extern int func_004126A0_2C20(double) __asm__("dptoul");
 extern char *D_0044F420_2C20[] __asm__("D_0044F420");

@@ -3253,7 +3253,7 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cBXString_cBXString1(void* self, void* src);
 extern "C" int func_003194A8(void* str, const char* fmt, ...);
 extern "C" float func_0040DA10(float x);
-extern "C" int func_00413AF8(float f);
+extern "C" int fptodp(float f);
 extern char D_004A3998[];
 extern char D_004A39A0[];
 extern char D_004A39A8[];
@@ -3290,7 +3290,7 @@ void* prettyFloat_impl(void* out, float v)
     }
     sBXStrDFD8 s;
     s.p = (char*)D_004A3E90;
-    func_003194A8(&s, fmt, func_00413AF8(v));
+    func_003194A8(&s, fmt, fptodp(v));
     cBXString_cBXString1(out, &s);
     cBXString__cBXString(&s, 2);
     return out;
@@ -3411,7 +3411,7 @@ extern "C" void* func_002CE368(void* self, void* a1)
 INCLUDE_ASM("util/menu", cAngleMenuItem_render);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" int func_00413AF8(float f);
+extern "C" int fptodp(float f);
 // PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 extern char D_004A39C8[];
@@ -3419,7 +3419,7 @@ extern char D_004A39C8[];
 extern "C" void cAngleMenuItem_render(void* self, int a1)
 {
     char buf[0x70];
-    sprintf(buf, D_004A39C8, func_00413AF8(**(float**)((char*)self + 0x18) * 57.2957763671875f));
+    sprintf(buf, D_004A39C8, fptodp(**(float**)((char*)self + 0x18) * 57.2957763671875f));
     func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, buf);
 }
 #endif
@@ -3852,7 +3852,7 @@ INCLUDE_ASM("util/menu", cColorMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" int func_00413AF8(float f);
+extern "C" int fptodp(float f);
 extern char D_00486700[];
 extern char* D_00487470[];
 
@@ -3893,7 +3893,7 @@ extern "C" sRect_2CEEE8* cColorMenuItem_preRender(sRect_2CEEE8* ret, sMenuValueI
 {
     sRect_2CEEE8 r;
     char buf[64];
-    sprintf(buf, D_00486700, func_00413AF8(*(float*)((char*)item->values + (item->index << 2))));
+    sprintf(buf, D_00486700, fptodp(*(float*)((char*)item->values + (item->index << 2))));
     float z = 0.0f;
     r.y = z;
     r.x = z;
@@ -3913,7 +3913,7 @@ INCLUDE_ASM("util/menu", cColorMenuItem_render);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00391CB0(void* self, float x, float y, const char* str);
 extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
-extern "C" int func_00413AF8(float f);
+extern "C" int fptodp(float f);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* D_00487470[];
 extern char D_00486710[];
@@ -4056,7 +4056,7 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
                   D_00487470[*(int*)((char*)self + 0x18)]);
     char buf[0x10];
     sprintf(buf, D_00486710,
-            func_00413AF8(*(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2))),
+            fptodp(*(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2))),
             (int)(*(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2)) * 255.99000549316406f));
     char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
     float w = func_00391FB0(font, buf, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
@@ -4869,16 +4869,16 @@ INCLUDE_ASM("util/menu", func_002D0450);
 #ifdef SKIP_ASM
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" int func_00413AF8(float f);
+extern "C" int fptodp(float f);
 extern char D_00486720[];
 
 extern "C" void* func_002D0450(void* ret, void* item)
 {
     char buf[0x80];
     const char* fmt = D_00486720;
-    int x = func_00413AF8((*(float**)((char*)item + 0x14))[0]);
-    int y = func_00413AF8((*(float**)((char*)item + 0x14))[1]);
-    int z = func_00413AF8((*(float**)((char*)item + 0x14))[2]);
+    int x = fptodp((*(float**)((char*)item + 0x14))[0]);
+    int y = fptodp((*(float**)((char*)item + 0x14))[1]);
+    int z = fptodp((*(float**)((char*)item + 0x14))[2]);
     sprintf(buf, fmt, x, y, z);
     func_002CA4C8(ret, item, *(int*)((char*)item + 0x18), 0, buf);
     return ret;
@@ -4889,7 +4889,7 @@ extern "C" void* func_002D0450(void* ret, void* item)
 INCLUDE_ASM("util/menu", func_002D0500);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" int func_00413AF8(float f);
+extern "C" int fptodp(float f);
 extern char D_00486720[];
 // PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
@@ -4898,9 +4898,9 @@ extern "C" void func_002D0500(void* self, int a1)
 {
     char buf[0x80];
     const char* fmt = D_00486720;
-    int x = func_00413AF8((*(float**)((char*)self + 0x14))[0]);
-    int y = func_00413AF8((*(float**)((char*)self + 0x14))[1]);
-    int z = func_00413AF8((*(float**)((char*)self + 0x14))[2]);
+    int x = fptodp((*(float**)((char*)self + 0x14))[0]);
+    int y = fptodp((*(float**)((char*)self + 0x14))[1]);
+    int z = fptodp((*(float**)((char*)self + 0x14))[2]);
     sprintf(buf, fmt, x, y, z);
     func_002CA988_5(self, a1, *(int*)((char*)self + 0x18), 0, buf);
 }

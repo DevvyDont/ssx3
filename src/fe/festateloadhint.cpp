@@ -1176,7 +1176,7 @@ extern "C" void func_002C2540(void* dst, const char* s);
 extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
-extern "C" double func_00413AF8(float f);
+extern "C" double fptodp(float f);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* D_004A28A8;
 extern char D_004A2C28[];
@@ -1244,7 +1244,7 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
         char fmt[0x20];
         char buf[0x20];
         __builtin_memcpy(fmt, D_0047BF78, sizeof("%02.0f:%02.0f"));
-        sprintf(buf, fmt, func_00413AF8((float)min), func_00413AF8((float)sec));
+        sprintf(buf, fmt, fptodp((float)min), fptodp((float)sec));
         cUIText_setAsciiString((cUIText*)widget, buf);
     } else if (wHash_7AB0(w) == GetHashValue32(D_0047BF88)) {
         func_002C2540(fmtw, D_004A2C28);
