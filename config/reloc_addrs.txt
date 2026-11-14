@@ -611,6 +611,9 @@ rom:0x2F6364 reloc:MIPS_LO16 symbol:_gp
 // bx/memblockman func_0031A6D8: the memory-job threads' ThreadParam gp is `_gp` too (per row, as func_003F5000).
 rom:0x21B724 reloc:MIPS_HI16 symbol:_gp
 rom:0x21B728 reloc:MIPS_LO16 symbol:_gp
+// seg/seg_21A1C0 func_00319930: the ThreadParam gp of the thread it creates is `_gp` too (per row).
+rom:0x21A978 reloc:MIPS_HI16 symbol:_gp
+rom:0x21A97C reloc:MIPS_LO16 symbol:_gp
 // fe/festatecharequipdetail func_0019BFE8: two unpaired %lo uses of $23 = %hi(D_004FF140) (raw -0xEC0).
 rom:0x9D3FC reloc:MIPS_LO16 symbol:D_004FF140
 rom:0x9D6E0 reloc:MIPS_LO16 symbol:D_004FF140
