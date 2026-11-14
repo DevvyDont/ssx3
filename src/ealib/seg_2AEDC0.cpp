@@ -2279,6 +2279,10 @@ struct layer_data {
     int chroma_non_intra_quantizer_matrix[64];  // 0x310
     void* load_intra_quantizer_matrix;          // 0x410 (the unit's Get_Bits returns void*)
     void* load_non_intra_quantizer_matrix;      // 0x414
+    int load_chroma_intra_quantizer_matrix;     // 0x418
+    int load_chroma_non_intra_quantizer_matrix; // 0x41C
+    int MPEG2_Flag;                             // 0x420
+    int scalable_mode;                          // 0x424 (sequence scalable extension)
 };
 
 // MPEG2_sequence_header (mpeg2decode getheader.c sequence_header()).
