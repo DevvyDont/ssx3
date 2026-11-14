@@ -2215,7 +2215,132 @@ extern "C" void func_0025C878(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025C8A8);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// FAKEMATCH: identical if/else arms around the b3 GetString block change GCSE's table size and so the spill order (permuter); plain form 99.98%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+
+extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const char* name);
+extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
+extern "C" void* cBXString_cBXString2(void* self, const char* s);
+extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE(void* self, void* other);
+extern "C" unsigned int strlen(const char*);
+extern "C" void func_003EFD30(const char* s, int len, void* out, int n);
+extern char D_004A2F40[];
+extern char D_00480880[];
+extern char D_004A3050[];
+extern char D_004A3048[];
+extern char D_004A30F0[];
+extern char D_004A30F8[];
+extern char D_004A3100[];
+extern void* D_004811D0_C8A8[] __asm__("D_004811D0");
+extern void* D_00481290[];
+static inline void post_C8A8(char* self, void* msg)
+{
+    void* mp = msg;
+    sMsgListC610_insert(*(sMsgListNodeC610**)(self + 0xF0), mp);
+}
+struct sBXStrC8A8 { char* p; };
+struct sTagsUnkC8A8 {
+    char pad0[0x6C];
+    int count;
+    sBXStrC8A8 strs[4];
+};
+
+
+
+
+extern "C" void func_0025C8A8(char *self, char *msg)
+{
+  *((int *) self) = 1;
+  int status = *((int *) (msg + 8));
+  if (status == 0)
+  {
+    char name[0x100];
+    char b1[0x100];
+    char b2[0x10];
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), D_00480880), name, 0x100, D_004A2F40);
+    char *p = name;
+    ((sTagsUnkC8A8 *) self)->count = 0;
+    while (((*p) != 0) && (((sTagsUnkC8A8 *) self)->count < 4))
+    {
+      char *start = p;
+      while (((*p) != 0) && ((*p) != ','))
+      {
+        p++;
+      }
+
+      if ((*p) != 0)
+      {
+        *p = 0;
+        p++;
+      }
+      cBXString_cBXString4(&((sTagsUnkC8A8 *) self)->strs[((sTagsUnkC8A8 *) self)->count++], start);
+    }
+
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), D_004A3050), b1, 0x100, D_004A2F40);
+    cBXString_cBXString4(self + 0x2BC, b1);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), D_004A3048), b2, 3, D_004A2F40);
+    *((int *) (self + 0x2E8)) = b2[0] == 'Y';
+    *((int *) (self + 0x2EC)) = b2[1] == 'Y';
+    cBXString_operatorE(self + 0x2B0, self + 0x48);
+    cBXString_operatorE(self + 0x2B4, self + 0x4C);
+    cBXString_operatorE(self + 0x2B8, self + 0x4C);
+    const char *t = cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), D_004A30F0);
+    if (t != 0)
+    {
+      char b3[0x100];
+      if (p)
+      {
+        cDirtysock_tag_TagFieldGetString4(t, b3, 0x100, D_004A2F40);
+        func_003EFD30(b3, strlen(b3), self + 0x1C, 0x21);
+        *((int *) (self + 0x18)) = 1;
+      }
+      else
+      {
+        cDirtysock_tag_TagFieldGetString4(t, b3, 0x100, D_004A2F40);
+        func_003EFD30(b3, strlen(b3), self + 0x1C, 0x21);
+        *((int *) (self + 0x18)) = 1;
+      }
+    }
+    else
+    {
+      *((int *) (self + 0x18)) = 0;
+    }
+    *((int *) (self + 0x8)) = 1;
+    int *m = (int *) operator new(8, D_00480488, 0x20000000, 0);
+    *((void ***) (((char *) m) + 0x4)) = D_004812B0;
+    m[0] = 0xD4;
+    post_C610(self + 0xEC, m);
+  }
+  else
+    if (status == 0x6C6F636B)
+  {
+    char a[0x100];
+    char b[0x100];
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), D_004A30F8), a, 0x100, D_004A2F40);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), D_004A3100), b, 0x100, D_004A2F40);
+    int *m = (int *) operator new(0x14, D_00480488, 0x20000000, 0);
+    m[0] = 0x102;
+    *((void ***) (((char *) m) + 0x4)) = D_004811D0_C8A8;
+    m[2] = 0x6C6F636B;
+    cBXString_cBXString2(m + 3, a);
+    cBXString_cBXString2(m + 4, b);
+    post_C8A8(self, m);
+  }
+  else
+  {
+    int *m = (int *) operator new(0xC, D_00480488, 0x20000000, 0);
+    m[2] = *((int *) (msg + 8));
+    m[0] = 0x102;
+    *((void ***) (((char *) m) + 0x4)) = D_00481290;
+    post_C8A8(self, m);
+  }
+}
+#endif
 
 extern "C" void* func_0025CD50(void*, int);
 

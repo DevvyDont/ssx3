@@ -608,7 +608,77 @@ extern "C" void func_001874E8(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fememcard", func_00187580);
+#ifdef SKIP_ASM
+// FAKEMATCH: `st` is reused as the temporary for the constant 1 stored to +0x1EC (permuter); plain form 99.86%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+
+
+
+
+
+
+
+extern "C" void func_001D8700(void *self, void *a1, int key);
+extern "C" void cMCOverlayManager_update(void *mp);
+struct sVtEntK187580
+{
+  short delta;
+  short index;
+  void (*fn)(void *);
+};
+extern "C" void func_00187580(void *self, void *a1, int key)
+{
+  func_001D8700(self, a1, key);
+  int st = *((int *) (((char *) self) + 0x19C));
+  if (st == 0x15)
+  {
+    void *mp = cSSXApp_getMCManager(D_004A28A8);
+    func_0023FB18(mp, 0);
+    func_0023FAE0(mp);
+    int flags = *((int *) (((char *) self) + 0x238));
+    if (!(flags & 2))
+    {
+      func_00187920();
+      return;
+    }
+    if (!(flags & 1))
+    {
+      func_001877B0();
+      return;
+    }
+    func_00187318(self);
+    return;
+  }
+  if ((st == 10) && (key == 0xF))
+  {
+    func_00187318(self);
+    return;
+  }
+  if ((*((int *) (((char *) self) + 0x19C))) == 4)
+  {
+    func_00187318(self);
+    return;
+  }
+  if (((key == 0xF) || (key == 0x10)) && ((*((int *) (((char *) self) + 0x19C))) == 0x14))
+  {
+    int cancel = key == 0x10;
+    if (!cancel)
+    {
+      sVtEntK187580 *vt = *((sVtEntK187580 **) (((char *) self) + 8));
+      vt[41].fn(((char *) self) + vt[41].delta);
+      cMCOverlayManager_update(cSSXApp_getMCManager(D_004A28A8));
+      func_00187270((sFEMemCardK187270 *) self);
+    }
+    else
+    {
+      st = 1;
+      *((int *) (((char *) self) + 0x1EC)) = st;
+    }
+  }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/fememcard", func_001876A8);

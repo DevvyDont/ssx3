@@ -3789,7 +3789,92 @@ void func_003E0E90(int hnd, int id) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1110);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// FAKEMATCH: a per-function volatile view of the heap header (the landed heap functions read it plain). Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+typedef struct { int f0; int f4; } BLK_1110;
+typedef struct { int f0; int f4; int f8; int fC; } ENT_1110;
+typedef struct { int f0; int f4; } JOB_1110;
+typedef struct {
+    char pad0[0x24];
+    ENT_1110 *f24;
+    int f28;
+    char *f2C;
+    char *f30;
+    int pad34;
+    int f38;
+    char pad3C[0x4C - 0x3C];
+    int f4C;
+    char *f50;
+    char *f54;
+    char pad58[4];
+    int f5C;
+    JOB_1110 *f60;
+    JOB_1110 *f64;
+} HEAP_1110;
+extern int func_003DFBD0_1110(int, volatile HEAP_1110 **, int *) __asm__("func_003DFBD0");
+extern void func_003DFC48_1110(volatile HEAP_1110 *, int) __asm__("func_003DFC48");
+extern void func_003DFE18_1110(volatile HEAP_1110 *, int) __asm__("func_003DFE18");
+extern void func_003E0E90_1110(int, int) __asm__("func_003E0E90");
+
+void func_003E1110(int arg0) {
+    volatile HEAP_1110 *heap;
+    int other;
+    JOB_1110 *j;
+    BLK_1110 *b;
+    int i, sz, pad;
+
+    sz = 0;
+    if (func_003DFBD0_1110(arg0, &heap, &other) != 0) {
+        return;
+    }
+    j = heap->f64;
+    if (j == 0) {
+        return;
+    }
+    while ((unsigned int)(j->f4 - 1) < 2) {
+        func_003E0E90_1110(arg0, j->f0);
+        j = heap->f64;
+    }
+    while (heap->f5C != (int)heap->f60) {
+        func_003DFE18_1110(heap, heap->f5C);
+    }
+    heap->f60->f4 = 4;
+    for (i = 0; i < heap->f28; i++) {
+        heap->f24[i].f8 = 0;
+    }
+    func_003DFC48_1110(heap, heap->f4C);
+    b = (BLK_1110 *)heap->f50;
+    while ((char *)b != heap->f54) {
+        if (b->f0 == -1) {
+            b = (BLK_1110 *)heap->f30;
+        } else {
+            sz = b->f4 & 0xFFFFFF;
+            b->f0 = -2;
+            b->f4 = sz;
+            b = (BLK_1110 *)((char *)b + sz);
+        }
+    }
+    if (heap->f38 == 2) {
+        if ((char *)b == heap->f30) {
+            heap->f30 = heap->f54 = heap->f2C;
+        } else {
+            pad = 0x40 - ((int)heap->f54 & 0x3F);
+            if (pad == 0x40) {
+                pad = 0;
+            }
+            b = (BLK_1110 *)(heap->f54 - sz);
+            sz += pad;
+            b->f4 = sz;
+            heap->f54 += pad;
+        }
+        heap->f38 = 0;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E12E0);

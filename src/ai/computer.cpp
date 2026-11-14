@@ -3766,7 +3766,55 @@ extern "C" void func_00112D58(char* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ai/computer", func_00112FB0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// FAKEMATCH: an extra `dist` read and the `cp` pointer (cp->DistanceLeft re-read) keep jump.c under its duplicate-insn limit; plain form 97.81%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern float func_0026A638_2FB0(void* track, void* pos, void* iPos, float* iDistXY, int* pi, int is2D) __asm__("func_0026A638");
+extern char D_004D33A0[];
+
+// cTrackPath's vtable entry (g++ 2.95 layout: this-delta, index, fn).
+struct sVEntry_112FB0 { short delta; short index; int (*fn)(void*, float, float, void*, int); };
+// On Tour tPathCheckpoint.
+struct tPathCheckpoint_112FB0 { int TimeBonusSec; float DistanceLeft; };
+struct sPathSys_112FB0 { char pad0[0x18]; tPathCheckpoint_112FB0 Checkpoints[6]; };
+
+// cRider::checkTrackPathEvents(float& pathDistXY, float& pathParam, t4Vector& pathPos) (On Tour name)
+extern "C" void func_00112FB0(void* vself, float* pathDistXY, float* pathParam, sVec4_00112338* pathPos)
+{
+    cRider* self = (cRider*)vself;
+    float r = func_0026A638_2FB0(*(void**)((char*)self + 0xAB4), &self->mPosition, pathPos, pathDistXY, self->mTrackPathHint, 1);
+    *pathParam = r;
+    char* track = *(char**)((char*)self + 0xAB4);
+    float cur = *(float*)((char*)self + 0x4D4);
+    float d = *(float*)(track + 0x38) - r;
+    self->mDistToFinish = d;
+    if (d < cur)
+    {
+        sPathSys_112FB0* tbl = (sPathSys_112FB0*)D_004D33A0;
+        for (int i = 0; i < 6; i++)
+        {
+            tPathCheckpoint_112FB0* cp = &tbl->Checkpoints[i];
+            float dist = tbl->Checkpoints[i].DistanceLeft;
+            if (dist == 0.0f || dist < self->mDistToFinish)
+                break;
+            if (cp->DistanceLeft < *(float*)((char*)self + 0x4D4))
+                func_0010E558(self, (int*)cp);
+        }
+        char* t = *(char**)((char*)self + 0xAB4);
+        sVEntry_112FB0* vt = *(sVEntry_112FB0**)(t + 0x34);
+        self->mOverlapCount = vt[1].fn(t + vt[1].delta, *(float*)((char*)self + 0x4D4), self->mDistToFinish, (char*)self + 0x4DC, 0xC);
+        *(float*)((char*)self + 0x4D4) = self->mDistToFinish;
+    }
+    else
+    {
+        sVEntry_112FB0* vt = *(sVEntry_112FB0**)(track + 0x34);
+        self->mOverlapCount = vt[1].fn(track + vt[1].delta, cur, cur, (char*)self + 0x4DC, 0xC);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/computer", func_00113128__FPv);

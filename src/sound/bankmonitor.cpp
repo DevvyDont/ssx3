@@ -718,7 +718,69 @@ extern "C" void func_002AD998()
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/bankmonitor", cMonitor_cMonitor);
+#ifdef SKIP_ASM
+// FAKEMATCH: a per-function volatile view of fields 0x88/0x8C/0x90 orders the %hi(D_00483BA8) lui after the 0x88 store; plain form 96.88%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern "C" void* cSndPlayOpts_cSndPlayOpts(void* self, int inchrg, int heap);
+extern "C" void* cSoundSys_cSoundSys(void* self, int a);
+extern void* D_00483BA8[];
+
+struct sBmVEntryD9C8 {
+    short delta;
+    short index;
+    void* fn;
+};
+struct sBmVtblD9C8 {
+    sBmVEntryD9C8 e[4];
+} __attribute__((aligned(8)));
+extern const sBmVtblD9C8 D_00483BC0;
+
+struct sBmSlotD9C8 {
+    char pad_0x0[0x2C];
+};
+
+struct sSndPlayerD9C8 {
+    char* vbase;                // 0x0
+    char pad_0x4[0x88 - 0x4];
+    volatile int f88;                    // 0x88
+    volatile int f8C;                    // 0x8C
+    volatile int f90;                    // 0x90
+    int f94;                    // 0x94
+    sBmSlotD9C8 slots[48];      // 0x98
+    void** vtbl;                // 0x8D8
+    char vb[0x4];               // 0x8DC
+};
+
+extern "C" sSndPlayerD9C8* cMonitor_cMonitor(sSndPlayerD9C8* self, int inchrg, int heap)
+{
+    if (inchrg) {
+        self->vbase = self->vb;
+        cSoundSys_cSoundSys(self->vb, heap);
+    }
+    cSndPlayOpts_cSndPlayOpts(self, 0, heap);
+    *(const sBmVtblD9C8**)(self->vbase + 4) = &D_00483BC0;
+    if (!inchrg) {
+        // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
+        sBmVtblD9C8 vt = D_00483BC0;
+        *(sBmVtblD9C8**)(self->vbase + 4) = &vt;
+        char* base = self->vbase - 0x8DC;
+        int d = (char*)self - base;
+        vt.e[1].delta = D_00483BC0.e[1].delta + d;
+    }
+    self->f88 = 0;
+    self->f8C = 0;
+    self->vtbl = D_00483BA8;
+    self->f90 = 0;
+    {
+        sBmSlotD9C8* p = self->slots;
+        for (int i = 47; i != -1; i--, p++) func_002AD848(p);
+    }
+    D_004A3778 = (func_002AD998_cObj*)self;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002ADAC8);

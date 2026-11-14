@@ -1,6 +1,444 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("main/gameload", cGame_load);
+#ifdef SKIP_ASM
+// FAKEMATCH: an unused 11-byte copy `name` of D_0047B6A8 (the call passes D_0047B6A8.c directly); plain form 99.21%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+void cMemMan_free(void* p);
+void func_00317530(void* bar, float v);
+void func_00317550(void* bar, float v);
+extern "C" void func_00195DE0(void* p);
+extern "C" void cSSXScriptEngine_Load(void* eng);
+extern "C" void* cFont_cFont(void* p, const char* name, int a);
+extern "C" void cGameComm_syncGame(void* comm);
+void func_0014BD98(void* iface);
+extern "C" void cBucketMan_init(void* bm, int n);
+extern "C" void func_00355260(void* bm, int a);
+extern "C" void func_0016C918(void* p);
+void* cStreamPause_construct();
+void* cOcclusionMan_cOcclusionMan(void* p);
+extern "C" void* cWorld_cWorld(void* p);
+extern "C" void* cWorldLightMan_cWorldLightMan(void* p, void* a);
+extern "C" void* func_003087D0(void* p);
+extern "C" void* func_00229180(void* p);
+extern "C" void* func_00343A68(void* p);
+extern "C" void* func_003579C8(void* p);
+extern "C" void* cWScriptCompile_parseKeywords(void* p, int a, int b);
+extern "C" void cIrradianceDataBase_Load(void* p);
+void* cBXLoadIndicator_cBXLoadIndicator(void* p);
+struct cBigFile;
+void* cBigFile_cBigFile(cBigFile* p);
+extern "C" void cGame_loadTrack(char* self);
+extern "C" void* func_0026EFB8(void* p);
+extern "C" void* func_002DBD10(void* p, int a);
+extern "C" void* func_00237060(void* p, int n, int m);
+int BXrand();
+extern "C" void func_00237CB0(int seed);
+extern "C" void* cAI_cAI(void* p);
+extern "C" void* cPlaybackMan_cPlaybackMan(void* p, int n);
+extern "C" void cReplay_init(void* p);
+extern "C" void cAI_initAIRiders(void* ai);
+extern "C" void cGameModeMan_initGameMode(void* p, int mode);
+extern "C" char* func_001526D0(void* iface);
+extern "C" void func_0012BAC0(void* ai, void* p);
+extern "C" void cAI_initAIActors(void* ai, int a);
+extern "C" void cAI_loadRiders(void* ai);
+extern "C" void THREAD_yieldticks(int n);
+extern "C" int func_0012A180(void* ai);
+void func_00270EF8(void* p);
+extern "C" void func_00271758(void* p, void* a);
+void func_00270F18(void* p);
+extern "C" void func_00152728(void* iface);
+extern "C" void* cGameViewMan_cGameViewMan(void* p, int a);
+extern "C" void func_0015EDC8(void* p, void* a);
+extern "C" void* func_002CC018(void* p);
+extern "C" char* FILE_load(const char* name, int flags);
+extern "C" void* func_002E4228(void* p, int a, int i);
+extern "C" void* cSplashManager_cSplashManager(void* p, int a, int i);
+extern "C" void* cCutSceneTransitionMan_cCutSceneTransitionMan(void* p, int a);
+extern "C" void* cFlagManager_cFlagManager(void* p, int a);
+extern "C" void* cSnowFall_cSnowFall(void* p, int a);
+extern "C" void cSSXAudio_FrontEndLoad(void* p);
+extern "C" void* func_00397B08(void* p);
+extern "C" void cUIEngine_loadFile(void* ui, char* name);
+extern "C" void* func_001A2F38(void* p);
+extern "C" void* func_001E9A30(void* p, void* ui, int a);
+extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
+void func_0026F898(void* p, int a);
+void func_00231278(void* self, int val);
+extern "C" void func_00230F40(void* self);
+extern "C" void func_003E5398(int a);
+extern "C" int func_002312D8(void* self);
+extern "C" void func_002586B0(void* comm);
+extern "C" void func_00231250(void* self, int a, int b, int refresh);
+extern "C" void* cObjNode_cObjNode1(void* p, int a);
+extern "C" void* func_002F0390();
+extern "C" void* cVisualEffectsMan_construct();
+extern "C" void* func_002D2100();
+extern char* D_004A5B64;
+extern void* D_004A28A8;
+extern void* D_004A28A4;
+extern void* D_004A289C;
+extern void* D_004A2EEC;
+extern void* D_004A3500;
+extern int D_004A1228;
+extern int D_004A3484;
+extern void* D_004A2C68;
+extern char D_004A5988_gl __asm__("D_004A5988");
+extern int D_00534B30[];
+extern char D_00535BC8[];
+extern int D_00535BFC[];
+extern char D_004C5830[];
+extern char D_005047F8[];
+extern char D_004A2A58[];
+extern char D_0047B548[];
+extern char D_0047B558[];
+extern char D_0047B570[];
+extern char D_004A2A60[];
+extern char D_0047B580[];
+extern char D_0047B590[];
+extern char D_0047B5A0[];
+extern char D_0047B5B0[];
+extern char D_0047B5C0[];
+extern char D_0047B5D8[];
+extern char D_00479A80[];
+extern char D_004A2A68[];
+extern char D_004A2A70[];
+extern char D_0047B5E8[];
+extern char D_0047B5F8[];
+extern char D_004A2A78[];
+extern char D_0047B608[];
+extern char D_0047B618[];
+extern char D_004A2A80[];
+extern char D_0047B628[];
+extern char D_004A2A88[];
+extern char D_0047B640[];
+extern char D_0047B650[];
+extern char D_0047B660[];
+extern char D_0047B678[];
+extern char D_0047B688[];
+extern char D_0047B698[];
+extern char D_0047B6B8[];
+extern char D_0047B6C8[];
+extern char D_0047B6D8[];
+extern char D_0047B6E8[];
+extern char D_0047B700[];
+extern char D_0047B718[];
+extern void* D_0046D1D0[];
+extern void* D_0047CB60[];
+extern void* D_0047D070[];
+extern void* D_0047CAE8[];
+
+struct sVEntryGL {
+    short delta;
+    short index;
+    int (*fn)(void*, ...);
+};
+
+struct sVEntryVoidGL {
+    short delta;
+    short index;
+    void (*fn)(void*, ...);
+};
+
+struct sName11GL { char c[11]; };
+extern sName11GL D_0047B6A8;
+
+inline void* operator new(unsigned int, void* p) { return p; }
+
+struct sCellGL {
+    char pad[0x10];
+    int value;
+    sCellGL() { value = 0; }
+};
+
+struct sGridGL {
+    sCellGL cells[2][2][2];
+    int a0;
+    int a4;
+};
+
+struct sUIDataGL {
+    int pad0;
+    char flag;
+    void** vtbl;
+    int c;
+    int d;
+    int e;
+    int f;
+};
+
+struct sNamedGL {
+    char pad[0xC];
+    void** vtbl;
+    void* obj;
+};
+
+struct sStateGL {
+    char pad[0x1C];
+    unsigned int pad0 : 8;
+    unsigned int mode : 6;
+    unsigned int rest : 18;
+};
+
+struct sUIGL {
+    char pad[0x8];
+    void* p8;
+    sUIDataGL* data;
+    void* p10;
+    void* p14;
+    char stack[1];
+};
+
+struct cGameGL {
+    char pad_000[0xC];
+    char* ai; // 0xC
+    void* world; // 0x10
+    char pad_014[0xC];
+    sGridGL* grid; // 0x20
+    void* m24; // 0x24
+    void* m28; // 0x28
+    void* m2C; // 0x2C
+    void* m30; // 0x30
+    void* m34; // 0x34
+    void* m38; // 0x38
+    void* m3C; // 0x3C
+    void* m40; // 0x40
+    char pad_044[0x4];
+    sUIGL* ui; // 0x48
+    char pad_04C[0x4];
+    void* m50; // 0x50
+    void* m54; // 0x54
+    void* m58; // 0x58
+    void* m5C[2]; // 0x5C
+    void* m64; // 0x64
+    void* m68[2]; // 0x68
+    void* m70; // 0x70
+    void* m74; // 0x74
+    char pad_078[0x4];
+    void* m7C; // 0x7C
+    char pad_080[0x4];
+    void* m84; // 0x84
+    void* m88; // 0x88
+    void* m8C; // 0x8C
+    void* m90; // 0x90
+    void* m94; // 0x94
+    void* m98; // 0x98
+    int m9C; // 0x9C
+    int mA0; // 0xA0
+    char* hud; // 0xA4
+    void* mA8; // 0xA8
+    int mAC; // 0xAC
+    char pad_0B0[0x14C];
+    int m1FC; // 0x1FC
+    int m200; // 0x200
+    int m204; // 0x204
+    int m208; // 0x208
+    int m20C; // 0x20C
+    int m210; // 0x210
+    int m214; // 0x214
+    int m218; // 0x218
+    int m21C; // 0x21C
+    int m220; // 0x220
+};
+
+extern "C" void cGame_load(cGameGL* self)
+{
+    sGridGL** pGrid = &self->grid;
+    void** worlds = self->m5C;
+    void* bm = &D_004A5988_gl;
+    void** lights = self->m68;
+    func_00317530(D_004A5B64 + 0x38, 13.199999809265137f);
+    func_00317550(D_004A5B64 + 0x38, 43.5f);
+    func_00195DE0(*(void**)((char*)D_004A28A8 + 0x8C));
+    {
+        char* g = (char*)D_004A289C;
+        sVEntryVoidGL* vt = *(sVEntryVoidGL**)(g + 0x10D8);
+        vt[44].fn(g + vt[44].delta, 0);
+    }
+    self->m9C = 0;
+    self->mA0 = 0;
+    cSSXScriptEngine_Load(D_004A28A4);
+    sGridGL* grid = new (cMemMan_alloc(0xA8, D_004A2A58, 0, 0)) sGridGL;
+    *pGrid = grid;
+    grid->a4 = 0;
+    grid->a0 = 0;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    self->m24 = cFont_cFont(operator new(0x84, D_0047B548, 0, 0), D_0047B558, 0);
+    if (D_004A2EEC != 0)
+        cGameComm_syncGame(D_004A2EEC);
+    func_0014BD98(cBE_getInterface_Fv(cBE_getBE(), 9));
+    cBucketMan_init(bm, 9);
+    func_00355260(bm, 1);
+    func_0016C918(D_004C5830);
+    self->m98 = cStreamPause_construct();
+    self->m8C = cOcclusionMan_cOcclusionMan(operator new(0x114, D_0047B570, 0x20000000, 0));
+    self->world = cWorld_cWorld(operator new(0x18, D_004A2A60, 0, 0));
+    self->m90 = cWorldLightMan_cWorldLightMan(operator new(0x32A0, D_0047B580, 0x20000000, 0), self->grid);
+    self->m30 = func_003087D0(operator new(0x498, D_0047B590, 0x20000000, 0));
+    self->m38 = func_00229180(operator new(0x2720, D_0047B5A0, 0x20000000, 0));
+    self->m3C = func_00343A68(operator new(0x9C4, D_0047B5B0, 0x20000000, 0));
+    self->m40 = func_003579C8(operator new(0x10, D_0047B5C0, 0x20000000, 0));
+    self->m88 = cWScriptCompile_parseKeywords(operator new(0x10, D_0047B5D8, 0x20000000, 0), 0x80, 0x40);
+    cIrradianceDataBase_Load(D_005047F8);
+    self->m94 = cBXLoadIndicator_cBXLoadIndicator(operator new(0x10, D_00479A80, 0x20000000, 0));
+    self->mA8 = cBigFile_cBigFile((cBigFile*)operator new(8, D_004A2A68, 0, 0));
+    cGame_loadTrack((char*)self);
+    self->m28 = func_0026EFB8(operator new(0x688, D_004A2A70, 0, 0));
+    self->m2C = func_002DBD10(operator new(1, D_0047B5E8, 0, 0), 0);
+    cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 7);
+    if (D_00534B30[0] != 0) {
+        float dt = *(float*)((char*)D_004A28A8 + 0x14);
+        int n = (int)((*(float*)&D_00534B30[4] + (float)*(int*)((char*)D_004A2EEC + 0x120) * dt) / dt) + 2;
+        self->m7C = func_00237060(operator new(0x44, D_0047B5F8, 0, 0), n, *(int*)((char*)D_004A2EEC + 0x120));
+    } else {
+        func_00237CB0(BXrand());
+    }
+    {
+        char* ai = (char*)cAI_cAI(operator new(0xD0, D_004A2A78, 0, 0));
+        self->ai = ai;
+        sVEntryVoidGL* vt = *(sVEntryVoidGL**)(ai + 0xCC);
+        vt[2].fn(ai + vt[2].delta);
+    }
+    func_00317550(D_004A5B64 + 0x38, 55.0f);
+    self->m34 = cPlaybackMan_cPlaybackMan(operator new(0x7C, D_0047B608, 0x20000000, 0), 0x28);
+    cReplay_init(self->m28);
+    void* race = cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 5);
+    int replay = D_004A1228;
+    if (replay != 0) {
+        cAI_initAIRiders(self->ai);
+        signed char* gs = (signed char*)D_00535BC8;
+        cGameModeMan_initGameMode(*(void**)((char*)D_004A28A8 + 0xC0), gs[0x4A]);
+        func_0012BAC0(self->ai, func_001526D0(race) + 0x20);
+        int mode = gs[0x48];
+        int sub = gs[0x4A];
+        if (mode == 4) {
+        } else if (mode == 5 && sub != 4) {
+        } else if (mode == 6 && sub != 5) {
+        } else {
+            char* ai = self->ai;
+            if (*(int*)(ai + 0x80) == 0) {
+                if (mode == 0)
+                    cAI_initAIActors(ai, 0);
+                else
+                    cAI_initAIActors(ai, 2);
+                *(int*)(self->ai + 0x8C) = 0;
+            }
+        }
+        while (!func_0012A180(self->ai)) {
+            cAI_loadRiders(self->ai);
+            THREAD_yieldticks(1);
+        }
+        func_00270EF8(self->m28);
+        func_00271758(self->m28, func_001526D0(race));
+        func_00270F18(self->m28);
+        func_00152728(race);
+    }
+    if (D_00534B30[0] != 0)
+        self->m84 = cGameViewMan_cGameViewMan(operator new(0x38, D_0047B618, 0x20000000, 0), 1);
+    else
+        self->m84 = cGameViewMan_cGameViewMan(operator new(0x38, D_0047B618, 0x20000000, 0), D_00535BFC[0]);
+    if (D_00534B30[0] != 0 && D_00534B30[2] == 0) {
+        char* a = *(char**)(self->ai + 0x44);
+        void* cam = a != 0 ? *(void**)(a + 0x18) : 0;
+        func_0015EDC8(*(void**)((char*)self->m84 + 0x4), cam);
+    }
+    char* hud = (char*)func_002CC018(operator new(0x68, D_004A2A80, 0, 0));
+    self->hud = hud;
+    *(void**)(hud + 0x58) = self->m24;
+    *(void**)(self->hud + 0x5C) = *(void**)((char*)D_004A28A8 + 0xB0);
+    char* file = FILE_load(D_0047B628, 0x100);
+    {
+        char* g = (char*)D_004A289C;
+        sVEntryGL* vt = *(sVEntryGL**)(g + 0x10D8);
+        int r = vt[46].fn(g + vt[46].delta, file + *(int*)(file + 0x14), D_004A2A88, 0, 1, -1);
+        self->m220 = r;
+        *(int*)(self->hud + 0x60) = r;
+    }
+    if (file != 0)
+        cMemMan_free(file);
+    func_00317550(D_004A5B64 + 0x38, 93.0f);
+    for (unsigned int i = 0; i < 2; i++) {
+        worlds[i] = func_002E4228(operator new(0x84, D_0047B640, 0, 0), 3, i);
+        lights[i] = cSplashManager_cSplashManager(operator new(0x1030, D_0047B650, 0, 0), 2, i);
+    }
+    self->m64 = cCutSceneTransitionMan_cCutSceneTransitionMan(operator new(0x48, D_0047B660, 0, 0), 3);
+    self->m70 = cFlagManager_cFlagManager(operator new(0x1718, D_0047B678, 0, 0), 2);
+    self->m74 = cSnowFall_cSnowFall(operator new(0x60, D_0047B688, 0, 0), 2);
+    self->mAC = 0;
+    cSSXAudio_FrontEndLoad(D_004A3500);
+    func_00317550(D_004A5B64 + 0x38, 99.0f);
+    sUIGL* ui = (sUIGL*)func_00397B08(operator new(0x70, D_0047B698, 0, 0));
+    self->ui = ui;
+    ui->p10 = *(void**)((char*)D_004A28A8 + 0x8C);
+    sName11GL name = D_0047B6A8;
+    cUIEngine_loadFile(self->ui, D_0047B6A8.c);
+    sUIDataGL* data = (sUIDataGL*)operator new(0x1C, D_0047B6B8, 0, 0);
+    data->flag = 0;
+    data->vtbl = D_0046D1D0;
+    data->f = 0;
+    data->c = 0;
+    data->d = 0;
+    data->e = 0;
+    (self->ui)->data = data;
+    (self->ui)->p14 = func_001A2F38(operator new(8, D_0047B6C8, 0, 0));
+    (self->ui)->p8 = *(void**)((char*)D_004A28A8 + 0x88);
+    sStateGL* st = (sStateGL*)func_001E9A30(operator new(0xC98, D_0047B6D8, 0, 0), self->ui, 0);
+    st->mode = 5;
+    cUIStateStack_pushExplicit((self->ui)->stack, st);
+    self->m204 = 0;
+    self->m1FC = 0;
+    self->m200 = 0;
+    self->m20C = 0;
+    self->m208 = 0;
+    self->m218 = 0;
+    self->m214 = 0;
+    self->m210 = 0;
+    self->m21C = 0;
+    D_004A2C68 = self;
+    if (replay != 0) {
+        func_0026F898(self->m28, D_004A3484);
+        func_00231250(self, 0x10, 0, 0);
+    } else {
+        func_00231278(self, 0xA);
+        do {
+            func_00230F40(self);
+            func_003E5398(0);
+        } while (!func_002312D8(self));
+        if (D_004A2EEC != 0)
+            func_002586B0(D_004A2EEC);
+        if (D_00535BC8[0x49] == 0)
+            func_00231250(self, 0xA, 0, 0);
+        else
+            func_00231250(self, 0xA, 0, 0);
+    }
+    sNamedGL* o = (sNamedGL*)operator new(0x14, D_0047B6E8, 0, 0);
+    cObjNode_cObjNode1(o, 6);
+    o->vtbl = D_0047CB60;
+    void* r = func_002F0390();
+    self->m50 = o;
+    o->obj = r;
+    o = (sNamedGL*)operator new(0x14, D_0047B700, 0, 0);
+    cObjNode_cObjNode1(o, 3);
+    o->vtbl = D_0047D070;
+    r = cVisualEffectsMan_construct();
+    self->m54 = o;
+    o->obj = r;
+    o = (sNamedGL*)operator new(0x14, D_0047B718, 0, 0);
+    cObjNode_cObjNode1(o, 4);
+    o->vtbl = D_0047CAE8;
+    r = func_002D2100();
+    o->obj = r;
+    self->m58 = o;
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gameload", cGame_loadTrack);

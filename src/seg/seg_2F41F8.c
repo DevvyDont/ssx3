@@ -343,7 +343,32 @@ int func_003F3BC8(int self, int a, int b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F3C50);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// FAKEMATCH: `if (a > 0)` around an identical copy of the body: the target has no compare; jump2 merges the arms and the leftover block boundary holds sched2 back; straight-line form 78.57%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern int D_004A4BA4;
+
+extern int func_003F4C98(char *, int, int);
+extern int f4C68s(char *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
+// NOTE: retail had a branch on `a` whose two paths were identical (jump2
+// cross-jumped them after sched2, leaving only a block boundary before the
+// 'netw'/'star' setup). The original condition is unknown.
+int func_003F3C50(int a) {
+    char buf[16];
+    int out;
+    if (a > 0) {
+        func_003F4C98(buf, 'netw', 'star');
+        f4C68s(buf, 1, D_004A4BA4, 0, a, -1, 0, 0, 1, &out);
+        return out;
+    }
+    func_003F4C98(buf, 'netw', 'star');
+    f4C68s(buf, 1, D_004A4BA4, 0, a, -1, 0, 0, 1, &out);
+    return out;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F3CC0);

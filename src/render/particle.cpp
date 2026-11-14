@@ -10628,7 +10628,77 @@ extern "C" void func_00385C10(sBez_5C10* self, sMat_5C10* mat, int tex, int flag
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00385EB0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// FAKEMATCH: stand-in locals `hdrNext = 2` / `hdrFirst = 0x1D` set the hoisted constants' allocation order; plain literals 99.89%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+struct sStrip_5EB0 {
+    int len;    // 0x0
+    int n;      // 0x4
+    int m;      // 0x8
+};
+
+struct sPkt_5EB0 {
+    char pad_0x0[0xC];
+    sStrip_5EB0 s[32];      // 0xC
+    int count;              // 0x18C
+    char pad_0x190[0x1A8 - 0x190];
+    int total;              // 0x1A8
+};
+
+#define QW_5EB0(b) (((b) & 15 ? 1 : 0) + (b) / 16)
+
+int func_00385EB0_impl(sPkt_5EB0* self, int n, int m) __asm__("func_00385EB0");
+int func_00385EB0_impl(sPkt_5EB0* self, int n, int m)
+{
+    int add = m * 3 + 1;
+    int hdrNext = 2;
+    int hdrFirst = 0x1D;
+    self->count = 0;
+    self->s[0].n = 0;
+    self->s[0].m = 0;
+    do {
+        if (self->count == 0) {
+            self->s[self->count].len = hdrFirst;
+        } else {
+            self->s[self->count].len = hdrNext;
+        }
+        self->s[self->count].len += self->s[self->count].n;
+        self->s[self->count].len += self->s[self->count].m * 3;
+        int len = self->s[self->count].len + add;
+        if (len < 0xDB) {
+            self->s[self->count].len = len;
+            n--;
+            self->s[self->count].n++;
+            self->s[self->count].m += m;
+            if (n == 0) {
+                self->count++;
+            }
+        } else {
+            self->count++;
+            self->s[self->count].n = 0;
+            self->s[self->count].m = 0;
+        }
+    } while (n > 0);
+    self->total = 1;
+    for (int i = 0; i < self->count; i++) {
+        int q = 6;
+        q += QW_5EB0(self->s[i].n * 2);
+        q += 1;
+        q += QW_5EB0(self->s[i].m * 4);
+        q += 1;
+        q += QW_5EB0(self->s[i].m * 2);
+        q += 1;
+        q += QW_5EB0(self->s[i].m * 6);
+        q += 1;
+        self->total += q;
+    }
+    self->total += 2;
+    return self->total << 4;
+}
+#endif
 
 INCLUDE_ASM("render/particle", func_00386128);
 
