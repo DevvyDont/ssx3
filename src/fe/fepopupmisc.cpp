@@ -6491,7 +6491,258 @@ extern "C" unsigned char func_001E5AA0(void* self, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E5B80);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sInfo5B80 {
+    int kind;
+    int f04;
+    int f08;
+    int f0C;
+    int count;
+    int f14;
+    int a18[10];
+    int a40[12];
+    int f70;
+};
+
+extern "C" void cUIState_hideObjSafe(void* self, char* name);
+extern "C" void cUIState_showObjSafe(void* self, char* name);
+extern void* func_00144BF0_5B80(void* iface) __asm__("func_00144BF0");
+extern void func_002C2540_5B80(unsigned short* dst, const char* src) __asm__("func_002C2540");
+extern void sprintf2_5B80(unsigned short* dst, const unsigned short* fmt, ...) __asm__("sprintf2");
+extern "C" char* func_0014EEC8(void* iface, int a1, int a2);
+extern "C" int func_00238590(sInfo5B80* info, int idx, int which);
+extern int D_00536730[];
+extern int D_005366D0[];
+extern int D_00536708[];
+extern char* D_00441D10[];
+extern unsigned short D_004A2140_5B80[] __asm__("D_004A2140");
+extern char D_0046E360[];
+extern char D_0046E378[];
+extern char D_0046E388[];
+extern char D_0046E398[];
+extern char D_0046E3A8[];
+extern char D_0046E3C0[];
+extern char D_004A2148[];
+extern char D_0046E3D0[];
+extern char D_004A2150[];
+extern char D_0046E3E8[];
+extern char D_004A2158[];
+extern char D_0046E400[];
+extern char D_0046E418[];
+extern char D_0046E428[];
+extern char D_004A2160[];
+extern char D_0046E438[];
+extern char D_0046E448[];
+extern char D_004A2168[];
+extern char D_0046E458[];
+extern char D_0046E468[];
+extern char D_0046E4A0[];
+extern char D_0046E4B0[];
+extern char D_0046E4C0[];
+extern char D_0046E4D0[];
+
+
+struct sIdx5_5B80 {
+    int v[5];
+};
+extern sIdx5_5B80 D_0046E488;
+
+struct sVEntry5B80 {
+    short delta;
+    short index;
+    unsigned short* (*fn)(void*, int);
+};
+
+class cUIObj_5B80 {
+public:
+    int pad[2];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08(int on);
+    virtual void setVisible(int on);
+};
+
+extern "C" void func_001E5B80(void* self)
+{
+    unsigned short title[0x38];
+    unsigned short line[0x68];
+    void* engine = *(void**)((char*)self + 0x10);
+    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E360), 0);
+    *(void**)((char*)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    engine = *(void**)((char*)self + 0x10);
+    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0046E378), 0);
+    if (screen != 0) {
+        cUIScreen_playFrame(screen, 0, 0);
+    }
+    cOVState_onCreateScreen(self);
+    void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
+    void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
+    void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
+    signed char event = D_00535BC8[0x48];
+    sInfo5B80* info = *(sInfo5B80**)((char*)D_004A28A8 + 0xC0);
+    int kind = info->kind;
+    cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E388));
+    func_002C2540_5B80(title, (char*)func_00144BF0_5B80(iface0));
+    unsigned short* fmt = 0;
+    switch (event) {
+    case 1: {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntry5B80* vt = *(sVEntry5B80**)(o + 4);
+        fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0046E398));
+        break;
+    }
+    case 2: {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntry5B80* vt = *(sVEntry5B80**)(o + 4);
+        fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0046E3A8));
+        break;
+    }
+    case 3: {
+        char* o = *(char**)((char*)D_004A28A8 + 0x8C);
+        sVEntry5B80* vt = *(sVEntry5B80**)(o + 4);
+        fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(D_0046E3C0));
+        break;
+    }
+    }
+    sprintf2_5B80(line, D_004A2140_5B80, title, fmt);
+    cUIText_setUnicodeString(t, line);
+    t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2148));
+    switch (kind) {
+    case 1:
+        cUIText_setUnicodeStringByID(t, GetHashValue32(D_0046E3D0));
+        cUIState_hideObjSafe(self, D_004A2150);
+        break;
+    case 2:
+        cUIText_setUnicodeStringByID(t, GetHashValue32(D_0046E3E8));
+        break;
+    }
+    t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2158));
+    if (D_00535BC8[0x49] != 0) {
+        cUIText_setUnicodeStringByID(t, GetHashValue32(D_0046E400));
+    }
+    int flag = 0;
+    if (kind == 1 && info->f70 == 3) {
+        flag = 1;
+    }
+    int pl0 = cBENewPlayerInterface_getHumanRider(iface1, 0);
+    int pl1;
+    int any = 0;
+    pl1 = cBENewPlayerInterface_getHumanRider(iface1, 1);
+    int last;
+    {
+        char name[32];
+        char num[16];
+        char num2[32];
+        int i;
+        for (i = 1; i < info->count + 2; i++) {
+            int idx = D_00536708[i - 1];
+            sprintf(name, D_0046E418, i);
+            int hl = 0;
+            t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            if (i - 1 == D_00536730[pl0]) {
+                if (D_005366D0[pl0]) hl = 1; else hl = 0;
+            } else if (D_00535BC8[0x49] == 2 && i - 1 == D_00536730[pl1]) {
+                if (D_005366D0[pl1]) hl = 1; else hl = 0;
+            }
+            cUIText_setAsciiString(t, func_0014EEC8(iface2, info->a18[idx], info->a40[idx]));
+            sprintf(name, D_0046E428, i);
+            t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            if (hl && kind == 1) {
+                cUIText_setAsciiString(t, D_004A2160);
+                any = 1;
+            } else {
+                sprintf(num, D_004A2138, func_00238590(info, idx, 0));
+                cUIText_setAsciiString(t, num);
+            }
+            sprintf(name, D_0046E438, i);
+            t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            sprintf(name, D_0046E448, i);
+            cUIObj_5B80* b = (cUIObj_5B80*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            if (kind == 2 || flag) {
+                if (hl) {
+                    cUIText_setAsciiString(t, D_004A2160);
+                    any = 1;
+                    b->setVisible(0);
+                } else {
+                    sprintf(num, "%d", func_00238590(info, idx, 1));
+                    cUIText_setAsciiString(t, num);
+                    int total = func_00238590(info, idx, 0) + func_00238590(info, idx, 1);
+                    sprintf(num2, "%d", total);
+                    cUIText_setAsciiString((cUIText*)b, num2);
+                    if (i - 1 == D_00536730[pl0] && flag) {
+                        cUIText_setAsciiString(t, D_004A2168);
+                    }
+                }
+            } else {
+                cUIText_setAsciiString(t, D_004A2168);
+                b->setVisible(0);
+            }
+        }
+        last = -1;
+        int k;
+        for (k = 1; k < 7; k++) {
+            sprintf(name, D_0046E458, k);
+            int s = D_00536730[cBENewPlayerInterface_getHumanRider(iface1, 0)];
+            int m = s < 6 ? s : 5;
+            if (kind == 1 && m + 1 == k && !any) {
+                last = k;
+                cUIState_showObjSafe(self, name);
+            } else {
+                cUIState_hideObjSafe(self, name);
+            }
+        }
+        if (flag) {
+            sprintf(name, D_0046E458, last);
+            cUIText* o = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            cUIText_setUnicodeStringByID(o, GetHashValue32(D_0046E468));
+        }
+    }
+    {
+        sIdx5_5B80 ids = D_0046E488;
+        char name[32];
+        int i;
+        cUIState_hideObjSafe(self, D_0046E4A0);
+        cUIState_hideObjSafe(self, D_0046E4B0);
+        if (any) {
+            ids.v[0] = 2;
+        } else if (kind == 2) {
+            if (D_00536730[cBENewPlayerInterface_getHumanRider(iface1, 0)] < 3) {
+                cUIState_showObjSafe(self, D_0046E4A0);
+            } else {
+                cUIState_showObjSafe(self, D_0046E4B0);
+                ids.v[0] = kind;
+            }
+        }
+        for (i = 0; i < 5; i++) {
+            sprintf(name, D_0046E4C0, i);
+            cUIObj_5B80* o = (cUIObj_5B80*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            if (o != 0) {
+                if (i < 5) {
+                    cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_00441D10[ids.v[i]]));
+                    if (i == 0 && ids.v[0] == 1 && info->f70 == 3) {
+                        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_0046E4D0));
+                    }
+                    *(int*)((char*)o + 0x18) = ids.v[i];
+                } else {
+                    o->setVisible(0);
+                    o->v08(1);
+                }
+            }
+        }
+    }
+}
+#endif
 
 extern "C" void* cOVState_onUpdate(void* self);
 
