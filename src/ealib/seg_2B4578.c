@@ -5099,7 +5099,262 @@ again:
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BB140);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct P_B140 {
+    signed char b0;
+    signed char b1;
+    char pad2[2];
+    unsigned char b4;
+    signed char b5;
+    char pad6[2];
+    unsigned short h8;
+    unsigned short hA;
+    unsigned short hC;
+    unsigned short hE;
+    char pad10[2];
+    unsigned short h12;
+    unsigned short h14;
+    unsigned short h16;
+};
+struct Smp_B140 { int w0; int w4; };
+struct D_B140 {
+    char pad0[3];
+    signed char n;
+    unsigned short h4;
+    short h6;
+    char pad8[4];
+    signed char bC;
+    signed char bD;
+    unsigned char bE;
+    unsigned char bF;
+    signed char b10;
+    signed char b11;
+    signed char b12;
+    unsigned char b13;
+    signed char b14;
+    signed char b15;
+    unsigned char b16;
+    char pad17[3];
+    signed char b1A;
+    unsigned char b1B;
+    signed char b1C;
+    unsigned char b1D;
+    unsigned char b1E;
+    char pad1F;
+    int w20;
+    int w24;
+    struct Smp_B140 *smp;
+    int w2C;
+    int w30;
+    char pad34[0x54 - 0x34];
+    unsigned short h54;
+    unsigned short h56;
+    int w58;
+    char pad5C[4];
+    int w60;
+    char pad64[0xBC - 0x64];
+    unsigned short hBC[1];
+};
+struct Ch_B140 {
+    char pad0[4];
+    short ids[6];
+    unsigned short h10;
+    unsigned short h12;
+    int w14;
+    int w18;
+    unsigned short h1C;
+    unsigned short h1E;
+    unsigned short h20;
+    unsigned char b22;
+    unsigned char b23;
+    unsigned short h24;
+    char pad26[5];
+    unsigned char b2B;
+    char pad2C[4];
+    int w30;
+    char pad34[4];
+    int w38;
+    int w3C;
+    int w40;
+    int w44;
+    char pad48[4];
+    unsigned short h4C;
+    char pad4E[2];
+    unsigned short h50[6];
+    unsigned char b5C;
+    unsigned char b5D;
+    unsigned char b5E;
+    unsigned char b5F;
+    unsigned char b60;
+    unsigned char b61;
+    char pad62[2];
+    unsigned char b64;
+    unsigned char b65;
+    unsigned char b66;
+    unsigned char b67;
+    unsigned char b68;
+    char pad69;
+    unsigned short h6A;
+    struct Smp_B140 *smp;
+    int w70;
+    int w74;
+    int w78;
+    int w7C;
+    unsigned short h80;
+    unsigned short h82;
+    unsigned short h84;
+    unsigned short h86;
+    unsigned short h88;
+    char pad8A[2];
+};
+struct G_B140 {
+    char pad0[0x1F0];
+    struct Ch_B140 *chans;
+};
+extern struct G_B140 D_0050A8E8_B140[] __asm__("D_0050A8E8");
+extern int f6158_B140(int *, struct D_B140 *) __asm__("func_003C6158");
+extern void f0C18_B140(int, int *, int *) __asm__("func_003C0C18");
+extern int fA0B0_B140(int, int, int *, int, int) __asm__("func_003BA0B0");
+extern int f72A0_B140(int) __asm__("func_003C72A0");
+extern int fC570_B140(int) __asm__("func_003BC570");
+extern unsigned int fC5C8_B140(void) __asm__("func_003BC5C8");
+extern void fA938_B140(int) __asm__("func_003BA938");
+extern void fA740_B140(int, int) __asm__("func_003BA740");
+extern void fA7B0_B140(int) __asm__("func_003BA7B0");
+extern int f3EE0_B140(struct D_B140 *, int, int, int, int, int, int) __asm__("func_003C3EE0");
+extern void fA550_B140(int) __asm__("func_003BA550");
+
+/* SNDBANKI_playtimbre (On Tour stagpat.c): locals and statement order from the PSP debug build. */
+int func_003BB140(int bhandle, int patnum, void *psampledata, struct P_B140 *pspo, struct D_B140 *pph, int keynum, int velocity, int masterranddetune) {
+    struct Ch_B140 *pv;
+    int rendermodeindex;
+    int rendermode;
+    int minvoicerange;
+    int maxvoicerange;
+    int voice;
+    int vol;
+    int bend;
+    int builtinvol;
+    int fxlevel0;
+    int pan;
+    int handle;
+    int i;
+    int done;
+
+    handle = -9;
+    done = 0;
+    vol = pspo->b0;
+    bend = pspo->b1;
+    fxlevel0 = pspo->b5;
+    rendermodeindex = 0;
+    while (!done) {
+        rendermode = f6158_B140(&rendermodeindex, pph);
+        if (!rendermode) {
+            break;
+        }
+        f0C18_B140(rendermode, &minvoicerange, &maxvoicerange);
+        voice = fA0B0_B140(pph->n, pph->bC, &handle, minvoicerange, maxvoicerange);
+        if (voice < 0) {
+            continue;
+        }
+        pv = &D_0050A8E8_B140[0].chans[voice];
+        pan = pph->b11;
+        if (pph->b12) {
+            pan += f72A0_B140(pph->b12);
+            if (pan < 0) {
+                pan = 0;
+            } else if (pan > 127) {
+                pan = 127;
+            }
+        }
+        pv->h4C = fC570_B140(pan);
+        pv->h84 = pph->h4;
+        pv->h84 = pv->h84 - (pph->bD - keynum) * 100;
+        if (masterranddetune) {
+            pv->h84 = pv->h84 + masterranddetune;
+        }
+        if (pph->h6) {
+            pv->h84 = pv->h84 + f72A0_B140(pph->h6);
+        }
+        pv->w70 = pph->w20;
+        pv->w74 = pph->w24;
+        pv->w38 = vol << 16;
+        pv->w30 = 0;
+        builtinvol = pph->b14;
+        if (pph->b15) {
+            builtinvol += f72A0_B140(pph->b15);
+        }
+        if (builtinvol > 127) {
+            builtinvol = 127;
+        }
+        if (builtinvol < 0) {
+            builtinvol = 0;
+        }
+        builtinvol = builtinvol * velocity / 127;
+        pv->b2B = builtinvol;
+        pv->h82 = pph->b10 * 100;
+        pv->b64 = bend;
+        pv->smp = pph->smp;
+        pv->w40 = pph->b1A << 16;
+        pv->b5D = 0;
+        pv->b5C = pph->bF;
+        pv->b5E = pph->bE;
+        pv->w44 = pv->smp->w0;
+        if (pv->w44 < 0) {
+            pv->w44 = 0x7FFFFFFF;
+        }
+        pv->w3C = ((pv->smp->w4 << 16) - pv->w40) / pv->w44;
+        pv->w78 = pph->w2C;
+        pv->w7C = pph->w30;
+        pv->b65 = pph->b1B;
+        pv->b66 = pph->b1D;
+        pv->h80 = pph->h54;
+        if (pph->b1C) {
+            pv->b67 = fC5C8_B140() % pph->b1C;
+        } else {
+            pv->b67 = 0;
+        }
+        if (pph->b1E) {
+            pv->b68 = fC5C8_B140() % pph->b1D;
+        } else {
+            pv->b68 = 0;
+        }
+        pv->h6A = pspo->hE;
+        pv->h88 = pspo->hC;
+        pv->h86 = 0;
+        fA938_B140(voice);
+        pv->h12 = bhandle;
+        pv->h10 = patnum;
+        pv->h1C = pv->h4C + pspo->h8;
+        pv->h1E = pspo->hA;
+        pv->w18 = pph->w60;
+        pv->w14 = pph->w58;
+        pv->h20 = pph->h56;
+        pv->b22 = pph->b13;
+        pv->b23 = pph->n;
+        pv->h24 = rendermode;
+        for (i = 0; i < pph->n; i++) {
+            pv->h50[i] = pph->hBC[i];
+        }
+        pv->b5F = pspo->b4;
+        pv->b60 = pph->b16;
+        pv->b61 = fxlevel0;
+        fA740_B140(0, voice);
+        fA7B0_B140(voice);
+        if (f3EE0_B140(pph, (int)psampledata, voice, pspo->hE, pspo->h12, pspo->h14, pspo->h16) >= 0) {
+            return handle;
+        }
+        for (i = 0; i < pph->n; i++) {
+            fA550_B140(D_0050A8E8_B140[0].chans[voice].ids[i]);
+        }
+        handle = -9;
+    }
+    return handle;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003BB588);
@@ -7912,7 +8167,128 @@ void func_003C0C18(int arg0, int *arg1, int *arg2) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C0C90);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct S_0C90 {
+    unsigned short f0;
+    unsigned short f2;
+    unsigned char f4;
+    unsigned char f5;
+    unsigned char f6;
+    unsigned char f7;
+    unsigned char f8;
+    char pad0[3];
+    unsigned char fC;
+    char pad1[6];
+    unsigned char f13;
+    unsigned short f14;
+    unsigned short f16;
+    unsigned short f18;
+    unsigned short f1A;
+    unsigned short f1C;
+    unsigned short f1E;
+    char pad2[10];
+    unsigned short f2A;
+    unsigned short f2C;
+    unsigned char f2E;
+    unsigned char f2F;
+    unsigned char f30;
+    char pad3[13];
+    unsigned char f3E;
+    unsigned char f3F;
+    unsigned char f40;
+    unsigned char f41;
+    unsigned char f42;
+    char pad4[3];
+    unsigned char f46;
+    unsigned char f47;
+    char pad5[1];
+    unsigned char f49;
+    char pad6[2];
+    unsigned char f4C;
+    char pad7[1];
+    unsigned short f4E;
+    unsigned short f50;
+    unsigned short f52;
+    char pad8[24];
+    int f6C;
+    char pad9[8];
+    unsigned short f78;
+    char pad10[10];
+    unsigned short f84;
+    unsigned short f86;
+    char pad11[8];
+    unsigned short f90;
+    unsigned short f92;
+    unsigned short f94;
+    char pad12[6];
+    unsigned short f9C;
+    unsigned short f9E;
+    unsigned short fA0;
+    unsigned short fA2;
+    char pad13[4];
+    unsigned short fA8;
+    unsigned short fAA;
+    unsigned short fAC;
+    unsigned short fAE;
+    unsigned short fB0;
+};
+extern struct S_0C90 D_0050A8E8_0C90 __asm__("D_0050A8E8");
+extern int D_0044DD3C_0C90[] __asm__("D_0044DD3C");
+int func_003C0C90(void) {
+    D_0050A8E8_0C90.fC = 0;
+    D_0050A8E8_0C90.f0 = 0x5DC0;
+    D_0050A8E8_0C90.f6 = 0x20;
+    D_0050A8E8_0C90.f2 = 0xBB80;
+    D_0050A8E8_0C90.f7 = 0x10;
+    D_0050A8E8_0C90.f5 = 5;
+    D_0050A8E8_0C90.f4 = 1;
+    D_0050A8E8_0C90.f49 = 1;
+    D_0050A8E8_0C90.f8 = 0x30;
+    D_0050A8E8_0C90.f14 = 0x28;
+    D_0050A8E8_0C90.f13 = 6;
+    D_0050A8E8_0C90.f3E = 0;
+    D_0050A8E8_0C90.f2E = 8;
+    D_0050A8E8_0C90.f1A = 0x48;
+    D_0050A8E8_0C90.f16 = 0x24;
+    D_0050A8E8_0C90.f1C = 0x44;
+    D_0050A8E8_0C90.f18 = 0x120;
+    D_0050A8E8_0C90.f2F = 8;
+    D_0050A8E8_0C90.f4E = 0x28;
+    D_0050A8E8_0C90.f50 = 0x24;
+    D_0050A8E8_0C90.f2A = 0xBB80;
+    D_0050A8E8_0C90.f1E = 0x140;
+    D_0050A8E8_0C90.f4C = 3;
+    D_0050A8E8_0C90.f52 = 0x120;
+    D_0050A8E8_0C90.f30 = 0x30;
+    D_0050A8E8_0C90.f46 = 8;
+    D_0050A8E8_0C90.f2C = 0xBB80;
+    D_0050A8E8_0C90.f47 = 2;
+    D_0050A8E8_0C90.f42 = 0;
+    D_0050A8E8_0C90.f40 = 0x19;
+    D_0050A8E8_0C90.f3F = 1;
+    D_0050A8E8_0C90.f6C = D_0044DD3C_0C90[0];
+    D_0050A8E8_0C90.f41 = 0x19;
+    D_0050A8E8_0C90.f78 = 0;
+    D_0050A8E8_0C90.f84 = 0x4000;
+    D_0050A8E8_0C90.f86 = 0xC000;
+    D_0050A8E8_0C90.f90 = 0x2AAA;
+    D_0050A8E8_0C90.f92 = 0x8000;
+    D_0050A8E8_0C90.f94 = 0xD555;
+    D_0050A8E8_0C90.f9C = 0x2000;
+    D_0050A8E8_0C90.f9E = 0x6000;
+    D_0050A8E8_0C90.fA0 = 0xA000;
+    D_0050A8E8_0C90.fA2 = 0xE000;
+    D_0050A8E8_0C90.fA8 = 0;
+    D_0050A8E8_0C90.fAA = 0x2000;
+    D_0050A8E8_0C90.fAC = 0x6000;
+    D_0050A8E8_0C90.fAE = 0xA000;
+    D_0050A8E8_0C90.fB0 = 0xE000;
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C0E28);
@@ -11250,9 +11626,198 @@ struct s7B8 {
 extern struct s7B8 D_005157B8;
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6620);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+/* Uses the unit's struct s7B8 / s7B8Queue (D_005157B8, the stream queues). */
+extern unsigned char D_0050A92E;
+int func_003CE1A0_6620(int, char *) __asm__("func_003CE1A0");
 
+int func_003C6620(void (*preleasefunc)(int, int), void (*pframesfunc)(int, int, int), int pclientdata, char *pmem, unsigned int memsize) {
+    struct s7B8Queue *ppchan;
+    int packetinstancehandle;
+    char *pplatformmem;
+    int i;
+
+    func_003B58A0();
+    for (i = 0; i < D_0050A92E; i++) {
+        if (D_005157B8.f304[i] == 0) {
+            packetinstancehandle = i;
+            goto found;
+        }
+    }
+    func_003B58D8();
+    return -9;
+found:
+    if (func_003CE1A0_6620(packetinstancehandle, pmem) < 0) {
+        func_003B58D8();
+        return -6;
+    }
+    pplatformmem = pmem;
+    pmem += func_003CE198();
+    memsize -= func_003CE198();
+    ppchan = (struct s7B8Queue *)pmem;
+    ppchan->f40 = (memsize - 0x9C) >> 5;
+    ppchan->f50 = (int)pplatformmem;
+    ppchan->f54 = preleasefunc;
+    ppchan->f58 = pframesfunc;
+    ppchan->f5C = pclientdata;
+    ppchan->f00 = -1;
+    D_005157B8.f304[packetinstancehandle] = (struct s7B8Queue *)pmem;
+    func_003B58D8();
+    return packetinstancehandle;
+}
+#endif
+
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6760);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+typedef struct SNDSAMPLEATTR_6760 SNDSAMPLEATTR_6760;
+struct SNDSAMPLEATTR_6760 {
+    unsigned short h0;
+    char pad2;
+    unsigned char b3;
+    char pad4;
+    unsigned char b5;
+    signed char c6;
+    char pad7;
+    unsigned short h8;
+    char padA[2];
+    unsigned short hC[6];
+    int w18[8];
+};
+typedef struct SNDPLAYOPTS_6760 SNDPLAYOPTS_6760;
+struct SNDPLAYOPTS_6760 {
+    signed char c0;
+    unsigned char b1;
+    char pad2[2];
+    unsigned char b4;
+    unsigned char b5;
+    char pad6[2];
+    unsigned short h8;
+    char padA[2];
+    unsigned short hC;
+    unsigned short hE;
+    char pad10[2];
+    unsigned short h12;
+    unsigned short h14;
+    unsigned short h16;
+};
+/* The packet channel is the unit's struct s7B8Queue (D_005157B8.f304[], same volatile fields). */
+typedef struct SNDIPATCHHEADER_6760 SNDIPATCHHEADER_6760;
+struct SNDIPATCHHEADER_6760 { char pad0[3]; unsigned char n; char pad4[0x14]; unsigned short h18; char pad1A[0xD0 - 0x1A]; };
+extern int f_6158_6760(int *, SNDIPATCHHEADER_6760 *) __asm__("func_003C6158");
+extern void f_0C18_6760(int, int *, int *) __asm__("func_003C0C18");
+extern int f_A0B0_6760(int, int, int *, int, int) __asm__("func_003BA0B0");
+extern unsigned char f_6580_6760(int, int) __asm__("func_003C6580");
+extern void f_A938_6760(int) __asm__("func_003BA938");
+extern void f_A7B0_6760(int) __asm__("func_003BA7B0");
+extern void f_A740_6760(int, int) __asm__("func_003BA740");
+extern int f_E1B0_6760(int, int, int, int, int, int, SNDSAMPLEFORMAT *, SNDSAMPLEATTR_6760 *) __asm__("func_003CE1B0");
+extern void f_A550_6760(int) __asm__("func_003BA550");
+
+int func_003C6760_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSAMPLEATTR_6760 *pssa, SNDPLAYOPTS_6760 *pspo) __asm__("func_003C6760");
+int func_003C6760_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSAMPLEATTR_6760 *pssa, SNDPLAYOPTS_6760 *pspo) {
+    SNDIPATCHHEADER_6760 ph;
+    struct s7B8Queue *ppchan;
+    int minvoicerange;
+    int maxvoicerange;
+    int shandle;
+    int rendermodeindex = 0;
+    int rendermode;
+    int voice;
+    int ret;
+    int voicesneeded = 1;
+    int i;
+    int done = 0;
+    struct sA8E8Chan *pVoice;
+
+    voicesneeded = pssf->n;
+    ppchan = D_005157B8.f304[packetinstancehandle];
+    rendermodeindex = 0;
+    ph.n = pssf->n;
+    ph.h18 = pssa->h8;
+    ppchan->f60 = *pssf;
+    ppchan->f04 = 0;
+    ppchan->f48 = 0;
+    ppchan->f4C = 0;
+    ppchan->f0C = 0;
+    ppchan->f08 = 0;
+    ppchan->f46 = 0;
+    ppchan->f44 = 0;
+    for (i = 0; i < ppchan->f60.n; i++) {
+        ppchan->f10[i] = 0;
+        ppchan->f34[i] = 0;
+        ppchan->f28[i] = 0;
+        ppchan->f64[i] = pssa->w18[i];
+    }
+    while (!done) {
+        rendermode = f_6158_6760(&rendermodeindex, &ph);
+        if (rendermode == 0) {
+            break;
+        }
+        f_0C18_6760(rendermode, &minvoicerange, &maxvoicerange);
+        voice = f_A0B0_6760(voicesneeded, 0x65, &shandle, minvoicerange, maxvoicerange);
+        if (voice < 0) {
+            ppchan->f00 = -9;
+        } else {
+            ppchan->f00 = shandle;
+            ppchan->f42 = f_6580_6760(voice, pssf->n);
+            pVoice = &D_0050A8E8.f1F0[voice];
+            pVoice->f4C = 0;
+            pVoice->f1C = pspo->h8;
+            pVoice->f12 = -1;
+            pVoice->f84 = pssa->h0;
+            pVoice->f88 = pspo->hC;
+            pVoice->f30 = 0;
+            pVoice->f38 = pspo->c0 << 16;
+            pVoice->f44 = 0x7FFFFFFF;
+            pVoice->f40 = 0x7F0000;
+            pVoice->f3C = 0;
+            pVoice->f2B = pssa->b3;
+            pVoice->f64 = pspo->b1;
+            pVoice->f5C = 1;
+            pVoice->f5D = 0;
+            pVoice->f5E = 0;
+            pVoice->f60[0] = pssa->b5;
+            pVoice->f5F = pspo->b4;
+            pVoice->f61[0] = pspo->b5;
+            pVoice->f82 = pssa->c6 * 100;
+            pVoice->f26 = 0;
+            pVoice->f27 = 0;
+            pVoice->f6C = 0;
+            pVoice->f70 = 0;
+            pVoice->f74 = 0;
+            pVoice->f78 = 0;
+            pVoice->f7C = 0;
+            for (i = 0; i < pssf->n; i++) {
+                pVoice->f50[i] = pssa->hC[i];
+            }
+            pVoice->f14 = 0;
+            pVoice->f18 = -1;
+            pVoice->f20 = pssf->h0;
+            pVoice->f22 = pssf->b3;
+            pVoice->f23 = pssf->n;
+            pVoice->f24 = rendermode;
+            pVoice->f86 = 0;
+            f_A938_6760(voice);
+            f_A7B0_6760(voice);
+            f_A740_6760(0, voice);
+            ret = f_E1B0_6760(packetinstancehandle, voice, pspo->hE, pspo->h12, pspo->h14, pspo->h16, pssf, pssa);
+            if (ret >= 0) {
+                break;
+            }
+            for (i = 0; i < voicesneeded; i++) {
+                f_A550_6760(D_0050A8E8.f1F0[voice].f04[i]);
+            }
+            ppchan->f00 = ret;
+        }
+    }
+    return ppchan->f00;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C6AB8);
