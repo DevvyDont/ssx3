@@ -7976,9 +7976,9 @@ P5_E048   =  4.1381369442e-08; /* 0x3331bb4c */
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040E300);
 #ifdef SKIP_ASM
-// FAKEMATCH: `unsigned int n` with `while(n-- > 0)` for fdlibm's `__int32_t n` / `while(n--)` (n = ix-iy >= 0 after the |x|<|y|
-// return, so the loop runs the same); plain form 93.24%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
-// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+// FAKEMATCH: `while((unsigned int)n-- > 0)` for fdlibm's `while(n--)` (the same test for every n); the plain
+// form is strength-reduced to `--n != -1`; plain form 93.24%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 /* newlib libm __ieee754_fmodf (ef_fmod.c; fdlibm; notice at func_0040F840).
  * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com. */
 /* newlib libm's word-access helpers (fdlibm.h), verbatim */
@@ -8006,8 +8006,7 @@ extern const float D_004991F0[];	/* Zero[] = {0.0, -0.0} */
 
 	float func_0040E300(float x, float y)
 {
-	int hx,hy,hz,ix,iy,sx,i;
-	unsigned int n;
+	int n,hx,hy,hz,ix,iy,sx,i;
 
 	GET_FLOAT_WORD_E300(hx,x);
 	GET_FLOAT_WORD_E300(hy,y);
@@ -8049,7 +8048,7 @@ extern const float D_004991F0[];	/* Zero[] = {0.0, -0.0} */
 
     /* fix point fmod */
 	n = ix - iy;
-	while(n-- > 0) {
+	while((unsigned int)n-- > 0) {
 	    hz=hx-hy;
 	    if(hz<0){hx = hx+hx;}
 	    else {
