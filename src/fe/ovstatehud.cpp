@@ -597,10 +597,14 @@ extern char* D_004A21D8;
 extern sVec2f D_004A4F50;
 extern sVec2f D_004A4F58;
 
+// On Tour's t2Vector derives from t2vect, whose float& x() / y() accessors the ctor assigns through; X()/Y()
+// stand in for them here (the fields keep their names). onRender2D's codegen needs the accessor form.
 struct t2Vector {
     float x, y;
+    float& X() { return x; }
+    float& Y() { return y; }
     t2Vector() {}
-    t2Vector(float x_, float y_) : x(x_), y(y_) {}
+    t2Vector(float x_, float y_) { X() = x_; Y() = y_; }
 };
 
 // HUD element layout record (0x24 bytes, const tables in .rodata).
