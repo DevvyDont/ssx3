@@ -5876,7 +5876,76 @@ extern "C" void func_0017A378(void* selfp, const char* file)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A638);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// The camera list (0x8C0C bytes): up to 0x100 named cameras with their tag, index and flags; func_0017A638
+// builds it, func_0017A028 / func_0017A0B8 step through the valid ones.
+struct sCamEntry {
+    char name[0x40];    // 0x00
+    char tag[4];        // 0x40
+    char pad44[0x3C];
+    int idx;            // 0x80
+    int active;         // 0x84
+    int valid;          // 0x88
+};
+
+struct sCamMgr {
+    int count;                  // 0x0000
+    sCamEntry entries[0x100];   // 0x0004
+    int numActive;              // 0x8C04
+    int numValid;               // 0x8C08
+};
+
+// One name looked up in the bigfile by func_003A6948 (found flag written back).
+struct sCamName {
+    char* name;
+    int ok;
+};
+
+extern "C" void* MEM_fill(void* dst, int v, int n);
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
+void* cBE_getInterface_17A638(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" char* cBENewRaceInterface_getLocationFile(void* iface, int id);
+extern "C" int func_0017A978_A638(void* self, int n, void* names, char* tag) __asm__("func_0017A978");
+extern "C" int func_00179FC8_A638(void* self, int id) __asm__("func_00179FC8");
+extern "C" char* strcpy(char* d, const char* s);
+extern char* D_004A1290[];
+
+extern "C" void func_0017A638(sCamMgr* self)
+{
+    sCamName names[0x18];
+    int i;
+    self->count = 0;
+    self->numActive = 0;
+    self->numValid = 0;
+    MEM_fill(self->entries, 0, 0x8C00);
+    void* iface = cBE_getInterface_17A638(cBE_getBE(), 0);
+    for (i = 0; i < 0x16; i++)
+        names[i].name = cBENewRaceInterface_getLocationFile(iface, i);
+    if (func_0017A978_A638(self, 0x16, names, (char*)D_004A1290)) {
+        int j;
+        for (j = 0; j < 0x16 && self->count < 0x100; j++) {
+            if (names[j].ok) {
+                int* ip = &self->entries[0].idx;
+                int* ap = &self->entries[0].active;
+                strcpy(self->entries[self->count].name, cBENewRaceInterface_getLocationFile(iface, j));
+                *(char**)((char*)self + 0x44 + self->count * 0x8C) = D_004A1290[0];
+                ip[self->count * 35] = j;
+                ap[self->count * 35] = 1;
+                self->numActive++;
+                if (func_00179FC8_A638(self, ip[self->count * 35])) {
+                    *(int*)((char*)self + 0x8C + self->count * 0x8C) = 1;
+                    self->numValid++;
+                }
+                self->count++;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A830);
