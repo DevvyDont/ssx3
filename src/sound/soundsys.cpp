@@ -330,7 +330,144 @@ extern "C" int func_00290358(void* self, sSnd0358Req* req)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002906B8);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern "C" void func_003B58A0();
+extern "C" void func_003B58D8();
+extern "C" int func_003B6820(int bank, int id, void* ch);
+extern "C" void* cBankMonitor_BANKMONITOR_Create(void* sub, int h, int vol, int mode);
+void func_002ABCE8(void* self, int a1, int a2);
+extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
+
+struct sSnd06B8Key {
+    long v;
+} __attribute__((packed));
+// 64-bit sound key view of D_004A3678 (same packed layout as the unit's sSndKey8, declared later).
+extern sSnd06B8Key D_004A3678_06B8[] __asm__("D_004A3678");
+
+struct sSnd06B8Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSnd06B8Ent {
+    int type;
+    int id;
+    char pad8[0x58];
+};
+struct sSnd06B8Q {
+    int step;
+    int count;
+    int f8;
+    int fC;
+};
+struct sSnd06B8Sub {
+    char pad0[4];
+    sSnd06B8Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSnd06B8Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSnd06B8Q* p70;          // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSnd06B8Mgr {
+    char pad0[0x1D8];
+    sSnd06B8Sub sub;         // 0x1D8
+    char pad260[0xACC - 0x260];
+    sSnd06B8Ent* ents;       // 0xACC
+};
+struct sSnd06B8Sys {
+    sSnd06B8Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+};
+
+#define SND_06B8_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define SND_06B8_MAX(a, b) ((a) > (b) ? (a) : (b))
+#define SND_06B8_FMAX(a, b) ((a) >= (b) ? (a) : (b))
+
+// On Tour: cBankInstance::GetStatus() / Handle(), cBankManager::BANK_Used(int) / BANK_Handle(int).
+static inline int snd06B8Status(sSnd06B8Ent* e)
+{
+    return e->type;
+}
+static inline int snd06B8InstHandle(sSnd06B8Ent* e)
+{
+    return e->id;
+}
+static inline bool snd06B8Used(sSnd06B8Mgr* m, int id)
+{
+    return snd06B8Status(&m->ents[id]) == 1;
+}
+static inline int snd06B8Handle(sSnd06B8Mgr* m, int id)
+{
+    if (snd06B8Used(m, id)) return snd06B8InstHandle(&m->ents[id]);
+    return -1;
+}
+
+// On Tour: cSndPlayOpts::OPTS_GetCloseOnEnd().
+static inline int snd06B8CloseOnEnd(sSnd06B8Sub* o)
+{
+    return o->p7C[o->cur];
+}
+
+extern "C" int func_002906B8(void* vself)
+{
+    sSnd06B8Sys* self = (sSnd06B8Sys*)vself;
+    sSnd06B8Mgr* m = self->mgr;
+    sSnd06B8Sub* s = &m->sub;
+    int BaseVol = s->vals[s->cur];
+    if (m->sub.tgt[m->sub.cur] != 0) {
+        s->vals[m->sub.cur] = 0;
+        s->ch[m->sub.cur].vol = SND_06B8_MAX(0, SND_06B8_MIN(s->vals[s->cur], 0x7F));
+    } else if (s->p3C[s->cur] != 0) {
+        float gain = *(float*)s->p3C[s->cur];
+        s->vals[m->sub.cur] = (int)SND_06B8_FMAX(SND_06B8_MIN((float)s->vals[s->cur] * gain, 127.0f), 0.0f);
+        s->ch[s->cur].vol = SND_06B8_MAX(0, SND_06B8_MIN(s->vals[s->cur], 0x7F));
+    }
+    int Inst = self->mgr->sub.cur;
+    func_003B58A0();
+    int Handle = func_003B6820(snd06B8Handle(self->mgr, self->a4[Inst]), self->a8[Inst], &self->mgr->sub.ch[self->mgr->sub.cur]);
+    func_003B58D8();
+    if (Handle >= 0 || !snd06B8CloseOnEnd(&self->mgr->sub)) {
+        void* Mon = cBankMonitor_BANKMONITOR_Create(&self->mgr->sub, Handle, BaseVol, 1);
+        if (Mon != 0) {
+            func_002ABCE8(Mon, snd06B8Handle(self->mgr, self->a4[Inst]), self->a8[Inst]);
+        }
+        sSnd06B8Q* Delay = &self->mgr->sub.p70[self->mgr->sub.cur];
+        if (Delay->count > 0) {
+            int DelayTime = 0;
+            int Vol = BaseVol * Delay->fC / 100;
+            while (Delay->count > 0) {
+                Delay->count--;
+                DelayTime += Delay->step;
+                Vol = Vol * Delay->f8 / 100;
+                if (Vol > 0x7F) Vol = 0x7F;
+                if (Vol < 0) Vol = 0;
+                if (Vol == 0) break;
+                sSnd06B8Sub* opts = &self->mgr->sub;
+                func_002ADCA0(opts, DelayTime, D_004A3678_06B8->v, opts->p3C[opts->cur], self->a4[Inst], self->a8[Inst], Vol, 0);
+            }
+        }
+    }
+    self->mgr->sub.cur--;
+    return Handle;
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_00290B58);

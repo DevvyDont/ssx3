@@ -1997,7 +1997,222 @@ extern "C" void func_0035ED90(sRmBody* self, const sRmVec4* b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_collide);
+#ifdef SKIP_ASM
+extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* a1, int a2);
+extern "C" void func_003304E8(void* self, int flags);
+extern "C" void* cObjectInterface_getNash();
+extern "C" float func_0032C5A8(void* self);
+extern void func_0035D4A0_EDC8(void* self, void* hit, void* normal, float a, float b) __asm__("func_0035D4A0");
+
+struct sHitEDC8 {
+    sRmVec4 pos;        // 0x00
+    sRmVec4 normal;     // 0x10
+    float pad20[8];
+    float dist;         // 0x40
+    int pad44[3];
+    char* obj;          // 0x50
+    char* tri;          // 0x54
+    int pad58[10];
+    sHitEDC8() {}
+} __attribute__((aligned(16)));
+
+extern "C" float func_00336850_EDC8(void* world, void* tree, sHitEDC8* out, void* a3) __asm__("func_00336850");
+
+// PORT: PS2-only VU0 inline asm (v * s).
+static inline sRmVec4 vu0ScaleEDC8(const sRmVec4& v, float s)
+{
+    sRmVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v / s).
+static inline sRmVec4 vu0DivEDC8(const sRmVec4& v, float s)
+{
+    sRmVec4 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sRmVec4 vu0SubEDC8(const sRmVec4& a, const sRmVec4& b)
+{
+    sRmVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sRmVec4 vu0AddEDC8(const sRmVec4& a, const sRmVec4& b)
+{
+    sRmVec4 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a x b, w = 0).
+static inline sRmVec4 vu0CrossEDC8(const sRmVec4& a, const sRmVec4& b)
+{
+    sRmVec4 r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0DotEDC8(const sRmVec4& a, const sRmVec4& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0LengthEDC8(const sRmVec4& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+struct sRailEDC8 {
+    char pad_0x00[0x14];
+    float f14;          // 0x14
+    float f18;          // 0x18
+    float f1C;          // 0x1C
+    float f20;          // 0x20
+    float pad24;
+    float f28;          // 0x28
+    char pad_0x2C[0x4];
+    sRmBody body;       // 0x30
+};
+
+static inline sRmVec4 toDirEDC8(sRmBody* b, const sRmVec4& v)
+{
+    return vu0DivEDC8(v, b->scale);
+}
+
+static inline sRmVec4 xformEDC8(sRailEDC8* r)
+{
+    sRmVec4 o;
+    float x = r->body.pos.x;
+    float y = r->body.pos.y;
+    float z = r->body.pos.z;
+    o.x = r->body.rot.m[0][0] * x + r->body.rot.m[1][0] * y + r->body.rot.m[2][0] * z;
+    o.y = r->body.rot.m[0][1] * x + r->body.rot.m[1][1] * y + r->body.rot.m[2][1] * z;
+    o.z = r->body.rot.m[0][2] * x + r->body.rot.m[1][2] * y + r->body.rot.m[2][2] * z;
+    o.w = r->body.pos.w;
+    return o;
+}
+
+static inline void setPosEDC8(sRailEDC8* r, const sRmVec4& v)
+{
+    r->body.pos = v;
+    r->body.outPos = xformEDC8(r);
+}
+
+static inline void setOutDirEDC8(sRailEDC8* r, const sRmVec4& v)
+{
+    r->body.dir = toDirEDC8(&r->body, v);
+    r->body.outDir = v;
+}
+
+extern "C" void cRollerModifier_collide(sRailEDC8* self)
+{
+    sHitEDC8 hit;
+    char tree[0x70];
+    cWorldSphTree_cWorldSphTree(tree, (char*)self + 0xE0, 1);
+    float zero = 0.0f;
+    float d = func_00336850_EDC8(cObjectInterface_getNash(), tree, &hit, (char*)self + 0x2C0);
+    d -= func_0032C5A8((char*)self + 0xE0);
+    if (zero < d) {
+        sRmVec4 push = vu0ScaleEDC8(hit.normal, d + 2.0f);
+        func_0035ED90((sRmBody*)self, &push);
+        float k = 0.975f;
+        setPosEDC8(self, vu0ScaleEDC8(self->body.pos, k));
+        setOutDirEDC8(self, vu0ScaleEDC8(self->body.outDir, k));
+        float dp = vu0DotEDC8(vu0AddEDC8(self->body.outDir, vu0CrossEDC8(self->body.outPos, vu0SubEDC8(hit.pos, *(sRmVec4*)&self->body))), hit.normal);
+        if (dp < zero) {
+            float lim = self->f1C;
+            float len = vu0LengthEDC8(self->body.outDir);
+            float a = self->f14;
+            float c = self->f18;
+            if (len < lim)
+                a = zero;
+            func_0035D4A0_EDC8(&self->body, &hit, &hit.normal, a, c);
+            self->f28 += 0.016666668f;
+            if (5.0f < self->f20)
+                self->f20 = 10.0f;
+        }
+    }
+    func_003304E8(tree, 2);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035F0B8);
