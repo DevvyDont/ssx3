@@ -2449,7 +2449,76 @@ struct sA0A0Strm {                  /* 0x138 */
 };
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6BD0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern struct sA8E8 D_0050A8E8;
+
+/* D_0050A0A0_6BD0: the streams (one per stream slot, func_003B6A38 looks one up). Layout from every use in this unit;
+   field names are their offsets. */
+
+extern struct sA0A0Strm *D_0050A0A0_6BD0[32] __asm__("D_0050A0A0");
+
+// (prototype from their definition at line 2237)
+void func_003B68B8_6BD0(struct sA0A0Strm *p) __asm__("func_003B68B8");
+
+// (prototype from their definition at line 2257)
+int func_003B6948_6BD0(unsigned char *p) __asm__("func_003B6948");
+
+struct Ext_6BD0 { int f00; int pos[6]; };
+struct Ev_6BD0 { int a; int b; int c; int d; int e; int rest[3]; };
+extern void func_003BB820_6BD0(int, int *, struct sA0A0Fmt *, struct sA0A0Hdr *, struct Ext_6BD0 *, char *) __asm__("func_003BB820");
+extern void func_003E13E8_6BD0(int, int *) __asm__("func_003E13E8");
+extern int func_00415FC8(void *, void *, int);
+
+int func_003B6BD0(int h, int *chunk) {
+    struct sA0A0Strm *p = D_0050A0A0_6BD0[h];
+    struct sA0A0Node *n;
+    struct Ext_6BD0 ext;
+    struct Ev_6BD0 ev;
+    int i = 0;
+    int j;
+
+    if (p->f134 == 0) {
+        p->f134 = p->f11C.f00;
+    } else {
+        p->f134 = p->f134->f00;
+    }
+    n = (struct sA0A0Node *)p->f134;
+    func_003BB820_6BD0(0, chunk + 2, &p->f18, &p->f84, &ext, n->f25);
+    n->f18 = ext.f00;
+    n->f24 = 0;
+    while (p->f84.f48[i] != 0) {
+        ev.a = 3;
+        ev.b = p->f84.f48[i];
+        ev.c = p->f84.f58[i];
+        ev.e = n->f0C;
+        p->f84.f48[i] = 0;
+        p->f84.f58[i++] = 0;
+        for (j = 0; j < D_0050A8E8.f179; j++) {
+            D_0050A8E8.f1C8[j](&ev);
+        }
+    }
+    func_003E13E8_6BD0(p->f00, chunk);
+    n->f10 = func_003B6948_6BD0((unsigned char *)&p->f18);
+    if (func_00415FC8(&p->f14, &p->f18, 4) != 0 || func_00415FC8(&p->f1C, &p->f84, 0x68) != 0 || p->f84.f18[0] != 0) {
+        if (*(unsigned short *)&p->f14 != 0) {
+            p->f10 = 2;
+            return 0;
+        }
+        p->f14 = p->f18;
+        __builtin_memcpy(&p->f1C, &p->f84, sizeof(p->f1C));
+        p->f84.f18[0] = 0;
+    }
+    if (p->f10 != 1) {
+        func_003B68B8_6BD0(p);
+        p->f10 = 1;
+    }
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6EA8);
 
@@ -2595,7 +2664,109 @@ int func_003B7410(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7450);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+extern struct sA8E8 D_0050A8E8;
+
+/* D_0050A0A0_7450: the streams (one per stream slot, func_003B6A38 looks one up). Layout from every use in this unit;
+   field names are their offsets. */
+
+
+
+extern struct sA0A0Strm *D_0050A0A0_7450[32] __asm__("D_0050A0A0");
+
+extern void func_003C6288_7450(void *, void *) __asm__("func_003C6288");
+
+// (prototype from their definition at line 2527)
+int func_003B7410_7450(void) __asm__("func_003B7410");
+
+// (prototype from their definition at line 2333)
+void func_003B6B10_7450(struct sA0A0Node *node, unsigned n, struct sA0A0Strm *s) __asm__("func_003B6B10");
+
+// (prototype from their definition at line 2280)
+int func_003B69D8_7450(void) __asm__("func_003B69D8");
+
+// (prototype from their definition at line 2324)
+void func_003B6AD8_7450(void *arg0) __asm__("func_003B6AD8");
+
+// (prototype from their definition at line 2487)
+void func_003B71D8_7450(void) __asm__("func_003B71D8");
+
+extern void f_6210_7450(void *, int, int) __asm__("func_00416210");
+extern int f_6620_7450(void (*)(void *), void (*)(struct sA0A0Node *, unsigned, struct sA0A0Strm *), struct sA0A0Strm *, void *, int) __asm__("func_003C6620");
+extern int func_003E06D8(int, int, int, void *, int);
+extern int func_003E1580(int);
+extern int func_003C65F0_7450(int) __asm__("func_003C65F0");
+extern void func_003C6278_7450(void *) __asm__("func_003C6278");
+extern int func_003C6DA0_7450(int) __asm__("func_003C6DA0");
+extern void func_003C6018_7450(void (*)(void)) __asm__("func_003C6018");
+extern int func_003B8120_7450(int, int) __asm__("func_003B8120");
+extern int func_003B78F8_7450(int) __asm__("func_003B78F8");
+
+int f_7450(struct sA0A0Parm *src, int n, int a2, char *buf, int size, int h, int ext) __asm__("func_003B7450");
+int f_7450(struct sA0A0Parm *src, int n, int a2, char *buf, int size, int h, int ext) {
+    struct sA0A0Strm *s;
+    int i;
+    int slot;
+    int k;
+    struct sA0A0Node *ents;
+    char *q;
+    int r;
+    for (i = 0; i < D_0050A8E8.setup.cfg.f26; i++) {
+        if (D_0050A0A0_7450[i] == 0) goto found;
+    }
+    return -9;
+found:
+    slot = i;
+    s = (struct sA0A0Strm *)buf;
+    f_6210_7450(s, 0, 0x138);
+    buf += 0x138;
+    ents = (struct sA0A0Node *)buf;
+    buf += n * 0x28;
+    size -= 0x138;
+    size -= n * 0x28;
+    k = func_003C65F0_7450(a2);
+    q = buf;
+    buf += k;
+    size -= k;
+    func_003C6278_7450(&s->f11C);
+    func_003C6278_7450(&s->f128);
+    for (i = 0; i < n; i++) {
+        func_003C6288_7450(&s->f128, &ents[i]);
+    }
+    s->f08 = f_6620_7450(func_003B6AD8_7450, func_003B6B10_7450, s, q, func_003C65F0_7450(a2));
+    if (s->f08 < 0) return s->f08;
+    if (ext) {
+        s->f11 = 1;
+        s->f00 = h;
+    } else {
+        r = func_003E06D8(n + 2, 1, 1, buf, size);
+        if (r == 0) {
+            func_003C6DA0_7450(s->f08);
+            return -9;
+        }
+        s->f00 = r;
+        s->f11 = 0;
+    }
+    s->f0C = 0;
+    s->f04 = -1;
+    s->fEC = *src;
+    if (func_003B7410_7450() == 0) {
+        func_003C6018_7450(func_003B71D8_7450);
+        D_0050A8E8.f1EC = (void (*)(void))func_003B69D8_7450;
+    }
+    D_0050A0A0_7450[slot] = s;
+    if (ext == 0) {
+        func_003B8120_7450(slot, func_003E1580(s->f00) / 3);
+    }
+    s->f84.f18[0] = 0;
+    func_003B78F8_7450(slot);
+    return slot;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B76E8);
