@@ -641,6 +641,7 @@ unsigned func_003FE660(unsigned *p, unsigned v) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE678);
 #ifdef SKIP_ASM
 // VU0 status read: (status >> 0) & 1 from $vi29.
@@ -653,10 +654,12 @@ static inline unsigned int vu0_cfc2_678(void)
 	.set reorder" : "=r"(v));
     return v;
 }
-int func_003FE678(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FE678(void) {
+    return (vu0_cfc2_678() & 0xF) == 1;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE690);
 #ifdef SKIP_ASM
 // VU0 control: set bit 0x2 in $vi28 (read-modify-write).
@@ -675,10 +678,12 @@ static inline void vu0_ctc2_vi28_690(unsigned int v)
 	ctc2.ni %0, $vi28
 	.set reorder" : : "r"(v));
 }
-void func_003FE690(void); /* peak3 body held: see notes/stuck.md */
-
+void func_003FE690(void) {
+    vu0_ctc2_vi28_690(vu0_cfc2_vi28_690() | 0x2);
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE6A8);
 #ifdef SKIP_ASM
 // Act on the VU0 status decode: case 4 sets bit 0x1 in $vi28; returns 1 for cases 0, 3 and 4.
@@ -698,8 +703,21 @@ static inline void vu0_ctc2_vi28_6A8(unsigned int v)
 	ctc2.ni %0, $vi28
 	.set reorder" : : "r"(v));
 }
-int func_003FE6A8(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FE6A8(void) {
+    int r = 0;
+    switch (func_003FE7D8_6A8()) {
+    case 4:
+        vu0_ctc2_vi28_6A8(vu0_cfc2_vi28_6A8() | 0x1);
+    case 0:
+    case 3:
+        r = 1;
+        break;
+    case 1:
+    case 2:
+        break;
+    }
+    return r;
+}
 #endif
 
 //100%
@@ -771,6 +789,7 @@ void func_003FE788(int a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE7B8);
 #ifdef SKIP_ASM
 // VU0 status flag read: bit 2 of the VU0 status register ($vi28).
@@ -781,10 +800,12 @@ static inline unsigned int vu0_cfc2_vi28_7B8(void)
     __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi28\n\t.set reorder" : "=r"(v));
     return v;
 }
-int func_003FE7B8(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FE7B8(void) {
+    return (vu0_cfc2_vi28_7B8() >> 2) & 1;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE7C8);
 #ifdef SKIP_ASM
 // VU0 status read: (status >> 3) & 1 from $vi28.
@@ -797,10 +818,12 @@ static inline unsigned int vu0_cfc2_7C8(void)
 	.set reorder" : "=r"(v));
     return v;
 }
-int func_003FE7C8(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FE7C8(void) {
+    return (vu0_cfc2_7C8() >> 3) & 1;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE7D8);
 #ifdef SKIP_ASM
 // VU0 status decode from $vi29.
@@ -813,12 +836,21 @@ static inline unsigned int vu0_cfc2_vi29_7D8(void)
 	.set reorder" : "=r"(v));
     return v;
 }
-int func_003FE7D8(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FE7D8(void) {
+    unsigned int s = vu0_cfc2_vi29_7D8();
+    if (s & 2)
+        return 1;
+    if (s & 4)
+        return 2;
+    if (s & 8)
+        return 3;
+    return (s & 1) << 2;
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_003FE818);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE828);
 #ifdef SKIP_ASM
 // VU0 status read: (status >> 0) & 1 from $vi26.
@@ -831,14 +863,16 @@ static inline unsigned int vu0_cfc2_828(void)
 	.set reorder" : "=r"(v));
     return v;
 }
-int func_003FE828(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FE828(void) {
+    return vu0_cfc2_828() & 0xFFFF;
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_003FE838);
 
 INCLUDE_ASM("seg/seg_2FE810", func_003FE998);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FEB08);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 control-register read. The EE interlocks COP2 moves, so no hazard nop follows.
@@ -848,8 +882,14 @@ static inline unsigned int vu0_cfc2_vi29_EB08(void)
     __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi29\n\t.set reorder" : "=r"(v));
     return v;
 }
-int func_003FEB08(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FEB08(void) {
+    unsigned int s = vu0_cfc2_vi29_EB08();
+    if ((s & 0xF) == 1)
+        return 1;
+    else if ((s & 0xF00) == 0x100)
+        return 1;
+    return 0;
+}
 #endif
 
 //100%
@@ -872,6 +912,7 @@ void func_003FEB38(unsigned short addr, Q3EB38 v) {
 
 INCLUDE_ASM("seg/seg_2FE810", func_003FEB78);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FEBC0);
 #ifdef SKIP_ASM
 // VU0 control: set bit 0x200 in $vi28 (read-modify-write).
@@ -890,10 +931,12 @@ static inline void vu0_ctc2_vi28_BC0(unsigned int v)
 	ctc2.ni %0, $vi28
 	.set reorder" : : "r"(v));
 }
-void func_003FEBC0(void); /* peak3 body held: see notes/stuck.md */
-
+void func_003FEBC0(void) {
+    vu0_ctc2_vi28_BC0(vu0_cfc2_vi28_BC0() | 0x200);
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FEBD8);
 #ifdef SKIP_ASM
 // Act on the VU0 status decode: case 4 sets bit 0x100 in $vi28; returns 1 for cases 0, 3 and 4.
@@ -913,8 +956,21 @@ static inline void vu0_ctc2_vi28_BD8(unsigned int v)
 	ctc2.ni %0, $vi28
 	.set reorder" : : "r"(v));
 }
-int func_003FEBD8(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FEBD8(void) {
+    int r = 0;
+    switch (func_003FED08_BD8()) {
+    case 4:
+        vu0_ctc2_vi28_BD8(vu0_cfc2_vi28_BD8() | 0x100);
+    case 0:
+    case 3:
+        r = 1;
+        break;
+    case 1:
+    case 2:
+        break;
+    }
+    return r;
+}
 #endif
 
 //100%
@@ -986,6 +1042,7 @@ void func_003FECB8(int a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FECE8);
 #ifdef SKIP_ASM
 // VU0 status read: (status >> 10) & 1 from $vi28.
@@ -998,10 +1055,12 @@ static inline unsigned int vu0_cfc2_CE8(void)
 	.set reorder" : "=r"(v));
     return v;
 }
-int func_003FECE8(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FECE8(void) {
+    return (vu0_cfc2_CE8() >> 10) & 1;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FECF8);
 #ifdef SKIP_ASM
 // VU0 status read: (status >> 11) & 1 from $vi28.
@@ -1014,10 +1073,12 @@ static inline unsigned int vu0_cfc2_CF8(void)
 	.set reorder" : "=r"(v));
     return v;
 }
-int func_003FECF8(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FECF8(void) {
+    return (vu0_cfc2_CF8() >> 11) & 1;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FED08);
 #ifdef SKIP_ASM
 // VU0 status decode from $vi29 (bits 9, 10, 11, 8).
@@ -1028,8 +1089,21 @@ static inline unsigned int vu0_cfc2_vi29_ED08(void)
     __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi29\n\t.set reorder" : "=r"(v));
     return v;
 }
-int func_003FED08(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FED08(void) {
+    unsigned int s = vu0_cfc2_vi29_ED08();
+    int r;
+    if (s & 0x200)
+        r = 1;
+    else if (s & 0x400)
+        r = 2;
+    else if (s & 0x800)
+        r = 3;
+    else if (s & 0x100)
+        r = 4;
+    else
+        r = 0;
+    return r;
+}
 #endif
 
 //100%
