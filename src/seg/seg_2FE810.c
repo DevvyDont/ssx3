@@ -11,6 +11,15 @@ typedef struct {
     void *server;
 } sSifClient;
 
+/* A DMA channel's registers (Dn_CHCR +0x00, Dn_MADR +0x10, Dn_QWC +0x20, Dn_TADR +0x30). The wait routines
+   poll CHCR.STR and MADR while a transfer runs, so those two are volatile (tools/gen/phaseb_overrides.c). */
+typedef struct {
+    volatile int chcr; int p0[3];
+    volatile int madr; int p1[3];
+    int qwc; int p2[3];
+    int tadr; int p3[3];
+} sDmaChan;
+
 extern int func_00426B48(sSifClient *cd, unsigned int rpc_number, int mode);
 extern int func_00426D18(sSifClient *cd, int fno, int mode, void *send, int ssize, void *recv, int rsize,
                          void (*end_function)(void *), void *end_param);
@@ -325,15 +334,46 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FDAB0);
 
 INCLUDE_ASM("seg/seg_2FE810", sceGsSyncPath);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FDE30);
+#ifdef SKIP_ASM
+extern void func_00425C60();
+extern char D_004977D8[];
+/* wait for the channel's STR bit to clear; after 0x1000000 polls log and force-stop it */
+void func_003FDE30(d, m)
+    sDmaChan *d;
+    int m;
+{
+    int n = 0x1000000;
+    if (d->chcr & 0x100) {
+        do {
+            if (--n < 0) {
+                func_00425C60(D_004977D8);
+                func_003FE5C8(d);
+            }
+        } while (d->chcr & 0x100);
+    }
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FDEA0);
 #ifdef SKIP_ASM
 extern char D_004977D8[];
 extern void func_003FDEA0_log(char *) __asm__("func_00425C60");
 extern int func_003FE5C8();
-void func_003FDEA0(int *p, unsigned lim, int tmo); /* peak3 body held: see notes/stuck.md */
-
+/* wait until the channel's MADR reaches lim (tmo polls, default 0x1000000) */
+void func_003FDEA0(sDmaChan *d, unsigned lim, int tmo) {
+    int t = 0x1000000;
+    if (tmo)
+        t = tmo;
+    while (d->madr < lim) {
+        if (--t < 0) {
+            func_003FDEA0_log(D_004977D8);
+            func_003FE5C8(d);
+        }
+        }
+}
 #endif
 
 //100%
@@ -467,39 +507,39 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FE2B8);
 #ifdef SKIP_ASM
 extern unsigned func_003FDF28(unsigned);
 extern void func_003FDE30();
-void func_003FE2B8(int *p, unsigned a) {
+void func_003FE2B8(sDmaChan *d, unsigned a) {
     unsigned v = func_003FDF28(a);
-    func_003FDE30(p);
-    if (p[12] != 0xFFFFFFFF)
-        p[12] = v;
-    p[8] = 0;
-    p[0] = (p[0] & ~0xC) | 0x105;
+    func_003FDE30(d);
+    if (d->tadr != 0xFFFFFFFF)
+        d->tadr = v;
+    d->qwc = 0;
+    d->chcr = (d->chcr & ~0xC) | 0x105;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE320);
 #ifdef SKIP_ASM
-void func_003FE320(int *p, unsigned a, int c) {
+void func_003FE320(sDmaChan *d, unsigned a, int c) {
     unsigned v = func_003FDF28(a);
-    func_003FDE30(p);
-    if (p[4] != 0xFFFFFFFF)
-        p[4] = v;
-    p[8] = c;
-    p[0] = (p[0] & ~0xC) | 0x101;
+    func_003FDE30(d);
+    if (d->madr != 0xFFFFFFFF)
+        d->madr = v;
+    d->qwc = c;
+    d->chcr = (d->chcr & ~0xC) | 0x101;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE398);
 #ifdef SKIP_ASM
-void func_003FE398(int *p, unsigned a, int c) {
+void func_003FE398(sDmaChan *d, unsigned a, int c) {
     unsigned v = func_003FDF28(a);
-    func_003FDE30(p);
-    if (p[4] != 0xFFFFFFFF)
-        p[4] = v;
-    p[8] = c;
-    p[0] = (p[0] & ~0xC) | 0x109;
+    func_003FDE30(d);
+    if (d->madr != 0xFFFFFFFF)
+        d->madr = v;
+    d->qwc = c;
+    d->chcr = (d->chcr & ~0xC) | 0x109;
 }
 #endif
 
@@ -507,68 +547,88 @@ void func_003FE398(int *p, unsigned a, int c) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FE410);
 #ifdef SKIP_ASM
 extern void func_003FDE30();
-void func_003FE410(int *p) {
-    func_003FDE30(p);
-    p[8] = 0;
-    p[0] = ((p[0] & ~0xC | 0x4) & ~1) | 0x100;
+void func_003FE410(sDmaChan *d) {
+    func_003FDE30(d);
+    d->qwc = 0;
+    d->chcr = ((d->chcr & ~0xC | 0x4) & ~1) | 0x100;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE458);
 #ifdef SKIP_ASM
-void func_003FE458(int *p, unsigned a, int c) {
+void func_003FE458(sDmaChan *d, unsigned a, int c) {
     unsigned v = func_003FDF28(a);
     int t;
-    func_003FDE30(p);
-    if (p[4] != 0xFFFFFFFF)
-        p[4] = v;
-    p[8] = c;
-    t = p[0] & ~0xC;
-    p[0] = (t & ~1) | 0x100;
+    func_003FDE30(d);
+    if (d->madr != 0xFFFFFFFF)
+        d->madr = v;
+    d->qwc = c;
+    t = d->chcr & ~0xC;
+    d->chcr = (t & ~1) | 0x100;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE4D8);
 #ifdef SKIP_ASM
-void func_003FE4D8(int *p, unsigned a, int c) {
+void func_003FE4D8(sDmaChan *d, unsigned a, int c) {
     unsigned v = func_003FDF28(a);
     int t;
-    func_003FDE30(p);
-    if (p[4] != 0xFFFFFFFF)
-        p[4] = v;
-    p[8] = c;
-    t = (p[0] & ~0xC) | 8;
-    p[0] = (t & ~1) | 0x100;
+    func_003FDE30(d);
+    if (d->madr != 0xFFFFFFFF)
+        d->madr = v;
+    d->qwc = c;
+    t = (d->chcr & ~0xC) | 8;
+    d->chcr = (t & ~1) | 0x100;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE558);
 #ifdef SKIP_ASM
-extern void func_003FDE30(int *, int);
-int func_003FE558(unsigned *p, int m) {
+extern void func_003FDE30(sDmaChan *, int);
+int func_003FE558(sDmaChan *d, int m) {
     if (m == 1)
-        return (*p >> 8) & 1;
-    func_003FDE30((int *)p, m);
+        return ((unsigned)d->chcr >> 8) & 1;
+    func_003FDE30(d, m);
     return 0;
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE590);
 #ifdef SKIP_ASM
-extern void func_003FDEA0(int *, unsigned, int);
-int func_003FE590(int *p, unsigned n, int m, int x); /* peak3 body held: see notes/stuck.md */
-
+extern void func_003FDEA0(sDmaChan *, unsigned, int);
+int func_003FE590(sDmaChan *d, unsigned n, int m, int x) {
+    if (m == 1)
+        return (unsigned)d->madr < n;
+    func_003FDEA0(d, n, x);
+    return 0;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE5C8);
 #ifdef SKIP_ASM
 extern int func_0042C078();
 extern void func_0042C0C0(void);
-int func_003FE5C8(volatile unsigned *p); /* peak3 body held: see notes/stuck.md */
-
+/* force-stop a channel: suspend DMA (D_ENABLEW), clear CHCR.STR, restore */
+int func_003FE5C8(sDmaChan *d) {
+    int x, r, s;
+    unsigned v;
+    s = func_0042C078();
+    r = *(volatile int *)0x1000F520;
+    if ((r & 0x10000) == 0)
+        *(volatile int *)0x1000F590 = r | 0x10000;
+    x = *(volatile int *)0x1000E000;
+    v = d->chcr;
+    d->chcr = v & 0xFFFFFEFF;
+    *(volatile int *)0x1000F590 = r;
+    if (s)
+        func_0042C0C0();
+    return v;
+}
 #endif
 
 //100%
@@ -1141,13 +1201,37 @@ int func_003FF160(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF1B0);
 #ifdef SKIP_ASM
 struct S3FF1B0 { int w[11]; short h[4]; char c[4]; };
 extern int func_003FF160(void);
 #define R(a) (*(volatile int *)(a))
-int func_003FF1B0(struct S3FF1B0 *p); /* peak3 body held: see notes/stuck.md */
-
+int func_003FF1B0(struct S3FF1B0 *p) {
+    unsigned v = *(volatile unsigned *)0x10003840;
+    if ((unsigned)func_003FF160() >= 2)
+        return 0;
+    p->w[0] = R(0x10003900);
+    p->w[1] = R(0x10003910);
+    p->w[2] = R(0x10003920);
+    p->w[3] = R(0x10003930);
+    p->w[4] = R(0x10003940);
+    p->w[5] = R(0x10003950);
+    p->w[6] = R(0x10003960);
+    p->w[7] = R(0x10003970);
+    p->w[8] = R(0x10003870);
+    p->w[9] = R(0x10003880);
+    p->w[10] = R(0x10003800);
+    p->h[0] = R(0x100038D0);
+    p->h[1] = R(0x10003890);
+    p->h[2] = R(0x10003830);
+    p->h[3] = R(0x10003860);
+    p->c[0] = R(0x10003820);
+    p->c[1] = v;
+    p->c[2] = v >> 8;
+    p->c[3] = R(0x10003850);
+    return 1;
+}
 #undef R
 #endif
 
@@ -3151,6 +3235,7 @@ int func_00403600(int *p, int a, int b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403620);
 #ifdef SKIP_ASM
 extern char D_00453200[];
@@ -3160,14 +3245,48 @@ extern int func_004072E8();
 extern void func_00403AD0();
 extern void func_00403748();
 extern void func_004076F8();
-void func_00403620(int *p); /* peak3 body held: see notes/stuck.md */
-
+void func_00403620(int *p) {
+    unsigned v;
+    int w;
+    int b;
+    p[0xD4 / 4] = 0;
+    v = func_004072E8(p, 32);
+    w = (v >> 8) & 0xFFF;
+    p[0x124 / 4] = v >> 20;
+    p[0x128 / 4] = w;
+    if (w >= 0xAF1)
+        func_004034A8(p, (int)D_00497CF8);
+    v = func_004072E8(p, 30);
+    p[0x134 / 4] = v >> 12;
+    p[0x138 / 4] = (v >> 1) & 0x3FF;
+    b = func_004072E8(p, 1);
+    p[0x840 / 4] = b;
+    if (b != 0) {
+        func_00406E20((int)p);
+        func_00406DF0(p, 0x50000000);
+        func_00406E20((int)p);
+    } else {
+        func_00403AD0(p, 0x50000000, D_00453200);
+    }
+    b = func_004072E8(p, 1);
+    p[0x844 / 4] = b;
+    if (b != 0) {
+        func_00406E20((int)p);
+        func_00406DF0(p, 0x58000000);
+        func_00406E20((int)p);
+    } else {
+        func_00403AD0(p, 0x58000000, D_00453240);
+    }
+    func_004076F8(p);
+    func_00403748(p[0x858 / 4]);
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00403748);
 
 INCLUDE_ASM("seg/seg_2FE810", func_004039F0);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403AD0);
 #ifdef SKIP_ASM
 extern int f3AD0_DI() __asm__("func_0042C078");
@@ -3175,8 +3294,24 @@ extern void f3AD0_EI(void) __asm__("func_0042C0C0");
 extern int f3AD0_2C30(int, int *) __asm__("func_00402C30");
 extern void f3AD0_6E20(int *) __asm__("func_00406E20");
 extern void f3AD0_6DF0(int *, int) __asm__("func_00406DF0");
-void func_00403AD0(int *a, int b, int c); /* peak3 body held: see notes/stuck.md */
-
+void func_00403AD0(int *a, int b, int c) {
+    int v[8];
+    int s;
+    v[0] = 2;
+    f3AD0_2C30(a[534], v);
+    f3AD0_6E20(a);
+    *(volatile int *)0x10002000 = 0;
+    f3AD0_6E20(a);
+    s = f3AD0_DI();
+    *(volatile int *)0x1000B410 = c & 0xFFFFFFF;
+    *(volatile int *)0x1000B420 = 4;
+    *(volatile int *)0x1000B400 = 0x101;
+    if (s) f3AD0_EI();
+    f3AD0_6DF0(a, b);
+    f3AD0_6E20(a);
+    v[0] = 3;
+    f3AD0_2C30(a[534], v);
+}
 #endif
 
 //100%
@@ -3869,10 +4004,14 @@ void func_00406CA0(int p, int *x, int *out, int n0, int n1, int f1, int f2, int 
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00406DF0);
 #ifdef SKIP_ASM
-void func_00406DF0(int *p, unsigned a); /* peak3 body held: see notes/stuck.md */
-
+void func_00406DF0(int *p, unsigned a) {
+    volatile int *r = (volatile int *)0x10002000;
+    *r = a;
+    p[518] = D_004532C0[a >> 28];
+}
 #endif
 
 //100%
@@ -4273,6 +4412,7 @@ void func_00407AD0(int *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00407B70);
 #ifdef SKIP_ASM
 extern int func_004072E8(int, int);
@@ -4280,8 +4420,22 @@ extern void func_00406E20(int);
 extern void func_004034A8(int *, int);
 extern char D_00498010[];
 extern char D_00498038[];
-void func_00407B70(int *p); /* peak3 body held: see notes/stuck.md */
-
+void func_00407B70(int *p) {
+    if ((p[0x840 / 4] = func_004072E8((int)p, 1)) != 0) {
+        func_00406E20((int)p);
+        func_00406DF0(p, 0x50000000);
+        func_00406E20((int)p);
+    }
+    if ((p[0x844 / 4] = func_004072E8((int)p, 1)) != 0) {
+        func_00406E20((int)p);
+        func_00406DF0(p, 0x58000000);
+        func_00406E20((int)p);
+    }
+    if (func_004072E8((int)p, 1) != 0)
+        func_004034A8(p, (int)D_00498010);
+    if (func_004072E8((int)p, 1) != 0)
+        func_004034A8(p, (int)D_00498038);
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00407C38);
@@ -4607,7 +4761,34 @@ void func_00408AF8(unsigned a, int b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408B80);
+#ifdef SKIP_ASM
+extern int q8B80_C078() __asm__("func_0042C078");
+extern void q8B80_C0C0(void) __asm__("func_0042C0C0");
+extern void q8B80_6DF0(int *, int) __asm__("func_00406DF0");
+extern int q8B80_2C30(int *, int *) __asm__("func_00402C30");
+void q8B80(int *p, unsigned addr, int n) __asm__("func_00408B80");
+void q8B80(int *p, unsigned addr, int n) {
+    int s;
+    int sp[8];
+    while (*(volatile int *)0x10002010 < 0)
+        ;
+    s = q8B80_C078();
+    *(volatile int *)0x1000B010 = addr & 0x0FFFFFFF;
+    *(volatile int *)0x1000B020 = n << 6;
+    *(volatile int *)0x1000B000 = 0x100;
+    if (s)
+        q8B80_C0C0();
+    q8B80_6DF0(p, n | 0x70000000);
+    sp[0] = 4;
+    q8B80_2C30(*(int **)((char *)p + 0x858), sp);
+    while (((*(volatile unsigned *)0x1000B000 >> 8) & 1))
+        ;
+    while (*(volatile int *)0x10002010 < 0)
+        ;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00408CA8);
 

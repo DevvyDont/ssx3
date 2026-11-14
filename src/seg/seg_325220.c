@@ -73,7 +73,8 @@ extern int D_0052D6C0[];
 
 
 /* byte ring buffer (header + data, wraps at size + 16) */
-typedef struct { int size; int count; char *rd; char *wr; char data[1]; } sRing;
+/* count is shared with the RPC callback that fills the ring (volatile in every user) */
+typedef struct { int size; volatile int count; char *rd; char *wr; char data[1]; } sRing;
 /* serial console state; fd, wlen, pos and fC are shared with the RPC callback func_00424EA8 */
 typedef struct {
     volatile int fd;
@@ -217,12 +218,28 @@ void func_00424230(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_004242C0);
 #ifdef SKIP_ASM
 extern void func_0042C0C0(void);
 extern void func_00424110_vs(volatile int *, volatile unsigned long *) __asm__("func_00424110");
-unsigned long func_004242C0(void); /* peak3 body held: see notes/stuck.md */
-
+unsigned long func_004242C0(void) {
+    volatile int flag;
+    volatile unsigned long t;
+    int s;
+    flag = 0;
+    func_00424110_vs(&flag, &t);
+    s = func_0042C078_r();
+    *(volatile int *)0x1000F000 = 4;
+    SYNC_4248();
+    if (s) func_0042C0C0();
+    while (!(*(volatile int *)0x1000F000 & 4) && flag == 0);
+    s = func_0042C078_r();
+    *(volatile int *)0x1000F000 = 4;
+    SYNC_4248();
+    if (s) func_0042C0C0();
+    return t;
+}
 #endif
 
 //100%
@@ -244,12 +261,23 @@ int func_00424368(int a0, int a1, int a2) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_004243E8);
 #ifdef SKIP_ASM
 extern int func_00425260(void);
 extern int func_00425190(int, int);
-int func_004243E8(int a0, int a1, int a2); /* peak3 body held: see notes/stuck.md */
-
+int func_004243E8(int a0, int a1, int a2) {
+    if (a0 == 0) {
+        if (D_00455168 == 0) {
+            if (func_00425260() == 0) {
+                return -1;
+            }
+            D_00455168 = 1;
+        }
+        return func_00425190(a1, a2);
+    }
+    return -1;
+}
 #endif
 
 //100%
@@ -724,6 +752,7 @@ void func_00424E68(sRing *r) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00424EA8);
 #ifdef SKIP_ASM
 // The read position (volatile in sTty) is taken once into a local just before the read call.
@@ -731,18 +760,75 @@ extern int pf_4EA8(const char *, ...) __asm__("func_00425C28");
 extern int rd_4EA8(int, unsigned char *, unsigned short) __asm__("func_0042C968");
 extern int wr_4EA8(int, char *, unsigned short) __asm__("func_0042C9A0");
 extern char D_0049AB08[], D_0049AB30[], D_0049AB48[], D_0049AB60[];
-void func_00424EA8(int cmd, int n, sTty *s); /* peak3 body held: see notes/stuck.md */
-
+void func_00424EA8(int cmd, int n, sTty *s) {
+    switch (cmd) {
+    case 1:
+    case 2:
+        if (n != 0) {
+            if ((unsigned)(s->pos + n) > 0x140)
+                pf_4EA8(D_0049AB08);
+            {
+                int pos = s->pos;
+                n = rd_4EA8(s->fd, s->buf + pos, n);
+            }
+            if (n < 0)
+                pf_4EA8(D_0049AB30);
+            s->pos += n;
+        } else {
+            unsigned short *hdr = (unsigned short *)s->buf;
+            for (n = 12; n < *hdr; n++) {
+                *s->ring->wr = s->buf[n];
+                func_00424E28(s->ring);
+            }
+            s->pos = 0;
+        }
+        break;
+    case 3: {
+        int r = wr_4EA8(s->fd, s->wp, s->wlen);
+        if (r < 0) {
+            pf_4EA8(D_0049AB48, r);
+            s->fC = 0;
+            break;
+        }
+        s->wp += r;
+        s->wlen -= r;
+        break;
+    }
+    case 4:
+        if (s->wlen != 0)
+            pf_4EA8(D_0049AB60, s->wlen);
+        s->fC = 0;
+        break;
+    }
+}
 #endif
 
 INCLUDE_ASM("seg/seg_325220", func_00425040);
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00425190);
 #ifdef SKIP_ASM
-int func_00425190(int a0, int n); /* peak3 body held: see notes/stuck.md */
-
+int func_00425190(int a0, int n) {
+    char *buf = (char *)a0;
+    int i;
+    int j;
+    char *p;
+    for (i = 0; i < n; i = j) {
+        p = buf + i;
+        j = i + 1;
+        while (D_0052B8E8->count == 0) {
+        }
+        *p = *D_0052B8D0.ring->rd;
+        func_00424E68(D_0052B8D0.ring);
+        if (*p == '\n' || *p == '\r') {
+            return j;
+        }
+    }
+    return i;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00425260);
 #ifdef SKIP_ASM
 // The binary re-reads fd right after storing it (sTty.fd is volatile).
@@ -751,8 +837,25 @@ extern char D_0052B900[];
 extern char D_0052BA40[];
 extern void func_00424020(int);
 extern int f5260_open(int, void *, void *) __asm__("func_0042C8A0");
-int func_00425260(void); /* peak3 body held: see notes/stuck.md */
-
+int func_00425260(void) {
+    struct Pkt_5260 *p;
+    func_00424020(0);
+    D_0052B8D0.fd = f5260_open(0x210, &D_0052B8D0, func_00424EA8);
+    if (D_0052B8D0.fd < 0) return 0;
+    D_0052B8D0.fC = 0;
+    D_0052B8D0.wlen = 0;
+    D_0052B8D0.pos = 0;
+    D_0052B8D0.buf = (unsigned char *)((int)D_0052BA40 | 0x20000000);
+    p = (struct Pkt_5260 *)((int)D_0052B900 | 0x20000000);
+    D_0052B8D0.wp = (char *)p;
+    p->f4 = 0x210;
+    p->f6 = 0x45;
+    p->f7 = 0x48;
+    p->f2 = 0;
+    p->f8 = 0;
+    D_0052B8D0.ring = func_00424E00(0x100);
+    return 1;
+}
 #endif
 
 //100%
