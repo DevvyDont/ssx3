@@ -8742,7 +8742,206 @@ int func_003C1980(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C19A8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// PORT: PS2-only COP0 (disable / enable interrupts, pipeline sync, read the Status register).
+#define DI_2B45_19A8() __asm__ volatile("di")
+
+#define EI_2B45_19A8() __asm__ volatile("ei")
+
+#define SYNCP_2B45_19A8() __asm__ volatile("sync.p")
+
+#define MFC0_STATUS_2B45_19A8(v) __asm__ volatile("mfc0 %0, $12" : "=r"(v))
+
+extern struct sA8E8 D_0050A8E8;
+
+/* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
+   queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
+   their offsets. */
+struct sAD00Voice_19A8 { int key; int val; };
+
+struct sAD00SpuVoice_19A8 {              /* 8 bytes, sAD00Spu_19A8.f20[] */
+    int key;
+    short pitch;
+    signed char l;
+    signed char r;
+};
+
+struct sAD00SpuChan_19A8 {               /* 16 bytes, sAD00Spu_19A8.f1A0[] */
+    int key;
+    short pitch;
+    signed char vol[6];
+    signed char f0C[4];
+};
+
+struct sAD00Spu_19A8 {                   /* 0x2A0, block 3 of the shared buffer (D_0050AD00.fCB0) */
+    long f00;                       /* voice on bits */
+    unsigned long f08;
+    char f10;
+    char f11;
+    char f12;
+    unsigned char f13;
+    short f14;
+    short f16;
+    char pad18[0x20 - 0x18];
+    struct sAD00SpuVoice_19A8 f20[48];
+    struct sAD00SpuChan_19A8 f1A0[16];
+};
+
+struct sAD00Xfer_19A8 {                  /* 16 bytes, D_0050AD00.fCC8[] (also D_0050B9C8) */
+    unsigned int key;
+    int f04;
+    int f08;
+    unsigned short f0C;
+    unsigned char f0E;
+    char pad0F;
+};
+
+struct sAD00Spk_19A8 {                   /* 0x20, D_0050AD00.fE98[] (also D_0050BB98) */
+    float f00[6];
+    unsigned int f18;
+    short f1C;
+    short f1E;
+};
+
+struct sAD00Seg_19A8 { unsigned short a; unsigned short b; };
+
+struct sAD00Port_19A8 { int f00; int f04; int pad08[2]; };
+
+   /* 16 bytes, D_0050AD00.fE88[] */
+struct sAD00_19A8 {
+    char f000[0x83C];               /* RPC send buffer */
+    struct sAD00Voice_19A8 f83C[48];
+    struct sAD00Voice_19A8 f9BC[16];
+    char padA3C[0xC80 - 0xA3C];
+    char fC80[0x30];                /* RPC client data */
+    struct sAD00Spu_19A8 *fCB0;          /* also D_0050B9B0 */
+    int *fCB4;
+    void *fCB8;
+    int fCBC;              /* last transfer id */
+    unsigned char fCC0;    /* queued transfers */
+    unsigned char fCC1;    /* selected transfer */
+    unsigned char fCC2;    /* transfer running */
+    char padCC3;
+    int fCC4;                       /* tick of the last transfer */
+    struct sAD00Xfer_19A8 fCC8[28];
+    struct sAD00Port_19A8 fE88[1];
+    struct sAD00Spk_19A8 fE98[96];
+    unsigned short f1A98;           /* number of f1AA0 segments */
+    unsigned short f1A9A;
+    unsigned short f1A9C;
+    unsigned short f1A9E;
+    struct sAD00Seg_19A8 *f1AA0;
+    int f1AA4;
+    int f1AA8;
+    char f1AAC;
+    signed char f1AAD;
+    unsigned short f1AAE;
+    short f1AB0;
+    unsigned short f1AB2;           /* fill offset while func_003C1638 lays out f1AB4 */
+    char *f1AB4;
+    int f1AB8;
+    void *f1ABC[6];
+    int f1AD4;
+    int f1AD8;
+    char f1ADC[0x1AF4 - 0x1ADC];
+    void *f1AF4;
+    int f1AF8;
+    int f1AFC;
+    void *f1B00;
+    int f1B04;
+    int f1B08;
+    int f1B0C;
+    int f1B10;             /* lock: semaphore, owner thread, depth */
+    int f1B14;
+    int f1B18;
+    int f1B1C[7];                   /* saved SPU2 DMA registers */
+    int f1B38;
+};
+
+extern struct sAD00_19A8 D_0050AD00_19A8 __asm__("D_0050AD00");
+
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+extern void (*D_0044C46C_19A8)(void) __asm__("D_0044C46C");
+
+extern void *D_0050C848_19A8 __asm__("D_0050C848");
+
+// (prototype from their definition at line 8102)
+void func_003C09B8_19A8(void) __asm__("func_003C09B8");
+
+// (prototype from their definition at line 1557)
+void func_003B54E0_19A8(void) __asm__("func_003B54E0");
+
+// (prototype from their definition at line 8119)
+void func_003C0A60_19A8(void) __asm__("func_003C0A60");
+
+// (prototype from their definition at line 7983)
+/* PORT: PS2-only VU0 state save; func_0031A308 without the $vi22/$vi18
+   saves, and with ctc2 (not cfc2) on $vi16 as in the shipped code. */
+void func_003C0858_19A8(void* buf) __asm__("func_003C0858");
+
+// (prototype from their definition at line 1578)
+void func_003B5540_19A8(unsigned arg0) __asm__("func_003B5540");
+
+// (prototype from their definition at line 8040)
+/* PORT: PS2-only VU0 state restore; same as func_0031A3C0 without the
+   $vi22/$vi18 restore. */
+void func_003C08F8_19A8(void* buf) __asm__("func_003C08F8");
+
+// (prototype from their definition at line 8288)
+void func_003C1298_19A8(void) __asm__("func_003C1298");
+
+extern int func_00423DE0_19A8(int) __asm__("func_00423DE0");
+extern void func_003C8968_19A8(int *, int) __asm__("func_003C8968");
+extern void func_003C51E8(void *, void *, int);
+extern void func_003C7080_19A8(void) __asm__("func_003C7080");
+extern void func_00424020(int);
+extern int func_00424160(void *, int);
+extern void (*D_0044C470)(void);
+extern char D_0050C910[];
+extern char D_0050C800[];
+
+void func_003C19A8(void) {
+    int s;
+
+    for (;;) {
+        func_00423DE0_19A8(D_0050AD00_19A8.f1AA4);
+        if (D_0050AD00_19A8.f1AAD == 0) continue;
+        D_0044C46C_19A8();
+        if (D_0050A8E8.f328 != 0) D_0050A8E8.f328();
+        func_003B5540_19A8(0x5E);
+        if (D_0050AD00_19A8.f1AA8 < 0) D_0050A8E8.f1C0++;
+        func_003B54E0_19A8();
+        func_003C51E8(D_0050AD00_19A8.f000 + 0x800, (char *)&D_0050AD00_19A8 + 0xA40, 0x240);
+        func_003C1298_19A8();
+        func_003C0858_19A8(D_0050C910);
+        if (D_0050AD00_19A8.f1AAE != 0) func_003C09B8_19A8();
+        func_003C8968_19A8((int *)D_0050AD00_19A8.f1ABC, D_0050AD00_19A8.f1AB0);
+        if (D_0050A8E8.setup.cfg.f29 & 2) {
+            ((void (*)(void *, void *, int))D_0050C848_19A8)(D_0050AD00_19A8.f1ADC, D_0050AD00_19A8.f1AF4, D_0050AD00_19A8.f1AFC);
+        } else if (D_0050A8E8.setup.cfg.f27 == 1) {
+            func_003C51E8(D_0050AD00_19A8.f1ABC[1], D_0050AD00_19A8.f1ABC[0], D_0050AD00_19A8.f1AB0 << 1);
+        }
+        if (D_0050AD00_19A8.f1AAE != 0) func_003C0A60_19A8();
+        func_003C08F8_19A8(D_0050C910);
+        func_003C7080_19A8();
+        *D_0050AD00_19A8.fCB4 = D_0050A8E8.f330;
+        *(int *)D_0050AD00_19A8.fCB8 = D_0050A8E8.f330;
+        func_00424020(0);
+        do {
+            DI_2B45_19A8();
+            SYNCP_2B45_19A8();
+            MFC0_STATUS_2B45_19A8(s);
+        } while (s & 0x10000);
+        func_00424160(D_0050C800, 1);
+        EI_2B45_19A8();
+        if (D_0050A8E8.f32C != 0) D_0050A8E8.f32C();
+        D_0044C470();
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C1B80);
