@@ -266,6 +266,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FD810);
 void func_003FD908(void) {
 }
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FD910);
 #ifdef SKIP_ASM
 struct S3FD910 { short a; short b; short c; unsigned short d; int e; int f; };
@@ -274,8 +275,39 @@ extern void func_00424880(int);
 extern void func_004239A0(int, int, int);
 extern int func_004240E0(int);
 void *func_003FDAA0(void);
-void func_003FD910(short a, short b, short c, short d); /* peak3 body held: see notes/stuck.md */
-
+void func_003FD910(short a, short b, short c, short d) {
+    struct S3FD910 *p;
+    int e;
+    switch (a) {
+    case 0:
+        p = func_003FDAA0();
+        *(volatile long *)0x12001000 = 0x200;
+        p->a = b;
+        p->b = c;
+        p->d = (*(volatile unsigned long *)0x12001000 >> 16) & 0xFF;
+        func_004240E0(0xFF00);
+        p->c = !!d;
+        if (p->e) {
+            func_00424880(2);
+            func_00423AA0(2, p->f);
+            p->e = 0;
+            p->f = 0;
+        }
+        func_004239A0(b & 1, c & 0xFF, d & 1);
+        break;
+    case 1:
+        *(volatile long *)0x12001000 = 0x100;
+        break;
+    case 5:
+        p = func_003FDAA0();
+        p->c = d != 0;
+        p->a = b;
+        p->b = c;
+        p->d = (*(volatile unsigned long *)0x12001000 >> 16) & 0xFF;
+        func_004239A0(b & 1, c & 0xFF, d & 1);
+        break;
+    }
+}
 #endif
 
 //100%
@@ -331,15 +363,38 @@ int func_003FDF88(unsigned n) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FDFB0);
 #ifdef SKIP_ASM
 extern int D_004977F0[];
 extern void func_003FDF50(char *, int);
 extern int func_003FE090(sDmaEnv *);
-int func_003FDFB0(int a); /* peak3 body held: see notes/stuck.md */
-
+int func_003FDFB0(int a) {
+    sDmaEnv env;
+    int i;
+    int saved = *(volatile int *)0x1000E000 & 1;
+    for (i = 0; i < 10; i++) {
+        if (D_004977F0[i] != 0) {
+            int *t = (int *)D_00451590[i];
+            t[0] = 0;
+            t[0x30 / 4] = 0;
+            t[0x10 / 4] = 0;
+            t[0x50 / 4] = 0;
+            t[0x40 / 4] = 0;
+            t[0x80 / 4] = 0;
+        }
+    }
+    *(volatile int *)0x1000E010 = 0xFF1F;
+    *(int *)0x1000E010 &= 0xFF1F0000;
+    func_003FDF50((char *)&env, 20);
+    func_003FE090(&env);
+    if (a == 1)
+        *(volatile int *)0x1000E000 |= 1;
+    return saved;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE090);
 #ifdef SKIP_ASM
 // DMA environment write: validate the table indices, merge them into D_CTRL, write PCR/SQWC/RBOR/RBSR, keep a copy.
@@ -347,8 +402,42 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FE090);
 extern unsigned char D_00497818[];
 extern unsigned char D_00497828[];
 extern unsigned char D_00497838[];
-int func_003FE090(sDmaEnv *p); /* peak3 body held: see notes/stuck.md */
-
+int func_003FE090(sDmaEnv *p) {
+    unsigned c;
+    unsigned pcr;
+    unsigned sqwc;
+    unsigned rbor;
+    unsigned rbsr;
+    c = *(volatile unsigned *)0x1000E000;
+    pcr = *(volatile unsigned *)0x1000E020;
+    sqwc = *(volatile unsigned *)0x1000E030;
+    rbor = *(volatile unsigned *)0x1000E050;
+    rbsr = *(volatile unsigned *)0x1000E040;
+    if (p->sts >= 10) return -1;
+    if (p->std >= 10) return -2;
+    if (p->mfd >= 10) return -3;
+    if (p->rcyc >= 7) return -4;
+    c = (c & ~0x30) | (D_00497818[p->sts] << 4);
+    c = (c & ~0xC0) | (D_00497828[p->std] << 6);
+    c = (c & ~0xC) | (D_00497838[p->mfd] << 2);
+    if (p->rcyc != 0) {
+        c |= 2;
+        c = (c & ~0x300) | ((p->rcyc - 1) << 8);
+    } else {
+        c &= ~2;
+    }
+    sqwc = (p->hA << 16) | p->h8;
+    rbsr = p->w10;
+    rbor = (unsigned)p->w0C;
+    *(volatile unsigned *)0x1000E000 = c;
+    pcr = (p->h4 << 16) | p->h6;
+    *(volatile unsigned *)0x1000E020 = pcr;
+    *(volatile unsigned *)0x1000E030 = sqwc;
+    *(volatile unsigned *)0x1000E050 = rbor;
+    *(volatile unsigned *)0x1000E040 = rbsr;
+    D_005261D0 = *p;
+    return 0;
+}
 #endif
 
 //100%
@@ -364,7 +453,7 @@ sDmaEnv *func_003FE268(sDmaEnv *d) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FE2A0);
 #ifdef SKIP_ASM
 int func_003FE2A0(int v) {
-    int *r = (int *)0x1000E060;
+    volatile int *r = (volatile int *)0x1000E060;
     int o = *r;
     *r = v;
     return o;
@@ -976,42 +1065,78 @@ int func_003FEF18_impl(S3EF18 *s) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF060);
 #ifdef SKIP_ASM
-void func_003FF060(void); /* peak3 body held: see notes/stuck.md */
-
+void func_003FF060(void) {
+    *(volatile int *)0x10003810 = 1;
+    *(volatile int *)0x10003820 = 6;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF088);
 #ifdef SKIP_ASM
 extern int func_003FF160(void);
-int func_003FF088(int a); /* peak3 body held: see notes/stuck.md */
-
+int func_003FF088(int a) {
+    int r = func_003FF160();
+    if (r == 0) return 0;
+    if (r == 1) return 0;
+    if (a == 0) {
+        *(volatile int *)0x10003810 = 2;
+    } else if (a == 1) {
+        *(volatile int *)0x10003810 = 4;
+    }
+    return 1;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF0F0);
 #ifdef SKIP_ASM
 extern int func_003FF160(void);
-int func_003FF0F0(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FF0F0(void) {
+    if (func_003FF160() != 1)
+        return 0;
+    *(volatile int *)0x10003810 = 8;
+    return 1;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF130);
 #ifdef SKIP_ASM
-unsigned func_003FF130(unsigned a, unsigned b, unsigned c); /* peak3 body held: see notes/stuck.md */
-
+unsigned func_003FF130(unsigned a, unsigned b, unsigned c) {
+    unsigned v = a | (b << 1) | (c << 2);
+    *(volatile unsigned *)0x10003820 = v;
+    return v;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF150);
 #ifdef SKIP_ASM
-int func_003FF150(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FF150(void) {
+    return *(volatile int *)0x10003820;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF160);
 #ifdef SKIP_ASM
-int func_003FF160(void); /* peak3 body held: see notes/stuck.md */
-
+int func_003FF160(void) {
+    int v = *(volatile int *)0x10003800;
+    if (!(v & 3)) {
+        return 0;
+    }
+    if (v & 0x700) {
+        return 1;
+    }
+    if (v & 0xC) {
+        return 2;
+    }
+    return (v & 0x3000) ? 3 : 4;
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_003FF1B0);
@@ -1024,11 +1149,20 @@ int func_003FF1B0(struct S3FF1B0 *p); /* peak3 body held: see notes/stuck.md */
 #undef R
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF330);
 #ifdef SKIP_ASM
 typedef int i128 __attribute__((mode(TI)));
-int func_003FF330(i128 *src, int n); /* peak3 body held: see notes/stuck.md */
-
+int func_003FF330(i128 *src, int n) {
+    int c = 0;
+    while (n--) {
+        if (*(volatile unsigned *)0x10003800 & 0x10000000)
+            return c;
+        *(i128 *)0x10004000 = *src++;
+        c++;
+    }
+    return c;
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_003FF390);
@@ -1830,13 +1964,25 @@ int func_00402618(int a, int *out); /* peak3 body held: see notes/stuck.md */
 
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402708);
 #ifdef SKIP_ASM
 extern int func_0042C078();
 extern void func_0042C0C0(void);
 extern void func_00409708(void);
-int func_00402708(void); /* peak3 body held: see notes/stuck.md */
-
+int func_00402708(void) {
+    int s = func_0042C078();
+    *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
+    *(volatile int *)0x1000B000 &= 0xFFFFFEFF;
+    *(volatile int *)0x1000B400 &= 0xFFFFFEFF;
+    *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
+    if (s)
+        func_0042C0C0();
+    *(volatile int *)0x1000B020 = 0;
+    *(volatile int *)0x1000B420 = 0;
+    func_00409708();
+    return 1;
+}
 #endif
 
 //100%
@@ -2054,11 +2200,23 @@ int func_00402B48(int *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402B58);
 #ifdef SKIP_ASM
 extern void func_00403398(int *);
-int func_00402B58(int *a); /* peak3 body held: see notes/stuck.md */
-
+int func_00402B58(int *a) {
+    int *p = (int *)a[16];
+    p[0] = 0;
+    p[1] = 0;
+    p[2] = 0;
+    a[2] = 0;
+    p[43] = 0;
+    p[32] = -1;
+    func_00403398(p);
+    p[70] = 0;
+    func_004032A8(p);
+    return 1;
+}
 #endif
 
 //100%
@@ -2461,7 +2619,37 @@ void func_004034A8(int *p, int b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403500);
+#ifdef SKIP_ASM
+extern void func_00424020(int) __asm__("func_00424020");
+extern int func_0042C078();
+extern void func_0042C0C0(void);
+void q3500(int base, unsigned addr, int n) __asm__("func_00403500");
+void q3500(int base, unsigned addr, int n) {
+    unsigned t = ((unsigned)(base + 0x88F) >> 4) << 4;
+    long *tag = (long *)t;
+    int ret;
+    while (n > 0) {
+        int chunk = n > 0xFFF40 ? 0xFFF40 : n;
+        int id = 0;
+        long hi = addr & 0xFFFFFFF;
+        n -= chunk;
+        if (n != 0) id = 3;
+        *tag = (hi << 32) | ((long)id << 28) | (unsigned long)(unsigned)((chunk + 0xF) / 16);
+        __asm__ volatile("sync");
+        addr += chunk;
+        tag += 2;
+    }
+    func_00424020(0);
+    ret = func_0042C078();
+    *(volatile int *)0x1000B430 = t & 0xFFFFFFF;
+    *(volatile int *)0x1000B420 = 0;
+    *(volatile int *)0x1000B400 = 0x105;
+    if (ret)
+        func_0042C0C0();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403600);
@@ -2503,20 +2691,57 @@ void func_00403AD0(int *a, int b, int c); /* peak3 body held: see notes/stuck.md
 
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403BB0);
 #ifdef SKIP_ASM
 extern char D_00497D10[];
 extern char D_00497D38[];
 extern void func_00405B48(unsigned);
-void func_00403BB0(int *p); /* peak3 body held: see notes/stuck.md */
-
+void func_00403BB0(int *p) {
+    unsigned v;
+    unsigned h;
+    unsigned w;
+    int t;
+    unsigned x;
+    unsigned y;
+    unsigned z;
+    p[0x848 / 4] = 1;
+    func_00405B48(0);
+    v = func_004072E8(p, 28);
+    x = (v >> 1) & 0xFFF;
+    t = (v >> 17) & 3;
+    y = (v >> 13) & 3;
+    z = (v >> 15) & 3;
+    p[0x140 / 4] = t;
+    if (t != 1)
+        func_004034A8(p, (int)D_00497D10);
+    p[0x13C / 4] = (v >> 19) & 1;
+    h = v >> 20;
+    w = (unsigned)func_004072E8(p, 16) >> 8;
+    if (h != 0x48 && h != 0x58 && h != 0x44)
+        func_004034A8(p, (int)D_00497D38);
+    p[0x124 / 4] = (z << 12) | (p[0x124 / 4] & 0xFFF);
+    p[0x128 / 4] = (y << 12) | (p[0x128 / 4] & 0xFFF);
+    p[0x134 / 4] = p[0x134 / 4] + (x << 18);
+    p[0x138 / 4] = p[0x138 / 4] + (w << 10);
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403CE0);
 #ifdef SKIP_ASM
 extern int func_004072E8(int, int);
-void func_00403CE0(int *p); /* peak3 body held: see notes/stuck.md */
-
+void func_00403CE0(int *p) {
+    func_004072E8((int)p, 3);
+    if (func_004072E8((int)p, 1)) {
+        func_004072E8((int)p, 8);
+        func_004072E8((int)p, 8);
+        p[0x144 / 4] = func_004072E8((int)p, 8);
+    }
+    p[0x148 / 4] = func_004072E8((int)p, 0xE);
+    func_004072E8((int)p, 1);
+    p[0x14C / 4] = func_004072E8((int)p, 0xE);
+}
 #endif
 
 //100%
@@ -2735,18 +2960,89 @@ void func_00405AE8(void); /* peak3 body held: see notes/stuck.md */
 INCLUDE_ASM("seg/seg_2FE810", func_00405B48);
 #ifdef SKIP_ASM
 void func_00405B48(unsigned a) {
-    unsigned *r = (unsigned *)0x10002010;
+    volatile unsigned *r = (volatile unsigned *)0x10002010;
     *r = (*r & 0xFF7FFFFF) | (a << 23);
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405B70);
+#ifdef SKIP_ASM
+extern void func_00406E20(int);
+extern int func_00402C30(int *, int *);
+extern void func_004034A8(int *, int);
+extern int func_0042C078();
+extern void func_0042C0C0(void);
+extern char D_00497EB0[];
+struct M5B70 { char pad0[0x838]; int f838; int f83C; char pad840[0x18]; int *f858; char pad85C[0x10A0 - 0x85C]; int f10A0; };
+int f5B70(struct M5B70 *p) __asm__("func_00405B70");
+int f5B70(struct M5B70 *p) {
+    int cmd[8];
+    int cmd2[8];
+    int ret = 1;
+    int st;
+    long top;
+    int bp;
+    int n;
+    func_00406E20((int)p);
+    while (*(volatile int *)0x1000B020 != 0 && !(*(volatile int *)0x10002010 & 0x4000)) {
+        if (*(volatile int *)0x1000B420 == 0 && !(*(volatile int *)0x1000B400 & 0x100)) {
+            cmd[0] = 1;
+            func_00402C30(p->f858, cmd);
+        }
+    }
+    if (p->f10A0 != 0) {
+        st = func_0042C078();
+        *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
+        *(volatile int *)0x1000B400 = 0;
+        *(volatile int *)0x1000B000 = 0;
+        *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & ~0x10000;
+        if (st)
+            func_0042C0C0();
+        *(volatile int *)0x1000B020 = 0;
+        *(volatile int *)0x1000B420 = 0;
+        *(volatile int *)0x10002010 = 0x40000000;
+        return 0;
+    }
+    bp = *(volatile int *)0x10002020;
+    top = *(long *)0x10002030;
+    p->f838 = (int)top;
+    if (top < 0) {
+        if (bp & 0x1F)
+            n = 0x20 - (bp & 0x1F);
+        else
+            n = 0;
+        p->f83C = n;
+    } else {
+        p->f83C = 0x20;
+    }
+    if (*(volatile int *)0x10002010 & 0x4000) {
+        func_004034A8((int *)p, (int)D_00497EB0);
+        cmd2[0] = 2;
+        func_00402C30(p->f858, cmd2);
+        *(int *)0x10002010 = 0x40000000;
+        cmd2[0] = 3;
+        func_00402C30(p->f858, cmd2);
+        st = func_0042C078();
+        *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
+        *(volatile int *)0x1000B000 = 0;
+        *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & ~0x10000;
+        if (st)
+            func_0042C0C0();
+        ret = 0;
+        *(volatile int *)0x1000B020 = 0;
+    }
+    return ret;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405E10);
 #ifdef SKIP_ASM
 extern int func_00406F78(int, int);
-int func_00405E10(int a); /* peak3 body held: see notes/stuck.md */
-
+int func_00405E10(int a) {
+    return func_00406F78(a, 3);
+}
 #endif
 
 //100%
@@ -2780,6 +3076,7 @@ void func_00405E30(int *p, int *o, int *in, int a, int b) {
 #undef H3
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405FB8);
 #ifdef SKIP_ASM
 extern char D_00497ED0[];
@@ -2787,10 +3084,42 @@ extern int lx5_6F78(int *, int) __asm__("func_00406F78");
 extern int lx5_70F0(int *, int) __asm__("func_004070F0");
 extern void lx5_71F8(int *, int) __asm__("func_004071F8");
 extern void lx5_3470(int *, char *, int) __asm__("func_00403470");
-int func_00405FB8(int *p); /* peak3 body held: see notes/stuck.md */
-
+int func_00405FB8(int *p) {
+    int sum = 0;
+    int c;
+    int t;
+    int again;
+    do {
+        c = lx5_6F78(p, 0);
+        switch ((unsigned)c) {
+        case 0x23:
+            again = 1;
+            sum += 0x21;
+            break;
+        case 0x22:
+            again = 1;
+            break;
+        case 0:
+            t = lx5_70F0(p, 11);
+            if (p[0x848 / 4] != 0 && t == 15) {
+                lx5_71F8(p, 11);
+                again = 1;
+                break;
+            }
+            lx5_3470(p, D_00497ED0, c);
+            p[0x11C / 4] = 1;
+            return 1;
+        default:
+            sum += c;
+            again = 0;
+            break;
+        }
+    } while (again);
+    return sum;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004060C8);
 #ifdef SKIP_ASM
 extern char D_00497F08[];
@@ -2799,10 +3128,36 @@ extern void func_00406E20(int);
 extern int func_00405B70(int *);
 extern void func_00404B78(int *, int);
 extern void func_004034A8(int *, int);
-int func_004060C8(int *p); /* peak3 body held: see notes/stuck.md */
-
+int func_004060C8(int *p) {
+    int n;
+    int r;
+    p[0x810 / 4] = 0;
+    n = p[0x12C / 4] * p[0x130 / 4];
+    p[0x814 / 4] = 0;
+    if (p[0x174 / 4] != 3)
+        n >>= 1;
+    do {
+        r = func_00406318(p, n);
+    } while (r == 1 || r == 3);
+    func_00406E20((int)p);
+    if (func_00405B70(p) == 0) {
+        r = 4;
+        if (p[0x10A0 / 4] != 0)
+            p[0x10A0 / 4] = 0;
+        else
+            r = 2;
+    }
+    while ((*(volatile unsigned *)0x1000D400 >> 8) & 1)
+        ;
+    if (r == 0)
+        func_00404B78(p, p[0x810 / 4] == 0);
+    if ((unsigned)(r - 1) < 2)
+        func_004034A8(p, (int)D_00497F08);
+    return r == 0;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", _sliceA0);
 #ifdef SKIP_ASM
 extern char D_00497F28[];
@@ -2812,10 +3167,41 @@ extern int func_004070F0(int, int);
 extern void func_004071F8(int, int);
 extern void func_00407438();
 extern int func_00405FB8(int *);
-int _sliceA0(int *p, int unused, int *o1, int *o2, int *s); /* peak3 body held: see notes/stuck.md */
-
+int _sliceA0(int *p, int unused, int *o1, int *o2, int *s) {
+    int v;
+    int a;
+    int b;
+    p[0x11C / 4] = 0;
+    func_00407438();
+    v = func_004070F0((int)p, 32);
+    if ((unsigned)(v - 0x101) >= 0xAF) {
+        func_00403470_k(p, D_00497F28, v);
+        return 2;
+    }
+    func_004071F8((int)p, 32);
+    a = func_004074B8(p);
+    b = func_00405FB8(p);
+    *o2 = b;
+    if (p[0x11C / 4] != 0) {
+        func_004034A8(p, (int)D_00497F50);
+        return 1;
+    }
+    *o1 = ((((a << 7) + (v & 0xFF)) - 1) * p[0x12C / 4] + b) - 1;
+    *o2 = 1;
+    p[0x1B0 / 4] = 1;
+    s[5] = 0;
+    s[4] = 0;
+    s[1] = 0;
+    s[0] = 0;
+    s[7] = 0;
+    s[6] = 0;
+    s[3] = 0;
+    s[2] = 0;
+    return 0;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00406318);
 #ifdef SKIP_ASM
 extern char D_00497F70[];
@@ -2828,8 +3214,74 @@ extern int func_004065D0(int *, int *, int *, int *, int *, int *, int *);
 extern int func_00406510(int *, int *, int *, int *, int *);
 extern int func_00403E00_k() __asm__("func_00403E00");
 extern void func_00404B78(int *, int);
-int func_00406318(int *p, int n); /* peak3 body held: see notes/stuck.md */
-
+int func_00406318(int *p, int n) {
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+    int s[8];
+    int q[4];
+    int r[4];
+    int v;
+    a = 0;
+    b = 0;
+    v = _sliceA0(p, n, &a, &b, s);
+    if (v != 0)
+        return v;
+    p[0x11C / 4] = 0;
+    for (;;) {
+        if (a >= n)
+            return 0;
+        p[(0x6CC + p[0x810 / 4] * 0x140) / 4] = 0;
+        if (func_00405B70(p) == 0) {
+            if (p[0x10A0 / 4] != 0) {
+                p[0x10A0 / 4] = 0;
+                return 4;
+            }
+            return 2;
+        }
+        if (b == 0) {
+            if (func_004070F0((int)p, 0x17) == 0) {
+                p[0x11C / 4] = 0;
+                return 3;
+            }
+            if (p[0x11C / 4] != 0) {
+                p[0x11C / 4] = 0;
+                return 3;
+            }
+            b = func_00405FB8(p);
+            if (p[0x11C / 4] != 0) {
+                p[0x11C / 4] = 0;
+                return 1;
+            }
+        }
+        if (a >= n) {
+            func_004034A8(p, (int)D_00497F70);
+            return 2;
+        }
+        if (b == 1) {
+            if (func_004065D0(p, &c, &d, &e, s, q, r) == 0) {
+                p[0x11C / 4] = 0;
+                return 1;
+            }
+        } else {
+            if (func_00406510(p, s, &d, q, &c) == 0) {
+                p[0x11C / 4] = 0;
+                return 2;
+            }
+        }
+        if (func_00403E00_k(p, a, b, c, d, s, q, r) == 0) {
+            p[0x11C / 4] = 0;
+            return 2;
+        }
+        if (a != 0)
+            func_00404B78(p, p[0x810 / 4] ^ 1);
+        a++;
+        p[0x810 / 4] ^= 1;
+        b--;
+    }
+}
 #endif
 
 //100%
@@ -2869,22 +3321,64 @@ INCLUDE_ASM("seg/seg_2FE810", func_004065D0);
 
 INCLUDE_ASM("seg/seg_2FE810", func_00406A78);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00406B00);
 #ifdef SKIP_ASM
 extern int Q_72E8(int, int) __asm__("func_004072E8");
 extern void Q_6CA0(int, int *, int *, int, int, int, int, int) __asm__("func_00406CA0");
-void func_00406B00(int p, int *x, int *out, int *t, int idx, int m, int k, int n0, int n1, int f1, int f2); /* peak3 body held: see notes/stuck.md */
-
+void func_00406B00(int p, int *x, int *out, int *t, int idx, int m, int k, int n0, int n1, int f1, int f2) {
+    int v;
+    int *q;
+    if (m == 1) {
+        if (k == 0 && f1 == 0) {
+            v = Q_72E8(p, 1);
+            t[idx] = v;
+            t[idx + 2] = v;
+        }
+        q = &x[idx * 2];
+        Q_6CA0(p, q, out, n0, n1, f1, f2, 0);
+        q[4] = q[0];
+        q[5] = q[1];
+    } else {
+        t[idx] = Q_72E8(p, 1);
+        Q_6CA0(p, &x[idx * 2], out, n0, n1, f1, f2, 0);
+        t[idx + 2] = Q_72E8(p, 1);
+        Q_6CA0(p, &x[idx * 2 + 4], out, n0, n1, f1, f2, 0);
+    }
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00406CA0);
 #ifdef SKIP_ASM
 extern int func_00406F78();
 extern int func_004072E8();
 extern int func_00405E10();
 extern void func_00406A78();
-void func_00406CA0(int p, int *x, int *out, int n0, int n1, int f1, int f2, int z); /* peak3 body held: see notes/stuck.md */
-
+void func_00406CA0(int p, int *x, int *out, int n0, int n1, int f1, int f2, int z) {
+    int h;
+    int v;
+    h = func_00406F78(p, 2);
+    if (n0 != 0 && h != 0)
+        v = func_004072E8(p, n0);
+    else
+        v = 0;
+    func_00406A78(x, n0, h, v, z);
+    if (f1 != 0)
+        out[0] = func_00405E10(p);
+    h = func_00406F78(p, 2);
+    if (n1 != 0 && h != 0)
+        v = func_004072E8(p, n1);
+    else
+        v = 0;
+    if (f2 != 0)
+        x[1] = x[1] >> 1;
+    func_00406A78(x + 1, n1, h, v, z);
+    if (f2 != 0)
+        x[1] = x[1] * 2;
+    if (f1 != 0)
+        out[1] = func_00405E10(p);
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00406DF0);
@@ -2893,69 +3387,216 @@ void func_00406DF0(int *p, unsigned a); /* peak3 body held: see notes/stuck.md *
 
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00406E20);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
-void func_00406E20(int p); /* peak3 body held: see notes/stuck.md */
-
+void func_00406E20(int p) {
+    int n = 0;
+    if ((*(volatile unsigned *)0x10002010 & 0x80004000) == 0x80000000) {
+        do {
+            if (n++ >= 0x1389) {
+                func_00402C80(*(int **)(p + 0x858));
+                n = 0;
+            }
+        } while ((*(volatile unsigned *)0x10002010 & 0x80004000) == 0x80000000);
+    }
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00406EC8);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
-long func_00406EC8(int p); /* peak3 body held: see notes/stuck.md */
-
+long func_00406EC8(int p) {
+    int n = 0;
+    long v = *(volatile long *)0x10002000;
+    if (v < 0 && !(*(volatile unsigned *)0x10002010 & 0x4000)) {
+        do {
+            if (n++ >= 0x1389) {
+                func_00402C80(*(int **)(p + 0x858));
+                n = 0;
+            }
+            v = *(volatile long *)0x10002000;
+        } while (v < 0 && !(*(volatile unsigned *)0x10002010 & 0x4000));
+    }
+    return v;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00406F78);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
-int func_00406F78(int p, int cmd); /* peak3 body held: see notes/stuck.md */
-
+int func_00406F78(int p, int cmd) {
+    int m = 0;
+    int n = 0;
+    int w;
+    long v;
+    long b;
+    int s;
+    if ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000) {
+        do {
+            if (n++ >= 0x1389) {
+                func_00402C80(*(int **)(p + 0x858));
+                n = 0;
+            }
+        } while ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000);
+    }
+    w = (cmd << 26) | 0x30000000;
+    *(volatile int *)0x10002000 = w;
+    *(int *)(p + 0x818) = D_004532C0[w >> 28];
+    v = *(volatile long *)0x10002000;
+    if (v < 0) {
+        do {
+            if (m++ >= 0x1389) {
+                func_00402C80(*(int **)(p + 0x858));
+                m = 0;
+            }
+            v = *(volatile long *)0x10002000;
+        } while (v < 0);
+    }
+    s = *(volatile int *)0x10002020;
+    b = *(long *)0x10002030;
+    *(int *)(p + 0x838) = (int)b;
+    if (b < 0)
+        *(int *)(p + 0x83C) = -(s & 0x1F) & 0x1F;
+    else
+        *(int *)(p + 0x83C) = 32;
+    *(int *)(p + 0x11C) = (int)v == 0;
+    return (short)v;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004070F0);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
 extern long func_00406EC8_k() __asm__("func_00406EC8");
-int func_004070F0(int p, int n); /* peak3 body held: see notes/stuck.md */
-
+int func_004070F0(int p, int n) {
+    int c;
+    int x;
+    int *e;
+    if (*(int *)(p + 0x818) || *(int *)(p + 0x83C) < n) {
+        c = 0;
+        if ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000) {
+            do {
+                if (c++ >= 0x1389) {
+                    func_00402C80(*(int **)(p + 0x858));
+                    c = 0;
+                }
+            } while ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000);
+        }
+        *(volatile int *)0x10002000 = 0x40000000;
+        *(int *)(p + 0x818) = D_004532C0[4];
+        x = (int)func_00406EC8_k(p);
+        *(int *)(p + 0x838) = x;
+        *(int *)(p + 0x83C) = 32;
+    }
+    return (unsigned)*(int *)(p + 0x838) >> (32 - n);
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004071F8);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
 extern long func_00406EC8_k() __asm__("func_00406EC8");
-void func_004071F8(int p, int v); /* peak3 body held: see notes/stuck.md */
-
+void func_004071F8(int p, int v) {
+    int n = 0;
+    int w;
+    int x;
+    int *e;
+    if ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000) {
+        do {
+            if (n++ >= 0x1389) {
+                func_00402C80(*(int **)(p + 0x858));
+                n = 0;
+            }
+        } while ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000);
+    }
+    w = v | 0x40000000;
+    *(volatile int *)0x10002000 = w;
+    e = &D_004532C0[(unsigned)w >> 28];
+    *(int *)(p + 0x818) = *e;
+    x = (int)func_00406EC8_k(p, e);
+    *(int *)(p + 0x838) = x;
+    *(int *)(p + 0x83C) = 32;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004072E8);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
 extern long func_00406EC8_k() __asm__("func_00406EC8");
-int func_004072E8(int p, int n); /* peak3 body held: see notes/stuck.md */
-
+int func_004072E8(int p, int n) {
+    int c = 0;
+    int w;
+    unsigned r;
+    int x;
+    int *e;
+    if ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000) {
+        do {
+            if (c++ >= 0x1389) {
+                func_00402C80(*(int **)(p + 0x858));
+                c = 0;
+            }
+        } while ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000);
+    }
+    if (*(int *)(p + 0x818) || *(int *)(p + 0x83C) < n) {
+        *(volatile int *)0x10002000 = 0x40000000;
+        *(int *)(p + 0x818) = D_004532C0[4];
+        x = (int)func_00406EC8_k(p);
+        *(int *)(p + 0x838) = x;
+    }
+    r = (unsigned)*(int *)(p + 0x838) >> (32 - n);
+    *(int *)(p + 0x83C) = 32;
+    w = n | 0x40000000;
+    *(volatile int *)0x10002000 = w;
+    e = &D_004532C0[(unsigned)w >> 28];
+    *(int *)(p + 0x818) = *e;
+    x = (int)func_00406EC8_k(p);
+    *(int *)(p + 0x838) = x;
+    return r;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00407438);
 #ifdef SKIP_ASM
 extern void func_004071F8(int, int);
 extern int func_004070F0(int, int);
 extern void func_00406E20(int);
-void func_00407438(int p); /* peak3 body held: see notes/stuck.md */
-
+void func_00407438(int p) {
+    int n;
+    func_00406E20(p);
+    n = -(*(volatile int *)0x10002020 & 7) & 7;
+    if (n)
+        func_004071F8(p, n);
+    while (func_004070F0(p, 0x18) != 1)
+        func_004071F8(p, 8);
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004074B8);
 #ifdef SKIP_ASM
 extern void func_004071F8(int, int);
 extern int func_004072E8(int, int);
 extern void func_00407A10(int);
-int func_004074B8(int *p); /* peak3 body held: see notes/stuck.md */
-
+int func_004074B8(int *p) {
+    p[109] = func_004072E8((int)p, 5);
+    if (func_004072E8((int)p, 1)) {
+        func_004072E8((int)p, 1);
+        func_004071F8((int)p, 7);
+        func_00407A10((int)p);
+    }
+    return 0;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00407520);
 #ifdef SKIP_ASM
 struct B7520 { int op; long l1; long l2; };
@@ -2966,20 +3607,59 @@ extern void s7_3620(struct S_7520 *) __asm__("func_00403620");
 extern void s7_7AD0(struct S_7520 *) __asm__("func_00407AD0");
 extern void s7_7630(struct S_7520 *) __asm__("func_00407630");
 extern void s7_2C30(int, struct B7520 *) __asm__("func_00402C30");
-int func_00407520(struct S_7520 *a); /* peak3 body held: see notes/stuck.md */
-
+int func_00407520(struct S_7520 *a) {
+    struct B7520 b;
+    for (;;) {
+        s7_7438(a);
+        switch ((unsigned)s7_72E8(a, 0x20)) {
+        case 0x1B3:
+            s7_3620(a);
+            break;
+        case 0x1B8:
+            s7_7AD0(a);
+            break;
+        case 0x1B7:
+            return 0;
+        case 0x100:
+            s7_7630(a);
+            b.op = 5;
+            b.l1 = -1;
+            b.l2 = -1;
+            s7_2C30(a->f858, &b);
+            a->f830 = b.l2;
+            a->f828 = b.l1;
+            return a->f150;
+        }
+    }
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00407630);
 #ifdef SKIP_ASM
 extern int func_004072E8(int, int);
 extern void func_00407A10(int);
 extern void func_004076F8(int);
 extern void func_00407A58(int, int);
-void func_00407630(int *p); /* peak3 body held: see notes/stuck.md */
-
+void func_00407630(int *p) {
+    int v = func_004072E8((int)p, 10);
+    p[0x150 / 4] = func_004072E8((int)p, 3);
+    func_004072E8((int)p, 16);
+    if ((unsigned)(p[0x150 / 4] - 2) < 2) {
+        p[0x154 / 4] = func_004072E8((int)p, 1);
+        p[0x158 / 4] = func_004072E8((int)p, 3);
+    }
+    if (p[0x150 / 4] == 3) {
+        p[0x15C / 4] = func_004072E8((int)p, 1);
+        p[0x160 / 4] = func_004072E8((int)p, 3);
+    }
+    func_00407A10((int)p);
+    func_004076F8((int)p);
+    func_00407A58((int)p, v);
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004076F8);
 #ifdef SKIP_ASM
 struct PT44 { int v[11]; };
@@ -2987,23 +3667,73 @@ extern char D_00497FE0[];
 extern int func_004070F0(int, int);
 extern void func_004071F8(int, int);
 extern int func_004072E8();
-void func_004076F8(int p); /* peak3 body held: see notes/stuck.md */
-
+void func_004076F8(int p) {
+    struct PT44 t = *(struct PT44 *)D_00497FE0;
+    unsigned i;
+    int r;
+    func_00407438(p);
+    while ((r = func_004070F0(p, 32)) == 0x1B5 || r == 0x1B2) {
+        if (r == 0x1B5) {
+            func_004071F8(p, 32);
+            i = func_004072E8(p, 4);
+            i = i > 10 ? 0 : i;
+            ((void (*)(int))t.v[i])(p);
+            func_00407438(p);
+        } else {
+            func_004071F8(p, 32);
+            func_00407438(p);
+        }
+    }
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00407820);
 #ifdef SKIP_ASM
 extern int Q_72E8(int, int) __asm__("func_004072E8");
-void func_00407820(int *p); /* peak3 body held: see notes/stuck.md */
-
+void func_00407820(int *p) {
+    p[0x164 / 4] = Q_72E8((int)p, 4);
+    p[0x168 / 4] = Q_72E8((int)p, 4);
+    p[0x16C / 4] = Q_72E8((int)p, 4);
+    p[0x170 / 4] = Q_72E8((int)p, 4);
+    {
+        int v = Q_72E8((int)p, 2);
+        *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFFCFFFF) | (v << 16);
+    }
+    {
+        int v = Q_72E8((int)p, 2);
+        p[0x174 / 4] = v;
+        if (p[0xD4 / 4] == 0)
+            p[0xD4 / 4] = v;
+    }
+    p[0x178 / 4] = Q_72E8((int)p, 1);
+    p[0x17C / 4] = Q_72E8((int)p, 1);
+    p[0x180 / 4] = Q_72E8((int)p, 1);
+    *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFBFFFFF) | (Q_72E8((int)p, 1) << 22);
+    *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFDFFFFF) | (Q_72E8((int)p, 1) << 21);
+    *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFEFFFFF) | (Q_72E8((int)p, 1) << 20);
+    p[0x184 / 4] = Q_72E8((int)p, 1);
+    Q_72E8((int)p, 1);
+    p[0x188 / 4] = Q_72E8((int)p, 1);
+    if (Q_72E8((int)p, 1)) {
+        Q_72E8((int)p, 1);
+        Q_72E8((int)p, 3);
+        Q_72E8((int)p, 1);
+        Q_72E8((int)p, 7);
+        Q_72E8((int)p, 8);
+    }
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00407A10);
 #ifdef SKIP_ASM
 extern void func_004071F8(int, int);
 extern int func_004072E8(int, int);
-void func_00407A10(int p); /* peak3 body held: see notes/stuck.md */
-
+void func_00407A10(int p) {
+    while (func_004072E8(p, 1))
+        func_004071F8(p, 8);
+}
 #endif
 
 //100%
@@ -3034,12 +3764,25 @@ int f_407A58(struct S407A58 *p, int n) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00407AD0);
 #ifdef SKIP_ASM
 extern int func_004072E8(int, int);
 extern void func_004076F8();
-void func_00407AD0(int *p); /* peak3 body held: see notes/stuck.md */
-
+void func_00407AD0(int *p) {
+    p[0xE8 / 4] = 0;
+    p[0x84C / 4] = p[0x850 / 4] + 1;
+    p[0x854 / 4] = 1;
+    func_004072E8((int)p, 1);
+    func_004072E8((int)p, 5);
+    func_004072E8((int)p, 6);
+    func_004072E8((int)p, 1);
+    func_004072E8((int)p, 6);
+    func_004072E8((int)p, 6);
+    p[0x1A4 / 4] = func_004072E8((int)p, 1);
+    p[0x1A8 / 4] = func_004072E8((int)p, 1);
+    func_004076F8(p);
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00407B70);
@@ -3061,21 +3804,58 @@ void func_00407C38(struct S_7C38 *a); /* peak3 body held: see notes/stuck.md */
 
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00407D30);
 #ifdef SKIP_ASM
 extern int func_004072E8(int, int);
-void func_00407D30(int p); /* peak3 body held: see notes/stuck.md */
-
+void func_00407D30(int p) {
+    func_004072E8(p, 1);
+    func_004072E8(p, 8);
+    func_004072E8(p, 1);
+    func_004072E8(p, 7);
+    func_004072E8(p, 1);
+    func_004072E8(p, 0x14);
+    func_004072E8(p, 1);
+    func_004072E8(p, 0x16);
+    func_004072E8(p, 1);
+    func_004072E8(p, 0x16);
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00407DC0);
 #ifdef SKIP_ASM
 extern char D_00498068[];
 extern char D_00498088[];
 extern void func_004034A8();
 extern int func_004060C8(int *);
-int func_00407DC0(int *p); /* peak3 body held: see notes/stuck.md */
-
+int func_00407DC0(int *p) {
+    int *q;
+    int r;
+    if (p[0x174 / 4] == 3 && p[0x120 / 4] != 0) {
+        func_004034A8(p, D_00498068);
+        p[0x120 / 4] = 0;
+    }
+    switch (p[0x174 / 4]) {
+    case 3:
+        q = (int *)p[0x1C0 / 4];
+        break;
+    case 1:
+        q = (int *)p[0x1D0 / 4];
+        break;
+    case 2:
+        q = (int *)p[0x1E0 / 4];
+        break;
+    default:
+        q = (int *)p[0x1C0 / 4];
+        func_004034A8(p, D_00498088);
+        break;
+    }
+    r = func_004060C8(p);
+    if (r != 0)
+        q[0x28 / 4] = 1;
+    return r;
+}
 #endif
 
 //100%
@@ -3163,14 +3943,63 @@ int func_004081D8(int *p, int *q) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408278);
 #ifdef SKIP_ASM
 // Scratchpad DMA copy: per pass, move p[3] blocks of p[4]*0x180 bytes to the scratchpad (ch 9) and back out (ch 8).
 struct S8278 { char pad0[0xD8]; unsigned fD8; int padDC; int fE0; int fE4; char padE8[0x174 - 0xE8]; int f174; };
 extern int func_0042C078();
 extern void func_0042C0C0(void);
-void func_00408278(struct S8278 *s, unsigned *p); /* peak3 body held: see notes/stuck.md */
-
+void func_00408278(struct S8278 *s, unsigned *p) {
+    int n;
+    unsigned src = p[0] & 0x0FFFFFFF;
+    unsigned dst = s->fD8 & 0x0FFFFFFF;
+    int size, stride, qwc;
+    int i, j, st;
+    unsigned d;
+    if (s->f174 == 3 || s->fE0 == 0) {
+        size = p[4] * 0x180;
+        qwc = size >> 4;
+        if (s->fE0 != 0)
+            stride = (s->fE0 >> 4) * 0x180;
+        else
+            stride = size;
+        n = 1;
+    } else {
+        stride = (s->fE0 >> 4) * 0xC0;
+        size = ((int)p[4] >> 1) * 0x180;
+        n = 2;
+        qwc = size >> 4;
+    }
+    for (j = 0; j < n; j++) {
+        d = dst;
+        for (i = 0; i < (int)p[3]; i++) {
+            st = func_0042C078();
+            *(volatile int *)0x1000D480 = 0;
+            *(volatile int *)0x1000D410 = src;
+            *(volatile int *)0x1000D420 = qwc;
+            *(volatile int *)0x1000D400 = 0x101;
+            if (st)
+                func_0042C0C0();
+            while (*(volatile int *)0x1000D400 & 0x100)
+                ;
+            st = func_0042C078();
+            *(volatile int *)0x1000D080 = 0;
+            *(volatile int *)0x1000D010 = d;
+            *(volatile int *)0x1000D020 = qwc;
+            *(volatile int *)0x1000D000 = 0x100;
+            if (st)
+                func_0042C0C0();
+            while (*(volatile int *)0x1000D000 & 0x100)
+                ;
+            while (*(volatile int *)0x1000D020 != 0)
+                ;
+            d += stride;
+            src += size;
+        }
+        dst += s->fE4 * 0xC0;
+    }
+}
 #endif
 
 //100%
@@ -3234,18 +4063,60 @@ long func_00408530(struct S85 *a, struct B85 *b, long *o1, long *o2, long *o3) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004086C0);
+#ifdef SKIP_ASM
+struct S86C0 { char pad0[0x80]; int f80; int pad84; unsigned long f88; char pad90[0x20]; int fB0; int fB4; int fB8; int fBC; int fC0; int fC4; int fC8; int fCC; int fD0; char padD4[0x784]; int f858; };
+struct B86C0 { char pad0[0x28]; int f28; char pad2C[0x18]; int f44; int f48; int f4C; int f50; int f54; int f58; int f5C; int f60; };
+struct R86C0 { char pad[0x10]; int f10; int f14; int f18; int f1C; long f20; };
+extern unsigned D_004532E8[];
+extern void q86_8530(struct S86C0 *, struct B86C0 *, void *, void *, void *) __asm__("func_00408530");
+extern int q86_81D8(struct S86C0 *, struct B86C0 *) __asm__("func_004081D8");
+extern int q86_9088(struct S86C0 *, struct B86C0 *) __asm__("func_00409088");
+extern int q86_8278(struct S86C0 *, struct B86C0 *) __asm__("func_00408278");
+extern void q86_8508(struct S86C0 *) __asm__("func_00408508");
+void d86C0(struct S86C0 *a, struct B86C0 *b, int c) __asm__("func_004086C0");
+void d86C0(struct S86C0 *a, struct B86C0 *b, int c) {
+    struct R86C0 *r = (struct R86C0 *)a->f858;
+    int m;
+    q86_8530(a, b, &r->f10, &r->f18, &r->f20);
+    r = (struct R86C0 *)a->f858;
+    a->f80 = r->f10;
+    m = r->f20 >> 5;
+    a->f88 = D_004532E8[m & 0xF];
+    a->fCC = b->f5C;
+    a->fD0 = b->f60;
+    a->fB4 = b->f44;
+    a->fB8 = b->f48;
+    a->fBC = b->f4C;
+    a->fC0 = b->f50;
+    a->fC4 = b->f54;
+    a->fC8 = b->f58;
+    if (q86_81D8(a, b) && b->f28 == 1) {
+        if (a->fB0 != 0) q86_9088(a, b);
+        else q86_8278(a, b);
+        q86_8508(a);
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_004087D0);
 
 INCLUDE_ASM("seg/seg_2FE810", func_00408988);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408AF8);
 #ifdef SKIP_ASM
 extern int func_0042C078();
 extern void func_0042C0C0(void);
-void func_00408AF8(unsigned a, int b); /* peak3 body held: see notes/stuck.md */
-
+void func_00408AF8(unsigned a, int b) {
+    int s = func_0042C078();
+    *(volatile unsigned *)0x1000B010 = (a & 0xFFFFFFF) | 0x80000000;
+    *(volatile int *)0x1000B020 = b >> 4;
+    *(volatile int *)0x1000B000 = 0x100;
+    if (s)
+        func_0042C0C0();
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00408B80);
@@ -3254,34 +4125,122 @@ INCLUDE_ASM("seg/seg_2FE810", func_00408CA8);
 
 INCLUDE_ASM("seg/seg_2FE810", func_00408DF0);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408FB0);
 #ifdef SKIP_ASM
 struct S408FB0 { unsigned f0; int f4; };
-int func_00408FB0(int a, struct S408FB0 *s); /* peak3 body held: see notes/stuck.md */
-
+int func_00408FB0(int a, struct S408FB0 *s) {
+    unsigned n;
+    *(volatile int *)0x1000E010 = 0x10;
+    n = s->f0;
+    if (n == 0) {
+        SYNC_0810();
+        EI_0810();
+        return 1;
+    }
+    if (n > 0xFFFF) {
+        *(volatile int *)0x1000B410 = s->f4;
+        *(volatile int *)0x1000B420 = 0xFFFF;
+        *(volatile int *)0x1000B400 = 0x101;
+        s->f4 = (s->f4 + 0xFFFF0) & 0xFFFFFFF;
+        s->f0 = s->f0 - 0xFFFF;
+    } else {
+        *(volatile int *)0x1000B410 = s->f4;
+        *(volatile int *)0x1000B420 = s->f0;
+        *(volatile int *)0x1000B400 = 0x101;
+        s->f0 = 0;
+    }
+    SYNC_0810();
+    EI_0810();
+    return 0;
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00409088);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409310);
 #ifdef SKIP_ASM
 extern int func_0042C078();
 extern void func_0042C0C0(void);
-void func_00409310(int a); /* peak3 body held: see notes/stuck.md */
-
+void func_00409310(int a) {
+    int s = func_0042C078();
+    *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
+    *(volatile int *)0x1000B000 = a;
+    *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
+    if (s)
+        func_0042C0C0();
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409388);
 #ifdef SKIP_ASM
 extern int func_0042C078();
 extern void func_0042C0C0(void);
-void func_00409388(int a); /* peak3 body held: see notes/stuck.md */
-
+void func_00409388(int a) {
+    int s = func_0042C078();
+    *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
+    *(volatile int *)0x1000B400 = a;
+    *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
+    if (s)
+        func_0042C0C0();
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409400);
+#ifdef SKIP_ASM
+extern void q9400_9388(int) __asm__("func_00409388");
+extern void q9400_9310(int) __asm__("func_00409310");
+void q9400(int *p) __asm__("func_00409400");
+void q9400(int *p) {
+    q9400_9388(1);
+    p[0] = *(volatile int *)0x1000B410;
+    p[1] = *(volatile int *)0x1000B430;
+    p[2] = *(volatile int *)0x1000B420;
+    p[3] = *(volatile int *)0x1000B400;
+    while (*(volatile int *)0x10002010 & 0xF0)
+        ;
+    q9400_9310(0);
+    p[4] = *(volatile int *)0x1000B010;
+    p[5] = *(volatile int *)0x1000B020;
+    p[6] = *(volatile int *)0x1000B000;
+    p[7] = *(volatile int *)0x10002020;
+    p[8] = *(volatile int *)0x10002010;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004094E8);
+#ifdef SKIP_ASM
+extern void q94E8_9388(int) __asm__("func_00409388");
+extern void q94E8_9310(int) __asm__("func_00409310");
+void q94E8(int *p) __asm__("func_004094E8");
+void q94E8(int *p) {
+    unsigned v = p[7];
+    int e = v & 0x7F;
+    int n = ((v >> 16) & 3) + ((v >> 8) & 0xF);
+    int r = p[0] - (n << 4);
+    int q = p[2] + n;
+    if (p[4] != 0 && p[5] != 0) {
+        *(volatile int *)0x1000B010 = p[4];
+        *(volatile int *)0x1000B020 = p[5];
+        q94E8_9310(p[6] | 0x100);
+    }
+    while (*(volatile int *)0x10002010 < 0)
+        ;
+    *(volatile int *)0x10002000 = e;
+    while (*(volatile int *)0x10002010 < 0)
+        ;
+    if (r != 0 && q != 0) {
+        *(volatile int *)0x1000B410 = r;
+        *(volatile int *)0x1000B430 = p[1];
+        *(volatile int *)0x1000B420 = q;
+        q94E8_9388(p[3] | 0x100);
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00409638);
 #ifdef SKIP_ASM
@@ -3289,12 +4248,18 @@ int func_00409638(int a); /* peak3 body held: see notes/stuck.md */
 
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004096A0);
 #ifdef SKIP_ASM
 extern int func_0042C078(int);
 extern void func_0042C0C0(void);
-void func_004096A0(int a); /* peak3 body held: see notes/stuck.md */
-
+void func_004096A0(int a) {
+    func_0042C078(a);
+    *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
+    *(volatile int *)0x1000B400 = a;
+    *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
+    func_0042C0C0();
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00409708);

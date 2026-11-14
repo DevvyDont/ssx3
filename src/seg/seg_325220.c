@@ -198,12 +198,23 @@ void func_00424220(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00424230);
 #ifdef SKIP_ASM
 extern int func_0042C078_r(void) __asm__("func_0042C078");
 extern void func_0042C0C0(void);
-void func_00424230(void); /* peak3 body held: see notes/stuck.md */
-
+void func_00424230(void) {
+    int s;
+    s = func_0042C078_r();
+    *(volatile int *)0x1000F000 = 4;
+    SYNC_4248();
+    if (s) func_0042C0C0();
+    while (!(*(volatile int *)0x1000F000 & 4));
+    s = func_0042C078_r();
+    *(volatile int *)0x1000F000 = 4;
+    SYNC_4248();
+    if (s) func_0042C0C0();
+}
 #endif
 
 INCLUDE_ASM("seg/seg_325220", func_004242C0);
@@ -744,7 +755,17 @@ int func_00425260(void); /* peak3 body held: see notes/stuck.md */
 
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00425320);
+#ifdef SKIP_ASM
+int func_00425320_i(int a0) __asm__("func_00425320");
+int func_00425320_i(int a0) {
+    while (*(volatile int *)0x1000F130 & 0x8000)
+        ;
+    *(volatile char *)0x1000F180 = a0;
+    return a0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00425358);
@@ -3967,6 +3988,7 @@ INCLUDE_ASM("seg/seg_325220", func_0042C2F0);
 SYSCALL_STUB(func_0042C2F0, 0x74)
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042C300);
 #ifdef SKIP_ASM
 extern void func_0042C0D8(void);
@@ -3975,8 +3997,14 @@ extern void func_0042C7C8(void);
 extern void func_00424B78(void);
 extern void func_0042C410(void);
 extern void func_0042CBD0(void);
-void func_0042C300(void); /* peak3 body held: see notes/stuck.md */
-
+void func_0042C300(void) {
+    func_0042C0D8();
+    func_0042C1F0();
+    func_0042C7C8();
+    func_00424B78();
+    func_0042C410();
+    func_0042CBD0();
+}
 #endif
 
 //100%
@@ -4193,6 +4221,7 @@ INCLUDE_ASM("seg/seg_325220", func_0042C7B8);
 SYSCALL_STUB(func_0042C7B8, 0x5B)
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042C7C8);
 #ifdef SKIP_ASM
 extern int D_00456180[];
@@ -4202,8 +4231,23 @@ extern void func_00424020(int);
 extern int func_0042C7B8(int);
 extern void func_0042C760(int, int);
 extern void func_0042C770(int, char *, int);
-void func_0042C7C8(void); /* peak3 body held: see notes/stuck.md */
-
+void func_0042C7C8(void) {
+    unsigned i;
+    int *p;
+    if (!(*(volatile int *)0x10001810 & 0x100)) {
+        func_0042C760(D_00456180[0], D_00456180[1]);
+        func_0042C770(0x80076000, D_00455A18, 0x740);
+        func_0042C770(0x82000, D_00456158, 0x28);
+        func_00424020(0);
+        func_00424020(2);
+        func_0042C760(D_00456180[2], D_00456180[3]);
+        p = &D_00456180[4];
+        for (i = 2; i < 8; i++) {
+            func_0042C760(p[0], func_0042C7B8(p[0]));
+            p += 2;
+        }
+    }
+}
 #endif
 
 //100%
