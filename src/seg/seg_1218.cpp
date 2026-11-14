@@ -1,8 +1,6 @@
 #include "common.h"
 #include "ai/rider.h"
 
-INCLUDE_ASM("seg/seg_1218", func_00100218);
-
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00100250);
 #ifdef SKIP_ASM

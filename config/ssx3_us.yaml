@@ -66,7 +66,9 @@ segments:
     subsegments:
       - [0x1000, asm, sce/crt0]
         
-      - [0x1218, cpp, seg/seg_1218]
+      - [0x1218, c, seg/ctor_1218]   # one static constructor (last .ctors entry), C built -O0
+
+      - [0x1250, cpp, seg/seg_1218]
 
       - [0xd4f8, cpp, ai/computer]
 
@@ -523,6 +525,8 @@ segments:
       - [0x2aa800, cpp, world/worldview]
 
       - [0x2ad800, cpp, world/wscriptcache]
+
+      - [0x2aedc0, cpp, ealib/seg_2AEDC0]   # 0x3ADDC0: EA libraries (RCMP movie player, mpeg2decode, SHAPE, DXT), built -G0
 
       - [0x2b4578, c, ealib/seg_2B4578]
 

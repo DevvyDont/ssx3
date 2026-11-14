@@ -62,6 +62,13 @@ UNIT_CFLAGS = {
     # and never via $gp.
     "seg/seg_2F0F40": "-G0",
     "seg/seg_32F020": "-G0",
+    # The tail of the old world/wscriptcache text: EA library code (RCMP movie player, mpeg2decode, SHAPE, DXT) with no
+    # $gp or .lit4 reference, and float constants as gas li.s (lui/ori $at) expansions. Every landed function there is
+    # unchanged under -G0; func_003AE780 only matches with it (2026-11-13).
+    "ealib/seg_2AEDC0": "-G0",
+    # func_00100218, a static constructor (.ctors D_0043CEE4) right after crt0: frame pointer and unfilled delay slots,
+    # i.e. C at -O0 (2026-11-13).
+    "seg/ctor_1218": "-O0",
 }
 # Fork-only: per-unit compiler. EA's embedded $gp module (ealib/seg_2D7498, 0x3D6498-0x3DBAE8) was built with an
 # older SN build, ee-gcc 2.95.3-114 (its non-leaf functions save ra with sq; 107 and 114 reproduce all 48 landed
