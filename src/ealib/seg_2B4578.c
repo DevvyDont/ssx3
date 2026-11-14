@@ -12428,7 +12428,110 @@ void func_003C7CE0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7D00);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct Cfg_7D00 { int a; unsigned char n4; unsigned char n5; short pad6; int c; };
+/* 28-byte mixer record handed to func_003CA7A0: word-aligned (int members), which keeps d[i].h at base+28*i+0x14C */
+struct D_7D00 { int w[6]; short h; char b; char pad1B; };
+struct S_7D00 {
+    struct Cfg_7D00 cfg;
+    char padC[3];
+    char clr[1];
+    char pad10[0xA8 - 0x10];
+    char *a1[2];
+    char *a2[2];
+    char *b1[6];
+    char *b2[13];
+    int c[12];
+    struct D_7D00 d[4];
+    char pad1A4[0x1DC - 0x1A4];
+    char *p1DC;
+    int pad1E0;
+    unsigned int remain;
+};
+extern struct S_7D00 D_00515B40_7D00 __asm__("D_00515B40");
+struct G_7D00 { char pad0[0x64]; char *pool; unsigned int size; };
+/* sndmix's free-pool counter: addressed as its own symbol, as in landed func_003C1B80 */
+extern unsigned int D_00515D24_7D00 __asm__("D_00515D24");
+extern struct G_7D00 D_0050A8E8_7D00 __asm__("D_0050A8E8");
+extern void func_003C7CC0_7D00() __asm__("func_003C7CC0");
+extern void func_003C7CE0_7D00() __asm__("func_003C7CE0");
+extern void f_C918_7D00(void (*)()) __asm__("func_003CC918");
+extern void f_C928_7D00(void (*)()) __asm__("func_003CC928");
+extern void f_58A0_7D00(void) __asm__("func_003B58A0");
+extern void f_58D8_7D00(void) __asm__("func_003B58D8");
+extern char *f_5C60_7D00(int) __asm__("func_003B5C60");
+extern void *memset_7D00(void *, int, int) __asm__("func_00416210");
+extern void f_9268_7D00(void) __asm__("func_003C9268");
+extern void f_92B0_7D00(void) __asm__("func_003C92B0");
+extern void f_92F8_7D00(void) __asm__("func_003C92F8");
+extern void f_8128_7D00(void) __asm__("func_003C8128");
+extern void f_A7A0_7D00(struct D_7D00 *) __asm__("func_003CA7A0");
+extern void f_8F48_7D00(int *, struct D_7D00 *) __asm__("func_003C8F48");
+
+/* MIX_create (On Tour smixer.c, PSP debug 0x00354D18): allocation statements in On Tour's `a[i] = alloc(); b[i] = a[i];` form. */
+void func_003C7D00(struct Cfg_7D00 *cfg) {
+    int i;
+    char *pool;
+
+    f_C918_7D00(func_003C7CC0_7D00);
+    f_C928_7D00(func_003C7CE0_7D00);
+    for (i = 0; i < 1; i++) {
+        D_00515B40_7D00.clr[i] = 0;
+    }
+    D_00515B40_7D00.cfg = *cfg;
+    f_58A0_7D00();
+    D_00515D24_7D00 = D_0050A8E8_7D00.size;
+    pool = D_0050A8E8_7D00.pool;
+    for (i = 0; i < 2; i++) {
+        if (D_00515D24_7D00 >= 0x2058) {
+            D_00515D24_7D00 -= 0x2058;
+            D_00515B40_7D00.a1[i] = pool;
+            D_00515B40_7D00.a2[i] = pool;
+            pool += 0x2058;
+        } else {
+            D_00515B40_7D00.a1[i] = f_5C60_7D00(0x2058);
+            D_00515B40_7D00.a2[i] = D_00515B40_7D00.a1[i];
+        }
+        while ((int)D_00515B40_7D00.a2[i] & 0x3F) {
+            D_00515B40_7D00.a2[i] += 4;
+        }
+    }
+    for (i = 0; i < D_00515B40_7D00.cfg.n5; i++) {
+        if (D_00515D24_7D00 >= 0x840) {
+            D_00515D24_7D00 -= 0x840;
+            D_00515B40_7D00.b1[i] = pool;
+            D_00515B40_7D00.b2[i] = pool;
+            pool += 0x840;
+        } else {
+            D_00515B40_7D00.b1[i] = f_5C60_7D00(0x840);
+            D_00515B40_7D00.b2[i] = D_00515B40_7D00.b1[i];
+        }
+        while ((int)D_00515B40_7D00.b2[i] & 0x3F) {
+            D_00515B40_7D00.b2[i] += 4;
+        }
+    }
+    if (D_00515B40_7D00.cfg.n4 != 0) {
+        D_00515B40_7D00.p1DC = f_5C60_7D00(D_00515B40_7D00.cfg.n4 * 0x60);
+        memset_7D00(D_00515B40_7D00.p1DC, 0, D_00515B40_7D00.cfg.n4 * 0x60);
+    }
+    f_58D8_7D00();
+    f_9268_7D00();
+    f_92B0_7D00();
+    f_92F8_7D00();
+    f_8128_7D00();
+    for (i = 0; i < D_00515B40_7D00.cfg.n5; i++) {
+        D_00515B40_7D00.c[i] = 0;
+        f_A7A0_7D00(&D_00515B40_7D00.d[i]);
+        D_00515B40_7D00.d[i].h = 0;
+        D_00515B40_7D00.d[i].b = 0;
+        f_8F48_7D00(&D_00515B40_7D00.c[i], &D_00515B40_7D00.d[i]);
+        memset_7D00(D_00515B40_7D00.b2[i], 0, 0x800);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C8018);
