@@ -7570,7 +7570,7 @@ float func_0040D588(float x) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040D610);
 #ifdef SKIP_ASM
 struct E40D610 { int type; char *name; double arg1; double arg2; double retval; int err; };
-extern int D_00499688[];
+extern const int D_00499688[]; /* fdlibm _LIB_VERSION (newlib: _CONST) */
 extern char D_00499070[];
 extern double D_00499680[];
 extern double core_40D610(double) __asm__("func_0040DB58");
@@ -7612,11 +7612,166 @@ double func_0040D610(double x) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040D758);
+#ifdef SKIP_ASM
+/* newlib libm expf wrapper (wf_exp.c; fdlibm; notice at func_0040F840).
+ * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com. */
+struct exception_D758 { int type; char *name; double arg1; double arg2; double retval; int err; };
+extern float func_0040E048(float);                                  /* __ieee754_expf */
+extern int func_0040F8C0(float);                                    /* finitef */
+extern int matherr_D758(struct exception_D758 *) __asm__("func_0040F878");
+enum fdlibm_version_D758 { fdlibm_ieee_D758 = -1, fdlibm_svid_D758, fdlibm_xopen_D758, fdlibm_posix_D758 };
+extern const enum fdlibm_version_D758 fdlib_version_D758 __asm__("D_00499688");
+#define _LIB_VERSION_D758 fdlib_version_D758
+#define errno_D758 (*func_00415FB8())
+#define HUGE_D758 ((float)3.40282346638528860e+38)
+#define HUGE_VAL_D758 (D_00499680[0])
+static const float
+o_threshold_D758=  8.8721679688e+01,  /* 0x42b17180 */
+u_threshold_D758= -1.0397208405e+02;  /* 0xc2cff1b5 */
 
+	float func_0040D758(float x)		/* wrapper expf */
+{
+	float z;
+	struct exception_D758 exc;
+	z = func_0040E048(x);
+	if(_LIB_VERSION_D758 == -1) return z;
+	if(func_0040F8C0(x)) {
+	    if(x>o_threshold_D758) {
+		/* expf(finite) overflow */
+		exc.type = 3;
+		exc.name = "expf";
+		exc.err = 0;
+		exc.arg1 = exc.arg2 = (double)x;
+		if (_LIB_VERSION_D758 == 0)
+		  exc.retval = HUGE_D758;
+		else
+		  exc.retval = HUGE_VAL_D758;
+		if (_LIB_VERSION_D758 == 2)
+		  errno_D758 = 34;
+		else if (!matherr_D758(&exc)) {
+			errno_D758 = 34;
+		}
+	        if (exc.err != 0)
+	           errno_D758 = exc.err;
+	        return exc.retval;
+	    } else if(x<u_threshold_D758) {
+		/* expf(finite) underflow */
+		exc.type = 4;
+		exc.name = "expf";
+		exc.err = 0;
+		exc.arg1 = exc.arg2 = (double)x;
+		exc.retval = 0.0;
+		if (_LIB_VERSION_D758 == 2)
+		  errno_D758 = 34;
+		else if (!matherr_D758(&exc)) {
+			errno_D758 = 34;
+		}
+	        if (exc.err != 0)
+	           errno_D758 = exc.err;
+	        return exc.retval;
+	    }
+	}
+	return z;
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040D8D0);
+#ifdef SKIP_ASM
+/* newlib libm fmodf wrapper (wf_fmod.c; fdlibm; notice at func_0040F840).
+ * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com. */
+struct exception_D8D0 { int type; char *name; double arg1; double arg2; double retval; int err; };
+enum fdlibm_version_D8D0 { fdlibm_ieee_D8D0 = -1, fdlibm_svid_D8D0, fdlibm_xopen_D8D0, fdlibm_posix_D8D0 };
+extern const enum fdlibm_version_D8D0 fdlib_version_D8D0 __asm__("D_00499688");
+extern float func_0040E300(float, float);                           /* __ieee754_fmodf */
+extern int func_0040F9D0(float);                                    /* isnanf */
+extern int matherr_D8D0(struct exception_D8D0 *) __asm__("func_0040F878");
+#define _LIB_VERSION_D8D0 fdlib_version_D8D0
+#define errno_D8D0 (*func_00415FB8())
 
+	float func_0040D8D0(float x, float y)	/* wrapper fmodf */
+{
+	float z;
+	struct exception_D8D0 exc;
+	z = func_0040E300(x,y);
+	if(_LIB_VERSION_D8D0 == fdlibm_ieee_D8D0 ||func_0040F9D0(y)||func_0040F9D0(x)) return z;
+	if(y==(float)0.0) {
+            /* fmodf(x,0) */
+            exc.type = 1;
+            exc.name = "fmodf";
+	    exc.err = 0;
+	    exc.arg1 = (double)x;
+	    exc.arg2 = (double)y;
+            if (_LIB_VERSION_D8D0 == fdlibm_svid_D8D0)
+               exc.retval = x;
+	    else
+	       exc.retval = 0.0/0.0;
+            if (_LIB_VERSION_D8D0 == fdlibm_posix_D8D0)
+               errno_D8D0 = 33;
+            else if (!matherr_D8D0(&exc)) {
+                  errno_D8D0 = 33;
+            }
+	    if (exc.err != 0)
+	       errno_D8D0 = exc.err;
+            return (float)exc.retval;
+	} else
+	    return z;
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040DA10);
+#ifdef SKIP_ASM
+/* newlib libm logf wrapper (wf_log.c; fdlibm; notice at func_0040F840).
+ * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com. */
+struct exception_DA10 { int type; char *name; double arg1; double arg2; double retval; int err; };
+enum fdlibm_version_DA10 { fdlibm_ieee_DA10 = -1, fdlibm_svid_DA10, fdlibm_xopen_DA10, fdlibm_posix_DA10 };
+extern const enum fdlibm_version_DA10 fdlib_version_DA10 __asm__("D_00499688");
+extern float func_0040E550(float);                                  /* __ieee754_logf */
+extern int func_0040F9D0(float);                                    /* isnanf */
+extern int matherr_DA10(struct exception_DA10 *) __asm__("func_0040F878");
+#define _LIB_VERSION_DA10 fdlib_version_DA10
+#define errno_DA10 (*func_00415FB8())
+#define HUGE_DA10 ((float)3.40282346638528860e+38)
+#define HUGE_VAL_DA10 (D_00499680[0])
+
+	float func_0040DA10(float x)		/* wrapper logf */
+{
+	float z;
+	struct exception_DA10 exc;
+	z = func_0040E550(x);
+	if(_LIB_VERSION_DA10 == fdlibm_ieee_DA10 || func_0040F9D0(x) || x > (float)0.0) return z;
+	exc.name = "logf";
+	exc.err = 0;
+	exc.arg1 = exc.arg2 = (double)x;
+	if (_LIB_VERSION_DA10 == fdlibm_svid_DA10)
+           exc.retval = -HUGE_DA10;
+	else
+	   exc.retval = -HUGE_VAL_DA10;
+	if(x==(float)0.0) {
+	    /* logf(0) */
+	    exc.type = 2;
+	    if (_LIB_VERSION_DA10 == fdlibm_posix_DA10)
+	       errno_DA10 = 34;
+	    else if (!matherr_DA10(&exc)) {
+	       errno_DA10 = 33;
+	    }
+	} else {
+	    /* logf(x<0) */
+	    exc.type = 1;
+	    if (_LIB_VERSION_DA10 == fdlibm_posix_DA10)
+	       errno_DA10 = 33;
+	    else if (!matherr_DA10(&exc)) {
+	       errno_DA10 = 33;
+	    }
+        }
+	if (exc.err != 0)
+           errno_DA10 = exc.err;
+        return (float)exc.retval;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040DB58);
@@ -7724,9 +7879,314 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040E300);
 
 INCLUDE_ASM("seg/seg_2FE810", func_0040E550);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040E878);
+#ifdef SKIP_ASM
+/* newlib libm __ieee754_rem_pio2f (ef_rem_pio2.c; fdlibm; notice at func_0040F840).
+ * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com. */
+/* newlib libm's word-access helpers (fdlibm.h), verbatim */
+typedef union
+{
+  float value;
+  unsigned int word;
+} ieee_float_shape_type_E878;
+#define GET_FLOAT_WORD_E878(i,d)				\
+do {								\
+  ieee_float_shape_type_E878 gf_u;				\
+  gf_u.value = (d);						\
+  (i) = gf_u.word;						\
+} while (0)
+#define SET_FLOAT_WORD_E878(d,i)				\
+do {								\
+  ieee_float_shape_type_E878 sf_u;				\
+  sf_u.word = (i);						\
+  (d) = sf_u.value;						\
+} while (0)
 
+extern float func_0040F8A0(float);	/* fabsf */
+extern int func_0040EC58(float *, float *, int, int, int, const int *);	/* __kernel_rem_pio2f */
+/* the file's static tables, at their retail addresses */
+extern const int D_00499228[];	/* two_over_pi[] */
+extern const int D_00499540[];	/* npio2_hw[] */
+#define two_over_pi_E878 D_00499228
+#define npio2_hw_E878 D_00499540
+
+static const float
+zero_E878 =  0.0000000000e+00, /* 0x00000000 */
+half_E878 =  5.0000000000e-01, /* 0x3f000000 */
+two8_E878 =  2.5600000000e+02, /* 0x43800000 */
+invpio2_E878 =  6.3661980629e-01, /* 0x3f22f984 */
+pio2_1_E878  =  1.5707855225e+00, /* 0x3fc90f80 */
+pio2_1t_E878 =  1.0804334124e-05, /* 0x37354443 */
+pio2_2_E878  =  1.0804273188e-05, /* 0x37354400 */
+pio2_2t_E878 =  6.0770999344e-11, /* 0x2e85a308 */
+pio2_3_E878  =  6.0770943833e-11, /* 0x2e85a300 */
+pio2_3t_E878 =  6.1232342629e-17; /* 0x248d3132 */
+
+	int func_0040E878(float x, float *y)
+{
+	float z,w,t,r,fn;
+	float tx[3];
+	int i,j,n,ix,hx;
+	int e0,nx;
+
+	GET_FLOAT_WORD_E878(hx,x);
+	ix = hx&0x7fffffff;
+	if(ix<=0x3f490fd8)   /* |x| ~<= pi/4 , no need for reduction */
+	    {y[0] = x; y[1] = 0; return 0;}
+	if(ix<0x4016cbe4) {  /* |x| < 3pi/4, special case with n=+-1 */
+	    if(hx>0) {
+		z = x - pio2_1_E878;
+		if((ix&0xfffffff0)!=0x3fc90fd0) { /* 24+24 bit pi OK */
+		    y[0] = z - pio2_1t_E878;
+		    y[1] = (z-y[0])-pio2_1t_E878;
+		} else {		/* near pi/2, use 24+24+24 bit pi */
+		    z -= pio2_2_E878;
+		    y[0] = z - pio2_2t_E878;
+		    y[1] = (z-y[0])-pio2_2t_E878;
+		}
+		return 1;
+	    } else {	/* negative x */
+		z = x + pio2_1_E878;
+		if((ix&0xfffffff0)!=0x3fc90fd0) { /* 24+24 bit pi OK */
+		    y[0] = z + pio2_1t_E878;
+		    y[1] = (z-y[0])+pio2_1t_E878;
+		} else {		/* near pi/2, use 24+24+24 bit pi */
+		    z += pio2_2_E878;
+		    y[0] = z + pio2_2t_E878;
+		    y[1] = (z-y[0])+pio2_2t_E878;
+		}
+		return -1;
+	    }
+	}
+	if(ix<=0x43490f80) { /* |x| ~<= 2^7*(pi/2), medium size */
+	    t  = func_0040F8A0(x);
+	    n  = (int) (t*invpio2_E878+half_E878);
+	    fn = (float)n;
+	    r  = t-fn*pio2_1_E878;
+	    w  = fn*pio2_1t_E878;	/* 1st round good to 40 bit */
+	    if(n<32&&(ix&0xffffff00)!=npio2_hw_E878[n-1]) {
+		y[0] = r-w;	/* quick check no cancellation */
+	    } else {
+	        unsigned int high;
+	        j  = ix>>23;
+	        y[0] = r-w;
+		GET_FLOAT_WORD_E878(high,y[0]);
+	        i = j-((high>>23)&0xff);
+	        if(i>8) {  /* 2nd iteration needed, good to 57 */
+		    t  = r;
+		    w  = fn*pio2_2_E878;
+		    r  = t-w;
+		    w  = fn*pio2_2t_E878-((t-r)-w);
+		    y[0] = r-w;
+		    GET_FLOAT_WORD_E878(high,y[0]);
+		    i = j-((high>>23)&0xff);
+		    if(i>25)  {	/* 3rd iteration need, 74 bits acc */
+		    	t  = r;	/* will cover all possible cases */
+		    	w  = fn*pio2_3_E878;
+		    	r  = t-w;
+		    	w  = fn*pio2_3t_E878-((t-r)-w);
+		    	y[0] = r-w;
+		    }
+		}
+	    }
+	    y[1] = (r-y[0])-w;
+	    if(hx<0) 	{y[0] = -y[0]; y[1] = -y[1]; return -n;}
+	    else	 return n;
+	}
+    /*
+     * all other (large) arguments
+     */
+	if(ix>=0x7f800000) {		/* x is inf or NaN */
+	    y[0]=y[1]=x-x; return 0;
+	}
+    /* set z = scalbn(|x|,ilogb(x)-7) */
+	e0 	= (int)((ix>>23)-134);	/* e0 = ilogb(z)-7; */
+	SET_FLOAT_WORD_E878(z, ix - ((int)e0<<23));
+	for(i=0;i<2;i++) {
+		tx[i] = (float)((int)(z));
+		z     = (z-tx[i])*two8_E878;
+	}
+	tx[2] = z;
+	nx = 3;
+	while(tx[nx-1]==zero_E878) nx--;	/* skip zero term */
+	n  =  func_0040EC58(tx,y,e0,nx,2,two_over_pi_E878);
+	if(hx<0) {y[0] = -y[0]; y[1] = -y[1]; return -n;}
+	return n;
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040EC58);
+#ifdef SKIP_ASM
+/* newlib libm __kernel_rem_pio2f (kf_rem_pio2.c; fdlibm; notice at func_0040F840).
+ * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com. */
+extern float func_0040F9F8(float, int);	/* scalbnf */
+extern float func_0040F8E8(float);	/* floorf */
+#define scalbnf_EC58 func_0040F9F8
+#define floorf_EC58 func_0040F8E8
+/* the file's static tables, at their retail addresses */
+extern const int D_004995E8[];	/* init_jk[] = {4,7,9} */
+extern const float D_004995F8[];	/* PIo2[] */
+#define init_jk_EC58 D_004995E8
+#define PIo2_EC58 D_004995F8
+
+static const float
+zero_EC58   = 0.0,
+one_EC58    = 1.0,
+two8_EC58   =  2.5600000000e+02, /* 0x43800000 */
+twon8_EC58  =  3.9062500000e-03; /* 0x3b800000 */
+
+	int func_0040EC58(float *x, float *y, int e0, int nx, int prec, const int *ipio2)
+{
+	int jz,jx,jv,jp,jk,carry,n,iq[20],i,j,k,m,q0,ih;
+	float z,fw,f[20],fq[20],q[20];
+
+    /* initialize jk*/
+	jk = init_jk_EC58[prec];
+	jp = jk;
+
+    /* determine jx,jv,q0, note that 3>q0 */
+	jx =  nx-1;
+	jv = (e0-3)/8; if(jv<0) jv=0;
+	q0 =  e0-8*(jv+1);
+
+    /* set up f[0] to f[jx+jk] where f[jx+jk] = ipio2[jv+jk] */
+	j = jv-jx; m = jx+jk;
+	for(i=0;i<=m;i++,j++) f[i] = (j<0)? zero_EC58 : (float) ipio2[j];
+
+    /* compute q[0],q[1],...q[jk] */
+	for (i=0;i<=jk;i++) {
+	    for(j=0,fw=0.0;j<=jx;j++) fw += x[j]*f[jx+i-j]; q[i] = fw;
+	}
+
+	jz = jk;
+recompute:
+    /* distill q[] into iq[] reversingly */
+	for(i=0,j=jz,z=q[jz];j>0;i++,j--) {
+	    fw    =  (float)((int)(twon8_EC58* z));
+	    iq[i] =  (int)(z-two8_EC58*fw);
+	    z     =  q[j-1]+fw;
+	}
+
+    /* compute n */
+	z  = scalbnf_EC58(z,(int)q0);	/* actual value of z */
+	z -= (float)8.0*floorf_EC58(z*(float)0.125);	/* trim off integer >= 8 */
+	n  = (int) z;
+	z -= (float)n;
+	ih = 0;
+	if(q0>0) {	/* need iq[jz-1] to determine n */
+	    i  = (iq[jz-1]>>(8-q0)); n += i;
+	    iq[jz-1] -= i<<(8-q0);
+	    ih = iq[jz-1]>>(7-q0);
+	} 
+	else if(q0==0) ih = iq[jz-1]>>8;
+	else if(z>=(float)0.5) ih=2;
+
+	if(ih>0) {	/* q > 0.5 */
+	    n += 1; carry = 0;
+	    for(i=0;i<jz ;i++) {	/* compute 1-q */
+		j = iq[i];
+		if(carry==0) {
+		    if(j!=0) {
+			carry = 1; iq[i] = 0x100- j;
+		    }
+		} else  iq[i] = 0xff - j;
+	    }
+	    if(q0>0) {		/* rare case: chance is 1 in 12 */
+	        switch(q0) {
+	        case 1:
+	    	   iq[jz-1] &= 0x7f; break;
+	    	case 2:
+	    	   iq[jz-1] &= 0x3f; break;
+	        }
+	    }
+	    if(ih==2) {
+		z = one_EC58 - z;
+		if(carry!=0) z -= scalbnf_EC58(one_EC58,(int)q0);
+	    }
+	}
+
+    /* check if recomputation is needed */
+	if(z==zero_EC58) {
+	    j = 0;
+	    for (i=jz-1;i>=jk;i--) j |= iq[i];
+	    if(j==0) { /* need recomputation */
+		for(k=1;iq[jk-k]==0;k++);   /* k = no. of terms needed */
+
+		for(i=jz+1;i<=jz+k;i++) {   /* add q[jz+1] to q[jz+k] */
+		    f[jx+i] = (float) ipio2[jv+i];
+		    for(j=0,fw=0.0;j<=jx;j++) fw += x[j]*f[jx+i-j];
+		    q[i] = fw;
+		}
+		jz += k;
+		goto recompute;
+	    }
+	}
+
+    /* chop off zero terms */
+	if(z==(float)0.0) {
+	    jz -= 1; q0 -= 8;
+	    while(iq[jz]==0) { jz--; q0-=8;}
+	} else { /* break z into 8-bit if necessary */
+	    z = scalbnf_EC58(z,-(int)q0);
+	    if(z>=two8_EC58) { 
+		fw = (float)((int)(twon8_EC58*z));
+		iq[jz] = (int)(z-two8_EC58*fw);
+		jz += 1; q0 += 8;
+		iq[jz] = (int) fw;
+	    } else iq[jz] = (int) z ;
+	}
+
+    /* convert integer "bit" chunk to floating-point value */
+	fw = scalbnf_EC58(one_EC58,(int)q0);
+	for(i=jz;i>=0;i--) {
+	    q[i] = fw*(float)iq[i]; fw*=twon8_EC58;
+	}
+
+    /* compute PIo2[0,...,jp]*q[jz,...,0] */
+	for(i=jz;i>=0;i--) {
+	    for(fw=0.0,k=0;k<=jp&&k<=jz-i;k++) fw += PIo2_EC58[k]*q[i+k];
+	    fq[jz-i] = fw;
+	}
+
+    /* compress fq[] into y[] */
+	switch(prec) {
+	    case 0:
+		fw = 0.0;
+		for (i=jz;i>=0;i--) fw += fq[i];
+		y[0] = (ih==0)? fw: -fw; 
+		break;
+	    case 1:
+	    case 2:
+		fw = 0.0;
+		for (i=jz;i>=0;i--) fw += fq[i]; 
+		y[0] = (ih==0)? fw: -fw; 
+		fw = fq[0]-fw;
+		for (i=1;i<=jz;i++) fw += fq[i];
+		y[1] = (ih==0)? fw: -fw; 
+		break;
+	    case 3:	/* painful */
+		for (i=jz;i>0;i--) {
+		    fw      = fq[i-1]+fq[i]; 
+		    fq[i]  += fq[i-1]-fw;
+		    fq[i-1] = fw;
+		}
+		for (i=jz;i>1;i--) {
+		    fw      = fq[i-1]+fq[i]; 
+		    fq[i]  += fq[i-1]-fw;
+		    fq[i-1] = fw;
+		}
+		for (fw=0.0,i=jz;i>=2;i--) fw += fq[i]; 
+		if(ih==0) {
+		    y[0] =  fq[0]; y[1] =  fq[1]; y[2] =  fw;
+		} else {
+		    y[0] = -fq[0]; y[1] = -fq[1]; y[2] = -fw;
+		}
+	}
+	return n&7;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_0040F5A8);
 

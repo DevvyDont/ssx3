@@ -167,8 +167,31 @@ def li_is_macro(ops):
     return not (-0x8000 <= v <= 0xFFFF or (v & 0xFFFF) == 0 and -0x80000000 <= v <= 0xFFFFFFFF)
 
 
+# Hazard nops at `.set noreorder` (2026-11-14, from agent lm_A's experiment on the libm block 0x40D758-0x40FCB0): the
+# original assembler flushes the previous instruction's coprocessor hazard when cc1 opens a `.set noreorder` block
+# (binutils mips_emit_delays: it can't see the next instruction), while in reorder mode it relies on the EE's
+# interlocks (retail floorf: `c.lt.s; bc1f` with no nop). So an FP compare directly before a noreorder block gets a
+# nop, and an mfc1 does when the block's first instruction reads its GPR. ee-as 2.9-ee-991111 adds neither.
+HAZARD_NOREORDER = re.compile(r"(\t(?:c\.[a-z]+\.s|mfc1)\t[^\n]*\n)(\t#nop\n)?((?:\s*\n|\$L\d+:\n)*"
+                              r"\t\.set\tnoreorder\n\t\.set\tnomacro\n)(\t[^\n]*)")
+
+
+def noreorder_hazard_nops(text):
+    def sub(m):
+        insn, nxt = m.group(1), m.group(4).split("#", 1)[0].split(None, 1)
+        if insn.lstrip().startswith("c."):
+            return insn + "\tnop\n" + m.group(3) + m.group(4)
+        dst = gprs(insn.split(None, 1)[1].split(",")[0])
+        reads = insn_regs(nxt[0], [o.strip() for o in nxt[1].split(",")])[1] if len(nxt) > 1 else set()
+        if dst and dst[0] in reads:
+            return insn + "\tnop\n" + (m.group(2) or "") + m.group(3) + m.group(4)
+        return m.group(0)
+    return HAZARD_NOREORDER.sub(sub, text)
+
+
 def fill_delay_slots(text, log=None):
     """Move the previous instruction into the delay slot of unfilled reorder-mode branches (rules above)."""
+    text = noreorder_hazard_nops(text)
     lines = text.split("\n")
     noreorder, stack = False, []
     prev_flag = pp_flag = 0          # emitted-in-noreorder flags of the previous and the pre-previous instruction
