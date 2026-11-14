@@ -1895,7 +1895,173 @@ extern "C" void func_002F39C8(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_update);
+#ifdef SKIP_ASM
+extern int D_004A424C;
+extern void* D_004A28A8;
+extern int D_004A4258;
+extern float D_004A4260;
+extern int D_004A426C;
+// NOTE: tunable float member of a global record; splat names the field separately.
+struct sTun_39E0 {
+    float v;
+};
+extern sTun_39E0 D_004A4294_39E0 __asm__("D_004A4294");
+unsigned int BXrand();
+
+struct sV4_39E0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sV2_39E0 {
+    float x, y;
+    sV2_39E0() {}
+    sV2_39E0(float ax, float ay) : x(ax), y(ay) {}
+    sV2_39E0 operator*(float s) const { return sV2_39E0(x * s, y * s); }
+    float& X() { return x; }
+    float& Y() { return y; }
+};
+
+struct sSmoke_39E0 {
+    int active;
+    char pad[0x3C - 4];
+};
+
+struct sPart_39E0 {
+    int bursts;
+    int active;
+    sV2_39E0 pos;
+    sV2_39E0 size;
+    char pad[0x4C - 0x18];
+};
+
+struct sBase_39E0 {
+    int pad[3];
+};
+
+struct sVBase_39E0 : sBase_39E0 {
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
+    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
+    virtual void v12(); virtual void Reset();
+};
+
+struct sEmitter_39E0 : sVBase_39E0 {
+    unsigned int idx;
+    int nSmoke;
+    int nParts;
+    sSmoke_39E0 smoke[30];
+    sPart_39E0 parts[30];
+    int hasPrev;
+    sV4_39E0 prevPos;
+    float speed;
+};
+
+extern "C" void func_002F3810(char* self);
+extern "C" void func_002F2810_39E0(sSmoke_39E0*, float) __asm__("func_002F2810");
+extern "C" void func_002F3030_39E0(sPart_39E0*, float) __asm__("func_002F3030");
+extern "C" void func_002F37A8_39E0(void*, sV2_39E0*, sV2_39E0*) __asm__("func_002F37A8");
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline void Sub_39E0(sV4_39E0* out, const sV4_39E0& a, const sV4_39E0& b)
+{
+    sV4_39E0 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    *out = r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector length via vsqrt).
+static inline float Length_39E0(const sV4_39E0& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+extern "C" void cSplashManager_update(sEmitter_39E0* self)
+{
+    if (D_004A424C == 0)
+        return;
+    char* w = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x84);
+    if (self->idx >= *(unsigned int*)(w + 0x10))
+        return;
+    sV4_39E0 pos = *(sV4_39E0*)(*(char**)(w + (self->idx << 2) + 4) + 0x20);
+    if (self->hasPrev) {
+        sV4_39E0 d;
+        Sub_39E0(&d, pos, self->prevPos);
+        self->speed = Length_39E0(d) * 59.999996185302734f * 0.035999998450279236f;
+    } else {
+        self->speed = 0.0f;
+        self->hasPrev = 1;
+    }
+    if (self->speed > 1000.0f) {
+        self->Reset();
+        self->speed = 0.0f;
+    }
+    self->prevPos = pos;
+    func_002F3810((char*)self);
+
+    int i = 0;
+    while (i < self->nSmoke) {
+        sSmoke_39E0* sm = &self->smoke[i];
+        func_002F2810_39E0(sm, self->speed);
+        if (sm->active) {
+            i++;
+        } else {
+            self->smoke[i] = self->smoke[self->nSmoke - 1];
+            self->nSmoke--;
+        }
+    }
+
+    int pick = -1;
+    union {
+        unsigned int i;
+        float f;
+    } u;
+    u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+    if ((u.f - 1.0f) * (float)self->nParts / (float)D_004A4258 < D_004A4260 && self->nParts > 0)
+        pick = BXrand() % self->nParts;
+
+    i = 0;
+    while (i < self->nParts) {
+        sPart_39E0* p = &self->parts[i];
+        func_002F3030_39E0(p, self->speed);
+        if (p->active) {
+            if (pick == i && self->parts[i].bursts < D_004A426C) {
+                self->parts[i].bursts++;
+                sV2_39E0 sz = p->size * 0.6000000238418579f;
+                if (sz.X() > D_004A4294_39E0.v && sz.Y() > D_004A4294_39E0.v)
+                    func_002F37A8_39E0(self, &self->parts[i].pos, &sz);
+            }
+            i++;
+        } else {
+            self->parts[i] = self->parts[self->nParts - 1];
+            self->nParts--;
+        }
+    }
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_render);

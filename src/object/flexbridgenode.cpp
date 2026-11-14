@@ -640,7 +640,226 @@ extern "C" void cFlexBridgeNode_updateIntersectInfo(sFlBridge_70D0* self, sFlSta
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_intersect);
+#ifdef SKIP_ASM
+struct sFV_7268 {
+    float x, y, z, w;
+    sFV_7268() {}
+    sFV_7268(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sFRow_7268 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sFM_7268 {
+    sFRow_7268 r[4];
+} __attribute__((aligned(16)));
+
+extern sFV_7268 D_004FF120_v7268 __asm__("D_004FF120");
+
+struct sFMesh_7268 {
+    unsigned short numTris;     // 0x0
+    short numVerts;             // 0x2
+    void* indices;              // 0x4
+    void* boxes;                // 0x8
+    sFV_7268* verts;            // 0xC
+    sFV_7268* normals;          // 0x10
+};
+
+struct sFHit_7268 {
+    sFV_7268 pos;       // 0x00
+    sFV_7268 nrm;       // 0x10
+    sFV_7268 v20;       // 0x20
+    sFV_7268 v30;       // 0x30
+    float t;            // 0x40
+    int type;           // 0x44
+    int f48;            // 0x48
+    int f4C;            // 0x4C
+    void* owner;        // 0x50
+    int f54;            // 0x54
+    int f58;            // 0x58
+    int f5C;            // 0x5C
+    int tri;            // 0x60
+    int f64;            // 0x64
+    int f68;            // 0x68
+    int f6C;            // 0x6C
+    int f70;            // 0x70
+    int pad[3];
+};
+
+struct sFVE_7268 { short delta; short index; void* fn; };
+
+struct sFTester_7268 {
+    char pad0[0x50];
+    sFVE_7268* vt;      // 0x50
+};
+
+struct sFList_7268 {
+    int pad0;
+    int count;          // 0x4
+};
+
+struct sFData_7268 {
+    char pad0[0x80];
+    sFList_7268* list;  // 0x80
+    float scale;        // 0x84
+    char* elems;        // 0x88
+};
+
+struct sFNode_7268 {
+    char pad0[0xC];
+    sFVE_7268* vt;      // 0xC
+    char pad10[0x8];
+    sFData_7268* data;  // 0x18
+    char pad1C[0x34];
+    int count;          // 0x50
+    char pad54[0x28];
+    sFV_7268* pts;      // 0x7C
+    sFV_7268* normals;  // 0x80
+    void* indices;      // 0x84
+};
+
+typedef sFM_7268* (*GetMtxFn_7268)(void*);
+typedef void (*SetXformFn_7268)(void*, sFM_7268*, float);
+typedef void (*VoidFn_7268)(void*);
+
+extern "C" int func_0032C0F8(sFTester_7268* t, sFMesh_7268* mesh, int flag, sFHit_7268* out, int cap);
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+static inline void Copy_7268(sFM_7268* d, const sFM_7268* s)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sFV_7268 Scale_7268(float s, const sFV_7268& v)
+{
+    sFV_7268 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (m * v).
+static inline sFV_7268 MulVec_7268(const sFM_7268* m, const sFV_7268& v)
+{
+    sFV_7268 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+static inline sFV_7268 Pos_7268(const sFM_7268* m)
+{
+    return *(const sFV_7268*)&m->r[3];
+}
+
+static inline sFV_7268 Mul_7268(const sFV_7268& a, const sFV_7268& b)
+{
+    return sFV_7268(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
+}
+
+static inline void Reset_7268(sFHit_7268* h)
+{
+    h->f54 = 0;
+    h->owner = 0;
+    h->f58 = 0;
+    h->f5C = -1;
+    h->tri = -1;
+    h->f64 = -1;
+    h->type = 2;
+    h->f4C = -1;
+    h->v20 = D_004FF120_v7268;
+    h->v30 = D_004FF120_v7268;
+    h->f68 = 0;
+    h->f6C = 0;
+    h->f70 = 0;
+}
+
+// Orthonormal inverse in place: transpose the 3x3 part, position = R^T * -t.
+static inline void TransposeInverse_7268(sFM_7268* t)
+{
+    float tmp;
+    tmp = t->r[0].y; t->r[0].y = t->r[1].x; t->r[1].x = tmp;
+    tmp = t->r[0].z; t->r[0].z = t->r[2].x; t->r[2].x = tmp;
+    tmp = t->r[1].z; t->r[1].z = t->r[2].y; t->r[2].y = tmp;
+    sFV_7268 p = Scale_7268(-1.0f, Pos_7268(t));
+    p.w = 0.0f;
+    p = MulVec_7268(t, p);
+    p.w = 1.0f;
+    *(sFV_7268*)&t->r[3] = p;
+}
+
+extern "C" int cFlexBridgeNode_intersect(sFNode_7268* self, sFTester_7268* tester, sFHit_7268* out, int cap, int flags)
+{
+    if (!(flags & 2)) {
+        return 0;
+    }
+    sFMesh_7268 mesh;
+    mesh.numTris = (self->count - 1) * 2;
+    mesh.numVerts = self->count * 2;
+    mesh.indices = self->indices;
+    mesh.verts = self->pts;
+    mesh.normals = self->normals;
+    sFM_7268* m = ((GetMtxFn_7268)self->vt[24].fn)((char*)self + self->vt[24].delta);
+    sFM_7268 inv;
+    Copy_7268(&inv, m);
+    TransposeInverse_7268(&inv);
+    ((SetXformFn_7268)tester->vt[1].fn)((char*)tester + tester->vt[1].delta, &inv, 1.0f / self->data->scale);
+    int n = func_0032C0F8(tester, &mesh, 1, out, cap);
+    ((VoidFn_7268)tester->vt[2].fn)((char*)tester + tester->vt[2].delta);
+    for (int i = 0; i < n; i++) {
+        sFHit_7268* h = &out[i];
+        Reset_7268(h);
+        float s = self->data->scale;
+        float one = 1.0f;
+        h->pos = MulVec_7268(m, Mul_7268(h->pos, sFV_7268(s, s, s, one)));
+        h->nrm = MulVec_7268(m, h->nrm);
+        h->type = 1;
+        h->owner = self->data;
+        int k = self->data->list->count - 1;
+        h->f48 = 0;
+        h->f5C = k;
+        h->v20 = D_004FF120_v7268;
+        h->v30 = D_004FF120_v7268;
+        h->f4C = *(short*)(self->data->elems + k * 12 + 0x1A);
+    }
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_update);
