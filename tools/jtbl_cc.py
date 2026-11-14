@@ -273,11 +273,62 @@ def repoint_strings(text: str, unit: str) -> tuple[str, list[str]]:
     return text, log
 
 
+POOL_DEF = re.compile(r"^(\$LC\d+):\s*\n((?:\s*\.word\s+(?:0x[0-9A-Fa-f]+|-?\d+)[^\n]*\n)+)", re.M)
+
+
+def repoint_pool(text: str, unit: str) -> tuple[str, list[str]]:
+    """References to a numeric pool constant `$LCn: .word ...` -> the retail D_x with the same bytes that the function names.
+
+    The compiler writes a double/float constant it can't build in registers (-inf, NaN, 1e300 in newlib's libm) as
+    words in the unit's own .rdata and loads it with `lui %hi($LCn)` + `ld`/`lw`/`lwc1 %lo($LCn)`. As for the strings,
+    splat moved that pool into the shared rodata segment and the retail function names the entry, so the
+    references are renamed to the k-th D_x of the function's retail asm whose leading bytes are the same
+    (entries our body already names, e.g. the unit's static consts declared extern, are skipped).
+    """
+    defs = {}
+    for m in POOL_DEF.finditer(text):
+        words = [int(v, 0) & 0xFFFFFFFF for v in re.findall(r"\.word\s+(0x[0-9A-Fa-f]+|-?\d+)", m.group(2))]
+        defs[m.group(1)] = b"".join(w.to_bytes(4, "little") for w in words)
+    if not defs:
+        return text, []
+    data = retail_strings()
+    log = []
+    for func, a, b in reversed(list(functions(text))):
+        body = text[a:b]
+        labels = [l for l in dict.fromkeys(re.findall(r"\$LC\d+\b", body)) if l in defs]
+        if not labels:
+            continue
+        p = ROOT / "asm/nonmatchings" / unit / f"{func}.s"
+        if not p.exists():
+            continue
+        named = set(re.findall(r"\bD_[0-9A-F]{8}\b", body))
+        refs = [s for s in dict.fromkeys(re.findall(r"%lo\((D_[0-9A-F]{8})\)", p.read_text(errors="replace")))
+                if s in data and s not in named]
+        used = set()
+        for label in labels:
+            hit = next((s for s in refs if s not in used and data[s][:len(defs[label])] == defs[label]), None)
+            if hit is None:
+                continue
+            used.add(hit)
+            body = re.sub(re.escape(label) + r"\b", hit, body)
+            log.append(f"{func}: {label} -> {hit} ({defs[label].hex()})")
+        text = text[:a] + body + text[b:]
+    for label in defs:
+        if re.search(re.escape(label) + r"\b(?!:)", text):
+            continue
+        text = re.sub(r"^(?:\s*\.align\s+\d+\s*\n)?" + re.escape(label) + r":\s*\n(?:\s*\.word\s+(?:0x[0-9A-Fa-f]+|-?\d+)[^\n]*\n)+",
+                      "", text, flags=re.M)
+    text = re.sub(r"^\s*\.rdata\s*\n(?=\s*\.text\s*\n)", "", text, flags=re.M)
+    return text, log
+
+
 def repoint(text: str, unit: str, assemble) -> tuple[str, list[str]]:
     """assemble(asm_text, extra_flags) -> object Path. Returns the rewritten assembly and a log."""
     text, log = repoint_literals(text, unit)
     text, slog = repoint_strings(text, unit)
     log += slog
+    text, plog = repoint_pool(text, unit)
+    log += plog
     if not TABLE.search(text):
         return text, log
     syms = local_symbols(assemble(text, ["-Wa,-L"]))

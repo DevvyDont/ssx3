@@ -7618,7 +7618,105 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040D8D0);
 
 INCLUDE_ASM("seg/seg_2FE810", func_0040DA10);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040DB58);
+#ifdef SKIP_ASM
+/* newlib libm __ieee754_log (e_log.c; fdlibm; notice at func_0040F840) */
+/* newlib libm's word-access helpers (fdlibm.h), little-endian layout, verbatim */
+typedef union
+{
+  double value;
+  struct
+  {
+    unsigned int lsw;
+    unsigned int msw;
+  } parts;
+} ieee_double_shape_type_DB58;
+#define EXTRACT_WORDS_DB58(ix0,ix1,d)				\
+do {								\
+  ieee_double_shape_type_DB58 ew_u;				\
+  ew_u.value = (d);						\
+  (ix0) = ew_u.parts.msw;					\
+  (ix1) = ew_u.parts.lsw;					\
+} while (0)
+#define GET_HIGH_WORD_DB58(i,d)					\
+do {								\
+  ieee_double_shape_type_DB58 gh_u;				\
+  gh_u.value = (d);						\
+  (i) = gh_u.parts.msw;						\
+} while (0)
+#define SET_HIGH_WORD_DB58(d,v)					\
+do {								\
+  ieee_double_shape_type_DB58 sh_u;				\
+  sh_u.value = (d);						\
+  sh_u.parts.msw = (v);						\
+  (d) = sh_u.value;						\
+} while (0)
+
+static const double
+ln2_hi_DB58  =  6.93147180369123816490e-01,	/* 3fe62e42 fee00000 */
+ln2_lo_DB58  =  1.90821492927058770002e-10,	/* 3dea39ef 35793c76 */
+two54_DB58   =  1.80143985094819840000e+16,  /* 43500000 00000000 */
+Lg1_DB58 = 6.666666666666735130e-01,  /* 3FE55555 55555593 */
+Lg2_DB58 = 3.999999999940941908e-01,  /* 3FD99999 9997FA04 */
+Lg3_DB58 = 2.857142874366239149e-01,  /* 3FD24924 94229359 */
+Lg4_DB58 = 2.222219843214978396e-01,  /* 3FCC71C5 1D8E78AF */
+Lg5_DB58 = 1.818357216161805012e-01,  /* 3FC74664 96CB03DE */
+Lg6_DB58 = 1.531383769920937332e-01,  /* 3FC39A09 D078C69F */
+Lg7_DB58 = 1.479819860511658591e-01;  /* 3FC2F112 DF3E5244 */
+
+static const double zero_DB58   =  0.0;
+
+	double func_0040DB58(double x)
+{
+	double hfsq,f,s,z,R,w,t1,t2,dk;
+	int k,hx,i,j;
+	unsigned int lx;
+
+	EXTRACT_WORDS_DB58(hx,lx,x);
+
+	k=0;
+	if (hx < 0x00100000) {			/* x < 2**-1022  */
+	    if (((hx&0x7fffffff)|lx)==0)
+		return -two54_DB58/zero_DB58;		/* log(+-0)=-inf */
+	    if (hx<0) return (x-x)/zero_DB58;	/* log(-#) = NaN */
+	    k -= 54; x *= two54_DB58; /* subnormal number, scale up x */
+	    GET_HIGH_WORD_DB58(hx,x);
+	}
+	if (hx >= 0x7ff00000) return x+x;
+	k += (hx>>20)-1023;
+	hx &= 0x000fffff;
+	i = (hx+0x95f64)&0x100000;
+	SET_HIGH_WORD_DB58(x,hx|(i^0x3ff00000));	/* normalize x or x/2 */
+	k += (i>>20);
+	f = x-1.0;
+	if((0x000fffff&(2+hx))<3) {	/* |f| < 2**-20 */
+          if(f==zero_DB58) { if(k==0) return zero_DB58;  else {dk=(double)k;
+                               return dk*ln2_hi_DB58+dk*ln2_lo_DB58;}}
+	    R = f*f*(0.5-0.33333333333333333*f);
+	    if(k==0) return f-R; else {dk=(double)k;
+	    	     return dk*ln2_hi_DB58-((R-dk*ln2_lo_DB58)-f);}
+	}
+ 	s = f/(2.0+f);
+	dk = (double)k;
+	z = s*s;
+	i = hx-0x6147a;
+	w = z*z;
+	j = 0x6b851-hx;
+	t1= w*(Lg2_DB58+w*(Lg4_DB58+w*Lg6_DB58));
+	t2= z*(Lg1_DB58+w*(Lg3_DB58+w*(Lg5_DB58+w*Lg7_DB58)));
+	i |= j;
+	R = t2+t1;
+	if(i>0) {
+	    hfsq=0.5*f*f;
+	    if(k==0) return f-(hfsq-s*(hfsq+R)); else
+		     return dk*ln2_hi_DB58-((hfsq-(s*(hfsq+R)+dk*ln2_lo_DB58))-f);
+	} else {
+	    if(k==0) return f-s*(f-R); else
+		     return dk*ln2_hi_DB58-((s*(f-R)-dk*ln2_lo_DB58)-f);
+	}
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_0040E048);
 

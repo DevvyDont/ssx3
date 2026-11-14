@@ -2004,13 +2004,282 @@ void func_0041EC48(void) {
 
 INCLUDE_ASM("seg/seg_316FB8", func_0041EC70);
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041ED60);
+#ifdef SKIP_ASM
+/* newlib libm floor (fdlibm s_floor.c). The EE has no double hardware: the double travels in one 64-bit GPR and
+ * the arithmetic goes through the soft-float helpers (dpadd, dpcmp).
+ * ====================================================
+ * Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+ *
+ * Developed at SunPro, a Sun Microsystems, Inc. business.
+ * Permission to use, copy, modify, and distribute this
+ * software is freely granted, provided that this notice
+ * is preserved.
+ * ====================================================
+ */
+/* newlib libm's word-access helpers (fdlibm.h), little-endian layout, verbatim: the do-while(0) is part of the
+   library macro */
+typedef union
+{
+  double value;
+  struct
+  {
+    unsigned int lsw;
+    unsigned int msw;
+  } parts;
+} ieee_double_shape_type_ED60;
+#define EXTRACT_WORDS_ED60(ix0,ix1,d)				\
+do {								\
+  ieee_double_shape_type_ED60 ew_u;				\
+  ew_u.value = (d);						\
+  (ix0) = ew_u.parts.msw;					\
+  (ix1) = ew_u.parts.lsw;					\
+} while (0)
+#define INSERT_WORDS_ED60(d,ix0,ix1)				\
+do {								\
+  ieee_double_shape_type_ED60 iw_u;				\
+  iw_u.parts.msw = (ix0);					\
+  iw_u.parts.lsw = (ix1);					\
+  (d) = iw_u.value;						\
+} while (0)
+
+static const double huge_ED60 = 1.0e300;
+
+double func_0041ED60(double x)
+{
+	int i0,i1,j0;
+	unsigned int i,j;
+	EXTRACT_WORDS_ED60(i0,i1,x);
+	j0 = ((i0>>20)&0x7ff)-0x3ff;
+	if(j0<20) {
+	    if(j0<0) { 	/* raise inexact if x != 0 */
+		if(huge_ED60+x>0.0) {/* return 0*sign(x) if |x|<1 */
+		    if(i0>=0) {i0=i1=0;}
+		    else if(((i0&0x7fffffff)|i1)!=0)
+			{ i0=0xbff00000;i1=0;}
+		}
+	    } else {
+		i = (0x000fffff)>>j0;
+		if(((i0&i)|i1)==0) return x; /* x is integral */
+		if(huge_ED60+x>0.0) {	/* raise inexact flag */
+		    if(i0<0) i0 += (0x00100000)>>j0;
+		    i0 &= (~i); i1=0;
+		}
+	    }
+	} else if (j0>51) {
+	    if(j0==0x400) return x+x;	/* inf or NaN */
+	    else return x;		/* x is integral */
+	} else {
+	    i = ((unsigned int)(0xffffffff))>>(j0-20);
+	    if((i1&i)==0) return x;	/* x is integral */
+	    if(huge_ED60+x>0.0) { 		/* raise inexact flag */
+		if(i0<0) {
+		    if(j0==20) i0+=1;
+		    else {
+			j = i1+(1<<(52-j0));
+			if(j<i1) i0 +=1 ; 	/* got a carry */
+			i1=j;
+		    }
+		}
+		i1 &= (~i);
+	    }
+	}
+	INSERT_WORDS_ED60(x,i0,i1);
+	return x;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_316FB8", func_0041EF50);
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041F3A8);
+#ifdef SKIP_ASM
+/* newlib 1.9 libm/math/e_log.c (__ieee754_log) and the fdlibm.h word macros, verbatim:
+ * ====================================================
+ * Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+ *
+ * Developed at SunPro, a Sun Microsystems, Inc. business.
+ * Permission to use, copy, modify, and distribute this
+ * software is freely granted, provided that this notice 
+ * is preserved.
+ * ====================================================
+ */
+typedef union {
+    double value;
+    struct {
+        unsigned int lsw;
+        unsigned int msw;
+    } parts;
+} ieee_double_shape_type_0041F3A8;
+#define EXTRACT_WORDS_0041F3A8(ix0,ix1,d)			\
+do {								\
+  ieee_double_shape_type_0041F3A8 ew_u;				\
+  ew_u.value = (d);						\
+  (ix0) = ew_u.parts.msw;					\
+  (ix1) = ew_u.parts.lsw;					\
+} while (0)
+#define GET_HIGH_WORD_0041F3A8(i,d)				\
+do {								\
+  ieee_double_shape_type_0041F3A8 gh_u;				\
+  gh_u.value = (d);						\
+  (i) = gh_u.parts.msw;						\
+} while (0)
+#define SET_HIGH_WORD_0041F3A8(d,v)				\
+do {								\
+  ieee_double_shape_type_0041F3A8 sh_u;				\
+  sh_u.value = (d);						\
+  sh_u.parts.msw = (v);						\
+  (d) = sh_u.value;						\
+} while (0)
 
+static const double
+ln2_hi_0041F3A8  =  6.93147180369123816490e-01,	/* 3fe62e42 fee00000 */
+ln2_lo_0041F3A8  =  1.90821492927058770002e-10,	/* 3dea39ef 35793c76 */
+two54_0041F3A8   =  1.80143985094819840000e+16,  /* 43500000 00000000 */
+Lg1_0041F3A8 = 6.666666666666735130e-01,  /* 3FE55555 55555593 */
+Lg2_0041F3A8 = 3.999999999940941908e-01,  /* 3FD99999 9997FA04 */
+Lg3_0041F3A8 = 2.857142874366239149e-01,  /* 3FD24924 94229359 */
+Lg4_0041F3A8 = 2.222219843214978396e-01,  /* 3FCC71C5 1D8E78AF */
+Lg5_0041F3A8 = 1.818357216161805012e-01,  /* 3FC74664 96CB03DE */
+Lg6_0041F3A8 = 1.531383769920937332e-01,  /* 3FC39A09 D078C69F */
+Lg7_0041F3A8 = 1.479819860511658591e-01;  /* 3FC2F112 DF3E5244 */
+
+static const double zero_0041F3A8   =  0.0;
+
+double func_0041F3A8(double x)
+{
+	double hfsq,f,s,z,R,w,t1,t2,dk;
+	int k,hx,i,j;
+	unsigned int lx;
+
+	EXTRACT_WORDS_0041F3A8(hx,lx,x);
+
+	k=0;
+	if (hx < 0x00100000) {			/* x < 2**-1022  */
+	    if (((hx&0x7fffffff)|lx)==0) 
+		return -two54_0041F3A8/zero_0041F3A8;		/* log(+-0)=-inf */
+	    if (hx<0) return (x-x)/zero_0041F3A8;	/* log(-#) = NaN */
+	    k -= 54; x *= two54_0041F3A8; /* subnormal number, scale up x */
+	    GET_HIGH_WORD_0041F3A8(hx,x);
+	} 
+	if (hx >= 0x7ff00000) return x+x;
+	k += (hx>>20)-1023;
+	hx &= 0x000fffff;
+	i = (hx+0x95f64)&0x100000;
+	SET_HIGH_WORD_0041F3A8(x,hx|(i^0x3ff00000));	/* normalize x or x/2 */
+	k += (i>>20);
+	f = x-1.0;
+	if((0x000fffff&(2+hx))<3) {	/* |f| < 2**-20 */
+          if(f==zero_0041F3A8) { if(k==0) return zero_0041F3A8;  else {dk=(double)k;
+                               return dk*ln2_hi_0041F3A8+dk*ln2_lo_0041F3A8;}}
+	    R = f*f*(0.5-0.33333333333333333*f);
+	    if(k==0) return f-R; else {dk=(double)k;
+	    	     return dk*ln2_hi_0041F3A8-((R-dk*ln2_lo_0041F3A8)-f);}
+	}
+ 	s = f/(2.0+f); 
+	dk = (double)k;
+	z = s*s;
+	i = hx-0x6147a;
+	w = z*z;
+	j = 0x6b851-hx;
+	t1= w*(Lg2_0041F3A8+w*(Lg4_0041F3A8+w*Lg6_0041F3A8)); 
+	t2= z*(Lg1_0041F3A8+w*(Lg3_0041F3A8+w*(Lg5_0041F3A8+w*Lg7_0041F3A8))); 
+	i |= j;
+	R = t2+t1;
+	if(i>0) {
+	    hfsq=0.5*f*f;
+	    if(k==0) return f-(hfsq-s*(hfsq+R)); else
+		     return dk*ln2_hi_0041F3A8-((hfsq-(s*(hfsq+R)+dk*ln2_lo_0041F3A8))-f);
+	} else {
+	    if(k==0) return f-s*(f-R); else
+		     return dk*ln2_hi_0041F3A8-((s*(f-R)-dk*ln2_lo_0041F3A8)-f);
+	}
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041F9D8);
+#ifdef SKIP_ASM
+/* newlib libm __ieee754_log10 (fdlibm e_log10.c). The EE has no double hardware: the double travels in one 64-bit
+ * GPR and the arithmetic goes through the soft-float helpers.
+ * ====================================================
+ * Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+ *
+ * Developed at SunPro, a Sun Microsystems, Inc. business.
+ * Permission to use, copy, modify, and distribute this
+ * software is freely granted, provided that this notice
+ * is preserved.
+ * ====================================================
+ */
+/* newlib libm's word-access helpers (fdlibm.h), little-endian layout, verbatim: the do-while(0) is part of the
+   library macro */
+typedef union
+{
+  double value;
+  struct
+  {
+    unsigned int lsw;
+    unsigned int msw;
+  } parts;
+} ieee_double_shape_type_F9D8;
+#define EXTRACT_WORDS_F9D8(ix0,ix1,d)				\
+do {								\
+  ieee_double_shape_type_F9D8 ew_u;				\
+  ew_u.value = (d);						\
+  (ix0) = ew_u.parts.msw;					\
+  (ix1) = ew_u.parts.lsw;					\
+} while (0)
+#define GET_HIGH_WORD_F9D8(i,d)					\
+do {								\
+  ieee_double_shape_type_F9D8 gh_u;				\
+  gh_u.value = (d);						\
+  (i) = gh_u.parts.msw;						\
+} while (0)
+#define SET_HIGH_WORD_F9D8(d,v)					\
+do {								\
+  ieee_double_shape_type_F9D8 sh_u;				\
+  sh_u.value = (d);						\
+  sh_u.parts.msw = (v);						\
+  (d) = sh_u.value;						\
+} while (0)
+
+static const double
+two54_F9D8      =  1.80143985094819840000e+16, /* 0x43500000, 0x00000000 */
+ivln10_F9D8     =  4.34294481903251816668e-01, /* 0x3FDBCB7B, 0x1526E50E */
+log10_2hi_F9D8  =  3.01029995663611771306e-01, /* 0x3FD34413, 0x509F6000 */
+log10_2lo_F9D8  =  3.69423907715893078616e-13; /* 0x3D59FEF3, 0x11F12B36 */
+
+static const double zero_F9D8   =  0.0;
+
+extern double __ieee754_log_F9D8(double) __asm__("func_0041F3A8");
+
+double func_0041F9D8(double x)
+{
+	double y,z;
+	int i,k,hx;
+	unsigned int lx;
+
+	EXTRACT_WORDS_F9D8(hx,lx,x);
+
+        k=0;
+        if (hx < 0x00100000) {                  /* x < 2**-1022  */
+            if (((hx&0x7fffffff)|lx)==0)
+                return -two54_F9D8/zero_F9D8;             /* log(+-0)=-inf */
+            if (hx<0) return (x-x)/zero_F9D8;        /* log(-#) = NaN */
+            k -= 54; x *= two54_F9D8; /* subnormal number, scale up x */
+	    GET_HIGH_WORD_F9D8(hx,x);
+        }
+	if (hx >= 0x7ff00000) return x+x;
+	k += (hx>>20)-1023;
+	i  = ((unsigned int)k&0x80000000)>>31;
+        hx = (hx&0x000fffff)|((0x3ff-i)<<20);
+        y  = (double)(k+i);
+	SET_HIGH_WORD_F9D8(x,hx);
+	z  = y*log10_2lo_F9D8 + ivln10_F9D8*__ieee754_log_F9D8(x);
+	return  z+y*log10_2hi_F9D8;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041FB98);
