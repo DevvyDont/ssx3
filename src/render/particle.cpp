@@ -4942,7 +4942,144 @@ extern "C" void func_00379860(sPtGfx_9860* self, int n, sVtx_9860* src)
 
 INCLUDE_ASM("render/particle", func_00379BD0);
 
+//100%
 INCLUDE_ASM("render/particle", func_0037A260);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// 4x4 float matrix (POD, 16-byte aligned).
+struct sPtMatrix_A260 {
+    float m[4][4];
+} __attribute__((aligned(16)));
+
+// 4x4 float matrix with an empty ctor and a VU0 copy ctor (copies go through vf1..vf4).
+struct sPtMatrixV_A260 {
+    float m[4][4];
+    sPtMatrixV_A260() {}
+    // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
+    sPtMatrixV_A260(const sPtMatrixV_A260& s)
+    {
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            :
+            : "r"(this), "r"(&s)
+            : "memory");
+    }
+} __attribute__((aligned(16)));
+
+// g++ 2.95 vtable entry for a method taking (self, pointer).
+struct sPtVtVP_A260 {
+    short delta;
+    short index;
+    void (*fn)(void*, void*);
+};
+
+// cPS2GraphicsMan_A260 (prototype class) as the particle renderers see it: render-state stack top, texture ids, draw
+// ring, texture set, scissor, frame-buffer setup, bounds. Fields named by their users; the rest is padding.
+struct cPS2GraphicsMan_A260 {
+    char pad_0x0[0xE84];
+    sPtRenderState* top;            // 0xE84
+    char pad_0xE88[0xF50 - 0xE88];
+    int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
+    sPtVtVP_A260* vtable;                // 0x10D8
+    char pad_0x10DC[0x18F0 - 0x10DC];
+    sPtRing* ring;                  // 0x18F0
+    void* texset;                   // 0x18F4
+    char pad_0x18F8[0x5860 - 0x18F8];
+    sPtMatrixV_A260 m5860;               // 0x5860
+    char pad_0x58A0[0x5900 - 0x58A0];
+    unsigned short scX;             // 0x5900
+    unsigned short scY;             // 0x5902
+    unsigned short scW;             // 0x5904
+    unsigned short scH;             // 0x5906
+    char pad_0x5908[0x5A00 - 0x5908];
+    unsigned int bufAddr;           // 0x5A00
+    char pad_0x5A04[0x5A28 - 0x5A04];
+    unsigned int pendBuf;           // 0x5A28
+    unsigned long* pend;            // 0x5A2C
+    unsigned int width;             // 0x5A30
+    unsigned int height;            // 0x5A34
+    char pad_0x5A38[0x4];
+    unsigned int psm;               // 0x5A3C
+    char pad_0x5A40[0x5A50 - 0x5A40];
+    unsigned int fbw;               // 0x5A50
+    char pad_0x5A54[0x5A84 - 0x5A54];
+    unsigned int fbp;               // 0x5A84
+    char pad_0x5A88[0x6AF0 - 0x5A88];
+    float f6AF0;                    // 0x6AF0
+    char pad_0x6AF4[0x6B04 - 0x6AF4];
+    float f6B04;                    // 0x6B04
+    char pad_0x6B08[0x6B30 - 0x6B08];
+    sPtMatrix_A260 m6B30;                // 0x6B30
+    float xmin;                     // 0x6B70
+    float ymin;                     // 0x6B74
+    float zmin;                     // 0x6B78
+    float wmin;                     // 0x6B7C
+    float xmax;                     // 0x6B80
+    float ymax;                     // 0x6B84
+    float zmax;                     // 0x6B88
+    float wmax;                     // 0x6B8C
+    int texReady;                   // 0x6B90
+};
+
+extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
+
+extern int D_004A4474;
+
+extern int D_004A4380;
+extern char D_12B0[];
+extern char D_12B8[];
+
+static inline unsigned long gsPrim_A260(int prim)
+{
+    return ((unsigned long)prim << 47) | ((unsigned long)0x8000 << 31);
+}
+
+// PORT: PS2-only GS packet build (DMA tag + GIF tag + PRIM/TEX registers).
+// Opens an in-place triangle list of n vertices in the pending packet and returns where the vertices go.
+extern "C" unsigned long* func_0037A260(cPS2GraphicsMan_A260* self, int n)
+{
+    unsigned int addr = (D_004A4380 ? (unsigned int)D_12B0 : (unsigned int)D_12B8) >> 3;
+    int a;
+    long b;
+    D_004A4380 = 0;
+    self->top->f0 = (self->top->f0 & ~0x3C0) | 0xC0;
+    self->top->fC &= 0xC0000000;
+    if (self->texReady == 0) {
+        func_0037D968(self);
+    }
+    if (self->top->tex >= 0) {
+        a = 0x5C;
+        b = 0x412;
+    } else {
+        a = 0x4C;
+        b = 0x41F;
+    }
+    unsigned int buf = self->bufAddr;
+    self->pendBuf = buf;
+    self->pend = func_0038F460(D_004A4474, buf, -1, 0);
+    self->pend[0] = (n * 3 + 4) | 0x10000000;
+    self->pend[1] = 0;
+    self->pend[2] = 0;
+    self->pend[3] = (unsigned long)((n * 3 + 2) << 16 | 0x6C008000U) << 32;
+    self->pend[4] = (unsigned long)(n | 0x8000) | gsPrim_A260(a) | ((unsigned long)0xC000 << 46);
+    self->pend[5] = b;
+    self->pend[6] = (long)n * 3;
+    self->pend[7] = 0;
+    unsigned long* verts = self->pend + 8;
+    self->pend = verts + n * 6;
+    self->pend[0] = 0;
+    self->pend[1] = (unsigned long)(addr | 0x14000000) << 32;
+    self->pend += 2;
+    return verts;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0037A430);
