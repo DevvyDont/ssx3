@@ -7632,7 +7632,40 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040EC58);
 
 INCLUDE_ASM("seg/seg_2FE810", func_0040F5A8);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040F840);
+#ifdef SKIP_ASM
+/* newlib libm isnan (fdlibm s_isnan.c): the EE has no double hardware, so the double arrives in one 64-bit GPR.
+ * The bodies of isnan, finitef (func_0040F8C0) and isnanf (func_0040F9D0) and the word-access macros are fdlibm's:
+ * Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+ * Developed at SunPro, a Sun Microsystems, Inc. business.
+ * Permission to use, copy, modify, and distribute this software is freely granted, provided that this notice
+ * is preserved.
+ */
+/* newlib libm (fdlibm.h), little-endian layout, verbatim */
+typedef union {
+    double value;
+    struct {
+        unsigned int lsw;
+        unsigned int msw;
+    } parts;
+} ieee_double_shape_type;
+#define EXTRACT_WORDS(ix0,ix1,d)				\
+do {								\
+  ieee_double_shape_type ew_u;					\
+  ew_u.value = (d);						\
+  (ix0) = ew_u.parts.msw;					\
+  (ix1) = ew_u.parts.lsw;					\
+} while (0)
+int func_0040F840(double x) {
+    int hx, lx;
+    EXTRACT_WORDS(hx, lx, x);
+    hx &= 0x7fffffff;
+    hx |= (unsigned int)(lx | (-lx)) >> 31;
+    hx = 0x7ff00000 - hx;
+    return (int)(((unsigned int)(hx)) >> 31);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040F878);
@@ -7659,11 +7692,43 @@ float func_0040F8A0(float x) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040F8C0);
+#ifdef SKIP_ASM
+/* newlib libm finitef (fdlibm sf_finite.c; notice at func_0040F840) */
+/* newlib libm's word-access helpers (fdlibm.h), verbatim: the do-while(0) is part of the library macro */
+typedef union {
+    float value;
+    unsigned int word;
+} ieee_float_shape_type;
+#define GET_FLOAT_WORD(i,d)					\
+do {								\
+  ieee_float_shape_type gf_u;					\
+  gf_u.value = (d);						\
+  (i) = gf_u.word;						\
+} while (0)
+int func_0040F8C0(float x) {
+    int ix;
+    GET_FLOAT_WORD(ix, x);
+    return (int)((unsigned int)((ix & 0x7fffffff) - 0x7f800000) >> 31);
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_0040F8E8);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040F9D0);
+#ifdef SKIP_ASM
+/* newlib libm isnanf (fdlibm sf_isnan.c; notice at func_0040F840) */
+/* GET_FLOAT_WORD: defined with finitef (func_0040F8C0) above */
+int func_0040F9D0(float x) {
+    int ix;
+    GET_FLOAT_WORD(ix, x);
+    ix &= 0x7fffffff;
+    ix = 0x7f800000 - ix;
+    return (int)(((unsigned int)(ix)) >> 31);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040F9F8);
