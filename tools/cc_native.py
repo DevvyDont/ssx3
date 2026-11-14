@@ -176,13 +176,36 @@ HAZARD_NOREORDER = re.compile(r"(\t(?:c\.[a-z]+\.s|mfc1)\t[^\n]*\n)(\t#nop\n)?((
                               r"\t\.set\tnoreorder\n\t\.set\tnomacro\n)(\t[^\n]*)")
 
 
+def branch_or_insn_reads(mn, ops):
+    """GPRs an instruction reads; a branch's register operands are all reads (jalr/`jal $31,$2`: not the link)."""
+    if mn in BRANCHES:
+        if mn in ("jalr", "jal") and len(ops) == 2:
+            ops = ops[1:]
+        return set(sum((gprs(o) for o in ops if not o.startswith("$L")), [])) - {0}
+    return insn_regs(mn, ops)[1]
+
+
+def fpr_reads(mn, ops):
+    """FPRs an FPU instruction reads (`$fN` operands other than the destination)."""
+    f = [re.findall(r"\$f\d+", o) for o in ops]
+    if mn.startswith("c."):
+        return set(sum(f, []))
+    if mn in ("mfc1", "dmfc1"):
+        return set(sum(f[1:2], []))
+    if mn in ("swc1", "sdc1", "s.s", "s.d"):
+        return set(sum(f[:1], []))
+    if mn in ("mtc1", "dmtc1", "lwc1", "ldc1", "l.s", "l.d", "ctc1", "cfc1"):
+        return set()
+    return set(sum(f[1:], []))
+
+
 def noreorder_hazard_nops(text):
     def sub(m):
         insn, nxt = m.group(1), m.group(4).split("#", 1)[0].split(None, 1)
         if insn.lstrip().startswith("c."):
             return insn + "\tnop\n" + m.group(3) + m.group(4)
         dst = gprs(insn.split(None, 1)[1].split(",")[0])
-        reads = insn_regs(nxt[0], [o.strip() for o in nxt[1].split(",")])[1] if len(nxt) > 1 else set()
+        reads = branch_or_insn_reads(nxt[0], [o.strip() for o in nxt[1].split(",")]) if len(nxt) > 1 else set()
         if dst and dst[0] in reads:
             return insn + "\tnop\n" + (m.group(2) or "") + m.group(3) + m.group(4)
         return m.group(0)
@@ -197,6 +220,7 @@ def fill_delay_slots(text, log=None):
     prev_flag = pp_flag = 0          # emitted-in-noreorder flags of the previous and the pre-previous instruction
     prev = None                      # (line index, mnemonic, operands) of the previous instruction, None if unusable
     pending = False                  # a label or a non-.set directive since the previous instruction
+    last = plast = None              # (mnemonic, operands) of the last two instructions, any mode (li.s: its mtc1)
     swaps = []
     for i, raw in enumerate(lines):
         line = raw.split("#", 1)[0].strip() if not raw.lstrip().startswith("#") else ""
@@ -230,6 +254,8 @@ def fill_delay_slots(text, log=None):
         ops = [o.strip() for o in parts[1].split(",")] if len(parts) > 1 else []
         macro = mn in MACROS or (mn == "li" and li_is_macro(ops)) or \
             (mn in ("div", "divu", "ddiv", "ddivu") and len(ops) == 3)
+        before_prev = plast
+        plast, last = last, (("mtc1", ["$1", ops[0]]) if mn == "li.s" and ops else (mn, ops))
         if not noreorder and abs_mem(mn, ops):
             # `sw $6,ADDR` expands to `lui $1,%hi(ADDR); sw $6,%lo(ADDR)($1)`; its second half can be moved
             pp_flag, prev_flag = 0, 0
@@ -267,6 +293,11 @@ def fill_delay_slots(text, log=None):
                         ok = ok and not (cop == "2" and (pmn.startswith("v") or pmn.endswith("c2")))
                         ok = ok and not (cop == "0" and pmn.endswith("c0"))
                     if pmn in HILO_READS and mn in COND_BRANCHES | COP_BRANCHES:
+                        ok = False
+                    # an FPU op reading the FPR that the mtc1 right before it wrote stays put (retail libm
+                    # __ieee754_expf: `mtc1 $3,$f1; mul.s $f0,$f1,$f0; jr $31; nop`; agent lm_A, 2026-11-14)
+                    if before_prev and before_prev[0] in ("mtc1", "dmtc1") and len(before_prev[1]) > 1 \
+                            and before_prev[1][1] in fpr_reads(pmn, pops):
                         ok = False
                     if ok:
                         swaps.append((prev[0], i))

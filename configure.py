@@ -99,7 +99,11 @@ for _u, _d in list(UNIT_CC.items()):
 # neither SN 2.95.3 build produces (they use sq). Unit edges sit where that fingerprint starts and stops. Override
 # the location with EE_GCC29_DIR; if the compiler is missing (or not on Linux) these units fall back to the default
 # compiler and those functions just don't match.
-EE_GCC29_DIR = os.environ.get("EE_GCC29_DIR", f"{TOOLS_DIR}/cc/ee-gcc2.9-991111")
+# 2026-11-14: the default is the 2.9-ee-991111-01 build from the same bundle (ee-gcc2.9-991111-01.tar.xz into
+# tools/cc/ee-gcc2.9-991111-01). Its divsf3 template is `.set noreorder; nop; nop; div.s` (one 12-byte insn, so never
+# in a delay slot), which every div.s in these units shows (9 of 9, all in the libm block); on everything else it
+# compiles identically to 991111 (objdiff report unchanged for every landed function).
+EE_GCC29_DIR = os.environ.get("EE_GCC29_DIR", f"{TOOLS_DIR}/cc/ee-gcc2.9-991111-01")
 UNIT_CC_NATIVE = {
     "seg/seg_2FE810": EE_GCC29_DIR,
     "seg/seg_3113A0_eh": EE_GCC29_DIR,

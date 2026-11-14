@@ -7873,11 +7873,301 @@ static const double zero_DB58   =  0.0;
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040E048);
+#ifdef SKIP_ASM
+/* newlib libm __ieee754_expf (ef_exp.c; fdlibm; notice at func_0040F840).
+ * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com. */
+/* newlib libm's word-access helpers (fdlibm.h), verbatim */
+typedef union
+{
+  float value;
+  unsigned int word;
+} ieee_float_shape_type_E048;
+#define GET_FLOAT_WORD_E048(i,d)				\
+do {								\
+  ieee_float_shape_type_E048 gf_u;				\
+  gf_u.value = (d);						\
+  (i) = gf_u.word;						\
+} while (0)
+#define SET_FLOAT_WORD_E048(d,i)				\
+do {								\
+  ieee_float_shape_type_E048 sf_u;				\
+  sf_u.word = (i);						\
+  (d) = sf_u.value;						\
+} while (0)
 
+/* the file's static tables, at their retail addresses */
+extern const float D_004991A0[];	/* halF[2], then huge, twom100, o_threshold, u_threshold */
+extern const float D_004991B8[];	/* ln2HI[2] */
+extern const float D_004991C0[];	/* ln2LO[2], then invln2, P1..P5 */
+#define halF_E048 D_004991A0
+#define ln2HI_E048 D_004991B8
+#define ln2LO_E048 D_004991C0
+static const float
+one_E048	= 1.0,
+huge_E048	= 1.0e+30,
+twom100_E048 = 7.8886090522e-31,      /* 2**-100=0x0d800000 */
+o_threshold_E048=  8.8721679688e+01,  /* 0x42b17180 */
+u_threshold_E048= -1.0397208405e+02,  /* 0xc2cff1b5 */
+invln2_E048 =  1.4426950216e+00, 		/* 0x3fb8aa3b */
+P1_E048   =  1.6666667163e-01, /* 0x3e2aaaab */
+P2_E048   = -2.7777778450e-03, /* 0xbb360b61 */
+P3_E048   =  6.6137559770e-05, /* 0x388ab355 */
+P4_E048   = -1.6533901999e-06, /* 0xb5ddea0e */
+P5_E048   =  4.1381369442e-08; /* 0x3331bb4c */
+
+	float func_0040E048(float x)	/* default IEEE double exp */
+{
+	float y,hi,lo,c,t;
+	int k,xsb;
+	unsigned int hx;
+
+	GET_FLOAT_WORD_E048(hx,x);
+	xsb = (hx>>31)&1;		/* sign bit of x */
+	hx &= 0x7fffffff;		/* high word of |x| */
+
+    /* filter out non-finite argument */
+	if(hx >= 0x42b17218) {			/* if |x|>=88.721... */
+	    if(hx>0x7f800000)
+		 return x+x;	 		/* NaN */
+            if(hx==0x7f800000)
+		return (xsb==0)? x:0.0;		/* exp(+-inf)={inf,0} */
+	    if(x > o_threshold_E048) return huge_E048*huge_E048; /* overflow */
+	    if(x < u_threshold_E048) return twom100_E048*twom100_E048; /* underflow */
+	}
+
+    /* argument reduction */
+	if(hx > 0x3eb17218) {		/* if  |x| > 0.5 ln2 */
+	    if(hx < 0x3F851592) {	/* and |x| < 1.5 ln2 */
+		hi = x-ln2HI_E048[xsb]; lo=ln2LO_E048[xsb]; k = 1-xsb-xsb;
+	    } else {
+		k  = invln2_E048*x+halF_E048[xsb];
+		t  = k;
+		hi = x - t*ln2HI_E048[0];	/* t*ln2HI is exact here */
+		lo = t*ln2LO_E048[0];
+	    }
+	    x  = hi - lo;
+	}
+	else if(hx < 0x31800000)  {	/* when |x|<2**-28 */
+	    if(huge_E048+x>one_E048) return one_E048+x;/* trigger inexact */
+	}
+	else k = 0;
+
+    /* x is now in primary range */
+	t  = x*x;
+	c  = x - t*(P1_E048+t*(P2_E048+t*(P3_E048+t*(P4_E048+t*P5_E048))));
+	if(k==0) 	return one_E048-((x*c)/(c-(float)2.0)-x);
+	else 		y = one_E048-((lo-(x*c)/((float)2.0-c))-hi);
+	if(k >= -125) {
+	    unsigned int hy;
+	    GET_FLOAT_WORD_E048(hy,y);
+	    SET_FLOAT_WORD_E048(y,hy+(k<<23));	/* add k to y's exponent */
+	    return y;
+	} else {
+	    unsigned int hy;
+	    GET_FLOAT_WORD_E048(hy,y);
+	    SET_FLOAT_WORD_E048(y,hy+((k+100)<<23));	/* add k to y's exponent */
+	    return y*twom100_E048;
+	}
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040E300);
+#ifdef SKIP_ASM
+// FAKEMATCH: `unsigned int n` with `while(n-- > 0)` for fdlibm's `__int32_t n` / `while(n--)` (n = ix-iy >= 0 after the |x|<|y|
+// return, so the loop runs the same); plain form 93.24%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+/* newlib libm __ieee754_fmodf (ef_fmod.c; fdlibm; notice at func_0040F840).
+ * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com. */
+/* newlib libm's word-access helpers (fdlibm.h), verbatim */
+typedef union
+{
+  float value;
+  unsigned int word;
+} ieee_float_shape_type_E300;
+#define GET_FLOAT_WORD_E300(i,d)				\
+do {								\
+  ieee_float_shape_type_E300 gf_u;				\
+  gf_u.value = (d);						\
+  (i) = gf_u.word;						\
+} while (0)
+#define SET_FLOAT_WORD_E300(d,i)				\
+do {								\
+  ieee_float_shape_type_E300 sf_u;				\
+  sf_u.word = (i);						\
+  (d) = sf_u.value;						\
+} while (0)
 
+static const float one_E300 = 1.0;
+extern const float D_004991F0[];	/* Zero[] = {0.0, -0.0} */
+#define Zero_E300 D_004991F0
+
+	float func_0040E300(float x, float y)
+{
+	int hx,hy,hz,ix,iy,sx,i;
+	unsigned int n;
+
+	GET_FLOAT_WORD_E300(hx,x);
+	GET_FLOAT_WORD_E300(hy,y);
+	sx = hx&0x80000000;		/* sign of x */
+	hx ^=sx;		/* |x| */
+	hy &= 0x7fffffff;	/* |y| */
+
+    /* purge off exception values */
+	if(hy==0||(hx>=0x7f800000)||		/* y=0,or x not finite */
+	   (hy>0x7f800000))			/* or y is NaN */
+	    return (x*y)/(x*y);
+	if(hx<hy) return x;			/* |x|<|y| return x */
+	if(hx==hy)
+	    return Zero_E300[(unsigned int)sx>>31];	/* |x|=|y| return x*0*/
+
+    /* determine ix = ilogb(x) */
+	if(hx<0x00800000) {	/* subnormal x */
+	    for (ix = -126,i=(hx<<8); i>0; i<<=1) ix -=1;
+	} else ix = (hx>>23)-127;
+
+    /* determine iy = ilogb(y) */
+	if(hy<0x00800000) {	/* subnormal y */
+	    for (iy = -126,i=(hy<<8); i>=0; i<<=1) iy -=1;
+	} else iy = (hy>>23)-127;
+
+    /* set up {hx,lx}, {hy,ly} and align y to x */
+	if(ix >= -126)
+	    hx = 0x00800000|(0x007fffff&hx);
+	else {		/* subnormal x, shift x to normal */
+	    n = -126-ix;
+	    hx = hx<<n;
+	}
+	if(iy >= -126)
+	    hy = 0x00800000|(0x007fffff&hy);
+	else {		/* subnormal y, shift y to normal */
+	    n = -126-iy;
+	    hy = hy<<n;
+	}
+
+    /* fix point fmod */
+	n = ix - iy;
+	while(n-- > 0) {
+	    hz=hx-hy;
+	    if(hz<0){hx = hx+hx;}
+	    else {
+	    	if(hz==0) 		/* return sign(x)*0 */
+		    return Zero_E300[(unsigned int)sx>>31];
+	    	hx = hz+hz;
+	    }
+	}
+	hz=hx-hy;
+	if(hz>=0) {hx=hz;}
+
+    /* convert back to floating value and restore the sign */
+	if(hx==0) 			/* return sign(x)*0 */
+	    return Zero_E300[(unsigned int)sx>>31];
+	while(hx<0x00800000) {		/* normalize x */
+	    hx = hx+hx;
+	    iy -= 1;
+	}
+	if(iy>= -126) {		/* normalize output */
+	    hx = ((hx-0x00800000)|((iy+127)<<23));
+	    SET_FLOAT_WORD_E300(x,hx|sx);
+	} else {		/* subnormal output */
+	    n = -126 - iy;
+	    hx >>= n;
+	    SET_FLOAT_WORD_E300(x,hx|sx);
+	    x *= one_E300;		/* create necessary signal */
+	}
+	return x;		/* exact output */
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040E550);
+#ifdef SKIP_ASM
+/* newlib libm __ieee754_logf (ef_log.c; fdlibm; notice at func_0040F840).
+ * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com. */
+/* newlib libm's word-access helpers (fdlibm.h), verbatim */
+typedef union
+{
+  float value;
+  unsigned int word;
+} ieee_float_shape_type_E550;
+#define GET_FLOAT_WORD_E550(i,d)				\
+do {								\
+  ieee_float_shape_type_E550 gf_u;				\
+  gf_u.value = (d);						\
+  (i) = gf_u.word;						\
+} while (0)
+#define SET_FLOAT_WORD_E550(d,i)				\
+do {								\
+  ieee_float_shape_type_E550 sf_u;				\
+  sf_u.word = (i);						\
+  (d) = sf_u.value;						\
+} while (0)
+
+static const float
+ln2_hi_E550 =   6.9313812256e-01,	/* 0x3f317180 */
+ln2_lo_E550 =   9.0580006145e-06,	/* 0x3717f7d1 */
+two25_E550 =    3.355443200e+07,	/* 0x4c000000 */
+Lg1_E550 = 6.6666668653e-01,	/* 3F2AAAAB */
+Lg2_E550 = 4.0000000596e-01,	/* 3ECCCCCD */
+Lg3_E550 = 2.8571429849e-01, /* 3E924925 */
+Lg4_E550 = 2.2222198546e-01, /* 3E638E29 */
+Lg5_E550 = 1.8183572590e-01, /* 3E3A3325 */
+Lg6_E550 = 1.5313838422e-01, /* 3E1CD04F */
+Lg7_E550 = 1.4798198640e-01; /* 3E178897 */
+
+static const float zero_E550   =  0.0;
+
+	float func_0040E550(float x)
+{
+	float hfsq,f,s,z,R,w,t1,t2,dk;
+	int k,ix,i,j;
+
+	GET_FLOAT_WORD_E550(ix,x);
+
+	k=0;
+	if (ix < 0x00800000) {			/* x < 2**-126  */
+	    if ((ix&0x7fffffff)==0)
+		return -two25_E550/zero_E550;		/* log(+-0)=-inf */
+	    if (ix<0) return (x-x)/zero_E550;	/* log(-#) = NaN */
+	    k -= 25; x *= two25_E550; /* subnormal number, scale up x */
+	    GET_FLOAT_WORD_E550(ix,x);
+	}
+	if (ix >= 0x7f800000) return x+x;
+	k += (ix>>23)-127;
+	ix &= 0x007fffff;
+	i = (ix+(0x95f64<<3))&0x800000;
+	SET_FLOAT_WORD_E550(x,ix|(i^0x3f800000));	/* normalize x or x/2 */
+	k += (i>>23);
+	f = x-(float)1.0;
+	if((0x007fffff&(15+ix))<16) {	/* |f| < 2**-20 */
+           if(f==zero_E550) { if(k==0) return zero_E550;  else {dk=(float)k;
+                                return dk*ln2_hi_E550+dk*ln2_lo_E550;}}
+	    R = f*f*((float)0.5-(float)0.33333333333333333*f);
+	    if(k==0) return f-R; else {dk=(float)k;
+	    	     return dk*ln2_hi_E550-((R-dk*ln2_lo_E550)-f);}
+	}
+ 	s = f/((float)2.0+f);
+	dk = (float)k;
+	z = s*s;
+	i = ix-(0x6147a<<3);
+	w = z*z;
+	j = (0x6b851<<3)-ix;
+	t1= w*(Lg2_E550+w*(Lg4_E550+w*Lg6_E550));
+	t2= z*(Lg1_E550+w*(Lg3_E550+w*(Lg5_E550+w*Lg7_E550)));
+	i |= j;
+	R = t2+t1;
+	if(i>0) {
+	    hfsq=(float)0.5*f*f;
+	    if(k==0) return f-(hfsq-s*(hfsq+R)); else
+		     return dk*ln2_hi_E550-((hfsq-(s*(hfsq+R)+dk*ln2_lo_E550))-f);
+	} else {
+	    if(k==0) return f-s*(f-R); else
+		     return dk*ln2_hi_E550-((s*(f-R)-dk*ln2_lo_E550)-f);
+	}
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040E878);
@@ -8188,7 +8478,93 @@ recompute:
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040F5A8);
+#ifdef SKIP_ASM
+/* newlib libm __kernel_tanf (kf_tan.c; fdlibm; notice at func_0040F840).
+ * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com. */
+/* newlib libm's word-access helpers (fdlibm.h), verbatim */
+typedef union
+{
+  float value;
+  unsigned int word;
+} ieee_float_shape_type_F5A8;
+#define GET_FLOAT_WORD_F5A8(i,d)				\
+do {								\
+  ieee_float_shape_type_F5A8 gf_u;				\
+  gf_u.value = (d);						\
+  (i) = gf_u.word;						\
+} while (0)
+#define SET_FLOAT_WORD_F5A8(d,i)				\
+do {								\
+  ieee_float_shape_type_F5A8 sf_u;				\
+  sf_u.word = (i);						\
+  (d) = sf_u.value;						\
+} while (0)
+
+extern float func_0040F8A0(float);	/* fabsf */
+#define fabsf_F5A8 func_0040F8A0
+/* the file's static table, at its retail address */
+extern const float D_00499648[];	/* T[13] */
+#define T_F5A8 D_00499648
+
+static const float
+one_F5A8   =  1.0000000000e+00, /* 0x3f800000 */
+pio4_F5A8  =  7.8539812565e-01, /* 0x3f490fda */
+pio4lo_F5A8=  3.7748947079e-08; /* 0x33222168 */
+
+	float func_0040F5A8(float x, float y, int iy)
+{
+	float z,r,v,w,s;
+	int ix,hx;
+	GET_FLOAT_WORD_F5A8(hx,x);
+	ix = hx&0x7fffffff;	/* high word of |x| */
+	if(ix<0x31800000)			/* x < 2**-28 */
+	    {if((int)x==0) {			/* generate inexact */
+		if((ix|(iy+1))==0) return one_F5A8/fabsf_F5A8(x);
+		else return (iy==1)? x: -one_F5A8/x;
+	    }
+	    }
+	if(ix>=0x3f2ca140) { 			/* |x|>=0.6744 */
+	    if(hx<0) {x = -x; y = -y;}
+	    z = pio4_F5A8-x;
+	    w = pio4lo_F5A8-y;
+	    x = z+w; y = 0.0;
+	}
+	z	=  x*x;
+	w 	=  z*z;
+    /* Break x^5*(T[1]+x^2*T[2]+...) into
+     *	  x^5(T[1]+x^4*T[3]+...+x^20*T[11]) +
+     *	  x^5(x^2*(T[2]+x^4*T[4]+...+x^22*[T12]))
+     */
+	r = T_F5A8[1]+w*(T_F5A8[3]+w*(T_F5A8[5]+w*(T_F5A8[7]+w*(T_F5A8[9]+w*T_F5A8[11]))));
+	v = z*(T_F5A8[2]+w*(T_F5A8[4]+w*(T_F5A8[6]+w*(T_F5A8[8]+w*(T_F5A8[10]+w*T_F5A8[12])))));
+	s = z*x;
+	r = y + z*(s*(r+v)+y);
+	r += T_F5A8[0]*s;
+	w = x+r;
+	if(ix>=0x3f2ca140) {
+	    v = (float)iy;
+	    return (float)(1-((hx>>30)&2))*(v-(float)2.0*(x-(w*w/(w+v)-r)));
+	}
+	if(iy==1) return w;
+	else {		/* if allow error up to 2 ulp,
+			   simply return -1.0/(x+r) here */
+     /*  compute -1.0/(x+r) accurately */
+	    float a,t;
+	    int i;
+	    z  = w;
+	    GET_FLOAT_WORD_F5A8(i,z);
+	    SET_FLOAT_WORD_F5A8(z,i&0xfffff000);
+	    v  = r-(z - x); 	/* z+v = r+x */
+	    t = a  = -(float)1.0/w;	/* a = -1.0/w */
+	    GET_FLOAT_WORD_F5A8(i,t);
+	    SET_FLOAT_WORD_F5A8(t,i&0xfffff000);
+	    s  = (float)1.0+t*z;
+	    return t+a*(s+t*v);
+	}
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040F840);
