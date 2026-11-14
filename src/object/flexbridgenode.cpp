@@ -282,7 +282,215 @@ extern "C" void cFlexBridgeNode_initSpringNodes(sFlexBridge* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_applyForce);
+#ifdef SKIP_ASM
+struct sV4_6E38 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat_6E38 {
+    sV4_6E38 r[4];
+};
+
+struct sSeg_6E38 {
+    char pad_0x0[0x30];
+    sV4_6E38 force;             // 0x30
+    float torque;               // 0x40
+    char pad_0x44[0xC];
+};
+
+struct sNode_6E38 {
+    sV4_6E38 pos;               // 0x00
+    char pad_0x10[0x50];
+    int idx;                    // 0x60
+};
+
+class cBridge_6E38 {
+public:
+    char pad_0x0[0xC];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual sMat_6E38* GetMatrix();
+};
+
+struct sBridgeData_6E38 {
+    char pad_0x0[0x30];
+    sV4_6E38 axis;              // 0x30
+    char pad_0x40[0x24];
+    float kLin;                 // 0x64
+    float kAng;                 // 0x68
+    char pad_0x6C[0x8];
+    sSeg_6E38* segs;            // 0x74
+    char pad_0x78[0x8];
+    sV4_6E38* pts;              // 0x80
+};
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline sV4_6E38 vu0Sub_6E38(const sV4_6E38& a, const sV4_6E38& b)
+{
+    sV4_6E38 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline sV4_6E38 vu0Scale_6E38(float s, const sV4_6E38& v)
+{
+    sV4_6E38 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline sV4_6E38 vu0Norm_6E38(const sV4_6E38& v)
+{
+    sV4_6E38 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
+static inline sV4_6E38 vu0MulMat_6E38(const sMat_6E38* m, const sV4_6E38& v)
+{
+    sV4_6E38 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_6E38(const sV4_6E38& a, const sV4_6E38& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void vu0AddEq_6E38(sV4_6E38& dst, sV4_6E38 b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b));
+}
+
+static inline sV4_6E38 Pos_6E38(const sMat_6E38* m)
+{
+    return m->r[3];
+}
+
+static inline sV4_6E38 ToLocal_6E38(const sMat_6E38* m, const sV4_6E38& v)
+{
+    sV4_6E38 r;
+    sV4_6E38 f = vu0Sub_6E38(v, vu0Scale_6E38(v.w, Pos_6E38(m)));
+    r.x = m->r[0].x * f.x + m->r[0].y * f.y + m->r[0].z * f.z;
+    r.y = m->r[1].x * f.x + m->r[1].y * f.y + m->r[1].z * f.z;
+    r.z = m->r[2].x * f.x + m->r[2].y * f.y + m->r[2].z * f.z;
+    r.w = v.w;
+    return r;
+}
+
+static inline float Torque_6E38(float k, const sV4_6E38& a, const sV4_6E38& b)
+{
+    return k * vu0Dot_6E38(a, b);
+}
+
+extern "C" void cFlexBridgeNode_applyForce(cBridge_6E38* self, sNode_6E38* intInfo, sV4_6E38* force)
+{
+    sBridgeData_6E38* d = (sBridgeData_6E38*)self;
+    if (intInfo->idx < 0) {
+        return;
+    }
+    sMat_6E38* transform = self->GetMatrix();
+    sV4_6E38 v = vu0Sub_6E38(intInfo->pos, Pos_6E38(transform));
+    sV4_6E38 y = vu0MulMat_6E38(transform, vu0Norm_6E38(d->axis));
+    sV4_6E38 n = vu0MulMat_6E38(transform, d->pts[intInfo->idx]);
+    float yoffset = vu0Dot_6E38(v, y);
+    int seg = intInfo->idx / 2;
+    sSeg_6E38* pNode = d->segs;
+    vu0AddEq_6E38(pNode[seg].force, vu0Scale_6E38(d->kLin, ToLocal_6E38(transform, *force)));
+    pNode[seg].torque += Torque_6E38(d->kAng, n, *force) * yoffset;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_updateIntersectInfo);
