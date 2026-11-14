@@ -9855,7 +9855,75 @@ extern "C" void func_003850A8(sPartGsCtx* ctx, sPartGsVtx* v, sPartGsPos* pos)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_00385138);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+extern void* D_00493208[];
+extern char D_00492E18[];
+extern "C" int func_00385EB0(void* self, int rows, int pitch);
+extern "C" void func_00386128(void* self, int rows, int pitch, char* dst, char* src);
+
+struct sPtSurf5138 {
+    int field_0x0;
+    void** vtable;          // 0x4
+    char pad_0x8[0x188];
+    short w;                // 0x190
+    short h;                // 0x192
+    float field_0x194;      // 0x194
+    float field_0x198;      // 0x198
+    char* buf;              // 0x19C
+    int field_0x1A0;        // 0x1A0
+    int field_0x1A4;        // 0x1A4
+    int pad_0x1A8;
+    char* bufA;             // 0x1AC
+    char* bufB;             // 0x1B0
+    char* rowsA;            // 0x1B4
+    char* rowsB;            // 0x1B8
+    int rows;               // 0x1BC
+    int pitch;              // 0x1C0
+    int field_0x1C4;        // 0x1C4
+    int valid;              // 0x1C8
+};
+
+// PORT: the unit declares func_00385138(void*, void*, void*, void*, unsigned int); the body takes ints.
+extern "C" sPtSurf5138* func_00385138_impl(sPtSurf5138* self, int w, int h, int a3, int allocFlags) __asm__("func_00385138");
+extern "C" sPtSurf5138* func_00385138_impl(sPtSurf5138* self, int w, int h, int a3, int allocFlags)
+{
+    int pitch = w * 2;
+    int rows = h - 1;
+    self->vtable = D_00493208;
+    self->rows = rows;
+    self->pitch = pitch;
+    self->field_0x1C4 = a3;
+    self->field_0x194 = 20000.0f;
+    self->field_0x198 = 1.638350009918213f;
+    self->w = w;
+    self->h = h;
+    int size = func_00385EB0(self, rows, pitch);
+    char* buf = (char*)operator_new_tag(size * 2 + (self->rows << 5), D_00492E18, allocFlags, 0);
+    self->buf = buf;
+    if (buf == 0) {
+        self->valid = 0;
+    } else {
+        char* b = buf + size;
+        int r = self->rows;
+        self->bufB = b;
+        b += size;
+        self->rowsA = b;
+        self->valid = 1;
+        b += r * 16;
+        self->rowsB = b;
+        self->bufA = buf;
+        func_00386128(self, r, self->pitch, self->rowsA, buf);
+        func_00386128(self, self->rows, self->pitch, self->rowsB, self->bufB);
+        self->field_0x1A4 = 0;
+        self->field_0x1A0 = -1;
+    }
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00385260);
