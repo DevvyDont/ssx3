@@ -2378,30 +2378,21 @@ void func_003B6B10(int a, unsigned int n, struct C_6B10 *c) {
 }
 #endif
 
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6BD0);
-
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6EA8);
-
-//100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7080);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From peak3project's fork (github.com/peak3project/ssx3).
-
-/* D_0050A0A0_7080: the streams (one per stream slot, func_003B6A38 looks one up). Layout from every use in this unit;
-   field names are their offsets. */
+/* D_0050A0A0: the streams (one per stream slot, func_003B6A38 looks one up). Layout from every use in this unit;
+   field names are their offsets. Shared by func_003B6BD0 .. func_003B8050. */
 struct sA0A0Node {                  /* 0x28: a queued stream request */
     struct sA0A0Node *f00;          /* next */
     int f04;
     int f08;
     volatile int f0C;               /* handle */
-    unsigned int f10;
-    unsigned int f14;
-    unsigned int f18;
-    unsigned int f1C;
+    volatile unsigned int f10;
+    volatile unsigned int f14;
+    volatile unsigned int f18;
+    volatile unsigned int f1C;
     volatile int f20;
     unsigned char f24;
-    char pad25[0x28 - 0x25];
+    char f25[0x28 - 0x25];
 };
 struct sA0A0List {                  /* 0xC */
     struct sA0A0Node *f00;          /* first */
@@ -2414,7 +2405,9 @@ struct sA0A0Fmt {                   /* 4 bytes, copied as a whole: rate (u16), c
 struct sA0A0Hdr {                   /* 0x68 */
     char pad00[0x18];
     int f18[6];                     /* one per channel */
-    char pad30[0x68 - 0x30];
+    char pad30[0x48 - 0x30];
+    int f48[4];
+    int f58[4];
 };
 struct sA0A0Parm {                  /* 0x18, handed to func_003C6760 */
     signed char f00;
@@ -2452,8 +2445,22 @@ struct sA0A0Strm {                  /* 0x138 */
     struct sA0A0Trk f104[1];
     struct sA0A0List f11C;          /* queued requests */
     struct sA0A0List f128;          /* free requests */
-    struct sA0A0Node *f134;
+    volatile struct sA0A0Node *f134; /* current request */
 };
+#endif
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6BD0);
+
+INCLUDE_ASM("ealib/seg_2B4578", func_003B6EA8);
+
+//100% - objdiff report; single-function view differs only in a relocation name
+INCLUDE_ASM("ealib/seg_2B4578", func_003B7080);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+
+/* D_0050A0A0_7080: the streams (one per stream slot, func_003B6A38 looks one up). Layout from every use in this unit;
+   field names are their offsets. */
 extern struct sA0A0Strm *D_0050A0A0_7080[32] __asm__("D_0050A0A0");
 extern void func_003B6EA8_7080(struct sA0A0Strm *, int *) __asm__("func_003B6EA8");
 extern void func_003B6BD0_7080(int) __asm__("func_003B6BD0");
