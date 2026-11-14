@@ -59,7 +59,54 @@ extern "C" void cUIMenu_setSelected(char* self, char* item, int play)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uimenu", cUIMenu_onInputChangeItem);
+#ifdef SKIP_ASM
+extern "C" void cUIMenu_setSelected(char* self, char* item, int play);
+// PORT: called with an int index here (the unit declares an unsigned char parameter).
+void* func_00397870_i_AE98(void* list, int i) __asm__("func_00397870");
+
+struct cUIMenu_onInputChangeItem_sVEntry {
+    short delta;
+    short index;
+    int (*fn)(void*, void*, int, unsigned char);
+};
+
+// getScreen()->getParentState()->vcall slot 20 (On Tour: same slot at +0xA0 of the vtable)
+static inline void cUIMenu_onInputChangeItem_notify(char* self, int ev, unsigned char v)
+{
+    char* mgr = *(char**)(*(char**)(self + 0x5C) + 0xD0);
+    cUIMenu_onInputChangeItem_sVEntry* vt = *(cUIMenu_onInputChangeItem_sVEntry**)(mgr + 8);
+    vt[20].fn(mgr + vt[20].delta, self, ev, v);
+}
+
+// cUIMenu::onInputChangeItem(unsigned char OldScrollItemCurrent) (On Tour debug 0x0027E39C):
+// keeps the selected row (0x95) inside the visible window (top 0x98, rows 0x97), then reselects.
+// MenuEntryIndex is a short in On Tour's DWARF; the short is what keeps the second 0x95 load.
+extern "C" int cUIMenu_onInputChangeItem(void* selfp, unsigned char OldScrollItemCurrent)
+{
+    char* self = (char*)selfp;
+    if (OldScrollItemCurrent != *(unsigned char*)(self + 0x95)) {
+        short MenuEntryIndex = *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x98);
+        if (MenuEntryIndex < 0) {
+            *(unsigned char*)(self + 0x98) = *(unsigned char*)(self + 0x95);
+            MenuEntryIndex = 0;
+            cUIMenu_onInputChangeItem_notify(self, 2, *(unsigned char*)(self + 0x98));
+            cUIMenu_onInputChangeItem_notify(self, 4, *(unsigned char*)(self + 0x98));
+        } else if (MenuEntryIndex >= *(unsigned char*)(self + 0x97)) {
+            *(unsigned char*)(self + 0x98) = *(unsigned char*)(self + 0x95) - *(unsigned char*)(self + 0x97) + 1;
+            MenuEntryIndex = *(unsigned char*)(self + 0x97) - 1;
+            cUIMenu_onInputChangeItem_notify(self, 3, *(unsigned char*)(self + 0x98));
+            cUIMenu_onInputChangeItem_notify(self, 4, *(unsigned char*)(self + 0x98));
+        }
+        char* pNextSelected = (char*)func_00397870_i_AE98(self + 0x74, MenuEntryIndex);
+        cUIMenu_setSelected(self, pNextSelected, *(int*)(self + 0x90) & 1);
+        cUIMenu_onInputChangeItem_notify(self, 5, *(unsigned char*)(self + 0x98));
+        return 1;
+    }
+    return 0;
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uimenu", cUIMenu_onInput);

@@ -2716,7 +2716,66 @@ int func_0026AF98_impl(void* self, void* a1, void** out, int maxOut)
 }
 #endif
 
+//100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AFB8);
+#ifdef SKIP_ASM
+// PORT: the unit declares func_0026AFB8(void*) and this symbol's mangling says (void*),
+// but it really takes five arguments; bound by asm label (same as func_0026AF98).
+int func_0026AFB8_impl(void* self, float* pos, void** pathList, int maxListLen, int onlyResetPaths) __asm__("func_0026AFB8");
+
+// cAIPath (On Tour name): 0x40-byte path record
+struct cAIPath_AFB8 {
+    char pad0[0x3C];
+    int mIsReset;   // 0x3C: only these qualify when onlyResetPaths
+};
+
+// cPathSys (On Tour member names)
+struct cPathSys_AFB8 {
+    int NumStartpoints;        // 0x0
+    void* Startpoints;         // 0x4
+    int NumAIPaths;            // 0x8
+    cAIPath_AFB8* AIPaths;     // 0xC
+};
+
+// cPathSys::getNearAIPaths (On Tour name): up to maxListLen AI paths nearest to pos
+// (paths containing it first), nearest first; returns how many.
+int func_0026AFB8_impl(void* vself, float* pos, void** pathList, int maxListLen, int onlyResetPaths)
+{
+    cPathSys_AFB8* self = (cPathSys_AFB8*)vself;
+    int i;
+    int listLen = 0;
+    float prox[200];
+    if (self->NumAIPaths < maxListLen) {
+        maxListLen = self->NumAIPaths;
+    }
+    for (i = 0; i < self->NumAIPaths; i++) {
+        prox[i] = func_0026A9B0((sBXBox*)&self->AIPaths[i], pos);
+        if (onlyResetPaths && self->AIPaths[i].mIsReset == 0) {
+            prox[i] = 9.999999933815813e+36f;
+        }
+        if (prox[i] == 0.0f) {
+            prox[i] = 9.999999933815813e+36f;
+            pathList[listLen++] = &self->AIPaths[i];
+            if (listLen == maxListLen) {
+                break;
+            }
+        }
+    }
+    while (listLen < maxListLen) {
+        float bestProx = prox[0];
+        int bestI = 0;
+        for (i = 1; i < self->NumAIPaths; i++) {
+            if (prox[i] < bestProx) {
+                bestProx = prox[i];
+                bestI = i;
+            }
+        }
+        prox[bestI] = 9.999999933815813e+36f;
+        pathList[listLen++] = &self->AIPaths[bestI];
+    }
+    return listLen;
+}
+#endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026B178);
