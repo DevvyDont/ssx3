@@ -1843,7 +1843,26 @@ void func_00400838(unsigned short a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004008A0);
+#ifdef SKIP_ASM
+extern int func_004013E8(int);
+extern int func_0042C078();
+extern void func_0042C0C0(void);
+void (*func_004008A0(void (*cb)(int)))(int) {
+    void (*old)(int);
+    int s;
+    if (func_004013E8(1) != 0)
+        return 0;
+    s = func_0042C078();
+    old = D_005264C0;
+    D_005264C0 = cb;
+    __asm__ volatile("sw $28,%0" : "=m"(D_005264C4)); /* the callback runs with this $gp */
+    if (s != 0)
+        func_0042C0C0();
+    return old;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400908);
@@ -1866,14 +1885,36 @@ void func_00400908(int *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004009A8);
 #ifdef SKIP_ASM
 extern char D_004979E0[];
 extern void func_00423DE0(int);
 extern int func_00423BE0(void);
 extern void func_00425C60();
-void func_004009A8(void); /* peak3 body held: see notes/stuck.md */
-
+void func_004009A8(void) {
+    void (*fn)(int);
+    for (;;) {
+        func_00423DE0(D_00451620);
+        if (D_00451658 == -1) {
+            D_00451634 = 0;
+            D_00451658 = 0;
+            D_00451614 = 0;
+            D_005264D4 = 0;
+            func_00423BE0();
+        }
+        if (D_00451610 > 0)
+            func_00425C60(D_004979E0, D_005264C0, D_0045165C);
+        fn = D_005264C0;
+        if (fn != 0 && D_0045165C != 0) {
+            int saved;
+            __asm__ volatile("move %0,$28\n\tlw $28,%1" : "=r"(saved) : "m"(D_005264C4));
+            fn(D_0045165C);
+            __asm__ volatile("move $28,%0" : : "r"(saved));
+        }
+        D_00451634 = 0;
+    }
+}
 #endif
 
 //100%
@@ -1984,12 +2025,42 @@ void func_00400CB8(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400D58);
+#ifdef SKIP_ASM
+extern int func_0042C078();
+extern void func_0042C0C0(void);
+extern int func_00400E30(void);
+void (*func_00400D58(void (*a)(int), int b))(int) {
+    int s;
+    void (*old)(int);
+    if (D_00451640 < 0)
+        func_00400E30();
+    s = func_0042C078();
+    old = D_005264C8;
+    D_005264D0 = b;
+    D_005264C8 = a;
+    __asm__ volatile("sw $28,%0" : "=m"(D_005264CC));
+    if (s)
+        func_0042C0C0();
+    return old;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400DD8);
 #ifdef SKIP_ASM
-void func_00400DD8(void); /* peak3 body held: see notes/stuck.md */
-
+void func_00400DD8(void) {
+    void (*fn)(int) = D_005264C8;
+    if (fn) {
+        if (D_00451624 == 0) {
+            int saved;
+            __asm__ volatile("move %0,$28\n\tlw $28,%1" : "=r"(saved) : "m"(D_005264CC));
+            fn(D_005264D0);
+            __asm__ volatile("move $28,%0" : : "r"(saved));
+        }
+    }
+}
 #endif
 
 //100%

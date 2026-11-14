@@ -694,7 +694,28 @@ int func_00424B78_i(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00424C50);
+#ifdef SKIP_ASM
+extern void func_00423DD0(int);
+extern int func_00423CE0(void);
+// PORT: PS2 kernel syscall (number in $3, result in $2).
+#define SYSCALL_RET_4C50(n, r) do { register int r_ __asm__("$2"); __asm__ volatile("li $3, " #n "\n\tsyscall" : "=r"(r_) : : "$3"); r = r_; } while (0)
+int func_00424C50_r(int a0) __asm__("func_00424C50");
+int func_00424C50_r(int a0) {
+    int id;
+    unsigned i;
+    SYSCALL_RET_4C50(-0x2F, id);
+    if (id != a0) return func_00423CE0();
+    if ((unsigned)id >= 0x100 || D_00455170 == 0) return -1;
+    i = D_0052B3A8.idx & 0x1FF;
+    D_0052B3A8.idx = i + 1;
+    D_0052B3A8.e[i].a = 0;
+    D_0052B3A8.e[i].b = id;
+    func_00423DD0(D_0052B3A0);
+    return id;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00424CE8);
@@ -714,7 +735,25 @@ int func_00424CE8(unsigned a0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00424D68);
+#ifdef SKIP_ASM
+extern int func_00423D20(void);
+int func_00424D68_r(int a0) __asm__("func_00424D68");
+int func_00424D68_r(int a0) {
+    int id;
+    unsigned i;
+    SYSCALL_RET_4C50(-0x2F, id);
+    if (id != a0) return func_00423D20();
+    if ((unsigned)id >= 0x100 || D_00455170 == 0) return -1;
+    i = D_0052B3A8.idx & 0x1FF;
+    D_0052B3A8.idx = i + 1;
+    D_0052B3A8.e[i].a = 2;
+    D_0052B3A8.e[i].b = id;
+    func_00423DD0(D_0052B3A0);
+    return id;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00424E00);
