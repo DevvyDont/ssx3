@@ -2223,3 +2223,4 @@ dptoli = 0x00412608; // type:func
 dptofp = 0x004127A8; // type:func
 fptodp = 0x00413AF8; // type:func
 __fixdfdi = 0x0042D320; // type:func
+D_0049A9C0 = 0x0049A9C0; // size:0x28

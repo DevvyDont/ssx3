@@ -322,8 +322,11 @@ def repoint_pool(text: str, unit: str) -> tuple[str, list[str]]:
     return text, log
 
 
-def repoint(text: str, unit: str, assemble) -> tuple[str, list[str]]:
-    """assemble(asm_text, extra_flags) -> object Path. Returns the rewritten assembly and a log."""
+def repoint(text: str, unit: str, assemble, symbols=None) -> tuple[str, list[str]]:
+    """assemble(asm_text, extra_flags) -> object Path. Returns the rewritten assembly and a log.
+
+    symbols(asm_text) -> {name: .text offset} for the functions and the table entries' labels; default: gas -L.
+    (tools/ps2eeas_cc.py passes one that reads Ps2EeAs's own layout, which gas doesn't reproduce.)"""
     text, log = repoint_literals(text, unit)
     text, slog = repoint_strings(text, unit)
     log += slog
@@ -331,7 +334,7 @@ def repoint(text: str, unit: str, assemble) -> tuple[str, list[str]]:
     log += plog
     if not TABLE.search(text):
         return text, log
-    syms = local_symbols(assemble(text, ["-Wa,-L"]))
+    syms = symbols(text) if symbols else local_symbols(assemble(text, ["-Wa,-L"]))
     for func, a, b in reversed(list(functions(text))):  # back to front: earlier spans stay valid
         body = text[a:b]
         tables = list(TABLE.finditer(body))

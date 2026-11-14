@@ -5449,7 +5449,648 @@ int func_00422560(struct Bigint *b, struct Bigint *S) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_00422780);
+#ifdef SKIP_ASM
+/* newlib 1.9 libc/stdlib/dtoa.c (_dtoa_r) with the mprec.h macros it uses, verbatim (IEEE_8087, Pack_32,
+ * IEEE_Arith, no Sudden_Underflow / ROUND_BIASED / Check_FLT_ROUNDS / No_leftright):
+ *
+ * The author of this software is David M. Gay.
+ *
+ * Copyright (c) 1991 by AT&T.
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose without fee is hereby granted, provided that this entire notice
+ * is included in all copies of any software which is or includes a copy
+ * or modification of this software and in all copies of the supporting
+ * documentation for such software.
+ *
+ * THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
+ * WARRANTY.  IN PARTICULAR, NEITHER THE AUTHOR NOR AT&T MAKES ANY
+ * REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY
+ * OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
+ */
+struct _reent_00422780 {
+  int pad0[0x40 / 4];
+  struct Bigint *_result;
+  int _result_k;
+};
+union double_union_00422780
+{
+  double d;
+  unsigned int i[2];
+};
+#define word0_00422780(x) (x.i[1])
+#define word1_00422780(x) (x.i[0])
+#define Exp_shift1_00422780 20
+#define Exp_msk1_00422780    ((unsigned int)0x100000L)
+#define Exp_mask_00422780  ((unsigned int)0x7ff00000L)
+#define P_00422780 53
+#define Bias_00422780 1023
+#define Exp_11_00422780 ((unsigned int)0x3ff00000L)
+#define Frac_mask1_00422780 ((unsigned int)0xfffffL)
+#define Ten_pmax_00422780 22
+#define Bletch_00422780 0x10
+#define Bndry_mask_00422780  ((unsigned int)0xfffffL)
+#define Sign_bit_00422780 ((unsigned int)0x80000000L)
+#define Log2P_00422780 1
+#define Quick_max_00422780 14
+#define Int_max_00422780 14
+#define n_bigtens_00422780 5
+#define Bcopy_00422780(x,y) func_0041605C((char *)&x->sign, (char *)&y->sign, y->wds*sizeof(int) + 2*sizeof(int))
+extern const double tens_00422780[] __asm__("D_0049A8F8");
+extern const double bigtens_00422780[] __asm__("D_0049A9C0");
+extern struct Bigint *g2780_Balloc(struct _reent_00422780 *, int) __asm__("func_00420510");
+extern void g2780_Bfree(struct _reent_00422780 *, struct Bigint *) __asm__("func_004205B8");
+extern struct Bigint *g2780_multadd(struct _reent_00422780 *, struct Bigint *, int, int) __asm__("func_004205F0");
+extern int g2780_hi0bits(unsigned int) __asm__("func_00420830");
+extern struct Bigint *g2780_i2b(struct _reent_00422780 *, int) __asm__("func_00420978");
+extern struct Bigint *g2780_mult(struct _reent_00422780 *, struct Bigint *, struct Bigint *) __asm__("func_004209B0");
+extern struct Bigint *g2780_pow5mult(struct _reent_00422780 *, struct Bigint *, int) __asm__("func_00420BC8");
+extern struct Bigint *g2780_lshift(struct _reent_00422780 *, struct Bigint *, int) __asm__("func_00420CC8");
+extern int g2780_cmp(struct Bigint *, struct Bigint *) __asm__("func_00420E28");
+extern struct Bigint *g2780_diff(struct _reent_00422780 *, struct Bigint *, struct Bigint *) __asm__("func_00420E90");
+extern struct Bigint *g2780_d2b(struct _reent_00422780 *, double, int *, int *) __asm__("func_00421280");
+
+/* the unit declares this with struct Reent51 * (ecvtbuf, func_00421A50) */
+char *func_00422780_(struct _reent_00422780 *, double, int, int, int *, int *, char **) __asm__("func_00422780");
+char *
+func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, int *decpt, int *sign, char **rve)
+{
+  int bbits, b2, b5, be, dig, i, ieps, ilim, ilim0, ilim1, j, j1, k, k0,
+    k_check, leftright, m2, m5, s2, s5, spec_case, try_quick;
+  union double_union_00422780 d, d2, eps;
+  int L;
+  int denorm;
+  unsigned long x;
+  struct Bigint *b, *b1, *delta, *mlo, *mhi, *S;
+  double ds;
+  char *s, *s0;
+
+  d.d = _d;
+
+  if (ptr->_result)
+    {
+      ptr->_result->k = ptr->_result_k;
+      ptr->_result->maxwds = 1 << ptr->_result_k;
+      g2780_Bfree (ptr, ptr->_result);
+      ptr->_result = 0;
+    }
+
+  if (word0_00422780 (d) & Sign_bit_00422780)
+    {
+      /* set sign for everything, including 0's and NaNs */
+      *sign = 1;
+      word0_00422780 (d) &= ~Sign_bit_00422780;	/* clear sign bit */
+    }
+  else
+    *sign = 0;
+
+  if ((word0_00422780 (d) & Exp_mask_00422780) == Exp_mask_00422780)
+    {
+      /* Infinity or NaN */
+      *decpt = 9999;
+      s =
+	!word1_00422780 (d) && !(word0_00422780 (d) & 0xfffff) ? "Infinity" :
+	"NaN";
+      if (rve)
+	*rve =
+	  s[3] ? s + 8 :
+	  s + 3;
+      return s;
+    }
+  if (!d.d)
+    {
+      *decpt = 1;
+      s = "0";
+      if (rve)
+	*rve = s + 1;
+      return s;
+    }
+
+  b = g2780_d2b (ptr, d.d, &be, &bbits);
+  if ((i = (int) (word0_00422780 (d) >> Exp_shift1_00422780 & (Exp_mask_00422780 >> Exp_shift1_00422780))) != 0)
+    {
+      d2.d = d.d;
+      word0_00422780 (d2) &= Frac_mask1_00422780;
+      word0_00422780 (d2) |= Exp_11_00422780;
+
+      /* log(x)	~=~ log(1.5) + (x-1.5)/1.5
+		 * log10(x)	 =  log(x) / log(10)
+		 *		~=~ log(1.5)/log(10) + (x-1.5)/(1.5*log(10))
+		 * log10(d) = (i-Bias)*log(2)/log(10) + log10(d2)
+		 *
+		 * This suggests computing an approximation k to log10(d) by
+		 *
+		 * k = (i - Bias)*0.301029995663981
+		 *	+ ( (d2-1.5)*0.289529654602168 + 0.176091259055681 );
+		 *
+		 * We want k to be too large rather than too small.
+		 * The error in the first-order Taylor series approximation
+		 * is in our favor, so we just round up the constant enough
+		 * to compensate for any error in the multiplication of
+		 * (i - Bias) by 0.301029995663981; since |i - Bias| <= 1077,
+		 * and 1077 * 0.30103 * 2^-52 ~=~ 7.2e-14,
+		 * adding 1e-13 to the constant term more than suffices.
+		 * Hence we adjust the constant term to 0.1760912590558.
+		 * (We could get a more accurate k by invoking log10,
+		 *  but this is probably not worthwhile.)
+		 */
+
+      i -= Bias_00422780;
+      denorm = 0;
+    }
+  else
+    {
+      /* d is denormalized */
+
+      i = bbits + be + (Bias_00422780 + (P_00422780 - 1) - 1);
+      x = (i > 32) ? (word0_00422780 (d) << (64 - i)) | (word1_00422780 (d) >> (i - 32))
+       : (word1_00422780 (d) << (32 - i));
+      d2.d = x;
+      word0_00422780 (d2) -= 31 * Exp_msk1_00422780;	/* adjust exponent */
+      i -= (Bias_00422780 + (P_00422780 - 1) - 1) + 1;
+      denorm = 1;
+    }
+  ds = (d2.d - 1.5) * 0.289529654602168 + 0.1760912590558 + i * 0.301029995663981;
+  k = (int) ds;
+  if (ds < 0. && ds != k)
+    k--;			/* want k = floor(ds) */
+  k_check = 1;
+  if (k >= 0 && k <= Ten_pmax_00422780)
+    {
+      if (d.d < tens_00422780[k])
+	k--;
+      k_check = 0;
+    }
+  j = bbits - i - 1;
+  if (j >= 0)
+    {
+      b2 = 0;
+      s2 = j;
+    }
+  else
+    {
+      b2 = -j;
+      s2 = 0;
+    }
+  if (k >= 0)
+    {
+      b5 = 0;
+      s5 = k;
+      s2 += k;
+    }
+  else
+    {
+      b2 -= k;
+      b5 = -k;
+      s5 = 0;
+    }
+  if (mode < 0 || mode > 9)
+    mode = 0;
+  try_quick = 1;
+  if (mode > 5)
+    {
+      mode -= 4;
+      try_quick = 0;
+    }
+  leftright = 1;
+  switch (mode)
+    {
+    case 0:
+    case 1:
+      ilim = ilim1 = -1;
+      i = 18;
+      ndigits = 0;
+      break;
+    case 2:
+      leftright = 0;
+      /* no break */
+    case 4:
+      if (ndigits <= 0)
+	ndigits = 1;
+      ilim = ilim1 = i = ndigits;
+      break;
+    case 3:
+      leftright = 0;
+      /* no break */
+    case 5:
+      i = ndigits + k + 1;
+      ilim = i;
+      ilim1 = i - 1;
+      if (i <= 0)
+	i = 1;
+    }
+  j = sizeof (unsigned int);
+  for (ptr->_result_k = 0; sizeof (struct Bigint) - sizeof (unsigned int) + j <= i;
+       j <<= 1)
+    ptr->_result_k++;
+  ptr->_result = g2780_Balloc (ptr, ptr->_result_k);
+  s = s0 = (char *) ptr->_result;
+
+  if (ilim >= 0 && ilim <= Quick_max_00422780 && try_quick)
+    {
+      /* Try to get by with floating-point arithmetic. */
+
+      i = 0;
+      d2.d = d.d;
+      k0 = k;
+      ilim0 = ilim;
+      ieps = 2;			/* conservative */
+      if (k > 0)
+	{
+	  ds = tens_00422780[k & 0xf];
+	  j = k >> 4;
+	  if (j & Bletch_00422780)
+	    {
+	      /* prevent overflows */
+	      j &= Bletch_00422780 - 1;
+	      d.d /= bigtens_00422780[n_bigtens_00422780 - 1];
+	      ieps++;
+	    }
+	  for (; j; j >>= 1, i++)
+	    if (j & 1)
+	      {
+		ieps++;
+		ds *= bigtens_00422780[i];
+	      }
+	  d.d /= ds;
+	}
+      else if ((j1 = -k) != 0)
+	{
+	  d.d *= tens_00422780[j1 & 0xf];
+	  for (j = j1 >> 4; j; j >>= 1, i++)
+	    if (j & 1)
+	      {
+		ieps++;
+		d.d *= bigtens_00422780[i];
+	      }
+	}
+      if (k_check && d.d < 1. && ilim > 0)
+	{
+	  if (ilim1 <= 0)
+	    goto fast_failed;
+	  ilim = ilim1;
+	  k--;
+	  d.d *= 10.;
+	  ieps++;
+	}
+      eps.d = ieps * d.d + 7.;
+      word0_00422780 (eps) -= (P_00422780 - 1) * Exp_msk1_00422780;
+      if (ilim == 0)
+	{
+	  S = mhi = 0;
+	  d.d -= 5.;
+	  if (d.d > eps.d)
+	    goto one_digit;
+	  if (d.d < -eps.d)
+	    goto no_digits;
+	  goto fast_failed;
+	}
+      if (leftright)
+	{
+	  /* Use Steele & White method of only
+	   * generating digits needed.
+	   */
+	  eps.d = 0.5 / tens_00422780[ilim - 1] - eps.d;
+	  for (i = 0;;)
+	    {
+	      L = d.d;
+	      d.d -= L;
+	      *s++ = '0' + (int) L;
+	      if (d.d < eps.d)
+		goto ret1;
+	      if (1. - d.d < eps.d)
+		goto bump_up;
+	      if (++i >= ilim)
+		break;
+	      eps.d *= 10.;
+	      d.d *= 10.;
+	    }
+	}
+      else
+	{
+	  /* Generate ilim digits, then fix them up. */
+	  eps.d *= tens_00422780[ilim - 1];
+	  for (i = 1;; i++, d.d *= 10.)
+	    {
+	      L = d.d;
+	      d.d -= L;
+	      *s++ = '0' + (int) L;
+	      if (i == ilim)
+		{
+		  if (d.d > 0.5 + eps.d)
+		    goto bump_up;
+		  else if (d.d < 0.5 - eps.d)
+		    {
+		      while (*--s == '0');
+		      s++;
+		      goto ret1;
+		    }
+		  break;
+		}
+	    }
+	}
+    fast_failed:
+      s = s0;
+      d.d = d2.d;
+      k = k0;
+      ilim = ilim0;
+    }
+
+  /* Do we have a "small" integer? */
+
+  if (be >= 0 && k <= Int_max_00422780)
+    {
+      /* Yes. */
+      ds = tens_00422780[k];
+      if (ndigits < 0 && ilim <= 0)
+	{
+	  S = mhi = 0;
+	  if (ilim < 0 || d.d <= 5 * ds)
+	    goto no_digits;
+	  goto one_digit;
+	}
+      for (i = 1;; i++)
+	{
+	  L = d.d / ds;
+	  d.d -= L * ds;
+	  *s++ = '0' + (int) L;
+	  if (i == ilim)
+	    {
+	      d.d += d.d;
+             if ((d.d > ds) || ((d.d == ds) && (L & 1)))
+		{
+		bump_up:
+		  while (*--s == '9')
+		    if (s == s0)
+		      {
+			k++;
+			*s = '0';
+			break;
+		      }
+		  ++*s++;
+		}
+	      break;
+	    }
+	  if (!(d.d *= 10.))
+	    break;
+	}
+      goto ret1;
+    }
+
+  m2 = b2;
+  m5 = b5;
+  mhi = mlo = 0;
+  if (leftright)
+    {
+      if (mode < 2)
+	{
+	  i =
+	    denorm ? be + (Bias_00422780 + (P_00422780 - 1) - 1 + 1) :
+	    1 + P_00422780 - bbits;
+	}
+      else
+	{
+	  j = ilim - 1;
+	  if (m5 >= j)
+	    m5 -= j;
+	  else
+	    {
+	      s5 += j -= m5;
+	      b5 += j;
+	      m5 = 0;
+	    }
+	  if ((i = ilim) < 0)
+	    {
+	      m2 -= i;
+	      i = 0;
+	    }
+	}
+      b2 += i;
+      s2 += i;
+      mhi = g2780_i2b (ptr, 1);
+    }
+  if (m2 > 0 && s2 > 0)
+    {
+      i = m2 < s2 ? m2 : s2;
+      b2 -= i;
+      m2 -= i;
+      s2 -= i;
+    }
+  if (b5 > 0)
+    {
+      if (leftright)
+	{
+	  if (m5 > 0)
+	    {
+	      mhi = g2780_pow5mult (ptr, mhi, m5);
+	      b1 = g2780_mult (ptr, mhi, b);
+	      g2780_Bfree (ptr, b);
+	      b = b1;
+	    }
+         if ((j = b5 - m5) != 0)
+	    b = g2780_pow5mult (ptr, b, j);
+	}
+      else
+	b = g2780_pow5mult (ptr, b, b5);
+    }
+  S = g2780_i2b (ptr, 1);
+  if (s5 > 0)
+    S = g2780_pow5mult (ptr, S, s5);
+
+  /* Check for special case that d is a normalized power of 2. */
+
+  if (mode < 2)
+    {
+      if (!word1_00422780 (d) && !(word0_00422780 (d) & Bndry_mask_00422780)
+	  && word0_00422780 (d) & Exp_mask_00422780
+	)
+	{
+	  /* The special case */
+	  b2 += Log2P_00422780;
+	  s2 += Log2P_00422780;
+	  spec_case = 1;
+	}
+      else
+	spec_case = 0;
+    }
+
+  /* Arrange for convenient computation of quotients:
+   * shift left if necessary so divisor has 4 leading 0 bits.
+   *
+   * Perhaps we should just compute leading 28 bits of S once
+   * and for all and pass them and a shift to quorem, so it
+   * can do shifts and ors to compute the numerator for q.
+   */
+
+  if ((i = ((s5 ? 32 - g2780_hi0bits (S->x[S->wds - 1]) : 1) + s2) & 0x1f) != 0)
+    i = 32 - i;
+  if (i > 4)
+    {
+      i -= 4;
+      b2 += i;
+      m2 += i;
+      s2 += i;
+    }
+  else if (i < 4)
+    {
+      i += 28;
+      b2 += i;
+      m2 += i;
+      s2 += i;
+    }
+  if (b2 > 0)
+    b = g2780_lshift (ptr, b, b2);
+  if (s2 > 0)
+    S = g2780_lshift (ptr, S, s2);
+  if (k_check)
+    {
+      if (g2780_cmp (b, S) < 0)
+	{
+	  k--;
+	  b = g2780_multadd (ptr, b, 10, 0);	/* we botched the k estimate */
+	  if (leftright)
+	    mhi = g2780_multadd (ptr, mhi, 10, 0);
+	  ilim = ilim1;
+	}
+    }
+  if (ilim <= 0 && mode > 2)
+    {
+      if (ilim < 0 || g2780_cmp (b, S = g2780_multadd (ptr, S, 5, 0)) <= 0)
+	{
+	  /* no digits, fcvt style */
+	no_digits:
+	  k = -1 - ndigits;
+	  goto ret;
+	}
+    one_digit:
+      *s++ = '1';
+      k++;
+      goto ret;
+    }
+  if (leftright)
+    {
+      if (m2 > 0)
+	mhi = g2780_lshift (ptr, mhi, m2);
+
+      /* Compute mlo -- check for special case
+       * that d is a normalized power of 2.
+       */
+
+      mlo = mhi;
+      if (spec_case)
+	{
+	  mhi = g2780_Balloc (ptr, mhi->k);
+	  Bcopy_00422780 (mhi, mlo);
+	  mhi = g2780_lshift (ptr, mhi, Log2P_00422780);
+	}
+
+      for (i = 1;; i++)
+	{
+	  dig = func_00422560 (b, S) + '0';
+	  /* Do we yet have the shortest decimal string
+	   * that will round to d?
+	   */
+	  j = g2780_cmp (b, mlo);
+	  delta = g2780_diff (ptr, S, mhi);
+	  j1 = delta->sign ? 1 : g2780_cmp (b, delta);
+	  g2780_Bfree (ptr, delta);
+	  if (j1 == 0 && !mode && !(word1_00422780 (d) & 1))
+	    {
+	      if (dig == '9')
+		goto round_9_up;
+	      if (j > 0)
+		dig++;
+	      *s++ = dig;
+	      goto ret;
+	    }
+         if ((j < 0) || ((j == 0) && !mode
+	      && !(word1_00422780 (d) & 1)
+           ))
+	    {
+	      if (j1 > 0)
+		{
+		  b = g2780_lshift (ptr, b, 1);
+		  j1 = g2780_cmp (b, S);
+                 if (((j1 > 0) || ((j1 == 0) && (dig & 1)))
+		      && dig++ == '9')
+		    goto round_9_up;
+		}
+	      *s++ = dig;
+	      goto ret;
+	    }
+	  if (j1 > 0)
+	    {
+	      if (dig == '9')
+		{		/* possible if i == 1 */
+		round_9_up:
+		  *s++ = '9';
+		  goto roundoff;
+		}
+	      *s++ = dig + 1;
+	      goto ret;
+	    }
+	  *s++ = dig;
+	  if (i == ilim)
+	    break;
+	  b = g2780_multadd (ptr, b, 10, 0);
+	  if (mlo == mhi)
+	    mlo = mhi = g2780_multadd (ptr, mhi, 10, 0);
+	  else
+	    {
+	      mlo = g2780_multadd (ptr, mlo, 10, 0);
+	      mhi = g2780_multadd (ptr, mhi, 10, 0);
+	    }
+	}
+    }
+  else
+    for (i = 1;; i++)
+      {
+	*s++ = dig = func_00422560 (b, S) + '0';
+	if (i >= ilim)
+	  break;
+	b = g2780_multadd (ptr, b, 10, 0);
+      }
+
+  /* Round off last digit */
+
+  b = g2780_lshift (ptr, b, 1);
+  j = g2780_cmp (b, S);
+  if ((j > 0) || ((j == 0) && (dig & 1)))
+    {
+    roundoff:
+      while (*--s == '9')
+	if (s == s0)
+	  {
+	    k++;
+	    *s++ = '1';
+	    goto ret;
+	  }
+      ++*s++;
+    }
+  else
+    {
+      while (*--s == '0');
+      s++;
+    }
+ret:
+  g2780_Bfree (ptr, S);
+  if (mhi)
+    {
+      if (mlo && mlo != mhi)
+	g2780_Bfree (ptr, mlo);
+      g2780_Bfree (ptr, mhi);
+    }
+ret1:
+  g2780_Bfree (ptr, b);
+  *s = 0;
+  *decpt = k + 1;
+  if (rve)
+    *rve = s;
+  return s0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00423980);
