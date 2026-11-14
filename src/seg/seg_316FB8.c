@@ -812,7 +812,192 @@ void func_00418910(int a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_00418958);
+#ifdef SKIP_ASM
+/* newlib stdlib/mbtowc_r.c (_mbtowc_r) with stdlib/mbctype.h; neither file carries its own notice (newlib's
+ * default: Copyright (c) 1994-2000 Red Hat, Inc. Permission to use, copy, modify and distribute this software is
+ * freely granted, provided that this notice is preserved.) */
+typedef unsigned short wchar_t_8958;
+struct _reent_8958 {
+  int _errno;
+  void *_stdin, *_stdout, *_stderr;
+  int  _inc;
+  char _emergency[25];
+  int _current_category;
+  const char *_current_locale;
+};
+
+#define ESC_CHAR_8958 0x1b
+#define _issjis1_8958(c)    (((c) >= 0x81 && (c) <= 0x9f) || ((c) >= 0xe0 && (c) <= 0xef))
+#define _issjis2_8958(c)    (((c) >= 0x40 && (c) <= 0x7e) || ((c) >= 0x80 && (c) <= 0xfc))
+#define _iseucjp_8958(c)    ((c) >= 0xa1 && (c) <= 0xfe)
+#define _isjis_8958(c)      ((c) >= 0x21 && (c) <= 0x7e)
+
+typedef enum { ESCAPE, DOLLAR, BRACKET, AT, B, J,
+               NUL, JIS_CHAR, OTHER, JIS_C_NUM } JIS_CHAR_TYPE_8958;
+typedef enum { ASCII, A_ESC, A_ESC_DL, JIS, JIS_1, JIS_2, J_ESC, J_ESC_BR,
+               J2_ESC, J2_ESC_BR, DONE, INV, JIS_S_NUM } JIS_STATE_8958;
+typedef enum { COPY_A, COPY_J, COPY_J2, MAKE_A, MAKE_J, NOOP, EMPTY, ERROR } JIS_ACTION_8958;
+
+/* the file's static state/action tables, in .data */
+extern JIS_STATE_8958 JIS_state_table_8958[JIS_S_NUM][JIS_C_NUM] __asm__("D_00454948");
+extern JIS_ACTION_8958 JIS_action_table_8958[JIS_S_NUM][JIS_C_NUM] __asm__("D_00454AF8");
+extern unsigned int strlen_8958(const char *) __asm__("strlen");
+extern int strcmp_8958(const char *, const char *) __asm__("func_004165A8");
+
+int
+func_00418958 (struct _reent_8958 *r, wchar_t_8958 *pwc, const char *s, unsigned int n, int *state)
+{
+  wchar_t_8958 dummy;
+  unsigned char *t = (unsigned char *)s;
+
+  if (pwc == 0)
+    pwc = &dummy;
+
+  if (s != 0 && n == 0)
+    return -1;
+
+  if (r->_current_locale == 0 ||
+      (strlen_8958 (r->_current_locale) <= 1))
+    { /* fall-through */ }
+  else if (!strcmp_8958 (r->_current_locale, "C-SJIS"))
+    {
+      int char1 = *t;
+      if (s == 0)
+        return 0;  /* not state-dependent */
+      if (_issjis1_8958 (char1))
+        {
+          int char2 = t[1];
+          if (n <= 1)
+            return -1;
+          if (_issjis2_8958 (char2))
+            {
+              *pwc = (((wchar_t_8958)*t) << 8) + (wchar_t_8958)(*(t+1));
+              return 2;
+            }
+          else
+            return -1;
+        }
+    }
+  else if (!strcmp_8958 (r->_current_locale, "C-EUCJP"))
+    {
+      int char1 = *t;
+      if (s == 0)
+        return 0;  /* not state-dependent */
+      if (_iseucjp_8958 (char1))
+        {
+          int char2 = t[1];
+          if (n <= 1)
+            return -1;
+          if (_iseucjp_8958 (char2))
+            {
+              *pwc = (((wchar_t_8958)*t) << 8) + (wchar_t_8958)(*(t+1));
+              return 2;
+            }
+          else
+            return -1;
+        }
+    }
+  else if (!strcmp_8958 (r->_current_locale, "C-JIS"))
+    {
+      JIS_STATE_8958 curr_state;
+      JIS_ACTION_8958 action;
+      JIS_CHAR_TYPE_8958 ch;
+      unsigned char *ptr;
+      int i, curr_ch;
+
+      if (s == 0)
+        {
+          *state = 0;
+          return 1;  /* state-dependent */
+        }
+
+      curr_state = (*state == 0 ? ASCII : JIS);
+      ptr = t;
+
+      for (i = 0; i < n; ++i)
+        {
+          curr_ch = t[i];
+          switch (curr_ch)
+            {
+	    case ESC_CHAR_8958:
+              ch = ESCAPE;
+              break;
+	    case '$':
+              ch = DOLLAR;
+              break;
+            case '@':
+              ch = AT;
+              break;
+            case '(':
+	      ch = BRACKET;
+              break;
+            case 'B':
+              ch = B;
+              break;
+            case 'J':
+              ch = J;
+              break;
+            case '\0':
+              ch = NUL;
+              break;
+            default:
+              if (_isjis_8958 (curr_ch))
+                ch = JIS_CHAR;
+              else
+                ch = OTHER;
+	    }
+
+          action = JIS_action_table_8958[curr_state][ch];
+          curr_state = JIS_state_table_8958[curr_state][ch];
+
+          switch (action)
+            {
+            case NOOP:
+              break;
+            case EMPTY:
+              *state = 0;
+              *pwc = (wchar_t_8958)0;
+              return i;
+            case COPY_A:
+	      *state = 0;
+              *pwc = (wchar_t_8958)*ptr;
+              return (i + 1);
+            case COPY_J:
+              *state = 0;
+              *pwc = (((wchar_t_8958)*ptr) << 8) + (wchar_t_8958)(*(ptr+1));
+              return (i + 1);
+            case COPY_J2:
+              *state = 1;
+              *pwc = (((wchar_t_8958)*ptr) << 8) + (wchar_t_8958)(*(ptr+1));
+              return (ptr - t) + 2;
+            case MAKE_A:
+            case MAKE_J:
+              ptr = (char *)(t + i + 1);
+              break;
+            case ERROR:
+            default:
+              return -1;
+            }
+
+        }
+
+      return -1;  /* n < bytes needed */
+    }
+
+  /* otherwise this must be the "C" locale or unknown locale */
+  if (s == 0)
+    return 0;  /* not state-dependent */
+
+  *pwc = (wchar_t_8958)*t;
+
+  if (*t == '\0')
+    return 0;
+
+  return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00418CA8);
@@ -1100,9 +1285,68 @@ int func_0041AD10(char *s1, char *s2) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041AD80);
+#ifdef SKIP_ASM
+/* newlib string/strstr.c (no notice in the file; newlib's default: Copyright (c) 1994-2000 Red Hat, Inc.
+ * Permission to use, copy, modify and distribute this software is freely granted, provided that this notice is
+ * preserved.) */
+char *
+func_0041AD80 (const char *searchee, const char *lookfor)
+{
+  if (*searchee == 0)
+    {
+      if (*lookfor)
+	return (char *) 0;
+      return (char *) searchee;
+    }
 
+  while (*searchee)
+    {
+      unsigned int i;
+      i = 0;
+
+      while (1)
+	{
+	  if (lookfor[i] == 0)
+	    {
+	      return (char *) searchee;
+	    }
+
+	  if (lookfor[i] != searchee[i])
+	    {
+	      break;
+	    }
+	  i++;
+	}
+      searchee++;
+    }
+
+  return (char *) 0;
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041AE00);
+#ifdef SKIP_ASM
+/* Sony's libc float-to-string helper (not in newlib 1.9.0; called by func_0041AF88): round the n-digit decimal
+   string s at its last digit, propagating the carry. Returns 0 when the carry runs out of the first digit. */
+int func_0041AE00(char *s, int n)
+{
+    if (n > 0) {
+        n--;
+        if (s[n] >= '5') {
+            do
+                s[n] = '0';
+            while (--n > 0 && s[n] == '9');
+            if (s[n] == '9')
+                return 0;
+            s[n]++;
+        }
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041AE70);
@@ -1123,7 +1367,34 @@ char *func_0041AE70(char *s) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041AEE8);
+#ifdef SKIP_ASM
+/* Sony's libc addition itoa (not in newlib 1.9.0): digits from the .data table, then reversed in place by
+   func_0041AE70 (strrev). */
+extern char D_00454CB0[];
+extern char *func_0041AE70(char *s);
+
+char *func_0041AEE8(int value, char *buf, unsigned int base)
+{
+    int i;
+    int neg = value < 0;
+    unsigned int v;
+
+    v = value;
+    if (neg && base == 10)
+        v = -value;
+    i = 0;
+    do {
+        buf[i++] = D_00454CB0[v % base];
+        v /= base;
+    } while (v != 0);
+    if (neg)
+        buf[i++] = '-';
+    buf[i] = 0;
+    return func_0041AE70(buf);
+}
+#endif
 
 INCLUDE_ASM("seg/seg_316FB8", func_0041AF88);
 
@@ -1505,7 +1776,88 @@ void func_0041E340_(int ptr, void *mem) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041E638);
+#ifdef SKIP_ASM
+/* newlib stdlib/mallocr.c malloc_trim (_malloc_trim_r): "A version of malloc/free/realloc written by Doug Lea and
+ * released to the public domain." Uses the unit's mallocr macros (top, chunksize, set_head) and declarations from
+ * func_0041D990 / func_0041E340, and its libgcc 64-bit helpers from func_0041A840. */
+/* newlib's struct mallinfo; sbrked_mem is current_mallinfo.arena (D_00455118, declared int earlier in the unit) */
+struct mallinfo_E638 {
+  int arena;    /* total space allocated from system */
+  int ordblks;  /* number of non-inuse chunks */
+  int smblks;   /* unused -- always zero */
+  int hblks;    /* number of mmapped regions */
+  int hblkhd;   /* total space in mmapped regions */
+  int usmblks;  /* unused -- always zero */
+  int fsmblks;  /* unused -- always zero */
+  int uordblks; /* total allocated space */
+  int fordblks; /* total non-inuse space */
+  int keepcost; /* top-most, releasable (via malloc_trim) space */
+};
+extern struct mallinfo_E638 current_mallinfo_E638 __asm__("D_00455118");
+#define sbrked_mem_E638  (current_mallinfo_E638.arena)
+int func_0041E638_(int reent_ptr, unsigned int pad) __asm__("func_0041E638");
+int func_0041E638_(int reent_ptr, unsigned int pad)
+{
+  long  top_size;        /* Amount of top-most memory */
+  long  extra;           /* Amount to release */
+  char* current_brk;     /* address returned by pre-check sbrk call */
+  char* new_brk;         /* address returned by negative sbrk call */
+
+  unsigned long pagesz = 0x1000;
+
+  func_00418CA8_lock(reent_ptr);
+
+  top_size = chunksize(top);
+  extra = func_004114D0_mul(func_00411538_div(top_size - pad - 16 + (pagesz-1), pagesz) - 1, pagesz);
+
+  if (extra < (long)pagesz)  /* Not enough memory to release */
+  {
+    func_00418D08_unlock(reent_ptr);
+    return 0;
+  }
+
+  else
+  {
+    /* Test to make sure no one else called sbrk */
+    current_brk = (char*)(func_0041FD70_sbrk (reent_ptr, 0));
+    if (current_brk != (char*)(top) + top_size)
+    {
+      func_00418D08_unlock(reent_ptr);
+      return 0;     /* Apparently we don't own memory; must fail */
+    }
+
+    else
+    {
+      new_brk = (char*)(func_0041FD70_sbrk (reent_ptr, -extra));
+
+      if (new_brk == (char*)(-1)) /* sbrk failed? */
+      {
+        /* Try to figure out what we have */
+        current_brk = (char*)(func_0041FD70_sbrk (reent_ptr, 0));
+        top_size = current_brk - (char*)top;
+        if (top_size >= (long)16) /* if not, we are very very dead! */
+        {
+          sbrked_mem_E638 = current_brk - D_00455100;
+          set_head(top, top_size | 1);
+        }
+        func_00418D08_unlock(reent_ptr);
+        return 0;
+      }
+
+      else
+      {
+        /* Success. Adjust top accordingly. */
+        set_head(top, (top_size - extra) | 1);
+        sbrked_mem_E638 -= extra;
+        func_00418D08_unlock(reent_ptr);
+        return 1;
+      }
+    }
+  }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041E7A8);
@@ -1765,7 +2117,119 @@ long func_0041FDD0(int *err, int a, int b, int c) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041FE30);
+#ifdef SKIP_ASM
+/* newlib stdio/fflush.c (fflush), with CHECK_INIT from stdio/local.h and FILE from sys/reent.h:
+ * Copyright (c) 1990 The Regents of the University of California.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms are permitted
+ * provided that the above copyright notice and this paragraph are
+ * duplicated in all such forms and that any documentation,
+ * advertising materials, and other materials related to such
+ * distribution and use acknowledge that the software was developed
+ * by the University of California, Berkeley.  The name of the
+ * University may not be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+struct _reent_FE30 {
+  int _errno;
+  struct __sFILE_FE30 *_stdin, *_stdout, *_stderr;
+  int  _inc;
+  char _emergency[25];
+  int _current_category;
+  const char *_current_locale;
+  int __sdidinit;
+};
+struct __sbuf_FE30 {
+	unsigned char *_base;
+	int	_size;
+};
+struct __sFILE_FE30 {
+  unsigned char *_p;	/* current position in (some) buffer */
+  int	_r;		/* read space left for getc() */
+  int	_w;		/* write space left for putc() */
+  short	_flags;		/* flags, below; this FILE is free if 0 */
+  short	_file;		/* fileno, if Unix descriptor, else -1 */
+  struct __sbuf_FE30 _bf;	/* the buffer (at least 1 byte, if !NULL) */
+  int	_lbfsize;	/* 0 or -_bf._size, for inline putc */
+  void *_cookie;	/* cookie passed to io functions */
+  int	(*_read)(void *_cookie, char *_buf, int _n);
+  int	(*_write)(void *_cookie, const char *_buf, int _n);
+  long	(*_seek)(void *_cookie, long _offset, int _whence);
+  int	(*_close)(void *_cookie);
+  struct __sbuf_FE30 _ub;	/* ungetc buffer */
+  unsigned char *_up;	/* saved _p when _p is doing ungetc data */
+  int	_ur;		/* saved _r when _r is counting ungetc data */
+  unsigned char _ubuf[3];	/* guarantee an ungetc() buffer */
+  unsigned char _nbuf[1];	/* guarantee a getc() buffer */
+  struct __sbuf_FE30 _lb;	/* buffer for fgetline() */
+  int	_blksize;	/* stat.st_blksize (may be != _bf._size) */
+  int	_offset;	/* current lseek offset */
+  struct _reent_FE30 *_data;
+};
+#define __SLBF_FE30	0x0001
+#define __SNBF_FE30	0x0002
+#define __SWR_FE30	0x0008
+#define __SERR_FE30	0x0040
+extern struct _reent_FE30 *_impure_ptr_FE30 __asm__("D_00454944");
+#define _REENT_FE30 _impure_ptr_FE30
+extern void __sinit_FE30(struct _reent_FE30 *) __asm__("func_004200F0");
+extern int _fwalk_FE30(struct _reent_FE30 *, int (*)(struct __sFILE_FE30 *)) __asm__("func_00417418");
+/* newlib's CHECK_INIT (stdio/local.h), verbatim: the do-while(0) is part of the library macro */
+#define CHECK_INIT_FE30(fp) \
+  do					\
+    {					\
+      if ((fp)->_data == 0)		\
+	(fp)->_data = _REENT_FE30;	\
+      if (!(fp)->_data->__sdidinit)	\
+	__sinit_FE30 ((fp)->_data);	\
+    }					\
+  while (0)
+
+int fflush_FE30(struct __sFILE_FE30 *fp) __asm__("func_0041FE30");
+int
+fflush_FE30 (register struct __sFILE_FE30 * fp)
+{
+  register unsigned char *p;
+  register int n, t;
+
+  if (fp == 0)
+    return _fwalk_FE30 (_REENT_FE30, fflush_FE30);
+
+  CHECK_INIT_FE30 (fp);
+
+  t = fp->_flags;
+  if ((t & __SWR_FE30) == 0 || (p = fp->_bf._base) == 0)
+    return 0;
+  n = fp->_p - p;		/* write this much */
+
+  /*
+   * Set these immediately to avoid problems with longjmp
+   * and to allow exchange buffering (via setvbuf) in user
+   * write function.
+   */
+  fp->_p = p;
+  fp->_w = t & (__SLBF_FE30 | __SNBF_FE30) ? 0 : fp->_bf._size;
+
+  while (n > 0)
+    {
+      t = (*fp->_write) (fp->_cookie, (char *) p, n);
+      if (t <= 0)
+	{
+	  fp->_flags |= __SERR_FE30;
+	  return -1;
+	}
+      p += t;
+      n -= t;
+    }
+  return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041FF40);
@@ -1814,7 +2278,116 @@ int *func_0041FF98(int a, int cnt) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_00420010);
+#ifdef SKIP_ASM
+/* newlib stdio/findfp.c (__sfp), FILE and struct _glue from sys/reent.h:
+ * Copyright (c) 1990 The Regents of the University of California.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms are permitted
+ * provided that the above copyright notice and this paragraph are
+ * duplicated in all such forms and that any documentation,
+ * advertising materials, and other materials related to such
+ * distribution and use acknowledge that the software was developed
+ * by the University of California, Berkeley.  The name of the
+ * University may not be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+struct __sbuf_0010 {
+	unsigned char *_base;
+	int	_size;
+};
+struct __sFILE_0010 {
+  unsigned char *_p;	/* current position in (some) buffer */
+  int	_r;		/* read space left for getc() */
+  int	_w;		/* write space left for putc() */
+  short	_flags;		/* flags, below; this FILE is free if 0 */
+  short	_file;		/* fileno, if Unix descriptor, else -1 */
+  struct __sbuf_0010 _bf;	/* the buffer (at least 1 byte, if !NULL) */
+  int	_lbfsize;	/* 0 or -_bf._size, for inline putc */
+  void *_cookie;	/* cookie passed to io functions */
+  int	(*_read)(void *_cookie, char *_buf, int _n);
+  int	(*_write)(void *_cookie, const char *_buf, int _n);
+  long	(*_seek)(void *_cookie, long _offset, int _whence);
+  int	(*_close)(void *_cookie);
+  struct __sbuf_0010 _ub;	/* ungetc buffer */
+  unsigned char *_up;	/* saved _p when _p is doing ungetc data */
+  int	_ur;		/* saved _r when _r is counting ungetc data */
+  unsigned char _ubuf[3];	/* guarantee an ungetc() buffer */
+  unsigned char _nbuf[1];	/* guarantee a getc() buffer */
+  struct __sbuf_0010 _lb;	/* buffer for fgetline() */
+  int	_blksize;	/* stat.st_blksize (may be != _bf._size) */
+  int	_offset;	/* current lseek offset */
+  struct _reent_0010 *_data;
+};
+struct _glue_0010
+{
+  struct _glue_0010 *_next;
+  int _niobs;
+  struct __sFILE_0010 *_iobs;
+};
+/* newlib 1.9's struct _reent up to __sglue (0x1d8) */
+struct _reent_0010 {
+  int _errno;
+  struct __sFILE_0010 *_stdin, *_stdout, *_stderr;
+  int  _inc;
+  char _emergency[25];
+  int _current_category;
+  const char *_current_locale;
+  int __sdidinit;
+  char _pad_0x3c[0x1d8 - 0x3c];
+  struct _glue_0010 __sglue;
+};
+#define NDYNAMIC_0010 4
+#define ENOMEM_0010 12
+extern void __sinit_0010(struct _reent_0010 *) __asm__("func_004200F0");
+extern struct _glue_0010 *__sfmoreglue_0010(struct _reent_0010 *, int) __asm__("func_0041FF98");
+
+/* the unit declares func_00420010(int) for its caller func_00416EB0 */
+struct __sFILE_0010 *__sfp_0010(struct _reent_0010 *d) __asm__("func_00420010");
+struct __sFILE_0010 *
+__sfp_0010 (struct _reent_0010 *d)
+{
+  struct __sFILE_0010 *fp;
+  int n;
+  struct _glue_0010 *g;
+
+  if (!d->__sdidinit)
+    __sinit_0010 (d);
+  for (g = &d->__sglue;; g = g->_next)
+    {
+      for (fp = g->_iobs, n = g->_niobs; --n >= 0; fp++)
+	if (fp->_flags == 0)
+	  goto found;
+      if (g->_next == 0 &&
+	  (g->_next = __sfmoreglue_0010 (d, NDYNAMIC_0010)) == 0)
+	break;
+    }
+  d->_errno = ENOMEM_0010;
+  return 0;
+
+found:
+  fp->_flags = 1;		/* reserve this slot; caller sets real flags */
+  fp->_p = 0;		/* no current pointer */
+  fp->_w = 0;			/* nothing to read or write */
+  fp->_r = 0;
+  fp->_bf._base = 0;		/* no buffer */
+  fp->_bf._size = 0;
+  fp->_lbfsize = 0;		/* not line buffered */
+  fp->_file = -1;		/* no file */
+  /* fp->_cookie = <any>; */	/* caller sets cookie, _read/_write etc */
+  fp->_ub._base = 0;		/* no ungetc buffer */
+  fp->_ub._size = 0;
+  fp->_lb._base = 0;		/* no line buffer */
+  fp->_lb._size = 0;
+  fp->_data = d;
+  return fp;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_004200F0);
@@ -1872,7 +2445,164 @@ unsigned func_00420260(char *buf, unsigned size, unsigned count, int *fp) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", ungetc);
+#ifdef SKIP_ASM
+/* newlib stdio/ungetc.c (ungetc), as in Sony's copy: a full ungetc buffer is reported on fd 1 instead of being
+ * grown with __submore. CHECK_INIT from stdio/local.h, FILE from sys/reent.h:
+ * Copyright (c) 1990 The Regents of the University of California.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms are permitted
+ * provided that the above copyright notice and this paragraph are
+ * duplicated in all such forms and that any documentation,
+ * advertising materials, and other materials related to such
+ * distribution and use acknowledge that the software was developed
+ * by the University of California, Berkeley.  The name of the
+ * University may not be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+struct _reent_0378 {
+  int _errno;
+  struct __sFILE_0378 *_stdin, *_stdout, *_stderr;
+  int  _inc;
+  char _emergency[25];
+  int _current_category;
+  const char *_current_locale;
+  int __sdidinit;
+};
+struct __sbuf_0378 {
+	unsigned char *_base;
+	int	_size;
+};
+struct __sFILE_0378 {
+  unsigned char *_p;	/* current position in (some) buffer */
+  int	_r;		/* read space left for getc() */
+  int	_w;		/* write space left for putc() */
+  short	_flags;		/* flags, below; this FILE is free if 0 */
+  short	_file;		/* fileno, if Unix descriptor, else -1 */
+  struct __sbuf_0378 _bf;	/* the buffer (at least 1 byte, if !NULL) */
+  int	_lbfsize;	/* 0 or -_bf._size, for inline putc */
+  void *_cookie;	/* cookie passed to io functions */
+  int	(*_read)(void *_cookie, char *_buf, int _n);
+  int	(*_write)(void *_cookie, const char *_buf, int _n);
+  long	(*_seek)(void *_cookie, long _offset, int _whence);
+  int	(*_close)(void *_cookie);
+  struct __sbuf_0378 _ub;	/* ungetc buffer */
+  unsigned char *_up;	/* saved _p when _p is doing ungetc data */
+  int	_ur;		/* saved _r when _r is counting ungetc data */
+  unsigned char _ubuf[3];	/* guarantee an ungetc() buffer */
+  unsigned char _nbuf[1];	/* guarantee a getc() buffer */
+  struct __sbuf_0378 _lb;	/* buffer for fgetline() */
+  int	_blksize;	/* stat.st_blksize (may be != _bf._size) */
+  int	_offset;	/* current lseek offset */
+  struct _reent_0378 *_data;
+};
+#define __SRD_0378	0x0004
+#define __SWR_0378	0x0008
+#define __SRW_0378	0x0010
+#define __SEOF_0378	0x0020
+#define EOF_0378	(-1)
+#define HASUB_0378(fp) ((fp)->_ub._base != 0)
+extern struct _reent_0378 *_impure_ptr_0378 __asm__("D_00454944");
+#define _REENT_0378 _impure_ptr_0378
+extern void __sinit_0378(struct _reent_0378 *) __asm__("func_004200F0");
+extern int fflush_0378(struct __sFILE_0378 *) __asm__("func_0041FE30");
+extern int write_0378(int, const char *, int) __asm__("func_00424368");
+/* newlib's CHECK_INIT (stdio/local.h), verbatim: the do-while(0) is part of the library macro */
+#define CHECK_INIT_0378(fp) \
+  do					\
+    {					\
+      if ((fp)->_data == 0)		\
+	(fp)->_data = _REENT_0378;	\
+      if (!(fp)->_data->__sdidinit)	\
+	__sinit_0378 ((fp)->_data);	\
+    }					\
+  while (0)
+#define UNGETC_OVERFLOW_0378 "\nungetc error: *static buffer overflow* - char not added to buffer\n"
+
+int
+ungetc (int c, register struct __sFILE_0378 *fp)
+{
+  if (c == EOF_0378)
+    return (EOF_0378);
+
+  /* Ensure stdio has been initialized.
+     ??? Might be able to remove this as some other stdio routine should
+     have already been called to get the char we are un-getting.  */
+
+  CHECK_INIT_0378 (fp);
+
+  /* After ungetc, we won't be at eof anymore */
+  fp->_flags &= ~__SEOF_0378;
+
+  if ((fp->_flags & __SRD_0378) == 0)
+    {
+      /*
+       * Not already reading: no good unless reading-and-writing.
+       * Otherwise, flush any current write stuff.
+       */
+      if ((fp->_flags & __SRW_0378) == 0)
+	return EOF_0378;
+      if (fp->_flags & __SWR_0378)
+	{
+	  if (fflush_0378 (fp))
+	    return EOF_0378;
+	  fp->_flags &= ~__SWR_0378;
+	  fp->_w = 0;
+	  fp->_lbfsize = 0;
+	}
+      fp->_flags |= __SRD_0378;
+    }
+  c = (unsigned char) c;
+
+  /*
+   * If we are in the middle of ungetc'ing, just continue.
+   */
+
+  if (HASUB_0378 (fp))
+    {
+      if (fp->_r >= fp->_ub._size)
+	{
+	  write_0378 (1, UNGETC_OVERFLOW_0378, sizeof (UNGETC_OVERFLOW_0378));
+	  return EOF_0378;
+	}
+      *--fp->_p = c;
+      fp->_r++;
+      return c;
+    }
+
+  /*
+   * If we can handle this by simply backing up, do so,
+   * but never replace the original character.
+   * (This makes sscanf() work when scanning `const' data.)
+   */
+
+  if (fp->_bf._base != 0 && fp->_p > fp->_bf._base && fp->_p[-1] == c)
+    {
+      fp->_p--;
+      fp->_r++;
+      return c;
+    }
+
+  /*
+   * Create an ungetc buffer.
+   * Initially, we will use the `reserve' buffer.
+   */
+
+  fp->_ur = fp->_r;
+  fp->_up = fp->_p;
+  fp->_ub._base = fp->_ubuf;
+  fp->_ub._size = sizeof (fp->_ubuf);
+  fp->_ubuf[sizeof (fp->_ubuf) - 1] = c;
+  fp->_p = &fp->_ubuf[sizeof (fp->_ubuf) - 1];
+  fp->_r = 1;
+  return c;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00420510);
@@ -2412,7 +3142,48 @@ struct Bigint *func_00421280(int ptr, double _d, int *e, int *bits) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_00421400);
+#ifdef SKIP_ASM
+/* newlib stdlib/mprec.c (ratio), with the unit's struct Bigint, union double_union and word0 (func_00421020..):
+ * The author of this software is David M. Gay.
+ *
+ * Copyright (c) 1991 by AT&T.
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose without fee is hereby granted, provided that this entire notice
+ * is included in all copies of any software which is or includes a copy
+ * or modification of this software and in all copies of the supporting
+ * documentation for such software.
+ *
+ * THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
+ * WARRANTY.  IN PARTICULAR, NEITHER THE AUTHOR NOR AT&T MAKES ANY
+ * REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY
+ * OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
+ */
+#define Exp_msk1_1400 0x100000
+/* PORT: the soft-float double divide (gcc's dpdiv libcall), called by name: retail's symbol for it is
+   func_00412280 (as in seg_325220's func_00412280(x, 10.0)); on PC this is just da.d / db.d */
+extern double dpdiv_1400(double, double) __asm__("func_00412280");
+
+double func_00421400(struct Bigint *a, struct Bigint *b)
+{
+  union double_union da, db;
+  int k, ka, kb;
+
+  da.d = func_004210E8 (a, &ka);
+  db.d = func_004210E8 (b, &kb);
+  k = ka - kb + 32 * (a->wds - b->wds);
+  if (k > 0)
+    word0 (da) += k * Exp_msk1_1400;
+  else
+    {
+      k = -k;
+      word0 (db) += k * Exp_msk1_1400;
+    }
+  return dpdiv_1400 (da.d, db.d);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_004214C0);
@@ -2629,7 +3400,122 @@ char *func_00421A50_(double value, int ndigit, int *decpt, int *sign, char *buf)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_00421B98);
+#ifdef SKIP_ASM
+/* newlib stdlib/ecvtbuf.c (_gcvt). The file carries no notice of its own (newlib's default: Copyright (c)
+ * 1994-2000 Red Hat, Inc. Permission to use, copy, modify and distribute this software is freely granted, provided
+ * that this notice is preserved.) */
+struct _reent_1B98;
+extern double _mprec_log10_1B98(int) __asm__("func_004214C0");
+extern void print_e_1B98(struct _reent_1B98 *, char *, double, int, char, int) __asm__("func_004216E8");
+extern char *_dtoa_r_1B98(struct _reent_1B98 *, double, int, int, int *, int *, char **) __asm__("func_00422780");
+extern char *strcpy_1B98(char *, const char *) __asm__("strcpy");
+
+char *func_00421B98_(struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, char type, int dot)
+    __asm__("func_00421B98");
+char *
+func_00421B98_ (struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, char type, int dot)
+{
+  char *save = buf;
+
+  if (invalue < 0)
+    {
+      invalue = -invalue;
+    }
+
+  if (invalue == 0)
+    {
+      *buf++ = '0';
+      *buf = '\0';
+    }
+  else
+    /* Which one to print ?
+       ANSI says that anything with more that 4 zeros after the . or more
+       than precision digits before is printed in e with the qualification
+       that trailing zeroes are removed from the fraction portion.  */
+
+  if (0.0001 >= invalue || invalue >= _mprec_log10_1B98 (ndigit))
+    {
+      /* We subtract 1 from ndigit because in the 'e' format the precision is
+	 the number of digits after the . but in 'g' format it is the number
+	 of significant digits.
+
+	 We defer changing type to e/E so that print_e() can know it's us
+	 calling and thus should remove trailing zeroes.  */
+
+      print_e_1B98 (ptr, buf, invalue, ndigit - 1, type, dot);
+    }
+  else
+    {
+      int decpt;
+      int sign;
+      char *end;
+      char *p;
+
+      if (invalue < 1.0)
+	{
+	  /* what we want is ndigits after the point */
+	  p = _dtoa_r_1B98 (ptr, invalue, 3, ndigit, &decpt, &sign, &end);
+	}
+      else
+	{
+	  p = _dtoa_r_1B98 (ptr, invalue, 2, ndigit, &decpt, &sign, &end);
+	}
+
+      if (decpt == 9999)
+	{
+	  strcpy_1B98 (buf, p);
+	  return save;
+	}
+      while (*p && decpt > 0)
+	{
+	  *buf++ = *p++;
+	  decpt--;
+	  ndigit--;
+	}
+      /* Even if not in buffer */
+      while (decpt > 0 && ndigit > 0)
+	{
+	  *buf++ = '0';
+	  decpt--;
+	  ndigit--;
+	}
+
+      if (dot || *p)
+	{
+	  if (buf == save)
+	    *buf++ = '0';
+	  *buf++ = '.';
+	  while (decpt < 0 && ndigit > 0)
+	    {
+	      *buf++ = '0';
+	      decpt++;
+	      ndigit--;
+	    }
+
+	  /* Print rest of stuff */
+	  while (*p && ndigit > 0)
+	    {
+	      *buf++ = *p++;
+	      ndigit--;
+	    }
+	  /* And trailing zeros */
+	  if (dot)
+	    {
+	      while (ndigit > 0)
+		{
+		  *buf++ = '0';
+		  ndigit--;
+		}
+	    }
+	}
+      *buf++ = 0;
+    }
+
+  return save;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00421E60);

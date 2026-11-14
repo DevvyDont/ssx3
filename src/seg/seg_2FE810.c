@@ -7714,7 +7714,51 @@ int func_0040F8C0(float x) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040F8E8);
+#ifdef SKIP_ASM
+/* newlib libm floorf (sf_floor.c; fdlibm; notice at func_0040F840).
+ * Conversion to float by Ian Lance Taylor, Cygnus Support, ian@cygnus.com. */
+/* GET_FLOAT_WORD and ieee_float_shape_type: defined with finitef (func_0040F8C0) above.
+   SET_FLOAT_WORD: newlib libm's word-access helper (fdlibm.h), verbatim */
+#define SET_FLOAT_WORD_F8E8(d,i)				\
+do {								\
+  ieee_float_shape_type sf_u;					\
+  sf_u.word = (i);						\
+  (d) = sf_u.value;						\
+} while (0)
+
+static const float huge_F8E8 = 1.0e30;
+
+	float func_0040F8E8(float x)
+{
+	int i0,j0;
+	unsigned int i;
+	GET_FLOAT_WORD(i0,x);
+	j0 = ((i0>>23)&0xff)-0x7f;
+	if(j0<23) {
+	    if(j0<0) { 	/* raise inexact if x != 0 */
+		if(huge_F8E8+x>(float)0.0) {/* return 0*sign(x) if |x|<1 */
+		    if(i0>=0) {i0=0;}
+		    else if((i0&0x7fffffff)!=0)
+			{ i0=0xbf800000;}
+		}
+	    } else {
+		i = (0x007fffff)>>j0;
+		if((i0&i)==0) return x; /* x is integral */
+		if(huge_F8E8+x>(float)0.0) {	/* raise inexact flag */
+		    if(i0<0) i0 += (0x00800000)>>j0;
+		    i0 &= (~i);
+		}
+	    }
+	} else {
+	    if(j0==0x80) return x+x;	/* inf or NaN */
+	    else return x;		/* x is integral */
+	}
+	SET_FLOAT_WORD_F8E8(x,i0);
+	return x;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040F9D0);
