@@ -5148,7 +5148,29 @@ void func_00281000(void* self, int a1, void* a2, void* a3)
 }
 #endif
 
+//100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281018);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "scripter/ssxscriptengine_classes.h"
+
+cScriptEngine_1018::cScriptEngine_1018() : cScriptObject_1018(0)
+{
+    for (int i = 1; i >= 0; i--) {
+        f[i] = 0;
+    }
+    for (int i = 0; i < 9; i++) {
+        slots[i].setOwner(this);
+    }
+    fD8 = 0;
+    fF8 = -1;
+    func_00281A50(this);
+}
+
+// PORT: the retail names of the vtables g++ references here.
+__asm__("_vt$18cScriptEngine_1018$18cScriptEntity_1018 = D_00482360\n"
+        "_vt$18cScriptEngine_1018 = D_00482398\n");
+#endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281100);
