@@ -1867,6 +1867,7 @@ sFioFile *func_00427520(unsigned a0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00427590);
 #ifdef SKIP_ASM
 struct W7590 { char b[4]; };
@@ -1876,8 +1877,79 @@ struct L7590 { int n1; int n2; char *d1; char *d2; unsigned char b1[64]; unsigne
 extern int D_00455208;
 extern void *func_0041605C(void *, void *, int);
 extern void func_00423DD0(int);
-void func_00427590(int *a0); /* peak3 body held: see notes/stuck.md */
-
+void func_00427590(int *a0) {
+    char *p;
+    int sema;
+    int cmd;
+    char *dst;
+    int size;
+    char *buf;
+    unsigned len;
+    int idx;
+    int i;
+    D_00455208 = idx = D_00455210 != 0 ? a0[3] : 0;
+    p = (char *)((int)(D_0052E380 + idx * 0x440) | 0x20000000);
+    *(struct W7590 *)&sema = *(struct W7590 *)(p + 0x0);
+    *(struct W7590 *)&cmd = *(struct W7590 *)(p + 0x4);
+    *(struct W7590 *)&dst = *(struct W7590 *)(p + 0x8);
+    *(struct W7590 *)&size = *(struct W7590 *)(p + 0xC);
+    if (sema >= 0)
+        func_0041605C(dst, p + 0x10, size);
+    switch (cmd) {
+    case 2: {
+        struct L7590 *q = (struct L7590 *)(p + 0x14);
+        char *d;
+        char *u;
+        if (q->n1 > 0) {
+            d = q->d1;
+            u = (char *)((int)d | 0x20000000);
+            for (i = 0; i < q->n1; i++) {
+                unsigned char c = q->b1[i];
+                u[i] = c;
+                d[i] = c;
+            }
+        }
+        if (q->n2 > 0) {
+            d = q->d2;
+            u = (char *)((int)d | 0x20000000);
+            for (i = 0; i < q->n2; i++) {
+                unsigned char c = q->b2[i];
+                u[i] = c;
+                d[i] = c;
+            }
+        }
+        break;
+    }
+    case 0xB:
+        *(struct W7590 *)&buf = *(struct W7590 *)(p + 0x14);
+        *(struct B7590 *)buf = *(struct B7590 *)(p + 0x18);
+        break;
+    case 0xC:
+        *(struct W7590 *)&buf = *(struct W7590 *)(p + 0x14);
+        *(struct C7590 *)buf = *(struct C7590 *)(p + 0x18);
+        break;
+    case 0x17:
+    case 0x19:
+    case 0x1A:
+        *(struct W7590 *)&buf = *(struct W7590 *)(p + 0x14);
+        *(struct W7590 *)&len = *(struct W7590 *)(p + 0x18);
+        if (len > 0x400)
+            len = 0x400;
+        func_0041605C(buf, p + 0x1C, len);
+        break;
+    }
+    if (sema < 0) {
+        sema = -sema;
+        for (i = 0; i < 0x20; i++) {
+            if (D_00455188[i] == sema) {
+                D_00455188[i] = -1;
+                break;
+            }
+        }
+    } else {
+        func_00423DD0(sema);
+    }
+}
 #endif
 
 //100%
@@ -2186,6 +2258,7 @@ int func_00427FE8(int a0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00428168);
 #ifdef SKIP_ASM
 extern int func_00427988_b(int) __asm__("func_00427988");
@@ -2195,10 +2268,82 @@ extern void func_00423DB0(int);
 extern void func_00423DC0(int);
 extern int func_00423DE0_i(int) __asm__("func_00423DE0");
 // sceLseek
-int func_00428168(int a0, int a1, int a2); /* peak3 body held: see notes/stuck.md */
+int func_00428168(int a0, int a1, int a2)
+{
+  int buf[12];
+  int sem;
+  int v;
+  int i;
+  short flags;
+  sFioFile *t;
+  unsigned fl;
+  int *out;
+  sFioLseekCmd *p = &D_0052D700.lseek;
+  t = func_00427520(a0);
+  func_00427988_b(4);
+  if (D_0045520C == 0)
+  {
+    func_004279B8();
+    return -1;
+  }
+  if ((t == 0) || ((fl = t->f4) == 0))
+  {
+    func_004279B8();
+    return -9;
+  }
+  p->fC = t->f0;
+  p->f10 = a1;
+  p->f14 = a2;
+  p->f18 = t - D_0052EC00;
+  buf[1] = 1;
+  buf[2] = 0;
+  buf[5] = 0;
+  sem = func_00423DA0(&buf[0]);
+  out = &buf[8];
+  p->f8 = 4;
+  p->f4 = (int) out;
+  flags = fl;
+  D_0052D700.lseek.f0 = sem;
+  if (flags & 0x8000)
+  {
+    func_00423DE0_i(D_0045521C);
+    for (i = 0; i < 0x20; i++)
+    {
+      if (D_00455188[i] == (-1))
+      {
+        D_00455188[i] = p->f0;
+        p->f0 = -p->f0;
+        break;
+      }
+    }
 
+    func_00423DC0(D_0045521C);
+  }
+  if (func_00426D18(&D_0052EE00, 4, 0, &D_0052D700.lseek, 0x1C, D_0052E340, 4, 0, 0) < 0)
+  {
+    func_00423DB0(sem);
+    func_004279B8();
+    return -0xB;
+  }
+  v = *((int *) (((int) D_0052E340) | 0x20000000));
+  func_004279B8();
+  if (v == 0)
+  {
+    func_00423DB0(sem);
+    return -0xB;
+  }
+  if (fl & 0x8000)
+  {
+    func_00423DB0(sem);
+    return 0;
+  }
+  func_00423DE0_i(sem);
+  func_00423DB0(sem);
+  return buf[8];
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_004283A0);
 #ifdef SKIP_ASM
 extern int func_00427988_b(int) __asm__("func_00427988");
@@ -2207,10 +2352,85 @@ extern int func_00423DA0(int *p);
 extern void func_00423DB0(int);
 extern void func_00423DC0(int);
 extern int func_00423DE0_i(int) __asm__("func_00423DE0");
-int func_004283A0(int a0, int a1, int a2); /* peak3 body held: see notes/stuck.md */
+int func_004283A0(int a0, int a1, int a2)
+{
+  int buf[12];
+  int sem;
+  int v;
+  int i;
+  short flags;
+  sFioFile *t;
+  unsigned fl;
+  int *out;
+  sFioReadCmd *p = &D_0052D700.read;
+  t = func_00427520(a0);
+  func_00427988_b(2);
+  if (D_0045520C == 0)
+  {
+    func_004279B8();
+    return -1;
+  }
+  if ((t == 0) || ((fl = t->f4) == 0))
+  {
+    func_004279B8();
+    return -9;
+  }
+  p->fC = t->f0;
+  p->f10 = a1;
+  p->f14 = a2;
+  p->f1C = t - D_0052EC00;
+  buf[1] = 1;
+  buf[2] = 0;
+  buf[5] = 0;
+  sem = func_00423DA0(&buf[0]);
+  out = &buf[8];
+  p->f8 = 4;
+  p->f4 = (int) out;
+  flags = fl;
+  D_0052D700.read.f0 = sem;
+  if (flags & 0x8000)
+  {
+    func_00423DE0_i(D_0045521C);
+    for (i = 0; i < 0x20; i++)
+    {
+      if (D_00455188[i] == (-1))
+      {
+        D_00455188[i] = p->f0;
+        p->f0 = -p->f0;
+        break;
+      }
+    }
 
+    func_00423DC0(D_0045521C);
+  }
+  if (!(fl & 0x20000000))
+    func_00426358(a1, a2);
+  func_00426358((int) p, 0x20);
+  if (func_00426D18(&D_0052EE00, 2, 0, &D_0052D700.read, 0x20, D_0052E340, 4, 0, 0) < 0)
+  {
+    func_00423DB0(sem);
+    func_004279B8();
+    return -0xB;
+  }
+  v = *((int *) (((int) D_0052E340) | 0x20000000));
+  func_004279B8();
+  if (v == 0)
+  {
+    func_00423DB0(sem);
+    return -0xB;
+  }
+  if (fl & 0x8000)
+  {
+    func_00423DB0(sem);
+    return 0;
+  }
+  func_00423DE0_i(sem);
+  func_00423DB0(sem);
+  return buf[8];
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00428600);
 #ifdef SKIP_ASM
 extern int func_00427988_b(int) __asm__("func_00427988");
@@ -2219,8 +2439,96 @@ extern int func_00423DA0(int *p);
 extern void func_00423DB0(int);
 extern void func_00423DC0(int);
 extern int func_00423DE0_i(int) __asm__("func_00423DE0");
-int func_00428600(int a0, unsigned a1, int a2); /* peak3 body held: see notes/stuck.md */
+int func_00428600(int a0, unsigned a1, int a2)
+{
+  int buf[12];
+  int sem;
+  int v;
+  int i;
+  int n;
+  int j;
+  short flags;
+  sFioFile *t;
+  unsigned fl;
+  int *out;
+  sFioWriteCmd *p = &D_0052D700.write;
+  t = func_00427520(a0);
+  func_00427988_b(3);
+  if (D_0045520C == 0)
+  {
+    func_004279B8();
+    return -1;
+  }
+  if ((t == 0) || ((fl = t->f4) == 0))
+  {
+    func_004279B8();
+    return -9;
+  }
+  p->fC = t->f0;
+  p->f14 = a2;
+  p->f10 = a1;
+  p->f2C = t - D_0052EC00;
+  buf[1] = 1;
+  buf[2] = 0;
+  buf[5] = 0;
+  sem = func_00423DA0(&buf[0]);
+  out = &buf[8];
+  p->f8 = 4;
+  p->f4 = (int) out;
+  flags = fl;
+  D_0052D700.write.f0 = sem;
+  if (flags & 0x8000)
+  {
+    func_00423DE0_i(D_0045521C);
+    for (i = 0; i < 0x20; i++)
+    {
+      if (D_00455188[i] == (-1))
+      {
+        D_00455188[i] = p->f0;
+        p->f0 = -p->f0;
+        break;
+      }
+    }
 
+    func_00423DC0(D_0045521C);
+  }
+  if ((a1 & 0xF) == 0)
+    n = 0;
+  else
+    {
+      unsigned lo = a1 - 0x10;
+      n = ((a1 >> 4) << 4) - lo;
+    }
+  if (a2 < n)
+    n = a2;
+  if (!(fl & 0x20000000))
+    func_00426358(a1, a2);
+  a1 |= 0x20000000;
+  p->f18 = n;
+  for (j = 0; j < n; j++)
+    p->data[j] = ((char *) a1)[j];
+  if (func_00426D18(&D_0052EE00, 3, 0, &D_0052D700.write, 0x30, D_0052E340, 4, 0, 0) < 0)
+  {
+    func_00423DB0(sem);
+    func_004279B8();
+    return -0xB;
+  }
+  v = *((int *) (((int) D_0052E340) | 0x20000000));
+  func_004279B8();
+  if (v == 0)
+  {
+    func_00423DB0(sem);
+    return -0xB;
+  }
+  if (fl & 0x8000)
+  {
+    func_00423DB0(sem);
+    return 0;
+  }
+  func_00423DE0_i(sem);
+  func_00423DB0(sem);
+  return buf[8];
+}
 #endif
 
 INCLUDE_ASM("seg/seg_325220", func_004288C0);
@@ -3041,6 +3349,7 @@ int func_0042A2E0(int a0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042A300);
 #ifdef SKIP_ASM
 extern int func_00427988_b(int) __asm__("func_00427988");
@@ -3049,8 +3358,78 @@ extern int func_00423DA0(int *p);
 extern void func_00423DB0(int);
 extern void func_00423DC0(int);
 extern int func_00423DE0_i(int) __asm__("func_00423DE0");
-long func_0042A300(int a0, long a1, int a2); /* peak3 body held: see notes/stuck.md */
+long func_0042A300(int a0, long a1, int a2)
+{
+  int buf[8];
+  long res;
+  int sem;
+  int v;
+  int i;
+  short flags;
+  sFioFile *t;
+  unsigned fl;
+  sFioLseek64Cmd *p = &D_0052D700.lseek64;
+  t = func_00427520(a0);
+  func_00427988_b(0x16);
+  if (D_0045520C == 0)
+  {
+    func_004279B8();
+    return -1;
+  }
+  if ((t == 0) || ((fl = t->f4) == 0))
+  {
+    func_004279B8();
+    return -9;
+  }
+  p->fC = t->f0;
+  p->f10 = a1;
+  p->f18 = a2;
+  p->f1C = t - D_0052EC00;
+  buf[1] = 1;
+  buf[2] = 0;
+  buf[5] = 0;
+  sem = func_00423DA0(&buf[0]);
+  p->f4 = (int) &res;
+  p->f8 = 8;
+  flags = fl;
+  D_0052D700.lseek64.f0 = sem;
+  if (flags & 0x8000)
+  {
+    func_00423DE0_i(D_0045521C);
+    for (i = 0; i < 0x20; i++)
+    {
+      if (D_00455188[i] == (-1))
+      {
+        D_00455188[i] = p->f0;
+        p->f0 = -p->f0;
+        break;
+      }
+    }
 
+    func_00423DC0(D_0045521C);
+  }
+  if (func_00426D18(&D_0052EE00, 0x16, 0, &D_0052D700.lseek64, 0x20, D_0052E340, 4, 0, 0) < 0)
+  {
+    func_00423DB0(sem);
+    func_004279B8();
+    return -0xB;
+  }
+  v = *((int *) (((int) D_0052E340) | 0x20000000));
+  func_004279B8();
+  if (v == 0)
+  {
+    func_00423DB0(sem);
+    return -0xB;
+  }
+  if (fl & 0x8000)
+  {
+    func_00423DB0(sem);
+    return 0;
+  }
+  func_00423DE0_i(sem);
+  func_00423DB0(sem);
+  return res;
+}
 #endif
 
 //100%

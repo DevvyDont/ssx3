@@ -659,3 +659,7 @@ rom:0x30DBEC reloc:MIPS_HI16 symbol:D_00529008
 rom:0x32C2C0 reloc:MIPS_HI16 symbol:D_0052F280
 rom:0x32C4C8 reloc:MIPS_HI16 symbol:D_0052F280
 rom:0x32C8E4 reloc:MIPS_HI16 symbol:D_0052F280
+rom:0x329270 reloc:MIPS_HI16 symbol:D_0052E340
+rom:0x329710 reloc:MIPS_HI16 symbol:D_0052E340
+rom:0x329728 reloc:MIPS_HI16 symbol:D_0052E340
+rom:0x32B408 reloc:MIPS_HI16 symbol:D_0052E340

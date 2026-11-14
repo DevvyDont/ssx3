@@ -137,12 +137,14 @@ extern int D_00451610;          /* debug print level */
 extern int D_00451614;          /* callback thread id (0 = none) */
 extern int D_00451618;
 extern int D_0045161C;
-extern int D_00451620;          /* callback thread semaphore */
+/* libcdvd state shared with its RPC callback thread: volatile in every user
+   (retail re-reads each one; tools/gen/phaseb_import.py VOL_DECL_OK) */
+extern volatile int D_00451620;          /* callback thread semaphore */
 extern int D_00451624;
-extern int D_00451628;          /* semaphores */
-extern int D_0045162C;
-extern int D_00451630;
-extern int D_00451634;          /* busy flag */
+extern volatile int D_00451628;          /* semaphores */
+extern volatile int D_0045162C;
+extern volatile int D_00451630;
+extern volatile int D_00451634;          /* busy flag */
 extern volatile int D_00451638;
 extern int D_0045163C;
 extern int D_00451640;
@@ -1685,11 +1687,25 @@ void func_00400838(unsigned short a) {
 
 INCLUDE_ASM("seg/seg_2FE810", func_004008A0);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400908);
 #ifdef SKIP_ASM
 extern int func_00423DD0_i(int) __asm__("func_00423DD0");
-void func_00400908(int *p); /* peak3 body held: see notes/stuck.md */
-
+void func_00400908(int *p) {
+    D_00451658 = *p;
+    D_0045165C = D_00451658;
+    if (D_00451658 == 11) {
+        D_00451658 = 0;
+        D_00451634 = 0;
+        return;
+    }
+    func_00423DD0_i(D_00451628);
+    if (D_00451614 != 0 && D_005264C0 != 0)
+        func_00423DD0_i(D_00451620);
+    else
+        D_00451634 = 0;
+    D_00451658 = 0;
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_004009A8);
@@ -1714,22 +1730,60 @@ int func_00400A78(int a, int b, int c); /* peak3 body held: see notes/stuck.md *
 
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400B48);
 #ifdef SKIP_ASM
 struct S0B48 { int n0; int n1; unsigned char *d0; unsigned char *d1; unsigned char b0[0x40]; unsigned char b1[0x40]; };
 extern void func_00400908(int *);
-void func_00400B48(void *a); /* peak3 body held: see notes/stuck.md */
-
+void func_00400B48(void *a) {
+    struct S0B48 *s = (struct S0B48 *)((unsigned)a | 0x20000000);
+    unsigned char *e;
+    int i;
+    unsigned char *d;
+    if (s->n0 > 0) {
+        e = (unsigned char *)((unsigned)s->d0 | 0x20000000);
+        d = s->d0;
+        for (i = 0; i < s->n0; i++) {
+            unsigned char c = s->b0[i];
+            e[i] = c;
+            d[i] = c;
+        }
+    }
+    if (s->n1 > 0) {
+        e = (unsigned char *)((unsigned)s->d1 | 0x20000000);
+        d = s->d1;
+        for (i = 0; i < s->n1; i++) {
+            unsigned char c = s->b1[i];
+            e[i] = c;
+            d[i] = c;
+        }
+    }
+    func_00400908((int *)&D_00451658);
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400C00);
 #ifdef SKIP_ASM
 struct QSema { int count; int max_count; int init_count; int wait_threads; int attr; int option; };
 extern int Q0C00_create(struct QSema *) __asm__("func_00423DA0");
-void func_00400C00(void); /* peak3 body held: see notes/stuck.md */
-
+void func_00400C00(void) {
+    struct QSema s;
+    if (D_00451628 == -1 || D_0045162C == -1 || D_00451630 == -1) {
+        s.option = 0;
+        s.init_count = 1;
+        s.max_count = 1;
+        D_00451628 = Q0C00_create(&s);
+        D_0045162C = Q0C00_create(&s);
+        D_00451630 = Q0C00_create(&s);
+        s.init_count = 0;
+        D_00451620 = Q0C00_create(&s);
+        D_00451634 = 0;
+    }
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400CB8);
 #ifdef SKIP_ASM
 extern int cb_DB0(int) __asm__("func_00423DB0");
@@ -1737,8 +1791,21 @@ extern void cb_DC0(int) __asm__("func_00423DC0");
 extern void func_00426050(int);
 extern int cb_078() __asm__("func_0042C078");
 extern void func_0042C0C0(void);
-void func_00400CB8(void); /* peak3 body held: see notes/stuck.md */
-
+void func_00400CB8(void) {
+    int s;
+    if (D_00451614 != 0) {
+        D_00451658 = -1;
+        cb_DC0(D_00451620);
+    }
+    cb_DB0(D_00451628);
+    cb_DB0(D_0045162C);
+    cb_DB0(D_00451630);
+    cb_DB0(D_00451620);
+    s = cb_078();
+    func_00426050(0x80000012);
+    if (s)
+        func_0042C0C0();
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00400D58);
@@ -1759,7 +1826,82 @@ int func_00400E30(void); /* peak3 body held: see notes/stuck.md */
 
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400EA8);
+#ifdef SKIP_ASM
+typedef struct { char b[0x24]; } R0EA8;
+extern char D_00497A08[];
+extern char D_00497A28[];
+extern char D_00497A40[];
+extern char D_00497A50[];
+extern char D_00497A60[];
+extern void func_00400C00();
+extern int func_00423DF0(int);
+extern void func_00423DC0(int);
+extern void func_00423CA0(int, sThreadParam *);
+extern void func_00425C60();
+extern int func_004013E8(int);
+extern void func_00426408(int);
+extern void func_00426358(int, int);
+int f0EA8(char *out, char *name, int arg) __asm__("func_00400EA8");
+int f0EA8(char *out, char *name, int arg) {
+    int i;
+    int n;
+    int v;
+    func_00400C00();
+    if (D_00451628 != func_00423DF0(D_00451628))
+        return 0;
+    D_0045161C = 1;
+    func_00423CA0(D_005264D8, &D_005264E0);
+    if (func_004013E8(1) != 0) {
+        func_00423DC0(D_00451628);
+        return 0;
+    }
+    func_00426408(0);
+    if (D_00451644 < 0) {
+        for (;;) {
+            if (func_00426B48(&D_005266C0, 0x80000597, 0) < 0) {
+                if (D_00451610 > 0)
+                    func_00425C60(D_00497A08);
+                for (i = 0x100000; i--; )
+                    ;
+                continue;
+            }
+            if (D_005266C0.server != 0) {
+                D_00451644 = 0;
+                break;
+            }
+            for (i = 0x100000; i--; )
+                ;
+        }
+    }
+    for (n = 0; n < 0x100; n++) {
+        if ((D_00526540.name[n] = name[n]) == 0)
+            break;
+    }
+    if (n == 0x100)
+        D_00526540.name[0xFF] = 0;
+    if (D_00451610 > 0)
+        func_00425C60(D_00497A28, D_00526564);
+    D_00526540.arg = arg;
+    D_00526540.self = &D_00526540;
+    func_00426358((int)&D_00526540, 0x12C);
+    if (func_00426D18(&D_005266C0, 0, 0, &D_00526540, 0x12C, D_00526680, 4, 0, 0) < 0) {
+        func_00423DC0(D_00451628);
+        return 0;
+    }
+    *(R0EA8 *)out = *(R0EA8 *)((int)&D_00526540 | 0x20000000);
+    if (D_00451610 > 0)
+        func_00425C60(D_00497A40, out + 8);
+    if (D_00451610 > 0)
+        func_00425C60(D_00497A50, ((int *)out)[1]);
+    if (D_00451610 > 0)
+        func_00425C60(D_00497A60, ((int *)out)[0]);
+    v = *(int *)((int)D_00526680 | 0x20000000);
+    func_00423DC0(D_00451628);
+    return v;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_004011C0);
@@ -1770,6 +1912,7 @@ int func_004011C0(int a, int b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004011E0);
 #ifdef SKIP_ASM
 extern char D_00497A78[];
@@ -1781,16 +1924,58 @@ extern void func_00423CA0(int, sThreadParam *);
 extern void func_00425C60();
 extern int func_004013E8(int);
 extern void func_00426408(int);
-int func_004011E0(int a); /* peak3 body held: see notes/stuck.md */
-
+int func_004011E0(int a) {
+    int i;
+    func_00400C00();
+    if (D_00451628 != func_00423DF0(D_00451628)) {
+        if (D_00451610 > 0)
+            func_00425C60(D_00497A78, a, D_0045161C);
+        return 0;
+    }
+    D_0045161C = a;
+    func_00423CA0(D_005264D8, &D_005264E0);
+    if (func_004013E8(1) != 0) {
+        func_00423DC0(D_00451628);
+        return 0;
+    }
+    func_00426408(0);
+    if (D_0045163C >= 0)
+        return 1;
+    for (;;) {
+        if (func_00426B48(&D_004527D0, 0x80000595, 0) < 0) {
+            if (D_00451610 > 0)
+                func_00425C60(D_00497AA0);
+            for (i = 0x100000; i--; )
+                ;
+            continue;
+        }
+        if (D_004527D0.server != 0)
+            break;
+        for (i = 0x100000; i--; )
+            ;
+    }
+    D_0045163C = 0;
+    return 1;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00401350);
 #ifdef SKIP_ASM
 extern int func_004011E0();
 extern void func_00423DC0(int);
-int func_00401350(void); /* peak3 body held: see notes/stuck.md */
-
+int func_00401350(void) {
+    int v;
+    if (func_004011E0(2) == 0)
+        return 0;
+    if (func_00426D18(&D_004527D0, 14, 0, 0, 0, D_00451680, 4, 0, 0) < 0) {
+        func_00423DC0(D_00451628);
+        return 0;
+    }
+    v = *(int *)((unsigned)D_00451680 | 0x20000000);
+    func_00423DC0(D_00451628);
+    return v;
+}
 #endif
 
 //100%
@@ -1829,6 +2014,7 @@ int func_00401488(int a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004014F8);
 #ifdef SKIP_ASM
 extern char D_00497AD8[];
@@ -1840,18 +2026,86 @@ extern void func_00423CA0(int, sThreadParam *);
 extern void func_00425C60();
 extern int func_00401488(int);
 extern void func_00426408(int);
-int func_004014F8(int a); /* peak3 body held: see notes/stuck.md */
-
+int func_004014F8(int a) {
+    int i;
+    func_00400C00();
+    if (D_0045162C != func_00423DF0(D_0045162C)) {
+        if (D_00451610 > 0)
+            func_00425C60(D_00497AD8, a, D_00451618);
+        return 0;
+    }
+    D_00451618 = a;
+    func_00423CA0(D_005264D8, &D_005264E0);
+    if (func_00401488(1) != 0) {
+        func_00423DC0(D_0045162C);
+        return 0;
+    }
+    func_00426408(0);
+    if (D_0045164C >= 0)
+        return 1;
+    for (;;) {
+        if (func_00426B48(&D_00453180, 0x80000593, 0) < 0) {
+            if (D_00451610 > 0)
+                func_00425C60(D_00497B00);
+            for (i = 0x100000; i--; )
+                ;
+            continue;
+        }
+        if (D_00453180.server != 0)
+            break;
+        for (i = 0x100000; i--; )
+            ;
+    }
+    D_0045164C = 0;
+    return 1;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00401668);
 #ifdef SKIP_ASM
-int func_00401668(long id, int *out); /* peak3 body held: see notes/stuck.md */
-
+int func_00401668(long id, int *out) {
+    int v;
+    if (id != 0x8001) {
+        if (id != 0x8003) {
+            if (id != 0x8002) {
+                if (id != 0x8004) {
+                    if (id != 0x8011) {
+                        if (id != 0x8013) {
+                            if (id != 0x8012) {
+                                if (id == 0x8014)
+                                    v = (int)&D_00453180;
+                                else
+                                    v = 0;
+                            } else {
+                                v = (int)D_00452C40;
+                            }
+                        } else {
+                            v = (int)D_00452800;
+                        }
+                    } else {
+                        v = D_0045162C;
+                    }
+                } else {
+                    v = (int)&D_004527D0;
+                }
+            } else {
+                v = (int)D_00451700;
+            }
+        } else {
+            v = (int)D_00451680;
+        }
+    } else {
+        v = D_00451628;
+    }
+    *out = v;
+    return 1;
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00401718);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004019F8);
 #ifdef SKIP_ASM
 extern char D_00497B48[];
@@ -1864,10 +2118,51 @@ extern void func_00423DC0(int);
 extern int func_00401488(int);
 extern void func_00426408(int);
 extern void func_00426358(int, int);
-int func_004019F8(int a); /* peak3 body held: see notes/stuck.md */
-
+int func_004019F8(int a) {
+    int r;
+    int v;
+    if (D_00451610 > 0)
+        func_00425C60(D_00497B48);
+    func_00400C00();
+    if (D_0045162C != func_00423DF0(D_0045162C))
+        return 6;
+    if (func_00401488(1) != 0) {
+        func_00423DC0(D_0045162C);
+        return a != 8 ? 6 : -1;
+    }
+    func_00426408(0);
+    if (D_00451648 < 0) {
+        for (;;) {
+            if (func_00426B48(&D_00526710, 0x8000059A, 0) < 0) {
+                if (D_00451610 > 0)
+                    func_00425C60(D_00497B60);
+                for (r = 0x100000; r--; )
+                    ;
+                continue;
+            }
+            if (D_00526710.server != 0) {
+                D_00451648 = 0;
+                break;
+            }
+            for (r = 0x100000; r--; )
+                ;
+        }
+    }
+    D_00526750[0] = a;
+    func_00426358((int)D_00526750, 4);
+    if (func_00426D18(&D_00526710, 0, 0, D_00526750, 4, D_00452800, 4, 0, 0) < 0) {
+        func_00423DC0(D_0045162C);
+        return a != 8 ? 6 : -1;
+    }
+    if (D_00451610 > 0)
+        func_00425C60(D_00497B80);
+    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    func_00423DC0(D_0045162C);
+    return v;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00401BF0);
 #ifdef SKIP_ASM
 extern char D_00497B98[];
@@ -1882,12 +2177,56 @@ extern void b1_6358(int *, int) __asm__("func_00426358");
 extern int b1_19F8(int) __asm__("func_004019F8");
 /* The sema id passed to the Sema calls is read volatile throughout libcdvd (see the retail delay slots). */
 static inline int semaId1BF0(void) {
-    return *(volatile int *)&D_00451630;
+    return D_00451630;
 }
-int func_00401BF0(int a); /* peak3 body held: see notes/stuck.md */
-
+int func_00401BF0(int a) {
+    int i;
+    int r;
+    int v;
+    if (D_00451610 > 0)
+        b1_log(D_00497B98);
+    b1_0C00();
+    if (D_00451630 != b1_3DF0(semaId1BF0()))
+        return a != 8 ? 6 : -1;
+    b1_6408(0);
+    i = 0;
+    if (D_00451648 < 0) {
+        for (;;) {
+            if (func_00426B48(&D_00526710, 0x8000059C, 0) < 0) {
+                if (D_00451610 > 0)
+                    b1_log(D_00497B60);
+                for (r = 0x100000; r--; )
+                    ;
+                continue;
+            }
+            if (D_00526710.server != 0) {
+                D_00451648 = 0;
+                break;
+            }
+            if (i >= 0x11) {
+                b1_3DC0(semaId1BF0());
+                return b1_19F8(a);
+            }
+            for (r = 0x100000; r--; )
+                ;
+            i++;
+        }
+    }
+    D_00526750[0] = a;
+    b1_6358(D_00526750, 4);
+    if (func_00426D18(&D_00526710, 0, 0, D_00526750, 4, D_00453080, 4, 0, 0) < 0) {
+        b1_3DC0(semaId1BF0());
+        return a != 8 ? 6 : -1;
+    }
+    if (D_00451610 > 0)
+        b1_log(D_00497B80);
+    v = *(int *)((unsigned)D_00453080 | 0x20000000);
+    b1_3DC0(semaId1BF0());
+    return v;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00401DF8);
 #ifdef SKIP_ASM
 extern char D_00497BB0[];
@@ -1897,52 +2236,170 @@ extern int func_004011E0();
 extern void func_00425C60();
 extern void func_00423DC0(int);
 extern void func_00426358(int, int);
-int func_00401DF8(int lsn, int sectors, int buf, unsigned char *mode); /* peak3 body held: see notes/stuck.md */
-
+int func_00401DF8(int lsn, int sectors, int buf, unsigned char *mode) {
+    int size;
+    sCdReadCmd *p = (sCdReadCmd *)D_00451700;
+    if ((D_00451638 & 1) == 0) {
+        if (func_00401350() == 6)
+            return 0;
+    }
+    if (func_004011E0(4) == 0)
+        return 0;
+    p->lsn = lsn;
+    p->sectors = sectors;
+    p->buf = buf;
+    p->trycount = mode[0];
+    p->spindlctrl = mode[1];
+    p->datapattern = mode[2];
+    p->ebuf = D_00452700;
+    p->res = D_004527C0;
+    switch (mode[2]) {
+    case 1:
+        size = sectors * 0x918;
+        break;
+    case 2:
+        size = sectors * 0x924;
+        break;
+    case 0:
+    default:
+        size = sectors << 11;
+        break;
+    }
+    D_004527C0[0] = 0;
+    if ((D_00451638 & 2) == 0)
+        func_00426358(buf, size);
+    func_00426358((int)D_00452700, 0x90);
+    func_00426358((int)p, 0x18);
+    func_00426358((int)D_004527C0, 4);
+    if (D_00451610 > 0)
+        func_00425C60(D_00497BB0);
+    D_00451658 = 1;
+    D_00451634 = 1;
+    if (func_00426D18(&D_004527D0, 1, 1, p, 0x18, 0, 0, func_00400B48, D_00452700) < 0) {
+        D_00451658 = 0;
+        D_00451634 = 0;
+        func_00423DC0(D_00451628);
+        return 0;
+    }
+    if (D_00451610 > 0)
+        func_00425C60(D_00497BC8);
+    return 1;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00401FD8);
 #ifdef SKIP_ASM
 extern int func_004011E0();
 extern void func_00426358(int, int);
 extern void func_00423DC0(int);
-int func_00401FD8(char *dst); /* peak3 body held: see notes/stuck.md */
-
+int func_00401FD8(char *dst) {
+    int v;
+    int *p = D_00451700;
+    if (func_004011E0(8) == 0)
+        return 0;
+    p[0] = (int)D_00526780;
+    func_00426358((int)D_00526780, 0x810);
+    func_00426358((int)p, 12);
+    D_00451658 = 3;
+    if (func_00426D18(&D_004527D0, 4, 0, p, 12, D_00451680, 8, 0, 0) < 0) {
+        D_00451658 = 0;
+        func_00423DC0(D_00451628);
+        return 0;
+    }
+    D_00451658 = 0;
+    v = D_00451680[0];
+    if (D_00451680[1] == 0)
+        __builtin_memcpy(dst, (char *)((unsigned)D_00526780 | 0x20000000), 0x400);
+    else
+        __builtin_memcpy(dst, (char *)((unsigned)D_00526780 | 0x20000000), 0x810);
+    func_00423DC0(D_00451628);
+    return v;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402268);
 #ifdef SKIP_ASM
 extern int func_004014F8();
 extern void func_00423DC0(int);
-int func_00402268(void); /* peak3 body held: see notes/stuck.md */
-
+int func_00402268(void) {
+    int v;
+    if (func_004014F8(1) == 0)
+        return 0;
+    if (func_00426D18(&D_00453180, 3, 0, 0, 0, D_00452800, 4, 0, 0) < 0) {
+        func_00423DC0(D_0045162C);
+        return 0;
+    }
+    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    func_00423DC0(D_0045162C);
+    return v;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402300);
 #ifdef SKIP_ASM
 extern int func_004014F8();
 extern void func_00423DC0(int);
-int func_00402300(void); /* peak3 body held: see notes/stuck.md */
-
+int func_00402300(void) {
+    int v;
+    if (func_004014F8(3) == 0)
+        return -1;
+    if (func_00426D18(&D_00453180, 4, 0, 0, 0, D_00452800, 4, 0, 0) < 0) {
+        func_00423DC0(D_0045162C);
+        return -1;
+    }
+    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    func_00423DC0(D_0045162C);
+    return v;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402398);
 #ifdef SKIP_ASM
 extern int func_004014F8();
 extern void func_00423DC0(int);
-int func_00402398(int *out); /* peak3 body held: see notes/stuck.md */
-
+int func_00402398(int *out) {
+    int v;
+    if (func_004014F8(0x21) == 0)
+        return 0;
+    if (func_00426D18(&D_00453180, 0x21, 0, 0, 0, D_00452800, 8, 0, 0) < 0) {
+        func_00423DC0(D_0045162C);
+        return 0;
+    }
+    *out = *(int *)((unsigned)(D_00452800 + 1) | 0x20000000);
+    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    func_00423DC0(D_0045162C);
+    return v;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402450);
 #ifdef SKIP_ASM
 extern int func_004014F8();
 extern void func_00423DC0(int);
 extern void func_00426358_p(int *, int) __asm__("func_00426358");
-int func_00402450(int a); /* peak3 body held: see notes/stuck.md */
-
+int func_00402450(int a) {
+    int v;
+    int *p = D_00452C40;
+    if (func_004014F8(34) == 0)
+        return 0;
+    D_00452C40[0] = a;
+    func_00426358_p(p, 4);
+    if (func_00426D18(&D_00453180, D_004531A8, 0, p, D_004531AC, D_00452800, D_004531B0, 0, 0) < 0) {
+        func_00423DC0(D_0045162C);
+        return 0;
+    }
+    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    func_00423DC0(D_0045162C);
+    return v;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402520);
 #ifdef SKIP_ASM
 struct P8 { char b[8]; } __attribute__((packed));
@@ -1951,17 +2408,48 @@ extern char D_00497BF8[];
 extern int func_004014F8();
 extern void func_00423DC0(int);
 extern void func_00425C60();
-int func_00402520(struct P8 *a); /* peak3 body held: see notes/stuck.md */
-
+int func_00402520(struct P8 *a) {
+    int v;
+    if (func_004014F8(15) == 0)
+        return 0;
+    if (D_00451610 > 0)
+        func_00425C60(D_00497BD8);
+    if (func_00426D18(&D_00453180, 1, 0, 0, 0, D_00452800, 16, 0, 0) < 0) {
+        func_00423DC0(D_0045162C);
+        return 0;
+    }
+    *a = *(struct P8 *)((unsigned)&D_00452800[1] | 0x20000000);
+    if (D_00451610 > 0)
+        func_00425C60(D_00497BF8);
+    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    func_00423DC0(D_0045162C);
+    return v;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402618);
 #ifdef SKIP_ASM
 extern int func_004014F8();
 extern void func_00423DC0(int);
 extern void func_00426358_p(int *, int) __asm__("func_00426358");
-int func_00402618(int a, int *out); /* peak3 body held: see notes/stuck.md */
-
+int func_00402618(int a, int *out) {
+    int v;
+    int *p = D_00452C40;
+    if (func_004014F8(26) == 0)
+        return -1;
+    D_00452C40[0] = a;
+    func_00426358_p(p, 4);
+    if (func_00426D18(&D_00453180, 5, 0, p, 4, D_00452800, 8, 0, 0) < 0) {
+        func_00423DC0(D_0045162C);
+        return -1;
+    }
+    if (out)
+        *out = *(int *)((unsigned)&D_00452800[1] | 0x20000000);
+    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    func_00423DC0(D_0045162C);
+    return v;
+}
 #endif
 
 //100%
@@ -5083,6 +5571,7 @@ int func_0040B400(int cc, int a, int flag, int d, int e, int f) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040B5B0);
 #ifdef SKIP_ASM
 struct O_B5B0 { int f0; int f4; int f8; int fC; int f10; int f14; int f18; int f1C; int f20; int f24; int f28; int f2C; };
@@ -5094,8 +5583,43 @@ extern struct O_B5B0 *b5_0040B208(char *) __asm__("func_0040B208");
 extern void b5_0040B2B0(struct O_B5B0 *) __asm__("func_0040B2B0");
 extern int b5_00423DA0(struct QSema *) __asm__("func_00423DA0");
 extern int b5_004261B0(int, struct O_B5B0 *, int, int, int, int) __asm__("func_004261B0");
-int func_0040B5B0(struct O_B5B0 *a, int b); /* peak3 body held: see notes/stuck.md */
-
+int func_0040B5B0(struct O_B5B0 *a, int b) {
+    struct O_B5B0 *t;
+    struct QSema s;
+    int h;
+    if (b) {
+        b5_00425C60(D_00498178);
+        return -1;
+    }
+    b5_00423DE0(a->f28);
+    t = b5_0040B208(D_00528FC0);
+    if (t == 0)
+        return -1;
+    a->f4 = t->f18;
+    a->f0 = (int)t;
+    t->f20 = a->f10;
+    t->f14 = (int)t;
+    t->f1C = (int)a;
+    t->f24 = a->f24;
+    s.max_count = 1;
+    s.init_count = 0;
+    s.option = 0;
+    h = b5_00423DA0(&s);
+    a->f8 = h;
+    if (h < 0) {
+        b5_0040B2B0(t);
+        return -3;
+    }
+    if (b5_004261B0(0x8000001D, t, 0x40, 0, 0, 0) == 0) {
+        b5_0040B2B0(t);
+        b5_00423DB0(h);
+        return -2;
+    }
+    b5_00423DE0(h);
+    b5_00423DB0(h);
+    b5_00423DB0(a->f28);
+    return a->f2C;
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_0040B6D0);
@@ -5467,6 +5991,7 @@ void func_0040BFE0(int a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040C028);
 #ifdef SKIP_ASM
 struct KbInfo_C028 { int n; char pad[0x8C]; };
@@ -5481,8 +6006,82 @@ extern int k_C810(int, int *) __asm__("func_0040C810");
 extern int k_3A80(int, int (*)(void), int) __asm__("func_00423A80");
 extern int k_48E8(int) __asm__("func_004248E8");
 extern int func_0040CF88(void);
-int func_0040C028(int *out); /* peak3 body held: see notes/stuck.md */
-
+int func_0040C028(int *out) {
+    struct KbInfo_C028 info;
+    struct QSema s;
+    int st;
+    unsigned i;
+    k_6408(0);
+    for (;;) {
+        if (func_00426B48(&D_005290A0, 0x80000211, 0) < 0) {
+            k_log(D_00498240);
+            return -1;
+        }
+        if (D_005290A0.server != 0)
+            break;
+        i = 0x10000;
+        while (i--);
+    }
+    s.init_count = 1;
+    s.max_count = 1;
+    D_00453438 = k_sema(&s);
+    if (D_00453438 == -1) {
+        k_log(D_00498258);
+        return -1;
+    }
+    if (sceUsbKbGetInfo(&info) != 0) {
+        k_dsema(D_00453438);
+        D_00453438 = -1;
+        return -1;
+    }
+    k_C810(0, &st);
+    if (st != 0) {
+        k_dsema(D_00453438);
+        D_00453438 = -1;
+        return -1;
+    }
+    if (info.n <= 0) {
+        k_dsema(D_00453438);
+        D_00453438 = -1;
+        return -1;
+    }
+    if (info.n >= 0x80) {
+        k_dsema(D_00453438);
+        D_00453438 = -1;
+        return -1;
+    }
+    D_00529000.n = info.n;
+    *out = info.n;
+    D_00529000.port = D_005291D0;
+    if (D_00529000.port == 0) {
+        k_dsema(D_00453438);
+        D_00453438 = -1;
+        return -1;
+    }
+    for (i = 0; i < info.n; i++) {
+        D_00529000.port[i].rep.n = 0;
+        D_00529000.port[i].ledMode = 1;
+        D_00529000.port[i].f04 = 1;
+        D_00529000.port[i].f08 = 1;
+        D_00529000.port[i].f0C = 0;
+        D_00529000.port[i].rep.state = 0;
+        D_00529000.port[i].rep.count = 0;
+        D_00529000.port[i].rep.delay = 0;
+        D_00529000.port[i].rep.rate = 0;
+        D_00529000.port[i].rep.wr = 0;
+        D_00529000.port[i].rep.rd = 0;
+        D_00529000.port[i].rep.last = 0;
+    }
+    D_00529000.prev.n = 0;
+    D_00529000.thread = k_3A80(3, func_0040CF88, -1);
+    if (D_00529000.thread < 0) {
+        k_dsema(D_00453438);
+        D_00453438 = -1;
+        return -1;
+    }
+    k_48E8(3);
+    return 0;
+}
 #endif
 
 //100%
