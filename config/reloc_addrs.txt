@@ -640,3 +640,11 @@ rom:0x2CE358 reloc:MIPS_LO16 symbol:D_0044EBE8 addend:0x8
 rom:0x5FF70 reloc:MIPS_LO16 symbol:D_004FF160
 rom:0x5FFB0 reloc:MIPS_LO16 symbol:D_004FF160
 rom:0x60000 reloc:MIPS_LO16 symbol:D_004FF160
+// ealib/seg_2B4578 func_003C7D00 (MIX_create): the mixer's a2[]/b1[]/b2[] arrays are D_00515B40+0xA8/+0xB0/+0xD0; splat
+// named them as inner labels (only this function uses them). D_00515B40 stays sized 0x10 (D_00515B50/54 are named).
+rom:0x2C8D98 reloc:MIPS_HI16 symbol:D_00515B40 addend:0xB0
+rom:0x2C8DA0 reloc:MIPS_HI16 symbol:D_00515B40 addend:0xA8
+rom:0x2C8DA8 reloc:MIPS_LO16 symbol:D_00515B40 addend:0xA8
+rom:0x2C8E24 reloc:MIPS_LO16 symbol:D_00515B40 addend:0xB0
+rom:0x2C8E70 reloc:MIPS_HI16 symbol:D_00515B40 addend:0xD0
+rom:0x2C8EE4 reloc:MIPS_LO16 symbol:D_00515B40 addend:0xD0
