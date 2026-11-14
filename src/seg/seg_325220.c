@@ -5064,13 +5064,18 @@ INCLUDE_ASM("seg/seg_325220", func_0042CD48);
 SYSCALL_STUB(func_0042CD48, 0x59)
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042CD58);
 #ifdef SKIP_ASM
 extern int func_00424200(void);
 extern int func_0042CD98(void);
 extern int func_00424210(void);
-int func_0042CD58(void); /* peak3 body held: see notes/stuck.md */
-
+int func_0042CD58(void) {
+    if (func_00424200() == 0x2000000) {
+        return func_0042CD98();
+    }
+    return func_00424210();
+}
 #endif
 
 INCLUDE_ASM("seg/seg_325220", func_0042CD98);

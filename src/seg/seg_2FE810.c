@@ -1876,6 +1876,7 @@ void func_004009A8(void); /* peak3 body held: see notes/stuck.md */
 
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400A78);
 #ifdef SKIP_ASM
 extern int func_00423C90();
@@ -1884,8 +1885,25 @@ extern int func_00423BA0(sThreadParam *);
 extern void func_00423BC0(int, int);
 extern void func_00423C30(int, int);
 extern void func_004009A8(void);
-int func_00400A78(int a, int b, int c); /* peak3 body held: see notes/stuck.md */
-
+int func_00400A78(int a, int b, int c) {
+    int ok;
+    ok = 1;
+    if (D_00451614 == 0) {
+        D_005264D8 = func_00423C90();
+        func_00423CA0_i(D_005264D8, &D_005264E0);
+        D_00526510.stackSize = c;
+        D_00526510.entry = func_004009A8;
+        D_00526510.stack = b;
+        D_00526510.initPriority = a;
+        D_00526510.gpReg = 0;
+        D_00451614 = func_00423BA0(&D_00526510);
+        func_00423BC0(D_00451614, 0);
+    } else {
+        func_00423C30(D_00451614, a);
+        ok = 0;
+    }
+    return ok;
+}
 #endif
 
 //100%
@@ -1974,14 +1992,24 @@ void func_00400DD8(void); /* peak3 body held: see notes/stuck.md */
 
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400E30);
 #ifdef SKIP_ASM
 extern int func_0042C078();
 extern void func_0042C0C0(void);
 extern void func_00400DD8(void);
 extern void func_00426020(int, void (*)(void), int);
-int func_00400E30(void); /* peak3 body held: see notes/stuck.md */
-
+int func_00400E30(void) {
+    int s;
+    D_00451624 = 1;
+    s = func_0042C078();
+    func_00426020(0x80000012, func_00400DD8, 0);
+    if (s)
+        func_0042C0C0();
+    D_00451624 = 0;
+    D_00451640 = 1;
+    return 1;
+}
 #endif
 
 //100%
@@ -3294,13 +3322,30 @@ void func_00403338(int *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403398);
 #ifdef SKIP_ASM
 extern int func_0042C078_0() __asm__("func_0042C078");
 extern void func_0042C0C0(void);
 extern void func_00409638_2(int, int) __asm__("func_00409638");
-void func_00403398(int *p); /* peak3 body held: see notes/stuck.md */
-
+void func_00403398(int *p) {
+    int s;
+    p[0x818 / 4] = 1;
+    p[0x1B0 / 4] = 0;
+    s = func_0042C078_0();
+    *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
+    *(volatile int *)0x1000B000 = 0;
+    *(volatile int *)0x1000B400 = 0;
+    *(volatile int *)0x1000D400 = 0;
+    *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
+    if (s)
+        func_0042C0C0();
+    *(volatile int *)0x1000B020 = 0;
+    *(volatile int *)0x1000B420 = 0;
+    *(volatile int *)0x1000D420 = 0;
+    *(volatile int *)0x10002010 = 0x40000000;
+    func_00409638_2(0, 0);
+}
 #endif
 
 //100%
@@ -3585,7 +3630,48 @@ INCLUDE_ASM("seg/seg_2FE810", func_00404050);
 
 INCLUDE_ASM("seg/seg_2FE810", func_00404758);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00404B78);
+#ifdef SKIP_ASM
+struct B4B78 { char b[0x1C]; };
+struct E4B78 {
+    int f0;
+    void *src;
+    char pad8[0x20];
+    void (*fa[4])(void *);
+    void (*fb[4])(void *);
+    struct B4B78 blk[8];
+    void *dst;
+    int count;
+    int f130;
+    int pad134;
+    int enable;
+    int f13C;
+};
+struct S4B78 { char pad0[0x590]; struct E4B78 e[2]; char pad810[0xC]; void *f81C; };
+extern void func_004034A8(int *, int);
+extern char D_00497E98[];
+extern void add_4B78(void *, void *) __asm__("func_00405AE8");
+extern void mix_4B78(void *, void *, void *) __asm__("func_00405A88");
+void f4B78(struct S4B78 *s, int n) __asm__("func_00404B78");
+void f4B78(struct S4B78 *s, int n) {
+    int i;
+    if (s->e[n].enable != 0) {
+        for (i = 0; i < s->e[n].count; i++) {
+            s->e[n].fa[i](&s->e[n].blk[i]);
+            s->e[n].fb[i](&s->e[n].blk[i + 4]);
+        }
+    }
+    if (s->e[n].f130 != 0 && s->e[n].f13C != 0)
+        func_004034A8((int *)s, (int)D_00497E98);
+    if (s->e[n].f130 != 0)
+        add_4B78(s->e[n].dst, s->e[n].src);
+    else if (s->e[n].f13C != 0)
+        add_4B78(s->e[n].dst, s->f81C);
+    else
+        mix_4B78(s->e[n].dst, s->f81C, s->e[n].src);
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00404D98);
 #ifdef SKIP_ASM
