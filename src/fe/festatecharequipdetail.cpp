@@ -3462,9 +3462,96 @@ extern "C" int func_0019DE18(const int* a, const int* b)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019DF20);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// One file slot of the FE file cache (0x120 bytes; the cache sits at game + 0x7C -> + 0x1A70, D_004A196C points at
+// it). state: 0 idle, 1 loaded, 2 async load in flight, 3 queued.
+struct sFileSlot {
+    int state;              // 0x0
+    char name[0x100];       // 0x4
+    void* data;             // 0x104
+    int handle;             // 0x108: async file handle
+    int pending;            // 0x10C: load asynchronously
+    int type;               // 0x110
+    int timer;              // 0x114: use count
+    int size;               // 0x118
+    unsigned int stamp;     // 0x11C: least-recently-used stamp
+};
 
+// 256 slots per bank (0x12000 bytes).
+struct sFileBank {
+    sFileSlot slots[256];
+};
+
+// The FE file cache: ten banks, the loaded byte count, the number of loads in flight and per-bank stamp counters.
+struct sFileCache {
+    sFileBank banks[10];    // 0x0
+    int used;               // 0xB4000
+    int nPending;           // 0xB4004
+    int counts[10];         // 0xB4008
+};
+
+extern "C" void func_0019D8B8_DF20(sFileCache* self, int bank, int i) __asm__("func_0019D8B8");
+
+// (prototype from their definition at line 2766)
+extern "C" int func_0019DD10_DF20(const int* a, const int* b) __asm__("func_0019DD10");
+
+extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const int*, const int*));
+
+extern "C" void func_0019DF20(sFileCache* self, int bank)
+{
+    int keys[256];
+    for (int i = 0; i < 256; i++)
+        keys[i] = (bank << 16) | i;
+    func_00418EF8(keys, 256, 4, func_0019DD10_DF20);
+    for (int i = 0; i < 256; i++) {
+        unsigned short idx = keys[i] & 0xFFFF;
+        sFileSlot* s = &self->banks[bank].slots[idx];
+        if (s->stamp != 0 || s->type != 8)
+            break;
+        s->stamp = self->counts[bank]++;
+        if (self->nPending <= 0 && s->state == 3)
+            func_0019D8B8_DF20(self, bank, idx);
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E070);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// One file slot of the FE file cache (0x120 bytes; the cache sits at game + 0x7C -> + 0x1A70, D_004A196C points at
+// it). state: 0 idle, 1 loaded, 2 async load in flight, 3 queued.
+// 256 slots per bank (0x12000 bytes).
+// The FE file cache: ten banks, the loaded byte count, the number of loads in flight and per-bank stamp counters.
+extern "C" void func_0019D8B8_E070(sFileCache* self, int bank, int i) __asm__("func_0019D8B8");
+
+// (prototype from their definition at line 2789)
+extern "C" int func_0019DE18_E070(const int* a, const int* b) __asm__("func_0019DE18");
+
+extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const int*, const int*));
+
+extern "C" void func_0019E070(sFileCache* self, int bank)
+{
+    int keys[256];
+    for (int i = 0; i < 256; i++)
+        keys[i] = (bank << 16) | i;
+    func_00418EF8(keys, 256, 4, func_0019DE18_E070);
+    for (int i = 0; i < 256; i++) {
+        unsigned short idx = keys[i] & 0xFFFF;
+        sFileSlot* s = &self->banks[bank].slots[idx];
+        if (s->stamp != 0 || s->type != 0xB)
+            break;
+        s->stamp = self->counts[bank]++;
+        if (self->nPending <= 0 && s->state == 3)
+            func_0019D8B8_E070(self, bank, idx);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E1C0);

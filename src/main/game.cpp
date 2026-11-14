@@ -363,9 +363,153 @@ extern "C" void func_0022CD40(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/game", func_0022CEA8);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+struct sGroup_CEA8 {
+    int f0;
+    int count;      // 0x4
+    int a;          // 0x8
+    int b;          // 0xC
+    int ids[6];     // 0x10
+};
+struct sMode_CEA8 {
+    int f0;
+    int mode;       // 0x4
+};
+extern sGroup_CEA8 D_00442488_CEA8[] __asm__("D_00442488");
+extern sMode_CEA8 D_00442820_CEA8[] __asm__("D_00442820");
+extern "C" void func_0022D598(void* self, int idx);
+extern "C" void func_0022D3D8(void* self, int idx);
+extern "C" void func_0022D640(void* self, int a1);
 
+// PORT: the unit's other callers declare (void*, int, char*); the body reads three ints, bound by asm label
+extern "C" void func_0022CEA8_impl(void* self, int idx, int mode) __asm__("func_0022CEA8");
+
+// Shared with func_0022D088: true for a real section id (0x31 = no section).
+static inline bool IsSection(const int& id)
+{
+    return id != 0x31;
+}
+
+extern "C" void func_0022CEA8_impl(void* self, int idx, int mode)
+{
+    int v;
+    if (mode == 7) {
+        v = D_00442820_CEA8[idx].mode;
+    } else {
+        v = mode;
+    }
+    int extra = 0x31;
+    if (D_00442488_CEA8[idx].a >= 0) {
+        extra = D_00442488_CEA8[idx].a;
+    }
+    for (int i = 0; i < 0x32; i++) {
+        int found = 1;
+        for (int j = 0; j < D_00442488_CEA8[idx].count; j++) {
+            if (i == D_00442488_CEA8[idx].ids[j]) {
+                found = 0;
+                break;
+            }
+        }
+        if ((unsigned)(i - 0x2C) <= 4) {
+            found = 0;
+        }
+        if (i == 0x2B) {
+            found = 0;
+        }
+        if (found) {
+            func_0022D598(self, i);
+        }
+    }
+    *(int*)((char*)self + 0x1BC) = idx;
+    *(int*)((char*)self + 0x1C0) = 0;
+    for (int k = 0; k < D_00442488_CEA8[idx].count; k++) {
+        func_0022D3D8(self, D_00442488_CEA8[idx].ids[k]);
+    }
+    if (IsSection(extra)) {
+        *(int*)((char*)self + 0x1A4) = 0;
+        func_0022D3D8(self, extra);
+    }
+    int b = D_00442488_CEA8[idx].b;
+    if (b >= 0) {
+        func_0022D3D8(self, b);
+    }
+    func_0022D640(self, v);
+}
+#endif
+
+//100%
 INCLUDE_ASM("main/game", func_0022D088);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// Shared with func_0022D088: true for a real section id (0x31 = no section).
+struct sGroup_D088 {
+    int f0;
+    int count;
+    int a;
+    int b;
+    int ids[6];
+};
+struct sPair_D088 {
+    int f0;
+    int f4;
+};
+extern sGroup_D088 D_00442488_D088[] __asm__("D_00442488");
+extern sPair_D088 D_00442820_D088[] __asm__("D_00442820");
+extern "C" void func_0022D478_D088(void* self, int id) __asm__("func_0022D478");
+extern "C" void func_0022D668_D088(void* self, int v) __asm__("func_0022D668");
+extern "C" void func_0022D598_D088(void* self, int idx) __asm__("func_0022D598");
+extern "C" void cSectionMan_setSky(void* self, int sky);
+
+extern "C" void func_0022D088(void* self, int idx, int mode)
+{
+    int v;
+    if (mode == 7) {
+        v = D_00442820_D088[idx].f4;
+    } else {
+        v = mode;
+    }
+    int extra = 0x31;
+    if (D_00442488_D088[idx].a >= 0) {
+        extra = D_00442488_D088[idx].a;
+    }
+    for (int i = 0; i < 0x32; i++) {
+        int found = 1;
+        for (int j = 0; j < D_00442488_D088[idx].count; j++) {
+            if (i == D_00442488_D088[idx].ids[j]) {
+                found = 0;
+                break;
+            }
+        }
+        if ((unsigned)(i - 0x2C) <= 4) {
+            found = 0;
+        }
+        if (i == 0x2B) {
+            found = 0;
+        }
+        if (found) {
+            func_0022D598_D088(self, i);
+        }
+    }
+    *(int*)((char*)self + 0x1C0) = 1;
+    *(int*)((char*)self + 0x1BC) = idx;
+    for (int k = 0; k < D_00442488_D088[idx].count; k++) {
+        func_0022D478_D088(self, D_00442488_D088[idx].ids[k]);
+    }
+    cSectionMan_setSky(self, idx);
+    if (IsSection(extra)) {
+        func_0022D478_D088(self, extra);
+    }
+    int b = D_00442488_D088[idx].b;
+    if (b >= 0) {
+        func_0022D478_D088(self, b);
+    }
+    func_0022D668_D088(self, v);
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/game", func_0022D278);
