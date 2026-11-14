@@ -16,11 +16,11 @@
 .endm
 
 # An alternative entry to a function.
+# (No .aent: ee-gcc 2.9's assembler doesn't know it, and it only affects debug info, not code. From peak3project's fork.)
 .macro alabel label, visibility=global
     .\visibility \label
     .type \label, @function
     \label:
-        .aent \label
 .endm
 
 # A label referenced by an error handler table.

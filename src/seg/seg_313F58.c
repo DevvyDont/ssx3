@@ -1,0 +1,67 @@
+#include "common.h"
+
+INCLUDE_ASM("seg/seg_313F58", func_00412F58);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413068);
+
+INCLUDE_ASM("seg/seg_313F58", func_004130F8);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413330);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413388);
+
+INCLUDE_ASM("seg/seg_313F58", func_004133F0);
+
+INCLUDE_ASM("seg/seg_313F58", func_004135E8);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413748);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413860);
+
+INCLUDE_ASM("seg/seg_313F58", func_004138B0);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413968);
+
+INCLUDE_ASM("seg/seg_313F58", func_004139F8);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413A90);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413AC8);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413AF8);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413B38);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413B80);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413BD0);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413CD0);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413F38);
+
+INCLUDE_ASM("seg/seg_313F58", func_00413F80);
+
+INCLUDE_ASM("seg/seg_313F58", func_00414008);
+
+INCLUDE_ASM("seg/seg_313F58", func_00414148);
+
+INCLUDE_ASM("seg/seg_313F58", func_00414230);
+
+INCLUDE_ASM("seg/seg_313F58", func_00414338);
+
+INCLUDE_ASM("seg/seg_313F58", func_004146D0);
+
+INCLUDE_ASM("seg/seg_313F58", func_004146F8);
+
+INCLUDE_ASM("seg/seg_313F58", func_00414728);
+
+INCLUDE_ASM("seg/seg_313F58", func_00414750);
+
+INCLUDE_ASM("seg/seg_313F58", func_00414780);
+
+INCLUDE_ASM("seg/seg_313F58", func_004147F8);
+
+INCLUDE_ASM("seg/seg_313F58", func_00414818);
+
+INCLUDE_ASM("seg/seg_313F58", func_004149F0);

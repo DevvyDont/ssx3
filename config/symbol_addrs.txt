@@ -2194,3 +2194,13 @@ D_FFFFFF = 0x00FFFFFF; // ignore:true
 D_70000080 = 0x70000080; // ignore:true
 D_70000090 = 0x70000090; // ignore:true
 D_A0000040 = 0xA0000040; // ignore:true
+// Library tail Phase B (2026-11-14, from peak3project's fork): functions in the libgcc EH / libstdc++ exception units
+// that splat's function detection misses.
+func_004106E8 = 0x004106E8; //type:func
+func_00410800 = 0x00410800; //type:func
+func_00412818 = 0x00412818; //type:func
+func_00412828 = 0x00412828; //type:func
+func_00412860 = 0x00412860; //type:func
+func_00412CD8 = 0x00412CD8; //type:func
+func_00412D58 = 0x00412D58; //type:func
+func_00412DD8 = 0x00412DD8; //type:func

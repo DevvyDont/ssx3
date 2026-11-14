@@ -62,6 +62,17 @@ UNIT_CFLAGS = {
     # and never via $gp.
     "seg/seg_2F0F40": "-G0",
     "seg/seg_32F020": "-G0",
+    # Library tail Phase B (2026-11-14, as in peak3project's fork): the Sony SDK area, libgcc and libstdc++-v2 units
+    # built with ee-gcc 2.9 (UNIT_CC_NATIVE below) and the newlib unit. seg_2FE810's libm block loads float constants
+    # inline (li.s through $at, no $gp pool) and its assembler did not pad lwc1/mtc1 hazards (the EE interlocks
+    # them), hence -Wa,-mips4. The libgcc EH object and libstdc++ exception.cc were compiled with exceptions.
+    "seg/seg_2FE810": "-G0 -Wa,-mips4",
+    "seg/seg_3113A0_eh": "-fexceptions",
+    "seg/seg_313800_exception": "-G0 -fexceptions",
+    "seg/seg_313F58": "-G0",
+    "seg/seg_315B68_tinfo": "-G0",
+    "seg/seg_316FB8": "-G0",
+    "seg/seg_325220": "-G0",
     # The tail of the old world/wscriptcache text: EA library code (RCMP movie player, mpeg2decode, SHAPE, DXT) with no
     # $gp or .lit4 reference, and float constants as gas li.s (lui/ori $at) expansions. Every landed function there is
     # unchanged under -G0; func_003AE780 only matches with it (2026-11-13).
@@ -81,6 +92,44 @@ for _u, _d in list(UNIT_CC.items()):
     if not os.path.isfile(f"{_d}/bin/ee-gcc2953.exe"):
         print(f"warning: {_d} missing; {_u} builds with the default compiler")
         del UNIT_CC[_u]
+# Fork-only (library tail Phase B, 2026-11-14; tools and evidence from peak3project's fork): units built with Sony's
+# ee-gcc 2.9-ee-991111 (Linux-native i386 build from the decomp.me PS2 compiler bundle, GPL; extract
+# ee-gcc2.9-991111.tar.xz into tools/cc/ee-gcc2.9-991111). Most of the Sony SDK and runtime library code in .text was
+# compiled with it: its non-leaf functions save callee registers with `sd $16,0($sp); sd $31,0x10($sp)`, which
+# neither SN 2.95.3 build produces (they use sq). Unit edges sit where that fingerprint starts and stops. Override
+# the location with EE_GCC29_DIR; if the compiler is missing (or not on Linux) these units fall back to the default
+# compiler and those functions just don't match.
+EE_GCC29_DIR = os.environ.get("EE_GCC29_DIR", f"{TOOLS_DIR}/cc/ee-gcc2.9-991111")
+UNIT_CC_NATIVE = {
+    "seg/seg_2FE810": EE_GCC29_DIR,
+    "seg/seg_3113A0_eh": EE_GCC29_DIR,
+    "seg/seg_312310": EE_GCC29_DIR,
+    "seg/seg_313800_exception": EE_GCC29_DIR,
+    "seg/seg_313F58": EE_GCC29_DIR,
+    "seg/seg_315B68_tinfo": EE_GCC29_DIR,
+    "seg/seg_325220": EE_GCC29_DIR,
+}
+if not sys.platform.startswith("linux") or not os.path.isfile(f"{EE_GCC29_DIR}/bin/ee-gcc"):
+    if UNIT_CC_NATIVE:
+        print(f"warning: {EE_GCC29_DIR}/bin/ee-gcc missing or not on Linux; ee-gcc 2.9 units build with the default compiler")
+    UNIT_CC_NATIVE = {}
+# Fork-only: the retail objects of the ee-gcc 2.9 units were assembled by a reorder-mode assembler that moves the
+# previous instruction into an unfilled branch delay slot (gas 2.9-era behaviour). The ee-as of 2.9-ee-991111 never
+# does, so cc1's `lw; jal; nop` after a volatile access stays one instruction longer than retail. For these units
+# tools/cc_native.py runs its fill pass (--fill-delay-slots, passed in the unit's cflags and consumed there) on the
+# compiler's assembly before assembling it: one rule set for the whole unit, emulating that assembler.
+UNIT_AS_SWAP = set(UNIT_CC_NATIVE)
+# Fork-only: units whose retail code was assembled with SN's own Ps2EeAs (shipped in the stock SN compiler package),
+# not the driver's GNU as. In the newlib unit only Ps2EeAs reproduces `li -1; dsrl32` for `dli 0xffffffff`, its
+# ori/dsll16/dsll14 64-bit constant chains and its short-loop nops in loops with an inner exit branch. Affects
+# obj/current only (tools/ps2eeas_cc.py: Ps2EeAs can't read the .include/.org of a mixed asm/C unit); the linked
+# build assembles these functions from their asm. SSX3_NO_PS2EEAS=1 uses GNU as instead.
+PS2EEAS = os.environ.get("PS2EEAS", f"{STOCK_CC_DIR}/ee/bin/Ps2EeAs.exe")
+UNIT_PS2EEAS = {"seg/seg_316FB8"}
+if os.environ.get("SSX3_NO_PS2EEAS") or not os.path.isfile(PS2EEAS):
+    if UNIT_PS2EEAS and not os.environ.get("SSX3_NO_PS2EEAS"):
+        print(f"warning: {PS2EEAS} missing; {', '.join(sorted(UNIT_PS2EEAS))} use GNU as")
+    UNIT_PS2EEAS = set()
 # Fork-only: the assemblers that build our C get a 16 MB frag-obstack chunk (tools/patch_as_chunk.py). Stock
 # gas splits frags every ~998 instructions, and its R5900 short-loop padding miscounts loops across those splits;
 # where they fall depends on what precedes a function in the unit, which differs between our mixed asm/C builds
@@ -400,6 +449,19 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         command=f"{COMPILE_C_RULE.replace(CC_DIR, '$ccdir')} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
     )
 
+    # (fork) ee-gcc 2.9 units (UNIT_CC_NATIVE): a Linux-native driver, run through tools/cc_native.py (delay-slot fill
+    # pass, inode-safe mirroring); the _jt variant also repoints jump tables (obj/current)
+    ninja.rule(
+        "cc_native",
+        description="cc $in ($ccdir)",
+        command=f"python3 {ROOT}/tools/cc_native.py $ccdir -c {COMMON_INCLUDES} {ASM_INCLUDE_FLAG} {COMMON_CFLAGS} $in $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
+    )
+    ninja.rule(
+        "cc_native_jt",
+        description="cc $in ($ccdir, jtbl)",
+        command=f"python3 {ROOT}/tools/cc_native.py $ccdir -c {COMMON_INCLUDES} {ASM_INCLUDE_FLAG} {COMMON_CFLAGS} $in $cflags --jtbl-unit=$unit -o $out && {cross}strip $out -N dummy-symbol-name",
+    )
+
     ninja.rule(
         "cpp",
         description="cpp $in",
@@ -418,6 +480,12 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
         "cc_unit_jt",
         description="cc $in ($ccdir, jtbl)",
         command=f"{jt}{COMPILE_C_RULE.replace(CC_DIR, '$ccdir')} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
+    )
+    # (fork) units assembled with SN's Ps2EeAs (UNIT_PS2EEAS): the same compile, jump tables repointed, then Ps2EeAs
+    ninja.rule(
+        "cc_ps2as",
+        description="cc $in (jtbl, Ps2EeAs)",
+        command=f"python3 tools/ps2eeas_cc.py --unit $unit --as {PS2EEAS} -- {COMPILE_C_RULE} $cflags -o $out && {cross}strip $out -N dummy-symbol-name",
     )
     ninja.rule(
         "cpp_jt",
@@ -483,14 +551,28 @@ def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_
             unit_flags = UNIT_CFLAGS.get(seg.name, "")
             # .cpp sources are listed as c segments and go through the cc rule; give them the C++ flags here
             if any(str(p).endswith(".cpp") for p in entry.src_paths):
-                unit_flags = (unit_flags + " " + COMMON_CXXFLAGS).strip()
-            task, tvars = ("cc_unit", {"ccdir": UNIT_CC[seg.name]}) if seg.name in UNIT_CC else ("cc", None)
+                # a unit's own flags come last so they can override the default (-fexceptions over -fno-exceptions)
+                if "exceptions" in unit_flags:
+                    unit_flags = (COMMON_CXXFLAGS + " " + unit_flags).strip()
+                else:
+                    unit_flags = (unit_flags + " " + COMMON_CXXFLAGS).strip()
+            if seg.name in UNIT_CC_NATIVE:
+                task, tvars = "cc_native", {"ccdir": UNIT_CC_NATIVE[seg.name], "unit": seg.name}
+                if seg.name in UNIT_AS_SWAP:
+                    unit_flags = (unit_flags + " --fill-delay-slots").strip()
+            elif seg.name in UNIT_CC:
+                task, tvars = "cc_unit", {"ccdir": UNIT_CC[seg.name]}
+            else:
+                task, tvars = "cc", None
             if dual_objects:
                 build(entry.object_path, entry.src_paths, task, out_dir="obj/target", collect_objdiff=True, orig_entry=entry,
                       extra_flags=unit_flags or None, variables=tvars)
                 flags, inc = current_c_flags(entry)
-                build(entry.object_path, entry.src_paths, task + "_jt", out_dir="obj/current",
-                      extra_flags=(flags + " " + unit_flags).strip(), implicit=inc + ["tools/jtbl_cc.py"],
+                cur_task, tools_dep = task + "_jt", ["tools/jtbl_cc.py"] + (["tools/cc_native.py"] if task == "cc_native" else [])
+                if seg.name in UNIT_PS2EEAS and task == "cc":
+                    cur_task, tools_dep = "cc_ps2as", ["tools/jtbl_cc.py", "tools/ps2eeas_cc.py"]
+                build(entry.object_path, entry.src_paths, cur_task, out_dir="obj/current",
+                      extra_flags=(flags + " " + unit_flags).strip(), implicit=inc + tools_dep,
                       variables={**(tvars or {}), "unit": seg.name})
             else:
                 build(entry.object_path, entry.src_paths, task, extra_flags=unit_flags or None, variables=tvars)
