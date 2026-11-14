@@ -2107,7 +2107,8 @@ struct sFF90 {
 struct sFFA8 { int f00; int f04; int (*f08)(); int f0C; };
 extern struct sFF90 D_0044FF90_9830 __asm__("D_0044FF90");
 struct s0700Q { short x; short idx; unsigned short y; short d; };
-extern struct s0700Q D_0045070C_9830[] __asm__("D_0045070C");
+struct G_9830 { int f0, f4, f8; struct s0700Q q[0x30]; };
+extern struct G_9830 D_00450700_9830 __asm__("D_00450700");
 int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *out);
 
 static __inline__ void clearBit_9830(unsigned char *s, int bit) {
@@ -2142,7 +2143,7 @@ int func_003D9830(unsigned char *h, struct sKey4 *k, int a2) {
         n = h[4] >> 2;
         if (n != 0) {
             cnt = n;
-            e = D_0045070C_9830 + a2;
+            e = D_00450700_9830.q + a2;
             do {
                 x = e->x;
                 s = D_004A4824_9830[x];
@@ -2822,9 +2823,8 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DAE48);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned char **D_004A4824_AE48 __asm__("D_004A4824");      /* shape table, D_004A4828 entries */
 extern struct sFF90 D_0044FF90_AE48 __asm__("D_0044FF90");
-struct s0710 { unsigned short y; short pad[3]; };
-extern struct s0700Q D_0045070C_AE48[] __asm__("D_0045070C");
-extern struct s0710 D_00450710_AE48[] __asm__("D_00450710");
+struct G_AE48 { int f0, f4, f8; struct s0700Q q[0x30]; };
+extern struct G_AE48 D_00450700_AE48 __asm__("D_00450700");
 int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *out);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -2852,8 +2852,8 @@ void func_003DAE48(void *a0, int a1, struct sLayer *l, int a3) {
                 b = tbl[j];
                 if (b != 0xFF) {
                     h = func_003DB3E0_AE48(a1, b);
-                    yy = D_00450710_AE48[i + a3].y;
-                    shp = D_004A4824_AE48[D_0045070C_AE48[i + a3].x];
+                    yy = D_00450700_AE48.q[i + a3].y;
+                    shp = D_004A4824_AE48[D_00450700_AE48.q[i + a3].x];
                     if (func_003DB838(shp, yy, &o)) {
                         m = 1 << o.col[j];
                         D_0044FF90_AE48.f08(a0, h, (int)m, out);

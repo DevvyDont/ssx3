@@ -2094,6 +2094,11 @@ D_0043EE10 = 0x0043EE10; // size:0xC28
 D_00445D38 = 0x00445D38; // size:0xD8
 // ealib/seg_2D7498: request table {z[8], a[8], b[8], n, r[16] of 0x60}; D_00450068 / D_0045006C were r[0].p / r[0].arr.
 D_0044FFF8 = 0x0044FFF8; // size:0x664
+// ealib/seg_2D7498: 8 eight-byte {key, count} buckets (func_003D69A8 resets them); D_00450664 was bucket 0's count.
+D_00450660 = 0x00450660; // size:0x40
+// ealib/seg_2D7498: {f0, f4, f8; 0x30 eight-byte queue entries at +0xC; 8 0x5C-byte requests at +0x18C}; splat had cut
+// D_0045070C / D_00450710 (queue) and D_00450890 / D_00450898 (request fields) off it (func_003D9BD8, 003D9830, 003DAE48).
+D_00450700 = 0x00450700; // size:0x46C
 // ealib/seg_2D7498: 32-entry {val, key} history (func_003DB5C0); D_00450B8A was entry 0's key.
 D_00450B88 = 0x00450B88; // size:0x80
 // render/particle: vertex buffer of 0x30-byte {a, b, pos} (func_003726C8), sized to the next referenced symbol;

@@ -729,7 +729,7 @@ extern "C" void func_0031A920(void* self)
     func_00424880(3);
     func_00423AA0(3, *(int*)((char*)self + 0x14290));
     func_004248E8(3);
-    *(int*)((char*)self + 0x20) = 1;
+    *(volatile int*)((char*)self + 0x20) = 1;
     func_00423DC0(*(int*)((char*)self + 0x14044));
     func_00423DC0(*(int*)((char*)self + 0x4034));
     func_00423CC0();
@@ -920,7 +920,7 @@ int func_00317500_1(void* self) __asm__("func_00317500__Fv");
 
 extern "C" void func_0031AC08(void* self)
 {
-    while (func_00423DE0(*(int*)((char*)self + 0x4034)), *(int*)((char*)self + 0x20) == 0)
+    while (func_00423DE0(*(int*)((char*)self + 0x4034)), *(volatile int*)((char*)self + 0x20) == 0)
     {
         func_00317500_1(self);
     }
@@ -940,7 +940,7 @@ struct sMemJobVEntry {
 
 extern "C" void func_0031AC60(void* self)
 {
-    while (func_00423DE0(*(int*)((char*)self + 0x14044)), *(int*)((char*)self + 0x20) == 0)
+    while (func_00423DE0(*(int*)((char*)self + 0x14044)), *(volatile int*)((char*)self + 0x20) == 0)
     {
         void* obj = *(void* volatile*)((char*)self + 0x14048);
         sMemJobVEntry* vt = *(sMemJobVEntry**)obj;
