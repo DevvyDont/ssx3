@@ -3036,7 +3036,646 @@ extern "C" int func_0013D1B8(void* self, sHit_13D1B8* out, float* dist)
 #undef RIDER
 #endif
 
+//100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013D818);
+#ifdef SKIP_ASM
+#include "ai/rider.h"
+
+// The handplant controller: a cRider pointer at +0x18 (shared with func_0013C878/func_0013CCF0/func_0013D028).
+struct sHpCtl_13D818 {
+    float mPhase;     // 0x00: wobble phase, wrapped to [0, 2pi)
+    float m4;         // 0x04: slewed toward rider scale * surface m14
+    float m8;         // 0x08: slewed toward rider scale * surface m18
+    int mC;           // 0x0C: set to 1 when the plant is lost
+    char pad10[0x8];
+    cRider* mRider;   // 0x18
+};
+
+// One 0xB0-byte surface entry (D_004A28A8 -> +0x84 -> +0x44, indexed by cRider::mSurfaceType).
+struct sSurf_13D818 {
+    float m00;        // 0x00
+    float pad04[2];
+    float m0C;        // 0x0C: turn angle scale (degrees)
+    float m10;        // 0x10: max height above ground
+    float m14;        // 0x14
+    float m18;        // 0x18
+    float pad1C[3];
+    float m28;        // 0x28
+    float m2C;        // 0x2C
+    float m30;        // 0x30
+    float m34;        // 0x34
+    float m38;        // 0x38
+    char pad3C[0xB0 - 0x3C];
+};
+
+struct sCurvePt_13D818 { float x, y; };
+extern sCurvePt_13D818* D_004A1128;
+extern sCurvePt_13D818* D_004A1130;
+extern sCurvePt_13D818* D_004A1138;
+extern sCurvePt_13D818* D_004A1148;
+extern sCurvePt_13D818* D_004A1150;
+extern sCurvePt_13D818* D_004A1158;
+
+extern "C" float func_0013C878_13D818(void* self, sSurf_13D818* e, float h, float vn, float dt) __asm__("func_0013C878");
+extern float func_0013C948_D818(void* self, sSurf_13D818* e) __asm__("func_0013C948");
+extern "C" float func_0013CCF0_13D818(void* self, sSurf_13D818* e, float a, float b) __asm__("func_0013CCF0");
+// PORT: func_00148E68 is declared void in this unit; this caller uses its float result.
+extern "C" float func_00148E68_f(void* iface, int rider, int b) __asm__("func_00148E68");
+extern "C" void func_0011DFE0(cRider* self, const t4Vector& axis, float angle);
+extern "C" float func_0031C040(float a);
+extern "C" float func_0031C128(float x);
+int func_00312AA0(void* anim, int layer);
+
+extern t4Vector D_004FF120_13D818 __asm__("D_004FF120");
+extern t4Vector D_004FF160_13D818 __asm__("D_004FF160");
+
+struct sVEnt_13D818 { short delta; short index; void (*fn)(void*, sHit_13D1B8*, t4Vector*); };
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0Len_13D818(const t4Vector& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector times scalar).
+static inline void vu0ScaleEq_13D818(t4Vector& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline t4Vector vu0Scale_13D818(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add).
+static inline t4Vector vu0Add_13D818(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector subtract).
+static inline t4Vector vu0Sub_13D818(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector add).
+static inline void vu0AddEq_13D818(t4Vector& a, const t4Vector& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector subtract).
+static inline void vu0SubEq_13D818(t4Vector& a, const t4Vector& b)
+{
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(a)
+        : "m"(a), "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float vu0Dot_13D818(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (cross product, w = 0).
+static inline t4Vector vu0Cross_13D818(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vsub.w    $vf6, $vf6, $vf6\n"
+        "sqc2      $vf6, %0\n"
+        : "=m"(r)
+        : "m"(a), "o"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector divided by scalar).
+static inline t4Vector vu0Div_13D818(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %2\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf4, $vf4, Q\n"
+        "sqc2      $vf4, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
+static inline void vu0DivEq_13D818(t4Vector& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vdiv      Q, $vf0w, $vf3x\n"
+        "lqc2      $vf4, %0\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf4, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s));
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline t4Vector vu0Normalize_13D818(const t4Vector& v)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
+static inline float absf_13D818(float x)
+{
+    float r;
+    __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2 FPU float->int->float round trip (truncate) via inline asm.
+static inline float ffloor_13D818(float x)
+{
+    float t;
+    __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(t) : "f"(x));
+    if (x < t) {
+        t -= 1.0f;
+    }
+    return t;
+}
+
+// Wrap an angle to [-pi, pi).
+static inline float wrap_13D818(float x)
+{
+    return x - ffloor_13D818(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+}
+
+// PORT: g++ minimum operator (<?).
+static inline float clamp_13D818(float v, float lo, float hi)
+{
+    return (lo <= v) ? (v <? hi) : lo;
+}
+
+// The rider's front and up rows, by value.
+static inline t4Vector front_13D818(cRider* r) { return r->mMatrix.row[1]; }
+static inline t4Vector up_13D818(cRider* r) { return r->mMatrix.row[2]; }
+
+struct sVec4C_13D818 : t4Vector {
+    sVec4C_13D818(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
+};
+
+// Move cur toward target by at most step.
+static inline float approach_13D818(float cur, float target, float step)
+{
+    if (target + step < cur)
+        return cur - step;
+    if (cur < target - step)
+        return cur + step;
+    return target;
+}
+
+static inline float lerp_13D818(const sCurvePt_13D818& a, const sCurvePt_13D818& b, float x)
+{
+    float y0 = a.y;
+    x -= a.x;
+    return y0 + (b.y - y0) * x / (b.x - a.x);
+}
+
+// Piecewise-linear 4-point curve.
+static inline float curve_13D818(const sCurvePt_13D818* p, float x)
+{
+    if (p[1].x < x)
+    {
+        if (p[2].x < x)
+        {
+            if (p[3].x < x)
+                return p[3].y;
+            return lerp_13D818(p[2], p[3], x);
+        }
+        return lerp_13D818(p[1], p[2], x);
+    }
+    if (x < p[0].x)
+        return p[0].y;
+    return lerp_13D818(p[0], p[1], x);
+}
+
+// Lerp with scalar endpoints: the y loads happen at the call site (see curveB).
+static inline float lerpB_13D818(float x0, float y0, float x1, float y1, float x)
+{
+    return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+}
+
+// Piecewise-linear 4-point curve, scalar-endpoint lerp (the D_004A1138 table).
+static inline float curveB_13D818(const sCurvePt_13D818* p, float x)
+{
+    if (p[1].x < x)
+    {
+        if (p[2].x < x)
+        {
+            if (p[3].x < x)
+                return p[3].y;
+            return lerpB_13D818(p[2].x, p[2].y, p[3].x, p[3].y, x);
+        }
+        return lerpB_13D818(p[1].x, p[1].y, p[2].x, p[2].y, x);
+    }
+    if (x < p[0].x)
+        return p[0].y;
+    return lerpB_13D818(p[0].x, p[0].y, p[1].x, p[1].y, x);
+}
+
+// cRider::unk_3F8 is char[4] in rider.h but holds a float (FIELD cRider 0x3F8 float). A struct-member
+// store (MEM_IN_STRUCT) is what lets the curve-table pointer load issue before it; with the FIELD applied
+// this becomes self->mRider->unk_3F8 = steer.
+struct sF_13D818 { float f; };
+
+// atan2(y, x) built on a single-argument atan.
+static inline float atan2_13D818(float y, float x)
+{
+    if (x == 0.0f)
+    {
+        if (y == 0.0f)
+            return y;
+        if (y >= 0.0f)
+            return 1.5707964f;
+        return -1.5707964f;
+    }
+    float r = func_0031C228(y / x);
+    if (x < 0.0f)
+    {
+        if (y > 0.0f)
+            r += 3.1415927f;
+        else
+            r -= 3.1415927f;
+    }
+    return r;
+}
+
+extern "C" void func_0013D818(sHpCtl_13D818* self)
+{
+    func_00125970((char*)self->mRider);
+    float spd = vu0Len_13D818(self->mRider->mVelocity);
+    if (self->mRider->unk_2E4 < spd)
+        vu0ScaleEq_13D818(self->mRider->mVelocity, self->mRider->unk_2E4 / spd);
+
+    float dt = self->mRider->mTimeScale * 0.01666666753590107f;
+    sSurf_13D818* e = &(*(sSurf_13D818**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x44))[self->mRider->mSurfaceType];
+    float scale = self->mRider->mAnimModel->unk_140.x;
+    self->m4 = approach_13D818(self->m4, scale * e->m14, dt * 100.0f);
+    self->m8 = approach_13D818(self->m8, scale * e->m18, dt * 100.0f);
+
+    t4Vector rel = vu0Sub_13D818(self->mRider->mVelocity, self->mRider->unk_3D0);
+    float dN = vu0Dot_13D818(rel, self->mRider->mGroundNormal);
+    float dF = vu0Dot_13D818(rel, self->mRider->mGroundForward);
+    float dS = vu0Dot_13D818(rel, self->mRider->mGroundSide);
+    float lean = -self->mRider->mSlewed[0].cur;
+    float push = func_0013C878_13D818(self, e, self->mRider->unk_454, dN, dt);
+    float drag = func_0013C948_D818(self, e);
+    float steer = func_0013CCF0_13D818(self, e, dF, push / e->m00);
+    float edge = func_0013D028(self, (float*)e, dS, dF, lean);
+    if (self->mRider->mGroundNormal.z < 0.0f && push < 0.0f)
+        push = 0.0f;
+    ((sF_13D818*)self->mRider->unk_3F8)->f = steer;
+
+    float lo = curve_13D818(D_004A1148, spd * 0.035999998450279236f);
+    float hi = curve_13D818(D_004A1150, spd * 0.035999998450279236f);
+    float k = func_00148E68_f(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex, self->mRider->mStatsIndex);
+    float d = hi - lo;
+    float s, c;
+    func_0031BE50(&s, &c, e->m0C * (lo + (k * d + d)) * 0.01745329424738884f * lean);
+    float lift = (push <? (e->m00 + e->m00)) / c;
+    t4Vector up = vu0Add_13D818(vu0Scale_13D818(self->mRider->mGroundNormal, c), vu0Scale_13D818(self->mRider->mGroundSide, s));
+    push -= lift;
+    sVec4C_13D818 grav(0.0f, 0.0f, -e->m00, 0.0f);
+    t4Vector force = vu0Add_13D818(vu0Add_13D818(vu0Add_13D818(vu0Add_13D818(
+        vu0Scale_13D818(self->mRider->mGroundNormal, push), vu0Scale_13D818(up, lift)),
+        vu0Scale_13D818(self->mRider->mGroundForward, steer + drag)),
+        vu0Scale_13D818(self->mRider->mGroundSide, edge)), grav);
+    if (self->mRider->unk_308 == 0)
+        vu0AddEq_13D818(force, vu0Scale_13D818(self->mRider->mGroundNormal, -1000.0f));
+
+    float pen = (self->m8 + self->mRider->unk_454) >? -10.000000953674316f;
+    if (pen < 0.0f) {
+        vu0SubEq_13D818(self->mRider->mPosition, vu0Scale_13D818(self->mRider->mGroundNormal, pen));
+        self->mRider->unk_454 -= pen;
+        if (dN < 0.0f) {
+            vu0SubEq_13D818(rel, vu0Scale_13D818(self->mRider->mGroundNormal, dN));
+            self->mRider->mVelocity = vu0Add_13D818(rel, self->mRider->unk_3D0);
+        }
+        float fn = vu0Dot_13D818(force, self->mRider->mGroundNormal);
+        if (fn < 0.0f)
+            vu0SubEq_13D818(force, vu0Scale_13D818(self->mRider->mGroundNormal, fn));
+    }
+    if (self->mRider->unk_308 == 0 && 0.0f <= self->mRider->unk_454) {
+        vu0SubEq_13D818(self->mRider->mPosition, vu0Scale_13D818(self->mRider->mGroundNormal, self->mRider->unk_454));
+        self->mRider->unk_454 = 0.0f;
+    }
+
+    float vv = vu0Dot_13D818(rel, rel);
+    float h0 = vu0Dot_13D818(self->mRider->mPosition, self->mRider->unk_390);
+    if (0.5f < absf_13D818(self->mRider->mSlewed[3].cur) && vv < 250026.640625f) {
+        t4Vector n = self->mRider->mGroundNormal;
+        if (0.866100013256073f < n.z) {
+            float damp = 0.8999999761581421f;
+            if (vv < 2.0f)
+                damp = 0.0f;
+            vu0ScaleEq_13D818(rel, damp);
+            self->mRider->mVelocity = vu0Add_13D818(self->mRider->unk_3D0, rel);
+            force = D_004FF120_13D818;
+        }
+    }
+
+    t4Vector diff = vu0Sub_13D818(grav, force);
+    vu0AddEq_13D818(self->mRider->mPosition, vu0Scale_13D818(self->mRider->mVelocity, dt));
+    vu0AddEq_13D818(self->mRider->mVelocity, vu0Scale_13D818(force, dt));
+    rel = vu0Sub_13D818(self->mRider->mVelocity, self->mRider->unk_3D0);
+    float h1 = vu0Dot_13D818(self->mRider->mPosition, self->mRider->unk_390);
+    float lo2 = (1.0f - self->mRider->mSlewed[4].cur) * -20.0f;
+    float hi2 = self->mRider->mSlewed[4].cur * 10.0f;
+    float ch = self->mRider->mSlewed[18].cur + (h0 - h1) * 10.0f;
+    ch *= 1.0f - dt * 20.0f;
+    ch = clamp_13D818(ch, lo2, hi2);
+    if (func_00311AE8(self->mRider->mRiderAnim, 2) == 10 || func_00311AE8(self->mRider->mRiderAnim, 2) == 4 ||
+        func_00311AE8(self->mRider->mRiderAnim, 2) == 5 || func_00312AA0(self->mRider->mRiderAnim, 2) == 0x16)
+        ch = 0.0f;
+    cRider* r = self->mRider;
+    r->mSlewed[18].target = ch * scale;
+    r->mSlewed[18].rate = dt * 100.0f;
+
+    float yawRate = 0.0f;
+    float spd2 = vu0Len_13D818(rel);
+    int st = func_0011FEE8(self->mRider);
+    if ((st != 2 || (func_0011FEE8(self->mRider) == 2 && 0.6499999761581421f < self->mRider->mGroundNormal.z)) &&
+        9.999999747378752e-06f < spd2) {
+        t4Vector ax = vu0Div_13D818(vu0Cross_13D818(rel, self->mRider->mGroundForward), spd2);
+        float yaw = -func_0031C128(clamp_13D818(vu0Dot_13D818(ax, self->mRider->mGroundNormal), -1.0f, 1.0f));
+        float k30 = e->m30;
+        float turn = (k30 * ((1.0f - lean * lean) * 0.4000000059604645f) + 1.100000023841858f) * lean *
+                     (curve_13D818(D_004A1130, spd2 * 0.035999998450279236f) * 0.01745329424738884f);
+        turn /= self->mRider->mSlewed[4].cur * 0.9955680966377258f + 1.0f;
+        turn *= curveB_13D818(D_004A1138, spd2 * 0.035999998450279236f);
+        yaw += turn;
+        if (vu0Dot_13D818(rel, self->mRider->mGroundForward) < 0.0f)
+            yaw = -yaw;
+        float rate = (e->m34 * (spd2 * 9.999999974752427e-07f) * spd2 * dt) <? 1.0f;
+        float lowSpd = 555.5555419921875f; // kph2cps(20)
+        t4Vector dir;
+        t4Vector side = vu0Cross_13D818(self->mRider->mGroundNormal, D_004FF160_13D818);
+        float sl = vu0Len_13D818(side);
+        if (0.0010000000474974513f < sl) {
+            vu0DivEq_13D818(side, sl);
+            dir = vu0Cross_13D818(self->mRider->mGroundNormal, side);
+        } else {
+            dir = front_13D818(self->mRider);
+        }
+        float g = absf_13D818(vu0Dot_13D818(rel, dir)) / spd2;
+        float b = (spd2 / lowSpd) <? 1.0f;
+        float c = (b * (0.5f - g) * (e->m28 + e->m28)) >? 0.0f;
+        float grip = (e->m2C + c) <? 1.0f;
+        if (grip <= (yaw <= 0.0f ? -lean : lean) * 0.8999999761581421f)
+            rate = (yaw <= 0.0f) ? rate * 0.8999999761581421f * -lean : rate * 0.8999999761581421f * lean;
+        else
+            rate *= grip;
+        if (self->mRider->mSpinRate != 0.0f)
+            rate = 0.0f;
+        float maxTurn = 6.283185958862305f;
+        yawRate = clamp_13D818(yaw * rate, dt * -maxTurn, dt * maxTurn);
+    }
+
+    if (self->mRider->mSpinRate != 0.0f) {
+        float spinDecay = 8.203048706054688f;       // deg2rad(470): kMaxSpinOutRate
+        float spinDecelAng = 0.7853982448577881f;   // deg2rad(45): kSpinOutDecelAng
+        float spinEndAng = 0.2617994248867035f;     // deg2rad(15): kSpinOutEndAng
+        t4Vector flat = vu0Sub_13D818(rel, vu0Scale_13D818(self->mRider->mGroundNormal, vu0Dot_13D818(rel, self->mRider->mGroundNormal)));
+        float ang;
+        if (self->mRider->unk_320 != 0)
+            ang = atan2_13D818(-vu0Dot_13D818(flat, self->mRider->mGroundSide), -vu0Dot_13D818(flat, self->mRider->mGroundForward));
+        else
+            ang = atan2_13D818(vu0Dot_13D818(flat, self->mRider->mGroundSide), vu0Dot_13D818(flat, self->mRider->mGroundForward));
+        if (0.0f < ang * self->mRider->mSpinRate)
+            ang = wrap_13D818(3.1415927410125732f - ang);
+        else
+            ang = -ang;
+        if (3.1415927410125732f < absf_13D818(self->mRider->mSpinRate)) {
+            ang += (ang < 0.0f) ? -3.1415927410125732f : 3.1415927410125732f;
+            float step = spinDecay * dt;
+            float sr = self->mRider->mSpinRate;
+            float nsr;
+            if (step < sr)
+                nsr = sr - step;
+            else if (sr < -step)
+                nsr = sr + step;
+            else
+                nsr = 0.0f;
+            self->mRider->mSpinRate = nsr;
+        }
+        if (absf_13D818(ang) < spinEndAng) {
+            self->mRider->mSpinRate = 0.0f;
+        } else {
+            float t = -dt * clamp_13D818(ang * (spinDecay / spinDecelAng), -spinDecay, spinDecay);
+            if (t < 0.0f && yawRate < 0.0f)
+                yawRate = yawRate <? t;
+            else if (0.0f < t && 0.0f < yawRate)
+                yawRate = yawRate >? t;
+            else
+                yawRate += t;
+        }
+    }
+
+    float fwd = (0.0f < spd2) ? vu0Dot_13D818(rel, front_13D818(self->mRider)) / spd2 : 0.0f;
+    fwd = (fwd - 0.10000000149011612f) >? 0.0f;
+    float kf = curve_13D818(D_004A1158, spd2 * 0.035999998450279236f);
+    yawRate -= fwd * self->mRider->mSlewed[0].cur * kf;
+    if (yawRate != 0.0f)
+        func_0011DFE0(self->mRider, self->mRider->mGroundNormal, yawRate);
+
+    sHit_13D1B8 hit;
+    float dist;
+    int got = func_0013D1B8(self, &hit, &dist);
+    int lost = 0;
+    if (got == 0) {
+        lost = self->mRider->unk_308 == 0;
+    } else if (hit.obj != 0) {
+        char* h = *(char**)(hit.obj + 0xC);
+        if (h) {
+            sVEnt_13D818* vt = *(sVEnt_13D818**)(h + 0xC);
+            vt[43].fn(h + vt[43].delta, &hit, &diff);
+        }
+    }
+
+    int surf = self->mRider->mSurfaceType;
+    if (!(surf == 2 || surf == 3 || surf == 13)) {
+        float vn = vu0Dot_13D818(rel, self->mRider->mGroundNormal);
+        float l0 = vu0Len_13D818(rel);
+        t4Vector bump = vu0Scale_13D818(self->mRider->mGroundNormal, vn * -0.4000000059604645f);
+        if (bump.z < -40.0f)
+            bump.z = -40.0f;
+        vu0AddEq_13D818(rel, bump);
+        float l1 = vu0Len_13D818(rel);
+        if (l1 != 0.0f)
+            vu0ScaleEq_13D818(rel, l0 / l1);
+        self->mRider->mVelocity = vu0Add_13D818(self->mRider->unk_3D0, rel);
+    }
+
+    float maxH = e->m10;
+    if (got == 0 || maxH < self->mRider->unk_454) {
+        if (self->mRider->unk_308 != 0 || lost)
+            self->mC = 1;
+    } else {
+        if (dist < 5.0f) {
+            t4Vector n2 = vu0Normalize_13D818(vu0Add_13D818(self->mRider->mGroundNormal,
+                sVec4C_13D818(0.0f, 0.0f, self->mRider->mGroundNormal.z * 0.5f, 0.0f)));
+            t4Vector axis = vu0Cross_13D818(n2, up_13D818(self->mRider));
+            float al = vu0Len_13D818(axis);
+            if (0.0010000000474974513f < al) {
+                vu0DivEq_13D818(axis, al);
+                float tilt = -func_0031C128(al <? 1.0f) * 0.01666666753590107f * e->m38;
+                func_0011DFE0(self->mRider, axis, tilt);
+            }
+        }
+        int layer = func_00311AE8(self->mRider->mRiderAnim, 2);
+        int anim = func_00312AA0(self->mRider->mRiderAnim, 2);
+        int onSlope = func_0011FEE8(self->mRider) != 1 && (self->mRider->mSurfaceType == 2 || self->mRider->mSurfaceType == 3);
+        int brace = !onSlope && layer != 10 && layer != 5 && anim != 0x16 && anim != 2;
+        if (onSlope) {
+            float tgt = curve_13D818(D_004A1128, vu0Len_13D818(rel) * 0.035999998450279236f);
+            cRider* r2 = self->mRider;
+            r2->mSlewed[2].target = tgt;
+            r2->mSlewed[2].rate = absf_13D818(r2->mSlewed[2].cur - tgt) * (dt * 3.0f);
+        } else {
+            cRider* r2 = self->mRider;
+            r2->mSlewed[2].target = 0.0f;
+            r2->mSlewed[2].rate = dt * 3.0f;
+        }
+        if (brace) {
+            cRider* r3 = self->mRider;
+            r3->mSlewed[17].target = 1.0f;
+            r3->mSlewed[17].rate = dt * 3.0f;
+        } else {
+            cRider* r3 = self->mRider;
+            r3->mSlewed[17].target = 0.0f;
+            r3->mSlewed[17].rate = dt * 3.0f;
+        }
+        float base = absf_13D818(lean) + absf_13D818(self->mRider->mSlewed[3].cur) + 0.10000000149011612f;
+        float amt = vu0Len_13D818(rel) * 0.0003600000054575503f;
+        if (1.0f < amt)
+            amt = 1.0f;
+        float amp = amt * base;
+        self->mPhase += amp * 2.6500000953674316f;
+        if (6.283185958862305f <= self->mPhase)
+            self->mPhase -= 6.283185958862305f;
+        self->mRider->unk_31C = amp * (func_0031C040(self->mPhase) * 7.5f);
+    }
+    cRider_updateOrientationImplicit(self->mRider);
+}
+#endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F178);

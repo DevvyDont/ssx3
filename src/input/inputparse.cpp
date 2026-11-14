@@ -2499,7 +2499,92 @@ extern "C" void cInputPreProcessor_skipToEOL(void* self, sParseStream* s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("input/inputparse", cInputPreProcessor_readCmdLine);
+#ifdef SKIP_ASM
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+struct sParseStream;
+extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* s);
+extern "C" void cInputPreProcessor_writeTagLine(void* self, int a1, int a2);
+extern "C" void cInputPreProcessor_readFile(void* self, int a1, int a2);
+extern "C" void cInputPreProcessor_skipToEOL(void* self, sParseStream* s);
+extern "C" int func_004165A8(const char* a, const char* b);
+// PORT: func_00326A20__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
+void func_00326A20_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("func_00326A20__FPv");
+
+static inline int isWS_3266E8(int c)
+{
+    return c == ' ' || c == '\t' || c == '\r';
+}
+
+static inline int isAlpha_3266E8(int c)
+{
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* s, int a2, int a3)
+{
+    char word[16];
+    char name[0xA0];
+    char buf[0xA0];
+    int ch;
+    while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
+        cInputPreProcessor_readChar(self, s);
+    if (ch <= 0) {
+        func_00326A20_5(self, s, a2, a3, "unexpected EOF in pre-processor command");
+        return;
+    }
+    char* p = word;
+    do {
+        if (!isAlpha_3266E8(*(int*)((char*)self + 0xC)))
+            break;
+        *p = *(int*)((char*)self + 0xC);
+        cInputPreProcessor_readChar(self, s);
+        p++;
+    } while (p - word < 15);
+    *p = 0;
+    if (func_004165A8(word, "include") == 0) {
+        while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
+            cInputPreProcessor_readChar(self, s);
+        if (ch != '"') {
+            func_00326A20_5(self, s, a2, a3, "illegal 'include' directive");
+            cInputPreProcessor_skipToEOL(self, s);
+            return;
+        }
+        cInputPreProcessor_readChar(self, s);
+        int n = 0;
+        while (*(int*)((char*)self + 0xC) != '"') {
+            int c = *(int*)((char*)self + 0xC);
+            if (c < 0 || c == '\n') {
+                func_00326A20_5(self, s, a2, a3, "illegal 'include' directive");
+                cInputPreProcessor_skipToEOL(self, s);
+                return;
+            }
+            name[n++] = *(int*)((char*)self + 0xC);
+            cInputPreProcessor_readChar(self, s);
+        }
+        name[n] = 0;
+        cInputPreProcessor_readChar(self, s);
+        while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
+            cInputPreProcessor_readChar(self, s);
+        if (ch >= 0 && ch != '\n') {
+            func_00326A20_5(self, s, a2, a3, "illegal 'include' directive");
+            cInputPreProcessor_skipToEOL(self, s);
+            return;
+        }
+        if (ch == '\n')
+            *(int*)((char*)s + 0xC) += 1;
+        // PORT: the unit declares cInputPreProcessor_readFile's third parameter as int; it receives a char*.
+        cInputPreProcessor_readFile(self, a2, (int)name);
+        sprintf(buf, "%s%s", a2, a3);
+        cInputPreProcessor_writeTagLine(self, *(int*)((char*)s + 0xC), (int)buf);
+        cInputPreProcessor_readChar(self, s);
+    } else {
+        func_00326A20_5(self, s, a2, a3, "illegal pre-processor directive");
+        cInputPreProcessor_skipToEOL(self, s);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00326A20__FPv);
