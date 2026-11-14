@@ -626,7 +626,715 @@ void func_00417A98(int *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_00417AB8);
+#ifdef SKIP_ASM
+/* newlib libc/stdio/vfscanf.c (__svfscanf). The body follows newlib 1.9.0 (MB_CAPABLE format scan) with the
+ * CT_FLOAT conversion of the earlier newlib releases the retail code shows (atof, no leading-zero exponent fixup):
+ *
+ * Copyright (c) 1990 The Regents of the University of California.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms are permitted
+ * provided that the above copyright notice and this paragraph are
+ * duplicated in all such forms and that any documentation,
+ * advertising materials, and other materials related to such
+ * distribution and use acknowledge that the software was developed
+ * by the University of California, Berkeley.  The name of the
+ * University may not be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+/* EE EABI va_arg (gcc 2.95 va-mips.h, __mips64 soft/single-float branch), for types of at most 8 bytes */
+#define va_arg_00417AB8(__AP, __type) (*(__type *) (void *) ((__AP += 8) - 8))
+/* newlib ctype.h; D_00499C81 is _ctype_ + 1 */
+#define isspace_00417AB8(c)	(D_00499C81[(unsigned)(c)]&010)
+#define isupper_00417AB8(c)	(D_00499C81[(unsigned)(c)]&01)
+#define MB_CUR_MAX_00417AB8 (*(int *)D_00455140)
+extern char D_00499C81[];
+extern char D_00455140[];
+extern const short D_00499D90[17]; /* static const short basefix[17] */
+extern int mbtowc_r_7AB8(int, unsigned short *, char *, int, int *) __asm__("func_00418958");
+extern char *func_004185D0(char *, char *);
+extern unsigned func_00420260(char *buf, unsigned size, unsigned count, int *fp);
+extern int ungetc_7AB8(int, struct F7648 *) __asm__("ungetc");
+extern unsigned long g7AB8_strtol() __asm__("func_0041E9E0");
+extern unsigned long g7AB8_strtoul() __asm__("func_0041AA50");
+extern double g7AB8_atof(char *) __asm__("func_004187A0");
+
+#define	BUF_00417AB8	(308+39+3)	/* MAXEXP+MAXFRACT+3: 3 = sign + decimal point + NUL */
+
+#define	LONG		0x01	/* l: long or double */
+#define	LONGDBL		0x02	/* L: long double */
+#define	SHORT		0x04	/* h: short */
+#define	SUPPRESS	0x08	/* suppress assignment */
+#define	POINTER		0x10	/* weird %p pointer (`fake hex') */
+#define	NOSKIP		0x20	/* do not skip blanks */
+#define	SIGNOK		0x40	/* +/- is (still) legal */
+#define	NDIGITS		0x80	/* no digits detected */
+#define	DPTOK		0x100	/* (float) decimal point is still legal */
+#define	EXPOK		0x200	/* (float) exponent (e+3, etc) still legal */
+#define	PFXOK		0x100	/* 0x prefix is (still) legal */
+#define	NZDIGITS	0x200	/* no zero digits detected */
+#define	CT_CHAR		0	/* %c conversion */
+#define	CT_CCL		1	/* %[...] conversion */
+#define	CT_STRING	2	/* %s conversion */
+#define	CT_INT		3	/* integer, i.e., strtol or strtoul */
+#define	CT_FLOAT	4	/* floating, i.e., strtod */
+#define u_char_00417AB8 char
+#define u_long_00417AB8 unsigned long
+
+#define BufferEmpty_00417AB8 (fp->r <= 0 && func_00417648_impl(fp))
+
+int func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap) __asm__("func_00417AB8");
+int
+func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
+{
+  register u_char_00417AB8 *fmt = (u_char_00417AB8 *) fmt0;
+  register int c;		/* character from format, or conversion */
+  register unsigned int width;	/* field width, or 0 */
+  register char *p;		/* points into all kinds of strings */
+  register int n;		/* handy integer */
+  register int flags;		/* flags as defined above */
+  register char *p0;		/* saves original value of p when necessary */
+  int nassigned;		/* number of fields assigned */
+  int nread;			/* number of characters consumed from fp */
+  int base = 0;			/* base argument to strtol/strtoul */
+  int nbytes = 1;               /* number of bytes read from fmt string */
+  unsigned short wc;            /* wchar to use to read format string */
+
+  u_long_00417AB8 (*ccfn) () = 0;	/* conversion function (strtol/strtoul) */
+  char ccltab[256];		/* character class table for %[...] */
+  char buf[BUF_00417AB8];	/* buffer for numeric conversions */
+  char *lptr;                   /* literal pointer */
+  int state = 0;                /* value to keep track of multibyte state */
+
+  short *sp;
+  int *ip;
+  float *flp;
+  double *ldp;
+  double *dp;
+  long *lp;
+
+  /* `basefix' is used to avoid `if' tests in the integer scanner: the function's static table
+     {10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16} is retail's D_00499D90 */
+
+  nassigned = 0;
+  nread = 0;
+  for (;;)
+    {
+      nbytes = mbtowc_r_7AB8 (D_00454944, &wc, fmt, MB_CUR_MAX_00417AB8, &state);
+      fmt += nbytes;
+      if (wc == 0)
+	return nassigned;
+      if (nbytes == 1 && isspace_00417AB8 (wc))
+	{
+	  for (;;)
+	    {
+	      if (BufferEmpty_00417AB8)
+		return nassigned;
+	      if (!isspace_00417AB8 (*fp->p))
+		break;
+	      nread++, fp->r--, fp->p++;
+	    }
+	  continue;
+	}
+      if (wc != '%')
+	goto literal;
+      width = 0;
+      flags = 0;
+
+      /*
+       * switch on the format.  continue if done; break once format
+       * type is derived.
+       */
+
+    again:
+      c = *fmt++;
+
+      switch (c)
+	{
+	case '%':
+	literal:
+          lptr = fmt - nbytes;
+          for (n = 0; n < nbytes; ++n)
+            {
+	      if (BufferEmpty_00417AB8)
+	        goto input_failure;
+	      if (*fp->p != *lptr)
+	        goto match_failure;
+	      fp->r--, fp->p++;
+	      nread++;
+              ++lptr;
+            }
+	  continue;
+
+	case '*':
+	  flags |= SUPPRESS;
+	  goto again;
+	case 'l':
+	  flags |= LONG;
+	  goto again;
+	case 'L':
+	  flags |= LONGDBL;
+	  goto again;
+	case 'h':
+	  flags |= SHORT;
+	  goto again;
+
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+	  width = width * 10 + c - '0';
+	  goto again;
+
+	case 'D':		/* compat */
+	  flags |= LONG;
+	  /* FALLTHROUGH */
+	case 'd':
+	  c = CT_INT;
+	  ccfn = (u_long_00417AB8 (*)())g7AB8_strtol;
+	  base = 10;
+	  break;
+
+	case 'i':
+	  c = CT_INT;
+	  ccfn = (u_long_00417AB8 (*)())g7AB8_strtol;
+	  base = 0;
+	  break;
+
+	case 'O':		/* compat */
+	  flags |= LONG;
+	  /* FALLTHROUGH */
+	case 'o':
+	  c = CT_INT;
+	  ccfn = g7AB8_strtoul;
+	  base = 8;
+	  break;
+
+	case 'u':
+	  c = CT_INT;
+	  ccfn = g7AB8_strtoul;
+	  base = 10;
+	  break;
+
+	case 'X':		/* compat   XXX */
+	case 'x':
+	  flags |= PFXOK;	/* enable 0x prefixing */
+	  c = CT_INT;
+	  ccfn = g7AB8_strtoul;
+	  base = 16;
+	  break;
+
+	case 'E':		/* compat   XXX */
+	case 'G':		/* compat   XXX */
+/* ANSI says that E,G and X behave the same way as e,g,x */
+	  /* FALLTHROUGH */
+	case 'e':
+	case 'f':
+	case 'g':
+	  c = CT_FLOAT;
+	  break;
+
+	case 's':
+	  c = CT_STRING;
+	  break;
+
+	case '[':
+	  fmt = func_004185D0 (ccltab, fmt);
+	  flags |= NOSKIP;
+	  c = CT_CCL;
+	  break;
+
+	case 'c':
+	  flags |= NOSKIP;
+	  c = CT_CHAR;
+	  break;
+
+	case 'p':		/* pointer format is like hex */
+	  flags |= POINTER | PFXOK;
+	  c = CT_INT;
+	  ccfn = g7AB8_strtoul;
+	  base = 16;
+	  break;
+
+	case 'n':
+	  if (flags & SUPPRESS)	/* ??? */
+	    continue;
+	  if (flags & SHORT)
+	    {
+	      sp = va_arg_00417AB8 (ap, short *);
+	      *sp = nread;
+	    }
+	  else if (flags & LONG)
+	    {
+	      lp = va_arg_00417AB8 (ap, long *);
+	      *lp = nread;
+	    }
+	  else
+	    {
+	      ip = va_arg_00417AB8 (ap, int *);
+	      *ip = nread;
+	    }
+	  continue;
+
+	  /*
+	   * Disgusting backwards compatibility hacks.	XXX
+	   */
+	case '\0':		/* compat */
+	  return -1;
+
+	default:		/* compat */
+	  if (isupper_00417AB8 (c))
+	    flags |= LONG;
+	  c = CT_INT;
+	  ccfn = (u_long_00417AB8 (*)())g7AB8_strtol;
+	  base = 10;
+	  break;
+	}
+
+      /*
+       * We have a conversion that requires input.
+       */
+      if (BufferEmpty_00417AB8)
+	goto input_failure;
+
+      /*
+       * Consume leading white space, except for formats that
+       * suppress this.
+       */
+      if ((flags & NOSKIP) == 0)
+	{
+	  while (isspace_00417AB8 (*fp->p))
+	    {
+	      nread++;
+	      if (--fp->r > 0)
+		fp->p++;
+	      else
+	      if (func_00417648_impl (fp))
+		goto input_failure;
+	    }
+	  /*
+	   * Note that there is at least one character in the
+	   * buffer, so conversions that do not set NOSKIP ca
+	   * no longer result in an input failure.
+	   */
+	}
+
+      /*
+       * Do the conversion.
+       */
+      switch (c)
+	{
+
+	case CT_CHAR:
+	  /* scan arbitrary characters (sets NOSKIP) */
+	  if (width == 0)
+	    width = 1;
+	  if (flags & SUPPRESS)
+	    {
+	      unsigned int sum = 0;
+
+	      for (;;)
+		{
+		  if ((n = fp->r) < width)
+		    {
+		      sum += n;
+		      width -= n;
+		      fp->p += n;
+		      if (func_00417648_impl (fp))
+			{
+			  if (sum == 0)
+			    goto input_failure;
+			  break;
+			}
+		    }
+		  else
+		    {
+		      sum += width;
+		      fp->r -= width;
+		      fp->p += width;
+		      break;
+		    }
+		}
+	      nread += sum;
+	    }
+	  else
+	    {
+	      unsigned int r = func_00420260 ((void *) va_arg_00417AB8 (ap, char *), 1, width, (int *) fp);
+
+	      if (r == 0)
+		goto input_failure;
+	      nread += r;
+	      nassigned++;
+	    }
+	  break;
+
+	case CT_CCL:
+	  /* scan a (nonempty) character class (sets NOSKIP) */
+	  if (width == 0)
+	    width = ~0;		/* `infinity' */
+	  /* take only those things in the class */
+	  if (flags & SUPPRESS)
+	    {
+	      n = 0;
+	      while (ccltab[*fp->p])
+		{
+		  n++, fp->r--, fp->p++;
+		  if (--width == 0)
+		    break;
+		  if (BufferEmpty_00417AB8)
+		    {
+		      if (n == 0)
+			goto input_failure;
+		      break;
+		    }
+		}
+	      if (n == 0)
+		goto match_failure;
+	    }
+	  else
+	    {
+	      p0 = p = va_arg_00417AB8 (ap, char *);
+	      while (ccltab[*fp->p])
+		{
+		  fp->r--;
+		  *p++ = *fp->p++;
+		  if (--width == 0)
+		    break;
+		  if (BufferEmpty_00417AB8)
+		    {
+		      if (p == p0)
+			goto input_failure;
+		      break;
+		    }
+		}
+	      n = p - p0;
+	      if (n == 0)
+		goto match_failure;
+	      *p = 0;
+	      nassigned++;
+	    }
+	  nread += n;
+	  break;
+
+	case CT_STRING:
+	  /* like CCL, but zero-length string OK, & no NOSKIP */
+	  if (width == 0)
+	    width = ~0;
+	  if (flags & SUPPRESS)
+	    {
+	      n = 0;
+	      while (!isspace_00417AB8 (*fp->p))
+		{
+		  n++, fp->r--, fp->p++;
+		  if (--width == 0)
+		    break;
+		  if (BufferEmpty_00417AB8)
+		    break;
+		}
+	      nread += n;
+	    }
+	  else
+	    {
+	      p0 = p = va_arg_00417AB8 (ap, char *);
+	      while (!isspace_00417AB8 (*fp->p))
+		{
+		  fp->r--;
+		  *p++ = *fp->p++;
+		  if (--width == 0)
+		    break;
+		  if (BufferEmpty_00417AB8)
+		    break;
+		}
+	      *p = 0;
+	      nread += p - p0;
+	      nassigned++;
+	    }
+	  continue;
+
+	case CT_INT:
+	  /* scan an integer as if by strtol/strtoul */
+	  /* size_t is unsigned, hence this optimisation */
+	  if (--width > sizeof (buf) - 2)
+	    width = sizeof (buf) - 2;
+	  width++;
+	  flags |= SIGNOK | NDIGITS | NZDIGITS;
+	  for (p = buf; width; width--)
+	    {
+	      c = *fp->p;
+	      /*
+	       * Switch on the character; `goto ok' if we
+	       * accept it as a part of number.
+	       */
+	      switch (c)
+		{
+		case '0':
+		  if (base == 0)
+		    {
+		      base = 8;
+		      flags |= PFXOK;
+		    }
+		  if (flags & NZDIGITS)
+		    flags &= ~(SIGNOK | NZDIGITS | NDIGITS);
+		  else
+		    flags &= ~(SIGNOK | PFXOK | NDIGITS);
+		  goto ok;
+
+		  /* 1 through 7 always legal */
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		  base = D_00499D90[base];
+		  flags &= ~(SIGNOK | PFXOK | NDIGITS);
+		  goto ok;
+
+		  /* digits 8 and 9 ok iff decimal or hex */
+		case '8':
+		case '9':
+		  base = D_00499D90[base];
+		  if (base <= 8)
+		    break;	/* not legal here */
+		  flags &= ~(SIGNOK | PFXOK | NDIGITS);
+		  goto ok;
+
+		  /* letters ok iff hex */
+		case 'A':
+		case 'B':
+		case 'C':
+		case 'D':
+		case 'E':
+		case 'F':
+		case 'a':
+		case 'b':
+		case 'c':
+		case 'd':
+		case 'e':
+		case 'f':
+		  /* no need to fix base here */
+		  if (base <= 10)
+		    break;	/* not legal here */
+		  flags &= ~(SIGNOK | PFXOK | NDIGITS);
+		  goto ok;
+
+		  /* sign ok only as first character */
+		case '+':
+		case '-':
+		  if (flags & SIGNOK)
+		    {
+		      flags &= ~SIGNOK;
+		      goto ok;
+		    }
+		  break;
+
+		  /* x ok iff flag still set & 2nd char */
+		case 'x':
+		case 'X':
+		  if (flags & PFXOK && p == buf + 1)
+		    {
+		      base = 16;/* if %i */
+		      flags &= ~PFXOK;
+		      goto ok;
+		    }
+		  break;
+		}
+
+	      /*
+	       * If we got here, c is not a legal character
+	       * for a number.  Stop accumulating digits.
+	       */
+	      break;
+	    ok:
+	      /*
+	       * c is legal: store it and look at the next.
+	       */
+	      *p++ = c;
+	      if (--fp->r > 0)
+		fp->p++;
+	      else
+	      if (func_00417648_impl (fp))
+		break;		/* EOF */
+	    }
+	  /*
+	   * If we had only a sign, it is no good; push back the sign.
+	   * If the number ends in `x', it was [sign] '0' 'x', so push back
+	   * the x and treat it as [sign] '0'.
+	   */
+	  if (flags & NDIGITS)
+	    {
+	      if (p > buf)
+		(void) ungetc_7AB8 (*(u_char_00417AB8 *)-- p, fp);
+	      goto match_failure;
+	    }
+	  c = ((u_char_00417AB8 *) p)[-1];
+	  if (c == 'x' || c == 'X')
+	    {
+	      --p;
+	      /*(void)*/ ungetc_7AB8 (c, fp);
+	    }
+	  if ((flags & SUPPRESS) == 0)
+	    {
+	      u_long_00417AB8 res;
+
+	      *p = 0;
+	      res = (*ccfn) (buf, (char **) 0, base);
+	      if (flags & POINTER)
+		*(va_arg_00417AB8 (ap, void **)) = (void *) (unsigned int) res;
+	      else if (flags & SHORT)
+		{
+		  sp = va_arg_00417AB8 (ap, short *);
+		  *sp = res;
+		}
+	      else if (flags & LONG)
+		{
+		  lp = va_arg_00417AB8 (ap, long *);
+		  *lp = res;
+		}
+	      else
+		{
+		  ip = va_arg_00417AB8 (ap, int *);
+		  *ip = res;
+		}
+	      nassigned++;
+	    }
+	  nread += p - buf;
+	  break;
+
+	case CT_FLOAT:
+	  /* scan a floating point number as if by strtod */
+	  /* size_t is unsigned, hence this optimisation */
+	  if (--width > sizeof (buf) - 2)
+	    width = sizeof (buf) - 2;
+	  width++;
+	  flags |= SIGNOK | NDIGITS | DPTOK | EXPOK;
+	  for (p = buf; width; width--)
+	    {
+	      c = *fp->p;
+	      /*
+	       * This code mimicks the integer conversion
+	       * code, but is much simpler.
+	       */
+	      switch (c)
+		{
+
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+		  flags &= ~(SIGNOK | NDIGITS);
+		  goto fok;
+
+		case '+':
+		case '-':
+		  if (flags & SIGNOK)
+		    {
+		      flags &= ~SIGNOK;
+		      goto fok;
+		    }
+		  break;
+		case '.':
+		  if (flags & DPTOK)
+		    {
+		      flags &= ~(SIGNOK | DPTOK);
+		      goto fok;
+		    }
+		  break;
+		case 'e':
+		case 'E':
+		  /* no exponent without some digits */
+		  if ((flags & (NDIGITS | EXPOK)) == EXPOK)
+		    {
+		      flags =
+			(flags & ~(EXPOK | DPTOK)) |
+			SIGNOK | NDIGITS;
+		      goto fok;
+		    }
+		  break;
+		}
+	      break;
+	    fok:
+	      *p++ = c;
+	      if (--fp->r > 0)
+		fp->p++;
+	      else
+	      if (func_00417648_impl (fp))
+		break;		/* EOF */
+	    }
+	  /*
+	   * If no digits, might be missing exponent digits
+	   * (just give back the exponent) or might be missing
+	   * regular digits, but had sign and/or decimal point.
+	   */
+	  if (flags & NDIGITS)
+	    {
+	      if (flags & EXPOK)
+		{
+		  /* no digits at all */
+		  while (p > buf)
+		    ungetc_7AB8 (*(u_char_00417AB8 *)-- p, fp);
+		  goto match_failure;
+		}
+	      /* just a bad exponent (e and maybe sign) */
+	      c = *(u_char_00417AB8 *)-- p;
+	      if (c != 'e' && c != 'E')
+		{
+		  (void) ungetc_7AB8 (c, fp);	/* sign */
+		  c = *(u_char_00417AB8 *)-- p;
+		}
+	      (void) ungetc_7AB8 (c, fp);
+	    }
+	  if ((flags & SUPPRESS) == 0)
+	    {
+	      double res;
+
+	      *p = 0;
+	      res = g7AB8_atof (buf);
+	      if (flags & LONG)
+		{
+		  dp = va_arg_00417AB8 (ap, double *);
+		  *dp = res;
+		}
+	      else if (flags & LONGDBL)
+		{
+		  ldp = va_arg_00417AB8 (ap, double *);
+		  *ldp = res;
+		}
+	      else
+		{
+		  flp = va_arg_00417AB8 (ap, float *);
+		  *flp = res;
+		}
+	      nassigned++;
+	    }
+	  nread += p - buf;
+	  break;
+	}
+    }
+input_failure:
+  return nassigned ? nassigned : -1;
+match_failure:
+  return nassigned;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_004185D0);
@@ -1099,9 +1807,733 @@ int func_00418E68(int a, int prec, int buf_) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_00418EF8);
+#ifdef SKIP_ASM
+/* newlib 1.9 libc/stdlib/qsort.c (qsort), verbatim apart from the K&R wrappers:
+ *
+ * Copyright (c) 1992, 1993
+ *	The Regents of the University of California.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *	This product includes software developed by the University of
+ *	California, Berkeley and its contributors.
+ * 4. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+static inline char *med3_00418EF8(char *, char *, char *, int (*)());
+static inline void swapfunc_00418EF8(char *, char *, int, int);
 
+#define min_00418EF8(a, b)	(a) < (b) ? a : b
+
+#define swapcode_00418EF8(TYPE, parmi, parmj, n) { 		\
+	long i = (n) / sizeof (TYPE); 			\
+	register TYPE *pi = (TYPE *) (parmi); 		\
+	register TYPE *pj = (TYPE *) (parmj); 		\
+	do { 						\
+		register TYPE	t = *pi;		\
+		*pi++ = *pj;				\
+		*pj++ = t;				\
+        } while (--i > 0);				\
+}
+
+#define SWAPINIT_00418EF8(a, es) swaptype = ((char *)a - (char *)0) % sizeof(long) || \
+	es % sizeof(long) ? 2 : es == sizeof(long)? 0 : 1;
+
+static inline void
+swapfunc_00418EF8(char *a, char *b, int n, int swaptype)
+{
+	if(swaptype <= 1) 
+		swapcode_00418EF8(long, a, b, n)
+	else
+		swapcode_00418EF8(char, a, b, n)
+}
+
+#define swap_00418EF8(a, b)					\
+	if (swaptype == 0) {				\
+		long t = *(long *)(a);			\
+		*(long *)(a) = *(long *)(b);		\
+		*(long *)(b) = t;			\
+	} else						\
+		swapfunc_00418EF8(a, b, es, swaptype)
+
+#define vecswap_00418EF8(a, b, n) 	if ((n) > 0) swapfunc_00418EF8(a, b, n, swaptype)
+
+static inline char *
+med3_00418EF8(char *a, char *b, char *c, int (*cmp)())
+{
+	return cmp(a, b) < 0 ?
+	       (cmp(b, c) < 0 ? b : (cmp(a, c) < 0 ? c : a ))
+              :(cmp(b, c) > 0 ? b : (cmp(a, c) < 0 ? a : c ));
+}
+
+void
+func_00418EF8(void *a, unsigned int n, unsigned int es, int (*cmp)())
+{
+	char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
+	int d, r, swaptype, swap_cnt;
+
+loop:	SWAPINIT_00418EF8(a, es);
+	swap_cnt = 0;
+	if (n < 7) {
+		for (pm = (char *) a + es; pm < (char *) a + n * es; pm += es)
+			for (pl = pm; pl > (char *) a && cmp(pl - es, pl) > 0;
+			     pl -= es)
+				swap_00418EF8(pl, pl - es);
+		return;
+	}
+	pm = (char *) a + (n / 2) * es;
+	if (n > 7) {
+		pl = a;
+		pn = (char *) a + (n - 1) * es;
+		if (n > 40) {
+			d = (n / 8) * es;
+			pl = med3_00418EF8(pl, pl + d, pl + 2 * d, cmp);
+			pm = med3_00418EF8(pm - d, pm, pm + d, cmp);
+			pn = med3_00418EF8(pn - 2 * d, pn - d, pn, cmp);
+		}
+		pm = med3_00418EF8(pl, pm, pn, cmp);
+	}
+	swap_00418EF8(a, pm);
+	pa = pb = (char *) a + es;
+
+	pc = pd = (char *) a + (n - 1) * es;
+	for (;;) {
+		while (pb <= pc && (r = cmp(pb, a)) <= 0) {
+			if (r == 0) {
+				swap_cnt = 1;
+				swap_00418EF8(pa, pb);
+				pa += es;
+			}
+			pb += es;
+		}
+		while (pb <= pc && (r = cmp(pc, a)) >= 0) {
+			if (r == 0) {
+				swap_cnt = 1;
+				swap_00418EF8(pc, pd);
+				pd -= es;
+			}
+			pc -= es;
+		}
+		if (pb > pc)
+			break;
+		swap_00418EF8(pb, pc);
+		swap_cnt = 1;
+		pb += es;
+		pc -= es;
+	}
+	if (swap_cnt == 0) {  /* Switch to insertion sort */
+		for (pm = (char *) a + es; pm < (char *) a + n * es; pm += es)
+			for (pl = pm; pl > (char *) a && cmp(pl - es, pl) > 0; 
+			     pl -= es)
+				swap_00418EF8(pl, pl - es);
+		return;
+	}
+
+	pn = (char *) a + n * es;
+	r = min_00418EF8(pa - (char *)a, pb - pa);
+	vecswap_00418EF8(a, pb - r, r);
+	r = min_00418EF8(pd - pc, pn - pd - es);
+	vecswap_00418EF8(pb, pn - r, r);
+	if ((r = pb - pa) > es)
+		func_00418EF8(a, r / es, es, cmp);
+	if ((r = pd - pc) > es) { 
+		/* Iterate rather than recurse to save stack space */
+		a = pn - r;
+		n = r / es;
+		goto loop;
+	}
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_004198D8);
+#ifdef SKIP_ASM
+/* newlib 1.9 libc/stdlib/strtod.c (_strtod_r) with the mprec.h macros it uses, verbatim (IEEE_8087, Pack_32,
+ * no Sudden_Underflow / RND_PRODQUOT / Check_FLT_ROUNDS; FLT_ROUNDS is 1):
+ *
+ * The author of this software is David M. Gay.
+ *
+ * Copyright (c) 1991 by AT&T.
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose without fee is hereby granted, provided that this entire notice
+ * is included in all copies of any software which is or includes a copy
+ * or modification of this software and in all copies of the supporting
+ * documentation for such software.
+ *
+ * THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
+ * WARRANTY.  IN PARTICULAR, NEITHER THE AUTHOR NOR AT&T MAKES ANY
+ * REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY
+ * OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
+ */
+struct _Bigint_004198D8
+{
+  struct _Bigint_004198D8 *_next;
+  int _k, _maxwds, _sign, _wds;
+  unsigned int _x[1];
+};
+typedef struct _Bigint_004198D8 _Bigint_004198D8;
+struct _reent_004198D8 { int _errno; };
+union double_union_004198D8
+{
+  double d;
+  unsigned int i[2];
+};
+union __dmath_004198D8
+{
+  unsigned int i[2];
+  double d;
+};
+#define word0_004198D8(x) (x.i[1])
+#define word1_004198D8(x) (x.i[0])
+#define Exp_msk1_004198D8    ((unsigned int)0x100000L)
+#define Exp_mask_004198D8  ((unsigned int)0x7ff00000L)
+#define P_004198D8 53
+#define Bias_004198D8 1023
+#define Emin_004198D8 (-1022)
+#define Frac_mask1_004198D8 ((unsigned int)0xfffffL)
+#define Ten_pmax_004198D8 22
+#define Bndry_mask_004198D8  ((unsigned int)0xfffffL)
+#define Bndry_mask1_004198D8 ((unsigned int)0xfffffL)
+#define LSB_004198D8 1
+#define Log2P_004198D8 1
+#define Tiny0_004198D8 0
+#define Tiny1_004198D8 1
+#define rounded_product_004198D8(a,b) a *= b
+#define rounded_quotient_004198D8(a,b) a /= b
+#define Big0_004198D8 (Frac_mask1_004198D8 | Exp_msk1_004198D8*(1024+Bias_004198D8-1))
+#define Big1_004198D8 ((unsigned int)0xffffffffL)
+#define n_bigtens_004198D8 5
+#define DBL_DIG_004198D8 15
+#define DBL_MAX_10_EXP_004198D8 308
+#define DBL_MAX_EXP_004198D8 1024
+#define FLT_ROUNDS_004198D8 1
+#define FLT_RADIX_004198D8 2
+#define ERANGE_004198D8 34
+#define HUGE_VAL_004198D8 (infinity_004198D8[0].d)
+#define Bcopy_004198D8(x,y) g98D8_memcpy((char *)&x->_sign, (char *)&y->_sign, y->_wds*sizeof(int) + 2*sizeof(int))
+extern const union __dmath_004198D8 infinity_004198D8[] __asm__("D_0049A898");
+extern const double tens_004198D8[] __asm__("D_0049A8F8");
+extern const double bigtens_004198D8[] __asm__("D_0049A9C0");
+extern const double tinytens_004198D8[] __asm__("D_0049A9E8");
+extern void *g98D8_memcpy(void *, void *, int) __asm__("func_0041605C");
+extern _Bigint_004198D8 *g98D8_Balloc(struct _reent_004198D8 *, int) __asm__("func_00420510");
+extern void g98D8_Bfree(struct _reent_004198D8 *, _Bigint_004198D8 *) __asm__("func_004205B8");
+extern _Bigint_004198D8 *g98D8_s2b(struct _reent_004198D8 *, const char *, int, int, unsigned int) __asm__("func_004206F8");
+extern _Bigint_004198D8 *g98D8_i2b(struct _reent_004198D8 *, int) __asm__("func_00420978");
+extern _Bigint_004198D8 *g98D8_mult(struct _reent_004198D8 *, _Bigint_004198D8 *, _Bigint_004198D8 *) __asm__("func_004209B0");
+extern _Bigint_004198D8 *g98D8_pow5mult(struct _reent_004198D8 *, _Bigint_004198D8 *, int) __asm__("func_00420BC8");
+extern _Bigint_004198D8 *g98D8_lshift(struct _reent_004198D8 *, _Bigint_004198D8 *, int) __asm__("func_00420CC8");
+extern int g98D8_cmp(_Bigint_004198D8 *, _Bigint_004198D8 *) __asm__("func_00420E28");
+extern _Bigint_004198D8 *g98D8_diff(struct _reent_004198D8 *, _Bigint_004198D8 *, _Bigint_004198D8 *) __asm__("func_00420E90");
+extern double g98D8_ulp(double) __asm__("func_00421020");
+extern _Bigint_004198D8 *g98D8_d2b(struct _reent_004198D8 *, double, int *, int *) __asm__("func_00421280");
+extern double g98D8_ratio(_Bigint_004198D8 *, _Bigint_004198D8 *) __asm__("func_00421400");
+
+/* the unit declares this as void func_004198D8(int, int, int) (strtod, func_0041A7E8) */
+double func_004198D8_(struct _reent_004198D8 *, const char *, char **) __asm__("func_004198D8");
+double func_004198D8_(struct _reent_004198D8 *ptr, const char *s00, char **se)
+{
+  int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, dsign, e1, esign, i, j,
+    k, nd, nd0, nf, nz, nz0, sign;
+  long e;
+  const char *s, *s0, *s1;
+  double aadj, aadj1, adj;
+  long L;
+  unsigned long z;
+  unsigned int y;
+  union double_union_004198D8 rv, rv0;
+
+  _Bigint_004198D8 *bb, *bb1, *bd, *bd0, *bs, *delta;
+  sign = nz0 = nz = 0;
+  rv.d = 0.;
+  for (s = s00;; s++)
+    switch (*s)
+      {
+      case '-':
+	sign = 1;
+	/* no break */
+      case '+':
+	if (*++s)
+	  goto break2;
+	/* no break */
+      case 0:
+	s = s00;
+	goto ret;
+      case '\t':
+      case '\n':
+      case '\v':
+      case '\f':
+      case '\r':
+      case ' ':
+	continue;
+      default:
+	goto break2;
+      }
+break2:
+  if (*s == '0')
+    {
+      nz0 = 1;
+      while (*++s == '0');
+      if (!*s)
+	goto ret;
+    }
+  s0 = s;
+  y = z = 0;
+  for (nd = nf = 0; (c = *s) >= '0' && c <= '9'; nd++, s++)
+    if (nd < 9)
+      y = 10 * y + c - '0';
+    else if (nd < 16)
+      z = 10 * z + c - '0';
+  nd0 = nd;
+  if (c == '.')
+    {
+      c = *++s;
+      if (!nd)
+	{
+	  for (; c == '0'; c = *++s)
+	    nz++;
+	  if (c > '0' && c <= '9')
+	    {
+	      s0 = s;
+	      nf += nz;
+	      nz = 0;
+	      goto have_dig;
+	    }
+	  goto dig_done;
+	}
+      for (; c >= '0' && c <= '9'; c = *++s)
+	{
+	have_dig:
+	  nz++;
+	  if (c -= '0')
+	    {
+	      nf += nz;
+	      for (i = 1; i < nz; i++)
+		if (nd++ < 9)
+		  y *= 10;
+		else if (nd <= DBL_DIG_004198D8 + 1)
+		  z *= 10;
+	      if (nd++ < 9)
+		y = 10 * y + c;
+	      else if (nd <= DBL_DIG_004198D8 + 1)
+		z = 10 * z + c;
+	      nz = 0;
+	    }
+	}
+    }
+dig_done:
+  e = 0;
+  if (c == 'e' || c == 'E')
+    {
+      if (!nd && !nz && !nz0)
+	{
+	  s = s00;
+	  goto ret;
+	}
+      s00 = s;
+      esign = 0;
+      switch (c = *++s)
+	{
+	case '-':
+	  esign = 1;
+	case '+':
+	  c = *++s;
+	}
+      if (c >= '0' && c <= '9')
+	{
+	  while (c == '0')
+	    c = *++s;
+	  if (c > '0' && c <= '9')
+	    {
+	      e = c - '0';
+	      s1 = s;
+	      while ((c = *++s) >= '0' && c <= '9')
+		e = 10 * e + c - '0';
+	      if (s - s1 > 8)
+		/* Avoid confusion from exponents
+		 * so large that e might overflow.
+		 */
+		e = 9999999L;
+	      if (esign)
+		e = -e;
+	    }
+	  else
+	    e = 0;
+	}
+      else
+	s = s00;
+    }
+  if (!nd)
+    {
+      if (!nz && !nz0)
+	s = s00;
+      goto ret;
+    }
+  e1 = e -= nf;
+
+  /* Now we have nd0 digits, starting at s0, followed by a
+   * decimal point, followed by nd-nd0 digits.  The number we're
+   * after is the integer represented by those digits times
+   * 10**e */
+
+  if (!nd0)
+    nd0 = nd;
+  k = nd < DBL_DIG_004198D8 + 1 ? nd : DBL_DIG_004198D8 + 1;
+  rv.d = y;
+  if (k > 9)
+    rv.d = tens_004198D8[k - 9] * rv.d + z;
+  bd0 = 0;
+  if (nd <= DBL_DIG_004198D8
+      && FLT_ROUNDS_004198D8 == 1
+    )
+    {
+      if (!e)
+	goto ret;
+      if (e > 0)
+	{
+	  if (e <= Ten_pmax_004198D8)
+	    {
+	      /* rv.d = */ rounded_product_004198D8 (rv.d, tens_004198D8[e]);
+	      goto ret;
+	    }
+	  i = DBL_DIG_004198D8 - nd;
+	  if (e <= Ten_pmax_004198D8 + i)
+	    {
+	      /* A fancier test would sometimes let us do
+				 * this for larger i values.
+				 */
+	      e -= i;
+	      rv.d *= tens_004198D8[i];
+	      /* rv.d = */ rounded_product_004198D8 (rv.d, tens_004198D8[e]);
+	      goto ret;
+	    }
+	}
+      else if (e >= -Ten_pmax_004198D8)
+	{
+	  /* rv.d = */ rounded_quotient_004198D8 (rv.d, tens_004198D8[-e]);
+	  goto ret;
+	}
+    }
+  e1 += nd - k;
+
+  /* Get starting approximation = rv.d * 10**e1 */
+
+  if (e1 > 0)
+    {
+      if ((i = e1 & 15) != 0)
+	rv.d *= tens_004198D8[i];
+      if (e1 &= ~15)
+	{
+	  if (e1 > DBL_MAX_10_EXP_004198D8)
+	    {
+	    ovfl:
+	      ptr->_errno = ERANGE_004198D8;
+	      rv.d = HUGE_VAL_004198D8;
+	      if (bd0)
+		goto retfree;
+	      goto ret;
+	    }
+	  if (e1 >>= 4)
+	    {
+	      for (j = 0; e1 > 1; j++, e1 >>= 1)
+		if (e1 & 1)
+		  rv.d *= bigtens_004198D8[j];
+	      /* The last multiplication could overflow. */
+	      word0_004198D8 (rv) -= P_004198D8 * Exp_msk1_004198D8;
+	      rv.d *= bigtens_004198D8[j];
+	      if ((z = word0_004198D8 (rv) & Exp_mask_004198D8)
+		  > Exp_msk1_004198D8 * (DBL_MAX_EXP_004198D8 + Bias_004198D8 - P_004198D8))
+		goto ovfl;
+	      if (z > Exp_msk1_004198D8 * (DBL_MAX_EXP_004198D8 + Bias_004198D8 - 1 - P_004198D8))
+		{
+		  /* set to largest number */
+		  /* (Can't trust DBL_MAX) */
+		  word0_004198D8 (rv) = Big0_004198D8;
+		  word1_004198D8 (rv) = Big1_004198D8;
+		}
+	      else
+		word0_004198D8 (rv) += P_004198D8 * Exp_msk1_004198D8;
+	    }
+
+	}
+    }
+  else if (e1 < 0)
+    {
+      e1 = -e1;
+      if ((i = e1 & 15) != 0)
+	rv.d /= tens_004198D8[i];
+      if (e1 &= ~15)
+	{
+	  e1 >>= 4;
+	  if (e1 >= 1 << n_bigtens_004198D8)
+            goto undfl;
+	  for (j = 0; e1 > 1; j++, e1 >>= 1)
+	    if (e1 & 1)
+	      rv.d *= tinytens_004198D8[j];
+	  /* The last multiplication could underflow. */
+	  rv0.d = rv.d;
+	  rv.d *= tinytens_004198D8[j];
+	  if (!rv.d)
+	    {
+	      rv.d = 2. * rv0.d;
+	      rv.d *= tinytens_004198D8[j];
+	      if (!rv.d)
+		{
+		undfl:
+		  rv.d = 0.;
+		  ptr->_errno = ERANGE_004198D8;
+		  if (bd0)
+		    goto retfree;
+		  goto ret;
+		}
+	      word0_004198D8 (rv) = Tiny0_004198D8;
+	      word1_004198D8 (rv) = Tiny1_004198D8;
+	      /* The refinement below will clean
+	       * this approximation up.
+	       */
+	    }
+	}
+    }
+
+  /* Now the hard part -- adjusting rv to the correct value.*/
+
+  /* Put digits into bd: true value = bd * 10^e */
+
+  bd0 = g98D8_s2b (ptr, s0, nd0, nd, y);
+
+  for (;;)
+    {
+      bd = g98D8_Balloc (ptr, bd0->_k);
+      Bcopy_004198D8 (bd, bd0);
+      bb = g98D8_d2b (ptr, rv.d, &bbe, &bbbits);	/* rv.d = bb * 2^bbe */
+      bs = g98D8_i2b (ptr, 1);
+
+      if (e >= 0)
+	{
+	  bb2 = bb5 = 0;
+	  bd2 = bd5 = e;
+	}
+      else
+	{
+	  bb2 = bb5 = -e;
+	  bd2 = bd5 = 0;
+	}
+      if (bbe >= 0)
+	bb2 += bbe;
+      else
+	bd2 -= bbe;
+      bs2 = bb2;
+      i = bbe + bbbits - 1;	/* logb(rv.d) */
+      if (i < Emin_004198D8)		/* denormal */
+	j = bbe + (P_004198D8 - Emin_004198D8);
+      else
+	j = P_004198D8 + 1 - bbbits;
+      bb2 += j;
+      bd2 += j;
+      i = bb2 < bd2 ? bb2 : bd2;
+      if (i > bs2)
+	i = bs2;
+      if (i > 0)
+	{
+	  bb2 -= i;
+	  bd2 -= i;
+	  bs2 -= i;
+	}
+      if (bb5 > 0)
+	{
+	  bs = g98D8_pow5mult (ptr, bs, bb5);
+	  bb1 = g98D8_mult (ptr, bs, bb);
+	  g98D8_Bfree (ptr, bb);
+	  bb = bb1;
+	}
+      if (bb2 > 0)
+	bb = g98D8_lshift (ptr, bb, bb2);
+      if (bd5 > 0)
+	bd = g98D8_pow5mult (ptr, bd, bd5);
+      if (bd2 > 0)
+	bd = g98D8_lshift (ptr, bd, bd2);
+      if (bs2 > 0)
+	bs = g98D8_lshift (ptr, bs, bs2);
+      delta = g98D8_diff (ptr, bb, bd);
+      dsign = delta->_sign;
+      delta->_sign = 0;
+      i = g98D8_cmp (delta, bs);
+      if (i < 0)
+	{
+	  /* Error is less than half an ulp -- check for
+	   * special case of mantissa a power of two.
+	   */
+	  if (dsign || word1_004198D8 (rv) || word0_004198D8 (rv) & Bndry_mask_004198D8)
+	    break;
+	  delta = g98D8_lshift (ptr, delta, Log2P_004198D8);
+	  if (g98D8_cmp (delta, bs) > 0)
+	    goto drop_down;
+	  break;
+	}
+      if (i == 0)
+	{
+	  /* exactly half-way between */
+	  if (dsign)
+	    {
+	      if ((word0_004198D8 (rv) & Bndry_mask1_004198D8) == Bndry_mask1_004198D8
+		  && word1_004198D8 (rv) == 0xffffffff)
+		{
+		  /*boundary case -- increment exponent*/
+		  word0_004198D8 (rv) = (word0_004198D8 (rv) & Exp_mask_004198D8)
+		    + Exp_msk1_004198D8
+		    ;
+		  word1_004198D8 (rv) = 0;
+		  break;
+		}
+	    }
+	  else if (!(word0_004198D8 (rv) & Bndry_mask_004198D8) && !word1_004198D8 (rv))
+	    {
+	    drop_down:
+	      /* boundary case -- decrement exponent */
+	      L = (word0_004198D8 (rv) & Exp_mask_004198D8) - Exp_msk1_004198D8;
+	      word0_004198D8 (rv) = L | Bndry_mask1_004198D8;
+	      word1_004198D8 (rv) = 0xffffffff;
+	      break;
+	    }
+	  if (!(word1_004198D8 (rv) & LSB_004198D8))
+	    break;
+	  if (dsign)
+	    rv.d += g98D8_ulp (rv.d);
+	  else
+	    {
+	      rv.d -= g98D8_ulp (rv.d);
+	      if (!rv.d)
+		goto undfl;
+	    }
+	  break;
+	}
+      if ((aadj = g98D8_ratio (delta, bs)) <= 2.)
+	{
+	  if (dsign)
+	    aadj = aadj1 = 1.;
+	  else if (word1_004198D8 (rv) || word0_004198D8 (rv) & Bndry_mask_004198D8)
+	    {
+	      if (word1_004198D8 (rv) == Tiny1_004198D8 && !word0_004198D8 (rv))
+		goto undfl;
+	      aadj = 1.;
+	      aadj1 = -1.;
+	    }
+	  else
+	    {
+	      /* special case -- power of FLT_RADIX to be */
+	      /* rounded down... */
+
+	      if (aadj < 2. / FLT_RADIX_004198D8)
+		aadj = 1. / FLT_RADIX_004198D8;
+	      else
+		aadj *= 0.5;
+	      aadj1 = -aadj;
+	    }
+	}
+      else
+	{
+	  aadj *= 0.5;
+	  aadj1 = dsign ? aadj : -aadj;
+	  if (FLT_ROUNDS_004198D8 == 0)
+	    aadj1 += 0.5;
+	}
+      y = word0_004198D8 (rv) & Exp_mask_004198D8;
+
+      /* Check for overflow */
+
+      if (y == Exp_msk1_004198D8 * (DBL_MAX_EXP_004198D8 + Bias_004198D8 - 1))
+	{
+	  rv0.d = rv.d;
+	  word0_004198D8 (rv) -= P_004198D8 * Exp_msk1_004198D8;
+	  adj = aadj1 * g98D8_ulp (rv.d);
+	  rv.d += adj;
+	  if ((word0_004198D8 (rv) & Exp_mask_004198D8) >=
+	      Exp_msk1_004198D8 * (DBL_MAX_EXP_004198D8 + Bias_004198D8 - P_004198D8))
+	    {
+	      if (word0_004198D8 (rv0) == Big0_004198D8 && word1_004198D8 (rv0) == Big1_004198D8)
+		goto ovfl;
+	      word0_004198D8 (rv) = Big0_004198D8;
+	      word1_004198D8 (rv) = Big1_004198D8;
+	      goto cont;
+	    }
+	  else
+	    word0_004198D8 (rv) += P_004198D8 * Exp_msk1_004198D8;
+	}
+      else
+	{
+	  /* Compute adj so that the IEEE rounding rules will
+	   * correctly round rv.d + adj in some half-way cases.
+	   * If rv.d * ulp(rv.d) is denormalized (i.e.,
+	   * y <= (P-1)*Exp_msk1), we must adjust aadj to avoid
+	   * trouble from bits lost to denormalization;
+	   * example: 1.2e-307 .
+	   */
+	  if (y <= (P_004198D8 - 1) * Exp_msk1_004198D8 && aadj >= 1.)
+	    {
+	      aadj1 = (double) (int) (aadj + 0.5);
+	      if (!dsign)
+		aadj1 = -aadj1;
+	    }
+	  adj = aadj1 * g98D8_ulp (rv.d);
+	  rv.d += adj;
+	}
+      z = word0_004198D8 (rv) & Exp_mask_004198D8;
+      if (y == z)
+	{
+	  /* Can we stop now? */
+	  L = aadj;
+	  aadj -= L;
+	  /* The tolerances below are conservative. */
+	  if (dsign || word1_004198D8 (rv) || word0_004198D8 (rv) & Bndry_mask_004198D8)
+	    {
+	      if (aadj < .4999999 || aadj > .5000001)
+		break;
+	    }
+	  else if (aadj < .4999999 / FLT_RADIX_004198D8)
+	    break;
+	}
+    cont:
+      g98D8_Bfree (ptr, bb);
+      g98D8_Bfree (ptr, bd);
+      g98D8_Bfree (ptr, bs);
+      g98D8_Bfree (ptr, delta);
+    }
+retfree:
+  g98D8_Bfree (ptr, bb);
+  g98D8_Bfree (ptr, bd);
+  g98D8_Bfree (ptr, bs);
+  g98D8_Bfree (ptr, bd0);
+  g98D8_Bfree (ptr, delta);
+ret:
+  if (se)
+    *se = (char *) s;
+  return sign ? -rv.d : rv.d;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041A7E8);
