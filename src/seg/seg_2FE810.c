@@ -2823,12 +2823,23 @@ int func_00402C08(int *p, int n, int fn, void *arg) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402C30);
 #ifdef SKIP_ASM
 struct FA_402C30 { int (*fn)(int *, int *, int); int arg; };
 struct T_402C30 { char pad[12]; struct FA_402C30 e[1]; };
-int func_00402C30(int *p, int *v); /* peak3 body held: see notes/stuck.md */
-
+int func_00402C30(int *p, int *v) {
+    int r = 0;
+    if (p) {
+        struct T_402C30 *q = (struct T_402C30 *)p[16];
+        if (q) {
+            if (q->e[*v].fn) {
+                r = q->e[*v].fn(p, v, q->e[*v].arg);
+            }
+        }
+    }
+    return r;
+}
 #endif
 
 //100%
@@ -3041,6 +3052,7 @@ int func_00402E10(int *a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402F80);
 #ifdef SKIP_ASM
 struct P_2F80 { char pad[4]; int f4; int f8; char padC[0xA0]; int fAC; char pad2[0x68]; int f118; char pad3[4]; int f120; char pad4[0x50]; int f174; };
@@ -3049,8 +3061,32 @@ extern int s2_7F20(struct P_2F80 *, int) __asm__("func_00407F20");
 extern int s2_7DC0(struct P_2F80 *) __asm__("func_00407DC0");
 extern void s2_2C80(struct A_2F80 *) __asm__("func_00402C80");
 extern void s2_7E90(struct P_2F80 *, int, int) __asm__("func_00407E90");
-int func_00402F80(struct A_2F80 *a, int b, int c); /* peak3 body held: see notes/stuck.md */
-
+int func_00402F80(struct A_2F80 *a, int b, int c) {
+    struct P_2F80 *p = a->f40;
+    int t, ret;
+    int flag = 0;
+    if (c == -1 || b < c) {
+        if (p->f8 == 0) {
+            a->f8 = 0;
+            p->f8 = 1;
+        }
+        t = s2_7F20(p, 0) ? s2_7DC0(p) != 0 : 0;
+        ret = t;
+    } else {
+        ret = s2_7F20(p, 0);
+        flag = 1;
+        s2_2C80(a);
+    }
+    s2_7E90(p, p->f118, p->f4);
+    if ((t = p->f174) != 3 && flag == 0)
+        p->f120 = p->f120 == 0;
+    a->f8 = p->f118 - p->fAC;
+    if (p->f120 == 0) {
+        p->f118++;
+        p->f4++;
+    }
+    return ret;
+}
 #endif
 
 //100%
@@ -3066,6 +3102,7 @@ int func_00403098(struct A_3098 *a, int b, int c) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004030E0);
 #ifdef SKIP_ASM
 struct P_30E0 { int f0; int f4; int f8; char padC[0xA0]; int fAC; char pad2[0x24]; int fD4; char pad3[0x40]; int f118; char pad4[4]; int f120; char pad5[0x50]; int f174; };
@@ -3076,8 +3113,49 @@ extern void s3_2C80(struct A_30E0 *) __asm__("func_00402C80");
 extern void s3_7E90(struct P_30E0 *, int, int) __asm__("func_00407E90");
 extern int s3_7520(struct P_30E0 *) __asm__("func_00407520");
 extern void s3_3240(struct A_30E0 *) __asm__("func_00403240");
-int func_004030E0(struct A_30E0 *a, int b, int c); /* peak3 body held: see notes/stuck.md */
-
+int func_004030E0(struct A_30E0 *a, int b, int c) {
+    struct P_30E0 *p = a->f40;
+    int flag = 0;
+    int ret, k, t;
+    p->f120 = 0;
+    if (c == -1 || b < c)
+        flag = 1;
+    if (p->f8 == 0) {
+        a->f8 = 0;
+        p->f8 = 1;
+    }
+    if (s3_7F20(p, 0)) {
+        if (flag)
+            s3_7DC0(p);
+    }
+    p->f120 = 1;
+    if (s3_7520(p) == 0) {
+        s3_3240(a);
+        p->f0 = 1;
+        return 0;
+    }
+    k = 2;
+    if (p->fD4 != 1)
+        k = 1;
+    if (p->f174 != k)
+        return -1;
+    ret = 0;
+    t = 0;
+    if (s3_7F20(p, 1))
+        t = 1;
+    if (t && flag) {
+        if (s3_7DC0(p))
+            ret = 1;
+    }
+    s3_7E90(p, p->f118, p->f4);
+    p->f120 = 0;
+    a->f8 = p->f118 - p->fAC;
+    p->f118++;
+    p->f4++;
+    if (!flag)
+        s3_2C80(a);
+    return ret;
+}
 #endif
 
 //100%
@@ -4438,12 +4516,28 @@ void func_00407B70(int *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00407C38);
 #ifdef SKIP_ASM
 struct S_7C38 { char pad[0x13C]; int f13C; char pad2[0x34]; int f174; int f178; char pad3[8]; int f184; int pad188; int f18C[3]; int f198[3]; };
 extern int sc_72E8(struct S_7C38 *, int) __asm__("func_004072E8");
-void func_00407C38(struct S_7C38 *a); /* peak3 body held: see notes/stuck.md */
-
+void func_00407C38(struct S_7C38 *a) {
+    int n;
+    int i;
+    if (a->f13C) {
+        if (a->f184 == 0) n = 1;
+        else n = a->f178 ? 3 : 2;
+    } else {
+        if (a->f174 != 3) n = 1;
+        else n = a->f184 ? 3 : 2;
+    }
+    for (i = 0; i < n; i++) {
+        a->f18C[i] = sc_72E8(a, 16);
+        sc_72E8(a, 1);
+        a->f198[i] = sc_72E8(a, 16);
+        sc_72E8(a, 1);
+    }
+}
 #endif
 
 //100%
@@ -4530,6 +4624,7 @@ void func_00407E90(int *p, int n, int flag) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00407F20);
 #ifdef SKIP_ASM
 struct F7F20 {
@@ -4559,8 +4654,89 @@ struct M7F20 {
     long t828;
     long t830;
 };
-int func_00407F20(struct M7F20 *m, int a1); /* peak3 body held: see notes/stuck.md */
-
+int func_00407F20(struct M7F20 *m, int a1) {
+    int lim = 4;
+    struct F7F20 *x;
+    struct F7F20 *f = 0;
+    int r = 0;
+    if (m->f174 == 3)
+        lim = 2;
+    if (m->f150 == 3) {
+        m->c[0].cur = m->c[0].next;
+        m->c[1].cur = m->c[1].next;
+        m->c[2].cur = m->c[2].next;
+        if (m->fA0 + m->fA4 >= lim) {
+            m->fE8 = 0;
+            m->f1A8 = 0;
+            m->f1A4 = 0;
+        }
+        if ((m->fE8 != 0 || m->f1A8 != 0) && m->f1A4 == 0) {
+            m->c[0].ref0->state = 0;
+            m->c[1].ref0->state = 0;
+            m->c[2].ref0->state = 0;
+        }
+        m->fE8 = 0;
+        m->f1A8 = 0;
+        if (m->f174 == 3) {
+            if (m->c[0].ref0->state == 1 || m->f1A4 != 0)
+                if (m->c[0].ref1->state == 1)
+                    r = 1;
+        } else {
+            if ((m->c[1].ref0->state == 1 && m->c[2].ref0->state == 1) || m->f1A4 != 0) {
+                if (m->c[1].ref1->state == 1)
+                    if (m->c[2].ref1->state == 1)
+                        r = 1;
+            }
+        }
+    } else {
+        if (a1 == 0) {
+            struct F7F20 *t;
+            t = m->c[0].ref0; m->c[0].ref0 = m->c[0].ref1; m->c[0].ref1 = t;
+            t = m->c[1].ref0; m->c[1].ref0 = m->c[1].ref1; m->c[1].ref1 = t;
+            t = m->c[2].ref0; m->c[2].ref0 = m->c[2].ref1; m->c[2].ref1 = t;
+        }
+        m->c[0].cur = m->c[0].ref1;
+        m->c[1].cur = m->c[1].ref1;
+        m->c[2].cur = m->c[2].ref1;
+        if (m->f174 == 3) {
+            if (m->f150 != 2 || m->c[0].ref0->state == 1)
+                r = 1;
+        } else {
+            x = m->f174 == 1 ? m->c[2].ref1 : m->c[1].ref1;
+            if (m->f150 != 2 || (a1 != 0 && x->state == 1) || (m->c[1].ref0->state == 1 && m->c[2].ref0->state == 1))
+                r = 1;
+        }
+    }
+    switch (m->f174) {
+    case 3:
+        f = m->c[0].cur;
+        break;
+    case 1:
+        f = m->c[1].cur;
+        break;
+    case 2:
+        f = m->c[2].cur;
+        break;
+    }
+    f->state = 0;
+    f->t18 = m->t828;
+    f->f2C = m->f150;
+    f->t20 = m->t830;
+    f->f30 = m->f174;
+    f->f34 = m->f13C;
+    f->f38 = m->f188;
+    f->f3C = m->f178;
+    f->f40 = m->f184;
+    f->f44 = m->f18C;
+    f->f48 = m->f190;
+    f->f4C = m->f194;
+    f->f50 = m->f198;
+    f->f54 = m->f19C;
+    f->f58 = m->f1A0;
+    f->f5C = m->f148;
+    f->f60 = m->f14C;
+    return r;
+}
 #endif
 
 //100%
@@ -4744,7 +4920,41 @@ void d86C0(struct S86C0 *a, struct B86C0 *b, int c) {
 
 INCLUDE_ASM("seg/seg_2FE810", func_004087D0);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408988);
+#ifdef SKIP_ASM
+struct Ent_8988 { int f0; int f4; unsigned a[4]; unsigned b[69]; int cnt; int pad[4]; };
+struct P_8988 { char pad[0x590]; struct Ent_8988 e[2]; int idx; };
+extern char D_00526FC0[];
+extern int q8988_C078() __asm__("func_0042C078");
+extern void q8988_C0C0(void) __asm__("func_0042C0C0");
+void q8988(struct P_8988 *p) __asm__("func_00408988");
+void q8988(struct P_8988 *p) {
+    int i = 0;
+    unsigned long long *t = (unsigned long long *)(((unsigned)D_00526FC0 & 0x0FFFFFFF) | 0x20000000);
+    int n = p->e[p->idx].cnt;
+    int s;
+    if (n > 0) {
+        do {
+            unsigned a = p->e[p->idx].a[i] & 0x0FFFFFFF;
+            unsigned b = p->e[p->idx].b[i] & 0x0FFFFFFF;
+            int last = (i == n - 1) ? 0 : 3;
+            i++;
+            t[0] = ((unsigned long long)a << 32) | 0x30000030;
+            t[2] = ((unsigned long long)b << 32) | ((unsigned long long)last << 28) | 0x30;
+            t += 4;
+        } while (i < n);
+    }
+    s = q8988_C078();
+    __asm__ volatile("sync");
+    *(volatile int *)0x1000D480 = p->e[p->idx].f0;
+    *(volatile int *)0x1000D430 = (int)D_00526FC0;
+    *(volatile int *)0x1000D420 = 0;
+    *(volatile int *)0x1000D400 = 0x105;
+    if (s)
+        q8988_C0C0();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408AF8);
@@ -4825,7 +5035,71 @@ int func_00408FB0(int a, struct S408FB0 *s) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409088);
+#ifdef SKIP_ASM
+struct L9 { int ev; int pad[7]; unsigned cnt; unsigned addr; };
+extern int E_2C30(int, void *) __asm__("func_00402C30");
+extern void E_6DF0(char *, int) __asm__("func_00406DF0");
+extern int E_AddH(int, void *, int, void *) __asm__("func_00423AC0");
+extern int E_RemH(int, int) __asm__("func_00423AD0");
+extern void E_49B8(int) __asm__("func_004249B8");
+extern void E_4950(int) __asm__("func_00424950");
+extern int E_C078() __asm__("func_0042C078");
+extern void E_C0C0() __asm__("func_0042C0C0");
+extern void E_8B80(char *, int, int) __asm__("func_00408B80");
+extern void E_8DF0(char *, int, int) __asm__("func_00408DF0");
+extern void E_8FB0(void) __asm__("func_00408FB0");
+void q9088(char *d, unsigned *b) __asm__("func_00409088");
+void q9088(char *d, unsigned *b) {
+    struct L9 s;
+    int n = b[3] * b[4];
+    int h;
+    s.ev = 2;
+    E_2C30(*(int *)(d + 0x858), &s);
+    if (*(volatile unsigned *)0x10002010 & 0x4000)
+        *(volatile unsigned *)0x10002010 = 0x40000000;
+    while ((int)*(volatile unsigned *)0x10002010 < 0);
+    E_6DF0(d, 0);
+    while ((int)*(volatile unsigned *)0x10002010 < 0);
+    s.cnt = n * 0x18;
+    s.addr = b[0] & 0xFFFFFFF;
+    if (s.cnt > 0xFFFF) {
+        int r;
+        h = E_AddH(4, E_8FB0, 0, &s.cnt);
+        *(volatile unsigned *)0x1000E010 = 0x10;
+        E_49B8(4);
+        r = E_C078();
+        *(volatile unsigned *)0x1000B410 = s.addr;
+        *(volatile unsigned *)0x1000B420 = 0xFFFF;
+        *(volatile unsigned *)0x1000B400 = 0x101;
+        if (r)
+            E_C0C0();
+        s.addr = (s.addr + 0xFFFF0) & 0xFFFFFFF;
+        s.cnt -= 0xFFFF;
+        if (n < 0x400)
+            E_8B80(d, *(int *)(d + 0xD8), n);
+        else
+            E_8DF0(d, *(int *)(d + 0xD8), n);
+        E_4950(4);
+        E_RemH(4, h);
+    } else {
+        int r = E_C078();
+        *(volatile unsigned *)0x1000B410 = b[0] & 0xFFFFFFF;
+        *(volatile unsigned *)0x1000B420 = s.cnt;
+        *(volatile unsigned *)0x1000B400 = 0x101;
+        if (r)
+            E_C0C0();
+        s.cnt = 0;
+        if (n < 0x400)
+            E_8B80(d, *(int *)(d + 0xD8), n);
+        else
+            E_8DF0(d, *(int *)(d + 0xD8), n);
+    }
+    s.ev = 3;
+    E_2C30(*(int *)(d + 0x858), &s);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409310);
@@ -5662,14 +5936,43 @@ void func_0040B2B0(unsigned *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040B2D0);
 #ifdef SKIP_ASM
 struct C_B2D0 { unsigned *f0; int pad4; int f8; int pad[2]; int f14; int f18; void (*f1C)(int); int f20; int f24; int f28; int f2C; };
 struct E_B2D0 { char pad[0x1C]; struct C_B2D0 *ctx; unsigned code; int f24; int f28; int f2C; };
 extern void func_00423DD0(int);
 extern void func_0040B2B0(unsigned *);
-void func_0040B2D0(struct E_B2D0 *e); /* peak3 body held: see notes/stuck.md */
-
+void func_0040B2D0(struct E_B2D0 *e) {
+    struct C_B2D0 *c;
+    switch (e->code) {
+    case 0x8000001A:
+        c = e->ctx;
+        if (c->f1C)
+            c->f1C(c->f20);
+        func_00423DD0(c->f28);
+        break;
+    case 0x80000019:
+        c = e->ctx;
+        c->f24 = e->f24;
+        c->f14 = e->f28;
+        c->f18 = e->f2C;
+        func_00423DD0(c->f28);
+        break;
+    case 0x8000001C:
+        break;
+    case 0x8000001D:
+        c = e->ctx;
+        c->f2C = e->f24;
+        func_00423DD0(c->f28);
+        break;
+    }
+    c = e->ctx;
+    if (c->f8 >= 0)
+        func_00423DD0(c->f8);
+    func_0040B2B0(c->f0);
+    c->f0 = 0;
+}
 #endif
 
 //100%
@@ -5803,6 +6106,7 @@ int func_0040B5B0(struct O_B5B0 *a, int b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040B6D0);
 #ifdef SKIP_ASM
 struct N_B6D0 { int f0; int f4; int f8; char padC[8]; int f14; int f18; int f1C; int f20; int f24; int f28; int f2C; int f30; int f34; };
@@ -5819,8 +6123,76 @@ extern char D_00498178[];
 extern char D_004981A0[];
 extern char D_004981D8[];
 extern char D_004981E8[];
-int func_0040B6D0(struct N_B6D0 *c, int a, int flag, int d, int e, int f, int g, int h, int i); /* peak3 body held: see notes/stuck.md */
-
+int func_0040B6D0(struct N_B6D0 *c, int a, int flag, int d, int e, int f, int g, int h, int i) {
+    int s[6];
+    int sem;
+    struct N_B6D0 *n;
+    if (flag != 0) {
+        lg1_B6D0(D_00498178);
+        return -1;
+    }
+    wt_B6D0(c->f28);
+    if (d & 0x3F) {
+        lg3_B6D0(D_004981A0, D_004981D8, d);
+        return -1;
+    }
+    if (f & 0x3F) {
+        lg3_B6D0(D_004981E8, D_004981D8, f);
+        return -1;
+    }
+    n = al_B6D0(D_00528FC0);
+    if (n == 0)
+        return -1;
+    c->f4 = n->f18;
+    c->f20 = i;
+    c->f0 = (int)n;
+    c->f1C = h;
+    n->f20 = a;
+    n->f14 = (int)n;
+    n->f24 = e;
+    n->f28 = f;
+    n->f2C = g;
+    n->f1C = (int)c;
+    n->f34 = c->f24;
+    if (d == f) {
+        sz_B6D0(d, e >= g ? e : g);
+    } else {
+        if (e > 0)
+            sz_B6D0(d, e);
+        if (g > 0)
+            sz_B6D0(f, g);
+    }
+    if (flag & 1) {
+        if (h == 0)
+            n->f30 = 0;
+        else
+            n->f30 = 1;
+        c->f8 = -1;
+        if (st_B6D0(0x8000001A, n, 0x40, d, c->f14, e) == 0) {
+            rl_B6D0(n);
+            return -2;
+        }
+        return 0;
+    }
+    s[2] = 0;
+    s[1] = 1;
+    s[5] = 0;
+    sem = sm_B6D0(s);
+    c->f8 = sem;
+    if (sem < 0) {
+        rl_B6D0(n);
+        return -3;
+    }
+    n->f30 = 1;
+    if (st_B6D0(0x8000001A, n, 0x40, d, c->f14, e) == 0) {
+        rl_B6D0(n);
+        fr_B6D0(sem);
+        return -2;
+    }
+    wt_B6D0(sem);
+    fr_B6D0(sem);
+    return 0;
+}
 #endif
 
 //100%
@@ -6940,14 +7312,27 @@ int func_0040D4A0(unsigned a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040D588);
 #ifdef SKIP_ASM
 extern int func_0040E878(float x, float *y);
 extern float func_0040F5A8(float x, float y, int iy);
 typedef union { float f; int bits; } FloatBits_D588;
 #define FLOAT_TO_BITS_D588(i, d) do { FloatBits_D588 fb_; fb_.f = (d); (i) = fb_.bits; } while (0)
-float func_0040D588(float x); /* peak3 body held: see notes/stuck.md */
-
+float func_0040D588(float x) {
+    float y[2];
+    int hx, ix;
+    FLOAT_TO_BITS_D588(hx, x);
+    ix = hx & 0x7fffffff;
+    if (ix <= 0x3f490fda) {
+        return func_0040F5A8(x, 0.0f, 1);
+    } else if (ix > 0x7f7fffff) {
+        return x - x;
+    } else {
+        int n = func_0040E878(x, y);
+        return func_0040F5A8(y[0], y[1], 1 - ((n & 1) << 1));
+    }
+}
 #endif
 
 //100%
@@ -7029,13 +7414,18 @@ int func_0040F878(long *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040F8A0);
 #ifdef SKIP_ASM
 typedef union { float f; int bits; } FloatBits_F8A0;
 #define FLOAT_TO_BITS_F8A0(i, d) do { FloatBits_F8A0 fb_; fb_.f = (d); (i) = fb_.bits; } while (0)
 #define BITS_TO_FLOAT_F8A0(d, i) do { FloatBits_F8A0 fb_; fb_.bits = (i); (d) = fb_.f; } while (0)
-float func_0040F8A0(float x); /* peak3 body held: see notes/stuck.md */
-
+float func_0040F8A0(float x) {
+    int ix;
+    FLOAT_TO_BITS_F8A0(ix, x);
+    BITS_TO_FLOAT_F8A0(x, ix & 0x7fffffff);
+    return x;
+}
 #endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_0040F8C0);
@@ -7044,23 +7434,61 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040F8E8);
 
 INCLUDE_ASM("seg/seg_2FE810", func_0040F9D0);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040F9F8);
 #ifdef SKIP_ASM
 extern float copysignf_F9F8(float, float) __asm__("func_0040FB58");
 typedef union { float f; int bits; } FloatBits_F9F8;
 #define FLOAT_TO_BITS_F9F8(i, d) do { FloatBits_F9F8 fb_; fb_.f = (d); (i) = fb_.bits; } while (0)
 #define BITS_TO_FLOAT_F9F8(d, i) do { FloatBits_F9F8 fb_; fb_.bits = (i); (d) = fb_.f; } while (0)
-float func_0040F9F8(float x, int n); /* peak3 body held: see notes/stuck.md */
-
+static const float k_2pow25_F9F8 = 3.3554432e+07f, k_2powm25_F9F8 = 2.9802322e-08f, k_big_F9F8 = 1.0e+30f, k_small_F9F8 = 1.0e-30f;
+float func_0040F9F8(float x, int n) {
+    int k, ix;
+    FLOAT_TO_BITS_F9F8(ix, x);
+    k = (ix & 0x7f800000) >> 23;
+    if (k == 0) {
+        if ((ix & 0x7fffffff) == 0)
+            return x;
+        x *= k_2pow25_F9F8;
+        FLOAT_TO_BITS_F9F8(ix, x);
+        k = ((ix & 0x7f800000) >> 23) - 25;
+        if (n < -50000)
+            return k_small_F9F8 * x;
+    }
+    if (k == 0xff)
+        return x + x;
+    k = k + n;
+    if (k > 0xfe)
+        return k_big_F9F8 * copysignf_F9F8(k_big_F9F8, x);
+    if (k > 0) {
+        BITS_TO_FLOAT_F9F8(x, (ix & 0x807fffff) | (k << 23));
+        return x;
+    }
+    if (k <= -25) {
+        if (n > 50000)
+            return k_big_F9F8 * copysignf_F9F8(k_big_F9F8, x);
+        else
+            return k_small_F9F8 * copysignf_F9F8(k_small_F9F8, x);
+    }
+    k += 25;
+    BITS_TO_FLOAT_F9F8(x, (ix & 0x807fffff) | (k << 23));
+    return x * k_2powm25_F9F8;
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040FB58);
 #ifdef SKIP_ASM
 typedef union { float f; int bits; } FloatBits_FB58;
 #define FLOAT_TO_BITS_FB58(i, d) do { FloatBits_FB58 fb_; fb_.f = (d); (i) = fb_.bits; } while (0)
 #define BITS_TO_FLOAT_FB58(d, i) do { FloatBits_FB58 fb_; fb_.bits = (i); (d) = fb_.f; } while (0)
-float func_0040FB58(float x, float y); /* peak3 body held: see notes/stuck.md */
-
+float func_0040FB58(float x, float y) {
+    int ix, iy;
+    FLOAT_TO_BITS_FB58(ix, x);
+    FLOAT_TO_BITS_FB58(iy, y);
+    BITS_TO_FLOAT_FB58(x, (ix & 0x7fffffff) | (iy & 0x80000000));
+    return x;
+}
 #endif
 
 //100%
@@ -7078,16 +7506,30 @@ void func_0040FB88(int a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040FBE0);
 #ifdef SKIP_ASM
-// 98.52%: crt __do_global_ctors; only s0/s1 swapped in the final call loop (counter should be $17, ptr $16)
 typedef void (*func_ptr)(void);
 extern func_ptr D_0043CE38[0];
 
 
 
-void func_0040FBE0(void); /* peak3 body held: see notes/stuck.md */
+/* libgcc2's __do_global_ctors: DO_GLOBAL_CTORS_BODY from gcc's gbl-ctors.h, a do { } while (0) macro (the plain body
+   scores 98.52; its loop notes shape the register allocation) */
+#define DO_GLOBAL_CTORS_BODY_FBE0                                       \
+do {                                                                    \
+  unsigned long nptrs = (unsigned long) D_0043CE38[0];                  \
+  unsigned i;                                                           \
+  if (nptrs == (unsigned long)-1)                                       \
+    for (nptrs = 0; D_0043CE38[nptrs + 1] != 0; nptrs++);               \
+  for (i = nptrs; i >= 1; i--)                                          \
+    D_0043CE38[i] ();                                                   \
+} while (0)
 
+void func_0040FBE0(void)
+{
+  DO_GLOBAL_CTORS_BODY_FBE0;
+}
 #endif
 
 //100%

@@ -103,7 +103,161 @@ void func_00416FE0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_00417008);
+#ifdef SKIP_ASM
+struct R17008 {
+    int err;
+    char pad[0x38 - 4];
+    int didinit;
+};
+struct F17008 {
+    unsigned char *p;
+    int r;
+    int w;
+    unsigned short flags;
+    short file;
+    unsigned char *base;
+    int size;
+    int lbfsize;
+    int cookie;
+    int pad20[2];
+    long (*seek)(int, long, int);
+    int pad2C;
+    unsigned char *ubbase;
+    int ubsize;
+    unsigned char *up;
+    int ur;
+    char pad40[0x4C - 0x40];
+    int blksize;
+    int offset;
+    struct R17008 *data;
+};
+extern struct R17008 *g17008_impure __asm__("D_00454944");
+extern void g17008_init(struct R17008 *) __asm__("func_004200F0");
+extern int g17008_fflush(struct F17008 *) __asm__("func_0041FE30");
+extern int g17008_fstat(struct R17008 *, int, int *) __asm__("func_0041FBF0");
+extern long g17008_sseek(int, long, int) __asm__("func_00417A30");
+extern void g17008_smakebuf(struct F17008 *) __asm__("func_004174B0");
+extern int g17008_srefill(struct F17008 *) __asm__("func_00417648");
+int func_00417008_(struct F17008 *fp, long offset, int whence) __asm__("func_00417008");
+int func_00417008_(struct F17008 *fp, long offset, int whence) {
+    long (*seekfn)(int, long, int);
+    long target, curoff;
+    unsigned n;
+    int st[0x68 / 4];
+    int havepos;
+    struct R17008 *ptr;
+    if (fp->data == 0)
+        fp->data = g17008_impure;
+    if (fp->data->didinit == 0)
+        g17008_init(fp->data);
+    ptr = fp->data;
+    if ((*(int *)&fp->flags & 0x108) == 0x108)
+        g17008_fflush(fp);
+    if ((seekfn = fp->seek) == 0) {
+        ptr->err = 0x1D;
+        return -1;
+    }
+    switch (whence) {
+    case 1:
+        g17008_fflush(fp);
+        if (fp->flags & 0x1000)
+            curoff = fp->offset;
+        else {
+            curoff = (*seekfn)(fp->cookie, 0, 1);
+            if (curoff == -1)
+                return -1;
+        }
+        if (fp->flags & 4) {
+            curoff -= fp->r;
+            if (fp->ubbase)
+                curoff -= fp->ur;
+        } else if (fp->flags & 8 && fp->p != 0)
+            curoff += fp->p - fp->base;
+        offset += curoff;
+        whence = 0;
+        havepos = 1;
+        break;
+    case 0:
+    case 2:
+        havepos = 0;
+        break;
+    default:
+        ptr->err = 0x16;
+        return -1;
+    }
+    if (fp->base == 0)
+        g17008_smakebuf(fp);
+    if (fp->flags & 0x81A)
+        goto dumb;
+    if ((fp->flags & 0x400) == 0) {
+        if (seekfn != g17008_sseek || fp->file < 0 || g17008_fstat(ptr, fp->file, st) ||
+            (st[1] & 0xF000) != 0x8000) {
+            fp->flags |= 0x800;
+            goto dumb;
+        }
+        fp->blksize = 0x400;
+        fp->flags |= 0x400;
+    }
+    if (whence == 0)
+        target = offset;
+    else {
+        if (g17008_fstat(ptr, fp->file, st))
+            goto dumb;
+        target = *(long *)&st[4] + offset;
+    }
+    if (!havepos) {
+        if (fp->flags & 0x1000)
+            curoff = fp->offset;
+        else {
+            curoff = (*seekfn)(fp->cookie, 0, 1);
+            if (curoff == -1)
+                goto dumb;
+        }
+        curoff -= fp->r;
+        if (fp->ubbase)
+            curoff -= fp->ur;
+    }
+    if (fp->ubbase) {
+        curoff += fp->r;
+        n = fp->up - fp->base;
+        curoff -= n;
+        n += fp->ur;
+    } else {
+        n = fp->p - fp->base;
+        curoff -= n;
+        n += fp->r;
+    }
+    if ((fp->flags & 0x2000) == 0 && target >= curoff && target < curoff + n) {
+        int o = target - curoff;
+        fp->p = fp->base + o;
+        fp->r = n - o;
+        fp->flags &= ~0x20;
+        return 0;
+    }
+    curoff = target & -fp->blksize;
+    if ((*seekfn)(fp->cookie, curoff, 0) == -1)
+        goto dumb;
+    fp->r = 0;
+    fp->flags &= ~0x20;
+    n = target - curoff;
+    if (n) {
+        if (g17008_srefill(fp) || fp->r < n)
+            goto dumb;
+        fp->p += n;
+        fp->r -= n;
+    }
+    return 0;
+dumb:
+    if (g17008_fflush(fp) || (*seekfn)(fp->cookie, offset, whence) == -1)
+        return -1;
+    fp->p = fp->base;
+    fp->r = 0;
+    fp->flags &= ~0x20;
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00417418);
@@ -215,7 +369,95 @@ void func_00417628(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_00417648);
+#ifdef SKIP_ASM
+struct R7648 {
+    int err;
+    char pad[0x38 - 4];
+    int didinit;
+};
+struct F7648 {
+    unsigned char *p;
+    int r;
+    int w;
+    unsigned short flags;
+    short file;
+    unsigned char *base;
+    int size;
+    int lbfsize;
+    int cookie;
+    int (*rd)(int, unsigned char *, int);
+    int pad24;
+    int pad28;
+    int pad2C;
+    unsigned char *ubbase;
+    int ubsize;
+    unsigned char *up;
+    int ur;
+    char pad40[0x54 - 0x40];
+    struct R7648 *data;
+};
+extern struct R7648 *g7648_impure __asm__("D_00454944");
+extern void g7648_init(struct R7648 *) __asm__("func_004200F0");
+extern int g7648_fflush(struct F7648 *) __asm__("func_0041FE30");
+extern void g7648_smakebuf(struct F7648 *) __asm__("func_004174B0");
+extern int g7648_fwalk(struct R7648 *, void *) __asm__("func_00417418");
+extern void g7648_lflush(void) __asm__("func_00417628");
+int func_00417648_impl(struct F7648 *fp) __asm__("func_00417648");
+/* newlib's CHECK_INIT (stdio/local.h), a do { } while (0) macro: make sure stdio is set up (98.89 without the macro's
+   loop) */
+#define CHECK_INIT_7648(fp)                     \
+  do {                                          \
+      if ((fp)->data == 0)                      \
+          (fp)->data = g7648_impure;            \
+      if ((fp)->data->didinit == 0)             \
+          g7648_init((fp)->data);               \
+  } while (0)
+/* __srefill */
+int func_00417648_impl(struct F7648 *fp) {
+    int n;
+    CHECK_INIT_7648(fp);
+    fp->r = 0;
+    if (fp->flags & 0x20)
+        return -1;
+    if ((fp->flags & 4) == 0) {
+        if ((fp->flags & 0x10) == 0)
+            return -1;
+        if (fp->flags & 8) {
+            if (g7648_fflush(fp))
+                return -1;
+            fp->flags &= ~8;
+            fp->w = 0;
+            fp->lbfsize = 0;
+        }
+        fp->flags |= 4;
+    } else if (fp->ubbase != 0) {
+        if ((fp->r = fp->ur) != 0) {
+            fp->p = fp->up;
+            return 0;
+        }
+    }
+    if (fp->base == 0)
+        g7648_smakebuf(fp);
+    if (fp->flags & 3)
+        g7648_fwalk(fp->data, g7648_lflush);
+    fp->p = fp->base;
+    n = fp->rd(fp->cookie, fp->base, fp->size);
+    fp->r = n;
+    fp->flags &= ~0x2000;
+    if (n <= 0) {
+        if (n == 0) {
+            fp->flags |= 0x20;
+        } else {
+            fp->r = 0;
+            fp->flags |= 0x40;
+        }
+        return -1;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_004177B0);
@@ -288,6 +530,7 @@ int func_004178A8(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_004178B0);
 #ifdef SKIP_ASM
 #define func_004178B0_va_start(ap) \
@@ -313,8 +556,20 @@ struct F178B0 {
 extern int strlen(char *);
 extern int D_00454944;
 extern int func_00417AB8(struct F178B0 *, int, char *);
-int func_004178B0(char *str, int fmt, ...); /* peak3 body held: see notes/stuck.md */
-
+int func_004178B0(char *str, int fmt, ...) {
+    char *ap;
+    struct F178B0 f;
+    f.flags = 4;
+    f.p = str;
+    f.base = str;
+    f.size = f.r = strlen(str);
+    f.read = func_004178A8;
+    f.ubbase = 0;
+    f.lbbase = 0;
+    f.ent = D_00454944;
+    func_004178B0_va_start(ap);
+    return func_00417AB8(&f, fmt, ap);
+}
 #endif
 
 //100%
@@ -2401,9 +2656,138 @@ char *func_00421E60(int ep, char *buf, long val, int nd, int unused, char fmt, i
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_00421F20);
+#ifdef SKIP_ASM
+extern void func_00418CA8_lock(int) __asm__("func_00418CA8");
+extern void func_00418D08_unlock(int) __asm__("func_00418D08");
+extern void *func_0041DBF8_malloc(int, int) __asm__("func_0041DBF8");
+extern void func_0041E340_free(int, void *) __asm__("func_0041E340");
+extern void *func_0041605C_memcpy(void *, void *, unsigned) __asm__("func_0041605C");
+#define MALLOC_COPY(dest, src, nbytes)     do {         unsigned mcn = (nbytes);         if (mcn < 37) {             unsigned *mcsrc = (unsigned *)(src);             unsigned *mcdst = (unsigned *)(dest);             if (mcn >= 20) {                 *mcdst++ = *mcsrc++;                 *mcdst++ = *mcsrc++;                 if (mcn >= 28) {                     *mcdst++ = *mcsrc++;                     *mcdst++ = *mcsrc++;                     if (mcn >= 36) {                         *mcdst++ = *mcsrc++;                         *mcdst++ = *mcsrc++;                     }                 }             }             *mcdst++ = *mcsrc++;             *mcdst++ = *mcsrc++;             *mcdst = *mcsrc;         } else             func_0041605C_memcpy(dest, src, mcn);     } while (0)
+#define inuse(p) (chunk_at_offset(p, (p)->size & ~1u)->size & 1)
+void *func_00421F20_(int ptr, void *oldmem, unsigned bytes) __asm__("func_00421F20");
+void *func_00421F20_(int ptr, void *oldmem, unsigned bytes) {
+    unsigned nb, oldsize, newsize, nextsize, prevsize, remainder_size;
+    mchunkptr oldp, newp, next, prev, remainder, bck, fwd;
+    void *newmem;
+    if (oldmem == 0)
+        return func_0041DBF8_malloc(ptr, bytes);
+    func_00418CA8_lock(ptr);
+    newp = oldp = (mchunkptr)((char *)oldmem - 8);
+    newsize = oldsize = chunksize(oldp);
+    nb = (bytes + 19 < 31) ? 16 : ((bytes + 19) & ~15u);
+    if (oldsize < nb) {
+        next = chunk_at_offset(oldp, oldsize);
+        if (next == top || !inuse(next)) {
+            nextsize = chunksize(next);
+            if (next == top) {
+                if (nextsize + newsize >= nb + 16) {
+                    newsize += nextsize;
+                    top = chunk_at_offset(oldp, nb);
+                    set_head(top, (newsize - nb) | 1);
+                    set_head_size(oldp, nb);
+                    func_00418D08_unlock(ptr);
+                    return (char *)oldp + 8;
+                }
+            } else if (nextsize + newsize >= nb) {
+                unlink(next, bck, fwd);
+                newsize += nextsize;
+                goto split;
+            }
+        } else {
+            next = 0;
+            nextsize = 0;
+        }
+        if (!(oldp->size & 1)) {
+            prev = chunk_at_offset(oldp, -(int)oldp->prev_size);
+            prevsize = chunksize(prev);
+            if (next != 0) {
+                if (next == top) {
+                    if (nextsize + prevsize + newsize >= nb + 16) {
+                        unlink(prev, bck, fwd);
+                        newp = prev;
+                        newsize += prevsize + nextsize;
+                        newmem = (char *)newp + 8;
+                        MALLOC_COPY((char *)newp + 8, oldmem, oldsize - 4);
+                        top = chunk_at_offset(newp, nb);
+                        set_head(top, (newsize - nb) | 1);
+                        set_head_size(newp, nb);
+                        func_00418D08_unlock(ptr);
+                        return newmem;
+                    }
+                } else if (nextsize + prevsize + newsize >= nb) {
+                    unlink(next, bck, fwd);
+                    unlink(prev, bck, fwd);
+                    newp = prev;
+                    newsize += nextsize + prevsize;
+                    newmem = (char *)newp + 8;
+                    MALLOC_COPY((char *)newp + 8, oldmem, oldsize - 4);
+                    goto split;
+                }
+            }
+            if (prev != 0 && prevsize + newsize >= nb) {
+                unlink(prev, bck, fwd);
+                newp = prev;
+                newsize += prevsize;
+                newmem = (char *)newp + 8;
+                MALLOC_COPY((char *)newp + 8, oldmem, oldsize - 4);
+                goto split;
+            }
+        }
+        newmem = func_0041DBF8_malloc(ptr, bytes);
+        if (newmem == 0) {
+            func_00418D08_unlock(ptr);
+            return 0;
+        }
+        if ((newp = (mchunkptr)((char *)newmem - 8)) == chunk_at_offset(oldp, oldp->size & ~1u)) {
+            newsize += chunksize(newp);
+            newp = oldp;
+            goto split;
+        }
+        MALLOC_COPY(newmem, oldmem, oldsize - 4);
+        func_0041E340_free(ptr, oldmem);
+        func_00418D08_unlock(ptr);
+        return newmem;
+    }
+split:
+    if (newsize - nb >= 16) {
+        remainder = chunk_at_offset(newp, nb);
+        remainder_size = newsize - nb;
+        set_head_size(newp, nb);
+        set_head(remainder, remainder_size | 1);
+        chunk_at_offset(remainder, remainder_size)->size |= 1;
+        func_0041E340_free(ptr, (char *)remainder + 8);
+    } else {
+        set_head_size(newp, newsize);
+        chunk_at_offset(newp, newsize)->size |= 1;
+    }
+    func_00418D08_unlock(ptr);
+    return (char *)newp + 8;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_004224A0);
+#ifdef SKIP_ASM
+extern void *func_0041DBF8_malloc(int, int) __asm__("func_0041DBF8");
+extern void *func_00416210_memset(void *, int, unsigned) __asm__("func_00416210");
+#define MALLOC_ZERO(charp, nbytes)     do {         unsigned mctmp = (nbytes);         if (mctmp < 37) {             unsigned *mzp = (unsigned *)(charp);             if (mctmp >= 20) {                 *mzp++ = 0;                 *mzp++ = 0;                 if (mctmp >= 28) {                     *mzp++ = 0;                     *mzp++ = 0;                     if (mctmp >= 36) {                         *mzp++ = 0;                         *mzp++ = 0;                     }                 }             }             *mzp++ = 0;             *mzp++ = 0;             *mzp = 0;         } else             func_00416210_memset(charp, 0, mctmp);     } while (0)
+void *func_004224A0_(int ptr, int n, int elem_size) __asm__("func_004224A0");
+void *func_004224A0_(int ptr, int n, int elem_size) {
+    mchunkptr p;
+    unsigned csz;
+    unsigned sz = n * elem_size;
+    void *mem;
+    mem = func_0041DBF8_malloc(ptr, sz);
+    if (mem == 0)
+        return 0;
+    p = (mchunkptr)((char *)mem - 8);
+    csz = chunksize(p);
+    MALLOC_ZERO(mem, csz - 4);
+    return mem;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00422560);

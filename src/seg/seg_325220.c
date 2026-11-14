@@ -1711,6 +1711,7 @@ int func_00426B48_d(struct S6B48 *a0, int a1, int a2) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00426C88);
 #ifdef SKIP_ASM
 struct B26C88 {
@@ -1749,8 +1750,31 @@ struct A26C88 {
     struct E26C88 *e;
 };
 extern void func_00424C50(int);
-void func_00426C88(struct A26C88 *a); /* peak3 body held: see notes/stuck.md */
-
+void func_00426C88(struct A26C88 *a) {
+    struct E26C88 *e = a->e;
+    struct B26C88 *b = e->owner;
+    if (b->head == 0) {
+        b->head = (int)e;
+    } else {
+        ((struct E26C88 *)b->tail)->next = (int)e;
+    }
+    b->tail = (int)e;
+    {
+        int t1 = a->f14;
+        int t2 = a->f1C;
+        e->f20 = t1;
+        e->f1C = t2;
+    }
+    e->f24 = a->f20;
+    e->fC = a->f24;
+    e->f28 = a->f28;
+    e->f2C = a->f2C;
+    e->f30 = a->f30;
+    e->f34 = a->f10;
+    if (b->f0 >= 0 && b->f4 == 0) {
+        func_00424C50(b->f0);
+    }
+}
 #endif
 
 INCLUDE_ASM("seg/seg_325220", func_00426D18);
@@ -1879,14 +1903,28 @@ sSifQueue *f7148(sSifQueue *x) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_004271D8);
 #ifdef SKIP_ASM
 struct N4271D8 { char pad[0x3C]; int next; };
 struct S4271D8 { char pad[4]; int f4; char pad2[4]; struct N4271D8 *head; };
 extern void func_0042C078(void);
 extern void func_0042C0C0(void);
-int func_004271D8(int arg); /* peak3 body held: see notes/stuck.md */
-
+int func_004271D8(int arg) {
+    struct S4271D8 *a0 = (struct S4271D8 *)arg;
+    struct N4271D8 *n;
+    func_0042C078();
+    n = a0->head;
+    if (n == 0) {
+        a0->f4 = 0;
+    } else {
+        struct N4271D8 *t = (struct N4271D8 *)n->next;
+        a0->f4 = 1;
+        a0->head = t;
+    }
+    func_0042C0C0();
+    return (int)n;
+}
 #endif
 
 INCLUDE_ASM("seg/seg_325220", func_00427230);
