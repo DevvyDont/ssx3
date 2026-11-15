@@ -735,7 +735,88 @@ extern "C" void cRailManNode_writeToReplayFrame(void* self, void* stream)
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/multiparticle", func_00358C80);
+#ifdef SKIP_ASM
+// PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
+void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+// PORT: same symbol as the unit's func_00341AA0(void*, int, int, int, int); pointer-typed view.
+extern "C" void func_00341AA0_8C80(void* self, int a, int type, void* b, const void* c) __asm__("func_00341AA0");
+extern char D_0048EC28[];
+extern char D_0048EA20[];
+extern char* D_004A5B64;
+
+inline void* operator new[](unsigned int, void* p) { return p; }
+
+struct sMPElem8C80 {
+    char pad_0x0[0x40];
+    sMPElem8C80() {}
+};
+
+// One-member union view of a float field (see the FAKEMATCH note on func_00358C80).
+union uFloat8C80 { float v; };
+
+struct sMPDesc8C80 {
+    char pad_0x0[0x10];
+    float f10;              // 0x10
+    char pad_0x14[0x14];
+    float f28;              // 0x28
+    float f2C;              // 0x2C
+    float f30;              // 0x30
+    int f34;                // 0x34
+};
+
+struct sMPOwner8C80 {
+    char pad_0x0[0x80];
+    char* p80;              // 0x80
+};
+
+struct sMP8C80 {
+    float f0;               // 0x0
+    int f4;                 // 0x4
+    float f8;               // 0x8
+    float fC;               // 0xC
+    char pad_0x10[0x4];
+    char b14;               // 0x14
+    char b15;               // 0x15
+    char b16;               // 0x16
+    char b17;               // 0x17
+    char pad_0x18[0x3C];
+    void* vt54;             // 0x54
+    char pad_0x58[0x1C];
+    int n74;                // 0x74
+    char pad_0x78[0xC];
+    sMPElem8C80* elems84;   // 0x84
+};
+
+// FAKEMATCH: the fC (life) store goes through a one-member union view (uFloat8C80), which makes it MEM_IN_STRUCT so sched1
+// no longer keeps the TheAppMan (D_004A5B64) load after it; plain form 91.43%. Byte-identical and behaves like the plain form;
+// landed marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest
+// spelling matches.
+// cAnimComboNode::cAnimComboNode(int bucket, tInstanceRecord* pInstance, const tMakeAnimComboData* adata)
+// (SSX On Tour symbols; frame counts are scaled by 1/30, and f0 is then divided by the cAppMan tick rate like ticks2secs).
+extern "C" void* func_00358C80(sMP8C80* self, int bucket, sMPOwner8C80* pInstance, const sMPDesc8C80* adata)
+{
+    func_00341AA0_8C80((char*)self + 0x18, bucket, 3, pInstance, adata);
+    self->vt54 = D_0048EC28;
+    float* rate = &self->f8;
+    char* pModel = pInstance->p80;
+    *rate = (adata->f28 < 0.0f ? adata->f10 : adata->f28) * 0.03333333507180214f;
+    uFloat8C80* life = (uFloat8C80*)&self->fC;
+    life->v = adata->f2C < 0.0f ? *(float*)(pModel + 0x14) : adata->f2C * 0.03333333507180214f;
+    int fps = *(int*)(D_004A5B64 + 0x10);
+    self->f0 = adata->f30 * 0.03333333507180214f / (float)fps;
+    self->b16 = adata->f34 != 0;
+    self->b17 = adata->f34 < 0;
+    int n = self->n74;
+    sMPElem8C80** slot = &self->elems84;
+    *slot = new (operator_new_tag(n << 6, D_0048EA20, 0x20000000, 0)) sMPElem8C80[n];
+    self->b14 = 0;
+    self->b15 = 0;
+    self->f4 = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/multiparticle", cAnimComboNode_cAnimComboNode);
