@@ -2361,7 +2361,249 @@ extern "C" void func_0019BFE0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BFE8);
+#ifdef SKIP_ASM
+// FAKEMATCH: identical arms `if (self) { state = 2; } else { state = 2; }` in the state-3 arrival test (cross-jumping merges them after
+// reload; before that they lengthen yaw's live range from 166 to 169 insns, so global-alloc ranks the 0.0174533 constant above yaw and
+// they take retail's fs3/fs4); plain form 99.95%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern void* D_004A28A8;
+extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void func_0031BE50(float angle, float* s, float* c);
+
+struct sQuat_BFE8
+{
+    float x, y, z, w;
+    sQuat_BFE8() {}
+    sQuat_BFE8(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
+} __attribute__((aligned(16)));
+
+struct sXform_BFE8
+{
+    sQuat_BFE8 pos;
+    sQuat_BFE8 rot;
+};
+
+extern sQuat_BFE8 D_004FF140;
+extern sQuat_BFE8 D_004FF150;
+extern sQuat_BFE8 D_004FF160;
+extern "C" void func_0019F3E8(void* rider, sXform_BFE8* xf);
+extern "C" void func_0019F548(void* rider, sXform_BFE8* xf);
+extern "C" void func_0015E050(void* cam, sQuat_BFE8* a, sQuat_BFE8* b);
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sQuat_BFE8 QuatMul_BFE8(const sQuat_BFE8& a, const sQuat_BFE8& b)
+{
+    sQuat_BFE8 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline sQuat_BFE8 AxisAngle_BFE8(const sQuat_BFE8& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(angle * 0.5f, &s, &c);
+    return sQuat_BFE8(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+// PORT: PS2-only VU0 macro-mode asm (vector difference a - b).
+static inline sQuat_BFE8 VecSub_BFE8(const sQuat_BFE8& a, const sQuat_BFE8& b)
+{
+    sQuat_BFE8 r;
+    __asm__ (
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 macro-mode asm (vector times scalar).
+static inline sQuat_BFE8 VecScale_BFE8(const sQuat_BFE8& v, float s)
+{
+    sQuat_BFE8 r;
+    int t;
+    __asm__ (
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 macro-mode asm (dst = a + b).
+static inline void VecAdd_BFE8(sQuat_BFE8& dst, const sQuat_BFE8& a, const sQuat_BFE8& b)
+{
+    __asm__ (
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(dst)
+        : "m"(a), "m"(b));
+}
+
+// PORT: PS2-only VU0 macro-mode asm (4-component dot product).
+static inline float VecDot_BFE8(const sQuat_BFE8& a, const sQuat_BFE8& b)
+{
+    float r;
+    __asm__ (
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %0, $vf4\n"
+        : "=r"(r)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// Character-equip screen camera: snaps or eases the camera between the board view (states 1/4) and
+// the rider view (states 2/3), poses the rider and the board, then sets the scene camera.
+extern "C" void func_0019BFE8(void* vself)
+{
+    char* self = (char*)vself;
+    char* rider = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
+    int ok = 0;
+    if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
+        ok = *(int*)(rider + 0xCB4) != 0;
+    }
+    if (ok) {
+        sXform_BFE8 xf;
+        float zero;
+        float zoom = *(float*)(self + 0xAA4);
+        float zOff = *(float*)(self + 0xAA8) * zoom * 65.0f;
+        float yOff = zoom * 320.0f;
+        float yaw = *(float*)(self + 0xAAC);
+        int state = *(int*)(self + 0xAE0);
+        if (state == 1) {
+            sQuat_BFE8 v;
+            v.w = 1.0f;
+            v.x = -105.0f;
+            v.y = yOff + -100.0f;
+            v.z = zOff + -80.0f;
+            *(sQuat_BFE8*)(self + 0xAC0) = v;
+            v.x = 265.75f;
+            v.y = -1073.5f;
+            v.z = -232.0f;
+            *(sQuat_BFE8*)(self + 0xAD0) = v;
+        } else if (state == 2) {
+            sQuat_BFE8 v;
+            v.x = -250.0f;
+            v.y = -650.0f;
+            v.z = -215.0f;
+            v.w = 1.0f;
+            *(sQuat_BFE8*)(self + 0xAC0) = v;
+            v.x = -100.0f;
+            v.y = 45.0f;
+            v.z = 15.0f;
+            *(sQuat_BFE8*)(self + 0xAD0) = v;
+        } else if (state == 3) {
+            sQuat_BFE8 pos;
+            sQuat_BFE8 at;
+            pos.x = -250.0f;
+            pos.y = -650.0f;
+            pos.z = -215.0f;
+            pos.w = 1.0f;
+            at.x = -100.0f;
+            at.y = 45.0f;
+            at.z = 15.0f;
+            at.w = 1.0f;
+            sQuat_BFE8 dPos = VecSub_BFE8(pos, *(sQuat_BFE8*)(self + 0xAC0));
+            sQuat_BFE8 dAt = VecSub_BFE8(at, *(sQuat_BFE8*)(self + 0xAD0));
+            VecAdd_BFE8(*(sQuat_BFE8*)(self + 0xAC0), *(sQuat_BFE8*)(self + 0xAC0), VecScale_BFE8(dPos, 0.2f));
+            VecAdd_BFE8(*(sQuat_BFE8*)(self + 0xAD0), *(sQuat_BFE8*)(self + 0xAD0), VecScale_BFE8(dAt, 0.2f));
+            if (VecDot_BFE8(dAt, dAt) < 0.2f) {
+                if (self) { // FAKEMATCH: identical arms, see header
+                    *(int*)(self + 0xAE0) = 2;
+                } else {
+                    *(int*)(self + 0xAE0) = 2;
+                }
+            }
+        } else if (state == 4) {
+            sQuat_BFE8 pos;
+            sQuat_BFE8 at;
+            pos.x = -105.0f;
+            pos.y = yOff + -100.0f;
+            pos.z = zOff + -80.0f;
+            pos.w = 1.0f;
+            at.x = 265.75f;
+            at.y = -1073.5f;
+            at.z = -232.0f;
+            at.w = 1.0f;
+            sQuat_BFE8 dPos = VecSub_BFE8(pos, *(sQuat_BFE8*)(self + 0xAC0));
+            sQuat_BFE8 dAt = VecSub_BFE8(at, *(sQuat_BFE8*)(self + 0xAD0));
+            VecAdd_BFE8(*(sQuat_BFE8*)(self + 0xAC0), *(sQuat_BFE8*)(self + 0xAC0), VecScale_BFE8(dPos, 0.2f));
+            VecAdd_BFE8(*(sQuat_BFE8*)(self + 0xAD0), *(sQuat_BFE8*)(self + 0xAD0), VecScale_BFE8(dAt, 0.2f));
+            if (VecDot_BFE8(dPos, dPos) < 0.2f) {
+                *(int*)(self + 0xAE0) = 1;
+            }
+        }
+        xf.rot.x = 0.0f;
+        xf.rot.w = 1.0f;
+        xf.rot.y = 0.0f;
+        xf.rot.z = 0.0f;
+        xf.pos = *(sQuat_BFE8*)(self + 0xAC0);
+        zero = 0.0f;
+
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF140, zero));
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF150, zero));
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF160, (yaw + 80.0f) * 0.01745329424738884f));
+        func_0019F3E8(rider, &xf);
+        xf.pos = *(sQuat_BFE8*)(self + 0xAD0);
+        xf.rot.w = 1.0f;
+        xf.rot.x = zero;
+        xf.rot.y = zero;
+        xf.rot.z = zero;
+        *(float*)(self + 0xAB0) += 1.0f;
+        if (*(float*)(self + 0xAB0) >= 360.0f) {
+            *(float*)(self + 0xAB0) -= 360.0f;
+        }
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF160, 245.0f * 0.01745329424738884f));
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF150, 320.0f * 0.01745329424738884f));
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF140, (*(float*)(self + 0xAB0) + 90.0f) * 0.01745329424738884f));
+        func_0019F548(rider, &xf);
+    }
+    char* cam = *(char**)((char*)D_004A28A8 + 0x7C);
+    sQuat_BFE8 pos;
+    sQuat_BFE8 at;
+    pos.x = -110.0f;
+    pos.y = 394.0f;
+    pos.z = 0.0f;
+    pos.w = 1.0f;
+    at.x = -35.0f;
+    at.y = 0.0f;
+    at.z = 0.0f;
+    at.w = 1.0f;
+    func_0015E050(cam + 0x10, &pos, &at);
+    *(float*)(cam + 0x10) = 0.4363323450088501f;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C7E8);
@@ -3653,7 +3895,72 @@ extern "C" int func_0019E3A8(sTableK19D250* self, int bank, int i) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3D0);
+#ifdef SKIP_ASM
+// FAKEMATCH: stand-in local `int none = -1;` (declared after the -1 header stores, before `e`) used for the loop's `e->id` store instead
+// of a literal -1 that loop.c hoists after `e`; plain form 99.56%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+struct sQuadPairCE { int x[8]; } __attribute__((aligned(16)));
+extern sQuadPairCE D_004FF230;
+
+struct sSlotEntryCE {
+    int id;
+    unsigned char flag;
+    char pad[7];
+};
+
+struct sRiderSlotCE {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    int f10;
+    int f14;
+    int f18;
+    sSlotEntryCE entries[256];  // 0x1C
+};
+
+extern "C" void* func_0019E3D0(sRiderSlotCE* self)
+{
+    int i;
+    char* p = (char*)self;
+    sSlotEntryCE* e;
+    *(int*)(p + 0xC70) = 0;
+    *(int*)(p + 0xC74) = 0;
+    self->f0 = -1;
+    self->f4 = -1;
+    int none = -1;
+    e = self->entries;
+    self->f8 = 0;
+    self->fC = 0;
+    self->f10 = 0;
+    self->f14 = 0;
+    self->f18 = 0;
+    for (i = 0; i < 256; i++) {
+        e->flag = 0;
+        e->id = none;
+        e++;
+    }
+    *(int*)(p + 0xC1C) = 0;
+    *(unsigned int*)(p + 0xC2C) = 0xFFFFFFFF;
+    *(int*)(p + 0xC20) = 0;
+    *(int*)(p + 0xC24) = -1;
+    *(int*)(p + 0xC28) = 0;
+    *(int*)(p + 0xCCC) = 0;
+    *(sQuadPairCE*)(p + 0xC30) = D_004FF230;
+    *(sQuadPairCE*)(p + 0xC50) = D_004FF230;
+    *(int*)(p + 0xCD4) = -1;
+    *(int*)(p + 0xC78) = 0;
+    *(int*)(p + 0xCC4) = 0;
+    *(int*)(p + 0xCC8) = 0;
+    *(int*)(p + 0xCB4) = 0;
+    *(int*)(p + 0xCB8) = 0;
+    *(int*)(p + 0xCBC) = 0;
+    *(int*)(p + 0xCC0) = 0;
+    return self;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E498);

@@ -4619,7 +4619,111 @@ extern "C" void func_00162C78_impl(char* self, sInfo_162C78* info)
 }
 #endif
 
+//100%
 INCLUDE_ASM("camera/camera", func_00163010);
+#ifdef SKIP_ASM
+// FAKEMATCH: a dead two-statement chain `int u = 0; int w = u;` in the select's else arm (it outlives jump1's unused-set pass, so the
+// `pk = &f` select is rewritten only after purge_addressof, which then gives g the lower stack slot); plain form 99.95%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern "C" void* func_00168150(void* self);
+
+struct sVec4_163010
+{
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+// PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
+static inline float Sqrt_163010(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float Length_163010(const sVec4_163010& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (in-place v *= s).
+static inline void ScaleEq_163010(sVec4_163010& v, float s)
+{
+    int t;
+    __asm__(
+        "mfc1      %1, %2\n"
+        "lqc2      $vf4, %0\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(v), "=&r"(t)
+        : "f"(s)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline sVec4_163010 Sub_163010(const sVec4_163010& a, const sVec4_163010& b)
+{
+    sVec4_163010 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+extern "C" void func_00163010_impl(char* self, char* trig, float a0, float b, float c, float d, float e, float f, float g) __asm__("func_00163010");
+extern "C" void func_00163010_impl(char* self, char* trig, float a0, float b, float c, float d, float e, float f, float g)
+{
+    sVec4_163010 v = *(sVec4_163010*)(trig + 0x30);
+    float h = *(float*)(trig + 0x44) - c;
+    if (h < 0.0f)
+        h = 0.0f;
+    float a = a0 + b * (h * 9.999999747378752e-05f) * Sqrt_163010(h);
+    a = (a0 * 5.0f) <? (a >? a0);
+    if (*(float*)(self + 0x1EC) < *(float*)(trig + 0x4C))
+        *(float*)(self + 0x1E8) = d * Sqrt_163010(*(float*)(trig + 0x4C));
+    float extra = (*(float*)(self + 0x1E8) - e) >? 0.0f;
+    *(float*)(self + 0x1EC) = *(float*)(trig + 0x4C);
+    *(float*)(self + 0x1E8) = extra;
+    a += extra;
+    const float* pk;
+    if (a < *(float*)(self + 0x1D0))
+        pk = &g;
+    else
+    {
+        int u = 0; // FAKEMATCH: dead chain, see header
+        int w = u;
+        pk = &f;
+    }
+    const float& k = *pk;
+    float cur = k * *(float*)(self + 0x1D0) + (1.0f - k) * a;
+    *(float*)(self + 0x1D0) = cur;
+    ScaleEq_163010(v, cur / Length_163010(v));
+    sVec4_163010 r = Sub_163010(*(sVec4_163010*)(self + 0x20), v);
+    *(sVec4_163010*)(self + 0x40) = r;
+    func_00168150(self);
+}
+#endif
 
 //100%
 INCLUDE_ASM("camera/camera", func_00163158);

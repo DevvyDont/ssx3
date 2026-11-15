@@ -3999,7 +3999,83 @@ int func_003B8EE8(int arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8F78);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// FAKEMATCH: cc.b17 read into a temp `t17` between the two pitch statements (stored to parm.b1 at its original place), so its
+// extraction precedes pitch's zero-extension in insn order and wins sched's tie; plain form 99.81%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+struct sNoteParm_8F78 {             /* 0x20: note parameters for func_003B6820 (func_003BA020 sets defaults) */
+    unsigned char b0;               /* velocity */
+    unsigned char b1;
+    unsigned char b2;               /* key */
+    unsigned char b3;
+    int pad4;
+    unsigned short h8;
+    short padA;
+    unsigned short hC;
+    char padE[0x20 - 0xE];
+};
+struct sSongHandle_8F78 { int id; };
+extern int D_0044C474;              /* last voice slot handed out */
+extern int func_003BA6E8_8F78(int) __asm__("func_003BA6E8");
+extern void func_003BA020_8F78(struct sNoteParm_8F78 *) __asm__("func_003BA020");
+extern int func_003B6820_8F78(int, int, struct sNoteParm_8F78 *) __asm__("func_003B6820");
+
+void func_003B8F78(struct sSongHandle_8F78 h, struct sA120Chan *c, int ch, int key) {
+    struct sNoteParm_8F78 parm;
+    struct sA120Song *e = &D_0050A120.f000[h.id];
+    struct sA120Voice *v = 0;
+    int found = 0;
+    int i, end;
+    int a, b;
+    struct sA120Chan cc;
+    unsigned short pitch;
+    unsigned char t17;
+
+    end = D_0044C474 + 0x19;
+    i = ++D_0044C474;
+    for (; i < end; i++) {
+        D_0044C474 = i % 24;
+        v = &D_0050A820[D_0044C474];
+        if (func_003BA6E8_8F78(v->f00) < 0) {
+            found = 1;
+            break;
+        }
+    }
+    if (found) {
+        func_003BA020_8F78(&parm);
+        cc = *c;
+        parm.b0 = (unsigned int)(cc.b10 * (e->f14 >> 16)) >> 7;
+        parm.b3 = *e->f08;
+        pitch = cc.b00 << 6;
+        t17 = cc.b17; /* FAKEMATCH: early read, see header */
+        pitch += e->f20;
+        parm.h8 = pitch;
+        parm.hC = e->f22;
+        parm.b1 = t17;
+        if (ch == 9 && e->f2E >= 0) {
+            a = e->f2E;
+            b = key;
+            parm.b2 = 0x3C;
+        } else {
+            b = c->b24;
+            a = e->f2C;
+            parm.b2 = key;
+        }
+        v->f00 = func_003B6820_8F78(a, b, &parm);
+        v->f07 = *e->f08++;
+        if (v->f00 >= 0) {
+            v->f04 = h.id;
+            v->f05 = ch;
+            v->f06 = key;
+        }
+    } else {
+        e->f08++;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B9140);

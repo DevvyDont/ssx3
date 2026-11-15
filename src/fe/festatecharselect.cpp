@@ -570,7 +570,116 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/festatecharselect", func_00181EF0);
+#ifdef SKIP_ASM
+extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void cRiderAnimBase_reset(void* anim);
+extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
+
+struct sQuat_181EF0
+{
+    float x, y, z, w;
+    sQuat_181EF0() {}
+    // Assigns w first, like the w-first quaternion ctors elsewhere (CHEATSHEET "Quaternions").
+    sQuat_181EF0(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
+} __attribute__((aligned(16)));
+
+struct sXform_181EF0
+{
+    sQuat_181EF0 pos;
+    sQuat_181EF0 rot;
+};
+
+extern sQuat_181EF0 D_004FF140;
+extern sQuat_181EF0 D_004FF150;
+extern sQuat_181EF0 D_004FF160;
+extern "C" void func_0019F3E8(void* rider, sXform_181EF0* xf);
+extern "C" void func_0019F548(void* rider, sXform_181EF0* xf);
+
+// PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
+static inline sQuat_181EF0 QuatMul_181EF0(const sQuat_181EF0& a, const sQuat_181EF0& b)
+{
+    sQuat_181EF0 r;
+    __asm__(
+        "lqc2       $vf4, %1\n"
+        "lqc2       $vf5, %2\n"
+        "vmul.xyzw  $vf7, $vf4, $vf5\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vmulaw.xyz ACC, $vf4, $vf5w\n"
+        "vmaddaw.xyz ACC, $vf5, $vf4w\n"
+        "vsubax.w   ACC, $vf7, $vf7x\n"
+        "vmsubay.w  ACC, $vf0, $vf7y\n"
+        "vmsubz.w   $vf8, $vf0, $vf7z\n"
+        "vmaddw.xyz $vf8, $vf6, $vf0w\n"
+        "sqc2       $vf8, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+static inline sQuat_181EF0 AxisAngle_181EF0(const sQuat_181EF0& axis, float angle)
+{
+    float s, c;
+    func_0031BE50(&s, &c, angle * 0.5f);
+    return sQuat_181EF0(s * axis.x, s * axis.y, s * axis.z, c);
+}
+
+extern "C" void func_00181EF0(void* vself)
+{
+    char* self = (char*)vself;
+    char* rider = (char*)func_001A0548(*(char**)((char*)D_004A28A8 + 0x7C) + 0xB0, *(signed char*)(self + 0x44));
+    int ok = 0;
+    if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
+        ok = *(int*)(rider + 0xCB4) != 0;
+    }
+    if (ok && *(int*)(self + 0x80) != 0) {
+        sQuat_181EF0 pos;
+        sXform_181EF0 xf;
+        float ang = *(float*)(self + 0x60);
+        {
+            sQuat_181EF0 p;
+            p.x = 136.0f;
+            p.y = -250.0f;
+            p.z = -82.0f;
+            p.w = 1.0f;
+            pos = p;
+            xf.pos = p;
+            xf.rot.x = 0.0f;
+            xf.rot.y = 0.0f;
+            xf.rot.z = 0.0f;
+            xf.rot.w = 1.0f;
+            xf.rot = QuatMul_181EF0(xf.rot, AxisAngle_181EF0(D_004FF140, 0.0f));
+        }
+        xf.rot = QuatMul_181EF0(xf.rot, AxisAngle_181EF0(D_004FF150, 0.0f));
+        ang += 100.0f;
+        ang *= 0.01745329424738884f;
+        xf.rot = QuatMul_181EF0(xf.rot, AxisAngle_181EF0(D_004FF160, ang));
+        func_0019F3E8(rider, &xf);
+        if (*(int*)(self + 0x54) != 0) {
+            void* anim = *(void**)(rider + 0xC);
+            if (anim != 0) {
+                cRiderAnimBase_reset(anim);
+                cRiderAnimBase_play(anim, 0x1B2, 0, -1.0f);
+            }
+            *(int*)(rider + 0xCCC) = 0;
+            *(int*)(self + 0x54) = 0;
+        }
+        {
+            sQuat_181EF0 p;
+            p.x = 0.0f;
+            p.y = 10000.0f;
+            p.z = 0.0f;
+            p.w = 1.0f;
+            xf.pos = p;
+        }
+        func_0019F548(rider, &xf);
+        func_0019E538(rider, 1);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/festatecharselect", func_00182220);

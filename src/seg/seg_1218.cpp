@@ -1009,7 +1009,201 @@ cTable_101310::cTable_101310(void* o)
 __asm__(".globl cDangerMan_cDangerMan\n.type cDangerMan_cDangerMan,@function\ncDangerMan_cDangerMan = __13cTable_101310Pv\n.size cDangerMan_cDangerMan,0x94\n");
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1218", func_001013A8);
+#ifdef SKIP_ASM
+// FAKEMATCH: `do { ... } while (0)` around the recs loop (its loop notes weight self's ref, so global-alloc takes self before zoneCheckAIIndex); plain form 99.31%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+struct sVec4_13A8 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sXform_13A8 {
+    char pad[0x30];
+    sVec4_13A8 pos;
+};
+
+class cComp_13A8 {
+public:
+    int f0;
+    int f4;
+    int f8;
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual int IsDead();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual sXform_13A8* GetXform();
+};
+
+struct sObj_13A8 {
+    int pad[3];
+    cComp_13A8* comp;
+};
+
+struct sBank_13A8 {
+    char pad[0x1C];
+    unsigned int* handles;
+};
+
+struct sWorld_13A8 {
+    int pad[2];
+    sBank_13A8** banks;
+};
+
+extern sWorld_13A8** D_004A47B8_13A8 __asm__("D_004A47B8");
+
+// Entry of cRider's primary vtable (_vt$6cRider, at self->mVtbl): g++ 2.95 {delta, index, pfn}.
+struct sVEi_13A8 { short delta; short index; int (*fn)(void*, sObj_13A8*); };
+
+struct sRiders_13A8 {
+    char pad[0x28];
+    cRider* riders[20];
+    char pad78[0x78 - 0x28 - 20 * 4];
+    int count;
+    int getNumRiders() { return count; }
+    cRider* getRider(int idx) { return riders[idx]; }
+};
+
+struct sNode_13A8 {
+    unsigned int id;
+    int val;
+    int pad8;
+    sNode_13A8* next;
+};
+
+struct sEnt_13A8 {
+    float x;
+    float y;
+    int state;
+    float px, py, pz;
+    unsigned int id;
+};
+
+struct sRec_13A8 {
+    int a;
+    int b;
+    int c;
+};
+
+struct sMgr_13A8 {
+    sRiders_13A8* riders;
+    sEnt_13A8 ents[64];
+    int count;
+    int pad708;
+    sRec_13A8 recs[6];
+    char pad[0xB58 - 0x70C - 6 * 0xC];
+    sNode_13A8* list;
+    int cur;
+};
+
+void func_001441A0(void*, void*);
+extern "C" int func_001441B8(sMgr_13A8*, int);
+
+static inline sObj_13A8* toPtr_13A8(unsigned int v)
+{
+    return (sObj_13A8*)(v << 2); // PORT: packed pointer in a 32-bit handle
+}
+
+static inline sObj_13A8* lookup_13A8(unsigned int id)
+{
+    sBank_13A8* b = (*D_004A47B8_13A8)->banks[id & 0xFF];
+    if (b) {
+        unsigned int v = b->handles[id >> 8] >> 8;
+        if (v)
+            return toPtr_13A8(v);
+    }
+    return 0;
+}
+
+// cDangerMan::Update(void) (SSX On Tour symbols; riders are cAI::getRider/getNumRiders, the zone lookup is
+// cWorld::getTheWorld()->getInstanceResource(id)).
+extern "C" void func_001013A8(sMgr_13A8* self)
+{
+    if (self->list) {
+        int zoneCheckAIIndex = self->cur;
+        if (!(zoneCheckAIIndex < self->riders->getNumRiders()))
+            zoneCheckAIIndex = 0;
+        cRider* pRider = self->riders->getRider(zoneCheckAIIndex);
+        char* sub = (char*)&pRider->mVtbl;
+        sRec_13A8* pCurrentRiderTrack = &self->recs[zoneCheckAIIndex];
+        sNode_13A8* pCurrDangerZone = self->list;
+        int baseDangerZoneLevel = 0;
+        do {
+            sVEi_13A8* vt = *(sVEi_13A8**)&pRider->mVtbl;
+            int (**pf)(void*, sObj_13A8*) = &vt[kRiderVt_isIntersecting].fn;
+            if ((*pf)(sub + vt[kRiderVt_isIntersecting].delta, lookup_13A8(pCurrDangerZone->id))) {
+                if (baseDangerZoneLevel < pCurrDangerZone->val)
+                    baseDangerZoneLevel = pCurrDangerZone->val;
+            }
+            pCurrDangerZone = pCurrDangerZone->next;
+        } while (pCurrDangerZone);
+        if (baseDangerZoneLevel) {
+            pCurrentRiderTrack->a = baseDangerZoneLevel;
+            pCurrentRiderTrack->c = 60;
+        }
+        pCurrentRiderTrack->b = func_001441B8(self, zoneCheckAIIndex);
+    }
+    do { // FAKEMATCH: see header
+    for (int i = 0; i < 6; i++) {
+        sRec_13A8* r = &self->recs[i];
+        if (r->a) {
+            if (--r->c == 0) {
+                r->a = 0;
+                r->b = 0;
+            }
+        }
+    }
+    } while (0);
+    if (self->count) {
+        int numTrackedProcessed = self->count;
+        for (int currElem = 0; currElem < 64; currElem++) {
+            if (!numTrackedProcessed)
+                break;
+            sEnt_13A8* pCurrElem = &self->ents[currElem];
+            if (pCurrElem->state == 2)
+                continue;
+            numTrackedProcessed--;
+            if (pCurrElem->state == 1) {
+                pCurrElem->y -= 0.01666666753590107f;
+                if (pCurrElem->y <= 0.0f) {
+                    func_001441A0(self, pCurrElem);
+                    continue;
+                }
+            }
+            cComp_13A8* pInstNode = lookup_13A8(pCurrElem->id)->comp;
+            if (pInstNode == 0 || pInstNode->IsDead()) {
+                pCurrElem->state = 1;
+            } else {
+                sVec4_13A8 p = pInstNode->GetXform()->pos;
+                pCurrElem->px = p.x;
+                pCurrElem->py = p.y;
+                pCurrElem->pz = p.z;
+            }
+        }
+    }
+    for (int i = 0; i < self->riders->count; i++) {
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", cDangerMan_Reset);
