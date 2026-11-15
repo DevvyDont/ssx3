@@ -3696,7 +3696,50 @@ extern "C" void func_002E3338(void* vself, int idx)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3478);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// FAKEMATCH: the invented zero-valued index `bank` over size-1 leading array dimensions (cnt / strip / blk[1][...]), so retail's zero register times 0x6000 is kept; plain form (no bank dimension) 94.97%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+struct sBW3478Blk { char d[0x210]; };
+
+struct sBW3478Data {
+    char pad0[0x60];
+    int cnt[1][2];                      // 0x60
+    sWake_2868 strip[1][2][0x100];      // 0x68
+    char pad6068[0x6070 - 0x6068];
+    sBW3478Blk blk[1][2];               // 0x6070
+    char pad6490[0x649C - 0x6490];
+};
+
+struct sBW3478Fx : sBW3478Data {
+    virtual void vf08();
+    virtual void vf10();
+    virtual void vf18();
+};
+
+extern int D_004A3B18;
+extern "C" void func_002F4A08(void* dst, void* src, int i);
+
+extern "C" void func_002E3478(void* selfv, int i)
+{
+    sBW3478Fx* self = (sBW3478Fx*)selfv;
+    // The wake arrays have a leading bank dimension of one, indexed through a variable:
+    // func_002E3130 keeps it as a zeroed register multiplied by 0x6000 at run time.
+    int bank = 0;
+    if (D_004A3B18 != 0) {
+        func_002F4A08(&self->blk[bank][i], self, i);
+    }
+    self->vf10();
+    for (int n = 0; n < self->cnt[bank][i]; n++) {
+        if (self->strip[bank][i][n].on != 0) {
+            func_002E2868(&self->strip[bank][i][n], i);
+        }
+    }
+    self->vf18();
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3578);

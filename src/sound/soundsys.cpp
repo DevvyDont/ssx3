@@ -6602,7 +6602,95 @@ void func_0029D6D0(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_0029D6E0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// FAKEMATCH: a non-empty `do { ... } while (0)` around the final monitor block, and a second pointer local `mon` (self + 0x118, the same address as `bank`) for the vt[4] call; plain form 97.52% UNPOSITIONED (99.61% without the wrapper only, 96.72% UNPOSITIONED without `mon` only). Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+// OPTS_Callback handlers handed to cSndPlayOpts: 8-byte pointer-to-member constants.
+extern sSndCallback D_004A3648[];
+
+extern sSndCallback D_004A3650_D6E0[] __asm__("D_004A3650");
+
+extern sSndCallback D_004A3658[];
+
+// g++ 2.95 vtable entry for a method taking (self, int).
+struct sSndVtVI_D6E0 { short delta; short index; void (*fn)(void*, int); };
+
+extern "C" void* func_0028B1D8();
+
+extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+
+extern "C" void func_0028D488(void* self);
+
+extern "C" void func_0029B3C0_D6E0(void* self, void* obj) __asm__("func_0029B3C0");
+
+extern "C" int func_002B49E0(void*);
+
+// cBE interface lookup: cBE_getInterface__Fv takes (be, kind) despite its mangled name.
+extern "C" void* cBE_getBE();
+
+extern "C" void* cBE_getInterface__Fv(void* be, int kind);
+
+extern "C" void func_002ADDE0_D6E0(void* bank, sSndCallback key) __asm__("func_002ADDE0");
+
+extern "C" int func_002B46E8(void* monitor);
+extern "C" void func_002B4708(void* monitor);
+extern "C" int func_002B4620(void* monitor);
+extern "C" int func_001547A0(void* iface, int mission);
+extern "C" int func_0028D960(void* self);
+extern "C" int func_0028DEF0_D6E0(void* self, int a1) __asm__("func_0028DEF0");
+
+// Mission start: resets the rider sounds, stops the front-end bank loops and picks the mission's music track.
+extern "C" void func_0029D6E0(char* self, int mission)
+{
+    char* bank = self + 0x118;
+    *(int*)(self + 0x5FD8) = 0;
+    func_00296E20(self, *(void**)((char*)func_0028B1D8() + 0x28));
+    func_00297438(self, *(void**)((char*)func_0028B1D8() + 0x28));
+    func_0029B3C0_D6E0(self, 0);
+    if (func_002B46E8(bank) != 0) {
+        if (func_0028D960(self) != 0) {
+            sSndVtVI_D6E0* vt = *(sSndVtVI_D6E0**)(self + 0x5558);
+            vt[3].fn(bank + vt[3].delta, 8);
+        }
+        func_002B4708(bank);
+    }
+    if (*(int*)(self + 0x608C) == 2) {
+        return;
+    }
+    if ((unsigned int)(func_002B49E0(self + 0x118) - 1) < 3) {
+        func_002ADDE0_D6E0(**(char***)(self + 0x118) + 0x1D8, D_004A3648[0]);
+        func_002ADDE0_D6E0(**(char***)(self + 0x118) + 0x1D8, D_004A3650_D6E0[0]);
+        func_002ADDE0_D6E0(**(char***)(self + 0x118) + 0x1D8, D_004A3658[0]);
+        func_0028DEF0_D6E0(self, 0x12);
+        func_0028D488(self);
+        func_0028CF98(self, 0, 0, -1, 0);
+        return;
+    }
+    int track = -1;
+    int kind = func_001547A0(cBE_getInterface__Fv(cBE_getBE(), 0xA), mission);
+    *(int*)(self + 0x5FD0) = kind;
+    switch (kind) {
+    case 1: track = 0x21; break;
+    case 2: track = 0x22; break;
+    case 3: track = 0x26; break;
+    case 0:
+    case 4: track = -1; break;
+    }
+    do {
+        if (func_002B4620(self + 0x118) != 0) {
+            sSndVtVI_D6E0* vt = *(sSndVtVI_D6E0**)(self + 0x5558);
+            char* mon = self + 0x118;
+            ((int (*)(void*, int))vt[4].fn)(mon + vt[4].delta, track);
+            *(int*)(self + 0x5FD4) = 1;
+        }
+        func_002B4708(self + 0x118);
+    } while (0);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_0029D8E0);

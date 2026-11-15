@@ -166,8 +166,68 @@ extern "C" int func_00251A80(void)
     return i;
 }
 #endif
+//100%
 INCLUDE_ASM("mem/memstd", func_00251AC0);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// FAKEMATCH: an empty ASSERT macro (`ASSERT_1AC0(best != 0)`, `do { } while (0)`) before the return, perhaps EA's compiled-out assert but unconfirmed; its loop notes give retail's extra no-op before `jr ra`; plain form 97.22%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern int D_004A2E78_1AC0 __asm__("D_004A2E78");
+// Release-build assert (compiled out); EA code asserts its pointers
+#define ASSERT_1AC0(cond) do { } while (0)
+extern "C" int func_00251AC0(int id)
+{
+    if (id == 0) {
+        id = D_004A2E78_1AC0;
+    }
+    sMemClass_251718* cls = (sMemClass_251718*)D_004D2438[id & 0x3F];
+    sMemNode_251718* n = cls->head.next;
+    sMemNode_251718* best = 0;
+    int v = 0;
+    for (;;) {
+        if (v < n->size - 0x10) {
+            if (n->tag == 0x4253) {
+                break;
+            }
+            best = n;
+            v = best->size - 0x10;
+        }
+        n = n->next;
+    }
+    ASSERT_1AC0(best != 0);
+    return best != 0 ? best->size : 0;
+}
+#endif
+//100%
 INCLUDE_ASM("mem/memstd", func_00251B50);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// From peak3project's fork (github.com/peak3project/ssx3).
+// FAKEMATCH: an empty ASSERT macro (`ASSERT_1B50(n != 0)`, `do { } while (0)`) in the loop body, perhaps EA's compiled-out assert but unconfirmed; its loop notes give retail's extra no-op before `jr ra`; plain form 95.83%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern void* D_004D2438[];
+
+extern int D_004A2E78_1B50 __asm__("D_004A2E78");
+
+// Release-build assert (compiled out); EA code asserts its pointers
+#define ASSERT_1B50(cond) do { } while (0)
+extern "C" int func_00251B50(int id)
+{
+    if (id == 0) {
+        id = D_004A2E78_1B50;
+    }
+    sMemClass_251718* cls = (sMemClass_251718*)D_004D2438[id & 0x3F];
+    int total = 0;
+    sMemNode_251718* n = cls->head.next;
+    while (n->tag != 0x4253) {
+        ASSERT_1B50(n != 0);
+        total += n->size - 0x10;
+        n = n->next;
+    }
+    return total;
+}
+#endif
 //100%
 INCLUDE_ASM("mem/memstd", func_00251BB0);
 #ifdef SKIP_ASM

@@ -20276,7 +20276,26 @@ void func_003D6360(void *arg0, int arg1, int arg2, int arg3) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6378);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// FAKEMATCH: the dead `q = a / 0x7F;` (q is never used), which keeps retail's divide-by-zero trap check (`li 0x7F; beqzl; break 7`) after the divide itself is deleted; plain form 38.71%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern int func_002AF428(int);
+
+void func_003D6378(char *self, int a, int b) {
+    int t;
+    int q;
+    *(int *)(self + 8) = D_0044F438;
+    self[0xD] = b;
+    t = func_002AF428(*(int *)(self + 0x54));
+    self[0xC] = (int)(float)t;
+    self[0xE] = a;
+    self[0x34] = (int)(float)a;
+    q = a / 0x7F;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D63F8);

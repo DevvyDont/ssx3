@@ -1784,9 +1784,263 @@ extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float t
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021FD38);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// FAKEMATCH: the inline `scaleP()` returning &D_004A5B38 (a return-value pseudo keeps the address in $20 across 3 calls), and the PrintAt_FD38 helper (by-value position + reference offset, so q.x loads before half.x); plain form 94.30% (94.35% / 99.95% without each alone). Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+// scaleP(): returns &D_004A5B38 (the static scale vec); the target keeps that address in $20 across 3 calls, a pointer local
+//   or a direct &D_004A5B38 does not; only an inline returning the address (a return-value pseudo) matches.
+// PrintAt_FD38(font, float x, float y, const t2Vector& off, f, n): the target loads q.x before half.x but adds half.x + q.x;
+//   by-value position args + a reference offset reproduce it.
+// Scale2(out, const float&, const float&, float s): the by-value 0.5 param fixes the block-6 FPR order.
+static inline void Scale2(t2Vector& out, const float& x, const float& y, float s) { out.x = x * s; out.y = y * s; }
+extern int D_004A4E9C;
+extern int D_004A4EA0;
+extern int D_004A4EA4;
+extern float D_004A5B30;
+extern float D_004A5B34;
+extern float D_004A5B38;
+extern float D_004A5B3C;
+extern float D_004A5B40;
+extern float D_004A5B44;
+extern sColour D_004C8828;
+extern sColour D_004C8848;
+extern sColour D_004C8868;
+extern char D_004A2138[];
+extern "C" int cBEMissionInterface_isMissionCompleted(void*, int);
+extern "C" int func_00154240(void*, int);
+extern "C" void func_001DCA40(void* font, float x, float y, const char* fmt, ...);
 
+static inline void PrintAt_FD38(void* font, float x, float y, const t2Vector& off, float f, int n)
+{
+    func_001DCA40(font, off.x + x, (off.y + y) - f, D_004A2138, n);
+}
+static inline float* scaleP() { return &D_004A5B38; }
+extern "C" void func_0021FD38(char* self, char* obj) {
+    t2Vector q;
+    t2Vector half;
+    sColour col;
+    sFloat4 a;
+    t2Vector size;
+    t2Vector p2;
+    if (D_004A4E9C == 0) {
+        D_004A4E9C = 1;
+        D_004A5B3C = D_004A5B38 = 1.0f;
+    }
+    if (D_004A4EA0 == 0) {
+        D_004A4EA0 = 1;
+        D_004A5B34 = D_004A5B30 = 6.0f;
+    }
+    if (D_004A4EA4 == 0) {
+        D_004A4EA4 = 1;
+        D_004A5B44 = D_004A5B40 = 34.0f;
+    }
+    Scale2(half, D_004A5B40, D_004A5B44, 0.5f);
+    q.x = D_004A5B30 + half.x;
+    q.y = D_004A5B34 + half.y;
+    int c = obj[0x9D6];
+    func_001E91F8(obj + 0x9B4, &a);
+    func_001E9220(obj + 0x9B4, &size, *(int*)(self + 0x4CC));
+    func_001F10F8(self, &half, &a, &size, scaleP(), obj[0x9D4], obj[0x9D5], 0);
+    func_001E91A8(obj + 0x9B4, &col);
+    int* w = (int*)(D_004A289C->e84 + 8);
+    *w = (*w & ~0x3E0) | ((c << 5) & 0x3E0);
+    func_001F1190(self, *(int*)(self + 0x4CC), &half, &size, scaleP(), &col);
+    void* be = cBE_getInterface_Fv(cBE_getBE(), 10);
+    if (cBEMissionInterface_isMissionCompleted(be, *(int*)(self + 0x18C)) == 0) {
+        col = D_004C8848;
+    } else {
+        col = D_004C8828;
+    }
+    p2.x = half.x + D_004A5B30;
+    p2.y = half.x + D_004A5B34;
+    w = (int*)(D_004A289C->e84 + 8);
+    *w = (*w & ~0x3E0) | (((++c) << 5) & 0x3E0);
+    func_001F1190(self, *(int*)(self + 0x4D0), &p2, &D_004A5B40, scaleP(), &col);
+    float f = (float)*(int*)(*(char**)(self + 0x42C) + 0x14) * *(float*)(*(char**)(self + 0x42C) + 0x34) * 0.38805678486824036f;
+    int n = func_00154240(be, *(int*)(self + 0x18C));
+    col = D_004C8868;
+    *(sColour*)(*(char**)(self + 0x42C) + 0x40) = col;
+    char* t = *(char**)(self + 0x42C);
+    *(float*)(t + 0x38) = *(float*)(t + 0x30) * 0.7761135697364807f;
+    *(float*)(t + 0x3C) = *(float*)(t + 0x34) * 0.7761135697364807f;
+    w = (int*)(D_004A289C->e84 + 8);
+    *w = (*w & ~0x3E0) | (((c += 2) << 5) & 0x3E0);
+    PrintAt_FD38(*(char**)(self + 0x42C), q.x, q.y, half, f, n + 1);
+    char* t2 = *(char**)(self + 0x42C);
+    *(float*)(t2 + 0x38) = *(float*)(t2 + 0x30);
+    *(float*)(t2 + 0x3C) = *(float*)(t2 + 0x34);
+}
+#endif
+
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002200C0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// FAKEMATCH: both unit labels copied into locals `kmh` / `mph` up front (keeps "MPH" in $30 across the getVelocity call); plain form (`units = D_004A2310` in the branch) 91.11%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+// The rider's cBeing interface (rider + 0x6C0), slots in the prototype's order (as in seg/seg_1FBE38).
+struct t4Vector;
+
+struct t4Matrix;
+
+struct tInstanceRecord;
+
+class cBeing {
+public:
+    virtual ~cBeing();
+    virtual const t4Vector* getVelocity() const;
+    virtual int isIntersecting(tInstanceRecord* rec) const;
+    virtual void applyBoost(const t4Vector& impulse);
+    virtual const t4Vector* getPosition() const;
+    virtual const t4Matrix* getTransform() const;
+    virtual int getAIIndex() const;
+    virtual bool isHuman() const;
+    virtual bool isComputer() const;
+    virtual void transport(const t4Matrix& m);
+    virtual void resetToPath();
+    virtual void initForMission(const t4Matrix& m);
+};
+
+extern "C" void func_001E91F8(void*, void*);
+
+void func_001E9290(void*, void*);
+
+extern "C" void* cBE_getBE();
+
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+
+void func_001E91A8(void*, void*);
+
+extern "C" int sprintf(char*, const char*, ...);
+
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sSettings_00C0 {
+    unsigned int pad0 : 19;
+    unsigned int metric : 1;
+    unsigned int pad1 : 12;
+    int rest[0xA1];
+};
+struct sVec4_00C0 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+struct sV2_00C0 {
+    float x, y;
+    sV2_00C0() {}
+    sV2_00C0(const float& ax, const float& ay) : x(ax), y(ay) {}
+};
+extern sSettings_00C0 D_00535610_00C0 __asm__("D_00535610");
+extern char D_004A2308[];
+extern char D_004A2310[];
+extern char D_004A2138[];
+extern "C" void func_00391FB0(void* self, const char* str, float* rect, int n, float sx, float sy);
+extern "C" void func_00391CB0(void*, float, float, char*);
+extern "C" void func_00392908(void*, float, float, char*);
+extern "C" unsigned int strlen(const char*);
+void func_001F10F8_00C0(void*, t2Vector*, void*, t2Vector*, const sV2_00C0&, int, int, int) __asm__("func_001F10F8");
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float vu0Length_00C0(const sVec4_00C0& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+static inline void ScaleV2_00C0(sV2_00C0& v, float s)
+{
+    v.x *= s;
+    v.y *= s;
+}
+
+struct sFont_00C0 {
+    char pad_0x0[0x14];
+    int lineHeight;                 // 0x14
+    char pad_0x18[0x18];
+    float scaleX;                   // 0x30
+    float scaleY;                   // 0x34
+    float drawScaleX;               // 0x38
+    float drawScaleY;               // 0x3C
+    sColour colour;                 // 0x40
+};
+
+static inline sFont_00C0* font_00C0(char* self)
+{
+    return *(sFont_00C0**)(self + 0x42C);
+}
+
+static inline void SetScale_00C0(sFont_00C0* f, const sV2_00C0& s)
+{
+    f->drawScaleX = f->scaleX * s.x;
+    f->drawScaleY = f->scaleY * s.y;
+}
+
+static inline void TextSize_00C0(sFont_00C0* f, const char* str, float* rect, t2Vector& size)
+{
+    func_00391FB0(f, str, rect, 0, f->drawScaleX, f->drawScaleY);
+    size.x = rect[2];
+    size.y = rect[3];
+}
+
+extern "C" void func_002200C0(char* self, char* obj, char* rider, int x)
+{
+    sSettings_00C0 settings;
+    t2Vector a;
+    sV2_00C0 sc;
+    sColour col;
+    float rect[4];
+    t2Vector p;
+    t2Vector size;
+    cBE_getInterface_Fv(cBE_getBE(), 4);
+    settings = D_00535610_00C0;
+    // Both unit labels are taken up front: the target computes "MPH" before the velocity call and keeps it in
+    // $30 across that call (a literal in the branch would be materialised inside it).
+    char* kmh = D_004A2308;
+    char* mph = D_004A2310;
+    char* units = kmh;
+    cBeing* being = (cBeing*)(rider + 0x6C0);
+    float speed = vu0Length_00C0(*(const sVec4_00C0*)being->getVelocity()) * 0.035999998450279236f;
+    if (!settings.metric) {
+        speed *= 0.6209999918937683f;
+        units = mph;
+    }
+    char* e = obj + 0x384;
+    func_001E91F8(e, &a);
+    func_001E9290(e, &sc);
+    func_001E91A8(e, &col);
+    font_00C0(self)->colour = col;
+    SetScale_00C0(font_00C0(self), sc);
+    TextSize_00C0(font_00C0(self), units, rect, size);
+    func_001F10F8_00C0(self, &p, &a, &size, sV2_00C0(1.0f, 1.0f), obj[0x3A4], obj[0x3A5], x);
+    func_00391CB0(font_00C0(self), p.x, p.y, units);
+    char buf[8];
+    sprintf(buf, D_004A2138, (int)(speed + 0.5f));
+    if (strlen(buf) > 2)
+        ScaleV2_00C0(sc, 1.1214120388031006f);
+    else
+        ScaleV2_00C0(sc, 1.3623675107955933f);
+    SetScale_00C0(font_00C0(self), sc);
+    p.x += size.x * 0.5f;
+    p.y -= (float)font_00C0(self)->lineHeight * font_00C0(self)->scaleY * sc.y * 0.5f + 14.003287315368652f;
+    func_00392908(font_00C0(self), p.x, p.y, buf);
+    SetScale_00C0(font_00C0(self), sV2_00C0(1.0f, 1.0f));
+}
+#endif
 
 INCLUDE_ASM("fe/all_in_one_fe", func_002204A0);
 

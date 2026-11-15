@@ -975,7 +975,70 @@ extern "C" void func_0032B460(void) {
 
 }
 #endif
+//100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032B468);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// FAKEMATCH: the inner run loop wrapped in a non-empty `do { ... } while (0)`, and the stand-in local `one = 1` for the `1 < minRun` test (li + slt instead of slti); plain form 94.74% (97.65% without the wrapper only, 95.24% without `one` only). Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern "C" void MEM_fill(void* dst, int c, int n);
+
+extern "C" int func_0032B468(unsigned char* start, unsigned char* in, int len, int minRun)
+{
+    unsigned char* out = start;
+    unsigned char* end = in + len;
+    int one = 1;
+    int min = 2;
+    if (one < minRun) {
+        min = minRun;
+    }
+    while (in < end) {
+        unsigned char* p = in;
+        int run = 0;
+        int lit = 0;
+        unsigned char* q;
+        while (run == 0 && lit < 0x7F && p < end) {
+            unsigned char c = *p;
+            run = 1;
+            q = p + 1;
+            if (c == p[1] && q < end) {
+                do {
+                    do {
+                        q++;
+                        run++;
+                    } while (c == *q && q < end && run < 0x7F);
+                } while (0);
+            }
+            if (q == end && 1 < run) {
+                run--;
+                q = end - 1;
+            }
+            if (run < min) {
+                lit += run;
+                run = 0;
+                p = q;
+            }
+        }
+        if (0x7F < lit) {
+            lit = 0x7F;
+        }
+        if (lit != 0) {
+            MEM_fill(out++, -lit, 1);
+            while (lit-- != 0) {
+                *out++ = *in++;
+            }
+        }
+        if (run != 0) {
+            run--;
+            MEM_fill(out++, run, 1);
+            *out++ = *in++;
+            in += run;
+        }
+    }
+    MEM_fill(out++, 0, 1);
+    return out - start;
+}
+#endif
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032B620);
