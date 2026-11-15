@@ -1112,8 +1112,8 @@ extern "C" void* func_00194738(void* self, void* mgr);
 extern "C" void* func_001F3700(void* self, void* mgr);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
-extern "C" void cBENewRaceInterface_setGameMode(void* iface, int mode);
-extern "C" void cBENewRaceInterface_setGameEvent(void* iface, int ev);
+extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
+extern "C" int cBENewRaceInterface_setGameEvent(void* iface, int ev);
 extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index);
 extern "C" void cUIStateStack_push(void* list, void* item);
 

@@ -246,7 +246,7 @@ struct sDbgFE17D008 {
     int modes[8]; // 0x8C38
 };
 extern "C" void func_00145108(void* iface, int idx);
-extern "C" void cBENewRaceInterface_setGameMode(void* iface, int mode);
+extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
 
 extern "C" void func_0017D008(void* self, int idx)
 {
@@ -973,7 +973,7 @@ INCLUDE_ASM("fe/debugfe", func_0017DE70);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void func_00145108(void* iface, int idx);
-extern "C" void cBENewRaceInterface_setGameMode(void* iface, int mode);
+extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
 extern "C" int cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" void cBENewPlayerInterface_setRiderCtrlID(void* iface, int rider, int ctrl);
 extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int id);

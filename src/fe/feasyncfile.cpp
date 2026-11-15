@@ -7399,7 +7399,7 @@ extern "C" void* func_001A8500_DDD0(void* self, void* engine, void* owner) __asm
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_setGameMode_DDD0(void* iface, int mode) __asm__("cBENewRaceInterface_setGameMode");
-extern "C" void cBENewRaceInterface_setGameEvent_DDD0(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
+extern "C" int cBENewRaceInterface_setGameEvent_DDD0(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
 extern int D_004A4E88;
 extern int D_004A11B8;
 extern int D_00535C08[];
@@ -8747,7 +8747,7 @@ extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" int cBENewRaceInterface_setGameMode_FE68(void* iface, int mode) __asm__("cBENewRaceInterface_setGameMode");
-extern "C" void cBENewRaceInterface_setGameEvent_FE68(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
+extern "C" int cBENewRaceInterface_setGameEvent_FE68(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" void func_001B0850(void* self, void* iface, void* screen);
 extern "C" void func_0025E6D0(void* self, const char* str);

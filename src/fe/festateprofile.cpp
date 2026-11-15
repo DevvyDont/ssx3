@@ -738,8 +738,8 @@ struct cAppMan;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void cBENewRaceInterface_setGameMode(void* iface, int mode);
-extern "C" void cBENewRaceInterface_setGameEvent(void* iface, int ev);
+extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
+extern "C" int cBENewRaceInterface_setGameEvent(void* iface, int ev);
 extern "C" int cBENewPlayerInterface_getLastHub(void* iface, int a1);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
