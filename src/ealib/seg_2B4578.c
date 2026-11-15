@@ -9015,7 +9015,113 @@ void func_003C15D8(char *dst, char *src) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C1638);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// FAKEMATCH: unused local `p` with a dead store `p = (int *)(buf + pos);` in the b49 & 2 block (the 0xC header it would point at is
+// never written here); plain form 99.23%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+struct H_1638 {
+    char pad0[0xCB0];
+    char *cb0;
+    char *cb4;
+    char *cb8;
+    char padCBC[0x1AB2 - 0xCBC];
+    unsigned short pos;
+    char *buf;
+    int pad1AB8;
+    char *chan[(0x1AF4 - 0x1ABC) / 4];
+    char *x1AF4;
+    char pad1AF8[0x1B00 - 0x1AF8];
+    char *x1B00;
+    int pad1B04;
+    int x1B08;
+    int x1B0C;
+};
+struct G_1638 {
+    char pad0[0x2A];
+    unsigned short rate;
+    char pad2C[0x42 - 0x2C];
+    unsigned char b42;
+    char pad43[0x47 - 0x43];
+    unsigned char b47;
+    unsigned char b48;
+    unsigned char b49;
+};
+extern struct H_1638 D_0050AD00_1638 __asm__("D_0050AD00");
+extern struct G_1638 D_0050A8E8_1638 __asm__("D_0050A8E8");
+extern char D_00512B80_1638[] __asm__("D_00512B80");
+extern void *memset_1638(void *, int, int) __asm__("func_00416210");
+extern void f_BC00_1638(char *) __asm__("func_003CBC00");
+
+void func_003C1638(void) {
+    int rate;
+    int len;
+    int *p;
+    unsigned short *t;
+    int n;
+    int i;
+
+    D_0050AD00_1638.buf = (char *)((int)D_00512B80_1638 | 0x20000000);
+    memset_1638(D_0050AD00_1638.buf, 0, 0x2C00);
+    len = rate = (D_0050A8E8_1638.rate << 9) / 48000;
+    D_0050AD00_1638.pos = 0;
+    *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 0;
+    D_0050AD00_1638.pos += 4;
+    D_0050AD00_1638.cb4 = D_0050AD00_1638.buf + D_0050AD00_1638.pos;
+    D_0050AD00_1638.pos += 0xC;
+    *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 3;
+    D_0050AD00_1638.pos += 4;
+    p = (int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
+    D_0050AD00_1638.pos += 4;
+    D_0050AD00_1638.cb0 = D_0050AD00_1638.buf + D_0050AD00_1638.pos;
+    *p = 0x2A0;
+    D_0050AD00_1638.pos += 0x2A0;
+    while (D_0050AD00_1638.pos & 0xF) {
+        D_0050AD00_1638.pos++;
+        (*p)++;
+    }
+    if (D_0050A8E8_1638.b42) {
+        *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 2;
+        D_0050AD00_1638.pos += 0x10;
+        f_BC00_1638(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
+        D_0050AD00_1638.pos += rate * 4;
+    }
+    *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 1;
+    D_0050AD00_1638.pos += 4;
+    t = (unsigned short *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
+    D_0050AD00_1638.pos += 0xC;
+    n = D_0050A8E8_1638.b47 + D_0050A8E8_1638.b48;
+    for (i = 0; i < n; i++) {
+        D_0050AD00_1638.chan[i] = D_0050AD00_1638.buf + (D_0050AD00_1638.pos + i * len * 2);
+    }
+    *t = len * ((D_0050A8E8_1638.b47 + D_0050A8E8_1638.b48) << 1);
+    if (D_0050A8E8_1638.b47 == 1) {
+        D_0050AD00_1638.chan[1] = D_0050AD00_1638.buf + (D_0050AD00_1638.pos + rate * 2);
+        *t += rate * 2;
+    }
+    D_0050AD00_1638.pos += *t;
+    if (D_0050A8E8_1638.b49 & 2) {
+        *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 4;
+        D_0050AD00_1638.pos += 4;
+        p = (int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
+        D_0050AD00_1638.pos += 0xC;
+        D_0050AD00_1638.x1AF4 = D_0050AD00_1638.buf + D_0050AD00_1638.pos;
+        D_0050AD00_1638.pos += 0x800;
+    }
+    *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 5;
+    D_0050AD00_1638.pos += 4;
+    D_0050AD00_1638.cb8 = D_0050AD00_1638.buf + D_0050AD00_1638.pos;
+    D_0050AD00_1638.pos += 0xC;
+    *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 6;
+    D_0050AD00_1638.pos += 0x10;
+    *(int *)(D_0050AD00_1638.cb4 + 4) = D_0050AD00_1638.pos;
+    D_0050AD00_1638.x1B00 = D_00512B80_1638;
+    D_0050AD00_1638.x1B0C = 0;
+    D_0050AD00_1638.x1B08 = D_0050AD00_1638.pos;
+}
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C1980);
