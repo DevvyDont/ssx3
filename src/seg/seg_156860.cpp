@@ -116,7 +116,8 @@ extern "C" int func_003F3CC0_5A20(int sel, int a, int b) __asm__("func_003F3CC0"
 extern "C" int func_003F3C50(void* params, int a);
 extern "C" void func_00255FE8(void* self, int reason);
 extern "C" void func_00256038(void* self, int* out);
-extern char D_00536810[];
+// D_00536790: the 'netw'/'list' reply buffer (func_00255F20), 10 entries of 0x100 bytes; +0x80 is an entry's name field
+extern char D_00536790[];
 
 struct sCommVE_5A20 {
     short delta;
@@ -151,7 +152,7 @@ extern "C" void func_00255A20(sComm_5A20* self)
         break;
     case 2:
         if (func_003F3CC0_5A20(0x6F6E6C6E, 0, 0) == 0) {
-            func_003F3C50(D_00536810 + (self->index << 8), 0);
+            func_003F3C50(D_00536790 + 0x80 + (self->index << 8), 0);
             self->state = 3;
         }
         break;

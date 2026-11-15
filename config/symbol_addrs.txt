@@ -178,6 +178,10 @@ cMoveNode_addModifierBlock__FP9cMoveNode = 0x00355468; //type:func
 cSpline_calcLength__FP7cSpline = 0x003454E8; //type:func
 
 
+// 'netw'/'list' IOP reply buffer: 10 entries of 0x100 bytes (func_003F3BC8 sends b << 8 with b = 10, from
+// func_00255F20); D_00537190 follows. Entry fields at +0x4, +0x42, +0x80 were split as their own labels.
+D_00536790 = 0x00536790; // size:0xA00
+
 // gp-relative globals discovered while reversing (need explicit symbols since
 // splat doesn't auto-label single-instruction $gp-relative accesses like it
 // does for lui/addiu absolute addressing).
