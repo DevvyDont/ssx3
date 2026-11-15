@@ -946,7 +946,118 @@ extern "C" void func_00343C08(sDebounceElem3C08* self, void* arg)
 
 INCLUDE_ASM("object/debouncenode", func_00343C60);
 
+//100%
 INCLUDE_ASM("object/debouncenode", func_00343F38);
+#ifdef SKIP_ASM
+// FAKEMATCH: a dead two-variable cycle `dA = dB + id; dB = dA;` (dB = 0 before the loop) on release()'s not-found path, so
+// `id` is still referenced after the found arm when cse2 picks the canonical register for `ents[j].ref.id == id` (flow
+// deletes the cycle); plain form 92.09% (the earlier `id == ents[j].ref.id` spelling scores 96.46%). Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+struct sTrackWorld51C0;
+extern "C" sTrackWorld51C0** func_002D1BD8();
+struct sDebounceState;
+extern "C" void func_003442E0(sDebounceState* self);
+extern "C" void* func_00344800(void* self);
+
+struct sModel3F38 {
+    char pad_0x0[0x8];
+    unsigned int flags;     // 0x8
+    char pad_0xc[0x74];
+    unsigned int* key;      // 0x80
+};
+
+static inline sModel3F38* refToPtr3F38(unsigned int p)
+{
+    return (sModel3F38*)(p << 2);
+}
+
+struct sModelSet3F38 {
+    char pad_0x0[0x1C];
+    unsigned int* refs;     // 0x1C
+
+    sModel3F38* lookup(unsigned int idx)
+    {
+        unsigned int p = refs[idx] >> 8;
+        if (p == 0) {
+            return 0;
+        }
+        return refToPtr3F38(p);
+    }
+};
+
+struct sWorld3F38 {
+    char pad_0x0[0x8];
+    sModelSet3F38** sets;   // 0x8
+};
+
+static inline sModel3F38* getModel3F38(unsigned int id)
+{
+    sModelSet3F38* set = (*(sWorld3F38**)func_002D1BD8())->sets[id & 0xFF];
+    if (set == 0) {
+        return 0;
+    }
+    return set->lookup(id >> 8);
+}
+
+struct sModelRef3F38 {
+    unsigned int id;
+
+    sModel3F38* get()
+    {
+        return getModel3F38(id);
+    }
+};
+
+struct sEnt3F38 {
+    sModelRef3F38 ref;
+    int f4;
+};
+
+struct sBlock3F38 {
+    int count;              // 0x0
+    int f4;                 // 0x4
+    unsigned int key;       // 0x8
+    sEnt3F38 ents[32];      // 0xC
+    char pad[0x1F4 - 0x10C];
+
+    void release(unsigned int id)
+    {
+        unsigned int dA;
+        unsigned int dB = 0;
+        for (int j = 0; j < 32; j++) {
+            if (ents[j].ref.id == id) {
+                sEnt3F38* e = &ents[j];
+                sModel3F38* m2 = e->ref.get();
+                m2->flags = (m2->flags & 0xFFFFFFFB) | 2;
+                ents[j].ref.id = 0xFFFFFFFF;
+                if (--count <= 0) {
+                    func_00344800(this);
+                    func_003442E0((sDebounceState*)this);
+                }
+                return;
+            }
+            dA = dB + id;
+            dB = dA;
+        }
+    }
+};
+
+struct sDebounceMgr3F38 {
+    sBlock3F38 blocks[5];
+};
+
+extern "C" void func_00343F38(sDebounceMgr3F38* self, unsigned int id)
+{
+    sModel3F38* m = getModel3F38(id);
+    unsigned int* key = m->key;
+    for (int i = 0; i < 5; i++) {
+        if (*key >> 8 == self->blocks[i].key) {
+            self->blocks[i].release(id);
+            return;
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/debouncenode", func_003440C8);
