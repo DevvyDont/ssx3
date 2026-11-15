@@ -842,7 +842,51 @@ void func_00424EA8(int cmd, int n, sTty *s) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00425040);
+#ifdef SKIP_ASM
+/* DECI2 tty write: copy up to 256 bytes ('\n' -> "\r\n") into the uncached send packet and send it. */
+struct Pkt_5040 { short f0; short f2; short f4; char f6; char f7; int f8; };
+extern char D_0052B900[];
+extern int f5040_send(int, char) __asm__("func_0042C910");
+extern void f5040_poll(int) __asm__("func_0042C940");
+int func_00425040_d(char *buf, int len) __asm__("func_00425040");
+int func_00425040_d(char *buf, int len) {
+    struct Pkt_5040 *pkt;
+    char *p;
+    int i = 0;
+    int n = 0;
+    if (D_0052B8D0.fC != 0)
+        return -1;
+    func_0042C078();
+    pkt = (struct Pkt_5040 *)((int)D_0052B900 | 0x20000000);
+    D_0052B8D0.fC = 1;
+    D_0052B8D0.wp = (char *)pkt;
+    p = (char *)pkt + 12;
+    while (len-- != 0) {
+        if (*buf == '\n') {
+            *p++ = '\r';
+            if (++i >= 256)
+                break;
+        }
+        *p++ = *buf++;
+        n++;
+        if (++i >= 256)
+            break;
+    }
+    D_0052B8D0.wlen = i + 12;
+    pkt->f0 = D_0052B8D0.wlen;
+    if (f5040_send(D_0052B8D0.fd, pkt->f7) < 0) {
+        D_0052B8D0.fC = 0;
+        func_0042C0C0();
+        return -1;
+    }
+    while (D_0052B8D0.fC != 0)
+        f5040_poll(D_0052B8D0.fd);
+    func_0042C0C0();
+    return n;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00425190);
@@ -1300,7 +1344,87 @@ int *func_00425D28(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00425D38);
+#ifdef SKIP_ASM
+/* sceSifInitCmd (libkernel sifcmd): one-time SIF command layer setup and handshake with the IOP. */
+typedef struct { void (*func)(int *, int *); void *data; } sCmdHandler_5D38;
+typedef struct {
+    void *pktbuf;               /* uncached receive buffer */
+    void *unused;
+    void *iopbuf;               /* IOP-side receive address */
+    sCmdHandler_5D38 *sys;
+    int nsys;
+    sCmdHandler_5D38 *usr;
+    int nusr;
+    int *sregs;
+} sCmdData_5D38;
+/* D_0052BCD8 is declared int[] in this unit; this is its real layout */
+extern sCmdData_5D38 cmd_5D38 __asm__("D_0052BCD8");
+extern int D_0045517C;          /* SIF command layer initialised */
+extern char D_0052BC00[];       /* receive packet buffer */
+extern char D_0052BC80[];
+extern sCmdHandler_5D38 D_0052BD00[32];
+extern int D_0052BCC0[5];       /* change-address / init packet */
+extern int D_0052BCD4;          /* DMAC 5 handler id */
+extern int func_00426230();
+extern int f5D38_adddh(int, int (*)(), int) __asm__("func_00423AB0");
+extern void func_00424180(void);
+extern int func_004241B0(int a0);
+extern unsigned int f5D38_getreg(unsigned int) __asm__("func_004241B0");
+extern int func_004241A0(int, int);
+extern int f5D38_send(int, void *, int, void *, void *, int) __asm__("func_004261B0");
+void func_00425D38(void) {
+    int i;
+    func_0042C078();
+    if (D_0045517C) {
+        func_0042C0C0();
+        return;
+    }
+    D_0045517C = 1;
+    cmd_5D38.iopbuf = 0;
+    cmd_5D38.pktbuf = (void *)((int)D_0052BC00 | 0x20000000);
+    cmd_5D38.unused = (void *)((int)D_0052BC80 | 0x20000000);
+    cmd_5D38.sys = D_0052BD00;
+    cmd_5D38.nsys = 32;
+    cmd_5D38.usr = 0;
+    cmd_5D38.nusr = 0;
+    cmd_5D38.sregs = D_0052BE00;
+    for (i = 0; i < 32; i++) {
+        D_0052BD00[i].func = 0;
+        D_0052BD00[i].data = 0;
+    }
+    for (i = 0; i < 32; i++)
+        D_0052BE00[i] = 0;
+    D_0052BD00[0].func = func_00425CE0;
+    D_0052BD00[0].data = &cmd_5D38;
+    D_0052BD00[1].func = func_00425CC0;
+    D_0052BD00[1].data = &cmd_5D38;
+    func_0042C0C0();
+    func_00424020(0);
+    if (*(volatile int *)0x1000E010 & 0x20)
+        *(volatile int *)0x1000E010 = 0x20;
+    if (!(*(volatile int *)0x1000C000 & 0x100))
+        func_00424180();
+    D_0052BCD4 = f5D38_adddh(5, func_00426230, 0);
+    func_004249B8(5);
+    cmd_5D38.iopbuf = (void *)f5D38_getreg(0x80000000);
+    if (cmd_5D38.iopbuf) {
+        D_0052BCC0[4] = (int)D_0052BC00;
+        f5D38_send(0x80000000, D_0052BCC0, 0x14, 0, 0, 0);
+        return;
+    } else {
+        while (!(f5D38_getreg(4) & 0x20000))
+            ;
+        cmd_5D38.iopbuf = (void *)f5D38_getreg(2);
+        func_004241A0(0x80000000, (int)cmd_5D38.iopbuf);
+        func_004241A0(0x80000001, (int)&cmd_5D38);
+        D_0052BCC0[4] = (int)D_0052BC00;
+        D_0052BCC0[3] = 0;
+        f5D38_send(0x80000002, D_0052BCC0, 0x14, 0, 0, 0);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00425FB8);
@@ -4437,7 +4561,24 @@ int func_0042BF30(void) {
 
 INCLUDE_ASM("seg/seg_325220", func_0042BF68);
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042C078);
+#ifdef SKIP_ASM
+/* DIntr (libkernel): disable interrupts, return whether they were enabled. */
+int func_0042C078_r(void) {
+    int eie, st;
+    MFC0_STATUS_4248(eie);
+    eie &= 0x10000;
+    if (eie) {
+        do {
+            DI_4248();
+            SYNCP_4248();
+            MFC0_STATUS_4248(st);
+        } while (st & 0x10000);
+    }
+    return eie != 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C0C0);

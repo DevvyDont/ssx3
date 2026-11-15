@@ -330,9 +330,121 @@ void *func_003FDAA0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FDAB0);
+#ifdef SKIP_ASM
+typedef unsigned int u_long128_DAB0 __attribute__((mode(TI))); /* PORT: Sony's u_long128 (eetypes.h) */
+extern u_long128_DAB0 D_00451560[2]; /* VIF1 init codes sent to the VIF1 FIFO */
+/* Reset VIF1 and the GIF and send the VIF1 init codes (libgraph sceGsResetPath). */
+void func_003FDAB0(void) {
+    *(volatile int *)0x10003C10 = 1;    /* VIF1_FBRST */
+    *(volatile int *)0x10003C20 = 2;    /* VIF1_ERR */
+    /* PORT: PS2-only barrier and VU0 FBRST ($vi28) write: sync.l, cfc2/ori/ctc2, sync.p. */
+    __asm__ volatile("sync.l\n\tcfc2 %0, $vi28\n\tori %0, %0, 0x200\n\tctc2 %0, $vi28\n\tsync.p" : : "r"(0));
+    *(volatile u_long128_DAB0 *)0x10005000 = D_00451560[0];    /* VIF1_FIFO */
+    *(volatile u_long128_DAB0 *)0x10005000 = D_00451560[1];
+    *(volatile int *)0x10003000 = 1;    /* GIF_CTRL */
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", sceGsSyncPath);
+#ifdef SKIP_ASM
+extern void func_00425C60();   /* printf */
+extern char D_00497648[];
+extern char D_00497678[];
+extern char D_00497688[];
+extern char D_00497698[];
+extern char D_004976A8[];
+extern char D_004976B8[];
+extern char D_004976C8[];
+extern char D_004976D8[];
+extern char D_004976E8[];
+extern char D_004976F8[];
+extern char D_00497710[];
+extern char D_00497728[];
+extern char D_00497758[];
+extern char D_00497788[];
+extern char D_004977B0[];
+#define SYNC_D1_CHCR ((volatile unsigned int *)0x10009000)
+#define SYNC_D1_MADR ((volatile unsigned int *)0x10009010)
+#define SYNC_D1_QWC  ((volatile unsigned int *)0x10009020)
+#define SYNC_D1_TADR ((volatile unsigned int *)0x10009030)
+#define SYNC_D2_CHCR ((volatile unsigned int *)0x1000A000)
+#define SYNC_D2_MADR ((volatile unsigned int *)0x1000A010)
+#define SYNC_D2_QWC  ((volatile unsigned int *)0x1000A020)
+#define SYNC_D2_TADR ((volatile unsigned int *)0x1000A030)
+#define SYNC_VIF1_STAT ((volatile unsigned int *)0x10003C00)
+#define SYNC_GIF_STAT ((volatile unsigned int *)0x10003020)
+/* PORT: PS2-only VU1 status read (VPU_STAT, $vi29) through VU0 macro mode. */
+static inline unsigned int sync_vpu_stat(void)
+{
+    unsigned int v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi29\n\t.set reorder" : "=r"(v));
+    return v;
+}
+/* Report a path that did not drain: the message, then the DMA ch.1/ch.2, VIF1 and GIF registers. */
+static inline int sync_timeout(char *msg)
+{
+    func_00425C60(msg);
+    func_00425C60(D_00497678, *SYNC_D1_CHCR);
+    func_00425C60(D_00497688, *SYNC_D1_TADR);
+    func_00425C60(D_00497698, *SYNC_D1_MADR);
+    func_00425C60(D_004976A8, *SYNC_D1_QWC);
+    func_00425C60(D_004976B8, *SYNC_D2_CHCR);
+    func_00425C60(D_004976C8, *SYNC_D2_TADR);
+    func_00425C60(D_004976D8, *SYNC_D2_MADR);
+    func_00425C60(D_004976E8, *SYNC_D2_QWC);
+    func_00425C60(D_004976F8, *SYNC_VIF1_STAT);
+    func_00425C60(D_00497710, *SYNC_GIF_STAT);
+    return -1;
+}
+/* Wait for (mode 0) or poll (mode 1) the DMA ch.1/ch.2, VIF1, VU1 and GIF paths (libgraph). */
+int sceGsSyncPath(int mode, unsigned short timeout) {
+    unsigned int cnt;
+    unsigned int stat;
+    int ret;
+    cnt = 0;
+    if (mode == 0) {
+        while (*SYNC_D1_CHCR & 0x100) {
+            if (cnt++ > 0x1000000)
+                return sync_timeout(D_00497648);
+        }
+        while (*SYNC_D2_CHCR & 0x100) {
+            if (cnt++ > 0x1000000)
+                return sync_timeout(D_00497728);
+        }
+        while (*SYNC_VIF1_STAT & 0x1F000003) {
+            if (cnt++ > 0x1000000)
+                return sync_timeout(D_00497758);
+        }
+        stat = sync_vpu_stat();
+        while (stat & 0x100) {
+            if (cnt++ > 0x1000000)
+                return sync_timeout(D_00497788);
+            stat = sync_vpu_stat();
+        }
+        while (*SYNC_GIF_STAT & 0xC00) {
+            if (cnt++ > 0x1000000)
+                return sync_timeout(D_004977B0);
+        }
+        return 0;
+    }
+    ret = 0;
+    if (*SYNC_D1_CHCR & 0x100)
+        ret |= 1;
+    if (*SYNC_D2_CHCR & 0x100)
+        ret |= 2;
+    if (*SYNC_VIF1_STAT & 0x1F000003)
+        ret |= 4;
+    stat = sync_vpu_stat();
+    if (stat & 0x100)
+        ret |= 8;
+    if (*SYNC_GIF_STAT & 0xC00)
+        ret |= 0x10;
+    return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FDE30);
@@ -848,7 +960,15 @@ int func_003FE7D8(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE818);
+#ifdef SKIP_ASM
+/* Start the VU0 micro program at address `addr` (low 16 bits) through $vi27 (CMSAR0). */
+/* PORT: PS2-only VU0 macro-mode ctc2 + vcallmsr. */
+void func_003FE818(int addr) {
+    __asm__ volatile("ctc2 %0, $vi27\n\tvcallmsr $vi27" : : "r"(addr & 0xFFFF));
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE828);
@@ -868,9 +988,181 @@ int func_003FE828(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE838);
+#ifdef SKIP_ASM
+typedef unsigned int u_long128_E838 __attribute__((mode(TI))); /* PORT: Sony's u_long128 (eetypes.h) */
+/* VU0 register snapshot (libdev sceDevVu0Cnd, 0x238 bytes). */
+typedef struct {
+    u_long128_E838 vf[32];
+    unsigned int status;
+    unsigned int mac;
+    unsigned int clipping;
+    unsigned int r;
+    unsigned int i;
+    unsigned int q;
+    unsigned short vi[16];
+} sVu0Cnd;
+extern int func_003FE678(void);
+/* Snapshot the VU0 registers into *cnd (libdev sceDevVu0GetCnd); fails while VU0 is running. */
+int func_003FE838(sVu0Cnd *cnd) {
+    unsigned int v;
+    if (func_003FE678() != 0)
+        return 0;
+    /* PORT: PS2-only VU0 register dump (sqc2 $vf0..$vf31). Retail's base register holds 0 here, not cnd. */
+    __asm__ volatile("sqc2 $vf0, 0x0(%0)\n\tsqc2 $vf1, 0x10(%0)\n\tsqc2 $vf2, 0x20(%0)\n\tsqc2 $vf3, 0x30(%0)\n\tsqc2 $vf4, 0x40(%0)\n\tsqc2 $vf5, 0x50(%0)\n\tsqc2 $vf6, 0x60(%0)\n\tsqc2 $vf7, 0x70(%0)\n\tsqc2 $vf8, 0x80(%0)\n\tsqc2 $vf9, 0x90(%0)\n\tsqc2 $vf10, 0xA0(%0)\n\tsqc2 $vf11, 0xB0(%0)\n\tsqc2 $vf12, 0xC0(%0)\n\tsqc2 $vf13, 0xD0(%0)\n\tsqc2 $vf14, 0xE0(%0)\n\tsqc2 $vf15, 0xF0(%0)\n\tsqc2 $vf16, 0x100(%0)\n\tsqc2 $vf17, 0x110(%0)\n\tsqc2 $vf18, 0x120(%0)\n\tsqc2 $vf19, 0x130(%0)\n\tsqc2 $vf20, 0x140(%0)\n\tsqc2 $vf21, 0x150(%0)\n\tsqc2 $vf22, 0x160(%0)\n\tsqc2 $vf23, 0x170(%0)\n\tsqc2 $vf24, 0x180(%0)\n\tsqc2 $vf25, 0x190(%0)\n\tsqc2 $vf26, 0x1A0(%0)\n\tsqc2 $vf27, 0x1B0(%0)\n\tsqc2 $vf28, 0x1C0(%0)\n\tsqc2 $vf29, 0x1D0(%0)\n\tsqc2 $vf30, 0x1E0(%0)\n\tsqc2 $vf31, 0x1F0(%0)" : : "r"(0));
+    /* PORT: PS2-only VU0 control-register reads (cfc2). The EE interlocks COP2 moves, so no hazard nop follows. */
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi16\n\t.set reorder" : "=r"(v));
+    cnd->status = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi17\n\t.set reorder" : "=r"(v));
+    cnd->mac = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi18\n\t.set reorder" : "=r"(v));
+    cnd->clipping = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi20\n\t.set reorder" : "=r"(v));
+    cnd->r = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi21\n\t.set reorder" : "=r"(v));
+    cnd->i = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi22\n\t.set reorder" : "=r"(v));
+    cnd->q = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi0\n\t.set reorder" : "=r"(v));
+    cnd->vi[0] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi1\n\t.set reorder" : "=r"(v));
+    cnd->vi[1] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi2\n\t.set reorder" : "=r"(v));
+    cnd->vi[2] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi3\n\t.set reorder" : "=r"(v));
+    cnd->vi[3] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi4\n\t.set reorder" : "=r"(v));
+    cnd->vi[4] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi5\n\t.set reorder" : "=r"(v));
+    cnd->vi[5] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi6\n\t.set reorder" : "=r"(v));
+    cnd->vi[6] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi7\n\t.set reorder" : "=r"(v));
+    cnd->vi[7] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi8\n\t.set reorder" : "=r"(v));
+    cnd->vi[8] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi9\n\t.set reorder" : "=r"(v));
+    cnd->vi[9] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi10\n\t.set reorder" : "=r"(v));
+    cnd->vi[10] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi11\n\t.set reorder" : "=r"(v));
+    cnd->vi[11] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi12\n\t.set reorder" : "=r"(v));
+    cnd->vi[12] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi13\n\t.set reorder" : "=r"(v));
+    cnd->vi[13] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi14\n\t.set reorder" : "=r"(v));
+    cnd->vi[14] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi15\n\t.set reorder" : "=r"(v));
+    cnd->vi[15] = v;
+    return 1;
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE998);
+#ifdef SKIP_ASM
+typedef unsigned int u_long128_E998 __attribute__((mode(TI))); /* PORT: Sony's u_long128 (eetypes.h) */
+/* VU0 register snapshot (libdev sceDevVu0Cnd, 0x238 bytes). */
+typedef struct {
+    u_long128_E998 vf[32];
+    unsigned int status;
+    unsigned int mac;
+    unsigned int clipping;
+    unsigned int r;
+    unsigned int i;
+    unsigned int q;
+    unsigned short vi[16];
+} sVu0Cnd_E998;
+extern int func_003FE678(void);
+/* Load the VU0 registers from *cnd (libdev sceDevVu0PutCnd); fails while VU0 is running. */
+int func_003FE998(sVu0Cnd_E998 *cnd) {
+    u_long128_E998 *vf = cnd->vf;
+    unsigned int v;
+    if (func_003FE678() != 0)
+        return 0;
+    /* PORT: PS2-only VU0 register load (lqc2 $vf0..$vf31). */
+    __asm__ volatile("lqc2 $vf0, 0x0(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf1, 0x10(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf2, 0x20(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf3, 0x30(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf4, 0x40(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf5, 0x50(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf6, 0x60(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf7, 0x70(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf8, 0x80(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf9, 0x90(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf10, 0xA0(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf11, 0xB0(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf12, 0xC0(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf13, 0xD0(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf14, 0xE0(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf15, 0xF0(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf16, 0x100(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf17, 0x110(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf18, 0x120(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf19, 0x130(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf20, 0x140(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf21, 0x150(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf22, 0x160(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf23, 0x170(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf24, 0x180(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf25, 0x190(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf26, 0x1A0(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf27, 0x1B0(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf28, 0x1C0(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf29, 0x1D0(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf30, 0x1E0(%0)" : : "r"(vf));
+    __asm__ volatile("lqc2 $vf31, 0x1F0(%0)" : : "r"(vf));
+    /* PORT: PS2-only VU0 control-register writes (ctc2). */
+    v = cnd->status;
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi16\n\t.set reorder" : : "r"(v));
+    v = cnd->mac;
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi17\n\t.set reorder" : : "r"(v));
+    v = cnd->clipping;
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi18\n\t.set reorder" : : "r"(v));
+    v = cnd->r;
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi20\n\t.set reorder" : : "r"(v));
+    v = cnd->i;
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi21\n\t.set reorder" : : "r"(v));
+    v = cnd->q;
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi22\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[0];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi0\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[1];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi1\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[2];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi2\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[3];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi3\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[4];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi4\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[5];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi5\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[6];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi6\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[7];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi7\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[8];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi8\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[9];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi9\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[10];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi10\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[11];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi11\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[12];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi12\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[13];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi13\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[14];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi14\n\t.set reorder" : : "r"(v));
+    v = cnd->vi[15];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi15\n\t.set reorder" : : "r"(v));
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FEB08);
@@ -910,7 +1202,29 @@ void func_003FEB38(unsigned short addr, Q3EB38 v) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FEB78);
+#ifdef SKIP_ASM
+// FAKEMATCH: `unsigned long vf` holds the saved 128-bit $vf1 between the two asm statements (only asm touches it; `Q3EB78_i`, the
+// 128-bit type, swaps $2/$3); plain form 98.82%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+typedef int Q3EB78_i __attribute__((mode(TI)));
+typedef union { Q3EB78_i q; unsigned long d[2]; int w[4]; short h[8]; } Q3EB78;
+/* Read the qword at VU0 data address `addr` through $vi1/$vf1, restoring both. */
+Q3EB78 func_003FEB78_impl(unsigned short addr) __asm__("func_003FEB78");
+Q3EB78 func_003FEB78_impl(unsigned short addr) {
+    unsigned int vi;
+    unsigned long vf;
+    Q3EB78_i r;
+    Q3EB78 v;
+    /* PORT: PS2-only VU0 macro-mode load (cfc2/qmfc2/ctc2/vlqi/qmfc2), then the $vi1/$vf1 restore (ctc2/qmtc2). */
+    __asm__(".set noreorder\n\tcfc2.ni %0, $vi1\n\tqmfc2.ni %1, $vf1\n\tctc2.ni %3, $vi1\n\tvlqi.xyzw $vf1, ($vi1++)\n\tqmfc2.ni %2, $vf1\n\t.set reorder"
+            : "=&r"(vi), "=&r"(vf), "=&r"(r) : "r"(addr));
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi1\n\tqmtc2.ni %1, $vf1\n\t.set reorder" : : "r"(vi), "r"(vf));
+    v.q = r;
+    return v;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FEBC0);
@@ -1325,7 +1639,54 @@ int func_003FF330(i128 *src, int n) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF390);
+#ifdef SKIP_ASM
+// FAKEMATCH: `dma[16]` fills the 0x100-byte local area of the retail frame; only dma[0] is used; plain form 99.83%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+/* SIF DMA transfer descriptor (the SDK's sceSifDmaData). */
+typedef struct {
+    unsigned int data;
+    unsigned int addr;
+    unsigned int size;
+    unsigned int mode;
+} sSifDmaData;
+extern int func_00424140(int id);                       /* sceSifDmaStat */
+extern int func_00424160(sSifDmaData *sdd, int len);    /* sceSifSetDma */
+extern void func_00424698(int *, int *);                /* SyncDCache */
+extern void func_00425C60();                            /* printf */
+extern char D_00497888[];
+/* Send the slot's 0x20-byte actuator block to the IOP (into the half of its buffer picked by the block's counter). */
+int func_003FF390(int port, int slot) {
+    sSifDmaData dma[16];
+    int *act;
+    int dst;
+    int id;
+    int n;
+    act = (int *)D_00526250[port][slot].actBuf;
+    if (D_00526250[port][slot].f0C != 0 && func_00424140(D_00526250[port][slot].f0C) >= 0) {
+        if (D_004515CC != 0)
+            func_00425C60(D_00497888);
+        return 0;
+    }
+    n = act[0] + 1;
+    dst = D_00526250[port][slot].f08 + ((n & 1) << 5);
+    act[0] = n;
+    func_00424698(act, (int *)((char *)act + 0x1F));
+    dma[0].addr = dst;
+    dma[0].data = (unsigned int)act;
+    dma[0].size = 0x20;
+    dma[0].mode = 0;
+    id = func_00424160(dma, 1);
+    if (id == 0) {
+        if (D_004515CC != 0)
+            func_00425C60(D_00497888);
+        return 0;
+    }
+    D_00526250[port][slot].f0C = id;
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF4A8);
@@ -3552,7 +3913,26 @@ void func_00403620(int *p) {
 
 INCLUDE_ASM("seg/seg_2FE810", func_00403748);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004039F0);
+#ifdef SKIP_ASM
+static __inline__ int unc(int a) { return (a & 0x0FFFFFFF) | 0x20000000; }
+static __inline__ int adr(int base, int n) { return unc(base + n * 0x180); }
+void func_004039F0(int *y0, int *u0, int *v0, int *y1, int *u1, int *v1, int *y2, int *u2, int *v2,
+                   int y, int u, int v, int w, int h) {
+    int n;
+    *y0 = unc(y);
+    *u0 = unc(u);
+    *v0 = unc(v);
+    *y1 = unc(y);
+    *u1 = unc(u);
+    *v1 = unc(v);
+    n = w * h / 512;
+    *y2 = adr(y, n);
+    *u2 = adr(u, n);
+    *v2 = adr(v, n);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403AD0);
@@ -3697,7 +4077,102 @@ int func_00403DD8(int *p) {
 
 INCLUDE_ASM("seg/seg_2FE810", func_00403E00);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00404050);
+#ifdef SKIP_ASM
+/* MSSG mpeg2decode recon.c form_predictions(), as compiled into Sony's libmpeg */
+// FAKEMATCH: `sel = 1` at entry and again before the backward frame-picture branch, with `sel` passed where the frame-picture
+// calls mean the constant 1 (retail keeps that 1 in sel's $19); plain form (literal 1s) 97.19%. Byte-identical and behaves like the
+// plain form; landed marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest
+// spelling matches.
+extern char D_00497E38[];
+extern char D_00497E58[];
+extern char D_00497E78[];
+extern void q4050_4758(int *, int, int, int, int, int, int, int, int, int, int, int) __asm__("func_00404758");
+extern void q4050_5E30(int *, int *, int *, int, int) __asm__("func_00405E30");
+extern void q4050_3470(int *, char *, int) __asm__("func_00403470");
+
+void func_00404050(int *p, int bx, int by, int mbtype, int mtype, int PMV[2][2][2], int mvfs[2][2], int *dmv)
+{
+    int DMV[2][2];
+    int ref[2][2];
+    int cur, sel, avg, fwd;
+
+    sel = 1;
+    avg = 0;
+    *(int *)((char *)p + p[0x810 / 4] * 0x140 + 0x6BC) = 0;
+    fwd = mbtype & 8;
+    if (fwd || p[0x150 / 4] == 2) {
+        if (p[0x174 / 4] == 3) {
+            if (mtype == 2 || !fwd) {
+                q4050_4758(p, p[0x1B8 / 4], 0, 0, 0, 16, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
+            } else if (mtype == 1) {
+                q4050_4758(p, p[0x1B8 / 4], mvfs[0][0], 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, 1, 0);
+                q4050_4758(p, p[0x1B8 / 4], mvfs[1][0], 1, 0, 8, bx, by, PMV[1][0][0], PMV[1][0][1] >> 1, 1, 0);
+            } else if (mtype == 3) {
+                q4050_5E30(p, &DMV[0][0], dmv, PMV[0][0][0], PMV[0][0][1] >> 1);
+                q4050_4758(p, p[0x1B8 / 4], 0, 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, sel, 0);
+                q4050_4758(p, p[0x1B8 / 4], 1, 0, 0, 8, bx, by, DMV[0][0], DMV[0][1], sel, sel);
+                q4050_4758(p, p[0x1B8 / 4], 1, 1, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, sel, 0);
+                q4050_4758(p, p[0x1B8 / 4], 0, 1, 0, 8, bx, by, DMV[1][0], DMV[1][1], sel, sel);
+            } else {
+                q4050_3470(p, D_00497E38, mtype);
+            }
+        } else {
+            cur = p[0x174 / 4] == 2;
+            ref[0][0] = p[0x1C8 / 4];
+            ref[0][1] = p[0x1D8 / 4];
+            ref[1][0] = p[0x1CC / 4];
+            ref[1][1] = p[0x1DC / 4];
+            if (p[0x150 / 4] == 2 && p[0x120 / 4] && cur != mvfs[0][0])
+                sel = 1;
+            else
+                sel = 0;
+            if (mtype == 1 || !fwd) {
+                q4050_4758(p, ref[sel][mvfs[0][0]], 0, 0, 0, 16, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
+            } else if (mtype == 2) {
+                q4050_4758(p, ref[sel][mvfs[0][0]], 0, 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
+                if (p[0x150 / 4] == 2 && p[0x120 / 4] && cur != mvfs[1][0])
+                    sel = 1;
+                else
+                    sel = 0;
+                q4050_4758(p, ref[sel][mvfs[1][0]], 0, 0, 8, 8, bx, by, PMV[1][0][0], PMV[1][0][1], 0, 0);
+            } else if (mtype == 3) {
+                if (p[0x120 / 4])
+                    sel = 1;
+                else
+                    sel = 0;
+                q4050_5E30(p, &DMV[0][0], dmv, PMV[0][0][0], PMV[0][0][1]);
+                q4050_4758(p, ref[0][cur], 0, 0, 0, 16, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
+                q4050_4758(p, ref[sel][!cur], 0, 0, 0, 16, bx, by, DMV[0][0], DMV[0][1], 0, 1);
+            } else {
+                q4050_3470(p, D_00497E58, mtype);
+            }
+        }
+        avg = 1;
+    }
+    if (mbtype & 4) {
+        if (p[0x174 / 4] == 3) {
+            sel = 1;
+            if (mtype == 2) {
+                q4050_4758(p, p[0x1BC / 4], 0, 0, 0, 16, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
+            } else {
+                q4050_4758(p, p[0x1BC / 4], mvfs[0][1], 0, 0, 8, bx, by, PMV[0][1][0], PMV[0][1][1] >> 1, sel, avg);
+                q4050_4758(p, p[0x1BC / 4], mvfs[1][1], 1, 0, 8, bx, by, PMV[1][1][0], PMV[1][1][1] >> 1, sel, avg);
+            }
+        } else {
+            if (mtype == 1) {
+                q4050_4758(p, mvfs[0][1] ? p[0x1DC / 4] : p[0x1CC / 4], 0, 0, 0, 16, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
+            } else if (mtype == 2) {
+                q4050_4758(p, mvfs[0][1] ? p[0x1DC / 4] : p[0x1CC / 4], 0, 0, 0, 8, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
+                q4050_4758(p, mvfs[1][1] ? p[0x1DC / 4] : p[0x1CC / 4], 0, 0, 8, 8, bx, by, PMV[1][1][0], PMV[1][1][1], 0, avg);
+            } else {
+                q4050_3470(p, D_00497E78, mtype);
+            }
+        }
+    }
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00404758);
 
@@ -4251,7 +4726,28 @@ int func_00406510(int *p, int *q, int *r, int *s, int *t) {
 
 INCLUDE_ASM("seg/seg_2FE810", func_004065D0);
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00406A78);
+#ifdef SKIP_ASM
+/* MSSG mpeg2decode motion.c decode_motion_vector() */
+void func_00406A78(int *pred, int r_size, int motion_code, int motion_residual, int full_pel_vector) {
+    int lim, vec;
+
+    lim = 16 << r_size;
+    vec = full_pel_vector ? (*pred >> 1) : (*pred);
+
+    if (motion_code > 0) {
+        vec += ((motion_code - 1) << r_size) + motion_residual + 1;
+        if (vec >= lim)
+            vec -= lim + lim;
+    } else if (motion_code < 0) {
+        vec -= ((-motion_code - 1) << r_size) + motion_residual + 1;
+        if (vec < -lim)
+            vec += lim + lim;
+    }
+    *pred = full_pel_vector ? (vec << 1) : vec;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00406B00);
@@ -5149,7 +5645,62 @@ void d86C0(struct S86C0 *a, struct B86C0 *b, int c) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004087D0);
+#ifdef SKIP_ASM
+// FAKEMATCH: field +0x88 declared as `union { unsigned long l; int i[2]; }` (alias set 0; `i` is never used) so the two 64-bit
+// stores don't force the reloads a plain field gets; plain form (`unsigned long f88`) 87.07%. Byte-identical and behaves like the
+// plain form; landed marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest
+// spelling matches.
+struct S87D0 { char pad0[0x80]; int f80; int pad84; union { unsigned long l; int i[2]; } f88; char pad90[0x20]; int fB0; int fB4; int fB8; int fBC; int fC0; int fC4; int fC8; int fCC; int fD0; char padD4[0xA0]; int f174; char pad178[0x6E0]; int f858; };
+struct B87D0 { char pad0[0x10]; int f10; char pad14[0x14]; int f28; char pad2C[0x18]; int f44; int f48; int f4C; int f50; int f54; int f58; int f5C; int f60; };
+extern void q87_8530(struct S87D0 *, struct B87D0 *, void *, void *, void *) __asm__("func_00408530");
+struct R87D0 { char pad[0x10]; int f10; int f14; int f18; int f1C; long f20; int f28; int f2C; int f30; int f34; long f38; };
+extern int q87_81D8(struct S87D0 *, struct B87D0 *) __asm__("func_004081D8");
+extern int q87_9088(struct S87D0 *, struct B87D0 *) __asm__("func_00409088");
+extern int q87_8278(struct S87D0 *, struct B87D0 *) __asm__("func_00408278");
+extern void q87_8508(struct S87D0 *) __asm__("func_00408508");
+void d87D0(struct S87D0 *a, struct B87D0 *b, struct B87D0 *c) __asm__("func_004087D0");
+void d87D0(struct S87D0 *a, struct B87D0 *b, struct B87D0 *c) {
+    struct B87D0 *t, *u;
+    struct R87D0 *r, *r2, *r3;
+    int m = 0;
+    if (a->f174 == 2) {
+        t = b;
+        u = c;
+        m = 0x40;
+    } else {
+        t = c;
+        u = b;
+    }
+    r = (struct R87D0 *)a->f858;
+    q87_8530(a, t, &r->f10, &r->f18, &r->f20);
+    r2 = (struct R87D0 *)a->f858;
+    a->f80 = r2->f10;
+    a->f88.l = 1;
+    q87_8530(a, u, &r2->f28, &r2->f30, &r2->f38);
+    r3 = (struct R87D0 *)a->f858;
+    a->f80 = r3->f28;
+    a->f88.l = 1;
+    r3->f20 |= m;
+    r3->f38 |= m;
+    a->fCC = t->f5C;
+    a->fD0 = t->f60;
+    a->fB4 = t->f44;
+    a->fB8 = u->f48;
+    a->fC0 = t->f50;
+    a->fC4 = u->f54;
+    if (q87_81D8(a, b) && b->f28 == 1 && c->f28 == 1) {
+        b->f10 *= 2;
+        if (a->fB0 != 0)
+            q87_9088(a, b);
+        else
+            q87_8278(a, b);
+        b->f10 >>= 1;
+        q87_8508(a);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408988);
@@ -5231,7 +5782,40 @@ void q8B80(int *p, unsigned addr, int n) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408CA8);
+#ifdef SKIP_ASM
+struct S408CA8 { volatile int cnt; int stop; int rest; int addr; int n; };
+int func_00408CA8(int a, struct S408CA8 *s) {
+    int last;
+    *(volatile int *)0x1000E010 = 8;
+    s->cnt++;
+    if (*(volatile int *)0x1000B020 != 0 || (*(volatile int *)0x1000B000 & 0x100)) {
+        s->stop = 1;
+        /* PORT: PS2-only memory barrier and COP0 interrupt enable (interrupt handler exit). */
+        __asm__ volatile("sync");
+        __asm__ volatile("ei");
+        return 0;
+    }
+    last = s->n - 1;
+    if (s->cnt < last) {
+        *(volatile int *)0x1000B010 = s->addr;
+        *(volatile int *)0x1000B020 = 0xFFC0;
+        *(volatile int *)0x1000B000 = 0x100;
+        *(volatile int *)0x10002000 = 0x700003FF;
+        s->addr = (s->addr + 0xFFC00) & 0x0FFFFFFF;
+    } else if (s->cnt == last) {
+        s->rest -= s->cnt * 0x3FF;
+        *(volatile int *)0x1000B010 = s->addr;
+        *(volatile int *)0x1000B020 = s->rest << 6;
+        *(volatile int *)0x1000B000 = 0x100;
+        *(volatile int *)0x10002000 = s->rest | 0x70000000;
+    }
+    __asm__ volatile("sync");
+    __asm__ volatile("ei");
+    return 0;
+}
+#endif
 
 INCLUDE_ASM("seg/seg_2FE810", func_00408DF0);
 
@@ -6619,7 +7203,15 @@ unsigned char func_0040BC70(unsigned char a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040BCA0);
+#ifdef SKIP_ASM
+unsigned char func_0040BCA0(unsigned char b) {
+    unsigned char t = b >> 4;
+    t = t * 6;
+    return b - t;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040BCC0);
