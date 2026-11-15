@@ -4745,7 +4745,38 @@ int func_0042BF30(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042BF68);
+#ifdef SKIP_ASM
+/* sceSifRebootIop (libkernel): reset the IOP with "rom0:UDNL <img>". */
+extern void func_00425C60_s(const char *fmt, ...) __asm__("func_00425C60");
+int func_0042BF68(const char *img) {
+    char buf[80];
+    const char *s = "rom0:UDNL ";
+    char *d;
+    const char *p = img;
+    __SIZE_TYPE__ t;
+    while (*p)
+        p++;
+    /* PORT: integer pointer arithmetic (__SIZE_TYPE__ is pointer-width). */
+    /* NOTE: the length test is retail's p - (img - 11) > 80 (strlen + 11 > 80); the separate statement keeps fold from
+       reassociating it into (p - img) + 11. Integer arithmetic, so no out-of-bounds pointer. */
+    t = (__SIZE_TYPE__)img - 11;
+    if ((__SIZE_TYPE__)p - t > 80) {
+        func_00425C60_s("too long parameter '%s'\n", img);
+        return 0;
+    }
+    func_00426408_z(0);
+    func_004265A8();
+    d = buf;
+    while (*s)
+        *d++ = *s++;
+    while (*img)
+        *d++ = *img++;
+    *d = 0;
+    return func_0042BDC8(buf, 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C078);
