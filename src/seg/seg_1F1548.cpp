@@ -783,7 +783,254 @@ extern "C" void func_002F1A00(void *arg0) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1A08);
+#ifdef SKIP_ASM
+// FAKEMATCH: one local `side` carries 75.0f into both bone-23/24 arms (assigned in each, so loop.c never treats it as a
+// movable and each arm loads the constant inline, as retail does); plain form (`ox + 75.0f` / `ox - 75.0f`) 95.54
+// UNPOSITIONED. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14 ruling (portable,
+// behaviour-preserving steering only); replace it when an honest spelling matches.
+struct sObj_22C8;
+extern "C" void func_002F22C8(sObj_22C8* self);
+extern "C" float func_002D1928(int n, float x);
+extern "C" void func_003710D0(void* fx, sVec4_1150* pos, sVec4_1150* vel, int withVel, float dt);
+
+// Emitter parameters (an emitter's +0x20C).
+struct sFxParams_1A08 {
+    char pad0[0xD8];
+    float velScale;         // 0xD8: rider velocity factor
+    float nrmScale;         // 0xDC: ground normal factor
+    float nrmSpeedScale;    // 0xE0: ground normal factor, times speed
+    float offX;             // 0xE4: offset from the bone
+    float offY;             // 0xE8
+    float offZ;             // 0xEC
+    float dirX;             // 0xF0: extra velocity in bone space
+    float dirY;             // 0xF4
+    float dirZ;             // 0xF8
+    float minSpeed;         // 0xFC: km/h (x 27.78 = units/s)
+    float maxSpeed;         // 0x100
+    float chance;           // 0x104
+    float pulse;            // 0x108
+    float pulseRate;        // 0x10C
+};
+
+struct sFxEmit_1A08 {
+    char pad0[0x200];
+    int bone;               // 0x200: index into the owner's bone handles
+    int off;                // 0x204
+    float phase;            // 0x208
+    sFxParams_1A08* params; // 0x20C
+};
+
+struct sFxVE_1A08 {
+    short delta;
+    short index;
+    sVec4_1150* (*fn)(void*);
+};
+
+// Same object as sObj_22C8 (func_002F22C8 fills ready/h).
+struct sFxMgr_1A08 {
+    int ready;              // 0x00
+    int h[26];              // 0x04: bone handles
+    sFxEmit_1A08* fx[10];   // 0x6C
+    char* model;            // 0x94 (cAnimModel*)
+    char* rider;            // 0x98 (cRider*)
+    int f9C;                // 0x9C
+    int fA0;                // 0xA0
+};
+
+// PORT: PS2-only VU0 inline asm (4-component vector length).
+static inline float len_1A08(const sVec4_1150& v)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vsqrt     Q, $vf4x\n"
+        "vwaitq\n"
+        "cfc2.ni   %1, $vi22\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(v));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline sVec4_1150 scale_1A08(const sVec4_1150& v, float s)
+{
+    sVec4_1150 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec4_1150 add_1A08(const sVec4_1150& a, const sVec4_1150& b)
+{
+    sVec4_1150 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void addEq_1A08(sVec4_1150& a, const sVec4_1150& b)
+{
+    __asm__(
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: PS2-only VU0 inline asm (matrix * vector).
+static inline sVec4_1150 mul_1A08(const sMat_1150& m, const sVec4_1150& v)
+{
+    sVec4_1150 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(&m), "m"(v)
+        : "memory");
+    return r;
+}
+
+static inline sVec4_1150 groundNormal_1A08(char* rider)
+{
+    return *(sVec4_1150*)(rider + 0x370);
+}
+
+static inline sVec4_1150 bonePos_1A08(char* model, int i)
+{
+    return *(sVec4_1150*)(*(char**)(model + 0x30) + (i << 6) + 0x30);
+}
+
+extern "C" void func_002F1A08(sFxMgr_1A08* self)
+{
+    if (self->ready == 0)
+        func_002F22C8((sObj_22C8*)self);
+    sVec4_1150 vel = D_004FF120;
+    self->fA0 = 0;
+    sVec4_1150 nrm;
+    nrm.x = 0.0f;
+    nrm.y = 0.0f;
+    nrm.z = 1.0f;
+    nrm.w = 1.0f;
+    if (self->rider != 0) {
+        char* sub = self->rider + 0x6C0;
+        sFxVE_1A08* vt = *(sFxVE_1A08**)sub;
+        vel = *vt[2].fn(sub + vt[2].delta);
+        nrm = groundNormal_1A08(self->rider);
+    }
+    float speed = len_1A08(vel);
+    for (int i = 0; i < 10; i++) {
+        int emit = 0;
+        if (self->fx[i] == 0)
+            continue;
+        sFxParams_1A08* d = self->fx[i]->params;
+        if (self->fx[i]->off == 0 && d->minSpeed * 27.77777862548828f <= speed && speed <= d->maxSpeed * 27.77777862548828f)
+            emit = 1;
+        if (d->chance < 0.99f && d->chance < randf_1150())
+            emit = 0;
+        if (d->pulse < 0.99f) {
+            self->fx[i]->phase += d->pulseRate * 0.01666666753590107f;
+            if (self->fx[i]->phase >= 4.0f)
+                self->fx[i]->phase -= 4.0f;
+            if (d->pulse < (func_002D1928(3, self->fx[i]->phase) + 1.0f) * 0.5f)
+                emit = 0;
+        }
+        sVec4_1150 pos = bonePos_1A08(self->model, self->h[self->fx[i]->bone]);
+        {
+            float ox = d->offX;
+            float oy = d->offY;
+            float oz = d->offZ;
+            sVec4_1150 off;
+            off.x = ox;
+            off.y = oy;
+            off.z = oz;
+            off.w = 1.0f;
+            int which = self->fx[i]->bone;
+            float side;
+            if (which == 25) {
+                self->fA0 = 1;
+                float rx = randRange_1150(-85.0f, 85.0f);
+                float rz = randRange_1150(-14.0f, 14.0f);
+                off.x = ox + rx;
+                off.z = oz + rz;
+            } else if (which == 23) {
+                side = 75.0f;
+                off.x = ox + side;
+            } else if (which == 24) {
+                side = 75.0f;
+                off.x = ox - side;
+            }
+            off.x *= *(float*)(self->model + 0x140);
+            off.y *= *(float*)(self->model + 0x144);
+            off.z *= *(float*)(self->model + 0x148);
+            if (off.x != 0.0f || off.y != 0.0f || off.z != 0.0f) {
+                sMat_1150 m;
+                CopyMat_1150(&m, &(*(sMat_1150**)(self->model + 0x30))[self->h[self->fx[i]->bone]]);
+                m.r[3] = D_004FF120;
+                off = mul_1A08(m, off);
+                addEq_1A08(pos, off);
+            }
+        }
+        if (emit) {
+            sVec4_1150 v = add_1A08(add_1A08(scale_1A08(vel, d->velScale), scale_1A08(nrm, d->nrmScale)),
+                                    scale_1A08(scale_1A08(nrm, d->nrmSpeedScale), speed));
+            if (d->dirX != 0.0f || d->dirY != 0.0f || d->dirZ != 0.0f) {
+                sMat_1150 m;
+                CopyMat_1150(&m, &(*(sMat_1150**)(self->model + 0x30))[self->h[self->fx[i]->bone]]);
+                m.r[3] = D_004FF120;
+                float dx = d->dirX;
+                float dy = d->dirY;
+                float dz = d->dirZ;
+                sVec4_1150 dir;
+                dir.x = dx;
+                dir.y = dy;
+                dir.z = dz;
+                dir.w = 1.0f;
+                dir = mul_1A08(m, dir);
+                addEq_1A08(v, dir);
+            }
+            func_003710D0(self->fx[i], &pos, &v, 1, 0.01666666753590107f);
+        } else {
+            func_003710D0(self->fx[i], &pos, 0, 0, 0.01666666753590107f);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2088);
