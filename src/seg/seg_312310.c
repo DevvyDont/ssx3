@@ -1,3 +1,17 @@
+/* GNU CC runtime support, reconstructed: libgcc2.c (64-bit integer and conversion routines) and fp-bit.c
+   (software double precision, US_SOFTWARE_GOFAST names: dpadd, dpmul, ...).
+   Originals: Copyright (C) 1989, 92-98, 1999 / 1994-1998 Free Software Foundation, Inc.
+   It is free software under the GNU General Public License, version 2 or (at your option) any later version, with
+   this special exception: "if you link this library with other files, some of which are compiled with GCC, to
+   produce an executable, this library does not by itself cause the resulting executable to be covered by the
+   GNU General Public License. This exception does not however invalidate any other reasons why the
+   executable file might be covered by the GNU General Public License."
+   fp-bit.c adds: "the Free Software Foundation gives you unlimited permission to link the compiled version of
+   this file with other programs, and to distribute those programs without any restriction coming from the use
+   of this file."
+   This file stays under those terms; the repository's CC0 dedication does not apply to it (README, License).
+   Bodies credited to peak3project come from their fork (github.com/peak3project/ssx3). */
+
 #include "common.h"
 
 //100%

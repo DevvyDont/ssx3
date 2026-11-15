@@ -114,3 +114,19 @@ Original code, build scripts, and tooling in this repository are released
 under [CC0](LICENSE) (public domain). This does not extend to the decompiled
 game code being reconstructed, or to any game assets, which remain the
 property of Electronic Arts and are never included in this repository.
+
+**Third-party library code.** The executable statically links runtime
+libraries whose source is public, and the files that reconstruct them keep
+the original notices and stay under the original licenses (CC0 does not
+apply to them):
+
+- GCC's runtime, `libgcc` and `libstdc++` (GPL v2 or later, with the GCC
+  runtime linking exception): `src/seg/seg_3113A0_eh.c`,
+  `src/seg/seg_312310.c`, `src/seg/seg_313F58.c`,
+  `src/seg/seg_313800_exception.cpp`, `src/seg/seg_315B68_tinfo.cpp`, and
+  individual functions marked with a GPL notice in other units.
+- newlib's C library and fdlibm's math (BSD-style and Sun notices, kept on
+  each function in `src/seg/seg_316FB8.c` and `src/seg/seg_2FE810.c`).
+- EA library functions that EA also published under GPL v3 in its Command &
+  Conquer Generals source release are marked with that notice where their C
+  follows the published source.

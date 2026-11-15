@@ -1,3 +1,13 @@
+/* GNU CC C++ runtime support, reconstructed: cp/tinfo.cc and cp/tinfo2.cc (type_info, dynamic_cast).
+   Original: Copyright (C) 1994, 1996, 1998 Free Software Foundation.
+   It is free software under the GNU General Public License, version 2 or (at your option) any later version, with
+   this special exception: "if you link this library with other files, some of which are compiled with GCC, to
+   produce an executable, this library does not by itself cause the resulting executable to be covered by the
+   GNU General Public License. This exception does not however invalidate any other reasons why the
+   executable file might be covered by the GNU General Public License."
+   This file stays under those terms; the repository's CC0 dedication does not apply to it (README, License).
+   Bodies credited to peak3project come from their fork (github.com/peak3project/ssx3). */
+
 #include "common.h"
 
 extern "C" {
