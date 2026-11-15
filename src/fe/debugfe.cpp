@@ -1,6 +1,228 @@
 #include "common.h"
 
+//100%
 INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_draw);
+#ifdef SKIP_ASM
+// FAKEMATCH: the first row reads self->cursor through an integer temp, `__SIZE_TYPE__ hi = (__SIZE_TYPE__)self + 0x8000;
+// ... *(int*)(hi + 0xc1c)` (same address, same single load; the unflagged non-pointer base makes sched1's alias check keep the
+// load after the 12 colour stores); plain form 97.65%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern void* D_004A28A8;
+extern char* D_004A289C;
+extern void* D_004A2EB8;
+extern int D_004A11B8;
+extern int D_00535C04[];
+extern char D_004A12C0[];
+extern char D_004A12C8[];
+extern char D_004A12D0[];
+extern char D_004A12D8[];
+extern char* D_004A12E0[2];
+extern char D_004A12E8[];
+extern char D_004A12F0[];
+extern char D_004A1318[];
+extern char D_0045CEC0[];
+extern char D_0045CED0[];
+extern char D_0045CEE0[];
+extern char D_0045CEF0[];
+extern char D_0045CF08[];
+extern char D_0045CF18[];
+extern char D_0045CF28[];
+extern char D_0045CF38[];
+extern char D_0045CF50[];
+extern char D_0045CF68[];
+extern char D_0045CF78[];
+extern char D_0045CF88[];
+extern char D_0045CF98[];
+// The local mode-name table's initializer (five string pointers).
+struct sModeNamesDbg { char* name[5]; };
+extern sModeNamesDbg D_0045CFB8;
+extern char D_0045CFD0[];
+extern char D_0045CFE0[];
+extern char D_0045CFF0[];
+extern char D_0045D008[];
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" char* cBENewRaceInterface_getLocation(void* iface);
+extern "C" char* func_00145340(void* iface);
+extern "C" char* func_00145378(void* iface);
+extern "C" char* func_00145398(void* iface);
+extern "C" int func_00145C38(void* iface, int i);
+extern "C" int func_00147618(void* iface, int i);
+extern "C" char* func_0014EE28(void* iface, int i);
+extern "C" void func_0017AE00(void* self);
+extern "C" void func_001DC990(void* self, float x, float y, const char* fmt, ...);
+extern "C" void func_001DC9D0(void* self, float x, float y, float sx, float sy, const char* str, int n);
+extern "C" void func_001DCA40(void* self, float x, float y, const char* fmt, ...);
+extern "C" void func_001DCA80(void* self, float x, float y, const char* fmt, ...);
+extern "C" void func_00256038(void* comm, int* info);
+extern "C" char* func_0028B180();
+extern "C" void func_00391CB0(void* self, float x, float y, const char* str);
+extern "C" void func_00392908(void* self, float x, float y, const char* str);
+extern "C" void func_00392A60(void* self, const char* str, float x, float y);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+
+// tARGB (On Tour layout: A, R, G, B floats).
+struct tARGB {
+    float A, R, G, B;
+    tARGB() {}
+    float& operator[](int i) { return (&A)[i]; }
+    tARGB(float ia, float ir, float ig, float ib) { (*this)[0] = ia; (*this)[1] = ir; (*this)[2] = ig; (*this)[3] = ib; }
+};
+
+struct t2Vector_Dbg { float x, y; };
+// cFont (On Tour layout).
+struct cFont_Dbg {
+    char pad0[0x14];
+    int MaxCharHeight;          // 0x14
+    char pad18[0x30 - 0x18];
+    float BaseScaleX, BaseScaleY;   // 0x30
+    float ScaleX, ScaleY;           // 0x38
+    tARGB Color;                // 0x40
+    void clearScale() { ScaleX = BaseScaleX; ScaleY = BaseScaleY; }
+    float getMaxCharHeight() const { return (float)MaxCharHeight * BaseScaleY; }
+    void setScale(float sx, float sy) { ScaleX = BaseScaleX * sx; ScaleY = BaseScaleY * sy; }
+    void setColor(const tARGB& clr) { Color = clr; }
+};
+
+struct sDbgVEntry {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sDbgPopup {
+    char pad0[0x8];
+    int active;                 // 0x8
+};
+
+struct sDebugMenuScreen {
+    char pad0[0x8C10];
+    sDbgPopup popup;            // 0x8C10
+    int cursor;                 // 0x8C1C
+    int pad8C20;
+    int optFlag;                // 0x8C24
+    int pad8C28[2];
+    int optVal;                 // 0x8C30
+    int optTrack;               // 0x8C34
+    int pad8C38[3];
+    int optMode;                // 0x8C44
+};
+
+extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
+{
+    sDbgPopup* popup = &self->popup;
+    if (popup->active >= 0) {
+        func_0017AE00(popup);
+        return;
+    }
+    cFont_Dbg* font = *(cFont_Dbg**)(*(char**)((char*)D_004A28A8 + 0x80) + 0x18);
+    void* newRace = cBE_getInterface_Fv(cBE_getBE(), 0);
+    void* character = cBE_getInterface_Fv(cBE_getBE(), 2);
+    void* intPlayer = cBE_getInterface_Fv(*(void**)((char*)D_004A28A8 + 0x78), 1);
+    const float left = 60.0f;
+    const float right = 580.0f;
+    const float lineheight = font->getMaxCharHeight();
+    font->setScale(1.0f, 1.0f);
+    tARGB selectColor(1.0f, 0.7843137979507446f, 0.0f, 0.0f);
+    tARGB normalColor(1.0f, 0.7843137979507446f, 0.7843137979507446f, 0.7843137979507446f);
+    tARGB disabledColor(1.0f, 0.3921568989753723f, 0.3921568989753723f, 0.3921568989753723f);
+    float y = 20.0f;
+    char buf[0x80];
+
+    __SIZE_TYPE__ hi = (__SIZE_TYPE__)self + 0x8000;
+    font->setColor(*(int*)(hi + 0xc1c) == 0 ? selectColor : normalColor);
+    func_00391CB0(font, 60.0f, y, D_0045CEC0);
+    func_00392A60(font, func_00145378(newRace), 580.0f, y);
+    y += lineheight;
+    font->setColor(self->cursor == 1 ? selectColor : normalColor);
+    func_00391CB0(font, 60.0f, y, D_0045CED0);
+    func_00392A60(font, func_00145398(newRace), 580.0f, y);
+    y += lineheight;
+    font->setColor(self->cursor == 2 ? selectColor : normalColor);
+    func_00391CB0(font, 60.0f, y, D_0045CEE0);
+    func_00392A60(font, func_00145340(newRace), 580.0f, y);
+    y += lineheight;
+    font->setColor(self->cursor == 3 ? selectColor : normalColor);
+    func_00391CB0(font, 60.0f, y, D_0045CEF0);
+    func_001DCA80(font, 580.0f, y, D_004A12C0, func_00145C38(intPlayer, 0));
+    y += lineheight;
+    if (D_004A11B8 != 0)
+        sprintf(buf, D_0045CF08, cBENewRaceInterface_getLocation(newRace) + 4, cBENewRaceInterface_getLocation(newRace) + 0x44, cBENewRaceInterface_getLocation(newRace) + 0x34);
+    else
+        sprintf(buf, D_004A12C8, cBENewRaceInterface_getLocation(newRace) + 0x34, cBENewRaceInterface_getLocation(newRace) + 0x34);
+    font->setColor(self->cursor == 4 ? selectColor : normalColor);
+    func_00391CB0(font, 60.0f, y, D_004A12D0);
+    func_00392A60(font, buf, 580.0f, y);
+    y += lineheight;
+    font->setColor(self->cursor == 5 ? selectColor : normalColor);
+    func_00391CB0(font, 60.0f, y, D_0045CF18);
+    func_00392A60(font, func_0014EE28(character, 0), 580.0f, y);
+    y += lineheight;
+    font->setColor(self->cursor == 6 ? selectColor : normalColor);
+    func_00391CB0(font, 60.0f, y, D_0045CF28);
+    func_001DCA80(font, 580.0f, y, D_004A12C0, func_00147618(intPlayer, 0));
+    y += lineheight;
+    font->setColor(self->cursor == 7 ? selectColor : normalColor);
+    func_00391CB0(font, 60.0f, y, D_004A12D8);
+    func_00392A60(font, D_004A12E0[self->optFlag], 580.0f, y);
+    y += lineheight;
+    font->setColor(self->cursor == 8 ? selectColor : normalColor);
+    func_00391CB0(font, 60.0f, y, D_0045CF38);
+    func_001DCA80(font, 580.0f, y, D_004A12C0, D_00535C04[0]);
+    y += lineheight;
+    font->setColor(self->cursor == 9 ? selectColor : normalColor);
+    func_00391CB0(font, 60.0f, y, D_0045CF50);
+    func_001DCA80(font, 580.0f, y, D_004A12C0, self->optVal);
+    y += lineheight;
+    font->setColor(self->cursor == 10 ? selectColor : normalColor);
+    func_00391CB0(font, 60.0f, y, D_004A12E8);
+    {
+        char* g = D_004A289C;
+        sDbgVEntry* vt = *(sDbgVEntry**)(g + 0x10D8);
+        func_001DCA80(font, 580.0f, y, D_004A12F0, vt[9].fn(g + vt[9].delta) ? D_0045CF68 : D_0045CF78);
+    }
+    y += lineheight;
+    font->setColor(self->cursor == 11 ? selectColor : normalColor);
+    func_00391CB0(font, 60.0f, y, D_0045CF88);
+    func_001DCA80(font, 580.0f, y, D_004A12F0, func_0028B180() + (self->optTrack * 0x14 + 0x60A4));
+    y += lineheight;
+    unsigned int ip = 0;
+    if (D_004A2EB8 != 0)
+        func_00256038(D_004A2EB8, (int*)&ip);
+    char ipbuf[0x20];
+    sprintf(ipbuf, D_0045CF98, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
+    sModeNamesDbg modes = D_0045CFB8;
+    if (D_004A2EB8 != 0)
+        font->setColor(self->cursor == 12 ? selectColor : normalColor);
+    else
+        font->setColor(self->cursor == 12 ? selectColor : disabledColor);
+    func_001DC990(font, 60.0f, y, D_0045CFD0, ipbuf);
+    func_001DCA80(font, 580.0f, y, D_004A12F0, modes.name[self->optMode]);
+    y += lineheight;
+    y += 5.0f;
+    font->setColor(self->cursor == 13 ? selectColor : disabledColor);
+    func_001DCA40(font, 320.0f, y, D_004A1318);
+    font->setColor(self->cursor == 14 ? selectColor : normalColor);
+    func_001DCA40(font, 320.0f, y + lineheight, D_0045CFE0);
+    if (*(int*)((char*)D_004A28A8 + 0x4) == 0) {
+        tARGB t;
+        t.A = 1.0f;
+        t.R = 0.9f;
+        t.G = 0.9f;
+        t.B = 0.0f;
+        font->setColor(t);
+        func_00392908(font, 320.0f, 420.0f, D_0045CFF0);
+    }
+    tARGB t2;
+    t2.A = 1.0f;
+    t2.R = 0.5f;
+    t2.G = 0.5f;
+    t2.B = 0.5f;
+    font->setColor(t2);
+    func_001DC9D0(font, 60.0f, 420.0f, 0.5f, 0.5f, D_0045D008, 7);
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017D008);
