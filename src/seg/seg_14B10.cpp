@@ -877,7 +877,210 @@ extern "C" int func_00114CC0_i(char* s)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_14B10", func_00114DB8);
+#ifdef SKIP_ASM
+extern "C" void cRider_updateOrientationImplicit(cRider* self);
+extern "C" void func_00115168(char* s);
+extern "C" void cAirPredictor_startLaunchIntoAir(cAirPredictor* ap, t4Vector* pos, t4Vector* vel, float t);
+extern void* D_004A28A8;
+extern float D_004A0EA8[];
+extern t4Vector D_004FF130_4DB8 __asm__("D_004FF130");
+
+// PORT: PS2-only VU0 inline asm (4-component dot product).
+static inline float Dot_4DB8(const t4Vector& a, const t4Vector& b)
+{
+    float r;
+    int t;
+    __asm__(
+        "lqc2      $vf3, %2\n"
+        "lqc2      $vf5, %3\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf5\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "qmfc2.ni  %1, $vf4\n"
+        "mtc1      %1, %0\n"
+        : "=f"(r), "=&r"(t)
+        : "m"(a), "m"(b));
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector times scalar).
+static inline t4Vector Scale_4DB8(const t4Vector& v, float s)
+{
+    t4Vector r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b).
+static inline t4Vector Sub_4DB8(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a - b, b an offsettable memory operand).
+static inline t4Vector SubO_4DB8(const t4Vector& a, const t4Vector& b)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vsub.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "o"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (normalize via rsqrt).
+static inline t4Vector Normalize_4DB8(const t4Vector& v)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "vaddw.x   $vf6, $vf0, $vf0w\n"
+        "vmul.xyzw $vf4, $vf3, $vf3\n"
+        "vadday.x  ACC, $vf4, $vf4y\n"
+        "vmaddaz.x ACC, $vf6, $vf4z\n"
+        "vmaddw.x  $vf4, $vf6, $vf4w\n"
+        "vrsqrt    Q, $vf0w, $vf4x\n"
+        "vwaitq\n"
+        "vmulq.xyzw $vf5, $vf3, Q\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
+static inline t4Vector Rot_4DB8(const t4Vector& q, const t4Vector& v)
+{
+    t4Vector r;
+    __asm__(
+        "lqc2      $vf4, %1\n"
+        "lqc2      $vf5, %2\n"
+        "vsub.w    $vf8, $vf8, $vf8\n"
+        "vopmula.xyz ACC, $vf4, $vf5\n"
+        "vopmsub.xyz $vf6, $vf5, $vf4\n"
+        "vopmula.xyz ACC, $vf4, $vf6\n"
+        "vopmsub.xyz $vf7, $vf6, $vf4\n"
+        "vmulaw.xyz ACC, $vf5, $vf0w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf6, $vf4w\n"
+        "vmaddaw.xyz ACC, $vf7, $vf0w\n"
+        "vmaddw.xyz $vf8, $vf7, $vf0w\n"
+        "sqc2      $vf8, %0\n"
+        : "=m"(r)
+        : "m"(q), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector add-assign).
+static inline void AddEq_4DB8(t4Vector& dst, const t4Vector& b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "=m"(dst)
+        : "m"(dst), "m"(b)
+        : "memory");
+}
+
+// A vector built in place from four floats (the original used a vector type with a ctor).
+struct sV4_4DB8 : t4Vector {
+    sV4_4DB8(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
+};
+
+// FAKEMATCH: variable reuse: one `char* s` holds rider->mAirPredictor and then its state word (s = (char*)*(int*)(s + 0xAC);
+// compared with (char*)1 / (char*)3), so the pointer and the state share one pseudo; plain form 98.94%. Byte-identical and
+// behaves like the plain form; landed marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only);
+// replace it when an honest spelling matches.
+extern "C" int func_00114DB8(cRider* rider)
+{
+    int ok = 0;
+    char* s = (char*)rider->mAirPredictor;
+    s = (char*)*(int*)(s + 0xAC);
+    if (s == (char*)1 || s == (char*)3) {
+        ok = 1;
+    }
+    if (!ok) {
+        return 0;
+    }
+    char* ap = (char*)rider->mAirPredictor;
+    int n = *(int*)(ap + 0x90);
+    char* tbl = *(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x44) + n * 0xB0;
+    t4Vector dir;
+    t4Vector vel;
+    t4Vector up = rider->unk_180;
+    if (n == 0x12 || *(int*)(tbl + 0x44) != 0) {
+        dir = up;
+        vel = rider->mVelocity;
+    } else {
+        dir = *(t4Vector*)(ap + 0x20);
+        vel = *(t4Vector*)(ap + 0x10);
+    }
+    if (Dot_4DB8(up, dir) < 0.0f) {
+        return 0;
+    }
+    t4Vector front = rider->unk_170;
+    float d = Dot_4DB8(front, rider->mVelocity);
+    if (d > 277.77777099609375f) {
+        return 0;
+    }
+    d = Dot_4DB8(front, dir);
+    if (d > 0.8999999761581421f) {
+        return 0;
+    }
+    t4Vector side = Normalize_4DB8(Sub_4DB8(front, Scale_4DB8(dir, d)));
+    vel = Normalize_4DB8(Sub_4DB8(vel, Scale_4DB8(dir, Dot_4DB8(vel, dir))));
+    if (Dot_4DB8(side, vel) > D_004A0EA8[0]) {
+        return 0;
+    }
+    char* m = (char*)rider->mAnimModel;
+    float* b = (float*)((rider->mBoneHips << 4) + *(int*)(m + 0x24));
+    {
+        const t4Vector& origin = D_004FF130_4DB8;
+        t4Vector off = SubO_4DB8(sV4_4DB8(b[0] * *(float*)(m + 0x140), b[1] * *(float*)(m + 0x144),
+                                         b[2] * *(float*)(m + 0x148), b[3] * *(float*)(m + 0x14C)),
+                                origin);
+        off.z = 0.0f;
+        AddEq_4DB8(rider->mPosition, Rot_4DB8(rider->mRotation, Scale_4DB8(off, 2.0f)));
+    }
+    cRider_updateOrientationImplicit(rider);
+    func_00115168((char*)rider);
+    cAirPredictor_startLaunchIntoAir(rider->mAirPredictor, &rider->mPosition, &rider->mVelocity, 3333.33349609375f);
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00115168);

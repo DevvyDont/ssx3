@@ -188,7 +188,100 @@ extern "C" void func_0022C3B8(void* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/game", func_0022C410);
+#ifdef SKIP_ASM
+// NOTE: D_004A2A10 is a 4-byte const fog table ({4, 4, 6, 8}) in small data. It must be const: its loads then don't
+// conflict with the stack stores of ids[], so the scheduler places the ids[0] store before them as retail does.
+extern const unsigned char D_004A2A10[4];
+
+struct sVEp_C410 { short delta; short index; void (*fn)(void*, void*, unsigned char*, int*, int); };
+struct sCamObj_C410 {
+    char pad0[4];
+    sVEp_C410* vt;      // 0x4
+};
+struct sRenderCam_C410 {
+    sCamObj_C410* cam;  // 0x0
+    char pad4[0xC];
+    float px, py, pz, pw;   // 0x10
+    float k;            // 0x20
+    float c;            // 0x24
+    float n;            // 0x28
+    float f;            // 0x2C
+};
+struct sPatchVtx_C410 {
+    float x, y, z;
+};
+struct sPatch_C410 {
+    char pad0[0x170];
+    sPatchVtx_C410 v[4];    // 0x170
+    short id0;              // 0x1A0
+    short id1;              // 0x1A2
+};
+
+static inline float distSq_C410(const sRenderCam_C410* ctx, const sPatch_C410* p, int i)
+{
+    float dx = ctx->px - p->v[i].x;
+    float dy = ctx->py - p->v[i].y;
+    float dz = ctx->pz - p->v[i].z;
+    return dx * dx + dy * dy + dz * dz;
+}
+
+// PORT: g++ `<?` (min) operator.
+static inline float clamp_C410(float v, float lo, float hi)
+{
+    return (v >= lo) ? (v <? hi) : lo;
+}
+
+// PORT: the unit declares func_0022C410(void*, int, int) for its callers; this definition takes the
+// patch as a typed pointer, so it binds to the same symbol through an asm label.
+extern "C" void func_0022C410_impl(void* vctx, sPatch_C410* patch, int flag) __asm__("func_0022C410");
+void func_0022C410_impl(void* vctx, sPatch_C410* patch, int flag)
+{
+    sRenderCam_C410* ctx = (sRenderCam_C410*)vctx;
+    float lo = ctx->n;
+    float dx, dy, dz;
+    dx = ctx->px - patch->v[0].x;
+    dy = ctx->py - patch->v[0].y;
+    dz = ctx->pz - patch->v[0].z;
+    float d0 = dx * dx + dy * dy + dz * dz;
+    dx = ctx->px - patch->v[1].x;
+    dy = ctx->py - patch->v[1].y;
+    dz = ctx->pz - patch->v[1].z;
+    float d1 = dx * dx + dy * dy + dz * dz;
+    dx = ctx->px - patch->v[2].x;
+    dy = ctx->py - patch->v[2].y;
+    dz = ctx->pz - patch->v[2].z;
+    float d2 = dx * dx + dy * dy + dz * dz;
+    dx = ctx->px - patch->v[3].x;
+    dy = ctx->py - patch->v[3].y;
+    dz = ctx->pz - patch->v[3].z;
+    float d3 = dx * dx + dy * dy + dz * dz;
+    float e01 = ctx->c + ctx->k * (d0 + d1);
+    float e23 = ctx->c + ctx->k * (d2 + d3);
+    float e02 = ctx->c + ctx->k * (d0 + d2);
+    float e13 = ctx->c + ctx->k * (d1 + d3);
+    float hi = ctx->f;
+    e01 = clamp_C410(e01, lo, hi);
+    e23 = clamp_C410(e23, lo, hi);
+    e02 = clamp_C410(e02, lo, hi);
+    e13 = clamp_C410(e13, lo, hi);
+    unsigned char fog[4];
+    int ids[2];
+    unsigned char b01 = D_004A2A10[(int)e01];
+    unsigned char b23 = D_004A2A10[(int)e23];
+    unsigned char b02 = D_004A2A10[(int)e02];
+    unsigned char b13 = D_004A2A10[(int)e13];
+    fog[0] = b01;
+    fog[1] = b23;
+    fog[2] = b02;
+    fog[3] = b13;
+    ids[0] = patch->id0;
+    ids[1] = patch->id1;
+    sCamObj_C410* o = ctx->cam;
+    o->vt[21].fn((char*)o + o->vt[21].delta, patch, fog, ids, flag);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/game", cGame_renderPatches);

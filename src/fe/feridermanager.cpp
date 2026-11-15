@@ -1362,7 +1362,132 @@ extern "C" void func_0019FF00(int* self, sItemListFF00* list, sItemFF00* prev, i
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feridermanager", func_001A0100);
+#ifdef SKIP_ASM
+extern "C" void* cBE_getBE();
+// PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+// PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
+void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
+extern "C" void* func_0014AD28(void* self, int a1, int a2);
+extern "C" int func_0014D448(void* self, int g, int key);
+extern "C" int func_0019CBE0(void* self, int a1, int a2);
+extern "C" void func_0019CC30(void* self, int bit, int a2, int val);
+extern "C" void func_0019DC20(void* self, int bank, int i);
+extern "C" int func_0019E238(void* mgr, int bank, int i);
+extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
+void* func_00314978(void* self);
+// PORT: func_00314A40 forwards its second argument (the archive data); bind the 2-arg form.
+void* func_00314A40_data(void* self, void* data) __asm__("func_00314A40__FPv");
+extern "C" void func_00314988(int* self, int flags);
+extern "C" void* cMdfArchive_getModelPart(void* self, const char* name);
+extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int a3);
+extern void* D_004A28A8;
+extern void* D_004A1968;
+
+struct sItem_A0100 {
+    short id;
+    unsigned short flags;
+};
+struct sItemList_A0100 {
+    char pad_0x0[0x28C];
+    int count;              // 0x28C
+    sItem_A0100 items[1];   // 0x290
+};
+struct sBoneEnt_A0100 {
+    char f0;
+    signed char lod;        // 0x1
+    char pad_0x2[0x16];
+    char* file;             // 0x18
+    char pad_0x1C[0x38 - 0x1C];
+};
+struct sBoneDb_A0100 {
+    int f0;
+    sBoneEnt_A0100* entries;    // 0x4
+};
+struct sMdfArchive_A0100 {
+    int a[4];
+};
+
+static inline sBoneEnt_A0100* getEntK_A0100(sBoneDb_A0100* db, int i)
+{
+    if (i < 0)
+        return 0;
+    return &db->entries[i];
+}
+
+static inline sBoneEnt_A0100* getEnt_A0100(sBoneDb_A0100* db, int id, int g)
+{
+    return getEntK_A0100(db, func_0014D448(db, g, id));
+}
+
+// FAKEMATCH: identical arms on an always-non-null pointer in the inner loop (`void* g; if (self) g = D_004A1968; else
+// g = D_004A1968;`, g passed to the first func_0019CBE0 call); the extra inner-loop insns keep the `li 56` (sizeof entry)
+// out of loop.c's hoisting, and cross-jumping merges the arms after reload; plain form 98.50%. Byte-identical and
+// behaves like the plain form; landed marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only);
+// replace it when an honest spelling matches.
+extern "C" int func_001A0100(int* self)
+{
+    if (*(int*)((char*)self + 0xCBC) != 0) {
+        return 1;
+    }
+    int ok = 1;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
+    sItemList_A0100* list = (sItemList_A0100*)func_0014AD28(iface, self[1], self[0]);
+    int n = list->count;
+    char* mgr = *(char**)((char*)D_004A28A8 + 0x7C) + 0x1A70;
+    for (int i = 0; i < n; i++) {
+        sItem_A0100* it = &list->items[i];
+        int r = func_0019CBE0(D_004A1968, self[1], it->id);
+        if (r >= 0) {
+            if (func_0019E238(mgr, self[0], r) == 0) {
+                ok = 0;
+            }
+        }
+    }
+    if (ok) {
+        for (int i = 0; i < n;) {
+            int next = i + 1;
+            sItem_A0100* it = &list->items[i];
+            int r = func_0019CBE0(D_004A1968, self[1], it->id);
+            if (r >= 0) {
+                sMdfArchive_A0100 arc;
+                func_00314978(&arc);
+                void* pkg = func_0019E2B0(mgr, self[0], r);
+                if (pkg) {
+                    func_00314A40_data(&arc, pkg);
+                }
+                for (int j = i; j < n; j++) {
+                    sItem_A0100* jt = &list->items[j];
+                    void* g;
+                    if (self) {
+                        g = D_004A1968;
+                    } else {
+                        g = D_004A1968;
+                    }
+                    if (func_0019CBE0(g, self[1], jt->id) == r) {
+                        if (pkg) {
+                            sBoneEnt_A0100* e = getEnt_A0100((sBoneDb_A0100*)func_0014BDB8_noarg(), jt->id, self[0]);
+                            if (e->file) {
+                                void* part = cMdfArchive_getModelPart(&arc, e->file);
+                                if (part) {
+                                    cAnimModel_addModelPartLOD(*(void**)((char*)self + 0x8), 0, part, e->lod);
+                                }
+                            }
+                        }
+                        func_0019DC20(mgr, self[0], r);
+                        func_0019CC30(D_004A1968, self[1], jt->id, -1);
+                    }
+                }
+                func_00314988((int*)&arc, 2);
+            }
+            i = next;
+        }
+    }
+    return ok;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A0358);

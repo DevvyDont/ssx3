@@ -593,7 +593,60 @@ extern "C" int cDirtysock_tag_TagFieldSetFourCC(char* record, int len, char* nam
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetString);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// FAKEMATCH: the escaped '%' is stored through a wider stand-in, `long long pct = '%';` before the loop and `*data++ = (char)pct;`
+// (same byte; the in-loop truncation is not a constant when loop.c runs, so combine_movables does not merge it into the SI
+// `*value == '%'` compare constant, and cse2 folds it back to 37 in the preheader); plain form 97.15%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
+extern int cDirtysock_tag_TagFieldDelete_s(char* record, char* name) __asm__("cDirtysock_tag_TagFieldDelete");
+extern unsigned char D_00495FC0[];
+extern unsigned char D_004960C0[];
+
+extern "C" int cDirtysock_tag_TagFieldSetString_impl(char* record, int len, char* name, const unsigned char* value) __asm__("cDirtysock_tag_TagFieldSetString");
+extern "C" int cDirtysock_tag_TagFieldSetString_impl(char* record, int len, char* name, const unsigned char* value)
+{
+    char temp[0xA00];
+    char* data;
+    const unsigned char* scan;
+
+    if (value == 0)
+    {
+        cDirtysock_tag_TagFieldDelete_s(record, name);
+        return 0;
+    }
+    data = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
+
+    for (scan = value; (*scan != 0) && (*scan != ' '); ++scan)
+        ;
+    if (*scan == ' ')
+        *data++ = '"';
+
+    long long pct = '%';
+    for (; *value != 0; ++value)
+    {
+        if ((*value < ' ') || (*value > '~') || (*value == '=') || (*value == '"') || (*value == ':') || (*value == '%'))
+        {
+            *data++ = (char)pct;
+            *data++ = D_00495FC0[*value];
+            *data++ = D_004960C0[*value];
+        }
+        else
+        {
+            *data++ = *value;
+        }
+    }
+
+    if (*scan == ' ')
+        *data++ = '"';
+    *data = 0;
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetBinary);

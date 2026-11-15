@@ -370,7 +370,33 @@ extern "C" void func_002705B0(void* self, int obj, int alt)
 }
 #endif
 
+//100%
 INCLUDE_ASM("replay/replaycache", func_00270628);
+#ifdef SKIP_ASM
+extern char* D_004A28A8;
+
+// FAKEMATCH: the clear is written as three identical arms on the sign of v (`if (v > 0) {*on = 0;} else if (v < 0)
+// {*on = 0;} else {*on = 0;}`), which keeps v a global pseudo with priority over self; plain form 97.92%.
+// Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern "C" void func_00270628(void* self)
+{
+    int* on = (int*)((char*)self + 0x3D4);
+    int v = *on;
+    if (v != 0) {
+        int x = *(int*)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0xC) + 0x7C);
+        if (x == 1) {
+            if (v > 0) {
+                *on = 0;
+            } else if (v < 0) {
+                *on = 0;
+            } else {
+                *on = 0;
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00270658);

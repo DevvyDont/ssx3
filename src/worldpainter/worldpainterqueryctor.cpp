@@ -148,7 +148,136 @@ extern "C" void func_002C06C0(sWPQuery_06C0* self, int flags)
 }
 #endif
 
+//100%
 INCLUDE_ASM("worldpainter/worldpainterqueryctor", func_002C0778);
+#ifdef SKIP_ASM
+extern void* D_004A28A8;
+extern int D_004A3860;
+
+// PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
+static inline float Sqrt_0778(float x)
+{
+    float r;
+    __asm__("sqrt.s %0,%1" : "=f"(r) : "f"(x));
+    return r;
+}
+
+struct sHit_0778 {
+    unsigned int key;
+    float* data;
+};
+
+// PORT: func_002C0A10 takes (self, list); this caller also passes the query point in $f12/$f13.
+extern "C" sHit_0778* func_002C0A10_q(void* self, void* list, float x, float z) __asm__("func_002C0A10");
+
+struct sOutVt_0778 {
+    short delta;
+    short index;
+    void* fn;
+};
+
+typedef void (*tEnd_0778)(void*);
+typedef int (*tTest_0778)(void*, float*);
+typedef void (*tSet_0778)(void*, float*, float);
+
+struct sOut_0778 {
+    float value;
+    sOutVt_0778* vt;
+};
+
+struct sLayer_0778 {
+    char pad_0x0[0x4];
+    int count;              // 0x4
+    void* cells[1];         // 0x8
+};
+
+struct sEntry_0778 {
+    short type;
+    short pad;
+    int f4;
+    sLayer_0778* layer;     // 0x8
+};
+
+struct sQuery_0778 {
+    sOut_0778* out;         // 0x0
+    int f4;
+    float x;                // 0x8
+    float z;                // 0xC
+    unsigned int id;        // 0x10
+};
+
+static inline int valid_0778(sEntry_0778* e)
+{
+    return e->type == 3 && e->layer != 0 && e->layer->count > 0;
+}
+
+static inline void end_0778(sOut_0778* o)
+{
+    ((tEnd_0778)o->vt[69].fn)((char*)o + o->vt[69].delta);
+}
+
+static inline void set_0778(sOut_0778* o, float* d, float v)
+{
+    ((tSet_0778)o->vt[66].fn)((char*)o + o->vt[66].delta, d, v);
+}
+
+extern "C" sOut_0778* func_002C0778(sQuery_0778* self, float x, float z, float h)
+{
+    int first = 1;
+    char* map = *(char**)(*(char**)(*(char**)((char*)D_004A28A8 + 0x84) + 0x10) + 0x8);
+    if (self->out->value != -99999.0f) {
+        first = 0;
+    }
+    if (!first) {
+        float dx = self->x - x;
+        float dz = self->z - z;
+        self->out->value += Sqrt_0778(dx * dx + dz * dz);
+    }
+    int idx = D_004A3860;
+    self->x = x;
+    self->z = z;
+    while (valid_0778(&(*(sEntry_0778**)(map + 4))[idx])) {
+        sEntry_0778* e = (sEntry_0778*)(*(char**)(map + 4) + idx * (int)sizeof(sEntry_0778));
+        void* cell = e->layer->cells[*(unsigned char*)&self->id];
+        if (cell == 0) {
+            if (first) {
+                end_0778(self->out);
+            }
+            break;
+        }
+        sHit_0778* hit = func_002C0A10_q(self, cell, self->x, self->z);
+        if (hit == 0) {
+            break;
+        }
+        if (hit->key != (self->id >> 8)) {
+            return self->out;
+        }
+        if (((tTest_0778)self->out->vt[68].fn)((char*)self->out + self->out->vt[68].delta, hit->data)) {
+            self->out->value = 0.0f;
+        }
+        if (first) {
+            set_0778(self->out, hit->data, -1.0f);
+            self->out->value = 0.0f;
+            return self->out;
+        }
+        if (h == -99999.0f) {
+            h = 0.0f;
+            float v = *hit->data;
+            if (h <= v && v <= self->out->value) {
+                set_0778(self->out, hit->data, 1.0f);
+                self->out->value = h;
+            } else {
+                set_0778(self->out, hit->data, -*hit->data);
+            }
+        } else {
+            set_0778(self->out, hit->data, h);
+        }
+        return self->out;
+    }
+    end_0778(self->out);
+    return self->out;
+}
+#endif
 
 //100%
 INCLUDE_ASM("worldpainter/worldpainterqueryctor", func_002C0A10);
