@@ -2452,7 +2452,224 @@ extern "C" void func_002E10B8(sWake10B8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1120);
+#ifdef SKIP_ASM
+extern "C" void func_003717C0(void* em, void* pos, void* d, void* vel, int alive, float dt);
+extern "C" int func_00311AE8(void* self, int i);
+extern "C" float func_002EE6F0(int i);
+
+struct sVec1120 {
+    float x, y, z, w;
+    sVec1120() {}
+    sVec1120(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
+} __attribute__((aligned(16)));
+
+struct sRow1120 {
+    float x, y, z, w;
+} __attribute__((aligned(16)));
+
+struct sMat1120 {
+    sRow1120 v[4];
+    // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
+    sMat1120(const sMat1120& o)
+    {
+        __asm__ __volatile__(
+            "lqc2      $vf1, 0x0(%1)\n"
+            "lqc2      $vf2, 0x10(%1)\n"
+            "lqc2      $vf3, 0x20(%1)\n"
+            "lqc2      $vf4, 0x30(%1)\n"
+            "sqc2      $vf1, 0x0(%0)\n"
+            "sqc2      $vf2, 0x10(%0)\n"
+            "sqc2      $vf3, 0x20(%0)\n"
+            "sqc2      $vf4, 0x30(%0)\n"
+            :
+            : "r"(this), "r"(&o)
+            : "memory");
+    }
+} __attribute__((aligned(16)));
+
+extern sRow1120 D_004FF130_1120 __asm__("D_004FF130");
+
+struct sWakeFx1120 {
+    char* obj;                  // 0x00
+    char pad4[0x10];            // 0x04
+    float rate;                 // 0x14
+    int blink;                  // 0x18
+    float glow;                 // 0x1C
+    float timer;                // 0x20
+    float period;               // 0x24
+    char* p28;                  // 0x28
+    char* p2C;                  // 0x2C
+    char pad30[0x8C];           // 0x30
+    float fBC;                  // 0xBC
+};
+
+struct sWakeVtI1120 {
+    short delta;
+    short index;
+    int (*fn)(void*);
+};
+
+struct sWakeVtV1120 {
+    short delta;
+    short index;
+    sVec1120* (*fn)(void*);
+};
+
+// PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
+static inline sVec1120 wakeMulMat1120(const sMat1120* m, const sVec1120& v)
+{
+    sVec1120 r;
+    __asm__(
+        "lqc2      $vf8, %2\n"
+        "lqc2      $vf4, 0x0(%1)\n"
+        "lqc2      $vf5, 0x10(%1)\n"
+        "lqc2      $vf6, 0x20(%1)\n"
+        "lqc2      $vf7, 0x30(%1)\n"
+        "vmulax.xyzw ACC, $vf4, $vf8x\n"
+        "vmadday.xyzw ACC, $vf5, $vf8y\n"
+        "vmaddaz.xyzw ACC, $vf6, $vf8z\n"
+        "vmaddw.xyzw $vf12, $vf7, $vf8w\n"
+        "sqc2      $vf12, %0\n"
+        : "=m"(r)
+        : "r"(m), "m"(v)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (vector * scalar).
+static inline sVec1120 wakeScale1120(const sVec1120& v, float s)
+{
+    sVec1120 r;
+    int t;
+    __asm__(
+        "mfc1      %1, %3\n"
+        "lqc2      $vf4, %2\n"
+        "qmtc2.ni  %1, $vf3\n"
+        "vmulx.xyzw $vf5, $vf4, $vf3x\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r), "=&r"(t)
+        : "m"(v), "f"(s)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a + b).
+static inline sVec1120 wakeAdd1120(const sVec1120& a, const sVec1120& b)
+{
+    sVec1120 r;
+    __asm__(
+        "lqc2      $vf3, %1\n"
+        "lqc2      $vf4, %2\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        : "=m"(r)
+        : "m"(a), "m"(b)
+        : "memory");
+    return r;
+}
+
+// PORT: PS2-only VU0 inline asm (a += b).
+static inline void wakeAddEq1120(sVec1120& a, const sVec1120& b)
+{
+    __asm__(
+        ".set push\n"
+        ".set noreorder\n"
+        "lqc2      $vf3, %0\n"
+        "lqc2      $vf4, %1\n"
+        "vadd.xyzw $vf5, $vf3, $vf4\n"
+        "sqc2      $vf5, %0\n"
+        ".set pop\n"
+        : "+m"(a)
+        : "m"(b)
+        : "memory");
+}
+
+// PORT: g++ minimum operator (<?).
+static inline float wakeClamp1120(float v, float lo, float hi)
+{
+    float r;
+    if (v >= lo) {
+        r = v <? hi;
+    } else {
+        r = lo;
+    }
+    return r;
+}
+
+extern "C" void func_002E1120(sWakeFx1120* self)
+{
+    void* em = self->p28 + 0x840;
+    char* obj = self->obj;
+    int k = *(int*)(obj + 0x8A8);
+    sMat1120* mats = *(sMat1120**)(*(char**)(obj + 0x780) + 0x30);
+    sMat1120 mat = mats[k];
+    float back = -3.0f;
+    float up = 4.0f;
+    float one = 1.0f;
+    sVec1120 pos = wakeMulMat1120(&mat, sVec1120(back, 0.0f, up, one));
+    if (1111.111083984375f < self->fBC) {
+        self->rate = 0.0f;
+        func_003717C0(em, &pos, 0, 0, 0, 0.01666666753590107f);
+        return;
+    } else {
+        float target = 0.0f;
+        if (func_00311AE8(*(void**)(self->obj + 0x784), 2) == 30) {
+            target = 1.0f;
+        }
+        if (self->glow <= target) {
+            self->glow = target;
+        } else {
+            self->glow -= 0.0016666668234393f;
+        }
+        self->timer += 0.01666666753590107f;
+        if (self->period <= self->timer) {
+            self->timer = 0.0f;
+            self->blink ^= 1;
+            if (self->blink != 0) {
+                self->period = 0.4000000059604645f;
+            } else {
+                self->period = (1.0f - self->glow) * 0.6000000238418579f + 0.4000000059604645f;
+            }
+        }
+        char* sub = self->obj + 0x6C0;
+        sWakeVtI1120* vi = *(sWakeVtI1120**)sub;
+        float r = func_002EE6F0(vi[7].fn(sub + vi[7].delta));
+        float zero = 0.0f;
+        float one2 = 1.0f;
+        float c = wakeClamp1120((self->glow + 0.5f) * (one2 - (r + 5.0f) * 0.03999999910593033f), zero, 2.0f);
+        sVec1120 col(one2, one2, one2, c);
+        sVec1120* pcol = &col;
+        if (self->blink == 0 || !(0.019999999552965164f < c)) {
+            goto off;
+        }
+        {
+            float dt = 0.01666666753590107f;
+            self->rate += ((wakeRandE398()) * 6.0f + 18.0f) * dt;
+            if (1.0f < self->rate) {
+                self->rate -= 1.0f;
+                mat.v[3] = D_004FF130_1120;
+                char* sub2 = self->obj + 0x6C0;
+                sWakeVtV1120* vv = *(sWakeVtV1120**)sub2;
+                sVec1120* v = vv[2].fn(sub2 + vv[2].delta);
+                sVec1120 vel = wakeAdd1120(
+                    wakeAdd1120(wakeScale1120(*v, *(float*)(self->p2C + 0x478)),
+                                wakeScale1120(*(sVec1120*)(self->obj + 0x370), *(float*)(self->p2C + 0x47C))),
+                    wakeScale1120(wakeScale1120(*(sVec1120*)(self->obj + 0x370), *(float*)(self->p2C + 0x480)), self->fBC));
+                wakeAddEq1120(vel, wakeMulMat1120(&mat, sVec1120(zero, zero, 150.0f, one2)));
+                func_003717C0(em, &pos, &vel, pcol, 1, dt);
+                return;
+            }
+        }
+    }
+    func_003717C0(em, &pos, 0, 0, 0, 0.01666666753590107f);
+    return;
+off:
+    self->rate = 0.0f;
+    func_003717C0(em, &pos, 0, 0, 0, 0.01666666753590107f);
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E1598);

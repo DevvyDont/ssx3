@@ -774,7 +774,114 @@ extern "C" void func_0036AE20(void* vself, int idx, int a, int b, int n, char** 
 
 INCLUDE_ASM("render/graphicsman", func_0036B158);
 
+//100%
 INCLUDE_ASM("render/graphicsman", func_0036B5E8);
+#ifdef SKIP_ASM
+// PORT: ulong is 64-bit here (GIF/DMA packet words).
+struct sGmVE_B5E8 {
+    short delta;
+    short index;
+    unsigned int (*fn)(void*);
+};
+
+// Saved scissor rectangle per view (self+0x59B0, copied from the current one at self+0x5900).
+struct sGmRect_B5E8 {
+    unsigned short x, y, w, h;
+};
+
+// Per-view fill colour (self+0x6C64, 0x20 bytes each): r, g, b at +0x14..+0x1C, 0..1.
+struct sGmFill_B5E8 {
+    char pad0[0x14];
+    float r, g, b;          // 0x14
+};
+
+struct sGmMan_B5E8 {
+    char pad0[0x10D8];
+    sGmVE_B5E8* vt;             // 0x10D8
+    char pad10DC[0x5900 - 0x10DC];
+    sGmRect_B5E8 scissor;       // 0x5900: current
+    char pad5908[0x59B0 - 0x5908];
+    sGmRect_B5E8 saved[1];      // 0x59B0: per view
+    char pad59B8[0x5A80 - 0x59B8];
+    int zbp;                    // 0x5A80
+    int fbp;                    // 0x5A84
+    char pad5A88[0x6C64 - 0x5A88];
+    sGmFill_B5E8 fill[1];       // 0x6C64: per view
+};
+
+static inline unsigned int gmVCall_B5E8(sGmMan_B5E8* self, int slot)
+{
+    sGmVE_B5E8* vt = self->vt;
+    return vt[slot].fn((char*)self + vt[slot].delta);
+}
+
+// Clears view idx's saved scissor rectangle with its fill colour: sets FRAME/ZBUF/XYOFFSET and
+// TEST/ALPHA states, draws the rectangle as 32-pixel-wide sprite strips, then restores
+// FRAME/XYOFFSET/SCISSOR for the full screen.
+extern "C" void func_0036B5E8(sGmMan_B5E8* self, int idx, char** pp)
+{
+    sGmFill_B5E8* fill = &self->fill[idx];
+    int x = self->saved[idx].x;
+    int y = self->saved[idx].y;
+    int w = self->saved[idx].w;
+    int h = self->saved[idx].h;
+    int offX = (((0x1000 - gmVCall_B5E8(self, 10)) >> 1) + x) << 4;
+    int offY = (((0x1000 - gmVCall_B5E8(self, 11)) >> 1) + y) << 4;
+    int cols = w / 32;
+    int fbp = self->fbp;
+    int zbp = self->zbp;
+    ulong* p = (ulong*)*pp;
+    p += 2;
+    p[0] = (cols * 2 + 7) | ((ulong)0x8000 << 45);
+    p[1] = 0xE;
+    unsigned int fbw = gmVCall_B5E8(self, 10) >> 6;
+    p[2] = (ulong)(unsigned int)fbp | ((ulong)fbw << 16);
+    p[3] = 0x4C;
+    p[4] = (ulong)(unsigned int)(zbp | 0x1000000) | ((ulong)0x8000 << 17);
+    p[5] = 0x4E;
+    p[6] = 0x70000;
+    p[7] = 0x47;
+    p[8] = offX | ((ulong)offY << 32);
+    p[9] = 0x18;
+    p[10] = 0x11;
+    p[11] = 0x42;
+    p[12] = 0x46;
+    p[13] = 0;
+    p[14] = (ulong)(int)(fill->r * 256.0f) | ((ulong)(int)(fill->g * 256.0f) << 8)
+          | ((ulong)(int)(fill->b * 256.0f) << 16) | 0x3F80000080000000;
+    p[15] = 1;
+    p += 16;
+    int sx = 0;                 // strip's pixel offset from the left edge
+    for (int i = 0; i < cols; i++) {
+        int x0 = offX + sx * 16;
+        p[0] = x0 | ((ulong)offY << 16) | ((ulong)0x7FFF << 32);
+        p[1] = 5;
+        p[2] = (x0 + 0x200) | ((ulong)(offY + h * 16) << 16) | ((ulong)0x7FFF << 32);
+        p[3] = 5;
+        p += 4;
+        sx += 32;
+    }
+    *(ulong*)*pp = ((p - (ulong*)*pp) / 2 - 1) | 0x10000000;
+    ((ulong*)*pp)[1] = 0;
+    p[0] = 0x10000004;
+    p[1] = 0;
+    p[2] = ((ulong)0x10000000 << 32) | 0x8003;
+    p[3] = 0xE;
+    unsigned int fbp2 = self->fbp;
+    unsigned int fbw2 = gmVCall_B5E8(self, 10) >> 6;
+    p[4] = (ulong)fbp2 | ((ulong)fbw2 << 16);
+    p[5] = 0x4C;
+    int offX2 = ((0x1000 - gmVCall_B5E8(self, 10)) >> 1) << 4;
+    int offY2 = ((0x1000 - gmVCall_B5E8(self, 11)) >> 1) << 4;
+    p[6] = offX2 | ((ulong)offY2 << 32);
+    p[7] = 0x18;
+    p[8] = (ulong)self->scissor.x | ((ulong)(self->scissor.x + (self->scissor.w - 1)) << 16)
+         | ((ulong)self->scissor.y << 32) | ((ulong)(self->scissor.y + (self->scissor.h - 1)) << 48);
+    p[9] = 0x40;
+    p += 10;
+    *pp = (char*)p;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036B9D8);

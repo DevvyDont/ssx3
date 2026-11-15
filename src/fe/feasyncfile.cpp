@@ -12274,7 +12274,136 @@ extern "C" void func_001B4C40(void* self, void* a1, unsigned int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/feasyncfile", func_001B4CD8);
+#ifdef SKIP_ASM
+int GetHashValue32(char* str);
+struct cUIText;
+extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
+void UIAsciiToUnicode(unsigned short* dst, const char* src);
+extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data);
+extern "C" int sprintf(char* buf, const char* fmt, ...);
+extern "C" void func_001B47C0(void* self, int a1);
+extern "C" void func_001B4FA0(void* self, int err);
+extern "C" void func_001B5068(void* self, int a1);
+extern "C" int func_00255F20(void* self, int a1);
+extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" void* func_00399920(void* box);
+extern "C" void func_0039A4B0(void* box, unsigned short* str, int id);
+extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
+extern "C" int func_004165A8(const char* a, const char* b);
+extern int D_004A1B80;
+extern int D_004A1B90[2];
+extern void* D_004A2EB8;
+extern int D_004A2EBC;
+extern char* D_004A1B7C;
+extern char D_00463F88[];
+extern char D_004A1B98[];
+// the 'netw'/'list' reply buffer filled by func_00255F20 (10 entries of 0x100 bytes, count in D_004A2EBC)
+struct sNetEntry_4CD8 { int f0; char name4[0x3E]; char name42[0xBE]; };
+extern sNetEntry_4CD8 D_00536790[10];
+
+struct sVec3_001B4CD8 {
+    float x, y, z;
+};
+
+struct sVec4_001B4CD8 {
+    float x, y, z, w;
+};
+
+class cFEVObj_001B4CD8 {
+public:
+    char pad[0x8];
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20(void* out);
+};
+
+extern "C" void func_001B4CD8(void* self)
+{
+    char* s = (char*)self;
+    char buf[64];
+    unsigned short name[64];
+    unsigned short line[64];
+    sVec4_001B4CD8 size;
+    sVec3_001B4CD8 scale;
+    sVec4_001B4CD8 pos;
+    func_00255F20(D_004A2EB8, D_004A1B90[D_004A1B80]);
+    *(int*)(s + 0x6D4) = D_004A2EBC;
+    if (*(int*)(s + 0x6D4) > 4) {
+        *(int*)(s + 0x6D4) = 4;
+    }
+    if (*(int*)(s + 0x6D4) <= 0) {
+        if (D_004A1B80 == 0) {
+            D_004A1B80 = 1;
+            func_001B47C0(self, 2);
+            *(int*)(s + 0x708) = 1;
+            *(int*)(s + 0x70C) = *(int*)(s + 0x6D4);
+            return;
+        }
+        if (*(int*)(s + 0x6D4) != 0) {
+            if (*(int*)(s + 0x70C) == 0) {
+                D_004A1B80 = 0;
+                *(int*)(s + 0x708) = 5;
+                *(int*)(s + 0x6E0) = 15;
+                return;
+            }
+            func_001B4FA0(self, *(int*)(s + 0x6D4));
+            *(int*)(s + 0x708) = 0;
+            return;
+        }
+    } else {
+        ((cFEVObj_001B4CD8*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_00463F88)))->v20(&pos);
+        scale = *(sVec3_001B4CD8*)(*(char**)(s + 0x6E8) + 0x50);
+        if (*(int*)(s + 0x6D4) > 4) {
+            *(int*)(s + 0x6D4) = 4;
+        }
+        for (int i = 0; i < *(int*)(s + 0x6D4); i++) {
+            char* nm = D_00536790[i].name42;
+            float w;
+            int len;
+            if (*(int*)(s + 0x6D4) >= 2) {
+                len = sprintf(buf, D_004A1B98, i + 1);
+                w = pos.x - func_00391FB0(func_00399920(*(void**)(s + 0x6E8)), buf, &size, 1, scale.x, scale.y);
+            } else {
+                w = pos.x;
+                len = 0;
+                buf[0] = 0;
+            }
+            char* rec = D_00536790[i].name4;
+            func_003EFA48(name, 0x40, nm);
+            UIAsciiToUnicode(line, buf);
+            func_00392680(func_00399920(*(void**)(s + 0x6E8)), scale.x, w, name, line + len, 0x40 - len);
+            func_0039A4B0(*(void**)(s + 0x6E8), line, i + 0x14);
+            if (func_004165A8(D_004A1B7C, rec) == 0) {
+                cUIListBox_addEntryByAsciiString(*(void**)(s + 0x6E4), rec, i + 0x1E);
+            } else {
+                cUIListBox_addEntryByAsciiString(*(void**)(s + 0x6E4), rec, i + 0x1E);
+            }
+        }
+        func_001B5068(self, *(int*)(s + 0x6D4));
+    }
+    *(int*)(s + 0x708) = 5;
+    *(int*)(s + 0x6E0) = 15;
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B4FA0);

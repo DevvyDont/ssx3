@@ -256,7 +256,113 @@ void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType)
 }
 #endif
 
+//100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_playFrameByThread);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// Command handlers: every one is called with (self, list, cmd, thread); the unit's definitions declare only the
+// parameters each reads, so they're bound here by asm label with the full argument list.
+extern void func_0039CBC8_4(void *, void *, void *, void *) __asm__("func_0039CBC8");
+extern void func_0039CBE0_4(void *, void *, void *, void *) __asm__("func_0039CBE0");
+extern void func_0039CC38_4(void *, void *, void *, void *) __asm__("func_0039CC38");
+extern void func_0039CCA8_4(void *, void *, void *, void *) __asm__("func_0039CCA8");
+extern void func_0039CD30_4(void *, void *, void *, void *) __asm__("func_0039CD30");
+extern void func_0039CD90_4(void *, void *, void *, void *) __asm__("func_0039CD90__FPv");
+extern void func_0039CD98_4(void *, void *, void *, void *) __asm__("func_0039CD98__FPv");
+extern void func_0039CDA0_4(void *, void *, void *, void *) __asm__("func_0039CDA0");
+extern void func_0039CE20_4(void *, void *, void *, void *) __asm__("func_0039CE20");
+extern void cUIScreen_parseScreenFocusLose_4(void *, void *, void *, void *) __asm__("cUIScreen_parseScreenFocusLose");
+extern void func_0039CE90_4(void *, void *, void *, void *) __asm__("func_0039CE90__FPv");
+extern void func_0039CE98_4(void *, void *, void *, void *) __asm__("func_0039CE98");
+
+// One frame command: opcode and byte size (commands are packed back to back).
+struct sCmd_C978 {
+    unsigned char op;         // 0x0
+    char pad1;
+    unsigned short size;      // 0x2
+};
+
+// The frame's command list (from func_0039C728).
+struct sCmdList_C978 {
+    char pad0[0xA];
+    unsigned short count;     // 0xA
+    sCmd_C978 first;          // 0xC
+};
+
+// cUIScreen::playFrameByThread: advances the thread one frame toward its stop frame, then runs the commands of
+// the frame it was on.
+extern "C" void cUIScreen_playFrameByThread(void *self, void *thread)
+{
+    cUIThread_C870 *s = (cUIThread_C870 *)thread;
+    sCmdList_C978 *list;
+    sCmd_C978 *cmd;
+    unsigned int i;
+    unsigned short CurrentFrame = s->getCurrentFrameNumber();
+    s->setLastFrameNumber(s->getCurrentFrameNumber());
+    if (s->mStopFrameNumber != 0xFFFF) {
+        if (s->getFrameIncrement() > 0) {
+            if (s->mLastFrameNumber < s->mStopFrameNumber) {
+                s->mCurrentFrameNumber = s->getCurrentFrameNumber() + s->getFrameIncrement();
+            }
+        } else if (s->getFrameIncrement() < 0) {
+            if (s->mLastFrameNumber > s->mStopFrameNumber) {
+                s->mCurrentFrameNumber = s->getCurrentFrameNumber() + s->getFrameIncrement();
+            }
+        }
+    } else {
+        s->mCurrentFrameNumber = s->getCurrentFrameNumber() + s->getFrameIncrement();
+    }
+    list = (sCmdList_C978 *)func_0039C728(self, CurrentFrame);
+    cmd = &list->first;
+    if (list != 0) {
+        i = 0;
+        if (list->count != 0) {
+            do {
+                switch (cmd->op) {
+                case 0x10:
+                    func_0039CBC8_4(self, list, cmd, s);
+                    break;
+                case 0x11:
+                    func_0039CBE0_4(self, list, cmd, s);
+                    break;
+                case 0x12:
+                    func_0039CC38_4(self, list, cmd, s);
+                    break;
+                case 0x20:
+                    func_0039CCA8_4(self, list, cmd, s);
+                    break;
+                case 0x21:
+                    func_0039CD30_4(self, list, cmd, s);
+                    break;
+                case 0x22:
+                    func_0039CD90_4(self, list, cmd, s);
+                    break;
+                case 0x30:
+                    func_0039CDA0_4(self, list, cmd, s);
+                    break;
+                case 0x31:
+                    func_0039CD98_4(self, list, cmd, s);
+                    break;
+                case 0x40:
+                    func_0039CE90_4(self, list, cmd, s);
+                    break;
+                case 0x41:
+                    func_0039CE98_4(self, list, cmd, s);
+                    break;
+                case 0x42:
+                    func_0039CE20_4(self, list, cmd, s);
+                    break;
+                case 0x43:
+                    cUIScreen_parseScreenFocusLose_4(self, list, cmd, s);
+                    break;
+                }
+                i++;
+                cmd = (sCmd_C978 *)((char *)cmd + cmd->size);
+            } while (i < list->count);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039CBC8);
