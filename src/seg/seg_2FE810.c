@@ -5817,7 +5817,59 @@ int func_00408CA8(int a, struct S408CA8 *s) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408DF0);
+#ifdef SKIP_ASM
+extern char D_004980D8[];
+extern int q8DF0_AddH(int, void *, int, void *) __asm__("func_00423AC0");
+extern int q8DF0_RemH(int, int) __asm__("func_00423AD0");
+extern void q8DF0_En(int) __asm__("func_004249B8");
+extern void q8DF0_Dis(int) __asm__("func_00424950");
+extern int q8DF0_C078() __asm__("func_0042C078");
+extern void q8DF0_C0C0() __asm__("func_0042C0C0");
+extern int q8DF0_2C30(int *, int *) __asm__("func_00402C30");
+extern void q8DF0_34A8(int *, int) __asm__("func_004034A8");
+extern int func_00408CA8();
+void q8DF0(int *p, int addr, int size) __asm__("func_00408DF0");
+void q8DF0(int *p, int addr, int size) {
+
+    int sp[8];
+    struct S408CA8 s; /* func_00408CA8's state: it counts the chunks and sets stop */
+    int h;
+    int i;
+    s.n = size / 1023 + 1;
+    s.rest = size;
+    s.addr = (addr + 0xFFC00) & 0x0FFFFFFF;
+    s.cnt = s.stop = 0;
+    while (*(volatile int *)0x10002010 < 0)
+        ;
+    h = q8DF0_AddH(3, func_00408CA8, 0, &s);
+    *(volatile int *)0x1000E010 = 8;
+    q8DF0_En(3);
+    i = q8DF0_C078();
+    {
+        volatile int *madr = (volatile int *)0x1000B010;
+        volatile int *qwc = (volatile int *)0x1000B020;
+        volatile int *chcr = (volatile int *)0x1000B000;
+        *madr = addr & 0x0FFFFFFF;
+        *qwc = 0xFFC0;
+        *chcr = 0x100;
+    }
+    if (i)
+        q8DF0_C0C0();
+    *(volatile int *)0x10002000 = 0x700003FF;
+    sp[0] = 4;
+    q8DF0_2C30(*(int **)((char *)p + 0x858), sp);
+    while (s.cnt < s.n)
+        ;
+    if (s.stop)
+        q8DF0_34A8(p, (int)D_004980D8);
+    while (*(volatile int *)0x10002010 < 0)
+        ;
+    q8DF0_Dis(3);
+    q8DF0_RemH(3, h);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408FB0);
