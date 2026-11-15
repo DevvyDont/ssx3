@@ -213,6 +213,8 @@ struct cUIThread_C870 {
     unsigned int mIsActive : 1;         // 0x10 bit 24
     unsigned int mIsPrimary : 1;        // 0x10 bit 25
 
+    unsigned short getCurrentFrameNumber() { return mCurrentFrameNumber; }
+    signed char getFrameIncrement() { return mFrameIncrement; }
     void setCurrentFrameNumber(unsigned short v) { mCurrentFrameNumber = v; }
     void setLastFrameNumber(unsigned short v) { mLastFrameNumber = v; }
     void setStopFrameNumber(unsigned short v) { mStopFrameNumber = v; }
