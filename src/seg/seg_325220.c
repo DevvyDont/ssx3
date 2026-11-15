@@ -1940,7 +1940,109 @@ void func_00426C88(struct A26C88 *a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00426D18);
+#ifdef SKIP_ASM
+/* sceSifCallRpc (libkernel sifrpc): send an RPC call packet; wait for the reply unless mode bit 0 (no wait) is set. */
+// FAKEMATCH: every void* field of the client view (rpcd.paddr, buff, para, serve) and of the call packet (pkt, recv,
+// server) is a one-member union (uPtr6D18), which gives those accesses alias set 0 (TBAA steering: retail's void*
+// accesses conflict with every other store); plain form 93.93%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+typedef union { void *p; } uPtr6D18;
+struct SifServ6D18;
+/* the SDK's sceSifClientData (sSifClient), as seen here */
+struct SifClient6D18 {
+    struct {
+        uPtr6D18 paddr;             /* 0x00 packet */
+        unsigned int pid;           /* 0x04 packet id */
+        int tid;                    /* 0x08 semaphore (or -1) */
+        unsigned int mode;          /* 0x0C */
+    } rpcd;
+    unsigned int command;           /* 0x10 */
+    uPtr6D18 buff;                  /* 0x14 */
+    void *cbuff;                    /* 0x18 */
+    void (*func)(void *);           /* 0x1C end function */
+    uPtr6D18 para;                  /* 0x20 end function argument */
+    uPtr6D18 serve;                 /* 0x24 bound server */
+};
+/* RPC call packet (0x40 bytes) */
+struct Call6D18 {
+    int f0; int f4; int f8; int fC; int f10;
+    uPtr6D18 pkt;                   /* 0x14 */
+    int rpc_id;                     /* 0x18 */
+    sSifClient *client;             /* 0x1C */
+    int rpc_number;                 /* 0x20 */
+    int send_size;                  /* 0x24 */
+    uPtr6D18 recv;                  /* 0x28 */
+    int recv_size;                  /* 0x2C */
+    int rmode;                      /* 0x30 */
+    uPtr6D18 server;                /* 0x34 */
+};
+struct Sema6D18 { int count; int max_count; int init_count; int wait_threads; unsigned attr; unsigned option; };
+extern struct Call6D18 *f6D18_get(sSifRpcState *) __asm__("func_004265D0");
+extern void f6D18_free(struct Call6D18 *) __asm__("func_00426678");
+extern void f6D18_wb(void *, int) __asm__("func_00426358");
+extern int f6D18_send(int, void *, int, void *, void *, int) __asm__("func_004261B0");
+extern int f6D18_csema(struct Sema6D18 *) __asm__("func_00423DA0");
+extern int f6D18_wsema(int) __asm__("func_00423DE0");
+int func_00426D18(sSifClient *client, int fno, int mode, void *send, int ssize, void *recv, int rsize,
+                  void (*end_function)(void *), void *end_param) {
+    struct SifClient6D18 *cd = (struct SifClient6D18 *)client;
+    struct Sema6D18 sema;
+    struct Call6D18 *call;
+    call = f6D18_get(&D_0052D680);
+    if (call == 0)
+        return -1;
+    cd->rpcd.pid = call->rpc_id;
+    cd->para.p = end_param;
+    cd->rpcd.paddr.p = call;
+    cd->func = end_function;
+    call->rpc_number = fno;
+    call->send_size = ssize;
+    call->recv.p = recv;
+    call->recv_size = rsize;
+    call->pkt.p = call;
+    call->server.p = cd->serve.p;
+    call->client = client;
+    if (!(mode & 2)) {
+        if (send == recv) {
+            f6D18_wb(send, ssize < rsize ? rsize : ssize);
+        } else {
+            if (ssize > 0)
+                f6D18_wb(send, ssize);
+            if (rsize > 0)
+                f6D18_wb(recv, rsize);
+        }
+    }
+    if (mode & 1) {
+        if (!end_function)
+            call->rmode = 0;
+        else
+            call->rmode = 1;
+        cd->rpcd.tid = -1;
+        if (f6D18_send(0x8000000A, call, 0x40, send, cd->buff.p, ssize))
+            return 0;
+        f6D18_free(call);
+        return -2;
+    }
+    sema.max_count = 1;
+    sema.init_count = 0;
+    cd->rpcd.tid = f6D18_csema(&sema);
+    if (cd->rpcd.tid < 0) {
+        f6D18_free(call);
+        return -3;
+    }
+    call->rmode = 1;
+    if (f6D18_send(0x8000000A, call, 0x40, send, cd->buff.p, ssize) == 0) {
+        func_00423DB0(cd->rpcd.tid);
+        f6D18_free(call);
+        return -2;
+    }
+    f6D18_wsema(cd->rpcd.tid);
+    func_00423DB0(cd->rpcd.tid);
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00426F08);
