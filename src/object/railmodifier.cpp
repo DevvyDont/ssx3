@@ -7093,7 +7093,124 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
 }
 #endif
 
+//100%
 INCLUDE_ASM("object/railmodifier", func_00363C20);
+#ifdef SKIP_ASM
+// FAKEMATCH: `self` is taken as an integer (`__SIZE_TYPE__ selfi`, cast to sRmRend3C20* in the body), so its pseudo is not
+// pointer-flagged and sched1's find_base_term cannot tell `self+0x68000` from the stack: the scissor load then stays after
+// the packet-header stores, as in retail (integer-typed base steering); plain form 96.29%. Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+extern "C" void func_00362478(sGifPacket* pkt, int a, int b, int ctx);
+extern "C" void func_00364CD0(void* self, int a, int b, unsigned int c, ulong** pp);
+extern char* D_004A5B80;
+
+struct sRmGs3C20 {
+    unsigned int w0;
+    unsigned int w1;
+    unsigned int w2;
+    unsigned int w3;
+    short tex[2];
+};
+
+struct sRmKey3C20 {
+    unsigned short a, b, c, d;
+};
+
+struct sRmRend3C20 {
+    char pad_0x0[0x69CA8];
+    sRmGs3C20 state;            // 0x69CA8
+    unsigned int frame;         // 0x69CBC
+    int buf;                    // 0x69CC0
+    int scissor;                // 0x69CC4
+    char pad_0x69CC8[0x6AED4 - 0x69CC8];
+    sRmKey3C20 keys[1];         // 0x6AED4
+};
+
+static inline sRmGs3C20* State3C20(sRmRend3C20* self)
+{
+    return &self->state;
+}
+
+static inline unsigned int Mask3C20(unsigned int m, unsigned int w)
+{
+    return w & m;
+}
+
+static inline unsigned int Bits3C20(unsigned int w, unsigned int m)
+{
+    return w & m;
+}
+
+// PORT: 64-bit DMA/GIF tag writes (ulong); self arrives as a pointer-sized integer (__SIZE_TYPE__).
+extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int a2, ulong** pp) __asm__("func_00363C20");
+extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int a2, ulong** pp)
+{
+    sRmRend3C20* self = (sRmRend3C20*)selfi;
+    sRmPkt27A8 pkt;
+    (*pp)[0] = 0x10000001;
+    (*pp)[1] = 0;
+    (*pp)[2] = 0;
+    (*pp)[3] = (ulong)1 << 60;
+    *pp += 4;
+    int ctx = (st->w0 & 0x3C0) >> 6;
+    if (ctx != 0) {
+        unsigned int c = Mask3C20(0x3FFFFFFF, st->w3);
+        if (((State3C20(self)->w0 & 0x3C0) >> 6) != ctx) {
+            self->buf = a2;
+            self->frame = c;
+            func_00364CD0(self, (st->w0 & 0x3C0) >> 6, 0, c, pp);
+        } else if (a2 != self->buf) {
+            self->buf = a2;
+            self->frame = c;
+            func_00364CD0(self, (st->w0 & 0x3C0) >> 6, 1, c, pp);
+        }
+        if (self->frame != c) {
+            self->buf = a2;
+            self->frame = c;
+            func_00364CD0(self, (st->w0 & 0x3C0) >> 6, 2, c, pp);
+        }
+    }
+    pkt.count = 0;
+    pkt.base = *pp;
+    pkt.cur = *pp + 6;
+    int k = st->w2 & 0x1F;
+    if (k != self->scissor) {
+        self->scissor = k;
+        if (k >= 0) {
+            func_003623D8((sGifPacket*)&pkt, self->keys[k].a, self->keys[k].c, self->keys[k].b, self->keys[k].d);
+        }
+    }
+    if (((State3C20(self)->w1 & 0x400000) >> 22) != ((st->w1 & 0x400000) >> 22)) {
+        char* gs = D_004A5B80;
+        func_00362660((sGifPacket*)&pkt, *(unsigned int*)(gs + 0x5A80), *(unsigned int*)(gs + 0x5A40),
+                      (st->w1 & 0x400000) >> 22, 0);
+        func_00362660((sGifPacket*)&pkt, *(unsigned int*)(gs + 0x5A80), *(unsigned int*)(gs + 0x5A40),
+                      (st->w1 & 0x400000) >> 22, 1);
+    }
+    if (Bits3C20(State3C20(self)->w1, 0x1800000) != Bits3C20(st->w1, 0x1800000) ||
+        Bits3C20(State3C20(self)->w1, 0x300000) != Bits3C20(st->w1, 0x300000) ||
+        Bits3C20(State3C20(self)->w1, 0xFF000) != Bits3C20(st->w1, 0xFF000)) {
+        func_003626D8((sRmGsPacket*)&pkt, (st->w1 & 0x1800000) >> 23, (st->w1 & 0x300000) >> 20,
+                      (st->w1 & 0xFF000) >> 12, 0);
+        func_003626D8((sRmGsPacket*)&pkt, (st->w1 & 0x1800000) >> 23, (st->w1 & 0x300000) >> 20,
+                      (st->w1 & 0xFF000) >> 12, 1);
+    }
+    if ((State3C20(self)->w0 & 0xC) != (st->w0 & 0xC)) {
+        func_003625C0((sGifPacket*)&pkt, (st->w0 & 0xC) >> 2, 0);
+    }
+    if (((State3C20(self)->w1 & 0x7C) >> 2) != ((st->w1 & 0x7C) >> 2) || ((State3C20(self)->w0 >> 12) & 0xFF) != ((st->w0 >> 12) & 0xFF)) {
+        func_00362478((sGifPacket*)&pkt, (st->w1 & 0x7C) >> 2, (st->w0 >> 12) & 0xFF, 0);
+    }
+    if ((State3C20(self)->w0 & 0x30) != (st->w0 & 0x30)) {
+        func_003625C0((sGifPacket*)&pkt, (st->w0 & 0x30) >> 4, 1);
+    }
+    if (((State3C20(self)->w1 & 0xF80) >> 7) != ((st->w1 & 0xF80) >> 7) || ((State3C20(self)->w0 >> 20) & 0xFF) != ((st->w0 >> 20) & 0xFF)) {
+        func_00362478((sGifPacket*)&pkt, (st->w1 & 0xF80) >> 7, (st->w0 >> 20) & 0xFF, 1);
+    }
+    self->state = *st;
+    func_003627A8(&pkt, pp, 1);
+}
+#endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00364050);
