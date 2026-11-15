@@ -554,6 +554,9 @@ segments:
       - [0x316fb8, c, seg/seg_316FB8]   # 0x415FB8: C library (newlib: strchr, strcpy, sprintf, ungetc); SN 2.95.3, -G0, Ps2EeAs
       - [0x3249a0, c, seg/seg_3249A0]   # 0x4239A0: 16-byte hand-written syscall stubs
       - [0x325220, c, seg/seg_325220]   # 0x424220: ee-gcc 2.9, -G0
+      # 0x42E018: two zero words after __umoddi3 (func_0042DAD8), alignment padding before seg_32F020. As a pad the linker
+      # fills them, so the libgcc2 routine can be C (the hybrid link lost them: SUBALIGN(4)).
+      - [0x32f018, pad]
       - [0x32f020, c, seg/seg_32F020]   # 0x42E020: SN 2.95.3, -G0
       # 0x42E588: two zero words of alignment padding (the VU microcode below starts 16-byte aligned), not code.
       # As a pad the linker fills them, so func_0042E508 can be C without fake nops.
