@@ -9,6 +9,7 @@
    Bodies credited to peak3project come from their fork (github.com/peak3project/ssx3). */
 
 #include "common.h"
+#include "seg/seg_315B68_tinfo.h"
 
 extern "C" {
 
@@ -99,18 +100,82 @@ int func_00414C70(int *p, int a, int b, int c, int d, int e) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414D08);
 #ifdef SKIP_ASM
-struct dcVE { short d; short i; void *f; };
-struct dcTI { const char *name; dcVE *vt; };
-struct dcBI { dcTI *type; unsigned flags; };
-struct dcCT : dcTI { dcBI *bases; unsigned n; };
-static inline void *dcCall(dcTI *o, dcTI *desired, int pub, void *obj, dcTI *sub, void *subp) {
-    dcVE *v = o->vt + 2;
-    return ((void *(*)(void *, dcTI *, int, void *, dcTI *, void *))v->f)((char *)o + v->d, desired, pub, obj, sub, subp);
-}
-void *func_00414D08(dcCT *self, dcTI *desired, int pub, void *obj, dcTI *sub, void *subp); /* peak3 body held: see notes/stuck.md */
+/* cp/tinfo.cc / cp/tinfo2.cc (GCC runtime, GPL v2+ with the runtime linking exception): needs the class
+   declarations of include/seg/seg_315B68_tinfo.h (included at the top of the unit).
+   g++ calls these under fixed names (type_info::operator==, the typeinfo functions typeid and dynamic_cast use,
+   __dynamic_cast); bind each to the retail symbol (assembler assignments: the relocations then name the retail
+   symbols). All of them are defined in this unit. */
+__asm__("__eq__C9type_infoRC9type_info = func_00414B98\n"
+        "__tf16__user_type_info = func_00415018\n"
+        "__tf9type_info = func_004151F8\n"
+        "__dynamic_cast = func_00415840\n"
+        "__tfv = func_004158F0\n"
+        "__tf16__func_type_info = func_00415DF8\n"
+        "__tf16__attr_type_info = func_00415ED8\n"
+        "__tf19__pointer_type_info = func_00415F48");
 
+/* tinfo.cc __class_type_info::dcast (GCC runtime, GPL v2+ with the runtime linking exception) */
+}  // extern "C"  (a member function definition cannot have C linkage)
+
+void* __class_type_info::
+dcast (const type_info& desired, int is_public, void *objptr,
+       const type_info *sub, void *subptr) const
+{
+  if (*this == desired)
+    return objptr;
+
+  void *match_found = 0;
+  for (size_t i = 0; i < n_bases; i++)
+    {
+      if (is_public && base_list[i].access != PUBLIC)
+	continue;
+
+      void *p = (char *)objptr + base_list[i].offset;
+      if (base_list[i].is_virtual)
+	p = *(void **)p;
+      p = base_list[i].base->dcast (desired, is_public, p, sub, subptr);
+      if (p)
+	{
+	  if (match_found == 0)
+	    match_found = p;
+	  else if (match_found != p)
+	    {
+	      if (sub)
+		{
+		  // Perhaps we're downcasting from *sub to desired; see if
+		  // subptr is a subobject of exactly one of {match_found,p}.
+
+		  const __user_type_info &d =
+		    static_cast <const __user_type_info &> (desired);
+
+		  void *os = d.dcast (*sub, 1, match_found);
+		  void *ns = d.dcast (*sub, 1, p);
+
+		  if (os == ns)
+		    /* ambiguous -- subptr is a virtual base */;
+		  else if (os == subptr)
+		    continue;
+		  else if (ns == subptr)
+		    {
+		      match_found = p;
+		      continue;
+		    }
+		}
+
+	      // base found at two different pointers,
+	      // conversion is not unique
+	      return 0;
+	    }
+	}
+    }
+
+  return match_found;
+}
+
+extern "C" {
 #endif
 
 //100%
@@ -349,7 +414,151 @@ int func_00415238(int *a, int *b) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415260);
+#ifdef SKIP_ASM
+/* tinfo2.cc __throw_type_match_rtti (GCC runtime, GPL v2+ with the runtime linking exception) */
+/* Low level match routine used by compiler to match types of catch
+   variables and thrown objects.  */
+
+extern "C" void*
+__throw_type_match_rtti (const void *catch_type_r, const void *throw_type_r,
+			 void *objptr) __asm__ ("func_00415260");
+extern "C" void*
+__throw_type_match_rtti (const void *catch_type_r, const void *throw_type_r,
+			 void *objptr)
+{
+  const type_info &catch_type = *(const type_info *)catch_type_r;
+  const type_info &throw_type = *(const type_info *)throw_type_r;
+  
+  if (catch_type == throw_type)
+    return objptr;
+  
+  /* (a disabled `#if 0` printf of the two type names was here) */
+
+  void *new_objptr = 0;
+
+  if (const __user_type_info *p
+      = dynamic_cast <const __user_type_info *> (&throw_type))
+    {
+      /* The 1 skips conversions to private bases. */
+      new_objptr = p->dcast (catch_type, 1, objptr);
+    }
+  else if (const __pointer_type_info *fr =
+	   dynamic_cast <const __pointer_type_info *> (&throw_type))
+    {
+      const __pointer_type_info *to =
+	   dynamic_cast <const __pointer_type_info *> (&catch_type);
+
+      if (! to)
+	goto fail;
+
+      const type_info *subfr = &fr->type, *subto = &to->type;
+      __attr_type_info::cv cvfrom, cvto;
+
+      if (const __attr_type_info *at
+	  = dynamic_cast <const __attr_type_info *> (subfr))
+	{
+	  cvfrom = at->attr;
+	  subfr = &at->type;
+	}
+      else
+	cvfrom = __attr_type_info::NONE;
+      
+      if (const __attr_type_info *at
+	  = dynamic_cast <const __attr_type_info *> (subto))
+	{
+	  cvto = at->attr;
+	  subto = &at->type;
+	}
+      else
+	cvto = __attr_type_info::NONE;
+
+      if (((cvfrom & __attr_type_info::CONST)
+	   > (cvto & __attr_type_info::CONST))
+	  || ((cvfrom & __attr_type_info::VOLATILE)
+	      > (cvto & __attr_type_info::VOLATILE)))
+	goto fail;
+
+      if (*subto == *subfr)
+	new_objptr = objptr;
+      else if (*subto == typeid (void)
+	       && dynamic_cast <const __func_type_info *> (subfr) == 0)
+	new_objptr = objptr;
+      else if (const __user_type_info *p
+	       = dynamic_cast <const __user_type_info *> (subfr))
+	{
+	  /* The 1 skips conversions to private bases. */
+	  new_objptr = p->dcast (*subto, 1, objptr);
+	}
+      else if (const __pointer_type_info *pfr
+	       = dynamic_cast <const __pointer_type_info *> (subfr))
+	{
+	  // Multi-level pointer conversion.
+
+	  const __pointer_type_info *pto
+	    = dynamic_cast <const __pointer_type_info *> (subto);
+
+	  if (! pto)
+	    goto fail;
+	    
+	  bool constp = (cvto & __attr_type_info::CONST);
+	  for (subto = &pto->type, subfr = &pfr->type; ;
+	       subto = &pto->type, subfr = &pfr->type)
+	    {
+	      if (const __attr_type_info *at
+		  = dynamic_cast <const __attr_type_info *> (subfr))
+		{
+		  cvfrom = at->attr;
+		  subfr = &at->type;
+		}
+	      else
+		cvfrom = __attr_type_info::NONE;
+      
+	      if (const __attr_type_info *at
+		  = dynamic_cast <const __attr_type_info *> (subto))
+		{
+		  cvto = at->attr;
+		  subto = &at->type;
+		}
+	      else
+		cvto = __attr_type_info::NONE;
+
+	      if (((cvfrom & __attr_type_info::CONST)
+		   > (cvto & __attr_type_info::CONST))
+		  || ((cvfrom & __attr_type_info::VOLATILE)
+		      > (cvto & __attr_type_info::VOLATILE)))
+		goto fail;
+
+	      if (! constp
+		  && (((cvfrom & __attr_type_info::CONST)
+		       < (cvto & __attr_type_info::CONST))
+		      || ((cvfrom & __attr_type_info::VOLATILE)
+			  < (cvto & __attr_type_info::VOLATILE))))
+		goto fail;
+
+	      if (*subto == *subfr)
+		{
+		  new_objptr = objptr;
+		  break;
+		}
+
+	      pto = dynamic_cast <const __pointer_type_info *> (subto);
+	      pfr = dynamic_cast <const __pointer_type_info *> (subfr);
+	      if (! pto || ! pfr)
+		goto fail;		
+
+	      if (! (cvto & __attr_type_info::CONST))
+		constp = false;
+	    }
+	}
+    }
+ fail:
+
+  /* (a disabled `#if 0` printf of the pointer delta was here) */
+  return new_objptr;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415728);

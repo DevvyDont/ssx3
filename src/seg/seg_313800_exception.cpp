@@ -210,11 +210,192 @@ void func_00412AF0(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_313800_exception", func_00412B20);
+#ifdef SKIP_ASM
+/* cp/exception.cc (GCC runtime, GPL v2+ with the runtime linking exception): the declarations at the top of the
+   file that __check_eh_spec, __throw_bad_cast and __throw_bad_typeid use, with the pieces of <typeinfo>,
+   <exception> and eh-common.h they need. g++ 2.9 is run without -fhonor-std, so std:: names live in the global
+   namespace (terminate__Fv, not terminate__3stdFv); the classes exception/bad_cast/bad_typeid/bad_exception come
+   from include/seg/seg_313800_exception.h. */
 
+/* g++ calls the EH runtime under fixed names, and the source declares or defines them under those names; bind
+   each name to the retail symbol (assembler assignments: the relocations then name the retail symbols). __throw
+   is libgcc2.c's (emitted by the back end), __throw_type_match_rtti tinfo2.cc's, the vtables, out-of-line
+   destructors and typeid functions those of exception.cc's #pragma implementation "exception". */
+__asm__("__get_eh_info = func_00410490\n"
+        "__throw = func_00410F48\n"
+        "terminate__Fv = func_00412800\n"
+        "unexpected__Fv = func_00412848\n"
+        "__start_cp_handler = func_004128A8\n"
+        "__eh_alloc = func_004128E0\n"
+        "__cp_push_exception = func_00412998\n"
+        "__cp_pop_exception = func_00412A28\n"
+        "__uncatch_exception = func_00412AF0\n"
+        "__throw_type_match_rtti = func_00415260\n"
+        "_vt$9exception = D_004998B8\n"
+        "_vt$13bad_exception = D_004998A0\n"
+        "_$_13bad_exception = func_00412E38\n"
+        "__tf13bad_exception = func_00412E80\n"
+        "_vt$8bad_cast = D_00499A30\n"
+        "_$_8bad_cast = func_00415120\n"
+        "_vt$10bad_typeid = D_00499A18\n"
+        "_$_10bad_typeid = func_00415088");
+
+extern "C++" {
+
+/* <typeinfo> (needed complete for typeid) */
+class type_info {
+private:
+  // assigning type_info is not supported.  made private.
+  type_info& operator= (const type_info&);
+  type_info (const type_info&);
+
+protected:
+  explicit type_info (const char *n): _name (n) { }
+
+  const char *_name;
+
+public:
+  // destructor
+  virtual ~type_info ();
+
+  bool before (const type_info& arg) const;
+  const char* name () const
+    { return _name; }
+  bool operator== (const type_info& arg) const;
+  bool operator!= (const type_info& arg) const;
+};
+
+/* <exception> */
+void terminate () __attribute__ ((__noreturn__));
+void unexpected () __attribute__ ((__noreturn__));
+
+}
+
+typedef __SIZE_TYPE__ size_t;
+
+/* eh-common.h */
+typedef void * (*__eh_matcher)          (void *, void *, void *);
+
+typedef struct __eh_info
+{
+  __eh_matcher match_function;
+  short language;
+  short version;
+} __eh_info;
+
+/* C++-specific state about the current exception.
+   This must match init_exception_processing().
+
+   Note that handlers and caught are not redundant; when rethrown, an
+   exception can have multiple active handlers and still be considered
+   uncaught.  */
+
+struct cp_eh_info
+{
+  __eh_info eh_info;
+  void *value;
+  void *type;
+  void (*cleanup)(void *, int);
+  bool caught;
+  cp_eh_info *next;
+  long handlers;
+  void *original_value;
+};
+
+/* Language-specific EH info pointer, defined in libgcc2. */
+
+extern "C" cp_eh_info **__get_eh_info (); 	// actually void **
+
+#define CP_EH_INFO ((cp_eh_info *) *__get_eh_info ())
+
+/* Defined earlier in exception.cc (func_004128A8, func_004128E0, func_00412998, func_00412A28, func_00412AF0);
+   declared here under their source names and signatures, so the code g++ generates for catch, throw and rethrow
+   uses them as in the original file. */
+extern "C" cp_eh_info *__start_cp_handler (void);
+extern "C" void *__eh_alloc (size_t size);
+extern "C" void __cp_push_exception (void *value, void *type, void (*cleanup)(void *, int));
+extern "C" void __cp_pop_exception (cp_eh_info *p);
+extern "C" void __uncatch_exception (void);
+
+/* exception.cc __check_eh_spec (GCC runtime, GPL v2+ with the runtime linking exception) */
+/* As per [except.unexpected]:
+   If an exception is thrown, we check it against the spec.  If it doesn't
+   match, we call unexpected ().  If unexpected () throws, we check that
+   exception against the spec.  If it doesn't match, if the spec allows
+   bad_exception we throw that; otherwise we call terminate ().
+
+   The compiler treats an exception spec as a try block with a generic
+   handler that just calls this function with a list of the allowed
+   exception types, so we have an active exception that can be rethrown.
+
+   This function does not return.  */
+
+extern "C" void __check_eh_spec (int n, const void **spec) __asm__("func_00412B20");
+extern "C" void
+__check_eh_spec (int n, const void **spec)
+{
+  cp_eh_info *p = CP_EH_INFO;
+
+  for (int i = 0; i < n; ++i)
+    {
+      if (__throw_type_match_rtti (spec[i], p->type, p->value))
+	throw;
+    }
+
+  try
+    {
+      std::unexpected ();
+    }
+  catch (...)
+    {
+      // __exception_info is an artificial var pushed into each catch block.
+      if (p != __exception_info)
+	{
+	  p = __exception_info;
+	  for (int i = 0; i < n; ++i)
+	    {
+	      if (__throw_type_match_rtti (spec[i], p->type, p->value))
+		throw;
+	    }
+	}
+
+      const std::type_info &bad_exc = typeid (std::bad_exception);
+      for (int i = 0; i < n; ++i)
+	{
+	  if (__throw_type_match_rtti (spec[i], &bad_exc, p->value))
+	    throw std::bad_exception ();
+	}
+
+      terminate ();
+    }
+}
+#endif
+
+//100%
 INCLUDE_ASM("seg/seg_313800_exception", func_00412CD8);
+#ifdef SKIP_ASM
+/* exception.cc __throw_bad_cast (GCC runtime, GPL v2+ with the runtime linking exception) */
+extern "C" void __throw_bad_cast (void) __asm__("func_00412CD8");
+extern "C" void
+__throw_bad_cast (void)
+{
+  throw std::bad_cast ();
+}
+#endif
 
+//100%
 INCLUDE_ASM("seg/seg_313800_exception", func_00412D58);
+#ifdef SKIP_ASM
+/* exception.cc __throw_bad_typeid (GCC runtime, GPL v2+ with the runtime linking exception) */
+extern "C" void __throw_bad_typeid (void) __asm__("func_00412D58");
+extern "C" void
+__throw_bad_typeid (void)
+{
+  throw std::bad_typeid ();
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", func_00412DD8);
