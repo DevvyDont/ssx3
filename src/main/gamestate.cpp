@@ -2162,7 +2162,130 @@ extern "C" void* func_00237280(sOwner_237280* self, int a1)
 }
 #endif
 
+//100%
 INCLUDE_ASM("main/gamestate", func_002373B8);
+#ifdef SKIP_ASM
+// FAKEMATCH: redundant pointer local `psp` (`SyncedPad* psp = &syncedpads[i]; SyncedPad& sp = *psp;`) adds the one RTL insn
+// that puts the outer loop over loop.c's 257-insn hoist threshold, so the constant 24 is not hoisted into s5; plain form 97.12%
+// (99.69% with a ternary clamp). Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+struct sPackSrc_7B28;
+extern "C" void func_00237BE8(void* self, sPackSrc_7B28* src, char* buf);
+extern "C" void func_00237A98(void* self, sPackSrc_7B28* src);
+extern "C" void MEM_fill(void* dst, int value, int size);
+extern "C" int func_00257BD8(void* self, int ch, void* dst, int size);
+extern "C" float func_00258360(void* self);
+extern char* D_004A2EEC;
+extern void* D_004A28A8;
+
+// cInputSync::preupdate (On Tour name and member names; the SSX 3 version differs in structure).
+// cGameComm::mGameComm through On Tour's GameComm() accessor.
+static inline char* GameComm() { return D_004A2EEC; }
+
+// cInputSync::PadSample (On Tour, size 0x64).
+struct PadSample_2373B8 {
+    int NumButtons;
+    float Buttons[24];
+};
+
+// cInputSync::CompressedSample (SSX 3 layout: no PlayerID byte, size 0x1C).
+struct CompressedSample_2373B8 {
+    unsigned char NumButtons;
+    unsigned char NonZeroBitBytes[3];
+    unsigned char NonZeroBytes[24];
+};
+
+struct sInputPadButton_2373B8 {
+    float value;
+    char pad[0x18];
+};
+
+// cInputPad: button count and values (getNumButtons / getButtonValue in On Tour).
+struct cInputPad_2373B8 {
+    int numbuttons;
+    sInputPadButton_2373B8 buttons[1];
+    int getNumButtons() { return numbuttons; }
+    float getButtonValue(int k) { return k < numbuttons ? buttons[k].value : 0.0f; }
+};
+
+// cInputSync::SyncedPad (SSX 3 layout: no sendpos, size 0x18).
+struct SyncedPad_2373B8 {
+    PadSample_2373B8* samples;          // 0x00: ring of samples
+    int readpos;                        // 0x04
+    int writepos;                       // 0x08
+    cInputPad_2373B8* sourcepad;        // 0x0C: local pad (0 = remote)
+    void* destinationpad;               // 0x10
+    void* input;                        // 0x14
+};
+
+struct cInputSync_2373B8 {
+    int sendlimit;                      // 0x00
+    int latency;                        // 0x04: ring size
+    int numsamples;                     // 0x08: copies per sample
+    int tick;                           // 0x0C
+    int numsyncedpads;                  // 0x10
+    SyncedPad_2373B8 syncedpads[1];     // 0x14
+};
+
+extern "C" void func_002373B8(cInputSync_2373B8* self)
+{
+    PadSample_2373B8 sample;
+    CompressedSample_2373B8 compsample;
+    if (*(int*)(GameComm() + 0x70) < 14) {
+        return;
+    }
+    for (int i = 0; i < self->numsyncedpads; i++) {
+        SyncedPad_2373B8* psp = &self->syncedpads[i];
+        SyncedPad_2373B8& sp = *psp;
+        if (sp.sourcepad == 0) {
+            char* gc = GameComm();
+            int net = *(int*)(gc + 0x40) != 0 && *(int*)(gc + 4) == 0 && *(int*)(gc + 0) != 0;
+            if (net) {
+                while (sp.writepos - sp.readpos < self->latency - (self->numsamples - 1) &&
+                       func_00257BD8(GameComm(), 0, &compsample, sizeof(compsample))) {
+                    func_00237BE8(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
+                    for (int j = 0; j < self->numsamples; j++) {
+                        sp.samples[sp.writepos % self->latency] = sample;
+                        sp.writepos++;
+                    }
+                }
+            } else {
+                MEM_fill(&compsample, 0, sizeof(compsample));
+                compsample.NumButtons = 24;
+                func_00237BE8(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
+                while (sp.writepos - sp.readpos < self->latency - (self->numsamples - 1)) {
+                    for (int j = 0; j < self->numsamples; j++) {
+                        sp.samples[sp.writepos % self->latency] = sample;
+                        sp.writepos++;
+                    }
+                }
+            }
+        } else if (sp.writepos - sp.readpos < self->sendlimit - (self->numsamples - 1)) {
+            self->tick++;
+            if (self->tick % self->numsamples == 0) {
+                PadSample_2373B8 localsample;
+                localsample.NumButtons = sp.sourcepad->getNumButtons();
+                for (int j = 0; j < localsample.NumButtons; j++) {
+                    localsample.Buttons[j] = sp.sourcepad->getButtonValue(j);
+                }
+                func_00237A98(self, (sPackSrc_7B28*)&localsample);
+                for (int j = 0; j < self->numsamples; j++) {
+                    sp.samples[sp.writepos % self->latency] = localsample;
+                    sp.writepos++;
+                }
+                int n = (int)(func_00258360(GameComm()) / *(float*)((char*)D_004A28A8 + 0x14));
+                if (!(1 < n)) {
+                    n = 2;
+                }
+                self->sendlimit = n * self->numsamples;
+                if (self->latency < self->sendlimit) {
+                    self->sendlimit = self->latency;
+                }
+            }
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("main/gamestate", func_00237948__FPv);
