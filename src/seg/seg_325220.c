@@ -2090,7 +2090,91 @@ int func_004271D8(int arg) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_00427230);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// FAKEMATCH: an empty ASSERT macro (`ASSERT_7230(e != 0)`, `do { } while (0)`) after the lookup, and the stand-in local `w = 0x8000000A` (with `v = a0->f1C` read first) for the two header stores; plain form 98.10% (98.01% without the ASSERT only, 97.95% without `w` only). Byte-identical and behaves like the plain form; landed marked under
+// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
+struct W7230 { int f0; int (*f4)(int, int, int); int f8; int fC; int f10; int f14; int f18; int f1C; int f20; int f24; int f28; int f2C; int f30; int f34; };
+struct R7230 { int f0; int f4; int f8; int fC; int f10; int f14; int f18; int f1C; int f20; };
+extern void func_00426358(int, int);
+extern void func_0042C078_w(void) __asm__("func_0042C078");
+extern int func_0042C0C0_w(void) __asm__("func_0042C0C0");
+extern struct R7230 *func_004266C8_w(sSifRpcState *, unsigned) __asm__("func_004266C8");
+extern struct R7230 *func_00426698_w(sSifRpcState *, unsigned) __asm__("func_00426698");
+extern int func_004261B0_w(int, void *, int, int, int, int) __asm__("func_004261B0");
+void func_00427230_d(struct W7230 *) __asm__("func_00427230");
+// Release-build assert: compiles to an empty do { } while (0) (its loop notes still shape the code)
+#define ASSERT_7230(cond) do { } while (0)
+void func_00427230_d(struct W7230 *a0) {
+    int s4 = 0;
+    int t;
+    int n;
+    int i;
+    int r;
+    int fl;
+    int v;
+    int w;
+    int x4;
+    struct R7230 *e;
+    sSifDmaData ent[2];
+    t = a0->f4(a0->f24, a0->f8, a0->fC);
+    if (t != 0) {
+        s4 = a0->f2C;
+    }
+    if (a0->fC > 0) {
+        func_00426358(a0->f8, a0->fC);
+    }
+    if (s4 > 0) {
+        func_00426358(t, s4);
+    }
+    func_0042C078_w();
+    fl = a0->f34;
+    x4 = fl & 4;
+    fl = (unsigned)fl >> 16;
+    if (x4) {
+        e = func_004266C8_w(&D_0052D680, fl);
+    } else {
+        e = func_00426698_w(&D_0052D680, fl);
+    }
+    func_0042C0C0_w();
+    ASSERT_7230(e != 0);
+    w = 0x8000000A;
+    v = a0->f1C;
+    e->f20 = w;
+    e->f1C = v;
+    if (a0->f30 != 0) {
+        while (func_004261B0_w(0x80000008, e, 0x40, t, a0->f28, s4) == 0) {
+        }
+        return;
+    }
+    e->f18 = 0;
+    n = 0;
+    e->f10 = 0;
+    if (s4 > 0) {
+        n = 1;
+        ent[0].data = t;
+        ent[0].addr = a0->f28;
+        ent[0].size = s4;
+        ent[0].attr = 0;
+    }
+    ent[n].data = (int)e;
+    ent[n].addr = a0->f20;
+    ent[n].size = 0x40;
+    ent[n].attr = 0;
+    n++;
+    do {
+        r = func_00424160(ent, n);
+        if (r == 0) {
+            i = 0x100000;
+            do {
+                i--;
+            } while (i != -1);
+        }
+    } while (r == 0);
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_004273F8);
