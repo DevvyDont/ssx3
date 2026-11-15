@@ -577,17 +577,15 @@ extern "C" float func_002EDF00(void* self)
 }
 #endif
 
-// padded past the 8-byte gp-relative threshold so the compiler emits
-// absolute lui/lo addressing like the target
-struct sPad16 { char x; int pad[3]; };
-extern sPad16 D_004FA3C0;
+// the lens table D_004FA370 (8 rows of 0xF0 bytes, config size 0x780); the unit types it as sLensFxSlot[] further down
+extern char D_lensTable_DFB8[] __asm__("D_004FA370");
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EDFB8);
 #ifdef SKIP_ASM
 extern "C" void* func_002EDFB8(int a0)
 {
-    return (char*)&D_004FA3C0 + a0 * 0xf0;
+    return D_lensTable_DFB8 + 0x50 + a0 * 0xf0;
 }
 #endif
 

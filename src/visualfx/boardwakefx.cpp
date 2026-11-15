@@ -912,7 +912,8 @@ struct sWake_E058 {
     int cap;                    // 0xB8
 };
 
-extern sEnt_E058 D_004FA398[];
+// D_004FA370: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sEnt_E058 views a row from its +0x28 field
+extern char D_004FA370[];
 
 // PORT: g++ minimum operator (<?).
 static inline float wakeClampE058(float v, float lo, float hi)
@@ -938,7 +939,7 @@ extern "C" void func_002DE058(sWake_E058* self)
     self->head = (self->head + self->cap - 1) % self->cap;
     char* sub = self->obj + 0x6C0;
     sWakeVt_E058* vt = *(sWakeVt_E058**)sub;
-    sCol_E058 col = D_004FA398[vt[7].fn(sub + vt[7].delta)].col;
+    sCol_E058 col = ((sEnt_E058*)(D_004FA370 + 0x28))[vt[7].fn(sub + vt[7].delta)].col;
     col.a *= 2.0f;
     col.r *= 2.0f;
     col.g *= 2.0f;
@@ -2154,7 +2155,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     char* sub2 = self->obj + 0x6C0;
     sWakeVtIF920* vt2 = *(sWakeVtIF920**)sub2;
     int idx = vt2[7].fn(sub2 + vt2[7].delta);
-    sEnt_E058* e = &D_004FA398[idx];
+    sEnt_E058* e = &((sEnt_E058*)(D_004FA370 + 0x28))[idx];
     sWakeVecE398 c;
     c.x = e->col.r;
     c.y = e->col.g;

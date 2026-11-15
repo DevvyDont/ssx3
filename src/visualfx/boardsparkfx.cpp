@@ -382,7 +382,8 @@ extern char* D_004A28A8;
 extern int D_004A472C;
 extern int D_004A4728;
 extern int D_004A3AFC;
-extern sEnt_ABC8 D_004FA398[];
+// D_004FA370: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sEnt_ABC8 views a row from its +0x28 field
+extern char D_004FA370[];
 
 extern "C" void func_0036D428(void* self, float val);
 int func_0011FE98(void* self);
@@ -544,7 +545,7 @@ extern "C" void func_002DABC8(sSparkFx_ABC8* self)
         } else {
             char* sub = self->rider + 0x6C0;
             sRiderVE_ABC8* vt = *(sRiderVE_ABC8**)sub;
-            sCol_ABC8 c = D_004FA398[vt[7].fn(sub + vt[7].delta)].col;
+            sCol_ABC8 c = ((sEnt_ABC8*)(D_004FA370 + 0x28))[vt[7].fn(sub + vt[7].delta)].col;
             groundColour = sV4_ABC8(c.r, c.g, c.b, c.a);
             ScaleTo_ABC8(groundColour, groundColour, 2.0f);
             groundColour.w = 1.0f;
