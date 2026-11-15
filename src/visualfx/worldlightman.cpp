@@ -456,7 +456,53 @@ extern "C" sWorldLightNode* func_002F59D0(sWorldLightMan* self, int priority)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F5A70);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+// cWorldLightMan::evictOverlapNode(int iCurrentTick) (SSX On Tour DWARF): returns the first free overlap node,
+// else the one with the oldest tick. Types and names follow On Tour.
+// tResourceID: a 4-byte resource id; tResourceID::Invalid() is 0xFFFFFFFF. The comparison goes through the
+// bool-returning operator== (store-flag, which combine turns into retail's nor/bnez); a plain integer compare is 25%.
+struct tResourceID_5A70 {
+    unsigned int m_uiRID;
+    tResourceID_5A70(unsigned int rid) : m_uiRID(rid) {}
+    bool operator==(const tResourceID_5A70& a) const { return m_uiRID == a.m_uiRID; }
+    bool operator!=(const tResourceID_5A70& a) const { return m_uiRID != a.m_uiRID; }
+    static const tResourceID_5A70 Invalid() { return tResourceID_5A70(0xFFFFFFFF); }
+};
+
+struct tOverlapListNode_5A70 {
+    tResourceID_5A70 RID;  // 0x00
+    int iTick;             // 0x04
+    char pad08[0x38];      // tBoundBox box at 0x10, cOverlapList* pOverlapList at 0x30
+};
+
+struct cWorldLightMan_5A70 {
+    char pad00[0x10];      // m_pNash, m_pWPQuery
+    tOverlapListNode_5A70 OverlapNodeList[8];
+};
+
+// The unit declares this function as `sBox_5400* func_002F5A70(sMan_5400*, int)` (line ~198); define it under its own types.
+extern "C" tOverlapListNode_5A70* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan_5A70* self, int iCurrentTick) __asm__("func_002F5A70");
+extern "C" tOverlapListNode_5A70* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan_5A70* self, int iCurrentTick)
+{
+    tOverlapListNode_5A70* pNode = 0;
+    int iOldest = iCurrentTick + 1;
+    unsigned int i;
+    for (i = 0; i < 8; i++) {
+        if (self->OverlapNodeList[i].RID == tResourceID_5A70::Invalid()) {
+            pNode = &self->OverlapNodeList[i];
+            break;
+        }
+        if (self->OverlapNodeList[i].iTick < iOldest) {
+            iOldest = self->OverlapNodeList[i].iTick;
+            pNode = &self->OverlapNodeList[i];
+        }
+    }
+    return pNode;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F5AF0);
