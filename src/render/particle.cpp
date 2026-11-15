@@ -12182,7 +12182,147 @@ extern "C" int func_0038A618(float* p, float* n, void* s, float* dist, float* in
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/particle", func_0038A6A8);
+#ifdef SKIP_ASM
+struct sForce_38A6A8 {
+    char pad0[0x10];
+    int type;           // 0x10
+    float strength;     // 0x14
+    char pad18[4];
+    float radius;       // 0x1C
+    float dir[3];       // 0x20
+    char pad2C[0x5C - 0x2C];
+    float outer;        // 0x5C
+    float inner;        // 0x60
+    signed char curve;  // 0x64
+    signed char power;  // 0x65
+};
+
+struct sVec3_38A6A8 {
+    float x, y, z;
+};
+
+struct sVec4_38A6A8 {
+    float x, y, z, w;
+};
+
+static inline float powgen_38A6A8(float x, int n)
+{
+    if (x == 0.0f)
+        return 0.0f;
+    if (n < 0) {
+        n = -n;
+        x = 1.0f / x;
+    }
+    float r = 1.0f;
+    while (n != 0) {
+        if (n & 1)
+            r *= x;
+        n >>= 1;
+        x *= x;
+    }
+    return r;
+}
+
+static inline float powi_38A6A8(float x, int n)
+{
+    switch (n) {
+    case 0:
+        return 1.0f;
+    case 1:
+        return x;
+    case 2:
+        return x * x;
+    case 3:
+        return x * x * x;
+    case 4:
+        return x * x * x * x;
+    }
+    return powgen_38A6A8(x, n);
+}
+
+static inline float fade_38A6A8(sForce_38A6A8* s, float dist)
+{
+    if (s->radius < 5000.0f || dist <= 3750.0f)
+        return 1.0f;
+    return 1.0f - (dist - 3750.0f) * 0.0008f;
+}
+
+static inline float curve_38A6A8(sForce_38A6A8* s, float t)
+{
+    int c = s->curve;
+    t *= 100.0f;
+    if (t < 1.0f) {
+        switch (c) {
+        case 1:
+            return t;
+        case 2:
+            return t * t;
+        case 3:
+            return t * t * t;
+        }
+    }
+    return 1.0f;
+}
+
+// PORT: g++ `<?` (min) operator; needs a macro / std::min on a modern compiler.
+static inline float clamp_38A6A8(float x, float hi)
+{
+    return x >= 0.0f ? (x <? hi) : 0.0f;
+}
+
+extern "C" void func_0038A6A8(void* self, float* p, sForce_38A6A8* s)
+{
+    sVec4_38A6A8 n;
+    sVec3_38A6A8 out;
+    float dist;
+    float inv;
+    float planeD;
+    float k;
+    float fade;
+
+    switch (s->type) {
+    case 0:
+        break;
+    case 1:
+        if (!func_0038A530(p, (float*)&n, s, &dist, &inv, &planeD))
+            return;
+        if (!(planeD >= s->inner))
+            return;
+        fade = fade_38A6A8(s, dist);
+        k = curve_38A6A8(s, inv) * s->strength * fade;
+        if (planeD >= s->outer)
+            k *= powi_38A6A8(planeD, s->power);
+        else {
+            k *= powi_38A6A8(s->outer, s->power);
+            k *= (planeD - s->inner) / (s->outer - s->inner);
+        }
+        k = clamp_38A6A8(k, 5.0f);
+        {
+            float x = s->dir[0] * k;
+            float y = s->dir[1] * k;
+            float z = s->dir[2] * k;
+            out.x = x;
+            out.y = y;
+            out.z = z;
+        }
+        func_00389520(self, (float*)&n, &out);
+        break;
+    case 2:
+        if (!func_0038A618(p, (float*)&n, s, &dist, &inv))
+            return;
+        fade = fade_38A6A8(s, dist);
+        k = curve_38A6A8(s, inv) * s->strength * fade;
+        k = clamp_38A6A8(k, 5.0f);
+        out.x = s->dir[0] * k;
+        out.y = s->dir[1] * k;
+        out.z = s->dir[2] * k;
+        func_00389520(self, (float*)&n, &out);
+        break;
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/particle", func_0038ABF8);
