@@ -760,7 +760,7 @@ static inline float fabs_2680(float x)
 }
 
 // Unicode version of func_00392430: copies as much of str into dst as fits in width; returns the next line start (0 when done).
-extern "C" unsigned short* func_00392680(void* f_, const unsigned short* str, unsigned short* dst, int max, float sx, float width)
+extern "C" unsigned short* func_00392680(void* f_, float sx, float width, const unsigned short* str, unsigned short* dst, int max)
 {
     sFontRes2680* f = (sFontRes2680*)f_;
     width -= fabs_2680(f->padX);

@@ -2452,7 +2452,7 @@ extern "C" void strcpy1(void* str, int a1);
 extern "C" void func_002C2688(void* str, unsigned short* s);
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
 extern "C" void sprintf1_1A7390(void* str, int fmt, ...) __asm__("sprintf1");
-extern "C" unsigned short* func_00392680(void* f, const unsigned short* str, unsigned short* dst, int max, float sx, float width);
+extern "C" unsigned short* func_00392680(void* f, float sx, float width, const unsigned short* str, unsigned short* dst, int max);
 extern "C" char* cUIText_getFont(void* text);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
@@ -2540,7 +2540,7 @@ extern "C" void func_001A7390(void* self, const char* name, int mode)
         sVEntryP_001A7390* vt = *(sVEntryP_001A7390**)((char*)t1 + 8);
         vt[20].fn((char*)t1 + vt[20].delta, size);
         sVec3_001A7390 scale = *(sVec3_001A7390*)((char*)t1 + 0x50);
-        unsigned short* rest = func_00392680(cUIText_getFont(t1), wide, wrapped, 0x30, scale.x, size[0]);
+        unsigned short* rest = func_00392680(cUIText_getFont(t1), scale.x, size[0], wide, wrapped, 0x30);
         cUIText_setUnicodeString(t1, (char*)wrapped);
         if (rest != 0) {
             cUIText_setUnicodeString(t2, (char*)rest);

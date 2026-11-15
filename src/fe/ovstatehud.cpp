@@ -2096,7 +2096,7 @@ extern "C" void func_001F2AA0(void* self, sFont_001F2AA0* font, sHudElemDef_001F
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001F2DB0);
 #ifdef SKIP_ASM
-extern "C" unsigned short* func_00392680(void* f, const unsigned short* str, unsigned short* dst, int max, float sx, float width);
+extern "C" unsigned short* func_00392680(void* f, float sx, float width, const unsigned short* str, unsigned short* dst, int max);
 extern "C" float func_003921F0(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
 extern "C" void func_00391E30(void* self, float x, float y, const unsigned short* str);
 
@@ -2144,7 +2144,7 @@ extern "C" void func_001F2DB0(void* self, sFont_001F2DB0* font, sHudElemDef_001F
     sf->f3C = sf->f34 * escale[1];
     const unsigned short* p = str;
     while (p != 0) {
-        p = func_00392680(*(sFont_001F2DB0**)((char*)self + 0x428), p, lines[n], 0x32, (*(sFont_001F2DB0**)((char*)self + 0x428))->f38, wrap[0]);
+        p = func_00392680(*(sFont_001F2DB0**)((char*)self + 0x428), (*(sFont_001F2DB0**)((char*)self + 0x428))->f38, wrap[0], p, lines[n], 0x32);
         n++;
     }
     func_001E91A8(&defs[idx], &col);
