@@ -619,7 +619,195 @@ extern "C" void func_001515B8(sEconItems_001515B8* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("be/beintecon", func_00151600);
+#ifdef SKIP_ASM
+// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct sEconBits_1600 {
+    unsigned long b0 : 1;
+    unsigned long b1 : 1;
+    unsigned long b2 : 1;
+    unsigned long b3 : 1;
+    unsigned long b4 : 1;
+    unsigned long b5 : 1;
+    unsigned long b6 : 1;
+    unsigned long b7 : 1;
+    unsigned long b8 : 1;
+    unsigned long b9 : 1;
+    unsigned long b10 : 1;
+    unsigned long b11 : 1;
+    unsigned long b12 : 1;
+    unsigned long b13 : 1;
+    unsigned long b14 : 1;
+    unsigned long b15 : 1;
+    unsigned long b16 : 1;
+    unsigned long b17 : 1;
+    unsigned long b18 : 1;
+    unsigned long b19 : 1;
+};
+
+struct sEconSlot_1600 {
+    char b[8];
+};
+
+struct sEconEnt_1600 {
+    signed char flag;               // 0x0
+    char pad1[3];
+    int data[2];                    // 0x4
+};
+
+struct sEconFlags_1600 {
+    unsigned int f0 : 1;
+    unsigned int f1 : 1;
+    unsigned int f2 : 1;
+    unsigned int f3 : 1;
+    unsigned int f4 : 1;
+};
+
+struct sEconDef_1600 {
+    char pad0[0x1A];
+    signed char a;                  // 0x1A
+    signed char b;                  // 0x1B
+    char pad1C[0x8];
+};
+
+struct sEconCol_1600 {
+    char b[7];
+};
+
+struct sEconColRec_1600 {
+    sEconCol_1600 col;
+    char pad[8];
+};
+
+struct sEcon_1600 {
+    int f0;                         // 0x0
+    sEconEnt_1600 ents[23][1];      // 0x4
+    sEconFlags_1600 flags[0x58];    // 0x118
+    char pad_0x278[0x0];
+    sEconBits_1600 bits;            // 0x278
+    char pad_0x280[0x0];
+    short h280;                     // 0x280
+    short h282;                     // 0x282
+    short h284;                     // 0x284
+    short h286;                     // 0x286
+    char pad_0x288[0xAC4 - 0x288];
+    int fAC4;                       // 0xAC4
+    int fAC8;                       // 0xAC8
+    int fACC;                       // 0xACC
+    sEconSlot_1600 slots[26];       // 0xAD0
+    char fBA0[0x18];                // 0xBA0
+    char fBB8[0x8];                 // 0xBB8
+    signed char kind;               // 0xBC0
+    char pad_0xBC1[0xBDF - 0xBC1];
+    sEconCol_1600 col;              // 0xBDF
+    char fBE6[0xDE4 - 0xBE6];       // 0xBE6
+    char fDE4[0x54];                // 0xDE4
+    int pad_0xE38_[0];
+    struct {
+        int v;
+        int pad;
+    } fE38[25];                    // 0xE38
+    char pad_0xF00_[0xF00 - 0xE38 - 25 * 8];
+    unsigned int fF00;              // 0xF00
+    signed char fF04;               // 0xF04
+    char pad_0xF05[3];
+    unsigned int fF08[2];           // 0xF08
+    char pad_0xF10[0xF28 - 0xF10];
+    char fF28[4];                   // 0xF28
+    char pad_0xF2C[4];
+    char fF30[0x50];                // 0xF30
+    int fF80;                       // 0xF80
+};
+
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void MEM_fill(void* dst, int c, int n);
+struct sEconItems_151A88;
+struct sEcon_001519E0;
+extern "C" void func_00151A88(sEconItems_151A88* self, int k);
+extern "C" void func_001519E0(sEcon_001519E0* self, int k);
+extern "C" void func_00150558(int kind, void* dst);
+extern sEconDef_1600 D_0043EE10_v1600[] __asm__("D_0043EE10");
+extern sEconColRec_1600 D_005308D9[];
+
+extern "C" void func_00151600(sEcon_1600* self, int k, int reload)
+{
+    if (reload) {
+        func_00151A88((sEconItems_151A88*)self, k);
+    }
+    self->bits.b0 = 0;
+    self->bits.b1 = 0;
+    self->bits.b2 = 0;
+    self->bits.b3 = 0;
+    self->bits.b4 = 0;
+    self->bits.b5 = 0;
+    self->bits.b12 = 1;
+    self->bits.b13 = 1;
+    self->bits.b6 = 1;
+    self->bits.b7 = 1;
+    self->bits.b8 = 1;
+    self->bits.b9 = 1;
+    self->bits.b10 = 1;
+    self->bits.b11 = 1;
+    self->bits.b14 = 1;
+    self->bits.b15 = 1;
+    self->bits.b16 = 1;
+    self->bits.b17 = 1;
+    self->bits.b18 = 1;
+    self->bits.b19 = 1;
+    self->f0 = 1;
+    self->h280 = 1;
+    self->h284 = 1;
+    self->h282 = 0;
+    self->h286 = 0;
+    self->fACC = 0;
+    func_00416210(self->fBA0, 0, 0x18);
+    sEconSlot_1600 blank;
+    func_00416210(&blank, 0, 8);
+    blank.b[1] = -1;
+    int i;
+    for (i = 0; i < 17; i++) {
+        for (int j = 0; j < 26; j++) {
+            self->slots[j] = blank;
+        }
+    }
+    for (i = 0; i < 1; i++) {
+        for (int j = 0; j < 23; j++) {
+            func_00416210(self->ents[j][i].data, 0, 8);
+            self->ents[j][i].flag = 0;
+        }
+    }
+    for (i = 0; i < 0x58; i++) {
+        sEconDef_1600* d = &D_0043EE10_v1600[i];
+        self->flags[i].f0 = d->a;
+        self->flags[i].f1 = 1;
+        self->flags[i].f2 = 0;
+        self->flags[i].f3 = 0;
+        self->flags[i].f4 = d->b;
+    }
+    func_00416210(&self->col, 1, 7);
+    self->col = D_005308D9[k].col;
+    self->fAC4 = 0;
+    self->fAC8 = 0;
+    func_001519E0((sEcon_001519E0*)self, self->kind);
+    func_00150558(self->kind, self->fBE6);
+    func_00416210(self->fBB8, 0, 8);
+    func_00416210(self->fDE4, 0, 0x54);
+    self->fF04 = 0;
+    for (int i = 0; i < 25; i++) {
+        *(int*)((char*)self + 0xE38 + i * 8) = 0;
+        self->fF00 &= ~(1 << i);
+    }
+    for (int i = 0; i < 61; i++) {
+        self->fF08[i / 32] &= ~(1 << (i % 32));
+    }
+    MEM_fill(self->fF28, 0, 4);
+    MEM_fill(self->fF30, 0, 0x50);
+    self->fF80 = 0;
+    *(int*)((char*)self + 0x27C) = 0x11;
+}
+#endif
 
 //100%
 INCLUDE_ASM("be/beintecon", func_001519E0);
