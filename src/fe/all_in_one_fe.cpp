@@ -1542,7 +1542,120 @@ extern "C" void func_0021EA00(void* self, sColour* col, float* pos, float w, flo
 }
 #endif
 
+//100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021ED48);
+#ifdef SKIP_ASM
+struct V2_ED48 { float x, y; };
+struct V4_ED48 { float x, y, z, w; };
+struct Ent_ED48 { signed char a, b, c, d; };
+struct Tab_ED48 { Ent_ED48 e[9]; } __attribute__((aligned(4)));
+struct Str_ED48 { char c[2]; };
+extern Tab_ED48 D_0046ED40;
+extern Str_ED48 D_004A22E8[];
+extern char* D_004A21C8;
+extern "C" void func_001E91F8(void*, void*);
+extern "C" void func_001E9220(void*, void*, int);
+void func_001E91A8(void*, void*);
+extern "C" void func_001F10F8(void*, void*, void*, void*, void*, int, int, int);
+extern "C" void func_001F1190(void*, int, void*, void*, void*, void*);
+extern "C" void func_00391CB0(void*, float, float, char*);
+
+// Inline copy of func_0021E7E0's body (the original helper was inlined here): colour/position/size by pointer, copied locally.
+static inline void draw_ED48(char* self, const Col_E7E0* colp, const V2_ED48* posp, const V2_ED48* sizep,
+                             float t, float sx, float sy, float amin, float amax) {
+    Col_E7E0 col = *colp;
+    V2_ED48 pos = *posp;
+    V2_ED48 size = *sizep;
+    float dw, dh;
+    float range = amax - amin;
+    col.r = col.r * (amin + (t > 1.0f ? range * (2.0f - t) : range * t));
+    dw = size.x * (sx - 1.0f);
+    dh = size.y * (sy - 1.0f);
+    pos.x -= dw * 0.5f;
+    pos.y -= dh * 0.5f;
+    size.x += dw;
+    size.y += dh;
+    float* pp = &pos.x;
+    int id = *(int*)(self + 0x474);
+    *(short*)(D_004A289C->e84 + 0x10) = id;
+    if (size.x > 72.0f) {
+        float cap = 36.0f;  // width of each end cap: left cap, stretched middle (size.x - 2 caps), right cap
+        float mid = (*(float*)(self + 0x484) + *(float*)(self + 0x488)) * 0.5f;
+        func_0021EA00_E7E0(self, &col, pp, cap, size.y, *(float*)(self + 0x484), *(float*)(self + 0x480), mid, *(float*)(self + 0x48C));
+        pos.x += cap;
+        func_0021EA00_E7E0(self, &col, pp, size.x - 72.0f, size.y, mid, *(float*)(self + 0x480), mid, *(float*)(self + 0x48C));
+        pos.x += size.x - 72.0f;
+        func_0021EA00_E7E0(self, &col, pp, cap, size.y, mid, *(float*)(self + 0x480), *(float*)(self + 0x488), *(float*)(self + 0x48C));
+    } else {
+        func_0021EA00_E7E0(self, &col, pp, size.x, size.y, *(float*)(self + 0x484), *(float*)(self + 0x480), *(float*)(self + 0x488), *(float*)(self + 0x48C));
+    }
+}
+
+// PORT: elems is a pointer passed as int
+extern "C" void func_0021ED48(char* self, int elems, char* rider, int mode, int idx, float* scale, V2_ED48* sc2, int kind, int layer) {
+    V2_ED48 one;
+    Tab_ED48 tab;
+    Str_ED48 str;
+    V2_ED48 a;
+    V2_ED48 size;
+    V2_ED48 p;
+    Col_E7E0 col;
+    signed char e;
+    one.x = 1.0f;
+    one.y = 1.0f;
+    tab = D_0046ED40;
+    str = D_004A22E8[0];
+    if (mode == 0) {
+        e = idx * 2 + 30;
+    } else {
+        e = tab.e[idx].a;
+    }
+    col.r = 0.4000000059604645f;
+    col.g = 1.0f;
+    col.b = 1.0f;
+    col.a = 1.0f;
+    Col_E7E0* cp = &col;
+    if (kind == 2) {
+        func_001E91A8((char*)(e * 0x24 + elems), cp);
+    }
+    str.c[0] = D_004A21C8[idx];
+    char* E = (char*)(e * 0x24 + elems);
+    func_001E91F8(E, &a);
+    func_001E9220(E, &size, 0);
+    func_001F10F8(self, &p, &a, &size, scale, E[0x20], E[0x21], mode);
+    scale[0] = scale[0] * 0.0555555559694767f * size.x;
+    scale[1] = scale[1] * 0.0555555559694767f * size.y;
+    int* w = (int*)(D_004A289C->e84 + 8);
+    *w = (*w & ~0x3E0) | (((E[0x22] + layer) << 5) & 0x3E0);
+    *(Col_E7E0*)(*(char**)(self + 0x42C) + 0x40) = col;
+    char* t = *(char**)(self + 0x42C);
+    *(float*)(t + 0x38) = *(float*)(t + 0x30) * scale[0];
+    *(float*)(t + 0x3C) = *(float*)(t + 0x34) * scale[1];
+    func_00391CB0(*(char**)(self + 0x42C), p.x, p.y, str.c);
+    char* t2 = *(char**)(self + 0x42C);
+    *(float*)(t2 + 0x38) = *(float*)(t2 + 0x30) * one.x;
+    *(float*)(t2 + 0x3C) = *(float*)(t2 + 0x34) * one.y;
+    if (kind != 0) {
+        char* E2 = (char*)(elems + (e + 1) * 0x24);
+        func_001E91F8(E2, &a);
+        func_001E9220(E2, &size, 0);
+        size.x *= sc2->x;
+        size.y *= sc2->y;
+        func_001F10F8(self, &p, &a, &size, &one, E[0x20], E[0x21], mode);
+        func_001E91A8(E2, cp);
+        *(Col_E7E0*)(*(char**)(self + 0x42C) + 0x40) = col;
+        w = (int*)(D_004A289C->e84 + 8);
+        *w = (*w & ~0x3E0) | (((E2[0x22] + layer) << 5) & 0x3E0);
+        func_001F1190(self, *(int*)(self + 0x494), &p, &size, &one, cp);
+        if (kind == 2 && *(float*)(rider + 0x64) >= 0.0f) {
+            int under = layer - 1;
+            w = (int*)(D_004A289C->e84 + 8);
+            *w = (*w & ~0x3E0) | (((E2[0x22] + under) << 5) & 0x3E0);
+            draw_ED48(self, (Col_E7E0*)(rider + 0x54), &p, &size, *(float*)(rider + 0x64), 3.4000000953674316f, 3.4000000953674316f, 0.2603548765182495f, 0.49998536705970764f);
+        }
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021F338);
