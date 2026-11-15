@@ -356,7 +356,79 @@ extern "C" void func_002ECFA0(void)
 }
 #endif
 
+//100%
 INCLUDE_ASM("visualfx/lensfx", func_002ED048);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+struct cWorldPainterManArg {
+    void* field_0x0;
+};
+
+struct sLensVec_ED048 {
+    float x, y, z, w;
+};
+
+struct sLensRow_ED048 {
+    void* q[9];                 // 0x00
+    int f24;                    // 0x24
+    sLensVec_ED048 v28;         // 0x28
+    sLensVec_ED048 v38;         // 0x38
+    char pad48[0xF0 - 0x48];
+};
+
+// The unit declares D_004FA370 later as sLensFxSlot[]; bind views to the labels.
+extern sLensRow_ED048 D_lensRows_ED048[] __asm__("D_004FA370");
+extern char* D_004A28A8;
+extern int D_004A3B54;
+extern cWorldPainterManArg D_004A5560;
+extern cWorldPainterManArg D_004A5568;
+extern cWorldPainterManArg D_004A5570;
+extern cWorldPainterManArg D_004A5578;
+extern cWorldPainterManArg D_004A5580;
+extern cWorldPainterManArg D_004A5588;
+extern cWorldPainterManArg D_004A5590;
+extern cWorldPainterManArg D_004A5598;
+extern cWorldPainterManArg D_004A55A0;
+void* cWorldPainterMan_getQuery(void* self, cWorldPainterManArg* x);
+
+static inline void lensVecOneED048(sLensVec_ED048* v)
+{
+    v->x = 1.0f;
+    v->y = 1.0f;
+    v->z = 1.0f;
+    v->w = 1.0f;
+}
+
+extern "C" void func_002ED048(void)
+{
+    void* pm = *(void**)(*(char**)(*(char**)(D_004A28A8 + 0x84) + 0x10) + 0x8);
+    int i;
+    cWorldPainterManArg* a0 = &D_004A5560;
+    cWorldPainterManArg* a1 = &D_004A5568;
+    cWorldPainterManArg* a2 = &D_004A5570;
+    cWorldPainterManArg* a3 = &D_004A5578;
+    cWorldPainterManArg* a4 = &D_004A5580;
+    cWorldPainterManArg* a5 = &D_004A5588;
+    cWorldPainterManArg* a6 = &D_004A5590;
+    cWorldPainterManArg* a7 = &D_004A5598;
+    cWorldPainterManArg* a8 = &D_004A55A0;
+    for (i = 0; i < 8; i++) {
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[0] = cWorldPainterMan_getQuery(pm, a0);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[1] = cWorldPainterMan_getQuery(pm, a1);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[2] = cWorldPainterMan_getQuery(pm, a2);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[3] = cWorldPainterMan_getQuery(pm, a3);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[4] = cWorldPainterMan_getQuery(pm, a4);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[5] = cWorldPainterMan_getQuery(pm, a5);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[6] = cWorldPainterMan_getQuery(pm, a6);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[7] = cWorldPainterMan_getQuery(pm, a7);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[8] = cWorldPainterMan_getQuery(pm, a8);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].f24 = 0;
+        lensVecOneED048(&D_lensRows_ED048[i].v28);
+        lensVecOneED048(&D_lensRows_ED048[i].v38);
+    }
+    D_004A3B54 = 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002ED1D0);
