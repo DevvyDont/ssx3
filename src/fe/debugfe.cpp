@@ -1160,7 +1160,7 @@ extern char D_004A12F8[];
 extern char D_004A1330[];
 extern char D_004A1338[];
 extern char D_004A12C0[];
-extern "C" void func_00392908(void* self, const char* str, float x, float y);
+extern "C" void func_00392908(void* self, float x, float y, const char* str);
 extern "C" void func_00392A60(void* self, const char* str, float x, float y);
 extern "C" void func_00391CB0(void* self, float x, float y, const char* str);
 extern "C" void func_001DCA80(void* self, float x, float y, const char* fmt, ...);
@@ -1228,120 +1228,120 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
     case 1:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D258, 320.0f, 200.0f);
+        func_00392908(font, 320.0f, 200.0f, D_0045D258);
         break;
     case 2:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D270, 320.0f, 200.0f);
+        func_00392908(font, 320.0f, 200.0f, D_0045D270);
         break;
     case 4:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D288, 320.0f, 200.0f);
+        func_00392908(font, 320.0f, 200.0f, D_0045D288);
         break;
     case 5:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D2A0, 320.0f, 200.0f);
+        func_00392908(font, 320.0f, 200.0f, D_0045D2A0);
         break;
     case 8:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D2B8, 320.0f, 200.0f);
+        func_00392908(font, 320.0f, 200.0f, D_0045D2B8);
         break;
     case 9:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D2D0, 320.0f, 200.0f);
+        func_00392908(font, 320.0f, 200.0f, D_0045D2D0);
         break;
     case 7:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D2E8, 320.0f, 200.0f);
+        func_00392908(font, 320.0f, 200.0f, D_0045D2E8);
         break;
     case 11:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D300, 320.0f, 200.0f);
+        func_00392908(font, 320.0f, 200.0f, D_0045D300);
         break;
     case 13:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D310, 320.0f, 100.0f);
+        func_00392908(font, 320.0f, 100.0f, D_0045D310);
         break;
     case 17:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D328, 320.0f, 100.0f);
+        func_00392908(font, 320.0f, 100.0f, D_0045D328);
         break;
     case 18: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D340, 320.0f, 100.0f);
+        func_00392908(font, 320.0f, 100.0f, D_0045D340);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
         break;
     }
     case 19: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D358, 320.0f, 100.0f);
+        func_00392908(font, 320.0f, 100.0f, D_0045D358);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
         break;
     }
     case 20: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D378, 320.0f, 100.0f);
+        func_00392908(font, 320.0f, 100.0f, D_0045D378);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
         break;
     }
     case 22: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D390, 320.0f, 100.0f);
+        func_00392908(font, 320.0f, 100.0f, D_0045D390);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
         break;
     }
     case 21: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D3A0, 320.0f, 100.0f);
+        func_00392908(font, 320.0f, 100.0f, D_0045D3A0);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
         break;
     }
     case 23: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D3C0, 320.0f, 100.0f);
+        func_00392908(font, 320.0f, 100.0f, D_0045D3C0);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
         break;
     }
     case 24: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D3D8, 320.0f, 100.0f);
+        func_00392908(font, 320.0f, 100.0f, D_0045D3D8);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, getStr17E5C8(D_004A3028, self->tag).p, 320.0f, 150.0f);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
         break;
     }
     case 16: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, D_0045D3F8, 320.0f, 100.0f);
+        func_00392908(font, 320.0f, 100.0f, D_0045D3F8);
         scale17E5C8(font, 0.7f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.6f);
         float y = 200.0f;

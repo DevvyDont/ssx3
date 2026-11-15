@@ -401,7 +401,7 @@ extern sColour_EDA0 D_004C6878;
 extern sV2_EDA0 D_004A4EC0;
 extern char D_004A2690[];
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_00392908(void* font, const char* str, float x, float y);
+extern "C" void func_00392908(void* font, float x, float y, const char* str);
 
 extern int D_004A275C;
 extern char* D_004A2758;
@@ -504,7 +504,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     D_004A2764_EDA0->color2 = D_004C6878;
     D_004A2764_EDA0->scale = D_004A4EC0;
     D_004A289C_EDA0->stateTop->SetPrim(10);
-    func_00392908(D_004A2764_EDA0, buf, self->x, self->y);
+    func_00392908(D_004A2764_EDA0, self->x, self->y, buf);
     D_004A2764_EDA0->SetScale(1.0f, 1.0f);
 
     sIcon_EDA0* arrow = &D_004C8C58_EDA0[4];

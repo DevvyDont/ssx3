@@ -823,7 +823,7 @@ INCLUDE_ASM("render/font", func_00392908);
 #ifdef SKIP_ASM
 extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
 
-extern "C" void func_00392908(void* self, const char* str, float x, float y)
+extern "C" void func_00392908(void* self, float x, float y, const char* str)
 {
     float w = func_00391FB0(self, str, 0, 0, *(float*)((char*)self + 0x38), *(float*)((char*)self + 0x3C));
     func_00391CB0(self, x - w * 0.5f, y, (sMat00391C48*)str);
@@ -856,7 +856,7 @@ extern "C" void func_003929F8(void* self, const char* fmt, void* ap, float x, fl
     sBXStr_29F8 s;
     s.p = (char*)D_004A3E90;
     func_003191C0(&s, fmt, ap);
-    func_00392908(self, s.p, x, y);
+    func_00392908(self, x, y, s.p);
     cBXString__cBXString(&s, 2);
 }
 #endif
