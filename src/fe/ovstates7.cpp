@@ -2,7 +2,7 @@
 
 INCLUDE_ASM("fe/ovstates7", cOVStateTrophy_onCreateScreen);
 
-INCLUDE_ASM("fe/ovstates7", func_0020E9A0);
+INCLUDE_ASM("fe/ovstates7", cOVStateTrophy_onWidgetEvent);
 
 INCLUDE_ASM("fe/ovstates7", func_0020EAA0);
 

@@ -21,7 +21,7 @@ extern "C" void cFEStateProfileSelect_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018EB40);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileSelect_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void cUIStateStack_push(void* self, void* state);
 
@@ -51,7 +51,7 @@ struct sVEK18EB40b {
 };
 
 
-extern "C" void func_0018EB40(void* self, char* menu, unsigned int msg)
+extern "C" void cFEStateProfileSelect_onWidgetEvent(void* self, char* menu, unsigned int msg)
 {
     if (menu == 0)
         return;
@@ -796,9 +796,9 @@ extern "C" void func_0018FAF0(void* self)
 extern "C" void* func_001D58B8(void*);
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018FC70__FPv);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
-void func_0018FC70(void* self)
+void cFEStateProfileLoad_onDestroyScreen(void* self)
 {
     func_001D58B8(self);
     *(int*)((char*)self + 0x1a4) = 0;

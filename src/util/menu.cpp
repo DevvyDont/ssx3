@@ -26,11 +26,11 @@ cMenuItem* cMenuItem_cMenuItem(cMenuItem* self, void* text)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CA280);
+INCLUDE_ASM("util/menu", cMenuItem__cMenuItem);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern "C" void func_002CA280(int* self, int flags)
+extern "C" void cMenuItem__cMenuItem(int* self, int flags)
 {
     *(void***)((char*)self + 0x10) = cMenuItem_vtbl;
     if (flags & 1) {
@@ -2213,13 +2213,13 @@ extern "C" cSubMenuItem_sItem* cSubMenuItem_cSubMenuItem(cSubMenuItem_sItem* sel
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CCD20);
+INCLUDE_ASM("util/menu", cSubMenuItem_input);
 #ifdef SKIP_ASM
 extern "C" int func_002CA2B0(void* self);
 extern "C" int func_002CA3E8(void** self);
 extern "C" void func_002CC3B8(void* stack, void* item);
 
-extern "C" int func_002CCD20(void* self)
+extern "C" int cSubMenuItem_input(void* self)
 {
     int r = func_002CA2B0(self);
     if (cMenuItem_isLocked(self) == 0 && r == 0 && func_002CA3E8((void**)self) == 6) {
@@ -2230,11 +2230,11 @@ extern "C" int func_002CCD20(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CCD90);
+INCLUDE_ASM("util/menu", cSubMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 
-extern "C" void* func_002CCD90(void* self, void* a1)
+extern "C" void* cSubMenuItem_preRender(void* self, void* a1)
 {
     func_002CA4C8(self, a1, 0, *(int*)((char*)a1 + 0x14), 0);
     return self;
@@ -2244,13 +2244,13 @@ extern "C" void* func_002CCD90(void* self, void* a1)
 extern "C" void* func_002CA988(void*, int, int, int);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CCDC8__FPvi);
+INCLUDE_ASM("util/menu", cSubMenuItem_render__FPvi);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 
-void* func_002CCDC8(void* self, int a1)
+void* cSubMenuItem_render(void* self, int a1)
 {
     return func_002CA988_5(self, a1, 0, *(int*)((char*)self + 0x14), 0);
 }
@@ -2581,11 +2581,11 @@ int func_002CD2E8(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CD2F0);
+INCLUDE_ASM("util/menu", cNullMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 
-extern "C" void* func_002CD2F0(void* self, void* a1)
+extern "C" void* cNullMenuItem_preRender(void* self, void* a1)
 {
     func_002CA4C8(self, a1, 0, *(int*)((char*)a1 + 0x14), 0);
     return self;
@@ -2593,13 +2593,13 @@ extern "C" void* func_002CD2F0(void* self, void* a1)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CD328__FPvi);
+INCLUDE_ASM("util/menu", cNullMenuItem_render__FPvi);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 
-void* func_002CD328(void* self, int a1)
+void* cNullMenuItem_render(void* self, int a1)
 {
     return func_002CA988_5(self, a1, 0, *(int*)((char*)self + 0x14), 0);
 }
@@ -2639,13 +2639,13 @@ int func_002CD398(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CD3A0);
+INCLUDE_ASM("util/menu", cSpaceMenuItem_preRender);
 #ifdef SKIP_ASM
 struct s2CD3A0Vec {
     float x, y, z, w;
 };
 
-extern "C" s2CD3A0Vec func_002CD3A0(void* self)
+extern "C" s2CD3A0Vec cSpaceMenuItem_preRender(void* self)
 {
     s2CD3A0Vec v;
     v.x = v.y = v.z = 0.0f;
@@ -2655,9 +2655,9 @@ extern "C" s2CD3A0Vec func_002CD3A0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CD3F0__FPv);
+INCLUDE_ASM("util/menu", cSpaceMenuItem_render__FPv);
 #ifdef SKIP_ASM
-void func_002CD3F0(void* self)
+void cSpaceMenuItem_render(void* self)
 {
 }
 #endif
@@ -2982,7 +2982,7 @@ extern "C" void func_002CD9B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CD9D8);
+INCLUDE_ASM("util/menu", cIntMenuItem_input);
 #ifdef SKIP_ASM
 // PORT: func_002CA408/func_002CA428 return a float (axis value, $f0); the unit declares them void*.
 float func_002CA408_f(void* self) __asm__("func_002CA408__FPv");
@@ -3005,7 +3005,7 @@ static inline float ffloor_002CD9D8(float x)
     return t;
 }
 
-extern "C" int func_002CD9D8(void* self)
+extern "C" int cIntMenuItem_input(void* self)
 {
     char* s = (char*)self;
     int r = func_002CA2B0(self);
@@ -3069,12 +3069,12 @@ extern "C" int func_002CD9D8(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CDBF0);
+INCLUDE_ASM("util/menu", cIntMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 extern void* D_004866E0[];
 
-extern "C" void* func_002CDBF0(void* self, void* a1)
+extern "C" void* cIntMenuItem_preRender(void* self, void* a1)
 {
     func_002CA4C8(self, a1, *(int*)((char*)a1 + 0x14), 0, D_004866E0);
     return self;
@@ -3082,14 +3082,14 @@ extern "C" void* func_002CDBF0(void* self, void* a1)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CDC28);
+INCLUDE_ASM("util/menu", cIntMenuItem_render);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 extern char D_004A3970[];
 
-extern "C" void func_002CDC28(void* self, int a1)
+extern "C" void cIntMenuItem_render(void* self, int a1)
 {
     char buf[0x70];
     sprintf(buf, D_004A3970, **(int**)((char*)self + 0x18));
@@ -3155,7 +3155,7 @@ extern "C" cFloatMenuItem_sItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem_sI
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CDD78);
+INCLUDE_ASM("util/menu", cFloatMenuItem_input);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "vtable.h"
@@ -3172,7 +3172,7 @@ void* func_002CA488_DD78(void* self) __asm__("func_002CA488__FPv");
 void* func_002CA4A8_DD78(void* self) __asm__("func_002CA4A8__FPv");
 
 // PORT: uses g++'s >? (max) operator.
-extern "C" int func_002CDD78(void* self)
+extern "C" int cFloatMenuItem_input(void* self)
 {
     char* s = (char*)self;
     int r = func_002CA2B0(self);
@@ -3249,12 +3249,12 @@ extern "C" void func_002CDF78(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CDFA0);
+INCLUDE_ASM("util/menu", cFloatMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 extern void* D_004866F0[];
 
-extern "C" void* func_002CDFA0(void* self, void* a1)
+extern "C" void* cFloatMenuItem_preRender(void* self, void* a1)
 {
     func_002CA4C8(self, a1, *(int*)((char*)a1 + 0x14), 0, D_004866F0);
     return self;
@@ -3314,22 +3314,22 @@ void* prettyFloat_impl(void* out, float v)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CE100);
+INCLUDE_ASM("util/menu", cFloatMenuItem_render);
 #ifdef SKIP_ASM
 // PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 extern "C" void cBXString__cBXString(void* self, int flags);
 
-struct func_002CE100_sString {
+struct cFloatMenuItem_render_sString {
     char* str;
 };
 
 // returns a cBXString by value (hidden result pointer in $4)
-extern "C" void prettyFloat(func_002CE100_sString* out, float v);
+extern "C" void prettyFloat(cFloatMenuItem_render_sString* out, float v);
 
-extern "C" void func_002CE100(void* self, int a1)
+extern "C" void cFloatMenuItem_render(void* self, int a1)
 {
-    func_002CE100_sString s;
+    cFloatMenuItem_render_sString s;
     prettyFloat(&s, **(float**)((char*)self + 0x18) * *(float*)((char*)self + 0x24) + *(float*)((char*)self + 0x28));
     func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, s.str);
     cBXString__cBXString(&s, 2);
@@ -3356,13 +3356,13 @@ extern "C" void* func_002CE170(void* self, void* text, int a2, int a3, float f1,
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CE1F0);
+INCLUDE_ASM("util/menu", cAngleMenuItem_input);
 #ifdef SKIP_ASM
 extern "C" int func_002CA2B0(void* self);
 extern "C" int cMenuItem_isLocked(void* self);
 
 // PORT: uses g++'s >? (max) operator.
-extern "C" int func_002CE1F0(void* self)
+extern "C" int cAngleMenuItem_input(void* self)
 {
     char* s = (char*)self;
     int r = func_002CA2B0(self);
@@ -3411,12 +3411,12 @@ extern "C" int func_002CE1F0(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CE368);
+INCLUDE_ASM("util/menu", cAngleMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 extern void* D_004866F0[];
 
-extern "C" void* func_002CE368(void* self, void* a1)
+extern "C" void* cAngleMenuItem_preRender(void* self, void* a1)
 {
     func_002CA4C8(self, a1, *(int*)((char*)a1 + 0x14), 0, D_004866F0);
     return self;
@@ -3808,13 +3808,13 @@ extern "C" cColorMenuItem__cColorMenuItem_sItem* cColorMenuItem__cColorMenuItem(
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CED78);
+INCLUDE_ASM("util/menu", cColorMenuItem_input);
 #ifdef SKIP_ASM
 extern "C" int func_002CA2B0(void* self);
 extern "C" int cMenuItem_isLocked(void* self);
 
 // PORT: uses g++'s >? (max) operator.
-extern "C" int func_002CED78(void* self)
+extern "C" int cColorMenuItem_input(void* self)
 {
     char* s = (char*)self;
     int r = func_002CA2B0(self);
@@ -4624,9 +4624,9 @@ int func_002CFF80(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/menu", func_002CFF88);
+INCLUDE_ASM("util/menu", cRGBTitleMenuItem_preRender);
 #ifdef SKIP_ASM
-struct func_002CFF88_sRect {
+struct cRGBTitleMenuItem_preRender_sRect {
     float x;
     float y;
     float w;
@@ -4634,9 +4634,9 @@ struct func_002CFF88_sRect {
 };
 
 // PORT: `>?` (g++ max operator); returns the rect through the hidden result pointer.
-extern "C" func_002CFF88_sRect* func_002CFF88(func_002CFF88_sRect* out, void* item)
+extern "C" cRGBTitleMenuItem_preRender_sRect* cRGBTitleMenuItem_preRender(cRGBTitleMenuItem_preRender_sRect* out, void* item)
 {
-    func_002CFF88_sRect r;
+    cRGBTitleMenuItem_preRender_sRect r;
     func_002CA4C8(&r, item, *(int*)((char*)item + 0x18), 0, 0);
     r.w += 36.0f;
     r.h = r.h >? 29.0f;
@@ -4646,7 +4646,7 @@ extern "C" func_002CFF88_sRect* func_002CFF88(func_002CFF88_sRect* out, void* it
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002D0008);
+INCLUDE_ASM("util/menu", cRGBTitleMenuItem_render);
 #ifdef SKIP_ASM
 // PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the body reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
@@ -4759,7 +4759,7 @@ public:
 extern cCtx_2D0008* D_004A289C_2d0008 __asm__("D_004A289C");
 
 // PORT: rect pointer passed through func_002CA988's int parameter
-extern "C" void func_002D0008(char* self, float* rect)
+extern "C" void cRGBTitleMenuItem_render(char* self, float* rect)
 {
     func_002CA988_5(self, (int)rect, *(int*)(self + 0x18), 0, 0);
     sVtx_2D0008 v[4];
@@ -4958,7 +4958,7 @@ extern "C" void* func_002D05A8(void* self, void* name, float* values, int a3, fl
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002D06E8);
+INCLUDE_ASM("util/menu", cVectorMenuItem_input);
 #ifdef SKIP_ASM
 extern "C" void* cExpandMenuItem_input(void* self);
 
@@ -5002,7 +5002,7 @@ static inline void menuNormalizeD6E8(sMenuVecD6E8& out, const sMenuVecD6E8& v)
     }
 }
 
-extern "C" void* func_002D06E8(sMenuColD6E8* self)
+extern "C" void* cVectorMenuItem_input(sMenuColD6E8* self)
 {
     void* ret = cExpandMenuItem_input(self);
     if (self->linked != 0) {

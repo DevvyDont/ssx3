@@ -739,13 +739,13 @@ extern "C" void *func_0021D0D0(void *arg0, int arg1, int arg2) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021D138);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateHiScoreList__cOVStateHiScoreList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
-extern "C" void func_0021D138(void *arg0) {
+extern "C" void cOVStateHiScoreList__cOVStateHiScoreList(void *arg0) {
     *(char **)((char*)arg0 + 8) = D_00474E08;
     func_0039E390_a(arg0);
 }
@@ -2246,13 +2246,13 @@ extern "C" void* func_00220D98(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00220DD0);
+INCLUDE_ASM("fe/all_in_one_fe", cFEStateLodgeRiderDetail__cFEStateLodgeRiderDetail);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_0046D0D0[];
 
-extern "C" void func_00220DD0(void *arg0) {
+extern "C" void cFEStateLodgeRiderDetail__cFEStateLodgeRiderDetail(void *arg0) {
     *(char **)((char*)arg0 + 8) = D_0046D0D0;
     func_0039E390_a(arg0);
 }
@@ -2272,13 +2272,13 @@ extern "C" void* func_00220DF8(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00220E30);
+INCLUDE_ASM("fe/all_in_one_fe", cFEStateBuyAttrib__cFEStateBuyAttrib);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_0046D0D0[];
 
-extern "C" void func_00220E30(void *arg0) {
+extern "C" void cFEStateBuyAttrib__cFEStateBuyAttrib(void *arg0) {
     *(char **)((char*)arg0 + 8) = D_0046D0D0;
     func_0039E390_a(arg0);
 }
@@ -2298,13 +2298,13 @@ extern "C" void *func_00220E58(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00220E90);
+INCLUDE_ASM("fe/all_in_one_fe", cFEStateCareerStats__cFEStateCareerStats);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_0046D0D0[];
 
-extern "C" void func_00220E90(void *arg0) {
+extern "C" void cFEStateCareerStats__cFEStateCareerStats(void *arg0) {
     *(char **)((char*)arg0 + 8) = D_0046D0D0;
     func_0039E390_a(arg0);
 }
@@ -2467,13 +2467,13 @@ extern "C" void func_00221110(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221138);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_TOPTIMES__cOVState_TOPTIMES);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
-extern "C" void func_00221138(void *arg0) {
+extern "C" void cOVState_TOPTIMES__cOVState_TOPTIMES(void *arg0) {
     *(char **)((char*)arg0 + 8) = D_00474E08;
     func_0039E390_a(arg0);
 }
@@ -2615,12 +2615,12 @@ extern "C" void *func_00221350(void *arg0, int arg1, int arg2) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002213D8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_MAP__cOVState_MAP);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
-extern "C" void* func_002213D8(void *self) {
+extern "C" void* cOVState_MAP__cOVState_MAP(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
 }
@@ -2733,12 +2733,12 @@ extern "C" void *func_00221558(void *arg0, int arg1, int arg2) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002215C8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVTemplate_PauseMenu__cOVTemplate_PauseMenu);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
-extern "C" void* func_002215C8(void *self) {
+extern "C" void* cOVTemplate_PauseMenu__cOVTemplate_PauseMenu(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
 }
@@ -3099,12 +3099,12 @@ extern "C" void* func_00221BC8(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221BF0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_OPTIONS__cOVState_PAUSE_OPTIONS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
-extern "C" void* func_00221BF0(void *self) {
+extern "C" void* cOVState_PAUSE_OPTIONS__cOVState_PAUSE_OPTIONS(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
 }
@@ -3181,12 +3181,12 @@ extern "C" void *func_00221CE0(void *arg0, int arg1, int arg2) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221D58);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_ONLINE_ERROR__cOVState_PAUSE_ONLINE_ERROR);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
-extern "C" void* func_00221D58(void *self) {
+extern "C" void* cOVState_PAUSE_ONLINE_ERROR__cOVState_PAUSE_ONLINE_ERROR(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
 }
@@ -3196,12 +3196,12 @@ extern "C" void func_00221D80(void) {
 }
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221D88);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PROFILE__cOVState_PROFILE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001D5428_x(void*) __asm__("func_001D5428");
 extern char cOVState_PROFILE_vtbl[];
-extern "C" void* func_00221D88(void *self) {
+extern "C" void* cOVState_PROFILE__cOVState_PROFILE(void *self) {
     *(char**)((char*)self + 8) = cOVState_PROFILE_vtbl;
     return func_001D5428_x(self);
 }
@@ -3456,24 +3456,24 @@ extern "C" void *func_00222160(void *arg0, int arg1, int arg2) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002221C8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateRewardsList__cOVStateRewardsList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
-extern "C" void* func_002221C8(void *self) {
+extern "C" void* cOVStateRewardsList__cOVStateRewardsList(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002221F0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_REWARDS__cOVState_REWARDS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
-extern "C" void* func_002221F0(void *self) {
+extern "C" void* cOVState_REWARDS__cOVState_REWARDS(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
 }
@@ -3503,12 +3503,12 @@ extern "C" void *func_00222218(void *arg0, int arg1, int arg2) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00222280);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_AUTOSAVE__cOVState_AUTOSAVE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_001D5428_x(void*) __asm__("func_001D5428");
 extern char cOVState_AUTOSAVE_vtbl[];
-extern "C" void* func_00222280(void *self) {
+extern "C" void* cOVState_AUTOSAVE__cOVState_AUTOSAVE(void *self) {
     *(char**)((char*)self + 8) = cOVState_AUTOSAVE_vtbl;
     return func_001D5428_x(self);
 }
@@ -3579,12 +3579,12 @@ extern "C" void *func_00222358(void *arg0, int arg1, int arg2) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002223C0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateTrophy__cOVStateTrophy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
-extern "C" void* func_002223C0(void *self) {
+extern "C" void* cOVStateTrophy__cOVStateTrophy(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
 }

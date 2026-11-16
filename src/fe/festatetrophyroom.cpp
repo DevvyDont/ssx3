@@ -24,9 +24,9 @@ extern "C" void cFEStateTrophyRoom_onCreateScreen(void* self)
 extern "C" void* cUIState_onGainFocus(void* self);
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D43D0__FPv);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_001D43D0(void* self)
+void* cFEStateTrophyRoom_onGainFocus(void* self)
 {
     return cUIState_onGainFocus(self);
 }
@@ -134,9 +134,9 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4660);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int func_001D4660(void* self, int a1, unsigned int a2)
+extern "C" int cFEStateTrophyRoom_onWidgetMenu(void* self, int a1, unsigned int a2)
 {
     switch (a2) {
     case 6:
@@ -149,7 +149,7 @@ extern "C" int func_001D4660(void* self, int a1, unsigned int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4698);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onWidgetEvent);
 #ifdef SKIP_ASM
 struct sVEntry001D4698 {
     short delta;
@@ -174,7 +174,7 @@ public:
     virtual void show(int on);
 };
 
-extern "C" void func_001D4698(void* self, void* item, int msg)
+extern "C" void cFEStateTrophyRoom_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {
         return;
@@ -203,12 +203,12 @@ extern "C" void func_001D4698(void* self, void* item, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4760);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_001D4A20(void* self);
 extern "C" void* func_0039E510(void* self);
 
-extern "C" void func_001D4760(void* self)
+extern "C" void cFEStateTrophyRoom_onUpdate(void* self)
 {
     if (*(int*)((char*)self + 0x5C) > 0) {
         func_001D4A20(self);
@@ -616,7 +616,7 @@ extern "C" void cFEStateRewardsRoom_onWidgetCreate(void* self, void* w)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4EA8);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetEvent);
 #ifdef SKIP_ASM
 struct sVEntry001D4EA8 {
     short delta;
@@ -625,7 +625,7 @@ struct sVEntry001D4EA8 {
 };
 extern "C" void cUIStateStack_push(void* list, void* item);
 
-extern "C" void func_001D4EA8(void* self, void* item, unsigned int msg)
+extern "C" void cFEStateRewardsRoom_onWidgetEvent(void* self, void* item, unsigned int msg)
 {
     if (item == 0) {
         return;
@@ -654,10 +654,10 @@ extern "C" void func_001D4EA8(void* self, void* item, unsigned int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4F68);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetMenu);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001D4F68(void* self, int a1, unsigned int key)
+extern "C" int cFEStateRewardsRoom_onWidgetMenu(void* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {

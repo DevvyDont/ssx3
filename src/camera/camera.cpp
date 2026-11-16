@@ -3390,13 +3390,13 @@ extern "C" void* cChaseCameraController_cChaseCameraController(void* self, int i
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00161A10);
+INCLUDE_ASM("camera/camera", cChaseCameraController__cChaseCameraController);
 #ifdef SKIP_ASM
 extern void* cChaseCameraController_vtbl[];
 void operator_delete(int* ptr);
 extern "C" void cCameraController__cCameraController(void* self, int flags);
 
-extern "C" void func_00161A10(void* self, int flags)
+extern "C" void cChaseCameraController__cChaseCameraController(void* self, int flags)
 {
     *(void***)((char*)self + 0x14) = cChaseCameraController_vtbl;
     operator_delete(*(int**)((char*)self + 0x20));

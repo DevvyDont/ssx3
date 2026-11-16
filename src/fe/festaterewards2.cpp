@@ -2,15 +2,15 @@
 
 INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_onCreateScreen);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D43D0);
+INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_onGainFocus);
 
 INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_onWidgetCreate);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D4660);
+INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_onWidgetMenu);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D4698);
+INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_onWidgetEvent);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D4760);
+INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_onUpdate);
 
 INCLUDE_ASM("fe/festaterewards2", func_001D47A0);
 
@@ -28,9 +28,9 @@ INCLUDE_ASM("fe/festaterewards2", cFEStateRewardsRoom_onCreateScreen);
 
 INCLUDE_ASM("fe/festaterewards2", cFEStateRewardsRoom_onWidgetCreate);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D4EA8);
+INCLUDE_ASM("fe/festaterewards2", cFEStateRewardsRoom_onWidgetEvent);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D4F68);
+INCLUDE_ASM("fe/festaterewards2", cFEStateRewardsRoom_onWidgetMenu);
 
 INCLUDE_ASM("fe/festaterewards2", func_001D4F90);
 

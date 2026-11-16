@@ -21,7 +21,7 @@ extern "C" void cFEStateLegal_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatelegal", func_00187CB8);
+INCLUDE_ASM("fe/festatelegal", cFEStateLegal_onUpdate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045DC60[];
@@ -31,7 +31,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void func_0039E510(void* self);
 extern "C" void func_0039F190(void* list, int a1);
 
-extern "C" void func_00187CB8(void* self)
+extern "C" void cFEStateLegal_onUpdate(void* self)
 {
     func_0039E510(self);
     if (++*(int*)((char*)self + 0x48) == 0xF0) {

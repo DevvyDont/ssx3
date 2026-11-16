@@ -737,9 +737,9 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FAF08__FPv);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_onGainTransition__FPv);
 #ifdef SKIP_ASM
-int func_001FAF08(void* self)
+int cOVState_PAUSE_ONLINE_ERROR_onGainTransition(void* self)
 {
     return 0x1;
 }

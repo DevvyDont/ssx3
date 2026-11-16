@@ -239,13 +239,13 @@ extern "C" void* func_00350B98(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/deadfadenode", func_00350BE0);
+INCLUDE_ASM("object/deadfadenode", cDeadFadeNode__cDeadFadeNode);
 #ifdef SKIP_ASM
 extern char cDeadFadeNode_vtbl[];
 void cMemMan_free(void*);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
-extern "C" void func_00350BE0(void* self, int flags)
+extern "C" void cDeadFadeNode__cDeadFadeNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cDeadFadeNode_vtbl;
     void* p = *(void**)((char*)self + 0x38);
@@ -257,13 +257,13 @@ extern "C" void func_00350BE0(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/deadfadenode", func_00350C38);
+INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_update);
 #ifdef SKIP_ASM
 // PORT: the project names this func_002D1CC0__FPv (one void* arg), but it is a
 // pass-through wrapper and this caller passes two args (prototype mismatch).
 void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
 
-extern "C" void func_00350C38(void* self)
+extern "C" void cDeadFadeNode_update(void* self)
 {
     float t;
     *(float*)((char*)self + 0x30) += *(float*)((char*)self + 0x34);
@@ -277,20 +277,20 @@ extern "C" void func_00350C38(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/deadfadenode", func_00350C90);
+INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_loseFocus);
 #ifdef SKIP_ASM
 // PORT: the project names this func_002D1CC0__FPv (one void* arg), but it is a
 // pass-through wrapper and this caller passes two args (prototype mismatch).
 void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
 
-extern "C" void func_00350C90(void* self)
+extern "C" void cDeadFadeNode_loseFocus(void* self)
 {
     func_002D1CC0_2(*(void**)((char*)self + 0x18), (char*)self + 0x1C);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/deadfadenode", func_00350CB8);
+INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sDfVec_350CB8 {
@@ -381,7 +381,7 @@ static inline int Visible_350CB8(sDfCam_350CB8* cam, sDfObj_350CB8* obj)
 }
 
 // Draws the fading corpse: culls its box, then draws it lowered by the fade depth at 0x30.
-extern "C" void func_00350CB8(char* self)
+extern "C" void cDeadFadeNode_render(char* self)
 {
     sDfCam_350CB8* cam = *D_004A47B8_350CB8;
     if (!Visible_350CB8(cam, OBJ_350CB8(self))) {
@@ -421,9 +421,9 @@ extern "C" void func_00350CB8(char* self)
 extern "C" void* cInstanceNode_writeToReplayFrame(void* self);
 
 //100%
-INCLUDE_ASM("object/deadfadenode", func_00350E70__FPv);
+INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
-void* func_00350E70(void* self)
+void* cDeadFadeNode_writeToReplayFrame(void* self)
 {
     return cInstanceNode_writeToReplayFrame(self);
 }

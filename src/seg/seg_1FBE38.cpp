@@ -7706,40 +7706,40 @@ extern "C" void* cWScriptMission_cWScriptMission(void* self, void* man, int a1, 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003071C8);
+INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission__cWScriptMission);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_00489A30_71C8[] __asm__("cWScriptMission_vtbl");
 extern "C" void cWScriptProcess__cWScriptProcess_71C8(void*) __asm__("cWScriptProcess__cWScriptProcess");
-extern "C" void func_003071C8(void* self) {
+extern "C" void cWScriptMission__cWScriptMission(void* self) {
     *(void**)((char*)self + 0x5C) = D_00489A30_71C8;
     cWScriptProcess__cWScriptProcess_71C8(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003071F0);
+INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_processStart);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A28A8_71F0 __asm__("SSXApp");
 void func_0010F2B8_71F0(void*) __asm__("func_0010F2B8__FPv");
 extern "C" void cWScriptProcess_processStart_71F0(void*) __asm__("cWScriptProcess_processStart");
 struct Tab_71F0 { char pad[0x28]; void *arr[1]; };
-extern "C" void func_003071F0(void* self) {
+extern "C" void cWScriptMission_processStart(void* self) {
     func_0010F2B8_71F0((*(Tab_71F0**)(*(char**)(D_004A28A8_71F0 + 0x84) + 0xC))->arr[**(int**)((char*)self + 0x10)]);
     cWScriptProcess_processStart_71F0(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00307240);
+INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_processComplete);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_7240 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); };
 int func_0030B898_7240(void*, void*) __asm__("func_0030B898__FPvT0");
 extern "C" void *func_0028B180_7240(void) __asm__("func_0028B180");
 extern "C" void func_0029D8E0_7240(void*) __asm__("func_0029D8E0");
-extern "C" void func_00307240(P_7240* self) {
+extern "C" void cWScriptMission_processComplete(P_7240* self) {
     if (func_0030B898_7240(*(void**)((char*)self + 0x10), self)) {
         self->v06();
         self->v18();

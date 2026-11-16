@@ -3843,9 +3843,9 @@ void cDeadNode_signal(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360A68__FPv);
+INCLUDE_ASM("object/railmodifier", cDeadFadeNode_signal__FPv);
 #ifdef SKIP_ASM
-void func_00360A68(void* self)
+void cDeadFadeNode_signal(void* self)
 {
 }
 #endif
@@ -4340,13 +4340,13 @@ void* cDynamicEmitter__cDynamicEmitter(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360C98);
+INCLUDE_ASM("object/railmodifier", cEffectLink__cEffectLink);
 #ifdef SKIP_ASM
 extern "C" void func_00345760(void* self);
 void operator_delete(int*);
 extern void* cEffectLink_vtbl[];
 
-extern "C" void func_00360C98(void* self, int flags)
+extern "C" void cEffectLink__cEffectLink(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cEffectLink_vtbl;
     func_00345760(self);
@@ -5215,9 +5215,9 @@ extern void* cDebounceNode_vtbl[];
 extern "C" void* cMoveNode__cMoveNode(void*);
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003614D0__FPv);
+INCLUDE_ASM("object/railmodifier", cDebounceNode__cDebounceNode__FPv);
 #ifdef SKIP_ASM
-void* func_003614D0(void* self)
+void* cDebounceNode__cDebounceNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)cDebounceNode_vtbl;
     return cMoveNode__cMoveNode(self);
@@ -5225,9 +5225,9 @@ void* func_003614D0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003614F8__FPv);
+INCLUDE_ASM("object/railmodifier", cDebounceNode_onCollide__FPv);
 #ifdef SKIP_ASM
-void func_003614F8(void* self)
+void cDebounceNode_onCollide(void* self)
 {
 }
 #endif
@@ -5258,9 +5258,9 @@ extern void* cCounterNode_vtbl[];
 extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361530__FPv);
+INCLUDE_ASM("object/railmodifier", cCounterNode__cCounterNode__FPv);
 #ifdef SKIP_ASM
-void* func_00361530(void* self)
+void* cCounterNode__cCounterNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)cCounterNode_vtbl;
     return cInstanceNode__cInstanceNode(self);

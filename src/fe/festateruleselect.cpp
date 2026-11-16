@@ -325,16 +325,16 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
 extern "C" void* cUIState_onGainFocus(void* self);
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00191C48__FPv);
+INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_00191C48(void* self)
+void* cFEStateRuleSelect_onGainFocus(void* self)
 {
     return cUIState_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00191C68);
+INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
@@ -361,7 +361,7 @@ struct sMsg_1C68 {
     int* info;          // 0x7C
 };
 
-extern "C" void func_00191C68(char* self, sMsg_1C68* msg, unsigned int type)
+extern "C" void cFEStateRuleSelect_onWidgetEvent(char* self, sMsg_1C68* msg, unsigned int type)
 {
     if (msg == 0) {
         return;
@@ -404,12 +404,12 @@ extern "C" void func_00191C68(char* self, sMsg_1C68* msg, unsigned int type)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00191E08);
+INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onWidgetPair);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A13A0[];
 
-extern "C" int func_00191E08(void* self, void* msg)
+extern "C" int cFEStateRuleSelect_onWidgetPair(void* self, void* msg)
 {
     int id = *(int*)((char*)msg + 0x38);
     return (id == GetHashValue32(D_004A13A0)) ? 0x101 : 0x100;
@@ -417,7 +417,7 @@ extern "C" int func_00191E08(void* self, void* msg)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festateruleselect", func_00191E48);
+INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onWidgetMenu);
 #ifdef SKIP_ASM
 struct cUIScreen;
 struct cUIText;
@@ -449,7 +449,7 @@ static inline void SetVisible_1E48(char* o, int on)
     vt[9].fn(o + vt[9].delta, on);
 }
 
-extern "C" int func_00191E48(char* self, void* unused, unsigned int type, int idx)
+extern "C" int cFEStateRuleSelect_onWidgetMenu(char* self, void* unused, unsigned int type, int idx)
 {
     switch (type) {
     case 9:

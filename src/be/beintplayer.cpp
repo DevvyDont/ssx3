@@ -13,7 +13,7 @@ struct sPlayerCharEntry {
 };
 extern sPlayerCharEntry D_00534FE0[];
 
-extern "C" void func_00145B20(void* self);
+extern "C" void cBENewPlayerInterface_discard(void* self);
 extern "C" void cBENewPlayerInterface_defaultCtrl(void* self);
 extern void* cBENewPlayerInterface_vtbl[16];
 
@@ -30,7 +30,7 @@ cBENewPlayerInterfaceCtor* cBENewPlayerInterface_cBENewPlayerInterface(cBENewPla
 {
     self->field_0x8 = 0;
     self->vtable = cBENewPlayerInterface_vtbl;
-    func_00145B20(self);
+    cBENewPlayerInterface_discard(self);
     cBENewPlayerInterface_defaultCtrl(self);
     return self;
 }
@@ -54,7 +54,7 @@ void* cBENewPlayerInterface_getThis()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001459B8);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_submit);
 #ifdef SKIP_ASM
 struct sRecords_59B8 {
     int w[42];
@@ -66,7 +66,7 @@ extern void* D_004A11C0;
 extern "C" void func_00145A98_59B8(void* self) __asm__("func_00145A98");
 
 // Copies the 0xA8-byte character table from its backup when D_004A11C0 says so, otherwise rebuilds it.
-extern "C" void func_001459B8(void* self)
+extern "C" void cBENewPlayerInterface_submit(void* self)
 {
     if (*(int*)((char*)D_004A11C0 + 8) != 0) {
         D_00535B20_59B8 = D_00534FE0_59B8;
@@ -106,7 +106,7 @@ extern "C" void func_00145A98(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00145B20);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_discard);
 #ifdef SKIP_ASM
 struct sPlayerTable_00145B20
 {
@@ -115,7 +115,7 @@ struct sPlayerTable_00145B20
 
 extern sPlayerTable_00145B20 cBELibrary_playerDB;
 
-extern "C" void func_00145B20(void* self)
+extern "C" void cBENewPlayerInterface_discard(void* self)
 {
     *(sPlayerTable_00145B20*)D_00534FE0 = cBELibrary_playerDB;
 }

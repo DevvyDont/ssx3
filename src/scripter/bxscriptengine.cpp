@@ -1228,12 +1228,12 @@ void* cScriptObject_cScriptObject(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_00283228);
+INCLUDE_ASM("scripter/bxscriptengine", cScriptObject__cScriptObject);
 #ifdef SKIP_ASM
 extern "C" void cScriptObject_DeInitScriptObject(void* self);
 void operator_delete(int* ptr);
 
-extern "C" void func_00283228(void* self, int flags)
+extern "C" void cScriptObject__cScriptObject(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = cScriptObject_vtbl;
     if (*(int*)((char*)self + 0x4) != -1 && *(int*)((char*)self + 0x4) != 0) {

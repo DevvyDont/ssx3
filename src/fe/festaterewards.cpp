@@ -2078,7 +2078,7 @@ extern "C" void* func_001D1AA0(void* self, void* engine, void* owner, int player
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1B68);
+INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward__cFEStatePreviewReward);
 #ifdef SKIP_ASM
 struct sVEntry001D1B68 {
     short delta;
@@ -2092,7 +2092,7 @@ extern void* D_004A289C;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_0039E390(void* self, int flags);
 
-extern "C" void func_001D1B68(void* self, int flags)
+extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(void* self, int flags)
 {
     *(void***)((char*)self + 8) = cFEStatePreviewReward_vtbl;
     int id = *(int*)((char*)self + 0x70);
@@ -2291,9 +2291,9 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1F78);
+INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int func_001D1F78(void* self, int a1, unsigned int a2)
+extern "C" int cFEStatePreviewReward_onWidgetMenu(void* self, int a1, unsigned int a2)
 {
     switch (a2) {
     case 6:
@@ -2306,12 +2306,12 @@ extern "C" int func_001D1F78(void* self, int a1, unsigned int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1FB0);
+INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_001D2198(void* self);
 extern "C" void* func_0039E510(void* self);
 
-extern "C" void func_001D1FB0(void* self)
+extern "C" void cFEStatePreviewReward_onUpdate(void* self)
 {
     if (*(int*)((char*)self + 0x6C) >= 0) {
         func_001D2198(self);
@@ -2321,7 +2321,7 @@ extern "C" void func_001D1FB0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1FF0);
+INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onInputBegin);
 #ifdef SKIP_ASM
 struct cUIScreen;
 int GetHashValue32(char* str);
@@ -2345,7 +2345,7 @@ struct sDefObj_1FF0 {
 // $gp-relative default object (target has raw `addiu $3,$28,0x2968`, no symbol)
 extern sDefObj_1FF0 D_004A5A58;
 
-extern "C" int func_001D1FF0(void* self, void* obj)
+extern "C" int cFEStatePreviewReward_onInputBegin(void* self, void* obj)
 {
     sVE_1FF0a* vt = *(sVE_1FF0a**)((char*)obj + 8);
     if (vt[6].fn((char*)obj + vt[6].delta) != 0) {

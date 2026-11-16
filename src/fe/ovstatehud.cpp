@@ -70,7 +70,7 @@ extern "C" void cOVStateHiScoreList_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001E9130);
+INCLUDE_ASM("fe/ovstatehud", cOVStateHiScoreList_onWidgetEvent);
 #ifdef SKIP_ASM
 struct sVEntry001E9130 {
     short delta;
@@ -85,7 +85,7 @@ struct sObj001E9130 {
 
 extern "C" void cUIStateStack_push(void* list, void* item);
 
-extern "C" void func_001E9130(void* self, void* item, int a2)
+extern "C" void cOVStateHiScoreList_onWidgetEvent(void* self, void* item, int a2)
 {
     if (item != 0 && a2 == 5) {
         void* r = 0;

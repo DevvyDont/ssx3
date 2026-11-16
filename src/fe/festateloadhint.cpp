@@ -60,7 +60,7 @@ extern "C" void cFELoadHintState_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245AE0);
+INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onGainTransition);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A2BC8[];
@@ -70,7 +70,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
-extern "C" int func_00245AE0(void* self)
+extern "C" int cFELoadHintState_onGainTransition(void* self)
 {
     char buf[200];
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
@@ -83,20 +83,20 @@ extern "C" int func_00245AE0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245B50__FPv);
+INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
-void func_00245B50(void* self)
+void cFELoadHintState_onWidgetCreate(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245B58);
+INCLUDE_ASM("fe/festateloadhint", cFELoadState__cFELoadState);
 #ifdef SKIP_ASM
 extern void* cFELoadState_vtbl[];
 extern "C" void* func_0039E390(void* self);
 
-extern "C" void* func_00245B58(void* self)
+extern "C" void* cFELoadState__cFELoadState(void* self)
 {
     *(void**)((char*)self + 0x8) = cFELoadState_vtbl;
     return func_0039E390(self);
@@ -141,7 +141,7 @@ extern "C" void cFELoadState_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245C60);
+INCLUDE_ASM("fe/festateloadhint", cFELoadState_onGainTransition);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A2BC8[];
@@ -151,7 +151,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
-extern "C" int func_00245C60(void* self)
+extern "C" int cFELoadState_onGainTransition(void* self)
 {
     char buf[200];
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
@@ -164,7 +164,7 @@ extern "C" int func_00245C60(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245CD0);
+INCLUDE_ASM("fe/festateloadhint", cFELoadState_onWidgetCreate);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -172,7 +172,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget);
 extern signed char D_00535C11[];
 
-extern "C" void func_00245CD0(void* self, void* widget)
+extern "C" void cFELoadState_onWidgetCreate(void* self, void* widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] != 2) {
@@ -182,12 +182,12 @@ extern "C" void func_00245CD0(void* self, void* widget)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245D28);
+INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge__cFELoadStateInLodge);
 #ifdef SKIP_ASM
 extern void* cFELoadStateInLodge_vtbl[];
 extern "C" void* func_0039E390(void* self);
 
-extern "C" void* func_00245D28(void* self)
+extern "C" void* cFELoadStateInLodge__cFELoadStateInLodge(void* self)
 {
     *(void**)((char*)self + 0x8) = cFELoadStateInLodge_vtbl;
     return func_0039E390(self);
@@ -214,15 +214,15 @@ extern "C" void cFELoadStateInLodge_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245DB8__FPv);
+INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
-void func_00245DB8(void* self)
+void cFELoadStateInLodge_onWidgetCreate(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245DC0);
+INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge_onGainTransition);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A2BC8[];
@@ -232,7 +232,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
-extern "C" int func_00245DC0(void* self)
+extern "C" int cFELoadStateInLodge_onGainTransition(void* self)
 {
     char buf[200];
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));

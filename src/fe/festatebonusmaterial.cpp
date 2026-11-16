@@ -20,14 +20,14 @@ extern "C" void cFEStateBonusMaterial_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebonusmaterial", func_00195540);
+INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A14F8[];
 extern char D_004A1500[];
 extern char D_004A1508[];
 
-extern "C" void func_00195540(void* self, void* menu)
+extern "C" void cFEStateBonusMaterial_onWidgetCreate(void* self, void* menu)
 {
     int h = *(int*)((char*)menu + 0x38);
     if (h == GetHashValue32(D_004A14F8)) {
@@ -45,10 +45,10 @@ extern "C" void func_00195540(void* self, void* menu)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebonusmaterial", func_001955B8);
+INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onWidgetMenu);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001955B8(void* self, int a1, unsigned int key)
+extern "C" int cFEStateBonusMaterial_onWidgetMenu(void* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -65,16 +65,16 @@ extern "C" int func_001955B8(void* self, int a1, unsigned int key)
 extern "C" void* cUIState_onGainFocus(void* self);
 
 //100%
-INCLUDE_ASM("fe/festatebonusmaterial", func_001955E0__FPv);
+INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_001955E0(void* self)
+void* cFEStateBonusMaterial_onGainFocus(void* self)
 {
     return cUIState_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebonusmaterial", func_00195600);
+INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001D22F0(void* self, void* engine, void* owner, signed char idx);
@@ -90,7 +90,7 @@ struct sVEntryK195600 {
     void* (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00195600(void* self, void* item, unsigned int event)
+extern "C" void cFEStateBonusMaterial_onWidgetEvent(void* self, void* item, unsigned int event)
 {
     if (item == 0)
         return;

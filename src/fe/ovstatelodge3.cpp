@@ -32,7 +32,7 @@ INCLUDE_ASM("fe/ovstatelodge3", func_001F77F0);
 
 INCLUDE_ASM("fe/ovstatelodge3", func_001F7800);
 
-INCLUDE_ASM("fe/ovstatelodge3", func_001F7958);
+INCLUDE_ASM("fe/ovstatelodge3", cOVState_TOPTIMES_onCreateScreen);
 
 INCLUDE_ASM("fe/ovstatelodge3", cOVState_TOPTIMES_onWidgetCreate);
 

@@ -49,7 +49,7 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_001833D0);
+INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onGainFocus);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -72,7 +72,7 @@ static inline void showObj_001833D0(void* self, char* name, int id)
     }
 }
 
-extern "C" void func_001833D0(void* self, int a1)
+extern "C" void cFEStateRiderDetail_onGainFocus(void* self, int a1)
 {
     showObj_001833D0(self, D_0045D888, 5);
     showObj_001833D0(self, D_0045D898, 6);
@@ -84,14 +84,14 @@ extern "C" void func_001833D0(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_00183550);
+INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
 extern char D_0045D898[];
 
-extern "C" void func_00183550(void* self)
+extern "C" void cFEStateRiderDetail_onPreRender2D(void* self)
 {
     if (*(int*)((char*)self + 0x50) == 0) {
         void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045D898));
@@ -105,21 +105,21 @@ extern "C" void func_00183550(void* self)
 extern "C" void* func_0039E6B8(void* self);
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_001835A8__FPv);
+INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onRender2D__FPv);
 #ifdef SKIP_ASM
-void* func_001835A8(void* self)
+void* cFEStateRiderDetail_onRender2D(void* self)
 {
     return func_0039E6B8(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_001835C8);
+INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_0039E510(void*);
 extern "C" void func_00182EC0(void*);
 
-extern "C" void func_001835C8(void* self)
+extern "C" void cFEStateRiderDetail_onUpdate(void* self)
 {
     func_0039E510(self);
     func_00182EC0(self);
@@ -127,7 +127,7 @@ extern "C" void func_001835C8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_001835F8);
+INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -147,7 +147,7 @@ struct sVE_35F8 {
 
 static inline int Is_001835F8(int id, char* s) { return id == GetHashValue32(s); }
 
-extern "C" void func_001835F8(void* self, void* item, int msg)
+extern "C" void cFEStateRiderDetail_onPopupEvent(void* self, void* item, int msg)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (msg == 0x16) {
@@ -173,7 +173,7 @@ extern "C" void func_001835F8(void* self, void* item, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_00183710);
+INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -209,7 +209,7 @@ struct sBits_3710 {
     unsigned hi : 18;
 };
 
-extern "C" void func_00183710(char* self, char* item, unsigned int msg)
+extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsigned int msg)
 {
     if (item == 0) return;
     switch (msg) {

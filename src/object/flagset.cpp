@@ -637,7 +637,7 @@ extern "C" sFlagSet_C428* cFlagManager_cFlagManager(sFlagSet_C428* self, void* a
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034C4B8);
+INCLUDE_ASM("object/flagset", cFlagManager__cFlagManager);
 #ifdef SKIP_ASM
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern void* cFlagManager_vtbl[];
@@ -660,7 +660,7 @@ struct sFlagSet_C4B8 {
     sFlagSetElem_C4B8 elems[15];    // 0x20
 };
 
-extern "C" void func_0034C4B8(sFlagSet_C4B8* self, int flags)
+extern "C" void cFlagManager__cFlagManager(sFlagSet_C4B8* self, int flags)
 {
     self->vtable = cFlagManager_vtbl;
     if (self->elems != 0) {
@@ -740,7 +740,7 @@ extern "C" void func_0034C600(sFlagSet_C600* self, void* arg)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flagset", func_0034C668);
+INCLUDE_ASM("object/flagset", cFlagManager_update);
 #ifdef SKIP_ASM
 struct sFlagSetElem_C668 {
     char pad0[0x5C];
@@ -773,7 +773,7 @@ static inline float randf_34C668()
     return u.f - 1.0f;
 }
 
-extern "C" void func_0034C668(sFlagSet_C668* self)
+extern "C" void cFlagManager_update(sFlagSet_C668* self)
 {
     float amp = 0.15f;
     switch (func_002D1BA0()) {
@@ -812,7 +812,7 @@ extern "C" void func_0034C668(sFlagSet_C668* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flagset", func_0034C7F8);
+INCLUDE_ASM("object/flagset", cFlagManager_render);
 #ifdef SKIP_ASM
 struct sFlagSetEntry {
     char pad_0x0[0x5C];
@@ -827,7 +827,7 @@ struct sFlagSetOwner {
 
 extern "C" void func_0034B9B0(sFlagSetEntry* e);
 
-extern "C" void func_0034C7F8(sFlagSetOwner* self)
+extern "C" void cFlagManager_render(sFlagSetOwner* self)
 {
     int i;
     for (i = 0; i < 15; i++) {
@@ -1087,7 +1087,7 @@ extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* 
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034CB80);
+INCLUDE_ASM("object/flagset", cFenceNode__cFenceNode);
 #ifdef SKIP_ASM
 extern char* D_004A5B80;
 extern void* cFenceNode_vtbl[];
@@ -1099,7 +1099,7 @@ struct sFlagSetVEntryCB80 {
     void (*fn)(void*, void*);
 };
 
-extern "C" void func_0034CB80(void* self, int flags)
+extern "C" void cFenceNode__cFenceNode(void* self, int flags)
 {
     char* s = (char*)self;
     *(void***)(s + 0xC) = cFenceNode_vtbl;
@@ -1247,7 +1247,7 @@ extern "C" void func_0034CDE8(void* self, int on, float dt)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034CE48);
+INCLUDE_ASM("object/flagset", cFenceNode_update);
 #ifdef SKIP_ASM
 extern "C" void func_0034CC80(char* self, char* obj, int flag);
 extern "C" void func_0034CF98(void* self);
@@ -1266,7 +1266,7 @@ static inline float fabs_34CE48(float x)
     return r;
 }
 
-extern "C" void func_0034CE48(char* self)
+extern "C" void cFenceNode_update(char* self)
 {
     if (*(int*)(self + 0x38) > 0) {
         if (--*(int*)(self + 0x38) == 0) {
@@ -1521,7 +1521,7 @@ extern "C" void func_0034D1E8(void* p)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034D650);
+INCLUDE_ASM("object/flagset", cFenceNode_onCollide);
 #ifdef SKIP_ASM
 extern "C" void func_0034D6F0(void* self, float dt);
 
@@ -1549,7 +1549,7 @@ static inline float fsDot_D650(const sFsVec4_D650& a, const sFsVec4_D650& b)
     return r;
 }
 
-extern "C" void func_0034D650(void* self, void* obj)
+extern "C" void cFenceNode_onCollide(void* self, void* obj)
 {
     char* s = (char*)self;
     char* o = (char*)obj;
@@ -1601,10 +1601,10 @@ extern "C" void func_0034D6F0(void* vself, float v)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034D778);
+INCLUDE_ASM("object/flagset", cFenceNode_render);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_0034D778(char* self)
+extern "C" void cFenceNode_render(char* self)
 {
     if (!IsLoaded_34B9B0(*(sModel_34B9B0**)(self + 0x18))) {
         return;
@@ -1643,7 +1643,7 @@ extern "C" void func_0034D778(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034D960);
+INCLUDE_ASM("object/flagset", cFenceNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sSerVEntry_0034D960 {
     short delta;
@@ -1653,7 +1653,7 @@ struct sSerVEntry_0034D960 {
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
-extern "C" void func_0034D960(void* self, void* stream)
+extern "C" void cFenceNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_0034D960* vt = *(sSerVEntry_0034D960**)stream;

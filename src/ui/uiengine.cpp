@@ -901,7 +901,7 @@ void func_00398A60(void* a, void* b)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398A78);
+INCLUDE_ASM("ui/uiengine", cUIIcon_render2D);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_0039FEB8(void* self, void* a, void* b);
@@ -1064,7 +1064,7 @@ static inline sV4_8A78 Xform_8A78(const sM33_8A78& m, const sV4_8A78& v)
 }
 
 // cUIIcon: draws the icon as a textured quad at (x, y), rotated about its position.
-extern "C" void func_00398A78(cUIIcon_8A78* self, float x, float y)
+extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
 {
     sVtx_8A78 verts[4];
     cUICtx_8A78* ctx = D_004A289C_8a78;

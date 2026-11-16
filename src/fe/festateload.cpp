@@ -45,21 +45,21 @@ void* func_00186708(void* self)
 extern "C" void* cUITemplate_MAP_onGainTransition(void*);
 
 //100%
-INCLUDE_ASM("fe/festateload", func_00186728__FPv);
+INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onGainTransition__FPv);
 #ifdef SKIP_ASM
-void* func_00186728(void* self)
+void* cFEStateEventSelect_onGainTransition(void* self)
 {
     return cUITemplate_MAP_onGainTransition((char*)self + 0x48);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateload", func_00186748);
+INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_onGainFocus(void* self);
 extern "C" void cUITemplate_MAP_onGainFocus(void* tmpl);
 
-extern "C" void func_00186748(void* self)
+extern "C" void cFEStateEventSelect_onGainFocus(void* self)
 {
     cUIState_onGainFocus(self);
     cUITemplate_MAP_onGainFocus((char*)self + 0x48);
@@ -67,12 +67,12 @@ extern "C" void func_00186748(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateload", func_00186778);
+INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onDestroyScreen);
 #ifdef SKIP_ASM
 void* cUIState_onDestroyScreen(void* self);
 extern "C" void func_00200AF0(void* tmpl);
 
-extern "C" void func_00186778(void* self)
+extern "C" void cFEStateEventSelect_onDestroyScreen(void* self)
 {
     cUIState_onDestroyScreen(self);
     func_00200AF0((char*)self + 0x48);
@@ -200,22 +200,22 @@ extern "C" int func_00186950(void* self, int a1, int a2)
 void func_00202768(void*);
 
 //100%
-INCLUDE_ASM("fe/festateload", func_00186978);
+INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onInputBegin);
 #ifdef SKIP_ASM
-extern "C" void func_00186978(void* self)
+extern "C" void cFEStateEventSelect_onInputBegin(void* self)
 {
     func_00202768((char*)self + 0x48);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateload", func_00186998);
+INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onInputAlways);
 #ifdef SKIP_ASM
 extern "C" void cUITemplate_MAP_onInputAlways(void* self, int a1);
 // PORT: cUIState_onInputAlways__FPv is called with (self, a1) here; bind the 2-arg form to that symbol.
 void cUIState_onInputAlways_2(void* self, int a1) __asm__("cUIState_onInputAlways__FPv");
 
-extern "C" void func_00186998(void* self, int a1)
+extern "C" void cFEStateEventSelect_onInputAlways(void* self, int a1)
 {
     cUITemplate_MAP_onInputAlways((char*)self + 0x48, a1);
     cUIState_onInputAlways_2(self, a1);
@@ -336,13 +336,13 @@ extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* e
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateload", func_00186B18);
+INCLUDE_ASM("fe/festateload", cFEStateMemCard__cFEStateMemCard);
 #ifdef SKIP_ASM
 extern void* cFEStateMemCard_vtbl[];
 extern int D_004A14B8;
 extern "C" void func_001D5428(void* self, int flags);
 
-extern "C" void func_00186B18(void* self, int flags)
+extern "C" void cFEStateMemCard__cFEStateMemCard(void* self, int flags)
 {
     *(void***)((char*)self + 8) = cFEStateMemCard_vtbl;
     D_004A14B8 = 0;

@@ -207,7 +207,7 @@ extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, sWidget_
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197500);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -274,7 +274,7 @@ static inline int countSel_7500(sReqLine_7500* self)
 }
 
 // Request-line widget events: 1 hilights a song, 5 toggles it (done/selected masks), 6 saves the masks and leaves.
-extern "C" void func_00197500(void* p, void* item, unsigned int msg)
+extern "C" void cFEStateRequestLine_onWidgetEvent(void* p, void* item, unsigned int msg)
 {
     sReqLine_7500* self = (sReqLine_7500*)p;
     if (item == 0) {
@@ -342,7 +342,7 @@ extern "C" void func_00197500(void* p, void* item, unsigned int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_001977D0);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_onWidgetMenu);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -356,7 +356,7 @@ extern "C" void func_00197E70_77D0(void* self) __asm__("func_00197E70");
 extern "C" void func_0028CF98(void* p, int a, int b, long c, int d);
 extern "C" void func_002B4978(void* list, int idx);
 
-extern "C" int func_001977D0(void* p, void* item, unsigned int msg, int k)
+extern "C" int cFEStateRequestLine_onWidgetMenu(void* p, void* item, unsigned int msg, int k)
 {
     sReqLine_7500* self = (sReqLine_7500*)p;
     switch (msg) {
@@ -413,7 +413,7 @@ extern "C" int func_001977D0(void* p, void* item, unsigned int msg, int k)
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_001979D8);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" void func_001988D8(void* self, int idx);
 extern "C" void cFEStateRequestLine_updatePlayList(void* self);
@@ -434,7 +434,7 @@ struct sMsgCenter_979D8 {
     char* menu;       // 0x170
 };
 
-extern "C" void func_001979D8(sMsgCenter_979D8* self, void* item, int msg)
+extern "C" void cFEStateRequestLine_onPopupEvent(sMsgCenter_979D8* self, void* item, int msg)
 {
     switch (msg) {
     case 0x15:

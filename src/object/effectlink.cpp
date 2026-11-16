@@ -581,7 +581,7 @@ extern "C" void cDynamicParticleModifier_render(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/effectlink", func_003460A0);
+INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sEffectLinkVEntry60A0 {
     short delta;
@@ -591,7 +591,7 @@ struct sEffectLinkVEntry60A0 {
 
 extern "C" void func_003712B8(void* self, void* stream);
 
-extern "C" void func_003460A0(void* self, void* stream)
+extern "C" void cDynamicParticleModifier_writeToReplayFrame(void* self, void* stream)
 {
     cEffectModifier_writeToReplayFrame(self, stream);
     sEffectLinkVEntry60A0* e = &(*(sEffectLinkVEntry60A0**)stream)[1];
@@ -739,7 +739,7 @@ extern "C" void cHaloModifier_render(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/effectlink", func_00346300);
+INCLUDE_ASM("object/effectlink", cHaloModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sEffectLinkVEntry {
     short delta;
@@ -749,7 +749,7 @@ struct sEffectLinkVEntry {
 
 extern "C" void cEffectModifier_writeToReplayFrame(void* self, void* stream);
 
-extern "C" void func_00346300(void* self, void* stream)
+extern "C" void cHaloModifier_writeToReplayFrame(void* self, void* stream)
 {
     cEffectModifier_writeToReplayFrame(self, stream);
     sEffectLinkVEntry* vt = *(sEffectLinkVEntry**)stream;

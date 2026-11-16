@@ -108,7 +108,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D28F8);
+INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom__cFEStateMountainRoom);
 #ifdef SKIP_ASM
 struct sVEntry001D28F8 {
     short delta;
@@ -122,7 +122,7 @@ extern void* D_004A289C;
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_0039E390(void* self, int flags);
 
-extern "C" void func_001D28F8(void* self, int flags)
+extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(void* self, int flags)
 {
     *(void***)((char*)self + 8) = cFEStateMountainRoom_vtbl;
     int slot = *(int*)((char*)self + 0xBC);
@@ -185,12 +185,12 @@ extern "C" void cFEStateMountainRoom_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D2A90);
+INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void func_001D3340(void* self);
 extern "C" void cFEState_onGainFocus(void* self, int a1);
 
-extern "C" void func_001D2A90(void* self, int a1)
+extern "C" void cFEStateMountainRoom_onGainFocus(void* self, int a1)
 {
     func_001D3340(self);
     cFEState_onGainFocus(self, a1);
@@ -403,7 +403,7 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D2EA0);
+INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onInputBegin);
 #ifdef SKIP_ASM
 struct sVEi1D2EA0 { short delta; short index; int (*fn)(void*); };
 struct sVEv1D2EA0 { short delta; short index; void (*fn)(void*, int); };
@@ -416,7 +416,7 @@ static inline int IsShown1D2EA0(char* self)
 }
 
 // Lodge menu: when the detail panel is shown and the widget accepts, plays the select sound and closes the panel.
-extern "C" int func_001D2EA0(char* self, char* widget)
+extern "C" int cFEStateMountainRoom_onInputBegin(char* self, char* widget)
 {
     if (IsShown1D2EA0(self)) {
     sVEi1D2EA0* wvt = *(sVEi1D2EA0**)(widget + 8);
@@ -438,10 +438,10 @@ extern "C" int func_001D2EA0(char* self, char* widget)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D2F40);
+INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetMenu);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001D2F40(void* self, int a1, unsigned int key)
+extern "C" int cFEStateMountainRoom_onWidgetMenu(void* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -555,12 +555,12 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3120);
+INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_001D31C0(void* self);
 extern "C" void* func_0039E510(void* self);
 
-extern "C" void func_001D3120(void* self)
+extern "C" void cFEStateMountainRoom_onUpdate(void* self)
 {
     if (~*(int*)((char*)self + 0xBC) != 0) {
         func_001D31C0(self);
@@ -983,16 +983,16 @@ extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* 
 extern "C" void* cUIState_onGainFocus(void* self);
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3C60__FPv);
+INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_001D3C60(void* self)
+void* cFEStatePeakRoom_onGainFocus(void* self)
 {
     return cUIState_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3C80);
+INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1006,7 +1006,7 @@ struct sVEntA_001D3C80 { short delta; short index; void* (*fn)(void*, void*, int
 struct sVEntB_001D3C80 { short delta; short index; void (*fn)(void*, int); };
 struct sItem_001D3C80 { int pad[2]; sVEntB_001D3C80* vt; };
 
-extern "C" void func_001D3C80(void* self, void* item, unsigned int key)
+extern "C" void cFEStatePeakRoom_onWidgetEvent(void* self, void* item, unsigned int key)
 {
     if (item == 0) {
         return;
@@ -1046,7 +1046,7 @@ extern "C" void func_001D3C80(void* self, void* item, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3E08);
+INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onWidgetMenu);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1054,7 +1054,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" void* func_00397870(void* list, int id);
 
-extern "C" int func_001D3E08(void* self, void* item, unsigned int key, int id)
+extern "C" int cFEStatePeakRoom_onWidgetMenu(void* self, void* item, unsigned int key, int id)
 {
     switch (key) {
     default:

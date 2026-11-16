@@ -2,25 +2,25 @@
 
 INCLUDE_ASM("fe/festateload4", cFELoadHintState_onCreateScreen);
 
-INCLUDE_ASM("fe/festateload4", func_00245AE0);
+INCLUDE_ASM("fe/festateload4", cFELoadHintState_onGainTransition);
 
-INCLUDE_ASM("fe/festateload4", func_00245B50);
+INCLUDE_ASM("fe/festateload4", cFELoadHintState_onWidgetCreate);
 
-INCLUDE_ASM("fe/festateload4", func_00245B58);
+INCLUDE_ASM("fe/festateload4", cFELoadState__cFELoadState);
 
 INCLUDE_ASM("fe/festateload4", cFELoadState_onCreateScreen);
 
-INCLUDE_ASM("fe/festateload4", func_00245C60);
+INCLUDE_ASM("fe/festateload4", cFELoadState_onGainTransition);
 
-INCLUDE_ASM("fe/festateload4", func_00245CD0);
+INCLUDE_ASM("fe/festateload4", cFELoadState_onWidgetCreate);
 
-INCLUDE_ASM("fe/festateload4", func_00245D28);
+INCLUDE_ASM("fe/festateload4", cFELoadStateInLodge__cFELoadStateInLodge);
 
 INCLUDE_ASM("fe/festateload4", cFELoadStateInLodge_onCreateScreen);
 
-INCLUDE_ASM("fe/festateload4", func_00245DB8);
+INCLUDE_ASM("fe/festateload4", cFELoadStateInLodge_onWidgetCreate);
 
-INCLUDE_ASM("fe/festateload4", func_00245DC0);
+INCLUDE_ASM("fe/festateload4", cFELoadStateInLodge_onGainTransition);
 
 INCLUDE_ASM("fe/festateload4", func_00245E30);
 

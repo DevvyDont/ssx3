@@ -1977,7 +1977,7 @@ extern void* D_00482318[];
 extern "C" void cSSXScriptEngine_DeInitOnce(cSSXScriptEngine* self);
 extern "C" void func_00283518(void* self, int flags);
 extern "C" void func_00275498(void* self, int flags);
-extern "C" void func_00283228(void* self, int flags);
+extern "C" void cScriptObject__cScriptObject(void* self, int flags);
 extern "C" void func_002758C0(void* self, int flags);
 extern "C" void func_002837C8(void* self, int flags);
 extern "C" void cBXScriptEngine__cBXScriptEngine(void* self, int flags);
@@ -2009,10 +2009,10 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
     func_00275498(((char*)self) + 0xA28, 2);
     *(void***)(((char*)self) + 0x944) = D_00482298;
     *(void***)(((char*)self) + 0x92C) = cScriptObjEvent_vtbl;
-    func_00283228(((char*)self) + 0x938, 0);
+    cScriptObject__cScriptObject(((char*)self) + 0x938, 0);
     *(void***)(((char*)self) + 0x928) = D_00482318;
     *(void***)(((char*)self) + 0x910) = cScriptObjGS_vtbl;
-    func_00283228(((char*)self) + 0x91C, 0);
+    cScriptObject__cScriptObject(((char*)self) + 0x91C, 0);
     sSlot_780B8* p = (sSlot_780B8*)(((char*)self) + 0x910);
     sSlot_780B8* begin = (sSlot_780B8*)(((char*)self) + 0x6D0);
     if (begin != 0) {

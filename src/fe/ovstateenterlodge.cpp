@@ -400,7 +400,7 @@ extern "C" void func_001F7800(void* self, void* item, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7958);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
@@ -467,7 +467,7 @@ static inline int Loc1F7958(char* name)
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
 
-extern "C" void func_001F7958(char* self)
+extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
 {
     char buf[0x40];
     char line[0x40];

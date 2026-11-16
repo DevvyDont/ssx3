@@ -4801,7 +4801,7 @@ struct sBWVEntry1 {
 extern char* D_004A5B80;
 extern "C" void func_002E4578(void* self);
 extern "C" void cScriptObject_DeInitScriptObject(void* self);
-extern "C" void func_00283228(void* self, int flags);
+extern "C" void cScriptObject__cScriptObject(void* self, int flags);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 
 extern "C" void cTransitionMan__cTransitionMan(void* self, int flags)
@@ -4817,7 +4817,7 @@ extern "C" void cTransitionMan__cTransitionMan(void* self, int flags)
         *(int*)((char*)self + 0x7C) = 0;
     }
     cScriptObject_DeInitScriptObject(m);
-    func_00283228(m, 0);
+    cScriptObject__cScriptObject(m, 0);
     cObjNode__cObjNode(self, flags);
 }
 #endif
@@ -5011,7 +5011,7 @@ extern "C" float func_002E4678(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E46C8);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_update);
 #ifdef SKIP_ASM
 extern char* D_004A5B80;
 extern char* D_004A5B64;
@@ -5019,7 +5019,7 @@ extern char* D_004A5B64;
 struct sWkVtA46C8 { short delta; short index; int (*fn)(void*); };
 struct sWkVtB46C8 { short delta; short index; void (*fn)(void*, void*); };
 
-extern "C" void func_002E46C8(char* self)
+extern "C" void cTransitionMan_update(char* self)
 {
     char* ctx = D_004A5B80;
     if (*(int*)(self + 0x7C) != 0) {
@@ -5046,7 +5046,7 @@ extern "C" void func_002E46C8(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E47E8);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_render);
 #ifdef SKIP_ASM
 extern char* D_004A5B80;
 extern "C" void func_002EB8F0(void);
@@ -5130,7 +5130,7 @@ static inline int fadeTex47E8(sFade47E8* self)
     return self->tex;
 }
 
-extern "C" void func_002E47E8(sFade47E8* self)
+extern "C" void cTransitionMan_render(sFade47E8* self)
 {
     if (self->rider != *(int*)((char*)SSXApp->Game->ViewMan + 0x14)) {
         return;
@@ -5487,7 +5487,7 @@ struct cSnowBox_4F50 {
     int firstWind;                  // 0xB0
 };
 
-// tWorldPainterSnowfallParameters (filled by func_002E5DA0).
+// tWorldPainterSnowfallParameters (filled by cSnowFall_update).
 struct tWorldPainterSnowfallParameters_4F50 {
     float f[8];                     // 0x00
     float c0[4];                    // 0x20
@@ -6001,7 +6001,7 @@ extern "C" void cSnowFall__cSnowFall(void* self, int flags)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E5DA0);
+INCLUDE_ASM("visualfx/boardwakefx", cSnowFall_update);
 #ifdef SKIP_ASM
 extern int cSnowfallToggles_m_EnableTest;
 extern float cSnowfallToggles_m_TestSnowIntensity;
@@ -6041,7 +6041,7 @@ struct sWakeRec_5DA0 {
 };
 extern "C" void func_002E4F50(int* elem, sWakeRec_5DA0* rec);
 
-extern "C" void func_002E5DA0(void* self)
+extern "C" void cSnowFall_update(void* self)
 {
     sWakeRec_5DA0 recs[2];
     unsigned int i;
@@ -6089,7 +6089,7 @@ extern "C" void func_002E5DA0(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E6008);
+INCLUDE_ASM("visualfx/boardwakefx", cSnowFall_render);
 #ifdef SKIP_ASM
 struct sV4_6008 {
     float x, y, z, w;
@@ -6196,7 +6196,7 @@ static inline void rsSetB_6008(sRsCtx_6008* ctx, int mask, int shift, int v)
     ctx->top->flagsB = (ctx->top->flagsB & ~mask) | ((v << shift) & mask);
 }
 
-extern "C" void func_002E6008(sWakeFx_6008* self)
+extern "C" void cSnowFall_render(sWakeFx_6008* self)
 {
     if (D_004A4524 != 0) {
         return;

@@ -130,9 +130,9 @@ extern "C" void cFEStateTitle_onUpdate(sSelf_1948A8* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00194980__FPv);
+INCLUDE_ASM("fe/ovstates", cFEStateTitle_onPopupEvent__FPv);
 #ifdef SKIP_ASM
-void func_00194980(void* self)
+void cFEStateTitle_onPopupEvent(void* self)
 {
 }
 #endif
@@ -257,7 +257,7 @@ extern "C" void cFEStateMainMenu_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00194BF0);
+INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -300,7 +300,7 @@ public:
     virtual void setSelected(int v);
 };
 
-extern "C" void func_00194BF0(void* self)
+extern "C" void cFEStateMainMenu_onPreRender2D(void* self)
 {
     cUIObj_194BF0* obj = (cUIObj_194BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00460040));
     if (obj != 0) {
@@ -364,7 +364,7 @@ extern "C" void cFEStateMainMenu_onWidgetCreate(void* self, void* item)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00194DD0);
+INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_0039E510(void* self);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -422,7 +422,7 @@ public:
     virtual int isValid();
 };
 
-extern "C" void func_00194DD0(void* self)
+extern "C" void cFEStateMainMenu_onUpdate(void* self)
 {
     int i = 0;
     func_0039E510(self);
@@ -590,9 +590,9 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_001952E8);
+INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int func_001952E8(void* self, int a1, int a2)
+extern "C" int cFEStateMainMenu_onWidgetMenu(void* self, int a1, int a2)
 {
     switch (a2) {
     case 6:
@@ -605,7 +605,7 @@ extern "C" int func_001952E8(void* self, int a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00195328);
+INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -637,7 +637,7 @@ static inline void Show195328(void* self, char* name)
 }
 
 // On confirm (msg 0x16) commits the selected entry, then re-shows the four main-menu buttons.
-extern "C" void func_00195328(void* self, char* obj, int msg)
+extern "C" void cFEStateMainMenu_onPopupEvent(void* self, char* obj, int msg)
 {
     if (msg == 0x15) {
         return;

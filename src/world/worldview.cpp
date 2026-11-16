@@ -1680,21 +1680,21 @@ extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param,
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003ABE40);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve_resolveModel);
 #ifdef SKIP_ASM
-struct func_003ABE40_sTab {
+struct cPS2ChunkResolve_resolveModel_sTab {
     int f0;
     unsigned int* entries;
 };
-struct func_003ABE40_sLib {
+struct cPS2ChunkResolve_resolveModel_sLib {
     int f0;
     int f4;
-    func_003ABE40_sTab** tables;
+    cPS2ChunkResolve_resolveModel_sTab** tables;
 };
 
-class func_003ABE40_cObj {
+class cPS2ChunkResolve_resolveModel_cObj {
 public:
-    func_003ABE40_sLib** f0;
+    cPS2ChunkResolve_resolveModel_sLib** f0;
     int f4;
     // vptr at 0x8; slot N at vtable offset N*8
     virtual void v01();
@@ -1707,9 +1707,9 @@ public:
 
 extern "C" int func_003ABF20(void* self, void* a1);
 
-static inline unsigned int func_003ABE40_lookup(func_003ABE40_cObj* self, unsigned int id)
+static inline unsigned int cPS2ChunkResolve_resolveModel_lookup(cPS2ChunkResolve_resolveModel_cObj* self, unsigned int id)
 {
-    func_003ABE40_sTab* t = (*self->f0)->tables[id & 0xFF];
+    cPS2ChunkResolve_resolveModel_sTab* t = (*self->f0)->tables[id & 0xFF];
     unsigned int r;
     unsigned int v;
     if (t == 0 || (v = t->entries[id >> 8] >> 8) == 0) {
@@ -1721,7 +1721,7 @@ static inline unsigned int func_003ABE40_lookup(func_003ABE40_cObj* self, unsign
 }
 
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003ABE40(func_003ABE40_cObj* self, void* a1)
+extern "C" int cPS2ChunkResolve_resolveModel(cPS2ChunkResolve_resolveModel_cObj* self, void* a1)
 {
     int i = 0;
     *(int*)((char*)a1 + 0x8) += (int)a1;
@@ -1729,7 +1729,7 @@ extern "C" int func_003ABE40(func_003ABE40_cObj* self, void* a1)
     int* tbl = *(int**)((char*)a1 + 0xC);
     unsigned int* p = (unsigned int*)(tbl + 1);
     for (; i < *tbl; i++, p++) {
-        *p = func_003ABE40_lookup(self, *p);
+        *p = cPS2ChunkResolve_resolveModel_lookup(self, *p);
     }
     self->v06(a1);
     func_003ABF20(self, a1);
@@ -1904,52 +1904,52 @@ extern "C" int func_003AC048_impl(void* self, char* obj, char* ctx, int index)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AC2A8);
+INCLUDE_ASM("world/worldview", cPS2ChunkResolve_resolveInstance);
 #ifdef SKIP_ASM
-struct func_003AC2A8_sRes {
+struct cPS2ChunkResolve_resolveInstance_sRes {
     int f0;
     int f4;
     int f8;
     int fC;
 };
-struct func_003AC2A8_sTab {
+struct cPS2ChunkResolve_resolveInstance_sTab {
     int pad[5];
     unsigned int* entries;
 };
-struct func_003AC2A8_sLib {
+struct cPS2ChunkResolve_resolveInstance_sLib {
     int f0;
     int f4;
-    func_003AC2A8_sTab** tables;
+    cPS2ChunkResolve_resolveInstance_sTab** tables;
 };
-struct func_003AC2A8_sView {
+struct cPS2ChunkResolve_resolveInstance_sView {
     int f0;
     int f4;
 };
-struct func_003AC2A8_cObj {
-    func_003AC2A8_sLib** f0;
-    func_003AC2A8_sView* f4;
+struct cPS2ChunkResolve_resolveInstance_cObj {
+    cPS2ChunkResolve_resolveInstance_sLib** f0;
+    cPS2ChunkResolve_resolveInstance_sView* f4;
 };
 
 extern "C" int func_003AC358(void* self, void* a1);
 
-static inline func_003AC2A8_sRes* func_003AC2A8_lookup(func_003AC2A8_cObj* self, unsigned int id)
+static inline cPS2ChunkResolve_resolveInstance_sRes* cPS2ChunkResolve_resolveInstance_lookup(cPS2ChunkResolve_resolveInstance_cObj* self, unsigned int id)
 {
-    func_003AC2A8_sTab* t = (*self->f0)->tables[id & 0xFF];
+    cPS2ChunkResolve_resolveInstance_sTab* t = (*self->f0)->tables[id & 0xFF];
     unsigned int v;
     if (t == 0 || (v = t->entries[id >> 8] >> 8) == 0) {
         return 0;
     }
-    return (func_003AC2A8_sRes*)(v << 2);
+    return (cPS2ChunkResolve_resolveInstance_sRes*)(v << 2);
 }
 
 // PORT: stores pointers in int fields; not 64-bit safe.
-extern "C" int func_003AC2A8(func_003AC2A8_cObj* self, void* a1)
+extern "C" int cPS2ChunkResolve_resolveInstance(cPS2ChunkResolve_resolveInstance_cObj* self, void* a1)
 {
-    func_003AC2A8_sRes* r = func_003AC2A8_lookup(self, *(unsigned int*)((char*)a1 + 0x80));
-    *(func_003AC2A8_sRes**)((char*)a1 + 0x80) = r;
+    cPS2ChunkResolve_resolveInstance_sRes* r = cPS2ChunkResolve_resolveInstance_lookup(self, *(unsigned int*)((char*)a1 + 0x80));
+    *(cPS2ChunkResolve_resolveInstance_sRes**)((char*)a1 + 0x80) = r;
     *(int*)((char*)a1 + 0x94) = r->fC;
     *(int*)((char*)a1 + 0x8C) = 0;
-    *(func_003AC2A8_sView**)((char*)a1 + 0x88) = self->f4;
+    *(cPS2ChunkResolve_resolveInstance_sView**)((char*)a1 + 0x88) = self->f4;
     int x = self->f4->f4 & 0xFFFF0000;
     *(int*)((char*)a1 + 0x8) = x | (x >> 16) | 2;
     func_003AC358(self, a1);

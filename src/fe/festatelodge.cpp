@@ -360,7 +360,7 @@ extern "C" void cFEStateLodgeRiderDetail_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F4108);
+INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -388,7 +388,7 @@ static inline void commitK1F4108(void* np)
     vt[1].fn((char*)np + vt[1].delta);
 }
 
-extern "C" void func_001F4108(void* self, char* popup, int event)
+extern "C" void cFEStateLodgeRiderDetail_onPopupEvent(void* self, char* popup, int event)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (event != 0x16)
@@ -459,14 +459,14 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetCreate(void* self, void* w)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F4380);
+INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
 extern char D_0046EF70[];
 
-extern "C" void func_001F4380(void* self)
+extern "C" void cFEStateLodgeRiderDetail_onPreRender2D(void* self)
 {
     if (*(int*)((char*)self + 0x48) == 0) {
         void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046EF70));
@@ -478,10 +478,10 @@ extern "C" void func_001F4380(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F43D8);
+INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onWidgetMenu);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001F43D8(void* self, int a1, unsigned int key)
+extern "C" int cFEStateLodgeRiderDetail_onWidgetMenu(void* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -496,7 +496,7 @@ extern "C" int func_001F43D8(void* self, int a1, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F4400);
+INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -527,7 +527,7 @@ struct sVE_1F4400 {
     void* (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001F4400(char* self, char* w, int event)
+extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(char* self, char* w, int event)
 {
     if (w == 0) {
         return;

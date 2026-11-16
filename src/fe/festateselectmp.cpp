@@ -20,13 +20,13 @@ extern "C" void cFEStateSelectMultiplayerMode_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateselectmp", func_001A30F8);
+INCLUDE_ASM("fe/festateselectmp", cFEStateSelectMultiplayerMode_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A14F8[];
 extern char D_004A1500[];
 
-extern "C" void func_001A30F8(void* self, void* item)
+extern "C" void cFEStateSelectMultiplayerMode_onWidgetCreate(void* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(D_004A14F8)) {
@@ -41,7 +41,7 @@ extern "C" void func_001A30F8(void* self, void* item)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateselectmp", func_001A3160);
+INCLUDE_ASM("fe/festateselectmp", cFEStateSelectMultiplayerMode_onWidgetEvent);
 #ifdef SKIP_ASM
 struct sVEntry001A3160 {
     short delta;
@@ -50,7 +50,7 @@ struct sVEntry001A3160 {
 };
 extern "C" void cUIStateStack_push(void* list, void* item);
 
-extern "C" void func_001A3160(void* self, void* item, int msg)
+extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {
         return;

@@ -22,7 +22,7 @@ extern "C" void cOVStateRewardsList_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstaterewardslist", func_00200288);
+INCLUDE_ASM("fe/ovstaterewardslist", cOVStateRewardsList_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void cUIStateStack_push(void* list, void* item);
 
@@ -53,7 +53,7 @@ struct sVEntry_200288 {
     void* (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00200288(void* self, cUIObj_200288* item, int msg)
+extern "C" void cOVStateRewardsList_onWidgetEvent(void* self, cUIObj_200288* item, int msg)
 {
     if (item == 0) {
         return;

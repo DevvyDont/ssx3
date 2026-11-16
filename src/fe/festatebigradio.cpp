@@ -210,9 +210,9 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00193310__FPv);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onGainTransition__FPv);
 #ifdef SKIP_ASM
-int func_00193310(void* self)
+int cFEStateBraggingRights_onGainTransition(void* self)
 {
     return 0;
 }
@@ -221,16 +221,16 @@ int func_00193310(void* self)
 extern "C" void* func_0039E6B8(void* self);
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00193318__FPv);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onRender2D__FPv);
 #ifdef SKIP_ASM
-void* func_00193318(void* self)
+void* cFEStateBraggingRights_onRender2D(void* self)
 {
     return func_0039E6B8(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00193338);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onUpdate);
 #ifdef SKIP_ASM
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
@@ -271,7 +271,7 @@ typedef sVEntry<int(void*, void*)> sVEPtr_3338;
 
 static inline int get6F8_3338(void* p) { return *(int*)((char*)p + 0x6F8); }
 
-extern "C" void func_00193338(sBragging_2DB0* self)
+extern "C" void cFEStateBraggingRights_onUpdate(sBragging_2DB0* self)
 {
     int n = isNet_2DB0() ? 1 : 2;
     int i;
@@ -317,7 +317,7 @@ extern "C" void func_00193338(sBragging_2DB0* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00193568);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onGainFocus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIScreen;
@@ -339,7 +339,7 @@ static inline int isOn00193568()
 
 static inline int get6F8_3568(void* p) { return *(int*)((char*)p + 0x6F8); }
 
-extern "C" void func_00193568(void* self, int a1)
+extern "C" void cFEStateBraggingRights_onGainFocus(void* self, int a1)
 {
     if (isOn00193568()) {
         func_001A87D0(self, a1);
@@ -461,7 +461,7 @@ extern "C" void cFEStateBraggingRights_onWidgetCreate(char* self, cUIObj_193650*
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_001938F8);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -515,7 +515,7 @@ static inline void* vcall_38F8(char* self, int slot, sWidget_38F8* w)
 }
 
 // Widget event handler of the big radio-button screen (two radio panels at self+0x6D0).
-extern "C" void func_001938F8(char* self, sWidget_38F8* w, int event)
+extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w, int event)
 {
     int panel;
     switch (event) {
@@ -616,7 +616,7 @@ extern "C" void func_00193C00(void* self, void* popup)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00193CF8);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onWidgetMenu);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A1A70;
@@ -628,7 +628,7 @@ static inline int isOn00193CF8()
     return D_004A1A70 == 1;
 }
 // Handles a menu event for one of the two radio list controls.
-extern "C" int func_00193CF8(void* self, void* ctrl, int msg)
+extern "C" int cFEStateBraggingRights_onWidgetMenu(void* self, void* ctrl, int msg)
 {
     int found = 0;
     void** item;
@@ -789,7 +789,7 @@ extern "C" void* func_00194138(void* self, int a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00194168);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onPopupEvent);
 #ifdef SKIP_ASM
 extern int D_004A1A70;
 extern "C" void func_00194440(void* self, void* a1, int a2);
@@ -800,7 +800,7 @@ static inline int isOn00194168()
     return D_004A1A70 == 1;
 }
 
-extern "C" void func_00194168(void* self, void* a1, int a2)
+extern "C" void cFEStateBraggingRights_onPopupEvent(void* self, void* a1, int a2)
 {
     if (isOn00194168()) {
         if (*(int*)((char*)a1 + 0x18) == 0x838) {

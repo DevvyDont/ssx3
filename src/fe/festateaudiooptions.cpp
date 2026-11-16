@@ -479,7 +479,7 @@ extern "C" void cFEStateRequestLine_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateaudiooptions", func_00196E80);
+INCLUDE_ASM("fe/festateaudiooptions", cFEStateRequestLine_onDestroyScreen);
 #ifdef SKIP_ASM
 struct sVEntry00196E80 {
     short delta;
@@ -492,7 +492,7 @@ void* cUIState_onDestroyScreen(void* self);
 extern "C" void* cUIStateStack_findState(void* self, int id);
 extern char D_004A18A8[];
 
-extern "C" void func_00196E80(void* self)
+extern "C" void cFEStateRequestLine_onDestroyScreen(void* self)
 {
     if ((int)SSXApp->Game != 0) {
         void* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
@@ -506,7 +506,7 @@ extern "C" void func_00196E80(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateaudiooptions", func_00196F00);
+INCLUDE_ASM("fe/festateaudiooptions", cFEStateRequestLine_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cFEState_onGainFocus(void* self);
 extern "C" void cFEStateRequestLine_updatePlayList(void* self);
@@ -514,7 +514,7 @@ extern "C" void func_00197E70(void* self);
 extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int a1);
 extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
 
-extern "C" void func_00196F00(void* self)
+extern "C" void cFEStateRequestLine_onGainFocus(void* self)
 {
     cFEState_onGainFocus(self);
     *(int*)((char*)self + 0x150) = 0;
@@ -526,13 +526,13 @@ extern "C" void func_00196F00(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateaudiooptions", func_00196F50);
+INCLUDE_ASM("fe/festateaudiooptions", cFEStateRequestLine_onGainTransition);
 #ifdef SKIP_ASM
 extern "C" void cFEStateRequestLine_updatePlayListArrows(void* self);
 extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int a1);
 extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
 
-extern "C" int func_00196F50(void* self, int a1)
+extern "C" int cFEStateRequestLine_onGainTransition(void* self, int a1)
 {
     if (a1 != 0) {
         cFEStateRequestLine_updatePlayListArrows(self);

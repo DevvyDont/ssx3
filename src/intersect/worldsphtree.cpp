@@ -4971,9 +4971,9 @@ extern void* cBoostNode_vtbl[];
 extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_003415A8__FPv);
+INCLUDE_ASM("intersect/worldsphtree", cBoostNode__cBoostNode__FPv);
 #ifdef SKIP_ASM
-void* func_003415A8(void* self)
+void* cBoostNode__cBoostNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)cBoostNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
@@ -4981,7 +4981,7 @@ void* func_003415A8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_003415D0);
+INCLUDE_ASM("intersect/worldsphtree", cBoostNode_update);
 #ifdef SKIP_ASM
 extern "C" int func_002D1AF0();
 extern "C" void** cObjectInterface_getNumBeings(int i);
@@ -5005,7 +5005,7 @@ struct sNode_003415D0 {
     int type;
 };
 
-extern "C" void func_003415D0(sNode_003415D0* self)
+extern "C" void cBoostNode_update(sNode_003415D0* self)
 {
     int hit = 0;
     if (self->type != 1) {
@@ -5207,9 +5207,9 @@ extern "C" void func_00341818(sSph_341818* self, cMover_341818* obj)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00341A30);
+INCLUDE_ASM("intersect/worldsphtree", cBoostNode_signal);
 #ifdef SKIP_ASM
-extern "C" void func_00341A30(void* self, int a1)
+extern "C" void cBoostNode_signal(void* self, int a1)
 {
     if (a1 == 1) {
         *(int*)((char*)self + 0x3c) = *(int*)((char*)self + 0x38);
@@ -5218,7 +5218,7 @@ extern "C" void func_00341A30(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00341A50);
+INCLUDE_ASM("intersect/worldsphtree", cBoostNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sSerVEntry_00341A50 {
     short delta;
@@ -5228,7 +5228,7 @@ struct sSerVEntry_00341A50 {
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
-extern "C" void func_00341A50(void* self, void* stream)
+extern "C" void cBoostNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_00341A50* vt = *(sSerVEntry_00341A50**)stream;

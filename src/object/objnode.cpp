@@ -161,15 +161,15 @@ void* cSortObjNode__cSortObjNode(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/objnode", func_00354948);
+INCLUDE_ASM("object/objnode", cTypeObjNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-class func_00354948_cObj {
+class cTypeObjNode_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
 };
 
-extern "C" void func_00354948(void* self, func_00354948_cObj* obj)
+extern "C" void cTypeObjNode_writeToReplayFrame(void* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
 {
     obj->v01((char*)self + 0x10, 4);
 }
@@ -178,9 +178,9 @@ extern "C" void func_00354948(void* self, func_00354948_cObj* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/objnode", cSortObjNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void cSortObjNode_writeToReplayFrame(void* self, func_00354948_cObj* obj)
+extern "C" void cSortObjNode_writeToReplayFrame(void* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
 {
-    func_00354948(self, obj);
+    cTypeObjNode_writeToReplayFrame(self, obj);
     obj->v01((char*)self + 0x14, 4);
 }
 #endif

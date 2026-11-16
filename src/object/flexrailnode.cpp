@@ -1603,14 +1603,14 @@ extern "C" void* cFlagNode_cFlagNode(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AEA0);
+INCLUDE_ASM("object/flexrailnode", cFlagNode__cFlagNode);
 #ifdef SKIP_ASM
 extern char cFlagNode_vtbl[];
 extern "C" void* func_002D1CB0(void);
 extern "C" void func_0034C600(void* set, void* arg);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
-extern "C" void func_0034AEA0(void* self, int flags)
+extern "C" void cFlagNode__cFlagNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
     func_0034C600(func_002D1CB0(), *(void**)((char*)self + 0x18));
@@ -1621,18 +1621,18 @@ extern "C" void func_0034AEA0(void* self, int flags)
 extern "C" void* cInstanceNode_writeToReplayFrame(void* self);
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AEF8__FPv);
+INCLUDE_ASM("object/flexrailnode", cFlagNode_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
-void* func_0034AEF8(void* self)
+void* cFlagNode_writeToReplayFrame(void* self)
 {
     return cInstanceNode_writeToReplayFrame(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AF18__FPv);
+INCLUDE_ASM("object/flexrailnode", cFlagNode_render__FPv);
 #ifdef SKIP_ASM
-void func_0034AF18(void* self)
+void cFlagNode_render(void* self)
 {
 }
 #endif

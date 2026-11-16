@@ -2618,12 +2618,12 @@ extern "C" int func_002458B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245928);
+INCLUDE_ASM("main/ssxappdtor", cFELoadHintState__cFELoadHintState);
 #ifdef SKIP_ASM
 extern void* cFELoadHintState_vtbl[];
 extern "C" void* func_0039E390(void* self);
 
-extern "C" void* func_00245928(void* self)
+extern "C" void* cFELoadHintState__cFELoadHintState(void* self)
 {
     *(void**)((char*)self + 0x8) = cFELoadHintState_vtbl;
     return func_0039E390(self);

@@ -594,9 +594,9 @@ extern "C" void func_00211AA8(void* self)
 extern "C" void* func_001D58B8(void*);
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211B10__FPv);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
-void func_00211B10(void* self)
+void cOVState_PROFILE_onDestroyScreen(void* self)
 {
     func_001D58B8(self);
     *(int*)((char*)self + 0x1a4) = 0;
@@ -978,9 +978,9 @@ extern "C" void func_00212208(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_002122E0__FPv);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onInputBegin__FPv);
 #ifdef SKIP_ASM
-int func_002122E0(void* self)
+int cOVState_AUTOSAVE_onInputBegin(void* self)
 {
     return 0;
 }
@@ -1088,7 +1088,7 @@ extern "C" void func_002124C8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00212508);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onDestroyScreen);
 #ifdef SKIP_ASM
 extern int D_004A11B8;
 extern int D_00535C08[];
@@ -1112,7 +1112,7 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 
 struct sVEnt_00212508 { short delta; short index; void (*fn)(void*); };
 
-extern "C" void func_00212508(void* self)
+extern "C" void cOVState_AUTOSAVE_onDestroyScreen(void* self)
 {
     func_001D58B8(self);
     int s = *(int*)((char*)self + 0x22C);

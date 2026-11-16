@@ -149,7 +149,7 @@ extern "C" void* func_0028B180();
 // PORT: func_00289AF8 takes (mgr, rider); the mangled name says one void* param.
 void func_00289AF8_impl(void* mgr, void* rider) __asm__("func_00289AF8__FPv");
 extern "C" void cScriptObject_DeInitScriptObject(void* p);
-extern "C" void func_00283228(void* p, int flags);
+extern "C" void cScriptObject__cScriptObject(void* p, int flags);
 extern "C" void cAnimModel__cAnimModel(void* p, int flags);
 extern "C" void cRiderSphereTree__cRiderSphereTree(void* p, int flags);
 extern "C" void func_00113170(void* p, int flags);
@@ -212,7 +212,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
         func_00375918(p, 3);
     self->mScriptObjectVtbl = D_00482018;
     self->mScriptObjRiderVtbl = D_00481FD8;
-    func_00283228(self->unk_6DC, 0);
+    cScriptObject__cScriptObject(self->unk_6DC, 0);
     self->mVtbl = cBeing_vtbl;
     if (flags & 1)
         operator_delete((int*)self);

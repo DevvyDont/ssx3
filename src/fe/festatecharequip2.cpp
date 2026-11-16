@@ -2,27 +2,27 @@
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_cFEStateCharEquip);
 
-INCLUDE_ASM("fe/festatecharequip2", func_00199148);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip__cFEStateCharEquip);
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onCreateScreen);
 
-INCLUDE_ASM("fe/festatecharequip2", func_00199350);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onDestroyScreen);
 
-INCLUDE_ASM("fe/festatecharequip2", func_001993A0);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onGainFocus);
 
-INCLUDE_ASM("fe/festatecharequip2", func_00199420);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onLoseFocus);
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onWidgetCreate);
 
-INCLUDE_ASM("fe/festatecharequip2", func_00199870);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onPopupEvent);
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onUpdate);
 
-INCLUDE_ASM("fe/festatecharequip2", func_00199A38);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onInputBegin);
 
-INCLUDE_ASM("fe/festatecharequip2", func_00199C28);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onWidgetEvent);
 
-INCLUDE_ASM("fe/festatecharequip2", func_00199F20);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onWidgetMenu);
 
 INCLUDE_ASM("fe/festatecharequip2", func_0019A098);
 

@@ -44,7 +44,7 @@ extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181238);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onDestroyScreen);
 #ifdef SKIP_ASM
 extern signed char D_00535C11[];
 extern "C" void* cBE_getBE();
@@ -54,7 +54,7 @@ extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_0019E538(void* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
 
-extern "C" void func_00181238(void* self)
+extern "C" void cFEStateCharSelect_onDestroyScreen(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     char* mgr = (char*)SSXApp->RealFE;
@@ -66,7 +66,7 @@ extern "C" void func_00181238(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_001812A8);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onGainTransition);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -74,7 +74,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void func_00181BD0(void* self, int index, signed char charID);
 
-extern "C" int func_001812A8(void* self, int on)
+extern "C" int cFEStateCharSelect_onGainTransition(void* self, int on)
 {
     if (on != 0) {
         int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
@@ -85,7 +85,7 @@ extern "C" int func_001812A8(void* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181308);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onGainFocus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
@@ -101,7 +101,7 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern signed char D_00440F68[];
 extern char D_004A1398[];
 
-extern "C" void func_00181308(void* self, int a1)
+extern "C" void cFEStateCharSelect_onGainFocus(void* self, int a1)
 {
     int i = 0;
     int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
@@ -124,21 +124,21 @@ extern "C" void func_00181308(void* self, int a1)
 extern "C" void* func_0039E6B8(void* self);
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181400__FPv);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onRender2D__FPv);
 #ifdef SKIP_ASM
-void* func_00181400(void* self)
+void* cFEStateCharSelect_onRender2D(void* self)
 {
     return func_0039E6B8(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181420);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_00181EF0(void* self);
 extern "C" void* func_0039E510(void* self);
 
-extern "C" void func_00181420(void* self)
+extern "C" void cFEStateCharSelect_onUpdate(void* self)
 {
     func_00181EF0(self);
     func_0039E510(self);
@@ -146,7 +146,7 @@ extern "C" void func_00181420(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181450);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onInputBegin);
 #ifdef SKIP_ASM
 struct sPadVtI_1450 { short delta; short index; int (*fn)(void*); };
 struct sPadVtF_1450 { short delta; short index; float (*fn)(void*); };
@@ -184,7 +184,7 @@ static inline float clamp_1450(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" int func_00181450(char* self, char* pad)
+extern "C" int cFEStateCharSelect_onInputBegin(char* self, char* pad)
 {
     int changed = 0;
     if (padBtn_1450(pad, 35)) {
@@ -304,7 +304,7 @@ extern "C" void cFEStateCharSelect_onWidgetCreate(char* self, sWidget_1620* w)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_001817E8);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -387,7 +387,7 @@ static inline void refresh_17E8(sIface_17E8* iface)
 }
 
 // Character select: widget event handler.
-extern "C" void func_001817E8(sCharSel_17E8* self, sObj_17E8* widget, int event)
+extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8* widget, int event)
 {
     if (widget == 0)
         return;
@@ -752,14 +752,14 @@ extern "C" sCharSel_2220* func_00182220(sCharSel_2220* self, void* engine, void*
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00182420);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_0045D780[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
-extern "C" void func_00182420(void* self)
+extern "C" void cFEStateCheatCharSelect_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_0045D780), 0);
@@ -868,7 +868,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetCreate(sCheat_2460* self, sCW_24
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00182690);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onWidgetEvent);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
@@ -891,7 +891,7 @@ struct sVEK182690b {
     void (*fn)(void*);
 };
 
-extern "C" void func_00182690(void* self, void* menu, unsigned int msg)
+extern "C" void cFEStateCheatCharSelect_onWidgetEvent(void* self, void* menu, unsigned int msg)
 {
     if (menu == 0)
         return;
@@ -931,11 +931,11 @@ extern "C" void func_00182690(void* self, void* menu, unsigned int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00182808);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onWidgetMenu);
 #ifdef SKIP_ASM
 extern "C" void func_00182870(void* self);
 
-extern "C" int func_00182808(void* self, int a1, unsigned int msg, int value)
+extern "C" int cFEStateCheatCharSelect_onWidgetMenu(void* self, int a1, unsigned int msg, int value)
 {
     switch (msg) {
     case 7:

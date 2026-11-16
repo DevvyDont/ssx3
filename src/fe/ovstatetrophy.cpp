@@ -22,7 +22,7 @@ extern "C" void cOVStateTrophy_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020E9A0);
+INCLUDE_ASM("fe/ovstatetrophy", cOVStateTrophy_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void cUIStateStack_push(void* list, void* item);
 
@@ -53,7 +53,7 @@ struct sVEntry_20E9A0 {
     void* (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0020E9A0(void* self, cUIObj_20E9A0* item, int msg)
+extern "C" void cOVStateTrophy_onWidgetEvent(void* self, cUIObj_20E9A0* item, int msg)
 {
     if (item == 0) {
         return;

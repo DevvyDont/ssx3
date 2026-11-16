@@ -443,7 +443,7 @@ extern "C" void* func_0017D298(char* self)
 INCLUDE_ASM("fe/debugfe", func_0017D3B0);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
-extern "C" void func_002CA280(void* self, int flags);
+extern "C" void cMenuItem__cMenuItem(void* self, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 extern "C" void func_001DD0C8(void* self, int flags);
 extern "C" void func_001DCEA0(void* self, int flags);
@@ -471,50 +471,50 @@ struct sVE_17D3B0 {
 
 static inline void dtorA_17D3B0(char* sub)
 {
-    func_002CA280(sub + 0x134, 2);
+    cMenuItem__cMenuItem(sub + 0x134, 2);
     cMenu__cMenu(sub, 2);
 }
 
 static inline void dtorB_17D3B0(char* sub)
 {
-    func_002CA280(sub + 0x1C8, 2);
-    func_002CA280(sub + 0x1A4, 2);
-    func_002CA280(sub + 0x18C, 2);
-    func_002CA280(sub + 0x170, 2);
-    func_002CA280(sub + 0x154, 2);
-    func_002CA280(sub + 0x138, 2);
+    cMenuItem__cMenuItem(sub + 0x1C8, 2);
+    cMenuItem__cMenuItem(sub + 0x1A4, 2);
+    cMenuItem__cMenuItem(sub + 0x18C, 2);
+    cMenuItem__cMenuItem(sub + 0x170, 2);
+    cMenuItem__cMenuItem(sub + 0x154, 2);
+    cMenuItem__cMenuItem(sub + 0x138, 2);
     cMenu__cMenu(sub, 2);
 }
 
 static inline void dtorC_17D3B0(char* sub)
 {
     DTOR_ARR_17D3B0(sub + 0x194, 14)
-    func_002CA280(sub + 0x168, 2);
-    func_002CA280(sub + 0x150, 2);
-    func_002CA280(sub + 0x134, 2);
+    cMenuItem__cMenuItem(sub + 0x168, 2);
+    cMenuItem__cMenuItem(sub + 0x150, 2);
+    cMenuItem__cMenuItem(sub + 0x134, 2);
     cMenu__cMenu(sub, 2);
 }
 
 static inline void dtorD_17D3B0(char* sub)
 {
-    func_002CA280(sub + 0x4CC, 2);
+    cMenuItem__cMenuItem(sub + 0x4CC, 2);
     DTOR_ARR_17D3B0(sub + 0x16C, 24)
-    func_002CA280(sub + 0x154, 2);
-    func_002CA280(sub + 0x138, 2);
+    cMenuItem__cMenuItem(sub + 0x154, 2);
+    cMenuItem__cMenuItem(sub + 0x138, 2);
     cMenu__cMenu(sub, 2);
 }
 
 static inline void dtorE_17D3B0(char* sub)
 {
     DTOR_ARR_17D3B0(sub + 0x168, 12)
-    func_002CA280(sub + 0x150, 2);
-    func_002CA280(sub + 0x134, 2);
+    cMenuItem__cMenuItem(sub + 0x150, 2);
+    cMenuItem__cMenuItem(sub + 0x134, 2);
     cMenu__cMenu(sub, 2);
 }
 
 static inline void dtorF_17D3B0(char* sub)
 {
-    func_002CA280(sub + 0x130, 2);
+    cMenuItem__cMenuItem(sub + 0x130, 2);
     cMenu__cMenu(sub, 2);
 }
 

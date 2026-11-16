@@ -94,7 +94,7 @@ struct cKeyboardPopup {
     int mbReferEventsToParent;      // 0x438 [O]; [R] ctor zeroes; [U] handleEvent (func_001CB3D0) forwards to the parent
     int meType;                     // 0x43C [O] eKeyboardType; [R] ctor 1; [U] onGainTransition: 0 "regular", 1 "compact",
                                     //       2 "expanded"
-    int mbCallParentsUpdate;        // 0x440 [O]; [R] ctor zeroes; [U] onUpdate (func_001CB208) calls the parent's onUpdate
+    int mbCallParentsUpdate;        // 0x440 [O]; [R] ctor zeroes; [U] onUpdate (cKeyboardPopup_onUpdate) calls the parent's onUpdate
 };
 
 CHECK_OFFSET(cKeyboardPopup, mpPrev, 0x0);

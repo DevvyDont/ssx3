@@ -43,12 +43,12 @@ extern "C" int func_001D9E20(void* self, int a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatenethelppopup", func_001D9E68);
+INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onUpdate);
 #ifdef SKIP_ASM
 extern "C" float cInput_getValue(void* self, int id);
 extern "C" void func_0039F190(void*, int);
 
-extern "C" void func_001D9E68(void* self)
+extern "C" void cFEStateNetHelpPopup_onUpdate(void* self)
 {
     int i;
     int found = 0;
@@ -66,9 +66,9 @@ extern "C" void func_001D9E68(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatenethelppopup", func_001D9F30__FPv);
+INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onInputBegin__FPv);
 #ifdef SKIP_ASM
-int func_001D9F30(void* self)
+int cFEStateNetHelpPopup_onInputBegin(void* self)
 {
     return 0x1;
 }
@@ -219,7 +219,7 @@ extern "C" void func_001DA110(void* p)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festatenethelppopup", func_001DA238);
+INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onGainTransition);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
@@ -259,7 +259,7 @@ static inline void show_1DA238(sWidget_1DA238* w, int on)
     w->vt[9].fn((char*)w + w->vt[9].delta, on);
 }
 
-extern "C" int func_001DA238(sNetHelp_1DA238* self, int a1)
+extern "C" int cFEStateNetHelpPopup_onGainTransition(sNetHelp_1DA238* self, int a1)
 {
     if (a1) {
         if (self->title) {
@@ -302,11 +302,11 @@ extern "C" int func_001DA238(sNetHelp_1DA238* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatenethelppopup", func_001DA478);
+INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void func_0039F190(void*, int);
 
-extern "C" void func_001DA478(void* self, int a1, int msg)
+extern "C" void cFEStateNetHelpPopup_onWidgetEvent(void* self, int a1, int msg)
 {
     if (msg == 6) {
         func_0039F190((char*)*(void**)((char*)self + 0x10) + 0x18, 1);

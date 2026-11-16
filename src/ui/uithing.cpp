@@ -285,7 +285,7 @@ extern "C" func_003A0348_sObj* func_003A0348(func_003A0348_sObj* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A03F0);
+INCLUDE_ASM("ui/uithing", cUIText_setUIData);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText*, int);
@@ -316,7 +316,7 @@ struct sUIData03F0 {
     unsigned char r, g, b, a;   // 0x28
 };
 
-extern "C" void func_003A03F0(sUIThing03F0* self, sUIData03F0* data)
+extern "C" void cUIText_setUIData(sUIThing03F0* self, sUIData03F0* data)
 {
     cUIThing_setUIData_2(self, data);
     self->mode = data->mode & 3;

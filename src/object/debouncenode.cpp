@@ -25,7 +25,7 @@ extern "C" void* cDebounceNode_cDebounceNode(void* self, void* unused, void* str
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00342D88);
+INCLUDE_ASM("object/debouncenode", cDebounceNode_updateNode);
 #ifdef SKIP_ASM
 struct sDebounceVEntry2D88 {
     short delta;
@@ -33,7 +33,7 @@ struct sDebounceVEntry2D88 {
     void (*fn)(void*, int);
 };
 
-extern "C" int func_00342D88(void* self)
+extern "C" int cDebounceNode_updateNode(void* self)
 {
     int n = *(int*)((char*)self + 0x2C);
     if (n > 0) {
@@ -50,7 +50,7 @@ extern "C" int func_00342D88(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00342DD8);
+INCLUDE_ASM("object/debouncenode", cDebounceNode_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_003506D8(void* self, void* parent);
@@ -62,7 +62,7 @@ struct sDebounceVEntry2DD8 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_00342DD8(void* self)
+extern "C" void cDebounceNode_loseFocus(void* self)
 {
     if (*(int*)((char*)self + 0x2C) >= 0) {
         if (*(int*)((char*)self + 0x30) == 0) {
@@ -85,22 +85,22 @@ extern "C" void func_00342DD8(void* self)
 extern "C" void* cMoveNode_signal(void* self);
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00342E78__FPv);
+INCLUDE_ASM("object/debouncenode", cDebounceNode_signal__FPv);
 #ifdef SKIP_ASM
-void* func_00342E78(void* self)
+void* cDebounceNode_signal(void* self)
 {
     return cMoveNode_signal(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00342E98);
+INCLUDE_ASM("object/debouncenode", cDebounceNode_expire);
 #ifdef SKIP_ASM
 int func_0034FCC0(void* self);
 extern "C" void* func_00350F60(void* self, void* parent);
 extern const char D_0048E748[];
 
-extern "C" void func_00342E98(void* self, int check)
+extern "C" void cDebounceNode_expire(void* self, int check)
 {
     if (check != 0 && func_0034FCC0(self) != 0) {
         return;
@@ -132,7 +132,7 @@ extern "C" void func_00342E98(void* self, int check)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00342FA8);
+INCLUDE_ASM("object/debouncenode", cDebounceNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sDebounceVEntry2FA8 {
     short delta;
@@ -142,7 +142,7 @@ struct sDebounceVEntry2FA8 {
 
 extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
 
-extern "C" void func_00342FA8(void* self, void* stream)
+extern "C" void cDebounceNode_writeToReplayFrame(void* self, void* stream)
 {
     cMoveNode_writeToReplayFrame(self, stream);
     sDebounceVEntry2FA8* e = &(*(sDebounceVEntry2FA8**)stream)[1];
@@ -722,7 +722,7 @@ extern "C" void* cCounterNode_cCounterNode(void* self, void* unused, void* strea
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343820);
+INCLUDE_ASM("object/debouncenode", cCounterNode_update);
 #ifdef SKIP_ASM
 struct sDebounceVEntry1 {
     short delta;
@@ -730,7 +730,7 @@ struct sDebounceVEntry1 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_00343820(void* self)
+extern "C" void cCounterNode_update(void* self)
 {
     if (*(int*)((char*)self + 0x1C) == 0) {
         *(int*)((char*)self + 0x1C) = -1;
@@ -741,9 +741,9 @@ extern "C" void func_00343820(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343868);
+INCLUDE_ASM("object/debouncenode", cCounterNode_signal);
 #ifdef SKIP_ASM
-extern "C" void func_00343868(void* self, int msg, float level)
+extern "C" void cCounterNode_signal(void* self, int msg, float level)
 {
     int bit = 0;
     int fire = 0;
@@ -807,7 +807,7 @@ extern "C" void func_00343868(void* self, int msg, float level)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343A18);
+INCLUDE_ASM("object/debouncenode", cCounterNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sDebounceVEntryA18 {
     short delta;
@@ -817,7 +817,7 @@ struct sDebounceVEntryA18 {
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
-extern "C" void func_00343A18(void* self, void* stream)
+extern "C" void cCounterNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sDebounceVEntryA18* vt = *(sDebounceVEntryA18**)stream;

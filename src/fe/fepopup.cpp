@@ -69,14 +69,14 @@ extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, void* engine, voi
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001C5A90);
+INCLUDE_ASM("fe/fepopup", cScreenPopup__cScreenPopup);
 #ifdef SKIP_ASM
 extern void* cScreenPopup_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void func_001C5750(void* self, int flags);
 extern "C" void func_0039E390(void* self, int flags);
 
-extern "C" void func_001C5A90(cScreenPopup* self, int flags)
+extern "C" void cScreenPopup__cScreenPopup(cScreenPopup* self, int flags)
 {
     self->mVtbl = cScreenPopup_vtbl;
     cBXString__cBXString((char*)self + 0x2B4, 2);
@@ -3194,7 +3194,7 @@ extern "C" void cKeyboardPopup_onCreateScreen(cKeyboardPopup* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CB208);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onUpdate);
 #ifdef SKIP_ASM
 struct sVEntry001CB208 {
     short delta;
@@ -3206,7 +3206,7 @@ extern void* D_004A2EEC;
 extern "C" void func_0039E510(void*);
 extern "C" void func_0039F190(void* self, int a1);
 
-extern "C" void func_001CB208(cKeyboardPopup* self)
+extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
 {
     func_0039E510(self);
     if (D_004A2EEC != 0 && *(int*)((char*)D_004A2EEC + 0x64) == 0 && (int)SSXApp->Game != 0) {
@@ -3223,11 +3223,11 @@ extern "C" void func_001CB208(cKeyboardPopup* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CB290);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void func_0039F190(void* self, int a1);
 
-extern "C" void func_001CB290(cKeyboardPopup* self, void* a1, unsigned int a2)
+extern "C" void cKeyboardPopup_onWidgetEvent(cKeyboardPopup* self, void* a1, unsigned int a2)
 {
     switch (a2) {
     case 5:
@@ -4645,12 +4645,12 @@ extern "C" int cKeyboardPopup_getObjName(cKeyboardPopup* self, int key, char* ou
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CD2F0);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 
-extern "C" void func_001CD2F0(cKeyboardPopup* self, int a1)
+extern "C" void cKeyboardPopup_onGainFocus(cKeyboardPopup* self, int a1)
 {
     if (self->miCursorPos == self->miMaxCharacters) {
         self->miCursorPos = self->miCursorPos - 1;
@@ -5012,7 +5012,7 @@ extern "C" void cKeyboardPopup_SetNameForKey(cKeyboardPopup* vself, cUIText* tex
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CDB98);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onInputBegin);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
@@ -5086,7 +5086,7 @@ static inline int isOnK1CDB98()
     return D_004A1A70 == 1;
 }
 
-extern "C" int func_001CDB98(cKeyboardPopup* self, char* ev)
+extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
 {
     if (InputK1CDB98(ev, 8) != 0)
         return 1;

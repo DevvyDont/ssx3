@@ -178,5 +178,5 @@ INCLUDE_ASM("main/ssxapp2", func_002458B0);
 
 INCLUDE_ASM("main/ssxapp2", func_002458B8);
 
-INCLUDE_ASM("main/ssxapp2", func_00245928);
+INCLUDE_ASM("main/ssxapp2", cFELoadHintState__cFELoadHintState);
 

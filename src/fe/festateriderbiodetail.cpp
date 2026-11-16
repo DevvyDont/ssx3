@@ -268,7 +268,7 @@ extern "C" void cFEStateRiderBio_fillBioInfo(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", func_001912D0);
+INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_onWidgetEvent);
 #ifdef SKIP_ASM
 struct sVEntry001912D0 {
     short delta;
@@ -278,7 +278,7 @@ struct sVEntry001912D0 {
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void func_00190A08(void* self);
 
-extern "C" void func_001912D0(void* self, void* item, int msg)
+extern "C" void cFEStateRiderBio_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {
         return;

@@ -219,7 +219,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* p, void* owner, signe
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_00199148);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip__cFEStateCharEquip);
 #ifdef SKIP_ASM
 struct sEquipTable_DC20;
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
@@ -244,7 +244,7 @@ static inline void releaseK199148(int id)
     }
 }
 
-extern "C" void func_00199148(void* self, int flags)
+extern "C" void cFEStateCharEquip__cFEStateCharEquip(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cFEStateCharEquip_vtbl;
     if (*(int*)((char*)self + 0xA64) >= 0) {
@@ -305,12 +305,12 @@ extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_00199350);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onDestroyScreen);
 #ifdef SKIP_ASM
 extern "C" void* func_001A0548(void* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
 
-extern "C" void func_00199350(void* self)
+extern "C" void cFEStateCharEquip_onDestroyScreen(void* self)
 {
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
@@ -322,7 +322,7 @@ extern "C" void func_00199350(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_001993A0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void func_0019A308(void* self);
 extern "C" void func_0019A238(void* self);
@@ -331,7 +331,7 @@ extern "C" void func_0019BD48(void* self, int a1);
 extern "C" void func_0019B618(void* self, int a1, int a2);
 extern "C" void cFEState_onGainFocus(void* self, int a1);
 
-extern "C" void func_001993A0(void* self, int a1)
+extern "C" void cFEStateCharEquip_onGainFocus(void* self, int a1)
 {
     bool off = !*(bool*)((char*)self + 0xC8);
     if (!off) {
@@ -347,12 +347,12 @@ extern "C" void func_001993A0(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_00199420);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onLoseFocus);
 #ifdef SKIP_ASM
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_0019E538(void* rider, int a1);
 
-extern "C" void func_00199420(void* self)
+extern "C" void cFEStateCharEquip_onLoseFocus(void* self)
 {
     func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
 }
@@ -550,7 +550,7 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, void* w)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_00199870);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" void func_0019BE80(void* self);
 extern "C" void func_0019BBA0(void* self);
@@ -558,7 +558,7 @@ struct sEquipDetail;
 extern "C" int func_0019B458(sEquipDetail* self, int idx);
 extern "C" void func_0019B618(void* self, int a1, int a2);
 
-extern "C" void func_00199870(void* self, void* widget, int msg)
+extern "C" void cFEStateCharEquip_onPopupEvent(void* self, void* widget, int msg)
 {
     switch (msg) {
     case 0x15:
@@ -635,7 +635,7 @@ extern "C" void cFEStateCharEquip_onUpdate(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_00199A38);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onInputBegin);
 #ifdef SKIP_ASM
 class cPad_9A38 {
 public:
@@ -692,7 +692,7 @@ static inline float clamp_9A38(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" int func_00199A38(void* self, cPad_9A38* in)
+extern "C" int cFEStateCharEquip_onInputBegin(void* self, cPad_9A38* in)
 {
     int r = 0;
     if (!isMode1_9A38(self)) {
@@ -722,7 +722,7 @@ extern "C" int func_00199A38(void* self, cPad_9A38* in)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_00199C28);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cFEStateCharEquip_updateHeading(void* self, int id);
@@ -791,7 +791,7 @@ static inline int isMode1_9C28(sCharEquip_9C28* self)
     return self->mode == 1;
 }
 
-extern "C" void func_00199C28(void* selfv, char* w, unsigned int ev)
+extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, char* w, unsigned int ev)
 {
     sCharEquip_9C28* self = (sCharEquip_9C28*)selfv;
     if (w == 0)
@@ -869,7 +869,7 @@ extern "C" void func_00199C28(void* selfv, char* w, unsigned int ev)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_00199F20);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetMenu);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_0019A3D0(void* self);
@@ -908,7 +908,7 @@ static inline bool hasFlag_9F20(sEquipItem_9F20* item, int f)
     return (item->flags & f) != 0;
 }
 
-extern "C" int func_00199F20(sEquipDetail_9F20* self, int a1, int kind, int idx)
+extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int a1, int kind, int idx)
 {
     switch (kind) {
     case 2:

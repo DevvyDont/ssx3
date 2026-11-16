@@ -152,7 +152,7 @@ extern "C" void cFEStateCredits_onGainFocus(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_00185F40);
+INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onRender2D);
 #ifdef SKIP_ASM
 extern "C" void func_00391E30(void* self, float x, float y, void* m);
 extern "C" float func_003921F0(void* f_, const unsigned short* s, void* r_, int mono, float sx, float sy);
@@ -217,7 +217,7 @@ static inline void DrawText_185F40(char* font, unsigned short* s, float x, float
     *(sV2_185F40*)(font + 0x38) = *(sV2_185F40*)(font + 0x30);
 }
 
-extern "C" void func_00185F40(char* self)
+extern "C" void cFEStateCredits_onRender2D(char* self)
 {
     char* o = *(char**)(self + 0x5C);
     if (o != 0)
@@ -312,11 +312,11 @@ extern "C" void func_00185F40(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_001863B8);
+INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E510(void* self);
 
-extern "C" void func_001863B8(void* self)
+extern "C" void cFEStateCredits_onUpdate(void* self)
 {
     *(int*)((char*)self + 0x60) += *(int*)((char*)self + 0x64);
     func_0039E510(self);
@@ -324,7 +324,7 @@ extern "C" void func_001863B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_001863E8);
+INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onInputBegin);
 #ifdef SKIP_ASM
 struct sVEntry001863E8 {
     short delta;
@@ -332,7 +332,7 @@ struct sVEntry001863E8 {
     int (*fn)(void*);
 };
 
-extern "C" int func_001863E8(void* self, void* pad)
+extern "C" int cFEStateCredits_onInputBegin(void* self, void* pad)
 {
     sVEntry001863E8* e = &(*(sVEntry001863E8**)((char*)pad + 8))[17];
     if (e->fn((char*)pad + e->delta)) {
@@ -353,9 +353,9 @@ extern "C" int func_001863E8(void* self, void* pad)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_00186478);
+INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int func_00186478(void* self, int a1, unsigned int a2)
+extern "C" int cFEStateCredits_onWidgetMenu(void* self, int a1, unsigned int a2)
 {
     switch (a2) {
     case 6:
@@ -368,7 +368,7 @@ extern "C" int func_00186478(void* self, int a1, unsigned int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_001864B0);
+INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onWidgetEvent);
 #ifdef SKIP_ASM
 struct sVEntry001864B0 {
     short delta;
@@ -377,7 +377,7 @@ struct sVEntry001864B0 {
 };
 extern "C" void cUIStateStack_push(void* list, void* item);
 
-extern "C" void func_001864B0(void* self, void* item, int msg)
+extern "C" void cFEStateCredits_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item != 0 && msg == 6) {
         void* obj = **(void***)((char*)self + 0x10);

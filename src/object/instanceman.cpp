@@ -809,9 +809,9 @@ extern void* cMeshAnimNode_vtbl[];
 extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352208__FPv);
+INCLUDE_ASM("object/instanceman", cMeshAnimNode__cMeshAnimNode__FPv);
 #ifdef SKIP_ASM
-void* func_00352208(void* self)
+void* cMeshAnimNode__cMeshAnimNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)cMeshAnimNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
@@ -942,7 +942,7 @@ extern "C" void func_00352230(void* p)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352500);
+INCLUDE_ASM("object/instanceman", cMeshAnimNode_update);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern char* D_004A5B64;
@@ -1031,7 +1031,7 @@ static inline void AddEq_352500(sV4_352500& d, const sV4_352500& b)
         : "memory");
 }
 
-extern "C" void func_00352500(sDebris_352500* self)
+extern "C" void cMeshAnimNode_update(sDebris_352500* self)
 {
     if (self->timer > 0.0f) {
         self->timer -= *(float*)(D_004A5B64 + 0x14);
@@ -1058,7 +1058,7 @@ extern "C" void func_00352500(sDebris_352500* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352708);
+INCLUDE_ASM("object/instanceman", cMeshAnimNode_expire);
 #ifdef SKIP_ASM
 struct sInstanceManVEntry2708 {
     short delta;
@@ -1069,7 +1069,7 @@ struct sInstanceManVEntry2708 {
 int func_0034FCC0(void* self);
 extern "C" void func_0034FE28(void* self);
 
-extern "C" void func_00352708(void* self, int check)
+extern "C" void cMeshAnimNode_expire(void* self, int check)
 {
     if (check != 0 && func_0034FCC0(self) != 0) {
         return;
@@ -1085,7 +1085,7 @@ extern "C" void func_00352708(void* self, int check)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352780);
+INCLUDE_ASM("object/instanceman", cMeshAnimNode_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void func_0034FE28(void* self);
 
@@ -1095,7 +1095,7 @@ struct sInstManVEntry2780 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_00352780(void* self)
+extern "C" void cMeshAnimNode_loseFocus(void* self)
 {
     if (*(int*)((char*)self + 0x6B0) != 0) {
         *(int*)(*(char**)((char*)self + 0x18) + 0x8) &= 0xFFFF0300;
@@ -1112,7 +1112,7 @@ extern "C" void func_00352780(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352810);
+INCLUDE_ASM("object/instanceman", cMeshAnimNode_render);
 #ifdef SKIP_ASM
 struct sV4_352810 {
     float x, y, z, w;
@@ -1245,7 +1245,7 @@ static inline void setOffset_352810(sMat_352810& m, const sV4_352810& v)
     m.r[3] = v;
 }
 
-extern "C" void func_00352810(sDebris_352810* self)
+extern "C" void cMeshAnimNode_render(sDebris_352810* self)
 {
     if (self->timer <= 0.0f) {
         return;
@@ -1275,7 +1275,7 @@ extern "C" void func_00352810(sDebris_352810* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352A58);
+INCLUDE_ASM("object/instanceman", cMeshAnimNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sSerVEntry_00352A58 {
     short delta;
@@ -1285,7 +1285,7 @@ struct sSerVEntry_00352A58 {
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
-extern "C" void func_00352A58(void* self, void* stream)
+extern "C" void cMeshAnimNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_00352A58* vt = *(sSerVEntry_00352A58**)stream;

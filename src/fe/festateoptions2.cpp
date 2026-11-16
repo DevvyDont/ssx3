@@ -10,9 +10,9 @@ INCLUDE_ASM("fe/festateoptions2", func_00196B90);
 
 INCLUDE_ASM("fe/festateoptions2", cFEStateRequestLine_onCreateScreen);
 
-INCLUDE_ASM("fe/festateoptions2", func_00196E80);
+INCLUDE_ASM("fe/festateoptions2", cFEStateRequestLine_onDestroyScreen);
 
-INCLUDE_ASM("fe/festateoptions2", func_00196F00);
+INCLUDE_ASM("fe/festateoptions2", cFEStateRequestLine_onGainFocus);
 
-INCLUDE_ASM("fe/festateoptions2", func_00196F50);
+INCLUDE_ASM("fe/festateoptions2", cFEStateRequestLine_onGainTransition);
 

@@ -4,17 +4,17 @@ INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_onCreateScreen);
 
 INCLUDE_ASM("fe/fepopup2", func_001D9E20);
 
-INCLUDE_ASM("fe/fepopup2", func_001D9E68);
+INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_onUpdate);
 
-INCLUDE_ASM("fe/fepopup2", func_001D9F30);
+INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_onInputBegin);
 
 INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_onWidgetCreate);
 
 INCLUDE_ASM("fe/fepopup2", func_001DA110);
 
-INCLUDE_ASM("fe/fepopup2", func_001DA238);
+INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_onGainTransition);
 
-INCLUDE_ASM("fe/fepopup2", func_001DA478);
+INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_onWidgetEvent);
 
 INCLUDE_ASM("fe/fepopup2", func_001DA4A8);
 

@@ -2288,7 +2288,7 @@ extern "C" void* cParticleNode_cParticleNode(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00357950);
+INCLUDE_ASM("object/movenode", cParticleNode_update);
 #ifdef SKIP_ASM
 struct sMnDtorVEntry7950 {
     short delta;
@@ -2298,7 +2298,7 @@ struct sMnDtorVEntry7950 {
 
 extern "C" void cMoveNode_update(void* self);
 
-extern "C" void func_00357950(void* self)
+extern "C" void cParticleNode_update(void* self)
 {
     cMoveNode_update(self);
     void* mb = *(void**)((char*)self + 0x1C);

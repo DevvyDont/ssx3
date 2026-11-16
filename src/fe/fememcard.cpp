@@ -901,9 +901,9 @@ extern "C" void func_00187A38(void* p)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcard", func_00187C10__FPv);
+INCLUDE_ASM("fe/fememcard", cFEStateMemCard_onInputBegin__FPv);
 #ifdef SKIP_ASM
-int func_00187C10(void* self)
+int cFEStateMemCard_onInputBegin(void* self)
 {
     return 0;
 }

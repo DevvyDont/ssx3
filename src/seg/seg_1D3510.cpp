@@ -534,10 +534,10 @@ extern "C" int func_002D3A58(void **arg0) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A68);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3A68(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -560,10 +560,10 @@ extern "C" void func_002D3A90(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A98);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3A98(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -601,12 +601,12 @@ extern "C" int func_002D3AD8(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3AE0);
+INCLUDE_ASM("seg/seg_1D3510", cSubMenuItem__cSubMenuItem);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3AE0(void) {
-    func_002CA280();
+extern "C" void cSubMenuItem__cSubMenuItem(void) {
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -629,10 +629,10 @@ extern "C" int func_002D3B08(void *arg0) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B10);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3B10(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -647,10 +647,10 @@ extern "C" void func_002D3B30(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B38);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3B38(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -697,10 +697,10 @@ extern "C" int func_002D3B78(void *arg0) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B80);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3B80(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -723,10 +723,10 @@ extern "C" int func_002D3BA8(void *arg0) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BB0);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3BB0(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -749,20 +749,20 @@ extern "C" void func_002D3BD8(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BE0);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3BE0(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C00);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3C00(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -783,12 +783,12 @@ extern "C" void func_002D3C28(void *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3C30);
+INCLUDE_ASM("seg/seg_1D3510", cIntMenuItem__cIntMenuItem);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3C30(void) {
-    func_002CA280();
+extern "C" void cIntMenuItem__cIntMenuItem(void) {
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -809,12 +809,12 @@ extern "C" void func_002D3C58(void *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3C60);
+INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem__cFloatMenuItem);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3C60(void) {
-    func_002CA280();
+extern "C" void cFloatMenuItem__cFloatMenuItem(void) {
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -869,12 +869,12 @@ extern "C" float func_002D3CC0(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3CE0);
+INCLUDE_ASM("seg/seg_1D3510", cAngleMenuItem__cAngleMenuItem);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3CE0(void) {
-    func_002CA280();
+extern "C" void cAngleMenuItem__cAngleMenuItem(void) {
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -906,10 +906,10 @@ extern "C" void func_002D3D18(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D20);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3D20(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -936,10 +936,10 @@ extern "C" int func_002D3D48(char *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D70);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3D70(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -963,22 +963,22 @@ extern "C" void cExpandMenuItemMenu__cExpandMenuItemMenu(void) {
 INCLUDE_ASM("seg/seg_1D3510", cExpandMenuItem__cExpandMenuItem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_002CA280_3DB0(int, int) __asm__("func_002CA280");
+extern void cMenuItem__cMenuItem_3DB0(int, int) __asm__("cMenuItem__cMenuItem");
 extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void cExpandMenuItem__cExpandMenuItem(int arg0, int arg1) {
     cMenu__cMenu(arg0 + 0x18, 2);
-    func_002CA280_3DB0(arg0, arg1);
+    cMenuItem__cMenuItem_3DB0(arg0, arg1);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3DF8);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3DF8(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -994,17 +994,17 @@ extern "C" void func_002D3E18(void *arg0, int arg1) {
 INCLUDE_ASM("seg/seg_1D3510", cARGBMenuItem__cARGBMenuItem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_002CA280_3E20(int, int) __asm__("func_002CA280");
+extern void cMenuItem__cMenuItem_3E20(int, int) __asm__("cMenuItem__cMenuItem");
 extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void cARGBMenuItem__cARGBMenuItem(int arg0, int arg1) {
-    func_002CA280_3E20(arg0 + 0x640, 2);
-    func_002CA280_3E20(arg0 + 0x61C, 2);
-    func_002CA280_3E20(arg0 + 0x5F8, 2);
-    func_002CA280_3E20(arg0 + 0x5D4, 2);
-    func_002CA280_3E20(arg0 + 0x5B0, 2);
+    cMenuItem__cMenuItem_3E20(arg0 + 0x640, 2);
+    cMenuItem__cMenuItem_3E20(arg0 + 0x61C, 2);
+    cMenuItem__cMenuItem_3E20(arg0 + 0x5F8, 2);
+    cMenuItem__cMenuItem_3E20(arg0 + 0x5D4, 2);
+    cMenuItem__cMenuItem_3E20(arg0 + 0x5B0, 2);
     cMenu__cMenu(arg0 + 0x18, 2);
-    func_002CA280_3E20(arg0, arg1);
+    cMenuItem__cMenuItem_3E20(arg0, arg1);
 }
 #endif
 
@@ -1019,10 +1019,10 @@ extern "C" void func_002D3EA0(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3EA8);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3EA8(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -1038,16 +1038,16 @@ extern "C" void func_002D3EC8(void *arg0, int arg1) {
 INCLUDE_ASM("seg/seg_1D3510", cVectorMenuItem__cVectorMenuItem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_002CA280_3ED0(int, int) __asm__("func_002CA280");
+extern void cMenuItem__cMenuItem_3ED0(int, int) __asm__("cMenuItem__cMenuItem");
 extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void cVectorMenuItem__cVectorMenuItem(int arg0, int arg1) {
-    func_002CA280_3ED0(arg0 + 0x654, 2);
-    func_002CA280_3ED0(arg0 + 0x620, 2);
-    func_002CA280_3ED0(arg0 + 0x5EC, 2);
-    func_002CA280_3ED0(arg0 + 0x5B8, 2);
+    cMenuItem__cMenuItem_3ED0(arg0 + 0x654, 2);
+    cMenuItem__cMenuItem_3ED0(arg0 + 0x620, 2);
+    cMenuItem__cMenuItem_3ED0(arg0 + 0x5EC, 2);
+    cMenuItem__cMenuItem_3ED0(arg0 + 0x5B8, 2);
     cMenu__cMenu(arg0 + 0x18, 2);
-    func_002CA280_3ED0(arg0, arg1);
+    cMenuItem__cMenuItem_3ED0(arg0, arg1);
 }
 #endif
 
@@ -1062,10 +1062,10 @@ extern "C" void func_002D3F48(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F50);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280();
+extern "C" void cMenuItem__cMenuItem();
 
 extern "C" void func_002D3F50(void) {
-    func_002CA280();
+    cMenuItem__cMenuItem();
 }
 #endif
 
@@ -1080,13 +1080,13 @@ extern "C" void func_002D3F70(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F78);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(int, int);
+extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_002D3F78(int arg0, int arg1) {
-    func_002CA280(arg0 + 0x164, 2);
-    func_002CA280(arg0 + 0x14C, 2);
-    func_002CA280(arg0 + 0x130, 2);
+    cMenuItem__cMenuItem(arg0 + 0x164, 2);
+    cMenuItem__cMenuItem(arg0 + 0x14C, 2);
+    cMenuItem__cMenuItem(arg0 + 0x130, 2);
     cMenu__cMenu(arg0, arg1);
 }
 #endif

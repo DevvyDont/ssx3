@@ -2,25 +2,25 @@
 
 INCLUDE_ASM("fe/fepopup3", cFEPopupVideoCalibration_onCreateScreen);
 
-INCLUDE_ASM("fe/fepopup3", func_001DEC68);
+INCLUDE_ASM("fe/fepopup3", cFEPopupVideoCalibration_onInputBegin);
 
-INCLUDE_ASM("fe/fepopup3", func_001DEDE8);
+INCLUDE_ASM("fe/fepopup3", cFEPopupScreenPos__cFEPopupScreenPos);
 
-INCLUDE_ASM("fe/fepopup3", func_001DEE10);
+INCLUDE_ASM("fe/fepopup3", cFEPopupScreenPos_onCreateScreen);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF028);
+INCLUDE_ASM("fe/fepopup3", cFEPopupScreenPos_getData);
 
 INCLUDE_ASM("fe/fepopup3", cFEPopupScreenPos_onUpdate);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF378);
+INCLUDE_ASM("fe/fepopup3", cFEPopupScreenPos_onLoseTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF3B8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRiderBio__cFEStateRiderBio);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF418);
+INCLUDE_ASM("fe/fepopup3", cFEStateRuleSelect__cFEStateRuleSelect);
 
 INCLUDE_ASM("fe/fepopup3", func_001DF440);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF4E8);
+INCLUDE_ASM("fe/fepopup3", cFEStateBraggingRights__cFEStateBraggingRights);
 
 INCLUDE_ASM("fe/fepopup3", func_001DF578);
 
@@ -44,9 +44,9 @@ INCLUDE_ASM("fe/fepopup3", func_001DF878);
 
 INCLUDE_ASM("fe/fepopup3", func_001DF8E0);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF960);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetHelpPopup__cFEStateNetHelpPopup);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF988);
+INCLUDE_ASM("fe/fepopup3", cFEStateNetHelpPopup_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", func_001DFA10);
 
@@ -132,27 +132,27 @@ INCLUDE_ASM("fe/fepopup3", func_001E0020);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0028);
 
-INCLUDE_ASM("fe/fepopup3", func_001E01B0);
+INCLUDE_ASM("fe/fepopup3", cFEStatePeakRoom__cFEStatePeakRoom);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0210);
+INCLUDE_ASM("fe/fepopup3", cFEStateTrophyRoom__cFEStateTrophyRoom);
 
-INCLUDE_ASM("fe/fepopup3", func_001E02A0);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardsRoom__cFEStateRewardsRoom);
 
-INCLUDE_ASM("fe/fepopup3", func_001E02D0);
+INCLUDE_ASM("fe/fepopup3", cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode);
 
 INCLUDE_ASM("fe/fepopup3", cFEPopupSelectMultiplayerMode_onCreateScreen);
 
 INCLUDE_ASM("fe/fepopup3", cFEPopupSelectMultiplayerMode_onWidgetCreate);
 
-INCLUDE_ASM("fe/fepopup3", func_001E03F8);
+INCLUDE_ASM("fe/fepopup3", cFEPopupSelectMultiplayerMode_onWidgetEvent);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0470);
+INCLUDE_ASM("fe/fepopup3", cFEPopupSelectMultiplayerMode_onWidgetMenu);
 
-INCLUDE_ASM("fe/fepopup3", func_001E04F8);
+INCLUDE_ASM("fe/fepopup3", cFEPopupSelectMultiplayerMode_getData);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0500);
+INCLUDE_ASM("fe/fepopup3", cFEPopupSelectMultiplayerMode_onGainTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0508);
+INCLUDE_ASM("fe/fepopup3", cFEPopupSelectMultiplayerMode_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateAudioOptions__cFEStateAudioOptions);
 
@@ -170,9 +170,9 @@ INCLUDE_ASM("fe/fepopup3", func_001E07B0);
 
 INCLUDE_ASM("fe/fepopup3", func_001E07B8);
 
-INCLUDE_ASM("fe/fepopup3", func_001E07F8);
+INCLUDE_ASM("fe/fepopup3", cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0858);
+INCLUDE_ASM("fe/fepopup3", cFEStateMPCircuit__cFEStateMPCircuit);
 
 INCLUDE_ASM("fe/fepopup3", func_001E08D0);
 
@@ -268,7 +268,7 @@ INCLUDE_ASM("fe/fepopup3", func_001E10F8);
 
 INCLUDE_ASM("fe/fepopup3", func_001E1100);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1108);
+INCLUDE_ASM("fe/fepopup3", cUIInput__cUIInput);
 
 INCLUDE_ASM("fe/fepopup3", func_001E1138);
 

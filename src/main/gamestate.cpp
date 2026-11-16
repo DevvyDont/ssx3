@@ -1103,7 +1103,7 @@ extern "C" void func_00235FD0(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236058);
+INCLUDE_ASM("main/gamestate", cGFSessionTeleportState_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void func_0030B7F8(void* self);
 extern "C" void cGameModeMan_initGameMode(void* gm, int mode);
@@ -1121,7 +1121,7 @@ struct sColor_236058 {
     float r, g, b, a;
 };
 
-extern "C" void func_00236058(void* self)
+extern "C" void cGFSessionTeleportState_gainFocus(void* self)
 {
     void* gm = SSXApp->GameModeMan;
     func_0030B7F8(D_004A3DD8);
@@ -1203,7 +1203,7 @@ extern "C" void* func_00236208(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236250);
+INCLUDE_ASM("main/gamestate", cGFUserSelectState_gainFocus);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1226,7 +1226,7 @@ static inline int isOne_6250(int m)
     return m == 1;
 }
 
-extern "C" void func_00236250(void* self, int mode)
+extern "C" void cGFUserSelectState_gainFocus(void* self, int mode)
 {
     func_0030B7F8(D_004A3DD8);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1888,12 +1888,12 @@ extern "C" void cGFPodiumState_gainFocus(void)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236F40);
+INCLUDE_ASM("main/gamestate", cGFPodiumState_update);
 #ifdef SKIP_ASM
 extern "C" int func_00279220(void* a, int b);
 extern "C" void cGameState_gotoNextState(void* self);
 
-extern "C" void func_00236F40(void* self)
+extern "C" void cGFPodiumState_update(void* self)
 {
     int r = func_00279220(ScriptEngine, 0);
     int busy = r != 0 && r != 5;

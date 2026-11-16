@@ -24,7 +24,7 @@ extern "C" void cFEStateOptions_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188870);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char D_004A14F8[];
@@ -38,7 +38,7 @@ extern char D_004A1530[];
 
 static inline int Is_00188870(int id, char* s) { return id == GetHashValue32(s); }
 
-extern "C" void func_00188870(void* self, void* item)
+extern "C" void cFEStateOptions_onWidgetCreate(void* self, void* item)
 {
     if (Is_00188870(*(int*)((char*)item + 0x38), D_004A14F8)) {
         *(int*)((char*)item + 0x18) = 0x1C;
@@ -61,7 +61,7 @@ extern "C" void func_00188870(void* self, void* item)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188980);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIScreen;
@@ -117,7 +117,7 @@ struct sOpt_188980 {
 
 static inline int Is_00188980(int id, char* s) { return id == GetHashValue32(s); }
 
-extern "C" void func_00188980(sOpt_188980* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, unsigned int event)
 {
     switch (event) {
     case 5:
@@ -187,11 +187,11 @@ extern "C" void func_00188980(sOpt_188980* self, char* widget, unsigned int even
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188C58);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onInputBegin);
 #ifdef SKIP_ASM
 extern int D_004A3484;
 
-extern "C" int func_00188C58(void* self, void* a1)
+extern "C" int cFEStateOptions_onInputBegin(void* self, void* a1)
 {
     D_004A3484 = *(unsigned char*)((char*)a1 + 4);
     return 0;
@@ -199,13 +199,13 @@ extern "C" int func_00188C58(void* self, void* a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188C68);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onWidgetMenu);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* func_00397870(void* list, int index);
 extern char D_004A1530[];
 
-extern "C" int func_00188C68(void* self, void* menu, unsigned int key, int index)
+extern "C" int cFEStateOptions_onWidgetMenu(void* self, void* menu, unsigned int key, int index)
 {
     if (key < 10) {
         if (key >= 8) {
@@ -231,7 +231,7 @@ extern "C" int func_00188C68(void* self, void* menu, unsigned int key, int index
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188D08);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -258,7 +258,7 @@ static inline int IsK188D08(int id, char* s)
     return id == GetHashValue32(s);
 }
 
-extern "C" void func_00188D08(void* self, char* popup, int event)
+extern "C" void cFEStateOptions_onPopupEvent(void* self, char* popup, int event)
 {
     switch (event) {
     case 0x15: {
@@ -510,9 +510,9 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
 extern "C" void* cUIState_onGainFocus(void* self);
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_001895F0__FPv);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_001895F0(void* self)
+void* cFEStateOptionsGame_onGainFocus(void* self)
 {
     return cUIState_onGainFocus(self);
 }
@@ -1036,9 +1036,9 @@ extern "C" void func_0018A3D8(void* self, char* popup, int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018A870__FPv);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0018A870(void* self)
+void* cFEStateOptionsSound_onGainFocus(void* self)
 {
     return cUIState_onGainFocus(self);
 }
@@ -1773,12 +1773,12 @@ extern "C" void cFEStateOptionsController_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C8B8);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onDestroyScreen);
 #ifdef SKIP_ASM
 extern "C" void func_0018D108(void* self, int idx, float x, float y);
 void* cUIState_onDestroyScreen(void* self);
 
-extern "C" void* func_0018C8B8(void* self)
+extern "C" void* cFEStateOptionsController_onDestroyScreen(void* self)
 {
     func_0018D108(self, 0, 0.0f, 0.0f);
     func_0018D108(self, 1, 0.0f, 0.0f);
@@ -2220,7 +2220,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetCreate(void* self, void* widget)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D3C0);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onPreRender2D);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -2229,7 +2229,7 @@ extern int D_004A19D8;
 extern char D_0045E0F0[];
 extern char D_0045E100[];
 
-extern "C" void func_0018D3C0(void* self)
+extern "C" void cFEStateOptionsSaveLoad_onPreRender2D(void* self)
 {
     if (D_004A19D8 != 0) {
         void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E0F0));
@@ -2245,10 +2245,10 @@ extern "C" void func_0018D3C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D438);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onWidgetMenu);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_0018D438(void* self, int a1, unsigned int key)
+extern "C" int cFEStateOptionsSaveLoad_onWidgetMenu(void* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -2263,7 +2263,7 @@ extern "C" int func_0018D438(void* self, int a1, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D460);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onPopupEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
@@ -2292,7 +2292,7 @@ struct sVE_18D460p {
     void* (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0018D460(char* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(char* self, char* widget, unsigned int event)
 {
     switch (event) {
     case 0xF:

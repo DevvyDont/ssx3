@@ -70,11 +70,11 @@ extern "C" void cFEStateBuyAttrib_onWidgetCreate(void* self, void* widget)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F49D0);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onGainTransition);
 #ifdef SKIP_ASM
 extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* self);
 
-extern "C" int func_001F49D0(void* self, int on)
+extern "C" int cFEStateBuyAttrib_onGainTransition(void* self, int on)
 {
     if (on != 0) {
         cFEStateBuyAttrib_updateExperienceDisplay(self);
@@ -84,7 +84,7 @@ extern "C" int func_001F49D0(void* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F49F8);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onGainFocus);
 #ifdef SKIP_ASM
 struct sVEntry001F49F8 {
     short delta;
@@ -94,7 +94,7 @@ struct sVEntry001F49F8 {
 
 extern "C" void cFEState_onGainFocus(void* self);
 
-extern "C" void func_001F49F8(void* self)
+extern "C" void cFEStateBuyAttrib_onGainFocus(void* self)
 {
     cFEState_onGainFocus(self);
     void* obj = *(void**)((char*)self + 0xAC);
@@ -104,10 +104,10 @@ extern "C" void func_001F49F8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F4A38);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onWidgetMenu);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001F4A38(void* self, int a1, unsigned int key)
+extern "C" int cFEStateBuyAttrib_onWidgetMenu(void* self, int a1, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -122,11 +122,11 @@ extern "C" int func_001F4A38(void* self, int a1, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F4A60);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" void func_001F5300(void* self);
 
-extern "C" void func_001F4A60(void* self, void* sender, int msg)
+extern "C" void cFEStateBuyAttrib_onPopupEvent(void* self, void* sender, int msg)
 {
     if (msg == 0x16) {
         if (*(int*)((char*)sender + 0x6C) != 0) {
@@ -137,7 +137,7 @@ extern "C" void func_001F4A60(void* self, void* sender, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F4A90);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onWidgetEvent);
 #ifdef SKIP_ASM
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
@@ -167,7 +167,7 @@ struct sDefObj_4A90 {
 };
 extern sDefObj_4A90 D_004A5A58;
 
-extern "C" void func_001F4A90(char* self, char* obj, int msg)
+extern "C" void cFEStateBuyAttrib_onWidgetEvent(char* self, char* obj, int msg)
 {
     if (obj == 0)
         return;
@@ -209,7 +209,7 @@ extern "C" void func_001F4A90(char* self, char* obj, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F4C30);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onInputAlways);
 #ifdef SKIP_ASM
 // PORT: cUIState_onInputAlways__FPv is called with (self, widget) here; bind the 2-arg form to that symbol.
 void cUIState_onInputAlways_2(void* self, void* w) __asm__("cUIState_onInputAlways__FPv");
@@ -257,7 +257,7 @@ static inline void playFrame_4C30(sBuyAttrib_4C30* s, char* name)
     defaultMsg_4C30(s, 1);
 }
 
-extern "C" void func_001F4C30(sBuyAttrib_4C30* self, char* w)
+extern "C" void cFEStateBuyAttrib_onInputAlways(sBuyAttrib_4C30* self, char* w)
 {
     int changed = 0;
     cUIState_onInputAlways_2(self, w);
@@ -631,11 +631,11 @@ extern "C" void cFEStateCareerStats_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F55C0);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onGainTransition);
 #ifdef SKIP_ASM
 extern "C" void cFEStateCareerStats_setupHighlightsList(void* self);
 
-extern "C" int func_001F55C0(void* self, int on)
+extern "C" int cFEStateCareerStats_onGainTransition(void* self, int on)
 {
     if (on != 0) {
         cFEStateCareerStats_setupHighlightsList(self);
@@ -645,12 +645,12 @@ extern "C" int func_001F55C0(void* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F55E8);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cFEState_onGainFocus(void* self);
 extern "C" void cFEStateCareerStats_setupMenuFocus(void* self, int focus);
 
-extern "C" void func_001F55E8(void* self)
+extern "C" void cFEStateCareerStats_onGainFocus(void* self)
 {
     cFEState_onGainFocus(self);
     cFEStateCareerStats_setupMenuFocus(self, *(int*)((char*)self + 0x48));
@@ -658,9 +658,9 @@ extern "C" void func_001F55E8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F5618);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int func_001F5618(void* self, int a1, unsigned int a2)
+extern "C" int cFEStateCareerStats_onWidgetMenu(void* self, int a1, unsigned int a2)
 {
     switch (a2) {
     case 6:
@@ -673,7 +673,7 @@ extern "C" int func_001F5618(void* self, int a1, unsigned int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F5650);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onWidgetEvent);
 #ifdef SKIP_ASM
 struct sVEntry001F5650 {
     short delta;
@@ -682,7 +682,7 @@ struct sVEntry001F5650 {
 };
 extern "C" void cUIStateStack_push(void* list, void* item);
 
-extern "C" void func_001F5650(void* self, void* item, int msg)
+extern "C" void cFEStateCareerStats_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {
         return;

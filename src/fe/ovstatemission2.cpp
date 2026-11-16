@@ -16,7 +16,7 @@ INCLUDE_ASM("fe/ovstatemission2", func_00211A08);
 
 INCLUDE_ASM("fe/ovstatemission2", func_00211AA8);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00211B10);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_onDestroyScreen);
 
 INCLUDE_ASM("fe/ovstatemission2", func_00211B38);
 
@@ -30,7 +30,7 @@ INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_onCreateScreen);
 
 INCLUDE_ASM("fe/ovstatemission2", func_00212208);
 
-INCLUDE_ASM("fe/ovstatemission2", func_002122E0);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_onInputBegin);
 
 INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_displayStatus);
 
@@ -38,5 +38,5 @@ INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_displayOn);
 
 INCLUDE_ASM("fe/ovstatemission2", func_002124C8);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00212508);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_onDestroyScreen);
 

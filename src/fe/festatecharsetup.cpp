@@ -123,12 +123,12 @@ extern "C" void func_00182C08(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharsetup", func_00182C38);
+INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E510(void* self);
 extern "C" void func_00182EC0(void* self);
 
-extern "C" void func_00182C38(void* self)
+extern "C" void cFEStateCharSetup_onUpdate(void* self)
 {
     func_0039E510(self);
     func_00182EC0(self);
@@ -145,7 +145,7 @@ extern "C" int func_00182C68(void* self, int a1, int a2)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharsetup", func_00182C80);
+INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_001887A0(void* self, void* engine, int reset);
@@ -167,7 +167,7 @@ struct sStateK182C80 {
     unsigned hi : 18;
 };
 
-extern "C" void func_00182C80(void* self, void* item, unsigned int event)
+extern "C" void cFEStateCharSetup_onWidgetEvent(void* self, void* item, unsigned int event)
 {
     if (item == 0)
         return;

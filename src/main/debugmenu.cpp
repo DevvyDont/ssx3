@@ -1882,9 +1882,9 @@ extern "C" void* cVisualEffectsMainMenu_cVisualEffectsMainMenu(void* self)
 extern "C" void* cMenu_onGainFocus(void* self);
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024D690__FPv);
+INCLUDE_ASM("main/debugmenu", cVisualEffectsMainMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024D690(void* self)
+void* cVisualEffectsMainMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
@@ -1893,9 +1893,9 @@ void* func_0024D690(void* self)
 extern "C" void* cMenu_onLoseFocus(void* self);
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024D6B0__FPv);
+INCLUDE_ASM("main/debugmenu", cVisualEffectsMainMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024D6B0(void* self)
+void* cVisualEffectsMainMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
@@ -1911,324 +1911,324 @@ extern "C" void* func_0024D6D0(void* self, ...)
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024D710);
+INCLUDE_ASM("main/debugmenu", cRenderTogglesMenu__cRenderTogglesMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024D710(void* self, int flags)
+extern "C" void cRenderTogglesMenu__cRenderTogglesMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0xA18, 2);
-    func_002CA280((char*)self + 0x9E8, 2);
-    func_002CA280((char*)self + 0x9B8, 2);
-    func_002CA280((char*)self + 0x988, 2);
-    func_002CA280((char*)self + 0x958, 2);
-    func_002CA280((char*)self + 0x924, 2);
-    func_002CA280((char*)self + 0x8F0, 2);
-    func_002CA280((char*)self + 0x8BC, 2);
-    func_002CA280((char*)self + 0x888, 2);
-    func_002CA280((char*)self + 0x858, 2);
-    func_002CA280((char*)self + 0x828, 2);
-    func_002CA280((char*)self + 0x7F8, 2);
-    func_002CA280((char*)self + 0x7C4, 2);
-    func_002CA280((char*)self + 0x794, 2);
-    func_002CA280((char*)self + 0x764, 2);
-    func_002CA280((char*)self + 0x734, 2);
-    func_002CA280((char*)self + 0x704, 2);
-    func_002CA280((char*)self + 0x6D4, 2);
-    func_002CA280((char*)self + 0x6A4, 2);
-    func_002CA280((char*)self + 0x674, 2);
-    func_002CA280((char*)self + 0x644, 2);
-    func_002CA280((char*)self + 0x614, 2);
-    func_002CA280((char*)self + 0x5E4, 2);
-    func_002CA280((char*)self + 0x5B4, 2);
-    func_002CA280((char*)self + 0x584, 2);
-    func_002CA280((char*)self + 0x554, 2);
-    func_002CA280((char*)self + 0x524, 2);
-    func_002CA280((char*)self + 0x4F4, 2);
-    func_002CA280((char*)self + 0x4C4, 2);
-    func_002CA280((char*)self + 0x494, 2);
-    func_002CA280((char*)self + 0x464, 2);
-    func_002CA280((char*)self + 0x434, 2);
-    func_002CA280((char*)self + 0x404, 2);
-    func_002CA280((char*)self + 0x3D4, 2);
-    func_002CA280((char*)self + 0x3A4, 2);
-    func_002CA280((char*)self + 0x374, 2);
-    func_002CA280((char*)self + 0x344, 2);
-    func_002CA280((char*)self + 0x314, 2);
-    func_002CA280((char*)self + 0x2E4, 2);
-    func_002CA280((char*)self + 0x2B4, 2);
-    func_002CA280((char*)self + 0x284, 2);
-    func_002CA280((char*)self + 0x254, 2);
-    func_002CA280((char*)self + 0x224, 2);
-    func_002CA280((char*)self + 0x1F4, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0xA18, 2);
+    cMenuItem__cMenuItem((char*)self + 0x9E8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x9B8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x988, 2);
+    cMenuItem__cMenuItem((char*)self + 0x958, 2);
+    cMenuItem__cMenuItem((char*)self + 0x924, 2);
+    cMenuItem__cMenuItem((char*)self + 0x8F0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x8BC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x888, 2);
+    cMenuItem__cMenuItem((char*)self + 0x858, 2);
+    cMenuItem__cMenuItem((char*)self + 0x828, 2);
+    cMenuItem__cMenuItem((char*)self + 0x7F8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x7C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x794, 2);
+    cMenuItem__cMenuItem((char*)self + 0x764, 2);
+    cMenuItem__cMenuItem((char*)self + 0x734, 2);
+    cMenuItem__cMenuItem((char*)self + 0x704, 2);
+    cMenuItem__cMenuItem((char*)self + 0x6D4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x6A4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x674, 2);
+    cMenuItem__cMenuItem((char*)self + 0x644, 2);
+    cMenuItem__cMenuItem((char*)self + 0x614, 2);
+    cMenuItem__cMenuItem((char*)self + 0x5E4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x5B4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x584, 2);
+    cMenuItem__cMenuItem((char*)self + 0x554, 2);
+    cMenuItem__cMenuItem((char*)self + 0x524, 2);
+    cMenuItem__cMenuItem((char*)self + 0x4F4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x4C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x494, 2);
+    cMenuItem__cMenuItem((char*)self + 0x464, 2);
+    cMenuItem__cMenuItem((char*)self + 0x434, 2);
+    cMenuItem__cMenuItem((char*)self + 0x404, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3D4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3A4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x374, 2);
+    cMenuItem__cMenuItem((char*)self + 0x344, 2);
+    cMenuItem__cMenuItem((char*)self + 0x314, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2E4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2B4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x284, 2);
+    cMenuItem__cMenuItem((char*)self + 0x254, 2);
+    cMenuItem__cMenuItem((char*)self + 0x224, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024D998);
+INCLUDE_ASM("main/debugmenu", cVisualEffectsTestMenu__cVisualEffectsTestMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024D998(void* self, int flags)
+extern "C" void cVisualEffectsTestMenu__cVisualEffectsTestMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x464, 2);
-    func_002CA280((char*)self + 0x434, 2);
-    func_002CA280((char*)self + 0x404, 2);
-    func_002CA280((char*)self + 0x3D4, 2);
-    func_002CA280((char*)self + 0x3A4, 2);
-    func_002CA280((char*)self + 0x374, 2);
-    func_002CA280((char*)self + 0x344, 2);
-    func_002CA280((char*)self + 0x314, 2);
-    func_002CA280((char*)self + 0x2E4, 2);
-    func_002CA280((char*)self + 0x2B4, 2);
-    func_002CA280((char*)self + 0x284, 2);
-    func_002CA280((char*)self + 0x254, 2);
-    func_002CA280((char*)self + 0x224, 2);
-    func_002CA280((char*)self + 0x1F4, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x464, 2);
+    cMenuItem__cMenuItem((char*)self + 0x434, 2);
+    cMenuItem__cMenuItem((char*)self + 0x404, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3D4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3A4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x374, 2);
+    cMenuItem__cMenuItem((char*)self + 0x344, 2);
+    cMenuItem__cMenuItem((char*)self + 0x314, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2E4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2B4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x284, 2);
+    cMenuItem__cMenuItem((char*)self + 0x254, 2);
+    cMenuItem__cMenuItem((char*)self + 0x224, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024DAB8);
+INCLUDE_ASM("main/debugmenu", cLightGlowMenu__cLightGlowMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024DAB8(void* self, int flags)
+extern "C" void cLightGlowMenu__cLightGlowMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x700, 2);
-    func_002CA280((char*)self + 0x6CC, 2);
-    func_002CA280((char*)self + 0x698, 2);
-    func_002CA280((char*)self + 0x664, 2);
-    func_002CA280((char*)self + 0x630, 2);
-    func_002CA280((char*)self + 0x600, 2);
-    func_002CA280((char*)self + 0x5CC, 2);
-    func_002CA280((char*)self + 0x598, 2);
-    func_002CA280((char*)self + 0x564, 2);
-    func_002CA280((char*)self + 0x530, 2);
-    func_002CA280((char*)self + 0x4FC, 2);
-    func_002CA280((char*)self + 0x4C8, 2);
-    func_002CA280((char*)self + 0x494, 2);
-    func_002CA280((char*)self + 0x460, 2);
-    func_002CA280((char*)self + 0x42C, 2);
-    func_002CA280((char*)self + 0x3FC, 2);
-    func_002CA280((char*)self + 0x3C8, 2);
-    func_002CA280((char*)self + 0x394, 2);
-    func_002CA280((char*)self + 0x360, 2);
-    func_002CA280((char*)self + 0x32C, 2);
-    func_002CA280((char*)self + 0x2F8, 2);
-    func_002CA280((char*)self + 0x2C4, 2);
-    func_002CA280((char*)self + 0x290, 2);
-    func_002CA280((char*)self + 0x25C, 2);
-    func_002CA280((char*)self + 0x228, 2);
-    func_002CA280((char*)self + 0x1F4, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x700, 2);
+    cMenuItem__cMenuItem((char*)self + 0x6CC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x698, 2);
+    cMenuItem__cMenuItem((char*)self + 0x664, 2);
+    cMenuItem__cMenuItem((char*)self + 0x630, 2);
+    cMenuItem__cMenuItem((char*)self + 0x600, 2);
+    cMenuItem__cMenuItem((char*)self + 0x5CC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x598, 2);
+    cMenuItem__cMenuItem((char*)self + 0x564, 2);
+    cMenuItem__cMenuItem((char*)self + 0x530, 2);
+    cMenuItem__cMenuItem((char*)self + 0x4FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x4C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x494, 2);
+    cMenuItem__cMenuItem((char*)self + 0x460, 2);
+    cMenuItem__cMenuItem((char*)self + 0x42C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x394, 2);
+    cMenuItem__cMenuItem((char*)self + 0x360, 2);
+    cMenuItem__cMenuItem((char*)self + 0x32C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2F8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x290, 2);
+    cMenuItem__cMenuItem((char*)self + 0x25C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x228, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024DC68);
+INCLUDE_ASM("main/debugmenu", cDepthFogMenu__cDepthFogMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
 static inline void dtorSubMenuItem_24DC68(void* p)
 {
     cMenu__cMenu((char*)p + 0x18, 2);
-    func_002CA280(p, 2);
+    cMenuItem__cMenuItem(p, 2);
 }
 
-extern "C" void func_0024DC68(void* self, int flags)
+extern "C" void cDepthFogMenu__cDepthFogMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x904, 2);
-    func_002CA280((char*)self + 0x8E0, 2);
-    func_002CA280((char*)self + 0x8BC, 2);
-    func_002CA280((char*)self + 0x898, 2);
-    func_002CA280((char*)self + 0x874, 2);
+    cMenuItem__cMenuItem((char*)self + 0x904, 2);
+    cMenuItem__cMenuItem((char*)self + 0x8E0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x8BC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x898, 2);
+    cMenuItem__cMenuItem((char*)self + 0x874, 2);
     dtorSubMenuItem_24DC68((char*)self + 0x2C4);
-    func_002CA280((char*)self + 0x290, 2);
-    func_002CA280((char*)self + 0x25C, 2);
-    func_002CA280((char*)self + 0x22C, 2);
-    func_002CA280((char*)self + 0x1F8, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x290, 2);
+    cMenuItem__cMenuItem((char*)self + 0x25C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024DD70);
+INCLUDE_ASM("main/debugmenu", cScreenTintMenu__cScreenTintMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024DD70(void* self, int flags)
+extern "C" void cScreenTintMenu__cScreenTintMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x928, 2);
-    func_002CA280((char*)self + 0x8F4, 2);
-    func_002CA280((char*)self + 0x8C0, 2);
-    func_002CA280((char*)self + 0x88C, 2);
-    func_002CA280((char*)self + 0x858, 2);
-    func_002CA280((char*)self + 0x824, 2);
-    func_002CA280((char*)self + 0x7F0, 2);
-    func_002CA280((char*)self + 0x7C0, 2);
-    func_002CA280((char*)self + 0x78C, 2);
-    func_002CA280((char*)self + 0x758, 2);
-    func_002CA280((char*)self + 0x724, 2);
-    func_002CA280((char*)self + 0x6F0, 2);
-    func_002CA280((char*)self + 0x6BC, 2);
-    func_002CA280((char*)self + 0x688, 2);
-    func_002CA280((char*)self + 0x654, 2);
-    func_002CA280((char*)self + 0x620, 2);
-    func_002CA280((char*)self + 0x5EC, 2);
-    func_002CA280((char*)self + 0x5B8, 2);
-    func_002CA280((char*)self + 0x584, 2);
-    func_002CA280((char*)self + 0x550, 2);
-    func_002CA280((char*)self + 0x520, 2);
-    func_002CA280((char*)self + 0x4F0, 2);
-    func_002CA280((char*)self + 0x4C0, 2);
-    func_002CA280((char*)self + 0x490, 2);
-    func_002CA280((char*)self + 0x45C, 2);
-    func_002CA280((char*)self + 0x42C, 2);
-    func_002CA280((char*)self + 0x3FC, 2);
-    func_002CA280((char*)self + 0x3C8, 2);
-    func_002CA280((char*)self + 0x394, 2);
-    func_002CA280((char*)self + 0x360, 2);
-    func_002CA280((char*)self + 0x32C, 2);
-    func_002CA280((char*)self + 0x2F8, 2);
-    func_002CA280((char*)self + 0x2C4, 2);
-    func_002CA280((char*)self + 0x290, 2);
-    func_002CA280((char*)self + 0x25C, 2);
-    func_002CA280((char*)self + 0x228, 2);
-    func_002CA280((char*)self + 0x1F4, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x928, 2);
+    cMenuItem__cMenuItem((char*)self + 0x8F4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x8C0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x88C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x858, 2);
+    cMenuItem__cMenuItem((char*)self + 0x824, 2);
+    cMenuItem__cMenuItem((char*)self + 0x7F0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x7C0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x78C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x758, 2);
+    cMenuItem__cMenuItem((char*)self + 0x724, 2);
+    cMenuItem__cMenuItem((char*)self + 0x6F0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x6BC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x688, 2);
+    cMenuItem__cMenuItem((char*)self + 0x654, 2);
+    cMenuItem__cMenuItem((char*)self + 0x620, 2);
+    cMenuItem__cMenuItem((char*)self + 0x5EC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x5B8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x584, 2);
+    cMenuItem__cMenuItem((char*)self + 0x550, 2);
+    cMenuItem__cMenuItem((char*)self + 0x520, 2);
+    cMenuItem__cMenuItem((char*)self + 0x4F0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x4C0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x490, 2);
+    cMenuItem__cMenuItem((char*)self + 0x45C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x42C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x394, 2);
+    cMenuItem__cMenuItem((char*)self + 0x360, 2);
+    cMenuItem__cMenuItem((char*)self + 0x32C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2F8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x290, 2);
+    cMenuItem__cMenuItem((char*)self + 0x25C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x228, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024DFA0);
+INCLUDE_ASM("main/debugmenu", cBoardTrailMenu__cBoardTrailMenu);
 #ifdef SKIP_ASM
-extern "C" void func_0024DFA0(void* self, int flags)
+extern "C" void cBoardTrailMenu__cBoardTrailMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x59C, 2);
-    func_002CA280((char*)self + 0x56C, 2);
-    func_002CA280((char*)self + 0x53C, 2);
-    func_002CA280((char*)self + 0x508, 2);
-    func_002CA280((char*)self + 0x4D4, 2);
-    func_002CA280((char*)self + 0x4A0, 2);
-    func_002CA280((char*)self + 0x46C, 2);
-    func_002CA280((char*)self + 0x438, 2);
-    func_002CA280((char*)self + 0x404, 2);
-    func_002CA280((char*)self + 0x3D0, 2);
-    func_002CA280((char*)self + 0x39C, 2);
-    func_002CA280((char*)self + 0x368, 2);
-    func_002CA280((char*)self + 0x334, 2);
-    func_002CA280((char*)self + 0x300, 2);
-    func_002CA280((char*)self + 0x2CC, 2);
-    func_002CA280((char*)self + 0x298, 2);
-    func_002CA280((char*)self + 0x264, 2);
-    func_002CA280((char*)self + 0x230, 2);
-    func_002CA280((char*)self + 0x1FC, 2);
-    func_002CA280((char*)self + 0x1C8, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x59C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x56C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x53C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x508, 2);
+    cMenuItem__cMenuItem((char*)self + 0x4D4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x4A0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x46C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x438, 2);
+    cMenuItem__cMenuItem((char*)self + 0x404, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3D0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x39C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x368, 2);
+    cMenuItem__cMenuItem((char*)self + 0x334, 2);
+    cMenuItem__cMenuItem((char*)self + 0x300, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2CC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x298, 2);
+    cMenuItem__cMenuItem((char*)self + 0x264, 2);
+    cMenuItem__cMenuItem((char*)self + 0x230, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024E0F8);
+INCLUDE_ASM("main/debugmenu", cPowerUpFXTogglesMenu__cPowerUpFXTogglesMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024E0F8(void* self, int flags)
+extern "C" void cPowerUpFXTogglesMenu__cPowerUpFXTogglesMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x418, 2);
-    func_002CA280((char*)self + 0x3E8, 2);
-    func_002CA280((char*)self + 0x3B8, 2);
-    func_002CA280((char*)self + 0x388, 2);
-    func_002CA280((char*)self + 0x358, 2);
-    func_002CA280((char*)self + 0x328, 2);
-    func_002CA280((char*)self + 0x2F8, 2);
-    func_002CA280((char*)self + 0x2C8, 2);
-    func_002CA280((char*)self + 0x294, 2);
-    func_002CA280((char*)self + 0x260, 2);
-    func_002CA280((char*)self + 0x22C, 2);
-    func_002CA280((char*)self + 0x1F8, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x418, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3E8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3B8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x388, 2);
+    cMenuItem__cMenuItem((char*)self + 0x358, 2);
+    cMenuItem__cMenuItem((char*)self + 0x328, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2F8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x294, 2);
+    cMenuItem__cMenuItem((char*)self + 0x260, 2);
+    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024E200);
+INCLUDE_ASM("main/debugmenu", cSnowfallTogglesMenu__cSnowfallTogglesMenu);
 #ifdef SKIP_ASM
 static inline void dtorSubMenuItem_24E200(void* p)
 {
     cMenu__cMenu((char*)p + 0x18, 2);
-    func_002CA280(p, 2);
+    cMenuItem__cMenuItem(p, 2);
 }
 
-extern "C" void func_0024E200(void* self, int flags)
+extern "C" void cSnowfallTogglesMenu__cSnowfallTogglesMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0xFEC, 2);
-    func_002CA280((char*)self + 0xFD0, 2);
-    func_002CA280((char*)self + 0xFAC, 2);
-    func_002CA280((char*)self + 0xF88, 2);
-    func_002CA280((char*)self + 0xF64, 2);
-    func_002CA280((char*)self + 0xF40, 2);
+    cMenuItem__cMenuItem((char*)self + 0xFEC, 2);
+    cMenuItem__cMenuItem((char*)self + 0xFD0, 2);
+    cMenuItem__cMenuItem((char*)self + 0xFAC, 2);
+    cMenuItem__cMenuItem((char*)self + 0xF88, 2);
+    cMenuItem__cMenuItem((char*)self + 0xF64, 2);
+    cMenuItem__cMenuItem((char*)self + 0xF40, 2);
     dtorSubMenuItem_24E200((char*)self + 0x990);
-    func_002CA280((char*)self + 0x974, 2);
-    func_002CA280((char*)self + 0x950, 2);
-    func_002CA280((char*)self + 0x92C, 2);
-    func_002CA280((char*)self + 0x908, 2);
-    func_002CA280((char*)self + 0x8E4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x974, 2);
+    cMenuItem__cMenuItem((char*)self + 0x950, 2);
+    cMenuItem__cMenuItem((char*)self + 0x92C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x908, 2);
+    cMenuItem__cMenuItem((char*)self + 0x8E4, 2);
     dtorSubMenuItem_24E200((char*)self + 0x334);
-    func_002CA280((char*)self + 0x300, 2);
-    func_002CA280((char*)self + 0x2CC, 2);
-    func_002CA280((char*)self + 0x298, 2);
-    func_002CA280((char*)self + 0x264, 2);
-    func_002CA280((char*)self + 0x230, 2);
-    func_002CA280((char*)self + 0x1FC, 2);
-    func_002CA280((char*)self + 0x1C8, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x300, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2CC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x298, 2);
+    cMenuItem__cMenuItem((char*)self + 0x264, 2);
+    cMenuItem__cMenuItem((char*)self + 0x230, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2236,125 +2236,125 @@ extern "C" void func_0024E200(void* self, int flags)
 //100%
 INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu__cSplashTogglesMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
 static inline void dtorSubMenuItem_24E388(void* p)
 {
     cMenu__cMenu((char*)p + 0x18, 2);
-    func_002CA280(p, 2);
+    cMenuItem__cMenuItem(p, 2);
 }
 
 extern "C" void cSplashTogglesMenu__cSplashTogglesMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x252C, 2);
-    func_002CA280((char*)self + 0x2508, 2);
-    func_002CA280((char*)self + 0x24E4, 2);
-    func_002CA280((char*)self + 0x24C0, 2);
-    func_002CA280((char*)self + 0x249C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x252C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2508, 2);
+    cMenuItem__cMenuItem((char*)self + 0x24E4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x24C0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x249C, 2);
     dtorSubMenuItem_24E388((char*)self + 0x1EEC);
-    func_002CA280((char*)self + 0x1ED0, 2);
-    func_002CA280((char*)self + 0x1EAC, 2);
-    func_002CA280((char*)self + 0x1E88, 2);
-    func_002CA280((char*)self + 0x1E64, 2);
-    func_002CA280((char*)self + 0x1E40, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1ED0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1EAC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1E88, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1E64, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1E40, 2);
     dtorSubMenuItem_24E388((char*)self + 0x1890);
-    func_002CA280((char*)self + 0x185C, 2);
-    func_002CA280((char*)self + 0x1828, 2);
-    func_002CA280((char*)self + 0x17F4, 2);
-    func_002CA280((char*)self + 0x17C0, 2);
-    func_002CA280((char*)self + 0x178C, 2);
-    func_002CA280((char*)self + 0x1758, 2);
-    func_002CA280((char*)self + 0x1724, 2);
-    func_002CA280((char*)self + 0x16F0, 2);
-    func_002CA280((char*)self + 0x16BC, 2);
-    func_002CA280((char*)self + 0x1688, 2);
-    func_002CA280((char*)self + 0x1654, 2);
-    func_002CA280((char*)self + 0x1620, 2);
-    func_002CA280((char*)self + 0x15EC, 2);
-    func_002CA280((char*)self + 0x15B8, 2);
-    func_002CA280((char*)self + 0x1584, 2);
-    func_002CA280((char*)self + 0x1550, 2);
-    func_002CA280((char*)self + 0x151C, 2);
-    func_002CA280((char*)self + 0x14E8, 2);
-    func_002CA280((char*)self + 0x14B4, 2);
-    func_002CA280((char*)self + 0x1498, 2);
-    func_002CA280((char*)self + 0x1474, 2);
-    func_002CA280((char*)self + 0x1450, 2);
-    func_002CA280((char*)self + 0x142C, 2);
-    func_002CA280((char*)self + 0x1408, 2);
+    cMenuItem__cMenuItem((char*)self + 0x185C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1828, 2);
+    cMenuItem__cMenuItem((char*)self + 0x17F4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x17C0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x178C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1758, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1724, 2);
+    cMenuItem__cMenuItem((char*)self + 0x16F0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x16BC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1688, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1654, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1620, 2);
+    cMenuItem__cMenuItem((char*)self + 0x15EC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x15B8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1584, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1550, 2);
+    cMenuItem__cMenuItem((char*)self + 0x151C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14E8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14B4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1498, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1474, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1450, 2);
+    cMenuItem__cMenuItem((char*)self + 0x142C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1408, 2);
     dtorSubMenuItem_24E388((char*)self + 0xE58);
-    func_002CA280((char*)self + 0xE3C, 2);
-    func_002CA280((char*)self + 0xE18, 2);
-    func_002CA280((char*)self + 0xDF4, 2);
-    func_002CA280((char*)self + 0xDD0, 2);
-    func_002CA280((char*)self + 0xDAC, 2);
+    cMenuItem__cMenuItem((char*)self + 0xE3C, 2);
+    cMenuItem__cMenuItem((char*)self + 0xE18, 2);
+    cMenuItem__cMenuItem((char*)self + 0xDF4, 2);
+    cMenuItem__cMenuItem((char*)self + 0xDD0, 2);
+    cMenuItem__cMenuItem((char*)self + 0xDAC, 2);
     dtorSubMenuItem_24E388((char*)self + 0x7FC);
-    func_002CA280((char*)self + 0x7C8, 2);
-    func_002CA280((char*)self + 0x794, 2);
-    func_002CA280((char*)self + 0x760, 2);
-    func_002CA280((char*)self + 0x72C, 2);
-    func_002CA280((char*)self + 0x6F8, 2);
-    func_002CA280((char*)self + 0x6C4, 2);
-    func_002CA280((char*)self + 0x690, 2);
-    func_002CA280((char*)self + 0x65C, 2);
-    func_002CA280((char*)self + 0x628, 2);
-    func_002CA280((char*)self + 0x5F4, 2);
-    func_002CA280((char*)self + 0x5C0, 2);
-    func_002CA280((char*)self + 0x58C, 2);
-    func_002CA280((char*)self + 0x558, 2);
-    func_002CA280((char*)self + 0x524, 2);
-    func_002CA280((char*)self + 0x4F0, 2);
-    func_002CA280((char*)self + 0x4BC, 2);
-    func_002CA280((char*)self + 0x488, 2);
-    func_002CA280((char*)self + 0x454, 2);
-    func_002CA280((char*)self + 0x420, 2);
-    func_002CA280((char*)self + 0x3EC, 2);
-    func_002CA280((char*)self + 0x3B8, 2);
-    func_002CA280((char*)self + 0x384, 2);
-    func_002CA280((char*)self + 0x350, 2);
-    func_002CA280((char*)self + 0x31C, 2);
-    func_002CA280((char*)self + 0x2EC, 2);
-    func_002CA280((char*)self + 0x2BC, 2);
-    func_002CA280((char*)self + 0x28C, 2);
-    func_002CA280((char*)self + 0x258, 2);
-    func_002CA280((char*)self + 0x224, 2);
-    func_002CA280((char*)self + 0x1F4, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x7C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x794, 2);
+    cMenuItem__cMenuItem((char*)self + 0x760, 2);
+    cMenuItem__cMenuItem((char*)self + 0x72C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x6F8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x6C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x690, 2);
+    cMenuItem__cMenuItem((char*)self + 0x65C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x628, 2);
+    cMenuItem__cMenuItem((char*)self + 0x5F4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x5C0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x58C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x558, 2);
+    cMenuItem__cMenuItem((char*)self + 0x524, 2);
+    cMenuItem__cMenuItem((char*)self + 0x4F0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x4BC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x488, 2);
+    cMenuItem__cMenuItem((char*)self + 0x454, 2);
+    cMenuItem__cMenuItem((char*)self + 0x420, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3EC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3B8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x384, 2);
+    cMenuItem__cMenuItem((char*)self + 0x350, 2);
+    cMenuItem__cMenuItem((char*)self + 0x31C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2EC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2BC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x28C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x258, 2);
+    cMenuItem__cMenuItem((char*)self + 0x224, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024E7C8);
+INCLUDE_ASM("main/debugmenu", cPathArrowMenu__cPathArrowMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024E7C8(void* self, int flags)
+extern "C" void cPathArrowMenu__cPathArrowMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x458, 2);
-    func_002CA280((char*)self + 0x428, 2);
-    func_002CA280((char*)self + 0x3F4, 2);
-    func_002CA280((char*)self + 0x3C0, 2);
-    func_002CA280((char*)self + 0x38C, 2);
-    func_002CA280((char*)self + 0x35C, 2);
-    func_002CA280((char*)self + 0x32C, 2);
-    func_002CA280((char*)self + 0x2FC, 2);
-    func_002CA280((char*)self + 0x2CC, 2);
-    func_002CA280((char*)self + 0x298, 2);
-    func_002CA280((char*)self + 0x264, 2);
-    func_002CA280((char*)self + 0x230, 2);
-    func_002CA280((char*)self + 0x1FC, 2);
-    func_002CA280((char*)self + 0x1C8, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x458, 2);
+    cMenuItem__cMenuItem((char*)self + 0x428, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3F4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3C0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x38C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x35C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x32C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2CC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x298, 2);
+    cMenuItem__cMenuItem((char*)self + 0x264, 2);
+    cMenuItem__cMenuItem((char*)self + 0x230, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2377,138 +2377,138 @@ struct sSlot_E8D8 {
     void* operator new(unsigned int, void* p) { return p; }
 };
 
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 extern "C" void* cRenderTogglesMenu_cRenderTogglesMenu(void* self);
-extern "C" void func_0024D710(void* self, int flags);
+extern "C" void cRenderTogglesMenu__cRenderTogglesMenu(void* self, int flags);
 extern "C" void* cVisualEffectsTestMenu_cVisualEffectsTestMenu(void* self);
-extern "C" void func_0024D998(void* self, int flags);
+extern "C" void cVisualEffectsTestMenu__cVisualEffectsTestMenu(void* self, int flags);
 extern "C" void* cLightGlowMenu_cLightGlowMenu(void* self);
-extern "C" void func_0024DAB8(void* self, int flags);
+extern "C" void cLightGlowMenu__cLightGlowMenu(void* self, int flags);
 extern "C" void* cPlantsMenu_cPlantsMenu(void* self);
 extern "C" void* cDepthFogMenu_cDepthFogMenu(void* self);
-extern "C" void func_0024DC68(void* self, int flags);
+extern "C" void cDepthFogMenu__cDepthFogMenu(void* self, int flags);
 extern "C" void* cHeightFogMenu_cHeightFogMenu(void* self);
 extern "C" void* cDetailSystemMenu_cDetailSystemMenu(void* self);
 extern "C" void* cScreenTintMenu_cScreenTintMenu(void* self);
-extern "C" void func_0024DD70(void* self, int flags);
+extern "C" void cScreenTintMenu__cScreenTintMenu(void* self, int flags);
 extern "C" void* cShadowMenu_cShadowMenu(void* self);
 extern "C" void* cSnowSurfaceMenu_cSnowSurfaceMenu(void* self);
 extern "C" void* cBoardTrailMenu_cBoardTrailMenu(void* self);
-extern "C" void func_0024DFA0(void* self, int flags);
+extern "C" void cBoardTrailMenu__cBoardTrailMenu(void* self, int flags);
 extern "C" void* cFlagsMenu_cFlagsMenu(void* self);
 extern "C" void* cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(void* self);
-extern "C" void func_0024E0F8(void* self, int flags);
+extern "C" void cPowerUpFXTogglesMenu__cPowerUpFXTogglesMenu(void* self, int flags);
 extern "C" void* cSnowfallTogglesMenu_cSnowfallTogglesMenu(void* self);
-extern "C" void func_0024E200(void* self, int flags);
+extern "C" void cSnowfallTogglesMenu__cSnowfallTogglesMenu(void* self, int flags);
 extern "C" void* cSplashTogglesMenu_cSplashTogglesMenu(void* self);
 extern "C" void cSplashTogglesMenu__cSplashTogglesMenu(void* self, int flags);
 extern "C" void* cTubeMenu_cTubeMenu(void* self);
 extern "C" void* cPathArrowMenu_cPathArrowMenu(void* self);
-extern "C" void func_0024E7C8(void* self, int flags);
+extern "C" void cPathArrowMenu__cPathArrowMenu(void* self, int flags);
 
 // cPlantsMenu's destructor, inlined here (no out-of-line copy is called).
 static inline void cPlantsMenu_dtor(void* self)
 {
-    func_002CA280((char*)self + 0x398, 2);
-    func_002CA280((char*)self + 0x364, 2);
-    func_002CA280((char*)self + 0x330, 2);
-    func_002CA280((char*)self + 0x2FC, 2);
-    func_002CA280((char*)self + 0x2C8, 2);
-    func_002CA280((char*)self + 0x298, 2);
-    func_002CA280((char*)self + 0x264, 2);
-    func_002CA280((char*)self + 0x230, 2);
-    func_002CA280((char*)self + 0x1FC, 2);
-    func_002CA280((char*)self + 0x1C8, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x398, 2);
+    cMenuItem__cMenuItem((char*)self + 0x364, 2);
+    cMenuItem__cMenuItem((char*)self + 0x330, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x298, 2);
+    cMenuItem__cMenuItem((char*)self + 0x264, 2);
+    cMenuItem__cMenuItem((char*)self + 0x230, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, 2);
 }
 
 // cHeightFogMenu's destructor, inlined here (no out-of-line copy is called).
 static inline void cHeightFogMenu_dtor(void* self)
 {
-    func_002CA280((char*)self + 0x1C8, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, 2);
 }
 
 // cDetailSystemMenu's destructor, inlined here (no out-of-line copy is called).
 static inline void cDetailSystemMenu_dtor(void* self)
 {
-    func_002CA280((char*)self + 0x334, 2);
-    func_002CA280((char*)self + 0x300, 2);
-    func_002CA280((char*)self + 0x2CC, 2);
-    func_002CA280((char*)self + 0x298, 2);
-    func_002CA280((char*)self + 0x264, 2);
-    func_002CA280((char*)self + 0x230, 2);
-    func_002CA280((char*)self + 0x1FC, 2);
-    func_002CA280((char*)self + 0x1C8, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x334, 2);
+    cMenuItem__cMenuItem((char*)self + 0x300, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2CC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x298, 2);
+    cMenuItem__cMenuItem((char*)self + 0x264, 2);
+    cMenuItem__cMenuItem((char*)self + 0x230, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, 2);
 }
 
 // cShadowMenu's destructor, inlined here (no out-of-line copy is called).
 static inline void cShadowMenu_dtor(void* self)
 {
-    func_002CA280((char*)self + 0x2FC, 2);
-    func_002CA280((char*)self + 0x2C8, 2);
-    func_002CA280((char*)self + 0x294, 2);
-    func_002CA280((char*)self + 0x260, 2);
-    func_002CA280((char*)self + 0x22C, 2);
-    func_002CA280((char*)self + 0x1F8, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x294, 2);
+    cMenuItem__cMenuItem((char*)self + 0x260, 2);
+    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, 2);
 }
 
 // cSnowSurfaceMenu's destructor, inlined here (no out-of-line copy is called).
 static inline void cSnowSurfaceMenu_dtor(void* self)
 {
-    func_002CA280((char*)self + 0x294, 2);
-    func_002CA280((char*)self + 0x260, 2);
-    func_002CA280((char*)self + 0x22C, 2);
-    func_002CA280((char*)self + 0x1F8, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x294, 2);
+    cMenuItem__cMenuItem((char*)self + 0x260, 2);
+    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, 2);
 }
 
 // cFlagsMenu's destructor, inlined here (no out-of-line copy is called).
 static inline void cFlagsMenu_dtor(void* self)
 {
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, 2);
 }
 
 // cTubeMenu's destructor, inlined here (no out-of-line copy is called).
 static inline void cTubeMenu_dtor(void* self)
 {
-    func_002CA280((char*)self + 0x25C, 2);
-    func_002CA280((char*)self + 0x22C, 2);
-    func_002CA280((char*)self + 0x1FC, 2);
-    func_002CA280((char*)self + 0x1C8, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x25C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, 2);
 }
 
@@ -2669,474 +2669,474 @@ extern "C" void __sti__visualeffectsmenu_cpp_impl(int init, int prio)
             cTubeMenu_cTubeMenu(D_004D11F0);
             cPathArrowMenu_cPathArrowMenu(D_004D1480);
         } else {
-            func_0024E7C8(D_004D1480, 2);
+            cPathArrowMenu__cPathArrowMenu(D_004D1480, 2);
             cTubeMenu_dtor(D_004D11F0);
             cSplashTogglesMenu__cSplashTogglesMenu(D_004CECA8, 2);
-            func_0024E200(D_004CDC88, 2);
-            func_0024E0F8(D_004CD840, 2);
+            cSnowfallTogglesMenu__cSnowfallTogglesMenu(D_004CDC88, 2);
+            cPowerUpFXTogglesMenu__cPowerUpFXTogglesMenu(D_004CD840, 2);
             cFlagsMenu_dtor(D_004CD678);
-            func_0024DFA0(D_004CD0A8, 2);
+            cBoardTrailMenu__cBoardTrailMenu(D_004CD0A8, 2);
             cSnowSurfaceMenu_dtor(D_004CCDE0);
             cShadowMenu_dtor(D_004CCAB0);
-            func_0024DD70(D_004CC150, 2);
+            cScreenTintMenu__cScreenTintMenu(D_004CC150, 2);
             cDetailSystemMenu_dtor(D_004CBDE8);
             cHeightFogMenu_dtor(D_004CBBE8);
-            func_0024DC68(D_004CB2C8, 2);
+            cDepthFogMenu__cDepthFogMenu(D_004CB2C8, 2);
             cPlantsMenu_dtor(D_004CAEF8);
-            func_0024DAB8(D_004CA7C0, 2);
-            func_0024D998(D_004CA328, 2);
-            func_0024D710(D_004C98E0, 2);
+            cLightGlowMenu__cLightGlowMenu(D_004CA7C0, 2);
+            cVisualEffectsTestMenu__cVisualEffectsTestMenu(D_004CA328, 2);
+            cRenderTogglesMenu__cRenderTogglesMenu(D_004C98E0, 2);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F6C0);
+INCLUDE_ASM("main/debugmenu", cVisualEffectsMainMenu__cVisualEffectsMainMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024F6C0(void* self, int flags)
+extern "C" void cVisualEffectsMainMenu__cVisualEffectsMainMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x324, 2);
-    func_002CA280((char*)self + 0x308, 2);
-    func_002CA280((char*)self + 0x2EC, 2);
-    func_002CA280((char*)self + 0x2D0, 2);
-    func_002CA280((char*)self + 0x2B4, 2);
-    func_002CA280((char*)self + 0x298, 2);
-    func_002CA280((char*)self + 0x27C, 2);
-    func_002CA280((char*)self + 0x260, 2);
-    func_002CA280((char*)self + 0x244, 2);
-    func_002CA280((char*)self + 0x228, 2);
-    func_002CA280((char*)self + 0x20C, 2);
-    func_002CA280((char*)self + 0x1F0, 2);
-    func_002CA280((char*)self + 0x1D4, 2);
-    func_002CA280((char*)self + 0x1B8, 2);
-    func_002CA280((char*)self + 0x19C, 2);
-    func_002CA280((char*)self + 0x180, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x324, 2);
+    cMenuItem__cMenuItem((char*)self + 0x308, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2EC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2D0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2B4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x298, 2);
+    cMenuItem__cMenuItem((char*)self + 0x27C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x260, 2);
+    cMenuItem__cMenuItem((char*)self + 0x244, 2);
+    cMenuItem__cMenuItem((char*)self + 0x228, 2);
+    cMenuItem__cMenuItem((char*)self + 0x20C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1D4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1B8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x19C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x180, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F7E0__FPv);
+INCLUDE_ASM("main/debugmenu", cRenderTogglesMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024F7E0(void* self)
+void* cRenderTogglesMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F800__FPv);
+INCLUDE_ASM("main/debugmenu", cRenderTogglesMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024F800(void* self)
+void* cRenderTogglesMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F820__FPv);
+INCLUDE_ASM("main/debugmenu", cVisualEffectsTestMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024F820(void* self)
+void* cVisualEffectsTestMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F840__FPv);
+INCLUDE_ASM("main/debugmenu", cVisualEffectsTestMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024F840(void* self)
+void* cVisualEffectsTestMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F860);
+INCLUDE_ASM("main/debugmenu", cPlantsMenu__cPlantsMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024F860(void* self, int flags)
+extern "C" void cPlantsMenu__cPlantsMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x398, 2);
-    func_002CA280((char*)self + 0x364, 2);
-    func_002CA280((char*)self + 0x330, 2);
-    func_002CA280((char*)self + 0x2FC, 2);
-    func_002CA280((char*)self + 0x2C8, 2);
-    func_002CA280((char*)self + 0x298, 2);
-    func_002CA280((char*)self + 0x264, 2);
-    func_002CA280((char*)self + 0x230, 2);
-    func_002CA280((char*)self + 0x1FC, 2);
-    func_002CA280((char*)self + 0x1C8, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x398, 2);
+    cMenuItem__cMenuItem((char*)self + 0x364, 2);
+    cMenuItem__cMenuItem((char*)self + 0x330, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x298, 2);
+    cMenuItem__cMenuItem((char*)self + 0x264, 2);
+    cMenuItem__cMenuItem((char*)self + 0x230, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F940__FPv);
+INCLUDE_ASM("main/debugmenu", cPlantsMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024F940(void* self)
+void* cPlantsMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F960__FPv);
+INCLUDE_ASM("main/debugmenu", cPlantsMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024F960(void* self)
+void* cPlantsMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F980__FPv);
+INCLUDE_ASM("main/debugmenu", cLightGlowMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024F980(void* self)
+void* cLightGlowMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F9A0__FPv);
+INCLUDE_ASM("main/debugmenu", cLightGlowMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024F9A0(void* self)
+void* cLightGlowMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F9C0__FPv);
+INCLUDE_ASM("main/debugmenu", cDepthFogMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024F9C0(void* self)
+void* cDepthFogMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024F9E0__FPv);
+INCLUDE_ASM("main/debugmenu", cDepthFogMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024F9E0(void* self)
+void* cDepthFogMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FA00);
+INCLUDE_ASM("main/debugmenu", cHeightFogMenu__cHeightFogMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024FA00(void* self, int flags)
+extern "C" void cHeightFogMenu__cHeightFogMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x1C8, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FA78__FPv);
+INCLUDE_ASM("main/debugmenu", cHeightFogMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FA78(void* self)
+void* cHeightFogMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FA98__FPv);
+INCLUDE_ASM("main/debugmenu", cHeightFogMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FA98(void* self)
+void* cHeightFogMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FAB8);
+INCLUDE_ASM("main/debugmenu", cDetailSystemMenu__cDetailSystemMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024FAB8(void* self, int flags)
+extern "C" void cDetailSystemMenu__cDetailSystemMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x334, 2);
-    func_002CA280((char*)self + 0x300, 2);
-    func_002CA280((char*)self + 0x2CC, 2);
-    func_002CA280((char*)self + 0x298, 2);
-    func_002CA280((char*)self + 0x264, 2);
-    func_002CA280((char*)self + 0x230, 2);
-    func_002CA280((char*)self + 0x1FC, 2);
-    func_002CA280((char*)self + 0x1C8, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x334, 2);
+    cMenuItem__cMenuItem((char*)self + 0x300, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2CC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x298, 2);
+    cMenuItem__cMenuItem((char*)self + 0x264, 2);
+    cMenuItem__cMenuItem((char*)self + 0x230, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FB80__FPv);
+INCLUDE_ASM("main/debugmenu", cDetailSystemMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FB80(void* self)
+void* cDetailSystemMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FBA0__FPv);
+INCLUDE_ASM("main/debugmenu", cDetailSystemMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FBA0(void* self)
+void* cDetailSystemMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FBC0);
+INCLUDE_ASM("main/debugmenu", cShellRendererMenu__cShellRendererMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024FBC0(void* self, int flags)
+extern "C" void cShellRendererMenu__cShellRendererMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x2EC, 2);
-    func_002CA280((char*)self + 0x2B8, 2);
-    func_002CA280((char*)self + 0x284, 2);
-    func_002CA280((char*)self + 0x254, 2);
-    func_002CA280((char*)self + 0x224, 2);
-    func_002CA280((char*)self + 0x1F4, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2EC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2B8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x284, 2);
+    cMenuItem__cMenuItem((char*)self + 0x254, 2);
+    cMenuItem__cMenuItem((char*)self + 0x224, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FC80__FPv);
+INCLUDE_ASM("main/debugmenu", cShellRendererMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FC80(void* self)
+void* cShellRendererMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FCA0__FPv);
+INCLUDE_ASM("main/debugmenu", cShellRendererMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FCA0(void* self)
+void* cShellRendererMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FCC0__FPv);
+INCLUDE_ASM("main/debugmenu", cScreenTintMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FCC0(void* self)
+void* cScreenTintMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FCE0__FPv);
+INCLUDE_ASM("main/debugmenu", cScreenTintMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FCE0(void* self)
+void* cScreenTintMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FD00);
+INCLUDE_ASM("main/debugmenu", cShadowMenu__cShadowMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024FD00(void* self, int flags)
+extern "C" void cShadowMenu__cShadowMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x2FC, 2);
-    func_002CA280((char*)self + 0x2C8, 2);
-    func_002CA280((char*)self + 0x294, 2);
-    func_002CA280((char*)self + 0x260, 2);
-    func_002CA280((char*)self + 0x22C, 2);
-    func_002CA280((char*)self + 0x1F8, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x294, 2);
+    cMenuItem__cMenuItem((char*)self + 0x260, 2);
+    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FDC0__FPv);
+INCLUDE_ASM("main/debugmenu", cShadowMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FDC0(void* self)
+void* cShadowMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FDE0__FPv);
+INCLUDE_ASM("main/debugmenu", cShadowMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FDE0(void* self)
+void* cShadowMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FE00);
+INCLUDE_ASM("main/debugmenu", cSnowSurfaceMenu__cSnowSurfaceMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024FE00(void* self, int flags)
+extern "C" void cSnowSurfaceMenu__cSnowSurfaceMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x294, 2);
-    func_002CA280((char*)self + 0x260, 2);
-    func_002CA280((char*)self + 0x22C, 2);
-    func_002CA280((char*)self + 0x1F8, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x294, 2);
+    cMenuItem__cMenuItem((char*)self + 0x260, 2);
+    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FEA8__FPv);
+INCLUDE_ASM("main/debugmenu", cSnowSurfaceMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FEA8(void* self)
+void* cSnowSurfaceMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FEC8__FPv);
+INCLUDE_ASM("main/debugmenu", cSnowSurfaceMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FEC8(void* self)
+void* cSnowSurfaceMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FEE8__FPv);
+INCLUDE_ASM("main/debugmenu", cBoardTrailMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FEE8(void* self)
+void* cBoardTrailMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FF08__FPv);
+INCLUDE_ASM("main/debugmenu", cBoardTrailMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FF08(void* self)
+void* cBoardTrailMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FF28);
+INCLUDE_ASM("main/debugmenu", cFlagsMenu__cFlagsMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_0024FF28(void* self, int flags)
+extern "C" void cFlagsMenu__cFlagsMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FF90__FPv);
+INCLUDE_ASM("main/debugmenu", cFlagsMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FF90(void* self)
+void* cFlagsMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FFB0__FPv);
+INCLUDE_ASM("main/debugmenu", cFlagsMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FFB0(void* self)
+void* cFlagsMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FFD0__FPv);
+INCLUDE_ASM("main/debugmenu", cPowerUpFXTogglesMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FFD0(void* self)
+void* cPowerUpFXTogglesMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_0024FFF0__FPv);
+INCLUDE_ASM("main/debugmenu", cPowerUpFXTogglesMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_0024FFF0(void* self)
+void* cPowerUpFXTogglesMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250010__FPv);
+INCLUDE_ASM("main/debugmenu", cSnowfallTogglesMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_00250010(void* self)
+void* cSnowfallTogglesMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250030__FPv);
+INCLUDE_ASM("main/debugmenu", cSnowfallTogglesMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_00250030(void* self)
+void* cSnowfallTogglesMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
@@ -3171,53 +3171,53 @@ void* cSplashTogglesMenu_onLoseFocus(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250090);
+INCLUDE_ASM("main/debugmenu", cTubeMenu__cTubeMenu);
 #ifdef SKIP_ASM
-extern "C" void func_00250090(void* self, int flags)
+extern "C" void cTubeMenu__cTubeMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x25C, 2);
-    func_002CA280((char*)self + 0x22C, 2);
-    func_002CA280((char*)self + 0x1FC, 2);
-    func_002CA280((char*)self + 0x1C8, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x25C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250128__FPv);
+INCLUDE_ASM("main/debugmenu", cTubeMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_00250128(void* self)
+void* cTubeMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250148__FPv);
+INCLUDE_ASM("main/debugmenu", cTubeMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_00250148(void* self)
+void* cTubeMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250168__FPv);
+INCLUDE_ASM("main/debugmenu", cPathArrowMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_00250168(void* self)
+void* cPathArrowMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250188__FPv);
+INCLUDE_ASM("main/debugmenu", cPathArrowMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_00250188(void* self)
+void* cPathArrowMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
@@ -3428,18 +3428,18 @@ extern "C" void* cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250A60__FPv);
+INCLUDE_ASM("main/debugmenu", cAIVisualEffectsMainMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_00250A60(void* self)
+void* cAIVisualEffectsMainMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250A80__FPv);
+INCLUDE_ASM("main/debugmenu", cAIVisualEffectsMainMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_00250A80(void* self)
+void* cAIVisualEffectsMainMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
@@ -3455,47 +3455,47 @@ extern "C" void* func_00250AA0(void* self, ...)
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00250AE0);
+INCLUDE_ASM("main/debugmenu", cAvalancheMenu__cAvalancheMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_00250AE0(void* self, int flags)
+extern "C" void cAvalancheMenu__cAvalancheMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x77C, 2);
-    func_002CA280((char*)self + 0x748, 2);
-    func_002CA280((char*)self + 0x714, 2);
-    func_002CA280((char*)self + 0x6E0, 2);
-    func_002CA280((char*)self + 0x6B0, 2);
-    func_002CA280((char*)self + 0x67C, 2);
-    func_002CA280((char*)self + 0x648, 2);
-    func_002CA280((char*)self + 0x614, 2);
-    func_002CA280((char*)self + 0x5E0, 2);
-    func_002CA280((char*)self + 0x5AC, 2);
-    func_002CA280((char*)self + 0x578, 2);
-    func_002CA280((char*)self + 0x544, 2);
-    func_002CA280((char*)self + 0x514, 2);
-    func_002CA280((char*)self + 0x4E0, 2);
-    func_002CA280((char*)self + 0x4AC, 2);
-    func_002CA280((char*)self + 0x478, 2);
-    func_002CA280((char*)self + 0x444, 2);
-    func_002CA280((char*)self + 0x410, 2);
-    func_002CA280((char*)self + 0x3DC, 2);
-    func_002CA280((char*)self + 0x3AC, 2);
-    func_002CA280((char*)self + 0x37C, 2);
-    func_002CA280((char*)self + 0x34C, 2);
-    func_002CA280((char*)self + 0x31C, 2);
-    func_002CA280((char*)self + 0x2E8, 2);
-    func_002CA280((char*)self + 0x2B8, 2);
-    func_002CA280((char*)self + 0x288, 2);
-    func_002CA280((char*)self + 0x258, 2);
-    func_002CA280((char*)self + 0x228, 2);
-    func_002CA280((char*)self + 0x1F8, 2);
-    func_002CA280((char*)self + 0x1C4, 2);
-    func_002CA280((char*)self + 0x194, 2);
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x77C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x748, 2);
+    cMenuItem__cMenuItem((char*)self + 0x714, 2);
+    cMenuItem__cMenuItem((char*)self + 0x6E0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x6B0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x67C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x648, 2);
+    cMenuItem__cMenuItem((char*)self + 0x614, 2);
+    cMenuItem__cMenuItem((char*)self + 0x5E0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x5AC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x578, 2);
+    cMenuItem__cMenuItem((char*)self + 0x544, 2);
+    cMenuItem__cMenuItem((char*)self + 0x514, 2);
+    cMenuItem__cMenuItem((char*)self + 0x4E0, 2);
+    cMenuItem__cMenuItem((char*)self + 0x4AC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x478, 2);
+    cMenuItem__cMenuItem((char*)self + 0x444, 2);
+    cMenuItem__cMenuItem((char*)self + 0x410, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3DC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x3AC, 2);
+    cMenuItem__cMenuItem((char*)self + 0x37C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x34C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x31C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2E8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x2B8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x288, 2);
+    cMenuItem__cMenuItem((char*)self + 0x258, 2);
+    cMenuItem__cMenuItem((char*)self + 0x228, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
+    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
+    cMenuItem__cMenuItem((char*)self + 0x194, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -3518,7 +3518,7 @@ struct sSlot_0CB0 {
 };
 
 extern "C" void* cAvalancheMenu_cAvalancheMenu(void* self);
-extern "C" void func_00250AE0(void* self, int flags);
+extern "C" void cAvalancheMenu__cAvalancheMenu(void* self, int flags);
 
 extern char D_004D1908[], D_004D1918[], D_004D1928[], D_004D1938[], D_004D1948[], D_004D1958[], D_004D1968[], D_004D1978[], D_004D1988[], D_004D1998[], D_004D19A8[], D_004D19B8[], D_004D19C8[], D_004D19D8[], D_004D19E8[], D_004D19F8[], D_004D1A08[], D_004D1A18[], D_004D1A28[], D_004D1A38[], D_004D1A48[], D_004D1A58[], D_004D1A68[], D_004D1A78[], D_004D1A88[], D_004D1A98[], D_004D1AA8[], D_004D1AB8[], D_004D1AC8[], D_004D1AD8[], D_004D1AE8[], D_004D1AF8[], D_004D1B08[], D_004D1B18[], D_004D1B28[], D_004D1B38[], D_004D1B48[], D_004D1B58[], D_004D1B68[], D_004D1B78[], D_004D1B88[], D_004D1B98[], D_004D1BA8[], D_004D1BB8[], D_004D1BC8[], D_004D1BD8[], D_004D1BE8[], D_004D1BF8[], D_004D1C08[], D_004D1C18[], D_004D1C28[], D_004D1C38[], D_004D1C48[], D_004D1C58[], D_004D1C68[], D_004D1C78[];
 extern char D_004D1C88[];
@@ -3606,41 +3606,41 @@ extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio)
             new (&D_004A50D0) sSlot_0CB0(13);
             cAvalancheMenu_cAvalancheMenu(D_004D1C88);
         } else {
-            func_00250AE0(D_004D1C88, 2);
+            cAvalancheMenu__cAvalancheMenu(D_004D1C88, 2);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_002515F0__FPv);
+INCLUDE_ASM("main/debugmenu", cAvalancheMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
-void* func_002515F0(void* self)
+void* cAvalancheMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00251610__FPv);
+INCLUDE_ASM("main/debugmenu", cAvalancheMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
-void* func_00251610(void* self)
+void* cAvalancheMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/debugmenu", func_00251630);
+INCLUDE_ASM("main/debugmenu", cAIVisualEffectsMainMenu__cAIVisualEffectsMainMenu);
 #ifdef SKIP_ASM
-extern "C" void func_002CA280(void* p, int flags);
+extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 
-extern "C" void func_00251630(void* self, int flags)
+extern "C" void cAIVisualEffectsMainMenu__cAIVisualEffectsMainMenu(void* self, int flags)
 {
-    func_002CA280((char*)self + 0x164, 2);
-    func_002CA280((char*)self + 0x14C, 2);
-    func_002CA280((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem((char*)self + 0x164, 2);
+    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
+    cMenuItem__cMenuItem((char*)self + 0x130, 2);
     cMenu__cMenu(self, flags);
 }
 #endif

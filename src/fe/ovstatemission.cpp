@@ -29,15 +29,15 @@ extern "C" void cFEStateMPCircuit_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A3300__FPv);
+INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
-void func_001A3300(void* self)
+void cFEStateMPCircuit_onWidgetCreate(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A3308);
+INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_onGainFocus);
 #ifdef SKIP_ASM
 struct cUIScreen;
 int GetHashValue32(char* str);
@@ -49,7 +49,7 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
 void func_001A34A8(void* self);
 extern char D_004A19E8[];
 
-extern "C" void func_001A3308(void* self, int a1)
+extern "C" void cFEStateMPCircuit_onGainFocus(void* self, int a1)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A19E8));
     if (obj != 0) {
@@ -64,7 +64,7 @@ extern "C" void func_001A3308(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A33A0);
+INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_onWidgetEvent);
 #ifdef SKIP_ASM
 struct cUIScreen;
 int GetHashValue32(char* str);
@@ -80,7 +80,7 @@ struct sVEntry_33A0 {
     void* (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001A33A0(void* self, void* item, unsigned int msg)
+extern "C" void cFEStateMPCircuit_onWidgetEvent(void* self, void* item, unsigned int msg)
 {
     if (item == 0) {
         return;

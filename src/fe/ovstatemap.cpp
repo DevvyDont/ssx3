@@ -243,7 +243,7 @@ extern "C" int cOVState_MAP_onGainTransition(void* selfp, int on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00208B00);
+INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onGainFocus);
 #ifdef SKIP_ASM
 struct sVEntry00208B00 {
     short delta;
@@ -261,7 +261,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern char D_00470A20[];
 
-extern "C" void func_00208B00(void* self, int a1)
+extern "C" void cOVState_MAP_onGainFocus(void* self, int a1)
 {
     sObj00208B00* o;
     cUIState_onGainFocus(self, a1);
@@ -274,13 +274,13 @@ extern "C" void func_00208B00(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00208B78);
+INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onDestroyScreen);
 #ifdef SKIP_ASM
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
 extern "C" void func_0020A088(void* self);
 extern "C" void cOVState_onDestroyScreen(cOVState* self);
 
-extern "C" void func_00208B78(void* self)
+extern "C" void cOVState_MAP_onDestroyScreen(void* self)
 {
     cFEAsyncManager_UnloadFEAsyncFile(SSXApp->mFEAsyncManager, *(int*)((char*)self + 0xC4));
     func_0020A088(self);
