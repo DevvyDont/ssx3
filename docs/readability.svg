@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="840" height="150" viewBox="0 0 840 150" role="img" aria-labelledby="t d">
 <title id="t">SSX 3 readability</title>
-<desc id="d">Mean readability 1.85 of 5 over 15,107 functions (2026-11-16). score 5: 516, score 4: 888, score 3: 2,681, score 2: 4,324, score 1: 5,200, score 0: 1,498. Criteria met: documented 20% · named variables 28% · named function 20% · real types 39% · natural constants 80%.</desc>
+<desc id="d">Mean readability 1.88 of 5 over 15,107 functions (2026-11-16). score 5: 516, score 4: 966, score 3: 2,693, score 2: 4,378, score 1: 5,090, score 0: 1,464. Criteria met: documented 20% · named variables 28% · named function 22% · real types 39% · natural constants 80%.</desc>
 <style>
   .surface { fill: #fcfcfb; } text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; fill: #0b0b0b; }
   .ink2 { fill: #52514e; } .muted { fill: #898781; } .track { fill: #c3c2b7; } .rule { stroke: #e1e0d9; stroke-width: 1; }
@@ -14,21 +14,21 @@
 </style>
 <rect class="surface" width="840" height="150" rx="8"/>
 <text x="20" y="34" font-size="14" font-weight="600">Readability</text>
-<text x="124" y="34" font-size="14" font-weight="600">1.85 / 5 mean</text>
+<text x="124" y="34" font-size="14" font-weight="600">1.88 / 5 mean</text>
 <text x="820" y="34" font-size="13" class="ink2 num" text-anchor="end">15,107 functions, scored 0-5</text>
-<clipPath id="rclip20_44_800"><rect x="20" y="44" width="800" height="20" rx="4"/></clipPath><g clip-path="url(#rclip20_44_800)"><rect class="s5" x="20.00" y="44" width="26.98" height="20"><title>Functions · score 5 (fully readable): 516 functions (3.4%)</title></rect><rect class="s4" x="48.98" y="44" width="46.44" height="20"><title>Functions · score 4: 888 functions (5.9%)</title></rect><rect class="s3" x="97.42" y="44" width="140.20" height="20"><title>Functions · score 3: 2,681 functions (17.7%)</title></rect><rect class="s2" x="239.62" y="44" width="226.12" height="20"><title>Functions · score 2: 4,324 functions (28.6%)</title></rect><rect class="s1" x="467.74" y="44" width="271.93" height="20"><title>Functions · score 1: 5,200 functions (34.4%)</title></rect><rect class="track" x="741.66" y="44" width="78.34" height="20"><title>Functions · score 0 or not matched: 1,498 functions (9.9%)</title></rect></g>
+<clipPath id="rclip20_44_800"><rect x="20" y="44" width="800" height="20" rx="4"/></clipPath><g clip-path="url(#rclip20_44_800)"><rect class="s5" x="20.00" y="44" width="26.98" height="20"><title>Functions · score 5 (fully readable): 516 functions (3.4%)</title></rect><rect class="s4" x="48.98" y="44" width="50.52" height="20"><title>Functions · score 4: 966 functions (6.4%)</title></rect><rect class="s3" x="101.50" y="44" width="140.83" height="20"><title>Functions · score 3: 2,693 functions (17.8%)</title></rect><rect class="s2" x="244.33" y="44" width="228.94" height="20"><title>Functions · score 2: 4,378 functions (29.0%)</title></rect><rect class="s1" x="475.27" y="44" width="266.17" height="20"><title>Functions · score 1: 5,090 functions (33.7%)</title></rect><rect class="track" x="743.44" y="44" width="76.56" height="20"><title>Functions · score 0 or not matched: 1,464 functions (9.7%)</title></rect></g>
 <rect class="s5" x="20" y="72" width="12" height="12" rx="3"/>
 <text x="38" y="82" font-size="12"><tspan>score 5 (fully readable)</tspan><tspan class="muted num"> · 516</tspan></text>
 <rect class="s4" x="287" y="72" width="12" height="12" rx="3"/>
-<text x="305" y="82" font-size="12"><tspan>score 4</tspan><tspan class="muted num"> · 888</tspan></text>
+<text x="305" y="82" font-size="12"><tspan>score 4</tspan><tspan class="muted num"> · 966</tspan></text>
 <rect class="s3" x="422" y="72" width="12" height="12" rx="3"/>
-<text x="440" y="82" font-size="12"><tspan>score 3</tspan><tspan class="muted num"> · 2,681</tspan></text>
+<text x="440" y="82" font-size="12"><tspan>score 3</tspan><tspan class="muted num"> · 2,693</tspan></text>
 <rect class="s2" x="569" y="72" width="12" height="12" rx="3"/>
-<text x="587" y="82" font-size="12"><tspan>score 2</tspan><tspan class="muted num"> · 4,324</tspan></text>
+<text x="587" y="82" font-size="12"><tspan>score 2</tspan><tspan class="muted num"> · 4,378</tspan></text>
 <rect class="s1" x="20" y="94" width="12" height="12" rx="3"/>
-<text x="38" y="104" font-size="12"><tspan>score 1</tspan><tspan class="muted num"> · 5,200</tspan></text>
+<text x="38" y="104" font-size="12"><tspan>score 1</tspan><tspan class="muted num"> · 5,090</tspan></text>
 <rect class="track" x="168" y="94" width="12" height="12" rx="3"/>
-<text x="186" y="104" font-size="12"><tspan>score 0 or not matched</tspan><tspan class="muted num"> · 1,498</tspan></text>
-<text x="20" y="128" font-size="12" class="ink2">Criteria met: documented 20% · named variables 28% · named function 20% · real types 39% · natural constants 80%</text>
+<text x="186" y="104" font-size="12"><tspan>score 0 or not matched</tspan><tspan class="muted num"> · 1,464</tspan></text>
+<text x="20" y="128" font-size="12" class="ink2">Criteria met: documented 20% · named variables 28% · named function 22% · real types 39% · natural constants 80%</text>
 <text x="820" y="144" font-size="10" class="muted" text-anchor="end">updated 2026-11-16</text>
 </svg>
