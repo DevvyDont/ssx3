@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/riderhandler.h"
 #include "be/beintnetwork.h"
 #include "main/ssxapp.h"
 
@@ -779,7 +780,7 @@ void* func_002F64F0(void* self);
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x10): vtable copies with delta fixups when not in charge.
-extern "C" void* func_002F6238(void* self, int inChrg)
+extern "C" void* func_002F6238(cCheatFX* self, int inChrg)
 {
     sVt9_6238 t1;
     sVt22_6238 t2;
@@ -804,7 +805,7 @@ extern "C" void* func_002F6238(void* self, int inChrg)
         t2.e[1].delta = D_00488728.e[1].delta + vc;
     }
     func_002F64F0(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1143,7 +1144,7 @@ public:
     virtual int v02(void* src, int size);
 };
 
-extern "C" void func_002F6A58(void* self, func_002F6A58_cObj* stream)
+extern "C" void func_002F6A58(cCheatFX* self, func_002F6A58_cObj* stream)
 {
     stream->v01((char*)self + 4, 4);
 }
@@ -1152,7 +1153,7 @@ extern "C" void func_002F6A58(void* self, func_002F6A58_cObj* stream)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6A90);
 #ifdef SKIP_ASM
-extern "C" void func_002F6A90(void* self, func_002F6A58_cObj* stream)
+extern "C" void func_002F6A90(cCheatFX* self, func_002F6A58_cObj* stream)
 {
     stream->v02((char*)self + 4, 4);
 }
@@ -1161,17 +1162,17 @@ extern "C" void func_002F6A90(void* self, func_002F6A58_cObj* stream)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6AC8);
 #ifdef SKIP_ASM
-extern "C" void func_002F6AC8(void* self, int type)
+extern "C" void func_002F6AC8(cCheatFX* self, int type)
 {
     switch (type) {
     case 0:
-        *(unsigned char*)((char*)self + 7) |= 0x10;
+        *(unsigned char*)&self->m_cheatState.m_misc |= 0x10;
         break;
     case 1:
-        *(unsigned char*)((char*)self + 7) |= 0x20;
+        *(unsigned char*)&self->m_cheatState.m_misc |= 0x20;
         break;
     case 2:
-        *(unsigned char*)((char*)self + 7) |= 0x40;
+        *(unsigned char*)&self->m_cheatState.m_misc |= 0x40;
         break;
     }
 }

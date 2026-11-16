@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/riderhandler.h"
 #include "sound/ssxaudio.h"
 #include "ai/computer.h"
 #include "be/beintnewrace.h"
@@ -2306,13 +2307,13 @@ __asm__("_vt$15cCompPart01_cmp$13cRiderVbC_cmp = D_004599A0\n"
 INCLUDE_ASM("ai/computer", cRiderHandler__setMotionState);
 #ifdef SKIP_ASM
 extern "C" void func_001112F8();
-extern "C" void cRiderHandler_gainMotionState(void*, int);
+extern "C" void cRiderHandler_gainMotionState(cRiderHandler*, int);
 
-extern "C" void cRiderHandler__setMotionState(void* self, int v)
+extern "C" void cRiderHandler__setMotionState(cRiderHandler* self, int v)
 {
     func_001112F8();
-    int old = *(int*)((char*)self + 0xDE0);
-    *(int*)((char*)self + 0xDE0) = v;
+    int old = self->MotionState;
+    self->MotionState = v;
     cRiderHandler_gainMotionState(self, old);
 }
 #endif
@@ -2334,9 +2335,9 @@ extern "C" void cWipeoutMotion_gainFocus(void* motion, int a1);
 extern "C" void func_0013AD20(void* motion, int a1);
 extern "C" void cHandplantMotion_gainFocus(void* motion, int a1);
 
-extern "C" void func_001112F8(void* self, int a1)
+extern "C" void func_001112F8(cRiderHandler* self, int a1)
 {
-    switch (*(int*)((char*)self + 0xDE0)) {
+    switch (self->MotionState) {
     case 0:
         func_0013F410(self, a1);
         break;
@@ -2372,9 +2373,9 @@ extern "C" void cWipeoutMotion_gainFocus(void* motion, int a1);
 extern "C" void func_0013AD20(void* motion, int a1);
 extern "C" void cHandplantMotion_gainFocus(void* motion, int a1);
 
-extern "C" void cRiderHandler_gainMotionState(void* self, int a1)
+extern "C" void cRiderHandler_gainMotionState(cRiderHandler* self, int a1)
 {
-    switch (*(int*)((char*)self + 0xDE0)) {
+    switch (self->MotionState) {
     case 0:
         cGroundMotion_gainFocus(self, a1);
         break;
@@ -2405,9 +2406,9 @@ extern "C" void func_00136958(void* motion);
 extern "C" void func_0013AF28(void* motion);
 extern "C" void func_001391A8(void* motion);
 
-extern "C" void func_00111408(void* self)
+extern "C" void func_00111408(cRiderHandler* self)
 {
-    switch (*(int*)((char*)self + 0xDE0)) {
+    switch (self->MotionState) {
     case 0:
         func_0013D818(self);
         break;
@@ -2441,9 +2442,9 @@ void func_00136978(void* motion);
 extern "C" void func_0013BFA8(void* motion);
 void func_00139528(void* motion);
 
-extern "C" void func_001114A0(void* self)
+extern "C" void func_001114A0(cRiderHandler* self)
 {
-    switch (*(int*)((char*)self + 0xDE0)) {
+    switch (self->MotionState) {
     case 0:
         func_0013F178(self);
         break;
@@ -2470,13 +2471,13 @@ extern "C" void func_001114A0(void* self)
 INCLUDE_ASM("ai/computer", func_00111538);
 #ifdef SKIP_ASM
 extern "C" void func_00111578();
-extern "C" void func_00111630(void*, int);
+extern "C" void func_00111630(cRiderHandler*, int);
 
-extern "C" void func_00111538(void* self, int v)
+extern "C" void func_00111538(cRiderHandler* self, int v)
 {
     func_00111578();
-    int old = *(int*)((char*)self + 0xDE4);
-    *(int*)((char*)self + 0xDE4) = v;
+    int old = self->ControlState;
+    self->ControlState = v;
     func_00111630(self, old);
 }
 #endif
@@ -2496,9 +2497,9 @@ extern "C" void func_0012E690(void* m, int a1);
 extern "C" void func_00132F98(void* m, int a1);
 
 // Controller-state dispatch: the second argument is passed through to the handler.
-extern "C" void func_00111578(void* self, int a1)
+extern "C" void func_00111578(cRiderHandler* self, int a1)
 {
-    switch (*(int*)((char*)self + 0xDE4)) {
+    switch (self->ControlState) {
     case 0:
         func_00131C30((char*)self + 0x1C0, a1);
         break;
@@ -2546,9 +2547,9 @@ extern "C" void func_0012C5C8(void* p, int a1);
 extern "C" void func_001328B0(void* p, int a1);
 extern "C" void func_00136268(void* p, int a1);
 // Forwards to the handler for the AI's current state.
-extern "C" void func_00111630(void* self, int a1)
+extern "C" void func_00111630(cRiderHandler* self, int a1)
 {
-    switch (*(int*)((char*)self + 0xDE4)) {
+    switch (self->ControlState) {
     case 0:
         func_00131608((char*)self + 0x1C0);
         break;
@@ -2610,9 +2611,9 @@ extern "C" void func_0012C678(void* p, int a1);
 extern "C" void func_00132A30(void* p, int a1);
 extern "C" void func_00136508(void* p, int a1);
 // Forwards to the second handler for the AI's current state.
-extern "C" void func_00111728(void* self, int a1)
+extern "C" void func_00111728(cRiderHandler* self, int a1)
 {
-    switch (*(int*)((char*)self + 0xDE4)) {
+    switch (self->ControlState) {
     case 0:
         func_00131620((char*)self + 0x1C0, a1);
         break;
@@ -2664,9 +2665,9 @@ INCLUDE_ASM("ai/computer", func_00111830);
 extern const char* D_00459D70[];
 extern char D_00456C48[];
 
-extern "C" const char* func_00111830(char* self)
+extern "C" const char* func_00111830(cRiderHandler* self)
 {
-    unsigned int state = *(unsigned int*)(self + 0xDE0);
+    unsigned int state = (unsigned int)self->MotionState;
     if (state >= 7U) {
         return D_00456C48;
     }
@@ -2679,9 +2680,9 @@ INCLUDE_ASM("ai/computer", func_00111860);
 extern const char* D_00459DC8[];
 extern char D_00456C48[];
 
-extern "C" const char* func_00111860(char* self)
+extern "C" const char* func_00111860(cRiderHandler* self)
 {
-    unsigned int state = *(unsigned int*)(self + 0xDE4);
+    unsigned int state = (unsigned int)self->ControlState;
     if (state >= 15U) {
         return D_00456C48;
     }
@@ -2709,22 +2710,21 @@ void* func_002306A8(void* self, int i);
 
 struct sVEntry00111890 { short delta; short index; void (*fn)(void*); };
 
-extern "C" void func_00111890(void* self)
+extern "C" void func_00111890(cRiderHandler* self)
 {
-    char* s = (char*)self;
-    func_002DCF28(s + 0x3B0);
-    func_002DAA78(s + 0x470);
-    cBoardTrailFX_reset(s + 0x520);
-    func_002E6640(s + 0x610);
-    func_002EADC0(s + 0x9C0);
-    func_002EF6A0(s + 0xAD0);
-    func_002D4BE0(s + 0xAF0);
-    func_002E3930(s + 0xB00);
-    func_002DF3B0(s + 0xB40);
-    func_002F1148(s + 0xC70);
-    func_002F64E8(s + 0xD20);
+    func_002DCF28(((char*)self) + 0x3B0);
+    func_002DAA78(((char*)self) + 0x470);
+    cBoardTrailFX_reset(((char*)self) + 0x520);
+    func_002E6640(((char*)self) + 0x610);
+    func_002EADC0(((char*)self) + 0x9C0);
+    func_002EF6A0(((char*)self) + 0xAD0);
+    func_002D4BE0(((char*)self) + 0xAF0);
+    func_002E3930(((char*)self) + 0xB00);
+    func_002DF3B0(((char*)self) + 0xB40);
+    func_002F1148(((char*)self) + 0xC70);
+    func_002F64E8(((char*)self) + 0xD20);
     cWorldPainterMan_reset_noarg();
-    int id = *(int*)(*(char**)(s + 0x18) + 0x870);
+    int id = *(int*)((char*)self->GroundMotion.mRider + 0x870);
     if (id >= 0)
     {
         char* obj = (char*)func_002306A8(SSXApp->Game, id);
@@ -2758,10 +2758,10 @@ extern int D_004A4534;
 
 struct sVE_00111948 { short delta; short index; int (*fn)(void*); };
 
-extern "C" void func_00111948(void* self)
+extern "C" void func_00111948(cRiderHandler* self)
 {
     if (D_004A4534 != 0) {
-        cRider* r = *(cRider**)((char*)self + 0x18);
+        cRider* r = self->GroundMotion.mRider;
         char* o = (char*)&r->mVtbl;
         sVE_00111948* e = &(*(sVE_00111948**)o)[kRiderVt_isComputer];
         if (e->fn(o + e->delta) != 0)
@@ -2799,10 +2799,10 @@ extern int D_004A4534;
 
 struct sVE_001119F8 { short delta; short index; int (*fn)(void*); };
 
-extern "C" void func_001119F8(void* self)
+extern "C" void func_001119F8(cRiderHandler* self)
 {
     if (D_004A4534 != 0) {
-        cRider* r = *(cRider**)((char*)self + 0x18);
+        cRider* r = self->GroundMotion.mRider;
         char* o = (char*)&r->mVtbl;
         sVE_001119F8* e = &(*(sVE_001119F8**)o)[kRiderVt_isComputer];
         if (e->fn(o + e->delta) != 0)
@@ -2871,51 +2871,51 @@ extern "C" void func_002F6A58(void* self, void* s);
 extern "C" int func_0026B508(void* tree, void* path);
 extern "C" int func_0026B550(void* tree, void* path);
 
-extern "C" void func_00111AC0(char* self, char* s)
+extern "C" void func_00111AC0(cRiderHandler* self, char* s)
 {
     cStream_00111AC0* st = (cStream_00111AC0*)s;
-    st->Write(*(void**)(self + 0x18), 0x6C0);
-    func_00104D68(*(void**)(*(char**)(self + 0x18) + 0x784), s);
-    func_00310EA8(*(void**)(*(char**)(self + 0x18) + 0x780), s);
-    func_00113AA0(*(void**)(*(char**)(self + 0x18) + 0x788), s);
-    func_001174B0(*(void**)(*(char**)(self + 0x18) + 0x790), s);
+    st->Write(self->GroundMotion.mRider, 0x6C0);
+    func_00104D68(*(void**)((char*)self->GroundMotion.mRider + 0x784), s);
+    func_00310EA8(*(void**)((char*)self->GroundMotion.mRider + 0x780), s);
+    func_00113AA0(*(void**)((char*)self->GroundMotion.mRider + 0x788), s);
+    func_001174B0(*(void**)((char*)self->GroundMotion.mRider + 0x790), s);
     unsigned int id0 = 0xFFFFFFFF;
-    char* p0 = **(char***)(*(char**)(self + 0x18) + 0x864);
+    char* p0 = **(char***)((char*)self->GroundMotion.mRider + 0x864);
     if (p0 != 0) {
         id0 = *(unsigned int*)(p0 + 0x150);
     }
     st->Write(&id0, 4);
-    st->Write(*(void**)(*(char**)(self + 0x18) + 0x864), 0x10);
+    st->Write(*(void**)((char*)self->GroundMotion.mRider + 0x864), 0x10);
     unsigned int id1 = 0xFFFFFFFF;
-    char* p1 = **(char***)(*(char**)(self + 0x18) + 0x868);
+    char* p1 = **(char***)((char*)self->GroundMotion.mRider + 0x868);
     if (p1 != 0) {
         id1 = *(unsigned int*)(p1 + 0x150);
     }
     st->Write(&id1, 4);
-    st->Write(*(void**)(*(char**)(self + 0x18) + 0x868), 0x10);
-    st->Write(self + 0xDE0, 4);
-    st->Write(self + 0xDE4, 4);
-    func_0013F848(self, s);
-    func_0013ACB0(self + 0x20, s);
-    func_00138AD8(self + 0x30, s);
-    func_0013C5E0(self + 0xB0, s);
-    func_00139970(self + 0x110, s);
-    func_00131598(self + 0x1D0, s);
-    func_0012FBF0(self + 0x210, s);
-    func_001361F8(self + 0x230, s);
-    func_0012C558(self + 0x290, s);
-    func_00132840(self + 0x2B0, s);
-    func_0012E708(self + 0x2C0, s);
-    func_0012F5B0(self + 0x350, s);
-    func_0012C9C0(self + 0x360, s);
-    func_001330B8(self + 0x370, s);
-    func_001368E8(self + 0x390, s);
-    func_002F6A58(self + 0xD20, s);
-    st->Write(*(void**)(*(char**)(self + 0x18) + 0xABC), 0x20);
-    st->Write(*(void**)(*(char**)(self + 0x18) + 0xAC0), 0x20);
+    st->Write(*(void**)((char*)self->GroundMotion.mRider + 0x868), 0x10);
+    st->Write(((char*)self) + 0xDE0, 4);
+    st->Write(((char*)self) + 0xDE4, 4);
+    func_0013F848(((char*)self), s);
+    func_0013ACB0(((char*)self) + 0x20, s);
+    func_00138AD8(((char*)self) + 0x30, s);
+    func_0013C5E0(((char*)self) + 0xB0, s);
+    func_00139970(((char*)self) + 0x110, s);
+    func_00131598(((char*)self) + 0x1D0, s);
+    func_0012FBF0(((char*)self) + 0x210, s);
+    func_001361F8(((char*)self) + 0x230, s);
+    func_0012C558(((char*)self) + 0x290, s);
+    func_00132840(((char*)self) + 0x2B0, s);
+    func_0012E708(((char*)self) + 0x2C0, s);
+    func_0012F5B0(((char*)self) + 0x350, s);
+    func_0012C9C0(((char*)self) + 0x360, s);
+    func_001330B8(((char*)self) + 0x370, s);
+    func_001368E8(((char*)self) + 0x390, s);
+    func_002F6A58(((char*)self) + 0xD20, s);
+    st->Write(*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
+    st->Write(*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
     int ids[2];
-    ids[0] = func_0026B508(D_004D33A0, *(void**)(*(char**)(self + 0x18) + 0xAB4));
-    ids[1] = func_0026B550(D_004D33A0, *(void**)(*(char**)(self + 0x18) + 0xAB8));
+    ids[0] = func_0026B508(D_004D33A0, *(void**)((char*)self->GroundMotion.mRider + 0xAB4));
+    ids[1] = func_0026B550(D_004D33A0, *(void**)((char*)self->GroundMotion.mRider + 0xAB8));
     st->Write(ids, 8);
 }
 #endif
@@ -3008,66 +3008,66 @@ struct sQuad_00111D98 {
     int v[4];
 } __attribute__((aligned(16)));
 
-extern "C" void func_00111D98(char* self, char* s)
+extern "C" void func_00111D98(cRiderHandler* self, char* s)
 {
     cStream_00111D98* st = (cStream_00111D98*)s;
-    st->Read(*(void**)(self + 0x18), 0x6C0);
-    func_00104DE0(*(void**)(*(char**)(self + 0x18) + 0x784), s);
-    func_00310EE0(*(void**)(*(char**)(self + 0x18) + 0x780), s);
-    func_00113AD8(*(void**)(*(char**)(self + 0x18) + 0x788), s);
-    func_001174E8(*(void**)(*(char**)(self + 0x18) + 0x790), s);
+    st->Read(self->GroundMotion.mRider, 0x6C0);
+    func_00104DE0(*(void**)((char*)self->GroundMotion.mRider + 0x784), s);
+    func_00310EE0(*(void**)((char*)self->GroundMotion.mRider + 0x780), s);
+    func_00113AD8(*(void**)((char*)self->GroundMotion.mRider + 0x788), s);
+    func_001174E8(*(void**)((char*)self->GroundMotion.mRider + 0x790), s);
     int ids[2];
     sRef_00111D98 r0;
     st->Read(&r0, 4);
-    st->Read(*(void**)(*(char**)(self + 0x18) + 0x864), 0x10);
+    st->Read(*(void**)((char*)self->GroundMotion.mRider + 0x864), 0x10);
     if (~r0.id != 0) {
-        **(void***)(*(char**)(self + 0x18) + 0x864) = r0.get();
+        **(void***)((char*)self->GroundMotion.mRider + 0x864) = r0.get();
     }
     sRef_00111D98 r1;
     st->Read(&r1, 4);
-    st->Read(*(void**)(*(char**)(self + 0x18) + 0x868), 0x10);
+    st->Read(*(void**)((char*)self->GroundMotion.mRider + 0x868), 0x10);
     if (~r1.id != 0) {
-        **(void***)(*(char**)(self + 0x18) + 0x868) = r1.get();
+        **(void***)((char*)self->GroundMotion.mRider + 0x868) = r1.get();
     }
-    st->Read(self + 0xDE0, 4);
-    st->Read(self + 0xDE4, 4);
-    func_0013F880(self, s);
-    func_0013ACE8(self + 0x20, s);
-    func_00138B10(self + 0x30, s);
-    func_0013C618(self + 0xB0, s);
-    func_001399A8(self + 0x110, s);
-    func_001315D0(self + 0x1D0, s);
-    func_0012FC28(self + 0x210, s);
-    func_00136230(self + 0x230, s);
-    func_0012C590(self + 0x290, s);
-    func_00132878(self + 0x2B0, s);
-    func_0012E740(self + 0x2C0, s);
-    func_0012F5E8(self + 0x350, s);
-    func_0012C9F8(self + 0x360, s);
-    func_001330F0(self + 0x370, s);
-    func_00136920(self + 0x390, s);
-    func_002DCF28(self + 0x3B0);
-    func_002DAA78(self + 0x470);
-    cBoardTrailFX_reset(self + 0x520);
-    func_002E6640(self + 0x610);
-    func_002EADC0(self + 0x9C0);
-    func_002EF6A0(self + 0xAD0);
-    func_002D4BE0(self + 0xAF0);
-    func_002E3930(self + 0xB00);
-    func_002F1148(self + 0xC70);
-    func_002F6A90(self + 0xD20, s);
-    st->Read(*(void**)(*(char**)(self + 0x18) + 0xABC), 0x20);
-    st->Read(*(void**)(*(char**)(self + 0x18) + 0xAC0), 0x20);
+    st->Read(((char*)self) + 0xDE0, 4);
+    st->Read(((char*)self) + 0xDE4, 4);
+    func_0013F880(((char*)self), s);
+    func_0013ACE8(((char*)self) + 0x20, s);
+    func_00138B10(((char*)self) + 0x30, s);
+    func_0013C618(((char*)self) + 0xB0, s);
+    func_001399A8(((char*)self) + 0x110, s);
+    func_001315D0(((char*)self) + 0x1D0, s);
+    func_0012FC28(((char*)self) + 0x210, s);
+    func_00136230(((char*)self) + 0x230, s);
+    func_0012C590(((char*)self) + 0x290, s);
+    func_00132878(((char*)self) + 0x2B0, s);
+    func_0012E740(((char*)self) + 0x2C0, s);
+    func_0012F5E8(((char*)self) + 0x350, s);
+    func_0012C9F8(((char*)self) + 0x360, s);
+    func_001330F0(((char*)self) + 0x370, s);
+    func_00136920(((char*)self) + 0x390, s);
+    func_002DCF28(((char*)self) + 0x3B0);
+    func_002DAA78(((char*)self) + 0x470);
+    cBoardTrailFX_reset(((char*)self) + 0x520);
+    func_002E6640(((char*)self) + 0x610);
+    func_002EADC0(((char*)self) + 0x9C0);
+    func_002EF6A0(((char*)self) + 0xAD0);
+    func_002D4BE0(((char*)self) + 0xAF0);
+    func_002E3930(((char*)self) + 0xB00);
+    func_002F1148(((char*)self) + 0xC70);
+    func_002F6A90(((char*)self) + 0xD20, s);
+    st->Read(*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
+    st->Read(*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
     st->Read(ids, 8);
-    *(void**)(*(char**)(self + 0x18) + 0xAB4) = func_0026AF70(D_004D33A0, ids[0]);
-    *(void**)(*(char**)(self + 0x18) + 0xAB8) = func_0026AF88(D_004D33A0, ids[1]);
-    sQuad_00111D98* q = *(sQuad_00111D98**)(*(char**)(self + 0x18) + 0x78C);
+    *(void**)((char*)self->GroundMotion.mRider + 0xAB4) = func_0026AF70(D_004D33A0, ids[0]);
+    *(void**)((char*)self->GroundMotion.mRider + 0xAB8) = func_0026AF88(D_004D33A0, ids[1]);
+    sQuad_00111D98* q = *(sQuad_00111D98**)((char*)self->GroundMotion.mRider + 0x78C);
     if (q != 0) {
-        *q = *(sQuad_00111D98*)(*(char**)(self + 0x18) + 0x110);
+        *q = *(sQuad_00111D98*)((char*)self->GroundMotion.mRider + 0x110);
     }
-    func_00312598(*(void**)(*(char**)(self + 0x18) + 0x784), 0);
-    func_003103F0(*(void**)(*(char**)(self + 0x18) + 0x780));
-    func_00106828(*(void**)(self + 0x18));
+    func_00312598(*(void**)((char*)self->GroundMotion.mRider + 0x784), 0);
+    func_003103F0(*(void**)((char*)self->GroundMotion.mRider + 0x780));
+    func_00106828(self->GroundMotion.mRider);
 }
 #endif
 

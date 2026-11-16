@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/riderhandler.h"
 #include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
 #include "ai/ai.h"
@@ -2298,14 +2299,14 @@ static inline sQuat_12BE20 AxisAngle_12BE20(const sQuat_12BE20& axis, float angl
     return sQuat_12BE20(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-extern "C" void func_0012BE20(void* self)
+extern "C" void func_0012BE20(cGateControl* self)
 {
-    char* r0 = *(char**)((char*)self + 0x14);
+    char* r0 = (char*)self->mRider;
     *(int*)(r0 + 0x320) = *(int*)(r0 + 0x324);
-    cRiderAnimBase_reset(*(void**)(*(char**)((char*)self + 0x14) + 0x784));
-    char* r1 = *(char**)((char*)self + 0x14);
+    cRiderAnimBase_reset(*(void**)((char*)self->mRider + 0x784));
+    char* r1 = (char*)self->mRider;
     *(int*)(*(char**)(r1 + 0x784) + 0x18) = *(int*)(r1 + 0x320);
-    char* r = *(char**)((char*)self + 0x14);
+    char* r = (char*)self->mRider;
     float a = 0.0f;
     if (*(int*)(r + 0x320) != 0) a = 3.1415927410125732f;
     char* anim = *(char**)(r + 0x784);
@@ -2313,17 +2314,17 @@ extern "C" void func_0012BE20(void* self)
     *(sQuat_12BE20*)(anim + 0x40) = AxisAngle_12BE20(D_004FF160_12BE20, -a);
     if (*(int*)self == 2)
     {
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 1, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 1, 0, -1.0f);
     }
     else
     {
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0, 0, -1.0f);
         *(int*)self = 0;
     }
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xC) = 0;
+    *(int*)&self->GateAnticipate = 0;
+    *(int*)&self->HeldAtExtremeSec = 0;
+    *(int*)&self->CurThrustMin = 0;
+    *(int*)&self->CurThrustMax = 0;
 }
 #endif
 
@@ -2331,14 +2332,14 @@ extern "C" void func_0012BE20(void* self)
 INCLUDE_ASM("ai/ai", func_0012BF68);
 #ifdef SKIP_ASM
 extern "C" void func_00114130(void* rider, int a, int b);
-extern "C" void func_0012C0C0(void* self, void* a1);
-extern "C" void func_0012C130(void* self, void* a1);
-extern "C" void func_0012C230(void* self, void* a1);
-extern "C" void func_0012C408(void* self, void* a1);
+extern "C" void func_0012C0C0(cGateControl* self, void* a1);
+extern "C" void func_0012C130(cGateControl* self, void* a1);
+extern "C" void func_0012C230(cGateControl* self, void* a1);
+extern "C" void func_0012C408(cGateControl* self, void* a1);
 
-extern "C" void func_0012BF68(void* self, void* a1)
+extern "C" void func_0012BF68(cGateControl* self, void* a1)
 {
-    func_00114130(*(void**)((char*)self + 0x14), 0, 0);
+    func_00114130(self->mRider, 0, 0);
     switch (*(int*)self)
     {
     case 0:
@@ -2361,13 +2362,13 @@ extern "C" void func_0012BF68(void* self, void* a1)
 INCLUDE_ASM("ai/ai", func_0012C028);
 #ifdef SKIP_ASM
 
-extern "C" int func_0012C028(void* self)
+extern "C" int func_0012C028(cGateControl* self)
 {
     int r = 0;
     char* s = (char*)SSXApp->Game->AI;
     if (*(int*)s == 5)
     {
-        r = *(int*)(*(char**)((char*)self + 0x14) + 0xB30) <= (int)(*(int*)(s + 0xC) * 0.01666666753590107f);
+        r = *(int*)((char*)self->mRider + 0xB30) <= (int)(*(int*)(s + 0xC) * 0.01666666753590107f);
     }
     return r;
 }
@@ -2377,11 +2378,11 @@ extern "C" int func_0012C028(void* self)
 INCLUDE_ASM("ai/ai", func_0012C078);
 #ifdef SKIP_ASM
 
-extern "C" int func_0012C078(void* self)
+extern "C" int func_0012C078(cGateControl* self)
 {
     if (SSXApp->Game->AI->CurrentAIState == 5)
         return 1;
-    if (*(float*)(*(char**)((char*)self + 0x14) + 0x470) >= 0.0f)
+    if (*(float*)((char*)self->mRider + 0x470) >= 0.0f)
         return 1;
     return 0;
 }
@@ -2398,11 +2399,11 @@ struct sAiBits0012C0C0
     int v : 6;
 };
 
-extern "C" void func_0012C0C0(void* self, void* a1)
+extern "C" void func_0012C0C0(cGateControl* self, void* a1)
 {
     if (((sAiBits0012C0C0*)a1)->v * 0.032258063554763794f > 0.0f)
     {
-        cRiderAnimBase_play_i(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 2, 0, -1.0f);
+        cRiderAnimBase_play_i(*(void**)((char*)self->mRider + 0x784), 2, 0, -1.0f);
         *(int*)self = 3;
     }
 }
@@ -2441,30 +2442,30 @@ static inline sVec4_12C130 vu0Scale_12C130(const sVec4_12C130& in, float s)
     return r;
 }
 
-extern "C" void func_0012C130(void* self, void* a1)
+extern "C" void func_0012C130(cGateControl* self, void* a1)
 {
-    func_00113F88(*(void**)((char*)self + 0x14), 1.0f, 0.0f);
-    if (func_00312AA0(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 2) == 2)
+    func_00113F88(self->mRider, 1.0f, 0.0f);
+    if (func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2) == 2)
     {
-        if (func_0011FE98(*(void**)((char*)self + 0x14)) == 3)
+        if (func_0011FE98(self->mRider) == 3)
         {
-            if (func_00312AB0(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 2) > 0.5f)
+            if (func_00312AB0(*(void**)((char*)self->mRider + 0x784), 2) > 0.5f)
             {
-                char* rider = *(char**)((char*)self + 0x14);
+                char* rider = (char*)self->mRider;
                 *(sVec4_12C130*)(rider + 0x1E0) = vu0Scale_12C130(*(sVec4_12C130*)(rider + 0x1B0), 555.5555419921875f);
-                cRider_setMotionState_impl(*(void**)((char*)self + 0x14), 0);
+                cRider_setMotionState_impl(self->mRider, 0);
             }
         }
     }
     else
     {
-        if (func_0011FE98(*(void**)((char*)self + 0x14)) == 1)
+        if (func_0011FE98(self->mRider) == 1)
         {
-            func_0011FEC8_impl(*(void**)((char*)self + 0x14), 4);
+            func_0011FEC8_impl(self->mRider, 4);
         }
         else
         {
-            func_0011FEC8_impl(*(void**)((char*)self + 0x14), 0);
+            func_0011FEC8_impl(self->mRider, 0);
         }
         *(int*)self = 0;
     }
@@ -2475,8 +2476,8 @@ extern "C" void func_0012C130(void* self, void* a1)
 INCLUDE_ASM("ai/ai", func_0012C230);
 #ifdef SKIP_ASM
 extern "C" float func_00115AB0(void* rider);
-extern "C" int func_0012C028(void* self);
-extern "C" int func_0012C078(void* self);
+extern "C" int func_0012C028(cGateControl* self);
+extern "C" int func_0012C078(cGateControl* self);
 
 struct sAiBits0012C230
 {
@@ -2484,10 +2485,10 @@ struct sAiBits0012C230
     int v : 6;
 };
 
-extern "C" void func_0012C230(void* self, void* a1)
+extern "C" void func_0012C230(cGateControl* self, void* a1)
 {
     float fy = ((sAiBits0012C230*)a1)->v * 0.032258063554763794f;
-    float old = *(float*)((char*)self + 0x10);
+    float old = self->GateAnticipate;
     float target;
     if (fy > 0.0f)
         target = 0.6200000047683716f;
@@ -2495,19 +2496,19 @@ extern "C" void func_0012C230(void* self, void* a1)
         target = 0.0f;
     else
         target = 0.3100000023841858f;
-    float v = func_00115AB0(*(void**)((char*)self + 0x14));
-    char* r = *(char**)((char*)self + 0x14);
+    float v = func_00115AB0(self->mRider);
+    char* r = (char*)self->mRider;
     *(float*)(r + 0x2CC) = 0.0f;
     *(float*)(r + 0x2D0) = v;
     *(float*)(r + 0x2C8) = v;
-    float d = __builtin_fabsf(target - *(float*)((char*)self + 0x10));
+    float d = __builtin_fabsf(target - self->GateAnticipate);
     float rate;
     if (d >= 0.20000000298023224f)
         rate = d * 4.5f;
     else
         rate = 0.9000000357627869f;
     float step = rate * 0.01666666753590107f;
-    float t = *(float*)((char*)self + 0x10);
+    float t = self->GateAnticipate;
     float n;
     if (t > target + step)
     {
@@ -2519,27 +2520,27 @@ extern "C" void func_0012C230(void* self, void* a1)
         if (t < target - step)
             n = t + step;
     }
-    *(float*)((char*)self + 0x10) = n;
-    *(float*)((char*)self + 0x4) = *(float*)((char*)self + 0x4) + 0.01666666753590107f;
+    self->GateAnticipate = n;
+    self->HeldAtExtremeSec = self->HeldAtExtremeSec + 0.01666666753590107f;
     if (old != n)
     {
-        *(int*)((char*)self + 0x4) = 0;
+        *(int*)&self->HeldAtExtremeSec = 0;
         if (old < n)
-            *(float*)((char*)self + 0xC) = n;
+            self->CurThrustMax = n;
         else
-            *(float*)((char*)self + 0x8) = n;
+            self->CurThrustMin = n;
     }
     if (func_0012C028(self) == 0) return;
     if (func_0012C078(self) == 0) return;
     float z = 0.0f;
-    if (target > 0.5f && *(float*)((char*)self + 0x4) < 0.4000000059604645f)
+    if (target > 0.5f && self->HeldAtExtremeSec < 0.4000000059604645f)
     {
-        float e = *(float*)((char*)self + 0x4);
-        z = (*(float*)((char*)self + 0xC) - *(float*)((char*)self + 0x8)) * 2027.77783203125f * (1.0f - *(float*)((char*)self + 0x10)) / (e + 1.0f);
+        float e = self->HeldAtExtremeSec;
+        z = (self->CurThrustMax - self->CurThrustMin) * 2027.77783203125f * (1.0f - self->GateAnticipate) / (e + 1.0f);
     }
     if (z < 555.5555419921875f)
         z = 555.5555419921875f;
-    *(float*)((char*)self + 0xC) = z;
+    self->CurThrustMax = z;
     *(int*)self = 1;
 }
 #endif
@@ -2550,15 +2551,15 @@ INCLUDE_ASM("ai/ai", func_0012C408);
 extern "C" float func_00115AB0(void* rider);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
-extern "C" void func_0012C408(void* self, void* a1)
+extern "C" void func_0012C408(cGateControl* self, void* a1)
 {
-    float v = func_00115AB0(*(void**)((char*)self + 0x14));
-    char* r = *(char**)((char*)self + 0x14);
+    float v = func_00115AB0(self->mRider);
+    char* r = (char*)self->mRider;
     *(float*)(r + 0x2CC) = 0.0f;
     *(float*)(r + 0x2D0) = v;
     *(float*)(r + 0x2C8) = v;
     float d = 0.015000001527369022f;
-    float t = *(float*)((char*)self + 0x10);
+    float t = self->GateAnticipate;
     float n;
     if (t > 1.0149999856948853f)
     {
@@ -2570,24 +2571,24 @@ extern "C" void func_0012C408(void* self, void* a1)
         if (t < 0.9850000143051147f)
             n = t + d;
     }
-    *(float*)((char*)self + 0x10) = n;
-    func_00113F88(*(void**)((char*)self + 0x14), 1.0f, 0.0f);
-    if (func_0011FE98(*(void**)((char*)self + 0x14)) == 3 && *(float*)((char*)self + 0x10) >= 0.6200000047683716f)
+    self->GateAnticipate = n;
+    func_00113F88(self->mRider, 1.0f, 0.0f);
+    if (func_0011FE98(self->mRider) == 3 && self->GateAnticipate >= 0.6200000047683716f)
     {
-        char* rider = *(char**)((char*)self + 0x14);
-        *(sVec4_12C130*)(rider + 0x1E0) = vu0Scale_12C130(*(sVec4_12C130*)(rider + 0x1B0), *(float*)((char*)self + 0xC));
-        cRider_setMotionState_impl(*(void**)((char*)self + 0x14), 0);
+        char* rider = (char*)self->mRider;
+        *(sVec4_12C130*)(rider + 0x1E0) = vu0Scale_12C130(*(sVec4_12C130*)(rider + 0x1B0), self->CurThrustMax);
+        cRider_setMotionState_impl(self->mRider, 0);
     }
-    if (*(float*)((char*)self + 0x10) == 1.0f)
+    if (self->GateAnticipate == 1.0f)
     {
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 6, 0, -1.0f);
-        if (func_0011FE98(*(void**)((char*)self + 0x14)) == 1)
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 6, 0, -1.0f);
+        if (func_0011FE98(self->mRider) == 1)
         {
-            func_0011FEC8_impl(*(void**)((char*)self + 0x14), 4);
+            func_0011FEC8_impl(self->mRider, 4);
         }
         else
         {
-            func_0011FEC8_impl(*(void**)((char*)self + 0x14), 0);
+            func_0011FEC8_impl(self->mRider, 0);
         }
     }
 }
@@ -2602,7 +2603,7 @@ struct sAiVEntry12C558 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012C558(void* self, void* obj)
+extern "C" void func_0012C558(cGateControl* self, void* obj)
 {
     sAiVEntry12C558* vt = *(sAiVEntry12C558**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x14);
@@ -2618,7 +2619,7 @@ struct sAiVEntry12C590 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012C590(void* self, void* obj)
+extern "C" void func_0012C590(cGateControl* self, void* obj)
 {
     sAiVEntry12C590* vt = *(sAiVEntry12C590**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x14);
@@ -2662,26 +2663,26 @@ struct sAiObj12C5C8
     char* mRider;
 };
 
-extern "C" void func_0012C5C8(sAiObj12C5C8* self)
+extern "C" void func_0012C5C8(cFinishLineControl* self)
 {
-    func_00119368(*(void**)(self->mRider + 0x790), 1);
-    char* r = self->mRider;
+    func_00119368(*(void**)((char*)self->mRider + 0x790), 1);
+    char* r = (char*)self->mRider;
     if (D_004A4C8C < aiLength_12C5C8(*(sAiVec4_12C5C8*)(r + 0x1E0)))
     {
-        self->m0 = 0;
+        self->FinishState = 0;
         return;
     }
     if (*(float*)(r + 0x2DC) != 0.0f)
     {
-        self->m0 = 0;
+        self->FinishState = 0;
         return;
     }
     if (*(float*)(r + 0x378) < 0.800000011920929f)
     {
-        self->m0 = 0;
+        self->FinishState = 0;
         return;
     }
-    self->m0 = 1;
+    self->FinishState = 1;
 }
 #endif
 
@@ -2755,48 +2756,48 @@ struct sAiObj12C678
     char* mRider;
 };
 
-extern "C" void func_0012C678(sAiObj12C678* self)
+extern "C" void func_0012C678(cFinishLineControl* self)
 {
-    int anim = func_00312AA0(*(void**)(self->mRider + 0x784), 2);
+    int anim = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
     int prev = anim;
-    char* r = self->mRider;
+    char* r = (char*)self->mRider;
     *(float*)(r + 0x200) = 0.03333333507180214f;
     *(float*)(r + 0x204) = *(float*)(r + 0x1F0);
-    switch (self->mState)
+    switch (self->FinishState)
     {
     case 0:
-        if (anim == 0x15 || (*(float*)(self->mRider + 0x2DC) == 0.0f && func_00114CC0(self->mRider)))
+        if (anim == 0x15 || (*(float*)((char*)self->mRider + 0x2DC) == 0.0f && func_00114CC0((char*)self->mRider)))
         {
             anim = 0x15;
-            func_00113F88(self->mRider, 0.0f, 0.0f);
+            func_00113F88((char*)self->mRider, 0.0f, 0.0f);
         }
         else
         {
-            if (func_0011FE98(self->mRider) != 0)
+            if (func_0011FE98((char*)self->mRider) != 0)
                 break;
             float zero = 0.0f;
             float t = -0.10000000149011612f;
-            if (zero < *(float*)(self->mRider + 0x1F0))
+            if (zero < *(float*)((char*)self->mRider + 0x1F0))
                 t = 0.10000000149011612f;
             anim = 0xB;
-            func_00113E80(self->mRider, t);
-            func_00114130(self->mRider, 0, 0);
-            *(float*)(self->mRider + 0x2DC) = zero;
-            if (*(float*)(self->mRider + 0x378) < 0.800000011920929f)
+            func_00113E80((char*)self->mRider, t);
+            func_00114130((char*)self->mRider, 0, 0);
+            *(float*)((char*)self->mRider + 0x2DC) = zero;
+            if (*(float*)((char*)self->mRider + 0x378) < 0.800000011920929f)
             {
-                func_00113F88(self->mRider, zero, zero);
+                func_00113F88((char*)self->mRider, zero, zero);
             }
             else
             {
-                vu0ScaleEq_12C678(*(sVec4_12C678*)(self->mRider + 0x1E0), 0.9700000286102295f);
-                if (aiAbs_12C678(*(float*)(self->mRider + 0x214)) == 1.0f ||
-                    aiLength_12C678(*(sVec4_12C678*)(self->mRider + 0x1E0)) < D_004A4C8C)
+                vu0ScaleEq_12C678(*(sVec4_12C678*)((char*)self->mRider + 0x1E0), 0.9700000286102295f);
+                if (aiAbs_12C678(*(float*)((char*)self->mRider + 0x214)) == 1.0f ||
+                    aiLength_12C678(*(sVec4_12C678*)((char*)self->mRider + 0x1E0)) < D_004A4C8C)
                 {
-                    self->mState = 1;
+                    self->FinishState = 1;
                 }
                 else
                 {
-                    func_00113F88(self->mRider, zero, 1.0f);
+                    func_00113F88((char*)self->mRider, zero, 1.0f);
                 }
             }
         }
@@ -2804,38 +2805,38 @@ extern "C" void func_0012C678(sAiObj12C678* self)
     case 1:
     {
         float zero = 0.0f;
-        func_00113F88(self->mRider, zero, zero);
-        func_00113E80(self->mRider, zero);
-        vu0ScaleEq_12C678(*(sVec4_12C678*)(self->mRider + 0x1E0), 0.9300000071525574f);
-        if (aiAbs_12C678(*(float*)(self->mRider + 0x214)) < 0.20000000298023224f &&
-            *(float*)(self->mRider + 0x1F0) == zero)
+        func_00113F88((char*)self->mRider, zero, zero);
+        func_00113E80((char*)self->mRider, zero);
+        vu0ScaleEq_12C678(*(sVec4_12C678*)((char*)self->mRider + 0x1E0), 0.9300000071525574f);
+        if (aiAbs_12C678(*(float*)((char*)self->mRider + 0x214)) < 0.20000000298023224f &&
+            *(float*)((char*)self->mRider + 0x1F0) == zero)
         {
-            self->mState = 2;
+            self->FinishState = 2;
             anim = 4;
-            if (*(int*)(self->mRider + 0x100) == 1)
-                func_0010E028(self->mRider, 1, zero);
+            if (*(int*)((char*)self->mRider + 0x100) == 1)
+                func_0010E028((char*)self->mRider, 1, zero);
             else
-                func_0010E028(self->mRider, 4, zero);
+                func_0010E028((char*)self->mRider, 4, zero);
         }
         break;
     }
     case 2:
-        *(sVec4_12C678*)(self->mRider + 0x1E0) = *(sVec4_12C678*)t4vect_Zero;
-        *(float*)(*(char**)(self->mRider + 0x784) + 0x1C) = 0.75f;
-        func_00115B58(self->mRider);
-        *(float*)(*(char**)(self->mRider + 0x784) + 0x1C) = 1.0f;
-        if (func_00311AE8(*(void**)(self->mRider + 0x784), 1) == 0)
+        *(sVec4_12C678*)((char*)self->mRider + 0x1E0) = *(sVec4_12C678*)t4vect_Zero;
+        *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C) = 0.75f;
+        func_00115B58((char*)self->mRider);
+        *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C) = 1.0f;
+        if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 1) == 0)
         {
-            *(float*)(self->mRider + 0x470) = *(float*)(self->mRider + 0x470) >? 10.0f;
-            self->mState = 3;
+            *(float*)((char*)self->mRider + 0x470) = *(float*)((char*)self->mRider + 0x470) >? 10.0f;
+            self->FinishState = 3;
         }
         break;
     case 3:
-        *(sVec4_12C678*)(self->mRider + 0x1E0) = *(sVec4_12C678*)t4vect_Zero;
+        *(sVec4_12C678*)((char*)self->mRider + 0x1E0) = *(sVec4_12C678*)t4vect_Zero;
         break;
     }
     if (anim != prev)
-        cRiderAnimBase_play(*(void**)(self->mRider + 0x784), anim, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), anim, 0, -1.0f);
 }
 #endif
 
@@ -2848,7 +2849,7 @@ struct sVEntry0012C9C0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012C9C0(void* self, void* obj)
+extern "C" void func_0012C9C0(cFinishLineControl* self, void* obj)
 {
     sVEntry0012C9C0* vt = *(sVEntry0012C9C0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x4);
@@ -2864,7 +2865,7 @@ struct sVEntry0012C9F8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012C9F8(void* self, void* obj)
+extern "C" void func_0012C9F8(cFinishLineControl* self, void* obj)
 {
     sVEntry0012C9F8* vt = *(sVEntry0012C9F8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x4);
@@ -2921,26 +2922,26 @@ struct sAiObj12CA30
     char* mRider;           // 0x80
 };
 
-extern "C" void func_0012CA30(sAiObj12CA30* self)
+extern "C" void func_0012CA30(cWipeoutControl* self)
 {
-    sVecPair_12CA30* p30 = &self->m30;
-    *(int*)(self->mRider + 0x2EC) = 0;
-    *(int*)(self->mRider + 0x2E8) = 0;
-    self->f54 = 0;
-    self->f70 = 0;
-    func_0029E578(func_0028B180(), self->mRider);
-    char* r = self->mRider;
-    self->m10 = (*(sVecPair_12CA30**)(*(char**)(r + 0x780) + 0x2C))[*(int*)(r + 0x89C)];
-    self->m30 = (*(sVecPair_12CA30**)(*(char**)(r + 0x780) + 0x2C))[*(int*)(r + 0x8A4)];
-    vu0AddEq_12CA30(self->m10.a, *(sVec4_12CA30*)(self->mRider + 0x9D0));
-    vu0AddEq_12CA30(self->m30.a, *(sVec4_12CA30*)(self->mRider + 0x9D0));
-    self->f0 = 0;
-    if (func_00311AE8(*(void**)(self->mRider + 0x784), 2) == 0x16)
+    sVecPair_12CA30* p30 = &(*(sVecPair_12CA30*)&self->BoardPrevPose);
+    *(int*)((char*)self->mRider + 0x2EC) = 0;
+    *(int*)((char*)self->mRider + 0x2E8) = 0;
+    self->IsNewImpact = 0;
+    *(int*)&self->RecoverPercent = 0;
+    func_0029E578(func_0028B180(), (char*)self->mRider);
+    char* r = (char*)self->mRider;
+    (*(sVecPair_12CA30*)&self->RiderPrevPose) = (*(sVecPair_12CA30**)(*(char**)(r + 0x780) + 0x2C))[*(int*)(r + 0x89C)];
+    (*(sVecPair_12CA30*)&self->BoardPrevPose) = (*(sVecPair_12CA30**)(*(char**)(r + 0x780) + 0x2C))[*(int*)(r + 0x8A4)];
+    vu0AddEq_12CA30((*(sVec4_12CA30*)&self->RiderPrevPose), *(sVec4_12CA30*)((char*)self->mRider + 0x9D0));
+    vu0AddEq_12CA30((*(sVec4_12CA30*)&self->BoardPrevPose), *(sVec4_12CA30*)((char*)self->mRider + 0x9D0));
+    self->RiderState = 0;
+    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x16)
     {
-        func_00136D40(*(char**)(self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)(self->mRider + 0x1E0), (sVec4_12CA30*)t4vect_Zero, p30);
-        *(int*)(self->mRider + 0x318) = 0;
+        func_00136D40(*(char**)((char*)self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)((char*)self->mRider + 0x1E0), (sVec4_12CA30*)t4vect_Zero, p30);
+        *(int*)((char*)self->mRider + 0x318) = 0;
     }
-    func_002708F0(SSXApp->Game->Replay, *(int*)(self->mRider + 0x86C), *(int*)(self->mRider + 0x790) + 0xFC);
+    func_002708F0(SSXApp->Game->Replay, *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0x790) + 0xFC);
     func_00309990(D_004A3DD8);
 }
 #endif
@@ -2956,10 +2957,10 @@ extern "C" void* func_0028B180();
 extern "C" void func_0029E970(void* snd, void* rider);
 extern "C" void func_0029E590(void* snd, void* rider, float t);
 extern "C" void func_0012CD20_CB68(void* self) __asm__("func_0012CD20");
-extern "C" void func_0012D4E8(void* self);
-extern "C" void func_0012D160(void* self);
-extern "C" void func_0012D848(void* self);
-extern "C" void func_0012D9D8(void* self);
+extern "C" void func_0012D4E8(cWipeoutControl* self);
+extern "C" void func_0012D160(cWipeoutControl* self);
+extern "C" void func_0012D848(cWipeoutControl* self);
+extern "C" void func_0012D9D8(cWipeoutControl* self);
 
 struct sAiObj12CB68
 {
@@ -2971,15 +2972,15 @@ struct sAiObj12CB68
 };
 
 // Decays or charges the AI's 0x70 meter (updating its sound), then runs the current state's handler.
-extern "C" void func_0012CB68(sAiObj12CB68* self, int* input)
+extern "C" void func_0012CB68(cWipeoutControl* self, int* input)
 {
-    func_00114130(self->mRider, 0, 0);
-    if (cRider_checkForReset_CB68(self->mRider, (*input >> 12) & 1, 0)) {
+    func_00114130((char*)self->mRider, 0, 0);
+    if (cRider_checkForReset_CB68((char*)self->mRider, (*input >> 12) & 1, 0)) {
         return;
     }
-    bool b = self->f0 == 3;
+    bool b = self->RiderState == 3;
     if (!b) {
-        float t = self->f70;
+        float t = self->RecoverPercent;
         float v;
         if (t > 0.00416986271739006f) {
             v = t - 0.00416986271739006f;
@@ -2989,10 +2990,10 @@ extern "C" void func_0012CB68(sAiObj12CB68* self, int* input)
                 v = t + 0.00416986271739006f;
             }
         }
-        self->f70 = v;
+        self->RecoverPercent = v;
         if (*input & 0x2000) {
             float rate = 17.00261688232422f;
-            switch (*(int*)(self->mRider + 0xB20)) {
+            switch (*(int*)((char*)self->mRider + 0xB20)) {
             case 0:
                 rate = 8.001495361328125f;
                 break;
@@ -3000,17 +3001,17 @@ extern "C" void func_0012CB68(sAiObj12CB68* self, int* input)
                 rate = 34.00276565551758f;
                 break;
             }
-            self->f70 += rate * 0.01666666753590107f;
-            if (self->f70 >= 1.0f) {
-                func_0029E970(func_0028B180(), self->mRider);
+            self->RecoverPercent += rate * 0.01666666753590107f;
+            if (self->RecoverPercent >= 1.0f) {
+                func_0029E970(func_0028B180(), (char*)self->mRider);
             } else {
-                func_0029E590(func_0028B180(), self->mRider, self->f70);
+                func_0029E590(func_0028B180(), (char*)self->mRider, self->RecoverPercent);
             }
         }
     }
-    switch (self->f0) {
+    switch (self->RiderState) {
     case 0:
-        func_0012CD20_CB68(self);
+        func_0012CD20_CB68(((sAiObj12CB68*)self));
         break;
     case 1:
         func_0012D4E8(self);
@@ -3039,7 +3040,7 @@ extern "C" int func_00312AE8(void* self, int i);
 extern "C" char* func_00311B20(void*, int);
 extern "C" float func_00312AB0(void* self, int i);
 extern "C" int func_00311AE8(void*, int);
-extern "C" void func_0012DA88(void* self);
+extern "C" void func_0012DA88(cWipeoutControl* self);
 extern "C" void func_00136DE0(char* self, void* vel, void* angvel);
 extern "C" void func_00296868(void* mgr, void* self);
 extern "C" void func_00296E80(void* mgr, void* self);
@@ -3136,54 +3137,54 @@ static inline sV_12CD20 Conj_12CD20(const sVP_12CD20& p)
     return r;
 }
 
-extern "C" void func_0012CD20(sAiObj12CD20* self)
+extern "C" void func_0012CD20(cWipeoutControl* self)
 {
-    char* r = self->mRider;
+    char* r = (char*)self->mRider;
     sVP_12CD20* nodes = *(sVP_12CD20**)(*(char**)(r + 0x780) + 0x2C);
     sVP_12CD20* p1 = &nodes[*(int*)(r + 0x89C)];
     sVP_12CD20* p2 = &nodes[*(int*)(r + 0x8A4)];
     float t = func_00312AB0(*(void**)(r + 0x784), 2);
-    if (func_00312AE8(*(void**)(self->mRider + 0x784), 2))
+    if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2))
     {
-        char* an = func_00311B20(*(void**)(self->mRider + 0x784), 2);
+        char* an = func_00311B20(*(void**)((char*)self->mRider + 0x784), 2);
         float rate = *(float*)(an + 0x90);
-        float s = rate / ((t - self->f50) * *(float*)(an + 0x10));
-        sV_12CD20 vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(p1->a, self->m10.a), *(float*)(*(char**)(self->mRider + 0x784) + 0x1C)), s);
+        float s = rate / ((t - self->PrevFramePercent) * *(float*)(an + 0x10));
+        sV_12CD20 vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(p1->a, (*(sV_12CD20*)&self->RiderPrevPose)), *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C)), s);
         float s2 = s + s;
-        sV_12CD20 d = Sub_12CD20(p1->b, self->m10.b);
+        sV_12CD20 d = Sub_12CD20(p1->b, (*(sV_12CD20*)&self->RiderPrevPose.Q));
         sV_12CD20 q = QuatMul_12CD20(d, Conj_12CD20(*p1));
         sV_12CD20 angvel = Scale_12CD20(sV_12CD20(q.x, q.y, q.z, 0.0f), s2);
-        func_00136DE0(*(char**)(self->mRider + 0x77C) + 0x30, self->mRider + 0x1E0, &angvel);
-        if (func_00311AE8(*(void**)(self->mRider + 0x784), 2) == 0x17)
+        func_00136DE0(*(char**)((char*)self->mRider + 0x77C) + 0x30, (char*)self->mRider + 0x1E0, &angvel);
+        if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x17)
         {
-            vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(p2->a, self->m30.a), *(float*)(*(char**)(self->mRider + 0x784) + 0x1C)), s);
-            d = Sub_12CD20(p2->b, self->m30.b);
+            vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(p2->a, (*(sV_12CD20*)&self->BoardPrevPose)), *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C)), s);
+            d = Sub_12CD20(p2->b, (*(sV_12CD20*)&self->BoardPrevPose.Q));
             q = QuatMul_12CD20(d, Conj_12CD20(*p2));
             angvel = Scale_12CD20(sV_12CD20(q.x, q.y, q.z, 0.0f), s2);
-            func_00136D40(*(char**)(self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)&vel, (sVec4_12CA30*)&angvel, (sVecPair_12CA30*)p2);
+            func_00136D40(*(char**)((char*)self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)&vel, (sVec4_12CA30*)&angvel, (sVecPair_12CA30*)p2);
         }
-        if (*(int*)(*(char**)(self->mRider + 0x77C) + 0x30) == 1)
+        if (*(int*)(*(char**)((char*)self->mRider + 0x77C) + 0x30) == 1)
         {
-            self->f0 = 1;
+            self->RiderState = 1;
             func_0012DA88(self);
         }
         else
         {
-            self->f0 = 2;
+            self->RiderState = 2;
             func_0012DA88(self);
-            if (func_00311AE8(*(void**)(self->mRider + 0x784), 2) == 0x1D ||
-                func_00311AE8(*(void**)(self->mRider + 0x784), 2) == 0x19)
-                func_00296868(func_0028B180(), self);
+            if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
+                func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
+                func_00296868(func_0028B180(), ((sAiObj12CD20*)self));
             else
-                func_00296E80(func_0028B180(), self);
+                func_00296E80(func_0028B180(), ((sAiObj12CD20*)self));
         }
         return;
     }
     if (t < 0.949999988079071f)
     {
-        self->f50 = t;
-        self->m10 = *p1;
-        self->m30 = *p2;
+        self->PrevFramePercent = t;
+        (*(sVP_12CD20*)&self->RiderPrevPose) = *p1;
+        (*(sVP_12CD20*)&self->BoardPrevPose) = *p2;
     }
 }
 #endif
@@ -3193,11 +3194,11 @@ INCLUDE_ASM("ai/ai", func_0012D160);
 #ifdef SKIP_ASM
 extern "C" void func_0010F280(void* rider, int flag);
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
-extern "C" void func_0012DCB0(void* self);
-extern "C" void func_0012DD98(void* self);
-extern "C" void func_0012DF48(void* self);
-extern "C" void func_0012E010(void* self);
-extern "C" float func_0012E528(void* self);
+extern "C" void func_0012DCB0(cWipeoutControl* self);
+extern "C" void func_0012DD98(cWipeoutControl* self);
+extern "C" void func_0012DF48(cWipeoutControl* self);
+extern "C" void func_0012E010(cWipeoutControl* self);
+extern "C" float func_0012E528(cWipeoutControl* self);
 extern "C" void func_0015E360(void* obj, int mode, float a, float b);
 extern "C" void* func_0028B180();
 extern "C" void func_00296E20(void* mgr, void* rider);
@@ -3236,15 +3237,15 @@ static inline void aiTail_12D160(void* self)
     func_00297438(func_0028B180(), *(char**)((char*)self + 0x80));
 }
 
-extern "C" void func_0012D160(void* self)
+extern "C" void func_0012D160(cWipeoutControl* self)
 {
-    char* r = *(char**)((char*)self + 0x80);
+    char* r = (char*)self->mRider;
     float speed = aiLength_12C5C8(*(sAiVec4_12C5C8*)(r + 0x1E0));
     if (*(int*)(r + 0x870) >= 0)
     {
         float v = speed * 0.035999998450279236f;
         float t = aiRatio_12D160(v, 100.0f);
-        char* r2 = *(char**)((char*)self + 0x80);
+        char* r2 = (char*)self->mRider;
         if (*(int*)(r2 + 0x87C) != 0)
         {
             func_0015E360(*(void**)((char*)SSXApp->Game->ViewMan + (*(int*)(r2 + 0x870) << 2) + 4), 4, t, 0.0f);
@@ -3252,41 +3253,41 @@ extern "C" void func_0012D160(void* self)
     }
     float k = func_0012E528(self);
     {
-        char* r3 = *(char**)((char*)self + 0x80);
+        char* r3 = (char*)self->mRider;
         sVEntry12D160* vt = *(sVEntry12D160**)(r3 + 0x6C0);
         vt[18].fn(r3 + vt[18].delta, k * 0.5f);
     }
-    if (*(int*)((char*)self + 0x54) != 0)
+    if (self->IsNewImpact != 0)
     {
-        *(int*)((char*)self + 0x54) = 0;
-        char* r4 = *(char**)((char*)self + 0x80);
+        self->IsNewImpact = 0;
+        char* r4 = (char*)self->mRider;
         sVEntry12D160* vt = *(sVEntry12D160**)(r4 + 0x6C0);
-        vt[17].fn(r4 + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)((char*)self + 0x60)));
+        vt[17].fn(r4 + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)&self->LatestImpact));
         return;
     }
-    if (aiIsOne_12D160(*(char**)((char*)self + 0x80)) && speed < 27.77777862548828f)
+    if (aiIsOne_12D160((char*)self->mRider) && speed < 27.77777862548828f)
     {
         func_0012E010(self);
         *(int*)self = 4;
         aiTail_12D160(self);
         return;
     }
-    if (func_00312AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0 &&
-        func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) != 0x1D &&
-        func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) != 0x19)
+    if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0 &&
+        func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0x1D &&
+        func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0x19)
         return;
     float lim = 694.4444580078125f;
-    if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x1C)
+    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1C)
         lim = 1666.666748046875f;
-    int fast = *(float*)((char*)self + 0x70) >= 1.0f || aiOk_12D160(self);
-    if ((!aiIsOne_12D160(*(char**)((char*)self + 0x80)) && speed < lim) || fast)
+    int fast = self->RecoverPercent >= 1.0f || aiOk_12D160(self);
+    if ((!aiIsOne_12D160((char*)self->mRider) && speed < lim) || fast)
     {
-        if (*(int*)(*(char**)((char*)self + 0x80) + 0x438) == 0x12 || aiIsOne_12D160(*(char**)((char*)self + 0x80)))
+        if (*(int*)((char*)self->mRider + 0x438) == 0x12 || aiIsOne_12D160((char*)self->mRider))
         {
             if (fast)
             {
-                cRider_checkForReset(*(char**)((char*)self + 0x80), 0, 3);
-                func_0010F280(*(char**)((char*)self + 0x80), 1);
+                cRider_checkForReset((char*)self->mRider, 0, 3);
+                func_0010F280((char*)self->mRider, 1);
             }
             else if (speed < 277.77777099609375f)
             {
@@ -3296,15 +3297,15 @@ extern "C" void func_0012D160(void* self)
         }
         else
         {
-            func_0010F280(*(char**)((char*)self + 0x80), fast);
-            if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x1C)
-                func_0029F660(func_0028B180(), *(char**)((char*)self + 0x80), 1, 0);
+            func_0010F280((char*)self->mRider, fast);
+            if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1C)
+                func_0029F660(func_0028B180(), (char*)self->mRider, 1, 0);
             func_0012DF48(self);
             *(int*)self = 3;
         }
         aiTail_12D160(self);
     }
-    else if (*(int*)(*(char**)(*(char**)((char*)self + 0x80) + 0x77C) + 0x30) == 1)
+    else if (*(int*)(*(char**)((char*)self->mRider + 0x77C) + 0x30) == 1)
     {
         func_0012DCB0(self);
         *(int*)self = 1;
@@ -3312,7 +3313,7 @@ extern "C" void func_0012D160(void* self)
     }
     else
     {
-        if (func_00312AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) != 0)
+        if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0)
             func_0012DD98(self);
     }
 }
@@ -3323,12 +3324,12 @@ INCLUDE_ASM("ai/ai", func_0012D4E8);
 #ifdef SKIP_ASM
 extern "C" void func_0010F280(void* rider, int flag);
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
-extern "C" void func_0012DCB0(void* self);
-extern "C" void func_0012DD98(void* self);
-extern "C" void func_0012DE80(void* self);
-extern "C" void func_0012E010(void* self);
-extern "C" void func_0012E468(void* self);
-extern "C" float func_0012E528(void* self);
+extern "C" void func_0012DCB0(cWipeoutControl* self);
+extern "C" void func_0012DD98(cWipeoutControl* self);
+extern "C" void func_0012DE80(cWipeoutControl* self);
+extern "C" void func_0012E010(cWipeoutControl* self);
+extern "C" void func_0012E468(cWipeoutControl* self);
+extern "C" float func_0012E528(cWipeoutControl* self);
 extern "C" void* func_0028B180();
 extern "C" void func_00296310(void* mgr, void* rider);
 extern "C" void func_00296868(void* mgr, void* self);
@@ -3392,19 +3393,19 @@ static inline int aiIsOne_12D4E8(char* r)
     return *(int*)(r + 0x150) == 1;
 }
 
-extern "C" void func_0012D4E8(void* self)
+extern "C" void func_0012D4E8(cWipeoutControl* self)
 {
     func_0012E528(self);
-    if (*(int*)((char*)self + 0x54) != 0)
+    if (self->IsNewImpact != 0)
     {
-        if (*(int*)(*(char**)(*(char**)((char*)self + 0x80) + 0x77C) + 0x30) == 0)
+        if (*(int*)(*(char**)((char*)self->mRider + 0x77C) + 0x30) == 0)
         {
-            if (*(float*)(*(char**)((char*)self + 0x80) + 0x378) > 0.8999999761581421f &&
-                aiDot_12D4E8(*(sAiVec4_12D4E8*)((char*)self + 0x60), *(sAiVec4_12D4E8*)(*(char**)((char*)self + 0x80) + 0x370)) <
-                    aiLength_12C5C8(*(sAiVec4_12C5C8*)((char*)self + 0x60)) * -0.8999999761581421f)
+            if (*(float*)((char*)self->mRider + 0x378) > 0.8999999761581421f &&
+                aiDot_12D4E8(*(sAiVec4_12D4E8*)&self->LatestImpact, *(sAiVec4_12D4E8*)((char*)self->mRider + 0x370)) <
+                    aiLength_12C5C8(*(sAiVec4_12C5C8*)&self->LatestImpact) * -0.8999999761581421f)
             {
                 func_0012E010(self);
-                char* r2 = *(char**)((char*)self + 0x80);
+                char* r2 = (char*)self->mRider;
                 sAiVec4_12D4E8 v = aiScale_12D4E8(*(sAiVec4_12D4E8*)(r2 + 0x370),
                     aiDot_12D4E8(*(sAiVec4_12D4E8*)(r2 + 0x370), *(sAiVec4_12D4E8*)(r2 + 0x1E0)));
                 *(sAiVec4_12D4E8*)(r2 + 0x1E0) = v;
@@ -3412,55 +3413,55 @@ extern "C" void func_0012D4E8(void* self)
             }
             else
             {
-                if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x1D ||
-                    func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x19)
+                if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
+                    func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
                 {
                     func_0012E468(self);
                     func_00296868(func_0028B180(), self);
                 }
                 else
                 {
-                    float t = func_00312AB0(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2);
+                    float t = func_00312AB0(*(void**)((char*)self->mRider + 0x784), 2);
                     func_0012DD98(self);
-                    float a = *(float*)(func_00311B20(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) + 0x10);
-                    func_00313CF0(func_00311B20(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2), 0, a * t);
+                    float a = *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x10);
+                    func_00313CF0(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2), 0, a * t);
                     func_00296E80(func_0028B180(), self);
                 }
                 *(int*)self = 2;
             }
-            func_00296310(func_0028B180(), *(void**)((char*)self + 0x80));
+            func_00296310(func_0028B180(), self->mRider);
         }
-        *(int*)((char*)self + 0x54) = 0;
-        char* r3 = *(char**)((char*)self + 0x80);
+        self->IsNewImpact = 0;
+        char* r3 = (char*)self->mRider;
         sVEntry12D4E8* vt = *(sVEntry12D4E8**)(r3 + 0x6C0);
-        vt[17].fn(r3 + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)((char*)self + 0x60)));
+        vt[17].fn(r3 + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)&self->LatestImpact));
         return;
     }
-    if (func_00312AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) != 0 ||
-        func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x1D ||
-        func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x19)
+    if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0 ||
+        func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
+        func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
     {
-        int fast = *(float*)((char*)self + 0x70) >= 1.0f || aiOk_12D4E8(self);
+        int fast = self->RecoverPercent >= 1.0f || aiOk_12D4E8(self);
         if (fast)
         {
-            if (!aiIsOne_12D4E8(*(char**)((char*)self + 0x80)))
+            if (!aiIsOne_12D4E8((char*)self->mRider))
             {
-                func_0010F280(*(char**)((char*)self + 0x80), fast);
+                func_0010F280((char*)self->mRider, fast);
                 func_0012DE80(self);
                 *(int*)self = 3;
             }
             else
             {
-                cRider_checkForReset(*(char**)((char*)self + 0x80), 0, 3);
-                func_0010F280(*(void**)((char*)self + 0x80), 1);
+                cRider_checkForReset((char*)self->mRider, 0, 3);
+                func_0010F280(self->mRider, 1);
             }
         }
-        else if (*(int*)(*(char**)(*(char**)((char*)self + 0x80) + 0x77C) + 0x30) == 0)
+        else if (*(int*)(*(char**)((char*)self->mRider + 0x77C) + 0x30) == 0)
         {
             func_0012DD98(self);
             *(int*)self = 2;
         }
-        else if (func_00312AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) != 0)
+        else if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0)
         {
             func_0012DCB0(self);
         }
@@ -3478,17 +3479,17 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 
 struct sVEntry12D848 { short delta; short index; void (*fn)(void*, float); };
 
-extern "C" void func_0012D848(void* self)
+extern "C" void func_0012D848(cWipeoutControl* self)
 {
-    if (*(int*)((char*)self + 0x54) != 0)
+    if (self->IsNewImpact != 0)
     {
-        *(int*)((char*)self + 0x54) = 0;
-        char* r = *(char**)((char*)self + 0x80);
+        self->IsNewImpact = 0;
+        char* r = (char*)self->mRider;
         sVEntry12D848* vt = *(sVEntry12D848**)(r + 0x6C0);
-        vt[17].fn(r + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)((char*)self + 0x60)));
-        func_002948D0(func_0028B180(), *(void**)((char*)self + 0x80), 0.0f);
+        vt[17].fn(r + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)&self->LatestImpact));
+        func_002948D0(func_0028B180(), self->mRider, 0.0f);
     }
-    char* r = *(char**)((char*)self + 0x80);
+    char* r = (char*)self->mRider;
     if (*(int*)(*(char**)(r + 0x77C) + 0x30) == 0)
     {
         sVEntry12D848* vt = *(sVEntry12D848**)(r + 0x6C0);
@@ -3496,21 +3497,21 @@ extern "C" void func_0012D848(void* self)
         float t = 1.0f - func_00312AB0(*(void**)(r + 0x784), 2);
         vt[18].fn(thisp, t + t);
     }
-    if (func_00312AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) != 0)
+    if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) != 0)
     {
-        char* r2 = *(char**)((char*)self + 0x80);
+        char* r2 = (char*)self->mRider;
         if (*(int*)(*(char**)(r2 + 0x77C) + 0x30) == 0)
         {
             cRiderAnimBase_play(*(void**)(r2 + 0x784), 5, 0, -1.0f);
-            func_0011FEC8_impl(*(void**)((char*)self + 0x80), 0);
-            cRider_setMotionState_impl(*(void**)((char*)self + 0x80), 0);
+            func_0011FEC8_impl(self->mRider, 0);
+            cRider_setMotionState_impl(self->mRider, 0);
         }
         else
         {
             func_00119E38(*(void**)(r2 + 0x790), *(int*)(r2 + 0x320) != *(int*)(r2 + 0x324), 0);
-            cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 0x11F, 0, -1.0f);
-            func_0011FEC8_impl(*(void**)((char*)self + 0x80), 5);
-            cRider_setMotionState_impl(*(void**)((char*)self + 0x80), 1);
+            cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x11F, 0, -1.0f);
+            func_0011FEC8_impl(self->mRider, 5);
+            cRider_setMotionState_impl(self->mRider, 1);
         }
     }
 }
@@ -3528,17 +3529,17 @@ static inline int AiCheck_0012D9D8(char* rider)
     return *(float*)(rider + 0x470) >= 0.0f;
 }
 
-extern "C" void func_0012D9D8(void* self)
+extern "C" void func_0012D9D8(cWipeoutControl* self)
 {
     int flag = 0;
-    if (*(float*)((char*)self + 0x70) >= 1.0f || AiCheck_0012D9D8(*(char**)((char*)self + 0x80)))
+    if (self->RecoverPercent >= 1.0f || AiCheck_0012D9D8((char*)self->mRider))
     {
         flag = 1;
     }
-    if (func_00312AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) || flag)
+    if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) || flag)
     {
-        func_0010F280(*(void**)((char*)self + 0x80), flag);
-        cRider_checkForReset(*(void**)((char*)self + 0x80), 0, 2);
+        func_0010F280(self->mRider, flag);
+        cRider_checkForReset(self->mRider, 0, 2);
     }
 }
 #endif
@@ -3550,10 +3551,10 @@ INCLUDE_ASM("ai/ai", func_0012DA88);
 int func_00312AA0(void* anim, int layer);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 // Maps the rider's layer-2 animation to its base (or alternate) variant and replays it.
-extern "C" void func_0012DA88(void* self)
+extern "C" void func_0012DA88(cWipeoutControl* self)
 {
     bool b = *(int*)self == 1;
-    int cur = func_00312AA0(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2);
+    int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
     int next = cur;
     switch (cur) {
     case 0x148:
@@ -3657,7 +3658,7 @@ extern "C" void func_0012DA88(void* self)
         break;
     }
     if (next != cur) {
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), next, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), next, 0, -1.0f);
         func_0012E528(self);
     }
 }
@@ -3670,11 +3671,11 @@ INCLUDE_ASM("ai/ai", func_0012DCB0);
 int func_00312AA0(void* anim, int layer);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 // Picks the rider's layer-2 follow-up animation and replays it.
-extern "C" void func_0012DCB0(void* self)
+extern "C" void func_0012DCB0(cWipeoutControl* self)
 {
-    int cur = func_00312AA0(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2);
+    int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
     int next = cur;
-    bool b = *(int*)(*(char**)((char*)self + 0x80) + 0x150) == 1;
+    bool b = *(int*)((char*)self->mRider + 0x150) == 1;
     if (!b) {
         switch (cur) {
         case 0x16A: next = 0x175; break;
@@ -3695,7 +3696,7 @@ extern "C" void func_0012DCB0(void* self)
         next = 0x17F;
     }
     if (next != cur) {
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), next, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), next, 0, -1.0f);
         func_0012E528(self);
     }
 }
@@ -3706,11 +3707,11 @@ INCLUDE_ASM("ai/ai", func_0012DD98);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Reverse of func_0012DCB0: maps follow-up animations back to their base.
-extern "C" void func_0012DD98(void* self)
+extern "C" void func_0012DD98(cWipeoutControl* self)
 {
-    int cur = func_00312AA0(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2);
+    int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
     int next = cur;
-    bool b = *(int*)(*(char**)((char*)self + 0x80) + 0x150) == 1;
+    bool b = *(int*)((char*)self->mRider + 0x150) == 1;
     if (!b) {
         switch (cur) {
         case 0x175: next = 0x16A; break;
@@ -3730,7 +3731,7 @@ extern "C" void func_0012DD98(void* self)
         next = 0x174;
     }
     if (next != cur) {
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), next, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), next, 0, -1.0f);
         func_0012E528(self);
     }
 }
@@ -3743,9 +3744,9 @@ INCLUDE_ASM("ai/ai", func_0012DE80);
 int func_00312AA0(void* anim, int layer);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 // Remaps the rider's current layer-2 animation to its follow-up and plays it.
-extern "C" void func_0012DE80(void* self)
+extern "C" void func_0012DE80(cWipeoutControl* self)
 {
-    int cur = func_00312AA0(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2);
+    int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
     int next = cur;
     switch (cur) {
     case 0x175:
@@ -3780,7 +3781,7 @@ extern "C" void func_0012DE80(void* self)
         break;
     }
     if (next != cur) {
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), next, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), next, 0, -1.0f);
     }
 }
 #endif
@@ -3792,9 +3793,9 @@ INCLUDE_ASM("ai/ai", func_0012DF48);
 int func_00312AA0(void* anim, int layer);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 // Remaps the rider's current layer-2 animation to its follow-up and plays it.
-extern "C" void func_0012DF48(void* self)
+extern "C" void func_0012DF48(cWipeoutControl* self)
 {
-    int cur = func_00312AA0(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2);
+    int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
     int next = cur;
     switch (cur) {
     case 0x16A:
@@ -3831,7 +3832,7 @@ extern "C" void func_0012DF48(void* self)
         break;
     }
     if (next != cur) {
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), next, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), next, 0, -1.0f);
     }
 }
 #endif
@@ -3977,17 +3978,17 @@ static inline sXf_12E010 Combine_12E010(const sXf_12E010& a, const sXf_12E010& b
     return r;
 }
 
-extern "C" void func_0012E010(void* self)
+extern "C" void func_0012E010(cWipeoutControl* self)
 {
-    char* r = *(char**)((char*)self + 0x80);
+    char* r = (char*)self->mRider;
     int anim = 0x199;
     if (*(int*)(r + 0x150) != 1)
         anim = 0x19A;
     char buf[0x50];
     cRiderAnimBase_getAIAnimFrame(buf, *(void**)(r + 0x784), anim, D_004A4C08_E010.a, 0.0f);
     sXf_12E010 a;
-    func_0030ECD8(&a, *(void**)(*(char**)((char*)self + 0x80) + 0x780), buf, 0);
-    char* rd = *(char**)((char*)self + 0x80);
+    func_0030ECD8(&a, *(void**)((char*)self->mRider + 0x780), buf, 0);
+    char* rd = (char*)self->mRider;
     char* trk = *(char**)(rd + 0x780);
     sQuat_12BE20* n = (sQuat_12BE20*)((*(int*)(rd + 0x89C) << 4) + *(int*)(trk + 0x24));
     sXf_12E010 node;
@@ -3995,13 +3996,13 @@ extern "C" void func_0012E010(void* self)
                             n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C));
     node.rot = *(sQuat_12BE20*)(*(char**)(*(char**)(rd + 0x780) + 0x28) + (*(int*)(rd + 0x89C) << 4));
     sXf_12E010 y = Combine_12E010(node, Invert_12E010(a));
-    sXf_12E010* rx = (sXf_12E010*)(*(char**)((char*)self + 0x80) + 0x110);
+    sXf_12E010* rx = (sXf_12E010*)((char*)self->mRider + 0x110);
     *rx = Combine_12E010(*rx, y);
-    cRider_updateOrientationImplicit(*(void**)((char*)self + 0x80));
-    char* rd3 = *(char**)((char*)self + 0x80);
+    cRider_updateOrientationImplicit(self->mRider);
+    char* rd3 = (char*)self->mRider;
     sXf_12E010 w = Invert_12E010(y);
     cRiderAnimBase_changeOrientationOffset(*(void**)(rd3 + 0x784), &w);
-    cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), anim, 0, -1.0f);
+    cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), anim, 0, -1.0f);
 }
 #endif
 
@@ -4012,23 +4013,23 @@ INCLUDE_ASM("ai/ai", func_0012E468);
 int func_00312AA0(void* anim, int layer);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
-extern "C" void func_0012E468(void* self)
+extern "C" void func_0012E468(cWipeoutControl* self)
 {
-    switch (func_00312AA0(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2)) {
+    switch (func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2)) {
     case 0x17B:
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 0x180, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x180, 0, -1.0f);
         break;
     case 0x17C:
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 0x181, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x181, 0, -1.0f);
         break;
     case 0x17D:
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 0x182, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x182, 0, -1.0f);
         break;
     case 0x17E:
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 0x183, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x183, 0, -1.0f);
         break;
     case 0x17F:
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 0x184, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x184, 0, -1.0f);
         break;
     }
 }
@@ -4052,26 +4053,26 @@ static inline float aiClamp_12E528(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" float func_0012E528(void* self)
+extern "C" float func_0012E528(cWipeoutControl* self)
 {
-    char* r = *(char**)((char*)self + 0x80);
+    char* r = (char*)self->mRider;
     char* m = *(char**)(r + 0x77C);
     char* a = func_00311B20(*(void**)(r + 0x784), 2);
     float v = aiLength_12C5C8(*(sAiVec4_12C5C8*)(m + 0x60)) * *(float*)(a + 0x10) * 0.15915493667125702f;
     float res = aiClamp_12E528(v, 0.5f, 2.0f);
-    if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x1D ||
-        func_00311AE8(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) == 0x19)
+    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x1D ||
+        func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x19)
     {
-        *(float*)(func_00311B20(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) + 0x90) = 1.0f;
+        *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
     }
-    else if (*(float*)((char*)self + 0x70) >= 1.0f || aiOk_12E528(self))
+    else if (self->RecoverPercent >= 1.0f || aiOk_12E528(self))
     {
         // PORT: g++ `>?` (max) operator.
-        *(float*)(func_00311B20(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) + 0x90) = res >? 2.0f;
+        *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = res >? 2.0f;
     }
     else
     {
-        *(float*)(func_00311B20(*(void**)(*(char**)((char*)self + 0x80) + 0x784), 2) + 0x90) = res;
+        *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = res;
     }
     return res;
 }
@@ -4091,17 +4092,17 @@ extern "C" void func_0010E028(void* self, int mode, float t);
 extern "C" void* func_0028B180();
 extern "C" void func_002A02D8(void*, void*);
 
-extern "C" void func_0012E690(void* self)
+extern "C" void func_0012E690(cWipeoutControl* self)
 {
     if ((func_001298C8() & 1) == 0)
     {
-        char* sub = *(char**)((char*)self + 0x80) + 0x6C0;
+        char* sub = (char*)self->mRider + 0x6C0;
         sVEntry0012E690* vt = *(sVEntry0012E690**)sub;
         if (vt[8].fn(sub + vt[8].delta))
         {
-            func_0010E028(*(void**)((char*)self + 0x80), 4, 0.0f);
+            func_0010E028(self->mRider, 4, 0.0f);
         }
-        func_002A02D8(func_0028B180(), *(void**)((char*)self + 0x80));
+        func_002A02D8(func_0028B180(), self->mRider);
     }
 }
 #endif
@@ -4115,7 +4116,7 @@ struct sVEntry0012E708 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012E708(void* self, void* obj)
+extern "C" void func_0012E708(cWipeoutControl* self, void* obj)
 {
     sVEntry0012E708* vt = *(sVEntry0012E708**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x80);
@@ -4131,7 +4132,7 @@ struct sVEntry0012E740 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012E740(void* self, void* obj)
+extern "C" void func_0012E740(cWipeoutControl* self, void* obj)
 {
     sVEntry0012E740* vt = *(sVEntry0012E740**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x80);
@@ -4152,7 +4153,7 @@ extern "C" void func_00113E80(void*, float);
 extern "C" void func_00113F38(void*, float);
 extern "C" void func_00113F88(void* rider, float a, float b);
 extern "C" int func_00312AE8(void* self, int i);
-extern "C" void func_001326C8(void*, int);
+extern "C" void func_001326C8(cRailslideControl*, int);
 extern "C" void func_00115640(void* rider);
 
 struct sAiVec4_12E778
@@ -4192,7 +4193,7 @@ static inline float aiDot_12E778(const sAiVec4_12E778& a, const sAiVec4_12E778& 
     return r;
 }
 
-extern "C" void func_0012E778(void* self, void* in)
+extern "C" void func_0012E778(cBumpControl* self, void* in)
 {
     if (func_00116378(*(void**)self))
         return;
@@ -4231,7 +4232,7 @@ extern "C" void func_0012E778(void* self, void* in)
         return;
     if (func_0011FE98(*(void**)self) == 4)
     {
-        func_001326C8(*(char**)(*(char**)self + 0x77C) + 0x2B0, 0);
+        func_001326C8((cRailslideControl*)(*(char**)(*(char**)self + 0x77C) + 0x2B0), 0);
         func_0011FEC8_impl(*(void**)self, 7);
     }
     else
@@ -4248,10 +4249,10 @@ extern "C" void func_0012E778(void* self, void* in)
 //100%
 INCLUDE_ASM("ai/ai", func_0012E980);
 #ifdef SKIP_ASM
-extern "C" void func_0012EE30(void*, void*);
+extern "C" void func_0012EE30(cPrewindControl*, void*);
 extern char D_0043D788[];
 
-extern "C" void func_0012E980(void* self)
+extern "C" void func_0012E980(cPrewindControl* self)
 {
     char* p = *(char**)self;
     *(float*)(p + 0x200) = 0.03333333507180214f;
@@ -4286,7 +4287,7 @@ extern "C" void func_00116930(void* rider);
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 int func_0011FE98(void* self);
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
-extern "C" void func_0012EE30(void*, void*);
+extern "C" void func_0012EE30(cPrewindControl*, void*);
 extern "C" void func_00294170(void* self, void* rider);
 extern "C" int func_00311AE8(void*, int);
 int func_00312AA0(void* self, int i);
@@ -4320,7 +4321,7 @@ static inline float aiAbs_12E9B8(float x)
     return r;
 }
 
-extern "C" void func_0012E9B8(void* self, void* in)
+extern "C" void func_0012E9B8(cPrewindControl* self, void* in)
 {
     if (func_00116378(*(void**)self))
         return;
@@ -4460,7 +4461,7 @@ static inline float aiAbs_12EE30(float x)
     return r;
 }
 
-extern "C" void func_0012EE30(void* self, void* tbl_)
+extern "C" void func_0012EE30(cPrewindControl* self, void* tbl_)
 {
     char* obj = *(char**)self;
     float x = *(float*)(obj + 0x2A4);
@@ -4528,7 +4529,7 @@ static inline float aiAtan2_12F118(float y, float x)
     return r;
 }
 
-extern "C" float func_0012F118(void* self, int* out)
+extern "C" float func_0012F118(cPrewindControl* self, int* out)
 {
     char* obj = *(char**)self;
     float y = *(float*)(obj + 0x2B0);
@@ -4547,7 +4548,7 @@ extern "C" float func_0012F118(void* self, int* out)
 INCLUDE_ASM("ai/ai", func_0012F230);
 #ifdef SKIP_ASM
 extern "C" char* func_00311B20(void*, int);
-extern "C" int func_0012F588(void* self);
+extern "C" int func_0012F588(cResetControl* self);
 void* func_00230698(void* self, int id);
 extern "C" void func_002E4578(void* obj);
 void* func_002E4D70(void* self);
@@ -4578,14 +4579,14 @@ static inline sFx_12F230* initFx_12F230(sFx_12F230* p, const sColor_12F230& col)
     return p;
 }
 
-extern "C" void func_0012F230(void* self)
+extern "C" void func_0012F230(cResetControl* self)
 {
     int* flag = (int*)((char*)self + 4);
     *flag = 0;
-    *(int*)(func_00311B20(*(void**)(*(char**)((char*)self + 8) + 0x784), 2) + 0x90) = 0;
+    *(int*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 0;
     if (func_0012F588(self))
     {
-        char* obj = (char*)func_00230698(SSXApp->Game, *(int*)(*(char**)((char*)self + 8) + 0x870));
+        char* obj = (char*)func_00230698(SSXApp->Game, *(int*)((char*)self->mRider + 0x870));
         if (*(int*)(obj + 0x44))
             func_002E4578(obj);
         sFx_12F230* a = (sFx_12F230*)func_002E4CE8_sz(0x14);
@@ -4613,7 +4614,7 @@ INCLUDE_ASM("ai/ai", func_0012F398);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 extern "C" char* func_00311B20(void*, int);
-extern "C" int func_0012F588(void* self);
+extern "C" int func_0012F588(cResetControl* self);
 void* func_00230698(void* self, int id);
 extern "C" void func_002E4578(void* obj);
 extern "C" void func_0010E098(void*, int, float);
@@ -4633,10 +4634,10 @@ struct sVec4_12F398
 extern "C" sVec4_12F398 func_0026A8B8(void* self, float t);
 extern "C" void func_0011D660_12F398(void* self, void* a, sVec4_12F398* b, int n, float t) __asm__("func_0011D660");
 
-extern "C" void func_0012F398(void* self)
+extern "C" void func_0012F398(cResetControl* self)
 {
-    float t = *(float*)((char*)self + 0x4);
-    float step = *(float*)(*(char**)((char*)self + 0x8) + 0x300) * 0.02500000223517418f;
+    float t = self->FadePercent;
+    float step = *(float*)((char*)self->mRider + 0x300) * 0.02500000223517418f;
     float n;
     if (t > step + 1.0f)
         n = t - step;
@@ -4644,30 +4645,30 @@ extern "C" void func_0012F398(void* self)
         n = t + step;
     else
         n = 1.0f;
-    *(float*)((char*)self + 0x4) = n;
+    self->FadePercent = n;
     if (t <= 0.5f && n > 0.5f)
     {
         float range = 200.0f;
-        func_00112D58(*(void**)((char*)self + 0x8));
-        char* r = *(char**)((char*)self + 0x8);
+        func_00112D58(self->mRider);
+        char* r = (char*)self->mRider;
         const sVec4_12F398& dir = func_0026A8B8(*(void**)(r + 0xAB8), *(float*)(r + 0x4C4));
         if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && D_00535C12[0] == 2)
             range = 1000.0f;
-        func_0011D660_12F398(*(void**)((char*)self + 0x8), *(char**)((char*)self + 0x8) + 0x490, (sVec4_12F398*)&dir, 0x11F, range);
-        func_0011DF18(*(void**)((char*)self + 0x8), 1);
+        func_0011D660_12F398(self->mRider, (char*)self->mRider + 0x490, (sVec4_12F398*)&dir, 0x11F, range);
+        func_0011DF18(self->mRider, 1);
         if (*(int*)self != 0)
-            func_0010E098(*(void**)((char*)self + 0x8), 1, func_00119368(*(void**)(*(char**)((char*)self + 0x8) + 0x790), 0));
+            func_0010E098(self->mRider, 1, func_00119368(*(void**)((char*)self->mRider + 0x790), 0));
         else
-            func_0010E098(*(void**)((char*)self + 0x8), 1, func_00119368(*(void**)(*(char**)((char*)self + 0x8) + 0x790), 1));
+            func_0010E098(self->mRider, 1, func_00119368(*(void**)((char*)self->mRider + 0x790), 1));
     }
-    if (*(float*)((char*)self + 0x4) == 1.0f)
+    if (self->FadePercent == 1.0f)
     {
         if (func_0012F588(self))
-            func_002E4578(func_00230698(SSXApp->Game, *(int*)(*(char**)((char*)self + 8) + 0x870)));
-        func_00119E38(*(void**)(*(char**)((char*)self + 8) + 0x790), 0, 0);
-        *(float*)(func_00311B20(*(void**)(*(char**)((char*)self + 8) + 0x784), 2) + 0x90) = 1.0f;
-        func_0011FEC8_impl(*(void**)((char*)self + 0x8), 4);
-        cRider_setMotionState_impl(*(void**)((char*)self + 0x8), 1);
+            func_002E4578(func_00230698(SSXApp->Game, *(int*)((char*)self->mRider + 0x870)));
+        func_00119E38(*(void**)((char*)self->mRider + 0x790), 0, 0);
+        *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
+        func_0011FEC8_impl(self->mRider, 4);
+        cRider_setMotionState_impl(self->mRider, 1);
     }
 }
 #endif
@@ -4675,9 +4676,9 @@ extern "C" void func_0012F398(void* self)
 //100%
 INCLUDE_ASM("ai/ai", func_0012F588);
 #ifdef SKIP_ASM
-extern "C" int func_0012F588(void* self)
+extern "C" int func_0012F588(cResetControl* self)
 {
-    void* p = *(void**)((char*)self + 0x8);
+    void* p = self->mRider;
     return *(int*)((char*)p + 0x87C) != 0 && *(int*)((char*)p + 0x870) >= 0;
 }
 #endif
@@ -4691,7 +4692,7 @@ struct sVEntry0012F5B0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012F5B0(void* self, void* obj)
+extern "C" void func_0012F5B0(cResetControl* self, void* obj)
 {
     sVEntry0012F5B0* vt = *(sVEntry0012F5B0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
@@ -4707,7 +4708,7 @@ struct sVEntry0012F5E8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012F5E8(void* self, void* obj)
+extern "C" void func_0012F5E8(cResetControl* self, void* obj)
 {
     sVEntry0012F5E8* vt = *(sVEntry0012F5E8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
@@ -4744,22 +4745,22 @@ static inline float aiAtan2_12F620(float y, float x)
     return r;
 }
 
-extern "C" void func_0012F620(void* self)
+extern "C" void func_0012F620(cNaturalAirControl* self)
 {
-    char* r = *(char**)((char*)self + 0x14);
+    char* r = (char*)self->mRider;
     float b = *(float*)(r + 0x220);
     float a = aiAbs_12F620(*(float*)(r + 0x1F0));
     if (a < b) a = b;
-    *(float*)((char*)self + 0x4) = a;
+    self->LimitMag = a;
     float ang = aiAtan2_12F620(*(float*)(r + 0x220), *(float*)(r + 0x1F0));
-    *(float*)((char*)self + 0x0) = ang;
-    *(int*)((char*)self + 0x8) = 1;
-    *(int*)((char*)self + 0xC) = 1;
-    *(int*)((char*)self + 0x10) = -1;
-    char* r1 = *(char**)((char*)self + 0x14);
+    self->LimitAng = ang;
+    self->IsPunchHeld = 1;
+    self->IsGrabHeld = 1;
+    self->InitGrabHeld = -1;
+    char* r1 = (char*)self->mRider;
     *(int*)(r1 + 0x2AC) = 0;
     *(float*)(r1 + 0x2A8) = 0.03333333507180214f;
-    char* r2 = *(char**)((char*)self + 0x14);
+    char* r2 = (char*)self->mRider;
     *(float*)(r2 + 0x2B4) = 0.03333333507180214f;
     *(int*)(r2 + 0x2B8) = 0;
 }
@@ -4842,78 +4843,78 @@ struct sAiObj12F730
     char* mRider;    // 0x14
 };
 
-extern "C" void func_0012F730(sAiObj12F730* self, void* in)
+extern "C" void func_0012F730(cNaturalAirControl* self, void* in)
 {
-    if (cRider_checkForReset_i(self->mRider, (*(int*)in >> 12) & 1, 0))
+    if (cRider_checkForReset_i((char*)self->mRider, (*(int*)in >> 12) & 1, 0))
         return;
-    if (self->mFlag != 0)
+    if (self->IsPunchHeld != 0)
     {
-        self->mFlag = (*(int*)in & 0xC000) != 0;
-        if (func_001163B0(self->mRider, (*(int*)in >> 14) & 1, (*(int*)in >> 15) & 1))
+        self->IsPunchHeld = (*(int*)in & 0xC000) != 0;
+        if (func_001163B0((char*)self->mRider, (*(int*)in >> 14) & 1, (*(int*)in >> 15) & 1))
             return;
     }
     else
     {
-        func_001163B0(self->mRider, 0, 0);
+        func_001163B0((char*)self->mRider, 0, 0);
     }
     int w = *(int*)in;
     float x = ((sAiBitsX_12F730*)&w)->v * 0.032258063554763794f;
     float y = ((sAiBitsY_12F730*)((char*)in + 4))->v * 0.032258063554763794f;
     if (w & 0x2000)
     {
-        if (func_00107578(self->mRider, y > 0.5f))
+        if (func_00107578((char*)self->mRider, y > 0.5f))
             return;
         y = 1.0f;
     }
-    if (func_00106848(self->mRider))
+    if (func_00106848((char*)self->mRider))
         return;
-    func_00114130(self->mRider, 0, 0);
-    if (self->mHold != 0 && self->mId == -1)
-        self->mId = *((signed char*)in + 2);
-    if (*((signed char*)in + 2) != self->mId || *((signed char*)in + 2) == -1)
-        self->mHold = 0;
-    if (self->mHold == 0 && self->mId != -1)
-        self->mTimer = -1.0f;
+    func_00114130((char*)self->mRider, 0, 0);
+    if (self->IsGrabHeld != 0 && self->InitGrabHeld == -1)
+        self->InitGrabHeld = *((signed char*)in + 2);
+    if (*((signed char*)in + 2) != self->InitGrabHeld || *((signed char*)in + 2) == -1)
+        self->IsGrabHeld = 0;
+    if (self->IsGrabHeld == 0 && self->InitGrabHeld != -1)
+        self->LimitMag = -1.0f;
     float ax = aiAbs_12F730(x);
     float lim = y;
     if (y <= ax)
         lim = ax;
     float ang = aiAtan2_12F730(y, x);
-    if (self->mTimer < 0.0f || lim <= (self->mTimer - 0.5f >? 0.0f) ||
-        __builtin_fabsf(aiWrap_12F730(ang - self->mHeading)) > 1.5707964897155762f)
+    if (self->LimitMag < 0.0f || lim <= (self->LimitMag - 0.5f >? 0.0f) ||
+        __builtin_fabsf(aiWrap_12F730(ang - self->LimitAng)) > 1.5707964897155762f)
     {
-        self->mTimer = -1.0f;
+        self->LimitMag = -1.0f;
         y = 0.0f;
         x = y;
     }
-    char* r = self->mRider;
+    char* r = (char*)self->mRider;
     *(float*)(r + 0x1F8) = x;
     *(float*)(r + 0x1F4) = 0.05000000447034836f;
-    char* r2 = self->mRider;
+    char* r2 = (char*)self->mRider;
     *(float*)(r2 + 0x200) = 0.05000000447034836f;
     *(float*)(r2 + 0x204) = *(float*)(r2 + 0x1F0);
-    char* r3 = self->mRider;
+    char* r3 = (char*)self->mRider;
     *(float*)(r3 + 0x224) = 0.05000000447034836f;
     *(float*)(r3 + 0x228) = y;
-    char* r4 = self->mRider;
+    char* r4 = (char*)self->mRider;
     *(float*)(r4 + 0x218) = 0.05000000447034836f;
     *(int*)(r4 + 0x21C) = 0;
-    int anim = func_00312AA0(*(void**)(self->mRider + 0x784), 2);
-    char* r5 = self->mRider;
-    if (*(float*)(r5 + 0x220) == 0.0f && *(float*)(r5 + 0x214) == 0.0f && *(float*)(r5 + 0x1F0) == 0.0f && self->mHold == 0)
+    int anim = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    char* r5 = (char*)self->mRider;
+    if (*(float*)(r5 + 0x220) == 0.0f && *(float*)(r5 + 0x214) == 0.0f && *(float*)(r5 + 0x1F0) == 0.0f && self->IsGrabHeld == 0)
     {
         if (anim != 0x11F)
         {
             if (func_00311AE8(*(void**)(r5 + 0x784), 2) != 9)
-                cRiderAnimBase_play(*(void**)(self->mRider + 0x784), 0x11F, 0, -1.0f);
+                cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x11F, 0, -1.0f);
         }
-        func_0011FEC8_impl(self->mRider, 5);
+        func_0011FEC8_impl((char*)self->mRider, 5);
         return;
     }
-    if (func_00311AE8(*(void**)(self->mRider + 0x784), 2) == 9)
+    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 9)
         return;
     int a = 10;
-    char* r6 = self->mRider;
+    char* r6 = (char*)self->mRider;
     if (*(float*)(r6 + 0x220) <= (1.0f - aiAbs_12F730(*(float*)(r6 + 0x1F0))) * 0.5f)
         a = 9;
     if (a != anim)
@@ -4928,15 +4929,15 @@ extern "C" int func_00311AE8(void*, int);
 extern "C" void func_00311E88(void*, int, float);
 extern "C" char* func_00311B20(void*, int);
 
-extern "C" void func_0012FB68(void* self, int a1)
+extern "C" void func_0012FB68(cNaturalAirControl* self, int a1)
 {
     if (a1)
     {
-        if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 1) == 3 ||
-            func_00311AE8(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 1) == 0xD)
+        if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 1) == 3 ||
+            func_00311AE8(*(void**)((char*)self->mRider + 0x784), 1) == 0xD)
         {
-            func_00311E88(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0, 0.10000000149011612f);
-            *(float*)(func_00311B20(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 1) + 0x90) = 1.0f;
+            func_00311E88(*(void**)((char*)self->mRider + 0x784), 0, 0.10000000149011612f);
+            *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 1) + 0x90) = 1.0f;
         }
     }
 }
@@ -4951,7 +4952,7 @@ struct sVEntry0012FBF0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012FBF0(void* self, void* obj)
+extern "C" void func_0012FBF0(cNaturalAirControl* self, void* obj)
 {
     sVEntry0012FBF0* vt = *(sVEntry0012FBF0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x14);
@@ -4967,7 +4968,7 @@ struct sVEntry0012FC28 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0012FC28(void* self, void* obj)
+extern "C" void func_0012FC28(cNaturalAirControl* self, void* obj)
 {
     sVEntry0012FC28* vt = *(sVEntry0012FC28**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x14);
@@ -4995,7 +4996,7 @@ extern "C" int func_00116378(void*);
 // The unit declares cRider_checkForReset as void, but this caller tests its result: bind an int view by asm label.
 extern "C" int cRider_checkForReset_i(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" int func_00106848(void*);
-extern "C" int func_0012FFF8(void*);
+extern "C" int func_0012FFF8(cBoardPressControl*);
 extern "C" int func_001162C8(void*, int, int);
 extern "C" void func_00114130(void* rider, int a, int b);
 extern "C" void func_00113E80(void*, float);
@@ -5004,10 +5005,10 @@ extern "C" void func_00113F88(void* rider, float a, float b);
 extern "C" void func_00115B58(void*);
 extern "C" void func_00115D48(void*);
 struct sPadIn_130228;
-extern "C" void func_00130228(void* self, sPadIn_130228* in);
-extern "C" void func_001303E0(void* self, void* a1);
+extern "C" void func_00130228(cBoardPressControl* self, sPadIn_130228* in);
+extern "C" void func_001303E0(cBoardPressControl* self, void* a1);
 struct sPadIn_1304E0;
-extern "C" void func_001304E0(void* self, sPadIn_1304E0* in);
+extern "C" void func_001304E0(cBoardPressControl* self, sPadIn_1304E0* in);
 // PORT: func_001304D0 is defined with one param, but this caller passes the input in $a1.
 void func_001304D0_2(void* self, void* in) __asm__("func_001304D0__FPv");
 
@@ -5038,23 +5039,23 @@ static inline float aiClamp_12FC80(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" void func_0012FC80(void* self, void* in)
+extern "C" void func_0012FC80(cBoardPressControl* self, void* in)
 {
-    if (func_00116378(*(void**)((char*)self + 0x14)))
+    if (func_00116378(self->mRider))
         return;
-    if (cRider_checkForReset_i(*(void**)((char*)self + 0x14), (*(int*)in >> 12) & 1, 0))
+    if (cRider_checkForReset_i(self->mRider, (*(int*)in >> 12) & 1, 0))
         return;
-    if (func_00106848(*(void**)((char*)self + 0x14)))
+    if (func_00106848(self->mRider))
         return;
     if (func_0012FFF8(self))
         return;
     int w = *(int*)in;
-    if (func_001162C8(*(void**)((char*)self + 0x14), (w >> 15) & 1, (w >> 16) & 1))
+    if (func_001162C8(self->mRider, (w >> 15) & 1, (w >> 16) & 1))
         return;
     int w2 = *(int*)in;
-    func_00114130(*(void**)((char*)self + 0x14), (w2 >> 14) & 1, (w2 >> 13) & 1);
-    func_00113F88(*(void**)((char*)self + 0x14), 0.0f, 0.0f);
-    char* r = *(char**)((char*)self + 0x14);
+    func_00114130(self->mRider, (w2 >> 14) & 1, (w2 >> 13) & 1);
+    func_00113F88(self->mRider, 0.0f, 0.0f);
+    char* r = (char*)self->mRider;
     if (*(int*)(r + 0x328) != 0)
     {
         func_00113F38(r, aiClamp_12FC80(((sAiBitsC_12FC80*)in)->v * 0.032258063554763794f, -0.5f, 0.5f));
@@ -5067,10 +5068,10 @@ extern "C" void func_0012FC80(void* self, void* in)
             d = a - 0.5f;
         else
             d = 0.5f - a;
-        func_00113E80(*(void**)((char*)self + 0x14), aiClamp_12FC80(((sAiBitsD_12FC80*)in)->v * 0.032258063554763794f, -d, d));
+        func_00113E80(self->mRider, aiClamp_12FC80(((sAiBitsD_12FC80*)in)->v * 0.032258063554763794f, -d, d));
     }
-    func_00115B58(*(void**)((char*)self + 0x14));
-    func_00115D48(*(void**)((char*)self + 0x14));
+    func_00115B58(self->mRider);
+    func_00115D48(self->mRider);
     switch (*(int*)self)
     {
     case 0:
@@ -5092,14 +5093,14 @@ extern "C" void func_0012FC80(void* self, void* in)
 //100%
 INCLUDE_ASM("ai/ai", func_0012FE98);
 #ifdef SKIP_ASM
-extern "C" void func_0012FE98(void* self)
+extern "C" void func_0012FE98(cBoardPressControl* self)
 {
-    char* a = *(char**)((char*)self + 0x14);
+    char* a = (char*)self->mRider;
     *(int*)(a + 0x330) = 0;
-    char* b = *(char**)((char*)self + 0x14);
+    char* b = (char*)self->mRider;
     *(float*)(b + 0x278) = 0.01666666753590107f;
     *(int*)(b + 0x27C) = 0;
-    char* c = *(char**)((char*)self + 0x14);
+    char* c = (char*)self->mRider;
     *(float*)(c + 0x26C) = 0.03333333507180214f;
     *(int*)(c + 0x270) = 0;
 }
@@ -5128,18 +5129,18 @@ static inline sQuat_12FEC8 AxisAngle_12FEC8(const sQuat_12FEC8& axis, float angl
     return sQuat_12FEC8(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-extern "C" void func_0012FEC8(void* self)
+extern "C" void func_0012FEC8(cBoardPressControl* self)
 {
-    *(int*)(*(char**)((char*)self + 0x14) + 0x320) ^= 1;
-    char* r = *(char**)((char*)self + 0x14);
+    *(int*)((char*)self->mRider + 0x320) ^= 1;
+    char* r = (char*)self->mRider;
     float a = 0.0f;
     if (*(int*)(r + 0x320) != 0) a = 3.1415927410125732f;
     char* anim = *(char**)(r + 0x784);
     *(sQuat_12FEC8*)(anim + 0x30) = D_004FF130;
     *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(D_004FF160, -a);
-    char* r2 = *(char**)((char*)self + 0x14);
+    char* r2 = (char*)self->mRider;
     *(int*)(*(char**)(r2 + 0x784) + 0x18) = *(int*)(r2 + 0x320);
-    char* r3 = *(char**)((char*)self + 0x14);
+    char* r3 = (char*)self->mRider;
     if (*(int*)(r3 + 0x328) == 1)
     {
         *(int*)(r3 + 0x328) = 2;
@@ -5148,9 +5149,9 @@ extern "C" void func_0012FEC8(void* self)
     {
         *(int*)(r3 + 0x328) = 1;
     }
-    *(float*)(*(char**)((char*)self + 0x14) + 0x280) = -*(float*)(*(char**)((char*)self + 0x14) + 0x280);
-    *(float*)(*(char**)((char*)self + 0x14) + 0x288) = -*(float*)(*(char**)((char*)self + 0x14) + 0x288);
-    func_00116930(*(void**)((char*)self + 0x14));
+    *(float*)((char*)self->mRider + 0x280) = -*(float*)((char*)self->mRider + 0x280);
+    *(float*)((char*)self->mRider + 0x288) = -*(float*)((char*)self->mRider + 0x288);
+    func_00116930(self->mRider);
 }
 #endif
 
@@ -5174,31 +5175,31 @@ static inline float aiAbs_12FFF8(float x)
     return r;
 }
 
-extern "C" int func_0012FFF8(void* self)
+extern "C" int func_0012FFF8(cBoardPressControl* self)
 {
-    int k = func_0011FE98(*(void**)((char*)self + 0x14));
+    int k = func_0011FE98(self->mRider);
     if (k != 1)
         return 0;
-    char* r = *(char**)((char*)self + 0x14);
+    char* r = (char*)self->mRider;
     if (*(int*)(r + 0x328) != 0)
     {
         *(int*)(r + 0x328) = 0;
-        func_00116930(*(void**)((char*)self + 0x14));
+        func_00116930(self->mRider);
     }
-    int anim = func_00312AA0(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 2);
+    int anim = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
     if (*(int*)self == 2)
     {
         int ok = 0;
         if (anim == 0x25 || anim == 0x26)
         {
-            char* p = *(char**)((char*)self + 0x14);
+            char* p = (char*)self->mRider;
             *(float*)(p + 0x288) = 0.0f;
             *(float*)(p + 0x284) = *(float*)(p + 0x300) * 0.02500000223517418f;
-            ok = aiAbs_12FFF8(*(float*)(*(char**)((char*)self + 0x14) + 0x280)) <= 0.15000000596046448f;
+            ok = aiAbs_12FFF8(*(float*)((char*)self->mRider + 0x280)) <= 0.15000000596046448f;
         }
         else if (anim == 0x1D || anim == 0x1E)
         {
-            char* p = *(char**)((char*)self + 0x14);
+            char* p = (char*)self->mRider;
             if (*(float*)(p + 0x280) < 0.0f)
             {
                 *(float*)(p + 0x288) = -1.0f;
@@ -5209,15 +5210,15 @@ extern "C" int func_0012FFF8(void* self)
                 *(float*)(p + 0x288) = 1.0f;
                 *(float*)(p + 0x284) = *(float*)(p + 0x300) * 0.02500000223517418f;
             }
-            ok = 0.8500000238418579f <= aiAbs_12FFF8(*(float*)(*(char**)((char*)self + 0x14) + 0x280));
+            ok = 0.8500000238418579f <= aiAbs_12FFF8(*(float*)((char*)self->mRider + 0x280));
         }
         if (ok == 0)
             return 1;
-        char* q = *(char**)((char*)self + 0x14);
-        func_0010E098(*(void**)((char*)self + 0x14), 1, func_00119AD8(*(void**)(q + 0x790), *(int*)(q + 0x330)));
-        func_0010E098(*(void**)((char*)self + 0x14), 1, func_00119A38(*(void**)(*(char**)((char*)self + 0x14) + 0x790)));
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0x11F, 0, -1.0f);
-        func_0011FEC8_impl(*(void**)((char*)self + 0x14), 5);
+        char* q = (char*)self->mRider;
+        func_0010E098(self->mRider, 1, func_00119AD8(*(void**)(q + 0x790), *(int*)(q + 0x330)));
+        func_0010E098(self->mRider, 1, func_00119A38(*(void**)((char*)self->mRider + 0x790)));
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x11F, 0, -1.0f);
+        func_0011FEC8_impl(self->mRider, 5);
         return 1;
     }
     if (anim == 0x25 || anim == 0x26 || anim == 0x1D || anim == 0x1E)
@@ -5226,12 +5227,12 @@ extern "C" int func_0012FFF8(void* self)
     }
     else
     {
-        char* s = *(char**)((char*)self + 0x14);
+        char* s = (char*)self->mRider;
         if (*(int*)(s + 0x330) == 1)
             cRiderAnimBase_play(*(void**)(s + 0x784), 0x1B, 0, -1.0f);
         else
             cRiderAnimBase_play(*(void**)(s + 0x784), 0x23, 0, -1.0f);
-        func_0011FEC8_impl(*(void**)((char*)self + 0x14), 5);
+        func_0011FEC8_impl(self->mRider, 5);
     }
     return 1;
 }
@@ -5259,17 +5260,17 @@ struct sPadIn_130228
     int y : 6;
 };
 
-extern "C" void func_00130228(void* self, sPadIn_130228* in)
+extern "C" void func_00130228(cBoardPressControl* self, sPadIn_130228* in)
 {
     float fx = in->x * 0.032258063554763794f;
     float fy = in->y * 0.032258063554763794f;
     if (fx == 0.0f && Abs_130228(fy) < 0.5f)
     {
-        char* r = *(char**)((char*)self + 0x14);
+        char* r = (char*)self->mRider;
         *(float*)(r + 0x270) = 0.0f;
         *(float*)(r + 0x26C) = *(float*)(r + 0x300) * 2.0f * 0.01666666753590107f;
         *(int*)self = 3;
-        char* r2 = *(char**)((char*)self + 0x14);
+        char* r2 = (char*)self->mRider;
         if (*(int*)(r2 + 0x330) == 2)
         {
             cRiderAnimBase_play_i(*(void**)(r2 + 0x784), 0x21, 0, -1.0f);
@@ -5280,22 +5281,22 @@ extern "C" void func_00130228(void* self, sPadIn_130228* in)
         }
         return;
     }
-    char* r = *(char**)((char*)self + 0x14);
+    char* r = (char*)self->mRider;
     *(float*)(r + 0x278) = *(float*)(r + 0x300) * 0.01666666753590107f;
     *(float*)(r + 0x27C) = 0.5f;
-    char* r2 = *(char**)((char*)self + 0x14);
+    char* r2 = (char*)self->mRider;
     *(float*)(r2 + 0x270) = 1.0f;
     *(float*)(r2 + 0x26C) = *(float*)(r2 + 0x300) * 2.0f * 0.01666666753590107f;
-    char* r3 = *(char**)((char*)self + 0x14);
+    char* r3 = (char*)self->mRider;
     if (*(float*)(r3 + 0x268) == 1.0f)
     {
-        func_0010E098(*(void**)((char*)self + 0x14), 1, func_001199F8(*(void**)(r3 + 0x790), *(int*)(r3 + 0x330)));
+        func_0010E098(self->mRider, 1, func_001199F8(*(void**)(r3 + 0x790), *(int*)(r3 + 0x330)));
         *(int*)self = 1;
-        char* r4 = *(char**)((char*)self + 0x14);
+        char* r4 = (char*)self->mRider;
         if (*(int*)(r4 + 0x330) == 2)
         {
             cRiderAnimBase_play_i(*(void**)(r4 + 0x784), 0x24, 0, -1.0f);
-            char* r5 = *(char**)((char*)self + 0x14);
+            char* r5 = (char*)self->mRider;
             *(float*)(r5 + 0x284) = 0.0f;
             *(float*)(r5 + 0x288) = 1.0f;
             *(float*)(r5 + 0x280) = 1.0f;
@@ -5303,7 +5304,7 @@ extern "C" void func_00130228(void* self, sPadIn_130228* in)
         else
         {
             cRiderAnimBase_play_i(*(void**)(r4 + 0x784), 0x1C, 0, -1.0f);
-            char* r5 = *(char**)((char*)self + 0x14);
+            char* r5 = (char*)self->mRider;
             *(float*)(r5 + 0x288) = 0.0f;
             *(float*)(r5 + 0x280) = 0.0f;
             *(float*)(r5 + 0x284) = 0.0f;
@@ -5315,14 +5316,14 @@ extern "C" void func_00130228(void* self, sPadIn_130228* in)
 //100%
 INCLUDE_ASM("ai/ai", func_001303E0);
 #ifdef SKIP_ASM
-extern "C" int func_001306B0(void* self);
-extern "C" int func_001307B8(void* self, void* a1);
-extern "C" int func_001308D8(void* self, void* a1);
-extern "C" int func_00130DD0(void* self, void* a1);
-extern "C" int func_00131200(void* self, void* a1);
+extern "C" int func_001306B0(cBoardPressControl* self);
+extern "C" int func_001307B8(cBoardPressControl* self, void* a1);
+extern "C" int func_001308D8(cBoardPressControl* self, void* a1);
+extern "C" int func_00130DD0(cBoardPressControl* self, void* a1);
+extern "C" int func_00131200(cBoardPressControl* self, void* a1);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
-extern "C" void func_001303E0(void* self, void* a1)
+extern "C" void func_001303E0(cBoardPressControl* self, void* a1)
 {
     if (func_001306B0(self) != 0) return;
     if (func_001307B8(self, a1) != 0) return;
@@ -5330,10 +5331,10 @@ extern "C" void func_001303E0(void* self, void* a1)
     if (func_00130DD0(self, a1) != 0) return;
     if (func_00131200(self, a1) != 0)
     {
-        char* r = *(char**)((char*)self + 0x14);
+        char* r = (char*)self->mRider;
         *(int*)(r + 0x270) = 0;
         *(float*)(r + 0x26C) = *(float*)(r + 0x300) * 2.0f * 0.01666666753590107f;
-        char* r2 = *(char**)((char*)self + 0x14);
+        char* r2 = (char*)self->mRider;
         if (*(int*)(r2 + 0x330) == 2)
         {
             cRiderAnimBase_play(*(void**)(r2 + 0x784), 0x21, 0, -1.0f);
@@ -5367,7 +5368,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 extern "C" void func_0010E098(void*, int, float);
 extern "C" void func_00115640(void* rider);
 extern "C" float func_00119A38(void*);
-extern "C" void func_001326C8(void*, int);
+extern "C" void func_001326C8(cRailslideControl*, int);
 
 struct sPadIn_1304E0
 {
@@ -5376,46 +5377,46 @@ struct sPadIn_1304E0
     int y : 6;
 };
 
-extern "C" void func_001304E0(void* self, sPadIn_1304E0* in)
+extern "C" void func_001304E0(cBoardPressControl* self, sPadIn_1304E0* in)
 {
-    int anim = func_00312AA0(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 2);
+    int anim = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
     char* r;
-    if ((anim == 0x21 || anim == 0x19) && 0.0f < *(float*)((r = *(char**)((char*)self + 0x14)) + 0x268))
+    if ((anim == 0x21 || anim == 0x19) && 0.0f < *(float*)((r = (char*)self->mRider) + 0x268))
     {
         float fx = in->x * 0.032258063554763794f;
         if ((fx < -0.5f && anim == 0x21) || (0.5f < fx && anim == 0x19))
         {
             if (fx < 0.0f)
             {
-                cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0x20, 0, -1.0f);
-                *(int*)(*(char**)((char*)self + 0x14) + 0x330) = 2;
+                cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x20, 0, -1.0f);
+                *(int*)((char*)self->mRider + 0x330) = 2;
             }
             else
             {
-                cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0x18, 0, -1.0f);
-                *(int*)(*(char**)((char*)self + 0x14) + 0x330) = 1;
+                cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x18, 0, -1.0f);
+                *(int*)((char*)self->mRider + 0x330) = 1;
             }
-            char* r2 = *(char**)((char*)self + 0x14);
+            char* r2 = (char*)self->mRider;
             *(float*)(r2 + 0x270) = 1.0f;
             *(float*)(r2 + 0x26C) = *(float*)(r2 + 0x300) * 2.0f * 0.01666666753590107f;
             *(int*)self = 0;
         }
         return;
     }
-    r = *(char**)((char*)self + 0x14);
+    r = (char*)self->mRider;
     if (*(int*)(r + 0x330) == 1 || *(int*)(r + 0x330) == 2)
     {
-        func_0010E098(*(void**)((char*)self + 0x14), 1, func_00119A38(*(void**)(r + 0x790)));
+        func_0010E098(self->mRider, 1, func_00119A38(*(void**)(r + 0x790)));
     }
-    if (func_0011FE98(*(void**)((char*)self + 0x14)) == 4)
+    if (func_0011FE98(self->mRider) == 4)
     {
-        func_001326C8(*(char**)(*(char**)((char*)self + 0x14) + 0x77C) + 0x2B0, 0);
-        func_0011FEC8_impl(*(void**)((char*)self + 0x14), 7);
+        func_001326C8((cRailslideControl*)(*(char**)((char*)self->mRider + 0x77C) + 0x2B0), 0);
+        func_0011FEC8_impl(self->mRider, 7);
     }
     else
     {
-        func_00115640(*(void**)((char*)self + 0x14));
-        func_0011FEC8_impl(*(void**)((char*)self + 0x14), 0);
+        func_00115640(self->mRider);
+        func_0011FEC8_impl(self->mRider, 0);
     }
 }
 #endif
@@ -5429,26 +5430,26 @@ extern "C" int func_00114CC0(void* rider);
 // PORT: cRiderAnimBase_play returns a value (the unit declares it void); int-returning view bound by asm label.
 extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 
-extern "C" int func_001306B0(void* self)
+extern "C" int func_001306B0(cBoardPressControl* self)
 {
-    int s = func_00312AA0(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 2);
+    int s = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
     if (s == 0x17 || s == 0x1F) return 1;
     if (s == 0x25 || s == 0x26 || s == 0x1D || s == 0x1E) return 0;
-    if (func_0011FE98(*(void**)((char*)self + 0x14)) != 0) return 0;
-    char* r = *(char**)((char*)self + 0x14);
+    if (func_0011FE98(self->mRider) != 0) return 0;
+    char* r = (char*)self->mRider;
     if (*(float*)(r + 0x2DC) != 0.0f) return 0;
     if (func_00114CC0(r) != 0)
     {
-        char* r2 = *(char**)((char*)self + 0x14);
+        char* r2 = (char*)self->mRider;
         if (*(int*)(r2 + 0x330) == 1)
         {
             cRiderAnimBase_play_i(*(void**)(r2 + 0x784), 0x17, 0, -1.0f);
-            *(int*)(*(char**)((char*)self + 0x14) + 0x330) = 2;
+            *(int*)((char*)self->mRider + 0x330) = 2;
         }
         else
         {
             cRiderAnimBase_play_i(*(void**)(r2 + 0x784), 0x1F, 0, -1.0f);
-            *(int*)(*(char**)((char*)self + 0x14) + 0x330) = 1;
+            *(int*)((char*)self->mRider + 0x330) = 1;
         }
         return 1;
     }
@@ -5459,7 +5460,7 @@ extern "C" int func_001306B0(void* self)
 //100%
 INCLUDE_ASM("ai/ai", func_001307B8);
 #ifdef SKIP_ASM
-extern "C" void func_00131428(void*);
+extern "C" void func_00131428(cBoardPressControl*);
 extern "C" void func_00116930(void* rider);
 extern "C" void func_00114298(void* rider, float v);
 extern "C" void func_00294170(void* self, void* rider);
@@ -5475,32 +5476,32 @@ static inline float aiAbs_1307B8(float x)
     return r;
 }
 
-extern "C" int func_001307B8(void* self, void* a1)
+extern "C" int func_001307B8(cBoardPressControl* self, void* a1)
 {
     int mask = 0x20000;
-    if (*(int*)a1 & mask) *(int*)((char*)self + 0x10) = 1;
-    int ok = *(int*)((char*)self + 0x10) != 0 && (*(int*)a1 & mask) == 0;
-    float speed = aiAbs_1307B8(*(float*)(*(char**)((char*)self + 0x14) + 0x280));
+    if (*(int*)a1 & mask) self->IsOllieHeld = 1;
+    int ok = self->IsOllieHeld != 0 && (*(int*)a1 & mask) == 0;
+    float speed = aiAbs_1307B8(*(float*)((char*)self->mRider + 0x280));
     if (!ok) return 0;
     func_00131428(self);
     if (speed > 0.5f)
     {
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0x23, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x23, 0, -1.0f);
     }
     else
     {
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0x1B, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x1B, 0, -1.0f);
     }
-    char* r = *(char**)((char*)self + 0x14);
+    char* r = (char*)self->mRider;
     if (*(int*)(r + 0x328) != 0)
     {
         *(int*)(r + 0x328) = 0;
-        func_00116930(*(void**)((char*)self + 0x14));
+        func_00116930(self->mRider);
     }
-    func_00114298(*(void**)((char*)self + 0x14), 1.0f);
-    cRider_setMotionState_impl(*(void**)((char*)self + 0x14), 1);
-    func_0011FEC8_impl(*(void**)((char*)self + 0x14), 5);
-    func_00294170(gSSXAudio, *(void**)((char*)self + 0x14));
+    func_00114298(self->mRider, 1.0f);
+    cRider_setMotionState_impl(self->mRider, 1);
+    func_0011FEC8_impl(self->mRider, 5);
+    func_00294170(gSSXAudio, self->mRider);
     return 1;
 }
 #endif
@@ -5509,9 +5510,9 @@ extern "C" int func_001307B8(void* self, void* a1)
 INCLUDE_ASM("ai/ai", func_001308D8);
 #ifdef SKIP_ASM
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
-extern "C" void func_0012FEC8(void* self);
-extern "C" void func_001313A8(void*);
-extern "C" void func_00131428(void*);
+extern "C" void func_0012FEC8(cBoardPressControl* self);
+extern "C" void func_001313A8(cBoardPressControl*);
+extern "C" void func_00131428(cBoardPressControl*);
 int func_00312AA0(void* self, int i);
 extern "C" float func_0031C228(float x);
 
@@ -5604,7 +5605,7 @@ struct sAiObj_08D8
     char* mRider;    // 0x14
 };
 
-extern "C" int func_001308D8(void* vself, void* in)
+extern "C" int func_001308D8(cBoardPressControl* vself, void* in)
 {
     sAiObj_08D8* self = (sAiObj_08D8*)vself;
     sAiBits_08D8* bits = (sAiBits_08D8*)((char*)in + 4);
@@ -5616,13 +5617,13 @@ extern "C" int func_001308D8(void* vself, void* in)
     char* r0;
     if (m < 0.1f || aiDot_08D8(*(sAiVec4_08D8*)((r0 = self->mRider) + 0x1E0), *(sAiVec4_08D8*)(r0 + 0x3A0)) < 0.0f || self->mId != 0)
     {
-        func_001313A8(self);
+        func_001313A8((cBoardPressControl*)self);
         float ra = aiAbs_08D8(*(float*)(self->mRider + 0x280));
         if (ra <= 0.2f || ra >= 0.8f)
         {
             if (m < 0.1f)
                 self->mC = 1.0f;
-            func_00131428(self);
+            func_00131428((cBoardPressControl*)self);
             return 0;
         }
         return 1;
@@ -5680,11 +5681,11 @@ extern "C" int func_001308D8(void* vself, void* in)
         if (anim == na)
             return 1;
         if (!special)
-            func_0012FEC8(self);
+            func_0012FEC8((cBoardPressControl*)self);
         cRiderAnimBase_play(*(void**)(self->mRider + 0x784), na, 0, -1.0f);
         return 1;
     }
-    func_00131428(self);
+    func_00131428((cBoardPressControl*)self);
     return 0;
 }
 #endif
@@ -5794,23 +5795,23 @@ static inline float Curve_130DD0(const sCurve_130DD0* c, float x)
     return Lerp_130DD0(c->p[0].x, c->p[0].y, c->p[1].x, c->p[1].y, x);
 }
 
-extern "C" int func_00130DD0(void* self, void* in)
+extern "C" int func_00130DD0(cBoardPressControl* self, void* in)
 {
-    char* r = *(char**)((char*)self + 0x14);
+    char* r = (char*)self->mRider;
     float k = *(float*)(r + 0x300) * 0.01666666753590107f;
-    *(float*)((char*)self + 0x4) += k;
+    self->BalanceSec += k;
     if (*(float*)(r + 0x274) == 1.0f)
-        *(float*)((char*)self + 0x8) += k;
+        self->OffBalanceSec += k;
     else
-        *(float*)((char*)self + 0x8) = 0.0f;
+        self->OffBalanceSec = 0.0f;
     float a = ((sAiBitsA_130DD0*)((char*)in + 4))->v * 0.032258063554763794f;
-    if (*(int*)(*(char**)((char*)self + 0x14) + 0x330) == 2)
+    if (*(int*)((char*)self->mRider + 0x330) == 2)
         a = -a >? 0.0f;
     else
         a = a >? 0.0f;
-    if (*(float*)((char*)self + 0x4) <= 1.0f)
+    if (self->BalanceSec <= 1.0f)
     {
-        a = a <? *(float*)((char*)self + 0x4) * 0.5f + 0.5f;
+        a = a <? self->BalanceSec * 0.5f + 0.5f;
     }
     else
     {
@@ -5821,35 +5822,35 @@ extern "C" int func_00130DD0(void* self, void* in)
             a = 1.0f;
     }
     float s;
-    if ((a <= 0.5f && *(float*)(*(char**)((char*)self + 0x14) + 0x274) > 0.5f) || (a >= 0.5f && *(float*)(*(char**)((char*)self + 0x14) + 0x274) < 0.5f))
+    if ((a <= 0.5f && *(float*)((char*)self->mRider + 0x274) > 0.5f) || (a >= 0.5f && *(float*)((char*)self->mRider + 0x274) < 0.5f))
     {
         s = 1.0f;
     }
     else
     {
-        float s1 = Curve_130DD0(D_004A1114, *(float*)(*(char**)((char*)self + 0x14) + 0x274));
-        float s2 = Curve_130DD0(D_004A111C, *(float*)(*(char**)((char*)self + 0x14) + 0x274));
-        float mix = *(float*)((char*)self + 0x4) * 0.20000895857810974f <? 1.0f;
+        float s1 = Curve_130DD0(D_004A1114, *(float*)((char*)self->mRider + 0x274));
+        float s2 = Curve_130DD0(D_004A111C, *(float*)((char*)self->mRider + 0x274));
+        float mix = self->BalanceSec * 0.20000895857810974f <? 1.0f;
         s = s1 * (1.0f - mix) + s2 * mix;
-        if (*(float*)(*(char**)((char*)self + 0x14) + 0x274) > 0.800000011920929f)
-            func_002A1560(func_0028B180(), *(void**)((char*)self + 0x14));
+        if (*(float*)((char*)self->mRider + 0x274) > 0.800000011920929f)
+            func_002A1560(func_0028B180(), self->mRider);
     }
-    char* r3 = *(char**)((char*)self + 0x14);
+    char* r3 = (char*)self->mRider;
     *(float*)(r3 + 0x27C) = a;
     *(float*)(r3 + 0x278) = s * k;
-    if (*(float*)((char*)self + 0x8) > 1.0f)
+    if (self->OffBalanceSec > 1.0f)
     {
         sInfo_130DD0 info;
-        char* r4 = *(char**)((char*)self + 0x14);
+        char* r4 = (char*)self->mRider;
         float speed = aiLength_12C5C8(*(sAiVec4_12C5C8*)(r4 + 0x1E0));
         info.pos = *(sQuat_12FEC8*)(r4 + 0x110);
         info.up = Scale_130DD0(D_004FF160, -1.0f);
         info.speed = speed;
         if (speed > 0.0010000000474974513f)
-            info.dir = Div_130DD0(*(sQuat_12FEC8*)(*(char**)((char*)self + 0x14) + 0x1E0), speed);
+            info.dir = Div_130DD0(*(sQuat_12FEC8*)((char*)self->mRider + 0x1E0), speed);
         else
             info.dir = D_004FF160;
-        char* r5 = *(char**)((char*)self + 0x14);
+        char* r5 = (char*)self->mRider;
         if (*(int*)(r5 + 0x330) == 2)
             func_0010EB30(r5, 0x167, 0, *(int*)(r5 + 0x438), &info);
         else
@@ -5878,28 +5879,28 @@ static inline float aiAbs_131200(float x)
     return r;
 }
 
-extern "C" int func_00131200(void* self, void* a1)
+extern "C" int func_00131200(cBoardPressControl* self, void* a1)
 {
     float x = ((sAiStick_131200*)a1)->x * 0.032258063554763794f;
     float y = ((sAiStick_131200*)a1)->y * 0.032258063554763794f;
     if (x == 0.0f && aiAbs_131200(y) < 0.5f)
     {
-        *(float*)((char*)self + 0xC) += *(float*)(*(char**)((char*)self + 0x14) + 0x300) * 0.01666666753590107f;
+        self->PressTimer += *(float*)((char*)self->mRider + 0x300) * 0.01666666753590107f;
     }
     else
     {
-        *(float*)((char*)self + 0xC) = 0.0f;
+        self->PressTimer = 0.0f;
     }
-    char* r = *(char**)((char*)self + 0x14);
-    if (*(float*)((char*)self + 0xC) > 0.5f ||
+    char* r = (char*)self->mRider;
+    if (self->PressTimer > 0.5f ||
         (*(int*)(r + 0x330) == 2 && x > 0.8f) ||
         (*(int*)(r + 0x330) == 1 && x < -0.8f))
     {
         *(int*)(r + 0x27C) = 0;
         *(float*)(r + 0x278) = *(float*)(r + 0x300) * 2.0f * 0.01666666753590107f;
-        if (*(float*)(*(char**)((char*)self + 0x14) + 0x274) < 0.5f) return 1;
+        if (*(float*)((char*)self->mRider + 0x274) < 0.5f) return 1;
     }
-    if (*(float*)(*(char**)((char*)self + 0x14) + 0x274) == 0.0f) return 1;
+    if (*(float*)((char*)self->mRider + 0x274) == 0.0f) return 1;
     return 0;
 }
 #endif
@@ -5907,20 +5908,20 @@ extern "C" int func_00131200(void* self, void* a1)
 //100%
 INCLUDE_ASM("ai/ai", func_00131348);
 #ifdef SKIP_ASM
-extern "C" void func_001313A8(void*);
-extern "C" void func_00131428(void*);
+extern "C" void func_001313A8(cBoardPressControl*);
+extern "C" void func_00131428(cBoardPressControl*);
 extern "C" float func_00119A38(void*);
 extern "C" void func_0010E098(void*, int, float);
 
-extern "C" void func_00131348(void* self)
+extern "C" void func_00131348(cBoardPressControl* self)
 {
     func_001313A8(self);
     func_00131428(self);
-    void* r = *(void**)((char*)self + 0x14);
+    void* r = self->mRider;
     int s = *(int*)((char*)r + 0x330);
     if (s >= 1 && s <= 2)
     {
-        func_0010E098(*(void**)((char*)self + 0x14), 1, func_00119A38(*(void**)((char*)r + 0x790)));
+        func_0010E098(self->mRider, 1, func_00119A38(*(void**)((char*)r + 0x790)));
     }
 }
 #endif
@@ -5928,9 +5929,9 @@ extern "C" void func_00131348(void* self)
 //100%
 INCLUDE_ASM("ai/ai", func_001313A8);
 #ifdef SKIP_ASM
-extern "C" void func_001313A8(void* self)
+extern "C" void func_001313A8(cBoardPressControl* self)
 {
-    char* r = *(char**)((char*)self + 0x14);
+    char* r = (char*)self->mRider;
     if (*(float*)(r + 0x280) < -0.5f)
     {
         *(float*)(r + 0x288) = -1.0f;
@@ -5956,37 +5957,37 @@ extern "C" void func_0010E098(void*, int, float);
 extern "C" float func_00119AD8(void* p, int v);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
-extern "C" void func_00131428(void* self)
+extern "C" void func_00131428(cBoardPressControl* self)
 {
-    int s = func_00312AA0(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 2);
+    int s = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
     if (s >= 0x25 && s <= 0x26)
     {
-        char* r = *(char**)((char*)self + 0x14);
+        char* r = (char*)self->mRider;
         if (aiAbs_12F118(*(float*)(r + 0x280)) <= 0.5f)
         {
-            func_0010E098(*(void**)((char*)self + 0x14), 1, func_00119AD8(*(void**)(r + 0x790), *(int*)(r + 0x330)));
-            cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0x1C, 0, -1.0f);
-            *(int*)(*(char**)((char*)self + 0x14) + 0x330) = 1;
+            func_0010E098(self->mRider, 1, func_00119AD8(*(void**)(r + 0x790), *(int*)(r + 0x330)));
+            cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x1C, 0, -1.0f);
+            *(int*)((char*)self->mRider + 0x330) = 1;
         }
         else
         {
             func_0012FEC8(self);
-            cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0x24, 0, -1.0f);
+            cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x24, 0, -1.0f);
         }
     }
     else if (s >= 0x1D && s <= 0x1E)
     {
-        char* r = *(char**)((char*)self + 0x14);
+        char* r = (char*)self->mRider;
         if (aiAbs_12F118(*(float*)(r + 0x280)) >= 0.5f)
         {
-            func_0010E098(*(void**)((char*)self + 0x14), 1, func_00119AD8(*(void**)(r + 0x790), *(int*)(r + 0x330)));
-            cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0x24, 0, -1.0f);
-            *(int*)(*(char**)((char*)self + 0x14) + 0x330) = 2;
+            func_0010E098(self->mRider, 1, func_00119AD8(*(void**)(r + 0x790), *(int*)(r + 0x330)));
+            cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x24, 0, -1.0f);
+            *(int*)((char*)self->mRider + 0x330) = 2;
         }
         else
         {
             func_0012FEC8(self);
-            cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0x1C, 0, -1.0f);
+            cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), 0x1C, 0, -1.0f);
         }
     }
 }
@@ -6001,7 +6002,7 @@ struct sVEntry00131598 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00131598(void* self, void* obj)
+extern "C" void func_00131598(cBoardPressControl* self, void* obj)
 {
     sVEntry00131598* vt = *(sVEntry00131598**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x14);
@@ -6017,7 +6018,7 @@ struct sVEntry001315D0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001315D0(void* self, void* obj)
+extern "C" void func_001315D0(cBoardPressControl* self, void* obj)
 {
     sVEntry001315D0* vt = *(sVEntry001315D0**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x14);
@@ -6040,7 +6041,7 @@ INCLUDE_ASM("ai/ai", func_00131620);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" int func_00116378(void*);
 extern "C" int cRider_checkForReset_1620(void* rider, int a, int b) __asm__("cRider_checkForReset");
-extern "C" int func_00131CC0(void* self);
+extern "C" int func_00131CC0(cCruiseControl* self);
 extern "C" int func_00106848(void*);
 extern "C" int func_00107578(void* rider, int on);
 extern "C" int func_001162C8(void*, int, int);
@@ -6142,7 +6143,7 @@ static inline float aiClamp_1620(float v, float lo, float hi)
     return r;
 }
 
-extern "C" void func_00131620(void* self, void* in)
+extern "C" void func_00131620(cCruiseControl* self, void* in)
 {
     float zero = 0.0f;
     float x = ((sAiBitsX_1620*)in)->v * 0.032258063554763794f;
@@ -6313,7 +6314,7 @@ extern "C" int func_00311AE8(void*, int);
 extern "C" void func_00311E88(void*, int, float);
 extern "C" char* func_00311B20(void*, int);
 
-extern "C" void func_00131C30(void* self, int a1)
+extern "C" void func_00131C30(cCruiseControl* self, int a1)
 {
     if (a1 != 4)
     {
@@ -6334,7 +6335,7 @@ INCLUDE_ASM("ai/ai", func_00131CC0);
 int func_0011FE98(void* self);
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
 
-extern "C" int func_00131CC0(void* self)
+extern "C" int func_00131CC0(cCruiseControl* self)
 {
     if (func_0011FE98(*(void**)self) == 1)
     {
@@ -6348,12 +6349,12 @@ extern "C" int func_00131CC0(void* self)
 //100%
 INCLUDE_ASM("ai/ai", func_00131D08);
 #ifdef SKIP_ASM
-extern "C" void func_00131D08(void* self)
+extern "C" void func_00131D08(cRailslideControl* self)
 {
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)(*(char**)((char*)self + 0x8) + 0x360) = 0;
-    *(int*)((char*)self + 0x4) = -1;
-    char* r = *(char**)((char*)self + 0x8);
+    *(int*)&self->RSpinAngle = 0;
+    *(int*)((char*)self->mRider + 0x360) = 0;
+    self->PrevGrindHeld = -1;
+    char* r = (char*)self->mRider;
     *(float*)(r + 0x200) = 0.06666667014360428f;
     *(int*)(r + 0x204) = 0;
 }
@@ -6367,9 +6368,9 @@ INCLUDE_ASM("ai/ai", func_00131D30);
 extern "C" bool func_001446A0(void* self, int bit);
 extern "C" int cRider_checkForReset_i(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" int func_001161D0(void* rider, float v);
-extern "C" void func_00132060(void* self, int neg);
-extern "C" int func_00132620(void* self, int id);
-extern "C" int func_00132770(void* self, void* a1);
+extern "C" void func_00132060(cRailslideControl* self, int neg);
+extern "C" int func_00132620(cRailslideControl* self, int id);
+extern "C" int func_00132770(cRailslideControl* self, void* a1);
 
 struct sPadA_131D30
 {
@@ -6396,30 +6397,30 @@ static inline float clamp_131D30(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" void func_00131D30(void* self, void* in)
+extern "C" void func_00131D30(cRailslideControl* self, void* in)
 {
-    if (cRider_checkForReset_i(*(void**)((char*)self + 0x8), (*(int*)in >> 12) & 1, 0))
+    if (cRider_checkForReset_i(self->mRider, (*(int*)in >> 12) & 1, 0))
         return;
     if (func_00132770(self, in))
         return;
     int w = *(int*)in;
-    if (func_001162C8(*(void**)((char*)self + 0x8), (w >> 14) & 1, (w >> 13) & 1))
+    if (func_001162C8(self->mRider, (w >> 14) & 1, (w >> 13) & 1))
         return;
     if (func_00132620(self, ((sPadA_131D30*)in)->id))
         return;
     int w2 = *(int*)in;
     float k = 0.032258063554763794f;
     float zero = 0.0f;
-    func_00114130(*(void**)((char*)self + 0x8), (w2 >> 16) & 1, (w2 >> 15) & 1);
-    func_00113F38(*(void**)((char*)self + 0x8), ((sPadB_131D30*)in)->v * k);
-    func_00113F88(*(void**)((char*)self + 0x8), zero, zero);
-    func_00115B58(*(void**)((char*)self + 0x8));
-    func_00115D48(*(void**)((char*)self + 0x8));
+    func_00114130(self->mRider, (w2 >> 16) & 1, (w2 >> 15) & 1);
+    func_00113F38(self->mRider, ((sPadB_131D30*)in)->v * k);
+    func_00113F88(self->mRider, zero, zero);
+    func_00115B58(self->mRider);
+    func_00115D48(self->mRider);
     sPadC_131D30* in2 = (sPadC_131D30*)((char*)in + 4);
-    if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 2) == 0xE) {
-        if (!func_001446A0(func_00311B20(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 2) + 0xB0, 0))
+    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0xE) {
+        if (!func_001446A0(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0xB0, 0))
             return;
-        if (func_001161D0(*(void**)((char*)self + 0x8), in2->y * k))
+        if (func_001161D0(self->mRider, in2->y * k))
             return;
         float fy = in2->x * k;
         if (fy == zero)
@@ -6427,7 +6428,7 @@ extern "C" void func_00131D30(void* self, void* in)
         func_00132060(self, fy < zero);
         return;
     }
-    if (func_001161D0(*(void**)((char*)self + 0x8), in2->y * k))
+    if (func_001161D0(self->mRider, in2->y * k))
         return;
     float fx = in2->y * k;
     float fy = in2->x * k;
@@ -6435,23 +6436,23 @@ extern "C" void func_00131D30(void* self, void* in)
     if (fx != zero && fy == zero)
         v = fx;
     if (v != 0.0f) {
-        char* r = *(char**)((char*)self + 0x8);
+        char* r = (char*)self->mRider;
         *(float*)(r + 0x240) = 0.0f;
         *(float*)(r + 0x23C) = 0.06666667014360428f;
         func_00132060(self, v < 0.0f);
         return;
     }
-    if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 2) == 0xA) {
-        char* r = *(char**)((char*)self + 0x8);
+    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0xA) {
+        char* r = (char*)self->mRider;
         *(float*)(r + 0x240) = 0.0f;
         *(float*)(r + 0x23C) = 0.06666667014360428f;
         return;
     }
-    char* r = *(char**)((char*)self + 0x8);
+    char* r = (char*)self->mRider;
     *(float*)(r + 0x240) = clamp_131D30(*(float*)(*(char**)(r + 0x77C) + 0xC8) * 1.2000000476837158f, -1.0f, 1.0f);
     *(float*)(r + 0x23C) = 0.06666667014360428f;
-    int cur = func_00312AA0(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 2);
-    char* r2 = *(char**)((char*)self + 0x8);
+    int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
+    char* r2 = (char*)self->mRider;
     int s = *(int*)(r2 + 0x328);
     int anim;
     if (s == 4)
@@ -6468,9 +6469,9 @@ extern "C" void func_00131D30(void* self, void* in)
 //100%
 INCLUDE_ASM("ai/ai", func_00132048);
 #ifdef SKIP_ASM
-extern "C" void func_00132048(void* self)
+extern "C" void func_00132048(cRailslideControl* self)
 {
-    char* r = *(char**)((char*)self + 0x8);
+    char* r = (char*)self->mRider;
     *(float*)(r + 0x23C) = 0.06666667014360428f;
     *(int*)(r + 0x240) = 0;
 }
@@ -6518,7 +6519,7 @@ static inline void flip_2060(void* self, int f)
     *(float*)(RIDER_2060 + 0x238) = -*(float*)(RIDER_2060 + 0x238);
     *(float*)(RIDER_2060 + 0x240) = -*(float*)(RIDER_2060 + 0x240);
 }
-extern "C" void func_00132060(void* self, int dir)
+extern "C" void func_00132060(cRailslideControl* self, int dir)
 {
     if (dir != 0) {
         *(float*)self -= 1.5707964897155762f;
@@ -6588,23 +6589,23 @@ void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
 extern "C" void* func_0028B180();
 extern "C" void func_00299B70(void* snd, void* rider);
 
-extern "C" int func_00132620(void* self, int id)
+extern "C" int func_00132620(cRailslideControl* self, int id)
 {
     if (id != -1)
     {
-        char* r = *(char**)((char*)self + 0x8);
+        char* r = (char*)self->mRider;
         if (*(float*)(r + 0x2F0) > 0.0f && ((*(int*)(r + 0xB2C) >> 1) & 1))
         {
             *(int*)(*(char**)(r + 0x77C) + 0x394) = id;
-            func_0011FEC8_impl(*(void**)((char*)self + 0x8), 0xC);
+            func_0011FEC8_impl(self->mRider, 0xC);
             return 1;
         }
-        if (id != *(int*)((char*)self + 0x4))
+        if (id != self->PrevGrindHeld)
         {
-            func_00299B70(func_0028B180(), *(void**)((char*)self + 0x8));
+            func_00299B70(func_0028B180(), self->mRider);
         }
     }
-    *(int*)((char*)self + 0x4) = id;
+    self->PrevGrindHeld = id;
     return 0;
 }
 #endif
@@ -6614,9 +6615,9 @@ INCLUDE_ASM("ai/ai", func_001326C8);
 #ifdef SKIP_ASM
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
-extern "C" void func_001326C8(void* self, int alt)
+extern "C" void func_001326C8(cRailslideControl* self, int alt)
 {
-    char* r = *(char**)((char*)self + 0x8);
+    char* r = (char*)self->mRider;
     int s = *(int*)(r + 0x328);
     if (s == 4)
     {
@@ -6659,27 +6660,27 @@ struct sAiBits00132770
     int v : 6;
 };
 
-extern "C" int func_00132770(void* self, void* a1)
+extern "C" int func_00132770(cRailslideControl* self, void* a1)
 {
-    if (func_0011FE98(*(void**)((char*)self + 0x8)) != 1)
+    if (func_0011FE98(self->mRider) != 1)
     {
         return 0;
     }
-    if (func_00311AE8(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 2) == 0xE)
+    if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0xE)
     {
-        if (!func_001446A0(func_00311B20(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 2) + 0xB0, 0))
+        if (!func_001446A0(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0xB0, 0))
         {
             return 0;
         }
     }
-    func_00115640(*(void**)((char*)self + 0x8));
+    func_00115640(self->mRider);
     if (((sAiBits00132770*)((char*)a1 + 4))->v * 0.032258063554763794f != 0.0f)
     {
-        func_0011FEC8_impl(*(void**)((char*)self + 0x8), 5);
+        func_0011FEC8_impl(self->mRider, 5);
     }
     else
     {
-        func_0011FEC8_impl(*(void**)((char*)self + 0x8), 4);
+        func_0011FEC8_impl(self->mRider, 4);
     }
     return 1;
 }
@@ -6694,7 +6695,7 @@ struct sVEntry00132840 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00132840(void* self, void* obj)
+extern "C" void func_00132840(cRailslideControl* self, void* obj)
 {
     sVEntry00132840* vt = *(sVEntry00132840**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
@@ -6710,7 +6711,7 @@ struct sVEntry00132878 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00132878(void* self, void* obj)
+extern "C" void func_00132878(cRailslideControl* self, void* obj)
 {
     sVEntry00132878* vt = *(sVEntry00132878**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
@@ -6723,30 +6724,30 @@ INCLUDE_ASM("ai/ai", func_001328B0);
 extern "C" void* func_0028B180();
 extern "C" void func_0029DC48(void* self, void* rider);
 extern "C" float func_00312790(char* self, int a1);
-extern "C" void func_00132FB8(void* self, int a1, int a2);
+extern "C" void func_00132FB8(cHandplantControl* self, int a1, int a2);
 extern "C" void func_00311E88(void*, int, float);
 extern char D_00459FC8[];
 
-extern "C" void func_001328B0(void* self)
+extern "C" void func_001328B0(cHandplantControl* self)
 {
     float k = 0.05000000447034836f;
     float blend = 0.33000001311302185f;
-    char* r = *(char**)((char*)self + 0x14);
+    char* r = (char*)self->mRider;
     *(float*)(r + 0x200) = k;
     *(int*)(r + 0x204) = 0;
-    char* r2 = *(char**)((char*)self + 0x14);
+    char* r2 = (char*)self->mRider;
     *(float*)(r2 + 0x1F4) = k;
     *(int*)(r2 + 0x1F8) = 0;
-    *(int*)(*(char**)((char*)self + 0x14) + 0x32C) = 1;
-    func_0029DC48(func_0028B180(), *(void**)((char*)self + 0x14));
-    char* r3 = *(char**)((char*)self + 0x14);
-    float d = func_00312790(*(char**)(r3 + 0x784), *(int*)(D_00459FC8 + *(int*)((char*)self + 0x10) * 8 + *(int*)(r3 + 0x32C) * 16));
-    *(float*)(*(char**)(*(char**)((char*)self + 0x14) + 0x784) + 0x1C) = d / *(float*)self;
-    func_00132FB8(self, *(int*)(*(char**)((char*)self + 0x14) + 0x32C), *(int*)((char*)self + 0x10));
-    *(float*)(*(char**)(*(char**)((char*)self + 0x14) + 0x784) + 0x1C) = 1.0f;
-    *(int*)((char*)self + 0x4) = 0;
-    func_00311E88(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 1, blend);
-    func_00311E88(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 0, blend);
+    *(int*)((char*)self->mRider + 0x32C) = 1;
+    func_0029DC48(func_0028B180(), self->mRider);
+    char* r3 = (char*)self->mRider;
+    float d = func_00312790(*(char**)(r3 + 0x784), *(int*)(D_00459FC8 + self->HandplantType * 8 + *(int*)(r3 + 0x32C) * 16));
+    *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C) = d / *(float*)self;
+    func_00132FB8(self, *(int*)((char*)self->mRider + 0x32C), self->HandplantType);
+    *(float*)(*(char**)((char*)self->mRider + 0x784) + 0x1C) = 1.0f;
+    *(int*)&self->CurBalance = 0;
+    func_00311E88(*(void**)((char*)self->mRider + 0x784), 1, blend);
+    func_00311E88(*(void**)((char*)self->mRider + 0x784), 0, blend);
 }
 #endif
 
@@ -6825,7 +6826,7 @@ extern "C" char* func_00311B20(void*, int);
 extern "C" void func_0010E098(void*, int, float);
 extern "C" float func_00119BF0(void* self, int a1);
 extern "C" float func_00119C38(void* self);
-extern "C" void func_00132FB8(void* self, int a1, int a2);
+extern "C" void func_00132FB8(cHandplantControl* self, int a1, int a2);
 extern "C" void cRider_doLeanPoseAdjust(void* self, void* p);
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
@@ -6864,39 +6865,39 @@ struct sAi_2A30 {
     cRider* r;    // 0x14
 };
 
-extern "C" void func_00132A30(sAi_2A30* self, sPad_2A30* in)
+extern "C" void func_00132A30(cHandplantControl* self, sPad_2A30* in)
 {
-    if (cRider_checkForReset_2A30(self->r, (in->flags >> 12) & 1, 0) != 0) {
+    if (cRider_checkForReset_2A30(self->mRider, (in->flags >> 12) & 1, 0) != 0) {
         return;
     }
-    cRider* r = self->r;
+    cRider* r = self->mRider;
     int st = r->unk_32C;
     if (st == 1) {
         if (func_00312AE8(r->mRiderAnim, 2) == 0) {
             return;
         }
-        if ((in->flags & 0x2000) && self->f8 == 0) {
-            self->r->unk_32C = 2;
-            func_0010E098(self->r, 1, func_00119BF0(self->r->mMetrix, 1));
+        if ((in->flags & 0x2000) && self->IsMissedHandplant == 0) {
+            self->mRider->unk_32C = 2;
+            func_0010E098(self->mRider, 1, func_00119BF0(self->mRider->mMetrix, 1));
         } else {
-            self->r->unk_32C = 3;
-            func_0010E098(self->r, 1, func_00119BF0(self->r->mMetrix, 2));
+            self->mRider->unk_32C = 3;
+            func_0010E098(self->mRider, 1, func_00119BF0(self->mRider->mMetrix, 2));
         }
-        func_00132FB8(self, self->r->unk_32C, self->dir);
-        self->t = 0.0f;
+        func_00132FB8(self, self->mRider->unk_32C, self->HandplantType);
+        self->EnterSec = 0.0f;
         return;
     }
     if (st == 2) {
         float dt = r->mTimeScale * 0.01666666753590107f;
-        self->t += dt;
+        self->EnterSec += dt;
         if ((in->flags & 0x2000) && __builtin_fabsf(r->mSlewed[8].cur) < 1.0f) {
             float desBal = ((in->flags << 12) >> 26) * 0.032258063554763794f;
             if (r->unk_320 != 0) desBal = -desBal;
-            if (self->dir == 1) desBal = -desBal;
+            if (self->HandplantType == 1) desBal = -desBal;
             r->mSlewed[7].target = desBal;
             r->mSlewed[7].rate = dt * 5.0f;
             float k = dt * 3.0f;
-            float p = self->pos;
+            float p = self->CurBalance;
             float np;
             if (desBal + k < p) {
                 np = p - k;
@@ -6905,18 +6906,18 @@ extern "C" void func_00132A30(sAi_2A30* self, sPad_2A30* in)
             } else {
                 np = desBal;
             }
-            self->pos = np;
+            self->CurBalance = np;
             float desTilt = np;
             if (np < 0.0f) {
                 desTilt = -1.0f;
             } else if (np > 0.0f) {
                 desTilt = 1.0f;
-            } else if (self->t > 0.5013384222984314f || self->r->mSlewed[8].cur != 0.0f) {
+            } else if (self->EnterSec > 0.5013384222984314f || self->mRider->mSlewed[8].cur != 0.0f) {
                 desTilt = 1.0f;
-                if (self->r->mSlewed[8].cur < 0.0f) desTilt = -1.0f;
+                if (self->mRider->mSlewed[8].cur < 0.0f) desTilt = -1.0f;
             }
-            r = self->r;
-            float weight = self->t * 0.19999131560325623f <? 1.0f; // PORT: g++ min operator
+            r = self->mRider;
+            float weight = self->EnterSec * 0.19999131560325623f <? 1.0f; // PORT: g++ min operator
             float b = 1.0f - weight;
             float c = fabs_2A30(r->mSlewed[8].cur);
             r->mSlewed[8].target = desTilt;
@@ -6925,67 +6926,67 @@ extern "C" void func_00132A30(sAi_2A30* self, sPad_2A30* in)
             r->mSlewed[8].rate = (edgeRate * c + cenRate * (1.0f - c)) * dt;
             return;
         }
-        if (self->fC != 0 && __builtin_fabsf(self->r->mSlewed[8].cur) < 0.25f) {
-            self->r->unk_32C = 6;
-        } else if (self->r->mSlewed[8].cur < -0.05000000074505806f) {
-            self->r->unk_32C = 4;
+        if (self->IsRailSpline != 0 && __builtin_fabsf(self->mRider->mSlewed[8].cur) < 0.25f) {
+            self->mRider->unk_32C = 6;
+        } else if (self->mRider->mSlewed[8].cur < -0.05000000074505806f) {
+            self->mRider->unk_32C = 4;
         } else {
-            self->r->unk_32C = 5;
+            self->mRider->unk_32C = 5;
         }
-        cRider_doLeanPoseAdjust(self->r, &self->r->mPosition);
-        cRider_updateOrientationImplicit(self->r);
-        cRider* q1 = self->r;
+        cRider_doLeanPoseAdjust(self->mRider, &self->mRider->mPosition);
+        cRider_updateOrientationImplicit(self->mRider);
+        cRider* q1 = self->mRider;
         q1->mSlewed[0].target = 0.0f;
         q1->mSlewed[0].cur = 0.0f;
         q1->mSlewed[0].rate = 0.0f;
-        cRider* q2 = self->r;
+        cRider* q2 = self->mRider;
         q2->mSlewed[2].target = 0.0f;
         q2->mSlewed[2].cur = 0.0f;
         q2->mSlewed[2].rate = 0.0f;
-        cRider* q3 = self->r;
+        cRider* q3 = self->mRider;
         q3->mSlewed[8].target = 0.0f;
         q3->mSlewed[8].cur = 0.0f;
         q3->mSlewed[8].rate = 0.0f;
-        func_00132FB8(self, self->r->unk_32C, self->dir);
+        func_00132FB8(self, self->mRider->unk_32C, self->HandplantType);
         return;
     }
     if (func_0011FE98(r) == 5) {
-        func_0010E098(self->r, 1, func_00119C38(self->r->mMetrix));
-        cRider_setMotionState_impl(self->r, 1);
+        func_0010E098(self->mRider, 1, func_00119C38(self->mRider->mMetrix));
+        cRider_setMotionState_impl(self->mRider, 1);
     }
-    if (func_001446A0(func_00311B20(self->r->mRiderAnim, 2) + 0xB0, 1)) {
-        if (func_00106848(self->r)) {
+    if (func_001446A0(func_00311B20(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
+        if (func_00106848(self->mRider)) {
             return;
         }
-        if (func_0011FE98(self->r) == 0) {
-            cRiderAnimBase_play(self->r->mRiderAnim, 0x3D, 0, -1.0f);
-            func_0011FEC8_impl(self->r, 0);
+        if (func_0011FE98(self->mRider) == 0) {
+            cRiderAnimBase_play(self->mRider->mRiderAnim, 0x3D, 0, -1.0f);
+            func_0011FEC8_impl(self->mRider, 0);
             return;
         }
     } else {
-        int m = func_0011FE98(self->r);
+        int m = func_0011FE98(self->mRider);
         if (m == 1) {
-            int ok = *(int*)((char*)self->r->mAirPredictor + 0xAC) == 1 || *(int*)((char*)self->r->mAirPredictor + 0xAC) == 3;
+            int ok = *(int*)((char*)self->mRider->mAirPredictor + 0xAC) == 1 || *(int*)((char*)self->mRider->mAirPredictor + 0xAC) == 3;
             if (ok) {
-                char* q = (char*)self->r->mAirPredictor;
+                char* q = (char*)self->mRider->mAirPredictor;
                 float airTimeLeft = *(float*)(q + 0x98) - *(float*)(q + 0xA0);
                 if (airTimeLeft > 0.0f) {
-                    char* seq = func_00311B20(self->r->mRiderAnim, 2);
+                    char* seq = func_00311B20(self->mRider->mRiderAnim, 2);
                     float animRate = (*(float*)(seq + 0x10) - *(float*)(seq + 0x8)) / airTimeLeft;
                     *(float*)(seq + 0x90) = clamp_2A30(animRate, 0.5f, 2.0f);
                 }
             }
         }
     }
-    if (func_00312AE8(self->r->mRiderAnim, 2) == 0) {
+    if (func_00312AE8(self->mRider->mRiderAnim, 2) == 0) {
         return;
     }
-    if (func_0011FE98(self->r) == 1) {
-        cRiderAnimBase_play(self->r->mRiderAnim, 0x11F, 0, -1.0f);
-        func_0011FEC8_impl(self->r, 4);
+    if (func_0011FE98(self->mRider) == 1) {
+        cRiderAnimBase_play(self->mRider->mRiderAnim, 0x11F, 0, -1.0f);
+        func_0011FEC8_impl(self->mRider, 4);
     } else {
-        cRiderAnimBase_play(self->r->mRiderAnim, 0x3D, 0, -1.0f);
-        func_0011FEC8_impl(self->r, 0);
+        cRiderAnimBase_play(self->mRider->mRiderAnim, 0x3D, 0, -1.0f);
+        func_0011FEC8_impl(self->mRider, 0);
     }
 }
 #endif
@@ -6993,11 +6994,11 @@ extern "C" void func_00132A30(sAi_2A30* self, sPad_2A30* in)
 //100%
 INCLUDE_ASM("ai/ai", func_00132F98);
 #ifdef SKIP_ASM
-extern "C" void func_00132F98(void* self)
+extern "C" void func_00132F98(cHandplantControl* self)
 {
-    char* a = *(char**)((char*)self + 0x14);
+    char* a = (char*)self->mRider;
     *(int*)(a + 0x32C) = 0;
-    char* b = *(char**)((char*)self + 0x14);
+    char* b = (char*)self->mRider;
     *(float*)(b + 0x248) = 0.05000000447034836f;
     *(int*)(b + 0x24C) = 0;
 }
@@ -7058,17 +7059,17 @@ static inline sQuat_132FB8 QuatMul_132FB8(const sQuat_132FB8& a, const sQuat_132
     return r;
 }
 
-extern "C" void func_00132FB8(void* self, int a1, int a2)
+extern "C" void func_00132FB8(cHandplantControl* self, int a1, int a2)
 {
     if (D_00459FC8_tbl[a1][a2].flip != 0)
     {
-        char* r = *(char**)((char*)self + 0x14);
+        char* r = (char*)self->mRider;
         sQuat_132FB8 t = QuatMul_132FB8(sQuat_132FB8(sVec3_132FB8(*(sVec4_132FB8*)(r + 0x1C0)), 0.0f), *(sQuat_132FB8*)(r + 0x120));
-        *(sQuat_132FB8*)(*(char**)((char*)self + 0x14) + 0x120) = t;
-        cRider_updateOrientationImplicit(*(void**)((char*)self + 0x14));
-        cRiderAnimBase_changeHeadingOffset(*(void**)(*(char**)((char*)self + 0x14) + 0x784), 3.1415927410125732f);
+        *(sQuat_132FB8*)((char*)self->mRider + 0x120) = t;
+        cRider_updateOrientationImplicit(self->mRider);
+        cRiderAnimBase_changeHeadingOffset(*(void**)((char*)self->mRider + 0x784), 3.1415927410125732f);
     }
-    cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x14) + 0x784), D_00459FC8_tbl[a1][a2].anim, 0, -1.0f);
+    cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), D_00459FC8_tbl[a1][a2].anim, 0, -1.0f);
 }
 #endif
 
@@ -7081,7 +7082,7 @@ struct sVEntry001330B8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001330B8(void* self, void* obj)
+extern "C" void func_001330B8(cHandplantControl* self, void* obj)
 {
     sVEntry001330B8* vt = *(sVEntry001330B8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x14);
@@ -7097,7 +7098,7 @@ struct sVEntry001330F0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001330F0(void* self, void* obj)
+extern "C" void func_001330F0(cHandplantControl* self, void* obj)
 {
     sVEntry001330F0* vt = *(sVEntry001330F0**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x14);
@@ -7112,38 +7113,38 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" float func_001495A8(void* self, int rider, int value);
 extern "C" char* func_00311B20(void*, int);
-extern "C" float func_00135180(void* self);
-extern "C" void func_00135B30(void* self, float a, float b);
+extern "C" float func_00135180(cSpinControl* self);
+extern "C" void func_00135B30(cSpinControl* self, float a, float b);
 
-extern "C" void func_00133128(void* self)
+extern "C" void func_00133128(cSpinControl* self)
 {
     float lo = 4.499661445617676f;
-    *(int*)((char*)self + 0x8) = -1;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x18) = 0;
-    *(int*)((char*)self + 0x1C) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x20) = 0;
-    *(int*)((char*)self + 0x24) = 0;
-    *(int*)((char*)self + 0x28) = 0;
-    *(int*)((char*)self + 0x2C) = 0;
-    *(int*)((char*)self + 0x30) = 0;
-    *(int*)((char*)self + 0x34) = 0;
-    *(float*)((char*)self + 0x38) = lo;
-    *(float*)((char*)self + 0x3C) = lo;
-    *(float*)((char*)self + 0x40) = 0.0f;
-    *(float*)((char*)self + 0x44) = 0.0f;
-    *(float*)(*(char**)((char*)self + 0x58) + 0x2DC) = 0.0f;
-    *(float*)(*(char**)((char*)self + 0x58) + 0x2E0) = 0.0f;
-    *(float*)((char*)self + 0x48) = 0.0f;
-    *(float*)((char*)self + 0x50) = 1.0000000150474662e+30f;
-    char* r = *(char**)((char*)self + 0x58);
-    *(float*)((char*)self + 0x4C) = 0.0f;
-    *(float*)((char*)self + 0x54) = 0.0f;
+    self->CurrentGrab = -1;
+    self->GrabState = 0;
+    *(int*)&self->CurFlip = 0;
+    *(int*)&self->CurSpin = 0;
+    *(int*)&self->DesFlip = 0;
+    *(int*)&self->DesSpin = 0;
+    *(int*)&self->TrickSpin = 0;
+    *(int*)&self->TrickFlip = 0;
+    *(int*)&self->AirAdjSpin = 0;
+    *(int*)&self->AirAdjFlip = 0;
+    *(int*)&self->TotalSpinAng = 0;
+    *(int*)&self->TotalFlipAng = 0;
+    self->MaxSpinAngVel = lo;
+    self->MaxFlipAngVel = lo;
+    self->FlipAxisWeight = 0.0f;
+    *(float*)&self->IsPartialLateSpin = 0.0f;
+    *(float*)((char*)self->mRider + 0x2DC) = 0.0f;
+    *(float*)((char*)self->mRider + 0x2E0) = 0.0f;
+    self->DesSpinInputSec = 0.0f;
+    self->FlipSpinInputAng = 1.0000000150474662e+30f;
+    char* r = (char*)self->mRider;
+    self->DesFlipInputSec = 0.0f;
+    self->NullFlipSpinInputSec = 0.0f;
     if (*(float*)(r + 0x2A4) != 0.0f || *(float*)(r + 0x2B0) != 0.0f)
     {
-        *(int*)((char*)self + 0xC) = 0;
+        self->SpinState = 0;
         float x = *(float*)(r + 0x2A4);
         float a = __builtin_fabsf(x);
         float b = __builtin_fabsf(*(float*)(r + 0x2B0));
@@ -7155,21 +7156,21 @@ extern "C" void func_00133128(void* self)
         if (x != 0.0f)
         {
             float v = m * 7.00038480758667f >? lo;
-            *(float*)((char*)self + 0x38) = v;
+            self->MaxSpinAngVel = v;
             *(float*)(r + 0x2DC) = v;
         }
-        r = *(char**)((char*)self + 0x58);
+        r = (char*)self->mRider;
         if (*(float*)(r + 0x2B0) != 0.0f)
         {
             float v = (m * 7.00038480758667f >? lo) * 0.6666666865348816f;
-            *(float*)((char*)self + 0x3C) = v;
+            self->MaxFlipAngVel = v;
             *(float*)(r + 0x2E0) = v;
         }
-        *(float*)((char*)self + 0x40) = func_00135180(self);
-        char* r2 = *(char**)((char*)self + 0x58);
+        self->FlipAxisWeight = func_00135180(self);
+        char* r2 = (char*)self->mRider;
         func_00135B30(self, *(float*)(r2 + 0x2B0), *(float*)(r2 + 0x2A4));
-        float s = func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(*(char**)((char*)self + 0x58) + 0x86C), *(int*)(*(char**)((char*)self + 0x58) + 0xB34));
-        char* r4 = *(char**)((char*)self + 0x58);
+        float s = func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
+        char* r4 = (char*)self->mRider;
         float t = (s * 0.5002591609954834f + 1.0f) * (*(float*)(r4 + 0x2E0) >? *(float*)(r4 + 0x2DC)) * 0.14284929633140564f;
         *(float*)(func_00311B20(*(void**)(r4 + 0x784), 2) + 0x90) = t;
         *(int*)self = 1;
@@ -7177,7 +7178,7 @@ extern "C" void func_00133128(void* self)
     else
     {
         *(int*)self = 0;
-        *(int*)((char*)self + 0xC) = 3;
+        self->SpinState = 3;
     }
 }
 #endif
@@ -7190,12 +7191,12 @@ INCLUDE_ASM("ai/ai", func_00133308);
 extern "C" int cRider_checkForReset_3308(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" int func_00107578(void* rider, int on);
 extern "C" int func_00106848(void*);
-extern "C" int func_001352A8(void* self, int c, int flag);
+extern "C" int func_001352A8(cSpinControl* self, int c, int flag);
 extern "C" void func_00114130(void* rider, int a, int b);
 int func_00312AA0(void* self, int i);
 extern "C" int func_00135BE0(void* self);
 extern "C" void func_001158B8(void* rider, void* a, void* b, float c, float d);
-extern "C" void func_00135B30(void* self, float a, float b);
+extern "C" void func_00135B30(cSpinControl* self, float a, float b);
 extern "C" float func_00119C98(void* self, int v);
 extern "C" void func_0010E098(void*, int, float);
 extern "C" void* cBE_getBE();
@@ -7405,7 +7406,7 @@ extern "C" void func_00133308(sSpinCtl_133308* self, int* input)
         spinAdj = flipAdj = 0.0f;
     }
 
-    int busy = func_001352A8(self, trick, (*input >> 14) & 1);
+    int busy = func_001352A8((cSpinControl*)self, trick, (*input >> 14) & 1);
     if (!busy && self->mode == 3)
         self->mode = 0;
 
@@ -7449,7 +7450,7 @@ extern "C" void func_00133308(sSpinCtl_133308* self, int* input)
             (spin != 0.0f || flip != 0.0f))
         {
             func_001158B8(self->rider, &flip, &spin, 0.7853982448577881f, 0.0f);
-            func_00135B30(self, flip, spin);
+            func_00135B30((cSpinControl*)self, flip, spin);
             self->spinAcc = 0.0f;
             self->flipAcc = 0.0f;
             self->spinSpeed = 4.499661445617676f;
@@ -7868,27 +7869,27 @@ extern "C" void func_00311E88(void*, int, float);
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void func_00134DD0(void* self, void* pos);
 
-extern "C" void func_00134CB0(void* self)
+extern "C" void func_00134CB0(cSpinControl* self)
 {
-    func_00311E88(*(void**)(*(char**)((char*)self + 0x58) + 0x784), 1, 0.33000001311302185f);
-    char* r = *(char**)((char*)self + 0x58);
+    func_00311E88(*(void**)((char*)self->mRider + 0x784), 1, 0.33000001311302185f);
+    char* r = (char*)self->mRider;
     *(int*)(r + 0x2AC) = 0;
     *(int*)(r + 0x2A4) = 0;
     *(int*)(r + 0x2A8) = 0;
-    char* r2 = *(char**)((char*)self + 0x58);
+    char* r2 = (char*)self->mRider;
     *(int*)(r2 + 0x2B8) = 0;
     *(int*)(r2 + 0x2B0) = 0;
     *(int*)(r2 + 0x2B4) = 0;
-    char* r3 = *(char**)((char*)self + 0x58);
+    char* r3 = (char*)self->mRider;
     *(float*)(r3 + 0x290) = 0.01666666753590107f;
     *(int*)(r3 + 0x294) = 0;
-    char* r4 = *(char**)((char*)self + 0x58);
+    char* r4 = (char*)self->mRider;
     *(float*)(r4 + 0x29C) = 0.01666666753590107f;
     *(int*)(r4 + 0x2A0) = 0;
-    func_00134DD0(self, *(char**)((char*)self + 0x58) + 0x110);
-    cRider_updateOrientationImplicit(*(void**)((char*)self + 0x58));
-    *(float*)(*(char**)((char*)self + 0x58) + 0x2DC) *= 0.7500380277633667f;
-    char* r5 = *(char**)((char*)self + 0x58);
+    func_00134DD0(self, (char*)self->mRider + 0x110);
+    cRider_updateOrientationImplicit(self->mRider);
+    *(float*)((char*)self->mRider + 0x2DC) *= 0.7500380277633667f;
+    char* r5 = (char*)self->mRider;
     float a = *(float*)(r5 + 0x2DC);
     if (a > 4.7123894691467285f)
         *(float*)(r5 + 0x2DC) = 7.853982448577881f;
@@ -7898,10 +7899,10 @@ extern "C" void func_00134CB0(void* self)
         *(float*)(r5 + 0x2DC) = 1.5707964897155762f;
     else
         *(float*)(r5 + 0x2DC) = 0.0f;
-    *(int*)(*(char**)((char*)self + 0x58) + 0x2E0) = 0;
-    if (*(float*)((char*)self + 0x1C) > *(float*)((char*)self + 0x14))
+    *(int*)((char*)self->mRider + 0x2E0) = 0;
+    if (self->CurSpin > self->DesSpin)
     {
-        *(float*)(*(char**)((char*)self + 0x58) + 0x2DC) = -*(float*)(*(char**)((char*)self + 0x58) + 0x2DC);
+        *(float*)((char*)self->mRider + 0x2DC) = -*(float*)((char*)self->mRider + 0x2DC);
     }
 }
 #endif
@@ -8002,7 +8003,7 @@ static inline sVec4 Scale_12E010_4DD0(const sVec4& v, float s)
         : "memory");
     return r;
 }
-extern "C" float func_00135180(void* self);
+extern "C" float func_00135180(cSpinControl* self);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar, constant vector through a register).
@@ -8173,7 +8174,7 @@ extern "C" void func_00134DD0_x(void* self, sXf* xf)
         AddToL_134DD0(xf->pos, v);
         xf->rot *= AxisAngle2_134DD0(D_004FF160_4DD0, a1);
     }
-    float cur = func_00135180(self);
+    float cur = func_00135180((cSpinControl*)self);
     float old = *(float*)((char*)self + 0x40);
     float delta = __builtin_fabsf(old - cur) * 0.03333333507180214f;
     float nv;
@@ -8242,9 +8243,9 @@ static inline float aiClamp_135180(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" float func_00135180(void* self)
+extern "C" float func_00135180(cSpinControl* self)
 {
-    char* r = *(char**)((char*)self + 0x58);
+    char* r = (char*)self->mRider;
     float x = *(float*)(r + 0x2DC);
     float y = *(float*)(r + 0x2E0);
     float ax = aiAbs_135180(x);
@@ -8282,7 +8283,7 @@ struct sTrickAnim_52A8 {
     cRider* rider;  // 0x58
 };
 
-extern "C" int func_001352A8(void* vself, int trick, int held)
+extern "C" int func_001352A8(cSpinControl* vself, int trick, int held)
 {
     sTrickAnim_52A8* self = (sTrickAnim_52A8*)vself;
     float speed = func_00120038(self->rider);
@@ -8424,27 +8425,26 @@ extern "C" int func_001352A8(void* vself, int trick, int held)
 //100%
 INCLUDE_ASM("ai/ai", func_00135B30);
 #ifdef SKIP_ASM
-extern "C" void func_00135B30(void* self, float a, float b)
+extern "C" void func_00135B30(cSpinControl* self, float a, float b)
 {
-    char* s = (char*)self;
     if (b > 0.0f)
-        *(float*)(s + 0x14) = 3.1415929794311523f;
+        self->DesSpin = 3.1415929794311523f;
     else if (b < 0.0f)
-        *(float*)(s + 0x14) = -3.1415929794311523f;
+        self->DesSpin = -3.1415929794311523f;
     else
-        *(float*)(s + 0x14) = 0.0f;
+        self->DesSpin = 0.0f;
     if (a > 0.0f)
-        *(float*)(s + 0x10) = 6.283185958862305f;
+        self->DesFlip = 6.283185958862305f;
     else if (a < 0.0f)
-        *(float*)(s + 0x10) = -6.283185958862305f;
+        self->DesFlip = -6.283185958862305f;
     else
-        *(float*)(s + 0x10) = 0.0f;
-    *(float*)(s + 0x1C) += *(float*)(s + 0x28);
-    *(float*)(s + 0x18) += *(float*)(s + 0x2C);
-    *(float*)(s + 0x20) += *(float*)(s + 0x28);
-    *(float*)(s + 0x24) += *(float*)(s + 0x2C);
-    *(float*)(s + 0x28) = 0.0f;
-    *(float*)(s + 0x2C) = 0.0f;
+        self->DesFlip = 0.0f;
+    self->CurSpin += self->AirAdjSpin;
+    self->CurFlip += self->AirAdjFlip;
+    self->TrickSpin += self->AirAdjSpin;
+    self->TrickFlip += self->AirAdjFlip;
+    self->AirAdjSpin = 0.0f;
+    self->AirAdjFlip = 0.0f;
 }
 #endif
 
@@ -8504,19 +8504,19 @@ static inline float aiAbs_135CB0(float x)
     return r;
 }
 
-extern "C" void func_00135CB0(void* self, float* a, float* b)
+extern "C" void func_00135CB0(cSpinControl* self, float* a, float* b)
 {
     float pi = 3.1415929794311523f;
-    float d = aiAbs_135CB0(*(float*)((char*)self + 0x1C) - *(float*)((char*)self + 0x14));
+    float d = aiAbs_135CB0(self->CurSpin - self->DesSpin);
     if (d > pi) d -= pi;
-    *a = d / *(float*)((char*)self + 0x38);
-    *b = pi / *(float*)((char*)self + 0x38);
-    if (*(float*)(*(char**)((char*)self + 0x58) + 0x2EC) > 0.0f)
+    *a = d / self->MaxSpinAngVel;
+    *b = pi / self->MaxSpinAngVel;
+    if (*(float*)((char*)self->mRider + 0x2EC) > 0.0f)
     {
         *b *= 0.5000624656677246f;
         *a *= 0.5000624656677246f;
     }
-    float s = func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(*(char**)((char*)self + 0x58) + 0x86C), *(int*)(*(char**)((char*)self + 0x58) + 0xB34));
+    float s = func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
     float m = 1.0f / (s * 0.5002591609954834f + 1.0f);
     *b *= m;
     *a *= m;
@@ -8539,19 +8539,19 @@ static inline float aiAbs_135DB0(float x)
     return r;
 }
 
-extern "C" void func_00135DB0(void* self, float* a, float* b)
+extern "C" void func_00135DB0(cSpinControl* self, float* a, float* b)
 {
     float twopi = 6.283185958862305f;
-    float d = aiAbs_135DB0(*(float*)((char*)self + 0x18) - *(float*)((char*)self + 0x10));
+    float d = aiAbs_135DB0(self->CurFlip - self->DesFlip);
     if (d > twopi) d -= twopi;
-    *a = d / *(float*)((char*)self + 0x3C);
-    *b = twopi / *(float*)((char*)self + 0x3C);
-    if (*(float*)(*(char**)((char*)self + 0x58) + 0x2EC) > 0.0f)
+    *a = d / self->MaxFlipAngVel;
+    *b = twopi / self->MaxFlipAngVel;
+    if (*(float*)((char*)self->mRider + 0x2EC) > 0.0f)
     {
         *b *= 0.5000624656677246f;
         *a *= 0.5000624656677246f;
     }
-    float s = func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(*(char**)((char*)self + 0x58) + 0x86C), *(int*)(*(char**)((char*)self + 0x58) + 0xB34));
+    float s = func_001495A8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
     float m = 1.0f / (s * 0.5002591609954834f + 1.0f);
     *b *= m;
     *a *= m;
@@ -8563,12 +8563,12 @@ INCLUDE_ASM("ai/ai", func_00135EB0);
 #ifdef SKIP_ASM
 extern "C" int func_00311AE8(void*, int);
 
-extern "C" int func_00135EB0(void* self)
+extern "C" int func_00135EB0(cSpinControl* self)
 {
     int r = 0;
-    if (*(int*)((char*)self + 0x4) == 2)
+    if (self->GrabState == 2)
     {
-        r = func_00311AE8(*(void**)(*(char**)((char*)self + 0x58) + 0x784), 2) == 0x12;
+        r = func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x12;
     }
     return r;
 }
@@ -8579,12 +8579,12 @@ INCLUDE_ASM("ai/ai", func_00135EF0);
 #ifdef SKIP_ASM
 extern "C" int func_00311AE8(void*, int);
 
-extern "C" int func_00135EF0(void* self)
+extern "C" int func_00135EF0(cSpinControl* self)
 {
     int r = 0;
-    if (*(int*)((char*)self + 0x4) == 4)
+    if (self->GrabState == 4)
     {
-        r = func_00311AE8(*(void**)(*(char**)((char*)self + 0x58) + 0x784), 2) == 0x13;
+        r = func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x13;
     }
     return r;
 }
@@ -8595,12 +8595,12 @@ INCLUDE_ASM("ai/ai", func_00135F30);
 #ifdef SKIP_ASM
 extern "C" int func_00311AE8(void*, int);
 
-extern "C" int func_00135F30(void* self)
+extern "C" int func_00135F30(cSpinControl* self)
 {
     int r = 0;
-    if (*(int*)((char*)self + 0x4) == 4)
+    if (self->GrabState == 4)
     {
-        r = func_00311AE8(*(void**)(*(char**)((char*)self + 0x58) + 0x784), 2) == 0x14;
+        r = func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x14;
     }
     return r;
 }
@@ -8619,10 +8619,10 @@ static inline float aiSign_135F70(float v)
     return -1.0f;
 }
 
-extern "C" float func_00135F70(void* self, int* out)
+extern "C" float func_00135F70(cSpinControl* self, int* out)
 {
-    float y = aiSign_135F70(*(float*)((char*)self + 0x18));
-    float x = aiSign_135F70(*(float*)((char*)self + 0x1C));
+    float y = aiSign_135F70(self->CurFlip);
+    float x = aiSign_135F70(self->CurSpin);
     int zero = 0;
     if (y == 0.0f && x == 0.0f) zero = 1;
     *out = zero;
@@ -8634,13 +8634,13 @@ extern "C" float func_00135F70(void* self, int* out)
 //100%
 INCLUDE_ASM("ai/ai", func_001360C8);
 #ifdef SKIP_ASM
-extern "C" float func_001360C8(void* self, int* out)
+extern "C" float func_001360C8(cSpinControl* self, int* out)
 {
-    int b = *(float*)((char*)self + 0x50) == 1.0000000150474662e+30f;
+    int b = self->FlipSpinInputAng == 1.0000000150474662e+30f;
     *out = b;
     if (b)
         return 0.0f;
-    return *(float*)((char*)self + 0x50);
+    return self->FlipSpinInputAng;
 }
 #endif
 
@@ -8648,9 +8648,9 @@ extern "C" float func_001360C8(void* self, int* out)
 INCLUDE_ASM("ai/ai", func_00136100);
 #ifdef SKIP_ASM
 // PORT: g++ `>?` (max) operator. aiWrap_135BE0 uses the FPU-only cvt.w.s/cvt.s.w asm helper.
-extern "C" float func_00136100(void* self)
+extern "C" float func_00136100(cSpinControl* self)
 {
-    float d = __builtin_fabsf(aiWrap_135BE0(*(float*)((char*)self + 0x18))) * 0.31830987334251404f - 0.5f;
+    float d = __builtin_fabsf(aiWrap_135BE0(self->CurFlip)) * 0.31830987334251404f - 0.5f;
     d = d >? 0.0f;
     return d * 2.0f;
 }
@@ -8660,9 +8660,9 @@ extern "C" float func_00136100(void* self)
 INCLUDE_ASM("ai/ai", func_00136168);
 #ifdef SKIP_ASM
 // PORT: g++ `>?` (max) operator. aiWrap_135BE0 uses the FPU-only cvt.w.s/cvt.s.w asm helper.
-extern "C" float func_00136168(void* self)
+extern "C" float func_00136168(cSpinControl* self)
 {
-    float d = __builtin_fabsf(aiWrap_135BE0(*(float*)((char*)self + 0x1C))) * 0.6366197466850281f;
+    float d = __builtin_fabsf(aiWrap_135BE0(self->CurSpin)) * 0.6366197466850281f;
     if (d > 1.0f)
         d = 2.0f - d;
     d = d - 0.25f;
@@ -8680,7 +8680,7 @@ struct sVEntry001361F8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001361F8(void* self, void* obj)
+extern "C" void func_001361F8(cSpinControl* self, void* obj)
 {
     sVEntry001361F8* vt = *(sVEntry001361F8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x58);
@@ -8696,7 +8696,7 @@ struct sVEntry00136230 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00136230(void* self, void* obj)
+extern "C" void func_00136230(cSpinControl* self, void* obj)
 {
     sVEntry00136230* vt = *(sVEntry00136230**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x58);
@@ -8715,38 +8715,38 @@ struct sAnimSet_00136268 {
 };
 extern sAnimSet_00136268 D_0045A038[];
 
-extern "C" void func_00136268(void* self)
+extern "C" void func_00136268(cUberGrindControl* self)
 {
-    sAnimSet_00136268* e = &D_0045A038[*(int*)((char*)self + 0x4)];
-    char* r = *(char**)((char*)self + 0x8);
+    sAnimSet_00136268* e = &D_0045A038[self->CurrentGrind];
+    char* r = (char*)self->mRider;
     int s = *(int*)(r + 0x328);
     if (s == 4) {
         char* anim = *(char**)(r + 0x784);
         *(sQuat_12FEC8*)(anim + 0x30) = D_004FF130;
         *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(D_004FF160, 1.5707963705062866f);
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x8) + 0x784), e->anims[0], 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), e->anims[0], 0, -1.0f);
     } else if (s == 3) {
         cRiderAnimBase_play(*(void**)(r + 0x784), e->anims[1], 0, -1.0f);
     } else if (s == 2) {
         *(int*)(r + 0x320) = 0;
-        *(int*)(*(char**)(*(char**)((char*)self + 0x8) + 0x784) + 0x18) = 0;
-        char* anim = *(char**)(*(char**)((char*)self + 0x8) + 0x784);
+        *(int*)(*(char**)((char*)self->mRider + 0x784) + 0x18) = 0;
+        char* anim = *(char**)((char*)self->mRider + 0x784);
         *(sQuat_12FEC8*)(anim + 0x30) = D_004FF130;
         *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(D_004FF160, 1.5707963705062866f);
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x8) + 0x784), e->anims[2], 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), e->anims[2], 0, -1.0f);
     } else {
         char* anim = *(char**)(r + 0x784);
         *(sQuat_12FEC8*)(anim + 0x30) = D_004FF130;
         *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(D_004FF160, 1.5707963705062866f);
-        cRiderAnimBase_play(*(void**)(*(char**)((char*)self + 0x8) + 0x784), e->anims[3], 0, -1.0f);
+        cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), e->anims[3], 0, -1.0f);
     }
     float k = 0.33000001311302185f;
-    func_0010E098(*(void**)((char*)self + 0x8), 1, func_00119938(*(void**)(*(char**)((char*)self + 0x8) + 0x790), e->x20, *(int*)(*(char**)((char*)self + 0x8) + 0x328)));
-    *(int*)(*(char**)((char*)self + 0x8) + 0x328) = 3;
+    func_0010E098(self->mRider, 1, func_00119938(*(void**)((char*)self->mRider + 0x790), e->x20, *(int*)((char*)self->mRider + 0x328)));
+    *(int*)((char*)self->mRider + 0x328) = 3;
     *(int*)self = 0;
-    func_00116930(*(void**)((char*)self + 0x8));
-    func_00311E88(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 1, k);
-    func_00311E88(*(void**)(*(char**)((char*)self + 0x8) + 0x784), 0, k);
+    func_00116930(self->mRider);
+    func_00311E88(*(void**)((char*)self->mRider + 0x784), 1, k);
+    func_00311E88(*(void**)((char*)self->mRider + 0x784), 0, k);
 }
 #endif
 
@@ -8765,7 +8765,7 @@ extern "C" int cRider_checkForReset_i(void* rider, int a, int b) __asm__("cRider
 extern "C" float func_00119958(void* p, int v);
 int func_0011FE98(void* self);
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
-extern "C" void func_001326C8(void*, int);
+extern "C" void func_001326C8(cRailslideControl*, int);
 extern "C" bool func_001446A0(void* self, int bit);
 extern "C" int func_00311AE8(void*, int);
 extern "C" char* func_00311B20(void*, int);
@@ -8800,96 +8800,96 @@ struct sAiObj136508
     char* mRider;
 };
 
-extern "C" void func_00136508(sAiObj136508* self, void* in)
+extern "C" void func_00136508(cUberGrindControl* self, void* in)
 {
-    if (cRider_checkForReset_i(self->mRider, (*(int*)in >> 12) & 1, 0))
+    if (cRider_checkForReset_i((char*)self->mRider, (*(int*)in >> 12) & 1, 0))
         return;
-    char* tbl = (char*)D_0045A038 + self->mIndex * 0x24;
-    if (func_00106848(self->mRider))
+    char* tbl = (char*)D_0045A038 + self->CurrentGrind * 0x24;
+    if (func_00106848((char*)self->mRider))
     {
-        if (self->mState == 1)
-            cRiderAnimBase_play_i136508(*(void**)(self->mRider + 0x784), *(int*)(tbl + 0x18), 0, -1.0f);
+        if (self->GrindState == 1)
+            cRiderAnimBase_play_i136508(*(void**)((char*)self->mRider + 0x784), *(int*)(tbl + 0x18), 0, -1.0f);
         return;
     }
     int w = *(int*)in;
     float zero = 0.0f;
-    func_00114130(self->mRider, (w >> 14) & 1, (w >> 13) & 1);
-    func_00113F38(self->mRider, ((sAiBitsA_136508*)in)->v * 0.032258063554763794f);
-    func_00113F88(self->mRider, zero, zero);
-    if (self->mState == 0)
+    func_00114130((char*)self->mRider, (w >> 14) & 1, (w >> 13) & 1);
+    func_00113F38((char*)self->mRider, ((sAiBitsA_136508*)in)->v * 0.032258063554763794f);
+    func_00113F88((char*)self->mRider, zero, zero);
+    if (self->GrindState == 0)
     {
-        char* r0 = self->mRider;
+        char* r0 = (char*)self->mRider;
         *(float*)(r0 + 0x240) = zero;
         *(float*)(r0 + 0x23C) = 0.05833333730697632f;
-        if (func_00312AE8(*(void**)(self->mRider + 0x784), 2))
+        if (func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2))
         {
-            cRiderAnimBase_play_i136508(*(void**)(self->mRider + 0x784), *(int*)(tbl + 0x10), 0, -1.0f);
-            *(float*)(func_00311B20(*(void**)(self->mRider + 0x784), 2) + 0x90) = 1.0f;
-            self->mState = 1;
+            cRiderAnimBase_play_i136508(*(void**)((char*)self->mRider + 0x784), *(int*)(tbl + 0x10), 0, -1.0f);
+            *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
+            self->GrindState = 1;
         }
     }
-    if (self->mState == 1)
+    if (self->GrindState == 1)
     {
-        if (((sAiBitsB_136508*)in)->v != self->mIndex || func_0011FE98(self->mRider) == 0)
+        if (((sAiBitsB_136508*)in)->v != self->CurrentGrind || func_0011FE98((char*)self->mRider) == 0)
         {
-            cRiderAnimBase_play_i136508(*(void**)(self->mRider + 0x784), *(int*)(tbl + 0x1C), 0, -1.0f);
-            *(float*)(func_00311B20(*(void**)(self->mRider + 0x784), 2) + 0x90) = 1.0f;
-            self->mState = 2;
+            cRiderAnimBase_play_i136508(*(void**)((char*)self->mRider + 0x784), *(int*)(tbl + 0x1C), 0, -1.0f);
+            *(float*)(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
+            self->GrindState = 2;
         }
-        else if (func_00312AA0(*(void**)(self->mRider + 0x784), 2) != *(int*)(tbl + 0x18) ||
-                 func_00312AE8(*(void**)(self->mRider + 0x784), 2))
+        else if (func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2) != *(int*)(tbl + 0x18) ||
+                 func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2))
         {
-            if (func_0011FE98(self->mRider) != 4)
+            if (func_0011FE98((char*)self->mRider) != 4)
             {
-                char* r = self->mRider;
+                char* r = (char*)self->mRider;
                 *(float*)(r + 0x240) = 0.0f;
                 *(float*)(r + 0x23C) = 0.05833333730697632f;
             }
             else
             {
-                char* r = self->mRider;
+                char* r = (char*)self->mRider;
                 *(float*)(r + 0x240) = *(float*)(*(char**)(r + 0x77C) + 0xC8);
                 *(float*)(r + 0x23C) = 0.05833333730697632f;
             }
-            int cur = func_00312AA0(*(void**)(self->mRider + 0x784), 2);
+            int cur = func_00312AA0(*(void**)((char*)self->mRider + 0x784), 2);
             int a;
-            if (aiAbs_136508(*(float*)(self->mRider + 0x238)) < 0.10000000149011612f)
+            if (aiAbs_136508(*(float*)((char*)self->mRider + 0x238)) < 0.10000000149011612f)
                 a = *(int*)(tbl + 0x10);
             else
                 a = *(int*)(tbl + 0x14);
             if (a != cur)
-                cRiderAnimBase_play_i136508(*(void**)(self->mRider + 0x784), a, 0, -1.0f);
+                cRiderAnimBase_play_i136508(*(void**)((char*)self->mRider + 0x784), a, 0, -1.0f);
         }
     }
-    if (self->mState == 2)
+    if (self->GrindState == 2)
     {
-        char* r2 = self->mRider;
+        char* r2 = (char*)self->mRider;
         *(float*)(r2 + 0x240) = 0.0f;
         *(float*)(r2 + 0x23C) = 0.05833333730697632f;
-        if (func_00311AE8(*(void**)(self->mRider + 0x784), 2) == 0x15 &&
-            !func_00312AE8(*(void**)(self->mRider + 0x784), 2) &&
-            !func_001446A0(func_00311B20(*(void**)(self->mRider + 0x784), 2) + 0xB0, 0))
+        if (func_00311AE8(*(void**)((char*)self->mRider + 0x784), 2) == 0x15 &&
+            !func_00312AE8(*(void**)((char*)self->mRider + 0x784), 2) &&
+            !func_001446A0(func_00311B20(*(void**)((char*)self->mRider + 0x784), 2) + 0xB0, 0))
             return;
-        if (func_0011FE98(self->mRider) == 4)
+        if (func_0011FE98((char*)self->mRider) == 4)
         {
-            func_001326C8(*(char**)(self->mRider + 0x77C) + 0x2B0, 0);
-            func_0011FEC8_impl(self->mRider, 7);
+            func_001326C8((cRailslideControl*)(*(char**)((char*)self->mRider + 0x77C) + 0x2B0), 0);
+            func_0011FEC8_impl((char*)self->mRider, 7);
         }
         else
         {
-            func_00115640(self->mRider);
-            if (func_0011FE98(self->mRider) == 1)
-                func_0011FEC8_impl(self->mRider, 5);
+            func_00115640((char*)self->mRider);
+            if (func_0011FE98((char*)self->mRider) == 1)
+                func_0011FEC8_impl((char*)self->mRider, 5);
             else
-                func_0011FEC8_impl(self->mRider, 0);
+                func_0011FEC8_impl((char*)self->mRider, 0);
         }
-        func_0010E098(self->mRider, 1, func_00119958(*(void**)(self->mRider + 0x790), *(int*)(self->mRider + 0x328)));
-        char* r = self->mRider;
+        func_0010E098((char*)self->mRider, 1, func_00119958(*(void**)((char*)self->mRider + 0x790), *(int*)((char*)self->mRider + 0x328)));
+        char* r = (char*)self->mRider;
         if (*(int*)(r + 0x2F4) < 10)
         {
             *(int*)(r + 0x2F4) = *(int*)(r + 0x2F4) + 1;
-            if (*(int*)(self->mRider + 0x2F4) == 10)
-                *(float*)(self->mRider + 0x2F0) = 60.0f;
+            if (*(int*)((char*)self->mRider + 0x2F4) == 10)
+                *(float*)((char*)self->mRider + 0x2F0) = 60.0f;
         }
     }
 }
@@ -8904,7 +8904,7 @@ struct sVEntry001368E8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_001368E8(void* self, void* obj)
+extern "C" void func_001368E8(cUberGrindControl* self, void* obj)
 {
     sVEntry001368E8* vt = *(sVEntry001368E8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
@@ -8920,7 +8920,7 @@ struct sVEntry00136920 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00136920(void* self, void* obj)
+extern "C" void func_00136920(cUberGrindControl* self, void* obj)
 {
     sVEntry00136920* vt = *(sVEntry00136920**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
@@ -8932,7 +8932,7 @@ extern "C" void cRider_updateOrientationImplicit(void*);
 //100%
 INCLUDE_ASM("ai/ai", func_00136958);
 #ifdef SKIP_ASM
-extern "C" void func_00136958(void* self)
+extern "C" void func_00136958(cStaticMotion* self)
 {
     cRider_updateOrientationImplicit(*(void**)self);
 }
@@ -8962,30 +8962,30 @@ extern const sVtbl22_136980 D_004597F8;
 // PORT: g++ 2.95 virtual-base construction. The class derives virtually from cRider (vbase pointer at
 // +0x40, vbase at +0x70); when not most-derived, g++ copies cRider's overridden vtables to the stack and
 // fixes up the this-deltas (expand_upcast_fixups). Written out by hand here.
-extern "C" void* func_00136980(void* self, int inChrg)
+extern "C" void* func_00136980(cWipeoutMotion* self, int inChrg)
 {
     if (inChrg)
     {
         char* vb = (char*)self + 0x70;
-        *(char**)((char*)self + 0x40) = vb;
+        self->mRider = (cRider*)vb;
         cRider_cRider(vb);
     }
-    *(void**)(*(char**)((char*)self + 0x40) + 0x6E8) = (void*)&D_004597B0;
-    *(void**)(*(char**)((char*)self + 0x40) + 0x6D0) = D_00459B90;
-    *(void**)(*(char**)((char*)self + 0x40) + 0x6C0) = (void*)&D_004597F8;
+    *(void**)((char*)self->mRider + 0x6E8) = (void*)&D_004597B0;
+    *(void**)((char*)self->mRider + 0x6D0) = D_00459B90;
+    *(void**)((char*)self->mRider + 0x6C0) = (void*)&D_004597F8;
     if (!inChrg)
     {
         sVtbl9_136980 t1 = D_004597B0;
-        *(void**)(*(char**)((char*)self + 0x40) + 0x6E8) = &t1;
-        char* base = *(char**)((char*)self + 0x40) - 0x70;
+        *(void**)((char*)self->mRider + 0x6E8) = &t1;
+        char* base = (char*)self->mRider - 0x70;
         int d = (char*)self - base;
         t1.e[1].delta = D_004597B0.e[1].delta + d;
         sVtbl22_136980 t2 = D_004597F8;
-        *(void**)(*(char**)((char*)self + 0x40) + 0x6C0) = &t2;
+        *(void**)((char*)self->mRider + 0x6C0) = &t2;
         t2.e[1].delta = D_004597F8.e[1].delta + d;
     }
-    *(int*)((char*)self + 0x44) = 0;
-    return self;
+    self->BoardSphereTree = 0;
+    return ((void*)self);
 }
 #endif
 

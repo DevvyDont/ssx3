@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/riderhandler.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
@@ -63,22 +64,22 @@ static inline void vu0SubWG(sVec4WG& dst, const sVec4WG& a, const sVec4WG& b)
         : "m"(a), "m"(b));
 }
 
-extern "C" void cWipeoutMotion_gainFocus(char* self, int a1)
+extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int a1)
 {
-    if (*(void**)(self + 0x44) == 0)
+    if (self->BoardSphereTree == 0)
     {
-        *(void**)(self + 0x44) = cRiderSphereTree_cRiderSphereTree((cRiderSphereTree*)cMemMan_alloc(0x2B0, D_00458210, 0, 0));
+        self->BoardSphereTree = (cRiderSphereTree*)cRiderSphereTree_cRiderSphereTree((cRiderSphereTree*)cMemMan_alloc(0x2B0, D_00458210, 0, 0));
     }
-    char* r = *(char**)(self + 0x40);
+    char* r = (char*)self->mRider;
     sVec4WG* pos = (sVec4WG*)(r + 0x110);
-    *(sVec4WG*)(self + 0x50) = *pos;
-    *(sVec4WG*)(self + 0x60) = *pos;
+    *(sVec4WG*)&self->BoardIntersectBox = *pos;
+    *(sVec4WG*)&self->BoardIntersectBox.MaxPoint = *pos;
     if (a1 == 0)
     {
         sVec4WG* n = (sVec4WG*)(r + 0x370);
         float d = vu0DotWG(*(sVec4WG*)(r + 0x1E0), *n);
         sVec4WG t = vu0ScaleMemWG(*n, d);
-        sVec4WG* p = (sVec4WG*)(*(char**)(self + 0x40) + 0x1E0);
+        sVec4WG* p = (sVec4WG*)((char*)self->mRider + 0x1E0);
         vu0SubWG(*p, *p, t);
         *(int*)self = 0;
     }
@@ -87,9 +88,9 @@ extern "C" void cWipeoutMotion_gainFocus(char* self, int a1)
         *(int*)self = 1;
         cAirPredictor_startLaunchIntoAir(*(void**)(r + 0x788), pos, r + 0x1E0, 3333.33349609375f);
     }
-    *(int*)(self + 0x4) = 0;
-    *(int*)(*(char**)(self + 0x40) + 0x2DC) = 0;
-    *(int*)(*(char**)(self + 0x40) + 0x2E0) = 0;
+    self->ForceNaturalAir = 0;
+    *(int*)((char*)self->mRider + 0x2DC) = 0;
+    *(int*)((char*)self->mRider + 0x2E0) = 0;
 }
 #endif
 
@@ -151,18 +152,18 @@ static inline void vu0SubWM(sVec4WM& dst, const sVec4WM& a, const sVec4WM& b)
         : "m"(a), "m"(b));
 }
 
-extern "C" void func_00136D40(char* self, sVec4WM* a, sVec4WM* b, sVecPairWM* c)
+extern "C" void func_00136D40(cWipeoutMotion* self, sVec4WM* a, sVec4WM* b, sVecPairWM* c)
 {
-    *(sVecPairWM*)(*(char**)(self + 0x40) + 0x130) = *c;
-    *(int*)(*(char**)(self + 0x40) + 0x150) = 1;
-    *(sVec4WM*)(self + 0x20) = *b;
-    *(sVec4WM*)(self + 0x10) = *a;
+    *(sVecPairWM*)((char*)self->mRider + 0x130) = *c;
+    *(int*)((char*)self->mRider + 0x150) = 1;
+    *(sVec4WM*)&self->BoardAngVelocity = *b;
+    *(sVec4WM*)&self->BoardVelocity = *a;
     if (*(int*)self == 0)
     {
-        sVec4WM* n = (sVec4WM*)(*(char**)(self + 0x40) + 0x370);
+        sVec4WM* n = (sVec4WM*)((char*)self->mRider + 0x370);
         float d = vu0DotWM(*n, *a);
         sVec4WM t = vu0ScaleWM(*n, d);
-        vu0SubWM(*(sVec4WM*)(self + 0x10), *(sVec4WM*)(self + 0x10), t);
+        vu0SubWM(*(sVec4WM*)&self->BoardVelocity, *(sVec4WM*)&self->BoardVelocity, t);
     }
 }
 #endif
@@ -189,24 +190,24 @@ static inline sVec4WM vu0ScaleMemWM_136DE0(const sVec4WM& v, float s)
     return r;
 }
 
-extern "C" void func_00136DE0(char* self, sVec4WM* a, sVec4WM* b)
+extern "C" void func_00136DE0(cWipeoutMotion* self, sVec4WM* a, sVec4WM* b)
 {
-    *(sVec4WM*)(self + 0x30) = *b;
-    *(sVec4WM*)(*(char**)(self + 0x40) + 0x1E0) = *a;
+    *(sVec4WM*)&self->RiderAngVelocity = *b;
+    *(sVec4WM*)((char*)self->mRider + 0x1E0) = *a;
     if (*(int*)self == 0)
     {
-        sVec4WM* n = (sVec4WM*)(*(char**)(self + 0x40) + 0x370);
+        sVec4WM* n = (sVec4WM*)((char*)self->mRider + 0x370);
         float d = vu0DotWM(*n, *a);
         sVec4WM t = vu0ScaleMemWM_136DE0(*n, d);
-        sVec4WM* p = (sVec4WM*)(*(char**)(self + 0x40) + 0x1E0);
+        sVec4WM* p = (sVec4WM*)((char*)self->mRider + 0x1E0);
         vu0SubWM(*p, *p, t);
     }
     else
     {
-        char* r = *(char**)(self + 0x40);
+        char* r = (char*)self->mRider;
         cAirPredictor_startLaunchIntoAir(*(void**)(r + 0x788), r + 0x110, r + 0x1E0, 3333.33349609375f);
     }
-    *(int*)(self + 0x4) = 0;
+    self->ForceNaturalAir = 0;
 }
 #endif
 
@@ -215,7 +216,7 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", func_00136E98);
 #ifdef SKIP_ASM
 extern "C" void func_00136F30();
 extern "C" void func_00137D18(void*);
-extern "C" void func_00137750(void*);
+extern "C" void func_00137750(cWipeoutMotion*);
 
 extern "C" void func_00136E98(int* self)
 {
@@ -226,7 +227,7 @@ extern "C" void func_00136E98(int* self)
     }
     else
     {
-        func_00137750(self);
+        func_00137750((cWipeoutMotion*)self);
     }
 }
 #endif
@@ -481,7 +482,7 @@ struct sWipe_137138 {
 extern "C" void* func_0032F650(void* self, void* tree, int flag);
 extern "C" void func_0032F708(void* self, int flags);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
-extern "C" void func_00137550(char* self);
+extern "C" void func_00137550(cWipeoutMotion* self);
 extern "C" float func_00336850_137138(void* self, void* q, void* out, int a3) __asm__("func_00336850");
 extern "C" void func_00329B40_137138(void* tree, const t4Vector* d) __asm__("func_00329B40");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
@@ -577,12 +578,12 @@ struct sVec4c_137138 : t4Vector {
     sVec4c_137138(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
-extern "C" void func_00137138(void* vself)
+extern "C" void func_00137138(cWipeoutMotion* vself)
 {
     sWipe_137138* self = (sWipe_137138*)vself;
     if (self->body->active == 0)
         return;
-    func_00137550((char*)self);
+    func_00137550((cWipeoutMotion*)((char*)self));
     sHit_137138 hit;
     sSphere_137138 sph;
     func_0032F650(&sph, self->tree, 1);
@@ -722,11 +723,11 @@ static inline sVec4_7550 xAxis_7550(const sBone_7550* b)
                       0.0f);
 }
 
-extern "C" void func_00137550(char* self)
+extern "C" void func_00137550(cWipeoutMotion* self)
 {
     sVec4_7550 pts[4];
     sRadii_7550 radii = D_00458220;
-    char* r = *(char**)(self + 0x40);
+    char* r = (char*)self->mRider;
     char* model = *(char**)(r + 0x780);
     sBone_7550* bone = &(*(sBone_7550**)(model + 0x2C))[*(int*)(r + 0x8A4)];
     float s = *(float*)(model + 0x140);
@@ -735,8 +736,8 @@ extern "C" void func_00137550(char* self)
     pts[1] = vu0Add_7550(bone->pos, vu0Scale_7550(d, 30.0f));
     pts[2] = vu0Sub_7550(bone->pos, vu0Scale_7550(d, 30.0f));
     pts[3] = vu0Sub_7550(bone->pos, vu0Scale_7550(d, 70.0f));
-    func_00329A90(*(void**)(self + 0x44), 4, pts, radii.r, &bone->pos,
-                  *(float*)(*(char**)(*(char**)(self + 0x40) + 0x780) + 0x140) * 90.0f);
+    func_00329A90(self->BoardSphereTree, 4, pts, radii.r, &bone->pos,
+                  *(float*)(*(char**)((char*)self->mRider + 0x780) + 0x140) * 90.0f);
 }
 #endif
 
@@ -765,18 +766,17 @@ static inline void vu0ScaleEqW7(sVec4W7& v, float s)
         : "m"(v), "f"(s));
 }
 
-extern "C" void func_00137750(void* p)
+extern "C" void func_00137750(cWipeoutMotion* p)
 {
-    char* self = (char*)p;
-    char* r = *(char**)(self + 0x40);
+    char* r = (char*)p->mRider;
     float dt = *(float*)(r + 0x300) * 0.01666666753590107f;
     func_00113648(*(void**)(r + 0x788), r + 0x110, r + 0x1E0, dt);
-    int st = *(int*)(*(char**)(*(char**)(self + 0x40) + 0x788) + 0xAC);
+    int st = *(int*)(*(char**)((char*)p->mRider + 0x788) + 0xAC);
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
     if (ok)
     {
-        char* r2 = *(char**)(self + 0x40);
+        char* r2 = (char*)p->mRider;
         char* ap = *(char**)(r2 + 0x788);
         float d = *(float*)(ap + 0x98) - *(float*)(ap + 0xA0);
         float x = *(float*)(r2 + 0x300);
@@ -784,12 +784,12 @@ extern "C" void func_00137750(void* p)
             x /= d;
         else
             x *= 59.999996185302734f;
-        char* r3 = *(char**)(self + 0x40);
+        char* r3 = (char*)p->mRider;
         float k = 6.632251739501953f;
         func_00121AA0(r3, *(char**)(r3 + 0x788) + 0x20, *(char**)(r3 + 0x788) + 0x10, x, *(float*)(r3 + 0x300) * k);
     }
-    vu0ScaleEqW7(*(sVec4W7*)(self + 0x30), 1.0f - dt * 1.5f);
-    cRider_updateOrientationImplicit(*(void**)(self + 0x40));
+    vu0ScaleEqW7(*(sVec4W7*)&p->RiderAngVelocity, 1.0f - dt * 1.5f);
+    cRider_updateOrientationImplicit(p->mRider);
 }
 #endif
 
@@ -1616,7 +1616,7 @@ struct sVEntry00138AD8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00138AD8(void* self, void* obj)
+extern "C" void func_00138AD8(cWipeoutMotion* self, void* obj)
 {
     sVEntry00138AD8* vt = *(sVEntry00138AD8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x40);
@@ -1632,7 +1632,7 @@ struct sVEntry00138B10 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00138B10(void* self, void* obj)
+extern "C" void func_00138B10(cWipeoutMotion* self, void* obj)
 {
     sVEntry00138B10* vt = *(sVEntry00138B10**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x40);

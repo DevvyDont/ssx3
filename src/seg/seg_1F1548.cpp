@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -358,7 +359,7 @@ __asm__("_vt$15cVbDtor002F0FE8$13cRiderVbC_s1f = D_004887D8\n"
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1148);
 #ifdef SKIP_ASM
-extern "C" void func_002F1148(void *arg0) {
+extern "C" void func_002F1148(cPunchFX* arg0) {
     (*(int *)((char*)(arg0) + (0xA0))) = 0;
 }
 #endif

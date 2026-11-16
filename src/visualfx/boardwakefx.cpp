@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnetwork.h"
 #include "scripter/ssxscriptengine.h"
@@ -53,7 +54,7 @@ struct sWakeElemBW {
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xC0): vtable copies with delta fixups when not in charge.
-extern "C" void* cBoardWakeFX_cBoardWakeFX(void* self, int inChrg)
+extern "C" void* cBoardWakeFX_cBoardWakeFX(cBoardWakeFX* self, int inChrg)
 {
     sVt9_BW t1;
     sVt22_BW t2;
@@ -86,7 +87,7 @@ extern "C" void* cBoardWakeFX_cBoardWakeFX(void* self, int inChrg)
     }
     *(int*)((char*)self + 0xB4) = -1;
     func_002DCF28((sWakeDCF28*)self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1161,7 +1162,7 @@ extern char D_004879C8[];
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern "C" void func_002E26B8(void* self);
 extern "C" void func_002DF448_E4A8(void* self) __asm__("func_002DF448");
-extern "C" void func_002DF3B0(void* self);
+extern "C" void func_002DF3B0(cDynamicSprayFX* self);
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x130): vtable copies with delta fixups when not in charge.
@@ -1785,7 +1786,7 @@ extern "C" void* func_002DE4A8(sSprayFxE4A8* self, int inChrg)
     self->p7C = operator new(0x78, D_004879C8, 0, 0);
     func_002E26B8(self);
     func_002DF448_E4A8(self);
-    func_002DF3B0(self);
+    func_002DF3B0((cDynamicSprayFX*)self);
     return self;
 }
 #endif
@@ -1819,7 +1820,7 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002DF3B0);
 extern "C" void func_002E26B8(void* self);
 extern "C" void func_002E2550(void* self);
 
-extern "C" void func_002DF3B0(void* self)
+extern "C" void func_002DF3B0(cDynamicSprayFX* self)
 {
     sVec4 c;
     c.x = 1.0f;
@@ -4291,7 +4292,7 @@ extern "C" void func_002E3930(sWakeFade_3930* self);
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x40): vtable copies with delta fixups when not in charge.
-extern "C" void* func_002E3680(void* self, int inChrg)
+extern "C" void* func_002E3680(cPlayerIndicatorFX* self, int inChrg)
 {
     sVt9_3680 t1;
     sVt22_3680 t2;
@@ -4316,7 +4317,7 @@ extern "C" void* func_002E3680(void* self, int inChrg)
         t2.e[1].delta = D_00488A10.e[1].delta + vc;
     }
     func_002E3930((sWakeFade_3930*)self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -6264,7 +6265,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_cSpeedBoostFX);
 extern const sVt9_3680 D_00488550;
 extern const sVt22_3680 D_00488598;
 extern char D_00487B08[];
-extern "C" void func_002E6640(void* self);
+extern "C" void func_002E6640(cSpeedBoostFX* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 inline void* operator new[](unsigned int, void* p) { return p; }
@@ -6281,7 +6282,7 @@ struct sWakePt_6320 {
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x3B0): vtable copies with delta fixups when not in charge.
-extern "C" void* cSpeedBoostFX_cSpeedBoostFX(void* self, int inChrg)
+extern "C" void* cSpeedBoostFX_cSpeedBoostFX(cSpeedBoostFX* self, int inChrg)
 {
     sVt9_3680 t1;
     sVt22_3680 t2;
@@ -6309,7 +6310,7 @@ extern "C" void* cSpeedBoostFX_cSpeedBoostFX(void* self, int inChrg)
     sWakePt_6320*& pts = *(sWakePt_6320**)((char*)self + 0x3AC);
     pts = new (D_00487B08, 0, 0) sWakePt_6320[20];
     func_002E6640(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -6345,7 +6346,7 @@ struct sWakeVec4 {
     float w;
 } __attribute__((aligned(16)));
 
-extern "C" void func_002E6640(void* self)
+extern "C" void func_002E6640(cSpeedBoostFX* self)
 {
     sWakeVec4 v;
     v.x = 1.0f;

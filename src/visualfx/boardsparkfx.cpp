@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -38,7 +39,7 @@ extern "C" void func_0036CE28(void* self, float a, float b);
 extern "C" void func_0036D008(void* self);
 extern "C" void func_0036D3D8(void* self, float val);
 extern "C" void func_00416210(void* dst, int c, int n);
-extern "C" void func_002DAA78(void* self);
+extern "C" void func_002DAA78(cBoardSparkFX* self);
 
 struct sBsVec4 {
     float x, y, z, w;
@@ -121,7 +122,7 @@ struct sBsEmitter {
     sBsVE* vt;          // 0x1F8
 };
 
-struct cBoardSparkFX {
+struct sBoardSparkFXView {  // this unit's view of cBoardSparkFX (ai/riderhandler.h, where the FX parts are not yet mapped)
     char* vbase;            // 0x00
     char pad04[0x1C];
     sBsEmitter* emitter;    // 0x20
@@ -136,7 +137,7 @@ struct cBoardSparkFX {
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xB0): vtable copies with delta fixups when not in charge.
-extern "C" void* cBoardSparkFX_cBoardSparkFX(cBoardSparkFX* self, int inChrg)
+extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg)
 {
     sVt9_BS t1;
     sVt22_BS t2;
@@ -237,7 +238,7 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(cBoardSparkFX* self, int inChrg)
     sBsEmitter* em = self->emitter;
     em->vt[3].fn((char*)em + em->vt[3].delta, self->params, em->rate);
     self->active = 0;
-    func_002DAA78(self);
+    func_002DAA78((cBoardSparkFX*)self);
     return self;
 }
 #endif
@@ -295,7 +296,7 @@ struct sSparkFx_AA78 {
 };
 
 // Spark FX init: two render states copied from the defaults with their mode bits set (the second also sets f0 bits 2-3).
-extern "C" void func_002DAA78(void* vself)
+extern "C" void func_002DAA78(cBoardSparkFX* vself)
 {
     sSparkFx_AA78* self = (sSparkFx_AA78*)vself;
     self->pos = D_004FF130;
@@ -500,7 +501,7 @@ static inline sV4_ABC8 RiderSide_ABC8(char* rider)
 
 #define MIN_ABC8(a, b) ((a) < (b) ? (a) : (b))
 
-// cBoardSparkFX::update(void) (On Tour name, unverified pairing; callees fit).
+// sBoardSparkFXView::update(void) (On Tour name, unverified pairing; callees fit).
 // Board spark FX update: emitter direction/colour from the rider's motion, then the glow and spark points.
 extern "C" void func_002DABC8(sSparkFx_ABC8* self)
 {
@@ -665,23 +666,23 @@ static inline void pop_B478(sRenderCtx_B478* ctx)
     ctx->top--;
 }
 
-extern "C" void func_002DB478(char* self)
+extern "C" void func_002DB478(cBoardSparkFX* self)
 {
-    char* o = *(char**)(self + 0x20);
+    char* o = *(char**)(((char*)self) + 0x20);
     if (*(int*)(o + 0x1E0) > 0) {
         func_00371688(o, 7);
     }
-    if (*(int*)(self + 0x70) != 0) {
+    if (*(int*)(((char*)self) + 0x70) != 0) {
         push_B478((sRenderCtx_B478*)GrMan);
-        *(sRS_B478*)GrMan->m_pCurrentDrawState = *(sRS_B478*)(self + 0x7C);
+        *(sRS_B478*)GrMan->m_pCurrentDrawState = *(sRS_B478*)(((char*)self) + 0x7C);
         cPS2GraphicsMan* ctx = GrMan;
         sVE_B478a* vt = (sVE_B478a*)ctx->mVtbl;
-        vt[82].fn((char*)ctx + vt[82].delta, *(int*)(self + 0x28));
+        vt[82].fn((char*)ctx + vt[82].delta, *(int*)(((char*)self) + 0x28));
         pop_B478((sRenderCtx_B478*)GrMan);
     }
-    if (*(int*)(self + 0x74) != 0) {
+    if (*(int*)(((char*)self) + 0x74) != 0) {
         push_B478((sRenderCtx_B478*)GrMan);
-        *(sRS_B478*)GrMan->m_pCurrentDrawState = *(sRS_B478*)(self + 0x90);
+        *(sRS_B478*)GrMan->m_pCurrentDrawState = *(sRS_B478*)(((char*)self) + 0x90);
         if (D_004A54D8 == 0) {
             D_004A54D8 = 1;
             D_004A54D0 = 0.0f;
@@ -702,10 +703,10 @@ extern "C" void func_002DB478(char* self)
         sVec2_B478* uv0 = (sVec2_B478*)&D_004A54D0;
         sVec2_B478* uv1 = (sVec2_B478*)&D_004A54E0;
         for (int i = 0; i < 3; i++) {
-            sVec2_B478 size(((float*)(self + 0x60))[i], ((float*)(self + 0x60))[i]);
+            sVec2_B478 size(((float*)(((char*)self) + 0x60))[i], ((float*)(((char*)self) + 0x60))[i]);
             cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
             sVE_B478b* vt = (sVE_B478b*)ctx->mVtbl;
-            vt[78].fn((char*)ctx + vt[78].delta, self + 0x30 + i * 0x10, &size, uv0, uv1, &D_004D57A0);
+            vt[78].fn((char*)ctx + vt[78].delta, ((char*)self) + 0x30 + i * 0x10, &size, uv0, uv1, &D_004D57A0);
         }
         pop_B478((sRenderCtx_B478*)GrMan);
     }

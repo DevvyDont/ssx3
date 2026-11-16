@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -53,7 +54,7 @@ INCLUDE_ASM("visualfx/angerfx", func_002D4BE0);
 #ifdef SKIP_ASM
 extern "C" void* MEM_fill(void* dst, int c, int n);
 
-extern "C" void func_002D4BE0(void* self)
+extern "C" void func_002D4BE0(cAngerFX* self)
 {
     MEM_fill(*(void**)((char*)self + 4), 0, 0x58);
 }

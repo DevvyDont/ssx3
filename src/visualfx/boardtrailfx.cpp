@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
 
 //100%
@@ -34,7 +35,7 @@ struct sBTTrailVtx {
     sBTTrailVtx() {}
 };
 
-struct cBoardTrailFX {
+struct sBoardTrailFXView {  // this unit's view of cBoardTrailFX (ai/riderhandler.h, where the FX parts are not yet mapped)
     char* vbase;                // 0x00
     int f04;                    // 0x04
     int f08;                    // 0x08
@@ -46,7 +47,7 @@ struct cBoardTrailFX {
 
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xF0): vtable copies with delta fixups when not in charge.
-extern "C" void* cBoardTrailFX_initialize(cBoardTrailFX* self, int inChrg)
+extern "C" void* cBoardTrailFX_initialize(sBoardTrailFXView* self, int inChrg)
 {
     if (inChrg) {
         self->vbase = (char*)self + 0xF0;
@@ -188,7 +189,7 @@ struct sBTV4_86F0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-// The trail part of cBoardTrailFX that this function uses (see func_002E8938's sBTrail_8938).
+// The trail part of sBoardTrailFXView that this function uses (see func_002E8938's sBTrail_8938).
 struct sBTrail_86F0 {
     char* rider;                // 0x00 virtual base pointer (the cRider part)
     char pad04[0x94 - 0x04];
@@ -350,7 +351,7 @@ struct sBTVtx_8938 {
     sBTV4_8938 pos;
 };
 
-// The trail part of cBoardTrailFX (the cRider virtual base follows at +0xF0).
+// The trail part of sBoardTrailFXView (the cRider virtual base follows at +0xF0).
 struct sBTrail_8938 {
     char* rider;                // 0x00 virtual base pointer (the cRider part)
     float w1;                   // 0x04
@@ -908,7 +909,7 @@ static inline void pop_A480(sRenderCtx_A480* ctx)
     ctx->top--;
 }
 
-extern "C" void func_002EA480(void* self)
+extern "C" void func_002EA480(cBoardTrailFX* self)
 {
     if (D_004A4518 != 0) {
         return;
