@@ -8,6 +8,9 @@ extern char D_0045DD10[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Creates the autosave notice screen ("122bAutosave") and resets its frame counter.
+ */
 extern "C" void cFEStateLegal_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -31,6 +34,9 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void func_0039E510(void* self);
 extern "C" void func_0039F190(void* list, int a1);
 
+/**
+ * Shows the autosave notice for 240 frames, then plays "TransitionOut" and closes it.
+ */
 extern "C" void cFEStateLegal_onUpdate(void* self)
 {
     func_0039E510(self);

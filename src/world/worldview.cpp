@@ -26,6 +26,12 @@ int cWorldView_getNumSections(cWorldView* self)
 //100%
 INCLUDE_ASM("world/worldview", cWorldView_getSectionName);
 #ifdef SKIP_ASM
+/**
+ * Returns a world section's record, which starts with its name.
+ *
+ * @param i  section id
+ * @return the 0x58-byte section record, or 0 when there is no header or i is out of range
+ */
 extern "C" void* cWorldView_getSectionName(cWorldView* self, unsigned int i)
 {
     tStreamDataHeader* list = self->mp_Hdr;
@@ -44,6 +50,12 @@ struct cWorldViewEntry {
 //100%
 INCLUDE_ASM("world/worldview", cWorldView_isSectionLoaded__FP10cWorldViewi);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a world section is loaded (stream state 5, or 6 when it is also active).
+ *
+ * @param section  section id
+ * @return 1 when loaded, 0 otherwise (also for an out-of-range id)
+ */
 int cWorldView_isSectionLoaded(cWorldView* self, int section)
 {
     if (self->mp_Hdr == 0 || (unsigned int)section >= (unsigned int)self->mp_Hdr->m_uiNumSections) {
@@ -57,6 +69,12 @@ int cWorldView_isSectionLoaded(cWorldView* self, int section)
 //100%
 INCLUDE_ASM("world/worldview", cWorldView_isSectionUnLoaded);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a world section is fully unloaded (stream state 0).
+ *
+ * @param i  section id
+ * @return 1 when unloaded, 0 otherwise (also for an out-of-range id)
+ */
 extern "C" int cWorldView_isSectionUnLoaded(cWorldView* self, unsigned int i)
 {
     tStreamDataHeader* list = self->mp_Hdr;
@@ -126,6 +144,14 @@ INCLUDE_ASM("world/worldview", cWorldView_activateSection);
 extern "C" void func_003A8F10(void* world, unsigned int i);
 struct cWorldView_activateSection_sEntry { int state; int field_0x4; };
 struct cWorldView_activateSection_sView { void* world; tStreamDataHeader* mp_Hdr; };
+/**
+ * Activates a loaded world section.
+ *
+ * A loaded section (state 5) becomes active (6) and the world cache activates its contents (func_003A8F10).
+ *
+ * @param i  section id
+ * @return 1 if the section is now active (or already was), 0 if it is not loaded or the id is out of range
+ */
 extern "C" int cWorldView_activateSection(cWorldView* self, unsigned int i)
 {
     tStreamDataHeader* list = self->mp_Hdr;
@@ -173,9 +199,15 @@ extern "C" int func_003A9A90(int arg0) {
 //100%
 INCLUDE_ASM("world/worldview", cWorldView_getHull);
 #ifdef SKIP_ASM
-extern "C" void* cWorldView_getHull(cWorldView* self, int a1)
+/**
+ * Returns one of the world's BSP hulls.
+ *
+ * @param uiIdx  hull index (no range check)
+ * @return the 0x44-byte hull (On Tour const tBxBSPHull*)
+ */
+extern "C" void* cWorldView_getHull(cWorldView* self, int uiIdx)
 {
-    return (char*)(self->mp_Hulls) + a1 * 0x44;
+    return (char*)(self->mp_Hulls) + uiIdx * 0x44;
 }
 #endif
 
@@ -666,6 +698,13 @@ public:
     virtual int v06(void* a1);
 };
 
+/**
+ * Fixes up a streamed model record: turns its offsets at +0x8 and +0xC into pointers, then resolves the rest
+ * through virtual slot 6 (probably resolveModelHeirarchy, On Tour's next method).
+ *
+ * @param pModel  the model record (On Tour tModelRecord*)
+ * @return always 1
+ */
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
 extern "C" int cChunkResolve_resolveModel(cChunkResolve_resolveModel_cObj* self, void* pModel)
 {
@@ -975,6 +1014,15 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveInstance);
 #ifdef SKIP_ASM
 static inline char *refToPtr_A8F0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_A8F0(unsigned i) { if (i == 0) return 0; return refToPtr_A8F0(i); }
+/**
+ * Fixes up a streamed instance record: replaces its model resource id (+0x80) with the model pointer.
+ *
+ * The id's low byte picks the section, the rest the entry of the section's resource table. Also copies the
+ * model's +0xC word to +0x94 and clears +0x8C.
+ *
+ * @param node  the instance record (On Tour tInstanceRecord*)
+ * @return always 1
+ */
 // Resolves the node's object handle (0x80) to its object pointer and caches the object's 0xC field.
 extern "C" int cChunkResolve_resolveInstance(char** self, char* node)
 {
@@ -1229,6 +1277,12 @@ extern "C" void func_003AA2F0(void* self);
 extern char D_00494F70[];
 extern void* cPS2ChunkResolve_vtbl[];
 
+/**
+ * Creates the PS2 chunk resolver: allocates it ("cPS2ChunkResolve", 0x14 bytes), runs the base constructor
+ * and stores the cPS2ChunkResolve vtable.
+ *
+ * @return the new resolver
+ */
 extern "C" void* cChunkResolve_construct()
 {
     void* p = cMemMan_alloc(0x14, D_00494F70, 0, 0);
@@ -1366,6 +1420,19 @@ static inline void insert_AE68(void* self, int type, char* obj, int off)
 #define CALL1_AE68(self, off, obj) \
     ((tMsg1_AE68)VT_AE68(self, off)->fn)((char*)(self) + VT_AE68(self, off)->delta, obj)
 
+/**
+ * Fixes up a chunk of streamed world data after it loads, by data type, and hands it to its owner.
+ *
+ * Models, instances, splines and the like are resolved through the resolver's own virtuals, and several go
+ * into the space hash by their bounding box. Textures ("strm_tex") and light pages ("strm_lpg") go to the
+ * graphics manager; others go to the world painter (15), the world-script cache (16), the script engine's
+ * anchor table (18), the AI path data (14, freed if refused) and other systems.
+ *
+ * @param msg  the data type (On Tour eBxStreamDataType)
+ * @param RID  the resource id (low byte: section; the rest: index)
+ * @param obj  the loaded data (On Tour pData)
+ * @return @p obj
+ */
 extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID, char* obj)
 {
     switch (msg) {
@@ -1715,19 +1782,29 @@ static inline unsigned int cPS2ChunkResolve_resolveModel_lookup(cPS2ChunkResolve
     return r;
 }
 
+/**
+ * Fixes up a streamed model record on the PS2.
+ *
+ * Turns its offsets at +0x8 and +0xC into pointers, replaces each resource id in the table at +0xC (a count,
+ * then the ids) with its pointer, then calls virtual slot 6 (probably resolveModelHeirarchy) and
+ * func_003ABF20().
+ *
+ * @param pModel  the model record (On Tour tModelRecord*)
+ * @return always 1
+ */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cPS2ChunkResolve_resolveModel(cPS2ChunkResolve_resolveModel_cObj* self, void* a1)
+extern "C" int cPS2ChunkResolve_resolveModel(cPS2ChunkResolve_resolveModel_cObj* self, void* pModel)
 {
     int i = 0;
-    *(int*)((char*)a1 + 0x8) += (int)a1;
-    *(int*)((char*)a1 + 0xC) += (int)a1;
-    int* tbl = *(int**)((char*)a1 + 0xC);
+    *(int*)((char*)pModel + 0x8) += (int)pModel;
+    *(int*)((char*)pModel + 0xC) += (int)pModel;
+    int* tbl = *(int**)((char*)pModel + 0xC);
     unsigned int* p = (unsigned int*)(tbl + 1);
     for (; i < *tbl; i++, p++) {
         *p = cPS2ChunkResolve_resolveModel_lookup(self, *p);
     }
-    self->v06(a1);
-    func_003ABF20(self, a1);
+    self->v06(pModel);
+    func_003ABF20(self, pModel);
     return 1;
 }
 #endif
@@ -1937,17 +2014,27 @@ static inline cPS2ChunkResolve_resolveInstance_sRes* cPS2ChunkResolve_resolveIns
     return (cPS2ChunkResolve_resolveInstance_sRes*)(v << 2);
 }
 
+/**
+ * Fixes up a streamed instance record on the PS2.
+ *
+ * Replaces its model resource id (+0x80) with the model pointer, copies the model's +0xC word to +0x94,
+ * clears +0x8C, stores the resolver's view at +0x88, rebuilds the flag word (+0x8) from it and calls
+ * func_003AC358().
+ *
+ * @param pInstance  the instance record (On Tour tInstanceRecord*)
+ * @return always 1
+ */
 // PORT: stores pointers in int fields; not 64-bit safe.
-extern "C" int cPS2ChunkResolve_resolveInstance(cPS2ChunkResolve_resolveInstance_cObj* self, void* a1)
+extern "C" int cPS2ChunkResolve_resolveInstance(cPS2ChunkResolve_resolveInstance_cObj* self, void* pInstance)
 {
-    cPS2ChunkResolve_resolveInstance_sRes* r = cPS2ChunkResolve_resolveInstance_lookup(self, *(unsigned int*)((char*)a1 + 0x80));
-    *(cPS2ChunkResolve_resolveInstance_sRes**)((char*)a1 + 0x80) = r;
-    *(int*)((char*)a1 + 0x94) = r->fC;
-    *(int*)((char*)a1 + 0x8C) = 0;
-    *(cPS2ChunkResolve_resolveInstance_sView**)((char*)a1 + 0x88) = self->f4;
+    cPS2ChunkResolve_resolveInstance_sRes* r = cPS2ChunkResolve_resolveInstance_lookup(self, *(unsigned int*)((char*)pInstance + 0x80));
+    *(cPS2ChunkResolve_resolveInstance_sRes**)((char*)pInstance + 0x80) = r;
+    *(int*)((char*)pInstance + 0x94) = r->fC;
+    *(int*)((char*)pInstance + 0x8C) = 0;
+    *(cPS2ChunkResolve_resolveInstance_sView**)((char*)pInstance + 0x88) = self->f4;
     int x = self->f4->f4 & 0xFFFF0000;
-    *(int*)((char*)a1 + 0x8) = x | (x >> 16) | 2;
-    func_003AC358(self, a1);
+    *(int*)((char*)pInstance + 0x8) = x | (x >> 16) | 2;
+    func_003AC358(self, pInstance);
     return 1;
 }
 #endif
@@ -2153,6 +2240,12 @@ INCLUDE_ASM("world/worldview", cWScriptCache_cWScriptCache);
 #ifdef SKIP_ASM
 extern "C" void cWScriptCache_init(void* self, int a1);
 
+/**
+ * Constructs the world-script cache for a world, sized for one section to start with.
+ *
+ * @param world  the owning world (On Tour cWorld*)
+ * @return self
+ */
 extern "C" void* cWScriptCache_cWScriptCache(void* self, int world)
 {
     *(int*)((char*)self + 0x0) = world;

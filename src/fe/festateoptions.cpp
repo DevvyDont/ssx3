@@ -11,6 +11,12 @@ extern char D_0045DD30[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Creates the options menu screen ("18options") and shows its first frame.
+ *
+ * Then clears the word at +0x48 and sets the word at +0x4C to 1 (onPopupEvent writes the same pair after the
+ * save-options prompt).
+ */
 extern "C" void cFEStateOptions_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -39,6 +45,14 @@ extern char D_004A1530[];
 
 static inline int Is_00188870(int id, char* s) { return id == GetHashValue32(s); }
 
+/**
+ * Tags each options menu entry ("1" to "8") with the id of the state it opens.
+ *
+ * Stores the id in the widget's misc data (+0x18): 0x1C, 0x1D, 0x1F, 0x1E, 0x20, 0x24, 0x24 and 0x22;
+ * onWidgetEvent passes it to the custom interface to get the next state.
+ *
+ * @param item  the widget being created; matched by its hash name (+0x38)
+ */
 extern "C" void cFEStateOptions_onWidgetCreate(void* self, void* item)
 {
     if (Is_00188870(*(int*)((char*)item + 0x38), D_004A14F8)) {
@@ -118,6 +132,23 @@ struct sOpt_188980 {
 
 static inline int Is_00188980(int id, char* s) { return id == GetHashValue32(s); }
 
+/**
+ * Handles a widget event on the options menu (select, back, keyboard popup closed).
+ *
+ * Event 5 (select): entry "6" opens a cKeyboardPopup with empty text; entry "8" asks to save first
+ * (func_00188E58, probably saveOptionPrompt) when an options-changed flag (D_004A14D0/D4/D8/DC) is set and
+ * D_004A14E0 is clear, otherwise it sets the pending-delete bit 0x80 of mAttrState (+0x1C), plays
+ * "TransitionOut" and, when +0x48 is set, stores 0x18 at +0xC of the custom interface; every other entry (and
+ * "8" with +0x48 set) pushes the state that the engine's custom interface (engine + 0x0) virtual slot 4,
+ * probably getNextState returns for the widget's misc data.
+ *
+ * Event 6 (back) does the same save check or transition-out. Event 13 (the keyboard popup is done) checks the
+ * typed text with func_00187D38 (unknown) and calls slot 2 of the engine's listener at +0x14 (default
+ * D_004A5A58) with 6 on a result of 1, else 4, then forgets the popup.
+ *
+ * @param widget  the widget the event is for
+ * @param event  UI event code (5, 6 or 13 are handled)
+ */
 extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, unsigned int event)
 {
     switch (event) {
@@ -192,6 +223,14 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onInputBegin);
 #ifdef SKIP_ASM
 extern int D_004A3484;
 
+/**
+ * Records which controller started input on the options menu.
+ *
+ * Stores the input's byte at +4 (probably the controller port) in D_004A3484.
+ *
+ * @param pInput  the UI input object
+ * @return always 0
+ */
 extern "C" int cFEStateOptions_onInputBegin(void* self, void* pInput)
 {
     D_004A3484 = *(unsigned char*)((char*)pInput + 4);
@@ -206,6 +245,17 @@ int GetHashValue32(char* str);
 extern "C" void* func_00397870(void* list, int index);
 extern char D_004A1530[];
 
+/**
+ * Filters menu keys on the options menu.
+ *
+ * Keys 8 and 9 give 0x100. Key 6 on the entry hashed "8", or key 7 anywhere, gives 1 when the word at +0x4C
+ * is 0 and 0x101 otherwise; every other key gives 0x101.
+ *
+ * @param menu  the menu; its entry list is at +0x74
+ * @param key  menu key/event code
+ * @param index  index of the current entry in the menu list
+ * @return 0x100, 0x101 or 1 (menu handling codes)
+ */
 extern "C" int cFEStateOptions_onWidgetMenu(void* self, void* menu, unsigned int key, int index)
 {
     if (key < 10) {
@@ -259,6 +309,16 @@ static inline int IsK188D08(int id, char* s)
     return id == GetHashValue32(s);
 }
 
+/**
+ * Handles events from the save-options popup.
+ *
+ * Event 0x15 sets the popup screen's "reset text" to kT_FESaveOptionsQuesPS2. Event 0x16 from the popup
+ * hashed "111resetopts" reads the answer (popup virtual slot 23), stores it at +0x48, sets +0x4C to 1 and
+ * re-sends entry "8" to this state's virtual slot 19 (probably onWidgetEvent) as event 5 (yes) or 6 (no).
+ *
+ * @param popup  the popup state; its hash (+0xC) and screen (+0x40) are read
+ * @param event  popup event code (0x15 or 0x16 are handled)
+ */
 extern "C" void cFEStateOptions_onPopupEvent(void* self, char* popup, int event)
 {
     switch (event) {
@@ -428,6 +488,14 @@ static inline void setText_188F28(sOptGame_188F28* self, char** names, int i, ch
         cUIText_setUnicodeStringByID(t, GetHashValue32(ids[i]));
 }
 
+/**
+ * Creates the game options screen ("19game_opt") and fills its option rows.
+ *
+ * Row indices are item[0] = -1, item[1] = 1, item[2] = 2, so the language row (four kT_LANG entries) is
+ * skipped. Row 1 gets MPH/KPH and selects the speed-unit setting (the view's field is named showHud); row 2
+ * gets Off/16:9/anamorphic and selects the widescreen setting (f20). Each row also gets its title and help
+ * text, the entry "1" is hidden but enabled, and the "Menu" selection starts at entry 1.
+ */
 extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
 {
     void* engine = self->engine;
@@ -718,6 +786,21 @@ static inline void Refresh_189980(sOptGame_189980* self)
     vt[16].fn(sub + vt[16].delta);
 }
 
+/**
+ * Handles a widget event on the game options screen.
+ *
+ * Event 7 pushes a cFEPopupOptionReset popup. Event 5 opens cFEPopupScreenPos (entry "6") or
+ * cFEPopupVideoCalibration (entry "7"). Event 6 (back) applies the options (interface 4 slot 1,
+ * cSSXApp_activateBEOptions), sets the locale's language, refreshes and pushes the state from the engine's
+ * custom interface (engine + 0x0) virtual slot 5, probably getPrevState.
+ *
+ * Event 9 (a list changed) stores the language, speed-unit or widescreen choice into the options block
+ * D_00535610 (the language also goes to the locale), re-applies the options and sets the changed flag
+ * D_004A14D0. A null widget is ignored.
+ *
+ * @param widget  the widget the event is for (null: nothing happens)
+ * @param event  UI event code (5, 6, 7 or 9 are handled)
+ */
 extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* widget, unsigned int event)
 {
     if (widget == 0) {
@@ -934,6 +1017,12 @@ public:
     virtual void setVisible(int v);
 };
 
+/**
+ * Creates the sound options screen ("141advsettings") and fills its widgets.
+ *
+ * Calls cFEStateOptionsSound_updateWidget, then shows "ongroup" and entry "7" (disabled) when D_004A1A70 is
+ * 1, and "fegroup" otherwise (D_004A1A70's meaning is unknown).
+ */
 extern "C" void cFEStateOptionsSound_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -1303,6 +1392,16 @@ static inline void* Find_18B380(sOptSound_18B380* self, char* name)
     return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
 }
 
+/**
+ * Fills the sound options widgets from the current sound settings and applies them.
+ *
+ * "1lb" lists stereo/surround/mono/DTS and selects the sound manager's current mode (func_00289DC0); the
+ * sliders "2sl", "3sl", "4sl" (range 12) show the effects, speech and music volumes and push them to the
+ * sound manager (func_0028B180); "5lb" and "6lb" are off/on switches applied the same way; "7lb" is filled
+ * only when D_004A1A70 is 1.
+ *
+ * @param vself  the cFEStateOptionsSound state
+ */
 // Sound options screen: fills the option widgets from the current sound settings.
 extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
 {
@@ -1744,6 +1843,13 @@ extern char D_0045E028[];
 extern char D_0045E078[];
 extern char D_0045E090[];
 
+/**
+ * Creates the controller options screen ("22control") and fills its lists.
+ *
+ * Clears +0x48 and +0x4C, gives "1lb" and "2lb" off/on entries and "3lb"/"4lb" default/pro preset entries,
+ * calls func_0018D108(self, pad, 0, 0) for pads 0 and 1 (probably vibratePad, stopping vibration) and then
+ * func_0018CDC0 (probably updateWidget).
+ */
 extern "C" void cFEStateOptionsController_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -2195,6 +2301,9 @@ extern char D_0045E0C0[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Creates the save/load menu screen ("25saveload") and shows its first frame.
+ */
 extern "C" void cFEStateOptionsSaveLoad_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -2219,6 +2328,14 @@ extern char D_004A1500[];
 
 static inline int IsHash_D2E8(int id, char* s) { return id == GetHashValue32(s); }
 
+/**
+ * Tags each save/load menu entry with the action it starts.
+ *
+ * Misc data (+0x18): "1saveoptions" 0, "2loadoptions" 2, "3loadreplay" 1, "4new game" 3, "3" 0x300, "2"
+ * 0x200.
+ *
+ * @param widget  the widget being created; matched by its hash name (+0x38)
+ */
 extern "C" void cFEStateOptionsSaveLoad_onWidgetCreate(void* self, void* widget)
 {
     if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_0045E0D0)) {
@@ -2247,6 +2364,11 @@ extern int D_004A19D8;
 extern char D_0045E0F0[];
 extern char D_0045E100[];
 
+/**
+ * Applies func_00194498 to the load-replay and new-game entries while D_004A19D8 is set.
+ *
+ * func_00194498 and D_004A19D8 are not identified (probably greys the two entries out).
+ */
 extern "C" void cFEStateOptionsSaveLoad_onPreRender2D(void* self)
 {
     if (D_004A19D8 != 0) {
@@ -2265,8 +2387,17 @@ extern "C" void cFEStateOptionsSaveLoad_onPreRender2D(void* self)
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onWidgetMenu);
 #ifdef SKIP_ASM
+/**
+ * Filters menu keys on the save/load menu.
+ *
+ * Keys 8 and 9 give 0x100; every other key gives 0x101.
+ *
+ * @param menu  the menu (unused)
+ * @param key  menu key/event code
+ * @return 0x100 for keys 8 and 9, else 0x101
+ */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateOptionsSaveLoad_onWidgetMenu(void* self, int a1, unsigned int key)
+extern "C" int cFEStateOptionsSaveLoad_onWidgetMenu(void* self, int menu, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -2310,6 +2441,18 @@ struct sVE_18D460p {
     void* (*fn)(void*, void*, int);
 };
 
+/**
+ * Handles the new-game confirmation popup on the save/load menu.
+ *
+ * Events 0xF and 0x10 store the answer (1 or 0) in the popup's misc data (+0x18) and pop the state stack.
+ * Event 0x16 with a yes answer resets the player for the user (+0x44, at least 0) through back-end interface
+ * 1 (func_00147138 with an empty name, then slot 1) and func_0014DE28, re-inits both front-end riders
+ * (cFERider_init), pushes the state from the custom interface's slot 4 for (1 << +0x48) | 0x100 and plays
+ * "TransitionOut".
+ *
+ * @param widget  the popup state (its misc data at +0x18 holds the answer)
+ * @param event  popup event code (0xF, 0x10, 0x15 or 0x16)
+ */
 extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(char* self, char* widget, unsigned int event)
 {
     switch (event) {
@@ -2387,6 +2530,19 @@ struct sVE_18D648v {
     void (*fn)(void*, int);
 };
 
+/**
+ * Handles a select or back on the save/load menu.
+ *
+ * Event 5: reads the entry's action from its misc data (+0x18) and then always stores 3 there. Action 3 (new
+ * game) remembers the current controller (+0x14 into +0x48) and pushes a cFEPopupConfirm with
+ * kT_HELPCreateNewFilePrompt; other actions (above 3 with the controller bit added) push the state that the
+ * engine's custom interface (engine + 0x0) virtual slot 4, probably getNextState returns. Event 6 pushes the
+ * state from the engine's custom interface (engine + 0x0) virtual slot 5, probably getPrevState. A null
+ * widget is ignored.
+ *
+ * @param widget  the selected widget
+ * @param event  UI event code (5 or 6 are handled)
+ */
 extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, int event)
 {
     if (widget == 0) {
@@ -2541,6 +2697,13 @@ static inline char* getString_DD60(char* name)
     return vt[4].fn(thisp, GetHashValue32(name));
 }
 
+/**
+ * Creates the memory card selection screen ("120MCselect") and sets it up for its mode.
+ *
+ * The mode comes from +0x1BC (1: load replay) and +0x22C (nonzero: save options; else load options): it picks
+ * the title (kT_TITLELoadReplay/SaveOptions/LoadOptions) and which button and help texts show. The four
+ * "%dmemory card" slots get kT_MEMEmpty and their index; outside replay mode only slot 1 stays visible.
+ */
 extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);

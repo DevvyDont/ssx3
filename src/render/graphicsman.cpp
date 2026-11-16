@@ -31,6 +31,16 @@ struct sGfxManBlend {
 
 extern "C" int func_00369A78(void* a, void* b, int tol0, int tol1, int tol2);
 
+/**
+ * Adds a skinning blend matrix to the shared history, or reuses a near-identical one already there.
+ *
+ * The 512-entry "BlendedMatrixHistory" is allocated on first use. A match within func_00369A78's tolerances
+ * copies the stored bone indices into @p blendedMatrix; otherwise it is appended, with no check against the
+ * 512
+ * entries.
+ *
+ * @param blendedMatrix  the bone weights to add (On Tour tMdfBlendedMatrix*)
+ */
 extern "C" void cGraphicsMan_AddBlendedMatrix(sGfxManBlend* self, sBlendMatrix* blendedMatrix)
 {
     if (self->blend == 0) {
@@ -2261,6 +2271,16 @@ INCLUDE_ASM("render/graphicsman", cStaticEmitter_update);
 #ifdef SKIP_ASM
 extern "C" void func_0036D428(void* self, float val);
 
+/**
+ * Advances a static particle emitter: emits while its timer runs (or forever when negative) and steps its
+ * texture animation.
+ *
+ * The timer counts down by one app tick; at 0 the emitter stops. The animation frame advances by rate times
+ * @p dt
+ * and wraps at the frame count. Marks the emitter updated (+0xC).
+ *
+ * @param dt  time step in seconds
+ */
 extern "C" void cStaticEmitter_update(char* self, float dt)
 {
     float t = *(float*)(self + 0x0);
@@ -2299,6 +2319,12 @@ struct sGmQuad2 {
 
 extern "C" void cStaticEmitter_render1(void* self);
 
+/**
+ * Stores the emitter's bounding box and position, then renders it.
+ *
+ * @param bbox  bounding box to cull against (On Tour const tBoundBox&)
+ * @param pos  emitter position (On Tour const t4Vector&)
+ */
 extern "C" void cStaticEmitter_render(void* self, const sGmQuad2* bbox, const sGmQuad* pos)
 {
     *(sGmQuad2*)((char*)self + 0x160) = *bbox;
@@ -2357,6 +2383,15 @@ static inline int GetTexId_708C0(int i)
     return D_004A5B80_708C0->texIds[i];
 }
 
+/**
+ * Draws a static emitter's particles with its texture-animation frame, unless it is culled or hidden.
+ *
+ * Pushes a render state with the layer for its kind (D_0044B420) and blend flags, draws through GrMan slot 82
+ * and
+ * pops the state.
+ *
+ * @param selfp  the emitter
+ */
 extern "C" void cStaticEmitter_render1(void* selfp)
 {
     char* self = (char*)selfp;

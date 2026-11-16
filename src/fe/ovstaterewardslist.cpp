@@ -9,6 +9,9 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern char D_004704B8[];
 
+/**
+ * Creates the overlay rewards-list screen "rewardslist", then runs cOVState_onCreateScreen().
+ */
 extern "C" void cOVStateRewardsList_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -53,6 +56,15 @@ struct sVEntry_200288 {
     void* (*fn)(void*, void*, int);
 };
 
+/**
+ * Handles the rewards list's select and back events by pushing the state the custom interface returns.
+ *
+ * Event 5 colours the item and asks the custom interface's slot 4 (getNextState) for item id 1 only; the
+ * result is pushed even when it is 0. Event 6 pushes the slot-5 result for the item's id when there is one.
+ *
+ * @param item  the widget (ignored when 0); its miscellaneous data (+0x18) is the id
+ * @param msg  the widget event
+ */
 extern "C" void cOVStateRewardsList_onWidgetEvent(void* self, cUIObj_200288* item, int msg)
 {
     if (item == 0) {

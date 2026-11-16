@@ -21,6 +21,10 @@ extern char D_00460A90[];
 extern char D_00460AA0[];
 extern char D_00460AB0[];
 
+/**
+ * Looks up the front-end rider model's bone indices by name: head, hips, the limbs, and the board root and
+ * child.
+ */
 extern "C" void cFERider_initBoneMap(void* self)
 {
     *(int*)((char*)self + 0xC7C) = cAnimModel_getBoneSkelIndex(*(void**)((char*)self + 0x8), 0, D_004A1970);
@@ -134,6 +138,19 @@ extern char D_00460AF0[];
 
 // PORT: callers declare cFERider_init as returning void; the body returns 1
 extern "C" int cFERider_init_impl(int* self, int profile, int character, int slot) __asm__("cFERider_init");
+/**
+ * Sets up a front-end rider for a character: emitters, bolt-on FX, the animated model, then the character's
+ * item list.
+ *
+ * Does nothing when the same character and @p slot are already loaded; otherwise releases the previous rider.
+ * Also
+ * sets a one-bit mask for the character (+0xCD8).
+ *
+ * @param profile  profile index (On Tour profileIndex)
+ * @param character  character ID (On Tour charID)
+ * @param slot  nonzero to load everything (On Tour loadAll), which adds func_0019E7F0()
+ * @return 1
+ */
 extern "C" int cFERider_init_impl(int* self, int profile, int character, int slot)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);

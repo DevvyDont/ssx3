@@ -59,6 +59,13 @@ struct sMap_86A8 {
     float speed;        // 0x1D0
 };
 
+/**
+ * Creates the session map overlay screen ("38session") and builds its pieces.
+ *
+ * After cOVState_onCreateScreen it stores func_001A3BF0(FE async manager) at +0xC4, closes the popup (+0xBC =
+ * 0), sets scale 1.0 and speed 0.16, hides "MapPic" (kept at its field), clears the four 8-entry arrays, then
+ * runs setupMapPic, setupPopup, setupPlayerIndicator and setupLocalSessionList.
+ */
 extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
 {
     void* engine = self->engine;
@@ -172,6 +179,19 @@ extern char D_004706C8[];
 extern char D_004A2558[];
 extern char D_004D33A0[];
 
+/**
+ * Fills the session point list when the map overlay transitions in.
+ *
+ * For the 8 "SessionPoint%d" texts: points below the location's session count are enabled and labelled
+ * kT_CMNTopOfRun (first), kT_CMNBottomOfRun (last, unless there are exactly 2) or "<kT_MAPSessionPt> n", with
+ * misc data n; the rest are hidden and disabled. Then selects in "SessionViewPoints" the point nearest the
+ * player's rider (func_0026B680 on D_004D33A0, minus 1), shows the indicators and gives the confirm Yes/No
+ * entries misc data 0/1 and the regular colour.
+ *
+ * @param selfp  the cOVState_MAP (raw pointer)
+ * @param on  nonzero when the transition starts; 0 does nothing
+ * @return always 0
+ */
 extern "C" int cOVState_MAP_onGainTransition(void* selfp, int on)
 {
     char* self = (char*)selfp;
@@ -263,10 +283,17 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern char D_00470A20[];
 
-extern "C" void cOVState_MAP_onGainFocus(void* self, int a1)
+/**
+ * Runs the base gain-focus handling, then resets the "ConfirmMenu" object.
+ *
+ * Calls the object's virtual slots 7 and 9 with 0 (probably disable and hide).
+ *
+ * @param pPrevState  the state that had focus before, passed on to cUIState_onGainFocus
+ */
+extern "C" void cOVState_MAP_onGainFocus(void* self, int pPrevState)
 {
     sObj00208B00* o;
-    cUIState_onGainFocus(self, a1);
+    cUIState_onGainFocus(self, pPrevState);
     o = (sObj00208B00*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xD4), GetHashValue32(D_00470A20));
     if (o != 0) {
         o->vt[7].fn((char*)o + o->vt[7].delta, 0);
@@ -364,6 +391,21 @@ public:
     virtual void set(const cVec_00208C28& v);
 };
 
+/**
+ * Handles the session map's widget events: pick a session, confirm or cancel, and button highlights.
+ *
+ * Event 5 with the popup closed opens it for the picked session (misc data into +0xD8). With it open, "No"
+ * closes it; "Yes" stores the session in mission interface (10) + 0x10, sets D_004A26FC = 3, pops the
+ * pause-mode stack (D_005366E8/D_004A2A54 into D_004A2A50), calls func_00231250(game, 0xF, 0, 0) and closes
+ * the overlay (func_0020A088, func_00208BB8).
+ *
+ * Event 6 closes the popup, or else closes the overlay, pops the state stack and marks this state pending
+ * delete with mode 7. Events 1 and 2 (highlight on/off) recolour the popup's Yes/No buttons.
+ *
+ * @param selfp  the cOVState_MAP (raw pointer)
+ * @param pWidget  the widget the event is for (null: nothing happens)
+ * @param Event  UI event code (1, 2, 5, 6 or 7)
+ */
 // Map overlay message handler: confirm/cancel of the map popup and toggling of the legend objects.
 extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* pWidget, int Event)
 {
@@ -530,6 +572,15 @@ extern char D_004706B8[];
 extern char D_004706C8[];
 extern char D_00470AA8[];
 
+/**
+ * Shows or hides the session purchase popup according to the popup flag (+0xBC).
+ *
+ * When open: shows "ConfirmPopup"/"Popup1", disables the session list, enables "ConfirmMenu", sets the title
+ * "<kT_MAPSessionPt>: n" for the selected point, the player's money as "$%d", a cost of $500 and
+ * kT_OVRCMNSessArea. When closed: hides the popup, re-enables the list and disables the menu.
+ *
+ * @param selfp  the cOVState_MAP
+ */
 extern "C" void cOVState_MAP_setupPopup(void* selfp)
 {
     char* self = (char*)selfp;
@@ -617,6 +668,13 @@ struct sObj00209300 {
 
 extern "C" void cOVState_MAP_showIndicators(void* self);
 
+/**
+ * Refreshes the map indicators when either of two input checks fires.
+ *
+ * The checks are the input's virtual slots 17 and 18 (probably up/down pressed).
+ *
+ * @param pInput  the UI input object
+ */
 extern "C" void cOVState_MAP_onInputAlways(void* self, sObj00209300* pInput)
 {
     if (pInput->vt[17].fn((char*)pInput + pInput->vt[17].delta) != 0 || pInput->vt[18].fn((char*)pInput + pInput->vt[18].delta) != 0) {
@@ -901,6 +959,15 @@ static inline float Absf_96A8(float v)
     return v;
 }
 
+/**
+ * Creates the hidden map icon that marks the player's position.
+ *
+ * Maps the player's rider position into the location's map bounds (func_00154678) as a 356 x 266 picture,
+ * then adds a cUIIcon ("location" texture, 17 x 17, offset to the map at 252, 97) to the screen's object
+ * list.
+ *
+ * @param selfp  the cOVState_MAP
+ */
 extern "C" void cOVState_MAP_setupPlayerIndicator(void* selfp)
 {
     sMapSt_96A8* self = (sMapSt_96A8*)selfp;
@@ -982,6 +1049,15 @@ struct sIconPos_9970 {
     void setPosition(const sV3_96A8& p) { pos = p; }
 };
 
+/**
+ * Creates the hidden map icons for every session point on the current location.
+ *
+ * For each point that exists (func_0026B598/func_0026B5E0 on D_004D33A0), maps its position into the 356 x
+ * 266 picture and adds two cUIIcons: a "dot_visited" dot and an "indicator" highlight (18 x 18), keeping the
+ * highlight's position too.
+ *
+ * @param selfp  the cOVState_MAP
+ */
 extern "C" void cOVState_MAP_setupLocalSessionList(void* selfp)
 {
     sMapSt_9970* self = (sMapSt_9970*)selfp;
@@ -1060,6 +1136,14 @@ struct sMap_9E78 {
     cUIObj_9E78* b[8];      // 0x104
 };
 
+/**
+ * Shows the player icon and highlights the selected session point on the map.
+ *
+ * The selected point is the misc data of "SessionViewPoints"'s current item (default 1); it gets its
+ * highlight icon and every other point its dot. The object lookup is not null-checked.
+ *
+ * @param p  the cOVState_MAP (raw pointer)
+ */
 extern "C" void cOVState_MAP_showIndicators(void* p)
 {
     sMap_9E78* self = (sMap_9E78*)p;
@@ -1240,6 +1324,13 @@ struct sSelf0020A380 {
     int pdaOn;
 };
 
+/**
+ * Common overlay set-up: leaves cut-scene TV mode and tells the HUD an overlay opened.
+ *
+ * If the game's cut-scene transition manager (+0x64) is not in regular mode, forces regular mode
+ * (func_002EA820) and sets mRestoreCutSceneMode when it was in, or going to, cut-scene mode. Then calls
+ * virtual slot 24 of the "hud" state with (3, 0).
+ */
 extern "C" void cOVState_onCreateScreen(cOVState* self)
 {
     self->mRestoreCutSceneMode = 0;
@@ -1277,6 +1368,12 @@ struct sVEntry0020A430 {
     int (*fn)(void*, int, int);
 };
 
+/**
+ * Common overlay tear-down: restores cut-scene TV mode, tells the HUD, removes the PDA template.
+ *
+ * Undoes cOVState_onCreateScreen (func_002EA860 when mRestoreCutSceneMode is set; "hud" slot 24 with (4, 0)),
+ * calls cOVStateManager_removePDATemplate when mRemovePDA is set, then cUIState_onDestroyScreen.
+ */
 extern "C" void cOVState_onDestroyScreen(cOVState* self)
 {
     if (self->mRestoreCutSceneMode != 0) {
@@ -1381,6 +1478,15 @@ struct sVEntry0020A6A8 {
 };
 
 
+/**
+ * Forwards an overlay widget event to the game's current state.
+ *
+ * Calls virtual slot 9 of Game->mCurrentState (+0x200) with the same arguments; nothing when there is no game
+ * or state.
+ *
+ * @param pWidget  the widget the event is for, passed through
+ * @param Event  UI event code, passed through
+ */
 extern "C" void cOVState_onWidgetEvent(cOVState* self, int pWidget, int Event)
 {
     char* w = (char*)SSXApp->Game;
@@ -1400,6 +1506,14 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_triggerTextFade);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* self, int hash);
 extern "C" void cUIThing_playAnimation(void* self, void* anim, int mode, int v, int a4);
 
+/**
+ * Plays a named animation on a named object of the overlay's screen.
+ *
+ * Looks both up by hash (the animation in the engine's animation bank at +0x50) and plays it with mode 3.
+ *
+ * @param objName  name of the screen object
+ * @param animName  name of the animation
+ */
 extern "C" void cOVState_triggerTextFade(cOVState* self, char* objName, char* animName)
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(objName));

@@ -17,6 +17,10 @@ extern sQuadR D_004FF160;
 extern sQuadR t4vect_Zero;
 extern sPair8 D_004A5960[];
 
+/**
+ * Clears the air predictor's flight: no landing found yet (patch -1), zero times, zero vectors and default
+ * landing data.
+ */
 extern "C" void cAirPredictor_reset(char* self)
 {
     *(int*)(self + 0xAC) = 0;
@@ -290,6 +294,14 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_startLaunchIntoAir);
 struct sQuad;
 void cAirPredictor_initLaunch(char* self, sQuad* a, sQuad* b);
 
+/**
+ * Starts predicting a jump: resets the predictor, sets the terminal velocity and seeds the flight with the
+ * launch state.
+ *
+ * @param launchPos  launch position (On Tour const t4Vector&)
+ * @param launchVel  launch velocity (On Tour const t4Vector&)
+ * @param terminalVel  maximum falling speed
+ */
 extern "C" void cAirPredictor_startLaunchIntoAir(char* self, sQuad* launchPos, sQuad* launchVel, float terminalVel)
 {
     cAirPredictor_reset(self);
@@ -307,6 +319,13 @@ struct sQuad {
 //100%
 INCLUDE_ASM("ai/airpredictor", cAirPredictor_initLaunch__FPcP5sQuadT1);
 #ifdef SKIP_ASM
+/**
+ * Seeds the predicted flight with a launch position and velocity, as both the start and the current
+ * simulation state.
+ *
+ * @param launchPos  launch position (On Tour const t4Vector&)
+ * @param launchVel  launch velocity (On Tour const t4Vector&)
+ */
 void cAirPredictor_initLaunch(char* self, sQuad* launchPos, sQuad* launchVel)
 {
     *(int*)(self + 0xAC) = 0;

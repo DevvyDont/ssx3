@@ -9,6 +9,12 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00460B80[];
 
+/**
+ * Sets the number of flow states and allocates a zeroed byte per state ("FEFlowState"), freeing the old
+ * array.
+ *
+ * @param NumStates  number of states
+ */
 extern "C" void cFEFlowState_setNumStates(void* self, int NumStates)
 {
     signed char n = NumStates;

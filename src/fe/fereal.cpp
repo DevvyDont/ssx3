@@ -21,6 +21,16 @@ extern char D_00460B90[];
 extern void* D_0046D810[];
 extern sVE0720 cFEStateTransition_vtbl[];
 
+/**
+ * Constructs the front end's custom interface and pushes its transition state on the UI engine's stack.
+ *
+ * Stores the engine at +0x0 and the vtable D_0046D810, allocates a "cFEStateTransition" state (cUIState on
+ * the same engine, +0x48 and +0x4C zeroed), keeps it at +0x10, runs its slot 4 (onCreateScreen) and pushes it
+ * with cUIStateStack_pushExplicit().
+ *
+ * @param owner  the UI engine
+ * @return @p self
+ */
 extern "C" void* cFECustom_cFECustom(void* self, void* owner)
 {
     *(void**)((char*)self + 0x0) = owner;
@@ -193,6 +203,23 @@ struct sVEntry0GNS {
     void (*fn)(void*);
 };
 
+/**
+ * Creates the front-end state to go to from a state, given the state's id and the choice made in it.
+ *
+ * The current state's id (its word at +0xC) and @p pData select the next state, allocated under its class
+ * name and built on the same engine, usually with the current state's user number (+0x44): the main menu,
+ * character select and setup, event select, the options screens, rider bio and details, the rooms and reward
+ * galleries, the lodge states and the online states. Some choices switch the app module instead
+ * (cPreFELoadScreen, cPreGameLoadScreen, or a game at the player's last hub with game mode 4, event 12) and
+ * return 0.
+ *
+ * Several cases let unlisted @p pData values fall through into the next case's code (for example id 12 into
+ * 13 and on to 16, the request line).
+ *
+ * @param st  the current state (On Tour: cUIState *pCurrentState)
+ * @param pData  the choice, usually the selected option's id (On Tour: void *pData)
+ * @return the new state to push, or 0 when there is none or the app module was switched
+ */
 // Cross-jumping keeps the later copy of identical case bodies, so the cases
 // whose code the original shares with a later case come first.
 extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
@@ -831,6 +858,16 @@ static inline void progress_1E80(float t)
     func_00317550(D_004A5B64 + 0x38, t);
 }
 
+/**
+ * Loads the front end: UI files, character animations, riders, camera, input and sound.
+ *
+ * Advances the loading bar (20, 50, 75, 99) as it goes. It calls func_0014BD78 and func_0014AF10 on BE
+ * interface 9 and func_00195BE0 on the front-end locale, calls the graphics manager's slot 44 with 0, loads
+ * "data/ui/fe" into the UI engine and the character animations, and calls func_0019CE68 on +0x1A70 and
+ * func_001A0498 on the rider manager (+0xB0). The camera gets (0, 0, -195) and (0, 1, 0) and is updated. The
+ * engine gets a cFEInput ("FEUIInput"), a cFECustom ("FEUICustom"), a sound object ("FEUISound"), the app's
+ * fonts and locale; finally it loads the irradiance database and calls func_00285FB0(func_0028B180()).
+ */
 // Front end: loads the UI files, rider data and sound for the front end.
 extern "C" void cRealFE_load(sRealFE_1E80* self)
 {
@@ -1315,6 +1352,13 @@ struct sAnimTableK1A2B00 {
 extern sAnimTableK1A2B00* D_004A3DF8_K1A2B00 __asm__("D_004A3DF8");
 extern void* D_004A3E7C;
 
+/**
+ * Loads the front end's character animation data from "data/char/anm.big" into the game animation map.
+ *
+ * Opens the big file, creates one "AdfDataSourceFE" data source (func_00311250) from D_004A19C0[0], stores it
+ * in the animation table D_004A3DF8 and registers it in the map D_004A3E7C (func_00314F30), resolves the map
+ * and closes the file.
+ */
 extern "C" void cRealFE_loadCharAnimations(void)
 {
     void* handle;
@@ -1402,6 +1446,14 @@ struct sRealFE_1A2C40 {
     char* ui;   // 0xC
 };
 
+/**
+ * Pushes the front end's first states: the background, then the title, lodge or online relogin screen.
+ *
+ * The cFEStateBackground is created and pushed first. D_004A19C4 (why the front end was entered) then picks:
+ * 0 the title screen (D_004A19D8 = 0), 0x27 the lodge (D_004A19D8 = 1), 0x34 cFEStateRelogin after restoring
+ * the online session (comm system, lobby manager, the network character profile, BE state calls). The last
+ * two reset D_004A19C4 to 0.
+ */
 extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
 {
     sStartState_1A2C40* s = new (D_00461358, 0, 0) sStartState_1A2C40;

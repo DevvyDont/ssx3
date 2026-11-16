@@ -21,6 +21,16 @@ static inline void SetText_6540(void* w, int text)
     *(int*)((char*)w + 0x7C) = text;
 }
 
+/**
+ * Binds the audio options' widgets: the four music-mode boxes, coloured by the current mode, and the menu
+ * entries.
+ *
+ * The entries are numbered 0 radio big, 1 request line, 2 big mountain, 3 playlist and 4 edit requests. The
+ * "2box"
+ * test appears twice; the second is unreachable.
+ *
+ * @param w  the widget being created
+ */
 extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
 {
     int id = *(int*)((char*)w + 0x38);
@@ -193,6 +203,20 @@ static inline void setEnabled_AOWE(sToggle_AOWE* t, int on)
     ((void (*)(void*, int))t->vt[6].fn)((char*)t + t->vt[6].delta, on);
 }
 
+/**
+ * Handles the audio options menu: select a music mode, open the request-line editor, leave, or show help
+ * text.
+ *
+ * Selecting a mode recolours the boxes and stores it (per player in the reward interface, and in the audio
+ * system);
+ * the request-line and playlist modes need a custom list (+0x7C). Entry 4 opens a cFEStateRequestLine.
+ * Leaving
+ * stores the mode too. Highlight help depends on whether a list exists and whether this is the in-game pause
+ * menu.
+ *
+ * @param w  the menu entry (its index at +0x18), or 0
+ * @param event  widget event number (On Tour Event)
+ */
 extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWidget_AOWE* w, unsigned int event)
 {
     if (w == 0)
@@ -298,6 +322,15 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
 //100%
 INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetMenu);
 #ifdef SKIP_ASM
+/**
+ * Refuses event 6 on the request-line, big-mountain or edit entries when they are unavailable, and blocks
+ * events 8 and 9.
+ *
+ * @param pMenu  the menu
+ * @param Event  menu event number
+ * @param index  the menu item index
+ * @return 0x10 for a refused event 6, 0 for events 8 and 9, otherwise 0x101
+ */
 extern "C" int cFEStateAudioOptions_onWidgetMenu(void* self, int pMenu, int Event, int index)
 {
     if (Event == 6 && (index == 2 || index == 3 || index == 4)) {
@@ -457,6 +490,12 @@ struct sVEntry00196DB0 {
     int (*fn)(void*, int, int);
 };
 
+/**
+ * Creates the request-line screen: "16radio" in the front end, or "143radio_pda" in game with the HUD told to
+ * hide (3).
+ *
+ * Then makes the song menu scrollable over the song count (+0x14C).
+ */
 extern "C" void cFEStateRequestLine_onCreateScreen(void* self)
 {
     char* name = D_004A18B0;
@@ -492,6 +531,9 @@ void* cUIState_onDestroyScreen(void* self);
 extern "C" void* cUIStateStack_findState(void* self, int id);
 extern char D_004A18A8[];
 
+/**
+ * Destroys the request-line screen, first telling the in-game HUD to come back (4) when a game is running.
+ */
 extern "C" void cFEStateRequestLine_onDestroyScreen(void* self)
 {
     if ((int)SSXApp->Game != 0) {

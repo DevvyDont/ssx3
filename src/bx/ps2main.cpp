@@ -44,6 +44,15 @@ struct sIoCfg_SysInit {
     char pad_0x10[0x14];
 };
 
+/**
+ * Boot-time setup of the PS2 side: IOP modules, random seed, heap, file system and the per-frame sync task.
+ *
+ * Loads SIO2MAN, PADMAN, LIBSD, SNDDRV, MCMAN and MCSERV.IRX, seeds BXsrand() from a clock reading, hands the
+ * memory from just past a 64-byte-aligned scratch block (+0x800) up to func_00423D80() to
+ * cMemMan_initialize(), installs func_00252FA0/MEM_free as the file system's allocator, runs FILESYS_init(48,
+ * 500, 32) and ASYNCFILE_init(16, 0), swaps sync task func_003E4000 for func_0031AD20 and finally passes
+ * "cd:" to func_003DDE78() (probably selecting the default file device).
+ */
 // Boot-time setup: IOP modules, timers, random seed, heap, file system and the per-frame sync task.
 extern "C" void systemInit(void)
 {

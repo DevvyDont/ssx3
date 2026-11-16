@@ -8,6 +8,9 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern char D_0045FFD8[];
 
+/**
+ * Creates the front end's background screen ("snowanim") and plays its first frame.
+ */
 extern "C" void cFEStateBackground_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -26,6 +29,9 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern char D_0045FFE8[];
 extern char D_0045FFF8[];
 
+/**
+ * Creates the transition state's two screens, "transition" and "whitefade".
+ */
 extern "C" void cFEStateTransition_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -43,6 +49,14 @@ int GetHashValue32(char* str);
 extern char D_004A1360[];
 extern char D_004A17B8[];
 
+/**
+ * Tracks a transition animation: "start" sets the state's busy flag (8) and the screen's 0x40 flag, "end"
+ * clears them.
+ *
+ * @param screen  the screen that sent the event
+ * @param id  the event's label hash
+ * @return 0
+ */
 extern "C" int cFEStateTransition_onScreenEvent(void* self, void* screen, int id)
 {
     int h1 = GetHashValue32(D_004A1360);

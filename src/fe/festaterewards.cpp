@@ -20,6 +20,13 @@ struct sRewardGallery_F0B0 {
     sRewardEntry_F0B0 entries[180];  // 0x7C
 };
 
+/**
+ * Creates the reward gallery screen ("129 rewardgallery"), clears the 180 reward entries and starts loading.
+ *
+ * Calls func_001D0180() (checks whether the rewards are loaded, else starts the load) and, unless flag bit 3
+ * of
+ * +0x48 is set, func_001CFE60().
+ */
 extern "C" void cFEStateRewardGalleryBase_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -385,6 +392,17 @@ static inline void show_F820(sWidget_F820* w, int on)
     w->vt[9].fn((char*)w + w->vt[9].delta, on);
 }
 
+/**
+ * Binds the reward gallery's widgets by name as the screen creates them, and fills the fixed ones.
+ *
+ * Stores the help text, arrows, select bar, counters ("max_rewards", "num_rewards" as %d), page text, reward
+ * name,
+ * cost and cash widgets; sets the title, the "reward name colon" label and the poster icon for the gallery's
+ * reward
+ * type (3 posters, 4 trading cards, 5 art, 6 videos, 7 toys, 8 cheat characters); and records the grid cells.
+ *
+ * @param w  the widget being created
+ */
 extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sWidget_F820* w)
 {
     char buf[16];
@@ -951,6 +969,14 @@ struct sVE_03F8 {
     void* (*fn)(void*);
 };
 
+/**
+ * Opens the viewer for the selected reward as a popup: a preview for posters, cards, art and toys, a video
+ * player for videos.
+ *
+ * The reward comes from vtable slot 34 (probably getReward). Types 3, 4, 5 and 7 push a
+ * cFEStatePreviewReward; type
+ * 6 pushes a cFEStateVideoPlayer playing the reward's file. Other types show nothing.
+ */
 extern "C" void cFEStateRewardGalleryBase_showReward(void* self)
 {
     void* p = 0;
@@ -1068,6 +1094,18 @@ static inline void setHelp_0648(char* self, char* key)
     cUIText_setUnicodeStringByID(*(cUIText**)(self + 0x900), GetHashValue32(key));
 }
 
+/**
+ * Shows the help line for a reward: view or select it if owned, else where it can be bought and whether cash
+ * suffices.
+ *
+ * Owned rewards show kT_129HELPViewItem (cheat characters: kT_129HELPSelectCheatChar). Otherwise, outside a
+ * store
+ * (+0x8F0 < 0) it says buy in CTM; in another peak's store, buy in peak 1-3; in its own store, buy or save
+ * cash
+ * (cash at +0x54 against the cost). A cheat character with no store number shows the reward's own text.
+ *
+ * @param idx  reward index (On Tour rIndex)
+ */
 // PORT: item pointers passed through int vtable parameters.
 extern "C" void cFEStateRewardGalleryBase_updateHelpText(char* self, int idx)
 {
@@ -1194,6 +1232,14 @@ static inline void show_08A0(sGalCell_08A0* c, int on)
     vt[9].fn((char*)c + vt[9].delta, on);
 }
 
+/**
+ * Refreshes one row of the reward grid: owned rewards show their icon, others a dollar sign or a question
+ * mark.
+ *
+ * The dollar sign marks rewards sold in the current store. Cells past the last reward are hidden.
+ *
+ * @param row  grid row on screen (On Tour rowNum)
+ */
 extern "C" void cFEStateRewardGalleryBase_updateRow(sGallery_08A0* self, int row)
 {
     int idx = (self->scroll + row) * self->cols;
@@ -1301,6 +1347,11 @@ struct sVEK1D0BC8b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Updates the "page X of Y" text and shows the L1/R1 page buttons only when there is more than one page.
+ *
+ * Clears the text when the localized format kT_OVRCMNPageOf is missing.
+ */
 extern "C" void cFEStateRewardGalleryBase_updatePageNumber(void* self)
 {
     if (*(void**)((char*)self + 0x904) == 0)
@@ -2090,6 +2141,12 @@ extern void* D_0046D0D0[];
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_0039E390(void* self, int flags);
 
+/**
+ * Destroys a reward preview: frees its texture and releases its file slot (func_0019DC20), then the base
+ * state.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(void* self, int flags)
 {
     *(void***)((char*)self + 8) = cFEStatePreviewReward_vtbl;
@@ -2120,6 +2177,9 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 
+/**
+ * Creates the reward preview screen ("130rewardposter") and sets flag 8 on its "Menu" object.
+ */
 extern "C" void cFEStatePreviewReward_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -2187,6 +2247,16 @@ struct sPreviewReward_1C98 {
     int sel;                    // 0x74
 };
 
+/**
+ * Binds the preview screen's widgets as they are created: icon and title by reward type, the name, and the
+ * frames.
+ *
+ * The reward picture goes into the square, horizontal or vertical bitmap chosen by the shape index (+0x70
+ * texture),
+ * and that frame is shown.
+ *
+ * @param w  the widget being created, or 0
+ */
 extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, sWidget_1C98* w)
 {
     if (w == 0)
@@ -2291,9 +2361,16 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int cFEStatePreviewReward_onWidgetMenu(void* self, int a1, unsigned int a2)
+/**
+ * Swallows menu events 6, 8 and 9 on the preview screen.
+ *
+ * @param menu  the menu (On Tour cUIMenu* pMenu), unused
+ * @param event  menu event number (On Tour Event)
+ * @return 0x100 for events 6, 8 and 9, otherwise 0x101
+ */
+extern "C" int cFEStatePreviewReward_onWidgetMenu(void* self, int menu, unsigned int event)
 {
-    switch (a2) {
+    switch (event) {
     case 6:
     case 8:
     case 9:
@@ -2350,6 +2427,13 @@ struct sDefObj_1FF0 {
 // $gp-relative default object (target has raw `addiu $3,$28,0x2968`, no symbol)
 extern sDefObj_1FF0 D_004A5A58;
 
+/**
+ * Closes the preview when the input passes its vtable slot-6 test: plays UI sound 3, hides the frames,
+ * transitions out.
+ *
+ * @param obj  the input (On Tour cUIInput* pInput)
+ * @return 1 when the preview closes, otherwise 0
+ */
 extern "C" int cFEStatePreviewReward_onInputBegin(void* self, void* obj)
 {
     sVE_1FF0a* vt = *(sVE_1FF0a**)((char*)obj + 8);

@@ -25,6 +25,13 @@ struct sVE_32A8 {
     int (*fn)(void*);
 };
 
+/**
+ * Creates the rider-details screen "154rider_details" and shows the player's character.
+ *
+ * Runs func_00182DB8, reloads the player table (the interface's slot 2, discard), sets up the user's
+ * front-end rider with the player's character, calls func_0028F140 with 1, and sets +0x50 when the character
+ * has any cheat characters unlocked (func_001577A0).
+ */
 extern "C" void cFEStateRiderDetail_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -100,6 +107,11 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
 extern char D_0045D898[];
 
+/**
+ * Greys out "Option_2" (the cheat characters) when the character has none unlocked (+0x50 is 0).
+ *
+ * func_00194498 disables the widget and caps its alpha at 0.5.
+ */
 extern "C" void cFEStateRiderDetail_onPreRender2D(void* self)
 {
     if (*(int*)((char*)self + 0x50) == 0) {
@@ -168,6 +180,16 @@ struct sVE_35F8 {
 
 static inline int Is_001835F8(int id, char* s) { return id == GetHashValue32(s); }
 
+/**
+ * Takes the result of the rider-details popups when one closes (event 0x16): a cheat character or a name.
+ *
+ * From "131cheat_char" a confirmed choice (+0x74) is stored in the player table (func_001474A8) and
+ * committed; from the keyboard (hash name 0) an accepted, non-empty text becomes the player's name
+ * (func_00147138). Then func_001831D0 with 1.
+ *
+ * @param item  the popup that sent the event
+ * @param msg  the popup event; only 0x16 is handled
+ */
 extern "C" void cFEStateRiderDetail_onPopupEvent(void* self, void* item, int msg)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -230,6 +252,16 @@ struct sBits_3710 {
     unsigned hi : 18;
 };
 
+/**
+ * Handles the rider-details options: edit the name, pick a cheat character, other screens, back and options.
+ *
+ * Event 5 on option 8 opens an 8-character keyboard (several symbol keys excluded) holding the player's name;
+ * on option 6 it opens "cFEStateCheatCharSelect" when the character has cheat characters; other options push
+ * the custom interface's next state. Event 6 pushes the previous state; 7 opens "FEOptions" (mode 1).
+ *
+ * @param item  the widget (ignored when 0); its miscellaneous data (+0x18) is the option
+ * @param msg  the widget event
+ */
 extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsigned int msg)
 {
     if (item == 0) return;

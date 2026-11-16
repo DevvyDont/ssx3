@@ -135,6 +135,19 @@ struct sBoardSparkFXView {  // this unit's view of cBoardSparkFX (ai/riderhandle
     sBsSlot slotB;          // 0x90
 };
 
+/**
+ * Constructs a rider's board spark effect: a particle emitter for grit, a glow and three spark points.
+ *
+ * When @p inChrg is set it also constructs the cRider virtual base at +0xB0. It patches the rider's vtables
+ * (the g++ 2.95 this-adjust fix-ups when not in charge).
+ *
+ * It creates the emitter (0x210 bytes), its particle settings (0xD8 bytes: brown grit, probably with gravity
+ * -800) and the glow object (0x150 bytes, set up through func_0036CBF8 and related calls). It hands the
+ * settings to the emitter, then resets the render states (cBoardSparkFX_readFromReplayFrame).
+ *
+ * @param inChrg  nonzero when this object is complete and must construct its virtual base
+ * @return self
+ */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xB0): vtable copies with delta fixups when not in charge.
 extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg)
@@ -249,6 +262,10 @@ INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX__cBoardSparkFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardsparkfx_classes.h"
 
+/**
+ * Destroys a board spark effect's parts: the emitter (+0x20), the particle settings (+0x24) and the glow
+ * (+0x28).
+ */
 cVbDtor002DA8E8::~cVbDtor002DA8E8()
 {
     delete m20;
@@ -295,6 +312,14 @@ struct sSparkFx_AA78 {
     sRS_AA78 rsB;           // 0x90
 };
 
+/**
+ * Resets a board spark effect; despite the name it reads no replay data (it takes no frame).
+ *
+ * Clears the position and flags and builds the two additive render states (glow and sparks, effect texture
+ * 22).
+ *
+ * @param vself  the spark effect
+ */
 // Spark FX init: two render states copied from the defaults with their mode bits set (the second also sets f0 bits 2-3).
 extern "C" void cBoardSparkFX_readFromReplayFrame(cBoardSparkFX* vself)
 {
@@ -501,6 +526,14 @@ static inline sV4_ABC8 RiderSide_ABC8(char* rider)
 
 #define MIN_ABC8(a, b) ((a) < (b) ? (a) : (b))
 
+/**
+ * Updates a rider's board sparks: grit particles, the glow under the board and random spark points.
+ *
+ * Above a speed of about 278 the surface decides: a surface with glow (+0x8C) lights the glow, and while rail
+ * sliding also the sparks. Grit is thrown on surface type 9 (brown) or on a rail whose surface has grit
+ * (+0x88), with a chance that grows with speed. The glow is magenta in the uber states, otherwise blue and
+ * red.
+ */
 // sBoardSparkFXView::update(void) (On Tour name, unverified pairing; callees fit).
 // Board spark FX update: emitter direction/colour from the rider's motion, then the glow and spark points.
 extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
@@ -666,6 +699,12 @@ static inline void pop_B478(sRenderCtx_B478* ctx)
     ctx->top--;
 }
 
+/**
+ * Draws a rider's board sparks: the emitter's particles, the glow (graphics slot 82) and up to three spark
+ * sprites.
+ *
+ * The sprites use the second render state and a full white UV quad (statics set up on first use).
+ */
 extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
 {
     char* o = *(char**)(((char*)self) + 0x20);

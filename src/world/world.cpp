@@ -16,6 +16,14 @@ extern char D_00494D68[];
 extern char D_00494D78[];
 // The unit declares cWorld_m_pTheWorld as int (later); this view stores the world pointer.
 
+/**
+ * Constructs the world and makes it the current one (cWorld_m_pTheWorld).
+ *
+ * Creates the world cache, the world-script cache and the world painter manager, clears +0x10/+0x14 and sets
+ * up the sphere-tree cache (SphereTree_initCache(10, 4, 2, 5)).
+ *
+ * @return self
+ */
 extern "C" void* cWorld_cWorld(void** self)
 {
     cWorld_m_pTheWorld = (cWorld*)(self);
@@ -44,6 +52,13 @@ extern "C" void func_002BB140(void* self, int flags);
 extern "C" void func_0032DE20(void);
 void operator_delete(int* p);
 
+/**
+ * Destroys the world: graphics manager slot 107, then deletes its caches and the world painter manager.
+ *
+ * Also calls func_0032DE20() and clears cWorld_m_pTheWorld.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cWorld__cWorld(void** self, int flags)
 {
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
@@ -288,6 +303,15 @@ struct cWorld_load_sBXString {
     char* str;
 };
 
+/**
+ * Loads a world: resets and initialises the world cache, then sizes the script cache and the world painter
+ * for its sections.
+ *
+ * A cBXString copy of the name is made and destroyed without being used.
+ *
+ * @param name  the world's base file name (On Tour base)
+ * @param nash  the Nash collision grid to use (On Tour nash::Nash*)
+ */
 extern "C" void cWorld_load(void** self, const char* name, int nash)
 {
     cWorld_load_sBXString s;
@@ -316,6 +340,14 @@ struct cWorld_getWScriptHeaderId_sTable {
 
 extern "C" int func_003AD120(cWorld_getWScriptHeaderId_sEntry* e, void* obj, int i);
 
+/**
+ * Returns the resource id of one of an instance's world-script headers, from the script cache of the
+ * instance's section (+0x78).
+ *
+ * @param obj  the instance (On Tour const tInstanceRecord*)
+ * @param i    which script entry
+ * @return the header's resource id (On Tour tResourceID)
+ */
 extern "C" int cWorld_getWScriptHeaderId(cWorld* self, void* obj, int i)
 {
     return func_003AD120(&((cWorld_getWScriptHeaderId_sTable*)self->m_pWScriptCache)->entries[*(unsigned char*)((char*)obj + 0x78)], obj, i);
@@ -338,6 +370,12 @@ struct cWorld_getNumGlobalScripts_sTable {
 
 extern "C" int func_003ADC80(cWorld_getNumGlobalScripts_sEntry* e);
 
+/**
+ * Returns how many global world scripts a section has.
+ *
+ * @param i  section id
+ * @return the number of global scripts
+ */
 extern "C" int cWorld_getNumGlobalScripts(cWorld* self, int i)
 {
     return func_003ADC80(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
@@ -349,6 +387,12 @@ INCLUDE_ASM("world/world", cWorld_getGlobalScripts);
 #ifdef SKIP_ASM
 extern "C" int func_003ADCB0(cWorld_getNumGlobalScripts_sEntry* e);
 
+/**
+ * Returns a section's global world scripts.
+ *
+ * @param i  section id
+ * @return the global script records (On Tour const tWScriptGlobalData*)
+ */
 extern "C" int cWorld_getGlobalScripts(cWorld* self, int i)
 {
     return func_003ADCB0(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
@@ -396,6 +440,12 @@ INCLUDE_ASM("world/world", cWorld_getNumMissionScripts);
 #ifdef SKIP_ASM
 extern "C" int func_003ADD40(cWorld_getNumGlobalScripts_sEntry* e);
 
+/**
+ * Returns how many mission scripts a section has.
+ *
+ * @param i  section id
+ * @return the number of mission scripts
+ */
 extern "C" int cWorld_getNumMissionScripts(cWorld* self, int i)
 {
     return func_003ADD40(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
@@ -407,6 +457,12 @@ INCLUDE_ASM("world/world", cWorld_getMissionScripts);
 #ifdef SKIP_ASM
 extern "C" int func_003ADD70(cWorld_getNumGlobalScripts_sEntry* e);
 
+/**
+ * Returns a section's mission scripts.
+ *
+ * @param i  section id
+ * @return the mission script records (On Tour const tWScriptMissionData*)
+ */
 extern "C" int cWorld_getMissionScripts(cWorld* self, int i)
 {
     return func_003ADD70(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
@@ -454,6 +510,12 @@ INCLUDE_ASM("world/world", cWorld_getWScriptScript);
 #ifdef SKIP_ASM
 extern "C" int func_003ADC50(cWorld_getNumGlobalScripts_sEntry* e, unsigned int i);
 
+/**
+ * Returns the code of a world script given its resource id (low byte: section; the rest: index).
+ *
+ * @param handle  the script's resource id (On Tour const tResourceID&)
+ * @return the script code (On Tour const char*)
+ */
 extern "C" int cWorld_getWScriptScript(cWorld* self, unsigned int* handle)
 {
     unsigned int h = *handle;

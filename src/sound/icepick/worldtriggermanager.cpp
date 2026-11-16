@@ -8,6 +8,10 @@ extern void* gWorldTriggerManager;
 //99.88%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", WORLDTRIGGERMANAGER_Init__Fv);
 #ifdef SKIP_ASM
+/**
+ * Creates the world trigger manager (gWorldTriggerManager, 0x344 bytes "WorldTriggerManager") if it does not
+ * exist.
+ */
 void WORLDTRIGGERMANAGER_Init()
 {
     if (gWorldTriggerManager == 0) {
@@ -428,6 +432,14 @@ struct sWorldTrigger58D0 {
     char pad[0x70];
 };
 
+/**
+ * Constructs the world trigger manager: resets its state, builds 40 trigger instances and loads the trigger
+ * info.
+ *
+ * The instances are a new[] array ("m_aWorldTriggerInstances", 0x70 bytes each).
+ *
+ * @return @p self
+ */
 extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self)
 {
     *(int*)((char*)self + 0x324) = 0;
@@ -455,6 +467,12 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager__cWorldTri
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 
+/**
+ * Destroys the world trigger manager: destroys its trigger instances, frees the array, then frees the object
+ * if asked.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cWorldTriggerManager__cWorldTriggerManager(char** self, int flags)
 {
     char* base = *self;
@@ -487,6 +505,15 @@ struct sTrigInfoEnt { int type; int* data; };
 // PORT: the unit declares LoadTriggerInfo as void (the ctor ignores it); the body returns 0/1. Bound by asm label.
 int cWorldTriggerManager_LoadTriggerInfo_impl(void* self) __asm__("cWorldTriggerManager_LoadTriggerInfo");
 
+/**
+ * Loads the sound trigger definitions from data/config/watrig.adl and indexes them by entry.
+ *
+ * Each entry's type decides its size (types 1-4 are 6, 14, 12 and 4 words); the index
+ * ("m_aTriggerInfoInstances")
+ * holds type and data pointer for entries 2 onwards. A missing file leaves the manager with no trigger info.
+ *
+ * @return 0 when the file's first byte is nonzero (rejected), otherwise 1
+ */
 int cWorldTriggerManager_LoadTriggerInfo_impl(void* self)
 {
     if (BXFILE_exists(D_004A3858) != 0) {

@@ -20,6 +20,16 @@ struct cUIMenu_sVEntryB {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Moves the menu's selection to a widget: unfocuses the old one (its "lose" animation event), focuses the new
+ * one.
+ *
+ * Both changes are reported to the screen's state (slot 19: 2 lost, 1 gained). The new item's "gain" event is
+ * played, or jumped to when @p play is 0.
+ *
+ * @param item  the widget to select (On Tour cUIThing* pWidget)
+ * @param play  nonzero to play the selection animation, 0 to jump to its end (On Tour createContext)
+ */
 extern "C" void cUIMenu_setSelected(cUIMenu* self, char* item, int play)
 {
     self->mStoredIndex = 0xFF;
@@ -81,6 +91,16 @@ static inline void cUIMenu_onInputChangeItem_notify(char* self, int ev, unsigned
     vt[20].fn(mgr + vt[20].delta, self, ev, v);
 }
 
+/**
+ * Keeps a scrolled menu's new current item inside the visible window and selects it, notifying the scroll
+ * changes.
+ *
+ * Scrolling up or down sends menu events 2 or 3 and 4 with the new offset; the change sends event 5.
+ *
+ * @param selfp  the menu
+ * @param OldScrollItemCurrent  the current item before the input
+ * @return 1 when the current item changed, otherwise 0
+ */
 // cUIMenu::onInputChangeItem(unsigned char OldScrollItemCurrent) (On Tour debug 0x0027E39C):
 // keeps the selected row (0x95) inside the visible window (top 0x98, rows 0x97), then reselects.
 // MenuEntryIndex is a short in On Tour's DWARF; the short is what keeps the second 0x95 load.
@@ -165,6 +185,18 @@ static inline void playEvent_B000(char* thing, int which)
     }
 }
 
+/**
+ * Handles input for a menu: the focused item gets it first, then the direction buttons move the selection and
+ * the
+ * other buttons are reported to the state.
+ *
+ * Horizontal menus (mAttr bit 0) use left and right. Inputs 4-8 are reported to the item (widget event) and
+ * to the
+ * state's menu handler, whose result flags pick the item's animation and sound; the UI sound player plays it.
+ *
+ * @param in  the input (On Tour const cUIInput*)
+ * @return 1 when the menu used the input, otherwise 0
+ */
 // 2D menu input: the focused child gets the input first; then up/down/left/right move the selection
 // (by row or by column), the paging slots move the focus between items, accept notifies.
 extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
@@ -313,6 +345,12 @@ struct cUIMenu_render2D_sVEntry {
     void (*fn)(void*, float, float);
 };
 
+/**
+ * Draws the menu's scroll bar and its visible child widgets at the menu's position plus the given offset.
+ *
+ * @param x  parent x offset
+ * @param y  parent y offset
+ */
 extern "C" void cUIMenu_render2D(cUIMenu* self, float x, float y)
 {
     void* p = self->mpScrollBar;
@@ -337,6 +375,12 @@ INCLUDE_ASM("ui/uimenu", cUIMenu_setScrollableMenu);
 #ifdef SKIP_ASM
 extern "C" char cList_size(void*);
 
+/**
+ * Makes the menu scroll over @p NumItems items with as many visible rows as it has widgets, starting at the
+ * top.
+ *
+ * @param NumItems  total number of items
+ */
 extern "C" void cUIMenu_setScrollableMenu(cUIMenu* self, char NumItems)
 {
     *(char*)&self->mScrollItemCurrent = 0;
@@ -436,6 +480,12 @@ static inline void cUIMenu_notify(char* self, int ev, unsigned char v)
     vt[20].fn(mgr + vt[20].delta, self, ev, v);
 }
 
+/**
+ * Selects a menu item by index, scrolling the window to it; before the screen is ready it only stores the
+ * index.
+ *
+ * @param idx  the item index (On Tour Index)
+ */
 extern "C" void cUIMenu_setSelectedByIndex(cUIMenu* self, unsigned char idx)
 {
     if (((self->mAttr >> 4) & 1) == 0 || ((*(int*)(*(char**)((char*)self->mpScreen + 0xD0) + 0x1C) >> 5) & 1) == 0) {
@@ -529,6 +579,11 @@ struct cUIPair_setVisible_sVEntry {
     void (*fn)(void*, int);
 };
 
+/**
+ * Shows or hides a widget pair and both of its widgets.
+ *
+ * @param on  nonzero to show (On Tour visible)
+ */
 extern "C" void cUIPair_setVisible(void* self, int on)
 {
     ((cUIPair_setVisible_sFlags*)((char*)self + 0x14))->on = (on != 0);
@@ -570,6 +625,13 @@ struct cUIPair_setFocus_sFlags {
     unsigned int on : 1;
 };
 
+/**
+ * Gives or removes focus on a widget pair: the label follows, the second widget plays its gain or lose event.
+ *
+ * The second widget's focus change is reported to the screen's state (slot 19: 1 gained, 2 lost).
+ *
+ * @param on  nonzero to focus (On Tour focus)
+ */
 extern "C" void cUIPair_setFocus(char* self, int on)
 {
     ((cUIPair_setFocus_sFlags*)(self + 0x14))->on = on != 0;
@@ -659,6 +721,12 @@ public:
     virtual void* v03(cUIPair_traverseRecurse_cPred*);
 };
 
+/**
+ * Searches the pair and then its two widgets for the first one the operator accepts.
+ *
+ * @param pred  the operator (On Tour cListOperator* pOperator)
+ * @return the widget found, or 0
+ */
 extern "C" void* cUIPair_traverseRecurse(void* self, cUIPair_traverseRecurse_cPred* pred)
 {
     if (pred->v02(self)) {
@@ -701,6 +769,9 @@ public:
     virtual void v16();
 };
 
+/**
+ * Refreshes the localized text of both widgets of a pair.
+ */
 extern "C" void cUIPair_updateLocale(void* self)
 {
     cUIPair_updateLocale_cVirt* a = *(cUIPair_updateLocale_cVirt**)((char*)self + 0x78);
@@ -724,6 +795,9 @@ public:
     virtual void v01(int);
 };
 
+/**
+ * Deletes both widgets of a pair and clears the pointers.
+ */
 extern "C" void cUIPair_destroyPair(void* self)
 {
     cUIPair_destroyPair_cVirt* a = *(cUIPair_destroyPair_cVirt**)((char*)self + 0x78);
@@ -772,6 +846,13 @@ static inline int focusMove_BED8(char* self, int dir)
     return vt[21].fn(o + vt[21].delta, self, dir);
 }
 
+/**
+ * Handles input for a widget pair: inputs 5 and 6 are reported to the state, input 4 notified, others go to
+ * the second widget.
+ *
+ * @param in  the input (On Tour const cUIInput* pInput)
+ * @return 1 when the pair used the input, otherwise the second widget's answer (0 without one)
+ */
 // Menu input: up/down move the selection (with transition frames and wrap events), accept notifies, else
 // the sub-handler gets the input.
 extern "C" int cUIPair_onInput(char* self, void* in)
@@ -843,6 +924,12 @@ struct cUIPair_render2D_sVEntry {
     void (*fn)(void*, float, float);
 };
 
+/**
+ * Draws both widgets of a pair at the pair's position plus the given offset.
+ *
+ * @param x  parent x offset
+ * @param y  parent y offset
+ */
 extern "C" void cUIPair_render2D(void* self, float x, float y)
 {
     void* a = *(void**)((char*)self + 0x78);
@@ -888,6 +975,11 @@ public:
     virtual void v19(unsigned short);
 };
 
+/**
+ * Updates the pair's animation for a frame, then both of its widgets.
+ *
+ * @param ev  the frame number (On Tour FrameNum)
+ */
 extern "C" void cUIPair_update(void* self, unsigned short ev)
 {
     cUIThing_update(self, ev);
@@ -914,6 +1006,11 @@ struct cUIProgress__cUIProgress_sVEntry {
     void (*fn)(void*, int);
 };
 
+/**
+ * Destroys a progress bar: deletes its two child widgets, then the cUIThing base.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cUIProgress__cUIProgress(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cUIProgress_vtbl;
@@ -958,6 +1055,12 @@ struct cUIProgress_render2D_sVEntry {
     void (*fn)(void*, float, float);
 };
 
+/**
+ * Draws a progress bar's two widgets (when both exist) at its position plus the given offset.
+ *
+ * @param x  parent x offset
+ * @param y  parent y offset
+ */
 extern "C" void cUIProgress_render2D(void* self, float x, float y)
 {
     void* a = *(void**)((char*)self + 0x74);
@@ -985,6 +1088,11 @@ struct cUIProgress_update_sVEntry {
     void (*fn)(void*, unsigned short);
 };
 
+/**
+ * Updates the progress bar's own animation for a frame, then its two widgets.
+ *
+ * @param ev  the frame number (On Tour FrameNum)
+ */
 extern "C" void cUIProgress_update(void* self, unsigned short ev)
 {
     if (*(void**)((char*)self + 0xC) != 0) {

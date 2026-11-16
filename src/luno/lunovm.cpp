@@ -553,6 +553,18 @@ public:
     void execute(const cLunoFunc& func, cLunoVar& result) __asm__("luno_cLunoVM_execute");
 };
 
+/**
+ * Runs one compiled Luno script function to completion on this VM's registers.
+ *
+ * Starts at the function table entry's first instruction and interprets op-codes until a return op (31 stores
+ * a register into @p result, 42 returns nil) or the end of the code: jumps, comparisons, arithmetic, table
+ * get/set, numeric for-loop steps, script calls (each through a fresh cLunoVM) and C-function calls through
+ * gLunoCFunctions with arguments pushed onto a local stack. On exit it frees the argument stack and also the
+ * VM's register array (m_Regs).
+ *
+ * @param func    the compiled function (code block and function index)
+ * @param result  receives the returned value; left untouched if the code runs off the end
+ */
 void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
 {
     const char* code = func.Code;
@@ -1165,6 +1177,16 @@ static inline int lunoKeyEquals_set(cLunoValue* a, cLunoValue* b)
     return 0;
 }
 
+/**
+ * Stores a value under a key in a Luno script table; a nil key does nothing.
+ *
+ * The key's first word modulo the table size picks the bucket. An empty bucket head, or one with an equal
+ * key, takes the value directly. A matching chained node gets the new value and is unlinked and destroyed if
+ * that value is nil. A new key with a non-nil value is appended to the chain in a new 0x20-byte node.
+ *
+ * @param key  the key value
+ * @param val  the value to store (nil removes a chained entry)
+ */
 // Table store: sets key to val (a nil value removes a chained entry); nil keys are ignored.
 extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoValue* val)
 {
@@ -1303,6 +1325,16 @@ struct cLunoNode_9A8 {
     void operator delete[](void* p, unsigned int size);
 };
 
+/**
+ * Rebuilds a Luno table from a replay frame, replacing its current contents.
+ *
+ * Destroys and frees the old node array, reads the table header (8 bytes) through the frame's read method,
+ * allocates modulus + 1 empty nodes, then reads an entry count and that many key/value pairs (func_00225CA0)
+ * and stores each pair with luno_cLunoTable_set().
+ *
+ * @param stream  the replay frame to read from (On Tour cBxReplayFrame*)
+ * @param base    passed through to the value reader (On Tour: const char* base)
+ */
 extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry00224C00** stream, int base)
 {
     if (self->table->nodes != 0) {

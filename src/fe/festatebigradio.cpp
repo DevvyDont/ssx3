@@ -94,6 +94,14 @@ static inline bool isNet_2DB0()
     return D_004A1A70 == 1;
 }
 
+/**
+ * Builds the bragging-rights screen: the rule rows of the current event and both players' choice lists.
+ *
+ * Creates "65bragrights", unlocks both panels when bit 4 of +0x1C is set, and picks the rule table and row
+ * count (5-7) from the game event. Each row's label gets the rule's text id (D_00441108), and each panel's
+ * list gets No/Yes for rules 1-6, Off/5s-20s for rule 0 and Off/3000-15000 for rule 7, with the current value
+ * (func_00193F38) selected. Online (D_004A1A70 == 1) shows "ongroup" and hides the second player's widgets.
+ */
 // Bragging rights screen: builds the rule rows of both player panels for the current mode.
 extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
 {
@@ -284,6 +292,14 @@ typedef sVEntry<int(void*, void*)> sVEPtr_3338;
 
 static inline int get6F8_3338(void* p) { return *(int*)((char*)p + 0x6F8); }
 
+/**
+ * Feeds each player's controller to their bragging-rights panel and handles unlocking a locked panel.
+ *
+ * One panel online, else two. The UI input is pointed at the player's controller (input slot 44); when input
+ * slot 40 is set and the panel is unlocked, the input goes to the panel's menu (slot 15). Back (input slot 6)
+ * on a locked panel unlocks it, rebuilds it, selects its first row and plays the label "11" or "21"; online
+ * that is also sent to the peer (func_00265700).
+ */
 extern "C" void cFEStateBraggingRights_onUpdate(sBragging_2DB0* self)
 {
     int n = isNet_2DB0() ? 1 : 2;
@@ -352,6 +368,15 @@ static inline int isOn00193568()
 
 static inline int get6F8_3568(void* p) { return *(int*)((char*)p + 0x6F8); }
 
+/**
+ * Gives the bragging-rights screen the focus: plays a "wait" label and recolours the panels.
+ *
+ * Online it runs the online states' handler (func_001A87D0) instead. Otherwise cUIState's handler runs, "wait
+ * 1" or "wait 2" plays when exactly one panel is locked (+0x6F8, +0x72C), and both panels are recoloured
+ * (func_001927B0).
+ *
+ * @param pPrevState  the state that had focus before (passed on online only)
+ */
 extern "C" void cFEStateBraggingRights_onGainFocus(void* self, int pPrevState)
 {
     if (isOn00193568()) {
@@ -426,6 +451,15 @@ public:
 
 static inline int Is_193650(int id, char* s) { return id == GetHashValue32(s); }
 
+/**
+ * Binds the bragging-rights widgets as they are created: the two menus, the rider names and the rule rows.
+ *
+ * "1Menu" and "2Menu" become the panels' menus; "Player1/2 title" and "Player1/2 name" show the human riders'
+ * short character names; "player1 info" and "player2 info" go to the panels' +0x4. Widgets named "ij" (panel
+ * i 1-2, row j 1-8) become row j of panel i and are tagged with the panel index.
+ *
+ * @param w  the widget being created
+ */
 extern "C" void cFEStateBraggingRights_onWidgetCreate(char* self, cUIObj_193650* w)
 {
     char* wp = (char*)w;
@@ -527,6 +561,18 @@ static inline void* vcall_38F8(char* self, int slot, sWidget_38F8* w)
     return o->vt[slot].fn((char*)o + o->vt[slot].delta, self, w->panel);
 }
 
+/**
+ * Handles the bragging-rights widgets: locking a panel, leaving, highlighting and changing a rule's value.
+ *
+ * Event 5 on a row locks its panel (func_00192740) and plays the wait labels; offline, once both panels are
+ * locked, the custom interface's next state is pushed. Event 6 online asks "kT_POPUPCMNCancelChallenge"
+ * (popup id 0x838), offline pushes the previous state and clears the rule records D_005308B8. Events 1 and 2
+ * recolour the panel; event 9 stores the new value with func_00193DE0 (online it is sent to the peer
+ * instead).
+ *
+ * @param w  the widget
+ * @param event  the widget event
+ */
 // Widget event handler of the big radio-button screen (two radio panels at self+0x6D0).
 extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w, int event)
 {
@@ -640,6 +686,16 @@ static inline int isOn00193CF8()
 {
     return D_004A1A70 == 1;
 }
+/**
+ * Handles menu events of the two bragging-rights menus: recolouring and which events pass on.
+ *
+ * Events 8 and 9 return 0x100. Event 5 recolours the menu's panel (online, panel 0's selection is also sent
+ * to the peer). Event 6 returns 1 while either panel is unlocked. Event 7 returns 0 online.
+ *
+ * @param ctrl  the menu (On Tour: cUIMenu *pMenu)
+ * @param msg  the menu event
+ * @return 0x100, 1 or 0 as above, else 0x101
+ */
 // Handles a menu event for one of the two radio list controls.
 extern "C" int cFEStateBraggingRights_onWidgetMenu(void* self, void* ctrl, int msg)
 {
@@ -813,6 +869,14 @@ static inline int isOn00194168()
     return D_004A1A70 == 1;
 }
 
+/**
+ * Handles popup events online: the cancel-challenge popup (id 0x838) separately, others with func_001A97B8.
+ *
+ * Does nothing offline.
+ *
+ * @param pPopup  the popup that sent the event
+ * @param Event  the popup event
+ */
 extern "C" void cFEStateBraggingRights_onPopupEvent(void* self, void* pPopup, int Event)
 {
     if (isOn00194168()) {

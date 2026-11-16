@@ -25,6 +25,14 @@ struct cFELocale_sFiles {
     cFELocale_sFile* items[4];
 };
 
+/**
+ * Loads the common string file for a language unless it is already loaded.
+ *
+ * For lang 0-3 this is data/locale/cmnamer, cmnfren, cmngrmn or cmnspan.loc, loaded by func_002C6E98() into a
+ * new 0x14-byte entry ("LocaleFile") of the table at +0x8. A negative lang does nothing.
+ *
+ * @param lang  language index (0 English, 1 French, 2 German, 3 Spanish)
+ */
 extern "C" void cFELocale_addFile(void* self, int lang)
 {
     signed char i = lang;
@@ -337,6 +345,19 @@ extern void* cFEStateAudioOptions_vtbl[];
 extern char D_0045DA48[];
 extern char D_0045DA38[];
 
+/**
+ * Constructs the audio options state for one player.
+ *
+ * Clears the widget pointers, looks up the "checkbox" and "empty box" entries (func_00398380 on the engine's
+ * +0x58 table) shown in the mode boxes, and reads the player's character, the selected music mode
+ * (func_00158700; going by the menu items' ids, probably 0 radio big, 1 request line, 2 big mountain, 3
+ * playlist) and whether the playlist has any songs.
+ *
+ * @param engine   the UI engine
+ * @param idx      player (user) number (On Tour userNum)
+ * @param inStore  nonzero when opened from the store (+0x74)
+ * @return self
+ */
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* engine, signed char idx, int inStore)
 {
     char* s = (char*)self;
@@ -414,6 +435,12 @@ public:
     virtual int v24(int a, int b);
 };
 
+/**
+ * Opens the audio options screen: the PDA version ("142audio_pda") in game, otherwise "140audio".
+ *
+ * In game it tells the "hud" state v24(3, 0); in the front end it calls func_0028F140(func_0028B180(), 4).
+ * The new screen is kept at +0x40 and starts at frame 0.
+ */
 extern "C" void cFEStateAudioOptions_onCreateScreen(void* self)
 {
     char* name;
@@ -475,6 +502,9 @@ public:
 
 extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(void* list, int hash);
 
+/**
+ * Closes the audio options screen; in game it first tells the "hud" state v24(4, 0).
+ */
 extern "C" void cFEStateAudioOptions_onDestroyScreen(void* self)
 {
     if ((void*)SSXApp->Game != 0) {
@@ -502,6 +532,15 @@ static inline void cFEStateAudioOptions_onGainTransition_show(char* o, int on)
     vt[9].fn(o + vt[9].delta, on);
 }
 
+/**
+ * On the first transition with an empty playlist, hides the options that need songs.
+ *
+ * Hides "request line", "playlist", the "2box" and "3box" ticks and, unless opened from the store, "edit
+ * req".
+ *
+ * @param bFirstTime  nonzero on the state's first transition
+ * @return always 0
+ */
 extern "C" int cFEStateAudioOptions_onGainTransition(void* self, int bFirstTime)
 {
     if (bFirstTime != 0 && *(int*)((char*)self + 0x7C) == 0) {
@@ -547,6 +586,15 @@ static inline void cFEStateAudioOptions_onGainFocus_callp(char* o, int slot, voi
     vt[slot].fn(o + vt[slot].delta, a);
 }
 
+/**
+ * When the playlist is empty, shows the song options but greyed out and disabled.
+ *
+ * "request line", "playlist" and (unless in the store) "edit req" are made visible, switched to the disabled
+ * colour and disabled; the "2box" and "3box" ticks are made visible and coloured with gDisableColour. Then
+ * runs cFEState_onGainFocus().
+ *
+ * @param pPrevState  the state that had focus before (On Tour cUIState*)
+ */
 extern "C" void cFEStateAudioOptions_onGainFocus(void* self, int pPrevState)
 {
     char* s = (char*)self;

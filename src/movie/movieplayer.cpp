@@ -11,6 +11,13 @@ extern void* D_004A2C74;
 //99.53%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getManager__Fv);
 #ifdef SKIP_ASM
+/**
+ * Returns the memory-card overlay manager, creating it on first use.
+ *
+ * The single instance (0x74C bytes, allocated as "MCManager") is kept in D_004A2C74.
+ *
+ * @return the cMCOverlayManager instance
+ */
 void* cMCOverlayManager_getManager()
 {
     if (D_004A2C74 == 0) {
@@ -367,6 +374,17 @@ struct sMovieVEntry_23CDB0 {
     void (*fn)(void*, char*);
 };
 
+/**
+ * Builds the save-file title for a file slot and hands it to the memory card.
+ *
+ * The title depends on mFileType: type 0 formats the localized kT_MEMFileNameReplay text with @p n, type 1
+ * uses
+ * the profile name of mSaveProfileID, others use kT_OVGameOptions, each inside "SSX 3 %s". The result goes to
+ * the
+ * card object (vtable slot 45) and into mActiveTitleString.
+ *
+ * @param n  file slot number (On Tour calls it file)
+ */
 extern "C" void cMCOverlayManager_setTitleString(cMCOverlayManager* self, int n)
 {
     char out[0x200];
@@ -697,6 +715,15 @@ static inline void canSkip_7D8(char* s, int& out)
         && callI_7D8(s, 67, *(int*)(s + 0xF8)) && !callI_7D8(s, 65, *(int*)(s + 0xF8)) && !callI_7D8(s, 66, *(int*)(s + 0xF8));
 }
 
+/**
+ * Runs one frame of the memory-card manager: polls the devices, then runs the handler for the current state.
+ *
+ * Recomputes the save/load/delete/cancel permissions, notices card changes, regathers device info for the
+ * device
+ * being polled, handles next/previous-device input in the Save (7) and Load (29) states, and every few frames
+ * picks
+ * the next device to check. The state numbers dispatched here match On Tour's tMCOverlayManagerState names.
+ */
 extern "C" void cMCOverlayManager_ManagerLoadSaveUpdate(cMCOverlayManager* self)
 {
     if (self->mState == 1)
@@ -977,6 +1004,13 @@ struct sMovieVEntryE268b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Waits for the initial card check to finish, then moves to InitCardsCheckDone (state 50).
+ *
+ * The card is idle once its vtable slot 11 (busy) returns 0; the state change goes through the virtual
+ * SetState
+ * (vtable slot 1).
+ */
 extern "C" void cMCOverlayManager_UpdateInitCardsCheck(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1014,6 +1048,9 @@ struct sMovieVEntryE2C8b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Waits for the card to go idle, then moves to InitFileCheck (state 51).
+ */
 extern "C" void cMCOverlayManager_UpdateInitFileCheckWait(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1048,6 +1085,12 @@ struct sMovieVEntryE320c {
 
 extern "C" void cMCOverlayManager_InitiateFileCheck(cMCOverlayManager* self);
 
+/**
+ * Once the card is idle, starts the file check on the selected device or reports that no card is present.
+ *
+ * If the card says the selected device is not present (card slot 52), moves to CheckCardsWait (2) and calls
+ * callbackDisplayNoCards; otherwise starts InitiateFileCheck() and calls callbackDisplayNoFiles.
+ */
 extern "C" void cMCOverlayManager_UpdateInitFileCheckDevice(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1082,6 +1125,9 @@ struct sMovieVEntryE3C0b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Waits on the "file exists" message: once the card is idle, cancelling returns to CheckCards (state 3).
+ */
 extern "C" void cMCOverlayManager_UpdateFileExists(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1107,6 +1153,12 @@ struct sMovieVEntryE428 {
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_RecheckCard(cMCOverlayManager* self);
 
+/**
+ * Waits on the "card changed" message: once the card is idle, cancelling aborts the operation and rechecks
+ * the card.
+ *
+ * Calls CancelCardOp(0), clears mCardChanged and calls RecheckCard().
+ */
 extern "C" void cMCOverlayManager_UpdateCardChanged(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1136,6 +1188,9 @@ struct sMovieVEntryE498b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Waits for the initial file check to finish, then moves to InitFileCheckDone (state 52).
+ */
 extern "C" void cMCOverlayManager_UpdateInitFileCheck(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1303,6 +1358,10 @@ struct sMovieVEntryE820 {
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 
+/**
+ * Handles the "no memory card" error: once the card is idle, cancel aborts the operation and retry retries
+ * it.
+ */
 extern "C" void cMCOverlayManager_UpdateNoCardsError(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1384,6 +1443,15 @@ struct sMovieVEntryEA30 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Abandons the current memory-card operation and returns the manager to Done (state 1).
+ *
+ * A save in progress is reported as failed through WriteFailed(); also clears the global save-in-progress
+ * flag,
+ * mDelete and the buffered format press, and marks the device state as acknowledged.
+ *
+ * @param showFailMessage  passed to WriteFailed() when a save is being abandoned: show the write-failed popup
+ */
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int showFailMessage)
 {
     int on = self->mSave;
@@ -1421,6 +1489,15 @@ struct sMovieVEntryEA90b {
     void (*fn)(void*);
 };
 
+/**
+ * Retries the operation that failed: a save restarts from CheckCardsWait, anything else rechecks the card.
+ *
+ * For a save, an unfinished card write is first stopped (card vtable slot 44). Otherwise, with mRetryToInit
+ * set it
+ * reselects device 0 and returns to InitCardsCheck (49); else it restarts the file check when the device
+ * state
+ * shows no problem besides a full card (func_0023C8D0()), or rechecks the card.
+ */
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self)
 {
     if (self->mSave != 0) {
@@ -1480,6 +1557,10 @@ struct sMovieVEntryEB80 {
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 
+/**
+ * Handles the "invalid card" error: once the card is idle, cancel aborts (with the fail message) and retry
+ * retries.
+ */
 extern "C" void cMCOverlayManager_UpdateCardInvalid(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1526,6 +1607,16 @@ static inline void post_EC00(char* s, int code)
     vt[1].fn(s + vt[1].delta, code);
 }
 
+/**
+ * Waits while the card is being read, then picks the next state from the device status and the pending
+ * operation.
+ *
+ * After the display delay and once the card is idle: a card change goes to CardChanged (56) or back to
+ * ReadingCard; a save goes to SaveFailed (20), SaveTooBig (21) or Save (7); a delete or load goes to the
+ * no-card
+ * error, LoadFailed (36), CardInvalid (5) or Load (29). Device status bits come from mCurrDeviceStateLast
+ * (1 error, 8 no card).
+ */
 extern "C" void cMCOverlayManager_UpdateReadingCard(cMCOverlayManager* self)
 {
     int ready = cMCOverlayManager_updateDeviceStateMonitor(self);
@@ -1688,6 +1779,15 @@ public:
 
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 
+/**
+ * Handles the format-card confirmation: starts the format once confirmed, or reports a missing or failed
+ * card.
+ *
+ * When no recheck is pending: a missing card goes to NoCardsError (4), a card error to FormatFailed (12), and
+ * a
+ * buffered format press to FormatProgress (11). Cancel aborts; the format button is buffered in
+ * mFormatPressedBuffered for the next frame.
+ */
 extern "C" void cMCOverlayManager_UpdateFormatConfirm(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -1719,6 +1819,9 @@ extern "C" void cMCOverlayManager_UpdateFormatConfirm(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateFormatProgress);
 #ifdef SKIP_ASM
+/**
+ * Waits for a card format to finish, then moves to FormatFailed (12) on error or PreSaveFile (13) on success.
+ */
 extern "C" void cMCOverlayManager_UpdateFormatProgress(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -1769,6 +1872,9 @@ struct sMovieVEntryF150 {
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 
+/**
+ * Handles the "save failed" message: once the card is idle, cancel aborts and retry restarts the save.
+ */
 extern "C" void cMCOverlayManager_UpdateSaveFailed(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1797,6 +1903,10 @@ struct sMovieVEntryF1D8 {
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 
+/**
+ * Handles the "not enough space" message: once the card is idle, cancel aborts and retry retries the
+ * operation.
+ */
 extern "C" void cMCOverlayManager_UpdateSaveTooBig(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1823,6 +1933,9 @@ struct sMovieVEntryF258 {
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 
+/**
+ * Handles the "no free blocks" message: once the card is idle, retry retries and cancel aborts.
+ */
 extern "C" void cMCOverlayManager_UpdateNoFreeBlocks(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1865,6 +1978,12 @@ struct sMovieVEntryF308b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Decides whether a save must first delete the existing file in the chosen slot.
+ *
+ * If the card reports the slot in use (card slots 67 or 65 for mFileCursor), moves to PreSaveFileDelete (14),
+ * otherwise straight to CreateFile (15).
+ */
 extern "C" void cMCOverlayManager_UpdatePreSaveFile(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1898,6 +2017,10 @@ struct sMovieVEntryF3A0b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Waits for the old save file to be deleted, then moves to CreateFile (15), or SaveFailed (20) on a card
+ * error.
+ */
 extern "C" void cMCOverlayManager_UpdatePreSaveFileDelete(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -1919,6 +2042,11 @@ extern "C" void cMCOverlayManager_UpdatePreSaveFileDelete(cMCOverlayManager* sel
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateCreateFile);
 #ifdef SKIP_ASM
+/**
+ * Waits for the save file to be created, then moves to SaveFile (16), or reports the error.
+ *
+ * A card error goes to FileExists (55) when card slot 74 says so, otherwise to SaveFailed (20).
+ */
 extern "C" void cMCOverlayManager_UpdateCreateFile(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -1953,6 +2081,10 @@ struct sMovieVEntryF4F8b {
 
 extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int a1);
 
+/**
+ * Updates the save progress and moves to SaveProgress (17), or fails the write when the card reports an
+ * error.
+ */
 extern "C" void cMCOverlayManager_UpdateSaveFile(cMCOverlayManager* self)
 {
     void* o;
@@ -2057,6 +2189,14 @@ struct sMovieVEntry1_23F578 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Feeds the save data to the card until it is all written, then finishes the write and moves to SaveClosing
+ * (18).
+ *
+ * Updates mProgress = mSavedSize / mSize; while data remains, callbackWriteUpdate gets the remaining byte
+ * count
+ * and a 0 result fails the write, as does a card error.
+ */
 extern "C" void cMCOverlayManager_UpdateSaveProgress(cMCOverlayManager* self)
 {
     self->mDisplayWaitTicks -= 1;
@@ -2142,6 +2282,16 @@ static inline void post_F698(char* s, int code)
     vt[1].fn(s + vt[1].delta, code);
 }
 
+/**
+ * Runs the save screen (state Save, 7): reacts to card status changes and starts a save, overwrite or delete.
+ *
+ * Card problems found by updateDeviceStateMonitor() send it to the no-card error, InitFormatConfirm (39),
+ * CardDamaged (48), CardInvalid (5) or NoFreeBlocks (23). Pressing save checks the card is usable and has
+ * room,
+ * refuses a name already used by another slot (FileExists, 55), and goes to OverwriteConfirm (9) for a used
+ * slot
+ * or PreSaveFile (13) for an empty one; delete goes to DeleteConfirm (24) and cancel to Done (1).
+ */
 extern "C" void cMCOverlayManager_UpdateSave(cMCOverlayManager* self)
 {
     if (self->mCheckCard)
@@ -2259,6 +2409,12 @@ void func_0023FB18(void* self, int val)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_checkDevice);
 #ifdef SKIP_ASM
+/**
+ * Starts a status check of one memory-card device: records it in mCurrCheckDevice and asks the card to check
+ * it.
+ *
+ * @param iSlot  device (card slot) to check
+ */
 extern "C" void cMCOverlayManager_checkDevice(cMCOverlayManager* self, int iSlot)
 {
     self->mCurrCheckDevice = iSlot;
@@ -2303,6 +2459,11 @@ extern "C" void* cMCOverlayManager_ReturnToDevSelectScreen(cMCOverlayManager* se
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateSaveClosing);
 #ifdef SKIP_ASM
+/**
+ * Waits for the save file to close: on success calls callbackSaveSuccess and moves to SaveDone (19).
+ *
+ * A card error goes to SaveFailed (20) instead; the display delay (mDisplayWaitTicks) must also have run out.
+ */
 extern "C" void cMCOverlayManager_UpdateSaveClosing(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -2335,6 +2496,10 @@ struct sMovieVEntryFC70b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Handles the "load failed" message: once the card is idle, cancel goes to CheckCards (3), retry to
+ * ReadingCard (6).
+ */
 extern "C" void cMCOverlayManager_UpdateLoadFailed(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -2443,6 +2608,13 @@ static inline void setState_23FD40(char* self, int s)
     vt[1].fn(self + vt[1].delta, s);
 }
 
+/**
+ * Handles a corrupt save file found while saving: offers cancel, retry, delete of the file, or overwrite.
+ *
+ * Once the card is idle: a missing card goes to NoCardsError (4); delete asks the card to delete the slot's
+ * file
+ * (mFileCursor) and moves to DeleteProgress (25); overwrite goes to PreSaveFile (13).
+ */
 extern "C" void cMCOverlayManager_UpdateSaveCorrupt(cMCOverlayManager* self)
 {
     if (((cMovieDecoder_23FD40*)self->mpMemCard)->isBusy() != 0) {
@@ -2483,6 +2655,11 @@ struct sMovieVEntryFE70 {
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 
+/**
+ * Handles a corrupt save file found while loading: cancel aborts with the fail message, retry retries.
+ *
+ * Otherwise it calls callbackIsDeletePressed and ignores the result.
+ */
 extern "C" void cMCOverlayManager_UpdateLoadCorrupt(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -2502,6 +2679,13 @@ extern "C" void cMCOverlayManager_UpdateLoadCorrupt(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadDoneWait);
 #ifdef SKIP_ASM
+/**
+ * Waits out the display delay after a load, then reports the result to the front end.
+ *
+ * A card error goes to LoadFailed (36) and calls callbackReadFailed; otherwise moves to LoadDone (35) and
+ * calls
+ * callbackReadSuccess.
+ */
 extern "C" void cMCOverlayManager_UpdateLoadDoneWait(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -2538,6 +2722,11 @@ extern "C" void cMCOverlayManager_UpdateLoadDone(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadConfirm);
 #ifdef SKIP_ASM
+/**
+ * Handles the load confirmation: load starts the read (LoadStart, 31) and cancel returns to Load (29).
+ *
+ * A missing card goes to NoCardsError (4).
+ */
 extern "C" void cMCOverlayManager_UpdateLoadConfirm(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -2572,6 +2761,9 @@ struct sMovieVEntry00B0b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Starts the load: moves to LoadProgress (32), or to LoadFailed (36) with callbackReadFailed on a card error.
+ */
 extern "C" void cMCOverlayManager_UpdateLoadStart(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -2670,6 +2862,14 @@ public:
     virtual int v73();
 };
 
+/**
+ * Tracks a save-file read and passes the data to the front end until the whole file is loaded.
+ *
+ * mProgress is the card's byte count (card slot 18) over mSize. When the card's read completes, the front end
+ * gets
+ * callbackReadUpdate with the remaining size, then callbackReadEnd; a 0 from either fails the load through
+ * func_00241240(), otherwise the manager moves to LoadClosing (33). A card error goes to LoadFailed (36).
+ */
 extern "C" void cMCOverlayManager_UpdateLoadProgress(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -2752,6 +2952,16 @@ static inline void Post_02D0(void* self, int code)
 #define S_02D0 ((char*)self)
 #define CB_02D0(off) (*(int (**)())(S_02D0 + (off)))()
 
+/**
+ * Runs the load screen (state Load, 29): reacts to card status changes and starts a load or a delete.
+ *
+ * Card problems go to the no-card error, InitFormatConfirm (39), CardInvalid (5) or NoFreeBlocks (23) as far
+ * as
+ * the mPollFor* flags allow; a card inserted or recovered restarts the file check. After callbackLoadReady,
+ * load
+ * goes to LoadStart (31), LoadFailed (36) or LoadCorrupt (37), delete to DeleteConfirm (24), cancel to Done
+ * (1).
+ */
 extern "C" void cMCOverlayManager_UpdateLoad(cMCOverlayManager* self)
 {
     if (self->mCheckCard)
@@ -2842,6 +3052,9 @@ extern "C" void cMCOverlayManager_UpdateLoad(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadClosing);
 #ifdef SKIP_ASM
+/**
+ * Waits for the loaded file to close, then moves to LoadDoneWait (34), or to LoadFailed (36) on a card error.
+ */
 extern "C" void cMCOverlayManager_UpdateLoadClosing(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -2864,6 +3077,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateDeleteConfirm);
 #ifdef SKIP_ASM
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 
+/**
+ * Handles the delete confirmation: delete moves to DeleteProgress (25) and cancel aborts with the fail
+ * message.
+ *
+ * Once the card is idle, a missing card goes to NoCardsError (4) and a card error to DeleteFailed (28).
+ */
 extern "C" void cMCOverlayManager_UpdateDeleteConfirm(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -2902,6 +3121,9 @@ struct sMovieVEntry0768b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Waits for a file delete to finish, then moves to DeleteDoneWait (26), or DeleteFailed (28) on a card error.
+ */
 extern "C" void cMCOverlayManager_UpdateDeleteProgress(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -2931,6 +3153,9 @@ struct sMovieVEntry0800 {
 
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 
+/**
+ * Handles the "delete failed" message: once the card is idle, cancel aborts the operation.
+ */
 extern "C" void cMCOverlayManager_UpdateDeleteFailed(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -3035,6 +3260,12 @@ static inline void setState_240860(char* self, int s)
     vt[1].fn(self + vt[1].delta, s);
 }
 
+/**
+ * Waits out the display delay after a delete, then moves to DeleteDone (27), or DeleteFailed (28) on a card
+ * error.
+ *
+ * While the delay runs, each idle frame asks the card to recheck the selected device.
+ */
 extern "C" void cMCOverlayManager_UpdateDeleteDoneWait(cMCOverlayManager* self)
 {
     cMovieDecoder_240860* d = (cMovieDecoder_240860*)self->mpMemCard;
@@ -3075,6 +3306,9 @@ struct sMovieVEntry0960b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Finishes a delete: once the card is idle and callbackDeleteDone accepts, rereads the card (ReadingCard, 6).
+ */
 extern "C" void cMCOverlayManager_UpdateDeleteDone(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -3091,6 +3325,11 @@ extern "C" void cMCOverlayManager_UpdateDeleteDone(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateOverwriteConfirm);
 #ifdef SKIP_ASM
+/**
+ * Handles the overwrite confirmation: overwrite goes to PreSaveFile (13) and cancel to Done (1).
+ *
+ * Once the card is idle, a missing card goes to NoCardsError (4) and a card error to SaveFailed (20).
+ */
 extern "C" void cMCOverlayManager_UpdateOverwriteConfirm(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -3120,6 +3359,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitFormatConfirm);
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 
+/**
+ * Handles the format prompt for an unformatted card: format starts it (InitFormatProgress, 40).
+ *
+ * Once the card is idle: a missing card goes to NoCardsError (4), cancel aborts with the fail message, retry
+ * retries.
+ */
 extern "C" void cMCOverlayManager_UpdateInitFormatConfirm(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -3146,6 +3391,9 @@ extern "C" void cMCOverlayManager_UpdateInitFormatConfirm(cMCOverlayManager* sel
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitFormatProgress);
 #ifdef SKIP_ASM
+/**
+ * Waits for the card format to finish, then moves to InitFormatFailed (41) or InitFormatDone (42).
+ */
 extern "C" void cMCOverlayManager_UpdateInitFormatProgress(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -3207,6 +3455,14 @@ extern "C" void cMCOverlayManager_UpdateInitFormatDone(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitDeleteConfirm);
 #ifdef SKIP_ASM
+/**
+ * Handles the prompt to delete the card's files: delete starts it (InitDeleteProgress, 44), cancel rereads
+ * the card.
+ *
+ * Once the card is idle a missing card goes to NoCardsError (4); while waiting it keeps asking the card to
+ * recheck
+ * the selected device.
+ */
 extern "C" void cMCOverlayManager_UpdateInitDeleteConfirm(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
@@ -3320,6 +3576,14 @@ static inline void setState_240D90(char* self, int s)
     vt[1].fn(self + vt[1].delta, s);
 }
 
+/**
+ * Deletes the card's files one per frame, then moves to InitDeleteDone (46), or InitDeleteFailed (45) on an
+ * error.
+ *
+ * mCurrDeleteFile walks the card's file list; each entry the card says can be deleted is deleted. The local
+ * view
+ * calls these card methods getCount, canSeek and seek (names copied from the movie-decoder views).
+ */
 extern "C" void cMCOverlayManager_UpdateInitDeleteProgress(cMCOverlayManager* self)
 {
     self->mDisplayWaitTicks -= 1;
@@ -3399,6 +3663,10 @@ struct sMovieVEntry0F30 {
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 
+/**
+ * Handles the "damaged card" message: once the card is idle, retry retries and cancel aborts with the fail
+ * message.
+ */
 extern "C" void cMCOverlayManager_UpdateCardDamaged(cMCOverlayManager* self)
 {
     void* o = self->mpMemCard;
@@ -3547,6 +3815,14 @@ struct sMovieVEntry1180b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Ends a failed save: stops the card write if one is in progress and optionally shows the failure.
+ *
+ * Clears the global save-in-progress flag; with @p showWriteFailPopup it also calls SetAction(0) and moves to
+ * SaveFailed (20).
+ *
+ * @param showWriteFailPopup  nonzero to show the save-failed state
+ */
 extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int showWriteFailPopup)
 {
     int on = self->mWriteInProgress;
@@ -4009,6 +4285,18 @@ static inline void* Loc_241710(char* key)
     return vt[4].fn(thisp, GetHashValue32(key));
 }
 
+/**
+ * Builds the on-screen label for a memory-card device.
+ *
+ * A missing or failing device gets the localized kT_MEMOVNotDetectedPS2 text and an unformatted one
+ * kT_MEMOVNotFormattedPS2, both formatted with the device number (idx + 1). A usable device shows its card
+ * name, or
+ * kT_MEMMemDevicePS2 when the name is empty. A formatted card with the wrong encoding leaves @p dst
+ * untouched.
+ *
+ * @param idx  device index
+ * @param dst  receives the label (16-bit string)
+ */
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(cMCOverlayManager* self, int idx, char* dst)
 {
     char buf[0x200];
@@ -4155,6 +4443,13 @@ struct sMovieVEntry1AC0 {
     int (*fn)(void*);
 };
 
+/**
+ * Returns how many memory-card devices the manager uses, asking the card once and caching the answer.
+ *
+ * The card's count (card vtable slot 69) is clamped to 1, so only the first device is ever used.
+ *
+ * @return the number of devices (cached in mMaxDevices)
+ */
 extern "C" int cMCOverlayManager_getMaxDevicesSupported(cMCOverlayManager* self)
 {
     if (self->mMaxDevices < 0) {
@@ -4250,6 +4545,17 @@ struct sMovieFlags_1B20
 // PORT: the unit declares cMCOverlayManager_getDeviceState as returning int; it really returns this 4-byte flags struct in $v0.
 extern "C" sMovieFlags_1B20 cMCOverlayManager_getDeviceState_s(void* self) __asm__("cMCOverlayManager_getDeviceState");
 
+/**
+ * Returns the status flags of the selected memory-card device.
+ *
+ * While another device is being checked it returns the last stored state (mCurrDeviceStateLast). Otherwise it
+ * asks
+ * the card and builds the flags: error, damaged, full (free space below what the save needs), no card,
+ * unformatted.
+ *
+ * @return the device state (bits 1 error, 2 damaged, 4 full, 8 no card, 0x10 unformatted in
+ *         mCurrDeviceStateLast)
+ */
 extern "C" sMovieFlags_1B20 cMCOverlayManager_getDeviceState_s(void* self)
 {
     if (*(int*)((char*)self + 0x42C) != *(int*)((char*)self + 0x428))
@@ -4440,6 +4746,12 @@ struct sMovieVEntry1FD0b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Starts looking for the game's files on the card: calls callbackSysRecheckFile and moves to a file-check
+ * state.
+ *
+ * Goes to InitFileCheck (51) when the card is idle, otherwise InitFileCheckWait (53).
+ */
 extern "C" void cMCOverlayManager_InitiateFileCheck(cMCOverlayManager* self)
 {
     void* o;
@@ -4472,6 +4784,10 @@ struct sMovieVEntry2050b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Starts a fresh card check: clears mCheckCard and moves to CheckCardsWait (2), or CheckCards (3) if the card
+ * is busy.
+ */
 extern "C" void cMCOverlayManager_RecheckCard(cMCOverlayManager* self)
 {
     void* o;
@@ -4591,6 +4907,16 @@ struct sMP_20C8
 // PORT: the unit declares cMCOverlayManager_GatherDeviceInfo1 as returning void*, but it returns nothing; bind the void body by asm label.
 extern "C" void cMCOverlayManager_GatherDeviceInfo1_v(void* self, int i) __asm__("cMCOverlayManager_GatherDeviceInfo1");
 
+/**
+ * Refreshes the record for one memory-card device from the card.
+ *
+ * Marks the device valid, formatted, correctly encoded and plugged in, then clears whichever flag the card
+ * contradicts and stops there. For a usable card it reads the card's name (100 characters), and for the
+ * device
+ * being checked (mCurrCheckDevice) also its free space.
+ *
+ * @param i  device index
+ */
 extern "C" void cMCOverlayManager_GatherDeviceInfo1_v(void* self, int i)
 {
     sMP_20C8* me = (sMP_20C8*)self;
@@ -4638,6 +4964,14 @@ extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int mode);
 extern void* cMCOverlayManager_vtbl[];
 extern int cMCOverlayManager_mSaveInProgress;
 
+/**
+ * Constructs the memory-card overlay manager: resets every state field and installs the default callbacks.
+ *
+ * Sets mFileType 2 and SetAction(1), and fills the 45 front-end callback slots with stubs that do nothing or
+ * return 0 or 1, as fitting each slot. The device records are zeroed and mMaxDevices is -1 (not yet asked).
+ *
+ * @return @p self
+ */
 // cMCOverlayManager constructor body: resets the state, the 45 state handlers (0x00-0xB0) and the device records.
 extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self)
 {
@@ -4750,6 +5084,12 @@ extern int cMCOverlayManager_mSaveInProgress;
 extern void* cMCOverlayManager_vtbl[];
 void operator_delete(int*);
 
+/**
+ * Destroys the memory-card overlay manager: restores its vtable, clears the save-in-progress flag, frees on
+ * request.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cMCOverlayManager__cMCOverlayManager(cMCOverlayManager* self, int flags)
 {
     self->mVtbl = cMCOverlayManager_vtbl;
@@ -4763,6 +5103,11 @@ extern "C" void cMCOverlayManager__cMCOverlayManager(cMCOverlayManager* self, in
 //100%
 INCLUDE_ASM("movie/movieplayer", cOcclusionMan_cOcclusionMan__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs the occlusion manager by zeroing its words at +0x0, +0x4, +0x108 and +0x10C.
+ *
+ * @return @p self
+ */
 void* cOcclusionMan_cOcclusionMan(void* self)
 {
     int t0 = 0;

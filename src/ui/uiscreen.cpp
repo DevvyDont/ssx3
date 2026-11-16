@@ -14,6 +14,9 @@ struct sDeleteTarget {
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIThread_deleteThread__FPv);
 #ifdef SKIP_ASM
+/**
+ * Unlinks an animation thread from its screen's thread list and deletes it.
+ */
 void cUIThread_deleteThread(void* self)
 {
     cListNode_removeFromList(self);
@@ -38,6 +41,12 @@ extern void* cUIGroup_vtbl[];
 extern void* cList_vtbl[];
 extern void* D_00494CC0[];
 
+/**
+ * Destroys a UI screen: frees its object table and its own copy of the screen data, then the embedded lists
+ * and group.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 // Destructor of a UI screen: frees its buffers and tears down the embedded members.
 extern "C" void cUIScreen__cUIScreen(cUIScreen* self, int flags)
 {
@@ -80,6 +89,14 @@ extern "C" void* func_003B47F8(void* src, void* dst);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00493E00[];
 
+/**
+ * Points the screen at its screen data, unpacking it first into a new "UIScreenData" buffer when it is
+ * compressed.
+ *
+ * Sets mBufferAlloc when a buffer was allocated, and finds the keyframe and object blocks from the header.
+ *
+ * @param data  the screen data (On Tour tUIScreenHeader* pScreenHeader)
+ */
 extern "C" void cUIScreen_setData(cUIScreen* self, char* data)
 {
     int size = func_003B4818(data);
@@ -131,6 +148,12 @@ struct sFrameList {
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByLabel__FP9cUIScreeni);
 #ifdef SKIP_ASM
+/**
+ * Looks up a keyframe label's frame number in the screen's keyframe block.
+ *
+ * @param label  the label's hash (On Tour hashname)
+ * @return the frame number, or 0xFFFF when the label is not found
+ */
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label)
 {
     sFrameList* list = (sFrameList*)self->mpKeyframeBlock;
@@ -236,6 +259,14 @@ struct cUIThread_C870 {
 // PORT: the unit declares cUIScreen_playFrame as void; the body returns the new thread. Bound by asm label.
 void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType) __asm__("cUIScreen_playFrame");
 
+/**
+ * Starts an animation thread at a frame; a primary thread (type 0) replaces the screen's current primary
+ * thread.
+ *
+ * @param frame  the frame to start at
+ * @param ThreadType  0 for the primary thread, otherwise an extra thread
+ * @return the new thread
+ */
 // cUIScreen::playFrame (On Tour name): starts a new thread at frame; a primary thread replaces the old one.
 void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType)
 {
@@ -299,6 +330,15 @@ struct sCmdList_C978 {
     sCmd_C978 first;          // 0xC
 };
 
+/**
+ * Advances a thread one frame (toward its stop frame, if any) and runs the commands of the frame it was on.
+ *
+ * Commands 0x10-0x12 are keyframe stop, jump and spawn, 0x2x and 0x3x object commands, 0x40-0x43 screen and
+ * focus
+ * events.
+ *
+ * @param thread  the thread (On Tour cUIThread* pThread)
+ */
 // cUIScreen::playFrameByThread: advances the thread one frame toward its stop frame, then runs the commands of
 // the frame it was on.
 extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
@@ -386,6 +426,13 @@ extern "C" void func_0039CBC8(void* p0, void* p1, void* p2, void* p3)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeJump);
 #ifdef SKIP_ASM
+/**
+ * Runs a keyframe jump command: moves the thread to the frame with the command's label.
+ *
+ * @param pFrame  the frame's command list (unused)
+ * @param pKCP  the jump command; its label hash is at +4
+ * @param pThread  the thread to move
+ */
 extern "C" void cUIScreen_parseKeyframeJump(cUIScreen* self, void* pFrame, void* pKCP, void* pThread)
 {
     sFrameEntry* e = (sFrameEntry*)((char*)self->mpKeyframeBlock + 4);
@@ -403,12 +450,18 @@ extern "C" void cUIScreen_parseKeyframeJump(cUIScreen* self, void* pFrame, void*
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeSpawn);
 #ifdef SKIP_ASM
-extern "C" void cUIScreen_parseKeyframeSpawn(cUIScreen* self, void* p1, void* p2)
+/**
+ * Runs a keyframe spawn command: starts an extra thread at the frame with the command's label.
+ *
+ * @param pFrame  the frame's command list (unused; On Tour pFrame)
+ * @param pKCP  the spawn command; its label hash is at +4 (On Tour pKCP)
+ */
+extern "C" void cUIScreen_parseKeyframeSpawn(cUIScreen* self, void* pFrame, void* pKCP)
 {
     sFrameEntry* e = (sFrameEntry*)((char*)self->mpKeyframeBlock + 4);
     unsigned int i;
     for (i = 0; i < (unsigned int)((sFrameList*)self->mpKeyframeBlock)->count; i++) {
-        if (e->label == *(int*)((char*)p2 + 4)) {
+        if (e->label == *(int*)((char*)pKCP + 4)) {
             cUIScreen_playFrame(self, e->field_0x8, 1);
             return;
         }
@@ -558,6 +611,9 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseScreenFocusLose);
 #ifdef SKIP_ASM
 extern "C" void cUIGroup_setFocus(void*, int);
 
+/**
+ * Runs a screen focus-lose command: unfocuses the screen's root group and sets the owning state's mode to 6.
+ */
 extern "C" void cUIScreen_parseScreenFocusLose(cUIScreen* self)
 {
     cUIGroup_setFocus((char*)self + 0x40, 0);
@@ -603,6 +659,13 @@ extern char D_00493EF0[];
 
 struct sUIVtCED0 { short delta; short index; void (*fn)(void*, void*); };
 
+/**
+ * Creates every widget described in the screen's object block, registers it by name and tells the state about
+ * each one.
+ *
+ * The objects go into a "UIScreenObjs" table and the screen's list; the state's slot 18 (onWidgetCreate) then
+ * sees each one.
+ */
 extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
 {
     char* data = (char*)self->mpObjectBlock;
@@ -713,6 +776,16 @@ static inline char* alloc_D078(unsigned int size, const char* tag)
     return (char*)operator new(size, tag, 0x20000000, 0);
 }
 
+/**
+ * Creates the widget a screen-data record describes, by record type, and adopts the child widgets it names.
+ *
+ * Types: 0x10 group, 0x11 icon, 0x12 list box, 0x13 menu, 0x15 pair, 0x16 slider, 0x17 text, 0x18 vector,
+ * 0x19
+ * progress, 0x20 text scroll, 0x21 scroll.
+ *
+ * @param rec  the object record (On Tour tUIBaseObject* pObject)
+ * @return the new widget, or 0 for an unknown type
+ */
 extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
 {
     switch (*(unsigned short*)rec) {
@@ -949,6 +1022,11 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_update);
 extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void* thread);
 extern "C" void cUIGroup_update(void* list, unsigned short frame);
 
+/**
+ * Runs the screen's animation threads for a frame, deleting finished ones, then updates the root group.
+ *
+ * The group is updated with the primary thread's frame (or the first thread's).
+ */
 extern "C" void cUIScreen_update(cUIScreen* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x18));
@@ -986,6 +1064,12 @@ extern "C" void cUIScreen_update(cUIScreen* self)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_getObjectByHashName);
 #ifdef SKIP_ASM
+/**
+ * Finds a screen widget by its name hash.
+ *
+ * @param hash  the name's hash (On Tour hashname)
+ * @return the widget, or 0
+ */
 extern "C" void* cUIScreen_getObjectByHashName(cUIScreen* self, int hash)
 {
     void** objs = (void**)self->mppObjectList;
@@ -1546,6 +1630,11 @@ struct sVEntry39E4C0 {
     void (*fn)(void*, void*);
 };
 
+/**
+ * Gives a UI state focus by focusing its first screen's root group (slot 13).
+ *
+ * On Tour passes the previous state; this build's declaration drops it.
+ */
 extern "C" void cUIState_onGainFocus(cUIState* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x24));

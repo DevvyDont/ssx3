@@ -23,6 +23,12 @@ extern char D_0047BE10[];
 extern char D_0047BE20[];
 extern char D_0047BE30[];
 
+/**
+ * Creates the loading-hint screen ("101QPMPHints") and fills it with the next hint and the loading image.
+ *
+ * Hints cycle through kT_FEHINTTitle%d / kT_FEHINTDES%d numbers 1-15, skipping 12 (counter D_004A2C38). The
+ * image comes from the load info at +0x48 (its word at +0x10) and goes on the "Bitmap0000" widget.
+ */
 extern "C" void cFELoadHintState_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -74,6 +80,13 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
+/**
+ * Shows the loading percentage on the hint screen's "%" text widget.
+ *
+ * The value is the float at D_004A5B64 + 0x38, printed as "%3d%%"; it is probably the load progress.
+ *
+ * @return always 0
+ */
 extern "C" int cFELoadHintState_onGainTransition(void* self)
 {
     char buf[200];
@@ -132,6 +145,12 @@ extern signed char D_00535C11[];
 extern char D_0047BE40[];
 extern char D_0047BE50[];
 
+/**
+ * Creates the loading screen with rider stats: "103MPStat" for both players online, else "100QPStat".
+ *
+ * The online check is the new-race game path (D_00535C11 == 2); the two-player screen is filled with
+ * InitwidgetMultiP() for players 0 and 1.
+ */
 extern "C" void cFELoadState_onCreateScreen(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -166,6 +185,13 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
+/**
+ * Shows the loading percentage on the stats loading screen's "%" text widget.
+ *
+ * Same as cFELoadHintState_onGainTransition(): the float at D_004A5B64 + 0x38 printed as "%3d%%".
+ *
+ * @return always 0
+ */
 extern "C" int cFELoadState_onGainTransition(void* self)
 {
     char buf[200];
@@ -233,6 +259,9 @@ extern char D_0047BFA0[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Creates the in-lodge loading screen ("117loadinlodge") and plays its first frame.
+ */
 extern "C" void cFELoadStateInLodge_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -266,6 +295,13 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 
+/**
+ * Shows the loading percentage on the in-lodge loading screen's "%" text widget.
+ *
+ * Same as cFELoadHintState_onGainTransition(): the float at D_004A5B64 + 0x38 printed as "%3d%%".
+ *
+ * @return always 0
+ */
 extern "C" int cFELoadStateInLodge_onGainTransition(void* self)
 {
     char buf[200];
@@ -1051,6 +1087,18 @@ static inline void Activate_72C0(char* obj)
 // The player index is a char parameter (the caller in onCreateScreen declares it int); bound by asm label.
 extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player) __asm__("cFELoadState_InitwidgetMultiP");
 
+/**
+ * Fills one player's column of the two-player loading screen with that rider's stats and picture.
+ *
+ * Widget names start with the side number ("1 rank", "2 time", ...). Fills rank number, level
+ * (kT_OVRCMNLevelNum;
+ * fixed at 8 in a ranked online game), time (race modes 0 and 5) or score, knockdowns, wipeouts, tricks,
+ * handplants, ubertricks and ubergrinds. In an online game the client swaps the player index, so each side
+ * shows
+ * the same rider on both machines.
+ *
+ * @param player  screen side, 0 or 1 (On Tour iHuman)
+ */
 extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
 {
     sName19_72C0 rankNumName = *(sName19_72C0*)D_0047BE60;
@@ -1218,6 +1266,15 @@ static inline int wHash_7AB0(char* w) { return *(int*)(w + 0x38); }
 
 struct sVEnt_7AB0 { short delta; short index; void* (*fn)(void*, int); };
 
+/**
+ * Fills one widget of the single-player loading screen with the human rider's stats, chosen by widget name.
+ *
+ * Handles results_rider (short name), results_ranking (level, kT_OVRCMNLevelNum), results_knockdown,
+ * results_wipeouts, results_ubertricks, results_ubergrinds, results_handplants, results_grabtime (mm:ss) and
+ * results_best combo; other widgets are left alone.
+ *
+ * @param widget  the widget being created (On Tour cUIThing* pWidget)
+ */
 extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
 {
     char* w = (char*)widget;

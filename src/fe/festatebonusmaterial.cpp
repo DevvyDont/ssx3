@@ -8,6 +8,9 @@ extern char D_00460168[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Creates the bonus material screen ("146Bonusmat") and plays its first frame.
+ */
 extern "C" void cFEStateBonusMaterial_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -27,6 +30,11 @@ extern char D_004A14F8[];
 extern char D_004A1500[];
 extern char D_004A1508[];
 
+/**
+ * Numbers the bonus material entries "1", "2" and "3" as 0-2.
+ *
+ * @param menu  the widget being created
+ */
 extern "C" void cFEStateBonusMaterial_onWidgetCreate(void* self, void* menu)
 {
     int h = *(int*)((char*)menu + 0x38);
@@ -47,8 +55,15 @@ extern "C" void cFEStateBonusMaterial_onWidgetCreate(void* self, void* menu)
 //100%
 INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onWidgetMenu);
 #ifdef SKIP_ASM
+/**
+ * Swallows menu events 8 and 9 on the bonus material screen.
+ *
+ * @param menu  the menu (On Tour cUIMenu* pMenu), unused
+ * @param key  menu event number (On Tour Event)
+ * @return 0x100 for events 8 and 9, otherwise 0x101
+ */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateBonusMaterial_onWidgetMenu(void* self, int a1, unsigned int key)
+extern "C" int cFEStateBonusMaterial_onWidgetMenu(void* self, int menu, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -95,6 +110,12 @@ struct sVEntryK195600 {
     void* (*fn)(void*, void*, int);
 };
 
+/**
+ * Plays the selected bonus video in a cFEStateVideoPlayer popup, or on event 6 pushes the factory's state.
+ *
+ * @param item  the entry (its index at +0x18 picks the video from D_00441128), or 0
+ * @param event  widget event number (On Tour Event)
+ */
 extern "C" void cFEStateBonusMaterial_onWidgetEvent(void* self, void* item, unsigned int event)
 {
     if (item == 0)

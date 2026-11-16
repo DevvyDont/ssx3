@@ -14,6 +14,14 @@ extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a
 extern int D_004A1270;
 extern char D_0045AB78[];
 
+/**
+ * Loads the reward database "data/be/rwrdps2.dat", at once or through the front end's asynchronous loader.
+ *
+ * Synchronously it reads the whole file into a "Rewards File" block, parses it (func_0015A818) and stores -1
+ * at +0x0; otherwise it stores the request id that func_0019DA10 returns for the front end's +0x1A70 object.
+ *
+ * @param async  0 to load now, else passed on to the asynchronous request
+ */
 extern "C" void cBERewardDB_init(int* self, int async)
 {
     if (async == 0)
@@ -1448,6 +1456,11 @@ void* func_0015C910(void* self)
 //100%
 INCLUDE_ASM("be/bedbreward", cCameraAlgoList_cCameraAlgoList__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs an empty camera algorithm list: Head and Length are 0.
+ *
+ * @return @p self
+ */
 void* cCameraAlgoList_cCameraAlgoList(void* self)
 {
     int t0 = 0;

@@ -26,6 +26,12 @@ public:
     virtual void v09(int);
 };
 
+/**
+ * Creates the memory-card screen "06cAutoload" and hides its "mc messages" object.
+ *
+ * Also calls cSSXApp_getMCManager() and discards the result; the "mc messages" object is used without a null
+ * check.
+ */
 extern "C" void cFEStateMemCard_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);

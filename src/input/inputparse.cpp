@@ -248,6 +248,16 @@ static inline void blanks_321AF0(sTok_321AF0* s)
     *p++ = c;                               \
     adv_321AF0(s);
 
+/**
+ * Reads the next token of the input-map script into CurrentToken, TokenText and TokenValue.
+ *
+ * Skips blanks, "//" comments and "#<line> "file"" tags (which set the line and file for errors). Recognises
+ * the
+ * operators, the function names max to sqrt and minradian, identifiers, and numbers (scanned with "%f"). The
+ * "-"
+ * case tests the next character for '+', copied from the "++" check: "-+" is rejected as "Operator '++' not
+ * defined." while "--" passes.
+ */
 extern "C" void cInputMapParser_readToken(cInputMapParser* self)
 {
     sTok_321AF0* s = (sTok_321AF0*)self;
@@ -660,6 +670,11 @@ struct sExprNode_00323268 {
     sExprNode_00323268* b;
 };
 
+/**
+ * Parses a conditional expression (cond ? a : b), folding it when the condition is a constant.
+ *
+ * @return the expression tree, or 0 after an error
+ */
 extern "C" void* cInputMapParser_parseExpression(cInputMapParser* self)
 {
     sExprNode_00323268* cond = (sExprNode_00323268*)cInputMapParser_parseOr(self);
@@ -792,6 +807,11 @@ struct sAndNode_00323540 {
     sAndNode_00323540* b;
 };
 
+/**
+ * Parses a chain of "&&" operands, folding constants: a constant 0 makes the whole chain 0.
+ *
+ * @return the expression tree, or 0 after an error
+ */
 extern "C" void* cInputMapParser_parseAnd(cInputMapParser* self)
 {
     sAndNode_00323540* left = (sAndNode_00323540*)cInputMapParser_parseCompare(self);
@@ -851,6 +871,11 @@ struct sCmpNode_003236D8 {
     sCmpNode_003236D8* b;
 };
 
+/**
+ * Parses a chain of comparison operators; comparisons of two constants fold to 1.0 or 0.0.
+ *
+ * @return the expression tree, or 0 after an error
+ */
 // Parses a chain of comparison operators; comparisons of two constants are folded to 1.0/0.0.
 extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self)
 {
@@ -938,6 +963,13 @@ struct sAddNode_00323900 {
     sAddNode_00323900* b;
 };
 
+/**
+ * Parses a chain of additions and subtractions, folding all constant operands into one constant.
+ *
+ * A subtracted constant is negated and added, so the chain keeps a single constant node.
+ *
+ * @return the expression tree, or 0 after an error
+ */
 extern "C" void* cInputMapParser_parseSum(cInputMapParser* self)
 {
     sAddNode_00323900* left = (sAddNode_00323900*)cInputMapParser_parseProduct(self);
@@ -1016,6 +1048,13 @@ struct sMulNode_00323A68 {
     sMulNode_00323A68* b;
 };
 
+/**
+ * Parses a chain of multiplications and divisions, folding all constant operands into one constant.
+ *
+ * A divisor constant is inverted and multiplied, so the chain keeps a single constant node.
+ *
+ * @return the expression tree, or 0 after an error
+ */
 extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self)
 {
     sMulNode_00323A68* left = (sMulNode_00323A68*)cInputMapParser_parseTerm(self);
@@ -1101,6 +1140,16 @@ struct sTermNode_3BD8 {
 };
 
 
+/**
+ * Parses a term: a button (with an optional ".modifier"), a config value, an identifier, a number, a unary
+ * operator, a parenthesised expression or a function call.
+ *
+ * References to constant identifiers are inlined as constants; a reference to the identifier being defined is
+ * an
+ * error. Unary minus and "!" on constants are folded.
+ *
+ * @return the term's tree, or 0 after an error
+ */
 extern "C" void* cInputMapParser_parseTerm(cInputMapParser* self)
 {
     sTermNode_3BD8* node;
@@ -1329,6 +1378,14 @@ static inline float atan2_4138(float y, float x)
     return a;
 }
 
+/**
+ * Parses the "(a, b)" arguments of max, min, pow or atan2, folding the call when both are constants.
+ *
+ * When the second argument fails to parse, the first argument's tree is not freed.
+ *
+ * @param op  the node type to build (On Tour eNodeType type)
+ * @return the call's tree, or 0 after an error
+ */
 // PORT: uses g++ min/max operators (<? >?).
 extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op)
 {
@@ -1441,6 +1498,15 @@ static inline float abs_43A0(float x)
     return r;
 }
 
+/**
+ * Parses the "(x)" argument of a one-argument function (atan to sqrt, minradian), folding a constant
+ * argument.
+ *
+ * "minradian" wraps an angle into [-pi, pi).
+ *
+ * @param op  the node type to build (On Tour eNodeType type)
+ * @return the call's tree, or 0 after an error
+ */
 // Parses "(expr)" after a unary function name; constant arguments are folded immediately.
 extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
 {
@@ -1516,6 +1582,15 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* nod
 extern char D_0048E208[];
 extern char D_0048E228[];
 
+/**
+ * Compiles a named statement of the map into op-codes, ending them with a space (0x20) terminator.
+ *
+ * @param name  the statement's identifier (On Tour id)
+ * @param out  the op-code buffer (On Tour codes)
+ * @param max  room left in the buffer, in op-codes (On Tour clen)
+ * @param defaultModifier  button modifier for buttons and references without one
+ * @return the number of op-codes written including the terminator, or -1 on an unknown name or a full buffer
+ */
 // Compiles one named statement into out (space-terminated); returns the new length or -1.
 extern "C" int cInputMapParser_compileStatement(cInputMapParser* self, const char* name, int* out, int max, int defaultModifier)
 {
@@ -1582,6 +1657,22 @@ union sInsn_324678 {
     } j;
     float f;
 };
+/**
+ * Compiles an expression tree into op-codes whose result lands in a register, allocating one when needed.
+ *
+ * Constants load a value (two words); buttons and configs are read straight from their register when no
+ * target
+ * is given; references compile their identifier's expression; selections compile to a conditional jump, the
+ * then
+ * branch, a jump and the else branch; operators go to compileBinaryNode() or compileUnaryNode().
+ *
+ * @param vnode  the tree (On Tour tParseNode* node)
+ * @param dst  the result register in and out; -1 lets the node pick one (On Tour int& reg)
+ * @param vcode  where to write the op-codes (On Tour codes)
+ * @param cap  room left in op-codes (On Tour clen)
+ * @param defaultModifier  button modifier for buttons and references without one
+ * @return the number of op-codes written, or -1 on error
+ */
 extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vnode, int* dst, void* vcode, int cap, int defaultModifier)
 {
     sNode_324678* node = (sNode_324678*)vnode;
@@ -1733,6 +1824,17 @@ struct sInsn_00324EC8 {
     unsigned int src : 10;
     unsigned int arg : 10;
 };
+/**
+ * Compiles both operands of a binary operator, frees their temporary registers and emits the operation.
+ *
+ * @param node  the operator's tree node
+ * @param dst  the result register in and out; a negative value allocates one (On Tour int& reg)
+ * @param code  where to write the op-codes
+ * @param cap  room left in op-codes (On Tour clen)
+ * @param op  the op-code to emit (On Tour eInputOpCodes opcode)
+ * @param defaultModifier  button modifier passed down to the operands
+ * @return the number of op-codes written, or -1 on error
+ */
 extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, void* node, int* dst, sInsn_00324EC8* code, int cap, int op, int defaultModifier)
 {
     int src = -1;
@@ -1790,6 +1892,17 @@ struct sInsn_003250D8 {
     unsigned int src : 10;
     unsigned int arg : 10;
 };
+/**
+ * Compiles the operand of a unary operator, frees its temporary register and emits the operation.
+ *
+ * @param node  the operator's tree node
+ * @param dst  the result register in and out; a negative value allocates one (On Tour int& reg)
+ * @param code  where to write the op-codes
+ * @param cap  room left in op-codes (On Tour clen)
+ * @param op  the op-code to emit (On Tour eInputOpCodes opcode)
+ * @param defaultModifier  button modifier passed down to the operand
+ * @return the number of op-codes written, or -1 on error
+ */
 extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, void* node, int* dst, sInsn_003250D8* code, int cap, int op, int defaultModifier)
 {
     void* arg = *(void**)((char*)node + 4);
@@ -2200,6 +2313,17 @@ struct sParseBuf_5F48 {
     char* data;
 };
 
+/**
+ * Loads an input-map file with its "#include"s expanded and returns the result in a new buffer.
+ *
+ * Splits @p path into directory and file name, runs readFile() into a growing "PreProcBuf", then copies the
+ * text
+ * into a block tagged with @p path.
+ *
+ * @param path  the file to load (On Tour fn)
+ * @param outSize  receives the text's size in bytes
+ * @return the preprocessed text (not null-terminated)
+ */
 extern "C" void* cInputPreProcessor_loadFileSize(sParseBuf_5F48* self, char* path, int* outSize)
 {
     char dir[128];
@@ -2248,6 +2372,12 @@ struct sParseStream_326078 {
     int line;
 };
 
+/**
+ * Reads one file into the output, line by line, starting with a "# 1 "file"" tag line.
+ *
+ * @param path  directory of the file, also used for its includes
+ * @param fn  file name within @p path
+ */
 extern "C" void cInputPreProcessor_readFile(void* self, int path, int fn)
 {
     char name[0xA0];
@@ -2282,6 +2412,16 @@ static inline int isWS_326150(int c)
     return c == ' ' || c == '\t' || c == '\r';
 }
 
+/**
+ * Copies one line of the source to the output, handling a "#" directive or a comment at the line start.
+ *
+ * Leading blanks are copied; line and block comments are passed to func_003265C0() and func_003264B0().
+ *
+ * @param isrc  the input source (On Tour tInputSource&)
+ * @param path  directory of the file, for includes and messages
+ * @param fn  file name, for messages
+ * @return nonzero while the source has more characters
+ */
 extern "C" int cInputPreProcessor_copyLine(void* self, sParseStream* isrc, int path, int fn)
 {
     int ch;
@@ -2359,7 +2499,12 @@ struct sCharBuf_326360 {
     char* data;
 };
 
-extern "C" void cInputPreProcessor_writeChar(void* self, char c)
+/**
+ * Appends a character to the output buffer, growing it by 1 KB or half its size, whichever is larger.
+ *
+ * @param ch  the character
+ */
+extern "C" void cInputPreProcessor_writeChar(void* self, char ch)
 {
     sCharBuf_326360* b = (sCharBuf_326360*)self;
     if (b->count == b->cap) {
@@ -2376,7 +2521,7 @@ extern "C" void cInputPreProcessor_writeChar(void* self, char c)
         b->data = p;
         b->cap = newCap;
     }
-    b->data[b->count++] = c;
+    b->data[b->count++] = ch;
 }
 #endif
 
@@ -2387,6 +2532,12 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cInputPreProcessor_writeString(void* self, char* msg);
 extern char D_0048E3C8[];
 
+/**
+ * Writes a "# <line> "<name>"" tag line so the parser can report the right file and line.
+ *
+ * @param line  line number in the source
+ * @param name  file name (passed as an int in this unit)
+ */
 extern "C" void cInputPreProcessor_writeTagLine(void* self, int line, int name)
 {
     char buf[0xB0];
@@ -2404,6 +2555,11 @@ struct sParseStream {
     unsigned char* cur;
 };
 
+/**
+ * Reads the source's next byte into the preprocessor's current character, or -1 at the end.
+ *
+ * @param isrc  the input source (On Tour tInputSource&)
+ */
 extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* isrc)
 {
     if (isrc->cur == isrc->base + isrc->size) {
@@ -2483,6 +2639,11 @@ error:
 //100%
 INCLUDE_ASM("input/inputparse", cInputPreProcessor_skipToEOL);
 #ifdef SKIP_ASM
+/**
+ * Skips the rest of the current line, including its newline, and counts the line.
+ *
+ * @param isrc  the input source (On Tour tInputSource&)
+ */
 extern "C" void cInputPreProcessor_skipToEOL(void* self, sParseStream* isrc)
 {
     while (*(int*)((char*)self + 0xC) >= 0) {
@@ -2519,6 +2680,18 @@ static inline int isAlpha_3266E8(int c)
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
+/**
+ * Handles a "#" directive: only #include "file", which reads the file (relative to @p path) and writes a tag
+ * line back.
+ *
+ * Any other directive or a malformed include is reported and the line skipped. The included name is copied
+ * into
+ * a 160-byte buffer without a length check.
+ *
+ * @param isrc  the input source (On Tour tInputSource&)
+ * @param path  directory of the current file
+ * @param fn  name of the current file
+ */
 extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* isrc, int path, int fn)
 {
     char word[16];
@@ -2696,6 +2869,9 @@ struct sInputParse_00326B88 {
     cInputDevice_326B88* devices[4];
 };
 
+/**
+ * Reads every pad device into the next slot of the 30-entry input ring buffer.
+ */
 extern "C" void cPadCache_cacheInput(sInputParse_00326B88* self)
 {
     int i;
@@ -2720,6 +2896,11 @@ struct sInputParse_00326C60 {
     int tail;
 };
 
+/**
+ * Counts the input frames cached since the last flush and moves the read position to the newest one.
+ *
+ * @return the number of cached frames
+ */
 extern "C" int cPadCache_flush(sInputParse_00326C60* self)
 {
     int tail = self->tail;
@@ -3167,6 +3348,11 @@ void func_00327808(void* self)
 //100%
 INCLUDE_ASM("input/inputparse", cAIFwdDiffCache_cAIFwdDiffCache__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs an AI forward-difference cache by zeroing its four words.
+ *
+ * @return @p self
+ */
 void* cAIFwdDiffCache_cAIFwdDiffCache(void* self)
 {
     int t0 = 0;

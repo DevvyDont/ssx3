@@ -15,6 +15,11 @@ struct cBEMissionInterface {
 //99.58%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getThis__Fv);
 #ifdef SKIP_ASM
+/**
+ * Returns the mission interface singleton, creating it on first use ("BEMissionInt").
+ *
+ * @return the cBEMissionInterface instance
+ */
 void* cBEMissionInterface_getThis()
 {
     if (D_004A1238 == 0) {
@@ -283,6 +288,18 @@ struct sMissionOwnerView_00153708
 };
 extern sMissionOwnerView_00153708 D_0043D9A4_v153708[] __asm__("D_0043D9A4");
 
+/**
+ * Counts the collectibles a profile's character has found on a peak.
+ *
+ * In a game it asks getCurrentCollectForPeak() for the profile's rider. Otherwise it counts the set bits (64
+ * per
+ * set) of the 22 collectible sets belonging to the peak in the saved profile data.
+ *
+ * @param profile  profile index (On Tour iProfileIndex)
+ * @param character  character ID (On Tour iCharacterID)
+ * @param owner  the peak (On Tour eBEPeakID peak)
+ * @return the number of collectibles found
+ */
 extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* self, int profile, int character, int owner)
 {
     if ((void*)SSXApp->Game != 0)
@@ -470,6 +487,13 @@ public:
     virtual void v4(int a);
 };
 
+/**
+ * Looks up a mission's name in the front-end locale.
+ *
+ * Declared void here, but On Tour returns the unsigned-short string; the locale call's result is left in $v0.
+ *
+ * @param id  mission ID (On Tour uiMissionId)
+ */
 extern "C" void cBEMissionInterface_getMissionName(void* self, int id)
 {
     int i = func_00154240(self, id);
@@ -533,6 +557,13 @@ public:
     virtual void v4(int a);
 };
 
+/**
+ * Looks up a mission's long description in the front-end locale.
+ *
+ * Declared void here, but On Tour returns the unsigned-short string; the locale call's result is left in $v0.
+ *
+ * @param id  mission ID (On Tour uiMissionId)
+ */
 extern "C" void cBEMissionInterface_getMissionLongDesc(void* self, int id)
 {
     int i = func_00154240(self, id);
@@ -546,6 +577,12 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_isMissionCompleted);
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Tells whether rider 0's character has completed a mission (bit 3 of its saved mission flags in profile 0).
+ *
+ * @param id  mission ID (On Tour uiMissionId)
+ * @return 1 when completed, otherwise 0
+ */
 extern "C" int cBEMissionInterface_isMissionCompleted(void* self, int id)
 {
     int i = func_00154240(self, id);
@@ -594,6 +631,13 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_isMissionAvailable);
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Tells whether a mission is available to rider 0's character (bit 2 of its saved mission flags in profile
+ * 0).
+ *
+ * @param id  mission ID (On Tour uiMissionId)
+ * @return 1 when available, otherwise 0
+ */
 extern "C" int cBEMissionInterface_isMissionAvailable(void* self, int id)
 {
     int i = func_00154240(self, id);

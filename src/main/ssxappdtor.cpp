@@ -585,6 +585,12 @@ void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
+/**
+ * Destroys a cGFEventStartState game-flow state: restores the base game-state vtable (D_0047D6E8), then frees
+ * the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cGFEventStartState__cGFEventStartState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
@@ -601,6 +607,12 @@ void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
+/**
+ * Destroys a cGFGateState game-flow state: restores the base game-state vtable (D_0047D6E8), then frees the
+ * object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cGFGateState__cGFGateState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
@@ -669,6 +681,12 @@ void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
+/**
+ * Destroys a cGFTrackStartState game-flow state: restores the base game-state vtable (D_0047D6E8), then frees
+ * the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cGFTrackStartState__cGFTrackStartState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
@@ -685,6 +703,12 @@ void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
+/**
+ * Destroys a cGFNextHeatState game-flow state: restores the base game-state vtable (D_0047D6E8), then frees
+ * the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cGFNextHeatState__cGFNextHeatState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
@@ -721,6 +745,12 @@ void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
+/**
+ * Destroys a cGFSessionTeleportState game-flow state: restores the base game-state vtable (D_0047D6E8), then
+ * frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cGFSessionTeleportState__cGFSessionTeleportState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
@@ -755,6 +785,12 @@ void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
+/**
+ * Destroys a cGFUserSelectState game-flow state: restores the base game-state vtable (D_0047D6E8), then frees
+ * the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cGFUserSelectState__cGFUserSelectState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
@@ -863,6 +899,12 @@ void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
+/**
+ * Destroys a cGFPodiumState game-flow state: restores the base game-state vtable (D_0047D6E8), then frees the
+ * object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cGFPodiumState__cGFPodiumState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
@@ -897,6 +939,12 @@ void operator_delete(int* ptr);
 
 extern char D_0047D6E8[];
 
+/**
+ * Destroys a cGFReplayStartState game-flow state: restores the base game-state vtable (D_0047D6E8), then
+ * frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cGFReplayStartState__cGFReplayStartState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;

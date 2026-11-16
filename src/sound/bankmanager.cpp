@@ -16,6 +16,20 @@ public:
     virtual int alloc(int size);
 };
 
+/**
+ * Allocates a sound bank's memory: optional sound (SPU) memory and a main-memory block ("StaticSoundMem").
+ *
+ * Sound memory comes from the bank manager's stream allocator; if that reports -3 the sound part is added to
+ * the
+ * main block instead. The state word (+0x8) becomes 1, or 2 when sound memory was obtained. Nothing happens
+ * when
+ * both sizes are 0. The unit declares it void*, but it returns no value.
+ *
+ * @param size  main-memory size in bytes (On Tour mainMemSize)
+ * @param extra  sound-memory size in bytes (On Tour soundMemSize)
+ * @param tag  memory flags for the main block (On Tour memflags)
+ * @return no meaningful value
+ */
 // PORT: the unit declares this void* (a caller forwards its $v0), but no value is returned.
 extern "C" void* cBankInstance_AllocMem(void* self, int size, int extra, int tag)
 {
@@ -218,6 +232,14 @@ extern char D_004829A8[];
 // PORT: real body returns the buffer; a later caller in this unit declares it void(void*, int, int)
 void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags) __asm__("cBankInstance_OnAsyncMainMemAlloc");
 
+/**
+ * Supplies main memory for an asynchronous bank load, allocating it ("DynamicSoundMem") unless the bank has
+ * some.
+ *
+ * @param size  size in bytes
+ * @param flags  memory flags
+ * @return the bank's main-memory block
+ */
 void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags)
 {
     if (*(int*)((char*)self + 0x8) == 0) {
@@ -310,6 +332,18 @@ struct sBankManager {
     char embedded[0x4];         // 0xAD0
 };
 
+/**
+ * Constructs the bank manager: async and bank-monitor parts, the bank table, and the global gpBankManager.
+ *
+ * With @p embedded set it also builds the cSoundSys virtual base; otherwise it patches a stack copy of the
+ * bank
+ * monitor's vtable with this object's offset. Allocates @p count banks ("BankInstances").
+ *
+ * @param embedded  g++ in-charge flag: nonzero when the virtual base is built here
+ * @param count  maximum number of banks (On Tour MaxBanks)
+ * @param heap  audio mode (eSOUNDDEF_MODE), passed to cSoundSys and the bank monitor
+ * @return @p self
+ */
 extern "C" sBankManager* cBankManager_cBankManager(sBankManager* self, int embedded, int count, int heap)
 {
     if (embedded) {

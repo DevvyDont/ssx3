@@ -43,6 +43,16 @@ struct sBankMonitorCD08 {
     char vb[0x4];               // 0x8F0
 };
 
+/**
+ * Constructs a bank monitor: the cMonitor part and 64 bank-sound instances ("mBankMonitorInstance").
+ *
+ * When @p inchrg is set it also constructs the cSoundSys virtual base at +0x8F0. Doppler and positional sound
+ * start on (+0x8E0, +0x8E4) and the re-entry count at 0.
+ *
+ * @param inchrg  nonzero when this object is complete and must construct its virtual base
+ * @param heap    the audio mode passed to the cSoundSys base (On Tour audioMode)
+ * @return self
+ */
 extern "C" sBankMonitorCD08* cBankMonitor_cBankMonitor(sBankMonitorCD08* self, int inchrg, int heap)
 {
     if (inchrg) {
@@ -102,6 +112,13 @@ struct sBankMonitorE40 {
     sBmVoiceE40* voices;        // 0x8EC
 };
 
+/**
+ * Destroys a bank monitor: its 64 instances, then the cMonitor part.
+ *
+ * With bit 1 of @p flags it also destroys the cSoundSys virtual base.
+ *
+ * @param flags  g++ destructor flags: bit 1 destroys the virtual base, bit 0 frees the object
+ */
 extern "C" void cBankMonitor__cBankMonitor(cBankMonitor* self, int flags)
 {
     self->mVtbl = cBankMonitor_vtbl;
@@ -137,6 +154,12 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_FindFreeInstance);
 #ifdef SKIP_ASM
 extern "C" int func_002ABB80(void*);
 
+/**
+ * Finds a free bank-sound instance, skipping some free ones.
+ *
+ * @param n  which free instance to return: 1 for the first (On Tour SkipCount)
+ * @return the instance index, or -1 if there are not that many free
+ */
 extern "C" int cBankMonitor_FindFreeInstance(cBankMonitor* self, int n)
 {
     for (int i = 0; i < 64; i++) {
@@ -371,6 +394,9 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Pause);
 #ifdef SKIP_ASM
 extern "C" void func_002ACAC8(void*);
 
+/**
+ * Pauses every bank-sound instance and marks the monitor paused (+0x8E8).
+ */
 extern "C" void cBankMonitor_BANKMONITOR_Pause(cBankMonitor* self)
 {
     self->mBankMonitorPaused = 1;
@@ -385,6 +411,9 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Resume);
 #ifdef SKIP_ASM
 extern "C" void func_002ACB30(void*);
 
+/**
+ * Resumes every bank-sound instance and clears the monitor's paused flag (+0x8E8).
+ */
 extern "C" void cBankMonitor_BANKMONITOR_Resume(cBankMonitor* self)
 {
     for (int i = 0; i < 64; i++) {
@@ -414,6 +443,11 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Destroy);
 #ifdef SKIP_ASM
 extern "C" void func_002ABB38(void*);
 
+/**
+ * Destroys one bank-sound instance (func_002ABB38).
+ *
+ * @param i  the instance index (On Tour Index)
+ */
 extern "C" void cBankMonitor_BANKMONITOR_Destroy(cBankMonitor* self, int i)
 {
     func_002ABB38((char*)self->mBankMonitorInstance + i * 0xC0);
@@ -472,6 +506,11 @@ extern "C" void func_002AD410(cBankMonitor* self, sBmKeyD410 key)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_DestroyAllWithPtr);
 #ifdef SKIP_ASM
+/**
+ * Destroys every bank-sound instance whose owner pointer (+0x80, On Tour mPtr) matches.
+ *
+ * @param id  the owner pointer to match (On Tour Ptr), as an int
+ */
 extern "C" void cBankMonitor_BANKMONITOR_DestroyAllWithPtr(cBankMonitor* self, int id)
 {
     for (int i = 0; i < 64; i++) {
@@ -487,6 +526,13 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_GetHandle);
 #ifdef SKIP_ASM
 struct sVoiceC0 { int key; int idx; char pad[0xC0 - 8]; };
 
+/**
+ * Finds the active bank-sound instance with a given handle and monitor type.
+ *
+ * @param idx  the sound handle (+0x4, On Tour Handle)
+ * @param key  the monitor type (+0x0; On Tour eMonitorType: 1 bank, 2 MIDI, 3 stream)
+ * @return the instance, or 0 if none matches
+ */
 extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx, int key)
 {
     for (int i = 0; i < 64; i++) {
@@ -507,6 +553,15 @@ extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx,
 extern "C" void func_002ABB38(void*);
 extern "C" void func_002ACB80(void* voice, int a, int b, float v);
 
+/**
+ * Stops the bank sound with a given handle and type, at once or with a fade.
+ *
+ * The names of the last two parameters are swapped against their use (On Tour: Handle, float FadeTime, type).
+ *
+ * @param idx       the sound handle
+ * @param FadeTime  despite its name, the monitor type passed to GetHandle
+ * @param type      despite its name, the fade time; 0 stops the sound at once
+ */
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(cBankMonitor* self, int idx, int FadeTime, float type)
 {
     void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, FadeTime);
@@ -536,15 +591,23 @@ struct sVoiceD650 {
     char pad[0xC0 - 0x10];
 };
 
-extern "C" void cBankMonitor_BANKMONITOR_StopBank(cBankMonitor* self, int id, float v)
+/**
+ * Stops every playing sound of one bank, at once or with a fade.
+ *
+ * Only active bank instances (type 1) whose bank id (+0xC) matches are stopped.
+ *
+ * @param id  the bank's handle (On Tour BankHandle)
+ * @param FadeTime   fade time; 0 stops at once (On Tour FadeTime)
+ */
+extern "C" void cBankMonitor_BANKMONITOR_StopBank(cBankMonitor* self, int id, float FadeTime)
 {
     for (int i = 0; i < 64; i++) {
         if (func_002ABB80((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
             // PORT: pointer arithmetic through int
             sVoiceD650* e = (sVoiceD650*)(i * 0xC0 + (int)self->mBankMonitorInstance);
             if (e->state == 1 && e->id == id) {
-                if (v != 0.0f) {
-                    func_002ACB80_f(e, v, -1, 1);
+                if (FadeTime != 0.0f) {
+                    func_002ACB80_f(e, FadeTime, -1, 1);
                 } else {
                     func_002ABB38(e);
                 }
@@ -606,6 +669,10 @@ struct sBankVoice {
     char pad2[0xc0 - 0x60];
 };
 
+/**
+ * Forgets every instance's last listener distance (+0x5C = -1) after a camera cut, so no Doppler jump is
+ * heard.
+ */
 extern "C" void cBankMonitor_BANKMONITOR_CameraChange(cBankMonitor* self)
 {
     for (int i = 0; i < 64; i++) {
@@ -651,18 +718,32 @@ struct sBmKeyD888 {
     int v;
 };
 
+/**
+ * Sets up a monitor instance: a callback to run every @p Freq ms with up to five values.
+ *
+ * Resets the instance, sets the countdown, stores the callback (an 8-byte member-function pointer) and the
+ * values, then enables it (func_002AD980, probably Enable).
+ *
+ * @param Freq   period of the callback in milliseconds (On Tour Freq)
+ * @param key  the callback, a member-function pointer (On Tour CallbackFn)
+ * @param Ptr    pointer value for the callback (mPtr, On Tour Ptr)
+ * @param Data1    first data word (mData1)
+ * @param Data2    second data word (mData2)
+ * @param Data3    third data word (mData3)
+ * @param Data4    fourth data word (mData4)
+ */
 // PORT: 64-bit long sound key
-extern "C" void cMonitorInstance_Create(cMonitorInstance* self, int a1, long key, int b, int c, int d, int e, int f)
+extern "C" void cMonitorInstance_Create(cMonitorInstance* self, int Freq, long key, int Ptr, int Data1, int Data2, int Data3, int Data4)
 {
     cMonitorInstance_Reset(self);
-    func_002AD970(self, a1);
+    func_002AD970(self, Freq);
     // PORT: the 8-byte key is copied through its in-memory layout
     *(sBmKeyD888*)&self->mCallback = *(sBmKeyD888*)&key;
-    self->mPtr = (void*)b;
-    self->mData1 = c;
-    self->mData2 = d;
-    self->mData3 = e;
-    self->mData4 = f;
+    self->mPtr = (void*)Ptr;
+    self->mData1 = Data1;
+    self->mData2 = Data2;
+    self->mData3 = Data3;
+    self->mData4 = Data4;
     func_002AD980(self);
 }
 #endif
@@ -670,6 +751,11 @@ extern "C" void cMonitorInstance_Create(cMonitorInstance* self, int a1, long key
 //100%
 INCLUDE_ASM("sound/bankmonitor", cMonitorInstance_IsFree);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a monitor instance is unused (its reset count is -1).
+ *
+ * @return 1 when free, otherwise 0
+ */
 extern "C" int cMonitorInstance_IsFree(cMonitorInstance* self)
 {
     return self->mCountReset == -1;
@@ -682,6 +768,9 @@ INCLUDE_ASM("sound/bankmonitor", cMonitorInstance_Reset);
 void func_002AD990(void* self);
 void func_002AD970(void* self, int a1);
 
+/**
+ * Frees a monitor instance: disables it (func_002AD990, probably Disable) and sets its reset count to -1.
+ */
 extern "C" void cMonitorInstance_Reset(cMonitorInstance* self)
 {
     func_002AD990(self);
@@ -768,6 +857,16 @@ struct sSndPlayerD9C8 {
     char vb[0x4];               // 0x8DC
 };
 
+/**
+ * Constructs the sound monitor: its play-options part, 48 timed callback instances, and the global gMonitor.
+ *
+ * When @p inchrg is set it also constructs the cSoundSys virtual base at +0x8DC. The counter and the fields
+ * at +0x8C/+0x90 start at 0.
+ *
+ * @param inchrg  nonzero when this object is complete and must construct its virtual base
+ * @param heap    the audio mode passed to the bases (On Tour audioMode)
+ * @return self
+ */
 extern "C" sSndPlayerD9C8* cMonitor_cMonitor(sSndPlayerD9C8* self, int inchrg, int heap)
 {
     if (inchrg) {
@@ -824,6 +923,14 @@ struct sSndPlayerDAC8 {
     void** vtbl;                // 0x8D8
 };
 
+/**
+ * Destroys the sound monitor: removes its timer callback (func_002AD998), clears gMonitor and destroys its 48
+ * instances and its play-options part.
+ *
+ * With bit 1 of @p flags it also destroys the cSoundSys virtual base.
+ *
+ * @param flags  g++ destructor flags: bit 1 destroys the virtual base, bit 0 frees the object
+ */
 extern "C" void cMonitor__cMonitor(cMonitor* self, int flags)
 {
     cMonitorInstance* end = ((&self->mMonitorInstance[0])) + 48;
@@ -872,6 +979,9 @@ void* func_002ADBF0(void* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_Update);
 #ifdef SKIP_ASM
+/**
+ * Counts one monitor tick (mCounter), unless the monitor is paused.
+ */
 extern "C" void cMonitor_MONITOR_Update(cMonitor* self)
 {
     if (self->mPaused == 0) {
@@ -883,6 +993,12 @@ extern "C" void cMonitor_MONITOR_Update(cMonitor* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_GetFreeInstance);
 #ifdef SKIP_ASM
+/**
+ * Finds a free monitor instance, skipping some free ones.
+ *
+ * @param n  which free instance to return: 1 for the first (On Tour Count)
+ * @return the instance index, or -1 if there are not that many free
+ */
 extern "C" int cMonitor_MONITOR_GetFreeInstance(cMonitor* self, int n)
 {
     for (int i = 0; i < 48; i++) {
@@ -1000,6 +1116,15 @@ extern "C" cSoundSys_cSoundSys_cObj* func_002A8FA0();
 extern char cSoundSys_vtbl[];
 extern void* D_004A377C;
 
+/**
+ * Constructs the sound system base and makes it the current one (D_004A377C).
+ *
+ * It creates the platform sound object (func_002A8FA0) and calls that object's first virtual with the mode.
+ *
+ * @param self       the cSoundSys
+ * @param audioMode  the audio mode (On Tour eSOUNDDEF_MODE)
+ * @return self
+ */
 extern "C" void* cSoundSys_cSoundSys(void* self, int audioMode)
 {
     *(void**)((char*)self + 0x4) = cSoundSys_vtbl;
@@ -1025,6 +1150,14 @@ void operator_delete(int* ptr);
 extern char cSoundSys_vtbl[];
 extern void* D_004A377C;
 
+/**
+ * Destroys the sound system base: shuts down and deletes the platform sound object and clears D_004A377C.
+ *
+ * The shutdown is the platform object's third virtual, called with @p flags.
+ *
+ * @param self   the cSoundSys
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void cSoundSys__cSoundSys(void* self, int flags)
 {
     *(void**)((char*)self + 0x4) = cSoundSys_vtbl;
@@ -3104,6 +3237,13 @@ extern "C" int func_003E4E98();
 extern char D_00483390[];
 extern char D_004833A8[];
 
+/**
+ * Sets up the speech system's memory and callbacks.
+ *
+ * Allocates a 0x5622-byte buffer (func_003D6778) and prints "SPCH_Init: rNum=%d". It passes func_002AF8A8, a
+ * value read through the bank manager and the buffer to func_003D6840. It then sizes a "bank mem" block for
+ * 500 (func_003D6C58), allocates it into +0x8 and hands it to func_003D6C60. The callees are unknown.
+ */
 extern "C" void SPCH_Init(cSpeechSys* self)
 {
     int buf = func_003D6778(0x5622, 0x10, 1);

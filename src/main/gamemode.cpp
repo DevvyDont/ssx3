@@ -61,6 +61,15 @@ struct sGMMode_D0 {
     sGMMode_D0(void** v) { vt = v; }
 };
 
+/**
+ * Returns the game-mode manager, creating it and its game-mode handlers on first use.
+ *
+ * The manager is "GameModeMan" (0xA0 bytes); the handlers ("GM Handler") fill table D_00536668, all but slot
+ * 3. Some creations are retried up to three times while the result is 0, and slots 5 and 6 are checked twice.
+ * A new manager starts with no event (-1), heat 0 and handler 0.
+ *
+ * @return the manager (cGameModeMan_instance)
+ */
 extern "C" int* cGameModeMan_getGM(void)
 {
     if (cGameModeMan_instance == 0) {
@@ -256,6 +265,10 @@ struct sVEntry_002382D8 {
 extern void* D_00536668[];
 extern int D_005366D0[];
 
+/**
+ * Restarts the current heat: calls the current handler's virtual slot 2 and clears the six riders' D_005366D0
+ * values.
+ */
 extern "C" void cGameModeMan_restartHeat(cGameModeMan* self)
 {
     int i;
@@ -303,7 +316,19 @@ struct sVEntry_00238358 {
     void (*fn)(void*, int);
 };
 
-extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int a2)
+/**
+ * Handles a rider finishing the race: tells the current mode handler, then records the result in the back
+ * end.
+ *
+ * The result (with the rider's time or score, D_00536640) is only recorded at locations below 17 and when the
+ * replay state is not 1-9. For rider 0, a conquered mountain leads to cBERewardInterface_awardUser() when
+ * func_0015A2E0 returns 0 (probably: not yet awarded). Locked results also record the rider's place
+ * (D_00536730).
+ *
+ * @param idx  rider index (On Tour iRider)
+ * @param pRiderStats   the rider's stats (On Tour pRiderStats), passed to the score interface
+ */
+extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int pRiderStats)
 {
     void* obj = D_00536668[self->iCurrModeHandler];
     sVEntry_00238358* vt = *(sVEntry_00238358**)obj;
@@ -314,7 +339,7 @@ extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int a2)
         if (!ok) {
             void* score = cBE_getInterface_Fv(cBE_getBE(), 8);
             unsigned int v = D_00536640[idx];
-            func_00154AB8(score, idx, a2, v);
+            func_00154AB8(score, idx, pRiderStats, v);
             if (idx == 0) {
                 int prof = cBELibrary_getProfileIndex(0);
                 int ch = cBELibrary_getCharacterID(0);
@@ -363,11 +388,17 @@ struct sVEntry_00238550 {
 
 extern void* D_00536668[];
 
-extern "C" void cGameModeMan_riderGateHit(cGameModeMan* self, int a, int b)
+/**
+ * Tells the current game-mode handler that a rider passed a gate (its virtual slot 7).
+ *
+ * @param iRider  rider index (On Tour iRider)
+ * @param iGateID  gate id (On Tour iGateID)
+ */
+extern "C" void cGameModeMan_riderGateHit(cGameModeMan* self, int iRider, int iGateID)
 {
     void* obj = D_00536668[self->iCurrModeHandler];
     sVEntry_00238550* vt = *(sVEntry_00238550**)obj;
-    vt[7].fn((char*)obj + vt[7].delta, a, b);
+    vt[7].fn((char*)obj + vt[7].delta, iRider, iGateID);
 }
 #endif
 

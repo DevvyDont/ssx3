@@ -160,6 +160,11 @@ extern "C" void func_00144B20(void* self, const char* name)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocation);
 #ifdef SKIP_ASM
+/**
+ * Returns the location table entry (0x64 bytes) of the race's location, newRace.iLocationIdx.
+ *
+ * @return the entry in D_0043D950
+ */
 extern "C" void* cBENewRaceInterface_getLocation()
 {
     return (char*)&D_0043D950[0] + D_00535C08.value * 0x64;
@@ -216,6 +221,12 @@ extern "C" void* func_00144C30(void* self, int i)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationFile);
 #ifdef SKIP_ASM
+/**
+ * Returns a location's file name (+0x34 of its location table entry).
+ *
+ * @param iLocation  the location index
+ * @return the file name
+ */
 extern "C" void* cBENewRaceInterface_getLocationFile(void* self, int iLocation)
 {
     return (char*)&D_0043D984 + iLocation * 0x64;
@@ -225,6 +236,12 @@ extern "C" void* cBENewRaceInterface_getLocationFile(void* self, int iLocation)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationName);
 #ifdef SKIP_ASM
+/**
+ * Returns a location's name (+0x4 of its location table entry).
+ *
+ * @param iLocation  the location index
+ * @return the name
+ */
 extern "C" void* cBENewRaceInterface_getLocationName(void* self, int iLocation)
 {
     return (char*)&D_0043D954 + iLocation * 0x64;
@@ -310,6 +327,13 @@ extern "C" int func_00144D50(void* self, int a1)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_assignPlayer__FPvii);
 #ifdef SKIP_ASM
+/**
+ * Puts a player at a start gate: playerID[iGate] = iPlayer and riderID[iPlayer] = iGate.
+ *
+ * @param iGate  the start gate, 0-5
+ * @param iPlayer  the player, 0-5
+ * @return the address of playerID[iGate] (no meaning; On Tour's method is void)
+ */
 void* cBENewRaceInterface_assignPlayer(void* self, int iGate, int iPlayer)
 {
     *(int*)((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + iGate * 4) = iPlayer;
@@ -370,6 +394,17 @@ static inline char* Race_144DF0()
     return (char*)&(*(&cBENewRaceInterface_newRace));
 }
 
+/**
+ * Sets the race's game mode and the matching numbers of human, AI and mission riders.
+ *
+ * Refused when the mode is not allowed on the current game path (D_0043E700). Mode 4 gets 1 human and 1
+ * mission rider and makes player 1 the mission man with player 0's character (func_00147828), then submits;
+ * leaving mode 4 restores the humans (2 on path 2) and resets player 1. Modes 0 (5 AI, 4 on path 2), 1 (1 AI)
+ * and 3, 5, 6 (1 AI for events 4-5 off path 2) set the counts; mode 5 also sets event 4.
+ *
+ * @param mode  the game mode
+ * @return 1 when set, 0 when the mode is not allowed
+ */
 extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode)
 {
     sModeRow_144DF0 row = D_0043E700[*((signed char*)Race_144DF0() + 0x49)];
@@ -475,6 +510,12 @@ static inline char* Race_1451E8()
     return (char*)&(*(&cBENewRaceInterface_newRace));
 }
 
+/**
+ * Sets the race's game event; events 4 and 5 also set one AI rider (none on game path 2).
+ *
+ * @param event  the game event
+ * @return whether the event's mode (D_0043E978) matches the current game mode
+ */
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event)
 {
     sGameEvent_001451E8 e = D_0043E978[event];

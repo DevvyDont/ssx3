@@ -12,6 +12,11 @@ void func_001A34A0_2(void* self, void* obj) __asm__("func_001A34A0__FPv");
 extern char D_004613C8[];
 extern char D_004A19E8[];
 
+/**
+ * Creates the multiplayer circuit select screen ("108cct_select") and sets up its "ListBox".
+ *
+ * Sets the list box's flag 0x80, clears flag 1, and fills it with func_001A34A0().
+ */
 extern "C" void cFEStateMPCircuit_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -52,6 +57,13 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
 void func_001A34A8(void* self);
 extern char D_004A19E8[];
 
+/**
+ * Plays the screen frame named after the list box's current entry, then gives the state focus.
+ *
+ * func_001A34A8() is empty in this build.
+ *
+ * @param pPreSt  the state that had focus before (On Tour pPreSt), passed on to cUIState_onGainFocus()
+ */
 extern "C" void cFEStateMPCircuit_onGainFocus(void* self, int pPreSt)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A19E8));
@@ -83,6 +95,13 @@ struct sVEntry_33A0 {
     void* (*fn)(void*, void*, int);
 };
 
+/**
+ * Handles the circuit select's widget events: select or event 6 push the factory's state, a change plays the
+ * entry's frame.
+ *
+ * @param item  the widget (its index at +0x18), or 0
+ * @param msg  widget event number (On Tour Event)
+ */
 extern "C" void cFEStateMPCircuit_onWidgetEvent(void* self, void* item, unsigned int msg)
 {
     if (item == 0) {
@@ -178,6 +197,11 @@ extern "C" int BXFILE_exists(char* name);
 extern "C" void func_003DED50(char* name, int a1, int a2, void* out);
 extern char D_00461418[];
 
+/**
+ * Constructs the front end's async manager, opening data/ui/mapgfx.big when it exists (handle at +0x58C).
+ *
+ * @return @p self
+ */
 extern "C" void* cFEAsyncManager_cFEAsyncManager(void* self)
 {
     if (BXFILE_exists(D_00461418) != 0) {
@@ -195,6 +219,11 @@ extern "C" void func_003DEDC0(void* handle, int arg);
 void operator_delete(int* p);
 extern char D_00461418[];
 
+/**
+ * Destroys the async manager: closes data/ui/mapgfx.big if it exists, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cFEAsyncManager__cFEAsyncManager(void* self, int flags)
 {
     if (BXFILE_exists(D_00461418) != 0) {

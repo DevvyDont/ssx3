@@ -46,6 +46,15 @@ extern int D_004A5B7C;
 
 struct sVtS_DBF0 { short delta; short index; void (*fn)(void*, void*); };
 
+/**
+ * Restores the whole game state from a replay frame: world map, BE, game, AI, avalanche, scripts and the
+ * object buckets.
+ *
+ * Clears the dynamic object buckets first, rewinds the frame stream and reads each system's part in recording
+ * order, then rebuilds the AI overlap list and updates every view.
+ *
+ * @param stream  the frame's stream (On Tour cReplayFramePtr* framePtr)
+ */
 extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
 {
     void* bm = &gBucketMan;
@@ -200,6 +209,16 @@ struct sVE_RO { short delta; short index; void (*fn)(void*, int); };
 struct sObj_RO { int pad[3]; sVE_RO* vt; };
 extern "C" sObj_RO* func_00350B98_RO(void* self, void* bucket, void* stream) __asm__("func_00350B98");
 
+/**
+ * Recreates one recorded world object of the stream's next node type in a bucket.
+ *
+ * Types 6 and 12 have no case and are not read. Type 22 is constructed and then deleted at once (virtual slot
+ * 1
+ * with flags 3), which looks like a leftover.
+ *
+ * @param bucket  the bucket to link the object into
+ * @param stream  the frame's stream, positioned at the object (On Tour cReplayFramePtr* data)
+ */
 // Recreates a replay object of the recorded type and links it into the bucket.
 extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cStreamRB* stream)
 {

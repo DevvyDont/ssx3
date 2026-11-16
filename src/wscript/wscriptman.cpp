@@ -13,9 +13,20 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a1, int a2);
 int func_0030B260(void* self, void* a1);
 
-extern "C" void* cWScriptMan_addProcess(void* self, int a1, int a2, int front)
+/**
+ * Creates a world-script process for a section's process data and adds it to one of the manager's lists.
+ *
+ * The process ("WScriptProcess", 0x60 bytes) goes to the list at +0x2BC when @p front is set, otherwise to
+ * the one at +0x2B4.
+ *
+ * @param sectionId     section id (On Tour sectionId)
+ * @param data     the process data (On Tour const tWScriptProcessData*)
+ * @param front  nonzero for the list at +0x2BC (On Tour start)
+ * @return the new process
+ */
+extern "C" void* cWScriptMan_addProcess(void* self, int sectionId, int data, int front)
 {
-    void* p = cWScriptProcess_cWScriptProcess(cMemMan_alloc(0x60, D_00489908, 0x20000000, 0), self, a1, a2);
+    void* p = cWScriptProcess_cWScriptProcess(cMemMan_alloc(0x60, D_00489908, 0x20000000, 0), self, sectionId, data);
     if (front != 0) {
         func_0030B260((char*)self + 0x2BC, p);
     } else {
@@ -32,9 +43,21 @@ extern char D_00489918[];
 extern "C" void* cWScriptMission_cWScriptMission(void* self, void* man, int a1, int a2, int a3);
 int func_0030B2C0(void* self, void* a1);
 
-extern "C" void* cWScriptMan_addProcess1(void* self, int a1, int a2, int a3, int front)
+/**
+ * Creates a world-script mission for a section's mission data and adds it to one of the manager's lists.
+ *
+ * The mission ("WScriptMission", 0x78 bytes) goes to the list at +0x2BC when @p front is set, otherwise to
+ * the one at +0x2B4.
+ *
+ * @param sectionId     section id (On Tour sectionId)
+ * @param data     the mission data (On Tour const tWScriptMissionData*)
+ * @param key     the mission's key (On Tour key)
+ * @param front  nonzero for the list at +0x2BC (On Tour start)
+ * @return the new mission
+ */
+extern "C" void* cWScriptMan_addProcess1(void* self, int sectionId, int data, int key, int front)
 {
-    void* p = cWScriptMission_cWScriptMission(cMemMan_alloc(0x78, D_00489918, 0x20000000, 0), self, a1, a2, a3);
+    void* p = cWScriptMission_cWScriptMission(cMemMan_alloc(0x78, D_00489918, 0x20000000, 0), self, sectionId, data, key);
     if (front != 0) {
         func_0030B2C0((char*)self + 0x2BC, p);
     } else {
@@ -552,6 +575,12 @@ static inline bool wsIsType3_9F18(sWSSection9F18* s)
     return s->type == 3;
 }
 
+/**
+ * Runs the global world scripts of every type-3 section once.
+ *
+ * Resets the avalanches and the script id table first, and runs the scripts with no current rider and the
+ * context fields cleared; the current rider (word 0) is restored afterwards.
+ */
 extern "C" void cWScriptMan_runGlobalScripts(sWSMan9F18* self)
 {
     int i;
@@ -1100,6 +1129,19 @@ public:
 // PORT: the unit defines func_0030B388 later with its own class type
 extern "C" cWSObj_30A868* func_0030B388_a(void* self, unsigned int id) __asm__("func_0030B388");
 
+/**
+ * Carries out a mission command from a world script, or answers a question about a mission.
+ *
+ * Except for commands 15 and 19, nothing happens unless D_00535C10 is 4 and the AI's +0x7C is 1. The rider is
+ * temporarily set to @p ctx. Commands 0-2, 18 and 8/9/11 are forwarded to helpers; 3, 4, 5 and 17 call
+ * virtuals of the running (or waiting) mission. Queries use the mission interface: 14 available, 15
+ * completed, 19 last in its chain, 12, 13 and 16 other states. An id of -1 means the current mission.
+ *
+ * @param id   mission id, or -1 for the current one (On Tour missionId)
+ * @param cmd  the command
+ * @param ctx  rider index to run it for, or -1 for the current one (On Tour being)
+ * @return the query's answer (1 or 0); 0 for plain commands
+ */
 extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned int cmd, int ctx)
 {
     int force = 0;
@@ -1287,6 +1329,15 @@ struct cWScriptMan_runScriptCode_sCall {
     int pad[4];
 };
 
+/**
+ * Runs a piece of world-script (Luno) code for a process.
+ *
+ * Makes @p obj the current process, then runs the code with the process's local table (+0x1C) or, if it has
+ * none, a temporary 8-slot table ("SetupLocalTable"). The current process and +0x290 are restored afterwards.
+ *
+ * @param obj   the process (On Tour cWScriptProcess*)
+ * @param data  the compiled code (On Tour const char*)
+ */
 extern "C" void cWScriptMan_runScriptCode(void* self, void* obj, int data)
 {
     cWScriptMan_runScriptCode_sValue arg;
@@ -2078,6 +2129,16 @@ struct sWSSlot_B9A0 {
     char pad[0x10C - 4];
 };
 
+/**
+ * Records that a rider picked up a collectible of the manager's pool.
+ *
+ * When the pool id matches, the instance is marked collected, the pickup sound plays and the rider gets an
+ * add-collectible event with the current peak (func_00144C98) and its value (func_00151178).
+ *
+ * @param rider   rider index (On Tour being)
+ * @param id      collectible pool id (On Tour poolId)
+ * @param instId  the collected instance's resource id
+ */
 extern "C" void cWScriptMan_collect(void* self, int rider, int id, int instId)
 {
     sWSSlot_B9A0* slots = (sWSSlot_B9A0*)((char*)self + 0x2C0);
@@ -3683,6 +3744,14 @@ static inline cPS2GraphicsMan* GetGfx_D540()
     return cGraphicsMan_TheGraphicsMan;
 }
 
+/**
+ * Destroys an animated model: frees every per-slot and per-group array and releases its graphics resources.
+ *
+ * Each animation element's handle goes to graphics manager slot 112 and each valid texture id (+0x130
+ * entries) to slot 50 before the arrays are freed.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
 {
     cPS2GraphicsMan* gfx = GetGfx_D540();

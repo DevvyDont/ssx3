@@ -28,6 +28,16 @@ public:
     cFEObjK1956F8_1(int a) __asm__("func_002DBD10");
 };
 
+/**
+ * Constructs the front end: its camera, rider manager, asynchronous files, UI engine and effects loader.
+ *
+ * Runs the base constructor func_00231CD0, stores the vtable D_0046D878, builds the camera at +0x10 (vtable
+ * at +0xA0) and sets it up with func_0015D700 (pi/4, 5, 5000), the rider manager at +0xB0 (On Tour
+ * mRiderManager) and the object at +0x1A70, and allocates the UI engine ("UIEngine", +0xC) and an effects
+ * loader ("FXLoader FE", +0xB5AA0).
+ *
+ * @return @p self
+ */
 extern "C" void* cFE_cFE(void* self)
 {
     func_00231CD0(self);
@@ -84,6 +94,15 @@ extern void* D_0046D848[];
 extern "C" void* func_001DCC40(void* p);
 extern "C" void func_00416210(void* dst, int value, int size);
 
+/**
+ * Constructs the front-end locale with no string files loaded.
+ *
+ * Zeroes the base's first three bytes, stores the base vtable, clears the low 5 bits of byte 3
+ * (func_001DCC40) and byte 0x58, then stores the cFELocale vtable, sets byte 2 to 4 and zeroes the 20 file
+ * slots at +0x8.
+ *
+ * @return @p self
+ */
 extern "C" void* cFELocale_cFELocale(void* self)
 {
     *(char*)((char*)self + 0x0) = 0;

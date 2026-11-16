@@ -201,6 +201,17 @@ struct sUIGL {
 };
 
 
+/**
+ * Loads a race: creates the game's managers, loads the track and enters the first game state.
+ *
+ * Progress (probably the load bar, func_00317550) goes from 13.2 % to 99 %. In order it creates the Nash
+ * grid, the debug font, the world and its managers and loads the track (cGame_loadTrack). Then come the
+ * replay, the network input sync (network games only) and the AI. Last are the views, the debug menu, the
+ * transition and splash managers, the in-game audio, the UI engine, and the AI visual-effects, visual-effects
+ * and stats nodes. When D_004A1228 is set (the 512 KB save buffer exists; probably a saved replay) the riders
+ * are loaded here, the replay is restored from that buffer and the game enters state 16. Otherwise game state
+ * 10 is preloaded and then entered.
+ */
 extern "C" void cGame_load(cGame* self)
 {
     sGridGL** pGrid = (sGridGL**)&self->BXNash;
@@ -470,6 +481,15 @@ struct sElemFF_F6B0 {
     static void* operator new[](unsigned int, void* p) { return p; }
 };
 
+/**
+ * Loads the race's track: opens its big file, loads the world and streams in the start section.
+ *
+ * Opens "data/worlds/" + name + ".big", where the name is the location's +0x44 string when D_004A11B8 is set,
+ * otherwise its +0x34 string. It creates the sky box, the section manager, the surface property cache and the
+ * world sound. It then activates the location's start section and updates the section manager until that
+ * section is in. It also passes the track's ".cam" file to func_0016CA10, and creates the fog particle
+ * manager ("cPS2FogParticleMan") and the lens effects manager.
+ */
 extern "C" void cGame_loadTrack(cGame* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -782,6 +802,13 @@ extern int D_004A43C8;
 extern int D_004A4324;
 extern int cScreenTint_m_Enable;
 
+/**
+ * Makes the game the active module again: refreshes the locale, the load indicator, the script engine and the
+ * world.
+ *
+ * It also clears the PDA overlay template, calls helpers on the graphics manager, the world trigger manager
+ * and the audio system, and turns the screen effects back on (D_004A4324, the screen tint, D_004A43C8).
+ */
 extern "C" void cGame_gainFocus(cGame* self)
 {
     func_00195D50(SSXApp->FELocale);
@@ -818,6 +845,12 @@ extern void* D_004A3DD8;
 // The unit declares gBucketMan later as sGp2898 (8 bytes); bind a small-data alias here.
 extern char D_004A5988_bm __asm__("gBucketMan");
 
+/**
+ * Resets the world for a new run: playback, missions, update buckets 1 and 8, the AI focus, avalanches and
+ * the map.
+ *
+ * It then reruns the global world scripts and sets the missions up again.
+ */
 extern "C" void cGame_resetWorld(cGame* self)
 {
     void* bm = &D_004A5988_bm;
@@ -861,6 +894,14 @@ struct sVEntry_230180b {
     int (*fn)(void*, int, int);
 };
 
+/**
+ * Restarts the race without reloading: resets playback, missions, buckets, riders (AI slot 5 with 3) and
+ * avalanches.
+ *
+ * It also snaps the views and resets the map, the replay, the script engine, the crowds and the particles. It
+ * tells the UI state found by D_004A2AB0's hash about it (slot 24 with 7), and reruns the global world
+ * scripts and the mission setup. Last, it calls func_00287108 on the audio system (On Tour PartialRestart).
+ */
 extern "C" void cGame_partialRestart(cGame* self)
 {
     void* bm = &D_004A5988_bm;
@@ -961,6 +1002,14 @@ extern void* D_004A2A00;
 extern void* D_004A3FF0;
 extern void* D_004A4028;
 
+/**
+ * Removes everything that belongs to a world section that is about to unload.
+ *
+ * The section's crowds, particles and update-bucket entries (buckets 1 and 8) go first. It then clears the AI
+ * focus manager for the section and for 0x80 (func_00103308), and unloads the section's world scripts.
+ *
+ * @param id  the section id (On Tour sectionId)
+ */
 extern "C" void cGame_sectionUnloading(cGame* self, int id)
 {
     void* bm = &D_004A5988_bm;
@@ -1388,6 +1437,15 @@ static inline int updateState_2306B8(cGame* self)
     }
 }
 
+/**
+ * Runs one game frame: streaming, the current game state, the update buckets, the AI, the views and the world
+ * sound.
+ *
+ * While the views or the section manager are not ready, it only keeps streaming and the views going. Mission
+ * overlays, the debug menu and the pause menu can take the frame first (they push a pause state). The pause
+ * flags (D_004A2A50), the replay and the playback can skip the simulation buckets; then only buckets 5, 3 and
+ * 4 run. Every frame also updates the network, the front-end async manager and the load indicator.
+ */
 extern "C" void cGame_update(cGame* self)
 {
     if (*(unsigned int*)((char*)self->ViewMan + 0x10) >= 2) {
@@ -1547,6 +1605,14 @@ struct cMgr00230E98 {
     virtual void v15(const sVec3_00230E98& v);
 };
 
+/**
+ * Lets the game give up focus, once the stream pause (its virtual slot 3) and the screen fade allow it.
+ *
+ * On success it calls the graphics manager's v15 with (0, 0, 0), sets its +0x270 flag, turns the screen
+ * effects off, and calls helpers on the script engine and the load indicator.
+ *
+ * @return 1 when focus was given up, 0 while the stream pause or the fade is still busy
+ */
 extern "C" int cGame_loseFocus(cGame* self)
 {
     void* obj = self->StreamPause;
@@ -1882,6 +1948,14 @@ extern "C" void func_00235990(void* p, void* s);
 extern "C" void func_00235F48(void* p, void* s);
 extern "C" void func_00236728(void* p, void* s);
 
+/**
+ * Writes the game's state to a replay frame: flags, snowfall, the game-state ids and each game-flow state
+ * object.
+ *
+ * The ids are the current (+0x214), previous (+0x218), pending (+0x210) and pending-startup (+0x21C) ones.
+ *
+ * @param stream  the replay frame (On Tour cReplayFramePtr*)
+ */
 extern "C" void cGame_writeToReplayFrame(cGame* self, cStream_00231348* stream)
 {
     ((cSerObj_00231348*)self->FlagManager)->serialize(stream);

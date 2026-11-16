@@ -23,6 +23,17 @@ struct cScriptAnimBankManager53B8 {
     void* vtable;               // 0xC
 };
 
+/**
+ * Constructs a script animation bank manager with a fixed number of empty bank slots.
+ *
+ * Allocates count 0x14-byte slots ("tScriptAnimBankInfo") with the given memory flags; each slot gets id -1
+ * (free), bank number base + i, and zeroed data.
+ *
+ * @param flags  memory flags for the allocation (On Tour memFlags), also stored at +0x0
+ * @param count  number of bank slots (On Tour maxBanks)
+ * @param base   bank number of the first slot (On Tour startBankNum)
+ * @return self
+ */
 extern "C" cScriptAnimBankManager53B8* cScriptAnimBankManager_cScriptAnimBankManager(
     cScriptAnimBankManager53B8* self, int flags, int count, int base)
 {

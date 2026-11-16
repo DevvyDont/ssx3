@@ -111,6 +111,13 @@ struct sDebugMenuScreen {
     int optMode;                // 0x8C44
 };
 
+/**
+ * Draws the debug front end's race setup screen, or its open popup instead.
+ *
+ * Lists game path, mode and event, the first-time flag, track, character, control map, board, AI rider count,
+ * screen calibration, HDTV, playlist and network (with the IP address), then the "Lobby" and "Real Front End"
+ * entries, highlighting the cursor row. Also prints "press <start> to play" and an anims count.
+ */
 extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
 {
     sDbgPopup* popup = &self->popup;
@@ -1805,6 +1812,11 @@ struct sDebugFE_17F868 {
     int snd20;          // 0x20
 };
 
+/**
+ * Loads the debug front end: its font, the dot and menu textures, and the debug and lobby menu screens.
+ *
+ * Starts on the lobby menu when SSXApp->unk_74 is set, otherwise on the debug menu screen.
+ */
 extern "C" void cDebugFE_load(sDebugFE_17F868* self)
 {
     cPS2GraphicsMan* m = GrMan;
@@ -2424,6 +2436,11 @@ extern "C" void func_00180478(void* self, unsigned char idx)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_isActive);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the front-end input has a controller that is connected.
+ *
+ * @return 1 when the controller pointer (+0x18) and its device are set, otherwise 0
+ */
 extern "C" int cFEInput_isActive(void* self)
 {
     void* p = *(void**)((char*)self + 0x18);

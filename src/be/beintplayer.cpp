@@ -81,6 +81,12 @@ extern void* D_004A11C0;
 // PORT: func_00145A98 takes no arguments; this caller passes its own self through untouched in $a0.
 extern "C" void func_00145A98_59B8(void* self) __asm__("func_00145A98");
 
+/**
+ * Commits the working player table D_00534FE0 to the library's cBELibrary_playerDB.
+ *
+ * When the player interface singleton's flag at +0x8 is set the whole 0xA8-byte table is copied; otherwise
+ * only the names and flag bit 1 of the six entries (func_00145A98).
+ */
 // Copies the 0xA8-byte character table from its backup when D_004A11C0 says so, otherwise rebuilds it.
 extern "C" void cBENewPlayerInterface_submit(void* self)
 {
@@ -131,6 +137,9 @@ struct sPlayerTable_00145B20
 
 extern sPlayerTable_00145B20 cBELibrary_playerDB;
 
+/**
+ * Throws away player-table edits: copies cBELibrary_playerDB back over the working table D_00534FE0.
+ */
 extern "C" void cBENewPlayerInterface_discard(void* self)
 {
     *(sPlayerTable_00145B20*)D_00534FE0 = cBELibrary_playerDB;
@@ -155,6 +164,11 @@ struct sCtrlEntry00145BD8 {
     char pad_0x14[0x8];
 };
 
+/**
+ * Resets the library's six player entries (byte 0x13 cleared, flag bit 1 set), then reloads the working copy.
+ *
+ * The reload is the interface's slot 2 (discard).
+ */
 extern "C" void cBENewPlayerInterface_defaultCtrl(void* self)
 {
     int i;
@@ -293,6 +307,16 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isPeakLocked);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
+/**
+ * Tells whether a peak is locked for a character: bit 12 (peak 1) or 13 (peak 2) of the record's flags.
+ *
+ * Peak 0 is never locked; the flags are the 64-bit word at +0x278 of the character's profile record.
+ *
+ * @param iProfileIndex  profile index
+ * @param iCharacterID  character id
+ * @param peak  the peak, 0-2
+ * @return 1 when locked, else 0
+ */
 // PORT: 64-bit ulong flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
 extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int iProfileIndex, int iCharacterID, int peak)
 {
@@ -734,6 +758,12 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Returns the last hub location of a rider's character (+0x27C of its profile record).
+ *
+ * @param index  the rider (On Tour: iRider); mapped to the profile and the player's character
+ * @return the location id
+ */
 extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -890,6 +920,12 @@ struct sVtEntry_00147170 {
 };
 
 
+/**
+ * Returns a player's name, filling in the default "kT_MEMPlayerName" text with the player number when empty.
+ *
+ * @param idx  the player slot (On Tour: iPlayer)
+ * @return the name stored in the player table
+ */
 extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx)
 {
     char* name = (char*)&D_00534FE0[idx];
@@ -917,6 +953,15 @@ struct sPlayerCharFlags_00147220 {
     unsigned int rest : 29;
 };
 
+/**
+ * Assigns a controller to a rider's player entry.
+ *
+ * A valid controller (0 or more) also clears the mission-man bit and stores the player id in the 1-bit field
+ * bit 0 (so only its low bit).
+ *
+ * @param index  the rider; mapped to its player with cBENewPlayerInterface_getPlayerID()
+ * @param ctrl  the controller id, or negative for none
+ */
 extern "C" void cBENewPlayerInterface_setRiderCtrlID(void* self, int index, int ctrl)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1073,6 +1118,12 @@ extern "C" void func_00147448(void* self, int a1, int charID)
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerCharID__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns a player's character id (+0x11 of its player table entry).
+ *
+ * @param index  the player slot
+ * @return the character id
+ */
 signed char cBENewPlayerInterface_getPlayerCharID(void* self, int index)
 {
     index *= sizeof(sPlayerCharEntry);
@@ -1299,6 +1350,12 @@ struct sPlayerFlags_001477E8
     char pad_0x14[0x1C - 0x14];
 };
 
+/**
+ * Tells whether a rider's player is the mission man (bit 2 of the entry's flags).
+ *
+ * @param index  the rider; mapped to its player
+ * @return 1 or 0
+ */
 int cBENewPlayerInterface_isMissionMan(int index)
 {
     int playerID = cBENewPlayerInterface_getPlayerID(index);
@@ -1320,6 +1377,11 @@ extern "C" void func_00147828(int index)
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_resetFromMissionMan);
 #ifdef SKIP_ASM
+/**
+ * Turns a rider's player back from the mission man: character id 0 and the mission-man bit cleared.
+ *
+ * @param index  the rider; mapped to its player
+ */
 extern "C" void cBENewPlayerInterface_resetFromMissionMan(void* self, int index)
 {
     D_00534FE0[cBENewPlayerInterface_getPlayerID(index)].mCharID = 0;
@@ -1621,6 +1683,14 @@ extern const char D_0045A280[];
 extern sVTablePlayer_00147F78 cBEStatInterface_vtbl;
 extern void* D_004A11C4;
 
+/**
+ * Returns the stat interface singleton, creating it on first use.
+ *
+ * The instance lives in D_004A11C4: 0x10 bytes tagged "BECharInt", with its vtable stored and slot 2
+ * (discard) run on it.
+ *
+ * @return the stat interface
+ */
 extern "C" void* cBEStatInterface_getThis(void)
 {
     if (D_004A11C4 == 0) {
@@ -1657,6 +1727,11 @@ extern sPlayerSlot_00147FD8 D_004A7887[];
 extern sPlayerSlot_00147FD8 D_004B13D7[];
 extern sPlayerSlot_00147FD8 D_004BAF27[];
 
+/**
+ * Commits the working character stats D_00535538 to the profiles.
+ *
+ * Copies the 7 stat bytes of each of 10 characters in 3 profiles into +0xBDF of the character records.
+ */
 extern "C" void cBEStatInterface_submit(void)
 {
     for (int i = 0; i < 10; i++)
@@ -1677,6 +1752,9 @@ extern sPlayerSlot_00147FD8 D_004A7887[];
 extern sPlayerSlot_00147FD8 D_004B13D7[];
 extern sPlayerSlot_00147FD8 D_004BAF27[];
 
+/**
+ * Reloads the working character stats D_00535538 from the profiles (the reverse of submit).
+ */
 extern "C" void cBEStatInterface_discard(void)
 {
     for (int i = 0; i < 10; i++)

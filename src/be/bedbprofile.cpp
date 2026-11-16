@@ -17,6 +17,15 @@ struct sCharProfile_00152398
     sScoreStat_00152398 stats[0x1A];  // 0xAD0
 };
 
+/**
+ * Returns a character's score record for a location and event.
+ *
+ * The index comes from cBELibrary_getScoreType(); the 26 eight-byte records start at +0xAD0.
+ *
+ * @param locID  the location (On Tour: eBELocationID)
+ * @param event  the event or stat kind (On Tour: eBEGameEvent)
+ * @return the record, or 0 when the pair has none (type 26)
+ */
 void* cBECharProfileDB_getScoreStats(void* self, int locID, int event)
 {
     int type = cBELibrary_getScoreType(locID, event);

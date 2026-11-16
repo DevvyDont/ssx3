@@ -90,6 +90,15 @@ struct sUIThing0048 {
     float f64;                // 0x64
 };
 
+/**
+ * Sets one animatable property of a widget from a keyframe value.
+ *
+ * Channels: 0-1 position, 3-5 rotation in degrees, 6-7 size, 9-10 scale in percent, 12 frame, 13-16 alpha and
+ * RGB in 0-255. Other channels are ignored.
+ *
+ * @param key  the channel (On Tour channel)
+ * @param data  the value in the channel's units
+ */
 // Sets one animatable property (position, rotation, scale, colour, frame...) from a keyframe value.
 extern "C" void cUIThing_setChannelData(cUIThing* self, unsigned short key, float data)
 {
@@ -332,6 +341,12 @@ struct sUIData03F0 {
     unsigned char r, g, b, a;   // 0x28
 };
 
+/**
+ * Sets a text widget up from its screen-data record: font, visibility, localized string and, when enabled,
+ * colour.
+ *
+ * @param data  the widget's record (On Tour tUIBaseObject* pUIBase)
+ */
 extern "C" void cUIText_setUIData(sUIThing03F0* self, sUIData03F0* data)
 {
     cUIThing_setUIData_2(self, data);
@@ -349,6 +364,11 @@ extern "C" void cUIText_setUIData(sUIThing03F0* self, sUIData03F0* data)
 //100%
 INCLUDE_ASM("ui/uithing", cUIText_getFont);
 #ifdef SKIP_ASM
+/**
+ * Returns the font of the text widget's font slot from the UI engine's font interface.
+ *
+ * @return the cFont (as int), or 0 without a font interface
+ */
 extern "C" int cUIText_getFont(cUIText* self)
 {
     void* p = *(void**)((char*)*(void**)((char*)self->mpScreen + 0xd0) + 0x10);
@@ -371,6 +391,9 @@ struct cUIText_updateLocale_sVEntry {
     void* fn;
 };
 
+/**
+ * Reloads a text widget's localized string for the current language, wrapping it when the widget wraps.
+ */
 extern "C" void cUIText_updateLocale(cUIText* self)
 {
     int id = self->mStringID;

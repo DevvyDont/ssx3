@@ -16,6 +16,17 @@ extern void* cScriptCameraController_vtbl[];
 extern char D_0045BE88[];
 extern char D_0045BEA0[];
 
+/**
+ * Constructs the script camera controller with its two ScriptObjCam objects.
+ *
+ * The second argument is really the view index (cCamera_cCamera passes it; On Tour: viewIndex): it goes to
+ * each ScriptObjCam (func_0027D5E8, 0x80 bytes), which is then set up by func_00283298. Type 3, not active
+ * (+0x18 = 0).
+ *
+ * @param script  the view index (misnamed)
+ * @param camera  the owning cCamera
+ * @return self
+ */
 extern "C" void* cScriptCameraController_cScriptCameraController(void* self, void* script, void* camera)
 {
     int i;
@@ -87,6 +98,15 @@ extern char D_0045BED0[];
 extern char D_0045BEF0[];
 extern char D_0045BF10[];
 
+/**
+ * Creates the camera algorithm for a script camera object and adds it to the controller.
+ *
+ * The kind (func_002743C8 on the object's data) picks a manual (0), target (1), subject (2) or algorithmic
+ * (3) script camera algorithm; other kinds are ignored. The algorithm is bound to the object, stored at its
+ * +0x1C, added as owned (func_00169340, probably addAlgorithm) and the controller becomes active (+0x18 = 1).
+ *
+ * @param cam  the script camera object (cScriptObjCamera)
+ */
 extern "C" void cScriptCameraController_addCamera(char* self, char* cam)
 {
     void* ctl;
@@ -186,6 +206,12 @@ struct sScrAlgoNodeK2 {
     sScrAlgoNodeK2* next;   // 0x14
 };
 
+/**
+ * Updates the blend weight of each script camera algorithm and runs it.
+ *
+ * For each node the weight is smoothstep(t) = 3t^2 - 2t^3 (capped at 1) of the time at +0x18 of the object
+ * func_001694B0 returns for the algorithm; then virtual slot 5 runs the algorithm.
+ */
 extern "C" void cScriptCameraController_update(void* self)
 {
     sScrAlgoNodeK2* n = **(sScrAlgoNodeK2***)((char*)self + 0x8);

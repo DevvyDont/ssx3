@@ -120,6 +120,12 @@ struct sSplineFollow5570 {
     float length;           // 0xC
 };
 
+/**
+ * Restores a spline follower from a replay frame: re-finds its current node by index and recomputes its
+ * length.
+ *
+ * @param stream  the replay frame (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cSpline_readFromReplayFrame(cSpline* self, cStream_5570* stream)
 {
     stream->v02(((sSplineFollow5570*)self), 8);

@@ -23,6 +23,12 @@ struct sCache_7890 {
     int count;                  // 0xC
 };
 
+/**
+ * Sets up the AI forward-difference cache: a ring of empty entries ("AIFwdDiffCache") and a hash table of
+ * 2n+13 buckets.
+ *
+ * @param n  number of cache entries (On Tour num)
+ */
 extern "C" void cAIFwdDiffCache_Init(sCache_7890* self, int n)
 {
     sCacheEntry_7890* mem = (sCacheEntry_7890*)operator_new_tag(n * sizeof(sCacheEntry_7890), D_0048E4F8, 0, 0);

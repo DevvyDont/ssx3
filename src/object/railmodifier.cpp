@@ -187,6 +187,14 @@ static inline t4Matrix scaled_C0E8(const t4Matrix* src, const t4Vector& s)
     return r;
 }
 
+/**
+ * Builds a rail modifier's world-to-rail transform and creates its rail node.
+ *
+ * The rail's frame is the instance's world matrix or, for a mesh index (+0x34) of 0 or more, that mesh's
+ * chain of link matrices (translations scaled by the instance scale) times the world matrix. The inverse
+ * (transposed rotation, rotated negative translation) is stored at +0x50. Then allocates a 0x10-byte
+ * "RailNode" (type 2, pointing back here) at +0x44.
+ */
 extern "C" void cRailModifier_buildXform(cRailModifier_C0E8* self)
 {
     sModel_C0E8* model = self->model;
@@ -1297,6 +1305,11 @@ public:
     virtual void v01(void* buf, int size);
 };
 
+/**
+ * Writes a rigid body's state (its first 0x50 bytes: pose, momentum, inverse mass) to a replay frame.
+ *
+ * @param obj  the replay frame (On Tour cBxReplayFrame*)
+ */
 extern "C" void cRigidBody_writeToReplayFrame(cRigidBody* self, cRigidBody_writeToReplayFrame_cObj* obj)
 {
     obj->v01(self, 0x50);
@@ -1457,6 +1470,19 @@ static inline void SetBits_DA70(unsigned int* w, unsigned int mask, unsigned int
     *w = (*w & mask) | bits;
 }
 
+/**
+ * Constructs a roller modifier: a rigid body that sends a hit object rolling.
+ *
+ * Takes the instance from the hit, copies its sphere tree, mass, elasticity, centre-of-mass offset and
+ * inverse inertia (halved); starts at the instance's pose moved to the centre of mass; sets the contact
+ * constants (elasticity 0.1, friction 0.4, stop speed 277.78, no drag), updates the instance's flag bits and
+ * gives it its first kick with cRollerModifier_Collision().
+ *
+ * @param rdata  the roller data (On Tour tAddRollerData): mass at +0x4, elasticity at +0x8
+ * @param ii     the hit (On Tour tIntersectInfo*): sphere tree at +0x48, instance at +0x50
+ * @param ci     the collision (On Tour tCollideInfo*)
+ * @return self
+ */
 extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rdata, char* ii, char* ci)
 {
     float* timing = (float*)(((char*)self) + 0x4);
@@ -2199,6 +2225,14 @@ static inline void setOutDirEDC8(cRollerModifier* rollerModifier, const sRmVec4&
     (*(sRmBody*)&rollerModifier->Pose).outDir = v;
 }
 
+/**
+ * Resolves a roller's contact with the world for this frame.
+ *
+ * Queries the Nash grid with the roller's sphere tree. If it penetrates, it is pushed out along the normal
+ * (depth + 2) and its linear and angular motion is damped to 97.5 %. If the contact point is moving into the
+ * surface, a contact impulse is applied (inelastic below the stop speed), HitFrequency grows by 1/60 and a
+ * Life above 5 is set to 10.
+ */
 extern "C" void cRollerModifier_collide(cRollerModifier* self)
 {
     sHitEDC8 hit;
@@ -3214,6 +3248,12 @@ int cTypeObjNode_shouldRebound(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTypeObjNode_isType);
 #ifdef SKIP_ASM
+/**
+ * Tells whether an object node has a given type (the short at +0x10).
+ *
+ * @param type  node type to compare with
+ * @return 1 when the types match, otherwise 0
+ */
 extern "C" int cTypeObjNode_isType(void* self, int type)
 {
     return *(short*)((char*)self + 0x10) == type;
@@ -4632,6 +4672,9 @@ int cMoveNode_isMoveNode(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_updateRootTransform);
 #ifdef SKIP_ASM
+/**
+ * Marks a move node's root transform as up to date by clearing bit 0 of its flags (+0x12).
+ */
 extern "C" void cMoveNode_updateRootTransform(cMoveNode* self)
 {
     unsigned short* p = (unsigned short*)((char*)self + 0x12);
@@ -5675,6 +5718,12 @@ INCLUDE_ASM("object/railmodifier", cFloatingNode_getBoundBox);
 #ifdef SKIP_ASM
 extern "C" int tModifierBlock_getBoundBox(void* p);
 
+/**
+ * Returns a floating node's bounding box: its modifier block's when it has one (+0x1C), otherwise its info
+ * block (+0x78).
+ *
+ * @return the bounding box (On Tour const tBoundBox*), or 0 if neither exists
+ */
 extern "C" int cFloatingNode_getBoundBox(cFloatingNode* self)
 {
     void* p = self->ModifierBlock;
@@ -5780,6 +5829,11 @@ struct sRmVtbl1858 {
     sRmVEntry2_1858 set;     // slot 33 (0x108)
 };
 
+/**
+ * Rebuilds a floating node's part matrices and clears its dirty bit.
+ *
+ * Calls makeAnimMats (slot 33) with the root transform (slot 24) and the matrix array at +0x74.
+ */
 extern "C" void cFloatingNode_updateRootTransform(cFloatingNode* self)
 {
     sRmVtbl1858* vt = (sRmVtbl1858*)self->mVtbl;
@@ -6167,6 +6221,11 @@ void* cSplineModifier_getBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cSplineModifier_setBoundBox);
 #ifdef SKIP_ASM
+/**
+ * Sets a spline modifier's bounding box (+0x10 min, +0x20 max).
+ *
+ * @param boundbox  the new box (On Tour const tBoundBox&)
+ */
 extern "C" void cSplineModifier_setBoundBox(cSplineModifier* self, void* boundbox)
 {
     *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
@@ -6276,6 +6335,11 @@ void* cMultiSplineModifier_getBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_setBoundBox);
 #ifdef SKIP_ASM
+/**
+ * Sets a multi-spline modifier's bounding box, stored in the record at +0x3C (+0x30 min, +0x40 max).
+ *
+ * @param boundbox  the new box (On Tour const tBoundBox&)
+ */
 extern "C" void cMultiSplineModifier_setBoundBox(cMultiSplineModifier* self, void* boundbox)
 {
     void* p = self->Nodes;
@@ -6447,6 +6511,11 @@ int cRollerModifier_runCollide(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_setBoundBox);
 #ifdef SKIP_ASM
+/**
+ * Sets a roller modifier's bounding box.
+ *
+ * @param bb  the new box (On Tour const tBoundBox&)
+ */
 extern "C" void cRollerModifier_setBoundBox(cRollerModifier* self, void* bb)
 {
     *(cQuad128*)&self->boundbox = *(cQuad128*)bb;

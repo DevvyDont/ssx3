@@ -37,6 +37,14 @@ struct sCodexAbout_HUFF {
     char desc[32];                  // 0x64
 };
 
+/**
+ * Returns a newly allocated "CODEXABOUT" block describing EA's Huffman/RLE codec (short name "huf", version
+ * 1.03).
+ *
+ * The caller owns the block.
+ *
+ * @return the block, or 0 when allocation failed
+ */
 extern "C" void* HUFF_about(void)
 {
     sCodexAbout_HUFF* a = (sCodexAbout_HUFF*)operator new(0x84, D_004865C8, 0x20000000, 0);
@@ -164,6 +172,14 @@ struct HuffState_8600 {
 
 // PORT: the unit declares this with other parameter types; defined under an asm label
 extern "C" void HUFF_writebits_impl(HuffState_8600* s, HuffOut_8600* out, unsigned int code, unsigned int len) __asm__("HUFF_writebits");
+/**
+ * Appends up to 32 bits of a code to the packed output, most significant first, flushing whole bytes.
+ *
+ * @param s  the encoder context (On Tour HuffEncodeContext* EC)
+ * @param out  the output buffer (On Tour HUFFMemStruct* dest)
+ * @param code  the bits to write, right-aligned
+ * @param len  number of bits
+ */
 extern "C" void HUFF_writebits_impl(HuffState_8600* s, HuffOut_8600* out, unsigned int code, unsigned int len)
 {
     if (len > 16) {
@@ -187,6 +203,12 @@ extern "C" void HUFF_writebits_impl(HuffState_8600* s, HuffOut_8600* out, unsign
 INCLUDE_ASM("seg/seg_1C9348", HUFF_treechase);
 #ifdef SKIP_ASM
 struct HS_86F8 { char pad[0x1524]; int l[0x208]; int r[0x208]; int a[256]; };
+/**
+ * Walks the Huffman tree from a node and records each leaf's code length.
+ *
+ * @param i  the node; values below 256 are byte symbols (On Tour node)
+ * @param bits  the node's depth
+ */
 extern "C" void HUFF_treechase(HS_86F8 *self, unsigned i, int bits) {
     if (i < 0x100) {
         self->a[i] = bits;
@@ -204,6 +226,12 @@ INCLUDE_ASM("seg/seg_1C9348", HUFF_maketree);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct HS_8770 { char pad0[0x100]; unsigned freq[256]; char pad1[0x1524 - 0x500]; int l[0x208]; int r[0x208]; int a[256]; char pad2[0x2DC4 - 0x2964]; int count; };
 extern "C" void HUFF_treechase_8770(struct HS_8770 *self, unsigned i, int d) __asm__("HUFF_treechase");
+/**
+ * Builds the Huffman tree from the byte frequencies by joining the two lightest nodes until one is left, then
+ * sets the code lengths.
+ *
+ * Bytes that never occur get length 99; a single used byte gets length 1.
+ */
 extern "C" void HUFF_maketree(struct HS_8770 *self) {
     unsigned w[260];
     unsigned id[260];
@@ -280,6 +308,14 @@ struct HS_8970 {
     int b[0x11A];           // 0x2964
     int cur;                // 0x2DCC
 };
+/**
+ * Returns the cheapest bit cost of coding a run with the repeat codes up to @p n, or with one clue-coded run
+ * length.
+ *
+ * @param remaining  the run length still to code
+ * @param n  the longest repeat code to consider (On Tour r)
+ * @return the cost in bits
+ */
 extern "C" int HUFF_minrep(HS_8970* self, unsigned remaining, unsigned n)
 {
     int best;
@@ -489,6 +525,16 @@ extern "C" void huffBits_9A48(void* s, void* out, unsigned int code, unsigned in
 extern "C" void huffNum_9A48(void* s, void* out, unsigned int v) __asm__("func_002C8A78");
 extern "C" void huffSym_9A48(void* s, void* out, unsigned int sym) __asm__("func_002C8CA8");
 
+/**
+ * Writes the packed stream: code table, symbol order, then the data as literals, clue-coded runs and byte
+ * deltas, then an end code.
+ *
+ * Each run is coded the cheapest of three ways (literal repeats, a clue code and length, or repeat codes).
+ *
+ * @param vs  the encoder context (On Tour HuffEncodeContext* EC)
+ * @param out  the output buffer (On Tour HUFFMemStruct* dest)
+ * @param opt  packing options (On Tour opt)
+ */
 // Huffman pack: writes the clue byte, code-length counts and the move-to-front symbol order, then
 // codes src..srcend with literals, clue-coded runs and delta codes, and ends with an end code.
 // Locals are reused the way the original does (run doubles as the MTF cursor, last holds the order
@@ -635,6 +681,18 @@ extern "C" void HUFF_writebits_9F60(HuffState_9F60* s, HuffBuf_9F60* out, unsign
 extern "C" void HUFF_analysis(void* s, int a, int b);
 extern "C" void HUFF_pack(void* s, void* out, int a);
 
+/**
+ * Packs a buffer with a Huffman header: 0x30FB-0x35FB by delta mode, plus the sizes.
+ *
+ * The odd header forms (0x31FB...) also store @p len when it differs from the input length.
+ *
+ * @param EC  the encoder context
+ * @param in  the input (On Tour HUFFMemStruct* infile)
+ * @param out  the output; its length is set to the packed size
+ * @param len  the original (unpacked) length
+ * @param mode  delta mode: 0 none, 1 or 2 delta passes
+ * @return the packed size in bytes
+ */
 extern "C" int HUFF_packfile(HuffState_9F60* EC, HuffBuf_9F60* in, HuffBuf_9F60* out, int len, int mode)
 {
     unsigned int i;
@@ -697,6 +755,18 @@ struct HuffBuf_A100 {
     int len;
 };
 
+/**
+ * Huffman-packs a buffer into @p dst, after 0, 1 or 2 byte-delta passes ("huffdeltadata") chosen by the
+ * options.
+ *
+ * Allocates and frees its own "HuffEncodeContext". The output's capacity is not checked.
+ *
+ * @param src  the data to pack
+ * @param len  its length in bytes
+ * @param dst  the output buffer
+ * @param opts  the delta mode in its first int, or 0 for none
+ * @return the packed size, or 0 when the context could not be allocated
+ */
 extern "C" int HUFF_encode(void* src, int len, void* dst, int* opts)
 {
     void* tmp = 0;

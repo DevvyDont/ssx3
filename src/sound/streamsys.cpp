@@ -35,6 +35,17 @@ static inline int curVol_99D8(sSsPlayer_99D8* p) { return p->vols[p->cur]; }
 #define MIN_99D8(a, b) ((a) < (b) ? (a) : (b))
 #define MAX_99D8(a, b) ((a) >= (b) ? (a) : (b))
 
+/**
+ * Constructs a sound stream instance from play options: applies the volume scale and opens the stream.
+ *
+ * Scales the options' current volume by their volume-scale pointer (clamped to 0-127), allocates the stream
+ * buffer ("Stream": the library's size for 8 requests of 300 plus @p extra) and opens the stream into it.
+ *
+ * @param p  play options (On Tour cSndPlayOpts* PlayOpts)
+ * @param heap  memory type for the buffer (On Tour MemType)
+ * @param extra  extra buffer space in bytes (On Tour BuffSpace)
+ * @return @p self
+ */
 extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance(sStreamInst_99D8* self, sSsPlayer_99D8* p, int heap, int extra)
 {
     self->f74 = 0;
@@ -534,6 +545,18 @@ struct sStreamSysA490 {
     char vb[0x4];       // 0x14
 };
 
+/**
+ * Constructs the stream system part of the audio system and allocates its stream table.
+ *
+ * With @p inchrg set it first builds the shared virtual bases (cSoundSys, cBankManager); otherwise it patches
+ * stack copies of the base vtables with this object's offset. The table ("StreamArray") starts empty.
+ *
+ * @param inchrg  g++ in-charge flag: nonzero when the virtual bases are built here
+ * @param banks  maximum number of banks (On Tour MaxBanks)
+ * @param count  maximum number of streams (On Tour MaxStreams)
+ * @param heap  audio mode (eSOUNDDEF_MODE), passed to the base constructors
+ * @return @p self
+ */
 extern "C" sStreamSysA490* cStreamSys_cStreamSys(sStreamSysA490* self, int inchrg, int banks, int count, int heap)
 {
     if (inchrg) {

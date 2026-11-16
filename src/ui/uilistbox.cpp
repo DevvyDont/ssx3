@@ -10,6 +10,15 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 void UIAsciiToUnicode(unsigned short* dst, const char* src);
 extern char D_00493DD0[];
 
+/**
+ * Appends a list-box entry showing an ASCII string, converted to a new Unicode copy ("UILBAscii").
+ *
+ * The list box has room for 32 entries and nothing checks the count.
+ *
+ * @param text  the entry's text (On Tour pAscii); the pointer is kept too
+ * @param data  caller data stored with the entry (On Tour void* pData)
+ * @return the new entry's index
+ */
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data)
 {
     unsigned short* u = (unsigned short*)operator_new_tag((strlen(text) + 1) * 2, D_00493DD0, 0x100, 0);
@@ -52,6 +61,15 @@ extern char D_00493DE0[];
 
 struct sUIStrVtA568 { short delta; short index; unsigned short* (*fn)(void*, int); };
 
+/**
+ * Appends a list-box entry showing a localized string, copied from the UI string table ("UILBStrID").
+ *
+ * When the string table or the string is missing the entry is left unset but the count still grows.
+ *
+ * @param id  the string's ID
+ * @param data  caller data stored with the entry (On Tour void* pData)
+ * @return the new entry's index
+ */
 extern "C" unsigned char cUIListBox_addEntryByStringID(void* self, int id, int data)
 {
     char* tbl = *(char**)(*(char**)(*(char**)(*(char**)((char*)self + 0x5C) + 0xD0) + 0x10) + 0x10);
@@ -264,6 +282,15 @@ struct sUIFlags39A928 {
     unsigned int active : 1;
 };
 
+/**
+ * Gives or removes focus on a menu, refocusing its stored, selected or first selectable item.
+ *
+ * A stored index (set before the screen was ready) wins. Focus changes of the item are reported to the
+ * screen's
+ * state (slot 19: 1 gained, 2 lost).
+ *
+ * @param on  nonzero to focus (On Tour focus)
+ */
 extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
 {
     ((sUIFlags39A928*)(((char*)self) + 0x14))->active = on != 0;
@@ -321,6 +348,11 @@ extern "C" void* cUIThing_setUIData(void* self);
 extern "C" char cList_size(void*);
 extern "C" void cUIMenu_setInputMap(cUIMenu* self, char a1);
 
+/**
+ * Sets a menu up from its screen data: one row per child widget, all visible, with the vertical input map.
+ *
+ * On Tour passes the screen-data record; this build's declaration drops it.
+ */
 extern "C" void cUIMenu_setUIData(cUIMenu* self)
 {
     cUIThing_setUIData(self);
@@ -334,6 +366,11 @@ extern "C" void cUIMenu_setUIData(cUIMenu* self)
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIMenu_setInputMap);
 #ifdef SKIP_ASM
+/**
+ * Chooses which inputs move a menu's selection: 0 maps inputs 0-3, anything else inputs 4-7.
+ *
+ * @param value  0 for the first input set, nonzero for the second
+ */
 extern "C" void cUIMenu_setInputMap(cUIMenu* self, char value)
 {
     if (value == 0) {
@@ -357,6 +394,14 @@ extern "C" void* func_00397870(void* list, unsigned char i);
 
 struct sUIVtAB50 { short delta; short index; int (*fn)(void*, void*, int, int); };
 
+/**
+ * Finds the next selectable item after the current one, wrapping to the start when the menu wraps (mAttr bit
+ * 7).
+ *
+ * Scrollable menus ask the screen's state (slot 20); others skip disabled child widgets.
+ *
+ * @return the next item's index, or the current one at the end of a non-wrapping menu
+ */
 extern "C" unsigned char cUIMenu_getNext(cUIMenu* self)
 {
     unsigned char i = self->mScrollItemCurrent + 1;

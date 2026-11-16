@@ -54,6 +54,14 @@ struct sTrigList_16BF40
     int count;
 };
 
+/**
+ * Frees every camera trigger and its parts, then re-initialises the header.
+ *
+ * For each trigger: frees the buffer at +0x8, destroys and deletes the parts at +0xC and +0x10 (virtual slot
+ * 1), then destroys and deletes the trigger itself.
+ *
+ * @param self_  the cCameraTriggerList
+ */
 extern "C" void cCameraTriggerList_reset(void* self_)
 {
     sTrigList_16BF40* self = (sTrigList_16BF40*)self_;

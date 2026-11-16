@@ -14,6 +14,16 @@ struct cTexSlots367150 {
     void** freeHead;
 };
 
+/**
+ * Takes a free texture id from the texture manager and allocates its texture info.
+ *
+ * Pops the head of the free list (+0x1F48, a pointer into the 2000-slot array at +0x8; each free slot holds
+ * the next free pointer), counts it at +0x4 and stores a new 0x58-byte "NBTexInfo" in the slot. The free list
+ * is not checked for empty. Despite the On Tour class name, self is the graphics manager's mpTextureMan
+ * (func_00367440).
+ *
+ * @return the new texture id (its slot index)
+ */
 extern "C" int cPSPGraphicsMan_NewNonBindTexID(cTexSlots367150* self)
 {
     void** head = self->freeHead;
@@ -64,6 +74,14 @@ INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_NewBindTexID);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_00492078[];
 
+/**
+ * Allocates the texture info for a texture id the caller chose.
+ *
+ * Stores a new 0x58-byte "BTexInfo" in slot @p id of the array at +0x8 and increments the bound count at
+ * +0x0; the free list is not touched. self is the texture manager, as for cPSPGraphicsMan_NewNonBindTexID().
+ *
+ * @param id  texture id (slot index) to fill
+ */
 extern "C" void cPSPGraphicsMan_NewBindTexID(void* self, int id)
 {
     char* tex = (char*)self + 8;

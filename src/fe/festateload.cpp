@@ -12,6 +12,12 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* owner);
 
+/**
+ * Creates the event-select screens "Map" and "femap_template" and sets up the map template.
+ *
+ * Only "Map" is kept in the state's screen pointer. Clears D_004A2594, then runs
+ * cUITemplate_MAP_onCreateScreen() on the template at +0x48.
+ */
 extern "C" void cFEStateEventSelect_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -232,6 +238,11 @@ extern "C" void cUITemplate_MAP_onInputAlways(void* self, int a1);
 // PORT: cUIState_onInputAlways__FPv is called with (self, a1) here; bind the 2-arg form to that symbol.
 void cUIState_onInputAlways_2(void* self, int a1) __asm__("cUIState_onInputAlways__FPv");
 
+/**
+ * Passes the always-on input to the map template (+0x48), then to cUIState's handler.
+ *
+ * @param pInput  the input object
+ */
 extern "C" void cFEStateEventSelect_onInputAlways(void* self, int pInput)
 {
     cUITemplate_MAP_onInputAlways((char*)self + 0x48, pInput);
@@ -359,6 +370,11 @@ extern void* cFEStateMemCard_vtbl[];
 extern int D_004A14B8;
 extern "C" void func_001D5428(void* self, int flags);
 
+/**
+ * Destroys a memory-card state: clears D_004A14B8 and runs the base destructor func_001D5428.
+ *
+ * @param flags  destructor flags, passed on
+ */
 extern "C" void cFEStateMemCard__cFEStateMemCard(void* self, int flags)
 {
     *(void***)((char*)self + 8) = cFEStateMemCard_vtbl;

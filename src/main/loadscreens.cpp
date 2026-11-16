@@ -45,6 +45,14 @@ struct sBgMan_17ACC8 {
     int count;
 };
 
+/**
+ * Loads the background images from data/textures/backs.ssh and registers each one with the graphics manager.
+ *
+ * Allocates the texture-ID table ("BackTID") with one entry per shape, unpacks each shape, registers it as a
+ * "back" texture (graphics manager vtable slot 46) and frees the unpacked copy and the file afterwards.
+ *
+ * @return 1 when the file was loaded, 0 if it could not be read
+ */
 extern "C" int cBackgroundMan_loadImages(sBgMan_17ACC8* self)
 {
     sBgFile_17ACC8* file = (sBgFile_17ACC8*)FILE_loadz(D_0045CE30, 0x100);
@@ -321,6 +329,17 @@ struct sLS_B1B0 {
     int f8C44;
 };
 
+/**
+ * Constructs the debug front-end menu screen and sets up a default single-player race for it.
+ *
+ * Loads the background images, sets one human, game mode 4 and event 12, clears the network flag (and, with
+ * D_004A29EC set, brings up the comm system using "mc0:"), selects the first active track entry as the race
+ * location, sets the network defaults (port 3658, latency 1/60 s, not host), picks default riders for both
+ * players
+ * and starts the menu sound.
+ *
+ * @return @p self
+ */
 // Load-screen constructor: sets up the race/player interfaces, picks the active entry and the sound entry.
 extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
 {

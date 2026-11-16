@@ -22,6 +22,17 @@ struct sCharStat_getCollisionAttrib
 extern sPlayerStatRow_getCollisionAttrib D_00535538_getCollisionAttrib[] __asm__("D_00535538");
 extern sCharStat_getCollisionAttrib D_005308D8_getCollisionAttrib[] __asm__("D_005308D8");
 
+/**
+ * Returns a rider's collision attribute as a fraction of the character's maximum.
+ *
+ * Mission riders get 0.5. The level is @p value when positive, else the profile's stat level for the
+ * character
+ * divided by 5.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
+ * @return the attribute level divided by the character's collision maximum
+ */
 extern "C" float cBEStatInterface_getCollisionAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);

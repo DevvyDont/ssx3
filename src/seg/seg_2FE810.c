@@ -5696,7 +5696,22 @@ extern int func_004070F0(int, int);
 extern void func_004071F8(int, int);
 extern void func_00407438();
 extern int func_00405FB8(int *);
-int _sliceA0(int *self, int unused, int *o1, int *o2, int *s) {
+/**
+ * Starts decoding an MPEG video slice: checks its start code and works out its first macroblock (Sony
+ * libmpeg).
+ *
+ * Reads the 32-bit slice start code (0x101-0x1AF, else an error and return 2), the rest of the slice header
+ * via func_004074B8 and the first macroblock address increment, and sets the macroblock address to (extension
+ * * 128 + vertical position - 1) * mb_width + increment - 1. Then sets the increment output to 1, sets the
+ * flag at +0x1B0 and zeroes the eight predictor values.
+ *
+ * @param mbCount  unused here (the caller passes the picture's macroblock count)
+ * @param mbAddress      receives the slice's first macroblock address
+ * @param mbIncrement      receives the address increment (1 on success)
+ * @param predictors       eight predictor values to reset, probably MPEG-2's motion vector predictors PMV[2][2][2]
+ * @return 0 on success, 1 if a decode error was flagged, 2 for a bad slice start code
+ */
+int _sliceA0(int *self, int mbCount, int *mbAddress, int *mbIncrement, int *predictors) {
     int v;
     int a;
     int b;
@@ -5710,22 +5725,22 @@ int _sliceA0(int *self, int unused, int *o1, int *o2, int *s) {
     func_004071F8((int)self, 32);
     a = func_004074B8(self);
     b = func_00405FB8(self);
-    *o2 = b;
+    *mbIncrement = b;
     if (self[0x11C / 4] != 0) {
         func_004034A8(self, (int)D_00497F50);
         return 1;
     }
-    *o1 = ((((a << 7) + (v & 0xFF)) - 1) * self[0x12C / 4] + b) - 1;
-    *o2 = 1;
+    *mbAddress = ((((a << 7) + (v & 0xFF)) - 1) * self[0x12C / 4] + b) - 1;
+    *mbIncrement = 1;
     self[0x1B0 / 4] = 1;
-    s[5] = 0;
-    s[4] = 0;
-    s[1] = 0;
-    s[0] = 0;
-    s[7] = 0;
-    s[6] = 0;
-    s[3] = 0;
-    s[2] = 0;
+    predictors[5] = 0;
+    predictors[4] = 0;
+    predictors[1] = 0;
+    predictors[0] = 0;
+    predictors[7] = 0;
+    predictors[6] = 0;
+    predictors[3] = 0;
+    predictors[2] = 0;
     return 0;
 }
 #endif
@@ -8875,6 +8890,15 @@ extern char D_004982D0[];
 extern void func_0040C8B0(void *);
 extern void func_00423DE0(int);
 extern void func_00425C60(char *, int);
+/**
+ * Requests the USB keyboard driver's connection info over SIF RPC (Sony libusbkb).
+ *
+ * Asynchronous: the reply (0x90 bytes) is copied to @p info by the RPC callback; the pending command (1) is
+ * recorded for the library's sync call.
+ *
+ * @param info  where the keyboard info is stored when the call completes
+ * @return 0 when the request was sent, -1 if the library is not bound, -2 if sceSifCallRpc failed
+ */
 int sceUsbKbGetInfo(void *info) {
     int r;
     if (D_00453438 == -1)
@@ -8897,12 +8921,23 @@ INCLUDE_ASM("seg/seg_2FE810", sceUsbKbRead);
 extern void func_0040C8B0(void *);
 extern void func_00423DE0(int);
 extern void func_00425C60(char *, int);
-int sceUsbKbRead(unsigned a, void *b) {
+/**
+ * Requests the latest input data of one USB keyboard over SIF RPC (Sony libusbkb).
+ *
+ * Asynchronous, like sceUsbKbGetInfo(): the 0x50-byte reply goes to @p data, and command 2 with the keyboard
+ * number is recorded as pending.
+ *
+ * @param kbdNo  keyboard number
+ * @param data  where the keyboard data is stored when the call completes
+ * @return 0 when the request was sent, -1 if the library is not bound, -11 when the keyboard number is not
+ *         below the driver's keyboard count, -2 if sceSifCallRpc failed
+ */
+int sceUsbKbRead(unsigned kbdNo, void *data) {
     if (D_00453438 == -1)
         return -1;
-    if (a >= D_00529000.n)
+    if (kbdNo >= D_00529000.n)
         return -11;
-    D_00529100[0] = a;
+    D_00529100[0] = kbdNo;
     func_00423DE0(D_00453438);
     {
         int r = func_00426D18(&D_005290A0, 2, 1, D_00529100, 16, D_00529140, 0x50, func_0040C8B0, 0);
@@ -8912,8 +8947,8 @@ int sceUsbKbRead(unsigned a, void *b) {
         }
     }
     D_00529000.cmd = 2;
-    D_00529000.arg = a;
-    D_00529000.out = b;
+    D_00529000.arg = kbdNo;
+    D_00529000.out = data;
     return 0;
 }
 #endif

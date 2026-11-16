@@ -282,6 +282,15 @@ INCLUDE_ASM("bx/execman", cInput_getValue);
 #ifdef SKIP_ASM
 extern "C" void* cInputMap_getValue(int, int, int);
 
+/**
+ * Reads the analogue value of one input state from the input's map and pad.
+ *
+ * Calls cInputMap_getValue(map (+0x4), pad (+0x0), state). On Tour's getValue returns a float; this
+ * declaration returns void*, so the value really comes back in the float return register.
+ *
+ * @param state  input state id (On Tour eInputStates), the index of the compiled map statement to evaluate
+ * @return the state's value (a float in practice; meaningless as a pointer)
+ */
 extern "C" void* cInput_getValue(void* self, int state)
 {
     return cInputMap_getValue(*(int*)((char*)self + 0x4), *(int*)self, state);
@@ -303,6 +312,14 @@ extern "C" void func_00320C18(void *arg0, int arg1, int arg2) {
 //100%
 INCLUDE_ASM("bx/execman", cInput_getState__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Tells whether one input state is active, using the input's map and pad.
+ *
+ * Calls cInputMap_getState(map (+0x4), pad (+0x0), state), which is true when the state's value is nonzero.
+ *
+ * @param state  input state id (On Tour eInputStates)
+ * @return nonzero when the state is active (On Tour returns bool)
+ */
 void* cInput_getState(void* self, int state)
 {
     return cInputMap_getState(*(int*)((char*)self + 0x4), *(int*)self, state);

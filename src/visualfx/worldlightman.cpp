@@ -59,6 +59,10 @@ struct sWLCMan {
     int count;
 };
 
+/**
+ * Sets up the world light cache: eight empty light slots with their "RTLOverlapList" buffers and 32 free
+ * light nodes.
+ */
 extern "C" void cWorldLightMan_initLightCache(sWLCMan* self)
 {
     unsigned int i;
@@ -778,6 +782,16 @@ extern char D_00459B90[];
 extern "C" void cRider_cRider(void* self);
 void* cCheatFX_resetStates(void* self);
 
+/**
+ * Constructs a rider's cheat-code tracker (g++ 2.95 constructor for a class with the virtual base cRider).
+ *
+ * When in charge it also constructs the cRider base; otherwise it patches the vtable deltas for the virtual
+ * base
+ * offset. The cheat state starts cleared.
+ *
+ * @param inChrg  nonzero when this constructor also builds the virtual base
+ * @return @p self
+ */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x10): vtable copies with delta fixups when not in charge.
 extern "C" void* cCheatFX_cCheatFX(cCheatFX* self, int inChrg)
@@ -815,6 +829,10 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX__cCheatFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/worldlightman_classes.h"
 
+/**
+ * Destroys a rider's cheat-code tracker: restores its vtables, then destroys the virtual cRider base when in
+ * charge.
+ */
 cVbDtor002F6388::~cVbDtor002F6388()
 {
 }
@@ -832,6 +850,9 @@ __asm__("_vt$15cVbDtor002F6388$13cRiderVbC_wlm = D_004886E0\n"
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cCheatFX_reset__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty reset).
+ */
 void cCheatFX_reset(void* self)
 {
 }
@@ -842,6 +863,11 @@ extern "C" void* func_00416210(void*, int, int);
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cCheatFX_resetStates__FPv);
 #ifdef SKIP_ASM
+/**
+ * Clears the cheat state (state, step, count and input bits).
+ *
+ * @return the cleared state's address (the memset result; On Tour's version returns nothing)
+ */
 void* cCheatFX_resetStates(void* self)
 {
     return func_00416210(((char*)self + 0x4), 0, 4);
@@ -993,6 +1019,16 @@ struct sVEsub6518 {
     int (*fn)(void*);
 };
 
+/**
+ * Runs the rider's cheat for a tick: reads the entered inputs and, while the cheat is on, applies its rider
+ * overrides.
+ *
+ * The cheat is forced off in network games. While on, the rider is held in mode 11 and its speed is pulled
+ * toward
+ * a set maximum and steered toward its facing direction. The closing test (x < 0 and x >= 0) can never be
+ * true,
+ * so the velocity reset after it is dead code.
+ */
 extern "C" void cCheatFX_update(sWLCode6518* self)
 {
     char* sub = (char*)self->rider + 0x6C0;
@@ -1064,6 +1100,9 @@ extern "C" void cCheatFX_update(sWLCode6518* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cCheatFX_render__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty render).
+ */
 void cCheatFX_render(void* self)
 {
 }
@@ -1144,6 +1183,11 @@ public:
     virtual int v02(void* src, int size);
 };
 
+/**
+ * Writes the cheat state (4 bytes) to a replay frame.
+ *
+ * @param stream  the replay frame (On Tour cReplayFramePtr* data)
+ */
 extern "C" void cCheatFX_writeToReplayFrame(cCheatFX* self, cCheatFX_writeToReplayFrame_cObj* stream)
 {
     stream->v01((char*)self + 4, 4);
@@ -1153,6 +1197,11 @@ extern "C" void cCheatFX_writeToReplayFrame(cCheatFX* self, cCheatFX_writeToRepl
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cCheatFX_readFromReplayFrame);
 #ifdef SKIP_ASM
+/**
+ * Reads the cheat state (4 bytes) back from a replay frame.
+ *
+ * @param stream  the replay frame (On Tour cReplayFramePtr* data)
+ */
 extern "C" void cCheatFX_readFromReplayFrame(cCheatFX* self, cCheatFX_writeToReplayFrame_cObj* stream)
 {
     stream->v02((char*)self + 4, 4);
@@ -1162,6 +1211,15 @@ extern "C" void cCheatFX_readFromReplayFrame(cCheatFX* self, cCheatFX_writeToRep
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cCheatFX_setCheatInput);
 #ifdef SKIP_ASM
+/**
+ * Records one of the three cheat-sequence inputs (bits 0x10, 0x20, 0x40 of m_misc) for the next update.
+ *
+ * The rider code sends them: inputs 0 and 1 from two trick paths, input 2 from the handplant code. Nine
+ * counted
+ * steps that match D_00445E30 turn the cheat on.
+ *
+ * @param type  the input, 0 to 2 (On Tour flag)
+ */
 extern "C" void cCheatFX_setCheatInput(cCheatFX* self, int type)
 {
     switch (type) {

@@ -36,6 +36,10 @@ struct sSpring_53EF0 {
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char D_0048E9C8[];
 extern sSpVec_53EF0 D_004FF120_53EF0 __asm__("t4vect_Zero");
+/**
+ * Allocates the spring's chain of nodes ("SpringNodes") with zero position, velocity, force, angle and
+ * torque.
+ */
 extern "C" void cSpring_setupNodes(sSpring_53EF0* self)
 {
     int i;
@@ -220,6 +224,13 @@ static inline float spLength_53FC0(const sSpVec_53FC0& v)
     return r;
 }
 
+/**
+ * Steps the spring chain by one app tick: stretch and twist springs between neighbours, damping, gravity and
+ * applied forces.
+ *
+ * The end nodes stay fixed. Velocities are solved semi-implicitly with each node's neighbours for stability;
+ * gravity is -980 on z. The applied forces and torques are cleared afterwards.
+ */
 extern "C" void cSpring_update(sSpring_53FC0* self)
 {
     sSpVec_53FC0 g(0.0f, 0.0f, -980.0f, 0.0f);

@@ -109,6 +109,15 @@ void func_00397138(void* self, int val);
 extern "C" void cUITextureBank_setData(void* bank, int id, void* data);
 extern const char D_004A4770[];
 
+/**
+ * Loads a UI file ("<name>.lui") and sets up its fonts and texture bank from the blocks it contains.
+ *
+ * Despite the int type, @p id is the file's base name (it is formatted with %s; On Tour const char*
+ * pszFilename).
+ *
+ * @param id  base name of the UI file (char*, passed as int)
+ * @return 1 (the load result is not checked)
+ */
 extern "C" int cUIEngine_loadFile(void* self, int id)
 {
     char name[100];
@@ -159,6 +168,18 @@ struct sUIScreenD4 {
 struct sUIScrEnt { unsigned int hash; int offset; };
 struct sUIScrTbl { unsigned int count; sUIScrEnt ents[1]; };
 
+/**
+ * Creates a screen from the loaded UI file's screen with the given name hash and adds it to a state.
+ *
+ * A new cUIScreen is allocated unless @p screen supplies one; the state gets the screen and then its widgets
+ * are
+ * created. A hash missing from the file is not checked for.
+ *
+ * @param owner  the state that owns the screen (On Tour cUIState* pState)
+ * @param hash  the screen's name hash (On Tour hashname)
+ * @param screen  an existing screen object to fill, or 0 to allocate one
+ * @return the screen
+ */
 extern "C" void* cUIEngine_addScreenByHashName(void* self, void* owner, unsigned int hash, void* screen)
 {
     char* bank = *(char**)((char*)self + 4);
@@ -433,6 +454,16 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 
+/**
+ * Loads the UI texture sheet "<name>_1.ssh" into the renderer and builds the bank's texture-element table.
+ *
+ * Every shape becomes a texture in the "UITPage" group (renderer slot 46); each element of @p vdata keeps its
+ * texture coordinates and the texture ID of its shape.
+ *
+ * @param vbank  the texture bank
+ * @param id  base name of the texture sheet (char*, passed as int; On Tour pShapeName)
+ * @param vdata  the UI file's texture-element block (On Tour pData)
+ */
 extern "C" void cUITextureBank_setData(void* vbank, int id, void* vdata)
 {
     sUITexBank8138* self = (sUITexBank8138*)vbank;
@@ -625,6 +656,9 @@ static inline int uiFontNameOf(s3983F0Entry* e)
     return e->unk4;
 }
 
+/**
+ * Creates a cFont for each of the UI's font entries.
+ */
 extern "C" void cUIFontInterface_loadFonts(s3983F0* self)
 {
     for (int i = 0; i < self->count; i++) {
@@ -669,6 +703,11 @@ struct cUIGroup_setFocus_sFlags {
 // PORT: functor object passed to func_003979F8 (declared later in the unit with its own functor struct).
 int func_003979F8_f(void* list, cUIGroup_setFocus_sFunctor* fn) __asm__("func_003979F8");
 
+/**
+ * Gives or removes focus on a widget group and all of its children.
+ *
+ * @param on  nonzero to focus (On Tour focus)
+ */
 extern "C" void cUIGroup_setFocus(void* self, int on)
 {
     cUIGroup_setFocus_sFunctor f;
@@ -696,6 +735,13 @@ struct cUIGroup_getObjectByHashName_sVEntry {
     void* (*fn)(void*, int);
 };
 
+/**
+ * Finds a widget by name hash in a group: the group itself, or the first child (searched recursively) that
+ * matches.
+ *
+ * @param id  the name's hash (On Tour hashname)
+ * @return the widget, or 0
+ */
 extern "C" void* cUIGroup_getObjectByHashName(void* self, int id)
 {
     if (cUIThing_getObjectByHashName(self, id) != 0) {
@@ -761,6 +807,13 @@ struct cUIGroup_onInput_sFunctor {
 
 extern "C" int func_003979F8(void* list, cUIGroup_onInput_sFunctor* fn);
 
+/**
+ * Offers an input to a group's children until one of them uses it; a disabled group (bit 5 of its flags)
+ * ignores input.
+ *
+ * @param pInput  the input (const cUIInput*, passed as int)
+ * @return 1 when a child used the input, otherwise 0
+ */
 extern "C" int cUIGroup_onInput(void* self, int pInput)
 {
     if ((*(int*)((char*)self + 0x14) >> 5) & 1) {
@@ -785,6 +838,11 @@ struct cUIGroup_render3D_sVEntry {
     void (*fn)(void*, int);
 };
 
+/**
+ * Renders a group's children in 3D.
+ *
+ * @param pRenCon  the render context (On Tour cUIRenderContext*, passed as int)
+ */
 extern "C" void cUIGroup_render3D(void* self, int pRenCon)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));
@@ -807,6 +865,12 @@ struct cUIGroup_render2D_sVEntry {
     void (*fn)(void*, float, float);
 };
 
+/**
+ * Draws a group's visible children at the group's position plus the given offset.
+ *
+ * @param x  parent x offset
+ * @param y  parent y offset
+ */
 extern "C" void cUIGroup_render2D(void* self, float x, float y)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));
@@ -891,6 +955,13 @@ struct sUIData8998 {
     unsigned short h;           // 0x2A
 };
 
+/**
+ * Sets an icon up from its screen-data record: clip and alignment bits, its texture element and its size.
+ *
+ * The size is stored in hundredths in the record.
+ *
+ * @param data  the icon's record (On Tour tUIBaseObject* pUIBase)
+ */
 // Copies the widget's clip/alignment bits, looks up its item and sets its size (stored in 1/100 units).
 extern "C" void cUIIcon_setUIData(sUIObj8998* self, sUIData8998* data)
 {
@@ -1076,6 +1147,16 @@ static inline sV4_8A78 Xform_8A78(const sM33_8A78& m, const sV4_8A78& v)
     return r;
 }
 
+/**
+ * Draws an icon as a textured, tinted quad, flipped, turned and rotated as set, at its position plus the
+ * given offset.
+ *
+ * Uses its texture element, else a whole texture by ID, else no texture. Rotation is about the icon's
+ * position.
+ *
+ * @param x  parent x offset
+ * @param y  parent y offset
+ */
 // cUIIcon: draws the icon as a textured quad at (x, y), rotated about its position.
 extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
 {

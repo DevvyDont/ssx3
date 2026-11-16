@@ -121,6 +121,15 @@ struct sFlexGrid {
 };
 
 
+/**
+ * Builds a flexible bridge's strip mesh: two rows of points along the instance's quad, with UVs, colours and
+ * faces.
+ *
+ * Creates a dynamic mesh (graphics manager slot 76) and allocates the vertex ("BridgeVerts"), normal
+ * ("BridgeNorms") and face ("BridgeFaces") arrays. The two rows interpolate the instance's four corners, UVs
+ * and colours over the spring node count; the colours and UVs go to the mesh (its slot 6). The bounding box
+ * is the instance's, grown by 100 on each side and moved in the Nash grid; each segment gets two triangles.
+ */
 extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
 {
     cPS2GraphicsMan* world = cGraphicsMan_TheGraphicsMan;
@@ -481,6 +490,16 @@ static inline float Torque_6E38(float k, const sV4_6E38& a, const sV4_6E38& b)
     return k * vu0Dot_6E38(a, b);
 }
 
+/**
+ * Applies a force at a hit point of a flexible bridge to the segment that was hit.
+ *
+ * The segment is the hit triangle / 2. It gets the force in the bridge's local space times the linear factor,
+ * and a torque from the force at the hit vertex times the angular factor, scaled by the hit's offset along
+ * the bridge axis. Nothing happens for a hit with no triangle index.
+ *
+ * @param intInfo  the hit (On Tour tIntersectInfo): position and triangle index
+ * @param force    the force to apply
+ */
 extern "C" void cFlexBridgeNode_applyForce(cBridge_6E38* self, sNode_6E38* intInfo, sV4_6E38* force)
 {
     sBridgeData_6E38* d = (sBridgeData_6E38*)self;
@@ -629,6 +648,14 @@ struct sFlState_70D0 {
     int idx;            // 0x60
 };
 
+/**
+ * Adds the motion of the bridge segment that was hit to an intersection's velocities.
+ *
+ * For the segment (triangle index / 2) it adds the segment's velocity at the hit point to intInfo's v[2] and
+ * its angular velocity to v[3], both turned into world space by the root transform (slot 24).
+ *
+ * @param intInfo  the hit (On Tour tIntersectInfo); nothing happens without a triangle index
+ */
 extern "C" void cFlexBridgeNode_updateIntersectInfo(sFlBridge_70D0* self, sFlState_70D0* intInfo)
 {
     int idx = intInfo->idx;
@@ -830,6 +857,19 @@ static inline void TransposeInverse_7268(sFM_7268* t)
     *(sFV_7268*)&t->r[3] = p;
 }
 
+/**
+ * Tests a world query against a flexible bridge's current strip and returns the hits.
+ *
+ * Only runs when bit 1 of @p flags is set. Moves the tester into the bridge's local space (inverse transform
+ * and 1 / scale), tests the strip's triangles (func_0032C0F8), then turns each hit's position and normal back
+ * into world space and fills in its type (1), owner and other fields.
+ *
+ * @param tester  the query (On Tour cWorldIntersectType)
+ * @param out     receives the hits
+ * @param cap     maximum number of hits
+ * @param flags   query flags; bit 1 must be set
+ * @return the number of hits
+ */
 extern "C" int cFlexBridgeNode_intersect(sFNode_7268* self, sFTester_7268* tester, sFHit_7268* out, int cap, int flags)
 {
     if (!(flags & 2)) {
@@ -1094,6 +1134,14 @@ static inline sV4_75D8 MulMat_75D8(const sMat_75D8* m, const sV4_75D8& v)
     return r;
 }
 
+/**
+ * Re-poses a flexible bridge's strip from its spring nodes and updates the mesh and the space hash.
+ *
+ * Each node gives two points: its position plus the up and side offsets turned by the node's angle. Then the
+ * per-triangle normals, the world bounding box (moved in the Nash grid) and the mesh positions (mesh slot 3).
+ *
+ * @param vself  the bridge node
+ */
 // Re-poses the bridge strip from its nodes: two rows of points (node pos +/- the rotated
 // side/up offsets), per-triangle normals, the transformed bounding box and the mesh update.
 extern "C" void cFlexBridgeNode_updateGrid(void* vself)
@@ -1198,6 +1246,13 @@ struct sVE24_7B80 { short delta; short index; void* (*fn)(void*); };
 
 #define TOP_7B80(c) (*(sRS_7B80**)((c) + 0xE84))
 
+/**
+ * Draws a flexible bridge: its strip mesh with the bridge's transform, or the instance model when there is no
+ * strip.
+ *
+ * Skips instances that are not loaded and boxes the graphics manager culls (slot 93). Pushes a copy of the
+ * render state with field 5 set for the draw and pops it afterwards.
+ */
 // Draws the bridge piece's model (through its handler if it has one) unless it is culled or not streamed in.
 extern "C" void cFlexBridgeNode_render(char* self)
 {
@@ -1414,6 +1469,14 @@ struct sObj00348058 {
 extern "C" void* cObjectInterface_getNash();
 extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox00348058* box, sBox00348058* old);
 
+/**
+ * Recomputes a flexible rail's bounding box and moves it in the Nash space hash.
+ *
+ * The box comes from virtual slot 50 (func_00349F18: the rail elements' box, padded by 200); the node moves
+ * from its old box to the new one as type 2.
+ *
+ * @param p  the flexible rail node
+ */
 extern "C" void cFlexRailNode_updateSpaceHash(void* p)
 {
     sObj00348058* self = (sObj00348058*)p;

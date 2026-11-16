@@ -76,6 +76,22 @@ struct sMapTmpl_200700 {
     int f2F0;                   // 0x2F0
 };
 
+/**
+ * Sets up the mountain map template on its screen: unlocks, layout, map picture, popup and the widgets per
+ * map style.
+ *
+ * The map style (D_004A2594; On Tour eMapStyle: 0/1 select peak event in the front end or back end, 2 pause
+ * map, 3
+ * transport, 4 end-of-event transport) decides which tabs and titles show; styles 1, 3 and 4 add the PDA
+ * template.
+ * Starts in the select-peak state unless returning to a front-end map, and requests the map file from the
+ * async
+ * manager.
+ *
+ * @param tmpl  the map template
+ * @param screen  the map screen (On Tour cUIScreen* screen)
+ * @param owner  the UI state the template belongs to (On Tour cUIState* pState)
+ */
 extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* owner)
 {
     sMapTmpl_200700* self = (sMapTmpl_200700*)tmpl;
@@ -425,6 +441,18 @@ struct sMapTmpl_200DE8 {
 // Location entries with track 0x17 have no event: no availability colour or text, the widget is made static.
 static inline int hasEvent(int track) { return track != 0x17; }
 
+/**
+ * Fills the map's menus: the peak entries, each peak's goal entries and its race, freestyle and freeride
+ * locations.
+ *
+ * Locked entries get the locked colour; in the select-peak-event styles (0, 1) the freeride and earnings
+ * goals are
+ * hidden and so are locations flagged in the tables. Location names come from the race setup, the table or
+ * the
+ * event kind. Also sets up the confirm menu's Yes and No.
+ *
+ * @param tmpl  the map template
+ */
 extern "C" void cUITemplate_MAP_setupMenus(void* tmpl)
 {
     sMapTmpl_200DE8* self = (sMapTmpl_200DE8*)tmpl;
@@ -593,6 +621,14 @@ struct sPeakUnlock_MAP {
     int unlocked[3];    // 0x4, indexed by peak
 };
 
+/**
+ * Marks peaks 2 and 3 locked when the rider's character (either player's in a two-player game) has not
+ * unlocked them.
+ *
+ * Peak 1 is always unlocked.
+ *
+ * @param p  the map template
+ */
 // Marks each peak as unlocked unless it is still locked for the active rider(s).
 extern "C" void cUITemplate_MAP_setupPeakUnlock(void* p)
 {
@@ -685,6 +721,14 @@ struct sVEntry00202770 {
 // PORT: the unit declares cUITemplate_MAP_onInputAlways(void*); the body also takes the menu object in $5.
 extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, void* menu) __asm__("cUITemplate_MAP_onInputAlways");
 
+/**
+ * Refreshes the map's info for the current map state when the input's vtable slot 17 or 18 test passes.
+ *
+ * Select peak refreshes the peak info, select goal the peak goals (both with the layout), select location
+ * func_00207430().
+ *
+ * @param menu  the input (On Tour cUIInput* pInput)
+ */
 extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, void* menu)
 {
     sVEntry00202770* e = &(*(sVEntry00202770**)((char*)menu + 8))[17];
@@ -748,6 +792,16 @@ public:
     virtual void v11(sColor_202828* c);
 };
 
+/**
+ * Fades in the map picture once its file has loaded, with the peak outlines or indicators, and the "you are
+ * here" markers.
+ *
+ * The "P<n>you are here" marker shows only on the peak list, for the current location's peak, with info
+ * hidden and
+ * in the pause or transport styles.
+ *
+ * @param vself  the map template
+ */
 extern "C" void cUITemplate_MAP_onUpdate(void* vself)
 {
     char* self = (char*)vself;
@@ -846,6 +900,16 @@ extern char D_004A2620[];
 extern char D_004A2628[];
 extern char D_004A2630[];
 
+/**
+ * Lays out the map for the current map state: title, which groups are shown, and the per-peak indicators.
+ *
+ * Select peak, select goal (the peak's goal list and its completion icon) and select location (the event
+ * type's
+ * title and func_00207430()); the bottom tabs are hidden while the list's fourth entry (the mountain) is
+ * selected.
+ *
+ * @param vself  the map template
+ */
 extern "C" void cUITemplate_MAP_setupLayout(void* vself)
 {
     char* self = (char*)vself;
@@ -1026,6 +1090,16 @@ static inline cUIObj_2030A0* hideObj_2030A0(char* self, char* name)
     return o;
 }
 
+/**
+ * Switches the map to a map state: hides every menu, then shows and focuses the peak list, goal list or
+ * location list.
+ *
+ * While the confirm popup is up only its menu is shown. In the select-peak-event styles it also sets the
+ * title.
+ *
+ * @param vself  the map template
+ * @param focus  the new map state (On Tour eMapState: 0 select peak, 1 select goal, 2 select location)
+ */
 extern "C" void cUITemplate_MAP_setupMenuFocus(void* vself, int focus)
 {
     char* self = (char*)vself;
@@ -1136,6 +1210,12 @@ extern "C" void cFEAsyncManager_Load3PeakPic(void* mgr, int file, int a);
 extern "C" void cFEAsyncManager_Load1PeakPic(void* mgr, int peak, int file, int a);
 extern int cUITemplate_MAP_mPeak;
 
+/**
+ * Requests the map picture for the current state: the three-peak picture on the peak list, else the current
+ * peak's.
+ *
+ * Does nothing when that picture is already loaded; a new request restarts the fade-in.
+ */
 extern "C" void cUITemplate_MAP_setupMapPic(void* self)
 {
     void* mgr = SSXApp->mFEAsyncManager;
@@ -1199,6 +1279,12 @@ public:
     virtual void v09(int on);
 };
 
+/**
+ * Shows or hides the transport confirm popup and sets its text and buttons.
+ *
+ * The popup's text is "go to peak now" or "transport to area"; a one-button popup (+0x2D0 is 1) shows OK and
+ * hides No, otherwise Yes and No.
+ */
 extern "C" void cUITemplate_MAP_setupPopup(char* self)
 {
     if (*(int*)(self + 0x2CC) != 0) {
@@ -1257,6 +1343,12 @@ extern char D_00470AB8[];
 extern char D_00470AC8[];
 extern char D_00470AD8[];
 
+/**
+ * Sets whether the map shows info instead of the map, and labels the tab button the other way (show map or
+ * show info).
+ *
+ * @param show  nonzero to show info
+ */
 extern "C" void cUITemplate_MAP_setShowInfo(void* self, int show)
 {
     *(int*)self = show;
@@ -1398,6 +1490,18 @@ struct sPeakInfo_MAP {
 
 // Goal kind test; the kind constant is taken by const reference.
 static inline int isKind(int kind, const int& k) { return kind == k; }
+/**
+ * Fills the peak list's info panel: completed-peak checks, lock boxes and the help text for the highlighted
+ * peak.
+ *
+ * A peak is checked when its four trophies are owned. In the pause and transport styles the panel also lists
+ * the
+ * peak's race medals, freestyle results, missions, collectibles, earnings and highlight level against their
+ * medal
+ * targets.
+ *
+ * @param tmpl  the map template
+ */
 extern "C" void cUITemplate_MAP_setupPeakInfo(void* tmpl)
 {
     sPeakInfo_MAP* self = (sPeakInfo_MAP*)tmpl;
@@ -1808,6 +1912,15 @@ extern char D_004712F0[], D_00471300[], D_00471318[], D_00471330[];
 
 extern "C" char* strcpy(char* d, const char* s);
 
+/**
+ * Fills the goal panel of the current peak: the race, freestyle and freeride goal groups with checks and
+ * progress.
+ *
+ * Shows each event's medal state, the completed counts, and the challenge and collectible counts against the
+ * platinum to bronze targets, and highlights the event path (showEventPath()).
+ *
+ * @param tmpl  the map template
+ */
 extern "C" void cUITemplate_MAP_setupPeakGoals(void* tmpl)
 {
     char* self = (char*)tmpl;
@@ -2155,6 +2268,14 @@ struct sNameList6_206690 {
     char* s[6];
 };
 
+/**
+ * Highlights one event's path on the current peak's map: that path in red, the others in orange.
+ *
+ * Does nothing unless @p name is an object on the screen or the empty name.
+ *
+ * @param tmpl  the map template
+ * @param name  the path object to highlight (On Tour pathName)
+ */
 // Recolours the map's event-path objects for the event or peak called `name`: objects on the
 // path get col0, the rest col1. The name lists are local copies of constant tables.
 extern "C" void cUITemplate_MAP_showEventPath(void* tmpl, char* name)

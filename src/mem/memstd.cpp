@@ -38,11 +38,30 @@ struct sMemClass_251718 {
     int sema[5];                // 0x3C
 };
 
-extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int f28, int align, int hdr, int a7, int a8, int lock)
+/**
+ * Creates a memory class (heap) over a block of memory and registers it under an id.
+ *
+ * Builds the "<name> LOW" sentinel block at the start, one free block covering the aligned middle, and the
+ * "<name> HIGH" sentinel at the end, sets up the class record (+0x10) with its free list, stores it in the
+ * class table (D_004D2438, id & 63) and optionally creates its mutex.
+ *
+ * @param id     class id; its low 6 bits index the class table, and it also seeds the block flags
+ * @param name   class name (copied into the record and used in the sentinel names)
+ * @param mem    start of the memory block
+ * @param size   size of the block in bytes
+ * @param sizeAlign    stored at class +0x28, which func_002523D0 uses to round allocation sizes (MEM_initadr: 0x40)
+ * @param align  alignment of the first free block's data (MEM_initadr: 0x80)
+ * @param hdr    extra header bytes per block
+ * @param endMarker     nonzero sets block flag 0x2000, which the block check uses to expect a "BEND" end marker
+ * @param a8     nonzero sets block flag 0x1000 (meaning unknown)
+ * @param lock   nonzero creates a mutex and marks the class locked
+ * @return the size of the initial free block
+ */
+extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int sizeAlign, int align, int hdr, int endMarker, int a8, int lock)
 {
     char buf[0x100];
     int flags = id;
-    if (a7) {
+    if (endMarker) {
         flags |= 0x2000;
     }
     if (a8) {
@@ -70,7 +89,7 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int f28,
     cls->last->tag = 0x4253;
     *(unsigned short*)(mem + 0x20) = 0x4253;
     *(int*)(mem + 0x24) = 0x7FFFFFFF;
-    *(int*)(mem + 0x38) = f28;
+    *(int*)(mem + 0x38) = sizeAlign;
     *(int*)(mem + 0x3C) = align;
     *(int*)(mem + 0x40) = hdr;
     *(int*)(mem + 0x44) = flags;
@@ -381,6 +400,18 @@ struct sMemClass_251D50 {
 
 extern void* D_004D2438[];
 
+/**
+ * Adds another block of memory to an existing memory class.
+ *
+ * Turns the class's old HIGH sentinel into a "<name> LINK" block pointing at the new memory, which gets a
+ * LINK block of its own, one free block and a new HIGH sentinel. The free block is inserted into the class's
+ * sorted free list (searched from whichever end is nearer).
+ *
+ * @param id    class id (low 6 bits index the class table)
+ * @param mem   start of the memory to add
+ * @param size  its size in bytes
+ * @return always 1
+ */
 extern "C" int MEMCLASS_link(int id, char* mem, int size)
 {
     sMemClass_251D50* cls = (sMemClass_251D50*)D_004D2438[id & 0x3F];
@@ -518,6 +549,18 @@ struct sMemClass_252010 {
 
 extern void* D_004D2438[];
 
+/**
+ * Prints a table of every block in a memory class through a printf-like callback.
+ *
+ * Prints a header, then one row per block: free blocks as "FREE" with "   SPACE " as the name, others as
+ * "unknown" with the names from func_00252658/func_00252660; each row has the address, size, span, flags, a
+ * CRC (func_003E62D0, seed 0xFBEA; 0 for sentinels) and the block check's status text. Ends with the total
+ * free memory, or prints "Not initialized" if the class does not exist.
+ *
+ * @param thing  memory class id (masked with 63), passed as a pointer
+ * @param fmt    row format string handed to the callback
+ * @param cb     printf-like output function
+ */
 // PORT: thing is a memory class id (masked with 0x3F) passed through a void* parameter.
 extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const char*, ...))
 {
@@ -2785,6 +2828,11 @@ INCLUDE_ASM("mem/memstd", cCommChannel__cCommChannel);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 
+/**
+ * Destroys a comm channel: restores cCommChannel's vtable, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cCommChannel__cCommChannel(cCommChannel* self, int flags)
 {
     self->mVtbl = cCommChannel_vtbl;
@@ -2809,6 +2857,9 @@ int func_00255830(void* self)
 //100%
 INCLUDE_ASM("mem/memstd", cCommChannel_channelClose);
 #ifdef SKIP_ASM
+/**
+ * Closes a comm channel: if it is open, clears mChannelOpen and mError.
+ */
 extern "C" void cCommChannel_channelClose(cCommChannel* self)
 {
     if (*(int*)self != 0) {

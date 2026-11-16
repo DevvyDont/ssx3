@@ -24,10 +24,23 @@ struct cWScriptCompileKw {
     cWScriptKeyword* pool;
 };
 
-extern "C" cWScriptCompileKw* cWScriptCompile_parseKeywords(cWScriptCompileKw* self, int a1, int n)
+/**
+ * Despite the name, constructs the instance manager: a pool of instance records on a free list.
+ *
+ * Its only caller (gameload.cpp) builds the game's InstanceMan with it, and On Tour's cInstanceMan
+ * constructor has
+ * the same (instanceSectionId, numInstances) parameters. Allocates @p n 0xB0-byte records ("Instance"),
+ * resets
+ * each and links them all into the free list.
+ *
+ * @param instanceSectionId  instance section ID, stored in the first word (the game passes 0x80)
+ * @param n  number of instance records (On Tour numInstances)
+ * @return @p self
+ */
+extern "C" cWScriptCompileKw* cWScriptCompile_parseKeywords(cWScriptCompileKw* self, int instanceSectionId, int n)
 {
     int i;
-    self->f0 = a1;
+    self->f0 = instanceSectionId;
     self->count = n;
     cWScriptKeyword** slot = &self->pool;
     cWScriptKeyword* mem = (cWScriptKeyword*)operator_new_tag(n * 0xB0, D_0048E8C0, 0x20000000, 0);

@@ -218,6 +218,10 @@ extern void* D_004A5B68;
 extern void* D_004A5B58;
 extern int D_004A3EC8;
 
+/**
+ * Creates the seven fixed-size block pools ("m_container8" to "m_container512") and marks the block manager
+ * ready.
+ */
 extern "C" void cMemBlockMan_initialize(void)
 {
     D_004A5B60 = func_003200E8(cMemMan_alloc(0x804, D_0048DA18, 0x1000000, 0));

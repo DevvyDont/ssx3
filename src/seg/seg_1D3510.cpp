@@ -47,6 +47,13 @@ INCLUDE_ASM("seg/seg_1D3510", get_t3Vector);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct t3Vector_25A0 { float x, y, z; };
 extern "C" int get_float_25A0(void*, void*) __asm__("get_float");
+/**
+ * Reads a three-float vector from a comms data stream.
+ *
+ * @param src  the stream position
+ * @param out  receives the vector
+ * @return number of bytes read
+ */
 extern "C" int get_t3Vector(void *src, t3Vector_25A0 *out) {
     t3Vector_25A0 v;
     int total = 0;
@@ -187,6 +194,13 @@ extern "C" int get_uint_2868(unsigned char **, void *) __asm__("get_uint");
 extern char D_00486778[];
 extern char D_00486788[];
 struct Data_2868 { unsigned int n; unsigned char *data; };
+/**
+ * Reads a length-prefixed byte block from a comms data stream into a new "Comm Data Block".
+ *
+ * @param src  the stream position, advanced past the block
+ * @param out  receives the new block (count and "Comm Data" bytes)
+ * @return number of bytes read
+ */
 extern "C" int get_data(unsigned char **src, Data_2868 **out) {
     unsigned int i = 0;
     Data_2868 *d = (Data_2868*)cMemMan_alloc_2868(8, D_00486778, 0x100, 0);
@@ -251,8 +265,8 @@ extern "C" int func_002D37D0(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D37D8);
 #ifdef SKIP_ASM
-extern "C" int func_002D37D8(cPS2MemCard* arg0) {
-    return (arg0->mDevice);
+extern "C" int func_002D37D8(cPS2MemCard* pS2MemCard) {
+    return (pS2MemCard->mDevice);
 }
 #endif
 
@@ -260,9 +274,9 @@ extern "C" int func_002D37D8(cPS2MemCard* arg0) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D37E0);
 #ifdef SKIP_ASM
 struct VEnt_37E0 { short delta; short idx; int (*fn)(void*, int); };
-extern "C" void func_002D37E0(cPS2MemCard* arg0) {
-    VEnt_37E0 *e = (VEnt_37E0*)(*(char **)arg0 + 0x180);
-    e->fn((char*)arg0 + e->delta, arg0->mDevice);
+extern "C" void func_002D37E0(cPS2MemCard* pS2MemCard) {
+    VEnt_37E0 *e = (VEnt_37E0*)(*(char **)pS2MemCard + 0x180);
+    e->fn((char*)pS2MemCard + e->delta, pS2MemCard->mDevice);
 }
 #endif
 
@@ -270,9 +284,9 @@ extern "C" void func_002D37E0(cPS2MemCard* arg0) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D3810);
 #ifdef SKIP_ASM
 struct VEnt_3810 { short delta; short idx; int (*fn)(void*, int); };
-extern "C" void func_002D3810(cPS2MemCard* arg0) {
-    VEnt_3810 *e = (VEnt_3810*)(*(char **)arg0 + 0x1A0);
-    e->fn((char*)arg0 + e->delta, arg0->mDevice);
+extern "C" void func_002D3810(cPS2MemCard* pS2MemCard) {
+    VEnt_3810 *e = (VEnt_3810*)(*(char **)pS2MemCard + 0x1A0);
+    e->fn((char*)pS2MemCard + e->delta, pS2MemCard->mDevice);
 }
 #endif
 
@@ -337,10 +351,10 @@ struct Obj_3840 {
   virtual void v55();
   virtual int v56(int);
 };
-extern "C" int func_002D3840(cPS2MemCard* o, int x) {
+extern "C" int func_002D3840(cPS2MemCard* pS2MemCard, int x) {
     int ok = 0;
-    if (!((Obj_3840*)o)->v48() && !((Obj_3840*)o)->v50(x) && ((Obj_3840*)o)->v56(x)) {
-        ok = ((Obj_3840*)o)->v52(x) != 0;
+    if (!((Obj_3840*)pS2MemCard)->v48() && !((Obj_3840*)pS2MemCard)->v50(x) && ((Obj_3840*)pS2MemCard)->v56(x)) {
+        ok = ((Obj_3840*)pS2MemCard)->v52(x) != 0;
     }
     return ok;
 }
@@ -350,9 +364,9 @@ extern "C" int func_002D3840(cPS2MemCard* o, int x) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D38F0);
 #ifdef SKIP_ASM
 struct VEnt_38F0 { short delta; short idx; int (*fn)(void*, int); };
-extern "C" void func_002D38F0(cPS2MemCard* arg0) {
-    VEnt_38F0 *e = (VEnt_38F0*)(*(char **)arg0 + 0x1C0);
-    e->fn((char*)arg0 + e->delta, arg0->mDevice);
+extern "C" void func_002D38F0(cPS2MemCard* pS2MemCard) {
+    VEnt_38F0 *e = (VEnt_38F0*)(*(char **)pS2MemCard + 0x1C0);
+    e->fn((char*)pS2MemCard + e->delta, pS2MemCard->mDevice);
 }
 #endif
 
@@ -377,8 +391,8 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3930);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_002C53C8_3930(void*, int) __asm__("func_002C53C8");
-extern "C" void func_002D3930(cPS2MemCard* arg0) {
-    func_002C53C8_3930(arg0, (arg0->mDevice));
+extern "C" void func_002D3930(cPS2MemCard* pS2MemCard) {
+    func_002C53C8_3930(pS2MemCard, (pS2MemCard->mDevice));
 }
 #endif
 
@@ -387,16 +401,16 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3950);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_002C53E0_3950(void*, int, int) __asm__("func_002C53E0");
-extern "C" void func_002D3950(cPS2MemCard* arg0, int arg1) {
-    func_002C53E0_3950(arg0, (arg0->mDevice), arg1);
+extern "C" void func_002D3950(cPS2MemCard* pS2MemCard, int arg1) {
+    func_002C53E0_3950(pS2MemCard, (pS2MemCard->mDevice), arg1);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3970);
 #ifdef SKIP_ASM
-extern "C" int func_002D3970(cPS2MemCard* arg0) {
-    return (arg0->mMaxFiles);
+extern "C" int func_002D3970(cPS2MemCard* pS2MemCard) {
+    return (pS2MemCard->mMaxFiles);
 }
 #endif
 
@@ -412,9 +426,9 @@ extern "C" int func_002D3978(void) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D3980);
 #ifdef SKIP_ASM
 struct VEnt_3980 { short delta; short idx; void (*fn)(void*, int, int, int); };
-extern "C" void func_002D3980(cPS2MemCard* arg0, int a1, int a2, int a3) {
-    VEnt_3980 *e = (VEnt_3980*)(*(char **)arg0 + 0x230);
-    e->fn((char*)arg0 + e->delta, a1, a2, a3);
+extern "C" void func_002D3980(cPS2MemCard* pS2MemCard, int a1, int a2, int a3) {
+    VEnt_3980 *e = (VEnt_3980*)(*(char **)pS2MemCard + 0x230);
+    e->fn((char*)pS2MemCard + e->delta, a1, a2, a3);
 }
 #endif
 
@@ -429,8 +443,8 @@ extern "C" int func_002D39A8(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D39B0);
 #ifdef SKIP_ASM
-extern "C" int func_002D39B0(cPS2MemCard* arg0) {
-    return (arg0->unk_03C);
+extern "C" int func_002D39B0(cPS2MemCard* pS2MemCard) {
+    return (pS2MemCard->unk_03C);
 }
 #endif
 
@@ -1054,6 +1068,13 @@ INCLUDE_ASM("seg/seg_1D3510", cARGBMenuItem__cARGBMenuItem);
 extern void cMenuItem__cMenuItem_3E20(int, int) __asm__("cMenuItem__cMenuItem");
 extern "C" void cMenu__cMenu(int, int);
 
+/**
+ * Destroys a colour (ARGB) debug-menu item: its five channel items and embedded menu, then the cMenuItem
+ * base.
+ *
+ * @param arg0  the menu item
+ * @param arg1  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cARGBMenuItem__cARGBMenuItem(int arg0, int arg1) {
     cMenuItem__cMenuItem_3E20(arg0 + 0x640, 2);
     cMenuItem__cMenuItem_3E20(arg0 + 0x61C, 2);
@@ -1098,6 +1119,12 @@ INCLUDE_ASM("seg/seg_1D3510", cVectorMenuItem__cVectorMenuItem);
 extern void cMenuItem__cMenuItem_3ED0(int, int) __asm__("cMenuItem__cMenuItem");
 extern "C" void cMenu__cMenu(int, int);
 
+/**
+ * Destroys a vector debug-menu item: its four component items and embedded menu, then the cMenuItem base.
+ *
+ * @param arg0  the menu item
+ * @param arg1  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cVectorMenuItem__cVectorMenuItem(int arg0, int arg1) {
     cMenuItem__cMenuItem_3ED0(arg0 + 0x654, 2);
     cMenuItem__cMenuItem_3ED0(arg0 + 0x620, 2);

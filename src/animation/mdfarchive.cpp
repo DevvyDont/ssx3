@@ -26,6 +26,16 @@ struct sMdfArchive_00314CB0
     char* data;
 };
 
+/**
+ * Returns a new heap copy of one archive part: its 0x60-byte header followed by the unpacked data.
+ *
+ * The block is dataSize + 0x60 bytes, tagged "MdfModel <part name>" with flags 0x3000000. When dataSize is
+ * not 0, the part's packed data at data + dataOffset is unpacked behind the header with func_003B47F8 (EA's
+ * packed-data decoder).
+ *
+ * @param i  part index in the archive
+ * @return the new block (On Tour: tMdfModelHeader*)
+ */
 extern "C" void* cMdfArchive_getModelPartByIndex(sMdfArchive_00314CB0* self, int i)
 {
     char name[0x40];
@@ -102,6 +112,14 @@ struct sMdfHashTable_00314DD8
     char map[0x818];
 };
 
+/**
+ * Builds the game-animation hash index and marks every game animation as unmapped.
+ *
+ * Hashes the 518 names of D_0048CFC0 ("G_GATEROCK", "G_SIT_CYC", ...) with GetHashValue32() into hash[],
+ * sorts order[] by hash with qsort (func_00418EF8; the comparator func_00314D60 reads the hashes through
+ * D_004A3E78, set only during the sort) and fills the 518-entry map with -1 (func_00416210). func_00314E88
+ * (On Tour lookupGAD) binary-searches this index.
+ */
 extern "C" void cGameAnimMap_initMap(sMdfHashTable_00314DD8* self)
 {
     for (int i = 0; i < 0x206; i++)

@@ -45,6 +45,17 @@ struct sBoardTrailFXView {  // this unit's view of cBoardTrailFX (ai/riderhandle
     short ids[48];              // 0x2C
 };
 
+/**
+ * Constructs a board trail effect; despite its name, this is cBoardTrailFX's constructor.
+ *
+ * As g++ 2.95 does for a class with a virtual base (cRider at +0xF0): with inChrg it also builds the cRider
+ * base, and it stores the three rider vtables (on stack copies with fixed deltas when not in charge). Then
+ * clears 48 ids to -1, allocates the 324 trail vertices ("BoardTrailVertices", 6 strips of 54), zeroes them
+ * and resets the trail.
+ *
+ * @param inChrg  g++ in-charge flag: nonzero when this is the most-derived object and must build cRider
+ * @return self
+ */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xF0): vtable copies with delta fixups when not in charge.
 extern "C" void* cBoardTrailFX_initialize(sBoardTrailFXView* self, int inChrg)
@@ -93,6 +104,11 @@ INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX__cBoardTrailFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardtrailfx_classes.h"
 
+/**
+ * Destroys a board trail effect, freeing its trail vertex buffer (+0x10).
+ *
+ * g++ adds the virtual-base vtable fix-ups and the delete.
+ */
 cVbDtor002E83F0::~cVbDtor002E83F0()
 {
     if (m10 != 0) cMemMan_free(m10);
@@ -651,6 +667,15 @@ static inline void btGrow(sBTrail_8938* self)
     if (self->count < kTrailNumSeg) self->count++;
 }
 
+/**
+ * Adds this frame's segment to the board trail ring (6 strips of 54 vertices).
+ *
+ * When func_002E87E8 says no trail, the trail is closed (faded to alpha 0 or rewound). Otherwise it takes the
+ * board's outermost edges across the travel direction (board bone, or bone positions off the ground),
+ * projects them to the ground contact, builds the six strip points (random flare widths +0x04/+0x08, lift
+ * +0xA0) coloured from the rider's surface, and advances the head when func_002E86F0 (probably shouldSample)
+ * agrees. A new trail starts with 3 segments.
+ */
 // Updates the board trail: adds a segment at the board's current edges each frame.
 extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
 {
@@ -916,6 +941,12 @@ static inline void pop_A480(sRenderCtx_A480* ctx)
     ctx->top--;
 }
 
+/**
+ * Board trail render stub: pushes and pops a draw state but draws nothing.
+ *
+ * Returns early when D_004A4518 is set, when D_004A451C is set and the rider part's virtual slot 9 is true,
+ * or with fewer than 2 segments (+0x90).
+ */
 extern "C" void cBoardTrailFX_render(cBoardTrailFX* self)
 {
     if (D_004A4518 != 0) {
@@ -1172,6 +1203,14 @@ struct sFade_A900 {
 
 extern char* D_004A5B64_A900 __asm__("D_004A5B64");
 
+/**
+ * Blends the TV display format between regular and cut-scene mode.
+ *
+ * Only while not paused (+0x1C) and in state 2 (to regular) or 3 (to cut-scene): advances the time by 1 / the
+ * app manager's word at +0x10 and, at the end, forces regular (func_002EA820) or cut-scene mode
+ * (func_002EA860). Otherwise it lerps the four floats of the regular (+0x20) and cut-scene (+0x34) formats
+ * and applies them through the graphics manager's virtual slot 41.
+ */
 extern "C" void cCutSceneTransitionMan_update(sFade_A900* self)
 {
     if (self->done != 0)
@@ -1226,6 +1265,13 @@ struct sBTVEntryGet {
 };
 
 
+/**
+ * Saves the current TV display format and derives the cut-scene format from it.
+ *
+ * Reads the format from the graphics manager (virtual slot 42) into +0x20. Display format 2 gets the
+ * cut-scene format (2, y offset 0, y scale 1.0, aspect 0.75/0.63); any other gets (1, 0.125, 0.75,
+ * 0.75/0.63), probably a letterbox.
+ */
 extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self)
 {
     sBTFx* s = (sBTFx*)self;
@@ -1256,6 +1302,12 @@ INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_cTrickBoostFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardtrailfx_classes.h"
 
+/**
+ * Constructs a trick boost effect and clears its ring of boost quads.
+ *
+ * Calls cTrickBoostFX_readFromReplayFrame__FPv, which zeroes the count and cursor; g++ adds the cRider
+ * virtual-base set-up.
+ */
 cBtf_2EAAE0::cBtf_2EAAE0()
 {
     cTrickBoostFX_readFromReplayFrame_AAE0(this);
@@ -1279,6 +1331,11 @@ INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX__cTrickBoostFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardtrailfx_classes.h"
 
+/**
+ * Destroys a trick boost effect; the body is empty.
+ *
+ * g++ adds the virtual-base vtable fix-ups and the delete.
+ */
 cVbDtor002EAC60::~cVbDtor002EAC60()
 {
 }
@@ -1296,6 +1353,13 @@ __asm__("_vt$15cVbDtor002EAC60$13cRiderVbC_btf = D_00488458\n"
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Clears the trick boost effect's quad count (+0xC) and ring cursor (+0x10).
+ *
+ * Takes no replay data and reads nothing, so it acts as a reset (On Tour has both reset and
+ * readFromReplayFrame). Called by the constructor, cRiderHandler_resetRiderFX,
+ * cRiderHandler_readFromReplayFrame and func_002F7ED0.
+ */
 void cTrickBoostFX_readFromReplayFrame(void* self)
 {
     *(int*)((char*)self + 0xc) = 0;
@@ -1393,6 +1457,14 @@ static inline sV4_2EADD0 Scale_2EADD0(const sV4_2EADD0& v, float s)
     return r;
 }
 
+/**
+ * Records the board outline for the trick boost effect while the rider's trick power-up runs.
+ *
+ * While mPowerUpTrickTimer (+0x2EC) is positive (or cPowerUpFXToggles_m_TestTrickBoost is set) it drives an
+ * effect in the rider handler at +0xD30 (func_00392DE8, func_00392D90; blue, size 2). In the air (motion
+ * state 1) it stores a 140 x 36 quad around the board bone in a ring of 3 (up to 3 kept), plus two points 12
+ * to each side; otherwise the count drops to 0.
+ */
 extern "C" void cTrickBoostFX_update(sTrail_2EADD0* self)
 {
     float speed = *(float*)(self->rider + 0x2EC);
@@ -1508,6 +1580,12 @@ static inline void addVtx_B198(sTrailVtx_B198* v, const sTrailCol_B198& c, float
     v->t = t;
 }
 
+/**
+ * Draws the trick boost effect as four textured strips through its stored board quads.
+ *
+ * Needs at least 2 quads. Uses effect texture 62 and its own draw state; each quad edge pair forms a strip
+ * whose v coordinate runs from 1 (newest) to 0, drawn through the graphics manager's virtual slot 71.
+ */
 extern "C" void cTrickBoostFX_render(sTrail_2EADD0* self)
 {
     if (self->count < 2) {

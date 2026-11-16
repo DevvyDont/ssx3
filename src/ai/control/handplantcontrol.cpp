@@ -301,6 +301,21 @@ static inline sQ_8BA0 Conj_8BA0(const sQ_8BA0& q)
 
 static inline sQ_8BA0 up_8BA0(char* r) { return *(sQ_8BA0*)(r + 0x1C0); }
 
+/**
+ * Starts a handplant on a wall hit: records the start and plant points and the rotation to the plant pose.
+ *
+ * InitPos takes the rider's position, SplinePos and SplineDir the hit point and normal, ApproachDir the unit
+ * vector from the rider's mBoneHead bone to the plant point, InitTangentSpeed the velocity along SplineDir
+ * and IsRailSpline bit 0 of the hit's surface flags (record at +0x58, flags at +0x1C); ExitVel and ElapsedSec
+ * start at 0. The plant pose is the rider turned upright, then about the vertical until its side axis lines
+ * up with the horizontal wall direction or its reverse, whichever is nearer (IsToeside marks the reverse and
+ * is toggled when rider +0x320 is set). SnapRotationAxis gets the axis of the rotation from the current
+ * orientation to that pose and SnapRotationRate its angle / EnterSec.
+ *
+ * @param hit  the wall hit (On Tour tIntersectInfo): position, then normal; the caller points the normal
+ *             along the velocity
+ * @param dur  entry time in seconds, stored as EnterSec (the caller passes 0.25-0.75 s, shorter when faster)
+ */
 // Starts a handplant on a hit: stores the start/target, and works out the spin axis and angle that turn the rider
 // from its current orientation to one facing the wall.
 // PORT: `<?` / `>?` are the g++ minimum / maximum operators (EE min.s / max.s).
@@ -380,6 +395,12 @@ struct sVec4_9178 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
+/**
+ * Ends the handplant motion: makes sure the exit velocity is computed and gives it to the rider.
+ *
+ * Calls func_00139548() (On Tour calcExitVel: fills ExitVel from the handplant kind at rider +0x32C unless it
+ * is already set), then copies ExitVel into the rider's mVelocity.
+ */
 // Updates the hand plant and copies its position into the rider's hand target.
 extern "C" void cHandplantMotion_loseFocus(cHandplantMotion* self)
 {
@@ -537,6 +558,17 @@ static inline int landed_91A8(char* ap)
     return ok;
 }
 
+/**
+ * Advances the handplant one frame: eases the rider onto the plant point, then holds it and plans the exit.
+ *
+ * The time step is mTimeScale / 60. While ElapsedSec <= EnterSec the position eases out from InitPos to
+ * SplinePos (InitPos + (InitPos - SplinePos) * u(u - 2), u = ElapsedSec / EnterSec) and the orientation turns
+ * about SnapRotationAxis at SnapRotationRate. After that the rider sits at SplinePos with zero velocity.
+ * While ExitVel is still zero it calls func_00139548() (calcExitVel); once that succeeds it launches the air
+ * predictor from 5 units above SplinePos with ExitVel and steps it (func_00113648, 1/60 s) at least 8 times
+ * and until it has a landing. Later frames keep stepping the prediction until it has a landing, then, if the
+ * landing normal faces ExitVel, turn the rider toward it (cRider_alignRiderAxis, at most 380 degrees/s).
+ */
 extern "C" void cHandplantMotion_step(cHandplantMotion* self)
 {
     float step = *(float*)((char*)self->mRider + 0x300) * 0.01666666753590107f;
@@ -585,6 +617,12 @@ extern "C" void* cRider_updateBoundBox(int, int);
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_resolve__FPv);
 #ifdef SKIP_ASM
+/**
+ * Resolves the handplant motion: only refreshes the rider's bounds with cRider_updateBoundBox(rider, 0).
+ *
+ * @return cRider_updateBoundBox()'s result, declared void* here; no meaningful value (On Tour's resolve
+ *         returns nothing)
+ */
 void* cHandplantMotion_resolve(void* self)
 {
     return cRider_updateBoundBox(*(int*)((char*)self + 0xa0), 0);
@@ -811,6 +849,13 @@ struct sVEntry00139970 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Writes the handplant state (its first 0xA0 bytes, cHandplantMotionState) to a replay frame.
+ *
+ * Calls the stream's write virtual (slot 1) with this object and the size 0xA0.
+ *
+ * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
+ */
 extern "C" void cHandplantMotion_writeToReplayFrame(cHandplantMotion* self, void* obj)
 {
     sVEntry00139970* vt = *(sVEntry00139970**)obj;
@@ -827,6 +872,13 @@ struct sVEntry001399A8 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Reads the handplant state (its first 0xA0 bytes, cHandplantMotionState) back from a replay frame.
+ *
+ * Calls the stream's read virtual (slot 2) with this object and the size 0xA0.
+ *
+ * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
+ */
 extern "C" void cHandplantMotion_readFromReplayFrame(cHandplantMotion* self, void* obj)
 {
     sVEntry001399A8* vt = *(sVEntry001399A8**)obj;
@@ -839,6 +891,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
 
+/**
+ * Starts the air motion: launches the air predictor from the rider's current position and velocity.
+ *
+ * IsLandVelAlign is set when the motion being left is MS_Handplant (5); cAirMotion_step() then also lines the
+ * rider's heading up with the predicted landing velocity. The predictor's terminal speed is 3333.33.
+ *
+ * @param state  the motion state being left (eMotionState; On Tour prev)
+ */
 extern "C" void cAirMotion_gainFocus(cAirMotion* self, int state)
 {
     *(int*)self = state == 5;
@@ -850,6 +910,9 @@ extern "C" void cAirMotion_gainFocus(cAirMotion* self, int state)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_loseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing when the air motion loses focus; the body is empty.
+ */
 void cAirMotion_loseFocus(void* self)
 {
 }
@@ -907,6 +970,17 @@ static inline float absf_139A20(float x)
     return r;
 }
 
+/**
+ * Moves the rider one frame along the air predictor's path and turns it to meet the predicted landing.
+ *
+ * Applies wind (cRider_updateWind), steps position and velocity with func_00113648() by mTimeScale / 60, sets
+ * mGroundNormal to the rider's posed up vector (+0x180) and the ground velocity (+0x3D0) to zero. When the
+ * predictor has a landing (state 1 or 3) on a triangle with flag 0x8, on a surface that is neither type 0x12
+ * nor a reset surface (+0x44), it turns the rider's up toward the landing normal, paced to finish around
+ * touchdown (rate = time scale / time to landing, at most 80 degrees/s). In CS_Spin with |AirAdjSpin| above 5
+ * degrees only the up axis turns; otherwise the heading also follows the landing velocity (flipped to the
+ * rider's front) when the landing is steep (normal z < 0.3) or IsLandVelAlign is set.
+ */
 extern "C" void cAirMotion_step(cAirMotion* self)
 {
     cRider_updateWind((char*)self->mRider);
@@ -1195,6 +1269,20 @@ static inline sVec4HP row_139C88(char* r, int k)
 #define RIDER_139C88 (*(char**)((char*)self + 0x4))
 #define V4_139C88(p, off) (*(sVec4HP*)((p) + (off)))
 
+/**
+ * Resolves the air motion: lands or crashes the rider when the board meets a surface, then checks collisions.
+ *
+ * A touchdown needs a board probe hit (cAirMotion_intersectBoard) at fraction >= 0.5 with the velocity
+ * relative to the surface heading into it; CS_Spin then drops to CS_Void. Reset surfaces (+0x44) and
+ * triangles with flag 0x2 force an auto reset. Otherwise the rider is pushed out, its ground frame and
+ * contact data come from the hit, the inward velocity is cancelled times the surface factor +0x3C (the rest
+ * capped at +0x40) and the hit object gets the impulse (handler slot 43). A crash (func_0010EB30) follows a
+ * layer-2 animation of category 0x12-0x15 whose sequence flags say so (probably an unfinished trick), an
+ * upside-down board, or too much fore/aft tilt for a stat-scaled limit; otherwise func_0010E910() takes the
+ * landing, the motion becomes MS_Ground, and the control state and landing animation follow the press type
+ * and current control. Terrain (cAirMotion_checkTerrainCollisions), func_00105398() and opponents are checked
+ * every frame.
+ */
 extern "C" void cAirMotion_resolve(cAirMotion* self)
 {
     sHit_139C88 hit;
@@ -1412,6 +1500,17 @@ static inline sVec4HP vu0Sub_13A7B0(const sVec4HP& a, const sVec4HP& b)
 
 struct sVEntry_13A7B0 { short delta; short index; void (*fn)(void*, void*); };
 
+/**
+ * Probes for a surface along the rider's up axis through the board, filling a hit record.
+ *
+ * Casts a capsule (radius 0.575) from 200 units below to 200 units above the board-root bone (mBoneBoardRoot)
+ * along the rider's posed up vector (+0x180) against its overlap list with the line hint (mLineHint). A hit
+ * whose object has a handler (+0xC) is reported to it (handler virtual slot 42).
+ *
+ * @param hit  hit record to fill (position, normal, velocity, surface type, objects)
+ * @return the hit's fraction along the probe (0.5 is the bone, so >= 0.5 means the surface is at or above
+ *         it), or a negative value when nothing was hit
+ */
 extern "C" float cAirMotion_intersectBoard(cAirMotion* self, char* hit)
 {
     char* rider = (char*)self->mRider;
@@ -1444,9 +1543,16 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_chooseFakieLandAnim);
 // PORT: cRiderAnimBase_play is declared void elsewhere; callers here match only with an int return.
 extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 
-extern "C" void cAirMotion_chooseFakieLandAnim(cAirMotion* self, float v)
+/**
+ * Plays the landing animation for a fakie landing, hard or soft by the landing speed.
+ *
+ * Below -2222.22 it plays anim 0x41 and clears the rider's mSpinRate; otherwise it plays anim 0x40.
+ *
+ * @param normSpeed  landing velocity along the ground normal, negative into the ground (On Tour normSpeed)
+ */
+extern "C" void cAirMotion_chooseFakieLandAnim(cAirMotion* self, float normSpeed)
 {
-    if (v < -2222.22216796875f)
+    if (normSpeed < -2222.22216796875f)
     {
         cRiderAnimBase_play_i(*(void**)((char*)self->mRider + 0x784), 0x41, 0, -1.0f);
         *(int*)((char*)self->mRider + 0x2DC) = 0;
@@ -1461,9 +1567,17 @@ extern "C" void cAirMotion_chooseFakieLandAnim(cAirMotion* self, float v)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_chooseLandAnim);
 #ifdef SKIP_ASM
-extern "C" void cAirMotion_chooseLandAnim(cAirMotion* self, float v)
+/**
+ * Plays the landing animation for a regular (not fakie) landing from the landing speed and any spin-out.
+ *
+ * Below -2222.22 it plays anim 0x3F and clears mSpinRate. Otherwise a spin-out (|mSpinRate| > pi) picks 0x42
+ * or 0x43 by its sign, else 0x3E below -1250 and 0x3D for a soft landing.
+ *
+ * @param normSpeed  landing velocity along the ground normal, negative into the ground (On Tour normSpeed)
+ */
+extern "C" void cAirMotion_chooseLandAnim(cAirMotion* self, float normSpeed)
 {
-    if (v < -2222.22216796875f)
+    if (normSpeed < -2222.22216796875f)
     {
         cRiderAnimBase_play_i(*(void**)((char*)self->mRider + 0x784), 0x3F, 0, -1.0f);
         *(int*)((char*)self->mRider + 0x2DC) = 0;
@@ -1477,7 +1591,7 @@ extern "C" void cAirMotion_chooseLandAnim(cAirMotion* self, float v)
             cRiderAnimBase_play_i(*(void**)(r + 0x784), 0x42, 0, -1.0f);
         else if (a > pi)
             cRiderAnimBase_play_i(*(void**)(r + 0x784), 0x43, 0, -1.0f);
-        else if (v < -1250.0f)
+        else if (normSpeed < -1250.0f)
             cRiderAnimBase_play_i(*(void**)(r + 0x784), 0x3E, 0, -1.0f);
         else
             cRiderAnimBase_play_i(*(void**)(r + 0x784), 0x3D, 0, -1.0f);
@@ -1616,6 +1730,18 @@ static inline t4Vector riderVec_AA48(char* r, int off)
 #define RIDER_AA48 (*(char**)((char*)self + 0x4))
 #define RV_AA48(off) (*(t4Vector*)(RIDER_AA48 + (off)))
 
+/**
+ * Pushes the airborne rider out of terrain and deflects its velocity off the surface.
+ *
+ * Skipped in CS_Reset. A world query built from the rider's sphere tree (func_0032F650) runs with its posed
+ * up vector (+0x180) against the overlap list with the wall hint (mWallHint). On a hit the rider moves out by
+ * 1.1 times the depth; if it is moving into the surface, the inward velocity is removed plus a bounce of
+ * max(5% of it, 27.78) and the impact goes to func_00105D98() (rumble, possible crash or reset). The query is
+ * destroyed with func_0032F708().
+ *
+ * @param outp  receives the surface normal when the function returns 1
+ * @return 1 when the rider hit terrain while moving into it, otherwise 0 (also 0 when it was only pushed out)
+ */
 extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* outp)
 {
     if (func_0011FEE8(RIDER_AA48) == 9)
@@ -1661,6 +1787,13 @@ struct sVEntry0013ACB0 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Writes the air-motion state (its first 4 bytes, IsLandVelAlign) to a replay frame.
+ *
+ * Calls the stream's write virtual (slot 1) with this object and the size 4.
+ *
+ * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
+ */
 extern "C" void cAirMotion_writeToReplayFrame(cAirMotion* self, void* obj)
 {
     sVEntry0013ACB0* vt = *(sVEntry0013ACB0**)obj;
@@ -1677,6 +1810,13 @@ struct sVEntry0013ACE8 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Reads the air-motion state (its first 4 bytes, IsLandVelAlign) back from a replay frame.
+ *
+ * Calls the stream's read virtual (slot 2) with this object and the size 4.
+ *
+ * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
+ */
 extern "C" void cAirMotion_readFromReplayFrame(cAirMotion* self, void* obj)
 {
     sVEntry0013ACE8* vt = *(sVEntry0013ACE8**)obj;
@@ -1691,6 +1831,14 @@ extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cRider_doLeanPoseAdjust(void* self, void* q);
 struct sQuadHP_0013AD20 { float x, y, z, w; } __attribute__((aligned(16)));
 
+/**
+ * Starts the rail motion: resets the rider's lean channels and the rail-slide state.
+ *
+ * Runs cRider_doLeanPoseAdjust() on the position and rebuilds the orientation, zeroes slewed channels 0
+ * (edging), 2 (braking) and 8, sets channel 9's rate to 0.05 and target to 0, clears mSpinRate,
+ * RailLeanAngle, RailTime, RailOffCenter, ForceNaturalAir, CrookedSlideAngle and StuckSec, and starts PrevPos
+ * at the rider's position.
+ */
 extern "C" void cRailslideMotion_gainFocus(cRailslideMotion* self)
 {
     char* r = (char*)self->mRider;
@@ -1793,14 +1941,22 @@ static inline float Clamp_13ADC0(float x, float lo, float hi)
     return (lo <= x) ? (x <? hi) : lo;
 }
 
+/**
+ * Sets CrookedSlideAngle, the signed angle between the rider's front axis and the rail (at most 45 degrees).
+ *
+ * The angle is atan2 of the front axis's parts along (rail up x rail) and along the rail, with the rail's up
+ * vector from func_0013BD80().
+ *
+ * @param railnorm  the rail direction (On Tour railnorm; the caller passes the rail hit's normal)
+ */
 // Signed angle (clamped to +-45 degrees) between the rider's velocity at +0x1B0 and the target direction p.
-extern "C" void cRailslideMotion_setCrookedAngle(cRailslideMotion* self, sVec4HP* p)
+extern "C" void cRailslideMotion_setCrookedAngle(cRailslideMotion* self, sVec4HP* railnorm)
 {
-    sVec4HP v = func_0013BD80(((char*)self), p);
-    sVec4HP c = vu0Cross_13ADC0(v, *p);
+    sVec4HP v = func_0013BD80(((char*)self), railnorm);
+    sVec4HP c = vu0Cross_13ADC0(v, *railnorm);
     char* rider = (char*)self->mRider;
     self->CrookedSlideAngle = Atan2_13ADC0(vu0DotV_13ADC0(*(sVec4HP*)(rider + 0x1B0), c),
-                                          vu0DotV_13ADC0(*(sVec4HP*)(rider + 0x1B0), *p));
+                                          vu0DotV_13ADC0(*(sVec4HP*)(rider + 0x1B0), *railnorm));
     float lim = 0.7853982448577881f;
     self->CrookedSlideAngle = Clamp_13ADC0(self->CrookedSlideAngle, -lim, lim);
 }
@@ -2082,6 +2238,20 @@ static inline float ScaleAtLeast_AF28(float v, float k, float lo)
 }
 #define RIDER_AF28 (*(char**)(self + 0x50))
 
+/**
+ * Advances the rider one frame on a rail: keeps it on the rail, moves it along and leans it into the pose.
+ *
+ * Caps the speed at rider +0x2E4, sets ForceNaturalAir (cleared while the rail holds) and looks for the rail
+ * near the board-root bone (func_00334680, radius 300), recording SplineID, the contact data and the rail
+ * object's answer to handler slot 46 (rider +0x5AC). While func_001086B8() accepts the contact, RailNorm
+ * becomes the rail direction of travel, the height snaps toward the rail, the velocity turns onto the rail
+ * and gains gravity (0, 0, -980) along it plus a boost push (mBoostStrength * 2450). The sideways offset gets
+ * the lean input plus a drift: a pull back to the rail for the first 0.6 s or on steep rails, otherwise a
+ * push outward (doubled on surfaces with flag 0x4, a pull within 2.5 units of the centre elsewhere) whose
+ * gain a rider stat reduces, probably the balance. RailOffCenter, RailLeanAngle and CrookedSlideAngle then
+ * set the pose for cRider_alignRiderAxis(). A rejected contact instead adds 277.78 to the velocity, pointing
+ * away from the rail.
+ */
 extern "C" void cRailslideMotion_step(char* self)
 {
     if (func_0011FEE8(RIDER_AF28) == 0xC)
@@ -2465,6 +2635,15 @@ static inline void vu0ScaleEq_BFA8(sVec4_BFA8& v, float s)
 
 #define RIDER_BFA8 (*(char**)((char*)self + 0x50))
 
+/**
+ * Resolves the rail motion: pops the rider off a lost rail, runs the collision checks and caps the speed.
+ *
+ * With ForceNaturalAir set it eases slewed channel 5 to 0 and pops the rider with func_00114298(rider, -1).
+ * func_00105398() runs with the sphere tree's filter word (+0x28) set to the current uber grind's entry of
+ * D_00458230 in CS_UberGrind (0x16 otherwise), cRailslideMotion_checkTerrainCollisions() with 3, then the
+ * filter is reset to -1 and opponents are checked. A rider that lost the rail switches to MS_Air with the
+ * lift sound (cSSXAudio_Lift), and the speed is capped at rider +0x2E4.
+ */
 extern "C" void cRailslideMotion_resolve(cRailslideMotion* self)
 {
     cRider_updateBoundBox_v(RIDER_BFA8, 0);
@@ -2661,6 +2840,16 @@ static inline bool riderFlag_13C140(char* r)
 #define RV(off) (*(sVec4HP*)(RIDER + (off)))
 #define SV(off) (*(sVec4HP*)((char*)self + (off)))
 
+/**
+ * Pushes a rail-sliding rider out of terrain and frees it when it stays stuck against it.
+ *
+ * Skipped in CS_Reset. A sphere-tree query against the overlap list (mWallHint) finds the overlap; hits
+ * facing straight against mGroundNormal (the rail's up) are ignored and downward ones lose their
+ * mGroundNormal part. The rider moves out by 1.1 times the depth. When it has moved no more than 2 units
+ * since the previous hit for over 0.5 s (StuckSec, counted at 1/60 per call, and PrevPos), its velocity
+ * becomes 1111.11 along its front, less the part into the surface. Inward velocity is then removed plus a
+ * bounce of max(half of it, 27.78), and the impact goes to func_00105D98() with that bounce as its speed.
+ */
 extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
 {
     if (func_0011FEE8(RIDER) == 9)
@@ -2722,6 +2911,11 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_loseFocus);
 #ifdef SKIP_ASM
+/**
+ * Ends the rail motion: restarts the rider's slewed channel 9 and clears the rider word at +0x5AC.
+ *
+ * Channel 9 is set to -0.25 and eased toward 1 at rate 1/30 (its target is written -0.25, then 1).
+ */
 extern "C" void cRailslideMotion_loseFocus(cRailslideMotion* self)
 {
     char* a = (char*)self->mRider;
@@ -2743,6 +2937,13 @@ struct sVEntry0013C5E0 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Writes the rail-slide state (its first 0x50 bytes, cRailslideMotionState) to a replay frame.
+ *
+ * Calls the stream's write virtual (slot 1) with this object and the size 0x50.
+ *
+ * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
+ */
 extern "C" void cRailslideMotion_writeToReplayFrame(cRailslideMotion* self, void* obj)
 {
     sVEntry0013C5E0* vt = *(sVEntry0013C5E0**)obj;
@@ -2759,6 +2960,13 @@ struct sVEntry0013C618 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Reads the rail-slide state (its first 0x50 bytes, cRailslideMotionState) back from a replay frame.
+ *
+ * Calls the stream's read virtual (slot 2) with this object and the size 0x50.
+ *
+ * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
+ */
 extern "C" void cRailslideMotion_readFromReplayFrame(cRailslideMotion* self, void* obj)
 {
     sVEntry0013C618* vt = *(sVEntry0013C618**)obj;
@@ -2779,6 +2987,18 @@ extern const sVtbl9_13C650 D_00459A98;
 extern char D_00459B90[];
 extern const sVtbl22_13C650 D_00459AE0;
 
+/**
+ * Constructs the ground-motion part: sets up its virtual cRider base and clears the AI ticks.
+ *
+ * When in charge it points mRider at self + 0x20 and constructs the cRider there. It then stores
+ * cGroundMotion's vtables in the cRider (D_00459A98 at +0x6E8, D_00459B90 at +0x6D0, D_00459AE0 at +0x6C0),
+ * using stack copies with adjusted this-deltas when not in charge (g++ 2.95 virtual-base code), and zeroes
+ * AITickOnGainFocus, AITickOnLoseFocus and rider +0x31C (the board chatter value).
+ *
+ * @param inChrg  g++ in-charge flag: nonzero when this is the complete object, so the cRider base is built
+ *                here
+ * @return self
+ */
 // PORT: g++ 2.95 virtual-base construction. The class derives virtually from cRider (vbase pointer at
 // +0x18, vbase at +0x20); when not most-derived, g++ copies cRider's overridden vtables to the stack and
 // fixes up the this-deltas (expand_upcast_fixups). Written out by hand here.
@@ -2851,6 +3071,15 @@ struct sHpCtl_13C7A8 {
     char* mRider;
 };
 
+/**
+ * Starts the ground motion: resets the ground state and cuts the speed after a quick re-landing.
+ *
+ * Clears ChatterTime and ForceNaturalAir, sets PowderDepth1G/3G from the surface's depths (+0x14, +0x18)
+ * times the model scale (mAnimModel +0x140), copies mGroundNormal to rider +0x390 and stores the AI tick in
+ * AITickOnGainFocus. The velocity is scaled by 0.7 when the rider left the ground at most 40 ticks ago,
+ * rising by 0.01 per tick to no cut at 70 ticks (cGroundMotion_loseFocus backdates the tick after a
+ * natural-air pop, so then there is no cut).
+ */
 extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
 {
     self->m0 = 0;
@@ -2877,29 +3106,43 @@ extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_getSnowForce);
 #ifdef SKIP_ASM
+/**
+ * Computes the snow's support force along the ground normal from the board's height in the powder.
+ *
+ * Above the surface it pulls down by g * height / 30 (g = snow +0x0), less damping (snow +0x1C) times an
+ * upward normal velocity. Below it the push grows linearly to 1 g at PowderDepth1G and 3 g at PowderDepth3G
+ * (the depth is capped there), less the damping times the normal velocity. Also sets mAudioPressure to the
+ * depth / PowderDepth3G (at least 0). The caller passes a fifth argument (the time step) that this body does
+ * not declare.
+ *
+ * @param snow  the surface data (SurfPropCache entry read as floats; On Tour tSurfData* snow)
+ * @param height  the board's height above the snow surface (rider +0x454), negative when sunk in
+ * @param normalVel  the velocity along the ground normal, relative to the ground
+ * @return the normal force (positive pushes the board out of the snow)
+ */
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" float cGroundMotion_getSnowForce(cGroundMotion* self, float* p, float a, float b)
+extern "C" float cGroundMotion_getSnowForce(cGroundMotion* self, float* snow, float height, float normalVel)
 {
     float r;
-    if (a > 0.0f)
+    if (height > 0.0f)
     {
-        r = p[0] * (a * -0.033333f);
-        if (b > 0.0f)
-            r -= p[7] * b;
+        r = snow[0] * (height * -0.033333f);
+        if (normalVel > 0.0f)
+            r -= snow[7] * normalVel;
     }
-    else if (-self->PowderDepth1G < a)
+    else if (-self->PowderDepth1G < height)
     {
-        r = -p[0] * a / self->PowderDepth1G;
-        r -= p[7] * b;
+        r = -snow[0] * height / self->PowderDepth1G;
+        r -= snow[7] * normalVel;
     }
     else
     {
-        a = -self->PowderDepth3G >? a;
-        r = p[0] * (1.0f - (a + self->PowderDepth1G + (a + self->PowderDepth1G)) / (self->PowderDepth3G - self->PowderDepth1G));
-        r -= p[7] * b;
+        height = -self->PowderDepth3G >? height;
+        r = snow[0] * (1.0f - (height + self->PowderDepth1G + (height + self->PowderDepth1G)) / (self->PowderDepth3G - self->PowderDepth1G));
+        r -= snow[7] * normalVel;
     }
-    *(float*)((char*)self->mRider + 0x758) = -a / self->PowderDepth3G >? 0.0f;
+    *(float*)((char*)self->mRider + 0x758) = -height / self->PowderDepth3G >? 0.0f;
     return r;
 }
 #endif
@@ -2985,6 +3228,20 @@ static inline float vu0Length_13C948(const sVec4HP& v)
 
 #define RIDER (*(char**)((char*)self + 0x18))
 
+/**
+ * Computes the forward propulsion: the boost push plus the drive toward the surface's cruising speed.
+ *
+ * Zero while braking (slewed channel 2) or past the finish line. The boost term (mBoostStrength * 0.17,
+ * raised to 5.5 times the path factor while the power-up boost timer +0x2E8 runs) needs |slewed channel 0|
+ * (edging) below 0.08, weakens as it grows, and grows with mGroundForward.z when that is positive. The drive
+ * term closes up to 1111.11 of the gap to the surface's speed (snow +0x20 * 27.78), weighted by the path
+ * factor (1 on flag-0x10 triangles, else falling to 0 at 90 degrees off the path heading at rider +0x4CC).
+ * Ground material (+0x434) 17 or above (On Tour's slow territory) halves the speed and the boost, and zeroes
+ * everything when facing off the path; snow +0x24 scales the total and slewed channel 4 adds 56.4 per unit.
+ *
+ * @param snow  the surface data (SurfPropCache entry; On Tour tSurfData*)
+ * @return the force along mGroundForward
+ */
 // cGroundMotion::getBoostForce(const tSurfData* snow) (SSX On Tour symbols; the retail state check stands in for
 // !cRider::isOnRaceCourse, and the retail code has no getAccelerationAttrib scale).
 extern "C" float cGroundMotion_getBoostForce(cGroundMotion* self, char* snow)
@@ -3106,15 +3363,30 @@ static inline float hpRamp_13CCF0(float v, float lo, float hi)
 
 #define RIDER (*(char**)((char*)self + 0x18))
 
-extern "C" float cGroundMotion_getSlipForce(cGroundMotion* self, sHpCfg_13CCF0* cfg, float a)
+/**
+ * Computes the friction along the board's forward direction from the speed, braking and the surface.
+ *
+ * The base is the surface's friction curve (4 points at cfg +0x90) at the speed in km/h (|a| * 0.036),
+ * lowered at low speed by a rider stat. Braking (b = |slewed channel 2|) adds 3 * b * b (times a stat factor)
+ * to the friction factor and a constant drag of 1000 * b, both faded out on near-vertical ground
+ * (mGroundNormal.z 0.2 to 0.1). Powder surfaces (types 2, 3, 13) scale it with the sinking depth, rising
+ * relative to the ground cuts it to 0.6, switch stance without boost raises it by 11%, and surface 13
+ * multiplies it by 34.8 while moving forward and rising. The caller's third argument (the normal force in g)
+ * is not declared.
+ *
+ * @param cfg  the surface data (SurfPropCache entry; On Tour tSurfData* snow)
+ * @param forwardVel  the forward velocity relative to the ground (On Tour v)
+ * @return the force along mGroundForward (the friction opposes a; the brake drag is always negative)
+ */
+extern "C" float cGroundMotion_getSlipForce(cGroundMotion* self, sHpCfg_13CCF0* cfg, float forwardVel)
 {
     float one = 1.0f;
     float spd = hpAbs_13CCF0(*(float*)(RIDER + 0x214));
     func_001494C0(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34));
     float k1 = one / (func_001493D8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34)) * 0.31941401958465576f + one);
     float k2 = func_00148D80(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34)) * 0.46218693256378174f + one;
-    float c = hpCurve_13CCF0(cfg, hpAbs_13CCF0(a) * 0.035999998450279236f);
-    float t = hpClamp_13CCF0(hpAbs_13CCF0(a) / 1666.666748046875f, 0.0f, 1.0f);
+    float c = hpCurve_13CCF0(cfg, hpAbs_13CCF0(forwardVel) * 0.035999998450279236f);
+    float t = hpClamp_13CCF0(hpAbs_13CCF0(forwardVel) / 1666.666748046875f, 0.0f, 1.0f);
     c = c * (one * (k1 * (1.0f - t) + one * t));
     float ramp = hpRamp_13CCF0(*(float*)(RIDER + 0x378), 0.10000000149011612f, 0.20000000298023224f);
     float lift = ramp * (spd * 3.0004208087921143f) * spd * k2;
@@ -3129,9 +3401,9 @@ extern "C" float cGroundMotion_getSlipForce(cGroundMotion* self, sHpCfg_13CCF0* 
     if (*(int*)(RIDER + 0x320) != *(int*)(RIDER + 0x324) && *(float*)(RIDER + 0x2FC) == 0.0f)
         f2 = 1.1147289276123047f;
     float f5 = 1.0f;
-    if (0.0f < a && 0.0f < *(float*)(RIDER + 0x1E8) - *(float*)(RIDER + 0x3D8) && *(int*)(RIDER + 0x438) == 13)
+    if (0.0f < forwardVel && 0.0f < *(float*)(RIDER + 0x1E8) - *(float*)(RIDER + 0x3D8) && *(int*)(RIDER + 0x438) == 13)
         f5 = 34.84144592285156f;
-    return ((-a * f8) * (c + lift) * f12 * f2 - drag) * f5;
+    return ((-forwardVel * f8) * (c + lift) * f12 * f2 - drag) * f5;
 }
 #undef RIDER
 #endif
@@ -3179,28 +3451,42 @@ static inline float hpCurve_13D028(const sCurvePt_13D028* p, float x)
     return hpLerp_13D028(p[0], p[1], x);
 }
 
-extern "C" float cGroundMotion_getDigForce(cGroundMotion* self, float* v, float a, float b, float c)
+/**
+ * Computes the edge (dig) force across the board when the rider leans against a sideways slide.
+ *
+ * Zero unless the lean and the sideways velocity have opposite signs. Otherwise it is the sideways velocity
+ * times |lean|, times the curve D_004A1140 at the forward speed in km/h (|b| * 0.036), times -(snow +0x8) so
+ * a positive factor opposes the slide, divided by (1 + 4.0 * mBoostStrength) while boosting. The stat
+ * func_00148E68() is read but unused.
+ *
+ * @param snow  the surface data (SurfPropCache entry read as floats; On Tour tSurfData* snow)
+ * @param dv  the sideways velocity relative to the ground (along mGroundSide)
+ * @param sv  the forward velocity relative to the ground
+ * @param lean  the lean input (minus slewed channel 0)
+ * @return the force along mGroundSide (0 when not digging in)
+ */
+extern "C" float cGroundMotion_getDigForce(cGroundMotion* self, float* snow, float dv, float sv, float lean)
 {
-    if (a < 0.0f && 0.0f < c)
+    if (dv < 0.0f && 0.0f < lean)
     {
-        a = a * c;
+        dv = dv * lean;
     }
-    else if (0.0f < a && c < 0.0f)
+    else if (0.0f < dv && lean < 0.0f)
     {
-        a = a * -c;
+        dv = dv * -lean;
     }
     else
     {
         return 0.0f;
     }
-    a = a * hpCurve_13D028(D_004A1140, hpAbs_13D028(b) * 0.035999998450279236f);
-    a = a * -v[2];
+    dv = dv * hpCurve_13D028(D_004A1140, hpAbs_13D028(sv) * 0.035999998450279236f);
+    dv = dv * -snow[2];
     func_00148E68(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
     float s = *(float*)((char*)self->mRider + 0x2FC);
     float one = 1.0f;
     if (0.0f < s)
-        a = a * (one / (s * 4.008637428283691f + one));
-    return a;
+        dv = dv * (one / (s * 4.008637428283691f + one));
+    return dv;
 }
 #endif
 
@@ -3417,6 +3703,21 @@ struct sVEnt_13D1B8 { short delta; short index; void (*fn)(void*, void*); };
 #define RIDER (*(char**)((char*)self + 0x18))
 #define RV(off) (*(sVec4HP*)(RIDER + (off)))
 
+/**
+ * Probes the ground under the rider and rebuilds its ground frame and contact data from the best hit.
+ *
+ * Saves mGroundNormal in rider +0x380, then casts a capsule (radius 0.5) along mGroundNormal from 100 below
+ * to 200 above the rider's position, shifted sideways by the edging channel, keeping up to 64 hits. It
+ * prefers hits whose normal is within about 72 degrees of the old one (dot >= 0.3) and that lie nearest the
+ * probe's middle, then stores the triangle data, surface type, normal, contact point, ground velocity,
+ * mGroundForward and mGroundSide and the height above ground, and reports the hit to its object (handler slot
+ * 42). With no hit the frame is reset to world up and surface type 0.
+ *
+ * @param out  receives the chosen hit
+ * @param dist  receives the probe point's distance from the contact point across the normal (On Tour
+ *              latOffset; 0 with no hit)
+ * @return 1 when ground was found, otherwise 0
+ */
 extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8* out, float* dist)
 {
     RV(0x380) = RV(0x370);
@@ -3869,6 +4170,19 @@ static inline float atan2_13D818(float y, float x)
     return r;
 }
 
+/**
+ * Advances the rider one frame on the ground: forces, steering, the ground probe and board chatter.
+ *
+ * Caps the speed at rider +0x2E4 and eases PowderDepth1G/3G toward the surface's values. The velocity
+ * relative to the ground is split along the ground frame and feeds getSnowForce (normal), getBoostForce and
+ * getSlipForce (forward) and getDigForce (side); up to 2 g of the normal force is redirected along the normal
+ * tilted by the edge angle, and the surface gravity (0, 0, -g) is added. A board sunk below PowderDepth3G is
+ * lifted out (at most 10 per frame). After integrating it yaws the rider about the ground normal from lean,
+ * speed curves and surface grip (or the spin-out decay while mSpinRate is set), re-probes with
+ * setupGroundVectors(), removes 40% of the normal velocity on non-powder surfaces (keeping the speed) and
+ * sets ForceNaturalAir when the ground is lost or too far below (surface +0x10). On ground it tilts toward
+ * the normal and drives slewed channels 2, 17 and 18 and the chatter (ChatterTime, rider +0x31C).
+ */
 extern "C" void cGroundMotion_step(cGroundMotion* self)
 {
     cRider_updateWind((char*)self->mRider);
@@ -4251,6 +4565,16 @@ static inline float absf_13F178(float x)
 
 #define RIDER_13F178 (*(char**)((char*)self + 0x18))
 
+/**
+ * Resolves the ground motion: natural-air pop or fatal surfaces, collisions, and the audio values.
+ *
+ * With ForceNaturalAir set it pops the rider with func_00114298(rider, -1) and, while still in MS_Ground
+ * after the checks, switches to MS_Air with the lift sound. Otherwise surface type 0x12 starts a wipeout
+ * (anim 0x168) and reset surfaces (+0x44) or triangles with flag 0x2 force an auto reset. Walls
+ * (cGroundMotion_checkWallCollisions, sphere-tree filter D_004A115C), func_00105398() and opponents are
+ * checked; rider +0x390 is blended toward mGroundNormal, the speed is capped at rider +0x2E4, and mAudioSpeed
+ * (speed / 3333.33, at most 1), mAudioEdging (|channel 0|) and mAudioBraking (|channel 2|) are set.
+ */
 extern "C" void cGroundMotion_resolve(cGroundMotion* self)
 {
     if (self->ForceNaturalAir != 0) {
@@ -4309,6 +4633,13 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_loseFocus);
 #ifdef SKIP_ASM
 extern "C" int func_001298C8();
 
+/**
+ * Ends the ground motion: eases slewed channels 2, 17 and 18 back to 0 and records the AI tick.
+ *
+ * Channels 2 and 17 get rate 0.05 and channel 18 rate 1.67. AITickOnLoseFocus becomes the current AI tick, or
+ * that tick minus 500 when it was -1 (marked by a natural-air pop), so cGroundMotion_gainFocus() makes no
+ * landing speed cut then.
+ */
 extern "C" void cGroundMotion_loseFocus(cGroundMotion* self)
 {
     char* a = (char*)self->mRider;
@@ -4479,6 +4810,16 @@ static inline bool riderFlag_13F488(char* r)
 #define RIDER (*(char**)((char*)self + 0x18))
 #define RV(off) (*(sVec4HP*)(RIDER + (off)))
 
+/**
+ * Pushes the grounded rider out of walls and bounces its velocity off them.
+ *
+ * Skipped in CS_Reset, and for computer riders while rider +0x4C8 < 50 and |rider +0x498 - mPosition.z| < 50
+ * (probably: close to their AI path). A sphere-tree query (mWallHint) finds the overlap and reports it to the
+ * hit object (handler slot 42); hits straight against mGroundNormal are ignored and downward ones lose their
+ * mGroundNormal part. The rider moves out by 1.1 times the depth; when moving into the wall (relative to the
+ * wall's velocity) the inward velocity is removed plus a bounce of max(5% of it, 27.78), then
+ * func_001065B0(), func_00105D98() and the wall sound (cSSXAudio_WallCollision) follow.
+ */
 extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
 {
     if (func_0011FEE8(RIDER) == 9)
@@ -4548,6 +4889,13 @@ struct sVEntry0013F848 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Writes the ground-motion state (its first 0x18 bytes, cGroundMotionState) to a replay frame.
+ *
+ * Calls the stream's write virtual (slot 1) with this object and the size 0x18.
+ *
+ * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
+ */
 extern "C" void cGroundMotion_writeToReplayFrame(cGroundMotion* self, void* obj)
 {
     sVEntry0013F848* vt = *(sVEntry0013F848**)obj;
@@ -4564,6 +4912,13 @@ struct sVEntry0013F880 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Reads the ground-motion state (its first 0x18 bytes, cGroundMotionState) back from a replay frame.
+ *
+ * Calls the stream's read virtual (slot 2) with this object and the size 0x18.
+ *
+ * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
+ */
 extern "C" void cGroundMotion_readFromReplayFrame(cGroundMotion* self, void* obj)
 {
     sVEntry0013F880* vt = *(sVEntry0013F880**)obj;
@@ -6096,6 +6451,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion__cGroundMotion);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cGroundMotion part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cGroundMotion's (D_00459A98 at +0x6E8, D_00459AE0 at
+ * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cVbDtor00140D80::~cVbDtor00140D80()
 {
 }
@@ -6120,6 +6483,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion__cAirMotion);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cAirMotion part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cAirMotion's (D_004599A0 at +0x6E8, D_004599E8 at
+ * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cVbDtor00140EE0::~cVbDtor00140EE0()
 {
 }
@@ -6140,6 +6511,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion__cRailslideMotion);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cRailslideMotion part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cRailslideMotion's (D_004598A8 at +0x6E8, D_004598F0
+ * at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cVbDtor00141040::~cVbDtor00141040()
 {
 }
@@ -6171,6 +6550,11 @@ extern "C" int func_001411A8(int arg0) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutMotion_getWipeoutMotionState);
 #ifdef SKIP_ASM
+/**
+ * Returns the wipeout motion's sub-state, WipeoutMotionState (its first word).
+ *
+ * @return the eWMotionState value: WMS_Ground (0) or WMS_Air (1)
+ */
 extern "C" int cWipeoutMotion_getWipeoutMotionState(int *self) {
     return *self;
 }
@@ -6178,6 +6562,11 @@ extern "C" int cWipeoutMotion_getWipeoutMotionState(int *self) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutMotion_getRiderAngVel);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the wipeout motion's RiderAngVelocity vector (self + 0x30).
+ *
+ * @return self + 0x30, as an int (On Tour returns a const t4Vector&)
+ */
 extern "C" int cWipeoutMotion_getRiderAngVel(int self) {
     return self + 0x30;
 }
@@ -6189,6 +6578,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cStaticMotion__cStaticMotion);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cStaticMotion part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cStaticMotion's (D_004596B8 at +0x6E8, D_00459700 at
+ * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cHandPlant11C0::~cHandPlant11C0()
 {
 }
@@ -6209,6 +6606,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion__cHandplantMotion);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cHandplantMotion part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cHandplantMotion's (D_004595C0 at +0x6E8, D_00459608
+ * at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cVbDtor00141320::~cVbDtor00141320()
 {
 }
@@ -6236,6 +6641,18 @@ extern const sVtblA_00141480 D_004595C0_00141480 __asm__("D_004595C0");
 extern char D_00459B90[];
 extern const sVtblB_00141480 D_00459608_00141480 __asm__("D_00459608");
 
+/**
+ * Constructs the handplant-motion part: sets up its virtual cRider base.
+ *
+ * When in charge it points mRider at self + 0xB0 and constructs the cRider there. It then stores
+ * cHandplantMotion's vtables in the cRider (D_004595C0 at +0x6E8, D_00459B90 at +0x6D0, D_00459608 at
+ * +0x6C0), using stack copies with adjusted this-deltas when not in charge (g++ 2.95 virtual-base code). No
+ * state member is initialised here.
+ *
+ * @param inChrg  g++ in-charge flag: nonzero when this is the complete object, so the cRider base is built
+ *                here
+ * @return self
+ */
 // PORT: g++ 2.95 virtual-base construction. The class derives virtually from cRider (vbase pointer at
 // +0xA0, vbase at +0xB0); when not most-derived, g++ copies cRider's overridden vtables to the stack
 // and fixes up the this-deltas (expand_upcast_fixups). Written out by hand here.
@@ -6271,6 +6688,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cCruiseControl__cCruiseControl);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cCruiseControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cCruiseControl's (D_004594C8 at +0x6E8, D_00459510
+ * at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cVbDtor001415C8::~cVbDtor001415C8()
 {
 }
@@ -6291,6 +6716,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBoardPressControl__cBoardPressContro
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cBoardPressControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cBoardPressControl's (D_004593D0 at +0x6E8,
+ * D_00459418 at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the
+ * flags are 0), destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is
+ * set, and frees the object when bit 0 is set.
+ */
 cVbDtor00141728::~cVbDtor00141728()
 {
 }
@@ -6311,6 +6744,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cPrewindControl__cPrewindControl);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cPrewindControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cPrewindControl's (D_004592D8 at +0x6E8, D_00459320
+ * at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cVbDtor00141888::~cVbDtor00141888()
 {
 }
@@ -6331,6 +6772,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cBumpControl__cBumpControl);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cBumpControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cBumpControl's (D_004591E0 at +0x6E8, D_00459228 at
+ * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cVbDtor001419E8::~cVbDtor001419E8()
 {
 }
@@ -6351,6 +6800,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cNaturalAirControl__cNaturalAirContro
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cNaturalAirControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cNaturalAirControl's (D_004590E8 at +0x6E8,
+ * D_00459130 at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the
+ * flags are 0), destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is
+ * set, and frees the object when bit 0 is set.
+ */
 cVbDtor00141B48::~cVbDtor00141B48()
 {
 }
@@ -6371,6 +6828,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cSpinControl__cSpinControl);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cSpinControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cSpinControl's (D_00458FF0 at +0x6E8, D_00459038 at
+ * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cVbDtor00141CA8::~cVbDtor00141CA8()
 {
 }
@@ -6391,6 +6856,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGateControl__cGateControl);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cGateControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cGateControl's (D_00458EF8 at +0x6E8, D_00458F40 at
+ * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cVbDtor00141E08::~cVbDtor00141E08()
 {
 }
@@ -6411,6 +6884,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideControl__cRailslideControl)
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cRailslideControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cRailslideControl's (D_00458E00 at +0x6E8,
+ * D_00458E48 at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the
+ * flags are 0), destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is
+ * set, and frees the object when bit 0 is set.
+ */
 cVbDtor00141F68::~cVbDtor00141F68()
 {
 }
@@ -6431,6 +6912,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cUberGrindControl__cUberGrindControl)
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cUberGrindControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cUberGrindControl's (D_00458D08 at +0x6E8,
+ * D_00458D50 at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the
+ * flags are 0), destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is
+ * set, and frees the object when bit 0 is set.
+ */
 cVbDtor001420C8::~cVbDtor001420C8()
 {
 }
@@ -6451,6 +6940,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutControl__cWipeoutControl);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cWipeoutControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cWipeoutControl's (D_00458C10 at +0x6E8, D_00458C58
+ * at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cVbDtor00142228::~cVbDtor00142228()
 {
 }
@@ -6478,6 +6975,18 @@ extern const sVtblA_00142388 D_00458C10_00142388 __asm__("D_00458C10");
 extern char D_00459B90[];
 extern const sVtblB_00142388 D_00458C58_00142388 __asm__("D_00458C58");
 
+/**
+ * Constructs the wipeout-control part: sets up its virtual cRider base.
+ *
+ * When in charge it points mRider at self + 0x90 and constructs the cRider there. It then stores
+ * cWipeoutControl's vtables in the cRider (D_00458C10 at +0x6E8, D_00459B90 at +0x6D0, D_00458C58 at +0x6C0),
+ * using stack copies with adjusted this-deltas when not in charge (g++ 2.95 virtual-base code). No state
+ * member is initialised here.
+ *
+ * @param inChrg  g++ in-charge flag: nonzero when this is the complete object, so the cRider base is built
+ *                here
+ * @return self
+ */
 // PORT: g++ 2.95 virtual-base construction. The class derives virtually from cRider (vbase pointer at
 // +0x80, vbase at +0x90); when not most-derived, g++ copies cRider's overridden vtables to the stack
 // and fixes up the this-deltas (expand_upcast_fixups). Written out by hand here.
@@ -6513,6 +7022,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cFinishLineControl__cFinishLineContro
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cFinishLineControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cFinishLineControl's (D_00458B18 at +0x6E8,
+ * D_00458B60 at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the
+ * flags are 0), destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is
+ * set, and frees the object when bit 0 is set.
+ */
 cVbDtor001424D0::~cVbDtor001424D0()
 {
 }
@@ -6533,6 +7050,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cResetControl__cResetControl);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cResetControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cResetControl's (D_00458A20 at +0x6E8, D_00458A68 at
+ * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cVbDtor00142630::~cVbDtor00142630()
 {
 }
@@ -6553,6 +7078,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cVoidControl__cVoidControl);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cVoidControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cVoidControl's (D_00458928 at +0x6E8, D_00458970 at
+ * +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the flags are 0),
+ * destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees
+ * the object when bit 0 is set.
+ */
 cVbDtor00142790::~cVbDtor00142790()
 {
 }
@@ -6573,6 +7106,14 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantControl__cHandplantControl)
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a cHandplantControl part; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code points the cRider's vtables back at cHandplantControl's (D_00458830 at +0x6E8,
+ * D_00458878 at +0x6C0, the shared D_00459B90 at +0x6D0; stack copies with adjusted this-deltas when the
+ * flags are 0), destroys the virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is
+ * set, and frees the object when bit 0 is set.
+ */
 cVbDtor001428F0::~cVbDtor001428F0()
 {
 }
@@ -6593,6 +7134,15 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRiderHandler__cRiderHandler);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
 
+/**
+ * Destroys a rider handler; the source body is empty, so all the work is compiler-generated.
+ *
+ * The generated code restores cRiderHandler's vtable (D_00458710 at +0xDE8), destroys the FX parts with their
+ * own destructors (cCheatFX__cCheatFX back to cBoardWakeFX__cBoardWakeFX), runs the inlined motion and
+ * control part destructors (their cRider vtable fix-ups) and cWipeoutMotion__cWipeoutMotion(), destroys the
+ * virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees the object
+ * when bit 0 is set.
+ */
 cVbDtor00142A50::~cVbDtor00142A50()
 {
 }
@@ -6661,6 +7211,11 @@ __asm__("_vt$15cVbDtor00142A50 = D_00458710\n"
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRiderHandler__getMotionState);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider handler's current motion state (MotionState, +0xDE0).
+ *
+ * @return the eMotionState value (MS_Ground 0 .. MS_Handplant 5; MS_Num before the first state is set)
+ */
 extern "C" int cRiderHandler__getMotionState(cRiderHandler* self) {
     return (self->MotionState);
 }
@@ -6668,6 +7223,11 @@ extern "C" int cRiderHandler__getMotionState(cRiderHandler* self) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRiderHandler__getControlState);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider handler's current control state (ControlState, +0xDE4).
+ *
+ * @return the eControlState value (CS_Cruise 0 .. CS_Void 13; CS_Num before the first state is set)
+ */
 extern "C" int cRiderHandler__getControlState(cRiderHandler* self) {
     return (self->ControlState);
 }
@@ -7188,9 +7748,15 @@ extern "C" bool func_001446B8(void* self, int bit)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cPlayer_setInput);
 #ifdef SKIP_ASM
-extern "C" void cPlayer_setInput(cPlayer* self, int a, int b) {
-    self->Input = (cInput*)a;
-    self->Pad = (cPadDevice*)b;
+/**
+ * Attaches an input source and a pad device to the player, storing them in Input and Pad.
+ *
+ * @param input  the cInput to read controls from (passed as an int)
+ * @param device  the cPadDevice (passed as an int)
+ */
+extern "C" void cPlayer_setInput(cPlayer* self, int input, int device) {
+    self->Input = (cInput*)input;
+    self->Pad = (cPadDevice*)device;
 }
 #endif
 //100%

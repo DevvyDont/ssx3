@@ -32,6 +32,17 @@ struct sPad_1788 {
 };
 
 
+/**
+ * Builds a font's glyph table from loaded font data and uploads its texture.
+ *
+ * Records the run of consecutive character codes from the first (LastLinearCode), uses glyph 0xAC as the
+ * missing
+ * glyph, gives 0xA0 (no-break space) the space's metrics, and tracks the tallest glyph.
+ *
+ * @param vself  the font
+ * @param vdata  the font file's data (On Tour const char* data)
+ * @param flags  memory class for the glyph table (On Tour memtype)
+ */
 extern "C" void cFont_linkFont(cFont* vself, void* vdata, int flags)
 {
     cFont* self = vself;
@@ -151,6 +162,9 @@ struct sFont_19E8 {
     int handle;         // 0x60
 };
 
+/**
+ * Frees a font's glyph table and releases its texture.
+ */
 extern "C" void cFont_purge(cFont* self)
 {
     if (self->Glyphs != 0) {
@@ -201,6 +215,15 @@ struct sFontUV {
     float u, v;
 };
 
+/**
+ * Uploads a font's 4-bit glyph sheet as a texture with a white palette whose alpha ramps over the 16 indices.
+ *
+ * The texture height is the next power of two above the sheet's height (double it when it already is one);
+ * the
+ * UV scale is set to match.
+ *
+ * @param img  the glyph sheet (On Tour const SHAPE* shape)
+ */
 extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
 {
     cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
@@ -251,6 +274,15 @@ extern sMat00391C48 D_00500CA0;
 extern "C" void func_004186C8(sMat00391C48* m);
 extern "C" void func_00391CB0(cFont* self, float x, float y, sMat00391C48* m);
 
+/**
+ * Formats text into a shared static buffer (D_00500CA0) and draws it at a position.
+ *
+ * The C declaration drops the format and va_list arguments (On Tour fmt, va); they reach the vsprintf
+ * (func_004186C8) in the untouched argument registers.
+ *
+ * @param x  screen x
+ * @param y  screen y
+ */
 extern "C" void cFont_vtextf(cFont* self, float x, float y)
 {
     func_004186C8(&D_00500CA0);
@@ -404,8 +436,20 @@ static inline sGlyph1FB0* sFontRes1FB0_find(cFont* font, int c)
     return ((sGlyph1FB0*)font->MissingGlyph);
 }
 
+/**
+ * Measures a string's bounding box in a font at the given scale, including the font's shadow offset.
+ *
+ * @param f_  the font
+ * @param str  the string
+ * @param r_  receives the bounding box (On Tour tRect* rect), or 0
+ * @param mono  nonzero to measure each character by its advance rather than its glyph width (On Tour
+ * addCharAdvanceOnEnd)
+ * @param sx  horizontal scale
+ * @param sy  vertical scale
+ * @return the box's right edge
+ */
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
-extern "C" float cFont_textExtent(cFont* f_, const char* s, void* r_, int mono, float sx, float sy)
+extern "C" float cFont_textExtent(cFont* f_, const char* str, void* r_, int mono, float sx, float sy)
 {
     cFont* f = f_;
     sRect1FB0* r = (sRect1FB0*)r_;
@@ -417,8 +461,8 @@ extern "C" float cFont_textExtent(cFont* f_, const char* s, void* r_, int mono, 
     rc->y1 = 0.0f;
     float x = 0.0f;
     float y = 0.0f;
-    for (; *s; s++) {
-        sGlyph1FB0* g = sFontRes1FB0_find(f, *(unsigned char*)s);
+    for (; *str; str++) {
+        sGlyph1FB0* g = sFontRes1FB0_find(f, *(unsigned char*)str);
         if (g) {
             float adv = g->adv * sx;
             rc->x0 = (x + g->xoff * sx) <? rc->x0;
@@ -781,6 +825,14 @@ struct sBXStr_29F8 {
     char* p;
 };
 
+/**
+ * Formats text and draws it centred on a position.
+ *
+ * @param fmt  printf-style format
+ * @param ap  the format's arguments (On Tour va)
+ * @param x  screen x of the centre
+ * @param y  screen y
+ */
 extern "C" void cFont_vcentertextf(cFont* self, const char* fmt, void* ap, float x, float y)
 {
     sBXStr_29F8 s;
@@ -824,6 +876,14 @@ struct sBXStr_2B40 {
     char* p;
 };
 
+/**
+ * Formats text and draws it right-aligned to a position.
+ *
+ * @param fmt  printf-style format
+ * @param ap  the format's arguments (On Tour va)
+ * @param x  screen x of the right edge
+ * @param y  screen y
+ */
 extern "C" void cFont_vrighttextf(cFont* self, const char* fmt, void* ap, float x, float y)
 {
     sBXStr_2B40 s;
@@ -2397,6 +2457,9 @@ INCLUDE_ASM("render/font", cPS2LightMan_Purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
+/**
+ * Frees the light manager's light buffer.
+ */
 extern "C" void cPS2LightMan_Purge(void* self)
 {
     void* p = *(void**)((char*)self + 0x4);

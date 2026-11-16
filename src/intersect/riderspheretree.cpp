@@ -20,6 +20,11 @@ struct sRiderSphere_329910 {
     sRiderSphere_329910() {}
 };
 
+/**
+ * Constructs a rider sphere tree with its 20 spheres and no source assigned (both IDs -1).
+ *
+ * @return @p self
+ */
 cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self)
 {
     new ((char*)self + 0x2C) sRiderSphere_329910[20];
@@ -266,6 +271,13 @@ struct sProd_9B90 : sSphereVec4 {
 // PORT: callers declare the matrix as sSphereMtx*.
 extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* s, sSphereVec4* m, float scale) __asm__("cRiderSphereTree_ApplyTransform");
 
+/**
+ * Moves a sphere tree node and its child spheres by a matrix, then scales their positions and radii.
+ *
+ * @param s  the sphere tree node
+ * @param m  the transform (On Tour const t4Matrix& mat)
+ * @param scale  uniform scale applied after the transform
+ */
 extern "C" void cRiderSphereTree_ApplyTransform_impl(sSphereTreeNode* s, sSphereVec4* m, float scale)
 {
     sScale_9B90 sc(scale);
@@ -1762,6 +1774,13 @@ struct sSc_C770 { float x, y, z, w; };
 
 extern "C" void SphereTree_TransformRel_i(sOct_C770* self, sSphereVec4* m, float scale) __asm__("SphereTree_TransformRel");
 
+/**
+ * Transforms a sphere tree's four axis directions (their opposites follow) and its centre, then scales them
+ * and its radius.
+ *
+ * @param m  the transform (On Tour const t4Matrix& transMat)
+ * @param scale  uniform scale (On Tour s)
+ */
 extern "C" void SphereTree_TransformRel_i(sOct_C770* self, sSphereVec4* m, float scale)
 {
     for (int i = 0; i < 4; i++) {
@@ -2706,6 +2725,17 @@ extern int D_004A3FE0;
 extern int D_004A3FE4;
 extern int D_004A3FE8;
 
+/**
+ * Allocates the sphere-tree decompression caches: small and big buffers, each holding a full octree of its
+ * depth.
+ *
+ * All buffers start unassigned (-1).
+ *
+ * @param nSmall  number of small buffers (On Tour numBufs)
+ * @param smallDepth  octree depth of a small buffer (On Tour bufDepth)
+ * @param nBig  number of big buffers (On Tour numBigBufs)
+ * @param threshold  octree depth of a big buffer, also kept in D_004A3FE8 (On Tour bigDepth)
+ */
 // Allocates the two decompression caches; each buffer holds a full octree of the given depth
 // (1 + 8 + 64 + ... nodes).
 extern "C" void SphereTree_initCache(int nSmall, int smallDepth, int nBig, int threshold)

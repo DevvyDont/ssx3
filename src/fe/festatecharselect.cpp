@@ -14,6 +14,13 @@ extern "C" void func_0015E050(void* cam, sVec4_181148* a, sVec4_181148* b);
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_0019E538(void* self, int a1);
 
+/**
+ * Creates the character-select screen "08sel_char" and sets up the front-end camera and rider view.
+ *
+ * The camera (cFE::mCamera) gets (0, 200, 0) and the origin, probably position and target (func_0015E050),
+ * and a field of view of 0.436 (25 degrees). Calls func_0019E538 with 0 on the user's front-end rider, sets
+ * +0x80 to 1, +0x5C to -1 and +0x58 and +0x60 to 0.
+ */
 extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -54,6 +61,12 @@ extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_0019E538(void* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
 
+/**
+ * Destroys the character-select screen; off game path 0 it first resets the user's front-end rider.
+ *
+ * The rider (cFE::mRiderManager slot for mUserNum) gets func_0019E538 with 0, then cUIState_onDestroyScreen()
+ * runs.
+ */
 extern "C" void cFEStateCharSelect_onDestroyScreen(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -110,6 +123,15 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern signed char D_00440F68[];
 extern char D_004A1398[];
 
+/**
+ * Gives the character-select screen the focus: selects the player's character in "Menu" and shows the rider.
+ *
+ * Finds the player's character among the 10 selectable ones (D_00440F68) and selects its entry. The front-end
+ * rider is then set to D_00440F68[0] (not the player's character), its +0xCCC cleared, and func_00181EF0
+ * places it before cUIState_onGainFocus() runs.
+ *
+ * @param pPrevState  the state that had focus before, passed on
+ */
 extern "C" void cFEStateCharSelect_onGainFocus(void* self, int pPrevState)
 {
     int i = 0;
@@ -205,6 +227,15 @@ static inline float clamp_1450(float v, float lo, float hi)
     return lo;
 }
 
+/**
+ * Lets the player turn and adjust the character model on the select screen with the analogue inputs.
+ *
+ * While input 35 is held, axis 38 times 3 turns the model (+0x60, degrees, wrapped to 0-360). Inputs 33 and
+ * 34 change +0x58 (clamped to 0-1) and +0x5C (clamped to -1-1) by their axes (36, 37) times -0.1.
+ *
+ * @param pInput  the input object
+ * @return 1 when any of the values changed, else 0
+ */
 extern "C" int cFEStateCharSelect_onInputBegin(char* self, char* pInput)
 {
     int changed = 0;
@@ -283,6 +314,15 @@ static inline void refresh_1620(sWidget_1620* w)
     w->vt[9].fn((char*)w + w->vt[9].delta, 0);
 }
 
+/**
+ * Sets up the character-select widgets: the name menu, the titles and the ten character names.
+ *
+ * "names menu" gets flag bit 0 cleared and bit 7 set. On game path 2 "titlesel_character" is hidden and
+ * "titlesel_character_multi" shows the player 1 or 2 title (by mUserNum); on other paths that one is hidden.
+ * Texts "0" to "9" get the selectable characters' names, their index as id, and start hidden.
+ *
+ * @param w  the widget being created
+ */
 extern "C" void cFEStateCharSelect_onWidgetCreate(char* self, sWidget_1620* w)
 {
     int h = w->hash;
@@ -407,6 +447,18 @@ static inline void refresh_17E8(sIface_17E8* iface)
     iface->commit();
 }
 
+/**
+ * Handles character-select events: picking or highlighting a character, back, options and profile load.
+ *
+ * Event 5 sets +0xC20 (clearing +0xC1C) on the user's front-end rider, stores the controller, the character
+ * and +0x4C in the player table, commits it, records the controller mask (func_001A1CB8) and pushes the
+ * custom interface's next state. Event 1 shows the highlighted name and its stats (func_00181BD0) and stores
+ * the choice; 2 hides the name. 6 pushes the previous state; 7 opens "FEOptions" (state bits 0x100); 8 opens
+ * "cFEStateProfileLoad" for this controller.
+ *
+ * @param widget  the widget (ignored when 0); its id (+0x18) is the character index
+ * @param event  the widget event
+ */
 // Character select: widget event handler.
 extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8* widget, int event)
 {
@@ -780,6 +832,9 @@ extern char D_0045D780[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Creates the cheat-character select screen "131cheat_char" and plays its first frame.
+ */
 extern "C" void cFEStateCheatCharSelect_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -839,6 +894,15 @@ static inline void vcall_2460(sCW_2460* w, int k, int v)
     w->vt[k].fn((char*)w + w->vt[k].delta, v);
 }
 
+/**
+ * Binds the cheat-character select widgets: picture menu, arrows, name text and picture slots.
+ *
+ * "6pics" is scrollable when there are 6 or more entries; "arrowleft" and "arrowright" show from 7 entries;
+ * "nametext" starts empty. The six picture slots ("pic1" ...) take the first entries' values; slots past the
+ * entry count are hidden and disabled, and the first slot gets the highlight colour.
+ *
+ * @param w  the widget being created
+ */
 extern "C" void cFEStateCheatCharSelect_onWidgetCreate(sCheat_2460* self, sCW_2460* w)
 {
     int h = w->hash;
@@ -912,6 +976,16 @@ struct sVEK182690b {
     void (*fn)(void*);
 };
 
+/**
+ * Handles the cheat-character pictures: highlight, the shown name, picking one and backing out.
+ *
+ * Event 1 highlights the picture and shows its entry's name, 2 restores its colour. Event 5 stores the
+ * entry's value (0 for the first entry) in +0x70 and in the player table (func_001474A8), commits it, sets
+ * +0x74 and closes the popup; 6 closes it with +0x70 = 0.
+ *
+ * @param menu  the picture widget (ignored when 0); its id plus the menu's scroll offset is the entry
+ * @param msg  the widget event
+ */
 extern "C" void cFEStateCheatCharSelect_onWidgetEvent(void* self, void* menu, unsigned int msg)
 {
     if (menu == 0)
@@ -956,6 +1030,15 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onWidgetMenu);
 #ifdef SKIP_ASM
 extern "C" void func_00182870(void* self);
 
+/**
+ * Handles the cheat-character menu's events: entry checks, picture refresh and which events pass on.
+ *
+ * @param pMenu  the menu (unused)
+ * @param msg  the menu event
+ * @param value  the entry index for event 1
+ * @return 0x100 for events 7-9, for event 1 whether @p value is below the entry count, else 0x101 (event 5
+ *         refreshes the pictures first)
+ */
 extern "C" int cFEStateCheatCharSelect_onWidgetMenu(void* self, int pMenu, unsigned int msg, int value)
 {
     switch (msg) {

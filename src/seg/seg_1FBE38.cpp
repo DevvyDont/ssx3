@@ -19,8 +19,22 @@ extern "C" void func_00351B40_AE38(void*, int, void*, void*, int, void*) __asm__
 extern "C" void func_00342C08_AE38(void*, int, void*, void*, void*) __asm__("func_00342C08");
 extern "C" void cDeadFadeNode_cDeadFadeNode_AE38(void*, int, void*, void*, void*) __asm__("cDeadFadeNode_cDeadFadeNode");
 struct N_AE38 { int p0, p1, p2; virtual ~N_AE38(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35(); virtual void v36(); virtual void v37(); };
-extern "C" int checkActiveNode(void *a, int type, void *buf) {
-    N_AE38 *n = (N_AE38*)a;
+/**
+ * Decides what to do with an object's existing node before a script attaches a node of the given type.
+ *
+ * Returns 1 (leave it) when the node is a dead-fade or another busy kind (9, 6, 22), or already of @p type
+ * (it is
+ * retriggered through slot 37). Particle (13), mesh-anim (11), debounce (0) and dead-fade (22) requests
+ * replace it
+ * with a new node built from @p buf and return -1; any other type deletes it and returns 0.
+ *
+ * @param node  the object's current node
+ * @param type  the node type being requested
+ * @param buf  the new node's parameter block
+ * @return 1, -1 or 0 as above
+ */
+extern "C" int checkActiveNode(void *node, int type, void *buf) {
+    N_AE38 *n = (N_AE38*)node;
     if (n->v10(9) || n->v10(6) || n->v10(22))
         return 1;
     if (n->v10(type)) {
@@ -862,6 +876,18 @@ extern int D_004A55E8;
 extern const int D_00445FA0[];
 extern "C" void* MEM_copy_C5D8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_C5D8 { int idx; int val; int pad; int type; };
+/**
+ * Script function: makes a world instance fade out and die (a new "DeadFade" node), unless it is already
+ * busy.
+ *
+ * Defaults come from a static block; each argument overrides one field (ints become floats where the field
+ * is a float). An instance ID of -1 means the script's current instance. Nothing happens when the instance is
+ * not found.
+ *
+ * @param n  number of arguments (On Tour numArgs)
+ * @param params  the arguments (On Tour cLunoCArg*)
+ * @return a void script value
+ */
 extern "C" V3_C5D8 MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
     if (D_004A55E8 == 0) {
         D_C5D8[0] = 0xFFFFFFFF;
@@ -1160,6 +1186,18 @@ extern int D_004A55F8;
 extern const int D_00446038[];
 extern "C" void* MEM_copy_CDC8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_CDC8 { int idx; int val; int pad; int type; };
+/**
+ * Script function: turns a world instance into a flexing bridge (a new "FlexBridge" node), unless it is
+ * already busy.
+ *
+ * Defaults come from a static block; each argument overrides one field (ints become floats where the field
+ * is a float). An instance ID of -1 means the script's current instance. Nothing happens when the instance is
+ * not found.
+ *
+ * @param n  number of arguments (On Tour numArgs)
+ * @param params  the arguments (On Tour cLunoCArg*)
+ * @return a void script value
+ */
 extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
     if (D_004A55F8 == 0) {
         *(float*)&D_CDC8[0] = 500.0f;
@@ -1315,6 +1353,17 @@ extern int D_004A5600;
 extern const int D_004460A0[];
 extern "C" void* MEM_copy_D250(void*, void*, int) __asm__("MEM_copy");
 struct Ent_D250 { int idx; int val; int pad; int type; };
+/**
+ * Script function: adds a roller modifier to a moving world instance, with the script's current collision.
+ *
+ * Defaults come from a static block; each argument overrides one field (ints become floats where the field
+ * is a float). An instance ID of -1 means the script's current instance. An instance ID that is not found is
+ * not checked and is dereferenced as null.
+ *
+ * @param n  number of arguments (On Tour numArgs)
+ * @param params  the arguments (On Tour cLunoCArg*)
+ * @return a void script value
+ */
 extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *params) {
     if (D_004A5600 == 0) {
         D_D250[0] = 0xFFFFFFFF;
@@ -1800,6 +1849,17 @@ extern int D_004A5614;
 extern const int D_004461D8[];
 extern "C" void* MEM_copy_DED0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_DED0 { int idx; int val; int pad; int type; };
+/**
+ * Script function: puts a moving world instance on a spline path (a single-spline description).
+ *
+ * Defaults come from a static block; each argument overrides one field (ints become floats where the field
+ * is a float). An instance ID of -1 means the script's current instance. Nothing happens without a spline ID;
+ * an instance that is not found is not checked.
+ *
+ * @param n  number of arguments (On Tour numArgs)
+ * @param params  the arguments (On Tour cLunoCArg*)
+ * @return a void script value
+ */
 extern "C" V3_DED0 AddSplineFunc(int n, Ent_DED0 *params) {
     if (D_004A5614 == 0) {
         D_DED0[0] = 0xFFFFFFFF;
@@ -1879,6 +1939,17 @@ extern int D_004A5618;
 extern const int D_00446208[];
 extern "C" void* MEM_copy_E0C0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_E0C0 { int idx; int val; int pad; int type; };
+/**
+ * Script function: puts a moving world instance on a multi-spline path.
+ *
+ * Defaults come from a static block; each argument overrides one field (ints become floats where the field
+ * is a float). An instance ID of -1 means the script's current instance. Nothing happens without a spline ID;
+ * an instance that is not found is not checked.
+ *
+ * @param n  number of arguments (On Tour numArgs)
+ * @param params  the arguments (On Tour cLunoCArg*)
+ * @return a void script value
+ */
 extern "C" V3_E0C0 AddMultiSplineFunc(int n, Ent_E0C0 *params) {
     if (D_004A5618 == 0) {
         D_E0C0[0] = 0xFFFFFFFF;
@@ -2217,7 +2288,20 @@ extern int D_004A5628;
 extern const int D_004462A0[];
 extern "C" void* MEM_copy_E840(void*, void*, int) __asm__("MEM_copy");
 struct Ent_E840 { int idx; int val; int pad; int type; };
-extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *e) {
+/**
+ * Script function (despite the name, not a cViewer method): adds a particle emitter to a world instance near
+ * the viewer.
+ *
+ * Builds a heap "AddParticleData" block from defaults and the arguments; a moving instance gets a particle
+ * modifier, a static one a new "ParticleNode". Far from the viewer the block is freed. An instance ID of -1
+ * means
+ * the script's current instance; one that is not found is not checked.
+ *
+ * @param n  number of arguments (On Tour numArgs)
+ * @param params  the arguments (cLunoCArg*)
+ * @return a void script value
+ */
+extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *params) {
     if (D_004A5628 == 0) {
         ((int*)D_E840)[0] = 1;
         ((int*)D_E840)[1] = 0;
@@ -2282,7 +2366,7 @@ extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *e) {
     unsigned *buf = (unsigned*)cMemMan_alloc(0xE0, D_00489740_E840, 0x20000000, 0);
     buf[54] = 0xFFFFFFFF;
     MEM_copy_E840(buf, D_E840, 0xE0);
-    Ent_E840 *x = e;
+    Ent_E840 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004462A0[idx];
@@ -2475,6 +2559,17 @@ extern int D_004A5630;
 extern const int D_00446470[];
 extern "C" void* MEM_copy_F1C8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_F1C8 { int idx; int val; int pad; int type; };
+/**
+ * Script function: adds a rail to a moving world instance.
+ *
+ * Defaults come from a static block; each argument overrides one field (ints become floats where the field
+ * is a float). An instance ID of -1 means the script's current instance. Nothing happens without a rail ID;
+ * an instance that is not found is not checked.
+ *
+ * @param n  number of arguments (On Tour numArgs)
+ * @param params  the arguments (On Tour cLunoCArg*)
+ * @return a void script value
+ */
 extern "C" V3_F1C8 AddRailFunc(int n, Ent_F1C8 *params) {
     if (D_004A5630 == 0) {
         D_F1C8[0] = 0xFFFFFFFF;
@@ -7627,6 +7722,16 @@ INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_cWScriptMission);
 extern char D_00489A30_7128[] __asm__("cWScriptMission_vtbl");
 extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a1, int a2);
 extern "C" int cWScriptMan_getScriptCode_7128(int, int) __asm__("cWScriptMan_getScriptCode");
+/**
+ * Constructs a mission script process: the script-process base, the mission's ID and key, and its four script
+ * entry points.
+ *
+ * @param man  the script manager (On Tour cWScriptMan* manager)
+ * @param sectionId  the world section the script belongs to
+ * @param data  the mission data (On Tour const tWScriptMissionData*)
+ * @param key  the mission key
+ * @return @p self
+ */
 extern "C" void* cWScriptMission_cWScriptMission(void* self, void* man, int sectionId, char* data, int key) {
     cWScriptProcess_cWScriptProcess(self, man, sectionId, (int)data);
     *(void**)((char*)self + 0x5C) = D_00489A30_7128;
@@ -7644,6 +7749,11 @@ INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission__cWScriptMission);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_00489A30_71C8[] __asm__("cWScriptMission_vtbl");
 extern "C" void cWScriptProcess__cWScriptProcess_71C8(void*) __asm__("cWScriptProcess__cWScriptProcess");
+/**
+ * Destroys a mission script process: restores its vtable, then destroys the script-process base.
+ *
+ * There is no flags argument here; the base destructor gets it in the untouched second argument register.
+ */
 extern "C" void cWScriptMission__cWScriptMission(void* self) {
     *(void**)((char*)self + 0x5C) = D_00489A30_71C8;
     cWScriptProcess__cWScriptProcess_71C8(self);
@@ -7658,6 +7768,10 @@ extern char *D_004A28A8_71F0 __asm__("SSXApp");
 void func_0010F2B8_71F0(void*) __asm__("func_0010F2B8__FPv");
 extern "C" void cWScriptProcess_processStart_71F0(void*) __asm__("cWScriptProcess_processStart");
 struct Tab_71F0 { char pad[0x28]; void *arr[1]; };
+/**
+ * Starts a mission: shows HUD effect 0x1A for one second on the manager's rider (func_0010F2B8), then runs
+ * the base process start.
+ */
 extern "C" void cWScriptMission_processStart(void* self) {
     func_0010F2B8_71F0((*(Tab_71F0**)(*(char**)(D_004A28A8_71F0 + 0x84) + 0xC))->arr[**(int**)((char*)self + 0x10)]);
     cWScriptProcess_processStart_71F0(self);
@@ -7672,6 +7786,10 @@ struct P_7240 { int state; char pad[0x58]; virtual void v01(); virtual void v02(
 int func_0030B898_7240(void*, void*) __asm__("func_0030B898__FPvT0");
 extern "C" void *func_0028B180_7240(void) __asm__("func_0028B180");
 extern "C" void func_0029D8E0_7240(void*) __asm__("func_0029D8E0");
+/**
+ * Completes a mission that the script manager still lists: runs its virtual slots 6 and 18, then calls
+ * func_0029D8E0 on the sound system.
+ */
 extern "C" void cWScriptMission_processComplete(P_7240* self) {
     if (func_0030B898_7240(*(void**)((char*)self + 0x10), self)) {
         self->v06();

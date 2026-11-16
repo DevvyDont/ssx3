@@ -45,6 +45,14 @@ extern char D_00456C88[];
 // PORT: the unit declares cAI_forceAIState(void*); defined under an asm label with its real type.
 extern "C" void cAI_forceAIState_impl(char* self, int state) __asm__("cAI_forceAIState");
 
+/**
+ * Sets the AI's game-flow state with its handler and name, without any change handling.
+ *
+ * States: 1 GameInit, 2 Freeride, 3 PreRace, 4 Countdown, 5 Race, 6 EndRace, 7 Shutdown; anything else clears
+ * all three.
+ *
+ * @param state  the state (On Tour tAIState)
+ */
 // Forces the AI into the given state: state id, its state block and its name.
 extern "C" void cAI_forceAIState_impl(char* self, int state)
 {
@@ -103,6 +111,10 @@ public:
     virtual void m2(void *);
 };
 
+/**
+ * Runs the AI's game-flow state: on a change, the old handler's exit and the new handler's enter, then the
+ * update.
+ */
 extern "C" void cAI_AIStateUpdate(cAI* self) {
     if (self->PreviousAIState != self->CurrentAIState) {
         cAIState_3C20 *prev = (cAIState_3C20*)self->PreviousAIStateHandler;
@@ -1211,6 +1223,14 @@ static inline t4Vector QuatMul_5358(const Q_5358& a, const t4Vector& b)
     return r;
 }
 
+/**
+ * Turns the rider to suit its rail-slide style, then refreshes its orientation.
+ *
+ * Styles 1 and 2 need a stance: the rider half-turns when its current stance (unk_320) disagrees. Other
+ * styles
+ * half-turn back when needed, then turn the rider and its animation heading a quarter turn (+90 degrees for
+ * style 4, else -90).
+ */
 extern "C" void cRider_doRailslideModeOrientation(cRider* self)
 {
     // Half turn about the up axis (quaternion (up, 0)) whenever the landing state disagrees with the stance flag.
@@ -1388,8 +1408,14 @@ extern "C" int cBE_getBE();
 extern "C" int cBE_getInterface__Fv(int, int);
 extern "C" float func_0014EFA8(int, int);
 
-extern "C" float cRider_getStartGateKneeOffset(void *arg0) {
-    return (func_0014EFA8(cBE_getInterface__Fv(cBE_getBE(), 2), (*(int *)((char*)(arg0) + (0x86C)))) * -90.0f) + 75.0f;
+/**
+ * Returns how far the rider crouches at the start gate, from its character's model scale (75 - 90 x scale).
+ *
+ * @param self  the rider
+ * @return the knee offset
+ */
+extern "C" float cRider_getStartGateKneeOffset(void *self) {
+    return (func_0014EFA8(cBE_getInterface__Fv(cBE_getBE(), 2), (*(int *)((char*)(self) + (0x86C)))) * -90.0f) + 75.0f;
 }
 #endif
 
@@ -1505,6 +1531,15 @@ static inline t4Vector GetFront_5D48(cRider* rider)
     return rider->mMatrix.row[1];
 }
 
+/**
+ * Once a second, may make the rider glance at a nearby rider (within 1000 units) that is out of view.
+ *
+ * An aggressive rival more than 60 degrees off the heading, not glanced at in the last 600 ticks, gets an
+ * upper-body
+ * look (one for behind); otherwise any rider more than 120 degrees off gets a head turn. The second random
+ * test
+ * (below 100 of 100) always passes.
+ */
 // Plays a glance animation towards a nearby rider (sRiderPair mDistance/mAngle).
 extern "C" void cRider_checkForProximityAction(cRider* self)
 {
@@ -1584,6 +1619,17 @@ extern "C" int func_0028B180();
 extern "C" void func_0029A220(int, void *);
 extern "C" void func_00270970(int, int);
 
+/**
+ * Resets the rider when the reset input is pressed or an automatic reset is forced.
+ *
+ * Clears the power-up timers, records an auto-reset metric for reset kinds 1 and 4, enters the reset motion
+ * state
+ * (3) and tells the sound system and the replay.
+ *
+ * @param isResetInput  nonzero when the player pressed reset
+ * @param forceAutoReset  automatic reset kind, 0 for none (On Tour eAutoReset)
+ * @return 1 when the rider resets, otherwise 0
+ */
 extern "C" int cRider_checkForReset(cRider* self, int isResetInput, int forceAutoReset) {
     if (isResetInput != 0 || forceAutoReset != 0) {
         *(int*)&self->mPowerUpBoostTimer = 0;
@@ -1732,6 +1778,18 @@ static inline int seqDone_163B0(char* p)
     return func_001446A0(p, 2) && func_001446B8(p, 2);
 }
 
+/**
+ * Starts or chains the rider's punch animations from the left and right punch inputs and aims the attack
+ * sideways.
+ *
+ * One input starts a left or right punch (by stance); both start a two-handed one; repeats chain into
+ * follow-up
+ * punches once the current one is done. The attack blend eases toward 1 while a punch plays.
+ *
+ * @param isLeft  nonzero when the left punch input is down
+ * @param isRight  nonzero when the right punch input is down
+ * @return 1 while a punch animation is playing, otherwise 0
+ */
 extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
 {
     if (func_00311AE8(self->mRiderAnim, 1) == 3) {
@@ -1880,6 +1938,15 @@ extern char* D_0043D320[];
 
 // The unit later declares gGenTrickName with a different second parameter type; bind this one by symbol.
 extern "C" void gGenTrickName_desc(char* out, sTrickDesc* t, int) __asm__("gGenTrickName");
+/**
+ * Builds a trick's display name by joining the name pieces its descriptor's fields select from the trick-name
+ * tables.
+ *
+ * There is no check on the output's length; the third argument is unused.
+ *
+ * @param out  receives the name
+ * @param t  the trick descriptor
+ */
 extern "C" void gGenTrickName_desc(char* out, sTrickDesc* t, int)
 {
     const char* p;
@@ -1964,6 +2031,14 @@ struct sMonsterReq_6E10 {
 };
 extern sMonsterReq_6E10 D_0043D608[];
 
+/**
+ * Writes the name of the monster trick that a trick requires, or an empty string when it is not in the
+ * 24-entry table.
+ *
+ * @param buf  receives the name
+ * @param trick  the trick to look up
+ * @param size  passed on to gGenTrickName (unused there)
+ */
 // Name of the monster trick required for `trick` (empty when it is not one).
 extern "C" void gGenMonsterTrickReqName(char* buf, int trick, int size)
 {
@@ -2018,8 +2093,13 @@ extern "C" void func_00116FB8(void *self) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", cHUDFX_copyDispStr);
 #ifdef SKIP_ASM
-extern "C" void cHUDFX_copyDispStr(char *self, signed char *arg1) {
-    signed char *s = arg1;
+/**
+ * Copies a HUD effect's display string into it, without a length check; null gives an empty string.
+ *
+ * @param str  the string, or 0 (On Tour s)
+ */
+extern "C" void cHUDFX_copyDispStr(char *self, signed char *str) {
+    signed char *s = str;
     unsigned char *d = (unsigned char*)(self + 0x18);
     if (s != 0) {
         while (*s != 0) {
@@ -2037,6 +2117,18 @@ INCLUDE_ASM("seg/seg_14B10", cHUDFX_set);
 #ifdef SKIP_ASM
 extern "C" void cHUDFX_copyDispStr(char *, signed char *);
 
+/**
+ * Starts a HUD effect showing a string.
+ *
+ * The int and float arguments are named the wrong way round: @p decayTime carries the effect's data and @p
+ * fparg0
+ * its decay time.
+ *
+ * @param id  the effect (On Tour eHUDFXID)
+ * @param displayStr  the text to show
+ * @param decayTime  the effect's data (On Tour int data)
+ * @param fparg0  how long the effect lasts (On Tour float decayTime)
+ */
 extern "C" void cHUDFX_set(char *self, int id, signed char *displayStr, int decayTime, float fparg0) {
     cHUDFX_copyDispStr(self, displayStr);
     *(int *)(self + 0) = id;
@@ -2055,6 +2147,14 @@ extern "C" void cHUDFX_copyDispStr(char *, signed char *);
 extern signed char D_004A5E20[];
 extern char D_004A1070[];
 
+/**
+ * Starts a HUD effect showing a number, formatted with "%d" into a shared buffer.
+ *
+ * @param id  the effect (On Tour eHUDFXID)
+ * @param displayInt  the number to show; also stored with the effect
+ * @param fparg0  how long the effect lasts (On Tour decayTime)
+ * @param data  the effect's data
+ */
 // Variant of cHUDFX_set that names the entry from a number (formatted into a shared buffer).
 extern "C" void cHUDFX_set1(char *self, int id, int displayInt, float fparg0, int data) {
     sprintf((char*)D_004A5E20, D_004A1070, displayInt);
@@ -2107,6 +2207,11 @@ INCLUDE_ASM("seg/seg_14B10", cRiderMetrix_cRiderMetrix);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_reset(void *);
 
+/**
+ * Constructs a rider's metrics with cleared counters and a multiplier of 1.0 (+0x1C4), then resets them.
+ *
+ * @return @p self
+ */
 extern "C" void *cRiderMetrix_cRiderMetrix(void *self) {
     *(int *)((char*)self + 0x1AC) = 0;
     *(int *)((char*)self + 0x1B0) = 0;

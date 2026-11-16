@@ -11,6 +11,11 @@ extern const char D_004A3B48[];
 //99.23%
 INCLUDE_ASM("visualfx/lensfx", cLensFxMan_construct__Fv);
 #ifdef SKIP_ASM
+/**
+ * Creates the lens effects manager ("LensFX", 0x6820 bytes) through the PS2 constructor func_002EC418.
+ *
+ * @return the new manager
+ */
 void* cLensFxMan_construct()
 {
     void* mem = cMemMan_alloc(0x6820, D_004A3B48, 0, 0);

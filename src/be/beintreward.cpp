@@ -1362,6 +1362,13 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getNumSongsInPlayList);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
+/**
+ * Counts the songs in a character's playlist: the set bits among the 64 at +0xF78 of the profile record.
+ *
+ * @param iProfileIndex  profile index (On Tour: iProfileIndex)
+ * @param iCharacterID  character id (On Tour: iCharacterID)
+ * @return the number of songs
+ */
 extern "C" int cBERewardInterface_getNumSongsInPlayList(cBERewardInterface* self, int iProfileIndex, int iCharacterID)
 {
     char* p = (char*)cBELibrary_profileLib + iProfileIndex * 0x9b50 + iCharacterID * 0xf88;
@@ -1412,6 +1419,13 @@ extern int D_0045AFE8[];
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getCollectibleMedalTarget);
 #ifdef SKIP_ASM
+/**
+ * Returns the collectibles count a peak needs for a medal (D_0045AFE8, four targets per peak).
+ *
+ * @param peakID  the peak id
+ * @param medal  the medal, 0 (best) to 3
+ * @return the target count
+ */
 extern "C" int cBERewardInterface_getCollectibleMedalTarget(cBERewardInterface* self, int peakID, int medal)
 {
     return *(int*)((char*)D_0045AFE8 + ((medal << 2) + (peakID << 4)));
@@ -1423,6 +1437,13 @@ extern int D_0045B018[];
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getChallengesMedalTarget);
 #ifdef SKIP_ASM
+/**
+ * Returns the completed big-challenge count a peak needs for a medal (D_0045B018, four per peak).
+ *
+ * @param peakID  the peak id
+ * @param medal  the medal, 0 (best) to 3
+ * @return the target count
+ */
 extern "C" int cBERewardInterface_getChallengesMedalTarget(cBERewardInterface* self, int peakID, int medal)
 {
     return *(int*)((char*)D_0045B018 + ((medal << 2) + (peakID << 4)));
@@ -1434,6 +1455,12 @@ extern void* D_0045B048[];
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getEarningsTarget__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns a peak's earnings target from D_0045B048.
+ *
+ * @param peakID  the peak id
+ * @return the target amount
+ */
 int cBERewardInterface_getEarningsTarget(void* self, int peakID)
 {
     return *(int*)((char*)(void*)D_0045B048 + peakID * 4);
@@ -1464,6 +1491,17 @@ struct sProfileSlot_00158910
     char data[0xF88];
 };
 
+/**
+ * Returns a character's medal for one event: byte 1 of its score record.
+ *
+ * The record comes from cBECharProfileDB_getScoreStats() with @p location and @p eventID.
+ *
+ * @param iProfileIndex  profile index (On Tour: iProfileIndex)
+ * @param iCharacterID  character id (On Tour: iCharacterID)
+ * @param eventID  passed as the score record's event kind
+ * @param location  passed as the score record's location
+ * @return the medal (0 best to 3), or -1 when there is no record
+ */
 signed char cBERewardInterface_getTrackMedal(void* self, int iProfileIndex, int iCharacterID, int eventID, int location)
 {
     void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])cBELibrary_profileLib)[iProfileIndex][iCharacterID], location, eventID);
@@ -1495,6 +1533,16 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* iface, int a, int b, int c);
 
+/**
+ * Returns the collectibles medal a character has on a peak.
+ *
+ * Compares the mission interface's collectibles count for the peak with the peak's four targets (D_0045AFE8).
+ *
+ * @param iProfileIndex  profile index (On Tour: iProfileIndex)
+ * @param iCharacterID  character id (On Tour: iCharacterID)
+ * @param kind  the peak id (On Tour: peakID)
+ * @return the best medal reached (0 best to 3), or -1
+ */
 extern "C" int cBERewardInterface_getCollectiblesMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind)
 {
     int v = cBEMissionInterface_getCurrentCollectForPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 0xA), iProfileIndex, iCharacterID, kind);
@@ -1516,6 +1564,16 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* iface, int a, int b, int c);
 
+/**
+ * Returns the big-challenges medal a character has on a peak.
+ *
+ * Compares the mission interface's completed-mission count on the peak with its four targets (D_0045B018).
+ *
+ * @param iProfileIndex  profile index (On Tour: iProfileIndex)
+ * @param iCharacterID  character id (On Tour: iCharacterID)
+ * @param kind  the peak id (On Tour: peakID)
+ * @return the best medal reached (0 best to 3), or -1
+ */
 extern "C" int cBERewardInterface_getBigChallengesMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind)
 {
     int v = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 0xA), iProfileIndex, iCharacterID, kind);
@@ -1537,6 +1595,14 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b);
 
+/**
+ * Tells whether a character's total earnings reach a peak's earnings target.
+ *
+ * @param iProfileIndex  profile index (On Tour: iProfileIndex)
+ * @param iCharacterID  character id (On Tour: iCharacterID)
+ * @param medal  the peak id (an index into D_0045B048), despite the parameter's name
+ * @return 1 (a medal) when the target is reached, else -1
+ */
 extern "C" int cBERewardInterface_getEarningsMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int medal)
 {
     unsigned int earned = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_Fv(cBE_getBE(), 0xB), iProfileIndex, iCharacterID);
@@ -1671,6 +1737,13 @@ extern int D_00440F58[];
 extern void* D_004C3EF0[];
 extern "C" void cBEUserAwards_clear(void* self);
 
+/**
+ * Clears the awards log and caches the next earnings, collectibles and big-challenge targets.
+ *
+ * Clears D_004C3EF0 (cBEUserAwards_clear()) and computes the targets for rider 0's character on profile 0
+ * into D_004A1260, D_00440F48[3] and D_00440F58[3]. Then zeroes +0x10 and stores -1 at +0x14 of
+ * cBERewardInterface_instance (not of @p self).
+ */
 extern "C" void cBERewardInterface_clearUserAwards(cBERewardInterface* self)
 {
     cBEUserAwards_clear(D_004C3EF0);
@@ -2099,6 +2172,16 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, i
 extern int D_00440F48[];
 extern int D_0045AFE8_2d[][4] __asm__("D_0045AFE8");
 
+/**
+ * Checks a rider's collectibles count on a peak against the next target and awards what it unlocks.
+ *
+ * Does nothing unless the cached target D_00440F48[k] is positive and reached. Then the target moves to the
+ * next level; when trophy 2 was owned and the count equals the peak's lowest target, the trophy is awarded; a
+ * newly conquered mountain awards category 0.
+ *
+ * @param rider  the rider index (On Tour: iRider)
+ * @param k  the peak id
+ */
 extern "C" void cBERewardInterface_awardUserCollectible(cBERewardInterface* self, int rider, int k)
 {
     int cur = cBEMissionInterface_getCurrentCollectForPeak(cBE_getInterface_Fv(cBE_getBE(), 0xA), rider, k);
@@ -2194,6 +2277,19 @@ struct sSlots2_00159CD0 {
 extern sSlots4_00159CD0 D_0045AA28;
 extern sSlots2_00159CD0 D_004A1268[];
 
+/**
+ * Gives a character an award category's rewards, logs them, and awards anything that unlocks as a result.
+ *
+ * Except for categories 17-19 an award already given is skipped. Categories 0-4 (mountain, peaks) call a
+ * front-end notice (func_001E2578, func_001E2518, func_001E2428) and give a fixed reward; peak 0's trophies
+ * give random rewards of kinds 4 and 3 and unlock peak 1, peak 1's give kinds 7 and 5 and unlock peaks 1 and
+ * 2, peak 2's give a fixed reward; 17-31 give an item. The category bit is set (+0xF28), the rewards go into
+ * the log D_004C3EF0, and the mountain, peak and trophy awards are re-checked.
+ *
+ * @param profile  profile index (On Tour: iProfileIndex)
+ * @param iCharacterID  character id (On Tour: iCharacterID)
+ * @param bit  the award category, 0-31 (On Tour: awardCategory)
+ */
 extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profile, int iCharacterID, int bit)
 {
     char* rec = (char*)cBELibrary_profileLib + profile * 0x9B50 + iCharacterID * 0xF88;
@@ -2444,6 +2540,14 @@ struct sRewardStrings_0015A488 {
     char* mStrings[10]; // 0x174
 };
 
+/**
+ * Constructs the awards log: points its per-kind bit sets into its own storage, then clears it.
+ *
+ * The pointers at +0x174 for kinds 0, 2, 3, 4, 5, 7 and 8 get areas inside the object (+0x146 to +0x170);
+ * kinds 1, 6 and 9 stay 0.
+ *
+ * @return @p self
+ */
 extern "C" void* cBEUserAwards_cBEUserAwards(sRewardStrings_0015A488* self)
 {
     for (int i = 0; i < 10; i++)
@@ -2466,6 +2570,9 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_clear);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 
+/**
+ * Clears the awards log: zeroes its first 0x174 bytes and sets the short at +0x4 to -1.
+ */
 extern "C" void cBEUserAwards_clear(void* self)
 {
     MEM_fill(self, 0, 0x174);

@@ -23,6 +23,13 @@ struct cDataManager5828 {
     void* vtable;           // 0xC
 };
 
+/**
+ * Constructs a data manager with a pool of data-instance records, all placed on the empty list.
+ *
+ * @param flags  memory flags for the record pool ("tDataInstanceInfo")
+ * @param count  number of instance records (On Tour maxDataInstances)
+ * @return @p self
+ */
 extern "C" cDataManager5828* cDataManager_cDataManager(cDataManager5828* self, int flags, int count)
 {
     self->vtable = cDataManager_vtbl;
@@ -131,6 +138,16 @@ public:
 // PORT: the unit declares cDataManager_DetachData as returning void; it really returns the entry's key.
 int cDataManager_DetachData_impl(cDataManager5A20* self, sDmNode5A20* entry) __asm__("cDataManager_DetachData");
 
+/**
+ * Detaches an attached data handle and every instance linked to it, recycling their records.
+ *
+ * Each linked instance goes through the detach callback (virtual slot 3); the head then gets slot 5 when it
+ * had
+ * linked instances, otherwise slot 3.
+ *
+ * @param entry  the data handle returned by the attach
+ * @return the detached data pointer, the handle's first word (On Tour returns void* pData)
+ */
 int cDataManager_DetachData_impl(cDataManager5A20* self, sDmNode5A20* entry)
 {
     sDmNode5A20* first = entry->next;
@@ -1421,6 +1438,18 @@ struct sDmEnt7450 {
     int c;      // 0x18
 };
 
+/**
+ * Finds the next entry of the NIS list that can play, requesting its script or readying its video.
+ *
+ * Starting at @p index, an entry already requested is returned at once; a script entry is requested by index
+ * (or by category when it has none) and returned when the request succeeds; a video entry readies its video
+ * when no video player exists yet and is returned.
+ *
+ * @param vself  the NIS list (tNISList)
+ * @param index  entry to start searching at (On Tour startSearchIndex)
+ * @param skipFlagged  nonzero to pass over entries with flag 2 (On Tour ignoreSkipInheritScripts)
+ * @return the index of the entry set up, or -1 when none can be
+ */
 extern "C" int tNISList_SetupNextScript(void* vself, int index, int skipFlagged)
 {
     char* self = (char*)vself;
@@ -1953,6 +1982,15 @@ struct sScriptMgr_7F20 {
     int fA48;                   // 0xA48
 };
 
+/**
+ * Constructs the script engine: its bases and member objects, then empty state.
+ *
+ * Builds the script, video and data-manager bases (256 data instances), the two object camera managers, the
+ * game-state and event objects and the animation and sound bank managers; registers itself as the engine
+ * instance (D_004A34B0); no NIS list playing (2), no bank attaching (10), no anchor tables and empty banks.
+ *
+ * @return @p self
+ */
 extern "C" sScriptMgr_7F20* cSSXScriptEngine_cSSXScriptEngine(sScriptMgr_7F20* self)
 {
     cBXScriptEngine_cBXScriptEngine(self);
@@ -2023,6 +2061,12 @@ struct sSlot_780B8 {
     char rest[0x120 - 0x10];
 };
 
+/**
+ * Destroys the script engine: runs DeInitOnce() if needed, then destroys the members and bases in reverse
+ * order.
+ *
+ * @param flags  g++ destructor flags, passed to the base destructor; bit 0 set frees the object's memory
+ */
 // Script manager destructor: members in reverse order, then the base.
 extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int flags)
 {
@@ -2083,6 +2127,13 @@ struct sDmEngine8210 {
     int field_0x620;            // 0x620
 };
 
+/**
+ * Loads the script master table (and its debug name table) and sets up the base script engine for it.
+ *
+ * With the debug table, each script's name offset becomes a pointer into it; without it, the names are 0.
+ * Then
+ * SetupBXEngine() is called with the script count, 10 and 0x4000.
+ */
 // PORT: script offsets are rebased into pointers held in int.
 extern "C" void cSSXScriptEngine_InitOnce(sDmEngine8210* self)
 {

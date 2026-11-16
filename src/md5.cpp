@@ -26,6 +26,14 @@ struct md5_state_process {
 #define H(x, y, z) ((x) ^ (y) ^ (z))
 #define I(x, y, z) ((y) ^ ((x) | ~(z)))
 
+/**
+ * Runs the MD5 compression function on one 64-byte block and adds the result into the state.
+ *
+ * The standard four rounds of 16 steps (RFC 1321). An unaligned block is first copied into a local buffer.
+ *
+ * @param ctx   MD5 state (the a, b, c, d words are updated)
+ * @param data  the 64-byte block
+ */
 extern "C" void md5_process(md5_ctx* ctx, const unsigned char* data)
 {
     md5_state_process* pms = (md5_state_process*)ctx;
@@ -168,6 +176,17 @@ struct md5_state_append {
     unsigned char buf[64];
 };
 
+/**
+ * Feeds bytes into an MD5 computation, hashing each complete 64-byte block.
+ *
+ * Adds the length in bits to the 64-bit counter, tops up and processes a partly filled buffer first, hashes
+ * the whole blocks straight from @p data and keeps the remainder in the buffer. Nothing happens for nbytes <=
+ * 0.
+ *
+ * @param ctx     MD5 state
+ * @param data    bytes to add
+ * @param nbytes  number of bytes
+ */
 extern "C" void md5_append(md5_ctx* ctx, const unsigned char* data, int nbytes)
 {
     md5_state_append* pms = (md5_state_append*)ctx;

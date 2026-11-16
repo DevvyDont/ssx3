@@ -174,6 +174,21 @@ typedef int (*DfBoolFn_0750)(void*);
 typedef sDfMat_0750* (*DfMatFn_0750)(void*);
 typedef void (*DfSetFn_0750)(void*, int);
 
+/**
+ * Constructs a dead-fade node: the object fades out and sinks while keeping the pose it had when it died.
+ *
+ * Copies the first 12 bytes of the fade data to +0x1C, sets the fade step to frame time / fade duration (desc
+ * +0x8) and the sink speed to desc +0xC * frame time, starting fully opaque at depth 0. Allocates one matrix
+ * per model part ("DeadFadeAnimMats"): copied from the old node's animation matrices when it has them (slots
+ * 26/27), otherwise built from the part hierarchy under the old node's root transform (slot 24) or the
+ * instance's world matrix. Then deletes the old node and updates the instance's flag bits.
+ *
+ * @param bucket  update bucket passed to the instance-node constructor
+ * @param obj     the world instance (On Tour tInstanceRecord*)
+ * @param desc    the fade data (On Tour tMakeDeadFadeData*)
+ * @param other   the instance's previous node, or 0 (On Tour pOldNode); it is deleted here
+ * @return self
+ */
 extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* self, int bucket, void* obj, sDfDesc_0750* desc, sDfOther_0750* other)
 {
     sDfMatElem_0750** pm = &self->mats;
@@ -247,6 +262,11 @@ extern char cDeadFadeNode_vtbl[];
 void cMemMan_free(void*);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
+/**
+ * Destroys a dead-fade node: frees its part matrices (+0x38), then runs the cInstanceNode destructor.
+ *
+ * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ */
 extern "C" void cDeadFadeNode__cDeadFadeNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cDeadFadeNode_vtbl;
@@ -265,6 +285,13 @@ INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_update);
 // pass-through wrapper and this caller passes two args (prototype mismatch).
 void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
 
+/**
+ * Advances a dead-fade node by one frame: sinks it further and fades it out.
+ *
+ * Adds the sink speed to the depth (+0x30) and subtracts the fade step from the opacity (+0x28). Once the
+ * opacity has reached 0, func_002D1CC0() applies the fade data's follow-up event to the instance (event 0
+ * turns it into a dead node, 3 into a restore node).
+ */
 extern "C" void cDeadFadeNode_update(void* self)
 {
     float t;
@@ -388,6 +415,13 @@ static inline int Visible_350CB8(sDfCam_350CB8* cam, sDfObj_350CB8* obj)
     return 0;
 }
 
+/**
+ * Draws a fading dead object, lowered by its sink depth and with its current opacity.
+ *
+ * Skips the object unless the world cache reports its section as drawable, or when its bounding box the
+ * graphics manager culls (slot 93), then draws the instance (slot 95) with an identity matrix translated down
+ * by the depth (+0x30), the opacity (+0x28) and the saved part matrices (+0x38).
+ */
 // Draws the fading corpse: culls its box, then draws it lowered by the fade depth at 0x30.
 extern "C" void cDeadFadeNode_render(char* self)
 {

@@ -39,6 +39,11 @@ public:
     virtual void v09(int);
 };
 
+/**
+ * Opens the THX video-calibration popup ("156thx") on its brightness page.
+ *
+ * Shows the "brightps2" image and sets Text0000 to kT_THXBrightness.
+ */
 extern "C" void cFEPopupVideoCalibration_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -97,6 +102,16 @@ struct sPopup_EC68 {
     signed char shown;          // 0x48
 };
 
+/**
+ * Steps the video-calibration popup on input slot 5 (probably accept): first to the colour-bars page, then
+ * marks it done.
+ *
+ * The bars page shows "barsps2" in place of "brightps2", sets Text0000 to kT_THXBars and hides Text0001. Each
+ * press plays UI sound 6.
+ *
+ * @param in  the input (On Tour cUIInput* pInput)
+ * @return 1 (the popup takes every input)
+ */
 extern "C" int cFEPopupVideoCalibration_onInputBegin(sPopup_EC68* self, char* in)
 {
     sVEi_EC68* vt = *(sVEi_EC68**)(in + 8);
@@ -184,6 +199,9 @@ static inline int optB5_EE10(sOptions_EE10 o)
     return o.b5;
 }
 
+/**
+ * Opens the screen-position popup ("24screen_position") and loads the current screen offset from the options.
+ */
 extern "C" void cFEPopupScreenPos_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -313,6 +331,14 @@ static inline int clamp_F050(int v, int lo, int hi)
     return v;
 }
 
+/**
+ * Moves the screen offset with the first pad that has input, or closes the popup on accept (keep) or back
+ * (cancel).
+ *
+ * The offset stays within -20..20 on each axis (UI sound 4 when pushed past it) and is applied at once
+ * through
+ * the renderer (GrMan slot 12). Accept plays sound 6 and back sound 3.
+ */
 extern "C" void cFEPopupScreenPos_onUpdate(sPopup_F050* self)
 {
     char* in = *(char**)(self->owner + 0xC);
@@ -393,6 +419,15 @@ extern "C" void* func_001DF380(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRiderBio__cFEStateRiderBio__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the rider-bio front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * delete
+ * flags reach it untouched in the second argument register.
+ *
+ * @return meaningless (the void base destructor's leftover return register)
+ */
 void* cFEStateRiderBio__cFEStateRiderBio(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
@@ -419,6 +454,15 @@ extern "C" void* func_001DF3E0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRuleSelect__cFEStateRuleSelect__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the rule-select front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * delete
+ * flags reach it untouched in the second argument register.
+ *
+ * @return meaningless (the void base destructor's leftover return register)
+ */
 void* cFEStateRuleSelect__cFEStateRuleSelect(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
@@ -478,6 +522,14 @@ struct sVEntry001DF4E8 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Destroys the bragging-rights front-end state: its two embedded 0x34-byte members (+0x6D0), then the base
+ * state.
+ *
+ * The base destructor func_001A85D0 frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cFEStateBraggingRights_vtbl;
@@ -1630,6 +1682,15 @@ extern "C" void* func_001E0178(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStatePeakRoom__cFEStatePeakRoom__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the peak-room front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * delete
+ * flags reach it untouched in the second argument register.
+ *
+ * @return meaningless (the void base destructor's leftover return register)
+ */
 void* cFEStatePeakRoom__cFEStatePeakRoom(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
@@ -1660,6 +1721,12 @@ extern "C" void func_001D4B20(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
+/**
+ * Destroys the trophy-room front-end state: releases its five loaded images (func_001D4B20), then the base
+ * states.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cFEStateTrophyRoom__cFEStateTrophyRoom(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
@@ -1686,6 +1753,15 @@ extern "C" void* func_001E0268(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom__cFEStateRewardsRoom__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the rewards-room front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * delete
+ * flags reach it untouched in the second argument register.
+ *
+ * @return meaningless (the void base destructor's leftover return register)
+ */
 void* cFEStateRewardsRoom__cFEStateRewardsRoom(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
@@ -1730,6 +1806,9 @@ extern char D_00460008[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Opens the multiplayer-mode popup ("86multiplayermode").
+ */
 extern "C" void cFEPopupSelectMultiplayerMode_onCreateScreen(void* self)
 {
     int hash = GetHashValue32(D_00460008);
@@ -1751,6 +1830,12 @@ extern char D_00460020[];
 extern char D_004A13A0[];
 extern char D_004A14F8[];
 
+/**
+ * Sets up the multiplayer-mode popup's widgets: menu0000 becomes a wrapping two-item menu, items "0" and "1"
+ * get indices 0 and 1.
+ *
+ * @param item  the widget being created (On Tour cUIThing* pWidget)
+ */
 extern "C" void cFEPopupSelectMultiplayerMode_onWidgetCreate(void* self, void* item)
 {
     int h1 = *(int*)((char*)item + 0x38);
@@ -1778,6 +1863,15 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onWidgetEvent);
 extern int D_004A19D4;
 extern "C" void func_0039F190(void* self, int a1);
 
+/**
+ * Closes the multiplayer-mode popup: select (5) records the chosen mode, back (6) cancels.
+ *
+ * Select stores whether item 1 was chosen in D_004A19D4, which the front end checks when it starts the next
+ * multiplayer state.
+ *
+ * @param pWidget  the widget that sent the event
+ * @param Event  the widget event
+ */
 extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(void* self, void* pWidget, int Event)
 {
     switch (Event) {
@@ -1900,6 +1994,15 @@ extern "C" void* func_001E0510(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions__cFEStateAudioOptions__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the audio-options front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * delete
+ * flags reach it untouched in the second argument register.
+ *
+ * @return meaningless (the void base destructor's leftover return register)
+ */
 void* cFEStateAudioOptions__cFEStateAudioOptions(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
@@ -1931,6 +2034,15 @@ extern "C" void* func_001E0578(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine__cFEStateRequestLine__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the request-line front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * delete
+ * flags reach it untouched in the second argument register.
+ *
+ * @return meaningless (the void base destructor's leftover return register)
+ */
 void* cFEStateRequestLine__cFEStateRequestLine(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
@@ -2144,6 +2256,15 @@ extern "C" void* func_001E07C0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the select-multiplayer-mode front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * delete
+ * flags reach it untouched in the second argument register.
+ *
+ * @return meaningless (the void base destructor's leftover return register)
+ */
 void* cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
@@ -2168,6 +2289,15 @@ extern "C" void* func_001E0820(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateMPCircuit__cFEStateMPCircuit__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the multiplayer-circuit front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * delete
+ * flags reach it untouched in the second argument register.
+ *
+ * @return meaningless (the void base destructor's leftover return register)
+ */
 void* cFEStateMPCircuit__cFEStateMPCircuit(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;

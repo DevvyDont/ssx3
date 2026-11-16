@@ -126,6 +126,12 @@ struct sEffectLinkObj_5828 {
     int value;         // 0xC
 };
 
+/**
+ * Destroys an effect modifier: decrements the live count (D_004A3FF4), unlinks it from its effect chain, then
+ * frees it when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cEffectModifier__cEffectModifier(void* self, int flags)
 {
     sEffectLinkObj_5828* o = (sEffectLinkObj_5828*)self;
@@ -272,6 +278,12 @@ void operator_delete(int*);
 extern "C" void func_00370758(int* self, int flags);
 extern "C" void cEffectModifier__cEffectModifier(void* self, int flags);
 
+/**
+ * Destroys a particle modifier: frees its 0xD8-byte buffer (+0x1E0), decrements the live count (D_004A3FF8),
+ * destroys the embedded static emitter (+0x50), then the cEffectModifier part.
+ *
+ * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ */
 extern "C" void cParticleModifier__cParticleModifier(void* self, int flags)
 {
     char* s = (char*)self;
@@ -291,6 +303,12 @@ INCLUDE_ASM("object/effectlink", cParticleModifier_update);
 #ifdef SKIP_ASM
 extern "C" void cStaticEmitter_update(void* self, float dt);
 
+/**
+ * Advances a particle modifier's static emitter by one 1/60 s step until the effect has finished.
+ *
+ * An emitter whose life (+0x50) starts negative runs forever; otherwise the effect is marked finished
+ * (+0x1E4) once the life has run down to 0.
+ */
 extern "C" void cParticleModifier_update(void* self)
 {
     char* s = (char*)self;
@@ -338,6 +356,14 @@ struct sEffectLinkVEntry5BF0 {
 
 extern "C" void cStaticEmitter_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes a particle modifier's state to a replay frame.
+ *
+ * Writes the cEffectModifier part and the finished flag (+0x1E4); while not finished, also the 0xD8-byte
+ * buffer (+0x1E0), the 0x40 bytes at +0x10 and the static emitter's own state.
+ *
+ * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
+ */
 extern "C" void cParticleModifier_writeToReplayFrame(void* self, void* stream)
 {
     cEffectModifier_writeToReplayFrame(self, stream);
@@ -466,6 +492,12 @@ void operator_delete(int*);
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags);
 extern "C" void cEffectModifier__cEffectModifier(void* self, int flags);
 
+/**
+ * Destroys a dynamic particle modifier: frees its 0xD8-byte buffer (+0x260), decrements the live count
+ * (D_004A3FFC), destroys the embedded dynamic emitter (+0x60), then the cEffectModifier part.
+ *
+ * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ */
 extern "C" void cDynamicParticleModifier__cDynamicParticleModifier(void* self, int flags)
 {
     char* s = (char*)self;
@@ -545,6 +577,14 @@ struct sEffectLink5EF8;
 extern "C" void func_00345EF8(sEffectLink5EF8* self);
 extern "C" void func_003710D0(void* sub, void* a, void* b, int flag, float dt);
 
+/**
+ * Advances a dynamic particle effect by one 1/60 s step and marks it finished when it is done.
+ *
+ * Follows its link first (func_00345EF8), then updates the emitter at +0x60 with the positions at
+ * +0x30/+0x40. While fading (+0x14) it stops emitting and finishes once no particles are left (+0x240);
+ * otherwise it keeps emitting and finishes when a non-negative life (+0x60) runs out. Does nothing once
+ * finished (+0x18).
+ */
 extern "C" void cDynamicParticleModifier_update(void* self)
 {
     char* s = (char*)self;
@@ -618,6 +658,14 @@ struct sEffectLinkVEntry60A0 {
 
 extern "C" void func_003712B8(void* self, void* stream);
 
+/**
+ * Writes a dynamic particle modifier's state to a replay frame.
+ *
+ * Writes the cEffectModifier part and the 0x50 bytes at +0x10 (which include the fade and finished flags);
+ * while not finished, also the 0xD8-byte buffer (+0x260) and the emitter's state (func_003712B8).
+ *
+ * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
+ */
 extern "C" void cDynamicParticleModifier_writeToReplayFrame(void* self, void* stream)
 {
     cEffectModifier_writeToReplayFrame(self, stream);
@@ -718,6 +766,11 @@ struct sEffectLinkObj_6228 {
     void** vt;         // 0x8
 };
 
+/**
+ * Destroys a halo modifier: decrements the live count (D_004A4000), then runs the cEffectModifier destructor.
+ *
+ * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ */
 extern "C" void cHaloModifier__cHaloModifier(void* self, int flags)
 {
     ((sEffectLinkObj_6228*)self)->vt = cHaloModifier_vtbl;
@@ -729,6 +782,9 @@ extern "C" void cHaloModifier__cHaloModifier(void* self, int flags)
 //100%
 INCLUDE_ASM("object/effectlink", cHaloModifier_update);
 #ifdef SKIP_ASM
+/**
+ * Spins a halo: adds the integer step (+0x2C) to its angle in degrees (+0x30), resetting it to 0 at +/-360.
+ */
 // Advance a rotation angle (degrees) by an integer step, wrapping to 0 at +/-360.
 extern "C" void cHaloModifier_update(void* self)
 {
@@ -754,6 +810,12 @@ struct sEffMtx_62A0 {
 extern "C" void func_0034FED8(void* a, int b, sEffMtx_62A0* out);
 extern "C" void func_002D1D10(sEffVec4_62A0* pos, void* p, int n, float a, float b);
 
+/**
+ * Draws a halo at the position of its instance's mesh.
+ *
+ * Gets the world matrix of mesh +0x28 of the instance (+0xC) and draws the halo sprite there with
+ * func_002D1D10(), passing the halo data (+0x10), +0x24, the size (+0x20) and the current angle (+0x30).
+ */
 extern "C" void cHaloModifier_render(void* self)
 {
     sEffMtx_62A0 m;
@@ -840,6 +902,18 @@ struct sEffFlags_346350 {
     unsigned int b6 : 1;
 };
 
+/**
+ * Constructs a flexible bridge node for a world instance.
+ *
+ * Builds the spring chain (+0x50) from the bridge data and the length of the instance's first edge (the first
+ * two mesh vertices, through graphics manager slot 97), then sets up the strip mesh, the spring nodes and the
+ * first pose, and updates the instance's flag bits. Also sets +0x40 = 100 and +0x44 = 12 (meaning unknown).
+ *
+ * @param bucket  update bucket
+ * @param pInst   the world instance (On Tour tInstanceRecord*)
+ * @param tdata   the bridge data (On Tour tMakeFlexBridgeData*)
+ * @return self
+ */
 extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int bucket, int pInst, int tdata)
 {
     func_0034FB00(self, bucket, 5, pInst);
@@ -883,6 +957,16 @@ struct sEffectLinkVEntry64E0 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Constructs a flexible bridge node from a replay frame.
+ *
+ * Runs the cInstanceNode replay constructor, reads the spring chain (func_00353E80), sets up the strip mesh,
+ * reads 0x30 bytes at +0x20 and poses the strip.
+ *
+ * @param bucket  update bucket
+ * @param stream  the replay frame to read (On Tour cBxReplayFrame*)
+ * @return self
+ */
 extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(void* self, void* bucket, void* stream)
 {
     void* p = (char*)self + 0x20;
@@ -933,6 +1017,15 @@ struct sRCtx_346568 {
     sRVEntry_346568* vt;
 };
 
+/**
+ * Destroys a flexible bridge node and puts its instance back into the space hash with its own bounding box.
+ *
+ * Frees the face, normal and vertex arrays, releases the strip mesh (graphics manager slot 77), moves the
+ * instance in the Nash grid from the bridge's box to the instance's own box, destroys the spring chain and
+ * runs the cInstanceNode destructor.
+ *
+ * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ */
 extern "C" void cFlexBridgeNode__cFlexBridgeNode(char* self, int flags)
 {
     *(void***)(self + 0xC) = cFlexBridgeNode_vtbl;

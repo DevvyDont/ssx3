@@ -26,6 +26,15 @@ extern int D_004A51EC;
 extern int D_004A525C;
 extern sSlot_3E60 D_004A51E0, D_004A51F0, D_004A51F8, D_004A5200, D_004A5208, D_004A5210, D_004A5218, D_004A5220, D_004A5228, D_004A5230, D_004A5238, D_004A5240, D_004A5248, D_004A5250, D_004A5258;
 
+/**
+ * Runs the static constructors of the scripter unit: colour constants, slot objects and the "NoScript" hash.
+ *
+ * Builds a slot with -1, 58 four-float constants (D_004D3798 on), 14 slots numbered 0-13 and stores
+ * GetHashValue32("NoScript") in D_004A525C. Only acts for the construction pass at the default priority.
+ *
+ * @param init  nonzero for the construction pass
+ * @param prio  initialisation priority; only 0xFFFF does anything
+ */
 extern "C" void __sti__all_in_one_scripter_cpp(int init, int prio)
 {
     if (prio == 0xFFFF && init != 0) {

@@ -57,6 +57,14 @@ struct sSse278358
     char rigD[0x1C];                // 0x938
 };
 
+/**
+ * Sets up the script engine for a game: setup-info pool, main script bank, script objects and the NIS/idle
+ * lists.
+ *
+ * Allocates the 10-entry setup-info free list ("SetupInfoHeap"), loads bank 0 synchronously from
+ * data/scripts/scdat.big|data/scripts/scdat_main.big, initialises the four built-in script objects
+ * (func_00283298) and creates two NIS lists ("NISLists") and two idle lists ("IdleLists", one per viewport).
+ */
 extern "C" void cSSXScriptEngine_Load(sSse278358* self)
 {
     self->links = (sLink_278358*)operator_new_tag(0xC8, D_00481BD8, 0, 0);
@@ -126,6 +134,15 @@ struct sSseEngine8590 {
     char rigD[0x1C];                // 0x938
 };
 
+/**
+ * Tears down what Load() and the track loads set up: ends all scripts and frees banks, lists and objects.
+ *
+ * Force-ends every script, releases all requests, de-initialises the built-in script objects, purges the
+ * track
+ * data and all 10 banks, detaches all data, resets the video engine, destroys the NIS and idle lists, frees
+ * the
+ * setup-info pool and clears the NIS play state.
+ */
 extern "C" void cSSXScriptEngine_Purge(sSseEngine8590* self)
 {
     cSSXScriptEngine_ForceEndScriptsAll((cSSXScriptEngine*)self);
@@ -235,6 +252,16 @@ struct sSse8720 {
     char fx[0x10];                  // 0x92C
 };
 
+/**
+ * Runs one frame of the script engine: updates the lists, requests, video, cameras and the playing NIS.
+ *
+ * While a NIS list plays, a human rider pressing the skip input (0x6F) skips it when skipping is allowed and
+ * the
+ * no-skip countdown (mNumFramesNoSkip) is 0; the play state is cleared once the list stops playing, and with
+ * the
+ * "hud" UI state up the load indicator shows while the list is probably loading. Counts mNumFramesNoSkip
+ * down.
+ */
 extern "C" void cSSXScriptEngine_Update(sSse8720* self)
 {
     for (int i = 0; i < 2; i++)
@@ -292,6 +319,12 @@ struct sScrSlot8918 {
     int pad[3];
 };
 
+/**
+ * Polls the pending asynchronous loads and processes any that have finished.
+ *
+ * Checks the track filter table first, then each of the 10 script banks; returns at once when mNumAsyncs is
+ * 0.
+ */
 extern "C" void cSSXScriptEngine_UpdateLoad(cSSXScriptEngine* self)
 {
     if (self->mNumAsyncs == 0) return;
@@ -341,6 +374,12 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AttachAnchorDataTable);
 #ifdef SKIP_ASM
 extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self, int a1);
 
+/**
+ * Registers a world section's anchor data table, stored by the section's BE section ID.
+ *
+ * @param key  world section ID (On Tour worldSectionID)
+ * @param val  the anchor table (On Tour pData)
+ */
 extern "C" void cSSXScriptEngine_AttachAnchorDataTable(cSSXScriptEngine* self, int key, int val)
 {
     *(int*)((char*)self + (cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan, key) << 2) + 0x558) = val;
@@ -352,6 +391,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_DetachAnchorDataTable);
 #ifdef SKIP_ASM
 extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self, int a1);
 
+/**
+ * Forgets a world section's anchor data table.
+ *
+ * @param key  world section ID (On Tour worldSectionID)
+ */
 extern "C" void cSSXScriptEngine_DetachAnchorDataTable(cSSXScriptEngine* self, int key)
 {
     *(int*)((char*)self + (cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan, key) << 2) + 0x558) = 0;
@@ -397,6 +441,15 @@ struct sScrSlot8AD0 {
     char pad[0x120 - 8];
 };
 
+/**
+ * Forces a script request to play now and refreshes the camera managers it uses.
+ *
+ * After func_00282450() succeeds, each of the two object camera managers that the request's player uses
+ * (engine vtable slot 4) is updated with func_00281100().
+ *
+ * @param key  request handle (On Tour requestHandle)
+ * @return func_00282450()'s result: nonzero when the request was played
+ */
 extern "C" int cSSXScriptEngine_ForcePlayUpdate(cSSXScriptEngine* self, int key)
 {
     int r = func_00282450(self, key);
@@ -446,6 +499,12 @@ extern const char D_004A34B8[];
 extern const char D_00481C38[];
 extern const char D_004A34C0[];
 
+/**
+ * Starts loading the current track's script data: its filter table and its script bank (bank 1).
+ *
+ * The files are data/scripts/scdat.big|data/scripts/scfilter<location>.dat and
+ * data/scripts/scdat.big|data/scripts/scdat_<location>.big, named after the new race's location.
+ */
 // Loads the current profile's script file (counting it if found), then queues the profile's second script.
 extern "C" void cSSXScriptEngine_AsyncLoadTrack(cSSXScriptEngine* self)
 {
@@ -499,6 +558,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsLoadTrackComplete);
 extern "C" void cSSXScriptEngine_UpdateLoad(cSSXScriptEngine*);
 extern "C" int cSSXScriptEngine_IsBankLoading(cSSXScriptEngine*, int);
 
+/**
+ * Tells whether the track's script data has finished loading, polling the loads first.
+ *
+ * @return 1 when the filter table has arrived and bank 1 is no longer loading, otherwise 0
+ */
 extern "C" int cSSXScriptEngine_IsLoadTrackComplete(cSSXScriptEngine* self)
 {
     int r;
@@ -516,6 +580,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsPauseMenuAllowed);
 #ifdef SKIP_ASM
 extern "C" int func_002770C0(void*);
 
+/**
+ * Tells whether the pause menu may open: always when no NIS list is playing, else as the playing list allows.
+ *
+ * @return nonzero when the pause menu is allowed
+ */
 extern "C" int cSSXScriptEngine_IsPauseMenuAllowed(cSSXScriptEngine* self)
 {
     int i = self->mPlayingNISList;
@@ -561,9 +630,16 @@ struct sSsxScriptRider {
 
 extern "C" void func_00275DD8(sSsxScriptRider* r, int a, int b);
 
-extern "C" void cSSXScriptEngine_AddToNISListByVideoCategory(cSSXScriptEngine* self, int i, int a, int b)
+/**
+ * Adds a video of the given category to a NIS list (the list's AddByVideoCategory, func_00275DD8).
+ *
+ * @param i  NIS list (eNISList)
+ * @param category  video category (On Tour eNISVideoCategory)
+ * @param scriptControlBits  script control bits
+ */
+extern "C" void cSSXScriptEngine_AddToNISListByVideoCategory(cSSXScriptEngine* self, int i, int category, int scriptControlBits)
 {
-    func_00275DD8(&((sSsxScriptRider*)self->mpNISLists)[i], a, b);
+    func_00275DD8(&((sSsxScriptRider*)self->mpNISLists)[i], category, scriptControlBits);
 }
 #endif
 
@@ -572,6 +648,17 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AddToNISListByScriptCat
 #ifdef SKIP_ASM
 extern "C" void func_00275ED0(void* e, int a, int b, int c, int d, int f, int g);
 
+/**
+ * Adds a script chosen from a category to a NIS list (the list's AddByScriptCategory, func_00275ED0).
+ *
+ * @param i  NIS list (eNISList)
+ * @param scriptCategory  script category to choose from
+ * @param scriptControlBits  script control bits
+ * @param selectScriptNow  nonzero to pick the script now rather than when it is reached
+ * @param mainCharAIIndex  AI index of the main character, or -1
+ * @param supportChar0AIIndex  AI index of the first supporting character, or -1
+ * @param supportChar1AIIndex  AI index of the second supporting character, or -1
+ */
 extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(cSSXScriptEngine* self, int i, int scriptCategory, int scriptControlBits, int selectScriptNow, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
     func_00275ED0((char*)self->mpNISLists + i * 0xCC, scriptCategory, scriptControlBits, selectScriptNow, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
@@ -583,9 +670,19 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AddToNISListByScriptInd
 #ifdef SKIP_ASM
 extern "C" void func_00276048(void* e, int a, int b, int c, int d, int f);
 
-extern "C" void cSSXScriptEngine_AddToNISListByScriptIndex(cSSXScriptEngine* self, int i, int a, int b, int c, int d, int f)
+/**
+ * Adds a script, given by its master-table index, to a NIS list (the list's AddByScriptIndex, func_00276048).
+ *
+ * @param i  NIS list (eNISList)
+ * @param scriptIndex  script index in the master table
+ * @param scriptControlBits  script control bits
+ * @param mainCharAIIndex  AI index of the main character, or -1
+ * @param supportChar0AIIndex  AI index of the first supporting character, or -1
+ * @param supportChar1AIIndex  AI index of the second supporting character, or -1
+ */
+extern "C" void cSSXScriptEngine_AddToNISListByScriptIndex(cSSXScriptEngine* self, int i, int scriptIndex, int scriptControlBits, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
-    func_00276048((char*)self->mpNISLists + i * 0xCC, a, b, c, d, f);
+    func_00276048((char*)self->mpNISLists + i * 0xCC, scriptIndex, scriptControlBits, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
 }
 #endif
 
@@ -598,11 +695,21 @@ struct sScriptKeyEntry {
     int unk8;
 };
 
-extern "C" void cSSXScriptEngine_AddToNISListByScriptHashID(cSSXScriptEngine* self, int a1, int key, int b, int c, int d, int f)
+/**
+ * Adds a script, given by its hash ID, to a NIS list; does nothing if no master-table script has that ID.
+ *
+ * @param nisList  NIS list (eNISList)
+ * @param key  script hash ID
+ * @param scriptControlBits  script control bits
+ * @param mainCharAIIndex  AI index of the main character, or -1
+ * @param supportChar0AIIndex  AI index of the first supporting character, or -1
+ * @param supportChar1AIIndex  AI index of the second supporting character, or -1
+ */
+extern "C" void cSSXScriptEngine_AddToNISListByScriptHashID(cSSXScriptEngine* self, int nisList, int key, int scriptControlBits, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
     for (int i = 0; i < *(int*)self->mpMasterTableHeader; i++) {
         if (((sScriptKeyEntry*)self->mpMasterTable)[i].key == key) {
-            cSSXScriptEngine_AddToNISListByScriptIndex(self, a1, i, b, c, d, f);
+            cSSXScriptEngine_AddToNISListByScriptIndex(self, nisList, i, scriptControlBits, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
             return;
         }
     }
@@ -614,6 +721,13 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ReadyNISList);
 #ifdef SKIP_ASM
 extern "C" void func_00276270(sSsxScriptRider* r, int a);
 
+/**
+ * Prepares a NIS list for playing (func_00276270(list, 0)).
+ *
+ * On Tour's ReadyNISList returns the list state; this declaration is void.
+ *
+ * @param i  NIS list (eNISList)
+ */
 extern "C" void cSSXScriptEngine_ReadyNISList(cSSXScriptEngine* self, int i)
 {
     func_00276270(&((sSsxScriptRider*)self->mpNISLists)[i], 0);
@@ -626,6 +740,17 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_PlayNISList);
 extern "C" void func_002EF368(int);
 extern "C" int func_00276388(sSsxScriptRider* r, int a, int b);
 
+/**
+ * Starts playing a NIS list and makes it the engine's playing list.
+ *
+ * If the list does not end up in state 3 (probably playing), the engine goes back to no playing list (2);
+ * func_002EF368() is told 1 when play starts and 0 when it does not.
+ *
+ * @param i  NIS list (eNISList)
+ * @param startWithTransitionIn  nonzero to start with the transition in
+ * @param forceUpdate  nonzero to force an immediate update
+ * @return the list's state after the play call
+ */
 extern "C" int cSSXScriptEngine_PlayNISList(cSSXScriptEngine* self, int i, int startWithTransitionIn, int forceUpdate)
 {
     self->mPlayingNISList = i;
@@ -645,13 +770,20 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_TransferNISList);
 struct sSsxScriptRider;
 extern "C" int func_00276198(sSsxScriptRider* a, sSsxScriptRider* b);
 
-extern "C" int cSSXScriptEngine_TransferNISList(cSSXScriptEngine* self, int a, int b)
+/**
+ * Moves the contents of one NIS list into another (func_00276198).
+ *
+ * @param destNISList  destination NIS list
+ * @param sourceNISList  source NIS list
+ * @return 1 when the lists are the same, otherwise func_00276198()'s result
+ */
+extern "C" int cSSXScriptEngine_TransferNISList(cSSXScriptEngine* self, int destNISList, int sourceNISList)
 {
-    if (a == b) {
+    if (destNISList == sourceNISList) {
         return 1;
     }
     char* base = (char*)self->mpNISLists;
-    return func_00276198((sSsxScriptRider*)(base + a * 0xCC), (sSsxScriptRider*)(base + b * 0xCC));
+    return func_00276198((sSsxScriptRider*)(base + destNISList * 0xCC), (sSsxScriptRider*)(base + sourceNISList * 0xCC));
 }
 #endif
 
@@ -660,6 +792,12 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_PauseNISList);
 #ifdef SKIP_ASM
 void func_002766B0(void* r, int a);
 
+/**
+ * Pauses or resumes a NIS list (func_002766B0).
+ *
+ * @param i  NIS list (eNISList)
+ * @param isPaused  nonzero to pause, 0 to resume
+ */
 extern "C" void cSSXScriptEngine_PauseNISList(cSSXScriptEngine* self, int i, int isPaused)
 {
     func_002766B0(&((sSsxScriptRider*)self->mpNISLists)[i], isPaused);
@@ -671,9 +809,18 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_SkipNISListScripts);
 #ifdef SKIP_ASM
 extern "C" void func_002766D0(sSsxScriptRider* r, int a, int b);
 
-extern "C" void cSSXScriptEngine_SkipNISListScripts(cSSXScriptEngine* self, int i, int a, int b)
+/**
+ * Skips scripts in a NIS list (func_002766D0).
+ *
+ * On Tour's version returns the list state; this declaration is void.
+ *
+ * @param i  NIS list (eNISList)
+ * @param numScriptsToSkip  number of scripts to skip
+ * @param doTransition  nonzero to transition into the next script
+ */
+extern "C" void cSSXScriptEngine_SkipNISListScripts(cSSXScriptEngine* self, int i, int numScriptsToSkip, int doTransition)
 {
-    func_002766D0(&((sSsxScriptRider*)self->mpNISLists)[i], a, b);
+    func_002766D0(&((sSsxScriptRider*)self->mpNISLists)[i], numScriptsToSkip, doTransition);
 }
 #endif
 
@@ -722,6 +869,15 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNISListScriptCategor
 #ifdef SKIP_ASM
 extern "C" void func_00276998(sSsxScriptRider* r, int a);
 
+/**
+ * Looks up the script category of one entry of a NIS list (func_00276998).
+ *
+ * On Tour returns the category; this declaration is void, so the result is only left in the return register
+ * (callers use the _r / _int aliases).
+ *
+ * @param i  NIS list (eNISList)
+ * @param listIndex  entry in the list
+ */
 extern "C" void cSSXScriptEngine_GetNISListScriptCategory(cSSXScriptEngine* self, int i, int listIndex)
 {
     func_00276998(&((sSsxScriptRider*)self->mpNISLists)[i], listIndex);
@@ -753,6 +909,13 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNISListState);
 extern "C" void cSSXScriptEngine_UpdateLoad(cSSXScriptEngine*);
 extern "C" void func_00276B98(void*);
 
+/**
+ * Polls the pending loads, then queries a NIS list's state (func_00276B98).
+ *
+ * On Tour returns the state; this declaration is void.
+ *
+ * @param i  NIS list (eNISList)
+ */
 extern "C" void cSSXScriptEngine_GetNISListState(cSSXScriptEngine* self, int i)
 {
     cSSXScriptEngine_UpdateLoad(self);
@@ -765,6 +928,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNISListPlayState);
 #ifdef SKIP_ASM
 extern "C" void func_00276BD8(void*);
 
+/**
+ * Queries a NIS list's play state (func_00276BD8); On Tour returns it, this declaration is void.
+ *
+ * @param i  NIS list (eNISList)
+ */
 extern "C" void cSSXScriptEngine_GetNISListPlayState(cSSXScriptEngine* self, int i)
 {
     func_00276BD8((char*)self->mpNISLists + i * 0xCC);
@@ -776,6 +944,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNISListLength);
 #ifdef SKIP_ASM
 void func_00276CA8(void*);
 
+/**
+ * Queries the number of entries in a NIS list (func_00276CA8); On Tour returns it, this declaration is void.
+ *
+ * @param i  NIS list (eNISList)
+ */
 extern "C" void cSSXScriptEngine_GetNISListLength(cSSXScriptEngine* self, int i)
 {
     func_00276CA8((char*)self->mpNISLists + i * 0xCC);
@@ -824,6 +997,13 @@ extern "C" int func_00277060(sSsxScriptRider* r);
 // its int result; bind an int-returning alias by asm label.
 extern "C" int func_00276BD8_i(sSsxScriptRider* r) __asm__("func_00276BD8");
 
+/**
+ * Tells whether the player may skip the NIS that is playing.
+ *
+ * @return 1 when no NIS list plays; otherwise 1 only when the no-skip countdown is 0, the list allows
+ *         skipping and
+ *         its play state is not 3
+ */
 extern "C" int cSSXScriptEngine_IsActiveNISSkippable(cSSXScriptEngine* self)
 {
     int idx = self->mPlayingNISList;
@@ -845,6 +1025,12 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsPlayingNISListPlayer)
 #ifdef SKIP_ASM
 extern "C" int func_002771C8(void*, int);
 
+/**
+ * Tells whether a script player belongs to the NIS list that is playing.
+ *
+ * @param pScriptPlayerMain  the script player
+ * @return 0 when no NIS list plays, otherwise func_002771C8()'s answer
+ */
 extern "C" int cSSXScriptEngine_IsPlayingNISListPlayer(cSSXScriptEngine* self, int pScriptPlayerMain)
 {
     int i = self->mPlayingNISList;
@@ -860,9 +1046,19 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AddToIdleListByScriptCa
 #ifdef SKIP_ASM
 extern "C" void func_00275ED0(void* e, int a, int b, int c, int d, int f, int g);
 
-extern "C" void cSSXScriptEngine_AddToIdleListByScriptCategory(cSSXScriptEngine* self, int i, int a, int flag, int d, int f, int g)
+/**
+ * Adds a script chosen from a category to a viewport's idle list.
+ *
+ * @param i  viewport index
+ * @param scriptCategory  script category
+ * @param flag  nonzero to play the script in a loop (control bits 8)
+ * @param mainCharAIIndex  AI index of the main character, or -1
+ * @param supportChar0AIIndex  AI index of the first supporting character, or -1
+ * @param supportChar1AIIndex  AI index of the second supporting character, or -1
+ */
+extern "C" void cSSXScriptEngine_AddToIdleListByScriptCategory(cSSXScriptEngine* self, int i, int scriptCategory, int flag, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
-    func_00275ED0((char*)self->mpIdleLists + i * 0xCC, a, flag ? 8 : 0, 0, d, f, g);
+    func_00275ED0((char*)self->mpIdleLists + i * 0xCC, scriptCategory, flag ? 8 : 0, 0, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
 }
 #endif
 //100%
@@ -871,6 +1067,12 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ReadyIdleList);
 struct sSsxScriptRider;
 extern "C" void func_00276270(sSsxScriptRider* r, int a);
 
+/**
+ * Prepares a viewport's idle list for playing.
+ *
+ * @param i  viewport index
+ * @param flag  nonzero to play the list as soon as it is ready (On Tour playOnReady)
+ */
 extern "C" void cSSXScriptEngine_ReadyIdleList(cSSXScriptEngine* self, int i, int flag)
 {
     func_00276270((sSsxScriptRider*)((char*)self->mpIdleLists + i * 0xCC), flag ? 2 : 0);
@@ -882,6 +1084,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_PlayIdleList);
 struct sSsxScriptRider;
 extern "C" int func_00276388(sSsxScriptRider* r, int a, int b);
 
+/**
+ * Starts playing a viewport's idle list, without a transition in.
+ *
+ * @param i  viewport index
+ */
 extern "C" void cSSXScriptEngine_PlayIdleList(cSSXScriptEngine* self, int i)
 {
     func_00276388((sSsxScriptRider*)((char*)self->mpIdleLists + i * 0xCC), 0, 0);
@@ -892,6 +1099,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ResetIdleList);
 #ifdef SKIP_ASM
 extern "C" void func_00276868(void* self, int a1);
 
+/**
+ * Resets a viewport's idle list (func_00276868(list, 1)).
+ *
+ * @param i  viewport index
+ */
 extern "C" void cSSXScriptEngine_ResetIdleList(cSSXScriptEngine* self, int i)
 {
     func_00276868((char*)self->mpIdleLists + i * 0xCC, 1);
@@ -922,6 +1134,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetIdleListState);
 extern "C" void cSSXScriptEngine_UpdateLoad(cSSXScriptEngine*);
 extern "C" void func_00276B98(void*);
 
+/**
+ * Polls the pending loads, then queries a viewport's idle-list state; On Tour returns it, this is void.
+ *
+ * @param i  viewport index
+ */
 extern "C" void cSSXScriptEngine_GetIdleListState(cSSXScriptEngine* self, int i)
 {
     cSSXScriptEngine_UpdateLoad(self);
@@ -937,15 +1154,28 @@ void* func_0027BD78(void* self);
 void func_0027BD90(void*, void*);
 extern "C" int func_002821A0(void* self, int key, void* node);
 
-extern "C" int cSSXScriptEngine_RequestScriptByCategory(cSSXScriptEngine* self, int category, int a, int b, int c)
+/**
+ * Requests a script chosen from a category, with up to three characters cast in it.
+ *
+ * The AI indices go into a setup-info node from the pool, which becomes the request's user data and returns
+ * to
+ * the pool if the request fails.
+ *
+ * @param category  script category
+ * @param mainCharAIIndex  AI index of the main character, or -1
+ * @param supportChar0AIIndex  AI index of the first supporting character, or -1
+ * @param supportChar1AIIndex  AI index of the second supporting character, or -1
+ * @return the request handle, or a negative value when no script qualifies or the request fails
+ */
+extern "C" int cSSXScriptEngine_RequestScriptByCategory(cSSXScriptEngine* self, int category, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
     // PORT: one variable holds the script pointer and then the result
     int r = (int)cSSXScriptEngine_GetScriptFromCategory((cSSXScriptEngine*)self, category);
     if (r == 0) return -1;
     int* node = (int*)func_0027BD78(self);
-    node[0] = a;
-    node[1] = b;
-    node[2] = c;
+    node[0] = mainCharAIIndex;
+    node[1] = supportChar0AIIndex;
+    node[2] = supportChar1AIIndex;
     r = func_002821A0(self, *(int*)r, node);
     if (r < 0) {
         func_0027BD90(self, node);
@@ -961,22 +1191,33 @@ void* func_0027BD78(void* self);
 void func_0027BD90(void*, void*);
 extern "C" int func_002821A0(void* self, int key, void* node);
 
-extern "C" int cSSXScriptEngine_RequestScriptByIndex(cSSXScriptEngine* self, int key, int a, int b, int c)
+/**
+ * Requests a script by its master-table index, with up to three characters cast in it.
+ *
+ * AI indices outside the allocated riders become -1.
+ *
+ * @param key  script index in the master table
+ * @param mainCharAIIndex  AI index of the main character, or -1
+ * @param supportChar0AIIndex  AI index of the first supporting character, or -1
+ * @param supportChar1AIIndex  AI index of the second supporting character, or -1
+ * @return the request handle, or a negative value when the request fails
+ */
+extern "C" int cSSXScriptEngine_RequestScriptByIndex(cSSXScriptEngine* self, int key, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
     int n = *(int*)((char*)SSXApp->Game->AI + 0x78);
-    if (a < 0 || a >= n) {
-        a = -1;
+    if (mainCharAIIndex < 0 || mainCharAIIndex >= n) {
+        mainCharAIIndex = -1;
     }
-    if (b < 0 || b >= n) {
-        b = -1;
+    if (supportChar0AIIndex < 0 || supportChar0AIIndex >= n) {
+        supportChar0AIIndex = -1;
     }
-    if (c < 0 || c >= n) {
-        c = -1;
+    if (supportChar1AIIndex < 0 || supportChar1AIIndex >= n) {
+        supportChar1AIIndex = -1;
     }
     int* node = (int*)func_0027BD78(self);
-    node[0] = a;
-    node[1] = b;
-    node[2] = c;
+    node[0] = mainCharAIIndex;
+    node[1] = supportChar0AIIndex;
+    node[2] = supportChar1AIIndex;
     int r = func_002821A0(self, key, node);
     if (r < 0) {
         func_0027BD90(self, node);
@@ -992,13 +1233,22 @@ extern "C" int cSSXScriptEngine_RequestScriptByIndex(cSSXScriptEngine* self, int
 
 struct sEnt_002796B8 { int a; int key; int c; };
 
-extern "C" int cSSXScriptEngine_RequestScriptByHashID(cSSXScriptEngine* self, int id, int a, int b, int c)
+/**
+ * Requests the master-table script with the given hash ID, with up to three characters cast in it.
+ *
+ * @param id  script hash ID
+ * @param mainCharAIIndex  AI index of the main character, or -1
+ * @param supportChar0AIIndex  AI index of the first supporting character, or -1
+ * @param supportChar1AIIndex  AI index of the second supporting character, or -1
+ * @return the request handle, or -1 when no script has that ID or the request fails
+ */
+extern "C" int cSSXScriptEngine_RequestScriptByHashID(cSSXScriptEngine* self, int id, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
     int i = 0;
     if (*(int*)self->mpMasterTableHeader > 0) {
         do {
             if (((sEnt_002796B8*)self->mpMasterTable)[i].key == id)
-                return cSSXScriptEngine_RequestScriptByIndex(self, i, a, b, c);
+                return cSSXScriptEngine_RequestScriptByIndex(self, i, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
             i++;
         } while (i < *(int*)self->mpMasterTableHeader);
     }
@@ -1015,10 +1265,18 @@ extern "C" void* func_002822A0(void* self, int key, int b, int c);
 // (self, index); bind the 2-arg form to the symbol.
 void* func_0027A668_2(void* self, int idx) __asm__("func_0027A668__FPv");
 
-extern "C" void cSSXScriptEngine_PlayRequestScript(cSSXScriptEngine* self, int val, int key, int b, int c)
+/**
+ * Plays a requested script in a given view: stores the view in the request's setup info, then plays it.
+ *
+ * @param val  view index (On Tour viewIndex)
+ * @param key  request handle
+ * @param autoRecycle  passed to func_002822A0(); On Tour calls it autoRecycle
+ * @param loop  passed to func_002822A0(); On Tour calls it loop
+ */
+extern "C" void cSSXScriptEngine_PlayRequestScript(cSSXScriptEngine* self, int val, int key, int autoRecycle, int loop)
 {
     *(int*)((char*)func_0027A668_2(self, func_00282BF0(self, key)) + 0xC) = val;
-    func_002822A0(self, key, b, c);
+    func_002822A0(self, key, autoRecycle, loop);
 }
 #endif
 
@@ -1027,6 +1285,12 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_SelectScriptFromCategor
 #ifdef SKIP_ASM
 extern "C" int* cSSXScriptEngine_GetScriptFromCategory(cSSXScriptEngine*, int);
 
+/**
+ * Picks a script from a category with GetScriptFromCategory() and returns its index.
+ *
+ * @param category  script category
+ * @return the chosen script's master-table index, or -1 when none qualifies
+ */
 extern "C" int cSSXScriptEngine_SelectScriptFromCategory(cSSXScriptEngine* self, int category)
 {
     int* script = cSSXScriptEngine_GetScriptFromCategory((cSSXScriptEngine*)self, category);
@@ -1121,6 +1385,18 @@ extern char D_004A34C8[];
 extern char D_004A34D0[];
 extern char D_004A34D8[];
 
+/**
+ * Handles data attached from a script bank, by file extension: scripts, animation banks or sound banks.
+ *
+ * "scr" data is registered as a script and tagged with the bank being attached (mCurrAttachingBankNum);
+ * "anm" and "snd" data is linked into the animation or sound bank manager under that bank number.
+ *
+ * @param ext  the data's name, compared by its first three characters
+ * @param data  the attached data
+ * @param dataSize  size of the data in bytes
+ * @param kind  receives the data kind: 0 script, 1 animation, 2 sound
+ * @param bank  receives the bank number for animation and sound data
+ */
 extern "C" void cSSXScriptEngine_OnAttachData(cSSXScriptEngine* self, const char* ext, void* data, int dataSize, int* kind, int* bank)
 {
     if (func_00416B18(D_004A34C8, ext, 3) == 0) {
@@ -1148,7 +1424,15 @@ extern "C" void func_00282178(void* self, int a1);
 extern "C" void func_00275650(void* list, int id);
 extern "C" void func_00283610(void* list, int id);
 
-extern "C" void cSSXScriptEngine_OnDetachData(cSSXScriptEngine* self, void* obj, int a2, int type, int id)
+/**
+ * Handles data detached from a script bank: unregisters the script or unlinks the animation or sound bank.
+ *
+ * @param obj  the detached data
+ * @param dataSize  size of the data (unused)
+ * @param type  data kind stored by OnAttachData(): 0 script, 1 animation, 2 sound
+ * @param id  bank number stored by OnAttachData()
+ */
+extern "C" void cSSXScriptEngine_OnDetachData(cSSXScriptEngine* self, void* obj, int dataSize, int type, int id)
 {
     switch (type) {
     case 0:
@@ -1200,6 +1484,18 @@ struct sScriptCount_9A70 {
     int pad[2];
 };
 
+/**
+ * Picks a random variation for each entity of a script that is starting, then counts the play.
+ *
+ * Choice entities (type 5) only pick options whose character mask matches the cast (flags built from the
+ * three AI
+ * indices), and a picked option tied to a cast slot uses that slot up; other entities pick any variation. The
+ * script's play count in the master table is incremented.
+ *
+ * @param script  the script player starting the script
+ * @param idx  the script's master-table index
+ * @param players  the request's setup info: the three AI indices of the cast
+ */
 // Picks a random option for every choice event of a script, honouring the per-slot team flags.
 extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, sScript_9A70* script, int idx, int* players)
 {
@@ -1256,9 +1552,15 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnReleaseRequest);
 #ifdef SKIP_ASM
 void func_0027BD90(void*, void*);
 
-extern "C" void cSSXScriptEngine_OnReleaseRequest(cSSXScriptEngine* self, int unused, void* arg)
+/**
+ * Returns a released request's setup-info node to the engine's pool.
+ *
+ * @param requestHandle  request handle (unused)
+ * @param pUserData  the request's user data: its setup-info node
+ */
+extern "C" void cSSXScriptEngine_OnReleaseRequest(cSSXScriptEngine* self, int requestHandle, void* pUserData)
 {
-    func_0027BD90(self, arg);
+    func_0027BD90(self, pUserData);
 }
 #endif
 
@@ -1291,6 +1593,15 @@ struct sScrSlot9D00 {
 };
 
 
+/**
+ * Adds a script object to the database and hooks cameras and transitions up to their camera manager.
+ *
+ * A camera (type 1) joins the camera manager its word at +0x7C selects; a transition (type 2) is set on the
+ * camera manager its virtual slot 9 names.
+ *
+ * @param obj  the script object
+ * @return the object's database ID
+ */
 extern "C" int cSSXScriptEngine_AddObject(cSSXScriptEngine* self, cScriptOwner9D00* obj)
 {
     int r = func_0027CEA8((self), obj);
@@ -1333,6 +1644,13 @@ struct sScrSlot9DA8 {
 };
 
 
+/**
+ * Removes a script object from the database, first unhooking a camera or transition from its camera manager.
+ *
+ * On Tour returns a bool; this declaration is void.
+ *
+ * @param idx  the object's database ID
+ */
 extern "C" void cSSXScriptEngine_RemoveObject(cSSXScriptEngine* self, int idx)
 {
     // PORT: func_0027D320 returns a table pointer as int
@@ -1354,6 +1672,15 @@ extern "C" int func_0027D790(void* self, int val);
 extern "C" void func_0027D210(void* self, int i, int val);
 extern "C" void func_00282EF0(void* obj, int val);
 
+/**
+ * Asks whether a script object is in use by a player, through the check for the object's type.
+ *
+ * Cameras (type 1) and transitions (type 2) have their own checks, others use the database's. On Tour returns
+ * the answer; this declaration is void.
+ *
+ * @param i  the object's database ID
+ * @param val  player ID
+ */
 extern "C" void cSSXScriptEngine_IsObjInUseByPlayer(cSSXScriptEngine* self, int i, int val)
 {
     // PORT: func_0027D320 returns a table pointer as int
@@ -1423,21 +1750,31 @@ static inline void* ObjOf_279F18(sLvlObj_279F18* o)
     return o ? o->obj : 0;
 }
 
-extern "C" void* cSSXScriptEngine_GetSubjectRider(cSSXScriptEngine* self, int slot, int arg)
+/**
+ * Returns the rider a script subject refers to.
+ *
+ * Subjects 0-2 are the request's main and supporting characters (by AI index), 3-4 the human players, 5-9 the
+ * computer riders then the actors, 10-14 the actors then the computer riders, and 15-20 the riders by index.
+ *
+ * @param slot  subject type
+ * @param pPlayer  the script player whose request supplies the cast
+ * @return the rider, or 0 when the subject has no rider
+ */
+extern "C" void* cSSXScriptEngine_GetSubjectRider(cSSXScriptEngine* self, int slot, int pPlayer)
 {
     int r;
     switch (slot) {
     case 0: {
-        int* p = (int*)func_0027A668_2(self, arg);
+        int* p = (int*)func_0027A668_2(self, pPlayer);
         if (p[0] < 0) break;
         return Lvl_279F18()->riders[p[0]];
     }
     case 1:
-        r = ((int*)func_0027A668_2(self, arg))[1];
+        r = ((int*)func_0027A668_2(self, pPlayer))[1];
         if (r < 0) break;
         return Lvl_279F18()->riders[r];
     case 2:
-        r = ((int*)func_0027A668_2(self, arg))[2];
+        r = ((int*)func_0027A668_2(self, pPlayer))[2];
         if (r < 0) break;
         return Lvl_279F18()->riders[r];
     case 3: case 4: {
@@ -1676,6 +2013,17 @@ static inline sFx_27A4A0* initFx_27A4A0(sFx_27A4A0* p, const sColor_27A4A0& col)
     return p;
 }
 
+/**
+ * Creates a screen-transition effect object of the given type and colour.
+ *
+ * Types 1 and 7 are fades (7 always uses all-ones colour), 2-5 directional wipes and 6 another effect; 0 and
+ * 8
+ * make nothing. Colour 0 is (1, 0, 0, 0) and 1 is all ones, probably black and white.
+ *
+ * @param type  transition type
+ * @param mode  transition colour, 0 or 1
+ * @return the new transition object, or 0
+ */
 extern "C" void* cSSXScriptEngine_MakeTransitionObject(cSSXScriptEngine* self, int type, int mode)
 {
     sColor_27A4A0 c;
@@ -1756,6 +2104,11 @@ extern "C" void func_002829D0(void* self, void* a1);
 extern "C" void tNISList_OnScriptPlay(void* self, int a1, void* obj);
 int func_00282BE0(void* self, void* a1);
 
+/**
+ * Handles a script player starting: runs func_002829D0() and tells the playing NIS list.
+ *
+ * @param pPlayer  the script player
+ */
 extern "C" void cSSXScriptEngine_OnInSeqPlay(cSSXScriptEngine* self, void* pPlayer)
 {
     func_002829D0(self, pPlayer);
@@ -1772,6 +2125,13 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnInSeqUpdate);
 extern "C" void func_00277310(void* self, int a1, void* obj, float x, float y);
 int func_00282BE0(void* self, void* a1);
 
+/**
+ * Passes a script player's frame update on to the playing NIS list, if any.
+ *
+ * @param pPlayer  the script player
+ * @param x  current frame (On Tour currFrame)
+ * @param y  frame delta (On Tour frameDelta)
+ */
 extern "C" void cSSXScriptEngine_OnInSeqUpdate(cSSXScriptEngine* self, void* pPlayer, float x, float y)
 {
     int r = self->mPlayingNISList;
@@ -1787,11 +2147,16 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnInSeqPlayStopping);
 extern "C" void func_002773A0(void* self, int a1, void* obj);
 int func_00282BE0(void* self, void* a1);
 
-extern "C" void cSSXScriptEngine_OnInSeqPlayStopping(cSSXScriptEngine* self, void* a1)
+/**
+ * Tells the playing NIS list, if any, that a script player is stopping.
+ *
+ * @param pPlayer  the script player
+ */
+extern "C" void cSSXScriptEngine_OnInSeqPlayStopping(cSSXScriptEngine* self, void* pPlayer)
 {
     int r = self->mPlayingNISList;
     if (r != 2) {
-        func_002773A0((char*)self->mpNISLists + r * 0xCC, func_00282BE0(self, a1), a1);
+        func_002773A0((char*)self->mpNISLists + r * 0xCC, func_00282BE0(self, pPlayer), pPlayer);
     }
 }
 #endif
@@ -1803,6 +2168,11 @@ extern "C" void func_00277400(void* self, int a1, void* obj);
 extern "C" void func_00282A18(void* self, void* a1);
 int func_00282BE0(void* self, void* a1);
 
+/**
+ * Handles a script player stopping: tells the playing NIS list, then runs func_00282A18().
+ *
+ * @param pPlayer  the script player
+ */
 extern "C" void cSSXScriptEngine_OnInSeqStop(cSSXScriptEngine* self, void* pPlayer)
 {
     int r = self->mPlayingNISList;
@@ -1832,6 +2202,17 @@ static inline int sseWorldMode_A860()
     return *(int*)((char*)SSXApp->Game->AI + 0x7C);
 }
 
+/**
+ * Queues and plays the transport cut-scene sequence in NIS list 1.
+ *
+ * Uses categories 18-21 when @p online is set and 12-15 otherwise, the last one picked by the world mode. On
+ * Tour
+ * names the parameters isGondolaSequence and doLeave, so @p online probably selects the gondola, not online
+ * play.
+ *
+ * @param online  selects the 18-21 sequence (On Tour isGondolaSequence)
+ * @param intro  nonzero to start with the first script (category 18 or 12; On Tour doLeave)
+ */
 extern "C" void cSSXScriptEngine_PlayTransportSequence(cSSXScriptEngine* self, int online, int intro)
 {
     if (online) {
@@ -1870,6 +2251,15 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_EndTransportSequence);
 int cSSXScriptEngine_GetNISListScriptCategory_r(void* self, int a1, int a2) __asm__("cSSXScriptEngine_GetNISListScriptCategory");
 extern "C" void cSSXScriptEngine_SkipNISListScripts(cSSXScriptEngine* self, int a1, int a2, int a3);
 
+/**
+ * Skips the rest of the transport sequence playing in NIS list 1.
+ *
+ * The number of scripts skipped depends on the category of the list's first entry: 3 for 12/18, 2 for 13/19,
+ * 1
+ * for 14/20, none otherwise.
+ *
+ * @return true when scripts were skipped
+ */
 extern "C" bool cSSXScriptEngine_EndTransportSequence(cSSXScriptEngine* self)
 {
     int v = 0;
@@ -1898,6 +2288,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsInTransportSequence);
 // int result (a tail call); bind an int-returning form to the symbol.
 int cSSXScriptEngine_GetNISListScriptCategory_int(void* self, int i, int a) __asm__("cSSXScriptEngine_GetNISListScriptCategory");
 
+/**
+ * Tells whether NIS list 1 is playing one of the transport sequence's first three scripts.
+ *
+ * @return 1 when list 1 is playing and its first entry has category 12, 13, 14, 18, 19 or 20, otherwise 0
+ */
 extern "C" int cSSXScriptEngine_IsInTransportSequence(cSSXScriptEngine* self)
 {
     if (self->mPlayingNISList != 1) {
@@ -1923,6 +2318,14 @@ extern signed char D_00535C11[];
 extern int* D_00445488[];
 extern int D_00481E80[];
 
+/**
+ * Queues the race-start cut-scenes for a start situation in NIS list 0.
+ *
+ * Situation 0 adds the intro scripts listed for the game path (or the online list); 1 and 2 add category 5;
+ * 3 adds category 4 and then 5.
+ *
+ * @param state  start situation (On Tour eNISStartSituation)
+ */
 extern "C" void cSSXScriptEngine_AppendStartSequence(cSSXScriptEngine* self, int state)
 {
     switch (state) {
@@ -2019,6 +2422,16 @@ static inline int Call_AC60(sScRider_AC60* r, int slot)
     return s->vt[slot].fn((char*)s + s->vt[slot].delta);
 }
 
+/**
+ * Queues the end-of-event cut-scenes in NIS list 0 when an event finishes.
+ *
+ * In the career path, a human in the top three queues a podium script cast with the top three riders
+ * (category
+ * by the best place; some cheat characters get category 10). Then, for race modes below 4, it probably queues
+ * an
+ * unlock scene (categories 24 and 25) depending on func_00146150() and func_001464D0(). Mode 4 and unfinished
+ * events queue nothing.
+ */
 extern "C" void cSSXScriptEngine_AppendEndEventSequence(cSSXScriptEngine* self)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2131,9 +2544,20 @@ struct sPri_27B0C0
 };
 
 
-extern "C" int* cSSXScriptEngine_GetScriptFromCategory(cSSXScriptEngine* p, int cat)
+/**
+ * Picks a random script from a category among the least-played ones whose cast requirements are met.
+ *
+ * A script qualifies when each of its 21 requirement masks matches the current cast flags; among those only
+ * the
+ * ones with the lowest master-table play count are kept. Uses a temporary 100-entry list ("ScriptChoice").
+ *
+ * @param engine  the script engine
+ * @param cat  script category
+ * @return the chosen script's filter record (its first word is the script index), or 0
+ */
+extern "C" int* cSSXScriptEngine_GetScriptFromCategory(cSSXScriptEngine* engine, int cat)
 {
-    cSSXScriptEngine* self = p;
+    cSSXScriptEngine* self = engine;
     if (((int)self->mpFilterTableHeader) == 0 || ((sCategory_27B0C0*)self->mpCategoryFilterTable)[cat].count == 0)
         return 0;
     int flags[21];
@@ -2192,6 +2616,19 @@ struct sSeSlotB268 {
     int temp;       // 0xC
 };
 
+/**
+ * Loads a script bank file now and attaches its contents, unless the bank is already loaded.
+ *
+ * With @p buf the file is read into that buffer, otherwise it is loaded with FILE_loadz() and owned by the
+ * bank.
+ * mCurrAttachingBankNum is set to @p i during the attach so OnAttachData() can tag the data.
+ *
+ * @param i  bank number
+ * @param name  file name
+ * @param flags  memory flags for FILE_loadz()
+ * @param key  data identifier stored in the bank
+ * @param buf  caller buffer to load into, or 0
+ */
 extern "C" void cSSXScriptEngine_SyncLoadScriptBank(cSSXScriptEngine* self, int i, const char* name, int flags, int key, int* buf)
 {
     sSeSlotB268* s = (sSeSlotB268*)(((char*)self) + (i * 0x10 + 0x628));
@@ -2235,6 +2672,16 @@ extern "C" void* func_003DF748(const char* name, int a, int b);
 extern "C" void* func_003DF690(const char* name, int flags, int b);
 void tSSXScriptBankInfo_Clear(void* slot);
 
+/**
+ * Starts an asynchronous load of a script bank file; the bank is cleared if the file cannot be opened.
+ *
+ * @param i  bank number
+ * @param name  file name
+ * @param flags  memory flags used when the engine allocates the buffer
+ * @param key  data identifier stored in the bank
+ * @param pMem  caller buffer to load into, or 0 to allocate
+ * @param memSize  size of the buffer
+ */
 extern "C" void cSSXScriptEngine_AsyncLoadScriptBank(cSSXScriptEngine* self, int i, const char* name, int flags, int key, int pMem, int memSize)
 {
     char* slot = (char*)self + (i * 16 + 0x628);
@@ -2264,6 +2711,11 @@ void tSSXScriptBankInfo_Clear(void* slot);
 void cMemMan_free(void*);
 extern "C" void* cDataManager_DetachData(void* self, int key);
 
+/**
+ * Empties a script bank: detaches its data (freeing it if the engine owns it) or cancels its pending load.
+ *
+ * @param i  bank number
+ */
 extern "C" void cSSXScriptEngine_PurgeScriptBank(cSSXScriptEngine* self, int i)
 {
     char* slot = (char*)self + (i * 16 + 0x628);
@@ -2289,6 +2741,12 @@ extern "C" void ASYNCFILE_cancel(void* file);
 extern "C" int ASYNCFILE_release(void* file, int a, int b);
 void tSSXScriptBankInfo_Clear(void* slot);
 
+/**
+ * Cancels a bank's pending asynchronous load and clears the bank; does nothing if no load is pending.
+ *
+ * @param i  bank number
+ * @param dataIdentifier  unused
+ */
 extern "C" void cSSXScriptEngine_CancelAsyncLoadScriptBank(cSSXScriptEngine* self, int i, int dataIdentifier)
 {
     char* slot = (char*)self + (i * 16 + 0x628);
@@ -2314,6 +2772,11 @@ static inline int isSlotFree(tSSXScriptBankInfo* ssxScriptBankInfo)
     return 0;
 }
 
+/**
+ * Finds a free script bank for an asynchronous load; banks 0 and 1 are never handed out.
+ *
+ * @return the first free bank number from 2 to 9, or -1 when all are in use
+ */
 extern "C" int cSSXScriptEngine_GetNextAvailableAsyncBankID(cSSXScriptEngine* self)
 {
     for (int i = 2; i < 10; i++) {
@@ -2367,6 +2830,13 @@ void tSSXScriptBankInfo_Clear(void* slot);
 extern "C" int func_00275920(void* self, const char* name, int* data, int size);
 extern const char D_00481EB0[];
 
+/**
+ * Attaches the data of a finished bank load, under the name "async<data identifier>".
+ *
+ * The bank whose async handle matches @p file is used; a load that returned no data clears the bank.
+ *
+ * @param file  the finished async file
+ */
 extern "C" void cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(cSSXScriptEngine* self, void* file)
 {
     char buf[128];
@@ -2407,6 +2877,11 @@ struct sScrReloc6B0 {
 };
 
 
+/**
+ * Takes the loaded track filter table and turns its category offsets into pointers.
+ *
+ * @param file  the finished async file
+ */
 extern "C" void cSSXScriptEngine_ProcessAsyncLoadTrackTableComplete(cSSXScriptEngine* self, void* file)
 {
     struct {
@@ -2491,6 +2966,18 @@ static inline float Atan2_27B750(float y, float x)
     return a;
 }
 
+/**
+ * Gives the base position and rotation of a rider's start point.
+ *
+ * The start point comes from the path system (func_0026B5E0) for the rider's start index; yaw and pitch come
+ * from its direction, and roll is 0.
+ *
+ * @param obj  the rider
+ * @param pos  receives the start position
+ * @param roll  receives 0 (On Tour baseRotX)
+ * @param pitch  receives the pitch of the start direction
+ * @param yaw  receives the heading of the start direction
+ */
 extern "C" void cSSXScriptEngine_FillOrientationFromStartPointInfo(cSSXScriptEngine* self, char* obj, sVec4_27B750* pos, int* roll, float* pitch, float* yaw)
 {
     char* sub = obj + 0x6C0;
@@ -2559,6 +3046,15 @@ static inline float Atan2_27B948(float y, float x)
     return a;
 }
 
+/**
+ * Gives the base position and rotation of a rider: its position and the heading and pitch of its direction.
+ *
+ * @param obj  the rider
+ * @param pos  receives the rider's position
+ * @param roll  receives 0 (On Tour baseRotX)
+ * @param pitch  receives the pitch of the rider's direction (+0x1B0)
+ * @param yaw  receives the heading of the rider's direction
+ */
 extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo(cSSXScriptEngine* self, char* obj, sVec4_27B948* pos, int* roll, float* pitch, float* yaw)
 {
     char* sub = obj + 0x6C0;
@@ -2679,6 +3175,21 @@ static inline char* Bone_27BB08(char* model, unsigned int code)
     return RefToPtr_27BB08(((unsigned int*)*(char**)(model + 0x1C))[code >> 8]);
 }
 
+/**
+ * Gives the base position and rotation of a world object named in a section's anchor table.
+ *
+ * Section 50 means the current location's section. Leaves the outputs alone when the section has no anchor
+ * table
+ * or the entry is -1. An optional offset is rotated by the object's matrix and added to the position.
+ *
+ * @param slot  object type, the index into the anchor table
+ * @param pos  receives the object's position
+ * @param flag  receives 0 (On Tour baseRotX)
+ * @param pitch  receives the object's pitch
+ * @param yaw  receives the object's heading
+ * @param cat  section ID, or 50 for the current location's (On Tour overrideSectionID)
+ * @param off  offset in the object's frame, or 0
+ */
 extern "C" void cSSXScriptEngine_FillOrientationFromObjectOrientationInfo(cSSXScriptEngine* self, int slot, sVec_27BB08* pos, int* flag, float* pitch, float* yaw, int cat,
                               const sVec_27BB08* off)
 {
@@ -2827,6 +3338,12 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsBankLoading);
 #ifdef SKIP_ASM
 extern "C" void cSSXScriptEngine_UpdateLoad(cSSXScriptEngine*);
 
+/**
+ * Tells whether a script bank still has a load pending, polling the loads first.
+ *
+ * @param i  bank number
+ * @return 1 while the bank's async load is pending, otherwise 0
+ */
 extern "C" int cSSXScriptEngine_IsBankLoading(cSSXScriptEngine* self, int i)
 {
     cSSXScriptEngine_UpdateLoad(self);
@@ -2867,6 +3384,11 @@ void* cScriptObject_cScriptObject(void*, int);
 extern void* D_00482318[];
 extern void* cScriptObjGS_vtbl[];
 
+/**
+ * Constructs the game-state script object: a script entity plus a type-4 script object.
+ *
+ * @return @p self
+ */
 extern "C" void* cScriptObjGS_cScriptObjGS(void* self)
 {
     cScriptEntity_cScriptEntity(self);
@@ -4738,6 +5260,13 @@ struct sScrObj05B8 {
     int field_0xF8;
 };
 
+/**
+ * Constructs the event script object: a script entity plus a type-5 script object with its triggers cleared.
+ *
+ * The four triggers get target -1, ID -1 and count 0.
+ *
+ * @return @p self
+ */
 extern "C" void* cScriptObjEvent_cScriptObjEvent(sScrObj05B8* self)
 {
     cScriptEntity_cScriptEntity(self);
@@ -5828,6 +6357,11 @@ extern char D_00482450[];
 extern char cBXScriptEngine_vtbl[];
 extern void* D_004A34E8;
 
+/**
+ * Constructs the base script engine: database part, vtables, global instance pointer, empty script database.
+ *
+ * @return @p self
+ */
 extern "C" void* cBXScriptEngine_cBXScriptEngine(void* self)
 {
     func_0027CDD0(self);
@@ -5850,6 +6384,13 @@ extern char D_00482450[];
 extern char cBXScriptEngine_vtbl[];
 extern void* D_004A34E8;
 
+/**
+ * Destroys the base script engine: restores its vtables, purges it and clears the global instance pointer.
+ *
+ * Then runs the database destructor (func_0027CE58), which frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cBXScriptEngine__cBXScriptEngine(void* self, int flags)
 {
     *(void**)((char*)self + 0x2AC) = D_00482450;

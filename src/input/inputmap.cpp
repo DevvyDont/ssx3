@@ -9,6 +9,14 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" void MEM_fill(void* dst, unsigned int value, int size);
 extern char D_0048DD00[];
 
+/**
+ * Initialises an input map with room for a number of compiled statements.
+ *
+ * Allocates the statement offset table ("InputMapTable", count words) and fills it with -1 (no code yet), and
+ * clears the op-code buffer pointer (+0x14), its capacity (+0xC) and its used size (+0x10).
+ *
+ * @param count  number of statement slots (input state ids)
+ */
 extern "C" void cInputMap_init(void* self, int count)
 {
     *(int*)((char*)self + 0x0) = count;
@@ -63,6 +71,15 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* self, void* a1, void* a2);
 extern char D_0048DD10[];
 
+/**
+ * Creates the parser for an input-map script that is already in memory.
+ *
+ * Allocates a cInputMapParser ("InputParser", 0x109EC bytes) over the text and keeps it at +0x8; the parser's
+ * constructor parses the whole file. Statements are compiled later with cInputMap_compileMap().
+ *
+ * @param mem  the map file's text
+ * @param len  the text's length in bytes
+ */
 extern "C" void cInputMap_loadMapFile(void* self, void* mem, void* len)
 {
     *(void**)((char*)self + 0x8) = cInputMapParser_cInputMapParser((cInputMapParser*)cMemMan_alloc(0x109EC, D_0048DD10, 0x100, 0), mem, len);
@@ -88,6 +105,16 @@ struct sInputMap_0E18 {
     int* code;      // 0x14
 };
 
+/**
+ * Compiles one named statement of the loaded map file into the map's op-code buffer.
+ *
+ * First makes sure at least 256 words are free, growing the buffer by 1024 words ("TempOpCodes") and copying
+ * the old code across. Then records where the statement's code starts in the offset table and appends what
+ * cInputMapParser_compileStatement() emits.
+ *
+ * @param idx  statement slot (input state id) that receives the code
+ * @param src  name of the statement in the map file
+ */
 extern "C" void cInputMap_compileMap(sInputMap_0E18* self, int idx, char* src)
 {
     if (self->cap - self->used < 0x100) {
@@ -117,6 +144,12 @@ void cMemMan_free(void* p);
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern char D_0048DD30[];
 
+/**
+ * Frees the map file's parser and trims the op-code buffer to the code actually compiled.
+ *
+ * Deletes the parser (+0x8), copies the used words into a new buffer of exactly that size ("InputOpCodes"),
+ * frees the old one and sets the capacity to the used size.
+ */
 extern "C" void cInputMap_purgeMapFile(void* self)
 {
     if (*(int**)((char*)self + 0x8) != 0) {
@@ -139,11 +172,21 @@ INCLUDE_ASM("input/inputmap", cInputMap_getValue);
 void* func_00325250(void* self);
 extern "C" float func_00325450(void* parser, void* a1, void* a2);
 
-extern "C" float cInputMap_getValue(void* self, void* a1, int id)
+/**
+ * Evaluates one compiled map statement against a controller pad and returns its value.
+ *
+ * Builds a 0x190-byte evaluator on the stack with func_00325250() and runs func_00325450() on the op-code
+ * stream at the statement's offset.
+ *
+ * @param inputPad  the controller pad to read (On Tour cInputPad*)
+ * @param id  statement slot (input state id) to evaluate
+ * @return the statement's value
+ */
+extern "C" float cInputMap_getValue(void* self, void* inputPad, int id)
 {
     char parser[0x190];
     func_00325250(parser);
-    return func_00325450(parser, a1, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2));
+    return func_00325450(parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2));
 }
 #endif
 
@@ -183,11 +226,20 @@ INCLUDE_ASM("input/inputmap", cInputMap_getState);
 void* func_00325250(void* self);
 extern "C" float func_00325450(void* parser, void* a1, void* a2);
 
-extern "C" int cInputMap_getState(void* self, void* a1, int id)
+/**
+ * Evaluates one compiled map statement against a controller pad and tells whether it is nonzero.
+ *
+ * Same evaluation as cInputMap_getValue().
+ *
+ * @param inputPad  the controller pad to read (On Tour cInputPad*)
+ * @param id  statement slot (input state id) to evaluate
+ * @return 1 when the statement's value is not 0.0, otherwise 0
+ */
+extern "C" int cInputMap_getState(void* self, void* inputPad, int id)
 {
     char parser[0x190];
     func_00325250(parser);
-    return func_00325450(parser, a1, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2)) != 0.0f;
+    return func_00325450(parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2)) != 0.0f;
 }
 #endif
 
@@ -319,6 +371,18 @@ struct sMapData_1428 {
     int numIds;                     // 0x109E8
 };
 
+/**
+ * Constructs an input-map parser over a script in memory and parses the whole file.
+ *
+ * Sets the read cursor to the start, LineNumber and IsLineStart to 1, clears the file name, the error flag
+ * and the identifier count, pushes registers 63..1 onto FreeRegisters, links all 2048 parse nodes into the
+ * free list and then calls cInputMapParser_parseFile().
+ *
+ * @param vself   the parser to construct
+ * @param file    the script text (On Tour const char*)
+ * @param length  the text's length in bytes
+ * @return the parser
+ */
 // Initialises a compiled input map: id stack 63..1 and the node free list.
 extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* vself, void* file, void* length)
 {
@@ -358,6 +422,14 @@ extern "C" int sprintf(char* dst, const char* fmt, ...);
 extern "C" int func_004186C8(char* dst, const char* fmt, char* ap);
 extern char D_0048DD40[];
 
+/**
+ * Reports a syntax error in the input-map script and sets the parser's error flag.
+ *
+ * Formats "FileName(LineNumber): " followed by the printf-style message into a 1 KB local buffer. Nothing
+ * prints the buffer in this build, so only ErrorFlag = 1 has an effect.
+ *
+ * @param fmt  printf-style message, followed by its arguments
+ */
 extern "C" void cInputMapParser_error(cInputMapParser* self, const char* fmt, ...)
 {
     char buf[0x400];
@@ -460,6 +532,15 @@ INCLUDE_ASM("input/inputmap", cInputMapParser_lookupButtonName);
 extern "C" int func_0041AB78(const char* a, const char* b, int n);
 extern char D_004A3EF0[];
 
+/**
+ * Parses a button name of the form "buttonN" and returns its number.
+ *
+ * "button" must be followed by at least one decimal digit; the name is rejected when the digits are followed
+ * by a letter or '_', or when the number is 924 or more.
+ *
+ * @param name  identifier text from the map script
+ * @return the button number, or -1 if the name is not a button name
+ */
 extern "C" int cInputMapParser_lookupButtonName(cInputMapParser* self, char* name)
 {
     if (func_0041AB78(name, D_004A3EF0, 6) != 0) {

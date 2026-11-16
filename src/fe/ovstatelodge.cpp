@@ -51,6 +51,19 @@ struct sMountainRoomK2678 {
     int fC4;
 };
 
+/**
+ * Constructs the lodge's mountain (trophy) room state for a player and starts loading the character's peak
+ * pass.
+ *
+ * Records the player's character, the highest unlocked peak (+0xB4), the rider's level (+0xB8) and that
+ * peak's pass
+ * item (+0xC0), loads the "dot_loc arrow" and "dot_visit arrow" textures, then starts the pass image load
+ * (func_001D3160).
+ *
+ * @param ui  the UI engine (On Tour cUIEngine* pEngine)
+ * @param idx  the player number (On Tour userNum)
+ * @return @p self
+ */
 extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui, int idx)
 {
     signed char pl = idx;
@@ -122,6 +135,12 @@ extern void* D_0046D0D0[];
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void func_0039E390(void* self, int flags);
 
+/**
+ * Destroys the mountain room: releases a pending pass-image load and frees the pass texture, then the base
+ * state.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(void* self, int flags)
 {
     *(void***)((char*)self + 8) = cFEStateMountainRoom_vtbl;
@@ -160,6 +179,10 @@ extern char D_004A14F8[];
 extern char D_004A1500[];
 extern char D_004A1508[];
 
+/**
+ * Creates the mountain room screen ("125mountainroom"), labels the peak numbers 1-3, and calls
+ * func_0028F140(.., 7) on the audio system.
+ */
 extern "C" void cFEStateMountainRoom_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -275,6 +298,17 @@ static inline void setW_2AD0(char* s, int off, sWidget_2AD0* w)
     wShow_2AD0(w, 0);
 }
 
+/**
+ * Binds the mountain room's widgets by name as the screen creates them.
+ *
+ * Sets the title (kT_TITLETrophyRoom), stores the peak-pass group, its front and the help text, the event
+ * markers
+ * ("mrk_race_0" and the others), sets the level-number icon ("nm<level>w") and numbers the peak-pass and peak
+ * entries
+ * 0-3.
+ *
+ * @param w  the widget being created
+ */
 extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
 {
     char* s = (char*)self;
@@ -423,6 +457,13 @@ static inline int IsShown1D2EA0(char* self)
     return w != 0 && ((*(int*)(w + 0x14) >> 6) & 1);
 }
 
+/**
+ * Closes the peak-pass view when the input passes its vtable slot-6 test: plays UI sound 3 and hides the pass
+ * group.
+ *
+ * @param widget  the input (On Tour cUIInput* pInput)
+ * @return 1 when the peak pass was shown and is closed, otherwise 0
+ */
 // Lodge menu: when the detail panel is shown and the widget accepts, plays the select sound and closes the panel.
 extern "C" int cFEStateMountainRoom_onInputBegin(char* self, char* widget)
 {
@@ -448,8 +489,15 @@ extern "C" int cFEStateMountainRoom_onInputBegin(char* self, char* widget)
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetMenu);
 #ifdef SKIP_ASM
+/**
+ * Swallows menu events 8 and 9 in the mountain room.
+ *
+ * @param menu  the menu (On Tour cUIMenu* pMenu), unused
+ * @param key  menu event number (On Tour Event)
+ * @return 0x100 for events 8 and 9, otherwise 0x101
+ */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateMountainRoom_onWidgetMenu(void* self, int a1, unsigned int key)
+extern "C" int cFEStateMountainRoom_onWidgetMenu(void* self, int menu, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -499,6 +547,16 @@ struct sText_MR {
     sTVE_MR* vt;
 };
 
+/**
+ * Handles the mountain room menu: entry 0 shows the peak pass, entries 1-3 open that peak's trophy room.
+ *
+ * Event 5 (select) opens the entry; event 6 pushes the state the engine's factory gives for the entry (slot
+ * 5),
+ * if any; event 1 (highlight) shows the entry's help: view pass, view trophies, or peak 2/3 locked.
+ *
+ * @param w  the menu entry (its index at +0x18), or 0
+ * @param msg  widget event number (On Tour Event)
+ */
 // Widget events of the mountain-room menu: opens sub-screens and updates the description text.
 extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned int msg)
 {
@@ -834,6 +892,9 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern char D_00467648[];
 
+/**
+ * Creates the peak (trophy) room screen ("126peakroom") and plays its first frame.
+ */
 extern "C" void cFEStatePeakRoom_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -907,6 +968,14 @@ static inline void wShow_38F8(sWidget_38F8* w, int on)
     w->vt[9].fn((char*)w + w->vt[9].delta, on);
 }
 
+/**
+ * Binds the peak room's widgets by name: the peak title, check marks, help text, trophies and event grid.
+ *
+ * Each of the four trophy slots shows the trophy's icon when the player's character owns it and is hidden
+ * otherwise; the six rows of event widgets start hidden.
+ *
+ * @param w  the widget being created
+ */
 extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* w)
 {
     int h = w->hash;
@@ -1026,6 +1095,17 @@ struct sVEntA_001D3C80 { short delta; short index; void* (*fn)(void*, void*, int
 struct sVEntB_001D3C80 { short delta; short index; void (*fn)(void*, int); };
 struct sItem_001D3C80 { int pad[2]; sVEntB_001D3C80* vt; };
 
+/**
+ * Handles the peak room menu: select opens an owned trophy, event 6 opens the factory's state for it,
+ * highlight updates help.
+ *
+ * Both open through the engine's state factory with (peak << 16 | trophy); event 6 first hides the four
+ * trophy
+ * slots. Event 1 updates the help text and calls func_001D3F80().
+ *
+ * @param item  the menu entry (its trophy index at +0x18), or 0
+ * @param key  widget event number (On Tour Event)
+ */
 extern "C" void cFEStatePeakRoom_onWidgetEvent(void* self, void* item, unsigned int key)
 {
     if (item == 0) {
@@ -1074,6 +1154,14 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" void* func_00397870(void* list, int id);
 
+/**
+ * Filters the peak room's menu events: swallows 8 and 9 and refuses event 6 on a trophy not yet owned.
+ *
+ * @param item  the menu (On Tour cUIMenu* pMenu)
+ * @param key  menu event number (On Tour Event)
+ * @param id  the menu item index (On Tour index)
+ * @return 0x100 for events 8 and 9, 0x10 for event 6 on an unowned trophy, otherwise 0x101
+ */
 extern "C" int cFEStatePeakRoom_onWidgetMenu(void* self, void* item, unsigned int key, int id)
 {
     switch (key) {
@@ -1123,6 +1211,11 @@ public:
     virtual void show(int on);
 };
 
+/**
+ * Sets the peak room's help line to select goal (trophy owned) or locked goal, and shows it.
+ *
+ * @param index  the trophy (On Tour trophyType)
+ */
 extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int index)
 {
     if (*(void**)((char*)self + 0xD0) != 0) {

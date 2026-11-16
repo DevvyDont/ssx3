@@ -52,6 +52,19 @@ struct sWakeElemBW {
     sWakeElemBW() {}
 };
 
+/**
+ * Constructs a rider's board wake effect: 32 wake segments and five rows of 32 points, then resets it.
+ *
+ * When @p inChrg is set it also constructs the cRider virtual base at +0xC0. It patches the rider's vtables
+ * (the g++ 2.95 this-adjust fix-ups when not in charge).
+ *
+ * The arrays are "WakeLines_cBoardWakeFX" (+0xC) and "WakeVerts_cBoardWakeFX" (one block of 160, split into
+ * the five rows at +0x10). +0xB4 starts at -1 and the reset (cBoardWakeFX_readFromReplayFrame) sets the
+ * sizes.
+ *
+ * @param inChrg  nonzero when this object is complete and must construct its virtual base
+ * @return self
+ */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xC0): vtable copies with delta fixups when not in charge.
 extern "C" void* cBoardWakeFX_cBoardWakeFX(cBoardWakeFX* self, int inChrg)
@@ -97,6 +110,9 @@ INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX__cBoardWakeFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardwakefx_classes.h"
 
+/**
+ * Destroys a board wake effect's arrays: frees the wake segments (+0xC) and the point rows (+0x10).
+ */
 cVbDtor002DCDA0::~cVbDtor002DCDA0()
 {
     if (m0C != 0) cMemMan_free(m0C);
@@ -149,6 +165,14 @@ struct sWakeDCF28 {
 
 extern "C" void func_002DE368(void* self);
 
+/**
+ * Resets a board wake effect; despite the name it reads no replay data (it takes no frame, like On Tour's
+ * reset).
+ *
+ * A rider with a view (a player) gets 5 rows, 32 segments and a 1.25 s life; others get 4 rows, 22 segments
+ * and 0.8 s. It sets the colour to white and clears the state. When the row count changed, each row's points
+ * get a height factor and the rows' sink speeds (0 down to -25) are recomputed.
+ */
 extern "C" void cBoardWakeFX_readFromReplayFrame(sWakeDCF28* self)
 {
     int old = self->count;
@@ -433,6 +457,15 @@ static inline float wakeMinStrengthD0B8()
     return 416.66668701171875f;
 }
 
+/**
+ * Advances a rider's board wake by one frame: ages and spreads the segments, then starts or extends the wake.
+ *
+ * Segments older than the life are dropped; the rest drift outwards and their lower rows sink. The new wake
+ * strength comes from the rider's speed, lean and sideways slip and the surface's wake scale (+0x4C). There
+ * is no wake off the ground, at a low strength, at a small lean or on a surface with little grip (+0x48). A
+ * running wake adds a segment every 50 units (createSeg, func_002DE058) and refreshes the current one
+ * (fillCurrentSeg, func_002DDD30). It ends when the grip or strength falls too low or the lean changes side.
+ */
 // PORT: g++ minimum/maximum operators (<?, >?).
 extern "C" void cBoardWakeFX_update(sWakeD0B8* self)
 {
@@ -693,6 +726,11 @@ public:
     virtual void DrawStrip(void* verts, int tex, int first, int max, int n, float a, float da);
 };
 
+/**
+ * Draws a board wake as a strip, fading its alpha from the newest point's age along the strip.
+ *
+ * Skipped when D_004A4528 is set or there are no segments; at most max - 2 segments are drawn.
+ */
 // Board wake: draws the wake strip with alpha fading by the age of the newest point.
 extern "C" void cBoardWakeFX_render(sWake_DAB8* self)
 {
@@ -1164,6 +1202,19 @@ extern "C" void func_002E26B8(void* self);
 extern "C" void func_002DF448_E4A8(void* self) __asm__("func_002DF448");
 extern "C" void func_002DF3B0(cDynamicSprayFX* self);
 
+/**
+ * Constructs a rider's snow spray effect: ten particle emitters and their ten spray settings.
+ *
+ * When @p inChrg is set it also constructs the cRider virtual base at +0x130. It patches the rider's vtables
+ * (the g++ 2.95 this-adjust fix-ups when not in charge).
+ *
+ * Allocates the emitters ("DynamicSprayEmitter") and the spray data ("DynamicSprayData", each set filled in
+ * here with its particle count, life, size, gravity, colour and speeds) and a 0x78-byte "BoneIndicies" block.
+ * It then calls func_002E26B8, func_002DF448 and func_002DF3B0 (unknown) to finish the setup.
+ *
+ * @param inChrg  nonzero when this object is complete and must construct its virtual base
+ * @return self
+ */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x130): vtable copies with delta fixups when not in charge.
 extern "C" void* cDynamicSprayFX_cDynamicSprayFX(sSprayFxE4A8* self, int inChrg)
@@ -1797,6 +1848,10 @@ INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX__cDynamicSprayFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardwakefx_classes.h"
 
+/**
+ * Destroys a snow spray effect's arrays: the emitters (+0x28), the spray data (+0x2C) and the bone indices
+ * (+0x7C).
+ */
 cVbDtor002DF1C8::~cVbDtor002DF1C8()
 {
     delete[] m28;
@@ -3838,6 +3893,16 @@ void* func_002E2860(void* self);
 void func_002E3110(void* self);
 extern "C" void func_002F4380(void* self);
 
+/**
+ * Constructs the lens effects manager base: its element arrays, then registers its callback with the graphics
+ * manager.
+ *
+ * It builds 2 x 256 elements of 0x30 bytes at +0x68 (func_002E2860) and two 0x210-byte objects at +0x6070
+ * (func_002F4380), sets +0x6494 to 1 and clears the pair at +0x60. It then passes func_002E3110 and itself to
+ * graphics manager slot 117 and sets D_004A3B18. The PS2 version's constructor (func_002EC418) calls this.
+ *
+ * @return self
+ */
 // PORT: hand-written g++ 2.95 member-array construction loops (vptr at 0x649C).
 extern "C" void* cLensFxMan_cLensFxMan(void* self)
 {
@@ -4290,6 +4355,15 @@ struct sWakeFade_3930;
 extern "C" void cRider_cRider(void* self);
 extern "C" void cPlayerIndicatorFX_readFromReplayFrame(sWakeFade_3930* self);
 
+/**
+ * Constructs a rider's player indicator (the light beam above another player) and resets its colours.
+ *
+ * When @p inChrg is set it also constructs the cRider virtual base at +0x40. It patches the rider's vtables
+ * (the g++ 2.95 this-adjust fix-ups when not in charge).
+ *
+ * @param inChrg  nonzero when this object is complete and must construct its virtual base
+ * @return self
+ */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x40): vtable copies with delta fixups when not in charge.
 extern "C" void* cPlayerIndicatorFX_cPlayerIndicatorFX(cPlayerIndicatorFX* self, int inChrg)
@@ -4327,6 +4401,9 @@ INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX__cPlayerIndicatorFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardwakefx_classes.h"
 
+/**
+ * Destroys a player indicator; this part of the destructor has nothing to free.
+ */
 cVbDtor002E37D0::~cVbDtor002E37D0()
 {
 }
@@ -4367,6 +4444,11 @@ struct sWakeFade_3930 {
     sWakeVec4_3930 c;
 };
 
+/**
+ * Resets a player indicator's colours; despite the name it reads no replay data (it takes no frame).
+ *
+ * The pulse runs between (0.5, 1, 0, 0) and (0.7, 1, 0.7, 0.7), starting at the first; +0x4 is cleared.
+ */
 extern "C" void cPlayerIndicatorFX_readFromReplayFrame(sWakeFade_3930* self)
 {
     self->a = sWakeVec4_3930(0.5f, 1.0f, 0.0f, 0.0f);
@@ -4391,6 +4473,12 @@ struct sWkCol39D8 {
     float out[4];               // 0x28
 };
 
+/**
+ * Pulses a player indicator's colour between its two colours with a sine wave, while its rider is active.
+ *
+ * The phase advances by D_004A55AC / 60 each frame and wraps at 2 pi. Nothing happens when the rider's
+ * virtual slot 8 (on its +0x6C0 part) returns 0.
+ */
 extern "C" void cPlayerIndicatorFX_update(sWkCol39D8* self)
 {
     char* o = self->rider + 0x6C0;
@@ -4626,6 +4714,13 @@ static inline int ShouldDraw_3AF8(sWake_3AF8* self)
     return vis;
 }
 
+/**
+ * Draws a player indicator: a tall beam of light (about 20000 units) rising from the rider's head.
+ *
+ * It faces the camera, is 170 units wide and fades out at both ends. It is drawn in split screen for the
+ * other player's rider seen from the other view, for remote riders in network games, and for AI riders in
+ * some event modes. It is never drawn during an in-game cutscene (mIsInNIS).
+ */
 extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
 {
     if (!ShouldDraw_3AF8(self)) {
@@ -4806,6 +4901,15 @@ extern "C" void cScriptObject_DeInitScriptObject(void* self);
 extern "C" void cScriptObject__cScriptObject(void* self, int flags);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 
+/**
+ * Destroys a transition manager: ends the transition and releases its held texture.
+ *
+ * The texture at +0x68 goes back through graphics manager slot 60. It then shuts down and destroys the script
+ * object part (+0x10) and runs the cObjNode destructor.
+ *
+ * @param self   the transition manager
+ * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ */
 extern "C" void cTransitionMan__cTransitionMan(void* self, int flags)
 {
     *(void***)((char*)self + 0x1C) = D_00488100;
@@ -5021,6 +5125,13 @@ extern char* D_004A5B64;
 struct sWkVtA46C8 { short delta; short index; int (*fn)(void*); };
 struct sWkVtB46C8 { short delta; short index; void (*fn)(void*, void*); };
 
+/**
+ * Advances a screen transition's clock and ends it once the fade in, hold and fade out are over.
+ *
+ * A held texture is released once graphics slot 114 (probably the frame count) is 3 past +0x80. While active
+ * (+0x44) and not paused (+0x40), the time (+0x48) is set from +0x3C when +0x18 is positive, from a tracked
+ * value (+0x70) times the total length, or else advanced by one frame (1 / frame rate).
+ */
 extern "C" void cTransitionMan_update(char* self)
 {
     char* ctx = cGraphicsMan_TheGraphicsMan_boardwakefx;
@@ -5132,6 +5243,14 @@ static inline int fadeTex47E8(sFade47E8* self)
     return self->tex;
 }
 
+/**
+ * Draws a full-screen transition for its rider's view: the first overlay fading in, then the second fading
+ * out.
+ *
+ * The overlay object's virtual slot 2 draws it with the alpha, over a 640 x 480 screen. The pending texture
+ * is released when the hold ends. At an alpha of 0.93 or more it also resets the world painter
+ * (cWorldPainterMan_reset).
+ */
 extern "C" void cTransitionMan_render(sFade47E8* self)
 {
     if (self->rider != *(int*)((char*)SSXApp->Game->ViewMan + 0x14)) {
@@ -5947,6 +6066,15 @@ struct sWake5920 {
     sVec5920 v[2];              // 0x40
 };
 
+/**
+ * Constructs the falling snow: six snow boxes ("SnowBox") per view, the second set only for two players.
+ *
+ * Each view gets four boxes of one kind (sizes probably 1500, 1500, 2000 and 3000) and two of another kind
+ * (probably the fluff). func_00319CC8 (unknown) is called before and after.
+ *
+ * @param bucket  update bucket (On Tour const int bucket)
+ * @return self
+ */
 extern "C" void* cSnowFall_cSnowFall(sWake5920* self, void* bucket)
 {
     cObjNode_cObjNode1(self, bucket);
@@ -5986,6 +6114,12 @@ extern "C" void func_00319CC8(void);
 extern "C" void func_002E4F28(int* self, int flags);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 
+/**
+ * Destroys the falling snow: deletes its twelve snow boxes and runs the cObjNode destructor.
+ *
+ * @param self   the snowfall node
+ * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ */
 extern "C" void cSnowFall__cSnowFall(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = cSnowFall_vtbl;
@@ -6043,6 +6177,17 @@ struct sWakeRec_5DA0 {
 };
 extern "C" void func_002E4F50(int* elem, sWakeRec_5DA0* rec);
 
+/**
+ * Updates the falling snow from each view's snow settings, then advances every snow box with its view's
+ * settings.
+ *
+ * The settings (snow and wind intensity, fluff, flake size, wind rotation, flurries, gravity and two colours)
+ * come from the debug snowfall toggles when cSnowfallToggles_m_EnableTest is set. Otherwise they come from
+ * the render-state manager (entries 6 and 7). The snow intensity also goes to func_002F4330 with the view's
+ * func_002306A8 object.
+ *
+ * @param self  the snowfall node
+ */
 extern "C" void cSnowFall_update(void* self)
 {
     sWakeRec_5DA0 recs[2];
@@ -6198,6 +6343,13 @@ static inline void rsSetB_6008(sRsCtx_6008* ctx, int mask, int shift, int v)
     ctx->top->flagsB = (ctx->top->flagsB & ~mask) | ((v << shift) & mask);
 }
 
+/**
+ * Draws the falling snow for the current view, moving its boxes with the camera.
+ *
+ * The boxes of the current view move by that view's position change since the last frame (+0x20). The colour
+ * comes from the view's +0x80 colour (times 0.6, minus 0.5). Skipped when D_004A4524 is set;
+ * cSnowfallToggles_m_TestAdditive selects additive blending.
+ */
 extern "C" void cSnowFall_render(sWakeFx_6008* self)
 {
     if (D_004A4524 != 0) {
@@ -6247,6 +6399,11 @@ INCLUDE_ASM("visualfx/boardwakefx", cSnowFall_readFromReplayFrame);
 #ifdef SKIP_ASM
 void func_002E4F10(void*);
 
+/**
+ * Resets every snow box (func_002E4F10); despite the name it reads no replay data (it takes no frame).
+ *
+ * @param self  the snowfall node
+ */
 extern "C" void cSnowFall_readFromReplayFrame(void* self)
 {
     int i;
@@ -6280,6 +6437,17 @@ struct sWakePt_6320 {
     sWakePt_6320() {}
 };
 
+/**
+ * Constructs a rider's speed boost streamers: 30 trail segments and 20 ribbon points, then resets them.
+ *
+ * When @p inChrg is set it also constructs the cRider virtual base at +0x3B0. It patches the rider's vtables
+ * (the g++ 2.95 this-adjust fix-ups when not in charge).
+ *
+ * The points are "cSpeedBoostStreamerFX" (+0x3AC).
+ *
+ * @param inChrg  nonzero when this object is complete and must construct its virtual base
+ * @return self
+ */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x3B0): vtable copies with delta fixups when not in charge.
 extern "C" void* cSpeedBoostFX_cSpeedBoostFX(cSpeedBoostFX* self, int inChrg)
@@ -6320,6 +6488,10 @@ INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX__cSpeedBoostFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/boardwakefx_classes.h"
 
+/**
+ * Destroys a speed boost effect: frees its ribbon points and calls func_0037C720 on the graphics manager with
+ * 0.
+ */
 cVbDtor002E64C0::~cVbDtor002E64C0()
 {
     if (m3AC != 0) cMemMan_free(m3AC);
@@ -6346,6 +6518,12 @@ struct sWakeVec4 {
     float w;
 } __attribute__((aligned(16)));
 
+/**
+ * Resets a speed boost effect; despite the name it reads no replay data (it takes no frame).
+ *
+ * Sets the colour to red, the ribbon texture to 57 and clears the trail. +0x3A4 is 20 for a rider with a view
+ * (a player) and 18 for others.
+ */
 extern "C" void cSpeedBoostFX_readFromReplayFrame(cSpeedBoostFX* self)
 {
     sWakeVec4 v;
@@ -6578,6 +6756,13 @@ static inline void Trail_66B8(sWake_66B8* self, const t4Vector& pos, int on, flo
     }
 }
 
+/**
+ * Updates a rider's speed boost streamers: picks the ribbon by the uber level and grows or fades the trail.
+ *
+ * The ribbon texture is 61 at uber level 11, 60 while a power-up boost runs, 59 (red) at level 10 or more, 58
+ * (orange) at 5 or more, otherwise 57. On the ground with a boost running, the trail length and width follow
+ * the boost and speed; otherwise they fade by 5 % a frame. The trail is cleared on landing.
+ */
 extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
 {
     int air = func_0011FE98(self->rider) == 1;
@@ -7142,6 +7327,13 @@ static inline void setVtx_7A10(sWakeVtx_7A10* base, int i, float s, float t, con
     vx->t = t;
 }
 
+/**
+ * Draws a rider's speed boost: two ribbons through the trail points and a strip along the trail segments.
+ *
+ * The ribbons fade with the square of their distance from the newest point; the strip fades along its length.
+ * Nothing is drawn when the trail is empty, short (under 3) or nearly transparent, or when
+ * cPowerUpFXToggles_m_EnableSpeedBoostFX is off.
+ */
 // Board wake: draws the two ribbons (left/right of each trail point, faded by age) and the
 // segment trail as a strip through the particle vertex buffer.
 extern "C" void cSpeedBoostFX_render(sBoardWake_7A10* self)

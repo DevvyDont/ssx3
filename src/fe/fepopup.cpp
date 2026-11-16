@@ -22,6 +22,19 @@ struct sQuad_58E8 { int v[4]; };
 extern sQuad_58E8 D_004C6788;
 extern sQuad_58E8 D_004C6798;
 
+/**
+ * Constructs a message/confirmation popup state with empty widgets and default layout settings.
+ *
+ * Runs the cUIState constructor (func_0039E318), stores cScreenPopup_vtbl, constructs the embedded cPopupInfo
+ * (func_001C55F8 at +0xBC) and points mszInputText and mszStaticText at the empty string D_004A3E90. Every
+ * widget pointer, mpKeyboard, the five options and the five confirmations are cleared; miDefaultOption is -1,
+ * mbReceivePrev 1, mvCurrentScale (1, 1, 1), the highlight colours come from D_004C6788 / D_004C6798 and
+ * miMaxChars is 0x3F.
+ *
+ * @param engine  the UI engine that owns the state
+ * @param owner  the parent state that receives the popup's events (mpParentState)
+ * @return @p self
+ */
 extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, void* engine, void* owner)
 {
     func_0039E318(self, engine, owner);
@@ -151,6 +164,13 @@ struct sVE5B88 {
 extern "C" void cScreenPopup_SetTextObjectsAlpha(cScreenPopup* self, float t);
 extern "C" void cScreenPopup_setPrivateDefaultOption(cScreenPopup* self, void* menu, int idx, int max);
 
+/**
+ * Re-activates the popup's menu when the popup gets the focus back.
+ *
+ * Only when mpMenu exists: sets the text alpha to 1 (cScreenPopup_SetTextObjectsAlpha()), calls the menu's
+ * slot 8 with 0, selects the default option with cScreenPopup_setPrivateDefaultOption(), calls the menu's
+ * slot 7 with 1, then recolours the entries through its own onWidgetMenu (slot 20) with message 5.
+ */
 extern "C" void cScreenPopup_onGainFocus(cScreenPopup* self)
 {
     if (self->mpMenu != 0) {
@@ -188,6 +208,18 @@ extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, void* p);
 extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* color);
 extern char D_004A1C48[];
 
+/**
+ * Runs the popup's opening transition: lays the popup out, then grows the blue background frame by frame.
+ *
+ * On the first call it sets mbFirstGainTran, builds the popup from its info (cScreenPopup_initScreenPopup())
+ * and scales the background to (0.2, 0.2, 1). For the blue background (meBackgroundType 1) the text starts
+ * transparent and the scale grows linearly to mvCurrentScale over miStartFrame frames (the frame of the
+ * screen label "Start", else 25); other backgrounds are set to mvCurrentScale at once. In the animated frames
+ * only x and y of the scale are written, so z is whatever is on the stack.
+ *
+ * @param first  nonzero on the first call of the transition (On Tour: bFirstTime)
+ * @return 0 while the background is still growing, 1 when the transition is done
+ */
 extern "C" int cScreenPopup_onGainTransition(cScreenPopup* self, int first)
 {
     if (first) {
@@ -258,6 +290,13 @@ extern "C" void cScreenPopup_restoreElements(cScreenPopup* self);
 extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, void* p);
 extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* color);
 
+/**
+ * Rebuilds the popup's layout from its info, once it has been shown at least once.
+ *
+ * Does nothing before the first gain transition (mbFirstGainTran). Otherwise it puts the widgets back
+ * (cScreenPopup_restoreElements()), lays them out again from the embedded info, rescales the background to
+ * mvCurrentScale and calls its own slot 6 (onGainFocus) with 0.
+ */
 extern "C" void cScreenPopup_redrawPopup(cScreenPopup* self)
 {
     if (self->mbFirstGainTran != 0) {
@@ -323,6 +362,15 @@ static inline void SetAlpha_5F20(char* o, float t)
     }
 }
 
+/**
+ * Sets the alpha of every text widget of the popup.
+ *
+ * Covers the button group, the message, post and title texts, the text-box pair, the screen objects "ngca",
+ * "xba" and "ps2x" and the five options; each existing widget keeps its colour (+0x1C) with only the alpha
+ * replaced (slot 11).
+ *
+ * @param fAlpha  the new alpha, 0 to 1
+ */
 extern "C" void cScreenPopup_SetTextObjectsAlpha(cScreenPopup* self, float fAlpha)
 {
     SetAlpha_5F20((char*)self->mpButtonGroup, fAlpha);
@@ -391,6 +439,15 @@ static inline sObj_6260* find_6260(void* self, char* name)
 #define POS_6260(o) (*(sV3_6260*)((char*)self + (o)))
 #define OBJ_6260(o) (*(sObj_6260**)((char*)self + (o)))
 
+/**
+ * Looks up the popup screen's widgets by name and caches them with their home positions and sizes.
+ *
+ * Fills mpBackGroundWhite ("whitefg"), mpBackGroundRed ("redbg"), the large/small shapes and outlines, the
+ * shadow, grey and black backgrounds, mpMenu, mpButtonGroup, the title, message and post texts, the entry
+ * box, static label, text-box pair and entry background, and mpOptions[0-4] ("Option0" to "Option4"). The
+ * positions go to the mvPos* fields; "whitefg", "Small shape" and "EnterBackground" also store their sizes
+ * (slot 20). Widgets that are not found leave their fields unchanged.
+ */
 // Looks up the popup's widgets by name and caches them (and their positions) in the screen object.
 extern "C" void cScreenPopup_FillObjectPointers(cScreenPopup* self)
 {
@@ -651,6 +708,18 @@ extern "C" void func_001C7C20(void* self);
 extern "C" void func_001C7EB0(cScreenPopup* self);
 extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* text, const char* str);
 
+/**
+ * Builds the popup from a popup description: copies its settings and lays out the title, text and options.
+ *
+ * Copies the misc data, pass-update, receive-previous, type, centring flags, minimum width, confirmations,
+ * offset, layer offset, background type, default option and maximum characters from the info. The start width
+ * is mfMinSize, or 472 (300 when the text is centred). Then it places the title (func_001C8678), message,
+ * options, buttons (func_001C8758, func_001C88C8) and post text (func_001C7040), shifts the layers, sets the
+ * background (func_001C66E8) and its layout (func_001C7C20); a text-entry popup (type -1) also sizes the
+ * entry box (func_001C7EB0) and fits its initial text with cScreenPopup_checkAndFixTextEntry().
+ *
+ * @param info  the popup description (On Tour: cPopupInfo *pInfo); the popup's own copy at +0xBC in practice
+ */
 extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, void* info)
 {
     cScreenPopup_FillObjectPointers(self);
@@ -721,6 +790,17 @@ extern "C" void func_001C8628(void* self, void* obj, void* out);
 extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out);
 extern "C" void func_001C9B68(void* self, float* size, float* item);
 
+/**
+ * Shows or hides the popup's text-entry widgets, depending on whether the popup is a text-entry popup.
+ *
+ * For a text-entry popup (type -1) it sets the static label from mtEntryBoxTitle, copies mtEntryBoxInitial
+ * into mszInputText, places the entry box 10 units right of the label, grows mvCurSize, shows the label,
+ * entry box, text-box pair and background, and changes the info's type to 1 (the text-box pair is the single
+ * option). Otherwise it hides those four widgets, yet still adds the entry box's size to mvCurSize.
+ *
+ * @param infop  the popup description (cPopupInfo); its type is overwritten for a text-entry popup
+ * @return 1 for a text-entry popup (the caller restores type -1 afterwards), else 0
+ */
 extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* infop)
 {
     int* info = (int*)infop;
@@ -874,6 +954,16 @@ extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* ms
 extern "C" void func_001C97E0(cScreenPopup* self, void* a, void* b, int which, float t);
 extern "C" void func_001C8930(void* self, void* obj, unsigned char state, float t);
 
+/**
+ * Places and fills the popup's message text below the title and records the size reached.
+ *
+ * The message goes at mvPosTitle shifted down by the height so far. With centred text it first measures the
+ * message's first wrapped line (cScreenPopup_getMessageLineWrapSize1()) and widens the texts (func_001C70F0)
+ * when it is wider than the popup. func_001C97E0 fills the text from the info's mtMessage and grows
+ * mvCurSize; centred text is then realigned (func_001C8930). mvMenuSize gets the size reached.
+ *
+ * @param pInfo  the popup description (cPopupInfo)
+ */
 extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, void* pInfo)
 {
     char* o = (char*)self->mpMessageText;
@@ -924,6 +1014,16 @@ extern "C" void func_001C8628(void* self, void* obj, void* out);
 extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out);
 extern "C" void func_001C9B68(void* self, float* size, float* item);
 
+/**
+ * Fills the popup's option texts from its description and hides the unused ones.
+ *
+ * Sets bit 3 of the menu's flags (+0x90) for types 0 and 1 and clears it otherwise, runs
+ * cScreenPopup_handleEntryBox(), shows the button group unless the type is 0, hides options from index type
+ * upward and fills the first type options from the info's option names, keeping the widest in mvLargestOption
+ * and growing mvCurSize. Adds 10 to the height and restores type -1 for a text-entry popup.
+ *
+ * @param infop  the popup description (cPopupInfo); meType is the number of options, -1 for text entry
+ */
 extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, void* infop)
 {
     int* info = (int*)infop;
@@ -1048,6 +1148,15 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_scaleBackground);
 #ifdef SKIP_ASM
 struct sColor_7738 { int r, g, b; };
 
+/**
+ * Applies a scale to the background shapes of the popup's current background type.
+ *
+ * Type 0 (online) scales the white and red backgrounds, type 1 (blue) the small and large shapes, their
+ * outlines and the shadow, type 2 (black) the black background; the vector is stored at +0x50 (the widget's
+ * scale) of each existing shape.
+ *
+ * @param color  the scale vector (On Tour: t3Vector vScale), despite the parameter's type name
+ */
 extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* color)
 {
     sColor_7738 c = *color;
@@ -1346,6 +1455,16 @@ struct sVEntry_80E8 {
     unsigned short* (*fn)(void*, int);
 };
 
+/**
+ * Sets a string object to the text of a popup element (unicode, ASCII or a localised text id).
+ *
+ * Unicode text is narrowed to ASCII through a temporary buffer (strcpy2); an id is looked up in the front-end
+ * locale (slot 4) and narrowed the same way, or printed as "String %08x" when it has no text; an empty
+ * element gives an empty string.
+ *
+ * @param dst  the cBXString to set (On Tour: cBXString &bxString)
+ * @param info  the popup element (On Tour: const tPopupElement *ptElement): type, then the string or id
+ */
 extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* info)
 {
     switch (info[0]) {
@@ -1708,6 +1827,17 @@ extern "C" void func_001C9CD0(void* self, int v);
 #define OBJ_8A38(off) (*(char**)((char*)self + (off)))
 #define VEC_8A38(p, off) (*(sVec3_8A38*)((char*)(p) + (off)))
 
+/**
+ * Puts the popup's widgets back to their unit scale and home positions before a new layout.
+ *
+ * Resets the background shapes' scale and position, moves the menu, buttons, texts, entry box and text-box
+ * pair back to the positions cached by cScreenPopup_FillObjectPointers(), realigns the options
+ * (func_001C8930), resets the text widths to 472 (func_001C70F0) and mvCurrentScale to 1, and undoes the
+ * layer offset (func_001C9CD0 with -miLayerOffset).
+ *
+ * The title and post-text branches realign mpMessageText instead of their own widgets (EA's code passes +0x74
+ * three times), so only the message is realigned.
+ */
 // Resets the popup's widgets: unit scale and home positions, then re-anchors the side items.
 extern "C" void cScreenPopup_restoreElements(cScreenPopup* self)
 {
@@ -1967,6 +2097,16 @@ struct sVEntryK93B0 {
     void* (*fn)(void*, int);
 };
 
+/**
+ * Measures the first wrapped line of a popup message with the popup's message text object.
+ *
+ * Does nothing without mpMessageText. ASCII text goes to cScreenPopup_getMessageLineWrapSize(), unicode to
+ * func_001C94B0; a text id is looked up in the front-end locale first, or measured as "String %08x" when it
+ * has no text. An empty element leaves the size alone.
+ *
+ * @param msg  the message element (On Tour: tPopupElement *ptElement)
+ * @param out  receives the width in x (On Tour: t3Vector &vSize)
+ */
 extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* msg, void* out)
 {
     if (self->mpMessageText == 0)
@@ -2077,6 +2217,18 @@ void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_004660F8[];
 
+/**
+ * Measures the width of an ASCII string up to the point where it would wrap in a text object.
+ *
+ * Sets flag 0x80 on the text (+0x14), then adds up the font's character advances times the text's x scale on
+ * a copy of the string. A double backslash or a carriage return starts a new line (width back to 0). When the
+ * line gets wider than the text box (slot 20) the width before that character is stored; otherwise the last
+ * line's width is. Returns early, without a size, when the text has no font.
+ *
+ * @param pText  the text object whose font, scale and box are used (cUIText)
+ * @param pString  the ASCII string
+ * @param pvSize  receives the width in x (a t3Vector)
+ */
 extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* pText, const char* pString, void* pvSize)
 {
     t3Vector_9648& vSize = *(t3Vector_9648*)pvSize;
@@ -2298,6 +2450,16 @@ struct sPairK1C9B98 { int a, b; };
 struct sEntryK1C9B98 { sPairK1C9B98 p; int c; };
 struct sSelfK1C9B98 { char pad[0x2D0]; sEntryK1C9B98 entries[4]; };
 
+/**
+ * Opens a yes/no confirmation popup for one of the popup's options.
+ *
+ * Allocates a "Confirmation Popup" cScreenPopup with this popup as parent and fills its info: two options
+ * "kT_CMNYes" and "kT_CMNNo", offset (30, 40), layer offset miLayerOffset + 3, and the message and default
+ * option of mtConfirmation[idx]. Stores it in mpConfirmPopup, remembers idx in miActiveConfirmation and
+ * pushes it on the engine's state stack as a popup.
+ *
+ * @param idx  the option index, 0-4
+ */
 extern "C" void cScreenPopup_createConfirmationPopup(cScreenPopup* self, int idx)
 {
     char* popup = (char*)cScreenPopup_cScreenPopup((cScreenPopup*)cMemMan_alloc(0x360, D_00466110, 0x100, 0), self->mpEngine, self);
@@ -2420,6 +2582,17 @@ static inline void SetColour1CA180(char* obj, void* colour)
     vt[11].fn(obj + vt[11].delta, colour);
 }
 
+/**
+ * Handles a menu event of the popup's menu: colours the selection and decides which events pass on.
+ *
+ * Message 5 colours the selected entry with mtHighlightedColor and the others with mtUnhighlightColor (the
+ * text-box pair is coloured through its static label). Messages 8 and 9 return 0; 7 returns 0x101 only when
+ * mbReceivePrev is set; 6 returns 0 while mbNoEntryOnNext is set.
+ *
+ * @param menu  the menu (On Tour: cUIMenu *pMenu)
+ * @param msg  the menu event (On Tour: Event)
+ * @return 0 or 0x101 as above; 0x101 for the other events
+ */
 // Popup menu event handler: on draw (5) colours the selected entry; 0x101 = not handled.
 extern "C" int cScreenPopup_onWidgetMenu(cScreenPopup* self, char* menu, int msg)
 {
@@ -2483,6 +2656,18 @@ static inline void Notify_1CA298(sPopupOwner_1CA298* o, int vi, void* self, int 
     o->vt[vi].fn((char*)o + o->vt[vi].delta, self, v);
 }
 
+/**
+ * Handles a widget event of the popup: option picks, the text box, back and the keyboard's result.
+ *
+ * Event 5 on an option either opens its confirmation (cScreenPopup_createConfirmationPopup()) or reports
+ * option + 15 to the parent's onPopupEvent (slot 17); on the text-box pair it opens a cKeyboardPopup limited
+ * to miMaxChars. A popup without options (type 0) only sets mbNoEntryOnNext. Event 6 reports 0x14 to the
+ * parent when mbReceivePrev is set. Event 13 copies the keyboard's text into mszInputText and refits the
+ * entry box. Events 7 and 8 are ignored; anything else goes to the parent's onWidgetEvent (slot 19).
+ *
+ * @param id  the widget (On Tour: cUIThing *pWidget), compared as an int against the option pointers
+ * @param ev  the widget event (On Tour: Event)
+ */
 extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
 {
     switch (ev) {
@@ -2685,6 +2870,17 @@ struct sVE1CA598 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Handles events from the popup's own child popups (the keyboard and the confirmation popup).
+ *
+ * 0x15 from the keyboard hands it the current input and static texts. 0xF (yes) pops the confirmation and
+ * keeps miActiveConfirmation + 15 as the return code; 0x10 and 0x14 pop it with -1; 0x11 to 0x13 just pop it.
+ * 0x16 (the child is gone) clears mpKeyboard or mpConfirmPopup; for the confirmation it then reports the
+ * return code to the parent's onPopupEvent (slot 17) unless it is -1.
+ *
+ * @param child  the child popup that sent the event (On Tour: cUIState *pPopup)
+ * @param msg  the event (On Tour: Event)
+ */
 // Child-popup message handler: forwards results, plays sounds and closes the popup when done.
 extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, void* child, int msg)
 {
@@ -2752,6 +2948,16 @@ static inline void measure_A6A0(cUIText* text, const char* s, float* out)
     cFont_textExtent(f, s, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
 }
 
+/**
+ * Shows a string in a text object, cut short with "..." when it does not fit the box.
+ *
+ * Scales the font to the text's scale, copies the string into a buffer of miMaxChars + 4 bytes and drops
+ * characters from the end until the text plus "..." fits the box width minus 1. The cut text gets "..."
+ * appended; a string that fits is shown unchanged.
+ *
+ * @param text  the text object (the entry box)
+ * @param str  the ASCII string to show
+ */
 extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* text, const char* str)
 {
     int fixed = 0;
@@ -2812,6 +3018,15 @@ int GetHashValue32(char* str);
 extern char D_004661B8[];
 extern char D_004661C8[];
 
+/**
+ * Fills a buy popup's info for getting a song with a credit.
+ *
+ * Stores the song title as an ASCII element (mItemName), the text ids "kT_OVRSong" (mItemType) and
+ * "kT_OVRCMNBuySongCredit" (mQuestion), and the credits left; the cost and cash are left as they are.
+ *
+ * @param song  the song title (an ASCII string pointer)
+ * @param credit  the credits left (mCreditsLeft)
+ */
 extern "C" void cBuyPopupInfo_initBuySongByCredit(cBuyPopupInfo* self, int song, int credit)
 {
     int three = 3;
@@ -2980,6 +3195,9 @@ extern char D_004662C8[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Creates the buy popup's screen "139buy_popup" and plays its first frame.
+ */
 extern "C" void cUIStateBuyPopup_onCreateScreen(cUIStateBuyPopup* self)
 {
     void* engine = self->mpEngine;
@@ -3024,6 +3242,15 @@ extern char D_00466318[];
 extern char D_00466328[];
 extern char D_004A12C0[];
 
+/**
+ * Fills the buy popup's widgets from its cBuyPopupInfo as they are created.
+ *
+ * "item type", "item name" and "question" get their elements (ASCII, unicode or text id). With no credits
+ * left (mCreditsLeft <= 0) "cost_answer" and "you have_answer" show the price and cash as dollars and "group
+ * credit" is hidden; otherwise "credits remain" shows the count and "group cash" is hidden.
+ *
+ * @param widget  the widget being created
+ */
 extern "C" void cUIStateBuyPopup_onWidgetCreate(void* self, void* widget)
 {
     cUIText* text = (cUIText*)widget;
@@ -3078,8 +3305,15 @@ extern "C" void cUIStateBuyPopup_onWidgetCreate(void* self, void* widget)
 //100%
 INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_onWidgetMenu);
 #ifdef SKIP_ASM
+/**
+ * Filters the buy popup's menu events: 7, 8 and 9 return 0x100, everything else 0x101.
+ *
+ * @param pMenu  the menu (On Tour: cUIMenu *pMenu); unused
+ * @param key  the menu event (On Tour: Event)
+ * @return 0x100 for events 7-9, else 0x101
+ */
 // Key filter: keys 7, 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cUIStateBuyPopup_onWidgetMenu(cUIStateBuyPopup* self, int a1, unsigned int key)
+extern "C" int cUIStateBuyPopup_onWidgetMenu(cUIStateBuyPopup* self, int pMenu, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -3099,6 +3333,12 @@ INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_onWidgetEvent);
 int GetHashValue32(char* str);
 extern char D_004A14E8[];
 
+/**
+ * Records the buy popup's answer: on event 5 mAccept (+0x6C) becomes 1 for the "yes" widget, 0 otherwise.
+ *
+ * @param item  the widget (ignored when 0)
+ * @param event  the widget event; only 5 is handled
+ */
 extern "C" void cUIStateBuyPopup_onWidgetEvent(cUIStateBuyPopup* self, void* item, int event)
 {
     if (item != 0) {
@@ -3121,6 +3361,16 @@ int GetHashValue32(char* str);
 extern char D_00466338[];
 extern char D_00466350[];
 
+/**
+ * Fills the buy popup's info for buying an uber trick.
+ *
+ * Stores the price and the cash, the trick's name as an ASCII element, and the text ids "kT_OVRCMNUbertrick"
+ * and "kT_OVRCMNBuyThisUber" as the item type and the question. mCreditsLeft is not touched.
+ *
+ * @param trick  the trick's name (an ASCII string pointer)
+ * @param cost  the price
+ * @param money  the cash the player has
+ */
 extern "C" void cUIStateBuyPopup_initBuyTrick(cUIStateBuyPopup* self, int trick, int cost, int money)
 {
     int three = 3;
@@ -3221,6 +3471,14 @@ void cMemMan_free(void* ptr);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void func_0039E390(void* self, int flags);
 
+/**
+ * Destroys the on-screen keyboard: frees its pending unicode static text and its static string.
+ *
+ * Stores the class vtable, frees mpustrStatic when set, destroys the mszStatic cBXString and runs the
+ * cUIState destructor (func_0039E390), which also frees the object when the flags ask for it.
+ *
+ * @param flags  destructor flags, passed on to func_0039E390
+ */
 extern "C" void cKeyboardPopup__cKeyboardPopup(cKeyboardPopup* self, int flags)
 {
     self->mVtbl = cKeyboardPopup_vtbl;
@@ -3298,6 +3556,12 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void func_0039F190(void* self, int a1);
 
+/**
+ * Closes the keyboard on widget events 5 and 6 by popping the top state of the engine's stack.
+ *
+ * @param pWidget  the widget (unused)
+ * @param Event  the widget event
+ */
 extern "C" void cKeyboardPopup_onWidgetEvent(cKeyboardPopup* self, void* pWidget, unsigned int Event)
 {
     switch (Event) {
@@ -3335,6 +3599,14 @@ static inline int IsK1CB2C8(int id, char* s)
     return id == GetHashValue32(s);
 }
 
+/**
+ * Sets up the keyboard's widgets as they are created: the help group and the three backgrounds.
+ *
+ * "HelpGroup" is shown only online (D_004A1A70 == 1) and outside a game (SSXApp->Game == 0); "back_com",
+ * "back_exp" and "back_reg" are kept in mpBackCompact, mpBackExpand and mpBackRegular.
+ *
+ * @param widget  the widget being created
+ */
 extern "C" void cKeyboardPopup_onWidgetCreate(cKeyboardPopup* self, void* widget)
 {
     if (IsK1CB2C8(*(int*)((char*)widget + 0x38), D_00466398)) {
@@ -3367,13 +3639,22 @@ struct sVEntry001CB3D0 {
     int (*fn)(void*, int, int);
 };
 
-extern "C" int cKeyboardPopup_handleEvent(cKeyboardPopup* self, int a1, int a2)
+/**
+ * Passes an event on to the parent state when the keyboard refers its events to it.
+ *
+ * Calls the parent's handleEvent (slot 24) only when mbReferEventsToParent is set and there is a parent.
+ *
+ * @param msg  event message (On Tour: msg)
+ * @param pParam  event parameter (On Tour: pParam)
+ * @return the parent's result, or 0
+ */
+extern "C" int cKeyboardPopup_handleEvent(cKeyboardPopup* self, int msg, int pParam)
 {
     if (self->mbReferEventsToParent != 0) {
         void* obj = self->mpParentState;
         if (obj != 0) {
             sVEntry001CB3D0* vt = *(sVEntry001CB3D0**)((char*)obj + 8);
-            return vt[24].fn((char*)obj + vt[24].delta, a1, a2);
+            return vt[24].fn((char*)obj + vt[24].delta, msg, pParam);
         }
     }
     return 0;
@@ -3389,6 +3670,16 @@ extern "C" void cKeyboardPopup_setIncludeKey(cKeyboardPopup* self, int i, int v,
 extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self);
 extern "C" void cKeyboardPopup_updateEdit(cKeyboardPopup* self, int a1);
 
+/**
+ * Puts a text into the keyboard's edit field with the cursor at its end.
+ *
+ * Sets mbSetInputText, copies the text into mszEditString, puts the cursor at its end and shows all of it.
+ * With mbDisableForFirst the space key (75) is enabled only for a non-empty text; the enter key (55) is
+ * enabled once the text has miMinCharacters. Redraws the keys, and the edit field once the transition is
+ * done.
+ *
+ * @param str  the text (On Tour: szText); copied without a length check into the 64-byte field
+ */
 extern "C" void cKeyboardPopup_setInputText(cKeyboardPopup* self, const char* str)
 {
     int one = 1;
@@ -3602,6 +3893,17 @@ extern "C" int cKeyboardPopup_handleMovementDownFromQuickKeyRow(cKeyboardPopup* 
 extern "C" int cKeyboardPopup_handleMovementDownFromLast(cKeyboardPopup* self, int a1);
 extern "C" int cKeyboardPopup_handleMovementDownToLast(cKeyboardPopup* self, int a1);
 
+/**
+ * Moves the keyboard's selection one row down, skipping gaps and keys that cannot be selected.
+ *
+ * With controller input it first remembers the key and direction, and returns to the key it came from when
+ * the previous direction was 0 (probably up), meSkipState allows it and that key is selectable. The quick-key
+ * row, the shift row (56-69) and the last row (70-83) have their own handlers; other keys move 14 down (the
+ * last row wraps to the top) past gaps in D_00441390. When the new key is not selectable it moves on
+ * recursively and updates meSkipState.
+ *
+ * @param bControllerInput  nonzero for a move from the pad (not a recursive skip)
+ */
 extern "C" void cKeyboardPopup_kbMoveDown(cKeyboardPopup* self, int bControllerInput)
 {
     bool b = self->mbCapsOn != 0;
@@ -3714,6 +4016,12 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleMovementDownFromQuickKeyRow);
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
 extern "C" void cKeyboardPopup_moveDownRows(cKeyboardPopup* self);
 
+/**
+ * Moves down from quick keys 4 and 5 to keys 16 and 18, or past the rows when those are not selectable.
+ *
+ * @param bUseReg  which key set the move is for; meSkipState records its inverse when the target is skipped
+ * @return 1 when the current key is 4 or 5 (handled), else 0
+ */
 extern "C" int cKeyboardPopup_handleMovementDownFromQuickKeyRow(cKeyboardPopup* self, int bUseReg)
 {
     int val;
@@ -3750,6 +4058,16 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleMovementDownFromLast);
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
 extern "C" void cKeyboardPopup_skipRowToTop(cKeyboardPopup* self);
 
+/**
+ * Moves down from the last row's arrow-left (76) and space (75) keys to the top rows.
+ *
+ * From key 76 it selects key 9 when key 0 is selectable (EA's code tests 0 but moves to 9), else key 23; from
+ * key 75 it selects key 19. When the target is not selectable it skips to the top
+ * (cKeyboardPopup_skipRowToTop()).
+ *
+ * @param bUseReg  which key set the move is for; meSkipState records its inverse when the target is skipped
+ * @return 1 when the current key is 75 or 76 (handled), else 0
+ */
 extern "C" int cKeyboardPopup_handleMovementDownFromLast(cKeyboardPopup* self, int bUseReg)
 {
     int val;
@@ -3896,6 +4214,15 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleMovementDownToLast);
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
 extern "C" void cKeyboardPopup_skipRowToTop(cKeyboardPopup* self);
 
+/**
+ * Moves down from the row above the last one onto the space (75) or arrow-left (76) key.
+ *
+ * Keys 57 to 65 go to the space key and key 66 to arrow-left; when that key is not selectable it skips to the
+ * top instead (cKeyboardPopup_skipRowToTop()).
+ *
+ * @param bUseReg  which key set the move is for; meSkipState records its inverse when the target is skipped
+ * @return 1 when the current key is 57-66 (handled), else 0
+ */
 extern "C" int cKeyboardPopup_handleMovementDownToLast(cKeyboardPopup* self, int bUseReg)
 {
     int val;
@@ -4075,6 +4402,20 @@ struct sKeyboard_C1E0 {
     int closeOnAccept;              // 0x420
 };
 
+/**
+ * Presses the keyboard's selected key: edits the text or runs the key's action, then redraws.
+ *
+ * With mbClearOnFirst set, any key but enter and clear first presses "clear" (70). Then, unless only the
+ * screen is updated or the key is not selectable, backspace (27) deletes before the cursor, caps (42) and
+ * shift (56) toggle, clear (70) empties the text, the arrows (76, 83) move the cursor, enter (55) sets
+ * mbAcceptText, pops the state when mbPopOnEnd and tells the parent (event 0xD), ESC (0) pops and sends 0xE,
+ * quick keys 4-13 run func_001CE5E0 and other keys add their character (func_001CC7C8). Shift is released
+ * after any other key; the edit field, the space and enter keys' availability and the key labels are
+ * refreshed.
+ *
+ * @param self_  the keyboard (the body views it through a local struct)
+ * @param flag  nonzero to only refresh the screen without pressing (On Tour: bScreenUpdateOnly)
+ */
 // Handles the currently selected key of the on-screen keyboard.
 extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
 {
@@ -4313,6 +4654,11 @@ extern "C" void cKeyboardPopup_updateViewable(cKeyboardPopup* self, int a1);
 extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self);
 extern char D_00466530[];
 
+/**
+ * Refreshes the keyboard's edit field: the visible part of the text, stars for passwords, and the cursor.
+ *
+ * @param bDropFromRight  passed to cKeyboardPopup_updateViewable(): trim the visible part from the right
+ */
 extern "C" void cKeyboardPopup_updateEdit(cKeyboardPopup* self, int bDropFromRight)
 {
     cKeyboardPopup_updateViewable(self, bDropFromRight);
@@ -4374,6 +4720,15 @@ public:
 };
 
 
+/**
+ * Works out which part of the edited text fits in the "EnterValue" box and copies it to mszViewableString.
+ *
+ * Trims characters from the right or the left until the measured width fits mvSizeEnter (less the cursor
+ * width when the cursor is at the end), then extends the end while there is room and miMaxCharacters allows.
+ * "ExtendCursorLeft" shows when the start is cut, "ExtendCursorRight" when text follows the visible part.
+ *
+ * @param bDropFromRight  nonzero to drop characters from the right end, 0 from the left
+ */
 // The body uses the incoming pointer directly (as `this` would be): a
 // separate `self` local leaves a copy in the entry block that changes
 // GCSE's expression numbering.
@@ -4455,6 +4810,13 @@ extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, void* obj);
 extern "C" char* strncpy(char* dst, const char* src, int n);
 extern char D_00466570[];
 
+/**
+ * Places and sizes the keyboard's "CharacterCursor" at the cursor position in the edit field.
+ *
+ * Refreshes the "EnterValue" size and position, sets the cursor's y so it ends 2 units above the box's
+ * bottom, gives it the width of the character under it ('*' for a password; the default cursor size at the
+ * end of the text) and moves it right by the width of the visible text before the cursor.
+ */
 extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
 {
     sVec3_CC30 pos;
@@ -4685,6 +5047,18 @@ extern char D_004A1CB8[];
 extern char D_004A1CC0[];
 extern char D_004A1CC8[];
 
+/**
+ * Builds the UI object name of a keyboard key or of its cursor highlight.
+ *
+ * The name is "keyboard_" or "cursor_" plus the key's name: "back", "caps", "Lshift", "clear", "arrLeft",
+ * "arrRight", "tab", "enter", "arrUp", "arrDown", "space" and "ESC" for the special keys, "Q1" to "Q10" for
+ * keys 4-13, otherwise the key's character from D_00441390.
+ *
+ * @param key  the key index, 0-83
+ * @param out  receives the name
+ * @param shifted  nonzero for the cursor object's name (On Tour: bCursor), 0 for the key's
+ * @return 0 for a gap in the layout (character '*'), else 1
+ */
 extern "C" int cKeyboardPopup_getObjName(cKeyboardPopup* self, int key, char* out, int shifted)
 {
     char num[16];
@@ -4798,6 +5172,18 @@ static inline void SetVis_D348(char* o, int on)
     vt[9].fn(o + vt[9].delta, on);
 }
 
+/**
+ * Prepares the keyboard the first time it is shown: layout, measurements and the initial texts.
+ *
+ * Sets mbTransistionDone, turns caps on (or takes bit 1 of D_004A33F0 + 0x88 when that exists) and shift off,
+ * clears the text unless one was set, shows the background for meType (0 "regular", 2 "expanded", else
+ * "compact") and plays that label's frame. It measures "CharacterCursor" and "EnterValue" (offset by "Name
+ * bar"), hides the extend arrows, re-applies a pending input text and the pending static text (string id,
+ * unicode copy or mszStatic), and places the cursor. Later calls do nothing.
+ *
+ * @param first  nonzero on the first call (On Tour: bFirstTime)
+ * @return always 1 (the transition finishes at once)
+ */
 extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
 {
     if (first) {
@@ -4925,6 +5311,14 @@ extern char D_004C67C8[];
 extern char D_004C67E8[];
 extern char D_004C67F8[];
 
+/**
+ * Redraws every key of the keyboard: labels, availability colours, cursor objects and the highlight.
+ *
+ * Special keys get their labels from cKeyboardPopup_SetNameForKey(); character keys show the upper or lower
+ * character (caps xor shift; keys 15-26 follow shift alone) and are coloured by
+ * cKeyboardPopup_allowSelection(). Cursor objects of keys 0-13 are hidden in the compact layout (meType 1).
+ * The current key's cursor gets the highlight colour D_004C67E8. Does nothing without a screen.
+ */
 extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
 {
     char name[0x20];
@@ -5181,6 +5575,18 @@ static inline int isOnK1CDB98()
     return D_004A1A70 == 1;
 }
 
+/**
+ * Handles the keyboard's input: moves, key presses, caps, shift, help, cancel and typed characters.
+ *
+ * Ignores input with slot 8 set. The four directions move the selection (func_001CB500, func_001CB650,
+ * func_001CB7F0, cKeyboardPopup_kbMoveDown()), accept presses the key, back pops the keyboard and sends 0xE
+ * to the parent, and online outside a game the help input opens a help popup. Keys from a typed-key event
+ * (slots 41-43) select the matching special key, or add the typed character (` becomes ~) and refresh. The
+ * old and new current keys' cursors are recoloured and a sound plays when something changed.
+ *
+ * @param ev  the input object (On Tour: cUIInput *pInput)
+ * @return always 1 (input consumed)
+ */
 extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
 {
     if (InputK1CDB98(ev, 8) != 0)
@@ -5366,6 +5772,13 @@ extern "C" void func_001CE2A8(cKeyboardPopup* self)
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setIncludeKey);
 #ifdef SKIP_ASM
+/**
+ * Sets whether a key can be selected, in the regular set, the alternate set or both.
+ *
+ * @param i  the key index, 0-83 (On Tour: eScreenFullKeyboard eCharacter)
+ * @param bIncludeKey  nonzero to allow the key
+ * @param mode  0 regular (mbRegular), 1 alternate (mbAlternate), 2 both (On Tour: eKeyStateType)
+ */
 extern "C" void cKeyboardPopup_setIncludeKey(cKeyboardPopup* self, int i, int bIncludeKey, int mode)
 {
     if (mode == 0 || mode == 2) {
@@ -5408,6 +5821,11 @@ struct sVec3_CE4C8 { float x, y, z; };
 
 extern "C" void* cUIText_getFont(void* self);
 
+/**
+ * Sets a text object's font to its current scale: the font's base size times the text's scale.
+ *
+ * @param obj  the text object (On Tour: cUIText *pText)
+ */
 extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, void* obj)
 {
     sVec3_CE4C8 v = *(sVec3_CE4C8*)((char*)obj + 0x50);

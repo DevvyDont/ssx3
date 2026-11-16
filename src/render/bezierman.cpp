@@ -8,6 +8,13 @@ extern const char D_00492EA0[];
 //99.23%
 INCLUDE_ASM("render/bezierman", cBezierMan_construct__Fv);
 #ifdef SKIP_ASM
+/**
+ * Creates the Bezier patch manager: allocates 0x9C90 bytes ("PS2BezierMan") and constructs it.
+ *
+ * The constructor is cPSPBezierMan_cPSPBezierMan() (the class keeps On Tour's PSP name).
+ *
+ * @return the new manager (the constructor's result)
+ */
 void* cBezierMan_construct()
 {
     void* mem = cMemMan_alloc(0x9C90, D_00492EA0, 0, 0);

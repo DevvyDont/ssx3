@@ -110,6 +110,13 @@ extern int D_004A4570;
 extern int D_004A4574;
 extern int D_004A4578;
 
+/**
+ * Builds the "Render Toggles Menu" debug menu: a title, a spacer and 47 int and float items bound to render
+ * debug globals: AI frames per render frame, render stats, one "Disable ..." toggle per render pass, test
+ * values and the build, NIS-memory and game-flow info overlays.
+ *
+ * @return @p self
+ */
 extern "C" void* cRenderTogglesMenu_cRenderTogglesMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -267,6 +274,13 @@ extern int D_004A44B0;
 extern int D_004A44B4;
 extern int D_004A44B8;
 
+/**
+ * Builds the "Visual Effects Test Menu" debug menu: a title, a spacer and 17 int items for inspecting HUD
+ * graphics (show all, current element, output HUD data, its position, size, scale, colour and layer) and the
+ * world painter display.
+ *
+ * @return @p self
+ */
 extern "C" void* cVisualEffectsTestMenu_cVisualEffectsTestMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -354,6 +368,12 @@ extern float D_004A4468;
 extern float D_004A446C;
 extern float D_004A4470;
 
+/**
+ * Builds the "Plants Menu" debug menu: a title, a spacer and an enable switch and 11 items for the plant sway
+ * and branch animation (amplitudes, frequencies, directions).
+ *
+ * @return @p self
+ */
 extern "C" void* cPlantsMenu_cPlantsMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -463,6 +483,12 @@ extern float D_004A4430;
 extern float D_004A4434;
 extern float D_004A4438;
 
+/**
+ * Builds the "Light Glow Menu" debug menu: a title, a spacer and 29 items for the light glow effect: enable,
+ * world painter override, the PS2 capture and blend settings, and glow size, colour and intensity curves.
+ *
+ * @return @p self
+ */
 extern "C" void* cLightGlowMenu_cLightGlowMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -566,6 +592,12 @@ extern int cDepthFog_m_Exponent;
 extern float cDepthFog_m_Density;
 extern float cDepthFog_m_XBoxDensityScale;
 
+/**
+ * Builds the "Depth Fog Menu" debug menu: a title, a spacer and 7 items: enable, world painter override, near
+ * and far planes, exponent, density, colour and the Xbox skybox density scale.
+ *
+ * @return @p self
+ */
 extern "C" void* cDepthFogMenu_cDepthFogMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -614,6 +646,12 @@ extern int D_004A43B4;
 extern float D_004A43B8;
 extern float D_004A43BC;
 
+/**
+ * Builds the "Height Fog Menu" debug menu: a title, a spacer and an enable switch, start height and
+ * thickness.
+ *
+ * @return @p self
+ */
 extern "C" void* cHeightFogMenu_cHeightFogMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -669,6 +707,12 @@ extern float D_004A435C;
 extern float D_004A4360;
 extern float D_004A4364;
 
+/**
+ * Builds the "Detail System Menu" debug menu: a title, a spacer and an enable switch and the sparkle settings
+ * for PS2 and Xbox (count, world size, screen size limits).
+ *
+ * @return @p self
+ */
 extern "C" void* cDetailSystemMenu_cDetailSystemMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -736,6 +780,13 @@ extern float D_004A46D0;
 extern float D_004A46D4;
 extern int D_004A46D8;
 
+/**
+ * Builds the "Shell Renderer Menu" debug menu: a title, a spacer and 9 items for the shell renderer: enable,
+ * model and shell texture IDs, near and far planes, distance and depth scales, depth brightness and the shell
+ * count.
+ *
+ * @return @p self
+ */
 extern "C" void* cShellRendererMenu_cShellRendererMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -862,6 +913,12 @@ extern float D_004A466C;
 extern float D_004A4670;
 extern float D_004A4674;
 
+/**
+ * Builds the "Screen Tint Menu" debug menu: a title, a spacer and 40 items for the screen tint and fill
+ * colours, the lightning flash (chance, fade, sustain, inverse and recover tints) and gamma correction.
+ *
+ * @return @p self
+ */
 extern "C" void* cScreenTintMenu_cScreenTintMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -989,6 +1046,12 @@ extern float D_004A41C8;
 extern float D_004A41CC;
 extern float D_004A41D0;
 
+/**
+ * Builds the "Shadow Menu" debug menu: a title, a spacer and 9 items: enable, show shadow polys, the shadow
+ * direction, length, intensity and UV range.
+ *
+ * @return @p self
+ */
 extern "C" void* cShadowMenu_cShadowMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -1047,6 +1110,12 @@ extern float D_004A46EC;
 extern float D_004A46F0;
 extern float D_004A46F4;
 
+/**
+ * Builds the "Snow Surface Menu" debug menu: a title, a spacer and an enable switch, patch reflection, the
+ * colour add and scale limits and base, bump and noise values.
+ *
+ * @return @p self
+ */
 extern "C" void* cSnowSurfaceMenu_cSnowSurfaceMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -1135,6 +1204,12 @@ extern float D_004A45BC;
 extern float D_004A45C0;
 extern float D_004A45C4;
 
+/**
+ * Builds the "Board Trail Menu" debug menu: a title, a spacer and 22 items for the board trail mesh: widths,
+ * depth per snow type, top biases, UVs, normal offsets, fade segments and slice caps.
+ *
+ * @return @p self
+ */
 extern "C" void* cBoardTrailMenu_cBoardTrailMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -1208,6 +1283,11 @@ extern char D_0047EBD8[];
 extern int D_004A4240;
 extern int D_004A4244;
 
+/**
+ * Builds the "Flags Menu" debug menu: a title, a spacer and two toggles, EnableUpdate and EnableRender.
+ *
+ * @return @p self
+ */
 extern "C" void* cFlagsMenu_cFlagsMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -1271,6 +1351,13 @@ extern int cPowerUpFXToggles_m_TestSpeedBoostRibbon;
 extern int cPowerUpFXToggles_m_TestRedRibbon;
 extern int cPowerUpFXToggles_m_TestOrangeRibbon;
 
+/**
+ * Builds the "PowerUpFXToggles Menu" debug menu: a title, a spacer and 15 items for the speed-boost effects
+ * (streamers, screen blur and its speed range) and test switches for the trick boost, uber states and boost
+ * ribbons.
+ *
+ * @return @p self
+ */
 extern "C" void* cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -1354,6 +1441,12 @@ extern float cSnowfallToggles_m_SnowFluffItensity;
 extern float cSnowfallToggles_m_SnowFluffWindIntensity;
 extern int cSnowfallToggles_m_TestAdditive;
 
+/**
+ * Builds the "Snowfall Toggles" debug menu: a title, a spacer and 10 test values for snowfall intensity,
+ * wind, flake size, flurries, gravity and fluff.
+ *
+ * @return @p self
+ */
 extern "C" void* cSnowfallTogglesMenu_cSnowfallTogglesMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -1517,6 +1610,13 @@ extern float D_004A4310;
 extern float D_004A4314;
 extern float D_004A4318;
 
+/**
+ * Builds the "Camera Splash Menu" debug menu: a title, a spacer and 52 items for snow drops and ice crystals
+ * hitting the camera: counts, spawn chances, impact limits, life spans, sizes, jiggle, push-off and velocity
+ * ranges.
+ *
+ * @return @p self
+ */
 extern "C" void* cSplashTogglesMenu_cSplashTogglesMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -1667,6 +1767,12 @@ extern int D_004A41E0;
 extern int D_004A41E4;
 extern int D_004A41E8;
 
+/**
+ * Builds the "Tube Menu" debug menu: a title, a spacer and 6 items: enable, width and height scales and the
+ * R, G and B colour.
+ *
+ * @return @p self
+ */
 extern "C" void* cTubeMenu_cTubeMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -1740,6 +1846,12 @@ extern float D_004A4220;
 extern int D_004A4224;
 extern int D_004A4228;
 
+/**
+ * Builds the "PathArrow Menu" debug menu: a title, a spacer and 16 items for the path arrow: enable, widths,
+ * lengths, height, RGBA colour, speeds, distance, path ID and maximum tick.
+ *
+ * @return @p self
+ */
 extern "C" void* cPathArrowMenu_cPathArrowMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -1835,6 +1947,12 @@ extern char D_004CECA8[];
 extern char D_004D11F0[];
 extern char D_004D1480[];
 
+/**
+ * Builds the "Visual Effects Main Menu" debug menu: one submenu entry for each of the 17 visual effects
+ * menus.
+ *
+ * @return @p self
+ */
 extern "C" void* cVisualEffectsMainMenu_cVisualEffectsMainMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -3792,6 +3910,13 @@ extern float D_004A3AA4;
 extern float D_004A3AA8;
 extern float D_004A3AAC;
 
+/**
+ * Builds the "Avalanche Menu" debug menu: a title, a spacer and 32 items for the avalanche effect: enable,
+ * recalc, save and load, trigger, update step, bounce and velocity scales, particle count, size, colour
+ * scales and seed.
+ *
+ * @return @p self
+ */
 extern "C" void* cAvalancheMenu_cAvalancheMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -3883,6 +4008,11 @@ extern char D_0047FFB0[];
 extern char D_004D1C88[];
 extern char D_0047FFD0[];
 
+/**
+ * Builds the "AIVisual Effects Main Menu" debug menu, whose only entry opens the avalanche effects menu.
+ *
+ * @return @p self
+ */
 extern "C" void* cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu(void* self)
 {
     cMenu_cMenu(self);
@@ -4199,14 +4329,30 @@ void* func_002516B0(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", MEM_initblock);
 #ifdef SKIP_ASM
-extern "C" void* MEM_initblock(void* self, int p1, void* p2, int p3, short p4, int p5, int p6)
+/**
+ * Writes a memory-manager block header: the "MB" magic (0x424D), flags, size and the next and previous
+ * blocks.
+ *
+ * Belongs to the memory manager (its only callers are in mem/memstd); the name and header-size arguments are
+ * not
+ * stored.
+ *
+ * @param name  the heap name (unused)
+ * @param size  block size in bytes, excluding the 16-byte header
+ * @param p3  the heap's extra header size (unused)
+ * @param flags  block flags
+ * @param prev  the previous block
+ * @param next  the next block
+ * @return @p size + 16, the block's size with its header (declared as a pointer)
+ */
+extern "C" void* MEM_initblock(void* self, int name, void* size, int p3, short flags, int prev, int next)
 {
     *(short*)self = 0x424d;
-    *(short*)((char*)self + 0x2) = p4;
-    *(int*)((char*)self + 0x4) = (int)p2;
-    *(int*)((char*)self + 0x8) = p6;
-    *(int*)((char*)self + 0xc) = p5;
-    return (char*)p2 + 0x10;
+    *(short*)((char*)self + 0x2) = flags;
+    *(int*)((char*)self + 0x4) = (int)size;
+    *(int*)((char*)self + 0x8) = next;
+    *(int*)((char*)self + 0xc) = prev;
+    return (char*)size + 0x10;
 }
 #endif
 

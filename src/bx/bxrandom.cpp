@@ -54,14 +54,23 @@ unsigned int AIrand()
 //100%
 INCLUDE_ASM("bx/bxrandom", AIrandf__Fff);
 #ifdef SKIP_ASM
-float AIrandf(float a, float b)
+/**
+ * Draws a random float between two bounds from the AI's random generator.
+ *
+ * Builds a float in [1, 2) from 23 random mantissa bits of AIrand(), so the result is uniform in [a, b).
+ *
+ * @param low  lower bound (returned when the random fraction is 0)
+ * @param high  upper bound (never quite reached)
+ * @return a + (b - a) * fraction, with fraction in [0, 1)
+ */
+float AIrandf(float low, float high)
 {
     union {
         unsigned int i;
         float f;
     } r;
     r.i = (AIrand() & 0x7FFFFF) | 0x3F800000; // float in [1.0, 2.0)
-    return a + (b - a) * (r.f - 1.0f);
+    return low + (high - low) * (r.f - 1.0f);
 }
 #endif
 

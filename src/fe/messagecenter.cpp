@@ -101,6 +101,15 @@ static inline int countBits_6F98(ulong v)
     return n;
 }
 
+/**
+ * Binds the request-line screen's named widgets to their fields and sets their first state.
+ *
+ * Keeps the song/artist texts, help text, arrows, menu, buttons, the 8 song rows ("songs%d") and check boxes
+ * ("%dbox", misc data = row) and the 6 "%dfree" markers. The playlist counter gets kT_OVRCMNSongsInList with
+ * the playlist size; the cost/cash widgets show only in the store (+0x16C), the cash (+0x168) as dollars.
+ *
+ * @param w  the widget being created; matched by its hash name
+ */
 extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, sWidget_6F98* w)
 {
     int hash = w->hash;
@@ -273,6 +282,21 @@ static inline int countSel_7500(sReqLine_7500* self)
     return n;
 }
 
+/**
+ * Handles highlight, select and back on the song request list.
+ *
+ * Song masks: +0x158 = songs in the playlist, +0x160 = owned songs; +0x168 is the cash, +0x16C the in-store
+ * flag.
+ *
+ * Event 5 on a song: an unowned song opens the buy popup when in the store and affordable or free; an owned
+ * song toggles in the playlist unless it is the last one. Event 6 saves both masks (back-end interface 13),
+ * hands the playlist to the sound manager and pops (in game) or opens cFEStateAudioOptions. Event 1 updates
+ * the song info, help and button texts.
+ *
+ * @param p  the cFEStateRequestLine (raw pointer)
+ * @param item  the widget; its misc data (+0x18) is the row
+ * @param msg  UI event code (1, 5 or 6)
+ */
 // Request-line widget events: 1 hilights a song, 5 toggles it (done/selected masks), 6 saves the masks and leaves.
 extern "C" void cFEStateRequestLine_onWidgetEvent(void* p, void* item, unsigned int msg)
 {
@@ -356,6 +380,20 @@ extern "C" void func_00197E70_77D0(void* self) __asm__("func_00197E70");
 extern "C" void func_0028CF98(void* p, int a, int b, long c, int d);
 extern "C" void func_002B4978(void* list, int idx);
 
+/**
+ * Handles menu keys on the song request list.
+ *
+ * Key 6 returns 0x10 (refuse) for the last playlist song, for an unowned song outside the store, and in the
+ * store when there is no free credit and too little cash. Key 8 plays an owned song in game (sound manager
+ * +0x508, func_0028CF98) or previews it in the front end (func_002B4978); key 4 scrolls the list to the row;
+ * key 9 gives 0.
+ *
+ * @param p  the cFEStateRequestLine (raw pointer)
+ * @param item  the menu (unused)
+ * @param msg  menu key/event code (4, 6, 8 or 9)
+ * @param k  row index in the menu
+ * @return 0x10 to refuse, 0 for key 9, else 0x101
+ */
 extern "C" int cFEStateRequestLine_onWidgetMenu(void* p, void* item, unsigned int msg, int k)
 {
     sReqLine_7500* self = (sReqLine_7500*)p;
@@ -434,6 +472,16 @@ struct sMsgCenter_979D8 {
     char* menu;       // 0x170
 };
 
+/**
+ * Hides the request line while another popup is up and completes song purchases.
+ *
+ * Event 0x15 clears the visible bit (bit 3 of mAttrState) unless the popup's id (+0xC) is 7 (the buy popup);
+ * event 0x16 sets it again and, for a confirmed buy popup (+0x6C), buys the selected song (func_001988D8,
+ * probably buySong) and refreshes the list, song info, cash, free markers, buttons and help.
+ *
+ * @param item  the popup state
+ * @param msg  popup event code (0x15 or 0x16)
+ */
 extern "C" void cFEStateRequestLine_onPopupEvent(sMsgCenter_979D8* self, void* item, int msg)
 {
     switch (msg) {
@@ -542,6 +590,11 @@ struct sMsgCenter_97BC8 {
     cMsgWidget_97BC8* texts[8]; // 0x174
 };
 
+/**
+ * Writes the song titles into the 8 visible playlist rows.
+ *
+ * Row i shows the title of list[top + i] (getSongTitle) and is hidden past the end of the list.
+ */
 extern "C" void cFEStateRequestLine_updatePlayListSongTitles(void* self)
 {
     sMsgCenter_97BC8* s = (sMsgCenter_97BC8*)self;
@@ -613,6 +666,12 @@ static inline void setVisible_97CA0(cMsgWidget_97CA0* w, int v)
     w->show(v);
 }
 
+/**
+ * Shows and colours the check box of each visible playlist row.
+ *
+ * A song in the playlist (+0x158) gets the colour at +0x204, an owned one (+0x160) the colour at +0x208, any
+ * other the colour at +0x20C; rows past the end are hidden.
+ */
 extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(void* self)
 {
     sMsgCenter_97CA0* s = (sMsgCenter_97CA0*)self;
@@ -791,6 +850,13 @@ struct sMsgCenter_00198118 {
     void* text;     // 0x1E4
 };
 
+/**
+ * Shows how many songs are in the playlist (kT_OVRCMNSongsInList).
+ *
+ * Counts the bits of the playlist mask (+0x158) and writes the formatted text to the counter widget (+0x1E4).
+ *
+ * @param p  the cFEStateRequestLine (raw pointer)
+ */
 extern "C" void cFEStateRequestLine_updatePlayListCounter(void* p)
 {
     sMsgCenter_00198118* self = (sMsgCenter_00198118*)p;
@@ -849,6 +915,16 @@ static inline int countSel_001981F8(sReqLine_001981F8* self)
     return n;
 }
 
+/**
+ * Picks the help text for the highlighted song.
+ *
+ * Owned: kT_HELPAudio1SongMin if it is the only playlist song, else kT_HELPAUDIOAddRem. In the store:
+ * kT_HELPAUDIOAvailBuy when affordable or free, else kT_16SaveMoreCarsh. Otherwise kT_FAQRADIOBA or
+ * kT_CMNHELPBuySongCTM by D_00535C11[0].
+ *
+ * @param p  the cFEStateRequestLine (raw pointer)
+ * @param idx  song index
+ */
 extern "C" void cFEStateRequestLine_updateHelpText(void* p, int idx)
 {
     sReqLine_001981F8* self = (sReqLine_001981F8*)p;
@@ -1040,6 +1116,11 @@ struct sMsgCenter_985F0 {
     cMsgWidget_985F0* icons[6]; // 0x1BC
 };
 
+/**
+ * Shows one marker per free song still to pick.
+ *
+ * Marker i is shown in the store while fewer than 6 - i songs are owned (6 songs are free).
+ */
 extern "C" void cFEStateRequestLine_updateFreeSongMarkers(void* self)
 {
     sMsgCenter_985F0* s = (sMsgCenter_985F0*)self;
@@ -1115,6 +1196,16 @@ struct sReqLine_1986D0 {
     cMsgWidget_1986D0* icon;    // 0x1DC
 };
 
+/**
+ * Shows the highlighted song's artist line and its price.
+ *
+ * "song by" gets kT_OVRCMNSongBy with the artist (func_00198AB8). The cost text is empty for an owned song,
+ * kT_OVRCMNFree while fewer than 6 are owned, else the price (func_00198AE8, always $5000); the cost icon
+ * shows only in the store.
+ *
+ * @param vself  the cFEStateRequestLine
+ * @param idx  song index
+ */
 extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* vself, int idx)
 {
     sReqLine_1986D0* self = (sReqLine_1986D0*)vself;
@@ -1220,6 +1311,14 @@ struct sMsgCenter_98988 {
     int price;          // 0x168
 };
 
+/**
+ * Opens the buy popup (cUIStateBuyPopup) for a song.
+ *
+ * With 6 or more songs owned it is a cash purchase (price from func_00198AE8, cash +0x168); otherwise it uses
+ * one of the remaining free credits (6 - owned).
+ *
+ * @param idx  song index
+ */
 extern "C" void cFEStateRequestLine_showBuyPopup(sMsgCenter_98988* self, int idx)
 {
     char* popup = (char*)func_001CABA8(cMemMan_alloc(0x70, D_00460790, 0, 0), self->engine, self, self->rider);

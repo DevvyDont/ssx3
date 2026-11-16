@@ -38,6 +38,13 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getMoney);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
+/**
+ * Returns a character's cash (+0xAC4 of its profile record).
+ *
+ * @param iHuman  the profile index; 2 or more gives 0
+ * @param charType  the character id
+ * @return the cash, or 0
+ */
 extern "C" int cBEEconInterface_getMoney(void* self, int iHuman, int charType)
 {
     if (iHuman >= 2) {
@@ -74,6 +81,13 @@ extern int cBELibrary_profileLib[];
 //100%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_getTotalMoneyEarned__FPvii);
 #ifdef SKIP_ASM
+/**
+ * Returns the total money a character has earned (+0xAC8 of its profile record).
+ *
+ * @param iHuman  the profile index; 2 or more gives 0
+ * @param charType  the character id
+ * @return the total earned, or 0
+ */
 int cBEEconInterface_getTotalMoneyEarned(void* self, int iHuman, int charType)
 {
     if (iHuman >= 2) {
@@ -93,6 +107,12 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getTotalMoneyEarned1);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
+/**
+ * Returns the total money earned by a rider's character, found from the rider's profile and character.
+ *
+ * @param rider  the rider index (On Tour: iRider)
+ * @return the total earned (+0xAC8 of the profile record)
+ */
 extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider)
 {
     int a = cBELibrary_getProfileIndex(rider);

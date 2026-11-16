@@ -60,6 +60,21 @@ struct sRiderAux_B698 {
 
 // PORT: the unit declares cRider_cRider as void, but the ctor returns this; bind by asm label.
 extern "C" void* cRider_cRider_impl(cRider* self) __asm__("cRider_cRider");
+/**
+ * Constructs a rider: its bases and vtables, default fields and the helper objects it owns.
+ *
+ * Runs func_00140738 (clears the slewed channels and other base data) and the cScriptObjRider base
+ * constructor (func_0027F968), installs the cRider, cScriptObjRider and cScriptObject vtables, sets mAIIndex,
+ * mViewIndex and mSafeRenderTick to -1, mGroundMaterial to 0x31, mIsLocal and mRenderFlag to 1, and registers
+ * the script object (func_00283298).
+ *
+ * Allocates the track and AI path intersect infos, the "OverlapList" (bound to the game's Nash grid), the
+ * attached-emitter and bolt-on FX, the line and wall intersect hints and the "BoaderShadow", and calls the
+ * empty audio hook func_00289AF0. Boost defaults: mode 1, source mask 31, uber flags 3, max speed 4000, cheat
+ * steer align 0.18, cheat speed lerp 0.015.
+ *
+ * @return @p self
+ */
 extern "C" void* cRider_cRider_impl(cRider* self)
 {
     unsigned int none = 0xFFFFFFFF;
@@ -174,6 +189,17 @@ static inline void vdel_11B978(char* o, int off)
     vt[1].fn(o + vt[1].delta, 3);
 }
 
+/**
+ * Destroys a rider: frees the helper objects it owns, then unwinds its base classes.
+ *
+ * Reinstalls the cRider vtables, stops the rider's sounds (func_00289AF8), deinitialises the script object
+ * and deletes mRiderAnim, mAnimModel, mSphereTree, the path hints, mAirPredictor, the focus box (after taking
+ * it out of the AI's focus manager), mMetrix, the overlap list, the wall and line hints, the bolt-on and
+ * attached-emitter FX and mShadow. Then restores the base vtables, runs cScriptObject__cScriptObject() and
+ * puts back cBeing's vtable.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the rider itself
+ */
 extern "C" void cRider__cRider(cRider* self, int flags)
 {
     self->mScriptObjectVtbl = D_00459BD0;
@@ -230,6 +256,13 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern const char D_00457960[];
 extern "C" void func_001033B0(void* self, void* box);
 
+/**
+ * Gives the rider a focus box and registers it with the AI's focus manager.
+ *
+ * Allocates a 16-byte "FocusBox" into mFocusBox and adds it to Game->AI->FocusMan with func_001033B0, which
+ * appends to the manager's 6-entry list without a bounds check. cRider_updateFocus() keeps the box at
+ * mPosition.
+ */
 extern "C" void cRider_addFocusBox(cRider* self)
 {
     void* box = cMemMan_alloc(0x10, D_00457960, 0, 0);
@@ -249,6 +282,12 @@ INCLUDE_ASM("ai/rider", cRider_addRiderMetrix__FP6cRider);
 // PORT: cRiderMetrix_linkToRider really takes (metrix, rider); the unit declares one arg.
 extern "C" void cRiderMetrix_linkToRider_impl(void* metrix, cRider* rider) __asm__("cRiderMetrix_linkToRider");
 
+/**
+ * Creates the rider's cRiderMetrix (trick and score tracking) and links it to the rider.
+ *
+ * Allocates 0x1CC bytes tagged "RiderMetrix", constructs it with cRiderMetrix_cRiderMetrix(), stores it in
+ * mMetrix and calls cRiderMetrix_linkToRider(metrix, self).
+ */
 void cRider_addRiderMetrix(cRider* self)
 {
     void* mem = cMemMan_alloc(0x1CC, D_00457970, 0, 0);
@@ -476,6 +515,14 @@ struct sRiderVE_0011C0E0
     int (*fn)(void*);
 };
 
+/**
+ * Tells whether the renderer is done with the rider, so that it can be deleted.
+ *
+ * mSafeRenderTick is a graphics-manager tick recorded for the rider (-1 = never set); the rider is safe once
+ * the tick that the graphics manager's virtual slot 114 returns has passed it.
+ *
+ * @return 1 when mSafeRenderTick is set and lower than the graphics manager's tick, otherwise 0
+ */
 extern "C" int cRider_isSafeToDelete(cRider* self)
 {
     if (self->mSafeRenderTick != -1)
@@ -503,12 +550,22 @@ struct sMdfArchive_11C138
     int a[4];
 };
 
-extern "C" void cRider_parsePartsFromBuf(cRider* self, int a1)
+/**
+ * Adds the rider's outfit model parts from an MDF archive buffer to its animation model.
+ *
+ * Wraps @p pData in a local cMdfArchive (func_00314978, func_00314A18) and gets the rider's part entries
+ * (func_0011BBE8: the equipped items of its character, or every part of a cheat character, into a 52-entry
+ * list). For each entry's four LOD part names (at +0x18), the named archive part is added to mAnimModel at
+ * that LOD as variant 0. The archive is destroyed with func_00314988(arc, 2).
+ *
+ * @param pData  the MDF archive data, passed as an int (On Tour: pData)
+ */
+extern "C" void cRider_parsePartsFromBuf(cRider* self, int pData)
 {
     sMdfArchive_11C138 arc;
     char* list[52];
     func_00314978(&arc);
-    func_00314A18(&arc, a1);
+    func_00314A18(&arc, pData);
     int n = func_0011BBE8(self, list);
     for (int i = 0; i < n; i++)
     {
@@ -688,6 +745,11 @@ void func_0011D390_impl(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_isLoaded);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the rider has finished loading (mLoadStep reached 7).
+ *
+ * @return 1 when mLoadStep is 7, otherwise 0
+ */
 extern "C" int cRider_isLoaded(cRider* self)
 {
     int s = self->mLoadStep;
@@ -1193,6 +1255,17 @@ struct sVec4_0011DE60
 
 extern "C" void func_0011D660(void* self, sVec4_0011DE60* a, sVec4_0011DE60* b, int n, float t);
 
+/**
+ * Puts the rider on the ground at a path start point, facing the point's direction.
+ *
+ * Looks the point up in the start-point list D_004D33A0 (func_0026B5E0 falls back to the list's first entry
+ * when nothing matches), ends the current trick and combo in mMetrix (func_00119368), sets control state
+ * CS_Cruise and motion state MS_Ground, then places the rider with func_0011D660 (anim 5, height 0, so it is
+ * dropped onto the ground).
+ *
+ * @param StartpointID  id of the start point (the rider resets pass 0, 1 or the rider's mAIIndex)
+ * @param StartpointType  start-point type (On Tour: tPathStartType); 1 and 2 are used
+ */
 extern "C" void cRider_putAtStartpoint(cRider* self, int StartpointID, int StartpointType)
 {
     float* p = (float*)func_0026B5E0(D_004D33A0, StartpointType, StartpointID);
@@ -1251,6 +1324,16 @@ static inline sVec4_0011DF18 vu0Scale_11DF18(const sVec4_0011DF18& v, float s)
     return r;
 }
 
+/**
+ * Finishes a placement: gives the rider a starting speed along its heading and resets its FX.
+ *
+ * Clears word +0x90 of the rider animation's sequence 2, sets mVelocity to the front axis times 833.33 with
+ * no z part and resets the handler's FX. With @p notify set it then calls virtual slot 3 of view 0's current
+ * camera controller with the rider's AI index, probably to reset the camera. Last, it queues world-script op
+ * 0x70005 (func_003099F8).
+ *
+ * @param notify  nonzero to notify view 0's camera controller (On Tour: resetCamera)
+ */
 extern "C" void cRider_cleanupAfterPutAt(cRider* self, int notify)
 {
     sVec4_0011DF18 v = *(sVec4_0011DF18*)&self->mMatrix.row[1];
@@ -1314,6 +1397,14 @@ static inline sQuat_0011DFE0 AxisAngle_0011DFE0(const t4Vector& axis, float angl
     return sQuat_0011DFE0(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
+/**
+ * Rotates the rider's orientation by an angle about an axis and rebuilds its matrix.
+ *
+ * Pre-multiplies mRotation by the axis-angle quaternion, then calls cRider_updateOrientationImplicit().
+ *
+ * @param axis  rotation axis (a unit vector)
+ * @param angle  rotation angle in radians
+ */
 extern "C" void cRider_rotateOrientation(cRider* self, t4Vector* axis, float angle)
 {
     self->mRotation = QuatMul_0011DFE0(AxisAngle_0011DFE0(*axis, angle), self->mRotation);
@@ -1483,6 +1574,14 @@ static inline void Grow_E150(sBox_E150& b, const sVec4& c)
 }
 
 extern "C" void cRider_updateBoundBox_impl(cRider* self, sVec4* pin) __asm__("cRider_updateBoundBox");
+/**
+ * Recomputes the rider's bounding box and bounding sphere around a position.
+ *
+ * The box (mBoundsMin, mBoundsMax) is grown over the eight corners at +-150 along the front axis, +-100 along
+ * the side axis and +250 or -50 along the up axis; mBoundSphere is the position with radius 250.
+ *
+ * @param pin  centre to use, or 0 for mPosition (On Tour: pRiderPos)
+ */
 extern "C" void cRider_updateBoundBox_impl(cRider* self, sVec4* pin)
 {
     sVec4 up = *(sVec4*)&self->mMatrix.row[2];
@@ -1509,6 +1608,15 @@ INCLUDE_ASM("ai/rider", cRider_updateAnimation);
 extern "C" void func_003123C0(void*, int);
 extern "C" void func_00312490(void*);
 
+/**
+ * Advances the rider's animation by one step.
+ *
+ * Calls func_003123C0(mRiderAnim, unk_B1C), which steps every node of the animation's six sequencers, then
+ * func_00312490(mRiderAnim). The C declares func_003123C0 without its float time argument, so @p value
+ * reaches it untouched in the float argument register.
+ *
+ * @param value  animation time step (On Tour: timescale; callers pass 1.0 or mTimeScale)
+ */
 extern "C" void cRider_updateAnimation(cRider* self, float value)
 {
     func_003123C0(self->mRiderAnim, self->unk_B1C);
@@ -2193,6 +2301,16 @@ static inline void LeanAbout_LP(char* self, sXf_LP* xf, float a, float b, float 
 }
 
 extern "C" void cRider_doLeanPoseAdjust_x(char* self, sXf_LP* xf) __asm__("cRider_doLeanPoseAdjust");
+/**
+ * Tilts the rider's root pose for its lean inputs.
+ *
+ * Takes slewed channels 2 and 0, each less a dead zone of twice |channel 3|; when either is nonzero the pose
+ * is rotated about the board root bone (mBoneBoardRoot) by channel 2 x 30 degrees about X and channel 0 x 45
+ * degrees about Y. A nonzero channel 8 adds channel 8 x 45 degrees about X, and the position moves along
+ * mGroundSide by channel 0 x 45 x the model's length scale (unk_140.x).
+ *
+ * @param xf  the root pose to adjust, position and rotation quaternion (On Tour: tPose & root)
+ */
 extern "C" void cRider_doLeanPoseAdjust_x(char* self, sXf_LP* xf)
 {
     float a = deadzone_LP(*(float*)(self + 0x208), *(float*)(self + 0x214));
@@ -2369,6 +2487,13 @@ extern "C" float func_00149690(void* iface, int character, int stat);
 //100%
 INCLUDE_ASM("ai/rider", cRider_getGrabAnimSpeedScale);
 #ifdef SKIP_ASM
+/**
+ * Returns the speed factor for the rider's grab animations, from a character stat.
+ *
+ * The stat is func_00149690(BE interface 3, mAIIndex, mStatsIndex).
+ *
+ * @return the stat x 0.29988 + 1
+ */
 extern "C" float cRider_getGrabAnimSpeedScale(cRider* self)
 {
     void* iface = cBE_getInterface(cBE_getBE(), 3);
@@ -2379,6 +2504,11 @@ extern "C" float cRider_getGrabAnimSpeedScale(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_updateTimeWarp);
 #ifdef SKIP_ASM
+/**
+ * Moves the rider's time scale (mTimeScale) toward a target by at most 1/1200 per call.
+ *
+ * @param x  desired time scale (On Tour: DesiredTimeWarp)
+ */
 extern "C" void cRider_updateTimeWarp(cRider* self, float x)
 {
     float cur = self->mTimeScale;
@@ -2412,6 +2542,17 @@ static inline float decay_1200D0(float v, float step)
     return 0.0f;
 }
 
+/**
+ * Runs the rider's per-frame boost meter, power-up and uber timers.
+ *
+ * With step = mTimeScale / 60: mPowerUpBoostTimer decays, and mPowerUpTrickTimer too unless it is in its last
+ * frame while airborne. mUberTimer cannot run out while airborne or in CS_UberGrind (it is held at 1/60);
+ * otherwise it decays, and reaching 0 calls func_0010E028(self, 6, 0).
+ *
+ * At uber level 10 the boost meter (unk_2F8) stays full until the timer runs out, then the level drops to 5
+ * with a 20 s timer. Otherwise mBoostMode sets the meter: 0 full, 1 and 2 drain by step x 0.005 or step x
+ * 0.024 except in CS_Gate. The isComputer virtual is also called and its result ignored.
+ */
 extern "C" void cRider_updateBoost(cRider* self)
 {
     float step = self->mTimeScale * 0.01666666753590107f;
@@ -2676,6 +2817,11 @@ extern "C" void func_00120378(void* vself)
 //100%
 INCLUDE_ASM("ai/rider", cRider_initBoost);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's starting boost meter (unk_2F8) from its boost mode.
+ *
+ * The meter starts at mBoostMeterStart, at 0 in boost mode 3, or full (1) in mode 0.
+ */
 extern "C" void cRider_initBoost(cRider* self)
 {
     self->unk_2F8 = self->mBoostMeterStart;
@@ -2702,6 +2848,12 @@ static inline float riderApproach_00120D90(float v, float t, float s)
     return t;
 }
 
+/**
+ * Fades the weight at unk_318, probably the leg-IK blend, in or out at 0.05 per frame.
+ *
+ * It goes toward 0 while the current animation of the rider animation's sequencer 2 (func_00311AE8) is
+ * 0x14-0x1A, otherwise toward 1.
+ */
 extern "C" void cRider_updateLegIK(cRider* self)
 {
     int a = func_00311AE8(self->mRiderAnim, 2);
@@ -2715,6 +2867,11 @@ extern "C" void cRider_updateLegIK(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_updateFocus);
 #ifdef SKIP_ASM
+/**
+ * Moves the rider's focus box to its current position.
+ *
+ * Copies mPosition into the first quadword of mFocusBox when there is one.
+ */
 extern "C" void cRider_updateFocus(cRider* self)
 {
     void* p = self->mFocusBox;
@@ -2730,6 +2887,11 @@ INCLUDE_ASM("ai/rider", cRider_updateOverlapList);
 extern "C" void func_00332DB8(void*, void*);
 extern "C" void cRider_updateActiveLights(cRider*);
 
+/**
+ * Refreshes the rider's overlap list for its bounding box, then picks its active lights.
+ *
+ * Calls func_00332DB8(mOverlapList, &mBoundsMin) (a world sphere-tree query) and cRider_updateActiveLights().
+ */
 extern "C" void cRider_updateOverlapList(cRider* self)
 {
     func_00332DB8(self->mOverlapList, &self->mBoundsMin);
@@ -2743,6 +2905,9 @@ INCLUDE_ASM("ai/rider", cRider_updateSplitMiscFX);
 extern "C" void func_002F1A08(void*);
 extern "C" void func_002ECF78(void*);
 
+/**
+ * Updates the rider's attached-emitter FX (func_002F1A08) and bolt-on FX (func_002ECF78).
+ */
 extern "C" void cRider_updateSplitMiscFX(cRider* self)
 {
     func_002F1A08(self->mAttachedEmitterFX);
@@ -2765,6 +2930,12 @@ INCLUDE_ASM("ai/rider", cRider_updateSplitPaused);
 #ifdef SKIP_ASM
 extern "C" void func_0011EB98(void* self);
 
+/**
+ * Paused-game rider step (On Tour name): orientation, plus animation and skeleton outside an NIS.
+ *
+ * Rebuilds mMatrix (cRider_updateOrientationImplicit()); unless mIsInNIS, steps the animation with time scale
+ * 1.0 and runs the skeleton update func_0011EB98.
+ */
 extern "C" void cRider_updateSplitPaused(cRider* self)
 {
     cRider_updateOrientationImplicit(self);
@@ -2799,6 +2970,18 @@ static inline int IsState1_120F20(void* obj)
     return *(int*)((char*)obj + 0x70) == 1;
 }
 
+/**
+ * First step of the rider's frame update: overlap list, NIS ground probe and per-frame resets.
+ *
+ * Clears unk_3FC and unk_AA4 (shadow drawn). The overlap list and active lights are refreshed on the AI ticks
+ * where AITick % 3 equals mAIIndex % 3, and on other ticks too unless the list's word +4 equals the Nash
+ * grid's word +0xA0 while the playback manager's state (+0x70) is neither 1 nor 3.
+ *
+ * In an NIS the ground under mPosition (or the board root bone when unk_AFC is set) is probed with
+ * func_001242B0. Then mModelOffset and unk_A30 are zeroed, mVisitedIds set to 0xFFFFFFFF, func_0011B3F8
+ * called (probably On Tour's updateTerminalVelocity) and, once the rider has finished, mFinishTime advanced
+ * by 1/60.
+ */
 extern "C" void cRider_updateSplit1(cRider* self)
 {
     self->unk_3FC = 0;
@@ -2848,6 +3031,12 @@ struct sVEntry00121068 {
 
 extern "C" void cRiderHandler_updateControl(void* obj, void* v);
 
+/**
+ * Reads the rider's control command and feeds it to its current control state.
+ *
+ * Calls the handler's getControlCmd virtual (slot 1) into a 16-byte buffer, then
+ * cRiderHandler_updateControl() with it.
+ */
 extern "C" void cRider_updateSplit2(cRider* self)
 {
     int buf[4];
@@ -2884,6 +3073,14 @@ static inline void VecScale_1210B0(sVec4_1210B0* v, float s)
         : "m"(*v), "f"(s));
 }
 
+/**
+ * Damps the rider's impact values and auto-resets it after hard hits or long falls.
+ *
+ * Scales mImpulse by 0.98, mImpactAccum by 0.956 and mImpactAccum2 by 0.97833. Calls
+ * cRider_checkForReset(self, 0, 2) when mImpactAccum exceeds 4.5, or while airborne (MS_Air, or a wipeout in
+ * its air phase) when the air predictor is in state 1 or 3 with its +0x98 minus +0xA0 above 45, or
+ * mImpactAccum2 exceeds 5. Then runs cRider_updateBoost() and cRider_updateLegIK().
+ */
 extern "C" void cRider_updateSplit3(cRider* self)
 {
     VecScale_1210B0((sVec4_1210B0*)&self->mImpulse, 0.9800000190734863f);
@@ -2929,6 +3126,12 @@ static inline void approach_11F8(sRiderChannel* riderChannel)
     riderChannel->cur = res;
 }
 
+/**
+ * Runs the rider's look controllers, then moves all 19 slewed channels toward their targets.
+ *
+ * func_00120378 updates the head and upper-body look controllers; each mSlewed channel then steps cur toward
+ * target by at most rate.
+ */
 extern "C" void cRider_updateSplit4(cRider* self)
 {
     func_00120378(self);
@@ -2971,6 +3174,9 @@ INCLUDE_ASM("ai/rider", cRider_updateSplit6);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateAnimation(cRider* self, float value);
 
+/**
+ * Steps the rider's animation by its time scale (mTimeScale), unless it is in an NIS.
+ */
 extern "C" void cRider_updateSplit6(cRider* self)
 {
     if (self->mIsInNIS == 0)
@@ -2985,6 +3191,12 @@ INCLUDE_ASM("ai/rider", cRider_updateSplit7);
 #ifdef SKIP_ASM
 extern "C" void func_0011EB98(void* self);
 
+/**
+ * Runs the rider's skeleton update (func_0011EB98), unless it is in an NIS.
+ *
+ * func_0011EB98 transforms the anim model's bones (cAnimModel_transform) with the lean pose adjustment
+ * (cRider_doLeanPoseAdjust).
+ */
 extern "C" void cRider_updateSplit7(cRider* self)
 {
     if (self->mIsInNIS == 0)
@@ -3012,6 +3224,12 @@ static inline int VecChanged_00121750(cRider* self, const sVec4_00121750& b)
         || self->mModelOffset.z != b.z || self->mModelOffset.w != b.w;
 }
 
+/**
+ * Resolves the rider's motion, then applies the frame's model offset to its animation model.
+ *
+ * Calls cRiderHandler_resolveMotion(); when mModelOffset is not zero, cAnimModel_applyOffset() moves the
+ * bones and skeleton matrices by it.
+ */
 extern "C" void cRider_updateSplit8(cRider* self)
 {
     cRiderHandler_resolveMotion(self->mRiderHandler);
@@ -3047,6 +3265,14 @@ extern "C" void func_00117C28(void* metrix);
 
 struct sVEntry00121818 { short delta; short index; void (*fn)(void*, void*, void*, void*); };
 
+/**
+ * Runs the rider's object script hook, then its path, finish, metrix and focus updates.
+ *
+ * When unk_A30 is set, calls virtual slot 40 of its object (+0xC) with unk_A60, unk_9E0 and the rider, or,
+ * without one, the world-script manager's func_0030A060 with the same arguments. Then func_00125AD0 (empty),
+ * func_00112338 (outside an NIS), func_001125C0, cRider_updateFinishTest(), the metrix update func_00117C28
+ * (outside an NIS) and cRider_updateFocus().
+ */
 extern "C" void cRider_updateSplit10(cRider* self)
 {
     char* h = (char*)self->unk_A30;
@@ -3092,6 +3318,13 @@ struct sRiderVE_001218D0
     void* (*fn)(void*);
 };
 
+/**
+ * Updates the rider's ground section and lens FX position, and clears its handler lights.
+ *
+ * When mGroundPolyId is valid, the BE section id of its world section (its low byte) is stored in
+ * mGroundMaterial, so that field holds a section id here. Then calls func_002ED490(AI index, contact x,
+ * contact y, -99999) (lens FX, unknown) and clears the handler's cPlayerLights (func_00392D18).
+ */
 extern "C" void cRider_updateSplit11(cRider* self)
 {
     if (~self->mGroundPolyId != 0)
@@ -3154,6 +3387,12 @@ static inline float Atan2_121950(float y, float x)
     return a;
 }
 
+/**
+ * Updates the rider's audio world painter and its smoothed slope angle, then its danger level.
+ *
+ * While the ground normal is valid, mSmoothedHeading moves 15% of the way (difference wrapped to +-pi) toward
+ * the slope angle atan2(|n.xy|, n.z). Then cRider_updateDangerLevel().
+ */
 extern "C" void cRider_updateSplit12(cRider* self)
 {
     cSSXAudio_UpdateAudioWorldPainter(func_0028B180(), self);
@@ -3311,6 +3550,18 @@ static inline int neq_1AA0(const sVec4* a, const t4Vector& b)
     return a->x != b.x || a->y != b.y || a->z != b.z || a->w != b.w;
 }
 
+/**
+ * Turns the rider's orientation toward a desired up axis and heading, limited per frame.
+ *
+ * The target is mRotation turned so its up axis lies on @p up and, when @p fwd is not zero, turned about @p
+ * up to face @p fwd. The rotation from the current orientation to the target is applied by min(maxRate, angle
+ * x rate) / 60 radians about its axis (the X axis below 1e-5), then mMatrix is rebuilt.
+ *
+ * @param up  desired up axis (On Tour: desUp)
+ * @param fwd  desired front direction, or the zero vector to keep the heading (On Tour: desFront)
+ * @param rate  fraction of the remaining angle to turn per second (On Tour: rateFactor)
+ * @param maxRate  turn-rate limit in radians per second
+ */
 extern "C" void cRider_alignRiderAxis(cRider* self, const sVec4* up, const sVec4* fwd, float rate, float maxRate)
 {
     sVec4W q = ROT_1AA0;
@@ -3511,6 +3762,12 @@ INCLUDE_ASM("ai/rider", cRider_updateActiveLights);
 #ifdef SKIP_ASM
 extern "C" void func_002F5B68(void* a, void* q, void* b, void* c, int d);
 
+/**
+ * Picks the world lights that light the rider into its active-light list (unk_794).
+ *
+ * func_002F5B68 keeps the 8 best-scoring lights of type 6 among those of the overlap list, scored from the
+ * rider's hip position.
+ */
 extern "C" void cRider_updateActiveLights(cRider* self)
 {
     cQuad128 q;
@@ -3553,6 +3810,14 @@ extern "C" void func_0038A6A8(void* m, void* q, void* p);
 extern "C" void func_00389558(void* m, sV3_20D8* v);
 extern "C" void func_00389520(void* m, sQ_20D8* q, sV3_20D8* v);
 
+/**
+ * Builds the rider's light block (unk_7C0) from its environment, active world lights and handler lights.
+ *
+ * Clears the 10-quadword block, copies the rider's lens-table entry (func_002EDFB8) to its start, adds
+ * func_00389CB8's term at the hip position with func_002EEFA8's value, adds each active light of unk_794
+ * (func_0038A6A8), then the handler cPlayerLights' extra ambient (func_00389558) and each of its directional
+ * lights (func_00389520).
+ */
 extern "C" void cRider_SetRiderLights(cRider* self)
 {
     sQ_20D8 q;
@@ -3650,6 +3915,16 @@ static inline int test_122278(void* a, void* b)
     return ((TestFn_122278)vt[93].fn)(obj, a, b, &m);
 }
 
+/**
+ * Decides whether the rider is on screen this frame and stores the answer in mIsOnScreen.
+ *
+ * Off screen when mRenderFlag is clear, the rider is not loaded or unk_AD0 is set. Otherwise on screen unless
+ * the graphics manager's box test (virtual slot 93) puts the bounding box outside the view; with
+ * mUseRootPoseOverride the handler's box (+0x80, +0x90) is tried too, and without it a bounding sphere hidden
+ * by an occluder of the occlusion manager counts as off screen.
+ *
+ * @return the new mIsOnScreen: 1 on screen, 0 not
+ */
 extern "C" int cRider_renderClip(cRider* self)
 {
     if (self->mRenderFlag == 0 || self->mLoadStep != 7 || self->unk_AD0 != 0) {
@@ -3684,6 +3959,15 @@ extern sVec4_122448 D_004FF120_v122448 __asm__("t4vect_Zero");
 struct sVEntryI_122448 { short delta; short index; void (*fn)(void*, void*, int); };
 struct sVEntryF_122448 { short delta; short index; void (*fn)(void*, float, void*); };
 
+/**
+ * Draws the rider's model when it is on screen, then updates the low-detail flag unk_B1C.
+ *
+ * Picks mLOD (func_00121F30), loads the rider's lights (graphics slot 69 with unk_7C0), sets bits 2-6 of the
+ * draw state's word 1 to 5 and draws mAnimModel between two graphics slot-27 calls (with mPosition, then the
+ * zero vector). The board and player additive flags come from the handler's cPlayerLights, or uber level 11
+ * and up. When the view manager's word +0x14 is 0 or unk_B1C is set, unk_B1C becomes 1 if the rider is off
+ * screen or at LOD 2.
+ */
 extern "C" void cRider_renderBody(cRider* self)
 {
     if (self->mIsOnScreen)
@@ -3726,6 +4010,11 @@ INCLUDE_ASM("ai/rider", cRider_renderLights);
 #ifdef SKIP_ASM
 extern "C" void cRider_SetRiderLights(cRider*);
 
+/**
+ * Builds the rider's lights (cRider_SetRiderLights) when it is on screen.
+ *
+ * @return always 1
+ */
 extern "C" int cRider_renderLights(cRider* self)
 {
     if (self->mIsOnScreen != 0) {
@@ -3740,6 +4029,9 @@ INCLUDE_ASM("ai/rider", cRider_renderShadow);
 #ifdef SKIP_ASM
 extern "C" void cRider_RenderShadow(cRider* self);
 
+/**
+ * Draws the rider's shadow (cRider_RenderShadow) when it is on screen.
+ */
 extern "C" void cRider_renderShadow(cRider* self)
 {
     if (self->mIsOnScreen != 0)
@@ -3777,6 +4069,9 @@ INCLUDE_ASM("ai/rider", cRider_flushActiveLights);
 // MEM_fill looks like memset(dst, value, size).
 extern "C" void* MEM_fill(void* dst, int value, int size);
 
+/**
+ * Clears the rider's active-light list (the 8 light pointers at unk_794).
+ */
 extern "C" void cRider_flushActiveLights(cRider* self)
 {
     MEM_fill(self->unk_794, 0, sizeof(self->unk_794));
@@ -3997,6 +4292,15 @@ static inline void* Tex_2898(sObj_2898* o) { return o->f170; }
 
 static inline sRS_2898*& top_2898(void* g) { return *(sRS_2898**)((char*)g + 0xE84); }
 
+/**
+ * Renders the rider's projected shadow texture once per frame, and draws the shadow.
+ *
+ * On the frame's first call (unk_AA4 clear): pushes a draw state, sets up the projection (func_00374D00)
+ * centred between bones unk_918 and unk_8E8, lit straight down, with the rider's up axis, renders the model's
+ * shadow pass (func_00310948 at LOD 3; board colour grey 0.3, black on the ground; shadow colour grey 0.3)
+ * through graphics slots 31, 53, 55, 101, 54 and 32, and pops the state. The shadow itself is drawn on every
+ * call (func_00375890).
+ */
 extern "C" void cRider_RenderShadow(cRider* self)
 {
     if (self->unk_AA4 == 0) {
@@ -4101,6 +4405,13 @@ extern "C" float func_00122C88(void) {
 //100%
 INCLUDE_ASM("ai/rider", cRider_isInVertZone);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the rider's smoothed slope angle is steep enough to count as vert.
+ *
+ * The limit is 0.925 rad (about 53 degrees) on either side of zero.
+ *
+ * @return 1 when mSmoothedHeading >= 0.925 or < -0.925, otherwise 0
+ */
 extern "C" int cRider_isInVertZone(cRider* self)
 {
     float v = self->mSmoothedHeading;
@@ -4128,6 +4439,12 @@ extern "C" int func_00101A10(void* self, int character);
 extern "C" int cRider_isInVertZone(cRider* self);
 float func_0011A0C0_2(void* self, int state) __asm__("func_0011A0C0__FPv");
 
+/**
+ * Updates the rider's danger level (unk_5B0) from the AI's danger manager.
+ *
+ * Takes the manager's level for mAIIndex (func_00101A10); level 0 becomes 1 when the rider is on the ground
+ * in a vert zone. A change goes to func_0011A0C0 on mMetrix, an empty stub in retail.
+ */
 extern "C" void cRider_updateDangerLevel(cRider* self)
 {
     int old = self->unk_5B0;
@@ -4154,6 +4471,14 @@ float func_00113130(void* self);
 
 struct sVEntry00122D78 { short delta; short index; int (*fn)(void*); };
 
+/**
+ * Estimates the race-clock tick at which the rider will finish.
+ *
+ * The speed is the distance covered (func_00113130's float at +0x4D8, probably the course length, minus
+ * mDistToFinish) over the race clock (AI EventTimerTick), but at least 30 minus the AI index per tick.
+ *
+ * @return the race clock plus mDistToFinish over that speed
+ */
 extern "C" int cRider_estimateFinishTick(cRider* self)
 {
     char* sub = (char*)&self->mVtbl;
@@ -4174,6 +4499,13 @@ INCLUDE_ASM("ai/rider", cRider_estimateFinishScore);
 #ifdef SKIP_ASM
 float func_00113130(void* self);
 
+/**
+ * Projects the rider's score at the finish from its score rate so far.
+ *
+ * n is the metrix word at +0x198 plus 1, and the rate is n over the distance covered (at least 1).
+ *
+ * @return n plus the remaining distance less 1000 (at least 0) times the rate
+ */
 extern "C" int cRider_estimateFinishScore(cRider* self)
 {
     int n = *(int*)((char*)self->mMetrix + 0x198) + 1;
@@ -4270,6 +4602,11 @@ signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
+/**
+ * Returns the rider's character id from the BE player interface (cBENewPlayerInterface_getRiderCharID).
+ *
+ * @return the character id for mAIIndex
+ */
 extern "C" int cRider_getIdentity(cRider* self)
 {
     return cBENewPlayerInterface_getRiderCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mAIIndex);
@@ -4293,6 +4630,11 @@ extern "C" int func_00123168(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_isGroundNormalValid);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the rider is on the ground, so that its ground normal is meaningful.
+ *
+ * @return 1 in motion state MS_Ground, or MS_Wipeout with the wipeout on the ground; otherwise 0
+ */
 extern "C" int cRider_isGroundNormalValid(cRider* self)
 {
     int grounded = 0;
@@ -4410,6 +4752,17 @@ static inline void SetPath_3210(void* self, sVec4* p, sVec4* d)
 
 extern "C" void cRider_transport_v(cRider* self, char* m) __asm__("cRider_transport");
 
+/**
+ * Teleports the rider to a transform, keeping its speed, with a per-rider offset so riders do not overlap.
+ *
+ * The rider's replay-cache slot is reset (func_00270970). The position is the matrix's row 3 plus an offset
+ * in the matrix's frame times 100: rider 0 (2, 0), 1 (1, 0), 2 (2, -2), 3 (2, 2), 4 (1, -2), 5 (2, 1); the
+ * heading is the matrix's X axis. Ends the trick, sets MS_Ground and CS_Cruise, cancels camera transitions,
+ * notifies view 0's camera controller (slot 3), places the rider (func_0011D660), points the old speed along
+ * the new front axis and resets the FX.
+ *
+ * @param m  the target transform, row 3 = position (On Tour: const t4Matrix & mat)
+ */
 extern "C" void cRider_transport_v(cRider* self, char* m)
 {
     func_00270970((int)SSXApp->Game->Replay, self->mAIIndex);
@@ -4487,13 +4840,23 @@ static inline t4Vector MatMulV_34D0(const char* m, const t4Vector& v) return r
 }
 
 
-extern "C" void cRider_initForMission(cRider* self, char* m)
+/**
+ * Places the rider at a mission's start transform, sitting in a start gate.
+ *
+ * Position = the matrix's row 3, heading = its X axis. Ends the trick, sets MS_Static and CS_Void, places the
+ * rider (func_0011D660), sets the gate control's GateState to GS_Sit and switches to CS_Gate, cancels camera
+ * transitions, resets the FX and, for a rider with a split-screen view, calls slot 4 of that view's chase
+ * camera controller.
+ *
+ * @param mat  the start transform (On Tour: const t4Matrix & mat)
+ */
+extern "C" void cRider_initForMission(cRider* self, char* mat)
 {
     t4Vector pos;
     t4Vector dir;
     func_00270970((int)SSXApp->Game->Replay, self->mAIIndex);
-    pos = *(t4Vector*)(m + 0x30);
-    dir = MatMulV_34D0(m, D_004FF140);
+    pos = *(t4Vector*)(mat + 0x30);
+    dir = MatMulV_34D0(mat, D_004FF140);
     func_00119368(self->mMetrix, 1);
     cRider_setMotionState_impl(self, 3);
     func_0011FEC8_impl(self, 0xD);
@@ -4519,6 +4882,12 @@ INCLUDE_ASM("ai/rider", cRider_resetForMission);
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
+/**
+ * Starts an automatic reset for a mission rider.
+ *
+ * Sets the reset control's IsAutoReset, control state CS_Reset, motion state MS_Static and the gate control's
+ * GateState to 0 (GS_GateRock).
+ */
 extern "C" void cRider_resetForMission(cRider* self)
 {
     *(int*)((char*)self->mRiderHandler + 0x350) = 1;
@@ -4656,6 +5025,18 @@ static inline sItem_3640* lookup_3640(sDb_3640* d, int i)
     return 0;
 }
 
+/**
+ * Starts a scripted sequence (NIS) for the rider: leaves normal control and poses the rider from the script.
+ *
+ * Sets CS_Void and MS_Static, plays anim 5, sets mIsInNIS and clears the event flag and sound ids. Byte 7 of
+ * the script record (func_0027C958) sets unk_AFC (probe the ground at the board root), byte 4 sets unk_AD0
+ * (rider not drawn). The entity's channels give the start position, put through mScriptMatrix into mPosition,
+ * and three angles in degrees that set mRotation.
+ *
+ * Velocity and speed are zeroed, the FX and the 19 slewed channels reset (channel 9 to 1), parts 5, 6, 8 and
+ * 9 enabled and 4 and 7 disabled at LOD 0; when byte 6 is set, the rider's items with flag 0x10 are disabled
+ * at every LOD. Ends any boost (func_00114130(self, 0, 0)).
+ */
 extern "C" void cRider_OnStartObjectUse(cRider* self)
 {
     int buf[12];
@@ -4829,6 +5210,14 @@ static inline unsigned short itemFlags_123B48(sDb_123B48* db, sEnt_123B48* e)
     return lookup_123B48(db, entItem_123B48(e))->flags;
 }
 
+/**
+ * Ends a scripted sequence (NIS) and puts the rider back into the race.
+ *
+ * Ends the script object's use (func_002803F0), resets the rider (func_0011D390), calls the audio stub
+ * func_002A1BD0 if an event fired, clears the NIS flags, disables parts 5, 6, 8, 9 and 11 and re-enables 4
+ * and 7 at LOD 0, re-enables the items cRider_OnStartObjectUse() hid, and stops the up to four sounds in
+ * unk_B08.
+ */
 extern "C" void cRider_OnEndObjectUse(cRider* self)
 {
     func_002803F0((char*)&self->mScriptObjRiderVtbl);
@@ -4887,6 +5276,20 @@ extern "C" void func_0027C9B0(int, void*);
 extern "C" void func_00124788(void*, void*, float, float, int);
 extern "C" void func_00125448(void*, void*, float, float, int);
 
+/**
+ * Per-frame update from the in-sequence script player while the rider is in an NIS.
+ *
+ * Reads the entity's channel values (func_0027C9B0) and passes them to func_00124788 (animation) and
+ * func_00125448 (sound), probably On Tour's DoInSeqAnimUpdate and DoInSeqSoundUpdate. The middle parameter
+ * names do not match the argument registers: the two floats are On Tour's currFrame and frameDelta, the int
+ * is its type.
+ *
+ * @param id  the script player entity (On Tour: pEntity)
+ * @param type  the current frame (the first float argument; On Tour: currFrame)
+ * @param currFrame  the frame step (the second float argument; On Tour: frameDelta)
+ * @param frameDelta  the entity type (On Tour: type); unused
+ * @param flags  event bits, passed on to both updates
+ */
 extern "C" void cRider_OnInSeqUpdate(cRider* self, int id, float type, float currFrame, int frameDelta, int flags)
 {
     int buf[12];
@@ -4922,7 +5325,21 @@ struct sAnimEventInfo_123E30
     int pad18[6];
 };
 
-extern "C" void cRider_OnInSeqKeyEvent(cRider* self, int id, float a, float b, int unused, int flags)
+/**
+ * Handles an in-sequence script's key events: sends its sound events for the rider.
+ *
+ * Only when @p flags has bit 0x10: reads the entity's channels (func_0027C9B0) and, for each event of channel
+ * 2 except 0x66, sends ids below 0x64 to the audio system (func_002A1B58) and ids from 0x64 on, less 0x64,
+ * with the event's subject rider (cSSXScriptEngine_GetSubjectRider) to func_002A1B88. Each event sent sets
+ * unk_AC8.
+ *
+ * @param id  the script player entity (On Tour: pEntity); its word +8 is passed to the subject lookup
+ * @param currFrame  the current frame (the first float argument; On Tour: currFrame); unused
+ * @param b  a second float argument that the caller (cScriptPlayerEntity_ExecutePlay) does not set; unused
+ * @param type  the entity type (On Tour: type); unused
+ * @param flags  event bits; bit 0x10 enables the event handling
+ */
+extern "C" void cRider_OnInSeqKeyEvent(cRider* self, int id, float currFrame, float b, int type, int flags)
 {
     sAnimEventInfo_123E30 info;
     if (flags & 0x10)
@@ -5022,6 +5439,17 @@ static inline void AddTo_3F38(sV_3F38& a, const sV_3F38& b)
         : "memory");
 }
 
+/**
+ * Returns where the rider should end up after its NIS, snapped to the ground.
+ *
+ * Returns mPosition unchanged when unk_6E4 <= 0. Otherwise byte 5 of the script record picks the point: 0 the
+ * current position; 1 start point (type 1, id = AI index); 2 start point (2, 0); 3 by the section manager's
+ * word +0x1BC: 17-21 (2, 0), 14-16 (2, AI index), others (2, 1); 4 start point (2, AI index), raised by 3000
+ * after the snap. A ray from 7000 below to 200 above the point against the Nash grid snaps it to the ground
+ * when it hits.
+ *
+ * @return the end position
+ */
 extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
 {
     if (self->unk_6E4 <= 0)
@@ -5133,6 +5561,17 @@ struct sQuat_001241C0
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
+/**
+ * Builds a quaternion from three Euler angles.
+ *
+ * The result is Rz(rx) Ry(ry) Rx(rz): despite the names, @p rx turns about Z (On Tour: heading) and @p rz
+ * about X (On Tour: roll). The rider itself is not used.
+ *
+ * @param out  receives the quaternion (x, y, z, w)
+ * @param rx  heading in radians, about the Z axis
+ * @param ry  pitch in radians, about the Y axis
+ * @param rz  roll in radians, about the X axis
+ */
 extern "C" void cRider_EulerToQuat(cRider* self, sQuat_001241C0* out, float rx, float ry, float rz)
 {
     sQuat_001241C0 q;
@@ -5756,6 +6195,12 @@ INCLUDE_ASM("ai/rider", cRider_cancelRiderTransitions);
 void* func_00230698(void* self, int id);
 extern "C" void func_002E4578(void* p);
 
+/**
+ * Cancels a camera transition in progress on the rider's view.
+ *
+ * When the game has a view manager and the rider a view, and Game->TransitionMan[mViewIndex] is in state 1,
+ * resets that transition manager with func_002E4578.
+ */
 extern "C" void cRider_cancelRiderTransitions(cRider* self)
 {
     void* w = SSXApp->Game;
@@ -5789,10 +6234,18 @@ static inline void riderAddEq_001250A8(sRiderVec4_001250A8& a, const sRiderVec4_
         : "m"(a), "m"(b));
 }
 
-extern "C" void cRider_applyBoost(cRider* self, sRiderVec4_001250A8* v)
+/**
+ * Adds an impulse to the rider's velocity, relaunching its air prediction when airborne.
+ *
+ * In MS_Air, cAirPredictor_startLaunchIntoAir() restarts from mPosition and the new mVelocity (last argument
+ * 3333.33).
+ *
+ * @param impulse  the velocity change (On Tour: const t4Vector & f)
+ */
+extern "C" void cRider_applyBoost(cRider* self, sRiderVec4_001250A8* impulse)
 {
     sRiderVec4_001250A8* p = (sRiderVec4_001250A8*)&self->mVelocity;
-    riderAddEq_001250A8(*p, *v);
+    riderAddEq_001250A8(*p, *impulse);
     if (func_0011FE98(self) == 1)
         cAirPredictor_startLaunchIntoAir(self->mAirPredictor, &self->mPosition, p, 3333.33349609375f);
 }
@@ -5814,6 +6267,15 @@ static inline void* getC0_125108()
     return SSXApp->GameModeMan;
 }
 
+/**
+ * Records that the rider has finished (or did not finish) and tells the game mode, camera and audio.
+ *
+ * Online (cGameComm present), a human who finished sets the local or remote finished flag. Calls the metrix
+ * finish (func_001193E0), sets mFinishTick to the race clock plus mPenaltyTicks and mFinishTime to at least
+ * 0, reports cGameModeMan_raceFinish(AI index, the metrix's stats at +0xFC), switches a split-screen rider's
+ * chase camera to the end-race camera and calls func_00286EA0 on the audio system. A rider who did not finish
+ * also gets unk_100 cleared.
+ */
 extern "C" void cRider_doFinishEvent(cRider* self)
 {
     cGameComm* g = cGameComm_mGameComm;
@@ -5859,6 +6321,16 @@ extern "C" unsigned int func_004139F8(float f);
 extern signed char D_00535C10[];
 extern int D_005308D0[];
 
+/**
+ * Checks whether a human rider has finished, applying a timed event's time limit.
+ *
+ * For a human who has not finished, outside game mode 4: in a timed event (GameModeMan bIsTimedEvent) with
+ * race-rule bit 9 clear, once the race clock passes uiTimeLimit (rounded down to whole seconds) the rider
+ * gets mDidNotFinish, its finish event and an audio cue (func_002A3C00). A rider already marked DNF gets its
+ * finish event when the game state is 4.
+ *
+ * @return 1 when the rider has finished (mFinishTime >= 0), otherwise 0
+ */
 extern "C" int cRider_updateFinishTest(cRider* self)
 {
     char* obj = (char*)&self->mVtbl;
@@ -5908,6 +6380,12 @@ static inline bool riderHasFinished001253D0(cRider* rider)
     return rider->mFinishTime >= 0.0f;
 }
 
+/**
+ * Marks a rider who quits before finishing as did-not-finish.
+ *
+ * Sets mDidNotFinish and the rider's entry in the per-rider table D_005366D0, which the front-end popups
+ * read.
+ */
 extern "C" void cRider_quitEvent(cRider* self)
 {
     bool finished = riderHasFinished001253D0(self);
@@ -6093,10 +6571,17 @@ extern "C" void func_00125448(void* vself, void* vobj, float when, float b, int 
 //100%
 INCLUDE_ASM("ai/rider", cRider_setUbersAllowed);
 #ifdef SKIP_ASM
-extern "C" void cRider_setUbersAllowed(cRider* self, int a1)
+/**
+ * Sets which uber tricks the rider may do; 0 also cancels any uber in progress.
+ *
+ * Stores the flags in mUberFlags (3 by default); 0 also clears mUberLevel and mUberTimer.
+ *
+ * @param uberAllowedFlags  uber permission flags (On Tour: uberAllowedFlags)
+ */
+extern "C" void cRider_setUbersAllowed(cRider* self, int uberAllowedFlags)
 {
-    self->mUberFlags = a1;
-    if (a1 == 0) {
+    self->mUberFlags = uberAllowedFlags;
+    if (uberAllowedFlags == 0) {
         self->mUberLevel = 0;
         *(int*)&self->mUberTimer = 0;
     }
@@ -6154,6 +6639,14 @@ static inline sVec4_125970 Scale_125970(const sVec4_125970& v, float s)
     return r;
 }
 
+/**
+ * Pushes a human rider along the wind of its environment.
+ *
+ * The wind speed (func_002EF0A0 x 27.78, capped at 1388.9) and direction (func_002EE570, in degrees) come
+ * from the rider's environment entry; below 277.78 nothing happens. When the rider's velocity along the wind
+ * is lower than the wind speed, the applyBoost virtual gets the wind direction times the difference times
+ * 0.015.
+ */
 extern "C" void cRider_updateWind(cRider* self)
 {
     if (self->mIsHuman == 0)
@@ -6194,6 +6687,13 @@ void func_00125AD0(void* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_syncCheckSum);
 #ifdef SKIP_ASM
+/**
+ * Returns a cheap checksum of the rider's state: the float sum of its position and rotation, as bits.
+ *
+ * Adds mPosition x, y, z and mRotation x, y, z, w (On Tour returns an unsigned int).
+ *
+ * @return the sum's bit pattern
+ */
 extern "C" int cRider_syncCheckSum(cRider* self)
 {
     union { float f; int i; } u;
@@ -6262,6 +6762,20 @@ extern "C" void cRider_cRider(void* self);
 extern "C" void cRiderHandler_cRiderHandler(void* self, int inChrg);
 extern "C" void* cReplay_addCache(void* p);
 
+/**
+ * Constructs a human player: the shared cRider virtual base, the rider handler and cPlayer's fields.
+ *
+ * In charge, points the 31 rider parts' virtual-base pointers at the cRider at +0xE10 and constructs it. Runs
+ * the cRiderHandler constructor (not in charge) and installs cPlayer's vtables in the cRider. Not in charge,
+ * two of them are then replaced by stack copies with adjusted deltas (the g++ 2.95 pattern the PORT note
+ * describes), which leaves the rider pointing into this function's stack frame.
+ *
+ * Then sets the cPlayer vtable (+0xDE8), clears Pad and the two rumble floats, sets mIsHuman and adds a
+ * replay cache (cReplay_addCache).
+ *
+ * @param inChrg  nonzero when this object is the most derived one and must build the virtual base
+ * @return @p self
+ */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xE10): vtable copies with delta fixups when not in charge.
 extern "C" void* cPlayer_cPlayer(char* self, int inChrg)

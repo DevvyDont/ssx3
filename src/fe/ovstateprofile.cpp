@@ -12,6 +12,11 @@ extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cOVState_PROFILE_initGeneral(void* self);
 extern char D_00471D50[];
 
+/**
+ * Creates the in-game profile save overlay screen ("121Profilesave_pda").
+ *
+ * Adds the PDA template, numbers the slots (initGeneral) and runs cOVState_onCreateScreen.
+ */
 extern "C" void cOVState_PROFILE_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -883,6 +888,12 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char D_004A2138[];
 extern char D_00471D68[];
 
+/**
+ * Numbers the six profile slot rows of the profile overlay.
+ *
+ * Sets the texts "1".."6" to their own number and gives "player1".."player6" misc data 0..5; the lookups are
+ * not null-checked.
+ */
 extern "C" void cOVState_PROFILE_initGeneral(void* self)
 {
     char buf[16];
@@ -924,6 +935,9 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern char D_00471E28[];
 
+/**
+ * Creates the autosave overlay screen ("122Autosave") and runs the common overlay set-up.
+ */
 extern "C" void cOVState_AUTOSAVE_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -1019,6 +1033,12 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_AUTOSAVE_displayOn(void* self);
 extern char D_00471E38[];
 
+/**
+ * Shows the autosave indicator while a memory card operation is running.
+ *
+ * Calls displayOn when the memory card state (+0x1C0) is neither 0 nor 6, else hides "autosave_text" (virtual
+ * slot 9).
+ */
 extern "C" void cOVState_AUTOSAVE_displayStatus(void* self)
 {
     int s = *(int*)((char*)self + 0x1C0);
@@ -1059,6 +1079,13 @@ public:
     virtual void setVisible(int v);
 };
 
+/**
+ * Updates the autosave icon and text when the processing flag changes.
+ *
+ * Compares the processing flag (+0x1A8) with its last shown value (+0x230). While processing, with
+ * func_0023C898(memory card manager) 0 and state not 6, it pulses "exclam" ("@pulsingicon") and shows
+ * kT_MEMAutosaving; otherwise it stops the animation and hides the text.
+ */
 extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
 {
     void* mp = cSSXApp_getMCManager(SSXApp);
@@ -1126,6 +1153,13 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 
 struct sVEnt_00212508 { short delta; short index; void (*fn)(void*); };
 
+/**
+ * Tears down the autosave overlay and moves on to where the save was started from.
+ *
+ * After func_001D58B8 (the shared memory card teardown) it switches on +0x22C (the constructor's parent
+ * code): 1 exits the game, 6 pushes cFEStateTitle, 7 pushes cFEStateLodge, 0 sets up a new race (game mode 4,
+ * event 0xC, the last hub into D_00535C08, D_004A11B8 = 1) and makes cPreGameLoadScreen the next module.
+ */
 extern "C" void cOVState_AUTOSAVE_onDestroyScreen(void* self)
 {
     func_001D58B8(self);

@@ -67,6 +67,18 @@ struct sSndPlayOpts9350 {
     int* f84;                   // 0x84
 };
 
+/**
+ * Constructs the sound play options: a stack of option sets for the next sound to play.
+ *
+ * When @p inchrg is set it also constructs the cSoundSys virtual base at +0x88. It allocates one array per
+ * option ("mCurrent", "mPosStatic", "mBaseVol", "mVolControl", "mPtr", "mViewport", "mVanish", "mRadius",
+ * "mDelay", "mExternalVol", "mMapToMaxVol", "mCloseOnEnd", "mTwoPlayerPan", "mTwoPlayerSide"). Level 0 gets
+ * the defaults (max volume 127, close on end), which are copied to the current set; the depth is back at -1.
+ *
+ * @param inchrg  nonzero when this object is complete and must construct its virtual base
+ * @param heap    the audio mode passed to the cSoundSys base (On Tour audioMode)
+ * @return self
+ */
 // PORT: g++ 2.95 virtual-base construction with a stack vtable this-adjust fix-up, written out by hand.
 extern "C" sSndPlayOpts9350* cSndPlayOpts_cSndPlayOpts(sSndPlayOpts9350* self, int inchrg, int heap)
 {

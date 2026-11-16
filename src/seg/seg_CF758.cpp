@@ -154,13 +154,27 @@ static inline unsigned int umod_CE758(unsigned int a, unsigned int b)
     return a % b;
 }
 
-extern "C" void setChallengeStats(cUIText* text, int a1, int a2, int peak, int kind, int idx)
+/**
+ * Sets a trophy-room text to one challenge statistic of a rider: best time, best score, collectibles,
+ * missions or money.
+ *
+ * Kinds: 0 best time (minutes:seconds) and 1 best score for the peak's challenge @p idx, 2 collectibles found
+ * (@p idx 0) or missions completed, 3 total money earned.
+ *
+ * @param text  the text widget to set
+ * @param profileIndex  the profile index (On Tour iProfileIndex)
+ * @param characterID  the character (On Tour eBECharacters iCharacterID)
+ * @param peak  the peak (On Tour eBEPeakID)
+ * @param kind  which statistic (above)
+ * @param idx  the challenge index, or 0 for collectibles and anything else for missions
+ */
+extern "C" void setChallengeStats(cUIText* text, int profileIndex, int characterID, int peak, int kind, int idx)
 {
     unsigned short buf[100];
     char num[200];
     void* reward = cBE_getInterface_CE758(cBE_getBE(), 0xD);
     if (kind == 3) {
-        int money = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_CE758(cBE_getBE(), 0xB), a1, a2);
+        int money = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_CE758(cBE_getBE(), 0xB), profileIndex, characterID);
         int fmt = Loc_CE758(D_00466CE0);
         sprintf2(num, D_004A1EE0, getDollarString_price(money));
         if (fmt != 0) {
@@ -171,7 +185,7 @@ extern "C" void setChallengeStats(cUIText* text, int a1, int a2, int peak, int k
         void* iface = cBE_getInterface_CE758(cBE_getBE(), 0xA);
         if (idx == 0) {
             int t = cBEMissionInterface_getTotalCollectForPeak(iface, peak);
-            int v = func_00153688(iface, a1, a2, peak);
+            int v = func_00153688(iface, profileIndex, characterID, peak);
             int fmt = Loc_CE758(D_00466CF8);
             if (fmt != 0) {
                 sprintf1_CE758(buf, (void*)fmt, v, t);
@@ -179,7 +193,7 @@ extern "C" void setChallengeStats(cUIText* text, int a1, int a2, int peak, int k
             }
         } else {
             int t = cBEMissionInterface_getNumberMissionsOnPeak(iface, peak);
-            int v = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(iface, a1, a2, peak);
+            int v = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(iface, profileIndex, characterID, peak);
             int fmt = Loc_CE758(D_00466D10);
             if (fmt != 0) {
                 sprintf1_CE758(buf, (void*)fmt, v, t);
@@ -189,7 +203,7 @@ extern "C" void setChallengeStats(cUIText* text, int a1, int a2, int peak, int k
     } else if (kind == 0) {
         int track = D_0045AAD8_CE758[peak][kind][idx].track;
         int type = D_0045AAD8_CE758[peak][kind][idx].type;
-        unsigned int time = func_00158960(reward, a1, a2, type, track);
+        unsigned int time = func_00158960(reward, profileIndex, characterID, type, track);
         unsigned int min = udiv_CE758(time, 60);
         unsigned int sec = umod_CE758(time, 60);
         sprintf(num, D_00466D28, fptodp((float)(int)min), fptodp((float)(int)sec));
@@ -201,7 +215,7 @@ extern "C" void setChallengeStats(cUIText* text, int a1, int a2, int peak, int k
     } else if (kind == 1) {
         int track = D_0045AAD8_CE758[peak][kind][idx].track;
         int type = D_0045AAD8_CE758[peak][kind][idx].type;
-        int v = func_00158960(reward, a1, a2, type, track);
+        int v = func_00158960(reward, profileIndex, characterID, type, track);
         int fmt = Loc_CE758(D_00466D50);
         if (fmt != 0) {
             sprintf1_CE758(buf, (void*)fmt, v);

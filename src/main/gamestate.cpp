@@ -35,6 +35,12 @@ struct sRace_234AD0 {
     int f8C;
 };
 
+/**
+ * Starts the start-gate countdown: resets the replay for the race, puts the AI in state 4 and fires
+ * "StartlightBegin".
+ *
+ * An online game first resets the world. Game modes 4-6 skip the gate and go straight to the next state.
+ */
 extern "C" void cGFGateState_gainFocus(void* self)
 {
     (*(sRace_234AD0**)(cGameState_mpGame + 0xC))->f8C = 0;
@@ -122,6 +128,14 @@ static inline float ffloor_00234C68(float x)
     return t;
 }
 
+/**
+ * Runs the start-gate countdown: announces each second, and at zero opens the gate ("StartgateOpen") and
+ * moves on.
+ *
+ * At zero it also tells the HUD (event 6) and the audio system, then goes to the next state. Nothing happens
+ * while
+ * a replay plays or in game mode 4.
+ */
 extern "C" void cGFGateState_update(void* self)
 {
     if (func_00270280(*(void**)(cGameState_mpGame + 0x28)) != 0) {
@@ -275,6 +289,14 @@ struct sState_234F40 {
     int f18;
 };
 
+/**
+ * Prepares the track-start preload: resets the replay and NIS list, reloads the track scripts and sets up the
+ * AI.
+ *
+ * Offline at locations 14-16 a first visit plays the location's intro (sets the audio flags and +0x14);
+ * otherwise
+ * the start sequence is appended to the NIS list.
+ */
 extern "C" void cGFTrackStartState_preloadInit(sState_234F40* self)
 {
     self->f18 = 0;
@@ -423,6 +445,16 @@ static inline int isOne_235080(int v)
     return v == 1;
 }
 
+/**
+ * Steps the track-start preload: track scripts and intro NIS, wait for the NIS lists, AI riders, loaded
+ * check, intro time.
+ *
+ * Step 2 reinitialises the game mode (except events 6-11), sets the computer riders' characters from the game
+ * mode
+ * and rebuilds the AI riders and actors; step 3 loads riders until ready. An intro holds the last step for
+ * 180
+ * frames.
+ */
 extern "C" void cGFTrackStartState_preloadUpdate(void* self)
 {
     *(int*)((char*)self + 0x18) += 1;
@@ -623,6 +655,14 @@ static inline int isMode2_2355C0(void* s)
     return *(int*)((char*)s + 0x550) == 2;
 }
 
+/**
+ * Starts a track: picks the start flow, initialises the missions and global scripts, and plays the start NIS
+ * lists.
+ *
+ * Offline outside locations 14-16 the state goes to step 4; otherwise to step 1. Game mode 4 puts the AI in
+ * state 3
+ * and disables its countdown flag. A location visited for the first time is recorded for player 1.
+ */
 extern "C" void cGFTrackStartState_gainFocus(void* self)
 {
     *(int*)((char*)self + 0x1C) = 0;
@@ -720,6 +760,12 @@ static inline int otherSide_235868(char* p)
     return *(int*)(p + 0xB0) == 0;
 }
 
+/**
+ * Finishes the track start: sets up the missions, restarts the replay recording and resets heat flags.
+ *
+ * Offline it records the location as visited for player 1; game modes 5 and 6 reset the heat in the game mode
+ * manager; a split-screen game clears the other view's cache flag.
+ */
 extern "C" void cGFTrackStartState_loseFocus(void* self)
 {
     func_00308F38(D_004A3DD8);
@@ -830,6 +876,12 @@ struct sVE_235AA0 {
 };
 
 
+/**
+ * Starts the next heat: restarts the heat and the game, re-picks the computer riders and queues the start
+ * sequence.
+ *
+ * Game modes 5 and 6, and online games, skip straight to step 3. Race mode also plays the transport sequence.
+ */
 extern "C" void cGFNextHeatState_gainFocus(void* self)
 {
     cBE_setState(0);
@@ -936,6 +988,13 @@ void* func_00230698(void* self, int id);
 extern char* cGameState_mpGame;
 extern int D_00535C04[];
 
+/**
+ * Steps the next-heat setup: rebuild the AI riders, place the world-cache focus at the first rider, end the
+ * transport, continue.
+ *
+ * Step 2 waits until the focus is 20000 units away, 120 frames have passed and the transport NIS and rider
+ * are idle.
+ */
 extern "C" void cGFNextHeatState_update(void* self)
 {
     *(int*)((char*)self + 0x14) += 1;
@@ -1079,6 +1138,10 @@ struct sColor_236058 {
     float r, g, b, a;
 };
 
+/**
+ * Teleports the rider for a new session: free-ride event 12, a partial restart at the mission start point, a
+ * white fade.
+ */
 extern "C" void cGFSessionTeleportState_gainFocus(void* self)
 {
     void* gm = SSXApp->GameModeMan;
@@ -1184,6 +1247,13 @@ static inline int isOne_6250(int m)
     return m == 1;
 }
 
+/**
+ * Starts the user-select flow (choosing where to go next) and plays its NIS.
+ *
+ * @param mode  how it was entered (On Tour startupFlag): 0 the session menu, 1 a saved target location, 2 or
+ *              3 the
+ *              transport map
+ */
 extern "C" void cGFUserSelectState_gainFocus(void* self, int mode)
 {
     func_0030B7F8(D_004A3DD8);
@@ -1287,6 +1357,13 @@ static inline void pop_6418()
     D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 
+/**
+ * Steps the user-select flow: open the session overlay or transport map, then transport or teleport to the
+ * choice.
+ *
+ * Choosing the current location (outside 14-16) asks the game flow to teleport (0xF); otherwise it plays the
+ * transport sequence, then loads the target location (cSectionMan load, mode 7) during it.
+ */
 extern "C" void cGFUserSelectState_update(void* self)
 {
     // Retail builds `flag` as a copy of a register holding 1, then `movn flag, zero, (D != 4)`: a condition the compiler
@@ -1908,6 +1985,10 @@ extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
 extern "C" void cOVStateManager_triggerOverlay(int state);
 extern void* D_004A3DD8;
 
+/**
+ * Starts a replay: initialises the missions and global scripts, hides the load indicator and opens the replay
+ * overlay (0x11).
+ */
 extern "C" void cGFReplayStartState_gainFocus(void)
 {
     cWScriptMan_initMissions(D_004A3DD8);

@@ -88,6 +88,19 @@ struct sText_05E8 {
     unsigned short* str;    // 0xB4
 };
 
+/**
+ * Draws a text object's lines at its position plus an offset.
+ *
+ * Refreshes the string through updateLocale (slot 16) when there is none or the cached bit is clear. Picks
+ * the static colour (static thing with use-static-colour set), the disabled colour (disabled thing with
+ * use-disabled-colour set) or the normal colour, and adds a drop shadow when the shadow bit is set. Each line
+ * is measured, placed by func_0039FEB8 and drawn 3 pixels below the last; with ellipses on and several lines,
+ * only the first line is drawn, followed by "...". When a flag word reached through the screen's engine has
+ * bit 27 set (probably a debug option), every line is replaced by a row of 'W's as wide as the object.
+ *
+ * @param x  horizontal offset added to the object's position
+ * @param y  vertical offset added to the object's position
+ */
 extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
 {
     if (self->str == 0 || ((self->flags14 >> 2) & 1) == 0) {
@@ -205,6 +218,13 @@ INCLUDE_ASM("ui/uitext", cUIText_getNumTextLines);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned short gUSTRBackSlash;
 extern "C" char cUIText_getNumTextLines_(void* self) __asm__("cUIText_getNumTextLines");
+/**
+ * Counts the lines of a text object's string.
+ *
+ * A carriage return (13) or a doubled line-break character (gUSTRBackSlash twice) starts a new line.
+ *
+ * @return the number of lines, or 0 when there is no string
+ */
 extern "C" char cUIText_getNumTextLines_(void* self)
 {
     unsigned short* text = *(unsigned short**)((char*)self + 0xB4);
@@ -322,6 +342,15 @@ public:
     virtual void v24(int);
 };
 
+/**
+ * Sets a text object's string from an ASCII string.
+ *
+ * Marks the text cached (setCached(1), slot 5) and not Unicode (setUnicode(0), slot 24), then converts the
+ * string to UCS-2 and stores it with cUIText_setUnicodeStringPrivate(). A string of 0x200 characters or more
+ * is ignored.
+ *
+ * @param str  the ASCII string
+ */
 extern "C" void cUIText_setAsciiStringPrivate(cUIText* self, const char* str)
 {
     unsigned short buf[0x200];
@@ -348,6 +377,15 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern char D_00494078[];
 extern unsigned short gUSTRBackSlash;
 
+/**
+ * Sets a text object's string, word-wrapped to the object's width.
+ *
+ * Copies the string, then walks it adding up character widths (scaled by mScale.x); when a line gets wider
+ * than mSize.x, the last space is replaced by a carriage return. Doubled line-break markers reset the line
+ * width. The result goes to cUIText_setUnicodeStringPrivate(). Nothing happens when the text has no font.
+ *
+ * @param str  the UCS-2 string
+ */
 extern "C" void cUIText_setUnicodeStringWrap(cUIText* self, unsigned short* str)
 {
     ((cUIText_3A0C70*)self)->v05(1);
@@ -419,6 +457,16 @@ extern char D_00494088[];
 extern char D_00494098[];
 extern unsigned short gUSTRBackSlash;
 
+/**
+ * Stores a copy of a UCS-2 string in a text object and splits it into lines.
+ *
+ * Marks the text cached and Unicode (slots 5 and 24), deletes the old text, copies the string (ignored if
+ * longer than 800 characters) and counts its lines. With two or more lines it builds the line-start table,
+ * cutting the copy at each carriage return and doubled line-break marker.
+ *
+ * @param self_  the text object
+ * @param str    the string to store
+ */
 // Stores a copy of the string and splits it into lines at CR and at doubled line-break markers.
 extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self_, const unsigned short* str)
 {
@@ -938,6 +986,14 @@ extern "C" void* func_0041605C(void* dst, const void* src, int n);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_004940A8[];
 
+/**
+ * Adds one slot to a scrolling text's line table and returns its index.
+ *
+ * Grows the line pointer array (+0xBC) by one entry, copies the old pointers and frees the old array. The new
+ * slot is cleared only when an old array existed.
+ *
+ * @return index of the new line slot (the old line count)
+ */
 extern "C" int cUITextScroll_allocLine(void* self)
 {
     unsigned short old = *(unsigned short*)((char*)self + 0xC8);
@@ -1031,6 +1087,11 @@ extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_004940B8[];
 
+/**
+ * Appends a copy of a UCS-2 string to a scrolling text as a new line.
+ *
+ * @param str  the string to add
+ */
 extern "C" void cUITextScroll_addUnicodeString(void* self, unsigned short* str)
 {
     int idx = cUITextScroll_allocLine(self);
@@ -1807,6 +1868,14 @@ extern "C" void cUIVector__cUIVector(cUIVector* self, int flags)
 INCLUDE_ASM("ui/uitext", cUIVector_setColour);
 #ifdef SKIP_ASM
 
+/**
+ * Sets a UI vector shape's colour, also recolouring every vertex.
+ *
+ * Stores the colour in mColour; when vertex colours exist, each gets the colour's components times 255,
+ * truncated to whole numbers.
+ *
+ * @param colour  the new colour (components 0 to 1)
+ */
 extern "C" void cUIVector_setColour(cUIVector* self, tARGB* colour)
 {
     tARGB tmp = *colour;

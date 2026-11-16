@@ -262,6 +262,18 @@ static inline void Reset_5778(sAvAct_5778* self)
     self->mat = D_004FF1A0_5778;
 }
 
+/**
+ * Steps an active avalanche node to the frame at time t and returns its interpolated state.
+ *
+ * Frames run at 30 per second. Moving to a new frame steps the node's position (packed deltas x 2) and
+ * rotation (axis plus an angle byte for 0-120 degrees) one frame at a time, restarting from the start for
+ * frame 0 or going back; while m_updateEmitters is set, each step also emits debris at m_UpdateTimeStep x
+ * speed intervals, and the flag is cleared afterwards. Updates the scales first (calculateScale).
+ *
+ * @param t  time since the avalanche started, in seconds
+ * @return the frame data: position, colour (packed bytes / 128, alpha = m_emitterAlphaScale) and rotation at
+ *         t
+ */
 // Steps the active node's path up to the frame at time t (emitting debris for the skipped frames while
 // it is emitting) and returns the interpolated position, colour and orientation at t.
 extern "C" tFrameData_5778 tActiveAvalancheNode_getFrameData(sAvAct_5778* self, float t)
@@ -573,6 +585,15 @@ struct sAvalancheData {
     float f108;
 };
 
+/**
+ * Computes an active node's object scale (+0xB0) and emitter alpha (+0xB4) for a time.
+ *
+ * In frames (time x 30): during the fade-in the alpha ramps up with scale 1; in the middle both are 1; during
+ * the fade-out both fall linearly to 0 and the scale becomes the square root of that, except for base type 2
+ * nodes, which keep their last values.
+ *
+ * @param currTime  time since the avalanche started, in seconds
+ */
 extern "C" void tActiveAvalancheNode_calculateScale(void* self, float currTime)
 {
     sAvalancheData* d = *(sAvalancheData**)((char*)self + 0x2E0);
@@ -697,6 +718,15 @@ struct sVEntry2D7DD8 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Releases an active node from its avalanche node.
+ *
+ * Only when it has a node and either force is set or the node's base type is not 2: calls virtual slot 1 with
+ * 3 on the object at +0xC of the node's instance (unknown), clears the node's m_activeNode and this node's
+ * m_node, and resets the emitter.
+ *
+ * @param force  end even base type 2 nodes
+ */
 extern "C" void tActiveAvalancheNode_end(void* self, int force)
 {
     char* p = *(char**)((char*)self + 0x2E0);
@@ -1024,6 +1054,18 @@ struct sAvGroup_83B8 {
     sAvPair_83B8 pairs[1];          // 0x110
 };
 
+/**
+ * Writes the avalanche data of the current location to "<location file>.<name>".
+ *
+ * File layout: magic 0x2BEEF00 and the data size, then per avalanche, for each node 0xBEEF, the record size,
+ * the start position and life x 10-byte packed frames, followed by the collision and ground-collision counts
+ * and records (a collision stores its time and its instance's word at +0x78). Clears the save request
+ * D_004A3A48 (On Tour m_Save).
+ *
+ * @param direct  byte-order flag for the writer func_002D82A0 (On Tour: littleEndian); the packed frames
+ *                always pass 1
+ * @param name  file extension
+ */
 // PORT: func_002D82A0 takes the file handle and offset as void* (ints passed through pointers).
 extern "C" void cAvalanche_SaveData1(int direct, char* name)
 {
@@ -1098,6 +1140,13 @@ extern "C" int func_003DEC60_i(int fd, int off, void* data, int size, int prio) 
 extern "C" void cAvalanche_end(void);
 extern "C" void cAvalanche_resolveDataPointers(void);
 
+/**
+ * Loads the current location's avalanche data file ("<location file>.sav") and resolves it.
+ *
+ * On a good magic (0x2BEEF00) the whole file is read into a buffer of the stored data size, but size + 8
+ * bytes are read into it (header included), so the read runs 8 bytes past the allocation. With a bad magic
+ * the file is not closed. Clears D_004A3A4C (On Tour m_Load) and resolves the data pointers.
+ */
 // Loads the avalanche data file for the current mountain (magic 0x2BEEF00, then the data size) into a fresh buffer.
 extern "C" void cAvalanche_LoadData(void)
 {
@@ -1417,6 +1466,15 @@ static inline void SetBits_8A00(int& w, int mask, int shift, int v)
     w = (w & ~mask) | ((v << shift) & mask);
 }
 
+/**
+ * Debug-draws an active node's recorded path when D_004A3A58 (On Tour m_RenderLines) is set.
+ *
+ * Walks the avalanche node's packed frames from its start (position deltas x 2, frame colours) into the
+ * vertex array D_004D5B70 and draws them with the graphics manager's virtual at vtable offset 0x248. The
+ * rotation it builds per frame is not used for the vertices.
+ *
+ * @param nodep  the tActiveAvalancheNode; nothing happens without an avalanche node
+ */
 // Draws the debris particles of an avalanche node.
 extern "C" void tActiveAvalancheNode_renderLines(void* nodep)
 {
@@ -1590,6 +1648,16 @@ public:
     virtual sAvVec4_D8EA8* getPos();
 };
 
+/**
+ * Renders one active avalanche: its emitters and, in debug mode, its paths and collision lines.
+ *
+ * For each active node: path lines for the first D_004A3A58 nodes, and func_00371688(emitter, 7) when
+ * D_004A3A54 (On Tour m_RenderEmitters, default 1) is set and the node has an emitter. With D_004A3A58 set it
+ * also draws a line from each collision instance to the player's rider, red once the collision time has
+ * passed and green before.
+ *
+ * @param slotv  the tActiveAvalanche slot; nothing happens when it has no avalanche
+ */
 extern "C" void tActiveAvalanche_render(void* slotv)
 {
     sAvSlot_D8EA8* slot = (sAvSlot_D8EA8*)slotv;
@@ -1692,6 +1760,12 @@ static inline sCam_9130* getCam_9130() { return (sCam_9130*)SSXApp->Game->ViewMa
 
 static inline void setB5_9130(sRCtx_9130* c, int v) { c->top->b5 = v; }
 
+/**
+ * Renders all active avalanches with the current camera's view.
+ *
+ * Runs when the system is enabled (D_004A3A30) and resolved, or when D_004A41EC is set: pushes a draw state
+ * set up for the camera's matrix, position and rotation and, if enabled, renders the 16 active slots.
+ */
 extern "C" void cAvalanche_render(void)
 {
     if ((D_004A3A30 != 0 && cAvalanche_m_resolved != 0) || D_004A41EC != 0)
@@ -1772,7 +1846,22 @@ static inline float Abs_D92D0(float x)
 
 #define AV_MIN_D92D0(a, b) ((a) < (b) ? (a) : (b))
 
-extern "C" void cAvalanche_addAvalancheNode(int id, char* obj, int type, float a, float b, float c, float d)
+/**
+ * Adds a node (a falling object) to the avalanche with the given id, creating the avalanche if needed.
+ *
+ * The new node takes the instance, life/fade-in/fade-out in frames (seconds x 30), the speed, a radius of 0.2
+ * x the instance's smallest bound extent and a base type (5 gives 2, 2 gives 0, else 1). It is registered in
+ * the node table D_00538450 and its index is written into the instance's flags at +0x92 ((index << 8) | 2).
+ *
+ * @param id  avalanche id
+ * @param obj  the world instance that falls
+ * @param type  the instance's kind, mapped to the node's base type
+ * @param life  life in seconds
+ * @param fadeIn  fade-in time in seconds
+ * @param fadeOut  fade-out time in seconds
+ * @param nodeSpeed  speed (scales the emitter time step)
+ */
+extern "C" void cAvalanche_addAvalancheNode(int id, char* obj, int type, float life, float fadeIn, float fadeOut, float nodeSpeed)
 {
     sAvGroupD92D0* g = (sAvGroupD92D0*)cAvalanche_m_avalancheList;
     while (g != 0 && g->id != id)
@@ -1786,10 +1875,10 @@ extern "C" void cAvalanche_addAvalancheNode(int id, char* obj, int type, float a
     sAvNodeD92D0* n = new (D_00487578, 0, 0) sAvNodeD92D0;
     n->next = g->nodes;
     g->nodes = n;
-    n->rate = d;
-    n->count = a * 30.0f;
-    n->sy = b * 30.0f;
-    n->sz = c * 30.0f;
+    n->rate = nodeSpeed;
+    n->count = life * 30.0f;
+    n->sy = fadeIn * 30.0f;
+    n->sz = fadeOut * 30.0f;
     n->obj = obj;
     // The target materialises &n->radius (addiu v1,a0,0x110; swc1 0(v1)): the source bound the field by reference.
     float& radius = n->radius;
@@ -1896,6 +1985,12 @@ extern "C" void cAvalanche_SaveData(void);
 extern "C" void cAvalanche_LoadData(void);
 extern void* cAvalanche_m_avalancheList;
 
+/**
+ * Recalculates every avalanche, then saves and reloads the data file.
+ *
+ * Ends the active avalanches, runs tAvalanche_calculate on each, then cAvalanche_SaveData and
+ * cAvalanche_LoadData.
+ */
 extern "C" void cAvalanche_calculate(void)
 {
     cAvalanche_end();
@@ -2028,6 +2123,17 @@ struct sAvSlot_D97A8 {
 };
 extern sAvSlot_D97A8 D_slots_D97A8[] __asm__("cAvalanche_m_activeAvalanches");
 
+/**
+ * Starts the avalanche with the given id in a free active slot.
+ *
+ * Gives each of its nodes a free active node from the 64-entry pool (position, rotation, scale, and for nodes
+ * with an emitter a reset emitter in the snow-flake colour), builds the node array, calls func_0029DEF0(sound
+ * manager, 1) and counts the avalanche in the danger manager (+0x708).
+ *
+ * @param id  avalanche id
+ * @return the slot index (0-15), or 0x80000000 when the id is unknown, already active, or no slot or node is
+ *         free
+ */
 extern "C" int cAvalanche_triggerAvalanche(int id)
 {
     cAvalanche_resolveDataPointers();
@@ -2120,6 +2226,9 @@ static inline void freeSlot_9A80(cAvalanche_end_sSlot* s)
     }
 }
 
+/**
+ * Stops all active avalanches and, for loaded data, drops each node's owned frame history.
+ */
 extern "C" void cAvalanche_end(void)
 {
     int i;
@@ -2153,6 +2262,11 @@ extern void* D_004A3AB4;
 extern int cAvalanche_m_fileDataDeleteable;
 extern int cAvalanche_m_resolved;
 
+/**
+ * Deletes all avalanches and nodes and frees the loaded avalanche data.
+ *
+ * Also clears the node table and its count and the resolved flag. self is unused (On Tour: a static method).
+ */
 extern "C" void cAvalanche_reset(void* self)
 {
     cAvalanche_end();
@@ -2349,6 +2463,14 @@ static inline void clearSlot_RR(sSlotRR* s)
     }
 }
 
+/**
+ * Restores the active avalanches from a replay frame.
+ *
+ * self is the replay stream, not a cAvalanche: it reads 16 avalanche ids and 16 times (0x80 bytes) through
+ * the stream's virtual slot 2. Each id of 0 or more is re-triggered and wound to its time: node scales and
+ * frames are recomputed (emitter nodes re-emit) and the slot's collision cursors (+0x10, +0x14) skip events
+ * already past.
+ */
 extern "C" void cAvalanche_readFromReplayFrame(int* self)
 {
     struct {
@@ -2455,6 +2577,13 @@ struct sAvGroupA028 {
     sAvIdxA028 idx[1];          // 0x110
 };
 
+/**
+ * Points the avalanche nodes at their records in the loaded data file.
+ *
+ * Once per load: each node gets its start position and a borrowed pointer to its packed frames (an owned one
+ * is freed first); each avalanche reads its collision times (instances cleared) and ground collisions. The
+ * collision count is then set back to 0, so the loaded collisions are not used.
+ */
 extern "C" void cAvalanche_resolveDataPointers(void)
 {
     if (cAvalanche_m_avalancheList == 0)

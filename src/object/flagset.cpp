@@ -84,6 +84,16 @@ struct sFlagElem_CM {
     float v;                // 0x8C
 };
 
+/**
+ * Builds a flag set's cloth grid mesh from a flag instance's quad, then computes its first frame.
+ *
+ * The grid is 8 by 2 vertices when the set has almost no wind, otherwise 8 by 5; positions, UVs and colours
+ * are
+ * interpolated from the quad's corners (renderer slot 97). The four flag phases start random.
+ *
+ * @param p  the flag set
+ * @param item  the flag's instance record (On Tour tInstanceRecord* pInst)
+ */
 extern "C" void cFlagSet_CreateMesh(void* p, void* item)
 {
     sFlagElem_CM* self = (sFlagElem_CM*)p;
@@ -619,6 +629,12 @@ struct sFlagSet_C428 {
     sFlagSetElem_C428 elems[15];    // 0x20
 };
 
+/**
+ * Constructs the flag manager object node with 15 empty flag sets and its wind at base 0.5, delta 0.25.
+ *
+ * @param bucket  the bucket the node belongs to
+ * @return @p self
+ */
 extern "C" sFlagSet_C428* cFlagManager_cFlagManager(sFlagSet_C428* self, void* bucket)
 {
     int i;
@@ -660,6 +676,11 @@ struct sFlagSet_C4B8 {
     sFlagSetElem_C4B8 elems[15];    // 0x20
 };
 
+/**
+ * Destroys the flag manager: destroys its 15 flag sets, then the cObjNode base.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cFlagManager__cFlagManager(sFlagSet_C4B8* self, int flags)
 {
     self->vtable = cFlagManager_vtbl;
@@ -773,6 +794,12 @@ static inline float randf_34C668()
     return u.f - 1.0f;
 }
 
+/**
+ * Varies the wind once a second by a random step and updates every active flag set.
+ *
+ * The step's range is 0.15, 0.3 or 0.45 by a per-location level read from the new-race BE (func_002D1BA0,
+ * probably the location's wind); the wind is kept within 0..1 and interpolated over the second.
+ */
 extern "C" void cFlagManager_update(sFlagSet_C668* self)
 {
     float amp = 0.15f;
@@ -1104,6 +1131,11 @@ struct sFlagSetVEntryCB80 {
     void (*fn)(void*, void*);
 };
 
+/**
+ * Destroys a swinging fence node: releases its grid mesh (renderer slot 77), then the cInstanceNode base.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cFenceNode__cFenceNode(void* self, int flags)
 {
     char* s = (char*)self;
@@ -1137,6 +1169,14 @@ struct sFlagElem_CBE8 {
     void* operator new[](unsigned int, void* p) { return p; }
 };
 
+/**
+ * Recreates a swinging fence node from a replay frame: the instance-node part, its 0x24-byte swing state and
+ * its mesh.
+ *
+ * @param bucket  the bucket the node belongs to
+ * @param stream  the replay frame (On Tour cBxReplayFrame* data)
+ * @return @p self
+ */
 extern "C" void* cFenceNode_cFenceNode(void* self, void* bucket, void* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
@@ -1271,6 +1311,14 @@ static inline float fabs_34CE48(float x)
     return r;
 }
 
+/**
+ * Swings a hit fence section back and forth with a decaying amplitude and passes the swing on to its
+ * neighbours.
+ *
+ * Each neighbour timer that runs out pushes the next or previous fence section (func_0034CC80). At each end
+ * of a
+ * swing the amplitude halves; once it and the angle are near 0 the node expires (slot 34).
+ */
 extern "C" void cFenceNode_update(char* self)
 {
     if (*(int*)(self + 0x38) > 0) {
@@ -1554,6 +1602,14 @@ static inline float fsDot_D650(const sFsVec4_D650& a, const sFsVec4_D650& b)
     return r;
 }
 
+/**
+ * Adds a collision's push to the fence's swing, unless it is already swinging fully, and arms both neighbour
+ * timers.
+ *
+ * The C declaration keeps only the collision info (On Tour also passes the intersect info and the being).
+ *
+ * @param obj  the collision info (On Tour const tCollideInfo* tc)
+ */
 extern "C" void cFenceNode_onCollide(void* self, void* obj)
 {
     char* s = (char*)self;
@@ -1608,6 +1664,10 @@ extern "C" void func_0034D6F0(void* vself, float v)
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode_render);
 #ifdef SKIP_ASM
+/**
+ * Draws a fence section, through its swinging grid mesh when it has one, unless its model is culled or not
+ * loaded.
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void cFenceNode_render(char* self)
 {
@@ -1658,6 +1718,11 @@ struct sSerVEntry_0034D960 {
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes a fence node to a replay frame: the instance-node part and its 0x24-byte swing state.
+ *
+ * @param stream  the replay frame (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cFenceNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
@@ -1960,6 +2025,16 @@ struct sFsModel_DD18 {
     float scale;            // 0x84
 };
 
+/**
+ * Builds the world matrix of every bone of the node's model from the root or its parent bone.
+ *
+ * Animated bones take the current animation matrix (func_0034E320), others their rest matrix; translations
+ * are
+ * scaled by the model's scale.
+ *
+ * @param vroot  the root transform (On Tour const t4Matrix* root)
+ * @param out  receives one matrix per bone (On Tour animMats)
+ */
 // Builds the world matrix of every bone: root or parent * (bone matrix with its translation scaled).
 extern "C" void cAnimNode_makeAnimMats(void* self, void* vroot, sFsMtx_DD18* out)
 {

@@ -47,6 +47,19 @@ extern "C" void cChaseCameraController_addAlgorithm(char* self, cCamAlgo_D0A0* a
 
 static inline int camNetActive_D0A0(int n) { return n != 0 && n < 10; }
 
+/**
+ * Creates the chase-camera algorithm for a camera type, aims it at the controller's target and blends it in.
+ *
+ * Types include idle, mid left and right, manual, lazy, look back, matrix, eight "Direction N" and
+ * relative-angle
+ * cameras, superpipe (91, falling back to a bounded camera), spline (92) and post-race; most others use
+ * DEFAULT_3.
+ * Type 67 and unlisted types leave no algorithm and then call through a null pointer.
+ *
+ * @param kind  the camera algorithm type (On Tour eCamAlgoType type)
+ * @param ctx  the camera action that asked for it (On Tour cCTAction* action)
+ * @param blend  blend rate; bit 1 of the controller's flags (+0x30) forces an instant switch (1.0)
+ */
 // Creates the chase-camera algorithm for the given kind and blends it in.
 extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int kind, char* ctx, float blend)
 {

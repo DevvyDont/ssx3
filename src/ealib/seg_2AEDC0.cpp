@@ -2816,6 +2816,13 @@ extern char D_00495598[];
 extern char D_004955D0[];
 void* func_003B2360(void* self);
 
+/**
+ * Reads an MPEG-2 picture spatial scalable extension header (as in the reference mpeg2decode's gethdr.c).
+ *
+ * Reads the lower layer's temporal reference, its signed 15-bit horizontal and vertical offsets (each after a
+ * checked marker bit), the spatial-temporal weight table index and two lower-layer field flags, and marks the
+ * stream as spatially scalable (ld+0x430).
+ */
 // PORT: func_003B1300 really returns unsigned int (unit declares void*)
 extern "C" void picture_spatial_scalable_extension(void)
 {
@@ -2900,6 +2907,12 @@ extern char D_00495658[];
 extern char D_00495688[];
 void* func_003B2360(void* self);
 
+/**
+ * Reads an MPEG-2 copyright extension header into globals (as in the reference mpeg2decode's gethdr.c).
+ *
+ * Copyright flag, identifier, original-or-copy flag, 7 reserved bits, then the 20-, 22- and 22-bit copyright
+ * number parts, each after a checked marker bit.
+ */
 extern "C" void copyright_extension(void)
 {
     D_00509610[0] = func_003B1300(1);
@@ -3129,6 +3142,21 @@ static inline unsigned char* texData_27C8(sTexHdr_27C8* t)
     return (unsigned char*)t + 0x10;
 }
 
+/**
+ * Lays out a new SHAPE in caller-provided memory: header, then the palette, comment and metal-bin blocks it
+ * asks for, linked in a chain.
+ *
+ * A 32-bit or wider palette starts as a grey ramp; narrower ones are filled with 0xFF.
+ *
+ * @param tex  memory for the shape, sized by SHAPE_createsize (On Tour SHAPE* shp)
+ * @param w  width in pixels
+ * @param h  height in pixels
+ * @param fmt  pixel format; 0 means 32 bpp (On Tour bpp)
+ * @param clut  palette colour depth, 0 for none (On Tour clutbpp)
+ * @param levels  number of mipmap levels (On Tour mipmaplevels)
+ * @param extra1  comment size, 0 for none (On Tour commentsize)
+ * @param extra2  metal-bin size, 0 for none (On Tour metalbinsize)
+ */
 extern "C" void SHAPE_createat(void* tex, int w, int h, int fmt, int clut, int levels, int extra1, int extra2)
 {
     sTexHdr_27C8* t = (sTexHdr_27C8*)tex;
@@ -3248,6 +3276,18 @@ INCLUDE_ASM("ealib/seg_2AEDC0", decodeAlpha);
 // NOTE: the DXT3 path steps through dst as `unsigned long` (64-bit on the EE), not as 32-bit pixels.
 // PORT: callers declare decodeAlpha with char* parameters; defined under an asm label.
 extern "C" void decodeAlpha_impl(unsigned long* dst, int stride, unsigned char* src, int mode) __asm__("decodeAlpha");
+/**
+ * Decodes the alpha of one DXT block into the alpha bytes of its 4x4 texels.
+ *
+ * Mode 3 (DXT3) has explicit 4-bit alpha; otherwise (DXT5) two endpoints with 6 interpolated levels, or 4
+ * plus 0
+ * and 255.
+ *
+ * @param dst  the block's first output texel (On Tour d)
+ * @param stride  bytes per output row (On Tour rowbytes)
+ * @param src  the compressed alpha block (On Tour blockbuf)
+ * @param mode  the DXT type (On Tour dxttype)
+ */
 extern "C" void decodeAlpha_impl(unsigned long* dst, int stride, unsigned char* src, int mode)
 {
     if (mode == 3) {
@@ -3324,6 +3364,19 @@ static inline unsigned short dxtTo1555_2E78(unsigned short c)
     return c;
 }
 
+/**
+ * Decodes the colour part of one DXT block into 4 rows of 4 texels.
+ *
+ * Builds the four-colour palette from the two 565 endpoints (5:3 and 3:5 blends, or their average and
+ * transparent
+ * black when the first is not larger) and converts it with dxtTo1555. Despite the names, @p src is the output
+ * and
+ * @p dst the compressed block.
+ *
+ * @param src  the block's first output texel (On Tour d)
+ * @param pitch  bytes per output row (On Tour rowbytes)
+ * @param dst  the compressed colour block (On Tour blockbuf)
+ */
 // Decode one DXT1 block into 4 rows of 4 64-bit texels.
 extern "C" void decodeRGB(char* src, int pitch, char* dst)
 {

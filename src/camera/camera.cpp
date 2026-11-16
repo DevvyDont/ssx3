@@ -53,6 +53,16 @@ extern const char D_0045B778[];
 extern cQuad128 D_004FF160;
 extern cQuad128 D_004FF130;
 
+/**
+ * Constructs a rider's game camera with its three controllers.
+ *
+ * Runs the cSimpleCamera constructor, sets cCamera_vtbl, builds ResultAlgorithm (func_00176D68) and allocates
+ * the manual (0x20), chase (0x44, for the view) and script (0x20) controllers. StreamFocusID starts at -1;
+ * the shake, ground-avoidance and safe-position state is reset (LastSafePositionInvalid = 1).
+ *
+ * @param idx  view index, passed to the chase and script controllers
+ * @return self
+ */
 extern "C" void* cCamera_cCamera(cCamera* self, int idx)
 {
     func_0015D698(self);
@@ -92,6 +102,14 @@ public:
     virtual ~cCamPartK2();
 };
 
+/**
+ * Destroys a game camera: frees its controllers and its result algorithm.
+ *
+ * Clears each controller's algorithm list (func_0015CD60) and deletes it, destroys ResultAlgorithm, restores
+ * cSimpleCamera_vtbl and frees the camera when bit 0 of flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 = free the memory
+ */
 // PORT: func_00176DA8__FPv is a destructor taking (self, flags); bind the 2-arg form.
 extern "C" void cCamera__cCamera(cCamera* self, int flags)
 {
@@ -171,6 +189,23 @@ struct sRiderRef_15DE60
     int rider;
 };
 
+/**
+ * Sets up the camera for one view: limits, controllers, rider target and stream focus.
+ *
+ * The float arguments are misnamed: MIPS EABI passes them in order, so nearPlane is stored as MaxView,
+ * farPlane as MinNear and riderIndex as MaxFar (On Tour: init(float v, float nearPlane, float farPlane, int
+ * riderIndex)).
+ *
+ * Gives the manual and script controllers input 0 and the chase controller the view's input, selects the
+ * manual algorithm 0x51, gives the chase controller and ResultAlgorithm a new cRiderCameraTarget on the
+ * view's rider, switches the chase camera to the player's choice (0x4C), snaps the result and uses stream
+ * focus 0 or 1.
+ *
+ * @param idx  view index (also picks the rider and the stream focus)
+ * @param nearPlane  stored as MaxView (the maximum field of view; see above)
+ * @param farPlane  stored as MinNear
+ * @param riderIndex  stored as MaxFar
+ */
 extern "C" void cCamera_init(sCamera_15DE60* self, int idx, float nearPlane, float farPlane, float riderIndex)
 {
     self->f0C = nearPlane;
@@ -217,6 +252,11 @@ public:
 
 extern "C" void* func_0015E668(void* self);
 
+/**
+ * Updates the current controller, then the camera itself.
+ *
+ * Calls the current controller's virtual slot 2 (update), then func_0015E668 (unknown).
+ */
 extern "C" void cCamera_update(cCamera* self)
 {
     ((cCamVObj_0015DF98*)self->Controller)->v02();
@@ -227,6 +267,13 @@ extern "C" void cCamera_update(cCamera* self)
 //100%
 INCLUDE_ASM("camera/camera", cCamera_setCurrentController);
 #ifdef SKIP_ASM
+/**
+ * Selects which controller drives the camera.
+ *
+ * 1 = manual, 2 = chase, 3 = script; any other value leaves Controller unchanged.
+ *
+ * @param mode  controller type (On Tour eCamControllerType)
+ */
 extern "C" void cCamera_setCurrentController(cCamera* self, int mode)
 {
     switch (mode) {
@@ -501,6 +548,16 @@ extern sCamShake_E360 D_004C53E0_E360[] __asm__("D_004C53E0");
 #define MIN_E360(a, b) ((a) <= (b) ? (a) : (b))
 #define MAX_E360(a, b) ((b) <= (a) ? (a) : (b))
 
+/**
+ * Requests a camera shake for this frame, keeping the strongest request.
+ *
+ * The amount is scaled by the type's weight and by distance: full strength up to half the type's range,
+ * fading to 0 at the range (no fade when either is 0). Types 1-4 are ignored during a replay.
+ *
+ * @param type  shake type, index into the shake table D_004C53E0
+ * @param amount  requested strength
+ * @param dist  distance from the shake source
+ */
 // Requests a camera shake of 'type' with strength 'amount' at 'dist' from the camera; keeps the strongest request.
 // Replays ignore types 1-4.
 extern "C" void cCamera_shakeCamera(cCamera* self, int type, float amount, float dist)
@@ -574,6 +631,16 @@ extern "C" void func_00165938(char* self, int flag, int sel, float base, float s
 extern "C" void func_001656B0_E460(char* self, float base, float spread, float r) __asm__("func_001656B0");
 extern "C" void cCamera_shakeCamera_E460(char* self, int type, float amount, float dist) __asm__("cCamera_shakeCamera");
 
+/**
+ * Adds the boost shake and applies this frame's dominant camera shake to the result algorithm.
+ *
+ * While bit 0 of the pause-mode flags D_004A2A50 is clear and the target rider's mBoostStrength is over 0.1,
+ * requests shake type 1, 2 or 3 (boost over 0.4 or 0.7) with a strength from the target's vector at slot 3
+ * (probably the velocity): 0 below 60, rising to 1 at 120 after scaling by 0.036.
+ *
+ * Starts the shake (func_001656B0) on the first frame, runs func_00165938 with the dominant type's table
+ * values, then clears the per-frame request.
+ */
 extern "C" void cCamera_applyCameraShake(cCamera* self)
 {
     char* tgt = *(char**)((char*)self->ChaseController + 0x20);
@@ -982,6 +1049,13 @@ static inline float clamp_15EC98(float v, float lo, float hi)
     return r;
 }
 
+/**
+ * Moves the camera's stream focus to its position and checks whether streaming has caught up.
+ *
+ * The radius is Far (clamped to 15000 unless the view manager's word at +0x10 is 1); the focus is set at the
+ * camera position with 1.5 x radius. bStreamIsReady becomes 1 when the world cache's focus distance reaches
+ * the radius or 2/3 of it clamped to 15000-30000.
+ */
 extern "C" void cCamera_updateStreamFocus(cCamera* self)
 {
     float r;
@@ -1017,6 +1091,13 @@ public:
     virtual void v04();
 };
 
+/**
+ * Points the chase controller's rider target at another rider.
+ *
+ * Stores the value as the target's Rider (+0x4) and calls the chase controller's virtual slot 4.
+ *
+ * @param value  the rider to follow (On Tour: cRider *)
+ */
 extern "C" void cCamera_switchChaseControllerTargetRider(cCamera* self, int value)
 {
     char* obj = (char*)self->ChaseController;
@@ -1650,6 +1731,13 @@ extern void* D_0045BD78[];
 extern cQuad128 D_004FF130;
 extern "C" float func_00167E30(void* self);
 
+/**
+ * Constructs a basic camera algorithm (a position with pitch and heading).
+ *
+ * Sets the default view, near 10, far 30000, type 0x4F, Position (0, 0, 0, 1) and zero pitch and heading.
+ *
+ * @return self
+ */
 extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(void* self)
 {
     *(void***)((char*)self + 0x10) = D_0045BDE0;
@@ -1826,6 +1914,13 @@ INCLUDE_ASM("camera/camera", cManualCameraAlgorithm_cManualCameraAlgorithm);
 extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(void* self);
 extern void* cManualCameraAlgorithm_vtbl[];
 
+/**
+ * Constructs a manual camera algorithm on top of the basic one.
+ *
+ * Sets type 0x51 and cManualCameraAlgorithm_vtbl.
+ *
+ * @return self
+ */
 extern "C" void* cManualCameraAlgorithm_cManualCameraAlgorithm(void* self)
 {
     cBasicCameraAlgorithm_cBasicCameraAlgorithm(self);
@@ -1961,6 +2056,13 @@ INCLUDE_ASM("camera/camera", cEditorCameraAlgorithm_cEditorCameraAlgorithm);
 extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(void* self);
 extern void* cEditorCameraAlgorithm_vtbl[];
 
+/**
+ * Constructs an editor camera algorithm on top of the basic one.
+ *
+ * Sets type 0x50 and cEditorCameraAlgorithm_vtbl.
+ *
+ * @return self
+ */
 extern "C" void* cEditorCameraAlgorithm_cEditorCameraAlgorithm(void* self)
 {
     cBasicCameraAlgorithm_cBasicCameraAlgorithm(self);
@@ -3366,6 +3468,14 @@ struct cChaseCameraController_switchCamera_HardReset_flags {
 
 extern int persistentPlayerChoiceType[2];
 
+/**
+ * Fully resets the chase camera's switch state for a view.
+ *
+ * Clears the volume/replay/slow flags and timers, sets the preferred, replay and volume types to 0x3D (none),
+ * drops the trigger action and restores the view's persistent player choice.
+ *
+ * @param i  view index into persistentPlayerChoiceType
+ */
 extern "C" void cChaseCameraController_switchCamera_HardReset(cChaseCameraController* self, int i)
 {
     self->PreferredChaseAlgoLastFrame = 0x3D;
@@ -3438,13 +3548,18 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_setTarget);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern "C" void cChaseCameraController_setTarget(cChaseCameraController* self, int* p)
+/**
+ * Replaces the chase controller's rider target, deleting the old one.
+ *
+ * @param target  the new cRiderCameraTarget (owned by the controller)
+ */
+extern "C" void cChaseCameraController_setTarget(cChaseCameraController* self, int* target)
 {
     int* old = (int*)self->Target;
     if (old != 0) {
         operator_delete(old);
     }
-    self->Target = (cRiderCameraTarget*)p;
+    self->Target = (cRiderCameraTarget*)target;
 }
 #endif
 
@@ -3499,6 +3614,13 @@ static inline float vlength_161AB0(const sCamVec4_161AB0& v)
     return r;
 }
 
+/**
+ * Per-frame chase camera choice: player preference and the slow camera.
+ *
+ * The preferred algorithm is always 0x3D here, so the user-change path only fires once after something else
+ * was preferred (and not while the latest algorithm is 0x4A). The slow camera starts when the rider's motion
+ * state is 5 (MS_Handplant) and ends once the speed (velocity x 0.036) is over 35.
+ */
 extern "C" void cChaseCameraController_processInput(cChaseCameraController* self)
 {
     int mode = 0x3D;
@@ -3591,6 +3713,15 @@ static inline int InRace_161BB8(int* st)
     return *st && *st < 10;
 }
 
+/**
+ * Updates the chase controller: blends its algorithm list and re-suggests the player's camera.
+ *
+ * While bit 0 of the pause-mode flags D_004A2A50 is clear: processes input, blends the head algorithm's
+ * weight towards 1 and the others towards 0, dropping finished ones (type 0x4A at once).
+ *
+ * During a replay (replay state 1-9) of type 0x5D showing another camera than the player's choice, switches
+ * back to the player's choice after 10 s; the timer is held at 0 while the replay's word at +0x484 is 0.
+ */
 extern "C" void cChaseCameraController_update(cChaseCameraController* self)
 {
     if ((D_004A2A50 & 1) == 0) {
@@ -3634,6 +3765,15 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_addAlgorithm);
 extern "C" void cCameraAlgoList_insert(void* list, void* algo, int b, float w);
 extern "C" void func_0015CB08(void* list);
 
+/**
+ * Adds a chase algorithm to the controller's blend list.
+ *
+ * Records its type as LatestAlgoType. Into an empty list it goes in at weight 1; a blend rate of 1.0 clears
+ * the list first (a cut).
+ *
+ * @param algo  the algorithm to add
+ * @param w  blend rate (1.0 = cut)
+ */
 extern "C" void cChaseCameraController_addAlgorithm(cChaseCameraController* self, void* algo, float w)
 {
     self->LatestAlgoType = *(int*)((char*)algo + 0xC);
@@ -3655,12 +3795,20 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_UserChange);
 extern int persistentPlayerChoiceType[2];
 extern "C" void* func_0015D050(void*, int, int);
 
-extern "C" void cChaseCameraController_switchCamera_UserChange(cChaseCameraController* self, int v)
+/**
+ * Stores the player's chosen chase camera and switches to it when nothing overrides it.
+ *
+ * Also saves it in persistentPlayerChoiceType for the rider's index (+0x870); switches (func_0015D050) only
+ * when no volume, replay or slow flag is set.
+ *
+ * @param type  the chosen algorithm type
+ */
+extern "C" void cChaseCameraController_switchCamera_UserChange(cChaseCameraController* self, int type)
 {
-    self->CamSwitchRecord.PlayerChoiceType = v;
-    persistentPlayerChoiceType[*(int*)(*(char**)((char*)self->Target + 0x4) + 0x870)] = v;
+    self->CamSwitchRecord.PlayerChoiceType = type;
+    persistentPlayerChoiceType[*(int*)(*(char**)((char*)self->Target + 0x4) + 0x870)] = type;
     if ((*(int*)((char*)self + 0x30) & 7) == 0) {
-        func_0015D050(self, v, 0);
+        func_0015D050(self, type, 0);
     }
 }
 #endif
@@ -3682,6 +3830,12 @@ struct sCam161F50 {
 
 extern "C" void* func_0015D050(void*, int, int);
 
+/**
+ * Leaves replay camera mode and cuts back to the normal chase camera.
+ *
+ * Clears the volume and replay flags and cuts (func_0015D050) to the slow camera 0x42 when slow, else the
+ * player's choice, keeping the trigger action.
+ */
 extern "C" void cChaseCameraController_switchCamera_EndReplay(cChaseCameraController* self)
 {
     int mode;
@@ -3698,6 +3852,15 @@ extern "C" void cChaseCameraController_switchCamera_EndReplay(cChaseCameraContro
 //100%
 INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_ReplayToggle);
 #ifdef SKIP_ASM
+/**
+ * Enters replay camera mode with the given camera type.
+ *
+ * Algorithm types: 0x3D none, 0x42 slow camera, 0x44 end of race, 0x4C the player's choice, 0x5D replay. 0x4C
+ * cuts to the player's choice; 0x5D cuts to the volume camera, the slow camera or the player's choice by the
+ * current flags; other types are used as is. The type is kept as LatestReplayType.
+ *
+ * @param mode  replay camera type
+ */
 extern "C" void cChaseCameraController_switchCamera_ReplayToggle(cChaseCameraController* self, int mode)
 {
     int flags = *(int*)((char*)self + 0x30) | 2;
@@ -3736,7 +3899,17 @@ struct sCam162060 {
 
 extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, int, float);
 
-extern "C" void cChaseCameraController_switchCamera_Volume(cChaseCameraController* self, int mode, int arg, float blend)
+/**
+ * Switches the chase camera for a camera-trigger volume.
+ *
+ * 0x4C (leave the volume) clears the volume flag and uses the player's choice; any other type is stored with
+ * its action. The blend is made unless a replay is on with a type other than 0x5D.
+ *
+ * @param mode  camera type of the volume (0x4C = back to the player's choice)
+ * @param action  the trigger's action (cCTAction *)
+ * @param blend  blend rate
+ */
+extern "C" void cChaseCameraController_switchCamera_Volume(cChaseCameraController* self, int mode, int action, float blend)
 {
     if (mode == 0x4C) {
         ((sCam162060*)self)->b0 = 0;
@@ -3744,11 +3917,11 @@ extern "C" void cChaseCameraController_switchCamera_Volume(cChaseCameraControlle
     } else {
         self->CamSwitchRecord.VolumeType = mode;
         ((sCam162060*)self)->b0 = 1;
-        self->CamSwitchRecord.TriggerAction = (cCTAction*)arg;
+        self->CamSwitchRecord.TriggerAction = (cCTAction*)action;
     }
     int ok = !((sCam162060*)self)->b1 ? 1 : self->CamSwitchRecord.LatestReplayType == 0x5D;
     if (ok) {
-        cChaseCameraController_createChaseAlgorithmBlend(((sCam162060*)self), mode, arg, blend);
+        cChaseCameraController_createChaseAlgorithmBlend(((sCam162060*)self), mode, action, blend);
     }
 }
 #endif
@@ -3771,6 +3944,12 @@ struct sCam1620D0 {
 extern "C" void func_0015DAC0();
 extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, int, float);
 
+/**
+ * Re-applies the chase camera at a chapter change.
+ *
+ * Clears the volume flag, marks view 0's camera safe position invalid (func_0015DAC0 sets its
+ * LastSafePositionInvalid) and cuts to the latest replay type, or the player's choice when that is 0x5D.
+ */
 extern "C" void cChaseCameraController_switchCamera_Chapter(cChaseCameraController* self)
 {
     int mode = self->CamSwitchRecord.LatestReplayType;
@@ -3801,6 +3980,12 @@ struct sCam162138 {
 };
 
 
+/**
+ * Resets the chase camera's switch flags, keeping the player's choice.
+ *
+ * Clears the volume, replay and slow flags, the slow state and the trigger action and sets the volume type to
+ * the player's choice.
+ */
 extern "C" void cChaseCameraController_switchCamera_SoftReset(cChaseCameraController* self)
 {
     ((sCam162138*)self)->b1 = 0;
@@ -3818,6 +4003,11 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_Restart);
 #ifdef SKIP_ASM
 extern "C" void* func_0015D050(void*, int, int);
 
+/**
+ * Soft-resets the chase camera and cuts to the player's choice.
+ *
+ * @return whatever func_0015D050 returns (callers ignore it)
+ */
 extern "C" void* cChaseCameraController_switchCamera_Restart(cChaseCameraController* self)
 {
     cChaseCameraController_switchCamera_SoftReset(self);
@@ -3830,6 +4020,12 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_Slow);
 #ifdef SKIP_ASM
 int func_0011FE98(void*);
 
+/**
+ * Starts the slow-speed chase camera (0x42).
+ *
+ * Sets the slow flag; unless a volume or replay is active, blends to 0x42 at 1.2/60 per frame in motion state
+ * 5 (handplant), else 0.6/60.
+ */
 extern "C" void cChaseCameraController_switchCamera_Slow(cChaseCameraController* self)
 {
     ((sCam162138*)self)->b2 = 1;
@@ -3843,6 +4039,12 @@ extern "C" void cChaseCameraController_switchCamera_Slow(cChaseCameraController*
 //100%
 INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_EndSlow);
 #ifdef SKIP_ASM
+/**
+ * Ends the slow-speed chase camera.
+ *
+ * Clears the slow flag; unless a volume or replay is active, blends back to the player's choice at about
+ * 1/150 per frame.
+ */
 extern "C" void cChaseCameraController_switchCamera_EndSlow(cChaseCameraController* self)
 {
     ((sCam162138*)self)->b2 = 0;
@@ -3855,6 +4057,9 @@ extern "C" void cChaseCameraController_switchCamera_EndSlow(cChaseCameraControll
 //100%
 INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_EndRace);
 #ifdef SKIP_ASM
+/**
+ * Blends to the end-of-race camera (0x44) unless a volume camera is active.
+ */
 extern "C" void cChaseCameraController_switchCamera_EndRace(cChaseCameraController* self)
 {
     if (!((sCam162138*)self)->b0) {
@@ -8340,9 +8545,17 @@ extern "C" void func_00167F70(void* self, int flags)
 //100%
 INCLUDE_ASM("camera/camera", cChaseAlgorithm_getTargetPos);
 #ifdef SKIP_ASM
-extern "C" void* cChaseAlgorithm_getTargetPos(void* self, void* a1)
+/**
+ * Returns the chase algorithm's target position (CamTargetPos).
+ *
+ * self is the hidden t4Vector return slot; the algorithm itself comes second.
+ *
+ * @param algorithm  the cChaseAlgorithm
+ * @return self, holding a copy of CamTargetPos (+0x20)
+ */
+extern "C" void* cChaseAlgorithm_getTargetPos(void* self, void* algorithm)
 {
-    *(cQuad128*)self = *(cQuad128*)((char*)a1 + 0x20);
+    *(cQuad128*)self = *(cQuad128*)((char*)algorithm + 0x20);
     return self;
 }
 #endif

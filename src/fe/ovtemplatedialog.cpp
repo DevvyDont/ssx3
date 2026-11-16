@@ -36,6 +36,13 @@ static inline int div_PDA(int a, int b)
     return a / b;
 }
 
+/**
+ * Creates the in-game PDA's screens ("PDATemplate" and the looping "bganim1") and fills in its temperature
+ * readout.
+ *
+ * The temperature is -10 C minus (app update ticks / 3600) mod 15, so it drops by one degree a minute (at 60
+ * updates a second) and wraps from -24 back to -10.
+ */
 extern "C" void cPDATemplate_onCreateScreen(char* self)
 {
     *(int*)(self + 0xC) = 0x29;
@@ -232,6 +239,15 @@ extern char cOVState_REPLAY_vtbl[];
 extern char D_00474B80[];
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 
+/**
+ * Creates the in-game overlay state of the given type and pushes it onto the game UI's state stack.
+ *
+ * Each type 1-0x28 builds its own cOVState subclass ("cOVStateOverlay"). There is no default case: any other
+ * type
+ * leaves the result null and the flag write after the chain dereferences it.
+ *
+ * @param type  the overlay (On Tour tOVStateEnum overlay)
+ */
 extern "C" void cOVStateManager_triggerOverlay(int type)
 {
     char* result = 0;
@@ -1501,6 +1517,10 @@ extern void* cOVStateManager_mpPDATemplate;
 extern char D_00471A10[];
 extern char cPDATemplate_vtbl[];
 
+/**
+ * Pushes the PDA template state ("PDATemplate") onto the game UI's stack, once; the instance is kept in
+ * cOVStateManager_mpPDATemplate.
+ */
 extern "C" void cOVStateManager_addPDATemplate(void)
 {
     if (cOVStateManager_mpPDATemplate == 0) {
@@ -1643,6 +1663,12 @@ struct sObj_DlgCreate {
     sVE_DlgCreate* vt;
 };
 
+/**
+ * Creates the yes/no dialog overlay ("87yndialog") and sets its question for the dialog kind (+0x9C).
+ *
+ * Kinds: 0 restart event, 1 quit game, 2 restart challenge, 3 quit challenge, 4 quit event, 5 give up, 6 save
+ * before quitting, others quit competition. Kinds 1 and 6 hide the "title_quitchallenge" object.
+ */
 // Builds the generic dialog overlay: title/body texts depend on the dialog kind at 0x9C.
 extern "C" void cOVTemplate_Dialog_onCreateScreen(char* self)
 {
@@ -1794,6 +1820,19 @@ static inline void Pop_20D5A8()
     D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 
+/**
+ * Carries out the dialog's answer: Yes restarts, quits or leaves the event by dialog kind; No or back closes
+ * it.
+ *
+ * Yes on kind 0 restarts the event (re-entering it for game events 6-11), 1 quits to the front end, 2 opens
+ * overlay 0x1D, 4 switches to free ride at the start point, 5 makes the rider quit the event, 6 opens the
+ * save
+ * state. No on kind 6 quits without saving. In kind 1 the "Save Profile" branch is dead: its flag is always
+ * 0.
+ *
+ * @param w  the button (its index at +0x18: 0 yes, 1 no), or 0
+ * @param ev  widget event number: 5 select, 6 back
+ */
 extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1985,6 +2024,14 @@ extern char D_00471BF0[];
 
 struct sVE_20DC68 { short delta; short index; void (*fn)(void*, int); };
 
+/**
+ * Creates the replay overlay ("64replay"): hides the popup and help, shows the timeline toggle and sets the
+ * camera name.
+ *
+ * When the replay was loaded from a save (cReplay Loaded), selects menu item 2 and hides and disables the
+ * save
+ * replay option.
+ */
 extern "C" void cOVState_REPLAY_onCreateScreen(char* self)
 {
     *(int*)(self + 0xC) = GetHashValue32(D_00471A40);

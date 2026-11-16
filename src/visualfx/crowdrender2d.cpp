@@ -69,6 +69,14 @@ extern "C" int MEM_free(int file);
 
 // PORT: the unit declares this as void(); defined under an asm label with its real type
 extern "C" void cCrowdRender2D_init_impl(int* self) __asm__("cCrowdRender2D_init__Fv");
+/**
+ * Loads the 2D crowd textures ("data/textures/crwd.ssh") and registers every frame of the crowd animations.
+ *
+ * Each frame's shape is looked up and registered with the graphics manager (slot 46). The first shape's size
+ * and format byte are stored at +0x4..+0xC. The unit declares this function without its parameter.
+ *
+ * @param self  the crowd renderer
+ */
 extern "C" void cCrowdRender2D_init_impl(int* self)
 {
     int i;
@@ -98,6 +106,13 @@ struct sCrowdVEntry2D {
     void (*fn)(void*, int);
 };
 
+/**
+ * Releases the 2D crowd textures: unregisters every animation frame (graphics slot 50) and frees the loaded
+ * file.
+ *
+ * @param param_1  the crowd renderer; its first word is the loaded texture file
+ * @return what MEM_free() returns
+ */
 int cCrowdRender2D_purge(int* param_1)
 {
     int i;
@@ -154,6 +169,13 @@ struct sCrowdAnimDefFrames_ctor { char pad_0x0[0x98]; int frames[16]; };
 extern sCrowdAnimDefFrames_ctor D_00445D38_ctor __asm__("D_00445D38");
 extern char* D_004A5B64;
 
+/**
+ * Constructs a 2D crowd animation: type and animation 0 at frame 0, advancing every 3 ticks from now.
+ *
+ * @param memory   the memory for the animation (0x20 bytes)
+ * @param param_1  stored at +0x1C (purpose unknown)
+ * @return @p memory
+ */
 void* cCrowdAnim2D_cCrowdAnim2D(void* memory, void* param_1)
 {
     sCrowdAnim2D* a = (sCrowdAnim2D*)memory;
@@ -267,6 +289,13 @@ struct sCrowdAnim2D_BAC0 {
     void* param;            // 0x1C
 };
 
+/**
+ * Advances a 2D crowd animation once its delay has passed, moving to the next animation through the
+ * transition table.
+ *
+ * The table (D_00445E10, by type and current animation) gives the next animation. Kind 0 switches when back
+ * at frame 0, kind 1 at the last frame, kind 2 at once; then the frame's texture is stored.
+ */
 extern "C" void cCrowdAnim2D_update(sCrowdAnim2D_BAC0* self)
 {
     int now = *(int*)(D_004A5B64 + 0x1C);

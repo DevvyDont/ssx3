@@ -12,6 +12,14 @@ cPSPLightMan* cPSPLightMan_cPSPLightMan(cPSPLightMan* self);
 //100%
 INCLUDE_ASM("render/lightman", cLightMan_construct__Fv);
 #ifdef SKIP_ASM
+/**
+ * Creates the light manager: allocates 0x14 bytes ("LightMan"), constructs it and installs the PS2 vtable.
+ *
+ * Runs cPSPLightMan_cPSPLightMan(), which registers the object as the global light manager (D_004A5B8C), then
+ * overwrites the vtable with D_00493650 (cPS2LightMan's: its slot 1 is cPS2LightMan__cPS2LightMan).
+ *
+ * @return the new manager
+ */
 void* cLightMan_construct()
 {
     void* mem = cMemMan_alloc(0x14, D_00492EE0, 0, 0);
@@ -2040,6 +2048,17 @@ struct sLmLight_15E8 {
 
 extern "C" void cFont_loadFont(cFont* self, const char* name, int flags);
 
+/**
+ * Constructs a font: sets the default draw state, then loads the named font file.
+ *
+ * MissingGlyph = 0, ShadowOffset (0, 0), BaseScale and Scale (1, 1), Color (1, 1, 1, 1), ShadowColor (1, 0,
+ * 0, 0) and an empty FontName, then cFont_loadFont(). The self type here is a local overlay of cFont
+ * (sLmLight_15E8).
+ *
+ * @param name  font file name (e.g. "data/fonts/debugfnt.sfn")
+ * @param flags  memory flags for the font's allocations (On Tour: memtype)
+ * @return @p self
+ */
 extern "C" sLmLight_15E8* cFont_cFont(sLmLight_15E8* self, const char* name, int flags)
 {
     self->field_0x8 = 0;
@@ -2085,6 +2104,17 @@ extern "C" void cFont_linkFont(void* self, void* data, int flags);
 void cMemMan_free(void*);
 extern const char D_00492F30[];
 
+/**
+ * Loads a font file and builds the font's glyph table and texture from it.
+ *
+ * Writes "font:%24s" with @p name into FontName, loads the whole file with FILE_load() (flags with bit 0x100
+ * flipped; memstd's allocator func_00252A10 treats that bit as a "back" flag), builds the font with
+ * cFont_linkFont() and frees the file buffer. %24s is a minimum width, not a limit, so a name longer than 26
+ * characters would overrun the 32-byte FontName.
+ *
+ * @param name  font file name
+ * @param flags  memory flags for the glyph table (On Tour: memtype)
+ */
 extern "C" void cFont_loadFont(cFont* self, const char* name, int flags)
 {
     void* data;

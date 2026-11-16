@@ -81,9 +81,16 @@ extern int D_0044AFF0[];
 // PORT: cObjNode_cObjNode takes (self, param2); this caller also leaves the stream in $6.
 cObjNode* cObjNode_cObjNode_3(cObjNode* self, void* param2, void* stream) __asm__("cObjNode_cObjNode__FP8cObjNodePv");
 
-extern "C" void* cTypeObjNode_cTypeObjNode(void* self, void* a, void* stream)
+/**
+ * Recreates a typed object node from a replay frame and counts it in the per-type live counts (D_0044AFF0).
+ *
+ * @param bucket  the bucket the node belongs to (On Tour const int bucket)
+ * @param stream  the replay frame (On Tour cBxReplayFrame* data)
+ * @return @p self
+ */
+extern "C" void* cTypeObjNode_cTypeObjNode(void* self, void* bucket, void* stream)
 {
-    cObjNode_cObjNode_3((cObjNode*)self, a, stream);
+    cObjNode_cObjNode_3((cObjNode*)self, bucket, stream);
     *(void***)((char*)self + 0xC) = cTypeObjNode_vtbl;
     sObjNodeVEntry4788* vt = *(sObjNodeVEntry4788**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 4);
@@ -103,6 +110,11 @@ extern int D_0044AFF0[];
 // destructor taking (self, flags); the real body is bound by asm label.
 void cTypeObjNode__cTypeObjNode_impl(void* self, int flags) __asm__("cTypeObjNode__cTypeObjNode");
 
+/**
+ * Destroys a typed object node: removes it from the per-type live counts, then destroys the cObjNode base.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 void cTypeObjNode__cTypeObjNode_impl(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = cTypeObjNode_vtbl;
@@ -150,9 +162,16 @@ struct sVEntryCSortObjNode {
 extern void* cSortObjNode_vtbl[];
 extern "C" void* cTypeObjNode_cTypeObjNode(void* self, void* a, void* stream);
 
-extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a, void* stream)
+/**
+ * Recreates a sorted object node from a replay frame: the typed-node part and its sort index.
+ *
+ * @param bucket  the bucket the node belongs to (On Tour const int bucket)
+ * @param stream  the replay frame (On Tour cBxReplayFrame* data)
+ * @return @p self
+ */
+extern "C" void* cSortObjNode_cSortObjNode(void* self, void* bucket, void* stream)
 {
-    cTypeObjNode_cTypeObjNode(self, a, stream);
+    cTypeObjNode_cTypeObjNode(self, bucket, stream);
     *(void***)((char*)self + 0xC) = cSortObjNode_vtbl;
     sVEntryCSortObjNode* vt = *(sVEntryCSortObjNode**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x14, 4);
@@ -189,6 +208,11 @@ public:
     virtual void v01(void* buf, int size);
 };
 
+/**
+ * Writes a typed object node's type and flags to a replay frame.
+ *
+ * @param obj  the replay frame (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cTypeObjNode_writeToReplayFrame(void* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
 {
     obj->v01((char*)self + 0x10, 4);
@@ -198,6 +222,11 @@ extern "C" void cTypeObjNode_writeToReplayFrame(void* self, cTypeObjNode_writeTo
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/objnode", cSortObjNode_writeToReplayFrame);
 #ifdef SKIP_ASM
+/**
+ * Writes a sorted object node to a replay frame: its type and flags, then its sort index.
+ *
+ * @param obj  the replay frame (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cSortObjNode_writeToReplayFrame(void* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
 {
     cTypeObjNode_writeToReplayFrame(self, obj);

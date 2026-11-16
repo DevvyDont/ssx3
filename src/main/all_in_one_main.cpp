@@ -21,7 +21,18 @@ extern char D_00467DC8[];
 extern int D_00467DD0[];
 extern int D_00467DD8[];
 
-extern "C" char* __sti__all_in_one_main_cpp(char* self, int* a, int* b)
+/**
+ * Constructs the debug front end's "You've been Challenged!" menu; despite its name it is not a static
+ * initializer.
+ *
+ * The items are "You've been Challenged!", "by", an empty line, a spacer and the Accept and Decline items.
+ * Accept and Decline later call func_0017E490 / func_0017E4F0 with the owner stored at +0x130 / +0x134.
+ *
+ * @param acceptOwner  the owner for Accept: its first word is stored at +0x130
+ * @param declineOwner  the owner for Decline: its first word is stored at +0x134
+ * @return self
+ */
+extern "C" char* __sti__all_in_one_main_cpp(char* self, int* acceptOwner, int* declineOwner)
 {
     char* item0 = self + 0x138;
     char* item1 = self + 0x154;
@@ -31,8 +42,8 @@ extern "C" char* __sti__all_in_one_main_cpp(char* self, int* a, int* b)
     char* item5 = self + 0x1C8;
     cMenu_cMenu(self);
     *(char**)(self + 0x12C) = D_0046D3D0;
-    *(int*)(self + 0x130) = *a;
-    *(int*)(self + 0x134) = *b;
+    *(int*)(self + 0x130) = *acceptOwner;
+    *(int*)(self + 0x134) = *declineOwner;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item0, D_00467DA8);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item1, D_00467DC0);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item2, D_00467DC8);
@@ -1997,6 +2008,13 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateCharSelect__cFEStateCharSelect);
 extern "C" void* func_0039E390_DD840(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the character select front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
+ * destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ */
 extern "C" void cFEStateCharSelect__cFEStateCharSelect(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DD840(self);
@@ -2010,6 +2028,13 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateCheatCharSelect__cFEStateCheatCharSe
 extern "C" void* func_0039E390_DD868(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the cheat character select front-end state: restores cFEState's vtable (D_0046D0D0) and runs
+ * cUIState's destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ */
 extern "C" void cFEStateCheatCharSelect__cFEStateCheatCharSelect(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DD868(self);
@@ -2039,6 +2064,13 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateCharSetup__cFEStateCharSetup);
 extern "C" void* func_0039E390_DD8A0(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the character setup front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
+ * destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ */
 extern "C" void cFEStateCharSetup__cFEStateCharSetup(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DD8A0(self);
@@ -2052,6 +2084,13 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateRiderDetail__cFEStateRiderDetail);
 extern "C" void* func_0039E390_DD8C8(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the rider detail front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
+ * destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ */
 extern "C" void cFEStateRiderDetail__cFEStateRiderDetail(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DD8C8(self);
@@ -2594,6 +2633,13 @@ INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup__cUIStateBuyPopup);
 extern "C" void* func_0039E390_DDC90(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the buy popup front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
+ * destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ */
 extern "C" void cUIStateBuyPopup__cUIStateBuyPopup(cUIStateBuyPopup* self) {
     self->mVtbl = D_0046D0D0;
     func_0039E390_DDC90(self);
@@ -2611,8 +2657,8 @@ extern "C" int func_001DDCB8(int arg0) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDCC0);
 #ifdef SKIP_ASM
-extern "C" int func_001DDCC0(cUIStateBuyPopup* arg0) {
-    return (arg0->mbAccept);
+extern "C" int func_001DDCC0(cUIStateBuyPopup* uiStateBuyPopup) {
+    return (uiStateBuyPopup->mbAccept);
 }
 #endif
 
@@ -2841,6 +2887,12 @@ INCLUDE_ASM("main/all_in_one_main", cFEPopupConfirm__cFEPopupConfirm);
 extern "C" void* cScreenPopup__cScreenPopup_DEB8(void*) __asm__("cScreenPopup__cScreenPopup");
 extern void* D_0046C890_DEB8[] __asm__("cFEPopupConfirm_vtbl");
 
+/**
+ * Destroys a confirm popup: restores the cFEPopupConfirm vtable and runs the cScreenPopup destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for
+ * cScreenPopup__cScreenPopup.
+ */
 extern "C" void cFEPopupConfirm__cFEPopupConfirm(void *self) {
     *(void***)((char*)self + 8) = D_0046C890_DEB8;
     cScreenPopup__cScreenPopup_DEB8(self);
@@ -2878,6 +2930,13 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateOptions__cFEStateOptions);
 extern "C" void* func_0039E390_DDF20(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the options front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
+ * destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ */
 extern "C" void cFEStateOptions__cFEStateOptions(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DDF20(self);
@@ -2905,6 +2964,13 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsGame__cFEStateOptionsGame);
 extern "C" void* func_0039E390_DDF80(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the game options front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
+ * destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ */
 extern "C" void cFEStateOptionsGame__cFEStateOptionsGame(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DDF80(self);
@@ -2935,6 +3001,13 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsSound__cFEStateOptionsSound);
 extern "C" void* func_0039E390_DDFE8(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the sound options front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
+ * destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ */
 extern "C" void cFEStateOptionsSound__cFEStateOptionsSound(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DDFE8(self);
@@ -2996,6 +3069,13 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsController__cFEStateOptionsCo
 extern "C" void* func_0039E390_DE0C0(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the controller options front-end state: restores cFEState's vtable (D_0046D0D0) and runs
+ * cUIState's destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ */
 extern "C" void cFEStateOptionsController__cFEStateOptionsController(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DE0C0(self);
@@ -3026,6 +3106,13 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsSaveLoad__cFEStateOptionsSave
 extern "C" void* func_0039E390_DE128(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the save/load options front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
+ * destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ */
 extern "C" void cFEStateOptionsSaveLoad__cFEStateOptionsSaveLoad(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DE128(self);
@@ -3088,6 +3175,15 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateProfileSelect__cFEStateProfileSelect
 extern "C" void* func_0039E390_E1F0(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the profile select front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
+ * destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ *
+ * @return nothing meaningful (whatever func_0039E390 leaves)
+ */
 extern "C" void* cFEStateProfileSelect__cFEStateProfileSelect(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     return func_0039E390_E1F0(self);
@@ -3442,6 +3538,15 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateEventSelect__cFEStateEventSelect);
 extern "C" void* func_0039E390_E528(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the event select front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
+ * destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ *
+ * @return nothing meaningful (whatever func_0039E390 leaves)
+ */
 extern "C" void* cFEStateEventSelect__cFEStateEventSelect(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     return func_0039E390_E528(self);
@@ -3572,6 +3677,14 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateTitle__cFEStateTitle);
 extern "C" void* func_0039E390_E6C8(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the title front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ *
+ * @return nothing meaningful (whatever func_0039E390 leaves)
+ */
 extern "C" void* cFEStateTitle__cFEStateTitle(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     return func_0039E390_E6C8(self);
@@ -3599,6 +3712,15 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateMainMenu__cFEStateMainMenu);
 extern "C" void* func_0039E390_E728(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the main menu front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
+ * destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ *
+ * @return nothing meaningful (whatever func_0039E390 leaves)
+ */
 extern "C" void* cFEStateMainMenu__cFEStateMainMenu(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     return func_0039E390_E728(self);
@@ -3626,6 +3748,15 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateBonusMaterial__cFEStateBonusMaterial
 extern "C" void* func_0039E390_E788(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
+/**
+ * Destroys the bonus material front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
+ * destructor.
+ *
+ * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * (bit 0 frees).
+ *
+ * @return nothing meaningful (whatever func_0039E390 leaves)
+ */
 extern "C" void* cFEStateBonusMaterial__cFEStateBonusMaterial(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     return func_0039E390_E788(self);

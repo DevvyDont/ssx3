@@ -11,6 +11,18 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
 extern char D_00489C80[];
 extern "C" void MEM_fill(void* dst, int c, int n);
 
+/**
+ * Adds a model part (an MDF part header plus its data) to the model at one LOD and variant slot.
+ *
+ * Parts are matched by the header's signed byte at +0x52 (the part id). An existing part gets that LOD marked
+ * used and refs[index] set to the header and its data (+0x60). A new part first gets four zeroed
+ * "ModelVariant" ref arrays of numLodRefs entries, then its bone names, two more data tables, bone count, two
+ * shorts from the header and refIndex = @p index; numParts is not bounds-checked.
+ *
+ * @param lod  LOD slot, 0-3
+ * @param part  the part header (On Tour: tMdfModelHeader*), its data following at +0x60
+ * @param index  variant slot in the LOD's ref array (On Tour: variant)
+ */
 extern "C" void cAnimModel_addModelPartLOD(cAnimModel* self, int lod, char* part, int index)
 {
     char* data = part + 0x60;
@@ -69,6 +81,15 @@ extern "C" int func_0030DB90(void* self, void* a1)
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimModel_setScale);
 #ifdef SKIP_ASM
+/**
+ * Sets the model's scale vector unk_140 to (length, width, width, 1).
+ *
+ * cAnimModel_transform() scales the local bone positions by it, the skeleton build scales the second matrix
+ * set by it and cAnimModel_render() passes its y to the draw call.
+ *
+ * @param lengthScale  scale along x
+ * @param widthScale  scale along y and z
+ */
 extern "C" void cAnimModel_setScale(cAnimModel* self, float lengthScale, float widthScale)
 {
     t4Vector v;
@@ -223,6 +244,14 @@ extern "C" void func_0030EC18(cAnimModel* self, int i, int param)
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimModel_addAnimMinPart);
 #ifdef SKIP_ASM
+/**
+ * Adds a part's bone mask to the model's second part mask (unk_158).
+ *
+ * The part number goes through partIndex without a range check. On Tour calls this addAnimMinPart, and its
+ * blend() takes an animMinParts flag, so this is probably the set of parts blended in that mode.
+ *
+ * @param i  part number (On Tour: partID), mapped through partIndex
+ */
 // PORT: ulong is 64-bit here
 extern "C" void cAnimModel_addAnimMinPart(cAnimModel* self, int i)
 {
@@ -419,6 +448,16 @@ struct sAmBoneInfo_0200 {
     char pad[0x3C];
 };
 
+/**
+ * Rebuilds every bone's world transform from the model's local pose.
+ *
+ * For each part's bones in order: the parent is bones[parent index], or the next entry of @p roots for a root
+ * bone; the local position is localPos[k] scaled componentwise by unk_140 and the local rotation is
+ * localRot[k]; bones[k] = parent combined with local (rotate, then translate).
+ *
+ * @param roots  root transforms (position, rotation), one per root bone in part order (On Tour also passes
+ *               their count)
+ */
 // Rebuilds the world bones from the local pose: bone k = parent (or the next root transform) * local k.
 extern "C" void cAnimModel_transform(cAnimModel* self, sAnimModelBone* roots)
 {
@@ -451,6 +490,12 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_buildSkelMatrices);
 #ifdef SKIP_ASM
 extern "C" void func_00310120(cAnimModel* self, int i, sAnimModelBone* p);
 
+/**
+ * Builds the skeleton matrices of every bone from its world transform.
+ *
+ * func_00310120 writes unk_030[i] from the bone's rotation and position, and unk_034[i] as that matrix with
+ * its rows scaled by unk_140 (probably On Tour's getSkelMatrices and getSkelMatricesScaled).
+ */
 extern "C" void cAnimModel_buildSkelMatrices(cAnimModel* self)
 {
     int i;
@@ -547,6 +592,14 @@ static inline t4Vector amVecAdd(const t4Vector& src, t4Vector* b)
     return r;
 }
 
+/**
+ * Moves the whole posed model by an offset.
+ *
+ * Adds @p offset to every part bone's position and to row 3 (the translation) of its unk_030 and unk_034
+ * matrices.
+ *
+ * @param offset  translation to add
+ */
 extern "C" void cAnimModel_applyOffset(cAnimModel* self, t4Vector* offset)
 {
     for (int i = 0; i < self->numParts; i++) {
@@ -662,6 +715,18 @@ typedef void (*tDraw_0640)(void*, char*, char*, int, int, float);
 extern int D_004A5948;
 extern sAmMat_0640 D_004FC420[];
 
+/**
+ * Draws the model at one LOD with its skinning palette.
+ *
+ * Builds the static 64-matrix palette D_004FC420 (constructed once) as unk_034[i] times unk_038[i]; the bone
+ * count is not checked against 64. With per-part refs (unk_018 set), each used part's current variant ref
+ * gets a set-matrices call (graphics virtual slot 111) and a draw (slot 99); otherwise one slot-111 call uses
+ * lodInfo[lod] and each used part's first ref is drawn. Each draw also gets unk_140.y.
+ *
+ * @param lod  LOD slot, 0-3
+ * @param x  draw flag for the part with id 2, probably the board (On Tour: additiveBoard)
+ * @param y  draw flag for every other part (On Tour: additivePlayer)
+ */
 extern "C" void cAnimModel_render(cAnimModel* self, int lod, int x, int y)
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
@@ -849,6 +914,15 @@ struct sAmItem50 {
     char name[0x50];
 };
 
+/**
+ * Finds a bone by name in one part and returns its skeleton index.
+ *
+ * Compares the part's 0x50-byte bone names with func_004165A8 (strcmp); the part number is not range-checked.
+ *
+ * @param idx  part number (On Tour: partID), mapped through partIndex
+ * @param name  bone name
+ * @return the part's firstBone plus the bone's position in the part, or -1 when no bone has that name
+ */
 extern "C" int cAnimModel_getBoneSkelIndex(cAnimModel* self, int idx, const char* name)
 {
     sAnimModelPart* g = &self->parts[self->partIndex[idx]];
@@ -868,6 +942,17 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_getGraftMask);
 extern "C" int func_00416B18(const char* a, const char* b, int n);
 extern char D_004A3DF0[];
 
+/**
+ * Builds the 64-bit bone mask for a comma-separated list of bone names in one part.
+ *
+ * Each name sets bit firstBone + j of the part's bone with exactly that name. When the part has a channel bit
+ * (unk_0C >= 0), "morph" sets bit numBones + unk_0C instead; that test compares only the name's own length,
+ * so a prefix of "morph" matches too.
+ *
+ * @param idx  part number (On Tour: partID); an out-of-range or unmapped part gives 0
+ * @param names  comma-separated bone names
+ * @return the mask; unknown names add nothing
+ */
 // PORT: returns a 64-bit mask (long is 8 bytes on the EE).
 extern "C" ulong cAnimModel_getGraftMask(cAnimModel* self, int idx, char* names)
 {
@@ -915,18 +1000,34 @@ public:
     virtual void write(void* data, int size);
 };
 
-extern "C" void cAnimModel_writeToReplayFrame(cAnimModel* self, cAmStream* s)
+/**
+ * Writes the model's bone transforms (numBones x 0x20 bytes) to a replay frame.
+ *
+ * Calls the stream's first virtual, which is the replay stream's write (as in cReplay_saveFrame()); the local
+ * cAmStream class has the two names swapped and calls it read.
+ *
+ * @param data  the replay frame stream (On Tour: cBxReplayFrame*)
+ */
+extern "C" void cAnimModel_writeToReplayFrame(cAnimModel* self, cAmStream* data)
 {
-    s->read(self->bones, self->numBones << 5);
+    data->read(self->bones, self->numBones << 5);
 }
 #endif
 
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimModel_readFromReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void cAnimModel_readFromReplayFrame(cAnimModel* self, cAmStream* s)
+/**
+ * Reads the model's bone transforms (numBones x 0x20 bytes) back from a replay frame.
+ *
+ * Calls the stream's second virtual, which is the replay stream's read (as in cReplay_restoreFrame()); the
+ * local cAmStream class has the two names swapped and calls it write.
+ *
+ * @param data  the replay frame stream (On Tour: cBxReplayFrame*)
+ */
+extern "C" void cAnimModel_readFromReplayFrame(cAnimModel* self, cAmStream* data)
 {
-    s->write(self->bones, self->numBones << 5);
+    data->write(self->bones, self->numBones << 5);
 }
 #endif
 
@@ -956,6 +1057,16 @@ struct sAnimNode_310F18
 extern sAnimNode_310F18* D_004FE7A0_310F18[] __asm__("D_004FE7A0");
 extern sAnimNode_310F18* D_004FE860_310F18[] __asm__("D_004FE860");
 
+/**
+ * Allocates one channel-cache bucket: 20 nodes in a circular list, each with room for n channels.
+ *
+ * The 0x24-byte nodes and their n x 0x14-byte element buffers are tagged "AnimChanCache"; every node starts
+ * unowned. The ring is stored in D_004FE7A0[bank] and its head (the next node to reuse) in D_004FE860[bank].
+ *
+ * @param bank  bucket number (On Tour: partID; cAdfDataSource_getFramePartData passes a block's kind byte)
+ * @param n  number of channels per node (On Tour: numChan)
+ * @return the first node, which is also the new head
+ */
 extern "C" sAnimNode_310F18* gGenCacheBucket(int bank, int n)
 {
     D_004FE7A0_310F18[bank] = new (D_00489D50, 0x20000000, 0) sAnimNode_310F18[20];
@@ -1188,6 +1299,22 @@ extern "C" void dcmpInitFrameAccessor(void* dst, void* src, int len);
 extern "C" void func_00312C20(void* node, float t, void* a, long b, void* c);
 
 void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* p2, unsigned int* p3, int p4, void* p5, long p6) __asm__("cAdfDataSource_getFramePartData");
+/**
+ * Decodes one animation frame's channels for a part, through a cache of unpacked channel blocks.
+ *
+ * The frame index is the time x 30; the animation's 0x14-byte sequence record gives the block (frames per
+ * block at +0xE) and the block entry for the part. A cached block's node moves to the most-recently-used end
+ * of its kind's ring; otherwise the ring's head node is taken from its previous owner (the bucket is created
+ * on first use), set up with dcmpInitFrameAccessor() and claimed. dcmpGetFrame (func_00312C20) then writes
+ * the channels.
+ *
+ * @param p2  destination float buffer (On Tour: dest)
+ * @param p3  the source frame: word 0 >> 8 = animation number, word 1 = time in seconds (On Tour:
+ *            tAnimSourceFrame*)
+ * @param p4  part number (On Tour: part)
+ * @param p5  first channel to decode (On Tour: start)
+ * @param p6  number of channels, clamped to the block's channel count (On Tour: len)
+ */
 void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* p2, unsigned int* p3, int p4, void* p5, long p6)
 {
     float t = *(float*)(p3 + 1) * 30.0f;

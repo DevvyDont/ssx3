@@ -249,6 +249,11 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWorldPainterQuery__tWorldPaint
 extern void* D_00485D30[];
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a world painter query: restores its vtable (+0x4), then frees it when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void tWorldPainterQuery__tWorldPainterQuery(void* self, int flags)
 {

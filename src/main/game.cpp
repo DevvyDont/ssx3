@@ -43,6 +43,15 @@ static inline int curLayer_C078(sRCtx_C078* c)
     return c->tbl[c->cur];
 }
 
+/**
+ * Draws the models found visible by the world's frustum query, the second list with render flag 0x20 added.
+ *
+ * Sets the draw-state layer and blend bits first; the flags passed to GrMan's model draw (vtable slot 0x60)
+ * are
+ * 0xC00, or 0x400 with two or more views.
+ *
+ * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
+ */
 extern "C" void cGame_renderModels(cGame* self, void* world)
 {
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x12) = curLayer_C078((sRCtx_C078*)GrMan);
@@ -295,6 +304,14 @@ struct sVEntry0022C620 {
     void (*fn)(void*);
 };
 
+/**
+ * Draws the visible terrain patches of the frustum query (two lists, passes 0 and 1), then flushes the patch
+ * batch.
+ *
+ * With no second view (ViewMan + 0x14 is 0) it also calls slot 5 of D_004A4248 before the flush.
+ *
+ * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
+ */
 extern "C" void cGame_renderPatches(cGame* self, void* world)
 {
     char ctx[0x30];
@@ -328,6 +345,11 @@ struct sVEntry_renderFog {
 };
 extern "C" void func_002DBF98(void* r);
 
+/**
+ * Hands the frustum query's two fog-volume lists (types 0 and 2) to the fog manager, then draws them.
+ *
+ * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
+ */
 extern "C" void cGame_renderFogVolumes(cGame* self, void* world)
 {
     void* fog = (char*)world + 0x78B8;
@@ -355,6 +377,13 @@ void func_002E2F98(void* self, int a1);
 extern "C" void func_002E2FF8(void* self, void* list, int n, int mode, int a4);
 extern "C" void func_002E30D0(void* self, int a1);
 
+/**
+ * Draws the light halos of the frustum query's two light lists (types 0 and 2) for one view through the
+ * lens-FX manager.
+ *
+ * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
+ * @param ViewID  the view being drawn
+ */
 extern "C" void cGame_renderLightHalos(cGame* self, void* world, int ViewID)
 {
     *(int*)((char*)self->LensFxMan + 0x6494) = 1;
@@ -574,6 +603,12 @@ INCLUDE_ASM("main/game", cSectionMan_cSectionMan);
 #ifdef SKIP_ASM
 extern "C" void cSectionMan_init(cSectionMan* self);
 
+/**
+ * Constructs the section manager for a game and initializes it.
+ *
+ * @param Game  the game (cGame*) that owns it
+ * @return @p self
+ */
 extern "C" void* cSectionMan_cSectionMan(cSectionMan* self, int Game)
 {
     self->mpGame = (cGame*)Game;
@@ -587,6 +622,11 @@ INCLUDE_ASM("main/game", cSectionMan__cSectionMan);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Destroys the section manager; it owns nothing, so this only frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cSectionMan__cSectionMan(cSectionMan* self, int flags)
 {
     if (flags & 1) {
@@ -613,6 +653,13 @@ static inline cWorldView* gameWorldView_22CD40(void* self)
     return (cWorldView*)(*(char**)*(char**)(*(char**)((char*)self + 0x1B0) + 0x10) + 0x10);
 }
 
+/**
+ * Resets the section manager: maps each back-end section to its world section by name and clears all state.
+ *
+ * All 50 sections start empty; section 49 maps to world section 0 unless a name matches. The location starts
+ * at
+ * 0x16, streaming is ready and the event pool is rebuilt.
+ */
 extern "C" void cSectionMan_init(cSectionMan* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -748,6 +795,15 @@ extern "C" void cSectionMan_activateMode_D088(void* self, int v) __asm__("cSecti
 extern "C" void cSectionMan_unloadSection_D088(void* self, int idx) __asm__("cSectionMan_unloadSection");
 extern "C" void cSectionMan_setSky(void* self, int sky);
 
+/**
+ * Activates a location: unloads every section it does not use, activates its sections and sky, then its event
+ * mode.
+ *
+ * Sky sections 0x2B-0x30 are never unloaded here. Mode 7 (default) uses the location's own mode.
+ *
+ * @param idx  the location (On Tour eBELocationID LocationID)
+ * @param mode  the event mode (On Tour eSectionManMode Mode)
+ */
 extern "C" void cSectionMan_activate(cSectionMan* self, int idx, int mode)
 {
     int v;
@@ -857,6 +913,14 @@ INCLUDE_ASM("main/game", cSectionMan_loadSection);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cSectionMan_addActiveEvent(void* self);
 
+/**
+ * Queues a section for loading unless it is already loaded or on its way.
+ *
+ * An empty or unloading section (states 0, 7) becomes load-queued (3); one queued for unload (5) goes back to
+ * loaded (1).
+ *
+ * @param idx  the back-end section (On Tour eBESectionID SectionID)
+ */
 extern "C" void cSectionMan_loadSection(cSectionMan* self, int idx)
 {
     if (D_00442168[idx].field_0x4 >= 0) {
@@ -888,6 +952,16 @@ INCLUDE_ASM("main/game", cSectionMan_activateSection);
 void cSectionMan_addActiveEvent_478(void* self, int i) __asm__("cSectionMan_addActiveEvent");
 void cWorldView_activateSection_478(void* mgr, int handle) __asm__("cWorldView_activateSection");
 
+/**
+ * Makes a section active: at once when it is loaded, otherwise once its load finishes.
+ *
+ * A loaded section (1, or 5 queued for unload) is activated in the world view (2); empty or queued sections
+ * become
+ * load-and-activate queued (4), and one loading (6) is marked to activate when loaded (8).
+ *
+ * @param self_  the section manager
+ * @param i  the back-end section (On Tour eBESectionID SectionID)
+ */
 extern "C" void cSectionMan_activateSection(cSectionMan* self_, int i)
 {
     int changed;
@@ -931,6 +1005,12 @@ INCLUDE_ASM("main/game", cSectionMan_unloadSection);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cSectionMan_addActiveEvent(void* self);
 
+/**
+ * Queues a section for unloading: a load-queued one goes back to empty, a loaded, active or loading one to
+ * state 5.
+ *
+ * @param idx  the back-end section (On Tour eBESectionID SectionID)
+ */
 extern "C" void cSectionMan_unloadSection(cSectionMan* self, int idx)
 {
     if (D_00442168[idx].field_0x4 >= 0) {
@@ -957,11 +1037,16 @@ extern "C" void cSectionMan_unloadSection(cSectionMan* self, int idx)
 //100%
 INCLUDE_ASM("main/game", cSectionMan_loadMode);
 #ifdef SKIP_ASM
-extern "C" void cSectionMan_loadMode(cSectionMan* self, int a1)
+/**
+ * Starts preloading an event mode when no mode change is in progress.
+ *
+ * @param Mode  the event mode (On Tour eSectionManMode Mode); 0 does nothing
+ */
+extern "C" void cSectionMan_loadMode(cSectionMan* self, int Mode)
 {
-    if (a1 != 0 && self->mModeState == 0) {
+    if (Mode != 0 && self->mModeState == 0) {
         self->mModeState = 1;
-        self->mMode = a1;
+        self->mMode = Mode;
     }
 }
 #endif
@@ -969,6 +1054,11 @@ extern "C" void cSectionMan_loadMode(cSectionMan* self, int a1)
 //100%
 INCLUDE_ASM("main/game", cSectionMan_activateMode);
 #ifdef SKIP_ASM
+/**
+ * Requests a switch to an event mode, after its preload finishes when one is running.
+ *
+ * @param flag  the event mode (On Tour eSectionManMode Mode); 0 does nothing
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cSectionMan_activateMode(cSectionMan* self, int flag)
 {
@@ -1015,6 +1105,17 @@ static inline bool Is_22D6C8(int m, int v)
     return m == v;
 }
 
+/**
+ * Switches the race setup to the event the rider has entered while riding freely, and starts it.
+ *
+ * Only offline in game mode 4 (probably free ride), outside locations 14-16 and not for mode 1. Maps the
+ * section
+ * mode to the back end's game mode and event (race, slopestyle, big air, pipe, time challenge), resets the
+ * riders'
+ * stat totals and initializes the game mode.
+ *
+ * @param mode  the event mode (On Tour eSectionManMode Mode)
+ */
 extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
 {
     char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1103,6 +1204,14 @@ static inline cWorldView* gameWorldView_22D8D8(void* self)
     return (cWorldView*)(*(char**)*(char**)(*(char**)((char*)self + 0x1B0) + 0x10) + 0x10);
 }
 
+/**
+ * Runs the section streaming each frame: advances queued loads and unloads, the sky swap and the event-mode
+ * switch.
+ *
+ * Finished sections leave the active list; queued loads start only when no unload is pending. It then picks
+ * the
+ * stream bandwidth (fastest while loading, 4 while a mode switch holds the stream) and sets m_bStreamReady.
+ */
 extern "C" void cSectionMan_update(cSectionMan* self)
 {
     char buf[0x100];
@@ -1265,6 +1374,11 @@ INCLUDE_ASM("main/game", cSectionMan_skyLoadComplete);
 #ifdef SKIP_ASM
 extern "C" void cSectionMan_activateSection(cSectionMan* self, int v);
 
+/**
+ * Records a newly loaded sky section, activates it and marks the sky swap pending.
+ *
+ * @param SectionID  the sky's back-end section
+ */
 extern "C" void cSectionMan_skyLoadComplete(cSectionMan* self, int SectionID)
 {
     if (self->m_iNextSkySectionID != SectionID) {
@@ -1282,6 +1396,10 @@ extern "C" void cSectionMan_unloadSection(cSectionMan* self, int id);
 void func_00353D98(void* self);
 extern "C" void func_00353CF0(void* self, int id);
 
+/**
+ * Swaps to the pending sky once triggered: unloads the other sky sections and switches the sky object's
+ * section.
+ */
 extern "C" void cSectionMan_skySwap(cSectionMan* self)
 {
     if (self->m_bSkySwapPending == 0) {
@@ -1324,6 +1442,10 @@ void func_00231278(void* gm, int state);
 extern int D_00535C08[];
 extern int D_004A11B8;
 
+/**
+ * Starts preloading the next event: stores the location in the race setup and notifies the game flow (0xB,
+ * then 0xA).
+ */
 extern "C" void cSectionMan_preLoadMode(cSectionMan* self)
 {
     func_00231250(self->mpGame, 0xB, 0, 1);
@@ -1365,6 +1487,10 @@ extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cSectionMan_setSky(void* self, int sky);
 extern "C" void func_00231250(void* gm, int state, int a, int b);
 
+/**
+ * Finishes an event-mode switch: sets the location's sky, resets the AI if requested (mModeReset), notifies
+ * the game flow.
+ */
 extern "C" void cSectionMan_changeMode(cSectionMan* self)
 {
     cSectionMan_setSky(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
@@ -1379,9 +1505,15 @@ extern "C" void cSectionMan_changeMode(cSectionMan* self)
 //100%
 INCLUDE_ASM("main/game", cSectionMan_isSectionLoaded);
 #ifdef SKIP_ASM
-extern "C" int cSectionMan_isSectionLoaded(cSectionMan* self, int a1)
+/**
+ * Tells whether a back-end section is loaded or active.
+ *
+ * @param SectionID  the back-end section (On Tour eBESectionID SectionID)
+ * @return 1 when the section's state is 1 or 2, otherwise 0
+ */
+extern "C" int cSectionMan_isSectionLoaded(cSectionMan* self, int SectionID)
 {
-    int v = D_00442168[a1].field_0x8;
+    int v = D_00442168[SectionID].field_0x8;
     return (unsigned int)(v - 1) < 2;
 }
 #endif
@@ -1403,29 +1535,47 @@ struct sGameEntry2 {
 };
 extern sGameEntry2 D_00442488[];
 
-extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(cSectionMan* self, int a1)
+/**
+ * Returns the world section of a location's main section.
+ *
+ * @param LocationID  the location (On Tour eBELocationID LocationID)
+ * @return the world section ID, or -1 when it is not in the world
+ */
+extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(cSectionMan* self, int LocationID)
 {
-    return D_00442168[D_00442488[a1].field_0x10].field_0x4;
+    return D_00442168[D_00442488[LocationID].field_0x10].field_0x4;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/game", cSectionMan_getWorldSectionIDFromBESectionID);
 #ifdef SKIP_ASM
-extern "C" int cSectionMan_getWorldSectionIDFromBESectionID(cSectionMan* self, int a1)
+/**
+ * Returns the world section a back-end section maps to.
+ *
+ * @param SectionID  the back-end section (On Tour eBESectionID SectionID)
+ * @return the world section ID, or -1 when it is not in the world
+ */
+extern "C" int cSectionMan_getWorldSectionIDFromBESectionID(cSectionMan* self, int SectionID)
 {
-    return D_00442168[a1].field_0x4;
+    return D_00442168[SectionID].field_0x4;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/game", cSectionMan_getBESectionIDFromWorldSectionID);
 #ifdef SKIP_ASM
-extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(cSectionMan* self, int a1)
+/**
+ * Finds the back-end section that maps to a world section.
+ *
+ * @param WorldSectionID  the world section (On Tour WorldSectionID)
+ * @return the back-end section, or 50 when none maps to it
+ */
+extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(cSectionMan* self, int WorldSectionID)
 {
     int i;
     for (i = 0; i < 50; i++) {
-        if (a1 == D_00442168[i].field_0x4) {
+        if (WorldSectionID == D_00442168[i].field_0x4) {
             return i;
         }
     }

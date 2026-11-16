@@ -371,6 +371,22 @@ extern void ucopy_C148(unsigned short *, unsigned short *) __asm__("USTR_copy");
     }
 
 int output_number_impl(unsigned short **pp, double val, int base, unsigned int flags, int width, int prec, unsigned short *digits) __asm__("output_number");
+/**
+ * Formats one number for USTR_vsprintf into a wide-character string and appends it at *pp.
+ *
+ * Flags: 1 '+', 2 '#', 4 ' ', 8 '0', 0x10 '-', 0x20 unsigned integer, 0x40/0x80/0x100 for f/e/g. Integers
+ * arrive
+ * converted to double. The e and g forms are formatted exactly like f in this build.
+ *
+ * @param pp  the output pointer, advanced past the text (On Tour pdst)
+ * @param val  the value (On Tour value)
+ * @param base  number base: 8, 10 or 16
+ * @param flags  format flags (above)
+ * @param width  minimum field width
+ * @param prec  digits after the decimal point for f, e and g
+ * @param digits  the digit characters to use (lower- or upper-case hex)
+ * @return number of characters written
+ */
 int output_number_impl(unsigned short **pp, double val, int base, unsigned int flags, int width, int prec, unsigned short *digits) {
     unsigned short *out = *pp;
     unsigned short buf[128];
@@ -444,6 +460,17 @@ extern signed char D_00495BD8_C450[] __asm__("D_00495BD8");
 #define VA_ARG_C450(ap, T) (*(T *)((ap += 8) - 8))
 
 void USTR_vsprintf_impl(unsigned short *dst, unsigned short *fmt, char *ap) __asm__("USTR_vsprintf");
+/**
+ * Formats a wide-character (UTF-16) string printf-style into @p dst, with no length limit.
+ *
+ * Supports flags - + 0 space #, width and precision (also *), and c C d i o u x X e E f g G n p P s S:
+ * lower-case
+ * c and s take wide characters, C and S narrow ones; null strings print "(null)". The output is terminated.
+ *
+ * @param dst  output buffer
+ * @param fmt  wide-character format
+ * @param ap  the arguments (va_list)
+ */
 void USTR_vsprintf_impl(unsigned short *dst, unsigned short *fmt, char *ap) {
     unsigned short lower[24];
     unsigned short upper[24];
@@ -679,6 +706,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", USTR_strcpyW);
 extern char D_00495D18_CB20[] __asm__("D_00495D18");
 extern int sprintf_CB20(char *, const char *, ...) __asm__("sprintf");
 
+/**
+ * Copies a wide-character string to a narrow one, writing characters above 0xFF (and a literal "\x") as
+ * "\x%04x" escapes.
+ *
+ * @param dst  the narrow output buffer; up to six bytes per input character
+ * @param src  the wide-character string
+ */
 void USTR_strcpyW(char *dst, unsigned short *src) {
     int c;
     while ((c = *src) != 0) {
@@ -2307,15 +2341,21 @@ INCLUDE_ASM("ealib/seg_2DCAE8", queueadd);
 extern void MUTEX_unlock_qa(void *) __asm__("MUTEX_unlock");
 extern char D_00519C08_9C08[] __asm__("D_00519C08");
 
-void queueadd(char *arg0, char *arg1) {
+/**
+ * Appends an async-file request to the end of a request queue (head, tail), under the async-file mutex.
+ *
+ * @param list  the queue: head pointer at +0, tail at +4
+ * @param node  the request to append; its link (+4) is cleared
+ */
+void queueadd(char *list, char *node) {
     MUTEX_lock(D_00519C08_9C08);
-    if (*(char **)arg0 == 0) {
-        *(char **)arg0 = arg1;
+    if (*(char **)list == 0) {
+        *(char **)list = node;
     } else {
-        *(char **)(*(char **)(arg0 + 4) + 4) = arg1;
+        *(char **)(*(char **)(list + 4) + 4) = node;
     }
-    *(char **)(arg0 + 4) = arg1;
-    *(int *)(arg1 + 4) = 0;
+    *(char **)(list + 4) = node;
+    *(int *)(node + 4) = 0;
     MUTEX_unlock_qa(D_00519C08_9C08);
 }
 #endif
@@ -2389,18 +2429,25 @@ extern void queueadd_rr(char *, char *) __asm__("queueadd");
 extern void (*D_00450C18_0C18[])(unsigned int) __asm__("D_00450C18");
 extern char D_00519BF8_9BF8[] __asm__("D_00519BF8");
 
-void releaserequest(char *arg0) {
+/**
+ * Returns an async-file request to the free queue, freeing its buffer through the free hook when it owns one.
+ *
+ * The request's in-flight operation is cleared and its flags reduced to the low byte.
+ *
+ * @param request  the request
+ */
+void releaserequest(char *request) {
     unsigned int temp_4;
 
-    if (*(int *)(arg0 + 0x10) != 0) {
-        temp_4 = *(unsigned int *)(arg0 + 0x14);
+    if (*(int *)(request + 0x10) != 0) {
+        temp_4 = *(unsigned int *)(request + 0x14);
         if (temp_4 >= 2U) {
             D_00450C18_0C18[0](temp_4);
         }
     }
-    *(volatile int *)(arg0 + 0x1C) = 0;
-    *(int *)arg0 = *(unsigned char *)arg0;
-    queueadd_rr(D_00519BF8_9BF8, arg0);
+    *(volatile int *)(request + 0x1C) = 0;
+    *(int *)request = *(unsigned char *)request;
+    queueadd_rr(D_00519BF8_9BF8, request);
 }
 #endif
 
@@ -2516,21 +2563,31 @@ extern char D_5DA8_F1E0[] __asm__("D_00495DA8");
 extern char fF0B8_F1E0[] __asm__("func_003DF0B8");
 extern char fF0F0_F1E0[] __asm__("func_003DF0F0");
 
-void loadfilesizecallback(int a, int b, char *s) {
+/**
+ * Continues an async file load once its size is known: allocates the buffer and starts reading, or closes a
+ * cancelled load.
+ *
+ * The buffer comes from the allocator hook ("ASYNCFILEBUF", D_00450C14); reads go in chunks of at most 32 KB.
+ *
+ * @param a  unused (callback argument)
+ * @param b  unused (callback argument)
+ * @param userdata  the load request (On Tour void* userdata)
+ */
+void loadfilesizecallback(int a, int b, char *userdata) {
     int t5, v, m, old;
-    t5 = fD310_F1E0(*(volatile int *)(s + 0x1C));
-    if (*(int *)(s + 0x10) != 0) {
-        *(volatile int *)(s + 0x1C) = fD5A0_F1E0(*(int *)(s + 0x20), 0x63, s);
-        if (*(volatile int *)(s + 0x1C) != 0) fCF70_F1E0(*(volatile int *)(s + 0x1C), fF0B8_F1E0);
+    t5 = fD310_F1E0(*(volatile int *)(userdata + 0x1C));
+    if (*(int *)(userdata + 0x10) != 0) {
+        *(volatile int *)(userdata + 0x1C) = fD5A0_F1E0(*(int *)(userdata + 0x20), 0x63, userdata);
+        if (*(volatile int *)(userdata + 0x1C) != 0) fCF70_F1E0(*(volatile int *)(userdata + 0x1C), fF0B8_F1E0);
     } else {
-        old = *(int *)(s + 0x28);
-        *(int *)(s + 0x28) = t5;
+        old = *(int *)(userdata + 0x28);
+        *(int *)(userdata + 0x28) = t5;
         v = D_0C14_F1E0[0](D_5DA8_F1E0, t5, old);
-        m = *(int *)(s + 0x28);
-        *(int *)(s + 0x14) = v;
-        *(int *)(s + 0x2C) = v;
-        *(volatile int *)(s + 0x1C) = fD648_F1E0(*(int *)(s + 0x20), *(int *)(s + 0x24), v, m <= 0x8000 ? m : 0x8000, 0x63, s);
-        if (*(volatile int *)(s + 0x1C) != 0) fCF70_F1E0(*(volatile int *)(s + 0x1C), fF0F0_F1E0);
+        m = *(int *)(userdata + 0x28);
+        *(int *)(userdata + 0x14) = v;
+        *(int *)(userdata + 0x2C) = v;
+        *(volatile int *)(userdata + 0x1C) = fD648_F1E0(*(int *)(userdata + 0x20), *(int *)(userdata + 0x24), v, m <= 0x8000 ? m : 0x8000, 0x63, userdata);
+        if (*(volatile int *)(userdata + 0x1C) != 0) fCF70_F1E0(*(volatile int *)(userdata + 0x1C), fF0F0_F1E0);
     }
 }
 #endif
@@ -2615,6 +2672,14 @@ extern char D_00519C08_F488[] __asm__("D_00519C08");
 extern char D_00495DB8_F488[] __asm__("D_00495DB8");
 extern void MUTEX_create_F488(void *) __asm__("MUTEX_create");
 
+/**
+ * Sets up the async-file system once: a pool of @p n requests ("ASYNCFILE") on the free queue and its mutex.
+ *
+ * Does nothing when already set up or when @p n is above 256.
+ *
+ * @param n  number of requests (On Tour requests)
+ * @param x  memory type for the pool (On Tour memtype)
+ */
 void ASYNCFILE_init(int n, int x) {
     E_F488 *p;
     int i;
@@ -2881,6 +2946,12 @@ extern char *fEF70_FAF0(int) __asm__("func_003DEF70");
 extern void rel_FAF0(char *) __asm__("releaserequest");
 extern char D_9C08_FAF0[] __asm__("D_00519C08");
 
+/**
+ * Cancels an async file request: stops its in-flight operation, or releases it when it has not started.
+ *
+ * @param handle  the request handle
+ * @return 1 when cancelled; -1 for a bad handle, an already-cancelled request or one that has completed
+ */
 int ASYNCFILE_cancel(int handle) {
     int v18, v19, v20, r;
     char *t;
@@ -4928,15 +4999,21 @@ int func_003E2490(signed char *a, signed char *b) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", BIG_typeofheader);
 #ifdef SKIP_ASM
-int BIG_typeofheader(unsigned char *p) {
+/**
+ * Identifies a big-file (archive) header by its magic.
+ *
+ * @param header  the header
+ * @return 1 for the compact 0xC0FB form, 2 for "BIGF", 3 for another "BIG" variant, 0 when not a big file
+ */
+int BIG_typeofheader(unsigned char *header) {
     int r;
-    unsigned char b0 = p[0];
-    unsigned char b1 = p[1];
+    unsigned char b0 = header[0];
+    unsigned char b1 = header[1];
     unsigned int v;
     if (((b0 << 8) | b1) == 0xC0FB) {
         r = 1;
     } else {
-        v = (b0 << 24) | (b1 << 16) | (p[2] << 8) | p[3];
+        v = (b0 << 24) | (b1 << 16) | (header[2] << 8) | header[3];
         if (v == 0x42494746) {
             r = 2;
         } else {
@@ -4983,6 +5060,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", BIG_debuginfo);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int BIG_sizeofheader_debuginfo(char *) __asm__("BIG_sizeofheader");
+/**
+ * Checks a big-file header for the 8-byte debug trailer: a letter and three digits, then a 4-byte tag.
+ *
+ * @param base  the big-file header
+ * @param num  receives the three-digit number, or 0
+ * @param tag  receives the tag, or 0
+ * @return 8 (the trailer's size) when present, otherwise 0
+ */
 int BIG_debuginfo(char *base, int *num, int *tag) {
     int r = 0;
     unsigned char *p = (unsigned char *)base + BIG_sizeofheader_debuginfo(base);
@@ -5046,6 +5131,18 @@ static inline long rd8_LOC(unsigned char *p, int n) {
 }
 
 char *BIG_locateentryz_LOC(char *base, char *name, int idx, int *out1, int *out2) __asm__("BIG_locateentryz");
+/**
+ * Finds a big-file directory entry by name (case-insensitive) or, without a name, by index.
+ *
+ * Offset and size field widths follow the header type (3 bytes each in the compact form).
+ *
+ * @param base  the big-file header
+ * @param name  the entry name, or 0 to look up by @p idx
+ * @param idx  the entry index when @p name is 0
+ * @param out1  receives the entry's offset, or 0
+ * @param out2  receives the entry's size, or 0
+ * @return the entry's name in the directory, or 0 when not found
+ */
 char *BIG_locateentryz_LOC(char *base, char *name, int idx, int *out1, int *out2) {
     unsigned char *p = (unsigned char *)base + 0x10;
     int n1 = 4;
@@ -6986,6 +7083,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", MUTEX_create);
 typedef struct { int a; int b; int c; int d[5]; } S_5698;
 extern int func_00423DA0(S_5698 *);
 
+/**
+ * Creates a recursive mutex (@p self): no owner, count 0, and a binary semaphore (CreateSema).
+ *
+ * @return 0
+ */
 int MUTEX_create(int *self) {
     S_5698 s;
     self[2] = 0;
@@ -7013,14 +7115,19 @@ INCLUDE_ASM("ealib/seg_2DCAE8", MUTEX_lock);
 extern int func_00423C90();
 extern void func_00423DE0(int);
 
-void MUTEX_lock(void *arg0) {
-    if ((*(int *)((char*)(arg0) + (4))) == func_00423C90()) {
-        (*(int *)((char*)(arg0) + (8))) = (int) ((*(int *)((char*)(arg0) + (8))) + 1);
+/**
+ * Locks a recursive mutex: a thread that already owns it only bumps the count, others wait on its semaphore.
+ *
+ * @param mutex  the mutex (On Tour MUTEX*)
+ */
+void MUTEX_lock(void *mutex) {
+    if ((*(int *)((char*)(mutex) + (4))) == func_00423C90()) {
+        (*(int *)((char*)(mutex) + (8))) = (int) ((*(int *)((char*)(mutex) + (8))) + 1);
         return;
     }
-    func_00423DE0((*(int *)((char*)(arg0) + (0xC))));
-    (*(int *)((char*)(arg0) + (4))) = func_00423C90();
-    (*(int *)((char*)(arg0) + (8))) = (int) ((*(int *)((char*)(arg0) + (8))) + 1);
+    func_00423DE0((*(int *)((char*)(mutex) + (0xC))));
+    (*(int *)((char*)(mutex) + (4))) = func_00423C90();
+    (*(int *)((char*)(mutex) + (8))) = (int) ((*(int *)((char*)(mutex) + (8))) + 1);
 }
 #endif
 
@@ -7320,6 +7427,16 @@ extern struct E_5C78 D_00450E08_5C78[] __asm__("PRINTchannellist");
 extern struct H_5C78 D_00451250_5C78[] __asm__("PRINTdevicelist");
 
 void PRINT_vstring_5C78(int, char *, char *) __asm__("PRINT_vstring");
+/**
+ * Formats a message into an 8 KB buffer and passes it to every enabled print handler, if the channel is
+ * enabled.
+ *
+ * Sets the print system up on first use.
+ *
+ * @param idx  the print channel (On Tour PRINTCHANNEL channel)
+ * @param fmt  printf-style format
+ * @param ap  the arguments (va_list)
+ */
 void PRINT_vstring_5C78(int idx, char *fmt, char *ap) {
     char buf[0x2000];
     int h;
@@ -7369,11 +7486,16 @@ INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_string1);
 #ifdef SKIP_ASM
 extern void PRINT_vstring_5D78(int, int, char *) __asm__("PRINT_vstring");
 
-void PRINT_string1(int a0, ...) {
+/**
+ * Prints a printf-style message on print channel 2.
+ *
+ * @param format  the format (const char*, passed as int; On Tour format)
+ */
+void PRINT_string1(int format, ...) {
     char *ap;
     // PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
     ap = (char *)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
-    PRINT_vstring_5D78(2, a0, ap);
+    PRINT_vstring_5D78(2, format, ap);
 }
 #endif
 
@@ -7545,6 +7667,12 @@ extern char D_00495F00[];
 extern char *D_0045100C_100C[] __asm__("REALabortfilename");
 extern int D_00451010_1010[] __asm__("REALabortlinenum");
 
+/**
+ * Prints "ERROR: " and a formatted message, plus the recorded source file and line when set, then exits the
+ * program.
+ *
+ * @param fmt  printf-style format, or 0 for no message
+ */
 void SYSTEM_abortmessage(char *fmt, ...) {
     char buf[512];
     // PORT: hand-rolled EE EABI va_start
@@ -7720,6 +7848,17 @@ INCLUDE_ASM("ealib/seg_2DCAE8", MEM_fill);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 void MEM_fill_memset(char *p, int c, int n) __asm__("MEM_fill");
+/**
+ * Fills memory with a value, using the widest aligned stores it can (64-bit for blocks of 64 bytes).
+ *
+ * The value is stored as a 32-bit pattern, not repeated per byte: only values whose bytes are all equal (such
+ * as
+ * 0) give a uniform byte fill.
+ *
+ * @param p  start of the memory (On Tour dest)
+ * @param c  the fill value (On Tour unsigned int val)
+ * @param n  number of bytes
+ */
 void MEM_fill_memset(char *p, int c, int n) {
     if (n > 0 && ((int)p & 1)) {
         *p = c;
@@ -8104,6 +8243,16 @@ extern int func_003F4C68_6C80(int *, int, int, int, char *, int, int, int, int, 
 extern int func_003F4C98_6C80(int *, int, int) __asm__("func_003F4C98");
 extern int D_0051EEC8_6C80[] __asm__("D_0051EEC8");
 
+/**
+ * Queues a packet on a game link's (@p self) IOP send buffer and tells the IOP side ("gmlk" "send") to send
+ * it.
+ *
+ * A length of 1 means "work it out from the packet header" (rounded up to 4 bytes).
+ *
+ * @param msg  the packet (On Tour NetGamePacketT* pkt)
+ * @param len  packet length in bytes, or 1
+ * @return 1 when queued, 0 when the send buffer is full
+ */
 int NetGameLinkSend(S_6C80 *self, unsigned char *msg, int len) {
     U4_6C80 t;
     int w;

@@ -82,6 +82,18 @@ static inline void setTab_3DE0(char* t, int c)
     setHighlight_3DE0(t, c);
 }
 
+/**
+ * Fills the store's uber-trick screen with the tricks of the selected category; the name does not fit the
+ * body.
+ *
+ * Shows each unlocked trick of the category (the selected menu item's misc data, default 1) in
+ * "Trick00".."Trick08" with its check mark "ck00".., coloured as owned (+0x5C), current pick (+0x54) or
+ * neither (+0x58). Then sets the button icons "InstBtn0".."InstBtn2" for the category (bsl1/bsl2/bsr1/bsr2,
+ * "square NML") and lays out the instruction texts "inst0".."inst2" around them. Called by the store's
+ * uber-trick states (fe/festatestore).
+ *
+ * @param vself  the store state
+ */
 extern "C" void cWScriptMan_checkGate(void* vself)
 {
     char* self = (char*)vself;

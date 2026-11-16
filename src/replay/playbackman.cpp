@@ -41,6 +41,19 @@ struct cPlaybackMan_C458 {
     int field_0x78;         // 0x78
 };
 
+/**
+ * Constructs the mission playback manager and opens the playback archive.
+ *
+ * Builds the embedded replay frame at +0x14 (func_0026D5E8), keeps SSXApp->Game (+0x5C) and its AI (+0x60),
+ * clears the state words and sets the current entry (+0x74) and async handle (+0x78) to -1. From player 1's
+ * input (AI->Players[0]->Input) it keeps the first word at +0x64 and builds an 8-byte "cInput" (+0x6C)
+ * holding a new 0x2A4-byte "cInputPad" block (+0x68) and the input's second word. Finally opens
+ * "|data\missions\playback.big" through a new cBigFile (+0x0).
+ *
+ * @param maxPlaybackFiles  number of playback-file entries cPlaybackMan_initLocation() allocates (cGame
+ *                          passes 40)
+ * @return @p self
+ */
 extern "C" cPlaybackMan_C458* cPlaybackMan_cPlaybackMan(cPlaybackMan_C458* self, int maxPlaybackFiles)
 {
     func_0026D5E8((char*)self + 0x14);
@@ -125,6 +138,13 @@ struct cPlaybackMan_C5F8 {
     int handle;                     // 0x78
 };
 
+/**
+ * Finishes a pending playback-file load by copying the file into the current entry.
+ *
+ * When the async request (+0x78) has completed (ASYNCFILE_getstatus() == 1), releases it, copies a non-empty
+ * result into a new "PlaybackFile" buffer stored with its size in entries[cur], frees the loaded buffer and
+ * sets the handle to -1. func_0026C9F0 starts these loads.
+ */
 extern "C" void cPlaybackMan_update(cPlaybackMan_C5F8* self)
 {
     if (self->handle >= 0 && ASYNCFILE_getstatus(self->handle) == 1) {
@@ -184,6 +204,17 @@ struct cPlaybackMan_C6E8 {
     int handle;                 // 0x78
 };
 
+/**
+ * Prepares the playback manager for a location: frame buffers and one playback-file entry per mission.
+ *
+ * Copies @p name to +0x8, resets the counters, allocates the 0x14000-byte "SaveFrameData" buffer and attaches
+ * it to the embedded replay frame, allocates the zeroed 0x1C22C-byte "CurrentFrame" block (header 0xDBAC0101,
+ * 0x1C200) and maxPlaybackFiles "tPlaybackFile" entries (id -1, no buffer), then gives the first
+ * cBEMissionInterface_getNumberMissions() entries their mission ids (func_00154588). The mission count is not
+ * checked against the number of entries.
+ *
+ * @param name  location name (cWScriptMan_setupMissions passes the BE location record + 0x34)
+ */
 // PORT: entry addresses formed as i*12 + (int)entries (pointer held in int) for the index-first addu.
 extern "C" void cPlaybackMan_initLocation(cPlaybackMan_C6E8* self, const char* name)
 {
@@ -1195,6 +1226,17 @@ static inline cPbWorld* pbWorld(cPbObjSys* o)
     return *(cPbWorld**)((char*)o + 0xC);
 }
 
+/**
+ * Writes one replay key frame: the state of every game system that a restore needs.
+ *
+ * In order: the frame start (func_0026E9C0), a 0x18-byte time block (func_003178E0), the object-id counters
+ * D_004A5B78 and D_004A5B7C, the BE state, the game and its AI (their save virtuals), func_002D9CB0 (where
+ * the restore reads the avalanche), the world-script manager, D_004A2A00, D_004A3FF0, the multi-particle
+ * manager, the object buckets (func_0026D988 with 1, func_0026DA88) and the AI's focus manager.
+ * cReplay_restoreFrame() reads them back in the same order.
+ *
+ * @param stream  the frame stream to write (On Tour: cReplayFramePtr*)
+ */
 extern "C" void cReplay_saveFrame(cReplay* self, void* stream)
 {
     cPbStream* out = (cPbStream*)stream;

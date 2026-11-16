@@ -72,6 +72,11 @@ INCLUDE_ASM("bx/bigfile", cBigFile_close__FP8cBigFile);
 // The unit declares func_003DEDC0 as returning void; it returns int (the result is tested).
 int func_003DEDC0_ret(int handle, int arg) __asm__("func_003DEDC0");
 
+/**
+ * Closes the big file if it is open (func_003DEDC0 with 100) and marks it closed.
+ *
+ * @return 1 when it was not open or closed cleanly, otherwise 0
+ */
 int cBigFile_close(cBigFile* self)
 {
     int result = 1;
@@ -94,6 +99,15 @@ extern "C" int func_003DED50(const char* name, int memclass, int a2, cBigFile* o
 // (self, name, memclass) and returns field_0x4. Bound by asm label.
 int cBigFile_open_impl(cBigFile* self, const char* name, int memclass) __asm__("cBigFile_open");
 
+/**
+ * Opens a big (archive) file in a memory class, if it exists.
+ *
+ * The memory class is set in D_004A2E78 for the duration of the open (func_003DED50) and then restored.
+ *
+ * @param name  the big file's path (On Tour bigname)
+ * @param memclass  memory class for its data (On Tour memtype)
+ * @return 1 when the file is open, otherwise 0
+ */
 int cBigFile_open_impl(cBigFile* self, const char* name, int memclass)
 {
     if (func_003DEE18(name, 0x64) == 0) {

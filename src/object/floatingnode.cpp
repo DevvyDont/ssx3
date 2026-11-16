@@ -13,6 +13,10 @@ INCLUDE_ASM("object/floatingnode", cFloatingNode_initInfo__FP13cFloatingNode);
 // PORT: the unit declares cInstanceNode_getBoundBoxInfo with 2 args; its body uses 3 ($6 is written).
 void cInstanceNode_getBoundBoxInfo_3(void* self, void* box, void* out) __asm__("cInstanceNode_getBoundBoxInfo");
 
+/**
+ * Allocates a floating node's info block (0x30 bytes, "FloatingBoundBox") and fills it with the instance's
+ * bounding box (+0x0) and the value cInstanceNode_getBoundBoxInfo() writes at +0x20 (the radius).
+ */
 void cFloatingNode_initInfo(cFloatingNode* self)
 {
     void* mem = cMemMan_alloc(0x30, D_0048E890, 0x20000000, 0);
@@ -102,6 +106,11 @@ static inline sFlVec4_34EF40 nodePos_34EF40(char* self)
     return *(sFlVec4_34EF40*)(vt[24].fn(self + vt[24].delta) + 0x30);
 }
 
+/**
+ * Moves a floating object in the Nash space hash to a box of its radius around its current position.
+ *
+ * Without an info block it falls back to cMoveNode_updateOverlapSystem().
+ */
 extern "C" void cFloatingNode_updateOverlapSystem(cFloatingNode* self)
 {
     sFlInfo_34EF40* info = (sFlInfo_34EF40*)self->Info;
@@ -147,6 +156,12 @@ extern "C" void* cObjectInterface_getNash();
 extern "C" void nash_Nash_movenode(void* world, int type, void* id, sBox_F048* box, sBox_F048* old);
 extern "C" void cMoveNode_restoreOverlapSystem(void* self);
 
+/**
+ * Puts a floating object back into the Nash space hash with its instance's own bounding box and frees its
+ * info block.
+ *
+ * Without an info block it falls back to cMoveNode_restoreOverlapSystem().
+ */
 extern "C" void cFloatingNode_restoreOverlapSystem(cFloatingNode* self)
 {
     sBox_F048* info = (sBox_F048*)((void*)self->Info);
@@ -307,6 +322,16 @@ static inline void Pose_F120(sMat_F120* dst, const sMat_F120* parent, const sMat
     Copy_F120(dst, &t);
 }
 
+/**
+ * Builds a floating object's part matrices: the bob and tilt on top of the root transform, then each part
+ * under its parent.
+ *
+ * The root gets a rotation from the two tilt angles and a lift of the bob height minus the root's z. Parts
+ * are scaled by the instance's scale. Clears the node's dirty bit afterwards.
+ *
+ * @param mat  the root transform (On Tour root)
+ * @param out  receives one matrix per part (On Tour animMats)
+ */
 // Poses a floating object's skeleton: the root bob/tilt transform, then each bone under its parent.
 extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, sMat_F120* mat, sMat_F120* out)
 {
@@ -474,6 +499,15 @@ struct sFloat_F600 {
     float f70;
 };
 
+/**
+ * Adds a push at a hit point to a floating object's bob and tilt inputs for the next update.
+ *
+ * The bob input gets the force along the hit normal; the two tilt inputs get the torque about the object's
+ * local x and y axes.
+ *
+ * @param intInfo  the hit (On Tour tIntersectInfo): position, then normal
+ * @param force    the force
+ */
 extern "C" void cFloatingNode_applyForce(cFloatingNode* self, sV4_F600* intInfo, sV4_F600* force)
 {
     sFlVE_F600* vt = (sFlVE_F600*)self->mVtbl;
@@ -625,6 +659,14 @@ struct sFloat_F790 {
     sFlVE_F790* vt;     // 0x0C
 };
 
+/**
+ * Adds a floating object's motion to an intersection's velocities.
+ *
+ * After cMoveNode_updateIntersectInfo(), adds the bob speed (along z) plus the tilt rotation's velocity at
+ * the hit point to intInfo's v[2] and the tilt angular velocity to v[3].
+ *
+ * @param intInfo  the hit (On Tour tIntersectInfo)
+ */
 extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790* intInfo)
 {
     cMoveNode_updateIntersectInfo(((sFloat_F790*)self), intInfo);
@@ -677,6 +719,15 @@ struct sFloatingNode_34F930 {
     float in3;          // 0x70
 };
 
+/**
+ * Steps a floating object's springs by one frame: the bob height and the two tilt angles.
+ *
+ * Each is a damped spring driven by the inputs gathered by applyForce (the bob towards its rest height); the
+ * step is 1 / the app's frame rate. The tilts are clamped to +/-80 degrees, the inputs are cleared and the
+ * dirty bit is set.
+ *
+ * @return always 1 (the node stays alive)
+ */
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // Steps the float spring (bob height plus two tilt axes) by one frame.
 extern "C" int cFloatingNode_updateNode(cFloatingNode* self)
@@ -715,6 +766,12 @@ struct sFloatingVEntryFA88 {
 
 extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes a floating node's state to a replay frame: the cMoveNode part, whether it has an info block, and the
+ * 0x48 bytes of spring state at +0x2C.
+ *
+ * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
+ */
 extern "C" void cFloatingNode_writeToReplayFrame(cFloatingNode* self, void* stream)
 {
     int has;

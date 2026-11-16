@@ -82,6 +82,18 @@ static inline void* find_1388(sRuleSel_1388* self, char* name)
     return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
 }
 
+/**
+ * Fills the 11 visible rule rows (name text and option list box) from the rule list, starting at a scroll
+ * offset.
+ *
+ * Each rule's kind picks its options: off/on, no/yes, off or 90-60%, +10s to -10s, 0-5, or skill levels 1-3;
+ * the
+ * list box selects the rule's current setting (func_00192240) and rule 0 has none. Plays the "normal" or
+ * "greyedout" frame for the selected row, then updates the row colours.
+ *
+ * @param self_  the rule select state
+ * @param first  first rule shown (On Tour MenuOffset)
+ */
 // Fills the 11 rule rows (name text plus the option list box) starting at the given scroll row.
 extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
 {
@@ -245,6 +257,14 @@ static inline void* find_19188(sRuleSel_19188* self, char* name)
     return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
 }
 
+/**
+ * Builds the custom rules screen ("11my_rules"): picks the rule list for the game event and fills the rows.
+ *
+ * The list and its length (8-11 rules) depend on the new-race game event (cGameEvent, D_00535C12). Clears the
+ * per-rule disable counters and the rule settings (D_005308B8), makes the menu scrollable, shows rule 0's
+ * help
+ * and hides the rows past the list.
+ */
 // Builds the rule select screen: picks the rule list for the current mode and fills the 11 rule rows.
 extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
 {
@@ -366,6 +386,19 @@ struct sMsg_1C68 {
     int* info;          // 0x7C
 };
 
+/**
+ * Handles the rule screen's widget events: open states through the factory, apply an option change, open
+ * options.
+ *
+ * Event 5 (select, when the entry allows it) and event 6 push the engine factory's state for the entry (slot
+ * 4 or
+ * 5); event 6 also resets the rule settings. Event 9 stores the list box's new value for the rule and updates
+ * the
+ * rules it disables; event 7 pushes a "FEOptions" state.
+ *
+ * @param msg  the widget (its rule at +0x18), or 0
+ * @param type  widget event number (On Tour Event)
+ */
 extern "C" void cFEStateRuleSelect_onWidgetEvent(char* self, sMsg_1C68* msg, unsigned int type)
 {
     if (msg == 0) {
@@ -414,6 +447,12 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onWidgetPair);
 int GetHashValue32(char* str);
 extern char D_004A13A0[];
 
+/**
+ * Decides a widget pair event on the rule screen by the pair's name.
+ *
+ * @param msg  the pair (On Tour cUIPair* pPair)
+ * @return 0x101 for the pair named "0", otherwise 0x100
+ */
 extern "C" int cFEStateRuleSelect_onWidgetPair(void* self, void* msg)
 {
     int id = *(int*)((char*)msg + 0x38);
@@ -454,6 +493,17 @@ static inline void SetVisible_1E48(char* o, int on)
     vt[9].fn(o + vt[9].delta, on);
 }
 
+/**
+ * Handles the rule menu's events: highlight shows the rule's help and arrows, scrolling refills the rows.
+ *
+ * A rule whose disable counter (+0x51 + rule) is above 0 cannot be highlighted. Event 9 is swallowed.
+ *
+ * @param pMenu  the menu
+ * @param type  menu event number (On Tour Event)
+ * @param idx  the item index for event 1, the new scroll offset for event 4
+ * @return for event 1, 1 when the rule is enabled and 0 when it is disabled; 0x100 for event 9; otherwise
+ *         0x101
+ */
 extern "C" int cFEStateRuleSelect_onWidgetMenu(char* self, void* pMenu, unsigned int type, int idx)
 {
     switch (type) {
@@ -675,6 +725,11 @@ struct sObj_2488 {
 extern char D_004A16A8[];
 extern char D_004A16B0[];
 
+/**
+ * Greys out the visible rule rows whose rule is disabled by another rule's setting and restores the others.
+ *
+ * @param selfp  the rule select state
+ */
 extern "C" void cFEStateRuleSelect_updateMenuColor(void* selfp)
 {
     char* self = (char*)selfp;

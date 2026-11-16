@@ -72,6 +72,16 @@ struct sUIVecData_34C0 {
 };
 
 
+/**
+ * Sets up a UI vector shape from its record in the screen data.
+ *
+ * After the base cUIThing setup it copies the fill and loop flags and the triangle and vertex counts, points
+ * the triangle list just past the record, and allocates the vertex colour, position (zeroed) and
+ * render-position arrays. An unfilled (line) shape also gets an array of 0x30-byte line vertices.
+ *
+ * @param p        the vector object
+ * @param pUIBase  its record (On Tour tUIBaseObject*)
+ */
 extern "C" void cUIVector_setUIData(cUIVector* p, void* pUIBase)
 {
     cUIVector* self = p;
@@ -126,6 +136,16 @@ struct cUIVector_36D0 {
 };
 extern "C" void cUIThing_setChannelData(void* self, unsigned short key, float v);
 
+/**
+ * Sets one animated channel of a UI vector shape.
+ *
+ * Channels below 21 go to cUIThing_setChannelData(). Higher channels address vertex data, nine per vertex: x,
+ * y, z, u, v and the four colour components in tARGB order. Does nothing at all, even for base channels,
+ * while the shape has no vertex positions; vertex channels past the last vertex are ignored.
+ *
+ * @param key  channel number (On Tour channel)
+ * @param v    the channel's new value
+ */
 // Sets a keyframed property: keys < 0x15 go to the base thing, higher keys address per-vertex position/UV/colour.
 extern "C" void cUIVector_setChannelData(cUIVector_36D0* self, unsigned short key, float v)
 {
@@ -197,6 +217,17 @@ struct sKey_3808 {
     short value;
 };
 
+/**
+ * Applies a list of keyframed (channel, value) pairs to a UI vector shape.
+ *
+ * Vertex channels (21 and up) set position or colour like cUIVector_setChannelData() (no UVs). Base channels
+ * are handled here: 0/1 position, 6/7 size, 9/10 scale in percent, 12 the 6-bit attribute field at bits 13-18
+ * (mPivot in On Tour's tAttrThing), 13-16 the colour components divided by 255. Nothing happens while the
+ * shape has no vertex positions.
+ *
+ * @param n     number of pairs (On Tour NumChannels)
+ * @param keys  the pairs, two shorts each (channel, value)
+ */
 // Applies a list of (key, value) pairs: keys < 0x15 set base properties, higher keys address per-vertex data.
 extern "C" void cUIVector_setChannelDataKCP(cUIVector_3808* self, unsigned int n, sKey_3808* keys)
 {
@@ -289,6 +320,16 @@ static inline void AddPos_3A39F8(sV4_3A39F8& p, int k, float d)
     p.v[k] += d;
 }
 
+/**
+ * Draws a UI vector shape at its position plus an offset.
+ *
+ * Scales the vertex positions by mScale, sets the draw layer from the thing's attributes, then either draws
+ * the filled triangles through graphics manager slot 72 or, for an outline, builds the line vertices (offset
+ * positions, colours halved into the GS 0-128 range) and draws them through slot 73.
+ *
+ * @param x  horizontal offset added to the position
+ * @param y  vertical offset added to the position
+ */
 extern "C" void cUIVector_render2D(cUIVector* self, float x, float y)
 {
     if (self->mpVertexPosition == 0)
@@ -346,6 +387,11 @@ INCLUDE_ASM("ui/uivector", cUIVector_update);
 extern "C" void cUIAnimation_updateThing(void*, void*, unsigned char, unsigned short);
 extern "C" void cUIAnimation_updateFrame(void*, unsigned char);
 
+/**
+ * Advances a UI vector shape's animation, if it has one, to a frame.
+ *
+ * @param ev  the frame number (On Tour FrameNum)
+ */
 extern "C" void cUIVector_update(cUIVector* self, unsigned short ev)
 {
     void* a = self->mpAnim;
@@ -362,6 +408,14 @@ INCLUDE_ASM("ui/uivector", cUIVector_getSize);
 
 extern t3Vector t3vect_Zero;
 
+/**
+ * Returns a UI vector shape's size: the width and height of its vertices' bounding box.
+ *
+ * z is 0. The box starts from +/-1000, so vertices further out are not measured correctly. @p out is left
+ * untouched when there are no vertex positions.
+ *
+ * @param out  receives the size
+ */
 extern "C" void cUIVector_getSize(cUIVector* self, t3Vector* out)
 {
     if (self->mpVertexPosition == 0) {
@@ -711,6 +765,12 @@ extern "C" void* cList_destroyList(void*);
 extern void* cList_vtbl[];
 extern void* D_00494CC0[];
 
+/**
+ * Destroys a list: restores cList's vtable, destroys its nodes, then unlinks its end and start sentinel
+ * nodes.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cList__cList(void* self, int flags)
 {
     *(void***)((char*)self + 0x18) = cList_vtbl;
@@ -1271,6 +1331,14 @@ public:
     virtual void v07(int);
 };
 
+/**
+ * List operator callback that sets the focus state of one UI node.
+ *
+ * Calls the node's setFocus (slot 7) with the operator's value (+0x4).
+ *
+ * @param obj  the node visited
+ * @return 0, so the traversal continues to every node
+ */
 extern "C" int cListOpSetFocus_onListNode(void* self, cListOpSetFocus_onListNode_cVirt* obj)
 {
     obj->v07(*(int*)((char*)self + 0x4));
@@ -1543,6 +1611,11 @@ extern "C" void func_003A4868(void* p);
 // PORT: the unit declares cUIThing__cUIThing with one argument; the dtor chain passes the delete flag too.
 extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cUIThing");
 
+/**
+ * Destroys a UI group: destroys its child list (+0x74) and the list's sentinel nodes, then the cUIThing part.
+ *
+ * @param flag  g++ destructor flags, passed to cUIThing's destructor (bit 0 frees the object)
+ */
 // Destructor: restores the vtables, destroys the two vertex lists, then the base thing.
 extern "C" void cUIGroup__cUIGroup(char* self, int flag)
 {
@@ -1655,6 +1728,15 @@ public:
 
 extern "C" void* func_00397A68(void* list, cUIGroup_traverseRecurse_cFunctor* fn);
 
+/**
+ * Runs a list operator on a UI group and then, recursively, on its children.
+ *
+ * Stops at the group itself when the operator's callback (slot 2) returns nonzero; otherwise traverses the
+ * child list (+0x74) with func_00397A68().
+ *
+ * @param fn  the list operator (On Tour cListOperator*)
+ * @return the node the operator stopped at, or 0 if none
+ */
 extern "C" void* cUIGroup_traverseRecurse(void* self, cUIGroup_traverseRecurse_cFunctor* fn)
 {
     if (fn->v02(self) != 0) {
@@ -1703,6 +1785,13 @@ extern "C" void func_003A4868(void* p);
 // PORT: the unit declares cUIThing__cUIThing with one argument; the dtor chain passes the delete flag too.
 extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cUIThing");
 
+/**
+ * Destroys a UI menu: the cUIGroup destructor's work, with cUIGroup's vtable stored.
+ *
+ * cUIMenu has nothing of its own to destroy, so this is cUIGroup__cUIGroup inlined.
+ *
+ * @param flag  g++ destructor flags, passed to cUIThing's destructor (bit 0 frees the object)
+ */
 // Second destructor variant; same body as cUIGroup__cUIGroup.
 extern "C" void cUIMenu__cUIMenu(cUIMenu* self, int flag)
 {
@@ -2789,6 +2878,11 @@ extern "C" int func_003A5E58(void *arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIText_setShadow);
 #ifdef SKIP_ASM
+/**
+ * Sets or clears bit 2 of a text object's attributes (+0x74): whether the text draws a drop shadow.
+ *
+ * @param enable  nonzero sets the bit, 0 clears it
+ */
 extern "C" void cUIText_setShadow(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit2 = enable;
@@ -2798,6 +2892,11 @@ extern "C" void cUIText_setShadow(cUIText* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIText_setUnicode);
 #ifdef SKIP_ASM
+/**
+ * Sets or clears bit 3 of a text object's attributes (+0x74): whether the text holds a Unicode string.
+ *
+ * @param enable  nonzero sets the bit, 0 clears it
+ */
 extern "C" void cUIText_setUnicode(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit3 = enable;
@@ -2807,6 +2906,12 @@ extern "C" void cUIText_setUnicode(cUIText* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIText_setUseStaticColour);
 #ifdef SKIP_ASM
+/**
+ * Sets or clears bit 4 of a text object's attributes (+0x74): whether the text uses its static colour while
+ * the thing is static.
+ *
+ * @param enable  nonzero sets the bit, 0 clears it
+ */
 extern "C" void cUIText_setUseStaticColour(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit4 = enable;
@@ -2816,6 +2921,12 @@ extern "C" void cUIText_setUseStaticColour(cUIText* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIText_setUseDisabledColour);
 #ifdef SKIP_ASM
+/**
+ * Sets or clears bit 5 of a text object's attributes (+0x74): whether the text uses its disabled colour while
+ * the thing is disabled.
+ *
+ * @param enable  nonzero sets the bit, 0 clears it
+ */
 extern "C" void cUIText_setUseDisabledColour(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit5 = enable;
@@ -2825,6 +2936,12 @@ extern "C" void cUIText_setUseDisabledColour(cUIText* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIText_setEllipses);
 #ifdef SKIP_ASM
+/**
+ * Sets or clears bit 6 of a text object's attributes (+0x74): whether the text draws only its first line
+ * followed by "...".
+ *
+ * @param enable  nonzero sets the bit, 0 clears it
+ */
 extern "C" void cUIText_setEllipses(cUIText* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit6 = enable;

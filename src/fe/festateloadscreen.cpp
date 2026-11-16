@@ -83,6 +83,14 @@ static inline char* newScreenC_233438(void* self)
 
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 
+/**
+ * Loads the loading screen's UI and pushes the right loading state.
+ *
+ * Calls the graphics manager's slot 44 with 0x100, creates a UI engine loaded from "data/ui/fl" with the
+ * app's fonts and locale and a cFEInput, then pushes cFELoadStateInLodge when D_004A19C4 is 0x27 (going to
+ * the lodge), cFELoadHintState when results are not locked or the game path is 0, else cFELoadState; the last
+ * two get this screen as parent and a texture (func_00233640 with 1 or 2). SplashTexID (+0x18) becomes -1.
+ */
 extern "C" void cFELoadScreen_load(void* self)
 {
     {
@@ -372,6 +380,9 @@ INCLUDE_ASM("fe/festateloadscreen", cGameState_gotoNextState);
 extern void* cGameState_mpGame;
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
 
+/**
+ * Switches the game to the state's next state (mNextState) with its startup flag, when one is set.
+ */
 extern "C" void cGameState_gotoNextState(void* self)
 {
     int a = *(int*)self;
@@ -968,6 +979,15 @@ static inline void* hud_43B0()
     return SSXApp->Game->LoadIndicator;
 }
 
+/**
+ * Steps the event-start state: readies the event, sets up and loads the AI riders, then starts the event.
+ *
+ * The load indicator shows (and NIS list 0 pauses) until sub-state 3. Sub-state 0 waits for NIS transitions;
+ * 1 readies the event, then either prepares to purge the computer riders and actors (game mode 4, mode 5
+ * unless event 4, mode 6 unless event 5) or, on game path 0, initialises the AI riders (and the actors when
+ * no computers are allocated), and sets the rank type; 2 loads riders until the AI is ready; 3 waits for the
+ * NIS lists, activates the computers, purges if pending and goes to the next game state (sub-state 4).
+ */
 // Load screen update: drives the loading state machine (stream start, track setup, wait for load, finish).
 extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
 {
@@ -1106,6 +1126,15 @@ static inline int otherSide_234750(char* p)
     return *(int*)(p + 0xB0) == 0;
 }
 
+/**
+ * Starts the event as the event-start state ends: initialises the AI and missions and enters the race state.
+ *
+ * Resets NIS list 1; game mode 0 initialises the AI riders, other modes cAI_initFreeride() and the replay's
+ * race start. Outside mode 4 the computer riders are made active. Sets the rank type, missions
+ * (cWScriptMan_setupMissions()), AI state 3 and back-end state 1, refreshes the riders' animation, re-clamps
+ * aggression on game paths other than 0 and clears mHasTransitionNIS (+0x14). When the view manager's word at
+ * +0x10 is 1 it also clears a word in the world's slot for the other view.
+ */
 extern "C" void cGFEventStartState_loseFocus(void* self)
 {
     cSSXScriptEngine_ResetNISList(ScriptEngine, 1);

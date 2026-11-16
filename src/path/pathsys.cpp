@@ -27,19 +27,26 @@ struct sPathSysB310 {
     sPathB310* paths;       // 0x14
 };
 
-extern "C" int cPathSys_resolvePaths(sPathSysB310* self, char* p)
+/**
+ * Despite the name, loads the track paths ("TrackPaths") from the level's path data; On Tour's resolvePaths
+ * takes no data.
+ *
+ * @param data  the serialized data: a count, then each path
+ * @return number of bytes read
+ */
+extern "C" int cPathSys_resolvePaths(sPathSysB310* self, char* data)
 {
     int count;
     sPathB310** slot = &self->paths;
-    char* start = p;
-    func_0026BA68(&count, p);
-    p += 4;
+    char* start = data;
+    func_0026BA68(&count, data);
+    data += 4;
     self->count = count;
     *slot = new (operator_new_tag(count * sizeof(sPathB310), D_00481438, 0, 0)) sPathB310[count];
     for (int i = 0; i < self->count; i++) {
-        p += func_0026A180(&self->paths[i], p);
+        data += func_0026A180(&self->paths[i], data);
     }
-    return p - start;
+    return data - start;
 }
 #endif
 
@@ -68,19 +75,25 @@ struct sPathSysB410 {
     sPathB410* paths;       // 0xC
 };
 
-extern "C" int cPathSys_loadAIPaths(sPathSysB410* self, char* p)
+/**
+ * Loads the AI paths ("AIPaths") from the level's path data.
+ *
+ * @param data  the serialized data: a count, then each path
+ * @return number of bytes read
+ */
+extern "C" int cPathSys_loadAIPaths(sPathSysB410* self, char* data)
 {
     int count;
     sPathB410** slot = &self->paths;
-    char* start = p;
-    func_0026BA68(&count, p);
-    p += 4;
+    char* start = data;
+    func_0026BA68(&count, data);
+    data += 4;
     self->count = count;
     *slot = new (operator_new_tag(count * sizeof(sPathB410), D_004A3408, 0, 0)) sPathB410[count];
     for (int i = 0; i < self->count; i++) {
-        p += func_0026A180(&self->paths[i], p);
+        data += func_0026A180(&self->paths[i], data);
     }
-    return p - start;
+    return data - start;
 }
 #endif
 

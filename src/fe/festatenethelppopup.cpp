@@ -9,6 +9,9 @@ extern char D_004679A0[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Creates the online help popup's screen ("help_popup") and plays its first frame.
+ */
 extern "C" void cFEStateNetHelpPopup_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -48,6 +51,9 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onUpdate);
 extern "C" float cInput_getValue(void* self, int id);
 extern "C" void func_0039F190(void*, int);
 
+/**
+ * Closes the help popup once neither controller holds input 0x99, probably the help button that opened it.
+ */
 extern "C" void cFEStateNetHelpPopup_onUpdate(void* self)
 {
     int i;
@@ -127,6 +133,12 @@ struct sNetHelp_1D9F38 {
 
 static inline int IsHash_1D9F38(int id, char* s) { return id == GetHashValue32(s); }
 
+/**
+ * Binds the help popup's widgets by name: title, body and bottom note texts, the button icons and the seven
+ * option rows.
+ *
+ * @param w  the widget being created
+ */
 extern "C" void cFEStateNetHelpPopup_onWidgetCreate(sNetHelp_1D9F38* self, sWidget_1D9F38* w)
 {
     int h = w->hash;
@@ -267,6 +279,17 @@ static inline void show_1DA238(sWidget_1DA238* w, int on)
     w->vt[9].fn((char*)w + w->vt[9].delta, on);
 }
 
+/**
+ * Fills the help popup on its first transition: title, body, bottom note and one row per option with its
+ * button icon.
+ *
+ * Rows past the option count are hidden; each shown row's icon is moved down 22 units per row. A missing
+ * string
+ * ID leaves the text empty; the body is built by func_001DA110().
+ *
+ * @param bFirstTime  nonzero on the first transition
+ * @return 1
+ */
 extern "C" int cFEStateNetHelpPopup_onGainTransition(sNetHelp_1DA238* self, int bFirstTime)
 {
     if (bFirstTime) {
@@ -314,6 +337,12 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void func_0039F190(void*, int);
 
+/**
+ * Closes the help popup on widget event 6.
+ *
+ * @param pWidget  the widget, unused
+ * @param msg  widget event number
+ */
 extern "C" void cFEStateNetHelpPopup_onWidgetEvent(void* self, int pWidget, int msg)
 {
     if (msg == 6) {

@@ -266,6 +266,12 @@ struct cWorldMemoryMan_cWorldMemoryMan_sCfg {
 extern cWorldMemoryMan_cWorldMemoryMan_sCfg D_0044C1E0[];
 extern "C" void cWorldBlockAllocator_init(void* self, int count, int blockSize);
 
+/**
+ * Constructs the world memory manager: three block allocators sized from D_0044C1E0 and 64 empty section
+ * allocators.
+ *
+ * @return @p self
+ */
 extern "C" void* cWorldMemoryMan_cWorldMemoryMan(cWorldMemoryMan* self)
 {
     cWorldBlockAllocator_init(self, D_0044C1E0[0].count, D_0044C1E0[0].blockSize);
@@ -315,6 +321,14 @@ struct cWorldMemoryMan_sSection {
     char pad[0x14];
 };
 
+/**
+ * Gives a world section its own "Section Allocator" drawing from one of the three block allocators.
+ *
+ * @param index  the section ID (On Tour uiSectionID)
+ * @param section  despite the name, the block memory type that picks the allocator (On Tour
+ *                 eWorldBlockMemType
+ * blocktype)
+ */
 // PORT: the section pointer is passed as int (the callee's mangled name is __FPvii).
 extern "C" void cWorldMemoryMan_activateSectionMem(cWorldMemoryMan* self, int index, int section)
 {
@@ -348,6 +362,13 @@ INCLUDE_ASM("world/worldcache", cHullPage_cHullPage);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00494E00[];
 
+/**
+ * Constructs a hull page for a BSP hull's data, with an empty entry table sized by the hull's first word
+ * ("cHullPage Entries").
+ *
+ * @param data  the hull data (On Tour const tBxBSPHull* pBSPHull)
+ * @return @p self
+ */
 extern "C" void* cHullPage_cHullPage(void* self, unsigned short* data)
 {
     *(unsigned short**)self = data;
@@ -455,6 +476,12 @@ extern "C" void cWorldView_cWorldView(void* self);
 extern "C" void cStreamMan_cStreamMan(void* self);
 extern char* D_004A5B64;
 
+/**
+ * Constructs the world cache with its world view and stream manager, nothing loaded, and a touch-stale age of
+ * 0.1 s.
+ *
+ * @return @p self
+ */
 extern "C" void* cWorldCache_cWorldCache(cWorldCache* self)
 {
     cWorldView_cWorldView((char*)self + 0x10);
@@ -521,6 +548,12 @@ struct cWorldCache_purge_sObj {
 
 
 
+/**
+ * Unloads everything the world cache holds: pages, chunk resolver, cache tables, active sections, header and
+ * memory manager.
+ *
+ * @param p  the world cache
+ */
 extern "C" void cWorldCache_purge(cWorldCache* p)
 {
     cWorldCache* self = p;
@@ -608,6 +641,14 @@ extern "C" void cBXString__cBXString(sBXStr_7FC0* self, int flags);
 
 struct sVE_7FC0 { short delta; short index; void (*fn)(void*, int); };
 
+/**
+ * Loads a world's stream-data header (.sdb) and sets up its memory, cache tables, chunk resolver, streaming
+ * and view.
+ *
+ * @param name  the world's base file name (On Tour baseFileName)
+ * @param pNash  the overlap system the chunk resolver uses (On Tour Nash*, passed as int)
+ * @return nonzero when the stream manager and the world view started, otherwise 0
+ */
 extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
 {
     self->m_pWorldMemMan = (cWorldMemoryMan*)cWorldMemoryMan_cWorldMemoryMan((cWorldMemoryMan*)cMemMan_alloc(0x13C, D_00494E30, 0, 0));
@@ -646,6 +687,13 @@ INCLUDE_ASM("world/worldcache", cWorldCache_activateSectionMem);
 extern char D_00494E60[];
 extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* self, void* data);
 
+/**
+ * Activates a world section's memory: its section allocator and a "SectionTable" cache table from its header
+ * entry.
+ *
+ * @param i  the section ID (On Tour uiSectionID)
+ * @param section  despite the name, the block memory type (On Tour eWorldBlockMemType blocktype)
+ */
 extern "C" void cWorldCache_activateSectionMem(cWorldCache* self, int i, int section)
 {
     cWorldMemoryMan_activateSectionMem(self->m_pWorldMemMan, i, section);
@@ -662,6 +710,11 @@ INCLUDE_ASM("world/worldcache", cWorldCache_deactivateSectionMem);
 extern "C" void func_003A7B98(void* self, int i);
 extern "C" void func_003A7D80(int* self, int flags);
 
+/**
+ * Releases a world section's allocator and deletes its cache table.
+ *
+ * @param i  the section ID (On Tour uiSectionID)
+ */
 extern "C" void cWorldCache_deactivateSectionMem(cWorldCache* self, int i)
 {
     func_003A7B98(self->m_pWorldMemMan, i);
@@ -757,6 +810,11 @@ struct sWc_8330 {
     sWcEnt_8330 ents[1];        // 0x3F0
 };
 
+/**
+ * Empties every hull page: cancels pages being streamed, purges loaded ones, and clears each entry.
+ *
+ * @param vself  the world cache
+ */
 extern "C" void cWorldCache_resetPageMap(cWorldCache* vself)
 {
     sWc_8330* self = (sWc_8330*)vself;
@@ -890,6 +948,12 @@ struct sCache_8528 {
 extern "C" void func_003A8E20(void* self, int cell, int kind, sHandle_8528 h);
 extern "C" void func_003A7C30(int* self, int flags);
 
+/**
+ * Unloads a hull page: releases every stream resource it references (func_003A8E20), then deletes its list.
+ *
+ * @param vself  the world cache
+ * @param cell  the page index (On Tour uiHullPage)
+ */
 // Unloads a cache cell: reports each referenced object (kind, handle) to func_003A8E20, then frees the list.
 extern "C" void cWorldCache_purgePage(cWorldCache* vself, int cell)
 {
@@ -912,9 +976,15 @@ extern "C" void cWorldCache_purgePage(cWorldCache* vself, int cell)
 //100%
 INCLUDE_ASM("world/worldcache", cWorldCache_isPageLoaded);
 #ifdef SKIP_ASM
-extern "C" int cWorldCache_isPageLoaded(cWorldCache* self, int a1)
+/**
+ * Tells whether a hull page is loaded (state 3).
+ *
+ * @param uiHullPage  the page index (On Tour uiHullPage)
+ * @return 1 when loaded, otherwise 0
+ */
+extern "C" int cWorldCache_isPageLoaded(cWorldCache* self, int uiHullPage)
 {
-    char* p = (char*)self + a1 * 0x18;
+    char* p = (char*)self + uiHullPage * 0x18;
     return *(int*)(p + 0x3f0) == 3;
 }
 #endif
@@ -922,9 +992,15 @@ extern "C" int cWorldCache_isPageLoaded(cWorldCache* self, int a1)
 //100%
 INCLUDE_ASM("world/worldcache", cWorldCache_isPageEmpty);
 #ifdef SKIP_ASM
-extern "C" int cWorldCache_isPageEmpty(cWorldCache* self, int a1)
+/**
+ * Tells whether a hull page is empty (state 0).
+ *
+ * @param uiHullPage  the page index (On Tour uiHullPage)
+ * @return 1 when empty, otherwise 0
+ */
+extern "C" int cWorldCache_isPageEmpty(cWorldCache* self, int uiHullPage)
 {
-    char* p = (char*)self + a1 * 0x18;
+    char* p = (char*)self + uiHullPage * 0x18;
     return *(int*)(p + 0x3f0) == 0;
 }
 #endif
@@ -932,9 +1008,14 @@ extern "C" int cWorldCache_isPageEmpty(cWorldCache* self, int a1)
 //100%
 INCLUDE_ASM("world/worldcache", cWorldCache_signalPageLoadComplete);
 #ifdef SKIP_ASM
-extern "C" void cWorldCache_signalPageLoadComplete(cWorldCache* self, int a1)
+/**
+ * Marks a hull page as loaded (state 3).
+ *
+ * @param uiHullPage  the page index (On Tour uiHullPage)
+ */
+extern "C" void cWorldCache_signalPageLoadComplete(cWorldCache* self, int uiHullPage)
 {
-    char* p = (char*)self + a1 * 0x18;
+    char* p = (char*)self + uiHullPage * 0x18;
     *(int*)(p + 0x3f0) = 3;
 }
 #endif
@@ -984,6 +1065,16 @@ static inline int Frame_8668()
     return vt[114].fn((char*)o + vt[114].delta);
 }
 
+/**
+ * Ages the hull pages and starts streaming the highest-priority requested page when the stream manager is
+ * free.
+ *
+ * Page states: 0 empty, 1 requested, 2 streaming, 3 loaded, 4 being purged. Unlocked pages untouched for the
+ * stale
+ * age drop their request or start purging; a purge completes 5 frames later.
+ *
+ * @param p  the world cache
+ */
 extern "C" void cWorldCache_updatePages(cWorldCache* p)
 {
     sWCPCache_8668* self = (sWCPCache_8668*)p;
@@ -1203,6 +1294,21 @@ static inline void release_8AA8(sBxRef_8AA8* r)
         *(unsigned int*)r = r->refs;
 }
 
+/**
+ * Reserves storage for one stream resource of a hull page, or records it on the page when it is already
+ * resident.
+ *
+ * The key holds the bank in its low byte (0xFF for the shared bank) and the resource ID above it. Memory
+ * comes
+ * from a pool picked by the data type; AI paths (type 14) use a "BxStream AIPATH" allocation.
+ *
+ * @param slot  the hull page (On Tour uiHullPage)
+ * @param type  the data type (On Tour eBxStreamDataType dataType)
+ * @param key  the resource ID (On Tour tResourceID RID)
+ * @param size  the data size (On Tour uiDataSize)
+ * @return the storage address; 0 when it is already resident or @p size is 0; 0xFFFFFFFF when allocation
+ *         failed
+ */
 // Adds one stream data item (type, bank|id<<8) to a load list, allocating its storage on first use.
 extern "C" unsigned int cWorldCache_addBxStreamDataTest(sWorldCache_8AA8* self, int slot, int type, unsigned int key, int size)
 {
@@ -1510,6 +1616,16 @@ struct sWorldCacheMap {
     sWCQuad max;
 };
 
+/**
+ * Sets the world view up over the stream-data header, turning the section, BSP-node and leaf indices into
+ * pointers in place.
+ *
+ * The world's bounds are taken from the first section's root node.
+ *
+ * @param hdr  the stream-data header (On Tour tStreamDataHeader* pHeader)
+ * @param id  the world cache (On Tour cWorldCache* pWorldCache, passed as int)
+ * @return 1
+ */
 // PORT: offsets in the loaded data are rewritten in place as pointers (pointer in int)
 extern "C" int cWorldView_init(sWorldCacheMap* self, sWCHdr* hdr, int id)
 {
@@ -1674,6 +1790,17 @@ struct sVE_9258 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Advances each world section's load state and refreshes the two stream focuses.
+ *
+ * States: 1 load requested (activates its memory; sky sections ASKY-ESKY use block type 0, others 2), 2
+ * loading,
+ * 3 unload requested, 4 unloading, 5 and 6 loaded (counted). Newly loaded sections are announced to the
+ * renderer
+ * (slot 102).
+ *
+ * @param p  the world view
+ */
 extern "C" void cWorldView_update(cWorldView* p)
 {
     sWCLoader_9258* self = (sWCLoader_9258*)p;
@@ -1870,6 +1997,14 @@ INCLUDE_ASM("world/worldcache", cWorldView_getFocus);
 #ifdef SKIP_ASM
 extern "C" void func_003A9D60(void* self, int i);
 
+/**
+ * Gets a stream focus's current position and safe radius (less a 0.5 margin).
+ *
+ * @param i  the focus (On Tour eStreamFocusID id)
+ * @param outPos  receives the position (On Tour pos)
+ * @param outT  receives the safe radius (On Tour fsafeRadius)
+ * @return 1 when the focus is active and the radius positive, otherwise 0
+ */
 extern "C" int cWorldView_getFocus(cWorldView* self, int i, sWCQuad* outPos, float* outT)
 {
     char* e = (char*)self + i * 0x50;
@@ -1893,6 +2028,14 @@ INCLUDE_ASM("world/worldcache", cWorldView_getTestFocus);
 #ifdef SKIP_ASM
 extern "C" void func_003A9D60(void* self, int i);
 
+/**
+ * Gets a stream focus's position and its test safe radius (less a 0.5 margin).
+ *
+ * @param i  the focus (On Tour eStreamFocusID id)
+ * @param outPos  receives the position (On Tour pos)
+ * @param outT  receives the test safe radius (On Tour fsafeRadius)
+ * @return 1 when the focus is active and the radius positive, otherwise 0
+ */
 extern "C" int cWorldView_getTestFocus(cWorldView* self, int i, sWCQuad* outPos, float* outT)
 {
     char* e = (char*)self + i * 0x50;

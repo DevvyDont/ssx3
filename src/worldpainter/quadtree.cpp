@@ -142,6 +142,20 @@ struct sQTHeader_1DA8 {
     int f24;            // 0x24
 };
 
+/**
+ * Writes a quad tree into a new flat buffer ("QuadTreeOutputBuffer"), remapping node links and converting
+ * byte order.
+ *
+ * Probably an editor or tool export. The output is pre-filled with 0xDEADBEEF; the "QuadTreeRemapTable" it
+ * allocates is never freed.
+ *
+ * @param out  receives the new buffer (On Tour char*& buffer)
+ * @param size  receives the buffer size in bytes
+ * @param ctx  passed to the converters (On Tour bool isBigEndian)
+ * @param fixFloat  float converter (On Tour convertFloat)
+ * @param fixInt  int converter (On Tour convertInt)
+ * @param fixShort  unsigned short converter
+ */
 extern "C" void cQuadTree_exportTree(cQuadTree* self, char** out, int* size, void* ctx,
                                      float (*fixFloat)(void*, float), int (*fixInt)(int, void*),
                                      unsigned short (*fixShort)(unsigned short, void*))

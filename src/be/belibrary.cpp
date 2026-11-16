@@ -32,6 +32,12 @@ signed char cBELibrary_getCharacterID(int index)
 //100%
 INCLUDE_ASM("be/belibrary", cBELibrary_getCheatCharacterID);
 #ifdef SKIP_ASM
+/**
+ * Returns the cheat character selected for a race rider, from the rider's player record.
+ *
+ * @param index  race rider slot (On Tour iRider)
+ * @return the cheat character ID (byte 0x12 of the record)
+ */
 extern "C" signed char cBELibrary_getCheatCharacterID(int index)
 {
     int charID = D_005305B0[index];
@@ -49,6 +55,12 @@ struct sCharEntry2 {
 //100%
 INCLUDE_ASM("be/belibrary", cBELibrary_getProfileIndex__Fi);
 #ifdef SKIP_ASM
+/**
+ * Returns the profile a race rider belongs to: 0 or 1 for a human player, probably 2 for a computer rider.
+ *
+ * @param index  race rider slot
+ * @return the profile index, or 2 when the record's +0xC is -1 (a computer rider)
+ */
 int cBELibrary_getProfileIndex(int index)
 {
     int charID = D_005305B0[index];
@@ -63,6 +75,14 @@ int cBELibrary_getProfileIndex(int index)
 //100%
 INCLUDE_ASM("be/belibrary", cBELibrary_getRiderIndex__Fi);
 #ifdef SKIP_ASM
+/**
+ * Finds the first race rider slot whose player record belongs to a profile.
+ *
+ * Computer records also have a profile bit, so this is meant for human profiles 0 and 1.
+ *
+ * @param flag  profile index (0 or 1)
+ * @return the rider slot (0-5), or -1 when none matches
+ */
 int cBELibrary_getRiderIndex(int flag)
 {
     int* base = D_005305B0;

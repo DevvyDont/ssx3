@@ -26,6 +26,18 @@ extern char *f_4010_3578(SHAPE_3578 *, int, int, int) __asm__("func_003B4010");
 extern void f_33B0_3578(char *, char *, int, int, int) __asm__("undxtpack");
 extern void SHAPE_cloneat_3578(void *, SHAPE_3578 *) __asm__("SHAPE_cloneat");
 
+/**
+ * Returns a usable copy of a SHAPE image: decompressed when packed, decoded to 32 bpp when DXT, otherwise a
+ * plain clone.
+ *
+ * Packed shapes (type bit 0x80) unpack into an "unShp" allocation; DXT1/3/5 (types 0x60-0x62) decode every
+ * mipmap into an "undxt" allocation with the size rounded up to a multiple of 4. Attached blocks (palette,
+ * name...)
+ * are copied after the image. The original is left alone.
+ *
+ * @param shape  the shape, or 0
+ * @return the new shape, or 0 for a null input
+ */
 SHAPE_3578 *SHAPE_unpack(SHAPE_3578 *shape) {
     SHAPE_3578 hdr;
     SHAPE_3578 *old;
@@ -146,6 +158,13 @@ struct B_3900 { int pad; char c; };
 struct H_3900 { char pad[8]; int n; char pad2[8]; struct { int off; int x; } t[1]; };
 
 char *SHAPE_locatez_3900(struct H_3900 *, int) __asm__("SHAPE_locatez");
+/**
+ * Finds a shape in a shape file (FSH) by name: its long name when it has one, else its directory name.
+ *
+ * @param arg0  the shape file (On Tour const void* shpfile)
+ * @param arg1  the name to find (const char*, passed as int)
+ * @return the shape, or 0 when not found
+ */
 char *SHAPE_locatez_3900(struct H_3900 *arg0, int arg1) {
     int i;
     int n = arg0->n;
@@ -312,6 +331,16 @@ extern int func_003B3A50_3BB0(unsigned char, short, short, unsigned int, int) __
 extern int func_003B4D00_3BB0(char *, int *) __asm__("func_003B4D00");
 extern int strlen_3BB0(char *) __asm__("strlen");
 
+/**
+ * Returns the size in bytes of one block of a shape chain, by block type.
+ *
+ * Name (0x70), comment (0x6F), 0x7C table and metal-bin (0x69) blocks carry their sizes; packed images read
+ * it from
+ * the packed header; other images are sized from format, dimensions and mipmap count.
+ *
+ * @param shp  the block
+ * @return the size, or 0 when it cannot be worked out
+ */
 int SHAPE_size(char *shp) {
     int sp0;
     int r = 0;
@@ -474,6 +503,12 @@ block_10:
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_type);
 #ifdef SKIP_ASM
+/**
+ * Maps a pixel depth or format code to a SHAPE type class.
+ *
+ * @param bpp  bits per pixel or format code
+ * @return 1 for 4 bpp, 2 for 8 bpp, 3 for 15/16-bit formats, 5 for 32-bit formats, otherwise 0
+ */
 int SHAPE_type(int bpp) {
     int r = 0;
     switch (bpp) {
@@ -779,6 +814,15 @@ extern void MEM_move_neat(char *, char *, int) __asm__("MEM_move");
 extern int sprintf_neat(char *, char *, ...) __asm__("sprintf");
 extern char D_004957B8_neat[] __asm__("D_004957B8");
 
+/**
+ * Copies a shape and its whole block chain to new memory, realigning each block and relinking the chain.
+ *
+ * Palette blocks get the stricter alignment. Metal-bin blocks of 0x15 bytes or more get "EAGL<n>" written at
+ * +0x10.
+ *
+ * @param dst  destination memory, large enough for the realigned chain
+ * @param src  the first block of the source chain, or 0
+ */
 void SHAPE_cloneat(char *dst, char *src) {
     char *p = src;
     int off = 0;
@@ -854,6 +898,12 @@ void *SHAPE_clone(int shp) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_isclut);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a shape block type is a palette (CLUT) block.
+ *
+ * @param shptype  the block type
+ * @return 1 for the palette types (0x20-0x38 set), otherwise 0
+ */
 int SHAPE_isclut(int shptype) {
     int var_5;
 
@@ -20802,7 +20852,16 @@ extern int D_0044F43C_2068[] __asm__("D_0044F43C");
 extern char D_00495B48_2068[] __asm__("D_00495B48");
 extern void func_0041605C_2068(unsigned int, void *, int) __asm__("func_0041605C");
 
-unsigned int PATHI_copyevent(void *arg0) {
+/**
+ * Copies a path-interpreter event into free space of the event buffer, after the events the 16 slots already
+ * use.
+ *
+ * The event's size is 16 bytes per unit in the low 6 bits of its word at +0xE, plus 16.
+ *
+ * @param event  the event to copy
+ * @return the copy's address, or 0 (with a debug message when enabled) when the buffer is full
+ */
+unsigned int PATHI_copyevent(void *event) {
     int temp_9;
     unsigned int *p;
     unsigned int temp_3;
@@ -20813,7 +20872,7 @@ unsigned int PATHI_copyevent(void *arg0) {
     temp_6 = D_0044F420_2068[0] + 0x91C;
     cur = D_0044F420_2068[0] + 0x11C;
     p = (unsigned int*)(D_0044F420_2068[0] + 0xDC);
-    temp_9 = (((*(unsigned short*)((char*)arg0 + 0xE)) & 0x3F) * 0x10) + 0x10;
+    temp_9 = (((*(unsigned short*)((char*)event + 0xE)) & 0x3F) * 0x10) + 0x10;
     for (i = 0; i < 0x10; i++, p++) {
         temp_3 = *p;
         if (temp_3 >= cur) {
@@ -20824,7 +20883,7 @@ unsigned int PATHI_copyevent(void *arg0) {
         }
     }
     if (cur + temp_9 < temp_6) {
-        func_0041605C_2068(cur, arg0, temp_9);
+        func_0041605C_2068(cur, event, temp_9);
         return cur;
     }
     if (D_0044F43C_2068[0] & 0x120) {

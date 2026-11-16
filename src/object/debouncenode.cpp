@@ -14,6 +14,16 @@ struct sDebounceVEntry2D10 {
 extern "C" void* cMoveNode_cMoveNode(void* self, void*, void*);
 extern char cDebounceNode_vtbl[];
 
+/**
+ * Constructs a debounce node from a replay frame.
+ *
+ * Runs the cMoveNode replay constructor, then reads the countdown (+0x2C) and the expire mode (+0x30) through
+ * the frame's read method (slot 2).
+ *
+ * @param bucket  update bucket
+ * @param stream  the replay frame to read (On Tour cBxReplayFrame*)
+ * @return self
+ */
 extern "C" void* cDebounceNode_cDebounceNode(void* self, void* bucket, void* stream)
 {
     cMoveNode_cMoveNode(self, bucket, stream);
@@ -72,6 +82,11 @@ struct sDebounceVEntry2DD8 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Removes a debounce node when its object loses focus, unless its countdown is negative.
+ *
+ * The node deletes itself; with expire mode 0 (+0x30) the instance then gets a new dead node ("DeadNode").
+ */
 extern "C" void cDebounceNode_loseFocus(void* self)
 {
     if (*(int*)((char*)self + 0x2C) >= 0) {
@@ -118,6 +133,15 @@ int func_0034FCC0(void* self);
 extern "C" void* func_00350F60(void* self, void* parent);
 extern const char D_0048E748[];
 
+/**
+ * Ends a debounce node and replaces it according to its expire mode.
+ *
+ * Does nothing when @p check is set and the instance's expire script runs instead (func_0034FCC0), or when
+ * the countdown is negative. Otherwise the node deletes itself and the instance gets a dead node (mode 0), a
+ * restore node (mode 3, "RestoreNode") or no new node (other modes).
+ *
+ * @param check  nonzero to run the instance's script first (On Tour runscript)
+ */
 extern "C" void cDebounceNode_expire(void* self, int check)
 {
     if (check != 0 && func_0034FCC0(self) != 0) {
@@ -160,6 +184,14 @@ struct sDebounceVEntry2FA8 {
 
 extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes a debounce node's state to a replay frame.
+ *
+ * Writes the cMoveNode part, then the countdown (+0x2C) and the expire mode (+0x30) through the frame's write
+ * method (slot 1).
+ *
+ * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
+ */
 extern "C" void cDebounceNode_writeToReplayFrame(void* self, void* stream)
 {
     cMoveNode_writeToReplayFrame(self, stream);
@@ -727,6 +759,16 @@ struct sDebounceVEntry37C0 {
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void*, void*);
 extern char cCounterNode_vtbl[];
 
+/**
+ * Constructs a counter node from a replay frame.
+ *
+ * Runs the cInstanceNode replay constructor, then reads 8 bytes at +0x1C (the count and the received-level
+ * bits) through the frame's read method (slot 2).
+ *
+ * @param bucket  update bucket
+ * @param stream  the replay frame to read (On Tour cBxReplayFrame*)
+ * @return self
+ */
 extern "C" void* cCounterNode_cCounterNode(void* self, void* bucket, void* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
@@ -765,6 +807,17 @@ extern "C" void cCounterNode_update(void* self)
 //100%
 INCLUDE_ASM("object/debouncenode", cCounterNode_signal);
 #ifdef SKIP_ASM
+/**
+ * Counts a signal towards a counter node's target; each counted signal decrements the count (+0x1C) while
+ * positive.
+ *
+ * Levels 1-10 map to bits 0-9 of the received mask (+0x20). Signal 500 counts each level once, in any order;
+ * signal 501 counts each level once and only in sequence (level 1 first, then a level whose predecessor was
+ * received); signal 502 always counts. Other signals do nothing.
+ *
+ * @param msg    signal number (On Tour signal)
+ * @param level  the signal's argument: the level 1-10 (On Tour arg)
+ */
 extern "C" void cCounterNode_signal(void* self, int msg, float level)
 {
     int bit = 0;

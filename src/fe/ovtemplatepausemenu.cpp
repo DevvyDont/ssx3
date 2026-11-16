@@ -75,6 +75,19 @@ struct sPauseMenu_PM {
     int aD8[14];                // 0xD8
 };
 
+/**
+ * Creates the pause menu ("31paus_freeride"): labels its up-to-8 option rows, decides which options are
+ * enabled, pauses audio.
+ *
+ * Options come from the state's list (+0x9C, +0xBC entries): return, restart event, options, audio, quit,
+ * give up,
+ * challenge and competition quits, session, transport, messages. In game state 0xB give up is disabled;
+ * offline,
+ * when func_00231AB8() fails or a controller is unplugged, only return stays enabled. Restores the last
+ * selection.
+ *
+ * @param arg0  the pause menu state
+ */
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* arg0)
 {
     sPauseMenu_PM* self = (sPauseMenu_PM*)arg0;
@@ -154,6 +167,12 @@ struct sVec3_001F8448 {
 };
 struct sVEnt_001F8448 { short delta; short index; void (*fn)(void*, int); };
 
+/**
+ * On its first transition, shows only the PDA icon groups of the menu's options and stacks them 40 units
+ * apart.
+ *
+ * @return 0
+ */
 extern "C" int cOVTemplate_PauseMenu_onGainTransition(void* self)
 {
     char buf[64];
@@ -209,6 +228,11 @@ static inline void setColor_001F85C0(char* obj, void* c)
     vt[11].fn(obj + vt[11].delta, c);
 }
 
+/**
+ * Recolours the pause menu rows for focus (selected or not, enabled or disabled), then gives the state focus.
+ *
+ * @param pPrevState  the state that had focus before, passed on to cUIState_onGainFocus()
+ */
 extern "C" void cOVTemplate_PauseMenu_onGainFocus(void* self, int pPrevState)
 {
     char buf[32];
@@ -277,6 +301,14 @@ extern char D_0046F850[];
 struct sColor_1F8728 { float r, g, b, a; };
 struct sVEnt_1F8728 { short delta; short index; void (*fn)(void*, void*); };
 
+/**
+ * Pulses the "NewMail" icon while messages are waiting and closes the pause menu when an online pause times
+ * out.
+ *
+ * The pulse runs in states 1, 2 and 4 when func_001E3408() reports mail. When the online pause or overlay
+ * timeout
+ * reaches 0 it sends an unpause, plays "trans_out", removes the PDA and pops the pause state.
+ */
 extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
 {
     int st = *(int*)((char*)self + 0x110);
@@ -348,9 +380,16 @@ void* cOVTemplate_PauseMenu_onDestroyScreen(void* self)
 //100%
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int cOVTemplate_PauseMenu_onWidgetMenu(void* self, int a1, unsigned int a2)
+/**
+ * Swallows menu events 8 and 9 and refuses event 6 in the pause menu.
+ *
+ * @param menu  the menu (On Tour cUIMenu* pMenu), unused
+ * @param event  menu event number (On Tour Event)
+ * @return 0x100 for events 8 and 9, 0 for event 6, otherwise 0x101
+ */
+extern "C" int cOVTemplate_PauseMenu_onWidgetMenu(void* self, int menu, unsigned int event)
 {
-    switch (a2) {
+    switch (event) {
     case 8:
     case 9:
         return 0x100;
@@ -445,6 +484,19 @@ static inline void setColor_PMWE(sWidget_PMWE* w, void* c)
     w->vt[11].fn((char*)w + w->vt[11].delta, c);
 }
 
+/**
+ * Handles the pause menu: runs the chosen option, resumes on back, and updates colours, icons and help on
+ * highlight.
+ *
+ * Selecting a disabled option only plays sound 4. Return (1) and back resume the game, popping the pause
+ * state;
+ * restart, options, quit, give up, session, transport (map style 2) and messages open their overlays, audio
+ * opens
+ * cFEStateAudioOptions.
+ *
+ * @param w  the option row (its option at +0x18), or 0
+ * @param event  widget event number: 5 select, 6 back, 1 highlight, 2 unhighlight
+ */
 extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidget_PMWE* w, int event)
 {
     if (w == 0)
@@ -581,6 +633,13 @@ extern char* D_00441C30[];
 extern char D_004A2488[];
 extern char D_004A2490[];
 
+/**
+ * Plays an option's PDA icon animation: "<icon>_S" when it gains focus, "<icon>_R" (release) when it loses
+ * it.
+ *
+ * @param idx  the option (On Tour type), indexing the icon names
+ * @param on  nonzero for focus (On Tour focus)
+ */
 extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(void* self, int idx, int on)
 {
     char buf[64];

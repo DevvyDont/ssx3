@@ -81,6 +81,11 @@ struct sSectionMan {
     int field_0x1a0;
 };
 
+/**
+ * Resets the section manager's event pool: links all entries into the free list and empties the active list.
+ *
+ * Every pooled entry gets section ID 49 (probably "none"); the last of the 51 entries ends the free list.
+ */
 extern "C" void cSectionMan_initEventPool(cSectionMan* self)
 {
     int i;
@@ -135,6 +140,13 @@ struct sSectionNode_E298 {
 void* func_0022E278(void* self);
 extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, void* prev, void* node);
 
+/**
+ * Makes a section event active, moving it to the end of the active list if it was already there.
+ *
+ * Removes any active entries with the same ID, takes a node from the free list and appends it.
+ *
+ * @param id  section ID to activate (On Tour eBESectionID)
+ */
 extern "C" void cSectionMan_addActiveEvent(cSectionMan* self, int id)
 {
     sSectionNode_E298* n = (sSectionNode_E298*)self->m_pActiveEventList;
@@ -164,6 +176,12 @@ extern "C" void cSectionMan_addActiveEvent(cSectionMan* self, int id)
 //100%
 INCLUDE_ASM("main/sectionman", cSectionMan_getNextActiveEvent);
 #ifdef SKIP_ASM
+/**
+ * Steps through the active section events.
+ *
+ * @param pPrevEvent  the previous event, or 0 to start at the head of the list
+ * @return the event after @p pPrevEvent, the first event when it is 0, or 0 at the end of the list
+ */
 extern "C" int cSectionMan_getNextActiveEvent(cSectionMan* self, void* pPrevEvent)
 {
     if (pPrevEvent != 0) {
@@ -179,6 +197,12 @@ INCLUDE_ASM("main/sectionman", cSectionMan_removeActiveEvent);
 // PORT: the unit defines func_0022E288 as returning int; this caller treats it as void.
 void func_0022E288_v(void* self, void* node) __asm__("func_0022E288__FPvT0");
 
+/**
+ * Unlinks an event from the active list and returns its node to the free list.
+ *
+ * @param prev  the event before @p node in the active list, or 0 when @p node is the head
+ * @param node  the event to remove
+ */
 extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, void* prev, void* node)
 {
     if (prev == 0) {

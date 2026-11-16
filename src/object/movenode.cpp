@@ -27,6 +27,18 @@ extern char cMoveNode_vtbl[];
 // (forwarded to cInstanceNode_cInstanceNode), so the 3-arg body is bound by asm label.
 void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream) __asm__("cMoveNode_cMoveNode");
 
+/**
+ * Recreates a moving world object from a replay frame: the instance-node part, debounce, fade and transfer
+ * flag, and its modifiers.
+ *
+ * A modifier block is created and read back only when the frame says the node had one. Joins the overlap
+ * system
+ * and marks the node for update.
+ *
+ * @param a  the bucket the node belongs to (On Tour const int bucket)
+ * @param stream  the replay frame (On Tour cBxReplayFrame* data)
+ * @return @p self
+ */
 void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream)
 {
     int flag;
@@ -118,6 +130,9 @@ extern const char D_0048E9D8[];
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_addModifierBlock__FP9cMoveNode);
 #ifdef SKIP_ASM
+/**
+ * Gives the node a new, empty modifier block ("ModifierBlock").
+ */
 void cMoveNode_addModifierBlock(cMoveNode* self)
 {
     void* mem = cMemMan_alloc(0x28, D_0048E9D8, 0x20000000, 0);
@@ -136,6 +151,15 @@ struct sMoveNodeVEntryV54B0 {
 
 extern "C" void func_003530D0(void* block);
 
+/**
+ * Makes a transform modifier the node's root transform, replacing (deleting) any earlier one.
+ *
+ * Leaves the overlap system first (restoreOverlapSystem, slot 49) and rejoins it after (setupOverlapSystem,
+ * slot
+ * 48), then switches the object's flags from static (0x20) to moving (0x40).
+ *
+ * @param mod  the transform modifier (On Tour cTransformModifier* modifier)
+ */
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod)
 {
     sMoveNodeVEntryV54B0* e = &((sMoveNodeVEntryV54B0*)self->mVtbl)[49];
@@ -207,6 +231,12 @@ void cEffectLink_add(cEffectLink* link, cEffectLink* other);
 //99.74%
 INCLUDE_ASM("object/movenode", cMoveNode_addEffectModifier__FP9cMoveNodePv);
 #ifdef SKIP_ASM
+/**
+ * Adds an effect modifier (particles, halo...) to the node's effect list, creating the modifier block if
+ * needed.
+ *
+ * @param effect  the effect modifier (On Tour cEffectModifier* modifier)
+ */
 void cMoveNode_addEffectModifier(cMoveNode* self, void* effect)
 {
     if (((void*)self->ModifierBlock) == 0) {
@@ -221,6 +251,11 @@ INCLUDE_ASM("object/movenode", cMoveNode_addRailModifier);
 #ifdef SKIP_ASM
 extern "C" void cRailLink_add(void* list, void* item);
 
+/**
+ * Adds a rail modifier to the node's rail list, creating the modifier block if needed.
+ *
+ * @param item  the rail modifier (On Tour cRailModifier* modifier)
+ */
 extern "C" void cMoveNode_addRailModifier(cMoveNode* self, void* item)
 {
     if (((void*)self->ModifierBlock) == 0) {
@@ -236,6 +271,9 @@ INCLUDE_ASM("object/movenode", cMoveNode_preUpdateModifierBlock);
 extern "C" void func_00352C70(void* block);
 extern "C" int func_00352E50(void* block);
 
+/**
+ * Runs the modifier block's pre-update and marks the node for update when its root transform asks for it.
+ */
 extern "C" void cMoveNode_preUpdateModifierBlock(cMoveNode* self)
 {
     if (((void*)self->ModifierBlock) != 0) {
@@ -289,6 +327,20 @@ struct cMN_355770_VEnt {
     int (*fn)(void*, int);
 };
 
+/**
+ * Handles a collision with the node: the root transform reacts first, then the collision is passed on at most
+ * every half second.
+ *
+ * When the root transform's slot-9 test rejects the colliding being, nothing more happens. Otherwise, once
+ * the
+ * debounce has run out it is re-armed to half a second and func_0034FE00 forwards the collision (probably to
+ * the
+ * script system, D_004A3DD8).
+ *
+ * @param tc  collision info (On Tour const tCollideInfo*, passed as int)
+ * @param ti  intersection info (On Tour const tIntersectInfo*, passed as int)
+ * @param pBeing  the colliding being (cBeing*, passed as int)
+ */
 extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
 {
     cMN_355770_Obj** p = (cMN_355770_Obj**)((void*)self->ModifierBlock);
@@ -315,6 +367,11 @@ INCLUDE_ASM("object/movenode", cMoveNode_setDebounce);
 #ifdef SKIP_ASM
 extern char* D_004A5B64;
 
+/**
+ * Sets the node's collision debounce, in seconds, as a count of app timer ticks.
+ *
+ * @param secs  debounce time in seconds
+ */
 extern "C" void cMoveNode_setDebounce(cMoveNode* self, float secs)
 {
     self->Debounce = (int)((float)*(int*)(D_004A5B64 + 0x10) * secs);
@@ -447,6 +504,11 @@ extern char D_0048E9E8[];
 extern "C" void* cMultiSplineModifier_cMultiSplineModifier(void* mem, void* desc, void* owner);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
+/**
+ * Makes a new spline-path modifier ("MultiSplineModifier") the node's root transform.
+ *
+ * @param desc  the spline description (On Tour const tAddSplineData& sdata)
+ */
 extern "C" void cMoveNode_addSpline(cMoveNode* self, void* desc)
 {
     cMoveNode_addTransformModifier(self, cMultiSplineModifier_cMultiSplineModifier(cMemMan_alloc(0x58, D_0048E9E8, 0x20000000, 0), desc,
@@ -500,6 +562,11 @@ extern char D_0048E978[];
 extern "C" void* func_003458C0(void* mem, void* desc, void* owner);
 void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
 
+/**
+ * Adds a particle-emitter effect ("ParticleModifier") to the node.
+ *
+ * @param desc  the particle description (On Tour tAddParticleData* pdata)
+ */
 extern "C" void cMoveNode_addParticle(cMoveNode* self, void* desc)
 {
     cMoveNode_addEffectModifier(self, func_003458C0(cMemMan_alloc(0x1F0, D_0048E978, 0x20000000, 0), desc,
@@ -514,6 +581,14 @@ void operator_delete(int* ptr);
 extern "C" void* func_00345C90(void* mem, void* desc, void* inst, int index, void* a4);
 extern const char D_0048E990[];
 
+/**
+ * Adds a particle effect tied to one of the node's meshes ("DynamicParticleModifier"); a bad mesh index frees
+ * the description instead.
+ *
+ * @param desc  the particle description (On Tour tAddDynamicParticleData* pdata); owned by the call
+ * @param index  the mesh index (On Tour mesh)
+ * @param offset  emitter offset from the mesh (On Tour const t4Vector&)
+ */
 extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int index, void* offset)
 {
     if (index < 0 || index >= *(int*)(*(char**)((char*)self->Instance + 0x80) + 4)) {
@@ -531,6 +606,13 @@ extern char D_0048E908[];
 extern "C" void* cRollerModifier_cRollerModifier(void* mem, void* a1, void* a2, void* a3);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
+/**
+ * Makes a new roller modifier ("RollerModifier") the node's root transform.
+ *
+ * @param rdata  the roller description (On Tour const tAddRollerData&)
+ * @param ii  intersection info of the trigger (On Tour const tIntersectInfo*)
+ * @param ci  collision info of the trigger (On Tour const tCollideInfo*)
+ */
 extern "C" void cMoveNode_addRoller(cMoveNode* self, void* rdata, void* ii, void* ci)
 {
     cMoveNode_addTransformModifier(self, cRollerModifier_cRollerModifier(cMemMan_alloc(0x2D0, D_0048E908, 0x20000000, 0), rdata, ii, ci));
@@ -545,6 +627,12 @@ extern "C" int tModifierBlock_findRail(void* self, int id);
 extern "C" void* cRailModifier_cRailModifier(void* mem, void* desc, void* owner);
 extern "C" void cMoveNode_addRailModifier(cMoveNode* self, void* item);
 
+/**
+ * Adds a rail modifier ("RailModifier") for a rail description, unless the node already has a rail with that
+ * ID.
+ *
+ * @param desc  the rail description (On Tour const tAddRailData& rdata); its ID is at +4
+ */
 extern "C" void cMoveNode_addRail(cMoveNode* self, void* desc)
 {
     void* block = ((void*)self->ModifierBlock);
@@ -563,6 +651,11 @@ extern char D_0048E9A8[];
 extern "C" void* func_00346120(void* mem, void* desc, void* owner);
 void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
 
+/**
+ * Adds a halo effect ("HaloModifier") to the node.
+ *
+ * @param desc  the halo description (On Tour const tAddHaloData& hdata)
+ */
 extern "C" void cMoveNode_addHalo(cMoveNode* self, void* desc)
 {
     cMoveNode_addEffectModifier(self, func_00346120(cMemMan_alloc(0x40, D_0048E9A8, 0x20000000, 0), desc,
@@ -677,6 +770,11 @@ static inline void* VCall18_6078(char*& o)
     sMnVEntryP_6078* vt = *(sMnVEntryP_6078**)o;
     return vt[18].fn(o + vt[18].delta);
 }
+/**
+ * Returns the node's world transform: its root transform modifier's (slot 18), or the object's own matrix.
+ *
+ * @return the transform matrix (On Tour const t4Matrix*)
+ */
 extern "C" void* cMoveNode_getRootTransform(cMoveNode* self)
 {
     char** h = (char**)self->ModifierBlock;
@@ -706,6 +804,13 @@ static inline int VCall23_60C0(char*& o, int a)
     sMnVEntryI2_60C0* vt = *(sMnVEntryI2_60C0**)o;
     return vt[23].fn(o + vt[23].delta, a);
 }
+/**
+ * Returns the animation matrices for an instance: the root transform modifier's (slot 23), else the node's
+ * own (slot 27).
+ *
+ * @param inst  the instance record (On Tour tInstanceRecord*, passed as int)
+ * @return the matrices (On Tour const t4Matrix*, as int), or 0
+ */
 // Asks the modifier object (slot 23, passing a through), then falls back to the node's own slot 27.
 extern "C" int cMoveNode_getInstAnimMats(cMoveNode* self, int inst)
 {
@@ -734,6 +839,14 @@ static inline void* VCall_6128(char*& o, int i)
     sMnVEntryP_6128* vt = *(sMnVEntryP_6128**)o;
     return vt[i].fn(o + vt[i].delta);
 }
+/**
+ * Returns the transform for an instance: the root transform modifier's slot 19 or else slot 18, or the
+ * object's own matrix.
+ *
+ * The C declaration drops the instance argument (On Tour tInstanceRecord* inst).
+ *
+ * @return the transform matrix (On Tour const t4Matrix*)
+ */
 // Returns the modifier object's slot-19 value, else its slot-18 value; without one, the node's object position.
 extern "C" void* cMoveNode_getRootTransform1(cMoveNode* self)
 {
@@ -771,6 +884,15 @@ struct sMnVEntryVi_356198 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Updates a moving node for one tick: debounce, losing focus, its modifiers, and expiry once they complete.
+ *
+ * A node with a focus count that has dropped to 0 loses focus (slot 35) unless its lose-focus script handles
+ * it.
+ * When the modifier block reports completion the node expires (slot 34 with 1).
+ *
+ * @param selfv  the node
+ */
 extern "C" void cMoveNode_update(cMoveNode* selfv)
 {
     cMoveNode* self = (cMoveNode*)selfv;
@@ -1016,6 +1138,12 @@ static inline int Visible_6298(sMnCam_6298* cam, sMnObj_6298* obj)
     return 0;
 }
 
+/**
+ * Draws a moving node's object when it is visible, enabled, not culled, and not hidden by the transfer flag.
+ *
+ * Culls with its bound box or the object's bounds, picks animation matrices or the root transform, applies
+ * modifier rotation and lighting, and draws with its fade through GrMan slot 95.
+ */
 extern "C" void cMoveNode_render(cMoveNode* self)
 {
     sMnCam_6298* cam = (sMnCam_6298*)cWorld_m_pTheWorld->m_pWorldCache;
@@ -1187,6 +1315,11 @@ extern "C" sMnBox_67E0* tModifierBlock_getBoundBox_67E0(void* mb) __asm__("tModi
 extern "C" void* cObjectInterface_getNash(void);
 extern "C" void nash_Nash_movenode_67E0(void* mgr, int a, void* obj, sMnBox_67E0* box, sMnBox_67E0* old) __asm__("nash_Nash_movenode");
 
+/**
+ * Puts the node back in the overlap system with the object's own bound box, moving it from the old box.
+ *
+ * @param vself  the node
+ */
 // Sets the modifier block's bound box from the node's own extents (self->18 + 0x60) and re-files it.
 extern "C" void cMoveNode_restoreOverlapSystem(cMoveNode* vself)
 {
@@ -1286,6 +1419,10 @@ static inline void VCall24_68B0(char*& o)
     vt[24].fn(o + vt[24].delta);
 }
 
+/**
+ * Refits the node's overlap box around its position with the root transform's radius and re-files it in the
+ * overlap system.
+ */
 // Refits the modifier block's bound box around the node's position (radius from the block) and re-files it.
 extern "C" void cMoveNode_updateOverlapSystem(cMoveNode* self)
 {
@@ -1390,6 +1527,15 @@ struct sMoveNodeVEntryA70 {
     int (*fn)(void*, int, int, int, int);
 };
 
+/**
+ * Intersects against the node's root transform modifier (slot 21), if it has one.
+ *
+ * @param w  the intersection query (On Tour cWorldIntersectType&, passed as int)
+ * @param intInfo  receives the hits (On Tour tIntersectInfo*, passed as int)
+ * @param num  maximum number of hits
+ * @param flags  intersection flags
+ * @return the number of hits, or 0 without a root transform
+ */
 extern "C" int cMoveNode_intersect(cMoveNode* self, int w, int intInfo, int num, int flags)
 {
     void* block = self->ModifierBlock;
@@ -1477,6 +1623,12 @@ extern "C" void tModifierBlock_writeToReplayFrame(void* block, void* stream);
 // to the stream in a1, so the 2-arg body is bound by asm label.
 void cMoveNode_writeToReplayFrame_2(void* self, void* stream) __asm__("cMoveNode_writeToReplayFrame");
 
+/**
+ * Writes a moving node to a replay frame: the instance-node part, debounce, fade, transfer flag and its
+ * modifiers.
+ *
+ * @param stream  the replay frame (On Tour cBxReplayFrame* data)
+ */
 void cMoveNode_writeToReplayFrame_2(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
@@ -1509,6 +1661,11 @@ static inline int VCall_6BF0(char* o, int i)
     sMnVEntryI_6BF0* vt = *(sMnVEntryI_6BF0**)o;
     return vt[i].fn(o + vt[i].delta);
 }
+/**
+ * Tells whether the node keeps a focus count, which only a type-2 root transform modifier does.
+ *
+ * @return 1 when it does, otherwise 0
+ */
 // Does the modifier object's virtual slot 26 report state 2?
 extern "C" int cMoveNode_hasFocusCount(cMoveNode* self)
 {
@@ -1535,6 +1692,12 @@ struct sMnVEntryI6C48 {
 // the original declaration it was compiled against must have had two parameters.
 int func_0035AAD0_2(void* self, void* a1) __asm__("func_0035AAD0__FPv");
 
+/**
+ * Increments the focus count of a type-2 root transform modifier.
+ *
+ * @param pInst  the instance gaining focus (unused by the counter)
+ * @return the new count, or 0 when the node keeps no focus count
+ */
 extern "C" int cMoveNode_incFocusCount(cMoveNode* self, void* pInst)
 {
     void* block = ((void*)self->ModifierBlock);
@@ -1565,6 +1728,12 @@ struct sMnVEntryI6CC8 {
 // the original declaration it was compiled against must have had two parameters.
 int func_0035AAE0_2(void* self, void* a1) __asm__("func_0035AAE0__FPv");
 
+/**
+ * Decrements the focus count of a type-2 root transform modifier.
+ *
+ * @param pInst  the instance losing focus (unused by the counter)
+ * @return the new count, or 0 when the node keeps no focus count
+ */
 extern "C" int cMoveNode_decFocusCount(cMoveNode* self, void* pInst)
 {
     void* block = ((void*)self->ModifierBlock);
@@ -2576,6 +2745,11 @@ struct sMnVEntrySer7CA8 {
 
 extern "C" void cMultiParticle_writeToReplayFrame(void* obj, void* stream);
 
+/**
+ * Writes the multi-particle manager's four slots to a replay frame, each as a present flag and then its data.
+ *
+ * @param stream  the replay frame (On Tour cBxReplayFrame* data)
+ */
 extern "C" void cMultiParticleMan_writeToReplayFrame(void** self, void* stream)
 {
     int i;

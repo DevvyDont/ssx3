@@ -6,6 +6,14 @@ INCLUDE_ASM("bx/appman", cAppMan_cAppMan);
 extern void* cAppMan_vtbl[16];
 extern void* D_004A5B64;
 
+/**
+ * Constructs the application manager with its defaults and makes it the global instance (D_004A5B64, On Tour
+ * TheAppMan).
+ *
+ * Up to 12 update steps per frame, game rate 1.0, frame-rate damping 0.9, no 30 fps lock, no modules.
+ *
+ * @return @p self
+ */
 extern "C" void* cAppMan_cAppMan(void* self)
 {
     *(void**)((char*)self + 0x5C) = cAppMan_vtbl;
@@ -32,6 +40,12 @@ void operator_delete(int* ptr);
 //99.92%
 INCLUDE_ASM("bx/appman", cAppMan__cAppMan__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Destroys the application manager: restores its vtable and clears the global instance, then frees it when
+ * asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 void cAppMan__cAppMan(void* self, int flags)
 {
     *(void**)((char*)self + 0x5C) = cAppMan_vtbl;
@@ -74,6 +88,18 @@ static inline void call1_6D60(char* o, int vtoff, int slot, int a)
     vt[slot].fn(o + vt[slot].delta, a);
 }
 
+/**
+ * Runs the application: sets a 60 Hz timer, starts the app, loads the first module and runs the main loop
+ * until it quits.
+ *
+ * Waits for the first module's load (pumping the execution manager and sync tasks), activates it, runs
+ * cAppMan_mainLoop(), then shuts the app and the execution manager down.
+ *
+ * @param exec  the execution manager (On Tour cExecutionMan* ex)
+ * @param ac  command-line argument count
+ * @param av  command-line arguments (char**, passed as int)
+ * @return 0
+ */
 extern "C" int cAppMan_run(char* self, char* exec, int ac, int av)
 {
     *(float*)(self + 0x14) = 0.01666666753590107f;
@@ -154,6 +180,17 @@ static inline void call1_6F00(char* o, int vtoff, int slot, int a)
     vt[slot].fn(o + vt[slot].delta, a);
 }
 
+/**
+ * Runs the frame loop: fixed-rate module updates, rendering, frame-rate tracking and module switching.
+ *
+ * Each frame runs at most MaxUpdateSteps updates while the timer has ticks (counting Tick), renders when
+ * updates
+ * ran (two needed with the 30 fps lock) and keeps a damped FrameRate. LoadState 1 waits for the next module
+ * to
+ * load, 2 swaps it in, 3 shuts the active module down and returns.
+ *
+ * @param p  the application manager
+ */
 extern "C" void cAppMan_mainLoop(void* p)
 {
     char* self = (char*)p;
@@ -331,6 +368,9 @@ struct sAppObj00317400 {
     sVEntry00317400* vt;
 };
 
+/**
+ * Tells the execution manager to purge (slot 3), then to shut down with code 3 (slot 1).
+ */
 extern "C" void cAppMan_loadexecpurge(void* self)
 {
     sAppObj00317400* o = *(sAppObj00317400**)((char*)self + 8);

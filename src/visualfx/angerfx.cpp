@@ -40,6 +40,10 @@ INCLUDE_ASM("visualfx/angerfx", cAngerFX__cAngerFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/angerfx_classes.h"
 
+/**
+ * Destroys a rider's anger effect: frees its state buffer (+4), then destroys the virtual cRider base when in
+ * charge.
+ */
 cVbDtor002D4A70::~cVbDtor002D4A70()
 {
     if (m04 != 0) cMemMan_free(m04);

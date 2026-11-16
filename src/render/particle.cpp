@@ -20,6 +20,12 @@ struct sEmitState_0C60 {
     sEmitState_0C60() {}
 };
 
+/**
+ * Allocates a dynamic emitter's position and velocity arrays, one 16-byte vector per sub-emitter.
+ *
+ * The count is the word at +0x178; positions go to +0x1A0 ("DynEmitterData Positions") and velocities to
+ * +0x1A4 ("DynEmitterData Velocities").
+ */
 extern "C" void cBaseClass_DynamicEmitter_Allocate(void* self)
 {
     char* s = (char*)self;
@@ -397,6 +403,17 @@ struct sPtObj1380 {
     sPtRS1380 rs;           // 0x1E4
 };
 
+/**
+ * Draws a dynamic emitter's particles with its current texture frame and draw state.
+ *
+ * Returns unless the words at +0x174 and +0x1E0 are set and the graphics manager's effect texture
+ * _EffectTexMap[base (+0x4) + (int)frame (+0x10)] is valid. Sets bits 2-6 of the emitter's draw state
+ * (+0x1E4) word 1 from its kind (+0x8) through D_0044B420 {7, 5, 9, 0}, bits 5-9 of word 2 from @p blend, and
+ * the texture id; pushes that state on the graphics manager's draw-state stack, draws through its virtual
+ * slot 83 (func_003807A0) and pops the state.
+ *
+ * @param blend  value for bits 5-9 of the draw state's word 2 (On Tour: drawLayer, an eGMDrawLayer)
+ */
 extern "C" void cDynamicEmitter_render(sPtObj1380* self, int blend)
 {
     if (self->field_0x174 == 0) {
@@ -471,6 +488,11 @@ struct sEmitColour_1548 {
     sEmitColour_1548() {}
 };
 
+/**
+ * Allocates a colour emitter's arrays: the base positions and velocities plus one RGBA colour each.
+ *
+ * The colours (4 bytes per sub-emitter, count at +0x178) go to +0x204, tagged "DynEmitterData Colours".
+ */
 extern "C" void cDynamicColourEmitter_Allocate(void* self)
 {
     char* s = (char*)self;
@@ -486,6 +508,14 @@ INCLUDE_ASM("render/particle", cDynamicColourEmitter_purge);
 void cMemMan_free(void* p);
 extern "C" void func_00370CF8(void* self, int a1);
 
+/**
+ * Frees a colour emitter's colour array, then its base arrays.
+ *
+ * The base purge (func_00370CF8) frees the position and velocity arrays and, when @p resetEmitter is set,
+ * zeroes +0x170 and sets the count at +0x178 to -1.
+ *
+ * @param resetEmitter  nonzero to also reset the emitter's count and state word
+ */
 extern "C" void cDynamicColourEmitter_purge(void* self, int resetEmitter)
 {
     void* p = *(void**)((char*)self + 0x204);
@@ -512,6 +542,11 @@ extern unsigned char D_004A599A;
 extern unsigned char D_004A599B;
 extern int D_004A599C;
 
+/**
+ * Resets a colour emitter: runs the base reset, then sets every colour to transparent black.
+ *
+ * The (0, 0, 0, 0) colour is a function-local static, constructed on first use.
+ */
 extern "C" void cDynamicColourEmitter_reset(void* self)
 {
     int i;

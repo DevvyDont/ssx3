@@ -10,6 +10,9 @@ extern char D_0045E240[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Creates the profile select screen ("05sel_prof") and shows its first frame.
+ */
 extern "C" void cFEStateProfileSelect_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -52,6 +55,15 @@ struct sVEK18EB40b {
 };
 
 
+/**
+ * Handles select, back and highlight events on the profile select screen.
+ *
+ * Event 5 recolours the entry and pushes the next state for its misc data (custom interface slot 4); event 6
+ * pushes the previous state (slot 5); events 1 and 2 set the highlight and normal colours.
+ *
+ * @param menu  the widget the event is for (null: nothing happens)
+ * @param msg  UI event code (1, 2, 5 or 6)
+ */
 extern "C" void cFEStateProfileSelect_onWidgetEvent(void* self, char* menu, unsigned int msg)
 {
     if (menu == 0)
@@ -148,6 +160,12 @@ extern "C" void cFEStateProfileLoad_initCreateScreen(void* self);
 extern "C" void func_00190670(void* self);
 extern "C" void func_00190768(void* self);
 
+/**
+ * Creates the profile load/save screen ("93profile_load") and sets it up for the current mode.
+ *
+ * After initGeneral, mode D_004A15E8 picks initCreateScreen (1), func_00190670 (2) or func_00190768 (3),
+ * probably On Tour's initLoadScreen and initSaveScreen.
+ */
 extern "C" void cFEStateProfileLoad_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -476,6 +494,17 @@ static inline cUIObj_F2B8* getObj_F2B8(cState_F2B8* self, char* name)
     return (cUIObj_F2B8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
 }
 
+/**
+ * Refreshes the memory card panel and the six profile slot rows.
+ *
+ * Does nothing unless this state's virtual slot 42 returns true (probably: a card is ready). If the memory
+ * card manager's profile object (+0x434) then fails its slot 53, calls func_001D8240 and func_0018F9D8 and
+ * returns; otherwise it moves to state 3 (slot 35) if needed, shows the device name, fills
+ * "player1".."player6" with the slot names (plus the "date%d"/"time%d" lines for used slots) and shows the
+ * left/right device arrows when another device is available.
+ *
+ * @param vself  the cFEStateProfileLoad
+ */
 // Memory-card profile slots: refreshes the device name and the six slot rows (name, the two detail lines).
 extern "C" void cFEStateProfileLoad_displayOn(void* vself)
 {
@@ -1119,6 +1148,14 @@ static inline cUIObj_02C0* getObj_02C0(char* self, char* name)
     return (cUIObj_02C0*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
 }
 
+/**
+ * Hides the profile panels, numbers the six slot rows and sets up the menus.
+ *
+ * Hides the save/load titles and help texts and the buttons "btext3", "btext3a", "btext5"; numbers "1".."6",
+ * gives "player1".."player6" misc data 0..5, disables "onmenu" and enables "offmenu".
+ *
+ * @param selfp  the cFEStateProfileLoad
+ */
 // Hides the profile panels, numbers the six slot rows and enables the confirm buttons.
 extern "C" void cFEStateProfileLoad_initGeneral(void* selfp)
 {
@@ -1180,6 +1217,12 @@ struct cUIObj_0540 {
     virtual void setActive(int on);
 };
 
+/**
+ * Sets the profile screen up for creating a new profile save.
+ *
+ * Activates "Title_SaveProfile" (kT_FEProfileNew), "helptext_save" (kT_HELPCreateSaveNewFile) and the buttons
+ * "btext3" and "btext5", and sets the words at +0x220 and +0x224 to 1.
+ */
 extern "C" void cFEStateProfileLoad_initCreateScreen(void* self)
 {
     cUIObj_0540* t = (cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E318));

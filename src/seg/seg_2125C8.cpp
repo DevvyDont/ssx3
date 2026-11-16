@@ -42,6 +42,15 @@ extern Groups_15E0 D_00489D60;
 
 // PORT: the unit declares this as void(int); defined under an asm label with its real type
 extern "C" void cAIAnimEventMap_initMaps_impl(RangeTable_15E0* t) __asm__("cAIAnimEventMap_initMaps");
+/**
+ * Builds the AI animation event map's group ranges from the static group table.
+ *
+ * Clears the counts of the 437 groups, then walks the 472 entries of D_00489D60 (a group number per entry)
+ * and records, for each group, the index where its run starts and how many entries it has. A group is
+ * expected to occupy one contiguous run; the start of a group with no entries is left as it was.
+ *
+ * @param t  the map: one (start, count) pair of shorts per group
+ */
 extern "C" void cAIAnimEventMap_initMaps_impl(RangeTable_15E0* t)
 {
     Groups_15E0 tab = D_00489D60;
@@ -111,6 +120,12 @@ extern "C" void cAIAnimEventMap_initMaps(int);
 extern char D_0048A4D0[];
 extern int D_004A3DFC;
 
+/**
+ * Allocates the shared AI animation event map and fills it.
+ *
+ * Allocates 0x6D4 bytes ("AIAnimEventMap"), keeps the pointer in D_004A3DFC and runs
+ * cAIAnimEventMap_initMaps() on it.
+ */
 extern "C" void cRiderAnimBase_initAIAnimEventMap(void) {
     int temp_2;
 
