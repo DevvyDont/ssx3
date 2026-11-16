@@ -15,6 +15,11 @@ struct cWorldView {
 //100%
 INCLUDE_ASM("world/worldview", cWorldView_getNumSections__FP10cWorldView);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of sections in the world view.
+ *
+ * @return mSections->mNumSections, or 0 when there is no section table
+ */
 int cWorldView_getNumSections(cWorldView* self)
 {
     if (self->mSections == 0) {

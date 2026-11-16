@@ -3085,6 +3085,11 @@ extern "C" int func_00176438(void *arg0) {
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_pos__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the camera-trigger object's position, which sits at the start of the object.
+ *
+ * @return self
+ */
 void* cCTObject_pos(void* self)
 {
     return self;

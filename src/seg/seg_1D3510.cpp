@@ -948,6 +948,12 @@ INCLUDE_ASM("seg/seg_1D3510", cExpandMenuItemMenu__cExpandMenuItemMenu);
 #ifdef SKIP_ASM
 extern "C" void cMenu__cMenu();
 
+/**
+ * Destroys an expand-menu-item menu through the base cMenu destructor.
+ *
+ * Declared without parameters: the object and the destructor flags reach cMenu__cMenu() unchanged in their
+ * registers.
+ */
 extern "C" void cExpandMenuItemMenu__cExpandMenuItemMenu(void) {
     cMenu__cMenu();
 }

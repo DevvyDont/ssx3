@@ -833,6 +833,13 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoTable_cLunoTable);
 #ifdef SKIP_ASM
 extern "C" void luno_cLunoTable_constructTable(cLunoTableRef* self);
 
+/**
+ * Constructs a Luno table reference holding a new table.
+ *
+ * Clears the table pointer, then creates the table with luno_cLunoTable_constructTable().
+ *
+ * @return self
+ */
 extern "C" cLunoTableRef* luno_cLunoTable_cLunoTable(cLunoTableRef* self)
 {
     self->table = 0;
@@ -857,6 +864,13 @@ extern "C" void **func_00224DD0(void **arg0, void **arg1) {
 //100%
 INCLUDE_ASM("luno/lunovm", luno_cLunoTable__cLunoTable);
 #ifdef SKIP_ASM
+/**
+ * Destroys a Luno table reference, releasing the shared table when this was its last reference.
+ *
+ * Decrements the table's refCount; at zero func_00224F30() deletes the table and clears the pointer.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the reference object's memory
+ */
 extern "C" void luno_cLunoTable__cLunoTable(cLunoTableRef* self, int flags)
 {
     if (--self->table->refCount == 0) {
@@ -1315,6 +1329,13 @@ extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry
 //100%
 INCLUDE_ASM("luno/lunovm", luno_cLunoVar__cLunoVar);
 #ifdef SKIP_ASM
+/**
+ * Destroys a Luno variable, releasing its table reference when it holds a table.
+ *
+ * A variable of type 4 (table) runs the table-reference destructor without freeing; the type is then reset to 0.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the variable's memory
+ */
 extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags)
 {
     if (self->type == 4) {

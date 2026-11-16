@@ -15,6 +15,12 @@ struct cList {
 //100%
 INCLUDE_ASM("util/list", cListNode_isSentinel__FP9cListNode);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a list node is an end marker, i.e. links to itself in either direction.
+ *
+ * @param node  node to test
+ * @return 1 if node->prev or node->next points back at the node, else 0
+ */
 int cListNode_isSentinel(cListNode* node)
 {
     return (node->prev == node) || (node->next == node);
@@ -24,6 +30,12 @@ int cListNode_isSentinel(cListNode* node)
 //100%
 INCLUDE_ASM("util/list", cListNode_removeFromList);
 #ifdef SKIP_ASM
+/**
+ * Unlinks the node from its neighbours and leaves it linked only to itself.
+ *
+ * Neighbour links that are null or point at the node are skipped. When the node was a self-linked end on one
+ * side, the neighbour on the other side becomes self-linked on that side, so it is the new end.
+ */
 extern "C" void cListNode_removeFromList(cListNode* self)
 {
     cListNode* next = self->next;
@@ -104,6 +116,12 @@ extern "C" void* func_003977E8(void* self)
 //100%
 INCLUDE_ASM("util/list", cList_first__FP5cList);
 #ifdef SKIP_ASM
+/**
+ * Returns the list's first node.
+ *
+ * @param list  list to read
+ * @return list->head, or 0 when the head's prev link points at itself (an empty list)
+ */
 cListNode* cList_first(cList* list)
 {
     cListNode* head = list->head;
@@ -155,6 +173,15 @@ extern "C" int func_003978E8(void) {
 //100%
 INCLUDE_ASM("util/list", cList_addToFront__FP5cListP9cListNode);
 #ifdef SKIP_ASM
+/**
+ * Links a node in at the head of the list and makes it list->head.
+ *
+ * Sets newNode->prev to the old head, newNode->next to the old head's next, and the old head's next to newNode.
+ * In this list, prev links run from the head towards the tail (cList_size() walks them).
+ *
+ * @param list     list to add to
+ * @param newNode  node to insert
+ */
 void cList_addToFront(cList* list, cListNode* newNode)
 {
     cListNode* head = list->head;
@@ -168,6 +195,15 @@ void cList_addToFront(cList* list, cListNode* newNode)
 //100%
 INCLUDE_ASM("util/list", cList_addToEnd__FP5cListP9cListNode);
 #ifdef SKIP_ASM
+/**
+ * Links a node in at the tail of the list and makes it list->tail.
+ *
+ * Sets newNode->next to the old tail, newNode->prev to the old tail's prev, and the old tail's prev to newNode.
+ * In this list, next links run from the tail towards the head.
+ *
+ * @param list     list to add to
+ * @param newNode  node to insert
+ */
 void cList_addToEnd(cList* list, cListNode* newNode)
 {
     cListNode* tail = list->tail;
@@ -219,6 +255,14 @@ extern "C" void cList_destroyList(void* self)
 //100%
 INCLUDE_ASM("util/list", cList_size);
 #ifdef SKIP_ASM
+/**
+ * Counts the nodes in the list.
+ *
+ * Follows prev links from the head until a node whose prev points at itself; that end node is not counted.
+ *
+ * @param list  list to count
+ * @return the number of nodes
+ */
 extern "C" int cList_size(cList* list)
 {
     cListNode* node = list->head;

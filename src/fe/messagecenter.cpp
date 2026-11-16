@@ -500,6 +500,9 @@ extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(void* self);
 extern "C" void cFEStateRequestLine_updatePlayListArrows(void* self);
 extern "C" void cFEStateRequestLine_updatePlayListCounter(void* self);
 
+/**
+ * Refreshes the request-line play list: song titles, check marks, arrows and counter, in that order.
+ */
 extern "C" void cFEStateRequestLine_updatePlayList(void* self)
 {
     cFEStateRequestLine_updatePlayListSongTitles(self);

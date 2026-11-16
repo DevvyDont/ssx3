@@ -3,6 +3,15 @@
 //100%
 INCLUDE_ASM("ui/uiengine", UIAsciiToUnicode__FPUsPCc);
 #ifdef SKIP_ASM
+/**
+ * Widens a NUL-terminated byte string to 16-bit characters.
+ *
+ * Each byte goes through a (char) cast, so bytes 0x80-0xFF are sign-extended to 0xFF80-0xFFFF rather than
+ * mapped to U+0080-U+00FF.
+ *
+ * @param dst  destination buffer of 16-bit characters, including room for the terminator
+ * @param src  NUL-terminated byte string
+ */
 void UIAsciiToUnicode(unsigned short* dst, const char* src)
 {
     for (; *src != 0; src++, dst++) {
@@ -629,6 +638,11 @@ extern "C" void* cUIThing_setUIData(void* self);
 //100%
 INCLUDE_ASM("ui/uiengine", cUIGroup_setUIData__FPv);
 #ifdef SKIP_ASM
+/**
+ * Sets the group's UI data using the base cUIThing_setUIData().
+ *
+ * @return the result of cUIThing_setUIData()
+ */
 void* cUIGroup_setUIData(void* self)
 {
     return cUIThing_setUIData(self);

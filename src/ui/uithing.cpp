@@ -8,6 +8,12 @@ struct cUIThing {
 //100%
 INCLUDE_ASM("ui/uithing", cUIThing_getKeyframerEvent__FP8cUIThingi);
 #ifdef SKIP_ASM
+/**
+ * Returns the keyframer event id stored at an index.
+ *
+ * @param x  event index; only its low 8 bits are used, as a signed value
+ * @return mEvents[x], or 0xFFFF when the thing has no event table
+ */
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x)
 {
     signed char idx = (signed char)x;

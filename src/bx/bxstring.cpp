@@ -269,6 +269,14 @@ struct cBXString;
 extern "C" unsigned int strlen(const char* s);
 extern "C" void cBXString_InitFromCString(cBXString* self, int len, const char* str);
 
+/**
+ * Constructs a string from a C string.
+ *
+ * Initialises it with cBXString_InitFromCString() using strlen(@p str); a null @p str gives an empty string.
+ *
+ * @param str  NUL-terminated text, or 0
+ * @return self
+ */
 extern "C" cBXString* cBXString_cBXString4(cBXString* self, const char* str)
 {
     int len;
@@ -465,6 +473,14 @@ struct cBXString;
 extern "C" unsigned int strlen(const char* s);
 extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str);
 
+/**
+ * Appends a C string to this string.
+ *
+ * Passes strlen(@p str) and the text to cBXString_ConcatImpl(); a null @p str appends nothing.
+ *
+ * @param str  NUL-terminated text to append, or 0
+ * @return self
+ */
 extern "C" cBXString* cBXString_Concat(cBXString* self, const char* str)
 {
     int len;
@@ -651,6 +667,15 @@ extern "C" int func_00318C60(int *arg0) {
 //100%
 INCLUDE_ASM("bx/bxstring", cBXString_FindFirstOf__FP9cBXStringc);
 #ifdef SKIP_ASM
+/**
+ * Finds a character in the string, searching from the end.
+ *
+ * Despite the name, this is a reverse search: it calls func_0041ACC0(), which behaves like strrchr(), so it
+ * returns the last occurrence of @p ch.
+ *
+ * @param ch  character to look for
+ * @return the offset of the last match from the start of the string, or -1 if there is none
+ */
 int cBXString_FindFirstOf(cBXString* self, char ch)
 {
     char* result = func_0041ACC0(self->str, ch);

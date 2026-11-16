@@ -622,6 +622,12 @@ INCLUDE_ASM("mem/memstd", MEM_free);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
+/**
+ * Frees a block through the memory manager, ignoring a null pointer.
+ *
+ * @param self  block to free, or 0
+ * @return always 1
+ */
 extern "C" void* MEM_free(void* self)
 {
     if (self != 0) {

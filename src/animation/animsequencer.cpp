@@ -10,6 +10,14 @@ struct cAnimSequence {
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequence_fadeWeight__FP13cAnimSequenceff);
 #ifdef SKIP_ASM
+/**
+ * Sets the sequence's current and target blend weights and clears its fade speed.
+ *
+ * Despite the name, no fade rate is set: mFadeSpeed is reset to 0.
+ *
+ * @param weight  value stored in mCurrentWeight
+ * @param target  value stored in mTargetWeight
+ */
 void cAnimSequence_fadeWeight(cAnimSequence* self, float weight, float target)
 {
     self->mCurrentWeight = weight;
@@ -711,6 +719,14 @@ struct cAnimSequencer {
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getSequence__FP14cAnimSequenceri);
 #ifdef SKIP_ASM
+/**
+ * Returns the sequence node at a position in the sequencer's list.
+ *
+ * Follows @p index next links from mFirstSequence; a negative index returns the first node.
+ *
+ * @param index  zero-based position in the list
+ * @return the node, or 0 if the list has no node at that position
+ */
 cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index)
 {
     cAnimSequenceNode* cur = self->mFirstSequence;
@@ -981,6 +997,15 @@ struct sMdfArchive {
     sMdfPart60* parts;  // 0x8
 };
 
+/**
+ * Finds a model part in the MDF archive by name.
+ *
+ * Compares @p name against each part's name case-insensitively (func_0041AA88) and returns the first match
+ * through cMdfArchive_getModelPartByIndex().
+ *
+ * @param name  part name to look for
+ * @return the model part, or 0 if no part has that name
+ */
 extern "C" void* cMdfArchive_getModelPart(sMdfArchive* self, const char* name)
 {
     for (int i = 0; i < self->header->count; i++)

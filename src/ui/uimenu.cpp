@@ -463,6 +463,11 @@ extern "C" void* cUIThing_setUIData(void* self);
 //100%
 INCLUDE_ASM("ui/uimenu", cUIPair_setUIData__FPv);
 #ifdef SKIP_ASM
+/**
+ * Sets the pair's UI data using the base cUIThing_setUIData().
+ *
+ * @return the result of cUIThing_setUIData()
+ */
 void* cUIPair_setUIData(void* self)
 {
     return cUIThing_setUIData(self);

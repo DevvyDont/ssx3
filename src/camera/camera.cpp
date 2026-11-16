@@ -8330,6 +8330,9 @@ int cLookAtChaseAlgorithm_shouldSnapOnUpdate(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cCameraController_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the camera controller's update has an empty body.
+ */
 void cCameraController_update(void* self)
 {
 }

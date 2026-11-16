@@ -54,6 +54,12 @@ INCLUDE_ASM("bx/memman", operator_new__FUi);
 // PORT: the target calls the 4-arg cMemMan_alloc with only $a0 set (a1..a3 left as-is).
 void* cMemMan_alloc1(unsigned int size) __asm__("cMemMan_alloc");
 
+/**
+ * Allocates memory for operator new through the memory manager.
+ *
+ * @param size  number of bytes to allocate
+ * @return the block from cMemMan_alloc1()
+ */
 void* operator_new(unsigned int size)
 {
     return cMemMan_alloc1(size);
@@ -68,6 +74,14 @@ extern "C" void func_00319B48(void* ptr);
 //100%
 INCLUDE_ASM("bx/memman", operator_delete__FPi);
 #ifdef SKIP_ASM
+/**
+ * Frees memory for operator delete while holding the memory-manager mutex.
+ *
+ * func_00319B48() ignores a null pointer and returns the block to the block manager or the dynamic heap,
+ * whichever owns it. Same body as cMemMan_free().
+ *
+ * @param ptr  block to free, or 0
+ */
 void operator_delete(int* ptr)
 {
     MUTEX_lock(cMemMan_m_mutex);
@@ -79,6 +93,14 @@ void operator_delete(int* ptr)
 //100%
 INCLUDE_ASM("bx/memman", cMemMan_free__FPv);
 #ifdef SKIP_ASM
+/**
+ * Frees a block while holding the memory-manager mutex.
+ *
+ * func_00319B48() ignores a null pointer and returns the block to the block manager or the dynamic heap,
+ * whichever owns it. Same body as operator_delete().
+ *
+ * @param ptr  block to free, or 0
+ */
 void cMemMan_free(void* ptr)
 {
     MUTEX_lock(cMemMan_m_mutex);

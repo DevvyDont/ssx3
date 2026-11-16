@@ -338,6 +338,9 @@ void func_0026ED88(void* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_getFrameBlock__Fv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing and returns nothing, despite the name: the body is empty.
+ */
 void cReplayFramePtr_getFrameBlock()
 {
 }

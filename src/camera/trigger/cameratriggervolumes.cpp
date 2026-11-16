@@ -5,6 +5,11 @@ void operator_delete(int* ptr);
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggervolumes", tCameraTrigger__tCameraTrigger__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Destroys a camera trigger; the only work is freeing the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 void tCameraTrigger__tCameraTrigger(void* self, int flags)
 {
     if (flags & 1) {

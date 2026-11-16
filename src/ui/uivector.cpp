@@ -1019,6 +1019,11 @@ extern "C" int func_003A4BD0(void *arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_onInput__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does no input handling for a UI thing and reports the input as not handled.
+ *
+ * @return always 0
+ */
 int cUIThing_onInput(void* self)
 {
     return 0;
@@ -1028,6 +1033,9 @@ int cUIThing_onInput(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_updateLocale__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cUIThing's updateLocale has an empty body.
+ */
 void cUIThing_updateLocale(void* self)
 {
 }
@@ -1036,6 +1044,9 @@ void cUIThing_updateLocale(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_render2D__FPv);
 #ifdef SKIP_ASM
+/**
+ * Draws nothing: cUIThing's render2D has an empty body.
+ */
 void cUIThing_render2D(void* self)
 {
 }
@@ -1044,6 +1055,9 @@ void cUIThing_render2D(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_render3D__FPv);
 #ifdef SKIP_ASM
+/**
+ * Draws nothing: cUIThing's render3D has an empty body.
+ */
 void cUIThing_render3D(void* self)
 {
 }
@@ -1475,6 +1489,11 @@ extern "C" void cUIGroup__cUIGroup(char* self, int flag)
 //100%
 INCLUDE_ASM("ui/uivector", cUIGroup_getType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI type id of a group.
+ *
+ * @return always 0x10 (vectors return 0x18)
+ */
 int cUIGroup_getType(void* self)
 {
     return 0x10;
@@ -2258,6 +2277,11 @@ void func_003A5AA8(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIState_onGainTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing for the base UI state's gain transition.
+ *
+ * @return always 0
+ */
 int cUIState_onGainTransition(void* self)
 {
     return 0;
@@ -2346,6 +2370,9 @@ extern "C" signed char func_003A5B00(void *arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIState_onPopupEvent__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores popup events: the base UI state's onPopupEvent has an empty body.
+ */
 void cUIState_onPopupEvent(void* self)
 {
 }
@@ -2354,6 +2381,9 @@ void cUIState_onPopupEvent(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIState_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base UI state's onWidgetCreate has an empty body.
+ */
 void cUIState_onWidgetCreate(void* self)
 {
 }
@@ -2362,6 +2392,9 @@ void cUIState_onWidgetCreate(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIState_onWidgetEvent__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores widget events: the base UI state's onWidgetEvent has an empty body.
+ */
 void cUIState_onWidgetEvent(void* self)
 {
 }
@@ -2397,6 +2430,11 @@ int func_003A5B30(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIState_getData__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns no data for the base UI state.
+ *
+ * @return always 0
+ */
 int cUIState_getData(void* self)
 {
     return 0;
@@ -2406,6 +2444,11 @@ int cUIState_getData(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIState_handleEvent__FPv);
 #ifdef SKIP_ASM
+/**
+ * Handles no event for the base UI state and reports it as not handled.
+ *
+ * @return always 0
+ */
 int cUIState_handleEvent(void* self)
 {
     return 0;
@@ -3211,6 +3254,11 @@ extern "C" void* func_003A64F8(char* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIVector_getType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI type id of a vector.
+ *
+ * @return always 0x18 (groups return 0x10)
+ */
 int cUIVector_getType(void* self)
 {
     return 0x18;

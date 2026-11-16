@@ -3,6 +3,9 @@
 //100%
 INCLUDE_ASM("animation/gameanimmap", cGameAnimMap_testResolve__Fv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the animation-map resolve test has an empty body.
+ */
 void cGameAnimMap_testResolve()
 {
 }

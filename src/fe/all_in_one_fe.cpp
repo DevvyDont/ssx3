@@ -306,6 +306,12 @@ INCLUDE_ASM("fe/all_in_one_fe", cPDATemplate__cPDATemplate);
 #ifdef SKIP_ASM
 extern "C" void func_0039E390();
 
+/**
+ * Destroys the PDA template through the UI-screen destructor func_0039E390().
+ *
+ * Declared without parameters: the object and the destructor flags reach func_0039E390() unchanged in their
+ * registers.
+ */
 extern "C" void cPDATemplate__cPDATemplate(void) {
     func_0039E390();
 }

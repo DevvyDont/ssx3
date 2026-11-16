@@ -532,6 +532,14 @@ INCLUDE_ASM("ai/rider", cRider_initOnce);
 extern "C" void cRider_loadRider(void* self);
 extern "C" void THREAD_yieldticks(int ticks);
 
+/**
+ * Loads the rider, either with a single load step or step by step until loading completes.
+ *
+ * With @p immediate set it makes one cRider_loadRider() call and returns. Otherwise it keeps calling
+ * cRider_loadRider(), yielding the thread for one tick after each call, until mLoadStep reaches 7.
+ *
+ * @param immediate  nonzero to make exactly one cRider_loadRider() call without waiting for mLoadStep
+ */
 extern "C" void cRider_initOnce(cRider* self, int immediate)
 {
     if (immediate)
@@ -1313,6 +1321,12 @@ extern "C" void func_0011DFE0(cRider* self, t4Vector* axis, float angle)
 //100%
 INCLUDE_ASM("ai/rider", cRider_updateOrientationImplicit);
 #ifdef SKIP_ASM
+/**
+ * Normalises the rider's orientation quaternion and rebuilds its matrix from it.
+ *
+ * VU0 macro-mode code: scales mRotation to unit length in place, writes the rotation it describes into rows 0-2
+ * of mMatrix (w components cleared) and copies mPosition into row 3.
+ */
 // PORT: PS2-only VU0 macro-mode asm. Normalises the orientation quaternion mRotation
 // (0x120), then builds mMatrix (0x1A0) from it (rows 0-2) and mPosition (0x110, row 3).
 extern "C" void cRider_updateOrientationImplicit(cRider* self)
@@ -2196,6 +2210,15 @@ extern "C" void* cRiderHandler__setMotionState(void* obj);
 //100%
 INCLUDE_ASM("ai/rider", cRider_setMotionState__FPv);
 #ifdef SKIP_ASM
+/**
+ * Forwards a motion-state change to the rider's handler.
+ *
+ * Calls cRiderHandler__setMotionState() on mRiderHandler. Only the rider is declared here; any further
+ * arguments the caller passed in registers reach the handler unchanged.
+ *
+ * @param vself  the cRider, untyped
+ * @return the handler call's result
+ */
 void* cRider_setMotionState(void* vself)
 {
     cRider* self = (cRider*)vself;
@@ -2315,6 +2338,15 @@ extern "C" void* func_0011FF70(void* dst, cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_getMass);
 #ifdef SKIP_ASM
+/**
+ * Computes the rider's mass from character weight, collision toughness and boost strength.
+ *
+ * mass = weight * (1 + 1.5 * toughness) * (1 + 10 * mBoostStrength), where weight comes from the BE character
+ * interface for mAIIndex and toughness is the BE stat interface's collision attribute for mAIIndex and
+ * mStatsIndex (the 1.5 is 1.5003352 in the binary).
+ *
+ * @return the rider's mass
+ */
 extern "C" float cRider_getMass(cRider* self)
 {
     int weight = cBECharacterInterface_getWeight(cBE_getInterface(cBE_getBE(), 2), self->mAIIndex);

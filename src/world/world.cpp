@@ -72,6 +72,9 @@ extern "C" void cWorld_resetMap(void*);
 //100%
 INCLUDE_ASM("world/world", cWorld_init);
 #ifdef SKIP_ASM
+/**
+ * Initialises the world by resetting its map with cWorld_resetMap().
+ */
 extern "C" void cWorld_init(void* self)
 {
     cWorld_resetMap(self);

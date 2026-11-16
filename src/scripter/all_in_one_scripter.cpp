@@ -525,6 +525,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjTransition__cScriptObjTran
 #ifdef SKIP_ASM
 extern "C" void func_00283228();
 
+/**
+ * Destroys a script transition object through the script-object destructor func_00283228().
+ *
+ * Declared without parameters: the object and the destructor flags reach func_00283228() unchanged in their
+ * registers. That destructor de-initialises the script object if it holds a valid handle and frees it when bit 0
+ * of the flags is set.
+ */
 extern "C" void cScriptObjTransition__cScriptObjTransition(void) {
     func_00283228();
 }
@@ -549,6 +556,11 @@ extern "C" int func_00284AD0(void *arg0) {
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjTransition_GetNumScriptEntities);
 #ifdef SKIP_ASM
+/**
+ * Reports that a script transition object has no script entities.
+ *
+ * @return always 0
+ */
 extern "C" int cScriptObjTransition_GetNumScriptEntities(void) {
     return 0;
 }
@@ -557,6 +569,11 @@ extern "C" int cScriptObjTransition_GetNumScriptEntities(void) {
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjTransition_GetScriptEntity);
 #ifdef SKIP_ASM
+/**
+ * Returns no script entity for a script transition object.
+ *
+ * @return always 0
+ */
 extern "C" int cScriptObjTransition_GetScriptEntity(void) {
     return 0;
 }
@@ -584,6 +601,11 @@ extern "C" void func_00284AE8(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetNumScriptEntities);
 #ifdef SKIP_ASM
+/**
+ * Reports that a rider script object has exactly one script entity.
+ *
+ * @return always 1
+ */
 extern "C" int cScriptObjRider_GetNumScriptEntities(void) {
     return 1;
 }

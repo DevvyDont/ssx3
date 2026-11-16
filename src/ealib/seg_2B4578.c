@@ -170,6 +170,11 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_locate);
 #ifdef SKIP_ASM
 extern void SHAPE_locatez();
 
+/**
+ * Thin wrapper that calls SHAPE_locatez().
+ *
+ * Declared without parameters: the caller's arguments reach SHAPE_locatez() unchanged in their registers.
+ */
 void SHAPE_locate(void) {
     SHAPE_locatez();
 }
@@ -364,6 +369,17 @@ __asm__(
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_name);
 #ifdef SKIP_ASM
+/**
+ * Copies the four-character name of a shape directory entry into a buffer.
+ *
+ * Hand-written: if @p index is below the entry count at offset 8 of the shape file, the name word of entry
+ * @p index (at 0x10 + index * 8) is stored to @p out with an unaligned store; otherwise 0 is stored.
+ *
+ * @param shape  shape file to read
+ * @param index  directory entry index
+ * @param out    receives the 4-byte name; need not be aligned
+ * @return @p out
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only hand-written bounds-checked unaligned store: the assembler bgeu macro (sltu $1 + beqz $1), an explicit load-delay nop, swr/swl; the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.

@@ -423,6 +423,11 @@ extern "C" void* func_0039E6B8(void* self);
 //100%
 INCLUDE_ASM("fe/ovstatereplay", cOVState_onRender2D__FPv);
 #ifdef SKIP_ASM
+/**
+ * Renders the overlay state's 2D layer with the shared UI-screen render routine func_0039E6B8().
+ *
+ * @return no meaningful value (func_0039E6B8() returns nothing)
+ */
 void* cOVState_onRender2D(void* self)
 {
     return func_0039E6B8(self);
@@ -435,6 +440,9 @@ INCLUDE_ASM("fe/ovstatereplay", cOVState_onUpdate);
 extern "C" void func_00231840(void* game, int a);
 extern "C" void func_0039E510(void* self);
 
+/**
+ * Updates the overlay state: calls func_00231840(SSXApp->Game, 1), then the UI-screen update func_0039E510().
+ */
 extern "C" void cOVState_onUpdate(void* self)
 {
     func_00231840(SSXApp->Game, 1);

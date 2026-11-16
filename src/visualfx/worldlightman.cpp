@@ -1929,6 +1929,9 @@ void func_002F7C28(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cVisualEffect_deferredRender__FPv);
 #ifdef SKIP_ASM
+/**
+ * Draws nothing: cVisualEffect's deferredRender has an empty body.
+ */
 void cVisualEffect_deferredRender(void* self)
 {
 }
@@ -2524,6 +2527,9 @@ extern "C" void func_002F8138(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cSnowFall_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes nothing to the replay frame: cSnowFall's writeToReplayFrame has an empty body.
+ */
 void cSnowFall_writeToReplayFrame(void* self)
 {
 }
@@ -2560,6 +2566,14 @@ extern "C" void* cObjNode__cObjNode(void* self);
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cCutSceneTransitionMan__cCutSceneTransitionMan__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the cut-scene transition manager through the cObjNode destructor.
+ *
+ * Only @p self is declared here; any further argument the caller passed (such as destructor flags) reaches
+ * cObjNode__cObjNode() unchanged in its register.
+ *
+ * @return the result of cObjNode__cObjNode()
+ */
 void* cCutSceneTransitionMan__cCutSceneTransitionMan(void* self)
 {
     return cObjNode__cObjNode(self);

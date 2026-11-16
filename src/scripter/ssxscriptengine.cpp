@@ -321,6 +321,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Restart);
 extern "C" void cSSXScriptEngine_ResetNISListAll(void* self);
 extern "C" void cSSXScriptEngine_ResetIdleListAll(void* self);
 
+/**
+ * Restarts the script engine by resetting all NIS lists and all idle lists.
+ */
 extern "C" void cSSXScriptEngine_Restart(void* self)
 {
     cSSXScriptEngine_ResetNISListAll(self);
@@ -357,6 +360,11 @@ extern "C" void cSSXScriptEngine_ResetNISListAll(void* self);
 extern "C" void cSSXScriptEngine_ResetIdleListAll(void* self);
 extern "C" void cBXScriptEngine_StopScriptAll(void* self);
 
+/**
+ * Ends every script: resets all NIS and idle lists, then stops all running scripts.
+ *
+ * Same as cSSXScriptEngine_Restart() followed by cBXScriptEngine_StopScriptAll().
+ */
 extern "C" void cSSXScriptEngine_ForceEndScriptsAll(void* self)
 {
     cSSXScriptEngine_ResetNISListAll(self);
@@ -677,6 +685,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ResetNISListAll);
 #ifdef SKIP_ASM
 extern "C" void cSSXScriptEngine_ResetNISList(void*, int);
 
+/**
+ * Resets both NIS lists (indices 0 and 1) with cSSXScriptEngine_ResetNISList().
+ */
 extern "C" void cSSXScriptEngine_ResetNISListAll(void* self)
 {
     int i;

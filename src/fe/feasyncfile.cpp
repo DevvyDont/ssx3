@@ -146,6 +146,12 @@ struct cFEAsyncManager {
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_GetFileStatus__FP15cFEAsyncManageri);
 #ifdef SKIP_ASM
+/**
+ * Returns the status of one of the async manager's files.
+ *
+ * @param index  file slot, not range-checked
+ * @return mFiles[index].mStatus
+ */
 int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index)
 {
     return self->mFiles[index].mStatus;
@@ -155,6 +161,12 @@ int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_SetFileStatus__FP15cFEAsyncManagerii);
 #ifdef SKIP_ASM
+/**
+ * Sets the status of one of the async manager's files.
+ *
+ * @param index   file slot, not range-checked
+ * @param status  value stored in mFiles[index].mStatus
+ */
 void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status)
 {
     self->mFiles[index].mStatus = status;

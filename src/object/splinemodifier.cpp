@@ -916,6 +916,11 @@ extern "C" void* cMultiSplineModifier_updateNodes(void* self);
 //100%
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_updateRootTransform__FPv);
 #ifdef SKIP_ASM
+/**
+ * Updates the multi-spline modifier's root transform by updating its nodes.
+ *
+ * @return the result of cMultiSplineModifier_updateNodes()
+ */
 void* cMultiSplineModifier_updateRootTransform(void* self)
 {
     return cMultiSplineModifier_updateNodes(self);
@@ -1854,6 +1859,14 @@ struct sSplineLink {
     sSplineLink* prev; // 0x4
 };
 
+/**
+ * Appends a rail link to the end of the chain another link belongs to.
+ *
+ * Follows next links from @p link to the last node and attaches @p other after it, clearing other->next.
+ *
+ * @param link   any link in the chain
+ * @param other  link to append
+ */
 extern "C" void cRailLink_append(sSplineLink* link, sSplineLink* other)
 {
     while (link->next != 0) {

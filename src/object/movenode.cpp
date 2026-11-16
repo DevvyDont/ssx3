@@ -2315,6 +2315,11 @@ extern "C" void func_00357950(void* self)
 //99.29%
 INCLUDE_ASM("object/movenode", cParticleNode_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes the particle node to the replay frame using the cMoveNode implementation.
+ *
+ * @return the result of cMoveNode_writeToReplayFrame()
+ */
 void* cParticleNode_writeToReplayFrame(void* self)
 {
     return cMoveNode_writeToReplayFrame(self);
@@ -2451,6 +2456,9 @@ INCLUDE_ASM("object/movenode", cMultiParticleMan_render);
 #ifdef SKIP_ASM
 extern "C" void cMultiParticle_render(void* p);
 
+/**
+ * Renders each of the manager's four multi-particle slots that holds an object.
+ */
 extern "C" void cMultiParticleMan_render(void** self)
 {
     int i;

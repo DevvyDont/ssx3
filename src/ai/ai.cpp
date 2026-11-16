@@ -245,6 +245,11 @@ INCLUDE_ASM("ai/ai", cAI_reinitMissionRiders);
 #ifdef SKIP_ASM
 extern "C" void cAI_initMissionRiders(void*);
 
+/**
+ * Re-runs the mission rider setup followed by the shared AI initialisation.
+ *
+ * Calls cAI_initMissionRiders() and then cAI_commonInit(self, 0).
+ */
 extern "C" void cAI_reinitMissionRiders(void* self)
 {
     cAI_initMissionRiders(self);
@@ -1747,6 +1752,11 @@ INCLUDE_ASM("ai/ai", cAI_cleanupActors);
 extern "C" void cAI_purgeComputerActors(void*);
 extern "C" void cAI_RefreshGroupAI(void*);
 
+/**
+ * Removes the computer-controlled actors and refreshes the group AI.
+ *
+ * Calls cAI_purgeComputerActors() and then cAI_RefreshGroupAI().
+ */
 extern "C" void cAI_cleanupActors(void* self)
 {
     cAI_purgeComputerActors(self);

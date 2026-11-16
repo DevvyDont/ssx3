@@ -12,6 +12,16 @@ extern "C" void MUTEX_create(void* mutex);
 extern "C" void func_0031FF60(void* heap, unsigned int base, unsigned int size);
 extern "C" void cMemBlockMan_initialize(void);
 
+/**
+ * Sets up the memory manager on a heap region.
+ *
+ * Creates the manager mutex, records the heap base and size, initialises TheDynamicMemMan over the region
+ * (func_0031FF60, which 16-byte aligns it and reserves a 0x380-byte header), marks the manager initialised and
+ * then initialises the block manager.
+ *
+ * @param base  start address of the heap
+ * @param size  heap size in bytes
+ */
 extern "C" void cMemMan_initialize(unsigned int base, unsigned int size)
 {
     MUTEX_create(cMemMan_m_mutex);

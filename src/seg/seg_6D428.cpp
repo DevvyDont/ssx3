@@ -24,6 +24,13 @@ INCLUDE_ASM("seg/seg_6D428", readVolume);
 #ifdef SKIP_ASM
 extern "C" int get_camvolume();
 
+/**
+ * Reads a camera trigger volume as one step of readTrigger().
+ *
+ * Declared without parameters: the caller's arguments reach get_camvolume() unchanged in their registers.
+ *
+ * @return 0 on success, or error code 4 when get_camvolume() fails
+ */
 extern "C" int readVolume(void) {
     return (get_camvolume() != 0) ? 0 : 4;
 }
@@ -34,6 +41,13 @@ INCLUDE_ASM("seg/seg_6D428", readBoundObj);
 #ifdef SKIP_ASM
 extern "C" int get_camboundobj();
 
+/**
+ * Reads a camera bound object as one step of readAction().
+ *
+ * Declared without parameters: the caller's arguments reach get_camboundobj() unchanged in their registers.
+ *
+ * @return 0 on success, or error code 5 when get_camboundobj() fails
+ */
 extern "C" int readBoundObj(void) {
     return (get_camboundobj() != 0) ? 0 : 5;
 }

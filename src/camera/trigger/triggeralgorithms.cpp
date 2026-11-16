@@ -14,6 +14,9 @@ struct cActiveTriggerList {
 //100%
 INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_purge__FP18cActiveTriggerList);
 #ifdef SKIP_ASM
+/**
+ * Frees every node of the active trigger list and leaves the list empty.
+ */
 void cActiveTriggerList_purge(cActiveTriggerList* self)
 {
     sTriggerNode* node = self->head;

@@ -28,6 +28,16 @@ INCLUDE_ASM("dirtysock/tagsunk", cDirtysock_tag_TagFieldGetUnk);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int cDirtysock_tag_TagFieldGetString(const char* tag, char* buf, int size);
 
+/**
+ * Reads a string field and copies it to dst, dropping a leading backquote.
+ *
+ * Fetches the value with cDirtysock_tag_TagFieldGetString() into a stack buffer of @p size + 1 bytes; if the
+ * value starts with '`' that character is skipped when copying.
+ *
+ * @param tag   field data to read, as for cDirtysock_tag_TagFieldGetString()
+ * @param dst   destination; receives up to @p size characters plus the terminator
+ * @param size  maximum number of characters to read
+ */
 // PORT: variable-length array (GNU extension in C++).
 extern "C" void cDirtysock_tag_TagFieldGetUnk(const char* tag, char* dst, int size)
 {
@@ -11091,6 +11101,11 @@ extern "C" int func_00267DA0(void *arg0) {
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_disconnect__FPv);
 #ifdef SKIP_ASM
+/**
+ * Disconnects the channel by clearing its first two words, if the first is set (func_00255840).
+ *
+ * @return no meaningful value (func_00255840() returns nothing)
+ */
 void* cCommChannel_disconnect(void* self)
 {
     return func_00255840(self);
@@ -11100,6 +11115,9 @@ void* cCommChannel_disconnect(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base comm channel's update has an empty body.
+ */
 void cCommChannel_update(void* self)
 {
 }
@@ -11108,6 +11126,11 @@ void cCommChannel_update(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_isConnected__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports the base comm channel as never connected.
+ *
+ * @return always 0
+ */
 int cCommChannel_isConnected(void* self)
 {
     return 0;
@@ -11117,6 +11140,11 @@ int cCommChannel_isConnected(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_getLatency);
 #ifdef SKIP_ASM
+/**
+ * Returns a fixed latency of one 60 Hz frame.
+ *
+ * @return 1/60 (about 0.0167)
+ */
 extern "C" float cCommChannel_getLatency(void)
 {
     return 0.01666666753590107f;
@@ -11126,6 +11154,11 @@ extern "C" float cCommChannel_getLatency(void)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_getChannelType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the base comm channel's type id.
+ *
+ * @return always 0 (cDSockChannel returns 1)
+ */
 int cCommChannel_getChannelType(void* self)
 {
     return 0;
@@ -11135,6 +11168,11 @@ int cCommChannel_getChannelType(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_readPacket__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reads no packet: the base comm channel always reports nothing read.
+ *
+ * @return always 0
+ */
 int cCommChannel_readPacket(void* self)
 {
     return 0;
@@ -11144,6 +11182,11 @@ int cCommChannel_readPacket(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_writePacket__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes no packet: the base comm channel always reports nothing written.
+ *
+ * @return always 0
+ */
 int cCommChannel_writePacket(void* self)
 {
     return 0;
@@ -11162,6 +11205,11 @@ extern "C" int cDSockChannel_isConnected(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", cDSockChannel_getChannelType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the DirtySock channel's type id.
+ *
+ * @return always 1 (the base cCommChannel returns 0)
+ */
 int cDSockChannel_getChannelType(void* self)
 {
     return 0x1;

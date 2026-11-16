@@ -8,6 +8,17 @@ int tHashName32_getHashValue(uint*, char*);
 //https://decomp.me/scratch/YWMcE
 INCLUDE_ASM("hashvalue", tHashName32_getHashValue__FPUiPc);
 #ifdef SKIP_ASM
+/**
+ * Hashes a string to 32 bits with a PJW/ELF-style hash.
+ *
+ * Each character is added after shifting the hash left by 4; when the top nibble becomes nonzero it is folded in
+ * with hash ^= top >> 23 and then cleared. The fold shift is 23 where the classic ELF hash uses 24, so results
+ * differ from that hash.
+ *
+ * @param out  receives the hash
+ * @param str  NUL-terminated string to hash
+ * @return the hash (the value stored in @p out)
+ */
 int tHashName32_getHashValue(uint* out, char* str) {
     uint hash = 0;
     uint top;
@@ -29,6 +40,14 @@ int tHashName32_getHashValue(uint* out, char* str) {
 //https://decomp.me/scratch/VD967
 INCLUDE_ASM("hashvalue", GetHashValue32__FPc);
 #ifdef SKIP_ASM
+/**
+ * Returns the 32-bit name hash of a string.
+ *
+ * Calls tHashName32_getHashValue() with a scratch output word.
+ *
+ * @param param_1  NUL-terminated string to hash
+ * @return the hash
+ */
 int GetHashValue32(char* param_1) {
     char hash[4];
     return tHashName32_getHashValue((uint*)hash, param_1);
@@ -55,6 +74,13 @@ extern "C" void md5_append(md5_ctx* ctx, char* data, unsigned int len);
 extern "C" void md5_finish(md5_ctx* ctx, ulong* digest);
 extern "C" unsigned int strlen(const char*);
 
+/**
+ * Hashes a string to 64 bits by taking the first half of its MD5 digest.
+ *
+ * @param out  receives the hash
+ * @param str  NUL-terminated string to hash; its strlen() bytes are digested
+ * @return the hash (the value stored in @p out)
+ */
 ulong tHashName64_getHashValue(ulong* out, char* str)
 {
     md5_ctx ctx;
@@ -73,6 +99,14 @@ ulong tHashName64_getHashValue(ulong* out, char* str)
 //https://decomp.me/scratch/I4NLb
 INCLUDE_ASM("hashvalue", GetHashValue64__FPc);
 #ifdef SKIP_ASM
+/**
+ * Returns the 64-bit (MD5-based) name hash of a string.
+ *
+ * Calls tHashName64_getHashValue() with a scratch output value.
+ *
+ * @param str  NUL-terminated string to hash
+ * @return the hash
+ */
 ulong GetHashValue64(char* str) {
     char hash[8];
     return tHashName64_getHashValue((ulong*)hash, str);

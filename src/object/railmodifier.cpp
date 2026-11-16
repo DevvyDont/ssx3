@@ -1966,6 +1966,9 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_update);
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_updateRootTransform__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the roller modifier's updateRootTransform has an empty body.
+ */
 void cRollerModifier_updateRootTransform(void* self)
 {
 }
@@ -3032,6 +3035,9 @@ extern "C" void* func_00360700(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cObjNode_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cObjNode's update has an empty body.
+ */
 void cObjNode_update(void* self)
 {
 }
@@ -3040,6 +3046,9 @@ void cObjNode_update(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cObjNode_apply__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cObjNode's apply has an empty body.
+ */
 void cObjNode_apply(void* self)
 {
 }
@@ -3048,6 +3057,9 @@ void cObjNode_apply(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cObjNode_render__FPv);
 #ifdef SKIP_ASM
+/**
+ * Draws nothing: cObjNode's render has an empty body.
+ */
 void cObjNode_render(void* self)
 {
 }
@@ -3056,6 +3068,9 @@ void cObjNode_render(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cObjNode_renderModel__FPv);
 #ifdef SKIP_ASM
+/**
+ * Draws nothing: cObjNode's renderModel has an empty body.
+ */
 void cObjNode_renderModel(void* self)
 {
 }
@@ -3091,6 +3106,11 @@ int func_00360750(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cObjNode_hasParent__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that the object node has no parent.
+ *
+ * @return always 0
+ */
 int cObjNode_hasParent(void* self)
 {
     return 0;
@@ -3100,6 +3120,11 @@ int cObjNode_hasParent(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cObjNode_isType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that the object node is not of the queried type.
+ *
+ * @return always 0
+ */
 int cObjNode_isType(void* self)
 {
     return 0;
@@ -3118,6 +3143,9 @@ extern "C" unsigned int func_00360768()
 //100%
 INCLUDE_ASM("object/railmodifier", cObjNode_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes nothing to the replay frame: cObjNode's writeToReplayFrame has an empty body.
+ */
 void cObjNode_writeToReplayFrame(void* self)
 {
 }
@@ -3126,6 +3154,9 @@ void cObjNode_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cObjNode_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reads nothing from the replay frame: cObjNode's readFromReplayFrame has an empty body.
+ */
 void cObjNode_readFromReplayFrame(void* self)
 {
 }
@@ -3134,6 +3165,9 @@ void cObjNode_readFromReplayFrame(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTypeObjNode_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cTypeObjNode's update has an empty body.
+ */
 void cTypeObjNode_update(void* self)
 {
 }
@@ -3142,6 +3176,9 @@ void cTypeObjNode_update(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTypeObjNode_render__FPv);
 #ifdef SKIP_ASM
+/**
+ * Draws nothing: cTypeObjNode's render has an empty body.
+ */
 void cTypeObjNode_render(void* self)
 {
 }
@@ -3150,6 +3187,11 @@ void cTypeObjNode_render(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTypeObjNode_shouldRebound__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a typed object node should rebound.
+ *
+ * @return always 1
+ */
 int cTypeObjNode_shouldRebound(void* self)
 {
     return 0x1;
@@ -3385,6 +3427,11 @@ extern "C" int cInstanceNode_update(cInstanceNode* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_updateNode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does no per-node update and reports success.
+ *
+ * @return always 1
+ */
 int cInstanceNode_updateNode(void* self)
 {
     return 0x1;
@@ -3394,6 +3441,11 @@ int cInstanceNode_updateNode(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_isMoveNode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that an instance node is not a move node.
+ *
+ * @return always 0 (cMoveNode returns 1)
+ */
 int cInstanceNode_isMoveNode(void* self)
 {
     return 0;
@@ -3412,6 +3464,11 @@ unsigned char func_00360920(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_isComplete__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports an instance node as complete.
+ *
+ * @return always 1
+ */
 int cInstanceNode_isComplete(void* self)
 {
     return 0x1;
@@ -3421,6 +3478,9 @@ int cInstanceNode_isComplete(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_throwMe__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cInstanceNode's throwMe has an empty body.
+ */
 void cInstanceNode_throwMe(void* self)
 {
 }
@@ -3429,6 +3489,11 @@ void cInstanceNode_throwMe(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_getNodeState__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that an instance node has no node state.
+ *
+ * @return always 0
+ */
 int cInstanceNode_getNodeState(void* self)
 {
     return 0;
@@ -3438,6 +3503,11 @@ int cInstanceNode_getNodeState(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_hasFocusCount__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that an instance node keeps no focus count.
+ *
+ * @return always 0
+ */
 int cInstanceNode_hasFocusCount(void* self)
 {
     return 0;
@@ -3447,6 +3517,11 @@ int cInstanceNode_hasFocusCount(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_incFocusCount__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does not change any focus count; an instance node keeps none.
+ *
+ * @return always 0
+ */
 int cInstanceNode_incFocusCount(void* self)
 {
     return 0;
@@ -3456,6 +3531,11 @@ int cInstanceNode_incFocusCount(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_decFocusCount__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does not change any focus count; an instance node keeps none.
+ *
+ * @return always 0
+ */
 int cInstanceNode_decFocusCount(void* self)
 {
     return 0;
@@ -3465,6 +3545,11 @@ int cInstanceNode_decFocusCount(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_getFocusCount__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a focus count of zero; an instance node keeps none.
+ *
+ * @return always 0
+ */
 int cInstanceNode_getFocusCount(void* self)
 {
     return 0;
@@ -3500,6 +3585,11 @@ void* func_00360980(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_hasAnimMats__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that an instance node has no animation matrices.
+ *
+ * @return always 0
+ */
 int cInstanceNode_hasAnimMats(void* self)
 {
     return 0;
@@ -3536,6 +3626,11 @@ int func_003609A8(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_getAnimFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns animation frame zero; an instance node is not animated.
+ *
+ * @return always 0.0f
+ */
 float cInstanceNode_getAnimFrame(void* self)
 {
     return 0.0f;
@@ -3545,6 +3640,11 @@ float cInstanceNode_getAnimFrame(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_getAnimDir__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns an animation direction of zero for an instance node.
+ *
+ * @return always 0
+ */
 int cInstanceNode_getAnimDir(void* self)
 {
     return 0;
@@ -3554,6 +3654,11 @@ int cInstanceNode_getAnimDir(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_frameUpdateEvent__FPv);
 #ifdef SKIP_ASM
+/**
+ * Handles no frame-update event and reports nothing done.
+ *
+ * @return always 0
+ */
 int cInstanceNode_frameUpdateEvent(void* self)
 {
     return 0;
@@ -3563,6 +3668,9 @@ int cInstanceNode_frameUpdateEvent(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_signal__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores the signal: cInstanceNode's signal has an empty body.
+ */
 void cInstanceNode_signal(void* self)
 {
 }
@@ -3571,6 +3679,9 @@ void cInstanceNode_signal(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_makeActive__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cInstanceNode's makeActive has an empty body.
+ */
 void cInstanceNode_makeActive(void* self)
 {
 }
@@ -3579,6 +3690,11 @@ void cInstanceNode_makeActive(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_hasIntersect__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that an instance node has no intersection geometry.
+ *
+ * @return always 0
+ */
 int cInstanceNode_hasIntersect(void* self)
 {
     return 0;
@@ -3588,6 +3704,11 @@ int cInstanceNode_hasIntersect(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_intersect__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports no intersection for an instance node.
+ *
+ * @return always 0
+ */
 int cInstanceNode_intersect(void* self)
 {
     return 0;
@@ -3597,6 +3718,9 @@ int cInstanceNode_intersect(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_onCollide__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores collisions: cInstanceNode's onCollide has an empty body.
+ */
 void cInstanceNode_onCollide(void* self)
 {
 }
@@ -3605,6 +3729,9 @@ void cInstanceNode_onCollide(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_setDebounce__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cInstanceNode's setDebounce has an empty body.
+ */
 void cInstanceNode_setDebounce(void* self)
 {
 }
@@ -3613,6 +3740,9 @@ void cInstanceNode_setDebounce(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_updateIntersectInfo__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cInstanceNode's updateIntersectInfo has an empty body.
+ */
 void cInstanceNode_updateIntersectInfo(void* self)
 {
 }
@@ -3621,6 +3751,9 @@ void cInstanceNode_updateIntersectInfo(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_applyForce__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores the force: cInstanceNode's applyForce has an empty body.
+ */
 void cInstanceNode_applyForce(void* self)
 {
 }
@@ -3629,6 +3762,11 @@ void cInstanceNode_applyForce(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_hasBoundBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that an instance node has no bounding box.
+ *
+ * @return always 0
+ */
 int cInstanceNode_hasBoundBox(void* self)
 {
     return 0;
@@ -3647,6 +3785,11 @@ int func_00360A18(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cInstanceNode_isFlexRail__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that an instance node is not a flex rail.
+ *
+ * @return always 0
+ */
 int cInstanceNode_isFlexRail(void* self)
 {
     return 0;
@@ -3669,6 +3812,9 @@ void* cDeadNode__cDeadNode(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cDeadNode_expire__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cDeadNode's expire has an empty body.
+ */
 void cDeadNode_expire(void* self)
 {
 }
@@ -3677,6 +3823,9 @@ void cDeadNode_expire(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cDeadNode_loseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cDeadNode's loseFocus has an empty body.
+ */
 void cDeadNode_loseFocus(void* self)
 {
 }
@@ -3685,6 +3834,9 @@ void cDeadNode_loseFocus(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cDeadNode_signal__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores the signal: cDeadNode's signal has an empty body.
+ */
 void cDeadNode_signal(void* self)
 {
 }
@@ -3822,6 +3974,9 @@ void func_00360B38(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_postUpdate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cTransformModifier's postUpdate has an empty body.
+ */
 void cTransformModifier_postUpdate(void* self)
 {
 }
@@ -3830,6 +3985,9 @@ void cTransformModifier_postUpdate(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_signal__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores the signal: cTransformModifier's signal has an empty body.
+ */
 void cTransformModifier_signal(void* self)
 {
 }
@@ -3838,6 +3996,11 @@ void cTransformModifier_signal(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_isComplete__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports a transform modifier as not complete.
+ *
+ * @return always 0
+ */
 int cTransformModifier_isComplete(void* self)
 {
     return 0;
@@ -3847,6 +4010,9 @@ int cTransformModifier_isComplete(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_clearComplete__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cTransformModifier's clearComplete has an empty body.
+ */
 void cTransformModifier_clearComplete(void* self)
 {
 }
@@ -3855,6 +4021,11 @@ void cTransformModifier_clearComplete(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_shouldRebound__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a transform modifier should rebound.
+ *
+ * @return always 1 (cRollerModifier returns 0)
+ */
 int cTransformModifier_shouldRebound(void* self)
 {
     return 0x1;
@@ -3864,6 +4035,11 @@ int cTransformModifier_shouldRebound(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_runCollide__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that collision should run for a transform modifier.
+ *
+ * @return always 1 (cRollerModifier returns 0)
+ */
 int cTransformModifier_runCollide(void* self)
 {
     return 0x1;
@@ -3873,6 +4049,9 @@ int cTransformModifier_runCollide(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_collide__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cTransformModifier's collide has an empty body.
+ */
 void cTransformModifier_collide(void* self)
 {
 }
@@ -3881,6 +4060,9 @@ void cTransformModifier_collide(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_render__FPv);
 #ifdef SKIP_ASM
+/**
+ * Draws nothing: cTransformModifier's render has an empty body.
+ */
 void cTransformModifier_render(void* self)
 {
 }
@@ -3923,6 +4105,11 @@ void func_00360BA0(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_getMesh__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a transform modifier has no mesh.
+ *
+ * @return always 0
+ */
 int cTransformModifier_getMesh(void* self)
 {
     return 0;
@@ -3932,6 +4119,11 @@ int cTransformModifier_getMesh(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_isRootTransformDirty__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports the transform modifier's root transform as clean.
+ *
+ * @return always 0
+ */
 int cTransformModifier_isRootTransformDirty(void* self)
 {
     return 0;
@@ -3950,6 +4142,11 @@ int func_00360BB8(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_getRootTransform__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a transform modifier has no root transform.
+ *
+ * @return always 0
+ */
 int cTransformModifier_getRootTransform(void* self)
 {
     return 0;
@@ -3959,6 +4156,11 @@ int cTransformModifier_getRootTransform(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_hasIntersect__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a transform modifier has no intersection geometry.
+ *
+ * @return always 0
+ */
 int cTransformModifier_hasIntersect(void* self)
 {
     return 0;
@@ -3968,6 +4170,11 @@ int cTransformModifier_hasIntersect(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_intersect__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports no intersection for a transform modifier.
+ *
+ * @return always 0
+ */
 int cTransformModifier_intersect(void* self)
 {
     return 0;
@@ -3977,6 +4184,9 @@ int cTransformModifier_intersect(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_updateIntersectInfo__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cTransformModifier's updateIntersectInfo has an empty body.
+ */
 void cTransformModifier_updateIntersectInfo(void* self)
 {
 }
@@ -3985,6 +4195,11 @@ void cTransformModifier_updateIntersectInfo(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_getAnimMats__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a transform modifier has no animation matrices.
+ *
+ * @return always 0
+ */
 int cTransformModifier_getAnimMats(void* self)
 {
     return 0;
@@ -3994,6 +4209,9 @@ int cTransformModifier_getAnimMats(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_updateOverlapSystem__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cTransformModifier's updateOverlapSystem has an empty body.
+ */
 void cTransformModifier_updateOverlapSystem(void* self)
 {
 }
@@ -4002,6 +4220,11 @@ void cTransformModifier_updateOverlapSystem(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_getParent__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a transform modifier has no parent.
+ *
+ * @return always 0
+ */
 int cTransformModifier_getParent(void* self)
 {
     return 0;
@@ -4055,6 +4278,9 @@ extern "C" void cPhysicsModifier__cPhysicsModifier(void* self, int flags)
 //100%
 INCLUDE_ASM("object/railmodifier", cPhysicsModifier_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cPhysicsModifier's update has an empty body.
+ */
 void cPhysicsModifier_update(void* self)
 {
 }
@@ -4063,6 +4289,9 @@ void cPhysicsModifier_update(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cPhysicsModifier_signal__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores the signal: cPhysicsModifier's signal has an empty body.
+ */
 void cPhysicsModifier_signal(void* self)
 {
 }
@@ -4080,6 +4309,11 @@ int cPhysicsModifier_isActive(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cPhysicsModifier_getPhysicsType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the base physics modifier's physics type id.
+ *
+ * @return always 0 (cBoostModifier returns 1)
+ */
 int cPhysicsModifier_getPhysicsType(void* self)
 {
     return 0;
@@ -4091,6 +4325,14 @@ extern "C" void* cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self
 //100%
 INCLUDE_ASM("object/railmodifier", cDynamicEmitter__cDynamicEmitter__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a dynamic emitter through its base-class destructor.
+ *
+ * Calls cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(); only @p self is declared here, so any further
+ * argument the caller passed (such as destructor flags) reaches it unchanged in its register.
+ *
+ * @return the base destructor's result
+ */
 void* cDynamicEmitter__cDynamicEmitter(void* self)
 {
     return cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(self);
@@ -4126,6 +4368,9 @@ int func_00360CE8(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cEffectLink_fadeEffect__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cEffectLink's fadeEffect has an empty body.
+ */
 void cEffectLink_fadeEffect(void* self)
 {
 }
@@ -4134,6 +4379,9 @@ void cEffectLink_fadeEffect(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cEffectLink_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes nothing to the replay frame: cEffectLink's writeToReplayFrame has an empty body.
+ */
 void cEffectLink_writeToReplayFrame(void* self)
 {
 }
@@ -4142,6 +4390,9 @@ void cEffectLink_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cEffectModifier_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cEffectModifier's update has an empty body.
+ */
 void cEffectModifier_update(void* self)
 {
 }
@@ -4150,6 +4401,9 @@ void cEffectModifier_update(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cEffectModifier_render__FPv);
 #ifdef SKIP_ASM
+/**
+ * Draws nothing: cEffectModifier's render has an empty body.
+ */
 void cEffectModifier_render(void* self)
 {
 }
@@ -4158,6 +4412,9 @@ void cEffectModifier_render(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cEffectModifier_signal__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores the signal: cEffectModifier's signal has an empty body.
+ */
 void cEffectModifier_signal(void* self)
 {
 }
@@ -4176,6 +4433,11 @@ extern "C" int func_00360D18(void) {
 //100%
 INCLUDE_ASM("object/railmodifier", cParticleModifier_getType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the effect type id of a particle modifier.
+ *
+ * @return always 1 (dynamic particle modifiers return 2, halo modifiers 3)
+ */
 int cParticleModifier_getType(void* self)
 {
     return 0x1;
@@ -4185,6 +4447,11 @@ int cParticleModifier_getType(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cDynamicParticleModifier_getType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the effect type id of a dynamic particle modifier.
+ *
+ * @return always 2 (particle modifiers return 1, halo modifiers 3)
+ */
 int cDynamicParticleModifier_getType(void* self)
 {
     return 0x2;
@@ -4204,6 +4471,11 @@ extern "C" int func_00360D30(void) {
 //100%
 INCLUDE_ASM("object/railmodifier", cHaloModifier_getType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the effect type id of a halo modifier.
+ *
+ * @return always 3 (particle modifiers return 1, dynamic particle modifiers 2)
+ */
 int cHaloModifier_getType(void* self)
 {
     return 0x3;
@@ -4230,6 +4502,9 @@ extern "C" void cRailLink__cRailLink(void* self, int flags)
 //100%
 INCLUDE_ASM("object/railmodifier", cRailLink_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes nothing to the replay frame: cRailLink's writeToReplayFrame has an empty body.
+ */
 void cRailLink_writeToReplayFrame(void* self)
 {
 }
@@ -4255,6 +4530,9 @@ extern "C" void cMoveNode_apply(cRailVirt* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_updateAnimState__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cMoveNode's updateAnimState has an empty body.
+ */
 void cMoveNode_updateAnimState(void* self)
 {
 }
@@ -4263,6 +4541,11 @@ void cMoveNode_updateAnimState(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_isMoveNode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that this node is a move node.
+ *
+ * @return always 1 (cInstanceNode returns 0)
+ */
 int cMoveNode_isMoveNode(void* self)
 {
     return 0x1;
@@ -4543,6 +4826,11 @@ float func_00361080(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cAnimNode_hasAnimMats__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that an animated node has animation matrices.
+ *
+ * @return always 1
+ */
 int cAnimNode_hasAnimMats(void* self)
 {
     return 0x1;
@@ -4890,6 +5178,11 @@ extern "C" void cBoostModifier__cBoostModifier(void* self, int flags)
 //100%
 INCLUDE_ASM("object/railmodifier", cBoostModifier_getPhysicsType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the boost modifier's physics type id.
+ *
+ * @return always 1 (the base cPhysicsModifier returns 0)
+ */
 int cBoostModifier_getPhysicsType(void* self)
 {
     return 0x1;
@@ -4899,6 +5192,9 @@ int cBoostModifier_getPhysicsType(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cBoostModifier_boostStart__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing when a boost starts; the body is empty.
+ */
 void cBoostModifier_boostStart(void* self)
 {
 }
@@ -4907,6 +5203,9 @@ void cBoostModifier_boostStart(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cBoostModifier_boostEnd__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing when a boost ends; the body is empty.
+ */
 void cBoostModifier_boostEnd(void* self)
 {
 }
@@ -4971,6 +5270,11 @@ void* func_00361530(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cFlexBridgeNode_getNodeState__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the flex bridge node itself as its node state.
+ *
+ * @return self
+ */
 void* cFlexBridgeNode_getNodeState(void* self)
 {
     return self;
@@ -4980,6 +5284,11 @@ void* cFlexBridgeNode_getNodeState(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cFlexBridgeNode_hasIntersect__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a flex bridge node has intersection geometry.
+ *
+ * @return always 1
+ */
 int cFlexBridgeNode_hasIntersect(void* self)
 {
     return 0x1;
@@ -4989,6 +5298,11 @@ int cFlexBridgeNode_hasIntersect(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cFlexBridgeNode_hasBoundBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a flex bridge node has a bounding box.
+ *
+ * @return always 1
+ */
 int cFlexBridgeNode_hasBoundBox(void* self)
 {
     return 0x1;
@@ -5192,6 +5506,11 @@ void* cFloatingNode_getNodeState(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cFloatingNode_hasBoundBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a floating node has a bounding box.
+ *
+ * @return always 1
+ */
 int cFloatingNode_hasBoundBox(void* self)
 {
     return 0x1;
@@ -5216,6 +5535,11 @@ extern "C" int cFloatingNode_getBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cFloatingNode_hasAnimMats__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a floating node has animation matrices.
+ *
+ * @return always 1
+ */
 int cFloatingNode_hasAnimMats(void* self)
 {
     return 0x1;
@@ -5711,6 +6035,11 @@ extern "C" void* cSplineModifier_getRootTransform(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cSplineModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the transform type id of a spline modifier.
+ *
+ * @return always 1 (multi-spline modifiers return 2, roller modifiers 5)
+ */
 int cSplineModifier_getTransformType(void* self)
 {
     return 0x1;
@@ -5785,6 +6114,11 @@ extern "C" void* cMultiSplineModifier_getRootTransform1(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the transform type id of a multi-spline modifier.
+ *
+ * @return always 2 (spline modifiers return 1, roller modifiers 5)
+ */
 int cMultiSplineModifier_getTransformType(void* self)
 {
     return 0x2;
@@ -5809,6 +6143,11 @@ extern "C" void cRollerModifier__cRollerModifier(void* self, int flags)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_shouldRebound__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a roller modifier should not rebound.
+ *
+ * @return always 0 (the base cTransformModifier returns 1)
+ */
 int cRollerModifier_shouldRebound(void* self)
 {
     return 0;
@@ -5839,6 +6178,11 @@ void* cRollerModifier_collide1(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_runCollide__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that collision should not run for a roller modifier.
+ *
+ * @return always 0 (the base cTransformModifier returns 1)
+ */
 int cRollerModifier_runCollide(void* self)
 {
     return 0;
@@ -5903,6 +6247,11 @@ void* cRollerModifier_getRootTransform1(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_getTransformType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the transform type id of a roller modifier.
+ *
+ * @return always 5 (spline modifiers return 1, multi-spline modifiers 2)
+ */
 int cRollerModifier_getTransformType(void* self)
 {
     return 0x5;
@@ -5933,6 +6282,11 @@ void* cParticleNode__cParticleNode(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRailManNode_getSectionId);
 #ifdef SKIP_ASM
+/**
+ * Returns the rail manager node's section id, which is always all bits set.
+ *
+ * @return always 0xFFFFFFFF
+ */
 extern "C" unsigned int cRailManNode_getSectionId()
 {
     return 0xFFFFFFFFU;

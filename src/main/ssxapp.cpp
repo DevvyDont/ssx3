@@ -717,6 +717,11 @@ extern void* PadCache;
 //99.9%
 INCLUDE_ASM("main/ssxapp", cSSXApp_flush__Fv);
 #ifdef SKIP_ASM
+/**
+ * Flushes the pad input cache, if one exists.
+ *
+ * @return the result of cPadCache_flush(), or 0 when there is no PadCache
+ */
 int cSSXApp_flush()
 {
     if (PadCache != 0) {
@@ -765,6 +770,9 @@ extern "C" void cPadCache_cacheInput(void* mgr);
 //99.89%
 INCLUDE_ASM("main/ssxapp", cSSXApp_timerCallback__Fv);
 #ifdef SKIP_ASM
+/**
+ * Timer callback that caches the current pad input, if a pad cache exists.
+ */
 void cSSXApp_timerCallback()
 {
     if (PadCache != 0) {
@@ -778,6 +786,11 @@ void* cMCOverlayManager_getManager();
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_getMCManager);
 #ifdef SKIP_ASM
+/**
+ * Returns the memory-card overlay manager.
+ *
+ * @return the result of cMCOverlayManager_getManager()
+ */
 extern "C" void* cSSXApp_getMCManager()
 {
     return cMCOverlayManager_getManager();

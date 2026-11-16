@@ -8,6 +8,12 @@ struct cEffectLink {
 //100%
 INCLUDE_ASM("object/effectlink", cEffectLink_add__FP11cEffectLinkT0);
 #ifdef SKIP_ASM
+/**
+ * Inserts an effect link into the chain directly after another.
+ *
+ * @param link   link to insert after
+ * @param other  link to insert
+ */
 void cEffectLink_add(cEffectLink* link, cEffectLink* other)
 {
     if (link->next != 0) {

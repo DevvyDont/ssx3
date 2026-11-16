@@ -78,6 +78,9 @@ extern "C" int func_002CA320(void* self)
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_gainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base menu item's gainFocus has an empty body.
+ */
 void cMenuItem_gainFocus(void* self)
 {
 }
@@ -545,6 +548,11 @@ extern "C" int func_002CACC0(void* self)
 //100%
 INCLUDE_ASM("util/menu", cMenu_onCommand__FPv);
 #ifdef SKIP_ASM
+/**
+ * Handles no command for the base menu and reports it as not handled.
+ *
+ * @return always 0
+ */
 int cMenu_onCommand(void* self)
 {
     return 0;
@@ -1349,6 +1357,17 @@ struct cMenuList {
     int wrap;           // 0x124
 };
 
+/**
+ * Inserts an item into the menu at an index, shifting later items up.
+ *
+ * Stores @p menu in the item's first word, then inserts the item at @p index (or appends it when @p index is
+ * negative). If menu->wrap is set, the menu was not empty and the selection is at or after the insertion point,
+ * the selected index moves up by one. There is no check against the 70-item capacity.
+ *
+ * @param menu   menu to add to
+ * @param item   item to insert; its first word is set to @p menu
+ * @param index  position to insert at, or negative to append
+ */
 extern "C" void cMenu_addItem(cMenuList* menu, void** item, int index)
 {
     *item = menu;
@@ -4828,6 +4847,11 @@ extern "C" void* cExpandMenuItem_input(void* self);
 //99.29%
 INCLUDE_ASM("util/menu", cARGBMenuItem_input__FPv);
 #ifdef SKIP_ASM
+/**
+ * Handles input for an ARGB menu item using cExpandMenuItem_input().
+ *
+ * @return the result of cExpandMenuItem_input()
+ */
 void* cARGBMenuItem_input(void* self)
 {
     return cExpandMenuItem_input(self);
@@ -5812,6 +5836,11 @@ extern "C" void* func_002D1BD8()
 INCLUDE_ASM("util/menu", cObjectInterface_getNash);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the game's BXNash object (SSXApp->Game->BXNash).
+ *
+ * @return the BXNash pointer
+ */
 extern "C" void* cObjectInterface_getNash()
 {
     return SSXApp->Game->BXNash;

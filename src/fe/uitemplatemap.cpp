@@ -180,6 +180,15 @@ extern int cUITemplate_MAP_mMapState;
 // PORT: the unit declares cUITemplate_MAP_onGainTransition(void*); the body also takes a flag in $5.
 extern "C" int cUITemplate_MAP_onGainTransition_r(void* self, int on) __asm__("cUITemplate_MAP_onGainTransition");
 
+/**
+ * Sets up the map screen's menus when its gain transition starts.
+ *
+ * When @p on is nonzero: sets the menu focus for cUITemplate_MAP_mMapState, builds the menus, calls
+ * func_00207430() and passes the object's first word to cUITemplate_MAP_setShowInfo(). Does nothing otherwise.
+ *
+ * @param on  nonzero to run the setup
+ * @return always 0
+ */
 extern "C" int cUITemplate_MAP_onGainTransition_r(void* self, int on)
 {
     if (on != 0) {
@@ -200,6 +209,12 @@ extern "C" void* func_0028B180(void);
 extern "C" void func_0028F5B8(void* mgr);
 extern int cUITemplate_MAP_mMapState;
 
+/**
+ * Restores the map screen's menu focus for the current map state when it gains focus.
+ *
+ * Calls cUITemplate_MAP_setupMenuFocus() for cUITemplate_MAP_mMapState, then func_0028F5B8() on the game audio
+ * object returned by func_0028B180().
+ */
 extern "C" void cUITemplate_MAP_onGainFocus(void* self)
 {
     cUITemplate_MAP_setupMenuFocus(self, cUITemplate_MAP_mMapState);

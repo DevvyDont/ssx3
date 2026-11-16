@@ -218,6 +218,14 @@ struct sBucketNode {
     sBucketNode* next; // 0x8
 };
 
+/**
+ * Unlinks a node from its bucket list.
+ *
+ * Only a node with both a previous and a next neighbour is unlinked; a node at either end stays linked. The
+ * node's own links are not cleared, and @p self is not used.
+ *
+ * @param node  node to remove
+ */
 extern "C" void cBucketMan_remove(cBucketMan* self, sBucketNode* node)
 {
     if (node->prev != 0 && node->next != 0) {

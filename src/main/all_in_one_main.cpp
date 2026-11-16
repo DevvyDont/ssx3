@@ -3129,6 +3129,11 @@ extern "C" S_E288 *func_001DE288(S_E288 *self) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_onLoseTransition);
 #ifdef SKIP_ASM
+/**
+ * Handles the keyboard popup's lose transition by reporting it finished immediately.
+ *
+ * @return always 1
+ */
 extern "C" int cKeyboardPopup_onLoseTransition(void) {
     return 1;
 }

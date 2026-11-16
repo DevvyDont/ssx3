@@ -134,6 +134,9 @@ INCLUDE_ASM("main/loadscreens_prestart", cInitLoadScreen_load);
 #ifdef SKIP_ASM
 extern "C" void cSSXApp_initload(void* app);
 
+/**
+ * Runs the application's initial load for the init load screen via cSSXApp_initload(SSXApp).
+ */
 extern "C" void cInitLoadScreen_load(void)
 {
     cSSXApp_initload(SSXApp);

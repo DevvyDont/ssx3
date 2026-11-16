@@ -243,6 +243,9 @@ extern "C" void cOVTemplate_PauseMenu_onGainFocus(void* self, int a1)
 //100%
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing when the pause menu loses focus; the body is empty.
+ */
 void cOVTemplate_PauseMenu_onLoseFocus(void* self)
 {
 }
@@ -548,6 +551,11 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
 //100%
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onInputBegin__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does no input handling for the pause menu and reports the input as not handled.
+ *
+ * @return always 0
+ */
 int cOVTemplate_PauseMenu_onInputBegin(void* self)
 {
     return 0;

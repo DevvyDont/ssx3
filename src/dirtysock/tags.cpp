@@ -3,6 +3,17 @@
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag__TagFieldSetupAppend__FPcN20);
 #ifdef SKIP_ASM
+/**
+ * Writes a field name and '=' at the append position of a tag buffer.
+ *
+ * With a null @p name it instead empties the buffer (writes 0 to its first byte) and leaves @p dst where it
+ * was. Nothing is NUL-terminated after the '='.
+ *
+ * @param buf   start of the tag buffer
+ * @param dst   where to write the name
+ * @param name  field name, or 0
+ * @return the position just after the '=', or @p dst when @p name is 0
+ */
 char* cDirtysock_tag__TagFieldSetupAppend(char* buf, char* dst, char* name)
 {
     if (name == 0) {
@@ -368,6 +379,16 @@ extern "C" int func_003EB9E8(unsigned char* record, int len, char* name, const s
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldDupl);
 #ifdef SKIP_ASM
+/**
+ * Copies a string into a fixed-size buffer, truncating it to fit.
+ *
+ * Copies at most @p len - 1 characters and adds the terminator when @p len is positive.
+ *
+ * @param dst  destination buffer
+ * @param len  size of @p dst in bytes
+ * @param src  NUL-terminated text to copy
+ * @return the number of characters copied, not counting the terminator
+ */
 extern "C" int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src)
 {
     int left = len;
@@ -1090,6 +1111,16 @@ extern "C" unsigned char* func_003ECE38(unsigned char* src, int unused, char* ou
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetNumber);
 #ifdef SKIP_ASM
+/**
+ * Parses a signed decimal integer from a tag field value.
+ *
+ * Accepts one leading '+' or '-' and stops at the first non-digit, with no overflow check. Only a null @p data
+ * yields @p defval: text without digits parses as 0.
+ *
+ * @param data    field text, or 0
+ * @param defval  value returned when @p data is 0
+ * @return the parsed value, or @p defval
+ */
 extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* data, int defval)
 {
     int sign;
@@ -1134,6 +1165,16 @@ extern "C" int cDirtysock_tag_TagFieldGetFlags(const char* data, int defval)
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetAddr);
 #ifdef SKIP_ASM
+/**
+ * Parses a dotted-decimal IPv4 address from a tag field value.
+ *
+ * Digits accumulate into the low byte and each '.' shifts the address left by 8 bits; parsing stops at any other
+ * character. There is no range or format check, and only a null @p data yields @p defval.
+ *
+ * @param data    field text such as "10.0.0.1", or 0
+ * @param defval  value returned when @p data is 0
+ * @return the address with the first number in the top byte, or @p defval
+ */
 extern "C" unsigned int cDirtysock_tag_TagFieldGetAddr(const char* data, unsigned int defval)
 {
     unsigned int addr = 0;
@@ -1156,6 +1197,16 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetAddr(const char* data, unsigne
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetFourCC);
 #ifdef SKIP_ASM
+/**
+ * Packs the start of a tag field value into a four-character code.
+ *
+ * Shifts in up to four characters, stopping at the first one outside '!'..'~'; a shorter code keeps space
+ * characters (0x20) in its unused high bytes.
+ *
+ * @param data    field text, or 0
+ * @param defval  value returned when @p data is 0 or does not start with a character in '!'..'~'
+ * @return the packed code, or @p defval
+ */
 extern "C" int cDirtysock_tag_TagFieldGetFourCC(const char* data, int defval)
 {
     int token;

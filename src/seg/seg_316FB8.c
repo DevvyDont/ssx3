@@ -235,6 +235,15 @@ __asm__(
 //100%
 INCLUDE_ASM("seg/seg_316FB8", strchr);
 #ifdef SKIP_ASM
+/**
+ * Finds the first occurrence of a character in a string (newlib strchr, EE-optimised).
+ *
+ * Scans 16 or 8 bytes at a time when the string is aligned. Searching for 0 returns the terminator.
+ *
+ * @param s  NUL-terminated string to search
+ * @param c  character to find; only its low byte is used
+ * @return a pointer to the first match, or 0 if there is none
+ */
 // PORT: PS2-only newlib C library routine; kept as the binary's own instructions (library source is never reconstructed); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
@@ -462,6 +471,15 @@ __asm__(
 //100%
 INCLUDE_ASM("seg/seg_316FB8", strcpy);
 #ifdef SKIP_ASM
+/**
+ * Copies a NUL-terminated string, including the terminator (newlib strcpy, EE-optimised).
+ *
+ * Copies 16 or 8 bytes at a time while both pointers are aligned and no terminator has been seen.
+ *
+ * @param dst  destination buffer
+ * @param src  string to copy
+ * @return @p dst
+ */
 // PORT: PS2-only newlib C library routine; kept as the binary's own instructions (library source is never reconstructed); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
@@ -550,6 +568,14 @@ __asm__(
 //100%
 INCLUDE_ASM("seg/seg_316FB8", strlen);
 #ifdef SKIP_ASM
+/**
+ * Returns the length of a NUL-terminated string (newlib strlen, EE-optimised).
+ *
+ * Scans 16 or 8 bytes at a time when the string is aligned.
+ *
+ * @param s  string to measure
+ * @return the number of bytes before the terminator
+ */
 // PORT: PS2-only newlib C library routine; kept as the binary's own instructions (library source is never reconstructed); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
@@ -919,6 +945,16 @@ __asm__(
 //100%
 INCLUDE_ASM("seg/seg_316FB8", strncpy);
 #ifdef SKIP_ASM
+/**
+ * Copies at most n characters of a string and pads the rest with zeros (newlib strncpy, EE-optimised).
+ *
+ * The destination is not terminated when @p src has n or more characters.
+ *
+ * @param dst  destination buffer of at least @p n bytes
+ * @param src  string to copy
+ * @param n    number of bytes to write
+ * @return @p dst
+ */
 // PORT: PS2-only newlib C library routine; kept as the binary's own instructions (library source is never reconstructed); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(

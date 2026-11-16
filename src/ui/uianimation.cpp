@@ -202,6 +202,15 @@ struct cUIAnimation_updateFrame_sAnim {
     signed char dir;
 };
 
+/**
+ * Steps the animation's frame once according to the play-mode flags.
+ *
+ * The low three bits of @p flags select the mode: 1 steps forward, 2 steps backward and 3 ping-pongs between the
+ * ends using self->dir. In modes 1 and 2, bit 3 (0x8) wraps to the other end instead of stopping at the last or
+ * first frame. Mode 0, modes 4-7 and an animation without data leave the frame alone.
+ *
+ * @param flags  play mode in bits 0-2, wrap flag in bit 3
+ */
 extern "C" void cUIAnimation_updateFrame(cUIAnimation_updateFrame_sAnim* self, unsigned char flags)
 {
     cUIAnimation_updateFrame_sData* data = self->data;

@@ -1386,6 +1386,15 @@ INCLUDE_ASM("seg/seg_312310", dptofp);
 /* fp-bit.c df_to_sf (GCC runtime, GPL v2+ with the libgcc linking exception): dptofp (US_SOFTWARE_GOFAST) */
 extern SFtype __make_fp (fp_class_type, unsigned int, int, USItype) __asm__("func_00413AC8");
 
+/**
+ * Converts a double to a float in software (libgcc's df_to_sf).
+ *
+ * Unpacks the double, shifts its fraction down to single precision with the lowest guard bit set when any
+ * discarded bit was nonzero, and lets __make_fp() round and pack the result.
+ *
+ * @param arg_a  the double to convert
+ * @return the value as a float
+ */
 SFtype
 df_to_sf (DFtype arg_a)
 {

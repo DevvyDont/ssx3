@@ -399,6 +399,13 @@ extern "C" int strlen1(unsigned short* s)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", strcpy1);
 #ifdef SKIP_ASM
+/**
+ * Copies a NUL-terminated 16-bit-character string.
+ *
+ * @param dst  destination buffer
+ * @param src  string to copy
+ * @return @p dst
+ */
 extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src)
 {
     unsigned short* ret = dst;
@@ -431,6 +438,13 @@ INCLUDE_ASM("worldpainter/quadtree", strcpy2);
 // The unit declares this as extern "C" void* strcpy2(void*) further down
 // (its caller func_002C5500 passes one arg); bind the 2-arg body to the symbol.
 char* strcpy2_impl(char* dst, unsigned short* src) __asm__("strcpy2");
+/**
+ * Copies a 16-bit-character string into a byte string, keeping only the low byte of each character.
+ *
+ * @param dst  destination byte buffer
+ * @param src  NUL-terminated 16-bit string to copy
+ * @return @p dst
+ */
 char* strcpy2_impl(char* dst, unsigned short* src)
 {
     char* ret = dst;
@@ -511,6 +525,13 @@ typedef char* sprintf1_va_list;
 
 extern "C" int USTR_vsprintf(unsigned short* dst, const unsigned short* fmt, char* ap);
 
+/**
+ * Formats a 16-bit-character string, like sprintf(), through USTR_vsprintf().
+ *
+ * @param dst  destination buffer of 16-bit characters
+ * @param fmt  16-bit format string, followed by its arguments
+ * @return the value USTR_vsprintf() returns
+ */
 extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...)
 {
     sprintf1_va_list ap;

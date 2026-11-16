@@ -2025,6 +2025,11 @@ INCLUDE_ASM("replay/replaycache", cInSeq__cInSeq);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
+/**
+ * Destroys an input sequence; the only work is freeing the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 // Deleting-destructor tail: free self when bit 0 of the g++ 2.95 in-charge flag is set.
 extern "C" void cInSeq__cInSeq(int* self, int flags)
 {
@@ -4382,6 +4387,11 @@ int cScriptPlayerChannelSpline_GetCustom(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetNextKeyFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a spline channel has no next key frame.
+ *
+ * @return always -1
+ */
 int cScriptPlayerChannelSpline_GetNextKeyFrame(void* self)
 {
     return -0x1;
@@ -4391,6 +4401,11 @@ int cScriptPlayerChannelSpline_GetNextKeyFrame(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the channel type id of a spline channel.
+ *
+ * @return always 0 (object channels return 1, block channels 2, event channels 3)
+ */
 int cScriptPlayerChannelSpline_GetType(void* self)
 {
     return 0;
@@ -4436,6 +4451,11 @@ int cScriptPlayerChannelBlock_GetCustom(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the channel type id of a block channel.
+ *
+ * @return always 2 (spline channels return 0, object channels 1, event channels 3)
+ */
 int cScriptPlayerChannelBlock_GetType(void* self)
 {
     return 0x2;
@@ -4481,6 +4501,11 @@ int cScriptPlayerChannelEvent_GetCustom(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the channel type id of an event channel.
+ *
+ * @return always 3 (spline channels return 0, object channels 1, block channels 2)
+ */
 int cScriptPlayerChannelEvent_GetType(void* self)
 {
     return 0x3;
@@ -4526,6 +4551,11 @@ int cScriptPlayerChannelObject_GetCustom(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the channel type id of an object channel.
+ *
+ * @return always 1 (spline channels return 0, block channels 2, event channels 3)
+ */
 int cScriptPlayerChannelObject_GetType(void* self)
 {
     return 0x1;

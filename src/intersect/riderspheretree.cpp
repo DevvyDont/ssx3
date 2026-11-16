@@ -50,6 +50,11 @@ INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree__cRiderSphereTree);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a rider sphere tree; the only work is freeing the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cRiderSphereTree__cRiderSphereTree(void* self, int flags)
 {
     if (flags & 1) {

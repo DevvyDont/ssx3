@@ -178,6 +178,13 @@ extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 //99.75%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_jumpToFrame__FPvUs);
 #ifdef SKIP_ASM
+/**
+ * Restarts the screen's animation at a given frame.
+ *
+ * Deletes the primary animation thread if there is one, then calls cUIScreen_playFrame(self, frame, 0).
+ *
+ * @param frame  frame to play from
+ */
 void cUIScreen_jumpToFrame(void* self, unsigned short frame)
 {
     void* thread = cUIScreen_getPrimaryThread(self);
@@ -1537,6 +1544,9 @@ extern "C" void cUIState_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIState_onInputAlways__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base UI state's onInputAlways has an empty body.
+ */
 void cUIState_onInputAlways(void* self)
 {
 }

@@ -384,6 +384,9 @@ extern "C" void func_00243C80(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGameState_preloadInit__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base game state's preloadInit has an empty body.
+ */
 void cGameState_preloadInit(void* self)
 {
 }
@@ -392,6 +395,9 @@ void cGameState_preloadInit(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGameState_preloadUpdate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base game state's preloadUpdate has an empty body.
+ */
 void cGameState_preloadUpdate(void* self)
 {
 }
@@ -400,6 +406,9 @@ void cGameState_preloadUpdate(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGameState_preloadCancel__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base game state's preloadCancel has an empty body.
+ */
 void cGameState_preloadCancel(void* self)
 {
 }
@@ -424,6 +433,9 @@ void func_00243CD0(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGameState_loseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base game state's loseFocus has an empty body.
+ */
 void cGameState_loseFocus(void* self)
 {
 }
@@ -432,6 +444,11 @@ void cGameState_loseFocus(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGameState_isPreloadComplete__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports the base game state's preload as already complete.
+ *
+ * @return always 1
+ */
 int cGameState_isPreloadComplete(void* self)
 {
     return 0x1;
@@ -441,6 +458,9 @@ int cGameState_isPreloadComplete(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGameState_onWidgetEvent__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores widget events: the base game state's onWidgetEvent has an empty body.
+ */
 void cGameState_onWidgetEvent(void* self)
 {
 }

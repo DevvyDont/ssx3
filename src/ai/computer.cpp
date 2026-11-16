@@ -22,6 +22,17 @@ struct cComputer_SIRD {
     float skillB;           // 0xDFC
 };
 
+/**
+ * Applies the AI tuning for one difficulty level to this computer rider.
+ *
+ * Levels 1-5 each set skillA, skillB and the tune block's accel, speed and boost flag; level 1 has the highest
+ * skill values and top speed, level 5 the lowest, and only level 1 leaves boost off. Mode 0 and mode 2 then
+ * override skillA, skillB and speed with their own per-level tables (mode 0 lower, mode 2 higher). skillB is
+ * written as a percentage and scaled by 0.01 at the end, even when @p level is outside 1-5 and nothing else changed.
+ *
+ * @param level  difficulty level, 1 to 5; other values leave the tuning as it was
+ * @param mode   tuning variant: 0 and 2 apply their override tables, any other value keeps the base values
+ */
 // Applies the per-level AI tuning; mode 0 and mode 2 override the skill values with their own tables.
 // skillB is stored as a percentage and scaled to 0..1 at the end.
 extern "C" void cComputer_setIndividualRiderDifficulty(cComputer_SIRD* self, int level, int mode)

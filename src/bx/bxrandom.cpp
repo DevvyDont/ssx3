@@ -96,6 +96,15 @@ void* func_00317930(void* self)
 //100%
 INCLUDE_ASM("bx/bxrandom", cBxPseudoRng_Seed);
 #ifdef SKIP_ASM
+/**
+ * Seeds a pseudo-random generator state from one value.
+ *
+ * Fills the six state words with @p seed plus a running sum of fixed constants: state[0] = seed + 0xF22D0E56,
+ * state[1] = state[0] + 0x96041893, and so on.
+ *
+ * @param state  six-word generator state to fill
+ * @param seed   seed value
+ */
 extern "C" void cBxPseudoRng_Seed(uint* state, uint seed)
 {
     ulong x = seed;

@@ -119,6 +119,17 @@ extern "C" int* func_0016C0D8(cCameraTriggerList2* self, int key)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_insert__FP19cCameraTriggerList2Pvi);
 #ifdef SKIP_ASM
+/**
+ * Stores a trigger in the list, either appended or written into a given slot.
+ *
+ * A negative @p idx appends the item when fewer than 120 are stored. A non-negative @p idx overwrites that slot
+ * with no bounds check and does not change the count.
+ *
+ * @param list  list to modify
+ * @param item  trigger to store
+ * @param idx   slot to overwrite, or negative to append
+ * @return 0 if an append found the list full, otherwise 1
+ */
 int cCameraTriggerList_insert(cCameraTriggerList2* list, void* item, int idx)
 {
     if (idx < 0) {

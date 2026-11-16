@@ -5079,6 +5079,9 @@ int func_001406C0(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cBeing_applyBoost__FPv);
 #ifdef SKIP_ASM
+/**
+ * Applies no boost: cBeing's applyBoost has an empty body.
+ */
 void cBeing_applyBoost(void* self)
 {
 }
@@ -5134,6 +5137,9 @@ int func_00140700(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cBeing_transport__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cBeing's transport has an empty body.
+ */
 void cBeing_transport(void* self)
 {
 }
@@ -5142,6 +5148,9 @@ void cBeing_transport(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cBeing_resetToPath__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cBeing's resetToPath has an empty body.
+ */
 void cBeing_resetToPath(void* self)
 {
 }
@@ -5150,6 +5159,9 @@ void cBeing_resetToPath(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cBeing_initForMission__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cBeing's initForMission has an empty body.
+ */
 void cBeing_initForMission(void* self)
 {
 }
@@ -5158,6 +5170,9 @@ void cBeing_initForMission(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cBeing_flagEventSpeedBoost__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores a speed-boost event: cBeing's flagEventSpeedBoost has an empty body.
+ */
 void cBeing_flagEventSpeedBoost(void* self)
 {
 }
@@ -5166,6 +5181,9 @@ void cBeing_flagEventSpeedBoost(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cBeing_flagEventTrickBoost__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores a trick-boost event: cBeing's flagEventTrickBoost has an empty body.
+ */
 void cBeing_flagEventTrickBoost(void* self)
 {
 }
@@ -5174,6 +5192,9 @@ void cBeing_flagEventTrickBoost(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cBeing_flagEventTrickMultiplier__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores a trick-multiplier event: cBeing's flagEventTrickMultiplier has an empty body.
+ */
 void cBeing_flagEventTrickMultiplier(void* self)
 {
 }
@@ -6697,6 +6718,9 @@ extern "C" void func_00144040(char* self, int idx)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cAIStateHandler_OnLoseState__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing when the AI state handler loses its state; the body is empty.
+ */
 void cAIStateHandler_OnLoseState(void* self)
 {
 }
@@ -7101,6 +7125,15 @@ extern "C" void* func_00311958(void* self);
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRiderAnim__cRiderAnim__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a rider animation object by handing it to the base destructor func_00311958().
+ *
+ * That destructor expires the object's six animation sequencers and frees their storage, then frees the object
+ * itself when bit 0 of the destructor flags is set. Only @p self is declared here: the flags the caller passed in
+ * the second argument register reach func_00311958() unchanged.
+ *
+ * @return no meaningful value (func_00311958() returns nothing)
+ */
 void* cRiderAnim__cRiderAnim(void* self)
 {
     return func_00311958(self);

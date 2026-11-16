@@ -4738,6 +4738,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILE_loadpackat);
 #ifdef SKIP_ASM
 extern void FILE_loadpackatz();
 
+/**
+ * Thin wrapper that calls FILE_loadpackatz().
+ *
+ * Declared without parameters: the caller's arguments reach FILE_loadpackatz() unchanged in their registers.
+ */
 void FILE_loadpackat(void) {
     FILE_loadpackatz();
 }
@@ -6128,6 +6133,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", REAL_exit);
 #ifdef SKIP_ASM
 extern void REAL_restore(void);
 
+/**
+ * Calls REAL_restore() and then stops at a break trap (code 0xFFFF) instead of returning.
+ */
 void REAL_exit(void) {
     REAL_restore();
     __asm__ volatile("break 0xFFFF");  // PORT: trap
@@ -7532,6 +7540,17 @@ void MEM_fill_memset(char *p, int c, int n) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", MEM_copy);
 #ifdef SKIP_ASM
+/**
+ * Copies n bytes from src to dst (hand-written EE memcpy).
+ *
+ * Copies under 18 bytes, or from a source that is not 16-byte aligned, byte by byte. An unaligned destination is
+ * first aligned by func_003E665C(); aligned copies move 128-byte quadword blocks, then 8-byte and single-byte
+ * tails. Overlapping ranges are not handled, and nothing is returned.
+ *
+ * @param dst  destination
+ * @param src  source
+ * @param n    number of bytes to copy
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only hand-written memcpy (0x80-byte lq/sq blocks, ld/sd and byte tails, unfilled delay slots; it branches into func_003E665C, which jumps back into it); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.

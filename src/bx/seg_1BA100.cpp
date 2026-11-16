@@ -5,6 +5,11 @@
 //100%
 INCLUDE_ASM("bx/seg_1BA100", bxLogPrint);
 #ifdef SKIP_ASM
+/**
+ * Discards a formatted log message: the body is empty in this build.
+ *
+ * @param fmt  printf-style format string (ignored, as are the variable arguments)
+ */
 extern "C" void bxLogPrint(const char *fmt, ...) {
 }
 #endif

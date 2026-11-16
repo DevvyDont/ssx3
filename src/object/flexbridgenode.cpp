@@ -269,6 +269,12 @@ struct sFlexBridge {
     sFlexVec4* pts;      // 0x7C: 2 * count points
 };
 
+/**
+ * Places the flex bridge's spring segments and records its end offsets.
+ *
+ * Each of the count segments goes to the midpoint between pts[i] and pts[count + i]. Then start is set to
+ * pts[0] and end to pts[count], both relative to the first segment's position.
+ */
 extern "C" void cFlexBridgeNode_initSpringNodes(sFlexBridge* self)
 {
     int n = self->count;

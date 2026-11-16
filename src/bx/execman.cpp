@@ -24,6 +24,9 @@ void cExecutionMan__cExecutionMan(cExecutionMan* self, int flags)
 //100%
 INCLUDE_ASM("bx/execman", cExecutionMan_prepause__Fv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing before a pause: the execution manager's prepause hook has an empty body.
+ */
 void cExecutionMan_prepause()
 {
 }
@@ -32,6 +35,9 @@ void cExecutionMan_prepause()
 //100%
 INCLUDE_ASM("bx/execman", cExecutionMan_postpause__Fv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing after a pause: the execution manager's postpause hook has an empty body.
+ */
 void cExecutionMan_postpause()
 {
 }

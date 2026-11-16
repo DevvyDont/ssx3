@@ -472,6 +472,12 @@ extern "C" void* func_0016CF48(void* self, int type);
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_setInGameTriggers__FPv);
 #ifdef SKIP_ASM
+/**
+ * Activates the in-game camera triggers.
+ *
+ * Calls func_0016CF48(self, 2): every trigger whose mask has bit 1 set is registered with its bounds in
+ * SSXApp->Game->BXNash (if it is not already), and every other registered trigger is removed from it.
+ */
 void cCameraTriggerMan_setInGameTriggers(void* self)
 {
     func_0016CF48(self, 2);

@@ -114,6 +114,11 @@ struct cAppMan {
 //100%
 INCLUDE_ASM("bx/appman", cAppMan_setNextModule__FP7cAppManUi);
 #ifdef SKIP_ASM
+/**
+ * Records which module the application manager should switch to next.
+ *
+ * @param module  module id stored in mNextModule
+ */
 void cAppMan_setNextModule(cAppMan* self, unsigned int module)
 {
     self->mNextModule = module;
@@ -252,6 +257,11 @@ extern "C" void func_00317308(void *arg0) {
 //100%
 INCLUDE_ASM("bx/appman", cAppMan_checkHalt__FP7cAppMan);
 #ifdef SKIP_ASM
+/**
+ * Asks the execution manager whether execution should halt.
+ *
+ * @return the result of cExecutionMan_checkHalt(mExecutionMan, 1)
+ */
 int cAppMan_checkHalt(cAppMan* self)
 {
     return cExecutionMan_checkHalt(self->mExecutionMan, 1);

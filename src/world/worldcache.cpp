@@ -1401,6 +1401,11 @@ INCLUDE_ASM("world/worldcache", cWorldView__cWorldView);
 void operator_delete(int*);
 void cWorldView_purge(void* self);
 
+/**
+ * Destroys a world view: purges it, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cWorldView__cWorldView(void* self, int flags)
 {
     cWorldView_purge(self);
@@ -1508,6 +1513,9 @@ extern "C" int cWorldView_init(sWorldCacheMap* self, sWCHdr* hdr, int id)
 //100%
 INCLUDE_ASM("world/worldcache", cWorldView_purge__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: this cWorldView_purge has an empty body.
+ */
 void cWorldView_purge(void* self)
 {
 }

@@ -1314,6 +1314,9 @@ extern "C" void cReplay_restoreFrame(void*);
 //100%
 INCLUDE_ASM("replay/playbackman", cReplay_restoreFrame1);
 #ifdef SKIP_ASM
+/**
+ * Thin wrapper that restores a replay frame through cReplay_restoreFrame().
+ */
 extern "C" void cReplay_restoreFrame1(void* self)
 {
     cReplay_restoreFrame(self);

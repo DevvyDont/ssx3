@@ -3423,6 +3423,11 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onGainFocus);
 extern "C" void cUIState_onGainFocus(void* self);
 extern "C" void cOVState_REWARDS_updateMenu(void* self, int a1);
 
+/**
+ * Runs the base UI-state focus handling, then refreshes the rewards menu.
+ *
+ * Calls cUIState_onGainFocus() and then cOVState_REWARDS_updateMenu(self, 0).
+ */
 extern "C" void cOVState_REWARDS_onGainFocus(void* self)
 {
     cUIState_onGainFocus(self);

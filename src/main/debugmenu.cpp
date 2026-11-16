@@ -3145,6 +3145,11 @@ void* func_00250030(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the splash toggles menu focus using the base cMenu_onGainFocus().
+ *
+ * @return the result of cMenu_onGainFocus()
+ */
 void* cSplashTogglesMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -3154,6 +3159,11 @@ void* cSplashTogglesMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Removes focus from the splash toggles menu using the base cMenu_onLoseFocus().
+ *
+ * @return the result of cMenu_onLoseFocus()
+ */
 void* cSplashTogglesMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);

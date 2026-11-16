@@ -186,6 +186,9 @@ void func_0015BB08(void* self)
 //100%
 INCLUDE_ASM("be/bedbreward", cBEInterface_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes nothing to the replay frame: cBEInterface's writeToReplayFrame has an empty body.
+ */
 void cBEInterface_writeToReplayFrame(void* self)
 {
 }
@@ -194,6 +197,9 @@ void cBEInterface_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("be/bedbreward", cBEInterface_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reads nothing from the replay frame: cBEInterface's readFromReplayFrame has an empty body.
+ */
 void cBEInterface_readFromReplayFrame(void* self)
 {
 }
@@ -1442,6 +1448,13 @@ INCLUDE_ASM("be/bedbreward", cCameraAlgoList__cCameraAlgoList);
 void operator_delete(int* ptr);
 extern "C" void func_0015CB08(void* self);
 
+/**
+ * Destroys a camera algorithm list: frees its nodes, then the object itself when asked to.
+ *
+ * func_0015CB08() deletes every node and the algorithms the list owns.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cCameraAlgoList__cCameraAlgoList(int* self, int flags)
 {
     func_0015CB08(self);

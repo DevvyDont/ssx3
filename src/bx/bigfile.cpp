@@ -36,6 +36,11 @@ void operator_delete(int* ptr);
 //100%
 INCLUDE_ASM("bx/bigfile", cBigFile__cBigFile__FP8cBigFilei);
 #ifdef SKIP_ASM
+/**
+ * Destroys a big file: closes it, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 void cBigFile__cBigFile(cBigFile* self, int flags)
 {
     cBigFile_close(self);

@@ -1490,6 +1490,16 @@ static inline void destroy_B0E8(sNode_B0E8* n)
     }
 }
 
+/**
+ * Destroys the processes with a given section key at the front of the list.
+ *
+ * First destroys the leading run of nodes with @p key, advancing @p head past each. Then destroys the run of
+ * matching nodes right after the new head, stopping at the first node with another key. That second run is
+ * destroyed without updating the head's next link.
+ *
+ * @param head  pointer to the list head; updated as leading nodes are destroyed
+ * @param key   section key of the processes to unload
+ */
 // Deletes the leading run of nodes with the given key, then the run after the new head.
 extern "C" void cProcessList_unloadSection(sNode_B0E8** head, int key)
 {
@@ -3417,6 +3427,11 @@ extern "C" int func_0030D3D0(void *arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_isMission__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a world-script process is not a mission.
+ *
+ * @return always 0 (cWScriptMission returns 1)
+ */
 int cWScriptProcess_isMission(void* self)
 {
     return 0;
@@ -3494,6 +3509,11 @@ extern "C" int func_0030D478(void *arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMission_isMission__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that this world-script process is a mission.
+ *
+ * @return always 1
+ */
 int cWScriptMission_isMission(void* self)
 {
     return 0x1;

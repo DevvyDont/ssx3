@@ -309,6 +309,16 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isPeakLocked1);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
+/**
+ * Checks whether a peak is locked for a rider given by rider index.
+ *
+ * Resolves the rider's profile index and character id through cBELibrary and passes them on to
+ * cBENewPlayerInterface_isPeakLocked().
+ *
+ * @param rider  rider index passed to cBELibrary_getProfileIndex() and cBELibrary_getCharacterID()
+ * @param peak   peak to test
+ * @return the result of cBENewPlayerInterface_isPeakLocked()
+ */
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int peak)
 {
     int profile = cBELibrary_getProfileIndex(rider);

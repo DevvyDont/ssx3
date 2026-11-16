@@ -1049,6 +1049,11 @@ INCLUDE_ASM("main/gamestate", cGFNextHeatState_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
 
+/**
+ * Hides the game's load indicator when the next-heat state loses focus.
+ *
+ * Calls cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 3).
+ */
 extern "C" void cGFNextHeatState_loseFocus(void)
 {
     cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 3);
@@ -1151,6 +1156,12 @@ INCLUDE_ASM("main/gamestate", cGFSessionTeleportState_update);
 #ifdef SKIP_ASM
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
 
+/**
+ * Updates the session-teleport state with one fixed call on the game object.
+ *
+ * Calls func_00231250(SSXApp->Game, 1, 0, 0), which stores 1 and 0 in two game fields (offsets 0x210 and
+ * 0x21C) and skips its refresh step.
+ */
 extern "C" void cGFSessionTeleportState_update(void)
 {
     func_00231250(SSXApp->Game, 1, 0, 0);
@@ -1953,6 +1964,9 @@ extern "C" void cGFReplayStartState_gainFocus(void)
 //100%
 INCLUDE_ASM("main/gamestate", cGFReplayStartState_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the replay-start state's update has an empty body.
+ */
 void cGFReplayStartState_update(void* self)
 {
 }

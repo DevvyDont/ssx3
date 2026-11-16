@@ -2949,6 +2949,15 @@ struct SHAPE_bpctobpp_sKey {
 extern "C" char SHAPE_type(int key);
 extern "C" void SHAPE_depth(SHAPE_bpctobpp_sKey* k);
 
+/**
+ * Converts a bits-per-component format code to its bits per pixel.
+ *
+ * Maps @p key to a shape type with SHAPE_type() (codes such as 4, 8, 15, 16, 555, 1555, 32 and 8888, decimal)
+ * and looks the type up with SHAPE_depth(). A @p key of 0 is treated as 32. Declared void here, but
+ * SHAPE_depth()'s result is still in the return register when it returns.
+ *
+ * @param key  format code, or 0 for 32
+ */
 extern "C" void SHAPE_bpctobpp(int key)
 {
     SHAPE_bpctobpp_sKey k;

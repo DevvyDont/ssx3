@@ -989,6 +989,9 @@ extern "C" void cMCOverlayManager_UpdateInitCardsCheck(void* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitCardsCheckDone__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the memory-card overlay's init-cards-check-done update has an empty body.
+ */
 void cMCOverlayManager_UpdateInitCardsCheckDone(void* self)
 {
 }
@@ -1145,6 +1148,9 @@ extern "C" void cMCOverlayManager_UpdateInitFileCheck(void* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitFileCheckDone__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the memory-card overlay's init-file-check-done update has an empty body.
+ */
 void cMCOverlayManager_UpdateInitFileCheckDone(void* self)
 {
 }
@@ -3311,6 +3317,11 @@ extern "C" void* cMCOverlayManager_ReturnToDevSelectScreen(void* self);
 //99.29%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateCardUnusable__FPv);
 #ifdef SKIP_ASM
+/**
+ * Handles an unusable memory card by returning to the device-select screen.
+ *
+ * @return the result of cMCOverlayManager_ReturnToDevSelectScreen()
+ */
 void* cMCOverlayManager_UpdateCardUnusable(void* self)
 {
     return cMCOverlayManager_ReturnToDevSelectScreen(self);

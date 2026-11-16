@@ -22,6 +22,11 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", WORLDTRIGGERMANAGER_DeInit);
 #ifdef SKIP_ASM
 extern "C" void cWorldTriggerManager__cWorldTriggerManager(char** self, int flags);
 
+/**
+ * Destroys the global world trigger manager, if there is one, and clears the pointer.
+ *
+ * Calls the destructor with flags 3, so the object's memory is freed too.
+ */
 extern "C" void WORLDTRIGGERMANAGER_DeInit()
 {
     if (gWorldTriggerManager != 0) {

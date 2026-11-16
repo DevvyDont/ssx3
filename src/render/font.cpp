@@ -2393,6 +2393,9 @@ extern "C" int func_00394C40(void) {
 //100%
 INCLUDE_ASM("render/font", cLightMan_CreateAmbient__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cLightMan's CreateAmbient has an empty body.
+ */
 void cLightMan_CreateAmbient(void* self)
 {
 }
@@ -2427,6 +2430,14 @@ extern "C" void* func_0038AE28(void* self);
 //100%
 INCLUDE_ASM("render/font", cPS2LightMan__cPS2LightMan__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the PS2 light manager through the light-manager destructor func_0038AE28().
+ *
+ * That destructor clears the global D_004A5B8C and frees the object when bit 0 of the destructor flags is set.
+ * Only @p self is declared here: the flags reach func_0038AE28() unchanged in their register.
+ *
+ * @return no meaningful value (func_0038AE28() returns nothing)
+ */
 void* cPS2LightMan__cPS2LightMan(void* self)
 {
     return func_0038AE28(self);
@@ -2493,6 +2504,9 @@ extern "C" char* func_00394D18(void* self)
 //100%
 INCLUDE_ASM("render/font", cPS2LightMan_SetAmbient__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cPS2LightMan's SetAmbient has an empty body.
+ */
 void cPS2LightMan_SetAmbient(void* self)
 {
 }

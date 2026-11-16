@@ -6,6 +6,13 @@
 
 INCLUDE_ASM("visualfx/crowdrender2d", cCrowdRender2D_cCrowdRender2D__Fi);
 #ifdef SKIP_ASM
+/**
+ * Constructs the 2D crowd renderer by calling cCrowdRender2D_init().
+ *
+ * @param param_1  the object being constructed; it is still in the first argument register when
+ *                 cCrowdRender2D_init() is called
+ * @return @p param_1
+ */
 int cCrowdRender2D_cCrowdRender2D(int param_1) {
 	cCrowdRender2D_init();
 	return param_1;
@@ -16,6 +23,12 @@ int cCrowdRender2D_cCrowdRender2D(int param_1) {
 //https://decomp.me/scratch/zsTkS
 INCLUDE_ASM("visualfx/crowdrender2d", cCrowdRender2D__cCrowdRender2D__FPii);
 #ifdef SKIP_ASM
+/**
+ * Destroys the 2D crowd renderer: purges it, then frees the object when asked to.
+ *
+ * @param param_1  the object being destroyed
+ * @param param_2  g++ destructor flags; bit 0 set frees the object's memory
+ */
 void cCrowdRender2D__cCrowdRender2D(int* param_1, int param_2)
 {
 	cCrowdRender2D_purge(param_1);
@@ -150,6 +163,18 @@ void* cCrowdAnim2D_cCrowdAnim2D(void* memory, void* param_1)
 //100%
 INCLUDE_ASM("visualfx/crowdrender2d", cCrowdAnim2D_advanceFrame);
 #ifdef SKIP_ASM
+/**
+ * Steps a crowd animation frame according to its play mode and returns the new frame.
+ *
+ * Mode 0 plays forward and holds the last frame, 1 plays backward and holds frame 0, 2 and 3 ping-pong forward
+ * and backward (the mode flips at each end), and 4 plays forward and loops to frame 0. Modes 2-4 leave a
+ * one-frame animation alone. @p self is not used.
+ *
+ * @param frame  current frame
+ * @param n      number of frames
+ * @param mode   play mode; switched between 2 and 3 in place when a ping-pong reverses
+ * @return the new frame
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Steps a crowd animation frame for the current play mode and returns the new frame.
 extern "C" int cCrowdAnim2D_advanceFrame(void* self, int frame, int n, int* mode)

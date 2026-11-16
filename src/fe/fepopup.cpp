@@ -209,6 +209,11 @@ extern "C" int cScreenPopup_onGainTransition(void* self, int first)
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Handles the popup's lose transition by reporting it finished immediately.
+ *
+ * @return always 1
+ */
 int cScreenPopup_onLoseTransition(void* self)
 {
     return 0x1;
@@ -957,6 +962,15 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_setPrivateDefaultOption);
 #ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 
+/**
+ * Selects the menu entry one past an option index, clamped to the valid range.
+ *
+ * Selects item @p idx + 1, clamped to 1..@p max; when @p max is -1 the range is 0..1 instead.
+ *
+ * @param menu  menu whose selection is set
+ * @param idx   option index; the item selected is @p idx + 1
+ * @param max   highest selectable item, or -1 for the range 0..1
+ */
 extern "C" void cScreenPopup_setPrivateDefaultOption(void* self, void* menu, int idx, int max)
 {
     int lo;
@@ -2605,6 +2619,11 @@ extern "C" void* func_0039E6B8(void* self);
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_onRender2D__FPv);
 #ifdef SKIP_ASM
+/**
+ * Renders the popup's 2D layer with the shared UI-screen render routine func_0039E6B8().
+ *
+ * @return no meaningful value (func_0039E6B8() returns nothing)
+ */
 void* cScreenPopup_onRender2D(void* self)
 {
     return func_0039E6B8(self);
@@ -4430,6 +4449,13 @@ struct sPwd_CCE98 {
     char buf[1];
 };
 
+/**
+ * Fills the popup's text buffer with one '*' per character of the given password.
+ *
+ * Only the masked text is stored; @p str itself is not kept.
+ *
+ * @param str  password whose length sets the number of asterisks
+ */
 extern "C" void cKeyboardPopup_setPasswordText(sPwd_CCE98* self, char* str)
 {
     int n = strlen(str);

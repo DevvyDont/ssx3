@@ -990,6 +990,14 @@ struct sMissionEntry {
 
 extern sMissionEntry cBELibrary_pictureDB[];
 
+/**
+ * Looks up the number of sessions for a track id in the 22-entry cBELibrary_pictureDB table.
+ *
+ * The table's name (picture DB) does not fit a session count, so either it or this function is likely misnamed.
+ *
+ * @param id  track id to find
+ * @return the value of the entry with that id, or 0 if there is none
+ */
 extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* self, int id)
 {
     for (int i = 0; i < 22; i++) {

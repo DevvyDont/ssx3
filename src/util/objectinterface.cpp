@@ -11,6 +11,11 @@ struct cObjectInterface_Impl {
 //100%
 INCLUDE_ASM("util/objectinterface", cObjectInterface_getInstanceMan__Fv);
 #ifdef SKIP_ASM
+/**
+ * Returns the game's instance manager.
+ *
+ * @return mInstanceMan of SSXApp->Game
+ */
 void* cObjectInterface_getInstanceMan()
 {
     return ((cObjectInterface_Impl*)SSXApp->Game)->mInstanceMan;
