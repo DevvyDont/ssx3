@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/menu.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -345,7 +346,7 @@ extern "C" void func_002CA768_impl(char* item, sRect_2CA768* rect, const char* l
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CA988);
 #ifdef SKIP_ASM
-extern "C" void* cMenu_getFocusItem(void* self);
+extern "C" void* cMenu_getFocusItem(cMenu* self);
 extern char D_004D5380[];
 extern char D_004D5390[];
 
@@ -371,7 +372,7 @@ void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 
 void* func_002CA988_5(void* self, int a1, int a2, int a3, void* a4)
 {
-    int focused = self == cMenu_getFocusItem(*(void**)self);
+    int focused = self == cMenu_getFocusItem((cMenu*)(*(void**)self));
     char* style = focused ? D_004D5380 : D_004D5390;
     func_002CA988_sVec3* v = focused ? &D_004D53A0 : &D_004D53B0;
     func_002CA988_sColor c;
@@ -428,11 +429,11 @@ public:
     virtual int v03();
 };
 
-extern "C" void cMenu_nextFocus(void* self);
+extern "C" void cMenu_nextFocus(cMenu* self);
 
-extern "C" void cMenu_checkFocus(void* self)
+extern "C" void cMenu_checkFocus(cMenu* self)
 {
-    cMenu_checkFocus_cItem* item = *(cMenu_checkFocus_cItem**)((char*)self + (*(int*)((char*)self + 0x4) << 2) + 0xC);
+    cMenu_checkFocus_cItem* item = (cMenu_checkFocus_cItem*)self->Items[self->FocusItem];
     if (item->v03() == 0) {
         cMenu_nextFocus(self);
     }
@@ -462,7 +463,7 @@ struct cMenu_nextFocus_sMenu {
     cMenu_nextFocus_cItem* items[1];
 };
 
-extern "C" void cMenu_nextFocus(void* menu)
+extern "C" void cMenu_nextFocus(cMenu* menu)
 {
     cMenu_nextFocus_sMenu* self = (cMenu_nextFocus_sMenu*)menu;
     int start = self->cur;
@@ -500,7 +501,7 @@ struct cMenu_prevFocus_sMenu {
     cMenu_prevFocus_cItem* items[1];
 };
 
-extern "C" void cMenu_prevFocus(void* menu)
+extern "C" void cMenu_prevFocus(cMenu* menu)
 {
     cMenu_prevFocus_sMenu* self = (cMenu_prevFocus_sMenu*)menu;
     int start = self->cur;
@@ -526,19 +527,19 @@ public:
     virtual int v02();
 };
 
-extern "C" void cMenu_prevFocus(void* self);
+extern "C" void cMenu_prevFocus(cMenu* self);
 
 extern "C" int func_002CACC0(void* self)
 {
-    cMenu_checkFocus(self);
+    cMenu_checkFocus((cMenu*)self);
     func_002CACC0_cItem* item = *(func_002CACC0_cItem**)((char*)self + (*(int*)((char*)self + 0x4) << 2) + 0xC);
     int r = item->v02();
     switch (r) {
     case 3:
-        cMenu_nextFocus(self);
+        cMenu_nextFocus((cMenu*)self);
         return 0;
     case 4:
-        cMenu_prevFocus(self);
+        cMenu_prevFocus((cMenu*)self);
         return 0;
     }
     return r;
@@ -1389,7 +1390,7 @@ extern "C" void cMenu_addItem(cMenuList* menu, void** item, int index)
 INCLUDE_ASM("util/menu", func_002CBD50);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cMenu_checkFocus(void* self);
+extern "C" void cMenu_checkFocus(cMenu* self);
 
 void func_002CBD50_impl(cMenuList* list, int index) __asm__("func_002CBD50");
 void func_002CBD50_impl(cMenuList* list, int index)
@@ -1405,7 +1406,7 @@ void func_002CBD50_impl(cMenuList* list, int index)
         list->selected = list->count - 1;
     }
     if (index == list->selected) {
-        cMenu_checkFocus(list);
+        cMenu_checkFocus((cMenu*)list);
     }
     if (list->selected < 0) {
         list->selected = 0;
@@ -1432,7 +1433,7 @@ extern "C" void func_002CBE20(void* self, int (*cmp)(int, int))
     D_004A54BC = cmp;
     func_00418EF8((char*)self + 0xC, *(int*)self, 4, func_002D4008);
     D_004A54BC = 0;
-    cMenu_checkFocus(self);
+    cMenu_checkFocus((cMenu*)self);
 }
 #endif
 
@@ -1469,7 +1470,7 @@ extern "C" void cMenu_setFocus(cMenu_setFocus_sMenu* self, int index)
         self->items[self->selected]->v07();
         self->selected = index;
         self->items[index]->v06(2);
-        cMenu_checkFocus(self);
+        cMenu_checkFocus((cMenu*)self);
     }
 }
 #endif
@@ -1477,19 +1478,19 @@ extern "C" void cMenu_setFocus(cMenu_setFocus_sMenu* self, int index)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cMenu_getFocus);
 #ifdef SKIP_ASM
-extern "C" void cMenu_checkFocus(void* self);
+extern "C" void cMenu_checkFocus(cMenu* self);
 
-extern "C" int cMenu_getFocus(void* self)
+extern "C" int cMenu_getFocus(cMenu* self)
 {
     cMenu_checkFocus(self);
-    return *(int*)((char*)self + 0x4);
+    return self->FocusItem;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cMenu_getFocusItem);
 #ifdef SKIP_ASM
-extern "C" void* cMenu_getFocusItem(void* self)
+extern "C" void* cMenu_getFocusItem(cMenu* self)
 {
     return *(void**)((char*)self + (cMenu_getFocus(self) << 2) + 0xC);
 }
@@ -1518,7 +1519,7 @@ struct cMenu_onGainFocus_sMenu {
     int wrap;           // 0x124
 };
 
-extern "C" void cMenu_onGainFocus(void* p, int wrap)
+extern "C" void cMenu_onGainFocus(cMenu* p, int wrap)
 {
     cMenu_onGainFocus_sMenu* self = (cMenu_onGainFocus_sMenu*)p;
     self->wrap = wrap;
@@ -1526,7 +1527,7 @@ extern "C" void cMenu_onGainFocus(void* p, int wrap)
         self->selected = self->count - 1;
     }
     self->items[self->selected]->v06(2);
-    cMenu_checkFocus(self);
+    cMenu_checkFocus((cMenu*)self);
 }
 #endif
 
@@ -1547,7 +1548,7 @@ struct s2CBFD0Menu {
     int wrap;           // 0x124
 };
 
-extern "C" void cMenu_onLoseFocus(void* p)
+extern "C" void cMenu_onLoseFocus(cMenu* p)
 {
     s2CBFD0Menu* self = (s2CBFD0Menu*)p;
     void* item = self->items[self->selected];
@@ -3560,7 +3561,7 @@ extern "C" int func_002CE488(sTextItem_E488* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CE820);
 #ifdef SKIP_ASM
-extern "C" void* cMenu_getFocusItem(void* self);
+extern "C" void* cMenu_getFocusItem(cMenu* self);
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
@@ -3585,7 +3586,7 @@ extern "C" func_002CE820_sResult func_002CE820(void* item)
 {
     char buf[0x20];
     char* name = (char*)item + 0x18;
-    int focused = item == cMenu_getFocusItem(*(void**)item);
+    int focused = item == cMenu_getFocusItem((cMenu*)(*(void**)item));
     strcpy(buf, name);
     int len = strlen(name);
     if (focused && *(int*)((char*)item + 0x28) == len && *(int*)((char*)item + 0x28) < 15) {
@@ -3713,7 +3714,7 @@ extern "C" void func_002CE910(void* self, float* rect)
 {
     char buf[0x20];
     char* name = (char*)self + 0x18;
-    int focused = self == cMenu_getFocusItem(*(void**)self);
+    int focused = self == cMenu_getFocusItem((cMenu*)(*(void**)self));
     strcpy(buf, name);
     int len = strlen(name);
     if (focused && *(int*)((char*)self + 0x28) == len && *(int*)((char*)self + 0x28) < 15) {
@@ -3725,7 +3726,7 @@ extern "C" void func_002CE910(void* self, float* rect)
         fn2CB880* f = &vt[8].fn;
         (*f)(menu + vt[8].delta, rect, focused ? D_004D5380 : D_004D5390);
     }
-    func_002CA988_sVec3* col = self == cMenu_getFocusItem(*(void**)self) ? &D_004D53A0 : &D_004D53B0;
+    func_002CA988_sVec3* col = self == cMenu_getFocusItem((cMenu*)(*(void**)self)) ? &D_004D53A0 : &D_004D53B0;
     func_002CA988_sColor c;
     c.a = 1.0f;
     c.r = col->x;
@@ -4055,11 +4056,11 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
         char* menu = *(char**)self;
         sVEntry_2CF1C8* vt = *(sVEntry_2CF1C8**)(menu + 0x12C);
         char* thisp = menu + vt[9].delta;
-        vt[9].fn(thisp, rect, self == cMenu_getFocusItem(menu));
+        vt[9].fn(thisp, rect, self == cMenu_getFocusItem((cMenu*)menu));
     }
     float barX = rect[0] + rect[2] - 16.0f - 80.0f;
     float textX = barX - 16.0f;
-    func_002CA988_sVec3* col = self == cMenu_getFocusItem(*(void**)self) ? &D_004D53A0 : &D_004D53B0;
+    func_002CA988_sVec3* col = self == cMenu_getFocusItem((cMenu*)(*(void**)self)) ? &D_004D53A0 : &D_004D53B0;
     func_002CA988_sColor c;
     c.a = 1.0f;
     c.r = col->x;
@@ -4286,11 +4287,11 @@ public:
     virtual void v08();
 };
 
-extern "C" void* cMenu_getFocusItem(void* self);
+extern "C" void* cMenu_getFocusItem(cMenu* self);
 
 extern "C" void func_002CF8D8(void* self)
 {
-    ((func_002CF8D8_cItem*)cMenu_getFocusItem((char*)self + 0x18))->v08();
+    ((func_002CF8D8_cItem*)cMenu_getFocusItem((cMenu*)((char*)self + 0x18)))->v08();
 }
 #endif
 
@@ -4353,9 +4354,9 @@ extern "C" void func_002CF988(void* self, void* item)
 INCLUDE_ASM("util/menu", cExpandMenuItem_input);
 #ifdef SKIP_ASM
 extern "C" int cMenuItem_isLocked(void* self);
-extern "C" void cMenu_checkFocus(void* self);
-extern "C" void cMenu_nextFocus(void* self);
-extern "C" void cMenu_prevFocus(void* self);
+extern "C" void cMenu_checkFocus(cMenu* self);
+extern "C" void cMenu_nextFocus(cMenu* self);
+extern "C" void cMenu_prevFocus(cMenu* self);
 
 class cExpandMenuItem_input_cItem {
 public:
@@ -4374,7 +4375,7 @@ struct cExpandMenuItem_input_sOwner {
 extern "C" void* cExpandMenuItem_input(void* p)
 {
     cExpandMenuItem_input_sOwner* self = (cExpandMenuItem_input_sOwner*)p;
-    cMenu_checkFocus(&self->menu);
+    cMenu_checkFocus((cMenu*)(&self->menu));
     int prev = self->menu.selected;
     int key = ((cExpandMenuItem_input_cItem*)self->menu.items[prev])->v02();
     if (cMenuItem_isLocked(self) != 0) {
@@ -4382,14 +4383,14 @@ extern "C" void* cExpandMenuItem_input(void* p)
     }
     switch (key) {
     case 3:
-        cMenu_nextFocus(&self->menu);
+        cMenu_nextFocus((cMenu*)(&self->menu));
         if (prev < self->menu.selected) {
             return 0;
         }
         cMenu_setFocus(&self->menu, prev);
         return (void*)3;
     case 4:
-        cMenu_prevFocus(&self->menu);
+        cMenu_prevFocus((cMenu*)(&self->menu));
         if (self->menu.selected < prev) {
             return 0;
         }
@@ -4441,7 +4442,7 @@ extern "C" void func_002CFB28(func_002CFB28_cMenu** self)
 INCLUDE_ASM("util/menu", func_002CFB58);
 #ifdef SKIP_ASM
 extern "C" int cMenuItem_isActive(void* self);
-extern "C" void* cMenu_getFocusItem(void* self);
+extern "C" void* cMenu_getFocusItem(cMenu* self);
 
 struct sMenuRect_2CFB58 { float x, y, z, w; };
 
@@ -4477,7 +4478,7 @@ extern "C" sMenuRect_2CFB58* func_002CFB58(sMenuRect_2CFB58* ret, sMenu_2CFB58* 
         if (cMenuItem_isActive(self->items[i])) {
             sVEnt_2CFB58* vt = self->items[i]->vt;
             self->rects[i] = vt[4].fn((char*)self->items[i] + vt[4].delta);
-            if (self == cMenu_getFocusItem(self->owner) || self->items[i] == self->sel) {
+            if (self == cMenu_getFocusItem((cMenu*)self->owner) || self->items[i] == self->sel) {
                 r.w += self->rects[i].w;
             }
             float h = self->rects[i].z;
@@ -4505,7 +4506,7 @@ extern "C" sMenuRect_2CFB58* func_002CFB58(sMenuRect_2CFB58* ret, sMenu_2CFB58* 
 INCLUDE_ASM("util/menu", func_002CFD28);
 #ifdef SKIP_ASM
 extern "C" int cMenuItem_isActive(void* self);
-extern "C" void* cMenu_getFocusItem(void* self);
+extern "C" void* cMenu_getFocusItem(cMenu* self);
 
 struct func_002CFD28_sRect {
     float x, y, w, h;
@@ -4542,7 +4543,7 @@ extern "C" void func_002CFD28(func_002CFD28_sOwner* self, func_002CFD28_sRect* r
         if (cMenuItem_isActive(self->items[i]) == 0) {
             continue;
         }
-        if ((void*)self == cMenu_getFocusItem(self->menu) || self->items[i] == self->cur) {
+        if ((void*)self == cMenu_getFocusItem((cMenu*)self->menu) || self->items[i] == self->cur) {
             int off = self->items[i] == self->cur ? 0 : 20;
             self->rects[i].x = pos.x + (float)off;
             self->rects[i].y = pos.y;
@@ -4572,19 +4573,19 @@ extern "C" void func_002CFE78(void* self, int mode)
         cMenu_setFocus_v((char*)self + 0x18, -1);
         break;
     }
-    cMenu_onGainFocus((char*)self + 0x18, *(int*)(*(char**)self + 0x124));
+    cMenu_onGainFocus((cMenu*)((char*)self + 0x18), *(int*)(*(char**)self + 0x124));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", func_002CFEF8);
 #ifdef SKIP_ASM
-extern "C" void cMenu_onLoseFocus(void* p);
+extern "C" void cMenu_onLoseFocus(cMenu* p);
 
 extern "C" void func_002CFEF8(void* self)
 {
     func_002CA370(self);
-    cMenu_onLoseFocus((char*)self + 0x18);
+    cMenu_onLoseFocus((cMenu*)((char*)self + 0x18));
 }
 #endif
 
@@ -5189,7 +5190,7 @@ extern "C" int func_002D0908(sCurveItem_D0908* self)
 //100%
 INCLUDE_ASM("util/menu", func_002D0D48);
 #ifdef SKIP_ASM
-extern "C" void* cMenu_getFocusItem(void* self);
+extern "C" void* cMenu_getFocusItem(cMenu* self);
 extern "C" float func_00391FB0(void* self, const char* str, void* out, int n, float sx, float sy);
 extern char D_00486748[];
 
@@ -5204,7 +5205,7 @@ extern "C" sMenuRect_2D0D48* func_002D0D48(sMenuRect_2D0D48* ret, char* item)
 {
     int margin = 100;
     int focused = 0;
-    if (item == cMenu_getFocusItem(*(void**)item)) {
+    if (item == cMenu_getFocusItem((cMenu*)(*(void**)item))) {
         focused = *(int*)(item + 0x40) != 0;
     }
     int pad = focused ? 0x50 : 0x14;
@@ -5454,7 +5455,7 @@ static inline void SetDepth_D0EF8(sRenderState* rs, int base, int layer)
 // with its zero line, the polyline and a marker on the current point, each one depth layer higher.
 extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
 {
-    int focused = self == cMenu_getFocusItem(self->owner);
+    int focused = self == cMenu_getFocusItem((cMenu*)self->owner);
     {
         char* menu = (char*)self->owner;
         sVEntry<void(void*, float*, int)>* vt = *(sVEntry<void(void*, float*, int)>**)(menu + 0x12C);
@@ -5462,7 +5463,7 @@ extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
     }
     char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
     float lineH = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
-    func_002CA988_sVec3* col = self == cMenu_getFocusItem(self->owner) ? &D_004D53A0 : &D_004D53B0;
+    func_002CA988_sVec3* col = self == cMenu_getFocusItem((cMenu*)self->owner) ? &D_004D53A0 : &D_004D53B0;
     sColor c;
     c.a = 1.0f;
     c.r = col->x;
