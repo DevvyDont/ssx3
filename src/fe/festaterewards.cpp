@@ -66,16 +66,16 @@ struct sVE_F168b {
 
 extern "C" void func_001CF168(void* self)
 {
-    sVec3_F168 a;
-    sVec3_F168 b;
-    void* t = *(void**)((char*)self + 0x924);
-    if (t != 0) {
-        func_003A0290(t, &a);
-        t = *(void**)((char*)self + 0x8F8);
-        if (t != 0) {
-            func_003A0290(t, &b);
-            *(float*)((char*)self + 0x74) = b.y - a.y;
-            *(float*)((char*)self + 0x70) = b.x - a.x;
+    sVec3_F168 firstCellPos;
+    sVec3_F168 widgetPos;
+    void* widget = *(void**)((char*)self + 0x924);
+    if (widget != 0) {
+        func_003A0290(widget, &firstCellPos);
+        widget = *(void**)((char*)self + 0x8F8);
+        if (widget != 0) {
+            func_003A0290(widget, &widgetPos);
+            *(float*)((char*)self + 0x74) = widgetPos.y - firstCellPos.y;
+            *(float*)((char*)self + 0x70) = widgetPos.x - firstCellPos.x;
         }
     }
     *(int*)((char*)self + 0x64) = 0;
@@ -614,8 +614,8 @@ extern "C" void func_001CFE60(void* self)
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     sVE_FE60* vt = *(sVE_FE60**)((char*)self + 8);
     if (vt[25].fn((char*)self + vt[25].delta) != 0) {
-        sVE_FE60* e = &(*(sVE_FE60**)((char*)self + 8))[25];
-        *(int*)((char*)self + 0x8EC) = func_0019DA10(mgr, *(int*)((char*)self + 0x50), e->fn((char*)self + e->delta), 9, 1, 0);
+        sVE_FE60* fileNameEntry = &(*(sVE_FE60**)((char*)self + 8))[25];
+        *(int*)((char*)self + 0x8EC) = func_0019DA10(mgr, *(int*)((char*)self + 0x50), fileNameEntry->fn((char*)self + fileNameEntry->delta), 9, 1, 0);
         *(int*)((char*)self + 0x48) = (*(int*)((char*)self + 0x48) & ~8) | 4;
     } else {
         *(int*)((char*)self + 0x48) = (*(int*)((char*)self + 0x48) | 8) & ~4;
@@ -654,10 +654,10 @@ extern "C" void func_001CFF10(void* self)
             *(int*)((char*)self + 0x48) = (*(int*)((char*)self + 0x48) & ~4) | 8;
             if ((*(int*)((char*)self + 0x48) >> 1) & 1) {
                 *(int*)((char*)self + 0x8FC) = *(int*)((char*)self + 0x924);
-                sVE_FF10* e = &(*(sVE_FF10**)((char*)self + 8))[40];
-                e->fn((char*)self + e->delta);
-                sVE_FF10i* e2 = &(*(sVE_FF10i**)((char*)self + 8))[33];
-                e2->fn((char*)self + e2->delta, 0);
+                sVE_FF10* refreshEntry = &(*(sVE_FF10**)((char*)self + 8))[40];
+                refreshEntry->fn((char*)self + refreshEntry->delta);
+                sVE_FF10i* helpTextEntry = &(*(sVE_FF10i**)((char*)self + 8))[33];
+                helpTextEntry->fn((char*)self + helpTextEntry->delta, 0);
             }
         }
     }
@@ -934,16 +934,16 @@ struct sVE_0320b {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_001D0320(void* self, int a1)
+extern "C" void func_001D0320(void* self, int rewardIndex)
 {
     func_00157F20(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
-                  *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x4C), a1, 1);
+                  *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x4C), rewardIndex, 1);
     *(int*)((char*)self + 0x54) = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)((char*)self + 0x44),
                                                 *(int*)((char*)self + 0x50));
     sVE_0320a* vt = *(sVE_0320a**)((char*)self + 8);
     vt[42].fn((char*)self + vt[42].delta);
     sVE_0320b* vt2 = *(sVE_0320b**)((char*)self + 8);
-    vt2[33].fn((char*)self + vt2[33].delta, a1);
+    vt2[33].fn((char*)self + vt2[33].delta, rewardIndex);
     sVE_0320a* vt3 = *(sVE_0320a**)((char*)self + 8);
     vt3[43].fn((char*)self + vt3[43].delta);
     sVE_0320a* vt4 = *(sVE_0320a**)((char*)self + 8);
@@ -1029,10 +1029,10 @@ extern "C" void func_001D0510(void* self)
     char* popup = (char*)cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), *(void**)((char*)self + 0x10), self,
                                        *(signed char*)((char*)self + 0x44));
     sVE_0510b* vt2 = *(sVE_0510b**)((char*)self + 8);
-    int a = vt2[37].fn((char*)self + vt2[37].delta, sel);
+    int rewardName = vt2[37].fn((char*)self + vt2[37].delta, sel);
     sVE_0510b* vt3 = *(sVE_0510b**)((char*)self + 8);
-    int b = vt3[35].fn((char*)self + vt3[35].delta, sel);
-    func_001CAA18(popup + 0x48, *(int*)((char*)self + 0x4C), a, b, *(int*)((char*)self + 0x54));
+    int cost = vt3[35].fn((char*)self + vt3[35].delta, sel);
+    func_001CAA18(popup + 0x48, *(int*)((char*)self + 0x4C), rewardName, cost, *(int*)((char*)self + 0x54));
     cUIStateStack_pushPopup((char*)*(void**)((char*)self + 0x10) + 0x18, popup);
 }
 #endif
@@ -1045,10 +1045,10 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00157468(void* iface, int a, int b, int c, int d);
 
-extern "C" void func_001D05F0(void* self, int arg)
+extern "C" void func_001D05F0(void* self, int rewardIndex)
 {
     func_00157468(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
-                  *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x4C), arg);
+                  *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x4C), rewardIndex);
 }
 #endif
 
@@ -1615,8 +1615,8 @@ extern "C" void func_001CFDD0(void* self, char* name);
 extern "C" void func_001D11A8(void* self, int i)
 {
     char buf[5];
-    void* e = *(void**)((char*)self + (i << 2) + 0xA28);
-    strncpy(buf, *(const char**)((char*)e + 8), 4);
+    void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
+    strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
     func_001CFDD0(self, buf);
 }
@@ -1702,8 +1702,8 @@ extern "C" void func_001CFDD0(void* self, char* name);
 extern "C" void func_001D1340(void* self, int i)
 {
     char buf[5];
-    void* e = *(void**)((char*)self + (i << 2) + 0xA28);
-    strncpy(buf, *(const char**)((char*)e + 8), 4);
+    void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
+    strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
     func_001CFDD0(self, buf);
 }
@@ -1789,8 +1789,8 @@ extern "C" void func_001CFDD0(void* self, char* name);
 extern "C" void func_001D14D8(void* self, int i)
 {
     char buf[5];
-    void* e = *(void**)((char*)self + (i << 2) + 0xA28);
-    strncpy(buf, *(const char**)((char*)e + 8), 4);
+    void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
+    strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
     func_001CFDD0(self, buf);
 }
@@ -1876,8 +1876,8 @@ extern "C" void func_001CFDD0(void* self, char* name);
 extern "C" void func_001D1670(void* self, int i)
 {
     char buf[5];
-    void* e = *(void**)((char*)self + (i << 2) + 0xA28);
-    strncpy(buf, *(const char**)((char*)e + 8), 4);
+    void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
+    strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
     func_001CFDD0(self, buf);
 }
@@ -1963,8 +1963,8 @@ extern "C" void func_001CFDD0(void* self, char* name);
 extern "C" void func_001D1808(void* self, int i)
 {
     char buf[5];
-    void* e = *(void**)((char*)self + (i << 2) + 0xA28);
-    strncpy(buf, *(const char**)((char*)e + 8), 4);
+    void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
+    strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
     func_001CFDD0(self, buf);
 }
@@ -2081,9 +2081,9 @@ extern "C" void* func_00398380(void* self, int id);
 extern "C" void func_001D1A60(void* self, int i)
 {
     char* obj = *(char**)((char*)self + 0x10);
-    void* e = *(void**)((char*)self + (i << 2) + 0xA28);
-    int h = GetHashValue32(*(char**)((char*)e + 4));
-    func_00398380(obj + 0x58, h);
+    void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
+    int textureHash = GetHashValue32(*(char**)((char*)reward + 4));
+    func_00398380(obj + 0x58, textureHash);
 }
 #endif
 
@@ -2626,9 +2626,9 @@ extern "C" void func_00253418(void* p, int a1);
 
 extern "C" void func_001D2430(void* self)
 {
-    void* p = *(void**)((char*)self + 0x248);
-    if (p != 0) {
-        func_00253418(p, 3);
+    void* moviePlayer = *(void**)((char*)self + 0x248);
+    if (moviePlayer != 0) {
+        func_00253418(moviePlayer, 3);
     }
     *(void**)((char*)self + 0x248) = 0;
 }
@@ -2642,10 +2642,10 @@ extern "C" void* func_0039E6B8(void* self);
 
 extern "C" void func_001D2468(void* self)
 {
-    void* p = *(void**)((char*)self + 0x248);
-    if (p != 0) {
+    void* moviePlayer = *(void**)((char*)self + 0x248);
+    if (moviePlayer != 0) {
         *(int*)((char*)self + 0x278) = 1;
-        func_00253890(p, 0);
+        func_00253890(moviePlayer, 0);
     }
     func_0039E6B8(self);
 }
@@ -2660,10 +2660,10 @@ extern "C" void* func_0039E510(void* self);
 
 extern "C" void func_001D24A8(void* self)
 {
-    void* p = *(void**)((char*)self + 0x248);
-    if (p != 0) {
+    void* moviePlayer = *(void**)((char*)self + 0x248);
+    if (moviePlayer != 0) {
         *(int*)((char*)self + 0x274) = 1;
-        func_00253938(p);
+        func_00253938(moviePlayer);
         if ((*(int*)((char*)self + 0x27C) != 0 && *(int*)((char*)self + 0x278) != 0)
             || **(int**)((char*)self + 0x248) != 0) {
             func_001D2638(self);
@@ -2705,11 +2705,11 @@ INCLUDE_ASM("fe/festaterewards", func_001D2598);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 
-extern "C" void func_001D2598(void* self, const char* a, const char* b)
+extern "C" void func_001D2598(void* self, const char* videoFile, const char* audioFile)
 {
-    strcpy((char*)self + 0x48, a);
-    if (b != 0) {
-        strcpy((char*)self + 0x148, b);
+    strcpy((char*)self + 0x48, videoFile);
+    if (audioFile != 0) {
+        strcpy((char*)self + 0x148, audioFile);
     } else {
         *((char*)self + 0x148) = 0;
     }

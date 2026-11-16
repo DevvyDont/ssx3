@@ -1587,37 +1587,37 @@ extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
 
 extern "C" void func_00236960(void* self)
 {
-    char* g84 = (char*)SSXApp->Game;
-    char* game = *(char**)(g84 + 0x78);
+    char* appGame = (char*)SSXApp->Game;
+    char* game = *(char**)(appGame + 0x78);
     if (*(int*)(game + 0x1C8) == 0) {
         return;
     }
     int state = *(int*)((char*)self + 0x10);
-    char** cache = *(char***)(g84 + 0x10);
-    int idx = *(int*)(*(char**)(*(char**)(g84 + 0x84) + 4) + 0xB0) == 0;
+    char** cache = *(char***)(appGame + 0x10);
+    int idx = *(int*)(*(char**)(*(char**)(appGame + 0x84) + 4) + 0xB0) == 0;
     switch (state) {
     case 0:
         if (func_0022D278(game, *(int*)(game + 0x1BC)) != 0) {
-            char* r = *(char**)((char*)SSXApp->Game->AI + 0x40);
-            sVec4_236960 pos = cRider_GetNISEndPosition(*(void**)(r + 0x18));
-            char* e = *cache + idx * 0x50;
-            *(int*)(e + 0x250) = 1;
+            char* aiPlayer = *(char**)((char*)SSXApp->Game->AI + 0x40);
+            sVec4_236960 pos = cRider_GetNISEndPosition(*(void**)(aiPlayer + 0x18));
+            char* viewEntry = *cache + idx * 0x50;
+            *(int*)(viewEntry + 0x250) = 1;
             func_003A9658(*cache + 0x10, idx, &pos, 45000.0f);
             *(int*)((char*)self + 0x10) = 1;
         }
         break;
     case 1: {
-        sVec4_236960 v;
+        sVec4_236960 focusPos;
         float dist;
-        cWorldView_getTestFocus(*cache + 0x10, idx, &v, &dist);
+        cWorldView_getTestFocus(*cache + 0x10, idx, &focusPos, &dist);
         if (dist < 20000.0f) {
             break;
         }
-        char* o = (char*)func_00230698(SSXApp->Game, 0);
-        if (((cRiderObj_236960*)(o + 0x10))->isBusy() != 0) {
+        char* transitionMan = (char*)func_00230698(SSXApp->Game, 0);
+        if (((cRiderObj_236960*)(transitionMan + 0x10))->isBusy() != 0) {
             break;
         }
-        if (*(int*)(o + 0x44) != 0) {
+        if (*(int*)(transitionMan + 0x44) != 0) {
             break;
         }
         if (cSSXScriptEngine_IsActiveNISInTransition(ScriptEngine) != 0) {
@@ -2031,14 +2031,14 @@ extern "C" void cGFReplayStartState_loseFocus(void)
 //100%
 INCLUDE_ASM("main/gamestate", func_00237060);
 #ifdef SKIP_ASM
-extern "C" void* func_00237060(void* self, int a1, int a2)
+extern "C" void* func_00237060(void* self, int latencyFrames, int numSamples)
 {
-    *(int*)((char*)self + 0x4) = a1;
-    *(int*)((char*)self + 0x8) = a2;
+    *(int*)((char*)self + 0x4) = latencyFrames;
+    *(int*)((char*)self + 0x8) = numSamples;
     *(int*)((char*)self + 0xc) = 0;
     *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x0) = a1 * a2;
-    *(int*)((char*)self + 0x4) = (60 / a2) * a2;
+    *(int*)((char*)self + 0x0) = latencyFrames * numSamples;
+    *(int*)((char*)self + 0x4) = (60 / numSamples) * numSamples;
     return self;
 }
 #endif
@@ -2066,11 +2066,11 @@ extern "C" void func_002370A0(sObj_func_002370A0* self, int flags)
 {
     int i;
     for (i = 0; i < self->count; i++) {
-        sEntry_func_002370A0* e = &self->entries[i];
-        if (e->buf)
-            cMemMan_free(e->buf);
-        operator_delete(e->a);
-        operator_delete(e->b);
+        sEntry_func_002370A0* entry = &self->entries[i];
+        if (entry->buf)
+            cMemMan_free(entry->buf);
+        operator_delete(entry->a);
+        operator_delete(entry->b);
     }
     if (flags & 1)
         operator_delete((int*)self);
@@ -2359,8 +2359,8 @@ extern "C" int func_00237950(sOwner237950* self)
     }
     int i;
     for (i = 0; i < self->count; i++) {
-        sSlot237950* s = &self->slots[i];
-        if (s->cur == s->max) {
+        sSlot237950* slot = &self->slots[i];
+        if (slot->cur == slot->max) {
             return 0;
         }
     }
@@ -2460,10 +2460,10 @@ extern "C" int func_00237B28(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst)
     }
     n = 0;
     for (i = 0; i < src->count; i++) {
-        unsigned char v = (int)(src->vals[i] * 255.0f);
-        if (v != 0) {
+        unsigned char quantized = (int)(src->vals[i] * 255.0f);
+        if (quantized != 0) {
             dst->mask[i >> 3] |= 1 << (i & 7);
-            dst->vals[n++] = v;
+            dst->vals[n++] = quantized;
         }
     }
     return n + 4;

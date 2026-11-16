@@ -152,24 +152,24 @@ sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self)
 {
     self->cam = (sCamObj_C1B0*)cBezierMan_TheBezierMan;
     self->pos = Scale_C1B0(sVec_C1B0(*(sVec_C1B0*)viewMat_C1B0()->m[3]), -1.0f);
-    sMat_C1B0* m = viewMat_C1B0();
-    self->pos = sVec_C1B0(self->pos.x * m->m[0][0] + self->pos.y * m->m[0][1] + self->pos.z * m->m[0][2] + self->pos.w * m->m[0][3],
-                          self->pos.x * m->m[1][0] + self->pos.y * m->m[1][1] + self->pos.z * m->m[1][2] + self->pos.w * m->m[1][3],
-                          self->pos.x * m->m[2][0] + self->pos.y * m->m[2][1] + self->pos.z * m->m[2][2] + self->pos.w * m->m[2][3],
-                          self->pos.x * m->m[3][0] + self->pos.y * m->m[3][1] + self->pos.z * m->m[3][2] + self->pos.w * m->m[3][3]);
+    sMat_C1B0* viewMatrix = viewMat_C1B0();
+    self->pos = sVec_C1B0(self->pos.x * viewMatrix->m[0][0] + self->pos.y * viewMatrix->m[0][1] + self->pos.z * viewMatrix->m[0][2] + self->pos.w * viewMatrix->m[0][3],
+                          self->pos.x * viewMatrix->m[1][0] + self->pos.y * viewMatrix->m[1][1] + self->pos.z * viewMatrix->m[1][2] + self->pos.w * viewMatrix->m[1][3],
+                          self->pos.x * viewMatrix->m[2][0] + self->pos.y * viewMatrix->m[2][1] + self->pos.z * viewMatrix->m[2][2] + self->pos.w * viewMatrix->m[2][3],
+                          self->pos.x * viewMatrix->m[3][0] + self->pos.y * viewMatrix->m[3][1] + self->pos.z * viewMatrix->m[3][2] + self->pos.w * viewMatrix->m[3][3]);
     self->n = 1.0f;
     self->f = 3.0f;
     self->pos.w = 1.0f;
-    sCamObj_C1B0* o = self->cam;
-    float a = o->vt[8].fn((char*)o + o->vt[8].delta);
-    o = self->cam;
-    float b = o->vt[9].fn((char*)o + o->vt[9].delta);
-    a = a * a * 2.0f;
-    b = b * b * 2.0f;
-    self->k = (self->n - self->f) / (b - a);
-    self->c = self->f - self->k * a;
-    o = self->cam;
-    ((sVEv_C1B0*)o->vt)[17].fn((char*)o + o->vt[17].delta);
+    sCamObj_C1B0* bezierMan = self->cam;
+    float nearLod = bezierMan->vt[8].fn((char*)bezierMan + bezierMan->vt[8].delta);
+    bezierMan = self->cam;
+    float farLod = bezierMan->vt[9].fn((char*)bezierMan + bezierMan->vt[9].delta);
+    nearLod = nearLod * nearLod * 2.0f;
+    farLod = farLod * farLod * 2.0f;
+    self->k = (self->n - self->f) / (farLod - nearLod);
+    self->c = self->f - self->k * nearLod;
+    bezierMan = self->cam;
+    ((sVEv_C1B0*)bezierMan->vt)[17].fn((char*)bezierMan + bezierMan->vt[17].delta);
     return self;
 }
 #endif

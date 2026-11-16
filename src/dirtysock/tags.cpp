@@ -156,36 +156,36 @@ INCLUDE_ASM("dirtysock/tags", func_003EB588);
 // Normalizes a record in place: header control runs become `sep` (stopping at the first
 // key line), a trailing sep becomes a newline (or the end), then each control run in the
 // body becomes one '\n' (a run of the same char stays separate lines).
-extern "C" void func_003EB588(unsigned char* d, unsigned char sep)
+extern "C" void func_003EB588(unsigned char* dst, unsigned char sep)
 {
-    unsigned char* buf = d;
-    unsigned char* s = d;
-    if (*s != 0) {
+    unsigned char* buf = dst;
+    unsigned char* src = dst;
+    if (*src != 0) {
         do {
-            if (*s < 0x20) {
-                *d++ = sep;
-                while (*s != 0 && *s < 0x20)
-                    s++;
-                if ((*s == '=' || *s == ':') && s[1] < 0x20)
+            if (*src < 0x20) {
+                *dst++ = sep;
+                while (*src != 0 && *src < 0x20)
+                    src++;
+                if ((*src == '=' || *src == ':') && src[1] < 0x20)
                     break;
             } else {
-                *d++ = *s++;
+                *dst++ = *src++;
             }
-        } while (*s != 0);
+        } while (*src != 0);
     }
-    if (d != buf && d[-1] == sep)
-        d[-1] = (sep == '\n' || *s != 0) ? '\n' : 0;
-    while (*s != 0) {
-        if (*s < 0x20) {
-            *d++ = '\n';
-            unsigned char c = *s++;
-            while (*s != 0 && *s < 0x20 && *s != c)
-                s++;
+    if (dst != buf && dst[-1] == sep)
+        dst[-1] = (sep == '\n' || *src != 0) ? '\n' : 0;
+    while (*src != 0) {
+        if (*src < 0x20) {
+            *dst++ = '\n';
+            unsigned char runChar = *src++;
+            while (*src != 0 && *src < 0x20 && *src != runChar)
+                src++;
         } else {
-            *d++ = *s++;
+            *dst++ = *src++;
         }
     }
-    *d = 0;
+    *dst = 0;
 }
 #endif
 
@@ -263,17 +263,17 @@ extern "C" void func_004162D0_EB840(char* dst, const char* src) __asm__("func_00
 extern "C" char* func_003EB840(char* record, char* prefix, char* name)
 {
     char buf[256];
-    char* r;
+    char* field;
     if (prefix == 0) {
-        r = cDirtysock_tag_TagFieldFind_B840(record, name);
+        field = cDirtysock_tag_TagFieldFind_B840(record, name);
     } else if (name == 0) {
-        r = cDirtysock_tag_TagFieldFind_B840(record, prefix);
+        field = cDirtysock_tag_TagFieldFind_B840(record, prefix);
     } else {
         strcpy(buf, prefix);
         func_004162D0_EB840(buf, name);
-        r = cDirtysock_tag_TagFieldFind_B840(record, buf);
+        field = cDirtysock_tag_TagFieldFind_B840(record, buf);
     }
-    return r;
+    return field;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -353,51 +353,51 @@ extern "C" unsigned int strlen(const char* s);
 
 extern "C" int func_003EB9E8(unsigned char* record, int len, char* name, const signed char* value)
 {
-    unsigned char* p = cDirtysock_tag_TagFieldFind((char*)record, name);
+    unsigned char* nameEnd = cDirtysock_tag_TagFieldFind((char*)record, name);
     unsigned char* start;
-    unsigned char* q;
+    unsigned char* tail;
     int delta;
 
-    if (p == 0) {
+    if (nameEnd == 0) {
         return -1;
     }
-    if (p[-1] == ' ') {
-        p--;
+    if (nameEnd[-1] == ' ') {
+        nameEnd--;
     }
-    start = p - 1;
-    p = start;
+    start = nameEnd - 1;
+    nameEnd = start;
     while (start != record && start[-1] >= 0x21) {
         start--;
     }
-    delta = strlen((const char*)value) - (p - start);
+    delta = strlen((const char*)value) - (nameEnd - start);
     if (delta < 0) {
-        unsigned char c = *p;
-        if (c != 0) {
-            unsigned char* dst = p + delta;
-            *dst = c;
-            while ((c = *p) != 0) {
-                *dst = c;
+        unsigned char curChar = *nameEnd;
+        if (curChar != 0) {
+            unsigned char* dst = nameEnd + delta;
+            *dst = curChar;
+            while ((curChar = *nameEnd) != 0) {
+                *dst = curChar;
             }
         }
-        *p = 0;
+        *nameEnd = 0;
     }
     if (delta > 0) {
-        q = p;
-        if (*q != 0) {
+        tail = nameEnd;
+        if (*tail != 0) {
             do {
-                q++;
-            } while (*q != 0);
+                tail++;
+            } while (*tail != 0);
         }
-        if (q - record < len - delta) {
+        if (tail - record < len - delta) {
             return -1;
         }
-        if (q != p) {
+        if (tail != nameEnd) {
             do {
-                unsigned char t = *q;
-                unsigned char* d = q + delta;
-                q--;
-                *d = t;
-            } while (q != p);
+                unsigned char movedChar = *tail;
+                unsigned char* moveDst = tail + delta;
+                tail--;
+                *moveDst = movedChar;
+            } while (tail != nameEnd);
         }
     }
     while (*value != 0) {
@@ -447,16 +447,16 @@ extern "C" int func_003EBBA8(const unsigned char* rec, char* buf, int len)
         *buf = 0;
     if (rec == 0 || *rec == 0)
         return 0;
-    for (const unsigned char* p = rec; *p != 0; p++) {
-        if (*p != '=' && *p != ':')
+    for (const unsigned char* cursor = rec; *cursor != 0; cursor++) {
+        if (*cursor != '=' && *cursor != ':')
             continue;
-        if (p[1] < 0x20 && p[-1] <= 0x20)
+        if (cursor[1] < 0x20 && cursor[-1] <= 0x20)
             break;
-        const unsigned char* s = p;
-        while (s != rec && s[-1] > 0x20)
-            s--;
-        while (s != p && n + 1 < len)
-            buf[n++] = *s++;
+        const unsigned char* nameStart = cursor;
+        while (nameStart != rec && nameStart[-1] > 0x20)
+            nameStart--;
+        while (nameStart != cursor && n + 1 < len)
+            buf[n++] = *nameStart++;
         buf[n] = 0;
         break;
     }
@@ -468,34 +468,34 @@ INCLUDE_ASM("dirtysock/tags", func_003EBCB0);
 #ifdef SKIP_ASM
 extern "C" int func_003EBCB0(char* record, int len, const char* value)
 {
-    char* p = record;
+    char* cursor = record;
     char* end;
     for (;;) {
-        unsigned char c = *p;
-        if (c == 0) {
+        unsigned char curChar = *cursor;
+        if (curChar == 0) {
             break;
         }
-        if (c == '=' || c == ':') {
-            if ((unsigned char)p[1] < 0x20) {
+        if (curChar == '=' || curChar == ':') {
+            if ((unsigned char)cursor[1] < 0x20) {
                 break;
             }
         }
-        p++;
+        cursor++;
     }
-    *p = 0;
+    *cursor = 0;
     if (value == 0) {
         return 0;
     }
     end = record + len - 1;
-    if (end - p < 5) {
+    if (end - cursor < 5) {
         return -1;
     }
-    *p++ = '=';
-    *p++ = '\n';
-    while (*value != 0 && p != end) {
-        *p++ = *value++;
+    *cursor++ = '=';
+    *cursor++ = '\n';
+    while (*value != 0 && cursor != end) {
+        *cursor++ = *value++;
     }
-    *p = 0;
+    *cursor = 0;
     return 0;
 }
 #endif
@@ -1100,18 +1100,18 @@ extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* te
 
 extern "C" int func_003ECA88(char* record, int len, char* name, char* data)
 {
-    char* p = cDirtysock_tag_TagFieldFind_CA88(data, name);
-    int r = 0;
-    if (p != 0) {
-        while (p != data) {
-            if ((unsigned char)p[-1] < 0x20U) {
+    char* field = cDirtysock_tag_TagFieldFind_CA88(data, name);
+    int result = 0;
+    if (field != 0) {
+        while (field != data) {
+            if ((unsigned char)field[-1] < 0x20U) {
                 break;
             }
-            p--;
+            field--;
         }
-        r = cDirtysock_tag__TagFieldSetupTerm(record, len, p);
+        result = cDirtysock_tag__TagFieldSetupTerm(record, len, field);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -1125,16 +1125,16 @@ extern "C" int func_003ECB00(char* record, int len, unsigned char* data)
 {
     int count = 0;
     for (;;) {
-        unsigned char c = *data;
-        if (c == 0)
+        unsigned char curChar = *data;
+        if (curChar == 0)
             break;
         // skip whitespace
-        if (c <= ' ') {
+        if (curChar <= ' ') {
             ++data;
             continue;
         }
         // stop at a separator
-        if ((c == '=') || (c == ':'))
+        if ((curChar == '=') || (curChar == ':'))
             break;
         // add the field
         if (cDirtysock_tag__TagFieldSetupTerm(record, len, (char*)data) > 0)
@@ -1223,21 +1223,21 @@ INCLUDE_ASM("dirtysock/tags", func_003ECE38);
 extern "C" unsigned char* func_003ECE38(unsigned char* src, int unused, char* out, int size, const char* dflt)
 {
     int i;
-    unsigned char* p = src;
-    while (*p != 0) {
-        if ((*p == '=' || *p == ':') && p[1] < 0x20) {
-            if (p[1] == 0)
+    unsigned char* cursor = src;
+    while (*cursor != 0) {
+        if ((*cursor == '=' || *cursor == ':') && cursor[1] < 0x20) {
+            if (cursor[1] == 0)
                 break;
-            p += 2;
+            cursor += 2;
             if (out != 0) {
                 size--;
-                for (i = 0; i < size && p[i] != 0; i++)
-                    out[i] = p[i];
+                for (i = 0; i < size && cursor[i] != 0; i++)
+                    out[i] = cursor[i];
                 out[i] = 0;
             }
-            return p;
+            return cursor;
         }
-        p++;
+        cursor++;
     }
     if (out != 0 && dflt != 0) {
         size--;
@@ -1852,25 +1852,25 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int 
 extern "C" int func_003EDD70(char* data, int* year, int* month, int* day, int* hour, int* min, int* sec, int offset)
 {
     sDsTmK2 tm;
-    sDsTmK2* t;
+    sDsTmK2* calendar;
     unsigned int secs = cDirtysock_tag_TagFieldGetTime(data, 1);
     if (secs < 2)
         return -1;
-    t = func_003EAEB8(&tm, secs + offset);
-    if (t == 0)
+    calendar = func_003EAEB8(&tm, secs + offset);
+    if (calendar == 0)
         return -1;
     if (year)
-        *year = t->tm_year + 1900;
+        *year = calendar->tm_year + 1900;
     if (month)
-        *month = t->tm_mon + 1;
+        *month = calendar->tm_mon + 1;
     if (day)
-        *day = t->tm_mday;
+        *day = calendar->tm_mday;
     if (hour)
-        *hour = t->tm_hour;
+        *hour = calendar->tm_hour;
     if (min)
-        *min = t->tm_min;
+        *min = calendar->tm_min;
     if (sec)
-        *sec = t->tm_sec;
+        *sec = calendar->tm_sec;
     return 0;
 }
 #endif
@@ -1882,17 +1882,17 @@ INCLUDE_ASM("dirtysock/tags", func_003EDE80);
 extern "C" int func_003EDE80(char* data, unsigned int* date, unsigned int* time, int offset)
 {
     sDsTmK2 tm;
-    sDsTmK2* t;
+    sDsTmK2* calendar;
     unsigned int secs = cDirtysock_tag_TagFieldGetTime(data, 1);
     if (secs < 2)
         return -1;
-    t = func_003EAEB8(&tm, secs + offset);
-    if (t == 0)
+    calendar = func_003EAEB8(&tm, secs + offset);
+    if (calendar == 0)
         return -1;
     if (date)
-        *date = ((t->tm_year + 1900) << 16) | ((t->tm_mon + 1) << 8) | t->tm_mday;
+        *date = ((calendar->tm_year + 1900) << 16) | ((calendar->tm_mon + 1) << 8) | calendar->tm_mday;
     if (time)
-        *time = (t->tm_hour << 16) | (t->tm_min << 8) | t->tm_sec;
+        *time = (calendar->tm_hour << 16) | (calendar->tm_min << 8) | calendar->tm_sec;
     return 0;
 }
 #endif

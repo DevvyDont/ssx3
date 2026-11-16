@@ -53,9 +53,9 @@ extern char cDataManager_vtbl[];
 extern "C" void func_002758C0(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cDataManager_vtbl;
-    void* p = *(void**)((char*)self + 0x4);
-    if (p != 0) {
-        cMemMan_free(p);
+    void* instanceHeap = *(void**)((char*)self + 0x4);
+    if (instanceHeap != 0) {
+        cMemMan_free(instanceHeap);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -202,18 +202,18 @@ extern "C" void cDataManager_DetachAll(sDmTable275B08* self)
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00275B78);
 #ifdef SKIP_ASM
-extern "C" int func_00275B78(void* self, char* o)
+extern "C" int func_00275B78(void* self, char* dataHandle)
 {
-    return *(int*)(o + 8);
+    return *(int*)(dataHandle + 8);
 }
 #endif
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00275B80);
 #ifdef SKIP_ASM
-extern "C" void func_00275B80(void* self, char* o, int* out0, int* out1)
+extern "C" void func_00275B80(void* self, char* dataHandle, int* out0, int* out1)
 {
-    *out0 = *(int*)o;
-    *out1 = *(int*)(o + 4);
+    *out0 = *(int*)dataHandle;
+    *out1 = *(int*)(dataHandle + 4);
 }
 #endif
 
@@ -577,7 +577,7 @@ extern "C" int func_00282798(void* self, int a1);
 extern "C" void* func_00283D28(void*);
 extern "C" void* func_00283D70(void* list, int i);
 
-extern "C" int func_00276270(char* self, int a1)
+extern "C" int func_00276270(char* self, int playOnReady)
 {
     if (*(int*)(self + 0xA4) == 1) {
         func_00277778(self);
@@ -585,7 +585,7 @@ extern "C" int func_00276270(char* self, int a1)
     if (*(int*)(self + 0xA4) != 0) {
         return *(int*)(self + 0xA4);
     }
-    *(int*)(self + 0xB4) = a1;
+    *(int*)(self + 0xB4) = playOnReady;
     void* list = self + 0xC;
     if (func_00283D28(list) == 0) {
         return 0;
@@ -596,15 +596,15 @@ extern "C" int func_00276270(char* self, int a1)
         return *(int*)(self + 0xA4);
     }
     func_00277598(self, idx);
-    char* e = (char*)func_00283D70(list, 0);
-    if (func_00277DD8(self, e) == 0) {
-        if (func_00282798(*(void**)self, *(int*)(e + 0xC)) == 1) {
+    char* entry = (char*)func_00283D70(list, 0);
+    if (func_00277DD8(self, entry) == 0) {
+        if (func_00282798(*(void**)self, *(int*)(entry + 0xC)) == 1) {
             *(int*)(self + 0xA4) = 1;
         } else {
             *(int*)(self + 0xA4) = 2;
         }
     } else {
-        if (*(int*)(e + 0xC) < 0) {
+        if (*(int*)(entry + 0xC) < 0) {
             *(int*)(self + 0xA4) = 1;
         } else {
             *(int*)(self + 0xA4) = 2;
@@ -884,9 +884,9 @@ struct sDmVEntry6868 {
     int (*fn)(void*, int, int);
 };
 
-extern "C" void func_00276868(void* p, int a1)
+extern "C" void func_00276868(void* nisList, int resetTransition)
 {
-    char* self = (char*)p;
+    char* self = (char*)nisList;
     if (*(int*)(self + 0xA8) != 0) {
         func_00277C08(self, 0, 1);
     }
@@ -896,17 +896,17 @@ extern "C" void func_00276868(void* p, int a1)
     }
     if (*(int*)(self + 0x4) != 0 && *(int*)(self + 0xA4) == 3) {
         void* gm = SSXApp->Game->CutSceneTransitionMan;
-        if (a1 != 0) {
+        if (resetTransition != 0) {
             func_002EA820(gm);
             if (*(int*)(self + 0xB0) != 0) {
                 func_002E4578(func_00230698(SSXApp->Game, 0));
             }
         }
         char* table = (char*)SSXApp->Game->UI + 0x18;
-        char* o = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
-        if (o != 0) {
-            sDmVEntry6868* e = &(*(sDmVEntry6868**)(o + 0x8))[24];
-            e->fn(o + e->delta, 1, 0);
+        char* hudState = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
+        if (hudState != 0) {
+            sDmVEntry6868* vtEntry = &(*(sDmVEntry6868**)(hudState + 0x8))[24];
+            vtEntry->fn(hudState + vtEntry->delta, 1, 0);
         }
     }
     func_00277598(self, 5);
@@ -975,15 +975,15 @@ extern "C" int func_00276A78(void* self, int i)
     if (func_00277DD8(self, item) != 0) {
         return -1;
     }
-    int r = *(int*)((char*)item + 0x4);
-    if (r < 0) {
+    int scriptIndex = *(int*)((char*)item + 0x4);
+    if (scriptIndex < 0) {
         int id = *(int*)((char*)item + 0xC);
-        r = -1;
+        scriptIndex = -1;
         if (id >= 0) {
-            r = func_002827F8(*(void**)self, id);
+            scriptIndex = func_002827F8(*(void**)self, id);
         }
     }
-    return r;
+    return scriptIndex;
 }
 #endif
 //100%
@@ -1083,9 +1083,9 @@ extern "C" void func_00276CC8(char* self)
         return;
     }
     if (*(int*)(self + 0xA4) == 2) {
-        int v = *(int*)(self + 0xB4);
-        if (v != 0) {
-            func_00276388(self, v == 1, 0);
+        int playOnReady = *(int*)(self + 0xB4);
+        if (playOnReady != 0) {
+            func_00276388(self, playOnReady == 1, 0);
             *(int*)(self + 0xB4) = 0;
         }
     }
@@ -1178,8 +1178,8 @@ extern "C" void func_00276F48(char* self)
         return;
     }
     void* list = self + 0xC;
-    char* e = (char*)func_00283D70(list, 0);
-    if (!(*(int*)(e + 0x8) & 1)) {
+    char* entry = (char*)func_00283D70(list, 0);
+    if (!(*(int*)(entry + 0x8) & 1)) {
         return;
     }
     *(int*)(self + 0xC8) = 1;
@@ -1189,11 +1189,11 @@ extern "C" void func_00276F48(char* self)
     }
     int idx = tNISList_SetupNextScript(self, *(int*)(self + 0xBC), 1);
     if (idx != *(int*)(self + 0xBC)) {
-        char* e2 = (char*)func_00283D70(list, *(int*)(self + 0xBC));
-        if (func_00277DD8(self, e2) == 0) {
-            func_00282540(*(void**)self, *(int*)(e2 + 0xC));
-            *(int*)(e2 + 0xC) = -1;
-        } else if (*(int*)(e2 + 0xC) >= 0) {
+        char* pendingEntry = (char*)func_00283D70(list, *(int*)(self + 0xBC));
+        if (func_00277DD8(self, pendingEntry) == 0) {
+            func_00282540(*(void**)self, *(int*)(pendingEntry + 0xC));
+            *(int*)(pendingEntry + 0xC) = -1;
+        } else if (*(int*)(pendingEntry + 0xC) >= 0) {
             cVidEngine_ResetVideoEngine(*(char**)self + 0x500);
         }
         *(int*)(self + 0xBC) = idx;
@@ -1233,8 +1233,8 @@ extern "C" int func_002770C0(void* self)
     if (*(int*)((char*)self + 0xA4) != 3) {
         return 1;
     }
-    void* e = func_00283D70((char*)self + 0xC, 0);
-    return (*(int*)((char*)e + 0x8) >> 2) & 1;
+    void* entry = func_00283D70((char*)self + 0xC, 0);
+    return (*(int*)((char*)entry + 0x8) >> 2) & 1;
 }
 #endif
 
@@ -1263,8 +1263,8 @@ INCLUDE_ASM("scripter/datamanager", func_002771A8);
 #ifdef SKIP_ASM
 extern "C" void func_00283C58__FPv(int);
 
-extern "C" void func_002771A8(int arg0) {
-    func_00283C58__FPv(arg0 + 0xC);
+extern "C" void func_002771A8(int nisList) {
+    func_00283C58__FPv(nisList + 0xC);
 }
 #endif
 
@@ -1280,11 +1280,11 @@ extern "C" int func_002771C8(void* self, void* obj)
     if (*(int*)((char*)self + 0xA4) != 3) {
         return 0;
     }
-    void* e = func_00283D70((char*)self + 0xC, 0);
-    if (func_00277DD8(self, e) != 0) {
+    void* headEntry = func_00283D70((char*)self + 0xC, 0);
+    if (func_00277DD8(self, headEntry) != 0) {
         return 0;
     }
-    return obj == func_00282BF0(ScriptEngine, *(int*)((char*)e + 0xC));
+    return obj == func_00282BF0(ScriptEngine, *(int*)((char*)headEntry + 0xC));
 }
 #endif
 
@@ -1387,11 +1387,11 @@ extern "C" int func_002771C8(void* self, void* obj);
 extern "C" void func_002776E0(void* self);
 extern "C" void func_002826D8(void* self, int a1);
 
-extern "C" void func_002773A0(void* self, int a1, void* obj)
+extern "C" void func_002773A0(void* self, int requestHandle, void* obj)
 {
     if (func_002771C8(self, obj) != 0) {
         if (*(int*)((char*)self + 0xB8) != 0) {
-            func_002826D8(*(void**)self, a1);
+            func_002826D8(*(void**)self, requestHandle);
         }
         func_002776E0(self);
     }
@@ -1533,9 +1533,9 @@ extern "C" void func_00277598(void* selfp, int n)
                         snd = ent[5];
                     }
                     if (snd >= 0) {
-                        char* o = (char*)func_0028B180();
-                        sDmSndVEntry7598* vt = *(sDmSndVEntry7598**)(o + 0x5558);
-                        char* sys = o + 0x118;
+                        char* soundMan = (char*)func_0028B180();
+                        sDmSndVEntry7598* vt = *(sDmSndVEntry7598**)(soundMan + 0x5558);
+                        char* sys = soundMan + 0x118;
                         vt[4].fn(sys + vt[4].delta, snd);
                     }
                 }
@@ -1560,13 +1560,13 @@ extern "C" void func_002776E0(void* self)
     int idx = *(int*)((char*)self + 0xBC);
     if (idx >= 0) {
         void* list = (char*)self + 0xC;
-        char* e = (char*)func_00283D70(list, idx);
+        char* nextEntry = (char*)func_00283D70(list, idx);
         int ok;
-        if (func_00277DD8(self, e) == 0) {
+        if (func_00277DD8(self, nextEntry) == 0) {
             ok = func_00282798(*(void**)self,
                                *(int*)((char*)func_00283D70(list, *(int*)((char*)self + 0xBC)) + 0xC)) == 1;
         } else {
-            ok = *(int*)(e + 0xC) < 0;
+            ok = *(int*)(nextEntry + 0xC) < 0;
         }
         if (ok) {
             func_00277C08(self, 1, 1);
@@ -1585,11 +1585,11 @@ extern "C" int func_00282798(void* self, int a1);
 extern "C" void func_00277778(void* self)
 {
     if (*(int*)((char*)self + 0xA4) == 1) {
-        char* e = (char*)func_00283D70((char*)self + 0xC, 0);
-        if (func_00277DD8(self, e) == 0) {
-            int r = func_00282798(*(void**)self, *(int*)(e + 0xC));
-            if (r == 2) {
-                *(int*)((char*)self + 0xA4) = r;
+        char* headEntry = (char*)func_00283D70((char*)self + 0xC, 0);
+        if (func_00277DD8(self, headEntry) == 0) {
+            int requestState = func_00282798(*(void**)self, *(int*)(headEntry + 0xC));
+            if (requestState == 2) {
+                *(int*)((char*)self + 0xA4) = requestState;
             }
         } else {
             *(int*)((char*)self + 0xA4) = 2;
@@ -1667,9 +1667,9 @@ extern "C" void func_00277838(void* selfp)
         if (*(int*)(self + 0x4) != 0) {
             void* app = SSXApp->Game;
             void* fade = *(void**)((char*)app + 0x64);
-            char* p = (char*)func_00230698(app, 0);
-            if (wasOn != 0 && *(int*)(p + 0x44) != 0) {
-                func_002EA780(fade, func_002E4678(p));
+            char* transitionMan = (char*)func_00230698(app, 0);
+            if (wasOn != 0 && *(int*)(transitionMan + 0x44) != 0) {
+                func_002EA780(fade, func_002E4678(transitionMan));
             } else {
                 func_002EA780(fade, 0.5f);
             }
@@ -1878,9 +1878,9 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00277DD8);
 #ifdef SKIP_ASM
-extern "C" int func_00277DD8(void* self, void* a1)
+extern "C" int func_00277DD8(void* self, void* entry)
 {
-    return *(int*)a1 >= 0x1d;
+    return *(int*)entry >= 0x1d;
 }
 #endif
 

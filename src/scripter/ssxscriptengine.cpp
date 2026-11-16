@@ -607,7 +607,7 @@ void func_00278DE8(void* self, int val)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00278DF0);
 #ifdef SKIP_ASM
-extern "C" void func_00278DF0(void *arg0, int arg1) {
+extern "C" void func_00278DF0(void *scriptEngine, int viewIndex) {
     int var_3;
     int var_6;
 
@@ -615,7 +615,7 @@ extern "C" void func_00278DF0(void *arg0, int arg1) {
     var_3 = 1;
     do {
         var_3 -= 1;
-        (*(int *)((char*)((var_6 + (*(int *)((char*)(arg0) + (0x54C))))) + (8))) = arg1;
+        (*(int *)((char*)((var_6 + (*(int *)((char*)(scriptEngine) + (0x54C))))) + (8))) = viewIndex;
         var_6 += 0xCC;
     } while (var_3 >= 0);
 }
@@ -889,8 +889,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00279178);
 #ifdef SKIP_ASM
 extern "C" void func_00276A08(int, int);
 
-extern "C" void func_00279178(void *arg0, int arg1, int arg2) {
-    func_00276A08((*(int *)((char*)(arg0) + (0x54C))) + (arg1 * 0xCC), arg2);
+extern "C" void func_00279178(void *scriptEngine, int nisList, int listIndex) {
+    func_00276A08((*(int *)((char*)(scriptEngine) + (0x54C))) + (nisList * 0xCC), listIndex);
 }
 #endif
 //100%
@@ -898,8 +898,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_002791A8);
 #ifdef SKIP_ASM
 extern "C" void func_00276A78(int, int);
 
-extern "C" void func_002791A8(void *arg0, int arg1, int arg2) {
-    func_00276A78((*(int *)((char*)(arg0) + (0x54C))) + (arg1 * 0xCC), arg2);
+extern "C" void func_002791A8(void *scriptEngine, int nisList, int listIndex) {
+    func_00276A78((*(int *)((char*)(scriptEngine) + (0x54C))) + (nisList * 0xCC), listIndex);
 }
 #endif
 
@@ -960,11 +960,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00279270);
 #ifdef SKIP_ASM
 extern "C" void func_00277100(int, int);
 
-extern "C" void func_00279270(void *arg0, int arg1) {
+extern "C" void func_00279270(void *scriptEngine, int nisList) {
     int temp_5;
 
-    temp_5 = arg1 * 0xCC;
-    func_00277100((*(int *)((char*)(arg0) + (0x54C))) + temp_5, temp_5);
+    temp_5 = nisList * 0xCC;
+    func_00277100((*(int *)((char*)(scriptEngine) + (0x54C))) + temp_5, temp_5);
 }
 #endif
 
@@ -3235,14 +3235,14 @@ void* func_0027BD78(void* self)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027BD90__FPvT0);
 #ifdef SKIP_ASM
-void func_0027BD90(void* self, void* a1)
+void func_0027BD90(void* self, void* setupInfo)
 {
-    *(void**)((char*)a1 + 0x10) = *(void**)((char*)self + 0x548);
-    *(int*)a1 = -1;
-    *(int*)((char*)a1 + 0x4) = -1;
-    *(int*)((char*)a1 + 0x8) = -1;
-    *(int*)((char*)a1 + 0xc) = -1;
-    *(void**)((char*)self + 0x548) = a1;
+    *(void**)((char*)setupInfo + 0x10) = *(void**)((char*)self + 0x548);
+    *(int*)setupInfo = -1;
+    *(int*)((char*)setupInfo + 0x4) = -1;
+    *(int*)((char*)setupInfo + 0x8) = -1;
+    *(int*)((char*)setupInfo + 0xc) = -1;
+    *(void**)((char*)self + 0x548) = setupInfo;
 }
 #endif
 
@@ -3413,9 +3413,9 @@ extern "C" void func_0027C020(void* self)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C040);
 #ifdef SKIP_ASM
-extern "C" int func_0027C040(void* self, void* a1, int a2)
+extern "C" int func_0027C040(void* self, void* entity, int type)
 {
-    return a2 == 6;
+    return type == 6;
 }
 #endif
 
@@ -3424,10 +3424,10 @@ extern "C" void func_0027CBB0(void*, void*);
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027C050);
 #ifdef SKIP_ASM
-extern "C" void func_0027C050(void* self, void* a1)
+extern "C" void func_0027C050(void* self, void* entity)
 {
     char buf[16];
-    func_0027CBB0(a1, buf);
+    func_0027CBB0(entity, buf);
 }
 #endif
 
@@ -4117,8 +4117,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027D2C8);
 #ifdef SKIP_ASM
 extern "C" int func_0027D2C8(void* self, int i, int val)
 {
-    char* p = (char*)self + i * 0x14;
-    return *(int*)(p + 0x58) == val;
+    char* record = (char*)self + i * 0x14;
+    return *(int*)(record + 0x58) == val;
 }
 #endif
 
@@ -4149,13 +4149,13 @@ struct sScriptEng0050 {
     sVar0050 vars[1];
 };
 
-extern "C" int func_0027D2F0(sScriptEng0050* self, void* a1)
+extern "C" int func_0027D2F0(sScriptEng0050* self, void* entity)
 {
-    sVar0050* v = &self->vars[*(int*)((char*)a1 + 0x4)];
-    if (v->type != 1) {
+    sVar0050* record = &self->vars[*(int*)((char*)entity + 0x4)];
+    if (record->type != 1) {
         return -1;
     }
-    return v->value;
+    return record->value;
 }
 #endif
 
@@ -4203,16 +4203,16 @@ struct sScrEnt27D390 {
 
 extern "C" int func_0027D390(void* self, void* msg)
 {
-    sScrEnt27D390* e = (sScrEnt27D390*)((char*)self + (*(int*)((char*)msg + 0x4) * 0x14 + 0x50));
-    if (e->state == 1) {
+    sScrEnt27D390* record = (sScrEnt27D390*)((char*)self + (*(int*)((char*)msg + 0x4) * 0x14 + 0x50));
+    if (record->state == 1) {
         func_00282F90(msg);
     }
-    e->obj[1] = -1;
-    e->a = -1;
-    e->obj = 0;
-    e->b = -1;
-    e->state = 0;
-    e->c = -1;
+    record->obj[1] = -1;
+    record->a = -1;
+    record->obj = 0;
+    record->b = -1;
+    record->state = 0;
+    record->c = -1;
     return 1;
 }
 #endif
@@ -4248,14 +4248,14 @@ struct sScrOwnerD400 {
 extern "C" void func_0027D400(sScrOwnerD400* self, int* key, int value)
 {
     sScrVEntryD400* vt = *(sScrVEntryD400**)((char*)self + 0x2A8);
-    sScrSlotD400* s = &self->slots[key[1]];
-    if (vt[4].fn((char*)self + vt[4].delta, s->id, value) == 0) {
-        char* obj = (char*)self->objs[s->id];
+    sScrSlotD400* record = &self->slots[key[1]];
+    if (vt[4].fn((char*)self + vt[4].delta, record->id, value) == 0) {
+        char* obj = (char*)self->objs[record->id];
         sScrVEntryD400b* vt2 = *(sScrVEntryD400b**)(obj + 0xC);
         vt2[4].fn(obj + vt2[4].delta, value);
     }
-    s->value = value;
-    s->set = 1;
+    record->value = value;
+    record->set = 1;
 }
 #endif
 
@@ -4289,13 +4289,13 @@ struct sScrOwnerD4A0 {
 
 extern "C" void func_0027D4A0(sScrOwnerD4A0* self, int* key)
 {
-    sScrSlotD4A0* s = &self->slots[key[1]];
-    int old = s->value;
-    s->value = -1;
-    s->set = 0;
+    sScrSlotD4A0* record = &self->slots[key[1]];
+    int old = record->value;
+    record->value = -1;
+    record->set = 0;
     sScrVEntryD4A0* vt = *(sScrVEntryD4A0**)((char*)self + 0x2A8);
-    if (vt[4].fn((char*)self + vt[4].delta, s->id, old) == 0) {
-        char* obj = (char*)self->objs[s->id];
+    if (vt[4].fn((char*)self + vt[4].delta, record->id, old) == 0) {
+        char* obj = (char*)self->objs[record->id];
         sScrVEntryD4A0b* vt2 = *(sScrVEntryD4A0b**)(obj + 0xC);
         vt2[5].fn(obj + vt2[5].delta, old);
     }
@@ -4305,22 +4305,22 @@ extern "C" void func_0027D4A0(sScrOwnerD4A0* self, int* key)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D540);
 #ifdef SKIP_ASM
-extern "C" void func_0027D540(void* self, void* a1, int a2)
+extern "C" void func_0027D540(void* self, void* entity, int playerId)
 {
-    int i = *(int*)((char*)a1 + 0x4);
-    char* p = (char*)self + i * 0x14;
-    *(int*)(p + 0x60) = a2;
+    int i = *(int*)((char*)entity + 0x4);
+    char* record = (char*)self + i * 0x14;
+    *(int*)(record + 0x60) = playerId;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_0027D558);
 #ifdef SKIP_ASM
-extern "C" void func_0027D558(void* self, void* a1)
+extern "C" void func_0027D558(void* self, void* entity)
 {
-    int i = *(int*)((char*)a1 + 0x4);
-    char* p = (char*)self + i * 0x14;
-    *(int*)(p + 0x60) = -1;
+    int i = *(int*)((char*)entity + 0x4);
+    char* record = (char*)self + i * 0x14;
+    *(int*)(record + 0x60) = -1;
 }
 #endif
 
@@ -4331,14 +4331,14 @@ extern "C" int func_0027D578(sScriptEng0050* self, int key, int* out, int max)
 {
     int n = 0;
     int i = 0;
-    sVar0050* v = self->vars;
+    sVar0050* record = self->vars;
     while (i < 30 && n != max) {
-        if (v->a != 0 && v->type != 1 && (v->e < 0 || v->e == key)) {
-            *out++ = v->a;
+        if (record->a != 0 && record->type != 1 && (record->e < 0 || record->e == key)) {
+            *out++ = record->a;
             n++;
         }
         i++;
-        if (i < 30) v = &self->vars[i];
+        if (i < 30) record = &self->vars[i];
     }
     return n;
 }
@@ -5218,20 +5218,20 @@ extern "C" int func_00280458(cScriptCtx0458* self, void* msg, int type)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00280520__FPviT0T0);
 #ifdef SKIP_ASM
-void func_00280520(void* self, int a1, void* a2, void* a3)
+void func_00280520(void* self, int scriptAnimId, void* gameAnimIndex, void* gameAnimBankId)
 {
-    *(int*)a3 = *(int*)((char*)*(void**)((char*)self + 0x1c) + 0x4);
-    *(int*)a2 = (*(int**)((char*)*(void**)((char*)self + 0x1c) + 0x10))[a1];
+    *(int*)gameAnimBankId = *(int*)((char*)*(void**)((char*)self + 0x1c) + 0x4);
+    *(int*)gameAnimIndex = (*(int**)((char*)*(void**)((char*)self + 0x1c) + 0x10))[scriptAnimId];
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00280548__FPviT0T0);
 #ifdef SKIP_ASM
-void func_00280548(void* self, int a1, void* a2, void* a3)
+void func_00280548(void* self, int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
 {
-    *(int*)a3 = *(int*)((char*)*(void**)((char*)self + 0x20) + 0x4);
-    *(int*)a2 = a1;
+    *(int*)gameSoundBankId = *(int*)((char*)*(void**)((char*)self + 0x20) + 0x4);
+    *(int*)gameSoundIndex = scriptSoundId;
 }
 #endif
 
@@ -5240,12 +5240,12 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00280560);
 #ifdef SKIP_ASM
 extern "C" void* cSSXScriptEngine_GetSubjectRider(cSSXScriptEngine* self, int i, int a2);
 
-extern "C" int func_00280560(void* self, void* rider, int id, int a3)
+extern "C" int func_00280560(void* self, void* rider, int id, int playerMain)
 {
     if (id != 0) {
         if (id >= 0) {
             if (id < 0x16) {
-                return cSSXScriptEngine_GetSubjectRider(ScriptEngine, id - 1, a3) == rider;
+                return cSSXScriptEngine_GetSubjectRider(ScriptEngine, id - 1, playerMain) == rider;
             }
         }
     } else {
@@ -5448,9 +5448,9 @@ extern "C" void func_002807B0(sSeEngine07B0* self)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_002808D8);
 #ifdef SKIP_ASM
-extern "C" int func_002808D8(void* self, void* a1, int a2)
+extern "C" int func_002808D8(void* self, void* entity, int type)
 {
-    return a2 == 7;
+    return type == 7;
 }
 #endif
 
@@ -5729,10 +5729,10 @@ extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int unused, float
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281000__FPviT0T0);
 #ifdef SKIP_ASM
-void func_00281000(void* self, int a1, void* a2, void* a3)
+void func_00281000(void* self, int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
 {
-    *(int*)a3 = *(int*)((char*)*(void**)((char*)self + 0xf8) + 0x4);
-    *(int*)a2 = a1;
+    *(int*)gameSoundBankId = *(int*)((char*)*(void**)((char*)self + 0xf8) + 0x4);
+    *(int*)gameSoundIndex = scriptSoundId;
 }
 #endif
 
@@ -5803,12 +5803,12 @@ int func_00281168(void* self)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", func_00281170);
 #ifdef SKIP_ASM
-extern "C" void* func_00281170(void* self, int a1)
+extern "C" void* func_00281170(void* self, int index)
 {
-    if (a1 == 0) {
+    if (index == 0) {
         return (char*)self + 0x10;
     }
-    return (char*)self + (a1 * 0x14 + 0x8);
+    return (char*)self + (index * 0x14 + 0x8);
 }
 #endif
 
@@ -5852,10 +5852,10 @@ extern "C" int func_002811E8_impl(sSeEng11E8* self, char* key)
 {
     int k = *(int*)(key + 4);
     for (int i = 0; i < 2; i++) {
-        char* o = self->objs[i];
-        if (o != 0 && *(int*)(o + 4) == k) {
-            if (self->count > 0 && *(int*)(o + 0x14) != 0) {
-                func_0027D688(o, 0);
+        char* cameraObj = self->objs[i];
+        if (cameraObj != 0 && *(int*)(cameraObj + 4) == k) {
+            if (self->count > 0 && *(int*)(cameraObj + 0x14) != 0) {
+                func_0027D688(cameraObj, 0);
                 for (int j = 0; j < 2; j++) {
                     if (self->slots[j] == i) {
                         self->slots[j] = -1;
@@ -5996,7 +5996,7 @@ struct sNode_2814F8
     sNode_2814F8* next;
 };
 
-extern "C" void func_002814F8(void* self, void* obj, int a2, int flags, float t)
+extern "C" void func_002814F8(void* self, void* obj, int type, int flags, float currFrame)
 {
     if ((flags & 0xC) == 0)
         return;
@@ -6015,7 +6015,7 @@ extern "C" void func_002814F8(void* self, void* obj, int a2, int flags, float t)
             }
         }
         if (go)
-            func_00281C68(self, info, t);
+            func_00281C68(self, info, currFrame);
     }
     if (flags & 8)
     {
@@ -6030,7 +6030,7 @@ extern "C" void func_002814F8(void* self, void* obj, int a2, int flags, float t)
         }
         if (*(int*)((char*)self + 0xEC))
         {
-            func_00281C68(self, info, t);
+            func_00281C68(self, info, currFrame);
             *(int*)((char*)self + 0xEC) = 0;
         }
         int mask = 0;
@@ -6068,20 +6068,20 @@ struct sNode_2816A0
     signed char* kind;  // 0x14
 };
 
-extern "C" void func_002816A0(char* self, void* obj, float t, float dt)
+extern "C" void func_002816A0(char* self, void* obj, float currFrame, float dt)
 {
     int info[2];
     func_0027C8E0(obj, info);
     if (*func_0027C888_p(obj) != 0) {
         *(int*)(self + 0xF0) = 0;
-        char* p = (char*)func_0028B180();
-        void* timer = p + 0x118;
-        if (*(int*)(p + 0x530) != 0) {
+        char* soundMan = (char*)func_0028B180();
+        void* timer = soundMan + 0x118;
+        if (*(int*)(soundMan + 0x530) != 0) {
             float now = func_002B4920(timer);
             if (*(float*)(self + 0xF4) < now) {
                 *(int*)(self + 0xF0) = 1;
                 if (*(int*)(self + 0xEC) != 0) {
-                    func_00281C68(self, info, t);
+                    func_00281C68(self, info, currFrame);
                     *(int*)(self + 0xEC) = 0;
                 }
             }
@@ -6100,23 +6100,23 @@ extern "C" void func_002816A0(char* self, void* obj, float t, float dt)
     sNode_2816A0* n = (sNode_2816A0*)info[1];
     switch (*n->kind) {
     case 0: {
-        if ((float)(n->len + n->start) < t) {
+        if ((float)(n->len + n->start) < currFrame) {
             *(int*)(self + 0xE8) = 0;
         }
-        int a = func_00281C40(self, n->side);
-        int b = func_00281C40(self, 1 - n->side);
-        if (b == 0) {
+        int camera = func_00281C40(self, n->side);
+        int otherCamera = func_00281C40(self, 1 - n->side);
+        if (otherCamera == 0) {
             *(int*)(self + 0xE8) = 0;
             break;
         }
         float w = 1.0f;
-        if ((float)(n->len + n->start) < t) {
+        if ((float)(n->len + n->start) < currFrame) {
             *(int*)(self + 0xE8) = 0;
         } else {
-            w = (t - (float)n->start) / (float)n->len;
+            w = (currFrame - (float)n->start) / (float)n->len;
         }
-        func_0027D788((void*)a, w);
-        func_0027D788((void*)b, 1.0f - w);
+        func_0027D788((void*)camera, w);
+        func_0027D788((void*)otherCamera, 1.0f - w);
         break;
     }
     case 1:
@@ -6125,20 +6125,20 @@ extern "C" void func_002816A0(char* self, void* obj, float t, float dt)
     case 4:
     case 5:
     case 6: {
-        int a = func_00281C40(self, n->side);
-        int b = func_00281C40(self, 1 - n->side);
+        int camera = func_00281C40(self, n->side);
+        int otherCamera = func_00281C40(self, 1 - n->side);
         func_00282D30(*(void**)(self + 0xD8), dt);
         if (*(int*)(*(char**)(self + 0xD8) + 8) <= 0) {
             *(int*)(self + 0xE8) = 0;
         }
-        if (*(int*)(self + 0xE8) != 0 && b != 0 && t < (float)(n->len + n->start)) {
-            func_0027D788((void*)b, 1.0f);
-            func_0027D788((void*)a, 0.0f);
+        if (*(int*)(self + 0xE8) != 0 && otherCamera != 0 && currFrame < (float)(n->len + n->start)) {
+            func_0027D788((void*)otherCamera, 1.0f);
+            func_0027D788((void*)camera, 0.0f);
         } else {
-            if (b != 0) {
-                func_0027D788((void*)b, 0.0f);
+            if (otherCamera != 0) {
+                func_0027D788((void*)otherCamera, 0.0f);
             }
-            func_0027D788((void*)a, 1.0f);
+            func_0027D788((void*)camera, 1.0f);
         }
         break;
     }
@@ -6160,12 +6160,12 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00281A00);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* func_0027A668_2(void* self, int idx) __asm__("func_0027A668__FPv");
 
-extern "C" int func_00281A00(void* self, void* arg, int n)
+extern "C" int func_00281A00(void* self, void* entity, int n)
 {
     if (n != 4) {
         return 0;
     }
-    return *(int*)((char*)func_0027A668_2(ScriptEngine, *(int*)((char*)arg + 0x8)) + 0xC) ==
+    return *(int*)((char*)func_0027A668_2(ScriptEngine, *(int*)((char*)entity + 0x8)) + 0xC) ==
            *(int*)((char*)self + 0xF8);
 }
 #endif
@@ -6239,8 +6239,8 @@ extern "C" void func_00281AC8(void* selfp, int ch, int anim)
             return;
         }
         for (int i = 0; i < 2; i++) {
-            sSseRig1AC8* r = self->rigs[i];
-            if (r != 0 && r->busy <= 0) {
+            sSseRig1AC8* camera = self->rigs[i];
+            if (camera != 0 && camera->busy <= 0) {
                 slot = i;
                 break;
             }
@@ -6257,12 +6257,12 @@ extern "C" void func_00281AC8(void* selfp, int ch, int anim)
     sSseAnim1AC8* cur = self->rigs[slot]->cur;
     if (cur == 0 || cur->id != anim) {
         int j = 0;
-        for (sSseAnim1AC8* a = self->anims; ; a++, j++) {
+        for (sSseAnim1AC8* cameraEntity = self->anims; ; cameraEntity++, j++) {
             if (j >= 9) {
                 return;
             }
-            if (func_00282F80(a) != 0 && a->id == anim) {
-                func_0027D688((char*)self->rigs[slot], a);
+            if (func_00282F80(cameraEntity) != 0 && cameraEntity->id == anim) {
+                func_0027D688((char*)self->rigs[slot], cameraEntity);
                 break;
             }
         }
@@ -6316,7 +6316,7 @@ struct sNode_281C68
     sKind_281C68* kind;
 };
 
-extern "C" void func_00281C68(void* self, int* info, float t)
+extern "C" void func_00281C68(void* self, int* info, float currFrame)
 {
     sNode_281C68* node = (sNode_281C68*)info[1];
     int bit = node->bit;
@@ -6329,9 +6329,9 @@ extern "C" void func_00281C68(void* self, int* info, float t)
             func_00281AC8(self, i, 9);
             continue;
         }
-        void* o = func_00281C40_p(self, i);
-        if (o)
-            func_0027D788(o, 0.0f);
+        void* camera = func_00281C40_p(self, i);
+        if (camera)
+            func_0027D788(camera, 0.0f);
     }
     func_00281AC8(self, bit, node->mode);
     *(int*)((char*)self + 0xE8) = 0;
@@ -6350,7 +6350,7 @@ extern "C" void func_00281C68(void* self, int* info, float t)
             return;
         }
         int id = func_0027D2F0((sScriptEng0050*)func_0027D2E8(), (char*)self + 0x10);
-        func_00282DB0_f(*pf, id, node->kind->a, t - (float)node->start, (float)node->len, 0.0f, 0.0f);
+        func_00282DB0_f(*pf, id, node->kind->a, currFrame - (float)node->start, (float)node->len, 0.0f, 0.0f);
     }
     else if (k > 0)
     {
@@ -6361,7 +6361,7 @@ extern "C" void func_00281C68(void* self, int* info, float t)
             return;
         }
         int id = func_0027D2F0((sScriptEng0050*)func_0027D2E8(), (char*)self + 0x10);
-        func_00282DD0(*pf, id, node->kind->a, node->kind->b, t - (float)node->start, (float)node->kind->d, (float)node->len, (float)node->kind->c);
+        func_00282DD0(*pf, id, node->kind->a, node->kind->b, currFrame - (float)node->start, (float)node->kind->d, (float)node->len, (float)node->kind->c);
     }
 }
 #endif

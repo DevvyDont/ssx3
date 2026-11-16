@@ -800,14 +800,14 @@ struct sObj00192740 {
     sVEntry00192740* vt;
 };
 
-extern "C" void func_00192740(void* self, int a1)
+extern "C" void func_00192740(void* self, int enabled)
 {
     int i;
-    *(int*)((char*)self + 0x28) = a1;
+    *(int*)((char*)self + 0x28) = enabled;
     for (i = 0; i < 8; i++) {
-        sObj00192740* o = ((sObj00192740**)((char*)self + 0x8))[i];
-        if (o != 0) {
-            o->vt[8].fn((char*)o + o->vt[8].delta, a1);
+        sObj00192740* item = ((sObj00192740**)((char*)self + 0x8))[i];
+        if (item != 0) {
+            item->vt[8].fn((char*)item + item->vt[8].delta, enabled);
         }
     }
 }
@@ -842,17 +842,17 @@ extern "C" void func_001927B0(sRuleSel_001927B0* self)
             continue;
         }
         if (i == sel) {
-            sObj_001927B0* o = self->items[i];
-            sVEnt_001927B0* e = &o->vt[11];
-            e->fn((char*)o + e->delta, sColor_001927B0(1.0f, 1.0f, 1.0f, 1.0f));
+            sObj_001927B0* item = self->items[i];
+            sVEnt_001927B0* colorEntry = &item->vt[11];
+            colorEntry->fn((char*)item + colorEntry->delta, sColor_001927B0(1.0f, 1.0f, 1.0f, 1.0f));
         } else if (cUIListBox_getCurrentEntryData(self->items[i])) {
-            sObj_001927B0* o = self->items[i];
-            sVEnt_001927B0* e = &o->vt[11];
-            e->fn((char*)o + e->delta, sColor_001927B0(1.0f, 0.5921568870544434f, 0.04313725605607033f, 0.0f));
+            sObj_001927B0* item = self->items[i];
+            sVEnt_001927B0* colorEntry = &item->vt[11];
+            colorEntry->fn((char*)item + colorEntry->delta, sColor_001927B0(1.0f, 0.5921568870544434f, 0.04313725605607033f, 0.0f));
         } else {
-            sObj_001927B0* o = self->items[i];
-            sVEnt_001927B0* e = &o->vt[11];
-            e->fn((char*)o + e->delta, sColor_001927B0(1.0f, 0.14509804546833038f, 0.027450982481241226f, 0.019607843831181526f));
+            sObj_001927B0* item = self->items[i];
+            sVEnt_001927B0* colorEntry = &item->vt[11];
+            colorEntry->fn((char*)item + colorEntry->delta, sColor_001927B0(1.0f, 0.14509804546833038f, 0.027450982481241226f, 0.019607843831181526f));
         }
     }
 }
@@ -876,9 +876,9 @@ extern "C" int func_00192918(void* self, int val)
 //100%
 INCLUDE_ASM("fe/festateruleselect", func_00192948);
 #ifdef SKIP_ASM
-extern "C" int func_00192948(void* self, int a1)
+extern "C" int func_00192948(void* self, int itemIndex)
 {
-    int mask = (int)(0x1000000 << a1) >> 24;
+    int mask = (int)(0x1000000 << itemIndex) >> 24;
     return (*(int*)((char*)self + 0x2c) & mask) != 0;
 }
 #endif
@@ -987,15 +987,15 @@ INCLUDE_ASM("fe/festateruleselect", func_00192D00);
 extern void* cFEStateBraggingRights_vtbl[];
 extern "C" void* func_001A8500(void* self, int a1, int a2);
 
-extern "C" void* func_00192D00(void* self, int a1)
+extern "C" void* func_00192D00(void* self, int engine)
 {
-    char* p;
+    char* ruleSel;
     int i;
-    func_001A8500(self, a1, 0);
+    func_001A8500(self, engine, 0);
     *(void***)((char*)self + 0x8) = cFEStateBraggingRights_vtbl;
-    p = (char*)self + 0x6D0;
-    for (i = 1; i != -1; i--, p += 0x34) {
-        func_001926F0(p);
+    ruleSel = (char*)self + 0x6D0;
+    for (i = 1; i != -1; i--, ruleSel += 0x34) {
+        func_001926F0(ruleSel);
     }
     *(int*)((char*)self + 0xC) = 0x14;
     *(int*)((char*)self + 0x738) = 0;

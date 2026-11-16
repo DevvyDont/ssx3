@@ -262,9 +262,9 @@ extern "C" int* func_0030C820(void* list);
 
 extern "C" void func_001F7548(void* self)
 {
-    int* p = func_0030C820((char*)cWScriptMan_TheWScriptMan + 0x1C4);
-    if (p != 0) {
-        *(int*)((char*)self + 0x9C) = *p;
+    int* queueEntry = func_0030C820((char*)cWScriptMan_TheWScriptMan + 0x1C4);
+    if (queueEntry != 0) {
+        *(int*)((char*)self + 0x9C) = *queueEntry;
     } else {
         *(int*)((char*)self + 0x9C) = *(int*)((char*)cWScriptMan_TheWScriptMan + 0x2A0);
     }
@@ -417,9 +417,9 @@ extern "C" void func_001F7770(void* self, void* item)
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F77F0);
 #ifdef SKIP_ASM
-extern "C" int func_001F77F0(void* self, int a1, int a2)
+extern "C" int func_001F77F0(void* self, int menu, int event)
 {
-    return a2 == 6 ? 0x101 : 0;
+    return event == 6 ? 0x101 : 0;
 }
 #endif
 
@@ -800,14 +800,14 @@ extern "C" void cOVStateManager_triggerOverlay(int id);
 extern "C" void func_001F8118(void* self, void* a1)
 {
     if (*(int*)((char*)self + 0xA0) == 0) {
-        int v = *(int*)((char*)a1 + 0x18);
-        switch (v) {
+        int choice = *(int*)((char*)a1 + 0x18);
+        switch (choice) {
         case 0:
             *(int*)((char*)self + 0xA0) = 1;
             cOVStateManager_mStatus = 1;
             break;
         case 1:
-            *(int*)((char*)self + 0xA0) = v;
+            *(int*)((char*)self + 0xA0) = choice;
             cOVStateManager_triggerOverlay(0x13);
             break;
         }

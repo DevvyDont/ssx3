@@ -87,14 +87,14 @@ extern "C" void func_00348C48(void* self)
     (*(int*)((char*)cell + 0xA0))++;
     sHashKey_8B90 key;
     func_00328F28(&key, (char*)self + 0x30);
-    sHashCellR_8C48* c1 = key.x < 0 ? cell + 4 : cell;
-    sHashCellR_8C48* c2 = key.y < 0 ? c1 + 2 : c1;
-    sHashCellR_8C48* c3 = key.z < 0 ? c2 + 1 : c2;
-    sHashCellR_8C48* c = c3;
-    func_003284B8(c->oct, 2, node, &key, c);
-    if (octEmpty_8C48(c->oct)) {
-        operator_delete((int*)c->oct);
-        c->oct = 0;
+    sHashCellR_8C48* cellX = key.x < 0 ? cell + 4 : cell;
+    sHashCellR_8C48* cellXY = key.y < 0 ? cellX + 2 : cellX;
+    sHashCellR_8C48* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
+    sHashCellR_8C48* octant = cellXYZ;
+    func_003284B8(octant->oct, 2, node, &key, octant);
+    if (octEmpty_8C48(octant->oct)) {
+        operator_delete((int*)octant->oct);
+        octant->oct = 0;
     }
     operator_delete(*(int**)((char*)self + 0x54));
     *(void**)((char*)self + 0x54) = 0;
@@ -288,37 +288,37 @@ static inline void vu0AddFRBox(sFrBoxVec4& dst, sFrBoxVec4& b)
 // bounding box of the rail elements, padded by 200 on x/y/z
 extern "C" void func_00349110(sFrBoxRail* self)
 {
-    sFrBoxElem* e = self->elems;
+    sFrBoxElem* points = self->elems;
     int n = self->count;
-    self->min = self->max = e[0].pos;
+    self->min = self->max = points[0].pos;
     for (int i = 1; i < n; i++) {
-        sFrBoxVec4* p = &e[i].pos;
-        if (p->x < self->min.x) {
-            self->min.x = p->x;
+        sFrBoxVec4* point = &points[i].pos;
+        if (point->x < self->min.x) {
+            self->min.x = point->x;
         }
-        if (p->y < self->min.y) {
-            self->min.y = p->y;
+        if (point->y < self->min.y) {
+            self->min.y = point->y;
         }
-        if (p->z < self->min.z) {
-            self->min.z = p->z;
+        if (point->z < self->min.z) {
+            self->min.z = point->z;
         }
-        if (p->x > self->max.x) {
-            self->max.x = p->x;
+        if (point->x > self->max.x) {
+            self->max.x = point->x;
         }
-        if (p->y > self->max.y) {
-            self->max.y = p->y;
+        if (point->y > self->max.y) {
+            self->max.y = point->y;
         }
-        if (p->z > self->max.z) {
-            self->max.z = p->z;
+        if (point->z > self->max.z) {
+            self->max.z = point->z;
         }
     }
-    sFrBoxVec4 pad;
-    pad.x = 200.0f;
-    pad.y = 200.0f;
-    pad.z = 200.0f;
-    pad.w = 0.0f;
-    vu0SubFRBox(self->min, pad);
-    vu0AddFRBox(self->max, pad);
+    sFrBoxVec4 margin;
+    margin.x = 200.0f;
+    margin.y = 200.0f;
+    margin.z = 200.0f;
+    margin.w = 0.0f;
+    vu0SubFRBox(self->min, margin);
+    vu0AddFRBox(self->max, margin);
 }
 #endif
 
@@ -378,11 +378,11 @@ struct sFrNode9220 {
 
 extern "C" void func_00349220(void* self, sFrNode9220* node)
 {
-    sFrNodeMtx m;
-    func_0034FED8(node->model.get(), node->bone, &m);
-    sFrNodeVec4 v = m.r[3];
-    node->posB = v;
-    node->posA = v;
+    sFrNodeMtx boneMat;
+    func_0034FED8(node->model.get(), node->bone, &boneMat);
+    sFrNodeVec4 bonePos = boneMat.r[3];
+    node->posB = bonePos;
+    node->posA = bonePos;
 }
 #endif
 
@@ -546,13 +546,13 @@ static inline void vu0AddFR(sFrVec4& dst, sFrVec4 b)
         : "m"(dst), "m"(b));
 }
 
-extern "C" void func_00349798(void* self, void* node, sFrVec4* v)
+extern "C" void func_00349798(void* self, void* node, sFrVec4* offset)
 {
     if (*(int*)((char*)node + 0x64) >= 0) {
         vu0AddFR((*(sFrElem**)((char*)self + 0x70))[*(int*)((char*)node + 0x64)].pos,
-                 vu0ScaleFR(*v, 1.0f - *(float*)((char*)node + 0x68)));
+                 vu0ScaleFR(*offset, 1.0f - *(float*)((char*)node + 0x68)));
         vu0AddFR((*(sFrElem**)((char*)self + 0x70))[*(int*)((char*)node + 0x64) + 1].pos,
-                 vu0ScaleFR(*v, *(float*)((char*)node + 0x68)));
+                 vu0ScaleFR(*offset, *(float*)((char*)node + 0x68)));
     }
 }
 #endif
@@ -689,10 +689,10 @@ extern "C" void func_00348B40(void* self, void* stream);
 extern "C" void func_00349AD0(void* self, void* stream)
 {
     func_00348B40(self, stream);
-    sFlexRailVEntry9AD0* e = &(*(sFlexRailVEntry9AD0**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x60, 0xC);
-    e = &(*(sFlexRailVEntry9AD0**)stream)[1];
-    e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x70), *(int*)((char*)self + 0x20) * 0x50);
+    sFlexRailVEntry9AD0* writeFn = &(*(sFlexRailVEntry9AD0**)stream)[1];
+    writeFn->fn((char*)stream + writeFn->delta, (char*)self + 0x60, 0xC);
+    writeFn = &(*(sFlexRailVEntry9AD0**)stream)[1];
+    writeFn->fn((char*)stream + writeFn->delta, *(void**)((char*)self + 0x70), *(int*)((char*)self + 0x20) * 0x50);
 }
 #endif
 
@@ -866,37 +866,37 @@ struct sFrBoxRail60 {
 // bounding box of the rail elements, padded by 200 on x/y/z
 extern "C" void func_00349F18(sFrBoxRail60* self)
 {
-    sFrBoxElem60* e = self->elems;
+    sFrBoxElem60* points = self->elems;
     int n = self->count;
-    self->min = self->max = e[0].pos;
+    self->min = self->max = points[0].pos;
     for (int i = 1; i < n; i++) {
-        sFrBoxVec4* p = &e[i].pos;
-        if (p->x < self->min.x) {
-            self->min.x = p->x;
+        sFrBoxVec4* point = &points[i].pos;
+        if (point->x < self->min.x) {
+            self->min.x = point->x;
         }
-        if (p->y < self->min.y) {
-            self->min.y = p->y;
+        if (point->y < self->min.y) {
+            self->min.y = point->y;
         }
-        if (p->z < self->min.z) {
-            self->min.z = p->z;
+        if (point->z < self->min.z) {
+            self->min.z = point->z;
         }
-        if (p->x > self->max.x) {
-            self->max.x = p->x;
+        if (point->x > self->max.x) {
+            self->max.x = point->x;
         }
-        if (p->y > self->max.y) {
-            self->max.y = p->y;
+        if (point->y > self->max.y) {
+            self->max.y = point->y;
         }
-        if (p->z > self->max.z) {
-            self->max.z = p->z;
+        if (point->z > self->max.z) {
+            self->max.z = point->z;
         }
     }
-    sFrBoxVec4 pad;
-    pad.x = 200.0f;
-    pad.y = 200.0f;
-    pad.z = 200.0f;
-    pad.w = 0.0f;
-    vu0SubFRBox(self->min, pad);
-    vu0AddFRBox(self->max, pad);
+    sFrBoxVec4 margin;
+    margin.x = 200.0f;
+    margin.y = 200.0f;
+    margin.z = 200.0f;
+    margin.w = 0.0f;
+    vu0SubFRBox(self->min, margin);
+    vu0AddFRBox(self->max, margin);
 }
 #endif
 
@@ -915,10 +915,10 @@ struct sFrNodeA028 {
 
 extern "C" void func_0034A028(void* self, sFrNodeA028* node)
 {
-    sFrNodeMtx m;
-    func_0034FED8(node->model.get(), node->bone, &m);
-    sFrNodeVec4 v = m.r[3];
-    node->pos = v;
+    sFrNodeMtx boneMat;
+    func_0034FED8(node->model.get(), node->bone, &boneMat);
+    sFrNodeVec4 bonePos = boneMat.r[3];
+    node->pos = bonePos;
 }
 #endif
 
@@ -1187,28 +1187,28 @@ static inline void vu0AddEq_A568(sV4_A568& dst, sV4_A568 b)
 extern "C" void func_0034A568(sFrRailA568* self, sFrNodeA568* node, sV4_A568* dir)
 {
     float len = vu0Len_A568(*dir);
-    sV4_A568 d;
+    sV4_A568 clamped;
     if (200.0f < len) {
-        d = vu0Scale_A568(*dir, 200.0f / len);
+        clamped = vu0Scale_A568(*dir, 200.0f / len);
     } else {
-        d = *dir;
+        clamped = *dir;
     }
     if (node->idx < 0) {
         return;
     }
-    sV4_A568 a = vu0Sub_A568(node->pos, self->elems[0].pos);
-    sV4_A568 c = vu0Cross_A568(d, a);
-    float alen = vu0Len_A568(a);
+    sV4_A568 arm = vu0Sub_A568(node->pos, self->elems[0].pos);
+    sV4_A568 torque = vu0Cross_A568(clamped, arm);
+    float alen = vu0Len_A568(arm);
     int i;
     for (i = 0; i < node->idx; i++) {
         float* k = self->k;
-        sV4_A568 t = a;
+        sV4_A568 scaled = arm;
         float lv = vu0Len_A568(self->elems[i].vel);
-        vu0ScaleEq_A568(t, lv / vu0Len_A568(t));
-        vu0AddEq_A568(self->elems[i].force, vu0Scale_A568(vu0Scale_A568(c, vu0Len_A568(self->elems[i].vel) / alen), k[2]));
+        vu0ScaleEq_A568(scaled, lv / vu0Len_A568(scaled));
+        vu0AddEq_A568(self->elems[i].force, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(self->elems[i].vel) / alen), k[2]));
     }
     float* k = self->k;
-    vu0AddEq_A568(self->elems[node->idx].force, vu0Scale_A568(vu0Scale_A568(c, vu0Len_A568(vu0Sub_A568(node->pos, self->elems[node->idx].pos)) / alen), k[2]));
+    vu0AddEq_A568(self->elems[node->idx].force, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(vu0Sub_A568(node->pos, self->elems[node->idx].pos)) / alen), k[2]));
 }
 #endif
 
@@ -1290,10 +1290,10 @@ extern "C" void func_0034A838(sFrR_A838* self, sFrN_A838* node)
     if (node->idx < 0)
         return;
     for (int i = 0; i <= node->idx; i++) {
-        sFrV_A838 c;
-        sFrV_A838 d = vu0Sub_A838(node->pos, self->elems[i].pos);
-        vu0CrossTo_A838(c, d, self->elems[i].axis);
-        vu0AddEq_A838(node->acc, c);
+        sFrV_A838 cross;
+        sFrV_A838 arm = vu0Sub_A838(node->pos, self->elems[i].pos);
+        vu0CrossTo_A838(cross, arm, self->elems[i].axis);
+        vu0AddEq_A838(node->acc, cross);
     }
 }
 #endif
@@ -1480,10 +1480,10 @@ extern "C" void func_00348B40(void* self, void* stream);
 extern "C" void func_0034AC10(void* self, void* stream)
 {
     func_00348B40(self, stream);
-    sFlexRailVEntryAC10* e = &(*(sFlexRailVEntryAC10**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x60, 0xC);
-    e = &(*(sFlexRailVEntryAC10**)stream)[1];
-    e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x70), *(int*)((char*)self + 0x20) * 0x60);
+    sFlexRailVEntryAC10* writeFn = &(*(sFlexRailVEntryAC10**)stream)[1];
+    writeFn->fn((char*)stream + writeFn->delta, (char*)self + 0x60, 0xC);
+    writeFn = &(*(sFlexRailVEntryAC10**)stream)[1];
+    writeFn->fn((char*)stream + writeFn->delta, *(void**)((char*)self + 0x70), *(int*)((char*)self + 0x20) * 0x60);
 }
 #endif
 
@@ -1582,10 +1582,10 @@ struct sFrRailDesc {
 extern "C" sFrRailDesc* func_0034AC88(sFrRailDesc* out, void* src);
 extern "C" void func_0034C548(void* mgr, void* node, sFrRailDesc* desc);
 
-extern "C" void* func_0034ADD8(void* self, void* a1, void* node, void* src)
+extern "C" void* func_0034ADD8(void* self, void* bucket, void* node, void* src)
 {
     sFrRailDesc desc;
-    func_0034FB00(self, a1, 0xA, node);
+    func_0034FB00(self, bucket, 0xA, node);
     *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
     *(unsigned int*)((char*)node + 0x8) = (*(unsigned int*)((char*)node + 0x8) & 0xFFFFFFFD) | 4;
     func_0034AC88(&desc, src);

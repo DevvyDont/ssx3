@@ -233,8 +233,8 @@ extern "C" void func_002338C8(void)
     cGraphicsMan_UploadTextures(GrMan);
     cSSXApp_startFELoad(SSXApp);
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
-    int* p = &cDepthFog_m_Enable;
-    *p = 0;
+    int* fogEnable = &cDepthFog_m_Enable;
+    *fogEnable = 0;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_38C8* vt = (sVE_38C8*)ps2GraphicsMan->mVtbl;
     vt[15].fn((char*)ps2GraphicsMan + vt[15].delta, sVec3i_38C8(0, 0, 0));
@@ -346,17 +346,17 @@ extern "C" void func_00397DF8(void* engine);
 
 extern "C" int func_002339F8(void* self)
 {
-    char* g = (char*)GrMan;
-    sVEntryI002339F8* vt = *(sVEntryI002339F8**)(g + 0x10D8);
-    if (vt[17].fn(g + vt[17].delta) == 0) {
+    char* graphicsMan = (char*)GrMan;
+    sVEntryI002339F8* vt = *(sVEntryI002339F8**)(graphicsMan + 0x10D8);
+    if (vt[17].fn(graphicsMan + vt[17].delta) == 0) {
         return 0;
     }
     if (func_00231D60(self) == 0) {
         func_00397DF8(*(void**)((char*)self + 0xC));
     }
-    g = (char*)GrMan;
-    sVEntryV002339F8* vt2 = *(sVEntryV002339F8**)(g + 0x10D8);
-    vt2[20].fn(g + vt2[20].delta);
+    graphicsMan = (char*)GrMan;
+    sVEntryV002339F8* vt2 = *(sVEntryV002339F8**)(graphicsMan + 0x10D8);
+    vt2[20].fn(graphicsMan + vt2[20].delta);
     return 1;
 }
 #endif

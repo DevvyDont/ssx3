@@ -91,10 +91,10 @@ INCLUDE_ASM("replay/frameptr", func_0026E9C0__FPv);
 #ifdef SKIP_ASM
 int func_0026E9C0(void* self)
 {
-    int t0 = *(int*)((char*)self + 0x4);
+    int block = *(int*)((char*)self + 0x4);
     *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x8) = t0;
-    return t0;
+    *(int*)((char*)self + 0x8) = block;
+    return block;
 }
 #endif
 
@@ -364,10 +364,10 @@ extern "C" void func_0026ED28(sFpSerObj* out, void* obj)
         unsigned short type;
     } rec;
     rec.id = 0xFFFFFFFF;
-    void* p = *(void**)((char*)obj + 0x18);
-    if (p != 0) {
-        rec.id = *(unsigned int*)((char*)p + 0x78);
-        rec.type = *(unsigned short*)((char*)p + 0x8);
+    void* inst = *(void**)((char*)obj + 0x18);
+    if (inst != 0) {
+        rec.id = *(unsigned int*)((char*)inst + 0x78);
+        rec.type = *(unsigned short*)((char*)inst + 0x8);
     } else {
         rec.type = 0;
     }
@@ -1155,8 +1155,8 @@ INCLUDE_ASM("replay/frameptr", cReplay_endReplay);
  */
 extern "C" void cReplay_endReplay(cReplay* self)
 {
-    int s = self->State;
-    bool ok = !(s == 0xE || s == 0xF);
+    int curState = self->State;
+    bool ok = !(curState == 0xE || curState == 0xF);
     if (ok) {
         self->EndReplay = 1;
     }
@@ -1364,12 +1364,12 @@ extern "C" void cReplay_processInput(cReplay* self)
         break;
     case 3: {
         redraw = 1;
-        char* f = (char*)func_0026E448_2(((char*)self), self->PlaybackTick);
-        self->PlaybackFrame = (cReplayFrame*)f;
-        if (self->PlaybackTick == *(int*)(f + 0x30)) {
+        char* frame = (char*)func_0026E448_2(((char*)self), self->PlaybackTick);
+        self->PlaybackFrame = (cReplayFrame*)frame;
+        if (self->PlaybackTick == *(int*)(frame + 0x30)) {
             cReplay_prevFrame(((char*)self));
         } else {
-            char* n = *(char**)(f + 0x14);
+            char* n = *(char**)(frame + 0x14);
             if (n != 0 && *(int*)(n + 0x30) == self->PlaybackTick) {
                 cReplay_prevFrame(((char*)self));
             }
@@ -1416,10 +1416,10 @@ extern "C" void cReplay_processInput(cReplay* self)
     self->Cmd = 0;
     if (redraw) {
         char* views = (char*)SSXApp->Game->ViewMan;
-        char* o = *(char**)(*(char**)(views + 4) + 0xA8);
-        cChaseCameraController_switchCamera_Chapter(o);
-        sVE_26FE50* vt = *(sVE_26FE50**)(o + 0x14);
-        vt[4].fn(o + vt[4].delta);
+        char* controller = *(char**)(*(char**)(views + 4) + 0xA8);
+        cChaseCameraController_switchCamera_Chapter(controller);
+        sVE_26FE50* vt = *(sVE_26FE50**)(controller + 0x14);
+        vt[4].fn(controller + vt[4].delta);
         cGameViewMan_updateAll(views);
     }
 }

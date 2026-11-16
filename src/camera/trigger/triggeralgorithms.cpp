@@ -153,16 +153,16 @@ extern "C" void* cCameraTriggerStack_cCameraTriggerStack(void* self);
 
 extern "C" void* func_0016C800(void* self)
 {
-    char* p;
+    char* cursor;
     int i;
     func_0016BEE8(self);
-    p = (char*)self + 0x14;
-    for (i = 1; i != -1; i--, p += 4) {
-        func_0016C5D0(p);
+    cursor = (char*)self + 0x14;
+    for (i = 1; i != -1; i--, cursor += 4) {
+        func_0016C5D0(cursor);
     }
-    p = (char*)self + 0x1C;
-    for (i = 1; i != -1; i--, p += 0x20) {
-        cCameraTriggerStack_cCameraTriggerStack(p);
+    cursor = (char*)self + 0x1C;
+    for (i = 1; i != -1; i--, cursor += 0x20) {
+        cCameraTriggerStack_cCameraTriggerStack(cursor);
     }
     return self;
 }

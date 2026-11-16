@@ -202,14 +202,14 @@ extern "C" sPathEntry* func_0026B5E0(sPathEntryList* list, int type, int id)
 //100%
 INCLUDE_ASM("path/pathsys", func_0026B648);
 #ifdef SKIP_ASM
-extern "C" int func_0026B648(void *arg0, int arg1) {
+extern "C" int func_0026B648(void *list, int index) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(arg0) + (0)));
-    if ((temp_2 <= 0) || (arg1 >= temp_2) || (arg1 < 0)) {
+    temp_2 = (*(int *)((char*)(list) + (0)));
+    if ((temp_2 <= 0) || (index >= temp_2) || (index < 0)) {
         return 0;
     }
-    return (*(int *)((char*)(arg0) + (4))) + (arg1 * 0x28);
+    return (*(int *)((char*)(list) + (4))) + (index * 0x28);
 }
 #endif
 
@@ -295,19 +295,19 @@ struct sPathSys_B7D8 {
     sPathPair_B7D8 pairs[1];    // 0x18
 };
 
-extern "C" int func_0026B7D8(sPathSys_B7D8* self, char* p)
+extern "C" int func_0026B7D8(sPathSys_B7D8* self, char* cursor)
 {
     int count;
-    char* start = p;
-    func_0026BA68(&count, p);
-    p += 4;
+    char* start = cursor;
+    func_0026BA68(&count, cursor);
+    cursor += 4;
     for (int i = 0; i < count; i++) {
-        func_0026BA88(&self->pairs[i].b, p);
-        p += 4;
-        func_0026BA68(&self->pairs[i].a, p);
-        p += 4;
+        func_0026BA88(&self->pairs[i].b, cursor);
+        cursor += 4;
+        func_0026BA68(&self->pairs[i].a, cursor);
+        cursor += 4;
     }
-    return p - start;
+    return cursor - start;
 }
 #endif
 

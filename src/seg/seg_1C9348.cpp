@@ -75,12 +75,12 @@ extern "C" void* HUFF_about(void)
 //100%
 INCLUDE_ASM("seg/seg_1C9348", func_002C8468);
 #ifdef SKIP_ASM
-extern "C" unsigned func_002C8468(unsigned char *p, int n) {
-    unsigned r = 0;
+extern "C" unsigned func_002C8468(unsigned char *bytes, int n) {
+    unsigned value = 0;
     while (n--) {
-        r = (r << 8) + *p++;
+        value = (value << 8) + *bytes++;
     }
-    return r;
+    return value;
 }
 #endif
 
@@ -89,17 +89,17 @@ INCLUDE_ASM("seg/seg_1C9348", func_002C84A0);
 #ifdef SKIP_ASM
 extern "C" unsigned func_002C8468(unsigned char *p, int n);
 
-extern "C" int func_002C84A0(unsigned char *p) {
-    int r = 0;
-    if (func_002C8468(p, 2) == 0x30FB
-        || func_002C8468(p, 2) == 0x31FB
-        || func_002C8468(p, 2) == 0x32FB
-        || func_002C8468(p, 2) == 0x33FB
-        || func_002C8468(p, 2) == 0x34FB
-        || func_002C8468(p, 2) == 0x35FB) {
-        r = 100;
+extern "C" int func_002C84A0(unsigned char *compressed) {
+    int confidence = 0;
+    if (func_002C8468(compressed, 2) == 0x30FB
+        || func_002C8468(compressed, 2) == 0x31FB
+        || func_002C8468(compressed, 2) == 0x32FB
+        || func_002C8468(compressed, 2) == 0x33FB
+        || func_002C8468(compressed, 2) == 0x34FB
+        || func_002C8468(compressed, 2) == 0x35FB) {
+        confidence = 100;
     }
-    return r;
+    return confidence;
 }
 #endif
 
@@ -108,11 +108,11 @@ INCLUDE_ASM("seg/seg_1C9348", func_002C8550);
 #ifdef SKIP_ASM
 extern "C" unsigned func_002C8468(unsigned char *p, int n);
 
-extern "C" void func_002C8550(unsigned char *p) {
-    if (func_002C8468(p, 2) & 0x100) {
-        func_002C8468(p + 5, 3);
+extern "C" void func_002C8550(unsigned char *compressed) {
+    if (func_002C8468(compressed, 2) & 0x100) {
+        func_002C8468(compressed + 5, 3);
     } else {
-        func_002C8468(p + 2, 3);
+        func_002C8468(compressed + 2, 3);
     }
 }
 #endif
@@ -122,8 +122,8 @@ INCLUDE_ASM("seg/seg_1C9348", func_002C85A0);
 #ifdef SKIP_ASM
 extern "C" int func_002C76C0(int, int);
 
-extern "C" int func_002C85A0(int a, int b, int c) {
-    return func_002C76C0(a, c);
+extern "C" int func_002C85A0(int packBuf, int b, int unpackBuf) {
+    return func_002C76C0(packBuf, unpackBuf);
 }
 #endif
 

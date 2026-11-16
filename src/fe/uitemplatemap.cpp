@@ -685,9 +685,9 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onWidgetEvent);
 //100%
 INCLUDE_ASM("fe/uitemplatemap", func_00202738);
 #ifdef SKIP_ASM
-extern "C" int func_00202738(void* self, int a1, int a2)
+extern "C" int func_00202738(void* self, int menu, int event)
 {
-    if (a2 == 6 || a2 == 9 || a2 == 8) {
+    if (event == 6 || event == 9 || event == 8) {
         return 0;
     }
     return 0x101;
@@ -3008,9 +3008,9 @@ extern "C" void func_002085B8(char* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/uitemplatemap", func_00208610);
 #ifdef SKIP_ASM
-extern "C" int func_00208610(void* self, int a1, int a2)
+extern "C" int func_00208610(void* self, int menu, int event)
 {
-    if (func_00202738((char*)self + 0x9C, a1, a2) != 0) {
+    if (func_00202738((char*)self + 0x9C, menu, event) != 0) {
         return 0x101;
     }
     return 0;

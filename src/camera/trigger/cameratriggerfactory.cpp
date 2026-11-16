@@ -721,28 +721,28 @@ extern "C" sVec4_171FA8 func_00171FA8(char* obj, sVec4_171FA8* pos, float step)
 {
     sVec4_171FA8 center = Center_171FA8(GetBox_171FA8(obj));
     sVec4_171FA8 dir = Sub_171FA8(*pos, center);
-    sVec4_171FA8 a = *pos;
-    sVec4_171FA8 b = center;
+    sVec4_171FA8 outsidePos = *pos;
+    sVec4_171FA8 lastInsidePos = center;
     float k = 2.0f;
-    sVEin_171FA8* e;
-    while (e = &(*(sVEin_171FA8**)(obj + 0x24))[7], e->fn(obj + e->delta, &a)) {
-        b = a;
+    sVEin_171FA8* containsEntry;
+    while (containsEntry = &(*(sVEin_171FA8**)(obj + 0x24))[7], containsEntry->fn(obj + containsEntry->delta, &outsidePos)) {
+        lastInsidePos = outsidePos;
         sVec4_171FA8 off = Scale_171FA8(dir, k);
-        a = Add_171FA8(center, off);
+        outsidePos = Add_171FA8(center, off);
         k += k;
     }
-    float len = Length_171FA8(Sub_171FA8(a, b));
+    float len = Length_171FA8(Sub_171FA8(outsidePos, lastInsidePos));
     int n = (int)func_0040DA10(len / step) + 1;
     for (int i = 0; i < n; i++) {
-        sVec4_171FA8 m = Scale_171FA8(Add_171FA8(a, b), 0.5f);
-        e = &(*(sVEin_171FA8**)(obj + 0x24))[7];
-        if (e->fn(obj + e->delta, &m)) {
-            b = m;
+        sVec4_171FA8 testPos = Scale_171FA8(Add_171FA8(outsidePos, lastInsidePos), 0.5f);
+        containsEntry = &(*(sVEin_171FA8**)(obj + 0x24))[7];
+        if (containsEntry->fn(obj + containsEntry->delta, &testPos)) {
+            lastInsidePos = testPos;
         } else {
-            a = m;
+            outsidePos = testPos;
         }
     }
-    return a;
+    return outsidePos;
 }
 #endif
 
@@ -782,10 +782,10 @@ struct sCTBoxK2 {
 // Bounding box of a trigger volume: centre +- the largest half-extent.
 extern "C" sCTBoxK2 func_001721C0(char* obj)
 {
-    float r = func_001731C0((float*)(obj + 0x18));
-    sCTVec3K2 rv(r, r, r);
-    const sCTVec3K2& c = *(sCTVec3K2*)obj;
-    return sCTBoxK2(sCTVec4K2(c - r, 1.0f), sCTVec4K2(c + r, 1.0f));
+    float maxDist = func_001731C0((float*)(obj + 0x18));
+    sCTVec3K2 rv(maxDist, maxDist, maxDist);
+    const sCTVec3K2& center = *(sCTVec3K2*)obj;
+    return sCTBoxK2(sCTVec4K2(center - maxDist, 1.0f), sCTVec4K2(center + maxDist, 1.0f));
 }
 #endif
 
@@ -1044,10 +1044,10 @@ struct sCTBoxK2b {
 // Bounding box of a trigger volume: centre +- the largest half-extent.
 extern "C" sCTBoxK2b func_00172840(char* obj)
 {
-    float r = func_001731C0((float*)(obj + 0x18));
-    sCTVec3K2b rv(r, r, r);
-    const sCTVec3K2b& c = *(sCTVec3K2b*)obj;
-    return sCTBoxK2b(sCTVec4K2b(c - r, 1.0f), sCTVec4K2b(c + r, 1.0f));
+    float maxDist = func_001731C0((float*)(obj + 0x18));
+    sCTVec3K2b rv(maxDist, maxDist, maxDist);
+    const sCTVec3K2b& center = *(sCTVec3K2b*)obj;
+    return sCTBoxK2b(sCTVec4K2b(center - maxDist, 1.0f), sCTVec4K2b(center + maxDist, 1.0f));
 }
 #endif
 
@@ -1474,19 +1474,19 @@ extern "C" int get_cCTVolumeBox(void* reader, cCTVolumeBoxK2* obj)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001731C0);
 #ifdef SKIP_ASM
-extern "C" float func_001731C0(float* v)
+extern "C" float func_001731C0(float* halfExtents)
 {
-    float x = v[0];
-    float y = v[1];
-    float r = v[2];
+    float x = halfExtents[0];
+    float y = halfExtents[1];
+    float largest = halfExtents[2];
     if (y < x) {
-        if (r < x) {
+        if (largest < x) {
             return x;
         }
-    } else if (r < y) {
-        r = y;
+    } else if (largest < y) {
+        largest = y;
     }
-    return r;
+    return largest;
 }
 #endif
 
@@ -1711,9 +1711,9 @@ struct sVE173678b {
 extern "C" void* func_00173678(void* self)
 {
     sVE173678b* vt = *(sVE173678b**)((char*)self + 0x10);
-    char* o = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
-    sVE173678a* vt2 = *(sVE173678a**)o;
-    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(o + vt2[7].delta));
+    char* riderIface = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
+    sVE173678a* vt2 = *(sVE173678a**)riderIface;
+    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(riderIface + vt2[7].delta));
 }
 #endif
 
@@ -2488,9 +2488,9 @@ struct sVE1747A0b {
 extern "C" void* func_001747A0(void* self)
 {
     sVE1747A0b* vt = *(sVE1747A0b**)((char*)self + 0x10);
-    char* o = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
-    sVE1747A0a* vt2 = *(sVE1747A0a**)o;
-    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(o + vt2[7].delta));
+    char* riderIface = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
+    sVE1747A0a* vt2 = *(sVE1747A0a**)riderIface;
+    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(riderIface + vt2[7].delta));
 }
 #endif
 
@@ -2573,9 +2573,9 @@ static inline void Subtree_4848(sOctNode_4848* node, void* ctx)
     if (node->child[7]) func_00176890(node->child[7], ctx);
 }
 
-extern "C" void func_00174848(int a0, void* ctx1, void* ctx2, sBox_4848* box, sOctNode_4848* node, sCell_4848* cell)
+extern "C" void func_00174848(int hit, void* ctx1, void* ctx2, sBox_4848* box, sOctNode_4848* node, sCell_4848* cell)
 {
-    sCell_4848 c;
+    sCell_4848 childCell;
     sOctNode_4848* ch;
 
     WalkList_4848(node->list, ctx1);
@@ -2584,37 +2584,37 @@ extern "C" void func_00174848(int a0, void* ctx1, void* ctx2, sBox_4848* box, sO
     }
     int bits = (cell->level + 0x7E) << 23;
     float size = *(float*)&bits;
-    c.level = cell->level - 1;
-    c.u = cell->u * 2;
-    c.v = cell->v * 2;
-    c.w = cell->w * 2;
+    childCell.level = cell->level - 1;
+    childCell.u = cell->u * 2;
+    childCell.v = cell->v * 2;
+    childCell.w = cell->w * 2;
 
-    float ulo0 = ((float)c.u - 0.2f) * size;
-    float uhi0 = ((float)(c.u + 1) + 0.2f) * size;
+    float ulo0 = ((float)childCell.u - 0.2f) * size;
+    float uhi0 = ((float)(childCell.u + 1) + 0.2f) * size;
     int fu0 = 0;
     if (box->minx < uhi0 && ulo0 < box->maxx) fu0 = 1;
-    float ulo1 = ((float)(c.u + 1) - 0.2f) * size;
-    float uhi1 = ((float)(c.u + 2) + 0.2f) * size;
+    float ulo1 = ((float)(childCell.u + 1) - 0.2f) * size;
+    float uhi1 = ((float)(childCell.u + 2) + 0.2f) * size;
     int fu1 = 0;
     if (box->minx < uhi1 && ulo1 < box->maxx) fu1 = 1;
     if (!fu0 && !fu1) return;
 
-    float vlo0 = ((float)c.v - 0.2f) * size;
-    float vhi0 = ((float)(c.v + 1) + 0.2f) * size;
+    float vlo0 = ((float)childCell.v - 0.2f) * size;
+    float vhi0 = ((float)(childCell.v + 1) + 0.2f) * size;
     int fv0 = 0;
     if (box->miny < vhi0 && vlo0 < box->maxy) fv0 = 1;
-    float vlo1 = ((float)(c.v + 1) - 0.2f) * size;
-    float vhi1 = ((float)(c.v + 2) + 0.2f) * size;
+    float vlo1 = ((float)(childCell.v + 1) - 0.2f) * size;
+    float vhi1 = ((float)(childCell.v + 2) + 0.2f) * size;
     int fv1 = 0;
     if (box->miny < vhi1 && vlo1 < box->maxy) fv1 = 1;
     if (!fv0 && !fv1) return;
 
-    float wlo0 = ((float)c.w - 0.2f) * size;
-    float whi0 = ((float)(c.w + 1) + 0.2f) * size;
+    float wlo0 = ((float)childCell.w - 0.2f) * size;
+    float whi0 = ((float)(childCell.w + 1) + 0.2f) * size;
     int fw0 = 0;
     if (box->minz < whi0 && wlo0 < box->maxz) fw0 = 1;
-    float wlo1 = ((float)(c.w + 1) - 0.2f) * size;
-    float whi1 = ((float)(c.w + 2) + 0.2f) * size;
+    float wlo1 = ((float)(childCell.w + 1) - 0.2f) * size;
+    float whi1 = ((float)(childCell.w + 2) + 0.2f) * size;
     int fw1 = 0;
     if (box->minz < whi1 && wlo1 < box->maxz) fw1 = 1;
     if (!fw0 && !fw1) return;
@@ -2637,70 +2637,70 @@ extern "C" void func_00174848(int a0, void* ctx1, void* ctx2, sBox_4848* box, sO
         if (iu0 && iv0 && iw0) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    c.w++;
+    childCell.w++;
     ch = node->child[1];
     if (ch != 0 && fu0 && fv0 && fw1) {
         if (iu0 && iv0 && iw1) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    c.v++;
+    childCell.v++;
     ch = node->child[3];
     if (ch != 0 && fu0 && fv1 && fw1) {
         if (iu0 && iv1 && iw1) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    c.w--;
+    childCell.w--;
     ch = node->child[2];
     if (ch != 0 && fu0 && fv1 && fw0) {
         if (iu0 && iv1 && iw0) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    c.u++;
+    childCell.u++;
     ch = node->child[6];
     if (ch != 0 && fu1 && fv1 && fw0) {
         if (iu1 && iv1 && iw0) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    c.w++;
+    childCell.w++;
     ch = node->child[7];
     if (ch != 0 && fu1 && fv1 && fw1) {
         if (iu1 && iv1 && iw1) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    c.v--;
+    childCell.v--;
     ch = node->child[5];
     if (ch != 0 && fu1 && fv0 && fw1) {
         if (iu1 && iv0 && iw1) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    c.w--;
+    childCell.w--;
     ch = node->child[4];
     if (ch != 0 && fu1 && fv0 && fw0) {
         if (iu1 && iv0 && iw0) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(a0, ctx1, ctx2, box, ch, &c);
+            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
 }
@@ -3057,9 +3057,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762C8);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern long long t4vect_Zero;
 
-extern "C" long long *func_001762C8(long long *arg0) {
-    *arg0 = t4vect_Zero;
-    return arg0;
+extern "C" long long *func_001762C8(long long *result) {
+    *result = t4vect_Zero;
+    return result;
 }
 #endif
 //100%
@@ -3134,9 +3134,9 @@ typedef int cQuad128 __attribute__((mode(TI)));
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176358);
 #ifdef SKIP_ASM
-extern "C" void* func_00176358(void* self, void* a1)
+extern "C" void* func_00176358(void* self, void* scriptAlgo)
 {
-    *(cQuad128*)self = *(cQuad128*)((char*)a1 + 0x20);
+    *(cQuad128*)self = *(cQuad128*)((char*)scriptAlgo + 0x20);
     return self;
 }
 #endif
@@ -3208,15 +3208,15 @@ extern "C" void func_001763F8(void* self, int flags)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176428);
 #ifdef SKIP_ASM
-extern "C" void func_00176428(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x80))) = arg1;
+extern "C" void func_00176428(void *boundedAlgo, int boundAction) {
+    (*(int *)((char*)(boundedAlgo) + (0x80))) = boundAction;
 }
 #endif
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176430);
 #ifdef SKIP_ASM
-extern "C" int func_00176430(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x80)));
+extern "C" int func_00176430(void *boundedAlgo) {
+    return (*(int *)((char*)(boundedAlgo) + (0x80)));
 }
 #endif
 //100%
@@ -3373,15 +3373,15 @@ sCTBoundLineK::sCTBoundLineK() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001767F8);
 #ifdef SKIP_ASM
-extern "C" int func_001767F8(int arg0) {
-    return arg0 + 0x2C;
+extern "C" int func_001767F8(int boundLine) {
+    return boundLine + 0x2C;
 }
 #endif
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176800);
 #ifdef SKIP_ASM
-extern "C" int func_00176800(int arg0) {
-    return arg0 + 0x38;
+extern "C" int func_00176800(int boundLine) {
+    return boundLine + 0x38;
 }
 #endif
 
@@ -3417,9 +3417,9 @@ void operator_delete(int* ptr);
 
 extern "C" void func_00176840(void* self)
 {
-    int* p = *(int**)((char*)self + 0x8);
-    if (p != 0) {
-        operator_delete(p);
+    int* buffer = *(int**)((char*)self + 0x8);
+    if (buffer != 0) {
+        operator_delete(buffer);
     }
 }
 #endif
@@ -3431,9 +3431,9 @@ void operator_delete(int* ptr);
 
 extern "C" void func_00176868(void* self)
 {
-    int* p = *(int**)((char*)self + 0x8);
-    if (p != 0) {
-        operator_delete(p);
+    int* buffer = *(int**)((char*)self + 0x8);
+    if (buffer != 0) {
+        operator_delete(buffer);
     }
 }
 #endif
@@ -3452,20 +3452,20 @@ extern "C" void cActiveTriggerList_add(void*, void*);
 
 extern "C" void func_00176890(void* node, void* ctx)
 {
-    char* e;
-    for (e = *(char**)((char*)node + 0x28); e != 0; e = *(char**)e) {
-        if (*(int*)(e + 8) == 4) {
-            char* trig = *(char**)(e + 0xC);
+    char* entry;
+    for (entry = *(char**)((char*)node + 0x28); entry != 0; entry = *(char**)entry) {
+        if (*(int*)(entry + 8) == 4) {
+            char* trig = *(char**)(entry + 0xC);
             char* sub = *(char**)((char*)ctx + 4) + 0x6C0;
             char* bound = *(char**)(trig + 8);
             sVEnt176890* cvt = *(sVEnt176890**)sub;
             sVEnt176890* bvt = *(sVEnt176890**)(bound + 0x24);
             char* bthis = bound + bvt[7].delta;
-            int r = cvt[5].fn(sub + cvt[5].delta);
-            if (bvt[7].fn(bthis, r)) {
-                void* f = func_0016C6B0(*(void**)ctx, trig);
-                if (f) {
-                    *(int*)((char*)f + 0xC) = 1;
+            int riderPos = cvt[5].fn(sub + cvt[5].delta);
+            if (bvt[7].fn(bthis, riderPos)) {
+                void* existing = func_0016C6B0(*(void**)ctx, trig);
+                if (existing) {
+                    *(int*)((char*)existing + 0xC) = 1;
                 } else {
                     cActiveTriggerList_add(*(void**)ctx, trig);
                 }
@@ -4491,10 +4491,10 @@ static inline sVec_00177EF8 ctGetB_00177EF8(void* self)
  */
 extern "C" sVec_00177EF8 cSPOKEChaseAlgorithm_getRiderPosition(cSPOKEChaseAlgorithm* self)
 {
-    char* o = *(char**)((char*)self->Target + 4) + 0x6C0;
-    sVEa_00177EF8* e = &(*(sVEa_00177EF8**)o)[5];
-    sVec_00177EF8* v = e->fn(o + e->delta);
-    return ctAdd_00177EF8(ctScale_00177EF8(*v, 0.19999998807907104f), ctScale_00177EF8(ctGetB_00177EF8(self), 0.800000011920929f));
+    char* riderIface = *(char**)((char*)self->Target + 4) + 0x6C0;
+    sVEa_00177EF8* posEntry = &(*(sVEa_00177EF8**)riderIface)[5];
+    sVec_00177EF8* riderPos = posEntry->fn(riderIface + posEntry->delta);
+    return ctAdd_00177EF8(ctScale_00177EF8(*riderPos, 0.19999998807907104f), ctScale_00177EF8(ctGetB_00177EF8(self), 0.800000011920929f));
 }
 #endif
 
@@ -5336,13 +5336,13 @@ extern "C" void cSUPERPIPEChaseAlgorithm_update(cSUPERPIPEChaseAlgorithm* self)
     *(float*)self = 0.7853981852531433f;
     self->Position = f_1785F0_1787E0(((char*)self));
     self->CamTargetPos = f_178758_1787E0(((char*)self));
-    t4Vector d = Sub_1787E0(self->CamTargetPos, self->Position);
-    float len = Length_1787E0(d);
+    t4Vector look = Sub_1787E0(self->CamTargetPos, self->Position);
+    float len = Length_1787E0(look);
     if (len < 1.0f) {
-        d = ScaleP_1787E0(&t4vect_XAxis, 600.0f);
+        look = ScaleP_1787E0(&t4vect_XAxis, 600.0f);
     } else if (len > 600.0f) {
-        ScaleEq_1787E0(d, 600.0f / len);
-        self->Position = Sub_1787E0(self->CamTargetPos, d);
+        ScaleEq_1787E0(look, 600.0f / len);
+        self->Position = Sub_1787E0(self->CamTargetPos, look);
     }
 }
 #endif
@@ -5783,23 +5783,23 @@ extern "C" void cPOST_RACE_1ChaseAlgorithm_update(cPOST_RACE_1ChaseAlgorithm* se
     (self->AgeInFrames)++;
     self->AgeInFrames %= 0x44C;
     float ang = wrap_00178BB0((float)self->AgeInFrames * 0.0009090909152291715f * 6.2831854820251465f);
-    float a = (1.0f - func_0031C040(ang)) * 0.7482788562774658f + -0.7482788562774658f;
-    a -= ffloor_00178BB0(a * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
-    sVec_00178BB0 q = AxisAngle_00178BB0(t4vect_ZAxis, a);
-    sVec_00178BB0 v = ctRot_00178BB0(q, *(sVec_00178BB0*)&self->StartDir);
+    float angle = (1.0f - func_0031C040(ang)) * 0.7482788562774658f + -0.7482788562774658f;
+    angle -= ffloor_00178BB0(angle * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
+    sVec_00178BB0 rotation = AxisAngle_00178BB0(t4vect_ZAxis, angle);
+    sVec_00178BB0 look = ctRot_00178BB0(rotation, *(sVec_00178BB0*)&self->StartDir);
     *(sVec_00178BB0*)&self->CamTargetPos = ctAdd_00178BB0(getPos_00178BB0(((char*)self)), ctScale_00178BB0(t4vect_ZAxis, -3.0f));
     int multi = *(int*)((char*)SSXApp->Game->AI + 0x78) >= 2;
-    float h = 0.0f;
+    float multiplayerHeight = 0.0f;
     if (multi) {
-        h = 150.0f;
+        multiplayerHeight = 150.0f;
     }
-    float d = 0.0f;
+    float multiplayerDistance = 0.0f;
     if (multi) {
-        d = 200.0f;
+        multiplayerDistance = 200.0f;
     }
     *(sVec_00178BB0*)&self->Position =
-        ctAdd_00178BB0(ctSub_00178BB0(*(sVec_00178BB0*)&self->CamTargetPos, ctScale_00178BB0(v, d + 126.0f)),
-                       ctScale_00178BB0(t4vect_ZAxis, h + -27.0f));
+        ctAdd_00178BB0(ctSub_00178BB0(*(sVec_00178BB0*)&self->CamTargetPos, ctScale_00178BB0(look, multiplayerDistance + 126.0f)),
+                       ctScale_00178BB0(t4vect_ZAxis, multiplayerHeight + -27.0f));
 }
 #endif
 
@@ -6534,20 +6534,20 @@ extern "C" int func_0017A830(sCamMgr_A830* self, char* name, char* tag)
         }
     }
     sStr_A830 base;
-    sStr_A830 s;
+    sStr_A830 workStr;
     sBigFile_A830 bf;
     sCamName_A830 nm;
     char* pre = str_data_worlds;
-    cBXString_cBXString2(&s, tag);
-    func_003186D0((cBXString*)&base, pre, (cBXString*)&s);
-    cBXString__cBXString(&s, 2);
+    cBXString_cBXString2(&workStr, tag);
+    func_003186D0((cBXString*)&base, pre, (cBXString*)&workStr);
+    cBXString__cBXString(&workStr, 2);
     cBigFile* pbf = (cBigFile*)&bf;
-    func_00318630((cBXString*)&s, (cBXString*)&base, str_big);
-    cBigFile_cBigFile1_A830(pbf, s.s, 0x100);
-    cBXString__cBXString(&s, 2);
+    func_00318630((cBXString*)&workStr, (cBXString*)&base, str_big);
+    cBigFile_cBigFile1_A830(pbf, workStr.s, 0x100);
+    cBXString__cBXString(&workStr, 2);
     nm.name = name;
-    int r = func_003A6948(base.s, 1, &nm);
-    int result = r == 0 ? 0 : nm.ok;
+    int anyFound = func_003A6948(base.s, 1, &nm);
+    int result = anyFound == 0 ? 0 : nm.ok;
     cBigFile__cBigFile((cBigFile*)&bf, 2);
     cBXString__cBXString(&base, 2);
     return result;
@@ -6626,27 +6626,27 @@ extern "C" int func_0017A978(void* selfp, int n, void* namesp, char* tag)
         return 0;
     }
     sStr_17A978 base;
-    sStr_17A978 s;
+    sStr_17A978 workStr;
     sBigFile_17A978 bf;
     char* pre = str_data_worlds;
-    cBXString_cBXString2(&s, tag);
-    func_003186D0((cBXString*)&base, pre, (cBXString*)&s);
-    cBXString__cBXString(&s, 2);
+    cBXString_cBXString2(&workStr, tag);
+    func_003186D0((cBXString*)&base, pre, (cBXString*)&workStr);
+    cBXString__cBXString(&workStr, 2);
     cBigFile* pbf = (cBigFile*)&bf;
-    func_00318630((cBXString*)&s, (cBXString*)&base, str_big);
-    cBigFile_cBigFile1_17A978(pbf, s.s, 0x100);
-    cBXString__cBXString(&s, 2);
-    int r = func_003A6948(base.s, n, names);
-    if (r == 0) {
+    func_00318630((cBXString*)&workStr, (cBXString*)&base, str_big);
+    cBigFile_cBigFile1_17A978(pbf, workStr.s, 0x100);
+    cBXString__cBXString(&workStr, 2);
+    int anyFound = func_003A6948(base.s, n, names);
+    if (anyFound == 0) {
         cBigFile__cBigFile((cBigFile*)&bf, 2);
         cBXString__cBXString(&base, 2);
         return 0;
     }
     for (int k = 0; k < n; k++) {
         if (names[k].ok) {
-            for (int m = 0; m < self->count; m++) {
-                if (func_0041AA88(names[k].name, self->entries[m].name) == 0 &&
-                    func_0041AA88(tag, self->entries[m].tag) == 0) {
+            for (int entryIndex = 0; entryIndex < self->count; entryIndex++) {
+                if (func_0041AA88(names[k].name, self->entries[entryIndex].name) == 0 &&
+                    func_0041AA88(tag, self->entries[entryIndex].tag) == 0) {
                     names[k].ok = 0;
                     break;
                 }
@@ -6655,7 +6655,7 @@ extern "C" int func_0017A978(void* selfp, int n, void* namesp, char* tag)
     }
     cBigFile__cBigFile((cBigFile*)&bf, 2);
     cBXString__cBXString(&base, 2);
-    return r;
+    return anyFound;
 }
 #endif
 

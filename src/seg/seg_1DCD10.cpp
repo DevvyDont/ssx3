@@ -273,12 +273,12 @@ extern "C" void func_002DBF98(cFogParticleMan* self) {
 //100%
 INCLUDE_ASM("seg/seg_1DCD10", func_002DC168);
 #ifdef SKIP_ASM
-extern "C" int func_002DC168(void *arg0, void *arg1) {
+extern "C" int func_002DC168(void *lhs, void *rhs) {
     int temp_3;
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(arg0) + (4)));
-    temp_3 = (*(int *)((char*)(arg1) + (4)));
+    temp_4 = (*(int *)((char*)(lhs) + (4)));
+    temp_3 = (*(int *)((char*)(rhs) + (4)));
     if (temp_4 >= temp_3) {
         return (temp_3 >= temp_4) ? 0 : -1;
     }
@@ -675,13 +675,13 @@ extern "C" void func_002DC7B0(cPS2FogParticleMan* list)
         int rest = left - n;
         p += 10;
         for (int i = start; i < start + n; i++) {
-            tFogSprite* v = &((&list->mSprites[0]))[((sSort_C7B0*)D_00537AC0)[i].idx];
-            float q = v->mTopLeft.w;
+            tFogSprite* fogSprite = &((&list->mSprites[0]))[((sSort_C7B0*)D_00537AC0)[i].idx];
+            float q = fogSprite->mTopLeft.w;
             p[0] = FBits_C7B0(st0[0] * q) | ((unsigned long)FBits_C7B0(st0[1] * q) << 32);
-            p[1] = (int)v->mColour[1] | ((unsigned long)(int)v->mColour[2] << 8) | ((unsigned long)(int)v->mColour[3] << 16) | ((unsigned long)(int)v->mColour[0] << 24) | ((unsigned long)FBits_C7B0(q) << 32);
-            p[2] = (int)v->mTopLeft.x | ((unsigned long)(int)v->mTopLeft.y << 16) | ((unsigned long)(int)(v->mTopLeft.z * q) << 32);
+            p[1] = (int)fogSprite->mColour[1] | ((unsigned long)(int)fogSprite->mColour[2] << 8) | ((unsigned long)(int)fogSprite->mColour[3] << 16) | ((unsigned long)(int)fogSprite->mColour[0] << 24) | ((unsigned long)FBits_C7B0(q) << 32);
+            p[2] = (int)fogSprite->mTopLeft.x | ((unsigned long)(int)fogSprite->mTopLeft.y << 16) | ((unsigned long)(int)(fogSprite->mTopLeft.z * q) << 32);
             p[3] = FBits_C7B0(st1[0] * q) | ((unsigned long)FBits_C7B0(st1[1] * q) << 32);
-            p[4] = (int)v->mBottomRight.x | ((unsigned long)(int)v->mBottomRight.y << 16) | ((unsigned long)(int)(v->mBottomRight.z * q) << 32);
+            p[4] = (int)fogSprite->mBottomRight.x | ((unsigned long)(int)fogSprite->mBottomRight.y << 16) | ((unsigned long)(int)(fogSprite->mBottomRight.z * q) << 32);
             p += 5;
         }
         if (pad) *p++ = 0;

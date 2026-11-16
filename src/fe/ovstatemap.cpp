@@ -483,9 +483,9 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* pWidget, int Event
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_00208EF8);
 #ifdef SKIP_ASM
-extern "C" int func_00208EF8(void* self, int a1, int a2)
+extern "C" int func_00208EF8(void* self, int menu, int event)
 {
-    return ((unsigned int)(a2 - 8) < 2) ? 0 : 0x101;
+    return ((unsigned int)(event - 8) < 2) ? 0 : 0x101;
 }
 #endif
 
@@ -1201,9 +1201,9 @@ struct sMap_9FD0 {
     cUIObj_9FD0* b[8];      // 0x104
 };
 
-extern "C" void func_00209FD0(void* p)
+extern "C" void func_00209FD0(void* vself)
 {
-    sMap_9FD0* self = (sMap_9FD0*)p;
+    sMap_9FD0* self = (sMap_9FD0*)vself;
     if (self->cursor != 0) {
         self->cursor->setVisible(0);
     }

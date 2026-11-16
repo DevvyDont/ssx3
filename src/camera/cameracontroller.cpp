@@ -303,8 +303,8 @@ extern "C" void cManualCameraController_setCurrentAlgorithmType(void* self, int 
 //100%
 INCLUDE_ASM("camera/cameracontroller", func_0015CFD0);
 #ifdef SKIP_ASM
-extern "C" int func_0015CFD0(void *arg0) {
-    return (*(int *)((char*)(**(*(void ****)((char*)(arg0) + (8)))) + (0xC)));
+extern "C" int func_0015CFD0(void *manualController) {
+    return (*(int *)((char*)(**(*(void ****)((char*)(manualController) + (8)))) + (0xC)));
 }
 #endif
 
@@ -327,14 +327,14 @@ INCLUDE_ASM("camera/cameracontroller", func_0015D020);
 #ifdef SKIP_ASM
 extern "C" int func_0015D020(void* self)
 {
-    int r = 0;
+    int replayCamActive = 0;
     if (*(int*)((char*)self + 0x30) & 2) {
-        int s = *(int*)((char*)self + 0x2C);
-        if (s != 0x5D) {
-            r = s != 0x3C;
+        int replayType = *(int*)((char*)self + 0x2C);
+        if (replayType != 0x5D) {
+            replayCamActive = replayType != 0x3C;
         }
     }
-    return r;
+    return replayCamActive;
 }
 #endif
 

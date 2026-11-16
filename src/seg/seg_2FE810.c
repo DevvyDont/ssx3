@@ -357,36 +357,36 @@ extern void func_00424880(int);
 extern void func_004239A0(int, int, int);
 extern int func_004240E0(int);
 void *func_003FDAA0(void);
-void func_003FD910(short a, short b, short c, short d) {
-    struct S3FD910 *p;
+void func_003FD910(short mode, short interlace, short videoMode, short frameMode) {
+    struct S3FD910 *gsState;
     int e;
-    switch (a) {
+    switch (mode) {
     case 0:
-        p = func_003FDAA0();
+        gsState = func_003FDAA0();
         *(volatile long *)0x12001000 = 0x200;
-        p->a = b;
-        p->b = c;
-        p->d = (*(volatile unsigned long *)0x12001000 >> 16) & 0xFF;
+        gsState->a = interlace;
+        gsState->b = videoMode;
+        gsState->d = (*(volatile unsigned long *)0x12001000 >> 16) & 0xFF;
         func_004240E0(0xFF00);
-        p->c = !!d;
-        if (p->e) {
+        gsState->c = !!frameMode;
+        if (gsState->e) {
             func_00424880(2);
-            func_00423AA0(2, p->f);
-            p->e = 0;
-            p->f = 0;
+            func_00423AA0(2, gsState->f);
+            gsState->e = 0;
+            gsState->f = 0;
         }
-        func_004239A0(b & 1, c & 0xFF, d & 1);
+        func_004239A0(interlace & 1, videoMode & 0xFF, frameMode & 1);
         break;
     case 1:
         *(volatile long *)0x12001000 = 0x100;
         break;
     case 5:
-        p = func_003FDAA0();
-        p->c = d != 0;
-        p->a = b;
-        p->b = c;
-        p->d = (*(volatile unsigned long *)0x12001000 >> 16) & 0xFF;
-        func_004239A0(b & 1, c & 0xFF, d & 1);
+        gsState = func_003FDAA0();
+        gsState->c = frameMode != 0;
+        gsState->a = interlace;
+        gsState->b = videoMode;
+        gsState->d = (*(volatile unsigned long *)0x12001000 >> 16) & 0xFF;
+        func_004239A0(interlace & 1, videoMode & 0xFF, frameMode & 1);
         break;
     }
 }
@@ -562,21 +562,21 @@ void func_003FDEA0(sDmaChan *d, unsigned lim, int tmo) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FDF28);
 #ifdef SKIP_ASM
-unsigned func_003FDF28(unsigned a) {
-    if ((a >> 28) == 7) {
-        a &= 0xFFFFFFF;
-        a |= 0x80000000;
+unsigned func_003FDF28(unsigned addr) {
+    if ((addr >> 28) == 7) {
+        addr &= 0xFFFFFFF;
+        addr |= 0x80000000;
     }
-    return a;
+    return addr;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FDF50);
 #ifdef SKIP_ASM
-void func_003FDF50(char *p, int n) {
+void func_003FDF50(char *dst, int n) {
     while (n--)
-        *p++ = 0;
+        *dst++ = 0;
 }
 #endif
 
@@ -677,11 +677,11 @@ sDmaEnv *func_003FE268(sDmaEnv *d) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE2A0);
 #ifdef SKIP_ASM
-int func_003FE2A0(int v) {
-    volatile int *r = (volatile int *)0x1000E060;
-    int o = *r;
-    *r = v;
-    return o;
+int func_003FE2A0(int newValue) {
+    volatile int *stadrReg = (volatile int *)0x1000E060;
+    int oldValue = *stadrReg;
+    *stadrReg = newValue;
+    return oldValue;
 }
 #endif
 
@@ -690,39 +690,39 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FE2B8);
 #ifdef SKIP_ASM
 extern unsigned func_003FDF28(unsigned);
 extern void func_003FDE30();
-void func_003FE2B8(sDmaChan *d, unsigned a) {
-    unsigned v = func_003FDF28(a);
-    func_003FDE30(d);
-    if (d->tadr != 0xFFFFFFFF)
-        d->tadr = v;
-    d->qwc = 0;
-    d->chcr = (d->chcr & ~0xC) | 0x105;
+void func_003FE2B8(sDmaChan *dmaChan, unsigned addr) {
+    unsigned physAddr = func_003FDF28(addr);
+    func_003FDE30(dmaChan);
+    if (dmaChan->tadr != 0xFFFFFFFF)
+        dmaChan->tadr = physAddr;
+    dmaChan->qwc = 0;
+    dmaChan->chcr = (dmaChan->chcr & ~0xC) | 0x105;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE320);
 #ifdef SKIP_ASM
-void func_003FE320(sDmaChan *d, unsigned a, int c) {
-    unsigned v = func_003FDF28(a);
-    func_003FDE30(d);
-    if (d->madr != 0xFFFFFFFF)
-        d->madr = v;
-    d->qwc = c;
-    d->chcr = (d->chcr & ~0xC) | 0x101;
+void func_003FE320(sDmaChan *dmaChan, unsigned addr, int qwordCount) {
+    unsigned physAddr = func_003FDF28(addr);
+    func_003FDE30(dmaChan);
+    if (dmaChan->madr != 0xFFFFFFFF)
+        dmaChan->madr = physAddr;
+    dmaChan->qwc = qwordCount;
+    dmaChan->chcr = (dmaChan->chcr & ~0xC) | 0x101;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE398);
 #ifdef SKIP_ASM
-void func_003FE398(sDmaChan *d, unsigned a, int c) {
-    unsigned v = func_003FDF28(a);
-    func_003FDE30(d);
-    if (d->madr != 0xFFFFFFFF)
-        d->madr = v;
-    d->qwc = c;
-    d->chcr = (d->chcr & ~0xC) | 0x109;
+void func_003FE398(sDmaChan *dmaChan, unsigned addr, int qwordCount) {
+    unsigned physAddr = func_003FDF28(addr);
+    func_003FDE30(dmaChan);
+    if (dmaChan->madr != 0xFFFFFFFF)
+        dmaChan->madr = physAddr;
+    dmaChan->qwc = qwordCount;
+    dmaChan->chcr = (dmaChan->chcr & ~0xC) | 0x109;
 }
 #endif
 
@@ -730,40 +730,40 @@ void func_003FE398(sDmaChan *d, unsigned a, int c) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FE410);
 #ifdef SKIP_ASM
 extern void func_003FDE30();
-void func_003FE410(sDmaChan *d) {
-    func_003FDE30(d);
-    d->qwc = 0;
-    d->chcr = ((d->chcr & ~0xC | 0x4) & ~1) | 0x100;
+void func_003FE410(sDmaChan *dmaChan) {
+    func_003FDE30(dmaChan);
+    dmaChan->qwc = 0;
+    dmaChan->chcr = ((dmaChan->chcr & ~0xC | 0x4) & ~1) | 0x100;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE458);
 #ifdef SKIP_ASM
-void func_003FE458(sDmaChan *d, unsigned a, int c) {
-    unsigned v = func_003FDF28(a);
-    int t;
-    func_003FDE30(d);
-    if (d->madr != 0xFFFFFFFF)
-        d->madr = v;
-    d->qwc = c;
-    t = d->chcr & ~0xC;
-    d->chcr = (t & ~1) | 0x100;
+void func_003FE458(sDmaChan *dmaChan, unsigned addr, int qwordCount) {
+    unsigned physAddr = func_003FDF28(addr);
+    int chcrBits;
+    func_003FDE30(dmaChan);
+    if (dmaChan->madr != 0xFFFFFFFF)
+        dmaChan->madr = physAddr;
+    dmaChan->qwc = qwordCount;
+    chcrBits = dmaChan->chcr & ~0xC;
+    dmaChan->chcr = (chcrBits & ~1) | 0x100;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE4D8);
 #ifdef SKIP_ASM
-void func_003FE4D8(sDmaChan *d, unsigned a, int c) {
-    unsigned v = func_003FDF28(a);
-    int t;
-    func_003FDE30(d);
-    if (d->madr != 0xFFFFFFFF)
-        d->madr = v;
-    d->qwc = c;
-    t = (d->chcr & ~0xC) | 8;
-    d->chcr = (t & ~1) | 0x100;
+void func_003FE4D8(sDmaChan *dmaChan, unsigned addr, int qwordCount) {
+    unsigned physAddr = func_003FDF28(addr);
+    int chcrBits;
+    func_003FDE30(dmaChan);
+    if (dmaChan->madr != 0xFFFFFFFF)
+        dmaChan->madr = physAddr;
+    dmaChan->qwc = qwordCount;
+    chcrBits = (dmaChan->chcr & ~0xC) | 8;
+    dmaChan->chcr = (chcrBits & ~1) | 0x100;
 }
 #endif
 
@@ -771,10 +771,10 @@ void func_003FE4D8(sDmaChan *d, unsigned a, int c) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FE558);
 #ifdef SKIP_ASM
 extern void func_003FDE30(sDmaChan *, int);
-int func_003FE558(sDmaChan *d, int m) {
-    if (m == 1)
-        return ((unsigned)d->chcr >> 8) & 1;
-    func_003FDE30(d, m);
+int func_003FE558(sDmaChan *dmaChan, int mode) {
+    if (mode == 1)
+        return ((unsigned)dmaChan->chcr >> 8) & 1;
+    func_003FDE30(dmaChan, mode);
     return 0;
 }
 #endif
@@ -783,10 +783,10 @@ int func_003FE558(sDmaChan *d, int m) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FE590);
 #ifdef SKIP_ASM
 extern void func_003FDEA0(sDmaChan *, unsigned, int);
-int func_003FE590(sDmaChan *d, unsigned n, int m, int x) {
-    if (m == 1)
-        return (unsigned)d->madr < n;
-    func_003FDEA0(d, n, x);
+int func_003FE590(sDmaChan *dmaChan, unsigned n, int mode, int x) {
+    if (mode == 1)
+        return (unsigned)dmaChan->madr < n;
+    func_003FDEA0(dmaChan, n, x);
     return 0;
 }
 #endif
@@ -797,30 +797,30 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FE5C8);
 extern int func_0042C078();
 extern void func_0042C0C0(void);
 /* force-stop a channel: suspend DMA (D_ENABLEW), clear CHCR.STR, restore */
-int func_003FE5C8(sDmaChan *d) {
-    int x, r, s;
-    unsigned v;
-    s = func_0042C078();
-    r = *(volatile int *)0x1000F520;
-    if ((r & 0x10000) == 0)
-        *(volatile int *)0x1000F590 = r | 0x10000;
+int func_003FE5C8(sDmaChan *dmaChan) {
+    int x, enabler, intrState;
+    unsigned oldChcr;
+    intrState = func_0042C078();
+    enabler = *(volatile int *)0x1000F520;
+    if ((enabler & 0x10000) == 0)
+        *(volatile int *)0x1000F590 = enabler | 0x10000;
     x = *(volatile int *)0x1000E000;
-    v = d->chcr;
-    d->chcr = v & 0xFFFFFEFF;
-    *(volatile int *)0x1000F590 = r;
-    if (s)
+    oldChcr = dmaChan->chcr;
+    dmaChan->chcr = oldChcr & 0xFFFFFEFF;
+    *(volatile int *)0x1000F590 = enabler;
+    if (intrState)
         func_0042C0C0();
-    return v;
+    return oldChcr;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE660);
 #ifdef SKIP_ASM
-unsigned func_003FE660(unsigned *p, unsigned v) {
-    unsigned o = *p;
-    *p = v;
-    return (o >> 8) & 1;
+unsigned func_003FE660(unsigned *reg, unsigned newValue) {
+    unsigned oldValue = *reg;
+    *reg = newValue;
+    return (oldValue >> 8) & 1;
 }
 #endif
 
@@ -887,19 +887,19 @@ static inline void vu0_ctc2_vi28_6A8(unsigned int v)
 	.set reorder" : : "r"(v));
 }
 int func_003FE6A8(void) {
-    int r = 0;
+    int result = 0;
     switch (func_003FE7D8_6A8()) {
     case 4:
         vu0_ctc2_vi28_6A8(vu0_cfc2_vi28_6A8() | 0x1);
     case 0:
     case 3:
-        r = 1;
+        result = 1;
         break;
     case 1:
     case 2:
         break;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -910,15 +910,15 @@ extern int func_003FE7D8(void);
 extern int func_003FE828(void);
 extern void func_003FE818(int);
 int func_003FE708(void) {
-    int r = 0;
+    int result = 0;
     int n = func_003FE7D8();
     if (n < 4) {
         if (n > 0) {
             func_003FE818(func_003FE828());
-            r = 1;
+            result = 1;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -937,13 +937,13 @@ static inline void vu0_ctc2_758(unsigned int v)
 {
     __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi28\n\t.set reorder" : : "r"(v));
 }
-void func_003FE758(int a) {
-    unsigned int s = vu0_cfc2_758();
-    if (a == 1)
-        s |= 0x4;
+void func_003FE758(int enable) {
+    unsigned int ctrlBits = vu0_cfc2_758();
+    if (enable == 1)
+        ctrlBits |= 0x4;
     else
-        s &= ~0x4;
-    vu0_ctc2_758(s);
+        ctrlBits &= ~0x4;
+    vu0_ctc2_758(ctrlBits);
 }
 #endif
 
@@ -962,13 +962,13 @@ static inline void vu0_ctc2_788(unsigned int v)
 {
     __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi28\n\t.set reorder" : : "r"(v));
 }
-void func_003FE788(int a) {
-    unsigned int s = vu0_cfc2_788();
-    if (a == 1)
-        s |= 0x8;
+void func_003FE788(int enable) {
+    unsigned int ctrlBits = vu0_cfc2_788();
+    if (enable == 1)
+        ctrlBits |= 0x8;
     else
-        s &= ~0x8;
-    vu0_ctc2_788(s);
+        ctrlBits &= ~0x8;
+    vu0_ctc2_788(ctrlBits);
 }
 #endif
 
@@ -1020,14 +1020,14 @@ static inline unsigned int vu0_cfc2_vi29_7D8(void)
     return v;
 }
 int func_003FE7D8(void) {
-    unsigned int s = vu0_cfc2_vi29_7D8();
-    if (s & 2)
+    unsigned int vpuStat = vu0_cfc2_vi29_7D8();
+    if (vpuStat & 2)
         return 1;
-    if (s & 4)
+    if (vpuStat & 4)
         return 2;
-    if (s & 8)
+    if (vpuStat & 8)
         return 3;
-    return (s & 1) << 2;
+    return (vpuStat & 1) << 2;
 }
 #endif
 
@@ -1077,56 +1077,56 @@ typedef struct {
 extern int func_003FE678(void);
 /* Snapshot the VU0 registers into *cnd (libdev sceDevVu0GetCnd); fails while VU0 is running. */
 int func_003FE838(sVu0Cnd *cnd) {
-    unsigned int v;
+    unsigned int regValue;
     if (func_003FE678() != 0)
         return 0;
     /* PORT: PS2-only VU0 register dump (sqc2 $vf0..$vf31). Retail's base register holds 0 here, not cnd. */
     __asm__ volatile("sqc2 $vf0, 0x0(%0)\n\tsqc2 $vf1, 0x10(%0)\n\tsqc2 $vf2, 0x20(%0)\n\tsqc2 $vf3, 0x30(%0)\n\tsqc2 $vf4, 0x40(%0)\n\tsqc2 $vf5, 0x50(%0)\n\tsqc2 $vf6, 0x60(%0)\n\tsqc2 $vf7, 0x70(%0)\n\tsqc2 $vf8, 0x80(%0)\n\tsqc2 $vf9, 0x90(%0)\n\tsqc2 $vf10, 0xA0(%0)\n\tsqc2 $vf11, 0xB0(%0)\n\tsqc2 $vf12, 0xC0(%0)\n\tsqc2 $vf13, 0xD0(%0)\n\tsqc2 $vf14, 0xE0(%0)\n\tsqc2 $vf15, 0xF0(%0)\n\tsqc2 $vf16, 0x100(%0)\n\tsqc2 $vf17, 0x110(%0)\n\tsqc2 $vf18, 0x120(%0)\n\tsqc2 $vf19, 0x130(%0)\n\tsqc2 $vf20, 0x140(%0)\n\tsqc2 $vf21, 0x150(%0)\n\tsqc2 $vf22, 0x160(%0)\n\tsqc2 $vf23, 0x170(%0)\n\tsqc2 $vf24, 0x180(%0)\n\tsqc2 $vf25, 0x190(%0)\n\tsqc2 $vf26, 0x1A0(%0)\n\tsqc2 $vf27, 0x1B0(%0)\n\tsqc2 $vf28, 0x1C0(%0)\n\tsqc2 $vf29, 0x1D0(%0)\n\tsqc2 $vf30, 0x1E0(%0)\n\tsqc2 $vf31, 0x1F0(%0)" : : "r"(0));
     /* PORT: PS2-only VU0 control-register reads (cfc2). The EE interlocks COP2 moves, so no hazard nop follows. */
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi16\n\t.set reorder" : "=r"(v));
-    cnd->status = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi17\n\t.set reorder" : "=r"(v));
-    cnd->mac = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi18\n\t.set reorder" : "=r"(v));
-    cnd->clipping = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi20\n\t.set reorder" : "=r"(v));
-    cnd->r = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi21\n\t.set reorder" : "=r"(v));
-    cnd->i = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi22\n\t.set reorder" : "=r"(v));
-    cnd->q = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi0\n\t.set reorder" : "=r"(v));
-    cnd->vi[0] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi1\n\t.set reorder" : "=r"(v));
-    cnd->vi[1] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi2\n\t.set reorder" : "=r"(v));
-    cnd->vi[2] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi3\n\t.set reorder" : "=r"(v));
-    cnd->vi[3] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi4\n\t.set reorder" : "=r"(v));
-    cnd->vi[4] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi5\n\t.set reorder" : "=r"(v));
-    cnd->vi[5] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi6\n\t.set reorder" : "=r"(v));
-    cnd->vi[6] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi7\n\t.set reorder" : "=r"(v));
-    cnd->vi[7] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi8\n\t.set reorder" : "=r"(v));
-    cnd->vi[8] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi9\n\t.set reorder" : "=r"(v));
-    cnd->vi[9] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi10\n\t.set reorder" : "=r"(v));
-    cnd->vi[10] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi11\n\t.set reorder" : "=r"(v));
-    cnd->vi[11] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi12\n\t.set reorder" : "=r"(v));
-    cnd->vi[12] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi13\n\t.set reorder" : "=r"(v));
-    cnd->vi[13] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi14\n\t.set reorder" : "=r"(v));
-    cnd->vi[14] = v;
-    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi15\n\t.set reorder" : "=r"(v));
-    cnd->vi[15] = v;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi16\n\t.set reorder" : "=r"(regValue));
+    cnd->status = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi17\n\t.set reorder" : "=r"(regValue));
+    cnd->mac = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi18\n\t.set reorder" : "=r"(regValue));
+    cnd->clipping = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi20\n\t.set reorder" : "=r"(regValue));
+    cnd->r = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi21\n\t.set reorder" : "=r"(regValue));
+    cnd->i = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi22\n\t.set reorder" : "=r"(regValue));
+    cnd->q = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi0\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[0] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi1\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[1] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi2\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[2] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi3\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[3] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi4\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[4] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi5\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[5] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi6\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[6] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi7\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[7] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi8\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[8] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi9\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[9] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi10\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[10] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi11\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[11] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi12\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[12] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi13\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[13] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi14\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[14] = regValue;
+    __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi15\n\t.set reorder" : "=r"(regValue));
+    cnd->vi[15] = regValue;
     return 1;
 }
 #endif
@@ -1150,7 +1150,7 @@ extern int func_003FE678(void);
 /* Load the VU0 registers from *cnd (libdev sceDevVu0PutCnd); fails while VU0 is running. */
 int func_003FE998(sVu0Cnd_E998 *cnd) {
     u_long128_E998 *vf = cnd->vf;
-    unsigned int v;
+    unsigned int regValue;
     if (func_003FE678() != 0)
         return 0;
     /* PORT: PS2-only VU0 register load (lqc2 $vf0..$vf31). */
@@ -1187,50 +1187,50 @@ int func_003FE998(sVu0Cnd_E998 *cnd) {
     __asm__ volatile("lqc2 $vf30, 0x1E0(%0)" : : "r"(vf));
     __asm__ volatile("lqc2 $vf31, 0x1F0(%0)" : : "r"(vf));
     /* PORT: PS2-only VU0 control-register writes (ctc2). */
-    v = cnd->status;
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi16\n\t.set reorder" : : "r"(v));
-    v = cnd->mac;
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi17\n\t.set reorder" : : "r"(v));
-    v = cnd->clipping;
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi18\n\t.set reorder" : : "r"(v));
-    v = cnd->r;
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi20\n\t.set reorder" : : "r"(v));
-    v = cnd->i;
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi21\n\t.set reorder" : : "r"(v));
-    v = cnd->q;
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi22\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[0];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi0\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[1];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi1\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[2];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi2\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[3];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi3\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[4];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi4\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[5];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi5\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[6];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi6\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[7];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi7\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[8];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi8\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[9];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi9\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[10];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi10\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[11];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi11\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[12];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi12\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[13];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi13\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[14];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi14\n\t.set reorder" : : "r"(v));
-    v = cnd->vi[15];
-    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi15\n\t.set reorder" : : "r"(v));
+    regValue = cnd->status;
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi16\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->mac;
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi17\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->clipping;
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi18\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->r;
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi20\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->i;
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi21\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->q;
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi22\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[0];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi0\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[1];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi1\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[2];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi2\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[3];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi3\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[4];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi4\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[5];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi5\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[6];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi6\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[7];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi7\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[8];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi8\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[9];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi9\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[10];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi10\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[11];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi11\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[12];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi12\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[13];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi13\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[14];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi14\n\t.set reorder" : : "r"(regValue));
+    regValue = cnd->vi[15];
+    __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi15\n\t.set reorder" : : "r"(regValue));
     return 1;
 }
 #endif
@@ -1246,10 +1246,10 @@ static inline unsigned int vu0_cfc2_vi29_EB08(void)
     return v;
 }
 int func_003FEB08(void) {
-    unsigned int s = vu0_cfc2_vi29_EB08();
-    if ((s & 0xF) == 1)
+    unsigned int vpuStat = vu0_cfc2_vi29_EB08();
+    if ((vpuStat & 0xF) == 1)
         return 1;
-    else if ((s & 0xF00) == 0x100)
+    else if ((vpuStat & 0xF00) == 0x100)
         return 1;
     return 0;
 }
@@ -1268,8 +1268,8 @@ static inline void vu0_write_qword_EB38(unsigned int addr, Q3EB38_i v)
     __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi1\n\tqmfc2.ni %1, $vf1\n\tqmtc2.ni %2, $vf1\n\tctc2.ni %3, $vi1\n\tvsqi.xyzw $vf1, ($vi1++)\n\tctc2.ni %0, $vi1\n\tqmtc2.ni %1, $vf1\n\t.set reorder"
                      : "=&r"(vi), "=&r"(vf) : "r"(v), "r"(addr));
 }
-void func_003FEB38(unsigned short addr, Q3EB38 v) {
-    vu0_write_qword_EB38(addr, v.q);
+void func_003FEB38(unsigned short addr, Q3EB38 value) {
+    vu0_write_qword_EB38(addr, value.q);
 }
 #endif
 
@@ -1286,14 +1286,14 @@ Q3EB78 func_003FEB78_impl(unsigned short addr) __asm__("func_003FEB78");
 Q3EB78 func_003FEB78_impl(unsigned short addr) {
     unsigned int vi;
     unsigned long vf;
-    Q3EB78_i r;
-    Q3EB78 v;
+    Q3EB78_i rawData;
+    Q3EB78 result;
     /* PORT: PS2-only VU0 macro-mode load (cfc2/qmfc2/ctc2/vlqi/qmfc2), then the $vi1/$vf1 restore (ctc2/qmtc2). */
     __asm__(".set noreorder\n\tcfc2.ni %0, $vi1\n\tqmfc2.ni %1, $vf1\n\tctc2.ni %3, $vi1\n\tvlqi.xyzw $vf1, ($vi1++)\n\tqmfc2.ni %2, $vf1\n\t.set reorder"
-            : "=&r"(vi), "=&r"(vf), "=&r"(r) : "r"(addr));
+            : "=&r"(vi), "=&r"(vf), "=&r"(rawData) : "r"(addr));
     __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi1\n\tqmtc2.ni %1, $vf1\n\t.set reorder" : : "r"(vi), "r"(vf));
-    v.q = r;
-    return v;
+    result.q = rawData;
+    return result;
 }
 #endif
 
@@ -1342,19 +1342,19 @@ static inline void vu0_ctc2_vi28_BD8(unsigned int v)
 	.set reorder" : : "r"(v));
 }
 int func_003FEBD8(void) {
-    int r = 0;
+    int result = 0;
     switch (func_003FED08_BD8()) {
     case 4:
         vu0_ctc2_vi28_BD8(vu0_cfc2_vi28_BD8() | 0x100);
     case 0:
     case 3:
-        r = 1;
+        result = 1;
         break;
     case 1:
     case 2:
         break;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -1365,15 +1365,15 @@ extern int func_003FED08(void);
 extern unsigned short func_003FED60(void);
 extern void func_003FED50(int);
 int func_003FEC38(void) {
-    int r = 0;
+    int result = 0;
     int n = func_003FED08();
     if (n < 4) {
         if (n > 0) {
             func_003FED50(func_003FED60());
-            r = 1;
+            result = 1;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -1392,13 +1392,13 @@ static inline void vu0_ctc2_C88(unsigned int v)
 {
     __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi28\n\t.set reorder" : : "r"(v));
 }
-void func_003FEC88(int a) {
-    unsigned int s = vu0_cfc2_C88();
-    if (a == 1)
-        s |= 0x400;
+void func_003FEC88(int enable) {
+    unsigned int ctrlBits = vu0_cfc2_C88();
+    if (enable == 1)
+        ctrlBits |= 0x400;
     else
-        s &= ~0x400;
-    vu0_ctc2_C88(s);
+        ctrlBits &= ~0x400;
+    vu0_ctc2_C88(ctrlBits);
 }
 #endif
 
@@ -1417,13 +1417,13 @@ static inline void vu0_ctc2_CB8(unsigned int v)
 {
     __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi28\n\t.set reorder" : : "r"(v));
 }
-void func_003FECB8(int a) {
-    unsigned int s = vu0_cfc2_CB8();
-    if (a == 1)
-        s |= 0x800;
+void func_003FECB8(int enable) {
+    unsigned int ctrlBits = vu0_cfc2_CB8();
+    if (enable == 1)
+        ctrlBits |= 0x800;
     else
-        s &= ~0x800;
-    vu0_ctc2_CB8(s);
+        ctrlBits &= ~0x800;
+    vu0_ctc2_CB8(ctrlBits);
 }
 #endif
 
@@ -1475,19 +1475,19 @@ static inline unsigned int vu0_cfc2_vi29_ED08(void)
     return v;
 }
 int func_003FED08(void) {
-    unsigned int s = vu0_cfc2_vi29_ED08();
-    int r;
-    if (s & 0x200)
-        r = 1;
-    else if (s & 0x400)
-        r = 2;
-    else if (s & 0x800)
-        r = 3;
-    else if (s & 0x100)
-        r = 4;
+    unsigned int vpuStat = vu0_cfc2_vi29_ED08();
+    int state;
+    if (vpuStat & 0x200)
+        state = 1;
+    else if (vpuStat & 0x400)
+        state = 2;
+    else if (vpuStat & 0x800)
+        state = 3;
+    else if (vpuStat & 0x100)
+        state = 4;
     else
-        r = 0;
-    return r;
+        state = 0;
+    return state;
 }
 #endif
 
@@ -1500,8 +1500,8 @@ static inline void vu0_ctc2_D50(unsigned int v)
 {
     __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi31\n\t.set reorder" : : "r"(v));
 }
-void func_003FED50(int v) {
-    vu0_ctc2_D50(v & 0xFFFF);
+void func_003FED50(int value) {
+    vu0_ctc2_D50(value & 0xFFFF);
 }
 #endif
 
@@ -1510,9 +1510,9 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FED60);
 #ifdef SKIP_ASM
 extern void func_003FEB78(void *, int);
 unsigned short func_003FED60(void) {
-    unsigned short v;
-    func_003FEB78(&v, 0x43A);
-    return v;
+    unsigned short value;
+    func_003FEB78(&value, 0x43A);
+    return value;
 }
 #endif
 
@@ -1525,22 +1525,22 @@ typedef struct { Q3ED88 a[32]; int b[7]; short c[16]; } S3ED88;
 extern int e3ED88_a(void) __asm__("func_003FEB08");
 extern Q3ED88 e3ED88_b(unsigned short) __asm__("func_003FEB78");
 int func_003FED88_impl(S3ED88 *s) __asm__("func_003FED88");
-int func_003FED88_impl(S3ED88 *s) {
+int func_003FED88_impl(S3ED88 *cnd) {
     unsigned i;
     if (e3ED88_a() != 0)
         return 0;
     for (i = 0; i < 0x20; i++) {
-        s->a[i].q = e3ED88_b(0x400 + i).q;
+        cnd->a[i].q = e3ED88_b(0x400 + i).q;
     }
-    s->b[0] = e3ED88_b(0x430).w[0];
-    s->b[1] = e3ED88_b(0x431).w[0];
-    s->b[2] = e3ED88_b(0x432).w[0];
-    s->b[3] = e3ED88_b(0x434).w[0];
-    s->b[4] = e3ED88_b(0x435).w[0];
-    s->b[5] = e3ED88_b(0x436).w[0];
-    s->b[6] = e3ED88_b(0x437).w[0];
+    cnd->b[0] = e3ED88_b(0x430).w[0];
+    cnd->b[1] = e3ED88_b(0x431).w[0];
+    cnd->b[2] = e3ED88_b(0x432).w[0];
+    cnd->b[3] = e3ED88_b(0x434).w[0];
+    cnd->b[4] = e3ED88_b(0x435).w[0];
+    cnd->b[5] = e3ED88_b(0x436).w[0];
+    cnd->b[6] = e3ED88_b(0x437).w[0];
     for (i = 0; i < 0x10; i++)
-        s->c[i] = e3ED88_b(0x420 + i).h[0];
+        cnd->c[i] = e3ED88_b(0x420 + i).h[0];
     return 1;
 }
 #endif
@@ -1554,33 +1554,33 @@ typedef struct { Q3EF18 a[32]; unsigned b[7]; unsigned short c[16]; } S3EF18;
 extern int e3EF18_a(void) __asm__("func_003FEB08");
 extern void e3EF18_b(unsigned short, Q3EF18) __asm__("func_003FEB38");
 int func_003FEF18_impl(S3EF18 *s) __asm__("func_003FEF18");
-int func_003FEF18_impl(S3EF18 *s) {
+int func_003FEF18_impl(S3EF18 *cnd) {
     unsigned i;
-    Q3EF18 t;
+    Q3EF18 value;
     if (e3EF18_a() != 0)
         return 0;
     for (i = 0; i < 0x20; i++) {
-        t.q = s->a[i].q;
-        e3EF18_b(0x400 + i, t);
+        value.q = cnd->a[i].q;
+        e3EF18_b(0x400 + i, value);
     }
-    t.q = 0;
-    t.d[0] = s->b[0];
-    e3EF18_b(0x430, t);
-    t.d[0] = s->b[1];
-    e3EF18_b(0x431, t);
-    t.d[0] = s->b[2];
-    e3EF18_b(0x432, t);
-    t.d[0] = s->b[3];
-    e3EF18_b(0x434, t);
-    t.d[0] = s->b[4];
-    e3EF18_b(0x435, t);
-    t.d[0] = s->b[5];
-    e3EF18_b(0x436, t);
-    t.d[0] = s->b[6];
-    e3EF18_b(0x437, t);
+    value.q = 0;
+    value.d[0] = cnd->b[0];
+    e3EF18_b(0x430, value);
+    value.d[0] = cnd->b[1];
+    e3EF18_b(0x431, value);
+    value.d[0] = cnd->b[2];
+    e3EF18_b(0x432, value);
+    value.d[0] = cnd->b[3];
+    e3EF18_b(0x434, value);
+    value.d[0] = cnd->b[4];
+    e3EF18_b(0x435, value);
+    value.d[0] = cnd->b[5];
+    e3EF18_b(0x436, value);
+    value.d[0] = cnd->b[6];
+    e3EF18_b(0x437, value);
     for (i = 0; i < 0x10; i++) {
-        t.d[0] = s->c[i];
-        e3EF18_b(0x420 + i, t);
+        value.d[0] = cnd->c[i];
+        e3EF18_b(0x420 + i, value);
     }
     return 1;
 }
@@ -1599,13 +1599,13 @@ void func_003FF060(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FF088);
 #ifdef SKIP_ASM
 extern int func_003FF160(void);
-int func_003FF088(int a) {
-    int r = func_003FF160();
-    if (r == 0) return 0;
-    if (r == 1) return 0;
-    if (a == 0) {
+int func_003FF088(int mode) {
+    int vifState = func_003FF160();
+    if (vifState == 0) return 0;
+    if (vifState == 1) return 0;
+    if (mode == 0) {
         *(volatile int *)0x10003810 = 2;
-    } else if (a == 1) {
+    } else if (mode == 1) {
         *(volatile int *)0x10003810 = 4;
     }
     return 1;
@@ -1627,10 +1627,10 @@ int func_003FF0F0(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF130);
 #ifdef SKIP_ASM
-unsigned func_003FF130(unsigned a, unsigned b, unsigned c) {
-    unsigned v = a | (b << 1) | (c << 2);
-    *(volatile unsigned *)0x10003820 = v;
-    return v;
+unsigned func_003FF130(unsigned maskInt, unsigned maskTagErr, unsigned maskCmdErr) {
+    unsigned errReg = maskInt | (maskTagErr << 1) | (maskCmdErr << 2);
+    *(volatile unsigned *)0x10003820 = errReg;
+    return errReg;
 }
 #endif
 
@@ -1646,17 +1646,17 @@ int func_003FF150(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FF160);
 #ifdef SKIP_ASM
 int func_003FF160(void) {
-    int v = *(volatile int *)0x10003800;
-    if (!(v & 3)) {
+    int vifStat = *(volatile int *)0x10003800;
+    if (!(vifStat & 3)) {
         return 0;
     }
-    if (v & 0x700) {
+    if (vifStat & 0x700) {
         return 1;
     }
-    if (v & 0xC) {
+    if (vifStat & 0xC) {
         return 2;
     }
-    return (v & 0x3000) ? 3 : 4;
+    return (vifStat & 0x3000) ? 3 : 4;
 }
 #endif
 
@@ -1666,29 +1666,29 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FF1B0);
 struct S3FF1B0 { int w[11]; short h[4]; char c[4]; };
 extern int func_003FF160(void);
 #define R(a) (*(volatile int *)(a))
-int func_003FF1B0(struct S3FF1B0 *p) {
-    unsigned v = *(volatile unsigned *)0x10003840;
+int func_003FF1B0(struct S3FF1B0 *cnd) {
+    unsigned cycleReg = *(volatile unsigned *)0x10003840;
     if ((unsigned)func_003FF160() >= 2)
         return 0;
-    p->w[0] = R(0x10003900);
-    p->w[1] = R(0x10003910);
-    p->w[2] = R(0x10003920);
-    p->w[3] = R(0x10003930);
-    p->w[4] = R(0x10003940);
-    p->w[5] = R(0x10003950);
-    p->w[6] = R(0x10003960);
-    p->w[7] = R(0x10003970);
-    p->w[8] = R(0x10003870);
-    p->w[9] = R(0x10003880);
-    p->w[10] = R(0x10003800);
-    p->h[0] = R(0x100038D0);
-    p->h[1] = R(0x10003890);
-    p->h[2] = R(0x10003830);
-    p->h[3] = R(0x10003860);
-    p->c[0] = R(0x10003820);
-    p->c[1] = v;
-    p->c[2] = v >> 8;
-    p->c[3] = R(0x10003850);
+    cnd->w[0] = R(0x10003900);
+    cnd->w[1] = R(0x10003910);
+    cnd->w[2] = R(0x10003920);
+    cnd->w[3] = R(0x10003930);
+    cnd->w[4] = R(0x10003940);
+    cnd->w[5] = R(0x10003950);
+    cnd->w[6] = R(0x10003960);
+    cnd->w[7] = R(0x10003970);
+    cnd->w[8] = R(0x10003870);
+    cnd->w[9] = R(0x10003880);
+    cnd->w[10] = R(0x10003800);
+    cnd->h[0] = R(0x100038D0);
+    cnd->h[1] = R(0x10003890);
+    cnd->h[2] = R(0x10003830);
+    cnd->h[3] = R(0x10003860);
+    cnd->c[0] = R(0x10003820);
+    cnd->c[1] = cycleReg;
+    cnd->c[2] = cycleReg >> 8;
+    cnd->c[3] = R(0x10003850);
     return 1;
 }
 #undef R
@@ -1699,14 +1699,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FF330);
 #ifdef SKIP_ASM
 typedef int i128 __attribute__((mode(TI)));
 int func_003FF330(i128 *src, int n) {
-    int c = 0;
+    int sentCount = 0;
     while (n--) {
         if (*(volatile unsigned *)0x10003800 & 0x10000000)
-            return c;
+            return sentCount;
         *(i128 *)0x10004000 = *src++;
-        c++;
+        sentCount++;
     }
-    return c;
+    return sentCount;
 }
 #endif
 
@@ -2250,8 +2250,8 @@ INCLUDE_ASM("seg/seg_2FE810", func_00400810);
 #define SYNC_0810() __asm__ volatile("sync")
 #define EI_0810() __asm__ volatile("ei")
 extern void func_00423DD0(int);
-void func_00400810(int a, int b, int c) {
-    func_00423DD0(c);
+void func_00400810(int alarmId, int ticks, int sema) {
+    func_00423DD0(sema);
     SYNC_0810();
     EI_0810();
 }
@@ -2262,16 +2262,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_00400838);
 #ifdef SKIP_ASM
 extern int func_00423DA0(int *);
 extern void func_00400810(int, int, int);
-void func_00400838(unsigned short a) {
-    int s[6];
-    int h;
-    s[1] = 1;
-    s[2] = 0;
-    s[5] = 0;
-    h = func_00423DA0(s);
-    func_00423B20(a, func_00400810, h);
-    func_00423DE0(h);
-    func_00423DB0(h);
+void func_00400838(unsigned short ticks) {
+    int semaParam[6];
+    int sema;
+    semaParam[1] = 1;
+    semaParam[2] = 0;
+    semaParam[5] = 0;
+    sema = func_00423DA0(semaParam);
+    func_00423B20(ticks, func_00400810, sema);
+    func_00423DE0(sema);
+    func_00423DB0(sema);
 }
 #endif
 
@@ -3238,12 +3238,12 @@ extern int func_0042C078();
 extern void func_0042C0C0(void);
 extern void func_00409708(void);
 int func_00402708(void) {
-    int s = func_0042C078();
+    int intrState = func_0042C078();
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
     *(volatile int *)0x1000B000 &= 0xFFFFFEFF;
     *(volatile int *)0x1000B400 &= 0xFFFFFEFF;
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
-    if (s)
+    if (intrState)
         func_0042C0C0();
     *(volatile int *)0x1000B020 = 0;
     *(volatile int *)0x1000B420 = 0;
@@ -3364,8 +3364,8 @@ int func_004029C8(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_004029D0);
 #ifdef SKIP_ASM
 extern int func_00403500(int, int, int);
-int func_004029D0(int *p, int b, int n) {
-    func_00403500(p[16], b, (n + 19) / 16 * 16);
+int func_004029D0(int *mpeg, int dataAddr, int n) {
+    func_00403500(mpeg[16], dataAddr, (n + 19) / 16 * 16);
     return 1;
 }
 #endif
@@ -3374,15 +3374,15 @@ int func_004029D0(int *p, int b, int n) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402A10);
 #ifdef SKIP_ASM
 extern int func_00402E10(int *);
-int func_00402A10(int *a, unsigned b, int c) {
-    int *p = (int *)a[16];
-    b = (b & 0xFFFFFFF) | 0x20000000;
-    p[44] = 1;
-    p[54] = b;
-    p[57] = c;
-    p[56] = 0;
-    p[55] = 0;
-    return func_00402E10(a);
+int func_00402A10(int *mpeg, unsigned picture, int mbCount) {
+    int *mpegSys = (int *)mpeg[16];
+    picture = (picture & 0xFFFFFFF) | 0x20000000;
+    mpegSys[44] = 1;
+    mpegSys[54] = picture;
+    mpegSys[57] = mbCount;
+    mpegSys[56] = 0;
+    mpegSys[55] = 0;
+    return func_00402E10(mpeg);
 }
 #endif
 
@@ -3390,15 +3390,15 @@ int func_00402A10(int *a, unsigned b, int c) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402A58);
 #ifdef SKIP_ASM
 extern int func_00402E10(int *);
-int func_00402A58(int *a, unsigned b, int c) {
-    int *p = (int *)a[16];
-    b = (b & 0xFFFFFFF) | 0x20000000;
-    p[57] = c;
-    p[54] = b;
-    p[44] = 0;
-    p[56] = 0;
-    p[55] = 0;
-    return func_00402E10(a);
+int func_00402A58(int *mpeg, unsigned picture, int mbCount) {
+    int *mpegSys = (int *)mpeg[16];
+    picture = (picture & 0xFFFFFFF) | 0x20000000;
+    mpegSys[57] = mbCount;
+    mpegSys[54] = picture;
+    mpegSys[44] = 0;
+    mpegSys[56] = 0;
+    mpegSys[55] = 0;
+    return func_00402E10(mpeg);
 }
 #endif
 
@@ -3406,64 +3406,64 @@ int func_00402A58(int *a, unsigned b, int c) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402AA0);
 #ifdef SKIP_ASM
 extern int func_00402E10(int *);
-int func_00402AA0(int *a, unsigned b, int c, int d) {
-    int *p = (int *)a[16];
-    b = (b & 0xFFFFFFF) | 0x20000000;
-    p[56] = d * 16;
-    p[54] = b;
-    p[57] = c * d;
-    p[55] = c * 16;
-    p[44] = 0;
-    return func_00402E10(a);
+int func_00402AA0(int *mpeg, unsigned picture, int mbWidth, int mbHeight) {
+    int *mpegSys = (int *)mpeg[16];
+    picture = (picture & 0xFFFFFFF) | 0x20000000;
+    mpegSys[56] = mbHeight * 16;
+    mpegSys[54] = picture;
+    mpegSys[57] = mbWidth * mbHeight;
+    mpegSys[55] = mbWidth * 16;
+    mpegSys[44] = 0;
+    return func_00402E10(mpeg);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402AF0);
 #ifdef SKIP_ASM
-void func_00402AF0(int *p) {
-    int *q = (int *)p[16];
-    q[0x428] = 1;
+void func_00402AF0(int *mpeg) {
+    int *mpegSys = (int *)mpeg[16];
+    mpegSys[0x428] = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402B00);
 #ifdef SKIP_ASM
-void func_00402B00(int *p, int a, int b, int c) {
-    int *q = (int *)p[16];
-    q[37] = a;
-    q[38] = b;
-    q[39] = c;
+void func_00402B00(int *mpeg, int a, int b, int c) {
+    int *mpegSys = (int *)mpeg[16];
+    mpegSys[37] = a;
+    mpegSys[38] = b;
+    mpegSys[39] = c;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402B18);
 #ifdef SKIP_ASM
-void func_00402B18(int *p, int *a, int *b, int *c) {
-    int *q = (int *)p[16];
-    *a = q[37];
-    *b = q[38];
-    *c = q[39];
+void func_00402B18(int *mpeg, int *a, int *b, int *c) {
+    int *mpegSys = (int *)mpeg[16];
+    *a = mpegSys[37];
+    *b = mpegSys[38];
+    *c = mpegSys[39];
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402B38);
 #ifdef SKIP_ASM
-int func_00402B38(int *p) {
-    int *q = (int *)p[16];
-    return q[0];
+int func_00402B38(int *mpeg) {
+    int *mpegSys = (int *)mpeg[16];
+    return mpegSys[0];
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402B48);
 #ifdef SKIP_ASM
-int func_00402B48(int *p) {
-    int *q = (int *)p[16];
-    return q[1] == 0;
+int func_00402B48(int *mpeg) {
+    int *mpegSys = (int *)mpeg[16];
+    return mpegSys[1] == 0;
 }
 #endif
 
@@ -3471,17 +3471,17 @@ int func_00402B48(int *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402B58);
 #ifdef SKIP_ASM
 extern void func_00403398(int *);
-int func_00402B58(int *a) {
-    int *p = (int *)a[16];
-    p[0] = 0;
-    p[1] = 0;
-    p[2] = 0;
-    a[2] = 0;
-    p[43] = 0;
-    p[32] = -1;
-    func_00403398(p);
-    p[70] = 0;
-    func_004032A8(p);
+int func_00402B58(int *mpeg) {
+    int *mpegSys = (int *)mpeg[16];
+    mpegSys[0] = 0;
+    mpegSys[1] = 0;
+    mpegSys[2] = 0;
+    mpeg[2] = 0;
+    mpegSys[43] = 0;
+    mpegSys[32] = -1;
+    func_00403398(mpegSys);
+    mpegSys[70] = 0;
+    func_004032A8(mpegSys);
     return 1;
 }
 #endif
@@ -3489,15 +3489,15 @@ int func_00402B58(int *a) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402BB0);
 #ifdef SKIP_ASM
-int func_00402BB0(int *p) {
-    char *q = (char *)p[16];
+int func_00402BB0(int *mpeg) {
+    char *mpegSys = (char *)mpeg[16];
     int *t;
-    if ((t = *(int **)(q + 0x1B8))) t[10] = 0;
-    if ((t = *(int **)(q + 0x1C8))) t[10] = 0;
-    if ((t = *(int **)(q + 0x1D8))) t[10] = 0;
-    if ((t = *(int **)(q + 0x1BC))) t[10] = 0;
-    if ((t = *(int **)(q + 0x1CC))) t[10] = 0;
-    if ((t = *(int **)(q + 0x1DC))) t[10] = 0;
+    if ((t = *(int **)(mpegSys + 0x1B8))) t[10] = 0;
+    if ((t = *(int **)(mpegSys + 0x1C8))) t[10] = 0;
+    if ((t = *(int **)(mpegSys + 0x1D8))) t[10] = 0;
+    if ((t = *(int **)(mpegSys + 0x1BC))) t[10] = 0;
+    if ((t = *(int **)(mpegSys + 0x1CC))) t[10] = 0;
+    if ((t = *(int **)(mpegSys + 0x1DC))) t[10] = 0;
     return 1;
 }
 #endif
@@ -3505,15 +3505,15 @@ int func_00402BB0(int *p) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402C08);
 #ifdef SKIP_ASM
-int func_00402C08(int *p, int n, int fn, void *arg) {
-    char *q = (char *)p[16];
-    char *tbl = q + 0xC;
-    char *ea = q + n * 8;
+int func_00402C08(int *mpeg, int n, int fn, void *cbData) {
+    char *mpegSys = (char *)mpeg[16];
+    char *tbl = mpegSys + 0xC;
+    char *ea = mpegSys + n * 8;
     char *eb = tbl + n * 8;
     int old;
     old = *(int *)eb;
     *(int *)eb = fn;
-    *(void **)(ea + 0x10) = arg;
+    *(void **)(ea + 0x10) = cbData;
     return old;
 }
 #endif
@@ -3523,17 +3523,17 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402C30);
 #ifdef SKIP_ASM
 struct FA_402C30 { int (*fn)(int *, int *, int); int arg; };
 struct T_402C30 { char pad[12]; struct FA_402C30 e[1]; };
-int func_00402C30(int *p, int *v) {
-    int r = 0;
-    if (p) {
-        struct T_402C30 *q = (struct T_402C30 *)p[16];
-        if (q) {
-            if (q->e[*v].fn) {
-                r = q->e[*v].fn(p, v, q->e[*v].arg);
+int func_00402C30(int *mpeg, int *cbData) {
+    int result = 0;
+    if (mpeg) {
+        struct T_402C30 *mpegSys = (struct T_402C30 *)mpeg[16];
+        if (mpegSys) {
+            if (mpegSys->e[*cbData].fn) {
+                result = mpegSys->e[*cbData].fn(mpeg, cbData, mpegSys->e[*cbData].arg);
             }
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3541,10 +3541,10 @@ int func_00402C30(int *p, int *v) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402C80);
 #ifdef SKIP_ASM
 extern int func_00402C30(int *, int *);
-int func_00402C80(int *p) {
-    int v[8];
-    v[0] = 1;
-    func_00402C30(p, v);
+int func_00402C80(int *mpeg) {
+    int cbData[8];
+    cbData[0] = 1;
+    func_00402C30(mpeg, cbData);
     return 1;
 }
 #endif
@@ -3552,10 +3552,10 @@ int func_00402C80(int *p) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402CA8);
 #ifdef SKIP_ASM
-int func_00402CA8(int *p, long v) {
-    int *q = (int *)p[16];
-    q[28] = 1;
-    *(long *)&q[30] = v;
+int func_00402CA8(int *mpeg, long v) {
+    int *mpegSys = (int *)mpeg[16];
+    mpegSys[28] = 1;
+    *(long *)&mpegSys[30] = v;
     return 1;
 }
 #endif
@@ -3563,10 +3563,10 @@ int func_00402CA8(int *p, long v) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402CC0);
 #ifdef SKIP_ASM
-int func_00402CC0(int *p) {
-    int *q = (int *)p[16];
-    q[28] = 0;
-    *(long *)&q[30] = 0;
+int func_00402CC0(int *mpeg) {
+    int *mpegSys = (int *)mpeg[16];
+    mpegSys[28] = 0;
+    *(long *)&mpegSys[30] = 0;
     return 1;
 }
 #endif
@@ -3574,9 +3574,9 @@ int func_00402CC0(int *p) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402CD8);
 #ifdef SKIP_ASM
-int func_00402CD8(int *p, int v) {
-    int *q = (int *)p[16];
-    q[54] = v;
+int func_00402CD8(int *mpeg, int v) {
+    int *mpegSys = (int *)mpeg[16];
+    mpegSys[54] = v;
     return 1;
 }
 #endif
@@ -3584,44 +3584,44 @@ int func_00402CD8(int *p, int v) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402CE8);
 #ifdef SKIP_ASM
-int func_00402CE8(int *p) {
-    int *q = (int *)p[16];
-    return q[51];
+int func_00402CE8(int *mpeg) {
+    int *mpegSys = (int *)mpeg[16];
+    return mpegSys[51];
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402CF8);
 #ifdef SKIP_ASM
-int func_00402CF8(int *p) {
-    int *q = (int *)p[16];
-    return q[52];
+int func_00402CF8(int *mpeg) {
+    int *mpegSys = (int *)mpeg[16];
+    return mpegSys[52];
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D08);
 #ifdef SKIP_ASM
-char *func_00402D08(int *p) {
-    return (char *)p[16] + 0xB4;
+char *func_00402D08(int *mpeg) {
+    return (char *)mpeg[16] + 0xB4;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D18);
 #ifdef SKIP_ASM
-char *func_00402D18(int *p) {
-    return (char *)p[16] + 0xB4;
+char *func_00402D18(int *mpeg) {
+    return (char *)mpeg[16] + 0xB4;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D28);
 #ifdef SKIP_ASM
-int func_00402D28(int *p, int v) {
-    int *q = (int *)p[16];
-    int old = q[58];
-    q[58] = v;
+int func_00402D28(int *mpeg, int newValue) {
+    int *mpegSys = (int *)mpeg[16];
+    int old = mpegSys[58];
+    mpegSys[58] = newValue;
     return old;
 }
 #endif
@@ -3629,10 +3629,10 @@ int func_00402D28(int *p, int v) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D38);
 #ifdef SKIP_ASM
-int func_00402D38(int *p, long v) {
-    int *q = (int *)p[16];
-    *(long *)&q[60] = v;
-    q[62] = 1;
+int func_00402D38(int *mpeg, long v) {
+    int *mpegSys = (int *)mpeg[16];
+    *(long *)&mpegSys[60] = v;
+    mpegSys[62] = 1;
     return 1;
 }
 #endif
@@ -3640,27 +3640,27 @@ int func_00402D38(int *p, long v) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D50);
 #ifdef SKIP_ASM
-void func_00402D50(int *p, int a, int b) {
-    p[0] = a;
-    p[1] = b;
-    p[2] = a;
-    p[3] = a;
+void func_00402D50(int *heap, int base, int size) {
+    heap[0] = base;
+    heap[1] = size;
+    heap[2] = base;
+    heap[3] = base;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D68);
 #ifdef SKIP_ASM
-int func_00402D68(int *p) {
-    return p[3] = p[2];
+int func_00402D68(int *heap) {
+    return heap[3] = heap[2];
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D78);
 #ifdef SKIP_ASM
-int func_00402D78(int *p) {
-    return p[2] = p[3];
+int func_00402D78(int *heap) {
+    return heap[2] = heap[3];
 }
 #endif
 
@@ -3684,8 +3684,8 @@ unsigned func_00402D88(int *a, unsigned *p, unsigned size, unsigned align) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402DF8);
 #ifdef SKIP_ASM
-int func_00402DF8(int *p) {
-    return p[0] + p[1] - p[2];
+int func_00402DF8(int *heap) {
+    return heap[0] + heap[1] - heap[2];
 }
 #endif
 
@@ -3857,16 +3857,16 @@ int func_004030E0(struct A_30E0 *a, int b, int c) {
 INCLUDE_ASM("seg/seg_2FE810", func_00403240);
 #ifdef SKIP_ASM
 extern void func_004032B8(int *);
-int func_00403240(int *a) {
-    int *s = (int *)a[16];
-    int r = 0;
-    if (s[1] != 0 && s[2] != 0) {
-        func_004032B8(s);
-        a[2] = s[70] - s[43];
-        s[1] = 0;
-        r = 1;
+int func_00403240(int *mpeg) {
+    int *mpegSys = (int *)mpeg[16];
+    int result = 0;
+    if (mpegSys[1] != 0 && mpegSys[2] != 0) {
+        func_004032B8(mpegSys);
+        mpeg[2] = mpegSys[70] - mpegSys[43];
+        mpegSys[1] = 0;
+        result = 1;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3904,14 +3904,14 @@ void func_004032B8(int *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00403338);
 #ifdef SKIP_ASM
 extern void func_00405B48(unsigned);
-void func_00403338(int *p) {
-    int v = 0x70000000;
+void func_00403338(int *mpegSys) {
+    int scratchBase = 0x70000000;
     func_00405B48(1);
-    p[356] = v;
-    p[357] = 0x70001800;
-    p[436] = 0x70001B00;
-    p[437] = 0x70003300;
-    p[516] = 0;
+    mpegSys[356] = scratchBase;
+    mpegSys[357] = 0x70001800;
+    mpegSys[436] = 0x70001B00;
+    mpegSys[437] = 0x70003300;
+    mpegSys[516] = 0;
 }
 #endif
 
@@ -3921,17 +3921,17 @@ INCLUDE_ASM("seg/seg_2FE810", func_00403398);
 extern int func_0042C078_0() __asm__("func_0042C078");
 extern void func_0042C0C0(void);
 extern void func_00409638_2(int, int) __asm__("func_00409638");
-void func_00403398(int *p) {
-    int s;
-    p[0x818 / 4] = 1;
-    p[0x1B0 / 4] = 0;
-    s = func_0042C078_0();
+void func_00403398(int *mpegSys) {
+    int intrState;
+    mpegSys[0x818 / 4] = 1;
+    mpegSys[0x1B0 / 4] = 0;
+    intrState = func_0042C078_0();
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
     *(volatile int *)0x1000B000 = 0;
     *(volatile int *)0x1000B400 = 0;
     *(volatile int *)0x1000D400 = 0;
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
-    if (s)
+    if (intrState)
         func_0042C0C0();
     *(volatile int *)0x1000B020 = 0;
     *(volatile int *)0x1000B420 = 0;
@@ -3956,10 +3956,10 @@ INCLUDE_ASM("seg/seg_2FE810", func_00403470);
 #ifdef SKIP_ASM
 extern int sprintf(char *, const char *, ...);
 extern void func_004034A8(int *, int);
-void func_00403470(int *a, char *fmt) {
+void func_00403470(int *mpegSys, char *fmt) {
     char buf[256];
     sprintf(buf, fmt);
-    func_004034A8(a, (int)buf);
+    func_004034A8(mpegSys, (int)buf);
 }
 #endif
 
@@ -3968,16 +3968,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_004034A8);
 #ifdef SKIP_ASM
 extern int func_00402C30(int *, int *);
 extern void func_00403460(int);
-void func_004034A8(int *p, int b) {
-    int v[2];
-    int *q = (int *)p[534];
-    if (q && p && p[3]) {
-        v[0] = 0;
-        v[1] = b;
-        func_00402C30(q, v);
+void func_004034A8(int *mpegSys, int message) {
+    int cbData[2];
+    int *mpeg = (int *)mpegSys[534];
+    if (mpeg && mpegSys && mpegSys[3]) {
+        cbData[0] = 0;
+        cbData[1] = message;
+        func_00402C30(mpeg, cbData);
         return;
     }
-    func_00403460(b);
+    func_00403460(message);
 }
 #endif
 
@@ -3989,8 +3989,8 @@ extern int func_0042C078();
 extern void func_0042C0C0(void);
 void q3500(int base, unsigned addr, int n) __asm__("func_00403500");
 void q3500(int base, unsigned addr, int n) {
-    unsigned t = ((unsigned)(base + 0x88F) >> 4) << 4;
-    long *tag = (long *)t;
+    unsigned tagBase = ((unsigned)(base + 0x88F) >> 4) << 4;
+    long *tag = (long *)tagBase;
     int ret;
     while (n > 0) {
         int chunk = n > 0xFFF40 ? 0xFFF40 : n;
@@ -4005,7 +4005,7 @@ void q3500(int base, unsigned addr, int n) {
     }
     func_00424020(0);
     ret = func_0042C078();
-    *(volatile int *)0x1000B430 = t & 0xFFFFFFF;
+    *(volatile int *)0x1000B430 = tagBase & 0xFFFFFFF;
     *(volatile int *)0x1000B420 = 0;
     *(volatile int *)0x1000B400 = 0x105;
     if (ret)
@@ -4016,11 +4016,11 @@ void q3500(int base, unsigned addr, int n) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403600);
 #ifdef SKIP_ASM
-int func_00403600(int *p, int a, int b) {
-    p[1] = a;
-    p[2] = b;
-    p[3] = a >> 4;
-    p[4] = b >> 4;
+int func_00403600(int *picInfo, int width, int height) {
+    picInfo[1] = width;
+    picInfo[2] = height;
+    picInfo[3] = width >> 4;
+    picInfo[4] = height >> 4;
     return 1;
 }
 #endif
@@ -4079,19 +4079,19 @@ INCLUDE_ASM("seg/seg_2FE810", func_004039F0);
 #ifdef SKIP_ASM
 static __inline__ int unc(int a) { return (a & 0x0FFFFFFF) | 0x20000000; }
 static __inline__ int adr(int base, int n) { return unc(base + n * 0x180); }
-void func_004039F0(int *y0, int *u0, int *v0, int *y1, int *u1, int *v1, int *y2, int *u2, int *v2,
-                   int y, int u, int v, int w, int h) {
+void func_004039F0(int *y0, int *uOut0, int *vOut0, int *y1, int *uOut1, int *vOut1, int *y2, int *uOut2, int *vOut2,
+                   int y, int uBuffer, int vBuffer, int w, int height) {
     int n;
     *y0 = unc(y);
-    *u0 = unc(u);
-    *v0 = unc(v);
+    *uOut0 = unc(uBuffer);
+    *vOut0 = unc(vBuffer);
     *y1 = unc(y);
-    *u1 = unc(u);
-    *v1 = unc(v);
-    n = w * h / 512;
+    *uOut1 = unc(uBuffer);
+    *vOut1 = unc(vBuffer);
+    n = w * height / 512;
     *y2 = adr(y, n);
-    *u2 = adr(u, n);
-    *v2 = adr(v, n);
+    *uOut2 = adr(uBuffer, n);
+    *vOut2 = adr(vBuffer, n);
 }
 #endif
 
@@ -4103,23 +4103,23 @@ extern void f3AD0_EI(void) __asm__("func_0042C0C0");
 extern int f3AD0_2C30(int, int *) __asm__("func_00402C30");
 extern void f3AD0_6E20(int *) __asm__("func_00406E20");
 extern void f3AD0_6DF0(int *, int) __asm__("func_00406DF0");
-void func_00403AD0(int *a, int b, int c) {
-    int v[8];
-    int s;
-    v[0] = 2;
-    f3AD0_2C30(a[534], v);
-    f3AD0_6E20(a);
+void func_00403AD0(int *mpegSys, int ipuCmd, int srcAddr) {
+    int cbData[8];
+    int intrState;
+    cbData[0] = 2;
+    f3AD0_2C30(mpegSys[534], cbData);
+    f3AD0_6E20(mpegSys);
     *(volatile int *)0x10002000 = 0;
-    f3AD0_6E20(a);
-    s = f3AD0_DI();
-    *(volatile int *)0x1000B410 = c & 0xFFFFFFF;
+    f3AD0_6E20(mpegSys);
+    intrState = f3AD0_DI();
+    *(volatile int *)0x1000B410 = srcAddr & 0xFFFFFFF;
     *(volatile int *)0x1000B420 = 4;
     *(volatile int *)0x1000B400 = 0x101;
-    if (s) f3AD0_EI();
-    f3AD0_6DF0(a, b);
-    f3AD0_6E20(a);
-    v[0] = 3;
-    f3AD0_2C30(a[534], v);
+    if (intrState) f3AD0_EI();
+    f3AD0_6DF0(mpegSys, ipuCmd);
+    f3AD0_6E20(mpegSys);
+    cbData[0] = 3;
+    f3AD0_2C30(mpegSys[534], cbData);
 }
 #endif
 
@@ -4163,16 +4163,16 @@ void func_00403BB0(int *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00403CE0);
 #ifdef SKIP_ASM
 extern int func_004072E8(int, int);
-void func_00403CE0(int *p) {
-    func_004072E8((int)p, 3);
-    if (func_004072E8((int)p, 1)) {
-        func_004072E8((int)p, 8);
-        func_004072E8((int)p, 8);
-        p[0x144 / 4] = func_004072E8((int)p, 8);
+void func_00403CE0(int *mpegSys) {
+    func_004072E8((int)mpegSys, 3);
+    if (func_004072E8((int)mpegSys, 1)) {
+        func_004072E8((int)mpegSys, 8);
+        func_004072E8((int)mpegSys, 8);
+        mpegSys[0x144 / 4] = func_004072E8((int)mpegSys, 8);
     }
-    p[0x148 / 4] = func_004072E8((int)p, 0xE);
-    func_004072E8((int)p, 1);
-    p[0x14C / 4] = func_004072E8((int)p, 0xE);
+    mpegSys[0x148 / 4] = func_004072E8((int)mpegSys, 0xE);
+    func_004072E8((int)mpegSys, 1);
+    mpegSys[0x14C / 4] = func_004072E8((int)mpegSys, 0xE);
 }
 #endif
 
@@ -4228,8 +4228,8 @@ void func_00403DA0(int *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00403DB0);
 #ifdef SKIP_ASM
 extern void func_00409400(void *);
-int func_00403DB0(int *p) {
-    func_00409400((char *)p[16] + 0x4C);
+int func_00403DB0(int *mpeg) {
+    func_00409400((char *)mpeg[16] + 0x4C);
     return 1;
 }
 #endif
@@ -4238,8 +4238,8 @@ int func_00403DB0(int *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00403DD8);
 #ifdef SKIP_ASM
 extern void func_004094E8(void *);
-int func_00403DD8(int *p) {
-    func_004094E8((char *)p[16] + 0x4C);
+int func_00403DD8(int *mpeg) {
+    func_004094E8((char *)mpeg[16] + 0x4C);
     return 1;
 }
 #endif
@@ -5488,9 +5488,9 @@ void func_00405AE8(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405B48);
 #ifdef SKIP_ASM
-void func_00405B48(unsigned a) {
-    volatile unsigned *r = (volatile unsigned *)0x10002010;
-    *r = (*r & 0xFF7FFFFF) | (a << 23);
+void func_00405B48(unsigned mpeg1) {
+    volatile unsigned *ipuCtrl = (volatile unsigned *)0x10002010;
+    *ipuCtrl = (*ipuCtrl & 0xFF7FFFFF) | (mpeg1 << 23);
 }
 #endif
 
@@ -5569,8 +5569,8 @@ int f5B70(struct M5B70 *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00405E10);
 #ifdef SKIP_ASM
 extern int func_00406F78(int, int);
-int func_00405E10(int a) {
-    return func_00406F78(a, 3);
+int func_00405E10(int mpegSys) {
+    return func_00406F78(mpegSys, 3);
 }
 #endif
 
@@ -5579,26 +5579,26 @@ INCLUDE_ASM("seg/seg_2FE810", func_00405E30);
 #ifdef SKIP_ASM
 #define H1(x) (((x) + ((x) > 0)) >> 1)
 #define H3(x) ((3 * (x) + ((x) > 0)) >> 1)
-void func_00405E30(int *p, int *o, int *in, int a, int b) {
-    if (p[93] == 3) {
-        if (p[94] != 0) {
-            o[0] = H1(a) + in[0];
-            o[1] = H1(b) + in[1] - 1;
-            o[2] = H3(a) + in[0];
-            o[3] = H3(b) + in[1] + 1;
+void func_00405E30(int *mpegSys, int *outVec, int *in, int a, int b) {
+    if (mpegSys[93] == 3) {
+        if (mpegSys[94] != 0) {
+            outVec[0] = H1(a) + in[0];
+            outVec[1] = H1(b) + in[1] - 1;
+            outVec[2] = H3(a) + in[0];
+            outVec[3] = H3(b) + in[1] + 1;
         } else {
-            o[0] = H3(a) + in[0];
-            o[1] = H3(b) + in[1] - 1;
-            o[2] = H1(a) + in[0];
-            o[3] = H1(b) + in[1] + 1;
+            outVec[0] = H3(a) + in[0];
+            outVec[1] = H3(b) + in[1] - 1;
+            outVec[2] = H1(a) + in[0];
+            outVec[3] = H1(b) + in[1] + 1;
         }
     } else {
-        o[0] = H1(a) + in[0];
-        o[1] = H1(b) + in[1];
-        if (p[93] == 1)
-            o[1] = o[1] - 1;
+        outVec[0] = H1(a) + in[0];
+        outVec[1] = H1(b) + in[1];
+        if (mpegSys[93] == 1)
+            outVec[1] = outVec[1] - 1;
         else
-            o[1] = o[1] + 1;
+            outVec[1] = outVec[1] + 1;
     }
 }
 #undef H1
@@ -5991,24 +5991,24 @@ INCLUDE_ASM("seg/seg_2FE810", func_00406B00);
 #ifdef SKIP_ASM
 extern int Q_72E8(int, int) __asm__("func_004072E8");
 extern void Q_6CA0(int, int *, int *, int, int, int, int, int) __asm__("func_00406CA0");
-void func_00406B00(int p, int *x, int *out, int *t, int idx, int m, int k, int n0, int n1, int f1, int f2) {
-    int v;
-    int *q;
-    if (m == 1) {
-        if (k == 0 && f1 == 0) {
-            v = Q_72E8(p, 1);
-            t[idx] = v;
-            t[idx + 2] = v;
+void func_00406B00(int mpegSys, int *x, int *out, int *fieldSelect, int idx, int mvCount, int k, int rSizeH, int rSizeV, int dualPrime, int mvScale) {
+    int selectBit;
+    int *vector;
+    if (mvCount == 1) {
+        if (k == 0 && dualPrime == 0) {
+            selectBit = Q_72E8(mpegSys, 1);
+            fieldSelect[idx] = selectBit;
+            fieldSelect[idx + 2] = selectBit;
         }
-        q = &x[idx * 2];
-        Q_6CA0(p, q, out, n0, n1, f1, f2, 0);
-        q[4] = q[0];
-        q[5] = q[1];
+        vector = &x[idx * 2];
+        Q_6CA0(mpegSys, vector, out, rSizeH, rSizeV, dualPrime, mvScale, 0);
+        vector[4] = vector[0];
+        vector[5] = vector[1];
     } else {
-        t[idx] = Q_72E8(p, 1);
-        Q_6CA0(p, &x[idx * 2], out, n0, n1, f1, f2, 0);
-        t[idx + 2] = Q_72E8(p, 1);
-        Q_6CA0(p, &x[idx * 2 + 4], out, n0, n1, f1, f2, 0);
+        fieldSelect[idx] = Q_72E8(mpegSys, 1);
+        Q_6CA0(mpegSys, &x[idx * 2], out, rSizeH, rSizeV, dualPrime, mvScale, 0);
+        fieldSelect[idx + 2] = Q_72E8(mpegSys, 1);
+        Q_6CA0(mpegSys, &x[idx * 2 + 4], out, rSizeH, rSizeV, dualPrime, mvScale, 0);
     }
 }
 #endif
@@ -6020,29 +6020,29 @@ extern int func_00406F78();
 extern int func_004072E8();
 extern int func_00405E10();
 extern void func_00406A78();
-void func_00406CA0(int p, int *x, int *out, int n0, int n1, int f1, int f2, int z) {
-    int h;
-    int v;
-    h = func_00406F78(p, 2);
-    if (n0 != 0 && h != 0)
-        v = func_004072E8(p, n0);
+void func_00406CA0(int mpegSys, int *x, int *out, int rSizeH, int rSizeV, int dualPrime, int mvScale, int z) {
+    int motionCode;
+    int residual;
+    motionCode = func_00406F78(mpegSys, 2);
+    if (rSizeH != 0 && motionCode != 0)
+        residual = func_004072E8(mpegSys, rSizeH);
     else
-        v = 0;
-    func_00406A78(x, n0, h, v, z);
-    if (f1 != 0)
-        out[0] = func_00405E10(p);
-    h = func_00406F78(p, 2);
-    if (n1 != 0 && h != 0)
-        v = func_004072E8(p, n1);
+        residual = 0;
+    func_00406A78(x, rSizeH, motionCode, residual, z);
+    if (dualPrime != 0)
+        out[0] = func_00405E10(mpegSys);
+    motionCode = func_00406F78(mpegSys, 2);
+    if (rSizeV != 0 && motionCode != 0)
+        residual = func_004072E8(mpegSys, rSizeV);
     else
-        v = 0;
-    if (f2 != 0)
+        residual = 0;
+    if (mvScale != 0)
         x[1] = x[1] >> 1;
-    func_00406A78(x + 1, n1, h, v, z);
-    if (f2 != 0)
+    func_00406A78(x + 1, rSizeV, motionCode, residual, z);
+    if (mvScale != 0)
         x[1] = x[1] * 2;
-    if (f1 != 0)
-        out[1] = func_00405E10(p);
+    if (dualPrime != 0)
+        out[1] = func_00405E10(mpegSys);
 }
 #endif
 
@@ -6060,12 +6060,12 @@ void func_00406DF0(int *p, unsigned a) {
 INCLUDE_ASM("seg/seg_2FE810", func_00406E20);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
-void func_00406E20(int p) {
+void func_00406E20(int mpegSys) {
     int n = 0;
     if ((*(volatile unsigned *)0x10002010 & 0x80004000) == 0x80000000) {
         do {
             if (n++ >= 0x1389) {
-                func_00402C80(*(int **)(p + 0x858));
+                func_00402C80(*(int **)(mpegSys + 0x858));
                 n = 0;
             }
         } while ((*(volatile unsigned *)0x10002010 & 0x80004000) == 0x80000000);
@@ -6077,19 +6077,19 @@ void func_00406E20(int p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00406EC8);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
-long func_00406EC8(int p) {
+long func_00406EC8(int mpegSys) {
     int n = 0;
-    long v = *(volatile long *)0x10002000;
-    if (v < 0 && !(*(volatile unsigned *)0x10002010 & 0x4000)) {
+    long cmdResult = *(volatile long *)0x10002000;
+    if (cmdResult < 0 && !(*(volatile unsigned *)0x10002010 & 0x4000)) {
         do {
             if (n++ >= 0x1389) {
-                func_00402C80(*(int **)(p + 0x858));
+                func_00402C80(*(int **)(mpegSys + 0x858));
                 n = 0;
             }
-            v = *(volatile long *)0x10002000;
-        } while (v < 0 && !(*(volatile unsigned *)0x10002010 & 0x4000));
+            cmdResult = *(volatile long *)0x10002000;
+        } while (cmdResult < 0 && !(*(volatile unsigned *)0x10002010 & 0x4000));
     }
-    return v;
+    return cmdResult;
 }
 #endif
 
@@ -6237,14 +6237,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_00407438);
 extern void func_004071F8(int, int);
 extern int func_004070F0(int, int);
 extern void func_00406E20(int);
-void func_00407438(int p) {
+void func_00407438(int mpegSys) {
     int n;
-    func_00406E20(p);
+    func_00406E20(mpegSys);
     n = -(*(volatile int *)0x10002020 & 7) & 7;
     if (n)
-        func_004071F8(p, n);
-    while (func_004070F0(p, 0x18) != 1)
-        func_004071F8(p, 8);
+        func_004071F8(mpegSys, n);
+    while (func_004070F0(mpegSys, 0x18) != 1)
+        func_004071F8(mpegSys, 8);
 }
 #endif
 
@@ -6254,12 +6254,12 @@ INCLUDE_ASM("seg/seg_2FE810", func_004074B8);
 extern void func_004071F8(int, int);
 extern int func_004072E8(int, int);
 extern void func_00407A10(int);
-int func_004074B8(int *p) {
-    p[109] = func_004072E8((int)p, 5);
-    if (func_004072E8((int)p, 1)) {
-        func_004072E8((int)p, 1);
-        func_004071F8((int)p, 7);
-        func_00407A10((int)p);
+int func_004074B8(int *mpegSys) {
+    mpegSys[109] = func_004072E8((int)mpegSys, 5);
+    if (func_004072E8((int)mpegSys, 1)) {
+        func_004072E8((int)mpegSys, 1);
+        func_004071F8((int)mpegSys, 7);
+        func_00407A10((int)mpegSys);
     }
     return 0;
 }
@@ -6310,21 +6310,21 @@ extern int func_004072E8(int, int);
 extern void func_00407A10(int);
 extern void func_004076F8(int);
 extern void func_00407A58(int, int);
-void func_00407630(int *p) {
-    int v = func_004072E8((int)p, 10);
-    p[0x150 / 4] = func_004072E8((int)p, 3);
-    func_004072E8((int)p, 16);
-    if ((unsigned)(p[0x150 / 4] - 2) < 2) {
-        p[0x154 / 4] = func_004072E8((int)p, 1);
-        p[0x158 / 4] = func_004072E8((int)p, 3);
+void func_00407630(int *mpegSys) {
+    int temporalRef = func_004072E8((int)mpegSys, 10);
+    mpegSys[0x150 / 4] = func_004072E8((int)mpegSys, 3);
+    func_004072E8((int)mpegSys, 16);
+    if ((unsigned)(mpegSys[0x150 / 4] - 2) < 2) {
+        mpegSys[0x154 / 4] = func_004072E8((int)mpegSys, 1);
+        mpegSys[0x158 / 4] = func_004072E8((int)mpegSys, 3);
     }
-    if (p[0x150 / 4] == 3) {
-        p[0x15C / 4] = func_004072E8((int)p, 1);
-        p[0x160 / 4] = func_004072E8((int)p, 3);
+    if (mpegSys[0x150 / 4] == 3) {
+        mpegSys[0x15C / 4] = func_004072E8((int)mpegSys, 1);
+        mpegSys[0x160 / 4] = func_004072E8((int)mpegSys, 3);
     }
-    func_00407A10((int)p);
-    func_004076F8((int)p);
-    func_00407A58((int)p, v);
+    func_00407A10((int)mpegSys);
+    func_004076F8((int)mpegSys);
+    func_00407A58((int)mpegSys, temporalRef);
 }
 #endif
 
@@ -6360,36 +6360,36 @@ void func_004076F8(int p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00407820);
 #ifdef SKIP_ASM
 extern int Q_72E8(int, int) __asm__("func_004072E8");
-void func_00407820(int *p) {
-    p[0x164 / 4] = Q_72E8((int)p, 4);
-    p[0x168 / 4] = Q_72E8((int)p, 4);
-    p[0x16C / 4] = Q_72E8((int)p, 4);
-    p[0x170 / 4] = Q_72E8((int)p, 4);
+void func_00407820(int *mpegSys) {
+    mpegSys[0x164 / 4] = Q_72E8((int)mpegSys, 4);
+    mpegSys[0x168 / 4] = Q_72E8((int)mpegSys, 4);
+    mpegSys[0x16C / 4] = Q_72E8((int)mpegSys, 4);
+    mpegSys[0x170 / 4] = Q_72E8((int)mpegSys, 4);
     {
-        int v = Q_72E8((int)p, 2);
+        int v = Q_72E8((int)mpegSys, 2);
         *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFFCFFFF) | (v << 16);
     }
     {
-        int v = Q_72E8((int)p, 2);
-        p[0x174 / 4] = v;
-        if (p[0xD4 / 4] == 0)
-            p[0xD4 / 4] = v;
+        int v = Q_72E8((int)mpegSys, 2);
+        mpegSys[0x174 / 4] = v;
+        if (mpegSys[0xD4 / 4] == 0)
+            mpegSys[0xD4 / 4] = v;
     }
-    p[0x178 / 4] = Q_72E8((int)p, 1);
-    p[0x17C / 4] = Q_72E8((int)p, 1);
-    p[0x180 / 4] = Q_72E8((int)p, 1);
-    *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFBFFFFF) | (Q_72E8((int)p, 1) << 22);
-    *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFDFFFFF) | (Q_72E8((int)p, 1) << 21);
-    *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFEFFFFF) | (Q_72E8((int)p, 1) << 20);
-    p[0x184 / 4] = Q_72E8((int)p, 1);
-    Q_72E8((int)p, 1);
-    p[0x188 / 4] = Q_72E8((int)p, 1);
-    if (Q_72E8((int)p, 1)) {
-        Q_72E8((int)p, 1);
-        Q_72E8((int)p, 3);
-        Q_72E8((int)p, 1);
-        Q_72E8((int)p, 7);
-        Q_72E8((int)p, 8);
+    mpegSys[0x178 / 4] = Q_72E8((int)mpegSys, 1);
+    mpegSys[0x17C / 4] = Q_72E8((int)mpegSys, 1);
+    mpegSys[0x180 / 4] = Q_72E8((int)mpegSys, 1);
+    *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFBFFFFF) | (Q_72E8((int)mpegSys, 1) << 22);
+    *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFDFFFFF) | (Q_72E8((int)mpegSys, 1) << 21);
+    *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFEFFFFF) | (Q_72E8((int)mpegSys, 1) << 20);
+    mpegSys[0x184 / 4] = Q_72E8((int)mpegSys, 1);
+    Q_72E8((int)mpegSys, 1);
+    mpegSys[0x188 / 4] = Q_72E8((int)mpegSys, 1);
+    if (Q_72E8((int)mpegSys, 1)) {
+        Q_72E8((int)mpegSys, 1);
+        Q_72E8((int)mpegSys, 3);
+        Q_72E8((int)mpegSys, 1);
+        Q_72E8((int)mpegSys, 7);
+        Q_72E8((int)mpegSys, 8);
     }
 }
 #endif
@@ -6399,9 +6399,9 @@ INCLUDE_ASM("seg/seg_2FE810", func_00407A10);
 #ifdef SKIP_ASM
 extern void func_004071F8(int, int);
 extern int func_004072E8(int, int);
-void func_00407A10(int p) {
-    while (func_004072E8(p, 1))
-        func_004071F8(p, 8);
+void func_00407A10(int mpegSys) {
+    while (func_004072E8(mpegSys, 1))
+        func_004071F8(mpegSys, 8);
 }
 #endif
 
@@ -6438,19 +6438,19 @@ INCLUDE_ASM("seg/seg_2FE810", func_00407AD0);
 #ifdef SKIP_ASM
 extern int func_004072E8(int, int);
 extern void func_004076F8();
-void func_00407AD0(int *p) {
-    p[0xE8 / 4] = 0;
-    p[0x84C / 4] = p[0x850 / 4] + 1;
-    p[0x854 / 4] = 1;
-    func_004072E8((int)p, 1);
-    func_004072E8((int)p, 5);
-    func_004072E8((int)p, 6);
-    func_004072E8((int)p, 1);
-    func_004072E8((int)p, 6);
-    func_004072E8((int)p, 6);
-    p[0x1A4 / 4] = func_004072E8((int)p, 1);
-    p[0x1A8 / 4] = func_004072E8((int)p, 1);
-    func_004076F8(p);
+void func_00407AD0(int *mpegSys) {
+    mpegSys[0xE8 / 4] = 0;
+    mpegSys[0x84C / 4] = mpegSys[0x850 / 4] + 1;
+    mpegSys[0x854 / 4] = 1;
+    func_004072E8((int)mpegSys, 1);
+    func_004072E8((int)mpegSys, 5);
+    func_004072E8((int)mpegSys, 6);
+    func_004072E8((int)mpegSys, 1);
+    func_004072E8((int)mpegSys, 6);
+    func_004072E8((int)mpegSys, 6);
+    mpegSys[0x1A4 / 4] = func_004072E8((int)mpegSys, 1);
+    mpegSys[0x1A8 / 4] = func_004072E8((int)mpegSys, 1);
+    func_004076F8(mpegSys);
 }
 #endif
 
@@ -6508,17 +6508,17 @@ void func_00407C38(struct S_7C38 *a) {
 INCLUDE_ASM("seg/seg_2FE810", func_00407D30);
 #ifdef SKIP_ASM
 extern int func_004072E8(int, int);
-void func_00407D30(int p) {
-    func_004072E8(p, 1);
-    func_004072E8(p, 8);
-    func_004072E8(p, 1);
-    func_004072E8(p, 7);
-    func_004072E8(p, 1);
-    func_004072E8(p, 0x14);
-    func_004072E8(p, 1);
-    func_004072E8(p, 0x16);
-    func_004072E8(p, 1);
-    func_004072E8(p, 0x16);
+void func_00407D30(int mpegSys) {
+    func_004072E8(mpegSys, 1);
+    func_004072E8(mpegSys, 8);
+    func_004072E8(mpegSys, 1);
+    func_004072E8(mpegSys, 7);
+    func_004072E8(mpegSys, 1);
+    func_004072E8(mpegSys, 0x14);
+    func_004072E8(mpegSys, 1);
+    func_004072E8(mpegSys, 0x16);
+    func_004072E8(mpegSys, 1);
+    func_004072E8(mpegSys, 0x16);
 }
 #endif
 
@@ -6563,28 +6563,28 @@ INCLUDE_ASM("seg/seg_2FE810", func_00407E90);
 #ifdef SKIP_ASM
 extern void func_004086C0(int *, int, int);
 extern void func_004087D0(int *, int, int, int);
-void func_00407E90(int *p, int n, int flag) {
+void func_00407E90(int *mpegSys, int n, int flag) {
     int a, b;
     if (flag) {
-        if (p[0x174 / 4] == 3) {
-            if (p[0x150 / 4] == 3)
-                a = p[0x1C4 / 4];
+        if (mpegSys[0x174 / 4] == 3) {
+            if (mpegSys[0x150 / 4] == 3)
+                a = mpegSys[0x1C4 / 4];
             else
-                a = p[0x1B8 / 4];
-            func_004086C0(p, a, n - 1);
+                a = mpegSys[0x1B8 / 4];
+            func_004086C0(mpegSys, a, n - 1);
         } else {
-            if (p[0x150 / 4] == 3) {
-                a = p[0x1D4 / 4];
-                b = p[0x1E4 / 4];
+            if (mpegSys[0x150 / 4] == 3) {
+                a = mpegSys[0x1D4 / 4];
+                b = mpegSys[0x1E4 / 4];
             } else {
-                a = p[0x1C8 / 4];
-                b = p[0x1D8 / 4];
+                a = mpegSys[0x1C8 / 4];
+                b = mpegSys[0x1D8 / 4];
             }
-            func_004087D0(p, a, b, n - 1);
+            func_004087D0(mpegSys, a, b, n - 1);
         }
     }
-    if (p[0xF8 / 4] == 1)
-        p[0xF8 / 4] = 2;
+    if (mpegSys[0xF8 / 4] == 1)
+        mpegSys[0xF8 / 4] = 2;
 }
 #endif
 
@@ -6787,12 +6787,12 @@ void func_00408278(struct S8278 *s, unsigned *p) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408508);
 #ifdef SKIP_ASM
-void func_00408508(int *p) {
-    if (p[2] != 2) {
-        p[2] = 2;
-        p[43] = p[70];
+void func_00408508(int *mpegSys) {
+    if (mpegSys[2] != 2) {
+        mpegSys[2] = 2;
+        mpegSys[43] = mpegSys[70];
     }
-    p[520] = 1;
+    mpegSys[520] = 1;
 }
 #endif
 
@@ -6980,12 +6980,12 @@ INCLUDE_ASM("seg/seg_2FE810", func_00408AF8);
 #ifdef SKIP_ASM
 extern int func_0042C078();
 extern void func_0042C0C0(void);
-void func_00408AF8(unsigned a, int b) {
-    int s = func_0042C078();
-    *(volatile unsigned *)0x1000B010 = (a & 0xFFFFFFF) | 0x80000000;
-    *(volatile int *)0x1000B020 = b >> 4;
+void func_00408AF8(unsigned dstAddr, int byteCount) {
+    int intrState = func_0042C078();
+    *(volatile unsigned *)0x1000B010 = (dstAddr & 0xFFFFFFF) | 0x80000000;
+    *(volatile int *)0x1000B020 = byteCount >> 4;
     *(volatile int *)0x1000B000 = 0x100;
-    if (s)
+    if (intrState)
         func_0042C0C0();
 }
 #endif
@@ -6998,20 +6998,20 @@ extern void q8B80_C0C0(void) __asm__("func_0042C0C0");
 extern void q8B80_6DF0(int *, int) __asm__("func_00406DF0");
 extern int q8B80_2C30(int *, int *) __asm__("func_00402C30");
 void q8B80(int *p, unsigned addr, int n) __asm__("func_00408B80");
-void q8B80(int *p, unsigned addr, int n) {
-    int s;
+void q8B80(int *mpegSys, unsigned addr, int n) {
+    int intrState;
     int sp[8];
     while (*(volatile int *)0x10002010 < 0)
         ;
-    s = q8B80_C078();
+    intrState = q8B80_C078();
     *(volatile int *)0x1000B010 = addr & 0x0FFFFFFF;
     *(volatile int *)0x1000B020 = n << 6;
     *(volatile int *)0x1000B000 = 0x100;
-    if (s)
+    if (intrState)
         q8B80_C0C0();
-    q8B80_6DF0(p, n | 0x70000000);
+    q8B80_6DF0(mpegSys, n | 0x70000000);
     sp[0] = 4;
-    q8B80_2C30(*(int **)((char *)p + 0x858), sp);
+    q8B80_2C30(*(int **)((char *)mpegSys + 0x858), sp);
     while (((*(volatile unsigned *)0x1000B000 >> 8) & 1))
         ;
     while (*(volatile int *)0x10002010 < 0)
@@ -7023,30 +7023,30 @@ void q8B80(int *p, unsigned addr, int n) {
 INCLUDE_ASM("seg/seg_2FE810", func_00408CA8);
 #ifdef SKIP_ASM
 struct S408CA8 { volatile int cnt; int stop; int rest; int addr; int n; };
-int func_00408CA8(int a, struct S408CA8 *s) {
+int func_00408CA8(int channel, struct S408CA8 *xferState) {
     int last;
     *(volatile int *)0x1000E010 = 8;
-    s->cnt++;
+    xferState->cnt++;
     if (*(volatile int *)0x1000B020 != 0 || (*(volatile int *)0x1000B000 & 0x100)) {
-        s->stop = 1;
+        xferState->stop = 1;
         /* PORT: PS2-only memory barrier and COP0 interrupt enable (interrupt handler exit). */
         __asm__ volatile("sync");
         __asm__ volatile("ei");
         return 0;
     }
-    last = s->n - 1;
-    if (s->cnt < last) {
-        *(volatile int *)0x1000B010 = s->addr;
+    last = xferState->n - 1;
+    if (xferState->cnt < last) {
+        *(volatile int *)0x1000B010 = xferState->addr;
         *(volatile int *)0x1000B020 = 0xFFC0;
         *(volatile int *)0x1000B000 = 0x100;
         *(volatile int *)0x10002000 = 0x700003FF;
-        s->addr = (s->addr + 0xFFC00) & 0x0FFFFFFF;
-    } else if (s->cnt == last) {
-        s->rest -= s->cnt * 0x3FF;
-        *(volatile int *)0x1000B010 = s->addr;
-        *(volatile int *)0x1000B020 = s->rest << 6;
+        xferState->addr = (xferState->addr + 0xFFC00) & 0x0FFFFFFF;
+    } else if (xferState->cnt == last) {
+        xferState->rest -= xferState->cnt * 0x3FF;
+        *(volatile int *)0x1000B010 = xferState->addr;
+        *(volatile int *)0x1000B020 = xferState->rest << 6;
         *(volatile int *)0x1000B000 = 0x100;
-        *(volatile int *)0x10002000 = s->rest | 0x70000000;
+        *(volatile int *)0x10002000 = xferState->rest | 0x70000000;
     }
     __asm__ volatile("sync");
     __asm__ volatile("ei");
@@ -7155,53 +7155,53 @@ extern void E_8B80(char *, int, int) __asm__("func_00408B80");
 extern void E_8DF0(char *, int, int) __asm__("func_00408DF0");
 extern void E_8FB0(void) __asm__("func_00408FB0");
 void q9088(char *d, unsigned *b) __asm__("func_00409088");
-void q9088(char *d, unsigned *b) {
-    struct L9 s;
-    int n = b[3] * b[4];
-    int h;
-    s.ev = 2;
-    E_2C30(*(int *)(d + 0x858), &s);
+void q9088(char *mpegSys, unsigned *picInfo) {
+    struct L9 xferState;
+    int n = picInfo[3] * picInfo[4];
+    int handlerId;
+    xferState.ev = 2;
+    E_2C30(*(int *)(mpegSys + 0x858), &xferState);
     if (*(volatile unsigned *)0x10002010 & 0x4000)
         *(volatile unsigned *)0x10002010 = 0x40000000;
     while ((int)*(volatile unsigned *)0x10002010 < 0);
-    E_6DF0(d, 0);
+    E_6DF0(mpegSys, 0);
     while ((int)*(volatile unsigned *)0x10002010 < 0);
-    s.cnt = n * 0x18;
-    s.addr = b[0] & 0xFFFFFFF;
-    if (s.cnt > 0xFFFF) {
-        int r;
-        h = E_AddH(4, E_8FB0, 0, &s.cnt);
+    xferState.cnt = n * 0x18;
+    xferState.addr = picInfo[0] & 0xFFFFFFF;
+    if (xferState.cnt > 0xFFFF) {
+        int intrState;
+        handlerId = E_AddH(4, E_8FB0, 0, &xferState.cnt);
         *(volatile unsigned *)0x1000E010 = 0x10;
         E_49B8(4);
-        r = E_C078();
-        *(volatile unsigned *)0x1000B410 = s.addr;
+        intrState = E_C078();
+        *(volatile unsigned *)0x1000B410 = xferState.addr;
         *(volatile unsigned *)0x1000B420 = 0xFFFF;
         *(volatile unsigned *)0x1000B400 = 0x101;
-        if (r)
+        if (intrState)
             E_C0C0();
-        s.addr = (s.addr + 0xFFFF0) & 0xFFFFFFF;
-        s.cnt -= 0xFFFF;
+        xferState.addr = (xferState.addr + 0xFFFF0) & 0xFFFFFFF;
+        xferState.cnt -= 0xFFFF;
         if (n < 0x400)
-            E_8B80(d, *(int *)(d + 0xD8), n);
+            E_8B80(mpegSys, *(int *)(mpegSys + 0xD8), n);
         else
-            E_8DF0(d, *(int *)(d + 0xD8), n);
+            E_8DF0(mpegSys, *(int *)(mpegSys + 0xD8), n);
         E_4950(4);
-        E_RemH(4, h);
+        E_RemH(4, handlerId);
     } else {
-        int r = E_C078();
-        *(volatile unsigned *)0x1000B410 = b[0] & 0xFFFFFFF;
-        *(volatile unsigned *)0x1000B420 = s.cnt;
+        int intrState = E_C078();
+        *(volatile unsigned *)0x1000B410 = picInfo[0] & 0xFFFFFFF;
+        *(volatile unsigned *)0x1000B420 = xferState.cnt;
         *(volatile unsigned *)0x1000B400 = 0x101;
-        if (r)
+        if (intrState)
             E_C0C0();
-        s.cnt = 0;
+        xferState.cnt = 0;
         if (n < 0x400)
-            E_8B80(d, *(int *)(d + 0xD8), n);
+            E_8B80(mpegSys, *(int *)(mpegSys + 0xD8), n);
         else
-            E_8DF0(d, *(int *)(d + 0xD8), n);
+            E_8DF0(mpegSys, *(int *)(mpegSys + 0xD8), n);
     }
-    s.ev = 3;
-    E_2C30(*(int *)(d + 0x858), &s);
+    xferState.ev = 3;
+    E_2C30(*(int *)(mpegSys + 0x858), &xferState);
 }
 #endif
 
@@ -7210,12 +7210,12 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409310);
 #ifdef SKIP_ASM
 extern int func_0042C078();
 extern void func_0042C0C0(void);
-void func_00409310(int a) {
-    int s = func_0042C078();
+void func_00409310(int chcrValue) {
+    int intrState = func_0042C078();
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
-    *(volatile int *)0x1000B000 = a;
+    *(volatile int *)0x1000B000 = chcrValue;
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
-    if (s)
+    if (intrState)
         func_0042C0C0();
 }
 #endif
@@ -7225,12 +7225,12 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409388);
 #ifdef SKIP_ASM
 extern int func_0042C078();
 extern void func_0042C0C0(void);
-void func_00409388(int a) {
-    int s = func_0042C078();
+void func_00409388(int chcrValue) {
+    int intrState = func_0042C078();
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
-    *(volatile int *)0x1000B400 = a;
+    *(volatile int *)0x1000B400 = chcrValue;
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
-    if (s)
+    if (intrState)
         func_0042C0C0();
 }
 #endif
@@ -7241,20 +7241,20 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409400);
 extern void q9400_9388(int) __asm__("func_00409388");
 extern void q9400_9310(int) __asm__("func_00409310");
 void q9400(int *p) __asm__("func_00409400");
-void q9400(int *p) {
+void q9400(int *savedRegs) {
     q9400_9388(1);
-    p[0] = *(volatile int *)0x1000B410;
-    p[1] = *(volatile int *)0x1000B430;
-    p[2] = *(volatile int *)0x1000B420;
-    p[3] = *(volatile int *)0x1000B400;
+    savedRegs[0] = *(volatile int *)0x1000B410;
+    savedRegs[1] = *(volatile int *)0x1000B430;
+    savedRegs[2] = *(volatile int *)0x1000B420;
+    savedRegs[3] = *(volatile int *)0x1000B400;
     while (*(volatile int *)0x10002010 & 0xF0)
         ;
     q9400_9310(0);
-    p[4] = *(volatile int *)0x1000B010;
-    p[5] = *(volatile int *)0x1000B020;
-    p[6] = *(volatile int *)0x1000B000;
-    p[7] = *(volatile int *)0x10002020;
-    p[8] = *(volatile int *)0x10002010;
+    savedRegs[4] = *(volatile int *)0x1000B010;
+    savedRegs[5] = *(volatile int *)0x1000B020;
+    savedRegs[6] = *(volatile int *)0x1000B000;
+    savedRegs[7] = *(volatile int *)0x10002020;
+    savedRegs[8] = *(volatile int *)0x10002010;
 }
 #endif
 
@@ -7264,27 +7264,27 @@ INCLUDE_ASM("seg/seg_2FE810", func_004094E8);
 extern void q94E8_9388(int) __asm__("func_00409388");
 extern void q94E8_9310(int) __asm__("func_00409310");
 void q94E8(int *p) __asm__("func_004094E8");
-void q94E8(int *p) {
-    unsigned v = p[7];
-    int e = v & 0x7F;
-    int n = ((v >> 16) & 3) + ((v >> 8) & 0xF);
-    int r = p[0] - (n << 4);
-    int q = p[2] + n;
-    if (p[4] != 0 && p[5] != 0) {
-        *(volatile int *)0x1000B010 = p[4];
-        *(volatile int *)0x1000B020 = p[5];
-        q94E8_9310(p[6] | 0x100);
+void q94E8(int *savedRegs) {
+    unsigned ipuBp = savedRegs[7];
+    int e = ipuBp & 0x7F;
+    int n = ((ipuBp >> 16) & 3) + ((ipuBp >> 8) & 0xF);
+    int toIpuMadr = savedRegs[0] - (n << 4);
+    int toIpuQwc = savedRegs[2] + n;
+    if (savedRegs[4] != 0 && savedRegs[5] != 0) {
+        *(volatile int *)0x1000B010 = savedRegs[4];
+        *(volatile int *)0x1000B020 = savedRegs[5];
+        q94E8_9310(savedRegs[6] | 0x100);
     }
     while (*(volatile int *)0x10002010 < 0)
         ;
     *(volatile int *)0x10002000 = e;
     while (*(volatile int *)0x10002010 < 0)
         ;
-    if (r != 0 && q != 0) {
-        *(volatile int *)0x1000B410 = r;
-        *(volatile int *)0x1000B430 = p[1];
-        *(volatile int *)0x1000B420 = q;
-        q94E8_9388(p[3] | 0x100);
+    if (toIpuMadr != 0 && toIpuQwc != 0) {
+        *(volatile int *)0x1000B410 = toIpuMadr;
+        *(volatile int *)0x1000B430 = savedRegs[1];
+        *(volatile int *)0x1000B420 = toIpuQwc;
+        q94E8_9388(savedRegs[3] | 0x100);
     }
 }
 #endif
@@ -7295,21 +7295,21 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409638);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // NOTE: volatile = the IPU_CTRL hardware register (0x10002010), polled until BUSY clears; without it the poll is hoisted
 // (strip test 85.54). The R5900 short-loop nops in the loop come from the assembler, not from the source.
-int func_00409638(int a) {
-    int r = 0;
-    int v;
-    switch (a) {
+int func_00409638(int mode) {
+    int result = 0;
+    int ipuCtrl;
+    switch (mode) {
     case 0:
         do {
-            v = *(volatile int *)0x10002010;
-        } while (v < 0);
-        r = 0;
+            ipuCtrl = *(volatile int *)0x10002010;
+        } while (ipuCtrl < 0);
+        result = 0;
         break;
     case 1:
-        r = *(volatile unsigned *)0x10002010 >> 31;
+        result = *(volatile unsigned *)0x10002010 >> 31;
         break;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -7318,10 +7318,10 @@ INCLUDE_ASM("seg/seg_2FE810", func_004096A0);
 #ifdef SKIP_ASM
 extern int func_0042C078(int);
 extern void func_0042C0C0(void);
-void func_004096A0(int a) {
-    func_0042C078(a);
+void func_004096A0(int chcrValue) {
+    func_0042C078(chcrValue);
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
-    *(volatile int *)0x1000B400 = a;
+    *(volatile int *)0x1000B400 = chcrValue;
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
     func_0042C0C0();
 }
@@ -7677,8 +7677,8 @@ int func_0040A1A8(int a, unsigned char *p, int n) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040A320);
 #ifdef SKIP_ASM
 extern void func_00423DD0(int);
-void func_0040A320(int a, int b, int c) {
-    func_00423DD0(c);
+void func_0040A320(int alarmId, int ticks, int sema) {
+    func_00423DD0(sema);
 }
 #endif
 
@@ -8586,44 +8586,44 @@ int func_0040BC08(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040BC70);
 #ifdef SKIP_ASM
-unsigned char func_0040BC70(unsigned char a) {
-    return a + (a / 10) * 6;
+unsigned char func_0040BC70(unsigned char decimal) {
+    return decimal + (decimal / 10) * 6;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040BCA0);
 #ifdef SKIP_ASM
-unsigned char func_0040BCA0(unsigned char b) {
-    unsigned char t = b >> 4;
+unsigned char func_0040BCA0(unsigned char bcd) {
+    unsigned char t = bcd >> 4;
     t = t * 6;
-    return b - t;
+    return bcd - t;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040BCC0);
 #ifdef SKIP_ASM
-void func_0040BCC0(unsigned char *p) {
-    p[7] = func_0040BCA0(p[7]);
-    p[6] = func_0040BCA0(p[6]);
-    p[5] = func_0040BCA0(p[5]);
-    p[3] = func_0040BCA0(p[3]);
-    p[2] = func_0040BCA0(p[2]);
-    p[1] = func_0040BCA0(p[1]);
+void func_0040BCC0(unsigned char *clock) {
+    clock[7] = func_0040BCA0(clock[7]);
+    clock[6] = func_0040BCA0(clock[6]);
+    clock[5] = func_0040BCA0(clock[5]);
+    clock[3] = func_0040BCA0(clock[3]);
+    clock[2] = func_0040BCA0(clock[2]);
+    clock[1] = func_0040BCA0(clock[1]);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040BD28);
 #ifdef SKIP_ASM
-void func_0040BD28(unsigned char *p) {
-    p[7] = func_0040BC70(p[7]);
-    p[6] = func_0040BC70(p[6]);
-    p[5] = func_0040BC70(p[5]);
-    p[3] = func_0040BC70(p[3]);
-    p[2] = func_0040BC70(p[2]);
-    p[1] = func_0040BC70(p[1]);
+void func_0040BD28(unsigned char *clock) {
+    clock[7] = func_0040BC70(clock[7]);
+    clock[6] = func_0040BC70(clock[6]);
+    clock[5] = func_0040BC70(clock[5]);
+    clock[3] = func_0040BC70(clock[3]);
+    clock[2] = func_0040BC70(clock[2]);
+    clock[1] = func_0040BC70(clock[1]);
 }
 #endif
 
@@ -8680,11 +8680,11 @@ void func_0040BE48(unsigned char *a) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040BEF0);
 #ifdef SKIP_ASM
 extern void func_0040BD90(unsigned char *);
-void func_0040BEF0(unsigned char *p) {
-    p[3]++;
-    if (p[3] == 24) {
-        p[3] = 0;
-        func_0040BD90(p);
+void func_0040BEF0(unsigned char *clock) {
+    clock[3]++;
+    if (clock[3] == 24) {
+        clock[3] = 0;
+        func_0040BD90(clock);
     }
 }
 #endif
@@ -8693,12 +8693,12 @@ void func_0040BEF0(unsigned char *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040BF20);
 #ifdef SKIP_ASM
 extern void func_0040BE48(unsigned char *);
-void func_0040BF20(unsigned char *p) {
-    if (p[3] == 0) {
-        p[3] = 23;
-        func_0040BE48(p);
+void func_0040BF20(unsigned char *clock) {
+    if (clock[3] == 0) {
+        clock[3] = 23;
+        func_0040BE48(clock);
     } else {
-        p[3]--;
+        clock[3]--;
     }
 }
 #endif
@@ -8710,27 +8710,27 @@ extern void func_0040BCC0(unsigned char *);
 extern void func_0040BEF0(unsigned char *);
 extern void func_0040BF20(unsigned char *);
 extern void func_0040BD28(unsigned char *);
-void func_0040BF48(int a, int d0) {
-    int d;
-    unsigned char *p = (unsigned char *)a;
-    func_0040BCC0(p);
-    d = p[2] + d0;
-    if (d >= 0) {
-        if (d > 60) {
+void func_0040BF48(int clockAddr, int deltaMinutes) {
+    int minutes;
+    unsigned char *clock = (unsigned char *)clockAddr;
+    func_0040BCC0(clock);
+    minutes = clock[2] + deltaMinutes;
+    if (minutes >= 0) {
+        if (minutes > 60) {
             do {
-                d -= 60;
-                func_0040BEF0(p);
-            } while (d > 60);
+                minutes -= 60;
+                func_0040BEF0(clock);
+            } while (minutes > 60);
         }
-        p[2] = d;
+        clock[2] = minutes;
     } else {
-        while (d < 0) {
-            d += 60;
-            func_0040BF20(p);
+        while (minutes < 0) {
+            minutes += 60;
+            func_0040BF20(clock);
         }
-        p[2] = d;
+        clock[2] = minutes;
     }
-    func_0040BD28(p);
+    func_0040BD28(clock);
 }
 #endif
 
@@ -8738,8 +8738,8 @@ void func_0040BF48(int a, int d0) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040BFD8);
 #ifdef SKIP_ASM
 extern void func_0040BF48(int, int);
-void func_0040BFD8(int a) {
-    func_0040BF48(a, -540);
+void func_0040BFD8(int clockAddr) {
+    func_0040BF48(clockAddr, -540);
 }
 #endif
 
@@ -8749,9 +8749,9 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BFE0);
 extern int func_0040BAE8(void);
 extern int func_0040BBA0(void);
 extern void func_0040BF48(int, int);
-void func_0040BFE0(int a) {
-    int t = func_0040BAE8();
-    func_0040BF48(a, t - 540 + func_0040BBA0() * 60);
+void func_0040BFE0(int clockAddr) {
+    int timeZone = func_0040BAE8();
+    func_0040BF48(clockAddr, timeZone - 540 + func_0040BBA0() * 60);
 }
 #endif
 

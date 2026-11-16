@@ -130,10 +130,10 @@ extern "C" sSndEntry* func_002836D8(sSndList* self, int id);
 
 extern "C" void func_00283610(sSndList* self, int id)
 {
-    sSndEntry* p = func_002836D8(self, id);
-    if (p != 0) {
+    sSndEntry* bankInfo = func_002836D8(self, id);
+    if (bankInfo != 0) {
         sScSndVEntry* vt = *(sScSndVEntry**)((char*)self + 0xC);
-        vt[2].fn((char*)self + vt[2].delta, p);
+        vt[2].fn((char*)self + vt[2].delta, bankInfo);
     }
 }
 #endif

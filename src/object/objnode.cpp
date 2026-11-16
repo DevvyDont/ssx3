@@ -135,10 +135,10 @@ static inline int objNextId_4850(int* c)
     return (*c)++;
 }
 
-extern "C" void* func_00354850(void* self, void* a1, int type)
+extern "C" void* func_00354850(void* self, void* bucket, int type)
 {
     int id;
-    func_00354720(self, a1, type);
+    func_00354720(self, bucket, type);
     *(void***)((char*)self + 0xC) = cSortObjNode_vtbl;
     if (type == 6) {
         id = objNextId_4850(&cSortObjNode_ObjNodeNoSortIndex);
@@ -239,9 +239,9 @@ INCLUDE_ASM("object/objnode", func_003549D0__FPv);
 #ifdef SKIP_ASM
 void* func_003549D0(void* self)
 {
-    int t0 = 0;
-    *(int*)((char*)self + 0x4) = t0;
-    *(int*)self = t0;
+    int zero = 0;
+    *(int*)((char*)self + 0x4) = zero;
+    *(int*)self = zero;
     return self;
 }
 #endif

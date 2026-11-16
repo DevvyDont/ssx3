@@ -67,20 +67,20 @@ extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 //100%
 INCLUDE_ASM("object/instancenode", func_0034FC78);
 #ifdef SKIP_ASM
-extern "C" void func_0034FC78(int a0, void* a1)
+extern "C" void func_0034FC78(int node, void* inst)
 {
-    *(int*)((char*)a1 + 0xc) = a0;
+    *(int*)((char*)inst + 0xc) = node;
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/instancenode", func_0034FC80);
 #ifdef SKIP_ASM
-extern "C" void func_0034FC80(void* self, void* a1)
+extern "C" void func_0034FC80(void* self, void* inst)
 {
-    if (a1 != 0) {
-        if (*(int*)((char*)a1 + 0xc) == (int)self) {
-            *(int*)((char*)a1 + 0xc) = 0;
+    if (inst != 0) {
+        if (*(int*)((char*)inst + 0xc) == (int)self) {
+            *(int*)((char*)inst + 0xc) = 0;
         }
     }
 }

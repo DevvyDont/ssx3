@@ -709,13 +709,13 @@ extern "C" void func_00181EF0(void* vself)
         sXform_181EF0 xf;
         float ang = *(float*)(self + 0x60);
         {
-            sQuat_181EF0 p;
-            p.x = 136.0f;
-            p.y = -250.0f;
-            p.z = -82.0f;
-            p.w = 1.0f;
-            pos = p;
-            xf.pos = p;
+            sQuat_181EF0 position;
+            position.x = 136.0f;
+            position.y = -250.0f;
+            position.z = -82.0f;
+            position.w = 1.0f;
+            pos = position;
+            xf.pos = position;
             xf.rot.x = 0.0f;
             xf.rot.y = 0.0f;
             xf.rot.z = 0.0f;
@@ -737,12 +737,12 @@ extern "C" void func_00181EF0(void* vself)
             *(int*)(self + 0x54) = 0;
         }
         {
-            sQuat_181EF0 p;
-            p.x = 0.0f;
-            p.y = 10000.0f;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            xf.pos = p;
+            sQuat_181EF0 position;
+            position.x = 0.0f;
+            position.y = 10000.0f;
+            position.z = 0.0f;
+            position.w = 1.0f;
+            xf.pos = position;
         }
         func_0019F548(rider, &xf);
         func_0019E538(rider, 1);
@@ -1066,9 +1066,9 @@ extern "C" void func_00182870(void* self)
     for (i = 0; i < 6; i++) {
         void* it = ((void**)((char*)self + 0x54))[i];
         if (it != 0) {
-            int v = ((int*)((char*)self + 0xf4))[idx + i];
+            int textureElem = ((int*)((char*)self + 0xf4))[idx + i];
             *(int*)((char*)it + 0x78) = -1;
-            *(int*)((char*)it + 0x7c) = v;
+            *(int*)((char*)it + 0x7c) = textureElem;
         }
     }
 }

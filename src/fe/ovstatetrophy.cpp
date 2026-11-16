@@ -1647,10 +1647,10 @@ extern "C" void func_00210D20(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210DD0);
 #ifdef SKIP_ASM
-extern "C" void func_00210DD0(void* self, int a1, int a2)
+extern "C" void func_00210DD0(void* self, int popup, int event)
 {
-    if (a2 == 0x16) {
-        if (a1 == *(int*)((char*)self + 0xe0)) {
+    if (event == 0x16) {
+        if (popup == *(int*)((char*)self + 0xe0)) {
             *(int*)((char*)self + 0xe0) = 0;
         }
     }
@@ -1713,11 +1713,11 @@ extern "C" void func_00210FA0(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_001CCF00(void* p, int a);
 extern "C" void cKeyboardPopup_setInputText(void* p, int a);
 
-extern "C" void func_00210F40(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
+extern "C" void func_00210F40(void* self, int a1, int staticText, int inputText, int password, int miscData, int maxChars)
 {
-    func_00210FA0(self, a1, a4, a5, a6);
-    func_001CCF00(*(void**)((char*)self + 0xE0), a2);
-    cKeyboardPopup_setInputText(*(void**)((char*)self + 0xE0), a3);
+    func_00210FA0(self, a1, password, miscData, maxChars);
+    func_001CCF00(*(void**)((char*)self + 0xE0), staticText);
+    cKeyboardPopup_setInputText(*(void**)((char*)self + 0xE0), inputText);
 }
 #endif
 
@@ -1732,13 +1732,13 @@ extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode)
 extern "C" void func_001CE468(void* self, int v);
 extern char str_cKeyboardPopup_b[];
 
-extern "C" void func_00210FA0(void* self, int a1, int a2, int a3, int a4)
+extern "C" void func_00210FA0(void* self, int a1, int password, int miscData, int maxChars)
 {
-    void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, str_cKeyboardPopup_b, 0x100, 0), *(void**)((char*)self + 0x10), self, a2, 0xF);
+    void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, str_cKeyboardPopup_b, 0x100, 0), *(void**)((char*)self + 0x10), self, password, 0xF);
     *(void**)((char*)self + 0xE0) = w;
     cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, w);
-    *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x18) = a3;
-    cKeyboardPopup_setMaxCharacters(*(void**)((char*)self + 0xE0), a4);
+    *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x18) = miscData;
+    cKeyboardPopup_setMaxCharacters(*(void**)((char*)self + 0xE0), maxChars);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x43C) = 0;
     cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 0x4B, 1, 2);
     func_001CE468(*(void**)((char*)self + 0xE0), 1);

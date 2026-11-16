@@ -166,16 +166,16 @@ struct sSphereTreeNode {
     sSphereChild children[1]; // 0x30
 };
 
-extern "C" void func_00329A90(sSphereTreeNode* s, int n, sSphereVec4* pos, float* radii,
+extern "C" void func_00329A90(sSphereTreeNode* node, int n, sSphereVec4* pos, float* radii,
                               sSphereVec4* center, float radius)
 {
-    s->count = n;
-    for (int i = 0; i < s->count; i++) {
-        s->children[i].pos = pos[i];
-        s->children[i].radius = radii[i];
+    node->count = n;
+    for (int i = 0; i < node->count; i++) {
+        node->children[i].pos = pos[i];
+        node->children[i].radius = radii[i];
     }
-    s->center = *center;
-    s->radius = radius;
+    node->center = *center;
+    node->radius = radius;
 }
 #endif
 
@@ -216,11 +216,11 @@ static inline void sphereVecAdd(sSphereVec4* dst, sSphereVec4* v)
 }
 
 // self->center += *v, then every child's pos += *v
-extern "C" void func_00329B40(sSphereTreeNode* s, sSphereVec4* v)
+extern "C" void func_00329B40(sSphereTreeNode* node, sSphereVec4* offset)
 {
-    sphereVecAdd(&s->center, v);
-    for (int i = 0; i < s->count; i++) {
-        sphereVecAdd(&s->children[i].pos, v);
+    sphereVecAdd(&node->center, offset);
+    for (int i = 0; i < node->count; i++) {
+        sphereVecAdd(&node->children[i].pos, offset);
     }
 }
 #endif
@@ -303,27 +303,27 @@ extern "C" void func_00329CE0(sSphereTreeNode* self, sSphereBox_9CE0* box)
 {
     box->mn = box->mx = self->center;
     for (int i = 0; i < self->count; i++) {
-        sSphereChild* c = &self->children[i];
-        float r = c->radius;
-        float v;
-        v = c->pos.x - r;
-        if (v < box->mn.x)
-            box->mn.x = v;
-        v = c->pos.y - r;
-        if (v < box->mn.y)
-            box->mn.y = v;
-        v = c->pos.z - r;
-        if (v < box->mn.z)
-            box->mn.z = v;
-        v = c->pos.x + r;
-        if (box->mx.x < v)
-            box->mx.x = v;
-        v = c->pos.y + r;
-        if (box->mx.y < v)
-            box->mx.y = v;
-        v = c->pos.z + r;
-        if (box->mx.z < v)
-            box->mx.z = v;
+        sSphereChild* child = &self->children[i];
+        float childRadius = child->radius;
+        float bound;
+        bound = child->pos.x - childRadius;
+        if (bound < box->mn.x)
+            box->mn.x = bound;
+        bound = child->pos.y - childRadius;
+        if (bound < box->mn.y)
+            box->mn.y = bound;
+        bound = child->pos.z - childRadius;
+        if (bound < box->mn.z)
+            box->mn.z = bound;
+        bound = child->pos.x + childRadius;
+        if (box->mx.x < bound)
+            box->mx.x = bound;
+        bound = child->pos.y + childRadius;
+        if (box->mx.y < bound)
+            box->mx.y = bound;
+        bound = child->pos.z + childRadius;
+        if (box->mx.z < bound)
+            box->mx.z = bound;
     }
 }
 #endif
@@ -513,35 +513,35 @@ static inline float Sqrt_9F98(float v)
     return r;
 }
 
-extern "C" int func_00329F98(sNode_9F98* a, sNode_9F98* b, sSphereVec4* outA, sSphereVec4* outB)
+extern "C" int func_00329F98(sNode_9F98* nodeA, sNode_9F98* nodeB, sSphereVec4* outA, sSphereVec4* outB)
 {
-    sSphereVec4 d;
+    sSphereVec4 delta;
     float sum;
     float ss;
     float dd;
-    sum = b->r + a->r;
-    d = Sub_9F98(b->pos, a->pos);
+    sum = nodeB->r + nodeA->r;
+    delta = Sub_9F98(nodeB->pos, nodeA->pos);
     ss = sum * sum;
-    dd = Dot_9F98(d, d);
+    dd = Dot_9F98(delta, delta);
     if (ss < dd)
         return 0;
-    for (int i = 0; i < a->count; i++) {
-        sum = b->r + a->e[i].r;
-        d = Sub_9F98(b->pos, a->e[i].pos);
+    for (int i = 0; i < nodeA->count; i++) {
+        sum = nodeB->r + nodeA->e[i].r;
+        delta = Sub_9F98(nodeB->pos, nodeA->e[i].pos);
         ss = sum * sum;
-        dd = Dot_9F98(d, d);
+        dd = Dot_9F98(delta, delta);
         if (ss < dd)
             continue;
-        for (int j = 0; j < b->count; j++) {
-            sum = b->e[j].r + a->e[i].r;
-            d = Sub_9F98(b->e[j].pos, a->e[i].pos);
+        for (int j = 0; j < nodeB->count; j++) {
+            sum = nodeB->e[j].r + nodeA->e[i].r;
+            delta = Sub_9F98(nodeB->e[j].pos, nodeA->e[i].pos);
             ss = sum * sum;
-            dd = Dot_9F98(d, d);
+            dd = Dot_9F98(delta, delta);
             if (!(ss < dd)) {
-                sSphereVec4 n = Normalize_9F98(d);
-                float f = sum - Sqrt_9F98(dd);
-                *outA = Scale_9F98(n, f);
-                *outB = Sub_9F98(a->e[i].pos, Scale_9F98(n, a->e[i].r - f));
+                sSphereVec4 n = Normalize_9F98(delta);
+                float overlap = sum - Sqrt_9F98(dd);
+                *outA = Scale_9F98(n, overlap);
+                *outB = Sub_9F98(nodeA->e[i].pos, Scale_9F98(n, nodeA->e[i].r - overlap));
                 return 1;
             }
         }
@@ -956,28 +956,28 @@ static inline sSphereVec4 Scale_B2B8(const sSphereVec4& v, float s)
 
 struct sSphereHit_32FAC0;
 
-extern "C" int func_0032B2B8(void* tree, void* a, void* b, sSphereVec4* outPos, sSphereHit_32FAC0* hit)
+extern "C" int func_0032B2B8(void* tree, void* boxMin, void* boxMax, sSphereVec4* outPos, sSphereHit_32FAC0* hit)
 {
     sSphereHit_B2B8* self = (sSphereHit_B2B8*)tree;
     sSphereVec4* outNormal = (sSphereVec4*)hit;
     sSphereVec4 normal;
     sSphereVec4 dir;
-    float t;
-    if (func_00329590(a, b, &self->center, &normal, &dir, &t, self->radius) == 0) {
+    float dist;
+    if (func_00329590(boxMin, boxMax, &self->center, &normal, &dir, &dist, self->radius) == 0) {
         return 0;
     }
     if (self->mask == 0) {
-        *outPos = Scale_B2B8(dir, t);
+        *outPos = Scale_B2B8(dir, dist);
         *outNormal = normal;
         return 1;
     }
     float best = -1.0f;
     for (int i = 0; i < self->count; i++) {
         if (self->mask & (1 << i)) {
-            if (func_00329590(a, b, &self->center, &normal, &dir, &t, self->radius) && best < t) {
-                *outPos = Scale_B2B8(dir, t);
+            if (func_00329590(boxMin, boxMax, &self->center, &normal, &dir, &dist, self->radius) && best < dist) {
+                *outPos = Scale_B2B8(dir, dist);
                 *outNormal = normal;
-                best = t;
+                best = dist;
             }
         }
     }
@@ -1010,30 +1010,30 @@ extern "C" int func_0032B468(unsigned char* start, unsigned char* in, int len, i
         min = minRun;
     }
     while (in < end) {
-        unsigned char* p = in;
+        unsigned char* cursor = in;
         int run = 0;
         int lit = 0;
-        unsigned char* q;
-        while (run == 0 && lit < 0x7F && p < end) {
-            unsigned char c = *p;
+        unsigned char* runEnd;
+        while (run == 0 && lit < 0x7F && cursor < end) {
+            unsigned char runByte = *cursor;
             run = 1;
-            q = p + 1;
-            if (c == p[1] && q < end) {
+            runEnd = cursor + 1;
+            if (runByte == cursor[1] && runEnd < end) {
                 do {
                     do {
-                        q++;
+                        runEnd++;
                         run++;
-                    } while (c == *q && q < end && run < 0x7F);
+                    } while (runByte == *runEnd && runEnd < end && run < 0x7F);
                 } while (0);
             }
-            if (q == end && 1 < run) {
+            if (runEnd == end && 1 < run) {
                 run--;
-                q = end - 1;
+                runEnd = end - 1;
             }
             if (run < min) {
                 lit += run;
                 run = 0;
-                p = q;
+                cursor = runEnd;
             }
         }
         if (0x7F < lit) {
@@ -1068,26 +1068,26 @@ extern "C" int func_0032B620_impl(char* dst, signed char* src)
 {
     if (src == 0)
         return 0;
-    char* d = dst;
-    int c;
+    char* out = dst;
+    int code;
     do {
-        c = *src++;
-        if (c < 0) {
-            int n = -c;
+        code = *src++;
+        if (code < 0) {
+            int n = -code;
             do {
-                *d++ = *src++;
+                *out++ = *src++;
             } while (--n);
         } else {
-            int n = c + 1;
-            if (c == 0)
+            int n = code + 1;
+            if (code == 0)
                 break;
             do {
-                *d++ = *src;
+                *out++ = *src;
             } while (--n);
             src++;
         }
-    } while (c != 0);
-    return d - dst;
+    } while (code != 0);
+    return out - dst;
 }
 #endif
 
@@ -1103,7 +1103,7 @@ extern char D_6E0[];
 // of the microprogram.
 extern "C" int func_0032B6A8(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d)
 {
-    int r;
+    int hit;
     __asm__ __volatile__(
         ".set push\n"
         ".set noreorder\n"
@@ -1117,9 +1117,9 @@ extern "C" int func_0032B6A8(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSp
         "vcallmsr  $vi27\n"
         "cfc2.i    %0, $vi2\n"
         ".set pop\n"
-        : "=r"(r)
+        : "=r"(hit)
         : "r"(a), "r"(b), "r"(c), "r"(d), "0"((int)D_6E0 >> 3));
-    return r != 0;
+    return hit != 0;
 }
 #endif
 
@@ -1244,7 +1244,7 @@ static inline sSphereVec4& CellNormal_B6E0(sCell_B6E0* cell, int k, const sSpher
 // then every cell whose bounds overlap the query box; returns the hit cell's uv in uvOut
 extern "C" int func_0032B6E0_typed(sQuery_B6E0* q, void* obj, sPatch_B6E0* patch, void* a3, void* a4,
                                    void* a5, float* uvOut, sHitCache_B6E0* cache) __asm__("func_0032B6E0");
-extern "C" int func_0032B6E0_typed(sQuery_B6E0* q, void* obj, sPatch_B6E0* patch, void* a3, void* a4,
+extern "C" int func_0032B6E0_typed(sQuery_B6E0* query, void* obj, sPatch_B6E0* patch, void* a3, void* a4,
                                    void* a5, float* uvOut, sHitCache_B6E0* cache)
 {
     // the cached cell's row is scaled by its own step variable: the binary keeps it in a
@@ -1256,7 +1256,7 @@ extern "C" int func_0032B6E0_typed(sQuery_B6E0* q, void* obj, sPatch_B6E0* patch
     float scale;
     float half;
     sCell_B6E0* cell;
-    if (q->type == 0) {
+    if (query->type == 0) {
         step = 3;
         rowStep = 3;
         skip = 21;
@@ -1273,47 +1273,47 @@ extern "C" int func_0032B6E0_typed(sQuery_B6E0* q, void* obj, sPatch_B6E0* patch
         half = 1.0f / 18.0f;
         cell = patch->fine[0];
     }
-    if (cache != 0 && cache->obj == obj && cache->type == q->type) {
-        sCell_B6E0* c;
+    if (cache != 0 && cache->obj == obj && cache->type == query->type) {
+        sCell_B6E0* cachedCell;
         if (cache->type == 0)
-            c = &patch->coarse[cache->u][cache->v];
+            cachedCell = &patch->coarse[cache->u][cache->v];
         else
-            c = &patch->fine[cache->u][cache->v];
-        sSphereVec4* p00 = &patch->verts[cache->u * rowStep][cache->v * step];
-        sSphereVec4* p10 = p00 + step * 10;
-        sSphereVec4* p01 = p00 + step;
-        sSphereVec4* p11 = p10 + step;
-        if (c->lo.x == 10000000000.0f)
-            Bounds_B6E0(c, *p00, *p10, *p01, *p11);
+            cachedCell = &patch->fine[cache->u][cache->v];
+        sSphereVec4* corner00 = &patch->verts[cache->u * rowStep][cache->v * step];
+        sSphereVec4* corner10 = corner00 + step * 10;
+        sSphereVec4* corner01 = corner00 + step;
+        sSphereVec4* corner11 = corner10 + step;
+        if (cachedCell->lo.x == 10000000000.0f)
+            Bounds_B6E0(cachedCell, *corner00, *corner10, *corner01, *corner11);
         if (cache->tri) {
-            sSphereVec4& n0 = CellNormal_B6E0(c, 0, *p11, *p10, *p01);
-            if (n0.x != 99999997952.0f && (!q->facing || Dot_A1C0(n0, q->dir) <= 0.8f)) {
-                sVE_B6E0* vt = q->vt;
-                if (vt[4].test((char*)q + vt[4].delta, p11, p10, p01, &n0, a3, a4, a5)) {
-                    float s = cache->u * scale + half;
-                    float t = cache->v * scale + half;
-                    if (q->type == 2) {
-                        sVE_B6E0* vt = q->vt;
-                        vt[8].uv((char*)q + vt[8].delta, obj, &s, &t, a3, a4, a5);
+            sSphereVec4& triNormal0 = CellNormal_B6E0(cachedCell, 0, *corner11, *corner10, *corner01);
+            if (triNormal0.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal0, query->dir) <= 0.8f)) {
+                sVE_B6E0* vt = query->vt;
+                if (vt[4].test((char*)query + vt[4].delta, corner11, corner10, corner01, &triNormal0, a3, a4, a5)) {
+                    float hitU = cache->u * scale + half;
+                    float hitV = cache->v * scale + half;
+                    if (query->type == 2) {
+                        sVE_B6E0* vt = query->vt;
+                        vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, a3, a4, a5);
                     }
-                    uvOut[0] = s;
-                    uvOut[1] = t;
+                    uvOut[0] = hitU;
+                    uvOut[1] = hitV;
                     return 1;
                 }
             }
         } else {
-            sSphereVec4& n1 = CellNormal_B6E0(c, 1, *p01, *p10, *p00);
-            if (n1.x != 99999997952.0f && (!q->facing || Dot_A1C0(n1, q->dir) <= 0.8f)) {
-                sVE_B6E0* vt = q->vt;
-                if (vt[4].test((char*)q + vt[4].delta, p01, p10, p00, &n1, a3, a4, a5)) {
-                    float s = cache->u * scale + half;
-                    float t = cache->v * scale + half;
-                    if (q->type == 2) {
-                        sVE_B6E0* vt = q->vt;
-                        vt[8].uv((char*)q + vt[8].delta, obj, &s, &t, a3, a4, a5);
+            sSphereVec4& triNormal1 = CellNormal_B6E0(cachedCell, 1, *corner01, *corner10, *corner00);
+            if (triNormal1.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal1, query->dir) <= 0.8f)) {
+                sVE_B6E0* vt = query->vt;
+                if (vt[4].test((char*)query + vt[4].delta, corner01, corner10, corner00, &triNormal1, a3, a4, a5)) {
+                    float hitU = cache->u * scale + half;
+                    float hitV = cache->v * scale + half;
+                    if (query->type == 2) {
+                        sVE_B6E0* vt = query->vt;
+                        vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, a3, a4, a5);
                     }
-                    uvOut[0] = s;
-                    uvOut[1] = t;
+                    uvOut[0] = hitU;
+                    uvOut[1] = hitV;
                     return 1;
                 }
             }
@@ -1324,67 +1324,67 @@ extern "C" int func_0032B6E0_typed(sQuery_B6E0* q, void* obj, sPatch_B6E0* patch
         cache->tri = 0;
         cache->type = 0;
     }
-    sSphereVec4* p00 = patch->verts[0];
-    for (int u = 0; u < n; u++) {
-        sSphereVec4* p10 = p00 + step * 10;
-        sSphereVec4* p01 = p00 + step;
-        sSphereVec4* p11 = p10 + step;
-        for (int v = 0; v < n; v++) {
+    sSphereVec4* corner00 = patch->verts[0];
+    for (int cellU = 0; cellU < n; cellU++) {
+        sSphereVec4* corner10 = corner00 + step * 10;
+        sSphereVec4* corner01 = corner00 + step;
+        sSphereVec4* corner11 = corner10 + step;
+        for (int cellV = 0; cellV < n; cellV++) {
             if (cell->lo.x == 10000000000.0f)
-                Bounds_B6E0(cell, *p00, *p10, *p01, *p11);
-            if (Overlap_B6E0(cell, q)) {
-                sSphereVec4& n0 = CellNormal_B6E0(cell, 0, *p11, *p10, *p01);
-                if (n0.x != 99999997952.0f && (!q->facing || Dot_A1C0(n0, q->dir) <= 0.8f)) {
-                    sVE_B6E0* vt = q->vt;
-                    if (vt[4].test((char*)q + vt[4].delta, p11, p10, p01, &n0, a3, a4, a5)) {
-                        float s = u * scale + half;
-                        float t = v * scale + half;
-                        if (q->type == 2) {
-                            sVE_B6E0* vt = q->vt;
-                            vt[8].uv((char*)q + vt[8].delta, obj, &s, &t, a3, a4, a5);
+                Bounds_B6E0(cell, *corner00, *corner10, *corner01, *corner11);
+            if (Overlap_B6E0(cell, query)) {
+                sSphereVec4& triNormal0 = CellNormal_B6E0(cell, 0, *corner11, *corner10, *corner01);
+                if (triNormal0.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal0, query->dir) <= 0.8f)) {
+                    sVE_B6E0* vt = query->vt;
+                    if (vt[4].test((char*)query + vt[4].delta, corner11, corner10, corner01, &triNormal0, a3, a4, a5)) {
+                        float hitU = cellU * scale + half;
+                        float hitV = cellV * scale + half;
+                        if (query->type == 2) {
+                            sVE_B6E0* vt = query->vt;
+                            vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, a3, a4, a5);
                         }
-                        uvOut[0] = s;
-                        uvOut[1] = t;
+                        uvOut[0] = hitU;
+                        uvOut[1] = hitV;
                         if (cache) {
                             cache->obj = obj;
-                            cache->u = u;
-                            cache->v = v;
+                            cache->u = cellU;
+                            cache->v = cellV;
                             cache->tri = 1;
-                            cache->type = q->type;
+                            cache->type = query->type;
                         }
                         return 1;
                     }
                 }
-                sSphereVec4& n1 = CellNormal_B6E0(cell, 1, *p01, *p10, *p00);
-                if (n1.x != 99999997952.0f && (!q->facing || Dot_A1C0(n1, q->dir) <= 0.8f)) {
-                    sVE_B6E0* vt = q->vt;
-                    if (vt[4].test((char*)q + vt[4].delta, p01, p10, p00, &n1, a3, a4, a5)) {
-                        float s = u * scale + half;
-                        float t = v * scale + half;
-                        if (q->type == 2) {
-                            sVE_B6E0* vt = q->vt;
-                            vt[8].uv((char*)q + vt[8].delta, obj, &s, &t, a3, a4, a5);
+                sSphereVec4& triNormal1 = CellNormal_B6E0(cell, 1, *corner01, *corner10, *corner00);
+                if (triNormal1.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal1, query->dir) <= 0.8f)) {
+                    sVE_B6E0* vt = query->vt;
+                    if (vt[4].test((char*)query + vt[4].delta, corner01, corner10, corner00, &triNormal1, a3, a4, a5)) {
+                        float hitU = cellU * scale + half;
+                        float hitV = cellV * scale + half;
+                        if (query->type == 2) {
+                            sVE_B6E0* vt = query->vt;
+                            vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, a3, a4, a5);
                         }
-                        uvOut[0] = s;
-                        uvOut[1] = t;
+                        uvOut[0] = hitU;
+                        uvOut[1] = hitV;
                         if (cache) {
                             cache->obj = obj;
-                            cache->u = u;
-                            cache->v = v;
+                            cache->u = cellU;
+                            cache->v = cellV;
                             cache->tri = 0;
-                            cache->type = q->type;
+                            cache->type = query->type;
                         }
                         return 1;
                     }
                 }
             }
-            p00 += step;
-            p10 += step;
-            p01 += step;
-            p11 += step;
+            corner00 += step;
+            corner10 += step;
+            corner01 += step;
+            corner11 += step;
             cell++;
         }
-        p00 += skip;
+        corner00 += skip;
     }
     return 0;
 }
@@ -1615,9 +1615,9 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032C590);
 #ifdef SKIP_ASM
 extern "C" float func_0032C590(void* self)
 {
-    void* p = *(void**)((char*)self + 0x98);
-    void* q = *(void**)((char*)p + 0x20);
-    return *(float*)q * *(float*)((char*)self + 0x90);
+    void* tree = *(void**)((char*)self + 0x98);
+    void* levels = *(void**)((char*)tree + 0x20);
+    return *(float*)levels * *(float*)((char*)self + 0x90);
 }
 #endif
 
@@ -1662,11 +1662,11 @@ static inline sSphereVec4_C5E0 Add_C5E0(const sSphereVec4_C5E0& a, const sSphere
     return r;
 }
 
-extern "C" void func_0032C5E0(void* self, sSphereVec4_C5E0* v)
+extern "C" void func_0032C5E0(void* self, sSphereVec4_C5E0* offset)
 {
     float* n = *(float**)((char*)self + 0x98);
-    sSphereVec4_C5E0 p = Add_C5E0(sSphereVec4_C5E0(n), *v);
-    *(sSphereVec4_C5E0*)((char*)self + 0x80) = p;
+    sSphereVec4_C5E0 newPos = Add_C5E0(sSphereVec4_C5E0(n), *offset);
+    *(sSphereVec4_C5E0*)((char*)self + 0x80) = newPos;
 }
 #endif
 
@@ -1809,13 +1809,13 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032C898);
 extern "C" int func_0032DF28(void* self);
 extern "C" int func_0032CDB0(void* self, void* a1, float f, void* pos, int a4, int a5, void* a6, void* a7);
 
-extern "C" int func_0032C898(void* self, void* a1, float f, void* a2, void* a3)
+extern "C" int func_0032C898(void* self, void* spherePos, float sphereRadius, void* outPush, void* outContact)
 {
-    void* t = *(void**)((char*)self + 0x98);
-    if (*(int*)((char*)t + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(t);
+    void* tree = *(void**)((char*)self + 0x98);
+    if (*(int*)((char*)tree + 0x8) != 0) {
+        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(tree);
     }
-    return func_0032CDB0(self, a1, f, (char*)self + 0x80, 0, 0, a2, a3);
+    return func_0032CDB0(self, spherePos, sphereRadius, (char*)self + 0x80, 0, 0, outPush, outContact);
 }
 #endif
 
@@ -1825,13 +1825,13 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032C928);
 extern "C" int func_0032DF28(void* self);
 extern "C" int func_0032D028(void* self, void* a1, void* a2, void* pos, int a4, int a5, void* a6, void* a7);
 
-extern "C" int func_0032C928(void* self, void* a1, void* a2, void* a3, void* a4)
+extern "C" int func_0032C928(void* self, void* boxMin, void* boxMax, void* outPos, void* outNormal)
 {
-    void* t = *(void**)((char*)self + 0x98);
-    if (*(int*)((char*)t + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(t);
+    void* tree = *(void**)((char*)self + 0x98);
+    if (*(int*)((char*)tree + 0x8) != 0) {
+        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(tree);
     }
-    return func_0032D028(self, a1, a2, (char*)self + 0x80, 0, 0, a3, a4);
+    return func_0032D028(self, boxMin, boxMax, (char*)self + 0x80, 0, 0, outPos, outNormal);
 }
 #endif
 
@@ -1856,15 +1856,15 @@ static inline sVecArg_C9B8 zeroW_C9B8(const sVecArg_C9B8& in)
 extern "C" void func_0032DB40_v(void* self, sVecArg_C9B8 v) __asm__("func_0032DB40");
 extern "C" void func_0032D208(void* self, void* a1, void* pos, int a3, int a4, void* a5, void* a6);
 
-extern "C" int func_0032C9B8(void* self, sVecArg_C9B8* a1, void* a2, void* a3)
+extern "C" int func_0032C9B8(void* self, sVecArg_C9B8* plane, void* outPush, void* outContact)
 {
-    void* t = *(void**)((char*)self + 0x98);
-    if (*(int*)((char*)t + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(t);
+    void* tree = *(void**)((char*)self + 0x98);
+    if (*(int*)((char*)tree + 0x8) != 0) {
+        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(tree);
     }
-    func_0032DB40_v(self, zeroW_C9B8(*a1));
+    func_0032DB40_v(self, zeroW_C9B8(*plane));
     *(float*)((char*)self + 0x94) = 0.0f;
-    func_0032D208(self, a1, (char*)self + 0x80, 0, 0, a2, a3);
+    func_0032D208(self, plane, (char*)self + 0x80, 0, 0, outPush, outContact);
     if (*(float*)((char*)self + 0x94) < 0.0f) {
         return 1;
     }
@@ -1901,17 +1901,17 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032CB58);
 extern "C" int func_0032DF28(void* self);
 extern "C" int func_0032CBF8(void* self, void* other, void* pos, int a3, int a4, void* a5, void* a6);
 
-extern "C" int func_0032CB58(void* self, void* other, void* a2, void* a3)
+extern "C" int func_0032CB58(void* self, void* other, void* outPush, void* outContact)
 {
-    void* t = *(void**)((char*)self + 0x98);
-    if (*(int*)((char*)t + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(t);
+    void* tree = *(void**)((char*)self + 0x98);
+    if (*(int*)((char*)tree + 0x8) != 0) {
+        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = func_0032DF28(tree);
     }
-    t = *(void**)((char*)other + 0x98);
-    if (*(int*)((char*)t + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)other + 0x98) + 0x28) = func_0032DF28(t);
+    tree = *(void**)((char*)other + 0x98);
+    if (*(int*)((char*)tree + 0x8) != 0) {
+        *(int*)((char*)*(void**)((char*)other + 0x98) + 0x28) = func_0032DF28(tree);
     }
-    return func_0032CBF8(self, other, (char*)self + 0x80, 0, 0, a2, a3);
+    return func_0032CBF8(self, other, (char*)self + 0x80, 0, 0, outPush, outContact);
 }
 #endif
 
@@ -1976,10 +1976,10 @@ static inline sSphereVec4 Add_CBF8(const sSphereVec4& a, const sSphereVec4& b)
     return r;
 }
 
-extern "C" int func_0032CBF8(void* selfp, void* other, void* posp, int depth, int base, void* a5, void* a6)
+extern "C" int func_0032CBF8(void* selfp, void* other, void* posp, int depth, int base, void* outPush, void* outContact)
 {
     sSphereOct_CBF8* self = (sSphereOct_CBF8*)selfp;
-    sSphereVec4 p;
+    sSphereVec4 childPos;
     unsigned char mask = self->tree->masks[base];
     if (depth < self->tree->depth) {
         if (depth >= 4) {
@@ -1989,9 +1989,9 @@ extern "C" int func_0032CBF8(void* selfp, void* other, void* posp, int depth, in
             float off = self->tree->levels[depth + 1].offset;
             for (int i = 0; i < 8; i++) {
                 if ((mask >> i) & 1) {
-                    p = Add_CBF8(*(sSphereVec4*)posp, Scale_CBF8(self->dirs[i], off));
-                    if (func_0032CDB0(other, &p, self->tree->levels[depth].radius * self->scale, (char*)other + 0x80, 0, 0, a5, a6) &&
-                        func_0032CBF8(self, other, &p, depth + 1, (i + 1) * self->tree->levels[depth].stride + base, a5, a6)) {
+                    childPos = Add_CBF8(*(sSphereVec4*)posp, Scale_CBF8(self->dirs[i], off));
+                    if (func_0032CDB0(other, &childPos, self->tree->levels[depth].radius * self->scale, (char*)other + 0x80, 0, 0, outPush, outContact) &&
+                        func_0032CBF8(self, other, &childPos, depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outPush, outContact)) {
                         return 1;
                     }
                 }
@@ -2125,12 +2125,12 @@ static inline float Sqrt_CDB0(float v)
     return r;
 }
 
-extern "C" int func_0032CDB0(void* selfp, void* a1, float r, void* pos, int depth, int base, void* outA, void* outB)
+extern "C" int func_0032CDB0(void* selfp, void* spherePos, float sphereRadius, void* pos, int depth, int base, void* outA, void* outB)
 {
     sSphereOct_CDB0* self = (sSphereOct_CDB0*)selfp;
-    float sum = r + self->tree->levels[depth].radius * self->scale;
-    sSphereVec4 d = Sub_CDB0(*(sSphereVec4*)a1, *(sSphereVec4*)pos);
-    float dd = Dot_CDB0(d, d);
+    float sum = sphereRadius + self->tree->levels[depth].radius * self->scale;
+    sSphereVec4 delta = Sub_CDB0(*(sSphereVec4*)spherePos, *(sSphereVec4*)pos);
+    float dd = Dot_CDB0(delta, delta);
     if (!(dd < sum * sum))
         return 0;
     float f;
@@ -2139,17 +2139,17 @@ extern "C" int func_0032CDB0(void* selfp, void* a1, float r, void* pos, int dept
         f = self->tree->levels[depth + 1].offset;
         for (int i = 0; i < 8; i++) {
             if ((mask >> i) & 1) {
-                sSphereVec4 p = Add_CDB0(*(sSphereVec4*)pos, Scale_CDB0(self->dirs[i], f));
-                if (func_0032CDB0(self, a1, r, &p, depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outA, outB))
+                sSphereVec4 childPos = Add_CDB0(*(sSphereVec4*)pos, Scale_CDB0(self->dirs[i], f));
+                if (func_0032CDB0(self, spherePos, sphereRadius, &childPos, depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outA, outB))
                     return 1;
             }
         }
         return 0;
     }
-    sSphereVec4 n = Normalize_CDB0(d);
+    sSphereVec4 n = Normalize_CDB0(delta);
     f = sum - Sqrt_CDB0(dd);
     *(sSphereVec4*)outA = Scale_CDB0(n, f);
-    *(sSphereVec4*)outB = Sub_CDB0(*(sSphereVec4*)a1, Scale_CDB0(n, r - f));
+    *(sSphereVec4*)outB = Sub_CDB0(*(sSphereVec4*)spherePos, Scale_CDB0(n, sphereRadius - f));
     return 1;
 }
 #endif
@@ -2215,13 +2215,13 @@ static inline sSphereVec4 Add_D028(const sSphereVec4& a, const sSphereVec4& b)
     return r;
 }
 
-extern "C" int func_0032D028(void* selfp, void* a1, void* a2, void* pos, int depth, int base, void* outPos, void* outNormal)
+extern "C" int func_0032D028(void* selfp, void* boxMin, void* boxMax, void* pos, int depth, int base, void* outPos, void* outNormal)
 {
     sSphereOct_D028* self = (sSphereOct_D028*)selfp;
     sSphereVec4 normal;
     sSphereVec4 dir;
-    float t;
-    if (func_00329590(a1, a2, pos, &normal, &dir, &t, self->tree->levels[depth].radius * self->scale) == 0) {
+    float dist;
+    if (func_00329590(boxMin, boxMax, pos, &normal, &dir, &dist, self->tree->levels[depth].radius * self->scale) == 0) {
         return 0;
     }
     unsigned char mask = self->tree->masks[base];
@@ -2229,8 +2229,8 @@ extern "C" int func_0032D028(void* selfp, void* a1, void* a2, void* pos, int dep
         float off = self->tree->levels[depth + 1].offset;
         for (int i = 0; i < 8; i++) {
             if ((mask >> i) & 1) {
-                sSphereVec4 p = Add_D028(*(sSphereVec4*)pos, Scale_D028(self->dirs[i], off));
-                if (func_0032D028(self, a1, a2, &p, depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outPos, outNormal)) {
+                sSphereVec4 childPos = Add_D028(*(sSphereVec4*)pos, Scale_D028(self->dirs[i], off));
+                if (func_0032D028(self, boxMin, boxMax, &childPos, depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outPos, outNormal)) {
                     return 1;
                 }
             }
@@ -2238,7 +2238,7 @@ extern "C" int func_0032D028(void* selfp, void* a1, void* a2, void* pos, int dep
         return 0;
     }
     *(sSphereVec4*)outNormal = normal;
-    *(sSphereVec4*)outPos = Scale_D028(dir, t);
+    *(sSphereVec4*)outPos = Scale_D028(dir, dist);
     return 1;
 }
 #endif
@@ -2346,12 +2346,12 @@ static inline sSphereVec4 ZeroW_D208(const sSphereVec4& in)
 
 // Sphere tree against the plane through the origin with normal *a1: records the deepest
 // penetration below self->best (*outA = push-out vector, *outB = contact point).
-extern "C" void func_0032D208(void* selfp, void* a1, void* pos, int depth, int base, void* outA, void* outB)
+extern "C" void func_0032D208(void* selfp, void* plane, void* pos, int depth, int base, void* outA, void* outB)
 {
     sSphereOct_D208* self = (sSphereOct_D208*)selfp;
-    float d = Dot_D208(*(sSphereVec4*)a1, *(sSphereVec4*)pos);
-    float r = self->tree->levels[depth].radius * self->scale;
-    if (!(d < r + self->best))
+    float planeDist = Dot_D208(*(sSphereVec4*)plane, *(sSphereVec4*)pos);
+    float nodeRadius = self->tree->levels[depth].radius * self->scale;
+    if (!(planeDist < nodeRadius + self->best))
         return;
     float f;
     unsigned char mask = self->tree->masks[base];
@@ -2360,17 +2360,17 @@ extern "C" void func_0032D208(void* selfp, void* a1, void* pos, int depth, int b
         for (int i = 0; i < 8; i++) {
             int k = self->order[i];
             if ((mask >> k) & 1) {
-                sSphereVec4 p = Add_D208(*(sSphereVec4*)pos, Scale_D208(self->dirs[k], f));
-                func_0032D208(self, a1, &p, depth + 1, (k + 1) * self->tree->levels[depth].stride + base, outA, outB);
+                sSphereVec4 childPos = Add_D208(*(sSphereVec4*)pos, Scale_D208(self->dirs[k], f));
+                func_0032D208(self, plane, &childPos, depth + 1, (k + 1) * self->tree->levels[depth].stride + base, outA, outB);
             }
         }
         return;
     }
-    f = d - r;
+    f = planeDist - nodeRadius;
     if (f < self->best) {
-        sSphereVec4 n = ZeroW_D208(*(sSphereVec4*)a1);
+        sSphereVec4 n = ZeroW_D208(*(sSphereVec4*)plane);
         *(sSphereVec4*)outA = Scale_D208(n, f);
-        *(sSphereVec4*)outB = Sub_D208(*(sSphereVec4*)pos, Scale_D208(n, d));
+        *(sSphereVec4*)outB = Sub_D208(*(sSphereVec4*)pos, Scale_D208(n, planeDist));
         self->best = f;
     }
 }
@@ -4534,9 +4534,9 @@ INCLUDE_ASM("intersect/riderspheretree", func_003300F8);
 #ifdef SKIP_ASM
 // Returns -dot(*a, *b) (4-component dot product on VU0, macro mode).
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (-(ax*bx + ay*by + az*bz + aw*bw)).
-extern "C" float func_003300F8(sSphereVec4* a, sSphereVec4* b)
+extern "C" float func_003300F8(sSphereVec4* lhs, sSphereVec4* rhs)
 {
-    float d;
+    float dot;
     __asm__ __volatile__(
         ".set push\n"
         ".set noreorder\n"
@@ -4549,9 +4549,9 @@ extern "C" float func_003300F8(sSphereVec4* a, sSphereVec4* b)
         "vmaddw.x  $vf4, $vf6, $vf4w\n"
         "qmfc2.ni  %0, $vf4\n"
         ".set pop\n"
-        : "=r"(d)
-        : "r"(a), "r"(b));
-    return -d;
+        : "=r"(dot)
+        : "r"(lhs), "r"(rhs));
+    return -dot;
 }
 #endif
 
@@ -4623,13 +4623,13 @@ static inline float vu0Length_30250(const sSphereVec4& v)
 }
 
 // does the sphere at self+0x60 (radius self+0x70) touch any edge of triangle a,b,c?
-extern "C" int func_00330250(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c)
+extern "C" int func_00330250(void* self, sSphereVec4* vert0, sSphereVec4* vert1, sSphereVec4* vert2)
 {
     sSphereVec4 pt;
     sSphereVec4 tri[3];
-    tri[0] = *a;
-    tri[1] = *b;
-    tri[2] = *c;
+    tri[0] = *vert0;
+    tri[1] = *vert1;
+    tri[2] = *vert2;
     for (int i = 0; i < 3; i++) {
         pt = func_00330128_v(&tri[i], &tri[(i + 1) % 3], (sSphereVec4*)((char*)self + 0x60));
         float dist = vu0Length_30250(vu0Sub_30250(*(sSphereVec4*)((char*)self + 0x60), pt));
@@ -4672,12 +4672,12 @@ static inline float sphereAbs_330360(float x)
     return r;
 }
 
-extern "C" int func_00330360(void* self, sSphereVec4* plane, sSphereVec4* p, float* out)
+extern "C" int func_00330360(void* self, sSphereVec4* plane, sSphereVec4* point, float* out)
 {
-    float c = func_003300F8(plane, p);
-    float d = sphereDot_330360(*plane, *(sSphereVec4*)((char*)self + 0x60)) + c;
-    *out = d;
-    return sphereAbs_330360(d) < *(float*)((char*)self + 0x70);
+    float planeConst = func_003300F8(plane, point);
+    float signedDist = sphereDot_330360(*plane, *(sSphereVec4*)((char*)self + 0x60)) + planeConst;
+    *out = signedDist;
+    return sphereAbs_330360(signedDist) < *(float*)((char*)self + 0x70);
 }
 #endif
 

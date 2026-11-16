@@ -757,33 +757,33 @@ static inline void del_obj(char* o) {
 extern "C" void func_002FC2C0(char* self, char* ev) {
     switch (*(int*)(ev + 4)) {
     case 1: {
-        char* o = *(char**)(self + 0xC);
-        if (o) {
-            if (*(short*)(o + 0x10) == 6)
+        char* curNode = *(char**)(self + 0xC);
+        if (curNode) {
+            if (*(short*)(curNode + 0x10) == 6)
                 break;
-            del_obj(o);
+            del_obj(curNode);
         }
-        int t = *(int*)(self + 8) & 0xFFFF0300;
-        *(int*)(self + 8) = t | (t >> 16) | 2;
+        int maskedFlags = *(int*)(self + 8) & 0xFFFF0300;
+        *(int*)(self + 8) = maskedFlags | (maskedFlags >> 16) | 2;
         break;
     }
     case 0: {
-        char* o = *(char**)(self + 0xC);
-        if (o) {
-            if (*(short*)(o + 0x10) == 6)
+        char* curNode = *(char**)(self + 0xC);
+        if (curNode) {
+            if (*(short*)(curNode + 0x10) == 6)
                 break;
-            del_obj(o);
+            del_obj(curNode);
         }
         func_003506D8(cMemMan_alloc(0x1C, str_DeadNode, 0x20000000, 0), self);
         break;
     }
     case 3: {
-        char* o = *(char**)(self + 0xC);
-        if (o) {
-            short ty = *(short*)(o + 0x10);
+        char* curNode = *(char**)(self + 0xC);
+        if (curNode) {
+            short ty = *(short*)(curNode + 0x10);
             if (ty == 6 || ty == 0x13)
                 break;
-            del_obj(o);
+            del_obj(curNode);
         }
         func_00350F60(cMemMan_alloc(0x1C, str_RestoreNode, 0x20000000, 0), self);
         break;

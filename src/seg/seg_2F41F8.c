@@ -180,23 +180,23 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F3748);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void f33B0(void *, int, int, int) __asm__("func_003F33B0");
 extern void f3530(void *, unsigned char *, int) __asm__("func_003F3530");
-int func_003F3748(char *out, int n, unsigned char *in, int a, int b, int c) {
+int func_003F3748(char *out, int n, unsigned char *in, int key, int keyLen, int rounds) {
     unsigned char ctx[0x110];
     unsigned char k;
     int i;
     int ch;
     int cur;
-    unsigned t;
+    unsigned shift;
     k = 0;
-    f33B0(ctx, a, b, c);
+    f33B0(ctx, key, keyLen, rounds);
     i = 0;
     while (i < n - 1) {
         cur = in[i];
         i++;
         if (cur == 0) break;
         f3530(ctx, &k, 1);
-        t = k % 96U - 0x40;
-        ch = (int)(cur - t) % 96 + 0x20;
+        shift = k % 96U - 0x40;
+        ch = (int)(cur - shift) % 96 + 0x20;
         *out = ch;
         if ((char)ch == 0x7F) break;
         out++;
@@ -275,7 +275,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F3A98);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F39C8(void);
-int func_003F3A98(void* p, int a) { return func_003F39C8(); }
+int func_003F3A98(void* hostName, int timeoutMs) { return func_003F39C8(); }
 #endif
 
 //100%
@@ -284,16 +284,16 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F3AB8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F39C8(void);
 int func_003F3AB8(void) {
-    int *p;
-    int r = 0;
-    p = (int *)func_003F39C8();
-    if (p) {
-        while (((int (*)(int *))p[2])(p) == 0)
+    int *hostLookup;
+    int resolvedAddr = 0;
+    hostLookup = (int *)func_003F39C8();
+    if (hostLookup) {
+        while (((int (*)(int *))hostLookup[2])(hostLookup) == 0)
             ;
-        r = p[1];
-        ((void (*)(int *))p[3])(p);
+        resolvedAddr = hostLookup[1];
+        ((void (*)(int *))hostLookup[3])(hostLookup);
     }
-    return r;
+    return resolvedAddr;
 }
 #endif
 
@@ -604,18 +604,18 @@ int func_003F4330(void) { return func_003F4DE8(); }
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4350);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F4350(unsigned char *a, unsigned char *b, int n) {
-    int d;
+int func_003F4350(unsigned char *lhs, unsigned char *rhs, int n) {
+    int diff;
     if (n < 0) {
-        while (*a) {
-            if (*a != *b)
-                return *a - *b;
-            a++;
-            b++;
+        while (*lhs) {
+            if (*lhs != *rhs)
+                return *lhs - *rhs;
+            lhs++;
+            rhs++;
         }
         return 0;
     }
-    while (n > 0) { d = *a++ - *b; if (d) return d; n--; b++; }
+    while (n > 0) { diff = *lhs++ - *rhs; if (diff) return diff; n--; rhs++; }
     return 0;
 }
 #endif
@@ -682,17 +682,17 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4410);
 // FAKEMATCH: the Count read is wrapped in `do { ... } while (0)`; its loop notes make sched1 treat the next insn as a
 // barrier, so the volatile `total` load issues before `c - last` as in retail; plain form 84.62%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-int func_003F4410(int cause, void *arg) {
-    struct sSifQueue *d = (struct sSifQueue *)arg;
+int func_003F4410(int cause, void *handlerArg) {
+    struct sSifQueue *timing = (struct sSifQueue *)handlerArg;
     unsigned c;
-    unsigned last = d->last;
+    unsigned last = timing->last;
     unsigned long total;
     do {
         MFC0_COUNT_2F41(c);
     } while (0);
-    total = d->total;
-    d->total = total + (unsigned)(c - last);
-    d->last = c;
+    total = timing->total;
+    timing->total = total + (unsigned)(c - last);
+    timing->last = c;
     SYNC_2F41();
     EI_2F41();
     return 0;
@@ -1037,29 +1037,29 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4E80);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_00424698(int, int);
-int func_003F4E80(int a0, int a1) { return func_00424698(a0, a0 + a1); }
+int func_003F4E80(int start, int size) { return func_00424698(start, start + size); }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4EA0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F4EA0(unsigned a, int *out) {
-    unsigned *p = (unsigned *)((a & 0xFFFFFFF) | 0x20000000);
-    unsigned x = p[0];
+int func_003F4EA0(unsigned blockAddr, int *out) {
+    unsigned *header = (unsigned *)((blockAddr & 0xFFFFFFF) | 0x20000000);
+    unsigned x = header[0];
     int sz;
     int n;
-    unsigned *q;
-    unsigned h;
-    if (x == 0 || (sz = p[3]) < 0 || sz > 0x8000) return -1;
+    unsigned *nextHeader;
+    unsigned blockTag;
+    if (x == 0 || (sz = header[3]) < 0 || sz > 0x8000) return -1;
     n = ((sz + 0xF) & 0x7FFFFFF0) + 0x10;
-    q = (unsigned *)((x & 0xFFFFFFF) | 0x20000000);
-    h = p[2];
-    if (q != (unsigned *)((char *)p + n)) return -2;
-    if ((((q[0]) & 0xFFFFFFF) | 0x20000000) != (unsigned)p) return -2;
-    if (h != q[2]) return -3;
+    nextHeader = (unsigned *)((x & 0xFFFFFFF) | 0x20000000);
+    blockTag = header[2];
+    if (nextHeader != (unsigned *)((char *)header + n)) return -2;
+    if ((((nextHeader[0]) & 0xFFFFFFF) | 0x20000000) != (unsigned)header) return -2;
+    if (blockTag != nextHeader[2]) return -3;
     if (out) *out = sz;
-    return h;
+    return blockTag;
 }
 #endif
 
@@ -1623,14 +1623,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5E90);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_0042B438(int, int, int, int *);
 extern int func_0042B640(int);
-int func_003F5E90(int a, int b) {
+int func_003F5E90(int handle, int errorValue) {
     int buf[4];
-    int r = 0;
-    if (a >= 0) {
-        if (func_0042B438(a, 0, 0, buf) < 0) r = b;
-        if (func_0042B640(a) < 0) r = b;
+    int result = 0;
+    if (handle >= 0) {
+        if (func_0042B438(handle, 0, 0, buf) < 0) result = errorValue;
+        if (func_0042B640(handle) < 0) result = errorValue;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -1840,16 +1840,16 @@ extern void func_0040C810(int, int *);
 extern void func_0040D4A0(int);
 extern void func_0040C728(int, int, int);
 extern void func_0040C770(int, int);
-void func_003F6358(int h, int on) {
+void func_003F6358(int keyboard, int on) {
     int res;
     if (on) {
-        res = sceUsbKbSetLEDStatus(h, 1);
+        res = sceUsbKbSetLEDStatus(keyboard, 1);
         if (res == 0) func_0040C810(0, &res);
-        res = sceUsbKbSetLEDMode(h, 1);
+        res = sceUsbKbSetLEDMode(keyboard, 1);
         if (res == 0) func_0040C810(0, &res);
-        func_0040D4A0(h);
-        func_0040C728(h, 0x1E, 2);
-        func_0040C770(h, 0);
+        func_0040D4A0(keyboard);
+        func_0040C728(keyboard, 0x1E, 2);
+        func_0040C770(keyboard, 0);
     }
 }
 #endif
@@ -2024,17 +2024,17 @@ int func_003F6700_impl(unsigned flags, unsigned key, unsigned *out) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003F67E0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F67E0(int a, unsigned int mode, int *out) {
-    int r = 1;
-    int v = 0;
+int func_003F67E0(int lockFlags, unsigned int mode, int *out) {
+    int handled = 1;
+    int lockState = 0;
     switch (mode) {
-    case 0x90: v = a & 1; break;
-    case 0x14: v = a & 2; break;
-    case 0x91: v = a & 4; break;
-    default: r = 0; break;
+    case 0x90: lockState = lockFlags & 1; break;
+    case 0x14: lockState = lockFlags & 2; break;
+    case 0x91: lockState = lockFlags & 4; break;
+    default: handled = 0; break;
     }
-    if (r) *out = v;
-    return r;
+    if (handled) *out = lockState;
+    return handled;
 }
 #endif
 
@@ -2047,14 +2047,14 @@ typedef struct { int a; int b; int pad; unsigned short t[1]; } S6838;
 extern int f6700(int, int, int *) __asm__("func_003F6700");
 extern int f67E0(int, int, int *) __asm__("func_003F67E0");
 extern void f65F8(char *, S6838 *, int, int) __asm__("func_003F65F8");
-int func_003F6838(S6838 *s, int b, int idx, int d) {
+int func_003F6838(S6838 *kbdState, int mapMode, int idx, int virtKey) {
     int res = 0;
     char buf[8];
-    int key = s->t[idx];
-    if (f6700(s->b, d, &res) == 0) {
-        if (f67E0(s->a, d, &res) == 0) {
-            f65F8(buf, s, b, key);
-            if ((unsigned char)buf[0] == d) res = 1;
+    int key = kbdState->t[idx];
+    if (f6700(kbdState->b, virtKey, &res) == 0) {
+        if (f67E0(kbdState->a, virtKey, &res) == 0) {
+            f65F8(buf, kbdState, mapMode, key);
+            if ((unsigned char)buf[0] == virtKey) res = 1;
         }
     }
     return res;
@@ -3230,13 +3230,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F7E90);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 char *func_003F7E90(char *dst, char *src, int n) {
-    char *d;
-    unsigned char *s = (unsigned char*)src;
-    if (s && dst && n && s != (unsigned char*)dst) {
-        d = dst;
+    char *dstCursor;
+    unsigned char *srcCursor = (unsigned char*)src;
+    if (srcCursor && dst && n && srcCursor != (unsigned char*)dst) {
+        dstCursor = dst;
         do {
-            if (--n == 0) { *d = 0; break; }
-        } while ((*d++ = *s++) != 0);
+            if (--n == 0) { *dstCursor = 0; break; }
+        } while ((*dstCursor++ = *srcCursor++) != 0);
     }
     return dst;
 }
@@ -3249,9 +3249,9 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F7EE0);
 extern int func_003F6C50(void);
 extern int func_003F6C70(int);
 extern int func_003F6DC8(void);
-void func_003F7EE0(int a) {
+void func_003F7EE0(int initParams) {
     func_003F6C50();
-    func_003F6C70(a);
+    func_003F6C70(initParams);
     func_003F6DC8();
 }
 #endif
@@ -3397,8 +3397,8 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8178);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F8178(int a);
-int func_003F8178(int a) {
-    switch (a) {
+int func_003F8178(int sysError) {
+    switch (sysError) {
     case 0: return 0;
     case 104: return 1;
     case 103: return 2;
@@ -3445,7 +3445,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8230);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003FCF98(int, int);
-int func_003F8230(int a) { func_003FCF98(0x22, a); return 0; }
+int func_003F8230(int sizeOut) { func_003FCF98(0x22, sizeOut); return 0; }
 #endif
 
 //100%
@@ -3533,13 +3533,13 @@ int func_003F8258(int port) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003F8550);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F8550(unsigned v) {
+int func_003F8550(unsigned mask) {
     int i = 0;
-    v &= 0xFFFF;
-    if (!(v & 1)) {
+    mask &= 0xFFFF;
+    if (!(mask & 1)) {
         do {
             i++;
-        } while (i < 8 && !(v & (1 << i)));
+        } while (i < 8 && !(mask & (1 << i)));
     }
     return i;
 }
@@ -3549,13 +3549,13 @@ int func_003F8550(unsigned v) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003F8588);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F8588(unsigned v) {
+int func_003F8588(unsigned mask) {
     int i = 7;
-    v &= 0xFFFF;
-    if (!(v & 0x80)) {
+    mask &= 0xFFFF;
+    if (!(mask & 0x80)) {
         do {
             i--;
-        } while (i >= 0 && !(v & (1 << i)));
+        } while (i >= 0 && !(mask & (1 << i)));
     }
     return i;
 }
@@ -3601,10 +3601,10 @@ int func_003F85C0(unsigned short v, int dir) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003F86B8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F86B8(unsigned short v) {
-    int r = 0; int i = 0;
-    for (i = 0; i < 8; i++) { int bit = 1 << i; if (v & bit) r++; }
-    return r;
+int func_003F86B8(unsigned short mask) {
+    int count = 0; int i = 0;
+    for (i = 0; i < 8; i++) { int bit = 1 << i; if (mask & bit) count++; }
+    return count;
 }
 #endif
 
@@ -4708,11 +4708,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FA1D0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F9208(void);
 extern int func_003FA708(unsigned int, int);
-int func_003FA1D0(unsigned int a, int b) {
-    if (b == 0) return 12;
+int func_003FA1D0(unsigned int unitIndex, int portSlot) {
+    if (portSlot == 0) return 12;
     if (func_003F9208() == 0) return 2;
-    if (a >= 8) return 9;
-    func_003FA708(a, b);
+    if (unitIndex >= 8) return 9;
+    func_003FA708(unitIndex, portSlot);
     return 0;
 }
 #endif
@@ -5348,16 +5348,16 @@ int func_003FB308(int a0) { return a0 ? 0 : 12; }
 INCLUDE_ASM("seg/seg_2F41F8", func_003FB318);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-unsigned int func_003FB318(unsigned int c) {
+unsigned int func_003FB318(unsigned int crc) {
     unsigned char i = 8;
     do {
-        if (c & 1) {
-            c = (c >> 1) ^ 0xEDB88320;
+        if (crc & 1) {
+            crc = (crc >> 1) ^ 0xEDB88320;
         } else {
-            c >>= 1;
+            crc >>= 1;
         }
     } while (--i != 0);
-    return c;
+    return crc;
 }
 #endif
 
@@ -5366,10 +5366,10 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB358);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned int func_003FB318(unsigned int);
-void func_003FB358(unsigned int *t) {
+void func_003FB358(unsigned int *table) {
     unsigned int i;
     for (i = 0; i < 256; i++) {
-        *t++ = func_003FB318(i);
+        *table++ = func_003FB318(i);
     }
 }
 #endif
@@ -5701,9 +5701,9 @@ char *func_003FB840_impl(char *p) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003FB858);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003FB858(unsigned a, int *x, int *y) {
+void func_003FB858(unsigned memType, int *x, int *y) {
     int sx = 4, sy = 1;
-    switch (a) {
+    switch (memType) {
     case 0: sx = 4; sy = 1; break;
     case 1: sx = 4; sy = 1; break;
     case 2: sx = 4; sy = 1; break;
@@ -5722,16 +5722,16 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB898);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void func_003FB858b(int, int *, int *) __asm__("func_003FB858");
 int func_003FB898(int a, int b);
-int func_003FB898(int a, int b) {
+int func_003FB898(int size, int memType) {
     int x = 4;
     unsigned y = 1;
-    unsigned r;
+    unsigned rawSize;
     unsigned pad;
-    func_003FB858b(b, &x, (int *)&y);
-    r = a + 0xC;
-    if (r < y) return y;
-    pad = (y - r % y) % y;
-    return a + 0xC + pad;
+    func_003FB858b(memType, &x, (int *)&y);
+    rawSize = size + 0xC;
+    if (rawSize < y) return y;
+    pad = (y - rawSize % y) % y;
+    return size + 0xC + pad;
 }
 #endif
 
@@ -5742,12 +5742,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB910);
 extern char str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL[];
 
 extern int func_00415FC8(int, char *, int);
-int func_003FB910(int a, int b) {
-    int r = a - 0xC;
-    if (b & 0xFF) {
-        if (func_00415FC8(r, str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL, 0xC) != 0) r = 0;
+int func_003FB910(int userPtr, int checkTag) {
+    int header = userPtr - 0xC;
+    if (checkTag & 0xFF) {
+        if (func_00415FC8(header, str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL, 0xC) != 0) header = 0;
     }
-    return r;
+    return header;
 }
 #endif
 
@@ -5782,10 +5782,10 @@ void func_003FB9A0(char *dst) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003FB9D0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003FB9D0(char *src, char *d1, char *d2, char *d3) {
-    if (d1) __builtin_memcpy(d1, src, 4);
-    if (d2) __builtin_memcpy(d2, src + 4, 4);
-    if (d3) __builtin_memcpy(d3, src + 8, 4);
+void func_003FB9D0(char *src, char *outWord0, char *outWord1, char *outWord2) {
+    if (outWord0) __builtin_memcpy(outWord0, src, 4);
+    if (outWord1) __builtin_memcpy(outWord1, src + 4, 4);
+    if (outWord2) __builtin_memcpy(outWord2, src + 8, 4);
 }
 #endif
 
@@ -6502,13 +6502,13 @@ extern int func_003FC0D8(void);
 int func_003FC8F8_impl(int a, int b, int c, int *out) __asm__("func_003FC8F8");
 int func_003FC8F8_impl(int a, int b, int c, int *out) {
     int err = 0;
-    struct sMcEnt *e;
+    struct sMcEnt *entry;
     if (!func_003FC0D8()) return 2;
     if (a == 0) return 4;
     if (out == 0) return 4;
     *out = 0;
-    e = func_003FBA20(b, c);
-    if (e) *out = e->b;
+    entry = func_003FBA20(b, c);
+    if (entry) *out = entry->b;
     else err = 7;
     return err;
 }

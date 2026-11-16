@@ -163,18 +163,18 @@ struct sFlagSetVEntryB7B8 {
 
 extern "C" void func_0034B7B8(void* self)
 {
-    char* s = (char*)self;
-    void* h = *(void**)(s + 0x60);
-    if (h != 0) {
+    char* flagSet = (char*)self;
+    void* mesh = *(void**)(flagSet + 0x60);
+    if (mesh != 0) {
         char* mgr = cGraphicsMan_TheGraphicsMan;
         sFlagSetVEntryB7B8* vt = *(sFlagSetVEntryB7B8**)(mgr + 0x10D8);
-        vt[77].fn(mgr + vt[77].delta, h);
-        *(void**)(s + 0x60) = 0;
+        vt[77].fn(mgr + vt[77].delta, mesh);
+        *(void**)(flagSet + 0x60) = 0;
     }
-    void* m = *(void**)(s + 0x74);
-    if (m != 0) {
-        cMemMan_free(m);
-        *(void**)(s + 0x74) = 0;
+    void* verts = *(void**)(flagSet + 0x74);
+    if (verts != 0) {
+        cMemMan_free(verts);
+        *(void**)(flagSet + 0x74) = 0;
     }
 }
 #endif
@@ -566,11 +566,11 @@ extern "C" void func_0034C2E0(void* elem, void* stream)
 {
     int i;
     sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
-    sFlagSetVEntryC2E0a* e = &(*(sFlagSetVEntryC2E0a**)stream)[1];
-    e->fn((char*)stream + e->delta, self, 0x60);
+    sFlagSetVEntryC2E0a* writeFn = &(*(sFlagSetVEntryC2E0a**)stream)[1];
+    writeFn->fn((char*)stream + writeFn->delta, self, 0x60);
     for (i = 0; i < self->count; i++) {
-        sFlagSetVEntryC2E0b* e2 = &(*(sFlagSetVEntryC2E0b**)stream)[5];
-        e2->fn((char*)stream + e2->delta, self->items[i]);
+        sFlagSetVEntryC2E0b* writeItemFn = &(*(sFlagSetVEntryC2E0b**)stream)[5];
+        writeItemFn->fn((char*)stream + writeItemFn->delta, self->items[i]);
     }
 }
 #endif
@@ -596,11 +596,11 @@ extern "C" void func_0034C378(void* elem, void* stream)
 {
     int i;
     sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
-    sFlagSetVEntryC378a* e = &(*(sFlagSetVEntryC378a**)stream)[2];
-    e->fn((char*)stream + e->delta, self, 0x60);
+    sFlagSetVEntryC378a* readFn = &(*(sFlagSetVEntryC378a**)stream)[2];
+    readFn->fn((char*)stream + readFn->delta, self, 0x60);
     for (i = 0; i < self->count; i++) {
-        sFlagSetVEntryC378b* e2 = &(*(sFlagSetVEntryC378b**)stream)[3];
-        self->items[i] = e2->fn((char*)stream + e2->delta);
+        sFlagSetVEntryC378b* readItemFn = &(*(sFlagSetVEntryC378b**)stream)[3];
+        self->items[i] = readItemFn->fn((char*)stream + readItemFn->delta);
     }
     if (self->count > 0) {
         cFlagSet_CreateMesh(self, self->items[0]);
@@ -715,17 +715,17 @@ extern "C" void func_0034B038(void* self, void* data, void* ctx);
 extern "C" void func_0034C548(sFlagSet_C548* self, void* node, void* desc)
 {
     int i;
-    sFlagSetElem_C548* e;
-    for (i = 0, e = self->elems; i < 15; i++, e++) {
-        if (e->active != 0 && func_0034AFE8(e, desc, node) != 0) {
-            func_0034B038(e, desc, node);
+    sFlagSetElem_C548* existing;
+    for (i = 0, existing = self->elems; i < 15; i++, existing++) {
+        if (existing->active != 0 && func_0034AFE8(existing, desc, node) != 0) {
+            func_0034B038(existing, desc, node);
             return;
         }
     }
-    sFlagSetElem_C548* f = self->elems;
-    for (int j = 0; j < 15; j++, f++) {
-        if (f->active == 0) {
-            func_0034B038(f, desc, node);
+    sFlagSetElem_C548* freeElem = self->elems;
+    for (int j = 0; j < 15; j++, freeElem++) {
+        if (freeElem->active == 0) {
+            func_0034B038(freeElem, desc, node);
             return;
         }
     }
@@ -751,9 +751,9 @@ extern "C" int func_0034B168(void* elem, void* arg);
 extern "C" void func_0034C600(sFlagSet_C600* self, void* arg)
 {
     int i;
-    sFlagSetElem_C600* e = self->elems;
-    for (i = 0; i < 15; i++, e++) {
-        if (e->active != 0 && func_0034B168(e, arg) != 0) {
+    sFlagSetElem_C600* elem = self->elems;
+    for (i = 0; i < 15; i++, elem++) {
+        if (elem->active != 0 && func_0034B168(elem, arg) != 0) {
             return;
         }
     }
@@ -885,11 +885,11 @@ struct sFlagSet_C848 {
 
 extern "C" void func_0034C2E0(void* elem, void* arg);
 
-extern "C" void func_0034C848(sFlagSet_C848* self, void* arg)
+extern "C" void func_0034C848(sFlagSet_C848* self, void* stream)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        func_0034C2E0(&self->elems[i], arg);
+        func_0034C2E0(&self->elems[i], stream);
     }
 }
 #endif
@@ -908,11 +908,11 @@ struct sFlagSet_C898 {
 
 extern "C" void func_0034C378(void* elem, void* arg);
 
-extern "C" void func_0034C898(sFlagSet_C898* self, void* arg)
+extern "C" void func_0034C898(sFlagSet_C898* self, void* stream)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        func_0034C378(&self->elems[i], arg);
+        func_0034C378(&self->elems[i], stream);
     }
 }
 #endif
@@ -1235,38 +1235,38 @@ extern "C" void func_0034CC80(char* self, char* obj, int flag)
     } else {
         force = *(float*)(self + 0x30) * -0.4f;
     }
-    cFlagObj_CC80* o = *(cFlagObj_CC80**)(obj + 0xC);
-    if (o != 0) {
-        if (o->isA(9) == 0) {
+    cFlagObj_CC80* node = *(cFlagObj_CC80**)(obj + 0xC);
+    if (node != 0) {
+        if (node->isA(9) == 0) {
             return;
         }
         if (!(0.25f <= fabs_34CC80(force))) {
             return;
         }
         if (flag != 0) {
-            char* p = *(char**)(self + 0x104);
-            if (p == 0) {
+            char* neighbor = *(char**)(self + 0x104);
+            if (neighbor == 0) {
                 return;
             }
-            void* q = *(void**)(p + 0xC);
-            if (q == 0) {
+            void* neighborNode = *(void**)(neighbor + 0xC);
+            if (neighborNode == 0) {
                 return;
             }
-            func_0034CDE8(q, flag, force);
+            func_0034CDE8(neighborNode, flag, force);
         } else {
-            char* p = *(char**)(self + 0x108);
-            if (p == 0) {
+            char* neighbor = *(char**)(self + 0x108);
+            if (neighbor == 0) {
                 return;
             }
-            void* q = *(void**)(p + 0xC);
-            if (q == 0) {
+            void* neighborNode = *(void**)(neighbor + 0xC);
+            if (neighborNode == 0) {
                 return;
             }
-            func_0034CDE8(q, 0, force);
+            func_0034CDE8(neighborNode, 0, force);
         }
     } else if (0.25f <= fabs_34CC80(force)) {
-        void* m = cMemMan_alloc(0x10C, str_Fence_b, 0x20000000, 0);
-        func_0034CAB8(m, 1, obj, self + 0x1C, flag, force);
+        void* fence = cMemMan_alloc(0x10C, str_Fence_b, 0x20000000, 0);
+        func_0034CAB8(fence, 1, obj, self + 0x1C, flag, force);
     }
 }
 #endif
@@ -1640,15 +1640,15 @@ static inline float fabs_34D6F0(float x)
 }
 
 // Accumulates wind strength on the flag set (clamped to 1) and sets the flap speed with the wind direction.
-extern "C" void func_0034D6F0(void* vself, float v)
+extern "C" void func_0034D6F0(void* vself, float force)
 {
     sFlag34D6F0* self = (sFlag34D6F0*)vself;
-    self->wind += fabs_34D6F0(v);
+    self->wind += fabs_34D6F0(force);
     if (self->wind > 1.0f) {
         self->wind = 1.0f;
     }
     if (self->speed == 0.0f) {
-        if (v < 0.0f) {
+        if (force < 0.0f) {
             self->speed = self->wind * -0.1f;
         } else {
             self->speed = self->wind * 0.1f;
@@ -2132,10 +2132,10 @@ extern "C" void func_0034E3D8(void* self, void* stream)
 {
     int dummy;
     cMoveNode_writeToReplayFrame((char*)self + 0x14, stream);
-    sSerVEntry_0034E3D8* e = &(*(sSerVEntry_0034E3D8**)stream)[1];
-    e->fn((char*)stream + e->delta, self, 0x14);
-    e = &(*(sSerVEntry_0034E3D8**)stream)[1];
-    e->fn((char*)stream + e->delta, &dummy, 4);
+    sSerVEntry_0034E3D8* writeFn = &(*(sSerVEntry_0034E3D8**)stream)[1];
+    writeFn->fn((char*)stream + writeFn->delta, self, 0x14);
+    writeFn = &(*(sSerVEntry_0034E3D8**)stream)[1];
+    writeFn->fn((char*)stream + writeFn->delta, &dummy, 4);
 }
 #endif
 

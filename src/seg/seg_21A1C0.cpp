@@ -24,55 +24,55 @@ extern "C" void func_003191C0(void* self_, const char* fmt, char* args)
     cBXString_91C0* self = (cBXString_91C0*)self_;
     char* ap = args;
     int maxLen = 1;
-    const char* p;
-    for (p = fmt; *p != 0; p++) {
-        if (*p != '%' || *++p == '%') {
+    const char* fmtPos;
+    for (fmtPos = fmt; *fmtPos != 0; fmtPos++) {
+        if (*fmtPos != '%' || *++fmtPos == '%') {
             maxLen++;
             continue;
         }
         int width = 0;
         int widthArg = 0;
-        for (; *p != 0; p++) {
-            if (*p == '#')
+        for (; *fmtPos != 0; fmtPos++) {
+            if (*fmtPos == '#')
                 maxLen += 2;
-            else if (*p == '*') {
+            else if (*fmtPos == '*') {
                 ap += 8;
                 widthArg = 1;
                 width = *(int*)(ap - 8);
-            } else if (*p == '-' || *p == '+' || *p == '0' || *p == ' ')
+            } else if (*fmtPos == '-' || *fmtPos == '+' || *fmtPos == '0' || *fmtPos == ' ')
                 ;
             else
                 break;
         }
         if (!widthArg) {
             char* end;
-            width = func_0041E9E0(p, &end, 10);
-            p = end;
+            width = func_0041E9E0(fmtPos, &end, 10);
+            fmtPos = end;
         }
         int precision = 0;
-        if (*p == '.') {
-            p++;
-            if (*p == '*') {
+        if (*fmtPos == '.') {
+            fmtPos++;
+            if (*fmtPos == '*') {
                 ap += 8;
                 precision = *(int*)(ap - 8);
-                p++;
+                fmtPos++;
             } else {
                 char* end;
-                precision = func_0041E9E0(p, &end, 10);
-                p = end;
+                precision = func_0041E9E0(fmtPos, &end, 10);
+                fmtPos = end;
             }
         }
-        switch (*p) {
+        switch (*fmtPos) {
         case 'h':
         case 'l':
         case 'F':
         case 'N':
         case 'L':
-            p++;
+            fmtPos++;
             break;
         }
         int itemLen = 0;
-        switch (*p) {
+        switch (*fmtPos) {
         case 'c':
         case 'C':
             itemLen = 2;
@@ -90,7 +90,7 @@ extern "C" void func_003191C0(void* self_, const char* fmt, char* args)
             if (precision != 0)
                 itemLen = MIN_91C0(itemLen, precision);
         } else {
-            switch (*p) {
+            switch (*fmtPos) {
             case 'e':
             case 'f':
             case 'g':
@@ -269,12 +269,12 @@ extern "C" int func_0042BA68(const char* path, int argLen, const char* args);
 extern "C" int func_00319718(void* self, const char* name, int retry, int argLen, const char* args)
 {
     char path[256];
-    int r;
+    int result;
     func_00319690(self, path, name);
     do {
-        r = func_0042BA68(path, argLen, args);
-    } while (r < 0 && (retry != 0 || r == -204));
-    return r;
+        result = func_0042BA68(path, argLen, args);
+    } while (result < 0 && (retry != 0 || result == -204));
+    return result;
 }
 #endif
 
@@ -287,8 +287,8 @@ extern "C" void func_0042B640(int fd);
 
 extern "C" void func_00319790(void* self, int fd)
 {
-    char tmp[16];
-    func_0042B438(fd, 0, 0, tmp);
+    char scratch[16];
+    func_0042B438(fd, 0, 0, scratch);
     func_0042B640(fd);
 }
 #endif

@@ -270,16 +270,16 @@ struct sLmQuadVec4_E118 {
 
 // Transforms the 2D point p by the 3x3 row-vector matrix m (rows at +0, +0xC, +0x18).
 // Returned by value: the caller passes the hidden result pointer in a0.
-extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m)
+extern "C" sLmQuadVec4_E118 func_0038E0A8(float* point, float* mat)
 {
-    sLmQuadVec4_E118 r;
-    float x = p[0];
-    float y = p[1];
-    r.z = 0.0f;
-    r.w = 1.0f;
-    r.x = m[0] * x + m[3] * y + m[6];
-    r.y = m[1] * x + m[4] * y + m[7];
-    return r;
+    sLmQuadVec4_E118 result;
+    float x = point[0];
+    float y = point[1];
+    result.z = 0.0f;
+    result.w = 1.0f;
+    result.x = mat[0] * x + mat[3] * y + mat[6];
+    result.y = mat[1] * x + mat[4] * y + mat[7];
+    return result;
 }
 #endif
 //100%
@@ -308,15 +308,15 @@ struct sLmQuadCtx_E118 {
 
 
 // Fills the four corner positions of a quad from a rect {x, y, w, h}, then submits it.
-extern "C" void func_0038E118(void* self, sLmQuadVtx_E118* v, float* r)
+extern "C" void func_0038E118(void* self, sLmQuadVtx_E118* verts, float* rect)
 {
-    v[0].pos = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
-    v[1].pos = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
-    v[2].pos = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
-    v[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    verts[0].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
+    verts[1].pos = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
+    verts[2].pos = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
+    verts[3].pos = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, v, 0);
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, verts, 0);
 }
 #endif
 //100%
@@ -325,15 +325,15 @@ INCLUDE_ASM("render/lightman", func_0038E200);
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
 // Fills the four corner positions of a vertically flipped quad from a rect {x, y, w, h}, then submits it.
-extern "C" void func_0038E200(void* self, sLmQuadVtx_E118* v, float* r)
+extern "C" void func_0038E200(void* self, sLmQuadVtx_E118* verts, float* rect)
 {
-    v[1].pos = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
-    v[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
-    v[0].pos = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
-    v[2].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    verts[1].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
+    verts[3].pos = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
+    verts[0].pos = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
+    verts[2].pos = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, v, 0);
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, verts, 0);
 }
 #endif
 //100%
@@ -344,23 +344,23 @@ INCLUDE_ASM("render/lightman", func_0038E2E8);
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 
 // Builds the four corner positions of a quad from a rect {x, y, w, h}, transforms each by the 3x3 matrix m, then submits it.
-extern "C" void func_0038E2E8(void* self, sLmQuadVtx_E118* v, float* r, float* m)
+extern "C" void func_0038E2E8(void* self, sLmQuadVtx_E118* verts, float* rect, float* mat)
 {
-    sLmQuadVec4_E118* p0 = &v[0].pos;
-    sLmQuadVec4_E118* p1 = &v[1].pos;
-    sLmQuadVec4_E118* p2 = &v[2].pos;
-    sLmQuadVec4_E118* p3 = &v[3].pos;
-    *p0 = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
-    *p1 = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
-    *p2 = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
-    *p3 = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
-    *p0 = func_0038E0A8(&p0->x, m);
-    *p1 = func_0038E0A8(&p1->x, m);
-    *p2 = func_0038E0A8(&p2->x, m);
-    *p3 = func_0038E0A8(&p3->x, m);
+    sLmQuadVec4_E118* corner0 = &verts[0].pos;
+    sLmQuadVec4_E118* corner1 = &verts[1].pos;
+    sLmQuadVec4_E118* corner2 = &verts[2].pos;
+    sLmQuadVec4_E118* corner3 = &verts[3].pos;
+    *corner0 = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
+    *corner1 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
+    *corner2 = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
+    *corner3 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
+    *corner0 = func_0038E0A8(&corner0->x, mat);
+    *corner1 = func_0038E0A8(&corner1->x, mat);
+    *corner2 = func_0038E0A8(&corner2->x, mat);
+    *corner3 = func_0038E0A8(&corner3->x, mat);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, v, 0);
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, verts, 0);
 }
 #endif
 //100%
@@ -371,23 +371,23 @@ INCLUDE_ASM("render/lightman", func_0038E468);
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 
 // Builds the four corner positions of a vertically flipped quad from a rect {x, y, w, h}, transforms each by the 3x3 matrix m, then submits it.
-extern "C" void func_0038E468(void* self, sLmQuadVtx_E118* v, float* r, float* m)
+extern "C" void func_0038E468(void* self, sLmQuadVtx_E118* verts, float* rect, float* mat)
 {
-    sLmQuadVec4_E118* p0 = &v[0].pos;
-    sLmQuadVec4_E118* p1 = &v[1].pos;
-    sLmQuadVec4_E118* p2 = &v[2].pos;
-    sLmQuadVec4_E118* p3 = &v[3].pos;
-    *p1 = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
-    *p3 = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
-    *p0 = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
-    *p2 = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
-    *p0 = func_0038E0A8(&p0->x, m);
-    *p1 = func_0038E0A8(&p1->x, m);
-    *p2 = func_0038E0A8(&p2->x, m);
-    *p3 = func_0038E0A8(&p3->x, m);
+    sLmQuadVec4_E118* corner0 = &verts[0].pos;
+    sLmQuadVec4_E118* corner1 = &verts[1].pos;
+    sLmQuadVec4_E118* corner2 = &verts[2].pos;
+    sLmQuadVec4_E118* corner3 = &verts[3].pos;
+    *corner1 = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
+    *corner3 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
+    *corner0 = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
+    *corner2 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
+    *corner0 = func_0038E0A8(&corner0->x, mat);
+    *corner1 = func_0038E0A8(&corner1->x, mat);
+    *corner2 = func_0038E0A8(&corner2->x, mat);
+    *corner3 = func_0038E0A8(&corner3->x, mat);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, v, 0);
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, verts, 0);
 }
 #endif
 //100%
@@ -396,18 +396,18 @@ INCLUDE_ASM("render/lightman", func_0038E5E8);
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
 // Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad, then submits it.
-extern "C" void func_0038E5E8(void* self, sLmQuadVtx_E118* vtx, float* r, float* uv)
+extern "C" void func_0038E5E8(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv)
 {
-    vtx[0].pos = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
+    vtx[0].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].s = uv[0];
     vtx[0].t = uv[1];
-    vtx[1].pos = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
+    vtx[1].pos = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
     vtx[1].s = uv[0] + uv[2];
     vtx[1].t = uv[1];
-    vtx[2].pos = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
+    vtx[2].pos = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[2].s = uv[0];
     vtx[2].t = uv[1] + uv[3];
-    vtx[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    vtx[3].pos = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[3].s = uv[0] + uv[2];
     vtx[3].t = uv[1] + uv[3];
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -421,18 +421,18 @@ INCLUDE_ASM("render/lightman", func_0038E738);
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
 // Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad, (rotated mapping), then submits it.
-extern "C" void func_0038E738(void* self, sLmQuadVtx_E118* vtx, float* r, float* uv)
+extern "C" void func_0038E738(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv)
 {
-    vtx[0].pos = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
+    vtx[0].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].s = uv[0] + uv[2];
     vtx[0].t = uv[1];
-    vtx[1].pos = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
+    vtx[1].pos = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
     vtx[1].s = uv[0] + uv[2];
     vtx[1].t = uv[1] + uv[3];
-    vtx[2].pos = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
+    vtx[2].pos = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[2].s = uv[0];
     vtx[2].t = uv[1];
-    vtx[3].pos = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    vtx[3].pos = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[3].s = uv[0];
     vtx[3].t = uv[1] + uv[3];
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -448,28 +448,28 @@ INCLUDE_ASM("render/lightman", func_0038E880);
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 
 // Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad, transforms each position by the 3x3 matrix m, then submits it.
-extern "C" void func_0038E880(void* self, sLmQuadVtx_E118* vtx, float* r, float* uv, float* m)
+extern "C" void func_0038E880(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv, float* mat)
 {
-    sLmQuadVec4_E118* p0 = &vtx[0].pos;
-    sLmQuadVec4_E118* p1 = &vtx[1].pos;
-    sLmQuadVec4_E118* p2 = &vtx[2].pos;
-    sLmQuadVec4_E118* p3 = &vtx[3].pos;
-    *p0 = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
+    sLmQuadVec4_E118* corner0 = &vtx[0].pos;
+    sLmQuadVec4_E118* corner1 = &vtx[1].pos;
+    sLmQuadVec4_E118* corner2 = &vtx[2].pos;
+    sLmQuadVec4_E118* corner3 = &vtx[3].pos;
+    *corner0 = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].s = uv[0];
     vtx[0].t = uv[1];
-    *p1 = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
+    *corner1 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
     vtx[1].s = uv[0] + uv[2];
     vtx[1].t = uv[1];
-    *p2 = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
+    *corner2 = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[2].s = uv[0];
     vtx[2].t = uv[1] + uv[3];
-    *p3 = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    *corner3 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[3].s = uv[0] + uv[2];
     vtx[3].t = uv[1] + uv[3];
-    *p0 = func_0038E0A8(&p0->x, m);
-    *p1 = func_0038E0A8(&p1->x, m);
-    *p2 = func_0038E0A8(&p2->x, m);
-    *p3 = func_0038E0A8(&p3->x, m);
+    *corner0 = func_0038E0A8(&corner0->x, mat);
+    *corner1 = func_0038E0A8(&corner1->x, mat);
+    *corner2 = func_0038E0A8(&corner2->x, mat);
+    *corner3 = func_0038E0A8(&corner3->x, mat);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
     vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, vtx, 0);
@@ -483,28 +483,28 @@ INCLUDE_ASM("render/lightman", func_0038EA60);
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 
 // Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad (rotated mapping), transforms each position by the 3x3 matrix m, then submits it.
-extern "C" void func_0038EA60(void* self, sLmQuadVtx_E118* vtx, float* r, float* uv, float* m)
+extern "C" void func_0038EA60(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv, float* mat)
 {
-    sLmQuadVec4_E118* p0 = &vtx[0].pos;
-    sLmQuadVec4_E118* p1 = &vtx[1].pos;
-    sLmQuadVec4_E118* p2 = &vtx[2].pos;
-    sLmQuadVec4_E118* p3 = &vtx[3].pos;
-    *p0 = sLmQuadVec4_E118(r[0], r[1], 0.0f, 1.0f);
+    sLmQuadVec4_E118* corner0 = &vtx[0].pos;
+    sLmQuadVec4_E118* corner1 = &vtx[1].pos;
+    sLmQuadVec4_E118* corner2 = &vtx[2].pos;
+    sLmQuadVec4_E118* corner3 = &vtx[3].pos;
+    *corner0 = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].s = uv[0] + uv[2];
     vtx[0].t = uv[1];
-    *p1 = sLmQuadVec4_E118(r[0] + r[2], r[1], 0.0f, 1.0f);
+    *corner1 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
     vtx[1].s = uv[0] + uv[2];
     vtx[1].t = uv[1] + uv[3];
-    *p2 = sLmQuadVec4_E118(r[0], r[1] + r[3], 0.0f, 1.0f);
+    *corner2 = sLmQuadVec4_E118(rect[0], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[2].s = uv[0];
     vtx[2].t = uv[1];
-    *p3 = sLmQuadVec4_E118(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
+    *corner3 = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     vtx[3].s = uv[0];
     vtx[3].t = uv[1] + uv[3];
-    *p0 = func_0038E0A8(&p0->x, m);
-    *p1 = func_0038E0A8(&p1->x, m);
-    *p2 = func_0038E0A8(&p2->x, m);
-    *p3 = func_0038E0A8(&p3->x, m);
+    *corner0 = func_0038E0A8(&corner0->x, mat);
+    *corner1 = func_0038E0A8(&corner1->x, mat);
+    *corner2 = func_0038E0A8(&corner2->x, mat);
+    *corner3 = func_0038E0A8(&corner3->x, mat);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
     vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, vtx, 0);
@@ -542,35 +542,35 @@ struct sLmQuadCtx {
 };
 
 
-extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z)
+extern "C" void func_0038EC40(void* self, float* topLeft, float* bottomRight, float* col, float z)
 {
-    sLmQuadVtx v[4];
+    sLmQuadVtx verts[4];
     float zero = 0.0f;
     float one = 1.0f;
-    v[0].q = one;
-    v[0].c[0] = (int)(col[1] * 255.0f);
-    v[0].c[1] = (int)(col[2] * 255.0f);
-    v[0].c[2] = (int)(col[3] * 255.0f);
-    v[0].c[3] = (int)(col[0] * 128.0f);
-    v[0].pos = sLmQuadVec4(p0[0], p0[1], z, one);
-    v[3] = v[0];
-    v[2] = v[0];
-    v[1] = v[0];
-    v[3].pos.x = p1[0];
-    v[1].pos.x = p1[0];
-    v[3].pos.y = p1[1];
-    v[2].pos.y = p1[1];
-    v[0].t = zero;
-    v[0].s = zero;
-    v[1].s = one;
-    v[1].t = zero;
-    v[2].s = zero;
-    v[2].t = one;
-    v[3].s = one;
-    v[3].t = one;
+    verts[0].q = one;
+    verts[0].c[0] = (int)(col[1] * 255.0f);
+    verts[0].c[1] = (int)(col[2] * 255.0f);
+    verts[0].c[2] = (int)(col[3] * 255.0f);
+    verts[0].c[3] = (int)(col[0] * 128.0f);
+    verts[0].pos = sLmQuadVec4(topLeft[0], topLeft[1], z, one);
+    verts[3] = verts[0];
+    verts[2] = verts[0];
+    verts[1] = verts[0];
+    verts[3].pos.x = bottomRight[0];
+    verts[1].pos.x = bottomRight[0];
+    verts[3].pos.y = bottomRight[1];
+    verts[2].pos.y = bottomRight[1];
+    verts[0].t = zero;
+    verts[0].s = zero;
+    verts[1].s = one;
+    verts[1].t = zero;
+    verts[2].s = zero;
+    verts[2].t = one;
+    verts[3].s = one;
+    verts[3].t = one;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry* vt = (sLmQuadVEntry*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, v, 0);
+    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, verts, 0);
 }
 #endif
 
@@ -580,26 +580,26 @@ INCLUDE_ASM("render/lightman", func_0038ED90);
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
 // Submits two coloured points/vertices at the positions *p0 and *p1; col is {alpha, r, g, b} in 0..1.
-extern "C" void func_0038ED90(void* self, sLmQuadVec4_E118* p0, sLmQuadVec4_E118* p1, float* col)
+extern "C" void func_0038ED90(void* self, sLmQuadVec4_E118* start, sLmQuadVec4_E118* end, float* col)
 {
-    sLmQuadVtx_E118 v[2];
-    int r = (int)(col[1] * 255.0f);
-    int g = (int)(col[2] * 255.0f);
-    int b = (int)(col[3] * 255.0f);
-    int a = (int)(col[0] * 128.0f);
-    v[0].pos = *p0;
-    v[1].pos = *p1;
-    v[1].c[0] = r;
-    v[1].c[1] = g;
-    v[1].c[2] = b;
-    v[1].c[3] = a;
-    v[0].c[0] = r;
-    v[0].c[1] = g;
-    v[0].c[2] = b;
-    v[0].c[3] = a;
+    sLmQuadVtx_E118 verts[2];
+    int red = (int)(col[1] * 255.0f);
+    int green = (int)(col[2] * 255.0f);
+    int blue = (int)(col[3] * 255.0f);
+    int alpha = (int)(col[0] * 128.0f);
+    verts[0].pos = *start;
+    verts[1].pos = *end;
+    verts[1].c[0] = red;
+    verts[1].c[1] = green;
+    verts[1].c[2] = blue;
+    verts[1].c[3] = alpha;
+    verts[0].c[0] = red;
+    verts[0].c[1] = green;
+    verts[0].c[2] = blue;
+    verts[0].c[3] = alpha;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ctx->mVtbl;
-    vt[73].fn((char*)ctx + vt[73].delta, 2, v, 0);
+    vt[73].fn((char*)ctx + vt[73].delta, 2, verts, 0);
 }
 #endif
 
@@ -903,20 +903,20 @@ extern "C" void func_0038F768(void);
 
 extern "C" int func_0038F460(void* self, unsigned int addr, int size, int flags)
 {
-    sLightRing* r = (sLightRing*)self;
+    sLightRing* ring = (sLightRing*)self;
     if (flags & 4) {
         func_0038F768();
     }
     if (size < 0) {
-        size = r->defSize;
+        size = ring->defSize;
     } else {
         size >>= 4;
     }
-    int i = r->next++;
-    r->next %= r->count;
-    r->addr[i] = addr;
-    r->size[i] = size;
-    return r->result[i];
+    int i = ring->next++;
+    ring->next %= ring->count;
+    ring->addr[i] = addr;
+    ring->size[i] = size;
+    return ring->result[i];
 }
 #endif
 
@@ -928,9 +928,9 @@ extern "C" void func_00371D10(unsigned int madr, int sadr, int qwc, int flags);
 
 extern "C" int func_0038F4F8(void* self, unsigned int addr, int size, int flags)
 {
-    int r = func_0038F460(self, addr, size, 0);
-    func_00371D10(addr, r, size >> 4, flags);
-    return r;
+    int slot = func_0038F460(self, addr, size, 0);
+    func_00371D10(addr, slot, size >> 4, flags);
+    return slot;
 }
 #endif
 
@@ -984,9 +984,9 @@ unsigned int func_0038F598_impl(sLightDma_F598* self, int size, int flags)
         if (flags & 6) {
             func_0038F768();
         }
-        unsigned int r = self->addr[self->cur];
+        unsigned int retAddr = self->addr[self->cur];
         func_0038F6A8(self);
-        return r;
+        return retAddr;
     }
     size >>= 4;
     // PORT: EE sync (memory barrier before kicking the DMA)
@@ -994,9 +994,9 @@ unsigned int func_0038F598_impl(sLightDma_F598* self, int size, int flags)
     unsigned int* addrs = self->addr;
     func_00371DD8(self->result[self->cur], *(unsigned int*)((char*)addrs + (self->cur << 2)), size, flags);
     int cur = self->cur;
-    unsigned int r = *(unsigned int*)((char*)addrs + (cur << 2)) + (size << 4);
+    unsigned int retAddr = *(unsigned int*)((char*)addrs + (cur << 2)) + (size << 4);
     self->cur = (cur + 1) % self->count;
-    return r;
+    return retAddr;
 }
 #endif
 
@@ -1012,11 +1012,11 @@ struct sLmStack {
 
 extern "C" void func_0038F598(sLmStack* self, int size, int arg, int base);
 
-extern "C" void func_0038F668(sLmStack* self, int end, int arg)
+extern "C" void func_0038F668(sLmStack* self, int end, int flags)
 {
     int base = self->marks[self->depth];
     int size = end - base;
-    func_0038F598(self, size + (-size & 0xF), arg, base);
+    func_0038F598(self, size + (-size & 0xF), flags, base);
 }
 #endif
 
@@ -1317,7 +1317,7 @@ INCLUDE_ASM("render/lightman", func_0038FED0);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
 // Swizzles a w x h 4-bit texture in 128 x 128 tiles through func_0038F9C0.
-extern "C" int func_0038FED0(void* self, int w, int h, unsigned char* src, unsigned char* dst)
+extern "C" int func_0038FED0(void* self, int w, int height, unsigned char* src, unsigned char* dst)
 {
     unsigned char tile[0x2000];
     unsigned char out[0x2000];
@@ -1334,14 +1334,14 @@ extern "C" int func_0038FED0(void* self, int w, int h, unsigned char* src, unsig
     func_00416210(tile, 0, 0x2000);
     func_00416210(out, 0, 0x2000);
     for (i = 0; i < 11; i++) {
-        if (h == (0x400 >> i))
+        if (height == (0x400 >> i))
             break;
     }
     if (i == 11)
         return -1;
 
     int nx = (w - 1) / 128 + 1;
-    int ny = (h - 1) / 128 + 1;
+    int ny = (height - 1) / 128 + 1;
     int srow;
     int nrows;
     int drows;
@@ -1354,8 +1354,8 @@ extern "C" int func_0038FED0(void* self, int w, int h, unsigned char* src, unsig
         drows = 0x20;
     }
     if (ny == 1) {
-        nrows = h;
-        drow = h * 2;
+        nrows = height;
+        drow = height * 2;
     } else {
         drow = 0x100;
         nrows = 0x80;
@@ -1363,20 +1363,20 @@ extern "C" int func_0038FED0(void* self, int w, int h, unsigned char* src, unsig
 
     for (i = 0; i < ny; i++) {
         for (j = 0; j < nx; j++) {
-            unsigned char* d = tile;
-            unsigned char* s = src + srow * (nx << 7) * i + srow * j;
+            unsigned char* tileDst = tile;
+            unsigned char* srcRow = src + srow * (nx << 7) * i + srow * j;
             for (k = 0; k < nrows; k++) {
-                func_0041605C(d, s, srow);
-                s += srow * nx;
-                d += 0x40;
+                func_0041605C(tileDst, srcRow, srow);
+                srcRow += srow * nx;
+                tileDst += 0x40;
             }
             func_0038F9C0(self, 0x80, 0x80, tile, out);
-            unsigned char* s2 = out;
-            unsigned char* d2 = dst + drow * (nx << 5) * i + drow * j;
+            unsigned char* outRow = out;
+            unsigned char* dstRow = dst + drow * (nx << 5) * i + drow * j;
             for (k = 0; k < drows; k++) {
-                func_0041605C(d2, s2, drow);
-                d2 += drow * nx;
-                s2 += 0x100;
+                func_0041605C(dstRow, outRow, drow);
+                dstRow += drow * nx;
+                outRow += 0x100;
             }
         }
     }
@@ -1395,7 +1395,7 @@ extern "C" int func_0038FC48_0198(void* self, int w, int h, unsigned char* src, 
 extern "C" void* func_0041605C_0198(void* dst, void* src, int n) __asm__("func_0041605C");
 extern "C" void* func_00416210(void* dst, int c, int n);
 
-extern "C" int func_00390198(void* self, int w, int h, unsigned char* src, unsigned char* dst)
+extern "C" int func_00390198(void* self, int w, int height, unsigned char* src, unsigned char* dst)
 {
     unsigned char bufA[0x2000];
     unsigned char bufB[0x2000];
@@ -1409,7 +1409,7 @@ extern "C" int func_00390198(void* self, int w, int h, unsigned char* src, unsig
     if (i == 11)
         return -1;
     for (i = 0; i < 11; i++) {
-        if (h == (0x400 >> i))
+        if (height == (0x400 >> i))
             break;
     }
     if (i == 11)
@@ -1417,7 +1417,7 @@ extern "C" int func_00390198(void* self, int w, int h, unsigned char* src, unsig
     func_00416210(bufA, 0, 0x2000);
     func_00416210(bufB, 0, 0x2000);
     int qw = (w - 1) / 128;
-    int rows = (h - 1) / 64 + 1;
+    int rows = (height - 1) / 64 + 1;
     int cols = qw + 1;
     int bw;
     int bs;
@@ -1431,8 +1431,8 @@ extern "C" int func_00390198(void* self, int w, int h, unsigned char* src, unsig
         bs = 0x100;
     }
     if (rows == 1) {
-        th = h;
-        th2 = h / 2;
+        th = height;
+        th2 = height / 2;
     } else {
         th = 0x40;
         th2 = 0x20;
@@ -1441,21 +1441,21 @@ extern "C" int func_00390198(void* self, int w, int h, unsigned char* src, unsig
         int c64 = cols << 6;
         int sstep = bw * c64;
         for (j = 0; j < cols; j++) {
-            unsigned char* p = (unsigned char*)((int)src + sstep * i + bw * j);
-            unsigned char* a = bufA;
+            unsigned char* srcRow = (unsigned char*)((int)src + sstep * i + bw * j);
+            unsigned char* bufARow = bufA;
             for (k = 0; k < th; k++) {
-                func_0041605C_0198(a, p, bw);
-                p += bw * cols;
-                a += 0x80;
+                func_0041605C_0198(bufARow, srcRow, bw);
+                srcRow += bw * cols;
+                bufARow += 0x80;
             }
             func_0038FC48_0198(self, 0x80, 0x40, bufA, bufB);
             int dstep = bs * th2 * cols;
-            unsigned char* q = (unsigned char*)((int)dst + dstep * i + bs * j);
-            unsigned char* b = bufB;
+            unsigned char* dstRow = (unsigned char*)((int)dst + dstep * i + bs * j);
+            unsigned char* bufBRow = bufB;
             for (k = 0; k < th2; k++) {
-                func_0041605C_0198(q, b, bs);
-                q += bs * cols;
-                b += 0x100;
+                func_0041605C_0198(dstRow, bufBRow, bs);
+                dstRow += bs * cols;
+                bufBRow += 0x100;
             }
         }
     }
@@ -1484,13 +1484,13 @@ struct sLmOwner_0458 {
 
 extern "C" void func_00390458(void* self, int idx)
 {
-    char* e = (char*)&((sLmOwner_0458*)self)->entries[idx];
-    *(float*)(e + 0x0) = cScreenTint_m_ColourR;
-    *(float*)(e + 0x4) = cScreenTint_m_ColourG;
-    *(float*)(e + 0x8) = cScreenTint_m_ColourB;
-    *(float*)(e + 0xC) = cScreenTint_m_FillR;
-    *(float*)(e + 0x10) = cScreenTint_m_FillG;
-    *(float*)(e + 0x14) = cScreenTint_m_FillB;
+    char* entry = (char*)&((sLmOwner_0458*)self)->entries[idx];
+    *(float*)(entry + 0x0) = cScreenTint_m_ColourR;
+    *(float*)(entry + 0x4) = cScreenTint_m_ColourG;
+    *(float*)(entry + 0x8) = cScreenTint_m_ColourB;
+    *(float*)(entry + 0xC) = cScreenTint_m_FillR;
+    *(float*)(entry + 0x10) = cScreenTint_m_FillG;
+    *(float*)(entry + 0x14) = cScreenTint_m_FillB;
 }
 #endif
 
@@ -1781,32 +1781,32 @@ extern "C" void func_00390F20()
         }
     }
     if (flag) {
-        cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-        ((cGfx_0F20*)g)->PushState();
-        ((cGfx_0F20*)g)->v20();
-        ((cGfx_0F20*)g)->v30();
-        ((cGfx_0F20*)g)->v36();
+        cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
+        ((cGfx_0F20*)ps2GraphicsMan)->PushState();
+        ((cGfx_0F20*)ps2GraphicsMan)->v20();
+        ((cGfx_0F20*)ps2GraphicsMan)->v30();
+        ((cGfx_0F20*)ps2GraphicsMan)->v36();
         float a;
         float b;
-        if (((cGfx_0F20*)g)->f270 == 1) {
+        if (((cGfx_0F20*)ps2GraphicsMan)->f270 == 1) {
             a = 640.0f;
             b = 0.0f;
         } else {
             a = 320.0f;
             b = 0.0f;
-            if (((cGfx_0F20*)g)->f274 != 0) {
+            if (((cGfx_0F20*)ps2GraphicsMan)->f274 != 0) {
                 b = a;
             }
         }
-        ((cGfx_0F20*)g)->v25(b, 0.0f, a, 480.0f, 0.0f, 1.0f, 0, 0);
-        *((cGfx_0F20*)g)->stateTop = D_00501420_0F20;
-        ((cGfx_0F20*)g)->stateTop->f8_5 = 5;
-        ((cGfx_0F20*)g)->stateTop->SetF22(1);
-        ((cGfx_0F20*)g)->stateTop->f4_23 = 2;
-        ((cGfx_0F20*)g)->stateTop->f4_20 = 0;
-        ((cGfx_0F20*)g)->stateTop->f4_12 = 0x14;
-        ((cGfx_0F20*)g)->stateTop->SetF2(D_004A46AC_i);
-        *(short*)((char*)((cGfx_0F20*)g)->stateTop + 0x10) = -1;
+        ((cGfx_0F20*)ps2GraphicsMan)->v25(b, 0.0f, a, 480.0f, 0.0f, 1.0f, 0, 0);
+        *((cGfx_0F20*)ps2GraphicsMan)->stateTop = D_00501420_0F20;
+        ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f8_5 = 5;
+        ((cGfx_0F20*)ps2GraphicsMan)->stateTop->SetF22(1);
+        ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f4_23 = 2;
+        ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f4_20 = 0;
+        ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f4_12 = 0x14;
+        ((cGfx_0F20*)ps2GraphicsMan)->stateTop->SetF2(D_004A46AC_i);
+        *(short*)((char*)((cGfx_0F20*)ps2GraphicsMan)->stateTop + 0x10) = -1;
         sHudVert_0F20 v[4];
         sPos_0F20 p;
         p.x = b;
@@ -1839,11 +1839,11 @@ extern "C" void func_00390F20()
                 v[i].a = aa;
                 v[i].q = 1.0f;
             }
-            ((cGfx_0F20*)g)->v70(4, v, 0);
+            ((cGfx_0F20*)ps2GraphicsMan)->v70(4, v, 0);
         }
-        ((cGfx_0F20*)g)->v31();
-        ((cGfx_0F20*)g)->v21();
-        ((cGfx_0F20*)g)->stateTop--;
+        ((cGfx_0F20*)ps2GraphicsMan)->v31();
+        ((cGfx_0F20*)ps2GraphicsMan)->v21();
+        ((cGfx_0F20*)ps2GraphicsMan)->stateTop--;
     }
 }
 #endif
@@ -1895,7 +1895,7 @@ INCLUDE_ASM("render/lightman", func_00391418);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (lqc2 x16 into vf1-vf16, then vcallmsr of the
 // microprogram at VU0 micro-memory address 0); the PC port needs a C version.
-extern "C" void func_00391418(void* self, void* m)
+extern "C" void func_00391418(void* self, void* mats)
 {
     __asm__ __volatile__(
         ".set push\n"
@@ -1925,7 +1925,7 @@ extern "C" void func_00391418(void* self, void* m)
         "vcallmsr  $vi27\n"
         ".set pop\n"
         :
-        : "r"(m)
+        : "r"(mats)
         : "$2", "memory");
 }
 #endif
@@ -1964,9 +1964,9 @@ INCLUDE_ASM("render/lightman", func_003914F8);
 // PORT: PS2-only VU0 integer register read (vi1); the PC port needs a C fallback.
 extern "C" int func_003914F8(void)
 {
-    int r;
-    __asm__ __volatile__("cfc2.i %0, $vi1" : "=r"(r));
-    return r;
+    int result;
+    __asm__ __volatile__("cfc2.i %0, $vi1" : "=r"(result));
+    return result;
 }
 #endif
 
@@ -1990,9 +1990,9 @@ extern "C" void* func_00391508(char* self)
     *(sV2_1508*)(self + 0x30) = sV2_1508(1.0f, 1.0f);
     *(sV2_1508*)(self + 0x38) = *(sV2_1508*)(self + 0x30);
     {
-        sV4_1508 t;
-        t.x = 1.0f; t.y = 1.0f; t.z = 1.0f; t.w = 1.0f;
-        *(sV4_1508*)(self + 0x40) = t;
+        sV4_1508 allOnes;
+        allOnes.x = 1.0f; allOnes.y = 1.0f; allOnes.z = 1.0f; allOnes.w = 1.0f;
+        *(sV4_1508*)(self + 0x40) = allOnes;
     }
     *(sV4_1508*)(self + 0x50) = sV4_1508(1.0f, 0.0f, 0.0f, 0.0f);
     *(int*)(self + 0x60) = -1;

@@ -569,10 +569,10 @@ struct sEffectLink5EF8 {
 
 extern "C" void func_00345EF8(cDynamicParticleModifier* self)
 {
-    sEffMtx_5EF8 m;
-    func_0034FED8(self->Instance, self->Mesh, (sEffMtx_62A0*)&m);
-    (*(sEffVec4_5EF8*)&self->Pos) = effMtxApply5EF8(&m, &(*(sEffVec4_5EF8*)&self->Offset));
-    (*(sEffVec4_5EF8*)&self->Vel) = effMtxApply5EF8(&m, &(*(sEffVec4_5EF8*)&self->InitVel));
+    sEffMtx_5EF8 meshMat;
+    func_0034FED8(self->Instance, self->Mesh, (sEffMtx_62A0*)&meshMat);
+    (*(sEffVec4_5EF8*)&self->Pos) = effMtxApply5EF8(&meshMat, &(*(sEffVec4_5EF8*)&self->Offset));
+    (*(sEffVec4_5EF8*)&self->Vel) = effMtxApply5EF8(&meshMat, &(*(sEffVec4_5EF8*)&self->InitVel));
 }
 #endif
 

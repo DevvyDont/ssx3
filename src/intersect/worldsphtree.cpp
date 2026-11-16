@@ -573,24 +573,24 @@ static inline int overlapBox_3309D8(const sBox_3309D8* b, const sBox_3309D8* o)
 
 extern "C" void func_003309D8(sCtx_3309D8* ctx, void* tree)
 {
-    for (sNode_3309D8* p = *(sNode_3309D8**)((char*)tree + 0x20); p != 0; p = p->next) {
-        int flags = p->flags;
+    for (sNode_3309D8* node = *(sNode_3309D8**)((char*)tree + 0x20); node != 0; node = node->next) {
+        int flags = node->flags;
         if (flags & 0x20) {
-            if (overlapNode_3309D8(ctx->box, p)) {
+            if (overlapNode_3309D8(ctx->box, node)) {
                 int* cnt = ctx->count;
                 int n = *cnt;
-                ctx->list[n] = p;
+                ctx->list[n] = node;
                 *cnt = n + 1;
             }
         } else if (flags & 0x40) {
-            sVEnt_3309D8* vt = p->obj->vt;
-            if (((Test_3309D8)vt[44].fn)((char*)p->obj + vt[44].delta)) {
-                sVEnt_3309D8* vt2 = p->obj->vt;
-                sBox_3309D8* b = ((GetBox_3309D8)vt2[45].fn)((char*)p->obj + vt2[45].delta);
-                if (overlapBox_3309D8(ctx->box, b)) {
+            sVEnt_3309D8* vt = node->obj->vt;
+            if (((Test_3309D8)vt[44].fn)((char*)node->obj + vt[44].delta)) {
+                sVEnt_3309D8* vt2 = node->obj->vt;
+                sBox_3309D8* objBox = ((GetBox_3309D8)vt2[45].fn)((char*)node->obj + vt2[45].delta);
+                if (overlapBox_3309D8(ctx->box, objBox)) {
                     int* cnt = ctx->count;
                     int n = *cnt;
-                    ctx->list[n] = p;
+                    ctx->list[n] = node;
                     *cnt = n + 1;
                 }
             }
@@ -1199,10 +1199,10 @@ static inline void reset_333EF8(sHit_333EF8* h)
     h->v = 0;
 }
 
-extern "C" int func_00333EF8(void* vself, void* vq, sHit_003342D0* vhits, int cap, int arg)
+extern "C" int func_00333EF8(void* vself, void* vq, sHit_003342D0* vhits, int cap, int hitCache)
 {
     sTree_333EF8* self = (sTree_333EF8*)vself;
-    sQuery_333EF8* q = (sQuery_333EF8*)vq;
+    sQuery_333EF8* query = (sQuery_333EF8*)vq;
     sHit_333EF8* hits = (sHit_333EF8*)vhits;
     int n = 0;
     for (unsigned int i = 0; i < self->ntris; i++) {
@@ -1210,7 +1210,7 @@ extern "C" int func_00333EF8(void* vself, void* vq, sHit_003342D0* vhits, int ca
         if ((obj->flags & 0x41) != 0x41) {
             continue;
         }
-        if (!overlapTri_333EF8(q, obj)) {
+        if (!overlapTri_333EF8(query, obj)) {
             continue;
         }
         sVec4_333EF8 uv;
@@ -1219,7 +1219,7 @@ extern "C" int func_00333EF8(void* vself, void* vq, sHit_003342D0* vhits, int ca
         void* node;
         float dist;
         func_003279D0(self->owner->cache, obj, &node);
-        if (!func_0032B6E0(q, obj, node, (sVec4_335960*)&pos, (sVec4_335960*)&nrm, &dist, (sVec4_335960*)&uv, arg)) {
+        if (!func_0032B6E0(query, obj, node, (sVec4_335960*)&pos, (sVec4_335960*)&nrm, &dist, (sVec4_335960*)&uv, hitCache)) {
             continue;
         }
         reset_333EF8(&hits[n]);
@@ -1239,8 +1239,8 @@ extern "C" int func_00333EF8(void* vself, void* vq, sHit_003342D0* vhits, int ca
         }
         int flags = node->flags;
         if (flags & 0x20) {
-            if (overlapNode_333EF8(q, node)) {
-                n += func_00334888(q, node, (char*)hits + n * 0x80, cap - n, 2);
+            if (overlapNode_333EF8(query, node)) {
+                n += func_00334888(query, node, (char*)hits + n * 0x80, cap - n, 2);
             }
         } else if (flags & 0x40) {
             if (node->obj == 0) {
@@ -1249,9 +1249,9 @@ extern "C" int func_00333EF8(void* vself, void* vq, sHit_003342D0* vhits, int ca
             sVEnt_333EF8* vt = node->obj->vt;
             if (((Test_333EF8)vt[44].fn)((char*)node->obj + vt[44].delta)) {
                 sVEnt_333EF8* vt2 = node->obj->vt;
-                sBox_333EF8* b = ((GetBox_333EF8)vt2[45].fn)((char*)node->obj + vt2[45].delta);
-                if (overlapBox_333EF8(q, b)) {
-                    n += func_00334888(q, node, (char*)hits + n * 0x80, cap - n, 2);
+                sBox_333EF8* objBox = ((GetBox_333EF8)vt2[45].fn)((char*)node->obj + vt2[45].delta);
+                if (overlapBox_333EF8(query, objBox)) {
+                    n += func_00334888(query, node, (char*)hits + n * 0x80, cap - n, 2);
                 }
             }
         }
@@ -1298,23 +1298,23 @@ static inline int isBetter_003342D0(sHit_003342D0* a, sHit_003342D0* b)
     return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
 }
 
-extern "C" float func_003342D0(void* self, char* q, sHit_003342D0* out, int a3)
+extern "C" float func_003342D0(void* self, char* query, sHit_003342D0* out, int hitCache)
 {
     sHit_003342D0 hits[64];
-    int n = func_00333EF8(self, q, hits, 0x40, a3);
+    int n = func_00333EF8(self, query, hits, 0x40, hitCache);
     if (n == 0) {
         return -1.0f;
     }
     int best = 0;
-    sVEnt_003342D0* vt = *(sVEnt_003342D0**)(q + 0x50);
-    float ref = vt[3].fn(q + vt[3].delta);
+    sVEnt_003342D0* vt = *(sVEnt_003342D0**)(query + 0x50);
+    float ref = vt[3].fn(query + vt[3].delta);
     float bestDiff = absf_003342D0(hits[0].dist - ref);
     for (int i = 1; i < n; i++) {
-        float d = absf_003342D0(hits[i].dist - ref);
-        if (d < bestDiff) {
-            bestDiff = d;
+        float diff = absf_003342D0(hits[i].dist - ref);
+        if (diff < bestDiff) {
+            bestDiff = diff;
             best = i;
-        } else if (d == bestDiff) {
+        } else if (diff == bestDiff) {
             if (isBetter_003342D0(&hits[i], &hits[best])) {
                 best = i;
             }
@@ -1389,7 +1389,7 @@ static inline int overlapBox_334458(const sQuery_334458* q, const sBox_334458* o
     return r;
 }
 
-extern "C" int func_00334458(sList_334458* self, sQuery_334458* q, char* buf, int cap, int full)
+extern "C" int func_00334458(sList_334458* self, sQuery_334458* query, char* buf, int cap, int full)
 {
     int mode = 1;
     if (full) mode = 2;
@@ -1398,16 +1398,16 @@ extern "C" int func_00334458(sList_334458* self, sQuery_334458* q, char* buf, in
         sNode_334458* node = self->items[i];
         int flags = node->flags;
         if (flags & 0x20) {
-            if (overlapNode_334458(q, node)) {
-                n += func_00334888(q, node, buf + n * 0x80, cap - n, mode);
+            if (overlapNode_334458(query, node)) {
+                n += func_00334888(query, node, buf + n * 0x80, cap - n, mode);
             }
         } else if (flags & 0x40) {
             sVEnt_334458* vt = node->obj->vt;
             if (((Test_334458)vt[44].fn)((char*)node->obj + vt[44].delta)) {
                 sVEnt_334458* vt2 = node->obj->vt;
-                sBox_334458* b = ((GetBox_334458)vt2[45].fn)((char*)node->obj + vt2[45].delta);
-                if (overlapBox_334458(q, b)) {
-                    n += func_00334888(q, node, buf + n * 0x80, cap - n, mode);
+                sBox_334458* objBox = ((GetBox_334458)vt2[45].fn)((char*)node->obj + vt2[45].delta);
+                if (overlapBox_334458(query, objBox)) {
+                    n += func_00334888(query, node, buf + n * 0x80, cap - n, mode);
                 }
             }
         }
@@ -2479,8 +2479,8 @@ extern "C" void func_00335B90(void* vctx, void* vnode)
         sVEnt_335B90* vt = node->obj->vt;
         if (((Test_335B90)vt[44].fn)((char*)node->obj + vt[44].delta)) {
             sVEnt_335B90* vt2 = node->obj->vt;
-            sBox_335B90* b = ((GetBox_335B90)vt2[45].fn)((char*)node->obj + vt2[45].delta);
-            if (overlapBox_335B90(ctx->q, b)) {
+            sBox_335B90* objBox = ((GetBox_335B90)vt2[45].fn)((char*)node->obj + vt2[45].delta);
+            if (overlapBox_335B90(ctx->q, objBox)) {
                 collect_335B90(ctx, node);
             }
         }
@@ -2567,21 +2567,21 @@ static inline void queryCell_335D78(sGrid_335D78* grid, int i, sBox_335D78* box,
 
 struct sHit_00336850;
 
-extern "C" int func_00335D78(void* vself, void* vq, sHit_00336850* hits, int cap, int arg)
+extern "C" int func_00335D78(void* vself, void* vq, sHit_00336850* hits, int cap, int hitCache)
 {
     sGrid_335D78* grid = (sGrid_335D78*)vself;
-    sQry_335D78* q = (sQry_335D78*)vq;
+    sQry_335D78* query = (sQry_335D78*)vq;
     sCtx_335960 ctx;
     sBox_335D78 box;
     int count;
-    ctx.q = (sQuery_335960*)q;
+    ctx.q = (sQuery_335960*)query;
     ctx.hits = (sHit_335960*)hits;
     ctx.cap = cap;
     ctx.count = &count;
-    ctx.arg = arg;
+    ctx.arg = hitCache;
     ctx.cache = grid->cache;
-    box.min = q->min;
-    box.max = q->max;
+    box.min = query->min;
+    box.max = query->max;
     sCtx_335960* pctx = &ctx;
     count = 0;
     queryCell_335D78(grid, 0, &box, pctx);
@@ -2899,8 +2899,8 @@ extern "C" void func_00336D40(void* vctx, void* vnode)
         sVEnt_336D40* vt = node->obj->vt;
         if (((Test_336D40)vt[44].fn)((char*)node->obj + vt[44].delta)) {
             sVEnt_336D40* vt2 = node->obj->vt;
-            sBox_336D40* b = ((GetBox_336D40)vt2[45].fn)((char*)node->obj + vt2[45].delta);
-            if (overlapBox_336D40(ctx->q, b)) {
+            sBox_336D40* objBox = ((GetBox_336D40)vt2[45].fn)((char*)node->obj + vt2[45].delta);
+            if (overlapBox_336D40(ctx->q, objBox)) {
                 collect_336D40(ctx, node, mode);
             }
         }
@@ -2984,17 +2984,17 @@ struct sHit_003378C0;
 extern "C" int func_00336F30(void* vself, void* vq, sHit_003378C0* hits, int cap, int full)
 {
     sGrid_336F30* grid = (sGrid_336F30*)vself;
-    sQry_336F30* q = (sQry_336F30*)vq;
+    sQry_336F30* query = (sQry_336F30*)vq;
     sCtx_336D40 ctx;
     sBox_336F30 box;
     int count;
-    ctx.q = (sQuery_336D40*)q;
+    ctx.q = (sQuery_336D40*)query;
     ctx.buf = (char*)hits;
     ctx.cap = cap;
     ctx.count = &count;
     ctx.full = full;
-    box.min = q->min;
-    box.max = q->max;
+    box.min = query->min;
+    box.max = query->max;
     sCtx_336D40* pctx = &ctx;
     count = 0;
     queryCell_336F30(grid, 0, &box, pctx);
@@ -3047,23 +3047,23 @@ static inline int isBetter_003378C0(sHit_003378C0* a, sHit_003378C0* b)
     return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
 }
 
-extern "C" float func_003378C0(void* self, char* q, sHit_003378C0* out, int a3)
+extern "C" float func_003378C0(void* self, char* query, sHit_003378C0* out, int full)
 {
     sHit_003378C0 hits[128];
-    int n = func_00336F30(self, q, hits, 0x80, a3);
+    int n = func_00336F30(self, query, hits, 0x80, full);
     if (n == 0) {
         return -1.0f;
     }
     int best = 0;
-    sVEnt_003378C0* vt = *(sVEnt_003378C0**)(q + 0x50);
-    float ref = vt[3].fn(q + vt[3].delta);
+    sVEnt_003378C0* vt = *(sVEnt_003378C0**)(query + 0x50);
+    float ref = vt[3].fn(query + vt[3].delta);
     float bestDiff = absf_003378C0(hits[0].dist - ref);
     for (int i = 1; i < n; i++) {
-        float d = absf_003378C0(hits[i].dist - ref);
-        if (d < bestDiff) {
-            bestDiff = d;
+        float diff = absf_003378C0(hits[i].dist - ref);
+        if (diff < bestDiff) {
+            bestDiff = diff;
             best = i;
-        } else if (d == bestDiff) {
+        } else if (diff == bestDiff) {
             if (isBetter_003378C0(&hits[i], &hits[best])) {
                 best = i;
             }
@@ -3217,36 +3217,36 @@ extern "C" void func_00338920(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, v
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
     int bits = (sub.level + 0x7F) << 23;
-    float s = *(float*)&bits;
+    float cellSize = *(float*)&bits;
 
-    float x0lo = ((float)sub.x - 0.2f) * s;
-    float x0hi = ((float)(sub.x + 1) + 0.2f) * s;
+    float x0lo = ((float)sub.x - 0.2f) * cellSize;
+    float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
     if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
-    float x1lo = ((float)(sub.x + 1) - 0.2f) * s;
-    float x1hi = ((float)(sub.x + 2) + 0.2f) * s;
+    float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
+    float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
     if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
-    float y0lo = ((float)sub.y - 0.2f) * s;
-    float y0hi = ((float)(sub.y + 1) + 0.2f) * s;
+    float y0lo = ((float)sub.y - 0.2f) * cellSize;
+    float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
     if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
-    float y1lo = ((float)(sub.y + 1) - 0.2f) * s;
-    float y1hi = ((float)(sub.y + 2) + 0.2f) * s;
+    float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
+    float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
     if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
-    float z0lo = ((float)sub.z - 0.2f) * s;
-    float z0hi = ((float)(sub.z + 1) + 0.2f) * s;
+    float z0lo = ((float)sub.z - 0.2f) * cellSize;
+    float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
     if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
-    float z1lo = ((float)(sub.z + 1) - 0.2f) * s;
-    float z1hi = ((float)(sub.z + 2) + 0.2f) * s;
+    float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
+    float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
     if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
     if (!oz0 && !oz1) {
@@ -3265,53 +3265,53 @@ extern "C" void func_00338920(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, v
     int cz1 = 0;
     if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
 
-    sSphNode_340A40* c;
-    c = node->child[0];
-    if (c && ox0 && oy0 && oz0) {
-        if (cx0 && cy0 && cz0) collect_330BA8((sOctNode_330BA8*)c, ctx2);
-        else func_00338920(flag, ctx, ctx2, box, c, &sub);
+    sSphNode_340A40* subNode;
+    subNode = node->child[0];
+    if (subNode && ox0 && oy0 && oz0) {
+        if (cx0 && cy0 && cz0) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        else func_00338920(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    c = node->child[1];
-    if (c && ox0 && oy0 && oz1) {
-        if (cx0 && cy0 && cz1) collect_330BA8((sOctNode_330BA8*)c, ctx2);
-        else func_00338920(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[1];
+    if (subNode && ox0 && oy0 && oz1) {
+        if (cx0 && cy0 && cz1) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        else func_00338920(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y++;
-    c = node->child[3];
-    if (c && ox0 && oy1 && oz1) {
-        if (cx0 && cy1 && cz1) collect_330BA8((sOctNode_330BA8*)c, ctx2);
-        else func_00338920(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[3];
+    if (subNode && ox0 && oy1 && oz1) {
+        if (cx0 && cy1 && cz1) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        else func_00338920(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    c = node->child[2];
-    if (c && ox0 && oy1 && oz0) {
-        if (cx0 && cy1 && cz0) collect_330BA8((sOctNode_330BA8*)c, ctx2);
-        else func_00338920(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[2];
+    if (subNode && ox0 && oy1 && oz0) {
+        if (cx0 && cy1 && cz0) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        else func_00338920(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.x++;
-    c = node->child[6];
-    if (c && ox1 && oy1 && oz0) {
-        if (cx1 && cy1 && cz0) collect_330BA8((sOctNode_330BA8*)c, ctx2);
-        else func_00338920(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[6];
+    if (subNode && ox1 && oy1 && oz0) {
+        if (cx1 && cy1 && cz0) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        else func_00338920(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    c = node->child[7];
-    if (c && ox1 && oy1 && oz1) {
-        if (cx1 && cy1 && cz1) collect_330BA8((sOctNode_330BA8*)c, ctx2);
-        else func_00338920(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[7];
+    if (subNode && ox1 && oy1 && oz1) {
+        if (cx1 && cy1 && cz1) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        else func_00338920(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y--;
-    c = node->child[5];
-    if (c && ox1 && oy0 && oz1) {
-        if (cx1 && cy0 && cz1) collect_330BA8((sOctNode_330BA8*)c, ctx2);
-        else func_00338920(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[5];
+    if (subNode && ox1 && oy0 && oz1) {
+        if (cx1 && cy0 && cz1) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        else func_00338920(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    c = node->child[4];
-    if (c && ox1 && oy0 && oz0) {
-        if (cx1 && cy0 && cz0) collect_330BA8((sOctNode_330BA8*)c, ctx2);
-        else func_00338920(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[4];
+    if (subNode && ox1 && oy0 && oz0) {
+        if (cx1 && cy0 && cz0) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        else func_00338920(flag, ctx, ctx2, box, subNode, &sub);
     }
 }
 #endif
@@ -3329,9 +3329,9 @@ extern "C" void func_00339598(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, v
     sBox_3309D8* box = (sBox_3309D8*)vbox;
     sOctNode_331450* node = (sOctNode_331450*)vnode;
     sCell_339598* cell = (sCell_339598*)vcell;
-    void** p;
-    for (p = node->objs; p != 0; p = (void**)*p) {
-        ctx->list[(*ctx->count)++] = (sNode_3309D8*)p;
+    void** objNode;
+    for (objNode = node->objs; objNode != 0; objNode = (void**)*objNode) {
+        ctx->list[(*ctx->count)++] = (sNode_3309D8*)objNode;
     }
     if (cell->level == 11) {
         return;
@@ -3342,36 +3342,36 @@ extern "C" void func_00339598(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, v
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
     int bits = (sub.level + 0x7F) << 23;
-    float s = *(float*)&bits;
+    float cellSize = *(float*)&bits;
 
-    float x0lo = ((float)sub.x - 0.2f) * s;
-    float x0hi = ((float)(sub.x + 1) + 0.2f) * s;
+    float x0lo = ((float)sub.x - 0.2f) * cellSize;
+    float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
     if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
-    float x1lo = ((float)(sub.x + 1) - 0.2f) * s;
-    float x1hi = ((float)(sub.x + 2) + 0.2f) * s;
+    float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
+    float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
     if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
-    float y0lo = ((float)sub.y - 0.2f) * s;
-    float y0hi = ((float)(sub.y + 1) + 0.2f) * s;
+    float y0lo = ((float)sub.y - 0.2f) * cellSize;
+    float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
     if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
-    float y1lo = ((float)(sub.y + 1) - 0.2f) * s;
-    float y1hi = ((float)(sub.y + 2) + 0.2f) * s;
+    float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
+    float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
     if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
-    float z0lo = ((float)sub.z - 0.2f) * s;
-    float z0hi = ((float)(sub.z + 1) + 0.2f) * s;
+    float z0lo = ((float)sub.z - 0.2f) * cellSize;
+    float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
     if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
-    float z1lo = ((float)(sub.z + 1) - 0.2f) * s;
-    float z1hi = ((float)(sub.z + 2) + 0.2f) * s;
+    float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
+    float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
     if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
     if (!oz0 && !oz1) {
@@ -3390,53 +3390,53 @@ extern "C" void func_00339598(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, v
     int cz1 = 0;
     if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
 
-    sOctNode_331450* c;
-    c = (sOctNode_331450*)node->child[0];
-    if (c && ox0 && oy0 && oz0) {
-        if (cx0 && cy0 && cz0) collect_331450(c, ctx2);
-        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    sOctNode_331450* subNode;
+    subNode = (sOctNode_331450*)node->child[0];
+    if (subNode && ox0 && oy0 && oz0) {
+        if (cx0 && cy0 && cz0) collect_331450(subNode, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    c = (sOctNode_331450*)node->child[1];
-    if (c && ox0 && oy0 && oz1) {
-        if (cx0 && cy0 && cz1) collect_331450(c, ctx2);
-        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOctNode_331450*)node->child[1];
+    if (subNode && ox0 && oy0 && oz1) {
+        if (cx0 && cy0 && cz1) collect_331450(subNode, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y++;
-    c = (sOctNode_331450*)node->child[3];
-    if (c && ox0 && oy1 && oz1) {
-        if (cx0 && cy1 && cz1) collect_331450(c, ctx2);
-        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOctNode_331450*)node->child[3];
+    if (subNode && ox0 && oy1 && oz1) {
+        if (cx0 && cy1 && cz1) collect_331450(subNode, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    c = (sOctNode_331450*)node->child[2];
-    if (c && ox0 && oy1 && oz0) {
-        if (cx0 && cy1 && cz0) collect_331450(c, ctx2);
-        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOctNode_331450*)node->child[2];
+    if (subNode && ox0 && oy1 && oz0) {
+        if (cx0 && cy1 && cz0) collect_331450(subNode, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.x++;
-    c = (sOctNode_331450*)node->child[6];
-    if (c && ox1 && oy1 && oz0) {
-        if (cx1 && cy1 && cz0) collect_331450(c, ctx2);
-        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOctNode_331450*)node->child[6];
+    if (subNode && ox1 && oy1 && oz0) {
+        if (cx1 && cy1 && cz0) collect_331450(subNode, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    c = (sOctNode_331450*)node->child[7];
-    if (c && ox1 && oy1 && oz1) {
-        if (cx1 && cy1 && cz1) collect_331450(c, ctx2);
-        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOctNode_331450*)node->child[7];
+    if (subNode && ox1 && oy1 && oz1) {
+        if (cx1 && cy1 && cz1) collect_331450(subNode, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y--;
-    c = (sOctNode_331450*)node->child[5];
-    if (c && ox1 && oy0 && oz1) {
-        if (cx1 && cy0 && cz1) collect_331450(c, ctx2);
-        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOctNode_331450*)node->child[5];
+    if (subNode && ox1 && oy0 && oz1) {
+        if (cx1 && cy0 && cz1) collect_331450(subNode, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    c = (sOctNode_331450*)node->child[4];
-    if (c && ox1 && oy0 && oz0) {
-        if (cx1 && cy0 && cz0) collect_331450(c, ctx2);
-        else func_00339598(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOctNode_331450*)node->child[4];
+    if (subNode && ox1 && oy0 && oz0) {
+        if (cx1 && cy0 && cz0) collect_331450(subNode, ctx2);
+        else func_00339598(flag, ctx, ctx2, box, subNode, &sub);
     }
 }
 #endif
@@ -3518,36 +3518,36 @@ extern "C" void func_0033A3D8(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, v
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
     int bits = (sub.level + 0x7F) << 23;
-    float s = *(float*)&bits;
+    float cellSize = *(float*)&bits;
 
-    float x0lo = ((float)sub.x - 0.2f) * s;
-    float x0hi = ((float)(sub.x + 1) + 0.2f) * s;
+    float x0lo = ((float)sub.x - 0.2f) * cellSize;
+    float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
     if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
-    float x1lo = ((float)(sub.x + 1) - 0.2f) * s;
-    float x1hi = ((float)(sub.x + 2) + 0.2f) * s;
+    float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
+    float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
     if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
-    float y0lo = ((float)sub.y - 0.2f) * s;
-    float y0hi = ((float)(sub.y + 1) + 0.2f) * s;
+    float y0lo = ((float)sub.y - 0.2f) * cellSize;
+    float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
     if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
-    float y1lo = ((float)(sub.y + 1) - 0.2f) * s;
-    float y1hi = ((float)(sub.y + 2) + 0.2f) * s;
+    float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
+    float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
     if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
-    float z0lo = ((float)sub.z - 0.2f) * s;
-    float z0hi = ((float)(sub.z + 1) + 0.2f) * s;
+    float z0lo = ((float)sub.z - 0.2f) * cellSize;
+    float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
     if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
-    float z1lo = ((float)(sub.z + 1) - 0.2f) * s;
-    float z1hi = ((float)(sub.z + 2) + 0.2f) * s;
+    float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
+    float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
     if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
     if (!oz0 && !oz1) {
@@ -3566,53 +3566,53 @@ extern "C" void func_0033A3D8(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, v
     int cz1 = 0;
     if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
 
-    sTree_33A3D8* c;
-    c = node->child[0];
-    if (c && ox0 && oy0 && oz0) {
-        if (cx0 && cy0 && cz0) collect_33A3D8(c, ctx2);
-        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    sTree_33A3D8* subNode;
+    subNode = node->child[0];
+    if (subNode && ox0 && oy0 && oz0) {
+        if (cx0 && cy0 && cz0) collect_33A3D8(subNode, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    c = node->child[1];
-    if (c && ox0 && oy0 && oz1) {
-        if (cx0 && cy0 && cz1) collect_33A3D8(c, ctx2);
-        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[1];
+    if (subNode && ox0 && oy0 && oz1) {
+        if (cx0 && cy0 && cz1) collect_33A3D8(subNode, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y++;
-    c = node->child[3];
-    if (c && ox0 && oy1 && oz1) {
-        if (cx0 && cy1 && cz1) collect_33A3D8(c, ctx2);
-        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[3];
+    if (subNode && ox0 && oy1 && oz1) {
+        if (cx0 && cy1 && cz1) collect_33A3D8(subNode, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    c = node->child[2];
-    if (c && ox0 && oy1 && oz0) {
-        if (cx0 && cy1 && cz0) collect_33A3D8(c, ctx2);
-        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[2];
+    if (subNode && ox0 && oy1 && oz0) {
+        if (cx0 && cy1 && cz0) collect_33A3D8(subNode, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.x++;
-    c = node->child[6];
-    if (c && ox1 && oy1 && oz0) {
-        if (cx1 && cy1 && cz0) collect_33A3D8(c, ctx2);
-        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[6];
+    if (subNode && ox1 && oy1 && oz0) {
+        if (cx1 && cy1 && cz0) collect_33A3D8(subNode, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    c = node->child[7];
-    if (c && ox1 && oy1 && oz1) {
-        if (cx1 && cy1 && cz1) collect_33A3D8(c, ctx2);
-        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[7];
+    if (subNode && ox1 && oy1 && oz1) {
+        if (cx1 && cy1 && cz1) collect_33A3D8(subNode, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y--;
-    c = node->child[5];
-    if (c && ox1 && oy0 && oz1) {
-        if (cx1 && cy0 && cz1) collect_33A3D8(c, ctx2);
-        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[5];
+    if (subNode && ox1 && oy0 && oz1) {
+        if (cx1 && cy0 && cz1) collect_33A3D8(subNode, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    c = node->child[4];
-    if (c && ox1 && oy0 && oz0) {
-        if (cx1 && cy0 && cz0) collect_33A3D8(c, ctx2);
-        else func_0033A3D8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[4];
+    if (subNode && ox1 && oy0 && oz0) {
+        if (cx1 && cy0 && cz0) collect_33A3D8(subNode, ctx2);
+        else func_0033A3D8(flag, ctx, ctx2, box, subNode, &sub);
     }
 }
 #endif
@@ -3727,36 +3727,36 @@ extern "C" void func_0033B748(char* flag, sCtx_340DC0* vctx, sCtx_340DC0* vctx2,
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
     int bits = (sub.level + 0x7F) << 23;
-    float s = *(float*)&bits;
+    float cellSize = *(float*)&bits;
 
-    float x0lo = ((float)sub.x - 0.2f) * s;
-    float x0hi = ((float)(sub.x + 1) + 0.2f) * s;
+    float x0lo = ((float)sub.x - 0.2f) * cellSize;
+    float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
     if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
-    float x1lo = ((float)(sub.x + 1) - 0.2f) * s;
-    float x1hi = ((float)(sub.x + 2) + 0.2f) * s;
+    float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
+    float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
     if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
-    float y0lo = ((float)sub.y - 0.2f) * s;
-    float y0hi = ((float)(sub.y + 1) + 0.2f) * s;
+    float y0lo = ((float)sub.y - 0.2f) * cellSize;
+    float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
     if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
-    float y1lo = ((float)(sub.y + 1) - 0.2f) * s;
-    float y1hi = ((float)(sub.y + 2) + 0.2f) * s;
+    float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
+    float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
     if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
-    float z0lo = ((float)sub.z - 0.2f) * s;
-    float z0hi = ((float)(sub.z + 1) + 0.2f) * s;
+    float z0lo = ((float)sub.z - 0.2f) * cellSize;
+    float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
     if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
-    float z1lo = ((float)(sub.z + 1) - 0.2f) * s;
-    float z1hi = ((float)(sub.z + 2) + 0.2f) * s;
+    float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
+    float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
     if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
     if (!oz0 && !oz1) {
@@ -3775,53 +3775,53 @@ extern "C" void func_0033B748(char* flag, sCtx_340DC0* vctx, sCtx_340DC0* vctx2,
     int cz1 = 0;
     if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
 
-    sTree_33B748* c;
-    c = node->child[0];
-    if (c && ox0 && oy0 && oz0) {
-        if (cx0 && cy0 && cz0) collect_33B748(c, ctx2);
-        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    sTree_33B748* subNode;
+    subNode = node->child[0];
+    if (subNode && ox0 && oy0 && oz0) {
+        if (cx0 && cy0 && cz0) collect_33B748(subNode, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z++;
-    c = node->child[1];
-    if (c && ox0 && oy0 && oz1) {
-        if (cx0 && cy0 && cz1) collect_33B748(c, ctx2);
-        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[1];
+    if (subNode && ox0 && oy0 && oz1) {
+        if (cx0 && cy0 && cz1) collect_33B748(subNode, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.y++;
-    c = node->child[3];
-    if (c && ox0 && oy1 && oz1) {
-        if (cx0 && cy1 && cz1) collect_33B748(c, ctx2);
-        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[3];
+    if (subNode && ox0 && oy1 && oz1) {
+        if (cx0 && cy1 && cz1) collect_33B748(subNode, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z--;
-    c = node->child[2];
-    if (c && ox0 && oy1 && oz0) {
-        if (cx0 && cy1 && cz0) collect_33B748(c, ctx2);
-        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[2];
+    if (subNode && ox0 && oy1 && oz0) {
+        if (cx0 && cy1 && cz0) collect_33B748(subNode, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.x++;
-    c = node->child[6];
-    if (c && ox1 && oy1 && oz0) {
-        if (cx1 && cy1 && cz0) collect_33B748(c, ctx2);
-        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[6];
+    if (subNode && ox1 && oy1 && oz0) {
+        if (cx1 && cy1 && cz0) collect_33B748(subNode, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z++;
-    c = node->child[7];
-    if (c && ox1 && oy1 && oz1) {
-        if (cx1 && cy1 && cz1) collect_33B748(c, ctx2);
-        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[7];
+    if (subNode && ox1 && oy1 && oz1) {
+        if (cx1 && cy1 && cz1) collect_33B748(subNode, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.y--;
-    c = node->child[5];
-    if (c && ox1 && oy0 && oz1) {
-        if (cx1 && cy0 && cz1) collect_33B748(c, ctx2);
-        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[5];
+    if (subNode && ox1 && oy0 && oz1) {
+        if (cx1 && cy0 && cz1) collect_33B748(subNode, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z--;
-    c = node->child[4];
-    if (c && ox1 && oy0 && oz0) {
-        if (cx1 && cy0 && cz0) collect_33B748(c, ctx2);
-        else func_0033B748(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[4];
+    if (subNode && ox1 && oy0 && oz0) {
+        if (cx1 && cy0 && cz0) collect_33B748(subNode, ctx2);
+        else func_0033B748(flag, vctx, vctx2, vbox, subNode, &sub);
     }
 }
 #endif
@@ -3839,12 +3839,12 @@ extern "C" void func_0033CCF8(char* flag, sCtx_335960* ctx, sCtx_335960* ctx2, v
     sBox_3309D8* box = (sBox_3309D8*)vbox;
     sOct_335D78* node = (sOct_335D78*)vnode;
     sCell_33CCF8* cell = (sCell_33CCF8*)vcell;
-    void** p;
-    for (p = (void**)node->listA; p != 0; p = (void**)*p) {
-        func_00335960(ctx, p);
+    void** objNode;
+    for (objNode = (void**)node->listA; objNode != 0; objNode = (void**)*objNode) {
+        func_00335960(ctx, objNode);
     }
-    for (p = (void**)node->listB; p != 0; p = (void**)*p) {
-        func_00335B90(ctx, p);
+    for (objNode = (void**)node->listB; objNode != 0; objNode = (void**)*objNode) {
+        func_00335B90(ctx, objNode);
     }
     if (cell->level == 11) {
         return;
@@ -3855,36 +3855,36 @@ extern "C" void func_0033CCF8(char* flag, sCtx_335960* ctx, sCtx_335960* ctx2, v
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
     int bits = (sub.level + 0x7F) << 23;
-    float s = *(float*)&bits;
+    float cellSize = *(float*)&bits;
 
-    float x0lo = ((float)sub.x - 0.2f) * s;
-    float x0hi = ((float)(sub.x + 1) + 0.2f) * s;
+    float x0lo = ((float)sub.x - 0.2f) * cellSize;
+    float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
     if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
-    float x1lo = ((float)(sub.x + 1) - 0.2f) * s;
-    float x1hi = ((float)(sub.x + 2) + 0.2f) * s;
+    float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
+    float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
     if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
-    float y0lo = ((float)sub.y - 0.2f) * s;
-    float y0hi = ((float)(sub.y + 1) + 0.2f) * s;
+    float y0lo = ((float)sub.y - 0.2f) * cellSize;
+    float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
     if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
-    float y1lo = ((float)(sub.y + 1) - 0.2f) * s;
-    float y1hi = ((float)(sub.y + 2) + 0.2f) * s;
+    float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
+    float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
     if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
-    float z0lo = ((float)sub.z - 0.2f) * s;
-    float z0hi = ((float)(sub.z + 1) + 0.2f) * s;
+    float z0lo = ((float)sub.z - 0.2f) * cellSize;
+    float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
     if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
-    float z1lo = ((float)(sub.z + 1) - 0.2f) * s;
-    float z1hi = ((float)(sub.z + 2) + 0.2f) * s;
+    float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
+    float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
     if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
     if (!oz0 && !oz1) {
@@ -3903,53 +3903,53 @@ extern "C" void func_0033CCF8(char* flag, sCtx_335960* ctx, sCtx_335960* ctx2, v
     int cz1 = 0;
     if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
 
-    sOct_335D78* c;
-    c = (sOct_335D78*)node->child[0];
-    if (c && ox0 && oy0 && oz0) {
-        if (cx0 && cy0 && cz0) collect_335D78(c, ctx2);
-        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    sOct_335D78* subNode;
+    subNode = (sOct_335D78*)node->child[0];
+    if (subNode && ox0 && oy0 && oz0) {
+        if (cx0 && cy0 && cz0) collect_335D78(subNode, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    c = (sOct_335D78*)node->child[1];
-    if (c && ox0 && oy0 && oz1) {
-        if (cx0 && cy0 && cz1) collect_335D78(c, ctx2);
-        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOct_335D78*)node->child[1];
+    if (subNode && ox0 && oy0 && oz1) {
+        if (cx0 && cy0 && cz1) collect_335D78(subNode, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y++;
-    c = (sOct_335D78*)node->child[3];
-    if (c && ox0 && oy1 && oz1) {
-        if (cx0 && cy1 && cz1) collect_335D78(c, ctx2);
-        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOct_335D78*)node->child[3];
+    if (subNode && ox0 && oy1 && oz1) {
+        if (cx0 && cy1 && cz1) collect_335D78(subNode, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    c = (sOct_335D78*)node->child[2];
-    if (c && ox0 && oy1 && oz0) {
-        if (cx0 && cy1 && cz0) collect_335D78(c, ctx2);
-        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOct_335D78*)node->child[2];
+    if (subNode && ox0 && oy1 && oz0) {
+        if (cx0 && cy1 && cz0) collect_335D78(subNode, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.x++;
-    c = (sOct_335D78*)node->child[6];
-    if (c && ox1 && oy1 && oz0) {
-        if (cx1 && cy1 && cz0) collect_335D78(c, ctx2);
-        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOct_335D78*)node->child[6];
+    if (subNode && ox1 && oy1 && oz0) {
+        if (cx1 && cy1 && cz0) collect_335D78(subNode, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    c = (sOct_335D78*)node->child[7];
-    if (c && ox1 && oy1 && oz1) {
-        if (cx1 && cy1 && cz1) collect_335D78(c, ctx2);
-        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOct_335D78*)node->child[7];
+    if (subNode && ox1 && oy1 && oz1) {
+        if (cx1 && cy1 && cz1) collect_335D78(subNode, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y--;
-    c = (sOct_335D78*)node->child[5];
-    if (c && ox1 && oy0 && oz1) {
-        if (cx1 && cy0 && cz1) collect_335D78(c, ctx2);
-        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOct_335D78*)node->child[5];
+    if (subNode && ox1 && oy0 && oz1) {
+        if (cx1 && cy0 && cz1) collect_335D78(subNode, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    c = (sOct_335D78*)node->child[4];
-    if (c && ox1 && oy0 && oz0) {
-        if (cx1 && cy0 && cz0) collect_335D78(c, ctx2);
-        else func_0033CCF8(flag, ctx, ctx2, box, c, &sub);
+    subNode = (sOct_335D78*)node->child[4];
+    if (subNode && ox1 && oy0 && oz0) {
+        if (cx1 && cy0 && cz0) collect_335D78(subNode, ctx2);
+        else func_0033CCF8(flag, ctx, ctx2, box, subNode, &sub);
     }
 }
 #endif
@@ -4001,51 +4001,51 @@ static inline int Classify_DBE8(sCtx_DBE8* ctx, sCell_DBE8* c)
     return 2;
 }
 
-extern "C" void func_0033DBE8(char* flag, sQuery_369D8* q, sQuery_369D8* q2, sCtx_369D8* vctx, void* vnode, sCell_369D8* vcell)
+extern "C" void func_0033DBE8(char* flag, sQuery_369D8* query, sQuery_369D8* insideQuery, sCtx_369D8* vctx, void* vnode, sCell_369D8* vcell)
 {
     sCtx_DBE8* ctx = (sCtx_DBE8*)vctx;
     sOct_DBE8* node = (sOct_DBE8*)vnode;
     sCell_DBE8* cell = (sCell_DBE8*)vcell;
-    int r = Classify_DBE8(ctx, cell);
-    if (r == 0) {
-        void** o;
-        for (o = node->listA; o != 0; o = (void**)*o) {
-            func_00335960(q2, o);
+    int overlap = Classify_DBE8(ctx, cell);
+    if (overlap == 0) {
+        void** objNode;
+        for (objNode = node->listA; objNode != 0; objNode = (void**)*objNode) {
+            func_00335960(insideQuery, objNode);
         }
-        for (o = node->listB; o != 0; o = (void**)*o) {
-            func_00335B90(q2, o);
+        for (objNode = node->listB; objNode != 0; objNode = (void**)*objNode) {
+            func_00335B90(insideQuery, objNode);
         }
         if (node->child[0]) {
-            func_00340FA0(node->child[0], q2);
+            func_00340FA0(node->child[0], insideQuery);
         }
         if (node->child[1]) {
-            func_00340FA0(node->child[1], q2);
+            func_00340FA0(node->child[1], insideQuery);
         }
         if (node->child[2]) {
-            func_00340FA0(node->child[2], q2);
+            func_00340FA0(node->child[2], insideQuery);
         }
         if (node->child[3]) {
-            func_00340FA0(node->child[3], q2);
+            func_00340FA0(node->child[3], insideQuery);
         }
         if (node->child[4]) {
-            func_00340FA0(node->child[4], q2);
+            func_00340FA0(node->child[4], insideQuery);
         }
         if (node->child[5]) {
-            func_00340FA0(node->child[5], q2);
+            func_00340FA0(node->child[5], insideQuery);
         }
         if (node->child[6]) {
-            func_00340FA0(node->child[6], q2);
+            func_00340FA0(node->child[6], insideQuery);
         }
         if (node->child[7]) {
-            func_00340FA0(node->child[7], q2);
+            func_00340FA0(node->child[7], insideQuery);
         }
-    } else if (r == 2) {
-        void** o;
-        for (o = node->listA; o != 0; o = (void**)*o) {
-            func_00335960(q, o);
+    } else if (overlap == 2) {
+        void** objNode;
+        for (objNode = node->listA; objNode != 0; objNode = (void**)*objNode) {
+            func_00335960(query, objNode);
         }
-        for (o = node->listB; o != 0; o = (void**)*o) {
-            func_00335B90(q, o);
+        for (objNode = node->listB; objNode != 0; objNode = (void**)*objNode) {
+            func_00335B90(query, objNode);
         }
         if (cell->level == 11) {
             return;
@@ -4056,35 +4056,35 @@ extern "C" void func_0033DBE8(char* flag, sQuery_369D8* q, sQuery_369D8* q2, sCt
         sub.y = cell->y * 2;
         sub.z = cell->z * 2;
         if (node->child[0]) {
-            func_0033DBE8(flag, q, q2, vctx, node->child[0], (sCell_369D8*)&sub);
+            func_0033DBE8(flag, query, insideQuery, vctx, node->child[0], (sCell_369D8*)&sub);
         }
         sub.x++;
         if (node->child[4]) {
-            func_0033DBE8(flag, q, q2, vctx, node->child[4], (sCell_369D8*)&sub);
+            func_0033DBE8(flag, query, insideQuery, vctx, node->child[4], (sCell_369D8*)&sub);
         }
         sub.y++;
         if (node->child[6]) {
-            func_0033DBE8(flag, q, q2, vctx, node->child[6], (sCell_369D8*)&sub);
+            func_0033DBE8(flag, query, insideQuery, vctx, node->child[6], (sCell_369D8*)&sub);
         }
         sub.x--;
         if (node->child[2]) {
-            func_0033DBE8(flag, q, q2, vctx, node->child[2], (sCell_369D8*)&sub);
+            func_0033DBE8(flag, query, insideQuery, vctx, node->child[2], (sCell_369D8*)&sub);
         }
         sub.z++;
         if (node->child[3]) {
-            func_0033DBE8(flag, q, q2, vctx, node->child[3], (sCell_369D8*)&sub);
+            func_0033DBE8(flag, query, insideQuery, vctx, node->child[3], (sCell_369D8*)&sub);
         }
         sub.x++;
         if (node->child[7]) {
-            func_0033DBE8(flag, q, q2, vctx, node->child[7], (sCell_369D8*)&sub);
+            func_0033DBE8(flag, query, insideQuery, vctx, node->child[7], (sCell_369D8*)&sub);
         }
         sub.y--;
         if (node->child[5]) {
-            func_0033DBE8(flag, q, q2, vctx, node->child[5], (sCell_369D8*)&sub);
+            func_0033DBE8(flag, query, insideQuery, vctx, node->child[5], (sCell_369D8*)&sub);
         }
         sub.x--;
         if (node->child[1]) {
-            func_0033DBE8(flag, q, q2, vctx, node->child[1], (sCell_369D8*)&sub);
+            func_0033DBE8(flag, query, insideQuery, vctx, node->child[1], (sCell_369D8*)&sub);
         }
     }
 }
@@ -4126,9 +4126,9 @@ extern "C" void func_0033DFD8(char* flag, sCtx_336D40* ctx, sCtx_336D40* ctx2, v
     sBox_3309D8* box = (sBox_3309D8*)vbox;
     sOct_33DFD8* node = (sOct_33DFD8*)vnode;
     sCell_33DFD8* cell = (sCell_33DFD8*)vcell;
-    void** p;
-    for (p = (void**)node->list; p != 0; p = (void**)*p) {
-        func_00336D40(ctx, p);
+    void** objNode;
+    for (objNode = (void**)node->list; objNode != 0; objNode = (void**)*objNode) {
+        func_00336D40(ctx, objNode);
     }
     if (cell->level == 11) {
         return;
@@ -4139,36 +4139,36 @@ extern "C" void func_0033DFD8(char* flag, sCtx_336D40* ctx, sCtx_336D40* ctx2, v
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
     int bits = (sub.level + 0x7F) << 23;
-    float s = *(float*)&bits;
+    float cellSize = *(float*)&bits;
 
-    float x0lo = ((float)sub.x - 0.2f) * s;
-    float x0hi = ((float)(sub.x + 1) + 0.2f) * s;
+    float x0lo = ((float)sub.x - 0.2f) * cellSize;
+    float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
     if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
-    float x1lo = ((float)(sub.x + 1) - 0.2f) * s;
-    float x1hi = ((float)(sub.x + 2) + 0.2f) * s;
+    float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
+    float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
     if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
-    float y0lo = ((float)sub.y - 0.2f) * s;
-    float y0hi = ((float)(sub.y + 1) + 0.2f) * s;
+    float y0lo = ((float)sub.y - 0.2f) * cellSize;
+    float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
     if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
-    float y1lo = ((float)(sub.y + 1) - 0.2f) * s;
-    float y1hi = ((float)(sub.y + 2) + 0.2f) * s;
+    float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
+    float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
     if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
-    float z0lo = ((float)sub.z - 0.2f) * s;
-    float z0hi = ((float)(sub.z + 1) + 0.2f) * s;
+    float z0lo = ((float)sub.z - 0.2f) * cellSize;
+    float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
     if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
-    float z1lo = ((float)(sub.z + 1) - 0.2f) * s;
-    float z1hi = ((float)(sub.z + 2) + 0.2f) * s;
+    float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
+    float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
     if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
     if (!oz0 && !oz1) {
@@ -4187,53 +4187,53 @@ extern "C" void func_0033DFD8(char* flag, sCtx_336D40* ctx, sCtx_336D40* ctx2, v
     int cz1 = 0;
     if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
 
-    sOct_33DFD8* c;
-    c = node->child[0];
-    if (c && ox0 && oy0 && oz0) {
-        if (cx0 && cy0 && cz0) collect_33DFD8(c, ctx2);
-        else func_0033DFD8(flag, ctx, ctx2, box, c, &sub);
+    sOct_33DFD8* subNode;
+    subNode = node->child[0];
+    if (subNode && ox0 && oy0 && oz0) {
+        if (cx0 && cy0 && cz0) collect_33DFD8(subNode, ctx2);
+        else func_0033DFD8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    c = node->child[1];
-    if (c && ox0 && oy0 && oz1) {
-        if (cx0 && cy0 && cz1) collect_33DFD8(c, ctx2);
-        else func_0033DFD8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[1];
+    if (subNode && ox0 && oy0 && oz1) {
+        if (cx0 && cy0 && cz1) collect_33DFD8(subNode, ctx2);
+        else func_0033DFD8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y++;
-    c = node->child[3];
-    if (c && ox0 && oy1 && oz1) {
-        if (cx0 && cy1 && cz1) collect_33DFD8(c, ctx2);
-        else func_0033DFD8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[3];
+    if (subNode && ox0 && oy1 && oz1) {
+        if (cx0 && cy1 && cz1) collect_33DFD8(subNode, ctx2);
+        else func_0033DFD8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    c = node->child[2];
-    if (c && ox0 && oy1 && oz0) {
-        if (cx0 && cy1 && cz0) collect_33DFD8(c, ctx2);
-        else func_0033DFD8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[2];
+    if (subNode && ox0 && oy1 && oz0) {
+        if (cx0 && cy1 && cz0) collect_33DFD8(subNode, ctx2);
+        else func_0033DFD8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.x++;
-    c = node->child[6];
-    if (c && ox1 && oy1 && oz0) {
-        if (cx1 && cy1 && cz0) collect_33DFD8(c, ctx2);
-        else func_0033DFD8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[6];
+    if (subNode && ox1 && oy1 && oz0) {
+        if (cx1 && cy1 && cz0) collect_33DFD8(subNode, ctx2);
+        else func_0033DFD8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    c = node->child[7];
-    if (c && ox1 && oy1 && oz1) {
-        if (cx1 && cy1 && cz1) collect_33DFD8(c, ctx2);
-        else func_0033DFD8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[7];
+    if (subNode && ox1 && oy1 && oz1) {
+        if (cx1 && cy1 && cz1) collect_33DFD8(subNode, ctx2);
+        else func_0033DFD8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y--;
-    c = node->child[5];
-    if (c && ox1 && oy0 && oz1) {
-        if (cx1 && cy0 && cz1) collect_33DFD8(c, ctx2);
-        else func_0033DFD8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[5];
+    if (subNode && ox1 && oy0 && oz1) {
+        if (cx1 && cy0 && cz1) collect_33DFD8(subNode, ctx2);
+        else func_0033DFD8(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    c = node->child[4];
-    if (c && ox1 && oy0 && oz0) {
-        if (cx1 && cy0 && cz0) collect_33DFD8(c, ctx2);
-        else func_0033DFD8(flag, ctx, ctx2, box, c, &sub);
+    subNode = node->child[4];
+    if (subNode && ox1 && oy0 && oz0) {
+        if (cx1 && cy0 && cz0) collect_33DFD8(subNode, ctx2);
+        else func_0033DFD8(flag, ctx, ctx2, box, subNode, &sub);
     }
 }
 #endif
@@ -4313,36 +4313,36 @@ extern "C" void func_0033ED60(char* flag, sQry_337A48* vctx, sQry_337A48* vctx2,
     sub.y = cell->y * 2;
     sub.z = cell->z * 2;
     int bits = (sub.level + 0x7F) << 23;
-    float s = *(float*)&bits;
+    float cellSize = *(float*)&bits;
 
-    float x0lo = ((float)sub.x - 0.2f) * s;
-    float x0hi = ((float)(sub.x + 1) + 0.2f) * s;
+    float x0lo = ((float)sub.x - 0.2f) * cellSize;
+    float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
     if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
-    float x1lo = ((float)(sub.x + 1) - 0.2f) * s;
-    float x1hi = ((float)(sub.x + 2) + 0.2f) * s;
+    float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
+    float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
     if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
-    float y0lo = ((float)sub.y - 0.2f) * s;
-    float y0hi = ((float)(sub.y + 1) + 0.2f) * s;
+    float y0lo = ((float)sub.y - 0.2f) * cellSize;
+    float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
     if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
-    float y1lo = ((float)(sub.y + 1) - 0.2f) * s;
-    float y1hi = ((float)(sub.y + 2) + 0.2f) * s;
+    float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
+    float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
     if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
-    float z0lo = ((float)sub.z - 0.2f) * s;
-    float z0hi = ((float)(sub.z + 1) + 0.2f) * s;
+    float z0lo = ((float)sub.z - 0.2f) * cellSize;
+    float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
     if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
-    float z1lo = ((float)(sub.z + 1) - 0.2f) * s;
-    float z1hi = ((float)(sub.z + 2) + 0.2f) * s;
+    float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
+    float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
     if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
     if (!oz0 && !oz1) {
@@ -4361,53 +4361,53 @@ extern "C" void func_0033ED60(char* flag, sQry_337A48* vctx, sQry_337A48* vctx2,
     int cz1 = 0;
     if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
 
-    sOct_33ED60* c;
-    c = node->child[0];
-    if (c && ox0 && oy0 && oz0) {
-        if (cx0 && cy0 && cz0) collect_33ED60(c, ctx2);
-        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    sOct_33ED60* subNode;
+    subNode = node->child[0];
+    if (subNode && ox0 && oy0 && oz0) {
+        if (cx0 && cy0 && cz0) collect_33ED60(subNode, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z++;
-    c = node->child[1];
-    if (c && ox0 && oy0 && oz1) {
-        if (cx0 && cy0 && cz1) collect_33ED60(c, ctx2);
-        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[1];
+    if (subNode && ox0 && oy0 && oz1) {
+        if (cx0 && cy0 && cz1) collect_33ED60(subNode, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.y++;
-    c = node->child[3];
-    if (c && ox0 && oy1 && oz1) {
-        if (cx0 && cy1 && cz1) collect_33ED60(c, ctx2);
-        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[3];
+    if (subNode && ox0 && oy1 && oz1) {
+        if (cx0 && cy1 && cz1) collect_33ED60(subNode, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z--;
-    c = node->child[2];
-    if (c && ox0 && oy1 && oz0) {
-        if (cx0 && cy1 && cz0) collect_33ED60(c, ctx2);
-        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[2];
+    if (subNode && ox0 && oy1 && oz0) {
+        if (cx0 && cy1 && cz0) collect_33ED60(subNode, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.x++;
-    c = node->child[6];
-    if (c && ox1 && oy1 && oz0) {
-        if (cx1 && cy1 && cz0) collect_33ED60(c, ctx2);
-        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[6];
+    if (subNode && ox1 && oy1 && oz0) {
+        if (cx1 && cy1 && cz0) collect_33ED60(subNode, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z++;
-    c = node->child[7];
-    if (c && ox1 && oy1 && oz1) {
-        if (cx1 && cy1 && cz1) collect_33ED60(c, ctx2);
-        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[7];
+    if (subNode && ox1 && oy1 && oz1) {
+        if (cx1 && cy1 && cz1) collect_33ED60(subNode, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.y--;
-    c = node->child[5];
-    if (c && ox1 && oy0 && oz1) {
-        if (cx1 && cy0 && cz1) collect_33ED60(c, ctx2);
-        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[5];
+    if (subNode && ox1 && oy0 && oz1) {
+        if (cx1 && cy0 && cz1) collect_33ED60(subNode, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z--;
-    c = node->child[4];
-    if (c && ox1 && oy0 && oz0) {
-        if (cx1 && cy0 && cz0) collect_33ED60(c, ctx2);
-        else func_0033ED60(flag, vctx, vctx2, vbox, c, &sub);
+    subNode = node->child[4];
+    if (subNode && ox1 && oy0 && oz0) {
+        if (cx1 && cy0 && cz0) collect_33ED60(subNode, ctx2);
+        else func_0033ED60(flag, vctx, vctx2, vbox, subNode, &sub);
     }
 }
 #endif
@@ -4688,9 +4688,9 @@ struct sOctCollect {
 
 extern "C" void func_00340B18(void* self, sOctCollect* out)
 {
-    void** p;
-    for (p = *(void***)((char*)self + 0x28); p != 0; p = (void**)*p) {
-        out->arr[(*out->count)++] = p;
+    void** objNode;
+    for (objNode = *(void***)((char*)self + 0x28); objNode != 0; objNode = (void**)*objNode) {
+        out->arr[(*out->count)++] = objNode;
     }
     if (*(void**)((char*)self + 0x0)) func_00340B18(*(void**)((char*)self + 0x0), out);
     if (*(void**)((char*)self + 0x4)) func_00340B18(*(void**)((char*)self + 0x4), out);
@@ -4733,12 +4733,12 @@ static inline int overlapObj_340C20(const sBox_3309D8* b, const sObj_340C20* n)
 extern "C" void func_00340C20(sTree_340C20* tree, sCtx_3309D8* ctx)
 {
     func_003309D8(ctx, tree);
-    sCtx_3309D8* q = (sCtx_3309D8*)((char*)ctx + 0x10);
-    for (sObj_340C20* p = tree->objs; p != 0; p = p->next) {
-        if (overlapObj_340C20(q->box, p)) {
-            int* cnt = q->count;
+    sCtx_3309D8* objCtx = (sCtx_3309D8*)((char*)ctx + 0x10);
+    for (sObj_340C20* obj = tree->objs; obj != 0; obj = obj->next) {
+        if (overlapObj_340C20(objCtx->box, obj)) {
+            int* cnt = objCtx->count;
             int n = *cnt;
-            q->list[n] = (sNode_3309D8*)p;
+            objCtx->list[n] = (sNode_3309D8*)obj;
             *cnt = n + 1;
         }
     }
@@ -4813,15 +4813,15 @@ static inline int overlap_340DC0(const sBox_340DC0* b, const sObjNode_340DC0* n)
 extern "C" void func_00340DC0(sTree_340DC0* self, sCtx_340DC0* ctx)
 {
     func_003309D8((sCtx_3309D8*)ctx, self);
-    sSub_340DC0* s = &ctx->objs;
-    for (sObjNode_340DC0* p = self->objs; p != 0; p = p->next) {
-        if (overlap_340DC0(s->box, p)) {
-            add_340DC0(s, p);
+    sSub_340DC0* bucket = &ctx->objs;
+    for (sObjNode_340DC0* objNode = self->objs; objNode != 0; objNode = objNode->next) {
+        if (overlap_340DC0(bucket->box, objNode)) {
+            add_340DC0(bucket, objNode);
         }
     }
-    s = &ctx->all;
-    for (void** q = self->all; q != 0; q = (void**)*q) {
-        add_340DC0(s, q);
+    bucket = &ctx->all;
+    for (void** allNode = self->all; allNode != 0; allNode = (void**)*allNode) {
+        add_340DC0(bucket, allNode);
     }
     if (self->child[0]) func_00340DC0(self->child[0], ctx);
     if (self->child[1]) func_00340DC0(self->child[1], ctx);
@@ -4842,12 +4842,12 @@ extern "C" void func_00335B90(void* ctx, void* obj);
 
 extern "C" void func_00340FA0(void* self, void* ctx)
 {
-    void** p;
-    for (p = *(void***)((char*)self + 0x24); p != 0; p = (void**)*p) {
-        func_00335960(ctx, p);
+    void** objNode;
+    for (objNode = *(void***)((char*)self + 0x24); objNode != 0; objNode = (void**)*objNode) {
+        func_00335960(ctx, objNode);
     }
-    for (p = *(void***)((char*)self + 0x20); p != 0; p = (void**)*p) {
-        func_00335B90(ctx, p);
+    for (objNode = *(void***)((char*)self + 0x20); objNode != 0; objNode = (void**)*objNode) {
+        func_00335B90(ctx, objNode);
     }
     if (*(void**)((char*)self + 0x0)) func_00340FA0(*(void**)((char*)self + 0x0), ctx);
     if (*(void**)((char*)self + 0x4)) func_00340FA0(*(void**)((char*)self + 0x4), ctx);
@@ -4867,9 +4867,9 @@ extern "C" void func_00336D40(void* ctx, void* obj);
 
 extern "C" void func_003410C0(void* self, void* ctx)
 {
-    void** p;
-    for (p = *(void***)((char*)self + 0x20); p != 0; p = (void**)*p) {
-        func_00336D40(ctx, p);
+    void** objNode;
+    for (objNode = *(void***)((char*)self + 0x20); objNode != 0; objNode = (void**)*objNode) {
+        func_00336D40(ctx, objNode);
     }
     if (*(void**)((char*)self + 0x0)) func_003410C0(*(void**)((char*)self + 0x0), ctx);
     if (*(void**)((char*)self + 0x4)) func_003410C0(*(void**)((char*)self + 0x4), ctx);
@@ -5232,8 +5232,8 @@ extern "C" float func_002D1C70();
 
 extern "C" void func_00341770(void* self, cMover_341770* obj)
 {
-    sVec4_341770 u = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), *(float*)((char*)self + 0x34) + 1.0f), func_002D1C70());
-    obj->setVelocity(&u);
+    sVec4_341770 newVel = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), *(float*)((char*)self + 0x34) + 1.0f), func_002D1C70());
+    obj->setVelocity(&newVel);
 }
 #endif
 
@@ -5337,17 +5337,17 @@ extern "C" void func_00341818(sSph_341818* self, cMover_341818* obj)
     if (dir.x == 0.0f && dir.y == 0.0f && dir.z == 0.0f) {
         dir = vu0Normalize_341818(vel);
     }
-    float d = vu0Dot_341818(vel, dir);
-    float diff = self->params.speed - d;
-    sParams_341818* p = &self->params;
+    float alongSpeed = vu0Dot_341818(vel, dir);
+    float diff = self->params.speed - alongSpeed;
+    sParams_341818* boostParams = &self->params;
     if (self->type == 2) {
-        if (d >= 0.0f) {
-            sVec4_341818 u = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, p->speed), p->scale), func_002D1C70());
-            obj->setVelocity(&u);
+        if (alongSpeed >= 0.0f) {
+            sVec4_341818 newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, boostParams->speed), boostParams->scale), func_002D1C70());
+            obj->setVelocity(&newVel);
         }
     } else if (diff > 0.0f) {
-        sVec4_341818 u = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, diff), p->scale), func_002D1C70());
-        obj->setVelocity(&u);
+        sVec4_341818 newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, diff), boostParams->scale), func_002D1C70());
+        obj->setVelocity(&newVel);
     }
 }
 #endif
@@ -5633,19 +5633,19 @@ struct sWrapFloat_1E48 {
     float last;     // 0x28
 };
 
-extern "C" void func_00341E48(sWrapFloat_1E48* s)
+extern "C" void func_00341E48(sWrapFloat_1E48* wrapValue)
 {
-    if (s->speed >= 0.0f) {
-        s->value += s->speed;
-        s->last = s->value;
-        if (s->value > s->max) {
-            s->value = s->min + (s->value - s->max);
+    if (wrapValue->speed >= 0.0f) {
+        wrapValue->value += wrapValue->speed;
+        wrapValue->last = wrapValue->value;
+        if (wrapValue->value > wrapValue->max) {
+            wrapValue->value = wrapValue->min + (wrapValue->value - wrapValue->max);
         }
     } else {
-        s->value += s->speed;
-        s->last = s->value;
-        if (s->value < s->min) {
-            s->value = s->max - (s->min - s->value);
+        wrapValue->value += wrapValue->speed;
+        wrapValue->last = wrapValue->value;
+        if (wrapValue->value < wrapValue->min) {
+            wrapValue->value = wrapValue->max - (wrapValue->min - wrapValue->value);
         }
     }
 }
@@ -5664,21 +5664,21 @@ struct sBounceFloat_1EC0 {
     float last;     // 0x28
 };
 
-extern "C" void func_00341EC0(sBounceFloat_1EC0* s)
+extern "C" void func_00341EC0(sBounceFloat_1EC0* bounceValue)
 {
-    if (s->speed >= 0.0f) {
-        s->value += s->speed;
-        s->last = s->value;
-        if (s->value > s->max) {
-            s->speed = -s->speed;
-            s->value = s->max - (s->value - s->max);
+    if (bounceValue->speed >= 0.0f) {
+        bounceValue->value += bounceValue->speed;
+        bounceValue->last = bounceValue->value;
+        if (bounceValue->value > bounceValue->max) {
+            bounceValue->speed = -bounceValue->speed;
+            bounceValue->value = bounceValue->max - (bounceValue->value - bounceValue->max);
         }
     } else {
-        s->value += s->speed;
-        s->last = s->value;
-        if (s->value < s->min) {
-            s->speed = -s->speed;
-            s->value = s->min + (s->min - s->value);
+        bounceValue->value += bounceValue->speed;
+        bounceValue->last = bounceValue->value;
+        if (bounceValue->value < bounceValue->min) {
+            bounceValue->speed = -bounceValue->speed;
+            bounceValue->value = bounceValue->min + (bounceValue->min - bounceValue->value);
         }
     }
 }
@@ -5699,25 +5699,25 @@ struct sClampFloat_1F38 {
     float last;     // 0x28
 };
 
-extern "C" void func_00341F38(sClampFloat_1F38* s)
+extern "C" void func_00341F38(sClampFloat_1F38* clampValue)
 {
-    if (s->speed >= 0.0f) {
-        if (s->value == s->max) {
-            s->atLimit = 1;
+    if (clampValue->speed >= 0.0f) {
+        if (clampValue->value == clampValue->max) {
+            clampValue->atLimit = 1;
         }
-        s->value += s->speed;
-        s->last = s->value;
-        if (s->value > s->max) {
-            s->value = s->max;
+        clampValue->value += clampValue->speed;
+        clampValue->last = clampValue->value;
+        if (clampValue->value > clampValue->max) {
+            clampValue->value = clampValue->max;
         }
     } else {
-        if (s->value == s->min) {
-            s->atLimit = 1;
+        if (clampValue->value == clampValue->min) {
+            clampValue->atLimit = 1;
         }
-        s->value += s->speed;
-        s->last = s->value;
-        if (s->value < s->min) {
-            s->value = s->min;
+        clampValue->value += clampValue->speed;
+        clampValue->last = clampValue->value;
+        if (clampValue->value < clampValue->min) {
+            clampValue->value = clampValue->min;
         }
     }
 }
@@ -5750,43 +5750,43 @@ INCLUDE_ASM("intersect/worldsphtree", func_00341FE8);
 extern char* cAppMan_TheAppMan;
 extern "C" void cMoveNode_signal(void* p);
 
-extern "C" void func_00341FE8(sClampFloat_1F38* self, int msg, float v)
+extern "C" void func_00341FE8(sClampFloat_1F38* self, int msg, float msgValue)
 {
     if (msg == 0x64) {
-        *(int*)((char*)self + 0xC) = (int)(v * (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        *(int*)((char*)self + 0xC) = (int)(msgValue * (float)*(int*)(cAppMan_TheAppMan + 0x10));
     } else if (msg == 0x65) {
-        v = v * 0.03333333507180214f;
-        if (self->min <= v && v <= self->max) {
-            self->value = v;
+        msgValue = msgValue * 0.03333333507180214f;
+        if (self->min <= msgValue && msgValue <= self->max) {
+            self->value = msgValue;
         }
     } else if (msg == 0x66) {
-        v = v * 0.03333333507180214f;
-        self->speed = v / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+        msgValue = msgValue * 0.03333333507180214f;
+        self->speed = msgValue / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     } else if (msg == 0x67) {
-        v = v * 0.03333333507180214f;
+        msgValue = msgValue * 0.03333333507180214f;
         float lim = *(float*)(*(char**)(*(char**)((char*)self + 0x48) + 0x80) + 0x14);
-        if (lim < v) {
-            v = lim;
+        if (lim < msgValue) {
+            msgValue = lim;
         }
-        if (v < 0.0f) {
-            v = 0.0f;
+        if (msgValue < 0.0f) {
+            msgValue = 0.0f;
         }
-        self->max = v;
-        if (v < self->value) {
-            self->value = v;
+        self->max = msgValue;
+        if (msgValue < self->value) {
+            self->value = msgValue;
         }
     } else if (msg == 0x68) {
-        v = v * 0.03333333507180214f;
+        msgValue = msgValue * 0.03333333507180214f;
         float lim = *(float*)(*(char**)(*(char**)((char*)self + 0x48) + 0x80) + 0x14);
-        if (lim < v) {
-            v = lim;
+        if (lim < msgValue) {
+            msgValue = lim;
         }
-        if (v < 0.0f) {
-            v = 0.0f;
+        if (msgValue < 0.0f) {
+            msgValue = 0.0f;
         }
-        self->min = v;
-        if (self->value < v) {
-            self->value = v;
+        self->min = msgValue;
+        if (self->value < msgValue) {
+            self->value = msgValue;
         }
     } else if (msg == 0x69) {
         *(short*)self = 0;
@@ -5963,56 +5963,56 @@ static inline float absf_00342358(float x)
     return r;
 }
 
-extern "C" int func_00342358(sSphCtl_00342358* s)
+extern "C" int func_00342358(sSphCtl_00342358* spring)
 {
-    s->prev = s->pos;
+    spring->prev = spring->pos;
     float dt = func_002D1C70();
-    float force = s->gain * s->force;
-    if (s->gain < 0.0f) {
+    float force = spring->gain * spring->force;
+    if (spring->gain < 0.0f) {
         force = -force;
     }
-    float vel = s->vel;
-    float maxStep = s->maxStep;
+    float vel = spring->vel;
+    float maxStep = spring->maxStep;
     float step = vel * dt;
-    float acc = -s->stiffness * (s->pos - s->rest);
+    float acc = -spring->stiffness * (spring->pos - spring->rest);
     acc += force;
-    acc += -s->damping * vel;
-    s->step = step;
+    acc += -spring->damping * vel;
+    spring->step = step;
     if (maxStep < absf_00342358(step)) {
         if (step < 0.0f) {
-            s->step = -maxStep;
+            spring->step = -maxStep;
         } else {
-            s->step = maxStep;
+            spring->step = maxStep;
         }
     }
-    float pos = s->pos + s->step;
-    float nv = s->vel + acc * dt;
-    s->pos = pos;
-    s->pos3C = pos;
-    s->vel = nv;
-    if (pos < s->min) {
-        s->pos = s->min;
+    float pos = spring->pos + spring->step;
+    float nv = spring->vel + acc * dt;
+    spring->pos = pos;
+    spring->pos3C = pos;
+    spring->vel = nv;
+    if (pos < spring->min) {
+        spring->pos = spring->min;
         if (absf_00342358(nv) > 0.1f) {
-            s->vel = nv * s->bounce;
+            spring->vel = nv * spring->bounce;
         } else {
-            s->step = 0.0f;
-            s->vel = 0.0f;
+            spring->step = 0.0f;
+            spring->vel = 0.0f;
         }
-    } else if (s->max < pos) {
-        s->pos = s->max;
+    } else if (spring->max < pos) {
+        spring->pos = spring->max;
         if (absf_00342358(nv) > 0.1f) {
-            s->vel = nv * s->bounce;
+            spring->vel = nv * spring->bounce;
         } else {
-            s->step = 0.0f;
-            s->vel = 0.0f;
+            spring->step = 0.0f;
+            spring->vel = 0.0f;
         }
     }
-    s->force = 0.0f;
-    s->pos34 = s->pos;
-    if (func_0034EBA0(&s->pos) == 0) {
+    spring->force = 0.0f;
+    spring->pos34 = spring->pos;
+    if (func_0034EBA0(&spring->pos) == 0) {
         return 0;
     }
-    s->flags |= 1;
+    spring->flags |= 1;
     return 1;
 }
 #endif

@@ -683,9 +683,9 @@ static inline int isActive_31C0(sWidget_31C0* w)
 }
 
 // Starts the preview sound of the selected lodge item once its bank entry has loaded.
-extern "C" void func_001D31C0(void* p)
+extern "C" void func_001D31C0(void* vself)
 {
-    char* self = (char*)p;
+    char* self = (char*)vself;
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     if (*(void**)(self + 0x50) == 0) {
         return;
@@ -693,10 +693,10 @@ extern "C" void func_001D31C0(void* p)
     if (func_0019E238(mgr, *(int*)(self + 0xB0), *(int*)(self + 0xBC)) == 0) {
         return;
     }
-    char* e = (char*)func_0019E2B0(mgr, *(int*)(self + 0xB0), *(int*)(self + 0xBC));
+    char* fileData = (char*)func_0019E2B0(mgr, *(int*)(self + 0xB0), *(int*)(self + 0xBC));
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_31C0* vt = (sVE_31C0*)ps2GraphicsMan->mVtbl;
-    int id = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, e + *(int*)(e + 0x14), str_pass, 0, 1, -1);
+    int id = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, fileData + *(int*)(fileData + 0x14), str_pass, 0, 1, -1);
     char* snd = *(char**)(self + 0x50);
     *(int*)(self + 0xC4) = id;
     *(int*)(snd + 0x78) = id;
@@ -1303,12 +1303,12 @@ extern "C" void func_001D3F80(void* vself, int peak)
         bar[i]->show(1);
         box[i]->show(1);
         if (ch != -1) {
-            char* o = func_00156AE0(iface, peak, ch);
+            char* trophyRec = func_00156AE0(iface, peak, ch);
             char* eng = self->engine;
-            int hash = GetHashValue32(*(char**)(o + 8));
-            int h = func_00398380(eng + 0x58, hash);
+            int hash = GetHashValue32(*(char**)(trophyRec + 8));
+            int textureElem = func_00398380(eng + 0x58, hash);
             cWidget_3F80* w = icon[i];
-            *(int*)((char*)w + 0x7C) = h;
+            *(int*)((char*)w + 0x7C) = textureElem;
             *(int*)((char*)w + 0x78) = -1;
             icon[i]->show(1);
             medal[i]->show(1);

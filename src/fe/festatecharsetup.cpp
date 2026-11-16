@@ -155,9 +155,9 @@ extern "C" void cFEStateCharSetup_onUpdate(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharsetup", func_00182C68);
 #ifdef SKIP_ASM
-extern "C" int func_00182C68(void* self, int a1, int a2)
+extern "C" int func_00182C68(void* self, int menu, int event)
 {
-    return a2 != 9 ? 0x101 : 0x100;
+    return event != 9 ? 0x101 : 0x100;
 }
 #endif
 
@@ -260,12 +260,12 @@ extern "C" void func_00182DB8(void* self)
     pos.y = 200.0f;
     pos.z = 0.0f;
     pos.w = 1.0f;
-    sVec4_182DB8 at;
-    at.x = 0.0f;
-    at.y = 0.0f;
-    at.z = 0.0f;
-    at.w = 1.0f;
-    func_0015E050((char*)cam + 0x10, &pos, &at);
+    sVec4_182DB8 lookAt;
+    lookAt.x = 0.0f;
+    lookAt.y = 0.0f;
+    lookAt.z = 0.0f;
+    lookAt.w = 1.0f;
+    func_0015E050((char*)cam + 0x10, &pos, &lookAt);
     cam->fov = 0.4363323450088501f;
     func_001831D0(self, 1);
     *(int*)((char*)self + 0x48) = 1;
@@ -345,13 +345,13 @@ extern "C" void func_00182EC0(void* self_)
         sQuat_182EC0 pos;
         sXform_182EC0 xf;
         {
-            sQuat_182EC0 p;
-            p.x = 136.0f;
-            p.y = -250.0f;
-            p.z = -82.0f;
-            p.w = 1.0f;
-            pos = p;
-            xf.pos = p;
+            sQuat_182EC0 position;
+            position.x = 136.0f;
+            position.y = -250.0f;
+            position.z = -82.0f;
+            position.w = 1.0f;
+            pos = position;
+            xf.pos = position;
             xf.rot.x = 0.0f;
             xf.rot.w = 1.0f;
             xf.rot.y = 0.0f;
@@ -362,12 +362,12 @@ extern "C" void func_00182EC0(void* self_)
         xf.rot = QuatMul_182EC0(xf.rot, AxisAngle_182EC0(t4vect_ZAxis, 1.7453293800354004f));
         func_0019F3E8(rider, &xf);
         {
-            sQuat_182EC0 p;
-            p.x = 0.0f;
-            p.y = 10000.0f;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            xf.pos = p;
+            sQuat_182EC0 position;
+            position.x = 0.0f;
+            position.y = 10000.0f;
+            position.z = 0.0f;
+            position.w = 1.0f;
+            xf.pos = position;
         }
         func_0019F548(rider, &xf);
         if (*(int*)(self + 0x48) != 0) {
@@ -395,9 +395,9 @@ extern "C" void func_001831D0(void* self, int on)
 {
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
-        void* r = func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
+        void* rider = func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
         if (on == 0) {
-            func_0019E538(r, 0);
+            func_0019E538(rider, 0);
         }
         *(int*)((char*)self + 0x4C) = on;
         if (on == 0) {

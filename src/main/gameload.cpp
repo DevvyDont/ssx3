@@ -1919,9 +1919,9 @@ extern "C" void cGameState_gotoNextState(void* p);
 
 extern "C" void func_00231320(void* self)
 {
-    void* p = *(void**)((char*)self + 0x200);
-    if (p != 0) {
-        cGameState_gotoNextState(p);
+    void* gameState = *(void**)((char*)self + 0x200);
+    if (gameState != 0) {
+        cGameState_gotoNextState(gameState);
     }
 }
 #endif
@@ -2334,7 +2334,7 @@ struct sQuadVtx {
 
 extern "C" void func_00231B50(void* self, int value) {
     sQuadVtx verts[4];
-    t4Vector p;
+    t4Vector cornerPos;
     int i;
     char* obj;
 
@@ -2345,14 +2345,14 @@ extern "C" void func_00231B50(void* self, int value) {
         verts[i].b = 0x80;
         verts[i].q = 1.0f;
     }
-    p.x = 0.0f; p.y = 0.0f; p.z = 0.0f; p.w = 1.0f;
-    verts[0].pos = p;
-    p.x = 1.0f; p.y = 0.0f; p.z = 0.0f;
-    verts[1].pos = p;
-    p.x = 0.0f; p.y = 1.0f; p.z = 0.0f;
-    verts[2].pos = p;
-    p.x = 1.0f; p.y = 1.0f; p.z = 0.0f;
-    verts[3].pos = p;
+    cornerPos.x = 0.0f; cornerPos.y = 0.0f; cornerPos.z = 0.0f; cornerPos.w = 1.0f;
+    verts[0].pos = cornerPos;
+    cornerPos.x = 1.0f; cornerPos.y = 0.0f; cornerPos.z = 0.0f;
+    verts[1].pos = cornerPos;
+    cornerPos.x = 0.0f; cornerPos.y = 1.0f; cornerPos.z = 0.0f;
+    verts[2].pos = cornerPos;
+    cornerPos.x = 1.0f; cornerPos.y = 1.0f; cornerPos.z = 0.0f;
+    verts[3].pos = cornerPos;
     verts[0].u = 0.0f; verts[0].v = 0.0f;
     verts[1].u = 1.0f; verts[1].v = 0.0f;
     verts[2].u = 0.0f; verts[2].v = 1.0f;

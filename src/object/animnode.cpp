@@ -596,10 +596,10 @@ struct sAnimFrame_ED88 {
     sAnimFrame_ED88() {}
 };
 
-extern "C" void* func_0034ED88(cFloatingNode* self, void* a1, void* stream)
+extern "C" void* func_0034ED88(cFloatingNode* self, void* bucket, void* stream)
 {
     int hasInfo;
-    cMoveNode_cMoveNode(self, a1, stream);
+    cMoveNode_cMoveNode(self, bucket, stream);
     self->Info = 0;
     self->mVtbl = cFloatingNode_vtbl;
     sStreamVE_ED88* vt = *(sStreamVE_ED88**)stream;

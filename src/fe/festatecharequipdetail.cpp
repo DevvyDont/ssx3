@@ -3489,8 +3489,8 @@ struct sEquipTable_D428 {
 extern "C" int func_0019D428(sEquipTable_D428* self, int bank, const char* name)
 {
     for (int i = 0; i < 256; i++) {
-        sEquipSlot_D428* s = &self->rows[bank].slots[i];
-        if (s->name[0] != 0 && func_004165A8(self->rows[bank].slots[i].name, name) == 0) {
+        sEquipSlot_D428* slot = &self->rows[bank].slots[i];
+        if (slot->name[0] != 0 && func_004165A8(self->rows[bank].slots[i].name, name) == 0) {
             return i;
         }
     }
@@ -3571,20 +3571,20 @@ struct sTableK19D578 {
     int used;                    // 0xB4000
 };
 
-extern "C" void func_0019D578(sEquipTable_DC20* p, int bank, int size)
+extern "C" void func_0019D578(sEquipTable_DC20* table, int bank, int size)
 {
-    sTableK19D578* self = (sTableK19D578*)p;
+    sTableK19D578* self = (sTableK19D578*)table;
     if (self->used + size <= 9999999)
         return;
-    int b;
+    int otherBank;
     int j;
-    for (b = 0; b < 10; b++) {
-        if (b == bank)
+    for (otherBank = 0; otherBank < 10; otherBank++) {
+        if (otherBank == bank)
             continue;
         for (j = 0; j < 256; j++) {
-            sSlotK19D578* s = &self->banks[b].e[j];
-            if (s->data != 0 && s->timer == 0 && s->state == 0) {
-                func_0019D4B8((sEquipTable_D4B8*)self, b, j);
+            sSlotK19D578* slot = &self->banks[otherBank].e[j];
+            if (slot->data != 0 && slot->timer == 0 && slot->state == 0) {
+                func_0019D4B8((sEquipTable_D4B8*)self, otherBank, j);
                 if (self->used + size <= 9999999)
                     return;
             }
@@ -3594,10 +3594,10 @@ extern "C" void func_0019D578(sEquipTable_DC20* p, int bank, int size)
         int best = -1;
         unsigned int stamp = 0;
         for (int k = 0; k < 256; k++) {
-            sSlotK19D578* s = &self->banks[bank].e[k];
-            if (s->data != 0 && s->state == 0 && s->timer == 0) {
-                if (best < 0 || s->stamp < stamp) {
-                    stamp = s->stamp;
+            sSlotK19D578* slot = &self->banks[bank].e[k];
+            if (slot->data != 0 && slot->state == 0 && slot->timer == 0) {
+                if (best < 0 || slot->stamp < stamp) {
+                    stamp = slot->stamp;
                     best = k;
                 }
             }
@@ -3634,19 +3634,19 @@ struct sTableK19D738 {
     sBankK19D738 banks[10];      // 0x0
 };
 
-extern "C" void func_0019D738(sEquipTable_DC20* p, int bank, int size)
+extern "C" void func_0019D738(sEquipTable_DC20* table, int bank, int size)
 {
-    sTableK19D738* self = (sTableK19D738*)p;
-    int b;
+    sTableK19D738* self = (sTableK19D738*)table;
+    int otherBank;
     int j;
-    for (b = 0; b < 10; b++) {
-        if (b == bank)
+    for (otherBank = 0; otherBank < 10; otherBank++) {
+        if (otherBank == bank)
             continue;
         for (j = 0; j < 256; j++) {
-            sSlotK19D738* s = &self->banks[b].e[j];
-            if (s->data != 0 && s->timer == 0 && s->state == 0) {
-                size -= s->size;
-                func_0019D4B8((sEquipTable_D4B8*)self, b, j);
+            sSlotK19D738* slot = &self->banks[otherBank].e[j];
+            if (slot->data != 0 && slot->timer == 0 && slot->state == 0) {
+                size -= slot->size;
+                func_0019D4B8((sEquipTable_D4B8*)self, otherBank, j);
                 if (size <= 0)
                     return;
             }
@@ -3656,10 +3656,10 @@ extern "C" void func_0019D738(sEquipTable_DC20* p, int bank, int size)
         int best = -1;
         unsigned int stamp = 0;
         for (int k = 0; k < 256; k++) {
-            sSlotK19D738* s = &self->banks[bank].e[k];
-            if (s->data != 0 && s->state == 0 && s->timer == 0) {
-                if (best < 0 || s->stamp < stamp) {
-                    stamp = s->stamp;
+            sSlotK19D738* slot = &self->banks[bank].e[k];
+            if (slot->data != 0 && slot->state == 0 && slot->timer == 0) {
+                if (best < 0 || slot->stamp < stamp) {
+                    stamp = slot->stamp;
                     best = k;
                 }
             }
@@ -3702,26 +3702,26 @@ struct sSlotK19D8B8 {
 
 extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i)
 {
-    sSlotK19D8B8* s = &((sSlotK19D8B8*)((char*)self + bank * 0x12000))[i];
-    int size = BXFILE_sizez(s->name);
+    sSlotK19D8B8* slot = &((sSlotK19D8B8*)((char*)self + bank * 0x12000))[i];
+    int size = BXFILE_sizez(slot->name);
     func_0019D578(self, bank, size);
-    s->data = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
-    while (s->data == 0) {
+    slot->data = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
+    while (slot->data == 0) {
         MUTEX_lock(cMemMan_m_mutex);
         MUTEX_unlock(cMemMan_m_mutex);
         func_0019D738(self, bank, size);
-        s->data = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
+        slot->data = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
     }
     *(int*)((char*)self + 0xB4000) += size;
-    if (s->pending != 0) {
-        s->size = size;
-        s->state = 2;
-        s->handle = func_003DF748(s->name, s->data, size);
+    if (slot->pending != 0) {
+        slot->size = size;
+        slot->state = 2;
+        slot->handle = func_003DF748(slot->name, slot->data, size);
         *(int*)((char*)self + 0xB4004) += 1;
     } else {
-        s->size = size;
-        func_003E1BB8(s->name, s->data, size);
-        s->state = 1;
+        slot->size = size;
+        func_003E1BB8(slot->name, slot->data, size);
+        slot->state = 1;
     }
 }
 #endif
@@ -3836,24 +3836,24 @@ extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i);
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i)
 {
     int status;
-    sEquipSlot_DC20* s = &self->rows[bank].slots[i];
-    if (--s->timer > 0) {
+    sEquipSlot_DC20* slot = &self->rows[bank].slots[i];
+    if (--slot->timer > 0) {
         return;
     }
-    if (s->state == 2) {
-        if (ASYNCFILE_getstatus(s->handle) != 1) {
+    if (slot->state == 2) {
+        if (ASYNCFILE_getstatus(slot->handle) != 1) {
             return;
         }
-        ASYNCFILE_release(s->handle, 0, &status);
-        func_0019D000(self, bank, s);
-        s->pending = 0;
-        s->state = 0;
+        ASYNCFILE_release(slot->handle, 0, &status);
+        func_0019D000(self, bank, slot);
+        slot->pending = 0;
+        slot->state = 0;
         *(int*)((char*)self + 0xB4004) -= 1;
     }
-    if (s->data == 0) {
+    if (slot->data == 0) {
         func_0019D4B8((sEquipTable_D4B8*)self, bank, i);
     } else {
-        s->state = 0;
+        slot->state = 0;
     }
 }
 #endif
@@ -3981,11 +3981,11 @@ extern "C" void func_0019DF20(sFileCache* self, int bank)
     func_00418EF8(keys, 256, 4, func_0019DD10_DF20);
     for (int i = 0; i < 256; i++) {
         unsigned short idx = keys[i] & 0xFFFF;
-        sFileSlot* s = &self->banks[bank].slots[idx];
-        if (s->stamp != 0 || s->type != 8)
+        sFileSlot* slot = &self->banks[bank].slots[idx];
+        if (slot->stamp != 0 || slot->type != 8)
             break;
-        s->stamp = self->counts[bank]++;
-        if (self->nPending <= 0 && s->state == 3)
+        slot->stamp = self->counts[bank]++;
+        if (self->nPending <= 0 && slot->state == 3)
             func_0019D8B8_DF20(self, bank, idx);
     }
 }
@@ -4015,11 +4015,11 @@ extern "C" void func_0019E070(sFileCache* self, int bank)
     func_00418EF8(keys, 256, 4, func_0019DE18_E070);
     for (int i = 0; i < 256; i++) {
         unsigned short idx = keys[i] & 0xFFFF;
-        sFileSlot* s = &self->banks[bank].slots[idx];
-        if (s->stamp != 0 || s->type != 0xB)
+        sFileSlot* slot = &self->banks[bank].slots[idx];
+        if (slot->stamp != 0 || slot->type != 0xB)
             break;
-        s->stamp = self->counts[bank]++;
-        if (self->nPending <= 0 && s->state == 3)
+        slot->stamp = self->counts[bank]++;
+        if (self->nPending <= 0 && slot->state == 3)
             func_0019D8B8_E070(self, bank, idx);
     }
 }
@@ -4059,9 +4059,9 @@ struct sEquipTable {
     sEquipRow12000 rows[1];
 };
 
-extern "C" int func_0019E238(sEquipTable* self, int a1, int a2)
+extern "C" int func_0019E238(sEquipTable* self, int bank, int slotIndex)
 {
-    return self->rows[a1].slots[a2].state == 1;
+    return self->rows[bank].slots[slotIndex].state == 1;
 }
 #endif
 
@@ -4077,12 +4077,12 @@ extern "C" char* func_0019E268(sTableK19D250* self, int bank, int i) {
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2B0);
 #ifdef SKIP_ASM
-extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2)
+extern "C" int func_0019E2B0(sEquipTable* self, int bank, int slotIndex)
 {
-    if (self->rows[a1].slots[a2].state != 1) {
+    if (self->rows[bank].slots[slotIndex].state != 1) {
         return 0;
     }
-    return self->rows[a1].slots[a2].value;
+    return self->rows[bank].slots[slotIndex].value;
 }
 #endif
 
@@ -4097,17 +4097,17 @@ extern "C" void* func_0019E2F0(sTableK19D250* self, int bank, int i) {
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E330);
 #ifdef SKIP_ASM
-extern "C" int func_0019E330(char* base, int a, int b) {
+extern "C" int func_0019E330(char* base, int bank, int slotIndex) {
     char* pb = base + 0x104;
     char* qb = base + 0x118;
-    int s = b * 0x120 + a * 0x12000;
-    int* p = (int*)(pb + s);
-    int* q = (int*)(qb + s);
-    int r = *p;
-    *p = 0;
-    *(int*)(base + 0xB4000) -= *q;
-    *q = 0;
-    return r;
+    int slotOffset = slotIndex * 0x120 + bank * 0x12000;
+    int* dataField = (int*)(pb + slotOffset);
+    int* sizeField = (int*)(qb + slotOffset);
+    int data = *dataField;
+    *dataField = 0;
+    *(int*)(base + 0xB4000) -= *sizeField;
+    *sizeField = 0;
+    return data;
 }
 #endif
 //100%
@@ -4211,18 +4211,18 @@ void operator_delete(int* p);
 
 extern "C" void func_0019E498(void* self, int flags)
 {
-    sSlot0019E498* s = (sSlot0019E498*)((char*)self + 0x1C);
+    sSlot0019E498* slot = (sSlot0019E498*)((char*)self + 0x1C);
     func_0019EBA0(self);
     int i;
     int none = -1;
-    for (i = 0xFF; i >= 0; i--, s++) {
-        if (s->id >= 0) {
+    for (i = 0xFF; i >= 0; i--, slot++) {
+        if (slot->id >= 0) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sVEntry0019E498* vt = (sVEntry0019E498*)ps2GraphicsMan->mVtbl;
-            vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, s->id);
+            vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, slot->id);
         }
-        s->id = none;
-        s->flag = 0;
+        slot->id = none;
+        slot->flag = 0;
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -4233,9 +4233,9 @@ extern "C" void func_0019E498(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E538);
 #ifdef SKIP_ASM
-extern "C" void func_0019E538(void* self, int a1)
+extern "C" void func_0019E538(void* self, int enable)
 {
-    if (a1 != 0) {
+    if (enable != 0) {
         if (*(int*)((char*)self + 0xcc0) != 0 && *(int*)((char*)self + 0xcb8) != 0 &&
             *(int*)((char*)self + 0xcb4) != 0 && *(int*)((char*)self + 0xcd4) < 0) {
             *(int*)((char*)self + 0xcc8) = 1;

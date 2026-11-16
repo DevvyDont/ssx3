@@ -176,11 +176,11 @@ extern "C" unsigned int func_001A34B8(void)
     unsigned char best = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     for (i = 0; i < 2; i++) {
-        int h = cBENewPlayerInterface_getHumanRider(iface, i != 0);
+        int rider = cBENewPlayerInterface_getHumanRider(iface, i != 0);
         unsigned char cnt = 0;
         signed char j;
         for (j = 1; j < 3; j++) {
-            cnt += cBENewPlayerInterface_isPeakLocked1(iface, h, j);
+            cnt += cBENewPlayerInterface_isPeakLocked1(iface, rider, j);
         }
         if (best < cnt) {
             best = cnt;

@@ -130,15 +130,15 @@ extern "C" void func_00253A40(void* self);
 
 extern "C" void func_00283AF8(void* self)
 {
-    void* v = *(void**)((char*)self + 0x0);
-    if (v != 0 && *(int*)((char*)self + 0x4) != 0) {
+    void* videoPlayer = *(void**)((char*)self + 0x0);
+    if (videoPlayer != 0 && *(int*)((char*)self + 0x4) != 0) {
         if (*(int*)((char*)self + 0x8) != 0) {
-            if (*(int*)((char*)v + 0x8) != 0) {
-                func_00253A40(v);
+            if (*(int*)((char*)videoPlayer + 0x8) != 0) {
+                func_00253A40(videoPlayer);
             }
         } else {
-            if (*(int*)((char*)v + 0x8) == 0) {
-                func_002539E0(v);
+            if (*(int*)((char*)videoPlayer + 0x8) == 0) {
+                func_002539E0(videoPlayer);
             }
         }
         func_00253890(*(void**)((char*)self + 0x0), *(int*)((char*)self + 0x8) ^ 1);
@@ -167,11 +167,11 @@ INCLUDE_ASM("scripter/videngine", func_00283BB8);
 #ifdef SKIP_ASM
 extern "C" int func_00283BB8(void* self)
 {
-    int* p = *(int**)((char*)self + 0x0);
-    if (p == 0 || *(int*)((char*)self + 0x4) == 0) {
+    int* videoPlayer = *(int**)((char*)self + 0x0);
+    if (videoPlayer == 0 || *(int*)((char*)self + 0x4) == 0) {
         return 0;
     }
-    return *p;
+    return *videoPlayer;
 }
 #endif
 
@@ -219,12 +219,12 @@ int func_00283C58(void* self)
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283C60);
 #ifdef SKIP_ASM
-extern "C" int func_00283C60(void* self, int a1)
+extern "C" int func_00283C60(void* self, int index)
 {
-    if (a1 == 4) {
+    if (index == 4) {
         return 0;
     }
-    return a1 + 1;
+    return index + 1;
 }
 #endif
 
@@ -272,9 +272,9 @@ extern "C" int func_00283D28(void* self)
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283D70);
 #ifdef SKIP_ASM
-extern "C" void* func_00283D70(void* self, int a1)
+extern "C" void* func_00283D70(void* self, int index)
 {
-    return (char*)self + ((*(int*)((char*)self + 0x8c) + a1) % 5) * 0x1c;
+    return (char*)self + ((*(int*)((char*)self + 0x8c) + index) % 5) * 0x1c;
 }
 #endif
 
@@ -283,11 +283,11 @@ INCLUDE_ASM("scripter/videngine", func_00283DA0);
 #ifdef SKIP_ASM
 extern "C" int func_00283DA0(void* self)
 {
-    int r = 0;
+    int isEmpty = 0;
     if (*(int*)((char*)self + 0x90) == *(int*)((char*)self + 0x8c)) {
-        r = *(int*)((char*)self + 0x94) == 0;
+        isEmpty = *(int*)((char*)self + 0x94) == 0;
     }
-    return r;
+    return isEmpty;
 }
 #endif
 

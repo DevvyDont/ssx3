@@ -2037,9 +2037,9 @@ static inline float Clamp_0016BC88(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" void func_0016BC88(float* p)
+extern "C" void func_0016BC88(float* fov)
 {
-    *p = Clamp_0016BC88(*p, 5.0f, 80.0f);
+    *fov = Clamp_0016BC88(*fov, 5.0f, 80.0f);
 }
 #endif
 //100%
@@ -2054,9 +2054,9 @@ static inline float Clamp_0016BCB8(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" void func_0016BCB8(float* p)
+extern "C" void func_0016BCB8(float* lead)
 {
-    *p = Clamp_0016BCB8(*p, -3000.0f, 3000.0f);
+    *lead = Clamp_0016BCB8(*lead, -3000.0f, 3000.0f);
 }
 #endif
 //100%
@@ -2073,11 +2073,11 @@ static inline float ffloor_BCE0(float x)
     return t;
 }
 
-extern "C" void func_0016BCE0(float* p)
+extern "C" void func_0016BCE0(float* angle)
 {
-    float a = *p;
-    float n = ffloor_BCE0(a * 0.15915493667125702f + 0.5f);
-    *p = a - n * 6.2831854820251465f;
+    float radians = *angle;
+    float n = ffloor_BCE0(radians * 0.15915493667125702f + 0.5f);
+    *angle = radians - n * 6.2831854820251465f;
 }
 #endif
 //100%
@@ -2109,11 +2109,11 @@ static inline float Wrap_BD30(float a)
     return a - n * 6.2831854820251465f;
 }
 
-extern "C" void func_0016BD30(float* p)
+extern "C" void func_0016BD30(float* angle)
 {
-    float w = Wrap_BD30(*p);
-    *p = w;
-    *p = Clamp_BD30(w, -1.5707963705062866f, 1.5707963705062866f);
+    float w = Wrap_BD30(*angle);
+    *angle = w;
+    *angle = Clamp_BD30(w, -1.5707963705062866f, 1.5707963705062866f);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -2121,11 +2121,11 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_0016BDA0);
 #ifdef SKIP_ASM
 extern "C" void func_0016BCE0(float* p);
 
-extern "C" void func_0016BDA0(float* p)
+extern "C" void func_0016BDA0(float* angle)
 {
-    float r = *p * 0.01745329424738884f;
-    func_0016BCE0(&r);
-    *p = r * 57.2957763671875f;
+    float radians = *angle * 0.01745329424738884f;
+    func_0016BCE0(&radians);
+    *angle = radians * 57.2957763671875f;
 }
 #endif
 //100%
@@ -2133,11 +2133,11 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_0016BDE8);
 #ifdef SKIP_ASM
 extern "C" void func_0016BD30(float* p);
 
-extern "C" void func_0016BDE8(float* p)
+extern "C" void func_0016BDE8(float* angle)
 {
-    float r = *p * 0.01745329424738884f;
-    func_0016BD30(&r);
-    *p = r * 57.2957763671875f;
+    float radians = *angle * 0.01745329424738884f;
+    func_0016BD30(&radians);
+    *angle = radians * 57.2957763671875f;
 }
 #endif
 //100%
@@ -2152,9 +2152,9 @@ static inline float Clamp_0016BE30(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" void func_0016BE30(float* p)
+extern "C" void func_0016BE30(float* angle)
 {
-    *p = Clamp_0016BE30(*p, -180.0f, 180.0f);
+    *angle = Clamp_0016BE30(*angle, -180.0f, 180.0f);
 }
 #endif
 //100%
@@ -2169,9 +2169,9 @@ static inline float Clamp_0016BE60(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" void func_0016BE60(float* p)
+extern "C" void func_0016BE60(float* jitter)
 {
-    *p = Clamp_0016BE60(*p, 0.0f, 10.0f);
+    *jitter = Clamp_0016BE60(*jitter, 0.0f, 10.0f);
 }
 #endif
 //100%
@@ -2186,9 +2186,9 @@ static inline float Clamp_0016BE90(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" void func_0016BE90(float* p)
+extern "C" void func_0016BE90(float* jitter)
 {
-    *p = Clamp_0016BE90(*p, 0.0f, 30.0f);
+    *jitter = Clamp_0016BE90(*jitter, 0.0f, 30.0f);
 }
 #endif
 //100%
@@ -2203,9 +2203,9 @@ static inline float Clamp_0016BEC0(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" void func_0016BEC0(float* p)
+extern "C" void func_0016BEC0(float* dist)
 {
-    *p = Clamp_0016BEC0(*p, -10000.0f, 10000.0f);
+    *dist = Clamp_0016BEC0(*dist, -10000.0f, 10000.0f);
 }
 #endif
 

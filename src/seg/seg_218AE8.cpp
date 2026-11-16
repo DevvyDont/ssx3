@@ -66,11 +66,11 @@ static inline void setPlane_7B50(sVec4_7B50* out, const sVec4_7B50& n, const sVe
     out->w = vu0Dot_7B50(vu0Scale_7B50(n, -1.0f), p);
 }
 
-extern "C" void func_00317B50(sVec4_7B50* out, sVec4_7B50* n, sVec4_7B50* p, sVec4_7B50* q)
+extern "C" void func_00317B50(sVec4_7B50* out, sVec4_7B50* n, sVec4_7B50* point, sVec4_7B50* frontPoint)
 {
-    setPlane_7B50(out, *n, *p);
-    if (vu0Dot_7B50(*out, *q) < 0.0f) {
-        setPlane_7B50(out, vu0Scale_7B50(*n, -1.0f), *p);
+    setPlane_7B50(out, *n, *point);
+    if (vu0Dot_7B50(*out, *frontPoint) < 0.0f) {
+        setPlane_7B50(out, vu0Scale_7B50(*n, -1.0f), *point);
     }
 }
 #endif
@@ -115,16 +115,16 @@ static inline float fabs_7C48(float x)
     return r;
 }
 
-extern "C" int func_00317C48(char *a, char *b) {
-    float d = *(float*)(a + 0xC);
-    if (d == 0.0f) {
-        if (fabs_7C48(*(float*)(b + 0xC)) > 0.1f) return 0;
+extern "C" int func_00317C48(char *planeA, char *planeB) {
+    float distA = *(float*)(planeA + 0xC);
+    if (distA == 0.0f) {
+        if (fabs_7C48(*(float*)(planeB + 0xC)) > 0.1f) return 0;
     } else {
-        float r = *(float*)(b + 0xC) / d;
-        if (r > 1.001f) return 0;
-        if (r < 0.999f) return 0;
+        float distRatio = *(float*)(planeB + 0xC) / distA;
+        if (distRatio > 1.001f) return 0;
+        if (distRatio < 0.999f) return 0;
     }
-    if (vu0Dot_7C48(mk_7C48(a), mk_7C48(b)) < 0.999f) return 0;
+    if (vu0Dot_7C48(mk_7C48(planeA), mk_7C48(planeB)) < 0.999f) return 0;
     return 1;
 }
 #endif

@@ -229,20 +229,20 @@ extern "C" void* func_0015D928(void* self);
 
 extern "C" void func_0015D700(void* self, float x, float y, float z)
 {
-    func_0015D698_sVec4 v;
+    func_0015D698_sVec4 poseVec;
     *(float*)((char*)self + 0xC) = x;
     *(float*)((char*)self + 0x10) = y;
     *(float*)((char*)self + 0x14) = z;
     *(float*)((char*)self + 0x0) = x;
     *(float*)((char*)self + 0x4) = y;
     *(float*)((char*)self + 0x8) = z;
-    v.x = 0; v.y = 0; v.z = 0; v.w = 0;
-    *(func_0015D698_sVec4*)((char*)self + 0x20) = v;
-    v.w = 1.0f;
-    v.x = 0;
-    v.y = 1.0f;
-    v.z = 0;
-    *(func_0015D698_sVec4*)((char*)self + 0x30) = v;
+    poseVec.x = 0; poseVec.y = 0; poseVec.z = 0; poseVec.w = 0;
+    *(func_0015D698_sVec4*)((char*)self + 0x20) = poseVec;
+    poseVec.w = 1.0f;
+    poseVec.x = 0;
+    poseVec.y = 1.0f;
+    poseVec.z = 0;
+    *(func_0015D698_sVec4*)((char*)self + 0x30) = poseVec;
     *(func_0015D698_sVec4*)((char*)self + 0x80) = t4vect_XAxis;
     func_0015D928(self);
 }
@@ -274,15 +274,15 @@ static inline float atan2_15D780(float y, float x, float zero)
 
 extern "C" float func_0015D780(void* self)
 {
-    func_0015D780_V v;
+    func_0015D780_V look;
     float x = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x30) - *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x38));
     float y = 1.0f - 2.0f * (*(float*)((char*)self + 0x38) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x30) * *(float*)((char*)self + 0x30));
     float z = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x30));
-    v.x = x;
-    v.y = y;
-    v.z = z;
-    v.w = 0;
-    float w = v.w;
+    look.x = x;
+    look.y = y;
+    look.z = z;
+    look.w = 0;
+    float w = look.w;
     return atan2_15D780(y, x, w);
 }
 #endif
@@ -316,12 +316,12 @@ static inline float func_0015D880_Length(const func_0015D880_V& v)
 
 extern "C" float func_0015D880(void* self)
 {
-    func_0015D880_V v;
-    v.x = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x30) - *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x38));
-    v.y = 1.0f - 2.0f * (*(float*)((char*)self + 0x38) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x30) * *(float*)((char*)self + 0x30));
-    v.z = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x30));
-    v.w = 0;
-    return func_0031C128(v.z / func_0015D880_Length(v));
+    func_0015D880_V look;
+    look.x = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x30) - *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x38));
+    look.y = 1.0f - 2.0f * (*(float*)((char*)self + 0x38) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x30) * *(float*)((char*)self + 0x30));
+    look.z = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x30));
+    look.w = 0;
+    return func_0031C128(look.z / func_0015D880_Length(look));
 }
 #endif
 
@@ -508,13 +508,13 @@ extern "C" void func_0015DAE0(void)
     void* cam = SSXApp->Game;
     char* ctx = *(char**)((char*)cam + 0x84);
     int count = *(int*)ctx;
-    char* a = *(char**)(*(char**)(ctx + 4) + 0xA8);
-    func_0015DAE0_VE* e = &(*(func_0015DAE0_VE**)(a + 0x14))[4];
-    e->fn(a + e->delta);
+    char* firstController = *(char**)(*(char**)(ctx + 4) + 0xA8);
+    func_0015DAE0_VE* firstSlot = &(*(func_0015DAE0_VE**)(firstController + 0x14))[4];
+    firstSlot->fn(firstController + firstSlot->delta);
     if (count >= 2) {
-        char* b = *(char**)(*(char**)(ctx + 8) + 0xA8);
-        func_0015DAE0_VE* e2 = &(*(func_0015DAE0_VE**)(b + 0x14))[4];
-        e2->fn(b + e2->delta);
+        char* secondController = *(char**)(*(char**)(ctx + 8) + 0xA8);
+        func_0015DAE0_VE* secondSlot = &(*(func_0015DAE0_VE**)(secondController + 0x14))[4];
+        secondSlot->fn(secondController + secondSlot->delta);
     }
 }
 #endif

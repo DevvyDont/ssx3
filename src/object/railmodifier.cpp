@@ -955,12 +955,12 @@ static inline sVec4CFF0 xformCFF0(const sMat33CFF0& m, sBodyCFF0* b)
     return r;
 }
 
-extern "C" void func_0035CFF0(sBodyCFF0* self, const sVec4CFF0* v)
+extern "C" void func_0035CFF0(sBodyCFF0* self, const sVec4CFF0* newPos)
 {
-    self->outPos = *v;
-    sMat33CFF0 m = self->rot;
-    invertCFF0(m);
-    self->pos = xformCFF0(m, self);
+    self->outPos = *newPos;
+    sMat33CFF0 invRot = self->rot;
+    invertCFF0(invRot);
+    self->pos = xformCFF0(invRot, self);
 }
 #endif
 
@@ -1114,25 +1114,25 @@ static inline void NormalizeD340(t4Vector& v)
         : "memory");
 }
 
-extern "C" void func_0035D340(sRmBody_D340* b, const t4Vector* a, const t4Vector* c, float dt)
+extern "C" void func_0035D340(sRmBody_D340* body, const t4Vector* force, const t4Vector* torque, float dt)
 {
-    t4Vector tmp;
-    ScaleD340(tmp, b->vel, dt);
-    AddEqD340(b->pos, tmp);
+    t4Vector step;
+    ScaleD340(step, body->vel, dt);
+    AddEqD340(body->pos, step);
     {
-        t4Vector d;
-        QuatDerivD340(d, b->quat, b->angVel);
-        ScaleD340(tmp, d, dt);
+        t4Vector quatDeriv;
+        QuatDerivD340(quatDeriv, body->quat, body->angVel);
+        ScaleD340(step, quatDeriv, dt);
     }
-    b->quat.x += tmp.x;
-    b->quat.y += tmp.y;
-    b->quat.z += tmp.z;
-    b->quat.w += tmp.w;
-    NormalizeD340(b->quat);
-    ScaleD340(tmp, *a, dt);
-    AddEqD340(b->acc0, tmp);
-    ScaleD340(tmp, *c, dt);
-    AddEqD340(b->acc1, tmp);
+    body->quat.x += step.x;
+    body->quat.y += step.y;
+    body->quat.z += step.z;
+    body->quat.w += step.w;
+    NormalizeD340(body->quat);
+    ScaleD340(step, *force, dt);
+    AddEqD340(body->acc0, step);
+    ScaleD340(step, *torque, dt);
+    AddEqD340(body->acc1, step);
 }
 #endif
 
@@ -1294,29 +1294,29 @@ static inline sRmVec4 PointVelD4A0(sRmRigid_D4A0* b, const sRmVec4& p)
     return AddD4A0(b->vel, CrossD4A0(b->angVel, SubD4A0(p, b->pos)));
 }
 
-extern "C" void func_0035D4A0(sRmRigid_D4A0* b, sRmVec4* point, sRmVec4* n, float e, float mu)
+extern "C" void func_0035D4A0(sRmRigid_D4A0* body, sRmVec4* point, sRmVec4* n, float restitution, float mu)
 {
-    sRmVec4 r = SubD4A0(*point, b->pos);
-    sRmVec4 vp = PointVelD4A0(b, *point);
-    float d = DotD4A0(vp, *n);
+    sRmVec4 arm = SubD4A0(*point, body->pos);
+    sRmVec4 vp = PointVelD4A0(body, *point);
+    float normalVel = DotD4A0(vp, *n);
     if (mu != 0.0f) {
-        sRmVec4 t = SubD4A0(vp, ScaleD4A0(*n, d));
-        float len = LengthD4A0(t);
+        sRmVec4 tangentVel = SubD4A0(vp, ScaleD4A0(*n, normalVel));
+        float len = LengthD4A0(tangentVel);
         if (len > 0.0010000000474974513f) {
-            sRmVec4 dir = DivD4A0(t, len);
-            float j = -mu * len / (b->invMass + DotD4A0(dir, CrossD4A0(MulID4A0(b, CrossD4A0(r, dir)), r)));
+            sRmVec4 dir = DivD4A0(tangentVel, len);
+            float j = -mu * len / (body->invMass + DotD4A0(dir, CrossD4A0(MulID4A0(body, CrossD4A0(arm, dir)), arm)));
             sRmVec4 imp = ScaleD4A0(dir, j);
-            func_0035D908((sRmBody*)b, &r, &imp);
-            vp = PointVelD4A0(b, *point);
-            d = DotD4A0(vp, *n);
-            if (d > 0.0f) {
+            func_0035D908((sRmBody*)body, &arm, &imp);
+            vp = PointVelD4A0(body, *point);
+            normalVel = DotD4A0(vp, *n);
+            if (normalVel > 0.0f) {
                 return;
             }
         }
     }
-    float j = -(e + 1.0f) * d / (b->invMass + DotD4A0(*n, CrossD4A0(MulID4A0(b, CrossD4A0(r, *n)), r)));
+    float j = -(restitution + 1.0f) * normalVel / (body->invMass + DotD4A0(*n, CrossD4A0(MulID4A0(body, CrossD4A0(arm, *n)), arm)));
     sRmVec4 imp = ScaleD4A0(*n, j);
-    func_0035D908((sRmBody*)b, &r, &imp);
+    func_0035D908((sRmBody*)body, &arm, &imp);
 }
 #endif
 
@@ -2318,28 +2318,28 @@ static inline float ftrunc_0035F0B8(float x)
 
 extern "C" cTexFlipModifier* func_0035F0B8(cTexFlipModifier* self, void* def, void* owner)
 {
-    char* d = (char*)def;
+    char* defData = (char*)def;
     float one = 1.0f;
     self->Instance = (tInstanceRecord*)owner;
     self->TexIndex = 0;
     self->NumMaterials = 0;
     self->NumTexFlipMaterials = 0;
-    self->Type = *(int*)(d + 0x4);
-    float rate = *(float*)(d + 0x10) * (one / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+    self->Type = *(int*)(defData + 0x4);
+    float rate = *(float*)(defData + 0x10) * (one / (float)*(int*)(cAppMan_TheAppMan + 0x10));
     self->Speed = rate;
-    self->Dir = *(int*)(d + 0xC);
+    self->Dir = *(int*)(defData + 0xC);
     self->BaseSpeed = rate;
     *(int*)&self->Time = 0;
-    int n = *(int*)(d + 0x8);
+    int n = *(int*)(defData + 0x8);
     if ((float)n < *(float*)(int*)&self->Time) {
-        union { int i; float f; } u;
-        u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
-        float x = (u.f - one) * 8.0f;
-        float t = ftrunc_0035F0B8(x);
-        if (t < x) {
-            t += one;
+        union { int i; float f; } randBits;
+        randBits.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+        float x = (randBits.f - one) * 8.0f;
+        float rounded = ftrunc_0035F0B8(x);
+        if (rounded < x) {
+            rounded += one;
         }
-        self->TexIndex = (int)t;
+        self->TexIndex = (int)rounded;
     } else {
         self->TexIndex = n;
     }
@@ -3347,29 +3347,29 @@ extern "C" int cTypeObjNode_isType(void* self, int type)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003607B0);
 #ifdef SKIP_ASM
-extern "C" short func_003607B0(void *arg0) {
-    return (*(short *)((char*)(arg0) + (0x10)));
+extern "C" short func_003607B0(void *node) {
+    return (*(short *)((char*)(node) + (0x10)));
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_003607B8);
 #ifdef SKIP_ASM
-extern "C" void func_003607B8(void *arg0) {
-    (*(unsigned short *)((char*)(arg0) + (0x12))) = (unsigned short) ((*(unsigned short *)((char*)(arg0) + (0x12))) | 1);
+extern "C" void func_003607B8(void *node) {
+    (*(unsigned short *)((char*)(node) + (0x12))) = (unsigned short) ((*(unsigned short *)((char*)(node) + (0x12))) | 1);
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_003607C8);
 #ifdef SKIP_ASM
-extern "C" int func_003607C8(void *arg0) {
-    return (*(unsigned short *)((char*)(arg0) + (0x12))) & 1;
+extern "C" int func_003607C8(void *node) {
+    return (*(unsigned short *)((char*)(node) + (0x12))) & 1;
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_003607D8);
 #ifdef SKIP_ASM
-extern "C" void func_003607D8(void *arg0) {
-    (*(unsigned short *)((char*)(arg0) + (0x12))) = (unsigned short) ((*(unsigned short *)((char*)(arg0) + (0x12))) & 0xFFFE);
+extern "C" void func_003607D8(void *node) {
+    (*(unsigned short *)((char*)(node) + (0x12))) = (unsigned short) ((*(unsigned short *)((char*)(node) + (0x12))) & 0xFFFE);
 }
 #endif
 //100%
@@ -3500,8 +3500,8 @@ INCLUDE_ASM("object/railmodifier", func_003608D8);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeSortIndex;
 
-extern "C" void func_003608D8(int arg0) {
-    cSortObjNode_ObjNodeSortIndex = arg0;
+extern "C" void func_003608D8(int sortIndex) {
+    cSortObjNode_ObjNodeSortIndex = sortIndex;
 }
 #endif
 //100%
@@ -3509,8 +3509,8 @@ INCLUDE_ASM("object/railmodifier", func_003608E0);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeNoSortIndex;
 
-extern "C" void func_003608E0(int arg0) {
-    cSortObjNode_ObjNodeNoSortIndex = arg0;
+extern "C" void func_003608E0(int noSortIndex) {
+    cSortObjNode_ObjNodeNoSortIndex = noSortIndex;
 }
 #endif
 
@@ -5184,11 +5184,11 @@ INCLUDE_ASM("object/railmodifier", func_00361170);
 #ifdef SKIP_ASM
 extern "C" int func_00361170(void* self)
 {
-    int r = -1;
+    int direction = -1;
     if (*(float*)((char*)self + 0x10) >= 0.0f) {
-        r = 1;
+        direction = 1;
     }
-    return r;
+    return direction;
 }
 #endif
 
@@ -5249,12 +5249,12 @@ struct sVec4_361208 {
 
 extern "C" void func_00361208(void* self, sVec4_361208* out)
 {
-    sVec4_361208 v;
-    v.x = -*(float*)((char*)self + 0x50);
-    v.y = -*(float*)((char*)self + 0x54);
-    v.z = -*(float*)((char*)self + 0x58);
-    v.w = 0.0f;
-    *out = v;
+    sVec4_361208 negated;
+    negated.x = -*(float*)((char*)self + 0x50);
+    negated.y = -*(float*)((char*)self + 0x54);
+    negated.z = -*(float*)((char*)self + 0x58);
+    negated.w = 0.0f;
+    *out = negated;
 }
 #endif
 //100%
@@ -5327,8 +5327,8 @@ extern "C" void func_003612C0(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003612F8);
 #ifdef SKIP_ASM
-extern "C" int func_003612F8(int arg0) {
-    return arg0 + 0x90;
+extern "C" int func_003612F8(int frame) {
+    return frame + 0x90;
 }
 #endif
 //100%
@@ -5365,8 +5365,8 @@ extern "C" void func_00361340(void* self, int flags)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361370);
 #ifdef SKIP_ASM
-extern "C" void func_00361370(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x40))) = arg1;
+extern "C" void func_00361370(void *frame, int source) {
+    (*(int *)((char*)(frame) + (0x40))) = source;
 }
 #endif
 //100%
@@ -5378,12 +5378,12 @@ struct sVec4_361378 {
 
 extern "C" void func_00361378(void* self, sVec4_361378* out)
 {
-    sVec4_361378 v;
-    v.x = *(float*)((char*)self + 0x44);
-    v.y = *(float*)((char*)self + 0x48);
-    v.z = *(float*)((char*)self + 0x4C);
-    v.w = 1.0f;
-    *out = v;
+    sVec4_361378 result;
+    result.x = *(float*)((char*)self + 0x44);
+    result.y = *(float*)((char*)self + 0x48);
+    result.z = *(float*)((char*)self + 0x4C);
+    result.w = 1.0f;
+    *out = result;
 }
 #endif
 //100%
@@ -5395,18 +5395,18 @@ struct sVec3_3613B0 {
 
 extern "C" void func_003613B0(void* self, sVec3_3613B0* out)
 {
-    sVec3_3613B0 v;
-    v.x = *(float*)((char*)self + 0x50);
-    v.y = *(float*)((char*)self + 0x54);
-    v.z = *(float*)((char*)self + 0x58);
-    *out = v;
+    sVec3_3613B0 result;
+    result.x = *(float*)((char*)self + 0x50);
+    result.y = *(float*)((char*)self + 0x54);
+    result.z = *(float*)((char*)self + 0x58);
+    *out = result;
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_003613F0);
 #ifdef SKIP_ASM
-extern "C" void func_003613F0(void *arg0, float *arg1) {
-    *arg1 = (*(float *)((char*)(arg0) + (0x70)));
+extern "C" void func_003613F0(void *frame, float *out) {
+    *out = (*(float *)((char*)(frame) + (0x70)));
 }
 #endif
 
@@ -5441,11 +5441,11 @@ INCLUDE_ASM("object/railmodifier", func_00361460);
 #ifdef SKIP_ASM
 extern "C" int func_00361460(void* self)
 {
-    int r = -1;
+    int direction = -1;
     if (*(float*)((char*)self + 0x4) >= 0.0f) {
-        r = 1;
+        direction = 1;
     }
-    return r;
+    return direction;
 }
 #endif
 
@@ -6145,8 +6145,8 @@ int func_003619D0(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003619D8);
 #ifdef SKIP_ASM
-extern "C" void func_003619D8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xA0))) = arg1;
+extern "C" void func_003619D8(void *modifier, int parentInst) {
+    (*(int *)((char*)(modifier) + (0xA0))) = parentInst;
 }
 #endif
 
@@ -6892,19 +6892,19 @@ INCLUDE_ASM("object/railmodifier", func_00361D90);
 #ifdef SKIP_ASM
 extern "C" int func_00361D90(void* self)
 {
-    int r;
+    int direction;
     if (*(signed char*)((char*)self + 0x14) != 0) {
-        r = -1;
+        direction = -1;
         if (*(float*)((char*)self + 0x0) >= 0.0f) {
-            r = 1;
+            direction = 1;
         }
-        return r;
+        return direction;
     }
-    r = -1;
+    direction = -1;
     if (*(float*)((char*)self + 0x28) >= 0.0f) {
-        r = 1;
+        direction = 1;
     }
-    return r;
+    return direction;
 }
 #endif
 
@@ -7040,10 +7040,10 @@ extern "C" int func_00424880(int ch);
 extern "C" int func_00423A80(int cause, int (*handler)(void), int arg);
 extern "C" int func_004248E8(int ch);
 
-extern "C" void func_00361F98(void* self, int cause, int (*handler)(void), int arg)
+extern "C" void func_00361F98(void* self, int cause, int (*handler)(void), int next)
 {
     func_00424880(cause);
-    *(int*)((char*)self + (cause << 2)) = func_00423A80(cause, handler, arg);
+    *(int*)((char*)self + (cause << 2)) = func_00423A80(cause, handler, next);
     func_004248E8(cause);
 }
 #endif
@@ -7057,9 +7057,9 @@ extern "C" void* func_00423AA0(int ch, int id);
 extern "C" void* func_00362008(void* self, int ch)
 {
     func_00424880(ch);
-    int* p = (int*)((char*)self + (ch << 2));
-    int id = *p;
-    *p = -1;
+    int* handlerSlot = (int*)((char*)self + (ch << 2));
+    int id = *handlerSlot;
+    *handlerSlot = -1;
     return func_00423AA0(ch, id);
 }
 #endif
@@ -7071,10 +7071,10 @@ extern "C" int func_00423AB0(int, int, int);
 extern "C" void func_00424950(int);
 extern "C" void func_004249B8(int);
 
-extern "C" void func_00362058(int arg0, int arg1, int arg2, int arg3) {
-    func_00424950(arg1);
-    (*(int *)(((char*)(arg0) + (arg1 << 2)) + (0x40))) = func_00423AB0(arg1, arg2, arg3);
-    func_004249B8(arg1);
+extern "C" void func_00362058(int owner, int channel, int handler, int next) {
+    func_00424950(channel);
+    (*(int *)(((char*)(owner) + (channel << 2)) + (0x40))) = func_00423AB0(channel, handler, next);
+    func_004249B8(channel);
 }
 #endif
 //100%
@@ -7310,9 +7310,9 @@ struct sGifPacket {
 };
 
 // PORT: 64-bit GS register writes (ulong).
-extern "C" void func_003623D8(sGifPacket* pkt, int x, int w, int y, int h)
+extern "C" void func_003623D8(sGifPacket* pkt, int x, int w, int y, int height)
 {
-    ulong scissor = (ulong)x | ((ulong)(x + (w - 1)) << 16) | ((ulong)y << 32) | ((ulong)(y + (h - 1)) << 48);
+    ulong scissor = (ulong)x | ((ulong)(x + (w - 1)) << 16) | ((ulong)y << 32) | ((ulong)(y + (height - 1)) << 48);
     pkt->cur[0] = scissor;
     pkt->cur[1] = 0x40;
     pkt->cur[2] = scissor;
@@ -9385,17 +9385,17 @@ struct sRailLink6548 {
 // Walks the rail's link list and calls func_003663D8 on every enabled link without flag bit 1.
 extern "C" void func_00366548(void* self)
 {
-    char* s = (char*)self;
-    int i = *(int*)(s + 0x23C0);
+    char* heap = (char*)self;
+    int i = *(int*)(heap + 0x23C0);
     while (i >= 0) {
-        sRailLink6548* links = *(sRailLink6548**)(s + 0x1FF0);
+        sRailLink6548* links = *(sRailLink6548**)(heap + 0x1FF0);
         sRailLink6548* cur = &links[i];
         int next = cur->next;
         while (next >= 0) {
-            if ((*(sRailLink6548**)(s + 0x1FF0))[next].flags & 1) {
+            if ((*(sRailLink6548**)(heap + 0x1FF0))[next].flags & 1) {
                 break;
             }
-            next = (*(sRailLink6548**)(s + 0x1FF0))[next].next;
+            next = (*(sRailLink6548**)(heap + 0x1FF0))[next].next;
         }
         if (cur->flags & 1) {
             if (((cur->flags >> 1) & 1) == 0) {
@@ -9423,17 +9423,17 @@ struct sRailLink6618 {
 // Walks the rail's link list, clearing flag bit 1 and calling func_003663D8 on every enabled link.
 extern "C" void func_00366618(void* self)
 {
-    char* s = (char*)self;
-    int i = *(int*)(s + 0x23C0);
+    char* heap = (char*)self;
+    int i = *(int*)(heap + 0x23C0);
     while (i >= 0) {
-        sRailLink6618* links = *(sRailLink6618**)(s + 0x1FF0);
+        sRailLink6618* links = *(sRailLink6618**)(heap + 0x1FF0);
         sRailLink6618* cur = &links[i];
         int next = cur->next;
         while (next >= 0) {
-            if ((*(sRailLink6618**)(s + 0x1FF0))[next].flags & 1) {
+            if ((*(sRailLink6618**)(heap + 0x1FF0))[next].flags & 1) {
                 break;
             }
-            next = (*(sRailLink6618**)(s + 0x1FF0))[next].next;
+            next = (*(sRailLink6618**)(heap + 0x1FF0))[next].next;
         }
         if (cur->flags & 1) {
             if ((cur->flags >> 1) & 1) {
@@ -9510,9 +9510,9 @@ static inline int railFloorLog2(int x)
 
 extern "C" int func_003667F8(sRailNodeMan* self, int size)
 {
-    int b;
-    for (b = railFloorLog2(size) - 6; b < 17; b++) {
-        int i = self->headsB[b].next2;
+    int bucket;
+    for (bucket = railFloorLog2(size) - 6; bucket < 17; bucket++) {
+        int i = self->headsB[bucket].next2;
         while (i >= 0) {
             if (self->nodes[i].size >= size) {
                 return i;
@@ -9745,10 +9745,10 @@ struct sRailLinkDD8 {
 // Finds the enabled link whose prev field equals `key`; returns its index or -1.
 extern "C" int func_00366DD8(void* self, int key)
 {
-    char* s = (char*)self;
-    int i = *(int*)(s + 0x23C0);
+    char* heap = (char*)self;
+    int i = *(int*)(heap + 0x23C0);
     while (i >= 0) {
-        sRailLinkDD8* links = *(sRailLinkDD8**)(s + 0x1FF0);
+        sRailLinkDD8* links = *(sRailLinkDD8**)(heap + 0x1FF0);
         if ((links[i].flags & 1) && links[i].prev == key) {
             return i;
         }
@@ -9765,12 +9765,12 @@ extern "C" void func_003663D8(void* self, int id);
 
 extern "C" void func_00366E30(void* self, int i)
 {
-    char* e = (*(char***)((char*)self + 0x23E8))[i];
-    if (*(int*)(e + 0x30) >= 0) {
-        func_003663D8(self, *(int*)(e + 0x30));
+    char* entry = (*(char***)((char*)self + 0x23E8))[i];
+    if (*(int*)(entry + 0x30) >= 0) {
+        func_003663D8(self, *(int*)(entry + 0x30));
     }
-    if (*(int*)(e + 0x34) >= 0) {
-        func_003663D8(self, *(int*)(e + 0x34));
+    if (*(int*)(entry + 0x34) >= 0) {
+        func_003663D8(self, *(int*)(entry + 0x34));
     }
 }
 #endif
@@ -9806,20 +9806,20 @@ extern "C" void func_00366E90(char* self, sRmTex_366E90* tex)
     int th = (tex->tex0 >> 30) & 0xF;
     int bpp = tex->bpp;
     int w = 1 << tw;
-    int h = 1 << th;
+    int height = 1 << th;
     char* src = tex->data;
     if (tex->mipCount >= 0) {
         do {
             n++;
-            int bytes = w * h * bpp / 8;
+            int bytes = w * height * bpp / 8;
             if (bytes <= 0xFF) {
                 bytes = 0x100;
             }
             MEM_copy(buf, src, bytes);
-            func_00390198(self, w, h, buf, src);
+            func_00390198(self, w, height, buf, src);
             src += bytes;
             w >>= 1;
-            h >>= 1;
+            height >>= 1;
         } while (n <= tex->mipCount);
     }
     if (buf != 0) {
@@ -9848,9 +9848,9 @@ extern "C" void func_00366FE8(void* self)
 {
     *(int*)((char*)self + 0x1F58) = 0;
     func_003670E0(self);
-    int* a = (int*)((char*)self + 0x1F4C);
+    int* bound = (int*)((char*)self + 0x1F4C);
     for (int i = 1; i >= 0; i--) {
-        a[i] = -1;
+        bound[i] = -1;
     }
     *(int*)((char*)self + 0x1F54) = -1;
     func_00365E40((char*)self + 0x1F60, 0, 0x400000, (char*)self + 0x8);
@@ -9867,9 +9867,9 @@ extern "C" void func_00367078(void* self)
 {
     func_00366618((char*)self + 0x4350);
     func_00366618((char*)self + 0x1F60);
-    int* a = (int*)((char*)self + 0x1F4C);
+    int* bound = (int*)((char*)self + 0x1F4C);
     for (int i = 1; i >= 0; i--) {
-        a[i] = -1;
+        bound[i] = -1;
     }
     *(int*)((char*)self + 0x1F54) = -1;
 }

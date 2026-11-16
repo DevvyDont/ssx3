@@ -83,17 +83,17 @@ static inline sVec4_0250 vNorm_0250(const sVec4_0250& v)
     return r;
 }
 
-extern "C" float func_00100250(void* self, const sVec4_0250* v)
+extern "C" float func_00100250(void* self, const sVec4_0250* direction)
 {
-    char* p = *(char**)((char*)self + 0x18);
-    sVec4_0250 a = *(sVec4_0250*)(p + 0x1A0);
-    sVec4_0250 b = *(sVec4_0250*)(p + 0x1C0);
-    sVec4_0250 u = vSub_0250(*v, vScale_0250(a, vDot_0250(*v, a)));
-    float r = -vDot_0250(vNorm_0250(u), b);
-    float f = *(float*)((char*)self + 0xDF4);
-    if (f == 1.0f)
-        return r;
-    return r * 0.12667641043663025f * f;
+    char* rider = *(char**)((char*)self + 0x18);
+    sVec4_0250 riderSide = *(sVec4_0250*)(rider + 0x1A0);
+    sVec4_0250 riderUp = *(sVec4_0250*)(rider + 0x1C0);
+    sVec4_0250 planarDir = vSub_0250(*direction, vScale_0250(riderSide, vDot_0250(*direction, riderSide)));
+    float slope = -vDot_0250(vNorm_0250(planarDir), riderUp);
+    float accuracy = *(float*)((char*)self + 0xDF4);
+    if (accuracy == 1.0f)
+        return slope;
+    return slope * 0.12667641043663025f * accuracy;
 }
 #endif
 
@@ -330,9 +330,9 @@ sV4_0610 func_00100610_0610(char* self) __asm__("func_00100610");
 
 sV4_0610 func_00100610_0610(char* self)
 {
-    sV4_0610 d = Sub_0610((*(sCam_0610**)(self + 0x18))->target, (*(sCam_0610**)(self + 0x18))->pos);
-    d = Scale_0610(d, 0.1f);
-    return Add_0610((*(sCam_0610**)(self + 0x18))->base, d);
+    sV4_0610 toTarget = Sub_0610((*(sCam_0610**)(self + 0x18))->target, (*(sCam_0610**)(self + 0x18))->pos);
+    toTarget = Scale_0610(toTarget, 0.1f);
+    return Add_0610((*(sCam_0610**)(self + 0x18))->base, toTarget);
 }
 #endif
 
@@ -1212,11 +1212,11 @@ extern "C" void func_001013A8(sMgr_13A8* self)
     }
     do { // FAKEMATCH: see header
     for (int i = 0; i < 6; i++) {
-        sRec_13A8* r = &self->recs[i];
-        if (r->a) {
-            if (--r->c == 0) {
-                r->a = 0;
-                r->b = 0;
+        sRec_13A8* riderTrack = &self->recs[i];
+        if (riderTrack->a) {
+            if (--riderTrack->c == 0) {
+                riderTrack->a = 0;
+                riderTrack->b = 0;
             }
         }
     }
@@ -1241,10 +1241,10 @@ extern "C" void func_001013A8(sMgr_13A8* self)
             if (pInstNode == 0 || pInstNode->IsDead()) {
                 pCurrElem->state = 1;
             } else {
-                sVec4_13A8 p = pInstNode->GetXform()->pos;
-                pCurrElem->px = p.x;
-                pCurrElem->py = p.y;
-                pCurrElem->pz = p.z;
+                sVec4_13A8 instPos = pInstNode->GetXform()->pos;
+                pCurrElem->px = instPos.x;
+                pCurrElem->py = instPos.y;
+                pCurrElem->pz = instPos.z;
             }
         }
     }
@@ -1407,23 +1407,23 @@ static inline sObj_1728* lookup_1728(unsigned int id)
 
 extern "C" void func_00101728(sMgr_1728* self, unsigned int* idp, float x, float y)
 {
-    cComp_1728* c = lookup_1728(*idp)->comp;
-    if (c == 0)
+    cComp_1728* instNode = lookup_1728(*idp)->comp;
+    if (instNode == 0)
         return;
-    if (c->IsDead())
+    if (instNode->IsDead())
         return;
     func_00101888(self, idp);
     for (int i = 0; i < 64; i++) {
-        sEnt_1728* e = &self->ents[i];
-        if (e->state == 2) {
-            e->state = 0;
-            e->id = *idp;
-            e->x = x;
-            e->y = y;
-            sVec4_1728 p = c->GetXform()->pos;
-            e->px = p.x;
-            e->py = p.y;
-            e->pz = p.z;
+        sEnt_1728* elemInfo = &self->ents[i];
+        if (elemInfo->state == 2) {
+            elemInfo->state = 0;
+            elemInfo->id = *idp;
+            elemInfo->x = x;
+            elemInfo->y = y;
+            sVec4_1728 instPos = instNode->GetXform()->pos;
+            elemInfo->px = instPos.x;
+            elemInfo->py = instPos.y;
+            elemInfo->pz = instPos.z;
             self->count++;
             return;
         }
@@ -1442,11 +1442,11 @@ extern "C" void func_00101888(sMgr_1728* self, unsigned int* idp)
     if (n != 0) {
         int remaining = n;
         for (int i = 0; i < 64 && remaining != 0; i++) {
-            sEnt_1728* e = &self->ents[i];
-            if (e->state != 2) {
+            sEnt_1728* elemInfo = &self->ents[i];
+            if (elemInfo->state != 2) {
                 remaining--;
-                if (e->id == *idp) {
-                    func_001441A0(self, e);
+                if (elemInfo->id == *idp) {
+                    func_001441A0(self, elemInfo);
                     return;
                 }
             }
@@ -1461,23 +1461,23 @@ INCLUDE_ASM("seg/seg_1218", func_00101900);
 struct N_1900 { int key; int val; int refs; N_1900 *next; };
 struct P_1900 { char pad[0xB54]; N_1900 *freelist; N_1900 *used; };
 
-extern "C" void func_00101900(P_1900 *arg0, int *arg1, int arg2) {
-    N_1900 *p;
+extern "C" void func_00101900(P_1900 *dangerMan, int *instId, int level) {
+    N_1900 *currActiveZone;
     N_1900 *n;
 
-    for (p = arg0->used; p != 0; p = p->next) {
-        if (p->key == *arg1) {
-            p->refs++;
+    for (currActiveZone = dangerMan->used; currActiveZone != 0; currActiveZone = currActiveZone->next) {
+        if (currActiveZone->key == *instId) {
+            currActiveZone->refs++;
             return;
         }
     }
-    n = arg0->freelist;
-    arg0->freelist = n->next;
-    n->key = *arg1;
-    n->val = arg2;
+    n = dangerMan->freelist;
+    dangerMan->freelist = n->next;
+    n->key = *instId;
+    n->val = level;
     n->refs = 1;
-    n->next = arg0->used;
-    arg0->used = n;
+    n->next = dangerMan->used;
+    dangerMan->used = n;
 }
 #endif
 
@@ -1519,8 +1519,8 @@ extern "C" void func_00101970(sSelf_1970* self, int* key) {
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00101A10);
 #ifdef SKIP_ASM
-extern "C" int func_00101A10(int arg0, int arg1) {
-    return (*(int *)((char*)(((arg1 * 0xC) + arg0)) + (0x710)));
+extern "C" int func_00101A10(int dangerMan, int aiIndex) {
+    return (*(int *)((char*)(((aiIndex * 0xC) + dangerMan)) + (0x710)));
 }
 #endif
 
@@ -1546,10 +1546,10 @@ extern "C" int func_0030A310(int, sLink_1A28*);
 
 extern "C" void func_00101A28(sList_1A28* list, sNode_1A28* node, int recurse)
 {
-    sLink_1A28* p;
-    for (p = node->items; p; p = p->next) {
-        if (func_0030A310(cWScriptMan_TheWScriptMan, p))
-            list->items[list->n++] = p;
+    sLink_1A28* item;
+    for (item = node->items; item; item = item->next) {
+        if (func_0030A310(cWScriptMan_TheWScriptMan, item))
+            list->items[list->n++] = item;
     }
     if (recurse) {
         if (node->kids[0]) func_00101A28(list, node->kids[0], 1);
@@ -1858,24 +1858,24 @@ struct S_32C0 {
     void *arr[8];
 };
 
-extern "C" void func_001032C0(S_32C0 *arg0, void *arg1) {
+extern "C" void func_001032C0(S_32C0 *focusMan, void *instance) {
     int temp_3;
     int temp_6;
     int var_2;
     int n;
 
-    temp_3 = (*(int *)((char*)(arg1) + (8)));
+    temp_3 = (*(int *)((char*)(instance) + (8)));
     temp_6 = temp_3 | 0x100;
-    (*(int *)((char*)(arg1) + (8))) = temp_6;
-    if (arg0->flag != 0) {
+    (*(int *)((char*)(instance) + (8))) = temp_6;
+    if (focusMan->flag != 0) {
         var_2 = temp_6 & 0xFFFFFDFF;
     } else {
         var_2 = temp_3 | 0x300;
     }
-    (*(int *)((char*)(arg1) + (8))) = var_2;
-    n = arg0->n;
-    arg0->arr[n] = arg1;
-    arg0->n = n + 1;
+    (*(int *)((char*)(instance) + (8))) = var_2;
+    n = focusMan->n;
+    focusMan->arr[n] = instance;
+    focusMan->n = n + 1;
 }
 #endif
 
@@ -2248,19 +2248,19 @@ extern "C" int func_001446B8(void*, int);
 extern "C" void func_00144670(void*, int);
 extern "C" void func_00104CC8(void*, int);
 
-extern "C" void func_00103AA0(void* self, sObj_3AA0* o)
+extern "C" void func_00103AA0(void* self, sObj_3AA0* sequence)
 {
-    int n = cAnimDataBase_TheAnimDataBase->banks[o->id & 0xFF]->ents[o->id >> 8].count;
+    int n = cAnimDataBase_TheAnimDataBase->banks[sequence->id & 0xFF]->ents[sequence->id >> 8].count;
     for (int i = 0; i < n; i++) {
         int ok = 0;
-        if (func_001446A0(o->sub, i) && func_001446B8(o->sub, i))
+        if (func_001446A0(sequence->sub, i) && func_001446B8(sequence->sub, i))
             ok = 1;
         if (ok) {
-            sBank_3AA0* b = cAnimDataBase_TheAnimDataBase->banks[o->id & 0xFF];
-            unsigned short r = b->recs[b->ents[o->id >> 8].first + i].b;
-            if (r & 0x8000) {
-                func_00144670(o->sub, i);
-                func_00104CC8(self, r & 0x7FFF);
+            sBank_3AA0* animBank = cAnimDataBase_TheAnimDataBase->banks[sequence->id & 0xFF];
+            unsigned short soundEvent = animBank->recs[animBank->ents[sequence->id >> 8].first + i].b;
+            if (soundEvent & 0x8000) {
+                func_00144670(sequence->sub, i);
+                func_00104CC8(self, soundEvent & 0x7FFF);
             }
         }
     }
@@ -2275,14 +2275,14 @@ extern "C" void func_00313C50(void*, int, int);
 extern "C" void func_00313CF0(void*, int, float);
 extern "C" int func_00313800(void*, float);
 extern "C" void func_003145F8(void*, void*);
-extern "C" int func_00103BE0(void* self, void* x, char* anim, int a, int b, float dt, float v)
+extern "C" int func_00103BE0(void* self, void* x, char* anim, int posAnim, int negAnim, float dt, float weight)
 {
-    if (v < 0.0f) {
-        func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + b * 4 + 0x1030));
-        func_00313CF0(anim, 0, -v * *(float*)(anim + 0x10));
+    if (weight < 0.0f) {
+        func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + negAnim * 4 + 0x1030));
+        func_00313CF0(anim, 0, -weight * *(float*)(anim + 0x10));
     } else {
-        func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + a * 4 + 0x1030));
-        func_00313CF0(anim, 0, v * *(float*)(anim + 0x10));
+        func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + posAnim * 4 + 0x1030));
+        func_00313CF0(anim, 0, weight * *(float*)(anim + 0x10));
     }
     if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
         func_003145F8(x, anim);
@@ -2304,22 +2304,22 @@ extern "C" void func_00313D28(void*, int, float);
 extern "C" int func_00313800(void*, float);
 extern "C" void func_003145F8(void*, void*);
 
-extern "C" int func_00103CC8(void* self, void* x, char* anim, int a, int b, float dt, float w, int c)
+extern "C" int func_00103CC8(void* self, void* x, char* anim, int negAnim, int cenAnim, float dt, float w, int posAnim)
 {
-    func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + b * 4 + 0x1030));
+    func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + cenAnim * 4 + 0x1030));
     if (0.0f < w) {
-        func_00313C50(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + c * 4 + 0x1030));
+        func_00313C50(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + posAnim * 4 + 0x1030));
     } else {
         w = -w;
-        func_00313C50(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + a * 4 + 0x1030));
+        func_00313C50(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + negAnim * 4 + 0x1030));
     }
     func_00313D28(anim, 0, 1.0f - w);
     func_00313D28(anim, 1, w);
     func_00313D40(anim, 0, 1);
-    float t = dt * 0.01666666753590107f;
-    func_003135B0(anim, 0, t);
+    float stepTime = dt * 0.01666666753590107f;
+    func_003135B0(anim, 0, stepTime);
     func_00313CF0(anim, 1, *(float*)(anim + 8) / *(float*)(anim + 0x10) * *(float*)(anim + 0x2C));
-    if (func_00313800(anim, t)) {
+    if (func_00313800(anim, stepTime)) {
         func_003145F8(x, anim);
         return 1;
     }
@@ -2339,40 +2339,40 @@ extern "C" void func_00313D28(void*, int, float);
 extern "C" int func_00313800(void*, float);
 extern "C" void func_003145F8(void*, void*);
 
-extern "C" int func_00103E28(void* self, void* x, char* anim, int i0, int i1, int i2, int i3, int i4, float dt, float v)
+extern "C" int func_00103E28(void* self, void* x, char* anim, int negEndAnim, int negMidAnim, int cenAnim, int posMidAnim, int posEndAnim, float dt, float weight)
 {
     int from, to;
     float w;
-    if (v > 0.5f) {
-        from = i4;
-        to = i3;
-        w = (v - 0.5f) * 2.0f;
-    } else if (v > 0.0f) {
-        from = i3;
-        to = i2;
-        w = v * 2.0f;
-    } else if (v > -0.5f) {
-        from = i2;
-        to = i1;
-        w = v * 2.0f + 1.0f;
+    if (weight > 0.5f) {
+        from = posEndAnim;
+        to = posMidAnim;
+        w = (weight - 0.5f) * 2.0f;
+    } else if (weight > 0.0f) {
+        from = posMidAnim;
+        to = cenAnim;
+        w = weight * 2.0f;
+    } else if (weight > -0.5f) {
+        from = cenAnim;
+        to = negMidAnim;
+        w = weight * 2.0f + 1.0f;
     } else {
-        from = i1;
-        to = i0;
-        w = (v + 1.0f) * 2.0f;
+        from = negMidAnim;
+        to = negEndAnim;
+        w = (weight + 1.0f) * 2.0f;
     }
     if (*(int*)(cGameAnimMap_TheGameAnimMap + from * 4 + 0x1030) != *(int*)(anim + 4)) {
-        float r = *(float*)(anim + 8) / *(float*)(anim + 0x10);
+        float frameFraction = *(float*)(anim + 8) / *(float*)(anim + 0x10);
         func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + from * 4 + 0x1030));
-        func_00313CF0(anim, 0, *(float*)(anim + 0x10) * r);
+        func_00313CF0(anim, 0, *(float*)(anim + 0x10) * frameFraction);
     }
     func_00313C50(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + to * 4 + 0x1030));
     func_00313D28(anim, 0, w);
     func_00313D28(anim, 1, 1.0f - w);
     func_00313D40(anim, 0, 1);
-    float t = dt * 0.01666666753590107f;
-    func_003135B0(anim, 0, t);
+    float stepTime = dt * 0.01666666753590107f;
+    func_003135B0(anim, 0, stepTime);
     func_00313CF0(anim, 1, *(float*)(anim + 8) / *(float*)(anim + 0x10) * *(float*)(anim + 0x2C));
-    if (func_00313800(anim, t)) {
+    if (func_00313800(anim, stepTime)) {
         func_003145F8(x, anim);
         return 1;
     }
@@ -2391,13 +2391,13 @@ extern "C" void func_00313CF0(void*, int, float);
 extern "C" int func_00313800(void*, float);
 extern "C" void func_003145F8(void*, void*);
 
-extern "C" int func_00103FF8(void* self, void* x, char* anim, int a, float dt, int b)
+extern "C" int func_00103FF8(void* self, void* x, char* anim, int intoAnim, float dt, int cycleAnim)
 {
-    if (*(int*)(anim + 4) == *(int*)(cGameAnimMap_TheGameAnimMap + a * 4 + 0x1030)) {
+    if (*(int*)(anim + 4) == *(int*)(cGameAnimMap_TheGameAnimMap + intoAnim * 4 + 0x1030)) {
         func_00313D40(anim, 0, 0);
         func_003135B0(anim, 0, dt * 0.01666666753590107f);
         if (*(float*)(anim + 8) >= *(float*)(anim + 0x10)) {
-            func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + b * 4 + 0x1030));
+            func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + cycleAnim * 4 + 0x1030));
             func_00313D40(anim, 0, 1);
             func_00313CF0(anim, 0, 0.0f);
         }
@@ -2418,22 +2418,22 @@ INCLUDE_ASM("seg/seg_1218", func_00104110);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00103CC8_4110(void*, void*, int*, int, int, int, float, float) __asm__("func_00103CC8");
 
-extern "C" int func_00104110(void *arg0, void *a1, int *arg2, float f12) {
+extern "C" int func_00104110(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
     float var_f13;
     void *temp_3;
 
-    temp_3 = (*(void **)((char*)(arg0) + (0x60)));
+    temp_3 = (*(void **)((char*)(riderAnim) + (0x60)));
     var_f13 = (*(float *)((char*)(temp_3) + (0x1FC)));
     if ((*(int *)((char*)(temp_3) + (0x320))) != 0) {
         var_f13 = -var_f13;
     }
-    if (*arg2 == 7) {
-        return func_00103CC8_4110(arg0, a1, arg2, 0x11, 0xF, 0x10, f12, var_f13);
+    if (*sequence == 7) {
+        return func_00103CC8_4110(riderAnim, sequencer, sequence, 0x11, 0xF, 0x10, deltaTime, var_f13);
     }
-    if (*arg2 == 0xA) {
-        return func_00103CC8_4110(arg0, a1, arg2, 0x1A, 0x17, 0x19, f12, var_f13);
+    if (*sequence == 0xA) {
+        return func_00103CC8_4110(riderAnim, sequencer, sequence, 0x1A, 0x17, 0x19, deltaTime, var_f13);
     }
-    return func_00103CC8_4110(arg0, a1, arg2, 0x1A, 0x18, 0x19, f12, var_f13);
+    return func_00103CC8_4110(riderAnim, sequencer, sequence, 0x1A, 0x18, 0x19, deltaTime, var_f13);
 }
 #endif
 
@@ -2443,24 +2443,24 @@ INCLUDE_ASM("seg/seg_1218", func_00104178);
 extern "C" int func_00103E28(void* self, void* x, char* anim, int i0, int i1, int i2, int i3, int i4, float dt, float v);
 extern "C" int func_00104178(char* self, void* x, int* anim, float dt)
 {
-    char* p = *(char**)(self + 0x60);
-    float v = *(float*)(p + 0x1FC);
-    if (*(int*)(p + 0x320) != 0)
-        v = -v;
-    int a, b, c, d, e;
-    int s = *anim;
-    if (s == 6) {
-        a = 0xE; b = 0xD; c = 0xA; d = 0xB; e = 0xC;
-    } else if (s == 8) {
-        a = 0x16; b = 0x15; c = 0x12; d = 0x13; e = 0x14;
-    } else if (s == 14) {
-        a = 0x20; b = 0x1F; c = 0x1B; d = 0x1D; e = 0x1E;
-    } else if (s != 15) {
-        a = 9; b = 8; c = 5; d = 6; e = 7;
+    char* rider = *(char**)(self + 0x60);
+    float weight = *(float*)(rider + 0x1FC);
+    if (*(int*)(rider + 0x320) != 0)
+        weight = -weight;
+    int negEndAnim, negMidAnim, cenAnim, posMidAnim, posEndAnim;
+    int animId = *anim;
+    if (animId == 6) {
+        negEndAnim = 0xE; negMidAnim = 0xD; cenAnim = 0xA; posMidAnim = 0xB; posEndAnim = 0xC;
+    } else if (animId == 8) {
+        negEndAnim = 0x16; negMidAnim = 0x15; cenAnim = 0x12; posMidAnim = 0x13; posEndAnim = 0x14;
+    } else if (animId == 14) {
+        negEndAnim = 0x20; negMidAnim = 0x1F; cenAnim = 0x1B; posMidAnim = 0x1D; posEndAnim = 0x1E;
+    } else if (animId != 15) {
+        negEndAnim = 9; negMidAnim = 8; cenAnim = 5; posMidAnim = 6; posEndAnim = 7;
     } else {
-        a = 0x20; b = 0x1F; c = 0x1C; d = 0x1D; e = 0x1E;
+        negEndAnim = 0x20; negMidAnim = 0x1F; cenAnim = 0x1C; posMidAnim = 0x1D; posEndAnim = 0x1E;
     }
-    return func_00103E28(self, x, (char*)anim, a, b, c, d, e, dt, v);
+    return func_00103E28(self, x, (char*)anim, negEndAnim, negMidAnim, cenAnim, posMidAnim, posEndAnim, dt, weight);
 }
 #endif
 
@@ -2470,19 +2470,19 @@ INCLUDE_ASM("seg/seg_1218", func_00104238);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00103CC8_4238(void*, void*, int*, int, int, int, float, float) __asm__("func_00103CC8");
 
-extern "C" void func_00104238(void *arg0, void *a1, int *arg2, float f12) {
+extern "C" void func_00104238(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
     int var_7;
     int var_8;
     int var_9;
     float var_f13;
     void *temp_3;
 
-    temp_3 = (*(void **)((char*)(arg0) + (0x60)));
+    temp_3 = (*(void **)((char*)(riderAnim) + (0x60)));
     var_f13 = (*(float *)((char*)(temp_3) + (0x238)));
     if ((*(int *)((char*)(temp_3) + (0x320))) != 0) {
         var_f13 = -var_f13;
     }
-    switch (*arg2) {
+    switch (*sequence) {
     case 0x12:
         var_7 = 0x41;
         var_8 = 0x3F;
@@ -2499,7 +2499,7 @@ extern "C" void func_00104238(void *arg0, void *a1, int *arg2, float f12) {
         var_9 = 0x43;
         break;
     }
-    func_00103CC8_4238(arg0, a1, arg2, var_7, var_8, var_9, f12, var_f13);
+    func_00103CC8_4238(riderAnim, sequencer, sequence, var_7, var_8, var_9, deltaTime, var_f13);
 }
 #endif
 
@@ -2509,16 +2509,16 @@ INCLUDE_ASM("seg/seg_1218", func_001042A8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00103CC8_42A8(void*, void*, char*, int, int, int, float, float) __asm__("func_00103CC8");
 
-extern "C" void func_001042A8(void *arg0, void *a1, char *a2, float dt) {
+extern "C" void func_001042A8(void *riderAnim, void *sequencer, char *sequence, float dt) {
     float var_f13;
     void *temp_3;
 
-    temp_3 = (*(void **)((char*)(arg0) + (0x60)));
+    temp_3 = (*(void **)((char*)(riderAnim) + (0x60)));
     var_f13 = (*(float *)((char*)(temp_3) + (0x214)));
     if ((*(int *)((char*)(temp_3) + (0x320))) == 0) {
         var_f13 = -var_f13;
     }
-    func_00103CC8_42A8(arg0, a1, a2, 0x24, 0x21, 0x22, dt, var_f13);
+    func_00103CC8_42A8(riderAnim, sequencer, sequence, 0x24, 0x21, 0x22, dt, var_f13);
 }
 #endif
 
@@ -2528,18 +2528,18 @@ INCLUDE_ASM("seg/seg_1218", func_001042E0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00103BE0_42E0(void *, void *, int *, int, int, float, float) __asm__("func_00103BE0");
 
-extern "C" int func_001042E0(void *arg0, void *a1, int *arg2, float f12) {
-    int x = *arg2;
+extern "C" int func_001042E0(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
+    int x = *sequence;
     if (x == 0xDA) {
-        return func_00103BE0_42E0(arg0, a1, arg2, 0x16A, 0x16B, f12, (*(float *)((char*)((*(void **)((char*)(arg0) + (0x60)))) + (0x238))));
+        return func_00103BE0_42E0(riderAnim, sequencer, sequence, 0x16A, 0x16B, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
     }
     if (x == 0xE2) {
-        return func_00103BE0_42E0(arg0, a1, arg2, 0x173, 0x174, f12, (*(float *)((char*)((*(void **)((char*)(arg0) + (0x60)))) + (0x238))));
+        return func_00103BE0_42E0(riderAnim, sequencer, sequence, 0x173, 0x174, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
     }
     if (x == 0xEA) {
-        return func_00103BE0_42E0(arg0, a1, arg2, 0x17C, 0x17D, f12, (*(float *)((char*)((*(void **)((char*)(arg0) + (0x60)))) + (0x238))));
+        return func_00103BE0_42E0(riderAnim, sequencer, sequence, 0x17C, 0x17D, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
     }
-    return func_00103BE0_42E0(arg0, a1, arg2, 0x185, 0x186, f12, (*(float *)((char*)((*(void **)((char*)(arg0) + (0x60)))) + (0x238))));
+    return func_00103BE0_42E0(riderAnim, sequencer, sequence, 0x185, 0x186, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
 }
 #endif
 
@@ -2554,11 +2554,11 @@ static inline float vAbs_4358(float x)
     return r;
 }
 extern "C" int func_00104358(char* self, void* x, char* anim, float dt) {
-    char* p = *(char**)(self + 0x60);
-    float b = vAbs_4358(*(float*)(p + 0x2A4));
-    float a = vAbs_4358(*(float*)(p + 0x2B0));
-    float m = (a < b) ? b : a;
-    func_00313CF0(anim, 0, m * *(float*)(anim + 0x10));
+    char* rider = *(char**)(self + 0x60);
+    float absSlew15 = vAbs_4358(*(float*)(rider + 0x2A4));
+    float absSlew16 = vAbs_4358(*(float*)(rider + 0x2B0));
+    float framePercent = (absSlew16 < absSlew15) ? absSlew15 : absSlew16;
+    func_00313CF0(anim, 0, framePercent * *(float*)(anim + 0x10));
     if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
         func_003145F8(x, anim);
         return 1;
@@ -2600,17 +2600,17 @@ extern "C" int func_001043F8(char* self, void* x, char* anim, float dt)
     func_00313C50(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + slot * 4 + 0x1030));
     func_00313D40(anim, 1, 1);
     char* rider = *(char**)(self + 0x60);
-    float b = vAbs_43F8(*(float*)(rider + 0x298));
-    float a = vAbs_43F8(*(float*)(rider + 0x28C));
-    float m = (a < b) ? b : a;
-    m = clamp_43F8(m, 0.0f, 1.0f);
-    float w = m * 0.75f + 0.25f;
+    float absSlew14 = vAbs_43F8(*(float*)(rider + 0x298));
+    float absSlew13 = vAbs_43F8(*(float*)(rider + 0x28C));
+    float framePercent = (absSlew13 < absSlew14) ? absSlew14 : absSlew13;
+    framePercent = clamp_43F8(framePercent, 0.0f, 1.0f);
+    float w = framePercent * 0.75f + 0.25f;
     func_00313D28(anim, 0, 1.0f - w);
     func_00313D28(anim, 1, w);
-    func_00313CF0(anim, 0, m * *(float*)(anim + 0x10));
-    float t = dt * 0.01666666753590107f;
-    func_003135B0(anim, 1, t);
-    if (func_00313800(anim, t)) {
+    func_00313CF0(anim, 0, framePercent * *(float*)(anim + 0x10));
+    float stepTime = dt * 0.01666666753590107f;
+    func_003135B0(anim, 1, stepTime);
+    if (func_00313800(anim, stepTime)) {
         func_003145F8(x, anim);
         return 1;
     }
@@ -2624,8 +2624,8 @@ INCLUDE_ASM("seg/seg_1218", func_001045B8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00103FF8_45B8(int, int, int, int, int) __asm__("func_00103FF8");
 
-extern "C" void func_001045B8(int a, int b, int c) {
-    func_00103FF8_45B8(a, b, c, 0x89, 0x8A);
+extern "C" void func_001045B8(int riderAnim, int sequencer, int sequence) {
+    func_00103FF8_45B8(riderAnim, sequencer, sequence, 0x89, 0x8A);
 }
 #endif
 
@@ -2648,13 +2648,13 @@ INCLUDE_ASM("seg/seg_1218", func_00104660);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00103BE0_4660(void *, void *, int *, int, int, float, float) __asm__("func_00103BE0");
 
-extern "C" int func_00104660(void *arg0, void *arg1, int *arg2, float f12) {
-    float w = (*(float *)((char*)((*(void **)((char*)(arg0) + (0x60)))) + (0x244)));
+extern "C" int func_00104660(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
+    float w = (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x244)));
 
-    if (*arg2 == 0x2D) {
-        return func_00103BE0_4660(arg0, arg1, arg2, 0x161, 0x160, f12, w);
+    if (*sequence == 0x2D) {
+        return func_00103BE0_4660(riderAnim, sequencer, sequence, 0x161, 0x160, deltaTime, w);
     }
-    return func_00103BE0_4660(arg0, arg1, arg2, 0x15B, 0x15A, f12, w);
+    return func_00103BE0_4660(riderAnim, sequencer, sequence, 0x15B, 0x15A, deltaTime, w);
 }
 #endif
 
@@ -2665,22 +2665,22 @@ INCLUDE_ASM("seg/seg_1218", func_001046B0);
 extern "C" int func_00103CC8(void* self, void* x, char* anim, int a, int b, float dt, float w, int c);
 extern "C" int func_001046B0(char* self, void* x, int* anim, float dt)
 {
-    float v = *(float*)(*(char**)(self + 0x60) + 0x274);
-    v = v + v - 1.0f;
+    float centeredSlew = *(float*)(*(char**)(self + 0x60) + 0x274);
+    centeredSlew = centeredSlew + centeredSlew - 1.0f;
     float w;
-    if (v >= -1.0f) {
-        w = v <? 1.0f;
+    if (centeredSlew >= -1.0f) {
+        w = centeredSlew <? 1.0f;
     } else {
         w = -1.0f;
     }
-    int a, b, c;
-    a = 0x3C;
+    int negAnim, cenAnim, posAnim;
+    negAnim = 0x3C;
     if (*anim != 0x1C) {
-        b = 0x3A; c = 0x3B;
+        cenAnim = 0x3A; posAnim = 0x3B;
     } else {
-        a = 0x31; b = 0x30; c = 0x32;
+        negAnim = 0x31; cenAnim = 0x30; posAnim = 0x32;
     }
-    return func_00103CC8(self, x, (char*)anim, a, b, dt, w, c);
+    return func_00103CC8(self, x, (char*)anim, negAnim, cenAnim, dt, w, posAnim);
 }
 #endif
 
@@ -2693,14 +2693,14 @@ static inline float clamp_4728(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo;
 }
 extern "C" int func_00104728(char* self, void* x, char* anim, float dt) {
-    float v;
-    int s = *(int*)anim;
-    if (s == 0x19 || s == 0x21) {
-        v = clamp_4728(1.0f - *(float*)(*(char**)(self + 0x60) + 0x268), 0.0f, 1.0f);
+    float framePercent;
+    int animId = *(int*)anim;
+    if (animId == 0x19 || animId == 0x21) {
+        framePercent = clamp_4728(1.0f - *(float*)(*(char**)(self + 0x60) + 0x268), 0.0f, 1.0f);
     } else {
-        v = *(float*)(*(char**)(self + 0x60) + 0x268);
+        framePercent = *(float*)(*(char**)(self + 0x60) + 0x268);
     }
-    func_00313CF0(anim, 0, v * *(float*)(anim + 0x10));
+    func_00313CF0(anim, 0, framePercent * *(float*)(anim + 0x10));
     if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
         func_003145F8(x, anim);
         return 1;
@@ -2725,16 +2725,16 @@ static inline float clamp_47F0(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo;
 }
 extern "C" int func_001047F0(char* self, void* x, char* anim, float dt) {
-    float v;
-    int s = *(int*)anim;
-    if (s == 0x25) {
-        v = 1.0f - vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
-    } else if (s == 0x26) {
-        v = 1.0f - vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
+    float framePercent;
+    int animId = *(int*)anim;
+    if (animId == 0x25) {
+        framePercent = 1.0f - vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
+    } else if (animId == 0x26) {
+        framePercent = 1.0f - vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
     } else {
-        v = vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
+        framePercent = vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
     }
-    func_00313CF0(anim, 0, clamp_47F0(v, 0.0f, 1.0f) * *(float*)(anim + 0x10));
+    func_00313CF0(anim, 0, clamp_47F0(framePercent, 0.0f, 1.0f) * *(float*)(anim + 0x10));
     if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
         func_003145F8(x, anim);
         return 1;
@@ -2749,12 +2749,12 @@ INCLUDE_ASM("seg/seg_1218", func_001048C0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_003135B0_48C0(void*, int, float) __asm__("func_003135B0");
 extern "C" int func_001048C0(void* self, void* x, void* anim, float dt) {
-    float t = dt * 0.01666666753590107f;
+    float stepTime = dt * 0.01666666753590107f;
     int done;
-    if (func_003135B0_48C0(anim, 0, t) != 0) {
+    if (func_003135B0_48C0(anim, 0, stepTime) != 0) {
         done = 1;
     } else {
-        done = func_00313800(anim, t);
+        done = func_00313800(anim, stepTime);
     }
     if (done == 0) {
         return 0;
@@ -2770,12 +2770,12 @@ INCLUDE_ASM("seg/seg_1218", func_00104940);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_003135B0_4940(void*, int, float) __asm__("func_003135B0");
 extern "C" int func_00104940(void* self, void* x, void* anim, float dt) {
-    float t = dt * 0.01666666753590107f;
+    float stepTime = dt * 0.01666666753590107f;
     int done;
-    if (func_003135B0_4940(anim, 0, t) != 0) {
+    if (func_003135B0_4940(anim, 0, stepTime) != 0) {
         done = 1;
     } else {
-        done = func_00313800(anim, t);
+        done = func_00313800(anim, stepTime);
     }
     if (done == 0) {
         return 0;
@@ -2791,12 +2791,12 @@ INCLUDE_ASM("seg/seg_1218", func_001049C0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_003135B0_49C0(void*, int, float) __asm__("func_003135B0");
 extern "C" int func_001049C0(void* self, void* x, void* anim, float dt) {
-    float t = dt * 0.01666666753590107f;
+    float stepTime = dt * 0.01666666753590107f;
     int done;
-    if (func_003135B0_49C0(anim, 0, t) != 0) {
+    if (func_003135B0_49C0(anim, 0, stepTime) != 0) {
         done = 1;
     } else {
-        done = func_00313800(anim, t);
+        done = func_00313800(anim, stepTime);
     }
     if (done == 0) {
         return 0;
@@ -2812,8 +2812,8 @@ INCLUDE_ASM("seg/seg_1218", func_00104A40);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00312B18_4A40(int, int, int, int) __asm__("func_00312B18");
 
-extern "C" void func_00104A40(int a, int b, int c) {
-    func_00312B18_4A40(a, b, c, 0x11F);
+extern "C" void func_00104A40(int riderAnim, int sequencer, int sequence) {
+    func_00312B18_4A40(riderAnim, sequencer, sequence, 0x11F);
 }
 #endif
 
@@ -2825,25 +2825,25 @@ INCLUDE_ASM("seg/seg_1218", func_00104A60);
 extern "C" int func_00312B18_4A60(void*, void*, int*, int) __asm__("func_00312B18");
 
 // Plays the landing animation that matches the current trick state.
-extern "C" int func_00104A60(void* a, void* b, int* c)
+extern "C" int func_00104A60(void* riderAnim, void* sequencer, int* sequence)
 {
-    switch (*c) {
+    switch (*sequence) {
     case 0x10F: case 0x11D:
-        return func_00312B18_4A60(a, b, c, 0x123);
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x123);
     case 0x110: case 0x118: case 0x119: case 0x11E:
-        return func_00312B18_4A60(a, b, c, 0x124);
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x124);
     case 0x10D: case 0x116: case 0x11B:
-        return func_00312B18_4A60(a, b, c, 0x121);
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x121);
     case 0x10E: case 0x117: case 0x11C:
-        return func_00312B18_4A60(a, b, c, 0x122);
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x122);
     case 0x111:
-        return func_00312B18_4A60(a, b, c, 0x125);
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x125);
     case 0x112:
-        return func_00312B18_4A60(a, b, c, 0x126);
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x126);
     case 0x113:
-        return func_00312B18_4A60(a, b, c, 0x127);
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x127);
     case 0x114:
-        return func_00312B18_4A60(a, b, c, 0x128);
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x128);
     }
     return 0x1B6;
 }
@@ -2855,11 +2855,11 @@ INCLUDE_ASM("seg/seg_1218", func_00104B48);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00312BD0_4B48(void*, int, int, int) __asm__("func_00312BD0");
 
-extern "C" int func_00104B48(void *arg0, int b, int c) {
-    if (*(int *)((char*)arg0 + 0x64) != 0) {
-        return func_00312BD0_4B48(arg0, b, c, 0x1B4);
+extern "C" int func_00104B48(void *riderAnim, int sequencer, int sequence) {
+    if (*(int *)((char*)riderAnim + 0x64) != 0) {
+        return func_00312BD0_4B48(riderAnim, sequencer, sequence, 0x1B4);
     }
-    return func_00312BD0_4B48(arg0, b, c, 0x11F);
+    return func_00312BD0_4B48(riderAnim, sequencer, sequence, 0x11F);
 }
 #endif
 
@@ -2869,8 +2869,8 @@ INCLUDE_ASM("seg/seg_1218", func_00104B78);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00312B18_4B78(int, int, int, int) __asm__("func_00312B18");
 
-extern "C" void func_00104B78(int a, int b, int c) {
-    func_00312B18_4B78(a, b, c, 5);
+extern "C" void func_00104B78(int riderAnim, int sequencer, int sequence) {
+    func_00312B18_4B78(riderAnim, sequencer, sequence, 5);
 }
 #endif
 
@@ -2880,8 +2880,8 @@ INCLUDE_ASM("seg/seg_1218", func_00104B98);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00312B18_4B98(int, int, int, int) __asm__("func_00312B18");
 
-extern "C" void func_00104B98(int a, int b, int c) {
-    func_00312B18_4B98(a, b, c, 3);
+extern "C" void func_00104B98(int riderAnim, int sequencer, int sequence) {
+    func_00312B18_4B98(riderAnim, sequencer, sequence, 3);
 }
 #endif
 
@@ -2891,8 +2891,8 @@ INCLUDE_ASM("seg/seg_1218", func_00104BB8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00312B18_4BB8(int, int, int, int) __asm__("func_00312B18");
 
-extern "C" void func_00104BB8(int a, int b, int c) {
-    func_00312B18_4BB8(a, b, c, 0x13);
+extern "C" void func_00104BB8(int riderAnim, int sequencer, int sequence) {
+    func_00312B18_4BB8(riderAnim, sequencer, sequence, 0x13);
 }
 #endif
 
@@ -2902,11 +2902,11 @@ INCLUDE_ASM("seg/seg_1218", func_00104BD8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00312BD0_4BD8(void *, int, int, int) __asm__("func_00312BD0");
 
-extern "C" int func_00104BD8(void *arg0, int a1, int a2) {
-    if ((*(int *)((char*)((*(void **)((char*)(arg0) + (0x60)))) + (0x330))) == 1) {
-        return func_00312BD0_4BD8(arg0, a1, a2, 0x1C);
+extern "C" int func_00104BD8(void *riderAnim, int sequencer, int sequence) {
+    if ((*(int *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x330))) == 1) {
+        return func_00312BD0_4BD8(riderAnim, sequencer, sequence, 0x1C);
     }
-    return func_00312BD0_4BD8(arg0, a1, a2, 0x24);
+    return func_00312BD0_4BD8(riderAnim, sequencer, sequence, 0x24);
 }
 #endif
 
@@ -2916,8 +2916,8 @@ INCLUDE_ASM("seg/seg_1218", func_00104C18);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00312BD0_4C18(int, int, int, int) __asm__("func_00312BD0");
 
-extern "C" void func_00104C18(int a, int b, int c) {
-    func_00312BD0_4C18(a, b, c, 5);
+extern "C" void func_00104C18(int riderAnim, int sequencer, int sequence) {
+    func_00312BD0_4C18(riderAnim, sequencer, sequence, 5);
 }
 #endif
 
@@ -2927,9 +2927,9 @@ INCLUDE_ASM("seg/seg_1218", func_00104C38);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00312BD0_4C38(int, int, int*, int) __asm__("func_00312BD0");
 
-extern "C" void func_00104C38(int a0, int a1, int *arg2) {
+extern "C" void func_00104C38(int riderAnim, int sequencer, int *sequence) {
     int var_7;
-    switch (*arg2) {
+    switch (*sequence) {
     case 0x45:
         var_7 = 0x14;
         break;
@@ -2940,7 +2940,7 @@ extern "C" void func_00104C38(int a0, int a1, int *arg2) {
         var_7 = 0x12;
         break;
     }
-    func_00312BD0_4C38(a0, a1, arg2, var_7);
+    func_00312BD0_4C38(riderAnim, sequencer, sequence, var_7);
 }
 #endif
 
@@ -2950,16 +2950,16 @@ INCLUDE_ASM("seg/seg_1218", func_00104C80);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00312BD0_4C80(int, int, int, int) __asm__("func_00312BD0");
 
-extern "C" void func_00104C80(int a, int b, int c) {
-    func_00312BD0_4C80(a, b, c, 0x1B2);
+extern "C" void func_00104C80(int riderAnim, int sequencer, int sequence) {
+    func_00312BD0_4C80(riderAnim, sequencer, sequence, 0x1B2);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00104CA0);
 #ifdef SKIP_ASM
-extern "C" int func_00104CA0(int arg0, void* arg1, void* arg2) {
-    func_003145F8(arg1, arg2);
+extern "C" int func_00104CA0(int riderAnim, void* sequencer, void* sequence) {
+    func_003145F8(sequencer, sequence);
     return 0x1B6;
 }
 #endif
@@ -2971,11 +2971,11 @@ INCLUDE_ASM("seg/seg_1218", func_00104CC8);
 extern "C" void func_00289B18_4CC8(int, int, int) __asm__("func_00289B18");
 extern int gSSXAudio_seg_1218 __asm__("gSSXAudio");
 
-extern "C" void func_00104CC8(void *arg0, int arg1) {
-    int temp_2 = (*(int *)((char*)(arg0) + (0x60)));
-    int s = arg1 & 0xFFFF;
+extern "C" void func_00104CC8(void *riderAnim, int soundId) {
+    int temp_2 = (*(int *)((char*)(riderAnim) + (0x60)));
+    int maskedSoundId = soundId & 0xFFFF;
     if (temp_2 != 0) {
-        func_00289B18_4CC8(gSSXAudio_seg_1218, temp_2, s);
+        func_00289B18_4CC8(gSSXAudio_seg_1218, temp_2, maskedSoundId);
     }
 }
 #endif
@@ -3019,10 +3019,10 @@ extern "C" void func_00104D38(void *arg0, void *arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00104D50);
 #ifdef SKIP_ASM
-extern "C" void func_00104D50(void *arg0, void *arg1) {
-    (*(void **)((char*)(arg0) + (0x64))) = arg1;
-    (*(int *)((char*)(arg0) + (0x60))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = (int) (*(int *)((char*)(arg1) + (8)));
+extern "C" void func_00104D50(void *riderAnim, void *arg1) {
+    (*(void **)((char*)(riderAnim) + (0x64))) = arg1;
+    (*(int *)((char*)(riderAnim) + (0x60))) = 0;
+    (*(int *)((char*)(riderAnim) + (0x54))) = (int) (*(int *)((char*)(arg1) + (8)));
 }
 #endif
 
@@ -3034,10 +3034,10 @@ public:
     virtual void Read(void* dst, int n);
 };
 extern "C" void func_003147F0(void*, cStream_4D68*);
-extern "C" void func_00104D68(char* self, cStream_4D68* s) {
-    s->Read(self, 0x50);
+extern "C" void func_00104D68(char* self, cStream_4D68* stream) {
+    stream->Read(self, 0x50);
     for (int i = 0; i < 6; i++) {
-        func_003147F0(*(char**)(self + 0x50) + i * 8, s);
+        func_003147F0(*(char**)(self + 0x50) + i * 8, stream);
     }
 }
 #endif
@@ -3052,11 +3052,11 @@ public:
 };
 extern "C" void cAnimSequencer_expireAll(void*);
 extern "C" void func_00314880(void*, cStream_4DE0*);
-extern "C" void func_00104DE0(char* self, cStream_4DE0* s) {
-    s->Read(self, 0x50);
+extern "C" void func_00104DE0(char* self, cStream_4DE0* stream) {
+    stream->Read(self, 0x50);
     for (int i = 0; i < 6; i++) {
         cAnimSequencer_expireAll(*(char**)(self + 0x50) + i * 8);
-        func_00314880(*(char**)(self + 0x50) + i * 8, s);
+        func_00314880(*(char**)(self + 0x50) + i * 8, stream);
     }
 }
 #endif
@@ -4127,13 +4127,13 @@ extern "C" void func_00329B40(void* p, const t4Vector* d);
 // PORT: the unit declares func_00106538(void*, const t4Vector&) for its callers; same symbol.
 extern "C" void func_00106538_6538(char* self, const t4Vector* d) __asm__("func_00106538");
 
-extern "C" void func_00106538_6538(char* self, const t4Vector* d)
+extern "C" void func_00106538_6538(char* self, const t4Vector* offset)
 {
-    AddEq_6538(*(t4Vector*)(self + 0x110), *d);
-    AddEq_6538(*(t4Vector*)(self + 0x9D0), *d);
-    func_00329B40(*(void**)(self + 0xAA0), d);
-    AddEq_6538(*(t4Vector*)(self + 0x400), *d);
-    AddEq_6538(*(t4Vector*)(self + 0x410), *d);
+    AddEq_6538(*(t4Vector*)(self + 0x110), *offset);
+    AddEq_6538(*(t4Vector*)(self + 0x9D0), *offset);
+    func_00329B40(*(void**)(self + 0xAA0), offset);
+    AddEq_6538(*(t4Vector*)(self + 0x400), *offset);
+    AddEq_6538(*(t4Vector*)(self + 0x410), *offset);
 }
 #endif
 
@@ -4274,19 +4274,19 @@ extern "C" void func_001065B0_impl(char* self, char* arg) __asm__("func_001065B0
 extern "C" void func_001065B0_impl(char* self, char* arg)
 {
     sV4_65B0 n = Norm_65B0(Cross_65B0(Up_65B0(self), *(sV4_65B0*)(arg + 0x10)));
-    sV4_65B0 c = Cross_65B0(Up_65B0(self), n);
-    float x = Dot_65B0(Fwd_65B0(self), c);
+    sV4_65B0 inPlaneDir = Cross_65B0(Up_65B0(self), n);
+    float x = Dot_65B0(Fwd_65B0(self), inPlaneDir);
     float y = Dot_65B0(Fwd_65B0(self), n);
     float angle = Atan2_65B0(y, x);
     float lim = 1.9198623895645142f;
     float step = 0.349065899848938f;
-    float d;
+    float turnAngle;
     if (angle > 0.0f)
-        d = Clamp_65B0(lim - angle, 0.0f, step);
+        turnAngle = Clamp_65B0(lim - angle, 0.0f, step);
     else
-        d = Clamp_65B0(-lim - angle, -step, 0.0f);
-    if (d != 0.0f) {
-        Rotate_65B0(self, Up_65B0(self), -d);
+        turnAngle = Clamp_65B0(-lim - angle, -step, 0.0f);
+    if (turnAngle != 0.0f) {
+        Rotate_65B0(self, Up_65B0(self), -turnAngle);
     }
 }
 #endif
@@ -5961,31 +5961,31 @@ extern "C" int func_001086B8_86B8(char* self, sV4_86B8* tgt, sV4_86B8* dir)
     sNode_86B8* n = &(*(sPath_86B8**)(self + 0x780))->nodes[*(int*)(self + 0x8A0)];
     const sV4_86B8& fwd = Fwd_86B8(n);
     sV4_86B8 pos = Add_86B8(n->pos, *(sV4_86B8*)(self + 0x9D0));
-    float t = *(float*)(self + 0x25C);
-    float nearR = Lerp_86B8(50.0f, 30.0f, t);
+    float blend = *(float*)(self + 0x25C);
+    float nearR = Lerp_86B8(50.0f, 30.0f, blend);
     float farR;
     if (!*(int*)(self + 0x330))
-        farR = Lerp_86B8(170.0f, 100.0f, t);
+        farR = Lerp_86B8(170.0f, 100.0f, blend);
     else
-        farR = Lerp_86B8(170.0f, 50.0f, t);
+        farR = Lerp_86B8(170.0f, 50.0f, blend);
     float proj = Dot_86B8(fwd, Sub_86B8(*tgt, pos));
     float lo = nearR - farR;
     float hi = farR - nearR;
-    sV4_86B8 d = Sub_86B8(Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(proj, lo, hi))), *tgt);
-    if (Len_86B8(d) <= nearR)
+    sV4_86B8 diff = Sub_86B8(Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(proj, lo, hi))), *tgt);
+    if (Len_86B8(diff) <= nearR)
         return 1;
     float dd = Dot_86B8(*dir, fwd);
     float den = 1.0f - dd * dd;
     if (den < 0.0010000000474974513f)
         return 0;
-    sV4_86B8 b = Div_86B8(Sub_86B8(pos, *tgt), den);
-    float u = Dot_86B8(b, Sub_86B8(Scale_86B8(*dir, dd), fwd));
-    sV4_86B8 p = Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(u, lo, hi)));
+    sV4_86B8 relScaled = Div_86B8(Sub_86B8(pos, *tgt), den);
+    float along = Dot_86B8(relScaled, Sub_86B8(Scale_86B8(*dir, dd), fwd));
+    sV4_86B8 probePos = Add_86B8(pos, Scale_86B8(fwd, Clamp_86B8(along, lo, hi)));
     sHit_86B8 hit;
-    if (!func_00334680_86B8(*(void**)(self + 0x860), &p, &hit.pos, 1, 300.0f))
+    if (!func_00334680_86B8(*(void**)(self + 0x860), &probePos, &hit.pos, 1, 300.0f))
         return 0;
-    d = Sub_86B8(p, hit.pos);
-    return Len_86B8(d) <= nearR;
+    diff = Sub_86B8(probePos, hit.pos);
+    return Len_86B8(diff) <= nearR;
 }
 #endif
 
@@ -7057,8 +7057,8 @@ extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
 //100%
 INCLUDE_ASM("seg/seg_1218", func_0010B750);
 #ifdef SKIP_ASM
-extern "C" void func_0010B750(cComputer* computer, int *arg1) {
-    *arg1 = (*arg1 & ~0x1000) | ((func_0010D1A0(computer) & 1) << 0xC);
+extern "C" void func_0010B750(cComputer* computer, int *controlCmd) {
+    *controlCmd = (*controlCmd & ~0x1000) | ((func_0010D1A0(computer) & 1) << 0xC);
 }
 #endif
 
@@ -7188,9 +7188,9 @@ struct sHit_BB18 { int type; int val; float lim; int d; };
 extern "C" int func_0010BB18(cComputer* self_, float* out, int* ok) {
     sHit_BB18 buf[12];
     char* rider = (char*)self_->mRider;
-    char* q = *(char**)(rider + 0xAB8);
-    char* vt = *(char**)(q + 0x34);
-    int n = (*(int (**)(char*, sHit_BB18*, int, float, float))(vt + 0xC))(q + *(short*)(vt + 8), buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4) + 600.0f);
+    char* track = *(char**)(rider + 0xAB8);
+    char* vt = *(char**)(track + 0x34);
+    int n = (*(int (**)(char*, sHit_BB18*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4) + 600.0f);
     for (int i = 0; i < n; i++) {
         if (buf[i].type == 0x11) {
             *out = (float)buf[i].val * 27.777780532836914f;
@@ -7209,9 +7209,9 @@ struct sHit_BBF8 { int type; int val; int d[2]; };
 extern "C" int func_0010BBF8(cComputer* self_, int* out) {
     sHit_BBF8 buf[12];
     char* rider = (char*)self_->mRider;
-    char* q = *(char**)(rider + 0xAB8);
-    char* vt = *(char**)(q + 0x34);
-    int n = (*(int (**)(char*, sHit_BBF8*, int, float, float))(vt + 0xC))(q + *(short*)(vt + 8), buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4) + 50.0f);
+    char* track = *(char**)(rider + 0xAB8);
+    char* vt = *(char**)(track + 0x34);
+    int n = (*(int (**)(char*, sHit_BBF8*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4) + 50.0f);
     *out = 0;
     for (int i = 0; i < n; i++) {
         if (buf[i].type == 0x13) {
@@ -7230,9 +7230,9 @@ struct sHit_BC98 { int type; int d[3]; };
 extern "C" int func_0010BC98(cComputer* self) {
     sHit_BC98 buf[12];
     char* rider = (char*)self->mRider;
-    char* q = *(char**)(rider + 0xAB8);
-    char* vt = *(char**)(q + 0x34);
-    int n = (*(int (**)(char*, sHit_BC98*, int, float, float))(vt + 0xC))(q + *(short*)(vt + 8), buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4));
+    char* track = *(char**)(rider + 0xAB8);
+    char* vt = *(char**)(track + 0x34);
+    int n = (*(int (**)(char*, sHit_BC98*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4));
     for (int i = 0; i < n; i++) {
         if (buf[i].type == 0xF) return 1;
     }

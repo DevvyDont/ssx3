@@ -375,21 +375,21 @@ public:
 
 extern "C" void func_00183B08(void* self)
 {
-    cUIObj_183B08* a = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_right));
-    if (a != 0) {
-        a->setVisible(0);
+    cUIObj_183B08* hiliteRight = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_right));
+    if (hiliteRight != 0) {
+        hiliteRight->setVisible(0);
     }
-    cUIObj_183B08* b = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_left));
-    if (b != 0) {
-        b->setVisible(1);
+    cUIObj_183B08* hiliteLeft = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_left));
+    if (hiliteLeft != 0) {
+        hiliteLeft->setVisible(1);
     }
-    cUIObj_183B08* c = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_choose));
-    if (c != 0) {
-        c->setVisible(1);
+    cUIObj_183B08* helpChoose = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_choose));
+    if (helpChoose != 0) {
+        helpChoose->setVisible(1);
     }
-    cUIObj_183B08* d = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_custom));
-    if (d != 0) {
-        d->setVisible(0);
+    cUIObj_183B08* helpCustom = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_custom));
+    if (helpCustom != 0) {
+        helpCustom->setVisible(0);
     }
 }
 #endif
@@ -420,21 +420,21 @@ public:
 
 extern "C" void func_00183C08(void* self)
 {
-    cUIObj_183C08* a = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_right));
-    if (a != 0) {
-        a->setVisible(1);
+    cUIObj_183C08* hiliteRight = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_right));
+    if (hiliteRight != 0) {
+        hiliteRight->setVisible(1);
     }
-    cUIObj_183C08* b = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_left));
-    if (b != 0) {
-        b->setVisible(0);
+    cUIObj_183C08* hiliteLeft = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_left));
+    if (hiliteLeft != 0) {
+        hiliteLeft->setVisible(0);
     }
-    cUIObj_183C08* c = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_choose));
-    if (c != 0) {
-        c->setVisible(0);
+    cUIObj_183C08* helpChoose = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_choose));
+    if (helpChoose != 0) {
+        helpChoose->setVisible(0);
     }
-    cUIObj_183C08* d = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_custom));
-    if (d != 0) {
-        d->setVisible(1);
+    cUIObj_183C08* helpCustom = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_custom));
+    if (helpCustom != 0) {
+        helpCustom->setVisible(1);
     }
 }
 #endif

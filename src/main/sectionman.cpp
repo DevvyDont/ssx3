@@ -120,12 +120,12 @@ void* func_0022E278(void* self)
 //100%
 INCLUDE_ASM("main/sectionman", func_0022E288__FPvT0);
 #ifdef SKIP_ASM
-int func_0022E288(void* self, void* a1)
+int func_0022E288(void* self, void* node)
 {
-    int t0 = *(int*)((char*)self + 0x198);
-    *(int*)((char*)a1 + 0x4) = t0;
-    *(int*)((char*)self + 0x198) = (int)a1;
-    return t0;
+    int prevHead = *(int*)((char*)self + 0x198);
+    *(int*)((char*)node + 0x4) = prevHead;
+    *(int*)((char*)self + 0x198) = (int)node;
+    return prevHead;
 }
 #endif
 

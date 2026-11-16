@@ -523,18 +523,18 @@ struct sMsgCenter_97AD8 {
 
 extern "C" void func_00197AD8(void* self)
 {
-    sMsgCenter_97AD8* s = (sMsgCenter_97AD8*)self;
+    sMsgCenter_97AD8* msgCenter = (sMsgCenter_97AD8*)self;
     int i;
     int j;
     int n = 0;
-    for (i = 0; i < s->count; i++) {
-        if ((int)((s->mask >> i) & 1)) {
-            s->list[n++] = i;
+    for (i = 0; i < msgCenter->count; i++) {
+        if ((int)((msgCenter->mask >> i) & 1)) {
+            msgCenter->list[n++] = i;
         }
     }
-    for (j = 0; j < s->count; j++) {
-        if (!(int)((s->mask >> j) & 1)) {
-            s->list[n++] = j;
+    for (j = 0; j < msgCenter->count; j++) {
+        if (!(int)((msgCenter->mask >> j) & 1)) {
+            msgCenter->list[n++] = j;
         }
     }
 }
@@ -1462,11 +1462,11 @@ extern "C" const char* getDollarString(void* amount_)
 //100%
 INCLUDE_ASM("fe/messagecenter", func_00198DA0);
 #ifdef SKIP_ASM
-extern "C" int func_00198DA0(void* self, void* a1)
+extern "C" int func_00198DA0(void* self, void* other)
 {
-    void* p = *(void**)self;
-    void* p2 = *(void**)a1;
-    return *(short*)((char*)p + 0xa) - *(short*)((char*)p2 + 0xa);
+    void* lhs = *(void**)self;
+    void* rhs = *(void**)other;
+    return *(short*)((char*)lhs + 0xa) - *(short*)((char*)rhs + 0xa);
 }
 #endif
 

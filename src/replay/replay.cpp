@@ -396,12 +396,12 @@ INCLUDE_ASM("replay/replay", cReplay_findNextFrame);
  */
 extern "C" void* cReplay_findNextFrame(cReplay* self)
 {
-    void* p = func_0026E448(self);
-    void* q = *(void**)((char*)p + 0x14);
-    if (q != 0) {
-        p = q;
+    void* frame = func_0026E448(self);
+    void* nextFrame = *(void**)((char*)frame + 0x14);
+    if (nextFrame != 0) {
+        frame = nextFrame;
     }
-    return p;
+    return frame;
 }
 #endif
 
@@ -419,12 +419,12 @@ INCLUDE_ASM("replay/replay", cReplay_findPrevFrame);
  */
 extern "C" void* cReplay_findPrevFrame(cReplay* self)
 {
-    void* p = func_0026E448(self);
-    void* q = *(void**)((char*)p + 0x18);
-    if (q != 0) {
-        p = q;
+    void* frame = func_0026E448(self);
+    void* prevFrame = *(void**)((char*)frame + 0x18);
+    if (prevFrame != 0) {
+        frame = prevFrame;
     }
-    return p;
+    return frame;
 }
 #endif
 
@@ -448,9 +448,9 @@ extern "C" void cReplay_rewindFrame(cReplay* self_)
 {
     cReplay* self = self_;
     int i;
-    void* p = func_0026E448_2(self, self->PlaybackTick);
-    (*(void**)&self->PlaybackFrame) = p;
-    self->PlaybackTick = *(int*)((char*)p + 0x30);
+    void* frame = func_0026E448_2(self, self->PlaybackTick);
+    (*(void**)&self->PlaybackFrame) = frame;
+    self->PlaybackTick = *(int*)((char*)frame + 0x30);
     for (i = 0; i < 2; i++) {
         if (((void**)&self->InputCache[0])[i] != 0) {
             func_0026D4D8(((void**)&self->InputCache[0])[i], self->PlaybackTick);
@@ -472,9 +472,9 @@ extern "C" void cReplay_rewindFrame(cReplay* self);
  */
 extern "C" void cReplay_nextFrame(cReplay* self)
 {
-    void* p = cReplay_findNextFrame_2(self, self->PlaybackTick);
-    self->PlaybackFrame = (cReplayFrame*)p;
-    self->PlaybackTick = *(int*)((char*)p + 0x30);
+    void* frame = cReplay_findNextFrame_2(self, self->PlaybackTick);
+    self->PlaybackFrame = (cReplayFrame*)frame;
+    self->PlaybackTick = *(int*)((char*)frame + 0x30);
     cReplay_rewindFrame(self);
 }
 #endif
@@ -492,9 +492,9 @@ extern "C" void cReplay_rewindFrame(cReplay* self);
  */
 extern "C" void cReplay_prevFrame(cReplay* self)
 {
-    void* p = cReplay_findPrevFrame_2(self, self->PlaybackTick);
-    self->PlaybackFrame = (cReplayFrame*)p;
-    self->PlaybackTick = *(int*)((char*)p + 0x30);
+    void* frame = cReplay_findPrevFrame_2(self, self->PlaybackTick);
+    self->PlaybackFrame = (cReplayFrame*)frame;
+    self->PlaybackTick = *(int*)((char*)frame + 0x30);
     cReplay_rewindFrame(self);
 }
 #endif
@@ -504,10 +504,10 @@ INCLUDE_ASM("replay/replay", func_0026E5A8__FPv);
 #ifdef SKIP_ASM
 void* func_0026E5A8(void* self)
 {
-    int t0 = 0;
-    *(int*)((char*)self + 0x4) = t0;
-    *(int*)self = t0;
-    *(int*)((char*)self + 0x8) = t0;
+    int zero = 0;
+    *(int*)((char*)self + 0x4) = zero;
+    *(int*)self = zero;
+    *(int*)((char*)self + 0x8) = zero;
     return self;
 }
 #endif
@@ -609,17 +609,17 @@ sReplayFrame* func_0026E6A0_impl(sReplayFrameList* list, int time) __asm__("func
 
 sReplayFrame* func_0026E6A0_impl(sReplayFrameList* list, int time)
 {
-    sReplayFrame* f = list->head;
-    while (f->next) {
-        if (f->time == time) {
+    sReplayFrame* frame = list->head;
+    while (frame->next) {
+        if (frame->time == time) {
             break;
         }
-        if (f->time < time && time < f->next->time) {
+        if (frame->time < time && time < frame->next->time) {
             break;
         }
-        f = f->next;
+        frame = frame->next;
     }
-    return f;
+    return frame;
 }
 #endif
 
@@ -661,9 +661,9 @@ INCLUDE_ASM("replay/replay", func_0026E800);
 #ifdef SKIP_ASM
 extern "C" void func_0026E800(void* self)
 {
-    unsigned char* p = *(unsigned char**)((char*)self + 0xb0);
-    if (p) {
-        p[0x1e] &= ~(1 << *(int*)self);
+    unsigned char* cache = *(unsigned char**)((char*)self + 0xb0);
+    if (cache) {
+        cache[0x1e] &= ~(1 << *(int*)self);
         *(int*)((char*)self + 0xb0) = 0;
     }
 }
@@ -674,22 +674,22 @@ INCLUDE_ASM("replay/replay", func_0026E838);
 #ifdef SKIP_ASM
 void func_0026D730(void*, int, int);
 
-extern "C" int func_0026E838(void* self, void* o, int mode)
+extern "C" int func_0026E838(void* self, void* stats, int mode)
 {
     if (mode) {
-        int d = *(int*)((char*)o + 0x9C) - *(int*)((char*)self + 0xA0);
+        int d = *(int*)((char*)stats + 0x9C) - *(int*)((char*)self + 0xA0);
         if (d == 0) return 0;
         if (d >= 1000) {
             func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, d);
             return 1;
         }
-        float v = *(float*)((char*)o + 0x44);
+        float v = *(float*)((char*)stats + 0x44);
         if (v >= 5.0f) {
             func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, (int)(v * 1000.0f));
             return 1;
         }
     }
-    int e = *(int*)((char*)o + 0xA4) - *(int*)((char*)self + 0xA8);
+    int e = *(int*)((char*)stats + 0xA4) - *(int*)((char*)self + 0xA8);
     if (e == 0) return 0;
     func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, -e);
     return 1;

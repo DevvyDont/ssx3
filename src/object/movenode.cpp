@@ -407,11 +407,11 @@ extern "C" void cMoveNode_setDebounce(cMoveNode* self, float secs)
 //100%
 INCLUDE_ASM("object/movenode", func_00355878__FPvT0);
 #ifdef SKIP_ASM
-float func_00355878(void* self, void* a1)
+float func_00355878(void* self, void* fadeData)
 {
-    float t0 = *(float*)((char*)a1 + 0x4);
-    *(float*)((char*)self + 0x24) = t0;
-    return t0;
+    float fade = *(float*)((char*)fadeData + 0x4);
+    *(float*)((char*)self + 0x24) = fade;
+    return fade;
 }
 #endif
 
@@ -1960,8 +1960,8 @@ extern void* cPositionModifier_vtbl[];
 extern "C" void* func_00356F10(cPositionModifier* self, void* src)
 {
     *(void***)self = cPositionModifier_vtbl;
-    sMoveQuad2 v = *(sMoveQuad2*)((char*)src + 0x30);
-    *(sMoveQuad2*)&self->Offset = v;
+    sMoveQuad2 translation = *(sMoveQuad2*)((char*)src + 0x30);
+    *(sMoveQuad2*)&self->Offset = translation;
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, src -> self+0x50).
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2061,12 +2061,12 @@ INCLUDE_ASM("object/movenode", func_00357038);
 #ifdef SKIP_ASM
 extern char cParentModifier_vtbl[];
 
-extern "C" void* func_00357038(cParentModifier* self, void* a1, void* a2, sMoveQuad* pos)
+extern "C" void* func_00357038(cParentModifier* self, void* parentInstance, void* meshIndex, sMoveQuad* pos)
 {
     func_00356EB8((cPositionModifier*)self, pos);
     self->mVtbl = (void**)cParentModifier_vtbl;
-    self->ParentInst = (tInstanceRecord*)a1;
-    self->Mesh = (int)a2;
+    self->ParentInst = (tInstanceRecord*)parentInstance;
+    self->Mesh = (int)meshIndex;
     return ((void*)self);
 }
 #endif
@@ -2292,11 +2292,11 @@ INCLUDE_ASM("object/movenode", func_003572E0);
 #ifdef SKIP_ASM
 extern char cMagnetModifier_vtbl[];
 
-extern "C" void* func_003572E0(cMagnetModifier* self, void* a1, void* mat, float f40, float speed)
+extern "C" void* func_003572E0(cMagnetModifier* self, void* inst, void* mat, float radius, float speed)
 {
     *(void**)self = cMagnetModifier_vtbl;
-    self->Instance = (tInstanceRecord*)a1;
-    self->Radius = f40;
+    self->Instance = (tInstanceRecord*)inst;
+    self->Radius = radius;
     self->Speed = speed * 27.77777862548828f;
     self->Being = -1;
     *(int*)&self->Time = 0;
@@ -2317,8 +2317,8 @@ extern "C" void* func_003572E0(cMagnetModifier* self, void* a1, void* mat, float
         : "r"(((char*)self) + 0x60), "r"(mat)
         : "memory");
     self->RootTransformDirty = 1;
-    sMoveQuad v = *(sMoveQuad*)&self->Transform.row[3];
-    *(sMoveQuad*)&self->Offset = v;
+    sMoveQuad translation = *(sMoveQuad*)&self->Transform.row[3];
+    *(sMoveQuad*)&self->Offset = translation;
     return ((void*)self);
 }
 #endif
@@ -2342,14 +2342,14 @@ extern char cMagnetModifier_vtbl[];
 
 extern "C" void* func_00357358(cMagnetModifier* self, void* stream)
 {
-    char* m = (char*)self + 0x10;
+    char* payload = (char*)self + 0x10;
     *(void**)self = cMagnetModifier_vtbl;
-    sMnVEntryRd7358* r = &(*(sMnVEntryRd7358**)stream)[3];
-    self->Instance = (tInstanceRecord*)r->fn((char*)stream + r->delta);
-    sMnVEntrySer7358* e = &(*(sMnVEntrySer7358**)stream)[2];
-    e->fn((char*)stream + e->delta, m, 0x50);
-    e = &(*(sMnVEntrySer7358**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x60, 0x40);
+    sMnVEntryRd7358* readInstFn = &(*(sMnVEntryRd7358**)stream)[3];
+    self->Instance = (tInstanceRecord*)readInstFn->fn((char*)stream + readInstFn->delta);
+    sMnVEntrySer7358* readFn = &(*(sMnVEntrySer7358**)stream)[2];
+    readFn->fn((char*)stream + readFn->delta, payload, 0x50);
+    readFn = &(*(sMnVEntrySer7358**)stream)[2];
+    readFn->fn((char*)stream + readFn->delta, (char*)self + 0x60, 0x40);
     self->RootTransformDirty = 1;
     return ((void*)self);
 }
@@ -2606,12 +2606,12 @@ void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
 
 extern "C" void* func_00357798(cAvaSplineModifier* self, void* stream)
 {
-    char* m = (char*)self + 0x10;
+    char* payload = (char*)self + 0x10;
     *(void***)self = cAvaSplineModifier_vtbl;
-    sMnVEntryRd7798* r = &(*(sMnVEntryRd7798**)stream)[3];
-    self->Instance = (tInstanceRecord*)r->fn((char*)stream + r->delta);
-    sMnVEntrySer7798* e = &(*(sMnVEntrySer7798**)stream)[2];
-    e->fn((char*)stream + e->delta, m, 0x30);
+    sMnVEntryRd7798* readInstFn = &(*(sMnVEntryRd7798**)stream)[3];
+    self->Instance = (tInstanceRecord*)readInstFn->fn((char*)stream + readInstFn->delta);
+    sMnVEntrySer7798* readFn = &(*(sMnVEntrySer7798**)stream)[2];
+    readFn->fn((char*)stream + readFn->delta, payload, 0x30);
     func_002D1CF0_2(self->Instance, (char*)self + 0x40);
     return ((void*)self);
 }
@@ -2781,9 +2781,9 @@ extern "C" void cMultiParticleMan__cMultiParticleMan(cMultiParticleMan* self, in
 {
     int i;
     for (i = 0; i < 4; i++) {
-        void* p = ((void**)self)[i];
-        if (p != 0) {
-            cMultiParticle__cMultiParticle((cMultiParticle*)p, 3);
+        void* particle = ((void**)self)[i];
+        if (particle != 0) {
+            cMultiParticle__cMultiParticle((cMultiParticle*)particle, 3);
         }
     }
     cMultiParticleMan_TheMultiParticleMan = 0;
@@ -2824,9 +2824,9 @@ extern "C" void* func_003581B8(int, int);
 //100%
 INCLUDE_ASM("object/movenode", func_00357AE8__FPvii);
 #ifdef SKIP_ASM
-void* func_00357AE8(void* self, int a1, int a2)
+void* func_00357AE8(void* self, int particleIndex, int instId)
 {
-    return func_003581B8(*(int*)((char*)self + (a1 << 2)), a2);
+    return func_003581B8(*(int*)((char*)self + (particleIndex << 2)), instId);
 }
 #endif
 
@@ -2835,9 +2835,9 @@ extern "C" void* func_003581F0(int, int);
 //100%
 INCLUDE_ASM("object/movenode", func_00357B10__FPvii);
 #ifdef SKIP_ASM
-void* func_00357B10(void* self, int a1, int a2)
+void* func_00357B10(void* self, int particleIndex, int instId)
 {
-    return func_003581F0(*(int*)((char*)self + (a1 << 2)), a2);
+    return func_003581F0(*(int*)((char*)self + (particleIndex << 2)), instId);
 }
 #endif
 
@@ -2863,12 +2863,12 @@ INCLUDE_ASM("object/movenode", func_00357B90);
 #ifdef SKIP_ASM
 extern "C" void func_00358140(void* p, void* arg);
 
-extern "C" void func_00357B90(void** self, void* arg)
+extern "C" void func_00357B90(void** self, void* sectionId)
 {
     int i;
     for (i = 0; i < 4; i++) {
         if (self[i] != 0) {
-            func_00358140(self[i], arg);
+            func_00358140(self[i], sectionId);
         }
     }
 }

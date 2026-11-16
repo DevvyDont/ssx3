@@ -140,18 +140,18 @@ extern "C" tIdentifier* cInputMapParser_lookupIdentifierName(cInputMapParser* se
 //100%
 INCLUDE_ASM("input/inputparse", func_00321AD0);
 #ifdef SKIP_ASM
-extern "C" void* func_00321AD0(void* self, void* a1)
+extern "C" void* func_00321AD0(void* self, void* varIndex)
 {
-    return (char*)a1 + 0x40;
+    return (char*)varIndex + 0x40;
 }
 #endif
 
 //100%
 INCLUDE_ASM("input/inputparse", func_00321AD8);
 #ifdef SKIP_ASM
-extern "C" int func_00321AD8(void* self, int a1, int a2)
+extern "C" int func_00321AD8(void* self, int inputIndex, int modifier)
 {
-    return a1 * 6 + a2 + 0x60;
+    return inputIndex * 6 + modifier + 0x60;
 }
 #endif
 
@@ -2072,13 +2072,13 @@ float func_003252F8_impl(sInputParse3252F8* self, int idx, unsigned int kind)
 //100%
 INCLUDE_ASM("input/inputparse", func_00325430);
 #ifdef SKIP_ASM
-extern "C" float func_00325430(void* self, int a1)
+extern "C" float func_00325430(void* self, int varIndex)
 {
-    if (a1 == 0) {
+    if (varIndex == 0) {
         return 0.0f;
     }
-    char* p = (char*)self + a1 * 4;
-    return *(float*)(p + 0x108);
+    char* varBase = (char*)self + varIndex * 4;
+    return *(float*)(varBase + 0x108);
 }
 #endif
 
@@ -2105,13 +2105,13 @@ extern "C" float func_00325450(sInputVM_325450* self, void* list, sInsn_324678* 
         pc++;
         switch (ins->r.op) {
         case 0: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = code[pc++].f;
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = code[pc++].f;
             break;
         }
         case 1: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = func_00325260_vm(self, ins->r.src);
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = func_00325260_vm(self, ins->r.src);
             break;
         }
         case 2:
@@ -2122,166 +2122,166 @@ extern "C" float func_00325450(sInputVM_325450* self, void* list, sInsn_324678* 
             pc += ins->j.offset;
             break;
         case 4: {
-            unsigned int r = 0;
-            float* d = (float*)func_003252E8(self, ins->r.dst);
+            unsigned int boolResult = 0;
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
             if (func_00325260_vm(self, ins->r.src) != 0.0f || func_00325260_vm(self, ins->r.arg) != 0.0f) {
-                r = 1;
+                boolResult = 1;
             }
-            *d = r;
+            *destSlot = boolResult;
             break;
         }
         case 5: {
-            unsigned int r = 0;
-            float* d = (float*)func_003252E8(self, ins->r.dst);
+            unsigned int boolResult = 0;
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
             if (func_00325260_vm(self, ins->r.src) != 0.0f && func_00325260_vm(self, ins->r.arg) != 0.0f) {
-                r = 1;
+                boolResult = 1;
             }
-            *d = r;
+            *destSlot = boolResult;
             break;
         }
         case 6: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            float a = func_00325260_vm(self, ins->r.src);
-            *d = (a > func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float lhs = func_00325260_vm(self, ins->r.src);
+            *destSlot = (lhs > func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 7: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            float a = func_00325260_vm(self, ins->r.src);
-            *d = (a >= func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float lhs = func_00325260_vm(self, ins->r.src);
+            *destSlot = (lhs >= func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 8: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            float a = func_00325260_vm(self, ins->r.src);
-            *d = (a < func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float lhs = func_00325260_vm(self, ins->r.src);
+            *destSlot = (lhs < func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 9: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            float a = func_00325260_vm(self, ins->r.src);
-            *d = (a <= func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float lhs = func_00325260_vm(self, ins->r.src);
+            *destSlot = (lhs <= func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 10: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            float a = func_00325260_vm(self, ins->r.src);
-            *d = (a == func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float lhs = func_00325260_vm(self, ins->r.src);
+            *destSlot = (lhs == func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 11: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            float a = func_00325260_vm(self, ins->r.src);
-            *d = (a != func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float lhs = func_00325260_vm(self, ins->r.src);
+            *destSlot = (lhs != func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 12: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            float a = func_00325260_vm(self, ins->r.src);
-            *d = a + func_00325260_vm(self, ins->r.arg);
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float lhs = func_00325260_vm(self, ins->r.src);
+            *destSlot = lhs + func_00325260_vm(self, ins->r.arg);
             break;
         }
         case 13: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            float a = func_00325260_vm(self, ins->r.src);
-            *d = a - func_00325260_vm(self, ins->r.arg);
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float lhs = func_00325260_vm(self, ins->r.src);
+            *destSlot = lhs - func_00325260_vm(self, ins->r.arg);
             break;
         }
         case 14: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            float a = func_00325260_vm(self, ins->r.src);
-            *d = a * func_00325260_vm(self, ins->r.arg);
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float lhs = func_00325260_vm(self, ins->r.src);
+            *destSlot = lhs * func_00325260_vm(self, ins->r.arg);
             break;
         }
         case 15: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            float a = func_00325260_vm(self, ins->r.src);
-            *d = a / func_00325260_vm(self, ins->r.arg);
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float lhs = func_00325260_vm(self, ins->r.src);
+            *destSlot = lhs / func_00325260_vm(self, ins->r.arg);
             break;
         }
         case 16: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = (func_00325260_vm(self, ins->r.src) > func_00325260_vm(self, ins->r.arg))
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = (func_00325260_vm(self, ins->r.src) > func_00325260_vm(self, ins->r.arg))
                 ? func_00325260_vm(self, ins->r.src) : func_00325260_vm(self, ins->r.arg);
             break;
         }
         case 17: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = (func_00325260_vm(self, ins->r.src) < func_00325260_vm(self, ins->r.arg))
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = (func_00325260_vm(self, ins->r.src) < func_00325260_vm(self, ins->r.arg))
                 ? func_00325260_vm(self, ins->r.src) : func_00325260_vm(self, ins->r.arg);
             break;
         }
         case 18: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            float a = func_00325260_vm(self, ins->r.src);
-            *d = pow_4138(a, func_00325260_vm(self, ins->r.arg));
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float lhs = func_00325260_vm(self, ins->r.src);
+            *destSlot = pow_4138(lhs, func_00325260_vm(self, ins->r.arg));
             break;
         }
         case 19: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            float a = func_00325260_vm(self, ins->r.src);
-            *d = atan2_4138(a, func_00325260_vm(self, ins->r.arg));
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float lhs = func_00325260_vm(self, ins->r.src);
+            *destSlot = atan2_4138(lhs, func_00325260_vm(self, ins->r.arg));
             break;
         }
         case 20: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = func_0031C228(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = func_0031C228(func_00325260_vm(self, ins->r.src));
             break;
         }
         case 21: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = func_0031BF60(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = func_0031BF60(func_00325260_vm(self, ins->r.src));
             break;
         }
         case 22: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = func_0031C040(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = func_0031C040(func_00325260_vm(self, ins->r.src));
             break;
         }
         case 23: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = func_0040D758(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = func_0040D758(func_00325260_vm(self, ins->r.src));
             break;
         }
         case 24: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = func_0040DA10(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = func_0040DA10(func_00325260_vm(self, ins->r.src));
             break;
         }
         case 25: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = floor_43A0(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = floor_43A0(func_00325260_vm(self, ins->r.src));
             break;
         }
         case 26: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = ceil_43A0(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = ceil_43A0(func_00325260_vm(self, ins->r.src));
             break;
         }
         case 27: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = abs_43A0(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = abs_43A0(func_00325260_vm(self, ins->r.src));
             break;
         }
         case 28: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = sqrt_43A0(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = sqrt_43A0(func_00325260_vm(self, ins->r.src));
             break;
         }
         case 29: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
             float x = func_00325260_vm(self, ins->r.src);
-            *d = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
+            *destSlot = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
             break;
         }
         case 30: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = -func_00325260_vm(self, ins->r.src);
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = -func_00325260_vm(self, ins->r.src);
             break;
         }
         case 31: {
-            float* d = (float*)func_003252E8(self, ins->r.dst);
-            *d = (func_00325260_vm(self, ins->r.src) == 0.0f) ? 1.0f : 0.0f;
+            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            *destSlot = (func_00325260_vm(self, ins->r.src) == 0.0f) ? 1.0f : 0.0f;
             break;
         }
         case 32:
@@ -2800,9 +2800,9 @@ extern "C" void func_00326A68(sOwner00326A68* self)
 {
     int i;
     for (i = 0; i < self->count; i++) {
-        sObj00326A68* o = self->objs[i];
-        if (o != 0) {
-            o->vt[1].fn((char*)o + o->vt[1].delta, 3);
+        sObj00326A68* inputPad = self->objs[i];
+        if (inputPad != 0) {
+            inputPad->vt[1].fn((char*)inputPad + inputPad->vt[1].delta, 3);
         }
     }
 }
@@ -2836,13 +2836,13 @@ struct sInputParse_00326B48 {
     unsigned int tail;
 };
 
-extern "C" int func_00326B48(sInputParse_00326B48* s)
+extern "C" int func_00326B48(sInputParse_00326B48* controllerCache)
 {
-    unsigned int next = (s->head + 1) % 30;
-    if (next == s->tail) {
+    unsigned int next = (controllerCache->head + 1) % 30;
+    if (next == controllerCache->tail) {
         return 0;
     }
-    s->head = next;
+    controllerCache->head = next;
     return 1;
 }
 #endif
@@ -2925,8 +2925,8 @@ struct sInputParse_00326CA0 {
 
 extern "C" int func_00326CA0(void* self, int i)
 {
-    sInputParse_00326CA0* s = (sInputParse_00326CA0*)self;
-    return s->slots[s->bank][i].value;
+    sInputParse_00326CA0* controllerCache = (sInputParse_00326CA0*)self;
+    return controllerCache->slots[controllerCache->bank][i].value;
 }
 #endif
 
@@ -2945,8 +2945,8 @@ struct sInputParse_00326CC8 {
 
 extern "C" void* func_00326CC8(void* self, int i)
 {
-    sInputParse_00326CC8* s = (sInputParse_00326CC8*)self;
-    return s->slots[s->bank][i].data;
+    sInputParse_00326CC8* controllerCache = (sInputParse_00326CC8*)self;
+    return controllerCache->slots[controllerCache->bank][i].data;
 }
 #endif
 
@@ -2962,9 +2962,9 @@ struct sVEntry00326CF0 {
 typedef int (*CountFn00326CF0)(void*);
 typedef void (*SetFn00326CF0)(void*, int, float);
 
-extern "C" void func_00326CF0(void* p)
+extern "C" void func_00326CF0(void* inputPad)
 {
-    sVEntry00326CF0** self = (sVEntry00326CF0**)p;
+    sVEntry00326CF0** self = (sVEntry00326CF0**)inputPad;
     int i;
     for (i = 0; i < ((CountFn00326CF0)(*self)[3].fn)((char*)self + (*self)[3].delta); i++) {
         ((SetFn00326CF0)(*self)[4].fn)((char*)self + (*self)[4].delta, i, 0.0f);
@@ -2979,9 +2979,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_00326DF0(void* self, int a1, int a2);
 extern char str_PS2Pad[];
 
-extern "C" int func_00326D60(void* p, int n)
+extern "C" int func_00326D60(void* inputPads, int n)
 {
-    void** arr = (void**)p;
+    void** arr = (void**)inputPads;
     int i;
     if (n > 2) {
         n = 2;
@@ -3290,21 +3290,21 @@ static inline int clamp_327740(int v, int lo, int hi)
     return v;
 }
 
-extern "C" void func_00327740(void* self, int mode, float v)
+extern "C" void func_00327740(void* self, int mode, float level)
 {
     if (mode == 1) {
-        *(int*)((char*)self + 0x30) = v != 0.0f;
+        *(int*)((char*)self + 0x30) = level != 0.0f;
         return;
     }
-    int* p = (int*)((char*)self + 0x38);
-    int r;
-    if (v != 0.0f) {
-        int t = (int)(v * 205.0f + 50.0f);
-        r = clamp_327740(t, 50, 255);
+    int* motorOut = (int*)((char*)self + 0x38);
+    int speed;
+    if (level != 0.0f) {
+        int rawSpeed = (int)(level * 205.0f + 50.0f);
+        speed = clamp_327740(rawSpeed, 50, 255);
     } else {
-        r = 0;
+        speed = 0;
     }
-    *p = r;
+    *motorOut = speed;
 }
 #endif
 

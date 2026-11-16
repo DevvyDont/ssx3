@@ -292,34 +292,34 @@ public:
 
 extern "C" void func_001D47A0(void* self, int index)
 {
-    int v;
+    int textureId;
     if (index < 0) {
         goto hide;
     }
-    v = -1;
+    textureId = -1;
     {
         if (index == 0) {
             if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
                               *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x54),
                               *(int*)((char*)self + 0x58)) != 0) {
-                v = *(int*)((char*)self + 0x60);
+                textureId = *(int*)((char*)self + 0x60);
             }
         } else {
-            int r = func_001CED90(*(signed char*)((char*)self + 0x44),
+            int medal = func_001CED90(*(signed char*)((char*)self + 0x44),
                                   *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x54),
                                   *(int*)((char*)self + 0x58), index - 1);
-            if (r != -1) {
-                v = *(int*)((char*)self + ((r + 1) << 2) + 0x60);
+            if (medal != -1) {
+                textureId = *(int*)((char*)self + ((medal + 1) << 2) + 0x60);
             }
         }
     }
-    if (v < 0) {
+    if (textureId < 0) {
     hide:
         (*(cTrophyWidget_47A0**)((char*)self + 0x48))->show(0);
     } else {
         (*(cTrophyWidget_47A0**)((char*)self + 0x48))->show(1);
         char* w = *(char**)((char*)self + 0x48);
-        *(int*)(w + 0x78) = v;
+        *(int*)(w + 0x78) = textureId;
         *(int*)(w + 0x7C) = 0;
     }
 }
@@ -579,7 +579,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern void* cFEStateRewardsRoom_vtbl[];
 
-extern "C" void* func_001D4BC8(void* self, int a1, signed char idx, int a3)
+extern "C" void* func_001D4BC8(void* self, int engine, signed char idx, int a3)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 0x2E;
@@ -855,8 +855,8 @@ extern "C" int func_001D5138(void* self, int msg)
         break;
     case 0x111: {
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        char* g = ((char*)&cBENetworkInterface_networkOpt);
-        func_0025FD50(LobbyMan_mLobbyMan, *(int*)(g + 4), *(int*)(g + 8) == 0, *(int*)(g + 8) != 0, g + 0x330, g + 0x3DC);
+        char* netOpt = ((char*)&cBENetworkInterface_networkOpt);
+        func_0025FD50(LobbyMan_mLobbyMan, *(int*)(netOpt + 4), *(int*)(netOpt + 8) == 0, *(int*)(netOpt + 8) != 0, netOpt + 0x330, netOpt + 0x3DC);
         break;
     }
     default:
@@ -872,15 +872,15 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D5240);
 extern "C" int func_001A9668(void* self, void* a1, int a2);
 extern "C" int cFEStateLogin_onPopupEvent(void* self, void* a1, int a2);
 
-extern "C" int func_001D5240(void* self, void* a1, int a2)
+extern "C" int func_001D5240(void* self, void* popup, int event)
 {
-    int r;
-    if (*(int*)((char*)a1 + 0x18) == 0x102) {
-        r = func_001A9668(self, a1, a2);
+    int result;
+    if (*(int*)((char*)popup + 0x18) == 0x102) {
+        result = func_001A9668(self, popup, event);
     } else {
-        r = cFEStateLogin_onPopupEvent(self, a1, a2);
+        result = cFEStateLogin_onPopupEvent(self, popup, event);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -981,17 +981,17 @@ extern "C" void func_001D5428(void* self, int flags)
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5460);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001D5460(void* self, int a1, unsigned int key)
+extern "C" int func_001D5460(void* self, int menu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 8) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -1162,13 +1162,13 @@ extern "C" void func_001D5488(void* self_, int mode)
         func_0023CAA0(app, n);
         func_0023C8F0(app, 1);
     }
-    char b0[0x200];
-    char b1[0x200];
-    char b2[0x200];
-    func_00241D40(app, *(int*)(app + 0xB4), b0, 0x100);
-    func_002C2540(b2, str_pct_s_pct_s_c);
-    func_00241AA0(b1, 0x100);
-    sprintf1(self + 0x11C, b2, b1, b0);
+    char saveType[0x200];
+    char productCode[0x200];
+    char format[0x200];
+    func_00241D40(app, *(int*)(app + 0xB4), saveType, 0x100);
+    func_002C2540(format, str_pct_s_pct_s_c);
+    func_00241AA0(productCode, 0x100);
+    sprintf1(self + 0x11C, format, productCode, saveType);
 }
 #endif
 
@@ -1380,9 +1380,9 @@ extern "C" int func_001D5D78(int key)
 {
     int out;
     if (((sFEMemCard_5D78*)cFEMemCard_mInstance)->mode == 1) {
-        void* r = cSSXApp_getMCManager(SSXApp);
+        void* mcManager = cSSXApp_getMCManager(SSXApp);
         if (cReplay_getSaveData(SSXApp->Game->Replay, &out, &key) != 0) {
-            func_00241138(r, out, key);
+            func_00241138(mcManager, out, key);
             return 1;
         }
         return 0;

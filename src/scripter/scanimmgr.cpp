@@ -186,10 +186,10 @@ extern "C" void* func_00275718(sAnimList* self, int id);
 
 extern "C" void func_00275650(sAnimList* self, int id)
 {
-    void* p = func_00275718(self, id);
-    if (p != 0) {
+    void* bankInfo = func_00275718(self, id);
+    if (bankInfo != 0) {
         sScAnimVEntry* vt = *(sScAnimVEntry**)((char*)self + 0xC);
-        vt[2].fn((char*)self + vt[2].delta, p);
+        vt[2].fn((char*)self + vt[2].delta, bankInfo);
     }
 }
 #endif

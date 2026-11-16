@@ -117,38 +117,38 @@ extern "C" void cOVStateHiScoreList_onWidgetEvent(void* self, void* item, int Ev
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E91A8__FPvT0);
 #ifdef SKIP_ASM
-void func_001E91A8(void* self, void* a1)
+void func_001E91A8(void* self, void* outColor)
 {
-    cOVStateHUDElem* e = (cOVStateHUDElem*)self;
-    float* out = (float*)a1;
-    out[0] = e->x;
-    out[1] = e->y;
-    out[2] = e->z;
-    out[3] = e->w;
+    cOVStateHUDElem* elem = (cOVStateHUDElem*)self;
+    float* out = (float*)outColor;
+    out[0] = elem->x;
+    out[1] = elem->y;
+    out[2] = elem->z;
+    out[3] = elem->w;
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E91D0__FPvT0);
 #ifdef SKIP_ASM
-void func_001E91D0(void* self, void* a1)
+void func_001E91D0(void* self, void* outColor)
 {
-    cOVStateHUDElem* e = (cOVStateHUDElem*)self;
-    float* out = (float*)a1;
-    out[3] = e->x;
-    out[0] = e->y;
-    out[1] = e->z;
-    out[2] = e->w;
+    cOVStateHUDElem* elem = (cOVStateHUDElem*)self;
+    float* out = (float*)outColor;
+    out[3] = elem->x;
+    out[0] = elem->y;
+    out[1] = elem->z;
+    out[2] = elem->w;
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E91F8);
 #ifdef SKIP_ASM
-extern "C" void func_001E91F8(void* self, void* a1)
+extern "C" void func_001E91F8(void* self, void* outPos)
 {
     short* in = (short*)self;
-    float* out = (float*)a1;
+    float* out = (float*)outPos;
     out[0] = in[0];
     out[1] = in[1];
 }
@@ -157,11 +157,11 @@ extern "C" void func_001E91F8(void* self, void* a1)
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E9220);
 #ifdef SKIP_ASM
-extern "C" void func_001E9220(void* self, void* a1, void* a2)
+extern "C" void func_001E9220(void* self, void* outVec, void* fallback)
 {
     short* in = (short*)self;
-    float* out = (float*)a1;
-    float* def = (float*)a2;
+    float* out = (float*)outVec;
+    float* def = (float*)fallback;
     float x = in[2];
     if (x >= 0.0f) {
         out[0] = x;
@@ -186,13 +186,13 @@ extern "C" void func_001E9220(void* self, void* a1, void* a2)
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E9290__FPvT0);
 #ifdef SKIP_ASM
-float func_001E9290(void* self, void* a1)
+float func_001E9290(void* self, void* outRange)
 {
-    cOVStateHUDElem* e = (cOVStateHUDElem*)self;
-    float t0 = e->rangeMin;
-    *(float*)a1 = t0;
-    *(float*)((char*)a1 + 0x4) = e->rangeMax;
-    return t0;
+    cOVStateHUDElem* elem = (cOVStateHUDElem*)self;
+    float minValue = elem->rangeMin;
+    *(float*)outRange = minValue;
+    *(float*)((char*)outRange + 0x4) = elem->rangeMax;
+    return minValue;
 }
 #endif
 
@@ -311,10 +311,10 @@ extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
 extern "C" void func_001E92A8(void* self);
 struct sVec2f { float x, y; };
 
-extern "C" void func_001E94E0(void* self, char* str, int a2, sVec2f* pos)
+extern "C" void func_001E94E0(void* self, char* str, int font, sVec2f* pos)
 {
     func_002C2540((unsigned short*)((char*)self + 0x4C), str);
-    *(int*)((char*)self + 0x8) = a2;
+    *(int*)((char*)self + 0x8) = font;
     *(sVec2f*)((char*)self + 0x10) = *pos;
     func_001E92A8(self);
 }
@@ -325,10 +325,10 @@ INCLUDE_ASM("fe/ovstatehud", func_001E9540);
 #ifdef SKIP_ASM
 extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src);
 extern "C" void func_001E92A8(void* self);
-extern "C" void func_001E9540(void* self, unsigned short* str, int a2, sVec2f* pos)
+extern "C" void func_001E9540(void* self, unsigned short* str, int font, sVec2f* pos)
 {
     strcpy1((unsigned short*)((char*)self + 0x4C), str);
-    *(int*)((char*)self + 0x8) = a2;
+    *(int*)((char*)self + 0x8) = font;
     *(sVec2f*)((char*)self + 0x10) = *pos;
     func_001E92A8(self);
 }
@@ -1193,57 +1193,57 @@ static inline int texOf_001F1190(cOVStateHUDElem* e) { return e->field_0x0; }
 
 struct sVEnt_001F1190 { short delta; short index; void (*fn)(void*, int, sHudVert_001F1190*, int); };
 
-extern "C" void func_001F1190(void* self, cOVStateHUDElem* e, float* pos, float* size, float* scale, float* color)
+extern "C" void func_001F1190(void* self, cOVStateHUDElem* elem, float* pos, float* size, float* scale, float* color)
 {
-    if (e != 0) {
-        *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf_001F1190(e);
-        sHudVert_001F1190 v[4];
-        int a = (int)(color[0] * 128.0f);
-        int r = (int)(color[1] * 128.0f);
-        int g = (int)(color[2] * 128.0f);
-        int b = (int)(color[3] * 128.0f);
+    if (elem != 0) {
+        *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf_001F1190(elem);
+        sHudVert_001F1190 verts[4];
+        int alpha = (int)(color[0] * 128.0f);
+        int red = (int)(color[1] * 128.0f);
+        int green = (int)(color[2] * 128.0f);
+        int blue = (int)(color[3] * 128.0f);
         for (int i = 0; i < 4; i++) {
-            v[i].a = a;
-            v[i].r = r;
-            v[i].g = g;
-            v[i].b = b;
-            v[i].q = 1.0f;
+            verts[i].a = alpha;
+            verts[i].r = red;
+            verts[i].g = green;
+            verts[i].b = blue;
+            verts[i].q = 1.0f;
         }
         float x0 = pos[0];
         float y0 = pos[1];
         float x1 = x0 + size[0] * scale[0];
         float y1 = y0 + size[1] * scale[1];
-        v[0].u = e->x;
-        v[0].v = e->rangeMax;
-        v[1].u = e->y;
-        v[1].v = e->rangeMax;
-        v[2].u = e->x;
-        v[2].v = e->z;
-        v[3].u = e->y;
-        v[3].v = e->z;
-        sPos_001F1190 p;
-        p.x = x0;
-        p.y = y0;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[0].pos = p;
-        p.x = x1;
-        p.y = y0;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[1].pos = p;
-        p.x = x0;
-        p.y = y1;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[2].pos = p;
-        p.x = x1;
-        p.y = y1;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[3].pos = p;
+        verts[0].u = elem->x;
+        verts[0].v = elem->rangeMax;
+        verts[1].u = elem->y;
+        verts[1].v = elem->rangeMax;
+        verts[2].u = elem->x;
+        verts[2].v = elem->z;
+        verts[3].u = elem->y;
+        verts[3].v = elem->z;
+        sPos_001F1190 corner;
+        corner.x = x0;
+        corner.y = y0;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[0].pos = corner;
+        corner.x = x1;
+        corner.y = y0;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[1].pos = corner;
+        corner.x = x0;
+        corner.y = y1;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[2].pos = corner;
+        corner.x = x1;
+        corner.y = y1;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[3].pos = corner;
         sVEnt_001F1190* vt = (sVEnt_001F1190*)GrMan->mVtbl;
-        vt[71].fn((char*)GrMan + vt[71].delta, 4, v, 0);
+        vt[71].fn((char*)GrMan + vt[71].delta, 4, verts, 0);
     }
 }
 #endif
@@ -1266,46 +1266,46 @@ struct sVEnt_001F1338 { short delta; short index; void (*fn)(void*, int, sHudVer
 
 extern "C" void func_001F1338(void* self, float* pos, float* size, float* scale, float* color)
 {
-    sHudVert_001F1338 v[4];
-    int a = (int)(color[0] * 128.0f);
-    int r = (int)(color[1] * 255.0f);
-    int g = (int)(color[2] * 255.0f);
-    int b = (int)(color[3] * 255.0f);
+    sHudVert_001F1338 verts[4];
+    int alpha = (int)(color[0] * 128.0f);
+    int red = (int)(color[1] * 255.0f);
+    int green = (int)(color[2] * 255.0f);
+    int blue = (int)(color[3] * 255.0f);
     for (int i = 0; i < 4; i++) {
-        v[i].a = a;
-        v[i].r = r;
-        v[i].g = g;
-        v[i].b = b;
-        v[i].q = 1.0f;
+        verts[i].a = alpha;
+        verts[i].r = red;
+        verts[i].g = green;
+        verts[i].b = blue;
+        verts[i].q = 1.0f;
     }
     float x0 = pos[0];
     float y0 = pos[1];
     float x1 = x0 + size[0] * scale[0];
     float y1 = y0 + size[1] * scale[1];
-    sPos_001F1338 p;
-    p.x = x0;
-    p.y = y0;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[0].pos = p;
-    p.x = x1;
-    p.y = y0;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[1].pos = p;
-    p.x = x0;
-    p.y = y1;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[2].pos = p;
-    p.x = x1;
-    p.y = y1;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[3].pos = p;
+    sPos_001F1338 corner;
+    corner.x = x0;
+    corner.y = y0;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[0].pos = corner;
+    corner.x = x1;
+    corner.y = y0;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[1].pos = corner;
+    corner.x = x0;
+    corner.y = y1;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[2].pos = corner;
+    corner.x = x1;
+    corner.y = y1;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[3].pos = corner;
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
     sVEnt_001F1338* vt = (sVEnt_001F1338*)GrMan->mVtbl;
-    vt[71].fn((char*)GrMan + vt[71].delta, 4, v, 0);
+    vt[71].fn((char*)GrMan + vt[71].delta, 4, verts, 0);
 }
 #endif
 
@@ -1412,14 +1412,14 @@ struct sHudElemDef_001F16C0 {
 };
 extern "C" void cOVStateHUD1P_renderTime(void* self, int a1, int a2, int a3, int a4, int a5, float* pos, float* scale, sColor_001F16C0* color, int align, int flags, int a11);
 
-extern "C" void func_001F16C0(void* self, int a1, int a2, int a3, int a4, int a5, sHudElemDef_001F16C0* defs, int idx, int a8, float* scaleMul, float* posOff, sColor_001F16C0* color)
+extern "C" void func_001F16C0(void* self, int hour, int minute, int sec, int secFrac, int timeRenderFlags, sHudElemDef_001F16C0* defs, int idx, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color)
 {
     float pos[4];
     float scale[4];
     sColor_001F16C0 col;
-    sHudElemDef_001F16C0* e = &defs[idx];
-    func_001E91F8(e, pos);
-    func_001E9290(e, scale);
+    sHudElemDef_001F16C0* elemDef = &defs[idx];
+    func_001E91F8(elemDef, pos);
+    func_001E9290(elemDef, scale);
     if (scaleMul != 0) {
         scale[0] *= scaleMul[0];
         scale[1] *= scaleMul[1];
@@ -1429,11 +1429,11 @@ extern "C" void func_001F16C0(void* self, int a1, int a2, int a3, int a4, int a5
         pos[1] += posOff[1];
     }
     if (color == 0) {
-        func_001E91A8(e, &col);
+        func_001E91A8(elemDef, &col);
     } else {
         col = *color;
     }
-    cOVStateHUD1P_renderTime(self, a1, a2, a3, a4, a5, pos, scale, &col, defs[idx].align, defs[idx].flags, a8);
+    cOVStateHUD1P_renderTime(self, hour, minute, sec, secFrac, timeRenderFlags, pos, scale, &col, defs[idx].align, defs[idx].flags, reflect);
 }
 #endif
 
@@ -2259,14 +2259,14 @@ extern "C" int func_003983F0(void* self, int key);
 extern char str_kT_ovrcmnloading_b[];
 extern char str_fefont[];
 
-extern "C" void func_001F30D8(void* p)
+extern "C" void func_001F30D8(void* vself)
 {
-    sHudIds001F30D8* self = (sHudIds001F30D8*)p;
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001F30D8* vt = *(sVEntry001F30D8**)(o + 4);
-    char* adj = o + vt[4].delta;
-    int h = GetHashValue32(str_kT_ovrcmnloading_b);
-    self->a = vt[4].fn(adj, h);
+    sHudIds001F30D8* self = (sHudIds001F30D8*)vself;
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001F30D8* vt = *(sVEntry001F30D8**)(locale + 4);
+    char* adj = locale + vt[4].delta;
+    int loadingHash = GetHashValue32(str_kT_ovrcmnloading_b);
+    self->a = vt[4].fn(adj, loadingHash);
     void* tbl = *(void**)((char*)SSXApp->Game->UI + 8);
     self->d = func_003983F0(tbl, GetHashValue32(str_fefont));
     self->b = 0;
@@ -2519,10 +2519,10 @@ extern "C" void* func_001F3700(void* self)
     *(void***)((char*)self + 0x8) = cFEStateLodge_vtbl;
     int idx = func_00147318(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
     *(signed char*)((char*)self + 0x44) = 0;
-    void* p = **(void***)((char*)self + 0x10);
-    if (p != 0) {
+    void* factory = **(void***)((char*)self + 0x10);
+    if (factory != 0) {
         unsigned char mask = 1 << idx;
-        func_001A1CB8(p, 0, mask);
+        func_001A1CB8(factory, 0, mask);
         *(unsigned char*)((char*)self + 0x15) = mask;
     }
     return self;

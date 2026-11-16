@@ -221,9 +221,9 @@ extern "C" void func_00255A20(sComm_5A20* self)
     }
     case 5:
         for (i = 0; i < 1; i++) {
-            sCommObj_5A20* o = self->objs[i];
-            if (o != 0) {
-                o->vt[3].fn((char*)o + o->vt[3].delta);
+            sCommObj_5A20* channel = self->objs[i];
+            if (channel != 0) {
+                channel->vt[3].fn((char*)channel + channel->vt[3].delta);
             }
         }
         break;
@@ -282,19 +282,19 @@ extern "C" int cCommSystem_openDSockChannel(void **slots, int addr, int port, in
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255CC8);
 #ifdef SKIP_ASM
-extern "C" void func_00255CC8(char *arg0, int arg1) {
-    void **slot = (void **)(arg0 + arg1 * 4);
-    char *a = (char *)*slot;
-    if (*(int *)a != 0) {
-        char *vt = *(char **)(a + 8);
+extern "C" void func_00255CC8(char *commSystem, int channelIndex) {
+    void **slot = (void **)(commSystem + channelIndex * 4);
+    char *channel = (char *)*slot;
+    if (*(int *)channel != 0) {
+        char *vt = *(char **)(channel + 8);
         void (*fn)(void *) = *(void (**)(void *))(vt + 0x14);
-        fn(a + *(short *)(vt + 0x10));
+        fn(channel + *(short *)(vt + 0x10));
     }
-    char *b = (char *)*slot;
-    if (b != 0) {
-        char *vt = *(char **)(b + 8);
+    char *channelToFree = (char *)*slot;
+    if (channelToFree != 0) {
+        char *vt = *(char **)(channelToFree + 8);
         void (*fn)(void *, int) = *(void (**)(void *, int))(vt + 0xC);
-        fn(b + *(short *)(vt + 8), 3);
+        fn(channelToFree + *(short *)(vt + 8), 3);
     }
     *slot = 0;
 }
@@ -303,16 +303,16 @@ extern "C" void func_00255CC8(char *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255D38);
 #ifdef SKIP_ASM
-extern "C" int func_00255D38(void *arg0, int arg1) {
-    return *(int *)((char*)arg0 + (arg1 << 2)) != 0;
+extern "C" int func_00255D38(void *commSystem, int channelIndex) {
+    return *(int *)((char*)commSystem + (channelIndex << 2)) != 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255D50);
 #ifdef SKIP_ASM
-extern "C" int func_00255D50(void *arg0, int arg1) {
-    char *obj = *(char **)((char*)arg0 + (arg1 << 2));
+extern "C" int func_00255D50(void *commSystem, int channelIndex) {
+    char *obj = *(char **)((char*)commSystem + (channelIndex << 2));
     char *vt = *(char **)(obj + 8);
     return (*(int (**)(void *))(vt + 0x24))(obj + *(short *)(vt + 0x20));
 }
@@ -321,8 +321,8 @@ extern "C" int func_00255D50(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255D88);
 #ifdef SKIP_ASM
-extern "C" float func_00255D88(int arg0, int arg1) {
-    char *obj = *(char **)(arg0 + (arg1 << 2));
+extern "C" float func_00255D88(int commSystem, int channelIndex) {
+    char *obj = *(char **)(commSystem + (channelIndex << 2));
     char *vt = *(char **)(obj + 8);
     return (*(float (**)(void *))(vt + 0x2C))(obj + *(short *)(vt + 0x28));
 }
@@ -331,31 +331,31 @@ extern "C" float func_00255D88(int arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255DC0);
 #ifdef SKIP_ASM
-extern "C" int func_00255DC0(void *arg0, int arg1, int arg2, int arg3) {
-    char *obj = *(char **)((char*)arg0 + (arg1 << 2));
+extern "C" int func_00255DC0(void *commSystem, int channelIndex, int data, int maxSize) {
+    char *obj = *(char **)((char*)commSystem + (channelIndex << 2));
     char *vt = *(char **)(obj + 8);
-    return (*(int (**)(void *, int, int))(vt + 0x3C))(obj + *(short *)(vt + 0x38), arg2, arg3);
+    return (*(int (**)(void *, int, int))(vt + 0x3C))(obj + *(short *)(vt + 0x38), data, maxSize);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255E00);
 #ifdef SKIP_ASM
-extern "C" int func_00255E00(void *arg0, int arg1, int arg2, int arg3) {
-    char *obj = *(char **)((char*)arg0 + (arg1 << 2));
+extern "C" int func_00255E00(void *commSystem, int channelIndex, int data, int size) {
+    char *obj = *(char **)((char*)commSystem + (channelIndex << 2));
     char *vt = *(char **)(obj + 8);
-    return (*(int (**)(void *, int, int))(vt + 0x44))(obj + *(short *)(vt + 0x40), arg2, arg3);
+    return (*(int (**)(void *, int, int))(vt + 0x44))(obj + *(short *)(vt + 0x40), data, size);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255E40);
 #ifdef SKIP_ASM
-extern "C" int func_00255E40(void *arg0, int arg1) {
-    if ((*(int *)((char*)(arg0) + (0x28))) != 0) {
+extern "C" int func_00255E40(void *commSystem, int channelIndex) {
+    if ((*(int *)((char*)(commSystem) + (0x28))) != 0) {
         return 1;
     }
-    return *(int *)((char*)(*(void **)((char*)arg0 + (arg1 << 2))) + 4);
+    return *(int *)((char*)(*(void **)((char*)commSystem + (channelIndex << 2))) + 4);
 }
 #endif
 
@@ -365,14 +365,14 @@ INCLUDE_ASM("seg/seg_156860", func_00255E68);
 extern "C" void MUTEX_lock(void *);
 extern "C" void MUTEX_unlock(void *);
 
-extern "C" int *func_00255E68(void *arg0) {
-    void *m = (char*)arg0 + 4;
-    MUTEX_lock(m);
-    int *r = *(int **)((char*)arg0 + 0x18);
-    *(int **)((char*)arg0 + 0x18) = (int *)*r;
-    MUTEX_unlock(m);
-    *r = 0;
-    return r;
+extern "C" int *func_00255E68(void *pool) {
+    void *mutex = (char*)pool + 4;
+    MUTEX_lock(mutex);
+    int *node = *(int **)((char*)pool + 0x18);
+    *(int **)((char*)pool + 0x18) = (int *)*node;
+    MUTEX_unlock(mutex);
+    *node = 0;
+    return node;
 }
 #endif
 
@@ -382,15 +382,15 @@ INCLUDE_ASM("seg/seg_156860", func_00255EC0);
 extern "C" void MUTEX_lock(void *);
 extern "C" void MUTEX_unlock(void *);
 
-extern "C" void func_00255EC0(void *arg0, void *arg1) {
-    void *m = (char*)arg0 + 4;
-    MUTEX_lock(m);
-    void *head = *(void **)((char*)arg0 + 0x18);
-    *(int *)((char*)arg1 + 4) = 0;
-    *(void **)((char*)arg1 + 0) = head;
-    *(int *)((char*)arg1 + 8) = 0;
-    *(void **)((char*)arg0 + 0x18) = arg1;
-    MUTEX_unlock(m);
+extern "C" void func_00255EC0(void *pool, void *node) {
+    void *mutex = (char*)pool + 4;
+    MUTEX_lock(mutex);
+    void *head = *(void **)((char*)pool + 0x18);
+    *(int *)((char*)node + 4) = 0;
+    *(void **)((char*)node + 0) = head;
+    *(int *)((char*)node + 8) = 0;
+    *(void **)((char*)pool + 0x18) = node;
+    MUTEX_unlock(mutex);
 }
 #endif
 
@@ -413,13 +413,13 @@ INCLUDE_ASM("seg/seg_156860", func_00255F50);
 #ifdef SKIP_ASM
 extern "C" void func_00255FA0(void *);
 
-extern "C" void func_00255F50(void *arg0, int arg1) {
-    func_00255FA0(arg0);
-    (*(int *)((char*)(arg0) + (0x1C))) = arg1;
-    (*(int *)((char*)(arg0) + (0x30))) = 1;
-    (*(int *)((char*)(arg0) + (0x24))) = 0x2328;
-    (*(int *)((char*)(arg0) + (0x20))) = 2;
-    (*(int *)((char*)(arg0) + (0x2C))) = 0;
+extern "C" void func_00255F50(void *commSystem, int configIndex) {
+    func_00255FA0(commSystem);
+    (*(int *)((char*)(commSystem) + (0x1C))) = configIndex;
+    (*(int *)((char*)(commSystem) + (0x30))) = 1;
+    (*(int *)((char*)(commSystem) + (0x24))) = 0x2328;
+    (*(int *)((char*)(commSystem) + (0x20))) = 2;
+    (*(int *)((char*)(commSystem) + (0x2C))) = 0;
 }
 #endif
 
@@ -428,14 +428,14 @@ INCLUDE_ASM("seg/seg_156860", func_00255FA0);
 #ifdef SKIP_ASM
 extern "C" void func_003F40B8();
 
-extern "C" void func_00255FA0(void *arg0) {
-    if ((*(int *)((char*)(arg0) + (0x1C))) >= 0) {
-        (*(int *)((char*)(arg0) + (0x1C))) = -1;
+extern "C" void func_00255FA0(void *commSystem) {
+    if ((*(int *)((char*)(commSystem) + (0x1C))) >= 0) {
+        (*(int *)((char*)(commSystem) + (0x1C))) = -1;
         func_003F40B8();
     }
-    (*(int *)((char*)(arg0) + (0x24))) = 0;
-    (*(int *)((char*)(arg0) + (0x20))) = 1;
-    (*(int *)((char*)(arg0) + (0x28))) = 0;
+    (*(int *)((char*)(commSystem) + (0x24))) = 0;
+    (*(int *)((char*)(commSystem) + (0x20))) = 1;
+    (*(int *)((char*)(commSystem) + (0x28))) = 0;
 }
 #endif
 
@@ -444,14 +444,14 @@ INCLUDE_ASM("seg/seg_156860", func_00255FE8);
 #ifdef SKIP_ASM
 extern "C" void func_003F40B8();
 
-extern "C" void func_00255FE8(void *arg0, int arg1) {
-    if ((*(int *)((char*)(arg0) + (0x1C))) >= 0) {
-        (*(int *)((char*)(arg0) + (0x1C))) = -1;
+extern "C" void func_00255FE8(void *commSystem, int errorCode) {
+    if ((*(int *)((char*)(commSystem) + (0x1C))) >= 0) {
+        (*(int *)((char*)(commSystem) + (0x1C))) = -1;
         func_003F40B8();
     }
-    (*(int *)((char*)(arg0) + (0x28))) = arg1;
-    (*(int *)((char*)(arg0) + (0x20))) = 6;
-    (*(int *)((char*)(arg0) + (0x24))) = 0;
+    (*(int *)((char*)(commSystem) + (0x28))) = errorCode;
+    (*(int *)((char*)(commSystem) + (0x20))) = 6;
+    (*(int *)((char*)(commSystem) + (0x24))) = 0;
 }
 #endif
 
@@ -461,13 +461,13 @@ INCLUDE_ASM("seg/seg_156860", func_00256038);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_003F3CC0_6038(int, int, int) __asm__("func_003F3CC0");
 
-extern "C" void func_00256038(void *arg0, int *arg1) {
+extern "C" void func_00256038(void *commSystem, int *localAddr) {
     int temp_2;
 
-    *arg1 = 0;
+    *localAddr = 0;
     temp_2 = func_003F3CC0_6038(0x61646472, 0, 0);
     if (temp_2 & 0xFFFFFF00) {
-        *arg1 = temp_2;
+        *localAddr = temp_2;
     }
 }
 #endif
@@ -503,22 +503,22 @@ extern char str_DNASMAN[];
 static inline int ge3_60B0(int *o) { return *o >= 3; }
 
 extern "C" void func_002560B0(void) {
-    int *o = func_002561B8_60B0(cMemMan_alloc_60B0(0xA50, str_DNASMAN, 0x20000000, 0));
-    func_00256258_60B0(o, 0);
-    while (!ge3_60B0(o)) {
-        func_002563F8_60B0(o);
+    int *dnasMan = func_002561B8_60B0(cMemMan_alloc_60B0(0xA50, str_DNASMAN, 0x20000000, 0));
+    func_00256258_60B0(dnasMan, 0);
+    while (!ge3_60B0(dnasMan)) {
+        func_002563F8_60B0(dnasMan);
         SYNCTASK_run_60B0(0);
         THREAD_yieldticks_60B0(1);
     }
-    func_002562D0_60B0(o);
-    while ((*o ^ 5) != 0) {
-        func_002563F8_60B0(o);
+    func_002562D0_60B0(dnasMan);
+    while ((*dnasMan ^ 5) != 0) {
+        func_002563F8_60B0(dnasMan);
         SYNCTASK_run_60B0(0);
         THREAD_yieldticks_60B0(1);
     }
-    func_002563A8_60B0(o);
-    if (o != 0) {
-        func_002561E0_60B0(o, 3);
+    func_002563A8_60B0(dnasMan);
+    if (dnasMan != 0) {
+        func_002561E0_60B0(dnasMan, 3);
     }
 }
 #endif
@@ -541,9 +541,9 @@ INCLUDE_ASM("seg/seg_156860", func_002561B8);
 #ifdef SKIP_ASM
 extern "C" void func_00256228();
 
-extern "C" int func_002561B8(int arg0) {
+extern "C" int func_002561B8(int dnasMan) {
     func_00256228();
-    return arg0;
+    return dnasMan;
 }
 #endif
 
@@ -554,10 +554,10 @@ INCLUDE_ASM("seg/seg_156860", func_002561E0);
 extern "C" void func_00256250_61E0(int *) __asm__("func_00256250");
 extern "C" void operator_delete__FPi(int *);
 
-extern "C" void func_002561E0(int *arg0, int arg1) {
-    func_00256250_61E0(arg0);
-    if (arg1 & 1) {
-        operator_delete__FPi(arg0);
+extern "C" void func_002561E0(int *dnasMan, int flags) {
+    func_00256250_61E0(dnasMan);
+    if (flags & 1) {
+        operator_delete__FPi(dnasMan);
     }
 }
 #endif
@@ -637,19 +637,19 @@ INCLUDE_ASM("seg/seg_156860", func_002563A8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void cMemMan_free__FPv_63A8(int) __asm__("cMemMan_free__FPv");
 
-extern "C" void func_002563A8(void *arg0) {
+extern "C" void func_002563A8(void *dnasMan) {
     int temp_4;
     int temp_4_2;
 
-    temp_4 = (*(int *)((char*)(arg0) + (0xC)));
+    temp_4 = (*(int *)((char*)(dnasMan) + (0xC)));
     if (temp_4 != 0) {
         cMemMan_free__FPv_63A8(temp_4);
-        (*(int *)((char*)(arg0) + (0xC))) = 0;
+        (*(int *)((char*)(dnasMan) + (0xC))) = 0;
     }
-    temp_4_2 = (*(int *)((char*)(arg0) + (4)));
+    temp_4_2 = (*(int *)((char*)(dnasMan) + (4)));
     if (temp_4_2 != 0) {
         cMemMan_free__FPv_63A8(temp_4_2);
-        (*(int *)((char*)(arg0) + (4))) = 0;
+        (*(int *)((char*)(dnasMan) + (4))) = 0;
     }
 }
 #endif
@@ -698,13 +698,13 @@ extern "C" void func_00256460(char *self) {
     if (ASYNCFILE_getstatus_6460(*(int *)(self + 0x18)) == 1) {
         *(int *)(self + 8) = 0;
         ASYNCFILE_release_6460(*(int *)(self + 0x18), 0, self + 8);
-        int a = *(int *)(self + 4);
-        if (a != 0) {
-            int b = *(int *)(self + 8);
-            if (b > 0 && func_003FCFD8_6460(a, b) >= 0) {
-                void *m = operator_new__FUi_6460(0x10000, str_AuthData, 0x04000100, 0);
-                *(void **)(self + 0xC) = m;
-                *(int *)(self + 0x18) = func_003DF748_6460(str_CONFIG_DAT, m, 0x10000);
+        int readBuffer = *(int *)(self + 4);
+        if (readBuffer != 0) {
+            int readSize = *(int *)(self + 8);
+            if (readSize > 0 && func_003FCFD8_6460(readBuffer, readSize) >= 0) {
+                void *authData = operator_new__FUi_6460(0x10000, str_AuthData, 0x04000100, 0);
+                *(void **)(self + 0xC) = authData;
+                *(int *)(self + 0x18) = func_003DF748_6460(str_CONFIG_DAT, authData, 0x10000);
                 *(int *)(self + 0) = 2;
             }
         }
@@ -753,18 +753,18 @@ extern "C" void USTR_copy_65E0(char *, char *) __asm__("USTR_copy");
 
 extern "C" void func_002565E0(char *self) {
     if (func_003FD100_65E0(*(int *)(self + 0x14)) == 0) {
-        char *p = self + 0xC4;
-        MEM_fill_65E0(p, 0, 0x38C);
+        char *infoBuf = self + 0xC4;
+        MEM_fill_65E0(infoBuf, 0, 0x38C);
         char *b = self + 0x650;
         char *c = self + 0x850;
-        int r = func_003FD128_65E0(p);
+        int result = func_003FD128_65E0(infoBuf);
         *(short *)(self + 0x450) = 0;
         *(short *)b = 0;
         *(short *)c = 0;
         USTR_copy_65E0(self + 0x450, self + 0xCC);
         USTR_copy_65E0(b, self + 0x10C);
         USTR_copy_65E0(c, self + 0x20C);
-        if (r == 0) {
+        if (result == 0) {
             *(int *)(self + 0x1C) = 1;
         } else {
             *(int *)(self + 0x1C) = 0;
@@ -780,15 +780,15 @@ INCLUDE_ASM("seg/seg_156860", func_00256698);
 void func_002557E0(void *);
 extern char cDSockChannel_vtbl[];
 
-extern "C" void *func_00256698(void *arg0) {
-    func_002557E0(arg0);
-    (*(char **)((char*)(arg0) + (8))) = cDSockChannel_vtbl;
-    (*(float *)((char*)(arg0) + (0x10))) = 0.10000000149011612f;
-    (*(int *)((char*)(arg0) + (0xC))) = 0;
-    (*(int *)((char*)(arg0) + (0x18))) = 0;
-    (*(int *)((char*)(arg0) + (0x1C))) = 0;
-    (*(int *)((char*)(arg0) + (0x14))) = 0;
-    return arg0;
+extern "C" void *func_00256698(void *channel) {
+    func_002557E0(channel);
+    (*(char **)((char*)(channel) + (8))) = cDSockChannel_vtbl;
+    (*(float *)((char*)(channel) + (0x10))) = 0.10000000149011612f;
+    (*(int *)((char*)(channel) + (0xC))) = 0;
+    (*(int *)((char*)(channel) + (0x18))) = 0;
+    (*(int *)((char*)(channel) + (0x1C))) = 0;
+    (*(int *)((char*)(channel) + (0x14))) = 0;
+    return channel;
 }
 #endif
 
@@ -1014,16 +1014,16 @@ INCLUDE_ASM("seg/seg_156860", func_00256A58);
 extern "C" int func_003E66F0(int, int, int);
 extern "C" int func_003E6FC8(int);
 
-extern "C" void func_00256A58(void *arg0) {
+extern "C" void func_00256A58(void *channel) {
     int temp_2;
     int temp_2_2;
 
-    temp_2 = func_003E6FC8((*(int *)((char*)(arg0) + (0x18))));
+    temp_2 = func_003E6FC8((*(int *)((char*)(channel) + (0x18))));
     if (temp_2 != 0) {
         temp_2_2 = func_003E66F0(temp_2, 0, 0x237C);
-        (*(int *)((char*)(arg0) + (0x1C))) = temp_2_2;
+        (*(int *)((char*)(channel) + (0x1C))) = temp_2_2;
         if (temp_2_2 != 0) {
-            (*(int *)((char*)(arg0) + (0xC))) = 2;
+            (*(int *)((char*)(channel) + (0xC))) = 2;
         }
     }
 }
@@ -1109,8 +1109,8 @@ INCLUDE_ASM("seg/seg_156860", func_00256BD8);
 #ifdef SKIP_ASM
 extern "C" void cMemMan_free__FPv();
 
-extern "C" void func_00256BD8(int arg0) {
-    if (arg0 != 0) {
+extern "C" void func_00256BD8(int buffer) {
+    if (buffer != 0) {
         cMemMan_free__FPv();
     }
 }
@@ -1376,20 +1376,20 @@ static inline int* Pop_6EE0(PacketQueue_6EE0* q)
 // PORT: the unit declares this as (int, int)
 extern "C" void func_00256EE0(int self, int flags)
 {
-    char* s = (char*)self;
+    char* gameComm = (char*)self;
     int i;
-    if (*(void**)(s + 0x3EC)) cMemMan_free_6EE0(*(void**)(s + 0x3EC));
-    if (*(int**)(s + 0x134)) func_002581B8((cGameComm*)s, *(int**)(s + 0x134));
+    if (*(void**)(gameComm + 0x3EC)) cMemMan_free_6EE0(*(void**)(gameComm + 0x3EC));
+    if (*(int**)(gameComm + 0x134)) func_002581B8((cGameComm*)gameComm, *(int**)(gameComm + 0x134));
     for (i = 0; i < 4; i++) {
-        while (Peek_6EE0((PacketQueue_6EE0*)(s + 0x144) + i)) {
-            func_002581B8((cGameComm*)s, Pop_6EE0((PacketQueue_6EE0*)(s + 0x144) + i));
+        while (Peek_6EE0((PacketQueue_6EE0*)(gameComm + 0x144) + i)) {
+            func_002581B8((cGameComm*)gameComm, Pop_6EE0((PacketQueue_6EE0*)(gameComm + 0x144) + i));
         }
     }
-    if (*(void**)(s + 0x140)) {
-        func_003E73E0(*(void**)(s + 0x140));
-        *(void**)(s + 0x140) = 0;
+    if (*(void**)(gameComm + 0x140)) {
+        func_003E73E0(*(void**)(gameComm + 0x140));
+        *(void**)(gameComm + 0x140) = 0;
     }
-    if (flags & 1) operator_delete__FPi((int*)s);
+    if (flags & 1) operator_delete__FPi((int*)gameComm);
 }
 #endif
 
@@ -1716,15 +1716,15 @@ INCLUDE_ASM("seg/seg_156860", func_00257750);
 #ifdef SKIP_ASM
 extern "C" void func_00257750(cGameComm* gameComm) {
     if (gameComm->mDisplayError == 0 && gameComm->mAlone == 0 && (gameComm->mError == 0 || gameComm->mRaceInProgress == 0)) {
-        int a = gameComm->mOverlayTimeout;
-        if (a > 0) {
+        int overlayTimeout = gameComm->mOverlayTimeout;
+        if (overlayTimeout > 0) {
             if (gameComm->mPauseMenu[0] == 0 || gameComm->mPauseMenu[1] == 0) {
-                gameComm->mOverlayTimeout = a - 1;
+                gameComm->mOverlayTimeout = overlayTimeout - 1;
             }
         }
-        int b = gameComm->mPauseTimeout;
-        if (b > 0) {
-            gameComm->mPauseTimeout = b - 1;
+        int pauseTimeout = gameComm->mPauseTimeout;
+        if (pauseTimeout > 0) {
+            gameComm->mPauseTimeout = pauseTimeout - 1;
         }
     }
 }
@@ -2088,9 +2088,9 @@ extern "C" int func_00257E98_impl(char* self, int type, const void* data, int le
         if (func_00255E00_7E98((int)cCommSystem_mCommSystem, *(int*)(self + 0x6C), &pkt, pkt.size)) return 1;
     }
     {
-        Packet_7E98* p = func_00258188_7E98(self);
-        MEM_copy_7E98(p, &pkt, pkt.size);
-        ((Conn_7E98*)self)->slots[(*(int*)(self + 0x364))++ % 32] = p;
+        Packet_7E98* queuedPacket = func_00258188_7E98(self);
+        MEM_copy_7E98(queuedPacket, &pkt, pkt.size);
+        ((Conn_7E98*)self)->slots[(*(int*)(self + 0x364))++ % 32] = queuedPacket;
     }
     return 1;
 }
@@ -2213,8 +2213,8 @@ INCLUDE_ASM("seg/seg_156860", func_00258160);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cGameComm_readPacket_8160(int, int, int, int) __asm__("cGameComm_readPacket");
 
-extern "C" int func_00258160(int arg0, int arg1, int arg2) {
-    return cGameComm_readPacket_8160(arg0, 1, arg1, arg2) > 0;
+extern "C" int func_00258160(int gameComm, int data, int maxSize) {
+    return cGameComm_readPacket_8160(gameComm, 1, data, maxSize) > 0;
 }
 #endif
 
@@ -2235,8 +2235,8 @@ INCLUDE_ASM("seg/seg_156860", func_002581B8);
 #ifdef SKIP_ASM
 extern "C" void operator_delete__FPi(int *);
 
-extern "C" void func_002581B8(cGameComm* gameComm, int *arg1) {
-    operator_delete__FPi(arg1);
+extern "C" void func_002581B8(cGameComm* gameComm, int *packet) {
+    operator_delete__FPi(packet);
 }
 #endif
 
@@ -2251,9 +2251,9 @@ extern "C" int func_002581D8(cGameComm* gameComm) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_002581E8);
 #ifdef SKIP_ASM
-extern "C" void func_002581E8(void *arg0, int arg1, int arg2) {
-    (*(int *)((char*)(arg0) + (0x124))) = arg1;
-    (*(int *)((char*)(arg0) + (0x128))) = arg2;
+extern "C" void func_002581E8(void *gameComm, int data, int size) {
+    (*(int *)((char*)(gameComm) + (0x124))) = data;
+    (*(int *)((char*)(gameComm) + (0x128))) = size;
 }
 #endif
 
@@ -2263,11 +2263,11 @@ INCLUDE_ASM("seg/seg_156860", func_002581F8);
 extern "C" int cGameComm_readPacket(cGameComm*, int, int, int);
 
 extern "C" void func_002581F8(cGameComm* gameComm) {
-    int a;
-    while ((a = (int)gameComm->mAsyncReadData) != 0) {
+    int readData;
+    while ((readData = (int)gameComm->mAsyncReadData) != 0) {
         int n = gameComm->mAsyncReadSize;
         if (n >= 0xED) n = 0xEC;
-        if (cGameComm_readPacket(gameComm, 2, a, n) == 0) break;
+        if (cGameComm_readPacket(gameComm, 2, readData, n) == 0) break;
         gameComm->mAsyncReadData = (char*)((int)gameComm->mAsyncReadData + n);
         int rem = gameComm->mAsyncReadSize - n;
         gameComm->mAsyncReadSize = rem;
@@ -2290,9 +2290,9 @@ extern "C" int func_00258280(cGameComm* gameComm) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00258290);
 #ifdef SKIP_ASM
-extern "C" void func_00258290(void *arg0, int arg1, int arg2) {
-    (*(int *)((char*)(arg0) + (0x12C))) = arg1;
-    (*(int *)((char*)(arg0) + (0x130))) = arg2;
+extern "C" void func_00258290(void *gameComm, int data, int size) {
+    (*(int *)((char*)(gameComm) + (0x12C))) = data;
+    (*(int *)((char*)(gameComm) + (0x130))) = size;
 }
 #endif
 
@@ -2303,11 +2303,11 @@ INCLUDE_ASM("seg/seg_156860", func_002582A0);
 extern "C" int func_00257E98_82A0(void *, int, int, int) __asm__("func_00257E98");
 
 extern "C" void func_002582A0(cGameComm* gameComm) {
-    int a = (int)gameComm->mAsyncWriteData;
-    if (a != 0 && gameComm->mWriteQueue.mTail == gameComm->mWriteQueue.mHead) {
+    int writeData = (int)gameComm->mAsyncWriteData;
+    if (writeData != 0 && gameComm->mWriteQueue.mTail == gameComm->mWriteQueue.mHead) {
         int n = gameComm->mAsyncWriteSize;
         if (n >= 0xED) n = 0xEC;
-        if (func_00257E98_82A0(((char*)gameComm), 2, a, n) != 0) {
+        if (func_00257E98_82A0(((char*)gameComm), 2, writeData, n) != 0) {
             gameComm->mAsyncWriteData = (char*)((int)gameComm->mAsyncWriteData + n);
             int rem = gameComm->mAsyncWriteSize - n;
             gameComm->mAsyncWriteSize = rem;
@@ -2326,14 +2326,14 @@ INCLUDE_ASM("seg/seg_156860", func_00258330);
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 
 extern "C" void func_00258330(cGameComm* gameComm) {
-    char *p = (char*)SSXApp;
-    float b = gameComm->mNetLatency[1];
-    float a = gameComm->mNetLatency[0];
-    float r = b >? a;
-    gameComm->mLatency = r;
-    float c = *(float *)(p + 0x14);
-    if (r < c) {
-        gameComm->mLatency = c;
+    char *app = (char*)SSXApp;
+    float latency1 = gameComm->mNetLatency[1];
+    float latency0 = gameComm->mNetLatency[0];
+    float maxLatency = latency1 >? latency0;
+    gameComm->mLatency = maxLatency;
+    float frameTime = *(float *)(app + 0x14);
+    if (maxLatency < frameTime) {
+        gameComm->mLatency = frameTime;
     }
 }
 #endif
@@ -2768,9 +2768,9 @@ INCLUDE_ASM("seg/seg_156860", func_00258C50);
 extern "C" void func_00257E98(void *, int, int, int);
 extern "C" int strlen(int);
 
-extern "C" void func_00258C50(cGameComm* gameComm, int arg1) {
+extern "C" void func_00258C50(cGameComm* gameComm, int message) {
     if (((gameComm->mError) == 0) && ((gameComm->mConnected) != 0)) {
-        func_00257E98(gameComm, 1, arg1, strlen(arg1) + 1);
+        func_00257E98(gameComm, 1, message, strlen(message) + 1);
     }
 }
 #endif
@@ -2944,12 +2944,12 @@ extern "C" void func_00258F20(cGameComm* gameComm, int frame, int value)
         gameComm->mCheckSumSent = 1;
     }
     {
-        int f = gameComm->mAITick[0];
-        if (f < 0) return;
-        int g = gameComm->mAITick[1];
-        if (g < 0) return;
-        int m = g < f ? g : f;
-        if (RingAt_8F20((Ring_8F20*)(((char*)gameComm) + 0x410), m) != RingAt_8F20((Ring_8F20*)(((char*)gameComm) + 0x500), m)) gameComm->mDesync = 1;
+        int localTick = gameComm->mAITick[0];
+        if (localTick < 0) return;
+        int peerTick = gameComm->mAITick[1];
+        if (peerTick < 0) return;
+        int minTick = peerTick < localTick ? peerTick : localTick;
+        if (RingAt_8F20((Ring_8F20*)(((char*)gameComm) + 0x410), minTick) != RingAt_8F20((Ring_8F20*)(((char*)gameComm) + 0x500), minTick)) gameComm->mDesync = 1;
     }
 }
 #endif
@@ -3046,8 +3046,8 @@ INCLUDE_ASM("seg/seg_156860", func_00259210);
 #ifdef SKIP_ASM
 extern "C" void cMemMan_free__FPv();
 
-extern "C" void func_00259210(int arg0) {
-    if (arg0 != 0) {
+extern "C" void func_00259210(int buffer) {
+    if (buffer != 0) {
         cMemMan_free__FPv();
     }
 }
@@ -3058,13 +3058,13 @@ INCLUDE_ASM("seg/seg_156860", func_00259230);
 #ifdef SKIP_ASM
 extern "C" void *func_0039FAE8(int);
 
-extern "C" void func_00259230(int *arg0) {
+extern "C" void func_00259230(int *event) {
     void *obj = SSXApp->RealFE;
     if (obj != 0) {
-        char *o = (char *)func_0039FAE8(*(int *)((char*)obj + 0xC) + 0x18);
-        char *vt = *(char **)(o + 8);
+        char *topState = (char *)func_0039FAE8(*(int *)((char*)obj + 0xC) + 0x18);
+        char *vt = *(char **)(topState + 8);
         void (*fn)(void *, int, int *) = *(void (**)(void *, int, int *))(vt + 0xC4);
-        fn(o + *(short *)(vt + 0xC0), *arg0, arg0);
+        fn(topState + *(short *)(vt + 0xC0), *event, event);
     }
 }
 #endif

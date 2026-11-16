@@ -5,10 +5,10 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003ADDC0);
 #ifdef SKIP_ASM
 extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
 
-extern "C" void* func_003ADDC0(void* self, int a1, int a2, int a3, int a4)
+extern "C" void* func_003ADDC0(void* self, int videoSource, int videoBufferSize, int sourceType, int noAudio)
 {
     *(int*)((char*)self + 0x60) = 0;
-    func_003ADEC8(self, a1, 0, a2, 0, 0, 0, a3, a4);
+    func_003ADEC8(self, videoSource, 0, videoBufferSize, 0, 0, 0, sourceType, noAudio);
     return self;
 }
 #endif
@@ -18,10 +18,10 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003ADE08);
 #ifdef SKIP_ASM
 extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
 
-extern "C" void* func_003ADE08(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
+extern "C" void* func_003ADE08(void* self, int videoSource, int videoBufferSize, int audioSource, int audioBufferSize, int sourceType, int noAudio)
 {
     *(int*)((char*)self + 0x60) = 0;
-    func_003ADEC8(self, a1, 0, a2, a3, 0, a4, a5, a6);
+    func_003ADEC8(self, videoSource, 0, videoBufferSize, audioSource, 0, audioBufferSize, sourceType, noAudio);
     return self;
 }
 #endif
@@ -31,10 +31,10 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003ADE58);
 #ifdef SKIP_ASM
 extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
 
-extern "C" void* func_003ADE58(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8)
+extern "C" void* func_003ADE58(void* self, int videoSource, int videoDataSize, int videoBufferSize, int audioSource, int audioDataSize, int audioBufferSize, int sourceType, int noAudio)
 {
     *(int*)((char*)self + 0x60) = 0;
-    func_003ADEC8(self, a1, a2, a3, a4, a5, a6, a7, a8);
+    func_003ADEC8(self, videoSource, videoDataSize, videoBufferSize, audioSource, audioDataSize, audioBufferSize, sourceType, noAudio);
     return self;
 }
 #endif
@@ -43,10 +43,10 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003ADE90);
 #ifdef SKIP_ASM
 extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
 
-extern "C" void* func_003ADE90(void* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
+extern "C" void* func_003ADE90(void* self, int videoSource, int videoDataSize, int videoBufferSize, int audioSource, int audioDataSize, int audioBufferSize, int noAudio)
 {
     *(int*)((char*)self + 0x60) = 0;
-    func_003ADEC8(self, a1, a2, a3, a4, a5, a6, 2, a7);
+    func_003ADEC8(self, videoSource, videoDataSize, videoBufferSize, audioSource, audioDataSize, audioBufferSize, 2, noAudio);
     return self;
 }
 #endif
@@ -161,8 +161,8 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE2F8);
 #ifdef SKIP_ASM
-extern "C" void func_003AE2F8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x70))) = arg1;
+extern "C" void func_003AE2F8(void *player, int table) {
+    (*(int *)((char*)(player) + (0x70))) = table;
 }
 #endif
 
@@ -351,10 +351,10 @@ extern "C" int func_004139F8(float f);
 extern "C" int func_003B0600(void* p, int a1);
 extern "C" int func_003B0580(void* self);
 
-extern "C" int func_003AE6C8(void* self, float f)
+extern "C" int func_003AE6C8(void* self, float position)
 {
-    *(float*)((char*)self + 0x48) = f;
-    *(int*)((char*)self + 0x74) = func_003B0600(*(void**)((char*)self + 0x64), func_004139F8(f));
+    *(float*)((char*)self + 0x48) = position;
+    *(int*)((char*)self + 0x74) = func_003B0600(*(void**)((char*)self + 0x64), func_004139F8(position));
     *(int*)((char*)self + 0x44) = func_003B0580(*(void**)((char*)self + 0x64));
     return *(int*)((char*)self + 0x74);
 }
@@ -386,9 +386,9 @@ extern "C" float func_003B05C0(void*);
 
 extern "C" int func_003AE780(char* self)
 {
-    unsigned int t = func_003AE9A0_E780(self);
-    float s = func_003B05C0(*(void**)(self + 0x64));
-    *(float*)(self + 0x48) = (float)(t + *(unsigned int*)(self + 0x40)) * 0.001f * s;
+    unsigned int elapsed = func_003AE9A0_E780(self);
+    float rate = func_003B05C0(*(void**)(self + 0x64));
+    *(float*)(self + 0x48) = (float)(elapsed + *(unsigned int*)(self + 0x40)) * 0.001f * rate;
     if (*(float*)(self + 0x48) < (float)*(unsigned int*)(self + 0x44) + 1.0f)
         return 0;
     return 1;
@@ -402,12 +402,12 @@ extern "C" int func_003AEFA8(void* p);
 
 extern "C" int func_003AE860(void** self)
 {
-    void* p = *self;
-    int r = 1;
-    if (p != 0) {
-        r = func_003AEFA8(p);
+    void* audio = *self;
+    int result = 1;
+    if (audio != 0) {
+        result = func_003AEFA8(audio);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -430,19 +430,19 @@ extern "C" void* func_003AE888(void* self, int speed)
     if ((unsigned int)speed > 0x4000) {
         speed = 0x4000;
     }
-    int s = speed;
+    int newRate = speed;
     if (*(void**)self != 0) {
-        func_003AEE98(*(void**)self, s);
+        func_003AEE98(*(void**)self, newRate);
     }
-    func_003AE888_sTimer* t = *(func_003AE888_sTimer**)((char*)self + 0x5C);
+    func_003AE888_sTimer* timer = *(func_003AE888_sTimer**)((char*)self + 0x5C);
     unsigned int now = func_003E4E98();
-    if (t->rate == 0x1000) {
-        t->accum += (ulong)(now - t->last);
+    if (timer->rate == 0x1000) {
+        timer->accum += (ulong)(now - timer->last);
     } else {
-        t->accum += ((ulong)t->rate * (ulong)(now - t->last)) >> 12;
+        timer->accum += ((ulong)timer->rate * (ulong)(now - timer->last)) >> 12;
     }
-    t->rate = s;
-    t->last = now;
+    timer->rate = newRate;
+    timer->last = now;
     return 0;
 }
 #endif
@@ -474,11 +474,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE978);
 #ifdef SKIP_ASM
 extern "C" int func_003AEF48(int);
 
-extern "C" int func_003AE978(int *arg0) {
+extern "C" int func_003AE978(int *player) {
     int temp_4;
     int var_2;
 
-    temp_4 = *arg0;
+    temp_4 = *player;
     var_2 = 0;
     if (temp_4 != 0) {
         var_2 = func_003AEF48(temp_4);
@@ -644,9 +644,9 @@ extern "C" void* func_003AEAD0(int, void*);
 //99.44%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AECB8__FPvT0);
 #ifdef SKIP_ASM
-void* func_003AECB8(void* self, void* a1)
+void* func_003AECB8(void* self, void* context)
 {
-    return func_003AEAD0(*(int*)a1, self);
+    return func_003AEAD0(*(int*)context, self);
 }
 #endif
 
@@ -672,9 +672,9 @@ extern "C" void* func_003AECE0(int, int);
 //99.38%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AED20__FPvT0i);
 #ifdef SKIP_ASM
-void* func_003AED20(void* self, void* a1, int a2)
+void* func_003AED20(void* self, void* context, int chunk)
 {
-    return func_003AECE0(*(int*)a1, a2);
+    return func_003AECE0(*(int*)context, chunk);
 }
 #endif
 
@@ -745,14 +745,14 @@ extern "C" void func_003B58A0();
 extern "C" void func_003B58D8();
 extern "C" int func_003B7FB8(int h, int v);
 
-extern "C" int func_003AEE98(void* self, int v)
+extern "C" int func_003AEE98(void* self, int speed)
 {
-    int r;
+    int result;
     if (*(int*)((char*)self + 0xC) != -1) {
         func_003B58A0();
-        r = func_003B7FB8(*(int*)((char*)self + 0xC), v);
+        result = func_003B7FB8(*(int*)((char*)self + 0xC), speed);
         func_003B58D8();
-        return r;
+        return result;
     }
     return 0;
 }
@@ -767,12 +767,12 @@ extern "C" int func_003B7D80(int h, int a1);
 
 extern "C" int func_003AEEF8(void* self)
 {
-    int r;
+    int result;
     if (*(int*)((char*)self + 0x10) != -1) {
         func_003B58A0();
-        r = func_003B7D80(*(int*)((char*)self + 0x10), 0);
+        result = func_003B7D80(*(int*)((char*)self + 0x10), 0);
         func_003B58D8();
-        return r;
+        return result;
     }
     return 0;
 }
@@ -785,14 +785,14 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AEF48);
 extern "C" int func_003B7E70(int, int);
 int func_003AEF48_impl(void *self, int arg) __asm__("func_003AEF48");
 
-int func_003AEF48_impl(void *self, int arg) {
-    int r;
+int func_003AEF48_impl(void *self, int volume) {
+    int result;
 
     if (*(int *)((char *)self + 0xC) != -1) {
         func_003B58A0();
-        r = func_003B7E70(*(int *)((char *)self + 0xC), arg);
+        result = func_003B7E70(*(int *)((char *)self + 0xC), volume);
         func_003B58D8();
-        return r;
+        return result;
     }
     return 0;
 }
@@ -832,10 +832,10 @@ extern void* D_00456890[];
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AF010);
 #ifdef SKIP_ASM
-extern "C" void *func_003AF010(void *arg0) {
-    (*(int *)((char*)(arg0) + (0))) = 0;
-    (*(int *)((char*)(arg0) + (4))) = 0;
-    return arg0;
+extern "C" void *func_003AF010(void *table) {
+    (*(int *)((char*)(table) + (0))) = 0;
+    (*(int *)((char*)(table) + (4))) = 0;
+    return table;
 }
 #endif
 //100%
@@ -976,8 +976,8 @@ extern "C" void* func_003AF258_impl(void* self, unsigned int key)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AF2F8);
 #ifdef SKIP_ASM
-extern "C" int func_003AF2F8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (4)));
+extern "C" int func_003AF2F8(void *table) {
+    return (*(int *)((char*)(table) + (4)));
 }
 #endif
 //100%
@@ -1002,20 +1002,20 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AF378);
 extern unsigned char D_00499C81[];
 
 static inline int to_lower_3AF378(int c) { if (D_00499C81[c] & 1) return c + 0x20; return c; }
-extern "C" int func_003AF378(const char* a, const char* b)
+extern "C" int func_003AF378(const char* lhs, const char* rhs)
 {
     int i;
-    int r;
-    r = 0;
+    int diff;
+    diff = 0;
     i = 0;
-    while (a[i] != 0 && b[i] != 0) {
-        r += to_lower_3AF378(a[i]) - to_lower_3AF378(b[i]);
-        if (r != 0) {
-            return r;
+    while (lhs[i] != 0 && rhs[i] != 0) {
+        diff += to_lower_3AF378(lhs[i]) - to_lower_3AF378(rhs[i]);
+        if (diff != 0) {
+            return diff;
         }
         i++;
     }
-    return a[i] - b[i];
+    return lhs[i] - rhs[i];
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -1068,17 +1068,17 @@ extern "C" int func_003AF560(unsigned char **pp, unsigned int *plen, int *out) {
     unsigned int i;
     int ch = 9;
     unsigned char *end;
-    long r;
+    long value;
 
     for (i = 0; i < *plen; i++) {
-        unsigned char c = (*pp)[i];
-        if ((unsigned int)(c - 9) < 2U) {
-            ch = (signed char)c;
+        unsigned char curChar = (*pp)[i];
+        if ((unsigned int)(curChar - 9) < 2U) {
+            ch = (signed char)curChar;
             (*pp)[i] = 0;
             break;
         }
     }
-    r = func_0041E9E0(*pp, &end, 10);
+    value = func_0041E9E0(*pp, &end, 10);
     *plen = *plen - (end - *pp);
     if (i != *plen) {
         (*pp)[i] = (unsigned char)ch;
@@ -1086,7 +1086,7 @@ extern "C" int func_003AF560(unsigned char **pp, unsigned int *plen, int *out) {
     if (end == *pp) {
         return 0;
     }
-    *out = (int)r;
+    *out = (int)value;
     return 1;
 }
 #endif
@@ -1097,23 +1097,23 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AF670);
 extern "C" void func_003AF300(char** pp, unsigned int* plen);
 extern "C" void func_003AF670(char** ps, unsigned int* plen, char** words, unsigned int* lens, unsigned int nwords, unsigned int* outIdx)
 {
-    char* s = *ps;
-    if (s == 0) {
+    char* text = *ps;
+    if (text == 0) {
         *ps = 0;
         *plen = 0;
         *outIdx = 0xFFFFFFFF;
         return;
     }
-    func_003AF300(&s, plen);
+    func_003AF300(&text, plen);
     for (unsigned int i = 0; i < *plen; i++) {
         for (unsigned int k = 0; k < nwords; k++) {
             unsigned int j;
-            for (j = 0; j < lens[k] && i + j < *plen && words[k][j] == s[i + j]; j++) {
+            for (j = 0; j < lens[k] && i + j < *plen && words[k][j] == text[i + j]; j++) {
             }
             if (j == lens[k]) {
-                unsigned int t = i + j;
-                *ps = s + t;
-                *plen -= t;
+                unsigned int consumed = i + j;
+                *ps = text + consumed;
+                *plen -= consumed;
                 *outIdx = k;
                 return;
             }
@@ -1151,92 +1151,92 @@ extern "C" void *func_003B0340(void *self) {
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B03A8);
 #ifdef SKIP_ASM
-extern "C" void func_003B03A8(int *arg0, int arg1) {
-    *arg0 = arg1;
+extern "C" void func_003B03A8(int *entry, int value) {
+    *entry = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B03B0);
 #ifdef SKIP_ASM
-extern "C" void func_003B03B0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (4))) = arg1;
+extern "C" void func_003B03B0(void *entry, int value) {
+    (*(int *)((char*)(entry) + (4))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B03B8);
 #ifdef SKIP_ASM
-extern "C" void func_003B03B8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (8))) = arg1;
+extern "C" void func_003B03B8(void *entry, int value) {
+    (*(int *)((char*)(entry) + (8))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B03C0);
 #ifdef SKIP_ASM
-extern "C" void func_003B03C0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xC))) = arg1;
+extern "C" void func_003B03C0(void *entry, int value) {
+    (*(int *)((char*)(entry) + (0xC))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B03C8);
 #ifdef SKIP_ASM
-extern "C" void func_003B03C8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x10))) = arg1;
+extern "C" void func_003B03C8(void *entry, int index) {
+    (*(int *)((char*)(entry) + (0x10))) = index;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B03D0);
 #ifdef SKIP_ASM
-extern "C" void func_003B03D0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_003B03D0(void *entry, int value) {
+    (*(int *)((char*)(entry) + (0x14))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B03D8);
 #ifdef SKIP_ASM
-extern "C" void func_003B03D8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_003B03D8(void *entry, int value) {
+    (*(int *)((char*)(entry) + (0x18))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B03E0);
 #ifdef SKIP_ASM
-extern "C" void func_003B03E0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x1C))) = arg1;
+extern "C" void func_003B03E0(void *entry, int value) {
+    (*(int *)((char*)(entry) + (0x1C))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B03E8);
 #ifdef SKIP_ASM
-extern "C" void func_003B03E8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x20))) = arg1;
+extern "C" void func_003B03E8(void *entry, int value) {
+    (*(int *)((char*)(entry) + (0x20))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B03F0);
 #ifdef SKIP_ASM
-extern "C" void func_003B03F0(void *arg0, signed char arg1) {
-    (*(signed char *)((char*)(arg0) + (0x24))) = arg1;
+extern "C" void func_003B03F0(void *entry, signed char value) {
+    (*(signed char *)((char*)(entry) + (0x24))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B03F8);
 #ifdef SKIP_ASM
-extern "C" void func_003B03F8(void *arg0, signed char arg1) {
-    (*(signed char *)((char*)(arg0) + (0x25))) = arg1;
+extern "C" void func_003B03F8(void *entry, signed char value) {
+    (*(signed char *)((char*)(entry) + (0x25))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0400);
 #ifdef SKIP_ASM
-extern "C" void func_003B0400(void *arg0, signed char arg1) {
-    (*(signed char *)((char*)(arg0) + (0x26))) = arg1;
+extern "C" void func_003B0400(void *entry, signed char value) {
+    (*(signed char *)((char*)(entry) + (0x26))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0408);
 #ifdef SKIP_ASM
-extern "C" void func_003B0408(void *arg0, signed char arg1) {
-    (*(signed char *)((char*)(arg0) + (0x27))) = arg1;
+extern "C" void func_003B0408(void *entry, signed char value) {
+    (*(signed char *)((char*)(entry) + (0x27))) = value;
 }
 #endif
 
@@ -1433,15 +1433,15 @@ struct func_003B06B0_sReq {
 
 extern "C" int func_003B06B0(func_003B06B0_sReq* self)
 {
-    int r;
-    int v = self->pending;
-    if (v != 0) {
+    int chunk;
+    int pendingChunk = self->pending;
+    if (pendingChunk != 0) {
         self->pending = 0;
-        r = v;
-        return v;
+        chunk = pendingChunk;
+        return pendingChunk;
     }
-    self->fn(self, self->arg, &r);
-    return r;
+    self->fn(self, self->arg, &chunk);
+    return chunk;
 }
 #endif
 
@@ -1458,9 +1458,9 @@ struct sWSCb06F8 {
 
 // The unit later declares func_003B06F8(void*, void*) for its caller; bind this definition by asm label.
 void func_003B06F8_impl(sWSCb06F8* self, int arg) __asm__("func_003B06F8");
-void func_003B06F8_impl(sWSCb06F8* self, int arg)
+void func_003B06F8_impl(sWSCb06F8* self, int chunk)
 {
-    self->fn(self, self->ctx, arg);
+    self->fn(self, self->ctx, chunk);
 }
 #endif
 
@@ -1469,10 +1469,10 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0720__FPv);
 #ifdef SKIP_ASM
 void* func_003B0720(void* self)
 {
-    int t0 = 0;
-    *(int*)((char*)self + 0x4) = t0;
-    *(int*)((char*)self + 0x8) = t0;
-    *(int*)self = t0;
+    int zero = 0;
+    *(int*)((char*)self + 0x4) = zero;
+    *(int*)((char*)self + 0x8) = zero;
+    *(int*)self = zero;
     return self;
 }
 #endif
@@ -1482,11 +1482,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0738__FPv);
 #ifdef SKIP_ASM
 void* func_003B0738(void* self)
 {
-    int t0 = 0;
-    *(int*)self = t0;
+    int zero = 0;
+    *(int*)self = zero;
     *(int*)((char*)self + 0xc) = 2;
-    *(int*)((char*)self + 0x4) = t0;
-    *(int*)((char*)self + 0x8) = t0;
+    *(int*)((char*)self + 0x4) = zero;
+    *(int*)((char*)self + 0x8) = zero;
     return self;
 }
 #endif
@@ -1494,12 +1494,12 @@ void* func_003B0738(void* self)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0758);
 #ifdef SKIP_ASM
-extern "C" void* func_003B0758(void* self, int a1, int a2, int a3, int a4)
+extern "C" void* func_003B0758(void* self, int context, int fetchFn, int releaseFn, int a4)
 {
     *(int*)((char*)self + 0xc) = a4;
-    *(int*)self = a1;
-    *(int*)((char*)self + 0x4) = a2;
-    *(int*)((char*)self + 0x8) = a3;
+    *(int*)self = context;
+    *(int*)((char*)self + 0x4) = fetchFn;
+    *(int*)((char*)self + 0x8) = releaseFn;
     return self;
 }
 #endif
@@ -1692,9 +1692,9 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0B10);
 #ifdef SKIP_ASM
 extern "C" void func_003B0B40(void* a, void* b, void* c);
 
-extern "C" int func_003B0B10(void* self, void* a1, void* a2)
+extern "C" int func_003B0B10(void* self, void* a1, void* source)
 {
-    func_003B0B40(a2, self, a1);
+    func_003B0B40(source, self, a1);
     return 1;
 }
 #endif
@@ -1723,9 +1723,9 @@ struct func_003B0B40_sScript {
 };
 
 // PORT: func_003B06B0 returns the block pointer as int.
-extern "C" void func_003B0B40(void* a, void* b, void* c)
+extern "C" void func_003B0B40(void* source, void* consumer, void* c)
 {
-    func_003B0B40_sScript* self = (func_003B0B40_sScript*)a;
+    func_003B0B40_sScript* self = (func_003B0B40_sScript*)source;
     void* data = 0;
     func_003B0B40_sBlock* blk = (func_003B0B40_sBlock*)func_003B06B0(self->req);
     if (blk != 0) {
@@ -1751,7 +1751,7 @@ extern "C" void func_003B0B40(void* a, void* b, void* c)
         func_003B06F8(self->req, blk);
     }
     self->count++;
-    func_004029D0(b, self->hdr, total);
+    func_004029D0(consumer, self->hdr, total);
 }
 #endif
 
@@ -2089,10 +2089,10 @@ extern "C" void func_003B1290(int n);
 
 extern "C" void func_003B1228(void* data)
 {
-    char* r = (char*)ld;
-    *(void**)(r + 0x0) = data;
-    *(int*)(r + 0x8) = 0;
-    *(int*)(r + 0x4) = 0;
+    char* reader = (char*)ld;
+    *(void**)(reader + 0x0) = data;
+    *(int*)(reader + 0x8) = 0;
+    *(int*)(reader + 0x4) = 0;
     func_003B1290(0);
 }
 #endif
@@ -2103,9 +2103,9 @@ extern layer_data* ld __asm__("D_0050A088") __attribute__((section(".bss")));
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B1258);
 #ifdef SKIP_ASM
-extern "C" unsigned int func_003B1258(int a0)
+extern "C" unsigned int func_003B1258(int numBits)
 {
-    return *(unsigned int*)((char*)ld + 0x4) >> (unsigned int)(-a0);
+    return *(unsigned int*)((char*)ld + 0x4) >> (unsigned int)(-numBits);
 }
 #endif
 
@@ -2138,14 +2138,14 @@ static inline void FillByte_1290(sBitReader_1290*& r, int c)
 // Drops n bits from the bit buffer and refills it a byte at a time.
 extern "C" void func_003B1290(int n)
 {
-    sBitReader_1290* r = (sBitReader_1290*)ld;
-    r->bits <<= n;
-    int c = r->count - n;
-    while (c < 25) {
-        FillByte_1290(r, c);
-        c += 8;
+    sBitReader_1290* reader = (sBitReader_1290*)ld;
+    reader->bits <<= n;
+    int bitCount = reader->count - n;
+    while (bitCount < 25) {
+        FillByte_1290(reader, bitCount);
+        bitCount += 8;
     }
-    ((sBitReader_1290*)ld)->count = c;
+    ((sBitReader_1290*)ld)->count = bitCount;
 }
 #endif
 
@@ -2158,9 +2158,9 @@ extern "C" void func_003B1290(int n);
 // `extern "C" void* func_003B1300(int)` declaration (really unsigned int).
 extern "C" void* func_003B1300(int n)
 {
-    unsigned int v = func_003B1258(n);
+    unsigned int bits = func_003B1258(n);
     func_003B1290(n);
-    return (void*)v;
+    return (void*)bits;
 }
 #endif
 
@@ -2182,14 +2182,14 @@ static inline void FillByte_1340(sBitReader_1340*& r, int c)
 // Drops the whole 32-bit buffer and refills it a byte at a time.
 extern "C" void func_003B1340(void)
 {
-    sBitReader_1340* r = (sBitReader_1340*)ld;
-    r->bits = 0;
-    int c = r->count - 32;
-    while (c < 25) {
-        FillByte_1340(r, c);
-        c += 8;
+    sBitReader_1340* reader = (sBitReader_1340*)ld;
+    reader->bits = 0;
+    int bitCount = reader->count - 32;
+    while (bitCount < 25) {
+        FillByte_1340(reader, bitCount);
+        bitCount += 8;
     }
-    ((sBitReader_1340*)ld)->count = c;
+    ((sBitReader_1340*)ld)->count = bitCount;
 }
 #endif
 
@@ -2200,9 +2200,9 @@ extern "C" void func_003B1340(void);
 
 extern "C" unsigned int func_003B13A8(void)
 {
-    unsigned int v = func_003B1258(0x20);
+    unsigned int bits = func_003B1258(0x20);
     func_003B1340();
-    return v;
+    return bits;
 }
 #endif
 

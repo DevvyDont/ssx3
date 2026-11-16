@@ -32,13 +32,13 @@ struct sVEntry001D9E20 {
     int (*fn)(void*, int, int);
 };
 
-extern "C" int func_001D9E20(void* self, int a1, int a2)
+extern "C" int func_001D9E20(void* self, int msg, int msgParam)
 {
     if (*(int*)((char*)self + 0x50) != 0) {
         void* obj = *(void**)((char*)self + 0x20);
         if (obj != 0) {
             sVEntry001D9E20* vt = *(sVEntry001D9E20**)((char*)obj + 8);
-            return vt[24].fn((char*)obj + vt[24].delta, a1, a2);
+            return vt[24].fn((char*)obj + vt[24].delta, msg, msgParam);
         }
     }
     return 0;
@@ -205,9 +205,9 @@ struct sStrings_A110 {
 };
 
 // Joins up to three localised help strings into one buffer and shows it in the popup text.
-extern "C" void func_001DA110(void* p)
+extern "C" void func_001DA110(void* helpPopup)
 {
-    char* self = (char*)p;
+    char* self = (char*)helpPopup;
     unsigned short* strs[3];
     unsigned short* buf = 0;
     int total = 0;
@@ -218,8 +218,8 @@ extern "C" void func_001DA110(void* p)
         if (ids[i] == 0) {
             break;
         }
-        sStrings_A110* s = (sStrings_A110*)SSXApp->FELocale;
-        strs[i] = s->vt[4].fn((char*)s + s->vt[4].delta, ids[i]);
+        sStrings_A110* locale = (sStrings_A110*)SSXApp->FELocale;
+        strs[i] = locale->vt[4].fn((char*)locale + locale->vt[4].delta, ids[i]);
         count++;
         total += USTR_length(strs[i]) + 1;
         i++;
@@ -391,11 +391,11 @@ struct sNetHelpPopup_DA510 {
     int b[7];
 };
 
-void func_001DA510(void* self, int i, int a, int b)
+void func_001DA510(void* self, int i, int textId, int iconIndex)
 {
-    sNetHelpPopup_DA510* s = (sNetHelpPopup_DA510*)self;
-    s->a[i] = a;
-    s->b[i] = b;
+    sNetHelpPopup_DA510* popup = (sNetHelpPopup_DA510*)self;
+    popup->a[i] = textId;
+    popup->b[i] = iconIndex;
 }
 #endif
 

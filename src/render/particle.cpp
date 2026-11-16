@@ -276,20 +276,20 @@ extern "C" void func_003710D0_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int
     (*(sPtQ10D0**)(self + 0x1A0))[*(int*)(self + 0x17C)].w = 0.0f;
     (*(sPtQ10D0**)(self + 0x1A4))[*(int*)(self + 0x17C)] = *vel;
     // PORT: pointer held in int (index-first addu)
-    sPtQ10D0* v = (sPtQ10D0*)((*(int*)(self + 0x17C) << 4) + *(int*)(self + 0x1A4));
+    sPtQ10D0* velSlot = (sPtQ10D0*)((*(int*)(self + 0x17C) << 4) + *(int*)(self + 0x1A4));
     if (rnd) {
-        v->w = randUnit10D0() + 1.0f;
+        velSlot->w = randUnit10D0() + 1.0f;
     } else {
-        v->w = 0.0f;
+        velSlot->w = 0.0f;
     }
     int idx = *(int*)(self + 0x17C) - 1;
     *(int*)(self + 0x17C) = idx;
     if (idx < 0) {
         *(int*)(self + 0x17C) = *(int*)(self + 0x178) - 1;
     }
-    float f = *(float*)(self + 0x10) + *(float*)(self + 0x14) * dt;
-    *(float*)(self + 0x10) = f;
-    if ((int)f >= *(int*)(self + 0xC)) {
+    float frameTime = *(float*)(self + 0x10) + *(float*)(self + 0x14) * dt;
+    *(float*)(self + 0x10) = frameTime;
+    if ((int)frameTime >= *(int*)(self + 0xC)) {
         *(float*)(self + 0x10) = 0.0f;
     }
 }
@@ -300,14 +300,14 @@ INCLUDE_ASM("render/particle", func_00371268);
 #ifdef SKIP_ASM
 extern "C" void tParticleEmitter_setTime(void* p, float v);
 
-extern "C" void func_00371268(cBaseClass_DynamicEmitter* self, float v)
+extern "C" void func_00371268(cBaseClass_DynamicEmitter* self, float duration)
 {
-    if (v == 0.0f) {
+    if (duration == 0.0f) {
         tParticleEmitter_setTime(((char*)self) + 0x20, 0.0f);
         return;
     }
-    *(float*)self = v;
-    tParticleEmitter_setTime(((char*)self) + 0x20, v);
+    *(float*)self = duration;
+    tParticleEmitter_setTime(((char*)self) + 0x20, duration);
 }
 #endif
 
@@ -893,11 +893,11 @@ INCLUDE_ASM("render/particle", func_003720F0);
 // Walks a DMA chain, rebasing REF tag addresses onto the chain start; returns the address past the RET tag.
 extern "C" unsigned long* func_003720F0(unsigned long* chain)
 {
-    unsigned long* p = chain;
+    unsigned long* tagPtr = chain;
     int done = 0;
 
     do {
-        unsigned long tag = *p;
+        unsigned long tag = *tagPtr;
         int id = (int)(tag >> 28) & 7;
         int addr = (long)tag >> 32;
         int qwc = (int)tag & 0xFFFF;
@@ -910,21 +910,21 @@ extern "C" unsigned long* func_003720F0(unsigned long* chain)
         case 7:
             break;
         case 1:
-            p += 2;
-            p += qwc * 2;
+            tagPtr += 2;
+            tagPtr += qwc * 2;
             break;
         case 3:
-            *p = ((unsigned long)(unsigned int)((char*)chain + addr) << 32) | (*p & 0xFFFFFFFF);
-            p += 2;
+            *tagPtr = ((unsigned long)(unsigned int)((char*)chain + addr) << 32) | (*tagPtr & 0xFFFFFFFF);
+            tagPtr += 2;
             break;
         case 6:
-            p += 2;
-            p += qwc * 2;
+            tagPtr += 2;
+            tagPtr += qwc * 2;
             done = 1;
             break;
         }
     } while (done == 0);
-    return p;
+    return tagPtr;
 }
 #endif
 //100%
@@ -1424,8 +1424,8 @@ extern "C" void* func_00372AA0(sPtObj_2AA0* self)
 //100%
 INCLUDE_ASM("render/particle", func_00372B20);
 #ifdef SKIP_ASM
-extern "C" int func_00372B20(int *arg0, int *arg1) {
-    return *arg0 - *arg1;
+extern "C" int func_00372B20(int *lhs, int *rhs) {
+    return *lhs - *rhs;
 }
 #endif
 
@@ -1874,11 +1874,11 @@ static inline float ptBlend_3C28(sPtVec3_3C28* p, sPtMtx_3C28* mt, float* w, int
 
 // Blends p through four matrices: out = M0 p * w[0] + M1 p * w[1] + M2 p * w[2] + M3 p
 // (rows 0-2 scale x, y, z; row 3 is the translation).
-extern "C" void func_00373C28(void* self, sPtVec3_3C28* p, sPtMtx_3C28* mt, float* w, float* out)
+extern "C" void func_00373C28(void* self, sPtVec3_3C28* points, sPtMtx_3C28* mt, float* w, float* out)
 {
-    out[0] = ptBlend_3C28(p, mt, w, 0);
-    out[1] = ptBlend_3C28(p, mt, w, 1);
-    out[2] = ptBlend_3C28(p, mt, w, 2);
+    out[0] = ptBlend_3C28(points, mt, w, 0);
+    out[1] = ptBlend_3C28(points, mt, w, 1);
+    out[2] = ptBlend_3C28(points, mt, w, 2);
 }
 #endif
 //100%
@@ -1906,11 +1906,11 @@ static inline float ptBlend4_3EA8(sPtVec4_3EA8* p, sPtMtx_3EA8* mt, float* w, in
 }
 
 // Blends the homogeneous point p through four matrices weighted by w[0..3]; writes x, y, z.
-extern "C" void func_00373EA8(void* self, sPtVec4_3EA8* p, sPtMtx_3EA8* mt, float* w, float* out)
+extern "C" void func_00373EA8(void* self, sPtVec4_3EA8* points, sPtMtx_3EA8* mt, float* w, float* out)
 {
-    out[0] = ptBlend4_3EA8(p, mt, w, 0);
-    out[1] = ptBlend4_3EA8(p, mt, w, 1);
-    out[2] = ptBlend4_3EA8(p, mt, w, 2);
+    out[0] = ptBlend4_3EA8(points, mt, w, 0);
+    out[1] = ptBlend4_3EA8(points, mt, w, 1);
+    out[2] = ptBlend4_3EA8(points, mt, w, 2);
 }
 #endif
 
@@ -1980,7 +1980,7 @@ extern "C" void func_00374180(sPatchSet* self, char* mat, sPatchOut* out, int id
             :
             : "r"(&basis[i]));
         for (j = 0; j < n; j++) {
-            sPatchVec t;
+            sPatchVec point;
             __asm__(
                 "lqc2      $vf22, 0x0(%1)\n"
                 "vmulax.xyzw ACC, $vf18, $vf22x\n"
@@ -1988,9 +1988,9 @@ extern "C" void func_00374180(sPatchSet* self, char* mat, sPatchOut* out, int id
                 "vmaddaz.xyzw ACC, $vf20, $vf22z\n"
                 "vmaddw.xyzw $vf23, $vf21, $vf22w\n"
                 "sqc2      $vf23, %0\n"
-                : "=m"(t)
+                : "=m"(point)
                 : "r"(&basis[j]));
-            *out++ = *(sPatchOut*)&t;
+            *out++ = *(sPatchOut*)&point;
         }
     }
 }
@@ -2019,25 +2019,25 @@ static inline sV2_4298 operator*(const sV2_4298& a, float k)
 extern "C" void func_00374298(char* self, char* src, sV2_4298* out, int idx)
 {
     int n = *(int*)(self + (idx << 2) + 0x19C);
-    sV2_4298 c0 = *(sV2_4298*)(src + 0x20);
-    sV2_4298 c1 = *(sV2_4298*)(src + 0x28);
-    sV2_4298 c2 = *(sV2_4298*)(src + 0x30);
-    sV2_4298 c3 = *(sV2_4298*)(src + 0x38);
+    sV2_4298 leftEdge = *(sV2_4298*)(src + 0x20);
+    sV2_4298 rightEdge = *(sV2_4298*)(src + 0x28);
+    sV2_4298 bottomLeft = *(sV2_4298*)(src + 0x30);
+    sV2_4298 bottomRight = *(sV2_4298*)(src + 0x38);
     float step = 1.0f / (float)(n - 1);
-    sV2_4298 dl = (c2 - c0) * step;
-    sV2_4298 dr = (c3 - c1) * step;
+    sV2_4298 dl = (bottomLeft - leftEdge) * step;
+    sV2_4298 dr = (bottomRight - rightEdge) * step;
     int i;
     for (i = 0; i < n; i++) {
-        sV2_4298 p = c0;
-        sV2_4298 d = (c1 - c0) * step;
+        sV2_4298 point = leftEdge;
+        sV2_4298 colStep = (rightEdge - leftEdge) * step;
         int j;
         for (j = 0; j < n; j++) {
-            *out = p;
+            *out = point;
             out++;
-            p += d;
+            point += colStep;
         }
-        c0 += dl;
-        c1 += dr;
+        leftEdge += dl;
+        rightEdge += dr;
     }
 }
 #endif
@@ -2122,7 +2122,7 @@ extern "C" void func_00374518(sPatchSet4518* self, char* mat, sPatchOut4518* out
     int n = self->count[idx];
     sPatchVec4518* basis = self->basis[idx];
     sPatchVec4518* dbasis = self->dbasis[idx];
-    sPatchOut4518* o = out;
+    sPatchOut4518* cursor = out;
     int i;
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%0)\n"
@@ -2165,7 +2165,7 @@ extern "C" void func_00374518(sPatchSet4518* self, char* mat, sPatchOut4518* out
             :
             : "r"(&dbasis[i]));
         for (int j = 0; j < n; j++) {
-            sPatchVec4518 t;
+            sPatchVec4518 point;
             __asm__(
                 "lqc2      $vf22, 0x0(%1)\n"
                 "vmulax.xyzw ACC, $vf18, $vf22x\n"
@@ -2173,12 +2173,12 @@ extern "C" void func_00374518(sPatchSet4518* self, char* mat, sPatchOut4518* out
                 "vmaddaz.xyzw ACC, $vf20, $vf22z\n"
                 "vmaddw.xyzw $vf23, $vf21, $vf22w\n"
                 "sqc2      $vf23, %0\n"
-                : "=m"(t)
+                : "=m"(point)
                 : "r"(&basis[j]));
-            *o++ = *(sPatchOut4518*)&t;
+            *cursor++ = *(sPatchOut4518*)&point;
         }
     }
-    o = out;
+    cursor = out;
     for (i = 0; i < n; i++) {
         __asm__ __volatile__(
             "lqc2      $vf17, 0x0(%0)\n"
@@ -2201,7 +2201,7 @@ extern "C" void func_00374518(sPatchSet4518* self, char* mat, sPatchOut4518* out
             :
             : "r"(&basis[i]));
         for (int j = 0; j < n; j++) {
-            sPatchVec4518 t;
+            sPatchVec4518 point;
             __asm__(
                 "lqc2      $vf22, 0x0(%1)\n"
                 "vmulax.xyzw ACC, $vf18, $vf22x\n"
@@ -2209,10 +2209,10 @@ extern "C" void func_00374518(sPatchSet4518* self, char* mat, sPatchOut4518* out
                 "vmaddaz.xyzw ACC, $vf20, $vf22z\n"
                 "vmaddw.xyzw $vf23, $vf21, $vf22w\n"
                 "sqc2      $vf23, %0\n"
-                : "=m"(t)
+                : "=m"(point)
                 : "r"(&dbasis[j]));
-            sPatchOut4518 r = Normalize4518(Cross4518(*(sPatchOut4518*)&t, *o));
-            *o++ = r;
+            sPatchOut4518 normal = Normalize4518(Cross4518(*(sPatchOut4518*)&point, *cursor));
+            *cursor++ = normal;
         }
     }
 }
@@ -2335,15 +2335,15 @@ extern "C" int func_003747A0(sPMgr_47A0* self, char* mat, int idx, int bit, int 
     func_00374180((sPatchSet*)self, mat, (sPatchOut*)pos, idx);
     func_00374298((char*)self, mat, (sV2_4298*)uv, idx);
     func_00374440((char*)self, (sPtRect*)mat, (sPtVec2*)col, idx);
-    sPEnt_47A0* e = &self->entries[idx][slot];
-    e->mat = mat;
+    sPEnt_47A0* entry = &self->entries[idx][slot];
+    entry->mat = mat;
     *(short*)(mat + (idx << 1) + 0x1A6) = slot;
-    e->flags |= 0xC | (1 << bit);
+    entry->flags |= 0xC | (1 << bit);
     if (normals) {
         int nslot = self->nfreeList[idx][--self->nfreeCount[idx]];
         sPV3_47A0* nrm = NrmOf_47A0(self, idx, nslot);
         func_00374518_47A0(self, mat, nrm, idx);
-        e->nslot = nslot;
+        entry->nslot = nslot;
     }
     return slot;
 }
@@ -2367,10 +2367,10 @@ extern "C" void func_00374A88(sPartOwner* self, int count, sPartItem* items, int
 {
     int mask = (1 << bit) | 0xC;
     for (int i = 0; i < count; i++) {
-        short v = items[i].v;
-        if (v >= 0) {
-            char* p = self->lists[idx] + v * 0xC;
-            *(int*)(p + 4) |= mask;
+        short listIndex = items[i].v;
+        if (listIndex >= 0) {
+            char* entry = self->lists[idx] + listIndex * 0xC;
+            *(int*)(entry + 4) |= mask;
         }
     }
 }
@@ -2390,10 +2390,10 @@ extern "C" void func_00374AE0(sPartOwner* self, int count, sPartItem14* items, i
 {
     int mask = (1 << bit) | 0xC;
     for (int i = 0; i < count; i++) {
-        short v = items[i].v;
-        if (v >= 0) {
-            char* p = self->lists[idx] + v * 0xC;
-            *(int*)(p + 4) |= mask;
+        short listIndex = items[i].v;
+        if (listIndex >= 0) {
+            char* entry = self->lists[idx] + listIndex * 0xC;
+            *(int*)(entry + 4) |= mask;
         }
     }
 }
@@ -2433,18 +2433,18 @@ extern "C" void func_00374B38(sPartLists* self)
         int n = self->count[i];
         sPartSlotEntry* list = self->entries[i];
         for (j = 0; j < n; j++) {
-            sPartSlotEntry* e = &list[j];
-            int f = e->flags;
-            if (f & 4) {
-                e->flags = f & ~4;
-            } else if (f & 8) {
-                e->flags = f & ~8;
-            } else if (f != 0) {
-                e->flags = 0;
-                e->owner->slot[i] = -1;
-                if (e->slot >= 0) {
-                    self->slotList[i][self->slotCount[i]++] = e->slot;
-                    e->slot = -1;
+            sPartSlotEntry* entry = &list[j];
+            int curFlags = entry->flags;
+            if (curFlags & 4) {
+                entry->flags = curFlags & ~4;
+            } else if (curFlags & 8) {
+                entry->flags = curFlags & ~8;
+            } else if (curFlags != 0) {
+                entry->flags = 0;
+                entry->owner->slot[i] = -1;
+                if (entry->slot >= 0) {
+                    self->slotList[i][self->slotCount[i]++] = entry->slot;
+                    entry->slot = -1;
                 }
                 self->freeList[i][self->freeCount[i]++] = j;
             }
@@ -2746,35 +2746,35 @@ extern "C" int func_003762F8(cPS2GraphicsMan* self, int width, int height, unsig
                              unsigned int clutBpp, int fmt, int id)
 {
     int i;
-    sPartTexEntA4* t = (sPartTexEntA4*)self->DisplayModes;
-    for (i = 0; i < self->NumDisplayModes; i++, t++) {
-        if (t->width == width && t->height == height && t->id == id) {
+    sPartTexEntA4* displayMode = (sPartTexEntA4*)self->DisplayModes;
+    for (i = 0; i < self->NumDisplayModes; i++, displayMode++) {
+        if (displayMode->width == width && displayMode->height == height && displayMode->id == id) {
             int ok1 = 0;
             int ok2 = 0;
             int ok3 = 0;
             switch (bpp) {
             case 16:
-                if (t->psm == 2) ok1 = 1; else ok1 = 0;
+                if (displayMode->psm == 2) ok1 = 1; else ok1 = 0;
             case 24:
-                if (t->psm == 1) ok1 = 1;
+                if (displayMode->psm == 1) ok1 = 1;
                 break;
             case 32:
-                if (t->psm == 0) ok1 = 1; else ok1 = 0;
+                if (displayMode->psm == 0) ok1 = 1; else ok1 = 0;
                 break;
             }
             switch (clutBpp) {
             case 16:
-                if (t->clutPsm == 2) ok2 = 1; else ok2 = 0;
+                if (displayMode->clutPsm == 2) ok2 = 1; else ok2 = 0;
                 break;
             case 24:
-                if (t->clutPsm == 1) ok2 = 1; else ok2 = 0;
+                if (displayMode->clutPsm == 1) ok2 = 1; else ok2 = 0;
                 break;
             case 32:
-                if (t->clutPsm == 0) ok2 = 1; else ok2 = 0;
+                if (displayMode->clutPsm == 0) ok2 = 1; else ok2 = 0;
                 break;
             }
             if (fmt == 24) {
-                if (t->fmt == 0x31) ok3 = 1; else ok3 = 0;
+                if (displayMode->fmt == 0x31) ok3 = 1; else ok3 = 0;
             }
             if (ok1 && ok2 && ok3) {
                 return i;
@@ -3097,19 +3097,19 @@ struct sPtVEntryI6938 {
 
 
 // Clips the rectangle to the screen (negative origins shrink the size) and stores it as the scissor box.
-extern "C" void func_00376938(cPS2GraphicsMan* pS2GraphicsMan, float x, float y, float w, float h)
+extern "C" void func_00376938(cPS2GraphicsMan* pS2GraphicsMan, float x, float y, float w, float rectHeight)
 {
     cPS2GraphicsMan* self = pS2GraphicsMan;
-    sPtVEntryI6938* e = &((sPtVEntryI6938*)self->mVtbl)[10];
-    int width = e->fn((char*)self + e->delta);
-    e = &((sPtVEntryI6938*)self->mVtbl)[11];
-    int height = e->fn((char*)self + e->delta);
+    sPtVEntryI6938* vtEntry = &((sPtVEntryI6938*)self->mVtbl)[10];
+    int width = vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry = &((sPtVEntryI6938*)self->mVtbl)[11];
+    int height = vtEntry->fn((char*)self + vtEntry->delta);
     if (x < 0.0f) {
         w += x;
         x = 0.0f;
     }
     if (y < 0.0f) {
-        h += y;
+        rectHeight += y;
         y = 0.0f;
     }
     int ix = (int)x;
@@ -3125,7 +3125,7 @@ extern "C" void func_00376938(cPS2GraphicsMan* pS2GraphicsMan, float x, float y,
         rw = 0;
     }
     self->mScissor[2] = rw;
-    int ih = (int)h;
+    int ih = (int)rectHeight;
     int maxh = height - self->mScissor[1];
     int rh;
     if (ih >= 0) {
@@ -3170,10 +3170,10 @@ struct sPtGfx6A70 {
 extern "C" void func_00376938(cPS2GraphicsMan* self, float x, float y, float w, float h);
 extern "C" void func_00364B88(void* table, void* key);
 
-extern "C" void func_00376A70(sPtGfx6A70* self, float x, float y, float w, float h)
+extern "C" void func_00376A70(sPtGfx6A70* self, float x, float y, float w, float rectHeight)
 {
-    sPtVEntryI6A70* e = &self->vtable[11];
-    int height = e->fn((char*)self + e->delta);
+    sPtVEntryI6A70* vtEntry = &self->vtable[11];
+    int height = vtEntry->fn((char*)self + vtEntry->delta);
     int mode = self->clampMode;
     if (mode < 3) {
         if (mode >= 0) {
@@ -3183,16 +3183,16 @@ extern "C" void func_00376A70(sPtGfx6A70* self, float x, float y, float w, float
                 y = top;
             }
             float bottom = self->clampBottom * fh;
-            if (bottom < h) {
-                h = bottom;
+            if (bottom < rectHeight) {
+                rectHeight = bottom;
             }
         }
     }
     self->views[self->curView].x = x;
     self->views[self->curView].y = y;
     self->views[self->curView].w = w;
-    self->views[self->curView].h = h;
-    func_00376938((cPS2GraphicsMan*)self, x, y, w, h);
+    self->views[self->curView].h = rectHeight;
+    func_00376938((cPS2GraphicsMan*)self, x, y, w, rectHeight);
     func_00364B88(self->keys, self->scissor);
 }
 #endif
@@ -3204,19 +3204,19 @@ struct sPartVec4i {
     float x, y, z, w;
 };
 
-extern "C" sPartVec4i* func_00376B90(sPartVec4i* r, void* self)
+extern "C" sPartVec4i* func_00376B90(sPartVec4i* out, void* self)
 {
     int i = *(int*)((char*)self + 0x10dc);
-    float* p = (float*)((char*)self + (i * 0x230 + 0x6d20));
-    int x = (int)p[0];
-    int y = (int)p[1];
-    int z = (int)p[2];
-    int w = (int)p[3];
-    r->x = (float)x;
-    r->y = (float)y;
-    r->z = (float)z;
-    r->w = (float)w;
-    return r;
+    float* window = (float*)((char*)self + (i * 0x230 + 0x6d20));
+    int x = (int)window[0];
+    int y = (int)window[1];
+    int z = (int)window[2];
+    int w = (int)window[3];
+    out->x = (float)x;
+    out->y = (float)y;
+    out->z = (float)z;
+    out->w = (float)w;
+    return out;
 }
 #endif
 
@@ -3232,8 +3232,8 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetViewportFOV);
 extern "C" float cPS2GraphicsMan_GetViewportFOV(cPS2GraphicsMan* self)
 {
     int i = self->mViewportDepth;
-    char* p = (char*)self + i * 0x230;
-    return *(float*)(p + 0x6d38);
+    char* stackEntry = (char*)self + i * 0x230;
+    return *(float*)(stackEntry + 0x6d38);
 }
 #endif
 
@@ -5222,21 +5222,21 @@ struct sPartEmitter_A540 {
 extern "C" sPartEmitter_A540* func_00385138(void* mem, void* a1, void* a2, void* a3, unsigned int flags);
 extern const char str_cPS2GridMesh[];
 
-extern "C" sPartEmitter_A540* func_0037A540(cPS2GraphicsMan* pS2GraphicsMan, void* a1, void* a2, unsigned int flags)
+extern "C" sPartEmitter_A540* func_0037A540(cPS2GraphicsMan* pS2GraphicsMan, void* width, void* height, unsigned int flags)
 {
-    sPartEmitter_A540* e = func_00385138(cMemMan_alloc(0x1CC, str_cPS2GridMesh, flags, 0), a1, a2, pS2GraphicsMan, flags);
+    sPartEmitter_A540* gridMesh = func_00385138(cMemMan_alloc(0x1CC, str_cPS2GridMesh, flags, 0), width, height, pS2GraphicsMan, flags);
     if (flags & 0x40000000) {
-        if (e == 0) {
+        if (gridMesh == 0) {
             return 0;
         }
-        sPartVEntryI_A540* vt = (sPartVEntryI_A540*)e->vt;
-        if (vt[2].fn((char*)e + vt[2].delta) == 0) {
-            sPartVEntryD_A540* vt2 = (sPartVEntryD_A540*)e->vt;
-            vt2[1].fn((char*)e + vt2[1].delta, 3);
+        sPartVEntryI_A540* vt = (sPartVEntryI_A540*)gridMesh->vt;
+        if (vt[2].fn((char*)gridMesh + vt[2].delta) == 0) {
+            sPartVEntryD_A540* vt2 = (sPartVEntryD_A540*)gridMesh->vt;
+            vt2[1].fn((char*)gridMesh + vt2[1].delta, 3);
             return 0;
         }
     }
-    return e;
+    return gridMesh;
 }
 #endif
 
@@ -5899,12 +5899,12 @@ static inline int zpages_37BC40(int psm, int bw, int h)
 }
 
 // Size in 256-byte blocks of the frame, texture and z buffers for a w x h screen.
-extern "C" int func_0037BC40(void* self, int w, int h, int fbPsm, int texPsm, int zPsm)
+extern "C" int func_0037BC40(void* self, int w, int height, int fbPsm, int texPsm, int zPsm)
 {
     int bw = (w + 63) >> 6;
-    int fb = pages_37BC40(fbPsm, bw, h);
-    int tex = pages_37BC40(texPsm, bw, h);
-    int z = zpages_37BC40(zPsm, bw, h);
+    int fb = pages_37BC40(fbPsm, bw, height);
+    int tex = pages_37BC40(texPsm, bw, height);
+    int z = zpages_37BC40(zPsm, bw, height);
     return (fb + tex + z) << 5;
 }
 #endif
@@ -5913,22 +5913,22 @@ extern "C" int func_0037BC40(void* self, int w, int h, int fbPsm, int texPsm, in
 INCLUDE_ASM("render/particle", func_0037BD38);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_0037BD38(void* self, int a, int b)
+extern "C" int func_0037BD38(void* self, int psmA, int psmB)
 {
-    switch (a) {
+    switch (psmA) {
     case 0:
     case 1:
     case 10:
     case '0':
     case '1':
     case ':':
-        if (b == '0' || b == '1' || b == ':') {
+        if (psmB == '0' || psmB == '1' || psmB == ':') {
             return 1;
         }
         break;
     case 2:
     case '2':
-        if (b == '2') {
+        if (psmB == '2') {
             return 1;
         }
         break;
@@ -6185,12 +6185,12 @@ struct sPartColour_C570 {
     float r, g, b;
 };
 
-extern "C" void func_0037C570(void* self, sPartColour_C570* c)
+extern "C" void func_0037C570(void* self, sPartColour_C570* colour)
 {
     float one = 1.0f;
-    *(int*)((char*)self + 0x59EC) = func_004139F8(clamp_C570(c->r, one) * 128.0f);
-    *(int*)((char*)self + 0x59F0) = func_004139F8(clamp_C570(c->g, one) * 128.0f);
-    *(int*)((char*)self + 0x59F4) = func_004139F8(clamp_C570(c->b, one) * 128.0f);
+    *(int*)((char*)self + 0x59EC) = func_004139F8(clamp_C570(colour->r, one) * 128.0f);
+    *(int*)((char*)self + 0x59F0) = func_004139F8(clamp_C570(colour->g, one) * 128.0f);
+    *(int*)((char*)self + 0x59F4) = func_004139F8(clamp_C570(colour->b, one) * 128.0f);
 }
 #endif
 
@@ -6205,11 +6205,11 @@ struct sRGB_C638 {
 
 extern "C" sRGB_C638 func_0037C638(void* self)
 {
-    sRGB_C638 v;
-    v.x = (float)*(unsigned int*)((char*)self + 0x59EC) * 0.0078125f;
-    v.y = (float)*(unsigned int*)((char*)self + 0x59F0) * 0.0078125f;
-    v.z = (float)*(unsigned int*)((char*)self + 0x59F4) * 0.0078125f;
-    return v;
+    sRGB_C638 colour;
+    colour.x = (float)*(unsigned int*)((char*)self + 0x59EC) * 0.0078125f;
+    colour.y = (float)*(unsigned int*)((char*)self + 0x59F0) * 0.0078125f;
+    colour.z = (float)*(unsigned int*)((char*)self + 0x59F4) * 0.0078125f;
+    return colour;
 }
 #endif
 
@@ -6223,9 +6223,9 @@ static inline float clamp_C720(float x, float hi)
 }
 
 // Stores the inverted alpha (1 - clamped a) as a 0..128 value.
-extern "C" void func_0037C720(void* self, float a)
+extern "C" void func_0037C720(void* self, float alpha)
 {
-    *(int*)((char*)self + 0x59F8) = func_004139F8((1.0f - clamp_C720(a, 1.0f)) * 128.0f);
+    *(int*)((char*)self + 0x59F8) = func_004139F8((1.0f - clamp_C720(alpha, 1.0f)) * 128.0f);
 }
 #endif
 
@@ -6234,8 +6234,8 @@ INCLUDE_ASM("render/particle", func_0037C770);
 #ifdef SKIP_ASM
 extern "C" float func_0037C770(void* self)
 {
-    unsigned int v = *(unsigned int*)((char*)self + 0x59F8);
-    return 1.0f - (float)v * 0.0078125f;
+    unsigned int rawAlpha = *(unsigned int*)((char*)self + 0x59F8);
+    return 1.0f - (float)rawAlpha * 0.0078125f;
 }
 #endif
 
@@ -6426,10 +6426,10 @@ INCLUDE_ASM("render/particle", func_0037CAF8);
 extern "C" int func_00367440(void* mgr, int a1, int a2, int a3, int a4, int a5, int a6, int a7,
                              int a8, int a9, int a10, int a11);
 
-extern "C" int func_0037CAF8(cPS2GraphicsMan* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7,
+extern "C" int func_0037CAF8(cPS2GraphicsMan* self, int pixels, int name, int width, int height, int a5, int a6, int a7,
                               int a8, int a9, int a10, int a11)
 {
-    int i = func_00367440(self->mpTextureMan, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
+    int i = func_00367440(self->mpTextureMan, pixels, name, width, height, a5, a6, a7, a8, a9, a10, a11);
     *(int*)((char*)self + (i << 2) + 0x3838) = 1;
     return i;
 }
@@ -6490,18 +6490,18 @@ struct sPartTexTable {
  */
 extern "C" int cPS2GraphicsMan_IsValidTexture(cPS2GraphicsMan* self, int idx)
 {
-    sPartTexTable* t = (sPartTexTable*)self->mpTextureMan;
-    int r;
+    sPartTexTable* texTable = (sPartTexTable*)self->mpTextureMan;
+    int valid;
     if (idx >= 0) {
         if (idx < 2000) {
-            r = t->entries[idx] != 0;
+            valid = texTable->entries[idx] != 0;
         } else {
-            r = 0;
+            valid = 0;
         }
     } else {
-        r = 1;
+        valid = 1;
     }
-    return r;
+    return valid;
 }
 #endif
 
@@ -6822,9 +6822,9 @@ INCLUDE_ASM("render/particle", func_0037D318);
 #ifdef SKIP_ASM
 extern "C" void func_00367D20(void* gm, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
 
-extern "C" void func_0037D318(cPS2GraphicsMan* self, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9)
+extern "C" void func_0037D318(cPS2GraphicsMan* self, int texId, int pixels, int width, int height, int a5, int a6, int a7, int a8, int a9)
 {
-    func_00367D20(self->mpTextureMan, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    func_00367D20(self->mpTextureMan, texId, pixels, width, height, a5, a6, a7, a8, a9);
 }
 #endif
 
@@ -6999,32 +6999,32 @@ struct sPtGfx_D668 {
     unsigned int fbp;               // 0x5A84
 };
 
-extern "C" void func_0037D668(sPtGfx_D668* self, ulong** pp, int a2, int mode)
+extern "C" void func_0037D668(sPtGfx_D668* self, ulong** pp, int frameMask, int mode)
 {
-    ulong* p = *pp;
+    ulong* packet = *pp;
     switch (mode) {
     case 0:
-        p[1] = ((ulong)0x50000001 << 32) | 0x11000000;
-        p[2] = ((ulong)0x10000000 << 32) | 0x8001;
-        p[3] = 0xE;
-        p[0] = 0;
-        p[4] = (ulong)self->fbp | ((ulong)self->fbw << 16) | ((ulong)self->psm << 24) | ((ulong)a2 << 32);
-        p[5] = 0x4C;
+        packet[1] = ((ulong)0x50000001 << 32) | 0x11000000;
+        packet[2] = ((ulong)0x10000000 << 32) | 0x8001;
+        packet[3] = 0xE;
+        packet[0] = 0;
+        packet[4] = (ulong)self->fbp | ((ulong)self->fbw << 16) | ((ulong)self->psm << 24) | ((ulong)frameMask << 32);
+        packet[5] = 0x4C;
         break;
     case 1:
-        p[1] = ((ulong)0x50000002 << 32) | 0x11000000;
-        p[2] = ((ulong)0x10000000 << 32) | 0x8001;
-        p[3] = 0xE;
-        p[0] = 0;
-        p[4] = (ulong)self->fbp | ((ulong)self->fbw << 16) | ((ulong)self->psm << 24) | ((ulong)a2 << 32);
-        p[5] = 0x4D;
+        packet[1] = ((ulong)0x50000002 << 32) | 0x11000000;
+        packet[2] = ((ulong)0x10000000 << 32) | 0x8001;
+        packet[3] = 0xE;
+        packet[0] = 0;
+        packet[4] = (ulong)self->fbp | ((ulong)self->fbw << 16) | ((ulong)self->psm << 24) | ((ulong)frameMask << 32);
+        packet[5] = 0x4D;
         break;
     default:
-        *pp = p;
+        *pp = packet;
         return;
     }
-    p += 6;
-    *pp = p;
+    packet += 6;
+    *pp = packet;
 }
 #endif
 
@@ -7173,8 +7173,8 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetTextureWidth);
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
 extern "C" int cPS2GraphicsMan_GetTextureWidth(cPS2GraphicsMan* self, int idx)
 {
-    sPartTexTable* t = (sPartTexTable*)self->mpTextureMan;
-    return 1 << t->entries[idx]->tex0.TW;
+    sPartTexTable* texTable = (sPartTexTable*)self->mpTextureMan;
+    return 1 << texTable->entries[idx]->tex0.TW;
 }
 #endif
 
@@ -7190,8 +7190,8 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetTextureHeight);
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
 extern "C" int cPS2GraphicsMan_GetTextureHeight(cPS2GraphicsMan* self, int idx)
 {
-    sPartTexTable* t = (sPartTexTable*)self->mpTextureMan;
-    return 1 << t->entries[idx]->tex0.TH;
+    sPartTexTable* texTable = (sPartTexTable*)self->mpTextureMan;
+    return 1 << texTable->entries[idx]->tex0.TH;
 }
 #endif
 
@@ -7261,18 +7261,18 @@ extern "C" void func_003645B8(void* ring, sMat_D968* m);
 extern "C" void func_0037D968(cPS2GraphicsMan* selfp)
 {
     selfp->mMatricesValid = 1;
-    sMat_D968 t2;
-    sMat_D968 t;
-    vu0MulMat_D968(&t, (sMat_D968*)(((char*)selfp) + 0x6AF0), (sMat_D968*)selfp->mCurrentView);
-    vu0CopyMat_D968(&t2, &t);
-    vu0CopyMat_D968((sMat_D968*)(((char*)selfp) + 0x6B30), &t2);
+    sMat_D968 copy;
+    sMat_D968 product;
+    vu0MulMat_D968(&product, (sMat_D968*)(((char*)selfp) + 0x6AF0), (sMat_D968*)selfp->mCurrentView);
+    vu0CopyMat_D968(&copy, &product);
+    vu0CopyMat_D968((sMat_D968*)(((char*)selfp) + 0x6B30), &copy);
     vu0CopyMat_D968((sMat_D968*)(((char*)selfp) + 0x5780), (sMat_D968*)selfp->mCurrentView);
-    vu0MulMat_D968(&t, (sMat_D968*)(((char*)selfp) + 0x57C0), (sMat_D968*)(((char*)selfp) + 0x5780));
-    vu0CopyMat_D968(&t2, &t);
-    vu0CopyMat_D968((sMat_D968*)(((char*)selfp) + 0x5800), &t2);
-    vu0MulMat_D968(&t, (sMat_D968*)(((char*)selfp) + 0x5860), (sMat_D968*)(((char*)selfp) + 0x5780));
-    vu0CopyMat_D968(&t2, &t);
-    vu0CopyMat_D968((sMat_D968*)(((char*)selfp) + 0x58A0), &t2);
+    vu0MulMat_D968(&product, (sMat_D968*)(((char*)selfp) + 0x57C0), (sMat_D968*)(((char*)selfp) + 0x5780));
+    vu0CopyMat_D968(&copy, &product);
+    vu0CopyMat_D968((sMat_D968*)(((char*)selfp) + 0x5800), &copy);
+    vu0MulMat_D968(&product, (sMat_D968*)(((char*)selfp) + 0x5860), (sMat_D968*)(((char*)selfp) + 0x5780));
+    vu0CopyMat_D968(&copy, &product);
+    vu0CopyMat_D968((sMat_D968*)(((char*)selfp) + 0x58A0), &copy);
     func_003645B8(selfp->mpDeferMan, (sMat_D968*)(((char*)selfp) + 0x5780));
 }
 #endif
@@ -7411,16 +7411,16 @@ static inline int clampDD20(int n)
     return r;
 }
 
-extern "C" sPtVecDD20 func_0037DD20(sPtGfxDD20* self, const sPtVecDD20* p)
+extern "C" sPtVecDD20 func_0037DD20(sPtGfxDD20* self, const sPtVecDD20* point)
 {
     if (self->clipValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    sPtVecDD20 v = func_0037DEE0_DD20(self, p);
-    v.X() = (float)(int)(v.X() - (2048.0f - (float)(self->width >> 1)));
-    v.Y() = (float)(int)(v.Y() - (2048.0f - (float)(self->height >> 1)));
-    v.Z() = (float)clampDD20((int)v.Z());
-    return v;
+    sPtVecDD20 screen = func_0037DEE0_DD20(self, point);
+    screen.X() = (float)(int)(screen.X() - (2048.0f - (float)(self->width >> 1)));
+    screen.Y() = (float)(int)(screen.Y() - (2048.0f - (float)(self->height >> 1)));
+    screen.Z() = (float)clampDD20((int)screen.Z());
+    return screen;
 }
 #endif
 
@@ -7443,8 +7443,8 @@ extern char D_570[];
 // version of the microprogram.
 extern "C" int cPS2GraphicsMan_ClipBoundBox(cPS2GraphicsMan* self, void* minp, void* maxp, void* mat)
 {
-    int r1;
-    int r2;
+    int vi1Result;
+    int vi2Result;
     __asm__ __volatile__(
         "lqc2      $vf15, 0x0(%2)\n"
         "lqc2      $vf16, 0x0(%3)\n"
@@ -7458,12 +7458,12 @@ extern "C" int cPS2GraphicsMan_ClipBoundBox(cPS2GraphicsMan* self, void* minp, v
         "vcallmsr  $vi27\n"
         "cfc2.i    %0, $vi1\n"
         "cfc2.ni   %1, $vi2\n"
-        : "=r"(r1), "=r"(r2)
+        : "=r"(vi1Result), "=r"(vi2Result)
         : "r"(minp), "r"(maxp), "r"(mat), "r"((unsigned int)D_570 >> 3));
-    if (r2 != 0) {
+    if (vi2Result != 0) {
         return 1;
     }
-    if (r1 != 0) {
+    if (vi1Result != 0) {
         return 2;
     }
     return 0;
@@ -7480,9 +7480,9 @@ struct sPartQVec {
 // Transforms v by the 4x4 matrix at self+0x58A0, divides by w, then scales by the
 // vector at self+0x58E0 and adds the one at self+0x58F0.
 // PORT: PS2-only VU0 macro-mode asm; the PC port needs a C version.
-extern "C" sPartQVec func_0037DEE0(void* self, sPartQVec* v)
+extern "C" sPartQVec func_0037DEE0(void* self, sPartQVec* point)
 {
-    sPartQVec r;
+    sPartQVec result;
     __asm__ __volatile__(
         "lqc2      $vf10, 0x0(%1)\n"
         "lqc2      $vf1, 0x0(%2)\n"
@@ -7501,11 +7501,11 @@ extern "C" sPartQVec func_0037DEE0(void* self, sPartQVec* v)
         "vmula.xyzw   ACC, $vf5, $vf12\n"
         "vmaddw.xyzw  $vf13, $vf6, $vf0w\n"
         "sqc2      $vf13, %0\n"
-        : "=m"(r)
-        : "r"(v), "r"((char*)self + 0x58A0),
+        : "=m"(result)
+        : "r"(point), "r"((char*)self + 0x58A0),
           "m"(*(sPartQVec*)((char*)self + 0x58E0)),
           "m"(*(sPartQVec*)((char*)self + 0x58F0)));
-    return r;
+    return result;
 }
 #endif
 
@@ -7517,10 +7517,10 @@ struct sPartVec4_DF40 {
 } __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
-extern "C" sPartVec4_DF40 func_0037DF40(void* self, sPartVec4_DF40* v)
+extern "C" sPartVec4_DF40 func_0037DF40(void* self, sPartVec4_DF40* point)
 {
-    char* m = (char*)self + 0x58A0;
-    sPartVec4_DF40 r;
+    char* mat = (char*)self + 0x58A0;
+    sPartVec4_DF40 result;
     __asm__ __volatile__(
         ".set push\n"
         ".set noreorder\n"
@@ -7535,10 +7535,10 @@ extern "C" sPartVec4_DF40 func_0037DF40(void* self, sPartVec4_DF40* v)
         "vmaddw.xyzw  $vf11, $vf4, $vf10w\n"
         "sqc2         $vf11, %0\n"
         ".set pop\n"
-        : "=m"(r)
-        : "m"(*v), "r"(m)
+        : "=m"(result)
+        : "m"(*point), "r"(mat)
         : "memory");
-    return r;
+    return result;
 }
 #endif
 
@@ -7564,12 +7564,12 @@ struct sPartSys_DF88 {
     sPartItem_DF88 items[1];    // 0x1400
 };
 
-extern "C" unsigned int func_0037DF88(sPartSys_DF88* self, void* a1, void* a2)
+extern "C" unsigned int func_0037DF88(sPartSys_DF88* self, void* boxMin, void* boxMax)
 {
     unsigned int mask = 0;
     for (unsigned int i = 0; i < self->count; i++) {
-        sPartVEntry_DF88* e = &self->vt[93];
-        if (e->fn((char*)self + e->delta, a1, a2, &self->items[i]) != 1) {
+        sPartVEntry_DF88* vtEntry = &self->vt[93];
+        if (vtEntry->fn((char*)self + vtEntry->delta, boxMin, boxMax, &self->items[i]) != 1) {
             mask |= 1 << i;
         }
     }
@@ -7586,12 +7586,12 @@ typedef int cPartQuad128 __attribute__((mode(TI)));
 // Appends a DMA cnt tag (qwc 5) plus a VIF UNPACK V4-32 header and the 4x4 matrix m
 // to the packet at *pp.
 // PORT: 64-bit `ulong` packet words and PS2-only VU0 asm (lqc2/sqc2 copy).
-extern "C" void func_0037E040(void* m, char** pp)
+extern "C" void func_0037E040(void* mat, char** pp)
 {
-    char* p = *pp;
-    *(cPartQuad128*)p = 0x10000005;
-    *(ulong*)(p + 0x18) = (ulong)0x6C048005 << 32;
-    *(ulong*)(p + 0x10) = 0;
+    char* packet = *pp;
+    *(cPartQuad128*)packet = 0x10000005;
+    *(ulong*)(packet + 0x18) = (ulong)0x6C048005 << 32;
+    *(ulong*)(packet + 0x10) = 0;
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%0)\n"
         "lqc2      $vf2, 0x10(%0)\n"
@@ -7602,9 +7602,9 @@ extern "C" void func_0037E040(void* m, char** pp)
         "sqc2      $vf3, 0x20(%1)\n"
         "sqc2      $vf4, 0x30(%1)\n"
         :
-        : "r"(m), "r"(p + 0x20)
+        : "r"(mat), "r"(packet + 0x20)
         : "memory");
-    *pp = p + 0x60;
+    *pp = packet + 0x60;
 }
 #endif
 
@@ -7618,23 +7618,23 @@ struct sPartPktQuad {
 // PORT: 64-bit `ulong` packet words.
 extern "C" void func_0037E098(sPartPktQuad* src, void* self, sPartPktQuad* hdr, char** pp)
 {
-    char* p = *pp;
+    char* packet = *pp;
     int i;
-    *(ulong*)(p + 0x0) = 0x1000000F;
-    *(ulong*)(p + 0x8) = 0;
-    *(ulong*)(p + 0x10) = 0;
-    *(ulong*)(p + 0x18) = (ulong)0x6C038009 << 32;
-    ((sPartPktQuad*)(p + 0x20))[0] = hdr[0];
-    ((sPartPktQuad*)(p + 0x20))[1] = hdr[1];
-    ((sPartPktQuad*)(p + 0x20))[2] = hdr[2];
-    *(ulong*)(p + 0x50) = 0;
-    *(ulong*)(p + 0x58) = (ulong)0x6C0A800F << 32;
-    p += 0x60;
+    *(ulong*)(packet + 0x0) = 0x1000000F;
+    *(ulong*)(packet + 0x8) = 0;
+    *(ulong*)(packet + 0x10) = 0;
+    *(ulong*)(packet + 0x18) = (ulong)0x6C038009 << 32;
+    ((sPartPktQuad*)(packet + 0x20))[0] = hdr[0];
+    ((sPartPktQuad*)(packet + 0x20))[1] = hdr[1];
+    ((sPartPktQuad*)(packet + 0x20))[2] = hdr[2];
+    *(ulong*)(packet + 0x50) = 0;
+    *(ulong*)(packet + 0x58) = (ulong)0x6C0A800F << 32;
+    packet += 0x60;
     for (i = 0; i < 10; i++) {
-        ((sPartPktQuad*)p)[i] = src[i];
+        ((sPartPktQuad*)packet)[i] = src[i];
     }
-    p += 0xA0;
-    *pp = p;
+    packet += 0xA0;
+    *pp = packet;
 }
 #endif
 
@@ -7644,13 +7644,13 @@ INCLUDE_ASM("render/particle", func_0037E120);
 // Appends a DMA cnt tag (qwc 6), a VIF header and the 4x4 matrix m to the packet at *pp,
 // then the optional sub-packets.
 // PORT: 64-bit `ulong` packet words and PS2-only VU0 asm (lqc2/sqc2 copy).
-extern "C" void func_0037E120(void* self, sPartPktQuad* m, sPartPktQuad* hdr, int a3, void* m2,
+extern "C" void func_0037E120(void* self, sPartPktQuad* mat, sPartPktQuad* hdr, int a3, void* extraMat,
                               sPartPktQuad* src, int flags, char** pp)
 {
-    char* p = *pp;
-    *(cPartQuad128*)p = 0x10000006;
-    *(ulong*)(p + 0x10) = 0x20000000;
-    *(ulong*)(p + 0x18) = 0x6C05800001000101;
+    char* packet = *pp;
+    *(cPartQuad128*)packet = 0x10000006;
+    *(ulong*)(packet + 0x10) = 0x20000000;
+    *(ulong*)(packet + 0x18) = 0x6C05800001000101;
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%0)\n"
         "lqc2      $vf2, 0x10(%0)\n"
@@ -7661,19 +7661,19 @@ extern "C" void func_0037E120(void* self, sPartPktQuad* m, sPartPktQuad* hdr, in
         "sqc2      $vf3, 0x20(%1)\n"
         "sqc2      $vf4, 0x30(%1)\n"
         :
-        : "r"(m), "r"(p + 0x20)
+        : "r"(mat), "r"(packet + 0x20)
         : "memory");
-    *(ulong*)(p + 0x60) = 0;
-    *(ulong*)(p + 0x68) = (ulong)flags << 32;
-    p += 0x70;
-    if (m2 != 0) {
-        func_0037E040(m2, &p);
+    *(ulong*)(packet + 0x60) = 0;
+    *(ulong*)(packet + 0x68) = (ulong)flags << 32;
+    packet += 0x70;
+    if (extraMat != 0) {
+        func_0037E040(extraMat, &packet);
     }
     if (flags & 1) {
-        sPartPktQuad t = m[3];
-        func_0037E098(src, &t, hdr, &p);
+        sPartPktQuad translation = mat[3];
+        func_0037E098(src, &translation, hdr, &packet);
     }
-    *pp = p;
+    *pp = packet;
 }
 #endif
 
@@ -7725,28 +7725,28 @@ extern "C" void cPS2GraphicsMan_GetMeshQuad(cPS2GraphicsMan* self, char* obj, in
     sMdl0380* mdl = *(sMdl0380**)(obj + 0x80);
     char* base = *(char**)(*(char**)(*(char**)(mdl->ents[idx].node + 0x20)) + 0x4);
     char* data = *(char**)(base + mdl->dataOff + 0x4);
-    short* t = (short*)(data + 0x80);
-    short* p = (short*)(data + 0xA0);
-    sCol0380* c = (sCol0380*)(*(char**)(base + *(int*)(obj + 0x98) + 0x14) + 0x10);
+    short* texCoords = (short*)(data + 0x80);
+    short* positions = (short*)(data + 0xA0);
+    sCol0380* colours = (sCol0380*)(*(char**)(base + *(int*)(obj + 0x98) + 0x14) + 0x10);
     sV3_0380 k;
-    sV3_0380 s = mdl->scale;
-    k.x = s.x * 3.0518509447574615e-05f;
-    k.y = s.y * 3.0518509447574615e-05f;
-    k.z = s.z * 3.0518509447574615e-05f;
+    sV3_0380 modelScale = mdl->scale;
+    k.x = modelScale.x * 3.0518509447574615e-05f;
+    k.y = modelScale.y * 3.0518509447574615e-05f;
+    k.z = modelScale.z * 3.0518509447574615e-05f;
     int i;
     for (i = 0; i < 4; i++) {
-        pos[i * 3 + 0] = (float)p[0] * k.x;
-        pos[i * 3 + 1] = (float)p[1] * k.y;
-        pos[i * 3 + 2] = (float)p[2] * k.z;
-        p += 3;
-        uv[i * 2 + 0] = (float)t[0] * 0.000244140625f;
-        uv[i * 2 + 1] = (float)t[1] * 0.000244140625f;
-        t += 2;
-        col[1] = (float)c->r * 0.032258063554763794f;
-        col[2] = (float)c->g * 0.032258063554763794f;
-        col[3] = (float)c->b * 0.032258063554763794f;
-        col[0] = (float)c->a;
-        c++;
+        pos[i * 3 + 0] = (float)positions[0] * k.x;
+        pos[i * 3 + 1] = (float)positions[1] * k.y;
+        pos[i * 3 + 2] = (float)positions[2] * k.z;
+        positions += 3;
+        uv[i * 2 + 0] = (float)texCoords[0] * 0.000244140625f;
+        uv[i * 2 + 1] = (float)texCoords[1] * 0.000244140625f;
+        texCoords += 2;
+        col[1] = (float)colours->r * 0.032258063554763794f;
+        col[2] = (float)colours->g * 0.032258063554763794f;
+        col[3] = (float)colours->b * 0.032258063554763794f;
+        col[0] = (float)colours->a;
+        colours++;
         col += 4;
     }
 }
@@ -9185,13 +9185,13 @@ INCLUDE_ASM("render/particle", func_003825C0);
 #ifdef SKIP_ASM
 extern "C" void func_003825F8(void* arg);
 
-extern "C" int func_003825C0(int cause, void* arg)
+extern "C" int func_003825C0(int cause, void* graphicsMan)
 {
     if (cause != 2) {
         // PORT: PS2-only debug trap (assert).
         __asm__ __volatile__("break 0");
     }
-    func_003825F8(arg);
+    func_003825F8(graphicsMan);
     // PORT: PS2-only: re-enable interrupts (EI).
     __asm__ __volatile__("sync.l\n\tei");
     return 1;
@@ -9205,9 +9205,9 @@ extern "C" void func_00423DD0(int sema);
 
 extern "C" void func_003825F8(void* self)
 {
-    int t = ++*(int*)((char*)self + 0x5ABC);
+    int vblanks = ++*(int*)((char*)self + 0x5ABC);
     if (*(volatile int*)((char*)self + 0x5A8C) == 4) {
-        if (t >= *(int*)((char*)self + 0x5AB8)) {
+        if (vblanks >= *(int*)((char*)self + 0x5AB8)) {
             *(volatile int*)((char*)self + 0x5A8C) = 5;
             *(int*)((char*)self + 0x5ABC) = 0;
             func_00423DD0(*(int*)((char*)self + 0x5AC8));
@@ -9221,13 +9221,13 @@ INCLUDE_ASM("render/particle", func_00382650);
 #ifdef SKIP_ASM
 extern "C" void func_00382688(void* arg);
 
-extern "C" int func_00382650(int cause, void* arg)
+extern "C" int func_00382650(int cause, void* graphicsMan)
 {
     if (cause != 1) {
         // PORT: PS2-only debug trap (assert).
         __asm__ __volatile__("break 0");
     }
-    func_00382688(arg);
+    func_00382688(graphicsMan);
     // PORT: PS2-only: re-enable interrupts (EI).
     __asm__ __volatile__("sync.l\n\tei");
     return 1;
@@ -9256,10 +9256,10 @@ INCLUDE_ASM("render/particle", func_003826E0);
 extern "C" int func_003826E0(void* self)
 {
     volatile int* arr = (volatile int*)((char*)self + 0x5a90);
-    volatile int* s = &arr[*(int*)((char*)self + 0x5a10)];
-    if (*s == 0 || *s == 1) {
-        if (*s == 0) {
-            *s = 1;
+    volatile int* bufState = &arr[*(int*)((char*)self + 0x5a10)];
+    if (*bufState == 0 || *bufState == 1) {
+        if (*bufState == 0) {
+            *bufState = 1;
         }
         return 1;
     }
@@ -9685,9 +9685,9 @@ INCLUDE_ASM("render/particle", func_00383770);
 extern "C" void func_00383808(void *, int, int, int, int, int, int, int, int);
 extern "C" void func_00424020(int);
 
-extern "C" int func_00383770(void *arg0, int arg1, int arg2, int arg3, int arg4, int arg5) {
+extern "C" int func_00383770(void *graphicsMan, int destX, int destY, int width, int height, int src) {
     func_00424020(0);
-    func_00383808(arg0, arg5, (*(int *)((char*)(arg0) + (0x5A84))) << 5, arg3, arg4, (*(int *)((char*)(arg0) + (0x5A30))), (*(int *)((char*)(arg0) + (0x5A3C))), arg1, arg2);
+    func_00383808(graphicsMan, src, (*(int *)((char*)(graphicsMan) + (0x5A84))) << 5, width, height, (*(int *)((char*)(graphicsMan) + (0x5A30))), (*(int *)((char*)(graphicsMan) + (0x5A3C))), destX, destY);
     return 1;
 }
 #endif
@@ -9700,10 +9700,10 @@ INCLUDE_ASM("render/particle", func_00383808);
 // GIF/DMA packets in scratchpad in chunks of at most 0x7FFF0 bytes and kicks the transfer.
 extern "C" void func_00371F98(unsigned int tadr, int flags);
 
-extern "C" void func_00383808(void* self, int src, int dbp, int w, int h, int dbw, int psm, int dsax, int dsay)
+extern "C" void func_00383808(void* self, int src, int dbp, int w, int height, int dbw, int psm, int dsax, int dsay)
 {
     int bpr = 0;
-    unsigned long* p = (unsigned long*)0x70000000;
+    unsigned long* packet = (unsigned long*)0x70000000;
     unsigned long bitbltbuf;
     int id = 3;
 
@@ -9733,36 +9733,36 @@ extern "C" void func_00383808(void* self, int src, int dbp, int w, int h, int db
     do {
         int rows;
         int qwc;
-        unsigned long* q = p + 16;
+        unsigned long* dmaTag = packet + 16;
         rows = 0x7FFF0 / bpr;
-        if (h < rows) {
-            rows = h;
+        if (height < rows) {
+            rows = height;
         }
-        p[0] = 0x10000007;
-        p[1] = 0;
-        p[2] = 0x1000000000000005;
-        p[3] = 0xE;
-        p[4] = bitbltbuf;
-        p[5] = 0x50;
-        p[6] = ((unsigned long)dsax << 32) | ((unsigned long)dsay << 48);
-        p[7] = 0x51;
-        p[9] = 0x52;
-        p[10] = 0;
-        p[11] = 0x3F;
-        p[12] = 0;
-        p[13] = 0x53;
-        p[8] = w | ((unsigned long)rows << 32);
-        h -= rows;
+        packet[0] = 0x10000007;
+        packet[1] = 0;
+        packet[2] = 0x1000000000000005;
+        packet[3] = 0xE;
+        packet[4] = bitbltbuf;
+        packet[5] = 0x50;
+        packet[6] = ((unsigned long)dsax << 32) | ((unsigned long)dsay << 48);
+        packet[7] = 0x51;
+        packet[9] = 0x52;
+        packet[10] = 0;
+        packet[11] = 0x3F;
+        packet[12] = 0;
+        packet[13] = 0x53;
+        packet[8] = w | ((unsigned long)rows << 32);
+        height -= rows;
         qwc = (bpr * rows) >> 4;
-        p[14] = qwc | 0x8000 | 0x0800000000000000;
-        p[15] = 0;
+        packet[14] = qwc | 0x8000 | 0x0800000000000000;
+        packet[15] = 0;
         unsigned long srcHi = (unsigned long)src << 32;
-        *q = qwc | (h != 0 ? srcHi | ((unsigned long)id << 28) : srcHi);
+        *dmaTag = qwc | (height != 0 ? srcHi | ((unsigned long)id << 28) : srcHi);
         dsay += rows;
-        p[17] = 0;
-        p += 18;
+        packet[17] = 0;
+        packet += 18;
         src += bpr * rows;
-    } while (h != 0);
+    } while (height != 0);
 
     func_00371F98(0x70000000, 6);
 }
@@ -9799,142 +9799,142 @@ struct sClipCtx_3A10 {
 
 extern "C" int func_00383A10_impl(sClipCtx_3A10* self, sClipVtx_3A10* v, sClipPt_3A10* p, int* codes) __asm__("func_00383A10");
 
-extern "C" int func_00383A10_impl(sClipCtx_3A10* self, sClipVtx_3A10* v, sClipPt_3A10* p, int* codes)
+extern "C" int func_00383A10_impl(sClipCtx_3A10* self, sClipVtx_3A10* verts, sClipPt_3A10* points, int* codes)
 {
-    int c = codes[0] | codes[1];
+    int unionCodes = codes[0] | codes[1];
 
-    if (c & 0x20) {
-        float w0 = p[0].w;
-        float K = self->wfar;
-        float t = (w0 - K) / (w0 - p[1].w);
+    if (unionCodes & 0x20) {
+        float w0 = points[0].w;
+        float plane = self->wfar;
+        float frac = (w0 - plane) / (w0 - points[1].w);
         int k = (codes[0] & 0x20) == 0;
-        float dx = t * (p[0].x - p[1].x);
-        float dy = t * (p[0].y - p[1].y);
-        float tv = t * p[1].w / K;
-        p[k].x = p[0].x - dx;
-        p[k].y = p[0].y - dy;
-        p[k].z = self->zfar;
-        p[k].w = self->wfar;
-        v[k].s = v[0].s + tv * (v[1].s - v[0].s);
-        v[k].t = v[0].t + tv * (v[1].t - v[0].t);
-        *(int*)&v[k].c[0] = (int)((float)v[0].c[0] + tv * (float)(v[1].c[0] - v[0].c[0]));
-        *(int*)&v[k].c[1] = (int)((float)v[0].c[1] + tv * (float)(v[1].c[1] - v[0].c[1]));
-        *(int*)&v[k].c[2] = (int)((float)v[0].c[2] + tv * (float)(v[1].c[2] - v[0].c[2]));
-        *(int*)&v[k].c[3] = (int)((float)v[0].c[3] + tv * (float)(v[1].c[3] - v[0].c[3]));
+        float dx = frac * (points[0].x - points[1].x);
+        float dy = frac * (points[0].y - points[1].y);
+        float tv = frac * points[1].w / plane;
+        points[k].x = points[0].x - dx;
+        points[k].y = points[0].y - dy;
+        points[k].z = self->zfar;
+        points[k].w = self->wfar;
+        verts[k].s = verts[0].s + tv * (verts[1].s - verts[0].s);
+        verts[k].t = verts[0].t + tv * (verts[1].t - verts[0].t);
+        *(int*)&verts[k].c[0] = (int)((float)verts[0].c[0] + tv * (float)(verts[1].c[0] - verts[0].c[0]));
+        *(int*)&verts[k].c[1] = (int)((float)verts[0].c[1] + tv * (float)(verts[1].c[1] - verts[0].c[1]));
+        *(int*)&verts[k].c[2] = (int)((float)verts[0].c[2] + tv * (float)(verts[1].c[2] - verts[0].c[2]));
+        *(int*)&verts[k].c[3] = (int)((float)verts[0].c[3] + tv * (float)(verts[1].c[3] - verts[0].c[3]));
         codes[k] = 0;
-        if (p[k].x < self->xmin) codes[k] |= 2;
-        if (p[k].x > self->xmax) codes[k] |= 1;
-        if (p[k].y < self->ymin) codes[k] |= 8;
-        if (p[k].y > self->ymax) codes[k] |= 4;
+        if (points[k].x < self->xmin) codes[k] |= 2;
+        if (points[k].x > self->xmax) codes[k] |= 1;
+        if (points[k].y < self->ymin) codes[k] |= 8;
+        if (points[k].y > self->ymax) codes[k] |= 4;
         if (codes[0] & codes[1]) return 0;
-        c = codes[0] | codes[1];
+        unionCodes = codes[0] | codes[1];
     }
-    if (c & 0x10) {
-        float w0 = p[0].w;
-        float K = self->wnear;
-        float t = (w0 - K) / (w0 - p[1].w);
+    if (unionCodes & 0x10) {
+        float w0 = points[0].w;
+        float plane = self->wnear;
+        float frac = (w0 - plane) / (w0 - points[1].w);
         int k = (codes[0] & 0x10) == 0;
-        float dx = t * (p[0].x - p[1].x);
-        float dy = t * (p[0].y - p[1].y);
-        float tv = t * p[1].w / K;
-        p[k].x = p[0].x - dx;
-        p[k].y = p[0].y - dy;
-        p[k].z = self->znear;
-        p[k].w = self->wnear;
-        v[k].s = v[0].s + tv * (v[1].s - v[0].s);
-        v[k].t = v[0].t + tv * (v[1].t - v[0].t);
-        *(int*)&v[k].c[0] = (int)((float)v[0].c[0] + tv * (float)(v[1].c[0] - v[0].c[0]));
-        *(int*)&v[k].c[1] = (int)((float)v[0].c[1] + tv * (float)(v[1].c[1] - v[0].c[1]));
-        *(int*)&v[k].c[2] = (int)((float)v[0].c[2] + tv * (float)(v[1].c[2] - v[0].c[2]));
-        *(int*)&v[k].c[3] = (int)((float)v[0].c[3] + tv * (float)(v[1].c[3] - v[0].c[3]));
+        float dx = frac * (points[0].x - points[1].x);
+        float dy = frac * (points[0].y - points[1].y);
+        float tv = frac * points[1].w / plane;
+        points[k].x = points[0].x - dx;
+        points[k].y = points[0].y - dy;
+        points[k].z = self->znear;
+        points[k].w = self->wnear;
+        verts[k].s = verts[0].s + tv * (verts[1].s - verts[0].s);
+        verts[k].t = verts[0].t + tv * (verts[1].t - verts[0].t);
+        *(int*)&verts[k].c[0] = (int)((float)verts[0].c[0] + tv * (float)(verts[1].c[0] - verts[0].c[0]));
+        *(int*)&verts[k].c[1] = (int)((float)verts[0].c[1] + tv * (float)(verts[1].c[1] - verts[0].c[1]));
+        *(int*)&verts[k].c[2] = (int)((float)verts[0].c[2] + tv * (float)(verts[1].c[2] - verts[0].c[2]));
+        *(int*)&verts[k].c[3] = (int)((float)verts[0].c[3] + tv * (float)(verts[1].c[3] - verts[0].c[3]));
         codes[k] = 0;
-        if (p[k].x < self->xmin) codes[k] |= 2;
-        if (p[k].x > self->xmax) codes[k] |= 1;
-        if (p[k].y < self->ymin) codes[k] |= 8;
-        if (p[k].y > self->ymax) codes[k] |= 4;
+        if (points[k].x < self->xmin) codes[k] |= 2;
+        if (points[k].x > self->xmax) codes[k] |= 1;
+        if (points[k].y < self->ymin) codes[k] |= 8;
+        if (points[k].y > self->ymax) codes[k] |= 4;
         if (codes[0] & codes[1]) return 0;
-        c = codes[0] | codes[1];
+        unionCodes = codes[0] | codes[1];
     }
-    if (c & 8) {
-        float t = (p[0].y - self->ymin) / (p[0].y - p[1].y);
+    if (unionCodes & 8) {
+        float frac = (points[0].y - self->ymin) / (points[0].y - points[1].y);
         int k = (codes[0] & 8) == 0;
-        float dx = t * (p[0].x - p[1].x);
-        float dz = t * (p[0].z - p[1].z);
-        float dw = t * (p[0].w - p[1].w);
-        p[k].x = p[0].x - dx;
-        p[k].y = self->ymin;
-        p[k].z = p[0].z - dz;
-        p[k].w = p[0].w - dw;
-        v[k].s = v[0].s + t * (v[1].s - v[0].s);
-        v[k].t = v[0].t + t * (v[1].t - v[0].t);
-        *(int*)&v[k].c[0] = (int)((float)v[0].c[0] + t * (float)(v[1].c[0] - v[0].c[0]));
-        *(int*)&v[k].c[1] = (int)((float)v[0].c[1] + t * (float)(v[1].c[1] - v[0].c[1]));
-        *(int*)&v[k].c[2] = (int)((float)v[0].c[2] + t * (float)(v[1].c[2] - v[0].c[2]));
-        *(int*)&v[k].c[3] = (int)((float)v[0].c[3] + t * (float)(v[1].c[3] - v[0].c[3]));
+        float dx = frac * (points[0].x - points[1].x);
+        float dz = frac * (points[0].z - points[1].z);
+        float dw = frac * (points[0].w - points[1].w);
+        points[k].x = points[0].x - dx;
+        points[k].y = self->ymin;
+        points[k].z = points[0].z - dz;
+        points[k].w = points[0].w - dw;
+        verts[k].s = verts[0].s + frac * (verts[1].s - verts[0].s);
+        verts[k].t = verts[0].t + frac * (verts[1].t - verts[0].t);
+        *(int*)&verts[k].c[0] = (int)((float)verts[0].c[0] + frac * (float)(verts[1].c[0] - verts[0].c[0]));
+        *(int*)&verts[k].c[1] = (int)((float)verts[0].c[1] + frac * (float)(verts[1].c[1] - verts[0].c[1]));
+        *(int*)&verts[k].c[2] = (int)((float)verts[0].c[2] + frac * (float)(verts[1].c[2] - verts[0].c[2]));
+        *(int*)&verts[k].c[3] = (int)((float)verts[0].c[3] + frac * (float)(verts[1].c[3] - verts[0].c[3]));
         codes[k] = 0;
-        if (p[k].x < self->xmin) codes[k] |= 2;
-        if (p[k].x > self->xmax) codes[k] |= 1;
+        if (points[k].x < self->xmin) codes[k] |= 2;
+        if (points[k].x > self->xmax) codes[k] |= 1;
         if (codes[0] & codes[1]) return 0;
-        c = codes[0] | codes[1];
+        unionCodes = codes[0] | codes[1];
     }
-    if (c & 4) {
-        float t = (p[0].y - self->ymax) / (p[0].y - p[1].y);
+    if (unionCodes & 4) {
+        float frac = (points[0].y - self->ymax) / (points[0].y - points[1].y);
         int k = (codes[0] & 4) == 0;
-        float dx = t * (p[0].x - p[1].x);
-        float dz = t * (p[0].z - p[1].z);
-        float dw = t * (p[0].w - p[1].w);
-        p[k].x = p[0].x - dx;
-        p[k].y = self->ymax;
-        p[k].z = p[0].z - dz;
-        p[k].w = p[0].w - dw;
-        v[k].s = v[0].s + t * (v[1].s - v[0].s);
-        v[k].t = v[0].t + t * (v[1].t - v[0].t);
-        *(int*)&v[k].c[0] = (int)((float)v[0].c[0] + t * (float)(v[1].c[0] - v[0].c[0]));
-        *(int*)&v[k].c[1] = (int)((float)v[0].c[1] + t * (float)(v[1].c[1] - v[0].c[1]));
-        *(int*)&v[k].c[2] = (int)((float)v[0].c[2] + t * (float)(v[1].c[2] - v[0].c[2]));
-        *(int*)&v[k].c[3] = (int)((float)v[0].c[3] + t * (float)(v[1].c[3] - v[0].c[3]));
+        float dx = frac * (points[0].x - points[1].x);
+        float dz = frac * (points[0].z - points[1].z);
+        float dw = frac * (points[0].w - points[1].w);
+        points[k].x = points[0].x - dx;
+        points[k].y = self->ymax;
+        points[k].z = points[0].z - dz;
+        points[k].w = points[0].w - dw;
+        verts[k].s = verts[0].s + frac * (verts[1].s - verts[0].s);
+        verts[k].t = verts[0].t + frac * (verts[1].t - verts[0].t);
+        *(int*)&verts[k].c[0] = (int)((float)verts[0].c[0] + frac * (float)(verts[1].c[0] - verts[0].c[0]));
+        *(int*)&verts[k].c[1] = (int)((float)verts[0].c[1] + frac * (float)(verts[1].c[1] - verts[0].c[1]));
+        *(int*)&verts[k].c[2] = (int)((float)verts[0].c[2] + frac * (float)(verts[1].c[2] - verts[0].c[2]));
+        *(int*)&verts[k].c[3] = (int)((float)verts[0].c[3] + frac * (float)(verts[1].c[3] - verts[0].c[3]));
         codes[k] = 0;
-        if (p[k].x < self->xmin) codes[k] |= 2;
-        if (p[k].x > self->xmax) codes[k] |= 1;
+        if (points[k].x < self->xmin) codes[k] |= 2;
+        if (points[k].x > self->xmax) codes[k] |= 1;
         if (codes[0] & codes[1]) return 0;
-        c = codes[0] | codes[1];
+        unionCodes = codes[0] | codes[1];
     }
-    if (c & 2) {
-        float K = self->xmin;
-        float t = (p[0].x - K) / (p[0].x - p[1].x);
+    if (unionCodes & 2) {
+        float plane = self->xmin;
+        float frac = (points[0].x - plane) / (points[0].x - points[1].x);
         int k = (codes[0] & 2) == 0;
-        float dy = t * (p[0].y - p[1].y);
-        float dz = t * (p[0].z - p[1].z);
-        float dw = t * (p[0].w - p[1].w);
-        p[k].x = K;
-        p[k].y = p[0].y - dy;
-        p[k].z = p[0].z - dz;
-        p[k].w = p[0].w - dw;
-        v[k].s = v[0].s + t * (v[1].s - v[0].s);
-        v[k].t = v[0].t + t * (v[1].t - v[0].t);
-        *(int*)&v[k].c[0] = (int)((float)v[0].c[0] + t * (float)(v[1].c[0] - v[0].c[0]));
-        *(int*)&v[k].c[1] = (int)((float)v[0].c[1] + t * (float)(v[1].c[1] - v[0].c[1]));
-        *(int*)&v[k].c[2] = (int)((float)v[0].c[2] + t * (float)(v[1].c[2] - v[0].c[2]));
-        *(int*)&v[k].c[3] = (int)((float)v[0].c[3] + t * (float)(v[1].c[3] - v[0].c[3]));
+        float dy = frac * (points[0].y - points[1].y);
+        float dz = frac * (points[0].z - points[1].z);
+        float dw = frac * (points[0].w - points[1].w);
+        points[k].x = plane;
+        points[k].y = points[0].y - dy;
+        points[k].z = points[0].z - dz;
+        points[k].w = points[0].w - dw;
+        verts[k].s = verts[0].s + frac * (verts[1].s - verts[0].s);
+        verts[k].t = verts[0].t + frac * (verts[1].t - verts[0].t);
+        *(int*)&verts[k].c[0] = (int)((float)verts[0].c[0] + frac * (float)(verts[1].c[0] - verts[0].c[0]));
+        *(int*)&verts[k].c[1] = (int)((float)verts[0].c[1] + frac * (float)(verts[1].c[1] - verts[0].c[1]));
+        *(int*)&verts[k].c[2] = (int)((float)verts[0].c[2] + frac * (float)(verts[1].c[2] - verts[0].c[2]));
+        *(int*)&verts[k].c[3] = (int)((float)verts[0].c[3] + frac * (float)(verts[1].c[3] - verts[0].c[3]));
         codes[k] = 0;
     }
-    if (c & 1) {
-        float K = self->xmax;
-        float t = (p[0].x - K) / (p[0].x - p[1].x);
+    if (unionCodes & 1) {
+        float plane = self->xmax;
+        float frac = (points[0].x - plane) / (points[0].x - points[1].x);
         int k = (codes[0] & 1) == 0;
-        float dy = t * (p[0].y - p[1].y);
-        float dz = t * (p[0].z - p[1].z);
-        float dw = t * (p[0].w - p[1].w);
-        p[k].x = K;
-        p[k].y = p[0].y - dy;
-        p[k].z = p[0].z - dz;
-        p[k].w = p[0].w - dw;
-        v[k].s = v[0].s + t * (v[1].s - v[0].s);
-        v[k].t = v[0].t + t * (v[1].t - v[0].t);
-        *(int*)&v[k].c[0] = (int)((float)v[0].c[0] + t * (float)(v[1].c[0] - v[0].c[0]));
-        *(int*)&v[k].c[1] = (int)((float)v[0].c[1] + t * (float)(v[1].c[1] - v[0].c[1]));
-        *(int*)&v[k].c[2] = (int)((float)v[0].c[2] + t * (float)(v[1].c[2] - v[0].c[2]));
-        *(int*)&v[k].c[3] = (int)((float)v[0].c[3] + t * (float)(v[1].c[3] - v[0].c[3]));
+        float dy = frac * (points[0].y - points[1].y);
+        float dz = frac * (points[0].z - points[1].z);
+        float dw = frac * (points[0].w - points[1].w);
+        points[k].x = plane;
+        points[k].y = points[0].y - dy;
+        points[k].z = points[0].z - dz;
+        points[k].w = points[0].w - dw;
+        verts[k].s = verts[0].s + frac * (verts[1].s - verts[0].s);
+        verts[k].t = verts[0].t + frac * (verts[1].t - verts[0].t);
+        *(int*)&verts[k].c[0] = (int)((float)verts[0].c[0] + frac * (float)(verts[1].c[0] - verts[0].c[0]));
+        *(int*)&verts[k].c[1] = (int)((float)verts[0].c[1] + frac * (float)(verts[1].c[1] - verts[0].c[1]));
+        *(int*)&verts[k].c[2] = (int)((float)verts[0].c[2] + frac * (float)(verts[1].c[2] - verts[0].c[2]));
+        *(int*)&verts[k].c[3] = (int)((float)verts[0].c[3] + frac * (float)(verts[1].c[3] - verts[0].c[3]));
         codes[k] = 0;
     }
     return 1;
@@ -10085,13 +10085,13 @@ struct sPartGsPos {
 };
 
 // PORT: 64-bit `ulong` GS packet words; float bits reinterpreted via *(int*)&f.
-extern "C" void func_00384FD0(sPartGsCtx* ctx, sPartGsVtx* v, sPartGsPos* pos)
+extern "C" void func_00384FD0(sPartGsCtx* ctx, sPartGsVtx* vtx, sPartGsPos* pos)
 {
-    ctx->p[0] = (ulong)v->r | ((ulong)v->g << 8) | ((ulong)v->b << 16) | ((ulong)v->a << 24)
+    ctx->p[0] = (ulong)vtx->r | ((ulong)vtx->g << 8) | ((ulong)vtx->b << 16) | ((ulong)vtx->a << 24)
               | ((ulong)*(int*)&pos->q << 32);
     union { float f; int i; } us, ut;
-    us.f = v->s * pos->q;
-    ut.f = v->t * pos->q;
+    us.f = vtx->s * pos->q;
+    ut.f = vtx->t * pos->q;
     ctx->p[1] = (ulong)us.i | ((ulong)ut.i << 32);
     ctx->p[2] = (ulong)(int)pos->x | ((ulong)(int)pos->y << 16) | ((ulong)(int)(pos->z * pos->q) << 32);
     ctx->p += 3;
@@ -10372,27 +10372,27 @@ extern "C" void func_00385530(sPartGrid5530* self, sPartPos5530* pos, sPartCol55
 {
     int back = self->sel == 0;
     for (int i = 0; i < self->rows; i++) {
-        sPartStrip5530* s = &self->strips[back][i];
+        sPartStrip5530* strip = &self->strips[back][i];
         int n = self->cols;
-        int a = i * n;
-        int b = a + n;
+        int rowStart = i * n;
+        int nextRowStart = rowStart + n;
         int k = 0;
         int j = 0;
         if (j < self->cols) {
-            sPartPos5530* p1 = &pos[b];
-            sPartPos5530* p0 = &pos[a];
-            sPartCol5530* c1 = (sPartCol5530*)((b << 4) + (int)col);  // PORT: pointer in int
-            sPartCol5530* c0 = (sPartCol5530*)((a << 4) + (int)col);  // PORT: pointer in int
+            sPartPos5530* nextPos = &pos[nextRowStart];
+            sPartPos5530* curPos = &pos[rowStart];
+            sPartCol5530* nextCol = (sPartCol5530*)((nextRowStart << 4) + (int)col);  // PORT: pointer in int
+            sPartCol5530* curCol = (sPartCol5530*)((rowStart << 4) + (int)col);  // PORT: pointer in int
             do {
-                func_00385AA0(self, s->col, k, c0->c);
-                func_00385A38(self, s->pos, k, (sPartVec3*)p0);
-                func_00385AA0(self, s->col, k + 1, c1->c);
-                func_00385A38(self, s->pos, k + 1, (sPartVec3*)p1);
+                func_00385AA0(self, strip->col, k, curCol->c);
+                func_00385A38(self, strip->pos, k, (sPartVec3*)curPos);
+                func_00385AA0(self, strip->col, k + 1, nextCol->c);
+                func_00385A38(self, strip->pos, k + 1, (sPartVec3*)nextPos);
                 k += 2;
-                p0++;
-                c0++;
-                p1++;
-                c1++;
+                curPos++;
+                curCol++;
+                nextPos++;
+                nextCol++;
                 j++;
             } while (j < self->cols);
         }
@@ -10438,43 +10438,43 @@ extern "C" void func_003856B8(sPartGrid_56B8* self, float* verts, float* colors,
         first = 1;
     }
     int z = self->sel == 0;
-    int r;
-    for (r = 0; r < self->height; r++) {
-        sPartRow_56B8* strip = &self->rows[z][r];
-        int i0 = r * self->width;
-        int i1 = i0 + self->width;
+    int rowIndex;
+    for (rowIndex = 0; rowIndex < self->height; rowIndex++) {
+        sPartRow_56B8* strip = &self->rows[z][rowIndex];
+        int topIdx = rowIndex * self->width;
+        int bottomIdx = topIdx + self->width;
         int idx = 0;
-        for (int c = 0; c < self->width; c++) {
-            func_00385BA0_uv(self, strip->uv, idx, uvs + i0 * 2);
-            func_00385AA0_col(self, strip->colors, idx, colors + i0 * 4);
-            func_00385A38_vt(self, strip->verts, idx, verts + i0 * 3);
-            func_00385BA0_uv(self, strip->uv, idx + 1, uvs + i1 * 2);
-            func_00385AA0_col(self, strip->colors, idx + 1, colors + i1 * 4);
-            func_00385A38_vt(self, strip->verts, idx + 1, verts + i1 * 3);
+        for (int col = 0; col < self->width; col++) {
+            func_00385BA0_uv(self, strip->uv, idx, uvs + topIdx * 2);
+            func_00385AA0_col(self, strip->colors, idx, colors + topIdx * 4);
+            func_00385A38_vt(self, strip->verts, idx, verts + topIdx * 3);
+            func_00385BA0_uv(self, strip->uv, idx + 1, uvs + bottomIdx * 2);
+            func_00385AA0_col(self, strip->colors, idx + 1, colors + bottomIdx * 4);
+            func_00385A38_vt(self, strip->verts, idx + 1, verts + bottomIdx * 3);
             idx += 2;
-            i0++;
-            i1++;
+            topIdx++;
+            bottomIdx++;
         }
     }
     // First update: fill the other buffer too. The binary has a second copy of the loop sharing the
     // row counter (one spill slot) and indexing rows[z] with z reset to 0, so it is written out here.
     if (first) {
         z = 0;
-        for (r = 0; r < self->height; r++) {
-            sPartRow_56B8* strip = &self->rows[z][r];
-            int i0 = r * self->width;
-            int i1 = i0 + self->width;
+        for (rowIndex = 0; rowIndex < self->height; rowIndex++) {
+            sPartRow_56B8* strip = &self->rows[z][rowIndex];
+            int topIdx = rowIndex * self->width;
+            int bottomIdx = topIdx + self->width;
             int idx = 0;
-            for (int c = 0; c < self->width; c++) {
-                func_00385BA0_uv(self, strip->uv, idx, uvs + i0 * 2);
-                func_00385AA0_col(self, strip->colors, idx, colors + i0 * 4);
-                func_00385A38_vt(self, strip->verts, idx, verts + i0 * 3);
-                func_00385BA0_uv(self, strip->uv, idx + 1, uvs + i1 * 2);
-                func_00385AA0_col(self, strip->colors, idx + 1, colors + i1 * 4);
-                func_00385A38_vt(self, strip->verts, idx + 1, verts + i1 * 3);
+            for (int col = 0; col < self->width; col++) {
+                func_00385BA0_uv(self, strip->uv, idx, uvs + topIdx * 2);
+                func_00385AA0_col(self, strip->colors, idx, colors + topIdx * 4);
+                func_00385A38_vt(self, strip->verts, idx, verts + topIdx * 3);
+                func_00385BA0_uv(self, strip->uv, idx + 1, uvs + bottomIdx * 2);
+                func_00385AA0_col(self, strip->colors, idx + 1, colors + bottomIdx * 4);
+                func_00385A38_vt(self, strip->verts, idx + 1, verts + bottomIdx * 3);
                 idx += 2;
-                i0++;
-                i1++;
+                topIdx++;
+                bottomIdx++;
             }
         }
     }
@@ -10489,17 +10489,17 @@ struct sPartVec3 {
     float x, y, z;
 };
 
-extern "C" void func_00385A38(void* self, short* out, int i, sPartVec3* v)
+extern "C" void func_00385A38(void* self, short* out, int i, sPartVec3* src)
 {
-    float s = *(float*)((char*)self + 0x198);
-    sPartVec3 t;
-    t.x = v->x * s;
-    t.y = v->y * s;
-    t.z = v->z * s;
+    float scale = *(float*)((char*)self + 0x198);
+    sPartVec3 scaled;
+    scaled.x = src->x * scale;
+    scaled.y = src->y * scale;
+    scaled.z = src->z * scale;
     int j = i * 3;
-    out[j] = (short)t.x;
-    out[j + 1] = (short)t.y;
-    out[j + 2] = (short)t.z;
+    out[j] = (short)scaled.x;
+    out[j + 1] = (short)scaled.y;
+    out[j + 2] = (short)scaled.z;
 }
 #endif
 
@@ -10515,17 +10515,17 @@ static inline float partClampf(float x, float lo, float hi)
     return lo;
 }
 
-extern "C" void func_00385AA0(void* self, unsigned short* buf, int idx, const float* c)
+extern "C" void func_00385AA0(void* self, unsigned short* buf, int idx, const float* colour)
 {
-    unsigned char r = (int)(partClampf(c[1], 0.0f, 1.0f) * 32.0f);
-    unsigned char g = (int)(partClampf(c[2], 0.0f, 1.0f) * 32.0f);
-    unsigned char b = (int)(partClampf(c[3], 0.0f, 1.0f) * 32.0f);
-    unsigned char a = (int)(partClampf(c[0], 0.0f, 1.0f) * 32.0f);
-    if (r > 31) r = 31;
-    if (g > 31) g = 31;
-    if (b > 31) b = 31;
-    if (a > 0) a = 1;
-    buf[idx] = (a << 15) | (b << 10) | (g << 5) | r;
+    unsigned char red = (int)(partClampf(colour[1], 0.0f, 1.0f) * 32.0f);
+    unsigned char green = (int)(partClampf(colour[2], 0.0f, 1.0f) * 32.0f);
+    unsigned char blue = (int)(partClampf(colour[3], 0.0f, 1.0f) * 32.0f);
+    unsigned char alpha = (int)(partClampf(colour[0], 0.0f, 1.0f) * 32.0f);
+    if (red > 31) red = 31;
+    if (green > 31) green = 31;
+    if (blue > 31) blue = 31;
+    if (alpha > 0) alpha = 1;
+    buf[idx] = (alpha << 15) | (blue << 10) | (green << 5) | red;
 }
 #endif
 
@@ -10793,9 +10793,9 @@ INCLUDE_ASM("render/particle", func_00386128);
 //100%
 INCLUDE_ASM("render/particle", func_003865D8);
 #ifdef SKIP_ASM
-extern "C" void func_003865D8(void *arg0, void **arg1) {
-    (*(void **)((char*)(arg0) + (8))) = (void *) *arg1;
-    *arg1 = arg0;
+extern "C" void func_003865D8(void *node, void **head) {
+    (*(void **)((char*)(node) + (8))) = (void *) *head;
+    *head = node;
 }
 #endif
 //100%
@@ -10805,16 +10805,16 @@ struct sVE3865E8 { short delta; short index; void (*fn)(void*, int); };
 
 extern "C" void func_003865E8(void* head)
 {
-    void* p = head;
-    if (p != 0) {
+    void* node = head;
+    if (node != 0) {
         do {
-            void* next = *(void**)((char*)p + 8);
-            if (p != 0) {
-                sVE3865E8* vt = *(sVE3865E8**)((char*)p + 4);
-                vt[1].fn((char*)p + vt[1].delta, 3);
+            void* next = *(void**)((char*)node + 8);
+            if (node != 0) {
+                sVE3865E8* vt = *(sVE3865E8**)((char*)node + 4);
+                vt[1].fn((char*)node + vt[1].delta, 3);
             }
-            p = next;
-        } while (p != 0);
+            node = next;
+        } while (node != 0);
     }
 }
 #endif
@@ -10877,10 +10877,10 @@ extern "C" void cPS2GraphicsMan_RenderFullScreenEffects(cPS2GraphicsMan* self, i
 //100%
 INCLUDE_ASM("render/particle", func_003866E0__FPvii);
 #ifdef SKIP_ASM
-void func_003866E0(void* self, int a1, int a2)
+void func_003866E0(void* self, int callback, int callbackArg)
 {
-    *(int*)((char*)self + 0x6d0c) = a1;
-    *(int*)((char*)self + 0x6d10) = a2;
+    *(int*)((char*)self + 0x6d0c) = callback;
+    *(int*)((char*)self + 0x6d10) = callbackArg;
 }
 #endif
 
@@ -11116,15 +11116,15 @@ extern "C" void cPS2GraphicsMan_GenerateBlendedMatrices(cPS2GraphicsMan* self, s
     int i;
     for (i = 0; i < n; i++) {
         sBlendMtx_6BD0* dst = out++;
-        sBlendEnt_6BD0* e = &ents[i];
-        sBlendLink_6BD0* l = e->links;
-        blendFirst_6BD0((sBlendMtx_6BD0*)((char*)mats + (l->idx << 6)), l->w);
-        int cnt = e->count;
-        l++;
+        sBlendEnt_6BD0* entry = &ents[i];
+        sBlendLink_6BD0* link = entry->links;
+        blendFirst_6BD0((sBlendMtx_6BD0*)((char*)mats + (link->idx << 6)), link->w);
+        int cnt = entry->count;
+        link++;
         int k;
         for (k = 1; k < cnt; k++) {
-            blendAdd_6BD0((sBlendMtx_6BD0*)((char*)mats + (l->idx << 6)), l->w);
-            l++;
+            blendAdd_6BD0((sBlendMtx_6BD0*)((char*)mats + (link->idx << 6)), link->w);
+            link++;
         }
         blendStore_6BD0(dst);
     }
@@ -11919,10 +11919,10 @@ extern "C" int func_004139F8(float f);
 extern "C" void cPS2GraphicsMan_SetScreenClearColour(cPS2GraphicsMan* self, const float* col)
 {
     float k = 255.0f;
-    int r = func_004139F8(col[0] * k);
-    r |= func_004139F8(col[1] * k) << 8;
-    r |= func_004139F8(col[2] * k) << 16;
-    *(int*)((char*)self + 0x6AE0) = r;
+    int packed = func_004139F8(col[0] * k);
+    packed |= func_004139F8(col[1] * k) << 8;
+    packed |= func_004139F8(col[2] * k) << 16;
+    *(int*)((char*)self + 0x6AE0) = packed;
 }
 #endif
 
@@ -11946,48 +11946,48 @@ extern "C" void func_00389118(void* self)
 //100%
 INCLUDE_ASM("render/particle", func_00389160);
 #ifdef SKIP_ASM
-extern "C" void *func_00389160(void *arg0, float fparg0, float fparg1, float fparg2, float fparg3, float fparg4, float fparg5, float fparg6, float fparg7, float arg_sp0, float arg_sp8, float arg_sp10, float arg_sp18, float arg_sp20, float arg_sp28, float arg_sp30, float arg_sp38, float arg_sp40, float arg_sp48, float arg_sp50, float arg_sp58, float arg_sp60, float arg_sp68, float arg_sp70, float arg_sp78, float arg_sp80, float arg_sp88, float arg_sp90, float arg_sp98, float arg_spA0, float arg_spA8) {
-    (*(float *)((char*)(arg0) + (0x10))) = fparg3;
-    (*(float *)((char*)(arg0) + (0x20))) = fparg6;
-    (*(float *)((char*)(arg0) + (0x30))) = arg_sp8;
-    (*(float *)((char*)(arg0) + (0x40))) = arg_sp20;
-    (*(float *)((char*)(arg0) + (0x50))) = arg_sp38;
-    (*(float *)((char*)(arg0) + (0x60))) = arg_sp50;
-    (*(float *)((char*)(arg0) + (0x70))) = arg_sp68;
-    (*(float *)((char*)(arg0) + (0x80))) = arg_sp80;
-    (*(float *)((char*)(arg0) + (0x90))) = arg_sp98;
-    (*(float *)((char*)(arg0) + (4))) = fparg1;
-    (*(float *)((char*)(arg0) + (0))) = fparg0;
-    (*(float *)((char*)(arg0) + (0x14))) = fparg4;
-    (*(float *)((char*)(arg0) + (0x24))) = fparg7;
-    (*(float *)((char*)(arg0) + (0x34))) = arg_sp10;
-    (*(float *)((char*)(arg0) + (0x44))) = arg_sp28;
-    (*(float *)((char*)(arg0) + (0x54))) = arg_sp40;
-    (*(float *)((char*)(arg0) + (0x64))) = arg_sp58;
-    (*(float *)((char*)(arg0) + (0x74))) = arg_sp70;
-    (*(float *)((char*)(arg0) + (0x84))) = arg_sp88;
-    (*(float *)((char*)(arg0) + (0x94))) = arg_spA0;
-    (*(float *)((char*)(arg0) + (8))) = fparg2;
-    (*(float *)((char*)(arg0) + (0x18))) = fparg5;
-    (*(float *)((char*)(arg0) + (0x28))) = arg_sp0;
-    (*(float *)((char*)(arg0) + (0x38))) = arg_sp18;
-    (*(float *)((char*)(arg0) + (0x48))) = arg_sp30;
-    (*(float *)((char*)(arg0) + (0x58))) = arg_sp48;
-    (*(float *)((char*)(arg0) + (0x68))) = arg_sp60;
-    (*(float *)((char*)(arg0) + (0x78))) = arg_sp78;
-    (*(float *)((char*)(arg0) + (0x88))) = arg_sp90;
-    (*(float *)((char*)(arg0) + (0x98))) = arg_spA8;
-    (*(int *)((char*)(arg0) + (0xC))) = 0;
-    (*(int *)((char*)(arg0) + (0x1C))) = 0;
-    (*(int *)((char*)(arg0) + (0x2C))) = 0;
-    (*(int *)((char*)(arg0) + (0x3C))) = 0;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x5C))) = 0;
-    (*(int *)((char*)(arg0) + (0x6C))) = 0;
-    (*(int *)((char*)(arg0) + (0x7C))) = 0;
-    (*(int *)((char*)(arg0) + (0x8C))) = 0;
-    (*(int *)((char*)(arg0) + (0x9C))) = 0;
-    return arg0;
+extern "C" void *func_00389160(void *dst, float fparg0, float fparg1, float fparg2, float fparg3, float fparg4, float fparg5, float fparg6, float fparg7, float arg_sp0, float arg_sp8, float arg_sp10, float arg_sp18, float arg_sp20, float arg_sp28, float arg_sp30, float arg_sp38, float arg_sp40, float arg_sp48, float arg_sp50, float arg_sp58, float arg_sp60, float arg_sp68, float arg_sp70, float arg_sp78, float arg_sp80, float arg_sp88, float arg_sp90, float arg_sp98, float arg_spA0, float arg_spA8) {
+    (*(float *)((char*)(dst) + (0x10))) = fparg3;
+    (*(float *)((char*)(dst) + (0x20))) = fparg6;
+    (*(float *)((char*)(dst) + (0x30))) = arg_sp8;
+    (*(float *)((char*)(dst) + (0x40))) = arg_sp20;
+    (*(float *)((char*)(dst) + (0x50))) = arg_sp38;
+    (*(float *)((char*)(dst) + (0x60))) = arg_sp50;
+    (*(float *)((char*)(dst) + (0x70))) = arg_sp68;
+    (*(float *)((char*)(dst) + (0x80))) = arg_sp80;
+    (*(float *)((char*)(dst) + (0x90))) = arg_sp98;
+    (*(float *)((char*)(dst) + (4))) = fparg1;
+    (*(float *)((char*)(dst) + (0))) = fparg0;
+    (*(float *)((char*)(dst) + (0x14))) = fparg4;
+    (*(float *)((char*)(dst) + (0x24))) = fparg7;
+    (*(float *)((char*)(dst) + (0x34))) = arg_sp10;
+    (*(float *)((char*)(dst) + (0x44))) = arg_sp28;
+    (*(float *)((char*)(dst) + (0x54))) = arg_sp40;
+    (*(float *)((char*)(dst) + (0x64))) = arg_sp58;
+    (*(float *)((char*)(dst) + (0x74))) = arg_sp70;
+    (*(float *)((char*)(dst) + (0x84))) = arg_sp88;
+    (*(float *)((char*)(dst) + (0x94))) = arg_spA0;
+    (*(float *)((char*)(dst) + (8))) = fparg2;
+    (*(float *)((char*)(dst) + (0x18))) = fparg5;
+    (*(float *)((char*)(dst) + (0x28))) = arg_sp0;
+    (*(float *)((char*)(dst) + (0x38))) = arg_sp18;
+    (*(float *)((char*)(dst) + (0x48))) = arg_sp30;
+    (*(float *)((char*)(dst) + (0x58))) = arg_sp48;
+    (*(float *)((char*)(dst) + (0x68))) = arg_sp60;
+    (*(float *)((char*)(dst) + (0x78))) = arg_sp78;
+    (*(float *)((char*)(dst) + (0x88))) = arg_sp90;
+    (*(float *)((char*)(dst) + (0x98))) = arg_spA8;
+    (*(int *)((char*)(dst) + (0xC))) = 0;
+    (*(int *)((char*)(dst) + (0x1C))) = 0;
+    (*(int *)((char*)(dst) + (0x2C))) = 0;
+    (*(int *)((char*)(dst) + (0x3C))) = 0;
+    (*(int *)((char*)(dst) + (0x4C))) = 0;
+    (*(int *)((char*)(dst) + (0x5C))) = 0;
+    (*(int *)((char*)(dst) + (0x6C))) = 0;
+    (*(int *)((char*)(dst) + (0x7C))) = 0;
+    (*(int *)((char*)(dst) + (0x8C))) = 0;
+    (*(int *)((char*)(dst) + (0x9C))) = 0;
+    return dst;
 }
 #endif
 
@@ -11998,10 +11998,10 @@ struct sPartVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern "C" void func_00389260(sPartVec4* v)
+extern "C" void func_00389260(sPartVec4* vecs)
 {
     for (int i = 0; i < 10; i++) {
-        v[i].x = v[i].y = v[i].z = v[i].w = 0.0f;
+        vecs[i].x = vecs[i].y = vecs[i].z = vecs[i].w = 0.0f;
     }
 }
 #endif
@@ -12035,37 +12035,37 @@ INCLUDE_ASM("render/particle", func_00389520);
 #ifdef SKIP_ASM
 extern "C" void func_00389308(void* self, void* dst, float w, float x, float y, float z);
 
-extern "C" void func_00389520(void* self, const float* v, void* dst)
+extern "C" void func_00389520(void* self, const float* normal, void* dst)
 {
-    func_00389308(self, dst, 1.0f, v[0], v[1], v[2]);
+    func_00389308(self, dst, 1.0f, normal[0], normal[1], normal[2]);
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00389558);
 #ifdef SKIP_ASM
-extern "C" void func_00389558(float* a, float* b)
+extern "C" void func_00389558(float* dst, float* src)
 {
-    a[0] += b[0];
-    a[1] += b[1];
-    a[2] += b[2];
+    dst[0] += src[0];
+    dst[1] += src[1];
+    dst[2] += src[2];
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/particle", func_00389590);
 #ifdef SKIP_ASM
-extern "C" void func_00389590(sPartVec4* a, sPartVec4* b, sPartVec4* c, float s)
+extern "C" void func_00389590(sPartVec4* dst, sPartVec4* src, sPartVec4* weights, float scale)
 {
-    float kx = s * c->x;
-    float ky = s * c->y;
-    float kz = s * c->z;
-    float kw = s * c->w;
+    float kx = scale * weights->x;
+    float ky = scale * weights->y;
+    float kz = scale * weights->z;
+    float kw = scale * weights->w;
     for (int i = 0; i < 10; i++) {
-        a[i].x += b[i].x * ky;
-        a[i].y += b[i].y * kz;
-        a[i].z += b[i].z * kw;
-        a[i].w += b[i].w * kx;
+        dst[i].x += src[i].x * ky;
+        dst[i].y += src[i].y * kz;
+        dst[i].z += src[i].z * kw;
+        dst[i].w += src[i].w * kx;
     }
 }
 #endif
@@ -12080,12 +12080,12 @@ struct sVec4_9620 {
 // Integrates the w channel of ten particle vectors: dst.w += src.w * dt.
 extern "C" void func_00389620(sVec4_9620* dst, sVec4_9620* src, float dt)
 {
-    float* s = &src->w;
-    float* d = &dst->w;
+    float* srcW = &src->w;
+    float* dstW = &dst->w;
     for (int i = 0; i < 10; i++) {
-        *d += *s * dt;
-        d += 4;
-        s += 4;
+        *dstW += *srcW * dt;
+        dstW += 4;
+        srcW += 4;
     }
 }
 #endif
@@ -12095,13 +12095,13 @@ INCLUDE_ASM("render/particle", func_00389660);
 #ifdef SKIP_ASM
 struct sV4_9660 { float x, y, z, w; };
 
-extern "C" void func_00389660(sV4_9660* v, float* q)
+extern "C" void func_00389660(sV4_9660* vecs, float* weights)
 {
     for (int i = 0; i < 10; i++) {
-        v[i].x *= q[1];
-        v[i].y *= q[2];
-        v[i].z *= q[3];
-        v[i].w *= q[0];
+        vecs[i].x *= weights[1];
+        vecs[i].y *= weights[2];
+        vecs[i].z *= weights[3];
+        vecs[i].w *= weights[0];
     }
 }
 #endif
@@ -12110,13 +12110,13 @@ INCLUDE_ASM("render/particle", func_003896C0);
 #ifdef SKIP_ASM
 struct sV4_96C0 { float x, y, z, w; };
 
-extern "C" void func_003896C0(sV4_96C0* v, float* q, float s)
+extern "C" void func_003896C0(sV4_96C0* vecs, float* weights, float scale)
 {
     for (int i = 0; i < 10; i++) {
-        v[i].x = v[i].x * s * q[1];
-        v[i].y = v[i].y * s * q[2];
-        v[i].z = v[i].z * s * q[3];
-        v[i].w = v[i].w * s * q[0];
+        vecs[i].x = vecs[i].x * scale * weights[1];
+        vecs[i].y = vecs[i].y * scale * weights[2];
+        vecs[i].z = vecs[i].z * scale * weights[3];
+        vecs[i].w = vecs[i].w * scale * weights[0];
     }
 }
 #endif
@@ -12142,13 +12142,13 @@ static inline sPartVec4 sPartVec4_add(const sPartVec4& a, const sPartVec4& b)
     return r;
 }
 
-extern "C" sPartVec4x10 func_00389730(sPartVec4x10* a, sPartVec4x10* b)
+extern "C" sPartVec4x10 func_00389730(sPartVec4x10* lhs, sPartVec4x10* rhs)
 {
-    sPartVec4x10 r;
+    sPartVec4x10 sum;
     for (int i = 0; i < 10; i++) {
-        r.v[i] = sPartVec4_add(a->v[i], b->v[i]);
+        sum.v[i] = sPartVec4_add(lhs->v[i], rhs->v[i]);
     }
-    return r;
+    return sum;
 }
 #endif
 
@@ -12171,13 +12171,13 @@ static inline sPartVec4 sPartVec4_scale(const sPartVec4& a, float s)
     return r;
 }
 
-extern "C" sPartVec4x10 func_003897A0(sPartVec4x10* a, float s)
+extern "C" sPartVec4x10 func_003897A0(sPartVec4x10* src, float scale)
 {
-    sPartVec4x10 r;
+    sPartVec4x10 scaled;
     for (int i = 0; i < 10; i++) {
-        r.v[i] = sPartVec4_scale(a->v[i], s);
+        scaled.v[i] = sPartVec4_scale(src->v[i], scale);
     }
-    return r;
+    return scaled;
 }
 #endif
 
@@ -12185,7 +12185,7 @@ extern "C" sPartVec4x10 func_003897A0(sPartVec4x10* a, float s)
 INCLUDE_ASM("render/particle", func_00389810);
 #ifdef SKIP_ASM
 // PORT: VU0 macro-mode vector scale (vec4 *= s); the PC port needs plain C.
-extern "C" sPartVec4* func_00389810(sPartVec4* v, float s)
+extern "C" sPartVec4* func_00389810(sPartVec4* vecs, float scale)
 {
     for (int i = 0; i < 10; i++) {
         __asm__ __volatile__(
@@ -12195,10 +12195,10 @@ extern "C" sPartVec4* func_00389810(sPartVec4* v, float s)
             "vmulx.xyzw $vf5, $vf4, $vf3x\n"
             "sqc2       $vf5, 0x0(%0)\n"
             :
-            : "r"(&v[i]), "f"(s)
+            : "r"(&vecs[i]), "f"(scale)
             : "$2", "memory");
     }
-    return v;
+    return vecs;
 }
 #endif
 
@@ -12687,31 +12687,31 @@ extern "C" void func_00389CB8(sPartVec4* out, void* sunp, float scale)
 //100%
 INCLUDE_ASM("render/particle", func_0038A530);
 #ifdef SKIP_ASM
-extern "C" int func_0038A530(float* p, float* n, void* s, float* dist, float* inv, float* planeD)
+extern "C" int func_0038A530(float* point, float* n, void* forceSrc, float* dist, float* inv, float* planeD)
 {
-    float d;
+    float length;
     float k;
-    float dx = *(float*)((char*)s + 0x38) - p[0];
-    float dy = *(float*)((char*)s + 0x3C) - p[1];
-    float r = *(float*)((char*)s + 0x1C);
-    float dz = *(float*)((char*)s + 0x40) - p[2];
-    float d2 = dx * dx + dy * dy + dz * dz;
-    if (r * r < d2) {
+    float dx = *(float*)((char*)forceSrc + 0x38) - point[0];
+    float dy = *(float*)((char*)forceSrc + 0x3C) - point[1];
+    float radius = *(float*)((char*)forceSrc + 0x1C);
+    float dz = *(float*)((char*)forceSrc + 0x40) - point[2];
+    float distSq = dx * dx + dy * dy + dz * dz;
+    if (radius * radius < distSq) {
         return 0;
     }
-    if (d2 != 0.0f) {
+    if (distSq != 0.0f) {
         // PORT: sqrt.s (sqrtf without errno check)
-        __asm__("sqrt.s %0, %1" : "=f"(d) : "f"(d2));
-        k = 1.0f / d;
+        __asm__("sqrt.s %0, %1" : "=f"(length) : "f"(distSq));
+        k = 1.0f / length;
     } else {
         k = 1.0f;
-        d = k;
+        length = k;
     }
     dx *= k;
     dy *= k;
     dz *= k;
-    *planeD = -(dx * *(float*)((char*)s + 0x2C) + dy * *(float*)((char*)s + 0x30) + dz * *(float*)((char*)s + 0x34));
-    *dist = d;
+    *planeD = -(dx * *(float*)((char*)forceSrc + 0x2C) + dy * *(float*)((char*)forceSrc + 0x30) + dz * *(float*)((char*)forceSrc + 0x34));
+    *dist = length;
     *inv = k;
     n[0] = dx;
     n[1] = dy;
@@ -12724,21 +12724,21 @@ extern "C" int func_0038A530(float* p, float* n, void* s, float* dist, float* in
 //100%
 INCLUDE_ASM("render/particle", func_0038A618);
 #ifdef SKIP_ASM
-extern "C" int func_0038A618(float* p, float* n, void* s, float* dist, float* inv)
+extern "C" int func_0038A618(float* point, float* n, void* forceSrc, float* dist, float* inv)
 {
-    float dx = *(float*)((char*)s + 0x38) - p[0];
-    float dy = *(float*)((char*)s + 0x3C) - p[1];
-    float r = *(float*)((char*)s + 0x1C);
-    float dz = *(float*)((char*)s + 0x40) - p[2];
-    float d2 = dx * dx + dy * dy + dz * dz;
-    if (r * r < d2) {
+    float dx = *(float*)((char*)forceSrc + 0x38) - point[0];
+    float dy = *(float*)((char*)forceSrc + 0x3C) - point[1];
+    float radius = *(float*)((char*)forceSrc + 0x1C);
+    float dz = *(float*)((char*)forceSrc + 0x40) - point[2];
+    float distSq = dx * dx + dy * dy + dz * dz;
+    if (radius * radius < distSq) {
         return 0;
     }
-    float d;
+    float length;
     // PORT: sqrt.s (sqrtf without errno check)
-    __asm__("sqrt.s %0, %1" : "=f"(d) : "f"(d2));
-    *dist = d;
-    float k = 1.0f / d;
+    __asm__("sqrt.s %0, %1" : "=f"(length) : "f"(distSq));
+    *dist = length;
+    float k = 1.0f / length;
     *inv = k;
     dy *= k;
     dz *= k;
@@ -12841,7 +12841,7 @@ static inline float clamp_38A6A8(float x, float hi)
     return x >= 0.0f ? (x <? hi) : 0.0f;
 }
 
-extern "C" void func_0038A6A8(void* self, float* p, sForce_38A6A8* s)
+extern "C" void func_0038A6A8(void* self, float* point, sForce_38A6A8* forceSrc)
 {
     sVec4_38A6A8 n;
     sVec3_38A6A8 out;
@@ -12851,27 +12851,27 @@ extern "C" void func_0038A6A8(void* self, float* p, sForce_38A6A8* s)
     float k;
     float fade;
 
-    switch (s->type) {
+    switch (forceSrc->type) {
     case 0:
         break;
     case 1:
-        if (!func_0038A530(p, (float*)&n, s, &dist, &inv, &planeD))
+        if (!func_0038A530(point, (float*)&n, forceSrc, &dist, &inv, &planeD))
             return;
-        if (!(planeD >= s->inner))
+        if (!(planeD >= forceSrc->inner))
             return;
-        fade = fade_38A6A8(s, dist);
-        k = curve_38A6A8(s, inv) * s->strength * fade;
-        if (planeD >= s->outer)
-            k *= powi_38A6A8(planeD, s->power);
+        fade = fade_38A6A8(forceSrc, dist);
+        k = curve_38A6A8(forceSrc, inv) * forceSrc->strength * fade;
+        if (planeD >= forceSrc->outer)
+            k *= powi_38A6A8(planeD, forceSrc->power);
         else {
-            k *= powi_38A6A8(s->outer, s->power);
-            k *= (planeD - s->inner) / (s->outer - s->inner);
+            k *= powi_38A6A8(forceSrc->outer, forceSrc->power);
+            k *= (planeD - forceSrc->inner) / (forceSrc->outer - forceSrc->inner);
         }
         k = clamp_38A6A8(k, 5.0f);
         {
-            float x = s->dir[0] * k;
-            float y = s->dir[1] * k;
-            float z = s->dir[2] * k;
+            float x = forceSrc->dir[0] * k;
+            float y = forceSrc->dir[1] * k;
+            float z = forceSrc->dir[2] * k;
             out.x = x;
             out.y = y;
             out.z = z;
@@ -12879,14 +12879,14 @@ extern "C" void func_0038A6A8(void* self, float* p, sForce_38A6A8* s)
         func_00389520(self, (float*)&n, &out);
         break;
     case 2:
-        if (!func_0038A618(p, (float*)&n, s, &dist, &inv))
+        if (!func_0038A618(point, (float*)&n, forceSrc, &dist, &inv))
             return;
-        fade = fade_38A6A8(s, dist);
-        k = curve_38A6A8(s, inv) * s->strength * fade;
+        fade = fade_38A6A8(forceSrc, dist);
+        k = curve_38A6A8(forceSrc, inv) * forceSrc->strength * fade;
         k = clamp_38A6A8(k, 5.0f);
-        out.x = s->dir[0] * k;
-        out.y = s->dir[1] * k;
-        out.z = s->dir[2] * k;
+        out.x = forceSrc->dir[0] * k;
+        out.y = forceSrc->dir[1] * k;
+        out.z = forceSrc->dir[2] * k;
         func_00389520(self, (float*)&n, &out);
         break;
     }

@@ -791,11 +791,11 @@ struct sVEntry00224C00 {
 extern "C" void func_00224C00(void* self, sVEntry00224C00** stream, int base)
 {
     int off;
-    int v;
+    int secondWord;
     off = *(int*)((char*)self + 0x0) - base;
     (*stream)[1].fn((char*)stream + (*stream)[1].delta, &off, 4);
-    v = *(int*)((char*)self + 0x4);
-    (*stream)[1].fn((char*)stream + (*stream)[1].delta, &v, 4);
+    secondWord = *(int*)((char*)self + 0x4);
+    (*stream)[1].fn((char*)stream + (*stream)[1].delta, &secondWord, 4);
 }
 #endif
 
@@ -826,11 +826,11 @@ extern "C" void func_00224D00(cLunoTable* self, int flags)
     cLunoTableEntry* nodes = self->nodes;
 
     if (nodes != 0) {
-        cLunoTableEntry* e = nodes + ((int*)nodes)[-4];
+        cLunoTableEntry* entry = nodes + ((int*)nodes)[-4];
 
-        while (self->nodes != e) {
-            e--;
-            e->vtable[1].func((char*)e + e->vtable[1].delta, 0);
+        while (self->nodes != entry) {
+            entry--;
+            entry->vtable[1].func((char*)entry + entry->vtable[1].delta, 0);
         }
         cMemMan_free((char*)self->nodes - 0x10);
     }
@@ -863,13 +863,13 @@ extern "C" cLunoTableRef* luno_cLunoTable_cLunoTable(cLunoTableRef* self)
 //100%
 INCLUDE_ASM("luno/lunovm", func_00224DD0);
 #ifdef SKIP_ASM
-extern "C" void **func_00224DD0(void **arg0, void **arg1) {
+extern "C" void **func_00224DD0(void **dest, void **src) {
     void *temp_6;
 
-    temp_6 = *arg1;
-    *arg0 = temp_6;
+    temp_6 = *src;
+    *dest = temp_6;
     (*(int *)((char*)(temp_6) + (8))) = (int) ((*(int *)((char*)(temp_6) + (8))) + 1);
-    return arg0;
+    return dest;
 }
 #endif
 
@@ -954,9 +954,9 @@ extern "C" void func_00224D00(cLunoTable* table, int flags);
 
 extern "C" void func_00224F30(cLunoTableRef* ref)
 {
-    cLunoTable* t = ref->table;
-    if (t != 0) {
-        func_00224D00(t, 3);
+    cLunoTable* ownedTable = ref->table;
+    if (ownedTable != 0) {
+        func_00224D00(ownedTable, 3);
     }
     ref->table = 0;
 }
@@ -990,10 +990,10 @@ struct cLunoNode_224F68 {
 extern "C" void func_00224F68(cLunoTableRef* ref)
 {
     if (ref->table->nodes != 0) {
-        cLunoTableEntry* p = ref->table->nodes + *(int*)((char*)ref->table->nodes - 0x10);
-        while (ref->table->nodes != p) {
-            p--;
-            p->vtable[1].func((char*)p + p->vtable[1].delta, 0);
+        cLunoTableEntry* entry = ref->table->nodes + *(int*)((char*)ref->table->nodes - 0x10);
+        while (ref->table->nodes != entry) {
+            entry--;
+            entry->vtable[1].func((char*)entry + entry->vtable[1].delta, 0);
         }
         cMemMan_free((char*)ref->table->nodes - 0x10);
     }
@@ -1051,15 +1051,15 @@ static inline int lunoKeyEquals_50E0(cLunoValue* a, cLunoValue* b)
     return 0;
 }
 
-extern "C" cLunoValue* func_002250E0(cLunoTableRef* self, unsigned int arg1)
+extern "C" cLunoValue* func_002250E0(cLunoTableRef* self, unsigned int intKey)
 {
-    cLunoTable* t = self->table;
-    cLunoNode_50E0* n = (cLunoNode_50E0*)t->nodes + arg1 % (unsigned int)t->modulus;
+    cLunoTable* hashTable = self->table;
+    cLunoNode_50E0* n = (cLunoNode_50E0*)hashTable->nodes + intKey % (unsigned int)hashTable->modulus;
     if (n->value.type != 0) {
         do {
             cLunoValue key;
             key.type = 3;
-            *(int*)func_00226620(&key) = arg1;
+            *(int*)func_00226620(&key) = intKey;
             int eq = lunoKeyEquals_50E0(&n->key, &key);
             luno_cLunoVar__cLunoVar(&key, 2);
             if (eq) {
@@ -1105,8 +1105,8 @@ static inline int lunoKeyEquals(cLunoValue* a, cLunoValue* b)
 // Table lookup: returns the value stored under key, or the nil value.
 extern "C" cLunoValue* func_00225248(cLunoTableRef* self, cLunoValue* key)
 {
-    cLunoTable* t = self->table;
-    cLunoNode* n = (cLunoNode*)t->nodes + (unsigned int)key->word0 % (unsigned int)t->modulus;
+    cLunoTable* hashTable = self->table;
+    cLunoNode* n = (cLunoNode*)hashTable->nodes + (unsigned int)key->word0 % (unsigned int)hashTable->modulus;
     if (n->value.type != 0) {
         do {
             if (lunoKeyEquals(&n->key, key)) {
@@ -1261,15 +1261,15 @@ extern "C" void func_002257E0(void* vself, sVEntry00224C00** stream, int base)
     cLunoTableRef* self = (cLunoTableRef*)vself;
     (*stream)[1].fn((char*)stream + (*stream)[1].delta, self->table, 8);
     int cnt = 0;
-    cLunoTable* t = self->table;
-    cLunoNode* n = (cLunoNode*)t->nodes;
-    for (int i = 0; i <= t->modulus; i++) {
+    cLunoTable* hashTable = self->table;
+    cLunoNode* n = (cLunoNode*)hashTable->nodes;
+    for (int i = 0; i <= hashTable->modulus; i++) {
         if (n->value.type != 0) {
             cnt++;
         }
         cLunoNode* next = n + 1;
-        for (cLunoNode* m = n->next; m != 0; m = m->next) {
-            if (m->value.type != 0) {
+        for (cLunoNode* chainNode = n->next; chainNode != 0; chainNode = chainNode->next) {
+            if (chainNode->value.type != 0) {
                 cnt++;
             }
         }
@@ -1279,18 +1279,18 @@ extern "C" void func_002257E0(void* vself, sVEntry00224C00** stream, int base)
     if (cnt > 0) {
         cLunoNode* n = (cLunoNode*)self->table->nodes;
         for (int i = 0; i <= self->table->modulus; i++) {
-            cLunoValue* v = &n->value;
+            cLunoValue* nodeValue = &n->value;
             if (n->value.type != 0) {
                 cnt--;
                 func_00225BE8(&n->key, stream, base);
-                func_00225BE8(v, stream, base);
+                func_00225BE8(nodeValue, stream, base);
             }
             cLunoNode* next = n + 1;
-            for (cLunoNode* m = n->next; m != 0; m = m->next) {
-                cLunoValue* mv = &m->value;
-                if (m->value.type != 0) {
+            for (cLunoNode* chainNode = n->next; chainNode != 0; chainNode = chainNode->next) {
+                cLunoValue* mv = &chainNode->value;
+                if (chainNode->value.type != 0) {
                     cnt--;
-                    func_00225BE8(&m->key, stream, base);
+                    func_00225BE8(&chainNode->key, stream, base);
                     func_00225BE8(mv, stream, base);
                 }
             }
@@ -1437,16 +1437,16 @@ extern "C" void func_00225CA0(cLunoValue* self, sVEntry00224C00** stream, int ba
 {
     int type = lunoReadInt_225CA0(stream);
     if (type == 5) {
-        sLunoPair_225CA0 tmp;
-        tmp.word0 = 0;
-        tmp.word1 = 0;
-        func_00224C78(&tmp, (sVEntry00224C78**)stream, base);
+        sLunoPair_225CA0 pair;
+        pair.word0 = 0;
+        pair.word1 = 0;
+        func_00224C78(&pair, (sVEntry00224C78**)stream, base);
         if (self->type == 4) {
             luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
         }
         self->type = 0;
         self->word0 = 0;
-        *(sLunoPair_225CA0*)self = tmp;
+        *(sLunoPair_225CA0*)self = pair;
         self->type = type;
     } else if (type == 4) {
         cLunoRefTmp_225CA0 ref;
@@ -1554,10 +1554,10 @@ extern "C" void func_00225DE8_impl(int initialize, int priority)
 //100%
 INCLUDE_ASM("luno/lunovm", func_00226600__FPvii);
 #ifdef SKIP_ASM
-void func_00226600(void* self, int a1, int a2)
+void func_00226600(void* self, int firstWord, int secondWord)
 {
-    *(int*)self = a1;
-    *(int*)((char*)self + 0x4) = a2;
+    *(int*)self = firstWord;
+    *(int*)((char*)self + 0x4) = secondWord;
 }
 #endif
 
@@ -1595,31 +1595,31 @@ INCLUDE_ASM("luno/lunovm", func_00226628);
 #ifdef SKIP_ASM
 // Value add (for-loop step): same-type int/float/symbol add, float+int
 // gives float, int+float gives int; anything else gives nil.
-extern "C" cLunoValue* func_00226628(cLunoValue* self, const cLunoValue& a, const cLunoValue& b)
+extern "C" cLunoValue* func_00226628(cLunoValue* self, const cLunoValue& lhs, const cLunoValue& rhs)
 {
-    if (b.type == a.type) {
-        if (a.type == 2) {
-            float f = *(float*)&a.word0 + *(float*)&b.word0;
-            self->type = a.type;
-            *(float*)func_00226618(self) = f;
-        } else if (a.type == 1) {
-            int i = a.word0 + b.word0;
-            self->type = a.type;
+    if (rhs.type == lhs.type) {
+        if (lhs.type == 2) {
+            float floatSum = *(float*)&lhs.word0 + *(float*)&rhs.word0;
+            self->type = lhs.type;
+            *(float*)func_00226618(self) = floatSum;
+        } else if (lhs.type == 1) {
+            int i = lhs.word0 + rhs.word0;
+            self->type = lhs.type;
             *(int*)func_00226610(self) = i;
-        } else if (a.type == 3) {
-            int i = a.word0 + b.word0;
-            self->type = a.type;
+        } else if (lhs.type == 3) {
+            int i = lhs.word0 + rhs.word0;
+            self->type = lhs.type;
             *(int*)func_00226620(self) = i;
         } else {
             *self = luno_gLunoNil;
         }
-    } else if (a.type == 2 && b.type == 1) {
-        float f = *(float*)&a.word0 + (float)b.word0;
-        self->type = a.type;
-        *(float*)func_00226618(self) = f;
-    } else if (a.type == 1 && b.type == 2) {
-        int i = a.word0 + (int)*(float*)&b.word0;
-        self->type = a.type;
+    } else if (lhs.type == 2 && rhs.type == 1) {
+        float floatSum = *(float*)&lhs.word0 + (float)rhs.word0;
+        self->type = lhs.type;
+        *(float*)func_00226618(self) = floatSum;
+    } else if (lhs.type == 1 && rhs.type == 2) {
+        int i = lhs.word0 + (int)*(float*)&rhs.word0;
+        self->type = lhs.type;
         *(int*)func_00226610(self) = i;
     } else {
         *self = luno_gLunoNil;

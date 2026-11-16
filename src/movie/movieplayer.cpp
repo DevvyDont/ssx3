@@ -64,15 +64,15 @@ extern "C" int func_0023C898(void* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023C8A8);
 #ifdef SKIP_ASM
-extern "C" int func_0023C8A8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x130))) == 0x23;
+extern "C" int func_0023C8A8(void *manager) {
+    return (*(int *)((char*)(manager) + (0x130))) == 0x23;
 }
 #endif
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023C8B8);
 #ifdef SKIP_ASM
-extern "C" int func_0023C8B8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xDC)));
+extern "C" int func_0023C8B8(void *manager) {
+    return (*(int *)((char*)(manager) + (0xDC)));
 }
 #endif
 //100%
@@ -127,36 +127,36 @@ extern "C" void func_0023C8F0(void* self, int mode)
     char desc[0x200];
     char name[0x200];
     char fmt[0x200];
-    char* s = (char*)self;
-    *(int*)(s + 0xB4) = mode;
+    char* manager = (char*)self;
+    *(int*)(manager + 0xB4) = mode;
     cMCOverlayManager_SetAction((cMCOverlayManager*)self, 1);
-    *(int*)(s + 0xFC) = -1;
-    *(int*)(s + 0xBC) = 0;
-    int m = *(int*)(s + 0xB4);
-    if (m == 0) {
-        *(int*)(s + 0xEC) = 4;
-        char* o = *(char**)(s + 0x434);
-        sMovieVEntry_23C8F0* vt = *(sMovieVEntry_23C8F0**)o;
-        vt[19].fn(o + vt[19].delta, 0x80000);
-    } else if (m == 1) {
-        *(int*)(s + 0xEC) = 6;
+    *(int*)(manager + 0xFC) = -1;
+    *(int*)(manager + 0xBC) = 0;
+    int fileType = *(int*)(manager + 0xB4);
+    if (fileType == 0) {
+        *(int*)(manager + 0xEC) = 4;
+        char* memCard = *(char**)(manager + 0x434);
+        sMovieVEntry_23C8F0* vt = *(sMovieVEntry_23C8F0**)memCard;
+        vt[19].fn(memCard + vt[19].delta, 0x80000);
+    } else if (fileType == 1) {
+        *(int*)(manager + 0xEC) = 6;
         cBE_getInterface_Fv(cBE_getBE(), 5);
-        int v = func_00152BA8();
-        char* o = *(char**)(s + 0x434);
-        sMovieVEntry_23C8F0* vt = *(sMovieVEntry_23C8F0**)o;
-        vt[19].fn(o + vt[19].delta, v);
+        int fileSize = func_00152BA8();
+        char* memCard = *(char**)(manager + 0x434);
+        sMovieVEntry_23C8F0* vt = *(sMovieVEntry_23C8F0**)memCard;
+        vt[19].fn(memCard + vt[19].delta, fileSize);
     } else {
-        *(int*)(s + 0xEC) = 1;
+        *(int*)(manager + 0xEC) = 1;
         cBE_getInterface_Fv(cBE_getBE(), 5);
-        int v = func_00152948_r();
-        char* o = *(char**)(s + 0x434);
-        sMovieVEntry_23C8F0* vt = *(sMovieVEntry_23C8F0**)o;
-        vt[19].fn(o + vt[19].delta, v);
+        int fileSize = func_00152948_r();
+        char* memCard = *(char**)(manager + 0x434);
+        sMovieVEntry_23C8F0* vt = *(sMovieVEntry_23C8F0**)memCard;
+        vt[19].fn(memCard + vt[19].delta, fileSize);
     }
     func_002C2540(fmt, str_pct_s_pct_s_e);
     func_00241AA0_r(desc, 0x200);
-    func_00241D40_r(self, *(int*)(s + 0xB4), name, 0x100);
-    sprintf1_v(s + 0x1B4, fmt, desc, name);
+    func_00241D40_r(self, *(int*)(manager + 0xB4), name, 0x100);
+    sprintf1_v(manager + 0x1B4, fmt, desc, name);
 }
 #endif
 
@@ -208,12 +208,12 @@ struct sMovieVEntryCAA0 {
 // second argument (callers pass it in $5); the real body is bound by asm label.
 void func_0023CAA0_impl(void* self, int a) __asm__("func_0023CAA0");
 
-void func_0023CAA0_impl(void* self, int a)
+void func_0023CAA0_impl(void* self, int size)
 {
     void* obj = *(void**)((char*)self + 0x434);
     sMovieVEntryCAA0* vt = *(sMovieVEntryCAA0**)obj;
-    vt[19].fn((char*)obj + vt[19].delta, a);
-    *(int*)((char*)self + 0xF0) = a;
+    vt[19].fn((char*)obj + vt[19].delta, size);
+    *(int*)((char*)self + 0xF0) = size;
 }
 #endif
 
@@ -240,41 +240,41 @@ struct sMovieVEntry_23CAE8 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_0023CAE8(void* self, int mode, int a2)
+extern "C" void func_0023CAE8(void* self, int mode, int profileId)
 {
     char desc[0x200];
     char name[0x200];
     char fmt[0x200];
-    char* s = (char*)self;
-    *(int*)(s + 0xB4) = mode;
+    char* manager = (char*)self;
+    *(int*)(manager + 0xB4) = mode;
     cMCOverlayManager_SetAction((cMCOverlayManager*)self, 1);
-    *(int*)(s + 0xFC) = a2;
-    *(int*)(s + 0xBC) = 1;
-    int m = *(int*)(s + 0xB4);
-    if (m == 0) {
-        *(int*)(s + 0xEC) = 4;
-        char* o = *(char**)(s + 0x434);
-        sMovieVEntry_23CAE8* vt = *(sMovieVEntry_23CAE8**)o;
-        vt[19].fn(o + vt[19].delta, 0x80000);
-    } else if (m == 1) {
-        *(int*)(s + 0xEC) = 6;
+    *(int*)(manager + 0xFC) = profileId;
+    *(int*)(manager + 0xBC) = 1;
+    int fileType = *(int*)(manager + 0xB4);
+    if (fileType == 0) {
+        *(int*)(manager + 0xEC) = 4;
+        char* memCard = *(char**)(manager + 0x434);
+        sMovieVEntry_23CAE8* vt = *(sMovieVEntry_23CAE8**)memCard;
+        vt[19].fn(memCard + vt[19].delta, 0x80000);
+    } else if (fileType == 1) {
+        *(int*)(manager + 0xEC) = 6;
         cBE_getInterface_Fv(cBE_getBE(), 5);
-        int v = func_00152BA8();
-        char* o = *(char**)(s + 0x434);
-        sMovieVEntry_23CAE8* vt = *(sMovieVEntry_23CAE8**)o;
-        vt[19].fn(o + vt[19].delta, v);
+        int fileSize = func_00152BA8();
+        char* memCard = *(char**)(manager + 0x434);
+        sMovieVEntry_23CAE8* vt = *(sMovieVEntry_23CAE8**)memCard;
+        vt[19].fn(memCard + vt[19].delta, fileSize);
     } else {
-        *(int*)(s + 0xEC) = 1;
+        *(int*)(manager + 0xEC) = 1;
         cBE_getInterface_Fv(cBE_getBE(), 5);
-        int v = func_00152948_r();
-        char* o = *(char**)(s + 0x434);
-        sMovieVEntry_23CAE8* vt = *(sMovieVEntry_23CAE8**)o;
-        vt[19].fn(o + vt[19].delta, v);
+        int fileSize = func_00152948_r();
+        char* memCard = *(char**)(manager + 0x434);
+        sMovieVEntry_23CAE8* vt = *(sMovieVEntry_23CAE8**)memCard;
+        vt[19].fn(memCard + vt[19].delta, fileSize);
     }
     func_002C2540(fmt, str_pct_s_pct_s_e);
     func_00241AA0_r(desc, 0x200);
-    func_00241D40_r(self, *(int*)(s + 0xB4), name, 0x100);
-    sprintf1_v(s + 0x1B4, fmt, desc, name);
+    func_00241D40_r(self, *(int*)(manager + 0xB4), name, 0x100);
+    sprintf1_v(manager + 0x1B4, fmt, desc, name);
 }
 #endif
 
@@ -460,13 +460,13 @@ extern "C" void* func_002C22C8(void);
 
 extern "C" void func_0023D5A8(void* self)
 {
-    char* s = (char*)self;
-    void* q = func_002C22C8();
+    char* manager = (char*)self;
+    void* memCard = func_002C22C8();
 //START
-    *(void**)(s + 0x434) = q;
-    *(int*)(s + 0x104) = 0;
-    *(float*)(s + 0x110) = 1.0f;
-    *(float*)(s + 0x114) = 0.016669999808073044f;
+    *(void**)(manager + 0x434) = memCard;
+    *(int*)(manager + 0x104) = 0;
+    *(float*)(manager + 0x110) = 1.0f;
+    *(float*)(manager + 0x114) = 0.016669999808073044f;
 //END
 }
 #endif
@@ -540,32 +540,32 @@ static inline bool isState_23D660(char* s, int k)
 
 extern "C" void func_0023D660(void* self)
 {
-    char* s = (char*)self;
-    char* o = *(char**)(s + 0x434);
-    sVoidVEntry_23D660* vt = *(sVoidVEntry_23D660**)o;
-    vt[3].fn(o + vt[3].delta);
-    if (*(int*)(s + 0x338) != 0) {
-        o = *(char**)(s + 0x434);
-        sIntVEntry_23D660* ivt = *(sIntVEntry_23D660**)o;
-        if (ivt[11].fn(o + ivt[11].delta) != 0) {
+    char* manager = (char*)self;
+    char* memCard = *(char**)(manager + 0x434);
+    sVoidVEntry_23D660* vt = *(sVoidVEntry_23D660**)memCard;
+    vt[3].fn(memCard + vt[3].delta);
+    if (*(int*)(manager + 0x338) != 0) {
+        memCard = *(char**)(manager + 0x434);
+        sIntVEntry_23D660* ivt = *(sIntVEntry_23D660**)memCard;
+        if (ivt[11].fn(memCard + ivt[11].delta) != 0) {
             return;
         }
-        *(int*)(s + 0x338) = 0;
+        *(int*)(manager + 0x338) = 0;
     }
-    if (*(int*)(s + 0x424) == -1) {
-        *(int*)(s + 0x424) = cMCOverlayManager_getMaxDevicesSupported((cMCOverlayManager*)self);
+    if (*(int*)(manager + 0x424) == -1) {
+        *(int*)(manager + 0x424) = cMCOverlayManager_getMaxDevicesSupported((cMCOverlayManager*)self);
     }
-    o = *(char**)(s + 0x434);
-    sIntVEntry_23D660* ivt = *(sIntVEntry_23D660**)o;
-    if (ivt[11].fn(o + ivt[11].delta) == 0) {
+    memCard = *(char**)(manager + 0x434);
+    sIntVEntry_23D660* ivt = *(sIntVEntry_23D660**)memCard;
+    if (ivt[11].fn(memCard + ivt[11].delta) == 0) {
         cMCOverlayManager_SetAction((cMCOverlayManager*)self, 0);
-        int ok = !(isState_23D660(s, 0x31) || isState_23D660(s, 0x32) || isState_23D660(s, 0x33) || isState_23D660(s, 0x34) || isState_23D660(s, 0x36));
+        int ok = !(isState_23D660(manager, 0x31) || isState_23D660(manager, 0x32) || isState_23D660(manager, 0x33) || isState_23D660(manager, 0x34) || isState_23D660(manager, 0x36));
         if (ok) {
-            sArgVEntry_23D660* avt = *(sArgVEntry_23D660**)(s + 0x748);
-            avt[1].fn(s + avt[1].delta, 3);
+            sArgVEntry_23D660* avt = *(sArgVEntry_23D660**)(manager + 0x748);
+            avt[1].fn(manager + avt[1].delta, 3);
         }
     }
-    int st = *(int*)(s + 0x130);
+    int st = *(int*)(manager + 0x130);
     if (st == 0x31) {
         cMCOverlayManager_UpdateInitCardsCheck((cMCOverlayManager*)self);
     } else if (st == 0x33) {
@@ -581,10 +581,10 @@ INCLUDE_ASM("movie/movieplayer", func_0023D7A8);
 #ifdef SKIP_ASM
 extern "C" int func_0023D7A8(void* self)
 {
-    int f = *(int*)((char*)self + 0x43C);
-    f &= ~4;
-    f &= ~0x10;
-    return *(int*)((char*)self + 0x440) == 0 && f != 0;
+    int deviceState = *(int*)((char*)self + 0x43C);
+    deviceState &= ~4;
+    deviceState &= ~0x10;
+    return *(int*)((char*)self + 0x440) == 0 && deviceState != 0;
 }
 #endif
 
@@ -1406,26 +1406,26 @@ static inline void notify_E8A0(char* s, int v)
 
 extern "C" void func_0023E8A0(void* self, int flag)
 {
-    char* s = (char*)self;
+    char* manager = (char*)self;
 
-    if (vq_E8A0(s, 53) == 0) {
-        if (vq_E8A0(s, 49) != 0 || vq_E8A0(s, 51) != 0 || vq_E8A0(s, 59) != 0) {
-            notify_E8A0(s, 5);
+    if (vq_E8A0(manager, 53) == 0) {
+        if (vq_E8A0(manager, 49) != 0 || vq_E8A0(manager, 51) != 0 || vq_E8A0(manager, 59) != 0) {
+            notify_E8A0(manager, 5);
         } else {
-            int ok = *(int*)(s + 0x130) != 4;
+            int ok = *(int*)(manager + 0x130) != 4;
             if (ok) {
-                notify_E8A0(s, 4);
+                notify_E8A0(manager, 4);
             }
         }
     } else {
-        if (vq_E8A0(s, 55) != 0 && vq_E8A0(s, 58) != 0 && vq_E8A0(s, 51) == 0 && vq_E8A0(s, 59) == 0) {
+        if (vq_E8A0(manager, 55) != 0 && vq_E8A0(manager, 58) != 0 && vq_E8A0(manager, 51) == 0 && vq_E8A0(manager, 59) == 0) {
             if (flag != 0) {
-                notify_E8A0(s, 6);
+                notify_E8A0(manager, 6);
             }
-        } else if (*(int*)(s + 0xBC) != 0) {
-            notify_E8A0(s, 7);
+        } else if (*(int*)(manager + 0xBC) != 0) {
+            notify_E8A0(manager, 7);
         } else {
-            notify_E8A0(s, 0x1D);
+            notify_E8A0(manager, 0x1D);
         }
     }
 }
@@ -3690,13 +3690,13 @@ struct sMovieVEntry0FB0 {
     int (*fn)(void*, int, int, int);
 };
 
-extern "C" void func_00240FB0(void* self, int a, int b, int c)
+extern "C" void func_00240FB0(void* self, int a, int data, int size)
 {
-    void* o = *(void**)((char*)self + 0x434);
+    void* memCard = *(void**)((char*)self + 0x434);
     cMCOverlayManager_mSaveInProgress = 1;
-    sMovieVEntry0FB0* vt = *(sMovieVEntry0FB0**)o;
-    vt[36].fn((char*)o + vt[36].delta, a, b, c);
-    *(int*)((char*)self + 0xE4) = c;
+    sMovieVEntry0FB0* vt = *(sMovieVEntry0FB0**)memCard;
+    vt[36].fn((char*)memCard + vt[36].delta, a, data, size);
+    *(int*)((char*)self + 0xE4) = size;
 }
 #endif
 
@@ -3711,13 +3711,13 @@ struct sMovieVEntry1000 {
     int (*fn)(void*, int, int, int);
 };
 
-extern "C" void func_00241000(void* self, int a, int b, int c)
+extern "C" void func_00241000(void* self, int fileName, int data, int size)
 {
-    void* o = *(void**)((char*)self + 0x434);
+    void* memCard = *(void**)((char*)self + 0x434);
     cMCOverlayManager_mSaveInProgress = 1;
-    sMovieVEntry1000* vt = *(sMovieVEntry1000**)o;
-    vt[37].fn((char*)o + vt[37].delta, a, b, c);
-    *(int*)((char*)self + 0xE4) = c;
+    sMovieVEntry1000* vt = *(sMovieVEntry1000**)memCard;
+    vt[37].fn((char*)memCard + vt[37].delta, fileName, data, size);
+    *(int*)((char*)self + 0xE4) = size;
 }
 #endif
 
@@ -3730,13 +3730,13 @@ struct sMovieVEntry1050 {
     int (*fn)(void*, int, int, int);
 };
 
-extern "C" void func_00241050(void* self, int a, int b, int c)
+extern "C" void func_00241050(void* self, int a, int data, int size)
 {
-    void* o = *(void**)((char*)self + 0x434);
+    void* memCard = *(void**)((char*)self + 0x434);
     cMCOverlayManager_mSaveInProgress = 1;
-    sMovieVEntry1050* vt = *(sMovieVEntry1050**)o;
-    vt[38].fn((char*)o + vt[38].delta, a, b, c);
-    *(int*)((char*)self + 0xE4) = c;
+    sMovieVEntry1050* vt = *(sMovieVEntry1050**)memCard;
+    vt[38].fn((char*)memCard + vt[38].delta, a, data, size);
+    *(int*)((char*)self + 0xE4) = size;
 }
 #endif
 
@@ -3762,15 +3762,15 @@ struct sMovieVEntry_2410D0 {
 
 extern "C" int func_002410D0(void* self)
 {
-    char* s = (char*)self;
-    char* o = *(char**)(s + 0x434);
-    sMovieVEntry_2410D0* vt = *(sMovieVEntry_2410D0**)o;
-    if (*(int*)(s + 0xEC) < vt[68].fn(o + vt[68].delta)) {
-        return *(int*)(s + 0xEC);
+    char* manager = (char*)self;
+    char* memCard = *(char**)(manager + 0x434);
+    sMovieVEntry_2410D0* vt = *(sMovieVEntry_2410D0**)memCard;
+    if (*(int*)(manager + 0xEC) < vt[68].fn(memCard + vt[68].delta)) {
+        return *(int*)(manager + 0xEC);
     }
-    char* o2 = *(char**)(s + 0x434);
-    sMovieVEntry_2410D0* vt2 = *(sMovieVEntry_2410D0**)o2;
-    return vt2[68].fn(o2 + vt2[68].delta);
+    char* memCardAgain = *(char**)(manager + 0x434);
+    sMovieVEntry_2410D0* vt2 = *(sMovieVEntry_2410D0**)memCardAgain;
+    return vt2[68].fn(memCardAgain + vt2[68].delta);
 }
 #endif
 
@@ -3785,14 +3785,14 @@ struct sMovieVEntry1138 {
     void (*fn)(void*, int, int);
 };
 
-extern "C" void func_00241138(void* self, int a, int b)
+extern "C" void func_00241138(void* self, int data, int size)
 {
-    void* o = *(void**)((char*)self + 0x434);
+    void* memCard = *(void**)((char*)self + 0x434);
     int one = 1;
-    *(int*)((char*)self + 0xE4) += b;
+    *(int*)((char*)self + 0xE4) += size;
     cMCOverlayManager_mSaveInProgress = one;
-    sMovieVEntry1138* vt = *(sMovieVEntry1138**)o;
-    vt[41].fn((char*)o + vt[41].delta, a, b);
+    sMovieVEntry1138* vt = *(sMovieVEntry1138**)memCard;
+    vt[41].fn((char*)memCard + vt[41].delta, data, size);
 }
 #endif
 
@@ -3875,9 +3875,9 @@ struct sMovieVEntry1240b {
 
 extern "C" void func_00241240(void* self)
 {
-    void* o = *(void**)((char*)self + 0x434);
-    sMovieVEntry1240a* vt = *(sMovieVEntry1240a**)o;
-    vt[33].fn((char*)o + vt[33].delta);
+    void* memCard = *(void**)((char*)self + 0x434);
+    sMovieVEntry1240a* vt = *(sMovieVEntry1240a**)memCard;
+    vt[33].fn((char*)memCard + vt[33].delta);
     sMovieVEntry1240b* vt2 = *(sMovieVEntry1240b**)((char*)self + 0x748);
     vt2[1].fn((char*)self + vt2[1].delta, 0x24);
     (*(void (**)())((char*)self + 0x2C))();
@@ -3909,13 +3909,13 @@ extern "C" void func_002412A0(void* self)
     char desc[0x200];
     char fmt[0x200];
     cMCOverlayManager_mSaveInProgress = 1;
-    int a = func_00152758(cBE_getInterface_Fv(cBE_getBE(), 5));
-    int b = func_00152948_r();
+    int saveData = func_00152758(cBE_getInterface_Fv(cBE_getBE(), 5));
+    int saveSize = func_00152948_r();
     func_002C2540(fmt, str_pct_s_pct_spct_04d_b);
     func_00241D40_r(self, 2, name, 0x82);
     func_00241AA0_r(desc, 0x200);
     sprintf1_v(text, fmt, desc, name, *(int*)((char*)self + 0xF8) + 1);
-    func_00241000_r(self, text, a, b);
+    func_00241000_r(self, text, saveData, saveSize);
 }
 #endif
 
@@ -3931,7 +3931,7 @@ struct sMovieVEntry1380 {
 extern "C" void func_00241380(void* self)
 {
     int one = 1;
-    void* o;
+    void* memCard;
     sMovieVEntry1380* vt;
     *(int*)((char*)self + 0x340) = one;
     *(int*)((char*)self + 0xDC) = 0;
@@ -3944,9 +3944,9 @@ extern "C" void func_00241380(void* self)
     func_0023FAE0(self);
     *(int*)((char*)self + 0x338) = one;
     *(int*)((char*)self + 0x130) = 2;
-    o = *(void**)((char*)self + 0x434);
-    vt = *(sMovieVEntry1380**)o;
-    vt[3].fn((char*)o + vt[3].delta);
+    memCard = *(void**)((char*)self + 0x434);
+    vt = *(sMovieVEntry1380**)memCard;
+    vt[3].fn((char*)memCard + vt[3].delta);
 }
 #endif
 
@@ -4369,10 +4369,10 @@ extern "C" void func_00241928(sMP1928* self, int i, void* out)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_002419D8);
 #ifdef SKIP_ASM
-extern "C" int func_002419D8(void* self, int a1)
+extern "C" int func_002419D8(void* self, int device)
 {
-    char* p = (char*)self + a1 * 0xe0;
-    return *(int*)(p + 0x354);
+    char* deviceBase = (char*)self + device * 0xe0;
+    return *(int*)(deviceBase + 0x354);
 }
 #endif
 
@@ -5329,34 +5329,34 @@ extern "C" void func_002425C0(sVisMgr_25C0* self, sBounds_25C0* bb)
         return;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sMtx_25C0 mtx = ((tCamMtx_25C0)((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x2B].fn)((char*)ps2GraphicsMan + ((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x2B].delta);
-    sVec4_25C0 p = vu0Scale_25C0(rowPos_25C0(camMtx_25C0()), -1.0f);
-    p = mulT_25C0(camMtx_25C0(), p);
+    sVec4_25C0 eye = vu0Scale_25C0(rowPos_25C0(camMtx_25C0()), -1.0f);
+    eye = mulT_25C0(camMtx_25C0(), eye);
     self->count = 0;
-    p.w = 1.0f;
+    eye.w = 1.0f;
     sView_25C0* it = self->head;
     while (it != 0) {
-        sView_25C0* v = it;
+        sView_25C0* candidate = it;
         it = it->next;
         sBox_25C0 box;
-        box.min.x = v->minx;
-        box.min.y = v->miny;
-        box.min.z = v->minz;
+        box.min.x = candidate->minx;
+        box.min.y = candidate->miny;
+        box.min.z = candidate->minz;
         box.min.w = 1.0f;
-        box.max.x = v->maxx;
-        box.max.y = v->maxy;
-        box.max.z = v->maxz;
+        box.max.x = candidate->maxx;
+        box.max.y = candidate->maxy;
+        box.max.z = candidate->maxz;
         box.max.w = 1.0f;
         int ov = bb->minx <= box.max.x && box.min.x <= bb->maxx
               && bb->miny <= box.max.y && box.min.y <= bb->maxy
               && bb->minz <= box.max.z && box.min.z <= bb->maxz;
         if (ov) {
-            cPS2GraphicsMan* c2 = GrMan;
-            bool vis = !((tCamCull_25C0)((sCamVt_25C0*)c2->mVtbl)[0x5D].fn)((char*)c2 + ((sCamVt_25C0*)c2->mVtbl)[0x5D].delta, &box.min, &box.max, &mtx);
+            cPS2GraphicsMan* graphics = GrMan;
+            bool vis = !((tCamCull_25C0)((sCamVt_25C0*)graphics->mVtbl)[0x5D].fn)((char*)graphics + ((sCamVt_25C0*)graphics->mVtbl)[0x5D].delta, &box.min, &box.max, &mtx);
             if (vis) {
-                if (!(0.0f < vu0Dot_25C0(p, v->normal))) {
-                    float d = vu0DistSq_25C0(p, v->pos);
-                    self->ents[self->count].view = v;
-                    self->ents[self->count].dist = d;
+                if (!(0.0f < vu0Dot_25C0(eye, candidate->normal))) {
+                    float distSq = vu0DistSq_25C0(eye, candidate->pos);
+                    self->ents[self->count].view = candidate;
+                    self->ents[self->count].dist = distSq;
                     self->count++;
                 }
             }
@@ -5371,7 +5371,7 @@ extern "C" void func_002425C0(sVisMgr_25C0* self, sBounds_25C0* bb)
     self->nvis = n;
     for (int i = 0; i < self->nvis; i++) {
         self->mask |= 1 << i;
-        func_002429B0(self, &p, self->ents[i].view);
+        func_002429B0(self, &eye, self->ents[i].view);
         func_00229F88(i, &self->ents[i].view->normal, (char*)self->ents[i].view + 0x60);
     }
 }
@@ -5381,10 +5381,10 @@ extern "C" void func_002425C0(sVisMgr_25C0* self, sBounds_25C0* bb)
 INCLUDE_ASM("movie/movieplayer", func_00242978);
 #ifdef SKIP_ASM
 // qsort-style comparator: orders by the float at +0x4, ascending.
-extern "C" int func_00242978(const void* a, const void* b)
+extern "C" int func_00242978(const void* lhs, const void* rhs)
 {
-    float fa = *(float*)((char*)a + 0x4);
-    float fb = *(float*)((char*)b + 0x4);
+    float fa = *(float*)((char*)lhs + 0x4);
+    float fb = *(float*)((char*)rhs + 0x4);
     if (fa < fb) {
         return -1;
     }
@@ -5501,14 +5501,14 @@ static inline void makePlane_29B0(sFrustum_29B0* f, int i, const sVec4_29B0& eye
     f->plane[i].d = n.w;
 }
 
-extern "C" void func_002429B0(void* self, const void* eyep, void* fp)
+extern "C" void func_002429B0(void* self, const void* eyep, void* frustumPtr)
 {
     const sVec4_29B0& eye = *(const sVec4_29B0*)eyep;
-    sFrustum_29B0* f = (sFrustum_29B0*)fp;
-    makePlane_29B0(f, 0, eye, f->corner[0], f->corner[1]);
-    makePlane_29B0(f, 1, eye, f->corner[1], f->corner[2]);
-    makePlane_29B0(f, 2, eye, f->corner[2], f->corner[3]);
-    makePlane_29B0(f, 3, eye, f->corner[3], f->corner[0]);
+    sFrustum_29B0* frustum = (sFrustum_29B0*)frustumPtr;
+    makePlane_29B0(frustum, 0, eye, frustum->corner[0], frustum->corner[1]);
+    makePlane_29B0(frustum, 1, eye, frustum->corner[1], frustum->corner[2]);
+    makePlane_29B0(frustum, 2, eye, frustum->corner[2], frustum->corner[3]);
+    makePlane_29B0(frustum, 3, eye, frustum->corner[3], frustum->corner[0]);
 }
 #endif
 

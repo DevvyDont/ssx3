@@ -136,8 +136,8 @@ INCLUDE_ASM("seg/seg_14B10", func_00113CC0);
 #ifdef SKIP_ASM
 extern "C" void cAI_setAIState(cAI*, int);
 
-extern "C" void func_00113CC0(void *arg0, void *arg1) {
-    cAI_setAIState((cAI*)arg1, 2);
+extern "C" void func_00113CC0(void *stateHandler, void *aiObj) {
+    cAI_setAIState((cAI*)aiObj, 2);
 }
 #endif
 
@@ -147,8 +147,8 @@ extern "C" void func_00113CE0(void) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00113CE8);
 #ifdef SKIP_ASM
-extern "C" void func_00113CE8(void *arg0, void *arg1) {
-    (*(int *)((char*)(arg1) + (0x14))) = 0;
+extern "C" void func_00113CE8(void *stateHandler, void *aiObj) {
+    (*(int *)((char*)(aiObj) + (0x14))) = 0;
 }
 #endif
 
@@ -157,8 +157,8 @@ INCLUDE_ASM("seg/seg_14B10", func_00113CF0);
 #ifdef SKIP_ASM
 extern "C" void cAI_setAIState(cAI*, int);
 
-extern "C" void func_00113CF0(void *arg0, void *arg1) {
-    cAI_setAIState((cAI*)arg1, 5);
+extern "C" void func_00113CF0(void *stateHandler, void *aiObj) {
+    cAI_setAIState((cAI*)aiObj, 5);
 }
 #endif
 
@@ -168,9 +168,9 @@ extern "C" void func_00113D10(void) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00113D18);
 #ifdef SKIP_ASM
-extern "C" void func_00113D18(void *arg0, void *arg1) {
-    (*(int *)((char*)(arg1) + (0xC))) = 0;
-    (*(int *)((char*)(arg0) + (4))) = 0;
+extern "C" void func_00113D18(void *stateHandler, void *aiObj) {
+    (*(int *)((char*)(aiObj) + (0xC))) = 0;
+    (*(int *)((char*)(stateHandler) + (4))) = 0;
 }
 #endif
 
@@ -1426,8 +1426,8 @@ extern "C" int cBE_getBE();
 extern "C" int cBE_getInterface__Fv(int, int);
 extern "C" float func_0014EFA8(int, int);
 
-extern "C" float func_00115B08(void *arg0) {
-    return (func_0014EFA8(cBE_getInterface__Fv(cBE_getBE(), 2), (*(int *)((char*)(arg0) + (0x86C)))) * 90.0f) - 90.0f;
+extern "C" float func_00115B08(void *rider) {
+    return (func_0014EFA8(cBE_getInterface__Fv(cBE_getBE(), 2), (*(int *)((char*)(rider) + (0x86C)))) * 90.0f) - 90.0f;
 }
 #endif
 
@@ -1729,9 +1729,9 @@ INCLUDE_ASM("seg/seg_14B10", func_00116378);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0011FEC8_6378(void *, int) __asm__("func_0011FEC8__FPv");
 
-extern "C" int func_00116378(void *arg0) {
-    if (*(float *)((char*)arg0 + 0x470) >= 0.0f) {
-        func_0011FEC8_6378(arg0, 10);
+extern "C" int func_00116378(void *rider) {
+    if (*(float *)((char*)rider + 0x470) >= 0.0f) {
+        func_0011FEC8_6378(rider, 10);
         return 1;
     }
     return 0;
@@ -2172,13 +2172,13 @@ INCLUDE_ASM("seg/seg_14B10", func_00117138);
 #ifdef SKIP_ASM
 extern "C" void cHUDFX_copyDispStr(char *, signed char *);
 
-extern "C" void func_00117138(char *arg0, int arg1, signed char *arg2, int arg3, float fparg0) {
-    cHUDFX_copyDispStr(arg0, arg2);
-    *(int *)(arg0 + 0) = arg1;
-    *(int *)(arg0 + 0xC) = arg3;
-    *(float *)(arg0 + 8) = -fparg0;
-    *(float *)(arg0 + 4) = -1.0f;
-    *(int *)(arg0 + 0x14) = 0;
+extern "C" void func_00117138(char *hudFx, int fxId, signed char *displayStr, int data, float fparg0) {
+    cHUDFX_copyDispStr(hudFx, displayStr);
+    *(int *)(hudFx + 0) = fxId;
+    *(int *)(hudFx + 0xC) = data;
+    *(float *)(hudFx + 8) = -fparg0;
+    *(float *)(hudFx + 4) = -1.0f;
+    *(int *)(hudFx + 0x14) = 0;
 }
 #endif
 

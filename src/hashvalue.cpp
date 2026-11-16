@@ -150,7 +150,7 @@ extern "C" sHash128 func_00317710(sHash128* out, char* str);
 
 extern "C" sHash128 func_00317798(char* str)
 {
-    sHash128 tmp;
-    return func_00317710(&tmp, str);
+    sHash128 digest;
+    return func_00317710(&digest, str);
 }
 #endif

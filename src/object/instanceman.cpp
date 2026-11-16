@@ -79,12 +79,12 @@ void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
 extern char cAnimFrame_vtbl[];
 
 extern "C" void* func_00351330_impl(char* self, float* src, float f) __asm__("func_00351330");
-extern "C" void* func_00351330_impl(char* self, float* src, float f)
+extern "C" void* func_00351330_impl(char* self, float* src, float time)
 {
     *(void**)(self + 0x84) = cAnimFrame_vtbl;
     func_003513D0(self);
     func_00351398(self, src);
-    cAnimFrame_update_impl(self, f);
+    cAnimFrame_update_impl(self, time);
     return self;
 }
 #endif
@@ -167,13 +167,13 @@ extern "C" void* func_00351330(void* self, float* src, float f);
 // PORT: cMeshAnimFrame_update is defined later in the unit with a typed self; bound by asm label.
 void cMeshAnimFrame_update_vf(void* self, float f) __asm__("cMeshAnimFrame_update");
 
-extern "C" void* func_00351480(void* self, float* src, float f)
+extern "C" void* func_00351480(void* self, float* src, float time)
 {
-    func_00351330(self, src, f);
+    func_00351330(self, src, time);
     *(void***)((char*)self + 0x84) = cMeshAnimFrame_vtbl;
     vu0CopyMat_351480((sImMat44_351480*)((char*)self + 0x90), &t4mat_Identity);
     *(float**)((char*)self + 0x40) = src;
-    cMeshAnimFrame_update_vf(self, f);
+    cMeshAnimFrame_update_vf(self, time);
     return self;
 }
 #endif
@@ -965,16 +965,16 @@ static inline void AddEq_352230(sV4_352230& d, const sV4_352230& b)
         : "memory");
 }
 
-extern "C" void func_00352230(void* p)
+extern "C" void func_00352230(void* debris)
 {
-    sDebris_352230* self = (sDebris_352230*)p;
-    char* g = *(char**)(self->model + 0x80);
-    for (int i = 0; i < *(int*)(g + 4); i++) {
+    sDebris_352230* self = (sDebris_352230*)debris;
+    char* modelDef = *(char**)(self->model + 0x80);
+    for (int i = 0; i < *(int*)(modelDef + 4); i++) {
         self->spin[i] = self->spinScale * randRange_352230(0.5f, 1.0f);
         self->axis[i] = sV4_352230(randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f), 0.0f);
         self->axis[i] = Normalize_352230(self->axis[i]);
     }
-    for (int j = 0; j < *(int*)(g + 4); j++) {
+    for (int j = 0; j < *(int*)(modelDef + 4); j++) {
         float vx = randScale_352230(self->vmax[0]) * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
         if (BXrand() & 1) {
             vx = -vx;

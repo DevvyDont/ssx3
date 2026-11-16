@@ -682,12 +682,12 @@ extern "C" void func_00353228(void* self)
 {
     sModBlockLink3228* head = *(sModBlockLink3228**)((char*)self + 0x10);
     if (head != 0) {
-        sModBlockLink3228* p = head;
+        sModBlockLink3228* link = head;
         do {
-            sModBlockLink3228* next = p->next;
-            p->vt[3].fn((char*)p + p->vt[3].delta);
-            p = next;
-        } while (p != 0);
+            sModBlockLink3228* next = link->next;
+            link->vt[3].fn((char*)link + link->vt[3].delta);
+            link = next;
+        } while (link != 0);
     }
 }
 #endif
@@ -711,16 +711,16 @@ extern "C" void func_00353278(void* self)
 {
     sModBlockLink3278* head = *(sModBlockLink3278**)((char*)self + 0x10);
     if (head != 0) {
-        sModBlockLink3278* p = head;
+        sModBlockLink3278* link = head;
         do {
-            sModBlockLink3278* next = p->next;
-            if (((int (*)(void*))p->vt[2].fn)((char*)p + p->vt[2].delta) == 3) {
-                if (p != 0) {
-                    ((void (*)(void*, int))p->vt[1].fn)((char*)p + p->vt[1].delta, 3);
+            sModBlockLink3278* next = link->next;
+            if (((int (*)(void*))link->vt[2].fn)((char*)link + link->vt[2].delta) == 3) {
+                if (link != 0) {
+                    ((void (*)(void*, int))link->vt[1].fn)((char*)link + link->vt[1].delta, 3);
                 }
             }
-            p = next;
-        } while (p != 0);
+            link = next;
+        } while (link != 0);
     }
 }
 #endif
@@ -1280,10 +1280,10 @@ INCLUDE_ASM("object/modifierblock", func_00353D98__FPv);
 #ifdef SKIP_ASM
 int func_00353D98(void* self)
 {
-    int t0 = -1;
+    int invalid = -1;
     *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x10) = t0;
-    return t0;
+    *(int*)((char*)self + 0x10) = invalid;
+    return invalid;
 }
 #endif
 

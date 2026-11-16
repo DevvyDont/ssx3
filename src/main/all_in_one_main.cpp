@@ -248,10 +248,10 @@ struct N_B718 { N_B718 *next; N_B718 *prev; };
 struct L_B718 { int pad; N_B718 *head; };
 
 extern "C" void func_001DB718(L_B718 *self) {
-    N_B718 *p = self->head->next;
-    while (p != self->head) {
-        N_B718 *n = p;
-        p = p->next;
+    N_B718 *node = self->head->next;
+    while (node != self->head) {
+        N_B718 *n = node;
+        node = node->next;
         operator_delete((int *)n);
     }
     self->head->next = self->head;
@@ -434,8 +434,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DBAB8);
 #ifdef SKIP_ASM
 extern "C" void func_0017E558(int);
 
-extern "C" int func_001DBAB8(void *arg0) {
-    func_0017E558((*(int *)((char*)(arg0) + (0x130))));
+extern "C" int func_001DBAB8(void *menu) {
+    func_0017E558((*(int *)((char*)(menu) + (0x130))));
     return 0;
 }
 #endif
@@ -446,14 +446,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DBAD8);
 extern "C" void func_0017E490(int);
 extern "C" void func_0017E4F0(int);
 
-extern "C" int func_001DBAD8(void *arg0, void *arg1) {
+extern "C" int func_001DBAD8(void *menu, void *item) {
     int temp_3;
 
-    temp_3 = (*(int *)((char*)(arg1) + (8)));
+    temp_3 = (*(int *)((char*)(item) + (8)));
     if (temp_3 == 0) {
-        func_0017E490((*(int *)((char*)(arg0) + (0x130))));
+        func_0017E490((*(int *)((char*)(menu) + (0x130))));
     } else if (temp_3 == 1) {
-        func_0017E4F0((*(int *)((char*)(arg0) + (0x134))));
+        func_0017E4F0((*(int *)((char*)(menu) + (0x134))));
     }
     return 0;
 }
@@ -464,8 +464,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DBB20);
 #ifdef SKIP_ASM
 extern "C" void func_0017E418(int, int);
 
-extern "C" int func_001DBB20(void *arg0, void *arg1) {
-    func_0017E418((*(int *)((char*)(arg0) + (0x130))), (*(int *)((char*)(arg1) + (0x14))));
+extern "C" int func_001DBB20(void *menu, void *item) {
+    func_0017E418((*(int *)((char*)(menu) + (0x130))), (*(int *)((char*)(item) + (0x14))));
     return 0;
 }
 #endif
@@ -477,12 +477,12 @@ INCLUDE_ASM("main/all_in_one_main", func_001DBB48);
 extern "C" void func_0017E368_BB48(int, int) __asm__("func_0017E368");
 extern "C" void func_0017E3B8_BB48(int) __asm__("func_0017E3B8");
 
-extern "C" int func_001DBB48(void *arg0, void *arg1) {
-    int t = *(int *)((char *)arg1 + 8);
-    if (t == -2) {
-        func_0017E3B8_BB48(*(int *)((char *)arg0 + 0x134));
-    } else if (t != -1) {
-        func_0017E368_BB48(*(int *)((char *)arg0 + 0x130), t);
+extern "C" int func_001DBB48(void *menu, void *item) {
+    int itemValue = *(int *)((char *)item + 8);
+    if (itemValue == -2) {
+        func_0017E3B8_BB48(*(int *)((char *)menu + 0x134));
+    } else if (itemValue != -1) {
+        func_0017E368_BB48(*(int *)((char *)menu + 0x130), itemValue);
     }
     return 0;
 }
@@ -493,12 +493,12 @@ INCLUDE_ASM("main/all_in_one_main", func_001DBB90);
 #ifdef SKIP_ASM
 extern "C" void func_0017E2F8(int, int);
 
-extern "C" int func_001DBB90(void *arg0, void *arg1) {
+extern "C" int func_001DBB90(void *menu, void *item) {
     int temp_5;
 
-    temp_5 = (*(int *)((char*)(arg1) + (8)));
+    temp_5 = (*(int *)((char*)(item) + (8)));
     if (temp_5 >= 0) {
-        func_0017E2F8((*(int *)((char*)(arg0) + (0x130))), temp_5);
+        func_0017E2F8((*(int *)((char*)(menu) + (0x130))), temp_5);
     }
     return 0;
 }
@@ -509,8 +509,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DBBC0);
 #ifdef SKIP_ASM
 extern "C" void func_0017E290(int, int);
 
-extern "C" int func_001DBBC0(void *arg0, void *arg1) {
-    func_0017E290((*(int *)((char*)(arg0) + (0x4E0))), (*(int *)((char*)(arg1) + (8))));
+extern "C" int func_001DBBC0(void *menu, void *item) {
+    func_0017E290((*(int *)((char*)(menu) + (0x4E0))), (*(int *)((char*)(item) + (8))));
     return 0;
 }
 #endif
@@ -521,8 +521,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DBBE8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0017E1C0_BBE8(int, void *) __asm__("func_0017E1C0");
 
-extern "C" int func_001DBBE8(char *arg0) {
-    func_0017E1C0_BBE8(*(int *)(arg0 + 0x130), arg0 + 0x180);
+extern "C" int func_001DBBE8(char *menu) {
+    func_0017E1C0_BBE8(*(int *)(menu + 0x130), menu + 0x180);
     return 0;
 }
 #endif
@@ -532,8 +532,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DBC10);
 #ifdef SKIP_ASM
 extern "C" void func_0017E228(int, int);
 
-extern "C" int func_001DBC10(void *arg0, void *arg1) {
-    func_0017E228((*(int *)((char*)(arg0) + (0x130))), (*(int *)((char*)(arg1) + (8))));
+extern "C" int func_001DBC10(void *menu, void *item) {
+    func_0017E228((*(int *)((char*)(menu) + (0x130))), (*(int *)((char*)(item) + (8))));
     return 0;
 }
 #endif
@@ -1105,11 +1105,11 @@ typedef char* func_001DC990_va_list;
 
 extern "C" void cFont_vtextf_C990(int, int, char*) __asm__("cFont_vtextf");
 
-extern "C" void func_001DC990(float x, float y, int c, int d, ...)
+extern "C" void func_001DC990(float x, float y, int font, int fmt, ...)
 {
     func_001DC990_va_list ap;
     func_001DC990_va_start(ap);
-    cFont_vtextf_C990(c, d, ap);
+    cFont_vtextf_C990(font, fmt, ap);
 }
 #endif
 
@@ -1125,13 +1125,13 @@ extern "C" void cFont_vtextf_C9D0(void *, int, char *) __asm__("cFont_vtextf");
 
 struct V2_C9D0 { float x, y; };
 
-extern "C" void func_001DC9D0(void *self, int d, float p0, float p1, float sx, float sy, ...)
+extern "C" void func_001DC9D0(void *self, int fmt, float posX, float posY, float sx, float sy, ...)
 {
     char *ap;
     func_001DC9D0_va_start(ap);
     *(float *)((char *)self + 0x38) = *(float *)((char *)self + 0x30) * sx;
     *(float *)((char *)self + 0x3C) = *(float *)((char *)self + 0x34) * sy;
-    cFont_vtextf_C9D0(self, d, ap);
+    cFont_vtextf_C9D0(self, fmt, ap);
     *(V2_C9D0 *)((char *)self + 0x38) = *(V2_C9D0 *)((char *)self + 0x30);
 }
 #endif
@@ -1147,11 +1147,11 @@ typedef char* func_001DCA40_va_list;
 
 extern "C" void cFont_vcentertextf_CA40(int, int, char*) __asm__("cFont_vcentertextf");
 
-extern "C" void func_001DCA40(float x, float y, int c, int d, ...)
+extern "C" void func_001DCA40(float x, float y, int font, int fmt, ...)
 {
     func_001DCA40_va_list ap;
     func_001DCA40_va_start(ap);
-    cFont_vcentertextf_CA40(c, d, ap);
+    cFont_vcentertextf_CA40(font, fmt, ap);
 }
 #endif
 
@@ -1166,11 +1166,11 @@ typedef char* func_001DCA80_va_list;
 
 extern "C" void cFont_vrighttextf_CA80(int, int, char*) __asm__("cFont_vrighttextf");
 
-extern "C" void func_001DCA80(float x, float y, int c, int d, ...)
+extern "C" void func_001DCA80(float x, float y, int font, int fmt, ...)
 {
     func_001DCA80_va_list ap;
     func_001DCA80_va_start(ap);
-    cFont_vrighttextf_CA80(c, d, ap);
+    cFont_vrighttextf_CA80(font, fmt, ap);
 }
 #endif
 
@@ -1208,16 +1208,16 @@ extern "C" void func_001DCAF0(char *arg0, int arg1) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCB60);
 #ifdef SKIP_ASM
-extern "C" int func_001DCB60(int arg0) {
-    return arg0 + 0x10;
+extern "C" int func_001DCB60(int realFe) {
+    return realFe + 0x10;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCB68);
 #ifdef SKIP_ASM
-extern "C" int func_001DCB68(int arg0) {
-    return arg0 + 0x10;
+extern "C" int func_001DCB68(int realFe) {
+    return realFe + 0x10;
 }
 #endif
 
@@ -1226,8 +1226,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCB70);
 #ifdef SKIP_ASM
 extern "C" void func_001A0538(int);
 
-extern "C" void func_001DCB70(int arg0) {
-    func_001A0538(arg0 + 0xB0);
+extern "C" void func_001DCB70(int realFe) {
+    func_001A0538(realFe + 0xB0);
 }
 #endif
 
@@ -1236,40 +1236,40 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCB90);
 #ifdef SKIP_ASM
 extern "C" void func_001A0548(int);
 
-extern "C" void func_001DCB90(int arg0) {
-    func_001A0548(arg0 + 0xB0);
+extern "C" void func_001DCB90(int realFe) {
+    func_001A0548(realFe + 0xB0);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCBB0);
 #ifdef SKIP_ASM
-extern "C" int func_001DCBB0(int arg0) {
-    return arg0 + 0xB0;
+extern "C" int func_001DCBB0(int realFe) {
+    return realFe + 0xB0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCBB8);
 #ifdef SKIP_ASM
-extern "C" int func_001DCBB8(int arg0) {
-    return arg0 + 0xB0;
+extern "C" int func_001DCBB8(int realFe) {
+    return realFe + 0xB0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCBC0);
 #ifdef SKIP_ASM
-extern "C" int func_001DCBC0(int arg0) {
-    return arg0 + 0x1A70;
+extern "C" int func_001DCBC0(int realFe) {
+    return realFe + 0x1A70;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCBC8);
 #ifdef SKIP_ASM
-extern "C" int func_001DCBC8(int arg0) {
-    return arg0 + 0x1A70;
+extern "C" int func_001DCBC8(int realFe) {
+    return realFe + 0x1A70;
 }
 #endif
 
@@ -1375,8 +1375,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCCB8);
 #ifdef SKIP_ASM
 extern int cRealFE_mStartState;
 
-extern "C" void func_001DCCB8(int arg0) {
-    cRealFE_mStartState = arg0;
+extern "C" void func_001DCCB8(int startState) {
+    cRealFE_mStartState = startState;
 }
 #endif
 
@@ -1403,16 +1403,16 @@ extern "C" void func_001DCCC8(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCCD8);
 #ifdef SKIP_ASM
-extern "C" int func_001DCCD8(int arg0) {
-    return arg0 + 0xB5AB0;
+extern "C" int func_001DCCD8(int realFe) {
+    return realFe + 0xB5AB0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCCE8);
 #ifdef SKIP_ASM
-extern "C" int func_001DCCE8(int arg0) {
-    return arg0 + 0xB5ABC;
+extern "C" int func_001DCCE8(int realFe) {
+    return realFe + 0xB5ABC;
 }
 #endif
 
@@ -1456,9 +1456,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCD58);
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
-extern "C" void func_001DCD58(int arg0, int arg1) {
-    cMenuItem__cMenuItem(arg0 + 0x130, 2);
-    cMenu__cMenu(arg0, arg1);
+extern "C" void func_001DCD58(int menu, int flags) {
+    cMenuItem__cMenuItem(menu + 0x130, 2);
+    cMenu__cMenu(menu, flags);
 }
 #endif
 
@@ -1468,14 +1468,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCDA0);
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
-extern "C" void func_001DCDA0(int arg0, int arg1) {
-    cMenuItem__cMenuItem(arg0 + 0x1E4, 2);
-    cMenuItem__cMenuItem(arg0 + 0x1C0, 2);
-    cMenuItem__cMenuItem(arg0 + 0x194, 2);
-    cMenuItem__cMenuItem(arg0 + 0x168, 2);
-    cMenuItem__cMenuItem(arg0 + 0x150, 2);
-    cMenuItem__cMenuItem(arg0 + 0x134, 2);
-    cMenu__cMenu(arg0, arg1);
+extern "C" void func_001DCDA0(int menu, int flags) {
+    cMenuItem__cMenuItem(menu + 0x1E4, 2);
+    cMenuItem__cMenuItem(menu + 0x1C0, 2);
+    cMenuItem__cMenuItem(menu + 0x194, 2);
+    cMenuItem__cMenuItem(menu + 0x168, 2);
+    cMenuItem__cMenuItem(menu + 0x150, 2);
+    cMenuItem__cMenuItem(menu + 0x134, 2);
+    cMenu__cMenu(menu, flags);
 }
 #endif
 
@@ -1485,14 +1485,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCE20);
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
-extern "C" void func_001DCE20(int arg0, int arg1) {
-    cMenuItem__cMenuItem(arg0 + 0x1E4, 2);
-    cMenuItem__cMenuItem(arg0 + 0x1C0, 2);
-    cMenuItem__cMenuItem(arg0 + 0x194, 2);
-    cMenuItem__cMenuItem(arg0 + 0x168, 2);
-    cMenuItem__cMenuItem(arg0 + 0x150, 2);
-    cMenuItem__cMenuItem(arg0 + 0x134, 2);
-    cMenu__cMenu(arg0, arg1);
+extern "C" void func_001DCE20(int menu, int flags) {
+    cMenuItem__cMenuItem(menu + 0x1E4, 2);
+    cMenuItem__cMenuItem(menu + 0x1C0, 2);
+    cMenuItem__cMenuItem(menu + 0x194, 2);
+    cMenuItem__cMenuItem(menu + 0x168, 2);
+    cMenuItem__cMenuItem(menu + 0x150, 2);
+    cMenuItem__cMenuItem(menu + 0x134, 2);
+    cMenu__cMenu(menu, flags);
 }
 #endif
 
@@ -1530,10 +1530,10 @@ static inline void SubMenuA_CEA0(int m)
     cMenu__cMenu(m, 2);
 }
 
-extern "C" void func_001DCEA0(int self, int arg)
+extern "C" void func_001DCEA0(int self, int flags)
 {
     SubMenuA_CEA0(self + 0x130);
-    cMenu__cMenu(self, arg);
+    cMenu__cMenu(self, flags);
 }
 #endif
 
@@ -1550,10 +1550,10 @@ extern "C" void cMenu__cMenu(int, int);
 extern "C" void func_001DCFC8(Obj *self, int flags) {
     if (self->elems != 0) {
         Elem *end = self->elems + 4;
-        Elem *p = end;
-        while (self->elems != p) {
-            p--;
-            p->vt->dtor.fn((char*)p + p->vt->dtor.delta, 0);
+        Elem *elem = end;
+        while (self->elems != elem) {
+            elem--;
+            elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
         }
     }
     cMenuItem__cMenuItem((int)self + 0x150, 2);
@@ -1568,12 +1568,12 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD060);
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
-extern "C" void func_001DD060(int arg0, int arg1) {
-    cMenuItem__cMenuItem(arg0 + 0x194, 2);
-    cMenuItem__cMenuItem(arg0 + 0x168, 2);
-    cMenuItem__cMenuItem(arg0 + 0x150, 2);
-    cMenuItem__cMenuItem(arg0 + 0x134, 2);
-    cMenu__cMenu(arg0, arg1);
+extern "C" void func_001DD060(int menu, int flags) {
+    cMenuItem__cMenuItem(menu + 0x194, 2);
+    cMenuItem__cMenuItem(menu + 0x168, 2);
+    cMenuItem__cMenuItem(menu + 0x150, 2);
+    cMenuItem__cMenuItem(menu + 0x134, 2);
+    cMenu__cMenu(menu, flags);
 }
 #endif
 
@@ -1648,10 +1648,10 @@ struct Obj_D258 { char pad[0x168]; Elem_D258 elems[12]; };
 extern "C" void func_001DD258(Obj_D258 *self, int flags) {
     if (self->elems != 0) {
         Elem_D258 *end = self->elems + 12;
-        Elem_D258 *p = end;
-        while (self->elems != p) {
-            p--;
-            p->vt->dtor.fn((char*)p + p->vt->dtor.delta, 0);
+        Elem_D258 *elem = end;
+        while (self->elems != elem) {
+            elem--;
+            elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
         }
     }
     cMenuItem__cMenuItem((int)self + 0x150, 2);
@@ -1671,10 +1671,10 @@ struct Obj_D2F0 { char pad[0x16C]; Elem_D2F0 elems[24]; };
 extern "C" void func_001DD2F0(Obj_D2F0 *self, int flags) {
     cMenuItem__cMenuItem((int)self + 0x4CC, 2);
     if (self->elems != 0) {
-        Elem_D2F0 *p = self->elems + 24;
-        while (self->elems != p) {
-            p--;
-            p->vt->dtor.fn((char*)p + p->vt->dtor.delta, 0);
+        Elem_D2F0 *elem = self->elems + 24;
+        while (self->elems != elem) {
+            elem--;
+            elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
         }
     }
     cMenuItem__cMenuItem((int)self + 0x154, 2);
@@ -1693,10 +1693,10 @@ struct Obj_D398 { char pad[0x194]; Elem_D398 elems[14]; };
 
 extern "C" void func_001DD398(Obj_D398 *self, int flags) {
     if (self->elems != 0) {
-        Elem_D398 *p = self->elems + 14;
-        while (self->elems != p) {
-            p--;
-            p->vt->dtor.fn((char*)p + p->vt->dtor.delta, 0);
+        Elem_D398 *elem = self->elems + 14;
+        while (self->elems != elem) {
+            elem--;
+            elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
         }
     }
     cMenuItem__cMenuItem((int)self + 0x168, 2);
@@ -1712,14 +1712,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD440);
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
-extern "C" void func_001DD440(int arg0, int arg1) {
-    cMenuItem__cMenuItem(arg0 + 0x1C8, 2);
-    cMenuItem__cMenuItem(arg0 + 0x1A4, 2);
-    cMenuItem__cMenuItem(arg0 + 0x18C, 2);
-    cMenuItem__cMenuItem(arg0 + 0x170, 2);
-    cMenuItem__cMenuItem(arg0 + 0x154, 2);
-    cMenuItem__cMenuItem(arg0 + 0x138, 2);
-    cMenu__cMenu(arg0, arg1);
+extern "C" void func_001DD440(int menu, int flags) {
+    cMenuItem__cMenuItem(menu + 0x1C8, 2);
+    cMenuItem__cMenuItem(menu + 0x1A4, 2);
+    cMenuItem__cMenuItem(menu + 0x18C, 2);
+    cMenuItem__cMenuItem(menu + 0x170, 2);
+    cMenuItem__cMenuItem(menu + 0x154, 2);
+    cMenuItem__cMenuItem(menu + 0x138, 2);
+    cMenu__cMenu(menu, flags);
 }
 #endif
 
@@ -1729,9 +1729,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD4C0);
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
-extern "C" void func_001DD4C0(int arg0, int arg1) {
-    cMenuItem__cMenuItem(arg0 + 0x134, 2);
-    cMenu__cMenu(arg0, arg1);
+extern "C" void func_001DD4C0(int menu, int flags) {
+    cMenuItem__cMenuItem(menu + 0x134, 2);
+    cMenu__cMenu(menu, flags);
 }
 #endif
 
@@ -1806,9 +1806,9 @@ extern "C" int func_001DD578(void *arg0) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD580);
 #ifdef SKIP_ASM
-extern "C" unsigned short *func_001DD580(unsigned short *arg0) {
-    *arg0 = (*arg0 | 1) & 0xFFFD;
-    return arg0;
+extern "C" unsigned short *func_001DD580(unsigned short *attr) {
+    *attr = (*attr | 1) & 0xFFFD;
+    return attr;
 }
 #endif
 
@@ -1854,52 +1854,52 @@ extern "C" void *func_001DD5B8(char *self) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD648);
 #ifdef SKIP_ASM
-extern "C" int func_001DD648(int arg0) {
-    return arg0 + 0xEC;
+extern "C" int func_001DD648(int screen) {
+    return screen + 0xEC;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD650);
 #ifdef SKIP_ASM
-extern "C" int func_001DD650(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x170)));
+extern "C" int func_001DD650(void *screen) {
+    return (*(int *)((char*)(screen) + (0x170)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD658);
 #ifdef SKIP_ASM
-extern "C" void func_001DD658(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xD8))) = arg1;
+extern "C" void func_001DD658(void *screen, int arg1) {
+    (*(int *)((char*)(screen) + (0xD8))) = arg1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD660);
 #ifdef SKIP_ASM
-extern "C" void func_001DD660(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xDC))) = arg1;
+extern "C" void func_001DD660(void *screen, int arg1) {
+    (*(int *)((char*)(screen) + (0xDC))) = arg1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD668);
 #ifdef SKIP_ASM
-extern "C" void func_001DD668(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xE0))) = arg1;
+extern "C" void func_001DD668(void *screen, int arg1) {
+    (*(int *)((char*)(screen) + (0xE0))) = arg1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD670);
 #ifdef SKIP_ASM
-extern "C" void func_001DD670(void *arg0) {
+extern "C" void func_001DD670(void *screen) {
     int temp_3;
 
-    temp_3 = (*(int *)((char*)(arg0) + (0x16C))) + 1;
-    if (temp_3 < (*(int *)((char*)(arg0) + (0xD4)))) {
-        (*(int *)((char*)(arg0) + (0x16C))) = temp_3;
+    temp_3 = (*(int *)((char*)(screen) + (0x16C))) + 1;
+    if (temp_3 < (*(int *)((char*)(screen) + (0xD4)))) {
+        (*(int *)((char*)(screen) + (0x16C))) = temp_3;
     }
 }
 #endif
@@ -1907,12 +1907,12 @@ extern "C" void func_001DD670(void *arg0) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD690);
 #ifdef SKIP_ASM
-extern "C" void func_001DD690(void *arg0) {
+extern "C" void func_001DD690(void *screen) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(arg0) + (0x16C)));
+    temp_2 = (*(int *)((char*)(screen) + (0x16C)));
     if (temp_2 > 0) {
-        (*(int *)((char*)(arg0) + (0x16C))) = (int) (temp_2 - 1);
+        (*(int *)((char*)(screen) + (0x16C))) = (int) (temp_2 - 1);
     }
 }
 #endif
@@ -1980,10 +1980,10 @@ extern "C" int func_001A1CD0(int, signed char);
 extern "C" void func_001DD778(char *self, signed char n) {
     int i = 0;
     int mask = 0xFF;
-    int h = **(int **)(self + 0x10);
+    int realFe = **(int **)(self + 0x10);
     if (n > 0) {
         do {
-            mask &= ~func_001A1CD0(h, i);
+            mask &= ~func_001A1CD0(realFe, i);
             i++;
         } while (i < n);
     }
@@ -1996,8 +1996,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD800);
 #ifdef SKIP_ASM
 extern "C" void func_001A1CB8(int, signed char, int);
 
-extern "C" void func_001DD800(void *arg0, signed char arg1, signed char arg2) {
-    func_001A1CB8(*(*(int **)((char*)(arg0) + (0x10))), arg1, (1 << arg2) & 0xFF);
+extern "C" void func_001DD800(void *feState, signed char userNum, signed char controllerNum) {
+    func_001A1CB8(*(*(int **)((char*)(feState) + (0x10))), userNum, (1 << controllerNum) & 0xFF);
 }
 #endif
 
@@ -2044,16 +2044,16 @@ extern "C" void cFEStateCheatCharSelect__cFEStateCheatCharSelect(void *self) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD890);
 #ifdef SKIP_ASM
-extern "C" int func_001DD890(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x74)));
+extern "C" int func_001DD890(void *cheatCharSelect) {
+    return (*(int *)((char*)(cheatCharSelect) + (0x74)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD898);
 #ifdef SKIP_ASM
-extern "C" int func_001DD898(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x70)));
+extern "C" int func_001DD898(void *cheatCharSelect) {
+    return (*(int *)((char*)(cheatCharSelect) + (0x70)));
 }
 #endif
 
@@ -2116,48 +2116,48 @@ extern "C" void func_001DD918(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD920);
 #ifdef SKIP_ASM
-extern "C" void func_001DD920(int *arg0, int arg1) {
-    *arg0 = arg1;
+extern "C" void func_001DD920(int *popupInfo, int popupType) {
+    *popupInfo = popupType;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD928);
 #ifdef SKIP_ASM
-extern "C" int func_001DD928(int *arg0) {
-    return *arg0;
+extern "C" int func_001DD928(int *popupInfo) {
+    return *popupInfo;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD930);
 #ifdef SKIP_ASM
-extern "C" void func_001DD930(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x94))) = arg1;
+extern "C" void func_001DD930(void *popupInfo, int miscData) {
+    (*(int *)((char*)(popupInfo) + (0x94))) = miscData;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD938);
 #ifdef SKIP_ASM
-extern "C" int func_001DD938(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x94)));
+extern "C" int func_001DD938(void *popupInfo) {
+    return (*(int *)((char*)(popupInfo) + (0x94)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD940);
 #ifdef SKIP_ASM
-extern "C" void func_001DD940(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x98))) = arg1;
+extern "C" void func_001DD940(void *popupInfo, int passUpdate) {
+    (*(int *)((char*)(popupInfo) + (0x98))) = passUpdate;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD948);
 #ifdef SKIP_ASM
-extern "C" int func_001DD948(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x98)));
+extern "C" int func_001DD948(void *popupInfo) {
+    return (*(int *)((char*)(popupInfo) + (0x98)));
 }
 #endif
 
@@ -2165,8 +2165,8 @@ extern "C" int func_001DD948(void *arg0) {
 INCLUDE_ASM("main/all_in_one_main", func_001DD950);
 #ifdef SKIP_ASM
 struct V3_D950 { float x, y, z; };
-extern "C" void func_001DD950(void *self, V3_D950 v) {
-    *(V3_D950 *)((char *)self + 0x9C) = v;
+extern "C" void func_001DD950(void *self, V3_D950 offset) {
+    *(V3_D950 *)((char *)self + 0x9C) = offset;
 }
 #endif
 
@@ -2183,155 +2183,155 @@ extern "C" V12_D990* func_001DD990(V12_D990* dst, char* src) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD9B0);
 #ifdef SKIP_ASM
-extern "C" void func_001DD9B0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xAC))) = arg1;
+extern "C" void func_001DD9B0(void *popupInfo, int defaultOption) {
+    (*(int *)((char*)(popupInfo) + (0xAC))) = defaultOption;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD9B8);
 #ifdef SKIP_ASM
-extern "C" int func_001DD9B8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xAC)));
+extern "C" int func_001DD9B8(void *popupInfo) {
+    return (*(int *)((char*)(popupInfo) + (0xAC)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD9C0);
 #ifdef SKIP_ASM
-extern "C" void func_001DD9C0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xA8))) = arg1;
+extern "C" void func_001DD9C0(void *popupInfo, int receivePrev) {
+    (*(int *)((char*)(popupInfo) + (0xA8))) = receivePrev;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD9C8);
 #ifdef SKIP_ASM
-extern "C" int func_001DD9C8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xA8)));
+extern "C" int func_001DD9C8(void *popupInfo) {
+    return (*(int *)((char*)(popupInfo) + (0xA8)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD9D0);
 #ifdef SKIP_ASM
-extern "C" void func_001DD9D0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x90))) = arg1;
+extern "C" void func_001DD9D0(void *popupInfo, int layerOffset) {
+    (*(int *)((char*)(popupInfo) + (0x90))) = layerOffset;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD9D8);
 #ifdef SKIP_ASM
-extern "C" int func_001DD9D8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x90)));
+extern "C" int func_001DD9D8(void *popupInfo) {
+    return (*(int *)((char*)(popupInfo) + (0x90)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD9E0);
 #ifdef SKIP_ASM
-extern "C" void func_001DD9E0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xC0))) = arg1;
+extern "C" void func_001DD9E0(void *popupInfo, int backgroundType) {
+    (*(int *)((char*)(popupInfo) + (0xC0))) = backgroundType;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD9E8);
 #ifdef SKIP_ASM
-extern "C" int func_001DD9E8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xC0)));
+extern "C" int func_001DD9E8(void *popupInfo) {
+    return (*(int *)((char*)(popupInfo) + (0xC0)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD9F0);
 #ifdef SKIP_ASM
-extern "C" void func_001DD9F0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xC4))) = arg1;
+extern "C" void func_001DD9F0(void *popupInfo, int maxChars) {
+    (*(int *)((char*)(popupInfo) + (0xC4))) = maxChars;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DD9F8);
 #ifdef SKIP_ASM
-extern "C" int func_001DD9F8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xC4)));
+extern "C" int func_001DD9F8(void *popupInfo) {
+    return (*(int *)((char*)(popupInfo) + (0xC4)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA00);
 #ifdef SKIP_ASM
-extern "C" void func_001DDA00(void *arg0, float fparg0) {
-    (*(float *)((char*)(arg0) + (0xB0))) = fparg0;
+extern "C" void func_001DDA00(void *popupInfo, float fparg0) {
+    (*(float *)((char*)(popupInfo) + (0xB0))) = fparg0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA08);
 #ifdef SKIP_ASM
-extern "C" float func_001DDA08(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0xB0)));
+extern "C" float func_001DDA08(void *popupInfo) {
+    return (*(float *)((char*)(popupInfo) + (0xB0)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA10);
 #ifdef SKIP_ASM
-extern "C" void func_001DDA10(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xB8))) = arg1;
+extern "C" void func_001DDA10(void *popupInfo, int centerOptions) {
+    (*(int *)((char*)(popupInfo) + (0xB8))) = centerOptions;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA18);
 #ifdef SKIP_ASM
-extern "C" int func_001DDA18(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xB8)));
+extern "C" int func_001DDA18(void *popupInfo) {
+    return (*(int *)((char*)(popupInfo) + (0xB8)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA20);
 #ifdef SKIP_ASM
-extern "C" void func_001DDA20(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xBC))) = arg1;
+extern "C" void func_001DDA20(void *popupInfo, int centerText) {
+    (*(int *)((char*)(popupInfo) + (0xBC))) = centerText;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA28);
 #ifdef SKIP_ASM
-extern "C" int func_001DDA28(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xBC)));
+extern "C" int func_001DDA28(void *popupInfo) {
+    return (*(int *)((char*)(popupInfo) + (0xBC)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA30);
 #ifdef SKIP_ASM
-extern "C" void func_001DDA30(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (8))) = arg1;
-    (*(int *)((char*)(arg0) + (4))) = 2;
+extern "C" void func_001DDA30(void *popupInfo, int message) {
+    (*(int *)((char*)(popupInfo) + (8))) = message;
+    (*(int *)((char*)(popupInfo) + (4))) = 2;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA40);
 #ifdef SKIP_ASM
-extern "C" void func_001DDA40(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (8))) = arg1;
-    (*(int *)((char*)(arg0) + (4))) = 1;
+extern "C" void func_001DDA40(void *popupInfo, int message) {
+    (*(int *)((char*)(popupInfo) + (8))) = message;
+    (*(int *)((char*)(popupInfo) + (4))) = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA50);
 #ifdef SKIP_ASM
-extern "C" void func_001DDA50(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (8))) = arg1;
-    (*(int *)((char*)(arg0) + (4))) = 3;
+extern "C" void func_001DDA50(void *popupInfo, int messageId) {
+    (*(int *)((char*)(popupInfo) + (8))) = messageId;
+    (*(int *)((char*)(popupInfo) + (4))) = 3;
 }
 #endif
 
@@ -2347,35 +2347,35 @@ extern "C" void func_001DDA60(V8_DA60* dst, V8_DA60* src) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA78);
 #ifdef SKIP_ASM
-extern "C" int func_001DDA78(int arg0) {
-    return arg0 + 4;
+extern "C" int func_001DDA78(int popupInfo) {
+    return popupInfo + 4;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA80);
 #ifdef SKIP_ASM
-extern "C" void func_001DDA80(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x10))) = arg1;
-    (*(int *)((char*)(arg0) + (0xC))) = 2;
+extern "C" void func_001DDA80(void *popupInfo, int title) {
+    (*(int *)((char*)(popupInfo) + (0x10))) = title;
+    (*(int *)((char*)(popupInfo) + (0xC))) = 2;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDA90);
 #ifdef SKIP_ASM
-extern "C" void func_001DDA90(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x10))) = arg1;
-    (*(int *)((char*)(arg0) + (0xC))) = 1;
+extern "C" void func_001DDA90(void *popupInfo, int title) {
+    (*(int *)((char*)(popupInfo) + (0x10))) = title;
+    (*(int *)((char*)(popupInfo) + (0xC))) = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDAA0);
 #ifdef SKIP_ASM
-extern "C" void func_001DDAA0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x10))) = arg1;
-    (*(int *)((char*)(arg0) + (0xC))) = 3;
+extern "C" void func_001DDAA0(void *popupInfo, int titleId) {
+    (*(int *)((char*)(popupInfo) + (0x10))) = titleId;
+    (*(int *)((char*)(popupInfo) + (0xC))) = 3;
 }
 #endif
 
@@ -2391,35 +2391,35 @@ extern "C" void func_001DDAB0(V8_DDAB0* dst, V8_DDAB0* src) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDAC8);
 #ifdef SKIP_ASM
-extern "C" int func_001DDAC8(int arg0) {
-    return arg0 + 0xC;
+extern "C" int func_001DDAC8(int popupInfo) {
+    return popupInfo + 0xC;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDAD0);
 #ifdef SKIP_ASM
-extern "C" void func_001DDAD0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
-    (*(int *)((char*)(arg0) + (0x14))) = 2;
+extern "C" void func_001DDAD0(void *popupInfo, int entryBoxTitle) {
+    (*(int *)((char*)(popupInfo) + (0x18))) = entryBoxTitle;
+    (*(int *)((char*)(popupInfo) + (0x14))) = 2;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDAE0);
 #ifdef SKIP_ASM
-extern "C" void func_001DDAE0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
-    (*(int *)((char*)(arg0) + (0x14))) = 1;
+extern "C" void func_001DDAE0(void *popupInfo, int entryBoxTitle) {
+    (*(int *)((char*)(popupInfo) + (0x18))) = entryBoxTitle;
+    (*(int *)((char*)(popupInfo) + (0x14))) = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDAF0);
 #ifdef SKIP_ASM
-extern "C" void func_001DDAF0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
-    (*(int *)((char*)(arg0) + (0x14))) = 3;
+extern "C" void func_001DDAF0(void *popupInfo, int entryBoxTitleId) {
+    (*(int *)((char*)(popupInfo) + (0x18))) = entryBoxTitleId;
+    (*(int *)((char*)(popupInfo) + (0x14))) = 3;
 }
 #endif
 
@@ -2435,35 +2435,35 @@ extern "C" void func_001DDB00(V8_DDB00* dst, V8_DDB00* src) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDB18);
 #ifdef SKIP_ASM
-extern "C" int func_001DDB18(int arg0) {
-    return arg0 + 0x14;
+extern "C" int func_001DDB18(int popupInfo) {
+    return popupInfo + 0x14;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDB20);
 #ifdef SKIP_ASM
-extern "C" void func_001DDB20(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x20))) = arg1;
-    (*(int *)((char*)(arg0) + (0x1C))) = 2;
+extern "C" void func_001DDB20(void *popupInfo, int entryBoxInitial) {
+    (*(int *)((char*)(popupInfo) + (0x20))) = entryBoxInitial;
+    (*(int *)((char*)(popupInfo) + (0x1C))) = 2;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDB30);
 #ifdef SKIP_ASM
-extern "C" void func_001DDB30(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x20))) = arg1;
-    (*(int *)((char*)(arg0) + (0x1C))) = 1;
+extern "C" void func_001DDB30(void *popupInfo, int entryBoxInitial) {
+    (*(int *)((char*)(popupInfo) + (0x20))) = entryBoxInitial;
+    (*(int *)((char*)(popupInfo) + (0x1C))) = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDB40);
 #ifdef SKIP_ASM
-extern "C" void func_001DDB40(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x20))) = arg1;
-    (*(int *)((char*)(arg0) + (0x1C))) = 3;
+extern "C" void func_001DDB40(void *popupInfo, int entryBoxInitialId) {
+    (*(int *)((char*)(popupInfo) + (0x20))) = entryBoxInitialId;
+    (*(int *)((char*)(popupInfo) + (0x1C))) = 3;
 }
 #endif
 
@@ -2479,35 +2479,35 @@ extern "C" void func_001DDB50(V8_DDB50* dst, V8_DDB50* src) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDB68);
 #ifdef SKIP_ASM
-extern "C" int func_001DDB68(int arg0) {
-    return arg0 + 0x1C;
+extern "C" int func_001DDB68(int popupInfo) {
+    return popupInfo + 0x1C;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDB70);
 #ifdef SKIP_ASM
-extern "C" void func_001DDB70(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x50))) = arg1;
-    (*(int *)((char*)(arg0) + (0x4C))) = 2;
+extern "C" void func_001DDB70(void *popupInfo, int postPending) {
+    (*(int *)((char*)(popupInfo) + (0x50))) = postPending;
+    (*(int *)((char*)(popupInfo) + (0x4C))) = 2;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDB80);
 #ifdef SKIP_ASM
-extern "C" void func_001DDB80(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x50))) = arg1;
-    (*(int *)((char*)(arg0) + (0x4C))) = 1;
+extern "C" void func_001DDB80(void *popupInfo, int postPending) {
+    (*(int *)((char*)(popupInfo) + (0x50))) = postPending;
+    (*(int *)((char*)(popupInfo) + (0x4C))) = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDB90);
 #ifdef SKIP_ASM
-extern "C" void func_001DDB90(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x50))) = arg1;
-    (*(int *)((char*)(arg0) + (0x4C))) = 3;
+extern "C" void func_001DDB90(void *popupInfo, int postPendingId) {
+    (*(int *)((char*)(popupInfo) + (0x50))) = postPendingId;
+    (*(int *)((char*)(popupInfo) + (0x4C))) = 3;
 }
 #endif
 
@@ -2523,24 +2523,24 @@ extern "C" void func_001DDBA0(V8_DDBA0* dst, V8_DDBA0* src) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDBB8);
 #ifdef SKIP_ASM
-extern "C" int func_001DDBB8(int arg0) {
-    return arg0 + 0x4C;
+extern "C" int func_001DDBB8(int popupInfo) {
+    return popupInfo + 0x4C;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDBC0);
 #ifdef SKIP_ASM
-extern "C" void func_001DDBC0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xB4))) = arg1;
+extern "C" void func_001DDBC0(void *popupInfo, int deferEvents) {
+    (*(int *)((char*)(popupInfo) + (0xB4))) = deferEvents;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDBC8);
 #ifdef SKIP_ASM
-extern "C" int func_001DDBC8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xB4)));
+extern "C" int func_001DDBC8(void *popupInfo) {
+    return (*(int *)((char*)(popupInfo) + (0xB4)));
 }
 #endif
 
@@ -2573,40 +2573,40 @@ extern "C" S_DBD0 *func_001DDBD0(S_DBD0 *self) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDC20);
 #ifdef SKIP_ASM
-extern "C" int func_001DDC20(int arg0) {
-    return arg0 + 0xBC;
+extern "C" int func_001DDC20(int screenPopup) {
+    return screenPopup + 0xBC;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDC28);
 #ifdef SKIP_ASM
-extern "C" void func_001DDC28(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x2C0))) = arg1;
+extern "C" void func_001DDC28(void *screenPopup, int passUpdate) {
+    (*(int *)((char*)(screenPopup) + (0x2C0))) = passUpdate;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDC30);
 #ifdef SKIP_ASM
-extern "C" int func_001DDC30(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x2C0)));
+extern "C" int func_001DDC30(void *screenPopup) {
+    return (*(int *)((char*)(screenPopup) + (0x2C0)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDC38);
 #ifdef SKIP_ASM
-extern "C" int func_001DDC38(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x2B0)));
+extern "C" int func_001DDC38(void *screenPopup) {
+    return (*(int *)((char*)(screenPopup) + (0x2B0)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDC40);
 #ifdef SKIP_ASM
-extern "C" int func_001DDC40(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x2B8)));
+extern "C" int func_001DDC40(void *screenPopup) {
+    return (*(int *)((char*)(screenPopup) + (0x2B8)));
 }
 #endif
 
@@ -2649,8 +2649,8 @@ extern "C" void cUIStateBuyPopup__cUIStateBuyPopup(cUIStateBuyPopup* self) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDCB8);
 #ifdef SKIP_ASM
-extern "C" int func_001DDCB8(int arg0) {
-    return arg0 + 0x48;
+extern "C" int func_001DDCB8(int buyPopup) {
+    return buyPopup + 0x48;
 }
 #endif
 
@@ -2667,8 +2667,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDCC8);
 #ifdef SKIP_ASM
 extern "C" void cBuyPopupInfo_initBuySongByCredit(int);
 
-extern "C" void func_001DDCC8(int arg0) {
-    cBuyPopupInfo_initBuySongByCredit(arg0 + 0x48);
+extern "C" void func_001DDCC8(int buyPopup) {
+    cBuyPopupInfo_initBuySongByCredit(buyPopup + 0x48);
 }
 #endif
 
@@ -2677,8 +2677,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDCE8);
 #ifdef SKIP_ASM
 extern "C" void cBuyPopupInfo_initBuySong(int);
 
-extern "C" void func_001DDCE8(int arg0) {
-    cBuyPopupInfo_initBuySong(arg0 + 0x48);
+extern "C" void func_001DDCE8(int buyPopup) {
+    cBuyPopupInfo_initBuySong(buyPopup + 0x48);
 }
 #endif
 
@@ -2687,8 +2687,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDD08);
 #ifdef SKIP_ASM
 extern "C" void func_001CAA18(int);
 
-extern "C" void func_001DDD08(int arg0) {
-    func_001CAA18(arg0 + 0x48);
+extern "C" void func_001DDD08(int buyPopup) {
+    func_001CAA18(buyPopup + 0x48);
 }
 #endif
 
@@ -2904,8 +2904,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDEE0);
 #ifdef SKIP_ASM
 extern int cFEPopupConfirm_mUsePreFE;
 
-extern "C" void func_001DDEE0(int arg0) {
-    cFEPopupConfirm_mUsePreFE = arg0;
+extern "C" void func_001DDEE0(int usePreFe) {
+    cFEPopupConfirm_mUsePreFE = usePreFe;
 }
 #endif
 
@@ -3274,8 +3274,8 @@ extern "C" int cKeyboardPopup_onLoseTransition(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE2E0);
 #ifdef SKIP_ASM
-extern "C" int func_001DE2E0(int arg0) {
-    return arg0 + 0x74;
+extern "C" int func_001DE2E0(int keyboard) {
+    return keyboard + 0x74;
 }
 #endif
 
@@ -3284,80 +3284,80 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE2E8);
 #ifdef SKIP_ASM
 extern "C" void strlen(int);
 
-extern "C" void func_001DE2E8(int arg0) {
-    strlen(arg0 + 0x74);
+extern "C" void func_001DE2E8(int keyboard) {
+    strlen(keyboard + 0x74);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE308);
 #ifdef SKIP_ASM
-extern "C" int func_001DE308(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x140)));
+extern "C" int func_001DE308(void *keyboard) {
+    return (*(int *)((char*)(keyboard) + (0x140)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE310);
 #ifdef SKIP_ASM
-extern "C" void func_001DE310(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x140))) = arg1;
+extern "C" void func_001DE310(void *keyboard, int currentKey) {
+    (*(int *)((char*)(keyboard) + (0x140))) = currentKey;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE318);
 #ifdef SKIP_ASM
-extern "C" void func_001DE318(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x43C))) = arg1;
+extern "C" void func_001DE318(void *keyboard, int keyboardType) {
+    (*(int *)((char*)(keyboard) + (0x43C))) = keyboardType;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE320);
 #ifdef SKIP_ASM
-extern "C" int func_001DE320(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x43C)));
+extern "C" int func_001DE320(void *keyboard) {
+    return (*(int *)((char*)(keyboard) + (0x43C)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE328);
 #ifdef SKIP_ASM
-extern "C" int func_001DE328(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x420)));
+extern "C" int func_001DE328(void *keyboard) {
+    return (*(int *)((char*)(keyboard) + (0x420)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE330);
 #ifdef SKIP_ASM
-extern "C" void func_001DE330(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x420))) = arg1;
+extern "C" void func_001DE330(void *keyboard, int popOnEnd) {
+    (*(int *)((char*)(keyboard) + (0x420))) = popOnEnd;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE338);
 #ifdef SKIP_ASM
-extern "C" void func_001DE338(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x70))) = arg1;
+extern "C" void func_001DE338(void *keyboard, int password) {
+    (*(int *)((char*)(keyboard) + (0x70))) = password;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE340);
 #ifdef SKIP_ASM
-extern "C" void func_001DE340(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x54))) = arg1;
+extern "C" void func_001DE340(void *keyboard, int clearOnFirst) {
+    (*(int *)((char*)(keyboard) + (0x54))) = clearOnFirst;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE348);
 #ifdef SKIP_ASM
-extern "C" void func_001DE348(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x58))) = arg1;
+extern "C" void func_001DE348(void *keyboard, int disableForFirst) {
+    (*(int *)((char*)(keyboard) + (0x58))) = disableForFirst;
 }
 #endif
 
@@ -3367,8 +3367,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE350);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cKeyboardPopup_setIncludeKey_DE350(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
-extern "C" void func_001DE350(int arg0, int arg1) {
-    cKeyboardPopup_setIncludeKey_DE350(arg0, 0x4B, arg1, 2);
+extern "C" void func_001DE350(int keyboard, int includeSpace) {
+    cKeyboardPopup_setIncludeKey_DE350(keyboard, 0x4B, includeSpace, 2);
 }
 #endif
 
@@ -3378,8 +3378,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE378);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cKeyboardPopup_setIncludeKey_DE378(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
-extern "C" void func_001DE378(int arg0, int arg1) {
-    cKeyboardPopup_setIncludeKey_DE378(arg0, 0x1C, arg1, 2);
+extern "C" void func_001DE378(int keyboard, int includeKey) {
+    cKeyboardPopup_setIncludeKey_DE378(keyboard, 0x1C, includeKey, 2);
 }
 #endif
 
@@ -3389,8 +3389,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE3A0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cKeyboardPopup_setIncludeKey_DE3A0(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
-extern "C" void func_001DE3A0(int arg0, int arg1) {
-    cKeyboardPopup_setIncludeKey_DE3A0(arg0, 0x45, arg1, 2);
+extern "C" void func_001DE3A0(int keyboard, int includeKey) {
+    cKeyboardPopup_setIncludeKey_DE3A0(keyboard, 0x45, includeKey, 2);
 }
 #endif
 
@@ -3400,8 +3400,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE3C8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cKeyboardPopup_setIncludeKey_DE3C8(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
-extern "C" void func_001DE3C8(int arg0, int arg1) {
-    cKeyboardPopup_setIncludeKey_DE3C8(arg0, 0x4F, arg1, 2);
+extern "C" void func_001DE3C8(int keyboard, int includeKey) {
+    cKeyboardPopup_setIncludeKey_DE3C8(keyboard, 0x4F, includeKey, 2);
 }
 #endif
 
@@ -3411,8 +3411,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE3F0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cKeyboardPopup_setIncludeKey_DE3F0(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
-extern "C" void func_001DE3F0(int arg0, int arg1) {
-    cKeyboardPopup_setIncludeKey_DE3F0(arg0, 0x29, arg1, 2);
+extern "C" void func_001DE3F0(int keyboard, int includeKey) {
+    cKeyboardPopup_setIncludeKey_DE3F0(keyboard, 0x29, includeKey, 2);
 }
 #endif
 
@@ -3422,68 +3422,68 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE418);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cKeyboardPopup_setIncludeKey_DE418(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
-extern "C" void func_001DE418(int arg0, int arg1) {
-    cKeyboardPopup_setIncludeKey_DE418(arg0, 0x42, arg1, 2);
+extern "C" void func_001DE418(int keyboard, int includeKey) {
+    cKeyboardPopup_setIncludeKey_DE418(keyboard, 0x42, includeKey, 2);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE440);
 #ifdef SKIP_ASM
-extern "C" int func_001DE440(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x64)));
+extern "C" int func_001DE440(void *keyboard) {
+    return (*(int *)((char*)(keyboard) + (0x64)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE448);
 #ifdef SKIP_ASM
-extern "C" int func_001DE448(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x60)));
+extern "C" int func_001DE448(void *keyboard) {
+    return (*(int *)((char*)(keyboard) + (0x60)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE450);
 #ifdef SKIP_ASM
-extern "C" void func_001DE450(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x438))) = arg1;
+extern "C" void func_001DE450(void *keyboard, int referEvents) {
+    (*(int *)((char*)(keyboard) + (0x438))) = referEvents;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE458);
 #ifdef SKIP_ASM
-extern "C" int func_001DE458(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x438)));
+extern "C" int func_001DE458(void *keyboard) {
+    return (*(int *)((char*)(keyboard) + (0x438)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE460);
 #ifdef SKIP_ASM
-extern "C" void func_001DE460(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x440))) = arg1;
+extern "C" void func_001DE460(void *keyboard, int callParentUpdate) {
+    (*(int *)((char*)(keyboard) + (0x440))) = callParentUpdate;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE468);
 #ifdef SKIP_ASM
-extern "C" int func_001DE468(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x5C)));
+extern "C" int func_001DE468(void *keyboard) {
+    return (*(int *)((char*)(keyboard) + (0x5C)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE470);
 #ifdef SKIP_ASM
-extern "C" void func_001DE470(void *arg0) {
+extern "C" void func_001DE470(void *keyboard) {
     int temp_3;
 
-    temp_3 = (*(int *)((char*)(arg0) + (0x134)));
-    if (temp_3 < ((*(int *)((char*)(arg0) + (0x60))) - 1)) {
-        (*(int *)((char*)(arg0) + (0x134))) = (int) (temp_3 + 1);
+    temp_3 = (*(int *)((char*)(keyboard) + (0x134)));
+    if (temp_3 < ((*(int *)((char*)(keyboard) + (0x60))) - 1)) {
+        (*(int *)((char*)(keyboard) + (0x134))) = (int) (temp_3 + 1);
     }
 }
 #endif
@@ -3491,12 +3491,12 @@ extern "C" void func_001DE470(void *arg0) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE498);
 #ifdef SKIP_ASM
-extern "C" void func_001DE498(void *arg0) {
+extern "C" void func_001DE498(void *keyboard) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(arg0) + (0x134)));
+    temp_2 = (*(int *)((char*)(keyboard) + (0x134)));
     if (temp_2 > 0) {
-        (*(int *)((char*)(arg0) + (0x134))) = (int) (temp_2 - 1);
+        (*(int *)((char*)(keyboard) + (0x134))) = (int) (temp_2 - 1);
     }
 }
 #endif
@@ -3867,12 +3867,12 @@ extern "C" void func_001DE8A0(cFEStateNet* feStateNet, int arg1) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE8A8);
 #ifdef SKIP_ASM
-extern "C" int func_001DE8A8(void *arg0) {
+extern "C" int func_001DE8A8(void *netState) {
     int var_3;
 
     var_3 = 0;
-    if ((*(int *)((char*)(arg0) + (0x40))) != 0) {
-        var_3 = (*(int *)((char*)(arg0) + (0x48))) != 0;
+    if ((*(int *)((char*)(netState) + (0x40))) != 0) {
+        var_3 = (*(int *)((char*)(netState) + (0x48))) != 0;
     }
     return var_3;
 }
@@ -4010,12 +4010,12 @@ extern "C" void cUIScreen_playFrame_EA20(int, int, int) __asm__("cUIScreen_playF
 extern char str_111resetopts[];
 
 extern "C" void func_001DEA20(void *self) {
-    int h = GetHashValue32_EA20(str_111resetopts);
-    *(int *)((char *)self + 0xC) = h;
-    int s = cUIEngine_addScreenByHashName_EA20(*(int *)((char *)self + 0x10), self, h, 0);
-    *(int *)((char *)self + 0x40) = s;
-    if (s != 0) {
-        cUIScreen_playFrame_EA20(s, 0, 0);
+    int hashName = GetHashValue32_EA20(str_111resetopts);
+    *(int *)((char *)self + 0xC) = hashName;
+    int screen = cUIEngine_addScreenByHashName_EA20(*(int *)((char *)self + 0x10), self, hashName, 0);
+    *(int *)((char *)self + 0x40) = screen;
+    if (screen != 0) {
+        cUIScreen_playFrame_EA20(screen, 0, 0);
     }
 }
 #endif
@@ -4024,17 +4024,17 @@ extern "C" void func_001DEA20(void *self) {
 INCLUDE_ASM("main/all_in_one_main", func_001DEA80);
 #ifdef SKIP_ASM
 // Key filter: keys 7, 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_001DEA80(void* self, int a1, unsigned int key)
+extern "C" int func_001DEA80(void* self, int menu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 7) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -4046,16 +4046,16 @@ extern "C" void func_0039F190(int, int);
 extern char str_yes[];
 extern char str_no[];
 
-extern "C" void func_001DEAA8(char *self, char *arg1, int arg2) {
-    if (arg1 != 0) {
-        if (arg2 == 5) {
-            int a = *(int*)(arg1 + 0x38);
-            if (a == GetHashValue32(str_yes)) {
+extern "C" void func_001DEAA8(char *self, char *widget, int event) {
+    if (widget != 0) {
+        if (event == 5) {
+            int yesCheckHash = *(int*)(widget + 0x38);
+            if (yesCheckHash == GetHashValue32(str_yes)) {
                 *(char*)(self + 0x48) = 1;
                 func_0039F190(*(int*)(self + 0x10) + 0x18, 1);
             } else {
-                int b = *(int*)(arg1 + 0x38);
-                if (b == GetHashValue32(str_no)) {
+                int noCheckHash = *(int*)(widget + 0x38);
+                if (noCheckHash == GetHashValue32(str_no)) {
                     *(char*)(self + 0x48) = 0;
                     func_0039F190(*(int*)(self + 0x10) + 0x18, 1);
                 }
@@ -4068,8 +4068,8 @@ extern "C" void func_001DEAA8(char *self, char *arg1, int arg2) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DEB50);
 #ifdef SKIP_ASM
-extern "C" signed char func_001DEB50(void *arg0) {
-    return (*(signed char *)((char*)(arg0) + (0x48)));
+extern "C" signed char func_001DEB50(void *resetPopup) {
+    return (*(signed char *)((char*)(resetPopup) + (0x48)));
 }
 #endif
 

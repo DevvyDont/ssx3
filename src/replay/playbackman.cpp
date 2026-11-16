@@ -727,9 +727,9 @@ void cMemMan_free(void* p);
 
 extern "C" void func_0026D130(void* self)
 {
-    void* p = *(void**)((char*)self + 0xC);
-    if (p != 0) {
-        cMemMan_free(p);
+    void* buffer = *(void**)((char*)self + 0xC);
+    if (buffer != 0) {
+        cMemMan_free(buffer);
         *(void**)((char*)self + 0xC) = 0;
     }
 }
@@ -758,26 +758,26 @@ extern "C" int func_0026D178(void* self, int a1)
     if (*(int*)((char*)self + 0xC) == 0) {
         return 0;
     }
-    int r = 1;
+    int result = 1;
     switch (SSXApp->Game->Replay->State) {
     case 0: {
-        char* g = (char*)SSXApp->Game->Replay;
-        if (*(int*)(g + 0x60C) != 0 || *(int*)(g + 0x608) != 0 || *(int*)(g + 0x610) != 0) {
+        char* replay = (char*)SSXApp->Game->Replay;
+        if (*(int*)(replay + 0x60C) != 0 || *(int*)(replay + 0x608) != 0 || *(int*)(replay + 0x610) != 0) {
             break;
         }
         func_0026D2B0_D178(self, a1);
     }
         /* fall through */
     case 10: case 11: case 12: case 14:
-        r = 0;
+        result = 0;
         break;
     case 1: case 2: case 4:
-        r = func_0026D420_D178(self, a1);
+        result = func_0026D420_D178(self, a1);
         break;
     case 3: case 5: case 6: case 7: case 8: case 9: case 13:
         break;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -806,9 +806,9 @@ extern "C" void func_0026D228(sPbStream_D2B0* stream, sPbChunk_D2B0* chunkp)
     sPbStream_D228* self = (sPbStream_D228*)stream;
     sPbChunk_D228* chunk = (sPbChunk_D228*)chunkp;
     if (self->count >= 0x1000) {
-        char* p = (char*)SSXApp->Game->Replay;
-        *(int*)(p + 0x610) = 1;
-        *(int*)(p + 0x614) = 0xB4;
+        char* replay = (char*)SSXApp->Game->Replay;
+        *(int*)(replay + 0x610) = 1;
+        *(int*)(replay + 0x614) = 0xB4;
         return;
     }
     self->chunks[self->count] = *chunk;
@@ -873,18 +873,18 @@ extern "C" void func_0026D390(sOwner_D390* self, unsigned int pos)
 {
     int n = self->count;
     unsigned int sum = 0;
-    sEntry_D390* p = self->entries;
+    sEntry_D390* entry = self->entries;
     int i = 0;
     if (n > 0) {
-        sum = p->len;
-        p++;
+        sum = entry->len;
+        entry++;
         if (pos >= sum) {
             do {
                 i++;
                 if (i >= n)
                     break;
-                sum += p->len;
-                p++;
+                sum += entry->len;
+                entry++;
             } while (pos >= sum);
         }
     }

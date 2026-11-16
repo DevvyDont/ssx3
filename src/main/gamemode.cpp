@@ -286,9 +286,9 @@ INCLUDE_ASM("main/gamemode", func_00238348__FPv);
 #ifdef SKIP_ASM
 int func_00238348(void* self)
 {
-    int t0 = *(int*)((char*)self + 0x74);
-    *(int*)((char*)self + 0x70) = t0;
-    return t0;
+    int restoreHeat = *(int*)((char*)self + 0x74);
+    *(int*)((char*)self + 0x70) = restoreHeat;
+    return restoreHeat;
 }
 #endif
 
@@ -1020,14 +1020,14 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
 INCLUDE_ASM("main/gamemode", func_002398E8);
 #ifdef SKIP_ASM
 
-extern "C" int func_002398E8(void* self, int a1, int secs)
+extern "C" int func_002398E8(void* self, int player, int secs)
 {
     cGameModeMan* gameModeMan = cGameModeHandler_pManager;
     if (gameModeMan->iCurrentGameEvent == 1) {
         unsigned int limit = *(unsigned int*)((char*)SSXApp->Game->AI + 8);
-        unsigned int t = gameModeMan->uiTimeLimit + secs * 60;
-        gameModeMan->uiTimeLimit = t;
-        if (t < limit) {
+        unsigned int newTimeLimit = gameModeMan->uiTimeLimit + secs * 60;
+        gameModeMan->uiTimeLimit = newTimeLimit;
+        if (newTimeLimit < limit) {
             return 0;
         }
         return 1;
@@ -1064,8 +1064,8 @@ extern "C" void func_00239938(void)
     int n = 0;
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-    int p = cBENewPlayerInterface_getHumanRider(player, 0);
-    int charA = cBENewPlayerInterface_getRiderCharID(player, p);
+    int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
+    int charA = cBENewPlayerInterface_getRiderCharID(player, humanRider);
     int charB = func_00145750(race);
     int list[10];
 
@@ -1077,7 +1077,7 @@ extern "C" void func_00239938(void)
     }
     func_0023C770(list, n);
     cGameModeHandler_pManager->iCharacters[0] = charA;
-    cGameModeHandler_pManager->iCheatCharacters[0] = func_00147410(player, p);
+    cGameModeHandler_pManager->iCheatCharacters[0] = func_00147410(player, humanRider);
     cGameModeHandler_pManager->iCharacters[1] = charB;
     cGameModeHandler_pManager->iCheatCharacters[1] = 0;
     for (int j = 0; j < n && j + 2 < 10; j++) {
@@ -1309,21 +1309,21 @@ extern "C" int func_0023A070(char* self, int player, int secs)
 {
     short* score = (short*)(self + 4);
     short* mine = (short*)((char*)score + (player << 1));
-    short s = ++*mine;
+    short newScore = ++*mine;
     int other = 0;
     if (player == 0) {
         other = 1;
     }
-    if (*(short*)((char*)score + (other << 1)) >= s) {
+    if (*(short*)((char*)score + (other << 1)) >= newScore) {
         return 0;
     }
     cGameModeMan* gameModeMan = cGameModeHandler_pManager;
     if (gameModeMan->iCurrentGameEvent == 1) {
-        unsigned int t = gameModeMan->uiTimeLimit;
-        if (t < *(unsigned int*)((char*)SSXApp->Game->AI + 8)) {
+        unsigned int timeLimit = gameModeMan->uiTimeLimit;
+        if (timeLimit < *(unsigned int*)((char*)SSXApp->Game->AI + 8)) {
             return 0;
         }
-        gameModeMan->uiTimeLimit = secs * 60 + t;
+        gameModeMan->uiTimeLimit = secs * 60 + timeLimit;
         return 1;
     }
     return 1;
@@ -1557,10 +1557,10 @@ extern "C" void func_0023A4F0(void* self)
     int charB = func_00145750(race);
     int arr[10];
     arr[0] = func_00237CD8() % 7 + 10;
-    unsigned int t = func_00237CD8() % 6;
-    arr[1] = t + 10;
+    unsigned int cheatRoll = func_00237CD8() % 6;
+    arr[1] = cheatRoll + 10;
     if (arr[1] >= arr[0]) {
-        arr[1] = t + 11;
+        arr[1] = cheatRoll + 11;
     }
     int n = 0;
     for (int i = 0; i < 10; i++) {
@@ -1628,19 +1628,19 @@ extern "C" void func_0023A668_A668(cGMRaceHandler* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     int id = cBENewPlayerInterface_getHumanRider(iface, 0);
     int ch = cBENewPlayerInterface_getRiderCharID(iface, id);
-    int r = func_00147410(iface, id);
+    int cheatChar = func_00147410(iface, id);
     int k = cGameModeHandler_pManager->iHeatNum - 1;
     if (k < 0) k = 0;
     for (int i = 0; i < 6; i++) {
-        int v = self->rows[k][i];
-        if (v >= 10) {
-            cGameModeHandler_pManager->iCheatCharacters[i] = v;
-            v = ch;
+        int charId = self->rows[k][i];
+        if (charId >= 10) {
+            cGameModeHandler_pManager->iCheatCharacters[i] = charId;
+            charId = ch;
         } else {
             cGameModeHandler_pManager->iCheatCharacters[i] = 0;
         }
-        cGameModeHandler_pManager->iCharacters[i] = v;
-        if (i == id) cGameModeHandler_pManager->iCheatCharacters[i] = r;
+        cGameModeHandler_pManager->iCharacters[i] = charId;
+        if (i == id) cGameModeHandler_pManager->iCheatCharacters[i] = cheatChar;
     }
 }
 #endif
@@ -3004,11 +3004,11 @@ extern "C" void func_0023C770(int* arr, unsigned int n)
 {
     int i;
     for (i = 0; i < 25; i++) {
-        unsigned int a = func_00237CD8() % n;
-        unsigned int b = func_00237CD8() % n;
-        int t = arr[a];
-        arr[a] = arr[b];
-        arr[b] = t;
+        unsigned int firstIndex = func_00237CD8() % n;
+        unsigned int secondIndex = func_00237CD8() % n;
+        int swapValue = arr[firstIndex];
+        arr[firstIndex] = arr[secondIndex];
+        arr[secondIndex] = swapValue;
     }
 }
 #endif

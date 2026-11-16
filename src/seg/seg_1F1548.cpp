@@ -817,17 +817,17 @@ extern "C" void func_002F1940(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F19F0);
 #ifdef SKIP_ASM
-extern "C" void func_002F19F0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x94))) = arg1;
-    (*(int *)((char*)(arg0) + (0))) = 0;
+extern "C" void func_002F19F0(void *emitterFx, int arg1) {
+    (*(int *)((char*)(emitterFx) + (0x94))) = arg1;
+    (*(int *)((char*)(emitterFx) + (0))) = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1A00);
 #ifdef SKIP_ASM
-extern "C" void func_002F1A00(void *arg0) {
-    (*(int *)((char*)(arg0) + (0xA0))) = 0;
+extern "C" void func_002F1A00(void *emitterFx) {
+    (*(int *)((char*)(emitterFx) + (0xA0))) = 0;
 }
 #endif
 
@@ -1167,10 +1167,10 @@ extern "C" void func_002F2218(char* self, int idx)
     int off = idx * 4;
     self += 0x6C;
     char** slot = (char**)(self + off);
-    char* o = *slot;
-    if (o != 0) {
-        sVE_2F2218* vt = *(sVE_2F2218**)(o + 0x1F8);
-        vt[4].fn(o + vt[4].delta, 3);
+    char* emitter = *slot;
+    if (emitter != 0) {
+        sVE_2F2218* vt = *(sVE_2F2218**)(emitter + 0x1F8);
+        vt[4].fn(emitter + vt[4].delta, 3);
     }
     *slot = 0;
 }
@@ -1179,32 +1179,32 @@ extern "C" void func_002F2218(char* self, int idx)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2268);
 #ifdef SKIP_ASM
-extern "C" void func_002F2268(void *arg0, int arg1) {
-    *(int *)((char *)(*(void **)((char *)arg0 + (arg1 << 2) + 0x6C)) + 0x204) = 1;
+extern "C" void func_002F2268(void *emitterFx, int emitterIndex) {
+    *(int *)((char *)(*(void **)((char *)emitterFx + (emitterIndex << 2) + 0x6C)) + 0x204) = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2280);
 #ifdef SKIP_ASM
-extern "C" void func_002F2280(void *arg0, int arg1) {
-    *(int *)((char *)(*(void **)((char *)arg0 + (arg1 << 2) + 0x6C)) + 0x204) = 0;
+extern "C" void func_002F2280(void *emitterFx, int emitterIndex) {
+    *(int *)((char *)(*(void **)((char *)emitterFx + (emitterIndex << 2) + 0x6C)) + 0x204) = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2298);
 #ifdef SKIP_ASM
-extern "C" void func_002F2298(void *arg0, int arg1) {
-    *(int *)((char *)(*(void **)((char *)arg0 + (arg1 << 2) + 0x6C)) + 0x174) = 0;
+extern "C" void func_002F2298(void *emitterFx, int emitterIndex) {
+    *(int *)((char *)(*(void **)((char *)emitterFx + (emitterIndex << 2) + 0x6C)) + 0x174) = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F22B0);
 #ifdef SKIP_ASM
-extern "C" void func_002F22B0(void *arg0, int arg1) {
-    *(int *)((char *)(*(void **)((char *)arg0 + (arg1 << 2) + 0x6C)) + 0x174) = 1;
+extern "C" void func_002F22B0(void *emitterFx, int emitterIndex) {
+    *(int *)((char *)(*(void **)((char *)emitterFx + (emitterIndex << 2) + 0x6C)) + 0x174) = 1;
 }
 #endif
 
@@ -1282,9 +1282,9 @@ extern "C" void func_002F22C8(sObj_22C8* self)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2588);
 #ifdef SKIP_ASM
-extern "C" int *func_002F2588(int *arg0) {
-    *arg0 = 0;
-    return arg0;
+extern "C" int *func_002F2588(int *drop) {
+    *drop = 0;
+    return drop;
 }
 #endif
 
@@ -1648,9 +1648,9 @@ extern "C" void func_002F2C30_impl(char* obj, sVec2_2C30* off)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2D60);
 #ifdef SKIP_ASM
-extern "C" void *func_002F2D60(void *arg0) {
-    (*(int *)((char*)(arg0) + (4))) = 0;
-    return arg0;
+extern "C" void *func_002F2D60(void *crystal) {
+    (*(int *)((char*)(crystal) + (4))) = 0;
+    return crystal;
 }
 #endif
 
@@ -2527,11 +2527,11 @@ extern "C" void func_002F4260_4118(void *, float, void *) __asm__("func_002F4260
 struct N4118 { char pad[0x84]; N4118 *c; };
 struct M4118 { char pad[0x10]; unsigned int cnt; };
 
-extern "C" void func_002F4118(void *arg0, float arg1) {
+extern "C" void func_002F4118(void *position, float speed) {
     unsigned int i = 0;
     if (((M4118 *)((N4118 *)((N4118 *)SSXApp)->c)->c)->cnt != 0) {
         do {
-            func_002F4260_4118(func_002306A8(((N4118 *)SSXApp)->c, i++), arg1, arg0);
+            func_002F4260_4118(func_002306A8(((N4118 *)SSXApp)->c, i++), speed, position);
         } while (i < ((M4118 *)((N4118 *)((N4118 *)SSXApp)->c)->c)->cnt);
     }
 }
@@ -2875,8 +2875,8 @@ extern "C" void func_002F4690(sFlare_4690* self)
             uv1 = sV2_4690(0.5f, 1.0f);
             break;
         }
-        float s = self->lights[i].size * 300.0f;
-        sV2_4690 sz(s, s);
+        float spriteSize = self->lights[i].size * 300.0f;
+        sV2_4690 sz(spriteSize, spriteSize);
         ((cWorld_4690*)GrMan)->DrawSprite(sV4_4690(pos.x, pos.y, 0.0f, 1.0f), sz, uv0, uv1, col);
     }
 }
@@ -3139,34 +3139,34 @@ extern "C" void func_002F4DB8(sSun_4DB8* self, sCam_4DB8* cam, int flag)
     }
     float dist = cam->farClip - 500.0f;
     int id = !flag ? 6 : 7;
-    float a = func_002EE0B8(id) * 0.01745329424738884f;
-    float b = func_002EE070(id) * 0.01745329424738884f;
+    float azimuth = func_002EE0B8(id) * 0.01745329424738884f;
+    float elevation = func_002EE070(id) * 0.01745329424738884f;
     float sa, ca, sb, cb;
-    if (a == 0.0f && b == 0.0f) {
+    if (azimuth == 0.0f && elevation == 0.0f) {
         func_0031BE50(1.8675024509429932f, &sa, &ca);
         func_0031BE50(0.27925270795822144f, &sb, &cb);
     } else {
-        func_0031BE50(a, &sa, &ca);
-        func_0031BE50(b, &sb, &cb);
+        func_0031BE50(azimuth, &sa, &ca);
+        func_0031BE50(elevation, &sb, &cb);
     }
     sV4_4DB8 dir;
     sV4_4DB8 sun;
     {
         // PORT: PS2-only VU0 inline asm (dir = row 3 of the view matrix * -1; written out in place:
         // an inline helper's parameter/frame pseudo keeps &temp in an s-reg up to the Project call).
-        sV4_4DB8 v = cam->m[3];
-        sV4_4DB8 r;
-        int t;
+        sV4_4DB8 viewPos = cam->m[3];
+        sV4_4DB8 negViewPos;
+        int scaleBits;
         __asm__(
             "mfc1      %1, %3\n"
             "lqc2      $vf4, %2\n"
             "qmtc2.ni  %1, $vf3\n"
             "vmulx.xyzw $vf5, $vf4, $vf3x\n"
             "sqc2      $vf5, %0\n"
-            : "=m"(r), "=&r"(t)
-            : "m"(v), "f"(-1.0f)
+            : "=m"(negViewPos), "=&r"(scaleBits)
+            : "m"(viewPos), "f"(-1.0f)
             : "memory");
-        dir = r;
+        dir = negViewPos;
     }
     cam->MulVec(&sun, dir);
     dir = sun;
@@ -3202,8 +3202,8 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F5148);
 #ifdef SKIP_ASM
 extern "C" void func_002F5400(int, void *, int);
 
-extern "C" void func_002F5148(void *arg0) {
-    func_002F5400(((int)SSXApp->Game->WorldLightMan), arg0, ((int) (*(int *)((char*)(arg0) + (8))) >> 0xC) & 1);
+extern "C" void func_002F5148(void *litObject) {
+    func_002F5400(((int)SSXApp->Game->WorldLightMan), litObject, ((int) (*(int *)((char*)(litObject) + (8))) >> 0xC) & 1);
 }
 #endif
 

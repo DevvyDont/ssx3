@@ -382,19 +382,19 @@ struct cUIObj_F168 {
     virtual void setVisible(int on);
 };
 
-extern "C" void func_0018F168(void* self, bool a, bool b)
+extern "C" void func_0018F168(void* self, bool loadBlocked, bool saveBlocked)
 {
-    cUIObj_F168* o = (cUIObj_F168*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x));
+    cUIObj_F168* xButton = (cUIObj_F168*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x));
     if (cFEStateProfileLoad_mScreenAction != 2) {
-        int v = !b;
-        ((cUIObj_F168*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setVisible(v);
-        *(int*)((char*)self + 0x224) = v;
-        o->setVisible(v);
+        int showButton = !saveBlocked;
+        ((cUIObj_F168*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setVisible(showButton);
+        *(int*)((char*)self + 0x224) = showButton;
+        xButton->setVisible(showButton);
     } else {
-        int v = !a;
-        ((cUIObj_F168*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3a)))->setVisible(v);
-        *(int*)((char*)self + 0x224) = v;
-        o->setVisible(v);
+        int showButton = !loadBlocked;
+        ((cUIObj_F168*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3a)))->setVisible(showButton);
+        *(int*)((char*)self + 0x224) = showButton;
+        xButton->setVisible(showButton);
     }
 }
 #endif
@@ -737,9 +737,9 @@ struct cUIObj_F9D8 {
     virtual void setSelected(int v);
 };
 
-extern "C" void func_0018F9D8(void* p)
+extern "C" void func_0018F9D8(void* vself)
 {
-    cSelf_F9D8* self = (cSelf_F9D8*)p;
+    cSelf_F9D8* self = (cSelf_F9D8*)vself;
     void* app = cSSXApp_getMCManager(SSXApp);
     if (self->isReady() != 0) {
         if ((*(cCard_F9D8**)((char*)app + 0x434))->isPresent() != 0) {
@@ -751,9 +751,9 @@ extern "C" void func_0018F9D8(void* p)
     for (int i = 1; i < 7; i++) {
         char buf[64];
         sprintf(buf, str_playerpct_d, i);
-        cUIObj_F9D8* o = (cUIObj_F9D8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
-        o->setSelected(0);
-        o->setEnabled(1);
+        cUIObj_F9D8* playerButton = (cUIObj_F9D8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+        playerButton->setSelected(0);
+        playerButton->setEnabled(1);
     }
 }
 #endif
@@ -892,9 +892,9 @@ struct cSelf_FC98 {
     virtual void showMessage(unsigned short* text, int a2, int a3, int a4, int a5, int a6);
 };
 
-extern "C" void func_0018FC98(void* p)
+extern "C" void func_0018FC98(void* vself)
 {
-    cSelf_FC98* self = (cSelf_FC98*)p;
+    cSelf_FC98* self = (cSelf_FC98*)vself;
     if (*(int*)((char*)self + 0x224) != 0) {
         func_0023CAE8(cSSXApp_getMCManager(SSXApp), 1, *(int*)((char*)self + 0x1CC));
         *(int*)((char*)self + 0x1C0) = 3;
@@ -1322,9 +1322,9 @@ extern void* cFEStateRiderBio_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 
-extern "C" void* func_00190858(void* self, int a1, int a2)
+extern "C" void* func_00190858(void* self, int engine, int userNum)
 {
-    signed char idx = a2;
+    signed char idx = userNum;
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = cFEStateRiderBio_vtbl;
     *(int*)((char*)self + 0xC) = 0xF;

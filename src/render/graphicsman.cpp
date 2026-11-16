@@ -96,19 +96,19 @@ static inline int iabs_9A78(int v)
 // Compares two entries' keys; type 3 (and inexact 1/2) allow position tolerances and swapped ends.
 extern "C" int func_00369A78(void* ap, void* bp, int tol0, int tol1, int tol2)
 {
-    sEnt_9A78* a = (sEnt_9A78*)ap;
-    sEnt_9A78* b = (sEnt_9A78*)bp;
-    if (a->type != b->type)
+    sEnt_9A78* lhs = (sEnt_9A78*)ap;
+    sEnt_9A78* rhs = (sEnt_9A78*)bp;
+    if (lhs->type != rhs->type)
         goto fail;
-    if (a->key->id != b->key->id)
+    if (lhs->key->id != rhs->key->id)
         goto fail;
-    switch (a->type) {
+    switch (lhs->type) {
     case 1:
-        if (a->key->x == b->key->x)
+        if (lhs->key->x == rhs->key->x)
             return 1;
         break;
     case 2:
-        if (a->key->x == b->key->x && a->key->idA == b->key->idA && a->key->y == b->key->y)
+        if (lhs->key->x == rhs->key->x && lhs->key->idA == rhs->key->idA && lhs->key->y == rhs->key->y)
             return 1;
         break;
     case 3:
@@ -116,13 +116,13 @@ extern "C" int func_00369A78(void* ap, void* bp, int tol0, int tol1, int tol2)
     default:
         goto fail;
     }
-    if (a->key->idA == b->key->idA && a->key->idB == b->key->idB) {
-        if (iabs_9A78(a->key->x - b->key->x) > tol0 || iabs_9A78(a->key->y - b->key->y) > tol1 || iabs_9A78(a->key->z - b->key->z) > tol2)
+    if (lhs->key->idA == rhs->key->idA && lhs->key->idB == rhs->key->idB) {
+        if (iabs_9A78(lhs->key->x - rhs->key->x) > tol0 || iabs_9A78(lhs->key->y - rhs->key->y) > tol1 || iabs_9A78(lhs->key->z - rhs->key->z) > tol2)
             goto fail;
         return 1;
     }
-    if (a->key->idB == b->key->idA && a->key->idA == b->key->idB) {
-        if (iabs_9A78(a->key->x - b->key->x) <= tol0 && iabs_9A78(a->key->z - b->key->y) <= tol1 && iabs_9A78(a->key->y - b->key->z) <= tol2)
+    if (lhs->key->idB == rhs->key->idA && lhs->key->idA == rhs->key->idB) {
+        if (iabs_9A78(lhs->key->x - rhs->key->x) <= tol0 && iabs_9A78(lhs->key->z - rhs->key->y) <= tol1 && iabs_9A78(lhs->key->y - rhs->key->z) <= tol2)
             return 1;
     }
 fail:
@@ -258,42 +258,42 @@ struct sGmVE_369CF8 {
 extern "C" void cGraphicsMan_RenderIndexedTriList(cPS2GraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* Positions,
                               sGmUV_369CF8* UV, sGmV4_369CF8* Color, sGmV3_369CF8* Offset)
 {
-    sGmVert_369CF8 V[3];
-    V[2].uv.z = 1.0f;
-    V[1].uv.z = 1.0f;
-    V[0].uv.z = 1.0f;
+    sGmVert_369CF8 verts[3];
+    verts[2].uv.z = 1.0f;
+    verts[1].uv.z = 1.0f;
+    verts[0].uv.z = 1.0f;
     if (UV) {
         for (int i = 0; i < NumTris; i++) {
             for (int j = 0; j < 3; j++) {
                 int Index = Indices[j];
-                V[j].pos = sGmV4_369CF8(Positions[Index] + *Offset, 1.0f);
-                V[j].a = (int)(Color[Index].x * 0.5f);
-                V[j].r = (int)(Color[Index].y * 0.5f);
-                V[j].g = (int)(Color[Index].z * 0.5f);
-                V[j].b = (int)(Color[Index].w * 0.5f);
-                V[j].uv.x = UV[Index].x();
-                V[j].uv.y = UV[Index].y();
+                verts[j].pos = sGmV4_369CF8(Positions[Index] + *Offset, 1.0f);
+                verts[j].a = (int)(Color[Index].x * 0.5f);
+                verts[j].r = (int)(Color[Index].y * 0.5f);
+                verts[j].g = (int)(Color[Index].z * 0.5f);
+                verts[j].b = (int)(Color[Index].w * 0.5f);
+                verts[j].uv.x = UV[Index].x();
+                verts[j].uv.y = UV[Index].y();
             }
             Indices += 3;
             sGmVE_369CF8* vt = (sGmVE_369CF8*)self->mVtbl;
-            vt[71].fn(((char*)self) + vt[71].delta, 3, V, 0);
+            vt[71].fn(((char*)self) + vt[71].delta, 3, verts, 0);
         }
     } else {
         for (int i = 0; i < NumTris; i++) {
             for (int j = 0; j < 3; j++) {
                 int Index = Indices[j];
-                V[j].pos = sGmV4_369CF8(Positions[Index] + *Offset, 1.0f);
-                V[j].a = (int)(Color[Index].x * 0.5f);
-                V[j].r = (int)(Color[Index].y * 0.5f);
-                V[j].g = (int)(Color[Index].z * 0.5f);
-                V[j].b = (int)(Color[Index].w * 0.5f);
-                V[j].uv.z = 1.0f;
-                V[j].uv.x = 0.0f;
-                V[j].uv.y = 0.0f;
+                verts[j].pos = sGmV4_369CF8(Positions[Index] + *Offset, 1.0f);
+                verts[j].a = (int)(Color[Index].x * 0.5f);
+                verts[j].r = (int)(Color[Index].y * 0.5f);
+                verts[j].g = (int)(Color[Index].z * 0.5f);
+                verts[j].b = (int)(Color[Index].w * 0.5f);
+                verts[j].uv.z = 1.0f;
+                verts[j].uv.x = 0.0f;
+                verts[j].uv.y = 0.0f;
             }
             Indices += 3;
             sGmVE_369CF8* vt = (sGmVE_369CF8*)self->mVtbl;
-            vt[71].fn(((char*)self) + vt[71].delta, 3, V, 0);
+            vt[71].fn(((char*)self) + vt[71].delta, 3, verts, 0);
         }
     }
 }
@@ -391,25 +391,25 @@ static inline sV4_A048 vu0MtxMul_A048(const sV4_A048* m, const sV4_A048& v)
 extern "C" void cGraphicsMan_RenderSpline(cPS2GraphicsMan* self, sV4_A048* BezMat, float* color, int n)
 {
     float step = 1.0f / ((float)n - 1.0f);
-    int c0 = (int)(color[1] * 128.0f);
-    int c1 = (int)(color[2] * 128.0f);
-    int c2 = (int)(color[3] * 128.0f);
-    int c3 = (int)(color[0] * 128.0f);
-    float t = 0.0f;
+    int red = (int)(color[1] * 128.0f);
+    int green = (int)(color[2] * 128.0f);
+    int blue = (int)(color[3] * 128.0f);
+    int alpha = (int)(color[0] * 128.0f);
+    float curveParam = 0.0f;
     sV4_A048 pos;
     sBezVert_A048 verts[20];
     for (int i = 0; i < n; i++) {
-        float t2 = t * t;
-        pos = vu0MtxMul_A048(BezMat, sV4_A048(t * t2, t2, t, 1.0f));
+        float curveParamSq = curveParam * curveParam;
+        pos = vu0MtxMul_A048(BezMat, sV4_A048(curveParam * curveParamSq, curveParamSq, curveParam, 1.0f));
         verts[i].st[0] = 0.0f;
         verts[i].st[1] = 0.0f;
         verts[i].st[2] = 1.0f;
-        verts[i].rgba[0] = c0;
-        verts[i].rgba[1] = c1;
-        verts[i].rgba[2] = c2;
-        verts[i].rgba[3] = c3;
+        verts[i].rgba[0] = red;
+        verts[i].rgba[1] = green;
+        verts[i].rgba[2] = blue;
+        verts[i].rgba[3] = alpha;
         verts[i].pos = pos;
-        t += step;
+        curveParam += step;
     }
     sGmVE_A048* vt = (sGmVE_A048*)self->mVtbl;
     vt[73].fn((char*)self + vt[73].delta, n, verts, 0);
@@ -421,9 +421,9 @@ extern "C" void* func_0036A1C0(int);
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036A190__FPvi);
 #ifdef SKIP_ASM
-void* func_0036A190(void* self, int a1)
+void* func_0036A190(void* self, int gridMesh)
 {
-    return func_0036A1C0(a1);
+    return func_0036A1C0(gridMesh);
 }
 #endif
 
@@ -441,10 +441,10 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_CreateScreenGrabTexture__FPvT0);
  */
 int cGraphicsMan_CreateScreenGrabTexture(void* self, void* screenGrabHandle)
 {
-    int t0 = -1;
+    int invalidId = -1;
     *(int*)screenGrabHandle = 0;
-    *(int*)((char*)screenGrabHandle + 0x4) = t0;
-    return t0;
+    *(int*)((char*)screenGrabHandle + 0x4) = invalidId;
+    return invalidId;
 }
 #endif
 
@@ -582,13 +582,13 @@ static inline void gmMtxCopy_A2C0(sGmMtx_A2C0* dst, sGmMtx_A2C0* src)
 extern "C" void cGraphicsMan_DeformMeshMatrix(cPS2GraphicsMan* self, sGmMtx_A2C0* mat)
 {
     if (self->m_isInNIS[6] != 0) {
-        sGmMtx_A2C0 t2;
+        sGmMtx_A2C0 result;
         sGmVec4_A2C0 pos = mat->r[3];
-        sGmMtx_A2C0 tmp;
-        sGmMtx_A2C0* r = func_0038F2A8(&pos);
-        gmMtxMul_A2C0(&tmp, mat, r);
-        gmMtxCopy_A2C0(&t2, &tmp);
-        gmMtxCopy_A2C0(mat, &t2);
+        sGmMtx_A2C0 product;
+        sGmMtx_A2C0* deform = func_0038F2A8(&pos);
+        gmMtxMul_A2C0(&product, mat, deform);
+        gmMtxCopy_A2C0(&result, &product);
+        gmMtxCopy_A2C0(mat, &result);
     }
 }
 #endif
@@ -596,12 +596,12 @@ extern "C" void cGraphicsMan_DeformMeshMatrix(cPS2GraphicsMan* self, sGmMtx_A2C0
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036A3B0);
 #ifdef SKIP_ASM
-extern "C" int func_0036A3B0(int arg0) {
+extern "C" int func_0036A3B0(int value) {
     int temp_2;
     int temp_2_2;
     int temp_2_3;
 
-    temp_2_2 = arg0 & 0xFF;
+    temp_2_2 = value & 0xFF;
     temp_2_3 = (temp_2_2 | (temp_2_2 * 0x10)) & 0xF0F;
     temp_2 = (temp_2_3 | (temp_2_3 * 4)) & 0x3333;
     return (temp_2 | (temp_2 * 2)) & 0x5555;
@@ -612,9 +612,9 @@ INCLUDE_ASM("render/graphicsman", func_0036A3E0);
 #ifdef SKIP_ASM
 extern "C" int func_0036A3B0(int);
 
-extern "C" int func_0036A3E0(unsigned short a, unsigned short b)
+extern "C" int func_0036A3E0(unsigned short evenValue, unsigned short oddValue)
 {
-    return func_0036A3B0(a) | (func_0036A3B0(b) << 1);
+    return func_0036A3B0(evenValue) | (func_0036A3B0(oddValue) << 1);
 }
 #endif
 
@@ -677,12 +677,12 @@ struct sGmOwner_ABA0 {
 
 extern "C" void func_0036ABA0(void* self, int idx)
 {
-    char* e = (char*)&((sGmOwner_ABA0*)self)->entries[idx];
-    *(float*)(e + 0x0) = cDepthFog_m_NearPlane;
-    *(float*)(e + 0x4) = cDepthFog_m_FarPlane;
-    *(int*)(e + 0x8) = cDepthFog_m_Exponent;
-    *(float*)(e + 0xC) = cDepthFog_m_Density;
-    *(sGmQuad_ABA0*)(e + 0x10) = cDepthFog_m_Colour;
+    char* entry = (char*)&((sGmOwner_ABA0*)self)->entries[idx];
+    *(float*)(entry + 0x0) = cDepthFog_m_NearPlane;
+    *(float*)(entry + 0x4) = cDepthFog_m_FarPlane;
+    *(int*)(entry + 0x8) = cDepthFog_m_Exponent;
+    *(float*)(entry + 0xC) = cDepthFog_m_Density;
+    *(sGmQuad_ABA0*)(entry + 0x10) = cDepthFog_m_Colour;
 }
 #endif
 
@@ -775,64 +775,64 @@ static inline unsigned int gmCall_AE20(char* self, int slot)
     return vt[slot].fn(self + vt[slot].delta);
 }
 
-extern "C" void func_0036AE20(void* vself, int idx, int a, int b, int n, char** pp)
+extern "C" void func_0036AE20(void* vself, int idx, int texBase, int frameBase, int n, char** pp)
 {
     char* self = (char*)vself;
     unsigned int full = 0x1000;
     int w = *(int*)(self + 0x5A30);
-    int h = *(int*)(self + 0x5A34);
+    int height = *(int*)(self + 0x5A34);
     int offX = ((full - gmCall_AE20(self, 10)) >> 1) << 4;
     int offY = ((full - gmCall_AE20(self, 11)) >> 1) << 4;
     int cols = w / 8;
     int zbp = *(int*)(self + 0x5A80);
-    ulong* p = (ulong*)*pp;
-    p += 2;
-    p[0] = (cols * 2 + 11) | ((ulong)0x8000 << 45);
-    p[1] = 0xE;
+    ulong* packet = (ulong*)*pp;
+    packet += 2;
+    packet[0] = (cols * 2 + 11) | ((ulong)0x8000 << 45);
+    packet[1] = 0xE;
     unsigned int fbw = gmCall_AE20(self, 10) >> 6;
-    p[2] = b | ((ulong)fbw << 16) | ((ulong)0x3FFF0200 << 16);
-    p[3] = 0x4C;
-    p[4] = (ulong)(unsigned int)(zbp | 0x1000000) | ((ulong)0x8000 << 17);
-    p[5] = 0x4E;
-    p[6] = 0x30000;
-    p[7] = 0x47;
-    p[8] = offX | ((ulong)offY << 32);
-    p[9] = 0x18;
-    p[10] = ((ulong)(w - 1) << 16) | ((ulong)(h * 2 - 1) << 48);
-    p[11] = 0x40;
-    p[12] = 0;
-    p[13] = 0x3F;
-    p[14] = (ulong)0x8000 << 24;
-    p[15] = 0x3B;
-    p[16] = 0;
-    p[17] = 0x14;
+    packet[2] = frameBase | ((ulong)fbw << 16) | ((ulong)0x3FFF0200 << 16);
+    packet[3] = 0x4C;
+    packet[4] = (ulong)(unsigned int)(zbp | 0x1000000) | ((ulong)0x8000 << 17);
+    packet[5] = 0x4E;
+    packet[6] = 0x30000;
+    packet[7] = 0x47;
+    packet[8] = offX | ((ulong)offY << 32);
+    packet[9] = 0x18;
+    packet[10] = ((ulong)(w - 1) << 16) | ((ulong)(height * 2 - 1) << 48);
+    packet[11] = 0x40;
+    packet[12] = 0;
+    packet[13] = 0x3F;
+    packet[14] = (ulong)0x8000 << 24;
+    packet[15] = 0x3B;
+    packet[16] = 0;
+    packet[17] = 0x14;
     unsigned int tbw = gmCall_AE20(self, 10) >> 6;
-    p[18] = (a << 5) | ((ulong)tbw << 14) | ((ulong)0xEAB2 << 20);
-    p[19] = 6;
-    p[20] = 0x116;
-    p[21] = 0;
-    p[22] = 0x3F80000080808080;
-    p[23] = 1;
-    p += 24;
+    packet[18] = (texBase << 5) | ((ulong)tbw << 14) | ((ulong)0xEAB2 << 20);
+    packet[19] = 6;
+    packet[20] = 0x116;
+    packet[21] = 0;
+    packet[22] = 0x3F80000080808080;
+    packet[23] = 1;
+    packet += 24;
     for (int i = 0; i < cols; i += 2) {
         int j = i * 0x80;
         int x0 = offX + 0x80 + j;
         int x1 = offX + 0x100 + j;
-        int u0 = 8 + j;
-        int u1 = 0x88 + j;
-        p[0] = u0 | 0x80000;
-        p[1] = 3;
-        p[2] = x0 | ((ulong)offY << 16);
-        p[3] = 5;
-        p[4] = u1 | ((ulong)(n * 16 + 8) << 16);
-        p[5] = 3;
-        p[6] = x1 | ((ulong)(offY + n * 16) << 16);
-        p[7] = 5;
-        p += 8;
+        int texU0 = 8 + j;
+        int texU1 = 0x88 + j;
+        packet[0] = texU0 | 0x80000;
+        packet[1] = 3;
+        packet[2] = x0 | ((ulong)offY << 16);
+        packet[3] = 5;
+        packet[4] = texU1 | ((ulong)(n * 16 + 8) << 16);
+        packet[5] = 3;
+        packet[6] = x1 | ((ulong)(offY + n * 16) << 16);
+        packet[7] = 5;
+        packet += 8;
     }
-    *(ulong*)*pp = ((p - (ulong*)*pp) / 2 - 1) | 0x10000000;
+    *(ulong*)*pp = ((packet - (ulong*)*pp) / 2 - 1) | 0x10000000;
     ((ulong*)*pp)[1] = 0;
-    *pp = (char*)p;
+    *pp = (char*)packet;
 }
 #endif
 
@@ -888,62 +888,62 @@ extern "C" void func_0036B5E8(sGmMan_B5E8* self, int idx, char** pp)
     int x = self->saved[idx].x;
     int y = self->saved[idx].y;
     int w = self->saved[idx].w;
-    int h = self->saved[idx].h;
+    int height = self->saved[idx].h;
     int offX = (((0x1000 - gmVCall_B5E8(self, 10)) >> 1) + x) << 4;
     int offY = (((0x1000 - gmVCall_B5E8(self, 11)) >> 1) + y) << 4;
     int cols = w / 32;
     int fbp = self->fbp;
     int zbp = self->zbp;
-    ulong* p = (ulong*)*pp;
-    p += 2;
-    p[0] = (cols * 2 + 7) | ((ulong)0x8000 << 45);
-    p[1] = 0xE;
+    ulong* packet = (ulong*)*pp;
+    packet += 2;
+    packet[0] = (cols * 2 + 7) | ((ulong)0x8000 << 45);
+    packet[1] = 0xE;
     unsigned int fbw = gmVCall_B5E8(self, 10) >> 6;
-    p[2] = (ulong)(unsigned int)fbp | ((ulong)fbw << 16);
-    p[3] = 0x4C;
-    p[4] = (ulong)(unsigned int)(zbp | 0x1000000) | ((ulong)0x8000 << 17);
-    p[5] = 0x4E;
-    p[6] = 0x70000;
-    p[7] = 0x47;
-    p[8] = offX | ((ulong)offY << 32);
-    p[9] = 0x18;
-    p[10] = 0x11;
-    p[11] = 0x42;
-    p[12] = 0x46;
-    p[13] = 0;
-    p[14] = (ulong)(int)(fill->r * 256.0f) | ((ulong)(int)(fill->g * 256.0f) << 8)
+    packet[2] = (ulong)(unsigned int)fbp | ((ulong)fbw << 16);
+    packet[3] = 0x4C;
+    packet[4] = (ulong)(unsigned int)(zbp | 0x1000000) | ((ulong)0x8000 << 17);
+    packet[5] = 0x4E;
+    packet[6] = 0x70000;
+    packet[7] = 0x47;
+    packet[8] = offX | ((ulong)offY << 32);
+    packet[9] = 0x18;
+    packet[10] = 0x11;
+    packet[11] = 0x42;
+    packet[12] = 0x46;
+    packet[13] = 0;
+    packet[14] = (ulong)(int)(fill->r * 256.0f) | ((ulong)(int)(fill->g * 256.0f) << 8)
           | ((ulong)(int)(fill->b * 256.0f) << 16) | 0x3F80000080000000;
-    p[15] = 1;
-    p += 16;
+    packet[15] = 1;
+    packet += 16;
     int sx = 0;                 // strip's pixel offset from the left edge
     for (int i = 0; i < cols; i++) {
         int x0 = offX + sx * 16;
-        p[0] = x0 | ((ulong)offY << 16) | ((ulong)0x7FFF << 32);
-        p[1] = 5;
-        p[2] = (x0 + 0x200) | ((ulong)(offY + h * 16) << 16) | ((ulong)0x7FFF << 32);
-        p[3] = 5;
-        p += 4;
+        packet[0] = x0 | ((ulong)offY << 16) | ((ulong)0x7FFF << 32);
+        packet[1] = 5;
+        packet[2] = (x0 + 0x200) | ((ulong)(offY + height * 16) << 16) | ((ulong)0x7FFF << 32);
+        packet[3] = 5;
+        packet += 4;
         sx += 32;
     }
-    *(ulong*)*pp = ((p - (ulong*)*pp) / 2 - 1) | 0x10000000;
+    *(ulong*)*pp = ((packet - (ulong*)*pp) / 2 - 1) | 0x10000000;
     ((ulong*)*pp)[1] = 0;
-    p[0] = 0x10000004;
-    p[1] = 0;
-    p[2] = ((ulong)0x10000000 << 32) | 0x8003;
-    p[3] = 0xE;
+    packet[0] = 0x10000004;
+    packet[1] = 0;
+    packet[2] = ((ulong)0x10000000 << 32) | 0x8003;
+    packet[3] = 0xE;
     unsigned int fbp2 = self->fbp;
     unsigned int fbw2 = gmVCall_B5E8(self, 10) >> 6;
-    p[4] = (ulong)fbp2 | ((ulong)fbw2 << 16);
-    p[5] = 0x4C;
+    packet[4] = (ulong)fbp2 | ((ulong)fbw2 << 16);
+    packet[5] = 0x4C;
     int offX2 = ((0x1000 - gmVCall_B5E8(self, 10)) >> 1) << 4;
     int offY2 = ((0x1000 - gmVCall_B5E8(self, 11)) >> 1) << 4;
-    p[6] = offX2 | ((ulong)offY2 << 32);
-    p[7] = 0x18;
-    p[8] = (ulong)self->scissor.x | ((ulong)(self->scissor.x + (self->scissor.w - 1)) << 16)
+    packet[6] = offX2 | ((ulong)offY2 << 32);
+    packet[7] = 0x18;
+    packet[8] = (ulong)self->scissor.x | ((ulong)(self->scissor.x + (self->scissor.w - 1)) << 16)
          | ((ulong)self->scissor.y << 32) | ((ulong)(self->scissor.y + (self->scissor.h - 1)) << 48);
-    p[9] = 0x40;
-    p += 10;
-    *pp = (char*)p;
+    packet[9] = 0x40;
+    packet += 10;
+    *pp = (char*)packet;
 }
 #endif
 
@@ -1243,14 +1243,14 @@ struct sGmOwner_C740 {
 
 extern "C" void func_0036C740(void* self, int idx)
 {
-    char* e = (char*)&((sGmOwner_C740*)self)->entries[idx];
-    *(float*)(e + 0x0) = cLightGlow_m_PS2MinIntensity;
-    *(float*)(e + 0x4) = cLightGlow_m_PS2ModIntensity;
-    *(float*)(e + 0x8) = cLightGlow_m_PS2CopyIntensity;
-    *(float*)(e + 0xC) = cLightGlow_m_PS2FrameSrcScale;
-    *(float*)(e + 0x10) = cLightGlow_m_PS2FrameDstScale;
-    *(float*)(e + 0x14) = cLightGlow_m_PS2IntensityTex2;
-    *(float*)(e + 0x18) = cLightGlow_m_PS2IntensityTex3;
+    char* entry = (char*)&((sGmOwner_C740*)self)->entries[idx];
+    *(float*)(entry + 0x0) = cLightGlow_m_PS2MinIntensity;
+    *(float*)(entry + 0x4) = cLightGlow_m_PS2ModIntensity;
+    *(float*)(entry + 0x8) = cLightGlow_m_PS2CopyIntensity;
+    *(float*)(entry + 0xC) = cLightGlow_m_PS2FrameSrcScale;
+    *(float*)(entry + 0x10) = cLightGlow_m_PS2FrameDstScale;
+    *(float*)(entry + 0x14) = cLightGlow_m_PS2IntensityTex2;
+    *(float*)(entry + 0x18) = cLightGlow_m_PS2IntensityTex3;
 }
 #endif
 
@@ -1471,12 +1471,12 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setLife);
  */
 extern "C" void tParticleEmitter_setLife(tParticleEmitter* self, float minlife, float maxlife)
 {
-    float d = maxlife - minlife;
-    float s = self->Damp;
-    minlife = minlife * s;
-    d = d * s;
-    self->LifeR = d;
-    self->Life0 = minlife - d;
+    float range = maxlife - minlife;
+    float dampFactor = self->Damp;
+    minlife = minlife * dampFactor;
+    range = range * dampFactor;
+    self->LifeR = range;
+    self->Life0 = minlife - range;
 }
 #endif
 
@@ -1492,8 +1492,8 @@ extern "C" void func_0036CE48(tParticleEmitter* particleEmitter) {
 INCLUDE_ASM("render/graphicsman", func_0036CE58);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_0036CE58(tParticleEmitter* particleEmitter, long long *arg1) {
-    (*(long long*)&particleEmitter->X0) = (long long) *arg1;
+extern "C" void func_0036CE58(tParticleEmitter* particleEmitter, long long *point) {
+    (*(long long*)&particleEmitter->X0) = (long long) *point;
     (*(long long*)&particleEmitter->Xr0) = (long long) t4vect_Zero;
     (*(long long*)&particleEmitter->Xr1) = (long long) t4vect_Zero;
 }
@@ -1533,10 +1533,10 @@ static inline sGfxVec4 vu0Scale_CE80(const sGfxVec4& v, float s)
     return r;
 }
 
-extern "C" void func_0036CE80(tParticleEmitter* self, sGfxVec4* a, sGfxVec4* b)
+extern "C" void func_0036CE80(tParticleEmitter* self, sGfxVec4* start, sGfxVec4* end)
 {
-    *(sGfxVec4*)&self->X0 = vu0Sub_CE80(vu0Scale_CE80(*a, 2.0f), *b);
-    *(sGfxVec4*)&self->Xr0 = vu0Sub_CE80(*b, *a);
+    *(sGfxVec4*)&self->X0 = vu0Sub_CE80(vu0Scale_CE80(*start, 2.0f), *end);
+    *(sGfxVec4*)&self->Xr0 = vu0Sub_CE80(*end, *start);
     *(cQuad128*)&self->Xr1 = t4vect_Zero;
 }
 #endif
@@ -1591,11 +1591,11 @@ static inline sGfxVec4 vu0ScaleGM(const sGfxVec4& v, float s)
     return r;
 }
 
-extern "C" void func_0036CEF8(tParticleEmitter* self, sGfxVec4* a, sGfxVec4* b, sGfxVec4* c)
+extern "C" void func_0036CEF8(tParticleEmitter* self, sGfxVec4* center, sGfxVec4* axis0, sGfxVec4* axis1)
 {
-    *(sGfxVec4*)&self->X0 = vu0SubGM(*a, vu0ScaleGM(vu0AddGM(*b, *c), 3.0f));
-    *(sGfxVec4*)&self->Xr0 = vu0ScaleGM(*b, 2.0f);
-    *(sGfxVec4*)&self->Xr1 = vu0ScaleGM(*c, 2.0f);
+    *(sGfxVec4*)&self->X0 = vu0SubGM(*center, vu0ScaleGM(vu0AddGM(*axis0, *axis1), 3.0f));
+    *(sGfxVec4*)&self->Xr0 = vu0ScaleGM(*axis0, 2.0f);
+    *(sGfxVec4*)&self->Xr1 = vu0ScaleGM(*axis1, 2.0f);
 }
 #endif
 
@@ -1604,9 +1604,9 @@ extern cQuad128 t4vect_Zero;
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CFA8);
 #ifdef SKIP_ASM
-extern "C" void func_0036CFA8(tParticleEmitter* self, sGfxVec4* v, float s)
+extern "C" void func_0036CFA8(tParticleEmitter* self, sGfxVec4* delta, float time)
 {
-    *(sGfxVec4*)&self->Xi = vu0DivGM(vu0ScaleGM(*v, self->TimeStep), s * self->Damp);
+    *(sGfxVec4*)&self->Xi = vu0DivGM(vu0ScaleGM(*delta, self->TimeStep), time * self->Damp);
 }
 #endif
 
@@ -1773,14 +1773,14 @@ static inline sGmVec4_D020 gmNormalizeD020(const sGmVec4_D020& v)
     return r;
 }
 
-extern "C" void func_0036D020(tParticleEmitter* self, const sGmVec4_D020* dir, float s)
+extern "C" void func_0036D020(tParticleEmitter* self, const sGmVec4_D020* dir, float spread)
 {
     (*(sGmVec4_D020*)&self->V0) = gmDivD020(*dir, self->Damp);
     float len = gmLengthD020((*(sGmVec4_D020*)&self->V0));
     const sGmVec4_D020* axis = (dir->x != 0.0f) ? &t4vect_YAxis : &t4vect_XAxis;
     sGmVec4_D020 norm = gmNormalizeD020(gmCrossD020(*dir, *axis));
-    (*(sGmVec4_D020*)&self->Vr0) = gmScaleD020(gmScaleD020(norm, s), len);
-    (*(sGmVec4_D020*)&self->Vr1) = gmScaleD020(gmCrossD020((*(sGmVec4_D020*)&self->V0), norm), s);
+    (*(sGmVec4_D020*)&self->Vr0) = gmScaleD020(gmScaleD020(norm, spread), len);
+    (*(sGmVec4_D020*)&self->Vr1) = gmScaleD020(gmCrossD020((*(sGmVec4_D020*)&self->V0), norm), spread);
     *(cQuad128*)&(*(sGmVec4_D020*)&self->Vr2) = t4vect_Zero;
     gmSubFromD020((*(sGmVec4_D020*)&self->V0), gmScaleD020(gmAddD020(gmAddD020((*(sGmVec4_D020*)&self->Vr0), (*(sGmVec4_D020*)&self->Vr1)), (*(sGmVec4_D020*)&self->Vr2)), 1.5f));
 }
@@ -1866,13 +1866,13 @@ static inline sGmVec4 gmScaleD1F0(const sGmVec4& v, float s)
     return r;
 }
 
-extern "C" void func_0036D1F0(tParticleEmitter* self, const sGmVec4* a, const sGmVec4* b,
-                              const sGmVec4* c, const sGmVec4* d)
+extern "C" void func_0036D1F0(tParticleEmitter* self, const sGmVec4* baseVel, const sGmVec4* randVel0,
+                              const sGmVec4* randVel1, const sGmVec4* randVel2)
 {
-    (*(sGmVec4*)&self->Vr0) = gmDivD1F0(*b, self->Damp);
-    (*(sGmVec4*)&self->Vr1) = gmDivD1F0(*c, self->Damp);
-    (*(sGmVec4*)&self->Vr2) = gmDivD1F0(*d, self->Damp);
-    (*(sGmVec4*)&self->V0) = gmSubD1F0(gmDivD1F0(*a, self->Damp), gmScaleD1F0(gmAddD1F0(gmAddD1F0((*(sGmVec4*)&self->Vr0), (*(sGmVec4*)&self->Vr1)), (*(sGmVec4*)&self->Vr2)), 1.5f));
+    (*(sGmVec4*)&self->Vr0) = gmDivD1F0(*randVel0, self->Damp);
+    (*(sGmVec4*)&self->Vr1) = gmDivD1F0(*randVel1, self->Damp);
+    (*(sGmVec4*)&self->Vr2) = gmDivD1F0(*randVel2, self->Damp);
+    (*(sGmVec4*)&self->V0) = gmSubD1F0(gmDivD1F0(*baseVel, self->Damp), gmScaleD1F0(gmAddD1F0(gmAddD1F0((*(sGmVec4*)&self->Vr0), (*(sGmVec4*)&self->Vr1)), (*(sGmVec4*)&self->Vr2)), 1.5f));
 }
 #endif
 
@@ -1883,12 +1883,12 @@ INCLUDE_ASM("render/graphicsman", func_0036D318);
 // PORT: PS2-only VU0 inline asm (vector subtract).
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-extern "C" void func_0036D318(tParticleEmitter* self, sGfxVec4* a, sGfxVec4* b, sGfxVec4* c, sGfxVec4* d, float t)
+extern "C" void func_0036D318(tParticleEmitter* self, sGfxVec4* colStart, sGfxVec4* colEnd, sGfxVec4* colRand0, sGfxVec4* colRand1, float time)
 {
-    *(sGfxVec4*)&self->C0 = vu0SubGM(*a, vu0ScaleGM(vu0AddGM(*c, *d), 1.5f));
-    *(sGfxVec4*)&self->Ct = vu0DivGM(vu0SubGM(*b, *a), t * self->Damp);
-    *(sGfxVec4*)&self->Cr0 = *c;
-    *(sGfxVec4*)&self->Cr1 = *d;
+    *(sGfxVec4*)&self->C0 = vu0SubGM(*colStart, vu0ScaleGM(vu0AddGM(*colRand0, *colRand1), 1.5f));
+    *(sGfxVec4*)&self->Ct = vu0DivGM(vu0SubGM(*colEnd, *colStart), time * self->Damp);
+    *(sGfxVec4*)&self->Cr0 = *colRand0;
+    *(sGfxVec4*)&self->Cr1 = *colRand1;
 }
 #endif
 
@@ -1921,15 +1921,15 @@ INCLUDE_ASM("render/graphicsman", func_0036D400);
 // PORT: PS2-only VU0 random-number unit (R register); the PC port needs a C PRNG.
 extern "C" void func_0036D400(float* seed)
 {
-    float v = *seed;
+    float rngState = *seed;
     __asm__ __volatile__(
         "qmtc2.ni  %0, $vf3\n"
         "vrinit    R, $vf3x\n"
         "vrnext.x  $vf3, R\n"
         "qmfc2.ni  %0, $vf3\n"
-        : "=r"(v)
-        : "0"(v));
-    *seed = v;
+        : "=r"(rngState)
+        : "0"(rngState));
+    *seed = rngState;
 }
 #endif
 
@@ -2288,8 +2288,8 @@ static inline void vu0SubInGM_0058(sGmV4_0058& d, const sGmV4_0058& b)
 extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, void* transform, void* particleData, void* boundBox, float seed)
 {
     tParticleEmitter_setSize(self, *(float*)((char*)particleData + 0x10), *(float*)((char*)particleData + 0xCC), *(float*)((char*)particleData + 0x18));
-    float h = *(float*)((char*)particleData + 0x1C) * 0.5f;
-    tParticleEmitter_setLife(self, *(float*)((char*)particleData + 0x14) - h, *(float*)((char*)particleData + 0x14) + h);
+    float halfSpread = *(float*)((char*)particleData + 0x1C) * 0.5f;
+    tParticleEmitter_setLife(self, *(float*)((char*)particleData + 0x14) - halfSpread, *(float*)((char*)particleData + 0x14) + halfSpread);
     if (seed < 0.0f) {
         func_0036CCB8(self);
     } else {
@@ -2339,21 +2339,21 @@ extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, void* transfor
     self->mFlipTextureRate = *(float*)(particleData + 0xD4);
     self->TextureId = *(int*)(particleData + 0xC4);
     self->BlendMode = *(int*)(particleData + 0xC8);
-    float t = *(float*)(particleData + 0x8);
-    float r;
-    if (t < 0.0f) {
-        r = t;
+    float dataDuration = *(float*)(particleData + 0x8);
+    float totalDuration;
+    if (dataDuration < 0.0f) {
+        totalDuration = dataDuration;
     } else {
-        r = t + *(float*)(particleData + 0x14) + *(float*)(particleData + 0x1C) * 0.5f;
+        totalDuration = dataDuration + *(float*)(particleData + 0x14) + *(float*)(particleData + 0x1C) * 0.5f;
     }
-    self->Duration = r;
+    self->Duration = totalDuration;
     float x = *(float*)(particleData + 0x8) >= 0.0f ? *(float*)(particleData + 0x8) : *(float*)(particleData + 0x14) + *(float*)(particleData + 0x1C) * 0.5f;
-    sGfxVec4 v;
-    v.x = *(float*)(particleData + 0x78);
-    v.y = *(float*)(particleData + 0x7C);
-    v.z = *(float*)(particleData + 0x80);
-    v.w = 0.0f;
-    tParticleEmitter_init((tParticleEmitter*)(((char*)self) + 0x10), *(int*)(particleData + 0x0), *(int*)(particleData + 0x4), x, *(float*)(particleData + 0x20), *(float*)(particleData + 0xC), &v);
+    sGfxVec4 force;
+    force.x = *(float*)(particleData + 0x78);
+    force.y = *(float*)(particleData + 0x7C);
+    force.z = *(float*)(particleData + 0x80);
+    force.w = 0.0f;
+    tParticleEmitter_init((tParticleEmitter*)(((char*)self) + 0x10), *(int*)(particleData + 0x0), *(int*)(particleData + 0x4), x, *(float*)(particleData + 0x20), *(float*)(particleData + 0xC), &force);
     tParticleEmitter_setupEmitter((tParticleEmitter*)(((char*)self) + 0x10), transform, particleData, ((char*)self) + 0x160, -1.0f);
 }
 #endif
@@ -2363,14 +2363,14 @@ INCLUDE_ASM("render/graphicsman", func_00370708);
 #ifdef SKIP_ASM
 extern "C" void tParticleEmitter_setTime(tParticleEmitter*, float);
 
-extern "C" void func_00370708(float *self, float f)
+extern "C" void func_00370708(float *self, float duration)
 {
-    if (f == 0.0f) {
+    if (duration == 0.0f) {
         tParticleEmitter_setTime((tParticleEmitter*)((char *)self + 0x10), 0.0f);
         return;
     }
-    *self = f;
-    tParticleEmitter_setTime((tParticleEmitter*)((char *)self + 0x10), f);
+    *self = duration;
+    tParticleEmitter_setTime((tParticleEmitter*)((char *)self + 0x10), duration);
 }
 #endif
 

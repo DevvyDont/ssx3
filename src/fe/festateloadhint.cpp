@@ -431,12 +431,12 @@ extern "C" void func_00245F50(void* self)
     if (text2 != 0) {
         cUIText_setUnicodeStringByID(text2, GetHashValue32(str_kT_CMNContinue_c));
     }
-    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_no_c));
-    if (o != 0) {
-        sVEK245F50* vt = *(sVEK245F50**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 0);
-        sVEK245F50* vt2 = *(sVEK245F50**)(o + 8);
-        vt2[8].fn(o + vt2[8].delta, 1);
+    char* noButton = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_no_c));
+    if (noButton != 0) {
+        sVEK245F50* vt = *(sVEK245F50**)(noButton + 8);
+        vt[9].fn(noButton + vt[9].delta, 0);
+        sVEK245F50* vt2 = *(sVEK245F50**)(noButton + 8);
+        vt2[8].fn(noButton + vt2[8].delta, 1);
     }
     *(int*)((char*)self + 0x4C) = 300;
 }
@@ -481,12 +481,12 @@ extern "C" void func_00246098(void* self)
                 if (text2 != 0) {
                     cUIText_setUnicodeStringByID(text2, GetHashValue32(str_kT_CMNContinue_c));
                 }
-                char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_no_c));
-                if (o != 0) {
-                    sVEK246098* vt = *(sVEK246098**)(o + 8);
-                    vt[9].fn(o + vt[9].delta, 0);
-                    sVEK246098* vt2 = *(sVEK246098**)(o + 8);
-                    vt2[8].fn(o + vt2[8].delta, 1);
+                char* noButton = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_no_c));
+                if (noButton != 0) {
+                    sVEK246098* vt = *(sVEK246098**)(noButton + 8);
+                    vt[9].fn(noButton + vt[9].delta, 0);
+                    sVEK246098* vt2 = *(sVEK246098**)(noButton + 8);
+                    vt2[8].fn(noButton + vt2[8].delta, 1);
                 }
                 cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
                 sVEK246098* vt3 = (sVEK246098*)ps2GraphicsMan->mVtbl;
@@ -525,9 +525,9 @@ extern "C" void func_002461E0(void* self, void* item, int msg)
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00246268);
 #ifdef SKIP_ASM
-extern "C" int func_00246268(void* self, int a1, int a2)
+extern "C" int func_00246268(void* self, int menu, int event)
 {
-    return a2 == 6 ? 0x101 : 0;
+    return event == 6 ? 0x101 : 0;
 }
 #endif
 

@@ -114,18 +114,18 @@ extern "C" void func_002820B0(sScriptEngine_2820B0* self)
     int i;
     cInSeq_UpdateFrame(self->obj2B8);
     for (i = 0; i < 16; i++) {
-        sScriptSlot_2820B0* s = &self->slots[i];
-        if (s->state == 0) {
+        sScriptSlot_2820B0* request = &self->slots[i];
+        if (request->state == 0) {
             continue;
         }
-        if (s->state == 1) {
-            switch (s->type) {
-            case 0: slotNop_2820B0(self, s); break;
-            case 1: func_00282908(self, s); break;
-            case 2: slotNop_2820B0(self, s); break;
-            case 3: slotNop_2820B0(self, s); break;
-            case 4: slotNop_2820B0(self, s); break;
-            case 5: slotNop_2820B0(self, s); break;
+        if (request->state == 1) {
+            switch (request->type) {
+            case 0: slotNop_2820B0(self, request); break;
+            case 1: func_00282908(self, request); break;
+            case 2: slotNop_2820B0(self, request); break;
+            case 3: slotNop_2820B0(self, request); break;
+            case 4: slotNop_2820B0(self, request); break;
+            case 5: slotNop_2820B0(self, request); break;
             }
         }
     }
@@ -232,22 +232,22 @@ INCLUDE_ASM("scripter/bxscriptengine", func_002822A0);
 extern "C" void* func_00282CB0(void* self, int a1);
 extern "C" void cInSeq_Play(void* cache, void* data, int a2);
 
-extern "C" int func_002822A0(void* self, int id, int value, int arg)
+extern "C" int func_002822A0(void* self, int id, int value, int loop)
 {
-    char* e = (char*)func_00282CB0(self, id);
-    if (e == 0) {
+    char* request = (char*)func_00282CB0(self, id);
+    if (request == 0) {
         return 0;
     }
-    int state = *(int*)(e + 0x4);
+    int state = *(int*)(request + 0x4);
     if (state != 2) {
         return state;
     }
-    *(short*)(e + 0x10) = value;
-    if (*(int*)(e + 0x20) == 1) {
-        *(int*)(e + 0x4) = 3;
-        cInSeq_Play(*(void**)((char*)self + 0x2B8), **(void***)e, arg);
+    *(short*)(request + 0x10) = value;
+    if (*(int*)(request + 0x20) == 1) {
+        *(int*)(request + 0x4) = 3;
+        cInSeq_Play(*(void**)((char*)self + 0x2B8), **(void***)request, loop);
     }
-    return *(int*)(e + 0x4);
+    return *(int*)(request + 0x4);
 }
 #endif
 
@@ -257,11 +257,11 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282338);
 extern "C" void* func_00282CB0(void* self, int a1);
 extern "C" void cInSeq_Stop(void* cache, void* data);
 
-extern "C" void func_00282338(void* self, int a1)
+extern "C" void func_00282338(void* self, int requestHandle)
 {
-    char* e = (char*)func_00282CB0(self, a1);
-    char* obj = *(char**)e;
-    if (obj != 0 && *(int*)(obj + 0x20) != 0 && *(int*)(e + 0x20) == 1) {
+    char* request = (char*)func_00282CB0(self, requestHandle);
+    char* obj = *(char**)request;
+    if (obj != 0 && *(int*)(obj + 0x20) != 0 && *(int*)(request + 0x20) == 1) {
         cInSeq_Stop(*(void**)((char*)self + 0x2B8), *(void**)obj);
     }
 }
@@ -365,16 +365,16 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282498);
 extern "C" void* func_00282CB0_v(void) __asm__("func_00282CB0");
 void func_00274808(void* self, float t);
 
-extern "C" int func_00282498(float t)
+extern "C" int func_00282498(float playRate)
 {
-    if (t < 0.01f) return 0;
-    char* c = (char*)func_00282CB0_v();
-    if (c == 0) return 0;
-    if (*(int*)(c + 4) == 1) {
-        *(float*)(c + 0x18) = t;
+    if (playRate < 0.01f) return 0;
+    char* request = (char*)func_00282CB0_v();
+    if (request == 0) return 0;
+    if (*(int*)(request + 4) == 1) {
+        *(float*)(request + 0x18) = playRate;
         return 1;
     }
-    func_00274808(*(void**)c, t);
+    func_00274808(*(void**)request, playRate);
     return 1;
 }
 #endif
@@ -383,20 +383,20 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282500);
 #ifdef SKIP_ASM
 extern "C" int func_00282500(void* self, char* obj, int val)
 {
-    char* p = *(char**)(obj + 0xC);
-    int old = *(int*)(p + 0xC);
-    *(int*)(p + 0xC) = val;
+    char* request = *(char**)(obj + 0xC);
+    int old = *(int*)(request + 0xC);
+    *(int*)(request + 0xC) = val;
     return old;
 }
 #endif
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282510);
 #ifdef SKIP_ASM
-extern "C" int func_00282510(void* self, int a1, int val)
+extern "C" int func_00282510(void* self, int requestHandle, int val)
 {
-    char* p = (char*)func_00282CB0(self, a1);
-    int old = *(int*)(p + 0xC);
-    *(int*)(p + 0xC) = val;
+    char* request = (char*)func_00282CB0(self, requestHandle);
+    int old = *(int*)(request + 0xC);
+    *(int*)(request + 0xC) = val;
     return old;
 }
 #endif
@@ -502,8 +502,8 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282698);
 #ifdef SKIP_ASM
 extern "C" void cInSeq_PauseAll(int);
 
-extern "C" void func_00282698(void *arg0) {
-    cInSeq_PauseAll((*(int *)((char*)(arg0) + (0x2B8))));
+extern "C" void func_00282698(void *engine) {
+    cInSeq_PauseAll((*(int *)((char*)(engine) + (0x2B8))));
 }
 #endif
 //100%
@@ -511,8 +511,8 @@ INCLUDE_ASM("scripter/bxscriptengine", func_002826B8);
 #ifdef SKIP_ASM
 extern "C" void cInSeq_ResumeAll(int);
 
-extern "C" void func_002826B8(void *arg0) {
-    cInSeq_ResumeAll((*(int *)((char*)(arg0) + (0x2B8))));
+extern "C" void func_002826B8(void *engine) {
+    cInSeq_ResumeAll((*(int *)((char*)(engine) + (0x2B8))));
 }
 #endif
 
@@ -521,12 +521,12 @@ INCLUDE_ASM("scripter/bxscriptengine", func_002826D8);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerMain_Pause(void* self);
 
-extern "C" void func_002826D8(void* self, int a1)
+extern "C" void func_002826D8(void* self, int requestHandle)
 {
-    char* p = (char*)self + (a1 * 0x24 + 0x2c0);
-    cScriptPlayerMain_Pause(*(void**)p);
-    if (*(int*)(*(char**)p + 0x2C) > 0) {
-        *(int*)(p + 0x4) = 5;
+    char* request = (char*)self + (requestHandle * 0x24 + 0x2c0);
+    cScriptPlayerMain_Pause(*(void**)request);
+    if (*(int*)(*(char**)request + 0x2C) > 0) {
+        *(int*)(request + 0x4) = 5;
     }
 }
 #endif
@@ -536,18 +536,18 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282720);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerMain_Resume(void* self);
 
-extern "C" void func_00282720(void* self, int a1)
+extern "C" void func_00282720(void* self, int requestHandle)
 {
-    char* p = (char*)self + (a1 * 0x24 + 0x2c0);
-    cScriptPlayerMain_Resume(*(void**)p);
-    if (*(int*)(p + 0x4) == 5) {
-        char* s = *(char**)p;
-        if (*(int*)(s + 0x2C) <= 0) {
-            int t = *(int*)(s + 0x20);
-            if (t == 3 || t == 4) {
-                *(int*)(p + 0x4) = 4;
+    char* request = (char*)self + (requestHandle * 0x24 + 0x2c0);
+    cScriptPlayerMain_Resume(*(void**)request);
+    if (*(int*)(request + 0x4) == 5) {
+        char* player = *(char**)request;
+        if (*(int*)(player + 0x2C) <= 0) {
+            int playState = *(int*)(player + 0x20);
+            if (playState == 3 || playState == 4) {
+                *(int*)(request + 0x4) = 4;
             } else {
-                *(int*)(p + 0x4) = 3;
+                *(int*)(request + 0x4) = 3;
             }
         }
     }
@@ -570,28 +570,28 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282798);
 extern "C" void* func_00282CB0(void* self, int a1);
 extern "C" void func_00282908(void* self, void* script);
 
-extern "C" int func_00282798(void* self, int a1)
+extern "C" int func_00282798(void* self, int requestHandle)
 {
-    char* s = (char*)func_00282CB0(self, a1);
-    if (s == 0) {
+    char* request = (char*)func_00282CB0(self, requestHandle);
+    if (request == 0) {
         return 0;
     }
-    if (*(int*)(s + 0x4) == 1) {
-        func_00282908(self, s);
+    if (*(int*)(request + 0x4) == 1) {
+        func_00282908(self, request);
     }
-    return *(int*)(s + 0x4);
+    return *(int*)(request + 0x4);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_002827F8);
 #ifdef SKIP_ASM
-extern "C" int func_002827F8(void* self, int a1)
+extern "C" int func_002827F8(void* self, int requestHandle)
 {
-    char* p = (char*)func_00282CB0(self, a1);
-    if (p == 0) return -1;
-    if (*(int*)(p + 4) == 1) return *(int*)(p + 0x14);
-    return *(int*)(p + 8);
+    char* request = (char*)func_00282CB0(self, requestHandle);
+    if (request == 0) return -1;
+    if (*(int*)(request + 4) == 1) return *(int*)(request + 0x14);
+    return *(int*)(request + 8);
 }
 #endif
 
@@ -601,19 +601,19 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282838);
 extern "C" void* func_00282CB0(void* self, int a1);
 extern "C" void func_00282908(void* self, void* script);
 
-extern "C" int func_00282838(void* self, int a1)
+extern "C" int func_00282838(void* self, int requestHandle)
 {
-    char* s = (char*)func_00282CB0(self, a1);
-    if (s == 0) {
+    char* request = (char*)func_00282CB0(self, requestHandle);
+    if (request == 0) {
         return 0;
     }
-    if (*(int*)(s + 0x4) == 1) {
-        func_00282908(self, s);
+    if (*(int*)(request + 0x4) == 1) {
+        func_00282908(self, request);
     }
-    if (*(int*)(s + 0x4) != 4 && *(int*)(s + 0x4) != 5) {
+    if (*(int*)(request + 0x4) != 4 && *(int*)(request + 0x4) != 5) {
         return 0;
     }
-    return *(int*)(*(char**)s + 0x20) == 4;
+    return *(int*)(*(char**)request + 0x20) == 4;
 }
 #endif
 
@@ -799,11 +799,11 @@ int func_00274C10(void* self, int a1);
 
 extern "C" void func_00282B40(void* self, void* obj)
 {
-    sBxsThreadHdr* t = func_00282C38(self, 1);
-    t->state = 2;
-    t->handle = -1;
-    t->owner = obj;
-    func_00274C10(obj, (int)t);
+    sBxsThreadHdr* request = func_00282C38(self, 1);
+    request->state = 2;
+    request->handle = -1;
+    request->owner = obj;
+    func_00274C10(obj, (int)request);
 }
 #endif
 
@@ -814,36 +814,36 @@ void func_00282C88(void* self, void* v);
 
 extern "C" void func_00282B88(void* self, void* ctx)
 {
-    void* v = *(void**)((char*)ctx + 0xC);
-    *(int*)((char*)v + 0x4) = 7;
-    func_00282C88(self, v);
+    void* request = *(void**)((char*)ctx + 0xC);
+    *(int*)((char*)request + 0x4) = 7;
+    func_00282C88(self, request);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282BB0__FPvT0);
 #ifdef SKIP_ASM
-int func_00282BB0(void* self, void* a1)
+int func_00282BB0(void* self, void* player)
 {
-    return *(int*)((char*)*(void**)((char*)a1 + 0xc) + 0xc);
+    return *(int*)((char*)*(void**)((char*)player + 0xc) + 0xc);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282BC0);
 #ifdef SKIP_ASM
-extern "C" int func_00282BC0(void* self, int a1)
+extern "C" int func_00282BC0(void* self, int requestHandle)
 {
-    return *(int*)((char*)func_00282CB0(self, a1) + 0xC);
+    return *(int*)((char*)func_00282CB0(self, requestHandle) + 0xC);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282BE0__FPvT0);
 #ifdef SKIP_ASM
-int func_00282BE0(void* self, void* a1)
+int func_00282BE0(void* self, void* player)
 {
-    return *(int*)((char*)*(void**)((char*)a1 + 0xc) + 0x1c);
+    return *(int*)((char*)*(void**)((char*)player + 0xc) + 0x1c);
 }
 #endif
 
@@ -892,19 +892,19 @@ struct sBxsEngineThreads {
     sBxsThreadSlot2C0 threads[16]; // 0x2C0
 };
 
-extern "C" sBxsThreadHdr* func_00282C38(void* self, int a1)
+extern "C" sBxsThreadHdr* func_00282C38(void* self, int requestType)
 {
-    sBxsEngineThreads* e = (sBxsEngineThreads*)self;
+    sBxsEngineThreads* engine = (sBxsEngineThreads*)self;
     int i = 0;
     do {
-        if (e->threads[i].type == 0) {
-            e->threads[i].type = a1;
-            switch (a1) {
+        if (engine->threads[i].type == 0) {
+            engine->threads[i].type = requestType;
+            switch (requestType) {
             case 1:
-                e->threads[i].hdr.handle = -1;
+                engine->threads[i].hdr.handle = -1;
                 break;
             }
-            return &e->threads[i].hdr;
+            return &engine->threads[i].hdr;
         }
         i++;
     } while (i < 16);
@@ -915,26 +915,26 @@ extern "C" sBxsThreadHdr* func_00282C38(void* self, int a1)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282C88__FPvT0);
 #ifdef SKIP_ASM
-void func_00282C88(void* self, void* a1)
+void func_00282C88(void* self, void* request)
 {
-    *(int*)((char*)a1 + 0x0) = 0;
-    *(int*)((char*)a1 + 0x4) = 0;
-    *(int*)((char*)a1 + 0x20) = 0;
-    *(short*)((char*)a1 + 0x10) = 0;
-    *(short*)((char*)a1 + 0x12) = 0;
-    *(int*)((char*)a1 + 0x14) = -1;
-    *(int*)((char*)a1 + 0x18) = 0;
-    *(int*)((char*)a1 + 0xc) = 0;
+    *(int*)((char*)request + 0x0) = 0;
+    *(int*)((char*)request + 0x4) = 0;
+    *(int*)((char*)request + 0x20) = 0;
+    *(short*)((char*)request + 0x10) = 0;
+    *(short*)((char*)request + 0x12) = 0;
+    *(int*)((char*)request + 0x14) = -1;
+    *(int*)((char*)request + 0x18) = 0;
+    *(int*)((char*)request + 0xc) = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282CB0);
 #ifdef SKIP_ASM
-extern "C" void* func_00282CB0(void* self, int a1)
+extern "C" void* func_00282CB0(void* self, int requestHandle)
 {
-    char* p = (char*)self + (a1 * 0x24 + 0x2c0);
-    return *(int*)(p + 0x20) != 0 ? p : 0;
+    char* request = (char*)self + (requestHandle * 0x24 + 0x2c0);
+    return *(int*)(request + 0x20) != 0 ? request : 0;
 }
 #endif
 
@@ -970,9 +970,9 @@ extern "C" void func_00282D30(void* self, float dt)
 {
     int id = *(int*)((char*)self + 0x14);
     if (id >= 0) {
-        float t = *(float*)((char*)self + 0x2C) + dt * 0.01666666753590107f;
-        *(float*)((char*)self + 0x2C) = t;
-        if (*(float*)((char*)self + 0x1C) + *(float*)((char*)self + 0x20) + *(float*)((char*)self + 0x24) - 0.009999999776482582f <= t) {
+        float currTime = *(float*)((char*)self + 0x2C) + dt * 0.01666666753590107f;
+        *(float*)((char*)self + 0x2C) = currTime;
+        if (*(float*)((char*)self + 0x1C) + *(float*)((char*)self + 0x20) + *(float*)((char*)self + 0x24) - 0.009999999776482582f <= currTime) {
             func_00282DB0_f4(self, id, 9, 0.0f, 0.0f, 0.0f, 0.0f);
         }
     }
@@ -993,9 +993,9 @@ extern "C" void* func_00282DD0(void*, int, int, int);
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282DB0__FPvii);
 #ifdef SKIP_ASM
-void* func_00282DB0(void* self, int a1, int a2)
+void* func_00282DB0(void* self, int playerID, int transition)
 {
-    return func_00282DD0(self, a1, a2, *(int*)((char*)self + 0x28));
+    return func_00282DD0(self, playerID, transition, *(int*)((char*)self + 0x28));
 }
 #endif
 
@@ -1023,13 +1023,13 @@ struct sBxsFade2DD0 {
 
 // PORT: the unit declares func_00282DD0(void*, int, int, int) returning void*; the body also takes four floats and returns nothing.
 extern "C" void func_00282DD0_impl(sBxsFade2DD0* self, int id, int kind, int arg, float t, float c, float a, float b) __asm__("func_00282DD0");
-extern "C" void func_00282DD0_impl(sBxsFade2DD0* self, int id, int kind, int arg, float t, float c, float a, float b)
+extern "C" void func_00282DD0_impl(sBxsFade2DD0* self, int id, int kind, int transitionColour, float currFrame, float outFrames, float inFrames, float holdFrames)
 {
     if (self->kind != 9) {
         sBxsVEntry2DD0* vt = self->vtable;
         vt[5].fn((char*)self + vt[5].delta, self->id);
     }
-    if (kind == 9 || a + b + c <= t) {
+    if (kind == 9 || inFrames + holdFrames + outFrames <= currFrame) {
         self->kind = 9;
         self->rateA = 0.0f;
         self->rateB = 0.0f;
@@ -1038,12 +1038,12 @@ extern "C" void func_00282DD0_impl(sBxsFade2DD0* self, int id, int kind, int arg
         self->time = 0;
     } else {
         self->kind = kind;
-        self->arg = arg;
+        self->arg = transitionColour;
         self->time = 0;
         self->id = id;
-        self->rateA = a * 0.01666666753590107f;
-        self->rateB = b * 0.01666666753590107f;
-        self->rateC = c * 0.01666666753590107f;
+        self->rateA = inFrames * 0.01666666753590107f;
+        self->rateB = holdFrames * 0.01666666753590107f;
+        self->rateC = outFrames * 0.01666666753590107f;
         sBxsVEntry2DD0* vt = self->vtable;
         vt[4].fn((char*)self + vt[4].delta, self->id);
     }
@@ -1053,9 +1053,9 @@ extern "C" void func_00282DD0_impl(sBxsFade2DD0* self, int id, int kind, int arg
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282EF0);
 #ifdef SKIP_ASM
-extern "C" int func_00282EF0(void* self, int a1)
+extern "C" int func_00282EF0(void* self, int playerID)
 {
-    return *(int*)((char*)self + 0x14) == a1;
+    return *(int*)((char*)self + 0x14) == playerID;
 }
 #endif
 
@@ -1132,9 +1132,9 @@ extern "C" void cScriptPlayerEntity_SetEntityComm(void* p, int a1);
 
 extern "C" void func_00282F90(void* self)
 {
-    void* p = *(void**)((char*)self + 0x8);
-    if (p != 0) {
-        cScriptPlayerEntity_SetEntityComm(p, 0);
+    void* entity = *(void**)((char*)self + 0x8);
+    if (entity != 0) {
+        cScriptPlayerEntity_SetEntityComm(entity, 0);
     }
 }
 #endif
@@ -1145,10 +1145,10 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00282FB8);
 extern "C" void* func_0027D2E8(void);
 extern "C" void func_0027D400(void* mgr, void* self, int a2);
 
-extern "C" void func_00282FB8(void* self, void* a1)
+extern "C" void func_00282FB8(void* self, void* entity)
 {
-    *(void**)((char*)self + 0x8) = a1;
-    func_0027D400(func_0027D2E8(), self, **(int**)((char*)a1 + 0x8));
+    *(void**)((char*)self + 0x8) = entity;
+    func_0027D400(func_0027D2E8(), self, **(int**)((char*)entity + 0x8));
 }
 #endif
 
@@ -1172,9 +1172,9 @@ extern "C" void cScriptPlayerMain_Pause(void* self);
 
 extern "C" void func_00283038(void* self)
 {
-    void* p = *(void**)((char*)self + 0x8);
-    if (p != 0) {
-        cScriptPlayerMain_Pause(*(void**)((char*)p + 0x8));
+    void* entity = *(void**)((char*)self + 0x8);
+    if (entity != 0) {
+        cScriptPlayerMain_Pause(*(void**)((char*)entity + 0x8));
     }
 }
 #endif
@@ -1186,9 +1186,9 @@ extern "C" void cScriptPlayerMain_Resume(void* self);
 
 extern "C" void func_00283060(void* self)
 {
-    void* p = *(void**)((char*)self + 0x8);
-    if (p != 0) {
-        cScriptPlayerMain_Resume(*(void**)((char*)p + 0x8));
+    void* entity = *(void**)((char*)self + 0x8);
+    if (entity != 0) {
+        cScriptPlayerMain_Resume(*(void**)((char*)entity + 0x8));
     }
 }
 #endif
@@ -1257,12 +1257,12 @@ INCLUDE_ASM("scripter/bxscriptengine", func_002831B0);
 // PORT: func_0027A668 is declared (void*) but takes (self, idx).
 void* func_0027A668_2(void* self, int idx) __asm__("func_0027A668__FPv");
 
-extern "C" int func_002831B0(void* self, void* arg, int n)
+extern "C" int func_002831B0(void* self, void* entity, int n)
 {
     if (n >= 4) {
         return 0;
     }
-    return *(int*)((char*)func_0027A668_2(ScriptEngine, *(int*)((char*)arg + 0x8)) + 0xC) ==
+    return *(int*)((char*)func_0027A668_2(ScriptEngine, *(int*)((char*)entity + 0x8)) + 0xC) ==
            *(int*)(*(char**)((char*)self + 0x10) + 0xF8);
 }
 #endif
@@ -1431,9 +1431,9 @@ INCLUDE_ASM("scripter/bxscriptengine", func_00283440__FPv);
 #ifdef SKIP_ASM
 void* func_00283440(void* self)
 {
-    void* t0 = (char*)*(void**)((char*)self + 0x8) - 0x1;
-    *(int*)((char*)self + 0x8) = (int)t0;
-    return t0;
+    void* useCount = (char*)*(void**)((char*)self + 0x8) - 0x1;
+    *(int*)((char*)self + 0x8) = (int)useCount;
+    return useCount;
 }
 #endif
 

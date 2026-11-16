@@ -35,13 +35,13 @@ void cMemMan_free(void* p);
 
 extern "C" void func_00320D08(void *self)
 {
-    void *p = *(void **)((char *)self + 4);
-    if (p != 0) {
-        cMemMan_free(p);
+    void *buffer = *(void **)((char *)self + 4);
+    if (buffer != 0) {
+        cMemMan_free(buffer);
     }
-    p = *(void **)((char *)self + 0x14);
-    if (p != 0) {
-        cMemMan_free(p);
+    buffer = *(void **)((char *)self + 0x14);
+    if (buffer != 0) {
+        cMemMan_free(buffer);
     }
 }
 #endif
@@ -467,10 +467,10 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 
 extern "C" void* func_003215F8(void* self)
 {
-    void* p = *(void**)((char*)self + 0xE0);
-    *(void**)((char*)self + 0xE0) = *(void**)((char*)p + 4);
-    func_00416210(p, 0, 0x10);
-    return p;
+    void* freeNode = *(void**)((char*)self + 0xE0);
+    *(void**)((char*)self + 0xE0) = *(void**)((char*)freeNode + 4);
+    func_00416210(freeNode, 0, 0x10);
+    return freeNode;
 }
 #endif
 

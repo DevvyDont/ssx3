@@ -104,9 +104,9 @@ struct sGmPtrTable {
 
 extern "C" void func_003672C0(sGmPtrTable* self, int idx)
 {
-    int** base = self->entries; int** e = base + idx;
-    operator_delete(*e);
-    *e = 0;
+    int** base = self->entries; int** slot = base + idx;
+    operator_delete(*slot);
+    *slot = 0;
     self->count--;
 }
 #endif
@@ -126,9 +126,9 @@ extern "C" void* func_00365E40(void*, int, int, void*);
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00367340__FPvii);
 #ifdef SKIP_ASM
-void* func_00367340(void* self, int a1, int a2)
+void* func_00367340(void* self, int start, int size)
 {
-    return func_00365E40((char*)self + 0x4350, a1, a2, (char*)self + 0x8);
+    return func_00365E40((char*)self + 0x4350, start, size, (char*)self + 0x8);
 }
 #endif
 
@@ -170,10 +170,10 @@ extern "C" int func_00366CE0(void* heap, int size, int idx, int other, int a4, i
 extern "C" int func_003673D8(char* self, int size)
 {
     int idx = func_00366CE0(self + 0x1F60, size, -1, -1, -1, 1);
-    char* e = *(char**)(self + 0x3F50) + idx * 0x1C;
-    *(int*)e |= 0x22;
-    *(int*)(e + 8) = 0x7FFFFFFF;
-    return *(int*)e >> 13;
+    char* node = *(char**)(self + 0x3F50) + idx * 0x1C;
+    *(int*)node |= 0x22;
+    *(int*)(node + 8) = 0x7FFFFFFF;
+    return *(int*)node >> 13;
 }
 #endif
 
@@ -285,33 +285,33 @@ static inline int clutPsm_7440(int f)
 }
 
 extern "C" int func_00367440(void* self, int a1, void* a2, int a3, int a4, int a5, int a6, int a7,
-                             int a8, int a9, int a10, int a11)
+                             int a8, int vramMode, int ownsData, int bindId)
 {
-    char* s = (char*)self;
+    char* texMan = (char*)self;
     void* data = (void*)a1;
     const char* name = (const char*)a2;
     unsigned int w = a3;
-    unsigned int h = a4;
+    unsigned int height = a4;
     int mip = a5;
     int fmt = a6;
     int clutFmt = a7;
     void* clut = (void*)a8;
     int id;
-    if (a11 < 0) {
+    if (bindId < 0) {
         id = cPSPGraphicsMan_NewNonBindTexID((cTexSlots367150*)self);
     } else {
-        cPSPGraphicsMan_NewBindTexID(self, a11);
-        id = a11;
+        cPSPGraphicsMan_NewBindTexID(self, bindId);
+        id = bindId;
     }
-    char* t = *(char**)(s + (id << 2) + 8);
-    strncpy(t + 4, name, 8);
-    *(int*)(t + 0x0) = a10;
-    *(int*)(t + 0xC) = fmt;
-    *(int*)(t + 0x28) = -1;
-    *(int*)(t + 0x30) = -1;
-    *(int*)(t + 0x2C) = -1;
-    *(int*)(t + 0x24) = mip;
-    *(int*)(t + 0x34) = -1;
+    char* tex = *(char**)(texMan + (id << 2) + 8);
+    strncpy(tex + 4, name, 8);
+    *(int*)(tex + 0x0) = ownsData;
+    *(int*)(tex + 0xC) = fmt;
+    *(int*)(tex + 0x28) = -1;
+    *(int*)(tex + 0x30) = -1;
+    *(int*)(tex + 0x2C) = -1;
+    *(int*)(tex + 0x24) = mip;
+    *(int*)(tex + 0x34) = -1;
     int psm;
     switch (fmt) {
     case 8:
@@ -334,7 +334,7 @@ extern "C" int func_00367440(void* self, int a1, void* a2, int a3, int a4, int a
         break;
     }
     int bpp = psmBpp_7440(psm);
-    *(int*)(t + 0x18) = bpp;
+    *(int*)(tex + 0x18) = bpp;
     if (bpp <= 0)
         return -1;
     if (data != 0) {
@@ -342,90 +342,90 @@ extern "C" int func_00367440(void* self, int a1, void* a2, int a3, int a4, int a
         int vram = 0;
         for (int lv = 0; lv <= mip; lv++) {
             int lw = w >> lv;
-            int lh = h >> lv;
+            int lh = height >> lv;
             int n = lw * lh * bpp / 8;
             if (n < 0x100)
                 n = 0x100;
             size += n;
             vram += vramBytes_7440(lw, lh, bpp);
         }
-        *(int*)(t + 0x14) = vram;
-        *(int*)(t + 0x10) = size;
-        if (*(int*)(t + 0x0) != 0) {
-            void* p = operator_new_7440(size, name, *(int*)(s + 0x1F58) | 0x05000000, 0);
-            *(void**)(t + 0x1C) = p;
-            MEM_copy(p, data, size);
+        *(int*)(tex + 0x14) = vram;
+        *(int*)(tex + 0x10) = size;
+        if (*(int*)(tex + 0x0) != 0) {
+            void* copy = operator_new_7440(size, name, *(int*)(texMan + 0x1F58) | 0x05000000, 0);
+            *(void**)(tex + 0x1C) = copy;
+            MEM_copy(copy, data, size);
         } else {
-            *(void**)(t + 0x1C) = data;
+            *(void**)(tex + 0x1C) = data;
         }
     } else {
-        *(void**)(t + 0x1C) = 0;
-        *(int*)(t + 0x10) = 0;
-        *(int*)(t + 0x14) = vramBytes_7440(w, h, bpp);
+        *(void**)(tex + 0x1C) = 0;
+        *(int*)(tex + 0x10) = 0;
+        *(int*)(tex + 0x14) = vramBytes_7440(w, height, bpp);
     }
     int esz;
     if (clut != 0 && (esz = clutEntryBytes_7440(clutFmt)) != 0) {
-        int entries = (unsigned int)(*(int*)(t + 0xC) - 0xB) <= 1 ? 0x10 : 0x100;
-        if (*(int*)(t + 0x0) != 0) {
-            void* p = operator_new_7440(0x400, name, *(int*)(s + 0x1F58) | 0x05000000, 0);
-            *(void**)(t + 0x20) = p;
-            MEM_copy(p, clut, entries * esz);
+        int entries = (unsigned int)(*(int*)(tex + 0xC) - 0xB) <= 1 ? 0x10 : 0x100;
+        if (*(int*)(tex + 0x0) != 0) {
+            void* copy = operator_new_7440(0x400, name, *(int*)(texMan + 0x1F58) | 0x05000000, 0);
+            *(void**)(tex + 0x20) = copy;
+            MEM_copy(copy, clut, entries * esz);
         } else {
-            *(void**)(t + 0x20) = clut;
+            *(void**)(tex + 0x20) = clut;
         }
     } else {
-        *(void**)(t + 0x20) = 0;
+        *(void**)(tex + 0x20) = 0;
     }
     int lcm = 0;
-    int l = 0;
+    int lodL = 0;
     int k = -0xB9;
     int mmin = 5;
     if (mip == 0) {
         lcm = 1;
-        l = mip;
+        lodL = mip;
         k = 0;
         mmin = 1;
     }
-    ulong* tex0p = (ulong*)(t + 0x38);
+    ulong* tex0p = (ulong*)(tex + 0x38);
     int lw2 = texLog2_7440(w - 1);
-    int lh2 = texLog2_7440(h - 1);
+    int lh2 = texLog2_7440(height - 1);
     int cpsm = clutPsm_7440(clutFmt);
     *tex0p = (ulong)0 | ((ulong)((w + 63) >> 6) << 14) | ((ulong)psm << 20) | ((ulong)(lw2 + 1) << 26)
         | ((ulong)(lh2 + 1) << 30) | ((ulong)1 << 34) | ((ulong)0 << 35) | ((ulong)0 << 37)
         | ((ulong)cpsm << 51) | ((ulong)0 << 55) | ((ulong)0 << 56) | ((ulong)(bpp <= 8) << 61);
-    *(ulong*)(t + 0x40) = (ulong)lcm | ((ulong)(unsigned int)mip << 2) | ((ulong)1 << 5)
-        | ((ulong)mmin << 6) | ((ulong)l << 19) | ((ulong)k << 32);
+    *(ulong*)(tex + 0x40) = (ulong)lcm | ((ulong)(unsigned int)mip << 2) | ((ulong)1 << 5)
+        | ((ulong)mmin << 6) | ((ulong)lodL << 19) | ((ulong)k << 32);
     if (mip != 0) {
-        *(ulong*)(t + 0x48) = ((ulong)((w + 0x7F) >> 7) << 14) | ((ulong)((w + 0xFF) >> 8) << 34)
+        *(ulong*)(tex + 0x48) = ((ulong)((w + 0x7F) >> 7) << 14) | ((ulong)((w + 0xFF) >> 8) << 34)
             | ((ulong)((w + 0x1FF) >> 9) << 54);
-        *(ulong*)(t + 0x50) = ((ulong)((w + 0x3FF) >> 10) << 14) | ((ulong)((w + 0x7FF) >> 11) << 34)
+        *(ulong*)(tex + 0x50) = ((ulong)((w + 0x3FF) >> 10) << 14) | ((ulong)((w + 0x7FF) >> 11) << 34)
             | ((ulong)((w + 0xFFF) >> 12) << 54);
     }
-    if (a9 == 1) {
-        int node = func_00366CE0(s + 0x1F60, *(int*)(t + 0x14), id, -1, -1, 1);
-        int* f = (int*)(*(char**)(s + 0x3F50) + node * 0x1C);
-        int fl = *f | 2;
-        *f = fl;
-        *(int*)(t + 0x30) = node;
-        *(int*)(t + 0x28) = fl >> 8;
-    } else if (a9 == 3) {
-        int node = func_00366CE0(s + 0x1F60, *(int*)(t + 0x14) + 0x2000, id, -1, -1, 1);
-        int* f = (int*)(*(char**)(s + 0x3F50) + node * 0x1C);
-        int fl = *f | 0x22;
-        *f = fl;
-        *(int*)(t + 0x30) = node;
-        int a = fl >> 8;
-        *(int*)(t + 0x28) = a + (-a & 0x1F);
+    if (vramMode == 1) {
+        int node = func_00366CE0(texMan + 0x1F60, *(int*)(tex + 0x14), id, -1, -1, 1);
+        int* nodeFlags = (int*)(*(char**)(texMan + 0x3F50) + node * 0x1C);
+        int fl = *nodeFlags | 2;
+        *nodeFlags = fl;
+        *(int*)(tex + 0x30) = node;
+        *(int*)(tex + 0x28) = fl >> 8;
+    } else if (vramMode == 3) {
+        int node = func_00366CE0(texMan + 0x1F60, *(int*)(tex + 0x14) + 0x2000, id, -1, -1, 1);
+        int* nodeFlags = (int*)(*(char**)(texMan + 0x3F50) + node * 0x1C);
+        int fl = *nodeFlags | 0x22;
+        *nodeFlags = fl;
+        *(int*)(tex + 0x30) = node;
+        int vramAddr = fl >> 8;
+        *(int*)(tex + 0x28) = vramAddr + (-vramAddr & 0x1F);
     }
-    if (*(int*)(t + 0x0) != 0) {
-        if (*(int*)(t + 0xC) == 9) {
-            if (*(int*)(s + 0x6344) < *(int*)(t + 0x14) && a9 == 0)
-                func_00366E90(self, t);
+    if (*(int*)(tex + 0x0) != 0) {
+        if (*(int*)(tex + 0xC) == 9) {
+            if (*(int*)(texMan + 0x6344) < *(int*)(tex + 0x14) && vramMode == 0)
+                func_00366E90(self, tex);
             else
-                *(ulong*)(t + 0x38) = (*(ulong*)(t + 0x38) & ~((ulong)0x3F << 20)) | ((ulong)0x1B << 20);
+                *(ulong*)(tex + 0x38) = (*(ulong*)(tex + 0x38) & ~((ulong)0x3F << 20)) | ((ulong)0x1B << 20);
         }
-    } else if (*(int*)(t + 0xC) == 9) {
-        *(ulong*)(t + 0x38) = (*(ulong*)(t + 0x38) & ~((ulong)0x3F << 20)) | ((ulong)0x1B << 20);
+    } else if (*(int*)(tex + 0xC) == 9) {
+        *(ulong*)(tex + 0x38) = (*(ulong*)(tex + 0x38) & ~((ulong)0x3F << 20)) | ((ulong)0x1B << 20);
     }
     return id;
 }
@@ -439,8 +439,8 @@ extern "C" void func_00367B60(void* self, int i)
     char* obj = *(char**)((char*)self + (i << 2) + 8);
     if (*(int*)(obj + 0x28) != -1) {
         char* sub = *(int*)(obj + 0xC) != 9 ? (char*)self + 0x1F60 : (char*)self + 0x4350;
-        char* e = *(char**)(sub + 0x1FF0) + *(int*)(obj + 0x30) * 0x1C;
-        *(int*)e &= ~2;
+        char* node = *(char**)(sub + 0x1FF0) + *(int*)(obj + 0x30) * 0x1C;
+        *(int*)node &= ~2;
     }
 }
 #endif
@@ -480,20 +480,20 @@ static inline void fill7BC0(int* p, int v)
 
 extern "C" void func_00367BC0(sGmMan7BC0* self, int id)
 {
-    char* s = (char*)self;
-    sGmTex7BC0* t = self->texs[id];
-    if (t->slotA != -1) {
-        func_003663D8(t->kind != 9 ? s + 0x1F60 : s + 0x4350, t->idA);
+    char* selfBytes = (char*)self;
+    sGmTex7BC0* tex = self->texs[id];
+    if (tex->slotA != -1) {
+        func_003663D8(tex->kind != 9 ? selfBytes + 0x1F60 : selfBytes + 0x4350, tex->idA);
     }
-    if (t->slotB != -1) {
-        func_003663D8(s + 0x1F60, t->idB);
+    if (tex->slotB != -1) {
+        func_003663D8(selfBytes + 0x1F60, tex->idB);
     }
-    if (t->owned != 0) {
-        if (t->bufA != 0) {
-            cMemMan_free(t->bufA);
+    if (tex->owned != 0) {
+        if (tex->bufA != 0) {
+            cMemMan_free(tex->bufA);
         }
-        if (t->bufB != 0) {
-            cMemMan_free(t->bufB);
+        if (tex->bufB != 0) {
+            cMemMan_free(tex->bufB);
         }
     }
     if (id < 0x5DC) {
@@ -501,8 +501,8 @@ extern "C" void func_00367BC0(sGmMan7BC0* self, int id)
     } else {
         func_003671C8((cTexSlots3671C8*)self, id);
     }
-    fill7BC0((int*)(s + 0x1F4C), -1);
-    *(int*)(s + 0x1F54) = -1;
+    fill7BC0((int*)(selfBytes + 0x1F4C), -1);
+    *(int*)(selfBytes + 0x1F54) = -1;
 }
 #endif
 
@@ -513,9 +513,9 @@ extern "C" int func_00367440(void* self, int a1, void* a2, int a3, int a4, int a
                              int a8, int a9, int a10, int a11);
 extern char str_LockTex[];
 
-extern "C" int func_00367CD0(void* self, int a, int b, int c)
+extern "C" int func_00367CD0(void* self, int width, int height, int format)
 {
-    return func_00367440(self, 0, str_LockTex, a, b, 0, c, 0, 0, 3, 0, -1);
+    return func_00367440(self, 0, str_LockTex, width, height, 0, format, 0, 0, 3, 0, -1);
 }
 #endif
 
@@ -525,16 +525,16 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367D20);
 extern "C" void* MEM_copy(void*, void*, int);
 extern "C" void func_00369098(void* self, int idx);
 
-extern "C" void func_00367D20(void* self, int idx, void* data, int a3, int a4, int a5, int a6,
+extern "C" void func_00367D20(void* self, int idx, void* data, int width, int height, int a5, int a6,
                               int a7, void* clut, int upload)
 {
-    char* e = *(char**)((char*)self + (idx << 2) + 8);
+    char* tex = *(char**)((char*)self + (idx << 2) + 8);
     if (upload != 0) {
         if (data != 0) {
-            MEM_copy(*(void**)(e + 0x1C), data, *(int*)(e + 0x10));
+            MEM_copy(*(void**)(tex + 0x1C), data, *(int*)(tex + 0x10));
         }
         if (clut != 0) {
-            MEM_copy(*(void**)(e + 0x20), clut, 4 << *(int*)(e + 0x18));
+            MEM_copy(*(void**)(tex + 0x20), clut, 4 << *(int*)(tex + 0x18));
         }
     }
     func_00369098(self, idx);
@@ -579,23 +579,23 @@ static inline ulong gsSetFrame367DB8(int fbp, int fbw, int psm, int fbmsk)
 
 extern "C" void func_00367DB8(sPs2TexSet* self, int idx, ulong** pp)
 {
-    sPs2RenderTex* t = self->tex[idx];
-    ulong* p = *pp;
-    p[0] = 0x10000005;
-    p[1] = 0;
-    p[2] = (ulong)0x8800 << 45;
-    p[3] = (ulong)0x50000004 << 32;
-    p[4] = ((ulong)0x10000000 << 32) | 0x8003;
-    p[5] = 0xE;
-    p[6] = gsSetFrame367DB8(t->addr >> 5, (1 << t->tex0.TW) >> 6, t->tex0.PSM, 0);
-    p[7] = 0x4C;
-    p[8] = ((ulong)((1 << t->tex0.TW) - 1) << 16) | ((ulong)((1 << t->tex0.TH) - 1) << 48);
-    p[9] = 0x40;
-    p[10] = (ulong)((0x800 - ((1 << t->tex0.TW) >> 1)) << 4) |
-            ((ulong)((0x800 - ((1 << t->tex0.TH) >> 1)) << 4) << 32);
-    p[11] = 0x18;
-    p += 12;
-    *pp = p;
+    sPs2RenderTex* renderTex = self->tex[idx];
+    ulong* packet = *pp;
+    packet[0] = 0x10000005;
+    packet[1] = 0;
+    packet[2] = (ulong)0x8800 << 45;
+    packet[3] = (ulong)0x50000004 << 32;
+    packet[4] = ((ulong)0x10000000 << 32) | 0x8003;
+    packet[5] = 0xE;
+    packet[6] = gsSetFrame367DB8(renderTex->addr >> 5, (1 << renderTex->tex0.TW) >> 6, renderTex->tex0.PSM, 0);
+    packet[7] = 0x4C;
+    packet[8] = ((ulong)((1 << renderTex->tex0.TW) - 1) << 16) | ((ulong)((1 << renderTex->tex0.TH) - 1) << 48);
+    packet[9] = 0x40;
+    packet[10] = (ulong)((0x800 - ((1 << renderTex->tex0.TW) >> 1)) << 4) |
+            ((ulong)((0x800 - ((1 << renderTex->tex0.TH) >> 1)) << 4) << 32);
+    packet[11] = 0x18;
+    packet += 12;
+    *pp = packet;
 }
 #endif
 
@@ -636,33 +636,33 @@ union sFloatBits7F18 {
 // Draw a full-size sprite over render texture idx, tinted with color (a, r, g, b in 0..1).
 extern "C" void func_00367F18(sPs2TexSet7F18* self, int idx, float* color, ulong** pp)
 {
-    sPs2RenderTex7F18* t = self->tex[idx];
-    ulong* p = *pp;
-    sFloatBits7F18 q;
-    q.f = 1.0f;
-    p[0] = 0x10000006;
-    p[1] = 0;
-    p[2] = 0;
-    p[3] = (ulong)0x50000005 << 32;
-    p[4] = ((ulong)0x44000000 << 32) | 1;
-    p[5] = 0x5510;
-    p[6] = 0x10E;
-    p[7] = (ulong)(int)(color[1] * 128.0f) | ((ulong)(int)(color[2] * 128.0f) << 8) |
+    sPs2RenderTex7F18* renderTex = self->tex[idx];
+    ulong* packet = *pp;
+    sFloatBits7F18 qValue;
+    qValue.f = 1.0f;
+    packet[0] = 0x10000006;
+    packet[1] = 0;
+    packet[2] = 0;
+    packet[3] = (ulong)0x50000005 << 32;
+    packet[4] = ((ulong)0x44000000 << 32) | 1;
+    packet[5] = 0x5510;
+    packet[6] = 0x10E;
+    packet[7] = (ulong)(int)(color[1] * 128.0f) | ((ulong)(int)(color[2] * 128.0f) << 8) |
            ((ulong)(int)(color[3] * 128.0f) << 16) | ((ulong)(int)(color[0] * 128.0f) << 24) |
-           ((ulong)q.i << 32);
-    p[8] = (ulong)((0x800 - ((1 << t->tex0.TW) >> 1)) << 4) |
-           ((ulong)((0x800 - ((1 << t->tex0.TH) >> 1)) << 4) << 16) | ((ulong)1 << 32);
-    p[9] = (ulong)((((1 << t->tex0.TW) >> 1) + 0x801) << 4) |
-           ((ulong)((((1 << t->tex0.TH) >> 1) + 0x801) << 4) << 16) | ((ulong)1 << 32);
-    p[10] = ((ulong)0x10000000 << 32) | 0x8001;
-    p[11] = 0xE;
+           ((ulong)qValue.i << 32);
+    packet[8] = (ulong)((0x800 - ((1 << renderTex->tex0.TW) >> 1)) << 4) |
+           ((ulong)((0x800 - ((1 << renderTex->tex0.TH) >> 1)) << 4) << 16) | ((ulong)1 << 32);
+    packet[9] = (ulong)((((1 << renderTex->tex0.TW) >> 1) + 0x801) << 4) |
+           ((ulong)((((1 << renderTex->tex0.TH) >> 1) + 0x801) << 4) << 16) | ((ulong)1 << 32);
+    packet[10] = ((ulong)0x10000000 << 32) | 0x8001;
+    packet[11] = 0xE;
     {
-        ulong hi = ((ulong)((1 << t->tex0.TH) - 2) << 48) | (((ulong)1 << 32) | 1);
-        p[12] = ((ulong)((1 << t->tex0.TW) - 2) << 16) | hi;
+        ulong hi = ((ulong)((1 << renderTex->tex0.TH) - 2) << 48) | (((ulong)1 << 32) | 1);
+        packet[12] = ((ulong)((1 << renderTex->tex0.TW) - 2) << 16) | hi;
     }
-    p[13] = 0x40;
-    p += 14;
-    *pp = p;
+    packet[13] = 0x40;
+    packet += 14;
+    *pp = packet;
 }
 #endif
 
@@ -717,38 +717,38 @@ template <class T> static inline T Max_8170(T a, T b)
 extern "C" void func_00368170(void* self_, int idx, ulong** dma, ulong** gif)
 {
     sTexMgr_8170* self = (sTexMgr_8170*)self_;
-    sBXTex_8170* t = self->texs[idx];
-    int psm = t->psm;
-    ulong* d = *dma;
-    int w = t->Width();
-    int h = t->Height();
-    int fmt = (int)((t->tex0 >> 20) & 0x3F);
-    ulong* p = *gif;
-    int src = t->src;
-    int dbp = t->dbp;
+    sBXTex_8170* texture = self->texs[idx];
+    int psm = texture->psm;
+    ulong* dmaCursor = *dma;
+    int w = texture->Width();
+    int height = texture->Height();
+    int fmt = (int)((texture->tex0 >> 20) & 0x3F);
+    ulong* gifCursor = *gif;
+    int src = texture->src;
+    int dbp = texture->dbp;
     int shift = 8;
     if (psm == 10) {
         fmt = 0;
         w >>= 1;
-        h >>= 1;
+        height >>= 1;
     } else if (psm == 9) {
         fmt = 0x1B;
         shift = 6;
     } else if (psm == 12) {
         fmt = 0;
-        if (w == h) {
+        if (w == height) {
             w >>= 1;
-            h >>= 2;
+            height >>= 2;
         } else {
             w >>= 2;
-            h >>= 1;
+            height >>= 1;
         }
     }
-    for (int i = 0; i <= t->levels; i++) {
-        int lw = t->Width() >> i;
-        int lh = t->Height() >> i;
-        int size = Max_8170(lw * lh * t->BPP() / 8, 256);
-        int bpp = t->BPP();
+    for (int i = 0; i <= texture->levels; i++) {
+        int lw = texture->Width() >> i;
+        int lh = texture->Height() >> i;
+        int size = Max_8170(lw * lh * texture->BPP() / 8, 256);
+        int bpp = texture->BPP();
         int pw, ph;
         switch (bpp) {
         case 4:
@@ -772,40 +772,40 @@ extern "C" void func_00368170(void* self_, int idx, ulong** dma, ulong** gif)
         }
         int vram = Max_8170(lw, pw) * Max_8170(lh, ph) * bpp / 8;
         vram += -vram & 0xFF;
-        *(cQuad128_8170*)p = 0x10000006;
-        p[2] = ((ulong)0x10000000 << 32) | 4;
-        p[3] = 0xE;
-        p[4] = ((ulong)dbp << 32) | ((ulong)((w + 63) >> 6) << 48) | ((ulong)fmt << 56);
-        p[5] = 0x50;
-        p[6] = 0;
-        p[7] = 0x51;
-        p[8] = w | ((ulong)h << 32);
-        p[9] = 0x52;
-        p[10] = 0;
-        p[11] = 0x53;
+        *(cQuad128_8170*)gifCursor = 0x10000006;
+        gifCursor[2] = ((ulong)0x10000000 << 32) | 4;
+        gifCursor[3] = 0xE;
+        gifCursor[4] = ((ulong)dbp << 32) | ((ulong)((w + 63) >> 6) << 48) | ((ulong)fmt << 56);
+        gifCursor[5] = 0x50;
+        gifCursor[6] = 0;
+        gifCursor[7] = 0x51;
+        gifCursor[8] = w | ((ulong)height << 32);
+        gifCursor[9] = 0x52;
+        gifCursor[10] = 0;
+        gifCursor[11] = 0x53;
         int nloop = size >> 4;
         if (nloop < 1) nloop = 1;
-        p[12] = nloop | ((ulong)2 << 58);
-        p[13] = 0;
+        gifCursor[12] = nloop | ((ulong)2 << 58);
+        gifCursor[13] = 0;
         int qwc = size >> 4;
         if (qwc < 1) qwc = 1;
-        p[14] = qwc | 0x30000000 | ((ulong)src << 32);
-        p[15] = 0;
-        p[16] = 0x10000002;
-        p[17] = 0;
-        p[18] = i == t->levels ? ((ulong)0x10000000 << 32) | 0x8001 : ((ulong)0x10000000 << 32) | 1;
-        p[19] = 0xE;
-        p[20] = 0;
-        p[21] = 0x3F;
+        gifCursor[14] = qwc | 0x30000000 | ((ulong)src << 32);
+        gifCursor[15] = 0;
+        gifCursor[16] = 0x10000002;
+        gifCursor[17] = 0;
+        gifCursor[18] = i == texture->levels ? ((ulong)0x10000000 << 32) | 0x8001 : ((ulong)0x10000000 << 32) | 1;
+        gifCursor[19] = 0xE;
+        gifCursor[20] = 0;
+        gifCursor[21] = 0x3F;
         src += size;
         dbp += vram >> shift;
         w >>= 1;
-        h >>= 1;
-        p += 22;
+        height >>= 1;
+        gifCursor += 22;
     }
-    func_00368138(self, &d);
-    *dma = d;
-    *gif = p;
+    func_00368138(self, &dmaCursor);
+    *dma = dmaCursor;
+    *gif = gifCursor;
 }
 #endif
 
@@ -830,46 +830,46 @@ struct sPs2UpMgr {
 extern "C" void func_003684F0(sPs2UpMgr* self, int idx, ulong** dma, ulong** gif)
 {
     sPs2UpTex* tex = self->texs[idx];
-    ulong* p = *gif;
-    ulong* d = *dma;
+    ulong* gifCursor = *gif;
+    ulong* dmaCursor = *dma;
     int w;
-    int h;
+    int height;
     int qwc;
     if (tex->psm - 0xB < 2) {
         w = 8;
-        h = 2;
+        height = 2;
         qwc = 0x10;
     } else {
         w = 0x10;
-        h = 0x10;
+        height = 0x10;
         qwc = 0x40;
     }
-    p[0] = 0x10000006;
-    p[1] = 0;
-    p[2] = ((ulong)0x10000000 << 32) | 4;
-    p[3] = 0xE;
-    p[4] = ((ulong)tex->dbp << 32) | ((ulong)1 << 48);
-    p[5] = 0x50;
-    p[6] = 0;
-    p[7] = 0x51;
-    p[8] = w | ((ulong)h << 32);
-    p[9] = 0x52;
-    p[10] = 0;
-    p[11] = 0x53;
-    p[12] = qwc | ((ulong)2 << 58);
-    p[13] = 0;
-    p[14] = 0x30000000 | qwc | ((ulong)tex->addr << 32);
-    p[15] = 0;
-    p[16] = 0x10000002;
-    p[17] = 0;
-    p[18] = ((ulong)0x10000000 << 32) | 0x8001;
-    p[19] = 0xE;
-    p[20] = 0;
-    p[21] = 0x3F;
-    func_00368138(self, &d);
-    p += 22;
-    *dma = d;
-    *gif = p;
+    gifCursor[0] = 0x10000006;
+    gifCursor[1] = 0;
+    gifCursor[2] = ((ulong)0x10000000 << 32) | 4;
+    gifCursor[3] = 0xE;
+    gifCursor[4] = ((ulong)tex->dbp << 32) | ((ulong)1 << 48);
+    gifCursor[5] = 0x50;
+    gifCursor[6] = 0;
+    gifCursor[7] = 0x51;
+    gifCursor[8] = w | ((ulong)height << 32);
+    gifCursor[9] = 0x52;
+    gifCursor[10] = 0;
+    gifCursor[11] = 0x53;
+    gifCursor[12] = qwc | ((ulong)2 << 58);
+    gifCursor[13] = 0;
+    gifCursor[14] = 0x30000000 | qwc | ((ulong)tex->addr << 32);
+    gifCursor[15] = 0;
+    gifCursor[16] = 0x10000002;
+    gifCursor[17] = 0;
+    gifCursor[18] = ((ulong)0x10000000 << 32) | 0x8001;
+    gifCursor[19] = 0xE;
+    gifCursor[20] = 0;
+    gifCursor[21] = 0x3F;
+    func_00368138(self, &dmaCursor);
+    gifCursor += 22;
+    *dma = dmaCursor;
+    *gif = gifCursor;
 }
 #endif
 
@@ -1044,14 +1044,14 @@ static inline int levelBlocks_8970(char* t, int lv, int shift)
 // PORT: 64-bit `ulong` GIF/DMA packet words.
 extern "C" void func_00368970(void* self, int idx, int slot, ulong** dma)
 {
-    char* s = (char*)self;
-    ulong* p = *dma;
+    char* selfBytes = (char*)self;
+    ulong* packet = *dma;
     int off = slot << 2;
-    char* bound = s + 0x1F4C;
+    char* bound = selfBytes + 0x1F4C;
     int* cur = (int*)(bound + off);
     if (*cur != idx) {
         *cur = idx;
-        char* t = *(char**)(s + (idx << 2) + 8);
+        char* tex = *(char**)(selfBytes + (idx << 2) + 8);
         int rTex0, rTex1, rMip1, rMip2;
         if (slot == 0) {
             rTex0 = 6;
@@ -1064,66 +1064,66 @@ extern "C" void func_00368970(void* self, int idx, int slot, ulong** dma)
             rMip1 = 0x35;
             rMip2 = 0x37;
         }
-        int shift = *(int*)(t + 0xC) == 9 ? 6 : 8;
+        int shift = *(int*)(tex + 0xC) == 9 ? 6 : 8;
         int n;
-        if (*(int*)(t + 0x24) >= 4) {
+        if (*(int*)(tex + 0x24) >= 4) {
             n = 4;
         } else {
             n = 2;
-            if (*(int*)(t + 0x24) >= 1)
+            if (*(int*)(tex + 0x24) >= 1)
                 n = 3;
         }
-        p[0] = (n + 2) | 0x10000000;
-        p[1] = 0;
-        p[2] = 0;
+        packet[0] = (n + 2) | 0x10000000;
+        packet[1] = 0;
+        packet[2] = 0;
         unsigned int direct = (n + 1) | 0x50000000;
-        p[3] = (ulong)direct << 32;
-        p[4] = (ulong)(n | 0x8000) | ((ulong)1 << 60);
-        p[5] = 0xE;
-        p += 6;
-        if (*(int*)(t + 0x24) > 0) {
-            int tbp1 = *(int*)(t + 0x28) + levelBlocks_8970(t, 0, shift);
-            int tbp2 = tbp1 + levelBlocks_8970(t, 1, shift);
-            int tbp3 = tbp2 + levelBlocks_8970(t, 2, shift);
-            p[0] = *(ulong*)(t + 0x48) | ((ulong)tbp1 | ((ulong)tbp2 << 20) | ((ulong)tbp3 << 40));
-            p[1] = rMip1;
-            p += 2;
-            if (*(int*)(t + 0x24) >= 4) {
-                int tbp4 = tbp3 + levelBlocks_8970(t, 3, shift);
-                int tbp5 = tbp4 + levelBlocks_8970(t, 4, shift);
-                int tbp6 = tbp5 + levelBlocks_8970(t, 5, shift);
-                p[0] = *(ulong*)(t + 0x50) | ((ulong)tbp4 | ((ulong)tbp5 << 20) | ((ulong)tbp6 << 40));
-                p[1] = rMip2;
-                p += 2;
+        packet[3] = (ulong)direct << 32;
+        packet[4] = (ulong)(n | 0x8000) | ((ulong)1 << 60);
+        packet[5] = 0xE;
+        packet += 6;
+        if (*(int*)(tex + 0x24) > 0) {
+            int tbp1 = *(int*)(tex + 0x28) + levelBlocks_8970(tex, 0, shift);
+            int tbp2 = tbp1 + levelBlocks_8970(tex, 1, shift);
+            int tbp3 = tbp2 + levelBlocks_8970(tex, 2, shift);
+            packet[0] = *(ulong*)(tex + 0x48) | ((ulong)tbp1 | ((ulong)tbp2 << 20) | ((ulong)tbp3 << 40));
+            packet[1] = rMip1;
+            packet += 2;
+            if (*(int*)(tex + 0x24) >= 4) {
+                int tbp4 = tbp3 + levelBlocks_8970(tex, 3, shift);
+                int tbp5 = tbp4 + levelBlocks_8970(tex, 4, shift);
+                int tbp6 = tbp5 + levelBlocks_8970(tex, 5, shift);
+                packet[0] = *(ulong*)(tex + 0x50) | ((ulong)tbp4 | ((ulong)tbp5 << 20) | ((ulong)tbp6 << 40));
+                packet[1] = rMip2;
+                packet += 2;
             }
         }
-        p[0] = *(ulong*)(t + 0x40);
-        p[1] = rTex1;
-        int caddr = *(int*)(t + 0x2C);
+        packet[0] = *(ulong*)(tex + 0x40);
+        packet[1] = rTex1;
+        int caddr = *(int*)(tex + 0x2C);
         int cbp = 0;
         if (caddr >= 0) {
-            *(int*)(s + 0x1F54) = idx;
+            *(int*)(selfBytes + 0x1F54) = idx;
             cbp = caddr;
         }
-        p[2] = *(ulong*)(t + 0x38) | ((ulong)*(int*)(t + 0x28) | ((ulong)cbp << 37));
-        p[3] = rTex0;
-        p += 4;
-    } else if (*(int*)(s + 0x1F54) != idx) {
-        char* t = *(char**)(s + (idx << 2) + 8);
-        if (*(int*)(t + 0x2C) >= 0) {
-            *(int*)(s + 0x1F54) = idx;
-            p[0] = 0x10000003;
-            p[1] = 0;
-            p[2] = 0;
-            p[3] = (ulong)0x50000002 << 32;
-            p[4] = (ulong)(1 | 0x8000) | ((ulong)1 << 60);
-            p[5] = 0xE;
-            p[6] = *(ulong*)(t + 0x38) | ((ulong)*(int*)(t + 0x2C) << 37);
-            p[7] = slot == 0 ? 0x16 : 0x17;
-            p += 8;
+        packet[2] = *(ulong*)(tex + 0x38) | ((ulong)*(int*)(tex + 0x28) | ((ulong)cbp << 37));
+        packet[3] = rTex0;
+        packet += 4;
+    } else if (*(int*)(selfBytes + 0x1F54) != idx) {
+        char* tex = *(char**)(selfBytes + (idx << 2) + 8);
+        if (*(int*)(tex + 0x2C) >= 0) {
+            *(int*)(selfBytes + 0x1F54) = idx;
+            packet[0] = 0x10000003;
+            packet[1] = 0;
+            packet[2] = 0;
+            packet[3] = (ulong)0x50000002 << 32;
+            packet[4] = (ulong)(1 | 0x8000) | ((ulong)1 << 60);
+            packet[5] = 0xE;
+            packet[6] = *(ulong*)(tex + 0x38) | ((ulong)*(int*)(tex + 0x2C) << 37);
+            packet[7] = slot == 0 ? 0x16 : 0x17;
+            packet += 8;
         }
     }
-    *dma = p;
+    *dma = packet;
 }
 #endif
 
@@ -1134,18 +1134,18 @@ extern "C" void func_00366E30(void* list, int i);
 
 extern "C" void func_00369098(void* self, int idx)
 {
-    char* e = *(char**)((char*)self + (idx << 2) + 8);
-    if (*(int*)(e + 0x28) != -1) {
-        if (*(int*)(e + 0xC) != 9) {
+    char* tex = *(char**)((char*)self + (idx << 2) + 8);
+    if (*(int*)(tex + 0x28) != -1) {
+        if (*(int*)(tex + 0xC) != 9) {
             func_00366E30((char*)self + 0x1F60, idx);
         } else {
             func_00366E30((char*)self + 0x4350, idx);
         }
     }
-    int v = -1;
-    int* a = (int*)((char*)self + 0x1F4C);
+    int unbound = -1;
+    int* bound = (int*)((char*)self + 0x1F4C);
     for (int i = 1; i >= 0; i--) {
-        a[i] = v;
+        bound[i] = unbound;
     }
     *(int*)((char*)self + 0x1F54) = -1;
 }
@@ -1179,15 +1179,15 @@ struct sGfxTexTable1 {
     sGfxTex1* entries[1];
 };
 
-extern "C" void func_00369130(sGfxTexTable1* self, int idx, int mmin, int mmag, int l, int k)
+extern "C" void func_00369130(sGfxTexTable1* self, int idx, int mmin, int mmag, int lodL, int k)
 {
-    sGfxTex1* e = self->entries[idx];
-    sGsTex1 t = e->tex1;
-    t.L = l;
-    t.K = k;
-    t.MMIN = mmin;
-    t.MMAG = mmag;
-    e->tex1 = t;
+    sGfxTex1* entry = self->entries[idx];
+    sGsTex1 tex1Reg = entry->tex1;
+    tex1Reg.L = lodL;
+    tex1Reg.K = k;
+    tex1Reg.MMIN = mmin;
+    tex1Reg.MMAG = mmag;
+    entry->tex1 = tex1Reg;
 }
 #endif
 
@@ -1478,10 +1478,10 @@ extern "C" int func_003696C8(cPS2GraphicsMan* self_, const char* name)
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00369890__FPvii);
 #ifdef SKIP_ASM
-void func_00369890(void* self, int a1, int a2)
+void func_00369890(void* self, int numFiles, int fileNames)
 {
-    *(int*)((char*)self + 0x27c) = a2;
-    *(int*)((char*)self + 0x278) = a1;
+    *(int*)((char*)self + 0x27c) = fileNames;
+    *(int*)((char*)self + 0x278) = numFiles;
     *(int*)((char*)self + 0xe80) = 0;
 }
 #endif
@@ -1493,9 +1493,9 @@ void cMemMan_free(void* p);
 
 extern "C" void func_003698A0(void* self)
 {
-    void* p = *(void**)((char*)self + 0xF48);
-    if (p != 0) {
-        cMemMan_free(p);
+    void* history = *(void**)((char*)self + 0xF48);
+    if (history != 0) {
+        cMemMan_free(history);
     }
     *(void**)((char*)self + 0xF48) = 0;
     *(int*)((char*)self + 0xF4C) = 0;

@@ -195,36 +195,36 @@ extern "C" void func_001849B0(void* self)
     }
     func_001A0508((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
     func_001A0570((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), 0);
-    char* m = (char*)SSXApp->RealFE;
-    sVec4_1849B0 a;
-    sVec4_1849B0 b;
+    char* realFe = (char*)SSXApp->RealFE;
+    sVec4_1849B0 camPos;
+    sVec4_1849B0 lookAt;
     float z = 80.0f;
     float w = 1.0f;
     float y = 660.0f;
-    a.x = 0.0f;
-    a.y = y;
-    a.z = z;
-    a.w = w;
-    b.x = 0.0f;
-    b.y = 0.0f;
-    b.z = z;
-    b.w = w;
-    func_0015E050(m + 0x10, &a, &b);
-    *(float*)(m + 0x10) = 0.4363323450088501f;
+    camPos.x = 0.0f;
+    camPos.y = y;
+    camPos.z = z;
+    camPos.w = w;
+    lookAt.x = 0.0f;
+    lookAt.y = 0.0f;
+    lookAt.z = z;
+    lookAt.w = w;
+    func_0015E050(realFe + 0x10, &camPos, &lookAt);
+    *(float*)(realFe + 0x10) = 0.4363323450088501f;
     {
-        char* e = *(char**)((char*)self + 0x10);
-        int h = GetHashValue32(str_empty_box);
-        *(void**)((char*)self + 0x58) = func_00398380(e + 0x58, h);
+        char* uiEngine = *(char**)((char*)self + 0x10);
+        int iconHash = GetHashValue32(str_empty_box);
+        *(void**)((char*)self + 0x58) = func_00398380(uiEngine + 0x58, iconHash);
     }
     {
-        char* e = *(char**)((char*)self + 0x10);
-        int h = GetHashValue32(str_checkbox);
-        *(void**)((char*)self + 0x54) = func_00398380(e + 0x58, h);
+        char* uiEngine = *(char**)((char*)self + 0x10);
+        int iconHash = GetHashValue32(str_checkbox);
+        *(void**)((char*)self + 0x54) = func_00398380(uiEngine + 0x58, iconHash);
     }
     {
-        char* e = *(char**)((char*)self + 0x10);
-        int h = GetHashValue32(str_yell_dollar_sign);
-        *(void**)((char*)self + 0x5C) = func_00398380(e + 0x58, h);
+        char* uiEngine = *(char**)((char*)self + 0x10);
+        int iconHash = GetHashValue32(str_yell_dollar_sign);
+        *(void**)((char*)self + 0x5C) = func_00398380(uiEngine + 0x58, iconHash);
     }
     func_0028F140(func_0028B180(), 5);
     cFEStateUberTrick_costVisible(self, 0);
@@ -279,19 +279,19 @@ struct sObj00184BE0 {
 extern "C" void func_00183B08(void* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 
-extern "C" void func_00184BE0(void* self, int a1)
+extern "C" void func_00184BE0(void* self, int prevState)
 {
-    sObj00184BE0* o;
+    sObj00184BE0* menu;
     func_00183B08(self);
-    o = *(sObj00184BE0**)((char*)self + 0x4C);
-    if (o != 0) {
-        o->vt[7].fn((char*)o + o->vt[7].delta, 1);
+    menu = *(sObj00184BE0**)((char*)self + 0x4C);
+    if (menu != 0) {
+        menu->vt[7].fn((char*)menu + menu->vt[7].delta, 1);
     }
-    o = *(sObj00184BE0**)((char*)self + 0x50);
-    if (o != 0) {
-        o->vt[7].fn((char*)o + o->vt[7].delta, 0);
+    menu = *(sObj00184BE0**)((char*)self + 0x50);
+    if (menu != 0) {
+        menu->vt[7].fn((char*)menu + menu->vt[7].delta, 0);
     }
-    cUIState_onGainFocus(self, a1);
+    cUIState_onGainFocus(self, prevState);
 }
 #endif
 
@@ -370,13 +370,13 @@ extern "C" void func_00184C60(char* self)
             sQuat_184C60 pos;
             sXform_184C60 xf;
             {
-                sQuat_184C60 p;
-                p.x = -228.0f;
-                p.y = -205.0f;
-                p.z = 63.0f;
-                p.w = 1.0f;
-                pos = p;
-                xf.pos = p;
+                sQuat_184C60 position;
+                position.x = -228.0f;
+                position.y = -205.0f;
+                position.z = 63.0f;
+                position.w = 1.0f;
+                pos = position;
+                xf.pos = position;
                 *(int*)(self + 0x48) = 1;
                 xf.rot.x = 0.0f;
                 xf.rot.y = 0.0f;
@@ -427,15 +427,15 @@ extern "C" void func_00184F40(void* self, void* item, int msg)
         if (*(int*)((char*)item + 0x6C) != 0) {
             int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
             func_00150B48(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)((char*)self + 0x44), charID, *(int*)((char*)item + 0x48));
-            int a = *(signed char*)(*(char**)(*(char**)((char*)self + 0x4C) + 0xA0) + 0x18);
-            int b = *(signed char*)(*(char**)(*(char**)((char*)self + 0x50) + 0xA0) + 0x18);
+            int entryIndex = *(signed char*)(*(char**)(*(char**)((char*)self + 0x4C) + 0xA0) + 0x18);
+            int flagBit = *(signed char*)(*(char**)(*(char**)((char*)self + 0x50) + 0xA0) + 0x18);
             void* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
-            func_0014FE08(pi, *(signed char*)((char*)self + 0x44), a, b);
+            func_0014FE08(pi, *(signed char*)((char*)self + 0x44), entryIndex, flagBit);
             sVE_4F40* vt = *(sVE_4F40**)((char*)pi + 0xC);
             vt[1].fn((char*)pi + vt[1].delta);
-            void* t = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_custom));
-            if (t != 0) {
-                cUIText_setUnicodeStringByID((cUIText*)t, GetHashValue32(str_kT_66HELPCustomUber));
+            void* helpText = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_custom));
+            if (helpText != 0) {
+                cUIText_setUnicodeStringByID((cUIText*)helpText, GetHashValue32(str_kT_66HELPCustomUber));
             }
             func_00184520(self);
         }
@@ -784,15 +784,15 @@ extern "C" void func_00185268(char* self, char* item, int msg)
 //100%
 INCLUDE_ASM("fe/festatestore", func_001859D8);
 #ifdef SKIP_ASM
-extern "C" int func_001859D8(void* self, int a1, unsigned int a2)
+extern "C" int func_001859D8(void* self, int menu, unsigned int event)
 {
-    if (a1 == *(int*)((char*)self + 0x50)) {
-        switch (a2) {
+    if (menu == *(int*)((char*)self + 0x50)) {
+        switch (event) {
         case 9:
             return 0x100;
         }
     } else {
-        switch (a2) {
+        switch (event) {
         case 8:
         case 9:
             return 0x100;

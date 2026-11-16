@@ -121,9 +121,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C0D8);
 extern "C" int* func_0016C0D8(cCameraTriggerList2* self, int key)
 {
     for (int i = 0; i < self->count; i++) {
-        int* p = (int*)self->arr[i];
-        if (*p == key)
-            return p;
+        int* entry = (int*)self->arr[i];
+        if (*entry == key)
+            return entry;
     }
     return 0;
 }

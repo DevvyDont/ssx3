@@ -83,35 +83,35 @@ extern "C" void* func_0041AA88(void*, void*);
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00259398__FPviT0T0);
 #ifdef SKIP_ASM
-void* func_00259398(void* self, int a1, void* a2, void* a3)
+void* func_00259398(void* self, int a1, void* lhs, void* rhs)
 {
-    return func_0041AA88((char*)a2 + 0x1c, (char*)a3 + 0x1c);
+    return func_0041AA88((char*)lhs + 0x1c, (char*)rhs + 0x1c);
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002593B8__FPviT0T0);
 #ifdef SKIP_ASM
-void* func_002593B8(void* self, int a1, void* a2, void* a3)
+void* func_002593B8(void* self, int a1, void* lhs, void* rhs)
 {
-    return func_0041AA88((char*)a2 + 0x8, (char*)a3 + 0x8);
+    return func_0041AA88((char*)lhs + 0x8, (char*)rhs + 0x8);
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002593D8);
 #ifdef SKIP_ASM
-extern "C" int func_002593D8(void* self, void* a1, void* a2)
+extern "C" int func_002593D8(void* self, void* a1, void* entry)
 {
-    return (((*(int*)((char*)a2 + 4)) >> 0x15) ^ 1) & 1;
+    return (((*(int*)((char*)entry + 4)) >> 0x15) ^ 1) & 1;
 }
 #endif
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002593F0);
 #ifdef SKIP_ASM
-extern "C" int func_002593F0(void* self, void* a1, int* a, int* b)
+extern "C" int func_002593F0(void* self, void* a1, int* lhs, int* rhs)
 {
-    return *b - *a;
+    return *rhs - *lhs;
 }
 #endif
 //100%
@@ -120,13 +120,13 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00259400);
 extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* tag, void* data, int len, const char* fmt);
 extern char str_l[];
 
-extern "C" int func_00259400(void* self, int a1, char* a2, char* a3)
+extern "C" int func_00259400(void* self, int a1, char* lhs, char* rhs)
 {
-    int s2[2];
-    int s3[2];
-    cDirtysock_tag_TagFieldGetStructure(a2 + 0x28, s2, 8, str_l);
-    cDirtysock_tag_TagFieldGetStructure(a3 + 0x28, s3, 8, str_l);
-    return s3[0] - s2[0];
+    int lhsStats[2];
+    int rhsStats[2];
+    cDirtysock_tag_TagFieldGetStructure(lhs + 0x28, lhsStats, 8, str_l);
+    cDirtysock_tag_TagFieldGetStructure(rhs + 0x28, rhsStats, 8, str_l);
+    return rhsStats[0] - lhsStats[0];
 }
 #endif
 //100%
@@ -135,13 +135,13 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00259468);
 extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* tag, void* data, int len, const char* fmt);
 extern char str_l[];
 
-extern "C" int func_00259468(void* self, int a1, char* a2, char* a3)
+extern "C" int func_00259468(void* self, int a1, char* lhs, char* rhs)
 {
-    int s2[2];
-    int s3[2];
-    cDirtysock_tag_TagFieldGetStructure(a2 + 0x28, s2, 8, str_l);
-    cDirtysock_tag_TagFieldGetStructure(a3 + 0x28, s3, 8, str_l);
-    return s2[0] - s3[0];
+    int lhsStats[2];
+    int rhsStats[2];
+    cDirtysock_tag_TagFieldGetStructure(lhs + 0x28, lhsStats, 8, str_l);
+    cDirtysock_tag_TagFieldGetStructure(rhs + 0x28, rhsStats, 8, str_l);
+    return lhsStats[0] - rhsStats[0];
 }
 #endif
 
@@ -279,10 +279,10 @@ extern "C" void func_00259628(LobbyMan* self_, int flags)
     cBXString__cBXString(((char*)self_) + 0x84, 2);
     cBXString__cBXString(((char*)self_) + 0x80, 2);
     if (((char*)self_) + 0x70 != 0) {
-        char* p = ((char*)self_) + 0x70 + 0x10;
-        while (((char*)self_) + 0x70 != p) {
-            p -= 4;
-            cBXString__cBXString(p, 0);
+        char* personaSlot = ((char*)self_) + 0x70 + 0x10;
+        while (((char*)self_) + 0x70 != personaSlot) {
+            personaSlot -= 4;
+            cBXString__cBXString(personaSlot, 0);
         }
     }
     cBXString__cBXString(((char*)self_) + 0x4C, 2);
@@ -847,9 +847,9 @@ extern "C" void func_003E6E70(void*);
 
 extern "C" void func_0025A6F8(LobbyMan* self)
 {
-    void* p = self->mpConfig;
-    if (p != 0) {
-        func_003E6E70(p);
+    void* config = self->mpConfig;
+    if (config != 0) {
+        func_003E6E70(config);
         self->mpConfig = 0;
     }
 }
@@ -865,9 +865,9 @@ extern "C" int func_0025A730(LobbyMan* self, const char* key, int def)
 {
     void* tags = self->mpConfig;
     if (tags != 0) {
-        int r = func_003E7218(tags, str_SSX_PS2_2004, key);
-        if (r != 0) {
-            def = r;
+        int configValue = func_003E7218(tags, str_SSX_PS2_2004, key);
+        if (configValue != 0) {
+            def = configValue;
         }
     }
     return def;
@@ -1381,11 +1381,11 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025B608);
 #ifdef SKIP_ASM
 extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
 
-extern "C" void func_0025B608(LobbyMan* self, int a1, int tag, void* cb, int a4, float f)
+extern "C" void func_0025B608(LobbyMan* self, int newState, int tag, void* cb, int callback, float timeout)
 {
-    *(int*)self = a1;
-    self->mTimeout = f;
-    self->mRequestId = func_003E8B10(self->mpLobbyApi, tag, cb, a4, self);
+    *(int*)self = newState;
+    self->mTimeout = timeout;
+    self->mRequestId = func_003E8B10(self->mpLobbyApi, tag, cb, callback, self);
 }
 #endif
 
@@ -2348,9 +2348,9 @@ extern "C" void* func_0025CD50(void*, int);
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025CD28__FPvi);
 #ifdef SKIP_ASM
-void* func_0025CD28(void* self, int a1)
+void* func_0025CD28(void* self, int personaIndex)
 {
-    return func_0025CD50(self, *(int*)((char*)((char*)self + a1 * 4) + 0x70));
+    return func_0025CD50(self, *(int*)((char*)((char*)self + personaIndex * 4) + 0x70));
 }
 #endif
 
@@ -2919,14 +2919,14 @@ extern char str_PASS[];
 extern "C" void func_00268D38(void* self, void* a1, int a2);
 
 // PORT: the unit declares a2 as int; it carries an optional string pointer.
-extern "C" void func_0025D860(LobbyMan* self, void* name, int a2)
+extern "C" void func_0025D860(LobbyMan* self, void* name, int password)
 {
     if (*(int*)self != 0) {
         char buf[0x100];
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_NAME, (const char*)name);
-        if (a2 != 0) {
-            cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PASS, (const char*)a2);
+        if (password != 0) {
+            cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PASS, (const char*)password);
         }
         // PORT: function pointer passed through func_0025B608's int parameter.
         func_0025B608(self, 0xC, 0x6D6F7665, buf, (int)func_00268D38, 20.0f);
@@ -3006,14 +3006,14 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025DA90);
 #ifdef SKIP_ASM
 extern "C" char* func_0025DA90(LobbyMan* self)
 {
-    char* s;
+    char* roomName;
     if ((int)self->mpLobbyApi == 0) {
         return 0;
     }
-    s = self->mRoomName;
-    if (s != 0) {
-        if (*s != 0) {
-            return s;
+    roomName = self->mRoomName;
+    if (roomName != 0) {
+        if (*roomName != 0) {
+            return roomName;
         }
     }
     return 0;
@@ -3029,16 +3029,16 @@ extern char str_pct_s_pct_s_f[];
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_00268D60(void* self, void* a1, int a2);
 
-extern "C" void func_0025DAC0(LobbyMan* self, int a1, int a2, const char* a3)
+extern "C" void func_0025DAC0(LobbyMan* self, int namePrefix, int nameSuffix, const char* password)
 {
     if (*(int*)self != 0) {
         char buf[0x100];
         char name[0x100];
-        sprintf(name, str_pct_s_pct_s_f, a1, a2);
+        sprintf(name, str_pct_s_pct_s_f, namePrefix, nameSuffix);
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_NAME, name);
-        if (a3 != 0) {
-            cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PASS, a3);
+        if (password != 0) {
+            cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PASS, password);
         }
         // PORT: function pointer passed through func_0025B608's int parameter.
         func_0025B608(self, 0x11, 0x726F6F6D, buf, (int)func_00268D60, 20.0f);
@@ -3143,10 +3143,10 @@ extern "C" void* func_003EE560(void*);
 extern "C" void func_0025DD68(LobbyMan* self)
 {
     if (*(int*)self != 0) {
-        char* e = (char*)func_003EE560(self->mpUserList);
-        if (e != 0) {
-            const char* key = e + 8;
-            func_003E8DC0(self->mpLobbyApi, key, func_0025A730(self, key, *(int*)(e + 0x30)), 0x1388, (void*)func_00268D88, ((char*)self));
+        char* userEntry = (char*)func_003EE560(self->mpUserList);
+        if (userEntry != 0) {
+            const char* key = userEntry + 8;
+            func_003E8DC0(self->mpLobbyApi, key, func_0025A730(self, key, *(int*)(userEntry + 0x30)), 0x1388, (void*)func_00268D88, ((char*)self));
         }
     }
 }
@@ -3841,14 +3841,14 @@ extern char str_l[];
 extern "C" int cDirtysock_tag_TagFieldSetStructure(char* buf, int size, const char* key, const void* data, int len, const char* fmt);
 extern "C" void func_00268E78(void* self, void* a1, int a2);
 
-extern "C" void func_0025EE20(LobbyMan* self, const void* data, int a2)
+extern "C" void func_0025EE20(LobbyMan* self, const void* data, int matchType)
 {
     int st = *(int*)self;
     if (st != 0) {
         bool on = (st == 1);
         if (on) {
             char buf[0x100];
-            self->mMatchType = a2;
+            self->mMatchType = matchType;
             buf[0] = 0;
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_KIND, str_DeathRace);
             cDirtysock_tag_TagFieldSetStructure(buf, 0x100, str_QMFP, data, 0x14, str_l);
@@ -4076,13 +4076,13 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025F248);
 #ifdef SKIP_ASM
 extern "C" int func_0025F248(LobbyMan* self)
 {
-    void* p;
+    void* userEntry;
     if (*(int*)self == 0) {
         return 0;
     }
-    p = func_003EE560(self->mpUserList);
-    if (p != 0) {
-        return (*(int*)((char*)p + 0x4) >> 21) & 1;
+    userEntry = func_003EE560(self->mpUserList);
+    if (userEntry != 0) {
+        return (*(int*)((char*)userEntry + 0x4) >> 21) & 1;
     }
     return 0;
 }
@@ -4116,11 +4116,11 @@ extern "C" void func_0025F288(LobbyMan* self, int a1, sDsPeerInfoK2* out)
     if (*(int*)self != 0) {
         int st[16];
         const char* rec;
-        sDsPeerK2* e = (sDsPeerK2*)func_003EE560(self->mpUserList);
-        if (e != 0 && e->record != 0) {
-            rec = e->record;
-            out->addr = e->addr;
-            out->nameLen = func_004187C0(e->name);
+        sDsPeerK2* userEntry = (sDsPeerK2*)func_003EE560(self->mpUserList);
+        if (userEntry != 0 && userEntry->record != 0) {
+            rec = userEntry->record;
+            out->addr = userEntry->addr;
+            out->nameLen = func_004187C0(userEntry->name);
         } else {
             out->addr = 0;
             rec = 0;
@@ -4215,17 +4215,17 @@ extern "C" void* func_0025F388(LobbyMan* self, int a1, int* outA, int* outB)
 {
     if (self->mState == 0)
         return 0;
-    char* e = (char*)func_003EE560(self->mRankSnapshot[self->mRankSlot]);
-    if (e != 0) {
+    char* rankEntry = (char*)func_003EE560(self->mRankSnapshot[self->mRankSlot]);
+    if (rankEntry != 0) {
         int st[2];
-        cDirtysock_tag_TagFieldGetStructure(e + 0x28, st, 8, str_l);
+        cDirtysock_tag_TagFieldGetStructure(rankEntry + 0x28, st, 8, str_l);
         *outB = st[1];
         if (self->mRankSlot != 0)
             *outA = st[0];
         else
-            *outA = *(int*)e;
+            *outA = *(int*)rankEntry;
     }
-    return e;
+    return rankEntry;
 }
 #endif
 
@@ -4235,12 +4235,12 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025F430);
 extern "C" char* func_003E8A70(void* p, int tag);
 extern "C" bool func_0025F430(LobbyMan* self)
 {
-    char* s;
+    char* room;
     if (*(int*)self == 0) {
         return false;
     }
-    s = func_003E8A70(self->mpLobbyApi, 0x726F6F6D);
-    return s != 0 && *s != 0;
+    room = func_003E8A70(self->mpLobbyApi, 0x726F6F6D);
+    return room != 0 && *room != 0;
 }
 #endif
 
@@ -4249,9 +4249,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025F478);
 #ifdef SKIP_ASM
 extern "C" void func_0025F4C0(void*, char*, int);
 
-extern "C" void func_0025F478(LobbyMan* self, int idx, int a2)
+extern "C" void func_0025F478(LobbyMan* self, int idx, int matchType)
 {
-    func_0025F4C0(self, func_0025F1E0(self, idx, 0), a2);
+    func_0025F4C0(self, func_0025F1E0(self, idx, 0), matchType);
 }
 #endif
 
@@ -4557,11 +4557,11 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025FB58);
 #ifdef SKIP_ASM
 extern "C" void func_0025FC70(LobbyMan* self, int a1, int a2);
 
-extern "C" void func_0025FB58(LobbyMan* self, int a1, int a2)
+extern "C" void func_0025FB58(LobbyMan* self, int recipient, int matchType)
 {
     if (*(int*)self != 0) {
-        self->mMatchType = a2;
-        func_0025FC70(self, a1, 0x17);
+        self->mMatchType = matchType;
+        func_0025FC70(self, recipient, 0x17);
     }
 }
 #endif
@@ -4576,12 +4576,12 @@ extern "C" int cDirtysock_tag_TagFieldSetFlags(char* record, int len, const char
 extern "C" void func_00268EC8(void* self, void* a1, int a2);
 
 // PORT: a1 carries a string pointer in an int (the unit's declaration).
-extern "C" void* func_0025FB80(LobbyMan* self, int a1, void* a2)
+extern "C" void* func_0025FB80(LobbyMan* self, int recipient, void* text)
 {
     char buf[0x100];
     buf[0] = 0;
-    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRIV, (const char*)a1);
-    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_TEXT, (const char*)a2);
+    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRIV, (const char*)recipient);
+    cDirtysock_tag_TagFieldSetString(buf, 0x100, str_TEXT, (const char*)text);
     cDirtysock_tag_TagFieldSetFlags(buf, 0x100, str_ATTR, 0x40004000);
     // PORT: function pointer passed through func_003E8B10's int parameter.
     return (void*)func_003E8B10(self->mpLobbyApi, 0x6D657367, buf, (int)func_00268EC8, self);
@@ -5274,25 +5274,25 @@ extern "C" void func_00260F80(void)
 {
     // An unused 32-byte local is needed to reproduce the 0x30-byte frame.
     int unused[8];
-    char* m = (char*)operator new(0xF0, str_BuddyMan, 0x20000000, 0);
-    *(int*)(m + 0x40) = -1;
-    *(int*)(m + 0xA4) = 0x15180;
-    *(void**)(m + 0xEC) = cBXString_EmptyString;
-    *(int*)(m + 0xAC) = 0;
-    *(int*)(m + 0xB0) = 0;
-    *(int*)(m + 0xB4) = 0;
-    *(int*)(m + 0xBC) = 0;
-    *(int*)(m + 0xC0) = 0;
-    *(int*)(m + 0xC4) = 0;
-    *(int*)(m + 0xC8) = 0;
-    *(int*)(m + 0xCC) = 0;
-    *(int*)(m + 0xD0) = 0;
-    *(int*)(m + 0xD8) = 0;
-    *(int*)(m + 0xDC) = 0;
-    *(int*)(m + 0xE0) = 0;
-    *(int*)(m + 0xE4) = 0;
-    *(int*)(m + 0xE8) = 0;
-    BuddyMan_mBuddyMan = (BuddyMan*)(m);
+    char* buddyMan = (char*)operator new(0xF0, str_BuddyMan, 0x20000000, 0);
+    *(int*)(buddyMan + 0x40) = -1;
+    *(int*)(buddyMan + 0xA4) = 0x15180;
+    *(void**)(buddyMan + 0xEC) = cBXString_EmptyString;
+    *(int*)(buddyMan + 0xAC) = 0;
+    *(int*)(buddyMan + 0xB0) = 0;
+    *(int*)(buddyMan + 0xB4) = 0;
+    *(int*)(buddyMan + 0xBC) = 0;
+    *(int*)(buddyMan + 0xC0) = 0;
+    *(int*)(buddyMan + 0xC4) = 0;
+    *(int*)(buddyMan + 0xC8) = 0;
+    *(int*)(buddyMan + 0xCC) = 0;
+    *(int*)(buddyMan + 0xD0) = 0;
+    *(int*)(buddyMan + 0xD8) = 0;
+    *(int*)(buddyMan + 0xDC) = 0;
+    *(int*)(buddyMan + 0xE0) = 0;
+    *(int*)(buddyMan + 0xE4) = 0;
+    *(int*)(buddyMan + 0xE8) = 0;
+    BuddyMan_mBuddyMan = (BuddyMan*)(buddyMan);
 }
 #endif
 
@@ -5349,10 +5349,10 @@ struct sObj261070 {
 extern "C" void func_00261070(BuddyMan* self)
 {
     while (((sObj261070**)self->mMessagesStart) != ((sObj261070**)self->mMessagesFinish)) {
-        sObj261070* p = ((sObj261070**)self->mMessagesFinish)[-1];
+        sObj261070* message = ((sObj261070**)self->mMessagesFinish)[-1];
         (*(sObj261070***)&self->mMessagesFinish)--;
-        if (p != 0) {
-            p->vt[1].fn((char*)p + p->vt[1].delta, 3);
+        if (message != 0) {
+            message->vt[1].fn((char*)message + message->vt[1].delta, 3);
         }
     }
 }
@@ -5385,11 +5385,11 @@ extern "C" void func_002610D0()
 {
     for (int i = 0; i < func_00262938((BuddyMan*)Mgr_2610D0()); i++)
     {
-        int* e = (int*)func_00263630((BuddyMan*)Mgr_2610D0(), i);
-        if (func_00262468((BuddyMan*)Mgr_2610D0(), *e) < 0)
+        int* message = (int*)func_00263630((BuddyMan*)Mgr_2610D0(), i);
+        if (func_00262468((BuddyMan*)Mgr_2610D0(), *message) < 0)
         {
             int out;
-            func_00261EF8((BuddyMan*)Mgr_2610D0(), *e, 2, &out);
+            func_00261EF8((BuddyMan*)Mgr_2610D0(), *message, 2, &out);
         }
     }
 }
@@ -5510,9 +5510,9 @@ extern "C" void func_00261408(BuddyMan* self);
 
 extern "C" void func_00261490(BuddyMan* self)
 {
-    void* p = self->mpBuddyApi;
-    if (p != 0) {
-        func_003F17D8(p);
+    void* buddyApi = self->mpBuddyApi;
+    if (buddyApi != 0) {
+        func_003F17D8(buddyApi);
         if (self->mbDisconnected != 0) {
             func_00261408(self);
             self->mbDisconnected = 0;
@@ -5539,9 +5539,9 @@ extern "C" void func_003F17C8(void* h, void (*cb)(void*), void* user);
 
 extern "C" void func_002614E8(BuddyMan* self, void* a1)
 {
-    void* h = func_003F0710(a1, str_2003_10_20);
-    self->mpBuddyApi = (BuddyApiRefT*)h;
-    func_003F17C8(h, func_00268F40, self);
+    void* buddyApi = func_003F0710(a1, str_2003_10_20);
+    self->mpBuddyApi = (BuddyApiRefT*)buddyApi;
+    func_003F17C8(buddyApi, func_00268F40, self);
 }
 #endif
 
@@ -5571,11 +5571,11 @@ extern "C" void func_00261530(BuddyMan* vself)
     BuddyMan* self = vself;
     if (((void*)self->mpBuddyApi) != 0) {
         while (((sObj261530**)self->mChallengersStart) != ((sObj261530**)self->mChallengersFinish)) {
-            sObj261530* p = ((sObj261530**)self->mChallengersFinish)[-1];
-            func_0025FC28_v(LobbyMan_mLobbyMan, p->id);
+            sObj261530* challenger = ((sObj261530**)self->mChallengersFinish)[-1];
+            func_0025FC28_v(LobbyMan_mLobbyMan, challenger->id);
             (*(sObj261530***)&self->mChallengersFinish)--;
-            if (p != 0) {
-                p->vt[1].fn((char*)p + p->vt[1].delta, 3);
+            if (challenger != 0) {
+                challenger->vt[1].fn((char*)challenger + challenger->vt[1].delta, 3);
             }
         }
         func_003F0BE0(((void*)self->mpBuddyApi));
@@ -6066,29 +6066,29 @@ extern "C" void func_003F11F8(void* h, void* e, void* cb, void* user, int timeou
 extern "C" void func_00268F90(void* self, void* a1, int a2);
 
 // PORT: the unit declares (void*, int, int, void*); a1 carries the name pointer.
-extern "C" void func_00261EF8(BuddyMan* self_, int a1, int kind, void* out)
+extern "C" void func_00261EF8(BuddyMan* self_, int rawName, int kind, void* out)
 {
-    char* name = (char*)a1;
+    char* name = (char*)rawName;
     int* err = (int*)out;
-    char* e = (char*)func_003F14D8(self_->mpBuddyApi);
-    if (e == 0) {
+    char* rosterEntry = (char*)func_003F14D8(self_->mpBuddyApi);
+    if (rosterEntry == 0) {
         func_002620D8(self_, name, kind, err, 0);
         if (*err == 0)
             *err = 0;
         return;
     }
-    int flags = *(int*)(e + 0xA8);
+    int flags = *(int*)(rosterEntry + 0xA8);
     // PORT: function pointer passed as a callback argument.
-    func_003F11F8(self_->mpBuddyApi, e, (void*)func_00268F90, ((char*)self_), 600);
+    func_003F11F8(self_->mpBuddyApi, rosterEntry, (void*)func_00268F90, ((char*)self_), 600);
     int has = func_00263128(self_, name);
     switch (kind) {
     case 0:
         if (!(flags & 4)) {
-            func_002620D8(self_, name, 0, err, e);
+            func_002620D8(self_, name, 0, err, rosterEntry);
             if (*err != 0) {
                 if (flags & 0x100000) {
-                    int tmp;
-                    func_002620D8(self_, name, 2, &tmp, e);
+                    int discardErr;
+                    func_002620D8(self_, name, 2, &discardErr, rosterEntry);
                 }
                 return;
             }
@@ -6099,7 +6099,7 @@ extern "C" void func_00261EF8(BuddyMan* self_, int a1, int kind, void* out)
     case 1:
         if (flags & 0x200)
             goto do2;
-        func_002620D8(self_, name, 1, err, e);
+        func_002620D8(self_, name, 1, err, rosterEntry);
         if (*err != 0) {
             if (has)
                 func_00263018(self_, name);
@@ -6109,7 +6109,7 @@ extern "C" void func_00261EF8(BuddyMan* self_, int a1, int kind, void* out)
     case 2:
         if (!(flags & 0x100000)) {
         do2:
-            func_002620D8(self_, name, 2, err, e);
+            func_002620D8(self_, name, 2, err, rosterEntry);
             if (*err != 0)
                 return;
         }
@@ -6229,9 +6229,9 @@ extern "C" int func_00262468(BuddyMan* self, int a1);
 // second argument (it reaches func_00262620's callee in $a1). Bound by asm label.
 int func_00262390_2(void* self, int a1) __asm__("func_00262390__FPv");
 
-extern "C" int func_00262360(BuddyMan* self, int a1)
+extern "C" int func_00262360(BuddyMan* self, int name)
 {
-    return func_00262390_2(self, func_00262468(self, a1));
+    return func_00262390_2(self, func_00262468(self, name));
 }
 #endif
 
@@ -6254,9 +6254,9 @@ extern "C" int func_00262468(BuddyMan* self, int a1);
 // second argument (it reaches func_00262658's callee in $a1). Bound by asm label.
 int func_002623E0_2(void* self, int a1) __asm__("func_002623E0__FPv");
 
-extern "C" int func_002623B0(BuddyMan* self, int a1)
+extern "C" int func_002623B0(BuddyMan* self, int name)
 {
-    return func_002623E0_2(self, func_00262468(self, a1));
+    return func_002623E0_2(self, func_00262468(self, name));
 }
 #endif
 
@@ -6276,11 +6276,11 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00262400);
 #ifdef SKIP_ASM
 extern "C" void* func_002625C8(BuddyMan* self, int idx);
 
-extern "C" int func_00262400(BuddyMan* self, int a1)
+extern "C" int func_00262400(BuddyMan* self, int rosterIndex)
 {
-    void* p = func_002625C8(self, a1);
-    if (p != 0) {
-        return (*(int*)((char*)p + 0xA8) >> 20) & 1;
+    void* rosterEntry = func_002625C8(self, rosterIndex);
+    if (rosterEntry != 0) {
+        return (*(int*)((char*)rosterEntry + 0xA8) >> 20) & 1;
     }
     return 0;
 }
@@ -6292,9 +6292,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00262438);
 extern "C" int func_00262468(BuddyMan* self, int a1);
 extern "C" int func_00262400(BuddyMan* self, int a1);
 
-extern "C" int func_00262438(BuddyMan* self, int a1)
+extern "C" int func_00262438(BuddyMan* self, int name)
 {
-    return func_00262400(self, func_00262468(self, a1));
+    return func_00262400(self, func_00262468(self, name));
 }
 #endif
 
@@ -6305,13 +6305,13 @@ extern "C" int func_004165A8(void*, void*);
 extern "C" void* func_002625C8(BuddyMan* self, int idx);
 
 // PORT: a1 carries a name pointer in an int (the unit's declaration).
-extern "C" int func_00262468(BuddyMan* self, int a1)
+extern "C" int func_00262468(BuddyMan* self, int name)
 {
     int i;
     int n = func_00262598(self);
     for (i = 0; i < n; i++) {
-        void* e = func_002625C8(self, i);
-        if (e != 0 && func_004165A8(e, (void*)a1) == 0) {
+        void* rosterEntry = func_002625C8(self, i);
+        if (rosterEntry != 0 && func_004165A8(rosterEntry, (void*)name) == 0) {
             return i;
         }
     }
@@ -6333,8 +6333,8 @@ extern "C" int func_002624F8(BuddyMan* self, void** key)
     }
     n = func_00262598(self);
     for (i = 0; i < n; i++) {
-        void* e = func_002625C8(self, i);
-        if (e != 0 && func_0041AA88(*key, e) == 0) {
+        void* rosterEntry = func_002625C8(self, i);
+        if (rosterEntry != 0 && func_0041AA88(*key, rosterEntry) == 0) {
             return i;
         }
     }
@@ -6349,11 +6349,11 @@ extern "C" int func_003EE550(void*);
 
 extern "C" int func_00262598(BuddyMan* self)
 {
-    void* p = self->mpRoster;
-    if (p == 0) {
+    void* roster = self->mpRoster;
+    if (roster == 0) {
         return 0;
     }
-    return func_003EE550(p);
+    return func_003EE550(roster);
 }
 #endif
 
@@ -6366,13 +6366,13 @@ void* func_003EE560_2(void* list, int idx) __asm__("func_003EE560");
 
 extern "C" void* func_002625C8(BuddyMan* self, int idx)
 {
-    void* r;
+    void* rosterEntry;
     if (idx < 0 || func_00262598(self) < idx) {
-        r = 0;
+        rosterEntry = 0;
     } else {
-        r = func_003EE560_2(self->mpRoster, idx);
+        rosterEntry = func_003EE560_2(self->mpRoster, idx);
     }
-    return r;
+    return rosterEntry;
 }
 #endif
 
@@ -6386,9 +6386,9 @@ void* func_00262620_2(void* self, int idx) __asm__("func_00262620");
 
 void* func_00262620_2(void* self, int idx)
 {
-    void* p = func_002625C8((BuddyMan*)self, idx);
-    if ((p != 0) && (*(int*)((char*)p + 0xA8) & 0x4)) {
-        return p;
+    void* rosterEntry = func_002625C8((BuddyMan*)self, idx);
+    if ((rosterEntry != 0) && (*(int*)((char*)rosterEntry + 0xA8) & 0x4)) {
+        return rosterEntry;
     }
     return 0;
 }
@@ -6404,9 +6404,9 @@ void* func_00262658_2(void* self, int idx) __asm__("func_00262658");
 
 void* func_00262658_2(void* self, int idx)
 {
-    void* p = func_002625C8((BuddyMan*)self, idx);
-    if ((p != 0) && (*(int*)((char*)p + 0xA8) & 0x200)) {
-        return p;
+    void* rosterEntry = func_002625C8((BuddyMan*)self, idx);
+    if ((rosterEntry != 0) && (*(int*)((char*)rosterEntry + 0xA8) & 0x200)) {
+        return rosterEntry;
     }
     return 0;
 }
@@ -6536,9 +6536,9 @@ extern "C" int func_00262950(BuddyMan* self, int idx)
     int count = 0;
     unsigned int i;
     for (i = 0; i < sDsListK2_size(self); i++) {
-        void** e = (void**)func_00263630(self, i);
-        if (e != 0) {
-            if (func_004165A8(*e, key) == 0)
+        void** message = (void**)func_00263630(self, i);
+        if (message != 0) {
+            if (func_004165A8(*message, key) == 0)
                 count++;
         }
     }
@@ -6552,9 +6552,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00262A08);
 extern "C" int func_00262468(BuddyMan* self, int a1);
 extern "C" int func_00262950(BuddyMan* self, int a1);
 
-extern "C" int func_00262A08(BuddyMan* self, int a1)
+extern "C" int func_00262A08(BuddyMan* self, int name)
 {
-    return func_00262950(self, func_00262468(self, a1));
+    return func_00262950(self, func_00262468(self, name));
 }
 #endif
 
@@ -6576,11 +6576,11 @@ extern "C" int func_00262A38(BuddyMan* self, void* name)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00262AB0);
 #ifdef SKIP_ASM
-extern "C" int func_00262AB0(BuddyMan* self, void** arg1)
+extern "C" int func_00262AB0(BuddyMan* self, void** nameStr)
 {
-    void*** p = (void***)self->mMessagesStart;
-    if (p != (void***)self->mMessagesFinish) {
-        func_004165A8(**p, *arg1);
+    void*** messageIter = (void***)self->mMessagesStart;
+    if (messageIter != (void***)self->mMessagesFinish) {
+        func_004165A8(**messageIter, *nameStr);
         return 1;
     }
     return 0;
@@ -6747,8 +6747,8 @@ static inline void** func_00262E20_at(void* self, unsigned int i)
 extern "C" int func_00262E20(BuddyMan* self, void* name)
 {
     for (unsigned int i = 0; i < func_00262E20_count(self); i++) {
-        void** e = func_00262E20_at(self, i);
-        if (e != 0 && func_0041AA88(*e, name) == 0) {
+        void** challenger = func_00262E20_at(self, i);
+        if (challenger != 0 && func_0041AA88(*challenger, name) == 0) {
             return i;
         }
     }
@@ -6799,31 +6799,31 @@ extern "C" void func_00262EC0(BuddyMan* self, int idx)
     char* name = (char*)func_002625C8(self, idx);
     if (name == 0)
         return;
-    sBXStr_262EC0 s;
-    cBXString_cBXString2(&s, name);
+    sBXStr_262EC0 nameStr;
+    cBXString_cBXString2(&nameStr, name);
     func_003F11F8(self->mpBuddyApi, name, (void*)func_00268F90, ((char*)self), 600);
-    if (func_00262A38(self, s.p))
+    if (func_00262A38(self, nameStr.p))
     {
         for (int i = func_00262938(self) - 1; i >= 0; i--)
         {
-            void** e = (void**)func_00263630(self, i);
-            if (e != 0 && func_0041AA88(*e, s.p) == 0)
+            void** message = (void**)func_00263630(self, i);
+            if (message != 0 && func_0041AA88(*message, nameStr.p) == 0)
                 func_002635A8(self, i);
         }
     }
-    if (func_00263128(self, s.p))
+    if (func_00263128(self, nameStr.p))
     {
         // PORT: the name is passed through an int parameter.
-        func_0025FC28_v(LobbyMan_mLobbyMan, (int)s.p);
-        int k = func_00262E20(self, s.p);
-        sObjVec_262EC0* v = (sObjVec_262EC0*)(((char*)self) + 0xB8);
+        func_0025FC28_v(LobbyMan_mLobbyMan, (int)nameStr.p);
+        int k = func_00262E20(self, nameStr.p);
+        sObjVec_262EC0* challengers = (sObjVec_262EC0*)(((char*)self) + 0xB8);
         // PORT: pointer arithmetic through int.
         void** pos = (void**)(k * 4 + (int)(void**)self->mChallengersStart);
         if (pos + 1 != (void**)self->mChallengersFinish)
-            sObjVec_262EC0_copy(pos + 1, v->mFinish, pos);
+            sObjVec_262EC0_copy(pos + 1, challengers->mFinish, pos);
         --*(void***)&self->mChallengersFinish;
     }
-    cBXString__cBXString(&s, 2);
+    cBXString__cBXString(&nameStr, 2);
 }
 #endif
 
@@ -6864,11 +6864,11 @@ extern "C" void func_00263018(BuddyMan* self, void* name)
     int idx = func_00262E20(self, name);
     if (idx >= 0) {
         func_0025FC28_v(LobbyMan_mLobbyMan, (int)name);
-        sTagsUnkObjVec18* v = (sTagsUnkObjVec18*)((char*)self + 0xB8);
+        sTagsUnkObjVec18* challengers = (sTagsUnkObjVec18*)((char*)self + 0xB8);
         void** pos = (void**)self->mChallengersStart + idx;
         char* obj = (char*)*pos;
         if (pos + 1 != (void**)self->mChallengersFinish) {
-            sTagsUnkObjVec18_copy(pos + 1, v->mFinish, pos);
+            sTagsUnkObjVec18_copy(pos + 1, challengers->mFinish, pos);
         }
         --*(void***)&self->mChallengersFinish;
         if (obj != 0) {
@@ -6877,10 +6877,10 @@ extern "C" void func_00263018(BuddyMan* self, void* name)
         }
         if (func_00262438(self, (int)name)) {
             if (func_00262A38(self, name) == 0) {
-                void* e = func_002625C8(self, func_00262468(self, (int)name));
-                if (e != 0) {
+                void* rosterEntry = func_002625C8(self, func_00262468(self, (int)name));
+                if (rosterEntry != 0) {
                     // PORT: function pointer passed as a callback argument.
-                    func_003F11F8(self->mpBuddyApi, e, (void*)func_00268F90, self, 600);
+                    func_003F11F8(self->mpBuddyApi, rosterEntry, (void*)func_00268F90, self, 600);
                 }
             }
         }
@@ -6901,14 +6901,14 @@ extern "C" int func_00263128(BuddyMan* self, char* name)
     if (((void***)self->mChallengersFinish - (void***)self->mChallengersStart) == 0)
         return 0;
     for (void*** it = (void***)self->mChallengersStart; it != (void***)self->mChallengersFinish; it++) {
-        void** e = *it;
-        char* tmp;
-        cBXString_cBXString2(&tmp, name);
-        if (func_004165A8(*e, name) == 0) {
-            cBXString__cBXString(&tmp, 2);
+        void** challenger = *it;
+        char* nameCopy;
+        cBXString_cBXString2(&nameCopy, name);
+        if (func_004165A8(*challenger, name) == 0) {
+            cBXString__cBXString(&nameCopy, 2);
             return 1;
         }
-        cBXString__cBXString(&tmp, 2);
+        cBXString__cBXString(&nameCopy, 2);
     }
     return 0;
 }
@@ -6923,8 +6923,8 @@ extern "C" int func_002631E0(BuddyMan* self, void** name)
         return 0;
     }
     for (void** it = (void**)self->mChallengersStart; it != (void**)self->mChallengersFinish; it++) {
-        void* e = *it;
-        if (func_004165A8(*(void**)e, *name) == 0) {
+        void* challenger = *it;
+        if (func_004165A8(*(void**)challenger, *name) == 0) {
             return 1;
         }
     }
@@ -6941,9 +6941,9 @@ extern "C" void* func_00263270(BuddyMan* self, void* name)
         return 0;
     }
     for (void** it = (void**)self->mChallengersStart; it != (void**)self->mChallengersFinish; it++) {
-        void* e = *it;
-        if (func_004165A8(*(void**)e, name) == 0) {
-            return e;
+        void* challenger = *it;
+        if (func_004165A8(*(void**)challenger, name) == 0) {
+            return challenger;
         }
     }
     return 0;
@@ -6979,15 +6979,15 @@ extern "C" int func_00263338(BuddyMan* self, int idx)
     if (func_00262598_noarg() < idx) {
         return 0;
     }
-    char* e = (char*)func_002625C8(self, idx);
-    if (e == 0) {
+    char* rosterEntry = (char*)func_002625C8(self, idx);
+    if (rosterEntry == 0) {
         return 0;
     }
-    int r = 0;
-    if ((*(unsigned char*)(e + 0xA7) & 1) || (*(unsigned int*)(e + 0xA8) & 0x100000)) {
-        r = 1;
+    int result = 0;
+    if ((*(unsigned char*)(rosterEntry + 0xA7) & 1) || (*(unsigned int*)(rosterEntry + 0xA8) & 0x100000)) {
+        result = 1;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -6997,9 +6997,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002633C8);
 extern "C" int func_00262468(BuddyMan* self, int a1);
 extern "C" int func_00263338(BuddyMan* self, int a1);
 
-extern "C" int func_002633C8(BuddyMan* self, int a1)
+extern "C" int func_002633C8(BuddyMan* self, int name)
 {
-    return func_00263338(self, func_00262468(self, a1));
+    return func_00263338(self, func_00262468(self, name));
 }
 #endif
 
@@ -7039,25 +7039,25 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00263490);
 extern "C" int func_00262468(BuddyMan* self, int a1);
 extern "C" int func_002633F8(BuddyMan* self, int a1);
 
-extern "C" int func_00263490(BuddyMan* self, int a1)
+extern "C" int func_00263490(BuddyMan* self, int name)
 {
-    return func_002633F8(self, func_00262468(self, a1));
+    return func_002633F8(self, func_00262468(self, name));
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002634C0);
 #ifdef SKIP_ASM
-extern "C" int func_002634C0(void* self, int a1, void* a, void* b)
+extern "C" int func_002634C0(void* self, int a1, void* lhs, void* rhs)
 {
-    if (a == 0) {
-        return b != 0;
+    if (lhs == 0) {
+        return rhs != 0;
     }
-    if (b == 0) {
+    if (rhs == 0) {
         return -1;
     }
     // PORT: func_0041AA88 (strcmp-like) is declared void* in this unit but returns int
-    return (int)func_0041AA88(a, b);
+    return (int)func_0041AA88(lhs, rhs);
 }
 #endif
 
@@ -7067,16 +7067,16 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00263500);
 extern "C" void func_00263500(BuddyMan* self, void* obj)
 {
     for (void** it = (void**)self->mMessagesFinish; it != (void**)self->mMessagesStart; it--) {
-        char* o = (char*)*it;
-        if (o == obj) {
-            sTagsUnkObjVec18* v = (sTagsUnkObjVec18*)(((char*)self) + 0xA8);
+        char* message = (char*)*it;
+        if (message == obj) {
+            sTagsUnkObjVec18* messages = (sTagsUnkObjVec18*)(((char*)self) + 0xA8);
             if (it + 1 != (void**)self->mMessagesFinish) {
-                sTagsUnkObjVec18_copy(it + 1, v->mFinish, it);
+                sTagsUnkObjVec18_copy(it + 1, messages->mFinish, it);
             }
             --*(void***)&self->mMessagesFinish;
-            if (o != 0) {
-                sTagsUnkVEntry18* vt = *(sTagsUnkVEntry18**)(o + 0xC);
-                vt[1].fn(o + vt[1].delta, 3);
+            if (message != 0) {
+                sTagsUnkVEntry18* vt = *(sTagsUnkVEntry18**)(message + 0xC);
+                vt[1].fn(message + vt[1].delta, 3);
             }
             break;
         }
@@ -7109,11 +7109,11 @@ static inline void** sTagsUnkObjVec_copy(void** first, void** last, void** resul
 
 extern "C" void func_002635A8(BuddyMan* self, int idx)
 {
-    sTagsUnkObjVec* v = (sTagsUnkObjVec*)((char*)self + 0xA8);
+    sTagsUnkObjVec* messages = (sTagsUnkObjVec*)((char*)self + 0xA8);
     void** pos = (void**)self->mMessagesStart + idx;
     char* obj = (char*)*pos;
     if (pos + 1 != (void**)self->mMessagesFinish) {
-        sTagsUnkObjVec_copy(pos + 1, v->mFinish, pos);
+        sTagsUnkObjVec_copy(pos + 1, messages->mFinish, pos);
     }
     --*(void***)&self->mMessagesFinish;
     if (obj != 0) {
@@ -7679,11 +7679,11 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002640C0);
 #ifdef SKIP_ASM
 extern "C" void* MEM_fill(void* dst, int value, int size);
 
-extern "C" void* func_002640C0(void* self, int a1, int a2, int a3)
+extern "C" void* func_002640C0(void* self, int channel, int isHost, int a3)
 {
     *(int*)((char*)self + 0x0) = 1;
-    *(int*)((char*)self + 0x120) = a1;
-    *(int*)((char*)self + 0x124) = a2;
+    *(int*)((char*)self + 0x120) = channel;
+    *(int*)((char*)self + 0x124) = isHost;
     *(int*)((char*)self + 0x4) = 0;
     *(int*)((char*)self + 0x118) = 0;
     *(int*)((char*)self + 0x11C) = 0;
@@ -7999,9 +7999,9 @@ void operator_delete(int*);
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00264990);
 #ifdef SKIP_ASM
-extern "C" void func_00264990(void* self, int* p)
+extern "C" void func_00264990(void* self, int* packet)
 {
-    operator_delete(p);
+    operator_delete(packet);
 }
 #endif
 
@@ -8031,10 +8031,10 @@ extern "C" int func_002649B0(sDsPacketQueueK2* self, void* dst)
     int head = self->head;
     if (head != self->tail) {
         self->head = head + 1;
-        sDsPacketK2* p = self->slots[head % 32];
-        int len = p->size - 4;
-        MEM_copy(dst, p->data, len);
-        func_00264990(self, (int*)p);
+        sDsPacketK2* packet = self->slots[head % 32];
+        int len = packet->size - 4;
+        MEM_copy(dst, packet->data, len);
+        func_00264990(self, (int*)packet);
         return len;
     }
     return 0;
@@ -8059,9 +8059,9 @@ struct sDsRecvQueue_00264A58 {
 };
 
 // Fills the 32-entry receive queue until it is full or no packet is pending.
-extern "C" void func_00264A58(void* p)
+extern "C" void func_00264A58(void* setupMan)
 {
-    sDsRecvQueue_00264A58* self = (sDsRecvQueue_00264A58*)p;
+    sDsRecvQueue_00264A58* self = (sDsRecvQueue_00264A58*)setupMan;
     void* buf;
     while (self->cur != 0
            || (buf = func_00264960_self(self), self->cur = buf,
@@ -8098,9 +8098,9 @@ struct sDsSendQueue_00264B20 {
 };
 
 // Sends queued packets until the queue is empty or the channel refuses one.
-extern "C" void func_00264B20(void* p)
+extern "C" void func_00264B20(void* setupMan)
 {
-    sDsSendQueue_00264B20* self = (sDsSendQueue_00264B20*)p;
+    sDsSendQueue_00264B20* self = (sDsSendQueue_00264B20*)setupMan;
     while (self->head != self->tail)
     {
         sDsPacket_00264B20* pkt;
@@ -8146,9 +8146,9 @@ struct sDsSendQueue_00264BE8 {
 int func_00264BE8_impl(void* p, const void* src, int len) __asm__("func_00264BE8");
 
 // Flushes the send queue, then sends `len` bytes now or queues a copy for later.
-int func_00264BE8_impl(void* p, const void* src, int len)
+int func_00264BE8_impl(void* setupMan, const void* src, int len)
 {
-    sDsSendQueue_00264BE8* self = (sDsSendQueue_00264BE8*)p;
+    sDsSendQueue_00264BE8* self = (sDsSendQueue_00264BE8*)setupMan;
     func_00264B20(self);
     sDsOutPacket_00264BE8 pkt;
     pkt.kind = 0;
@@ -8250,14 +8250,14 @@ struct sNetState_00264D80 {
 
 extern "C" void func_00264D80(void* self, int charID, sName7_00264D80* name)
 {
-    sIf_00264D80* p = (sIf_00264D80*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    func_00147448(p, 1, charID);
-    p->vt[1].fn((char*)p + p->vt[1].delta);
-    sIf_00264D80* q = (sIf_00264D80*)cBE_getInterface_Fv(SSXApp->BE, 7);
+    sIf_00264D80* playerIface = (sIf_00264D80*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    func_00147448(playerIface, 1, charID);
+    playerIface->vt[1].fn((char*)playerIface + playerIface->vt[1].delta);
+    sIf_00264D80* networkIface = (sIf_00264D80*)cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.OpponentCharacterID = charID;
     if (name != 0)
         *(sName7_00264D80*)((char*)&cBENetworkInterface_networkOpt + 0x4A8) = *name;
-    q->vt[1].fn((char*)q + q->vt[1].delta);
+    networkIface->vt[1].fn((char*)networkIface + networkIface->vt[1].delta);
 }
 #endif
 
@@ -8314,7 +8314,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264F88);
 extern "C" void func_00264CF0(void* self, int a1);
 extern "C" void func_00264E50(void* self, int event, int a2, int state);
 
-extern "C" void func_00264F88(void* self, int a1)
+extern "C" void func_00264F88(void* self, int rider)
 {
     int state = *(int*)self;
     if (state == 0xC) {
@@ -8324,10 +8324,10 @@ extern "C" void func_00264F88(void* self, int a1)
         if (state == 1) {
             *(int*)self = 2;
         }
-        func_00264CF0(self, a1);
-        func_00264E50(self, 0, a1, *(int*)self);
+        func_00264CF0(self, rider);
+        func_00264E50(self, 0, rider, *(int*)self);
     } else {
-        func_00264E50(self, 1, a1, 0);
+        func_00264E50(self, 1, rider, 0);
     }
 }
 #endif
@@ -8754,7 +8754,7 @@ struct sMsg_5688 {
 // Advances the connection state (5..7 -> 9, 8 -> 10) and posts a status message.
 extern "C" void func_00265688(int* self)
 {
-    sMsg_5688 m;
+    sMsg_5688 statusMsg;
     int code = 0xB;
     if (self[0x124 / 4] != 0) {
         code = 0xA;
@@ -8772,10 +8772,10 @@ extern "C" void func_00265688(int* self)
         }
     }
 send:
-    m.code = code;
-    m.state = self[0];
-    m.arg = 0xFFFFFFFF;
-    func_00264BE8_5688(self, &m, 0x14);
+    statusMsg.code = code;
+    statusMsg.state = self[0];
+    statusMsg.arg = 0xFFFFFFFF;
+    func_00264BE8_5688(self, &statusMsg, 0x14);
 }
 #endif
 
@@ -10274,18 +10274,18 @@ struct sChanSet_266BA8 {
 };
 
 // Pops the next (a, b) pair from channel ch's 64-entry ring; zero entries leave the outputs at -1.
-extern "C" int func_00266BA8(sChanSet_266BA8* self, int ch, int* a, int* b)
+extern "C" int func_00266BA8(sChanSet_266BA8* self, int ch, int* firstOut, int* secondOut)
 {
-    *a = -1;
-    *b = -1;
+    *firstOut = -1;
+    *secondOut = -1;
     if (self->active != 0 && ch < func_003F6348()) {
         if (self->chan[ch].read < self->chan[ch].count) {
             int i = self->chan[ch].read;
             i %= 64;
             if (self->chan[ch].buf[i][0] != 0)
-                *a = self->chan[ch].buf[i][0];
+                *firstOut = self->chan[ch].buf[i][0];
             if (self->chan[ch].buf[i][1] != 0)
-                *b = self->chan[ch].buf[i][1];
+                *secondOut = self->chan[ch].buf[i][1];
             self->chan[ch].read++;
             return 1;
         }
@@ -10328,9 +10328,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00266D00__FPv);
 #ifdef SKIP_ASM
 void* func_00266D00(void* self)
 {
-    int t0 = 0;
-    *(int*)self = t0;
-    *(int*)((char*)self + 0x4) = t0;
+    int zero = 0;
+    *(int*)self = zero;
+    *(int*)((char*)self + 0x4) = zero;
     return self;
 }
 #endif
@@ -10543,9 +10543,9 @@ extern "C" void func_002670C8(char* self)
     sListNode_2670C8* head = *(sListNode_2670C8**)(self + 4);
     sListNode_2670C8* cur = head->next;
     while (cur != *(sListNode_2670C8**)(self + 4)) {
-        sListNode_2670C8* tmp = cur;
+        sListNode_2670C8* node = cur;
         cur = cur->next;
-        operator_delete((int*)tmp);
+        operator_delete((int*)node);
     }
     (*(sListNode_2670C8**)(self + 4))->next = *(sListNode_2670C8**)(self + 4);
     (*(sListNode_2670C8**)(self + 4))->prev = *(sListNode_2670C8**)(self + 4);
@@ -10905,22 +10905,22 @@ extern "C" void* cCommChannel_channelClose(void* self);
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00267D88);
 #ifdef SKIP_ASM
-extern "C" int func_00267D88(int *arg0) {
-    return *arg0;
+extern "C" int func_00267D88(int *channel) {
+    return *channel;
 }
 #endif
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00267D90);
 #ifdef SKIP_ASM
-extern "C" void func_00267D90(void *arg0) {
-    (*(int *)((char*)(arg0) + (4))) = 1;
+extern "C" void func_00267D90(void *channel) {
+    (*(int *)((char*)(channel) + (4))) = 1;
 }
 #endif
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00267DA0);
 #ifdef SKIP_ASM
-extern "C" int func_00267DA0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (4)));
+extern "C" int func_00267DA0(void *channel) {
+    return (*(int *)((char*)(channel) + (4)));
 }
 #endif
 
@@ -11352,9 +11352,9 @@ static inline void Init268308(sLockMsg268308* m, const char* a, const char* b)
 // Builds a "lock" message carrying the two name strings of this request.
 extern "C" void* func_00268308(char* self)
 {
-    sLockMsg268308* m = (sLockMsg268308*)operator new(0x14, str_NetEvent, 0x20000000, 0);
-    Init268308(m, *(const char**)(self + 0xC), *(const char**)(self + 0x10));
-    return m;
+    sLockMsg268308* lockMsg = (sLockMsg268308*)operator new(0x14, str_NetEvent, 0x20000000, 0);
+    Init268308(lockMsg, *(const char**)(self + 0xC), *(const char**)(self + 0x10));
+    return lockMsg;
 }
 #endif
 

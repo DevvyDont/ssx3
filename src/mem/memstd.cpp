@@ -829,27 +829,27 @@ extern "C" void MUTEX_unlock(void* mutex);
 extern "C" int func_00319B98(int);
 extern void* cMemMan_m_mutex[16];
 
-extern "C" int func_002525F8(int arg0) {
-    int temp_17;
+extern "C" int func_002525F8(int memBlock) {
+    int result;
 
     MUTEX_lock(&cMemMan_m_mutex);
-    temp_17 = func_00319B98(arg0);
+    result = func_00319B98(memBlock);
     MUTEX_unlock(&cMemMan_m_mutex);
-    return temp_17;
+    return result;
 }
 #endif
 //100%
 INCLUDE_ASM("mem/memstd", func_00252648);
 #ifdef SKIP_ASM
-extern "C" int func_00252648(void *arg0) {
-    return (*(int *)((char*)(arg0) + (-0xC)));
+extern "C" int func_00252648(void *allocation) {
+    return (*(int *)((char*)(allocation) + (-0xC)));
 }
 #endif
 //100%
 INCLUDE_ASM("mem/memstd", func_00252650);
 #ifdef SKIP_ASM
-extern "C" unsigned short func_00252650(void *arg0) {
-    return (*(unsigned short *)((char*)(arg0) + (-0xE)));
+extern "C" unsigned short func_00252650(void *allocation) {
+    return (*(unsigned short *)((char*)(allocation) + (-0xE)));
 }
 #endif
 
@@ -871,13 +871,13 @@ struct sMemUnalignedInt {
 
 // PORT: pointer arithmetic done in int; a plain `(char*)p - 0xE` makes gcc 2.95
 // emit the offset as unsigned 0xFFFFFFF2 (addiu -0x8000 / 0x7ff2 split).
-extern "C" int func_00252660(void* p)
+extern "C" int func_00252660(void* allocation)
 {
-    int r = 0;
-    if (*(unsigned short*)((int)p - 0xE) & 0x800) {
-        r = ((sMemUnalignedInt*)((char*)p + *(int*)((int)p - 0xC) + 4))->value;
+    int trailerValue = 0;
+    if (*(unsigned short*)((int)allocation - 0xE) & 0x800) {
+        trailerValue = ((sMemUnalignedInt*)((char*)allocation + *(int*)((int)allocation - 0xC) + 4))->value;
     }
-    return r;
+    return trailerValue;
 }
 #endif
 
@@ -885,14 +885,14 @@ extern "C" int func_00252660(void* p)
 INCLUDE_ASM("mem/memstd", func_00252688);
 #ifdef SKIP_ASM
 // PORT: pointer arithmetic done in int (see func_00252660).
-extern "C" int func_00252688(void* p, int v)
+extern "C" int func_00252688(void* allocation, int trailerValue)
 {
-    int r = 0;
-    if (*(unsigned short*)((int)p - 0xE) & 0x800) {
-        r = 1;
-        ((sMemUnalignedInt*)((char*)p + *(int*)((int)p - 0xC) + 4))->value = v;
+    int written = 0;
+    if (*(unsigned short*)((int)allocation - 0xE) & 0x800) {
+        written = 1;
+        ((sMemUnalignedInt*)((char*)allocation + *(int*)((int)allocation - 0xC) + 4))->value = trailerValue;
     }
-    return r;
+    return written;
 }
 #endif
 
@@ -906,11 +906,11 @@ extern void* cMemMan_m_mutex[16];
 
 extern "C" void* func_002526B8(void* block, int size)
 {
-    void* r;
+    void* newBlock;
     MUTEX_lock(cMemMan_m_mutex);
-    r = cMemMan_internalResizeBlock(block, size);
+    newBlock = cMemMan_internalResizeBlock(block, size);
     MUTEX_unlock(cMemMan_m_mutex);
-    return r;
+    return newBlock;
 }
 #endif
 
@@ -1276,9 +1276,9 @@ void* func_00252980_6(void*, int, int, int, int, int) __asm__("func_00252980");
 // forwards 5 args (see func_00253AD0); the real body is bound by asm label.
 void* func_00252F60_impl(void* a0, int a1, int a2, int a3, int a4) __asm__("func_00252F60__FPv");
 
-void* func_00252F60_impl(void* a0, int a1, int a2, int a3, int a4)
+void* func_00252F60_impl(void* name, int size, int alignment, int hdrSize, int memType)
 {
-    return func_00252980_6(a0, a1, a2, a3, a4, 1);
+    return func_00252980_6(name, size, alignment, hdrSize, memType, 1);
 }
 #endif
 
@@ -1287,8 +1287,8 @@ INCLUDE_ASM("mem/memstd", func_00252F80);
 #ifdef SKIP_ASM
 extern "C" void func_00252A10(int, int, int, int, int, int);
 
-extern "C" void func_00252F80(int a0, int a1, int a2, int a3, int a4) {
-    func_00252A10(a0, a1, a2, a3, a4, 1);
+extern "C" void func_00252F80(int name, int size, int alignment, int hdrSize, int memType) {
+    func_00252A10(name, size, alignment, hdrSize, memType, 1);
 }
 #endif
 
@@ -1307,17 +1307,17 @@ extern "C" void* func_00252FA0(void* a0, int a1, int a2)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00252FC8);
 #ifdef SKIP_ASM
-extern "C" void func_00252FC8(int a0, int a1, int a2)
+extern "C" void func_00252FC8(int name, int size, int memType)
 {
-    func_00252A10(a0, a1, 0x80, 0, a2, 1);
+    func_00252A10(name, size, 0x80, 0, memType, 1);
 }
 #endif
 //100%
 INCLUDE_ASM("mem/memstd", func_00252FF0);
 #ifdef SKIP_ASM
-extern "C" void func_00252FF0(void* a0, int a1, int a2)
+extern "C" void func_00252FF0(void* name, int size, int memType)
 {
-    func_00252980_6(a0, a1, 0, 0, a2, 0);
+    func_00252980_6(name, size, 0, 0, memType, 0);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -1325,16 +1325,16 @@ INCLUDE_ASM("mem/memstd", func_00253018);
 #ifdef SKIP_ASM
 extern "C" void func_00252A10(int, int, int, int, int, int);
 
-extern "C" void func_00253018(int a0, int a1, int a2) {
-    func_00252A10(a0, a1, 0, 0, a2, 0);
+extern "C" void func_00253018(int name, int size, int memType) {
+    func_00252A10(name, size, 0, 0, memType, 0);
 }
 #endif
 //100%
 INCLUDE_ASM("mem/memstd", func_00253040);
 #ifdef SKIP_ASM
-extern "C" void func_00253040(int a0)
+extern "C" void func_00253040(int size)
 {
-    func_00252980_6(0, a0, 0, 0, 0, 1);
+    func_00252980_6(0, size, 0, 0, 0, 1);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -1342,16 +1342,16 @@ INCLUDE_ASM("mem/memstd", func_00253070);
 #ifdef SKIP_ASM
 extern "C" void func_00252A10(int, int, int, int, int, int);
 
-extern "C" void func_00253070(int arg0) {
-    func_00252A10(0, arg0, 0, 0, 0, 1);
+extern "C" void func_00253070(int size) {
+    func_00252A10(0, size, 0, 0, 0, 1);
 }
 #endif
 //100%
 INCLUDE_ASM("mem/memstd", func_002530A0);
 #ifdef SKIP_ASM
-extern "C" void func_002530A0(int a0)
+extern "C" void func_002530A0(int size)
 {
-    func_00252980_6(0, a0, 0, 0, 0, 0);
+    func_00252980_6(0, size, 0, 0, 0, 0);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -1359,8 +1359,8 @@ INCLUDE_ASM("mem/memstd", func_002530D0);
 #ifdef SKIP_ASM
 extern "C" void func_00252A10(int, int, int, int, int, int);
 
-extern "C" void func_002530D0(int arg0) {
-    func_00252A10(0, arg0, 0, 0, 0, 0);
+extern "C" void func_002530D0(int size) {
+    func_00252A10(0, size, 0, 0, 0, 0);
 }
 #endif
 //100%
@@ -1393,34 +1393,34 @@ extern "C" sMemNode_251718* func_00253170(sMemClass_251718* cls, int size, int d
     if (best < 0) {
         best = 0;
     }
-    sMemNode_251718* r = 0;
-    sMemNode_251718* p;
+    sMemNode_251718* bestNode = 0;
+    sMemNode_251718* node;
     if (dir == 0) {
-        p = cls->head.next;
+        node = cls->head.next;
         for (;;) {
-            if (best < p->size - 0x10) {
-                if (p->tag == 0x4253) {
+            if (best < node->size - 0x10) {
+                if (node->tag == 0x4253) {
                     break;
                 }
-                r = p;
-                best = r->size - 0x10;
+                bestNode = node;
+                best = bestNode->size - 0x10;
             }
-            p = p->next;
+            node = node->next;
         }
     } else {
-        p = cls->head.prev;
+        node = cls->head.prev;
         for (;;) {
-            if (best < p->size - 0x10) {
-                if (p->tag == 0x4253) {
+            if (best < node->size - 0x10) {
+                if (node->tag == 0x4253) {
                     break;
                 }
-                r = p;
-                best = r->size - 0x10;
+                bestNode = node;
+                best = bestNode->size - 0x10;
             }
-            p = p->prev;
+            node = node->prev;
         }
     }
-    return r;
+    return bestNode;
 }
 #endif
 //100%
@@ -1454,25 +1454,25 @@ INCLUDE_ASM("mem/memstd", func_002532B0);
 #ifdef SKIP_ASM
 extern "C" void func_002532B0(sMemClass_251D50* cls, sMemNode_251D50* blk)
 {
-    sMemNode_251D50* q = &cls->head;
-    sMemNode_251D50* p = q;
+    sMemNode_251D50* nextNode = &cls->head;
+    sMemNode_251D50* prevNode = nextNode;
     int sz = blk->end - (char*)blk;
     if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)blk) {
         do
-            p = p->prev;
-        while (blk < p);
-        q = p->next;
+            prevNode = prevNode->prev;
+        while (blk < prevNode);
+        nextNode = prevNode->next;
     } else {
         do
-            q = q->next;
-        while (q < blk);
-        p = q->prev;
+            nextNode = nextNode->next;
+        while (nextNode < blk);
+        prevNode = nextNode->prev;
     }
     blk->size = sz;
-    blk->next = q;
-    blk->prev = p;
-    p->next = blk;
-    q->prev = blk;
+    blk->next = nextNode;
+    blk->prev = prevNode;
+    prevNode->next = blk;
+    nextNode->prev = blk;
     blk->tag = 0x4246;
     blk->flags |= 0x4000;
 }
@@ -1885,10 +1885,10 @@ int func_003AE938(void*);
 
 extern "C" void func_002539E0(void* self)
 {
-    void* p = *(void**)((char*)self + 0x38);
-    if (p != 0 && *(int*)((char*)self + 0x3C) != 0 && *(int*)((char*)self + 0x0) == 0
+    void* handle = *(void**)((char*)self + 0x38);
+    if (handle != 0 && *(int*)((char*)self + 0x3C) != 0 && *(int*)((char*)self + 0x0) == 0
         && *(int*)((char*)self + 0x8) == 0) {
-        func_003AE938(p);
+        func_003AE938(handle);
         *(int*)((char*)self + 0x8) = 1;
     }
 }
@@ -1901,10 +1901,10 @@ void func_003AE958(void*);
 
 extern "C" void func_00253A40(void* self)
 {
-    void* p = *(void**)((char*)self + 0x38);
-    if (p != 0 && *(int*)((char*)self + 0x3C) != 0 && *(int*)((char*)self + 0x0) == 0
+    void* handle = *(void**)((char*)self + 0x38);
+    if (handle != 0 && *(int*)((char*)self + 0x3C) != 0 && *(int*)((char*)self + 0x0) == 0
         && *(int*)((char*)self + 0x8) != 0) {
-        func_003AE958(p);
+        func_003AE958(handle);
         *(int*)((char*)self + 0x8) = 0;
     }
 }
@@ -1962,9 +1962,9 @@ void* func_00253AF8(void* self)
 //100%
 INCLUDE_ASM("mem/memstd", func_00253B18);
 #ifdef SKIP_ASM
-extern "C" int func_00253B18(int a, ...)
+extern "C" int func_00253B18(int value, ...)
 {
-    return a;
+    return value;
 }
 #endif
 
@@ -2087,21 +2087,21 @@ extern "C" void* func_00254368(void* a0, int a1, int a2, int a3)
 //100%
 INCLUDE_ASM("mem/memstd", func_002543F0);
 #ifdef SKIP_ASM
-extern "C" void func_002543F0(void* self, float a, float b, float c)
+extern "C" void func_002543F0(void* self, float posX, float posY, float posZ)
 {
-    *(float*)((char*)self + 0x40) = a;
-    *(float*)((char*)self + 0x44) = b;
-    *(float*)((char*)self + 0x48) = c;
+    *(float*)((char*)self + 0x40) = posX;
+    *(float*)((char*)self + 0x44) = posY;
+    *(float*)((char*)self + 0x48) = posZ;
 }
 #endif
 
 //100%
 INCLUDE_ASM("mem/memstd", func_00254400__FPvff);
 #ifdef SKIP_ASM
-void func_00254400(void* self, float f0, float f1)
+void func_00254400(void* self, float scaleX, float scaleY)
 {
-    *(float*)((char*)self + 0x4c) = f0;
-    *(float*)((char*)self + 0x50) = f1;
+    *(float*)((char*)self + 0x4c) = scaleX;
+    *(float*)((char*)self + 0x50) = scaleY;
 }
 #endif
 
@@ -2601,15 +2601,15 @@ extern "C" void func_003B0680(void*, void*);
 
 extern "C" void func_00254DC0(void* self)
 {
-    void* o;
+    void* rend;
     sMemStdVEntry* vt;
     do {
-        o = *(void**)((char*)self + 0x8);
-        vt = *(sMemStdVEntry**)((char*)o + 0x10D8);
-    } while (vt[18].fn((char*)o + vt[18].delta) == 0);
-    void* p = *(void**)((char*)self + 0xC);
-    if (p != 0) {
-        func_003B0680(*(void**)((char*)self + 0x0), p);
+        rend = *(void**)((char*)self + 0x8);
+        vt = *(sMemStdVEntry**)((char*)rend + 0x10D8);
+    } while (vt[18].fn((char*)rend + vt[18].delta) == 0);
+    void* resource = *(void**)((char*)self + 0xC);
+    if (resource != 0) {
+        func_003B0680(*(void**)((char*)self + 0x0), resource);
         *(void**)((char*)self + 0xC) = 0;
     }
 }
@@ -2618,9 +2618,9 @@ extern "C" void func_00254DC0(void* self)
 //100%
 INCLUDE_ASM("mem/memstd", func_00254E20);
 #ifdef SKIP_ASM
-extern "C" int func_00254E20(int a, ...)
+extern "C" int func_00254E20(int value, ...)
 {
-    return a;
+    return value;
 }
 #endif
 
@@ -2815,10 +2815,10 @@ INCLUDE_ASM("mem/memstd", func_002557E0__FPv);
 #ifdef SKIP_ASM
 void* func_002557E0(void* self)
 {
-    int t0 = 0;
-    *(int*)self = t0;
+    int zero = 0;
+    *(int*)self = zero;
     *(int*)((char*)self + 0x8) = (int)(void*)cCommChannel_vtbl;
-    *(int*)((char*)self + 0x4) = t0;
+    *(int*)((char*)self + 0x4) = zero;
     return self;
 }
 #endif
@@ -2847,10 +2847,10 @@ INCLUDE_ASM("mem/memstd", func_00255830__FPv);
 #ifdef SKIP_ASM
 int func_00255830(void* self)
 {
-    int t0 = 1;
+    int one = 1;
     *(int*)((char*)self + 0x4) = 0;
-    *(int*)self = t0;
-    return t0;
+    *(int*)self = one;
+    return one;
 }
 #endif
 

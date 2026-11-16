@@ -169,16 +169,16 @@ extern "C" void func_00232588(void* self)
 {
     func_00231F80(SSXApp->LoadIndicator);
     if (*(int*)((char*)self + 8) != 0) {
-        float* f = (float*)((char*)SSXApp->LoadIndicator + 4);
-        *f -= 0.0833333358168602f;
-        if (*f < 0.0f) {
-            *f = 0.0f;
+        float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+        *fade -= 0.0833333358168602f;
+        if (*fade < 0.0f) {
+            *fade = 0.0f;
         }
     } else {
-        float* f = (float*)((char*)SSXApp->LoadIndicator + 4);
-        *f += 0.0833333358168602f;
-        if (*f > 1.0f) {
-            *f = 1.0f;
+        float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+        *fade += 0.0833333358168602f;
+        if (*fade > 1.0f) {
+            *fade = 1.0f;
         }
     }
     if (*(int*)((char*)SSXApp + 4) == 0) {

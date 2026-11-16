@@ -1601,16 +1601,16 @@ struct sCrowd_2292E0 {
 
 extern "C" void func_002292E0(void* self)
 {
-    sCrowd_2292E0* c = (sCrowd_2292E0*)self;
+    sCrowd_2292E0* crowd = (sCrowd_2292E0*)self;
     int i;
-    c->count = 0;
-    MEM_fill(c->slots, 0, 0x2000);
+    crowd->count = 0;
+    MEM_fill(crowd->slots, 0, 0x2000);
     for (i = 0; i < 128; i++) {
-        c->ids[i] = 0xFFFFFFFF;
-        c->slots[i].delay = BXrand() % 300 + 300;
+        crowd->ids[i] = 0xFFFFFFFF;
+        crowd->slots[i].delay = BXrand() % 300 + 300;
     }
-    c->count2 = 0;
-    MEM_fill(c->rest, 0, 0x500);
+    crowd->count2 = 0;
+    MEM_fill(crowd->rest, 0, 0x500);
 }
 #endif
 
@@ -1624,8 +1624,8 @@ extern "C" void func_00229398(void* self)
 {
     int i;
     for (i = 0; i < 0x80; i++) {
-        unsigned* e = (unsigned*)((char*)self + 0x8) + i;
-        if (*e != 0xFFFFFFFF) {
+        unsigned* slotId = (unsigned*)((char*)self + 0x8) + i;
+        if (*slotId != 0xFFFFFFFF) {
             func_00229B90(self, i);
         }
     }
@@ -1641,8 +1641,8 @@ extern "C" void func_00229408(void* self, int id)
 {
     int i;
     for (i = 0; i < 0x80; i++) {
-        unsigned* e = (unsigned*)((char*)self + 0x8) + i;
-        if (*e != 0xFFFFFFFF && *(unsigned char*)e == id) {
+        unsigned* slotId = (unsigned*)((char*)self + 0x8) + i;
+        if (*slotId != 0xFFFFFFFF && *(unsigned char*)slotId == id) {
             func_00229B90(self, i);
         }
     }
@@ -1768,20 +1768,20 @@ extern "C" void func_00229530(void* selfp)
     int n = func_002A77C8(gSSXAudio, 0);
     n = n > -1 ? n : -n;
     if (n != self->count) {
-        int c = n > 0 ? n : 1;
+        int animCount = n > 0 ? n : 1;
         self->count = n;
-        *self->anim = c;
+        *self->anim = animCount;
     }
     int dec = self->count * 10 + 4;
     for (int i = 0; i < 128; i++) {
         if (self->ids[i] != 0xFFFFFFFF) {
             self->slots[i].delay -= dec;
             if (self->slots[i].delay <= 0) {
-                float r1 = rands_229530(-1.0f, 1.0f);
-                float r2 = rands_229530(-1.0f, 1.0f);
-                sVec4_229530 p = Add_229530(Add_229530(self->slots[i].pos, Scale_229530(self->slots[i].dx, r1)),
-                                            Scale_229530(self->slots[i].dy, r2));
-                func_00229738((sRingOwner*)self, (sQuad229*)&p, 3);
+                float dxScale = rands_229530(-1.0f, 1.0f);
+                float dyScale = rands_229530(-1.0f, 1.0f);
+                sVec4_229530 spawnPos = Add_229530(Add_229530(self->slots[i].pos, Scale_229530(self->slots[i].dx, dxScale)),
+                                            Scale_229530(self->slots[i].dy, dyScale));
+                func_00229738((sRingOwner*)self, (sQuad229*)&spawnPos, 3);
                 self->slots[i].delay = BXrand() % 300 + 300;
             }
         }
@@ -1809,9 +1809,9 @@ struct sRingOwner {
     sRingEntry entries[40]; // 0x2220
 };
 
-extern "C" void func_00229738(sRingOwner* self, sQuad229* q, int value)
+extern "C" void func_00229738(sRingOwner* self, sQuad229* pos, int value)
 {
-    self->entries[self->index].q = *q;
+    self->entries[self->index].q = *pos;
     self->entries[self->index].value = value;
     self->index++;
     self->index %= 40;
@@ -1823,12 +1823,12 @@ INCLUDE_ASM("main/ssxapp", func_00229788);
 #ifdef SKIP_ASM
 extern "C" void func_00229910(void* self, int slot, int a1);
 
-extern "C" void func_00229788(void* self, int a1)
+extern "C" void func_00229788(void* self, int resourceId)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
         if (((unsigned int*)((char*)self + 0x8))[i] == 0xFFFFFFFF) {
-            func_00229910(self, i, a1);
+            func_00229910(self, i, resourceId);
             break;
         }
     }
@@ -2125,11 +2125,11 @@ extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_2299
     sV2_229910 uv[4];
     sV4_229910 col[4];
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    sModel_229910* m = HandleToModel_229910(RID);
+    sModel_229910* model = HandleToModel_229910(RID);
     sVEntry_229910* vt = (sVEntry_229910*)ps2GraphicsMan->mVtbl;
-    vt[97].fn((char*)ps2GraphicsMan + vt[97].delta, m, 0, pos, uv, col);
+    vt[97].fn((char*)ps2GraphicsMan + vt[97].delta, model, 0, pos, uv, col);
     for (int i = 0; i < 4; i++) {
-        pts[i] = MulMV_229910(m->mat, sV4_229910(pos[i], 1.0f));
+        pts[i] = MulMV_229910(model->mat, sV4_229910(pos[i], 1.0f));
     }
     self->slots[index].pos = Add_229910(pts[0], Scale_229910(Sub_229910(pts[3], pts[0]), 0.5f));
     self->slots[index].dx = Scale_229910(Sub_229910(pts[2], pts[0]), 0.45f);
@@ -2146,9 +2146,9 @@ extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_2299
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229B90);
 #ifdef SKIP_ASM
-extern "C" void func_00229B90(void* self, int a1)
+extern "C" void func_00229B90(void* self, int slotIndex)
 {
-    ((unsigned int*)self)[a1 + 2] = 0xFFFFFFFFU;
+    ((unsigned int*)self)[slotIndex + 2] = 0xFFFFFFFFU;
 }
 #endif
 
@@ -2338,7 +2338,7 @@ INCLUDE_ASM("main/ssxapp", func_00229F30);
 #ifdef SKIP_ASM
 // Upload two 4x4 matrices (a, b) to VU0 data memory starting at qword 4 (address 0x40).
 // PORT: PS2-only VU0 inline asm (ctc2/lqc2/vsqi); the PC port needs its own matrix store.
-extern "C" void func_00229F30(void* a, void* b)
+extern "C" void func_00229F30(void* firstMatrix, void* secondMatrix)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2361,7 +2361,7 @@ extern "C" void func_00229F30(void* a, void* b)
         "vsqi.xyzw $vf4, ($vi1++)\n"
         ".set reorder\n"
         :
-        : "r"(0x40), "r"(a), "r"(b)
+        : "r"(0x40), "r"(firstMatrix), "r"(secondMatrix)
         : "memory");
 }
 #endif
@@ -2380,7 +2380,7 @@ INCLUDE_ASM("main/ssxapp", func_00229F88);
 // Upload a vector plus a 4x4 matrix (5 qwords) to VU0 data memory slot `index`,
 // starting at qword 0x50 + index * 5.
 // PORT: PS2-only VU0 inline asm (ctc2/lqc2/vsqi); the PC port needs its own store.
-extern "C" void func_00229F88(int index, void* v, void* m)
+extern "C" void func_00229F88(int index, void* vector, void* matrix)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2397,7 +2397,7 @@ extern "C" void func_00229F88(int index, void* v, void* m)
         "vsqi.xyzw $vf5, ($vi1++)\n"
         ".set reorder\n"
         :
-        : "r"(index * 5 + 0x50), "r"(v), "r"(m)
+        : "r"(index * 5 + 0x50), "r"(vector), "r"(matrix)
         : "memory");
 }
 #endif

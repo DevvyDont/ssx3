@@ -541,23 +541,23 @@ extern "C" void func_00343130(sNode3130* self, sHit3130* hit)
     }
     sMat3130* w = self->vt[24].fn((char*)self + self->vt[24].delta);
     sBone3130* bones = *(sBone3130**)(*(char**)(self->model + 0x80) + 0x8);
-    sMat3130 m = *bones[hit->bone].mat;
-    for (int p = bones[hit->bone].parent; p != -1; p = bones[p].parent) {
-        m = mulMat3130(*bones[p].mat, m);
+    sMat3130 boneMat = *bones[hit->bone].mat;
+    for (int parentIndex = bones[hit->bone].parent; parentIndex != -1; parentIndex = bones[parentIndex].parent) {
+        boneMat = mulMat3130(*bones[parentIndex].mat, boneMat);
     }
-    m = mulMat3130(*w, m);
+    boneMat = mulMat3130(*w, boneMat);
     if (self->flags[hit->bone] != 0) {
-        sVec3130 d = sub3130(hit->pos, pos3130(m));
-        float k = self->strength / len3130(d);
-        sVec3130 s = scale3130(hit->dir, k);
-        sVec3130 c = cross3130(d, s);
-        addEq3130(hit->angVel, c);
-        addEq3130(hit->vel, s);
+        sVec3130 offset = sub3130(hit->pos, pos3130(boneMat));
+        float k = self->strength / len3130(offset);
+        sVec3130 impulse = scale3130(hit->dir, k);
+        sVec3130 torque = cross3130(offset, impulse);
+        addEq3130(hit->angVel, torque);
+        addEq3130(hit->vel, impulse);
     } else {
         loadVf8_3130(*(sVec3130*)&t4vect_YAxis);
-        sVec3130 n = norm3130(mulVec3130(m));
-        sVec3130 c = scale3130(cross3130(n, hit->dir), self->strength);
-        addEq3130(hit->angVel, c);
+        sVec3130 n = norm3130(mulVec3130(boneMat));
+        sVec3130 torque = scale3130(cross3130(n, hit->dir), self->strength);
+        addEq3130(hit->angVel, torque);
     }
 }
 #endif
@@ -737,11 +737,11 @@ INCLUDE_ASM("object/debouncenode", func_00343768);
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
 extern char cCounterNode_vtbl[];
 
-extern "C" void* func_00343768(void* self, void* a1, void* a2, void* a3)
+extern "C" void* func_00343768(void* self, void* bucket, void* inst, void* counterData)
 {
-    func_0034FB00(self, a1, 7, a2);
+    func_0034FB00(self, bucket, 7, inst);
     *(void**)((char*)self + 0xC) = cCounterNode_vtbl;
-    *(int*)((char*)self + 0x1C) = *(short*)((char*)a3 + 0x4);
+    *(int*)((char*)self + 0x1C) = *(short*)((char*)counterData + 0x4);
     *(int*)((char*)self + 0x20) = 0;
     return self;
 }
@@ -1131,8 +1131,8 @@ struct sDebounceMgr3F38 {
 
 extern "C" void func_00343F38(sDebounceMgr3F38* self, unsigned int id)
 {
-    sModel3F38* m = getModel3F38(id);
-    unsigned int* key = m->key;
+    sModel3F38* model = getModel3F38(id);
+    unsigned int* key = model->key;
     for (int i = 0; i < 5; i++) {
         if (*key >> 8 == self->blocks[i].key) {
             self->blocks[i].release(id);
@@ -1318,13 +1318,13 @@ INCLUDE_ASM("object/debouncenode", func_00344368);
 extern char* cAppMan_TheAppMan;
 extern "C" void func_003443A8(void* self);
 
-extern "C" void func_00344368(void* self, int a1)
+extern "C" void func_00344368(void* self, int modelId)
 {
-    char* s = (char*)self;
-    char* g = cAppMan_TheAppMan;
-    *(int*)(s + 0x4) = a1;
-    *(int*)(s + 0x1DC) = 0;
-    *(float*)(s + 0x1E4) = 1.0f / (float)*(int*)(g + 0x10);
+    char* owner = (char*)self;
+    char* appMan = cAppMan_TheAppMan;
+    *(int*)(owner + 0x4) = modelId;
+    *(int*)(owner + 0x1DC) = 0;
+    *(float*)(owner + 0x1E4) = 1.0f / (float)*(int*)(appMan + 0x10);
     func_003443A8(self);
 }
 #endif
@@ -1473,16 +1473,16 @@ extern "C" void func_00344AA0_43A8(void* self) __asm__("func_00344AA0");
 extern "C" void func_003443A8_impl(sDbOwner_43A8* self) __asm__("func_003443A8");
 extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
 {
-    sDbModel_43A8* m = self->model.get();
+    sDbModel_43A8* animModel = self->model.get();
     int i;
-    self->def = m->def;
+    self->def = animModel->def;
     self->period = self->def->period;
     sDbPad_43A8*& buf = self->buf;
     buf = new (str_AnimMats, 0x20000000, 0) sDbPad_43A8[self->def->count];
-    sDbEntry_43A8* e = self->def->entries;
+    sDbEntry_43A8* entry = self->def->entries;
     self->nActive = 0;
-    for (i = 0; i < self->def->count; i++, e++) {
-        if (e->src != 0)
+    for (i = 0; i < self->def->count; i++, entry++) {
+        if (entry->src != 0)
             self->nActive++;
     }
     if (self->nActive != 0) {
@@ -1491,11 +1491,11 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
     } else {
         self->meshes = 0;
     }
-    e = self->def->entries;
+    entry = self->def->entries;
     int k = 0;
-    for (i = 0; i < self->def->count; i++, e++) {
-        if (e->src != 0) {
-            func_00351398(&self->meshes[k++], e->src);
+    for (i = 0; i < self->def->count; i++, entry++) {
+        if (entry->src != 0) {
+            func_00351398(&self->meshes[k++], entry->src);
         }
     }
     for (i = 0; i < self->nActive; i++) {
@@ -1504,18 +1504,18 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
     }
     func_00344AA0_43A8(self);
     self->first = 0;
-    self->count = m->list->count;
+    self->count = animModel->list->count;
     for (i = 0; i < self->count; i++) {
-        char* d = m->list->items[i]->data;
-        if (d != 0) {
-            self->first = *(int*)d;
+        char* itemData = animModel->list->items[i]->data;
+        if (itemData != 0) {
+            self->first = *(int*)itemData;
             break;
         }
     }
     MEM_fill(&self->total, 0, 0xC4);
     self->total = self->count;
     for (i = 0; i < self->count; i++) {
-        sDbItem_43A8* item = m->list->items[i];
+        sDbItem_43A8* item = animModel->list->items[i];
         if (item->data != 0) {
             self->ptrs[i] = &self->slots[i];
             self->ptrs[i]->fC = item->fC;
@@ -1606,11 +1606,11 @@ struct sDebounce4730 {
 
 extern "C" void func_00344730(sDebounce4730* self, int index)
 {
-    sModel4730* m = self->model.get();
+    sModel4730* animModel = self->model.get();
     for (int i = 0; i < self->count; i++) {
-        char* d = m->list->items[i]->data;
-        if (d != 0) {
-            self->slots[i].value = *(unsigned short*)(d + (index << 2) + 4);
+        char* itemData = animModel->list->items[i]->data;
+        if (itemData != 0) {
+            self->slots[i].value = *(unsigned short*)(itemData + (index << 2) + 4);
         }
     }
 }
@@ -1648,10 +1648,10 @@ void func_00344800_v(sDebounceOwner4800* self)
 {
     sDebounceItem4800* items = self->items;
     if (items != 0) {
-        sDebounceItem4800* p = items + ((int*)items)[-4];
-        while (self->items != p) {
-            p--;
-            p->vt[1].fn((char*)p + p->vt[1].delta, 0);
+        sDebounceItem4800* item = items + ((int*)items)[-4];
+        while (self->items != item) {
+            item--;
+            item->vt[1].fn((char*)item + item->vt[1].delta, 0);
         }
         cMemMan_free((char*)self->items - 0x10);
     }
@@ -1697,14 +1697,14 @@ extern "C" void func_00344AA0(sDebounceOwner49F0* self);
 extern "C" void func_003449F0(void* elem)
 {
     sDebounceOwner49F0* self = (sDebounceOwner49F0*)elem;
-    float t = self->time + self->step;
-    self->time = t;
-    if (t > self->period) {
-        self->time = t - self->period;
+    float newTime = self->time + self->step;
+    self->time = newTime;
+    if (newTime > self->period) {
+        self->time = newTime - self->period;
     }
     for (int i = 0; i < self->count; i++) {
-        sDebounceItem49F0* p = (sDebounceItem49F0*)(i * 0xD0 + (int)self->items);
-        p->vt[2].fn((char*)p + p->vt[2].delta, self->time);
+        sDebounceItem49F0* item = (sDebounceItem49F0*)(i * 0xD0 + (int)self->items);
+        item->vt[2].fn((char*)item + item->vt[2].delta, self->time);
     }
     func_00344AA0(self);
 }
@@ -1890,35 +1890,35 @@ static inline void scaleTrans_4AA0(sDbMat_4AA0* m, const sDbV4_4AA0& s)
 extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self) __asm__("func_00344AA0");
 extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self)
 {
-    sDbPart_4AA0* p = self->info->parts;
+    sDbPart_4AA0* part = self->info->parts;
     float k = self->model.get()->scale;
-    sDbV4_4AA0 s;
-    s.x = k;
-    s.y = k;
-    s.z = k;
-    s.w = 1.0f;
+    sDbV4_4AA0 scaleVec;
+    scaleVec.x = k;
+    scaleVec.y = k;
+    scaleVec.z = k;
+    scaleVec.w = 1.0f;
     int n = 0;
-    for (int i = 0; i < self->info->count; i++, p++) {
-        int parent = p->parent;
-        if (p->animated != 0) {
+    for (int i = 0; i < self->info->count; i++, part++) {
+        int parent = part->parent;
+        if (part->animated != 0) {
             if (parent != -1) {
                 // PORT: pointer arithmetic done in int (gives the target's offset-first addu).
                 sDbMat_4AA0* local = &((sDbItem_4AA0*)(n++ * (int)sizeof(sDbItem_4AA0) + (int)self->items))->mat;
-                sDbMat_4AA0 t2;
-                partMat_4AA0(&t2, &self->mats[parent], local, s);
-                vu0CopyMat_4AA0(&self->mats[i], &t2);
+                sDbMat_4AA0 combined;
+                partMat_4AA0(&combined, &self->mats[parent], local, scaleVec);
+                vu0CopyMat_4AA0(&self->mats[i], &combined);
             } else {
                 vu0CopyMat_4AA0(&self->mats[i], &self->items[n++].mat);
-                scaleTrans_4AA0(&self->mats[i], s);
+                scaleTrans_4AA0(&self->mats[i], scaleVec);
             }
         } else {
             if (parent != -1) {
-                sDbMat_4AA0 t2;
-                partMat_4AA0(&t2, &self->mats[parent], p->mat, s);
-                vu0CopyMat_4AA0(&self->mats[i], &t2);
+                sDbMat_4AA0 combined;
+                partMat_4AA0(&combined, &self->mats[parent], part->mat, scaleVec);
+                vu0CopyMat_4AA0(&self->mats[i], &combined);
             } else {
-                vu0CopyMat_4AA0(&self->mats[i], p->mat);
-                scaleTrans_4AA0(&self->mats[i], s);
+                vu0CopyMat_4AA0(&self->mats[i], part->mat);
+                scaleTrans_4AA0(&self->mats[i], scaleVec);
             }
         }
     }
@@ -1974,19 +1974,19 @@ extern "C" void func_00344E18(void* self)
     {
         if (~*ref == 0)
             continue;
-        sModel_44E18* m = GetModel_44E18(ref);
-        if (!IsLoaded_44E18(m))
+        sModel_44E18* model = GetModel_44E18(ref);
+        if (!IsLoaded_44E18(model))
             continue;
         if (*(int*)((char*)self + 0x114) >= 2)
         {
             func_00344730((sDebounce4730*)self, *(int*)((char*)self + off + 0x10));
             sVE7_44E18* vt = (sVE7_44E18*)ps2GraphicsMan->mVtbl;
-            vt[95].fn((char*)ps2GraphicsMan + vt[95].delta, m, 1.0f, (char*)self + 0x118, (char*)m + 0x10, *(void**)((char*)self + 0x1E8), 0, 0);
+            vt[95].fn((char*)ps2GraphicsMan + vt[95].delta, model, 1.0f, (char*)self + 0x118, (char*)model + 0x10, *(void**)((char*)self + 0x1E8), 0, 0);
         }
         else
         {
             sVE5_44E18* vt = (sVE5_44E18*)ps2GraphicsMan->mVtbl;
-            vt[96].fn((char*)ps2GraphicsMan + vt[96].delta, m, *(void**)((char*)self + 0x1E8), 0, 0);
+            vt[96].fn((char*)ps2GraphicsMan + vt[96].delta, model, *(void**)((char*)self + 0x1E8), 0, 0);
         }
     }
 }
@@ -2237,20 +2237,20 @@ INCLUDE_ASM("object/debouncenode", func_00345320);
 #ifdef SKIP_ASM
 extern "C" int func_00345320(sTrackRef51C0* self)
 {
-    float* v = (float*)self->get();
-    sDfVec_343588 b[2];
-    b[0].x = v[1];
-    b[0].y = v[2];
-    b[0].z = v[3];
-    b[0].w = 1.0f;
-    b[1].x = v[4];
-    b[1].y = v[5];
-    b[1].z = v[6];
-    b[1].w = 1.0f;
+    float* bounds = (float*)self->get();
+    sDfVec_343588 box[2];
+    box[0].x = bounds[1];
+    box[0].y = bounds[2];
+    box[0].z = bounds[3];
+    box[0].w = 1.0f;
+    box[1].x = bounds[4];
+    box[1].y = bounds[5];
+    box[1].z = bounds[6];
+    box[1].w = 1.0f;
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     sDfGfxVt_343588* vt = (sDfGfxVt_343588*)gfx->mVtbl;
     char* thisp = (char*)gfx + vt[93].delta;
-    int res = ((DfCullFn_343588)vt[93].fn)(thisp, &b[0], &b[1], ((DfViewFn_343588)((sDfGfxVt_343588*)gfx->mVtbl)[43].fn)((char*)gfx + ((sDfGfxVt_343588*)gfx->mVtbl)[43].delta));
+    int res = ((DfCullFn_343588)vt[93].fn)(thisp, &box[0], &box[1], ((DfViewFn_343588)((sDfGfxVt_343588*)gfx->mVtbl)[43].fn)((char*)gfx + ((sDfGfxVt_343588*)gfx->mVtbl)[43].delta));
     return res != 1;
 }
 #endif

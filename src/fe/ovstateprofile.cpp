@@ -191,9 +191,9 @@ struct cUIObj_11270 {
     virtual void setSelected(int v);
 };
 
-extern "C" void func_00211270(void* p)
+extern "C" void func_00211270(void* vself)
 {
-    cSelf_11270* self = (cSelf_11270*)p;
+    cSelf_11270* self = (cSelf_11270*)vself;
     if (self->isReady() != 0) {
         if ((*(cCard_11270**)((char*)cSSXApp_getMCManager(SSXApp) + 0x434))->isPresent() != 0) {
             self->setState(3);
@@ -204,9 +204,9 @@ extern "C" void func_00211270(void* p)
     for (int i = 1; i < 7; i++) {
         char buf[64];
         sprintf(buf, str_playerpct_d_b, i);
-        cUIObj_11270* o = (cUIObj_11270*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
-        o->setSelected(0);
-        o->setEnabled(1);
+        cUIObj_11270* playerButton = (cUIObj_11270*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+        playerButton->setSelected(0);
+        playerButton->setEnabled(1);
     }
 }
 #endif
@@ -503,15 +503,15 @@ extern "C" void func_00211850(void* self, bool show)
     }
     if (*(int*)((char*)self + 0x230) != on) {
         int off = !on;
-        cUIObj_211850* a = (cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
-        if (a != 0) {
-            a->setVisible(off);
+        cUIObj_211850* xButton = (cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
+        if (xButton != 0) {
+            xButton->setVisible(off);
         }
         ((cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(off);
         ((cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_delete_text)))->setVisible(off);
-        cUIObj_211850* d = (cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b));
-        if (d != 0) {
-            d->setVisible(off);
+        cUIObj_211850* squareButton = (cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b));
+        if (squareButton != 0) {
+            squareButton->setVisible(off);
         }
         *(int*)((char*)self + 0x230) = on;
     }
@@ -568,12 +568,12 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
 extern char str_x_save[];
 
-extern "C" void func_00211A08(void* self, int a1, bool on)
+extern "C" void func_00211A08(void* self, int loadBlocked, bool on)
 {
-    cUIObj_211A08* a = (cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
+    cUIObj_211A08* xButton = (cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
     ((cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(!on);
     *(int*)((char*)self + 0x224) = !on;
-    a->setVisible(!on);
+    xButton->setVisible(!on);
 }
 #endif
 
@@ -1238,9 +1238,9 @@ extern "C" void func_00212788(sList_00212788* self)
 {
     sListNode_00212788* cur = self->node->next;
     while (cur != self->node) {
-        sListNode_00212788* tmp = cur;
+        sListNode_00212788* deadNode = cur;
         cur = cur->next;
-        operator_delete((int*)tmp);
+        operator_delete((int*)deadNode);
     }
     self->node->next = self->node;
     self->node->prev = self->node;

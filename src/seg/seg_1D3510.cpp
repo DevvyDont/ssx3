@@ -73,22 +73,22 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D2628);
 #ifdef SKIP_ASM
 extern "C" int get_float(int, int);
 
-extern "C" int func_002D2628(int arg0, int arg1) {
+extern "C" int func_002D2628(int src, int out) {
     int temp_2;
-    int var_16;
-    int var_17;
-    int var_18;
+    int outCursor;
+    int remaining;
+    int total;
 
-    var_16 = arg1;
-    var_17 = 3;
-    var_18 = 0;
+    outCursor = out;
+    remaining = 3;
+    total = 0;
     do {
-        temp_2 = get_float(arg0, var_16);
-        var_16 += 4;
-        var_17 -= 1;
-        var_18 += temp_2;
-    } while (var_17 >= 0);
-    return var_18;
+        temp_2 = get_float(src, outCursor);
+        outCursor += 4;
+        remaining -= 1;
+        total += temp_2;
+    } while (remaining >= 0);
+    return total;
 }
 #endif
 
@@ -97,22 +97,22 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D2690);
 #ifdef SKIP_ASM
 extern "C" int get_float(int, int);
 
-extern "C" int func_002D2690(int arg0, int arg1) {
+extern "C" int func_002D2690(int src, int out) {
     int temp_2;
-    int var_16;
-    int var_17;
-    int var_18;
+    int outCursor;
+    int remaining;
+    int total;
 
-    var_16 = arg1;
-    var_17 = 0xF;
-    var_18 = 0;
+    outCursor = out;
+    remaining = 0xF;
+    total = 0;
     do {
-        temp_2 = get_float(arg0, var_16);
-        var_16 += 4;
-        var_17 -= 1;
-        var_18 += temp_2;
-    } while (var_17 >= 0);
-    return var_18;
+        temp_2 = get_float(src, outCursor);
+        outCursor += 4;
+        remaining -= 1;
+        total += temp_2;
+    } while (remaining >= 0);
+    return total;
 }
 #endif
 
@@ -123,18 +123,18 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D26F8);
 struct V4_26F8 { float x, y, z, w; } __attribute__((aligned(16)));
 extern "C" int get_float_26F8(void*, void*) __asm__("get_float");
 extern "C" int func_002D26F8(void *src, V4_26F8 *out) {
-    float a, b, c, d;
-    V4_26F8 v;
+    float readW, readX, readY, readZ;
+    V4_26F8 result;
     int total;
-    total = get_float_26F8(src, &a);
-    total += get_float_26F8(src, &b);
-    total += get_float_26F8(src, &c);
-    total += get_float_26F8(src, &d);
-    v.w = a;
-    v.x = b;
-    v.y = c;
-    v.z = d;
-    *out = v;
+    total = get_float_26F8(src, &readW);
+    total += get_float_26F8(src, &readX);
+    total += get_float_26F8(src, &readY);
+    total += get_float_26F8(src, &readZ);
+    result.w = readW;
+    result.x = readX;
+    result.y = readY;
+    result.z = readZ;
+    *out = result;
     return total;
 }
 #endif
@@ -142,9 +142,9 @@ extern "C" int func_002D26F8(void *src, V4_26F8 *out) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D2790);
 #ifdef SKIP_ASM
-extern "C" int func_002D2790(unsigned char **arg0, unsigned char *arg1) {
-    *arg1 = **arg0;
-    *arg0 += 1;
+extern "C" int func_002D2790(unsigned char **cursor, unsigned char *out) {
+    *out = **cursor;
+    *cursor += 1;
     return 1;
 }
 #endif
@@ -275,8 +275,8 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D37E0);
 #ifdef SKIP_ASM
 struct VEnt_37E0 { short delta; short idx; int (*fn)(void*, int); };
 extern "C" void func_002D37E0(cPS2MemCard* pS2MemCard) {
-    VEnt_37E0 *e = (VEnt_37E0*)(*(char **)pS2MemCard + 0x180);
-    e->fn((char*)pS2MemCard + e->delta, pS2MemCard->mDevice);
+    VEnt_37E0 *vtEntry = (VEnt_37E0*)(*(char **)pS2MemCard + 0x180);
+    vtEntry->fn((char*)pS2MemCard + vtEntry->delta, pS2MemCard->mDevice);
 }
 #endif
 
@@ -285,8 +285,8 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3810);
 #ifdef SKIP_ASM
 struct VEnt_3810 { short delta; short idx; int (*fn)(void*, int); };
 extern "C" void func_002D3810(cPS2MemCard* pS2MemCard) {
-    VEnt_3810 *e = (VEnt_3810*)(*(char **)pS2MemCard + 0x1A0);
-    e->fn((char*)pS2MemCard + e->delta, pS2MemCard->mDevice);
+    VEnt_3810 *vtEntry = (VEnt_3810*)(*(char **)pS2MemCard + 0x1A0);
+    vtEntry->fn((char*)pS2MemCard + vtEntry->delta, pS2MemCard->mDevice);
 }
 #endif
 
@@ -365,8 +365,8 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D38F0);
 #ifdef SKIP_ASM
 struct VEnt_38F0 { short delta; short idx; int (*fn)(void*, int); };
 extern "C" void func_002D38F0(cPS2MemCard* pS2MemCard) {
-    VEnt_38F0 *e = (VEnt_38F0*)(*(char **)pS2MemCard + 0x1C0);
-    e->fn((char*)pS2MemCard + e->delta, pS2MemCard->mDevice);
+    VEnt_38F0 *vtEntry = (VEnt_38F0*)(*(char **)pS2MemCard + 0x1C0);
+    vtEntry->fn((char*)pS2MemCard + vtEntry->delta, pS2MemCard->mDevice);
 }
 #endif
 
@@ -401,8 +401,8 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3950);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_002C53E0_3950(void*, int, int) __asm__("func_002C53E0");
-extern "C" void func_002D3950(cPS2MemCard* pS2MemCard, int arg1) {
-    func_002C53E0_3950(pS2MemCard, (pS2MemCard->mDevice), arg1);
+extern "C" void func_002D3950(cPS2MemCard* pS2MemCard, int outText) {
+    func_002C53E0_3950(pS2MemCard, (pS2MemCard->mDevice), outText);
 }
 #endif
 
@@ -427,8 +427,8 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3980);
 #ifdef SKIP_ASM
 struct VEnt_3980 { short delta; short idx; void (*fn)(void*, int, int, int); };
 extern "C" void func_002D3980(cPS2MemCard* pS2MemCard, int a1, int a2, int a3) {
-    VEnt_3980 *e = (VEnt_3980*)(*(char **)pS2MemCard + 0x230);
-    e->fn((char*)pS2MemCard + e->delta, a1, a2, a3);
+    VEnt_3980 *vtEntry = (VEnt_3980*)(*(char **)pS2MemCard + 0x230);
+    vtEntry->fn((char*)pS2MemCard + vtEntry->delta, a1, a2, a3);
 }
 #endif
 
@@ -453,16 +453,16 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D39B8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_002C51D0_39B8(void*, int) __asm__("func_002C51D0");
-extern "C" void func_002D39B8(void *arg0) {
-    func_002C51D0_39B8(arg0, (*(int *)((char*)(arg0) + (0xC))));
+extern "C" void func_002D39B8(void *memCard) {
+    func_002C51D0_39B8(memCard, (*(int *)((char*)(memCard) + (0xC))));
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D39D8);
 #ifdef SKIP_ASM
-extern "C" int func_002D39D8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (4)));
+extern "C" int func_002D39D8(void *memCard) {
+    return (*(int *)((char*)(memCard) + (4)));
 }
 #endif
 
@@ -472,8 +472,8 @@ extern "C" void func_002D39E0(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D39E8);
 #ifdef SKIP_ASM
-extern "C" int func_002D39E8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x54)));
+extern "C" int func_002D39E8(void *memCard) {
+    return (*(int *)((char*)(memCard) + (0x54)));
 }
 #endif
 
@@ -583,16 +583,16 @@ extern "C" void func_002D3A68(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A88);
 #ifdef SKIP_ASM
-extern "C" void func_002D3A88(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x20))) = arg1;
+extern "C" void func_002D3A88(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x20))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A90);
 #ifdef SKIP_ASM
-extern "C" void func_002D3A90(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_002D3A90(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
@@ -609,33 +609,33 @@ extern "C" void func_002D3A98(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3AB8);
 #ifdef SKIP_ASM
-extern "C" void func_002D3AB8(void *arg0, int arg1, int arg2) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
-    (*(int *)((char*)(arg0) + (0x1C))) = arg2;
+extern "C" void func_002D3AB8(void *menuItem, int arg1, int arg2) {
+    (*(int *)((char*)(menuItem) + (0x18))) = arg1;
+    (*(int *)((char*)(menuItem) + (0x1C))) = arg2;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3AC8);
 #ifdef SKIP_ASM
-extern "C" void func_002D3AC8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x20))) = arg1;
+extern "C" void func_002D3AC8(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x20))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3AD0);
 #ifdef SKIP_ASM
-extern "C" void func_002D3AD0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_002D3AD0(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3AD8);
 #ifdef SKIP_ASM
-extern "C" int func_002D3AD8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x14)));
+extern "C" int func_002D3AD8(void *menuItem) {
+    return (*(int *)((char*)(menuItem) + (0x14)));
 }
 #endif
 
@@ -658,16 +658,16 @@ extern "C" void cSubMenuItem__cSubMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B00);
 #ifdef SKIP_ASM
-extern "C" void func_002D3B00(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_002D3B00(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B08);
 #ifdef SKIP_ASM
-extern "C" int func_002D3B08(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18)));
+extern "C" int func_002D3B08(void *menuItem) {
+    return (*(int *)((char*)(menuItem) + (0x18)));
 }
 #endif
 
@@ -684,8 +684,8 @@ extern "C" void func_002D3B10(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B30);
 #ifdef SKIP_ASM
-extern "C" void func_002D3B30(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_002D3B30(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
@@ -702,40 +702,40 @@ extern "C" void func_002D3B38(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B58);
 #ifdef SKIP_ASM
-extern "C" void func_002D3B58(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_002D3B58(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B60);
 #ifdef SKIP_ASM
-extern "C" void func_002D3B60(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_002D3B60(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B68);
 #ifdef SKIP_ASM
-extern "C" int func_002D3B68(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x14)));
+extern "C" int func_002D3B68(void *menuItem) {
+    return (*(int *)((char*)(menuItem) + (0x14)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B70);
 #ifdef SKIP_ASM
-extern "C" void func_002D3B70(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x20))) = arg1;
+extern "C" void func_002D3B70(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x20))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B78);
 #ifdef SKIP_ASM
-extern "C" int func_002D3B78(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x20)));
+extern "C" int func_002D3B78(void *menuItem) {
+    return (*(int *)((char*)(menuItem) + (0x20)));
 }
 #endif
 
@@ -752,16 +752,16 @@ extern "C" void func_002D3B80(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BA0);
 #ifdef SKIP_ASM
-extern "C" void func_002D3BA0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_002D3BA0(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BA8);
 #ifdef SKIP_ASM
-extern "C" int func_002D3BA8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x14)));
+extern "C" int func_002D3BA8(void *menuItem) {
+    return (*(int *)((char*)(menuItem) + (0x14)));
 }
 #endif
 
@@ -782,16 +782,16 @@ extern "C" void cNullMenuItem__cNullMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BD0);
 #ifdef SKIP_ASM
-extern "C" void func_002D3BD0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_002D3BD0(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BD8);
 #ifdef SKIP_ASM
-extern "C" void func_002D3BD8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_002D3BD8(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
@@ -822,16 +822,16 @@ extern "C" void func_002D3C00(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C20);
 #ifdef SKIP_ASM
-extern "C" void func_002D3C20(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_002D3C20(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C28);
 #ifdef SKIP_ASM
-extern "C" void func_002D3C28(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_002D3C28(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
@@ -854,16 +854,16 @@ extern "C" void cIntMenuItem__cIntMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C50);
 #ifdef SKIP_ASM
-extern "C" void func_002D3C50(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_002D3C50(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C58);
 #ifdef SKIP_ASM
-extern "C" void func_002D3C58(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_002D3C58(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
@@ -886,50 +886,50 @@ extern "C" void cFloatMenuItem__cFloatMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C80);
 #ifdef SKIP_ASM
-extern "C" void func_002D3C80(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_002D3C80(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C88);
 #ifdef SKIP_ASM
-extern "C" void func_002D3C88(void *arg0, float fparg0, float fparg1) {
-    (*(float *)((char*)(arg0) + (0x1C))) = fparg0;
-    (*(float *)((char*)(arg0) + (0x20))) = fparg1;
+extern "C" void func_002D3C88(void *menuItem, float fparg0, float fparg1) {
+    (*(float *)((char*)(menuItem) + (0x1C))) = fparg0;
+    (*(float *)((char*)(menuItem) + (0x20))) = fparg1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C98);
 #ifdef SKIP_ASM
-extern "C" void func_002D3C98(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_002D3C98(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CA0);
 #ifdef SKIP_ASM
-extern "C" void func_002D3CA0(void *arg0, float fparg0, float fparg1) {
-    (*(float *)((char*)(arg0) + (0x24))) = fparg0;
-    (*(float *)((char*)(arg0) + (0x28))) = fparg1;
+extern "C" void func_002D3CA0(void *menuItem, float fparg0, float fparg1) {
+    (*(float *)((char*)(menuItem) + (0x24))) = fparg0;
+    (*(float *)((char*)(menuItem) + (0x28))) = fparg1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CB0);
 #ifdef SKIP_ASM
-extern "C" void func_002D3CB0(void *arg0, float fparg0) {
-    *(*(float **)((char*)(arg0) + (0x18))) = fparg0;
+extern "C" void func_002D3CB0(void *menuItem, float fparg0) {
+    *(*(float **)((char*)(menuItem) + (0x18))) = fparg0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CC0);
 #ifdef SKIP_ASM
-extern "C" float func_002D3CC0(void *arg0) {
-    return ((*(float *)((char*)(arg0) + (0x24))) * *(*(float **)((char*)(arg0) + (0x18)))) + (*(float *)((char*)(arg0) + (0x28)));
+extern "C" float func_002D3CC0(void *menuItem) {
+    return ((*(float *)((char*)(menuItem) + (0x24))) * *(*(float **)((char*)(menuItem) + (0x18)))) + (*(float *)((char*)(menuItem) + (0x28)));
 }
 #endif
 
@@ -952,25 +952,25 @@ extern "C" void cAngleMenuItem__cAngleMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D00);
 #ifdef SKIP_ASM
-extern "C" void func_002D3D00(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_002D3D00(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D08);
 #ifdef SKIP_ASM
-extern "C" void func_002D3D08(void *arg0, float fparg0, float fparg1) {
-    (*(float *)((char*)(arg0) + (0x1C))) = fparg0;
-    (*(float *)((char*)(arg0) + (0x20))) = fparg1;
+extern "C" void func_002D3D08(void *menuItem, float fparg0, float fparg1) {
+    (*(float *)((char*)(menuItem) + (0x1C))) = fparg0;
+    (*(float *)((char*)(menuItem) + (0x20))) = fparg1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D18);
 #ifdef SKIP_ASM
-extern "C" void func_002D3D18(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_002D3D18(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
@@ -987,8 +987,8 @@ extern "C" void func_002D3D20(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D40);
 #ifdef SKIP_ASM
-extern "C" int func_002D3D40(int arg0) {
-    return arg0 + 0x18;
+extern "C" int func_002D3D40(int menuItem) {
+    return menuItem + 0x18;
 }
 #endif
 
@@ -997,10 +997,10 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3D48);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00416958_3D48(char*, int, int) __asm__("func_00416958");
-extern "C" int func_002D3D48(char *arg0, int arg1) {
-    char *p = arg0 + 0x18;
-    *p = 0;
-    return func_00416958_3D48(p, arg1, 0xF);
+extern "C" int func_002D3D48(char *menuItem, int text) {
+    char *textBuf = menuItem + 0x18;
+    *textBuf = 0;
+    return func_00416958_3D48(textBuf, text, 0xF);
 }
 #endif
 
@@ -1068,8 +1068,8 @@ extern "C" void cRGBTitleMenuItem__cRGBTitleMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3E18);
 #ifdef SKIP_ASM
-extern "C" void func_002D3E18(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_002D3E18(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
@@ -1101,8 +1101,8 @@ extern "C" void cARGBMenuItem__cARGBMenuItem(int menuItem, int flags) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3EA0);
 #ifdef SKIP_ASM
-extern "C" void func_002D3EA0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x658))) = arg1;
+extern "C" void func_002D3EA0(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x658))) = value;
 }
 #endif
 
@@ -1119,8 +1119,8 @@ extern "C" void func_002D3EA8(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3EC8);
 #ifdef SKIP_ASM
-extern "C" void func_002D3EC8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_002D3EC8(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
@@ -1150,8 +1150,8 @@ extern "C" void cVectorMenuItem__cVectorMenuItem(int menuItem, int flags) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F48);
 #ifdef SKIP_ASM
-extern "C" void func_002D3F48(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x66C))) = arg1;
+extern "C" void func_002D3F48(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x66C))) = value;
 }
 #endif
 
@@ -1168,8 +1168,8 @@ extern "C" void func_002D3F50(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F70);
 #ifdef SKIP_ASM
-extern "C" void func_002D3F70(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_002D3F70(void *menuItem, int value) {
+    (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
@@ -1179,11 +1179,11 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3F78);
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
-extern "C" void func_002D3F78(int arg0, int arg1) {
-    cMenuItem__cMenuItem(arg0 + 0x164, 2);
-    cMenuItem__cMenuItem(arg0 + 0x14C, 2);
-    cMenuItem__cMenuItem(arg0 + 0x130, 2);
-    cMenu__cMenu(arg0, arg1);
+extern "C" void func_002D3F78(int menu, int flags) {
+    cMenuItem__cMenuItem(menu + 0x164, 2);
+    cMenuItem__cMenuItem(menu + 0x14C, 2);
+    cMenuItem__cMenuItem(menu + 0x130, 2);
+    cMenu__cMenu(menu, flags);
 }
 #endif
 

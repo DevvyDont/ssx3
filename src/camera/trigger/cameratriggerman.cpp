@@ -136,10 +136,10 @@ extern "C" void func_0016CA18_impl(void* vself)
 {
     sCtMan_CA18* self = (sCtMan_CA18*)vself;
     for (int i = 0; i < self->count; i++) {
-        sCtTrig_CA18* t = self->trigs[i];
+        sCtTrig_CA18* trigger = self->trigs[i];
         char* w = (char*)SSXApp->Game->BXNash;
-        sCtBox_CA18 box = t->shape->bounds();
-        remove_CA18(w, t->item, &box);
+        sCtBox_CA18 box = trigger->shape->bounds();
+        remove_CA18(w, trigger->item, &box);
     }
     cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x1C));
     cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x3C));
@@ -571,10 +571,10 @@ extern "C" cCameraTriggerStack* cCameraTriggerStack_cCameraTriggerStack(cCameraT
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D238__FPvi);
 #ifdef SKIP_ASM
-void func_0016D238(void* self, int a1)
+void func_0016D238(void* self, int triggerId)
 {
-    *(int*)((char*)self + (*(int*)self << 2) + 0x8) = a1;
-    *(int*)((char*)self + 0x4) = a1;
+    *(int*)((char*)self + (*(int*)self << 2) + 0x8) = triggerId;
+    *(int*)((char*)self + 0x4) = triggerId;
     *(int*)self = *(int*)self + 1;
 }
 #endif
@@ -602,12 +602,12 @@ extern "C" int func_0016D260(sCamTrigStack* self, int key, int* changed, int* ou
         }
     }
     if (self->count != 0) {
-        int t = self->items[self->count - 1];
-        if (t == self->top) {
+        int newTop = self->items[self->count - 1];
+        if (newTop == self->top) {
             *changed = 0;
         } else {
             *changed = 1;
-            *out = t;
+            *out = newTop;
         }
         return 0;
     }
@@ -721,43 +721,43 @@ extern "C" void func_0016D320(char* self, char* rider)
         ctx.list = (char*)(idx * 4 + (int)self) + 0x14;
         ctx.rider = rider;
         char* sub = rider + 0x6C0;
-        sQuad_D320* p0 = getPos_D320(sub);
-        sQuad_D320* p1 = getPos_D320(sub);
+        sQuad_D320* riderPosMin = getPos_D320(sub);
+        sQuad_D320* riderPosMax = getPos_D320(sub);
         sBox_D320 box;
-        box.min = *p0;
-        box.max = *p1;
+        box.min = *riderPosMin;
+        box.max = *riderPosMax;
         // PORT: eight 1-byte hit flags kept in one 8-byte slot (relies on sizeof(long) == 8).
         long hits;
         sCtx_D320* pc = &ctx;
-        sRoot_D320* r0 = &w[0];
-        if (w[0].node) collect_D320(r0, (char*)&hits, 0, pc, &box);
-        sRoot_D320* r1 = &w[1];
-        if (w[1].node) collect_D320(r1, (char*)&hits, 1, pc, &box);
-        sRoot_D320* r2 = &w[2];
-        if (w[2].node) collect_D320(r2, (char*)&hits, 2, pc, &box);
-        sRoot_D320* r3 = &w[3];
-        if (w[3].node) collect_D320(r3, (char*)&hits, 3, pc, &box);
-        sRoot_D320* r4 = &w[4];
-        if (w[4].node) collect_D320(r4, (char*)&hits, 4, pc, &box);
-        sRoot_D320* r5 = &w[5];
-        if (w[5].node) collect_D320(r5, (char*)&hits, 5, pc, &box);
-        sRoot_D320* r6 = &w[6];
-        if (w[6].node) collect_D320(r6, (char*)&hits, 6, pc, &box);
-        sRoot_D320* r7 = &w[7];
-        if (w[7].node) collect_D320(r7, (char*)&hits, 7, pc, &box);
+        sRoot_D320* root0 = &w[0];
+        if (w[0].node) collect_D320(root0, (char*)&hits, 0, pc, &box);
+        sRoot_D320* root1 = &w[1];
+        if (w[1].node) collect_D320(root1, (char*)&hits, 1, pc, &box);
+        sRoot_D320* root2 = &w[2];
+        if (w[2].node) collect_D320(root2, (char*)&hits, 2, pc, &box);
+        sRoot_D320* root3 = &w[3];
+        if (w[3].node) collect_D320(root3, (char*)&hits, 3, pc, &box);
+        sRoot_D320* root4 = &w[4];
+        if (w[4].node) collect_D320(root4, (char*)&hits, 4, pc, &box);
+        sRoot_D320* root5 = &w[5];
+        if (w[5].node) collect_D320(root5, (char*)&hits, 5, pc, &box);
+        sRoot_D320* root6 = &w[6];
+        if (w[6].node) collect_D320(root6, (char*)&hits, 6, pc, &box);
+        sRoot_D320* root7 = &w[7];
+        if (w[7].node) collect_D320(root7, (char*)&hits, 7, pc, &box);
 
         int changed;
         int top;
         char* n = *(char**)((char*)(idx * 4 + (int)self) + 0x14);
         while (n != 0) {
             if (*(int*)(n + 0xC) == 0) {
-                char* t = *(char**)n;
-                if (func_0016D260((sCamTrigStack*)(self + (idx * 32 + 0x1C)), *(int*)t, &changed, &top)) {
-                    func_0016E1D8_D320(*(void**)(t + 0x10), rider);
+                char* trigger = *(char**)n;
+                if (func_0016D260((sCamTrigStack*)(self + (idx * 32 + 0x1C)), *(int*)trigger, &changed, &top)) {
+                    func_0016E1D8_D320(*(void**)(trigger + 0x10), rider);
                 } else if (changed) {
-                    char* f = (char*)func_0016C6E0(self + (idx * 4 + 0x14), top);
-                    if (f) {
-                        func_0016E1D8_D320(*(void**)(f + 0xC), rider);
+                    char* topActive = (char*)func_0016C6E0(self + (idx * 4 + 0x14), top);
+                    if (topActive) {
+                        func_0016E1D8_D320(*(void**)(topActive + 0xC), rider);
                     }
                 }
                 n = (char*)cActiveTriggerList_remove(self + (idx * 4 + 0x14), n);
@@ -765,10 +765,10 @@ extern "C" void func_0016D320(char* self, char* rider)
                 n = *(char**)(n + 4);
             }
         }
-        for (char* m = *(char**)((char*)(idx * 4 + (int)self) + 0x14); m != 0; m = *(char**)(m + 4)) {
-            if (*(int*)(m + 8)) {
-                func_0016D238(self + (idx * 32 + 0x1C), **(int**)m);
-                func_0016E1D8_D320(*(void**)(*(char**)m + 0xC), rider);
+        for (char* listNode = *(char**)((char*)(idx * 4 + (int)self) + 0x14); listNode != 0; listNode = *(char**)(listNode + 4)) {
+            if (*(int*)(listNode + 8)) {
+                func_0016D238(self + (idx * 32 + 0x1C), **(int**)listNode);
+                func_0016E1D8_D320(*(void**)(*(char**)listNode + 0xC), rider);
             }
         }
     }
@@ -1980,14 +1980,14 @@ static inline void ctmRotAxis(sCtmM* m, const sCtmV& axis, float angle)
 // World position of the point at src+0x2C: translate(src+0x0) * rotations(0x10, 0x14, 0xC) * scale(src+0x18).
 extern "C" sCtmV func_00170240(char* src)
 {
-    sCtmM m(t4mat_Identity);
+    sCtmM transform(t4mat_Identity);
     float one = 1.0f;
-    ctmTransMtx(&m, sCtmV(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis(&m, t4vect_XAxis, *(float*)(src + 0x10));
-    ctmRotAxis(&m, t4vect_YAxis, *(float*)(src + 0x14));
-    ctmRotAxis(&m, t4vect_ZAxis, *(float*)(src + 0xC));
-    m = ctmScaleMtx(&m, sCtmV(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
-    return ctmApplyMtx(&m, sCtmV(*(float*)(src + 0x2C), *(float*)(src + 0x30), *(float*)(src + 0x34), one));
+    ctmTransMtx(&transform, sCtmV(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
+    ctmRotAxis(&transform, t4vect_XAxis, *(float*)(src + 0x10));
+    ctmRotAxis(&transform, t4vect_YAxis, *(float*)(src + 0x14));
+    ctmRotAxis(&transform, t4vect_ZAxis, *(float*)(src + 0xC));
+    transform = ctmScaleMtx(&transform, sCtmV(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
+    return ctmApplyMtx(&transform, sCtmV(*(float*)(src + 0x2C), *(float*)(src + 0x30), *(float*)(src + 0x34), one));
 }
 #endif
 
@@ -2007,14 +2007,14 @@ extern "C" void func_0031BE50(float* s, float* c, float angle);
 // World position of the point at src+0x38: translate(src+0x0) * rotations(0x10, 0x14, 0xC) * scale(src+0x18).
 extern "C" sCtmV func_001707B0(char* src)
 {
-    sCtmM m(t4mat_Identity);
+    sCtmM transform(t4mat_Identity);
     float one = 1.0f;
-    ctmTransMtx(&m, sCtmV(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis(&m, t4vect_XAxis, *(float*)(src + 0x10));
-    ctmRotAxis(&m, t4vect_YAxis, *(float*)(src + 0x14));
-    ctmRotAxis(&m, t4vect_ZAxis, *(float*)(src + 0xC));
-    m = ctmScaleMtx(&m, sCtmV(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
-    return ctmApplyMtx(&m, sCtmV(*(float*)(src + 0x38), *(float*)(src + 0x3C), *(float*)(src + 0x40), one));
+    ctmTransMtx(&transform, sCtmV(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
+    ctmRotAxis(&transform, t4vect_XAxis, *(float*)(src + 0x10));
+    ctmRotAxis(&transform, t4vect_YAxis, *(float*)(src + 0x14));
+    ctmRotAxis(&transform, t4vect_ZAxis, *(float*)(src + 0xC));
+    transform = ctmScaleMtx(&transform, sCtmV(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
+    return ctmApplyMtx(&transform, sCtmV(*(float*)(src + 0x38), *(float*)(src + 0x3C), *(float*)(src + 0x40), one));
 }
 #endif
 

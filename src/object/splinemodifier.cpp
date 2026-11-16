@@ -1230,14 +1230,14 @@ extern "C" void func_0035A780(cMultiSplineModifier* vself)
         (*(int*)((char*)cell + 0xA0))++;
         sHashKey_A780 key;
         func_00328F28_A780(&key, box);
-        sHashCellR_A780* c1 = key.x < 0 ? cell + 4 : cell;
-        sHashCellR_A780* c2 = key.y < 0 ? c1 + 2 : c1;
-        sHashCellR_A780* c3 = key.z < 0 ? c2 + 1 : c2;
-        sHashCellR_A780* c = c3;
-        func_003284B8_A780(c->oct, 0, node, &key, c);
-        if (octEmpty_A780(c->oct)) {
-            operator_delete((int*)c->oct);
-            c->oct = 0;
+        sHashCellR_A780* cellX = key.x < 0 ? cell + 4 : cell;
+        sHashCellR_A780* cellXY = key.y < 0 ? cellX + 2 : cellX;
+        sHashCellR_A780* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
+        sHashCellR_A780* octant = cellXYZ;
+        func_003284B8_A780(octant->oct, 0, node, &key, octant);
+        if (octEmpty_A780(octant->oct)) {
+            operator_delete((int*)octant->oct);
+            octant->oct = 0;
         }
     }
 }
@@ -1377,9 +1377,9 @@ INCLUDE_ASM("object/splinemodifier", func_0035AAD0__FPv);
 #ifdef SKIP_ASM
 void* func_0035AAD0(void* self)
 {
-    void* t0 = (char*)*(void**)((char*)self + 0x34) + 0x1;
-    *(int*)((char*)self + 0x34) = (int)t0;
-    return t0;
+    void* focusCount = (char*)*(void**)((char*)self + 0x34) + 0x1;
+    *(int*)((char*)self + 0x34) = (int)focusCount;
+    return focusCount;
 }
 #endif
 
@@ -1388,9 +1388,9 @@ INCLUDE_ASM("object/splinemodifier", func_0035AAE0__FPv);
 #ifdef SKIP_ASM
 void* func_0035AAE0(void* self)
 {
-    void* t0 = (char*)*(void**)((char*)self + 0x34) - 0x1;
-    *(int*)((char*)self + 0x34) = (int)t0;
-    return t0;
+    void* focusCount = (char*)*(void**)((char*)self + 0x34) - 0x1;
+    *(int*)((char*)self + 0x34) = (int)focusCount;
+    return focusCount;
 }
 #endif
 

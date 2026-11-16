@@ -2152,9 +2152,9 @@ extern "C" int func_001FD320(void* self, void* msg)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FDB78);
 #ifdef SKIP_ASM
-extern "C" int func_001FDB78(void* self, int a1, int a2)
+extern "C" int func_001FDB78(void* self, int menu, int event)
 {
-    return a2 == 6 ? 0x101 : 0;
+    return event == 6 ? 0x101 : 0;
 }
 #endif
 
@@ -2656,12 +2656,12 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
 extern char str_x_save[];
 
-extern "C" void func_001FE648(void* self, int a1, bool on)
+extern "C" void func_001FE648(void* self, int loadBlocked, bool on)
 {
-    cUIObj_1FE648* a = (cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
+    cUIObj_1FE648* xButton = (cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
     ((cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(!on);
     *(int*)((char*)self + 0x224) = !on;
-    a->setVisible(!on);
+    xButton->setVisible(!on);
 }
 #endif
 
@@ -2829,7 +2829,7 @@ INCLUDE_ASM("fe/ovstatepause", func_001FE8F0);
 void func_00270ED8(void* self);
 extern "C" void func_001D8700(void* self, void* a1, int key);
 
-extern "C" void func_001FE8F0(void* self, void* a1, int key)
+extern "C" void func_001FE8F0(void* self, void* popup, int key)
 {
     if (key == 0x16) {
         if (*(int*)((char*)self + 0x19C) == 5) {
@@ -2837,7 +2837,7 @@ extern "C" void func_001FE8F0(void* self, void* a1, int key)
             *(int*)((char*)self + 0x1C8) = 0;
         }
     }
-    func_001D8700(self, a1, key);
+    func_001D8700(self, popup, key);
 }
 #endif
 
@@ -3292,12 +3292,12 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
 extern char str_x_save[];
 
-extern "C" void func_001FF310(void* self, int a1, bool on)
+extern "C" void func_001FF310(void* self, int loadBlocked, bool on)
 {
-    cUIObj_1FF310* a = (cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
+    cUIObj_1FF310* xButton = (cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
     ((cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(!on);
     *(int*)((char*)self + 0x224) = !on;
-    a->setVisible(!on);
+    xButton->setVisible(!on);
 }
 #endif
 

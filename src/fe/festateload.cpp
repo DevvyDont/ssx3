@@ -208,9 +208,9 @@ INCLUDE_ASM("fe/festateload", func_00186950);
 #ifdef SKIP_ASM
 extern "C" int func_00202738(void* self, int a1, int a2);
 
-extern "C" int func_00186950(void* self, int a1, int a2)
+extern "C" int func_00186950(void* self, int menu, int event)
 {
-    if (func_00202738((char*)self + 0x48, a1, a2) != 0) {
+    if (func_00202738((char*)self + 0x48, menu, event) != 0) {
         return 0x101;
     }
     return 0;

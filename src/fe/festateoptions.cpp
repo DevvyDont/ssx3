@@ -696,18 +696,18 @@ extern "C" void func_00189610(void* self, char* popup, int event)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_00189958);
 #ifdef SKIP_ASM
-extern "C" int func_00189958(void* self, int a1, int a2)
+extern "C" int func_00189958(void* self, int menu, int event)
 {
-    return a2 != 9 ? 0x101 : 0x100;
+    return event != 9 ? 0x101 : 0x100;
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", func_00189970);
 #ifdef SKIP_ASM
-extern "C" int func_00189970(void* self, int a1, int a2)
+extern "C" int func_00189970(void* self, int pair, int event)
 {
-    return a2 ? 0x100 : 0;
+    return event ? 0x100 : 0;
 }
 #endif
 
@@ -1145,9 +1145,9 @@ void* cFEStateOptionsSound_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018A890);
 #ifdef SKIP_ASM
-extern "C" int func_0018A890(void* self, int a1, int a2)
+extern "C" int func_0018A890(void* self, int menu, int event)
 {
-    switch (a2) {
+    switch (event) {
     case 9:
         return 0x100;
     case 6:
@@ -1160,9 +1160,9 @@ extern "C" int func_0018A890(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018A8C0);
 #ifdef SKIP_ASM
-extern "C" int func_0018A8C0(void* self, int a1, int a2)
+extern "C" int func_0018A8C0(void* self, int pair, int event)
 {
-    return a2 ? 0x100 : 0;
+    return event ? 0x100 : 0;
 }
 #endif
 
@@ -1514,39 +1514,39 @@ struct sVE_18BEF8v {
 
 extern "C" void func_0018BEF8(void* self, unsigned int mode)
 {
-    int m;
+    int audioMode;
     switch (mode) {
     case 1:
-        m = 2;
+        audioMode = 2;
         break;
     case 2:
-        m = 0;
+        audioMode = 0;
         break;
     case 3:
-        m = 3;
+        audioMode = 3;
         break;
     case 0:
     default:
-        m = 1;
+        audioMode = 1;
         break;
     }
     char* obj = *(char**)(**(char***)((char*)func_0028B180() + 0x118) + 0x1D8);
     sVE_18BEF8i* vt = *(sVE_18BEF8i**)(obj + 4);
-    if (vt[2].fn(obj + vt[2].delta, m) == 1) {
-        float a = func_00287670(func_0028B180());
-        float b = func_002876A0(func_0028B180());
-        float c = func_002876D0(func_0028B180());
+    if (vt[2].fn(obj + vt[2].delta, audioMode) == 1) {
+        float sfxVolume = func_00287670(func_0028B180());
+        float speechVolume = func_002876A0(func_0028B180());
+        float musicVolume = func_002876D0(func_0028B180());
         int s0 = *(int*)((char*)func_0028B180() + 0x62B8);
-        int s1 = *(int*)((char*)func_0028B180() + 0x62B4);
+        int arcadeSfx = *(int*)((char*)func_0028B180() + 0x62B4);
         int s2 = *(int*)((char*)func_0028B180() + 0x534);
         cSSXAudio_FrontEndPurge(func_0028B180());
         SSXAUDIO_DeInit();
-        SSXAUDIO_Init(m);
-        func_00287410(func_0028B180(), (int)a);
-        func_00287488(func_0028B180(), (int)b);
-        func_00287520(func_0028B180(), (int)c);
+        SSXAUDIO_Init(audioMode);
+        func_00287410(func_0028B180(), (int)sfxVolume);
+        func_00287488(func_0028B180(), (int)speechVolume);
+        func_00287520(func_0028B180(), (int)musicVolume);
         func_00287558(func_0028B180(), s0);
-        func_002875D0(func_0028B180(), s1);
+        func_002875D0(func_0028B180(), arcadeSfx);
         func_00285FB0(func_0028B180());
         char* snd = (char*)func_0028B180();
         sVE_18BEF8v* vt2 = *(sVE_18BEF8v**)(snd + 0x5558);
@@ -1645,9 +1645,9 @@ extern "C" void func_0018C1B8(void* self, void* widget, int msg)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018C270);
 #ifdef SKIP_ASM
-extern "C" int func_0018C270(void* self, int a1, int a2)
+extern "C" int func_0018C270(void* self, int menu, int event)
 {
-    switch (a2) {
+    switch (event) {
     case 9:
         return 0x100;
     case 6:
@@ -2116,9 +2116,9 @@ extern "C" int func_0018CCE0(void* self, char* menu, unsigned int key)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018CDB0);
 #ifdef SKIP_ASM
-extern "C" int func_0018CDB0(void* self, int a1, int a2)
+extern "C" int func_0018CDB0(void* self, int pair, int event)
 {
-    return a2 ? 0x100 : 0;
+    return event ? 0x100 : 0;
 }
 #endif
 
@@ -2144,26 +2144,26 @@ extern "C" void func_0018CDC0(void* self)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     unsigned char vals[4];
-    void* o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_1lb));
-    if (o != 0) {
-        cUIListBox_getEntryByData(o, func_001474E8(np, 0), &vals[0]);
-        cUIListBox_setCurrentEntryByIndex(o, vals[0]);
+    void* listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_1lb));
+    if (listBox != 0) {
+        cUIListBox_getEntryByData(listBox, func_001474E8(np, 0), &vals[0]);
+        cUIListBox_setCurrentEntryByIndex(listBox, vals[0]);
     }
-    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_2lb));
-    if (o != 0) {
-        cUIListBox_getEntryByData(o, func_001474E8(np, 1), &vals[1]);
-        cUIListBox_setCurrentEntryByIndex(o, vals[1]);
+    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_2lb));
+    if (listBox != 0) {
+        cUIListBox_getEntryByData(listBox, func_001474E8(np, 1), &vals[1]);
+        cUIListBox_setCurrentEntryByIndex(listBox, vals[1]);
     }
-    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3lb));
-    if (o != 0) {
-        cUIListBox_getEntryByData(o, func_00147618(np, 0), &vals[2]);
-        cUIListBox_setCurrentEntryByIndex(o, vals[2]);
+    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3lb));
+    if (listBox != 0) {
+        cUIListBox_getEntryByData(listBox, func_00147618(np, 0), &vals[2]);
+        cUIListBox_setCurrentEntryByIndex(listBox, vals[2]);
         func_0018CF50(self, func_00147618(np, 0) == 0);
     }
-    o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_4lb));
-    if (o != 0) {
-        cUIListBox_getEntryByData(o, func_00147618(np, 1), &vals[3]);
-        cUIListBox_setCurrentEntryByIndex(o, vals[3]);
+    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_4lb));
+    if (listBox != 0) {
+        cUIListBox_getEntryByData(listBox, func_00147618(np, 1), &vals[3]);
+        cUIListBox_setCurrentEntryByIndex(listBox, vals[3]);
     }
 }
 #endif
@@ -2260,19 +2260,19 @@ public:
 extern "C" void func_0018D108(void* self, int idx, float x, float y)
 {
     signed char i = idx;
-    float t = x * 0.9133333563804626f - 18.518518447875977f;
-    float a = 0.0f;
-    if (t >= 0.0f) {
-        a = t;
+    float scaledX = x * 0.9133333563804626f - 18.518518447875977f;
+    float clampedX = 0.0f;
+    if (scaledX >= 0.0f) {
+        clampedX = scaledX;
     }
     y = y * 0.9916666746139526f;
-    cSnd_18D108* s = 0;
+    cSnd_18D108* rumbleDevice = 0;
     if (PadCache != 0) {
-        s = *(cSnd_18D108**)(PadCache + (i << 2) + 0x2EEC);
+        rumbleDevice = *(cSnd_18D108**)(PadCache + (i << 2) + 0x2EEC);
     }
-    if (s->getState() == 2) {
-        s->setVolume(0, ((y - 0.5f) * 0.009999999776482582f >? (a - 2.0f) / 972.2222290039062f) >? 0.0f);
-        s->setVolume(1, ((y - 70.0f) * 0.0062500000931322575f >? (a - 100.0f) / 5000.0f) >? 0.0f);
+    if (rumbleDevice->getState() == 2) {
+        rumbleDevice->setVolume(0, ((y - 0.5f) * 0.009999999776482582f >? (clampedX - 2.0f) / 972.2222290039062f) >? 0.0f);
+        rumbleDevice->setVolume(1, ((y - 70.0f) * 0.0062500000931322575f >? (clampedX - 100.0f) / 5000.0f) >? 0.0f);
     }
 }
 #endif
@@ -2596,16 +2596,16 @@ extern "C" void* func_001D53B0(void* self, int a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern void* cFEStateOptionsDeviceSelect_vtbl[];
 
-extern "C" void* func_0018D7F0(void* self, int a1, int a2, int a3, int a4)
+extern "C" void* func_0018D7F0(void* self, int engine, int cardMode, int isSave, int a4)
 {
-    func_001D53B0(self, a1, a2);
+    func_001D53B0(self, engine, cardMode);
     *(int*)((char*)self + 0x230) = a4;
     *(void***)((char*)self + 8) = cFEStateOptionsDeviceSelect_vtbl;
     *(int*)((char*)self + 0xC) = 0x21;
-    *(int*)((char*)self + 0x22C) = a3;
+    *(int*)((char*)self + 0x22C) = isSave;
     *(int*)((char*)self + 0x234) = 0;
     *(int*)((char*)self + 0x238) = 0;
-    if (a3 == 0) {
+    if (isSave == 0) {
         *(int*)((char*)cSSXApp_getMCManager(SSXApp) + 0x11C) = 0;
     }
     return self;
@@ -3138,19 +3138,19 @@ struct cUIObj_E368 {
     virtual void setVisible(int on);
 };
 
-extern "C" void func_0018E368(void* self, bool a, bool b)
+extern "C" void func_0018E368(void* self, bool loadBlocked, bool saveBlocked)
 {
-    cUIObj_E368* o = (cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x));
+    cUIObj_E368* xButton = (cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x));
     if (*(int*)((char*)self + 0x22C) != 0) {
-        int v = !b;
-        ((cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setVisible(v);
-        *(int*)((char*)self + 0x224) = v;
-        o->setVisible(v);
+        int showButton = !saveBlocked;
+        ((cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setVisible(showButton);
+        *(int*)((char*)self + 0x224) = showButton;
+        xButton->setVisible(showButton);
     } else {
-        int v = !a;
-        ((cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3a)))->setVisible(v);
-        *(int*)((char*)self + 0x224) = v;
-        o->setVisible(v);
+        int showButton = !loadBlocked;
+        ((cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3a)))->setVisible(showButton);
+        *(int*)((char*)self + 0x224) = showButton;
+        xButton->setVisible(showButton);
     }
 }
 #endif
@@ -3181,9 +3181,9 @@ extern "C" void func_0018E478(void* self)
         }
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry0018E478* vt = *(sVEntry0018E478**)((char*)obj + 4);
-        void* r = vt[5].fn((char*)obj + vt[5].delta, self, mode);
-        if (r != 0) {
-            func_0039F4C0(*(char**)((char*)self + 0x10) + 0x18, r);
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, mode);
+        if (nextState != 0) {
+            func_0039F4C0(*(char**)((char*)self + 0x10) + 0x18, nextState);
         }
     }
     *(int*)((char*)self + 0x1AC) = 1;

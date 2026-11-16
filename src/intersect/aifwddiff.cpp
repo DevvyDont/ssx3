@@ -230,23 +230,23 @@ extern "C" void func_00327C00(void* self, void* a1, void* a2)
 //100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327C68);
 #ifdef SKIP_ASM
-extern "C" void func_00327C68(void* self, void* a)
+extern "C" void func_00327C68(void* self, void* patch)
 {
-    float* p = (float*)((char*)a + 0x650);
+    float* cell = (float*)((char*)patch + 0x650);
     int n = 0x50;
     do {
-        p[0] = 10000000000.0f;
-        p[4] = 10000000000.0f;
-        p[8] = 10000000000.0f;
-        p += 16;
+        cell[0] = 10000000000.0f;
+        cell[4] = 10000000000.0f;
+        cell[8] = 10000000000.0f;
+        cell += 16;
     } while (n-- > 0);
-    p = (float*)((char*)a + 0x1A90);
+    cell = (float*)((char*)patch + 0x1A90);
     n = 8;
     do {
-        p[0] = 10000000000.0f;
-        p[4] = 10000000000.0f;
-        p[8] = 10000000000.0f;
-        p += 16;
+        cell[0] = 10000000000.0f;
+        cell[4] = 10000000000.0f;
+        cell[8] = 10000000000.0f;
+        cell += 16;
     } while (n-- > 0);
 }
 #endif
@@ -351,20 +351,20 @@ struct sShape_27F18 {
     sSphere_27F18 subs[1];  // 0x30
 };
 
-extern "C" int func_00327F18(void* self, sShape_27F18* shape, int a2, int a3)
+extern "C" int func_00327F18(void* self, sShape_27F18* shape, int outPush, int outContact)
 {
-    void* m = *(void**)((char*)self + 0x98);
-    if (*(int*)((char*)m + 8) != 0) {
-        *(int*)(*(char**)((char*)self + 0x98) + 0x28) = func_0032DF28(m);
+    void* tree = *(void**)((char*)self + 0x98);
+    if (*(int*)((char*)tree + 8) != 0) {
+        *(int*)(*(char**)((char*)self + 0x98) + 0x28) = func_0032DF28(tree);
     }
-    if (func_0032CDB0(self, shape->pos, (char*)self + 0x80, 0, 0, a2, a3, shape->radius) == 0) {
+    if (func_0032CDB0(self, shape->pos, (char*)self + 0x80, 0, 0, outPush, outContact, shape->radius) == 0) {
         return 0;
     }
     if (shape->count == 0) {
         return 1;
     }
     for (int i = 0; i < shape->count; i++) {
-        if (func_0032CDB0(self, shape->subs[i].pos, (char*)self + 0x80, 0, 0, a2, a3, shape->subs[i].radius) != 0) {
+        if (func_0032CDB0(self, shape->subs[i].pos, (char*)self + 0x80, 0, 0, outPush, outContact, shape->subs[i].radius) != 0) {
             return 1;
         }
     }
@@ -455,14 +455,14 @@ INCLUDE_ASM("intersect/aifwddiff", func_00328170);
 #ifdef SKIP_ASM
 extern "C" void func_003281D0(void *, int, void *, int, int);
 
-extern "C" void func_00328170(void *arg0) {
+extern "C" void func_00328170(void *octree) {
     void *temp_4;
 
-    temp_4 = (*(void **)((char*)(arg0) + (0x98)));
+    temp_4 = (*(void **)((char*)(octree) + (0x98)));
     if ((*(int *)((char*)(temp_4) + (8))) != 0) {
-        (*(int *)((char*)((*(void **)((char*)(arg0) + (0x98)))) + (0x28))) = func_0032DF28(temp_4);
+        (*(int *)((char*)((*(void **)((char*)(octree) + (0x98)))) + (0x28))) = func_0032DF28(temp_4);
     }
-    func_003281D0(arg0, (*(int *)((char*)((*(void **)((char*)(arg0) + (0x98)))) + (0xC))), (char*)arg0 + 0x80, 0, 0);
+    func_003281D0(octree, (*(int *)((char*)((*(void **)((char*)(octree) + (0x98)))) + (0xC))), (char*)octree + 0x80, 0, 0);
 }
 #endif
 //100%
@@ -526,16 +526,16 @@ extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level
 extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off)
 {
     if (level < end) {
-        float s = *(float*)((char*)self->grid->levels + level * 12 + 0x10);
+        float levelOffset = *(float*)((char*)self->grid->levels + level * 12 + 0x10);
         for (int i = 0; i < 8; i++) {
             if ((self->grid->bits[off] >> i) & 1) {
                 sVec4_281D0 sum;
-                sVec4_281D0 d;
-                sVec4_281D0 t;
-                vu0Scale_281D0(t, self->dirs[i], s);
-                d = t;
-                vu0Add_281D0(t, *pos, d);
-                sum = t;
+                sVec4_281D0 offsetVec;
+                sVec4_281D0 tmpVec;
+                vu0Scale_281D0(tmpVec, self->dirs[i], levelOffset);
+                offsetVec = tmpVec;
+                vu0Add_281D0(tmpVec, *pos, offsetVec);
+                sum = tmpVec;
                 int st = self->grid->levels[level].stride;
                 func_281D0(self, end, &sum, level + 1, (i + 1) * st + off);
             }
@@ -544,13 +544,13 @@ extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
         sVE87_281D0* vt = &((sVE87_281D0*)w->mVtbl)[87];
         char* thisp = (char*)w + vt->delta;
-        sVec4_281D0 v;
-        float f = self->grid->levels[level].scale * self->unit;
-        v.x = 1.0f;
-        v.y = 0.0f;
-        v.z = 1.0f;
-        v.w = 0.0f;
-        vt->fn(thisp, f, pos, &v, 4);
+        sVec4_281D0 color;
+        float boxSize = self->grid->levels[level].scale * self->unit;
+        color.x = 1.0f;
+        color.y = 0.0f;
+        color.z = 1.0f;
+        color.w = 0.0f;
+        vt->fn(thisp, boxSize, pos, &color, 4);
     }
 }
 #endif
@@ -567,54 +567,54 @@ struct sBox_00328360 {
     float maxx, maxy, maxz;
 };
 
-extern "C" int func_00328360(sCell_00328360* c, sBox_00328360* b)
+extern "C" int func_00328360(sCell_00328360* cell, sBox_00328360* box)
 {
     union {
         int i;
         float f;
-    } s;
-    s.i = (c->level + 0x7F) << 23;
-    float scale = s.f;
-    float x0 = ((float)c->x - 0.2f) * scale;
-    if (b->maxx < x0) {
+    } expBits;
+    expBits.i = (cell->level + 0x7F) << 23;
+    float scale = expBits.f;
+    float x0 = ((float)cell->x - 0.2f) * scale;
+    if (box->maxx < x0) {
         return 1;
     }
-    float y0 = ((float)c->y - 0.2f) * scale;
-    if (b->maxy < y0) {
+    float y0 = ((float)cell->y - 0.2f) * scale;
+    if (box->maxy < y0) {
         return 1;
     }
-    float z0 = ((float)c->z - 0.2f) * scale;
-    if (b->maxz < z0) {
+    float z0 = ((float)cell->z - 0.2f) * scale;
+    if (box->maxz < z0) {
         return 1;
     }
-    float x1 = ((float)(c->x + 1) + 0.2f) * scale;
-    if (x1 < b->minx) {
+    float x1 = ((float)(cell->x + 1) + 0.2f) * scale;
+    if (x1 < box->minx) {
         return 1;
     }
-    float y1 = ((float)(c->y + 1) + 0.2f) * scale;
-    if (y1 < b->miny) {
+    float y1 = ((float)(cell->y + 1) + 0.2f) * scale;
+    if (y1 < box->miny) {
         return 1;
     }
-    float z1 = ((float)(c->z + 1) + 0.2f) * scale;
-    if (z1 < b->minz) {
+    float z1 = ((float)(cell->z + 1) + 0.2f) * scale;
+    if (z1 < box->minz) {
         return 1;
     }
-    if (x1 < b->maxx) {
+    if (x1 < box->maxx) {
         return 2;
     }
-    if (y1 < b->maxy) {
+    if (y1 < box->maxy) {
         return 2;
     }
-    if (z1 < b->maxz) {
+    if (z1 < box->maxz) {
         return 2;
     }
-    if (b->minx < x1) {
+    if (box->minx < x1) {
         return 2;
     }
-    if (b->miny < y1) {
+    if (box->miny < y1) {
         return 2;
     }
-    if (b->miny < y1) {
+    if (box->miny < y1) {
         return 2;
     }
     return 0;
@@ -1092,67 +1092,67 @@ static inline sVec4_29590 vu0Scale_29590(const sVec4_29590& v, float s)
     return r;
 }
 
-extern "C" int func_00329590(float m, sVec4_29590* mn, sVec4_29590* mx, sVec4_29590* p, sVec4_29590* hp, sVec4_29590* nrm, float* t)
+extern "C" int func_00329590(float margin, sVec4_29590* mn, sVec4_29590* mx, sVec4_29590* point, sVec4_29590* hp, sVec4_29590* nrm, float* outDist)
 {
-    *t = 1e30f;
-    if (mn->y <= p->y && p->y <= mx->y && p->z >= mn->z && p->z <= mx->z) {
-        float d1 = (p->x - mn->x) + m;
-        float d2 = (mx->x - p->x) + m;
-        if (0.0f <= d1 && 0.0f <= d2) {
-            if (d1 < *t) {
-                *hp = *p;
+    *outDist = 1e30f;
+    if (mn->y <= point->y && point->y <= mx->y && point->z >= mn->z && point->z <= mx->z) {
+        float distMin = (point->x - mn->x) + margin;
+        float distMax = (mx->x - point->x) + margin;
+        if (0.0f <= distMin && 0.0f <= distMax) {
+            if (distMin < *outDist) {
+                *hp = *point;
                 hp->x = mn->x;
-                *t = d1;
+                *outDist = distMin;
                 sVec4_29590 n = vu0Scale_29590(t4vect_XAxis, -1.0f);
                 *nrm = n;
             }
-            if (d2 < *t) {
-                *hp = *p;
+            if (distMax < *outDist) {
+                *hp = *point;
                 hp->x = mx->x;
-                *t = d2;
+                *outDist = distMax;
                 *nrm = t4vect_XAxis;
             }
         }
     }
-    if (p->x >= mn->x && p->x <= mx->x && p->z >= mn->z && p->z <= mx->z) {
-        float d1 = (p->y - mn->y) + m;
-        float d2 = (mx->y - p->y) + m;
-        if (0.0f <= d1 && 0.0f <= d2) {
-            if (d1 < *t) {
-                *hp = *p;
+    if (point->x >= mn->x && point->x <= mx->x && point->z >= mn->z && point->z <= mx->z) {
+        float distMin = (point->y - mn->y) + margin;
+        float distMax = (mx->y - point->y) + margin;
+        if (0.0f <= distMin && 0.0f <= distMax) {
+            if (distMin < *outDist) {
+                *hp = *point;
                 hp->y = mn->y;
-                *t = d1;
+                *outDist = distMin;
                 sVec4_29590 n = vu0Scale_29590(t4vect_YAxis, -1.0f);
                 *nrm = n;
             }
-            if (d2 < *t) {
-                *hp = *p;
+            if (distMax < *outDist) {
+                *hp = *point;
                 hp->y = mx->y;
-                *t = d2;
+                *outDist = distMax;
                 *nrm = t4vect_YAxis;
             }
         }
     }
-    if (p->y >= mn->y && p->y <= mx->y && p->x >= mn->x && p->x <= mx->x) {
-        float d1 = (p->z - mn->z) + m;
-        float d2 = (mx->z - p->z) + m;
-        if (0.0f <= d1 && 0.0f <= d2) {
-            if (d1 < *t) {
-                *hp = *p;
+    if (point->y >= mn->y && point->y <= mx->y && point->x >= mn->x && point->x <= mx->x) {
+        float distMin = (point->z - mn->z) + margin;
+        float distMax = (mx->z - point->z) + margin;
+        if (0.0f <= distMin && 0.0f <= distMax) {
+            if (distMin < *outDist) {
+                *hp = *point;
                 hp->z = mn->z;
-                *t = d1;
+                *outDist = distMin;
                 sVec4_29590 n = vu0Scale_29590(t4vect_ZAxis, -1.0f);
                 *nrm = n;
             }
-            if (d2 < *t) {
-                *hp = *p;
+            if (distMax < *outDist) {
+                *hp = *point;
                 hp->z = mx->z;
-                *t = d2;
+                *outDist = distMax;
                 *nrm = t4vect_ZAxis;
             }
         }
     }
-    return *t != 1e30f;
+    return *outDist != 1e30f;
 }
 #endif
 

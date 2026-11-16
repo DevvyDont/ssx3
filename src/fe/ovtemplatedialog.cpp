@@ -1328,9 +1328,9 @@ extern int cOVStateManager_mStatus;
 extern "C" void func_0020CC60(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* g = (signed char*)cBENewRaceInterface_newRace;
-    int mode = g[0x48];
-    int players = g[0x49];
+    signed char* newRace = (signed char*)cBENewRaceInterface_newRace;
+    int mode = newRace[0x48];
+    int players = newRace[0x49];
     if (mode == 0 || players == 2) {
         cOVStateManager_triggerOverlay(0xC);
     } else if ((mode >= 1 && mode <= 3) || mode == 6) {
@@ -1615,9 +1615,9 @@ extern "C" void func_0020D1D8(void* self)
 //100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020D308);
 #ifdef SKIP_ASM
-extern "C" int func_0020D308(void* self, int a1, int a2)
+extern "C" int func_0020D308(void* self, int menu, int event)
 {
-    return a2 == 6 ? 0x101 : 0;
+    return event == 6 ? 0x101 : 0;
 }
 #endif
 
@@ -1626,9 +1626,9 @@ INCLUDE_ASM("fe/ovtemplatedialog", func_0020D318);
 #ifdef SKIP_ASM
 extern int cOVStateManager_mStatus;
 
-extern "C" void func_0020D318(void* self, int a1, int key)
+extern "C" void func_0020D318(void* self, int widget, int key)
 {
-    if (a1 != 0 && key == 5) {
+    if (widget != 0 && key == 5) {
         cOVStateManager_mStatus = 1;
     }
 }
@@ -1741,17 +1741,17 @@ extern "C" void func_0020D4F0(void* self, void* item)
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020D568);
 #ifdef SKIP_ASM
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int func_0020D568(void* self, int a1, unsigned int key)
+extern "C" int func_0020D568(void* self, int menu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 8) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
