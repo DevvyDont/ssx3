@@ -8,7 +8,7 @@ INCLUDE_ASM("seg/seg_21A1C0", func_003191C0);
 struct cBXString_91C0 {
     char* str;
 };
-extern "C" long func_0041E9E0(const char* s, char** end, int base);
+extern "C" long strtol(const char* s, char** end, int base);
 extern "C" int strlen(const char* s);
 extern "C" void cBXString_getBuffer(cBXString_91C0* self, int len);
 extern "C" int func_004186C8(char* buf, const char* fmt, char* ap);
@@ -46,7 +46,7 @@ extern "C" void func_003191C0(void* self_, const char* fmt, char* args)
         }
         if (!widthArg) {
             char* end;
-            width = func_0041E9E0(fmtPos, &end, 10);
+            width = strtol(fmtPos, &end, 10);
             fmtPos = end;
         }
         int precision = 0;
@@ -58,7 +58,7 @@ extern "C" void func_003191C0(void* self_, const char* fmt, char* args)
                 fmtPos++;
             } else {
                 char* end;
-                precision = func_0041E9E0(fmtPos, &end, 10);
+                precision = strtol(fmtPos, &end, 10);
                 fmtPos = end;
             }
         }

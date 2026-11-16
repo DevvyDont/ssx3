@@ -4093,7 +4093,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025F288);
 #ifdef SKIP_ASM
 extern char str_l[];
 extern "C" void* func_003EE560(void*);
-extern "C" int func_004187C0(const char* s);
+extern "C" int atoi(const char* s);
 extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* tag, void* data, int len, const char* fmt);
 
 struct sDsPeerK2 {
@@ -4120,7 +4120,7 @@ extern "C" void func_0025F288(LobbyMan* self, int a1, sDsPeerInfoK2* out)
         if (userEntry != 0 && userEntry->record != 0) {
             rec = userEntry->record;
             out->addr = userEntry->addr;
-            out->nameLen = func_004187C0(userEntry->name);
+            out->nameLen = atoi(userEntry->name);
         } else {
             out->addr = 0;
             rec = 0;

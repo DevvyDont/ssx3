@@ -311,13 +311,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DC068);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern char *func_00418D48_C068(int, int, int *, int *) __asm__("func_00418D48");
+extern char *fcvt_C068(int, int, int *, int *) __asm__("fcvt");
 extern int strlen_C068(char *) __asm__("strlen");
 unsigned short *func_003DC068(unsigned short *dst, int val, int prec) {
     int exp, sign;
     int i = 0;
     int k = 0;
-    char *digits = func_00418D48_C068(val, prec, &exp, &sign);
+    char *digits = fcvt_C068(val, prec, &exp, &sign);
     int len = strlen_C068(digits);
     int total = exp + prec;
     for (; i != total + 1; i++) {

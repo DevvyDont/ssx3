@@ -883,8 +883,8 @@ extern "C" void func_0041610C();
 extern "C" void func_00415FC8();
 extern "C" void func_0041605C();
 extern "C" void func_002C28A0();
-extern "C" void func_004187A0();
-extern "C" void func_004187C0();
+extern "C" void atof();
+extern "C" void atoi();
 extern "C" void func_004187E8();
 extern "C" void func_00418EF8();
 extern "C" void func_002C2BD8(char* self) {
@@ -896,8 +896,8 @@ extern "C" void func_002C2BD8(char* self) {
     *(void**)(self + 0x54) = (void*)&func_00415FC8;
     *(void**)(self + 0x4C) = (void*)&func_0041605C;
     *(void**)(self + 0x58) = (void*)&func_002C28A0;
-    *(void**)(self + 0x14) = (void*)&func_004187A0;
-    *(void**)(self + 0x10) = (void*)&func_004187C0;
+    *(void**)(self + 0x14) = (void*)&atof;
+    *(void**)(self + 0x10) = (void*)&atoi;
     *(void**)(self + 0x1C) = (void*)&func_004187E8;
     *(void**)(self + 0x18) = (void*)&func_00418EF8;
     *(void**)(self + 0xC) = (void*)&func_004165A8;
@@ -1002,7 +1002,7 @@ extern "C" void func_002C2E40();
 extern "C" void func_00415FC8();
 extern "C" void func_0041610C();
 extern "C" void strcat();
-extern "C" void func_004187C0();
+extern "C" void atoi();
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* strcpy(char* dst, const char* src);
 
@@ -1019,7 +1019,7 @@ extern "C" void func_002C2E78(char* self) {
     *(void**)(self + 0x0C) = (void*)&func_002C2E40;
     *(void**)(self + 0x10) = (void*)&sprintf;
     *(void**)(self + 0x14) = (void*)&strcpy;
-    *(void**)(self + 0x18) = (void*)&func_004187C0;
+    *(void**)(self + 0x18) = (void*)&atoi;
 }
 #endif
 

@@ -1062,7 +1062,7 @@ extern "C" unsigned int func_003AF428(char* s, unsigned int len)
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AF560);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long func_0041E9E0(unsigned char *s, unsigned char **end, int base);
+extern "C" long strtol(unsigned char *s, unsigned char **end, int base);
 
 extern "C" int func_003AF560(unsigned char **pp, unsigned int *plen, int *out) {
     unsigned int i;
@@ -1078,7 +1078,7 @@ extern "C" int func_003AF560(unsigned char **pp, unsigned int *plen, int *out) {
             break;
         }
     }
-    value = func_0041E9E0(*pp, &end, 10);
+    value = strtol(*pp, &end, 10);
     *plen = *plen - (end - *pp);
     if (i != *plen) {
         (*pp)[i] = (unsigned char)ch;

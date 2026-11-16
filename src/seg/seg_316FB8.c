@@ -1725,9 +1725,9 @@ extern int mbtowc_r_7AB8(int, unsigned short *, char *, int, int *) __asm__("fun
 extern char *func_004185D0(char *, char *);
 extern unsigned func_00420260(char *buf, unsigned size, unsigned count, int *fp);
 extern int ungetc_7AB8(int, struct F7648 *) __asm__("ungetc");
-extern unsigned long g7AB8_strtol() __asm__("func_0041E9E0");
+extern unsigned long g7AB8_strtol() __asm__("strtol");
 extern unsigned long g7AB8_strtoul() __asm__("func_0041AA50");
-extern double g7AB8_atof(char *) __asm__("func_004187A0");
+extern double g7AB8_atof(char *) __asm__("atof");
 
 #define	BUF_00417AB8	(308+39+3)	/* MAXEXP+MAXFRACT+3: 3 = sign + decimal point + NUL */
 
@@ -2514,20 +2514,20 @@ void func_00418790(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_004187A0);
+INCLUDE_ASM("seg/seg_316FB8", atof);
 #ifdef SKIP_ASM
-extern void func_0041A7E8(int, int);
-void func_004187A0(int str) {
-    func_0041A7E8(str, 0);
+extern void strtod(int, int);
+void atof(int str) {
+    strtod(str, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_004187C0);
+INCLUDE_ASM("seg/seg_316FB8", atoi);
 #ifdef SKIP_ASM
-extern long func_0041E9E0(int, int, int);
-int func_004187C0(int str) {
-    return func_0041E9E0(str, 0, 10);
+extern long strtol(int, int, int);
+int atoi(int str) {
+    return strtol(str, 0, 10);
 }
 #endif
 
@@ -2808,67 +2808,67 @@ void func_00418D08(int unused) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00418D48);
+INCLUDE_ASM("seg/seg_316FB8", fcvt);
 #ifdef SKIP_ASM
-extern void func_004218D8(int, int, int, int, int);
-void func_00418D48(int value, int numDigits, int decptOut, int signOut) {
-    func_004218D8(value, numDigits, decptOut, signOut, 0);
+extern void fcvtbuf(int, int, int, int, int);
+void fcvt(int value, int numDigits, int decptOut, int signOut) {
+    fcvtbuf(value, numDigits, decptOut, signOut, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00418D68);
-#ifdef SKIP_ASM
-extern int fptodp(void);
-extern void func_00418D48(int, int, int, int);
-void func_00418D68(int numDigits, int decptOut, int signOut) {
-    func_00418D48(fptodp(), numDigits, decptOut, signOut);
-}
-#endif
-
-//100%
-INCLUDE_ASM("seg/seg_316FB8", func_00418DB8);
+INCLUDE_ASM("seg/seg_316FB8", fcvtf);
 #ifdef SKIP_ASM
 extern int fptodp(void);
-extern int func_00418E68(int, int, int);
-void func_00418DB8(int numDigits, int buf) {
-    func_00418E68(fptodp(), numDigits, buf);
+extern void fcvt(int, int, int, int);
+void fcvtf(int numDigits, int decptOut, int signOut) {
+    fcvt(fptodp(), numDigits, decptOut, signOut);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00418DF8);
-#ifdef SKIP_ASM
-extern void func_00421A50(int, int, int, int, int);
-void func_00418DF8(int value, int numDigits, int decptOut, int signOut) {
-    func_00421A50(value, numDigits, decptOut, signOut, 0);
-}
-#endif
-
-//100%
-INCLUDE_ASM("seg/seg_316FB8", func_00418E18);
+INCLUDE_ASM("seg/seg_316FB8", gcvtf);
 #ifdef SKIP_ASM
 extern int fptodp(void);
-extern void func_00418DF8(int, int, int, int);
-void func_00418E18(int numDigits, int decptOut, int signOut) {
-    func_00418DF8(fptodp(), numDigits, decptOut, signOut);
+extern int gcvt(int, int, int);
+void gcvtf(int numDigits, int buf) {
+    gcvt(fptodp(), numDigits, buf);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00418E68);
+INCLUDE_ASM("seg/seg_316FB8", ecvt);
+#ifdef SKIP_ASM
+extern void ecvtbuf(int, int, int, int, int);
+void ecvt(int value, int numDigits, int decptOut, int signOut) {
+    ecvtbuf(value, numDigits, decptOut, signOut, 0);
+}
+#endif
+
+//100%
+INCLUDE_ASM("seg/seg_316FB8", ecvtf);
+#ifdef SKIP_ASM
+extern int fptodp(void);
+extern void ecvt(int, int, int, int);
+void ecvtf(int numDigits, int decptOut, int signOut) {
+    ecvt(fptodp(), numDigits, decptOut, signOut);
+}
+#endif
+
+//100%
+INCLUDE_ASM("seg/seg_316FB8", gcvt);
 #ifdef SKIP_ASM
 extern int D_00454944;
 extern int dpcmp(int, int);
-extern int func_00421B98(int, int, int, char *, int, int);
-int func_00418E68(int a, int prec, int buf_) {
+extern int _gcvt(int, int, int, char *, int, int);
+int gcvt(int a, int prec, int buf_) {
     char *buf = (char *)buf_;
     char *p = buf;
     if (dpcmp(a, 0) < 0) {
         *p++ = '-';
         prec--;
     }
-    return func_00421B98(D_00454944, a, prec, p, 'g', 0) ? (int)buf : 0;
+    return _gcvt(D_00454944, a, prec, p, 'g', 0) ? (int)buf : 0;
 }
 #endif
 
@@ -3034,7 +3034,7 @@ loop:	SWAPINIT_00418EF8(a, es);
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_004198D8);
+INCLUDE_ASM("seg/seg_316FB8", _strtod_r);
 #ifdef SKIP_ASM
 /* newlib 1.9 libc/stdlib/strtod.c (_strtod_r) with the mprec.h macros it uses, verbatim (IEEE_8087, Pack_32,
  * no Sudden_Underflow / RND_PRODQUOT / Check_FLT_ROUNDS; FLT_ROUNDS is 1):
@@ -3118,9 +3118,9 @@ extern double g98D8_ulp(double) __asm__("func_00421020");
 extern _Bigint_004198D8 *g98D8_d2b(struct _reent_004198D8 *, double, int *, int *) __asm__("func_00421280");
 extern double g98D8_ratio(_Bigint_004198D8 *, _Bigint_004198D8 *) __asm__("func_00421400");
 
-/* the unit declares this as void func_004198D8(int, int, int) (strtod, func_0041A7E8) */
-double func_004198D8_(struct _reent_004198D8 *, const char *, char **) __asm__("func_004198D8");
-double func_004198D8_(struct _reent_004198D8 *ptr, const char *input, char **se)
+/* the unit declares this as void _strtod_r(int, int, int) (strtod, strtod) */
+double _strtod_r_(struct _reent_004198D8 *, const char *, char **) __asm__("_strtod_r");
+double _strtod_r_(struct _reent_004198D8 *ptr, const char *input, char **se)
 {
   int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, curChar, dsign, scaleExp, esign, i, j,
     k, nd, nd0, nf, nz, nz0, sign;
@@ -3601,12 +3601,12 @@ ret:
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041A7E8);
+INCLUDE_ASM("seg/seg_316FB8", strtod);
 #ifdef SKIP_ASM
 extern int D_00454944;
-extern void func_004198D8(int, int, int);
-void func_0041A7E8(int a, int b) {
-    func_004198D8(D_00454944, a, b);
+extern void _strtod_r(int, int, int);
+void strtod(int a, int b) {
+    _strtod_r(D_00454944, a, b);
 }
 #endif
 
@@ -3615,7 +3615,7 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041A818);
 #ifdef SKIP_ASM
 extern void dptofp(int);
 void func_0041A818(void) {
-    dptofp(((int (*)(void))func_0041A7E8)());
+    dptofp(((int (*)(void))strtod)());
 }
 #endif
 
@@ -4706,10 +4706,10 @@ int func_0041E638_(int reent_ptr, unsigned int pad)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041E7A8);
+INCLUDE_ASM("seg/seg_316FB8", _strtol_r);
 #ifdef SKIP_ASM
-long func_0041E7A8_(int *ptr, char *nptr, char **endptr, int base) __asm__("func_0041E7A8");
-long func_0041E7A8_(int *ptr, char *nptr, char **endptr, int base) {
+long _strtol_r_(int *ptr, char *nptr, char **endptr, int base) __asm__("_strtol_r");
+long _strtol_r_(int *ptr, char *nptr, char **endptr, int base) {
     char *s = nptr;
     unsigned long acc, cutoff;
     int c, neg = 0, any, cutlim;
@@ -4760,12 +4760,12 @@ long func_0041E7A8_(int *ptr, char *nptr, char **endptr, int base) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041E9E0);
+INCLUDE_ASM("seg/seg_316FB8", strtol);
 #ifdef SKIP_ASM
 extern int D_00454944;
-extern long func_0041E7A8(int, int, int, int);
-long func_0041E9E0(int s, int end, int base) {
-    return func_0041E7A8(D_00454944, s, end, base);
+extern long _strtol_r(int, int, int, int);
+long strtol(int s, int end, int base) {
+    return _strtol_r(D_00454944, s, end, base);
 }
 #endif
 
@@ -6641,7 +6641,7 @@ double func_004214C0(int n) {
 INCLUDE_ASM("seg/seg_316FB8", func_00421530);
 #ifdef SKIP_ASM
 struct R21530;
-extern char *g21530_dtoa(struct R21530 *, double, int, int, int *, int *, char **) __asm__("func_00422780");
+extern char *g21530_dtoa(struct R21530 *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
 extern char *g21530_strcpy(char *, char *) __asm__("strcpy");
 void func_00421530_(struct R21530 *ptr, char *buf, double invalue, int ndigit, int type, int dot, int mode) __asm__("func_00421530");
 void func_00421530_(struct R21530 *ptr, char *buf, double invalue, int ndigit, int type, int dot, int mode) {
@@ -6689,7 +6689,7 @@ void func_00421530_(struct R21530 *ptr, char *buf, double invalue, int ndigit, i
 INCLUDE_ASM("seg/seg_316FB8", func_004216E8);
 #ifdef SKIP_ASM
 struct R216E8;
-extern char *g216E8_dtoa(struct R216E8 *, double, int, int, int *, int *, char **) __asm__("func_00422780");
+extern char *g216E8_dtoa(struct R216E8 *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
 extern char *g216E8_strcpy(char *, char *) __asm__("strcpy");
 void func_004216E8_(struct R216E8 *ptr, char *buf, double invalue, int ndigit, char type, int dot) __asm__("func_004216E8");
 void func_004216E8_(struct R216E8 *ptr, char *buf, double invalue, int ndigit, char type, int dot) {
@@ -6742,7 +6742,7 @@ void func_004216E8_(struct R216E8 *ptr, char *buf, double invalue, int ndigit, c
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_004218D8);
+INCLUDE_ASM("seg/seg_316FB8", fcvtbuf);
 #ifdef SKIP_ASM
 struct R218D8 {
     int pad0[0x50 / 4];
@@ -6751,10 +6751,10 @@ struct R218D8 {
 };
 extern struct R218D8 *g218D8_impure __asm__("D_00454944");
 #define REENT218D8 g218D8_impure
-extern char *g218D8_realloc(struct R218D8 *, char *, int) __asm__("func_00421F20");
-extern char *g218D8_dtoa(struct R218D8 *, double, int, int, int *, int *, char **) __asm__("func_00422780");
-char *func_004218D8_(double invalue, int ndigit, int *decpt, int *sign, char *buf) __asm__("func_004218D8");
-char *func_004218D8_(double invalue, int ndigit, int *decpt, int *sign, char *buf) {
+extern char *g218D8_realloc(struct R218D8 *, char *, int) __asm__("_realloc_r");
+extern char *g218D8_dtoa(struct R218D8 *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
+char *fcvtbuf_(double invalue, int ndigit, int *decpt, int *sign, char *buf) __asm__("fcvtbuf");
+char *fcvtbuf_(double invalue, int ndigit, int *decpt, int *sign, char *buf) {
     char *save, *digits, *end;
     int done = 0;
     int newlen;
@@ -6790,7 +6790,7 @@ char *func_004218D8_(double invalue, int ndigit, int *decpt, int *sign, char *bu
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00421A50);
+INCLUDE_ASM("seg/seg_316FB8", ecvtbuf);
 #ifdef SKIP_ASM
 struct Reent51 {
     int pad0[0x50 / 4];
@@ -6799,17 +6799,17 @@ struct Reent51 {
 };
 extern int D_00454944;
 #define REENT ((struct Reent51 *)D_00454944)
-extern char *func_00421F20(struct Reent51 *, char *, int);
-extern char *func_00422780(struct Reent51 *, double, int, int, int *, int *, char **);
-char *func_00421A50_(double value, int ndigit, int *decpt, int *sign, char *buf) __asm__("func_00421A50");
-char *func_00421A50_(double value, int ndigit, int *decpt, int *sign, char *buf) {
+extern char *_realloc_r(struct Reent51 *, char *, int);
+extern char *_dtoa_r(struct Reent51 *, double, int, int, int *, int *, char **);
+char *ecvtbuf_(double value, int ndigit, int *decpt, int *sign, char *buf) __asm__("ecvtbuf");
+char *ecvtbuf_(double value, int ndigit, int *decpt, int *sign, char *buf) {
     char *save, *p, *end;
     int i = 0;
     int newlen;
     if (buf == 0) {
         if (ndigit >= REENT->cvtlen) {
             newlen = ndigit + 1;
-            buf = func_00421F20(REENT, REENT->cvtbuf, newlen);
+            buf = _realloc_r(REENT, REENT->cvtbuf, newlen);
             if (buf == 0)
                 return 0;
             REENT->cvtlen = newlen;
@@ -6818,7 +6818,7 @@ char *func_00421A50_(double value, int ndigit, int *decpt, int *sign, char *buf)
         buf = REENT->cvtbuf;
     }
     save = buf;
-    p = func_00422780(REENT, value, 2, ndigit, decpt, sign, &end);
+    p = _dtoa_r(REENT, value, 2, ndigit, decpt, sign, &end);
     while (p < end) {
         *buf++ = *p++;
         i++;
@@ -6835,7 +6835,7 @@ char *func_00421A50_(double value, int ndigit, int *decpt, int *sign, char *buf)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00421B98);
+INCLUDE_ASM("seg/seg_316FB8", _gcvt);
 #ifdef SKIP_ASM
 /* newlib stdlib/ecvtbuf.c (_gcvt). The file carries no notice of its own (newlib's default: Copyright (c)
  * 1994-2000 Red Hat, Inc. Permission to use, copy, modify and distribute this software is freely granted, provided
@@ -6843,13 +6843,13 @@ INCLUDE_ASM("seg/seg_316FB8", func_00421B98);
 struct _reent_1B98;
 extern double _mprec_log10_1B98(int) __asm__("func_004214C0");
 extern void print_e_1B98(struct _reent_1B98 *, char *, double, int, char, int) __asm__("func_004216E8");
-extern char *_dtoa_r_1B98(struct _reent_1B98 *, double, int, int, int *, int *, char **) __asm__("func_00422780");
+extern char *_dtoa_r_1B98(struct _reent_1B98 *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
 extern char *strcpy_1B98(char *, const char *) __asm__("strcpy");
 
-char *func_00421B98_(struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, char type, int dot)
-    __asm__("func_00421B98");
+char *_gcvt_(struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, char type, int dot)
+    __asm__("_gcvt");
 char *
-func_00421B98_ (struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, char type, int dot)
+_gcvt_ (struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, char type, int dot)
 {
   char *save = buf;
 
@@ -6955,7 +6955,7 @@ func_00421B98_ (struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, 
 INCLUDE_ASM("seg/seg_316FB8", func_00421E60);
 #ifdef SKIP_ASM
 extern void func_00421530_f(int, char *, long, int, int, int, int) __asm__("func_00421530");
-extern void func_00421B98_g(int, long, int, char *, int, int) __asm__("func_00421B98");
+extern void _gcvt_g(int, long, int, char *, int, int) __asm__("_gcvt");
 extern void func_004216E8_e(int, char *, long, int, int, int) __asm__("func_004216E8");
 char *func_00421E60(int ep, char *buf, long val, int nd, int width, char fmt, int forceDot) {
     switch (fmt) {
@@ -6965,7 +6965,7 @@ char *func_00421E60(int ep, char *buf, long val, int nd, int width, char fmt, in
         break;
     case 'g':
     case 'G':
-        func_00421B98_g(ep, val, nd ? nd : 1, buf, fmt, forceDot);
+        _gcvt_g(ep, val, nd ? nd : 1, buf, fmt, forceDot);
         break;
     case 'e':
     case 'E':
@@ -6977,7 +6977,7 @@ char *func_00421E60(int ep, char *buf, long val, int nd, int width, char fmt, in
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00421F20);
+INCLUDE_ASM("seg/seg_316FB8", _realloc_r);
 #ifdef SKIP_ASM
 extern void func_00418CA8_lock(int) __asm__("func_00418CA8");
 extern void func_00418D08_unlock(int) __asm__("func_00418D08");
@@ -6986,8 +6986,8 @@ extern void func_0041E340_free(int, void *) __asm__("func_0041E340");
 extern void *func_0041605C_memcpy(void *, void *, unsigned) __asm__("func_0041605C");
 #define MALLOC_COPY(dest, src, nbytes)     do {         unsigned mcn = (nbytes);         if (mcn < 37) {             unsigned *mcsrc = (unsigned *)(src);             unsigned *mcdst = (unsigned *)(dest);             if (mcn >= 20) {                 *mcdst++ = *mcsrc++;                 *mcdst++ = *mcsrc++;                 if (mcn >= 28) {                     *mcdst++ = *mcsrc++;                     *mcdst++ = *mcsrc++;                     if (mcn >= 36) {                         *mcdst++ = *mcsrc++;                         *mcdst++ = *mcsrc++;                     }                 }             }             *mcdst++ = *mcsrc++;             *mcdst++ = *mcsrc++;             *mcdst = *mcsrc;         } else             func_0041605C_memcpy(dest, src, mcn);     } while (0)
 #define inuse(p) (chunk_at_offset(p, (p)->size & ~1u)->size & 1)
-void *func_00421F20_(int ptr, void *oldmem, unsigned bytes) __asm__("func_00421F20");
-void *func_00421F20_(int ptr, void *oldmem, unsigned bytes) {
+void *_realloc_r_(int ptr, void *oldmem, unsigned bytes) __asm__("_realloc_r");
+void *_realloc_r_(int ptr, void *oldmem, unsigned bytes) {
     unsigned nb, oldsize, newsize, nextsize, prevsize, remainder_size;
     mchunkptr oldp, newp, next, prev, remainder, bck, fwd;
     void *newmem;
@@ -7183,7 +7183,7 @@ int func_00422560(struct Bigint *dividend, struct Bigint *divisor) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00422780);
+INCLUDE_ASM("seg/seg_316FB8", _dtoa_r);
 #ifdef SKIP_ASM
 /* newlib 1.9 libc/stdlib/dtoa.c (_dtoa_r) with the mprec.h macros it uses, verbatim (IEEE_8087, Pack_32,
  * IEEE_Arith, no Sudden_Underflow / ROUND_BIASED / Check_FLT_ROUNDS / No_leftright):
@@ -7245,10 +7245,10 @@ extern int g2780_cmp(struct Bigint *, struct Bigint *) __asm__("func_00420E28");
 extern struct Bigint *g2780_diff(struct _reent_00422780 *, struct Bigint *, struct Bigint *) __asm__("func_00420E90");
 extern struct Bigint *g2780_d2b(struct _reent_00422780 *, double, int *, int *) __asm__("func_00421280");
 
-/* the unit declares this with struct Reent51 * (ecvtbuf, func_00421A50) */
-char *func_00422780_(struct _reent_00422780 *, double, int, int, int *, int *, char **) __asm__("func_00422780");
+/* the unit declares this with struct Reent51 * (ecvtbuf, ecvtbuf) */
+char *_dtoa_r_(struct _reent_00422780 *, double, int, int, int *, int *, char **) __asm__("_dtoa_r");
 char *
-func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, int *decpt, int *sign, char **rve)
+_dtoa_r_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, int *decpt, int *sign, char **rve)
 {
   int bbits, bPow2, bPow5, be, dig, i, ieps, ilim, ilim0, ilim1, j, j1, k, savedK,
     k_check, leftright, mPow2, mPow5, sPow2, sPow5, spec_case, try_quick;

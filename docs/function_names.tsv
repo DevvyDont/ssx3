@@ -3434,3 +3434,20 @@ fn_leads3	0x00397440	cUIAnimation_isLastFrame	func_00397440	[a] (this) returning
 fn_leads3	0x00397458	cUIAnimation_getNumFrames	func_00397458	[a] (this) returning short = On Tour cUIAnimation::getNumFrames(); [b] returns mpAnimHeader->mNumFrames (tUIAnimation +2); [c] cUIThing_setFrameByPercent multiplies it by the percentage
 fn_leads3	0x0039FD80	cUIThing_setFrameByPercent	func_0039FD80	[a] (this, float) = On Tour cUIThing::setFrameByPercent(float f); [b] when mpAnim is set, sets its mFrameNum to getNumFrames() * f; [d] follows cUIThing_deleteAnimation as in On Tour's cUIThing
 fn_leads3	0x0039FDD8	cUIThing_isLastAnimFrame	func_0039FDD8	[a] (this) returning a flag = On Tour cUIThing::isLastAnimFrame(); [b] returns mpAnim ? mpAnim->isLastFrame() : 0
+fn_libc1	0x004187A0	atof	func_004187A0	[b] newlib atof: returns strtod(s, NULL) (calls func_0041A7E8 = strtod with 0); [a] one string argument
+fn_libc1	0x004187C0	atoi	func_004187C0	[b] newlib atoi: returns (int) strtol(s, NULL, 10) (calls func_0041E9E0 with 0, 10); [a] one string argument
+fn_libc1	0x00418D48	fcvt	func_00418D48	[b] newlib libc/stdlib/efgcvt.c fcvt: fcvtbuf(d, ndigit, decpt, sign, NULL); [d] efgcvt.c defines fcvt, fcvtf, gcvtf, ecvt, ecvtf, gcvt in this order, the order of 0x418D48..0x418E68
+fn_libc1	0x00418D68	fcvtf	func_00418D68	[b] newlib libc/stdlib/efgcvt.c fcvtf: fcvt((double) f, ...) (fptodp then func_00418D48); [d] file order
+fn_libc1	0x00418DB8	gcvtf	func_00418DB8	[b] newlib libc/stdlib/efgcvt.c gcvtf: gcvt((double) f, ndigit, buf) (fptodp then func_00418E68); [d] file order
+fn_libc1	0x00418DF8	ecvt	func_00418DF8	[b] newlib libc/stdlib/efgcvt.c ecvt: ecvtbuf(d, ndigit, decpt, sign, NULL); [d] file order
+fn_libc1	0x00418E18	ecvtf	func_00418E18	[b] newlib libc/stdlib/efgcvt.c ecvtf: ecvt((double) f, ...); [d] file order
+fn_libc1	0x00418E68	gcvt	func_00418E68	[b] newlib libc/stdlib/efgcvt.c gcvt: writes '-' and decrements ndigit when d < 0, then returns _gcvt(_REENT, d, ndigit, buf, 'g', 0) ? buf : 0; [d] file order
+fn_libc1	0x004198D8	_strtod_r	func_004198D8	[a] (struct _reent*, const char*, char**) returning double; [b] newlib's reentrant strtod body, called by strtod with _impure_ptr
+fn_libc1	0x0041A7E8	strtod	func_0041A7E8	[b] newlib strtod: _strtod_r(_REENT, s, ptr) with _REENT = D_00454944 (_impure_ptr); [a] (s, endptr); an existing comment already calls it strtod
+fn_libc1	0x0041E7A8	_strtol_r	func_0041E7A8	[a] (reent, nptr, endptr, base); [b] newlib's reentrant strtol, called by strtol with _impure_ptr
+fn_libc1	0x0041E9E0	strtol	func_0041E9E0	[b] newlib strtol: _strtol_r(_REENT, s, ptr, base); [a] (s, endptr, base)
+fn_libc1	0x004218D8	fcvtbuf	func_004218D8	[a] (double, ndigit, decpt, sign, buf); [b] newlib libc/stdlib/ecvtbuf.c fcvtbuf: grows _REENT->_cvtbuf with _realloc_r and calls _dtoa_r mode 3; [c] fcvt calls it with buf NULL
+fn_libc1	0x00421A50	ecvtbuf	func_00421A50	[a] (double, ndigit, decpt, sign, buf); [b] newlib ecvtbuf.c ecvtbuf (_dtoa_r mode 2 into _REENT->_cvtbuf); [c] ecvt calls it with buf NULL
+fn_libc1	0x00421B98	_gcvt	func_00421B98	[a] (reent, double, ndigit, buf, type, dot); [b] newlib ecvtbuf.c _gcvt; [c] gcvt calls it with 'g', 0
+fn_libc1	0x00421F20	_realloc_r	func_00421F20	[a] (reent, oldmem, bytes); [b] newlib _realloc_r; [c] fcvtbuf/ecvtbuf grow _REENT->_cvtbuf with it, as newlib's do
+fn_libc1	0x00422780	_dtoa_r	func_00422780	[a] (reent, double, mode, ndigits, decpt, sign, rve); [c] ecvtbuf calls it with mode 2 and fcvtbuf with mode 3, as newlib's do

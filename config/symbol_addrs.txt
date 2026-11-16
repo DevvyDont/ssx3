@@ -4911,6 +4911,25 @@ cUIAnimation_getNumFrames = 0x00397458; //type:func
 cUIThing_setFrameByPercent = 0x0039FD80; //type:func
 cUIThing_isLastAnimFrame = 0x0039FDD8; //type:func
 
+// fn_libc1: names by evidence (docs/function_names.tsv)
+atof = 0x004187A0; //type:func
+atoi = 0x004187C0; //type:func
+fcvt = 0x00418D48; //type:func
+fcvtf = 0x00418D68; //type:func
+gcvtf = 0x00418DB8; //type:func
+ecvt = 0x00418DF8; //type:func
+ecvtf = 0x00418E18; //type:func
+gcvt = 0x00418E68; //type:func
+_strtod_r = 0x004198D8; //type:func
+strtod = 0x0041A7E8; //type:func
+_strtol_r = 0x0041E7A8; //type:func
+strtol = 0x0041E9E0; //type:func
+fcvtbuf = 0x004218D8; //type:func
+ecvtbuf = 0x00421A50; //type:func
+_gcvt = 0x00421B98; //type:func
+_realloc_r = 0x00421F20; //type:func
+_dtoa_r = 0x00422780; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func
@@ -5693,7 +5712,7 @@ func_00412CD8 = 0x00412CD8; //type:func
 func_00412D58 = 0x00412D58; //type:func
 func_00412DD8 = 0x00412DD8; //type:func
 // libgcc soft-float helpers (seg/seg_312310, ee-gcc 2.9): g++/gcc emit calls to them by these names (confirmed by
-// diffing compiled callers against retail: func_0042D380, func_004218D8), so a compiled caller only matches when the
+// diffing compiled callers against retail: func_0042D380, fcvtbuf), so a compiled caller only matches when the
 // helper carries the name (2026-11-14).
 __floatdidf = 0x00411438; // type:func
 dpadd = 0x00411F18; // type:func
