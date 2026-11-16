@@ -28,6 +28,13 @@ struct sMultiParticle {
     void* sys;     // 0x10
 };
 
+/**
+ * Allocates a multi-particle effect's instance-id table and its static emitter, and sets the emitter up.
+ *
+ * InstIds (+0xC) becomes MaxInst (+0x0) ids ("InstIds"), all -1; Emitter (+0x10) a 0x190-byte cStaticEmitter
+ * ("Emitter", constructed by func_00370018), set up by func_003705E0 (On Tour setupEmitter) with an identity
+ * transform and the particle data (+0x8).
+ */
 extern "C" void cMultiParticle_setupMultiParticle(sMultiParticle* self)
 {
     sMPRef** slot = &self->refs;
@@ -230,6 +237,13 @@ struct sMultiPart58260 {
     sMPVec4 center;         // 0x40
 };
 
+/**
+ * Draws the multi-particle effect once at each loaded instance it is attached to.
+ *
+ * For each of the NumInst (+0x4) ids in InstIds (+0xC) whose instance record is loaded in the world, calls
+ * cStaticEmitter_render() with BoundBox (+0x20) moved by the record's position (record +0x40), drawing at
+ * that position plus Offset (+0x40).
+ */
 extern "C" void cMultiParticle_render(sMultiPart58260* self)
 {
     for (int i = 0; i < self->count; i++) {
@@ -263,6 +277,16 @@ struct sMultiPart_58380 {
 
 extern "C" void cStaticEmitter_writeToReplayFrame(void* desc, void* stream);
 
+/**
+ * Writes a multi-particle effect to a replay frame: its counts, particle data, emitter, offset, bound box and
+ * instance ids.
+ *
+ * In order: MaxInst and NumInst (4 bytes each), the 0xD8-byte particle data (+0x8), the emitter
+ * (cStaticEmitter_writeToReplayFrame), Offset (+0x40), BoundBox (+0x20) and, when NumInst > 0, the first
+ * NumInst entries of InstIds.
+ *
+ * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
+ */
 extern "C" void cMultiParticle_writeToReplayFrame(sMultiPart_58380* self, void* stream)
 {
     sSerVEntry_58380* e = &(*(sSerVEntry_58380**)stream)[1];
@@ -357,6 +381,18 @@ public:
     virtual void v02(void* buf, int size);
 };
 
+/**
+ * Rebuilds the rail manager node from a replay frame and disables again every rail it had disabled.
+ *
+ * After the cSortObjNode replay constructor and its vtable, the 128 rail slots (+0x18, On Tour RailInfo) are
+ * set to -1, the node becomes the active one (D_004A4040, On Tour ActiveNode) and the 0x200 bytes of slots
+ * are read from the frame. func_00358780 (On Tour disableRail) takes each used slot's spline segments out of
+ * the Nash rail-space octree.
+ *
+ * @param bucket  bucket index, passed on to the cSortObjNode constructor
+ * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
+ * @return @p self
+ */
 extern "C" void* cRailManNode_cRailManNode(void* self, void* bucket, cRailManNode_cRailManNode_cStream* stream)
 {
     char* s = (char*)self;
@@ -388,6 +424,15 @@ extern "C" void func_00358998(void* self, int idx);
 // PORT: cSortObjNode__cSortObjNode__FPv is the ObjNode deleting dtor; it takes (self, flags).
 extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
 
+/**
+ * Destroys the rail manager node: re-enables every rail it disabled and clears the active-node pointer.
+ *
+ * func_00358998 (On Tour enableRail) puts each used slot's spline segments back into the Nash rail-space
+ * octree and frees the slot; then D_004A4040 (On Tour ActiveNode) is cleared and the cSortObjNode destructor
+ * runs.
+ *
+ * @param flags  g++ destructor flags, passed on to the cSortObjNode destructor (bit 0 frees the memory)
+ */
 extern "C" void cRailManNode__cRailManNode(void* self, int flags)
 {
     char* s = (char*)self;
@@ -851,6 +896,18 @@ struct sParticle_8DB0 {
     sParticle_8DB0() {}
 };
 
+/**
+ * Rebuilds an animation combo node from a replay frame: its embedded animated-object node, combo state and
+ * combo matrices.
+ *
+ * Runs the cAnimObjectNode replay constructor on +0x18, stores the cAnimComboNode vtable (D_0048EC28) at
+ * +0x54 and reads the 0x18-byte cAnimComboNodeState into +0x0. ComboXform (+0x84) gets one 0x40-byte matrix
+ * per animated mesh (+0x74) ("ComboXform"), filled by func_00359030 (probably On Tour setComboXform).
+ *
+ * @param bucket  bucket index, passed on to the cAnimObjectNode constructor
+ * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
+ * @return @p self
+ */
 extern "C" void* cAnimComboNode_cAnimComboNode(void* self, void* bucket, void* stream)
 {
     char* s = (char*)self;
@@ -1196,6 +1253,16 @@ struct sVEntry00359270 {
 extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, void* a, void* stream);
 extern void* D_0048EA70[];
 
+/**
+ * Rebuilds an animation delta node from a replay frame: the cAnimObjectNode part, its vtable and its Delta.
+ *
+ * Stores the cAnimDeltaNode vtable (D_0048EA70) at +0x3C and reads the 4-byte Delta (On Tour +0x68) into
+ * +0x6C.
+ *
+ * @param bucket  bucket index, passed on to the cAnimObjectNode constructor
+ * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
+ * @return @p self
+ */
 extern "C" void* cAnimDeltaNode_cAnimDeltaNode(void* self, void* bucket, void* stream)
 {
     cAnimObjectNode_cAnimObjectNode(self, bucket, stream);
@@ -1302,6 +1369,20 @@ extern "C" void func_003451C0(void* ref, int id);
 extern "C" void cSplineModifier_setSpeed(void* self, float v);
 float AIrandf(float lo, float hi);
 
+/**
+ * Builds a spline modifier from script data: sets up its spline, speed, start distance and orientation.
+ *
+ * Sequence, Orient, Heading (degrees, stored in radians), Force (* 100) and ForceTime go to +0x30 to +0x44;
+ * the spline is set up from SplineId and the speed through cSplineModifier_setSpeed(). The start distance is
+ * 0 (Length for a negative Speed) or a nonzero StartDistance, plus AIrandf(-1, 1) * RandomDistance, reset to
+ * 0 when outside [0, Length].
+ *
+ * Start (+0x54) = Start != 0; Complete, Radius, Dir, DDir, X2 and Y2 are cleared and RootTransformDirty
+ * (+0x58) is set.
+ *
+ * @param desc  the spline data (On Tour const tAddSplineData&)
+ * @return @p self
+ */
 extern "C" void* cSplineModifier_cSplineModifier1(char* self, char* desc)
 {
     *(void**)self = cSplineModifier_vtbl;

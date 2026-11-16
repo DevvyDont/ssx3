@@ -20,6 +20,14 @@ extern "C" void cFEStateBuyAttrib_updateBank(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
 
+/**
+ * Opens the buy-attributes screen ("33buyattribs") and fills in its cost, level, bar and bank displays.
+ *
+ * Keeps the screen at 0x48 (On Tour mpScreen) and plays frame 0, sets the bank (0xA4, mBank) to the money of
+ * user 0's character from the economy interface (11), clears the total cost (0xA0) and the prompt flag
+ * (0xA8), runs the five update functions and switches the audio's front-end sound-bank mode to 3
+ * (func_0028F140 on gSSXAudio).
+ */
 extern "C" void cFEStateBuyAttrib_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -55,6 +63,14 @@ extern char D_004A2328[];
 
 static inline int IsHash_4910(int id, char* s) { return id == GetHashValue32(s); }
 
+/**
+ * Sets up the buy-attributes screen's widgets as they are created, matched by their hashed names.
+ *
+ * "BuyAttributesPrompt" gets the text kT_OVRCMNBuyAttributesColon, "AttribMenu" is kept at 0xAC (On Tour
+ * pAttribMenu), and "Buy_yes" and "Buy_no" get misc data 0 and 1.
+ *
+ * @param widget  the widget just created (its hash name is at +0x38)
+ */
 extern "C" void cFEStateBuyAttrib_onWidgetCreate(void* self, void* widget)
 {
     if (IsHash_4910(*(int*)((char*)widget + 0x38), D_0046F008)) {
@@ -121,8 +137,19 @@ extern "C" void cFEStateBuyAttrib_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onWidgetMenu);
 #ifdef SKIP_ASM
+/**
+ * Answers the attribute menu's events: 0x100 for the option and misc buttons (8 and 9), 0x101 for the rest.
+ *
+ * cUIMenu_onInput() sends 6 for the next button, 7 for previous, 8 for option and 9 for misc. Bit 0x100 plays
+ * the selected item's feedback frame and bit 0 also plays its mSound[1], so a 0x100 answer leaves the button
+ * silent.
+ *
+ * @param pMenu  the menu that sent the event (unused; On Tour pMenu)
+ * @param key  the menu event
+ * @return 0x100 for events 8 and 9, otherwise 0x101
+ */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateBuyAttrib_onWidgetMenu(void* self, int a1, unsigned int key)
+extern "C" int cFEStateBuyAttrib_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -141,6 +168,15 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" void func_001F5300(void* self);
 
+/**
+ * Buys the chosen attribute points when the buy popup closes with a yes.
+ *
+ * On event 0x16 (a popup was popped) with the popup's result word (+0x6C) set, calls func_001F5300() (On Tour
+ * buyExperience), which pays the total cost and records the points with the economy interface.
+ *
+ * @param sender  the popup that closed (the cUIStateBuyPopup)
+ * @param msg  the popup event (0x15 opened, 0x16 closed)
+ */
 extern "C" void cFEStateBuyAttrib_onPopupEvent(void* self, void* sender, int msg)
 {
     if (msg == 0x16) {
@@ -182,6 +218,20 @@ struct sDefObj_4A90 {
 };
 extern sDefObj_4A90 D_004A5A58;
 
+/**
+ * Handles accept and back on the buy-attributes screen: opens the buy popup, closes the prompt, or leaves.
+ *
+ * Event 5 (accept): when the bank (0xA4) covers a positive total cost (0xA0), pushes a 0x70-byte "UITRICKBUY"
+ * cUIStateBuyPopup (func_001CABA8, given the cost and bank by func_001CAFC0) as a popup; otherwise plays UI
+ * sound 4 through the engine's sound interface (+0x14).
+ *
+ * Event 6 (back): with the prompt flag (0xA8) set, clears it, hides "PopupGroup" and refocuses the attribute
+ * menu; otherwise asks the engine's custom interface (getPrevState, vtable slot 5) for a state with the
+ * widget's misc data and, when it gives one, plays "TransitionOut" and pushes it.
+ *
+ * @param obj  the widget that sent the event; nothing happens when null
+ * @param msg  the widget event (5 accept, 6 back)
+ */
 extern "C" void cFEStateBuyAttrib_onWidgetEvent(char* self, char* obj, int msg)
 {
     if (obj == 0)
@@ -272,6 +322,18 @@ static inline void playFrame_4C30(sBuyAttrib_4C30* s, char* name)
     defaultMsg_4C30(s, 1);
 }
 
+/**
+ * Adds or takes back a point of the selected attribute with right and left and updates the total cost.
+ *
+ * Works on the row selected in "AttribMenu". Left (input slot 19) takes back one of the points bought this
+ * visit (0x84); right (slot 20) adds one while the level (0x68) is below 11, the bank covers the new total
+ * and the points stay below (level + 1) * 5. A point costs func_00150E50(level - 1). A change plays "hl left"
+ * or "hl right" with UI sound 1; nothing to take back, level 11 or too little money plays sound 4, while a
+ * point at the level boundary is refused silently. Either key refreshes the bars. Nothing happens while the
+ * prompt flag (0xA8) is set.
+ *
+ * @param w  the controller input (cUIInput)
+ */
 extern "C" void cFEStateBuyAttrib_onInputAlways(sBuyAttrib_4C30* self, char* w)
 {
     int changed = 0;
@@ -338,6 +400,14 @@ struct sBuyAttribK1F4EA8 {
     int lvl[7];     // 0x68
 };
 
+/**
+ * Shows each of the seven attributes' level as "level.fraction" in its "lvl%d" text.
+ *
+ * The level is the attribute's points (0x4C) / 5 and raises the stored level (0x68) when higher; the text is
+ * "%d.%d" of the level and the leftover points times 2 (each point is 0.2 of a level).
+ *
+ * @param p  the buy-attributes state (this)
+ */
 extern "C" void cFEStateBuyAttrib_updateLevels(void* p)
 {
     sBuyAttribK1F4EA8* self = (sBuyAttribK1F4EA8*)p;
@@ -379,6 +449,12 @@ struct sVE4FC0 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Shows the price of one more point for each of the seven attributes in its "cost%d" text.
+ *
+ * The price is func_00150E50(level - 1) for the attribute's level (0x68), formatted by getDollarString(); at
+ * level 11 or more the text is hidden instead (setVisible(0), vtable slot 9).
+ */
 extern "C" void cFEStateBuyAttrib_updateCostPerLevel(void* self)
 {
     char buf[32];
@@ -427,6 +503,14 @@ struct sVEK1F50B0b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Sizes the seven attributes' bars: "Vector%d" for the points owned and "under%d" for owned plus bought.
+ *
+ * Each bar is set (setSize, vtable slot 21) to 37/11 pixels per point and 12 high, so 55 points fill 185
+ * pixels, then shown (setVisible(1)).
+ *
+ * @param p  the buy-attributes state (this)
+ */
 extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* p)
 {
     sBuyAttribK1F50B0* self = (sBuyAttribK1F50B0*)p;
@@ -471,6 +555,9 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" const char* getDollarString(int value);
 extern char D_0046F090[];
 
+/**
+ * Shows the total cost of the chosen points (0xA0) as dollars in the "AttributeCost" text, if it exists.
+ */
 extern "C" void cFEStateBuyAttrib_updateTotalCost(void* self)
 {
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x48), GetHashValue32(D_0046F090));
@@ -490,6 +577,9 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" const char* getDollarString(int value);
 extern char D_0046F0A0[];
 
+/**
+ * Shows the bank (0xA4) as dollars in the "CurrentMoney" text, if it exists.
+ */
 extern "C" void cFEStateBuyAttrib_updateBank(void* self)
 {
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x48), GetHashValue32(D_0046F0A0));
@@ -619,6 +709,13 @@ extern "C" void func_001F5A38(void* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
 
+/**
+ * Opens the career-stats screen ("35car_stat") on its highlights page and counts the event medals.
+ *
+ * Keeps the screen at 0x40, clears the scroll positions, event totals and medal bit masks (0x4C to 0x74) and
+ * the page (0x48), then runs func_001F6F30() (probably On Tour initTotalEventMedal), func_001F5A38() (shows
+ * the page's group, probably setupLayout) and switches the front-end sound-bank mode to 8.
+ */
 extern "C" void cFEStateCareerStats_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -690,9 +787,20 @@ extern "C" void cFEStateCareerStats_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int cFEStateCareerStats_onWidgetMenu(void* self, int a1, unsigned int a2)
+/**
+ * Answers the career-stats menu's events: 0x100 for next, option and misc (6, 8, 9), 0x101 for the rest.
+ *
+ * cUIMenu_onInput() sends 6 for the next button, 7 for previous, 8 for option and 9 for misc. Bit 0x100 plays
+ * the selected item's feedback frame and bit 0 also plays its mSound[1], so a 0x100 answer leaves the button
+ * silent.
+ *
+ * @param pMenu  the menu that sent the event (unused; On Tour pMenu)
+ * @param Event  the menu event
+ * @return 0x100 for events 6, 8 and 9, otherwise 0x101
+ */
+extern "C" int cFEStateCareerStats_onWidgetMenu(void* self, int pMenu, unsigned int Event)
 {
-    switch (a2) {
+    switch (Event) {
     case 6:
     case 8:
     case 9:
@@ -712,6 +820,15 @@ struct sVEntry001F5650 {
 };
 extern "C" void cUIStateStack_push(void* list, void* item);
 
+/**
+ * Leaves the career-stats screen on back, pushing the state the engine's custom interface gives.
+ *
+ * Only event 6 does anything: getPrevState (vtable slot 5 of the custom interface) is asked with the widget's
+ * misc data, and a returned state is pushed on the state stack.
+ *
+ * @param item  the widget that sent the event; nothing happens when null
+ * @param msg  the widget event (6 back; 5 accept is ignored)
+ */
 extern "C" void cFEStateCareerStats_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {
@@ -784,6 +901,18 @@ static inline void playFrame_56C8(sCareer_56C8* s, char* name)
         cUIScreen_playFrame(s->screen, frame, 1);
 }
 
+/**
+ * Pages through the career stats with left and right and scrolls the current page's list with up and down.
+ *
+ * Left and right (input slots 19 and 20) step the page (0x48) through 0-3 with wrap, play "hll" or "hlr" and
+ * refresh the focus and layout. Up and down (slots 17 and 18) move the highlights list (0x4C; 3 of 24 rows
+ * shown) on page 0 and the race (0x50) and freestyle (0x54) platinum lists (5 rows shown of the totals at
+ * 0x58 and 0x68) on pages 1 and 2, playing the list's "up" or "down" frame. The UI sound is always played at
+ * the end: 1 for a page change, 2 for a scroll, 4 at a list end, 0 for nothing.
+ *
+ * @param w  the controller input (cUIInput)
+ * @return 1 when a key changed the page or a list, otherwise 0
+ */
 extern "C" int cFEStateCareerStats_onInputBegin(sCareer_56C8* self, char* w)
 {
     int msg = 0;
@@ -964,6 +1093,17 @@ static inline void setFocus_5BA8(char* o, int on)
     vt[7].fn(o + vt[7].delta, on);
 }
 
+/**
+ * Switches the career stats to a page: focuses that page's dummy menu and fills its list.
+ *
+ * Stores @p menu at 0x48 (On Tour mStatsState), unfocuses "highlightsMenu", "race_platinumdummyMenu",
+ * "fs_platinumdummyMenu" and "ridersbestDummyMenu" (setFocus, vtable slot 7), then focuses the page's one
+ * without a null check and runs setupHighlightsList(), func_001F60E0() or func_001F6490() (probably the race
+ * and freestyle platinum-medal lists) or setupRidersBest().
+ *
+ * @param self_  the career-stats state (this)
+ * @param menu  the page: 0 highlights, 1 race platinum, 2 freestyle platinum, 3 rider's best
+ */
 extern "C" void cFEStateCareerStats_setupMenuFocus(void* self_, int menu)
 {
     char* self = (char*)self_;
@@ -1417,6 +1557,17 @@ struct sCareerStats_6890 {
     void* screen;               // 0x40
 };
 
+/**
+ * Fills the rider's-best page with the best records of user 0's character and the location of each.
+ *
+ * The record block comes from func_00155288() on the score interface (8), profile 0. Knockouts, ubers, super
+ * ubers and uber grinds show as "%d", handplants and airtime as "%d sec.", the longest rail as "%0.1f m."
+ * (value / 100), each with "[location]" from the race interface; a record of 0 or less shows "-" and "- - -".
+ * "favoriteEvent" shows the best combo (record 4) under the label kT_ovrcmnBestCombo, whose text widget is
+ * not null-checked. Texts are set through func_001F6840() (On Tour setTextSafe).
+ *
+ * @param vself  the career-stats state (this)
+ */
 extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
 {
     sCareerStats_6890* self = (sCareerStats_6890*)vself;

@@ -12,6 +12,9 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern char D_00471CD8[];
 
+/**
+ * Builds the trophy screen ("34trophy") and plays its first frame.
+ */
 extern "C" void cOVStateTrophy_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -55,6 +58,17 @@ struct sVEntry_20E9A0 {
     void* (*fn)(void*, void*, int);
 };
 
+/**
+ * Handles the trophy screen's buttons: Cross recolours the item and pushes the next state, Triangle goes
+ * back.
+ *
+ * Cross sets the item's colour (slot 11) to (1, 1, 0, 0), opaque red in tARGB's A, R, G, B order, then pushes
+ * getNextState(self, 1) for choice 1, or a null state otherwise. Triangle pushes getPrevState(self, miscData)
+ * when it is not null.
+ *
+ * @param item  the item; ignored when null
+ * @param msg  the widget event: 5 Cross, 6 Triangle
+ */
 extern "C" void cOVStateTrophy_onWidgetEvent(void* self, cUIObj_20E9A0* item, int msg)
 {
     if (item == 0) {

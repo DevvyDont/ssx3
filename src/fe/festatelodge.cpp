@@ -16,6 +16,14 @@ extern "C" int func_001474C8(void* iface, int player);
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
 
+/**
+ * Opens the lodge screen ("28lodge"), reads the user's cheat character and disables lodge option 7.
+ *
+ * Keeps the screen at 0x40, stores the user's cheat character id (func_001474C8; On Tour mCheatCharID) at
+ * 0x48, clears entry 7 of the option-enabled table D_00441AF8 (written as D_00441B14[0]), switches the
+ * front-end sound-bank mode to 1, clears bToNextState (0x4C) and mbIsYesOrNo (0x54) and sets
+ * mPathToSaveProfile (0x50) to 0x12.
+ */
 extern "C" void cFEStateLodge_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -59,6 +67,15 @@ extern char D_0046EE90[];
 
 struct sWVt_3840 { short delta; short index; void (*fn)(void*, int); };
 
+/**
+ * Numbers the lodge's option widgets and titles the screen with the current peak.
+ *
+ * "option_0" to "option_6" get misc data 0-6, except "option_5b" which gets 8; "option_7" gets 7 and is made
+ * static and hidden (vtable slots 8 and 9). "title_lodge" shows kT_TITLELodgePeak1 for user 0's last hub
+ * 17-18, kT_TITLELodgePeak2 for 19-20 and kT_TITLELodgePeak3 otherwise.
+ *
+ * @param w  the widget just created (its hash name is at +0x38)
+ */
 extern "C" void cFEStateLodge_onWidgetCreate(void* self, void* w)
 {
     int h = *(int*)((char*)w + 0x38);
@@ -133,6 +150,18 @@ struct sVE_1F3A38p {
     void* (*fn)(void*, void*, int);
 };
 
+/**
+ * Acts on an accepted lodge option: asks to save or quit, opens the profile state, or moves on.
+ *
+ * Only event 5, and only for options enabled in D_00441AF8. Until bToNextState (0x4C) is set, option 0 and
+ * option 6 push a cFEPopupConfirm asking kT_CMNSaveProgress or kT_OVRCMNQuitTitlePrompt (path 0x10 or 6 at
+ * 0x50). Option 8 sets the custom interface's +0xC to 0x27 and pushes a cFEStateProfileLoad (func_0018ECA0,
+ * mode 3); any other plays "TransitionOut" and pushes the custom interface's getNextState for the option. BE
+ * interface 4 is fetched first and its result ignored.
+ *
+ * @param w  the option widget that sent the event; nothing happens when null
+ * @param event  the widget event (only 5, accept, is handled)
+ */
 extern "C" void cFEStateLodge_onWidgetEvent(char* self, char* w, int event)
 {
     if (w == 0) {
@@ -186,8 +215,19 @@ extern "C" void cFEStateLodge_onWidgetEvent(char* self, char* w, int event)
 //100%
 INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onWidgetMenu);
 #ifdef SKIP_ASM
+/**
+ * Answers the lodge menu's events: 0x100 for previous, option and misc (7, 8, 9), 0x101 for the rest.
+ *
+ * cUIMenu_onInput() sends 6 for the next button, 7 for previous, 8 for option and 9 for misc. Bit 0x100 plays
+ * the selected item's feedback frame and bit 0 also plays its mSound[1], so a 0x100 answer leaves the button
+ * silent.
+ *
+ * @param pMenu  the menu that sent the event (unused; On Tour pMenu)
+ * @param key  the menu event
+ * @return 0x100 for events 7, 8 and 9, otherwise 0x101
+ */
 // Key filter: keys 7, 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateLodge_onWidgetMenu(void* self, int a1, unsigned int key)
+extern "C" int cFEStateLodge_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -238,6 +278,18 @@ struct sVE_1F3CF0o {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Runs the lodge's save and quit prompts: records yes or no, then saves, quits or carries on.
+ *
+ * Event 0xF (yes) sets mbIsYesOrNo (0x54) and 0x10 (no) clears it, both popping the prompt. No to the save
+ * prompt (path 0x10) sets bToNextState and re-sends accept for "option_0"; no to save-before-quit (0x11)
+ * plays "TransitionOut" and pushes getNextState(6). When a prompt (state id 0) closes (0x16) after a yes,
+ * path 0x10 or 0x11 pushes a cFEStateProfileLoad with +0x27C = 1 or 2 and mode 1, and path 6 (quit) asks
+ * kT_CMNSaveBeforeQuit (path 0x11).
+ *
+ * @param msg  the popup that sent the event (despite the name)
+ * @param id  the popup event (0xF yes, 0x10 no, 0x15 opened, 0x16 closed)
+ */
 extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int id)
 {
     switch (id) {
@@ -343,6 +395,12 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int player);
 extern "C" int func_001577A0(void* self, int a1, int a2);
 
+/**
+ * Opens the rider-details screen ("155rider_details_conquer") and checks for unlocked cheat characters.
+ *
+ * Keeps the screen at 0x40 and sets 0x48 (On Tour mbCheatCharEnable) to 1, or to 0 when func_001577A0() on
+ * the reward interface (13) counts no unlocked cheat characters (ids 10-29) for the user and their character.
+ */
 extern "C" void cFEStateLodgeRiderDetail_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -388,6 +446,17 @@ static inline void commitK1F4108(void* np)
     vt[1].fn((char*)np + vt[1].delta);
 }
 
+/**
+ * Applies the rider-details popups when they close: the chosen cheat character or a new player name.
+ *
+ * Only event 0x16. From the popup named "131cheat_char" with its confirm word (+0x74) set, stores its choice
+ * (+0x70) as the user's cheat character (func_001474A8); from a popup with state id 0 (the keyboard) that was
+ * accepted (+0x5C) with a non-empty text (+0x74), sets the user's player name (func_00147138). The player
+ * interface's vtable slot 1 is then called, probably to commit the change.
+ *
+ * @param popup  the popup state that sent the event
+ * @param event  the popup event (0x16 closed)
+ */
 extern "C" void cFEStateLodgeRiderDetail_onPopupEvent(void* self, char* popup, int event)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -433,6 +502,14 @@ extern char D_0046EFA0[];
 extern char D_0046EFB0[];
 extern char D_0046EFC0[];
 
+/**
+ * Numbers the rider-details options and shows the rider's name.
+ *
+ * "Option_1" to "Option_7" get misc data 9 to 15; "rider name" shows, as ASCII, func_0014EEC8()'s record (BE
+ * interface 2) for the character of human rider 0.
+ *
+ * @param w  the widget just created (its hash name is at +0x38)
+ */
 extern "C" void cFEStateLodgeRiderDetail_onWidgetCreate(void* self, void* w)
 {
     int h = *(int*)((char*)w + 0x38);
@@ -466,6 +543,12 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void func_00194498(void* obj);
 extern char D_0046EF70[];
 
+/**
+ * Greys out "Option_3" (the cheat-character option) before each draw when no cheat character is unlocked.
+ *
+ * When 0x48 (On Tour mbCheatCharEnable) is 0, func_00194498() makes the widget static and caps its alpha at
+ * 0.5.
+ */
 extern "C" void cFEStateLodgeRiderDetail_onPreRender2D(void* self)
 {
     if (*(int*)((char*)self + 0x48) == 0) {
@@ -480,8 +563,19 @@ extern "C" void cFEStateLodgeRiderDetail_onPreRender2D(void* self)
 //100%
 INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onWidgetMenu);
 #ifdef SKIP_ASM
+/**
+ * Answers the rider-details menu's events: 0x100 for the option and misc buttons (8, 9), else 0x101.
+ *
+ * cUIMenu_onInput() sends 6 for the next button, 7 for previous, 8 for option and 9 for misc. Bit 0x100 plays
+ * the selected item's feedback frame and bit 0 also plays its mSound[1], so a 0x100 answer leaves the button
+ * silent.
+ *
+ * @param pMenu  the menu that sent the event (unused; On Tour pMenu)
+ * @param key  the menu event
+ * @return 0x100 for events 8 and 9, otherwise 0x101
+ */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateLodgeRiderDetail_onWidgetMenu(void* self, int a1, unsigned int key)
+extern "C" int cFEStateLodgeRiderDetail_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -527,6 +621,18 @@ struct sVE_1F4400 {
     void* (*fn)(void*, void*, int);
 };
 
+/**
+ * Acts on the rider-details options: renames the rider, picks a cheat character, opens a screen, or leaves.
+ *
+ * Event 5 (accept), for options enabled in D_00441AF8 (read at 9-15, past its 7 entries): option 14
+ * ("Option_6") opens a "cKeyboardPopup" (func_001CB030) limited to 8 characters, with some keys left out and
+ * the player's name as its text; option 11 ("Option_3") opens a "cFEStateCheatCharSelect" popup
+ * (func_00182220) when a cheat character is unlocked; any other plays "TransitionOut" and pushes
+ * getNextState's state for the option. Event 6 (back) pushes getPrevState's state.
+ *
+ * @param w  the option widget that sent the event; nothing happens when null
+ * @param event  the widget event (5 accept, 6 back)
+ */
 extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(char* self, char* w, int event)
 {
     if (w == 0) {

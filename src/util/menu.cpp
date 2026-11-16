@@ -417,6 +417,14 @@ extern void* cMenu_vtbl[];
 //100%
 INCLUDE_ASM("util/menu", cMenu_cMenu__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs an empty menu: no items, focus and top row 0, no menu system, and cMenu's vtable at +0x12C.
+ *
+ * Zeroes NumItems, FocusItem, TopItem and MenuSys; the Items array and DrawLayer are left as they are.
+ * Derived menus store their own vtable over it afterwards.
+ *
+ * @return @p self
+ */
 void* cMenu_cMenu(void* self)
 {
     int t0 = 0;
@@ -1629,6 +1637,14 @@ struct s2CBFD0Menu {
     int wrap;           // 0x124
 };
 
+/**
+ * Deactivates the menu: tells its focused item it lost focus, then forgets the owning menu system.
+ *
+ * Calls Items[FocusItem]'s loseFocus (cMenuItem vtable slot 7, empty in the base item) and clears MenuSys
+ * (+0x124, which the local struct calls wrap). cMenuSys calls it on the menu a newly pushed menu covers.
+ *
+ * @param p  the menu (this)
+ */
 extern "C" void cMenu_onLoseFocus(cMenu* p)
 {
     s2CBFD0Menu* self = (s2CBFD0Menu*)p;
@@ -2311,6 +2327,16 @@ extern "C" int func_002CA2B0(void* self);
 extern "C" int func_002CA3E8(void** self);
 extern "C" void func_002CC3B8(void* stack, void* item);
 
+/**
+ * Handles input for a sub-menu item: the select command pushes the item's sub-menu onto the menu system.
+ *
+ * When the item is not locked, the base navigation result is 0 and the menu system's current command is 6
+ * (select; Enter on a USB keyboard), it pushes the sub-menu (+0x18) onto Menu->MenuSys with func_002CC3B8,
+ * which takes focus from the current menu.
+ *
+ * @return the base navigation result from func_002CA2B0 (tMIR: 0 none, 1 close this menu, 2 close all menus,
+ *         3 next item, 4 previous item)
+ */
 extern "C" int cSubMenuItem_input(void* self)
 {
     int r = func_002CA2B0(self);
@@ -2326,9 +2352,19 @@ INCLUDE_ASM("util/menu", cSubMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 
-extern "C" void* cSubMenuItem_preRender(void* self, void* a1)
+/**
+ * Computes a sub-menu item's row rectangle: its label (+0x14) measured as centred text.
+ *
+ * Returns a tRect by value: @p self is really the hidden result pointer and @p item the item (On Tour's this).
+ * func_002CA4C8 measures the texts in the menu system's font, adds 12 to the height and makes the width at
+ * least 100, plus 32.
+ *
+ * @param item  the sub-menu item (this)
+ * @return @p self, the filled rectangle
+ */
+extern "C" void* cSubMenuItem_preRender(void* self, void* item)
 {
-    func_002CA4C8(self, a1, 0, *(int*)((char*)a1 + 0x14), 0);
+    func_002CA4C8(self, item, 0, *(int*)((char*)item + 0x14), 0);
     return self;
 }
 #endif
@@ -2342,6 +2378,15 @@ INCLUDE_ASM("util/menu", cSubMenuItem_render__FPvi);
 // The unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 
+/**
+ * Draws a sub-menu item: its row background and its label centred.
+ *
+ * func_002CA988 picks the focused or normal style and text colour (is the item its menu's focus item?), draws
+ * the row background through the menu (vtable slot 8), then the text with a 2-pixel drop shadow.
+ *
+ * @param rect  the row rectangle (a tRect pointer passed as an int)
+ * @return no meaningful value (the draw helper returns nothing; On Tour's render is void)
+ */
 void* cSubMenuItem_render(void* self, int rect)
 {
     return func_002CA988_5(self, rect, 0, *(int*)((char*)self + 0x14), 0);
@@ -2686,9 +2731,19 @@ INCLUDE_ASM("util/menu", cNullMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 
-extern "C" void* cNullMenuItem_preRender(void* self, void* a1)
+/**
+ * Computes a text-only menu item's row rectangle: its text (+0x14) measured as centred text.
+ *
+ * Returns a tRect by value: @p self is really the hidden result pointer and @p item the item (On Tour's this).
+ * func_002CA4C8 measures the texts in the menu system's font, adds 12 to the height and makes the width at
+ * least 100, plus 32.
+ *
+ * @param item  the text-only item (this)
+ * @return @p self, the filled rectangle
+ */
+extern "C" void* cNullMenuItem_preRender(void* self, void* item)
 {
-    func_002CA4C8(self, a1, 0, *(int*)((char*)a1 + 0x14), 0);
+    func_002CA4C8(self, item, 0, *(int*)((char*)item + 0x14), 0);
     return self;
 }
 #endif
@@ -2700,6 +2755,15 @@ INCLUDE_ASM("util/menu", cNullMenuItem_render__FPvi);
 // The unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 
+/**
+ * Draws a text-only menu item: its row background and its text (+0x14) centred.
+ *
+ * func_002CA988 picks the focused or normal style and text colour (is the item its menu's focus item?), draws
+ * the row background through the menu (vtable slot 8), then the text with a 2-pixel drop shadow.
+ *
+ * @param rect  the row rectangle (a tRect pointer passed as an int)
+ * @return no meaningful value (the draw helper returns nothing; On Tour's render is void)
+ */
 void* cNullMenuItem_render(void* self, int rect)
 {
     return func_002CA988_5(self, rect, 0, *(int*)((char*)self + 0x14), 0);
@@ -2755,6 +2819,14 @@ struct s2CD3A0Vec {
     float x, y, z, w;
 };
 
+/**
+ * Returns a spacer item's row rectangle: zero position and width, with the spacer's size (+0x14) as the
+ * height.
+ *
+ * The int size is converted to float; the 16-byte rectangle comes back through the hidden result pointer.
+ *
+ * @return the rectangle {0, 0, 0, size}
+ */
 extern "C" s2CD3A0Vec cSpaceMenuItem_preRender(void* self)
 {
     s2CD3A0Vec v;
@@ -3132,6 +3204,20 @@ static inline float ffloor_002CD9D8(float x)
     return t;
 }
 
+/**
+ * Handles input for an int item: left and right step the value, faster the longer the direction is held.
+ *
+ * Unless the item is locked or the base navigation result is nonzero, it reads the horizontal input (cInput
+ * value 0x3F minus 0x3E, dead zone 0.1) and counts the frames one direction is held (+0x24, direction +0x28).
+ * A new direction seeds the accumulator (+0x2C) with 1 or -1, so the value steps at once; while held it adds
+ * input * 0.1 * (held^2 / 288, an integer), divided by 20 with input 0x42, 5 with 0x43 and 50 with both.
+ *
+ * The new value is floor(value + accumulator) clamped to [+0x1C, +0x20]; the fraction left over stays in the
+ * accumulator, and the menu's onChange (slot 4) is called.
+ *
+ * @return the base navigation result from func_002CA2B0 (tMIR: 0 none, 1 close this menu, 2 close all menus,
+ *         3 next item, 4 previous item)
+ */
 extern "C" int cIntMenuItem_input(void* self)
 {
     char* s = (char*)self;
@@ -3201,9 +3287,19 @@ INCLUDE_ASM("util/menu", cIntMenuItem_preRender);
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 extern void* D_004866E0[];
 
-extern "C" void* cIntMenuItem_preRender(void* self, void* a1)
+/**
+ * Computes an int item's row rectangle: its label on the left and room for "-99999999" on the right.
+ *
+ * Returns a tRect by value: @p self is really the hidden result pointer and @p item the item (On Tour's this).
+ * func_002CA4C8 measures the texts in the menu system's font, adds 12 to the height and makes the width at
+ * least 100, plus 32.
+ *
+ * @param item  the int menu item (this)
+ * @return @p self, the filled rectangle
+ */
+extern "C" void* cIntMenuItem_preRender(void* self, void* item)
 {
-    func_002CA4C8(self, a1, *(int*)((char*)a1 + 0x14), 0, D_004866E0);
+    func_002CA4C8(self, item, *(int*)((char*)item + 0x14), 0, D_004866E0);
     return self;
 }
 #endif
@@ -3216,6 +3312,14 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 extern char D_004A3970[];
 
+/**
+ * Draws an int item: its label on the left and the variable's value ("%d") on the right.
+ *
+ * func_002CA988 picks the focused or normal style and text colour (is the item its menu's focus item?), draws
+ * the row background through the menu (vtable slot 8), then the text with a 2-pixel drop shadow.
+ *
+ * @param rect  the row rectangle (a tRect pointer passed as an int)
+ */
 extern "C" void cIntMenuItem_render(void* self, int rect)
 {
     char buf[0x70];
@@ -3312,6 +3416,21 @@ void* func_002CA488_DD78(void* self) __asm__("func_002CA488__FPv");
 // (prototype from their definition at line 565)
 void* func_002CA4A8_DD78(void* self) __asm__("func_002CA4A8__FPv");
 
+/**
+ * Handles input for a float item: left and right move the value by a fraction of its range, faster while
+ * held.
+ *
+ * Unless the item is locked or the base navigation result is nonzero, it reads the horizontal input (cInput
+ * value 0x3F minus 0x3E, dead zone 0.1) and counts the frames one direction is held (+0x2C, direction +0x30).
+ * The step is input * (max - min) * 5e-5 * max(1, held^2 * 50 / div / 14400) / div, where div is 1, or 20
+ * with input 0x42, 5 with 0x43 and 50 with both.
+ *
+ * It works on the displayed value (scale * value + offset), clamps that to [+0x1C, +0x20], converts it back
+ * into the variable and calls the menu's onChange (slot 4).
+ *
+ * @return the base navigation result from func_002CA2B0 (tMIR: 0 none, 1 close this menu, 2 close all menus,
+ *         3 next item, 4 previous item)
+ */
 // PORT: uses g++'s >? (max) operator.
 extern "C" int cFloatMenuItem_input(void* self)
 {
@@ -3395,9 +3514,19 @@ INCLUDE_ASM("util/menu", cFloatMenuItem_preRender);
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 extern void* D_004866F0[];
 
-extern "C" void* cFloatMenuItem_preRender(void* self, void* a1)
+/**
+ * Computes a float item's row rectangle: its label on the left and room for "-9999999999.999" on the right.
+ *
+ * Returns a tRect by value: @p self is really the hidden result pointer and @p item the item (On Tour's this).
+ * func_002CA4C8 measures the texts in the menu system's font, adds 12 to the height and makes the width at
+ * least 100, plus 32.
+ *
+ * @param item  the float menu item (this)
+ * @return @p self, the filled rectangle
+ */
+extern "C" void* cFloatMenuItem_preRender(void* self, void* item)
 {
-    func_002CA4C8(self, a1, *(int*)((char*)a1 + 0x14), 0, D_004866F0);
+    func_002CA4C8(self, item, *(int*)((char*)item + 0x14), 0, D_004866F0);
     return self;
 }
 #endif
@@ -3478,6 +3607,16 @@ struct cFloatMenuItem_render_sString {
 // returns a cBXString by value (hidden result pointer in $4)
 extern "C" void prettyFloat(cFloatMenuItem_render_sString* out, float v);
 
+/**
+ * Draws a float item: its label on the left and the displayed value on the right.
+ *
+ * The value is scale (+0x24) * variable + offset (+0x28), formatted by prettyFloat() into a temporary
+ * cBXString that is destroyed afterwards. func_002CA988 picks the focused or normal style and text colour (is
+ * the item its menu's focus item?), draws the row background through the menu (vtable slot 8), then the text
+ * with a 2-pixel drop shadow.
+ *
+ * @param rect  the row rectangle (a tRect pointer passed as an int)
+ */
 extern "C" void cFloatMenuItem_render(void* self, int rect)
 {
     cFloatMenuItem_render_sString s;
@@ -3512,6 +3651,19 @@ INCLUDE_ASM("util/menu", cAngleMenuItem_input);
 extern "C" int func_002CA2B0(void* self);
 extern "C" int cMenuItem_isLocked(void* self);
 
+/**
+ * Handles input for an angle item: left and right move the angle by a fraction of its range, faster while
+ * held.
+ *
+ * Unless the item is locked or the base navigation result is nonzero, it reads the horizontal input (cInput
+ * value 0x3F minus 0x3E, dead zone 0.1) and counts the frames one direction is held (+0x24, direction +0x28),
+ * then adds input * (max - min) * 5e-5 * max(1, held^2 / 288) to the variable (+0x18), clamped to [+0x1C,
+ * +0x20], and calls the menu's onChange (slot 4). Unlike the int and float items there is no modifier
+ * slow-down.
+ *
+ * @return the base navigation result from func_002CA2B0 (tMIR: 0 none, 1 close this menu, 2 close all menus,
+ *         3 next item, 4 previous item)
+ */
 // PORT: uses g++'s >? (max) operator.
 extern "C" int cAngleMenuItem_input(void* self)
 {
@@ -3567,9 +3719,19 @@ INCLUDE_ASM("util/menu", cAngleMenuItem_preRender);
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 extern void* D_004866F0[];
 
-extern "C" void* cAngleMenuItem_preRender(void* self, void* a1)
+/**
+ * Computes an angle item's row rectangle: its label on the left and room for "-9999999999.999" on the right.
+ *
+ * Returns a tRect by value: @p self is really the hidden result pointer and @p item the item (On Tour's this).
+ * func_002CA4C8 measures the texts in the menu system's font, adds 12 to the height and makes the width at
+ * least 100, plus 32.
+ *
+ * @param item  the angle menu item (this)
+ * @return @p self, the filled rectangle
+ */
+extern "C" void* cAngleMenuItem_preRender(void* self, void* item)
 {
-    func_002CA4C8(self, a1, *(int*)((char*)a1 + 0x14), 0, D_004866F0);
+    func_002CA4C8(self, item, *(int*)((char*)item + 0x14), 0, D_004866F0);
     return self;
 }
 #endif
@@ -3583,6 +3745,15 @@ extern "C" int fptodp(float f);
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 extern char D_004A39C8[];
 
+/**
+ * Draws an angle item: its label on the left and the angle in degrees ("%3.2f") on the right.
+ *
+ * The variable holds radians; it is multiplied by 57.2958 and passed to sprintf as a double (fptodp).
+ * func_002CA988 picks the focused or normal style and text colour (is the item its menu's focus item?), draws
+ * the row background through the menu (vtable slot 8), then the text with a 2-pixel drop shadow.
+ *
+ * @param rect  the row rectangle (a tRect pointer passed as an int)
+ */
 extern "C" void cAngleMenuItem_render(void* self, int rect)
 {
     char buf[0x70];
@@ -3974,6 +4145,18 @@ INCLUDE_ASM("util/menu", cColorMenuItem_input);
 extern "C" int func_002CA2B0(void* self);
 extern "C" int cMenuItem_isLocked(void* self);
 
+/**
+ * Handles input for a colour-channel item: left and right move the channel between 0 and 1, faster while
+ * held.
+ *
+ * Unless the item is locked or the base navigation result is nonzero, it reads the horizontal input (cInput
+ * value 0x3F minus 0x3E, dead zone 0.1) and counts the frames one direction is held (+0x1C, direction +0x20),
+ * then adds input * max(1, held^2 / 288) / 2560 to channel +0x18 of the colour at +0x14, clamped to [0, 1],
+ * and calls the menu's onChange (slot 4).
+ *
+ * @return the base navigation result from func_002CA2B0 (tMIR: 0 none, 1 close this menu, 2 close all menus,
+ *         3 next item, 4 previous item)
+ */
 // PORT: uses g++'s >? (max) operator.
 extern "C" int cColorMenuItem_input(void* self)
 {
@@ -4065,6 +4248,18 @@ static inline float textWidth_2CEEE8(sMenuValueItem_2CEEE8* item, const char* st
 
 #define MAX_2CEEE8(a, b) ((a) > (b) ? (a) : (b))
 
+/**
+ * Computes a colour-channel item's row rectangle: the widest channel name, the value text and room for the
+ * bar.
+ *
+ * Width = the widest of the "Alpha", "Red" and "Green" labels ("Blue" is not measured) + the channel value
+ * formatted as "%.3f   999" + 144; height = the menu font's MaxCharHeight * BaseScale.y + 12. The tRect is
+ * returned by value through @p ret.
+ *
+ * @param ret   the hidden result pointer (the tRect to fill)
+ * @param item  the colour-channel menu item (this)
+ * @return @p ret
+ */
 // Returns the rect of a value menu item: sized for the widest of the three option labels plus the formatted value.
 extern "C" sRect_2CEEE8* cColorMenuItem_preRender(sRect_2CEEE8* ret, sMenuValueItem_2CEEE8* item)
 {
@@ -4210,6 +4405,19 @@ public:
 };
 
 
+/**
+ * Draws a colour-channel item: its channel name, its value and a gradient bar with a marker at the value.
+ *
+ * Draws the row background through the menu (slot 9, focused or not), the channel name ("Alpha", "Red",
+ * "Green", "Blue") on the left, "%.3f  %03d" (value, value * 255.99) right-aligned before the bar, an 80 x 10
+ * bar fading from the colour with this channel at 0 to the colour with it at 1, and a triangle above the bar
+ * at the value.
+ *
+ * The bar uses render state 5 instead of 1 when the colour's alpha is not 1. Unlike func_002CA768 it leaves
+ * the menu font's ShadowOffset at (2, 2).
+ *
+ * @param rect  the row rectangle (x, y, w, h)
+ */
 extern "C" void cColorMenuItem_render(void* self, float* rect)
 {
     {
@@ -4334,9 +4542,19 @@ public:
     virtual int v10(int a);
 };
 
-extern "C" int cExpandMenuItemMenu_onCommand(void* self, int item, int b)
+/**
+ * Passes a command from an expandable item's inner menu on to the menu that holds the expandable item.
+ *
+ * Calls the owning cExpandMenuItem (+0x130) through its vtable slot 9, whose handler calls the parent menu's
+ * onCommand with the same two arguments.
+ *
+ * @param item  the inner menu item the command came from
+ * @param cmdArg     the command's argument (item-specific: 0, or a word of the item's data; On Tour arg)
+ * @return the parent menu's tMIR result
+ */
+extern "C" int cExpandMenuItemMenu_onCommand(void* self, int item, int cmdArg)
 {
-    return (*(cExpandMenuItemMenu_onCommand_cItem**)((char*)self + 0x130))->v09(item, b);
+    return (*(cExpandMenuItemMenu_onCommand_cItem**)((char*)self + 0x130))->v09(item, cmdArg);
 }
 #endif
 
@@ -4359,6 +4577,14 @@ public:
     virtual void v10(int a);
 };
 
+/**
+ * Reports a value change in an expandable item's inner menu to the menu that holds the expandable item.
+ *
+ * Calls the owning cExpandMenuItem (+0x130) through its vtable slot 10, whose handler calls the parent menu's
+ * onChange with the expandable item itself, so @p item goes no further.
+ *
+ * @param item  the inner menu item whose value changed
+ */
 extern "C" void cExpandMenuItemMenu_onChange(void* self, int item)
 {
     (*(cExpandMenuItemMenu_onChange_cItem**)((char*)self + 0x130))->v10(item);
@@ -4413,6 +4639,17 @@ struct sMenuSlot_F860 {
     sMenuSlot_F860() {}
 };
 
+/**
+ * Constructs an expandable menu item: an item that holds its own inner menu of sub-items.
+ *
+ * Runs the base constructor with @p name as the ID, stores @p parent at +0x14 and the vtable, constructs the
+ * inner cMenu at +0x18 with cExpandMenuItemMenu's vtable and a back pointer to this item (+0x148), and adds
+ * @p parent to the inner menu as its first row when it is set.
+ *
+ * @param name    the item's ID (On Tour id), passed to the base constructor
+ * @param parent  despite the name, the title item shown as the inner menu's first row (On Tour title), or 0
+ * @return @p self
+ */
 extern "C" void* cExpandMenuItem_cExpandMenuItem(void* self, void* name, void* parent)
 {
     char* s = (char*)self;
@@ -4788,13 +5025,13 @@ struct cRGBTitleMenuItem_sItem {
  * cRGBTitleMenuItem's vtable. cARGBMenuItem_cARGBMenuItem() builds one as its expand title.
  *
  * @param cap  the title text, stored at +0x18
- * @param a2  the colour the row shows, stored at +0x14
+ * @param color  the colour the row shows, stored at +0x14
  * @return @p self
  */
-extern "C" cRGBTitleMenuItem_sItem* cRGBTitleMenuItem_cRGBTitleMenuItem(cRGBTitleMenuItem_sItem* self, void* cap, void* a2)
+extern "C" cRGBTitleMenuItem_sItem* cRGBTitleMenuItem_cRGBTitleMenuItem(cRGBTitleMenuItem_sItem* self, void* cap, void* color)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    self->field_0x14 = a2;
+    self->field_0x14 = color;
     self->field_0x18 = cap;
     self->vtable = cRGBTitleMenuItem_vtbl;
     return self;
@@ -4820,6 +5057,16 @@ struct cRGBTitleMenuItem_preRender_sRect {
     float h;
 };
 
+/**
+ * Computes a colour title row's rectangle: the title as left text, 36 wider for the swatch and at least 29
+ * high.
+ *
+ * Measures with func_002CA4C8 and returns the tRect by value through @p out.
+ *
+ * @param out   the hidden result pointer (the tRect to fill)
+ * @param item  the colour title item (this)
+ * @return @p out
+ */
 // PORT: `>?` (g++ max operator); returns the rect through the hidden result pointer.
 extern "C" cRGBTitleMenuItem_preRender_sRect* cRGBTitleMenuItem_preRender(cRGBTitleMenuItem_preRender_sRect* out, void* item)
 {
@@ -4944,6 +5191,15 @@ public:
 };
 
 
+/**
+ * Draws a colour title row: the title on the left and a 20 x 17 swatch of the colour at the right edge.
+ *
+ * The text goes through func_002CA988 (row background, focused or normal colours, shadow). The swatch is a
+ * 4-vertex primitive in the colour's channels (alpha included, scaled to 0-128) drawn through GrMan's slot
+ * 71, with render state 5 instead of 1 when the alpha is not 1.
+ *
+ * @param rect  the row rectangle (x, y, w, h)
+ */
 // PORT: rect pointer passed through func_002CA988's int parameter
 extern "C" void cRGBTitleMenuItem_render(char* self, float* rect)
 {
@@ -5009,6 +5265,22 @@ extern "C" void* cExpandMenuItem_cExpandMenuItem(void* self, void* name, void* t
 void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpandMenuItem_addItem__FPvT0");
 extern void* cARGBMenuItem_vtbl[];
 
+/**
+ * Constructs a colour editor menu item: an expandable item with a colour title row and one slider per
+ * channel.
+ *
+ * Builds the cExpandMenuItem base with the embedded title row (+0x640) as its first row, stores @p color at
+ * +0x5AC and the vtable, constructs cColorMenuItems at +0x5B0, +0x5D4, +0x5F8 and +0x61C for channels 0-3
+ * (alpha, red, green, blue), constructs the title row, then adds the four channel items.
+ *
+ * The title row is added before its constructor runs; that works because cMenuItem's constructor leaves the
+ * Menu word (+0x0) alone.
+ *
+ * @param name   the item's ID (On Tour id)
+ * @param title  the title text (On Tour caption)
+ * @param color  the tARGB colour the item edits
+ * @return @p self
+ */
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, void* name, void* title, void* color)
 {
     char* s = (char*)self;
@@ -5960,6 +6232,16 @@ extern "C" void* func_002D1AF0()
 INCLUDE_ASM("util/menu", cObjectInterface_getNumBeings);
 #ifdef SKIP_ASM
 
+/**
+ * Despite the name, returns a rider's being interface rather than a count: Riders[@p i] + 0x6C0, or 0.
+ *
+ * Reads cAI::Riders[i] of SSXApp->Game->AI; +0x6C0 is a base-class subobject of cRider whose virtuals the
+ * boost nodes call. The count is func_002D1AF0 (cAI::NumberOfRidersAllocated), so On Tour's getNumBeings
+ * probably belongs there and this one is a getBeing(i).
+ *
+ * @param i  rider index, 0 to 5
+ * @return that rider's +0x6C0 subobject, or 0 when the slot is empty
+ */
 extern "C" void* cObjectInterface_getNumBeings(int i)
 {
     char* base = (char*)SSXApp->Game->AI;

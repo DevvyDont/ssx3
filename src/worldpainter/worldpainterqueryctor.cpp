@@ -54,6 +54,18 @@ struct sWPQuery_0410 {
 
 extern sWPQuery_0410* D_004A3880_0410 __asm__("D_004A3880");
 
+/**
+ * Constructs a world painter query for a region type, creates the matching query implementation and links the
+ * query into the global query list.
+ *
+ * Kinds 0-13 get a new implementation at +0x0: tWPIGD_MusicTrigger, Mix, Ambience, Speech, Camera, Fog,
+ * LightGlow, ScreenTint, SkyBox, Sun, Surface, Lighting, Weather, Danger; other kinds leave it unset. Both
+ * distances (+0x8, +0xC) start at 4286578688.0, the integer 0xFF800000 (the bit pattern of -infinity)
+ * converted to float. The query becomes the head of the list at D_004A3880.
+ *
+ * @param type  the region type (On Tour tWorldPainterRegionType): low byte kept as flags, the kind above it
+ * @return @p self
+ */
 // Creates the query implementation for the requested kind and links the query into the global list.
 extern "C" sWPQuery_0410* cWorldPainterQuery_cWorldPainterQuery(sWPQuery_0410* self, unsigned int type)
 {

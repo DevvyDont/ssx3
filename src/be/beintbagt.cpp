@@ -21,6 +21,14 @@ extern void* D_004A1210;
 //100%
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getThis__Fv);
 #ifdef SKIP_ASM
+/**
+ * Returns the back end's BAGT interface singleton, creating it on first use.
+ *
+ * The first call allocates 0x10 bytes tagged "BEBAGTInt", stores the vtable D_0045ACD8, calls its virtual
+ * slot 2 (discard) and clears bIsActive (+0x8).
+ *
+ * @return the BAGT interface (D_004A1210)
+ */
 void* cBEBAGTInterface_getThis()
 {
     if (D_004A1210 == 0) {

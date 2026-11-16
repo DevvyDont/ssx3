@@ -13,6 +13,9 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern char D_004676C8[];
 
+/**
+ * Opens the trophy-room screen ("127trophyroom"), keeps it at 0x40 and plays its frame 0.
+ */
 extern "C" void cFEStateTrophyRoom_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -87,6 +90,17 @@ static inline void vcall_43F0(void* o, int slot, int arg)
     vt[slot].fn((char*)o + vt[slot].delta, arg);
 }
 
+/**
+ * Sets up the trophy room's widgets: the big icon, the stats text, the title and the trophy and event rows.
+ *
+ * "bitmap" is kept at 0x48 (On Tour mpBigIcon) and shows the selection (func_001D47A0, probably
+ * updateBigArt); "stats" is kept at 0x4C and hidden. "screentitle" names the trophy type (0x58): 0 race, 1
+ * freestyle, 2 explore, 3 earnings. Rows "trophy" and "event_0" to "event_4" (misc data 0-5) and "0text
+ * blocks" to "5text blocks" are hidden and made static past the peak's event count (func_001CE6F0); "trophy"
+ * shows the name from the reward interface and each event row its challenge name.
+ *
+ * @param w  the widget just created (its hash name is at +0x38)
+ */
 extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
 {
     int h = *(int*)((char*)w + 0x38);
@@ -144,9 +158,20 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int cFEStateTrophyRoom_onWidgetMenu(void* self, int a1, unsigned int a2)
+/**
+ * Answers the trophy-room menu's events: 0x100 for next, option and misc (6, 8, 9), else 0x101.
+ *
+ * cUIMenu_onInput() sends 6 for the next button, 7 for previous, 8 for option and 9 for misc. Bit 0x100 plays
+ * the selected item's feedback frame and bit 0 also plays its mSound[1], so a 0x100 answer leaves the button
+ * silent.
+ *
+ * @param pMenu  the menu that sent the event (unused; On Tour pMenu)
+ * @param Event  the menu event
+ * @return 0x100 for events 6, 8 and 9, otherwise 0x101
+ */
+extern "C" int cFEStateTrophyRoom_onWidgetMenu(void* self, int pMenu, unsigned int Event)
 {
-    switch (a2) {
+    switch (Event) {
     case 6:
     case 8:
     case 9:
@@ -182,6 +207,16 @@ public:
     virtual void show(int on);
 };
 
+/**
+ * Updates the big art and stats when a trophy row gets focus, and leaves the trophy room on back.
+ *
+ * Event 1 (a row focused) stores the row's misc data as the selection (0x9C) and runs func_001D47A0() and
+ * func_001D4890() (probably On Tour updateBigArt and updateStats). Event 6 (back) hides the big icon and
+ * pushes getPrevState's state for the peak (0x54).
+ *
+ * @param item  the widget that sent the event; nothing happens when null
+ * @param msg  the widget event (1 focused, 6 back)
+ */
 extern "C" void cFEStateTrophyRoom_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {
@@ -567,6 +602,9 @@ extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
 extern char D_00467738[];
 
+/**
+ * Opens the rewards-room screen ("128rewardsroom") and switches the front-end sound-bank mode to 6.
+ */
 extern "C" void cFEStateRewardsRoom_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -597,6 +635,15 @@ extern char D_004674D8[];
 extern char D_004674E8[];
 extern char D_00467768[];
 
+/**
+ * Tags the rewards room's category buttons with their reward type and fills their text blocks.
+ *
+ * "poster", "trading cards", "art", "video", "toys" and "cheat character" get misc data 3 to 8 in that order;
+ * the texts "txtmdl_0" to "txtmdl_5" are filled by func_001D4F90() (probably On Tour setRewardsWidgetText)
+ * for types 5, 3, 7, 4, 8 and 6.
+ *
+ * @param w  the widget just created (its hash name is at +0x38)
+ */
 extern "C" void cFEStateRewardsRoom_onWidgetCreate(void* self, void* w)
 {
     int id = *(int*)((char*)w + 0x38);
@@ -638,6 +685,15 @@ struct sVEntry001D4EA8 {
 };
 extern "C" void cUIStateStack_push(void* list, void* item);
 
+/**
+ * Opens the chosen reward category's screen on accept and goes back on back.
+ *
+ * Event 5 pushes the custom interface's getNextState for the widget's misc data (the reward type) without a
+ * null check; event 6 pushes getPrevState's state when there is one.
+ *
+ * @param item  the widget that sent the event; nothing happens when null
+ * @param msg  the widget event (5 accept, 6 back)
+ */
 extern "C" void cFEStateRewardsRoom_onWidgetEvent(void* self, void* item, unsigned int msg)
 {
     if (item == 0) {
@@ -669,8 +725,19 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(void* self, void* item, unsign
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetMenu);
 #ifdef SKIP_ASM
+/**
+ * Answers the rewards-room menu's events: 0x100 for the option and misc buttons (8, 9), else 0x101.
+ *
+ * cUIMenu_onInput() sends 6 for the next button, 7 for previous, 8 for option and 9 for misc. Bit 0x100 plays
+ * the selected item's feedback frame and bit 0 also plays its mSound[1], so a 0x100 answer leaves the button
+ * silent.
+ *
+ * @param pMenu  the menu that sent the event (unused; On Tour pMenu)
+ * @param key  the menu event
+ * @return 0x100 for events 8 and 9, otherwise 0x101
+ */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateRewardsRoom_onWidgetMenu(void* self, int a1, unsigned int key)
+extern "C" int cFEStateRewardsRoom_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {

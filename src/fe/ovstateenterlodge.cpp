@@ -12,6 +12,9 @@ extern "C" void cOVStateManager_addPDATemplate();
 extern "C" void cOVState_onCreateScreen(void* self);
 extern char D_0046F4D0[];
 
+/**
+ * Builds the Enter Lodge prompt ("98enterlodge"), adds the PDA template and runs the base overlay set-up.
+ */
 extern "C" void cOVState_ENTERLODGE_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -34,6 +37,13 @@ extern char D_004A23E8[];
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_onGainFocus(void* self, void* a1);
 
+/**
+ * Tags the Yes / No items with their choice ids, then runs the base focus handling.
+ *
+ * "yes" gets miscData 0 and "no" 1, then cUIState_onGainFocus(self, pPrevState).
+ *
+ * @param pPrevState  the state that had the focus before (passed on)
+ */
 extern "C" void cOVState_ENTERLODGE_onGainFocus(void* self, void* pPrevState)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A23E0));
@@ -68,8 +78,15 @@ void* cOVState_ENTERLODGE_onDestroyScreen(void* self)
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onWidgetMenu);
 #ifdef SKIP_ASM
+/**
+ * Picks the Enter Lodge menu's button feedback: Square and Circle animate silently.
+ *
+ * @param pMenu  the menu (On Tour pMenu); unused
+ * @param key  the menu event (8 Square, 9 Circle)
+ * @return 0x100 (animation only) for events 8 and 9, else 0x101 (animation and sound)
+ */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cOVState_ENTERLODGE_onWidgetMenu(void* self, int a1, unsigned int key)
+extern "C" int cOVState_ENTERLODGE_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
     int r = 0x101;
     if (key < 10) {
@@ -105,6 +122,17 @@ struct sSelf001F72E0 {
     int done;
 };
 
+/**
+ * Handles the Enter Lodge prompt: Yes leaves the race for the lodge, No or Triangle closes the prompt.
+ *
+ * Cross and Triangle first set word +0x8 of Game->mCurrentState (flag->active here) to 1. Yes (choice 0) sets
+ * the front-end start state D_004A19C4 to 0x27, which cRealFE_loadStartState turns into the lodge state, and
+ * exits the game (cGame_exit). No (1) and Triangle set mRemovePDA (+0x54, called done here) and close the
+ * state.
+ *
+ * @param widget  the item (On Tour pWidget); ignored when null
+ * @param msg  the widget event: 5 Cross, 6 Triangle
+ */
 extern "C" void cOVState_ENTERLODGE_onWidgetEvent(sSelf001F72E0* self, void* widget, int msg)
 {
     if (widget != 0) {
@@ -144,6 +172,9 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern char D_0046F4E0[];
 
+/**
+ * Builds the Big Challenge offer screen ("63bc_start") and runs the base overlay set-up.
+ */
 extern "C" void cOVState_BIGCHALLENGE_START_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -171,6 +202,15 @@ extern "C" void cUIText_setUnicodeStringWrap(void* text, void* str);
 extern char D_0046F4F0[];
 extern char D_004A23F0[];
 
+/**
+ * On the first call, fills in the offered Big Challenge's name and long description.
+ *
+ * For the mission id at +0x9C the mission interface (0xA) supplies "chalname" (getMissionName) and the
+ * word-wrapped "ObjText" (getMissionLongDesc).
+ *
+ * @param gained  nonzero on the first call (On Tour bFirstTime)
+ * @return always 0
+ */
 extern "C" int cOVState_BIGCHALLENGE_START_onGainTransition(void* self, int gained)
 {
     if (gained) {
@@ -195,6 +235,11 @@ int GetHashValue32(char* str);
 extern char D_004A23E0[];
 extern char D_004A23E8[];
 
+/**
+ * Tags the offer's Yes / No items with their choice ids ("yes" 0, "no" 1).
+ *
+ * @param item  the widget being created
+ */
 extern "C" void cOVState_BIGCHALLENGE_START_onWidgetCreate(void* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
@@ -229,9 +274,16 @@ extern "C" void func_001F7548(void* self)
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int cOVState_BIGCHALLENGE_START_onWidgetMenu(void* self, int a1, int a2)
+/**
+ * Picks the offer menu's button feedback: only Cross animates and plays a sound.
+ *
+ * @param pMenu  the menu (On Tour pMenu); unused
+ * @param Event  the menu event (6 Cross)
+ * @return 0x101 for event 6, else 0
+ */
+extern "C" int cOVState_BIGCHALLENGE_START_onWidgetMenu(void* self, int pMenu, int Event)
 {
-    return a2 == 6 ? 0x101 : 0;
+    return Event == 6 ? 0x101 : 0;
 }
 #endif
 
@@ -256,6 +308,20 @@ struct sMgr_75A0 {
     int f2A0;
 };
 
+/**
+ * Answers the Big Challenge offer: Yes starts the challenge, No or Triangle declines it, and the overlay
+ * closes.
+ *
+ * Yes (Cross on choice 0) queues WScriptMan operation 2 (func_0030B6F8, probably a restart) when a challenge
+ * already runs (func_0030B8C0), else stores the offer's mission id (+0x9C) in D_004A3DD8 +0x2A0 and queues
+ * operation 1 (start, func_0030B540); it also sets the audio's mBigChallengeStarting (func_0029D6D0). No
+ * falls through to Triangle: store the id, queue operation 3 (decline, func_0030B658).
+ * Both set the pending overlay action D_004A26FC to 3 (close) and pop the pause-mode stack D_005366E8,
+ * restoring the pause mask D_004A2A50.
+ *
+ * @param item  the selected item; ignored when null
+ * @param msg  the widget event: 5 Cross, 6 Triangle
+ */
 extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {
@@ -472,6 +538,15 @@ static inline int Loc1F7958(char* name)
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
 
+/**
+ * Builds the top-times panel ("61toptimes" over "OV_darkblue") for the current event and fills its five rows.
+ *
+ * "track_xxx" names the event as the rewards overlay does. Race modes (cGameMode 0 / 5) show time, top5record
+ * and helptext01, other modes points, top5scores and helptext02; ngca, xba and ps2x are shown, and both help
+ * texts hidden while D_004A2700 is set. Rows 1-5 get name0N / with0N / time0N from the score interface (8),
+ * the time formatted by func_0020A1A8 or the points as "%d". Plays UI event 0xE.
+ * func_001FD190() is declared without parameters here; retail relies on $a0 still holding the event kind.
+ */
 extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
 {
     char buf[0x40];
@@ -591,6 +666,13 @@ static inline int isHashTOPTIMES(int id, char* s)
     return id == GetHashValue32(s);
 }
 
+/**
+ * Sets up the top-times buttons: Continue (choice 0) or Return, and Save Records (choice 1).
+ *
+ * "continue" reads kT_CMNContinue, or kT_OVRCMNReturn while D_004A2700 is set; "saverecords" gets miscData 1.
+ *
+ * @param w  the widget being created
+ */
 extern "C" void cOVState_TOPTIMES_onWidgetCreate(void* self, cUIText* w)
 {
     int id = *(int*)((char*)w + 0x38);
@@ -636,6 +718,15 @@ static inline void LoadRider1F7F08(void* self, int n)
     cOVState_triggerTextFade(self, name, D_0046E4E8);
 }
 
+/**
+ * Runs the base focus handling, then pulses the rows of the players' new top-five entries.
+ *
+ * For the new record rank at score interface (8) +0x18, and at +0x1C when cGamePath is 2, plays
+ * "@TextPulseWhiteOrange" (cOVState_triggerTextFade) on that row's 0N, name0N, with0N and time0N texts; a
+ * negative rank means no new record.
+ *
+ * @param pPrevState  the state that had the focus before (passed on)
+ */
 extern "C" void cOVState_TOPTIMES_onGainFocus(void* self, void* pPrevState)
 {
     cUIState_onGainFocus(self, pPrevState);
@@ -657,9 +748,16 @@ extern "C" void cOVState_TOPTIMES_onGainFocus(void* self, void* pPrevState)
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int cOVState_TOPTIMES_onWidgetMenu(void* self, int a1, int a2)
+/**
+ * Picks the top-times menu's button feedback: only Cross animates and plays a sound.
+ *
+ * @param pMenu  the menu (On Tour pMenu); unused
+ * @param Event  the menu event (6 Cross)
+ * @return 0x101 for event 6, else 0
+ */
+extern "C" int cOVState_TOPTIMES_onWidgetMenu(void* self, int pMenu, int Event)
 {
-    return a2 == 6 ? 0x101 : 0;
+    return Event == 6 ? 0x101 : 0;
 }
 #endif
 
@@ -672,6 +770,16 @@ struct sVEntry_001F80D8 {
     void (*fn)(void*);
 };
 
+/**
+ * On Cross, passes the chosen button to the panel's virtual slot 26 (func_001F8118: continue or save
+ * records).
+ *
+ * The C call passes only self, while func_001F8118 takes the item as its second argument: it gets @p pWidget
+ * only because the argument register still holds it, so a port must pass it explicitly.
+ *
+ * @param pWidget  the chosen item; ignored when null
+ * @param Event  the widget event; only 5 (Cross) acts
+ */
 extern "C" void cOVState_TOPTIMES_onWidgetEvent(void* self, void* pWidget, int Event)
 {
     if (pWidget != 0) {

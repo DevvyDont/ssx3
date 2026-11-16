@@ -11,6 +11,14 @@ extern "C" void cRiderAnimBase_reset(cRiderAnimBase* self);
 extern char cRiderAnimBase_vtbl[];
 extern const char D_0048A4E0[];
 
+/**
+ * Constructs a rider animation player with six empty sequencers, in its reset state.
+ *
+ * Clears AnimModel, stores cRiderAnimBase's vtable, allocates the 0x30-byte "Sequencers" array (6 x 8 bytes,
+ * each cAnimSequencer_init'ed) into Sequencer and calls cRiderAnimBase_reset().
+ *
+ * @return @p self
+ */
 extern "C" void* cRiderAnimBase_cRiderAnimBase(cRiderAnimBase* self)
 {
     self->AnimModel = (cAnimModel*)0;
@@ -33,6 +41,15 @@ void operator_delete(int* p);
 extern "C" void cAnimSequencer_expireAll(void* self);
 extern char cRiderAnimBase_vtbl[];
 
+/**
+ * Destroys a rider animation player: expires every sequence and frees the sequencers, then the object when
+ * asked to.
+ *
+ * Restores cRiderAnimBase's vtable, runs cAnimSequencer_expireAll() on each of the six sequencers and frees
+ * the Sequencer array with cMemMan_free().
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cRiderAnimBase__cRiderAnimBase(cRiderAnimBase* self, int flags)
 {
     self->mVtbl = (void**)cRiderAnimBase_vtbl;
@@ -101,6 +118,14 @@ struct sRiderAnimBase {
     char* mSequencers;  // 0x50
 };
 
+/**
+ * Resets the animation player: expires all sequences and returns to the default playback state.
+ *
+ * Expires each sequencer and sets its CurrentAnimID to 0x1B6 (no anim), then IsFlipped = 0, FrameRateFactor =
+ * 1.0, OrientationOffset = the identity pose (D_004FF230) and GraftMask = -1 (cleared).
+ *
+ * @param p  the animation player (this)
+ */
 extern "C" void cRiderAnimBase_reset(cRiderAnimBase* p)
 {
     sRiderAnimBase* self = (sRiderAnimBase*)p;
@@ -181,6 +206,15 @@ static inline sRabQuat_00311B48 AxisAngle_00311B48(const sRabQuat_00311B48& axis
     return sRabQuat_00311B48(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
+/**
+ * Turns the orientation offset of every playing sequence by an angle about the heading axis.
+ *
+ * Builds a transform with position D_004FF130 and the rotation quaternion of -angle about D_004FF160
+ * (half-angle sine and cosine from func_0031BE50) and applies it with
+ * cRiderAnimBase_changeOrientationOffset().
+ *
+ * @param angle  the heading change (probably radians); applied with the opposite sign
+ */
 extern "C" void cRiderAnimBase_changeHeadingOffset(cRiderAnimBase* self, float angle)
 {
     sRabXform_00311B48 xf;
@@ -611,6 +645,21 @@ struct sAnimState_00312660
     sAnimState_00312660() {}
 } __attribute__((aligned(16)));
 
+/**
+ * Samples one frame of an AI animation on a scratch sequencer and returns its first blend state.
+ *
+ * Starts the anim on a local cAnimSequencer (func_00311F00, no blend), sets sequence 0's track 0 time
+ * (func_00313CF0), gathers up to 64 states (func_00314418) and expires the scratch sequencer.
+ *
+ * Despite their names, @p startFrameTime is the clip and @p animid the time: On Tour's order is (anid, float
+ * startFrameTime, tAnimID animid), and the int and the float travel in different registers.
+ *
+ * @param anim            the AI anim to sample (On Tour tAIAnimID anid)
+ * @param startFrameTime  the clip to play (On Tour tAnimID animid); D_004A5950 (-1) means the AI anim's own
+ *                        clip, found from its index (vtable slot 4) in the table at D_004A3E7C + 0x1030
+ * @param animid          the time to sample, given to func_00313CF0 (On Tour startFrameTime)
+ * @return the first 0x50-byte blend state (On Tour tAnimBlendFrame)
+ */
 // Samples anim at time t on a scratch sequencer and returns the first resulting state.
 extern "C" sAnimState_00312660 cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* self, int anim, int startFrameTime, float animid)
 {
@@ -709,6 +758,20 @@ struct sVEntry003128E8 {
 // sequence id (callers in ai/ai read $v0); the int-returning body is bound by asm label.
 int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 
+/**
+ * Starts an AI animation on its sequencer slot and records it as that slot's current anim.
+ *
+ * Maps @p anim through vtable slot 4; the result 0x207 means it has no animation. A negative @p blend takes
+ * the anim's default blend-in time from its event-map record (cAIAnimEventMap_getBlendInTime()[4]), whose [3]
+ * also gives the sequencer slot; func_00311F00 starts the clip there with the slot's constant from D_0048D808
+ * (3, 2, 1, 0, 0, 0).
+ *
+ * @param anim   the AI anim to play (On Tour tAIAnimID anid)
+ * @param flags  nonzero allows a duplicate sequence: a matching playing sequence then does not hand over its
+ *               tracks (On Tour isDupSeqAllowed)
+ * @param blend  blend-in time in seconds; negative for the anim's default
+ * @return the started AI anim (also stored in CurrentAnimID[slot]), or 0x1B6 when it has no animation
+ */
 int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend)
 {
     sVEntry003128E8* vt = *(sVEntry003128E8**)(self + 0x58);

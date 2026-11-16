@@ -24,6 +24,17 @@ struct cScriptSoundBankManager3450 {
     void* vtable;               // 0xC
 };
 
+/**
+ * Constructs the script sound bank manager with a table of free bank slots numbered from a start bank.
+ *
+ * Stores the vtable (+0xC), @p flags and @p count, and allocates @p count 12-byte "tScriptSoundBankInfo"
+ * slots with those memory flags; slot i gets user ID -1, bank number @p base + i and no data.
+ *
+ * @param flags  memory flags for the slot table, kept at +0x0 (On Tour memFlags)
+ * @param count  number of bank slots (On Tour maxBanks)
+ * @param base  bank number of the first slot (On Tour startBankNum)
+ * @return @p self
+ */
 extern "C" cScriptSoundBankManager3450* cScriptSoundBankManager_cScriptSoundBankManager(
     cScriptSoundBankManager3450* self, int flags, int count, int base)
 {
@@ -73,6 +84,18 @@ extern "C" sSndEntry* func_00283760(sSndList* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028BE60(void* bank, int handle, void* data, int b);
 
+/**
+ * Links a script sound bank: loads its data into a free bank slot unless the user ID is already linked.
+ *
+ * When no used slot has @p id (func_002836D8), it takes the first free slot (func_00283760), stores the ID
+ * and data and loads the bank into the audio object's sound system under the slot's bank number
+ * (func_0028BE60). There is no check for a full table: a null slot would be written through.
+ *
+ * @param id  the caller's bank ID (On Tour userID)
+ * @param data  the bank data, kept by the slot
+ * @param dataSize  size of the bank data in bytes
+ * @return the slot's bank number
+ */
 extern "C" int cScriptSoundBankManager_LinkBank(sSndList* self, int id, void* data, int dataSize)
 {
     char* e = (char*)func_002836D8(self, id);
@@ -303,6 +326,14 @@ public:
 };
 
 
+/**
+ * Stops and deletes the video player and undoes the game-state changes made when playback started.
+ *
+ * When a player exists it is destroyed (func_00253418, flags 3). If it was playing (+0x4), the pause-mode
+ * stack (D_005366E8, top D_004A2A54) is popped and D_004A2A50 reloaded from D_004428F0, sound effects resume,
+ * the graphics manager's virtual slot 40 gets the value saved at +0x10, and when +0x14 is set it is cleared
+ * and func_002EA860() is called on the cutscene transition manager. The first four words are then cleared.
+ */
 extern "C" void cVidEngine_ResetVideoEngine(void* self)
 {
     char* s = (char*)self;

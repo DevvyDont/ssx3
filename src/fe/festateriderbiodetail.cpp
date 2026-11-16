@@ -23,6 +23,13 @@ extern char D_0045E3E8[];
 
 struct sVEnt_001908C0 { short delta; short index; void (*fn)(void*); };
 
+/**
+ * Builds the rider bio screen ("14rid_prof"): its four heading tabs, the rider and the first page.
+ *
+ * Adds "kT_14Heading1" to "kT_14Heading4" to "ListBox0000", stores the character ID of player mUserNum
+ * (+0x44) at +0x48 (then discards the player interface, its vtable slot 2), selects page 0 (+0x4C), shows
+ * that page (func_00190A08) and shows only this rider's "<name>" and "<name>_s" objects (func_00190CD8).
+ */
 extern "C" void cFEStateRiderBio_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -167,6 +174,12 @@ struct sDNANames {
 extern sDNANames D_0045E998;
 extern char D_004A1678[];
 
+/**
+ * Fills the bio screen's DNA page: sets the texts "DNA1" to "DNA8" to this rider's DNA lines.
+ *
+ * For each text found, the string ID comes from a 10 x 8 table indexed by the character ID (+0x48), e.g.
+ * "kT_DNA1Moby" for Moby.
+ */
 extern "C" void cFEStateRiderBio_fillDNAInfo(void* self)
 {
     sDNANames names = D_0045E998;
@@ -196,6 +209,12 @@ struct sFavesNames {
 extern sFavesNames D_0045F2D0;
 extern char D_004A1680[];
 
+/**
+ * Fills the bio screen's favourites page: sets the texts "FAVES1" to "FAVES12" to this rider's favourites.
+ *
+ * For each text found, the string ID comes from a 10 x 12 table indexed by the character ID (+0x48), e.g.
+ * "kT_FAVES1Moby" for Moby.
+ */
 extern "C" void cFEStateRiderBio_fillFavesInfo(void* self)
 {
     sFavesNames names = D_0045F2D0;
@@ -225,6 +244,12 @@ struct sQnANames {
 extern sQnANames D_0045F730;
 extern char D_004A1688[];
 
+/**
+ * Fills the bio screen's Q&A page: sets the texts "QNA1" to "QNA4" to this rider's answers.
+ *
+ * For each text found, the string ID comes from a 10 x 4 table indexed by the character ID (+0x48), e.g.
+ * "kT_QNA1Moby" for Moby.
+ */
 extern "C" void cFEStateRiderBio_fillQnAInfo(void* self)
 {
     sQnANames names = D_0045F730;
@@ -254,6 +279,13 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char D_0045E438[];
 extern char D_0045F7D0[];
 
+/**
+ * Fills the biography page: puts "kT_FULLBIO1" + the rider's name into the "BIOAutoScrollText" scroller.
+ *
+ * The name is what func_0014EEC8() returns for the character ID at +0x48 (its character record, which
+ * probably starts with the name; character interface, BE interface 2). The scroller's old lines are freed
+ * (func_003A18C0) before func_003A1F18() sets the new string ID. Nothing happens when the object is missing.
+ */
 extern "C" void cFEStateRiderBio_fillBioInfo(void* self)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E438));
@@ -278,6 +310,16 @@ struct sVEntry001912D0 {
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void func_00190A08(void* self);
 
+/**
+ * Handles the rider bio screen's widget events: probably going back, and switching the page shown.
+ *
+ * Event 6 asks the engine's custom interface (vtable slot 5, probably getPrevState) for the state to go to,
+ * passing the widget's misc data, and pushes it when there is one. Event 9 takes the widget's current
+ * list-box entry (+0x319) as the page (+0x4C) and shows it (func_00190A08). A null widget is ignored.
+ *
+ * @param item  the widget (On Tour pWidget)
+ * @param msg  the event (On Tour Event)
+ */
 extern "C" void cFEStateRiderBio_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {

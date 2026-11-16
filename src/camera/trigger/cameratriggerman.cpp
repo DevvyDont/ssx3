@@ -231,6 +231,17 @@ static inline void remove_P(char* w, void* item, const sCtBox_P* box)
     }
 }
 
+/**
+ * Takes every registered camera trigger out of the world's space hash, then frees the trigger list and clears
+ * the trigger stacks and active lists.
+ *
+ * Each trigger with a registration (+0x20) is removed, with its shape's bounds, from SSXApp->Game->BXNash;
+ * the registration word is left as it was. Then both trigger stacks (+0x1C, +0x3C) are reset, the trigger
+ * list is reset and its array freed (func_0016C098), both active lists (+0x14, +0x18) are purged and the
+ * chase controller switches are reset.
+ *
+ * @param vself  the camera trigger manager (this)
+ */
 // Takes every registered trigger out of the world's space hash and clears the trigger stacks and active lists.
 extern "C" void cCameraTriggerMan_purge(void* vself)
 {
@@ -290,6 +301,15 @@ struct sCamTrigManB {
 extern "C" int cCameraTriggerList_loadFromBuffer(void* self, void* buf);
 void cCameraTriggerMan_setInGameTriggers(void* self);
 
+/**
+ * Replaces the camera triggers with the ones in a streamed-in trigger file and activates the in-game set.
+ *
+ * Clears all trigger state (cCameraTriggerMan_cleanupOnExit), loads the triggers from the buffer
+ * (cCameraTriggerList_loadFromBuffer; its result is ignored), clears each trigger's registration word (+0x20)
+ * and calls cCameraTriggerMan_setInGameTriggers().
+ *
+ * @param stream  the trigger file's data in memory (On Tour fileBuffer)
+ */
 extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream)
 {
     cCameraTriggerMan_cleanupOnExit(self);

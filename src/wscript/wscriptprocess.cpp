@@ -32,6 +32,23 @@ struct sDef_307598 {
     int b[10];          // 0x18
 };
 
+/**
+ * Constructs a world-script process for a world section from its process definition: resolves its scripts and
+ * creates its tasks.
+ *
+ * Stores the vtable (+0x5C), manager (+0x10), section (+0x24) and the definition's id (+0x20), resolves the
+ * definition's 3 script IDs into +0x28 (start script at +0x28, completion script at +0x30) and 10 more into
+ * +0x34 with cWScriptMan_getScriptCode(), then allocates its "WScriptTasks" (0x44 bytes each) at +0x14 and
+ * initialises each from its 0x38-byte task record with cWScriptTask_initTask().
+ *
+ * The state (+0x0), current task (+0x18) and local table (+0x1C) start at 0; +0x4 and +0x8 get the task
+ * count.
+ *
+ * @param man  the owning cWScriptMan (On Tour manager)
+ * @param sectionId  the world section the process belongs to
+ * @param def  the 0x40-byte process definition from the world (On Tour tWScriptProcessData)
+ * @return @p self
+ */
 extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int sectionId, sDef_307598* def)
 {
     *(void**)((char*)self + 0x5C) = cWScriptProcess_vtbl;
@@ -73,6 +90,15 @@ void operator_delete(int* p);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern char cWScriptProcess_vtbl[];
 
+/**
+ * Destroys a world-script process with its tasks and local Luno table, then frees it when asked to.
+ *
+ * Restores the vtable (+0x5C), runs each task's virtual destructor (vptr at task +0x40, flags 0) from last to
+ * first, frees the task array through its array cookie (count at -0x10) and destroys the luno table at +0x1C
+ * with flags 3.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 // PORT: array cookie arithmetic through int (pointer in int).
 extern "C" void cWScriptProcess__cWScriptProcess(void* self, int flags)
 {
@@ -1368,6 +1394,16 @@ static inline void* wsPlayback8C60()
     return SSXApp->Game->PlaybackMan;
 }
 
+/**
+ * Sets up the world's missions: in game mode 4 with one player, creates a mission process for every mission
+ * script of every world section.
+ *
+ * First releases the playback manager's loaded data (func_0026C898). When cGameMode (D_00535C10) is 4 and the
+ * AI's NumberOfPlayersAllocated is 1, it adds a cWScriptMission (cWScriptMan_addProcess1) per 0x54-byte
+ * mission script, keyed (section << 16) + section, and calls cPlaybackMan_initLocation() for the race
+ * location's data (+0x34). func_00308DB8() always runs last: it runs each mission script's code at +0x4C and
+ * clears the manager's mission state.
+ */
 extern "C" void cWScriptMan_setupMissions(void* self)
 {
     void* iface;
@@ -1546,6 +1582,15 @@ struct cWScriptMan_initMissions_sSection {
     int f8;
 };
 
+/**
+ * Rebuilds the world-script processes: deletes every process, resets the manager and re-adds the processes of
+ * each ready world section.
+ *
+ * Deletes the processes on the three lists (+0x2B8, +0x2BC, +0x2B4; func_0030B1B8), resets the manager's
+ * state (func_00308988), then for each world section calls cWScriptMan_activeSection() when the section's
+ * entry in the world's cWScriptCache has a state of 2 or more and a data word (+0x8), otherwise
+ * cWScriptMan_purgeSection().
+ */
 extern "C" void cWScriptMan_initMissions(void* self)
 {
     int i = 0;

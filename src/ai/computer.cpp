@@ -209,6 +209,17 @@ static inline int ValidOr_UR(int v, int invalid, int def)
 }
 
 void cComputer_updateRiderDifficulty_UR(sCompSkill* self) __asm__("cComputer_updateRiderDifficulty");
+/**
+ * Sets this computer rider's difficulty values for the race from its AI index (1-5) and the heat number.
+ *
+ * The level is the rider's getAIIndex() (1 if negative), the heat SSXApp->GameModeMan->iHeatNum. It sets
+ * mPathDifficulty by updateRiderPathDifficulty(), mShouldTakeShortcuts for level 1 in heat 3 and
+ * mShouldBeRandom in game modes 1, 5 and 6, then calls setIndividualRiderDifficulty() with a profile
+ * difficulty setting (func_00147CB8). Game events 4 and 5 force mPathDifficulty to 0 and 2. The Super AI race
+ * rule (D_005308D0 bit 2, "kT_11SuperAI") then maxes both skills, enables shortcuts, sets the rider's
+ * rubber-band thresholds to -100/100 with mode 2 (+0xE4), mPathDifficulty to 2 (levels 1-2) or 1 and returns;
+ * otherwise locations 4 (+25%) and 2-3 (+10%) raise mTrickDifficulty, capped at 1.
+ */
 void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
 {
     char* rider = *(char**)((char*)self + 0x18);
@@ -304,6 +315,9 @@ extern "C" void cComputer_updateRiderDifficulty(void*);
 // callee sits at a different .text offset in our object than in the target
 INCLUDE_ASM("ai/computer", cComputer_initRiderDifficulty);
 #ifdef SKIP_ASM
+/**
+ * Initialises this computer rider's difficulty by calling cComputer_updateRiderDifficulty().
+ */
 extern "C" void cComputer_initRiderDifficulty(cComputer* self)
 {
     cComputer_updateRiderDifficulty(self);
@@ -320,19 +334,29 @@ extern "C" int cComputer_chooseRandomUberGrab(cComputer* self, float t);
 extern "C" int cComputer_chooseRandomTweakGrab(cComputer* self, float t);
 extern "C" int cComputer_chooseRandomGrab(cComputer* self, float t);
 
-extern "C" int cComputer_chooseGrabMain(cComputer* self, float t)
+/**
+ * Picks the grab for a jump with the given air time: an uber, a tweak or a plain grab, tried in that order.
+ *
+ * Returns -1 when the air time is 0.75 s or less, exactly 100 (getSpinCmd's value when the air predictor has
+ * no landing), or under 1 s while the rider is heading for a rail (mToRail). Each kind is tried only when its
+ * shouldRider*() roll passes and the kind before it found nothing.
+ *
+ * @param airTime  predicted air time left, in seconds (On Tour airTime)
+ * @return the chosen grab slot (0-14), or -1 for none
+ */
+extern "C" int cComputer_chooseGrabMain(cComputer* self, float airTime)
 {
     int r = -1;
-    int skip = self->mToRail != 0 && t < 1.0f;
-    if (!skip && t > 0.75f && t != 100.0f)
+    int skip = self->mToRail != 0 && airTime < 1.0f;
+    if (!skip && airTime > 0.75f && airTime != 100.0f)
     {
-        if (cComputer_shouldRiderUber(self)) r = cComputer_chooseRandomUberGrab(self, t);
+        if (cComputer_shouldRiderUber(self)) r = cComputer_chooseRandomUberGrab(self, airTime);
         if (r == -1)
         {
-            if (cComputer_shouldRiderTweak(self)) r = cComputer_chooseRandomTweakGrab(self, t);
+            if (cComputer_shouldRiderTweak(self)) r = cComputer_chooseRandomTweakGrab(self, airTime);
             if (r == -1)
             {
-                if (cComputer_shouldRiderGrab(self)) r = cComputer_chooseRandomGrab(self, t);
+                if (cComputer_shouldRiderGrab(self)) r = cComputer_chooseRandomGrab(self, airTime);
             }
         }
     }
@@ -361,20 +385,32 @@ static inline int riderV7_10CBE0(char* rider)
 }
 
 
-extern "C" int cComputer_chooseRandomGrab(cComputer* computer, float t)
+/**
+ * Picks a random plain grab (slot 0-14) and times it against the air time; clears mIsUber and mIsTweak.
+ *
+ * Stores @p time in mGrabStartTime and reads the grab animation's marker times (func_00312820 keys 2 and 1,
+ * divided by cRider_getGrabAnimSpeedScale()). When @p time is at least the key-2 time it sets mGrabEndTime = t -
+ * key 2 and mHoldToLandTime = key 2 - key 1 and counts the grab in GrabHistoryCounter, which this function
+ * never reads: the pick is purely random.
+ *
+ * @param computer  the computer rider
+ * @param time  air time available, in seconds (On Tour time)
+ * @return the grab slot, or -1 when its animation does not fit in the air time
+ */
+extern "C" int cComputer_chooseRandomGrab(cComputer* computer, float time)
 {
     cComputer* self = computer;
     self->mIsUber = 0;
     self->mIsTweak = 0;
-    self->mGrabStartTime = t;
+    self->mGrabStartTime = time;
     int idx = AIrand() % 15;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
     int anim = func_001500D8(iface, riderV7_10CBE0(((char*)self->mRider)), idx);
     float spd = cRider_getGrabAnimSpeedScale(((char*)self->mRider));
     float a = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
     float b = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
-    if (t < a) return -1;
-    self->mGrabEndTime = t - a;
+    if (time < a) return -1;
+    self->mGrabEndTime = time - a;
     self->mHoldToLandTime = a - b;
     if (idx != -1 && idx < 15)
     {
@@ -406,11 +442,24 @@ static inline int riderV7_10CD20(char* rider)
 }
 
 
-extern "C" int cComputer_chooseRandomTweakGrab(cComputer* computer, float t)
+/**
+ * Picks the least-used tweak grab (slots 1-14) whose animation fits in the air time and sets mIsTweak.
+ *
+ * Skips slots with no tweak animation (0x1B6) and, while the rider's uber timer runs, slots that also have an
+ * uber variant (only checked when mUberFlags bit 0 is set). A slot fits when its tweak's key-2 time plus the
+ * plain grab's key-1 time is under @p time; the lowest TweakHistoryCounter wins (the first one on ties), gets
+ * mGrabEndTime and mHoldToLandTime and is counted. Clears mIsUber; mIsTweak is left as it was when nothing
+ * fits.
+ *
+ * @param computer  the computer rider
+ * @param time  air time available, in seconds (On Tour time)
+ * @return the tweak slot, or -1 when none fits
+ */
+extern "C" int cComputer_chooseRandomTweakGrab(cComputer* computer, float time)
 {
     cComputer* self = computer;
     self->mIsUber = 0;
-    self->mGrabStartTime = t;
+    self->mGrabStartTime = time;
     int found = -1;
     int best = 10000;
     int i = 1;
@@ -429,12 +478,12 @@ extern "C" int cComputer_chooseRandomTweakGrab(cComputer* computer, float t)
         float b = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
         float c = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
         float sum = c + a;
-        if (sum < t && self->TweakHistoryCounter[i] < best)
+        if (sum < time && self->TweakHistoryCounter[i] < best)
         {
             self->mIsTweak = 1;
             found = i;
             self->mHoldToLandTime = c - b;
-            self->mGrabEndTime = t - sum;
+            self->mGrabEndTime = time - sum;
             best = self->TweakHistoryCounter[i];
         }
     }
@@ -467,13 +516,25 @@ static inline int riderV7_10CF68(char* rider)
 }
 
 
-extern "C" int cComputer_chooseRandomUberGrab(cComputer* computer, float t)
+/**
+ * Picks the least-used uber grab (slots 0-14) whose animation fits in the air time and sets mIsUber.
+ *
+ * Fails at once unless the rider's uber timer (mUberTimer) is running. The animation is the slot's uber
+ * variant (func_00150198, with a flag for mUberLevel >= 5) and slots without one (0x1B6) are skipped; the fit
+ * test, timing fields and counting are as in chooseRandomTweakGrab(), on UberHistoryCounter. Clears mIsTweak
+ * but never clears mIsUber, so a failed call can leave an older value.
+ *
+ * @param computer  the computer rider
+ * @param time  air time available, in seconds (On Tour time)
+ * @return the uber slot, or -1 when none fits or no uber is available
+ */
+extern "C" int cComputer_chooseRandomUberGrab(cComputer* computer, float time)
 {
     cComputer* self = computer;
     self->mIsTweak = 0;
     if (*(float*)(((char*)self->mRider) + 0x2F0) <= 0.0f)
         return -1;
-    self->mGrabStartTime = t;
+    self->mGrabStartTime = time;
     int found = -1;
     int best = 10000;
     int i = 0;
@@ -489,12 +550,12 @@ extern "C" int cComputer_chooseRandomUberGrab(cComputer* computer, float t)
         float b = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
         float c = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
         float sum = c + a;
-        if (sum < t && self->UberHistoryCounter[i] < best)
+        if (sum < time && self->UberHistoryCounter[i] < best)
         {
             self->mIsUber = 1;
             found = i;
             self->mHoldToLandTime = c - b;
-            self->mGrabEndTime = t - sum;
+            self->mGrabEndTime = time - sum;
             best = self->UberHistoryCounter[i];
         }
     }
@@ -517,6 +578,10 @@ struct sComputer_0010D170
     int c[15];
 };
 
+/**
+ * Clears the three grab history tables: GrabHistoryCounter, UberHistoryCounter and TweakHistoryCounter (15
+ * entries each).
+ */
 extern "C" void cComputer_resetCounters(cComputer* self)
 {
     for (int i = 0; i < 15; i++)
@@ -729,6 +794,19 @@ struct sAi_10D410 {
     int count;
 };
 
+/**
+ * Scores an AI path as a route choice for this computer rider (route selection); higher is better.
+ *
+ * The path's flag word (+0x38) holds a shortcut bit (0), hard, medium and easy bits (1-3), a speed rule (bits
+ * 4-6: 0 at most, 3 at least) and a speed (bits 7-9: 20-120 km/h). A path that fails
+ * calculateDifficultyScore(), is a shortcut the rider may not take or breaks the speed rule scores 0; one
+ * over 5000 from the point 796 ahead of the rider scores -1, and the rival's current path 100. Otherwise it
+ * sums weighted terms (each /22): nearness, the speed-rule value, how few other computer riders use the path,
+ * the difficulty score, the shortcut bonus and, with mShouldBeRandom, a random term.
+ *
+ * @param tgt  the candidate path (On Tour cAIPath* CurrentPath)
+ * @return the score: 0 unusable, -1 too far, 100 the rival's path, otherwise the weighted sum
+ */
 extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
 {
     float sc[7];
@@ -823,6 +901,19 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
 //100%
 INCLUDE_ASM("ai/computer", cComputer_calculateDifficultyScore);
 #ifdef SKIP_ASM
+/**
+ * Rates how well a path's difficulty flags suit this rider's mPathDifficulty; 0 means unsuitable.
+ *
+ * Path difficulty 0, 1 and 2 require @p IsEasy, @p IsMedium and @p IsHard respectively. Any other value
+ * passes only when (IsEasy == IsMedium) equals IsHard, an odd test that is unused in practice since
+ * mPathDifficulty is always 0-2. A passing path scores (4 - number of flags set) * 33.3, so a path meant for
+ * fewer levels scores higher.
+ *
+ * @param IsEasy  the path suits easy riders
+ * @param IsMedium  the path suits medium riders
+ * @param IsHard  the path suits hard riders
+ * @return 33.3 to 99.9 for a suitable path, otherwise 0
+ */
 extern "C" float cComputer_calculateDifficultyScore(cComputer* self, int IsEasy, int IsMedium, int IsHard)
 {
     short s = self->mPathDifficulty;
@@ -864,6 +955,14 @@ struct sComputer_0010D8F8
     char pad[0x1C];
 };
 
+/**
+ * Finds this rider's opponent: the first rider in its relation table that is both valid and human.
+ *
+ * Scans the six mRelations entries of the rider, testing mValid and the +0x4 word, which cAI_RefreshGroupAI()
+ * fills with that rider's isHuman().
+ *
+ * @return the opponent's index (0-5), or -1 when there is none
+ */
 extern "C" int cComputer_myOpponentIndex(cComputer* self)
 {
     sComputer_0010D8F8* p = (sComputer_0010D8F8*)self->mRider;
@@ -882,6 +981,15 @@ INCLUDE_ASM("ai/computer", cComputer_isFarBehind);
 extern "C" int func_0010DEB0(void* self);
 float func_00113128(void* self);
 
+/**
+ * Tells whether this computer rider trails its opponent by more than its rubber-band threshold.
+ *
+ * Compares the opponent's mDistToFinish minus this rider's with the rider's mRubberBandBehind (a negative
+ * distance set by the difficulty code). Without an opponent (func_0010DEB0, the rider at myOpponentIndex())
+ * it is not behind.
+ *
+ * @return 1 when the difference is below mRubberBandBehind, otherwise 0
+ */
 extern "C" int cComputer_isFarBehind(cComputer* self)
 {
     // PORT: func_0010DEB0 returns a pointer as int (unit declaration).
@@ -900,6 +1008,14 @@ INCLUDE_ASM("ai/computer", cComputer_isFarAhead);
 extern "C" int func_0010DEB0(void* self);
 float func_00113128(void* self);
 
+/**
+ * Tells whether this computer rider leads its opponent by more than its rubber-band threshold.
+ *
+ * Compares the opponent's mDistToFinish minus this rider's with the rider's mRubberBandAhead. Without an
+ * opponent (func_0010DEB0, the rider at myOpponentIndex()) it is not ahead.
+ *
+ * @return 1 when the difference is above mRubberBandAhead, otherwise 0
+ */
 extern "C" int cComputer_isFarAhead(cComputer* self)
 {
     // PORT: func_0010DEB0 returns a pointer as int (unit declaration).
@@ -916,6 +1032,12 @@ extern "C" int cComputer_isFarAhead(cComputer* self)
 //100%
 INCLUDE_ASM("ai/computer", cComputer_checkForAttack);
 #ifdef SKIP_ASM
+/**
+ * Tells whether another rider is this computer rider's rival, the one it attacks rather than avoids.
+ *
+ * @param oppID  index of the other rider
+ * @return 1 when the rider has a rival (mHasRival) and mRivalIndex equals @p oppID, otherwise 0
+ */
 extern "C" int cComputer_checkForAttack(cComputer* self, int oppID)
 {
     void* p = self->mRider;
@@ -938,6 +1060,15 @@ extern "C" int func_001298C8();
 extern "C" int func_00311AE8(void*, int);
 unsigned int AIrand();
 
+/**
+ * Decides whether this computer rider should block an attack, keeping each decision for two seconds.
+ *
+ * While mBlockTimer runs it counts down by 1/60 and returns mShouldIBlock; a negative timer is reset to 0.
+ * Otherwise, on every sixth AI tick, it looks for another human rider within 200 whose channel-1 animation
+ * class is 13 (probably a punch); the first one found starts a 2 s timer with a 25% chance of blocking.
+ *
+ * @return nonzero when the rider should block now, otherwise 0
+ */
 extern "C" int cComputer_checkForBlock(cComputer* self)
 {
     float t = self->mBlockTimer;
@@ -1184,6 +1315,19 @@ static inline float clamp_10E098(float v, float lo, float hi)
     return lo;
 }
 
+/**
+ * Adds an amount to the rider's boost meter (+0x2F8, kept in 0-1) and handles the uber unlock at a full
+ * meter.
+ *
+ * Does nothing in boost mode 3 (mBoostMode) or for a zero amount. A gain first calls a BE stat getter
+ * (func_00149690, result unused) and is dropped unless @p mask shares a bit with mBoostSourceMask. It
+ * notifies the audio system (func_0029AB08), then clamps. A gain that fills the meter with uber enabled
+ * (mUberFlags) shows HUD message 5 when mUberTimer is 0, raises an mUberLevel of 0 or less by one and, at
+ * levels 1-9, makes mUberTimer at least 20; a loss below level 10 stops mUberTimer.
+ *
+ * @param mask  boost source flags (On Tour powerSourceFlags), tested against mBoostSourceMask for a gain
+ * @param amt  amount to add, negative to drain (On Tour powerUp)
+ */
 extern "C" void cRider_flagEventBoostPowerUp(void* self, int mask, float amt)
 {
     if (*(int*)((char*)self + 0x304) == 3)
@@ -1864,10 +2008,19 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRiderMetrix_evAddCash(int, int);
 extern "C" void cBERewardInterface_awardUserCollectible(void*, int, int);
 
-extern "C" void cRider_flagEventAddCollectible(cRider* self, int a)
+/**
+ * Credits the rider with a collected peak collectible: a cash event and the BE collectible reward check.
+ *
+ * Calls cRiderMetrix_evAddCash(mMetrix, 3) and cBERewardInterface_awardUserCollectible() for the rider's
+ * mAIIndex. The C declares no amount, but the caller's third argument (On Tour's money, passed by
+ * cWScriptMan_collect) stays in its register and reaches evAddCash as the cash amount.
+ *
+ * @param peakID  the peak whose collectible was taken (On Tour peakID)
+ */
+extern "C" void cRider_flagEventAddCollectible(cRider* self, int peakID)
 {
     cRiderMetrix_evAddCash((int)self->mMetrix, 3);
-    cBERewardInterface_awardUserCollectible(cBE_getInterface_Fv(cBE_getBE(), 0xD), self->mAIIndex, a);
+    cBERewardInterface_awardUserCollectible(cBE_getInterface_Fv(cBE_getBE(), 0xD), self->mAIIndex, peakID);
 }
 #endif
 
@@ -1894,6 +2047,13 @@ float func_00113128(void* self);
 
 // PORT: the unit declares this as returning void*; it returns nothing.
 extern "C" void cAI_RefreshGroupAI_impl(sAI_0010F3B8* self) __asm__("cAI_RefreshGroupAI");
+/**
+ * Rebuilds every race rider's relation table (mRelations) after the AI's rider list changes.
+ *
+ * For rider i and slot j it sets mValid when j != i, j is a race rider and cRider_isLoaded() holds for rider
+ * i (not j); fills the +0x4 word with rider j's isHuman(); sets mDistance to 1e10 and clears mAngle and the
+ * five words after it. It then copies the rider's mDistToFinish to +0x4D8 and sets +0xE8 to -1.
+ */
 extern "C" void cAI_RefreshGroupAI_impl(sAI_0010F3B8* self)
 {
     int i;
@@ -2350,6 +2510,13 @@ extern "C" void cWipeoutMotion_gainFocus(void* motion, int a1);
 extern "C" void cRailslideMotion_gainFocus(void* motion, int a1);
 extern "C" void cHandplantMotion_gainFocus(void* motion, int a1);
 
+/**
+ * Tells the current motion part (by MotionState) that it is losing focus, through its loseFocus function.
+ *
+ * Ground, air, wipeout, railslide and handplant have one; the static motion (3) and other values do nothing.
+ *
+ * @param a1  the motion state being switched to, passed on to loseFocus (On Tour next)
+ */
 extern "C" void cRiderHandler_loseMotionState(cRiderHandler* self, int a1)
 {
     switch (self->MotionState) {
@@ -2388,6 +2555,14 @@ extern "C" void cWipeoutMotion_gainFocus(void* motion, int a1);
 extern "C" void cRailslideMotion_gainFocus(void* motion, int a1);
 extern "C" void cHandplantMotion_gainFocus(void* motion, int a1);
 
+/**
+ * Tells the new current motion part (by MotionState) that it has gained focus, through its gainFocus
+ * function.
+ *
+ * Ground, air, wipeout, railslide and handplant have one; the static motion (3) and other values do nothing.
+ *
+ * @param prev  the motion state being left, passed on to gainFocus
+ */
 extern "C" void cRiderHandler_gainMotionState(cRiderHandler* self, int prev)
 {
     switch (self->MotionState) {
@@ -2421,6 +2596,9 @@ extern "C" void cStaticMotion_step(void* motion);
 extern "C" void cRailslideMotion_step(void* motion);
 extern "C" void cHandplantMotion_step(void* motion);
 
+/**
+ * Runs one step of the current motion part, chosen by MotionState (all six motions have a step function).
+ */
 extern "C" void cRiderHandler_stepMotion(cRiderHandler* self)
 {
     switch (self->MotionState) {
@@ -2457,6 +2635,9 @@ void cStaticMotion_resolve(void* motion);
 extern "C" void cRailslideMotion_resolve(void* motion);
 void cHandplantMotion_resolve(void* motion);
 
+/**
+ * Runs the resolve function of the current motion part, chosen by MotionState (all six motions have one).
+ */
 extern "C" void cRiderHandler_resolveMotion(cRiderHandler* self)
 {
     switch (self->MotionState) {
@@ -2488,6 +2669,15 @@ INCLUDE_ASM("ai/computer", cRiderHandler__setControlState);
 extern "C" void cRiderHandler_loseControlState();
 extern "C" void cRiderHandler_gainControlState(cRiderHandler*, int);
 
+/**
+ * Switches the rider handler to a new control state, telling the old and the new control part.
+ *
+ * Calls cRiderHandler_loseControlState() (declared without arguments, but self and @p cstate are still in the
+ * argument registers, so the old part learns the next state), stores @p cstate in ControlState, then calls
+ * cRiderHandler_gainControlState() with the previous state.
+ *
+ * @param cstate  the new control state (eControlState)
+ */
 extern "C" void cRiderHandler__setControlState(cRiderHandler* self, int cstate)
 {
     cRiderHandler_loseControlState();
@@ -2511,6 +2701,14 @@ extern "C" void cRailslideControl_loseFocus(void* m, int a1);
 extern "C" void cWipeoutControl_loseFocus(void* m, int a1);
 extern "C" void cHandplantControl_loseFocus(void* m, int a1);
 
+/**
+ * Tells the current control part (by ControlState) that it is losing focus, through its loseFocus function.
+ *
+ * Only cruise, board press, prewind, natural air, spin, railslide, wipeout and handplant have one; bump,
+ * gate, reset, finish line, uber grind and void do nothing.
+ *
+ * @param a1  the control state being switched to, passed on to loseFocus (On Tour next)
+ */
 // Controller-state dispatch: the second argument is passed through to the handler.
 extern "C" void cRiderHandler_loseControlState(cRiderHandler* self, int a1)
 {
@@ -2561,6 +2759,14 @@ extern "C" void cResetControl_gainFocus(void* p, int a1);
 extern "C" void cFinishLineControl_gainFocus(void* p, int a1);
 extern "C" void cHandplantControl_gainFocus(void* p, int a1);
 extern "C" void cUberGrindControl_gainFocus(void* p, int a1);
+/**
+ * Tells the new current control part (by ControlState) that it has gained focus, through its gainFocus
+ * function.
+ *
+ * Every control state but bump (3) and void (13) has one.
+ *
+ * @param prev  the control state being left, passed on to gainFocus
+ */
 // Forwards to the handler for the AI's current state.
 extern "C" void cRiderHandler_gainControlState(cRiderHandler* self, int prev)
 {
@@ -2625,6 +2831,14 @@ extern "C" void cResetControl_update(void* p, int a1);
 extern "C" void cFinishLineControl_update(void* p, int a1);
 extern "C" void cHandplantControl_update(void* p, int a1);
 extern "C" void cUberGrindControl_update(void* p, int a1);
+/**
+ * Feeds this frame's control command to the current control part (by ControlState) through its update
+ * function.
+ *
+ * States 0-12 each have one; the void state (13) does nothing.
+ *
+ * @param cmd  the control command (On Tour const tControlCmd&), passed on to the part's update
+ */
 // Forwards to the second handler for the AI's current state.
 extern "C" void cRiderHandler_updateControl(cRiderHandler* self, int cmd)
 {
@@ -2680,6 +2894,14 @@ INCLUDE_ASM("ai/computer", cRiderHandler__getMotionStateName);
 extern const char* D_00459D70[];
 extern char D_00456C48[];
 
+/**
+ * Returns the name of the current motion state, "Ground" to "Handplant", for debug display.
+ *
+ * The bound check accepts 0-6 but the table D_00459D70 has six entries, so MS_Num (6, the constructor's
+ * initial value) reads the next data word as a string pointer.
+ *
+ * @return the state's name, or " -- Invalid -- " for a state above 6
+ */
 extern "C" const char* cRiderHandler__getMotionStateName(cRiderHandler* self)
 {
     unsigned int state = (unsigned int)self->MotionState;
@@ -2695,6 +2917,14 @@ INCLUDE_ASM("ai/computer", cRiderHandler__getControlStateName);
 extern const char* D_00459DC8[];
 extern char D_00456C48[];
 
+/**
+ * Returns the name of the current control state, "Cruise" to "Void", for debug display.
+ *
+ * The bound check accepts 0-14 but the table D_00459DC8 has 14 entries, so CS_Num (14, the constructor's
+ * initial value) reads the next data word as a string pointer.
+ *
+ * @return the state's name, or " -- Invalid -- " for a state above 14
+ */
 extern "C" const char* cRiderHandler__getControlStateName(cRiderHandler* self)
 {
     unsigned int state = (unsigned int)self->ControlState;
@@ -2725,6 +2955,13 @@ void* func_002306A8(void* self, int i);
 
 struct sVEntry00111890 { short delta; short index; void (*fn)(void*); };
 
+/**
+ * Resets all of the rider's visual FX parts, the world painter and the splash manager of the rider's view.
+ *
+ * Calls the reset entry of each of the 11 FX parts (BoardWake to Cheat; for most parts the function named
+ * readFromReplayFrame, called without a stream), then cWorldPainterMan_reset() and, when the rider has a view
+ * (mViewIndex >= 0), virtual slot 14 of cGame::SplashManager[mViewIndex].
+ */
 extern "C" void cRiderHandler_resetRiderFX(cRiderHandler* self)
 {
     cBoardWakeFX_readFromReplayFrame(((char*)self) + 0x3B0);
@@ -2773,6 +3010,13 @@ extern int D_004A4534;
 
 struct sVE_00111948 { short delta; short index; int (*fn)(void*); };
 
+/**
+ * Updates the rider's player lights and all 11 visual FX parts for this frame.
+ *
+ * Skipped for computer riders while the "Disable AI Visual FX" debug option (D_004A4534) is on. The lights
+ * (PlayerLights, +0xD30) are reset first by func_00392D18. On Tour's version takes an a_bIsLocalHuman flag
+ * that this one lacks.
+ */
 extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* self)
 {
     if (D_004A4534 != 0) {
@@ -2814,6 +3058,11 @@ extern int D_004A4534;
 
 struct sVE_001119F8 { short delta; short index; int (*fn)(void*); };
 
+/**
+ * Draws all 11 of the rider's visual FX parts.
+ *
+ * Skipped for computer riders while the "Disable AI Visual FX" debug option (D_004A4534) is on.
+ */
 extern "C" void cRiderHandler_renderRiderFX(cRiderHandler* self)
 {
     if (D_004A4534 != 0) {
@@ -2886,6 +3135,16 @@ extern "C" void cCheatFX_writeToReplayFrame(void* self, void* s);
 extern "C" int func_0026B508(void* tree, void* path);
 extern "C" int func_0026B550(void* tree, void* path);
 
+/**
+ * Writes the rider's state into one replay frame: the cRider, its helpers, every stateful part and its paths.
+ *
+ * In order: the first 0x6C0 bytes of the cRider; the rider anim, anim model, air predictor and metrix; the
+ * line and wall hints (each a world-object ID from +0x150 of what it points at, or -1, then the hint's 16
+ * bytes); MotionState and ControlState; each motion and control part that has state, and cCheatFX; 0x20 bytes
+ * each of mAIPathHint and mTrackPathHint; and the IDs of the two paths at +0xAB4 and +0xAB8.
+ *
+ * @param data  the replay stream (On Tour cReplayFramePtr*), written through its virtual Write
+ */
 extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, char* data)
 {
     cStream_00111AC0* st = (cStream_00111AC0*)data;
@@ -3023,6 +3282,16 @@ struct sQuad_00111D98 {
     int v[4];
 } __attribute__((aligned(16)));
 
+/**
+ * Restores the rider from one replay frame, reading back what cRiderHandler_writeToReplayFrame() wrote.
+ *
+ * Turns the saved world-object IDs back into hint pointers (through the world cache) and the path IDs into
+ * the paths at +0xAB4 and +0xAB8, resets the FX parts (all but the dynamic spray, which resetRiderFX() does
+ * reset) and reads cCheatFX. It then copies mPosition into the focus box when there is one, updates the rider
+ * anim (func_00312598), rebuilds the skeleton matrices and refreshes the body spheres (func_00106828).
+ *
+ * @param data  the replay stream (On Tour cReplayFramePtr*), read through its virtual Read
+ */
 extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* data)
 {
     cStream_00111D98* st = (cStream_00111D98*)data;

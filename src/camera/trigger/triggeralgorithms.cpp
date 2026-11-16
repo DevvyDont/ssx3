@@ -90,6 +90,14 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_add);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern char D_0045BF68[];
 
+/**
+ * Adds a camera trigger to the front of the active trigger list.
+ *
+ * Allocates a 16-byte "Active Camera Trigger" node, stores @p item in its first word (the struct calls it
+ * pad) and sets both node flags (+0x8, +0xC; func_0016C678 clears them on every node) to 1.
+ *
+ * @param item  the trigger to add (On Tour tCameraTrigger*)
+ */
 extern "C" void cActiveTriggerList_add(cActiveTriggerList* self, void* item)
 {
     sTriggerNode* n = (sTriggerNode*)cMemMan_alloc(0x10, D_0045BF68, 0x20000000, 0);

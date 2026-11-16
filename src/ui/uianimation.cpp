@@ -14,6 +14,16 @@ struct sUIAnimEntry {
     int size;
 };
 
+/**
+ * Finds an animation in the bank by hash name and returns a new cUIAnimation over it.
+ *
+ * Walks the bank's records (count in the first word, then records with the hash at +0x8 and their size at
+ * +0xC); on a match it allocates 0x14 bytes ("UIAnim") and constructs a cUIAnimation over the record. The
+ * caller owns the result.
+ *
+ * @param hash  the animation's name hash (On Tour index)
+ * @return the new animation, or 0 when no record has that hash
+ */
 extern "C" void* cUIAnimationBank_getAnimationByHashName(unsigned int** self, int hash)
 {
     sUIAnimEntry* e = (sUIAnimEntry*)(*self + 1);
@@ -80,6 +90,14 @@ extern "C" float cUIAnimationChannel_evalAtFrameFloat(cUIAnimationChannel_evalAt
 //100%
 INCLUDE_ASM("ui/uianimation", cUIAnimationChannel_getAnimChanType);
 #ifdef SKIP_ASM
+/**
+ * Returns the channel's type, the 16-bit word at +0x2 of its data, or 0 when it has no data.
+ *
+ * The type selects the property the channel drives; cUIAnimation_updateThing() passes it to the object's
+ * setChannelData.
+ *
+ * @return the channel type
+ */
 extern "C" unsigned short cUIAnimationChannel_getAnimChanType(void* self)
 {
     void* p = *(void**)self;
@@ -108,6 +126,17 @@ void func_00397298(void* self, int val);
 extern char D_00493D60[];
 extern void* cUIAnimation_vtbl[];
 
+/**
+ * Constructs an animation over an animation record and points one channel at each of its tracks.
+ *
+ * Stores the vtable (+0x10) and @p data (+0x0), and marks no frame applied (+0x8 = -1), frame 0 (+0xA) and no
+ * start frame (+0xC = 0xFFFF). When the record has tracks (count at +0x4) it array-allocates the channels
+ * ("UIAnimChan") and points each at its track; tracks follow the 0x10-byte header, each sized by its u16 at
+ * +0x4.
+ *
+ * @param data  the animation record from the bank (On Tour pAnimHeader)
+ * @return @p self
+ */
 extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data)
 {
     *(void***)((char*)self + 0x10) = cUIAnimation_vtbl;
@@ -180,6 +209,16 @@ extern "C" short func_00397458(void **arg0) {
 //100%
 INCLUDE_ASM("ui/uianimation", cUIAnimation_start);
 #ifdef SKIP_ASM
+/**
+ * Starts the animation in a playback mode.
+ *
+ * Only the low 3 bits of @p mode count. Mode 0 (driven by an external frame clock) records @p FrameNum as the
+ * start frame (+0xC). Mode 2 (backwards) starts at the last frame with the direction byte (+0xE) set to 1;
+ * every other mode starts at frame 0 with it cleared.
+ *
+ * @param mode      playback mode (On Tour playback): 0 external clock, 1 forward, 2 backward, 3 ping-pong
+ * @param FrameNum  the current clock frame, kept as the start frame in mode 0
+ */
 extern "C" void cUIAnimation_start(void* self, int mode, unsigned short FrameNum)
 {
     mode &= 7;
@@ -288,6 +327,18 @@ struct sUIAnim75E0 {
     unsigned short start;       // 0xC
 };
 
+/**
+ * Applies the animation's current frame to a UI object, once per new frame.
+ *
+ * In mode 0 with a start frame the frame is @p FrameNum minus the start (nothing happens before the start or
+ * when it is unchanged). If the frame differs from the last applied one (+0x8) and lies inside the animation,
+ * each channel is evaluated there and passed with its type to the object's setChannelData (vtable slot 12);
+ * the frame is then recorded as applied.
+ *
+ * @param obj       the UI object to animate (On Tour pThing)
+ * @param mode      playback mode; only the low 3 bits count
+ * @param FrameNum  the external clock frame, used in mode 0
+ */
 extern "C" void cUIAnimation_updateThing(sUIAnim75E0* self, char* obj, int mode, unsigned short FrameNum)
 {
     unsigned short frame = self->frame;

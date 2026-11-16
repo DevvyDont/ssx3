@@ -82,6 +82,16 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern const char D_004A47D8[];
 extern const char D_004A47E0[];
 
+/**
+ * Sets the streamer up for a track: stores the world cache to feed and builds the stream file name
+ * "|<name>.ssb" in m_filename.
+ *
+ * Despite its name, @p id is the cWorldCache pointer (stored in mp_WorldCache; On Tour pWorldCache).
+ *
+ * @param name  the track's base file name (On Tour baseFileName)
+ * @param id  the world cache that receives the streamed chunks
+ * @return always 1
+ */
 extern "C" int cStreamMan_init(cStreamMan* self, const char* name, int id)
 {
     *(int*)self = id;
@@ -95,6 +105,13 @@ INCLUDE_ASM("world/streamman", cStreamMan_reset);
 #ifdef SKIP_ASM
 extern "C" void cStreamMan_setBandWidthLimit(cStreamMan* self, int size);
 
+/**
+ * Returns the streamer to idle: no active hull request, no chunk in progress and the default bandwidth limit.
+ *
+ * Sets m_ActiveHull to -1, clears m_filename[0], m_bActive, m_uiNumHullChunk and the chunk, decompression and
+ * allocation-failure state, turns m_bLimitBandWidth on and calls cStreamMan_setBandWidthLimit() with 0x19000
+ * bytes (100 KB) per second.
+ */
 extern "C" void cStreamMan_reset(cStreamMan* self)
 {
     self->m_ActiveHull = -1;
@@ -120,6 +137,12 @@ INCLUDE_ASM("world/streamman", cStreamMan_purge);
 void cMemMan_free(void*);
 extern "C" void func_003E0A28(int h);
 
+/**
+ * Releases the streamer's EA stream and frees its disc and decompression buffers.
+ *
+ * func_003E0A28() waits while the stream is busy and then shuts it down; m_streamBuffer and
+ * m_pDecompressBuffer are freed when set. The pointers are not cleared afterwards.
+ */
 extern "C" void cStreamMan_purge(cStreamMan* self)
 {
     func_003E0A28(self->m_streamHandle);
@@ -137,6 +160,20 @@ INCLUDE_ASM("world/streamman", cStreamMan_addStreamRequest);
 #ifdef SKIP_ASM
 extern "C" int func_003E0C88(int h, void* p, int a, int tag);
 
+/**
+ * Starts loading a hull page by queuing a read of the track's stream file, unless a request is already
+ * active.
+ *
+ * Queues m_filename at @p uiFileOffset on the EA stream (func_003E0C88, chunk tag 0x444E4543, "CEND"). On
+ * success it records the hull and its chunk count, sets m_bActive and clears m_iCarrySize, m_bBxNullChunk,
+ * m_iLastTimerTick and m_fTicksLeft.
+ *
+ * @param uiHullID  the hull page to load (stored in m_ActiveHull)
+ * @param uiNumHullChunk  number of chunks in the page (m_uiNumHullChunk)
+ * @param uiFileOffset  byte offset of the page in the stream file
+ * @return 1 when the read was queued (stored in m_streamRequest), 0 when a request was already active or
+ *         queuing failed
+ */
 extern "C" int cStreamMan_addStreamRequest(cStreamMan* self, int uiHullID, int uiNumHullChunk, int uiFileOffset)
 {
     if (self->m_bActive == 0) {
@@ -162,6 +199,12 @@ INCLUDE_ASM("world/streamman", cStreamMan_cancelStreamRequest);
 #ifdef SKIP_ASM
 extern "C" void func_003E0E90(int, int);
 
+/**
+ * Cancels the active hull stream request, if there is one, and marks the streamer idle.
+ *
+ * Passes m_streamRequest to the EA stream's cancel (func_003E0E90), clears m_bActive and sets m_ActiveHull to
+ * -1. On Tour's version takes the hull ID (and only asserts on it); this one takes none.
+ */
 extern "C" void cStreamMan_cancelStreamRequest(cStreamMan* self)
 {
     if (self->m_bActive != 0) {
@@ -182,6 +225,14 @@ static inline int imax(int a, int b)
     return a > b ? a : b;
 }
 
+/**
+ * Sets the streaming bandwidth limit and the matching number of timer ticks per 32 KB chunk.
+ *
+ * The rate is raised to at least 0x8000 bytes per second and kept in m_iDataRatePerSecond; m_fTicksPerChunk
+ * becomes the app timer's ticks per second (word +0x10 of D_004A5B64) divided by rate / 32768.
+ *
+ * @param rate  bytes per second (On Tour iBytesPerSecond); values below 0x8000 are raised to it
+ */
 extern "C" void cStreamMan_setBandWidthLimit(cStreamMan* self, int rate)
 {
     rate = imax(0x8000, rate);

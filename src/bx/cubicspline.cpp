@@ -23,6 +23,14 @@ struct sCubicSpline {
 
 // PORT: binds the real 2-arg body; the unit declares a 1-arg prototype used by callers
 extern "C" void cCubicSplineInterpolant_initCommon_impl(sCubicSpline* self, int n) __asm__("cCubicSplineInterpolant_initCommon");
+/**
+ * Prepares the spline for @p n points: frees any old data and allocates n - 1 segment records.
+ *
+ * Purges the old data (func_0031D790), stores n - 1 in the 8-bit count field, allocates (n - 1) * 0x14 bytes
+ * ("cCSICubicSpline"), sets the allocated flag (bit 1) and resets the added-point counter (bits 3-10).
+ *
+ * @param n  number of points (On Tour numPoints); at most 256 fit the count field
+ */
 extern "C" void cCubicSplineInterpolant_initCommon_impl(sCubicSpline* self, int n)
 {
     if (self->data != 0) {

@@ -27,6 +27,14 @@ public:
     virtual void setVisible(int a);
 };
 
+/**
+ * Shows or hides the uber-trick store's cost display: "cost_num", "cost_text", "have_num" and "have_text".
+ *
+ * Looks the objects up on the state's first screen (cUIState::mScreens), skips missing ones and calls each
+ * one's setVisible (vtable slot 9).
+ *
+ * @param on  nonzero to show, zero to hide (On Tour v)
+ */
 extern "C" void cFEStateUberTrick_costVisible(void* self, int on)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
@@ -99,6 +107,16 @@ extern char D_0045D960[];
 extern char D_0045D970[];
 extern char D_0045D980[];
 
+/**
+ * Shows or hides the uber-trick store's trick menu: its info text, checkboxes, menu and the three "InstBtn"
+ * objects.
+ *
+ * The objects are "To Execute info", "Checkboxes", "MenuTrick" and "InstBtn0" to "InstBtn2". Looks them up on
+ * the state's first screen (cUIState::mScreens), skips missing ones and calls each one's setVisible (vtable
+ * slot 9).
+ *
+ * @param on  nonzero to show, zero to hide (On Tour v)
+ */
 extern "C" void cFEStateUberTrick_trickVisible(void* self, int on)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
@@ -454,6 +472,17 @@ static inline int Is_185080(int id, char* s)
     return id == GetHashValue32(s);
 }
 
+/**
+ * Sets up the uber-trick store's widgets as they are created: labels the trick buttons, remembers the menus.
+ *
+ * By mHashName: "mute", "indy", "stalefish", "method", "nose" and "tail" get the texts "Mute", "Indy",
+ * "Stalefish", "Method", "Nose Grab" and "Tail Grab" and mMiscData 1, 3, 2, 0, 4 and 9; "done" gets -1.
+ * "MenuMain" is kept at +0x4C and "MenuTrick" at +0x50.
+ *
+ * The six trick tests sit in a loop that runs six times without using its counter.
+ *
+ * @param widget  the widget just created (On Tour pWidget)
+ */
 extern "C" void cFEStateUberTrick_onWidgetCreate(void* self, void* widget)
 {
     cUIText* text = (cUIText*)widget;
@@ -799,6 +828,15 @@ extern "C" void* func_0039E390(void*);
 //100%
 INCLUDE_ASM("fe/festatestore", cFEStateCredits__cFEStateCredits__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the credits front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(): the same
+ * body as cFEState's own destructor func_001DD750, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ *
+ * @return no meaningful value (func_0039E390() returns nothing)
+ */
 void* cFEStateCredits__cFEStateCredits(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;

@@ -27,6 +27,12 @@ extern "C" void func_00328F28(sHashKey_8B90* out, void* box);
 extern "C" void func_00328C20(sHashCell_8B90* cell, int type, sHashNode_8B90* node, sHashKey_8B90* key);
 extern const char D_0048E808[];
 
+/**
+ * Registers a flex rail in the Nash rail-space octree through a new space node.
+ *
+ * Allocates a 0x10-byte cFlexRailSpaceNode ("FlexRailSpaceNode") with type 3 (+0x8) and this node as its
+ * owner (+0xC), keeps it in Node (+0x54) and inserts it into octree list 2 under the bound box at +0x30.
+ */
 extern "C" void cFlexRailNode_addSpaceHash(void* self)
 {
     sHashNode_8B90* n = (sHashNode_8B90*)cMemMan_alloc(0x10, D_0048E808, 0x20000000, 0);

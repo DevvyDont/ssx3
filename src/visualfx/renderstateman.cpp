@@ -29,6 +29,15 @@ struct sRSMEntry {
 
 extern sRSMEntry D_004FA370[];
 
+/**
+ * Returns the red component of the snowflake colour for one row of the render-state table.
+ *
+ * Row @p i of D_004FA370 (0xF0 bytes per row) holds at +0x20 a pointer to an object whose virtual slot 55
+ * returns a pointer to the value.
+ *
+ * @param i  row of D_004FA370 (the avalanche effect passes 0)
+ * @return the red component
+ */
 extern "C" float cRenderStateMan_SnowFlakeColourR(int i)
 {
     sRSMEntry* e = &D_004FA370[i];
@@ -43,6 +52,15 @@ INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourG);
 #ifdef SKIP_ASM
 extern sRSMEntry D_004FA370[];
 
+/**
+ * Returns the green component of the snowflake colour for one row of the render-state table.
+ *
+ * Row @p i of D_004FA370 (0xF0 bytes per row) holds at +0x20 a pointer to an object whose virtual slot 56
+ * returns a pointer to the value.
+ *
+ * @param i  row of D_004FA370 (the avalanche effect passes 0)
+ * @return the green component
+ */
 extern "C" float cRenderStateMan_SnowFlakeColourG(int i)
 {
     sRSMEntry* e = &D_004FA370[i];
@@ -57,6 +75,15 @@ INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourB);
 #ifdef SKIP_ASM
 extern sRSMEntry D_004FA370[];
 
+/**
+ * Returns the blue component of the snowflake colour for one row of the render-state table.
+ *
+ * Row @p i of D_004FA370 (0xF0 bytes per row) holds at +0x20 a pointer to an object whose virtual slot 57
+ * returns a pointer to the value.
+ *
+ * @param i  row of D_004FA370 (the avalanche effect passes 0)
+ * @return the blue component
+ */
 extern "C" float cRenderStateMan_SnowFlakeColourB(int i)
 {
     sRSMEntry* e = &D_004FA370[i];
@@ -756,6 +783,13 @@ INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_cAirStreamerFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/renderstateman_classes.h"
 
+/**
+ * Constructs an air streamer, the ribbon trail of an airborne rider; cRider is its virtual base.
+ *
+ * Builds the cRider base only when it is the most-derived object (a hidden second argument), sets the cRider
+ * part's vtables, allocates the 25-entry ring of 0x20-byte trail segments (tag "cAirStreamerFX") at +0x4 and
+ * resets the trail with readFromReplayFrame().
+ */
 cRsm_2EF3B0::cRsm_2EF3B0()
 {
     cRsmItem_2EF3B0** slot = &items;
@@ -779,6 +813,12 @@ INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX__cAirStreamerFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/renderstateman_classes.h"
 
+/**
+ * Destroys an air streamer: frees its segment ring, then tears down per the g++ destructor flags.
+ *
+ * Restores this class's vtables in the virtual cRider base and frees the ring (+0x4) if set; bit 1 of the
+ * hidden flags then destroys the cRider base (cRider__cRider) and bit 0 frees the object.
+ */
 cVbDtor002EF530::~cVbDtor002EF530()
 {
     if (m04 != 0) cMemMan_free(m04);
@@ -797,6 +837,13 @@ __asm__("_vt$15cVbDtor002EF530$13cRiderVbC_rsm = D_004888D0\n"
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_readFromReplayFrame);
 #ifdef SKIP_ASM
+/**
+ * Resets the air streamer: empties the trail and picks its maximum length.
+ *
+ * Clears the head, count and texture scroll (+0x8, +0xC, +0x10) and sets the length (+0x14) to 25 segments
+ * for a rider with a view (mViewIndex >= 0), otherwise 18. Despite the name it reads nothing from a replay
+ * frame.
+ */
 extern "C" void cAirStreamerFX_readFromReplayFrame(cAirStreamerFX* self)
 {
     int mode = (*(int*)(*(char**)self + 0x870) >= 0) ? 0x19 : 0x12;
@@ -904,6 +951,14 @@ static inline int Approach_EF6D0(int n, int step)
     return n > step ? n - step : (n > -step - 1 ? 0 : n + step);
 }
 
+/**
+ * Grows the air streamer's trail while the rider is airborne, shrinks it otherwise, and scrolls its texture.
+ *
+ * In the air (MS_Air) the head segment gets two points 90 units either side of the board bone
+ * (mBoneBoardChild) along its axis, minus 0.7 x the hips position; on even AI ticks the head moves on around
+ * the 25-entry ring and the count grows up to the length. Otherwise the count drops by 2 per frame. The
+ * texture offset moves by the rider's speed / 6000 and wraps into 0..1.
+ */
 extern "C" void cAirStreamerFX_update(sTrail_EF6D0* self)
 {
     if (func_0011FE98(self->rider) == 1) {
@@ -1098,6 +1153,14 @@ static inline void rsVert_EF950(sRsVert_EF950* v, float u, float w, const sRsCol
     v->uv.y = w;
 }
 
+/**
+ * Draws the air streamer as two textured triangle strips that fade toward the tail.
+ *
+ * Needs at least two segments. Normally 15 units wide at alpha 0.3 with GrMan _EffectTexMap[63]; while a
+ * trick boost runs (mPowerUpTrickTimer > 0 or the TestTrickBoost toggle) it glows: 37.5 wide, alpha 1, tinted
+ * D_004A3B74, _EffectTexMap[61] scrolled by the trail offset. Segment alpha falls off as 1 - t^2/(len-1)^2,
+ * and the segments are placed back at 0.7 x the current hips position.
+ */
 extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
 {
     if (self->count < 2) {
@@ -1216,6 +1279,16 @@ extern sShadowCfg_002EFF98 D_004A45D4;
 extern int D_004A443C;
 extern void* D_004A3B78;
 
+/**
+ * Constructs the visual-effects manager base: empty effect slots, default effect textures, global pointer.
+ *
+ * Sets the vtable (+0x44), clears the 17 effect-object slots, stores 0x37 in D_004A45D4 and 0x30 in
+ * D_004A443C and makes itself the manager D_004A3B78. On the graphics manager it sets view 6's specular,
+ * patch specular, snow sparkle and rim texture ids (0x2E, 0x31, 0x44, 0x2F) and zeroes views 6 and 7 of the
+ * per-view arrays m_isInNIS through m_ScreenTintOffsetB.
+ *
+ * @return self
+ */
 extern "C" void* cVisualEffectsMan_cVisualEffectsMan(sRSMan_002EFF98* self)
 {
     self->vt = cVisualEffectsMan_vtbl;
@@ -1523,6 +1596,14 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cPSPVisualEffectsMan_cPSPVisualEffectsMan(void* self);
 extern char D_00487BA0[];
 
+/**
+ * Creates the visual-effects manager: allocates 0x48 bytes tagged "PS2VisualEffectsMan" and constructs a
+ * cPSPVisualEffectsMan there.
+ *
+ * The base constructor records it in D_004A3B78; this function stores it nowhere itself.
+ *
+ * @return the new manager
+ */
 extern "C" void* cVisualEffectsMan_construct(void)
 {
     return cPSPVisualEffectsMan_cPSPVisualEffectsMan(cMemMan_alloc(0x48, D_00487BA0, 0, 0));

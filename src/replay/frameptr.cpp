@@ -127,6 +127,14 @@ public:
     virtual void v02(void* buf, int size);
 };
 
+/**
+ * Reads the type of the next object record in the replay frame without consuming it.
+ *
+ * Reads the 4-byte record header (type, size) through the read virtual (slot 2), then puts the read position
+ * (+0xC) back.
+ *
+ * @return the record's object node type (On Tour tObjNodeType)
+ */
 // Peek the next frame header's id without consuming it.
 extern "C" short cReplayFramePtr_peekObjNodeType(cStream26EA68* self)
 {
@@ -596,6 +604,16 @@ struct sFpSlot_F228 {
     int fB0;
 };
 
+/**
+ * Resets the replay for a new race: clears the recording, playback and save state and refills the free frame
+ * list.
+ *
+ * Does nothing in kReplayPaused (14) or kReplayInit (15). Otherwise sets SaveState 15 and State kPreRace
+ * (10), zeroes the playback, record and writer fields, resets both input caches (func_0026D168) and
+ * highlights (PlayerId 0 / 1, no frame, stats cleared), empties FrameList and FreeFrameList and adds all
+ * MaxFrames frames to the free list. With one human player (cAI NumberOfPlayersAllocated == 1) it keeps 3
+ * highlights and 3 chapters, else 1 and 0.
+ */
 extern "C" void cReplay_reset(cReplay* self)
 {
     unsigned int st = self->State - 14;

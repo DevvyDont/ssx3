@@ -22,6 +22,17 @@ struct sVEntryVS1D66B0 {
     void (*fn)(void*, ...);
 };
 
+/**
+ * Memory-card callback for a finished save: resets the screen's save state and reports the success.
+ *
+ * Works on the current memory-card screen D_004A2028 and is plugged into the cMCOverlayManager slot of the
+ * same name by func_001D5488. Runs func_001D8C38() (busy flag +0x1A8 cleared, screen state +0x1C0 back to 1)
+ * and clears +0x1F0. Unless the flag at +0x208 is set it shows popup 5 (+0x19C), "kT_MEMOVSaveDone"; with the
+ * flag set it calls the screen's vtable slot 40 instead (func_001D86A0, screen state 6).
+ *
+ * The popup opens through the screen's getPopup (vtable slot 36, func_001D8530) with one button, which the
+ * popup's setButtonText (slot 26) labels "kT_CMNContinue".
+ */
 extern "C" void cFEMemCard_callbackSaveSuccess(void)
 {
     func_001D8C38(D_004A2028);
@@ -69,6 +80,17 @@ struct sVEntryVR1D67C8 {
     void (*fn)(void*, ...);
 };
 
+/**
+ * Memory-card callback for a finished load: clears the screen's busy state and reports the success.
+ *
+ * Works on the current memory-card screen D_004A2028 and is plugged into the cMCOverlayManager slot of the
+ * same name by func_001D5488. Clears the cached file name (func_001D9308(screen, 0)), sets +0x1B4 and clears
+ * the busy flag +0x1A8. Unless the flag at +0x204 is set it shows popup 6 (+0x19C), "kT_MEMOVLoadDone"; with
+ * the flag set it calls the screen's vtable slot 40 instead (func_001D86A0, screen state 6).
+ *
+ * The popup opens through the screen's getPopup (vtable slot 36, func_001D8530) with one button, which the
+ * popup's setButtonText (slot 26) labels "kT_CMNContinue".
+ */
 extern "C" void cFEMemCard_callbackReadSuccess(void)
 {
     func_001D9308(D_004A2028, 0);
@@ -478,6 +500,15 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmFormatDone);
 extern char D_00467818[];
 extern char D_0045F7E0[];
 
+/**
+ * Memory-card callback for a finished format: shows "kT_MEMOVFormatComplete" as popup 0x10 (+0x19C).
+ *
+ * Works on the current memory-card screen D_004A2028 and is plugged into the cMCOverlayManager slot of the
+ * same name by func_001D5488. The text is copied into a 0x7D0-byte "Temp String" buffer, freed again at the
+ * end. The popup opens through the screen's getPopup (vtable slot 36, func_001D8530) with one button, which
+ * the popup's setButtonText (slot 26) labels "kT_CMNContinue". The result of its cSSXApp_getMCManager() call
+ * is unused.
+ */
 extern "C" void cFEMemCard_callbackConfirmFormatDone(void)
 {
     void* buf = operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
@@ -553,6 +584,16 @@ struct sVEntryI_001D7688 {
     int (*fn)(void*, ...);
 };
 
+/**
+ * Memory-card callback asking to confirm a delete: a Yes/No popup naming the file under the cursor.
+ *
+ * Works on the current memory-card screen D_004A2028 and is plugged into the cMCOverlayManager slot of the
+ * same name by func_001D5488. Only when the card (cMCOverlayManager::mpMemCard) holds a save file (its vtable
+ * slot 13 counts them): sets popup 3 (+0x19C), formats "kT_MEMConfirmDeletePS2" with the name of file
+ * mFileCursor (card slot 14) into a "Temp String" buffer, opens a two-button popup that passes updates
+ * through and makes button 1 (No) the default. With no files it clears +0x1A8 and +0x1E0 when the screen
+ * state (+0x1C0) is 4.
+ */
 extern "C" void cFEMemCard_callbackConfirmDelete(void)
 {
     unsigned short name[0x100];
@@ -736,6 +777,14 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackFileExists);
 extern char D_00467860[];
 extern char D_0045F7E0[];
 
+/**
+ * Memory-card callback for a name clash: shows popup 0x17, "kT_FENameAlreadyExists", with a Continue button.
+ *
+ * Works on the current memory-card screen D_004A2028 and is plugged into the cMCOverlayManager slot of the
+ * same name by func_001D5488. The popup opens through the screen's getPopup (vtable slot 36, func_001D8530)
+ * with one button, which the popup's setButtonText (slot 26) labels "kT_CMNContinue". Then sets the screen
+ * state (+0x1C0) to 1.
+ */
 extern "C" void cFEMemCard_callbackFileExists(void)
 {
     void* app = SSXApp;
@@ -810,6 +859,18 @@ extern char D_0045E2A0[];
 extern char D_00467898[];
 extern char D_0045F7E0[];
 
+/**
+ * Memory-card callback for a finished delete: reports the success and resets the screen state.
+ *
+ * Works on the current memory-card screen D_004A2028 and is plugged into the cMCOverlayManager slot of the
+ * same name by func_001D5488. Unless the flag at +0x204 is set it copies "kT_MEMDeleteSuccess" into a "Temp
+ * String" buffer and shows it as popup 7 (+0x19C). Then a screen state (+0x1C0) of 4 is set back to 1.
+ *
+ * The popup opens through the screen's getPopup (vtable slot 36, func_001D8530) with one button, which the
+ * popup's setButtonText (slot 26) labels "kT_CMNContinue".
+ *
+ * @return 1, always
+ */
 extern "C" int cFEMemCard_callbackDeleteDone(void)
 {
     if (*(int*)((char*)D_004A2028 + 0x204) == 0) {
@@ -1401,6 +1462,17 @@ struct sVEntryK1D8C50 {
     int (*fn)(void*);
 };
 
+/**
+ * Handles left/right on the memory-card screen: requests the previous or next card device, pulsing its arrow.
+ *
+ * Ignores all input while the busy flag (+0x1A8) is 1. Left (input vtable slot 19, probably isLeft) sets
+ * +0x1FC, which callbackIsPrevDevicePressed (func_001DDD98) reads and clears; right (slot 20) sets +0x1F8 for
+ * callbackIsNextDevicePressed (func_001DDD88). Either one plays the "left arr" or "right arr" frame label
+ * when the screen (+0x40) exists.
+ *
+ * @param input  the UI input (On Tour cUIInput* pInput)
+ * @return 1 when left or right was pressed, otherwise 0
+ */
 extern "C" int cFEMemCard_onInputBegin(void* self, void* input)
 {
     int handled = 0;
@@ -1809,6 +1881,15 @@ struct sVEntryF1D9470 {
     unsigned short* (*fn)(void*, int);
 };
 
+/**
+ * Switches the memory-card screen's display state: moves the menu focus and jumps to that state's frame.
+ *
+ * Stores @p state at +0x214. States 1 and 2 take the focus from "onmenu" to "offmenu", jump to the "off" or
+ * "file display" frame label and show "kT_MEMFECheckingCardPS2" for the selected slot (mSelectedDevice + 1)
+ * in "text box message". State 3 focuses "onmenu" and jumps to "on"; any other value is only stored.
+ *
+ * @param state  the display state, 1 to 3 (On Tour gotoScreenState)
+ */
 extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
 {
     unsigned short buf[0x100];
@@ -2006,6 +2087,14 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 void cMemMan_free(void* p);
 extern char D_00467990[];
 
+/**
+ * Allocates the memory-card screen's read buffer, freeing the one it owns first.
+ *
+ * When +0x228 says a buffer is owned, frees the block at +0x1D4 and clears both. The new block (tag "read
+ * buffer") goes to +0x1D0 and +0x1D4, and +0x228 is set to 1.
+ *
+ * @param size  size of the buffer in bytes (On Tour iSize)
+ */
 extern "C" void cFEMemCard_createReadBuffer(void* self, unsigned int size)
 {
     if (*(int*)((char*)self + 0x228) == 1) {
@@ -2040,6 +2129,23 @@ struct sMemCardPopupK1D99C8 {
     int f17C;      // 0x17C
 };
 
+/**
+ * Constructs a confirmation popup: builds the cScreenPopup base, picks its background, then runs initPopup().
+ *
+ * The background (info.meBackgroundType, +0x17C) is 1 (blue) while D_004A203C is 0 (cSSXApp_startFELoad
+ * clears it, so probably in the front end), else 2 (black) with layer offset 4 (info.miLayerOffset, +0x14C),
+ * which initPopup() then overwrites with @p layerOffset.
+ *
+ * @param engine  the UI engine (On Tour pEngine)
+ * @param owner  the parent state (On Tour pParentState)
+ * @param ustrDisplay  the message, a 16-bit string (declared int here)
+ * @param bYesOnly  nonzero for a single button
+ * @param bNoButtons  nonzero for no buttons
+ * @param layerOffset  draw-layer offset of the popup
+ * @param passUpdate  nonzero to keep updating the parent state while the popup is up
+ * @param bSnowFlake  passed on to initPopup(), which ignores it
+ * @return @p self
+ */
 extern "C" sMemCardPopupK1D99C8* cFEPopupConfirm_cFEPopupConfirm(sMemCardPopupK1D99C8* self, void* engine, void* owner, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
 {
     cScreenPopup_cScreenPopup(self, engine, owner);
@@ -2068,6 +2174,24 @@ extern char D_0045DCC8[];
 extern char D_0045FCD8[];
 extern char D_004A1408[];
 
+/**
+ * Sets up a confirmation popup's info: Yes/No options, message, button count and layer, then redraws it.
+ *
+ * Names options 0 and 1 "kT_CMNYes" and "kT_CMNNo" (popup type 2), sets the default option to 0, clears the
+ * pass-update and receive-previous flags, copies the message to +0x360 and points info.mtMessage at the copy.
+ * No buttons: type 0, button count (+0xBF8) 0, pass-update on; yes only: type 1, count 1; otherwise count 2.
+ * Redraws when the popup has a screen (+0x40).
+ *
+ * The message is copied twice; a null @p ustrDisplay converts "" into the buffer and then still copies from
+ * the null pointer.
+ *
+ * @param ustrDisplay  the message, a 16-bit string (declared int here)
+ * @param bYesOnly  nonzero for a single button
+ * @param bNoButtons  nonzero for no buttons (wins over @p bYesOnly)
+ * @param layerOffset  draw-layer offset, stored in info.miLayerOffset
+ * @param passUpdate  stored in info.mbPassUpdate for the one- and two-button kinds
+ * @param bSnowFlake  unused
+ */
 // PORT: the unit declares the string pointer as int; a6 is unused
 extern "C" void cFEPopupConfirm_initPopup(void* self, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
 {
@@ -2118,6 +2242,16 @@ void func_001C57A0(void* slots, int idx, int data);
 // PORT: cScreenPopup_redrawPopup takes only self; the unit's later (void*, int) declaration is a guess. Bound by asm label.
 void cScreenPopup_redrawPopup_self(void* self) __asm__("cScreenPopup_redrawPopup");
 
+/**
+ * Sets the label of one of a confirmation popup's buttons, then redraws the popup if it has a screen.
+ *
+ * Button 0 copies the text to +0x9A0 and button 1 (only when the popup has two or more buttons, +0xBF8) to
+ * +0xA68; any other value makes it a three-button popup (type and count 3) and copies to +0xB30. The copy
+ * becomes that option's name (setPopupOptionNames).
+ *
+ * @param src  the label, a 16-bit string (On Tour ustrText)
+ * @param mode  which button: 0, 1, or anything else for a third one (On Tour uiButton)
+ */
 extern "C" void cFEPopupConfirm_setButtonText(void* self, void* src, int mode)
 {
     void* slots = (char*)self + 0xBC;
@@ -2180,6 +2314,14 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEPopupConfirm_setDefaultButton);
 #ifdef SKIP_ASM
 extern "C" void cScreenPopup_redrawPopup(void*, int);
 
+/**
+ * Sets a confirmation popup's default button, then redraws the popup if it has a screen.
+ *
+ * Stores @p uiButton in the popup info's miDefaultOption (+0x168). The redraw is declared with a second
+ * argument that cScreenPopup_redrawPopup does not take.
+ *
+ * @param uiButton  index of the default button
+ */
 extern "C" void cFEPopupConfirm_setDefaultButton(void* self, int uiButton)
 {
     *(int*)((char*)self + 0x168) = uiButton;

@@ -8,6 +8,11 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern char D_004613B8[];
 
+/**
+ * Builds the select-multiplayer-mode screen: adds "86sel_multi" to the state and plays its frame 0.
+ *
+ * The new screen is kept in mpScreen (+0x40); the frame is played only when the screen was created.
+ */
 extern "C" void cFEStateSelectMultiplayerMode_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -26,6 +31,13 @@ int GetHashValue32(char* str);
 extern char D_004A14F8[];
 extern char D_004A1500[];
 
+/**
+ * Tags the multiplayer-mode choices as they are created: the widget named "1" gets misc data 0, "2" gets 1.
+ *
+ * The value (mMiscData, +0x18) is what onWidgetEvent() hands to the engine's custom interface.
+ *
+ * @param item  the widget just created (On Tour pWidget)
+ */
 extern "C" void cFEStateSelectMultiplayerMode_onWidgetCreate(void* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
@@ -50,6 +62,16 @@ struct sVEntry001A3160 {
 };
 extern "C" void cUIStateStack_push(void* list, void* item);
 
+/**
+ * Handles the select-multiplayer-mode screen's widget events by moving to the next or previous state.
+ *
+ * Event 5 calls the engine's custom interface getNextState (vtable slot 4, cFECustom_getNextState), event 6
+ * its slot 5 (probably getPrevState), each with this state and the widget's misc data; a state returned is
+ * pushed on the engine's state stack (+0x18). A null widget is ignored.
+ *
+ * @param item  the widget (On Tour pWidget)
+ * @param msg  the event (On Tour Event)
+ */
 extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {

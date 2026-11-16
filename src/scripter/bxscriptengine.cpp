@@ -17,6 +17,17 @@ struct sBXSlot {
     short b;
 };
 
+/**
+ * Sets up the BX script engine: allocates the InSeq sequencer with its heap and an empty script database.
+ *
+ * Allocates @p size bytes of "InSeqHeap" (mpInSeqHeap), creates the 0x20-byte "InSeq" sequencer (mpInSeq)
+ * over that heap with this engine's cInSeqComm interface (+0x2AC), and allocates and zeroes @p count 8-byte
+ * "BXScriptDatabase" entries (mpScriptDatabase, count in mScriptDatabaseSize).
+ *
+ * @param count  number of script database entries (On Tour scriptDatabaseSize)
+ * @param maxUniqueAnimPlayers  passed to cInSeq_cInSeq() as its script limit (cInSeq's maxScripts)
+ * @param size  InSeq heap size in bytes (On Tour heapSize)
+ */
 extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int maxUniqueAnimPlayers, int size)
 {
     *(void**)((char*)self + 0x2BC) = operator_new_tag(size, D_00481F48, 0, 0);
@@ -273,6 +284,13 @@ struct sScriptEngine282390 {
     sScriptSlot282390 slots[16];
 };
 
+/**
+ * Stops the script of every script request that has a script object.
+ *
+ * Walks the 16 mScriptRequests (0x24 bytes each) and, for each whose first word (its script object) is set,
+ * calls func_00282338() with the request's id (+0x1C), which stops that script in the InSeq sequencer when it
+ * is running.
+ */
 extern "C" void cBXScriptEngine_StopScriptAll(sScriptEngine282390* self)
 {
     for (int i = 0; i < 16; i++) {
@@ -301,6 +319,13 @@ struct sScriptEngine2823F0 {
     sScriptSlot2823F0 slots[16];
 };
 
+/**
+ * Releases every script request that is still in use.
+ *
+ * Walks the 16 mScriptRequests and calls func_00282540() with the id (+0x1C) of each whose word at +0x20 is
+ * set; that runs the request type's cleanup, releases its script object and database reference and returns
+ * the slot to the free list.
+ */
 extern "C" void cBXScriptEngine_ReleaseRequestAll(sScriptEngine2823F0* self)
 {
     for (int i = 0; i < 16; i++) {
@@ -1239,6 +1264,14 @@ extern void* cScriptObject_vtbl[];
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_cScriptObject__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Constructs a script object of a given type that is not yet registered in the script database.
+ *
+ * Stores cScriptObject's vtable at +0xC, @p objType at +0x0, -1 (no database handle) at +0x4 and 0 at +0x8.
+ *
+ * @param objType  the object's script type
+ * @return @p self
+ */
 void* cScriptObject_cScriptObject(void* self, int objType)
 {
     *(void***)((char*)self + 0xc) = cScriptObject_vtbl;

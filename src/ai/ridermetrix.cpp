@@ -19,6 +19,15 @@ struct sMetrixEntry_001172E0
     sMetrixEntry_001172E0() { func_00116FA8(this); }
 };
 
+/**
+ * Links the score object to its rider and, for a rider with a view, creates its HUD message bank.
+ *
+ * Stores @p rider at +0x1AC. When the rider's mViewIndex is not negative it allocates 44 (0x2C) cHUDFX slots
+ * of 0x9C bytes (tag "cHUDFX"), each constructed free (type 0x34) with its index at +0x98, and stores the
+ * array and the count at +0x1B0 / +0x1B4. Other riders keep a null bank.
+ *
+ * @param rider  the owning rider
+ */
 // PORT: element address built through int (pointer in int).
 extern "C" void cRiderMetrix_linkToRider(char* self, char* rider)
 {
@@ -52,6 +61,9 @@ struct sRiderMetrix_001173B8
     int count;
 };
 
+/**
+ * Frees every slot of the HUD message bank (type 0x34), when the score object has a bank.
+ */
 extern "C" void cRiderMetrix_resetHUDfx(sRiderMetrix_001173B8* self)
 {
     if (self->entries != 0)
@@ -161,6 +173,14 @@ extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void cRiderMetrix_resetCurTrick(void* self);
 extern "C" void cRiderMetrix_resetComboChain(void* self);
 
+/**
+ * Resets the score object for a new run: totals, HUD messages, trick history, current trick and combo.
+ *
+ * Calls cRiderMetrix_resetTotals() and cRiderMetrix_resetHUDfx(), clears the repeat history (+0xA8, 0x50
+ * bytes) and its cursor (+0xF8), calls cRiderMetrix_resetCurTrick() and cRiderMetrix_resetComboChain(), then
+ * zeroes the smoothed speed (+0x1A8), suspends the combo clock (+0xA4 = -1), clears the renderer bits at
+ * +0x1B8 / +0x1BC and sets +0x1C0 to 1.
+ */
 extern "C" void cRiderMetrix_reset(char* self)
 {
     cRiderMetrix_resetTotals(self);
@@ -181,6 +201,11 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_resetTotals);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
 
+/**
+ * Resets the run statistics: zeroes +0xFC to +0x1A7 and restarts the total score from the starting total.
+ *
+ * Sets the best-trick points (+0x18C) to -1 and the total (+0x198) to the starting total at +0x1C8.
+ */
 extern "C" void cRiderMetrix_resetTotals(char* self)
 {
     MEM_fill(self + 0xFC, 0, 0xAC);
@@ -325,6 +350,15 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_resetCurTrick);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
 
+/**
+ * Clears the current-trick state of the score object before a new trick.
+ *
+ * Zeroes the trick fields +0x0 to +0x98 (stance, pending points, counts, grabs[3] at +0x60, threshold
+ * indices), sets the pickup multiplier (+0x18) to 1 and the trackers (rail +0x24, press +0x2C, air +0x30,
+ * hold +0x40, +0x6C, handplant +0x78) to -1 (inactive). The combo fields from +0x9C on are left alone.
+ *
+ * @param p  the score object (this)
+ */
 extern "C" void cRiderMetrix_resetCurTrick(void* p)
 {
     char* self = (char*)p;
@@ -474,6 +508,16 @@ static inline bool slotIsFreeR(const sMetrixSlotR& s)
     return s.type == 0x34;
 }
 
+/**
+ * Picks the HUD message slot for a message type.
+ *
+ * Types below 0x22 own slot [type]. Other types take the first free slot (type 0x34) from 0x23 up; with none
+ * free, the busy slot with the smallest value / maximum ratio below 1 (the least-aged one) is reused.
+ *
+ * @param self_  the score object (this)
+ * @param type   the message type (On Tour eHUDFXID hfx)
+ * @return the slot index, or -1 when no slot could be chosen
+ */
 extern "C" int cRiderMetrix_allocHUDfx(void* self_, int type)
 {
     sMetrixSlotsR* self = (sMetrixSlotsR*)self_;
@@ -513,6 +557,18 @@ extern "C" void cHUDFX_set(void* slot, int a, const char* b, float c, int d);
 // cRiderMetrix_evAutoResetSurface) says void; bind the int-returning body here.
 int cRiderMetrix_addHUDfx_impl(void* self, int a, const char* b, float c, int d) __asm__("cRiderMetrix_addHUDfx");
 
+/**
+ * Posts a text message of a type to the HUD message bank.
+ *
+ * Without a bank it does nothing and returns -1. Otherwise it takes a slot from cRiderMetrix_allocHUDfx() and
+ * fills it with cHUDFX_set(): type, text, decay time, data, elapsed 0. A -1 from allocHUDfx is not checked.
+ *
+ * @param a  message type (On Tour eHUDFXID hfx)
+ * @param b  text to show, copied into the slot
+ * @param c  seconds the message stays
+ * @param d  extra data stored in the slot (+0xC)
+ * @return the slot index used, or -1 without a bank
+ */
 int cRiderMetrix_addHUDfx_impl(void* self, int a, const char* b, float c, int d)
 {
     if (*(sMetrixSlotAE8**)((char*)self + 0x1B0) == 0)
@@ -536,6 +592,18 @@ extern "C" void cHUDFX_set1(void* slot, int type, int value, float duration, int
 // bind the int-returning body here.
 int cRiderMetrix_addHUDfx1_impl(void* self, int type, int value, int arg, float duration) __asm__("cRiderMetrix_addHUDfx1");
 
+/**
+ * Posts a number message of a type to the HUD message bank, its text being the number formatted with "%d".
+ *
+ * Without a bank it does nothing and returns -1. Otherwise it takes a slot from cRiderMetrix_allocHUDfx() and
+ * fills it with cHUDFX_set1(): type, the number (+0x14 and as text), duration, data, elapsed 0.
+ *
+ * @param type      message type (On Tour eHUDFXID hfx)
+ * @param value     number to show (On Tour displayInt)
+ * @param arg       extra data stored in the slot (+0xC), such as a grade or a count
+ * @param duration  seconds the message stays
+ * @return the slot index used, or -1 without a bank
+ */
 int cRiderMetrix_addHUDfx1_impl(void* self, int type, int value, int arg, float duration)
 {
     if (*(sMetrixSlotB88**)((char*)self + 0x1B0) == 0)
@@ -1878,6 +1946,19 @@ static inline int GetId119EF8(char* self)
 // PORT: callers in this unit declare it void; the function returns 0.0f.
 float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount) __asm__("cRiderMetrix_evAddCash");
 
+/**
+ * Awards career money to the rider and posts the matching HUD popups.
+ *
+ * Does nothing for 0, or while the replay is in a playback state (State 1 to 9). Otherwise it checks the
+ * earnings unlocks (func_001E3760) and credits the money through the back end's reward interface
+ * (func_001597B0), both for the rider's AI index (being slot 7), then posts the total flash (0x18, 0.7 s)
+ * and, by @p kind, popup 0x2F (0), 0x2E (1), 0x30 (2, data = the combo count at +0x9C) for 2.5 s or 0x31 (3,
+ * data = the amount) for 1.5 s; kind 4 posts no popup.
+ *
+ * @param kind    the cash source (On Tour eRiderMetrixCashSource), 0 to 4
+ * @param amount  money to award
+ * @return always 0.0
+ */
 // Awards trick/score metrics of the given kind and plays the matching reward popups.
 float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount)
 {
@@ -1913,6 +1994,11 @@ extern const char D_00457888[];
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evAutoResetSurface__FPv);
 #ifdef SKIP_ASM
+/**
+ * Event for an automatic rider reset: posts the "Wrong Way!" HUD message (type 0x33, 1.5 s).
+ *
+ * @return always 0.0
+ */
 float cRiderMetrix_evAutoResetSurface(void* self)
 {
     cRiderMetrix_addHUDfx(self, 0x33, D_00457888, 1.5f, 0);

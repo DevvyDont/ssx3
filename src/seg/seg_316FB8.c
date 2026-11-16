@@ -1554,6 +1554,17 @@ struct Fsprintf {
     int ent;
 };
 extern int D_00454944;
+/**
+ * Formats into a string buffer with no size limit (newlib's sprintf, writing through a string FILE).
+ *
+ * Sets up a FILE with flags 0x208 (write, string), buffer @p buf, size INT_MAX and the reentrancy data
+ * D_00454944, runs the formatter func_0041B658 (the floating-point or the integer-only vfprintf, by format)
+ * and terminates the output. The C declaration returns void; the character count stays in the return
+ * register.
+ *
+ * @param buf  destination buffer
+ * @param fmt  the format string (typed int here), followed by its arguments
+ */
 void sprintf(char *buf, int fmt, ...) {
     char *ap;
     struct Fsprintf f;
@@ -5907,10 +5918,22 @@ extern int write_0378(int, const char *, int) __asm__("func_00424368");
   while (0)
 #define UNGETC_OVERFLOW_0378 "\nungetc error: *static buffer overflow* - char not added to buffer\n"
 
+/**
+ * Pushes a character back onto a stdio stream (newlib's ungetc), so that the next read returns it.
+ *
+ * EOF is refused, and so is a stream that is neither reading nor read-write; a read-write stream that was
+ * writing is flushed, and the stream is switched to reading. The character goes back into the read buffer
+ * when it equals the previous byte, otherwise into the 3-byte pushback buffer; Sony's copy reports a full
+ * pushback buffer on fd 1 instead of growing it.
+ *
+ * @param ch  the character to push back (converted to unsigned char)
+ * @param fp  the stream
+ * @return the pushed-back character, or EOF (-1) on failure
+ */
 int
-ungetc (int c, register struct __sFILE_0378 *fp)
+ungetc (int ch, register struct __sFILE_0378 *fp)
 {
-  if (c == EOF_0378)
+  if (ch == EOF_0378)
     return (EOF_0378);
 
   /* Ensure stdio has been initialized.
@@ -5940,7 +5963,7 @@ ungetc (int c, register struct __sFILE_0378 *fp)
 	}
       fp->_flags |= __SRD_0378;
     }
-  c = (unsigned char) c;
+  ch = (unsigned char) ch;
 
   /*
    * If we are in the middle of ungetc'ing, just continue.
@@ -5953,9 +5976,9 @@ ungetc (int c, register struct __sFILE_0378 *fp)
 	  write_0378 (1, UNGETC_OVERFLOW_0378, sizeof (UNGETC_OVERFLOW_0378));
 	  return EOF_0378;
 	}
-      *--fp->_p = c;
+      *--fp->_p = ch;
       fp->_r++;
-      return c;
+      return ch;
     }
 
   /*
@@ -5964,11 +5987,11 @@ ungetc (int c, register struct __sFILE_0378 *fp)
    * (This makes sscanf() work when scanning `const' data.)
    */
 
-  if (fp->_bf._base != 0 && fp->_p > fp->_bf._base && fp->_p[-1] == c)
+  if (fp->_bf._base != 0 && fp->_p > fp->_bf._base && fp->_p[-1] == ch)
     {
       fp->_p--;
       fp->_r++;
-      return c;
+      return ch;
     }
 
   /*
@@ -5980,10 +6003,10 @@ ungetc (int c, register struct __sFILE_0378 *fp)
   fp->_up = fp->_p;
   fp->_ub._base = fp->_ubuf;
   fp->_ub._size = sizeof (fp->_ubuf);
-  fp->_ubuf[sizeof (fp->_ubuf) - 1] = c;
+  fp->_ubuf[sizeof (fp->_ubuf) - 1] = ch;
   fp->_p = &fp->_ubuf[sizeof (fp->_ubuf) - 1];
   fp->_r = 1;
-  return c;
+  return ch;
 }
 #endif
 

@@ -54,6 +54,15 @@ struct sAnimNode_E448 {
     sMeshRef_E448* refs;        // 0x4C
 };
 
+/**
+ * Allocates an animation node's per-mesh caches: one cMeshAnimFrame per animated mesh and one tMeshVelocity
+ * per mesh.
+ *
+ * Counts the meshes of the instance's model (record +0x2C, model +0x80) that have an animation record (+0x8
+ * of each 0x10-byte entry) into NumAnimMeshes (+0x40). AnimFrames (+0x48) gets that many 0xD0-byte frames
+ * (tag "IntersectInfo"; 0 when none) and MeshVelocity (+0x4C) one 0x20-byte entry per mesh ("MeshVelocity");
+ * each animated mesh's frame is then pointed at its record (func_00351398).
+ */
 extern "C" void cAnimNode_setAnimMeshCache(sAnimNode_E448* self)
 {
     sAnimDef_E448* def = *(sAnimDef_E448**)(self->res + 0x80);

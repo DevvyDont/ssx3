@@ -17,6 +17,12 @@ extern "C" int cCommSystem_cCommSystem_5860(int) __asm__("cCommSystem_cCommSyste
 extern "C" int cMemMan_alloc_5860(unsigned int, void *, unsigned int, int) __asm__("cMemMan_alloc");
 extern char D_00480300[];
 
+/**
+ * Creates the comm system singleton: allocates 0x34 bytes tagged "cCommSystem" and constructs it.
+ *
+ * Stores the result in cCommSystem_mCommSystem without checking for an existing one; func_00255898 destroys
+ * it.
+ */
 extern "C" void cCommSystem_construct(void) {
     cCommSystem_mCommSystem = (cCommSystem*)(cCommSystem_cCommSystem_5860(cMemMan_alloc_5860(0x34, D_00480300, 0x20000000, 0)));
 }
@@ -48,6 +54,16 @@ extern char D_00480310[];
 extern char D_00480320[];
 extern int cCommSystem_mNumNetConn;
 extern "C" int *cCommSystem_cCommSystem_(int *self) __asm__("cCommSystem_cCommSystem");
+/**
+ * Constructs the comm system: its message-element pool, the channel slot and an idle net connection.
+ *
+ * Creates the pool mutex, allocates the zeroed 0xFC00-byte "Comm pool" and links its 256 tCommMsgElem entries
+ * into the free list, clears the channel slot and cCommSystem_mNumNetConn, sets mActiveNetConn to -1 and
+ * mNetConnState and mInterfaceType to 1, then sends the IOP's 'netw'/'crea' request
+ * (func_003F3B18("www.ea.com")).
+ *
+ * @return self
+ */
 extern "C" int *cCommSystem_cCommSystem_(int *self) {
     int a, b, n;
     int i;
@@ -89,6 +105,13 @@ extern "C" void cMemMan_free__FPv_59B0(void *) __asm__("cMemMan_free__FPv");
 extern "C" void operator_delete__FPi_59B0(void *) __asm__("operator_delete__FPi");
 
 extern "C" void cCommSystem__cCommSystem_59B0(void *self, int flags) __asm__("cCommSystem__cCommSystem");
+/**
+ * Destroys the comm system: deletes its pool mutex and frees the message-element pool.
+ *
+ * Clears mPool and mFree; it does not close the channel.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cCommSystem__cCommSystem_59B0(void *self, int flags) {
     func_003E56E0_59B0((char*)self + 4);
     void *p = *(void **)((char*)self + 0x14);
@@ -791,6 +814,17 @@ INCLUDE_ASM("seg/seg_156860", cDSockChannel_readPacket);
 extern "C" void MEM_copy_6730(char *, char *, int) __asm__("MEM_copy");
 extern "C" int func_003E6B10_6730(int, char *, int) __asm__("func_003E6B10");
 
+/**
+ * Receives the next game packet from the channel's NetGameLink and copies its payload out.
+ *
+ * Only while connected (mState 2). It pulls packets one at a time (func_003E6B10, probably NetGameLinkRecv):
+ * a kind-5 packet (byte 2) whose length (byte 3) is nonzero and fits is copied, other kind-5 packets are
+ * dropped, and any other kind sets mPacketError (state 4 on the next updateConnected).
+ *
+ * @param dst     buffer for the payload
+ * @param maxlen  size of @p dst in bytes
+ * @return the payload length (1-255), or 0 when not connected, when nothing usable arrived or on a bad packet
+ */
 extern "C" unsigned char cDSockChannel_readPacket(cDSockChannel* self, char *dst, int maxlen) {
     unsigned char buf[0x108];
     if (self->mState == 2) {
@@ -817,6 +851,17 @@ INCLUDE_ASM("seg/seg_156860", cDSockChannel_writePacket);
 extern "C" void MEM_copy(char *, int, int);
 extern "C" int NetGameLinkSend(int, void *, int);
 
+/**
+ * Sends one game packet over the channel's NetGameLink.
+ *
+ * Only while connected (mState 2) with no channel error: wraps the payload in a kind-5 packet whose length
+ * byte (byte 3) holds the low 8 bits of @p len. Nothing checks that @p len fits the 0x104 bytes after the
+ * header of the stack packet.
+ *
+ * @param data  payload to send (a pointer passed as an int)
+ * @param len   payload size in bytes; 0 or less sends nothing
+ * @return 1 when NetGameLinkSend reports a positive result, otherwise 0
+ */
 extern "C" int cDSockChannel_writePacket(cDSockChannel* self, int data, int len) {
     char buf[0x108];
     if (self->mState != 2) return 0;
@@ -842,8 +887,18 @@ extern "C" int func_003E6F40_6860(int, int, void *) __asm__("func_003E6F40");
 extern "C" int sprintf_6860(char *, const char *, ...) __asm__("sprintf");
 extern char D_00480448[];
 
-extern "C" void cDSockChannel_listen(cDSockChannel* self, int a1, int a2) {
-    int n = a2 & 0xFFFF;
+/**
+ * Starts listening for the peer's game connection on "addr:port:port".
+ *
+ * Disconnects first (virtual slot 2), opens the channel (func_00255830, channelOpen), creates a NetGameUtil
+ * (func_003E6E08) into mGameUtil and, if that worked, starts it in mode 0x101 (On Tour's listen) on the
+ * formatted address and sets mState to 1 (connecting). Unlike connect, it leaves mError as it was.
+ *
+ * @param addr  peer address (dotted-decimal string)
+ * @param port  port; only the low 16 bits are used, written twice into the address
+ */
+extern "C" void cDSockChannel_listen(cDSockChannel* self, int addr, int port) {
+    int n = port & 0xFFFF;
     char buf[0x100];
     char *vt = (char*)self->mVtbl;
     (*(void (**)(void *))(vt + 0x14))(((char*)self) + *(short *)(vt + 0x10));
@@ -851,7 +906,7 @@ extern "C" void cDSockChannel_listen(cDSockChannel* self, int a1, int a2) {
     int h = func_003E6E08_6860();
     self->mGameUtil = (NetGameUtilRefT*)h;
     if (h != 0) {
-        sprintf_6860(buf, D_00480448, a1, n, n);
+        sprintf_6860(buf, D_00480448, addr, n, n);
         func_003E6F40_6860((int)self->mGameUtil, 0x101, buf);
         self->mState = 1;
     }
@@ -868,8 +923,18 @@ extern "C" int func_003E6F40_68F8(int, int, void *) __asm__("func_003E6F40");
 extern "C" int sprintf_68F8(char *, const char *, ...) __asm__("sprintf");
 extern char D_00480448[];
 
-extern "C" void cDSockChannel_connect(cDSockChannel* self, int a1, int a2) {
-    int n = a2 & 0xFFFF;
+/**
+ * Starts connecting to the peer's game link at "addr:port:port".
+ *
+ * Clears mError, disconnects (virtual slot 2), opens the channel (func_00255830, channelOpen), creates a
+ * NetGameUtil (func_003E6E08) into mGameUtil and, if that worked, starts it in mode 0x102 (On Tour's connect)
+ * on the formatted address and sets mState to 1 (connecting).
+ *
+ * @param addr  peer address (dotted-decimal string)
+ * @param port  port; only the low 16 bits are used, written twice into the address
+ */
+extern "C" void cDSockChannel_connect(cDSockChannel* self, int addr, int port) {
+    int n = port & 0xFFFF;
     char buf[0x100];
     self->mError = 0;
     char *vt = (char*)self->mVtbl;
@@ -878,7 +943,7 @@ extern "C" void cDSockChannel_connect(cDSockChannel* self, int a1, int a2) {
     int h = func_003E6E08_68F8();
     self->mGameUtil = (NetGameUtilRefT*)h;
     if (h != 0) {
-        sprintf_68F8(buf, D_00480448, a1, n, n);
+        sprintf_68F8(buf, D_00480448, addr, n, n);
         func_003E6F40_68F8((int)self->mGameUtil, 0x102, buf);
         self->mState = 1;
     }
@@ -920,6 +985,12 @@ INCLUDE_ASM("seg/seg_156860", cDSockChannel_update);
 extern "C" void func_00256A58(void* self);
 extern "C" void cDSockChannel_updateConnected(cDSockChannel* self);
 
+/**
+ * Advances the channel's connection state machine.
+ *
+ * State 1 (connecting) runs func_00256A58 (updateConnecting) and state 2 (connected) runs
+ * cDSockChannel_updateConnected(); the closed, timed-out and packet-error states (0, 3, 4) do nothing.
+ */
 extern "C" void cDSockChannel_update(cDSockChannel* self)
 {
     switch (self->mState) {
@@ -969,6 +1040,16 @@ struct VEnt_6AA8 {
 
 extern "C" char* func_003E6958(int id);
 
+/**
+ * Checks a connected channel's link health and smooths its latency.
+ *
+ * Reads the NetGameLink status (func_003E6958): a gap over 30000 between its first word and +0x20 (probably
+ * ms since the last receive) sets state 3, a zero byte at +0x45 (link lost) disconnects; both set mError.
+ * Otherwise mLatency = (4 * mLatency + ping) / 5, the ping (+0xC, ms) in seconds capped at 1, and a pending
+ * mPacketError then sets state 4 and mError.
+ *
+ * @param dSockChannel  the channel (this)
+ */
 extern "C" void cDSockChannel_updateConnected(cDSockChannel* dSockChannel)
 {
     char* st = func_003E6958((int)dSockChannel->mGameLink);
@@ -1042,8 +1123,16 @@ extern "C" int cMemMan_alloc(int, int *, int, int);
 extern "C" int func_00256C78(int, int, int);
 extern int D_004804B8[];
 
-extern "C" void cGameComm_construct(int arg0, int arg1) {
-    cGameComm_mGameComm = (cGameComm*)(func_00256C78(cMemMan_alloc(0x5F0, D_004804B8, 0x20000000, 0), arg0, arg1));
+/**
+ * Creates the game comm singleton: 0x5F0 bytes tagged "cGameComm", constructed by func_00256C78.
+ *
+ * Stores the result in cGameComm_mGameComm; func_00256C50 destroys it.
+ *
+ * @param channel  the cCommSystem channel index the game link uses (stored in unk_06C)
+ * @param isServer  nonzero to run the server side of the handshake (mServer)
+ */
+extern "C" void cGameComm_construct(int channel, int isServer) {
+    cGameComm_mGameComm = (cGameComm*)(func_00256C78(cMemMan_alloc(0x5F0, D_004804B8, 0x20000000, 0), channel, isServer));
 }
 #endif
 
@@ -1311,6 +1400,16 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_setState);
 extern "C" void func_00258330(cGameComm* arg0);
 extern "C" void func_00258870(cGameComm*, int, int);
 extern "C" void func_0031AD18(void);
+/**
+ * Switches the handshake and race state machine (mState) to a new tGameComm state.
+ *
+ * Entering GameActive (14) computes the latency (func_00258330), arms a 3600-frame link timeout and clears
+ * the flag D_004A3ED0 (func_0031AD18); GameOver (15) clears the waiting message and the peer's pause; the
+ * states 1, 3, ..., 13 arm an 1800-frame timeout. func_00258870 skips arming while either side is paused
+ * before the start gate.
+ *
+ * @param mode  the new tGameComm state
+ */
 // Switches the controller to a new mode, running per-mode setup first.
 extern "C" void cGameComm_setState(cGameComm* self, int mode)
 {
@@ -1587,6 +1686,13 @@ extern "C" void func_00257610(cGameComm* gameComm, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_156860", cGameComm_setCommError);
 #ifdef SKIP_ASM
+/**
+ * Records the first comm error of the session for the results report.
+ *
+ * Only the first call acts: sets mCommError, sets mCommErrorWasSignificant when the game was not over (mState
+ * below GameOver) and not both riders had finished, packs 11 flags into mFlagsOnCommError (mLocalFinishedRace
+ * in bit 0 ... mLoading in bit 10) and copies mState into mStateOnCommError.
+ */
 extern "C" void cGameComm_setCommError(cGameComm* self) {
     if (self->mCommError == 0) {
         self->mCommError = 1;
@@ -1692,6 +1798,14 @@ extern "C" void cGameComm_updateMessageDisplay_78F8(void *) __asm__("cGameComm_u
 extern "C" void func_00266DF8_78F8(int) __asm__("func_00266DF8");
 extern int D_004A33F4;
 
+/**
+ * Ends the online session on an error: stops input syncing and brings up the online-error overlay.
+ *
+ * Always clears the waiting message, the peer's pause and the unpause flag and timer. On the first error
+ * only, it sets mCheating[0] to 4 if this machine's controller is unplugged mid-race with no other error,
+ * closes the voice link (func_00266DF8 on D_004A33F4, probably cVoipMan), lets the connection popup close,
+ * clears mSyncInput and mConnected, sets mError and mDisplayError and runs updateDisplayError.
+ */
 extern "C" void cGameComm_displayError(cGameComm* self) {
     self->mWaitingMessage = 0;
     self->mPauseMenu[1] = 0;
@@ -1729,6 +1843,13 @@ extern int D_004A2A54;
 extern int D_00442924[];
 extern int D_005366E8[];
 
+/**
+ * Counts down a pending error display and then raises the online-error overlay.
+ *
+ * Waits while mLoading is set and until the UI stack's current state is empty or of kind 5. When
+ * mDisplayError reaches 0 it triggers overlay 0x27 (cOVState_PAUSE_ONLINE_ERROR) and pushes 13 onto the stack
+ * at D_005366E8 (D_004A2A50 = D_004428F0[13]), which the overlays pop.
+ */
 extern "C" void cGameComm_updateDisplayError(cGameComm* self) {
     if (self->mLoading == 0 && self->mDisplayError > 0) {
         char *p = (char*)SSXApp->Game->UI;
@@ -1816,8 +1937,21 @@ extern "C" void func_002581B8(cGameComm* arg0, int *arg1);
 extern "C" void func_00258870(cGameComm*, int, int);
 extern "C" void MEM_copy_7BD8(void* dst, const void* src, int n) __asm__("MEM_copy");
 
+/**
+ * Pops the oldest received packet of one type and copies its payload out.
+ *
+ * Returns 0 after a link error. Otherwise it first queues newly received packets (func_00257CD8,
+ * updateReadQueue), then copies and frees the oldest packet of type @p ch. An input packet (type 0) also
+ * clears the silence counters and the waiting message, and an armed link timeout is re-armed to 1800 frames.
+ *
+ * @param ch      packet type, which picks the read queue: 0 input samples, 1 chat, 2 BE sync data, 3 commands
+ * @param dst     buffer for the payload (a pointer passed as an int)
+ * @param maxsize  size of @p dst; never checked, so the whole payload (up to 236 bytes) is copied
+ * @return the payload length (packet size minus the 4-byte header), or 0 when the queue is empty or after an
+ *         error
+ */
 // PORT: the unit declares this as (void*, int, int, int); dst is a pointer passed as int
-extern "C" int cGameComm_readPacket(cGameComm* self, int ch, int dst, int unused)
+extern "C" int cGameComm_readPacket(cGameComm* self, int ch, int dst, int maxsize)
 {
     cGameComm* c = self;
     if (c->mError != 0) return 0;
@@ -1894,6 +2028,12 @@ extern "C" int func_00255E00_7DC0(int, int, char *, unsigned short) __asm__("fun
 extern "C" void func_002581B8_7DC0(char *, char *) __asm__("func_002581B8");
 struct S7DC0 { char pad[0x36C]; char *arr[32]; };
 
+/**
+ * Sends the packets waiting in the write queue, oldest first, until the channel refuses one.
+ *
+ * Each packet goes to the comm system's writePacket for this link's channel (func_00255E00); a sent packet is
+ * popped and freed (func_002581B8). It stops at once after a link error.
+ */
 extern "C" void cGameComm_updateWriteQueue(cGameComm* self) {
     if (self->mWriteQueue.mTail != self->mWriteQueue.mHead) {
         do {
@@ -2277,6 +2417,15 @@ static inline void ggSetTime_8448(char* g, float t) { *(float*)(g + 0x10) = t; }
 static inline int ggSynced_8448(char* s) { return *(int*)(s + 0x70) == 0xE; }
 static inline int ggDropped_8448(char* s) { return *(int*)(s + 4); }
 
+/**
+ * Runs the blocking pre-race handshake with the peer: exchanges back-end sync data and the AI random state.
+ *
+ * Packs this side's BE sync data into mBEBuffer (player 0 on the host; the client first swaps the option
+ * records and gives player 1 player 0's controller), saves the AI random state and pumps update
+ * (func_002570D8) until GameActive or an error. Then it runs postInitBE, restores the AI random state from
+ * mServerSettings, stores mLatency in networkOpt.fLatency, uses 2 input samples per packet when both sides
+ * are broadband, and raises a comm error when the two build signatures differ.
+ */
 // Joins the game session: sets up the sync buffer and this side's name slot, then pumps
 // messages until the sync state (0xE) is reached or the link drops.
 extern "C" void cGameComm_syncGame(cGameComm* self)
@@ -2338,6 +2487,13 @@ extern "C" void func_00258870(cGameComm*, int, int);
 extern "C" void func_002570D8(cGameComm*);
 extern "C" void THREAD_yieldticks(int);
 static inline int rd8(char *p) { return *(int*)(p + 8); }
+/**
+ * Waits for the peer at the end of loading by exchanging the sync-wait command (3).
+ *
+ * The host sends command 3 first and then waits; the client waits for the host's and then answers. While
+ * waiting it pumps update (func_002570D8) with a 3600-frame link timeout armed, until mSyncWaitComplete or an
+ * error. Afterwards it disarms the timeout (unk_094) and clears mLoading.
+ */
 extern "C" void cGameComm_syncWait(cGameComm* self) {
     char buf[12];
     cBE_getInterface_86B0((int)SSXApp->BE, 7);
@@ -2366,6 +2522,16 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_sendPauseCmd);
 extern "C" void func_00257E98(void *, int, int, int);
 extern "C" void func_00258870(cGameComm*, int, int);
 extern void cGameComm_setUnPauseTimer_8790(void *) __asm__("cGameComm_setUnPauseTimer");
+/**
+ * Tells the peer that this machine paused or unpaused, and updates the local pause bookkeeping.
+ *
+ * Needs a live link. Pausing sets mPauseMenu[0], counts mPauseCount[0] and force-arms a 3660-frame link
+ * timeout before the start gate, or sets mUnPauseFlag after it. Unpausing clears those, the silence counters
+ * and the waiting message, then arms an 1800-frame timeout or, after the gate, starts the unpause countdown.
+ * Only the command byte (0 or 1) of the 12-byte payload is set; the rest is uninitialised stack.
+ *
+ * @param pause  nonzero to pause, 0 to unpause
+ */
 extern "C" void cGameComm_sendPauseCmd(cGameComm* self, int pause) {
     char buf[12];
     if (self->mError == 0 && self->mConnected != 0) {
@@ -2415,6 +2581,13 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_setUnPauseTimer);
 struct S88A8_4 { int k0; char p[0x14]; int k18; int k1c; };
 struct S88A8_S { int k0; int k4; char p0[0x40]; int k48; char p1[0x24]; int k70; int k74; int k78; char p2[0x380]; int k3fc; };
 
+/**
+ * Starts the 180-frame unpause countdown (mUnPauseTimer) when the race can resume, otherwise clears it.
+ *
+ * The countdown starts only outside game state 2, with a live link (no error, not alone, connected), before
+ * GameOver, with neither side paused, the AI's EndOfRaceTimer at 0 or below, and not in AI state 4 with more
+ * than 150 countdown ticks left.
+ */
 extern "C" void cGameComm_setUnPauseTimer(cGameComm* self) {
     cGame *t6;
     S88A8_4 *t4;
@@ -2460,6 +2633,13 @@ extern "C" void func_002613C8_8988(int) __asm__("func_002613C8");
 extern "C" void func_0025B800_8988(void *) __asm__("func_0025B800");
 extern "C" void func_00262768_8988(int, int, int, int, int, int) __asm__("func_00262768");
 
+/**
+ * Marks the online race as started and tells the buddy server that this player is racing.
+ *
+ * Does nothing once the game is over. Creates (func_00260F80) and connects (func_002613C8) BuddyMan when
+ * needed, then sets its presence to LOCID 9 with the opponent (LobbyMan mOpponent) through func_00262768.
+ * Stores the start time (SSXApp +0x18 / +0x10) in unk_034, sets mRaceInProgress and disarms the link timeout.
+ */
 extern "C" void cGameComm_gameStartRace(cGameComm* self) {
     if (self->mState < 0xF) {
         if (BuddyMan_mBuddyMan == 0) {
@@ -2519,6 +2699,13 @@ extern "C" void func_00258A48(cGameComm*);
 extern "C" void cBENetworkInterface_copyProfile(void *, int, int);
 extern "C" void* cBE_getBE();
 extern int D_00534B38[];
+/**
+ * Leaves the online game: resets the buddy presence, tells the peer and ends the game locally.
+ *
+ * Makes sure BuddyMan exists and is connected, as gameStartRace does, and sets presence LOCID 0. Sends the
+ * exit-game command (func_00258BC8) and runs gameEnded (func_00258A48). On the client it then copies profile
+ * 1 into profile 0 and reloads the Stat interface (BE interface 3, virtual discard).
+ */
 extern "C" void cGameComm_gameExit(cGameComm* self) {
     if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
@@ -2632,6 +2819,14 @@ static inline const char* gcString_8CB0(char* name)
     return vt[4].fn(tbl + vt[4].delta, GetHashValue32(name));
 }
 
+/**
+ * Opens, retitles or closes the HUD's connection popup as the peer pauses or goes quiet.
+ *
+ * Sends the "hud" UI state message 0xE (open, with "kT_POPUPCMNOtherPauseMenu" if the peer paused, else
+ * "kT_OVRCMNWaitPlayer") or 0xF (close), tracking it in mMessageDisplay (0 closed, 1 peer paused, 2 waiting).
+ * The peer-paused popup opens only in AI state 4 or 5 or during an NIS; any popup closes when this machine
+ * pauses. While mWaitingMessage is set, unk_060 is cleared on every call.
+ */
 // Drives the connection-status popup: picks its text, then opens (0xE) or closes (0xF) it as the
 // link state changes (self+0x98: 0 closed, 1 shown while connected, 2 shown while waiting).
 extern "C" void cGameComm_updateMessageDisplay(cGameComm* self)

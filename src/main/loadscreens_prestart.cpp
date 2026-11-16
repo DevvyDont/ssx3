@@ -28,6 +28,17 @@ struct sPreStart_232348 {
     sModule_232348* next;
 };
 
+/**
+ * Updates the pre-start screen: animates and fades in the load indicator and queues the init load screen.
+ *
+ * Steps the indicator's phase (func_00231F80) and raises its fade level (+0x4) by 1/12 per frame up to 1.
+ * When no next module is queued it creates a cInitLoadScreen ("InitLoadScreen"), keeps it at +0x8 and queues
+ * it.
+ *
+ * The screen's timer (+0x4) gains 1/60 per frame, plus 0.15 while a pad is connected. When pad 0's sample has
+ * 11 or more values with values 8 and 10 nonzero, it sets the init load screen's +0x4 flag, which probably
+ * makes the start screen it creates open in mode 2.
+ */
 extern "C" void cPreStartScreen_update(sPreStart_232348* self)
 {
     func_00231F80(SSXApp->LoadIndicator);
@@ -518,6 +529,13 @@ struct sModule_232A00 {
     int f18;
 };
 
+/**
+ * Updates the pre-front-end load screen: animates and fades the load indicator and queues the front-end load.
+ *
+ * Steps the indicator's phase (func_00231F80); its fade level (+0x4) falls by 1/12 per frame while the word
+ * at +0x4 is set and rises otherwise. When no next module is queued it creates a cFELoadScreen ("FELoad",
+ * 0x1C bytes) and queues it.
+ */
 // Same shape as func_00232930 (see the note there): exceptions enabled for this unit, `tmp` reused.
 extern "C" void cPreFELoadScreen_update(void* self)
 {
@@ -1013,6 +1031,17 @@ static inline int loadTex_3048(char* data, const char* name)
     return vt[46].fn((char*)g + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
 }
 
+/**
+ * Loads the game load screen's picture: both players' character pictures online, the course picture
+ * otherwise.
+ *
+ * On the online game path (D_00535C11 == 2) it loads "|<character>_small_flat.ssh" for each player from
+ * data/ui/charpic.big as "CharaPics" into +0x10 and +0x14; otherwise "|<location>.ssh" for the race's
+ * location (0 when above 16) from data/ui/courspic.big as "coursePics" into +0x10.
+ *
+ * Textures go through GrMan's slot 46, the file data is freed and the big file closed. On Tour's version also
+ * takes a state argument.
+ */
 extern "C" void cGameLoadScreen_loadTexture(char* self)
 {
     char name[0x70];

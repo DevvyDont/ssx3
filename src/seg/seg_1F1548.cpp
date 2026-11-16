@@ -50,6 +50,17 @@ struct sMgr_0548 {
     char* vptr;
 };
 
+/**
+ * Constructs the platform visual-effects manager: the base manager plus its 17 effect-control objects.
+ *
+ * Runs cVisualEffectsMan_cVisualEffectsMan(), stores this class's vtable (+0x44) and allocates objs[0..16],
+ * 4-byte objects (mostly just a vtable) tagged RenderToggles, VisualEffectsTest, LightGlow, Plants, DepthFog,
+ * HeightFog, DetailSystem, ScreenTint, Shadow, SnowSurface, BoardTrail, Flags, PowerUpFXToggles,
+ * SnowfallToggles, SplashToggles, Tube and PathArrow. The name is On Tour's (PSP); retail tags the allocation
+ * "PS2VisualEffectsMan".
+ *
+ * @return self
+ */
 extern "C" sMgr_0548* cPSPVisualEffectsMan_cPSPVisualEffectsMan(sMgr_0548* self)
 {
     cVisualEffectsMan_cVisualEffectsMan(self);
@@ -321,6 +332,13 @@ INCLUDE_ASM("seg/seg_1F1548", cPunchFX_cPunchFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "seg/seg_1F1548_classes.h"
 
+/**
+ * Constructs a punch effect, a class with cRider as a virtual base, and clears its active flag.
+ *
+ * As g++ 2.95 does for virtual bases, a hidden second argument says whether this is the most-derived object;
+ * only then does it build the cRider at +0xB0 and point the base pointer (+0x0) at it. It sets the cRider
+ * part's vtables (+0x6C0, +0x6D0, +0x6E8 there) to this class's and calls readFromReplayFrame() to reset.
+ */
 cSeg_2F0E88::cSeg_2F0E88()
 {
     cPunchFX_readFromReplayFrame_0E88(this);
@@ -342,6 +360,12 @@ INCLUDE_ASM("seg/seg_1F1548", cPunchFX__cPunchFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "seg/seg_1F1548_classes.h"
 
+/**
+ * Destroys a punch effect: restores this class's vtables in its virtual cRider base, then tears down.
+ *
+ * The hidden g++ destructor flags decide the rest: bit 1 destroys the cRider virtual base (cRider__cRider)
+ * and bit 0 frees the object. The C++ body itself is empty.
+ */
 cVbDtor002F0FE8::~cVbDtor002F0FE8()
 {
 }
@@ -359,6 +383,12 @@ __asm__("_vt$15cVbDtor002F0FE8$13cRiderVbC_s1f = D_004887D8\n"
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cPunchFX_readFromReplayFrame);
 #ifdef SKIP_ASM
+/**
+ * Resets the punch effect by clearing its active flag (+0xA0).
+ *
+ * Despite the name it reads nothing from a replay frame (On Tour's version takes a cReplayFramePtr*); the
+ * constructor calls it as a reset.
+ */
 extern "C" void cPunchFX_readFromReplayFrame(cPunchFX* self) {
     (*(int *)((char*)(self) + (0xA0))) = 0;
 }
@@ -461,6 +491,15 @@ static inline float randRange_1150(float lo, float hi)
     return lo + (hi - lo) * randf_1150();
 }
 
+/**
+ * Places the punch effect's four sprites around the rider's punching hand while a punch is playing.
+ *
+ * Active while the rider's mAttackBlend (+0x350) is positive and a punch animation runs: 0x146 or 0x147 in
+ * anim slot 0, or 0x143 or 0x144 in slot 1 while its sequence's event bit 0 is set and bit 1 clear. That
+ * picks the hand bone (+0x8B0 or +0x8B8, swapped when +0x320 is set). Each sprite gets a random offset of up
+ * to 3 * blend around a point 8 units along the bone, a size of 15 to 15 + 15 * blend and a grey level of at
+ * most 0.9 x blend.
+ */
 extern "C" void cPunchFX_update(sFx_1150* self)
 {
     int active = 0.0f < *(float*)(self->owner + 0x350);
@@ -592,6 +631,13 @@ public:
     virtual void DrawSprite(const sVec4_1150&, const sV2_1510&, const sV2_1510&, const sV2_1510&, const sCol_1150&);
 };
 
+/**
+ * Draws the punch effect's four sprites when it is active.
+ *
+ * Pushes a copy of the default draw state (D_00501420) with the effect texture (GrMan _EffectTexMap[24],
+ * +0xFB0) and its blend settings, draws each sprite at pos[i] with its size and colour over the whole
+ * texture, then pops the state.
+ */
 extern "C" void cPunchFX_render(sFx_1150* self)
 {
     if (self->active == 0)
@@ -1952,6 +1998,18 @@ extern "C" void* func_002F2D60(void* arg0);
 extern "C" void func_002F39C8(void* arg0);
 extern char cSplashManager_vtbl[];
 
+/**
+ * Constructs a splash manager for one view: an object node with empty pools of drops and ice crystals.
+ *
+ * Runs the cObjNode constructor with @p bucket, stores @p viewIndex (+0x10) and the vtable (+0xC), builds 30
+ * drops (0x3C bytes from +0x1C) and 30 ice crystals (0x4C bytes from +0x724), clears the rest of the state
+ * (+0x101C = 1.0) and resets it (func_002F39C8). Drop and crystal are the SplashToggles debug menu's words.
+ *
+ * @param p          the object to construct (this)
+ * @param bucket     passed to the cObjNode constructor (On Tour: const int bucket)
+ * @param viewIndex  the view whose camera the splashes belong to
+ * @return the constructed object (@p p)
+ */
 // Particle emitter constructor: builds the two 30-entry element pools and resets the emitter state.
 extern "C" void* cSplashManager_cSplashManager(void* p, void* bucket, int viewIndex)
 {
@@ -1997,6 +2055,12 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager__cSplashManager);
 extern "C" void cObjNode__cObjNode(void *);
 extern char cSplashManager_vtbl[];
 
+/**
+ * Destroys a splash manager: restores its vtable (+0xC), then runs the cObjNode destructor.
+ *
+ * The g++ delete flags arrive in the second argument register, which this body leaves untouched, so
+ * cObjNode__cObjNode() receives them and frees the object when bit 0 is set.
+ */
 extern "C" void cSplashManager__cSplashManager(void *self) {
     *(char **)((char*)self + 0xC) = cSplashManager_vtbl;
     cObjNode__cObjNode(self);
@@ -2243,6 +2307,15 @@ static inline float Length_39E0(const sV4_39E0& v)
     return r;
 }
 
+/**
+ * Updates this view's screen splashes: tracks the camera speed, spawns ice crystals and lets them shed drops.
+ *
+ * Needs SplashToggles "Enable" (D_004A424C) and an existing view. The speed is the view position's change per
+ * frame times 60 * 0.036 (probably km/h); above 1000 (a camera cut) everything resets. func_002F3810 spawns
+ * crystals, every drop and crystal is updated with the speed and dead ones are replaced by the last. With a
+ * chance set by "Percentage Ice Crystal Spawn", one random crystal sheds a drop of 0.6 x its size, at most
+ * "Max Spawn Per Crystal" times and only above "Drop Min Size".
+ */
 extern "C" void cSplashManager_update(sEmitter_39E0* self)
 {
     if (D_004A424C == 0)
@@ -2398,6 +2471,13 @@ struct sEmitter_3E28 : sVBase_3E28 {
 extern "C" void func_002F2C30(void*, sV2_3E28*);
 extern void func_002F3418_3E28(void*, sV2_3E28*) __asm__("func_002F3418");
 
+/**
+ * Draws this view's splash drops and ice crystals as 2D sprites over the 640x480 screen.
+ *
+ * Needs SplashToggles "Enable" and "Render" and this view being the one rendered. When D_004A3B60 (a
+ * script-controlled flag that also gates other lens effects) is set, it resets the splashes instead. Draws in
+ * its own 2D scene with a pushed copy of the default draw state (D_00501420) and the current screen size.
+ */
 extern "C" void cSplashManager_render(sEmitter_3E28* self)
 {
     if (D_004A424C == 0)
@@ -3137,6 +3217,16 @@ extern char kWPR_Lighting;
 struct A5180 { unsigned int v; char pad[0x3C]; A5180() { v = 0xFFFFFFFF; } };
 struct B5180 { unsigned int v; char pad[0x17C]; B5180() { v = 0xFFFFFFFF; } };
 
+/**
+ * Constructs the world light manager: empty light tables, the light cache and a lighting query.
+ *
+ * Marks the 8 0x40-byte entries at +0x10 and the 32 0x180-byte entries at +0x210 unused (first word -1),
+ * keeps @p pNash at +0x0, builds the light cache (cWorldLightMan_initLightCache) and stores at +0x4 the world
+ * painter manager's query for kWPR_Lighting.
+ *
+ * @param pNash  the world's NASH data (On Tour: cBXNash*), passed as an int
+ * @return self
+ */
 extern "C" void *cWorldLightMan_cWorldLightMan(void *self, int pNash) {
     new ((char*)self + 0x10) A5180[8];
     new ((char*)self + 0x210) B5180[32];

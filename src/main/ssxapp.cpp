@@ -125,6 +125,18 @@ typedef void (*V0Fn_6900)(char*);
 typedef void (*V1Fn_6900)(char*, int);
 typedef void* (*LoadFn_6900)(char*, void*, const char*, int, int, int);
 
+/**
+ * Initialises the application: creates the core subsystems, parses the command line and queues the first
+ * module.
+ *
+ * Sets SSXApp; creates ConsoleConfig, the pad cache ("PadCache", also the global PadCache), GrMan (then its
+ * Init, slot 2), the light and bezier managers, a "2DRender" object and the two "InputPad"s; clears Game,
+ * DebugFE and RealFE; parses the arguments; loads the "loadicon" texture (+0xA0) from an embedded shape file;
+ * creates the white LoadIndicator; queues a new cPreStartScreen; creates and inits the cFEAsyncManager.
+ *
+ * @param argc  number of command-line arguments (On Tour ac)
+ * @param argv  the command-line arguments (On Tour av)
+ */
 extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
 {
     SSXApp = (cSSXApp*)self;
@@ -389,6 +401,16 @@ struct sParseBuf_226B60 {
     char* data;
 };
 
+/**
+ * Loads an input map file and compiles it into a new cInputMap.
+ *
+ * Reads the file (cInputPreProcessor_loadFileSize()), creates a 0x18-byte "InputMap" for 205 actions, parses
+ * the file data and frees it, compiles actions 0-204 by name ("CruiseTurn", "CruiseCrouch" ...
+ * "ReplayTimeLine"), then drops the parsed file.
+ *
+ * @param path  the map file, e.g. "data/config/input.map"
+ * @return the new cInputMap, as an int (On Tour returns cInputMap*)
+ */
 // PORT: the unit declares it returning int (callers store the map pointer in an int field).
 extern "C" int cSSXApp_loadInputMap(cSSXApp* self, const char* path)
 {
@@ -633,6 +655,19 @@ extern char D_0047A7F8[];
 
 #define MAX_7BF0(x, y) ((x) > (y) ? (x) : (y))
 
+/**
+ * Reads the game's command-line options (each starts with '-'; names compare case-insensitively).
+ *
+ * -track NAME stores NAME without its directory and cut at its first '.' in CommandLineTrack (+0xCC);
+ * -username and -password store the next argument in UserName and Password; -realfe sets unk_60 (already 1
+ * from the constructor), -nohud clears unk_64 and -autolobby sets unk_74. An option missing its value ends
+ * the scan.
+ *
+ * Finally D_004A4540 is set to (unk_64 == 0), so -nohud sets it.
+ *
+ * @param argc  number of arguments; argv[0] is skipped
+ * @param argv  the arguments
+ */
 // PORT: cBXString keeps its length in a header 8 bytes before the text (pointer held in int).
 extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
 {
@@ -724,6 +759,16 @@ extern "C" void func_00321298(void* target, int a, void* data);
 extern void* PadCache;
 extern void* D_004A33F0;
 
+/**
+ * Starts a frame's input: when the pad cache has a new sample, updates the network and keyboard and feeds the
+ * pads.
+ *
+ * Advances the pad cache's read position (func_00326B48); on success it updates cCommSystem_mCommSystem and
+ * the keyboard object D_004A33F0 when they exist, and passes each of the two sample slots (value count and
+ * values) to InputPads[i] through func_00321298().
+ *
+ * @return 1 when a new input sample was taken, 0 when none was ready
+ */
 extern "C" int cSSXApp_preUpdate(cSSXApp* self)
 {
     if (PadCache != 0 && func_00326B48(PadCache) != 0) {
@@ -837,6 +882,15 @@ struct sSSXAppPurge {
     void* f11C;         // 0x11C
 };
 
+/**
+ * Shuts the application down: frees what init and initload created and closes the big files.
+ *
+ * Deletes both InputMaps, the font interface, the pad cache, ScriptEngine and GrMan (after its slot 3);
+ * closes the script, character and audio big files (handles +0xD4 to +0x118); deinits the world triggers and
+ * audio; purges the BE and GameModeMan; deletes the cFEAsyncManager and ConsoleConfig; clears SSXApp.
+ *
+ * InputPads, Inputs, LoadIndicator and FELocale are not freed here.
+ */
 extern "C" void cSSXApp_purge(sSSXAppPurge* self)
 {
     int i;
@@ -915,6 +969,12 @@ void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cGameModeMan_getGM();
 extern char D_0047A808[];
 
+/**
+ * Starts the in-game module: creates the cGame and queues it as the application's next module.
+ *
+ * Allocates 0x22C bytes ("GameModule"), runs cGame_cGame(), stores the result in Game and refreshes
+ * GameModeMan from cGameModeMan_getGM().
+ */
 extern "C" void cSSXApp_startGameLoad(cSSXApp* self)
 {
     void* m = cGame_cGame(cMemMan_alloc(0x22C, D_0047A808, 0, 0));
@@ -932,6 +992,12 @@ extern char D_0047A818[];
 extern "C" void* func_001A1CE8(void* p);
 extern "C" void* func_0017F7B8(void* p);
 
+/**
+ * Starts the front-end module: creates the real or the debug front end and queues it as the next module.
+ *
+ * Clears D_004A203C, then builds the 0xB5AE0-byte real front end (RealFE) when unk_60 is set, as the
+ * constructor leaves it, or else the 0x238-byte debug front end (DebugFE); both are tagged "FEModule".
+ */
 extern "C" void cSSXApp_startFELoad(cSSXApp* self)
 {
     D_004A203C = 0;
@@ -1073,6 +1139,17 @@ struct sSSXApp_82D0 {
     void* f118;         // 0x118
 };
 
+/**
+ * Runs the game's one-time load: network modules, big files, scripts, input, fonts, animation data and audio.
+ *
+ * Calls initOnline(); opens the music, music2, audio and speech big files that exist, then scdat.big,
+ * mdlps2.big, the 11 character texture files and rwrdps2.big; creates the ScriptEngine; loads input.map and
+ * input2.map into InputMaps and gives both players a cInput using InputMaps[0]; loads fefont and hudfont.
+ *
+ * Then applies the BE options and the locale, builds GameAnimMap and AnimDataBase, starts audio with the
+ * saved volumes, inits the world triggers, and copies a non-empty CommandLineTrack into the string
+ * D_004A4CB8.
+ */
 extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
 {
     initOnline();
@@ -1152,6 +1229,12 @@ static inline int optLanguage_228A78(sOptions_228A78 o)
     return o.language;
 }
 
+/**
+ * Creates the front-end locale if needed and sets it to the language chosen in the options.
+ *
+ * Allocates the 0xC0-byte "FELocale" on first use, passes the options' language field (bits 22-24 of
+ * D_00535610) to its vtable slot 3, then calls func_00195B70() on it. BE interface 4 is fetched and unused.
+ */
 extern "C" void cSSXApp_initLocale(cSSXApp* self)
 {
     if (self->FELocale == 0) {
@@ -1187,6 +1270,12 @@ struct sExecPurgeMgr {
 //99.95%
 INCLUDE_ASM("main/ssxapp", cSSXApp_loadexecpurge__FPv);
 #ifdef SKIP_ASM
+/**
+ * Shuts down the world triggers, audio, the current module and the graphics, probably before a LoadExecPS2.
+ *
+ * Calls WORLDTRIGGERMANAGER_DeInit(), SSXAUDIO_DeInit() and cAppMan_loadexecpurge() (the current module's
+ * slot 3, then its deletion), then the graphics manager's vtable slot 119.
+ */
 void cSSXApp_loadexecpurge(void* self)
 {
     WORLDTRIGGERMANAGER_DeInit(self);
@@ -1270,6 +1359,13 @@ struct sVE_228C08 {
 };
 
 
+/**
+ * Applies the saved display options to the graphics manager: the TV display format and the screen offset.
+ *
+ * Passes the options' 2-bit display format (bits 20-21 of D_00535610; values above 2 count as 0) to GrMan's
+ * slot 40 (0 normal, 1 letterbox, 2 widescreen, by the scales func_00377950 sets), then option bytes 6 and 5
+ * to slot 12, the screen x and y offset. The C takes no arguments; initload passes the app anyway.
+ */
 extern "C" void cSSXApp_activateBEOptions()
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1333,6 +1429,16 @@ extern "C" void func_003F6A40();
 extern "C" void func_003F6AB0();
 extern "C" void func_00266788();
 
+/**
+ * Loads the IOP modules for USB, the keyboard, the network adapter, the modem and voice chat.
+ *
+ * Loads USBD, USBKB, DEV9, INET, NETCNF (with icon paths), INETCTL, SMAP and PPP through func_00319718.
+ * D_004A29EC (network hardware present) is set when SMAP (network adapter) or SPDUART (modem) loads, and
+ * PPPOE is loaded only after SMAP.
+ *
+ * With network hardware it then loads MSIFRPC, LIBNET, DRTYSCKF (DirtySock) and LGAUD; when VOIPF loads it
+ * binds a SIF RPC client, probably VOIPF's (func_003F6A40), else marks it unbound (func_003F6AB0).
+ */
 extern "C" void initOnline()
 {
     char buf[0x100];

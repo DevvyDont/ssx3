@@ -39,6 +39,17 @@ extern void* cSplineModifier_vtbl[];
 extern sSmQuad_95D8 t4vect_Zero;
 extern "C" void cSpline_readFromReplayFrame(void* self, cStream003595D8* stream);
 
+/**
+ * Rebuilds a spline modifier from a replay frame: reads its 0x50-byte state and its spline, then resets the
+ * cached path values.
+ *
+ * Stores cSplineModifier's vtable, clears the spline (id -1), reads cSplineModifierState into +0x10 and the
+ * spline with cSpline_readFromReplayFrame() (+0xD8), zeroes Dir (+0xB0), DDir (+0xC0), X2 and Y2
+ * (+0xD0/+0xD4) and sets RootTransformDirty (+0x58) so the transform is rebuilt.
+ *
+ * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
+ * @return @p self
+ */
 extern "C" cSplineModifier_95D8* cSplineModifier_cSplineModifier(cSplineModifier_95D8* self, cStream003595D8* stream)
 {
     self->vtable = cSplineModifier_vtbl;
@@ -63,6 +74,14 @@ INCLUDE_ASM("object/splinemodifier", cSplineModifier_setSpeed);
 #ifdef SKIP_ASM
 // PORT: callers declare cSplineModifier_setSpeed(void* self); the body also takes the speed in $f12.
 extern "C" void cSplineModifier_setSpeed_impl(void* self, float speed) __asm__("cSplineModifier_setSpeed");
+/**
+ * Sets the spline modifier's speed: Velocity (+0x48) = speed * 27.7778.
+ *
+ * 27.7778 is 100000 / 3600, so the input is probably in km/h and Velocity in cm/s. Some callers declare the
+ * function without the float, which then reaches it in $f12 (see cSplineModifier_signal()).
+ *
+ * @param speed  the new speed, probably in km/h
+ */
 extern "C" void cSplineModifier_setSpeed_impl(void* self, float speed)
 {
     *(float*)((char*)self + 0x48) = speed * 27.77777862548828f;
@@ -90,6 +109,18 @@ struct cSplineModifier_9698 {
     float length;           // 0xE4
 };
 
+/**
+ * Advances a spline modifier along its spline and handles reaching either end by its sequence type.
+ *
+ * While ForceTime (+0x44) is positive it counts down by the tick period and Force (+0x40) accelerates
+ * Velocity (+0x48). Unless stopped (Start +0x54 clear or Complete +0x50 set), OffsetDistance (+0x3C) moves by
+ * Velocity * tick and RootTransformDirty (+0x58) is set.
+ *
+ * Past an end, SequenceType (+0x30) 0 and 4 stop there (at 0 or Length - 0.1; Complete set, Start cleared,
+ * Velocity reversed), 2 reverses Velocity and any other type wraps around the spline Length (+0xE4). Type 2
+ * reflects the overshoot at the start (-pos), but at the far end its pos - (pos - (Length - 0.1)) comes to
+ * Length - 0.1 instead of a reflection.
+ */
 extern "C" void cSplineModifier_update(cSplineModifier_9698* self)
 {
     float zero = 0.0f;
@@ -288,6 +319,14 @@ static inline void vu0CopyMat_9830(sSmM44_9830* d, const sSmM44_9830* s)
         : "memory");
 }
 
+/**
+ * Rebuilds the spline modifier's transform from the spline's position and direction at its current distance.
+ *
+ * Evaluates the spline at OffsetDistance (+0x3C) into Pos, Dir and DDir (+0xA0, +0xB0, +0xC0) and caches X2 =
+ * Dir.x^2 and Y2 = Dir.y^2. OrientType (+0x34) 2 or 3 adds yaw and 1 or 3 adds pitch along Dir; that rotation
+ * and Pos form Transform (+0x60), turned by HeadTweak (+0x38) about the up axis (D_004FF160) when it is
+ * nonzero. Clears RootTransformDirty (+0x58).
+ */
 extern "C" void cSplineModifier_updateRootTransform(cSplineModifier_9830* self)
 {
     float rx = 0.0f;
@@ -552,6 +591,17 @@ static inline void vu0AddTo_9CF8(sSmVec4_9CF8& a, const sSmVec4_9CF8& b)
         : "memory");
 }
 
+/**
+ * Adds the spline modifier's motion to an intersect info: the velocity at the hit point and the angular
+ * velocity.
+ *
+ * Does nothing unless the modifier is moving (Start set, Complete clear). The linear part is the normalised
+ * Dir times Velocity; the angular rate (yaw and pitch rates from Dir, DDir, X2 and Y2, left 0 when |Dir.x| <=
+ * 1e-5) is scaled by Velocity and turned into world space by Transform. Ivel gets the linear part plus (Ipos
+ * - Pos) x w, and Iangvel gets w.
+ *
+ * @param body  the intersect info to update (On Tour tIntersectInfo&: Ipos +0x0, Ivel +0x20, Iangvel +0x30)
+ */
 extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier_9CF8* self, sSmBody_9CF8* body)
 {
     char* sub = (char*)self + 0x10;
@@ -591,6 +641,15 @@ INCLUDE_ASM("object/splinemodifier", cSplineModifier_signal);
 #ifdef SKIP_ASM
 extern "C" void cSplineModifier_setSpeed(void* self);
 
+/**
+ * Handles a script signal: 0x190 sets the speed and starts, 0x191 starts, 0x192 reverses and starts.
+ *
+ * Starting clears Complete (+0x50) and sets Start (+0x54); 0x192 negates Velocity (+0x48). For 0x190 the
+ * speed is On Tour's float arg, which arrives in $f12 and passes untouched to cSplineModifier_setSpeed() (the
+ * C declares no float parameter). Other signals are ignored.
+ *
+ * @param msg  signal id (On Tour signal)
+ */
 extern "C" void cSplineModifier_signal(void* self, int msg)
 {
     if (msg == 0x190) {
@@ -619,6 +678,11 @@ public:
 
 extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
 
+/**
+ * Writes a spline modifier to a replay frame: its 0x50-byte state (+0x10), then its spline (+0xD8).
+ *
+ * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
+ */
 extern "C" void cSplineModifier_writeToReplayFrame(void* self, cStream00359F30* stream)
 {
     stream->v01((char*)self + 0x10, 0x50);
@@ -643,6 +707,21 @@ extern "C" void cMultiSplineModifier_setupNodes(void* self);
 extern "C" void cMultiSplineModifier_setupOverlapSystem(void* self);
 extern "C" void* cMultiSplineModifier_updateNodes(void* self);
 
+/**
+ * Builds a multi-spline modifier from script data: NumModels copies of an instance spaced along a looping
+ * spline.
+ *
+ * Takes NumModels, Orient, Heading (degrees, stored in radians), DrawSpline and the ARGB colour from @p desc,
+ * initialises the spline from SplineId, sets the speed (func_0035A550, On Tour setSpeed) and starts at 0
+ * (Length for a negative Speed) or at a nonzero StartDistance, reset to 0 when outside [0, Length].
+ *
+ * Then allocates the node arrays and instance copies, copies @p model into them, places them, adds them to
+ * the overlap octree, and sets FocusCount (+0x34) to 1 when the model's flags (+0x8) have bit 0x100.
+ *
+ * @param desc   the multi-spline data (On Tour const tAddMultiSplineData&)
+ * @param model  the instance to copy along the spline (On Tour tInstanceRecord* inst)
+ * @return @p self
+ */
 extern "C" void* cMultiSplineModifier_cMultiSplineModifier(char* self, char* desc, char* model)
 {
     *(char**)(self + 0x40) = model;
@@ -724,6 +803,17 @@ extern "C" void cMultiSplineModifier_setupOverlapSystem(void* self);
 void* cObjectInterface_getInstanceMan();
 extern "C" void* cInstanceMan_allocInstance(void* man, unsigned int id);
 
+/**
+ * Rebuilds a multi-spline modifier from a replay frame, re-creating its instance copies by id.
+ *
+ * Reads the 0x34-byte state (+0x4), the spline (+0x48) and the model instance (readReplayInstance, +0x40),
+ * allocates the node arrays, then reads one id per copy and allocates that record with
+ * cInstanceMan_allocInstance(). Copies the model into them, re-adds them to the overlap octree and sets
+ * RootTransformDirty (+0x30).
+ *
+ * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
+ * @return @p self
+ */
 extern "C" cMultiSplineModifier_A118* cMultiSplineModifier_cMultiSplineModifier1(cMultiSplineModifier_A118* self, cStream0035A118* stream)
 {
     self->vtable = cMultiSplineModifier_vtbl;
@@ -769,6 +859,16 @@ struct cMultiSplineModifier_A250 {
     void** insts;           // 0x44
 };
 
+/**
+ * Destroys a multi-spline modifier: takes its copies out of the overlap octree and frees its arrays and
+ * instance records.
+ *
+ * func_0035A780 removes copies 1 to n-1 from the Nash octree; AnimMats (+0x38) and Nodes (+0x3C) are freed,
+ * each copy's record goes back on the instance manager's free list (func_00351260, probably On Tour
+ * freeInstance), NodeInst (+0x44) is freed and the base cTransformModifier vtable (D_004913F8) is restored.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cMultiSplineModifier__cMultiSplineModifier(cMultiSplineModifier_A250* self, int flags)
 {
     self->vtable = cMultiSplineModifier_vtbl;
@@ -822,6 +922,16 @@ struct sMultiSpline_A330 {
     int* indices;               // 0x44
 };
 
+/**
+ * Allocates a multi-spline modifier's arrays: shared animation matrices, per-copy nodes and per-copy instance
+ * pointers.
+ *
+ * AnimMats (+0x38) gets one 0x40-byte matrix per mesh of the model instance's model ("MultiAnimMats"), Nodes
+ * (+0x3C) one 0x60-byte node per copy ("MultiNodes", flags 0xA0000000) and NodeInst (+0x44) one pointer per
+ * copy ("NodeInsts").
+ *
+ * @param selfv  the multi-spline modifier (this)
+ */
 extern "C" void cMultiSplineModifier_allocNodes(void* selfv)
 {
     sMultiSpline_A330* self = (sMultiSpline_A330*)selfv;
@@ -877,6 +987,14 @@ struct sMultiSplineA458 {
     sSplineInstA458** insts;        // 0x44
 };
 
+/**
+ * Fills a multi-spline modifier's instance copies with the data of its model instance.
+ *
+ * Copy 0 gets the model record's first 0xA0 bytes but keeps its own word at +0x78; the other copies go
+ * through cInstanceMan_copyInstance() and then have flag 0x40 cleared, 0x20 set and 0x100 cleared.
+ *
+ * @param p  the multi-spline modifier (this)
+ */
 extern "C" void cMultiSplineModifier_setupNodes(void* p)
 {
     sMultiSplineA458* self = (sMultiSplineA458*)p;
@@ -906,6 +1024,12 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_update);
 #ifdef SKIP_ASM
 extern "C" float func_002D1C70();
 
+/**
+ * Advances a multi-spline modifier's distance along its looping spline and marks its transforms dirty.
+ *
+ * OffsetDistance (+0x10) moves by Velocity (+0x14) times the tick period and wraps into [0, Length) (+0x54);
+ * RootTransformDirty (+0x30) is set.
+ */
 extern "C" void cMultiSplineModifier_update(void* self)
 {
     float t = *(float*)((char*)self + 0x10) + *(float*)((char*)self + 0x14) * func_002D1C70();
@@ -1069,6 +1193,15 @@ static inline void insert_A5F8(char* w, void* item, const void* box)
     func_00328C20(findRoot(w, c.x, c.y, c.z), 0, item, &c);
 }
 
+/**
+ * Puts every instance copy but the first into the Nash overlap octree, boxed by the model's radius.
+ *
+ * Gets the model's bound radius from its node (cInstanceNode_getBoundBoxInfo, kept in Radius +0x18; the box
+ * itself is discarded), then gives each copy i >= 1 a box of its position (record +0x40) +/- Radius in
+ * Nodes[i] (+0x30) and inserts the copy's record into octree list 0 under it.
+ *
+ * @param vself  the multi-spline modifier (this)
+ */
 extern "C" void cMultiSplineModifier_setupOverlapSystem(void* vself)
 {
     cMultiSpline_A5F8* self = (cMultiSpline_A5F8*)vself;
@@ -1259,6 +1392,14 @@ static inline void setMax_A918(sSmInst_A918* in, const sSmVec4_A918& v)
     in->bmax[2] = v.z;
 }
 
+/**
+ * Moves every instance copy but the first to its new place in the Nash overlap octree.
+ *
+ * Refreshes the transforms first when RootTransformDirty (+0x30) is set (virtual updateRootTransform, slot
+ * 3). Each copy's box in Nodes (+0x3C, box at +0x30) becomes its position +/- Radius (+0x18);
+ * nash_Nash_movenode() moves it from the old box, and the box is also written to the copy's record (+0x60
+ * min, +0x6C max).
+ */
 extern "C" void cMultiSplineModifier_updateOverlapSystem(cMultiSpline_A918* self)
 {
     if (self->dirty != 0) {
@@ -1359,6 +1500,16 @@ struct sSmVEntryV_AB60 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Returns the animation matrices to draw an instance with: the model's own, or ones built for a copy.
+ *
+ * For the model instance (+0x40) it asks the instance's node (+0xC): getAnimMats (slot 27) when hasAnimMats
+ * (slot 26) says so, else 0. For a copy, the model's node builds them with makeAnimMats (slot 33) from the
+ * copy's root transform (record +0x10) into the shared AnimMats buffer (+0x38).
+ *
+ * @param item  the instance record to draw (On Tour tInstanceRecord* inst)
+ * @return the animation matrices, or 0 when the model instance has none
+ */
 extern "C" int cMultiSplineModifier_getAnimMats(void* self, void* item)
 {
     void* cur = *(void**)((char*)self + 0x40);
@@ -1440,6 +1591,14 @@ public:
     virtual int v51();
 };
 
+/**
+ * Lets the model instance's node refresh its root transform after the update.
+ *
+ * Calls virtual slot 51 (updateRootTransform in cMoveNode's vtable) of the node of the model instance (+0x40,
+ * node at +0xC).
+ *
+ * @return no meaningful value (the virtual returns void; On Tour's postUpdate returns nothing)
+ */
 extern "C" int cMultiSplineModifier_postUpdate(void* self)
 {
     cSplineVirt* o = *(cSplineVirt**)((char*)*(void**)((char*)self + 0x40) + 0xC);
@@ -1666,6 +1825,18 @@ struct cMultiSplineModifier_AC20 {
     float length;                   // 0x54
 };
 
+/**
+ * Places every instance copy along the spline: evaluates it at evenly spaced distances and writes each copy's
+ * root transform.
+ *
+ * Distances start at OffsetDistance (+0x10), step by Length / NumModels and wrap into [0, Length). Each Nodes
+ * entry (+0x3C) gets the spline's position, direction and DDir plus Dir.x^2 and Dir.y^2. OrientType (+0x8) 2
+ * or 3 adds yaw and 1 or 3 pitch; with the position this forms the copy's record matrix (+0x10), turned by
+ * HeadTweak (+0xC) about the up axis when nonzero. Clears RootTransformDirty (+0x30).
+ *
+ * @param p  the multi-spline modifier (this)
+ * @return no meaningful value (the C body has no return statement; On Tour's updateNodes returns void)
+ */
 extern "C" void* cMultiSplineModifier_updateNodes(void* p)
 {
     cMultiSplineModifier_AC20* self = (cMultiSplineModifier_AC20*)p;
@@ -1795,6 +1966,16 @@ struct cMultiSpline_35B418 {
 
 extern "C" void func_00345430(void* a, void* b);
 
+/**
+ * Draws every instance copy but the first that passes the view test, then the spline path when DrawPath is
+ * set.
+ *
+ * Refreshes the transforms first when dirty (slot 3). Each copy's box (Nodes +0x3C, at +0x30) goes through
+ * the graphics manager's box test (slot 93, with slot 43's matrix): 1 (culled) is skipped; otherwise the
+ * model's node builds the copy's matrices (slot 33, into AnimMats +0x38) and draws them (slot 5) with flags
+ * 0x420 when the box needs clipping (2) or 0x400 when inside (0). DrawPath (+0x1C) draws the spline in Colour
+ * (+0x20) through func_00345430.
+ */
 extern "C" void cMultiSplineModifier_render(cMultiSpline_35B418* self)
 {
     if (self->dirty != 0) {
@@ -1842,6 +2023,15 @@ public:
 class cStream00359F30;
 extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
 
+/**
+ * Writes a multi-spline modifier to a replay frame: its state, spline, model instance and each copy's id.
+ *
+ * Writes the 0x34-byte state (+0x4), the spline (+0x48), the model instance through the frame's
+ * writeReplayInstance (slot 5) and, per copy, the word at +0x78 of its record, which the replay constructor
+ * reads back as the id to allocate.
+ *
+ * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
+ */
 extern "C" void cMultiSplineModifier_writeToReplayFrame(void* self, cStream0035B5A8* stream)
 {
     stream->v01((char*)self + 0x4, 0x34);
@@ -1856,6 +2046,14 @@ extern "C" void cMultiSplineModifier_writeToReplayFrame(void* self, cStream0035B
 //100%
 INCLUDE_ASM("object/splinemodifier", cRailLink_add);
 #ifdef SKIP_ASM
+/**
+ * Links a rail link into the list right after this one.
+ *
+ * Sets node->Prev to this and node->Next to this->Next (whose Prev becomes @p node), then this->Next to @p
+ * node; called on a list head, it adds at the front.
+ *
+ * @param node  the link to insert (On Tour cRailLink* effect)
+ */
 extern "C" void cRailLink_add(void* self, void* node)
 {
     void* h = *(void**)self;
@@ -2107,6 +2305,19 @@ static inline void grow_B708(sSmBox_B708& box, float d)
     addEq_B708(box.max, pad);
 }
 
+/**
+ * Builds a rail modifier for an instance's rail spline and puts it in the Nash rail-space octree in place of
+ * the spline's segments.
+ *
+ * Takes SplineId and Mesh from @p desc. When the instance's node has no bound box (slot 44, hasBoundBox),
+ * BoundBox is the record's box (+0x60 to +0x74) grown by 100. cRailModifier_buildXform() makes the transform
+ * and space node, cRailModifier_updateBoundBox() refreshes the box and Node is inserted into octree list 2,
+ * from which every segment of the spline is then removed.
+ *
+ * @param desc   the rail data (On Tour const tAddRailData&: SplineId +0x4, Mesh +0x8)
+ * @param model  the instance the rail belongs to (On Tour tInstanceRecord* inst)
+ * @return @p self
+ */
 extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* desc, sSmModel_B708* model)
 {
     sSmBox_B708* box = (sSmBox_B708*)(((char*)self) + 0x10);
@@ -2287,6 +2498,17 @@ struct sSmRef_BA88 {
     }
 };
 
+/**
+ * Rebuilds a rail modifier from a replay frame and puts it back in the Nash rail-space octree in place of its
+ * spline's segments.
+ *
+ * Reads the 0x30-byte state (BoundBox, SplineId, Mesh at +0x10) and the instance (readReplayInstance),
+ * rebuilds the transform and space node with cRailModifier_buildXform(), inserts Node under the stored
+ * BoundBox (octree list 2) and removes the spline's segments from that list. The box is not recomputed.
+ *
+ * @param src  replay frame to read from (On Tour cBxReplayFrame*)
+ * @return @p self
+ */
 extern "C" char* cRailModifier_cRailModifier1(cRailModifier* self, cSmStream_BA88* src)
 {
     self->SplineId = 0xFFFFFFFF;
@@ -2537,6 +2759,13 @@ static inline void vecAddEq_C040(sSmVec4_C040& a, const sSmVec4_C040& b)
         : "memory");
 }
 
+/**
+ * Refreshes a rail modifier's bound box from its instance node's box, grown by 100 on each side.
+ *
+ * Only when the instance's node (record +0xC) has a bound box (slot 44, hasBoundBox): BoundBox (+0x10)
+ * becomes the node's getBoundBox (slot 45) result minus 100 at min and plus 100 at max. Otherwise the box is
+ * left as it is.
+ */
 extern "C" void cRailModifier_updateBoundBox(cRailModifier* self)
 {
     sSmObj_C040* o = ((sSmOwner_C040*)self->Instance)->obj;

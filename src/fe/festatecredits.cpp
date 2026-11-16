@@ -19,6 +19,12 @@ struct sVEntryK185A98 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Opens the credits screen ("26credits") and hides its two bitmaps, keeping the second as the Dolby icon.
+ *
+ * Sets bit 3 of "Menu0000"'s menu attributes (tAttrMenu mDisableDirSound). "Bitmap0000" and then "Bitmap0001"
+ * are stored at 0x58 (On Tour mpDolbyIcon) and hidden, so 0x58 ends up holding "Bitmap0001".
+ */
 extern "C" void cFEStateCredits_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -89,6 +95,15 @@ public:
     virtual void v21(float* pos);
 };
 
+/**
+ * Loads the credits text into the "TextScroll" widget, then gives the state focus.
+ *
+ * Keeps the widget at 0x5C (On Tour mpTextScroll), sets its width to 600, hides it (onRender2D() draws the
+ * lines) and adds kT_CREDITS000 to kT_CREDITS167 by string ID (func_003A1F18) with 006a, 006b and 074a,
+ * leaving out 047-048, 081-086, 089, 146 and 149. Ends with cFEState_onGainFocus().
+ *
+ * @param pPrevState  the state that had focus before, passed on to cFEState_onGainFocus()
+ */
 extern "C" void cFEStateCredits_onGainFocus(void* self, void* pPrevState)
 {
     cUIObjK185BA0* t = (cUIObjK185BA0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBC0));
@@ -217,6 +232,14 @@ static inline void DrawText_185F40(char* font, unsigned short* s, float x, float
     *(sV2_185F40*)(font + 0x38) = *(sV2_185F40*)(font + 0x30);
 }
 
+/**
+ * Draws the visible credits lines centred on the 640-pixel-wide screen, then renders the screens.
+ *
+ * Line spacing is the text scroll's font height x scale + 3; the first line and pixel offset come from the
+ * scroll position (0x60). A line starting with '~' places the Dolby icon (0x58) there instead; '^' draws in
+ * white at the scroll's scale, other lines in its colour at a scale 0.1 smaller. The position wraps from one
+ * end to the other in the scroll direction (0x64). Ends with the base state render func_0039E6B8().
+ */
 extern "C" void cFEStateCredits_onRender2D(char* self)
 {
     char* o = *(char**)(self + 0x5C);
@@ -338,6 +361,15 @@ struct sVEntry001863E8 {
     int (*fn)(void*);
 };
 
+/**
+ * Changes the credits scroll speed with up and down.
+ *
+ * Up (input slot 17) lowers the speed (0x64, On Tour mPixelDelta) down to -8 and down (slot 18) raises it up
+ * to 8.
+ *
+ * @param pInput  the controller input (cUIInput)
+ * @return 1 when up or down was pressed, otherwise 0
+ */
 extern "C" int cFEStateCredits_onInputBegin(void* self, void* pInput)
 {
     sVEntry001863E8* e = &(*(sVEntry001863E8**)((char*)pInput + 8))[17];
@@ -361,9 +393,20 @@ extern "C" int cFEStateCredits_onInputBegin(void* self, void* pInput)
 //100%
 INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int cFEStateCredits_onWidgetMenu(void* self, int a1, unsigned int a2)
+/**
+ * Answers the credits menu's events: 0x100 for next, option and misc (6, 8, 9), 0x101 for the rest.
+ *
+ * cUIMenu_onInput() sends 6 for the next button, 7 for previous, 8 for option and 9 for misc. Bit 0x100 plays
+ * the selected item's feedback frame and bit 0 also plays its mSound[1], so a 0x100 answer leaves the button
+ * silent.
+ *
+ * @param pMenu  the menu that sent the event (unused; On Tour pMenu)
+ * @param Event  the menu event
+ * @return 0x100 for events 6, 8 and 9, otherwise 0x101
+ */
+extern "C" int cFEStateCredits_onWidgetMenu(void* self, int pMenu, unsigned int Event)
 {
-    switch (a2) {
+    switch (Event) {
     case 6:
     case 8:
     case 9:
@@ -383,6 +426,12 @@ struct sVEntry001864B0 {
 };
 extern "C" void cUIStateStack_push(void* list, void* item);
 
+/**
+ * Leaves the credits on back, pushing the custom interface's getPrevState state for data 0x24.
+ *
+ * @param item  the widget that sent the event; nothing happens when null
+ * @param msg  the widget event (only 6, back, is handled)
+ */
 extern "C" void cFEStateCredits_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item != 0 && msg == 6) {
@@ -414,6 +463,14 @@ struct sFlowState_865A8 {
 };
 extern sFlowState_865A8 D_004A4E80;
 
+/**
+ * Gives an FE state focus and restores the selection of its first screen's "Menu" from the FE flow state.
+ *
+ * The index saved for the state's id (mHashName, 0xC) is read from the flow state (D_004A4E80, func_001A06F0)
+ * and set with cUIMenu_setSelectedByIndex(); then cUIState_onGainFocus() runs.
+ *
+ * @param pPrevState  the state that had focus before, passed on to cUIState_onGainFocus()
+ */
 extern "C" void cFEState_onGainFocus(void* self, void* pPrevState)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));

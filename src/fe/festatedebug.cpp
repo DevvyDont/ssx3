@@ -37,6 +37,15 @@ public:
     virtual void setVisible(int on);
 };
 
+/**
+ * Sets up an on-screen keyboard on a screen: key labels, hidden cursors and the starting text "mypro1".
+ *
+ * "keyboard_arrLeft", "keyboard_arrRight" and "keyboard_end" are shown as "<-", "->" and "END"; each
+ * "keyboard_A" to "keyboard_Z" and "keyboard_0" to "keyboard_9" gets its character, and every "cursor_"
+ * object but "cursor_A" is hidden. The input text (+0xEC) becomes "mypro1" and is shown in "profilename".
+ *
+ * @param screen  the screen holding the keyboard (On Tour mpScreen)
+ */
 extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, void* screen)
 {
     cUIObjK180B60* t;

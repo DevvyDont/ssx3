@@ -25,6 +25,14 @@ public:
     virtual void setVisible(int v);
 };
 
+/**
+ * Tags the replay menu's items with their choice ids and hides Save Replay for a loaded replay.
+ *
+ * option_savereplay 0 (for a cReplay with Loaded set: setEnabled(0) at slot 6, static at slot 8, hidden),
+ * option_exitreplay 1, option_continue 2. The slot called setEnabled here is cUIThing_setStatic.
+ *
+ * @param w  the widget being created
+ */
 extern "C" void cOVState_REPLAY_onWidgetCreate(void* self, cUIObj_20DE30* w)
 {
     int id = *(int*)((char*)w + 0x38);
@@ -54,9 +62,18 @@ INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onWidgetMenu);
 #ifdef SKIP_ASM
 #include "fakematch.h"
 
+/**
+ * Gives the replay menu's notifications 2-5 the 0x101 feedback while the menu is open; buttons get none.
+ *
+ * Cross and Triangle are handled in cOVState_REPLAY_onInputBegin instead.
+ *
+ * @param pMenu  the menu (On Tour pMenu); unused
+ * @param key  the menu event
+ * @return 0x101 for events 2-5 while the menu is open (+0x9C), else 0
+ */
 // FAKEMATCH: register pin `register int r FM_REG("$2")` keeps the result in v0 (local-alloc gives v0 to the block-local temps first, so the plain r lands in a0 and is copied to v0 at the end); plain form 88.50%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" int cOVState_REPLAY_onWidgetMenu(void* self, int a1, unsigned int key)
+extern "C" int cOVState_REPLAY_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
     register int r FM_REG("$2") = 0;
     if (*(int*)((char*)self + 0x9c) != 0) {
@@ -155,6 +172,21 @@ struct sReplay_20DF38 {
 
 static inline char* replay_20DF38() { return *(char**)(D_004A28A8_20DF38->game + 0x28); }
 
+/**
+ * Handles replay input before the menu does: slides the help panel, runs the replay menu, toggles the
+ * timeline, and passes the rest to the replay transport.
+ *
+ * Input from a pad other than the replay's PadNum is swallowed. With the menu closed: ReplayMenuUp / Down
+ * (202 / 203) set the panel speed to -4 / +4 (sound 2 when starting from an end or reversing), ReplayTimeLine
+ * (204) toggles "top" and the timeline hints, and Start opens the menu (pause mode 2 pushed, +0x9C = 1).
+ * With it open, Cross runs the selected item (0 save: overlay 0x12; 1 exit: close, "TransitionOut", and for a
+ * loaded replay cGame_exit; 2 continue) and Triangle closes it; both pop the pause-mode stack. For a loaded
+ * replay (+0xB4, copied from cReplay Loaded at create) Up on row 1 and Down on row 2 are swallowed, so the
+ * hidden Save item is never reached.
+ *
+ * @param pInput  the UI input (pad port at +0x4)
+ * @return 1 when handled here, 0 while the menu is open (the menu handles it), else func_0026FB88()'s result
+ */
 extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* pInput)
 {
     cSnd_20DF38* snd = &D_004A5A58;
@@ -292,9 +324,19 @@ struct sReplay_0020E530 {
     int end;            // 0xB0
 };
 
-extern "C" void cOVState_REPLAY_onUpdate(void* p)
+/**
+ * Updates the replay overlay: slides the help panel, shows the matching hints, and refreshes the camera name
+ * and the progress ticker.
+ *
+ * After cOVState_onUpdate() the panel position (+0xA4) moves by the speed and stops at its ends (+0xAC /
+ * +0xB0); "hidehelp" shows at the start, "showhelp" at the end, and "bottom" takes the position as its y.
+ * "ReplayMenuPopup" shows while the menu is open, else the replay advances (func_0026FA78).
+ *
+ * @param vself  the replay overlay state (this)
+ */
+extern "C" void cOVState_REPLAY_onUpdate(void* vself)
 {
-    sReplay_0020E530* self = (sReplay_0020E530*)p;
+    sReplay_0020E530* self = (sReplay_0020E530*)vself;
     cOVState_onUpdate((cOVState*)self);
     self->pos += self->speed;
     if (self->pos <= self->start) {
@@ -364,6 +406,13 @@ extern long D_004A2740[];
 extern long D_004A2748[];
 extern char D_004A2138[];
 
+/**
+ * Shows the name of the current replay camera in the "camera" text.
+ *
+ * By cReplay CurrentReplayCamIndex: Web-cam, Manual-cam, Near-cam, Mid-cam, Far-cam, then the fixed angles
+ * 2:00, 10:00, 4:00 and 8:00 (each after "-  "); other indices print index + 1, which the % 9 cycling never
+ * reaches.
+ */
 // Shows the name of the current replay camera.
 extern "C" void cOVState_REPLAY_setupCameraName(void* self)
 {
@@ -400,6 +449,11 @@ struct sVec3_20E818 {
     float x, y, z;
 };
 
+/**
+ * Moves the "percentcomplete" marker along the timeline to the playback position.
+ *
+ * x = 170 + 315 * PlaybackTick / EndRecordTick (0 when nothing was recorded).
+ */
 extern "C" void cOVState_REPLAY_setupTicker(void* self)
 {
     char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471CC8));

@@ -13,9 +13,18 @@ struct sInstNodeCtorVEntry {
 extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a1, void* stream);
 extern char cInstanceNode_vtbl[];
 
-extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* a1, void* stream)
+/**
+ * Rebuilds an instance node from a replay frame: the cSortObjNode part, its vtable and its instance record.
+ *
+ * The record comes from the frame's readReplayInstance(node) (frame slot 4, given this node).
+ *
+ * @param bucket      bucket index, passed on to the cSortObjNode constructor (On Tour const int bucket)
+ * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
+ * @return @p self
+ */
+extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* bucket, void* stream)
 {
-    cSortObjNode_cSortObjNode(self, a1, stream);
+    cSortObjNode_cSortObjNode(self, bucket, stream);
     self->mVtbl = (void**)cInstanceNode_vtbl;
     sInstNodeCtorVEntry* vt = *(sInstNodeCtorVEntry**)stream;
     self->Instance = (tInstanceRecord*)vt[4].fn((char*)stream + vt[4].delta, self);
@@ -30,6 +39,16 @@ INCLUDE_ASM("object/instancenode", cInstanceNode__cInstanceNode);
 extern "C" void func_0034FC80(void* self, void* a1);
 extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
 
+/**
+ * Destroys an instance node: detaches it from its instance record, resets the record's flags and runs the
+ * cSortObjNode destructor.
+ *
+ * func_0034FC80 (On Tour clearActiveNode) clears the record's node pointer (+0xC) if it points here. The
+ * record's flags (+0x8) keep the upper half and bits 8-9, get the upper half ORed into the lower half and get
+ * bit 1 set.
+ *
+ * @param flags  g++ destructor flags, passed on to the cSortObjNode destructor (bit 0 frees the memory)
+ */
 extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 {
     self->mVtbl = (void**)cInstanceNode_vtbl;
@@ -115,6 +134,16 @@ struct sInstNodeVEntryFD00 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Expires an instance node: unless an expire script takes over, resets the record's flags and deletes the
+ * node.
+ *
+ * With @p runscript set, func_0034FCC0 (On Tour runExpireScript) looks for the instance's expire script; when
+ * one runs, the node is left alone. Otherwise the record's flags (+0x8) are reset as in the destructor and
+ * the node deletes itself through its virtual destructor (slot 1, flags 3).
+ *
+ * @param runscript  nonzero to try the instance's expire script first
+ */
 extern "C" void cInstanceNode_expire(cInstanceNode* self, int runscript)
 {
     if (runscript != 0) {
@@ -143,6 +172,12 @@ struct sInstNodeVEntryFD90 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Drops an instance node that has lost focus: resets the record's flags and deletes the node.
+ *
+ * Like cInstanceNode_expire() without the script check, except that bits 8-9 of the record's flags (+0x8) are
+ * cleared too (mask 0xFFFF0000) before the upper half is ORed into the lower half and bit 1 is set.
+ */
 extern "C" void cInstanceNode_loseFocus(cInstanceNode* self)
 {
     int* f = (int*)((char*)self->Instance + 0x8);
@@ -182,6 +217,13 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern char D_0048E738[];
 extern "C" void* func_003506D8(void* mem, int v);
 
+/**
+ * Replaces an instance node by a dead node: deletes this node and creates a cDeadNode for the same record.
+ *
+ * The node deletes itself through its virtual destructor (slot 1, flags 3), then a 0x1C-byte block
+ * ("DeadNode") is constructed as a cDeadNode for the saved instance record by func_003506D8. The record's
+ * flags are not touched.
+ */
 extern "C" void cInstanceNode_makeThisDead(cInstanceNode* self)
 {
     int v = (int)self->Instance;
@@ -500,6 +542,17 @@ static inline void buildBone_0288(sInMat44_0288* d, const sInMat44_0288* parent,
     vu0CopyMat_0288(d, &t);
 }
 
+/**
+ * Builds the matrix of every mesh of the instance's model from its parent's matrix and the mesh's local
+ * matrix.
+ *
+ * For each mesh (model at record +0x80: count +0x4, 0x10-byte entries +0x8) the local matrix's translation is
+ * scaled by the record's scale (+0x84), then combined with out[parent], or with @p parent for a mesh whose
+ * parent index is -1. A parent mesh must therefore come before its children.
+ *
+ * @param parent  root transform for meshes without a parent (On Tour root)
+ * @param out     receives one matrix per mesh (On Tour animMats)
+ */
 extern "C" void cInstanceNode_makeAnimMats(cInstanceNode* self, sInMat44_0288* parent, sInMat44_0288* out)
 {
     char* o = (char*)self->Instance;
@@ -574,6 +627,15 @@ static inline float IbSqrt(float v)
     return r;
 }
 
+/**
+ * Reports the instance's bound box and the radius around the instance's position that holds all of it.
+ *
+ * box[0] and box[1] get the record's min (+0x60) and max (+0x6C) corners with w = 1; the radius is the
+ * largest distance from the record's position (+0x40) to any of the box's eight corners.
+ *
+ * @param box     receives the min and max corners (On Tour tBoundBox&)
+ * @param radius  receives the radius
+ */
 // Writes the model's bounding box (min, max) and the radius of the sphere around its centre that holds every corner.
 extern "C" void cInstanceNode_getBoundBoxInfo(cInstanceNode* self, sIbVec4* box, float* radius)
 {

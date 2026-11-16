@@ -44,6 +44,15 @@ struct sBucket_3549E0 {
     ~sBucket_3549E0() {}
 };
 
+/**
+ * Allocates the manager's buckets and gives each an empty node list and an empty pending-add list.
+ *
+ * Allocates @p n 0x44-byte buckets ("Buckets"), each a Flags word and four cObjNode sentinels (On Tour
+ * tBucketHeader Head, Tail, AddHead, AddTail) with cObjNode's vtable. Stores @p n in NumBuckets (+0x0), links
+ * each Head/Tail and AddHead/AddTail pair to each other and clears Flags.
+ *
+ * @param n  number of buckets (On Tour numBuckets)
+ */
 extern "C" void cBucketMan_init(cBucketMan* self, int n)
 {
     char** slot = &self->mBuckets;
@@ -176,6 +185,16 @@ struct sSortLists_4C98 {
     char pad_0x30[0x14];    // 0x30
 };
 
+/**
+ * Moves every node of a bucket's pending-add list into its main list, kept in decreasing sort-index order.
+ *
+ * Each pending node is unlinked and, searching from the tail with its virtual compare (slot 6), placed after
+ * the last node whose sort index is at least its own, or at the front when there is none. A node with an
+ * equal sort index (virtual equal, slot 7) takes the old node's place; the old one is deleted (slot 1, flags
+ * 3).
+ *
+ * @param index  bucket index
+ */
 // Moves every node of the bucket's pending list into its sorted list.
 extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
 {
@@ -258,6 +277,14 @@ extern "C" void func_00354E78(cBucketMan* self, sBucketNode* node)
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_first__FP10cBucketMani);
 #ifdef SKIP_ASM
+/**
+ * Returns the first node of a bucket's main list, or 0 when the list is empty.
+ *
+ * Reads Head's Next link (bucket +0x8) and compares it with the Tail sentinel (bucket +0x14).
+ *
+ * @param index  bucket index
+ * @return the first node, or 0
+ */
 // PORT: holds a pointer in an int (needed to match); not 64-bit safe.
 void* cBucketMan_first(cBucketMan* self, int index)
 {
@@ -284,6 +311,15 @@ extern "C" void* func_00354ED0(cBucketMan* self, int index)
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_next__FP10cBucketManPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the node after @p node in a bucket's main list, or 0 at the end of the list.
+ *
+ * Follows the node's Next link (+0x4) and stops at the bucket's Tail sentinel (bucket +0x14).
+ *
+ * @param node   the current node
+ * @param index  bucket index
+ * @return the next node, or 0
+ */
 void* cBucketMan_next(cBucketMan* self, void* node, int index)
 {
     char* bucket = self->mBuckets + index * 0x44;
@@ -305,6 +341,14 @@ extern "C" void* func_00354F20(cBucketMan* self, void* node, int index)
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_addfirst__FP10cBucketMani);
 #ifdef SKIP_ASM
+/**
+ * Returns the first node of a bucket's pending-add list, or 0 when that list is empty.
+ *
+ * Reads AddHead's Next link (bucket +0x28) and compares it with the AddTail sentinel (bucket +0x34).
+ *
+ * @param index  bucket index
+ * @return the first pending node, or 0
+ */
 // PORT: holds a pointer in an int (needed to match); not 64-bit safe.
 void* cBucketMan_addfirst(cBucketMan* self, int index)
 {

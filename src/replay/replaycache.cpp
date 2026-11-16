@@ -12,6 +12,15 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_0026D0A0(void* self);
 extern const char D_004817B0[];
 
+/**
+ * Adds a recorded-input cache to the replay: builds a new cReplayCache in the first free InputCache slot.
+ *
+ * Checks InputCache[0] and [1] (+0x48C); for the first empty one it allocates 0x10 bytes tagged "ReplayCache"
+ * and runs the cache constructor func_0026D0A0 (which allocates its 0x8000-byte "CmdFrame" buffer and clears
+ * its counters). Nothing is allocated when both slots are in use.
+ *
+ * @return the new cache, or 0 when both slots were already taken
+ */
 extern "C" void* cReplay_addCache(cReplay* self)
 {
     void** slot = (void**)((char*)self + 0x48C);
@@ -447,6 +456,13 @@ void cReplay_setReplayState(void* self, int arg);
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_stopAutoReplay__FPv);
 #ifdef SKIP_ASM
+/**
+ * Stops an auto replay and puts the replay into the kReplayEnd state (13).
+ *
+ * When AutoReplay (+0x61C) is set it first calls func_0026F980 (probably stopReplay: it clears AutoReplay,
+ * InstantReplay and StartInstantReplay and, unless Loaded, restores the saved frame). The state is then set
+ * to 13 either way, overriding the one func_0026F980 chose.
+ */
 void cReplay_stopAutoReplay(void* self)
 {
     if (*(int*)((char*)self + 0x61C) != 0) {
@@ -1999,6 +2015,22 @@ struct sRcPool2788 {
     int used;                   // 0x1C
 };
 
+/**
+ * Constructs the in-game sequence (InSeq) manager: a heap over the caller's buffer and a pool of script
+ * players.
+ *
+ * Sets up the heap at +0x8 over @p pHeap (func_002722E0), stores @p tag at +0x0 and @p count at +0x4, then
+ * allocates @p count 0x58-byte script nodes from that heap (each runs cScriptPlayerMain_cScriptPlayerMain()
+ * on node + 8), numbers them and links them all into the free list (+0x18); the active list (+0x1C) starts
+ * empty.
+ *
+ * @param pHeap     start of the memory the manager's heap manages
+ * @param heapSize  size of that memory in bytes
+ * @param count     number of script players to create (On Tour maxScripts)
+ * @param tag       despite the name, the comm interface (On Tour pCommInterface):
+ *                  cScriptPlayerMain_GetInSeqCommInterface() falls back to this word (+0x0)
+ * @return @p self
+ */
 extern "C" sRcPool2788* cInSeq_cInSeq(sRcPool2788* self, void* pHeap, void* heapSize, unsigned int count, int tag)
 {
     func_002722E0(self->heap, pHeap, heapSize);
@@ -2987,6 +3019,14 @@ extern "C" void func_002738F8(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_cScriptPlayerEntity);
 #ifdef SKIP_ASM
+/**
+ * Constructs an InSeq script entity player with no script, channels or entity comm interface.
+ *
+ * Zeroes mpData through mpEntityComm (+0x4 to +0x2C); unk_00 and the three setup flags (+0x30 to +0x38) are
+ * left alone.
+ *
+ * @return @p self
+ */
 extern "C" void* cScriptPlayerEntity_cScriptPlayerEntity(cScriptPlayerEntity* self)
 {
     self->mpData = 0;
@@ -3009,6 +3049,13 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity__cScriptPlayerEntity);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerEntity_DeInit(cScriptPlayerEntity* self);
 
+/**
+ * Destroys an entity player: runs cScriptPlayerEntity_DeInit(), then frees the object when asked to.
+ *
+ * The memory goes back to the cInSeq heap it came from, through func_002724E8.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cScriptPlayerEntity__cScriptPlayerEntity(cScriptPlayerEntity* self, int flags)
 {
     cScriptPlayerEntity_DeInit(self);
@@ -3021,6 +3068,17 @@ extern "C" void cScriptPlayerEntity__cScriptPlayerEntity(cScriptPlayerEntity* se
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_Init);
 #ifdef SKIP_ASM
+/**
+ * Binds the entity player to its block of script data and selects variation 0.
+ *
+ * Stores @p data as mpData and mpBlockHeader, the owner, the variation table (data + 8) and the first
+ * variation's header (data + table[0]); mpHeader points at that variation's custom header when its headerSize
+ * is above 8, else 0.
+ *
+ * @param data  the entity's script block (a tInSeqScriptEntityBlockHeader first)
+ * @param size  despite the name, the owning cScriptPlayerMain (On Tour pOwner), stored in mpOwner
+ * @return the block's blockSize, so the caller can step to the next entity block
+ */
 extern "C" int cScriptPlayerEntity_Init(cScriptPlayerEntity* self, char* data, int size)
 {
     self->mpData = (const char*)data;
@@ -3044,6 +3102,13 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_DeInit);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerEntity_Stop(cScriptPlayerEntity* self);
 
+/**
+ * Unbinds the entity player from its script data, stopping it first.
+ *
+ * Only acts when mpData is set: calls cScriptPlayerEntity_Stop(), then clears the data, owner, user data,
+ * header and variation fields and the three setup flags (mSetupScriptHasKeysLeft,
+ * mSetupScriptInitialEventBits, mWaitingPlayExec).
+ */
 extern "C" void cScriptPlayerEntity_DeInit(cScriptPlayerEntity* self)
 {
     if ((int)self->mpData != 0) {
@@ -3066,6 +3131,14 @@ extern "C" void cScriptPlayerEntity_DeInit(cScriptPlayerEntity* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_SetEntityVariation);
 #ifdef SKIP_ASM
+/**
+ * Selects which variation of the entity's script is played.
+ *
+ * Stores @p idx in mCurrVariation and points mpSystemHeader at mpData + mpVariationTable[idx]; mpHeader is
+ * the variation's custom header when its headerSize is above 8, else 0. The index is not range-checked.
+ *
+ * @param idx  variation index (On Tour varIndex)
+ */
 extern "C" void cScriptPlayerEntity_SetEntityVariation(cScriptPlayerEntity* self, int idx)
 {
     self->mCurrVariation = idx;
@@ -3211,6 +3284,16 @@ public:
     virtual void v04(void* src, int id, int h, float t0, float t1);
 };
 
+/**
+ * Finishes a pending play: reports the setup's initial events to the entity comm interface and clears the
+ * setup state.
+ *
+ * With an entity comm interface (mpEntityComm) it calls OnInSeqKeyEvent (slot 3) when
+ * mSetupScriptInitialEventBits is nonzero, then OnInSeqUpdate (slot 4), with the entity type and frame 0.
+ * Then clears mSetupScriptHasKeysLeft, mSetupScriptInitialEventBits and mWaitingPlayExec.
+ *
+ * @return mSetupScriptHasKeysLeft as it was: nonzero when a channel still has keys to play
+ */
 extern "C" int cScriptPlayerEntity_ExecutePlay(cScriptPlayerEntity* self)
 {
     cRcListener3D20* obj = (cRcListener3D20*)self->mpEntityComm;
@@ -3261,6 +3344,14 @@ public:
     virtual void v02(void* src, int id);
 };
 
+/**
+ * Stops the entity's playback: releases its comm interface and deletes all of its channel players.
+ *
+ * Does nothing unless mIsPlaying. Calls the comm interface's OnInSeqRelease (slot 2) and clears mpEntityComm;
+ * each channel then gets Stop (slot 2) and is deleted by type: spline channels (no destructor) through
+ * func_002724E8, the others through their virtual destructor (slot 10, flags 3). The channel array goes back
+ * to the owner's cInSeq heap (func_002723A8) and mIsPlaying is cleared.
+ */
 extern "C" void cScriptPlayerEntity_Stop(cScriptPlayerEntity* self)
 {
     if (self->mIsPlaying == 0)
@@ -3321,6 +3412,16 @@ public:
     virtual void v02();
 };
 
+/**
+ * Restarts every channel of a playing entity from the start of its data and reports the initial events.
+ *
+ * Walks the channel records after the variation header (4-byte record header, size at +2): each channel gets
+ * Stop (slot 2), then Play(record + 4, self, &bits) (slot 1), and the event bits are ORed. With an entity
+ * comm interface it then calls OnInSeqKeyEvent (slot 3, only when bits were raised) and OnInSeqUpdate (slot
+ * 4) at frame 0.
+ *
+ * @return nonzero when any channel's Play returned nonzero (still has keys to play); 0 when not playing
+ */
 extern "C" int cScriptPlayerEntity_Restart(cScriptPlayerEntity* self)
 {
     if (self->mIsPlaying == 0)
@@ -3432,15 +3533,24 @@ public:
     virtual void v02(void* src, int id);
 };
 
-extern "C" cRcListener4240* cScriptPlayerEntity_SetEntityComm(cScriptPlayerEntity* self, cRcListener4240* l)
+/**
+ * Replaces the entity's comm interface, releasing the old one and locking the new one.
+ *
+ * Calls OnInSeqRelease (slot 2) on the old interface and OnInSeqLock (slot 1) on the new one, each with the
+ * entity and its type (mpSystemHeader->type).
+ *
+ * @param pEntityComm  the new entity comm interface (On Tour cInSeqCommEntity*), or 0 for none
+ * @return the previous interface
+ */
+extern "C" cRcListener4240* cScriptPlayerEntity_SetEntityComm(cScriptPlayerEntity* self, cRcListener4240* pEntityComm)
 {
     cRcListener4240* old = (cRcListener4240*)self->mpEntityComm;
     if (old != 0) {
         old->v02(self, *(unsigned char*)((char*)self->mpSystemHeader + 3));
     }
-    self->mpEntityComm = (cInSeqCommEntity*)l;
-    if (l != 0) {
-        l->v01(self, *(unsigned char*)((char*)self->mpSystemHeader + 3));
+    self->mpEntityComm = (cInSeqCommEntity*)pEntityComm;
+    if (pEntityComm != 0) {
+        pEntityComm->v01(self, *(unsigned char*)((char*)self->mpSystemHeader + 3));
     }
     return old;
 }
@@ -3591,6 +3701,19 @@ public:
     virtual void b4(cScriptPlayerEntity* s, float t, float dt, unsigned char b, int flags);
 };
 
+/**
+ * Advances every channel of the entity to a frame and passes the resulting events to the entity comm
+ * interface.
+ *
+ * Calls each channel's Update (slot 3) with @p currFrameNum and @p dt, ORing the results and the event bits
+ * they raise. With an entity comm interface it then calls OnInSeqKeyEvent (slot 3, only when bits were
+ * raised) and OnInSeqUpdate (slot 4) with the frame, the step and the entity type.
+ *
+ * @param p             the entity player (this)
+ * @param currFrameNum  script frame to update to
+ * @param dt            frame step since the last update (On Tour frameDelta)
+ * @return nonzero while any channel is still playing (its Update returned true)
+ */
 extern "C" int cScriptPlayerEntity_DoFrameUpdate(cScriptPlayerEntity* p, float currFrameNum, float dt)
 {
     cScriptPlayerEntity* self = p;
@@ -3615,6 +3738,14 @@ extern "C" int cScriptPlayerEntity_DoFrameUpdate(cScriptPlayerEntity* p, float c
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_cScriptPlayerMain);
 #ifdef SKIP_ASM
+/**
+ * Constructs a stopped InSeq script player with no script loaded.
+ *
+ * mID, mScriptLength and mJumpFrame start at -1 and mPlaySpeed at 1.0; every other field (data, manager,
+ * entity players, play state, frame, pause count, update flags, preview interface) is 0.
+ *
+ * @return @p self
+ */
 extern "C" void* cScriptPlayerMain_cScriptPlayerMain(cScriptPlayerMain* self)
 {
     self->mID = -1;
@@ -3821,6 +3952,16 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_Preview);
 extern "C" void func_00274830_v(void*, int) __asm__("func_00274830");
 extern "C" void func_00274A30(cScriptPlayerMain* p);
 
+/**
+ * Runs the whole script at once through a preview comm interface, then restores the player's speed and loop
+ * setting.
+ *
+ * Sets mpPreviewCommInterface, starts playback without looping (func_00274830, which only starts a stopped
+ * player) and calls the frame update func_00274A30 at speed 1.0 until the play state is back to stopped; then
+ * restores mPlaySpeed and mLoopScript and clears the preview interface.
+ *
+ * @param flag  despite the name, the comm interface to preview through (On Tour pPreviewCommInterface)
+ */
 extern "C" void cScriptPlayerMain_Preview(cScriptPlayerMain* self, int flag)
 {
     float savedScale = self->mPlaySpeed;
@@ -3867,6 +4008,14 @@ public:
     virtual void v04(void* src);
 };
 
+/**
+ * Stops the script: stops every entity and resets the play state, frame and cached length.
+ *
+ * Does nothing when already stopped. During an entity update (mEntityUpdateInProgress) it only sets
+ * mDoStopInEntityUpdate, so the update stops afterwards. Otherwise it stops each entity
+ * (cScriptPlayerEntity_Stop), zeroes mPlayState, mCurrFrame, mNumPaused and mNumSteps, sets mScriptLength and
+ * mJumpFrame to -1 and calls the comm interface's slot 4 (OnInSeqStop by On Tour's order).
+ */
 extern "C" void cScriptPlayerMain_Stop(cScriptPlayerMain* self)
 {
     if (self->mPlayState == 0) return;
@@ -3893,6 +4042,11 @@ extern "C" void cScriptPlayerMain_Stop(cScriptPlayerMain* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_Pause);
 #ifdef SKIP_ASM
+/**
+ * Pauses a playing script by raising its pause count (mNumPaused).
+ *
+ * Pauses nest: each needs a matching cScriptPlayerMain_Resume(). Nothing happens while stopped.
+ */
 extern "C" void cScriptPlayerMain_Pause(cScriptPlayerMain* self)
 {
     if (self->mPlayState != 0) {
@@ -3904,6 +4058,11 @@ extern "C" void cScriptPlayerMain_Pause(cScriptPlayerMain* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_Resume);
 #ifdef SKIP_ASM
+/**
+ * Undoes one pause of a playing script: lowers mNumPaused, not below 0.
+ *
+ * Nothing happens while stopped.
+ */
 extern "C" void cScriptPlayerMain_Resume(cScriptPlayerMain* self)
 {
     if (self->mPlayState != 0) {
@@ -4009,9 +4168,15 @@ int func_00274C10(void* self, int a1)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_GetEntity);
 #ifdef SKIP_ASM
-extern "C" void* cScriptPlayerMain_GetEntity(cScriptPlayerMain* self, int a1)
+/**
+ * Returns one of the script's entity players: mpEntityPlayers + index * 0x3C.
+ *
+ * @param entityIndex  entity index (On Tour entityIndex)
+ * @return the entity player at that index (not range-checked)
+ */
+extern "C" void* cScriptPlayerMain_GetEntity(cScriptPlayerMain* self, int entityIndex)
 {
-    return (char*)self->mpEntityPlayers + a1 * 0x3c;
+    return (char*)self->mpEntityPlayers + entityIndex * 0x3c;
 }
 #endif
 
@@ -4059,6 +4224,14 @@ extern "C" unsigned char func_00274C68_impl(void *arg0) {
 INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_GetScriptLength);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the script's length in frames: the longest numFrames among its entities' current variations.
+ *
+ * Uses mScriptLength when it is not negative; otherwise computes the maximum with func_00274348 over the
+ * entities and caches it only while the script is playing.
+ *
+ * @return the length in frames
+ */
 extern "C" int cScriptPlayerMain_GetScriptLength(cScriptPlayerMain* self)
 {
     int r = self->mScriptLength;
@@ -4093,6 +4266,13 @@ static inline float ftrunc_00274D08(float x)
     return t;
 }
 
+/**
+ * Returns how many more updates the script needs to reach its end at the current play speed.
+ *
+ * Computes (cScriptPlayerMain_GetScriptLength() - mCurrFrame) / mPlaySpeed and rounds it up.
+ *
+ * @return the number of updates left, rounded up
+ */
 extern "C" int cScriptPlayerMain_GetNumUpdatesToEndLeft(cScriptPlayerMain* self)
 {
     float x = ((float)cScriptPlayerMain_GetScriptLength(self) - self->mCurrFrame) / self->mPlaySpeed;
@@ -4107,6 +4287,13 @@ extern "C" int cScriptPlayerMain_GetNumUpdatesToEndLeft(cScriptPlayerMain* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_GetInSeqCommInterface);
 #ifdef SKIP_ASM
+/**
+ * Returns the comm interface the script reports to: the preview interface when set, else the manager's.
+ *
+ * The manager's interface is the first word of the cInSeq (mpManager + 0x0).
+ *
+ * @return the cInSeqComm interface, as an int
+ */
 extern "C" int cScriptPlayerMain_GetInSeqCommInterface(cScriptPlayerMain* self)
 {
     int v = (int)self->mpPreviewCommInterface;

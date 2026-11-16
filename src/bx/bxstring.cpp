@@ -7,6 +7,17 @@ INCLUDE_ASM("bx/bxstring", cBXString_cBXString1);
 extern char* D_004A3E90;
 extern "C" cBXString* cBXString_cBXString4(cBXString* self, const char* str);
 
+/**
+ * Copy-constructs a string: shares the other string's buffer, or copies it when that buffer is static or
+ * locked.
+ *
+ * A NumRefs of 0 or more means a shared heap buffer: the pointer is copied and NumRefs incremented. A
+ * negative count (the static empty string or a locked buffer) makes a fresh copy through
+ * cBXString_cBXString4().
+ *
+ * @param other  the string to copy
+ * @return @p self
+ */
 // PORT: pointer held in int to get the target's negative header offsets.
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other)
 {
@@ -34,6 +45,15 @@ void* operator new(unsigned int size, const char* tag, int flags, int d) __asm__
 extern const char D_0048D850[];
 extern char* D_004A3E90;
 
+/**
+ * Gives the string a fresh, unshared buffer for @p size characters, or the shared empty string for 0.
+ *
+ * Allocates size + 0xD bytes tagged "cStringData" (flags 0x20000000): a tStringData header {NumRefs 1,
+ * DataLength size, AllocLength size}, the text, and a 0 at [size]. It does not release the old buffer;
+ * callers run cBXString_Reset() first.
+ *
+ * @param size  number of characters to make room for
+ */
 extern "C" void cBXString_Realloc(cBXString* self, int size)
 {
     if (size == 0) {
@@ -57,6 +77,12 @@ extern char D_0048DCD4[];
 extern char* D_004A3E90;
 void cMemMan_free(void*);
 
+/**
+ * Releases the string's buffer and makes it the shared empty string.
+ *
+ * Unless it already is the empty string, decrements NumRefs, frees the block (Str - 0xC) when the count
+ * reaches exactly 0, and points Str at cBXString::EmptyString.
+ */
 // PORT: pointer held in int to get the target's negative header offsets.
 extern "C" void cBXString_Reset(cBXString* self)
 {
@@ -83,6 +109,12 @@ extern "C" void cBXString_Reset(cBXString* self);
 extern "C" void cBXString_Realloc(cBXString* self, int size);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
+/**
+ * Unshares the string before a write: gives it a private copy of the text when its buffer is shared.
+ *
+ * When NumRefs is 2 or more, releases the shared buffer, allocates one of the same length and copies the text
+ * with its terminator.
+ */
 // PORT: pointer held in int to get the target's negative load offsets.
 extern "C" void cBXString_copyBeforeWrite(cBXString* self)
 {
@@ -102,6 +134,14 @@ INCLUDE_ASM("bx/bxstring", cBXString_Resize);
 extern "C" void cBXString_Reset(cBXString* self);
 extern "C" void cBXString_Realloc(cBXString* self, int size);
 
+/**
+ * Makes sure the string owns a buffer for at least @p size characters, discarding the text if it reallocates.
+ *
+ * When the buffer is shared (NumRefs 2 or more) or its AllocLength is below @p size, releases it and
+ * allocates a new one of exactly @p size, with DataLength = size and the text left uninitialised.
+ *
+ * @param size  number of characters needed
+ */
 // PORT: pointer held in int to get the target's negative load offsets.
 extern "C" void cBXString_Resize(cBXString* self, int size)
 {
@@ -142,6 +182,14 @@ extern char D_0048DCD4[];
 void cMemMan_free(void*);
 void operator_delete(int*);
 
+/**
+ * Destroys a string: drops its reference to the buffer, then frees the object when asked to.
+ *
+ * Unless it is the empty string, decrements NumRefs and frees the block when the count drops to 0 or below
+ * (so a locked buffer, count -1, is freed as well).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 // PORT: pointer held in int to get the target's negative header offsets.
 extern "C" void cBXString__cBXString(cBXString* self, int flags)
 {
@@ -224,6 +272,15 @@ INCLUDE_ASM("bx/bxstring", cBXString_InitFromCString);
 #ifdef SKIP_ASM
 extern char D_0048DCD4[];
 
+/**
+ * Sets the string to the first @p len characters of a C string.
+ *
+ * Makes sure it owns a buffer of @p len characters (cBXString_Resize()), copies the text, sets DataLength and
+ * the terminator. When the result is the empty string (len 0 on a shared buffer) nothing is written.
+ *
+ * @param len  number of characters to copy
+ * @param str  the source text (it need not end at @p len)
+ */
 // PORT: pointer held in int to get the target's negative store offset.
 extern "C" void cBXString_InitFromCString(cBXString* self, int len, const char* str)
 {
@@ -242,6 +299,16 @@ INCLUDE_ASM("bx/bxstring", cBXString_operatorE);
 #ifdef SKIP_ASM
 extern char D_0048DCD4[];
 
+/**
+ * Assigns another string to this one (operator=), sharing its buffer when it can.
+ *
+ * Does nothing when both hold the same text. When this buffer is locked (negative NumRefs, not the empty
+ * string) or the other's is static or locked, copies the characters with cBXString_InitFromCString();
+ * otherwise releases this buffer and shares the other's, incrementing NumRefs.
+ *
+ * @param other  the string to assign
+ * @return @p self
+ */
 // PORT: pointers held in int to get the target's negative header offsets
 // (refcount at -0xC, length at -8).
 extern "C" cBXString* cBXString_operatorE(cBXString* self, cBXString* other)
@@ -296,15 +363,26 @@ INCLUDE_ASM("bx/bxstring", cBXString_concatCopy);
 extern "C" void cBXString_Realloc(cBXString* self, int size);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
+/**
+ * Builds the string from two pieces: @p len1 characters of @p src1 followed by @p len2 characters of @p src2.
+ *
+ * Allocates a fresh buffer of len1 + len2 (cBXString_Realloc()) and copies both pieces; when both lengths are
+ * 0 it leaves the string untouched. Callers release the old buffer first.
+ *
+ * @param len1  length of the first piece
+ * @param src1    the first piece
+ * @param len2  length of the second piece
+ * @param src2    the second piece
+ */
 // Builds the string from two pieces: (len1, s1) followed by (len2, s2).
-extern "C" void cBXString_concatCopy(cBXString* self, int len1, const char* s1, int len2, const char* s2)
+extern "C" void cBXString_concatCopy(cBXString* self, int len1, const char* src1, int len2, const char* src2)
 {
     int total = len1 + len2;
     if (total != 0)
     {
         cBXString_Realloc(self, total);
-        func_0041605C(self->Str, s1, len1);
-        func_0041605C(self->Str + len1, s2, len2);
+        func_0041605C(self->Str, src1, len1);
+        func_0041605C(self->Str + len1, src2, len2);
     }
 }
 #endif
@@ -442,6 +520,16 @@ struct cBXStringHdrK2 {
     int cap; // -0x4
 };
 
+/**
+ * Appends @p len characters of @p str to the string, in place when its buffer is private and big enough.
+ *
+ * When the buffer is shared or AllocLength < DataLength + len, it keeps a reference to the old text, releases
+ * the buffer and rebuilds the string with cBXString_concatCopy(); otherwise it copies the text to the end,
+ * adds @p len to DataLength and writes the terminator.
+ *
+ * @param len  number of characters to append
+ * @param str  the text to append
+ */
 // PORT: pointer held in int to get the target's negative header offsets.
 extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str)
 {
@@ -520,6 +608,15 @@ INCLUDE_ASM("bx/bxstring", cBXString_getBuffer);
 #ifdef SKIP_ASM
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 
+/**
+ * Returns a writable buffer for the string with room for at least @p size characters.
+ *
+ * When the buffer is shared or too small it reallocates it to max(length, size) characters and copies the
+ * current text over, keeping DataLength. Pair with cBXString_releaseBuffer() after writing.
+ *
+ * @param size  the minimum number of characters the buffer must hold (On Tour minlen)
+ * @return the string's text buffer (Str)
+ */
 // PORT: pointer held in int to get the target's negative header offsets.
 extern "C" char* cBXString_getBuffer(cBXString* self, int size)
 {
@@ -545,6 +642,14 @@ INCLUDE_ASM("bx/bxstring", cBXString_releaseBuffer);
 #ifdef SKIP_ASM
 extern char D_0048DCD4[];
 
+/**
+ * Finishes a direct write into the string's buffer: stores the new length and the terminator.
+ *
+ * Unshares the buffer first (cBXString_copyBeforeWrite()); a length of -1 means strlen() of the text. Nothing
+ * is stored when the string is the empty string.
+ *
+ * @param len  the new length (On Tour newlen), or -1 to measure the text
+ */
 // PORT: pointer held in int to get the target's negative store offset.
 extern "C" void cBXString_releaseBuffer(cBXString* self, int len)
 {
@@ -699,6 +804,12 @@ INCLUDE_ASM("bx/bxstring", cBXString_makeUpper);
 #ifdef SKIP_ASM
 extern unsigned char D_00499C81[];
 static inline int to_upper(int c) { if (D_00499C81[c] & 2) return c - 0x20; return c; }
+/**
+ * Converts the string to upper case in place.
+ *
+ * Unshares the buffer first (cBXString_copyBeforeWrite()), then subtracts 0x20 from each character that the
+ * ctype table D_00499C81 marks lower-case (mask 2).
+ */
 // In-place upper-case; D_00499C81 is the ctype table (+1), bit 2 = lower-case.
 // PORT: pointer held in int to get the target's negative load offset.
 extern "C" void cBXString_makeUpper(cBXString* self)
@@ -832,6 +943,17 @@ extern "C" void func_003181E8(cBXString* src, cBXString* dst, int len, int pos, 
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
+/**
+ * Returns the last @p n characters of a string (right(n)), with @p n clamped to 0 and the string's length.
+ *
+ * Returns a cBXString by value: @p self is the hidden result pointer and @p other the source (On Tour's
+ * this). The tail is copied into a temporary with func_003181E8, @p self is copy-constructed from it and the
+ * temporary destroyed.
+ *
+ * @param other  the source string (On Tour this)
+ * @param n      number of characters to take from the end (On Tour count)
+ * @return @p self
+ */
 // Right(n): the last n chars of other. PORT: pointer held in int for the header offset.
 extern "C" cBXString* cBXString_right(cBXString* self, cBXString* other, int n)
 {
@@ -859,6 +981,18 @@ extern "C" void func_003181E8(cBXString* src, cBXString* dst, int len, int pos, 
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
+/**
+ * Makes @p self a copy of the first @p n characters of another string (like left(n)), @p n clamped to its
+ * length.
+ *
+ * The same shape as cBXString_right() with copy position 0: func_003181E8 copies into a temporary, @p self is
+ * copy-constructed from it and the temporary destroyed. cSSXApp_parseCommandLine() uses it to cut a file
+ * extension.
+ *
+ * @param other  the source string
+ * @param n      number of leading characters to keep; negative gives an empty string
+ * @return @p self
+ */
 // PORT: pointer held in int to get the target's negative header offset.
 extern "C" cBXString* cBXString_cBXString5(cBXString* self, cBXString* other, int n)
 {

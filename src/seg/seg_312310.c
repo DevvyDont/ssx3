@@ -1155,6 +1155,16 @@ struct S412280 { unsigned cls; int sign; int exp; int pad; unsigned long frac; l
 extern void unp_80(long *, struct S412280 *) __asm__("func_00411C38");
 extern void pk_80(struct S412280 *) __asm__("func_00411B08");
 extern struct S412280 D_0052ADC0;
+/**
+ * Divides two doubles in software (fp-bit.c's divide, exported as GOFAST dpdiv).
+ *
+ * NaN operands come back unchanged; inf / inf and 0 / 0 give the NaN D_0052ADC0, x / inf gives 0 and x / 0
+ * gives infinity. The quotient is left in the return register by pack_d (func_00411B08) although the C
+ * declaration returns void.
+ *
+ * @param x  dividend, as the raw 64-bit pattern of a double
+ * @param y  divisor, as the raw 64-bit pattern of a double
+ */
 void dpdiv(long x, long y) {
     struct S412280 a;
     struct S412280 b;
@@ -1323,6 +1333,15 @@ INCLUDE_ASM("seg/seg_312310", litodp);
 #ifdef SKIP_ASM
 struct S412550 { unsigned cls; int sign; int exp; int pad; unsigned long frac; };
 extern void pk_412550(struct S412550 *) __asm__("func_00411B08");
+/**
+ * Converts a 32-bit signed integer to a double in software (fp-bit.c's si_to_df, exported as GOFAST litodp).
+ *
+ * INT_MIN is returned directly as -2147483648.0. Any other value is normalised into unpacked form and packed
+ * by func_00411B08, whose result the C body leaves in the return register without a return statement.
+ *
+ * @param x  the integer to convert
+ * @return the value as a double
+ */
 double litodp(int x) {
     struct S412550 s;
     s.cls = 3;
@@ -1352,10 +1371,20 @@ INCLUDE_ASM("seg/seg_312310", dptoli);
 #ifdef SKIP_ASM
 extern void func_00411C38(long *, int *);
 struct S412608 { unsigned cls; int sign; int exp; int pad; unsigned long frac; };
-int dptoli(long a) {
+/**
+ * Converts a double to a 32-bit signed integer in software, truncating toward zero (fp-bit.c's df_to_si,
+ * GOFAST dptoli).
+ *
+ * Zero, NaN and magnitudes below 1 give 0; infinity and values with an exponent of 31 or more saturate to
+ * 0x80000000 or 0x7FFFFFFF by sign.
+ *
+ * @param value  the double to convert, as its raw 64-bit pattern
+ * @return the truncated integer
+ */
+int dptoli(long value) {
     struct S412608 s;
     int r;
-    func_00411C38(&a, (int *)&s);
+    func_00411C38(&value, (int *)&s);
     if ((s.cls ^ 2) == 0)
         return 0;
     if (s.cls < 2)
@@ -1378,9 +1407,19 @@ INCLUDE_ASM("seg/seg_312310", dptoul);
 #ifdef SKIP_ASM
 extern void func_00411C38(long *, int *);
 struct S4126A0 { unsigned cls; int sign; int exp; int pad; unsigned long frac; };
-unsigned dptoul(long a) {
+/**
+ * Converts a double to a 32-bit unsigned integer in software, truncating toward zero (fp-bit.c's df_to_usi,
+ * GOFAST dptoul).
+ *
+ * Zero, NaN, negative values (even -infinity) and magnitudes below 1 give 0; infinity and values of 2^32 or
+ * more give 0xFFFFFFFF. The left-shift branch for exponents of 61 or more can never run, as in fp-bit.c.
+ *
+ * @param value  the double to convert, as its raw 64-bit pattern
+ * @return the truncated unsigned integer
+ */
+unsigned dptoul(long value) {
     struct S4126A0 s;
-    func_00411C38(&a, (int *)&s);
+    func_00411C38(&value, (int *)&s);
     if ((s.cls ^ 2) == 0)
         return 0;
     if (s.cls < 2)

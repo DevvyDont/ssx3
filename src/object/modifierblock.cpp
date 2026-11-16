@@ -178,6 +178,12 @@ extern "C" float func_00352BF8(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_setRadius__FP14tModifierBlock);
 #ifdef SKIP_ASM
+/**
+ * Passes a radius to the modifier block's root transform modifier through its virtual setRadius (slot 15).
+ *
+ * Does nothing without a root transform modifier (+0x0, On Tour RootTransform). The radius (On Tour's float
+ * argument) travels in $f12 untouched; the mangled name and the C declare no float parameter.
+ */
 void tModifierBlock_setRadius(tModifierBlock* self)
 {
     sBoundBoxNode* node = self->node;
@@ -252,6 +258,13 @@ struct sMbLink2D20 {
     sMbVEntryV2D20* vt;     // 0x8
 };
 
+/**
+ * Runs a modifier block's post-update pass: updates its effects and rails, then its root transform modifier.
+ *
+ * Calls update (slot 5) on every effect link (Effect, +0x10), update (slot 3) on every rail modifier (Rail,
+ * +0x1C) and postUpdate (slot 4) on the root transform modifier (+0x0) when there is one. Each link's next
+ * pointer is read before its call.
+ */
 extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
 {
     sMbLink2D20* h = *(sMbLink2D20**)&self->field_0x10;
@@ -457,6 +470,15 @@ struct sMbVEntryVII3020 {
     void (*fn)(void*, int, int);
 };
 
+/**
+ * Passes a force on to the move node that owns the modifier block's root transform modifier.
+ *
+ * Asks the root transform modifier (+0x0) for its parent (getParent, slot 25) and calls that node's
+ * applyForce (slot 43); does nothing without either.
+ *
+ * @param intInfo  the intersect info, passed through (On Tour const tIntersectInfo&)
+ * @param force    the force vector, passed through (On Tour const t4Vector&)
+ */
 extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int intInfo, int force)
 {
     sBoundBoxNode* node = self->node;
@@ -477,6 +499,14 @@ extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int intInfo, int
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_updateIntersectInfo);
 #ifdef SKIP_ASM
+/**
+ * Lets the modifier block's root transform modifier add its motion to an intersect info.
+ *
+ * Calls the modifier's virtual updateIntersectInfo (slot 22); does nothing when the block has no root
+ * transform modifier.
+ *
+ * @param intInfo  the intersect info to update (On Tour tIntersectInfo&)
+ */
 extern "C" void tModifierBlock_updateIntersectInfo(tModifierBlock* self, void* intInfo)
 {
     sBoundBoxNode* node = self->node;
@@ -728,6 +758,14 @@ struct sModifierLink {
     int id;              // 0x30
 };
 
+/**
+ * Tells whether the modifier block has a rail modifier for a given spline.
+ *
+ * Walks the rail list (Rail, +0x1C) comparing each rail's SplineId (+0x30).
+ *
+ * @param id  the spline's resource id (On Tour tResourceID splineId)
+ * @return 1 if a rail with that spline id is found, otherwise 0
+ */
 extern "C" int tModifierBlock_findRail(void* self, int id)
 {
     sModifierLink* p = *(sModifierLink**)((char*)self + 0x1c);
@@ -773,6 +811,16 @@ static inline void VCall1_353448(char* o, int voff, int slot, void* arg)
     e->fn(o + e->delta, arg);
 }
 
+/**
+ * Writes a modifier block to a replay frame: a header saying which modifiers it has, then each modifier.
+ *
+ * The 0x34-byte header (On Tour tModifierBlockInfo) holds the flags (1 root transform, 2 UV scroll, 4 tex
+ * flip, 8 physics, 0x10 effects, 0x20 rails), the transform and physics types (getTransformType slot 26,
+ * getPhysicsType slot 5), the effect and rail counts and each effect's type (slot 2). Each present modifier
+ * then writes itself in that order. The 32-entry effect type table is filled without a bound.
+ *
+ * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
+ */
 extern "C" void tModifierBlock_writeToReplayFrame(char* self, char* stream)
 {
     sHdr_353448 h;
@@ -897,6 +945,16 @@ extern const char D_0048E990[];
 extern const char D_0048E9A8[];
 extern const char D_0048E9B8[];
 
+/**
+ * Rebuilds a modifier block from a replay frame: reads the header and re-creates every modifier it lists.
+ *
+ * The root transform is built by type: 1 spline, 2 multi-spline, 3 position, 4 parent, 5 roller, 6 magnet, 7
+ * AvaSpline modifier; UV scroll, tex flip and (physics type 1) boost modifiers follow their flags. Effects
+ * are rebuilt by type (1 particle, 2 dynamic particle, 3 halo) and appended to Effect (+0x10), rails to Rail
+ * (+0x1C). An unknown effect type appends a null pointer, which func_00345720 writes through.
+ *
+ * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
+ */
 extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStream36D8* stream)
 {
     sMbReplayHdr36D8 hdr;
@@ -1054,6 +1112,15 @@ static inline void SetBlendM_53B10(sRS_53B10* r, int v) { r->blendm = v; }
 static inline void SetZMode_53B10(sRS_53B10* r, int v) { r->zmode = v; }
 static inline void SetAlpha_53B10(sRS_53B10* r, int v) { r->alpha = v; }
 
+/**
+ * Draws the sky box instance around the current view's position with its own draw state.
+ *
+ * Skipped when the "Disable Sky Box" debug toggle (D_004A452C) is set or there is no sky instance (+0x14, On
+ * Tour m_pInstanceSky). Pushes a copy of the draw state with the blend field (bits 5-9 of word 8) cleared,
+ * zon 1, blendm 2, zmode 0 and alpha 0x14, sets bit 2 and clears bit 1 of the record's flags, and draws
+ * through the graphics manager's slot 95 with an identity matrix moved to the current view's position
+ * (func_002D1C20) and flags 0x5420. Then pops the state and writes the saved blend bits back.
+ */
 extern "C" void cSkyBox_render(void* self)
 {
     if (D_004A452C != 0)
@@ -1191,6 +1258,12 @@ INCLUDE_ASM("object/modifierblock", cSpring__cSpring);
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a spring: frees its node array (+0x24, On Tour Nodes) when it has one, then frees the object when
+ * asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cSpring__cSpring(void* self, int flags)
 {
     void* p = *(void**)((char*)self + 0x24);

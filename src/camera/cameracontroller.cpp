@@ -8,6 +8,15 @@ extern char D_0045B220[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cCameraAlgoList_cCameraAlgoList(void* self);
 
+/**
+ * Constructs the camera controller base for a camera, with an empty algorithm list and no input.
+ *
+ * Stores cCameraController's vtable at +0x14, allocates the 8-byte "Algorithm List" (AlgorithmList, +0x8),
+ * stores @p camera at +0x10 and zeroes Input (+0xC), Type (+0x0) and BlendType (+0x4).
+ *
+ * @param camera  the owning cCamera
+ * @return @p self
+ */
 extern "C" void* cCameraController_cCameraController(void* self, int camera)
 {
     *(void***)((char*)self + 0x14) = cCameraController_vtbl;
@@ -27,6 +36,13 @@ extern void* cCameraController_vtbl[];
 extern "C" void cCameraAlgoList__cCameraAlgoList(void* p, int mode);
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a camera controller: deletes its algorithm list, then frees the controller when asked to.
+ *
+ * Restores cCameraController's vtable at +0x14 and destroys AlgorithmList (+0x8) with flags 3 when it is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cCameraController__cCameraController(void* self, int flags)
 {
     *(void***)((char*)self + 0x14) = cCameraController_vtbl;
@@ -129,6 +145,17 @@ extern "C" void* cManualCameraAlgorithm_cManualCameraAlgorithm(void* self);
 extern "C" void* cEditorCameraAlgorithm_cEditorCameraAlgorithm(void* self);
 extern "C" void cManualCameraController_setCurrentAlgorithmType(void* self, int msg);
 
+/**
+ * Constructs a manual camera controller with its own manual and editor camera algorithms, starting in the
+ * manual one.
+ *
+ * Runs the cCameraController constructor, installs cManualCameraController's vtable (+0x14), sets Type to 1,
+ * allocates the 0x40-byte "Manual Cam Algo" (+0x18) and "Editor Cam Algo" (+0x1C) and selects algorithm type
+ * 0x51 with cManualCameraController_setCurrentAlgorithmType().
+ *
+ * @param camera  the owning cCamera
+ * @return @p self
+ */
 extern "C" void* cManualCameraController_cManualCameraController(void* self, int camera)
 {
     cCameraController_cCameraController(self, camera);
@@ -231,6 +258,14 @@ INCLUDE_ASM("camera/cameracontroller", cManualCameraController_setCurrentAlgorit
 #ifdef SKIP_ASM
 extern "C" void func_0015CF28(void* self, int a, int b);
 
+/**
+ * Switches the manual camera controller to its editor or its manual algorithm.
+ *
+ * Type 0x50 selects the editor algorithm (+0x1C) and 0x51 the manual one (+0x18); other types are ignored.
+ * func_0015CF28 empties the algorithm list and inserts the chosen algorithm at weight 1.0.
+ *
+ * @param msg  the eCamAlgoType to select (On Tour type): 0x50 editor, 0x51 manual
+ */
 extern "C" void cManualCameraController_setCurrentAlgorithmType(void* self, int msg)
 {
     switch (msg) {

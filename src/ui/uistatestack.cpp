@@ -18,6 +18,14 @@ public:
     virtual void v04();
 };
 
+/**
+ * Adds an explicit state: enables it, notifies it and appends it to the stack's second list.
+ *
+ * Sets mEnabled and mExplicit (0x60) in the state's mAttrState, calls its virtual slot 4 (empty in cUIState;
+ * the slot before onDestroyScreen) and adds it to the end of the cList at +0x1C, not the main stack at +0x0.
+ *
+ * @param state  the state to add (On Tour pPushState)
+ */
 extern "C" void cUIStateStack_pushExplicit(void* self, cUIStateStack_pushExplicit_cState* state)
 {
     *(int*)((char*)state + 0x1C) |= 0x60;
@@ -102,6 +110,18 @@ static inline int cUIStateStack_stateId(cUIStateStack_sState* s) { return s->id;
 
 extern "C" void* cUIStateStack_getCurrentState(void* self);
 
+/**
+ * Pushes a state onto the front of the stack, choosing whether it starts enabled and whether the current one
+ * dies.
+ *
+ * If the current (first enabled) state is in mode 5 it moves to mode 7 with mPendingDelete = @p
+ * bDestroyCurrent; other modes are left alone. With no current state the new one is forced enabled and set to
+ * mode 2. The pushed state's mEnabled becomes @p bEnable.
+ *
+ * @param st               the state to push (On Tour pPushState)
+ * @param bEnable          whether the pushed state starts enabled
+ * @param bDestroyCurrent  stored as the current state's mPendingDelete when it is in mode 5
+ */
 extern "C" void cUIStateStack_pushSpecial(cList* self, cUIStateStack_sState* st, int bEnable, int bDestroyCurrent)
 {
     cUIStateStack_sState* cur = (cUIStateStack_sState*)cUIStateStack_getCurrentState(self);
@@ -142,6 +162,15 @@ struct cUIStateStack_push_sState {
 
 static inline int cUIStateStack_push_stateId(cUIStateStack_push_sState* s) { return s->id; }
 
+/**
+ * Pushes a state onto the front of the stack, retiring the state on top.
+ *
+ * When the top state is enabled, not explicit and in a mode below 6, it is set to mode 6 with mPendingDelete,
+ * and the new state starts disabled in mode 1, probably until the old one has left; otherwise the new state
+ * starts enabled in mode 2.
+ *
+ * @param st  the state to push (On Tour pPushState)
+ */
 extern "C" void cUIStateStack_push(cList* self, cUIStateStack_push_sState* st)
 {
     int covered = 0;
@@ -801,6 +830,15 @@ struct sState39FE00 {
     void* data;             // 0x3C
 };
 
+/**
+ * Initialises a UI object from its screen-data record: hash name, layer, flags, visibility and event table.
+ *
+ * Copies the record's hash (+0x4) to mHashName and its 5-bit layer (+0x8) to mLayer; mOrientation and mWrap
+ * come from bits 6 and 7 of the record's flag word and the visibility from bit 9, through the virtual
+ * setVisible (slot 9). mpEvents points just past the 12-byte record.
+ *
+ * @param def  the object's record in the screen data (On Tour pObj, a tUIBaseObject)
+ */
 // Initialises a UI state from its definition record (id, layer, flags) and points it at the following data.
 extern "C" void cUIThing_setUIData(sState39FE00* self, sStateDef39FE00* def)
 {

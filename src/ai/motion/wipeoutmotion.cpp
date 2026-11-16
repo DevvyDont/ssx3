@@ -64,6 +64,17 @@ static inline void vu0SubWG(sVec4WG& dst, const sVec4WG& a, const sVec4WG& b)
         : "m"(a), "m"(b));
 }
 
+/**
+ * Enters the wipeout motion: sets up the board's collision and starts the rider's tumble on the ground or in
+ * the air.
+ *
+ * Creates the BoardSphereTree (0x2B0 bytes, "BoardSphereTree") the first time and collapses BoardIntersectBox
+ * onto the rider's position. Coming from MS_Ground it removes the ground-normal part of the rider's velocity
+ * and uses WMS_Ground; otherwise WMS_Air, launching the air predictor from the position and velocity
+ * (3333.33). Clears ForceNaturalAir and the rider's mSpinRate / mFlipRate.
+ *
+ * @param prev  the motion state being left (eMotionState; MS_Ground = 0)
+ */
 extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int prev)
 {
     if (self->BoardSphereTree == 0)
@@ -152,16 +163,27 @@ static inline void vu0SubWM(sVec4WM& dst, const sVec4WM& a, const sVec4WM& b)
         : "m"(a), "m"(b));
 }
 
-extern "C" void cWipeoutMotion_throwItem(cWipeoutMotion* self, sVec4WM* a, sVec4WM* b, sVecPairWM* c)
+/**
+ * Throws the rider's board free with a given velocity and spin.
+ *
+ * Copies @p itemBoneID into the rider's root pose override (+0x130: position, then rotation) and enables it
+ * (mUseRootPoseOverride), and sets BoardVelocity and BoardAngVelocity. On the ground (WMS_Ground) the
+ * ground-normal part of the board velocity is removed.
+ *
+ * @param initVel  the board's initial velocity (On Tour initVel)
+ * @param initAngVel  the board's initial angular velocity (On Tour initAngVel)
+ * @param itemBoneID  the board's starting pose, position then rotation (On Tour passes an item bone ID instead)
+ */
+extern "C" void cWipeoutMotion_throwItem(cWipeoutMotion* self, sVec4WM* initVel, sVec4WM* initAngVel, sVecPairWM* itemBoneID)
 {
-    *(sVecPairWM*)((char*)self->mRider + 0x130) = *c;
+    *(sVecPairWM*)((char*)self->mRider + 0x130) = *itemBoneID;
     *(int*)((char*)self->mRider + 0x150) = 1;
-    *(sVec4WM*)&self->BoardAngVelocity = *b;
-    *(sVec4WM*)&self->BoardVelocity = *a;
+    *(sVec4WM*)&self->BoardAngVelocity = *initAngVel;
+    *(sVec4WM*)&self->BoardVelocity = *initVel;
     if (*(int*)self == 0)
     {
         sVec4WM* n = (sVec4WM*)((char*)self->mRider + 0x370);
-        float d = vu0DotWM(*n, *a);
+        float d = vu0DotWM(*n, *initVel);
         sVec4WM t = vu0ScaleWM(*n, d);
         vu0SubWM(*(sVec4WM*)&self->BoardVelocity, *(sVec4WM*)&self->BoardVelocity, t);
     }
@@ -190,14 +212,24 @@ static inline sVec4WM vu0ScaleMemWM_136DE0(const sVec4WM& v, float s)
     return r;
 }
 
-extern "C" void cWipeoutMotion_throwRider(cWipeoutMotion* self, sVec4WM* a, sVec4WM* b)
+/**
+ * Throws the rider with a given velocity and spin during a wipeout.
+ *
+ * Sets RiderAngVelocity and the rider's mVelocity. On the ground (WMS_Ground) the ground-normal part of the
+ * velocity is removed; in the air the air predictor is relaunched from mPosition and mVelocity (3333.33).
+ * Clears ForceNaturalAir.
+ *
+ * @param initVel  initial velocity (On Tour initVel)
+ * @param initAngVel  initial angular velocity (On Tour initAngVel)
+ */
+extern "C" void cWipeoutMotion_throwRider(cWipeoutMotion* self, sVec4WM* initVel, sVec4WM* initAngVel)
 {
-    *(sVec4WM*)&self->RiderAngVelocity = *b;
-    *(sVec4WM*)((char*)self->mRider + 0x1E0) = *a;
+    *(sVec4WM*)&self->RiderAngVelocity = *initAngVel;
+    *(sVec4WM*)((char*)self->mRider + 0x1E0) = *initVel;
     if (*(int*)self == 0)
     {
         sVec4WM* n = (sVec4WM*)((char*)self->mRider + 0x370);
-        float d = vu0DotWM(*n, *a);
+        float d = vu0DotWM(*n, *initVel);
         sVec4WM t = vu0ScaleMemWM_136DE0(*n, d);
         sVec4WM* p = (sVec4WM*)((char*)self->mRider + 0x1E0);
         vu0SubWM(*p, *p, t);
@@ -218,6 +250,13 @@ extern "C" void func_00136F30();
 extern "C" void func_00137D18(void*);
 extern "C" void func_00137750(cWipeoutMotion*);
 
+/**
+ * Steps the wipeout physics one tick: the thrown board, then the rider on the ground or in the air.
+ *
+ * Calls func_00136F30 (the board, while the root pose override is on), then func_00137D18 for WMS_Ground or
+ * func_00137750 (air predictor) for WMS_Air. func_00136F30 is declared without arguments here but still
+ * receives self.
+ */
 extern "C" void cWipeoutMotion_step(int* self)
 {
     func_00136F30();
@@ -239,6 +278,13 @@ extern "C" void func_00137138();
 extern "C" void func_00138640(void*);
 extern "C" void func_00137860(void*);
 
+/**
+ * Resolves the wipeout's collisions for this tick: the thrown board, then the rider on the ground or in the
+ * air.
+ *
+ * Calls func_00137138 (the board against the world), then func_00138640 for WMS_Ground or func_00137860 for
+ * WMS_Air. func_00137138 is declared without arguments here but still receives self.
+ */
 extern "C" void cWipeoutMotion_resolve(int* self)
 {
     func_00137138();
@@ -256,6 +302,11 @@ extern "C" void cWipeoutMotion_resolve(int* self)
 //100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_loseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaves the wipeout motion; there is nothing to undo, so the body is empty.
+ *
+ * On Tour's version also takes the next eMotionState, which this declaration omits.
+ */
 void cWipeoutMotion_loseFocus(void* self)
 {
 }
@@ -1606,6 +1657,14 @@ struct sVEntry00138AD8 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Saves the wipeout motion's state to a replay frame.
+ *
+ * Writes the first 0x40 bytes (WipeoutMotionState, ForceNaturalAir, BoardVelocity, BoardAngVelocity,
+ * RiderAngVelocity) through the frame's write virtual (slot 1).
+ *
+ * @param obj  the replay frame pointer to write to (On Tour cReplayFramePtr*)
+ */
 extern "C" void cWipeoutMotion_writeToReplayFrame(cWipeoutMotion* self, void* obj)
 {
     sVEntry00138AD8* vt = *(sVEntry00138AD8**)obj;
@@ -1622,6 +1681,14 @@ struct sVEntry00138B10 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Restores the wipeout motion's state from a replay frame.
+ *
+ * Reads the first 0x40 bytes (WipeoutMotionState, ForceNaturalAir, BoardVelocity, BoardAngVelocity,
+ * RiderAngVelocity) through the frame's read virtual (slot 2).
+ *
+ * @param obj  the replay frame pointer to read from (On Tour cReplayFramePtr*)
+ */
 extern "C" void cWipeoutMotion_readFromReplayFrame(cWipeoutMotion* self, void* obj)
 {
     sVEntry00138B10* vt = *(sVEntry00138B10**)obj;

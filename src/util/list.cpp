@@ -238,6 +238,13 @@ public:
     virtual void v01(int);
 };
 
+/**
+ * Deletes every node in the list through its virtual destructor, then resets the list to empty.
+ *
+ * Walks from the head (+0x4) along the prev links up to the self-linked end node, calling each node's
+ * deleting destructor (slot 1, flags 3), then relinks the empty list (func_00397930). The null check on each
+ * node comes after its prev link has been read.
+ */
 extern "C" void cList_destroyList(void* self)
 {
     cList_destroyList_cVirt* n = *(cList_destroyList_cVirt**)((char*)self + 0x4);

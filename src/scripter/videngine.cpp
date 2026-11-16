@@ -24,6 +24,16 @@ struct sVidParams38E8 {
     float f20;      // 0x20
 };
 
+/**
+ * Creates the video player and prepares a video for playback, unless a player already exists.
+ *
+ * Allocates and constructs the 0x44-byte "VidEnginePlayer" at +0x0, fills a parameter block from the defaults
+ * (func_00253390), sets @p file and the words +0x8 = 1, +0x18 = 0x100 and +0x1C = 9 in it and hands it to
+ * func_002534A8. Its failure branch (destroy the player, return 0) is dead: func_002534A8 always returns 1.
+ *
+ * @param file  the video to play (On Tour pVideoFileName)
+ * @return 1 when the player was created, 0 when one already existed
+ */
 extern "C" int cVidEngine_ReadyVideo(void** self, int file)
 {
     if (*self != 0) return 0;

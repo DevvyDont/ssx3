@@ -124,7 +124,18 @@ extern char D_004A6F38[];
 extern char D_004A7778[];
 extern char D_004A7887[];
 
-extern "C" void cBENetworkInterface_getSyncData(cBENetworkInterface* self, int p, sNetState_E2C8* out)
+/**
+ * Packs one player's back-end race data into the 0xC44-byte network sync buffer.
+ *
+ * Copies the race settings (D_005305B0) and the words D_004A11B8/D_004A11BC, all six cBELibrary_playerDB
+ * records, the player's own record and character ID, the shared option pair (D_005308D0) and both players'
+ * option records, then from that character's cBELibrary_profileLib record the entries at +0x290, +0xAD0 and
+ * +0xBDF and the BAGT data at +0xBE6.
+ *
+ * @param player    the player whose data is packed (cGameComm_syncGame uses 0 on the host, 1 on the client)
+ * @param out  the sync buffer (cGameComm mBEBuffer)
+ */
+extern "C" void cBENetworkInterface_getSyncData(cBENetworkInterface* self, int player, sNetState_E2C8* out)
 {
     out->a = D_004A11B8;
     out->b = D_004A11BC;
@@ -132,21 +143,21 @@ extern "C" void cBENetworkInterface_getSyncData(cBENetworkInterface* self, int p
     for (int i = 0; i < 6; i++) {
         out->chars[i] = D_00535B20_E2C8[i];
     }
-    out->me = D_00535B20_E2C8[p];
-    signed char c = D_00535B20_E2C8[p].charID;
+    out->me = D_00535B20_E2C8[player];
+    signed char c = D_00535B20_E2C8[player].charID;
     out->charID = c;
     out->pair = *(sNetPair_E2C8*)D_005308D0;
     out->t0 = *(sNetTrip_E2C8*)(D_005308D0 - 0x18);
     out->t1 = *(sNetTrip_E2C8*)(D_005308D0 - 0xC);
     for (int k = 0; k < 0x20D; k++) {
-        out->blob[k] = ((sNetHW_E2C8*)(D_004A6F38 + (c * 0xF88 + p * 0x9B50)))[k];
+        out->blob[k] = ((sNetHW_E2C8*)(D_004A6F38 + (c * 0xF88 + player * 0x9B50)))[k];
     }
     for (int k = 0; k < 0x1A; k++) {
-        out->moves[k] = ((sNetDW_E2C8*)(D_004A7778 + (c * 0xF88 + p * 0x9B50)))[k];
+        out->moves[k] = ((sNetDW_E2C8*)(D_004A7778 + (c * 0xF88 + player * 0x9B50)))[k];
     }
-    out->tag = *(sNetTag_E2C8*)(D_004A7887 + (c * 0xF88 + p * 0x9B50));
+    out->tag = *(sNetTag_E2C8*)(D_004A7887 + (c * 0xF88 + player * 0x9B50));
     for (int k = 0; k < 0x55; k++) {
-        out->keys[k] = ((sNetKey_E2C8*)(D_004A7887 + 7 + (c * 0xF88 + p * 0x9B50)))[k];
+        out->keys[k] = ((sNetKey_E2C8*)(D_004A7887 + 7 + (c * 0xF88 + player * 0x9B50)))[k];
     }
 }
 #endif
@@ -174,6 +185,17 @@ public:
     virtual void v02();
 };
 
+/**
+ * Unpacks one player's back-end race data from the network sync buffer and reloads the affected interfaces.
+ *
+ * Restores the race settings and reloads NewRace (BE interface 0); on the client it also takes records 2-5
+ * and the shared option pair. It stores the player's record and option record, re-initialises that
+ * character's profile (func_00151600, func_00156810), copies the profile pieces back and reloads NewPlayer
+ * (1) and BAGT (6), each reload being the interface's virtual discard (slot 2).
+ *
+ * @param player  the player slot the data belongs to (0 host, 1 client)
+ * @param in      the sync buffer, as filled by cBENetworkInterface_getSyncData()
+ */
 extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int player, sNetState_E2C8* in)
 {
     D_004A11B8 = in->a;
@@ -214,10 +236,19 @@ extern sBEPlayerData cBELibrary_profileLib[];
 
 extern "C" void func_00156858(sBEPlayerData* dst, sBEPlayerData* src);
 
-extern "C" void cBENetworkInterface_copyProfile(cBENetworkInterface* self, int a1, int a2)
+/**
+ * Copies one profile's ten character records over another's (func_00156858).
+ *
+ * Each destination record keeps its own lookup-table pointer (+0x288), which is rebuilt from the copied 0x20D
+ * entries at +0x290.
+ *
+ * @param srcProfile  source profile index into cBELibrary_profileLib
+ * @param destProfile  destination profile index
+ */
+extern "C" void cBENetworkInterface_copyProfile(cBENetworkInterface* self, int srcProfile, int destProfile)
 {
-    sBEPlayerData* src = &cBELibrary_profileLib[a1];
-    func_00156858(&cBELibrary_profileLib[a2], src);
+    sBEPlayerData* src = &cBELibrary_profileLib[srcProfile];
+    func_00156858(&cBELibrary_profileLib[destProfile], src);
 }
 #endif
 
@@ -236,6 +267,13 @@ extern char D_004BA348[];
 extern int D_00534B38[];
 extern sRiderEntry_0014E9F8 D_00535B3C;
 
+/**
+ * Prepares the back end before the online handshake exchanges sync data.
+ *
+ * Re-initialises profile 2's ten character records (func_001567B8(D_004BA348, 0)); on the client it copies
+ * player record 0 into record 1 and profile 0 into profile 1 (the client is player 1 online). Then it swaps
+ * the two players' option records (func_0014EB08), which postInitBE swaps back.
+ */
 extern "C" void cBENetworkInterface_preInitBE(cBENetworkInterface* self)
 {
     func_001567B8(D_004BA348, 0);
@@ -269,6 +307,12 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: func_0014EB08 is defined (void) in this unit but called with self here.
 void func_0014EB08_self(void* self) __asm__("func_0014EB08");
 
+/**
+ * Finishes the back-end setup after the online handshake.
+ *
+ * Reloads the Stat (BE interface 3) and Aggression (12) interfaces through their virtual discard (slot 2),
+ * then swaps the two players' option records again (func_0014EB08), undoing preInitBE's swap.
+ */
 extern "C" void cBENetworkInterface_postInitBE(cBENetworkInterface* self)
 {
     sBEIface0014EA90* a = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 3);
@@ -346,6 +390,14 @@ extern sCharEntry_0014EBF8 cBELibrary_playerDB[];
 extern sCharEntry_0014EBF8 D_00534A88[];
 extern "C" void func_00156950(sBEPlayerData* data, int charID);
 
+/**
+ * Saves one player's current character record and all six player records for restoreCharProfile.
+ *
+ * Copies the cBELibrary_profileLib record of that player's character into the backup buffer D_004C4090
+ * (func_00156950) and the six cBELibrary_playerDB records into BackupPlayerDB (D_00534A88).
+ *
+ * @param idx  the player (profile index) whose character record is saved
+ */
 extern "C" void cBENetworkInterface_backupCharProfile(cBENetworkInterface* self, int idx)
 {
     func_00156950(&cBELibrary_profileLib[idx], cBELibrary_playerDB[idx].charID);
@@ -361,6 +413,15 @@ INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_restoreCharProfile);
 #ifdef SKIP_ASM
 extern "C" void func_00156988(sBEPlayerData* data);
 
+/**
+ * Restores what backupCharProfile saved and reloads the player and BAGT interfaces.
+ *
+ * Copies the backup buffer back into the saved character's record of profile @p idx (func_00156988). On the
+ * client, player record 0 first takes record 1; records 1-5 then come back from BackupPlayerDB (record 0 is
+ * never restored). Reloads NewPlayer (BE interface 1) and BAGT (6) through their virtual discard.
+ *
+ * @param idx  the player (profile index) to restore
+ */
 extern "C" void cBENetworkInterface_restoreCharProfile(cBENetworkInterface* self, int idx)
 {
     func_00156988(&cBELibrary_profileLib[idx]);

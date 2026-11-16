@@ -12,6 +12,10 @@ extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
 extern char D_004A17C8[];
 
+/**
+ * Builds the title screen ("06title"), plays its first frame, clears its idle timer and sets the front-end
+ * music state to the title (func_0028F140(audio, 0)).
+ */
 extern "C" void cFEStateTitle_onCreateScreen(void* self)
 {
     void* engine;
@@ -50,6 +54,14 @@ public:
     virtual void setVisible(int v);
 };
 
+/**
+ * Holds the title's first appearance for 300 calls, then focuses its menu and shows "tReal".
+ *
+ * The countdown D_004A17C0 is global and stays 0 afterwards, so later visits finish at once. "Menu0000" gets
+ * setFocus(1) (slot 7) and "tReal" (the Press START text) becomes visible.
+ *
+ * @return 1 when the transition is done, 0 while waiting
+ */
 extern "C" int cFEStateTitle_onGainTransition(void* self)
 {
     if (D_004A17C0 == 0 || --D_004A17C0 == 0) {
@@ -100,6 +112,13 @@ static inline int isActive_1948A8(sList_1948A8* l, int j)
     return 0;
 }
 
+/**
+ * Counts idle frames on the title screen and requests the attract movie after 1800 of them.
+ *
+ * After the UI update (func_0039E510), an active entry in either controller's input list resets the timer
+ * (+0x48). Past 1800 frames (30 s at 60 Hz) the timer restarts and bit 0x4 of D_004A19CC is set, which
+ * func_001A27A0 plays as a skippable movie.
+ */
 extern "C" void cFEStateTitle_onUpdate(sSelf_1948A8* self)
 {
     func_0039E510(self);
@@ -148,6 +167,11 @@ int GetHashValue32(char* str);
 extern "C" void func_003A0330(void* self, int a1, int a2);
 extern char D_004A17D0[];
 
+/**
+ * Gives the title's "tReal" item choice id 0 and silences its error sound (mSound[0] = 0).
+ *
+ * @param item  the widget being created
+ */
 extern "C" void cFEStateTitle_onWidgetCreate(void* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
@@ -168,6 +192,15 @@ struct sVEntry_cFEStateTitle_onWidgetEvent {
 };
 extern "C" void cUIStateStack_push(void* list, void* item);
 
+/**
+ * On Cross / Start, asks the front end for the next state and pushes it.
+ *
+ * The engine's custom interface (vtable slot 4, On Tour getNextState) gets the item's miscData; a non-null
+ * result goes onto the UI state stack.
+ *
+ * @param msg  the widget (On Tour pWidget), despite the name
+ * @param type  the widget event; only 5 acts
+ */
 extern "C" void cFEStateTitle_onWidgetEvent(void* self, void* msg, int type)
 {
     if (type == 5) {
@@ -184,9 +217,16 @@ extern "C" void cFEStateTitle_onWidgetEvent(void* self, void* msg, int type)
 //100%
 INCLUDE_ASM("fe/ovstates", cFEStateTitle_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int cFEStateTitle_onWidgetMenu(void* self, int a1, int a2)
+/**
+ * Picks the title menu's button feedback: only Cross plays a sound.
+ *
+ * @param pMenu  the menu (On Tour pMenu); unused
+ * @param Event  the menu event (6 Cross)
+ * @return 0x101 (animation and sound) for event 6, else 0x100 (animation only)
+ */
+extern "C" int cFEStateTitle_onWidgetMenu(void* self, int pMenu, int Event)
 {
-    return a2 != 6 ? 0x100 : 0x101;
+    return Event != 6 ? 0x100 : 0x101;
 }
 #endif
 
@@ -225,6 +265,14 @@ struct sVEnt0_00194AA8 { short delta; short index; void (*fn)(void*); };
 struct sVEnt1_00194AA8 { short delta; short index; void (*fn)(void*, unsigned char); };
 struct sVEnt2_00194AA8 { short delta; short index; int (*fn)(void*); };
 
+/**
+ * Builds the main menu ("07main_men"), shuts the online layer down and counts the connected controllers.
+ *
+ * Clears the option block D_005308B8, the choice flag (+0x48) and the Circle counter (+0x54); destroys the
+ * voice object, BuddyMan, LobbyMan, cGameComm and cCommSystem (func_00266CD8, func_00261008, func_0025B688,
+ * func_00256C50, func_00255898); clears bIsNetworkGame and calls the network interface's slot 1; sets the FE
+ * music state 1; stores the number of active pads (UI input slots 44 / 45) in +0x55.
+ */
 extern "C" void cFEStateMainMenu_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -303,6 +351,13 @@ public:
     virtual void setSelected(int v);
 };
 
+/**
+ * Greys out Multi Play without two controllers and Online without online support, every frame.
+ *
+ * "3multi play" is greyed out (func_00194498) with fewer than two active pads (+0x55); otherwise, while the
+ * state's mode is 5, it is restored: slot 25 (declared setSelected) and slot 8 (cUIThing_setStatic, declared
+ * setEnabled) cleared, alpha 1. "5online" is greyed out while D_004A29EC (set by initOnline) is 0.
+ */
 extern "C" void cFEStateMainMenu_onPreRender2D(void* self)
 {
     cUIObj_194BF0* obj = (cUIObj_194BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00460040));
@@ -336,6 +391,13 @@ extern char D_00460040[];
 extern char D_00460070[];
 extern char D_004A17D8[];
 
+/**
+ * Tags the main-menu items with the choice ids that the event handler and the front end switch on.
+ *
+ * "1conquer" 11, "2quick play" 9, "3multi play" 22, "4bonus material" 5, "5online" 49 (miscData).
+ *
+ * @param item  the widget being created
+ */
 extern "C" void cFEStateMainMenu_onWidgetCreate(void* self, void* item)
 {
     int id;
@@ -425,6 +487,13 @@ public:
     virtual int isValid();
 };
 
+/**
+ * Recounts the connected controllers and moves the selection off Multi Play when fewer than two remain.
+ *
+ * After the UI update, the UI input (engine +0xC, slot 44 selects pad i, slot 45 cFEInput_isActive) counts
+ * active pads into +0x55; if "Menu" has row 2 selected and fewer than 2 are active, row 1 is selected. The
+ * local class name cProfileMan_194DD0 is misleading.
+ */
 extern "C" void cFEStateMainMenu_onUpdate(void* self)
 {
     int i = 0;
@@ -507,6 +576,22 @@ static inline void setWidgetVisible_194EB0(char* self, char* name)
     }
 }
 
+/**
+ * Handles a main-menu choice: sets the game path for the chosen mode and pushes the next front-end state.
+ *
+ * Cross (5): func_001A86E8(0), then by the item's miscData: 11 Conquer path 0, 9 Quick Play path 1, 22 Multi
+ * Play path 2, 49 Online path 2 plus the online singletons (cCommSystem_construct ...), 5 Bonus Material;
+ * each sets the choice flag (+0x48). After the race interface's slot 1 it pushes the custom interface's
+ * getNextState(miscData). The Select Multiplayer Mode popup branch needs +0x48 clear for item 22, which case
+ * 22 has just set, so it never runs.
+ * Triangle (6) pushes getPrevState(); Square (7) pushes a new "FEOptions" state (func_001887A0); each Circle
+ * (8) counts in +0x54 and from the 7th on clears the static flag of "2quick play", "3multi play" and
+ * "4online".
+ *
+ * @param self_  the main-menu state (this)
+ * @param item_  the item (On Tour pWidget); ignored when null
+ * @param type  the widget event: 5 Cross, 6 Triangle, 7 Square, 8 Circle
+ */
 extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigned int type)
 {
     char* self = (char*)self_;
@@ -595,9 +680,18 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
 //100%
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int cFEStateMainMenu_onWidgetMenu(void* self, int a1, int a2)
+/**
+ * Picks the main menu's button feedback: Cross skips the animation until a choice is made, Circle animates
+ * silently.
+ *
+ * @param pMenu  the menu (On Tour pMenu); unused
+ * @param Event  the menu event (6 Cross, 9 Circle)
+ * @return for event 6, 1 (sound only) while the choice flag +0x48 is 0, else 0x101; 0x100 for event 9; 0x101
+ *         otherwise
+ */
+extern "C" int cFEStateMainMenu_onWidgetMenu(void* self, int pMenu, int Event)
 {
-    switch (a2) {
+    switch (Event) {
     case 6:
         return *(int*)((char*)self + 0x48) == 0 ? 1 : 0x101;
     case 9:
@@ -639,6 +733,17 @@ static inline void Show195328(void* self, char* name)
     }
 }
 
+/**
+ * Handles the Select Multiplayer Mode popup closing: on a result, replays Cross on the remembered Multi Play
+ * item.
+ *
+ * Only event 0x16 acts. If the popup's getData(0) (slot 23) is nonzero it sets the choice flag (+0x48),
+ * restores mCurrentCtrl from +0x50, calls func_0039FFA0(item, 2) and its own onWidgetEvent (slot 19) with the
+ * item (+0x4C) and 5. Then "hl", "3 help multi", "btext5" and "ps2sq" are shown again.
+ *
+ * @param obj  the popup state (On Tour pPopup)
+ * @param msg  the popup event (0x15, 0x16)
+ */
 // On confirm (msg 0x16) commits the selected entry, then re-shows the four main-menu buttons.
 extern "C" void cFEStateMainMenu_onPopupEvent(void* self, char* obj, int msg)
 {

@@ -150,6 +150,15 @@ struct sVEUnload {
     int (*fn)(void*);
 };
 
+/**
+ * Releases an async file slot at whatever stage its load is in and marks it free (status 0).
+ *
+ * Requested (1): only the status changes. Loading (2): releases the ASYNCFILE handle and frees the buffer.
+ * Loaded (3): keeps the texture and buffer and sets +0x118 to the graphics frame count (GrMan vtable slot
+ * 114) + 14, so cFEAsyncManager_Update() frees them once that frame has passed.
+ *
+ * @param idx  index of the file slot (On Tour fileNum)
+ */
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(cFEAsyncManager* self, int idx)
 {
     sFEUnloadFiles* m = (sFEUnloadFiles*)self;
@@ -255,6 +264,15 @@ extern "C" int ASYNCFILE_getstatus(int handle);
 void cMemMan_free(void* p);
 extern char D_004A1A18[];
 
+/**
+ * Advances the five async file slots by one frame: deferred frees, load starts and finished reads.
+ *
+ * A free or requested slot whose release frame (+0x118) is before the current frame count and which still
+ * holds a buffer releases its texture (GrMan vtable slot 50) and buffer; a requested slot past that frame
+ * then starts loading (cFEAsyncManager_LoadDataFile()). A loading slot whose ASYNCFILE read is done becomes
+ * loaded (3): its handle is released and the image (file + its word at +0x14) becomes a texture named "map"
+ * (GrMan slot 46), whose ID goes to +0x110.
+ */
 extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
 {
     sFE39F0Files* m = (sFE39F0Files*)self;
@@ -385,6 +403,16 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" int func_003DF748(void* file, void* data, int size);
 extern "C" void func_003E1BB8(void* file, void* data, int size);
 
+/**
+ * Starts reading a slot's file into a new buffer of a fixed 0x109A0 bytes (tag "FE Async Texture").
+ *
+ * Sets the status to 2 (loading). With the slot's async flag (+0x108) it starts an asynchronous read
+ * (func_003DF748) and keeps the handle at +0x104; otherwise it reads synchronously (func_003E1BB8) and sets
+ * status 3 directly, skipping the texture step that cFEAsyncManager_Update() runs only for asynchronous
+ * loads.
+ *
+ * @param idx  index of the file slot (On Tour fileNum)
+ */
 extern "C" void cFEAsyncManager_LoadDataFile(cFEAsyncManager* self, int idx)
 {
     sFEAsyncFiles* m = (sFEAsyncFiles*)self;

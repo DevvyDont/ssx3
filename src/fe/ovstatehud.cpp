@@ -41,6 +41,13 @@ static inline int HasScores1E8FF0(char* hs)
     return *(int*)(hs + 0x18) >= 0 || *(int*)(hs + 0x1C) >= 0;
 }
 
+/**
+ * Builds the high-score list ("hiscorelist") and shows its help texts for the current event.
+ *
+ * For cGameMode 0 / 5 it shows "helptext02", otherwise it hides "helptext01"; without a new record for either
+ * player (score interface +0x18 / +0x1C both negative) "helptxt01" and "helptxt02" are hidden. Plays UI event
+ * 0xE.
+ */
 // Builds the hi-score list screen and shows/hides its panels for the current game mode.
 extern "C" void cOVStateHiScoreList_onCreateScreen(void* self)
 {
@@ -86,6 +93,14 @@ struct sObj001E9130 {
 
 extern "C" void cUIStateStack_push(void* list, void* item);
 
+/**
+ * On Cross, pushes the front end's next state for the item with choice 1.
+ *
+ * Other items push a null state, which cUIStateStack_push() does not check.
+ *
+ * @param item  the chosen item; ignored when null
+ * @param Event  the widget event; only 5 (Cross) acts
+ */
 extern "C" void cOVStateHiScoreList_onWidgetEvent(void* self, void* item, int Event)
 {
     if (item != 0 && Event == 5) {
@@ -809,6 +824,21 @@ static inline unsigned short* getLocString_9AD0(char* id)
     return vt[4].fn(o, h);
 }
 
+/**
+ * Sets up the single-player HUD: resolves its textures, fonts and elements, resets its timers, and gives each
+ * local rider a panel.
+ *
+ * Names the state "hud" and fills the token table D_004C8980 with texture handles and UVs. Each local rider
+ * (cRider::mIsLocal) gets the next of two panels with its rider and AI index; the panels' display objects are
+ * placed from layout D_00477000 (one rider) or D_00477B40 (two, the second mirrored).
+ * Looks up "fefont" / "hudfont", the countdown (nm3w, nm2w, nm1w, go) and "switch" elements, the place digits
+ * nm1w-nm6w with st_w / nd_w / rd_w / th_w and "slash", "Sphere", 26 icons and 5x3 boost textures; sizes the
+ * bars; picks ":" or "'" as the time separator by the language bits 22-24 of D_00535610 and measures "00",
+ * "-" and "11". Builds the hint boxes: a random Uber trick (L1 or R1 + Square, BXrand() & 1 kept at +0x55C),
+ * RECOVER and "%s @skip %s" (kT_OVRCMNPress, kT_OVRCMNToSkip).
+ *
+ * @param vself  the HUD state (this)
+ */
 extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
 {
     sHUD1P* self = (sHUD1P*)vself;
@@ -1033,6 +1063,19 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_handleEvent);
 extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src);
 extern "C" void* func_002B40F0(void* self, int i);
 
+/**
+ * Handles a notification sent to the HUD (virtual slot 24): sets its flags, counters and message texts.
+ *
+ * 0 / 1 set and clear +0x3D4 (sent by the script data manager); 2 / 3 / 4 reset, raise and lower the
+ * open-overlay count +0x3D8 (cOVState_onCreateScreen / onDestroyScreen send 3 / 4); 5 rechecks the current
+ * song and restarts the Now Playing popup on a new title; 6 start gate opened; 7 restart reset; 8 / 9 start
+ * and stop the mail icon (+0x160); 12 / 13 and 14 / 15 set and clear the message texts at +0x944 and +0xA48
+ * (flags 0x20000 / 0x40000).
+ *
+ * @param msg  the notification code
+ * @param str  the text for codes 12 and 14 (On Tour pParam)
+ * @return always 0
+ */
 // HUD overlay message handler: flags, counters, the two message strings and the track-name hash.
 extern "C" int cOVStateHUD1P_handleEvent(char* self, int msg, unsigned short* str)
 {
@@ -1434,17 +1477,40 @@ static inline float oneAdj_001F1840(const char* s, float w)
     return adj;
 }
 
-extern "C" void cOVStateHUD1P_renderTime(void* self_, int a1, int a2, int a3, int a4, int a5, float* pos, float* scale, sColor_001F16C0* color, int align, int flags, int a11)
+/**
+ * Draws a clock as two-digit fields joined by the time separator, placed by the element's alignment.
+ *
+ * The box is three fields wide (four with hundredths); func_001F10F8 places it from @p pos, @p scale, the two
+ * alignments and @p reflect. Flag bit 0 appends ".hh" from @p secFrac, bits 1 / 2 prefix "-" / "+". Each '1' digit is
+ * nudged right by +0x178 (probably to centre the narrow glyph). The struct field called digitW (+0x16C) holds
+ * the separator's width and f170 the width of "00", so the locals sepW / digW are swapped; the sign's advance
+ * (f174) is not scaled.
+ *
+ * @param self_  the HUD state (this)
+ * @param hour  the first field, hours (On Tour hour)
+ * @param minute  the second field, minutes
+ * @param sec  the third field, seconds
+ * @param secFrac  hundredths, drawn only with flag bit 0 (On Tour secFrac)
+ * @param timeRenderFlags  the time flags: bit 0 hundredths, bit 1 a "-" sign, bit 2 a "+" sign
+ * @param pos  the element position (x, y)
+ * @param scale  the x / y scale, also applied to the font
+ * @param color  the text colour
+ * @param align  the horizontal alignment (the element's alignX; On Tour pivotX)
+ * @param flags  the vertical alignment, despite the name (alignY; On Tour pivotY)
+ * @param reflect  the reflect flags for func_001F10F8: bit 0 mirrors x about 640, bit 1 then keeps the horizontal
+ *             alignment unflipped
+ */
+extern "C" void cOVStateHUD1P_renderTime(void* self_, int hour, int minute, int sec, int secFrac, int timeRenderFlags, float* pos, float* scale, sColor_001F16C0* color, int align, int flags, int reflect)
 {
     sHUD_001F1840* self = (sHUD_001F1840*)self_;
     float size[2];
     float out[2];
     char bufs[3][4];
     float n = 3.0f;
-    if (a5 & 1) n = 4.0f;
+    if (timeRenderFlags & 1) n = 4.0f;
     size[1] = (float)self->font->count * self->font->f34;
     size[0] = self->f170 * n + (self->digitW + 2.0f + 2.0f) * (n - 1.0f);
-    func_001F10F8(self, out, pos, size, scale, align, flags, a11);
+    func_001F10F8(self, out, pos, size, scale, align, flags, reflect);
     sFont_001F1840* font = self->font;
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
@@ -1452,16 +1518,16 @@ extern "C" void cOVStateHUD1P_renderTime(void* self_, int a1, int a2, int a3, in
     float sepW = (self->f170 + 2.0f) * scale[0];
     float digW = (self->digitW + 2.0f) * scale[0];
     float oneW = self->oneW * scale[0];
-    if (a5 & 6) {
-        if (a5 & 2)
+    if (timeRenderFlags & 6) {
+        if (timeRenderFlags & 2)
             func_00391CB0(self->font, out[0], out[1], D_004A2108);
         else
             func_00391CB0(self->font, out[0], out[1], D_004A2100);
         out[0] += self->f174;
     }
-    sprintf(bufs[0], D_004A22F0, a1);
-    sprintf(bufs[1], D_004A22F0, a2);
-    sprintf(bufs[2], D_004A22F0, a3);
+    sprintf(bufs[0], D_004A22F0, hour);
+    sprintf(bufs[1], D_004A22F0, minute);
+    sprintf(bufs[2], D_004A22F0, sec);
     func_00391CB0(self->font, out[0] + oneAdj_001F1840(bufs[0], oneW), out[1], bufs[0]);
     out[0] += sepW;
     for (int i = 1; i < 3; i++) {
@@ -1471,8 +1537,8 @@ extern "C" void cOVStateHUD1P_renderTime(void* self_, int a1, int a2, int a3, in
         func_00391CB0(self->font, out[0] + oneAdj_001F1840(p, oneW), out[1], p);
         out[0] += sepW;
     }
-    if (a5 & 1)
-        func_001DC990(self->font, out[0], out[1], D_004A22F8, a4);
+    if (timeRenderFlags & 1)
+        func_001DC990(self->font, out[0], out[1], D_004A22F8, secFrac);
 }
 #endif
 

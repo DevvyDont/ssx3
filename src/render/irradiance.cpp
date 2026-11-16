@@ -19,6 +19,13 @@ struct cIrradianceDataBase_ACD0 {
     void* index;    // 0xC, 8 bytes each
 };
 
+/**
+ * Loads the irradiance database from "data/worlds/irr.dat" into its own entry and sample arrays.
+ *
+ * The file holds a count n, then n 8-byte entries and n 0xA0-byte samples; they are copied into new
+ * "IrradianceNames" (+0xC) and "IrradianceArray" (+0x8) blocks, n goes to +0x4 and the loaded file is freed,
+ * leaving +0x0 pointing at the freed block.
+ */
 extern "C" void cIrradianceDataBase_Load(cIrradianceDataBase_ACD0* self)
 {
     int* file = (int*)FILE_load(D_00492E68, 0x100);

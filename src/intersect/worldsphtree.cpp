@@ -12,6 +12,18 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 
 struct sSphV4 { float x, y, z, w; } __attribute__((aligned(16)));
 
+/**
+ * Constructs a world-intersection wrapper around a sphere tree, with a bounding box from its root sphere.
+ *
+ * Stores cWorldSphTree's vtable at +0x50, clears +0x4 and +0x8, sets +0x0 to 1 unless @p isLow and keeps @p
+ * ast at +0x60 and +0x64. Copies the tree's transCenter to +0x40 and stores centre + r and centre - r (w = 1)
+ * at +0x20 and +0x30, r being func_0032C590()'s radius. Also allocates a fresh 0x140-byte "SphereTree"
+ * (func_0032C508) at +0x68, which the destructor func_003304E8 frees.
+ *
+ * @param ast    the bxSphereTree to wrap
+ * @param isLow  nonzero for a low-detail wrapper: +0x0 is then 0 and cWorldSphTree_GetIdealParam() returns -1
+ * @return @p self
+ */
 extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* ast, int isLow)
 {
     *(void***)((char*)self + 0x50) = cWorldSphTree_vtbl;
@@ -133,6 +145,13 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_GetIdealParam);
 #ifdef SKIP_ASM
 extern "C" float func_0032C590(void* self);
 
+/**
+ * Returns the wrapper's ideal query parameter: twice the wrapped sphere tree's radius, or -1.
+ *
+ * Uses func_0032C590() on the tree at +0x60 when the flag at +0x0 is set (the constructor's isLow was 0).
+ *
+ * @return 2 * radius, or -1.0 for a low-detail wrapper
+ */
 extern "C" float cWorldSphTree_GetIdealParam(void* self)
 {
     float r;
@@ -1399,6 +1418,12 @@ void* cAIFwdDiffCache_cAIFwdDiffCache(void* self);
 extern "C" void cAIFwdDiffCache_Init(void* cache, int n);
 extern char D_0048E4F8[];
 
+/**
+ * Creates the nash's AI forward-difference cache: a 40-entry cAIFwdDiffCache stored at +0xA4.
+ *
+ * Allocates 0x10 bytes tagged "AIFwdDiffCache", runs the constructor, stores the cache at +0xA4 and calls
+ * cAIFwdDiffCache_Init(cache, 40), which allocates the entries and their hash buckets.
+ */
 extern "C" void cBXNash_initTheAIFwdDiffCache(void* self)
 {
     void* c = cAIFwdDiffCache_cAIFwdDiffCache(cMemMan_alloc(0x10, D_0048E4F8, 0, 0));
@@ -4971,6 +4996,18 @@ struct sVEntry_cBoostNode_cBoostNode {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Constructs a boost node from a replay frame (the replay counterpart of the record constructor
+ * func_00341388).
+ *
+ * Runs the cInstanceNode replay constructor, stores cBoostNode's vtable at +0xC, then reads the node's
+ * 0x30-byte boost state (direction, speed, factor, duration, timer, type: +0x20 to +0x4F) from @p stream
+ * through its read virtual (slot 2).
+ *
+ * @param bucket  bucket list the node joins, passed to cInstanceNode_cInstanceNode()
+ * @param stream  the replay frame to read from (On Tour cBxReplayFrame* data)
+ * @return @p self
+ */
 extern "C" void* cBoostNode_cBoostNode(void* self, void* bucket, void* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
@@ -5027,6 +5064,16 @@ struct sNode_003415D0 {
     int type;
 };
 
+/**
+ * Applies the boost node to every being touching it, and expires a timed (type 1) node once nothing keeps it
+ * alive.
+ *
+ * Counts the timer (+0x3C) down. For type 1, or once the timer is out, each being touching the node (being
+ * slot 3 with the node's Instance; type 2 skips computer riders, slot 9) is slowed (slot 48: velocity times
+ * (1 + factor)) when the factor (+0x34) is negative, else pushed along the boost direction (slot 47). A type
+ * 1 node that no being touches and whose timer is out expires (slot 34, runscript 1); slots 49/50 (empty)
+ * bracket the loop.
+ */
 extern "C" void cBoostNode_update(sNode_003415D0* self)
 {
     int hit = 0;
@@ -5231,9 +5278,17 @@ extern "C" void func_00341818(sSph_341818* self, cMover_341818* obj)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBoostNode_signal);
 #ifdef SKIP_ASM
-extern "C" void cBoostNode_signal(void* self, int a1)
+/**
+ * Handles a signal sent to the boost node: signal 1 restarts its timer.
+ *
+ * Reloads the timer (+0x3C) from the duration (+0x38); other signals are ignored. On Tour's float argument is
+ * not taken.
+ *
+ * @param signal  the signal number
+ */
+extern "C" void cBoostNode_signal(void* self, int signal)
 {
-    if (a1 == 1) {
+    if (signal == 1) {
         *(int*)((char*)self + 0x3c) = *(int*)((char*)self + 0x38);
     }
 }
@@ -5393,6 +5448,17 @@ struct sVEntry00341C80 {
 extern "C" void* func_0034DAC8(void* p, int a1, void* stream);
 extern void* D_00490B10[];
 
+/**
+ * Constructs an animated object node from a replay frame.
+ *
+ * Builds the animation node base at +0x1C with func_0034DAC8 (its cMoveNode part at +0x30), stores this
+ * class's vtable D_00490B10 at +0x3C, reads the 0x1C-byte object state into +0x0 from @p stream (read
+ * virtual, slot 2) and sets the root-transform-dirty flag (bit 0 of Flags, +0x42).
+ *
+ * @param bucket  bucket list the node joins, passed on to the base constructor
+ * @param stream  the replay frame to read from (On Tour cBxReplayFrame* data)
+ * @return @p self
+ */
 extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, int bucket, sVEntry00341C80** stream)
 {
     func_0034DAC8((char*)self + 0x1C, bucket, stream);
@@ -5585,6 +5651,14 @@ void func_0034FCC0(void*);
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cAnimObjectNode_expire);
 #ifdef SKIP_ASM
+/**
+ * Expires an animated object node: when asked, runs its instance's expire script and does nothing else.
+ *
+ * Calls func_0034FCC0() on the node part at +0x30 (probably the on-expire script, world script type 4).
+ * Unlike cInstanceNode_expire() it neither marks the instance dead nor deletes the node.
+ *
+ * @param runscript  nonzero to run the script
+ */
 extern "C" void cAnimObjectNode_expire(void* self, int runscript)
 {
     if (runscript != 0) {
@@ -5756,6 +5830,17 @@ struct sVEntry003422E8 {
 extern "C" void* func_0034DAC8(void* p, int a1, void* stream);
 extern void* D_004908F8[];
 
+/**
+ * Constructs an animated teeter node from a replay frame.
+ *
+ * Builds the animation node base at +0x30 with func_0034DAC8 (its cMoveNode part at +0x44), stores this
+ * class's vtable D_004908F8 at +0x50, reads the 0x30-byte teeter state into +0x0 from @p stream (read
+ * virtual, slot 2) and sets the root-transform-dirty flag (bit 0 of Flags, +0x56).
+ *
+ * @param bucket  bucket list the node joins, passed on to the base constructor
+ * @param stream  the replay frame to read from (On Tour cBxReplayFrame* data)
+ * @return @p self
+ */
 extern "C" void* cAnimTeeterNode_cAnimTeeterNode(void* self, int bucket, sVEntry003422E8** stream)
 {
     func_0034DAC8((char*)self + 0x30, bucket, stream);
@@ -6154,6 +6239,14 @@ typedef void (*Fn0_00342880)(void*);
 typedef void (*Fn1_00342880)(void*, void*);
 typedef int (*Test_00342880)(void*, int);
 
+/**
+ * Applies the boost modifier to every being touching it and updates its active flag (+0x0).
+ *
+ * The flag starts as type == 0; the timer (+0x2C) counts down and keeps it set while running. For type 1, or
+ * once the timer is out, each being whose slot 3 test accepts the instance at +0x40 sets the flag and is
+ * slowed (slot 8, func_003429E0) when the factor (+0x24) is negative, else pushed (slot 7, func_00342A88).
+ * boostStart (slot 9) and boostEnd (slot 10) bracket the loop.
+ */
 extern "C" void cBoostModifier_update(sSph_342768* self)
 {
     self->refs = 0;
@@ -6320,9 +6413,16 @@ extern "C" void func_00342A88(sSelf_342A88* self, cWsMover* obj)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_signal);
 #ifdef SKIP_ASM
-extern "C" void cBoostModifier_signal(void* self, int a1)
+/**
+ * Handles a signal sent to the boost modifier: signal 0x258 (600) restarts its timer.
+ *
+ * Reloads the timer (+0x2C) from the duration (+0x28); other signals are ignored.
+ *
+ * @param signal  the signal number
+ */
+extern "C" void cBoostModifier_signal(void* self, int signal)
 {
-    if (a1 == 0x258) {
+    if (signal == 0x258) {
         *(int*)((char*)self + 0x2c) = *(int*)((char*)self + 0x28);
     }
 }

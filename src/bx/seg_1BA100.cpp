@@ -1496,6 +1496,11 @@ extern "C" int func_002BB100(void *arg0, void *arg1) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_cWorldPainterMan);
 #ifdef SKIP_ASM
+/**
+ * Constructs the world painter manager: clears the word at +0x4.
+ *
+ * @return @p self
+ */
 extern "C" void *cWorldPainterMan_cWorldPainterMan(void *self) {
     (*(int *)((char*)(self) + (4))) = 0;
     return self;

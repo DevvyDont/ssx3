@@ -535,33 +535,45 @@ static inline float vAbs_09E0(float x)
     return r;
 }
 
-extern "C" void cComputer_jumpSetupCruise(cComputer* self, sPad_09E0* pad)
+/**
+ * Cruise logic 0: lines the computer rider up for the jump ahead and starts the prewind once it gets there.
+ *
+ * Without a jump event ahead (checkForJumpEvent(), which also sets mDesiredSpeed to the approach speed) it
+ * switches to followPathCruise (logic 1, func_00100680) and runs it. Otherwise it steers at the path target
+ * (bits 20-25). At the jump start, within 10000 of its path (+0x4C8) and with the turn under 1 (always:
+ * calcTurn caps it at 0.98) it calls setupPrewindState() and sets the 2-bit field at bit 14 to 3; else it
+ * crouches recklessly when 5 km/h too slow, or sets the low field of word 1 (probably brake) to 31 when 5
+ * km/h too fast.
+ *
+ * @param cmd  the cruise command being built (On Tour tCruiseCmd)
+ */
+extern "C" void cComputer_jumpSetupCruise(cComputer* self, sPad_09E0* cmd)
 {
     int below, o3, o4, o5, o6;
     if (!cComputer_checkForJumpEvent(self, (float*)(((char*)self) + 0xDF0), &below, &o3, &o4, &o5, &o6)) {
         *(Fn_8E88*)&self->cruiseLogic = D_0043CF20[1];
         self->mCruiseLogicID = 1;
-        func_00100680(((char*)self), pad);
+        func_00100680(((char*)self), cmd);
         return;
     }
     sVec4_09E0 v;
     func_00100610_09E0(&v, ((char*)self));
     float f = func_00100348_09E0(((char*)self), &v);
-    pad->b20 = (int)(f * 31.0f);
+    cmd->b20 = (int)(f * 31.0f);
     char* rider = (char*)self->mRider;
     float len = vLen_09E0(*(sVec4_09E0*)(rider + 0x1E0));
     if (below && *(float*)(rider + 0x4C8) < 10000.0f && vAbs_09E0(f) < 1.0f) {
         cComputer_setupPrewindState_09E0(((char*)self), o5, o6, o4, o3);
-        pad->b14 = 3;
+        cmd->b14 = 3;
         return;
     }
     float sp = self->mDesiredSpeed;
     if (len < sp - 138.88890075683594f) {
-        cComputer_setupRecklessCrouch(self, pad);
+        cComputer_setupRecklessCrouch(self, cmd);
         return;
     }
     if (sp + 138.88890075683594f < len)
-        pad->w0 = 0x1F;
+        cmd->w0 = 0x1F;
 }
 #endif
 
@@ -740,7 +752,19 @@ static inline sV4_0B90 Scale_0B90(const sV4_0B90& v, float s)
 
 static inline sRec_0B90* Rec_0B90(char* self) { return &((sRec_0B90*)*(char**)(self + 0x18))[*(int*)(self + 0xE70)]; }
 
-extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* pad)
+/**
+ * Cruise logic 3: chases the target rider (mTargetID), crouching to catch up and braking to stay with it.
+ *
+ * With the target more than 90 degrees off its heading it follows the path and brakes (low field of word 1,
+ * probably) when the target is over 200 away and slower. Otherwise it steers at a point 300 ahead of the
+ * target along its velocity: within 15 degrees it crouches recklessly, within 50 it crouches, beyond that it
+ * crouches when slower and brakes when faster. It then switches to jumpSetupCruise (dropping the target) at a
+ * jump event, to followPathCruise when checkForTargets() finds none, or to avoidTargetCruise for a new target
+ * it should not attack that is not human.
+ *
+ * @param cmd  the cruise command being built (On Tour tCruiseCmd)
+ */
+extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* cmd)
 {
     int below, o3, o4, o5, o6;
     int z;
@@ -763,23 +787,23 @@ extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* pad)
         func_00100610_0B90(&v, ((char*)self));
         steer = func_00100348_0B90(((char*)self), &v);
         if (Rec_0B90(((char*)self))->dist > 200.0f && hisSpd < mySpd)
-            pad->w0 = 0x1F;
+            cmd->w0 = 0x1F;
     } else {
         sV4_0B90 v = Norm_0B90(*tgt->GetVel());
         sV4_0B90 w = Add_0B90(*tgt->GetPos(), Scale_0B90(v, 300.0f));
         if (absAng < wideAng) {
             if (absAng < narrowAng)
-                cComputer_setupRecklessCrouch_0B90(((char*)self), pad);
+                cComputer_setupRecklessCrouch_0B90(((char*)self), cmd);
             else
-                cComputer_setupCrouch_0B90(((char*)self), pad);
+                cComputer_setupCrouch_0B90(((char*)self), cmd);
         } else if (mySpd < hisSpd) {
-            cComputer_setupCrouch_0B90(((char*)self), pad);
+            cComputer_setupCrouch_0B90(((char*)self), cmd);
         } else if (hisSpd < mySpd) {
-            pad->w0 = 0x1F;
+            cmd->w0 = 0x1F;
         }
         steer = func_00100348_0B90(((char*)self), &w);
     }
-    pad->b20 = (int)(steer * 31.0f);
+    cmd->b20 = (int)(steer * 31.0f);
     z = 1;
     ctl = (sCtl_0B90*)(((char*)self) + 0xDF0);
     if (cComputer_checkForJumpEvent_0B90(((char*)self), &ctl->speed, &below, &o3, &o4, &o5, &o6)) {
@@ -920,6 +944,19 @@ static inline float Floor_0F88(float x)
 
 static inline sRec_0F88* Rec_0F88(char* self) { return &((sRec_0F88*)*(char**)(self + 0x18))[*(int*)(self + 0xE70)]; }
 
+/**
+ * Cruise logic 2: keeps the computer rider out of the target rider's way (mTargetID) while following the
+ * path.
+ *
+ * With the target more than 90 degrees off its heading it follows the path and crouches, recklessly when
+ * slower than the target. Otherwise, when the target is outside atan(150 / distance) of the heading or not
+ * slower, it follows the path and crouches. When it is in the way and slower, a computer target gets the same
+ * (after re-picking the route with func_00112A50 if they share a path), while a human target leaves the
+ * steering at 0. It then switches to jumpSetupCruise at a jump event, to followPathCruise with no target, or
+ * to attackTargetCruise when checkForTargets() picks a target to attack.
+ *
+ * @param cmd  the cruise command being built (On Tour tCruiseCmd)
+ */
 extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
 {
     sV4_0F88 v;
@@ -1004,6 +1041,14 @@ public:
     cTable_101310(void* o);
 };
 
+/**
+ * Constructs the AI's danger manager: stores the owning cAI, marks every slot unused and resets it.
+ *
+ * The member constructors set the instance ID of each of the 64 tracked elements (+0x18 of each) and of the
+ * 64 danger-zone nodes to -1 before cDangerMan_Reset() runs.
+ *
+ * @param o  the owning cAI (On Tour pAI), whose riders func_001013A8 (On Tour Update) checks
+ */
 cTable_101310::cTable_101310(void* o)
 {
     owner = o;
@@ -1243,6 +1288,16 @@ struct sTable_101688 {
     int fB5C;                   // 0xB5C
 };
 
+/**
+ * Empties the danger manager: frees every tracked element and danger zone and clears the riders' danger
+ * levels.
+ *
+ * Sets the tracked count to 0 and all 64 element states to 2 (free), clears the danger level and the
+ * func_001441B8 value of each of the 6 rider records, chains the 64 zone nodes into the free list, empties
+ * the active zone list, sets the zone-check rider index to 0 and clears +0x708.
+ *
+ * @param vself  the danger manager (cDangerMan)
+ */
 extern "C" void cDangerMan_Reset(void* vself)
 {
     sTable_101688* self = (sTable_101688*)vself;
@@ -1847,6 +1902,11 @@ extern "C" void func_00103308(S_3308 *arg0, int arg1) {
 INCLUDE_ASM("seg/seg_1218", cFocusMan_reset);
 #ifdef SKIP_ASM
 struct S_3358 { char pad[0xD0]; int f_d0; int pad2; int cnt; void *arr[8]; };
+/**
+ * Empties the focus manager's list of up to 8 objects and sets its +0xD0 word to -1.
+ *
+ * Clears bit 0x100 in each listed object's +0x8 flags, the mark that func_001032C0 sets when it adds one.
+ */
 extern "C" void cFocusMan_reset(S_3358 *self) {
     int i;
 
@@ -4457,6 +4517,19 @@ static inline sQuat_6848 AxisAngle_6848(const sV_6848& axis, float angle)
 #define RAIL_STYLE(r) ((r)->mRailStyle)
 #define PRESS_TYPE(r) ((r)->mPressType)
 
+/**
+ * Checks for the board touching a rail and, on contact, puts the rider into the railslide motion.
+ *
+ * func_00108A48 finds the contact. The velocity is turned along its direction at the along-rail speed, at
+ * least 20 km/h and at most the old speed, with z cut to a tenth; the hit object's handler gets the opposite
+ * change (virtual slot 43). mRailStyle (1-4) comes from the control state and the board root bone's angle to
+ * the rail. The trick is then awarded (func_0010E910 from the air, else the score commit fed to
+ * cRider_flagEventBoostPowerUp()) and motion 4 set. From cruise, natural air, spin or handplant the rider
+ * starts the board-press (press landing) or railslide control; otherwise a style change away from 3 or 4
+ * turns the rider back by 90 degrees.
+ *
+ * @return 1 when the rider touched a rail, otherwise 0
+ */
 extern "C" int cRider_checkRailBoardCollisions(cRider* self)
 {
     sLand_6848 land;
@@ -5279,6 +5352,15 @@ static inline t4Vector operator*(const t4Vector& v, float s) { return Scale_7888
 
 static inline sRec_7888* Rec_7888(cRider* rider, int idx) { return &((sRec_7888*)rider)[idx]; }
 
+/**
+ * Handles this rider's contacts with the other riders: pushes overlapping bodies apart and lands shoves.
+ *
+ * Once per tick per pair, overlapping sphere trees (func_00329F98) push both riders 0.55 of the contact
+ * vector apart along their ground planes and, at most every 3 ticks, exchange momentum along the contact
+ * (func_00107E70). While this rider's channel-1 animation (class 13, probably the punch) is in its hit
+ * window, a rider within 150 in front of mAttackDir that is not blocking is shoved with a strength from the
+ * collision stat and mAttackBlend, at most every 3 ticks per pair. Actors (mIsActor) are skipped.
+ */
 extern "C" void cRider_checkOpponentCollisions(cRider* self)
 {
     int busy = 0;
@@ -6063,6 +6145,18 @@ extern char D_00459B90[];
 extern const sVtbl22_108C80 D_00458660;
 extern char cComputer_vtbl[];
 
+/**
+ * Constructs a computer rider: its cRiderHandler parts, the cRider virtual base and cComputer's vtables.
+ *
+ * In charge (both cAI callers pass 1) it points all 31 part virtual-base pointers at the cRider at +0xF50 and
+ * constructs it. It then constructs cRiderHandler not in charge, installs cComputer's three cRider vtables
+ * (not in charge: patched copies on its own stack) and its own vtable, sets mIsActor when @p actor is set,
+ * and runs cComputer's Init (func_00108E88).
+ *
+ * @param inChrg  g++ in-charge flag: nonzero when this is the complete object that owns the cRider base
+ * @param actor  nonzero for a podium or lodge actor (On Tour isActor)
+ * @return this object
+ */
 // PORT: g++ 2.95 most-derived constructor of a class deriving virtually from cRider (vbase at +0xF50,
 // vbase pointers in every subobject); the not-in-charge vtable fix-up is written out by hand.
 extern "C" char* cComputer_cComputer(cComputer* self, int inChrg, int actor)
@@ -6289,36 +6383,46 @@ extern "C" void cComputer_getSpinCmd_A768(void* self, void* pad) __asm__("cCompu
 extern "C" void func_0010B750_A768(void* self, void* pad) __asm__("func_0010B750");
 extern "C" void cComputer_getBoardPressCmd_A768(void* self, void* pad) __asm__("cComputer_getBoardPressCmd");
 
+/**
+ * Builds this computer rider's control command for the frame, the AI's stand-in for reading a pad.
+ *
+ * Zeroes the 8-byte command, applies the rubber-band time warp (cRider_updateTimeWarp() with func_0010DEF0's
+ * factor), then fills it with the get*Cmd for the rider's control state: cruise (func_0010A960), board press,
+ * prewind, natural air, spin, gate, railslide or wipeout (func_0010B750); other states leave it empty.
+ * Outside the spin state it clears mGrabEndTime.
+ *
+ * @param _cmd  the command to fill (On Tour tControlCmd&)
+ */
 // Clears the pad input, updates the rider, then runs the input handler for the rider state.
-extern "C" void cComputer_getControlCmd(cComputer* self, void* pad)
+extern "C" void cComputer_getControlCmd(cComputer* self, void* _cmd)
 {
-    MEM_fill(pad, 0, 8);
+    MEM_fill(_cmd, 0, 8);
     cRider_updateTimeWarp(self->mRider, func_0010DEF0(((char*)self)));
     int state = func_0011FEE8_A768(self->mRider);
     switch (state) {
     case 0:
-        func_0010A960_A768(((char*)self), pad);
+        func_0010A960_A768(((char*)self), _cmd);
         break;
     case 2:
-        cComputer_getPrewindCmd_A768(((char*)self), pad);
+        cComputer_getPrewindCmd_A768(((char*)self), _cmd);
         break;
     case 6:
-        cComputer_getGateCmd_A768(((char*)self), pad);
+        cComputer_getGateCmd_A768(((char*)self), _cmd);
         break;
     case 4:
-        cComputer_getNaturalAirCmd_A768(((char*)self), pad);
+        cComputer_getNaturalAirCmd_A768(((char*)self), _cmd);
         break;
     case 7:
-        cComputer_getRailslideCmd_A768(((char*)self), pad);
+        cComputer_getRailslideCmd_A768(((char*)self), _cmd);
         break;
     case 5:
-        cComputer_getSpinCmd_A768(((char*)self), pad);
+        cComputer_getSpinCmd_A768(((char*)self), _cmd);
         break;
     case 8:
-        func_0010B750_A768(((char*)self), pad);
+        func_0010B750_A768(((char*)self), _cmd);
         break;
     case 1:
-        cComputer_getBoardPressCmd_A768(((char*)self), pad);
+        cComputer_getBoardPressCmd_A768(((char*)self), _cmd);
         break;
     case 3: case 9: case 10: case 11: case 12: case 13:
         break;
@@ -6500,7 +6604,17 @@ static inline sV4_AA70 Scale_AA70(const sV4_AA70& v, float s)
     return r;
 }
 
-extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* pad)
+/**
+ * Builds the prewind command: speed crouch, jump timing at the lip, steering at the jump and the trick axes.
+ *
+ * Sets bit 14 when 5 km/h under mDesiredSpeed. For a pipe jump (mToPipe) it sets bit 13 until the rider is
+ * within 50 of the jump's length from mStartJumpPos, and returns. Otherwise a jump event within 50 ahead sets
+ * bit 13 and steers (low field of word 1) at the jump's end point minus half of the rider's +0x490 point
+ * minus its position. The fields at bits 15-20 and 21-26 get mSpinAxis and mFlipAxis.
+ *
+ * @param cmd  the prewind command (On Tour tPrewindCmd)
+ */
+extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
 {
     sRec_AA70 buf[12];
     char* rider = (char*)self->mRider;
@@ -6508,18 +6622,18 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* pad)
     int n = trk->Query(buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4) + 50.0f);
     int sel = -1;
     if (Len_AA70(*(sV4_AA70*)((char*)self->mRider + 0x1E0)) < self->mDesiredSpeed - 138.88890075683594f)
-        pad->b14 = 1;
+        cmd->b14 = 1;
     if (self->mToPipe) {
         sV4_AA70 a = Sub_AA70(*(sV4_AA70*)&self->mEndJumpPos, *(sV4_AA70*)&self->mStartJumpPos);
         sV4_AA70 b = Sub_AA70(*(sV4_AA70*)((char*)self->mRider + 0x110), *(sV4_AA70*)&self->mStartJumpPos);
         if (Len_AA70(b) < Len_AA70(a) - 50.0f)
-            pad->b13 = 1;
+            cmd->b13 = 1;
         return;
     }
     for (int i = 0; i < n; i++) {
         if (buf[i].type == 0x10) {
             sel = i;
-            pad->b13 = 1;
+            cmd->b13 = 1;
             break;
         }
     }
@@ -6530,10 +6644,10 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* pad)
         half = Scale_AA70(half, 0.5f);
         sV4_AA70 pos = func_0026AB20_AA70(trk, 0, buf[sel].b);
         sV4_AA70 d = Sub_AA70(pos, half);
-        pad->w0 = (int)(func_00100348_AA70(((char*)self), &d) * 31.0f);
+        cmd->w0 = (int)(func_00100348_AA70(((char*)self), &d) * 31.0f);
     }
-    pad->b15 = (int)(ctl[0x12] * 31.0f);
-    pad->b21 = (int)(ctl[0x13] * 31.0f);
+    cmd->b15 = (int)(ctl[0x12] * 31.0f);
+    cmd->b21 = (int)(ctl[0x13] * 31.0f);
 }
 #endif
 
@@ -6570,7 +6684,17 @@ static inline float clamp_AD78(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo;
 }
 
-extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* pad)
+/**
+ * Builds the board-press command: steering at the path target and, at a press event, the press and balance.
+ *
+ * The field at bits 18-23 gets the turn toward the path target (calcTurn). When checkForBoardPress
+ * (func_0010BBF8) finds a press event ahead, the low field of word 1 gets -31 for a positive event value and
+ * +31 otherwise, and the field at bits 24-29 gets twice the side vector's z, clamped to 1 (when over 0.1 in
+ * size); with no event the word-1 field is 0.
+ *
+ * @param cmd  the board-press command (On Tour tBoardPressCmd)
+ */
+extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* cmd)
 {
     int flag;
     int r = func_0010BBF8(self, &flag);
@@ -6580,17 +6704,17 @@ extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* pad)
     {
         sVec4_AD78 v;
         func_00100610(&v, ((char*)self));
-        pad->b18 = (int)(func_00100348(((char*)self), &v) * 31.0f);
+        cmd->b18 = (int)(func_00100348(((char*)self), &v) * 31.0f);
     }
     if (r) {
-        pad->w0 = (int)(s * 31.0f);
+        cmd->w0 = (int)(s * 31.0f);
         sVec4_AD78 p = *(sVec4_AD78*)((char*)self->mRider + 0x1A0);
         float z = p.z + p.z;
         float y = clamp_AD78(z, -1.0f, 1.0f);
         if (vAbs_AD78(y) > 0.1f)
-            pad->b24 = (int)(y * 31.0f);
+            cmd->b24 = (int)(y * 31.0f);
     } else {
-        pad->w0 = 0;
+        cmd->w0 = 0;
     }
 }
 #endif
@@ -6649,14 +6773,25 @@ static inline float clamp_AED8(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo;
 }
 
-extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* pad)
+/**
+ * Builds the railslide command: jumping off at a jump event, balance, rail spins and speed pumping.
+ *
+ * Copies the jump event's toRail flag into mToRail (uninitialised stack data when there is no event) and
+ * always sets bits 17-24. At a jump the rider has reached it sets bits 13-14 and calls setupPrewindState().
+ * Otherwise the field at bits 25-30 gets twice the side vector's z (clamped, when over 0.1), the low field of
+ * word 1 gets +31 for a negative mSpinAxis and -31 otherwise (not for mRailStyle 3 or 4, or channel-2
+ * animation class 14), and bit 16 is set in a reached speed zone (func_0010BB18) when 5 km/h too slow.
+ *
+ * @param cmd  the railslide command (On Tour tRailslideCmd)
+ */
+extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* cmd)
 {
     int below, o3, o4, o5, o6, ok;
     int r = cComputer_checkForJumpEvent(self, (float*)(((char*)self) + 0xDF0), &below, &o3, &o4, &o5, &o6);
     self->mToRail = o4;
-    *(unsigned int*)pad |= 0x1FE0000;
+    *(unsigned int*)cmd |= 0x1FE0000;
     if (r && below) {
-        *(unsigned int*)pad |= 0x6000;
+        *(unsigned int*)cmd |= 0x6000;
         cComputer_setupPrewindState_AED8(((char*)self), o5, o6, o4, o3);
         return;
     }
@@ -6664,17 +6799,17 @@ extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* pad)
     float z = p.z + p.z;
     float y = clamp_AED8(z, -1.0f, 1.0f);
     if (vAbs_AED8(y) > 0.1f)
-        pad->b25 = (int)(y * 31.0f);
+        cmd->b25 = (int)(y * 31.0f);
     char* rider = (char*)self->mRider;
     if ((unsigned int)(*(int*)(rider + 0x328) - 3) >= 2 &&
         func_00311AE8(*(void**)(rider + 0x784), 2) != 0xE) {
         float s = (self->mSpinAxis < 0.0f) ? 1.0f : -1.0f;
-        pad->w0 = (int)(s * 31.0f);
+        cmd->w0 = (int)(s * 31.0f);
     }
     int r2 = func_0010BB18(self, (float*)(((char*)self) + 0xDF0), &ok);
     float len = vLen_AED8(*(sVec4_AED8*)((char*)self->mRider + 0x1E0));
     if (r2 && ok && len < self->mDesiredSpeed - 138.88890075683594f)
-        *(unsigned int*)pad |= 0x10000;
+        *(unsigned int*)cmd |= 0x10000;
 }
 #endif
 
@@ -6684,13 +6819,23 @@ INCLUDE_ASM("seg/seg_1218", cComputer_setupEndSpin);
 extern "C" void cSpinControl_predictSpinSec(void*, float*, float*);
 extern "C" void cSpinControl_predictFlipSec(void*, float*, float*);
 
-extern "C" void cComputer_setupEndSpin(cComputer* self, float t)
+/**
+ * Stops the AI's spin and flip inputs in time to land, using the spin control's time predictions.
+ *
+ * Both axes are zeroed when heading for a rail with under 1 s of air. Otherwise, for a spin trick, the spin
+ * stops when the current half turn (predictSpinSec) cannot finish within @p airTime + 0.1 s, or when another half
+ * turn would not fit and the current one needs under 0.4 s; the flip uses the same test (predictFlipSec) and
+ * stops both axes.
+ *
+ * @param airTime  air time left, in seconds (On Tour airTime)
+ */
+extern "C" void cComputer_setupEndSpin(cComputer* self, float airTime)
 {
     float a, b, c, d;
     cSpinControl_predictSpinSec(*(char**)((char*)self->mRider + 0x77C) + 0x230, &a, &b);
     cSpinControl_predictFlipSec(*(char**)((char*)self->mRider + 0x77C) + 0x230, &c, &d);
     int stop = 0;
-    if (self->mToRail && t < 1.0f)
+    if (self->mToRail && airTime < 1.0f)
         stop = 1;
     if (stop) {
         self->mFlipAxis = 0.0f;
@@ -6700,14 +6845,14 @@ extern "C" void cComputer_setupEndSpin(cComputer* self, float t)
     if (!self->mIsSpinTrick)
         return;
     if (self->mSpinAxis != 0.0f) {
-        float lim = t + 0.1f;
+        float lim = airTime + 0.1f;
         if (lim < a)
             self->mSpinAxis = 0.0f;
         else if (lim < b && a - 0.4f < 0.0f)
             self->mSpinAxis = 0.0f;
     }
     if (self->mFlipAxis != 0.0f) {
-        float lim = t + 0.1f;
+        float lim = airTime + 0.1f;
         if (lim < c) {
             self->mFlipAxis = 0.0f;
             self->mSpinAxis = 0.0f;
@@ -6747,10 +6892,23 @@ extern "C" int func_00311AE8(void*, int);
 extern "C" void cComputer_setupEndSpin(cComputer*, float);
 extern "C" int cComputer_chooseGrabMain(char*, float);
 
+/**
+ * Builds the in-air trick command: spin and flip axes, the grab to hold, and when the grab starts and ends.
+ *
+ * Takes the air time left from the air predictor (100 when it has no landing) and counts frames with over 15
+ * s of air at rider +0x484; at 31 it sets bit 12 instead (probably a reset). A rider not set to mess up runs
+ * setupEndSpin(), picks a grab with chooseGrabMain() when there is time and none is held, and drops it near
+ * the landing (mHoldToLandTime + 0.3 s), 2 s into a non-uber grab or before a rail; a messing-up rider picks
+ * a random grab once it is not flipping. The command gets mSpinAxis, mFlipAxis, mGrabID (bits 16-23), the
+ * tweak/uber bit 14 and, toward a rail, -31 at word 1 bits 12-17.
+ *
+ * @param cmd  the spin command (On Tour tSpinCmd)
+ * @return -1 when no grab is chosen; otherwise no value is set (On Tour's getSpinCmd returns nothing)
+ */
 // Returns -1 only when no trick is queued, and has no value otherwise (the caller ignores it): the retail
 // tail keeps `lw E0C; li v0,-1` with no branch. The noop `v0 = -1` return arm survives reload as a USE,
 // so jump2 only deletes the branch after sched2 and the compare loads stay.
-extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* pad)
+extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* cmd)
 {
     char* obj = *(char**)((char*)self->mRider + 0x788);
     int t = *(int*)(obj + 0xAC);
@@ -6770,7 +6928,7 @@ extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* pad)
     }
     if (*(int*)((char*)self->mRider + 0x484) >= 31) {
         *(int*)((char*)self->mRider + 0x484) = 0;
-        pad->b12 = 1;
+        cmd->b12 = 1;
     } else {
         if (self->mIsGonnaMessUp == 0) {
             cComputer_setupEndSpin(self, gap);
@@ -6802,17 +6960,17 @@ extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* pad)
                 self->mIsTweak = 1;
         }
         float* ctl = (float*)(((char*)self) + 0xDF0);
-        pad->b24 = (int)(ctl[0x12] * 31.0f);
-        pad->w0 = (int)(ctl[0x13] * 31.0f);
-        pad->b16 = self->mGrabID;
+        cmd->b24 = (int)(ctl[0x12] * 31.0f);
+        cmd->w0 = (int)(ctl[0x13] * 31.0f);
+        cmd->b16 = self->mGrabID;
         if (self->mIsUber)
-            pad->b14 = 1;
+            cmd->b14 = 1;
         else if (self->mIsTweak)
-            pad->b14 = 1;
+            cmd->b14 = 1;
         else
-            pad->b14 = 0;
+            cmd->b14 = 0;
         if (self->mToRail == 1)
-            SetW12_B250(pad, -0x1F);
+            SetW12_B250(cmd, -0x1F);
         if (self->mGrabID == -1)
             return -1;
     }
@@ -6843,7 +7001,17 @@ int AIrand();
 extern "C" void func_00100610_B590(sVec4_B590*, void*) __asm__("func_00100610");
 extern "C" float func_00100348_B590(void*, sVec4_B590*) __asm__("func_00100348");
 
-extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* pad)
+/**
+ * Builds the command for natural (unplanned) air: random spins and flips sized to the air time.
+ *
+ * Takes the air time from the air predictor (0 without a landing), sets mIsNaturalAir and clears
+ * mIsGonnaMessUp, mToRail and the grab. Over 1 s it spins in a random direction and over 3 s it also flips
+ * (either sets mIsSpinTrick). Under 0.5 s with neither it steers at the path target (bits 24-29, negated
+ * calcTurn). Byte 2 gets mGrabID, which is always -1 here.
+ *
+ * @param cmd  the natural-air command (On Tour tNaturalAirCmd)
+ */
+extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
 {
     char* o = *(char**)((char*)self->mRider + 0x788);
     int st = *(int*)(o + 0xAC);
@@ -6879,10 +7047,10 @@ extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* pad)
     if (d < 0.5f && self->mFlipAxis == 0.0f && self->mSpinAxis == 0.0f) {
         sVec4_B590 v;
         func_00100610_B590(&v, ((char*)self));
-        ((sPadBits_B590*)pad)->b24 = (int)(-func_00100348_B590(((char*)self), &v) * 31.0f);
+        ((sPadBits_B590*)cmd)->b24 = (int)(-func_00100348_B590(((char*)self), &v) * 31.0f);
         self->mGrabID = -1;
     }
-    pad->b2 = self->mGrabID;
+    cmd->b2 = self->mGrabID;
 }
 #endif
 
@@ -6916,17 +7084,28 @@ public:
 int AIrand();
 extern "C" int func_001298C8();
 
-extern "C" void cComputer_getGateCmd(cComputer* self, sPad_B790* pad)
+/**
+ * Builds the start-gate command: random rocking, then a timed pull-back and launch for the best computer
+ * riders.
+ *
+ * With t = 180 minus the AI tick, riders with AI index 1-3 push forward (+31 at bits 12-17) once t is under
+ * 33 - 10 * (index - 1), and riders 1-2 pull back (-31) once it is under 72. Otherwise every 20th tick stores
+ * a new random value with a random sign in mDesiredSpeed and sends it as the rock input; AIrand() is not
+ * reduced first (only scaled by 0.01), so only the low bits survive the 6-bit field.
+ *
+ * @param cmd  the gate command (On Tour tGateCmd)
+ */
+extern "C" void cComputer_getGateCmd(cComputer* self, sPad_B790* cmd)
 {
     float t = 180.0f - (float)func_001298C8();
     float th = 33.0f;
     th -= (float)((((cLvl_B790*)((char*)self->mRider + 0x6C0))->Level() - 1) * 10);
     if (t < th && ((cLvl_B790*)((char*)self->mRider + 0x6C0))->Level() < 4) {
-        pad->b12 = 0x1F;
+        cmd->b12 = 0x1F;
         return;
     }
     if (t < 72.0f && ((cLvl_B790*)((char*)self->mRider + 0x6C0))->Level() < 3) {
-        pad->b12 = -0x1F;
+        cmd->b12 = -0x1F;
         return;
     }
     if (func_001298C8() % 20 == 0) {
@@ -6936,7 +7115,7 @@ extern "C" void cComputer_getGateCmd(cComputer* self, sPad_B790* pad)
         if ((AIrand() & 1) == 0)
             self->mDesiredSpeed = -self->mDesiredSpeed;
     }
-    pad->b12 = (int)(self->mDesiredSpeed * 31.0f);
+    cmd->b12 = (int)(self->mDesiredSpeed * 31.0f);
 }
 #endif
 
@@ -6962,6 +7141,22 @@ public:
 
 extern "C" sVec4_B980 func_0026AB20(cTrack_B980*, int, float);
 
+/**
+ * Looks for a jump event on the rider's path just ahead and returns its settings and end points.
+ *
+ * Queries the path at +0xAB8 for events from the rider's previous path distance (+0x4C0) to 300 past the
+ * current one (+0x4C4) and takes the first of type 0x10. Its flag word gives the approach speed (bits 4 up,
+ * km/h, returned in cm/s) and the pipe, rail, spin and flip bits (3 down to 0); mStartJumpPos and mEndJumpPos
+ * are set from the event's two path distances. The outputs are untouched when there is no event.
+ *
+ * @param approachSpeed  receives the speed to approach the jump at, in cm/s
+ * @param below  receives 1 when the rider has reached the jump's start (On Tour isPrewind)
+ * @param toPipe  receives the jump-into-pipe flag
+ * @param toRail  receives the jump-onto-rail flag
+ * @param isSpin  receives the spin flag
+ * @param isFlip  receives the flip flag
+ * @return 1 when a jump event was found, otherwise 0
+ */
 extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* approachSpeed, int* below, int* toPipe, int* toRail, int* isSpin, int* isFlip)
 {
     sRec_B980 buf[12];
@@ -7122,6 +7317,17 @@ static inline float Atan2_BD10(float y, float x)
 static inline sV4_BD10 Fwd_BD10(sRiderT_BD10* o) { return o->fwd; }
 
 
+/**
+ * Keeps or picks the rider this computer rider deals with (mTargetID) and says whether to attack it.
+ *
+ * Drops the target when it is over 1050 away or the rider has wandered over 600 from its path (+0x4C8). With
+ * no target, within 540 of the path and on every 12th tick, it scores each active rider within 700 by its
+ * distance times (|cos| + 1) of its bearing off the rider's facing for the rival (checkForAttack()), or times
+ * (1 - cos) for the others, and takes the lowest.
+ *
+ * @param isAttack  receives whether the new target is the rival to attack; written only when one is picked
+ * @return 1 when the rider has a target, otherwise 0
+ */
 // On Tour: bool cComputer::checkForTargets(bool& isAttack); retail stores a word through isAttack.
 extern "C" int cComputer_checkForTargets(cComputer* self, int* isAttack)
 {
@@ -7181,18 +7387,30 @@ struct sObj_BFA8 {
     float fE3C;
 };
 
-extern "C" void cComputer_setupPrewindState(cComputer* self, int a, int b, int c, int d)
+/**
+ * Prepares the trick for a coming jump: which axes to rotate on, whether to mess it up, and where it lands.
+ *
+ * Clears mGrabID and mIsNaturalAir, sets mIsSpinTrick when @p isSpin or @p isFlip is set, rolls mIsGonnaMessUp with
+ * shouldRiderWipeout() and stores @p toRail and @p toPipe in mToRail and mToPipe. For a spin trick mSpinAxis and
+ * mFlipAxis become 1 for the requested rotations (0 otherwise), each with a random sign.
+ *
+ * @param isSpin  the jump asks for a spin (On Tour isSpin)
+ * @param isFlip  the jump asks for a flip (On Tour isFlip)
+ * @param toRail  the jump leads onto a rail (On Tour toRail)
+ * @param toPipe  the jump leads into a pipe (On Tour toPipe)
+ */
+extern "C" void cComputer_setupPrewindState(cComputer* self, int isSpin, int isFlip, int toRail, int toPipe)
 {
     self->mGrabID = -1;
     int* p = &self->mIsSpinTrick;
-    *p = (a || b);
+    *p = (isSpin || isFlip);
     self->mIsGonnaMessUp = cComputer_shouldRiderWipeout(self);
-    self->mToRail = c;
-    self->mToPipe = d;
+    self->mToRail = toRail;
+    self->mToPipe = toPipe;
     self->mIsNaturalAir = 0;
     if (self->mIsSpinTrick) {
-        self->mSpinAxis = a ? 1.0f : 0.0f;
-        self->mFlipAxis = b ? 1.0f : 0.0f;
+        self->mSpinAxis = isSpin ? 1.0f : 0.0f;
+        self->mFlipAxis = isFlip ? 1.0f : 0.0f;
         if (AIrand() & 1)
             self->mSpinAxis = -self->mSpinAxis;
         if (AIrand() & 1)
@@ -7234,9 +7452,16 @@ static inline float vLen_C0A8(const sVec4_C0A8& v)
         : "m"(v));
     return r;
 }
-extern "C" void cComputer_setupCrouch(cComputer* self, void* padp)
+/**
+ * Sets the cruise command's crouch field (bits 26-31) unless the rider is weak (mRiderDifficulty under 20).
+ *
+ * The field gets 31 below 833.3 cm/s (30 km/h) and 0.97 * 31 above it, or 0 for a weak rider.
+ *
+ * @param cmd  the cruise command (On Tour tCruiseCmd)
+ */
+extern "C" void cComputer_setupCrouch(cComputer* self, void* cmd)
 {
-    sPad_C0A8* pad = (sPad_C0A8*)padp;
+    sPad_C0A8* pad = (sPad_C0A8*)cmd;
     float len = vLen_C0A8(*(sVec4_C0A8*)((char*)self->mRider + 0x1E0));
     float s = 0.97f;
     if (len < 833.3334350585938f)
@@ -7280,9 +7505,14 @@ static inline float vLen_C140(const sVec4_C140& v)
         : "m"(v));
     return r;
 }
-extern "C" void cComputer_setupRecklessCrouch(cComputer* self, void* padp)
+/**
+ * Sets the cruise command's crouch field as setupCrouch() does but for every rider, plus bits 16 and 17.
+ *
+ * @param cmd  the cruise command (On Tour tCruiseCmd)
+ */
+extern "C" void cComputer_setupRecklessCrouch(cComputer* self, void* cmd)
 {
-    sPad_C140* pad = (sPad_C140*)padp;
+    sPad_C140* pad = (sPad_C140*)cmd;
     float len = vLen_C140(*(sVec4_C140*)((char*)self->mRider + 0x1E0));
     float s = 0.97f;
     if (len < 833.3334350585938f)
@@ -7296,6 +7526,11 @@ extern "C" void cComputer_setupRecklessCrouch(cComputer* self, void* padp)
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderWipeout);
 #ifdef SKIP_ASM
+/**
+ * Rolls whether this computer rider will mess up its next trick, more often for a low mTrickDifficulty.
+ *
+ * @return 1 when AIrand() % 100 is at least mTrickDifficulty * 100 (a 1 - mTrickDifficulty chance), else 0
+ */
 extern "C" int cComputer_shouldRiderWipeout(cComputer* self) {
     unsigned int r = AIrand();
     float thr = self->mTrickDifficulty * 100.0f;
@@ -7310,6 +7545,13 @@ INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderUber);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_C258(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
+/**
+ * Rolls whether this computer rider tries an uber trick; needs uber enabled and never at location 14.
+ *
+ * Requires mUberFlags bit 0 and a location ID other than 14; the chance is then mTrickDifficulty.
+ *
+ * @return 1 when the roll (AIrand() % 100 under mTrickDifficulty * 100) passes, otherwise 0
+ */
 extern "C" int cComputer_shouldRiderUber(cComputer* self) {
     if (*(unsigned int*)((char*)self->mRider + 0xB2C) & 1) {
         if (cBENewRaceInterface_getLocationID(cBE_getInterface_C258(cBE_getBE(), 0)) != 0xE) {
@@ -7325,6 +7567,11 @@ extern "C" int cComputer_shouldRiderUber(cComputer* self) {
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderTweak);
 #ifdef SKIP_ASM
+/**
+ * Rolls whether this computer rider tweaks its grab: a 30 + 70 * mTrickDifficulty percent chance.
+ *
+ * @return 1 when AIrand() % 100 is under 30 + 70 * mTrickDifficulty, otherwise 0
+ */
 extern "C" int cComputer_shouldRiderTweak(cComputer* self) {
     unsigned int r = AIrand();
     float thr = self->mTrickDifficulty * 70.0f + 30.0f;
@@ -7335,6 +7582,11 @@ extern "C" int cComputer_shouldRiderTweak(cComputer* self) {
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderGrab);
 #ifdef SKIP_ASM
+/**
+ * Rolls whether this computer rider grabs at all: a 60 + 40 * mTrickDifficulty percent chance.
+ *
+ * @return 1 when AIrand() % 100 is under 60 + 40 * mTrickDifficulty, otherwise 0
+ */
 extern "C" int cComputer_shouldRiderGrab(cComputer* self) {
     unsigned int r = AIrand();
     float thr = self->mTrickDifficulty * 40.0f + 60.0f;
@@ -7345,34 +7597,44 @@ extern "C" int cComputer_shouldRiderGrab(cComputer* self) {
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_updateRiderPathDifficulty);
 #ifdef SKIP_ASM
+/**
+ * Picks the path difficulty (0 easy, 1 medium, 2 hard) for a computer rider from its slot and the heat.
+ *
+ * Riders 1 and 2 take medium paths in heats 1-2 and hard ones after; rider 3 easy in heat 1, then medium;
+ * rider 4 easy in heats 1-2, then medium; rider 5 and any other value always easy.
+ *
+ * @param RiderID  the rider's AI index, 1-5 (On Tour RiderID)
+ * @param Heat  the heat number, 1-3 (On Tour Heat)
+ * @return the path difficulty, 0-2 (the caller stores it in mPathDifficulty)
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int cComputer_updateRiderPathDifficulty(cComputer* self, int a, int b)
+extern "C" int cComputer_updateRiderPathDifficulty(cComputer* self, int RiderID, int Heat)
 {
-    switch (a) {
+    switch (RiderID) {
     case 1:
-        if (b == 1)
+        if (Heat == 1)
             return 1;
-        return (b == 2) ? 1 : 2;
+        return (Heat == 2) ? 1 : 2;
     case 2:
-        if (b == 1)
+        if (Heat == 1)
             return 1;
-        return (b == 2) ? 1 : 2;
+        return (Heat == 2) ? 1 : 2;
     case 3:
-        if (b == 1)
+        if (Heat == 1)
             return 0;
-        if (b == 2)
+        if (Heat == 2)
             return 1;
         return 1;
     case 4:
-        if (b == 1)
+        if (Heat == 1)
             return 0;
-        if (b == 2)
+        if (Heat == 2)
             return 0;
         return 1;
     case 5:
-        if (b == 1)
+        if (Heat == 1)
             return 0;
-        if (b == 2)
+        if (Heat == 2)
             return 0;
         return 0;
     }

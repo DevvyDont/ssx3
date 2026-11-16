@@ -67,6 +67,17 @@ static inline void showIdx_182928(sCharSetup_182928* self, char* name, int idx)
     }
 }
 
+/**
+ * Builds the character setup screen ("09set_char"): rider name and model, title and option buttons.
+ *
+ * Fills "rider name" and sets up the camera and rider pose (func_00182DB8), hides player mUserNum's front-end
+ * rider and probably gives it the player's character (rider manager, RealFE + 0xB0), and sets the audio bank
+ * mode to 1. In multiplayer (game path D_00535C11 == 2) "title" says "kT_TITLEPlayer1SetupCharacter" or
+ * "kT_TITLEPlayer2SetupCharacter".
+ *
+ * "Option_Continue", "Option_Equip", "Option_Rider" and "Option_Radio" are shown with misc data 0 to 3;
+ * "Option_GBA" is hidden and gets vtable slot 8 (cUIThing_setStatic) with 1.
+ */
 extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
 {
     void* engine = self->engine;
@@ -173,6 +184,17 @@ struct sStateK182C80 {
     unsigned hi : 18;
 };
 
+/**
+ * Handles the character setup screen's widget events: next state, previous state, or the options screen.
+ *
+ * Event 5 pushes the custom interface's getNextState result, if any, and always hides the rider
+ * (func_001831D0(self, 0)); event 6 does the same with slot 5 (probably getPrevState) but hides the rider
+ * only when a state came back. Event 7 builds a cFEStateOptions (0x54 bytes, "FEOptions"), sets its mode
+ * (mAttrState bits 8-13) to 1 and pushes it with cUIStateStack_pushSpecial(.., 0, 0).
+ *
+ * @param item  the widget (On Tour pWidget)
+ * @param event  the event (On Tour Event)
+ */
 extern "C" void cFEStateCharSetup_onWidgetEvent(void* self, void* item, unsigned int event)
 {
     if (item == 0)

@@ -14,6 +14,16 @@ struct sInstanceStruct {
 //100%
 INCLUDE_ASM("object/instanceman", cInstanceMan_copyInstance__FPvP15sInstanceStructT0);
 #ifdef SKIP_ASM
+/**
+ * Copies one instance record over another, keeping the destination's word at +0x78 and setting its flag
+ * 0x2000.
+ *
+ * MEM_copy of 0xA0 bytes, then the saved +0x78 word (probably the record's own id; multi-spline replays save
+ * it per copy) is put back and bit 0x2000 of the flags (+0x8) is set. The manager itself is not used.
+ *
+ * @param dst  record to overwrite
+ * @param src  record to copy from
+ */
 void cInstanceMan_copyInstance(void* self, sInstanceStruct* dst, void* src)
 {
     void* saved = dst->field_0x78;
@@ -792,6 +802,17 @@ struct sInstElem2168 {
     sInstElem2168() {}
 };
 
+/**
+ * Rebuilds a mesh-animation node (an instance whose meshes fly apart) from a replay frame.
+ *
+ * Runs the cInstanceNode replay constructor and stores cMeshAnimNode's vtable; the four 24-element vector
+ * arrays (On Tour Qrot, Axis, Pos, Vel) have empty constructors. Reads the 0xC-byte cMeshAnimNodeState (Life,
+ * AngVel, FadeTime) into +0x1C, then sets Life to -1, so update and render treat the node as finished.
+ *
+ * @param bucket  bucket index, passed on to cInstanceNode_cInstanceNode()
+ * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
+ * @return @p self
+ */
 extern "C" void* cMeshAnimNode_cMeshAnimNode(void* self, void* bucket, void* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
@@ -1042,6 +1063,14 @@ static inline void AddEq_352500(sV4_352500& d, const sV4_352500& b)
         : "memory");
 }
 
+/**
+ * Moves the flying meshes of a mesh-animation node and expires the node when its life runs out.
+ *
+ * While Life (+0x1C) is positive it drops by the tick period; on reaching 0 the node calls its virtual expire
+ * (slot 34) with runscript 1 and returns. Otherwise each mesh's Qrot (+0x30) turns by Angle[i] (+0x330) about
+ * Axis[i] (+0x1B0) and is renormalised, Pos (+0x3B0) advances by Vel (+0x530) with no time step, and Vel.z
+ * drops by Drag (+0x6B4) * 980 * the tick period.
+ */
 extern "C" void cMeshAnimNode_update(sDebris_352500* self)
 {
     if (self->timer > 0.0f) {
@@ -1270,6 +1299,15 @@ static inline void setOffset_352810(sMat_352810& m, const sV4_352810& v)
     m.r[3] = v;
 }
 
+/**
+ * Draws a mesh-animation node's meshes at their current rotations and positions, fading near the end of its
+ * life.
+ *
+ * Draws nothing once Life (+0x1C) is 0 or less, or while any of the model's materials is not loaded in the
+ * world cache (global section, type 9). Builds one matrix per mesh from Qrot and Pos and draws through the
+ * graphics manager's slot 95 with an identity root and flags 0x420. The fade is 1, or Life itself (not Life /
+ * FadeTime) when FadeTime (+0x24) is not negative and Life is at most FadeTime.
+ */
 extern "C" void cMeshAnimNode_render(sDebris_352810* self)
 {
     if (self->timer <= 0.0f) {

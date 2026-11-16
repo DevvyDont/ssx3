@@ -123,6 +123,13 @@ extern int D_004A11F0;
 extern "C" void cBELibrary__cBELibrary(void* p, int a);
 void operator_delete(int* ptr);
 
+/**
+ * Tears down the back end: the BE library, the three game-flow states and the BE object.
+ *
+ * Destroys the library (D_004A11F8, flags 3) if there is one, calls virtual slot 2 on each state, frees the
+ * 4-byte "BE" object and clears D_004A11EC and the exists flag D_004A11F0, so the next cBE_getBE() builds
+ * everything again. D_004A11F8 itself is not cleared.
+ */
 extern "C" void cBE_purgeBE(void)
 {
     if (D_004A11F8)

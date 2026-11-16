@@ -13,6 +13,15 @@ extern "C" void func_003ACA70(int* self, int flags);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00495070[];
 
+/**
+ * Sizes the world-script cache for a number of sections by replacing its section array with empty entries.
+ *
+ * Destroys any old array at +0x4 (func_003ACA70 on each entry, last to first) and frees it, stores @p count
+ * at +0x8, allocates @p count 12-byte "tWScriptCache" entries behind an array cookie, constructs each
+ * (func_003ACA50: state 0, +0x4 = -1, no data) and clears +0xC.
+ *
+ * @param count  number of world sections (On Tour numSections)
+ */
 // PORT: array cookie arithmetic through int (pointer in int).
 extern "C" void cWScriptCache_init(void* self, int count)
 {

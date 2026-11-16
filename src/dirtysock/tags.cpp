@@ -543,6 +543,18 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetNumber);
 #ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 
+/**
+ * Stores a signed integer in a tag record as decimal text.
+ *
+ * Negative values get a leading '-'. The most negative int stays negative when negated, so it is written as
+ * "-0".
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field name (0 clears the record first)
+ * @param value   the number to store
+ * @return cDirtysock_tag__TagFieldSetupTerm()'s result
+ */
 extern "C" int cDirtysock_tag_TagFieldSetNumber(char* record, int len, char* name, int value)
 {
     char temp[256 + 32];
@@ -695,6 +707,18 @@ extern unsigned char D_00495FC0[];
 extern unsigned char D_004960C0[];
 
 extern "C" int cDirtysock_tag_TagFieldSetString_impl(char* record, int len, char* name, const unsigned char* value) __asm__("cDirtysock_tag_TagFieldSetString");
+/**
+ * Stores a string in a tag record, %xx-escaping the characters the format reserves.
+ *
+ * A null @p value deletes the field instead. The text is put in double quotes when it contains a space;
+ * characters outside ' '..'~' and '=', '"', ':' and '%' become '%' plus two hex digits.
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field name (0 clears the record first)
+ * @param value   the text to store, or 0 to delete the field
+ * @return cDirtysock_tag__TagFieldSetupTerm()'s result, or 0 when the field was deleted
+ */
 extern "C" int cDirtysock_tag_TagFieldSetString_impl(char* record, int len, char* name, const unsigned char* value)
 {
     char temp[0xA00];
@@ -1554,6 +1578,20 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetStructure);
 #ifdef SKIP_ASM
 extern char D_004A4A90[];
 
+/**
+ * Decodes comma-separated tag value text into a C structure, laid out by a template string.
+ *
+ * The template is TagFieldSetStructure()'s: 'a' skips bytes, 'b', 'w' and 'l' read up to 2, 4 or 8 hex digits
+ * (a leading '-' negates) and 's' a count-byte string, undoing %xx escapes and zero-filling. A null @p data
+ * reads as empty. A null @p buffer decodes into a 1 KiB scratch array, but the limit was taken from the null
+ * pointer, so decoding stops after the first item.
+ *
+ * @param data    the value text to decode, or 0
+ * @param buffer  the structure to fill, or 0 to only measure
+ * @param len     size of @p buffer in bytes; negative allows 65535
+ * @param tmpl    the template describing the structure's fields
+ * @return the number of structure bytes filled or skipped
+ */
 extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* data, void* buffer, int len, const char* tmpl)
 {
     int count;

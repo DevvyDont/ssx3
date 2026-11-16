@@ -108,6 +108,25 @@ static inline int Find_8DB8(char* mgr, int hash)
     return func_00398380(mgr + 0x58, hash);
 }
 
+/**
+ * Constructs the equip-gear state for a user in store (buy) or inventory (equip) mode.
+ *
+ * Sets state id 0xE, the two preview positions (0xAC0, 0xAD0), the user's controller bits, the character
+ * (0xBC), the mode (0xC8: 1 in the store), money (0xC0) and equip points (0xC4, func_0014B478); clears the
+ * widget pointers and the category stack (root -1), finds the dollar and checkbox texture elements and sets
+ * the user's FE rider to the character (func_001A0508).
+ *
+ * With a store or a mode switch, 0xCC (On Tour mStoreNum) is the last hub's peak (2 for hubs 19-20, 3 for 21,
+ * else 1), otherwise -1. Builds the root item list (func_0019B180) and loads the character's icon file into
+ * the FE file cache (slot kept at 0xA64).
+ *
+ * @param p  the state being constructed (this)
+ * @param owner  the UI engine (On Tour pEngine)
+ * @param team  the user number (On Tour userNum)
+ * @param inStore  nonzero to open in store mode (buying), zero for the inventory (equipping)
+ * @param canSwitchMode  nonzero when the option button may switch between the two modes (kept at 0xAE4)
+ * @return the constructed state
+ */
 extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* p, void* owner, signed char team, int inStore, int canSwitchMode)
 {
     sCharEquip_8DB8* self = (sCharEquip_8DB8*)p;
@@ -244,6 +263,15 @@ static inline void releaseK199148(int id)
     }
 }
 
+/**
+ * Destroys the equip-gear state: frees its icon file and preview textures, then runs the base destructor.
+ *
+ * Releases the icon file (0xA64) from the FE file cache and the texture ids at 0xA68, 0xA70 and 0xA74 through
+ * the graphics manager (vtable slot 50), cancels a pending large-preview load (func_0019A498), restores the
+ * base vtable D_0046D0D0 and calls the cUIState destructor func_0039E390().
+ *
+ * @param flags  g++ destructor flags, passed on to func_0039E390(); bit 0 frees the object
+ */
 extern "C" void cFEStateCharEquip__cFEStateCharEquip(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cFEStateCharEquip_vtbl;
@@ -278,6 +306,14 @@ extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* self, int a1);
 extern char D_004607E8[];
 
+/**
+ * Opens the equip-gear screen ("12equ_char") and poses the user's FE rider for it.
+ *
+ * Puts the rider's draw layer (+0xC2C) at 0x11 and clears its +0xCCC; when its character id is below 10 and
+ * its model is ready (+0xCB4, +0xCB8), restarts its animation with animation 0x1B2. Resets the zoom (0xAA4)
+ * and turn (0xAAC) to 0 and the pan (0xAA8) to -1, places the camera and models (func_0019BFE8) and switches
+ * the front-end sound-bank mode to 2.
+ */
 extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -310,6 +346,11 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onDestroyScreen);
 extern "C" void* func_001A0548(void* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
 
+/**
+ * Takes the user's FE rider off the draw layers (+0xC2C = -1), then destroys the screens like the base state.
+ *
+ * The rider is left alone when SSXApp->RealFE is null; cUIState_onDestroyScreen() does the rest.
+ */
 extern "C" void cFEStateCharEquip_onDestroyScreen(void* self)
 {
     char* mgr = (char*)SSXApp->RealFE;
@@ -331,6 +372,16 @@ extern "C" void func_0019BD48(void* self, int a1);
 extern "C" void func_0019B618(void* self, int a1, int a2);
 extern "C" void cFEState_onGainFocus(void* self, int a1);
 
+/**
+ * Gives the equip-gear state focus: sets up its mode's widgets, the points bars and the item rows.
+ *
+ * Runs func_0019A308() in store mode (0xC8 set; probably On Tour initStorePreview) or func_0019A238()
+ * otherwise (initInventoryPreview), then the points bar (func_0019BC90) and the equip preview bar with no
+ * extra cost (func_0019BD48), redraws the rows with a scroll reset (func_0019B618) and runs
+ * cFEState_onGainFocus().
+ *
+ * @param pPrevState  the state that had focus before, passed on to cFEState_onGainFocus()
+ */
 extern "C" void cFEStateCharEquip_onGainFocus(void* self, int pPrevState)
 {
     bool off = !*(bool*)((char*)self + 0xC8);
@@ -453,6 +504,18 @@ static inline bool isC8_FE(sCharEquip_FE* s)
     return s->fC8 == 1;
 }
 
+/**
+ * Keeps the equip-gear screen's widgets as they are created and sets their first text and visibility.
+ *
+ * Each named widget goes to its On Tour member slot (0x48 title to 0x88 large preview). The title says
+ * kT_CMNBuyGear in store mode, else kT_CMNEquipGear; the switch-mode button text and icon ("btext5", "ps2sq",
+ * "xby", "ngcy") name the other mode, or hide when the mode cannot switch (0xAE4). "heading" shows the root
+ * (updateHeading(-1)), "MnuGroups" becomes a scrollable menu of the item count, the store totals show only in
+ * store mode, and the points and preview widgets start hidden. Rows "1"-"6" (misc data 0-5) and
+ * "check1"-"check6" are filled from the item list or hidden past its end.
+ *
+ * @param w  the widget just created (its hash name is at +0x38)
+ */
 extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, void* w)
 {
     int id = *(int*)((char*)w + 0x38);
@@ -564,6 +627,17 @@ struct sEquipDetail;
 extern "C" int func_0019B458(sEquipDetail* self, int idx);
 extern "C" void func_0019B618(void* self, int a1, int a2);
 
+/**
+ * Hides the equip-gear state behind popups and buys the selected item when the buy popup closes with a yes.
+ *
+ * Event 0x15 (a popup opened) clears this state's visible bit (mAttrState bit 3) unless the popup is the buy
+ * popup (state id 7). Event 0x16 (popped) sets it again and, for the buy popup with its result (+0x6C) set,
+ * buys the item (func_0019BE80), shows the new bank and redraws the rows when the item leaves the list
+ * (func_0019B458).
+ *
+ * @param widget  the popup state that sent the event
+ * @param msg  the popup event (0x15 opened, 0x16 closed)
+ */
 extern "C" void cFEStateCharEquip_onPopupEvent(void* self, void* widget, int msg)
 {
     switch (msg) {
@@ -610,6 +684,14 @@ struct sVEntryK199938 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Updates the equip-gear state each frame: the icon file's arrival, the "loading text" and the preview loads.
+ *
+ * Runs the base update func_0039E510(); once the icon file (0xA64) is ready in the FE file cache, marks it
+ * (0xA60) and refreshes the selected item's preview (func_0019A9B8). "loading text" shows in store mode while
+ * a large preview is pending (0xA6C, 0x95C), otherwise until the FE rider's model is shown (+0xCC8). Then
+ * func_0019A638() advances the preview load and func_0019BFE8() places the camera and models.
+ */
 extern "C" void cFEStateCharEquip_onUpdate(void* self)
 {
     func_0039E510(self);
@@ -698,6 +780,16 @@ static inline float clamp_9A38(float v, float lo, float hi)
     return lo;
 }
 
+/**
+ * Turns, zooms and pans the rider preview with the camera controls in inventory mode.
+ *
+ * Only outside store mode and in view state 1 or 4 (0xAE0): camera rotate adds 3 x getCamRotate() degrees to
+ * the turn (0xAAC, kept in 0-360), zoom subtracts 0.1 x getCamZoom() from 0xAA4 (clamped to 0..1) and pan 0.1
+ * x getCamPan() from 0xAA8 (clamped to -1..1); these are cUIInput vtable slots 33-38.
+ *
+ * @param in  the controller input (cUIInput)
+ * @return 1 when any camera control was used, otherwise 0
+ */
 extern "C" int cFEStateCharEquip_onInputBegin(void* self, cPad_9A38* in)
 {
     int r = 0;
@@ -797,6 +889,22 @@ static inline int isMode1_9C28(sCharEquip_9C28* self)
     return self->mode == 1;
 }
 
+/**
+ * Handles the item rows: opens a category, buys or equips an item, goes back up a category, or leaves.
+ *
+ * Event 5 (accept) on row top + misc data: a category (flag 0x20) is pushed on the stack (0xD0, depth 0x120)
+ * and listed, the boards category (3) easing the camera to the board (0xAE0 = 3); an item (flag 4) opens the
+ * buy popup in store mode when the money covers its price x 10, or in the inventory is equipped or taken off
+ * (func_0019BEE8) when the row's points fit the 3392 budget, then the bars and rider model are refreshed.
+ *
+ * Event 6 (back) lists the parent category (leaving boards eases back, 0xAE0 = 4) or, at the root, sets the
+ * FE rider's Customize speech request (+0xC1C) and pushes getPrevState's state. Event 1 (row focused) starts
+ * a delayed large-preview load in store mode and refreshes the item preview.
+ *
+ * @param selfv  the equip-gear state (this)
+ * @param w  the row widget that sent the event; nothing happens when null
+ * @param ev  the widget event (5 accept, 6 back, 1 focused)
+ */
 extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, char* w, unsigned int ev)
 {
     sCharEquip_9C28* self = (sCharEquip_9C28*)selfv;
@@ -914,6 +1022,20 @@ static inline bool hasFlag_9F20(sEquipItem_9F20* item, int f)
     return (item->flags & f) != 0;
 }
 
+/**
+ * Answers the item menu's queries and buttons: row checks, scrolling, accept, back and mode switch.
+ *
+ * Event 0 is true for an item with flag 4 and event 1 for an existing row; 2 and 3 (scrolled) redraw the rows
+ * and give 1. Event 6 (next) gives 0x101 for a category, any store item (its price test gives 0x101 either
+ * way) or an inventory item whose points fit (row cost at 0xA78 plus 0xC4 at most 3392), else 0x110 (the
+ * item's mSound[0]). Event 7 (back) steps the category depth (0x120) down and gives 1; 8 switches the mode
+ * (func_0019A3D0) when allowed (0xAE4) and gives 0x101, else 0x100; 9 gives 0x100.
+ *
+ * @param pMenu  the menu that sent the event (unused)
+ * @param kind  the menu event
+ * @param idx  the row index for events 0 and 1
+ * @return a flag for events 0 and 1, otherwise feedback bits (0x100 frame, 1 mSound[1], 0x10 mSound[0])
+ */
 extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu, int kind, int idx)
 {
     switch (kind) {
@@ -2291,6 +2413,15 @@ static inline sBEEntry38K19BBE0* findEntryK19BBE0(sBETableK19BBE0* t, int g, int
     return &t->entries[idx];
 }
 
+/**
+ * Shows the current category in the heading text: kT_FECategories at the root, else the category's name.
+ *
+ * For an @p id other than -1 (D_004A11D0), looks the category up for the character (0xBC) with
+ * func_0014D448() in the equip table from func_0014BDB8() and shows the string whose ID is the hash of its
+ * name (+0x14); a missing entry is not checked. Nothing happens without a heading widget (0x58).
+ *
+ * @param id  the category id, or -1 for the root
+ */
 extern "C" void cFEStateCharEquip_updateHeading(void* self, int id)
 {
     if (*(cUIText**)((char*)self + 0x58) != 0) {

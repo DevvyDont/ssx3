@@ -168,6 +168,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_REPLAY__cOVState_REPLAY);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
+/**
+ * Destroys the replay overlay state through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08), then calls the cUIState destructor func_0039E390(): the same body
+ * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ *
+ * @param arg0  the replay overlay state being destroyed
+ */
 extern "C" void cOVState_REPLAY__cOVState_REPLAY(void *arg0) {
     *(char **)((char*)arg0 + 8) = D_00474E08;
     func_0039E390_a(arg0);
@@ -457,6 +466,16 @@ extern "C" void func_0020EB08(void *, int);
 extern "C" void func_0039E390(void *, int);
 extern char cOVStateHUD1P_vtbl[];
 
+/**
+ * Destroys the one-player HUD overlay state: its two HUD elements, then the cUIState base.
+ *
+ * Restores cOVStateHUD1P_vtbl, destroys the two 0x8C-byte elements at +0x48 last to first (each through
+ * func_0020EB08() on its part at +8, with flags 2 so nothing is freed), then calls the cUIState destructor
+ * func_0039E390(). func_0020EB08 drops the shared instance count D_004A276C and clears the textures-loaded
+ * flag D_004A2768 when the last element goes.
+ *
+ * @param flags  g++ destructor flags, passed on to func_0039E390(); bit 0 set frees the object
+ */
 extern "C" void cOVStateHUD1P__cOVStateHUD1P(void *self, int flags) {
     (*(char **)((char*)(self) + (8))) = cOVStateHUD1P_vtbl;
     if ((char*)self + 0x48 != 0) {
@@ -753,6 +772,13 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateHiScoreList__cOVStateHiScoreList);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
+/**
+ * Destroys the high-score list overlay state through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08), then calls the cUIState destructor func_0039E390(): the same body
+ * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ */
 extern "C" void cOVStateHiScoreList__cOVStateHiScoreList(void *self) {
     *(char **)((char*)self + 8) = D_00474E08;
     func_0039E390_a(self);
@@ -2229,6 +2255,13 @@ INCLUDE_ASM("fe/all_in_one_fe", cFEStateLodge__cFEStateLodge);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_0046D0D0[];
 
+/**
+ * Destroys the lodge front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(): the same
+ * body as cFEState's own destructor func_001DD750, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ */
 extern "C" void cFEStateLodge__cFEStateLodge(void *self) {
     *(char **)((char*)self + 8) = D_0046D0D0;
     func_0039E390_a(self);
@@ -2255,6 +2288,13 @@ INCLUDE_ASM("fe/all_in_one_fe", cFEStateLodgeRiderDetail__cFEStateLodgeRiderDeta
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_0046D0D0[];
 
+/**
+ * Destroys the lodge rider-detail front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(): the same
+ * body as cFEState's own destructor func_001DD750, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ */
 extern "C" void cFEStateLodgeRiderDetail__cFEStateLodgeRiderDetail(void *self) {
     *(char **)((char*)self + 8) = D_0046D0D0;
     func_0039E390_a(self);
@@ -2281,6 +2321,13 @@ INCLUDE_ASM("fe/all_in_one_fe", cFEStateBuyAttrib__cFEStateBuyAttrib);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_0046D0D0[];
 
+/**
+ * Destroys the buy-attribute front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(): the same
+ * body as cFEState's own destructor func_001DD750, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ */
 extern "C" void cFEStateBuyAttrib__cFEStateBuyAttrib(void *self) {
     *(char **)((char*)self + 8) = D_0046D0D0;
     func_0039E390_a(self);
@@ -2307,6 +2354,13 @@ INCLUDE_ASM("fe/all_in_one_fe", cFEStateCareerStats__cFEStateCareerStats);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_0046D0D0[];
 
+/**
+ * Destroys the career-stats front-end state through the cFEState and cUIState destructors.
+ *
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(): the same
+ * body as cFEState's own destructor func_001DD750, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ */
 extern "C" void cFEStateCareerStats__cFEStateCareerStats(void *self) {
     *(char **)((char*)self + 8) = D_0046D0D0;
     func_0039E390_a(self);
@@ -2320,6 +2374,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_ENTERLODGE__cOVState_ENTERLODGE);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
+/**
+ * Destroys the enter-lodge overlay state through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08), then calls the cUIState destructor func_0039E390(): the same body
+ * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ *
+ * @param arg0  the enter-lodge overlay state being destroyed
+ */
 extern "C" void cOVState_ENTERLODGE__cOVState_ENTERLODGE(void *arg0) {
     *(char **)((char*)arg0 + 8) = D_00474E08;
     func_0039E390_a(arg0);
@@ -2403,6 +2466,13 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLEN
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
+/**
+ * Destroys the big-challenge start overlay state through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08), then calls the cUIState destructor func_0039E390(): the same body
+ * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ */
 extern "C" void cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START(void *self) {
     *(char **)((char*)self + 8) = D_00474E08;
     func_0039E390_a(self);
@@ -2476,6 +2546,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_TOPTIMES__cOVState_TOPTIMES);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
+/**
+ * Destroys the top-times overlay state through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08), then calls the cUIState destructor func_0039E390(): the same body
+ * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ *
+ * @param arg0  the top-times overlay state being destroyed
+ */
 extern "C" void cOVState_TOPTIMES__cOVState_TOPTIMES(void *arg0) {
     *(char **)((char*)arg0 + 8) = D_00474E08;
     func_0039E390_a(arg0);
@@ -2623,6 +2702,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_MAP__cOVState_MAP);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
+/**
+ * Destroys the map overlay state through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08), then calls the cUIState destructor func_0039E390(): the same body
+ * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ *
+ * @return no meaningful value (func_0039E390() returns nothing)
+ */
 extern "C" void* cOVState_MAP__cOVState_MAP(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
@@ -2741,6 +2829,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVTemplate_PauseMenu__cOVTemplate_PauseMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
+/**
+ * Destroys the pause-menu overlay template through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08), then calls the cUIState destructor func_0039E390(): the same body
+ * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ *
+ * @return no meaningful value (func_0039E390() returns nothing)
+ */
 extern "C" void* cOVTemplate_PauseMenu__cOVTemplate_PauseMenu(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
@@ -3107,6 +3204,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_OPTIONS__cOVState_PAUSE_OPTIONS);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
+/**
+ * Destroys the pause-options overlay state through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08), then calls the cUIState destructor func_0039E390(): the same body
+ * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ *
+ * @return no meaningful value (func_0039E390() returns nothing)
+ */
 extern "C" void* cOVState_PAUSE_OPTIONS__cOVState_PAUSE_OPTIONS(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
@@ -3189,6 +3295,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_ONLINE_ERROR__cOVState_PAUSE_ONLI
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
+/**
+ * Destroys the pause online-error overlay state through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08), then calls the cUIState destructor func_0039E390(): the same body
+ * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ *
+ * @return no meaningful value (func_0039E390() returns nothing)
+ */
 extern "C" void* cOVState_PAUSE_ONLINE_ERROR__cOVState_PAUSE_ONLINE_ERROR(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
@@ -3473,6 +3588,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateRewardsList__cOVStateRewardsList);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
+/**
+ * Destroys the rewards-list overlay state through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08), then calls the cUIState destructor func_0039E390(): the same body
+ * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ *
+ * @return no meaningful value (func_0039E390() returns nothing)
+ */
 extern "C" void* cOVStateRewardsList__cOVStateRewardsList(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
@@ -3485,6 +3609,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_REWARDS__cOVState_REWARDS);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
+/**
+ * Destroys the rewards overlay state through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08), then calls the cUIState destructor func_0039E390(): the same body
+ * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ *
+ * @return no meaningful value (func_0039E390() returns nothing)
+ */
 extern "C" void* cOVState_REWARDS__cOVState_REWARDS(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
@@ -3605,6 +3738,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateTrophy__cOVStateTrophy);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
+/**
+ * Destroys the trophy overlay state through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08), then calls the cUIState destructor func_0039E390(): the same body
+ * as cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own. The g++ delete
+ * flags reach func_0039E390() untouched in the second argument register.
+ *
+ * @return no meaningful value (func_0039E390() returns nothing)
+ */
 extern "C" void* cOVStateTrophy__cOVStateTrophy(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);

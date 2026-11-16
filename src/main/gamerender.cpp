@@ -57,6 +57,17 @@ struct cGameViewMan22E3B8 {
     float height;
 };
 
+/**
+ * Constructs the game view manager with one camera per player and a single full-screen view.
+ *
+ * For each of the two slots below @p count it creates a cCamera ("GameCamera", 0x4B0 bytes), calls its init
+ * (slot 2) with the slot index, a 45-degree field of view, near 30 and far 30000 (20000 with two players),
+ * and selects controller 2; other slots get 0. One view (+0x10) is active and view 0's rectangle is the whole
+ * display (GrMan slots 10 and 11).
+ *
+ * @param count  number of players, hence cameras (On Tour uiNumPlayers)
+ * @return @p self
+ */
 extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* self, unsigned int count)
 {
     new ((char*)self + 4) sCamRef22E3B8[2];
@@ -241,6 +252,12 @@ struct sVEntry_0022E7C8 {
     void (*fn)(void*);
 };
 
+/**
+ * Snaps the camera of every active view through its current controller's virtual slot 4 (probably snap).
+ *
+ * Loops over the active view count (+0x10), not the camera count (+0x0); the controller is the camera's
+ * Controller (+0xA0).
+ */
 extern "C" void cGameViewMan_snapAll(void* self)
 {
     unsigned int i;
@@ -262,6 +279,11 @@ struct sVEntry_0022E840 {
     void (*fn)(void*);
 };
 
+/**
+ * Updates the camera of every active view through its virtual update (cCamera vtable slot 3).
+ *
+ * Loops over the active view count (+0x10), not the camera count (+0x0).
+ */
 extern "C" void cGameViewMan_updateAll(void* self)
 {
     unsigned int i;
@@ -356,6 +378,19 @@ static inline void Init_22E968(char* s, int off, void* vt, int id)
     *(int*)(s + off + 0x0) = id;
 }
 
+/**
+ * Constructs the in-game module: clears its key subsystem pointers and builds its game-flow states in place.
+ *
+ * Runs the module base constructor (func_00231CD0), stores cGame's vtable, clears AI, DebugFont, UI,
+ * InputSync and ViewMan, clears D_004A2A54 and calls func_00244240(0). It then constructs the cGF* state
+ * objects in mStates (gate, podium, next heat, session teleport, replay start and others); each base state
+ * constructor also clears cGameState_mpGame.
+ *
+ * Finally PauseOwner = -1, ControllerUnplugged = 0, and both TransitionMan and SplashManager entries are
+ * cleared; the other subsystems are left for cGame_load.
+ *
+ * @return @p self
+ */
 extern "C" char* cGame_cGame(cGame* self)
 {
     func_00231CD0(((char*)self));

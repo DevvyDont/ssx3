@@ -176,6 +176,20 @@ static inline char* riders_PO()
     return (char*)SSXApp->Game->ViewMan;
 }
 
+/**
+ * Builds the in-game options screen ("37beoptions") and loads every widget from the current settings.
+ *
+ * List boxes: HUD (0lb: Full / Minimal / None, settings word D_00535610 bits 30-31), player 1 and 2 camera
+ * (1lb / 2lb: Near / Mid / Far = camera types 0x3C-0x3E, preselected from each game view's chase camera;
+ * "camera select" / "camera 2 select" get kT_CMNCameraVar with 1 / 2), DJ and arcade audio (7lb / 8lb: Off /
+ * On, bits 17 / 16). The 12-step sliders 4sl / 5sl / 6sl take the music, effects and speech volumes (bits
+ * 0-3, 8-11, 4-7), and all five audio settings are reapplied to the audio object.
+ * In a network game the EA Talk widgets (EATalkPair, EATalk, EATalksl) are shown and made selectable, and the
+ * voice slider (0..10) is loaded from func_00266F90's level / 10, calling func_00266E88 below level 10, else
+ * func_00266E30 (probably voice off / on); otherwise EATalk is hidden and made static in its static colour.
+ * The calls declared setEnabled / setHighlight are vtable slots 8 / 25 (cUIThing_setStatic /
+ * cUIText_setUseStaticColour).
+ */
 extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
 {
     unsigned char sel;
@@ -350,6 +364,13 @@ static inline bool isField_FA100(signed char* g, int off, int v)
     return g[off] == v;
 }
 
+/**
+ * Greys out the in-game options that do not apply to the current game, every frame before the 2D render.
+ *
+ * Outside a local two-player game (a network game, or newRace cGamePath != 2) object "2" is made static (slot
+ * 8, declared setEnabled) and "camera 2 select" / "2lb" are greyed out (func_00194498: static, alpha at most
+ * 0.5). "save" is greyed out unless cGameMode is 4 (free ride in the game-flow notes).
+ */
 extern "C" void cOVState_PAUSE_OPTIONS_onPreRender2D(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -456,6 +477,20 @@ static inline void* Sound_A238(int slot)
     return *(void**)(p + slot);
 }
 
+/**
+ * Handles the in-game options widgets: Save opens the profile save, Triangle closes the screen, and a changed
+ * value is stored and applied at once.
+ *
+ * Cross (5) on "save" pushes a new 0x27C-byte "Save Profile" state (func_00211088, kind 0x2A) as a special
+ * state; Triangle (6) closes this state (func_0039F190).
+ * A value change (9) writes the widget's value into the settings word D_00535610 and applies it: HUD mode,
+ * player 1 / 2 camera (cChaseCameraController_switchCamera_UserChange on game view 1 / 2), music / effects /
+ * speech volume, DJ and arcade audio; in a network game EATalksl sets the voice level (value x 10). The
+ * options interface's virtual slot 1 then runs, probably to commit the settings.
+ *
+ * @param obj  the widget (On Tour pWidget); nothing happens when it is null
+ * @param msg  the widget event: 5 Cross, 6 Triangle, 9 value changed
+ */
 // Pause-options widget handler: msg 5 opens the sub-state, 6 pops, 9 applies a changed setting.
 extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsigned int msg)
 {
@@ -533,6 +568,12 @@ extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void func_0039F190(void* self, int a1);
 extern char D_0046E050[];
 
+/**
+ * Closes the in-game options when an online pause or overlay timeout runs out.
+ *
+ * After cOVState_onUpdate(), if a cGameComm exists and its mPauseTimeout or mOverlayTimeout is 0, plays the
+ * screen's "TransitionOut" frame and closes the state (func_0039F190).
+ */
 extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(void* self)
 {
     cOVState_onUpdate(self);
@@ -557,6 +598,18 @@ int GetHashValue32(char* str);
 extern "C" void* func_00397870(void* list, int index);
 extern char D_004A24E8[];
 
+/**
+ * Tells the options menu how to react to a button: the press animation alone, or with the item's sound.
+ *
+ * Cross plays the sound only on the "save" item; Square and Circle never play it.
+ *
+ * @param menu  the options menu (On Tour pMenu)
+ * @param key  the menu event: 6 Cross, 7 Triangle, 8 Square, 9 Circle (1 asks whether row @p index can be
+ *             selected)
+ * @param index  the visible row the event is about
+ * @return 0x100 (animation only) for Square, Circle and Cross on any item but "save", else 0x101 (animation
+ *         and sound)
+ */
 // Pause-menu key filter: returns 0x100 for keys 8/9 and for key 6 unless the item is D_004A24E8, else 0x101.
 extern "C" int cOVState_PAUSE_OPTIONS_onWidgetMenu(void* self, void* menu, unsigned int key, int index)
 {
@@ -578,6 +631,13 @@ extern "C" int cOVState_PAUSE_OPTIONS_onWidgetMenu(void* self, void* menu, unsig
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetListBox);
 #ifdef SKIP_ASM
+/**
+ * Tells a list box how to react to input: Triangle animates silently, moves also play a sound.
+ *
+ * @param pListBox  the list box (unused)
+ * @param Event  the list-box event: 0-3 moves, 4 Triangle
+ * @return 0x100 (animation only) for event 4, else 0x101 (animation and sound)
+ */
 extern "C" int cOVState_PAUSE_OPTIONS_onWidgetListBox(void* self, int pListBox, int Event)
 {
     return Event != 4 ? 0x101 : 0x100;
@@ -587,6 +647,13 @@ extern "C" int cOVState_PAUSE_OPTIONS_onWidgetListBox(void* self, int pListBox, 
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetPair);
 #ifdef SKIP_ASM
+/**
+ * Tells a pair widget how to react to input: Cross animates silently, Triangle also plays a sound.
+ *
+ * @param pPair  the pair widget (unused)
+ * @param Event  the pair event: 0 Cross, 1 Triangle
+ * @return 0x100 (animation only) for event 0, else 0x101 (animation and sound)
+ */
 extern "C" int cOVState_PAUSE_OPTIONS_onWidgetPair(void* self, int pPair, int Event)
 {
     return Event != 0 ? 0x101 : 0x100;
@@ -639,6 +706,20 @@ public:
     virtual void setVisible(int v);
 };
 
+/**
+ * Builds the online-error pause screen ("265InGameError"), picks the error text and starts checking the
+ * server.
+ *
+ * TextError (word-wrapped) explains the cGameComm error: this machine's mCheating[0] 1-3 gives ExcessiveDelay
+ * and other values CheatDetected; the peer's mCheating[1], or no flag at all, ConnectionLost; mRemoteEndGame
+ * or mRemoteDisconnected OpponentQuit. Every case but the first clears the +0xA0 flag that gates the ping
+ * texts.
+ * Text_CancelGame reads kT_BTNOK after the local finish, else kT_OVRCancelEvent (choice 0); it, the four
+ * button graphics and the continue option start hidden. With a cGameComm it pings the lobby server for 3 s
+ * (func_002583A8), stores the start time in +0x9C, hides Cancel (func_001FAFF8) and shows
+ * kT_PauseErrorCheckingServer; without one it shows Cancel. The TextError branch reads cGameComm_mGameComm
+ * before that null check.
+ */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
 {
     char* s = (char*)self;
@@ -889,6 +970,12 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char D_0046FB18[];
 extern char D_0046FB60[];
 
+/**
+ * Reports that the server check timed out: TextInfo gets kT_PauseErrorServerCheckTimedOut.
+ *
+ * Called by the overlay update (func_001FAF10) when the ping runs out with no reply. The text is set only
+ * while +0xA0 is set, and TextInfo's visibility is set to +0xA0 without a null check on the object.
+ */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(void* self)
 {
     if (*(void**)((char*)self + 0x40) != 0) {
@@ -918,6 +1005,14 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self,
 extern char D_0046FB18[];
 extern char D_0046FB88[];
 
+/**
+ * Reports that the server answered, so the opponent dropped: shows kT_PauseErrorOpponentDisconnected and the
+ * continue option.
+ *
+ * Called by func_001FAF10 when a reply came while the race runs, the local rider has not finished and this
+ * machine is not flagged. The text is set only while +0xA0 is set; TextInfo's visibility becomes +0xA0 (no
+ * null check), then setContinueOptionVisible(self, 1).
+ */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self)
 {
     if (*(void**)((char*)self + 0x40) != 0) {
@@ -984,6 +1079,15 @@ public:
     virtual void setVisible(int v);
 };
 
+/**
+ * Shows or hides the "continue racing" choice of the online-error screen.
+ *
+ * Text_ContinueGame gets kT_OVRContinueRacing, is static while hidden (slot 8, declared setEnabled), takes
+ * visibility @p visible and choice 4, which func_001FB2B8 answers with cAI_finishRemotePlayer. When shown,
+ * "Menu" selects row 0.
+ *
+ * @param visible  nonzero to show the option (On Tour bVisible)
+ */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible)
 {
     cUIObj_1FB378* t = (cUIObj_1FB378*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046FB48));
@@ -3366,6 +3470,13 @@ extern char D_0046E818[];
 extern char D_004A2570[];
 extern char D_004A2578[];
 
+/**
+ * Builds the rewards list overlay ("62reward_list" over "OV_darkblue") and sizes its menu to the rewards.
+ *
+ * Zeroes the reward count (+0x9C) and runs cOVState_REWARDS_checkRewardList(self, 0, -1), which probably
+ * counts them into it. "Menu0000" loses its wrap flag and becomes scrollable when it has fewer rows than
+ * rewards, else gets mDisableDirSound; the "up" / "down" arrows start hidden.
+ */
 extern "C" void cOVState_REWARDS_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -3423,6 +3534,16 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBERewardInterface_clearUserAwards(void* iface);
 
+/**
+ * On Cross, clears the player's new-award list and lets the overlay manager move on.
+ *
+ * Sets the pending overlay action D_004A26FC to 1 (func_0020CFD0 then calls func_0020CCF8, which probably
+ * triggers the next end-of-event overlay) and calls cBERewardInterface_clearUserAwards() on the reward
+ * interface (0xD).
+ *
+ * @param pWidget  the item; ignored when null
+ * @param key  the widget event; only 5 (Cross) acts
+ */
 extern "C" void cOVState_REWARDS_onWidgetEvent(void* self, void* pWidget, int key)
 {
     if (pWidget != 0) {
@@ -3440,6 +3561,17 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onWidgetMenu);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cOVState_REWARDS_updateMenu(void* self, int a);
 
+/**
+ * Handles the rewards menu's notifications: refills the rows on a scroll and picks the button feedback.
+ *
+ * Event 4 (scroll offset changed) refills the rows from @p index (cOVState_REWARDS_updateMenu). Triangle,
+ * Square and Circle (7-9) give 0; scroll up / down (2 / 3) give 0 with fewer than 10 rewards (+0x9C).
+ *
+ * @param id  the menu (On Tour pMenu); unused
+ * @param event  the menu event (2 / 3 scrolled, 4 offset changed, 5 selection changed, 6-9 buttons)
+ * @param index  the new scroll offset for events 2-5
+ * @return 1 for event 4, 0 as above, else 0x101 (animation and sound)
+ */
 extern "C" int cOVState_REWARDS_onWidgetMenu(void* self, int id, int event, int index)
 {
     switch (event) {
@@ -3508,6 +3640,17 @@ public:
     virtual void v25(int on);
 };
 
+/**
+ * Fills the nine visible reward rows starting at reward @p base and shows the scroll arrows that apply.
+ *
+ * Rows "0".."8" get the text of reward base + i (cOVState_REWARDS_checkRewardList). With fewer than 10
+ * rewards (+0x9C) every row is drawn in a fixed static colour (+0x88, slot 25) and made static (slot 8),
+ * without a null check on the row. "up" is shown when @p base is not 0, "down" while rewards remain past base
+ * + 9.
+ *
+ * @param vself  the rewards overlay state (this)
+ * @param base  index of the reward in the top row (On Tour offset)
+ */
 extern "C" void cOVState_REWARDS_updateMenu(void* vself, int base)
 {
     char* self = (char*)vself;
@@ -3598,6 +3741,16 @@ static inline unsigned short* lookupString_1FFF78(char* name)
     return vt[4].fn(t, GetHashValue32(name));
 }
 
+/**
+ * Fills in the rewards overlay's event title and congratulation text the first time it is shown.
+ *
+ * Runs while mDoneTransition (+0x48) is 0, then sets it. "title_rewardlisting" names the event: the peak
+ * event title (func_001FD190) for cGameEvent 6-11, "%S - Jam" for 5, else "%S - %s" with the location name
+ * and the mode label (cGameMode 0 / 5 race, 1 slopestyle, 2 big air, 3 pipe). "1text" gets
+ * kT_OVRCMNCongratUser with the human rider's short name.
+ *
+ * @return always 0
+ */
 // Rewards overlay: fills in the event-result and reward texts the first time it is shown.
 extern "C" int cOVState_REWARDS_onGainTransition(void* self)
 {

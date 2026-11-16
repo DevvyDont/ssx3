@@ -527,6 +527,17 @@ extern "C" void* get_t3Vector(void* self, void* v);
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTBoundObjPoint__FPvP14sBoundObjPoint);
 #ifdef SKIP_ASM
+/**
+ * Reads a point bounding object's data from a trigger stream: sets its shape type to 3 and reads its
+ * position.
+ *
+ * The position vector is read through the object's first virtual accessor (vtable at +0x24), the one the
+ * other shapes read their position through. The first parameter is the stream cursor, not a this pointer.
+ *
+ * @param self  pointer to the stream's read cursor (On Tour char** src)
+ * @param obj  the point to fill
+ * @return the number of bytes read (get_t3Vector's count, typed void* here)
+ */
 void* get_cCTBoundObjPoint(void* self, sBoundObjPoint* obj)
 {
     obj->field_0x28 = 3;
@@ -565,6 +576,17 @@ public:
     virtual void* axis();
 };
 
+/**
+ * Allocates a camera trigger spline and reads its data from a trigger stream.
+ *
+ * Constructs a "Camera Trigger Spline" (scale 1, position and control points zero; it keeps the cCTBoundObj
+ * vtable D_0045C3F0), reads position, scale, heading, pitch and roll like the bounding shapes, then the four
+ * control-point vectors at +0x28, +0x34, +0x40 and +0x4C. readAction calls it for a spline action.
+ *
+ * @param reader  pointer to the stream's read cursor, advanced past what is read
+ * @param out  receives the new spline (On Tour cCTSpline*&)
+ * @return the number of bytes read
+ */
 extern "C" int get_camspline(void* reader, cCTSplineK2** out)
 {
     int n;
@@ -3368,6 +3390,13 @@ struct sVec4A16 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
+/**
+ * Limits a world point to a point shape, which means replacing it with the shape's position.
+ *
+ * Writes the shape's x, y and z (+0x0, +0x4, +0x8) with w = 1 into @p out, whatever it held before.
+ *
+ * @param out  the world point to limit (On Tour t4Vector& worldP); overwritten
+ */
 extern "C" void cCTBoundObjPoint_limitPoint(float* self, sVec4A16* out)
 {
     sVec4A16 t;
@@ -4664,6 +4693,16 @@ static inline t4Vector ScaleP_1783E0(const t4Vector* v, float s)
     return r;
 }
 
+/**
+ * Snaps the SPOKE chase camera straight to its subject when @p id is the AI index of the rider it follows.
+ *
+ * Takes the target's (+0x30) slot-4 vector into +0x390 and the desired position for its slot-3 vector
+ * (func_00177FC0, probably getDesiredPosition) into +0x40, and sets +0x20 to the rider position
+ * (func_00177EF8) plus 37 along the Z axis (D_004FF160). Then runs the look-at chase snap (func_00166C60),
+ * setupInitialCamDir (func_00166550, 559.744 and 300) and the algorithm's virtual slot 5.
+ *
+ * @param id  the subject's AI index (On Tour subjectID); any other rider is ignored
+ */
 extern "C" void cSPOKEChaseAlgorithm_snap(cCameraAlgorithm* self, long id)
 {
     char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);

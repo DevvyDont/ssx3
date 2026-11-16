@@ -22,6 +22,14 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_getThis__Fv);
 // PORT: the unit declares cBEScoreInterface_cBEScoreInterface as returning void; the body returns self.
 void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInterface_cBEScoreInterface");
 
+/**
+ * Returns the back end's score interface singleton, creating it on first use.
+ *
+ * The first call allocates 0x230 bytes tagged "BEScoreInt", runs the constructor, clears bIsActive (+0x8) and
+ * the words at +0x10 and +0x14, and sets +0x18 and +0x1C to -1.
+ *
+ * @return the score interface (D_004A1248)
+ */
 void* cBEScoreInterface_getThis()
 {
     if (D_004A1248 == 0) {
@@ -431,6 +439,15 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighlightLevel__FPvi);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sHL { char pad[0xBB8]; signed char lv[1]; };
+/**
+ * Returns the level reached in one career highlight by the current character of player 0's profile.
+ *
+ * Reads byte @p riderIndex of the highlight levels at +0xBB8 in cBELibrary_profileLib[0] for rider slot 0's
+ * character (cBELibrary_getCharacterID(0)). Callers sum the 8 highlights and compare the total with 24.
+ *
+ * @param riderIndex  which highlight (0-7; On Tour: eBEChallengeType); despite the name, not a rider index
+ * @return the highlight's level
+ */
 signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int riderIndex)
 {
     int charID = cBELibrary_getCharacterID(0);
