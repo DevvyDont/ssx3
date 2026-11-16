@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -849,7 +850,6 @@ extern "C" void cGameLoadScreen_loadTexture_2E20(void* self, int a1) __asm__("cG
 extern void* D_004A289C;
 extern int D_004A19D8;
 extern int D_004A19DC;
-extern char cBENewRaceInterface_newRace[];
 extern char D_0047B698[];
 extern char D_0047BD28[];
 extern char D_0047B9F0[];
@@ -939,7 +939,7 @@ extern "C" void func_00232E20(void* self)
     (*(sUI_2E20**)((char*)self + 0xC))->fC = n;
     void* item;
     if (D_004A19D8 == 0) {
-        signed char* g = (signed char*)cBENewRaceInterface_newRace;
+        signed char* g = (signed char*)((char*)&cBENewRaceInterface_newRace);
         if (g[0x49] != 0)
             goto other;
         if (g[0x48] == 5)
@@ -952,7 +952,7 @@ makeA:
     goto done;
 other:
     {
-        signed char* g2 = (signed char*)cBENewRaceInterface_newRace;
+        signed char* g2 = (signed char*)((char*)&cBENewRaceInterface_newRace);
         int x = 0;
         if (g2[0x49] == 0) {
             int t = g2[0x48] != 5;

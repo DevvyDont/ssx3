@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "online/commsystem.h"
 #include "main/ssxapp.h"
@@ -577,7 +578,6 @@ extern "C" const char* cBECharacterInterface_getShortName(void* iface, int a1);
 extern "C" int func_00148950(void* iface, int id);
 extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern signed char cBENewRaceInterface_newRace[];
 extern char D_0047BB70[];
 extern char D_0047BB80[];
 extern char D_0047BB98[];
@@ -678,7 +678,7 @@ extern "C" void func_002464E8(void* self, char* obj)
         cUIText_setUnicodeString(obj, buf);
         return;
     }
-    switch (cBENewRaceInterface_newRace[0x48]) {
+    switch (cBENewRaceInterface_newRace.cGameMode) {
     case 0:
         if (IsId_2464E8(obj, D_0047BB80)) { Activate_2464E8(obj); return; }
         break;
@@ -701,7 +701,7 @@ extern "C" void func_002464E8(void* self, char* obj)
         if (IsId_2464E8(obj, D_0047BBC8)) { Activate_2464E8(obj); return; }
         break;
     }
-    switch (cBENewRaceInterface_newRace[0x48]) {
+    switch (cBENewRaceInterface_newRace.cGameMode) {
     case 0:
         if (IsId_2464E8(obj, D_004A2BE0)) { Activate_2464E8(obj); return; }
         break;

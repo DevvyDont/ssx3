@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -430,7 +431,6 @@ extern "C" void sprintf1_1F7958(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void cUIText_setUnicodeString(void* text, void* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_004A2700;
-extern char cBENewRaceInterface_newRace[];
 extern char D_0046F510[];
 extern char D_0046E378[];
 extern char D_0046F520[];
@@ -490,7 +490,7 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
     cOVState_onCreateScreen(self);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* stats = cBE_getInterface_Fv(cBE_getBE(), 8);
-    signed char* g = (signed char*)cBENewRaceInterface_newRace;
+    signed char* g = (signed char*)((char*)&cBENewRaceInterface_newRace);
     int ev = g[0x4A];
     int mode = g[0x48];
     switch (ev) {
@@ -524,7 +524,7 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
     }
     }
     cUIText_setUnicodeString(cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F530)), wtext);
-    signed char* g2 = (signed char*)cBENewRaceInterface_newRace;
+    signed char* g2 = (signed char*)((char*)&cBENewRaceInterface_newRace);
     int m = g2[0x48];
     if (m == 0 || m == 5) {
         cUIState_showObjSafe(self, D_004A2408);

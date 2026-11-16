@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "online/commsystem.h"
 #include "main/ssxapp.h"
 
@@ -234,7 +235,6 @@ struct sDbgRaceSel17D008 {
     signed char mode;  // 0x48
     signed char slot;  // 0x49
 };
-extern sDbgRaceSel17D008 cBENewRaceInterface_newRace;
 class cBENewRaceIfaceK17D008 {
 public:
     char pad_0x00[0xC];
@@ -250,7 +250,7 @@ extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
 extern "C" void func_0017D008(void* self, int idx)
 {
     cBENewRaceIfaceK17D008* iface = (cBENewRaceIfaceK17D008*)cBE_getInterface_Fv(SSXApp->BE, 0);
-    ((sDbgFE17D008*)self)->modes[cBENewRaceInterface_newRace.slot] = cBENewRaceInterface_newRace.mode;
+    ((sDbgFE17D008*)self)->modes[cBENewRaceInterface_newRace.cGamePath] = cBENewRaceInterface_newRace.cGameMode;
     func_00145108(iface, idx);
     cBENewRaceInterface_setGameMode(iface, ((sDbgFE17D008*)self)->modes[idx]);
     iface->v01();

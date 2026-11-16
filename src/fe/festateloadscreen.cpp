@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "online/gamecomm.h"
 #include "scripter/ssxscriptengine.h"
@@ -573,7 +574,6 @@ struct sRace_233CD8 {
     signed char mode48;
     signed char flag49;
 };
-extern sRace_233CD8 D_00535BC8_r233CD8 __asm__("cBENewRaceInterface_newRace");
 
 static inline int isMode_233CD8(sRace_233CD8* r, int m)
 {
@@ -686,7 +686,7 @@ extern "C" void func_00233CD8(void* self)
                 }
             }
         }
-        sRace_233CD8* rc = &D_00535BC8_r233CD8;
+        sRace_233CD8* rc = &(*(sRace_233CD8*)&cBENewRaceInterface_newRace);
         int skip = !isMode_233CD8(rc, 4) && *(int*)(x + 0x98) != 0 && *(int*)(x + 0x9C) == 0;
         if (skip) {
             return;
@@ -697,7 +697,7 @@ extern "C" void func_00233CD8(void* self)
         if (func_00279248(ScriptEngine, 0) > 0) {
             *(int*)s = 0xC;
         }
-        sRace_233CD8* rc2 = &D_00535BC8_r233CD8;
+        sRace_233CD8* rc2 = &(*(sRace_233CD8*)&cBENewRaceInterface_newRace);
         if (rc2->mode48 == 0) {
             func_00155E58(cBEAggressionInterface_getThis());
         }
@@ -717,7 +717,7 @@ extern "C" void func_00233CD8(void* self)
         break;
     }
     case 2: {
-        sRace_233CD8* rc = &D_00535BC8_r233CD8;
+        sRace_233CD8* rc = &(*(sRace_233CD8*)&cBENewRaceInterface_newRace);
         if (rc->flag49 == 0 && rc->mode48 == 4) {
             cGameState_gotoNextState(self);
         }
@@ -931,7 +931,6 @@ extern "C" int func_0012ACF8(void* o);
 extern "C" void cAI_cleanupAfterRace(void* o);
 extern "C" void cAI_cleanupActors(void* o);
 extern void* cGameState_mpGame;
-extern signed char cBENewRaceInterface_newRace[];
 extern signed char D_00535C10[];
 
 struct sLoadObj_43B0 {
@@ -984,7 +983,7 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
     case 1: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         func_00234910(self);
-        signed char* cfg = cBENewRaceInterface_newRace;
+        signed char* cfg = ((signed char*)&cBENewRaceInterface_newRace);
         int mode = cfg[0x48];
         int skip = cfg[0x49];
         int sub = cfg[0x4A];
@@ -1085,7 +1084,6 @@ struct sRace_234750 {
     signed char mode48;
     signed char flag49;
 };
-extern sRace_234750 D_00535BC8_r234750 __asm__("cBENewRaceInterface_newRace");
 
 struct sRaceMan_234750 {
     char pad0[0x8C];
@@ -1112,7 +1110,7 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
 {
     cSSXScriptEngine_ResetNISList(ScriptEngine, 1);
     cBE_getInterface_4750(cBE_getBE(), 0);
-    sRace_234750* r = &D_00535BC8_r234750;
+    sRace_234750* r = &(*(sRace_234750*)&cBENewRaceInterface_newRace);
     int mode = r->mode48;
     if (mode == 0) {
         cAI_initAIRiders(*(void**)((char*)cGameState_mpGame + 0xC));
@@ -1138,7 +1136,7 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
     cAI_setAIState(*(void**)((char*)cGameState_mpGame + 0xC), 3);
     cBE_setState(1);
     func_00129160(*(void**)((char*)cGameState_mpGame + 0xC));
-    sRace_234750* r2 = &D_00535BC8_r234750;
+    sRace_234750* r2 = &(*(sRace_234750*)&cBENewRaceInterface_newRace);
     if (r2->flag49 != 0)
         func_00155E58(cBEAggressionInterface_getThis());
     *(int*)((char*)self + 0x14) = 0;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "online/commsystem.h"
 #include "main/ssxapp.h"
@@ -272,7 +273,6 @@ struct sG_B1B0 {
     char pad[0x40];
     int f40;
 };
-extern sG_B1B0 cBENewRaceInterface_newRace;
 
 struct sVE_B1B0 {
     short delta;
@@ -363,7 +363,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     int idx = self->f8C20;
     int kind = self->sub.e[idx].kind;
     D_004A11B8 = 1;
-    cBENewRaceInterface_newRace.f40 = kind;
+    cBENewRaceInterface_newRace.iLocationIdx = kind;
     if (self->sub.e[self->f8C20].f84 == 0) {
         D_004A11B8 = 0;
     }
@@ -484,7 +484,6 @@ struct sRace_B4E0 {
     signed char quick;           // 0x49
     signed char event;           // 0x4A
 };
-extern sRace_B4E0 D_00535BC8_b4 __asm__("cBENewRaceInterface_newRace");
 
 struct sVE_B4E0 {
     short delta;
@@ -579,7 +578,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
     switch (self->f8C1C) {
     case 0: {
         void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
-        sRace_B4E0* r = &D_00535BC8_b4;
+        sRace_B4E0* r = &(*(sRace_B4E0*)&cBENewRaceInterface_newRace);
         int quick = r->quick;
         if (dir == 3) {
             quick = (quick + 1) % 3;
@@ -613,7 +612,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
             func_0017D008(self, quick);
         }
         int changed = 0;
-        int mode = D_00535BC8_b4.mode;
+        int mode = cBENewRaceInterface_newRace.cGameMode;
         do {
             while (!cBENewRaceInterface_setGameMode_b4(race, mode)) {
                 mode = (mode + 1) % 7;
@@ -626,7 +625,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
         if (changed) {
             int kind = self->sub.e[self->f8C20].kind;
             D_004A11B8 = 1;
-            D_00535BC8_b4.kind = kind;
+            cBENewRaceInterface_newRace.iLocationIdx = kind;
             if (self->sub.e[self->f8C20].f84 == 0) {
                 D_004A11B8 = 0;
             }
@@ -635,7 +634,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
             }
         }
         update_B4E0(race);
-        int ev = D_00535BC8_b4.event;
+        int ev = cBENewRaceInterface_newRace.cGameEvent;
         if (!cBENewRaceInterface_setGameEvent_b4(race, ev)) {
             ev = (ev + 1) % 14;
             while (!cBENewRaceInterface_setGameEvent_b4(race, ev)) {
@@ -643,8 +642,8 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
             }
             update_B4E0(race);
         }
-        int numAI = D_00535BC8_b4.numAI;
-        int maxAI = func_0017D1B8(self, D_00535BC8_b4.quick, D_00535BC8_b4.mode, D_00535BC8_b4.event);
+        int numAI = cBENewRaceInterface_newRace.iNumberAI;
+        int maxAI = func_0017D1B8(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
         if (maxAI < numAI) {
             cBENewRaceInterface_setNumberAI(race, maxAI);
             update_B4E0(race);
@@ -653,7 +652,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
     }
     case 1: {
         void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
-        sRace_B4E0* r = &D_00535BC8_b4;
+        sRace_B4E0* r = &(*(sRace_B4E0*)&cBENewRaceInterface_newRace);
         if (r->quick == 0) {
             cBENewRaceInterface_setGameMode_b4(race, 4);
             cBENewRaceInterface_setNumberAI(race, 0);
@@ -681,7 +680,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
         if (changed) {
             int kind = self->sub.e[self->f8C20].kind;
             D_004A11B8 = 1;
-            D_00535BC8_b4.kind = kind;
+            cBENewRaceInterface_newRace.iLocationIdx = kind;
             if (self->sub.e[self->f8C20].f84 == 0) {
                 D_004A11B8 = 0;
             }
@@ -690,7 +689,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
             }
         }
         update_B4E0(race);
-        int ev = D_00535BC8_b4.event;
+        int ev = cBENewRaceInterface_newRace.cGameEvent;
         if (!cBENewRaceInterface_setGameEvent_b4(race, ev)) {
             ev = (ev + 1) % 14;
             while (!cBENewRaceInterface_setGameEvent_b4(race, ev)) {
@@ -698,8 +697,8 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
             }
             update_B4E0(race);
         }
-        int numAI = D_00535BC8_b4.numAI;
-        int maxAI = func_0017D1B8(self, D_00535BC8_b4.quick, D_00535BC8_b4.mode, D_00535BC8_b4.event);
+        int numAI = cBENewRaceInterface_newRace.iNumberAI;
+        int maxAI = func_0017D1B8(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
         if (maxAI < numAI) {
             cBENewRaceInterface_setNumberAI(race, maxAI);
             update_B4E0(race);
@@ -708,7 +707,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
     }
     case 2: {
         void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
-        sRace_B4E0* r = &D_00535BC8_b4;
+        sRace_B4E0* r = &(*(sRace_B4E0*)&cBENewRaceInterface_newRace);
         int ev = r->event;
         if (r->quick == 0) {
             cBENewRaceInterface_setGameMode_b4(race, 4);
@@ -723,8 +722,8 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
             } while (!cBENewRaceInterface_setGameEvent_b4(race, ev));
         }
         update_B4E0(race);
-        int numAI = D_00535BC8_b4.numAI;
-        int maxAI = func_0017D1B8(self, D_00535BC8_b4.quick, D_00535BC8_b4.mode, D_00535BC8_b4.event);
+        int numAI = cBENewRaceInterface_newRace.iNumberAI;
+        int maxAI = func_0017D1B8(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
         if (maxAI < numAI) {
             cBENewRaceInterface_setNumberAI(race, maxAI);
             update_B4E0(race);
@@ -756,7 +755,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
         if (dir != 2 && dir != 3) {
             return;
         }
-        sRace_B4E0* r = &D_00535BC8_b4;
+        sRace_B4E0* r = &(*(sRace_B4E0*)&cBENewRaceInterface_newRace);
         if (r->quick == 0) {
             if (dir == 3) {
                 self->f8C20 = func_0017A028_b4(&self->sub, self->f8C20);
@@ -767,9 +766,9 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
             int mode = r->mode;
             do {
                 if (dir == 3) {
-                    self->f8C20 = func_0017A220(&self->sub, self->f8C20, D_00535BC8_b4.mode);
+                    self->f8C20 = func_0017A220(&self->sub, self->f8C20, cBENewRaceInterface_newRace.cGameMode);
                 } else {
-                    self->f8C20 = func_0017A2C8(&self->sub, self->f8C20, D_00535BC8_b4.mode);
+                    self->f8C20 = func_0017A2C8(&self->sub, self->f8C20, cBENewRaceInterface_newRace.cGameMode);
                 }
                 if (self->f8C20 < 0) {
                     do {
@@ -782,7 +781,7 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
         sLSSub_B1B0* sub = &self->sub;
         int kind = sub->e[self->f8C20].kind;
         D_004A11B8 = 1;
-        D_00535BC8_b4.kind = kind;
+        cBENewRaceInterface_newRace.iLocationIdx = kind;
         if (sub->e[self->f8C20].f84 == 0) {
             D_004A11B8 = 0;
         }
@@ -823,16 +822,16 @@ extern "C" void func_0017B4E0(sLS_B1B0* self)
     }
     case 8: {
         void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
-        int numAI = D_00535BC8_b4.numAI;
-        int maxAI = func_0017D1B8(self, D_00535BC8_b4.quick, D_00535BC8_b4.mode, D_00535BC8_b4.event);
+        int numAI = cBENewRaceInterface_newRace.iNumberAI;
+        int maxAI = func_0017D1B8(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
         if (maxAI < numAI) {
             numAI = maxAI;
         }
         for (;;) {
             if (dir == 3) {
-                numAI = (D_00535BC8_b4.numAI + 1) % (maxAI + 1);
+                numAI = (cBENewRaceInterface_newRace.iNumberAI + 1) % (maxAI + 1);
             } else if (dir == 2) {
-                numAI = (D_00535BC8_b4.numAI + maxAI) % (maxAI + 1);
+                numAI = (cBENewRaceInterface_newRace.iNumberAI + maxAI) % (maxAI + 1);
             }
             if (cBENewRaceInterface_setNumberAI(race, numAI)) {
                 break;

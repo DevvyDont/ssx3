@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "world/world.h"
 #include "scripter/ssxscriptengine.h"
@@ -1968,7 +1969,6 @@ struct sScBlk_AC60 {
     int w2[(0x64 - 0x58) / 4];
 };
 
-extern sScGame_AC60 cBENewRaceInterface_newRace;
 extern int D_00536730[];
 extern int D_00536708[];
 extern sScTbl_AC60 D_00481E90;
@@ -1982,7 +1982,7 @@ static inline int Call_AC60(sScRider_AC60* r, int slot)
 extern "C" void func_0027AC60(cSSXScriptEngine* self)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScGame_AC60* g = &cBENewRaceInterface_newRace;
+    sScGame_AC60* g = &(*(sScGame_AC60*)&cBENewRaceInterface_newRace);
     int mode = g->mode;
     if (mode == 4) {
         return;
@@ -2028,7 +2028,7 @@ done:
         }
         func_00278E50(ScriptEngine, 0, k, 1, 0, ids[0], ids[1], ids[2]);
     }
-    if (cBENewRaceInterface_newRace.lock != 0) {
+    if (cBENewRaceInterface_newRace.cGamePath != 0) {
         return;
     }
     if ((unsigned)mode >= 4) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "online/gamecomm.h"
 #include "main/game.h"
@@ -4880,15 +4881,14 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00147580(void* iface, int a1);
-extern signed char cBENewRaceInterface_newRace[];
 
 extern "C" int func_001E3570(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace[0x49] != 0) {
+    if (cBENewRaceInterface_newRace.cGamePath != 0) {
         return 0;
     }
-    if (cBENewRaceInterface_newRace[0x4A] == 6 || cBENewRaceInterface_newRace[0x4A] == 9) {
+    if (cBENewRaceInterface_newRace.cGameEvent == 6 || cBENewRaceInterface_newRace.cGameEvent == 9) {
         return 0;
     }
     return func_00147580(cBE_getInterface_Fv(cBE_getBE(), 1), 0) == 0;
@@ -6695,7 +6695,7 @@ extern "C" void func_001E5B80(void* self)
     void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
-    signed char event = cBENewRaceInterface_newRace[0x48];
+    signed char event = cBENewRaceInterface_newRace.cGameMode;
     sInfo5B80* info = (sInfo5B80*)SSXApp->GameModeMan;
     int kind = info->kind;
     cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E388));
@@ -6734,7 +6734,7 @@ extern "C" void func_001E5B80(void* self)
         break;
     }
     t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2158));
-    if (cBENewRaceInterface_newRace[0x49] != 0) {
+    if (cBENewRaceInterface_newRace.cGamePath != 0) {
         cUIText_setUnicodeStringByID(t, GetHashValue32(D_0046E400));
     }
     int flag = 0;
@@ -6758,7 +6758,7 @@ extern "C" void func_001E5B80(void* self)
             t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
             if (i - 1 == D_00536730[pl0]) {
                 if (D_005366D0[pl0]) hl = 1; else hl = 0;
-            } else if (cBENewRaceInterface_newRace[0x49] == 2 && i - 1 == D_00536730[pl1]) {
+            } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i - 1 == D_00536730[pl1]) {
                 if (D_005366D0[pl1]) hl = 1; else hl = 0;
             }
             cUIText_setAsciiString(t, func_0014EEC8(iface2, info->a18[idx], info->a40[idx]));
@@ -6994,7 +6994,6 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 
-extern signed char cBENewRaceInterface_newRace[];
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
@@ -7107,8 +7106,8 @@ extern "C" int func_001E6718(void* self)
         void* net = cBE_getInterface_Fv(cBE_getBE(), 2);
         sRaceSetup_6718* p = (sRaceSetup_6718*)SSXApp->GameModeMan;
         int mode = p->mode;
-        int track = cBENewRaceInterface_newRace[0x48];
-        int players = cBENewRaceInterface_newRace[0x49];
+        int track = cBENewRaceInterface_newRace.cGameMode;
+        int players = cBENewRaceInterface_newRace.cGamePath;
         if ((track != 0 && players == 2) || (track == 5 || track == 6)) {
             cUIThing* o = (cUIThing*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E538));
             o->setVisible(1);
@@ -7123,7 +7122,7 @@ extern "C" int func_001E6718(void* self)
         unsigned short name[0x38];
         func_002C2540(name, func_00144BF0(iface0));
         unsigned short* str = 0;
-        switch (cBENewRaceInterface_newRace[0x48]) {
+        switch (cBENewRaceInterface_newRace.cGameMode) {
         case 0:
         case 5:
             str = Loc1E6718(D_0046E548);
@@ -7200,14 +7199,14 @@ extern "C" int func_001E6718(void* self)
                     if (D_005366A8[pl0] != 0) {
                         finished = 1;
                     }
-                } else if (cBENewRaceInterface_newRace[0x49] == 2 && i == D_00536730[pl1]) {
+                } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i == D_00536730[pl1]) {
                     if (D_005366A8[pl1] != 0) {
                         finished = 1;
                     }
                 }
-                if (cBENewRaceInterface_newRace[0x49] == 2 && i == D_00536730[pl0]) {
+                if (cBENewRaceInterface_newRace.cGamePath == 2 && i == D_00536730[pl0]) {
                     cUIText_setAsciiString(t, func_00146F88(player, pl0));
-                } else if (cBENewRaceInterface_newRace[0x49] == 2 && i == D_00536730[pl1]) {
+                } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i == D_00536730[pl1]) {
                     cUIText_setAsciiString(t, func_00146F88(player, pl1));
                 } else {
                     int rider = p->rider[idx];
@@ -7299,10 +7298,10 @@ extern "C" int func_001E6718(void* self)
         cUIState_hideObjSafe(self, D_004A2188);
         cUIState_hideObjSafe(self, D_004A2190);
         int show1 = 1;
-        if (cBENewRaceInterface_newRace[0x49] != 2 && (track == 5 || track == 6) && D_00536730[pl0] != 0) {
+        if (cBENewRaceInterface_newRace.cGamePath != 2 && (track == 5 || track == 6) && D_00536730[pl0] != 0) {
             show1 = 0;
         }
-        if (pl1 != -1 && cBENewRaceInterface_newRace[0x49] == 2) {
+        if (pl1 != -1 && cBENewRaceInterface_newRace.cGamePath == 2) {
             show2 = 1;
             if ((track >= 1 && track <= 3) || track == 5 || track == 6) {
                 if (D_00536730[pl0] < D_00536730[pl1]) {
@@ -7325,7 +7324,7 @@ extern "C" int func_001E6718(void* self)
                 } else if (D_00536730[pl0] == 2) {
                     cUIState_showObjSafe(self, D_004A2190);
                 }
-                if (cBENewRaceInterface_newRace[0x49] == 0 && D_004A213C != 0) {
+                if (cBENewRaceInterface_newRace.cGamePath == 0 && D_004A213C != 0) {
                     void* m = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2180));
                     func_00399730(m, GetHashValue32(D_0046E7A0));
                 }
@@ -7413,7 +7412,6 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void func_003A1310(void* self, int a1);
 extern int D_00536730[];
-extern signed char cBENewRaceInterface_newRace[];
 extern char D_004A2170[];
 extern char D_0046E4E8[];
 extern char D_0046E638[];
@@ -7435,8 +7433,8 @@ extern "C" void func_001E75D0(void* self)
     cUIState_onGainFocus_v(self);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    int mode = cBENewRaceInterface_newRace[0x49];
-    int track = cBENewRaceInterface_newRace[0x48];
+    int mode = cBENewRaceInterface_newRace.cGamePath;
+    int track = cBENewRaceInterface_newRace.cGameMode;
     int first = 1;
     if (mode == 2) {
         second = 1;
@@ -7613,7 +7611,6 @@ extern "C" char* func_0020A1A8(int v);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* func_0028B180();
 extern "C" void func_00294F78(void*, int);
-extern signed char cBENewRaceInterface_newRace[];
 extern int D_004A213C;
 extern int D_00536730[];
 extern unsigned int D_00536640[];
@@ -7686,24 +7683,24 @@ extern "C" void func_001E7BB0(void* self)
             o->setVisible(1);
         }
     }
-    if (*(int*)(ifaceD + 0x14) == 0 && (mode == 3 || cBENewRaceInterface_newRace[0x4A] == 4)) {
+    if (*(int*)(ifaceD + 0x14) == 0 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
         D_004A213C = 1;
         cUIState_showObjSafe(self, D_0046E7A0);
     } else {
         D_004A213C = 0;
         cUIState_hideObjSafe(self, D_0046E7A0);
     }
-    if (*(int*)(ifaceD + 0x14) == 1 && (mode == 3 || cBENewRaceInterface_newRace[0x4A] == 4)) {
+    if (*(int*)(ifaceD + 0x14) == 1 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
         cUIState_showObjSafe(self, D_004A2180);
     } else {
         cUIState_hideObjSafe(self, D_004A2180);
     }
-    if (*(int*)(ifaceD + 0x14) == 2 && (mode == 3 || cBENewRaceInterface_newRace[0x4A] == 4)) {
+    if (*(int*)(ifaceD + 0x14) == 2 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
         cUIState_showObjSafe(self, D_004A2188);
     } else {
         cUIState_hideObjSafe(self, D_004A2188);
     }
-    if (*(int*)(ifaceD + 0x14) == 3 && (mode == 3 || cBENewRaceInterface_newRace[0x4A] == 4)) {
+    if (*(int*)(ifaceD + 0x14) == 3 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
         cUIState_showObjSafe(self, D_004A2190);
     } else {
         cUIState_hideObjSafe(self, D_004A2190);
@@ -7719,9 +7716,9 @@ extern "C" void func_001E7BB0(void* self)
         o->setVisible(0);
     }
     char* r = *(char**)((char*)SSXApp->Game->AI + off + 0x28);
-    if (cBENewRaceInterface_newRace[0x49] == 2
+    if (cBENewRaceInterface_newRace.cGamePath == 2
         || *(int*)(r + 0x480) != 0
-        || cBENewRaceInterface_newRace[0x4A] == 6 || cBENewRaceInterface_newRace[0x4A] == 7 || cBENewRaceInterface_newRace[0x4A] == 8) {
+        || cBENewRaceInterface_newRace.cGameEvent == 6 || cBENewRaceInterface_newRace.cGameEvent == 7 || cBENewRaceInterface_newRace.cGameEvent == 8) {
         cUIState_hideObjSafe(self, D_0046E888);
         cUIState_hideObjSafe(self, D_004A21A0);
     } else {
@@ -7862,7 +7859,7 @@ extern "C" void func_001E8200(void* self)
     char* iface8 = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
     char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xD);
     int* p = (int*)SSXApp->GameModeMan;
-    signed char event = cBENewRaceInterface_newRace[0x48];
+    signed char event = cBENewRaceInterface_newRace.cGameMode;
     cUIState_hideObjSafe(self, D_0046E828);
     cUIState_hideObjSafe(self, D_0046E838);
     cUIState_hideObjSafe(self, D_0046E848);
@@ -7884,24 +7881,24 @@ extern "C" void func_001E8200(void* self)
     }
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
     int sel = D_00536730[pl];
-    if (*(int*)(ifaceD + 0x14) == 0 && (mode == 3 || cBENewRaceInterface_newRace[0x4A] == 4 || cBENewRaceInterface_newRace[0x4A] == 5)) {
+    if (*(int*)(ifaceD + 0x14) == 0 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
         D_004A213C = 1;
         cUIState_showObjSafe(self, D_0046E7A0);
     } else {
         D_004A213C = 0;
         cUIState_hideObjSafe(self, D_0046E7A0);
     }
-    if (*(int*)(ifaceD + 0x14) == 1 && (mode == 3 || cBENewRaceInterface_newRace[0x4A] == 5)) {
+    if (*(int*)(ifaceD + 0x14) == 1 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
         cUIState_showObjSafe(self, D_004A2180);
     } else {
         cUIState_hideObjSafe(self, D_004A2180);
     }
-    if (*(int*)(ifaceD + 0x14) == 2 && (mode == 3 || cBENewRaceInterface_newRace[0x4A] == 5)) {
+    if (*(int*)(ifaceD + 0x14) == 2 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
         cUIState_showObjSafe(self, D_004A2188);
     } else {
         cUIState_hideObjSafe(self, D_004A2188);
     }
-    if (*(int*)(ifaceD + 0x14) == 3 && (mode == 3 || cBENewRaceInterface_newRace[0x4A] == 5)) {
+    if (*(int*)(ifaceD + 0x14) == 3 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
         cUIState_showObjSafe(self, D_004A2190);
     } else {
         cUIState_hideObjSafe(self, D_004A2190);
@@ -7937,9 +7934,9 @@ extern "C" void func_001E8200(void* self)
         o->setVisible(0);
     }
     char* r = *(char**)((char*)SSXApp->Game->AI + off + 0x28);
-    if (cBENewRaceInterface_newRace[0x49] == 2
+    if (cBENewRaceInterface_newRace.cGamePath == 2
         || *(int*)(r + 0x480) != 0
-        || cBENewRaceInterface_newRace[0x4A] == 9 || cBENewRaceInterface_newRace[0x4A] == 10 || cBENewRaceInterface_newRace[0x4A] == 11
+        || cBENewRaceInterface_newRace.cGameEvent == 9 || cBENewRaceInterface_newRace.cGameEvent == 10 || cBENewRaceInterface_newRace.cGameEvent == 11
         || (mode == 1 && p[0x70 / 4] == 3)) {
         cUIState_hideObjSafe(self, D_0046E888);
         cUIState_hideObjSafe(self, D_004A21A0);

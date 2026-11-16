@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gamemode.h"
 #include "online/commsystem.h"
 #include "online/gamecomm.h"
 #include "scripter/ssxscriptengine.h"
@@ -1324,10 +1325,9 @@ extern "C" void func_002444F0(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244520);
 #ifdef SKIP_ASM
-extern int cGameModeHandler_pManager;
 
 extern "C" void func_00244520(int arg0) {
-    cGameModeHandler_pManager = arg0;
+    cGameModeHandler_pManager = (cGameModeMan*)(arg0);
 }
 #endif
 

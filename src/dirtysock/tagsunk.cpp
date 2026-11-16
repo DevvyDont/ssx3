@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "online/commsystem.h"
 #include "online/gamecomm.h"
@@ -4334,13 +4335,12 @@ void func_0025FB80_v(void*, int, void*) __asm__("func_0025FB80");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_005308D0[];
 extern int D_00534B34[];
-extern char cBENewRaceInterface_newRace[];
 extern char D_004808E0[];
 extern char D_00480610[];
 
 static inline char* Race_25F4C0()
 {
-    return cBENewRaceInterface_newRace;
+    return ((char*)&cBENewRaceInterface_newRace);
 }
 
 struct sDsStats_25F4C0 {

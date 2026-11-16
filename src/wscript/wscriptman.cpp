@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -2551,7 +2552,6 @@ struct sRace_C4A8 {
     signed char mode48;
     signed char flag49;
 };
-extern sRace_C4A8 D_00535BC8_rC4A8 __asm__("cBENewRaceInterface_newRace");
 
 struct sVE_C4A8 {
     short delta;
@@ -2606,7 +2606,7 @@ extern "C" void func_0030C4A8(void* ep, int a1, int a2)
     void* iface = cBE_getInterface_C4A8(cBE_getBE(), 10);
     if (a2 <= 0)
         return;
-    sRace_C4A8* r = &D_00535BC8_rC4A8;
+    sRace_C4A8* r = &(*(sRace_C4A8*)&cBENewRaceInterface_newRace);
     for (int n = a2; n != 0; n--, ids++) {
         unsigned int id = *ids;
         if (~id == 0)

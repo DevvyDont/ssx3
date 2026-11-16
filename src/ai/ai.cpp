@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ai/ai.h"
+#include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "online/gamecomm.h"
 #include "main/game.h"
@@ -42,37 +44,37 @@ struct sAIObj_1286A0 {
     sAIObj_1286A0(void* owner) __asm__("cDangerMan_cDangerMan");
 };
 
-extern "C" void* cAI_cAI(void* self)
+extern "C" void* cAI_cAI(cAI* self)
 {
-    *(void**)((char*)self + 0xCC) = cAI_vtbl;
-    *(void**)((char*)self + 0xAC) = D_004585C8;
-    *(void**)((char*)self + 0xB0) = D_004585A0;
-    *(void**)((char*)self + 0xB4) = D_00458550;
-    *(void**)((char*)self + 0xBC) = D_00458578;
-    *(void**)((char*)self + 0xC0) = cAIStateHandler_vtbl;
-    *(void**)((char*)self + 0xC4) = D_00458500;
-    *(void**)((char*)self + 0xC8) = cShutdownHandler_vtbl;
+    self->mVtbl = (void**)cAI_vtbl;
+    *(void**)&self->mGameInitHandler = D_004585C8;
+    *(void**)&self->mFreerideHandler = D_004585A0;
+    *(void**)&self->mPreRaceHandler = D_00458550;
+    *(void**)&self->mCountdownHandler = D_00458578;
+    *(void**)&self->mRaceHandler = cAIStateHandler_vtbl;
+    *(void**)&self->mEndRaceHandler = D_00458500;
+    *(void**)&self->mShutdownHandler = cShutdownHandler_vtbl;
     sAIState_1286A0** slot = (sAIState_1286A0**)((char*)self + 0xA4);
     *slot = new (D_00457F00, 0, 0) sAIState_1286A0;
-    *(sAIObj_1286A0**)((char*)self + 0xA8) = new (D_00457F10, 0, 0) sAIObj_1286A0(self);
-    *(int*)((char*)self + 0x74) = 0;
-    return self;
+    self->DangerMan = (cDangerMan*)(new (D_00457F10, 0, 0) sAIObj_1286A0(self));
+    self->RaceRankType = 0;
+    return ((void*)self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_001287B8);
 #ifdef SKIP_ASM
-extern "C" void cAI_shutdown(void*);
+extern "C" void cAI_shutdown(cAI*);
 void operator_delete(int*);
 extern char cAI_vtbl[];
 
-extern "C" void func_001287B8(void* self, int flags)
+extern "C" void func_001287B8(cAI* self, int flags)
 {
-    *(void**)((char*)self + 0xCC) = cAI_vtbl;
+    self->mVtbl = (void**)cAI_vtbl;
     cAI_shutdown(self);
-    operator_delete(*(int**)((char*)self + 0xA4));
-    operator_delete(*(int**)((char*)self + 0xA8));
+    operator_delete((int*)self->FocusMan);
+    operator_delete((int*)self->DangerMan);
     if (flags & 1)
     {
         operator_delete((int*)self);
@@ -86,7 +88,7 @@ INCLUDE_ASM("ai/ai", func_00128818);
 extern "C" void cFocusMan_reset(void*);
 extern "C" void cDangerMan_Reset(void*);
 extern "C" void cAI_setAIState(void*, int);
-extern "C" void* cAI_commonInit(void*, int);
+extern "C" void* cAI_commonInit(cAI*, int);
 // PORT: cAI_loadAnims is defined (void) in this unit, but this caller passes self in $a0; bound by asm label.
 void cAI_loadAnims_self(void* self) __asm__("cAI_loadAnims");
 
@@ -145,7 +147,7 @@ extern "C" void func_00128818(sAiObj128818* self)
     for (i = 0; i < 5; i++) self->a48[i] = 0;
     cAI_loadAnims_self(self);
     self->vt[6].fn((char*)self + self->vt[6].delta);
-    cAI_commonInit(self, 1);
+    cAI_commonInit((cAI*)self, 1);
     for (i = 0; i < 2; i++) self->a20[i] = 0;
 }
 #endif
@@ -153,13 +155,13 @@ extern "C" void func_00128818(sAiObj128818* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_initAIRiders);
 #ifdef SKIP_ASM
-extern "C" void cAI_purgeMissionRiders(void*);
-extern "C" void cAI_initComputerRiders(void*);
+extern "C" void cAI_purgeMissionRiders(cAI*);
+extern "C" void cAI_initComputerRiders(cAI*);
 
-extern "C" void cAI_initAIRiders(void* self)
+extern "C" void cAI_initAIRiders(cAI* self)
 {
-    *(int*)((char*)self + 0x94) = 0;
-    if (*(int*)((char*)self + 0x88) > 0)
+    self->NumberOfActorsRequired = 0;
+    if (self->NumberOfMissionRidersLoaded > 0)
     {
         cAI_purgeMissionRiders(self);
     }
@@ -173,28 +175,28 @@ INCLUDE_ASM("ai/ai", cAI_initAIActors);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void cAI_initComputerActors(void*);
+extern "C" void cAI_initComputerActors(cAI*);
 extern signed char D_00535C11[];
 
-extern "C" void cAI_initAIActors(void* self, int n)
+extern "C" void cAI_initAIActors(cAI* self, int n)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 0)
     {
-        *(int*)((char*)self + 0x94) = n;
+        self->NumberOfActorsRequired = n;
         cAI_initComputerActors(self);
     }
 }
 #endif
 
-extern "C" void* cAI_commonInit(void*, int);
+extern "C" void* cAI_commonInit(cAI*, int);
 
 //100%
 INCLUDE_ASM("ai/ai", func_001289F0__FPv);
 #ifdef SKIP_ASM
 void* func_001289F0(void* self)
 {
-    return cAI_commonInit(self, 0);
+    return cAI_commonInit((cAI*)self, 0);
 }
 #endif
 
@@ -202,12 +204,12 @@ void* func_001289F0(void* self)
 INCLUDE_ASM("ai/ai", func_00128A10);
 #ifdef SKIP_ASM
 struct sAiObj128A48;
-extern "C" void func_00128A48(sAiObj128A48* self, int mode);
+extern "C" void func_00128A48(cAI* self, int mode);
 
-extern "C" void func_00128A10(void* self)
+extern "C" void func_00128A10(cAI* self)
 {
     cAI_commonInit(self, 0);
-    func_00128A48((sAiObj128A48*)self, 0);
+    func_00128A48(self, 0);
 }
 #endif
 
@@ -222,21 +224,21 @@ struct sAiObj128A48
     int mCount;
 };
 
-extern "C" void func_00128A48(sAiObj128A48* self, int mode)
+extern "C" void func_00128A48(cAI* self, int mode)
 {
-    self->mMode = mode;
+    self->RaceRankType = mode;
     if (mode == 0)
     {
-        for (int i = 0; i < self->mCount; i++)
+        for (int i = 0; i < self->NumberOfRidersAllocated; i++)
         {
-            *(int*)(self->mRiders[i] + 0xEC) = 0;
+            *(int*)(((char**)&self->Riders[0])[i] + 0xEC) = 0;
         }
     }
     else
     {
-        for (int i = 0; i < self->mCount; i++)
+        for (int i = 0; i < self->NumberOfRidersAllocated; i++)
         {
-            *(int*)(self->mRiders[i] + 0xEC) = i;
+            *(int*)(((char**)&self->Riders[0])[i] + 0xEC) = i;
         }
     }
 }
@@ -245,14 +247,14 @@ extern "C" void func_00128A48(sAiObj128A48* self, int mode)
 //100%
 INCLUDE_ASM("ai/ai", cAI_reinitMissionRiders);
 #ifdef SKIP_ASM
-extern "C" void cAI_initMissionRiders(void*);
+extern "C" void cAI_initMissionRiders(cAI*);
 
 /**
  * Re-runs the mission rider setup followed by the shared AI initialisation.
  *
  * Calls cAI_initMissionRiders() and then cAI_commonInit(self, 0).
  */
-extern "C" void cAI_reinitMissionRiders(void* self)
+extern "C" void cAI_reinitMissionRiders(cAI* self)
 {
     cAI_initMissionRiders(self);
     cAI_commonInit(self, 0);
@@ -325,42 +327,42 @@ static inline char* Rider_AF0(char* obj)
 }
 
 // Updates every active rider: players, computers and others, in fixed passes.
-extern "C" void func_00128AF0(sAiObjAF0* self)
+extern "C" void func_00128AF0(cAI* self)
 {
     char* r[8];
     char* m[8];
     int n = 0;
     int i;
-    func_0012BB20_AF0(self);
-    func_00113C20(self);
-    func_0010F560(self);
-    if (self->mNumMission > 0 && self->mNumPlayers > 0) {
+    func_0012BB20_AF0(((sAiObjAF0*)self));
+    func_00113C20(((sAiObjAF0*)self));
+    func_0010F560(((sAiObjAF0*)self));
+    if (self->NumberOfMissionRidersLoaded > 0 && self->NumberOfPlayersAllocated > 0) {
         char* x = (char*)SSXApp->Game->PlaybackMan;
         if (x != 0 && *(int*)(x + 0x70) == 0) {
             n = 1;
-            r[0] = Rider_AF0(self->mPlayers[0]);
-            func_00120E30(Rider_AF0(*(char**)((char*)self + 0x70)));
+            r[0] = Rider_AF0(((char**)&self->Players[0])[0]);
+            func_00120E30(Rider_AF0((char*)self->MissionRiders[0]));
         } else {
             char** q = &r[n];
-            *q = Rider_AF0(self->mPlayers[0]);
+            *q = Rider_AF0(((char**)&self->Players[0])[0]);
             n = 2;
-            r[1] = Rider_AF0(*(char**)((char*)self + 0x70));
-            func_00120E30(Rider_AF0(self->mPlayers[0]));
+            r[1] = Rider_AF0((char*)self->MissionRiders[0]);
+            func_00120E30(Rider_AF0(((char**)&self->Players[0])[0]));
         }
     } else {
-        for (int i = 0; i < self->mNumPlayers; i++) {
+        for (int i = 0; i < self->NumberOfPlayersAllocated; i++) {
             n++;
-            r[n - 1] = Rider_AF0(self->mPlayers[i]);
+            r[n - 1] = Rider_AF0(((char**)&self->Players[0])[i]);
         }
-        if (self->mHaveComputers)
-            for (int i = 0; i < self->mNumComputers; i++) {
+        if (self->ComputerRidersActive)
+            for (int i = 0; i < self->NumberOfComputersAllocated; i++) {
                 n++;
-                r[n - 1] = Rider_AF0(self->mComputers[i]);
+                r[n - 1] = Rider_AF0(((char**)&self->Computers[0])[i]);
             }
-        if (self->mHaveOthers)
-            for (int i = 0; i < self->mNumOthers; i++) {
+        if (self->ComputerActorsActive)
+            for (int i = 0; i < self->NumberOfActorsAllocated; i++) {
                 n++;
-                r[n - 1] = Rider_AF0(self->mOthers[i]);
+                r[n - 1] = Rider_AF0(((char**)&self->Actors[0])[i]);
             }
     }
     if (D_004A2A50 & 1) {
@@ -392,9 +394,9 @@ extern "C" void func_00128AF0(sAiObjAF0* self)
         for (i = 0; i < n; i++) func_002F6518(m[i] + 0xD20);
         for (i = 0; i < n; i++) func_00120E88(r[i]);
     }
-    func_00101B60(self->fA4);
-    func_001013A8(self->fA8);
-    self->mFrame++;
+    func_00101B60(self->FocusMan);
+    func_001013A8(self->DangerMan);
+    self->AITick++;
 }
 #endif
 
@@ -572,12 +574,12 @@ extern "C" void cFocusMan_reset(void*);
 extern "C" void cDangerMan_Reset(void*);
 extern "C" void cAI_setAIState(void*, int);
 
-extern "C" void func_00129768(void* self, int state)
+extern "C" void func_00129768(cAI* self, int state)
 {
-    cFocusMan_reset(*(void**)((char*)self + 0xA4));
-    cDangerMan_Reset(*(void**)((char*)self + 0xA8));
-    *(int*)((char*)self + 0x98) = 0;
-    *(int*)((char*)self + 0x0) = 0;
+    cFocusMan_reset(self->FocusMan);
+    cDangerMan_Reset(self->DangerMan);
+    self->CurrentAIStateHandler = 0;
+    self->CurrentAIState = 0;
     cAI_setAIState(self, state);
     cAI_commonInit(self, 1);
 }
@@ -608,7 +610,7 @@ struct sAiObj1297C8
     int mCount2;        // 0x88
 };
 
-extern "C" void* cAI_commonInit(void* p, int flag)
+extern "C" void* cAI_commonInit(cAI* p, int flag)
 {
     sAiObj1297C8* self = (sAiObj1297C8*)p;
     func_0010F398(self);
@@ -642,7 +644,7 @@ INCLUDE_ASM("ai/ai", func_001298C8);
 
 extern "C" int func_001298C8()
 {
-    return *(int*)((char*)SSXApp->Game->AI + 0x8);
+    return SSXApp->Game->AI->AITick;
 }
 #endif
 
@@ -650,14 +652,13 @@ extern "C" int func_001298C8()
 INCLUDE_ASM("ai/ai", cAI_InitPlayers);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern char cBENewRaceInterface_newRace[];
 extern void* PadCache;
 extern char D_004A1108[];
 extern "C" int func_00147290(void* iface, int i);
 extern "C" int func_00147618(void* iface, int i);
 extern "C" int func_00237140(void* a, void* b);
 extern "C" int func_00237280(void* a, void* b);
-extern "C" void func_0012B498(void* self, void* obj, int i);
+extern "C" void func_0012B498(cAI* self, void* obj, int i);
 // PORT: cPlayer_cPlayer returns self here (declared void elsewhere in this unit); bound by asm label.
 extern "C" char* cPlayer_cPlayer_IP(void* self, int inChrg) __asm__("cPlayer_cPlayer");
 extern "C" void cRider_addFocusBox(void* self);
@@ -696,13 +697,13 @@ static inline int HudTab_IP(int ch)
     return h[0xBBB];
 }
 
-static inline char* Cfg_IP() { return cBENewRaceInterface_newRace; }
+static inline char* Cfg_IP() { return ((char*)&cBENewRaceInterface_newRace); }
 
 // PORT: cMemMan_alloc with unsigned size / int flags (the argument order retail sets up); bound by asm label.
 extern "C" void* cMemMan_alloc_IP(unsigned int size, const char* tag, int flags, int d) __asm__("cMemMan_alloc");
 
 // Creates the human players' riders and hooks them up to their input and HUD slots.
-extern "C" void cAI_InitPlayers(void* p)
+extern "C" void cAI_InitPlayers(cAI* p)
 {
     sAiObjIP* self = (sAiObjIP*)p;
     for (int k = 1; k >= 0; k--)
@@ -752,7 +753,7 @@ extern "C" void cAI_InitPlayers(void* p)
         cRider_addFocusBox(*(void**)(obj + 0x18));
         nPlayers++;
         cRider_addRiderMetrix(*(cRider**)(obj + 0x18));
-        func_0012B498(self, obj, i);
+        func_0012B498((cAI*)self, obj, i);
         *(int*)(*(char**)(obj + 0x18) + 0x2F8) = 0;
         cRider_initOnce(self->mRiders[i], 0);
         cBENewRaceInterface_assignPlayer(rm, idx, idx);
@@ -869,7 +870,7 @@ struct sAiObjMR
     int mNumMission;
 };
 
-extern "C" void cAI_initMissionRiders(void* p)
+extern "C" void cAI_initMissionRiders(cAI* p)
 {
     sAiObjMR* self = (sAiObjMR*)p;
     if (self->mNumMission > 0)
@@ -907,7 +908,7 @@ struct cRider;
 void cRider_addRiderMetrix(cRider* rider);
 extern "C" void func_0010C9A8(void*);
 extern "C" void cComputer_updateRiderDifficulty(void*);
-extern "C" void func_0012B698(void* self, void* rider);
+extern "C" void func_0012B698(cAI* self, void* rider);
 void cBENewRaceInterface_assignPlayer(void*, int, int);
 extern char D_00457F30[];
 extern int D_00535C04[];
@@ -933,7 +934,7 @@ struct sAiObjCR
     int mNumComputers;
 };
 
-extern "C" void cAI_initComputerRiders(void* p)
+extern "C" void cAI_initComputerRiders(cAI* p)
 {
     sAiObjCR* self = (sAiObjCR*)p;
     char* rm = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -957,7 +958,7 @@ extern "C" void cAI_initComputerRiders(void* p)
         cRider_addRiderMetrix(*(cRider**)(obj + 0x18));
         func_0010C9A8(obj);
         cComputer_updateRiderDifficulty(obj);
-        func_0012B698(self, obj);
+        func_0012B698((cAI*)self, obj);
         cBENewRaceInterface_assignPlayer(rm, idx, idx);
         self->mObjs[self->mNumComputers] = obj;
         self->mNumComputers++;
@@ -1000,7 +1001,7 @@ struct sAiObj129FF8
     int mMaxActors;
 };
 
-extern "C" void cAI_initComputerActors(void* p)
+extern "C" void cAI_initComputerActors(cAI* p)
 {
     sAiObj129FF8* self = (sAiObj129FF8*)p;
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -1037,12 +1038,12 @@ INCLUDE_ASM("ai/ai", func_0012A180);
 #ifdef SKIP_ASM
 extern "C" int func_0011D640(void* self);
 
-extern "C" int func_0012A180(sAiObj128A48* self)
+extern "C" int func_0012A180(cAI* self)
 {
     int result = 1;
-    for (int i = 0; i < self->mCount; i++)
+    for (int i = 0; i < self->NumberOfRidersAllocated; i++)
     {
-        if (func_0011D640(self->mRiders[i]) == 0)
+        if (func_0011D640(((char**)&self->Riders[0])[i]) == 0)
         {
             result = 0;
         }
@@ -1056,7 +1057,7 @@ INCLUDE_ASM("ai/ai", func_0012A1F0);
 #ifdef SKIP_ASM
 extern int D_00536708[];
 
-extern "C" int func_0012A1F0(void* self, int idx)
+extern "C" int func_0012A1F0(cAI* self, int idx)
 {
     char* tbl = (char*)SSXApp->GameModeMan;
     int v = *(int*)((char*)tbl + (idx << 2) + 0x18);
@@ -1090,11 +1091,11 @@ static inline bool aiRiderOk12A250(char* rider)
     return *(float*)(*(char**)(rider + 0x18) + 0x470) >= 0.0f;
 }
 
-extern "C" int func_0012A250(sAiObj12A250* self)
+extern "C" int func_0012A250(cAI* self)
 {
-    for (int i = 0; i < self->mCount; i++)
+    for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
     {
-        bool ok = aiRiderOk12A250(self->mRiders[i]);
+        bool ok = aiRiderOk12A250(((char**)&self->Players[0])[i]);
         if (!ok)
         {
             return 0;
@@ -1111,11 +1112,11 @@ extern "C" void func_00112180(void* rider, int v);
 extern "C" void func_0026AF00(void* self);
 extern "C" void func_0026ADA8(void*, int);
 extern char D_004D33A0[];
-extern "C" void func_0012A2B0(void* self, int arg1) {
+extern "C" void func_0012A2B0(cAI* self, int arg1) {
     int i;
     func_0026AF00(D_004D33A0);
     func_0026ADA8(D_004D33A0, arg1);
-    for (i = 0; i < *(int*)((char*)self + 0x78); i++) {
+    for (i = 0; i < self->NumberOfRidersAllocated; i++) {
         func_00112180(*(void**)((char*)self + 0x28 + (i << 2)), 0);
     }
 }
@@ -1128,7 +1129,6 @@ INCLUDE_ASM("ai/ai", func_0012A340);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_0022E0E0(void* self);
 extern char D_004D33A0[];
-extern char cBENewRaceInterface_newRace[];
 extern "C" void func_0026AF00(void* self);
 extern "C" int func_0026AD70(void* self, int v);
 extern "C" void func_00112180(void* rider, int v);
@@ -1141,13 +1141,13 @@ struct sAiObj12A340
     int mCount;
 };
 
-extern "C" int func_0012A340(sAiObj12A340* self, int unused, int mode, int arg)
+extern "C" int func_0012A340(cAI* self, int unused, int mode, int arg)
 {
     int lvl = func_0022E0E0(SSXApp->Game->SectionMan);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if ((unsigned)(lvl - 0x11) < 5)
     {
-        signed char* g = (signed char*)cBENewRaceInterface_newRace;
+        signed char* g = (signed char*)((char*)&cBENewRaceInterface_newRace);
         if (g[0x48] == 5 || g[0x4A] == 0xB)
         {
             if (mode != 1)
@@ -1170,9 +1170,9 @@ ok:
         func_0026AD70(D_004D33A0, arg);
         if ((void*)SSXApp->Game->AI == 0)
             return 1;
-        for (int i = 0; i < self->mCount; i++)
+        for (int i = 0; i < self->NumberOfRidersAllocated; i++)
         {
-            func_00112180(self->mRiders[i], 0);
+            func_00112180(((char**)&self->Riders[0])[i], 0);
         }
         return 1;
     }
@@ -1208,9 +1208,9 @@ extern "C" void func_0012A4D0(void) {
 //100%
 INCLUDE_ASM("ai/ai", func_0012A4F0);
 #ifdef SKIP_ASM
-extern "C" void func_0012A4F0(void* self) {
+extern "C" void func_0012A4F0(cAI* self) {
     int i;
-    for (i = 0; i < *(int*)((char*)self + 0x78); i++) {
+    for (i = 0; i < self->NumberOfRidersAllocated; i++) {
         func_00112180(*(void**)((char*)self + 0x28 + (i << 2)), 0);
     }
 }
@@ -1440,11 +1440,11 @@ INCLUDE_ASM("ai/ai", func_0012A998);
 struct sVEntry0012A998 { short delta; short index; int (*fn)(void*); };
 
 extern void* D_004A289C;
-extern "C" int func_0012A1F0(void*, int);
+extern "C" int func_0012A1F0(cAI*, int);
 
-extern "C" void func_0012A998(void* self)
+extern "C" void func_0012A998(cAI* self)
 {
-    for (int i = 0; i < *(int*)((char*)self + 0x80); i++)
+    for (int i = 0; i < self->NumberOfComputersAllocated; i++)
     {
         char** list = (char**)((char*)self + 0x48);
         cRider* rider = *(cRider**)(list[i] + 0x18);
@@ -1486,7 +1486,7 @@ struct sOwner_0012AA78 {
     int count;
 };
 
-extern "C" int func_0012A1F0(void*, int);
+extern "C" int func_0012A1F0(cAI*, int);
 
 extern "C" int func_0012AA78(sOwner_0012AA78* self) {
     int i;
@@ -1495,7 +1495,7 @@ extern "C" int func_0012AA78(sOwner_0012AA78* self) {
         if (func_0011C0E0(self->ent[i]->rider) == 0) {
             char* obj = (char*)&self->ent[i]->rider->mVtbl;
             sVE_0012AA78* vt = *(sVE_0012AA78**)obj;
-            if (func_0012A1F0(self, vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta)) != 0)
+            if (func_0012A1F0((cAI*)self, vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta)) != 0)
                 ok = 0;
         }
     }
@@ -1550,12 +1550,12 @@ struct sAiObj12ABD0
 
 extern "C" int func_0011C0E0(void*);
 
-extern "C" int func_0012ABD0(sAiObj12ABD0* self)
+extern "C" int func_0012ABD0(cAI* self)
 {
     int result = 1;
-    for (int i = 0; i < self->mCount; i++)
+    for (int i = 0; i < self->NumberOfComputersAllocated; i++)
     {
-        if (func_0011C0E0(*(void**)(self->mRiders[i] + 0x18)) == 0)
+        if (func_0011C0E0(*(void**)(((char**)&self->Computers[0])[i] + 0x18)) == 0)
         {
             result = 0;
         }
@@ -1611,12 +1611,12 @@ struct sAiObj12ACF8
 
 extern "C" int func_0011C0E0(void*);
 
-extern "C" int func_0012ACF8(sAiObj12ACF8* self)
+extern "C" int func_0012ACF8(cAI* self)
 {
     int result = 1;
-    for (int i = 0; i < self->mCount; i++)
+    for (int i = 0; i < self->NumberOfActorsAllocated; i++)
     {
-        if (func_0011C0E0(*(void**)(self->mRiders[i] + 0x18)) == 0)
+        if (func_0011C0E0(*(void**)(((char**)&self->Actors[0])[i] + 0x18)) == 0)
         {
             result = 0;
         }
@@ -1630,9 +1630,9 @@ INCLUDE_ASM("ai/ai", func_0012AD70);
 #ifdef SKIP_ASM
 // self is a cAI (no header yet); +0x70 is its list of rider objects (count at +0x88),
 // each holding its cRider virtual-base pointer at +0x18.
-extern "C" void func_0012AD70(void* self)
+extern "C" void func_0012AD70(cAI* self)
 {
-    for (int i = 0; i < *(int*)((char*)self + 0x88); i++)
+    for (int i = 0; i < self->NumberOfMissionRidersLoaded; i++)
     {
         char* obj = ((char**)((char*)self + 0x70))[i];
         cRider* rider = *(cRider**)(obj + 0x18);
@@ -1647,10 +1647,10 @@ extern "C" void func_0012AD70(void* self)
 //100%
 INCLUDE_ASM("ai/ai", func_0012ADC0);
 #ifdef SKIP_ASM
-extern "C" int func_0012ADC0(void* self) {
+extern "C" int func_0012ADC0(cAI* self) {
     int i;
     int ok = 1;
-    for (i = 0; i < *(int*)((char*)self + 0x88); i++) {
+    for (i = 0; i < self->NumberOfMissionRidersLoaded; i++) {
         void* p = *(void**)((char*)self + 0x70 + (i << 2));
         if (func_0011C0E0(*(void**)((char*)p + 0x18)) == 0)
             ok = 0;
@@ -1681,7 +1681,7 @@ struct sAiMission
     int m90;
 };
 
-extern "C" void cAI_purgeComputerRiders(void* p)
+extern "C" void cAI_purgeComputerRiders(cAI* p)
 {
     sAiMission* self = (sAiMission*)p;
     for (int i = 0; i < self->mCountA; i++)
@@ -1704,7 +1704,7 @@ extern "C" void cAI_purgeComputerRiders(void* p)
 //100%
 INCLUDE_ASM("ai/ai", cAI_purgeComputerActors);
 #ifdef SKIP_ASM
-extern "C" void cAI_purgeComputerActors(void* p)
+extern "C" void cAI_purgeComputerActors(cAI* p)
 {
     sAiMission* self = (sAiMission*)p;
     for (int i = 0; i < self->mCountB; i++)
@@ -1727,7 +1727,7 @@ extern "C" void cAI_purgeComputerActors(void* p)
 //100%
 INCLUDE_ASM("ai/ai", cAI_purgeMissionRiders);
 #ifdef SKIP_ASM
-extern "C" void cAI_purgeMissionRiders(void* p)
+extern "C" void cAI_purgeMissionRiders(cAI* p)
 {
     sAiMission* self = (sAiMission*)p;
     for (int i = 0; i < self->mCountC; i++)
@@ -1750,7 +1750,7 @@ extern "C" void cAI_purgeMissionRiders(void* p)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", cAI_cleanupActors);
 #ifdef SKIP_ASM
-extern "C" void cAI_purgeComputerActors(void*);
+extern "C" void cAI_purgeComputerActors(cAI*);
 extern "C" void cAI_RefreshGroupAI(void*);
 
 /**
@@ -1758,7 +1758,7 @@ extern "C" void cAI_RefreshGroupAI(void*);
  *
  * Calls cAI_purgeComputerActors() and then cAI_RefreshGroupAI().
  */
-extern "C" void cAI_cleanupActors(void* self)
+extern "C" void cAI_cleanupActors(cAI* self)
 {
     cAI_purgeComputerActors(self);
     cAI_RefreshGroupAI(self);
@@ -1768,25 +1768,25 @@ extern "C" void cAI_cleanupActors(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", cAI_cleanupAfterRace);
 #ifdef SKIP_ASM
-extern "C" void cAI_purgeComputerRiders(void*);
+extern "C" void cAI_purgeComputerRiders(cAI*);
 extern "C" void cAI_RefreshGroupAI(void*);
 
-extern "C" void cAI_cleanupAfterRace(void* self)
+extern "C" void cAI_cleanupAfterRace(cAI* self)
 {
     cAI_purgeComputerRiders(self);
     cAI_RefreshGroupAI(self);
-    *(int*)((char*)self + 0x10) = 0;
+    self->IsAIReadyToRace = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("ai/ai", func_0012B060);
 #ifdef SKIP_ASM
-extern "C" void func_0012B060(void* self)
+extern "C" void func_0012B060(cAI* self)
 {
     cAI_purgeMissionRiders(self);
     cAI_RefreshGroupAI(self);
-    *(int*)((char*)self + 0x10) = 0;
+    self->IsAIReadyToRace = 0;
 }
 #endif
 
@@ -1794,7 +1794,7 @@ extern "C" void func_0012B060(void* self)
 INCLUDE_ASM("ai/ai", cAI_shutdown);
 #ifdef SKIP_ASM
 extern "C" void func_00154A58(int rider, int a);
-extern "C" void cAI_purgeAnims(void*);
+extern "C" void cAI_purgeAnims(cAI*);
 
 struct sAiObj12B090
 {
@@ -1806,7 +1806,7 @@ struct sAiObj12B090
     int mCount2;
 };
 
-extern "C" void cAI_shutdown(void* p)
+extern "C" void cAI_shutdown(cAI* p)
 {
     sAiObj12B090* self = (sAiObj12B090*)p;
     for (int i = 0; i < self->mCount; i++)
@@ -1824,12 +1824,12 @@ extern "C" void cAI_shutdown(void* p)
         }
         self->mList[i] = 0;
     }
-    cAI_purgeMissionRiders(self);
-    cAI_purgeComputerRiders(self);
-    cAI_purgeComputerActors(self);
+    cAI_purgeMissionRiders((cAI*)self);
+    cAI_purgeComputerRiders((cAI*)self);
+    cAI_purgeComputerActors((cAI*)self);
     self->mCount2 = 0;
     self->mCount = 0;
-    cAI_purgeAnims(self);
+    cAI_purgeAnims((cAI*)self);
     self->m74 = 0;
 }
 #endif
@@ -1859,7 +1859,7 @@ extern "C" void func_00314FE8(void*, void*);
 extern "C" void func_00311110(void*);
 extern "C" void func_003112C8(void*, int);
 
-extern "C" void cAI_purgeAnims(void* self)
+extern "C" void cAI_purgeAnims(cAI* self)
 {
     int i;
     for (i = 0; i < 1; i++)
@@ -1920,14 +1920,14 @@ static inline bool aiRiderFar12B340(char* r)
     return *(float*)(r + 0x470) >= 10.0f;
 }
 
-extern "C" void func_0012B340(sAiObj12A250* self)
+extern "C" void func_0012B340(cAI* self)
 {
-    if (*(int*)self == 5)
+    if (self->CurrentAIState == 5)
     {
         func_00258950((char*)cGameComm_mGameComm);
-        for (int i = 0; i < self->mCount; i++)
+        for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
         {
-            char* rider = self->mRiders[i];
+            char* rider = ((char**)&self->Players[0])[i];
             char* r = *(char**)(rider + 0x18);
             if (*(int*)(r + 0x87C) == 0)
             {
@@ -1951,12 +1951,12 @@ INCLUDE_ASM("ai/ai", func_0012B420);
 unsigned int AIrand();
 extern "C" int func_00125AD8(void* self);
 
-extern "C" int func_0012B420(sAiObj128A48* self)
+extern "C" int func_0012B420(cAI* self)
 {
     int sum = AIrand();
-    for (int i = 0; i < self->mCount; i++)
+    for (int i = 0; i < self->NumberOfRidersAllocated; i++)
     {
-        sum += func_00125AD8(self->mRiders[i]);
+        sum += func_00125AD8(((char**)&self->Riders[0])[i]);
     }
     return sum;
 }
@@ -1998,7 +1998,7 @@ static inline int OptBit_12B498(sOptView_12B498* o, int b)
     return (o->f18 >> b) & 1;
 }
 
-extern "C" void func_0012B498(void* self, void* obj, int i)
+extern "C" void func_0012B498(cAI* self, void* obj, int i)
 {
     int v = 1;
     if (OptBit_12B498(&D_005308B8_12B498, 3))
@@ -2056,7 +2056,7 @@ static inline int OptBit_0012B698(sOptFlags_0012B698* o, int b)
     return (o->f18 >> b) & 1;
 }
 
-extern "C" void func_0012B698(void* self, void* rider)
+extern "C" void func_0012B698(cAI* self, void* rider)
 {
     int v = 1;
     if (OptBit_0012B698(&D_005308B8, 3))
@@ -2090,12 +2090,12 @@ struct sAi12B788
     int count;
 };
 
-extern "C" void func_0012B788(sAi12B788* self)
+extern "C" void func_0012B788(cAI* self)
 {
     int i;
-    for (i = 0; i < self->count; i++)
+    for (i = 0; i < self->NumberOfRidersAllocated; i++)
     {
-        func_00120E50(self->items[i]);
+        func_00120E50(((void**)&self->Riders[0])[i]);
     }
 }
 #endif
@@ -2127,21 +2127,21 @@ static inline void replayWriteObj(char* obj, void* frame)
     vt[2].fn(x + vt[2].delta, frame);
 }
 
-extern "C" void func_0012B7F0(sAiObj12B7F0* self, void* frame)
+extern "C" void func_0012B7F0(cAI* self, void* frame)
 {
     sVEntryWF* vt = *(sVEntryWF**)frame;
-    vt[1].fn((char*)frame + vt[1].delta, self, 0x28);
-    for (int i = 0; i < self->mNumPlayers; i++)
+    vt[1].fn((char*)frame + vt[1].delta, ((sAiObj12B7F0*)self), 0x28);
+    for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
     {
-        replayWriteObj(self->mPlayers[i], frame);
+        replayWriteObj(((char**)&self->Players[0])[i], frame);
     }
-    for (int i = 0; i < self->mNumMission; i++)
+    for (int i = 0; i < self->NumberOfComputersAllocated; i++)
     {
-        replayWriteObj(self->mMission[i], frame);
+        replayWriteObj(((char**)&self->Computers[0])[i], frame);
     }
-    for (int i = 0; i < self->mNumActors; i++)
+    for (int i = 0; i < self->NumberOfActorsAllocated; i++)
     {
-        replayWriteObj(self->mActors[i], frame);
+        replayWriteObj(((char**)&self->Actors[0])[i], frame);
     }
     func_002EF248(frame);
 }
@@ -2180,25 +2180,25 @@ static inline void replayReadObj(char* obj, void* frame)
     vt[3].fn(x + vt[3].delta, frame);
 }
 
-extern "C" void cAI_readFromReplayFrame(sAiObj12B948* self, void* frame)
+extern "C" void cAI_readFromReplayFrame(cAI* self, void* frame)
 {
     sVEntryRF* vt = *(sVEntryRF**)frame;
-    vt[2].fn((char*)frame + vt[2].delta, self, 0x28);
-    int state = self->mState;
-    cAI_forceAIState(self, self->mPrevState);
-    self->f9C = self->f98;
-    cAI_forceAIState(self, state);
-    for (int i = 0; i < self->mNumPlayers; i++)
+    vt[2].fn((char*)frame + vt[2].delta, ((sAiObj12B948*)self), 0x28);
+    int state = self->CurrentAIState;
+    cAI_forceAIState(((sAiObj12B948*)self), self->PreviousAIState);
+    self->PreviousAIStateHandler = (cAIStateHandler*)(int)self->CurrentAIStateHandler;
+    cAI_forceAIState(((sAiObj12B948*)self), state);
+    for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
     {
-        replayReadObj(self->mPlayers[i], frame);
+        replayReadObj(((char**)&self->Players[0])[i], frame);
     }
-    for (int i = 0; i < self->mNumMission; i++)
+    for (int i = 0; i < self->NumberOfComputersAllocated; i++)
     {
-        replayReadObj(self->mMission[i], frame);
+        replayReadObj(((char**)&self->Computers[0])[i], frame);
     }
-    for (int i = 0; i < self->mNumActors; i++)
+    for (int i = 0; i < self->NumberOfActorsAllocated; i++)
     {
-        replayReadObj(self->mActors[i], frame);
+        replayReadObj(((char**)&self->Actors[0])[i], frame);
     }
     cRenderStateMan_readFromReplayFrame(frame);
 }
@@ -2207,7 +2207,7 @@ extern "C" void cAI_readFromReplayFrame(sAiObj12B948* self, void* frame)
 //100%
 INCLUDE_ASM("ai/ai", func_0012BAC0);
 #ifdef SKIP_ASM
-extern "C" void func_0012BAC0(void* self, int* src)
+extern "C" void func_0012BAC0(cAI* self, int* src)
 {
     int* dst = (int*)((char*)self + 0x20);
     for (int i = 0; i < 2; i++)
@@ -2220,7 +2220,7 @@ extern "C" void func_0012BAC0(void* self, int* src)
 //100%
 INCLUDE_ASM("ai/ai", func_0012BAF0);
 #ifdef SKIP_ASM
-extern "C" void func_0012BAF0(void* self, int* dst)
+extern "C" void func_0012BAF0(cAI* self, int* dst)
 {
     int* src = (int*)((char*)self + 0x20);
     for (int i = 0; i < 2; i++)
@@ -2260,7 +2260,7 @@ extern "C" void func_0012BB20(sAi_12BB20* self)
         return;
     int seed = 0;
     if (self->timer % 60 == 0)
-        seed = func_0012B420((sAiObj128A48*)self);
+        seed = func_0012B420((cAI*)((sAiObj128A48*)self));
     int st = self->state;
     if (st != 5) {
         if (st != 3)
@@ -2289,7 +2289,7 @@ extern "C" void func_0012BB20(sAi_12BB20* self)
                 }
             }
         } else {
-            if (self->timer <= 0xD32B && func_0012A250((sAiObj12A250*)self) == 0) {
+            if (self->timer <= 0xD32B && func_0012A250((cAI*)((sAiObj12A250*)self)) == 0) {
                 int n = self->count;
                 for (int j = 0; j < n; j++) {
                     bool ok = riderOk_12BB20(self->riders[j]);
@@ -2300,7 +2300,7 @@ extern "C" void func_0012BB20(sAi_12BB20* self)
                     }
                 }
             }
-            if (self->timer > 0xD3A3 && func_0012A250((sAiObj12A250*)self) == 0) {
+            if (self->timer > 0xD3A3 && func_0012A250((cAI*)((sAiObj12A250*)self)) == 0) {
                 for (int i = 0; i < self->count; i++) {
                     bool ok = riderOk_12BB20(self->riders[i]);
                     if (!ok) {
@@ -2428,7 +2428,7 @@ INCLUDE_ASM("ai/ai", func_0012C078);
 
 extern "C" int func_0012C078(void* self)
 {
-    if (*(int*)SSXApp->Game->AI == 5)
+    if (SSXApp->Game->AI->CurrentAIState == 5)
         return 1;
     if (*(float*)(*(char**)((char*)self + 0x14) + 0x470) >= 0.0f)
         return 1;

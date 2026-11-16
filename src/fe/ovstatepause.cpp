@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gamemode.h"
 #include "be/beintnetwork.h"
 #include "online/gamecomm.h"
 #include "main/game.h"
@@ -1275,17 +1276,6 @@ extern char D_004A2518[];
 extern char D_0046FDD8[];
 extern char D_0046FDE8[];
 
-// The game-mode manager (cGameModeMan, as in main/gamemode) that SSXApp + 0xC0 points to.
-struct cGameModeMan {
-    int f0;             // 0x00 current heat (1..3)
-    int mode;           // 0x04
-    int type;           // 0x08
-    int net;            // 0x0C
-    int iNumberAI;      // 0x10
-    int f14;            // 0x14
-    int a18[10];        // 0x18 rider character IDs
-    int a40[10];        // 0x40
-};
 
 static inline unsigned short* lookupString_1FBD20(char* name)
 {
@@ -1320,7 +1310,7 @@ extern "C" void func_001FBD20(void* self)
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
     cGameModeMan* stats = SSXApp->GameModeMan;
-    int mode = stats->f0;
+    int mode = stats->iHeatNum;
     void* o = getObj_1FBD20(self, D_0046E388);
     func_002C2540_BD20(title, func_00144BF0(iface0));
     unsigned short* str = 0;
@@ -1421,7 +1411,7 @@ extern "C" void func_001FBD20(void* self)
             sprintf(name, D_0046E418, i);
             void* t = getObj_1FBD20(self, name);
             if (t != 0)
-                cUIText_setAsciiString((cUIText*)t, func_0014EEC8(iface2, stats->a18[id], stats->a40[id]));
+                cUIText_setAsciiString((cUIText*)t, func_0014EEC8(iface2, stats->iCharacters[id], stats->iCheatCharacters[id]));
             sprintf(name, D_0046E428, i);
             t = getObj_1FBD20(self, name);
             if (t != 0) {

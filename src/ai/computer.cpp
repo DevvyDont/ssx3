@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ai/computer.h"
+#include "be/beintnewrace.h"
 #include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -189,7 +191,6 @@ struct sCompSkill {
     int f8;                         // 0xE08
 };
 
-extern signed char cBENewRaceInterface_newRace[];
 extern int D_005308D0[];
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -221,16 +222,16 @@ void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
         self->f4 = 0;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace[0x48] == 1 || cBENewRaceInterface_newRace[0x48] == 6 || cBENewRaceInterface_newRace[0x48] == 5) {
+    if (cBENewRaceInterface_newRace.cGameMode == 1 || cBENewRaceInterface_newRace.cGameMode == 6 || cBENewRaceInterface_newRace.cGameMode == 5) {
         self->f8 = 1;
     } else {
         self->f8 = 0;
     }
-    cComputer_setIndividualRiderDifficulty_UR(self, level, func_00147CB8(cBE_getInterface_Fv(cBE_getBE(), 1), cBENewRaceInterface_newRace[0x48] == 0));
+    cComputer_setIndividualRiderDifficulty_UR(self, level, func_00147CB8(cBE_getInterface_Fv(cBE_getBE(), 1), cBENewRaceInterface_newRace.cGameMode == 0));
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (cBENewRaceInterface_newRace[0x4A] == 4) {
+    if (cBENewRaceInterface_newRace.cGameEvent == 4) {
         self->diff = 0;
-    } else if (cBENewRaceInterface_newRace[0x4A] == 5) {
+    } else if (cBENewRaceInterface_newRace.cGameEvent == 5) {
         self->diff = 2;
     }
     if ((D_005308D0[0] >> 2) & 1) {
@@ -276,21 +277,21 @@ static inline int riderV7_10C9A8(char* rider)
     return vt[7].fn(obj + vt[7].delta);
 }
 
-extern "C" void func_0010C9A8(void* self)
+extern "C" void func_0010C9A8(cComputer* self)
 {
     void* s = cBE_getInterface_Fv(cBE_getBE(), 3);
     void* g = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (func_00144C98(g) == 2)
     {
-        func_00148AA8(s, riderV7_10C9A8(*(char**)((char*)self + 0x18)), 7);
+        func_00148AA8(s, riderV7_10C9A8((char*)self->mRider), 7);
     }
     else if (func_00144C98(g) == 1)
     {
-        func_00148AA8(s, riderV7_10C9A8(*(char**)((char*)self + 0x18)), 4);
+        func_00148AA8(s, riderV7_10C9A8((char*)self->mRider), 4);
     }
     else
     {
-        func_00148AA8(s, riderV7_10C9A8(*(char**)((char*)self + 0x18)), 1);
+        func_00148AA8(s, riderV7_10C9A8((char*)self->mRider), 1);
     }
 }
 #endif
@@ -301,7 +302,7 @@ extern "C" void cComputer_updateRiderDifficulty(void*);
 // callee sits at a different .text offset in our object than in the target
 INCLUDE_ASM("ai/computer", func_0010CAB8);
 #ifdef SKIP_ASM
-extern "C" void func_0010CAB8(void* self)
+extern "C" void func_0010CAB8(cComputer* self)
 {
     cComputer_updateRiderDifficulty(self);
 }
@@ -313,14 +314,14 @@ INCLUDE_ASM("ai/computer", func_0010CAD8);
 extern "C" int func_0010C258(void* self);
 extern "C" int func_0010C320(void* self);
 extern "C" int func_0010C3B8(void* self);
-extern "C" int func_0010CF68(void* self, float t);
-extern "C" int func_0010CD20(void* self, float t);
-extern "C" int func_0010CBE0(void* self, float t);
+extern "C" int func_0010CF68(cComputer* self, float t);
+extern "C" int func_0010CD20(cComputer* self, float t);
+extern "C" int func_0010CBE0(cComputer* self, float t);
 
-extern "C" int func_0010CAD8(void* self, float t)
+extern "C" int func_0010CAD8(cComputer* self, float t)
 {
     int r = -1;
-    int skip = *(int*)((char*)self + 0xE20) != 0 && t < 1.0f;
+    int skip = self->mToRail != 0 && t < 1.0f;
     if (!skip && t > 0.75f && t != 100.0f)
     {
         if (func_0010C258(self)) r = func_0010CF68(self, t);
@@ -371,7 +372,7 @@ struct sComputer_0010CBE0
     int a[15];          // 0xE7C
 };
 
-extern "C" int func_0010CBE0(void* p, float t)
+extern "C" int func_0010CBE0(cComputer* p, float t)
 {
     sComputer_0010CBE0* self = (sComputer_0010CBE0*)p;
     self->fE24 = 0;
@@ -429,7 +430,7 @@ struct sComputer_0010CD20
     int c[15];          // 0xEF4
 };
 
-extern "C" int func_0010CD20(void* p, float t)
+extern "C" int func_0010CD20(cComputer* p, float t)
 {
     sComputer_0010CD20* self = (sComputer_0010CD20*)p;
     self->fE24 = 0;
@@ -503,7 +504,7 @@ struct sComputer_0010CF68
     int b[15];          // 0xEB8
 };
 
-extern "C" int func_0010CF68(void* p, float t)
+extern "C" int func_0010CF68(cComputer* p, float t)
 {
     sComputer_0010CF68* self = (sComputer_0010CF68*)p;
     self->fE28 = 0;
@@ -553,13 +554,13 @@ struct sComputer_0010D170
     int c[15];
 };
 
-extern "C" void func_0010D170(sComputer_0010D170* self)
+extern "C" void func_0010D170(cComputer* self)
 {
     for (int i = 0; i < 15; i++)
     {
-        self->a[i] = 0;
-        self->b[i] = 0;
-        self->c[i] = 0;
+        self->GrabHistoryCounter[i] = 0;
+        self->UberHistoryCounter[i] = 0;
+        self->TweakHistoryCounter[i] = 0;
     }
 }
 #endif
@@ -674,7 +675,7 @@ extern "C" int func_0010D1A0(sComputer_0010D1A0* self)
 INCLUDE_ASM("ai/computer", func_0010D410);
 #ifdef SKIP_ASM
 unsigned int AIrand();
-extern "C" float func_0010D870(void* self, int a1, int a2, int a3);
+extern "C" float func_0010D870(cComputer* self, int a1, int a2, int a3);
 struct sAi0010FC30;
 extern "C" int func_0010FC30(sAi0010FC30* self, int team);
 extern "C" float func_00112588(void* self, int arg1);
@@ -765,7 +766,7 @@ struct sAi_10D410 {
     int count;
 };
 
-extern "C" float func_0010D410(char* self, char* tgt)
+extern "C" float func_0010D410(cComputer* self, char* tgt)
 {
     float sc[7];
     char* ai = (char*)SSXApp->Game->AI;
@@ -783,10 +784,10 @@ extern "C" float func_0010D410(char* self, char* tgt)
     if (base <= 0.0f) {
         return 0.0f;
     }
-    if (*(int*)(self + 0xE04) == 0 && solo != 0) {
+    if (self->mShouldTakeShortcuts == 0 && solo != 0) {
         return 0.0f;
     }
-    float speed = vu0Length_10D410(*(sVec4_10D410*)(*(char**)(self + 0x18) + 0x1E0)) * 0.035999998450279236f;
+    float speed = vu0Length_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x1E0)) * 0.035999998450279236f;
     if (lvl == 0) {
         if ((float)speedLimit_10D410(kind) < speed) {
             return 0.0f;
@@ -796,11 +797,11 @@ extern "C" float func_0010D410(char* self, char* tgt)
             return 0.0f;
         }
     }
-    char* r = *(char**)(self + 0x18);
+    char* r = (char*)self->mRider;
     float len = vu0Length_10D410(*(sVec4_10D410*)(r + 0x1E0));
     float total = 22.0f;
     float s = func_00112588(r, 1) / len;
-    sVec4_10D410 pos = vu0Add_10D410(*(sVec4_10D410*)(*(char**)(self + 0x18) + 0x110), vu0Scale_10D410(*(sVec4_10D410*)(*(char**)(self + 0x18) + 0x1E0), s));
+    sVec4_10D410 pos = vu0Add_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x110), vu0Scale_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x1E0), s));
     sVec4_10D410 out;
     float t;
     func_0026A428(tgt, &pos, &out, &t, 1);
@@ -813,7 +814,7 @@ extern "C" float func_0010D410(char* self, char* tgt)
         return -1.0f;
     }
     sc[0] = v * 0.22727273404598236f;
-    char* r2 = *(char**)(self + 0x18);
+    char* r2 = (char*)self->mRider;
     if (*(int*)(r2 + 0xF0) != 0 && *(char**)(((sAi_10D410*)ai)->riders[*(int*)(r2 + 0xF8)] + 0xAB8) == tgt) {
         return 100.0f;
     }
@@ -823,7 +824,7 @@ extern "C" float func_0010D410(char* self, char* tgt)
     sc[2] = (float)lvl * (w * 0.3333333432674408f);
     // PORT: the path pointer is passed as func_0010FC30's int team
     int n = func_0010FC30((sAi0010FC30*)ai, (int)tgt);
-    n -= tgt == *(char**)(*(char**)(self + 0x18) + 0xAB8);
+    n -= tgt == *(char**)((char*)self->mRider + 0xAB8);
     float c;
     if (n <= 0) {
         c = 100.0f;
@@ -837,13 +838,13 @@ extern "C" float func_0010D410(char* self, char* tgt)
     w = base / total;
     sc[4] = w;
     w = 5.0f / total;
-    if (*(int*)(self + 0xE04) != 0 && solo != 0) {
+    if (self->mShouldTakeShortcuts != 0 && solo != 0) {
         sc[5] = w * 100.0f;
     } else {
         sc[5] = 0.0f;
     }
     w = 2.0f / total;
-    if (*(int*)(self + 0xE08) != 0) {
+    if (self->mShouldBeRandom != 0) {
         sc[6] = (float)(AIrand() % 100) * w;
     } else {
         sc[6] = 0.0f;
@@ -859,9 +860,9 @@ extern "C" float func_0010D410(char* self, char* tgt)
 //100%
 INCLUDE_ASM("ai/computer", func_0010D870);
 #ifdef SKIP_ASM
-extern "C" float func_0010D870(void* self, int a1, int a2, int a3)
+extern "C" float func_0010D870(cComputer* self, int a1, int a2, int a3)
 {
-    short s = *(short*)((char*)self + 0xE00);
+    short s = self->mPathDifficulty;
     if (s == 0)
     {
         if (!a1)
@@ -900,9 +901,9 @@ struct sComputer_0010D8F8
     char pad[0x1C];
 };
 
-extern "C" int func_0010D8F8(void* self)
+extern "C" int func_0010D8F8(cComputer* self)
 {
-    sComputer_0010D8F8* p = *(sComputer_0010D8F8**)((char*)self + 0x18);
+    sComputer_0010D8F8* p = (sComputer_0010D8F8*)self->mRider;
     for (int i = 0; i < 6; i++, p++)
     {
         if (p->a != 0 && p->b != 0)
@@ -918,14 +919,14 @@ INCLUDE_ASM("ai/computer", func_0010D938);
 extern "C" int func_0010DEB0(void* self);
 float func_00113128(void* self);
 
-extern "C" int func_0010D938(void* self)
+extern "C" int func_0010D938(cComputer* self)
 {
     // PORT: func_0010DEB0 returns a pointer as int (unit declaration).
     int p = func_0010DEB0(self);
     if (p == 0)
         return 0;
-    float d = func_00113128((void*)p) - (*(cRider**)((char*)self + 0x18))->mDistToFinish;
-    if (d < *(float*)((char*)(*(cRider**)((char*)self + 0x18)) + 0xDC))
+    float d = func_00113128((void*)p) - (self->mRider)->mDistToFinish;
+    if (d < *(float*)((char*)(self->mRider) + 0xDC))
         return 1;
     return 0;
 }
@@ -936,14 +937,14 @@ INCLUDE_ASM("ai/computer", func_0010D990);
 extern "C" int func_0010DEB0(void* self);
 float func_00113128(void* self);
 
-extern "C" int func_0010D990(void* self)
+extern "C" int func_0010D990(cComputer* self)
 {
     // PORT: func_0010DEB0 returns a pointer as int (unit declaration).
     int p = func_0010DEB0(self);
     if (p == 0)
         return 0;
-    float d = func_00113128((void*)p) - (*(cRider**)((char*)self + 0x18))->mDistToFinish;
-    if (*(float*)((char*)*(cRider**)((char*)self + 0x18) + 0xE0) < d)
+    float d = func_00113128((void*)p) - (self->mRider)->mDistToFinish;
+    if (*(float*)((char*)self->mRider + 0xE0) < d)
         return 1;
     return 0;
 }
@@ -952,9 +953,9 @@ extern "C" int func_0010D990(void* self)
 //100%
 INCLUDE_ASM("ai/computer", func_0010D9E8);
 #ifdef SKIP_ASM
-extern "C" int func_0010D9E8(void* self, int a1)
+extern "C" int func_0010D9E8(cComputer* self, int a1)
 {
-    void* p = *(void**)((char*)self + 0x18);
+    void* p = self->mRider;
     int r = 0;
     if (*(int*)((char*)p + 0xf0) != 0) {
         r = *(int*)((char*)p + 0xf8) == a1;
@@ -974,18 +975,18 @@ extern "C" int func_001298C8();
 extern "C" int func_00311AE8(void*, int);
 unsigned int AIrand();
 
-extern "C" int func_0010DA10(char* self)
+extern "C" int func_0010DA10(cComputer* self)
 {
-    float t = *(float*)(self + 0xF30);
+    float t = self->mBlockTimer;
     if (t < 0.0f)
     {
-        *(float*)(self + 0xF30) = 0.0f;
+        self->mBlockTimer = 0.0f;
         return 0;
     }
     if (0.0f < t)
     {
-        *(float*)(self + 0xF30) = t - 0.01666666753590107f;
-        return *(int*)(self + 0xF34);
+        self->mBlockTimer = t - 0.01666666753590107f;
+        return self->mShouldIBlock;
     }
     if (func_001298C8() % 6 != 0)
         return 0;
@@ -993,7 +994,7 @@ extern "C" int func_0010DA10(char* self)
     int i;
     for (i = 0; i < ai->count; i++)
     {
-        char* o = *(char**)(self + 0x18) + 0x6C0;
+        char* o = (char*)self->mRider + 0x6C0;
         sVE_0010DA10* ve = &(*(sVE_0010DA10**)o)[7];
         if (i == ve->fn(o + ve->delta))
             continue;
@@ -1001,15 +1002,15 @@ extern "C" int func_0010DA10(char* self)
         sVE_0010DA10* ve2 = &(*(sVE_0010DA10**)o2)[8];
         if (ve2->fn(o2 + ve2->delta) == 0)
             continue;
-        if (!((*(sRider_0010DA10**)(self + 0x18))->ent[i].dist < 200.0f))
+        if (!(((sRider_0010DA10*)self->mRider)->ent[i].dist < 200.0f))
             continue;
         if (func_00311AE8(*(void**)(ai->riders[i] + 0x784), 1) != 13)
             continue;
         unsigned int r = AIrand() % 100;
-        int* pf = (int*)(self + 0xF34);
+        int* pf = (int*)(((char*)self) + 0xF34);
         *pf = (float)r < 25.0f;
-        *(float*)(self + 0xF30) = 2.0f;
-        return *(int*)(self + 0xF34);
+        self->mBlockTimer = 2.0f;
+        return self->mShouldIBlock;
     }
     return 0;
 }
@@ -1129,7 +1130,7 @@ INCLUDE_ASM("ai/computer", func_0010DEB0);
 
 extern "C" int func_0010DEB0(void* self)
 {
-    int i = func_0010D8F8(self);
+    int i = func_0010D8F8((cComputer*)self);
     if (i < 0)
         return 0;
     return *(int*)((char*)SSXApp->Game->AI + (i << 2) + 0x28);
@@ -1408,9 +1409,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void func_00125108(void* self);
 extern "C" void func_00270AB0(void* a, int b, int c);
-extern signed char cBENewRaceInterface_newRace[];
 
-static inline int state_0010E5D8() { return cBENewRaceInterface_newRace[0x48]; }
+static inline int state_0010E5D8() { return cBENewRaceInterface_newRace.cGameMode; }
 
 struct sVEntry0010E5D8 { short delta; short index; int (*fn)(void*); };
 
@@ -1425,7 +1425,7 @@ extern "C" void func_0010E5D8(void* self, int* arg, int a2, int a3)
         || (state_0010E5D8() == 6 && *(int*)(s + 0x98) != 0)
         || mode == 5 || mode == 6 || mode == 7 || mode == 8 || mode == 9
         || mode == 10 || mode == 11 || mode == 12 || mode == 13 || mode == 1
-        || cBENewRaceInterface_newRace[0x49] != 0)
+        || cBENewRaceInterface_newRace.cGamePath != 0)
         v = 1;
     if (*arg == 1 && v != 0)
     {

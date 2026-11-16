@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "online/commsystem.h"
 #include "online/gamecomm.h"
 #include "main/ssxapp.h"
@@ -125,7 +126,6 @@ struct sRaceGNS {
     char pad44[5];
     signed char mode;
 };
-extern sRaceGNS cBENewRaceInterface_newRace;
 extern int D_00535C08[];
 extern int D_004A19D8;
 extern int D_004A19D4;
@@ -254,7 +254,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
             int one = 1;
             void* nr = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
-            sRaceGNS* g = &cBENewRaceInterface_newRace;
+            sRaceGNS* g = &(*(sRaceGNS*)&cBENewRaceInterface_newRace);
             switch (g->mode) {
             case 1:
                 return func_001828C0(cMemMan_alloc(0x50, D_00460C08, 0, 0), *self, 0);

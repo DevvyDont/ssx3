@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ai/computer.h"
+#include "ai/player.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -6685,18 +6687,18 @@ extern "C" void func_00144000(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144008);
 #ifdef SKIP_ASM
-extern "C" int func_00144008(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xE70)));
+extern "C" int func_00144008(cComputer* arg0) {
+    return (arg0->mTargetID);
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144010);
 #ifdef SKIP_ASM
-extern "C" int func_00144010(void *arg0, float fparg0) {
+extern "C" int func_00144010(cComputer* arg0, float fparg0) {
     int var_3;
 
     var_3 = 0;
-    if (((*(int *)((char*)(arg0) + (0xE20))) != 0) && (fparg0 < 1.0f)) {
+    if (((arg0->mToRail) != 0) && (fparg0 < 1.0f)) {
         var_3 = 1;
     }
     return var_3;
@@ -6708,10 +6710,10 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00144040);
 struct sPair8_4040 { int a; int b; };
 extern sPair8_4040 D_0043CF20[];
 
-extern "C" void func_00144040(char* self, int idx)
+extern "C" void func_00144040(cComputer* self, int idx)
 {
-    *(sPair8_4040*)(self + 0xF44) = D_0043CF20[idx];
-    *(short*)(self + 0xF38) = idx;
+    *(sPair8_4040*)&self->cruiseLogic = D_0043CF20[idx];
+    self->mCruiseLogicID = idx;
 }
 #endif
 
@@ -7192,16 +7194,16 @@ extern "C" bool func_001446B8(void* self, int bit)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446D0);
 #ifdef SKIP_ASM
-extern "C" void func_001446D0(void *self, int a, int b) {
-    *(int *)((char *)self + 0xDF0) = a;
-    *(int *)((char *)self + 0xDF4) = b;
+extern "C" void func_001446D0(cPlayer* self, int a, int b) {
+    self->Input = (cInput*)a;
+    self->Pad = (cPadDevice*)b;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446E0);
 #ifdef SKIP_ASM
-extern "C" int func_001446E0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xDF0)));
+extern "C" int func_001446E0(cPlayer* arg0) {
+    return ((int)arg0->Input);
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
@@ -10049,7 +10050,6 @@ extern "C" int func_0029F128(void* self);
 extern "C" int func_0029F198(void* self);
 // PORT: D_004A482C is called with 5 args here (the unit's later declaration has 3).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
-extern char cBENewRaceInterface_newRace[];
 extern int D_00536730[];
 
 struct sSndRiderList3860 {
@@ -10065,7 +10065,7 @@ extern "C" void func_002A3860(void* self)
     if (func_00288AE0(self) != 0) return;
     int n = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* g = (signed char*)cBENewRaceInterface_newRace;
+    signed char* g = (signed char*)((char*)&cBENewRaceInterface_newRace);
     if (g[0x49] == 2) {
         n = D_00536730[1] < D_00536730[0];
     }

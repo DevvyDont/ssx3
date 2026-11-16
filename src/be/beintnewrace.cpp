@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char D_0045A0F0[];
@@ -19,7 +20,6 @@ struct sRaceInterfaceGlobal {
     int field_0x38;
     int field_0x3C;
 };
-extern sRaceInterfaceGlobal cBENewRaceInterface_newRace;
 
 // padded past the 8-byte gp-relative threshold so the compiler emits
 // absolute lui/lo addressing like the target, instead of assuming small data
@@ -81,7 +81,7 @@ extern sRaceSettings_00144928 D_005305B0;
 
 extern "C" void func_00144928(void)
 {
-    D_005305B0 = *(sRaceSettings_00144928*)&cBENewRaceInterface_newRace;
+    D_005305B0 = *(sRaceSettings_00144928*)&cBENewRaceInterface_newRace.playerID[0];
 }
 #endif
 
@@ -92,7 +92,7 @@ extern sRaceSettings_00144928 D_005305B0;
 
 extern "C" void func_001449E8(void)
 {
-    *(sRaceSettings_00144928*)&cBENewRaceInterface_newRace = D_005305B0;
+    *(sRaceSettings_00144928*)&cBENewRaceInterface_newRace.playerID[0] = D_005305B0;
 }
 #endif
 
@@ -101,11 +101,11 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberHumans__FPvi);
 #ifdef SKIP_ASM
 void cBENewRaceInterface_setNumberHumans(void* self, int humans)
 {
-    cBENewRaceInterface_newRace.field_0x34 = humans;
-    cBENewRaceInterface_newRace.field_0x30 = humans + cBENewRaceInterface_newRace.field_0x3C + cBENewRaceInterface_newRace.field_0x38;
+    cBENewRaceInterface_newRace.iNumberHumans = humans;
+    cBENewRaceInterface_newRace.iNumberRiders = humans + cBENewRaceInterface_newRace.iNumberAI + cBENewRaceInterface_newRace.iNumberMissionRiders;
     for (int i = 0; i < 6; i++) {
-        cBENewRaceInterface_newRace.arr1[i] = i;
-        cBENewRaceInterface_newRace.arr2[i] = i;
+        cBENewRaceInterface_newRace.playerID[i] = i;
+        cBENewRaceInterface_newRace.riderID[i] = i;
     }
 }
 #endif
@@ -115,10 +115,10 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberMission__FPvi);
 #ifdef SKIP_ASM
 void cBENewRaceInterface_setNumberMission(void* self, int mission)
 {
-    int a = cBENewRaceInterface_newRace.field_0x34;
-    int b = cBENewRaceInterface_newRace.field_0x3C;
-    cBENewRaceInterface_newRace.field_0x38 = mission;
-    cBENewRaceInterface_newRace.field_0x30 = a + b + mission;
+    int a = cBENewRaceInterface_newRace.iNumberHumans;
+    int b = cBENewRaceInterface_newRace.iNumberAI;
+    cBENewRaceInterface_newRace.iNumberMissionRiders = mission;
+    cBENewRaceInterface_newRace.iNumberRiders = a + b + mission;
 }
 #endif
 
@@ -131,7 +131,7 @@ extern char D_0043E6EC[];
 extern "C" void func_00144B20(void* self, const char* name)
 {
     char* base = (char*)&D_0043D984;
-    char* g = (char*)&cBENewRaceInterface_newRace;
+    char* g = (char*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace);
     strcpy(base + *(int*)(g + 0x40) * 0x64, name);
     char* p1 = base + 0x10;
     strcpy(p1 + *(int*)(g + 0x40) * 0x64, name);
@@ -288,9 +288,9 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_assignPlayer__FPvii);
 #ifdef SKIP_ASM
 void* cBENewRaceInterface_assignPlayer(void* self, int a1, int a2)
 {
-    *(int*)((char*)(void*)&cBENewRaceInterface_newRace + a1 * 4) = a2;
-    *(int*)((char*)((char*)(void*)&cBENewRaceInterface_newRace + a2 * 4) + 0x18) = a1;
-    return ((char*)(void*)&cBENewRaceInterface_newRace + a1 * 4);
+    *(int*)((char*)(void*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace) + a1 * 4) = a2;
+    *(int*)((char*)((char*)(void*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace) + a2 * 4) + 0x18) = a1;
+    return ((char*)(void*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace) + a1 * 4);
 }
 #endif
 
@@ -302,10 +302,10 @@ extern unsigned int D_0043D8F8[][7];
 
 extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count)
 {
-    cBENewRaceInterface_newRace.field_0x3C = count;
-    cBENewRaceInterface_newRace.field_0x30 = cBENewRaceInterface_newRace.field_0x34 + count + cBENewRaceInterface_newRace.field_0x38;
-    signed char eventKind = *(signed char*)((char*)&cBENewRaceInterface_newRace + 0x48);
-    signed char gameType = *(signed char*)((char*)&cBENewRaceInterface_newRace + 0x49);
+    cBENewRaceInterface_newRace.iNumberAI = count;
+    cBENewRaceInterface_newRace.iNumberRiders = cBENewRaceInterface_newRace.iNumberHumans + count + cBENewRaceInterface_newRace.iNumberMissionRiders;
+    signed char eventKind = cBENewRaceInterface_newRace.cGameMode;
+    signed char gameType = cBENewRaceInterface_newRace.cGamePath;
     return (unsigned int)count <= D_0043D8F8[gameType][eventKind];
 }
 #endif
@@ -334,7 +334,7 @@ struct sVE_144DF0 {
 
 static inline char* Race_144DF0()
 {
-    return (char*)&cBENewRaceInterface_newRace;
+    return (char*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace);
 }
 
 extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode)
@@ -402,7 +402,7 @@ INCLUDE_ASM("be/beintnewrace", func_00145108);
 #ifdef SKIP_ASM
 extern "C" void func_00145108(void* self, int mode)
 {
-    sRaceInterfaceGlobal* g = &cBENewRaceInterface_newRace;
+    sRaceInterfaceGlobal* g = &(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace);
     *((char*)g + 0x49) = mode;
     switch (mode)
     {
@@ -439,7 +439,7 @@ extern sGameEvent_001451E8 D_0043E978[];
 
 static inline char* Race_1451E8()
 {
-    return (char*)&cBENewRaceInterface_newRace;
+    return (char*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace);
 }
 
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event)
@@ -569,7 +569,7 @@ extern sRaceLookup_00440B38 D_00440B38[];
 
 extern "C" int func_001454F8(void* self, int kind)
 {
-    char* g = (char*)&cBENewRaceInterface_newRace;
+    char* g = (char*)&(*(sRaceInterfaceGlobal*)&cBENewRaceInterface_newRace);
     unsigned char mode = *(unsigned char*)(g + 0x4A);
     if (mode >= 6 && mode < 12)
     {

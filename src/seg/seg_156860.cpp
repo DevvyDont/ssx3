@@ -2354,7 +2354,7 @@ extern "C" void func_00258870(cGameComm*, int, int);
 extern void func_002588A8_8790(void *) __asm__("func_002588A8");
 extern "C" void func_00258790(cGameComm* self, int arg1) {
     char buf[12];
-    if (self->mError == 0 && *(int*)self != 0) {
+    if (self->mError == 0 && self->mConnected != 0) {
         if (arg1 != 0) {
             if (self->mGameStartGate == 0) {
                 func_00258870(self, 0xE4C, 1);

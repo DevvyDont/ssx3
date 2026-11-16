@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "online/gamecomm.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
@@ -564,7 +565,6 @@ INCLUDE_ASM("ai/rider", func_0011D390);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "vtable.h"
-extern signed char cBENewRaceInterface_newRace[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_11D390(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -605,9 +605,9 @@ void func_0011D390_impl(cRider* self)
         void* iface = cBE_getInterface_11D390(cBE_getBE(), 0);
         // PORT: the gotos reproduce the shared compare chain (mode 4, 5, 6) that two different entry conditions fall into.
         if (func_00145C38(cBE_getInterface_11D390(cBE_getBE(), 1), self->mAIIndex) != 0
-            && cBENewRaceInterface_newRace[0x49] == 0 && *cBENewRaceInterface_getLocation(iface) == 0xE)
+            && cBENewRaceInterface_newRace.cGamePath == 0 && *cBENewRaceInterface_getLocation(iface) == 0xE)
         {
-            if (cBENewRaceInterface_newRace[0x48] == 4)
+            if (cBENewRaceInterface_newRace.cGameMode == 4)
             {
                 func_0011DD98(self);
                 cRider_setMotionState_impl(self, 1);
@@ -617,12 +617,12 @@ void func_0011D390_impl(cRider* self)
             }
             goto m5;
         }
-        if (cBENewRaceInterface_newRace[0x48] == 4)
+        if (cBENewRaceInterface_newRace.cGameMode == 4)
             goto bb;
     m5:
-        if (cBENewRaceInterface_newRace[0x48] == 5)
+        if (cBENewRaceInterface_newRace.cGameMode == 5)
             goto bb;
-        if (cBENewRaceInterface_newRace[0x48] == 6)
+        if (cBENewRaceInterface_newRace.cGameMode == 6)
         {
         bb:
             int v = *cBENewRaceInterface_getLocation(iface);
@@ -654,7 +654,7 @@ void func_0011D390_impl(cRider* self)
             func_0011FEC8_impl(self, 6);
         }
     done:
-        if (cBENewRaceInterface_newRace[0x49] != 0)
+        if (cBENewRaceInterface_newRace.cGamePath != 0)
             func_00120D58(self);
         self->mFinishTime = -1.0f;
         self->unk_3FC = 0;

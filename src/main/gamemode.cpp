@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beintnewrace.h"
+#include "main/gamemode.h"
 #include "be/beintnetwork.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -9,8 +11,6 @@ INCLUDE_ASM("main/gamemode", cGameModeMan_getGM);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_00536668[];
-extern int* cGameModeMan_instance;
-extern char* cGameModeHandler_pManager;
 extern char D_0047C0A8[];
 extern char D_0047C0B8[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -64,7 +64,7 @@ struct sGMMode_D0 {
 extern "C" int* cGameModeMan_getGM(void)
 {
     if (cGameModeMan_instance == 0) {
-        cGameModeMan_instance = (int*)cMemMan_alloc(0xA0, D_0047C0A8, 0, 0);
+        cGameModeMan_instance = (cGameModeMan*)((int*)cMemMan_alloc(0xA0, D_0047C0A8, 0, 0));
         func_00416210(D_00536668, 0, 0x28);
         if (D_00536668[0] == 0) {
             D_00536668[0] = new (D_0047C0B8, 0, 0) sGMMode_7C(D_0047CFA0);
@@ -123,14 +123,14 @@ extern "C" int* cGameModeMan_getGM(void)
         if (D_00536668[6] == 0) {
             D_00536668[6] = new (D_0047C0B8, 0, 0) sGMMode_4(D_0047CCC8);
         }
-        int* gm = cGameModeMan_instance;
-        cGameModeHandler_pManager = (char*)gm;
-        gm[2] = -1;
-        gm[0] = 0;
-        gm[1] = 0;
-        gm[0x20] = 0;
+        cGameModeMan* gm = cGameModeMan_instance;
+        cGameModeHandler_pManager = (cGameModeMan*)((char*)gm);
+        gm->iCurrentGameEvent = -1;
+        gm->iHeatNum = 0;
+        gm->iCurrModeHandler = 0;
+        gm->unk_80 = 0;
     }
-    return cGameModeMan_instance;
+    return (int*)cGameModeMan_instance;
 }
 #endif
 
@@ -143,7 +143,6 @@ public:
 };
 void operator_delete(int*);
 extern void* D_00536668[];
-extern int* cGameModeMan_instance;
 
 extern "C" void func_002380E8(void)
 {
@@ -152,7 +151,7 @@ extern "C" void func_002380E8(void)
         delete (cMode2380E8*)D_00536668[i];
     }
     if (cGameModeMan_instance != 0) {
-        operator_delete(cGameModeMan_instance);
+        operator_delete((int*)cGameModeMan_instance);
     }
     cGameModeMan_instance = 0;
 }
@@ -166,7 +165,7 @@ INCLUDE_ASM("main/gamemode", cGameModeMan_initGameMode);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern signed char D_00535C11[];
-extern "C" void cGameModeMan_restartHeat(void* self);
+extern "C" void cGameModeMan_restartHeat(cGameModeMan* self);
 
 struct sVE_initGameMode { short delta; short index; void (*fn)(void*); };
 
@@ -179,47 +178,47 @@ struct sGameModeMan {
     int f84;       // 0x84
 };
 
-extern "C" void cGameModeMan_initGameMode(sGameModeMan* self, unsigned int type)
+extern "C" void cGameModeMan_initGameMode(cGameModeMan* self, unsigned int type)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    char* gm = (char*)D_00536668[self->mode];
+    char* gm = (char*)D_00536668[self->iCurrModeHandler];
     sVE_initGameMode* vt = *(sVE_initGameMode**)gm;
     vt[3].fn(gm + vt[3].delta);
-    self->type = type;
+    self->iCurrentGameEvent = (int)type;
     int net = D_00535C11[0];
-    self->net = net;
+    self->iCurrentGamePath = net;
     if (net == 2) {
         switch (type) {
-        case 0: self->mode = 8; break;
-        case 1: self->mode = 9; break;
-        case 3: self->mode = 9; break;
-        case 2: self->mode = 9; break;
-        case 4: self->mode = 5; break;
-        case 5: self->mode = 6; break;
-        default: self->mode = 8; break;
+        case 0: self->iCurrModeHandler = 8; break;
+        case 1: self->iCurrModeHandler = 9; break;
+        case 3: self->iCurrModeHandler = 9; break;
+        case 2: self->iCurrModeHandler = 9; break;
+        case 4: self->iCurrModeHandler = 5; break;
+        case 5: self->iCurrModeHandler = 6; break;
+        default: self->iCurrModeHandler = 8; break;
         }
     } else {
         switch (type) {
         case 1:
         case 2:
         case 3:
-            self->mode = 0;
+            self->iCurrModeHandler = 0;
             break;
-        case 0: self->mode = 1; break;
-        case 12: self->mode = 2; break;
-        case 4: self->mode = 5; break;
-        case 6: self->mode = 4; break;
-        case 7: self->mode = 4; break;
-        case 8: self->mode = 4; break;
-        case 5: self->mode = 6; break;
+        case 0: self->iCurrModeHandler = 1; break;
+        case 12: self->iCurrModeHandler = 2; break;
+        case 4: self->iCurrModeHandler = 5; break;
+        case 6: self->iCurrModeHandler = 4; break;
+        case 7: self->iCurrModeHandler = 4; break;
+        case 8: self->iCurrModeHandler = 4; break;
+        case 5: self->iCurrModeHandler = 6; break;
         case 9:
         case 10:
         case 11:
-            self->mode = 7;
+            self->iCurrModeHandler = 7;
             break;
         }
     }
-    self->f84 = 1;
+    self->bIsEventDone = 1;
     cGameModeMan_restartHeat(self);
 }
 #endif
@@ -229,7 +228,7 @@ INCLUDE_ASM("main/gamemode", func_002382B8);
 #ifdef SKIP_ASM
 extern int D_00536730[];
 
-extern "C" void func_002382B8(void* self, int i)
+extern "C" void func_002382B8(cGameModeMan* self, int i)
 {
     D_00536730[i] = -1;
 }
@@ -247,10 +246,10 @@ struct sVEntry_002382D8 {
 extern void* D_00536668[];
 extern int D_005366D0[];
 
-extern "C" void cGameModeMan_restartHeat(void* self)
+extern "C" void cGameModeMan_restartHeat(cGameModeMan* self)
 {
     int i;
-    void* obj = D_00536668[*(int*)((char*)self + 0x4)];
+    void* obj = D_00536668[self->iCurrModeHandler];
     sVEntry_002382D8* vt = *(sVEntry_002382D8**)obj;
     vt[2].fn((char*)obj + vt[2].delta);
     for (i = 5; i >= 0; i--) {
@@ -294,9 +293,9 @@ struct sVEntry_00238358 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_00238358(void* self, int idx, int a2)
+extern "C" void func_00238358(cGameModeMan* self, int idx, int a2)
 {
-    void* obj = D_00536668[*(int*)((char*)self + 4)];
+    void* obj = D_00536668[self->iCurrModeHandler];
     sVEntry_00238358* vt = *(sVEntry_00238358**)obj;
     vt[8].fn((char*)obj + vt[8].delta, idx);
     if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) < 0x11) {
@@ -316,7 +315,7 @@ extern "C" void func_00238358(void* self, int idx, int a2)
                     }
                 }
             }
-            if (*(int*)((char*)self + 0x9C)) {
+            if (self->bAreResultsLocked) {
                 func_00154EE8(score, idx, D_00536730[idx], v);
             }
         }
@@ -354,9 +353,9 @@ struct sVEntry_00238550 {
 
 extern void* D_00536668[];
 
-extern "C" void func_00238550(void* self, int a, int b)
+extern "C" void func_00238550(cGameModeMan* self, int a, int b)
 {
-    void* obj = D_00536668[*(int*)((char*)self + 0x4)];
+    void* obj = D_00536668[self->iCurrModeHandler];
     sVEntry_00238550* vt = *(sVEntry_00238550**)obj;
     vt[7].fn((char*)obj + vt[7].delta, a, b);
 }
@@ -373,9 +372,9 @@ struct sVEntry_00238590 {
 
 extern void* D_00536668[];
 
-extern "C" void func_00238590(void* self, int a, int b)
+extern "C" void func_00238590(cGameModeMan* self, int a, int b)
 {
-    void* obj = D_00536668[*(int*)((char*)self + 0x4)];
+    void* obj = D_00536668[self->iCurrModeHandler];
     sVEntry_00238590* vt = *(sVEntry_00238590**)obj;
     vt[9].fn((char*)obj + vt[9].delta, a, b);
 }
@@ -408,31 +407,31 @@ public:
 
 extern int D_00536708[];
 
-extern "C" void func_002385D0(char* self, cGmStream_385D0* s)
+extern "C" void func_002385D0(cGameModeMan* self, cGmStream_385D0* s)
 {
-    s->write(self + 4, 4);
-    s->write(self, 4);
-    s->write(self + 8, 4);
-    s->write(self + 0x10, 4);
-    s->write(self + 0x14, 4);
-    s->write(self + 0x18, 0x28);
-    s->write(self + 0x68, 4);
-    s->write(self + 0x6C, 4);
-    s->write(self + 0x70, 4);
+    s->write(((char*)self) + 4, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 8, 4);
+    s->write(((char*)self) + 0x10, 4);
+    s->write(((char*)self) + 0x14, 4);
+    s->write(((char*)self) + 0x18, 0x28);
+    s->write(((char*)self) + 0x68, 4);
+    s->write(((char*)self) + 0x6C, 4);
+    s->write(((char*)self) + 0x70, 4);
     s->write(D_00536730, 0x28);
     s->write(D_00536708, 0x28);
-    s->write(self + 0x78, 4);
-    s->write(self + 0x7C, 4);
-    s->write(self + 0x80, 4);
+    s->write(((char*)self) + 0x78, 4);
+    s->write(((char*)self) + 0x7C, 4);
+    s->write(((char*)self) + 0x80, 4);
     s->write(D_00536640, 0x28);
-    s->write(self + 0x84, 4);
-    s->write(self + 0x88, 4);
-    s->write(self + 0x8C, 4);
-    s->write(self + 0x90, 4);
-    s->write(self + 0x94, 4);
-    s->write(self + 0x98, 4);
-    s->write(self + 0x9C, 4);
-    ((cGameModeObj_2385D0*)D_00536668[*(int*)(self + 4)])->save(s);
+    s->write(((char*)self) + 0x84, 4);
+    s->write(((char*)self) + 0x88, 4);
+    s->write(((char*)self) + 0x8C, 4);
+    s->write(((char*)self) + 0x90, 4);
+    s->write(((char*)self) + 0x94, 4);
+    s->write(((char*)self) + 0x98, 4);
+    s->write(((char*)self) + 0x9C, 4);
+    ((cGameModeObj_2385D0*)D_00536668[self->iCurrModeHandler])->save(s);
 }
 #endif
 //100%
@@ -454,31 +453,31 @@ public:
     virtual void load(cGmStream_385D0* s);
 };
 
-extern "C" void func_002388A0(char* self, cGmStream_385D0* s)
+extern "C" void func_002388A0(cGameModeMan* self, cGmStream_385D0* s)
 {
-    s->read(self + 4, 4);
-    s->read(self, 4);
-    s->read(self + 8, 4);
-    s->read(self + 0x10, 4);
-    s->read(self + 0x14, 4);
-    s->read(self + 0x18, 0x28);
-    s->read(self + 0x68, 4);
-    s->read(self + 0x6C, 4);
-    s->read(self + 0x70, 4);
+    s->read(((char*)self) + 4, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 8, 4);
+    s->read(((char*)self) + 0x10, 4);
+    s->read(((char*)self) + 0x14, 4);
+    s->read(((char*)self) + 0x18, 0x28);
+    s->read(((char*)self) + 0x68, 4);
+    s->read(((char*)self) + 0x6C, 4);
+    s->read(((char*)self) + 0x70, 4);
     s->read(D_00536730, 0x28);
     s->read(D_00536708, 0x28);
-    s->read(self + 0x78, 4);
-    s->read(self + 0x7C, 4);
-    s->read(self + 0x80, 4);
+    s->read(((char*)self) + 0x78, 4);
+    s->read(((char*)self) + 0x7C, 4);
+    s->read(((char*)self) + 0x80, 4);
     s->read(D_00536640, 0x28);
-    s->read(self + 0x84, 4);
-    s->read(self + 0x88, 4);
-    s->read(self + 0x8C, 4);
-    s->read(self + 0x90, 4);
-    s->read(self + 0x94, 4);
-    s->read(self + 0x98, 4);
-    s->read(self + 0x9C, 4);
-    ((cGameModeObj_2388A0*)D_00536668[*(int*)(self + 4)])->load(s);
+    s->read(((char*)self) + 0x84, 4);
+    s->read(((char*)self) + 0x88, 4);
+    s->read(((char*)self) + 0x8C, 4);
+    s->read(((char*)self) + 0x90, 4);
+    s->read(((char*)self) + 0x94, 4);
+    s->read(((char*)self) + 0x98, 4);
+    s->read(((char*)self) + 0x9C, 4);
+    ((cGameModeObj_2388A0*)D_00536668[self->iCurrModeHandler])->load(s);
 }
 #endif
 
@@ -552,7 +551,6 @@ struct sGM00238C80 {
     int f94;
     int f98;
 };
-extern char* cGameModeHandler_pManager;
 
 struct sVEntry00238C80 {
     short delta;
@@ -562,27 +560,27 @@ struct sVEntry00238C80 {
 
 extern "C" void func_00238C80(void* self)
 {
-    sGM00238C80* gm = (sGM00238C80*)cGameModeHandler_pManager;
-    gm->f84 = 1;
-    gm->f4 = -1;
-    gm->f68 = -1;
-    gm->f6C = -1;
-    gm->f8 = -1;
-    gm->f98 = 0;
-    gm->f0 = 0;
-    gm->f70 = 0;
-    gm->f74 = 0;
-    gm->f10 = 0;
-    gm->f14 = 0;
-    gm->f78 = 0;
-    gm->f7C = 0;
-    gm->f80 = 0;
-    gm->f88 = 0;
-    gm->f8C = 0;
-    gm->f90 = 0;
-    gm->f94 = 0;
-    func_00416210(gm->a18, 0, 0x28);
-    func_00416210(((sGM00238C80*)cGameModeHandler_pManager)->a40, 0, 0x28);
+    cGameModeMan* gm = cGameModeHandler_pManager;
+    gm->bIsEventDone = 1;
+    gm->iCurrModeHandler = -1;
+    gm->iLocation = -1;
+    gm->iNextLocation = -1;
+    gm->iCurrentGameEvent = -1;
+    gm->bIsLastHeat = 0;
+    gm->iHeatNum = 0;
+    gm->iNextHeat = 0;
+    gm->iRestoreHeat = 0;
+    gm->iNumberAI = 0;
+    gm->iSimAI = 0;
+    gm->uiTimeLimit = 0;
+    gm->uiPointTarget = 0;
+    gm->unk_80 = 0;
+    gm->bIsTimedEvent = 0;
+    gm->bHasPointTarget = 0;
+    gm->unk_90 = 0;
+    gm->unk_94 = 0;
+    func_00416210(gm->iCharacters, 0, 0x28);
+    func_00416210(cGameModeHandler_pManager->iCheatCharacters, 0, 0x28);
     sVEntry00238C80* e = &(*(sVEntry00238C80**)self)[5];
     e->fn((char*)self + e->delta);
 }
@@ -641,7 +639,6 @@ extern "C" void func_00239938_self(void* self) __asm__("func_00239938");
 struct sScore_239AA0;
 extern "C" void func_00239AA0(sScore_239AA0* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern char* cGameModeHandler_pManager;
 extern signed char D_00535C11[];
 extern unsigned int D_00536640[];
 extern int D_00536708[];
@@ -697,109 +694,109 @@ extern "C" void func_00238E20(sScore_238E20* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int i;
-    sGM_238E20* gm = (sGM_238E20*)cGameModeHandler_pManager;
+    cGameModeMan* gm = cGameModeHandler_pManager;
     int quick = D_00535C11[0];
-    gm->f8C = 0;
-    gm->f7C = 0;
+    gm->bHasPointTarget = 0;
+    gm->uiPointTarget = 0;
     if (quick != 0) {
-        gm->f10 = 5;
-        if (gm->f8 == 1) {
-            gm->f14 = 4;
+        gm->iNumberAI = 5;
+        if (gm->iCurrentGameEvent == 1) {
+            gm->iSimAI = 4;
         } else {
-            gm->f14 = 5;
+            gm->iSimAI = 5;
         }
-        sGM_238E20* g1 = (sGM_238E20*)cGameModeHandler_pManager;
-        g1->f6C = -1;
-        g1->f90 = 0;
-        if (g1->f8 == 1) {
-            g1->f94 = g1->f8;
+        cGameModeMan* g1 = cGameModeHandler_pManager;
+        g1->iNextLocation = -1;
+        g1->unk_90 = 0;
+        if (g1->iCurrentGameEvent == 1) {
+            g1->unk_94 = g1->iCurrentGameEvent;
         } else {
-            g1->f94 = 0;
+            g1->unk_94 = 0;
         }
         func_00416210(self->t, 0, 0x78);
         self->vt[4].fn((char*)self + self->vt[4].delta);
-        if (((sGM_238E20*)cGameModeHandler_pManager)->f84 == 1) {
+        if (cGameModeHandler_pManager->bIsEventDone == 1) {
             func_00239938_self(self);
         }
-        sGM_238E20* g2 = (sGM_238E20*)cGameModeHandler_pManager;
-        g2->f70 = 3;
-        g2->f74 = 3;
+        cGameModeMan* g2 = cGameModeHandler_pManager;
+        g2->iNextHeat = 3;
+        g2->iRestoreHeat = 3;
         func_00239AA0((sScore_239AA0*)self);
     }
-    ((sGM_238E20*)cGameModeHandler_pManager)->f78 = func_001454F8(race, ((sGM_238E20*)cGameModeHandler_pManager)->f0) * 60;
-    sGM_238E20* g3 = (sGM_238E20*)cGameModeHandler_pManager;
-    if (g3->f8 == 2) {
-        g3->f94 = 0;
+    cGameModeHandler_pManager->uiTimeLimit = func_001454F8(race, cGameModeHandler_pManager->iHeatNum) * 60;
+    cGameModeMan* g3 = cGameModeHandler_pManager;
+    if (g3->iCurrentGameEvent == 2) {
+        g3->unk_94 = 0;
     } else {
-        g3->f94 = 1;
+        g3->unk_94 = 1;
     }
-    sGM_238E20* g = (sGM_238E20*)cGameModeHandler_pManager;
-    int s = g->f70;
-    g->f0 = s;
+    cGameModeMan* g = cGameModeHandler_pManager;
+    int s = g->iNextHeat;
+    g->iHeatNum = s;
     switch (s) {
     case 0:
     case 1: {
-        g->f0 = 1;
-        g->f70 = 1;
-        g->f74 = 1;
-        g->f10 = 5;
-        g->f88 = 1;
-        g->f90 = 0;
-        g->f9C = 0;
-        g->f98 = 0;
-        g->f80 = 0;
-        g->f14 = 5;
-        g->f6C = -1;
+        g->iHeatNum = 1;
+        g->iNextHeat = 1;
+        g->iRestoreHeat = 1;
+        g->iNumberAI = 5;
+        g->bIsTimedEvent = 1;
+        g->unk_90 = 0;
+        g->bAreResultsLocked = 0;
+        g->bIsLastHeat = 0;
+        g->unk_80 = 0;
+        g->iSimAI = 5;
+        g->iNextLocation = -1;
         self->t[0][0] = 0;
         self->t[1][0] = 0;
         self->t[2][0] = 0;
         int* t0 = self->t[0];
-        if (g->f84 == 1) {
+        if (g->bIsEventDone == 1) {
             func_00416210(t0, 0, 0x78);
             self->vt[4].fn((char*)self + self->vt[4].delta);
             func_00239938_self(self);
             func_00239AA0((sScore_239AA0*)self);
         }
         D_00536640[0] = 0;
-        for (i = 1; i < ((sGM_238E20*)cGameModeHandler_pManager)->f10 + 1; i++) {
+        for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
             D_00536640[i] = self->t[2][i];
         }
-        func_00238B70(cGameModeHandler_pManager, ((sGM_238E20*)cGameModeHandler_pManager)->f10 + 1);
+        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         {
-            sGM_238E20* h = (sGM_238E20*)cGameModeHandler_pManager;
-            race_238E20()->f20 = h->a18[D_00536708[0]];
-            race_238E20()->f24 = h->a18[D_00536708[1]];
-            for (i = 1; i < ((sGM_238E20*)cGameModeHandler_pManager)->f10 + 1; i++) {
+            cGameModeMan* h = cGameModeHandler_pManager;
+            race_238E20()->f20 = h->iCharacters[D_00536708[0]];
+            race_238E20()->f24 = h->iCharacters[D_00536708[1]];
+            for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
                 D_00536640[i] = t0[i];
             }
         }
-        func_00238B70(cGameModeHandler_pManager, ((sGM_238E20*)cGameModeHandler_pManager)->f10 + 1);
-        ((sGM_238E20*)cGameModeHandler_pManager)->f84 = 0;
+        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
+        cGameModeHandler_pManager->bIsEventDone = 0;
         break;
     }
     case 2:
-        g->f9C = 0;
-        g->f70 = 1;
-        g->f74 = 1;
-        g->f98 = 0;
+        g->bAreResultsLocked = 0;
+        g->iNextHeat = 1;
+        g->iRestoreHeat = 1;
+        g->bIsLastHeat = 0;
         D_00536640[0] = 0;
-        for (i = 1; i < ((sGM_238E20*)cGameModeHandler_pManager)->f10 + 1; i++) {
+        for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
             D_00536640[i] = self->t[1][i] + self->t[0][i];
         }
-        func_00238B70(cGameModeHandler_pManager, ((sGM_238E20*)cGameModeHandler_pManager)->f10 + 1);
+        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         break;
     case 3:
-        g->f98 = 1;
-        g->f70 = 3;
-        g->f74 = 3;
-        g->f88 = 1;
-        g->f9C = 0;
-        g->f84 = 0;
+        g->bIsLastHeat = 1;
+        g->iNextHeat = 3;
+        g->iRestoreHeat = 3;
+        g->bIsTimedEvent = 1;
+        g->bAreResultsLocked = 0;
+        g->bIsEventDone = 0;
         D_00536640[0] = 0;
-        for (i = 1; i < ((sGM_238E20*)cGameModeHandler_pManager)->f10 + 1; i++) {
+        for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
             D_00536640[i] = self->t[2][i];
         }
-        func_00238B70(cGameModeHandler_pManager, ((sGM_238E20*)cGameModeHandler_pManager)->f10 + 1);
+        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         break;
     }
 }
@@ -817,7 +814,6 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_00147D20(void* iface, int a1);
 extern "C" void func_00147E18(void* iface, int a1);
 extern "C" void func_00238B70(void* self, int n);
-extern char* cGameModeHandler_pManager;
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
@@ -886,10 +882,10 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
     int n = cBENewPlayerInterface_getHumanRider(player, 0);
     sStats_239230 st = *(sStats_239230*)((char*)Rider_239230(idx)->mMetrix + 0xFC);
     if (Rider_239230(idx)->mDidNotFinish != 0) {
-        self->t[((sGM_239230*)cGameModeHandler_pManager)->f0 - 1][idx] = 0;
+        self->t[cGameModeHandler_pManager->iHeatNum - 1][idx] = 0;
         D_005366A8[idx] = 1;
     } else {
-        self->t[((sGM_239230*)cGameModeHandler_pManager)->f0 - 1][idx] = st.time;
+        self->t[cGameModeHandler_pManager->iHeatNum - 1][idx] = st.time;
         D_005366A8[idx] = 0;
     }
     if (func_0012A250(Race_239230()) == 0)
@@ -898,17 +894,17 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
     switch (gm->f0) {
     case 1:
         gm->f74 = gm->f70;
-        for (int i = 0; i < ((sGM_239230*)cGameModeHandler_pManager)->f10 + 1; i++)
+        for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[0][i] + self->t[1][i];
-        func_00238B70(cGameModeHandler_pManager, ((sGM_239230*)cGameModeHandler_pManager)->f10 + 1);
+        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         if (D_00536730[idx] < 3)
-            ((sGM_239230*)cGameModeHandler_pManager)->f70 = 3;
+            cGameModeHandler_pManager->iNextHeat = 3;
         else
-            ((sGM_239230*)cGameModeHandler_pManager)->f70 = ((sGM_239230*)cGameModeHandler_pManager)->f0 + 1;
-        for (int i = 0; i < ((sGM_239230*)cGameModeHandler_pManager)->f10 + 1; i++)
+            cGameModeHandler_pManager->iNextHeat = cGameModeHandler_pManager->iHeatNum + 1;
+        for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[0][i];
         if (D_00536730[idx] >= 3) {
-            func_00238B70(cGameModeHandler_pManager, ((sGM_239230*)cGameModeHandler_pManager)->f10 + 1);
+            func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
             if (D_00536730[idx] >= 3) {
                 Rider_239230(idx)->unk_100 = 0;
                 break;
@@ -917,10 +913,10 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
         Rider_239230(idx)->unk_100 = 1;
         break;
     case 2:
-        for (int i = 0; i < ((sGM_239230*)cGameModeHandler_pManager)->f10 + 1; i++)
+        for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[0][i] + self->t[1][i];
-        func_00238B70(cGameModeHandler_pManager, ((sGM_239230*)cGameModeHandler_pManager)->f10 + 1);
-        for (int i = 0; i < ((sGM_239230*)cGameModeHandler_pManager)->f10 + 1; i++)
+        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
+        for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[1][i];
         gm = (sGM_239230*)cGameModeHandler_pManager;
         gm->f74 = gm->f70;
@@ -945,9 +941,9 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
             if (!done)
                 self->t[2][i] = func_00122E50(r);
         }
-        for (int i = 0; i < ((sGM_239230*)cGameModeHandler_pManager)->f10 + 1; i++)
+        for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[2][i];
-        func_00238B70(cGameModeHandler_pManager, ((sGM_239230*)cGameModeHandler_pManager)->f10 + 1);
+        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         gm = (sGM_239230*)cGameModeHandler_pManager;
         gm->f74 = gm->f70;
         int lost = !(D_00536730[idx] < 3);
@@ -982,15 +978,14 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
 //100%
 INCLUDE_ASM("main/gamemode", func_002398E8);
 #ifdef SKIP_ASM
-extern char* cGameModeHandler_pManager;
 
 extern "C" int func_002398E8(void* self, int a1, int secs)
 {
-    char* m = cGameModeHandler_pManager;
-    if (*(int*)(m + 8) == 1) {
+    cGameModeMan* m = cGameModeHandler_pManager;
+    if (m->iCurrentGameEvent == 1) {
         unsigned int limit = *(unsigned int*)((char*)SSXApp->Game->AI + 8);
-        unsigned int t = *(unsigned int*)(m + 0x78) + secs * 60;
-        *(unsigned int*)(m + 0x78) = t;
+        unsigned int t = m->uiTimeLimit + secs * 60;
+        m->uiTimeLimit = t;
         if (t < limit) {
             return 0;
         }
@@ -1011,7 +1006,6 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" int func_00145750(void* iface);
 extern "C" int func_00147410(void* iface, int player);
 extern "C" void func_0023C770(int* arr, unsigned int n);
-extern signed char cBENewRaceInterface_newRace[];
 
 struct sGM_239938 {
     int f0;
@@ -1041,16 +1035,16 @@ extern "C" void func_00239938(void)
         }
     }
     func_0023C770(list, n);
-    ((sGM_239938*)cGameModeHandler_pManager)->a18[0] = charA;
-    ((sGM_239938*)cGameModeHandler_pManager)->a40[0] = func_00147410(player, p);
-    ((sGM_239938*)cGameModeHandler_pManager)->a18[1] = charB;
-    ((sGM_239938*)cGameModeHandler_pManager)->a40[1] = 0;
+    cGameModeHandler_pManager->iCharacters[0] = charA;
+    cGameModeHandler_pManager->iCheatCharacters[0] = func_00147410(player, p);
+    cGameModeHandler_pManager->iCharacters[1] = charB;
+    cGameModeHandler_pManager->iCheatCharacters[1] = 0;
     for (int j = 0; j < n && j + 2 < 10; j++) {
-        ((sGM_239938*)cGameModeHandler_pManager)->a18[j + 2] = list[j];
-        ((sGM_239938*)cGameModeHandler_pManager)->a40[j + 2] = 0;
+        cGameModeHandler_pManager->iCharacters[j + 2] = list[j];
+        cGameModeHandler_pManager->iCheatCharacters[j + 2] = 0;
     }
-    if (cBENewRaceInterface_newRace[0x49] != 0) {
-        ((sGM_239938*)cGameModeHandler_pManager)->a18[1] = list[n - 1];
+    if (cBENewRaceInterface_newRace.cGamePath != 0) {
+        cGameModeHandler_pManager->iCharacters[1] = list[n - 1];
     }
 }
 #endif
@@ -1064,8 +1058,6 @@ extern "C" void* cBE_getBE();
 extern "C" short func_00147CB8(void* self, int which);
 extern "C" int func_001453D0(void* self, int kind, int place, int mode);
 extern "C" void func_00238B70(void* self, int n);
-extern char* cGameModeHandler_pManager;
-extern signed char cBENewRaceInterface_newRace[];
 extern unsigned int D_00536640[];
 extern int D_00536730[];
 
@@ -1088,8 +1080,8 @@ extern "C" void func_00239AA0(sScore_239AA0* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
-    int nB = *(int*)(cGameModeHandler_pManager + 0x14);
-    int d = *(int*)(cGameModeHandler_pManager + 0x10) - nB;
+    int nB = cGameModeHandler_pManager->iSimAI;
+    int d = cGameModeHandler_pManager->iNumberAI - nB;
     int k = 0;
     for (int i = 0; i < d + 1; i++) {
         D_00536730[i] = 5 - i;
@@ -1102,7 +1094,7 @@ extern "C" void func_00239AA0(sScore_239AA0* self)
     int nA = d + 1;
     for (int r = 0; r < nB; r++) {
         for (int c = 0; c < 3; c++) {
-            int b = opt49_239AA0((sOpts_239AA0*)cBENewRaceInterface_newRace);
+            int b = opt49_239AA0((sOpts_239AA0*)((signed char*)&cBENewRaceInterface_newRace));
             int same = 0;
             if (c != 0) same = 1;
             if (b == 0) same = 0;
@@ -1116,7 +1108,7 @@ extern "C" void func_00239AA0(sScore_239AA0* self)
         D_00536730[k] = r;
         k++;
     }
-    func_00238B70(cGameModeHandler_pManager, nA + nB);
+    func_00238B70((char*)cGameModeHandler_pManager, nA + nB);
 }
 #endif
 
@@ -1127,11 +1119,10 @@ struct sScoreTable239CE0 {
     int f0;
     int tbl[8][10];
 };
-extern char* cGameModeHandler_pManager;
 
 extern "C" int func_00239CE0(sScoreTable239CE0* self, int col, int row)
 {
-    if (*(int*)cGameModeHandler_pManager < row) {
+    if (cGameModeHandler_pManager->iHeatNum < row) {
         return 0;
     }
     return self->tbl[row][col];
@@ -1209,33 +1200,33 @@ extern "C" void func_00239D88(void* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
-    sGM_239D88* gm = (sGM_239D88*)cGameModeHandler_pManager;
-    gm->f80 = 0;
-    gm->f84 = 0;
-    gm->f94 = 0;
-    gm->f90 = 0;
-    gm->f9C = 0;
-    gm->f10 = 0;
-    gm->f14 = 0;
-    gm->f98 = 1;
-    gm->f68 = -1;
-    gm->f6C = -1;
-    gm->f0 = 3;
-    gm->f70 = 3;
-    gm->f74 = 3;
-    gm->f88 = 1;
+    cGameModeMan* gm = cGameModeHandler_pManager;
+    gm->unk_80 = 0;
+    gm->bIsEventDone = 0;
+    gm->unk_94 = 0;
+    gm->unk_90 = 0;
+    gm->bAreResultsLocked = 0;
+    gm->iNumberAI = 0;
+    gm->iSimAI = 0;
+    gm->bIsLastHeat = 1;
+    gm->iLocation = -1;
+    gm->iNextLocation = -1;
+    gm->iHeatNum = 3;
+    gm->iNextHeat = 3;
+    gm->iRestoreHeat = 3;
+    gm->bIsTimedEvent = 1;
     int t = func_001454F8(race, 3);
-    sGM_239D88* gm2 = (sGM_239D88*)cGameModeHandler_pManager;
-    gm2->f7C = 0;
-    gm2->f8C = 0;
-    gm2->f78 = t * 60;
-    func_00416210(gm2->a18, -1, 0x28);
+    cGameModeMan* gm2 = cGameModeHandler_pManager;
+    gm2->uiPointTarget = 0;
+    gm2->bHasPointTarget = 0;
+    gm2->uiTimeLimit = t * 60;
+    func_00416210(gm2->iCharacters, -1, 0x28);
     sVEntry_239D88* e = &(*(sVEntry_239D88**)self)[4];
     e->fn((char*)self + e->delta);
-    ((sGM_239D88*)cGameModeHandler_pManager)->a18[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
-    ((sGM_239D88*)cGameModeHandler_pManager)->a18[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
-    ((sGM_239D88*)cGameModeHandler_pManager)->a40[0] = func_001474C8(player, 0);
-    ((sGM_239D88*)cGameModeHandler_pManager)->a40[1] = func_001474C8(player, 1);
+    cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
+    cGameModeHandler_pManager->iCharacters[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
+    cGameModeHandler_pManager->iCheatCharacters[0] = func_001474C8(player, 0);
+    cGameModeHandler_pManager->iCheatCharacters[1] = func_001474C8(player, 1);
     *(short*)((char*)self + 0x4) = 0;
     *(short*)((char*)self + 0x6) = 0;
 }
@@ -1258,10 +1249,10 @@ extern "C" void func_00239EC8(void* self, int idx)
     }
     bool over = func_0012A250(race) != 0;
     if (over) {
-        sGM_239230* gm = (sGM_239230*)cGameModeHandler_pManager;
-        gm->f84 = 1;
-        gm->f9C = 1;
-        func_00238B70(gm, 2);
+        cGameModeMan* gm = cGameModeHandler_pManager;
+        gm->bIsEventDone = 1;
+        gm->bAreResultsLocked = 1;
+        func_00238B70((sGM_239230*)gm, 2);
         if (D_00536730[idx] > 0) {
             Rider_239230(idx)->unk_100 = 0;
         }
@@ -1272,7 +1263,6 @@ extern "C" void func_00239EC8(void* self, int idx)
 //100%
 INCLUDE_ASM("main/gamemode", func_0023A070);
 #ifdef SKIP_ASM
-extern char* cGameModeHandler_pManager;
 
 extern "C" int func_0023A070(char* self, int player, int secs)
 {
@@ -1286,13 +1276,13 @@ extern "C" int func_0023A070(char* self, int player, int secs)
     if (*(short*)((char*)score + (other << 1)) >= s) {
         return 0;
     }
-    char* m = cGameModeHandler_pManager;
-    if (*(int*)(m + 8) == 1) {
-        unsigned int t = *(unsigned int*)(m + 0x78);
+    cGameModeMan* m = cGameModeHandler_pManager;
+    if (m->iCurrentGameEvent == 1) {
+        unsigned int t = m->uiTimeLimit;
         if (t < *(unsigned int*)((char*)SSXApp->Game->AI + 8)) {
             return 0;
         }
-        *(unsigned int*)(m + 0x78) = secs * 60 + t;
+        m->uiTimeLimit = secs * 60 + t;
         return 1;
     }
     return 1;
@@ -1311,7 +1301,6 @@ extern "C" int func_00145750(void* iface);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void func_0023A4F0(void* self);
 extern "C" void func_0023A668(void* self);
-extern char* cGameModeHandler_pManager;
 extern signed char D_00535C11[];
 extern unsigned int D_00536640[];
 extern int D_00536730[];
@@ -1375,10 +1364,10 @@ static inline void fillOthers_23A108(int* dst, int p)
     for (int i = 0; i < 3; i++) {
         int v = D_00536708[i];
         if (v != p) {
-            sGM_23A108* gm = (sGM_23A108*)cGameModeHandler_pManager;
-            int x = gm->a40[v];
+            cGameModeMan* gm = cGameModeHandler_pManager;
+            int x = gm->iCheatCharacters[v];
             if (x == 0) {
-                *dst = gm->a18[v];
+                *dst = gm->iCharacters[v];
             } else {
                 *dst = x;
             }
@@ -1389,52 +1378,52 @@ static inline void fillOthers_23A108(int* dst, int p)
 
 extern "C" void func_0023A108(sMode_23A108* self)
 {
-    sGM_23A108* g0 = (sGM_23A108*)cGameModeHandler_pManager;
-    g0->f9C = 0;
-    g0->f0 = g0->f70;
+    cGameModeMan* g0 = cGameModeHandler_pManager;
+    g0->bAreResultsLocked = 0;
+    g0->iHeatNum = g0->iNextHeat;
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int quick = D_00535C11[0];
-    if (quick != 0 && ((sGM_23A108*)cGameModeHandler_pManager)->f0 != 3) {
-        ((sGM_23A108*)cGameModeHandler_pManager)->f0 = 3;
+    if (quick != 0 && cGameModeHandler_pManager->iHeatNum != 3) {
+        cGameModeHandler_pManager->iHeatNum = 3;
         self->fC = 0;
     }
-    sGM_23A108* gm = (sGM_23A108*)cGameModeHandler_pManager;
-    int state = gm->f0;
-    gm->f7C = 0;
-    gm->f8C = 0;
+    cGameModeMan* gm = cGameModeHandler_pManager;
+    int state = gm->iHeatNum;
+    gm->uiPointTarget = 0;
+    gm->bHasPointTarget = 0;
     switch (state) {
     case 0:
     case 1:
-        gm->f98 = 0;
-        gm->f0 = 1;
-        gm->f14 = 0;
-        gm->f10 = 5;
-        if (gm->f84 == 1) {
+        gm->bIsLastHeat = 0;
+        gm->iHeatNum = 1;
+        gm->iSimAI = 0;
+        gm->iNumberAI = 5;
+        if (gm->bIsEventDone == 1) {
             func_0023A4F0(self);
             func_0023A668(self);
         }
         func_00416210(self->tbl, 9, 0x78);
         self->v05();
         {
-            sGM_23A108* g = (sGM_23A108*)cGameModeHandler_pManager;
-            g->f6C = -1;
-            g->f70 = 1;
-            g->f74 = 1;
-            g->f78 = 0;
-            g->f80 = 0;
-            g->f84 = 0;
-            g->f88 = 0;
-            g->f90 = 1;
-            g->f94 = 0;
+            cGameModeMan* g = cGameModeHandler_pManager;
+            g->iNextLocation = -1;
+            g->iNextHeat = 1;
+            g->iRestoreHeat = 1;
+            g->uiTimeLimit = 0;
+            g->unk_80 = 0;
+            g->bIsEventDone = 0;
+            g->bIsTimedEvent = 0;
+            g->unk_90 = 1;
+            g->unk_94 = 0;
         }
         self->f8 = 0;
         self->fC = 0;
         break;
     case 2:
-        gm->f98 = 0;
-        gm->f10 = 5;
-        gm->f14 = 0;
+        gm->bIsLastHeat = 0;
+        gm->iNumberAI = 5;
+        gm->iSimAI = 0;
         if (self->f8 == 0) {
             int p = cBENewPlayerInterface_getHumanRider(player, 0);
             self->charA = cBENewPlayerInterface_getRiderCharID(player, p);
@@ -1442,36 +1431,36 @@ extern "C" void func_0023A108(sMode_23A108* self)
             func_0023A668(self);
         }
         {
-            sGM_23A108* g = (sGM_23A108*)cGameModeHandler_pManager;
-            g->f6C = -1;
-            g->f70 = 2;
-            g->f74 = 2;
+            cGameModeMan* g = cGameModeHandler_pManager;
+            g->iNextLocation = -1;
+            g->iNextHeat = 2;
+            g->iRestoreHeat = 2;
         }
         func_00416210(D_00536640, 9, 0x28);
         func_00416210(D_00536730, 0, 0x28);
         func_00416210(self->tbl[1], 9, 0x28);
         {
-            sGM_23A108* g = (sGM_23A108*)cGameModeHandler_pManager;
-            g->f78 = 0;
-            g->f80 = 0;
-            g->f84 = 0;
-            g->f88 = 0;
-            g->f90 = 0;
-            g->f94 = 0;
+            cGameModeMan* g = cGameModeHandler_pManager;
+            g->uiTimeLimit = 0;
+            g->unk_80 = 0;
+            g->bIsEventDone = 0;
+            g->bIsTimedEvent = 0;
+            g->unk_90 = 0;
+            g->unk_94 = 0;
         }
         self->f8 = 1;
         self->fC = 0;
         break;
     case 3:
-        gm->f10 = 5;
-        gm->f14 = 0;
-        gm->f98 = 1;
+        gm->iNumberAI = 5;
+        gm->iSimAI = 0;
+        gm->bIsLastHeat = 1;
         if (self->fC == 0) {
             if (quick != 0) {
                 func_0023A4F0(self);
-                ((sGM_23A108*)cGameModeHandler_pManager)->f0 = 1;
+                cGameModeHandler_pManager->iHeatNum = 1;
                 func_0023A668(self);
-                ((sGM_23A108*)cGameModeHandler_pManager)->f0 = state;
+                cGameModeHandler_pManager->iHeatNum = state;
                 func_00416210(self->tbl, 9, 0x78);
                 self->v05();
             } else {
@@ -1483,22 +1472,22 @@ extern "C" void func_0023A108(sMode_23A108* self)
             }
         }
         {
-            sGM_23A108* g = (sGM_23A108*)cGameModeHandler_pManager;
-            g->f6C = -1;
-            g->f70 = 3;
-            g->f74 = 3;
+            cGameModeMan* g = cGameModeHandler_pManager;
+            g->iNextLocation = -1;
+            g->iNextHeat = 3;
+            g->iRestoreHeat = 3;
         }
         func_00416210(D_00536640, 9, 0x28);
         func_00416210(D_00536730, 9, 0x28);
         func_00416210(self->tbl[2], 9, 0x28);
         {
-            sGM_23A108* g = (sGM_23A108*)cGameModeHandler_pManager;
-            g->f78 = 0;
-            g->f80 = 0;
-            g->f84 = 0;
-            g->f88 = 0;
-            g->f90 = 0;
-            g->f94 = 0;
+            cGameModeMan* g = cGameModeHandler_pManager;
+            g->uiTimeLimit = 0;
+            g->unk_80 = 0;
+            g->bIsEventDone = 0;
+            g->bIsTimedEvent = 0;
+            g->unk_90 = 0;
+            g->unk_94 = 0;
         }
         self->fC = 1;
         self->f8 = 0;
@@ -1560,36 +1549,7 @@ extern "C" void func_0023A4F0(void* self)
 //100%
 INCLUDE_ASM("main/gamemode", func_0023A668);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-// The game-mode manager (cGameModeMan, 0xA0 bytes; cGameModeMan_getGM creates it). cGameModeMan_instance owns it and
-// D_004A2C70_A668 is the pointer the handlers read it through. iNumberAI is the prototype's name (assert
-// `iRider < (pManager->iNumberAI+1)` in func_0023A760); mode indexes the handler table D_00536668.
-struct cGameModeMan {
-    int f0;             // 0x00 current heat (1..3)
-    int mode;           // 0x04
-    int type;           // 0x08
-    int net;            // 0x0C
-    int iNumberAI;      // 0x10
-    int f14;            // 0x14
-    int a18[10];        // 0x18 rider character IDs
-    int a40[10];        // 0x40
-    int f68;            // 0x68
-    int f6C;            // 0x6C
-    int f70;            // 0x70
-    int f74;            // 0x74
-    int f78;            // 0x78
-    int f7C;            // 0x7C
-    int f80;            // 0x80
-    int f84;            // 0x84
-    int f88;            // 0x88
-    int f8C;            // 0x8C
-    int f90;            // 0x90
-    int f94;            // 0x94
-    int f98;            // 0x98
-    int f9C;            // 0x9C
-};
 
-extern cGameModeMan* D_004A2C70_A668 __asm__("cGameModeHandler_pManager");
 
 // Game-mode handler base (cGameModeHandler): the handlers in D_00536668 are its subclasses.
 class cGameModeHandler {
@@ -1628,18 +1588,18 @@ extern "C" void func_0023A668_A668(cGMRaceHandler* self)
     int id = cBENewPlayerInterface_getHumanRider(iface, 0);
     int ch = cBENewPlayerInterface_getRiderCharID(iface, id);
     int r = func_00147410(iface, id);
-    int k = D_004A2C70_A668->f0 - 1;
+    int k = cGameModeHandler_pManager->iHeatNum - 1;
     if (k < 0) k = 0;
     for (int i = 0; i < 6; i++) {
         int v = self->rows[k][i];
         if (v >= 10) {
-            D_004A2C70_A668->a40[i] = v;
+            cGameModeHandler_pManager->iCheatCharacters[i] = v;
             v = ch;
         } else {
-            D_004A2C70_A668->a40[i] = 0;
+            cGameModeHandler_pManager->iCheatCharacters[i] = 0;
         }
-        D_004A2C70_A668->a18[i] = v;
-        if (i == id) D_004A2C70_A668->a40[i] = r;
+        cGameModeHandler_pManager->iCharacters[i] = v;
+        if (i == id) cGameModeHandler_pManager->iCheatCharacters[i] = r;
     }
 }
 #endif
@@ -1655,7 +1615,6 @@ INCLUDE_ASM("main/gamemode", func_0023A760);
 // The game-mode manager (cGameModeMan, 0xA0 bytes; cGameModeMan_getGM creates it). cGameModeMan_instance owns it and
 // D_004A2C70_A760 is the pointer the handlers read it through. iNumberAI is the prototype's name (assert
 // `iRider < (pManager->iNumberAI+1)` in func_0023A760); mode indexes the handler table D_00536668.
-extern cGameModeMan* D_004A2C70_A760 __asm__("cGameModeHandler_pManager");
 
 // The race (seg/seg_1FBE38 layout): riders by being index at 0x28; each player holds its rider at +0x18.
 struct sRacePlayer {
@@ -1701,7 +1660,6 @@ struct sRaceSettings {
     signed char f49;            // 0x49
 };
 
-extern sRaceSettings D_00535BC8_A760 __asm__("cBENewRaceInterface_newRace");
 
 // Game-mode handler base (cGameModeHandler): the handlers in D_00536668 are its subclasses.
 // The race handler (cGMRaceHandler, vtable D_0047CF38, 0xD0 bytes).
@@ -1750,7 +1708,7 @@ extern "C" void func_0023A760(cGMRaceHandler* self, int idx)
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int n = cBENewPlayerInterface_getHumanRider(player, 0);
-    int heat = D_004A2C70_A760->f0 - 1;
+    int heat = cGameModeHandler_pManager->iHeatNum - 1;
     sRace* rc = GetRace();
     if (func_0012A250(rc) == 0 || vcall_23A760((char*)GetRace()->riders[idx] + 0x6C0, 9) == 0) {
         int tick = rc->riders[idx]->mFinishTick;
@@ -1768,50 +1726,50 @@ extern "C" void func_0023A760(cGMRaceHandler* self, int idx)
     if (vcall_23A760((char*)GetRace()->riders[idx] + 0x6C0, 8) == 0) {
         return;
     }
-    for (int i = 0; i < D_004A2C70_A760->iNumberAI + 1; i++) {
+    for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
         if (!Finished(rc->riders[i])) {
             self->tbl[heat][i] = func_00122D78(rc->riders[i]);
         }
         D_00536640[i] = self->tbl[heat][i];
     }
-    func_00238BF8_A760(D_004A2C70_A760, 10);
-    cGameModeMan* gm = D_004A2C70_A760;
-    gm->f74 = gm->f70;
+    func_00238BF8_A760(cGameModeHandler_pManager, 10);
+    cGameModeMan* gm = cGameModeHandler_pManager;
+    gm->iRestoreHeat = gm->iNextHeat;
     if (D_00536730[n] < 3) {
-        gm->f70 = gm->f0 + 1;
+        gm->iNextHeat = gm->iHeatNum + 1;
         GetRace()->riders[idx]->unk_100 = 1;
-        if (gm->f0 == 3) {
-            gm->f84 = 1;
-            gm->f70 = 3;
+        if (gm->iHeatNum == 3) {
+            gm->bIsEventDone = 1;
+            gm->iNextHeat = 3;
         }
-        if (D_00535BC8_A760.f49 == 0) {
+        if (cBENewRaceInterface_newRace.cGamePath == 0) {
             if (D_00536730[n] == 0) {
-                if ((D_004A2C70_A760->f0 < 2 && D_00536640[1] - D_00536640[0] > 600) ||
-                    (D_004A2C70_A760->f0 == 2 && D_00536640[1] - D_00536640[0] > 300) ||
-                    (D_004A2C70_A760->f0 == 3 && D_00536640[1] - D_00536640[0] > 180)) {
+                if ((cGameModeHandler_pManager->iHeatNum < 2 && D_00536640[1] - D_00536640[0] > 600) ||
+                    (cGameModeHandler_pManager->iHeatNum == 2 && D_00536640[1] - D_00536640[0] > 300) ||
+                    (cGameModeHandler_pManager->iHeatNum == 3 && D_00536640[1] - D_00536640[0] > 180)) {
                     func_00147D20(player, 1);
                 }
             }
-            if (D_004A2C70_A760->f0 == 3) {
-                D_004A2C70_A760->f70 = 0;
-                D_004A2C70_A760->f74 = 0;
+            if (cGameModeHandler_pManager->iHeatNum == 3) {
+                cGameModeHandler_pManager->iNextHeat = 0;
+                cGameModeHandler_pManager->iRestoreHeat = 0;
             }
         }
     } else {
-        gm->f70 = gm->f0;
+        gm->iNextHeat = gm->iHeatNum;
         self->f8 = 1;
         self->fC = 1;
         GetRace()->riders[idx]->unk_100 = 0;
-        if (D_00535BC8_A760.f49 == 0) {
-            if (D_004A2C70_A760->f0 < 2 ||
-                (D_004A2C70_A760->f0 == 2 && D_00536730[n] >= 4) ||
-                (D_004A2C70_A760->f0 == 3 && D_00536730[n] == 5)) {
+        if (cBENewRaceInterface_newRace.cGamePath == 0) {
+            if (cGameModeHandler_pManager->iHeatNum < 2 ||
+                (cGameModeHandler_pManager->iHeatNum == 2 && D_00536730[n] >= 4) ||
+                (cGameModeHandler_pManager->iHeatNum == 3 && D_00536730[n] == 5)) {
                 func_00147E18(player, 1);
             }
         }
     }
-    if (D_004A2C70_A760->f0 == 3) {
-        D_004A2C70_A760->f9C = 1;
+    if (cGameModeHandler_pManager->iHeatNum == 3) {
+        cGameModeHandler_pManager->bAreResultsLocked = 1;
     }
     int place = D_00536730[n];
     if (place == 0)
@@ -1897,48 +1855,47 @@ extern "C" void func_0023AC88(void* self)
 {
     int one = 1;
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
-    sGM_23AC88* gm = (sGM_23AC88*)cGameModeHandler_pManager;
-    gm->fC = 2;
-    gm->f94 = 0;
-    gm->f90 = 0;
-    gm->f9C = 0;
-    gm->f98 = one;
-    gm->f88 = 0;
-    gm->f8 = 0;
-    gm->f0 = 3;
-    gm->f70 = 3;
-    gm->f74 = 3;
-    gm->f6C = -1;
-    gm->f10 = 4;
+    cGameModeMan* gm = cGameModeHandler_pManager;
+    gm->iCurrentGamePath = 2;
+    gm->unk_94 = 0;
+    gm->unk_90 = 0;
+    gm->bAreResultsLocked = 0;
+    gm->bIsLastHeat = one;
+    gm->bIsTimedEvent = 0;
+    gm->iCurrentGameEvent = 0;
+    gm->iHeatNum = 3;
+    gm->iNextHeat = 3;
+    gm->iRestoreHeat = 3;
+    gm->iNextLocation = -1;
+    gm->iNumberAI = 4;
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        ((sGM_23AC88*)cGameModeHandler_pManager)->f10 = D_00535C04[0];
+        cGameModeHandler_pManager->iNumberAI = D_00535C04[0];
     }
-    sGM_23AC88* gm2 = (sGM_23AC88*)cGameModeHandler_pManager;
-    gm2->f14 = 0;
-    gm2->f80 = 0;
-    gm2->f78 = 0;
-    gm2->f7C = 0;
-    gm2->f8C = 0;
+    cGameModeMan* gm2 = cGameModeHandler_pManager;
+    gm2->iSimAI = 0;
+    gm2->unk_80 = 0;
+    gm2->uiTimeLimit = 0;
+    gm2->uiPointTarget = 0;
+    gm2->bHasPointTarget = 0;
     func_00416210((char*)self + 4, 9, 0x28);
     sVEntry_23AC88* e = &(*(sVEntry_23AC88**)self)[5];
     e->fn((char*)self + e->delta);
-    ((sGM_23AC88*)cGameModeHandler_pManager)->a18[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
-    ((sGM_23AC88*)cGameModeHandler_pManager)->a18[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
-    ((sGM_23AC88*)cGameModeHandler_pManager)->a40[0] = func_001474C8(player, 0);
-    ((sGM_23AC88*)cGameModeHandler_pManager)->a40[1] = func_001474C8(player, 1);
-    if (((sGM_23AC88*)cGameModeHandler_pManager)->f84 == one) {
+    cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
+    cGameModeHandler_pManager->iCharacters[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
+    cGameModeHandler_pManager->iCheatCharacters[0] = func_001474C8(player, 0);
+    cGameModeHandler_pManager->iCheatCharacters[1] = func_001474C8(player, 1);
+    if (cGameModeHandler_pManager->bIsEventDone == one) {
         func_0023B0A8(self);
     }
-    ((sGM_23AC88*)cGameModeHandler_pManager)->f84 = 0;
+    cGameModeHandler_pManager->bIsEventDone = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/gamemode", func_0023AE00);
 #ifdef SKIP_ASM
-extern char* cGameModeHandler_pManager;
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
@@ -2002,17 +1959,17 @@ extern "C" void func_0023AE00(sSelf_23AE00* self, int idx)
         }
     }
     if (func_0012A250(rc)) {
-        for (int i = 0; i < *(int*)(cGameModeHandler_pManager + 0x10) + 2; i++) {
+        for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 2; i++) {
             if (!finished_23AE00(rc->riders[i]) && i != idx) {
                 self->times[i] = func_00122D78(rc->riders[i]);
             }
             D_00536640[i] = self->times[i];
         }
-        func_00238BF8(cGameModeHandler_pManager, 10);
+        func_00238BF8((char*)cGameModeHandler_pManager, 10);
         if (D_00536730[idx] >= 3) {
             race_23AE00()->riders[idx]->f100 = 0;
         }
-        *(int*)(cGameModeHandler_pManager + 0x9C) = 1;
+        cGameModeHandler_pManager->bAreResultsLocked = 1;
     }
 }
 #endif
@@ -2083,29 +2040,29 @@ extern "C" void func_0023B170(void* self)
 {
     int one = 1;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-    sGM_23B170* gm = (sGM_23B170*)cGameModeHandler_pManager;
-    gm->f0 = one;
-    gm->f98 = one;
-    gm->f10 = 0;
-    gm->f14 = 0;
-    func_00416210(gm->a18, -1, 0x28);
+    cGameModeMan* gm = cGameModeHandler_pManager;
+    gm->iHeatNum = one;
+    gm->bIsLastHeat = one;
+    gm->iNumberAI = 0;
+    gm->iSimAI = 0;
+    func_00416210(gm->iCharacters, -1, 0x28);
     int p = cBENewPlayerInterface_getHumanRider(iface, 0);
-    ((sGM_23B170*)cGameModeHandler_pManager)->a18[p] = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
+    cGameModeHandler_pManager->iCharacters[p] = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
     sVEntry_23B170* e = &(*(sVEntry_23B170**)self)[4];
     e->fn((char*)self + e->delta);
-    sGM_23B170* gm2 = (sGM_23B170*)cGameModeHandler_pManager;
-    gm2->f70 = one;
-    gm2->f74 = one;
-    gm2->f9C = one;
-    gm2->f78 = 0;
-    gm2->f7C = 0;
-    gm2->f80 = 0;
-    gm2->f84 = 0;
-    gm2->f88 = 0;
-    gm2->f8C = 0;
-    gm2->f90 = 0;
-    gm2->f94 = 0;
-    gm2->f6C = -1;
+    cGameModeMan* gm2 = cGameModeHandler_pManager;
+    gm2->iNextHeat = one;
+    gm2->iRestoreHeat = one;
+    gm2->bAreResultsLocked = one;
+    gm2->uiTimeLimit = 0;
+    gm2->uiPointTarget = 0;
+    gm2->unk_80 = 0;
+    gm2->bIsEventDone = 0;
+    gm2->bIsTimedEvent = 0;
+    gm2->bHasPointTarget = 0;
+    gm2->unk_90 = 0;
+    gm2->unk_94 = 0;
+    gm2->iNextLocation = -1;
 }
 #endif
 
@@ -2120,7 +2077,6 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" int func_001455D0(void* iface, int mode, int a2);
 extern "C" int func_001558F8(void* iface, int a1, int a2, int a3);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern char* cGameModeHandler_pManager;
 extern signed char D_00535C12[];
 
 struct sGM_23B268 {
@@ -2166,54 +2122,54 @@ extern "C" void func_0023B268(void* self)
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* score = cBE_getInterface_Fv(cBE_getBE(), 8);
-    sGM_23B268* gm = (sGM_23B268*)cGameModeHandler_pManager;
-    gm->f0 = 1;
+    cGameModeMan* gm = cGameModeHandler_pManager;
+    gm->iHeatNum = 1;
     int mode = D_00535C12[0];
-    gm->f10 = 0;
-    gm->f8 = mode;
-    gm->f14 = 0;
-    gm->f8C = 0;
+    gm->iNumberAI = 0;
+    gm->iCurrentGameEvent = mode;
+    gm->iSimAI = 0;
+    gm->bHasPointTarget = 0;
     switch (mode) {
     case 6:
-        gm->f6C = 0;
-        gm->f68 = 14;
+        gm->iNextLocation = 0;
+        gm->iLocation = 14;
         break;
     case 7:
-        gm->f68 = 15;
-        gm->f6C = 3;
+        gm->iLocation = 15;
+        gm->iNextLocation = 3;
         break;
     case 8:
-        gm->f68 = 16;
-        gm->f6C = 4;
+        gm->iLocation = 16;
+        gm->iNextLocation = 4;
         break;
     }
-    int r = func_001558F8(score, 0, ((sGM_23B268*)cGameModeHandler_pManager)->f68, ((sGM_23B268*)cGameModeHandler_pManager)->f8);
+    int r = func_001558F8(score, 0, cGameModeHandler_pManager->iLocation, cGameModeHandler_pManager->iCurrentGameEvent);
     *(short*)((char*)self + 0xA) = 0;
     if (r == 1 || r == 2) {
         *(short*)((char*)self + 0xA) = 2;
     } else if (r == 3) {
         *(short*)((char*)self + 0xA) = 1;
     }
-    int t = func_001455D0(race, ((sGM_23B268*)cGameModeHandler_pManager)->f8, *(short*)((char*)self + 0xA));
-    sGM_23B268* gm2 = (sGM_23B268*)cGameModeHandler_pManager;
+    int t = func_001455D0(race, cGameModeHandler_pManager->iCurrentGameEvent, *(short*)((char*)self + 0xA));
+    cGameModeMan* gm2 = cGameModeHandler_pManager;
     *(int*)((char*)self + 4) = t * 60;
-    gm2->f88 = 1;
-    gm2->f78 = *(int*)((char*)self + 4);
-    gm2->f7C = *(int*)((char*)self + 4);
-    gm2->f70 = 2;
-    gm2->f74 = 2;
+    gm2->bIsTimedEvent = 1;
+    gm2->uiTimeLimit = *(int*)((char*)self + 4);
+    gm2->uiPointTarget = *(int*)((char*)self + 4);
+    gm2->iNextHeat = 2;
+    gm2->iRestoreHeat = 2;
     sVEntry_23B268* vt = *(sVEntry_23B268**)self;
     vt[5].fn((char*)self + vt[5].delta);
-    func_00416210(((sGM_23B268*)cGameModeHandler_pManager)->a18, -1, 0x28);
+    func_00416210(cGameModeHandler_pManager->iCharacters, -1, 0x28);
     int p = cBENewPlayerInterface_getHumanRider(player, 0);
-    ((sGM_23B268*)cGameModeHandler_pManager)->a18[p] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
-    sGM_23B268* gm3 = (sGM_23B268*)cGameModeHandler_pManager;
-    gm3->f80 = 0;
-    gm3->f84 = 0;
-    gm3->f90 = 0;
-    gm3->f94 = 0;
-    gm3->f98 = 0;
-    gm3->f9C = 0;
+    cGameModeHandler_pManager->iCharacters[p] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
+    cGameModeMan* gm3 = cGameModeHandler_pManager;
+    gm3->unk_80 = 0;
+    gm3->bIsEventDone = 0;
+    gm3->unk_90 = 0;
+    gm3->unk_94 = 0;
+    gm3->bIsLastHeat = 0;
+    gm3->bAreResultsLocked = 0;
     *(short*)((char*)self + 8) = 0;
 }
 #endif
@@ -2265,25 +2221,25 @@ extern "C" void func_0023B468(void* self, int p)
     int off = p << 2;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     char* g = (char*)SSXApp;
-    sGM_23B468* gm = (sGM_23B468*)cGameModeHandler_pManager;
+    cGameModeMan* gm = cGameModeHandler_pManager;
     unsigned int* t = &D_00536640[p];
     *t = *(unsigned int*)(rider_23B468(g, off) + 0x478);
-    gm->f9C = one;
+    gm->bAreResultsLocked = one;
     char* r = rider_23B468(g, off);
     if (*(int*)(r + 0x480) != 0) {
         *t = 0x57E40;
         *(int*)(rider_23B468(g, off) + 0x100) = 0;
-        gm->f70 = one;
+        gm->iNextHeat = one;
         D_005366A8[p] = one;
     } else if (*(unsigned int*)((char*)self + 4) < *t) {
         *(int*)(r + 0x100) = 0;
-        gm->f70 = one;
+        gm->iNextHeat = one;
         D_005366A8[p] = 0;
     } else {
         *(int*)(r + 0x100) = one;
-        gm->f84 = one;
-        unsigned int a = func_001455D0(race, gm->f8, 2) * 60;
-        unsigned int b = func_001455D0(race, ((sGM_23B468*)cGameModeHandler_pManager)->f8, 1) * 60;
+        gm->bIsEventDone = one;
+        unsigned int a = func_001455D0(race, gm->iCurrentGameEvent, 2) * 60;
+        unsigned int b = func_001455D0(race, cGameModeHandler_pManager->iCurrentGameEvent, 1) * 60;
         if (a >= *t) {
             D_00536730[p] = 0;
         } else if (b >= *t) {
@@ -2340,7 +2296,6 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" int func_00145750(void* iface);
 extern "C" int func_00147410(void* iface, int player);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern char* cGameModeHandler_pManager;
 extern signed char D_00535C11[];
 
 struct sGM_23B6C0 {
@@ -2379,40 +2334,40 @@ extern "C" void func_0023B6C0(void* self)
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int one = 1;
-    sGM_23B6C0* gm = (sGM_23B6C0*)cGameModeHandler_pManager;
-    gm->f0 = one;
-    gm->f10 = one;
-    gm->f14 = 0;
-    gm->f68 = -1;
-    gm->f70 = one;
-    gm->f74 = one;
-    gm->f78 = 0;
-    gm->f7C = 0;
-    gm->f80 = 0;
-    gm->f84 = 0;
-    gm->f88 = 0;
-    gm->f8C = 0;
-    gm->f90 = 0;
-    gm->f94 = 0;
-    gm->f6C = -1;
-    gm->f98 = one;
-    gm->f9C = 0;
+    cGameModeMan* gm = cGameModeHandler_pManager;
+    gm->iHeatNum = one;
+    gm->iNumberAI = one;
+    gm->iSimAI = 0;
+    gm->iLocation = -1;
+    gm->iNextHeat = one;
+    gm->iRestoreHeat = one;
+    gm->uiTimeLimit = 0;
+    gm->uiPointTarget = 0;
+    gm->unk_80 = 0;
+    gm->bIsEventDone = 0;
+    gm->bIsTimedEvent = 0;
+    gm->bHasPointTarget = 0;
+    gm->unk_90 = 0;
+    gm->unk_94 = 0;
+    gm->iNextLocation = -1;
+    gm->bIsLastHeat = one;
+    gm->bAreResultsLocked = 0;
     sVEntry_23B6C0* vt = *(sVEntry_23B6C0**)self;
     vt[5].fn((char*)self + vt[5].delta);
     if (D_00535C11[0] == 2) {
-        ((sGM_23B6C0*)cGameModeHandler_pManager)->f10 = 0;
+        cGameModeHandler_pManager->iNumberAI = 0;
         int p0 = cBENewPlayerInterface_getHumanRider(player, 0);
         int p1 = cBENewPlayerInterface_getHumanRider(player, 1);
-        ((sGM_23B6C0*)cGameModeHandler_pManager)->a18[p0] = cBENewPlayerInterface_getRiderCharID(player, p0);
-        ((sGM_23B6C0*)cGameModeHandler_pManager)->a40[p0] = func_00147410(player, p0);
-        ((sGM_23B6C0*)cGameModeHandler_pManager)->a18[p1] = cBENewPlayerInterface_getRiderCharID(player, p1);
-        ((sGM_23B6C0*)cGameModeHandler_pManager)->a40[p1] = func_00147410(player, p1);
+        cGameModeHandler_pManager->iCharacters[p0] = cBENewPlayerInterface_getRiderCharID(player, p0);
+        cGameModeHandler_pManager->iCheatCharacters[p0] = func_00147410(player, p0);
+        cGameModeHandler_pManager->iCharacters[p1] = cBENewPlayerInterface_getRiderCharID(player, p1);
+        cGameModeHandler_pManager->iCheatCharacters[p1] = func_00147410(player, p1);
     } else {
-        func_00416210(((sGM_23B6C0*)cGameModeHandler_pManager)->a18, -1, 0x28);
+        func_00416210(cGameModeHandler_pManager->iCharacters, -1, 0x28);
         int p = cBENewPlayerInterface_getHumanRider(player, 0);
-        ((sGM_23B6C0*)cGameModeHandler_pManager)->a18[p] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
-        ((sGM_23B6C0*)cGameModeHandler_pManager)->a18[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = func_00145750(race);
-        ((sGM_23B6C0*)cGameModeHandler_pManager)->a40[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = 0;
+        cGameModeHandler_pManager->iCharacters[p] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
+        cGameModeHandler_pManager->iCharacters[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = func_00145750(race);
+        cGameModeHandler_pManager->iCheatCharacters[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = 0;
     }
 }
 #endif
@@ -2427,7 +2382,6 @@ extern "C" int func_00122D78(void* self);
 extern "C" int func_0012A250(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_00238BF8(void* self, int n);
-extern char* cGameModeHandler_pManager;
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
@@ -2502,8 +2456,8 @@ extern "C" void func_0023B8C8(void* self, int idx)
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 2) {
-        func_00238BF8(cGameModeHandler_pManager, 10);
-        ((sGM_23B8C8*)cGameModeHandler_pManager)->f9C = 1;
+        func_00238BF8((char*)cGameModeHandler_pManager, 10);
+        cGameModeHandler_pManager->bAreResultsLocked = 1;
         int w = 1;
         if (D_00536640[0] < D_00536640[1]) {
             w = 0;
@@ -2512,7 +2466,7 @@ extern "C" void func_0023B8C8(void* self, int idx)
             return;
         }
     } else {
-        for (int i = 0; i < ((sGM_23B8C8*)cGameModeHandler_pManager)->f10 + 1; i++) {
+        for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
             char* r = Rider_23B8C8(i);
             int done = *(float*)(r + 0x470) >= 0.0f;
             if (!done) {
@@ -2521,15 +2475,15 @@ extern "C" void func_0023B8C8(void* self, int idx)
         }
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         int n = cBENewPlayerInterface_getHumanRider(player, 0);
-        sGM_23B8C8* gm = (sGM_23B8C8*)cGameModeHandler_pManager;
-        gm->f9C = 1;
-        func_00238BF8(gm, 10);
+        cGameModeMan* gm = cGameModeHandler_pManager;
+        gm->bAreResultsLocked = 1;
+        func_00238BF8((sGM_23B8C8*)gm, 10);
         if (D_00536730[n] == 0 && *(int*)(Rider_23B8C8(idx) + 0x480) == 0) {
             *(int*)(Rider_23B8C8(idx) + 0x100) = 1;
-            sGM_23B8C8* gm2 = (sGM_23B8C8*)cGameModeHandler_pManager;
-            gm2->f84 = 1;
-            gm2->f74 = gm2->f70;
-            gm2->f70 = 0;
+            cGameModeMan* gm2 = cGameModeHandler_pManager;
+            gm2->bIsEventDone = 1;
+            gm2->iRestoreHeat = gm2->iNextHeat;
+            gm2->iNextHeat = 0;
             return;
         }
     }
@@ -2549,7 +2503,6 @@ extern "C" int func_00145750(void* iface);
 extern "C" int func_00147410(void* iface, int player);
 extern "C" int func_001454F8(void* iface, int a1);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern char* cGameModeHandler_pManager;
 extern signed char D_00535C11[];
 
 struct sGM_23BB98 {
@@ -2588,42 +2541,42 @@ extern "C" void func_0023BB98(void* self)
     int one = 1;
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-    sGM_23BB98* gm = (sGM_23BB98*)cGameModeHandler_pManager;
-    gm->f68 = -1;
-    gm->f74 = one;
-    gm->f0 = one;
-    gm->f10 = one;
-    gm->f14 = 0;
-    gm->f70 = one;
-    gm->f6C = -1;
+    cGameModeMan* gm = cGameModeHandler_pManager;
+    gm->iLocation = -1;
+    gm->iRestoreHeat = one;
+    gm->iHeatNum = one;
+    gm->iNumberAI = one;
+    gm->iSimAI = 0;
+    gm->iNextHeat = one;
+    gm->iNextLocation = -1;
     int t = func_001454F8(race, 1);
-    sGM_23BB98* gm2 = (sGM_23BB98*)cGameModeHandler_pManager;
-    gm2->f9C = 0;
-    gm2->f7C = 0;
-    gm2->f78 = t * 60;
-    gm2->f80 = 0;
-    gm2->f84 = 0;
-    gm2->f88 = one;
-    gm2->f8C = 0;
-    gm2->f90 = 0;
-    gm2->f94 = 0;
-    gm2->f98 = one;
+    cGameModeMan* gm2 = cGameModeHandler_pManager;
+    gm2->bAreResultsLocked = 0;
+    gm2->uiPointTarget = 0;
+    gm2->uiTimeLimit = t * 60;
+    gm2->unk_80 = 0;
+    gm2->bIsEventDone = 0;
+    gm2->bIsTimedEvent = one;
+    gm2->bHasPointTarget = 0;
+    gm2->unk_90 = 0;
+    gm2->unk_94 = 0;
+    gm2->bIsLastHeat = one;
     sVEntry_23BB98* vt = *(sVEntry_23BB98**)self;
     vt[4].fn((char*)self + vt[4].delta);
     if (D_00535C11[0] == 2) {
-        ((sGM_23BB98*)cGameModeHandler_pManager)->f10 = 0;
+        cGameModeHandler_pManager->iNumberAI = 0;
         int p0 = cBENewPlayerInterface_getHumanRider(player, 0);
         int p1 = cBENewPlayerInterface_getHumanRider(player, 1);
-        ((sGM_23BB98*)cGameModeHandler_pManager)->a18[p0] = cBENewPlayerInterface_getRiderCharID(player, p0);
-        ((sGM_23BB98*)cGameModeHandler_pManager)->a40[p0] = func_00147410(player, p0);
-        ((sGM_23BB98*)cGameModeHandler_pManager)->a18[p1] = cBENewPlayerInterface_getRiderCharID(player, p1);
-        ((sGM_23BB98*)cGameModeHandler_pManager)->a40[p1] = func_00147410(player, p1);
+        cGameModeHandler_pManager->iCharacters[p0] = cBENewPlayerInterface_getRiderCharID(player, p0);
+        cGameModeHandler_pManager->iCheatCharacters[p0] = func_00147410(player, p0);
+        cGameModeHandler_pManager->iCharacters[p1] = cBENewPlayerInterface_getRiderCharID(player, p1);
+        cGameModeHandler_pManager->iCheatCharacters[p1] = func_00147410(player, p1);
     } else {
-        func_00416210(((sGM_23BB98*)cGameModeHandler_pManager)->a18, -1, 0x28);
+        func_00416210(cGameModeHandler_pManager->iCharacters, -1, 0x28);
         int p = cBENewPlayerInterface_getHumanRider(player, 0);
-        ((sGM_23BB98*)cGameModeHandler_pManager)->a18[p] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
-        ((sGM_23BB98*)cGameModeHandler_pManager)->a18[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = func_00145750(race);
-        ((sGM_23BB98*)cGameModeHandler_pManager)->a40[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = 0;
+        cGameModeHandler_pManager->iCharacters[p] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
+        cGameModeHandler_pManager->iCharacters[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = func_00145750(race);
+        cGameModeHandler_pManager->iCheatCharacters[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = 0;
     }
 }
 #endif
@@ -2638,7 +2591,6 @@ extern "C" int func_00122E50(void* self);
 extern "C" int func_0012A250(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_00238B70(void* self, int n);
-extern char* cGameModeHandler_pManager;
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
@@ -2701,8 +2653,8 @@ extern "C" void func_0023BDB8(void* self, int idx)
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 2) {
-        func_00238B70(cGameModeHandler_pManager, 2);
-        ((sGM_23BDB8*)cGameModeHandler_pManager)->f9C = 1;
+        func_00238B70((char*)cGameModeHandler_pManager, 2);
+        cGameModeHandler_pManager->bAreResultsLocked = 1;
         int w = 1;
         if (D_00536640[0] > D_00536640[1]) {
             w = 0;
@@ -2712,7 +2664,7 @@ extern "C" void func_0023BDB8(void* self, int idx)
         }
         *(int*)(Rider_23BDB8(idx) + 0x100) = 0;
     } else {
-        for (int i = 0; i < ((sGM_23BDB8*)cGameModeHandler_pManager)->f10 + 1; i++) {
+        for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
             char* r = Rider_23BDB8(i);
             int done = *(float*)(r + 0x470) >= 0.0f;
             if (!done) {
@@ -2721,15 +2673,15 @@ extern "C" void func_0023BDB8(void* self, int idx)
         }
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         int n = cBENewPlayerInterface_getHumanRider(player, 0);
-        sGM_23BDB8* gm = (sGM_23BDB8*)cGameModeHandler_pManager;
-        gm->f9C = 1;
-        func_00238B70(gm, 2);
+        cGameModeMan* gm = cGameModeHandler_pManager;
+        gm->bAreResultsLocked = 1;
+        func_00238B70((sGM_23BDB8*)gm, 2);
         if (D_00536730[n] == 0 && *(int*)(Rider_23BDB8(idx) + 0x480) == 0) {
             *(int*)(Rider_23BDB8(idx) + 0x100) = 1;
-            sGM_23BDB8* gm2 = (sGM_23BDB8*)cGameModeHandler_pManager;
-            gm2->f84 = 1;
-            gm2->f74 = gm2->f70;
-            gm2->f70 = 0;
+            cGameModeMan* gm2 = cGameModeHandler_pManager;
+            gm2->bIsEventDone = 1;
+            gm2->iRestoreHeat = gm2->iNextHeat;
+            gm2->iNextHeat = 0;
             return;
         }
         *(int*)(Rider_23BDB8(idx) + 0x100) = 0;
@@ -2749,7 +2701,6 @@ extern "C" int func_001455D0(void* iface, int mode, int a2);
 extern "C" int func_00145600(void* iface, int mode, int a2);
 extern "C" int func_001558F8(void* iface, int a1, int a2, int a3);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern char* cGameModeHandler_pManager;
 extern signed char D_00535C12[];
 
 struct sGM_23C0D0 {
@@ -2788,56 +2739,56 @@ extern "C" void func_0023C0D0(void* self)
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* score = cBE_getInterface_Fv(cBE_getBE(), 8);
-    sGM_23C0D0* gm = (sGM_23C0D0*)cGameModeHandler_pManager;
-    gm->f0 = 1;
+    cGameModeMan* gm = cGameModeHandler_pManager;
+    gm->iHeatNum = 1;
     int mode = D_00535C12[0];
-    gm->f10 = 0;
-    gm->f8 = mode;
-    gm->f14 = 0;
+    gm->iNumberAI = 0;
+    gm->iCurrentGameEvent = mode;
+    gm->iSimAI = 0;
     switch (mode) {
     case 9:
-        gm->f68 = 14;
-        gm->f6C = 5;
+        gm->iLocation = 14;
+        gm->iNextLocation = 5;
         break;
     case 10:
-        gm->f68 = 15;
-        gm->f6C = 6;
+        gm->iLocation = 15;
+        gm->iNextLocation = 6;
         break;
     case 11:
-        gm->f68 = 16;
-        gm->f6C = 4;
+        gm->iLocation = 16;
+        gm->iNextLocation = 4;
         break;
     }
-    unsigned int r = (unsigned int)func_001558F8(score, 0, ((sGM_23C0D0*)cGameModeHandler_pManager)->f68, ((sGM_23C0D0*)cGameModeHandler_pManager)->f8);
+    unsigned int r = (unsigned int)func_001558F8(score, 0, cGameModeHandler_pManager->iLocation, cGameModeHandler_pManager->iCurrentGameEvent);
     *(short*)((char*)self + 0xA) = 0;
     if (r < 3) {
         *(short*)((char*)self + 0xA) = 2;
     } else if (r == 3) {
         *(short*)((char*)self + 0xA) = 1;
     }
-    int t = func_001455D0(race, ((sGM_23C0D0*)cGameModeHandler_pManager)->f8, *(short*)((char*)self + 0xA)) * 100;
-    sGM_23C0D0* gm2 = (sGM_23C0D0*)cGameModeHandler_pManager;
+    int t = func_001455D0(race, cGameModeHandler_pManager->iCurrentGameEvent, *(short*)((char*)self + 0xA)) * 100;
+    cGameModeMan* gm2 = cGameModeHandler_pManager;
     *(int*)((char*)self + 4) = t;
-    gm2->f7C = t;
-    int u = func_00145600(race, gm2->f8, *(short*)((char*)self + 0xA));
-    sGM_23C0D0* gm3 = (sGM_23C0D0*)cGameModeHandler_pManager;
-    gm3->f70 = 2;
-    gm3->f74 = 2;
-    gm3->f78 = u * 60;
+    gm2->uiPointTarget = t;
+    int u = func_00145600(race, gm2->iCurrentGameEvent, *(short*)((char*)self + 0xA));
+    cGameModeMan* gm3 = cGameModeHandler_pManager;
+    gm3->iNextHeat = 2;
+    gm3->iRestoreHeat = 2;
+    gm3->uiTimeLimit = u * 60;
     sVEntry_23C0D0* vt = *(sVEntry_23C0D0**)self;
     vt[4].fn((char*)self + vt[4].delta);
-    func_00416210(((sGM_23C0D0*)cGameModeHandler_pManager)->a18, -1, 0x28);
+    func_00416210(cGameModeHandler_pManager->iCharacters, -1, 0x28);
     int p = cBENewPlayerInterface_getHumanRider(player, 0);
-    ((sGM_23C0D0*)cGameModeHandler_pManager)->a18[p] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
-    sGM_23C0D0* gm4 = (sGM_23C0D0*)cGameModeHandler_pManager;
-    gm4->f80 = 0;
-    gm4->f84 = 0;
-    gm4->f88 = 1;
-    gm4->f8C = 1;
-    gm4->f90 = 0;
-    gm4->f94 = 0;
-    gm4->f98 = 0;
-    gm4->f9C = 0;
+    cGameModeHandler_pManager->iCharacters[p] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
+    cGameModeMan* gm4 = cGameModeHandler_pManager;
+    gm4->unk_80 = 0;
+    gm4->bIsEventDone = 0;
+    gm4->bIsTimedEvent = 1;
+    gm4->bHasPointTarget = 1;
+    gm4->unk_90 = 0;
+    gm4->unk_94 = 0;
+    gm4->bIsLastHeat = 0;
+    gm4->bAreResultsLocked = 0;
     *(short*)((char*)self + 8) = 0;
 }
 #endif
@@ -2849,7 +2800,6 @@ INCLUDE_ASM("main/gamemode", func_0023C2D8);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int func_001455D0(void* iface, int mode, int a2);
-extern char* cGameModeHandler_pManager;
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
@@ -2898,23 +2848,23 @@ extern "C" void func_0023C2D8(void* self, int idx)
     char* r = ((sClk_23C2D8*)SSXApp->Game->AI)->riders[idx];
     if (*(int*)(r + 0x480) != 0) {
         D_00536640[idx] = 0;
-        ((sGM_23C2D8*)cGameModeHandler_pManager)->f70 = 1;
+        cGameModeHandler_pManager->iNextHeat = 1;
         *(int*)(((sClk_23C2D8*)SSXApp->Game->AI)->riders[idx] + 0x100) = 0;
         D_005366A8[idx] = 1;
     } else {
-        sGM_23C2D8* gm = (sGM_23C2D8*)cGameModeHandler_pManager;
-        if (st.time < gm->f7C) {
+        cGameModeMan* gm = cGameModeHandler_pManager;
+        if (st.time < (int)gm->uiPointTarget) {
             *(int*)(r + 0x100) = 0;
             D_00536640[idx] = st.time;
-            gm->f70 = 1;
+            gm->iNextHeat = 1;
             D_005366A8[idx] = 0;
         } else {
-            int a = func_001455D0(race, gm->f8, 2) * 100;
-            int b = func_001455D0(race, ((sGM_23C2D8*)cGameModeHandler_pManager)->f8, 1) * 100;
-            sGM_23C2D8* gm2 = (sGM_23C2D8*)cGameModeHandler_pManager;
+            int a = func_001455D0(race, gm->iCurrentGameEvent, 2) * 100;
+            int b = func_001455D0(race, cGameModeHandler_pManager->iCurrentGameEvent, 1) * 100;
+            cGameModeMan* gm2 = cGameModeHandler_pManager;
             *(int*)(((sClk_23C2D8*)SSXApp->Game->AI)->riders[idx] + 0x100) = 1;
             D_00536640[idx] = st.time;
-            gm2->f84 = 1;
+            gm2->bIsEventDone = 1;
             if (st.time >= a) {
                 D_00536730[idx] = 0;
             } else if (st.time >= b) {
@@ -2924,7 +2874,7 @@ extern "C" void func_0023C2D8(void* self, int idx)
             }
         }
     }
-    ((sGM_23C2D8*)cGameModeHandler_pManager)->f9C = 1;
+    cGameModeHandler_pManager->bAreResultsLocked = 1;
 }
 #endif
 
@@ -3008,11 +2958,11 @@ extern "C" void func_0023C618(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
-    sGM_23C618* gm = (sGM_23C618*)cGameModeHandler_pManager;
-    gm->f0 = 1;
-    gm->f98 = 1;
-    gm->f10 = D_00535C04[0];
-    gm->f14 = 0;
+    cGameModeMan* gm = cGameModeHandler_pManager;
+    gm->iHeatNum = 1;
+    gm->bIsLastHeat = 1;
+    gm->iNumberAI = D_00535C04[0];
+    gm->iSimAI = 0;
     int p = cBENewPlayerInterface_getHumanRider(player, 0);
     int ch = cBENewPlayerInterface_getRiderCharID(player, p);
     int arr[10];
@@ -3029,26 +2979,26 @@ extern "C" void func_0023C618(void* self)
                 src++;
                 v = *src;
             }
-            ((sGM_23C618*)cGameModeHandler_pManager)->a18[j] = v;
+            cGameModeHandler_pManager->iCharacters[j] = v;
             src++;
         } else {
-            ((sGM_23C618*)cGameModeHandler_pManager)->a18[j] = ch;
+            cGameModeHandler_pManager->iCharacters[j] = ch;
         }
     }
     sVEntry_23C618* e = &(*(sVEntry_23C618**)self)[4];
     e->fn((char*)self + e->delta);
-    sGM_23C618* gm2 = (sGM_23C618*)cGameModeHandler_pManager;
-    gm2->f70 = 1;
-    gm2->f78 = 0;
-    gm2->f7C = 0;
-    gm2->f80 = 0;
-    gm2->f84 = 0;
-    gm2->f88 = 0;
-    gm2->f8C = 0;
-    gm2->f90 = 0;
-    gm2->f6C = -1;
-    gm2->f74 = 1;
-    gm2->f94 = 0;
+    cGameModeMan* gm2 = cGameModeHandler_pManager;
+    gm2->iNextHeat = 1;
+    gm2->uiTimeLimit = 0;
+    gm2->uiPointTarget = 0;
+    gm2->unk_80 = 0;
+    gm2->bIsEventDone = 0;
+    gm2->bIsTimedEvent = 0;
+    gm2->bHasPointTarget = 0;
+    gm2->unk_90 = 0;
+    gm2->iNextLocation = -1;
+    gm2->iRestoreHeat = 1;
+    gm2->unk_94 = 0;
 }
 #endif
 

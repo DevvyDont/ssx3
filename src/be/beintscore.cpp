@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cBEScoreInterface_cBEScoreInterface(void* self);
@@ -164,7 +165,6 @@ struct sRaceGlobal_154AB8 {
     char pad_0x38[0x12];
     signed char mode;   // 0x4A
 };
-extern sRaceGlobal_154AB8 D_00535BC8_154AB8 __asm__("cBENewRaceInterface_newRace");
 struct sEvent_154AB8 {
     int id;
     char pad_0x4[0x60];
@@ -184,7 +184,7 @@ extern "C" void func_00154AB8(sScore_154AB8* self, int rider, sRaceStats_154AB8*
     func_00154A58(rider, (int)stats);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int charID = cBELibrary_getCharacterID(rider);
-    mode = D_00535BC8_154AB8.mode;
+    mode = cBENewRaceInterface_newRace.cGameEvent;
     int event = D_0043D950_154AB8[D_005305B0_154AB8.event].id;
     pc = &D_004A6CA8_154AB8[profile][charID];
     self->best[profile] = 0;
@@ -211,7 +211,7 @@ extern "C" void func_00154AB8(sScore_154AB8* self, int rider, sRaceStats_154AB8*
                     t[i].value = score;
                     strcpy(t[i].name, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), rider));
                     self->rank[profile] = i;
-                    if (D_00535BC8_154AB8.numHumans >= 2) {
+                    if (cBENewRaceInterface_newRace.iNumberHumans >= 2) {
                         if (self->rank[1 - profile] >= i) {
                             self->rank[1 - profile]++;
                             if (self->rank[1 - profile] >= 5)

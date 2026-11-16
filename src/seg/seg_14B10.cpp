@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/ai.h"
 #include "online/gamecomm.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -9,11 +10,11 @@ INCLUDE_ASM("seg/seg_14B10", cAI_setAIState);
 #ifdef SKIP_ASM
 extern "C" void cAI_forceAIState(void *);
 
-extern "C" void cAI_setAIState(void *arg0, int arg1) {
-    int old = *(int *)((char*)arg0 + 0);
+extern "C" void cAI_setAIState(cAI* arg0, int arg1) {
+    int old = arg0->CurrentAIState;
     if (arg1 != old) {
-        *(int *)((char*)arg0 + 4) = old;
-        *(int *)((char*)arg0 + 0x9C) = *(int *)((char*)arg0 + 0x98);
+        arg0->PreviousAIState = old;
+        arg0->PreviousAIStateHandler = (cAIStateHandler*)((int)arg0->CurrentAIStateHandler);
         cAI_forceAIState(arg0);
     }
 }
@@ -92,16 +93,16 @@ public:
     virtual void m2(void *);
 };
 
-extern "C" void func_00113C20(char *self) {
-    if (*(int *)(self + 4) != *(int *)(self + 0)) {
-        cAIState_3C20 *prev = *(cAIState_3C20 **)(self + 0x9C);
+extern "C" void func_00113C20(cAI* self) {
+    if (self->PreviousAIState != self->CurrentAIState) {
+        cAIState_3C20 *prev = (cAIState_3C20*)self->PreviousAIStateHandler;
         if (prev != 0)
-            prev->m1(self);
-        (*(cAIState_3C20 **)(self + 0x98))->m0(self);
-        *(cAIState_3C20 **)(self + 0x9C) = 0;
-        *(int *)(self + 4) = *(int *)(self + 0);
+            prev->m1(((char*)self));
+        ((cAIState_3C20*)self->CurrentAIStateHandler)->m0(((char*)self));
+        self->PreviousAIStateHandler = 0;
+        self->PreviousAIState = self->CurrentAIState;
     }
-    (*(cAIState_3C20 **)(self + 0x98))->m2(self);
+    ((cAIState_3C20*)self->CurrentAIStateHandler)->m2(((char*)self));
 }
 #endif
 
@@ -111,10 +112,10 @@ extern "C" void func_00113CB8(void) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00113CC0);
 #ifdef SKIP_ASM
-extern "C" void cAI_setAIState(void *, int);
+extern "C" void cAI_setAIState(cAI*, int);
 
 extern "C" void func_00113CC0(void *arg0, void *arg1) {
-    cAI_setAIState(arg1, 2);
+    cAI_setAIState((cAI*)arg1, 2);
 }
 #endif
 
@@ -132,10 +133,10 @@ extern "C" void func_00113CE8(void *arg0, void *arg1) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00113CF0);
 #ifdef SKIP_ASM
-extern "C" void cAI_setAIState(void *, int);
+extern "C" void cAI_setAIState(cAI*, int);
 
 extern "C" void func_00113CF0(void *arg0, void *arg1) {
-    cAI_setAIState(arg1, 5);
+    cAI_setAIState((cAI*)arg1, 5);
 }
 #endif
 
@@ -168,14 +169,14 @@ extern "C" void func_00113D38(void *arg0, void *arg1) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00113D48);
 #ifdef SKIP_ASM
-extern "C" void cAI_setAIState(void *, int);
+extern "C" void cAI_setAIState(cAI*, int);
 
 extern "C" void func_00113D48(void *arg0, void *arg1) {
     int temp_2;
 
     temp_2 = (*(int *)((char*)(arg1) + (0x1C)));
     if (temp_2 <= 0) {
-        cAI_setAIState(arg1, 5);
+        cAI_setAIState((cAI*)arg1, 5);
         return;
     }
     (*(int *)((char*)(arg1) + (0x1C))) = (int) (temp_2 - 1);
@@ -205,14 +206,14 @@ extern "C" void func_00113D88(void) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00113DB0);
 #ifdef SKIP_ASM
-extern "C" void cAI_setAIState(void *, int);
+extern "C" void cAI_setAIState(cAI*, int);
 extern "C" int func_0012A250(void *);
 extern "C" void func_00231250(int, int, int, int);
 
 extern "C" void func_00113DB0(void *arg0, void *arg1) {
     (*(int *)((char*)(arg1) + (0xC))) = (int) ((*(int *)((char*)(arg1) + (0xC))) + 1);
     if (func_0012A250(arg1) == 1) {
-        cAI_setAIState(arg1, 6);
+        cAI_setAIState((cAI*)arg1, 6);
         func_00231250(((int)SSXApp->Game), 5, 0, 0);
     }
 }
