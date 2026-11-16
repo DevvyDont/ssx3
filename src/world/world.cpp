@@ -246,6 +246,20 @@ struct sStr_3A6948 {
     sStr_3A6948(const sStr_3A6948&);
 };
 
+/**
+ * Checks which of @p n section names exist in a track's .sdb section table.
+ *
+ * Loads the file named D_004A47C0 + @p path + str_sdb with FILE_loadz. When it loaded and its first halfword is 0x3800,
+ * each name is upper-cased and compared (func_004165A8) with the 0x58-byte section records after the 0x50-byte header
+ * (count at +0x8); a found name gets its flag set (names[i].ok = 1, else 0). The file is freed afterwards. When the
+ * file is missing or has the wrong cookie the flags are left untouched. Called by cTrackFileMan_scanLocations' helpers
+ * (func_0017A830, func_0017A978).
+ *
+ * @param path  the track's base name
+ * @param n  how many names to check
+ * @param names  the names, each with a found flag
+ * @return 1 when at least one name was found, else 0
+ */
 extern "C" int func_003A6948(const char* path, int n, sName_3A6948* names)
 {
     sFile_3A6948* data;
@@ -479,6 +493,15 @@ extern "C" int cWorld_getMissionScripts(cWorld* self, int i)
 //100%
 INCLUDE_ASM("world/world", func_003A6CC8__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns a world instance's sphere-tree list: the word at +0x8 of the record that the instance's +0x88 record links at
+ * +0xC (func_003ACCD8 puts a collide model there).
+ *
+ * No null checks. The body is identical to func_003A6CD8's.
+ *
+ * @param a1  the tInstanceRecord
+ * @return the list pointer
+ */
 int func_003A6CC8(void* self, void* a1)
 {
     return *(int*)((char*)*(void**)((char*)*(void**)((char*)a1 + 0x88) + 0xc) + 0x8);
@@ -488,6 +511,16 @@ int func_003A6CC8(void* self, void* a1)
 //100%
 INCLUDE_ASM("world/world", func_003A6CD8__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns a world instance's poly-model list: the word at +0x8 of the record that the instance's +0x88 record links at
+ * +0xC (func_003ACCD8 puts a collide model there).
+ *
+ * No null checks. The body is identical to func_003A6CC8's; func_0035DF70 (railmodifier) passes its result to
+ * tSphTreeList_getMeshTree.
+ *
+ * @param a1  the tInstanceRecord
+ * @return the list pointer
+ */
 int func_003A6CD8(void* self, void* a1)
 {
     return *(int*)((char*)*(void**)((char*)*(void**)((char*)a1 + 0x88) + 0xc) + 0x8);

@@ -90,6 +90,11 @@ INCLUDE_ASM("world/wscriptcache", func_003AC980);
 #ifdef SKIP_ASM
 extern "C" void func_003ACAD0(int);
 
+/**
+ * Updates every section's script cache entry: func_003ACAD0 on each of the mNumSections entries (0xC bytes each).
+ *
+ * No C caller in the source.
+ */
 extern "C" void func_003AC980(void *self) {
     unsigned int i;
 
@@ -103,6 +108,15 @@ INCLUDE_ASM("world/wscriptcache", func_003AC9E0);
 #ifdef SKIP_ASM
 extern "C" void func_003ACBB8(int, int);
 
+/**
+ * Starts loading section @p index's script file by name: func_003ACBB8 on that cache entry.
+ *
+ * No C caller in the source.
+ *
+ * @param cache  the cWScriptCache
+ * @param index  the section id
+ * @param fileNum  the file name passed on to func_003ACBB8
+ */
 extern "C" void func_003AC9E0(void *cache, int index, int fileNum) {
     func_003ACBB8((*(int *)((char*)(cache) + (4))) + (index * 0xC), fileNum);
 }
@@ -117,6 +131,14 @@ struct sWScriptCacheItem {
 
 extern "C" void func_003ACC50(sWScriptCacheItem* e, int index, int value);
 
+/**
+ * Hands section @p index's script data to its cache entry (func_003ACC50), which resolves it.
+ *
+ * Called by cPS2ChunkResolve_resolve when a section's script chunk arrives.
+ *
+ * @param index  the section id
+ * @param value  the script file header
+ */
 extern "C" void func_003ACA10(void* self, int index, int value)
 {
     sWScriptCacheItem* items = *(sWScriptCacheItem**)((char*)self + 0x4);
@@ -133,6 +155,14 @@ struct sWScriptCacheEntry {
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003ACA38);
 #ifdef SKIP_ASM
+/**
+ * Returns section @p a1's script data (its cache entry's mpScriptHeader).
+ *
+ * The wscript code uses it as the section's script base (func_0030BB10, cWScriptMan_readFromReplayFrame).
+ *
+ * @param a1  the section id
+ * @return the script file header
+ */
 extern "C" int func_003ACA38(void* self, int a1)
 {
     sWScriptCacheEntry* p = *(sWScriptCacheEntry**)((char*)self + 0x4);
@@ -143,6 +173,11 @@ extern "C" int func_003ACA38(void* self, int a1)
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003ACA50__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a script cache entry: state 0, mStreamed 0, async handle -1, no data.
+ *
+ * @return @p self
+ */
 void* func_003ACA50(void* self)
 {
     int zero = 0;
@@ -160,6 +195,12 @@ INCLUDE_ASM("world/wscriptcache", func_003ACA70);
 void cMemMan_free(void* p);
 void operator_delete(int*);
 
+/**
+ * Destroys a script cache entry: frees its data unless it is streamed (mStreamed), and deletes the entry when bit 0 of
+ * @p flags is set.
+ *
+ * @param flags  bit 0 set to delete the object
+ */
 extern "C" void func_003ACA70(int* self, int flags)
 {
     if (*(void**)((char*)self + 0x8) != 0 && *(short*)((char*)self + 0x2) == 0) {
@@ -184,6 +225,15 @@ extern "C" void MEM_copy_CAD0(int, int, int) __asm__("MEM_copy");
 int operator_new_CAD0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
 extern char str_WScriptFile[];
 extern "C" void func_003ACAD0_impl(void *self_) __asm__("func_003ACAD0");
+/**
+ * Finishes a script file load: once the entry is loading (state 1) and its async file reports status 1, takes the data,
+ * unpacks or copies it into a new "WScriptFile" buffer (mpScriptHeader) and sets state 2.
+ *
+ * ASYNCFILE_release gives the data and size; with unpacksizez above 0 the data is unpacked, otherwise copied as is. The
+ * async buffer is freed with MEM_free. State 2 is set even when no data came back.
+ *
+ * @param self_  the cWScriptCacheEntry
+ */
 extern "C" void func_003ACAD0_impl(void *self_) {
     char *self = (char*)self_;
     short st = *(short*)self;
@@ -222,6 +272,14 @@ extern "C" void cBXString_dt_CBB8(sBXStr_CBB8*, int) __asm__("cBXString__cBXStri
 extern char D_004A47C0[];
 extern char str_ssf[];
 extern "C" void func_003ACBB8_impl(void *self, int arg) __asm__("func_003ACBB8");
+/**
+ * Starts loading an entry's script file asynchronously from D_004A47C0 + @p arg + str_ssf.
+ *
+ * Clears mStreamed and stores the ASYNCFILE_load handle (flags 0x100); the state becomes 1 (loading), or 2 when the
+ * handle is 0 or negative.
+ *
+ * @param arg  the file name (a cBXString)
+ */
 extern "C" void func_003ACBB8_impl(void *self, int arg) {
     sBXStr_CBB8 a;
     sBXStr_CBB8 b;
@@ -248,6 +306,14 @@ struct sWSCItemFields {
 
 extern "C" void func_003ACCD8(sWScriptCacheItem* e, void* world, int index);
 
+/**
+ * Gives an entry the script data that came with the stream: stores @p value, marks it streamed (mStreamed 1, not freed
+ * by the entry), sets state 2 and resolves it (func_003ACCD8 with cWorld_m_pTheWorld and @p index).
+ *
+ * @param item  the cWScriptCacheEntry
+ * @param index  the section id
+ * @param value  the script file header
+ */
 extern "C" void func_003ACC50(sWScriptCacheItem* item, int index, int value)
 {
     sWSCItemFields* fields = (sWSCItemFields*)item;
@@ -263,6 +329,9 @@ INCLUDE_ASM("world/wscriptcache", func_003ACC90);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
+/**
+ * Unloads an entry's script data: frees it unless streamed, clears mpScriptHeader and sets state 0.
+ */
 extern "C" void func_003ACC90(void* self)
 {
     void* buf = *(void**)((char*)self + 0x8);
@@ -331,6 +400,23 @@ static inline void* resolve_CCD8(char* w, sRef_CCD8 ref, int tblOff)
     return lookup_CCD8(obj, tblOff, ref.slot);
 }
 
+/**
+ * Resolves a section's script data: checks it against the world, turns its offsets into pointers and links the
+ * section's instances and other resources to it. Always ends in state 3.
+ *
+ * Without data it only sets state 3. Data whose first halfword is not 0x1000 or whose +0xC word differs from the
+ * world's .sdb checksum (mp_DataHeader->m_uiCheckSum) is dropped (freed unless streamed). Otherwise the ten offsets at
+ * +0x14 .. +0x58 and the tables at +0x3C (count +0x38) and +0x50 (count +0x4C, relative to +0x40) become pointers. Each
+ * instance of the section (count +0x44, kBxStreamData_Instance) gets its script record at +0x88 (from +0x48) and a
+ * rebuilt flag word at +0x8; script records of type 1 or 3 get their collide model (kBxStreamData_CollideModel) at
+ * +0xC, others 0; each spline (count +0x54, kBxStreamData_Spline) gets two values from the +0x58 pairs at +0x28 and
+ * +0x1C; and the records of the tables at +0x2C (0x40 bytes) and +0x24 (0x54 bytes) get their +0x8 offsets fixed. There
+ * are no null checks on the looked-up resources.
+ *
+ * @param ep  the cWScriptCacheEntry
+ * @param world  the cWorld
+ * @param index  the section id
+ */
 extern "C" void func_003ACCD8(sWScriptCacheItem* ep, void* world, int index)
 {
     char* e = (char*)ep;
@@ -431,6 +517,17 @@ static inline int valid_D120(sRef_D120 r)
     return *(unsigned int*)&r != 0xFFFFFFFF;
 }
 
+/**
+ * Returns the script header id of an instance's @p entry: word @p entry of the 0x18-byte row, picked by the instance's
+ * script reference, of the table at the script data's +0x1C.
+ *
+ * Returns -1 when the instance has no script record (+0x88), the entry has no data or the record's id (+0x8) is -1.
+ *
+ * @param cache  the cWScriptCacheEntry of the instance's section
+ * @param inst  the tInstanceRecord
+ * @param entry  the script slot
+ * @return the tResourceID, or -1
+ */
 extern "C" unsigned int func_003AD120(void* cache, void* inst, int entry)
 {
     char* data = *(char**)((char*)inst + 0x88);
@@ -449,6 +546,13 @@ extern "C" unsigned int func_003AD120(void* cache, void* inst, int entry)
 INCLUDE_ASM("world/wscriptcache", func_003AD188);
 #ifdef SKIP_ASM
 
+/**
+ * Returns SSXApp->Game.
+ *
+ * cPS2ChunkResolve_resolve passes it to func_00230430 with the section index.
+ *
+ * @return the cGame
+ */
 extern "C" void* func_003AD188(void)
 {
     return SSXApp->Game;
@@ -459,6 +563,13 @@ extern "C" void* func_003AD188(void)
 INCLUDE_ASM("world/wscriptcache", func_003AD198);
 #ifdef SKIP_ASM
 
+/**
+ * Returns SSXApp->Game->OcclusionMan.
+ *
+ * cPS2ChunkResolve_resolve and cPS2ChunkResolve_unresolve register and remove occluders through it.
+ *
+ * @return the occlusion manager
+ */
 extern "C" void* func_003AD198(void)
 {
     return SSXApp->Game->OcclusionMan;
@@ -471,6 +582,12 @@ INCLUDE_ASM("world/wscriptcache", func_003AD1A8);
 extern "C" void func_002F5998(void* lights);
 extern "C" void cRider_flushActiveLights(void* self);
 
+/**
+ * Drops all active lights: func_002F5998 on the game's WorldLightMan, then cRider_flushActiveLights on each rider of
+ * Game->AI (count +0x78, riders from +0x28).
+ *
+ * cWorldView_update calls it after freeing an unloaded section's memory.
+ */
 extern "C" void func_003AD1A8(void)
 {
     func_002F5998(SSXApp->Game->WorldLightMan);
@@ -488,6 +605,13 @@ extern "C" void* func_002E27E8(void* self);
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AD230__FPv);
 #ifdef SKIP_ASM
+/**
+ * Forwards to func_002E27E8 and returns its result.
+ *
+ * cChunkResolve_resolveHalo uses it to get the radius for a halo type.
+ *
+ * @return func_002E27E8's result
+ */
 void* func_003AD230(void* self)
 {
     return func_002E27E8(self);
@@ -497,6 +621,11 @@ void* func_003AD230(void* self)
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AD250);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument; the other arguments are ignored. No C caller in the source.
+ *
+ * @return its first argument
+ */
 extern "C" void* func_003AD250(void* self, ...)
 {
     return self;
@@ -598,6 +727,17 @@ static inline void initD(long* p, char* sz)
     p[1] = (long)(((unsigned)sz >> 3) | 0x14000000) << 32;
 }
 void sti_003AD290(int init, int prio) __asm__("func_003AD290");
+/**
+ * Static initialiser of the unit's render data, run with (1, 0xFFFF).
+ *
+ * Fills 56 four-float constants (D_00509080 .. D_005093F0), zeroes D_004A5A70 and D_004A5A74, gives the 14 two-word
+ * records D_004A5A78 .. D_004A5AE0 their index 0-13 (in the low byte and in the bits above it) and builds the three
+ * shared DMA packets used by func_003AC048 and func_003AC508: D_00509400, D_00509410 and D_00509420 hold a zero
+ * doubleword and a VIF MSCAL of the VU1 microprograms D_2400, D_2270 and D_22C8.
+ *
+ * @param init  1 to construct
+ * @param prio  the priority; only 0xFFFF does anything
+ */
 void sti_003AD290(int init, int prio)
 {
     if (prio == 0xFFFF && init) {

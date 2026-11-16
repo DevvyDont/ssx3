@@ -100,6 +100,17 @@ static inline bool rmBitTest00117400(int* bits, int i)
     return (*(int*)((char*)bits + ((i & ~0x1F) >> 3)) & mask) != 0;
 }
 
+/**
+ * Returns whether a HUD effect of @p type is active, rebuilding the 64-bit cache of active types first when it is
+ * marked stale.
+ *
+ * Returns 0 without an effect list (+0x1B0). When the stale flag (+0x1C0) is set, sets the bit of every effect's type
+ * (entries of 0x9C bytes, count at +0x1B4) except 52 (a free entry) in the cache (+0x1B8), then clears the flag.
+ * cRiderMetrix_resetHUDfx clears the cache and marks it stale. Nothing in the source calls it.
+ *
+ * @param type  the HUD effect id
+ * @return 1 when the type's bit is set, else 0
+ */
 extern "C" int func_00117400(sRiderMetrix_00117400* self, int type)
 {
     if (self->entries == 0)
@@ -131,6 +142,13 @@ struct sVEntry001174B0 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Writes the rider metrix's first 428 bytes (0x1AC) into a replay frame through @p obj's virtual slot 1.
+ *
+ * cRiderHandler_writeToReplayFrame calls it for the rider's mMetrix.
+ *
+ * @param obj  the replay frame
+ */
 extern "C" void func_001174B0(void* self, void* obj)
 {
     sVEntry001174B0* vt = *(sVEntry001174B0**)obj;
@@ -147,6 +165,13 @@ struct sVEntry001174E8 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Reads the rider metrix's first 428 bytes (0x1AC) back from a replay frame through @p obj's virtual slot 2.
+ *
+ * cRiderHandler_readFromReplayFrame calls it for the rider's mMetrix.
+ *
+ * @param obj  the replay frame
+ */
 extern "C" void func_001174E8(void* self, void* obj)
 {
     sVEntry001174E8* vt = *(sVEntry001174E8**)obj;
@@ -260,6 +285,15 @@ static inline bool rmIsState_117638(char* p, int st)
     return *(int*)p == st;
 }
 
+/**
+ * Adds a trick's points to the combo chain.
+ *
+ * For @p points above 0: increments the combo count (+0x9C), adds points x clamp((count + 10) x 0.05, 0.5, 2) to the
+ * combo points (+0xA0), sets the reset delay (+0xA4) to -1 and, with a HUD bank (+0x1B0), updates HUD effect 3
+ * (func_001171A8 on bank + 0x1D4) with its current value (0 when that slot's type is 52) and the new count.
+ *
+ * @param points  the points earned
+ */
 // PORT: g++ <? (min) operator, removed in GCC 4.3.
 extern "C" void func_00117638(void* self, int points)
 {
@@ -440,6 +474,13 @@ extern "C" void cRiderMetrix_resetCurTrick(void* riderMetrix)
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_00117900__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the current trick's power, the float at +0x14 that cRiderMetrix_getCurTrickPoints scales.
+ *
+ * cRiderMetrix_earnNameAndPoints divides it by 1 + the trick's repeats to get the boost earned.
+ *
+ * @return the trick power
+ */
 float func_00117900(void* self)
 {
     return *(float*)((char*)self + 0x14);
@@ -1317,6 +1358,14 @@ struct sMetrixRecent {
     int recent[3];
 };
 
+/**
+ * Adds a grab to the current trick's three-entry grab list (+0x60).
+ *
+ * The grab goes into the first empty entry; when it equals the last entry already filled, it is not added again.
+ *
+ * @param self_  the cRiderMetrix (this)
+ * @param value  the grab id
+ */
 extern "C" void func_00119068(void* self_, int value)
 {
     sMetrixRecent* self = (sMetrixRecent*)self_;
@@ -1376,6 +1425,17 @@ static inline int func_trickIdEqual(const void* a, const void* b, int size)
     return 1;
 }
 
+/**
+ * Records a trick in the ten-entry history (+0xA8, index +0xF8) and returns how many times it was already there.
+ *
+ * Returns 0 without recording when any of the words at +0x8, +0x20, +0x28, +0x70 or +0x7C is set. The 8-byte trick id
+ * is compared with all ten entries only when its flag fields are not the two excluded values ((w1 & 0x3F800) == 0x800
+ * or (w0 & 0xFC00000) == 0x400000); it is then stored at the ring index.
+ *
+ * @param self_  the cRiderMetrix (this)
+ * @param id_  the trick name id (8 bytes)
+ * @return the number of earlier copies
+ */
 // sTrickId is defined later in the unit, hence the casts. Don't copy id_ into a typed
 // local: a separate local shifts every register by one.
 extern "C" int func_001190F0(void* self_, sTrickId* id_)
@@ -1555,6 +1615,15 @@ INCLUDE_ASM("ai/ridermetrix", func_00119448);
 #ifdef SKIP_ASM
 extern "C" void func_001171A8(void* self, int type, int value, int arg, float f);
 
+/**
+ * Records a collected multiplier and shows it when it beats the best so far.
+ *
+ * Increments the multiplier count (+0x130); with a HUD bank (+0x1B0) and @p value above the stored best (+0x18) it
+ * shows HUD effect 4 with (int) @p value (func_001171A8 on bank + 0x270) and stores the new best.
+ *
+ * @param value  the multiplier
+ * @return 0.0 (no boost)
+ */
 extern "C" float func_00119448(char* self, float value)
 {
     *(int*)(self + 0x130) += 1;
@@ -1623,6 +1692,14 @@ INCLUDE_ASM("ai/ridermetrix", func_001195A8);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 
+/**
+ * Shows HUD effect 42 with @p value for 5 seconds.
+ *
+ * Called by func_0023B5F8 (game mode) with a time difference in seconds.
+ *
+ * @param value  the value to show
+ * @return 0.0
+ */
 extern "C" float func_001195A8(void* self, int value)
 {
     cRiderMetrix_addHUDfx1(self, 42, value, 0, 5.0f);
@@ -1635,6 +1712,14 @@ INCLUDE_ASM("ai/ridermetrix", func_001195D8);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 
+/**
+ * Shows HUD effect 43 with @p value for 5 seconds.
+ *
+ * Called by func_0023C560 (game mode) with a points difference.
+ *
+ * @param value  the value to show
+ * @return 0.0
+ */
 extern "C" float func_001195D8(void* self, int value)
 {
     cRiderMetrix_addHUDfx1(self, 43, value, 0, 5.0f);
@@ -1659,6 +1744,16 @@ struct sGameSettings_119608 {
 };
 extern sGameSettings_119608 D_00535BC8_119608 __asm__("cBENewRaceInterface_newRace");
 
+/**
+ * Adds trick points to the score (+0x198), or turns them into cash in a career free ride.
+ *
+ * The points are scaled by the multiplier at +0x1C4 and rounded. In a free ride (cBENewRaceInterface_newRace eventKind
+ * 4) of game type 0 they become cash: cRiderMetrix_evAddCash(1, points / 500, at most 20); otherwise HUD effects 35
+ * (2.5 s) and 0x18 (0.7 s) show them. The score grows either way. The new-race interface is fetched and not used.
+ *
+ * @param pts  the points
+ * @return 0.0
+ */
 extern "C" float func_00119608(void* self, int pts)
 {
     int v = (int)(pts * *(float*)((char*)self + 0x1C4) + 0.5f);
@@ -2024,6 +2119,12 @@ extern "C" float cRiderMetrix_evWipeout(void* self, int flag)
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_00119BB0);
 #ifdef SKIP_ASM
+/**
+ * Scores getting up after a wipeout: with @p a1 set shows HUD effect 33 for 1.5 s and returns a 0.1 boost.
+ *
+ * @param a1  set when the player recovered by input
+ * @return 0.1, or 0.0 when @p a1 is 0
+ */
 extern "C" float func_00119BB0(void* self, int a1)
 {
     float result;
@@ -2311,6 +2412,13 @@ float cRiderMetrix_evAutoResetSurface(void* self)
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_0011A0C0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing and returns 0.0.
+ *
+ * cRider_updateDangerLevel calls it on mMetrix when the rider's danger level changes.
+ *
+ * @return 0.0
+ */
 float func_0011A0C0(void* self)
 {
     return 0.0f;
@@ -2320,6 +2428,11 @@ float func_0011A0C0(void* self)
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_0011A0D0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing and returns 0.0. Nothing in the source calls it.
+ *
+ * @return 0.0
+ */
 extern "C" float func_0011A0D0(void) {
     return 0.0f;
 }
@@ -2330,6 +2443,11 @@ INCLUDE_ASM("ai/ridermetrix", func_0011A0E0);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 
+/**
+ * Shows HUD effect 26 for 1 second when a mission starts.
+ *
+ * @return 0.0
+ */
 extern "C" float func_0011A0E0(void* self)
 {
     cRiderMetrix_addHUDfx1(self, 26, 0, 0, 1.0f);
@@ -3087,6 +3205,13 @@ extern "C" void* strcasecmp(void* self);
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_0011B678__FPv);
 #ifdef SKIP_ASM
+/**
+ * Compares two load-list names without case: forwards to strcasecmp.
+ *
+ * The sort comparator func_0011BD60 and func_0011BE88 pass to func_00418EF8; the second string arrives in a1.
+ *
+ * @return strcasecmp's result
+ */
 void* func_0011B678(void* self)
 {
     return strcasecmp(self);

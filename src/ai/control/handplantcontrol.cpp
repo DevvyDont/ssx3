@@ -760,6 +760,18 @@ static inline void vu0SubTo_9548(t4Vector& dst, const t4Vector& a, const t4Vecto
 }
 
 extern "C" int func_00139548_x(sHP_9548* s) __asm__("func_00139548");
+/**
+ * Works out the handplant's exit velocity (ExitVel) from the rider's HandplantMode; returns whether it is set.
+ *
+ * Returns 1 at once when ExitVel is already non-zero. Speeds are in km/h (x 27.78). Mode 3: SplineDir times 0.7 x
+ * InitTangentSpeed, minus 2 km/h (15 with IsRailSpline) along the horizontal normal of SplineDir signed by ApproachDir,
+ * and a vertical 0 (10) km/h. Modes 4 and 5: 5 (15) km/h along the horizontal normal of SplineDir, turned toward
+ * ApproachDir in mode 4 and away from it in mode 5, and a vertical 0 (5) km/h. Mode 6: SplineDir x 30 km/h plus 15 km/h
+ * upward. The vertical value overwrites ExitVel.z in modes 3-5. Other modes return 0.
+ *
+ * @param s  the cHandplantMotion (this)
+ * @return 1 when ExitVel is set, else 0
+ */
 extern "C" int func_00139548_x(sHP_9548* s)
 {
     if (neq_9548(s, D_004FF120_9548))
@@ -2555,6 +2567,17 @@ static inline t4Vector up_BD80(char* p) { return *(t4Vector*)(*(char**)(p + 0x50
 
 // PORT: the unit declares func_0013BD80 earlier as returning sVec4HP; same symbol.
 extern "C" t4Vector func_0013BD80_BD80(char* p, const t4Vector& n) __asm__("func_0013BD80");
+/**
+ * Returns the up direction to use on a rail with normal @p n, tilted by the rail lean angle.
+ *
+ * For a rail whose normal is not steep (|n.z| <= 0.92) it is the Z axis with its component along @p n removed,
+ * normalised and flipped to agree with the rider's up (mMatrix row 2). For a steep one it builds a = normalised (up x
+ * n) and b = n x a, and returns b cos(RailLeanAngle) - a sin(RailLeanAngle) (func_0031BE50).
+ *
+ * @param p  the cRailslideMotion (this)
+ * @param n  the rail normal
+ * @return the up vector
+ */
 extern "C" t4Vector func_0013BD80_BD80(char* p, const t4Vector& n)
 {
     float s, c;
@@ -4929,6 +4952,13 @@ extern "C" void cGroundMotion_readFromReplayFrame(cGroundMotion* self, void* obj
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_0013F8B8);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument and does nothing else.
+ *
+ * It is variadic: the 60 bytes only spill the argument registers. Nothing in the source calls it.
+ *
+ * @return its first argument
+ */
 extern "C" void* func_0013F8B8(void* self, ...)
 {
     return self;
@@ -4943,6 +4973,17 @@ struct sSortObj_F8F8 {
     unsigned int key;   // 0x78
 };
 
+/**
+ * Merge-sorts the pointers from @p first to @p last by the unsigned key at +0x78 of each object, into @p buf.
+ *
+ * Two elements are compared directly; longer ranges sort each half recursively (the second half in place in @p first)
+ * and merge them. The input range is used as scratch. @p cmp is not used. Nothing in the source calls it.
+ *
+ * @param first  the first pointer
+ * @param last  one past the last pointer
+ * @param buf  receives the sorted pointers; needs room for last - first entries
+ * @param cmp  unused
+ */
 // Merge sort of an object-pointer array by key, using buf as scratch; the sorted result ends up in buf.
 extern "C" void func_0013F8F8(sSortObj_F8F8** first, sSortObj_F8F8** last, sSortObj_F8F8** buf, void* cmp)
 {
@@ -4993,6 +5034,17 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_0013FAD8);
 // Sort entry point: small ranges are handled inline, larger ones go to the merge sort.
 struct sSortObj_FAD8;
 extern "C" void func_0013F8F8_FAD8(sSortObj_FAD8**, sSortObj_FAD8**, sSortObj_FAD8**, void*) __asm__("func_0013F8F8");
+/**
+ * Merge-sorts the pointers from @p first to @p last into @p buf by each object's unsigned key at +0x78.
+ *
+ * A range of two or more goes to func_0013F8F8; a single pointer is copied; an empty range does nothing. Called twice
+ * by func_00101B60 (focus and unfocus instance lists).
+ *
+ * @param first  the first pointer
+ * @param last  one past the last pointer
+ * @param buf  receives the sorted pointers
+ * @param cmp  passed on unused (an InstanceCompare in the caller)
+ */
 extern "C" void func_0013FAD8(sSortObj_FAD8** first, sSortObj_FAD8** last, sSortObj_FAD8** buf, void* cmp)
 {
     int n = last - first;
@@ -5615,6 +5667,14 @@ struct sHPC140738 {
     unsigned int arr[64];   // 0x5B8
 };
 
+/**
+ * Constructs the rider's base state: clears the 19 mSlewed channels, sets mGroundPolyId to -1 and fills the 64 words
+ * from mVisitedIds (+0x5B8) with -1.
+ *
+ * Called first by cRider_cRider.
+ *
+ * @return the rider
+ */
 extern "C" sHPC140738* func_00140738(sHPC140738* self)
 {
     self->v[0][2] = 0;
@@ -5686,6 +5746,12 @@ extern "C" sHPC140738* func_00140738(sHPC140738* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140868);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mIsLocal flag.
+ *
+ * @param rider  the cRider
+ * @param isLocal  the new value
+ */
 extern "C" void func_00140868(void *rider, int isLocal) {
     (*(int *)((char*)(rider) + (0x87C))) = isLocal;
 }
@@ -5693,6 +5759,12 @@ extern "C" void func_00140868(void *rider, int isLocal) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140870);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mIsLocal flag.
+ *
+ * @param rider  the cRider
+ * @return mIsLocal
+ */
 extern "C" int func_00140870(void *rider) {
     return (*(int *)((char*)(rider) + (0x87C)));
 }
@@ -5700,6 +5772,12 @@ extern "C" int func_00140870(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140878);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's float at +0x5A4 (declared as the int unk_5A4).
+ *
+ * @param rider  the cRider
+ * @return the float at +0x5A4
+ */
 extern "C" float func_00140878(void *rider) {
     return (*(float *)((char*)(rider) + (0x5A4)));
 }
@@ -5707,6 +5785,12 @@ extern "C" float func_00140878(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140880);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's word at +0x5A8 (unk_5A8).
+ *
+ * @param rider  the cRider
+ * @return the word at +0x5A8
+ */
 extern "C" int func_00140880(void *rider) {
     return (*(int *)((char*)(rider) + (0x5A8)));
 }
@@ -5714,6 +5798,12 @@ extern "C" int func_00140880(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140888);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's word at +0x5AC (unk_5AC).
+ *
+ * @param rider  the cRider
+ * @return the word at +0x5AC
+ */
 extern "C" int func_00140888(void *rider) {
     return (*(int *)((char*)(rider) + (0x5AC)));
 }
@@ -5721,6 +5811,12 @@ extern "C" int func_00140888(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140890);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mAudioBraking.
+ *
+ * @param rider  the cRider
+ * @return mAudioBraking
+ */
 extern "C" float func_00140890(void *rider) {
     return (*(float *)((char*)(rider) + (0x750)));
 }
@@ -5728,6 +5824,12 @@ extern "C" float func_00140890(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140898);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mAudioEdging.
+ *
+ * @param rider  the cRider
+ * @return mAudioEdging
+ */
 extern "C" float func_00140898(void *rider) {
     return (*(float *)((char*)(rider) + (0x754)));
 }
@@ -5735,6 +5837,12 @@ extern "C" float func_00140898(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408A0);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mAudioPressure.
+ *
+ * @param rider  the cRider
+ * @return mAudioPressure
+ */
 extern "C" float func_001408A0(void *rider) {
     return (*(float *)((char*)(rider) + (0x758)));
 }
@@ -5742,6 +5850,12 @@ extern "C" float func_001408A0(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408A8);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mAudioSpeed.
+ *
+ * @param rider  the cRider
+ * @return mAudioSpeed
+ */
 extern "C" float func_001408A8(void *rider) {
     return (*(float *)((char*)(rider) + (0x75C)));
 }
@@ -5749,6 +5863,12 @@ extern "C" float func_001408A8(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408B0);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the rider's bounding box, mBoundsMin / mBoundsMax (+0x400).
+ *
+ * @param rider  the cRider
+ * @return rider + 0x400
+ */
 extern "C" int func_001408B0(int rider) {
     return rider + 0x400;
 }
@@ -5756,6 +5876,12 @@ extern "C" int func_001408B0(int rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408B8);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mSphereTree.
+ *
+ * @param rider  the cRider
+ * @return mSphereTree
+ */
 extern "C" int func_001408B8(void *rider) {
     return (*(int *)((char*)(rider) + (0xAA0)));
 }
@@ -5763,6 +5889,13 @@ extern "C" int func_001408B8(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408C0);
 #ifdef SKIP_ASM
+/**
+ * Copies the rider's front vector (mMatrix row 1, +0x1B0) into @p outFront.
+ *
+ * @param outFront  receives the vector
+ * @param rider  the cRider
+ * @return @p outFront
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" long long *func_001408C0(long long *outFront, void *rider) {
     *outFront = (*(long long *)((char*)(rider) + (0x1B0)));
@@ -5772,6 +5905,13 @@ extern "C" long long *func_001408C0(long long *outFront, void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408D0);
 #ifdef SKIP_ASM
+/**
+ * Copies the rider's side vector (mMatrix row 0, +0x1A0) into @p outSide.
+ *
+ * @param outSide  receives the vector
+ * @param rider  the cRider
+ * @return @p outSide
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" long long *func_001408D0(long long *outSide, void *rider) {
     *outSide = (*(long long *)((char*)(rider) + (0x1A0)));
@@ -5781,6 +5921,13 @@ extern "C" long long *func_001408D0(long long *outSide, void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408E0);
 #ifdef SKIP_ASM
+/**
+ * Copies the rider's up vector (mMatrix row 2, +0x1C0) into @p outUp.
+ *
+ * @param outUp  receives the vector
+ * @param rider  the cRider
+ * @return @p outUp
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" long long *func_001408E0(long long *outUp, void *rider) {
     *outUp = (*(long long *)((char*)(rider) + (0x1C0)));
@@ -5791,6 +5938,11 @@ extern "C" long long *func_001408E0(long long *outUp, void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408F0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the rider's mPosition (+0x110).
+ *
+ * @return self + 0x110
+ */
 void* func_001408F0(void* self)
 {
     return (char*)self + 0x110;
@@ -5800,6 +5952,12 @@ void* func_001408F0(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408F8);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the rider's mPosition (+0x110), like func_001408F0.
+ *
+ * @param rider  the cRider
+ * @return rider + 0x110
+ */
 extern "C" int func_001408F8(int rider) {
     return rider + 272;
 }
@@ -5807,6 +5965,13 @@ extern "C" int func_001408F8(int rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140900);
 #ifdef SKIP_ASM
+/**
+ * Copies the rider's mRotation quaternion (+0x120) into @p outRotation.
+ *
+ * @param outRotation  receives the quaternion
+ * @param rider  the cRider
+ * @return @p outRotation
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" long long *func_00140900(long long *outRotation, void *rider) {
     *outRotation = (*(long long *)((char*)(rider) + (0x120)));
@@ -5831,6 +5996,12 @@ void* cRider_getVelocity(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140918);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mVelocity (+0x1E0) from @p velocity.
+ *
+ * @param rider  the cRider
+ * @param velocity  the new velocity
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_00140918(void *rider, long long *velocity) {
     (*(long long *)((char*)(rider) + (0x1E0))) = (long long) *velocity;
@@ -5858,6 +6029,12 @@ static inline void hpCopyMat(void* dst, const void* src)
         : "memory");
 }
 
+/**
+ * Copies the rider's 4x4 matrix at +0x160 (0x40 bytes) into @p out.
+ *
+ * @param out  receives the matrix
+ * @return @p out
+ */
 extern "C" void* func_00140928(void* out, char* self)
 {
     hpCopyMat(out, self + 0x160);
@@ -5867,6 +6044,13 @@ extern "C" void* func_00140928(void* out, char* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140958);
 #ifdef SKIP_ASM
+/**
+ * Copies the rider's mGroundNormal (+0x370) into @p outNormal.
+ *
+ * @param outNormal  receives the vector
+ * @param rider  the cRider
+ * @return @p outNormal
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" long long *func_00140958(long long *outNormal, void *rider) {
     *outNormal = (*(long long *)((char*)(rider) + (0x370)));
@@ -5906,6 +6090,11 @@ static inline float atan2_0968(float y, float x) {
     return a;
 }
 
+/**
+ * Returns the rider's heading: atan2(front.y, front.x) of mMatrix row 1, in radians.
+ *
+ * @return the angle in -pi..pi
+ */
 extern "C" float func_00140968(void* self) {
     return atan2_0968(getVec_0968(self).y, getVec_0968(self).x);
 }
@@ -5913,6 +6102,12 @@ extern "C" float func_00140968(void* self) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A28);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mAnimModel.
+ *
+ * @param rider  the cRider
+ * @return mAnimModel
+ */
 extern "C" int func_00140A28(void *rider) {
     return (*(int *)((char*)(rider) + (0x780)));
 }
@@ -5920,6 +6115,12 @@ extern "C" int func_00140A28(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A30);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mRiderAnim.
+ *
+ * @param rider  the cRider
+ * @return mRiderAnim
+ */
 extern "C" int func_00140A30(void *rider) {
     return (*(int *)((char*)(rider) + (0x784)));
 }
@@ -5927,6 +6128,12 @@ extern "C" int func_00140A30(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A38);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mRiderHandler.
+ *
+ * @param rider  the cRider
+ * @return mRiderHandler
+ */
 extern "C" int func_00140A38(void *rider) {
     return (*(int *)((char*)(rider) + (0x77C)));
 }
@@ -5934,6 +6141,12 @@ extern "C" int func_00140A38(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A40);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mGroundPolyId (+0x430), the resource id of the ground patch under it.
+ *
+ * @param rider  the cRider
+ * @return mGroundPolyId
+ */
 extern "C" int func_00140A40(void *rider) {
     return (*(int *)((char*)(rider) + (0x430)));
 }
@@ -5941,6 +6154,12 @@ extern "C" int func_00140A40(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A48);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mGroundMaterial (+0x434).
+ *
+ * @param rider  the cRider
+ * @return mGroundMaterial
+ */
 extern "C" int func_00140A48(void *rider) {
     return (*(int *)((char*)(rider) + (0x434)));
 }
@@ -5948,6 +6167,12 @@ extern "C" int func_00140A48(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A50);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the rider's mGroundMaterial is below 17.
+ *
+ * @param rider  the cRider
+ * @return 1 when mGroundMaterial < 17, else 0
+ */
 extern "C" int func_00140A50(void *rider) {
     return (*(int *)((char*)(rider) + (0x434))) < 17;
 }
@@ -5955,6 +6180,12 @@ extern "C" int func_00140A50(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A60);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the rider's mGroundMaterial is 11, 12 or 13.
+ *
+ * @param rider  the cRider
+ * @return 1 for materials 11-13, else 0
+ */
 extern "C" int func_00140A60(void *rider) {
     return (unsigned int) ((*(int *)((char*)(rider) + (0x434))) - 11) < 3U;
 }
@@ -5962,6 +6193,12 @@ extern "C" int func_00140A60(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A70);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the rider's ground patch UV pair (+0xAAC, unk_AAC / unk_AB0).
+ *
+ * @param rider  the cRider
+ * @return rider + 0xAAC
+ */
 extern "C" int func_00140A70(int rider) {
     return rider + 2732;
 }
@@ -5969,6 +6206,12 @@ extern "C" int func_00140A70(int rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A78);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the rider's vector at +0x490.
+ *
+ * @param rider  the cRider
+ * @return rider + 0x490
+ */
 extern "C" int func_00140A78(int rider) {
     return rider + 1168;
 }
@@ -5976,6 +6219,12 @@ extern "C" int func_00140A78(int rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A80);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the rider's vector at +0x4A0.
+ *
+ * @param rider  the cRider
+ * @return rider + 0x4A0
+ */
 extern "C" int func_00140A80(int rider) {
     return rider + 1184;
 }
@@ -5983,6 +6232,12 @@ extern "C" int func_00140A80(int rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A88);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's track path pointer (+0xAB4).
+ *
+ * @param rider  the cRider
+ * @return the word at +0xAB4
+ */
 extern "C" int func_00140A88(void *rider) {
     return (*(int *)((char*)(rider) + (0xAB4)));
 }
@@ -5990,6 +6245,12 @@ extern "C" int func_00140A88(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A90);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's track path pointer (+0xAB4).
+ *
+ * @param rider  the cRider
+ * @param value  the new path
+ */
 extern "C" void func_00140A90(void *rider, int value) {
     (*(int *)((char*)(rider) + (0xAB4))) = value;
 }
@@ -5997,6 +6258,12 @@ extern "C" void func_00140A90(void *rider, int value) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A98);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's AI path pointer (+0xAB8).
+ *
+ * @param rider  the cRider
+ * @return the word at +0xAB8
+ */
 extern "C" int func_00140A98(void *rider) {
     return (*(int *)((char*)(rider) + (0xAB8)));
 }
@@ -6004,6 +6271,12 @@ extern "C" int func_00140A98(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AA0);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's AI path pointer (+0xAB8).
+ *
+ * @param rider  the cRider
+ * @param value  the new path
+ */
 extern "C" void func_00140AA0(void *rider, int value) {
     (*(int *)((char*)(rider) + (0xAB8))) = value;
 }
@@ -6011,6 +6284,12 @@ extern "C" void func_00140AA0(void *rider, int value) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AA8);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's total path distance (+0x4D8), the float func_00113130 returns.
+ *
+ * @param rider  the cRider
+ * @param fparg0  the distance
+ */
 extern "C" void func_00140AA8(void *rider, float fparg0) {
     (*(float *)((char*)(rider) + (0x4D8))) = fparg0;
 }
@@ -6018,6 +6297,12 @@ extern "C" void func_00140AA8(void *rider, float fparg0) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AB0);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's previous ranking (+0xE8).
+ *
+ * @param rider  the cRider
+ * @param value  the ranking
+ */
 extern "C" void func_00140AB0(void *rider, int value) {
     (*(int *)((char*)(rider) + (0xE8))) = value;
 }
@@ -6025,6 +6310,12 @@ extern "C" void func_00140AB0(void *rider, int value) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AB8);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's previous ranking (+0xE8).
+ *
+ * @param rider  the cRider
+ * @return the word at +0xE8
+ */
 extern "C" int func_00140AB8(void *rider) {
     return (*(int *)((char*)(rider) + (0xE8)));
 }
@@ -6032,6 +6323,11 @@ extern "C" int func_00140AB8(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AC0);
 #ifdef SKIP_ASM
+/**
+ * Marks the rider as still racing: mFinishTime = -1.
+ *
+ * @param rider  the cRider
+ */
 extern "C" void func_00140AC0(void *rider) {
     (*(float *)((char*)(rider) + (0x470))) = -1.0f;
 }
@@ -6039,6 +6335,11 @@ extern "C" void func_00140AC0(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AD0);
 #ifdef SKIP_ASM
+/**
+ * Marks the rider as past the finish line: a negative mFinishTime becomes 0 (counting starts).
+ *
+ * @param rider  the cRider
+ */
 extern "C" void func_00140AD0(void *rider) {
     if ((*(float *)((char*)(rider) + (0x470))) < 0.0f) {
         (*(float *)((char*)(rider) + (0x470))) = 0.0f;
@@ -6048,6 +6349,12 @@ extern "C" void func_00140AD0(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AF0);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the rider has crossed the finish line (mFinishTime >= 0).
+ *
+ * @param rider  the cRider
+ * @return 1 when mFinishTime >= 0, else 0
+ */
 extern "C" int func_00140AF0(void *rider) {
     int var_2;
 
@@ -6061,6 +6368,12 @@ extern "C" int func_00140AF0(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B18);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the rider finished at least 10 seconds ago (mFinishTime >= 10).
+ *
+ * @param rider  the cRider
+ * @return 1 when mFinishTime >= 10, else 0
+ */
 extern "C" int func_00140B18(void *rider) {
     int var_2;
 
@@ -6074,6 +6387,12 @@ extern "C" int func_00140B18(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B40);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mStartTick.
+ *
+ * @param rider  the cRider
+ * @param startTick  the tick
+ */
 extern "C" void func_00140B40(void *rider, int startTick) {
     (*(int *)((char*)(rider) + (0x474))) = startTick;
 }
@@ -6081,6 +6400,12 @@ extern "C" void func_00140B40(void *rider, int startTick) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B48);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mStartTick.
+ *
+ * @param rider  the cRider
+ * @return mStartTick
+ */
 extern "C" int func_00140B48(void *rider) {
     return (*(int *)((char*)(rider) + (0x474)));
 }
@@ -6088,6 +6413,12 @@ extern "C" int func_00140B48(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B50);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mFinishTick.
+ *
+ * @param rider  the cRider
+ * @param finishTick  the tick
+ */
 extern "C" void func_00140B50(void *rider, int finishTick) {
     (*(int *)((char*)(rider) + (0x478))) = finishTick;
 }
@@ -6095,6 +6426,12 @@ extern "C" void func_00140B50(void *rider, int finishTick) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B58);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mFinishTick.
+ *
+ * @param rider  the cRider
+ * @return mFinishTick
+ */
 extern "C" int func_00140B58(void *rider) {
     return (*(int *)((char*)(rider) + (0x478)));
 }
@@ -6102,6 +6439,12 @@ extern "C" int func_00140B58(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B60);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mPenaltyTicks.
+ *
+ * @param rider  the cRider
+ * @param penaltyTicks  the penalty
+ */
 extern "C" void func_00140B60(void *rider, int penaltyTicks) {
     (*(int *)((char*)(rider) + (0x47C))) = penaltyTicks;
 }
@@ -6109,6 +6452,12 @@ extern "C" void func_00140B60(void *rider, int penaltyTicks) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B68);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mPenaltyTicks.
+ *
+ * @param rider  the cRider
+ * @return mPenaltyTicks
+ */
 extern "C" int func_00140B68(void *rider) {
     return (*(int *)((char*)(rider) + (0x47C)));
 }
@@ -6116,6 +6465,12 @@ extern "C" int func_00140B68(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B70);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mDidNotFinish flag.
+ *
+ * @param rider  the cRider
+ * @param didNotFinish  the new value
+ */
 extern "C" void func_00140B70(void *rider, int didNotFinish) {
     (*(int *)((char*)(rider) + (0x480))) = didNotFinish;
 }
@@ -6123,6 +6478,12 @@ extern "C" void func_00140B70(void *rider, int didNotFinish) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B78);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mDidNotFinish flag.
+ *
+ * @param rider  the cRider
+ * @return mDidNotFinish
+ */
 extern "C" int func_00140B78(void *rider) {
     return (*(int *)((char*)(rider) + (0x480)));
 }
@@ -6145,6 +6506,12 @@ int cRider_getAIIndex(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B88);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mAIIndex.
+ *
+ * @param rider  the cRider
+ * @param aiIndex  the index
+ */
 extern "C" void func_00140B88(void *rider, int aiIndex) {
     (*(int *)((char*)(rider) + (0x86C))) = aiIndex;
 }
@@ -6152,6 +6519,12 @@ extern "C" void func_00140B88(void *rider, int aiIndex) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B90);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mViewIndex.
+ *
+ * @param rider  the cRider
+ * @return mViewIndex
+ */
 extern "C" int func_00140B90(void *rider) {
     return (*(int *)((char*)(rider) + (0x870)));
 }
@@ -6159,6 +6532,12 @@ extern "C" int func_00140B90(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B98);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mViewIndex.
+ *
+ * @param rider  the cRider
+ * @param viewIndex  the index
+ */
 extern "C" void func_00140B98(void *rider, int viewIndex) {
     (*(int *)((char*)(rider) + (0x870))) = viewIndex;
 }
@@ -6166,6 +6545,11 @@ extern "C" void func_00140B98(void *rider, int viewIndex) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140BA0);
 #ifdef SKIP_ASM
+/**
+ * Marks the rider as human: mIsHuman = 1.
+ *
+ * @param rider  the cRider
+ */
 extern "C" void func_00140BA0(void *rider) {
     (*(int *)((char*)(rider) + (0x874))) = 1;
 }
@@ -6173,6 +6557,11 @@ extern "C" void func_00140BA0(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140BB0);
 #ifdef SKIP_ASM
+/**
+ * Marks the rider as an actor: mIsActor = 1.
+ *
+ * @param rider  the cRider
+ */
 extern "C" void func_00140BB0(void *rider) {
     (*(int *)((char*)(rider) + (0x878))) = 1;
 }
@@ -6209,6 +6598,12 @@ extern "C" int cRider_isComputer(cRider* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140BD8);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mIsActor flag.
+ *
+ * @param rider  the cRider
+ * @return mIsActor
+ */
 extern "C" int func_00140BD8(void *rider) {
     return (*(int *)((char*)(rider) + (0x878)));
 }
@@ -6216,6 +6611,12 @@ extern "C" int func_00140BD8(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140BE0);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the rider is a local human: mIsHuman and mIsLocal both set.
+ *
+ * @param rider  the cRider
+ * @return 1 for a local human, else 0
+ */
 extern "C" int func_00140BE0(void *rider) {
     int var_3;
 
@@ -6229,6 +6630,12 @@ extern "C" int func_00140BE0(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C00);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mRenderFlag.
+ *
+ * @param rider  the cRider
+ * @return mRenderFlag
+ */
 extern "C" int func_00140C00(void *rider) {
     return (*(int *)((char*)(rider) + (0x884)));
 }
@@ -6236,6 +6643,12 @@ extern "C" int func_00140C00(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C08);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mRenderFlag and resets mSafeRenderTick to -1.
+ *
+ * @param rider  the cRider
+ * @param renderFlag  the new value
+ */
 extern "C" void func_00140C08(void *rider, int renderFlag) {
     (*(int *)((char*)(rider) + (0x884))) = renderFlag;
     (*(int *)((char*)(rider) + (0x888))) = -1;
@@ -6244,6 +6657,12 @@ extern "C" void func_00140C08(void *rider, int renderFlag) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C18);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mSafeRenderTick.
+ *
+ * @param rider  the cRider
+ * @return mSafeRenderTick
+ */
 extern "C" int func_00140C18(void *rider) {
     return (*(int *)((char*)(rider) + (0x888)));
 }
@@ -6251,6 +6670,12 @@ extern "C" int func_00140C18(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C20);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mSafeRenderTick.
+ *
+ * @param rider  the cRider
+ * @param safeRenderTick  the tick
+ */
 extern "C" void func_00140C20(void *rider, int safeRenderTick) {
     (*(int *)((char*)(rider) + (0x888))) = safeRenderTick;
 }
@@ -6258,6 +6683,12 @@ extern "C" void func_00140C20(void *rider, int safeRenderTick) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C28);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's word at +0x3FC (unk_3FC), which cRider_updateSplit1 clears each frame.
+ *
+ * @param rider  the cRider
+ * @return unk_3FC
+ */
 extern "C" int func_00140C28(void *rider) {
     return (*(int *)((char*)(rider) + (0x3FC)));
 }
@@ -6265,6 +6696,12 @@ extern "C" int func_00140C28(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C30);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's word at +0x3FC (unk_3FC).
+ *
+ * @param rider  the cRider
+ * @param value  the new value
+ */
 extern "C" void func_00140C30(void *rider, int value) {
     (*(int *)((char*)(rider) + (0x3FC))) = value;
 }
@@ -6272,6 +6709,12 @@ extern "C" void func_00140C30(void *rider, int value) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C38);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mMetrix.
+ *
+ * @param rider  the cRider
+ * @return mMetrix
+ */
 extern "C" int func_00140C38(void *rider) {
     return (*(int *)((char*)(rider) + (0x790)));
 }
@@ -6279,6 +6722,12 @@ extern "C" int func_00140C38(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C40);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mAirPredictor.
+ *
+ * @param rider  the cRider
+ * @return mAirPredictor
+ */
 extern "C" int func_00140C40(void *rider) {
     return (*(int *)((char*)(rider) + (0x788)));
 }
@@ -6286,6 +6735,12 @@ extern "C" int func_00140C40(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C48);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mWipeoutSlideHandle.
+ *
+ * @param rider  the cRider
+ * @return mWipeoutSlideHandle
+ */
 extern "C" int func_00140C48(void *rider) {
     return (*(int *)((char*)(rider) + (0x774)));
 }
@@ -6293,6 +6748,12 @@ extern "C" int func_00140C48(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C50);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mWipeoutSlideHandle.
+ *
+ * @param rider  the cRider
+ * @param slideHandle  the sound handle
+ */
 extern "C" void func_00140C50(void *rider, int slideHandle) {
     (*(int *)((char*)(rider) + (0x774))) = slideHandle;
 }
@@ -6300,6 +6761,12 @@ extern "C" void func_00140C50(void *rider, int slideHandle) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C58);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mWipeoutTumbleHandle.
+ *
+ * @param rider  the cRider
+ * @return mWipeoutTumbleHandle
+ */
 extern "C" int func_00140C58(void *rider) {
     return (*(int *)((char*)(rider) + (0x778)));
 }
@@ -6307,6 +6774,12 @@ extern "C" int func_00140C58(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C60);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mWipeoutTumbleHandle.
+ *
+ * @param rider  the cRider
+ * @param tumbleHandle  the sound handle
+ */
 extern "C" void func_00140C60(void *rider, int tumbleHandle) {
     (*(int *)((char*)(rider) + (0x778))) = tumbleHandle;
 }
@@ -6315,6 +6788,9 @@ extern "C" void func_00140C60(void *rider, int tumbleHandle) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C68__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the cRider base version of virtual slot 16 (kRiderVt_vibrationReset).
+ */
 void func_00140C68(void* self)
 {
 }
@@ -6323,6 +6799,9 @@ void func_00140C68(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C70__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the cRider base version of virtual slot 17 (kRiderVt_vibrationBump).
+ */
 void func_00140C70(void* self)
 {
 }
@@ -6331,6 +6810,9 @@ void func_00140C70(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C78__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the cRider base version of virtual slot 18 (kRiderVt_vibrationRumble).
+ */
 void func_00140C78(void* self)
 {
 }
@@ -6339,6 +6821,9 @@ void func_00140C78(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C80__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the cRider base version of virtual slot 19 (kRiderVt_vibrationUpdate).
+ */
 void func_00140C80(void* self)
 {
 }
@@ -6347,6 +6832,12 @@ void func_00140C80(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C88);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mLOD (0-2).
+ *
+ * @param rider  the cRider
+ * @return mLOD
+ */
 extern "C" int func_00140C88(void *rider) {
     return (*(int *)((char*)(rider) + (0x898)));
 }
@@ -6354,6 +6845,12 @@ extern "C" int func_00140C88(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C90);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mFocusBox.
+ *
+ * @param rider  the cRider
+ * @return mFocusBox
+ */
 extern "C" int func_00140C90(void *rider) {
     return (*(int *)((char*)(rider) + (0x78C)));
 }
@@ -6361,6 +6858,12 @@ extern "C" int func_00140C90(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C98);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mShadow.
+ *
+ * @param rider  the cRider
+ * @return mShadow
+ */
 extern "C" int func_00140C98(void *rider) {
     return (*(int *)((char*)(rider) + (0xAA8)));
 }
@@ -6368,6 +6871,12 @@ extern "C" int func_00140C98(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CA0);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mSmoothedHeading (+0x5B4).
+ *
+ * @param rider  the cRider
+ * @return mSmoothedHeading
+ */
 extern "C" float func_00140CA0(void *rider) {
     return (*(float *)((char*)(rider) + (0x5B4)));
 }
@@ -6375,6 +6884,12 @@ extern "C" float func_00140CA0(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CA8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the rider is in an NIS with unk_AD0 clear and unk_AFC set.
+ *
+ * @param rider  the cRider
+ * @return 1 when mIsInNIS and unk_AFC are set and unk_AD0 is 0, else 0
+ */
 extern "C" int func_00140CA8(void *rider) {
     int var_3;
 
@@ -6388,6 +6903,12 @@ extern "C" int func_00140CA8(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CD0);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's word at +0xB00 (unk_B00), which cRider_SetNISGroundVectors sets to 1.
+ *
+ * @param rider  the cRider
+ * @return unk_B00
+ */
 extern "C" int func_00140CD0(void *rider) {
     return (*(int *)((char*)(rider) + (0xB00)));
 }
@@ -6395,6 +6916,12 @@ extern "C" int func_00140CD0(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CD8);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mIsInNIS flag.
+ *
+ * @param rider  the cRider
+ * @return mIsInNIS
+ */
 extern "C" int func_00140CD8(void *rider) {
     return (*(int *)((char*)(rider) + (0xAC4)));
 }
@@ -6403,6 +6930,11 @@ extern "C" int func_00140CD8(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CE0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider itself.
+ *
+ * @return self
+ */
 void* func_00140CE0(void* self)
 {
     return self;
@@ -6412,6 +6944,12 @@ void* func_00140CE0(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CE8);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mIsOnScreen.
+ *
+ * @param rider  the cRider
+ * @return mIsOnScreen
+ */
 extern "C" int func_00140CE8(void *rider) {
     return (*(int *)((char*)(rider) + (0xB18)));
 }
@@ -6421,6 +6959,12 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140CF0);
 #ifdef SKIP_ASM
 extern "C" void cRider_initBoost();
 
+/**
+ * Sets the rider's mBoostMode and re-initialises the boost (cRider_initBoost, which gets the rider in a0).
+ *
+ * @param rider  the cRider
+ * @param boostMode  the mode, 0-3
+ */
 extern "C" void func_00140CF0(void *rider, int boostMode) {
     (*(int *)((char*)(rider) + (0x304))) = boostMode;
     cRider_initBoost();
@@ -6429,6 +6973,12 @@ extern "C" void func_00140CF0(void *rider, int boostMode) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D10);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's word at +0xB20 (unk_B20, 1 after construction).
+ *
+ * @param rider  the cRider
+ * @param value  the new value
+ */
 extern "C" void func_00140D10(void *rider, int value) {
     (*(int *)((char*)(rider) + (0xB20))) = value;
 }
@@ -6436,6 +6986,12 @@ extern "C" void func_00140D10(void *rider, int value) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D18);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mBoostMeterStart (+0xB24).
+ *
+ * @param rider  the cRider
+ * @param fparg0  the starting boost
+ */
 extern "C" void func_00140D18(void *rider, float fparg0) {
     (*(float *)((char*)(rider) + (0xB24))) = fparg0;
 }
@@ -6443,6 +6999,12 @@ extern "C" void func_00140D18(void *rider, float fparg0) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D20);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mBoostSourceMask (+0xB28).
+ *
+ * @param rider  the cRider
+ * @param sourceMask  the boost source flags
+ */
 extern "C" void func_00140D20(void *rider, int sourceMask) {
     (*(int *)((char*)(rider) + (0xB28))) = sourceMask;
 }
@@ -6450,6 +7012,12 @@ extern "C" void func_00140D20(void *rider, int sourceMask) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D28);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mStartHandicap (+0xB30).
+ *
+ * @param rider  the cRider
+ * @param handicap  the new value
+ */
 extern "C" void func_00140D28(void *rider, int handicap) {
     (*(int *)((char*)(rider) + (0xB30))) = handicap;
 }
@@ -6457,6 +7025,12 @@ extern "C" void func_00140D28(void *rider, int handicap) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D30);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's mStatsIndex (+0xB34).
+ *
+ * @param rider  the cRider
+ * @param statsIndex  the stat column
+ */
 extern "C" void func_00140D30(void *rider, int statsIndex) {
     (*(int *)((char*)(rider) + (0xB34))) = statsIndex;
 }
@@ -6464,6 +7038,12 @@ extern "C" void func_00140D30(void *rider, int statsIndex) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D38);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider's word at +0x308 (unk_308, 1 after construction).
+ *
+ * @param rider  the cRider
+ * @param value  the new value
+ */
 extern "C" void func_00140D38(void *rider, int value) {
     (*(int *)((char*)(rider) + (0x308))) = value;
 }
@@ -6471,6 +7051,12 @@ extern "C" void func_00140D38(void *rider, int value) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D40);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mBoostMode.
+ *
+ * @param rider  the cRider
+ * @return mBoostMode
+ */
 extern "C" int func_00140D40(void *rider) {
     return (*(int *)((char*)(rider) + (0x304)));
 }
@@ -6478,6 +7064,12 @@ extern "C" int func_00140D40(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D48);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's word at +0xB20 (unk_B20).
+ *
+ * @param rider  the cRider
+ * @return unk_B20
+ */
 extern "C" int func_00140D48(void *rider) {
     return (*(int *)((char*)(rider) + (0xB20)));
 }
@@ -6485,6 +7077,12 @@ extern "C" int func_00140D48(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D50);
 #ifdef SKIP_ASM
+/**
+ * Returns bit 0 of the rider's mUberFlags.
+ *
+ * @param rider  the cRider
+ * @return mUberFlags & 1
+ */
 extern "C" int func_00140D50(void *rider) {
     return (*(int *)((char*)(rider) + (0xB2C))) & 1;
 }
@@ -6492,6 +7090,12 @@ extern "C" int func_00140D50(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D60);
 #ifdef SKIP_ASM
+/**
+ * Returns bit 1 of the rider's mUberFlags.
+ *
+ * @param rider  the cRider
+ * @return (mUberFlags >> 1) & 1
+ */
 extern "C" int func_00140D60(void *rider) {
     return ((int) (*(int *)((char*)(rider) + (0xB2C))) >> 1) & 1;
 }
@@ -6499,6 +7103,12 @@ extern "C" int func_00140D60(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D70);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's mStartHandicap (+0xB30).
+ *
+ * @param rider  the cRider
+ * @return mStartHandicap
+ */
 extern "C" int func_00140D70(void *rider) {
     return (*(int *)((char*)(rider) + (0xB30)));
 }
@@ -6506,6 +7116,12 @@ extern "C" int func_00140D70(void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D78);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's word at +0x308 (unk_308), which func_00140D38 sets.
+ *
+ * @param rider  the cRider
+ * @return unk_308
+ */
 extern "C" int func_00140D78(void *rider) {
     return (*(int *)((char*)(rider) + (0x308)));
 }
@@ -6602,6 +7218,12 @@ __asm__("_vt$15cVbDtor00141040$13cRiderVbC_hpc = D_004598A8\n"
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001411A0);
 #ifdef SKIP_ASM
+/**
+ * Returns the wipeout motion's BoardSphereTree.
+ *
+ * @param wipeoutMotion  the cWipeoutMotion
+ * @return BoardSphereTree
+ */
 extern "C" int func_001411A0(cWipeoutMotion* wipeoutMotion) {
     return ((int)wipeoutMotion->BoardSphereTree);
 }
@@ -6609,6 +7231,12 @@ extern "C" int func_001411A0(cWipeoutMotion* wipeoutMotion) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001411A8);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the wipeout motion's BoardIntersectBox (+0x50).
+ *
+ * @param wipeoutMotion  the cWipeoutMotion
+ * @return wipeoutMotion + 0x50
+ */
 extern "C" int func_001411A8(int wipeoutMotion) {
     return wipeoutMotion + 80;
 }
@@ -7301,6 +7929,12 @@ extern "C" int cRiderHandler__getControlState(cRiderHandler* self) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144000);
 #ifdef SKIP_ASM
+/**
+ * Sets the computer's Input (+0xF40).
+ *
+ * @param computer  the cComputer
+ * @param input  the cInput
+ */
 extern "C" void func_00144000(void *computer, int input) {
     (*(int *)((char*)(computer) + (0xF40))) = input;
 }
@@ -7308,6 +7942,12 @@ extern "C" void func_00144000(void *computer, int input) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144008);
 #ifdef SKIP_ASM
+/**
+ * Returns the computer's mTargetID.
+ *
+ * @param computer  the cComputer
+ * @return mTargetID
+ */
 extern "C" int func_00144008(cComputer* computer) {
     return (computer->mTargetID);
 }
@@ -7315,6 +7955,13 @@ extern "C" int func_00144008(cComputer* computer) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144010);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the computer is about to land on a rail: mToRail is set and @p fparg0 is under 1.
+ *
+ * @param computer  the cComputer
+ * @param fparg0  the air time left, in seconds
+ * @return 1 when about to rail, else 0
+ */
 extern "C" int func_00144010(cComputer* computer, float fparg0) {
     int var_3;
 
@@ -7359,6 +8006,12 @@ void cAIStateHandler_OnLoseState(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144070);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's DangerMan.
+ *
+ * @param aiMan  the cAI
+ * @return DangerMan
+ */
 extern "C" int func_00144070(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (0xA8)));
 }
@@ -7366,6 +8019,12 @@ extern "C" int func_00144070(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144078);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's NumberOfRidersAllocated.
+ *
+ * @param aiMan  the cAI
+ * @return NumberOfRidersAllocated
+ */
 extern "C" int func_00144078(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (0x78)));
 }
@@ -7373,6 +8032,12 @@ extern "C" int func_00144078(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144080);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's NumberOfPlayersAllocated.
+ *
+ * @param aiMan  the cAI
+ * @return NumberOfPlayersAllocated
+ */
 extern "C" int func_00144080(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (0x7C)));
 }
@@ -7380,6 +8045,12 @@ extern "C" int func_00144080(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144088);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's NumberOfComputersAllocated.
+ *
+ * @param aiMan  the cAI
+ * @return NumberOfComputersAllocated
+ */
 extern "C" int func_00144088(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (0x80)));
 }
@@ -7387,6 +8058,12 @@ extern "C" int func_00144088(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144090);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's NumberOfActorsAllocated.
+ *
+ * @param aiMan  the cAI
+ * @return NumberOfActorsAllocated
+ */
 extern "C" int func_00144090(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (0x84)));
 }
@@ -7394,6 +8071,12 @@ extern "C" int func_00144090(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144098);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's NumberOfMissionRidersLoaded.
+ *
+ * @param aiMan  the cAI
+ * @return NumberOfMissionRidersLoaded
+ */
 extern "C" int func_00144098(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (0x88)));
 }
@@ -7401,6 +8084,12 @@ extern "C" int func_00144098(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440A0);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's Riders[@p index].
+ *
+ * @param index  the rider index
+ * @return the cRider
+ */
 extern "C" int func_001440A0(void *self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x28);
 }
@@ -7408,6 +8097,12 @@ extern "C" int func_001440A0(void *self, int index) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440B0);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's Players[@p index].
+ *
+ * @param index  the player index
+ * @return the cPlayer
+ */
 extern "C" int func_001440B0(void *self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x40);
 }
@@ -7415,6 +8110,12 @@ extern "C" int func_001440B0(void *self, int index) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440C0);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's Computers[@p index].
+ *
+ * @param index  the computer index
+ * @return the cComputer
+ */
 extern "C" int func_001440C0(void *self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x48);
 }
@@ -7422,6 +8123,12 @@ extern "C" int func_001440C0(void *self, int index) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440D0);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's Actors[@p index].
+ *
+ * @param index  the actor index
+ * @return the actor's cComputer
+ */
 extern "C" int func_001440D0(void *self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x5C);
 }
@@ -7429,6 +8136,12 @@ extern "C" int func_001440D0(void *self, int index) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440E0);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's MissionRiders[@p index].
+ *
+ * @param index  the mission rider index
+ * @return the cMissionRider
+ */
 extern "C" int func_001440E0(void *self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x70);
 }
@@ -7436,6 +8149,12 @@ extern "C" int func_001440E0(void *self, int index) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440F0);
 #ifdef SKIP_ASM
+/**
+ * Sets the AI's ComputerRidersActive flag.
+ *
+ * @param aiMan  the cAI
+ * @param active  the new value
+ */
 extern "C" void func_001440F0(void *aiMan, int active) {
     (*(int *)((char*)(aiMan) + (0x14))) = active;
 }
@@ -7443,6 +8162,12 @@ extern "C" void func_001440F0(void *aiMan, int active) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440F8);
 #ifdef SKIP_ASM
+/**
+ * Sets the AI's ComputerActorsActive flag.
+ *
+ * @param aiMan  the cAI
+ * @param active  the new value
+ */
 extern "C" void func_001440F8(void *aiMan, int active) {
     (*(int *)((char*)(aiMan) + (0x8C))) = active;
 }
@@ -7450,6 +8175,12 @@ extern "C" void func_001440F8(void *aiMan, int active) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144100);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's ComputerActorsActive flag.
+ *
+ * @param aiMan  the cAI
+ * @return ComputerActorsActive
+ */
 extern "C" int func_00144100(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (0x8C)));
 }
@@ -7457,6 +8188,12 @@ extern "C" int func_00144100(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144108);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's AITick.
+ *
+ * @param aiMan  the cAI
+ * @return AITick
+ */
 extern "C" int func_00144108(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (8)));
 }
@@ -7464,6 +8201,12 @@ extern "C" int func_00144108(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144110);
 #ifdef SKIP_ASM
+/**
+ * Sets the AI's AITick.
+ *
+ * @param aiMan  the cAI
+ * @param tick  the tick
+ */
 extern "C" void func_00144110(void *aiMan, int tick) {
     (*(int *)((char*)(aiMan) + (8))) = tick;
 }
@@ -7471,6 +8214,12 @@ extern "C" void func_00144110(void *aiMan, int tick) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144118);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's EventTimerTick.
+ *
+ * @param aiMan  the cAI
+ * @return EventTimerTick
+ */
 extern "C" int func_00144118(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (0xC)));
 }
@@ -7478,6 +8227,11 @@ extern "C" int func_00144118(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144120);
 #ifdef SKIP_ASM
+/**
+ * Adds 1 to the AI's EventTimerTick.
+ *
+ * @param aiMan  the cAI
+ */
 extern "C" void func_00144120(void *aiMan) {
     (*(int *)((char*)(aiMan) + (0xC))) = (int) ((*(int *)((char*)(aiMan) + (0xC))) + 1);
 }
@@ -7485,6 +8239,12 @@ extern "C" void func_00144120(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144130);
 #ifdef SKIP_ASM
+/**
+ * Sets the AI's EventTimerTick.
+ *
+ * @param aiMan  the cAI
+ * @param tick  the tick
+ */
 extern "C" void func_00144130(void *aiMan, int tick) {
     (*(int *)((char*)(aiMan) + (0xC))) = tick;
 }
@@ -7492,6 +8252,11 @@ extern "C" void func_00144130(void *aiMan, int tick) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144138);
 #ifdef SKIP_ASM
+/**
+ * Returns the race time elapsed in whole seconds: EventTimerTick / 60, truncated.
+ *
+ * @return the seconds
+ */
 extern "C" int func_00144138(char* self)
 {
     return (int)((float)*(int*)(self + 0xC) * 0.01666666753590107f);
@@ -7500,6 +8265,12 @@ extern "C" int func_00144138(char* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144158);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's CurrentAIState.
+ *
+ * @param aiMan  the cAI
+ * @return CurrentAIState
+ */
 extern "C" int func_00144158(int *aiMan) {
     return *aiMan;
 }
@@ -7507,6 +8278,12 @@ extern "C" int func_00144158(int *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144160);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's CountdownTicksLeft.
+ *
+ * @param aiMan  the cAI
+ * @return CountdownTicksLeft
+ */
 extern "C" int func_00144160(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (0x1C)));
 }
@@ -7514,6 +8291,12 @@ extern "C" int func_00144160(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144168);
 #ifdef SKIP_ASM
+/**
+ * Sets the AI's CountdownTicksLeft.
+ *
+ * @param aiMan  the cAI
+ * @param ticksLeft  the ticks
+ */
 extern "C" void func_00144168(void *aiMan, int ticksLeft) {
     (*(int *)((char*)(aiMan) + (0x1C))) = ticksLeft;
 }
@@ -7521,6 +8304,12 @@ extern "C" void func_00144168(void *aiMan, int ticksLeft) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144170);
 #ifdef SKIP_ASM
+/**
+ * Sets PodiumActorList[@p index] to @p value.
+ *
+ * @param index  the podium slot
+ * @param value  the character id
+ */
 extern "C" void func_00144170(void *self, int index, int value) {
     *(int *)((char *)self + (index << 2) + 0x20) = value;
 }
@@ -7528,6 +8317,12 @@ extern "C" void func_00144170(void *self, int index, int value) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144180);
 #ifdef SKIP_ASM
+/**
+ * Returns PodiumActorList[@p index].
+ *
+ * @param index  the podium slot
+ * @return the character id
+ */
 extern "C" int func_00144180(void *self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x20);
 }
@@ -7535,6 +8330,12 @@ extern "C" int func_00144180(void *self, int index) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144190);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's EndOfRaceTimer (+0x18).
+ *
+ * @param aiMan  the cAI
+ * @return EndOfRaceTimer
+ */
 extern "C" int func_00144190(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (0x18)));
 }
@@ -7542,6 +8343,12 @@ extern "C" int func_00144190(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144198);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI's FocusMan.
+ *
+ * @param aiMan  the cAI
+ * @return FocusMan
+ */
 extern "C" int func_00144198(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (0xA4)));
 }
@@ -7550,6 +8357,12 @@ extern "C" int func_00144198(void *aiMan) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001441A0__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Frees one tracked danger element: sets its state (+0x8) to 2 (free) and decrements the tracked count (+0x704).
+ *
+ * @param entry  the element record
+ * @return 2
+ */
 int func_001441A0(void* self, void* entry)
 {
     int inactiveState = 2;
@@ -7608,6 +8421,18 @@ struct sHpCtl_41B8 {
 
 extern "C" void func_002DA1C0(sHpGround_41B8* out, sHpVec3_41B8* pos);
 
+/**
+ * Works out the danger level that applies to rider @p pl: its base level raised by its height band or capped by the
+ * danger zones.
+ *
+ * Returns 0 when the rider's level (+0x70C + pl * 12) is 0. With height checks on (+0x708) the ground height under the
+ * rider (func_002DA1C0 at its position, virtual slot 5) gives band 3 below 1200.4, 2 below 2999.7, else 1, and a higher
+ * band is returned. Otherwise levels below 2, or no zones, give 1; level 2 and up are returned only while the rider is
+ * inside one of the active zones (type other than 2, sphere of its radius around its centre), else 1.
+ *
+ * @param pl  the rider index
+ * @return the danger level
+ */
 // Handplant difficulty level for player pl: at least the height band's level, and only above 1 when the rider is
 // inside one of the enabled zones.
 extern "C" int func_001441B8(sHpCtl_41B8* self, int pl)
@@ -7698,6 +8523,17 @@ struct sNode_144368 {
 
 extern "C" void func_00101A28(void* a, sNode_144368* node, int leaf);
 
+/**
+ * Walks a focus octree node and its children, calling func_00101A28 for every cell that overlaps one of the boxes.
+ *
+ * @p key gives the cell's level and integer x/y/z; the cell spans [x, x + 1] x 2^level on each axis, widened by 0.2.
+ * When the cell overlaps none of @p self's boxes it returns. Otherwise it calls func_00101A28 with @p self's first
+ * word, @p node and level < 14 and, unless that was a leaf (level below 14) or the level is 11, recurses into the eight
+ * non-null children with the halved cell keys.
+ *
+ * @param node  the cell node (eight child pointers)
+ * @param key  the cell's level and coordinates
+ */
 extern "C" void func_00144368(sTree_144368* self, sNode_144368* node, sKey_144368* key)
 {
     int n = self->count;
@@ -7776,6 +8612,12 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00144630);
 extern "C" void* cRiderAnimBase_cRiderAnimBase(void* self);
 extern void* cRiderAnim_vtbl[];
 
+/**
+ * Constructs a cRiderAnim: cRiderAnimBase_cRiderAnimBase, then +0x60 and +0x64 cleared and the cRiderAnim vtable at
+ * +0x58.
+ *
+ * @return the object
+ */
 extern "C" void* func_00144630(char* self)
 {
     cRiderAnimBase_cRiderAnimBase(self);
@@ -7789,6 +8631,11 @@ extern "C" void* func_00144630(char* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144670);
 #ifdef SKIP_ASM
+/**
+ * Clears event flag @p bit in a 64-bit flag set (+0x0) and sets it in the second set (+0x8) when it was set.
+ *
+ * @param bit  the flag number, 0-63
+ */
 // PORT: ulong is 64-bit here
 extern "C" void func_00144670(void* self, int bit)
 {
@@ -7802,6 +8649,12 @@ extern "C" void func_00144670(void* self, int bit)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446A0);
 #ifdef SKIP_ASM
+/**
+ * Returns whether event flag @p bit is set in a 64-bit flag set (+0x0).
+ *
+ * @param bit  the flag number, 0-63
+ * @return true when set
+ */
 extern "C" bool func_001446A0(void* self, int bit)
 {
     ulong mask = (ulong)1 << bit;
@@ -7812,6 +8665,12 @@ extern "C" bool func_001446A0(void* self, int bit)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446B8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether event flag @p bit is set in the second 64-bit set (+0x8), the one func_00144670 fills.
+ *
+ * @param bit  the flag number, 0-63
+ * @return true when set
+ */
 extern "C" bool func_001446B8(void* self, int bit)
 {
     ulong mask = (ulong)1 << bit;
@@ -7836,6 +8695,12 @@ extern "C" void cPlayer_setInput(cPlayer* self, int input, int device) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446E0);
 #ifdef SKIP_ASM
+/**
+ * Returns the player's Input.
+ *
+ * @param player  the cPlayer
+ * @return Input
+ */
 extern "C" int func_001446E0(cPlayer* player) {
     return ((int)player->Input);
 }
@@ -7889,6 +8754,13 @@ __asm__("_vt$12cHpD1_1446F8 = cPlayer_vtbl\n"
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001448A8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the playback manager's mode word (+0x70) is 3.
+ *
+ * cRider_updateSplit1 calls it on SSXApp->Game->PlaybackMan.
+ *
+ * @return 1 when the mode is 3, else 0
+ */
 extern "C" int func_001448A8(void* self)
 {
     return *(int*)((char*)self + 0x70) == 3;
@@ -7900,6 +8772,11 @@ extern "C" void* __sti__all_in_one_ai_cpp(int, int);
 //99.38%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001448B8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the unit's static initialisers: __sti__all_in_one_ai_cpp(1, 0xFFFF).
+ *
+ * @return __sti__all_in_one_ai_cpp's result
+ */
 void* func_001448B8(void* self)
 {
     return __sti__all_in_one_ai_cpp(1, 0xffff);

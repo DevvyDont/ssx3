@@ -290,6 +290,13 @@ static inline int riderV7_10C9A8(char* rider)
     return vt[7].fn(obj + vt[7].delta);
 }
 
+/**
+ * Sets every stat of the computer's rider to one level chosen by the current location.
+ *
+ * Reads the location DB's field 0x54 for the current race location (func_00144C98 on the new-race interface) and calls
+ * cBEStatInterface_setStatLevel for the rider's AI index (rider vtable slot 7, getAIIndex) with level 7 when it is 2, 4
+ * when it is 1 and 1 otherwise. Called from cAI_initComputerRiders for each new computer.
+ */
 extern "C" void func_0010C9A8(cComputer* self)
 {
     void* statInterface = cBE_getInterface_Fv(cBE_getBE(), 3);
@@ -663,6 +670,18 @@ static inline float wrap_0010D1A0(float x)
     return x - ffloor_0010D1A0(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
 }
 
+/**
+ * Returns whether the computer rider should reset: it has been going the wrong way or has been stuck for too long.
+ *
+ * When the rider's mTargetID is negative (no target), mBadHeadingTime counts the calls in which the rider's +0x4CC
+ * angle is more than 60 degrees off its facing (mMatrix front row), else it is zeroed; 61 or more means wrong way.
+ * Motion state 2 (func_0011FE98) counts mWanderTime up and cancels wrong way; state 4 with any bad-heading count
+ * returns 1 at once; state 1 or a speed (+0x4C8) under 1000 zeroes mWanderTime and, in state 1, returns 1 once the air
+ * predictor's CurAirTime (mAirPredictor + 0xA0) passes 30 s; anything else counts mWanderTime up. The result is wrong
+ * way or mWanderTime >= 223, and outside control state 8 (func_0011FEE8) only while mTargetID is negative.
+ *
+ * @return 1 when the rider should reset, else 0
+ */
 extern "C" int func_0010D1A0(sComputer_0010D1A0* self)
 {
     float ang = atan2_0010D1A0(self->rider->getVel().y, self->rider->getVel().x);
@@ -1178,6 +1197,18 @@ static inline bool isAggr_0010DBF0(void* agg, int a, int b)
     return func_00155B50(agg, a, b) >= 3;
 }
 
+/**
+ * Picks a rider beside the computer to punch: returns 1 and the side when one is close, at the side and disliked.
+ *
+ * Runs only every 6th AI tick. For each other rider i (by rider index, skipping its own getAIIndex) whose
+ * mRelations[i].mDistance is under 200 and whose bearing (mRelations[i].mAngle) is 30 to 150 degrees off the rider's
+ * facing (mMatrix front row), and towards whom the aggression interface (func_00155B50 on
+ * cBEAggressionInterface_getThis) gives 3 or more, it takes the first one when mLastShoveFrame + 120 is before the
+ * current AI tick, sets @p side and stores the tick in mLastShoveFrame.
+ *
+ * @param side  receives 1 when the rider is on the side of a positive angle difference, else 0
+ * @return 1 when a target was found, else 0
+ */
 // Taunt check: finds a close rider beside us (30..150 degrees off our heading) that we're aggressive towards,
 // at most every 120 frames; *side tells which side it is on.
 extern "C" int func_0010DBF0(char* self, int* side)
@@ -1222,6 +1253,13 @@ extern "C" int func_0010DBF0(char* self, int* side)
 INCLUDE_ASM("ai/computer", func_0010DEB0);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the computer's opponent rider: SSXApp->Game->AI's Riders[myOpponentIndex()], or 0 when it has none.
+ *
+ * The C declaration returns the pointer as an int.
+ *
+ * @return the opponent's cRider, or 0
+ */
 extern "C" int func_0010DEB0(void* self)
 {
     int i = cComputer_myOpponentIndex((cComputer*)self);
@@ -1240,6 +1278,18 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 float cRider_getDistanceLeft(void* self);
 extern signed char D_00535C11[];
 
+/**
+ * Returns the rubber-band time warp for the computer rider: above 1 when it is too far behind its opponent, below 1
+ * when too far ahead.
+ *
+ * Returns 1.0 without an opponent (func_0010DEB0), when the rider's +0xE4 mode is 0, in an online race (D_00535C11 ==
+ * 2) or within 50000 of the finish (mDistToFinish). Otherwise d = the opponent's distance left minus the rider's. When
+ * d < mRubberBandBehind (modes 2 and 3) it returns (d - k) / k + 1 times 1.1, with k = mRubberBandBehind; when d >
+ * mRubberBandAhead (modes 1 and 3) it returns 0.909 / ((d - k2) / k2 + 1), with k2 = mRubberBandAhead; else 1.0. The
+ * new-race interface is fetched and not used.
+ *
+ * @return the desired time scale for cRider_updateTimeWarp
+ */
 extern "C" float func_0010DEF0(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1658,6 +1708,13 @@ extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 extern "C" void func_002A3B18(void*, void*, int);
 
+/**
+ * Adds @p amount to the rider's mPowerUpTrickTimer and plays the icon sound for type 1.
+ *
+ * Also calls func_002A3B18 with 2 on the sound system. A cRider virtual (it is in six rider vtables).
+ *
+ * @param amount  the time to add
+ */
 extern "C" void func_0010E7D0(void* self, float amount)
 {
     *(float*)((char*)self + 0x2EC) += amount;
@@ -1675,6 +1732,15 @@ extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 
+/**
+ * Handles a collected multiplier icon: in motion states 1 and 4 hands it to the rider metrix and plays its sound.
+ *
+ * In those states it calls cRider_flagEventBoostPowerUp with source mask 4 and the boost returned by func_00119448 (the
+ * metrix's multiplier handler, which returns 0), then cSSXAudio_PlayIconSound with type 2 (multiplier) and @p value. A
+ * cRider virtual (it is in six rider vtables).
+ *
+ * @param value  the multiplier
+ */
 extern "C" void func_0010E830(void* self, float value)
 {
     if (func_0011FE98(self) == 1 || func_0011FE98(self) == 4)
@@ -1693,6 +1759,12 @@ extern "C" float func_00119608(int);
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 
+/**
+ * Adds trick points to the rider: the metrix's points handler (func_00119608) and the icon sound for type 3.
+ *
+ * The points reach func_00119608 untouched in a1 (the C declaration takes only self), which adds them to the score; its
+ * result (0) goes to cRider_flagEventBoostPowerUp with source mask 0x10.
+ */
 extern "C" void func_0010E8B8(void* self)
 {
     cRider_flagEventBoostPowerUp(self, 0x10, func_00119608(*(int*)((char*)self + 0x790)));
@@ -2057,6 +2129,17 @@ static inline void computerV_0010F1C0(char* self, int i)
     vt[i].fn(obj + vt[i].delta);
 }
 
+/**
+ * Handles a world (script) event on the rider.
+ *
+ * @p kind 1-3 call the rider's virtual slots 13, 14 and 15; 4 adds @p amt to the boost meter
+ * (cRider_flagEventBoostPowerUp, source mask 8); 5 forces an automatic reset of kind 4 (cRider_checkForReset with 0,
+ * 4); 6 adds (int) @p amt points (func_0010E8B8); 0 and 7 do nothing. Called by func_002FF850 with a rider from the
+ * AI's list.
+ *
+ * @param kind  the event id
+ * @param amt  the event's value
+ */
 extern "C" void func_0010F1C0(char* self, int kind, float amt)
 {
     switch (kind) {
@@ -2092,6 +2175,12 @@ INCLUDE_ASM("ai/computer", func_0010F280);
 extern "C" float func_00119BB0(int);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 
+/**
+ * Tells the rider metrix the rider got up after a wipeout and adds the boost it returns.
+ *
+ * Calls cRider_flagEventBoostPowerUp with source mask 1 and func_00119BB0's result for the rider's mMetrix. The
+ * callers' second argument reaches func_00119BB0 untouched in a1 (the C declaration takes only self).
+ */
 extern "C" void func_0010F280(void* self)
 {
     cRider_flagEventBoostPowerUp(self, 1, func_00119BB0(*(int*)((char*)self + 0x790)));
@@ -2103,6 +2192,11 @@ extern "C" void* func_0011A0E0(int);
 //100%
 INCLUDE_ASM("ai/computer", func_0010F2B8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells the rider metrix a mission started: returns func_0011A0E0 on the rider's mMetrix.
+ *
+ * @return func_0011A0E0's result
+ */
 void* func_0010F2B8(void* self)
 {
     return func_0011A0E0(*(int*)((char*)self + 0x790));
@@ -2165,6 +2259,13 @@ extern "C" void* cAI_RefreshGroupAI(void* self);
 //100%
 INCLUDE_ASM("ai/computer", func_0010F398__FPv);
 #ifdef SKIP_ASM
+/**
+ * Initialises the group AI: just calls cAI_RefreshGroupAI.
+ *
+ * Called from cAI_commonInit.
+ *
+ * @return cAI_RefreshGroupAI's result
+ */
 void* func_0010F398(void* self)
 {
     return cAI_RefreshGroupAI(self);
@@ -2437,6 +2538,18 @@ extern "C" void cSSXAudio_ChangePosition(void* mgr, void* rider, void* next, voi
 extern "C" void func_003E6328(int n, int* keys, int* idx);
 float cRider_getDistanceLeft(void* self);
 
+/**
+ * Re-ranks the riders by the AI's RaceRankType and tells the audio system about each change of place.
+ *
+ * Does nothing for rank type 0 or before cAI_isAILoadedAndReady. Type 1 ranks racers by -(distance left + 20 x their
+ * current place unk_0EC), so a rider must gain 20 units to pass; type 2 ranks by the metrix's +0x198 points. Keys are
+ * sorted largest first (func_003E6328). For each new place that differs from unk_0EC, cSSXAudio_ChangePosition gets the
+ * rider, the riders after and before it and the old and new place; the place is stored in unk_0EC. Actors get key
+ * 0xFFFF in type 1, which sorts them ahead of every racer, but -0xFFFF in type 2. The two branches on mFinishTime >= 10
+ * compute the same key.
+ *
+ * @param p  the cAI (this)
+ */
 extern "C" void func_0010F998(void* p)
 {
     sAI_0010F998* self = (sAI_0010F998*)p;
@@ -2498,6 +2611,14 @@ extern "C" void func_0010F998(void* p)
 //100%
 INCLUDE_ASM("ai/computer", func_0010FBF0);
 #ifdef SKIP_ASM
+/**
+ * Counts the riders whose AI path (+0xAB8, the word func_00140A98 returns) equals @p value.
+ *
+ * Goes over the AI's NumberOfRidersAllocated Riders. Nothing in the source calls it.
+ *
+ * @param value  the value to look for (cComputer_scorePath passes a path pointer to the similar func_0010FC30)
+ * @return the number of matching riders
+ */
 extern "C" int func_0010FBF0(char* self, int value)
 {
     int count = 0;
@@ -2527,6 +2648,15 @@ struct sAi0010FC30
     int mCount;
 };
 
+/**
+ * Counts the computer riders whose AI path (+0xAB8, the word func_00140A98 returns) equals @p team.
+ *
+ * A rider counts when its isComputer virtual (slot 9) returns true. cComputer_scorePath passes a path pointer as @p
+ * team.
+ *
+ * @param team  the value to look for (a path pointer)
+ * @return the number of matching computer riders
+ */
 extern "C" int func_0010FC30(sAi0010FC30* self, int team)
 {
     int n = 0;
@@ -3252,6 +3382,16 @@ void func_002E23E0_impl(void* self, void* a, void* b, int c, int flag, float x) 
 
 void func_00111AA0_impl(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 
+/**
+ * Spawns the rider handler's landing / impact effect: forwards to func_002E23E0 on the effect at self + 0xB40.
+ *
+ * Callers pass the cRiderHandler as self; the extra 0 flag is inserted before @p x.
+ *
+ * @param pos  the contact position
+ * @param dir  the contact normal
+ * @param c  the surface type
+ * @param x  the impact speed
+ */
 void func_00111AA0_impl(void* self, void* pos, void* dir, int c, float x)
 {
     func_002E23E0_impl((char*)self + 0xB40, pos, dir, c, 0, x);
@@ -4346,6 +4486,13 @@ float cRider_getDistanceLeft(void* self)
 //100%
 INCLUDE_ASM("ai/computer", func_00113130__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's total path distance, the float at +0x4D8 that func_00140AA8 sets.
+ *
+ * cRider_estimateFinishTick and cRider_estimateFinishScore subtract mDistToFinish from it to get the distance covered.
+ *
+ * @return the float at +0x4D8
+ */
 float func_00113130(void* self)
 {
     return *(float*)((char*)self + 0x4D8);

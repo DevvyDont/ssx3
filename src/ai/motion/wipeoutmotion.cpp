@@ -447,6 +447,14 @@ static inline void vu0NormalizeEq_6F30(sVec4_6F30& v)
         : "memory");
 }
 
+/**
+ * Moves the thrown board one tick while the rider's root pose override is on (mUseRootPoseOverride).
+ *
+ * With dt = mTimeScale / 60 it moves mRootPoseOverridePos by BoardVelocity, adds a drag of -0.2 x the horizontal
+ * velocity and gravity -1800 to BoardVelocity and clamps its length to 3333.3 (120 km/h), damps BoardAngVelocity by 1 -
+ * dt / 2, and integrates the quaternion at rider + 0x140 by it (VU0 quaternion derivative), then renormalises it.
+ * cWipeoutMotion_step calls it without arguments; self still arrives in a0.
+ */
 extern "C" void func_00136F30(sWipeout_6F30* self)
 {
     if (self->rider->active == 0) {
@@ -613,6 +621,21 @@ struct sVec4c_137138 : t4Vector {
     sVec4c_137138(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
+/**
+ * Collides the thrown board with the world and bounces or stops it.
+ *
+ * Only while mUseRootPoseOverride is set. Updates BoardSphereTree (cWipeoutMotion_updateBoardSphereTree), builds a
+ * cWorldRider probe from it, stores its segment in BoardIntersectBox and tests it against SSXApp->Game->BXNash
+ * (func_00336850). On a hit it pushes mRootPoseOverridePos, the sphere tree and the box out along the hit normal by 1.1
+ * x the depth. A fast impact (normal speed 555.6 or more) or a steep surface (normal.z below 0.8) bounces the board:
+ * BoardVelocity gains (v + max(v / 2, 27.8)) along the normal, the hit object's owner (virtual slot 43) gets the
+ * impulse scaled by -0.05 x SSXApp + 0x10, BoardAngVelocity is damped by 0.85 and, under 4 pi rad/s, gets a random
+ * 45-180 degree spin. Otherwise the owner gets the board velocity scaled by 0.05 x SSXApp + 0x10 and both board
+ * velocities are zeroed. The probe is destroyed at the end. cWipeoutMotion_resolve calls it without arguments; self
+ * still arrives in a0.
+ *
+ * @param vself  the cWipeoutMotion (this)
+ */
 extern "C" void func_00137138(cWipeoutMotion* vself)
 {
     cWipeoutMotion* self = vself;
@@ -808,6 +831,17 @@ static inline void vu0ScaleEqW7(sVec4W7& v, float s)
         : "m"(v), "f"(s));
 }
 
+/**
+ * Moves the wiped-out rider through the air one tick with the air predictor.
+ *
+ * Runs cAirPredictor_updateFlightPath on mAirPredictor with mPosition, mVelocity and dt = mTimeScale / 60. Once the
+ * predictor's SimState (+0xAC) is 1 or 3 (landing found) it turns the rider toward the landing (cRider_alignRiderAxis
+ * with the landing normal and velocity, a rate of mTimeScale over the remaining air time, or x 60 when under one tick,
+ * and mTimeScale x 6.63). RiderAngVelocity is damped by 1 - 1.5 dt and the orientation updated
+ * (cRider_updateOrientationImplicit).
+ *
+ * @param wipeoutMotion  the cWipeoutMotion
+ */
 extern "C" void func_00137750(cWipeoutMotion* wipeoutMotion)
 {
     char* rider = (char*)wipeoutMotion->mRider;
@@ -1297,6 +1331,23 @@ static inline t4Vector getFront_137D18(cRider* rider)
 
 #define RIDER (*(cRider**)(self + 0x40))
 
+/**
+ * Moves the wiped-out rider along the ground one tick: sliding friction, gravity, landing on and leaving the surface.
+ *
+ * RiderAngVelocity's length eases toward the speed x 0.0125. Friction comes from the surface material's curve
+ * (SurfPropCache entry for mSurfaceType, its four points at +0x90) at the tangential speed relative to the ground
+ * (unk_3D0), x 3 + 1.5; slow slides (under 1111) during the root pose override or anim categories 29 / 25 blend toward
+ * 40. It is scaled by mGroundNormal.z + 0.3 (clamped 0-1) and capped at 1 / dt. Position and velocity are integrated
+ * with gravity -1800 and the speed capped at 3333.3, and the rider is aligned to the ground (cRider_alignRiderAxis).
+ * func_00138960 then probes the ground: a hit updates unk_3D0, mGroundNormal, mSurfaceType, mGroundContactPoint and
+ * unk_454; sinking deeper than the material limit (mAnimModel unk_140.x x material +0x18) pushes the rider out and
+ * cancels the inward velocity, a shallower dip springs it back, both spawning the impact effect (func_00111AA0); more
+ * than 10 above it launches the rider (cAirPredictor_startLaunchIntoAir, ForceNaturalAir (+0x4) = 1), as does a miss.
+ * The hit object's owner (virtual slot 43) gets the velocity change, and a material with +0x44 set or a triangle with
+ * flag 2 forces a reset (cRider_checkForReset with 0, 1).
+ *
+ * @param vself  the cWipeoutMotion
+ */
 // Wipeout tumble: damps the spin, slides along the ground with surface friction, then re-probes the ground.
 extern "C" void func_00137D18(void* vself)
 {
@@ -1644,6 +1695,18 @@ static inline sVec4WG vu0Add_138960(const sVec4WG& a, const sVec4WG& b)
 
 struct sVEntry_138960 { short delta; short index; void (*fn)(void*, void*); };
 
+/**
+ * Probes the ground under the wiped-out rider along @p dir and records the patch it hits.
+ *
+ * Builds a capsule (func_0032E100, radius 0.575) from mPosition - 200 x @p dir to mPosition + 200 x @p dir and tests it
+ * against the rider's mOverlapList with mLineHint (func_003342D0). On a hit with a patch object it stores the patch's
+ * resource id (+0x150) in mGroundPolyId, the hit's u/v in unk_AAC / unk_AB0 and the patch's flags (+0xA) in unk_2D4
+ * (else mGroundPolyId = -1), and calls the hit object's owner's virtual slot 42 with the hit.
+ *
+ * @param hit  receives the intersection
+ * @param dir  the probe direction (the ground normal)
+ * @return the hit distance, negative on a miss
+ */
 extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir)
 {
     char* rider = *(char**)((char*)self + 0x40);

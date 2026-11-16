@@ -77,6 +77,13 @@ struct func_003A76C0_sCache {
     func_003A76C0_sEntry* entries;
 };
 
+/**
+ * Destroys a cWorldBlockAllocator: frees each block's memory (pBaseMem of the m_uiTotalBlocks entries of
+ * m_pBlockArray), then the array, and deletes the object when bit 0 of @p flags is set.
+ *
+ * @param cache  the cWorldBlockAllocator (this)
+ * @param flags  bit 0 set to delete the object
+ */
 extern "C" void func_003A76C0(void* cache, int flags)
 {
     func_003A76C0_sCache* self = (func_003A76C0_sCache*)cache;
@@ -97,6 +104,14 @@ extern "C" void func_003A76C0(void* cache, int flags)
 //100%
 INCLUDE_ASM("world/worldcache", func_003A7768__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes a block from the pool's free list: pops m_pFreeBlocks, decrements m_uiNumFreeBlocks and sets the block's
+ * bActive.
+ *
+ * There is no check for an empty free list.
+ *
+ * @return the tWorldMemBlock
+ */
 void* func_003A7768(void* self)
 {
     void* item = *(void**)((char*)self + 0x10);
@@ -110,6 +125,12 @@ void* func_003A7768(void* self)
 //100%
 INCLUDE_ASM("world/worldcache", func_003A7790__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns a block to the pool's free list: clears its bActive, pushes it on m_pFreeBlocks and increments
+ * m_uiNumFreeBlocks.
+ *
+ * @param item  the tWorldMemBlock
+ */
 void func_003A7790(void* self, void* item)
 {
     *(int*)((char*)item + 0x10) = 0;
@@ -122,6 +143,14 @@ void func_003A7790(void* self, void* item)
 //100%
 INCLUDE_ASM("world/worldcache", func_003A77B0__FPvii);
 #ifdef SKIP_ASM
+/**
+ * Constructs a cSectionBlockAllocator: stores the pool (@p a1) and the section id (@p a2) and clears m_uiNumBlocks,
+ * m_pAllocBlocks and m_pMRUBlock.
+ *
+ * @param a1  the cWorldBlockAllocator to take blocks from
+ * @param a2  the section id
+ * @return @p self
+ */
 void* func_003A77B0(void* self, int a1, int a2)
 {
     int zero = 0;
@@ -140,6 +169,11 @@ INCLUDE_ASM("world/worldcache", func_003A77D0);
 void operator_delete(int*);
 extern "C" void func_003A7818(void* self);
 
+/**
+ * Destroys a cSectionBlockAllocator: returns its blocks (func_003A7818) and deletes it when bit 0 of @p flags is set.
+ *
+ * @param flags  bit 0 set to delete the object
+ */
 extern "C" void func_003A77D0(void* self, int flags)
 {
     func_003A7818(self);
@@ -154,6 +188,11 @@ INCLUDE_ASM("world/worldcache", func_003A7818);
 #ifdef SKIP_ASM
 void func_003A7790(void* self, void* item);
 
+/**
+ * Returns all of a section arena's blocks to its pool (func_003A7790), counting m_uiNumBlocks down.
+ *
+ * m_pAllocBlocks ends up null; m_pMRUBlock is not cleared.
+ */
 extern "C" void func_003A7818(void* self)
 {
     if (*(void**)((char*)self + 0xC) != 0) {
@@ -202,6 +241,19 @@ static inline void NewBlock_7878(sWCPool_7878* self)
     self->count++;
 }
 
+/**
+ * Allocates @p size bytes from a section's arena, taking a new block from its pool when no block has room.
+ *
+ * The alignment is 4 << ((flags >> 24) & 0xF). The most recently used block (m_pMRUBlock) is tried first, then (with
+ * two or more blocks) every other block on m_pAllocBlocks; a block fits only when offset + padding + size is strictly
+ * below iBaseSize, and the padding is added to its iPad. Otherwise func_003A7768 gives a new block, pushed on the list
+ * and made the MRU, and the allocation starts at its base. Nothing checks that @p size fits in an empty block or that
+ * the pool has a free block.
+ *
+ * @param size  the bytes wanted
+ * @param flags  bits 24-27 select the alignment
+ * @return the memory
+ */
 extern "C" char* func_003A7878(sWCPool_7878* self, int size, unsigned int flags)
 {
     if (self->count == 0)
@@ -352,6 +404,11 @@ INCLUDE_ASM("world/worldcache", func_003A7B98);
 #ifdef SKIP_ASM
 extern "C" void func_003A77D0(void* self, int flags);
 
+/**
+ * Destroys the arena of section @p i (func_003A77D0 with 3) and clears its m_pSectionAllocator slot.
+ *
+ * @param i  the section id
+ */
 extern "C" void func_003A7B98(void* self, int i)
 {
     char* base = (char*)self + 0x3C;
@@ -394,6 +451,12 @@ INCLUDE_ASM("world/worldcache", func_003A7C30);
 void cMemMan_free(void*);
 void operator_delete(int*);
 
+/**
+ * Destroys a cHullPage: sets m_uiNumPageEntry to 0, frees m_pPageEntries and deletes the page when bit 0 of @p flags is
+ * set.
+ *
+ * @param flags  bit 0 set to delete the object
+ */
 extern "C" void func_003A7C30(int* self, int flags)
 {
     *(int*)((char*)self + 0x4) = 0;
@@ -466,6 +529,11 @@ INCLUDE_ASM("world/worldcache", func_003A7D80);
 void cMemMan_free(void*);
 void operator_delete(int*);
 
+/**
+ * Destroys a cWorldCacheTable: frees m_pCacheTableMem and deletes the table when bit 0 of @p flags is set.
+ *
+ * @param flags  bit 0 set to delete the object
+ */
 extern "C" void func_003A7D80(int* self, int flags)
 {
     if (*(void**)self != 0) {
@@ -873,6 +941,13 @@ struct sWCSlots {
 
 extern char* cAppMan_TheAppMan;
 
+/**
+ * Marks hull page @p i as wanted: stores the app tick (cAppMan_TheAppMan + 0x1C) in m_iTouchTick and @p f in
+ * m_fPriority, clears m_bLock and moves Empty to Queued and InActive back to Active.
+ *
+ * @param i  the hull page
+ * @param f  the page's priority
+ */
 extern "C" void func_003A8448(sWCSlots* self, int i, float f)
 {
     self->slot[i].time = *(int*)(cAppMan_TheAppMan + 0x1C);
@@ -900,6 +975,11 @@ extern char* cAppMan_TheAppMan;
 
 // PORT: callers declare (void*, unsigned short); the body never masks the id
 extern "C" void func_003A84C8_i(sWCSlots* self, int i) __asm__("func_003A84C8");
+/**
+ * Lets hull page @p i expire: clears m_bLock and backdates m_iTouchTick to the app tick minus m_iTouchStaleAge.
+ *
+ * @param i  the hull page
+ */
 extern "C" void func_003A84C8_i(sWCSlots* self, int i)
 {
     self->slot[i].f4 = 0;
@@ -910,6 +990,12 @@ extern "C" void func_003A84C8_i(sWCSlots* self, int i)
 //100%
 INCLUDE_ASM("world/worldcache", func_003A84F8);
 #ifdef SKIP_ASM
+/**
+ * Sets hull page @p a1's m_bLock to @p a2.
+ *
+ * @param a1  the hull page
+ * @param a2  the lock flag
+ */
 extern "C" void func_003A84F8(void* self, int a1, int a2)
 {
     self = (char*)self + a1 * 0x18;
@@ -920,6 +1006,13 @@ extern "C" void func_003A84F8(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("world/worldcache", func_003A8510);
 #ifdef SKIP_ASM
+/**
+ * Returns hull page @p arg1's m_bLock.
+ *
+ * @param arg0  the cWorldCache (this)
+ * @param arg1  the hull page
+ * @return the lock flag
+ */
 extern "C" int func_003A8510(int arg0, int arg1) {
     return (*(int *)((char*)(((arg1 * 0x18) + arg0)) + (0x3F4)));
 }
@@ -1142,6 +1235,15 @@ extern "C" void cWorldCache_updatePages(cWorldCache* worldCache)
 //100%
 INCLUDE_ASM("world/worldcache", func_003A88A8);
 #ifdef SKIP_ASM
+/**
+ * Frees the hull pages that have gone stale.
+ *
+ * A page that is not locked and whose m_iTouchTick is before the app tick has expired. Queued pages that expired go
+ * back to Empty; Active ones that expired become InActive and, like every InActive page, are purged
+ * (cWorldCache_purgePage) and set Empty. Loading pages are left alone. Called by cGame_update and func_00244A40.
+ *
+ * @param worldCache  the cWorldCache
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void func_003A88A8(cWorldCache* worldCache)
 {
@@ -1197,6 +1299,14 @@ struct sWc_89C8 {
 
 extern "C" void cWorldCache_purgePage(cWorldCache* self, int i);
 
+/**
+ * Purges the lowest-priority hull page that is Active or InActive, unlocked and below priority 1.0.
+ *
+ * The page is set InActive, purged (cWorldCache_purgePage) and set Empty. Does nothing when no page qualifies. No C
+ * caller in the source.
+ *
+ * @param vself  the cWorldCache
+ */
 extern "C" void func_003A89C8(cWorldCache* vself)
 {
     sWc_89C8* self = (sWc_89C8*)vself;
@@ -1414,6 +1524,20 @@ struct sWorldCache8CD0 {
 
 extern int cStreamMan_NULLCHUNK;
 
+/**
+ * Registers a streamed resource of hull page @p group: records it in the page's cHullPage, resolves it and stores its
+ * address in the cache table.
+ *
+ * The table is m_pSharedCacheTable when the RID's section byte is 0xFF, else m_pSectionCacheTable[section]. The entry
+ * (type, section byte, uid) is appended at m_uiCurrentPageEntry of the page's mp_Page. mp_ChunkResolve's virtual slot 3
+ * resolves the data (with 0 when @p chunk is cStreamMan_NULLCHUNK, whose address is then stored); the result >> 2 goes
+ * into the high 24 bits of the m_pCacheTable[type] tag, keeping its refcount byte.
+ *
+ * @param group  the hull page
+ * @param id  the eBxStreamDataType
+ * @param key  the tResourceID (section byte, uid << 8)
+ * @param chunk  the data, or cStreamMan_NULLCHUNK
+ */
 // PORT: a4 is a pointer carried in an int (compared against &cStreamMan_NULLCHUNK, then shifted).
 extern "C" void func_003A8CD0(sWorldCache8CD0* self, int group, int id, unsigned int key, int chunk)
 {
@@ -1482,6 +1606,17 @@ static inline char* release_8E20(sBxRef_8AA8* r)
 }
 
 extern "C" void rel_8E20(sWorldCache_8E20* self, int cell, int type, unsigned int key) __asm__("func_003A8E20");
+/**
+ * Releases one streamed resource: drops its tag's refcount and, at zero, clears the address and unresolves the data.
+ *
+ * The table is chosen by the RID's section byte as in func_003A8CD0. mp_ChunkResolve's virtual slot 4 gets the type,
+ * RID and data (0 for cStreamMan_NULLCHUNK); a non-null result for a shared (0xFF) resource is freed with cMemMan_free.
+ * @p cell is not used.
+ *
+ * @param cell  the hull page (unused)
+ * @param type  the eBxStreamDataType
+ * @param key  the tResourceID
+ */
 extern "C" void rel_8E20(sWorldCache_8E20* self, int cell, int type, unsigned int key)
 {
     int bank = key & 0xFF;
@@ -1511,6 +1646,15 @@ INCLUDE_ASM("world/worldcache", func_003A8F10);
 #ifdef SKIP_ASM
 static inline char *refToPtr_8F10(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_8F10(unsigned i) { if (i == 0) return 0; return refToPtr_8F10(i); }
+/**
+ * Marks every patch of section @p idx active: sets bit 0x40 of the halfword at +0xA of each patch record.
+ *
+ * The count is the section's patch count (m_iTable[1] of its tBxSection, +0x22) and the records come from the section's
+ * cache table (m_pCacheTable[1], kBxStreamData_Patch). There is no check for an empty tag (a missing patch would be
+ * written at address 0xA).
+ *
+ * @param idx  the section id
+ */
 // Sets flag 0x40 on every object listed for cell idx.
 extern "C" void func_003A8F10(char** self, int idx)
 {
@@ -1889,6 +2033,13 @@ struct func_003A9558_sNode {
     unsigned short* section;     // 0x58
 };
 
+/**
+ * Flushes every hull page under a BSP node (func_003A84C8), walking both children (+0x50, +0x54).
+ *
+ * The node's hull (+0x58) gives the page id (m_uiHullIndex). Called by cWorldView_update for an unloading section.
+ *
+ * @param node  the tBxBSPNode
+ */
 extern "C" void func_003A9558(void** self, func_003A9558_sNode* node)
 {
     if (node->section != 0) {
@@ -1908,6 +2059,12 @@ INCLUDE_ASM("world/worldcache", func_003A95C0);
 #ifdef SKIP_ASM
 extern "C" int cWorldCache_isPageEmpty(cWorldCache* self, int a1);
 
+/**
+ * Clears @p ok when any hull page under a BSP node is not empty (cWorldCache_isPageEmpty), stopping at the first.
+ *
+ * @param node  the tBxBSPNode
+ * @param ok  set on entry; cleared when a page is still loaded
+ */
 extern "C" void func_003A95C0(void** self, void* node, int* ok)
 {
     if (*ok != 0) {

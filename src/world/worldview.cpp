@@ -128,6 +128,16 @@ INCLUDE_ASM("world/worldview", func_003A9958);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sViewEnt_3A9958 { int state; int pad; };
 struct sView_3A9958 { int f0; char* info; char pad8[0xC]; sViewEnt_3A9958 ents[1]; };
+/**
+ * Asks for section @p idx to be unloaded.
+ *
+ * Loaded and Active sections go to UnLoadQueue and a LoadQueue section goes back to Empty; a section still Loading
+ * refuses (returns 0). Empty, UnLoadQueue and UnLoading are left as they are. An index past m_uiNumSections, or no
+ * mp_Hdr, also returns 1. Called by cSectionMan_update.
+ *
+ * @param idx  the section id
+ * @return 0 while the section is loading, else 1
+ */
 extern "C" int func_003A9958(sView_3A9958* self, unsigned int idx)
 {
     if (self->info != 0 && idx < *(unsigned int*)(self->info + 8)) {
@@ -187,6 +197,14 @@ INCLUDE_ASM("world/worldview", func_003A9A48);
 #ifdef SKIP_ASM
 struct sWVSlot_9A48 { int state; int pad; };
 struct sWV_9A48 { char pad0[4]; tStreamDataHeader* sec; char pad8[0xC]; sWVSlot_9A48 slots[1]; };
+/**
+ * Moves section @p idx from Active back to Loaded; any other state is kept.
+ *
+ * No C caller in the source.
+ *
+ * @param idx  the section id
+ * @return 1 for a valid index, else 0
+ */
 extern "C" int func_003A9A48(sWV_9A48* self, unsigned int idx)
 {
     if (self->sec != 0 && idx < (unsigned int)self->sec->m_uiNumSections) {
@@ -201,6 +219,12 @@ extern "C" int func_003A9A48(sWV_9A48* self, unsigned int idx)
 //100%
 INCLUDE_ASM("world/worldview", func_003A9A90);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the view's m_WorldBoundBox (+0x220). No C caller in the source.
+ *
+ * @param arg0  the cWorldView (this)
+ * @return the box's address
+ */
 extern "C" int func_003A9A90(int arg0) {
     return arg0 + 544;
 }
@@ -224,6 +248,13 @@ extern "C" void* cWorldView_getHull(cWorldView* self, int uiIdx)
 //100%
 INCLUDE_ASM("world/worldview", func_003A9AB0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of hull pages: mp_Hdr->m_uiNumBSPHulls.
+ *
+ * cWorldCache_initPageMap stores it in m_uiNumHullPage.
+ *
+ * @return the hull count
+ */
 int func_003A9AB0(void* self)
 {
     return *(int*)((char*)*(void**)((char*)self + 0x4) + 0x10);
@@ -237,6 +268,16 @@ INCLUDE_ASM("world/worldview", func_003A9AC0);
 extern "C" int cWorldCache_isPageLoaded(void* self, int a1);
 extern void func_003A9BB8_9AC0(void* self, int sec, int box, int* ok) __asm__("func_003A9BB8");
 
+/**
+ * Returns whether every hull page that @p box touches is loaded.
+ *
+ * First section 0's own hull page (m_BSP.m_iGlobalHull) must be loaded when it has chunks; then each Active section's
+ * tree is searched with func_003A9BB8. No C caller in the source.
+ *
+ * @param vself  the cWorldView
+ * @param box  the box (minimum and maximum corners)
+ * @return 1 when all those pages are loaded
+ */
 extern "C" int func_003A9AC0(cWorldView* vself, int box)
 {
     char* cur = (char*)vself->mp_Section;
@@ -313,6 +354,18 @@ static inline int overlap_9BB8(const sV4_9BB8* c, const sSection_9BB8* s)
     return r;
 }
 
+/**
+ * Clears @p ok when a hull page under a BSP node that overlaps @p box is not loaded (cWorldCache_isPageLoaded).
+ *
+ * Nodes whose box (+0x0 / +0x10) does not overlap @p box are skipped. The first child (+0x50) is visited when the
+ * node's first plane (+0x20) gives a negative dot with the box's minimum, the second (+0x54) when the second plane
+ * (+0x30) does with its maximum. Stops once @p ok is 0.
+ *
+ * @param world  the cWorldView
+ * @param sec  the tBxBSPNode
+ * @param box  the box (minimum and maximum corners)
+ * @param ok  set on entry; cleared when a page is missing
+ */
 extern "C" void func_003A9BB8(cWorldView* world, sSection_9BB8* sec, sV4_9BB8* box, int* ok)
 {
     if (*ok == 0)
@@ -378,6 +431,15 @@ struct sWV_9D60 {
 extern char* cAppMan_TheAppMan;
 extern "C" void func_003AA028(void* self, void* section, int cam, int loaded);
 
+/**
+ * Recomputes which hull pages stream focus @p cam needs.
+ *
+ * Only for an active focus (m_StreamFocus[cam].m_bActive): resets m_fSafeRadius and m_fSafeTestRadius to m_fLoadRadius,
+ * runs func_003AA028 on the root node of every Loaded or Active section (setting the safe radius only for Active ones),
+ * then stores the app frame (cAppMan_TheAppMan + 0x18) in m_iFocusTick and clears m_bFocusUpdate.
+ *
+ * @param cam  the focus index (0 or 1)
+ */
 extern "C" void func_003A9D60(sWV_9D60* self, int cam)
 {
     if (*(int*)((char*)self + cam * 0x50 + 0x240) != 0) {
@@ -420,6 +482,17 @@ struct t4Vector_3A9E50 {
 extern "C" float func_003A9E50_impl(void* self, const t4Vector_3A9E50& pos, const t4Vector_3A9E50& boxMin,
                                     const t4Vector_3A9E50& boxMax) __asm__("func_003A9E50");
 
+/**
+ * Returns the distance from @p pos to an axis-aligned box, or -1 when the point is inside it.
+ *
+ * When the point lies outside along one axis only, that axis's gap is returned as is; otherwise the gaps of the outside
+ * axes are combined as a Euclidean distance.
+ *
+ * @param pos  the point
+ * @param boxMin  the box's minimum corner
+ * @param boxMax  the box's maximum corner
+ * @return the distance, or -1 inside
+ */
 extern "C" float func_003A9E50_impl(void* self, const t4Vector_3A9E50& pos, const t4Vector_3A9E50& boxMin,
                                     const t4Vector_3A9E50& boxMax)
 {
@@ -584,6 +657,21 @@ static inline int overlap_A028(const sV4_A028* c, const sSection_A028* s)
     return r;
 }
 
+/**
+ * Touches the hull pages near stream focus @p cam under a BSP node, with a priority that falls with distance.
+ *
+ * For a node whose box overlaps the focus's m_FocusBox and that has a hull: inside the node's box the priority is 0.8
+ * and the safe radius drops to 0 when the page is not loaded; outside it, a node farther than m_fLoadRadius is dropped
+ * (with its children), the priority is (1 - distance / m_fLoadRadius) x 0.8 and the safe radius shrinks to the distance
+ * of an unloaded page. The radius goes to m_fSafeRadius when @p loaded is set and to m_fSafeTestRadius when smaller;
+ * the page is touched (func_003A8448). Children are visited by the same plane tests as func_003A9BB8, against the focus
+ * box.
+ *
+ * @param self_  the cWorldView
+ * @param sec_  the tBxBSPNode
+ * @param cam  the focus index
+ * @param loaded  set for an Active section (updates the safe radius)
+ */
 extern "C" void func_003AA028(void* self_, void* sec_, int cam, int loaded)
 {
     if (!overlap_A028(&((sWV_A028*)self_)->cams[cam].bmin, (sSection_A028*)sec_))
@@ -625,6 +713,11 @@ extern "C" void func_003AA028(void* self_, void* sec_, int cam, int loaded)
 //100%
 INCLUDE_ASM("world/worldview", func_003AA2D8);
 #ifdef SKIP_ASM
+/**
+ * Sets the word at +0x8 to -1 and returns @p self. No C caller in the source.
+ *
+ * @return @p self
+ */
 extern "C" void* func_003AA2D8(void* self)
 {
     *(unsigned int*)((char*)self + 8) = 0xFFFFFFFF;
@@ -1402,6 +1495,17 @@ INCLUDE_ASM("world/worldview", func_003AACE0);
 extern "C" float func_0040D758(float);
 extern "C" float func_0040DA10(float);
 
+/**
+ * Returns how far a light reaches before its strength falls to @p divisor.
+ *
+ * The strength is the light's +0x14 times +0x18. By the falloff type at +0x64: 1 gives strength / @p divisor x 100, 2
+ * the square root of that ratio x 100, 3 the cube root (func_0040DA10 log, func_0040D758 exp of a third) x 100; any
+ * other type gives 1e7. No C caller in the source.
+ *
+ * @param p  the tLightRecord
+ * @param divisor  the threshold strength
+ * @return the distance
+ */
 extern "C" float func_003AACE0(void* self, void* p, float divisor)
 {
     float prod = *(float*)((char*)p + 0x14) * *(float*)((char*)p + 0x18);
@@ -1998,6 +2102,14 @@ INCLUDE_ASM("world/worldview", func_003ABF20);
 #ifdef SKIP_ASM
 extern "C" void func_003ABF50(void* self, void* a1);
 
+/**
+ * Turns a streamed model's DMA data offset (+0x24) into a pointer and fixes up its mesh packets (func_003ABF50).
+ *
+ * Called by cPS2ChunkResolve_resolveModel.
+ *
+ * @param list  the tModelRecord
+ * @return 1
+ */
 // PORT: adds a pointer to an int field (offset -> pointer fixup); not 64-bit safe.
 extern "C" int func_003ABF20(void* self, void* list)
 {
@@ -2029,6 +2141,13 @@ struct func_003ABF50_sList {
 // but the body returns 1; bind the int-returning body to the symbol with an asm label.
 int func_003ABF50_impl(void* self, func_003ABF50_sList* list) __asm__("func_003ABF50");
 
+/**
+ * Fixes up the DMA packets of each mesh of a model: func_003ABFC0 on every non-null mesh in the model's list (count
+ * +0x4, 16-byte entries at +0x8, mesh at +0x4).
+ *
+ * @param list  the tModelRecord
+ * @return 1
+ */
 int func_003ABF50_impl(void* self, func_003ABF50_sList* list)
 {
     int n = list->count;
@@ -2052,6 +2171,13 @@ extern "C" void func_003AC048(void* self, void* obj, void* list, int index);
 // but the body returns 1; bind the int-returning body to the symbol with an asm label.
 int func_003ABFC0_impl(void* self, void* item, void* list) __asm__("func_003ABFC0");
 
+/**
+ * Fixes up a mesh's DMA packets: func_003AC048 on each of its +0x1C sub-meshes (pointers at +0x20), with its index.
+ *
+ * @param item  the mesh
+ * @param list  the tModelRecord
+ * @return 1
+ */
 int func_003ABFC0_impl(void* self, void* item, void* list)
 {
     void** childPtr = *(void***)((char*)item + 0x20);
@@ -2076,6 +2202,21 @@ extern char D_00509420[];
 
 // PORT: func_003ABFC0 declares this symbol as returning void; bound by asm label.
 extern "C" int func_003AC048_impl(void* self, char* obj, char* ctx, int index) __asm__("func_003AC048");
+/**
+ * Patches one sub-mesh's DMA chain in place so it can be sent to VU1.
+ *
+ * Walks the chain from @p obj's +0x4 offset, relative to the model's data (+0x24), until a ret tag (ID 6). Each pair of
+ * ref tags (ID 3) gets its offsets turned into addresses, and the last quadword of the second block gets the VIF code
+ * MSCAL of a VU1 microprogram (0x14000000 | address >> 3): D_2270 for the first pair, D_22C8 for later ones. When bit
+ * 31 of a tag's address is set (cleared here), or @p obj's flags have 0x60000, extra ref tags to the shared packets
+ * D_00509400, D_00509410 (first) or D_00509420 that func_003AD290 builds are written into the chain, ending with a ret
+ * tag (0x60000000) before the chain's own end.
+ *
+ * @param obj  the sub-mesh
+ * @param ctx  the tModelRecord
+ * @param index  the sub-mesh index (unused)
+ * @return 1
+ */
 extern "C" int func_003AC048_impl(void* self, char* obj, char* ctx, int index)
 {
     int done = 0;
@@ -2244,6 +2385,15 @@ struct func_003AC358_sList {
 
 extern "C" void* func_003AC508(void* self, void* a1, func_003AC358_sList* list, void* cur);
 
+/**
+ * Turns a streamed instance's DMA data offset (+0x98) into a pointer and fixes up its per-instance packets.
+ *
+ * For every sub-mesh of every mesh of the instance's model (+0x80, as in func_003ABF50), func_003AC508 patches the next
+ * chain in the instance's data, continuing where the previous one ended. Called by cPS2ChunkResolve_resolveInstance.
+ *
+ * @param a1  the tInstanceRecord
+ * @return 1
+ */
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
 extern "C" int func_003AC358(void* self, void* a1)
 {
@@ -2275,6 +2425,18 @@ INCLUDE_ASM("world/worldview", func_003AC438);
 extern char D_2320[];
 extern char D_2358[];
 
+/**
+ * Patches a DMA chain in place like func_003AC048 without the split handling, using the microprograms D_2320 (first
+ * pair) and D_2358.
+ *
+ * Offsets are relative to @p ctx's +0x24 data. No C caller in the source.
+ *
+ * @param a0  unused
+ * @param a1  unused
+ * @param ctx  the record whose +0x24 data the offsets are relative to
+ * @param tagPtr  the first DMA tag
+ * @return the address after the ret tag
+ */
 extern "C" char* func_003AC438(int a0, int a1, char* ctx, char* tagPtr)
 {
     int done = 0;
@@ -2319,6 +2481,18 @@ extern char D_2270[];
 extern char D_22C8[];
 extern char D_00509400[];
 
+/**
+ * Patches one per-instance DMA chain in place, like func_003AC048.
+ *
+ * The first ref of each pair points into the model's data (+0x24 of @p list), the second into the instance's own data
+ * (+0x98 of @p a1). MSCAL addresses are D_2270 for the first pair and D_22C8 after; a pair whose address has bit 31 set
+ * gets the extra refs to D_00509400 (or two more converted refs) as in func_003AC048.
+ *
+ * @param a1  the tInstanceRecord
+ * @param list  the tModelRecord
+ * @param cur  the first DMA tag of this chain
+ * @return the address after the ret tag (the next chain)
+ */
 // Walks one instance DMA chain: relocates the ref tags (+0x98 instance base for geometry, +0x24 for the
 // rest) and patches each packet's MSCAL (first one D_2270, later ones D_22C8).
 extern "C" void* func_003AC508(void* self, void* a1, func_003AC358_sList* list, void* cur)

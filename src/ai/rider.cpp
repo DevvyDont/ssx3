@@ -332,6 +332,20 @@ struct sRiderData_11BBE8
     sSlot_11BBE8 slots[1]; // 0x290
 };
 
+/**
+ * Fills @p list with the BE part entries the rider wears and returns how many.
+ *
+ * Uses the rider's character (cBELibrary_getCharacterID with mAIIndex) and the parts DB (func_0014BDB8, entry list
+ * func_0014D998, count func_0014D988; entries are 0x38 bytes). A cheat character (cBELibrary_getCheatCharacterID
+ * non-zero) takes all of its own entries. Otherwise each entry's slot in the rider's BE data (func_0014AD50 on
+ * interface 9: map at +0x288 indexed by the entry's +4 short, slots of 4 bytes from +0x290) is taken when the slot's
+ * flags have bit 0x10. Likely bug (retail too): an entry whose map value is negative gets a null slot whose flags are
+ * still read (address 2). Called by cRider_parsePartsFromBuf with a 52-entry list.
+ *
+ * @param vself  the cRider
+ * @param list  receives the entry pointers
+ * @return the number of entries written
+ */
 extern "C" int func_0011BBE8(void* vself, char** list)
 {
     cRider* self = (cRider*)vself;
@@ -397,6 +411,16 @@ struct sAnimNameTable_11BD60
     int count;      // 0x2940
 };
 
+/**
+ * Adds the animation file names of @p n parts to the rider's load list (mLoadList), skipping duplicates, and sorts it.
+ *
+ * Each part's name is at +0x28; empty names are skipped and a name already in the table (func_004165A8) is not added
+ * again. New entries (0x108 bytes: the name, -1, 0) go at the end and the count (+0x2940) is incremented; there is no
+ * check against the table's 40 entries. The table is then sorted with func_00418EF8 and func_0011B678.
+ *
+ * @param list  the part entries
+ * @param n  how many there are
+ */
 extern "C" void func_0011BD60(cRider* self, void** list, int n)
 {
     for (int i = 0; i < n; i++, list++)
@@ -453,6 +477,17 @@ struct sAnimNameTable_11BE88
     int count;      // 0x2944
 };
 
+/**
+ * Adds the texture names of @p n parts to the rider's second load list (mLoadList seen with a start index at +0x2940
+ * and a count at +0x2944), skipping duplicates, and sorts that range.
+ *
+ * For a cheat character the name is the part's +0x2C string; otherwise func_0014B988 on interface 9 builds it from the
+ * character values func_0014AC50 / func_0014AC30 and the part into a 256-byte buffer, skipping parts it rejects. New
+ * entries go at start + count, without a bound check, and the range is sorted with func_00418EF8 and func_0011B678.
+ *
+ * @param list  the part entries
+ * @param n  how many there are
+ */
 extern "C" void func_0011BE88(cRider* self, void** list, int n)
 {
     void* iface = cBE_getInterface(cBE_getBE(), 9);
@@ -2422,6 +2457,14 @@ void* cRider_setMotionState(void* vself)
 //100%
 INCLUDE_ASM("ai/rider", func_0011FE98__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's motion state: its mRiderHandler's MotionState (+0xDE0).
+ *
+ * 0 ground, 1 air, 2 wipeout, 3 static, 4 railslide, 5 handplant (On Tour's eMotionState).
+ *
+ * @param vself  the cRider
+ * @return the motion state
+ */
 int func_0011FE98(void* vself)
 {
     cRider* self = (cRider*)vself;
@@ -2436,6 +2479,13 @@ INCLUDE_ASM("ai/rider", func_0011FEA8);
 #ifdef SKIP_ASM
 extern "C" void cRiderHandler__getMotionStateName(int);
 
+/**
+ * Returns the name of the rider's motion state: cRiderHandler__getMotionStateName on mRiderHandler.
+ *
+ * The C body has no return, but the callee's string pointer is left in v0.
+ *
+ * @param rider  the cRider
+ */
 extern "C" void func_0011FEA8(void *rider) {
     cRiderHandler__getMotionStateName((*(int *)((char*)(rider) + (0x77C))));
 }
@@ -2463,6 +2513,15 @@ void* cRider_setControlState(void* vself)
 //100%
 INCLUDE_ASM("ai/rider", func_0011FEE8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's control state: its mRiderHandler's ControlState (+0xDE4).
+ *
+ * 0 cruise, 1 board press, 2 prewind, 3 bump, 4 natural air, 5 spin, 6 gate, 7 railslide, 8 wipeout, 9 reset, 10 finish
+ * line, 11 handplant, 12 uber grind, 13 void (On Tour's eControlState).
+ *
+ * @param vself  the cRider
+ * @return the control state
+ */
 int func_0011FEE8(void* vself)
 {
     cRider* self = (cRider*)vself;
@@ -2475,6 +2534,13 @@ INCLUDE_ASM("ai/rider", func_0011FEF8);
 #ifdef SKIP_ASM
 extern "C" void cRiderHandler__getControlStateName(int);
 
+/**
+ * Returns the name of the rider's control state: cRiderHandler__getControlStateName on mRiderHandler.
+ *
+ * The C body has no return, but the callee's string pointer is left in v0.
+ *
+ * @param rider  the cRider
+ */
 extern "C" void func_0011FEF8(void *rider) {
     cRiderHandler__getControlStateName((*(int *)((char*)(rider) + (0x77C))));
 }
@@ -2534,6 +2600,12 @@ extern "C" float cBEStatInterface_getCollisionAttrib(void* iface, int character,
 //100%
 INCLUDE_ASM("ai/rider", func_0011FF70);
 #ifdef SKIP_ASM
+/**
+ * Copies the position of the rider's head bone (mBoneHead in mAnimModel's bone array) into @p dst.
+ *
+ * @param dst  receives the position
+ * @return @p dst
+ */
 // Copies the quadword of the anim model's transform unk_8A8 into dst (sibling of cRider_getHipPosition).
 extern "C" void* func_0011FF70(void* dst, cRider* self)
 {
@@ -2868,6 +2940,19 @@ static inline float Clamp_120378(float v, float lo, float hi)
         }                                                                                           \
     }
 
+/**
+ * Drives the rider's three look animations (head, upper body, hips) from its velocity relative to the ground.
+ *
+ * The relative velocity is mVelocity - unk_3D0. Layers 3-5's current sequences get a playback rate of speed / 1666.7,
+ * clamped to 0.5-2 (sequence + 0x90). Every 6th AI tick, on the tick equal to mAIIndex, each enabled look controller
+ * (rider + 0x940, 0x970, 0x9A0: an enabled word and two offset quaternions, the second used when IsRidingFakie) picks
+ * an animation from its base (411, 418, 425): base when the rider is nearly still (speed 138.9 or less, except in
+ * control state 11, which also adds 1000 upward), base + 1 / + 2 for a mostly up / down direction above 888.9, base + 3
+ * / + 4 for forward / back above 416.7, else base + 5 or + 6 by side, measured in the bone's frame (mBoneHead, the bone
+ * at +0x8AC, mBoneHips). A different animation is started with cRiderAnimBase_play. Called by cRider_updateSplit4.
+ *
+ * @param vself  the cRider
+ */
 // Sets the look-layer anim speed from the rider's speed and (on its frame) picks the head/body look anims.
 extern "C" void func_00120378(void* vself)
 {
@@ -3006,6 +3091,11 @@ INCLUDE_ASM("ai/rider", func_00120EB8);
 #ifdef SKIP_ASM
 extern "C" void cRiderHandler_updateRiderFX(int);
 
+/**
+ * Updates the rider's handler FX: cRiderHandler_updateRiderFX on mRiderHandler. Nothing in the source calls it.
+ *
+ * @param rider  the cRider
+ */
 extern "C" void func_00120EB8(void *rider) {
     cRiderHandler_updateRiderFX((*(int *)((char*)(rider) + (0x77C))));
 }
@@ -3248,6 +3338,14 @@ extern "C" void* cRiderHandler_stepMotion(void* obj);
 //100%
 INCLUDE_ASM("ai/rider", func_001216E0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Steps the rider's motion: cRiderHandler_stepMotion on mRiderHandler.
+ *
+ * cAI_update calls it for every rider.
+ *
+ * @param vself  the cRider
+ * @return cRiderHandler_stepMotion's result
+ */
 void* func_001216E0(void* vself)
 {
     cRider* self = (cRider*)vself;
@@ -3732,6 +3830,12 @@ static inline sVec4_121F30 mtxMulVec_121F30(sVec4_121F30* m, sVec4_121F30* v)
     return r;
 }
 
+/**
+ * Picks the rider's mLOD from its distance in front of the camera.
+ *
+ * Transforms the rider's position (virtual slot 5) by GrMan's view matrix (slot 35), scales the depth by tan(fov) (slot
+ * 29) and 0.01: below 6 gives LOD 0, below 10 LOD 1, else 2. Called by cRider_renderBody.
+ */
 extern "C" void func_00121F30(cRider* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -3843,6 +3947,11 @@ public:
 };
 extern "C" void func_00389C38(void* rec, int flags);
 
+/**
+ * Builds a cleared 160-byte light record (func_00389C38 with 0) and hands it to GrMan's virtual slot 69 with 0.
+ *
+ * Nothing in the source calls it.
+ */
 extern "C" void func_00122048()
 {
     char rec[160];
@@ -4142,6 +4251,11 @@ INCLUDE_ASM("ai/rider", func_00122618);
 #ifdef SKIP_ASM
 extern "C" void cRiderHandler_renderRiderFX(int);
 
+/**
+ * Renders the rider's handler FX: cRiderHandler_renderRiderFX on mRiderHandler. Nothing in the source calls it.
+ *
+ * @param rider  the cRider
+ */
 extern "C" void func_00122618(void *rider) {
     cRiderHandler_renderRiderFX((*(int *)((char*)(rider) + (0x77C))));
 }
@@ -4150,6 +4264,14 @@ extern "C" void func_00122618(void *rider) {
 //100%
 INCLUDE_ASM("ai/rider", func_00122638__FPv);
 #ifdef SKIP_ASM
+/**
+ * Renders the rider's attached emitter FX: func_002F2088 on mAttachedEmitterFX.
+ *
+ * cAI_render calls it for every rider last.
+ *
+ * @param vself  the cRider
+ * @return func_002F2088's result
+ */
 void* func_00122638(void* vself)
 {
     cRider* self = (cRider*)vself;
@@ -4246,6 +4368,14 @@ struct sOverlay_2680 {
     sV2_2680 f38;
 };
 
+/**
+ * Opens and closes a 640x480 2D pass with the default draw state, drawing nothing, unless the HUD is disabled.
+ *
+ * Unless cRenderToggles_m_DisableHUD is set: copies the DebugFont object's +0x30 pair to +0x38, calls GrMan's
+ * BeginScene and Begin2D, pushes sDrawState_s_defaultDrawState onto the draw-state stack, sets the viewport and
+ * texture, two draw-state fields and the DebugFont's +0x28 pair (2, 2, then 0, 0), and ends with End2D, EndScene and a
+ * stack pop. Nothing in the source calls it.
+ */
 extern "C" void func_00122680(void)
 {
     ASSERT_2680(SSXApp != 0);
@@ -4501,6 +4631,12 @@ extern "C" float* cRider_getEventStartPos(float* out, cRider* rider)
 //100%
 INCLUDE_ASM("ai/rider", func_00122C88);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.92508197, the limit cRider_isInVertZone compares mSmoothedHeading with (at or above it, or below its
+ * negative).
+ *
+ * @return 0.92508197
+ */
 extern "C" float func_00122C88(void) {
     return 0.92508197f;
 }
@@ -4529,6 +4665,13 @@ extern "C" int cRider_isGroundNormalValid(cRider* self);
 //100%
 INCLUDE_ASM("ai/rider", func_00122CD0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns cRider_isGroundNormalValid for the rider.
+ *
+ * cRider_updateDangerLevel calls it.
+ *
+ * @return cRider_isGroundNormalValid's result
+ */
 void* func_00122CD0(void* self)
 {
     return (void*)cRider_isGroundNormalValid((cRider*)self);
@@ -4634,6 +4777,18 @@ extern "C" int cSpinControl_isUberHeld(void* p);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* self, int i);
 extern "C" int func_001446A0(void* self, int a1);
 
+/**
+ * Answers a mission query about the rider.
+ *
+ * @p query 0 wipeout (motion state 2), 1 reset (control state 9), 2 air (motion 1, or 2 with the handler's +0x30 word
+ * 1), 3 ground, 4 railslide, 5-7 grab / tweak / uber held during a spin (cSpinControl_isGrabHeld, isTweakHeld,
+ * isUberHeld on the handler's spin control at +0x230), 8 the metrix's points (+0x198), 9 / 10 PressMode 1 / 2, 11
+ * boosting (mBoostStrength non-zero), 15-17 the metrix's +0x138, +0x13C and +0x19C, 18 a layer-1 anim of category 13
+ * with event flag 0 set and flag 1 clear. 12-14 and others return 0. Nothing in the source calls it.
+ *
+ * @param query  the query number
+ * @return the answer (a flag or a count)
+ */
 extern "C" int func_00122EE8(char* self, int query)
 {
     int res;
@@ -6884,6 +7039,18 @@ extern "C" void func_00326CF0(void* obj);
 struct sVEntryI_125B18 { short delta; short index; int (*fn)(void*); };
 struct sVEntryF_125B18 { short delta; short index; void (*fn)(void*, float, int); };
 
+/**
+ * Decays a player's two vibration levels and drives the pad's two motors from them.
+ *
+ * With @p on 0 both levels are zeroed and func_00326CF0 stops the pad. Otherwise level 0 (bump) becomes max(level x
+ * 0.9133 - 18.5, 0) and level 1 (rumble) is multiplied by 0.99167; when the pad's virtual slot 3 returns 2, slot 4 sets
+ * motor 0 to max((rumble - 0.5) x 0.01, (bump - 2) / 972.2, 0) and motor 1 to max((rumble - 70) / 160, (bump - 100) /
+ * 5000, 0). Called by func_001278E8 with &unk_DFC.
+ *
+ * @param vibState  the two levels (bump, rumble)
+ * @param a  the cPadDevice
+ * @param on  0 to stop
+ */
 // PORT: the unit declares (void*, int, int); the second argument is really an object pointer.
 extern "C" void func_00125B18(void* vibState, int a, int on)
 {
@@ -7112,6 +7279,13 @@ __asm__("_vt$13cRider_125EB8 = cPlayer_vtbl\n"
 INCLUDE_ASM("ai/rider", func_001276F0);
 #ifdef SKIP_ASM
 int cInput_getState(void*, int);
+/**
+ * Returns which grab input the player holds: the first of input states 31-45 that is set, as 0-14, or -1.
+ *
+ * Reads Input (+0xDF0) with cInput_getState. cPlayer_getControlCmd packs it into the command in control states 4 and 5.
+ *
+ * @return the grab index, or -1
+ */
 extern "C" int func_001276F0(char* self)
 {
     if (cInput_getState(*(void**)(self + 0xDF0), 0x1F))
@@ -7153,6 +7327,13 @@ INCLUDE_ASM("ai/rider", func_00127848);
 #ifdef SKIP_ASM
 int cInput_getState(void*, int);
 
+/**
+ * Returns which uber-grind input the player holds: the first of input states 27-30 that is set, as 0-3, or -1.
+ *
+ * cPlayer_getControlCmd packs it into the command in control states 7 and 12.
+ *
+ * @return the grind index, or -1
+ */
 extern "C" int func_00127848(void* self)
 {
     if (cInput_getState(*(void**)((char*)self + 0xDF0), 27))
@@ -7170,6 +7351,9 @@ extern "C" int func_00127848(void* self)
 //100%
 INCLUDE_ASM("ai/rider", func_001278C0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Clears the player's two vibration levels, unk_DFC and unk_E00 (cRider virtual slot 16).
+ */
 void func_001278C0(void* self)
 {
     *(float*)((char*)self + 0xE00) = 0.0f;
@@ -7180,6 +7364,11 @@ void func_001278C0(void* self)
 //100%
 INCLUDE_ASM("ai/rider", func_001278D0);
 #ifdef SKIP_ASM
+/**
+ * Raises the player's bump vibration level (unk_DFC) to @p val when that is higher (cRider virtual slot 17).
+ *
+ * @param val  the bump strength
+ */
 extern "C" void func_001278D0(void* self, float val)
 {
     *(float*)((char*)self + 0xDFC) = val >? *(float*)((char*)self + 0xDFC);
@@ -7189,6 +7378,11 @@ extern "C" void func_001278D0(void* self, float val)
 //100%
 INCLUDE_ASM("ai/rider", func_001278E0__FPvf);
 #ifdef SKIP_ASM
+/**
+ * Sets the player's rumble vibration level (unk_E00) to @p val (cRider virtual slot 18).
+ *
+ * @param val  the rumble strength
+ */
 void func_001278E0(void* self, float val)
 {
     *(float*)((char*)self + 0xE00) = val;
@@ -7210,6 +7404,12 @@ static inline bool riderInRange_1278E8(int v)
     return v != 0 && v < 10;
 }
 
+/**
+ * Updates the player's pad vibration once a frame (cRider virtual slot 19).
+ *
+ * Only with a Pad. Vibration stays on when the option interface (cBE_getInterface kind 1, func_001474E8) allows it for
+ * the rider's AI index and the replay's first word is not 1-9; then func_00125B18 decays the levels and drives the pad.
+ */
 extern "C" void func_001278E8(void* self)
 {
     char* s = (char*)self;

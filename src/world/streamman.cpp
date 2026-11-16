@@ -335,6 +335,17 @@ extern "C" void* unpack(int);
 //100%
 INCLUDE_ASM("world/streamman", func_003A7218__FPviii);
 #ifdef SKIP_ASM
+/**
+ * Decompresses a stream chunk: unpack(@p a3, @p a1), returning the unpacked size.
+ *
+ * @p a2 is not used. cStreamMan_update calls it with the decompression buffer (+0x8C), the chunk size minus 8 and the
+ * chunk data after its 8-byte header.
+ *
+ * @param a1  the destination buffer
+ * @param a2  the source size (unused)
+ * @param a3  the compressed data
+ * @return unpack's result
+ */
 void* func_003A7218(void* self, int a1, int a2, int a3)
 {
     return unpack(a3);

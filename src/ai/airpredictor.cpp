@@ -221,6 +221,21 @@ static inline void vu0AddEq_3200(sVec4_3200& a, const sVec4_3200& b)
         : "m"(a), "m"(b));
 }
 
+/**
+ * Runs the air predictor's simulation forward until the flight changes direction, then looks for the landing.
+ *
+ * Saves CurSimPos/CurSimVel (0x50/0x60), then repeatedly adds 1/60 to TotalAirTime (+0x98) and steps the sim one tick
+ * (func_001139A0), recording ApexTime/GuessApexPos (+0x9C/+0x40) while the height keeps rising; it stops when the new
+ * velocity's direction differs from the start (speed * 0.99 > dot of the old unit velocity and the new velocity) or
+ * after 270000 / TerminalVel (+0xA8) ticks. It then casts a capsule (func_0032E100) along the travelled segment,
+ * lengthened by 2% at each end, against the world (func_00336850 in SimState 0, func_003378C0 otherwise). A hit facing
+ * the motion sets GuessLandPosition, rewinds TotalAirTime by the unused part of the step, blends GuessLandVelocity from
+ * the old and new velocities, and sets SimState 1 with the hit's normal and surface (or 3 with the Z axis and surface
+ * 13 when SimState was 2); the landing patch's flags, resource id and UV come from the hit object when SimState is 1,
+ * else -1. The duplicated "else if (self)" branch is a marked fakematch steering, not game logic.
+ *
+ * @param vself  the cAirPredictor (this)
+ */
 // cAirPredictor::simStep (On Tour names; the loop is a do-while in SSX 3).
 extern "C" void func_00113200(char* vself)
 {
@@ -457,6 +472,12 @@ extern "C" void cAirPredictor_updateFlightPath(char* self, sQuad* airPos, sQuad*
 //100%
 INCLUDE_ASM("ai/airpredictor", func_00113998__FPv);
 #ifdef SKIP_ASM
+/**
+ * Clears the air predictor's TotalAirTime (+0x98) when the rider lands.
+ *
+ * cWipeoutMotion_resolveAirMotion calls it with the rider's mPosition and mVelocity, which are ignored (the C
+ * declaration takes only self).
+ */
 void func_00113998(void* self)
 {
     *(int*)((char*)self + 0x98) = 0;
@@ -538,6 +559,19 @@ static inline float vu0Length_1139A0(const sVec4_1139A0& v)
     return r;
 }
 
+/**
+ * Advances a flight by one 1/60 s tick and returns the new speed.
+ *
+ * nextPos = curPos + curVel / 60. nextVel = curVel plus a drag of -vel.x / 300 and -vel.y / 300 and gravity -31.67 per
+ * tick (-14.17 while still rising). When the new speed exceeds TerminalVel (+0xA8) the velocity is scaled down to it.
+ * Input and output may be the same vectors (func_00113200 passes them so).
+ *
+ * @param pos  the current position
+ * @param vel  the current velocity
+ * @param outPos  receives the next position
+ * @param outVel  receives the next velocity
+ * @return the length of the new velocity, at most TerminalVel
+ */
 extern "C" float func_001139A0(void* self, sVec4_1139A0* pos, sVec4_1139A0* vel, sVec4_1139A0* outPos, sVec4_1139A0* outVel)
 {
     *outPos = vu0Add_1139A0(*pos, vu0Scale_1139A0(*vel, 0.01666666753590107f));
@@ -559,6 +593,9 @@ extern "C" float func_001139A0(void* self, sVec4_1139A0* pos, sVec4_1139A0* vel,
 //100%
 INCLUDE_ASM("ai/airpredictor", func_00113A98);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty body). Nothing in the source calls it.
+ */
 extern "C" void func_00113A98(void) {
 
 }
@@ -573,6 +610,11 @@ struct sVEntry00113AA0 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Writes the whole air predictor (0xB0 bytes) into a replay frame: calls @p obj's virtual slot 1 with (self, 176).
+ *
+ * @param obj  the replay frame (cReplayFramePtr)
+ */
 extern "C" void func_00113AA0(void* self, void* obj)
 {
     sVEntry00113AA0* vt = *(sVEntry00113AA0**)obj;
@@ -589,6 +631,11 @@ struct sVEntry00113AD8 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Reads the whole air predictor (0xB0 bytes) back from a replay frame: calls @p obj's virtual slot 2 with (self, 176).
+ *
+ * @param obj  the replay frame (cReplayFramePtr)
+ */
 extern "C" void func_00113AD8(void* self, void* obj)
 {
     sVEntry00113AD8* vt = *(sVEntry00113AD8**)obj;

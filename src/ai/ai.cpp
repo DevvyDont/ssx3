@@ -1215,6 +1215,16 @@ INCLUDE_ASM("ai/ai", func_0012A1F0);
 #ifdef SKIP_ASM
 extern int D_00536708[];
 
+/**
+ * Returns whether rider @p idx's character is one of the first six entries of D_00536708.
+ *
+ * Reads SSXApp->GameModeMan->iCharacters[idx] and compares it with D_00536708[0..5] (one of cGameModeMan's sorted score
+ * / rank tables, fe/ovstatepause uses it as a list of rider indices). Used by func_0012A998 and func_0012AA78 with each
+ * computer rider's getAIIndex.
+ *
+ * @param idx  the rider's AI index
+ * @return 1 when found, else 0
+ */
 extern "C" int func_0012A1F0(cAI* self, int idx)
 {
     char* tbl = (char*)SSXApp->GameModeMan;
@@ -1229,6 +1239,14 @@ extern "C" int func_0012A1F0(cAI* self, int idx)
 //100%
 INCLUDE_ASM("ai/ai", func_0012A240);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the AI's CurrentAIState (the first word of @p aiMan) is 5, On Tour's AIS_Race.
+ *
+ * Nothing in the source calls it.
+ *
+ * @param aiMan  the cAI
+ * @return 1 while racing, else 0
+ */
 extern "C" int func_0012A240(int *aiMan) {
     return *aiMan == 5;
 }
@@ -1374,6 +1392,14 @@ extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self);
 void func_0026ADA0(void* self);
 extern char gPaths[];
 
+/**
+ * Drops the AI path data injected with a world chunk when that chunk is unloaded.
+ *
+ * Callers pass (AI, resourceId); the section id reaches cSectionMan_getBESectionIDFromWorldSectionID untouched in a1
+ * (the C declaration has no parameters). When the BE section id is below 22 it calls func_0026ADA0 on gPaths, which has
+ * an empty body in retail, so the call does nothing. Called by cPS2ChunkResolve_unresolve for resource type 14; the
+ * load side is cAI_swaploadInjectedPathFile.
+ */
 extern "C" void func_0012A490(void)
 {
     if (cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan) < 22)
@@ -1388,6 +1414,12 @@ INCLUDE_ASM("ai/ai", func_0012A4D0);
 #ifdef SKIP_ASM
 extern "C" void func_0026ADE8(int *);
 
+/**
+ * Returns whether the AI path file is loaded: gPaths' loaded flag (+0x4C, via func_0026ADE8).
+ *
+ * The C body discards the value, but func_0026ADE8's result is left in v0, so callers get the flag. The flag is set to
+ * 1 by func_0026ADA8 when the path pack loads. Nothing in the source calls it.
+ */
 extern "C" void func_0012A4D0(void) {
     func_0026ADE8(&(*(int*)&gPaths));
 }
@@ -1395,6 +1427,11 @@ extern "C" void func_0012A4D0(void) {
 //100%
 INCLUDE_ASM("ai/ai", func_0012A4F0);
 #ifdef SKIP_ASM
+/**
+ * Re-initialises every allocated rider's path: cRider_initPath(Riders[i], 0) for i below NumberOfRidersAllocated.
+ *
+ * Nothing in the source calls it.
+ */
 extern "C" void func_0012A4F0(cAI* self) {
     int i;
     for (i = 0; i < self->NumberOfRidersAllocated; i++) {
@@ -1405,6 +1442,9 @@ extern "C" void func_0012A4F0(cAI* self) {
 //100%
 INCLUDE_ASM("ai/ai", func_0012A558);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty body). Nothing in the source calls it.
+ */
 extern "C" void func_0012A558(void) {
 
 }
@@ -1481,6 +1521,17 @@ static inline t4Vector Front_A560(cRider* rider)
     return rider->mMatrix.row[1];
 }
 
+/**
+ * Puts all riders, or one, back at the start of the first AI path that has a marker distance, facing along the path.
+ *
+ * Walks gPaths' nodes (count at gPaths + 0x10, func_0026AF70) to the first whose func_0026A138 distance is not -1. The
+ * position is the path point 1000 units before that distance (at least 0), the facing is the normalised vector from
+ * there to the point at the distance (the rider's current front row when that is shorter than 1). Each chosen rider
+ * (all when @p which is -1) gets cRider_setControlState and cRider_setMotionState with 0 and is placed with
+ * cRider_putAt (mode 5). Only the first such node is used. Nothing in the source calls it.
+ *
+ * @param which  the rider index to move, or -1 for all riders
+ */
 // Puts the riders (all, or only rider `which`) back on the first path node that has a distance, facing along the path.
 extern "C" void func_0012A560(sAiObj12A340* self, int which)
 {
@@ -1586,6 +1637,17 @@ static inline t4Vector Front_A768(cRider* rider)
     return rider->mMatrix.row[1];
 }
 
+/**
+ * Lines the first @p n riders up behind the first AI path node that has a marker distance, 1000 units apart, with
+ * staggered time penalties.
+ *
+ * Finds the node like func_0012A560. Rider j (while riders remain) is placed with mode 5, after cRider_setControlState
+ * / cRider_setMotionState with 0, at markerDist - k * 1000 (at least 0) facing along the path, with mPenaltyTicks = k *
+ * 3600 (one minute per place at 60 ticks/s), where k counts down from @p n. Rider 0 is placed furthest back and gets
+ * the largest penalty. Nothing in the source calls it.
+ *
+ * @param n  how many riders to place
+ */
 // Puts the first `n` riders back on the first path node that has a distance, staggered 1000 units apart,
 // each with a penalty of 3600 ticks per place.
 extern "C" void func_0012A768(sAiObj12A340* self, int n)
@@ -1628,6 +1690,13 @@ struct sVEntry0012A998 { short delta; short index; int (*fn)(void*); };
 
 extern "C" int func_0012A1F0(cAI*, int);
 
+/**
+ * Hides the computer riders that func_0012A1F0 picks so they can be deleted safely later.
+ *
+ * For each allocated computer (Computers[i], its cRider at +0x18) whose mRenderFlag is set and whose getAIIndex passes
+ * func_0012A1F0: clears mRenderFlag and sets mSafeRenderTick to GrMan's virtual slot 114 result + 4 (a frame count a
+ * few frames ahead). Nothing in the source calls it; it mirrors cAI_prepareToPurgeComputerRiders.
+ */
 extern "C" void func_0012A998(cAI* self)
 {
     for (int i = 0; i < self->NumberOfComputersAllocated; i++)
@@ -1674,6 +1743,14 @@ struct sOwner_0012AA78 {
 
 extern "C" int func_0012A1F0(cAI*, int);
 
+/**
+ * Returns whether the computer riders that func_0012A1F0 picks can all be deleted now.
+ *
+ * Returns 0 when any allocated computer that is not yet safe to delete (cRider_isSafeToDelete) passes func_0012A1F0,
+ * else 1. Nothing in the source calls it; it mirrors cAI_isReadyToPurgeComputerRiders.
+ *
+ * @return 1 when every selected rider is safe to delete, else 0
+ */
 extern "C" int func_0012AA78(sOwner_0012AA78* self) {
     int i;
     int ok = 1;
@@ -6200,6 +6277,11 @@ extern "C" void cBoardPressControl_handleBalanceState(cBoardPressControl* self, 
 //100%
 INCLUDE_ASM("ai/ai", func_001304D0__FPv);
 #ifdef SKIP_ASM
+/**
+ * cBoardPressControl's handler for the BP_IntoAir state: sets the state word (+0) to 1 (BP_Balance).
+ *
+ * cBoardPressControl_update calls it for state 2 and passes the input in a1, which it ignores.
+ */
 void func_001304D0(void* self)
 {
     *(int*)self = 1;
