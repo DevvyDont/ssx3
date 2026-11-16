@@ -52,7 +52,7 @@ INCLUDE_ASM("main/game2", cGame_activatePauseMenu);
 
 INCLUDE_ASM("main/game2", cGame_canUserActivatePauseMenu);
 
-INCLUDE_ASM("main/game2", func_00231C70);
+INCLUDE_ASM("main/game2", cLoadScreen_loseFocus);
 
 INCLUDE_ASM("main/game2", func_00231CB0);
 

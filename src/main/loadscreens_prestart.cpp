@@ -1128,14 +1128,14 @@ extern "C" void func_00233260(void)
 }
 #endif
 
-extern "C" void* func_00231C70(void* self);
+extern "C" void* cLoadScreen_loseFocus(void* self);
 
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_002332C8__FPv);
 #ifdef SKIP_ASM
 int func_002332C8(void* self)
 {
-    return (func_00231C70(self) != 0);
+    return (cLoadScreen_loseFocus(self) != 0);
 }
 #endif
 

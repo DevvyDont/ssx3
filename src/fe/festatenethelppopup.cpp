@@ -393,7 +393,7 @@ extern "C" void func_001DA4A8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatenethelppopup", func_001DA510__FPviii);
+INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_setOption__FPviii);
 #ifdef SKIP_ASM
 struct sNetHelpPopup_DA510 {
     char pad[0x68];
@@ -401,29 +401,29 @@ struct sNetHelpPopup_DA510 {
     int b[7];
 };
 
-void func_001DA510(void* self, int i, int textId, int iconIndex)
+void cFEStateNetHelpPopup_setOption(void* self, int optionNum, int textId, int iconIndex)
 {
     sNetHelpPopup_DA510* popup = (sNetHelpPopup_DA510*)self;
-    popup->a[i] = textId;
-    popup->b[i] = iconIndex;
+    popup->a[optionNum] = textId;
+    popup->b[optionNum] = iconIndex;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatenethelppopup", func_001DA528__FPvi);
+INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_setNumHelpOptions__FPvi);
 #ifdef SKIP_ASM
-void func_001DA528(void* self, int val)
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int numOptions)
 {
-    *(int*)((char*)self + 0x48) = val;
+    *(int*)((char*)self + 0x48) = numOptions;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatenethelppopup", func_001DA530__FPvii);
+INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_setDescription__FPvii);
 #ifdef SKIP_ASM
-void func_001DA530(void* self, int i, int value)
+void cFEStateNetHelpPopup_setDescription(void* self, int descriptionNum, int description)
 {
-    *(int*)((char*)self + (i << 2) + 0x58) = value;
+    *(int*)((char*)self + (descriptionNum << 2) + 0x58) = description;
 }
 #endif
 

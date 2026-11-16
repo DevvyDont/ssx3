@@ -642,9 +642,9 @@ extern "C" void cFEStateNetMessenger_onUpdate(cFEStateNetMessenger* self)
 INCLUDE_ASM("fe/feasyncfile", func_001A4040);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_BTNEAMessenger[];
 extern char str_kT_HELP279BuddiesOnline[];
 extern char str_kT_HELP279ReadMessages[];
@@ -657,16 +657,16 @@ extern char str_kT_POPUPCMNNextChallenge[];
 
 extern "C" void func_001A4040(cFEStateNetMessenger* self, void* menu)
 {
-    func_001DA528(menu, 5);
+    cFEStateNetHelpPopup_setNumHelpOptions(menu, 5);
     *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_BTNEAMessenger);
-    func_001DA530(menu, 0, GetHashValue32(str_kT_HELP279BuddiesOnline));
-    func_001DA530(menu, 1, GetHashValue32(str_kT_HELP279ReadMessages));
-    func_001DA530(menu, 2, GetHashValue32(str_kT_HELP279StoreBuddies));
-    func_001DA510(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(menu, 1, GetHashValue32(str_kT_HELP279SelectBuddy), 0);
-    func_001DA510(menu, 2, GetHashValue32(str_kT_HELP279FindUser), 2);
-    func_001DA510(menu, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
-    func_001DA510(menu, 4, GetHashValue32(str_kT_POPUPCMNNextChallenge), 6);
+    cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP279BuddiesOnline));
+    cFEStateNetHelpPopup_setDescription(menu, 1, GetHashValue32(str_kT_HELP279ReadMessages));
+    cFEStateNetHelpPopup_setDescription(menu, 2, GetHashValue32(str_kT_HELP279StoreBuddies));
+    cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELP279SelectBuddy), 0);
+    cFEStateNetHelpPopup_setOption(menu, 2, GetHashValue32(str_kT_HELP279FindUser), 2);
+    cFEStateNetHelpPopup_setOption(menu, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setOption(menu, 4, GetHashValue32(str_kT_POPUPCMNNextChallenge), 6);
 }
 #endif
 
@@ -6503,9 +6503,9 @@ extern "C" int func_001AC448(cFEUseExistingAccount* self)
 INCLUDE_ASM("fe/feasyncfile", func_001AC4F0);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP204UseAnotherAccount[];
 extern char str_kT_HELP204UseAnotherAccountMessage[];
 extern char str_kT_HELPCmnChangeHighlight[];
@@ -6514,12 +6514,12 @@ extern char str_kT_HELPCmnPrevious[];
 
 extern "C" void func_001AC4F0(cFEUseExistingAccount* self, void* popup)
 {
-    func_001DA528(popup, 3);
+    cFEStateNetHelpPopup_setNumHelpOptions(popup, 3);
     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP204UseAnotherAccount);
-    func_001DA530(popup, 0, GetHashValue32(str_kT_HELP204UseAnotherAccountMessage));
-    func_001DA510(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(popup, 1, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
-    func_001DA510(popup, 2, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP204UseAnotherAccountMessage));
+    cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(popup, 1, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
+    cFEStateNetHelpPopup_setOption(popup, 2, GetHashValue32(str_kT_HELPCmnPrevious), 1);
 }
 #endif
 
@@ -7203,9 +7203,9 @@ extern "C" void func_001AD3E8(cFEStateSelectPersona* self, cUIText* text)
 INCLUDE_ASM("fe/feasyncfile", func_001AD4F0);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP220Persona[];
 extern char str_kT_HELP220CreateName[];
 extern char str_kT_HELP220SelectName[];
@@ -7216,14 +7216,14 @@ extern char str_kT_HELPCmnPrevious[];
 
 extern "C" void func_001AD4F0(cFEStateSelectPersona* self, void* menu)
 {
-    func_001DA528(menu, 4);
+    cFEStateNetHelpPopup_setNumHelpOptions(menu, 4);
     *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP220Persona);
-    func_001DA530(menu, 0, GetHashValue32(str_kT_HELP220CreateName));
-    func_001DA530(menu, 1, GetHashValue32(str_kT_HELP220SelectName));
-    func_001DA510(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(menu, 1, GetHashValue32(str_kT_HELP220DeleteName), 2);
-    func_001DA510(menu, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
-    func_001DA510(menu, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP220CreateName));
+    cFEStateNetHelpPopup_setDescription(menu, 1, GetHashValue32(str_kT_HELP220SelectName));
+    cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELP220DeleteName), 2);
+    cFEStateNetHelpPopup_setOption(menu, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
+    cFEStateNetHelpPopup_setOption(menu, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
 }
 #endif
 
@@ -10171,9 +10171,9 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
 INCLUDE_ASM("fe/feasyncfile", func_001B14D8);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP245SelectCharacter[];
 extern char str_kT_HELP245SelectCharacterMessage[];
 extern char str_kT_HELP245ChangeCharacter[];
@@ -10182,12 +10182,12 @@ extern char str_kT_HELPCmnPrevious[];
 
 extern "C" void func_001B14D8(cFEStateOnlineCharacterSelect* self, void* popup)
 {
-    func_001DA528(popup, 3);
+    cFEStateNetHelpPopup_setNumHelpOptions(popup, 3);
     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP245SelectCharacter);
-    func_001DA530(popup, 0, GetHashValue32(str_kT_HELP245SelectCharacterMessage));
-    func_001DA510(popup, 0, GetHashValue32(str_kT_HELP245ChangeCharacter), 4);
-    func_001DA510(popup, 1, GetHashValue32(str_kT_HELP245SelectCharacterButton), 0);
-    func_001DA510(popup, 2, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP245SelectCharacterMessage));
+    cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELP245ChangeCharacter), 4);
+    cFEStateNetHelpPopup_setOption(popup, 1, GetHashValue32(str_kT_HELP245SelectCharacterButton), 0);
+    cFEStateNetHelpPopup_setOption(popup, 2, GetHashValue32(str_kT_HELPCmnPrevious), 1);
 }
 #endif
 
@@ -11243,9 +11243,9 @@ extern "C" void func_001B2CD0(cFEStateChatRoom* self, int infov)
 INCLUDE_ASM("fe/feasyncfile", func_001B2DA0);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP235ChatRoom[];
 extern char str_kT_HELP235InitiateChallenge[];
 extern char str_kT_HELP235ChangePlayer[];
@@ -11257,15 +11257,15 @@ extern char str_kT_HELP235ScrollChat[];
 
 extern "C" void func_001B2DA0(cFEStateChatRoom* self, void* menu)
 {
-    func_001DA528(menu, 6);
+    cFEStateNetHelpPopup_setNumHelpOptions(menu, 6);
     *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP235ChatRoom);
-    func_001DA530(menu, 0, GetHashValue32(str_kT_HELP235InitiateChallenge));
-    func_001DA510(menu, 0, GetHashValue32(str_kT_HELP235ChangePlayer), 3);
-    func_001DA510(menu, 1, GetHashValue32(str_kT_HELP235PlayerOptions), 0);
-    func_001DA510(menu, 2, GetHashValue32(str_kT_HELP235TypeMessages), 6);
-    func_001DA510(menu, 3, GetHashValue32(str_kT_BTNEAMessenger), 2);
-    func_001DA510(menu, 4, GetHashValue32(str_kT_HELPCmnPrevious), 1);
-    func_001DA510(menu, 5, GetHashValue32(str_kT_HELP235ScrollChat), 8);
+    cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP235InitiateChallenge));
+    cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELP235ChangePlayer), 3);
+    cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELP235PlayerOptions), 0);
+    cFEStateNetHelpPopup_setOption(menu, 2, GetHashValue32(str_kT_HELP235TypeMessages), 6);
+    cFEStateNetHelpPopup_setOption(menu, 3, GetHashValue32(str_kT_BTNEAMessenger), 2);
+    cFEStateNetHelpPopup_setOption(menu, 4, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setOption(menu, 5, GetHashValue32(str_kT_HELP235ScrollChat), 8);
 }
 #endif
 
@@ -13114,9 +13114,9 @@ extern "C" void cFEStateNetConfig_onWidgetCreate(cFEStateNetConfig* self, cUITex
 INCLUDE_ASM("fe/feasyncfile", func_001B54B8);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP200NetworkConfig[];
 extern char str_kT_HELP200NetworkConfigMessage[];
 extern char str_kT_HELPCmnChangeHighlight[];
@@ -13127,14 +13127,14 @@ extern char str_kT_HELPCmnPrevious[];
 
 extern "C" void func_001B54B8(cFEStateNetConfig* self, void* menu)
 {
-    func_001DA528(menu, 5);
+    cFEStateNetHelpPopup_setNumHelpOptions(menu, 5);
     *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP200NetworkConfig);
-    func_001DA530(menu, 0, GetHashValue32(str_kT_HELP200NetworkConfigMessage));
-    func_001DA510(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
-    func_001DA510(menu, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
-    func_001DA510(menu, 3, GetHashValue32(str_kT_HELP200Refresh), 2);
-    func_001DA510(menu, 4, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP200NetworkConfigMessage));
+    cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
+    cFEStateNetHelpPopup_setOption(menu, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
+    cFEStateNetHelpPopup_setOption(menu, 3, GetHashValue32(str_kT_HELP200Refresh), 2);
+    cFEStateNetHelpPopup_setOption(menu, 4, GetHashValue32(str_kT_HELPCmnPrevious), 1);
 }
 #endif
 
@@ -16310,9 +16310,9 @@ extern "C" void cFEStateCreateStep1_onWidgetEvent(cFEStateCreateStep1* self, cha
 INCLUDE_ASM("fe/feasyncfile", func_001B9088);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP211CreateNewAccount[];
 extern char str_kT_HELP211UniqueName[];
 extern char str_kT_HELP211Password[];
@@ -16326,16 +16326,16 @@ extern char str_kT_HELP211Note[];
 
 extern "C" void func_001B9088(cFEStateCreateStep1* self, void* menu)
 {
-    func_001DA528(menu, 5);
+    cFEStateNetHelpPopup_setNumHelpOptions(menu, 5);
     *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP211CreateNewAccount);
-    func_001DA530(menu, 0, GetHashValue32(str_kT_HELP211UniqueName));
-    func_001DA530(menu, 1, GetHashValue32(str_kT_HELP211Password));
-    func_001DA530(menu, 2, GetHashValue32(str_kT_HELP211ValidEmail));
-    func_001DA510(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
-    func_001DA510(menu, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
-    func_001DA510(menu, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
-    func_001DA510(menu, 4, GetHashValue32(str_kT_HELPCmnMembershipAgreement), 2);
+    cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP211UniqueName));
+    cFEStateNetHelpPopup_setDescription(menu, 1, GetHashValue32(str_kT_HELP211Password));
+    cFEStateNetHelpPopup_setDescription(menu, 2, GetHashValue32(str_kT_HELP211ValidEmail));
+    cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
+    cFEStateNetHelpPopup_setOption(menu, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
+    cFEStateNetHelpPopup_setOption(menu, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setOption(menu, 4, GetHashValue32(str_kT_HELPCmnMembershipAgreement), 2);
     *(int*)((char*)menu + 0x64) = GetHashValue32(str_kT_HELP211Note);
 }
 #endif
@@ -17354,9 +17354,9 @@ extern "C" void cFEStateCreateStep2_onWidgetEvent(cFEStateCreateStep2* self, int
 INCLUDE_ASM("fe/feasyncfile", func_001BA8B8);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP211CreateNewAccount[];
 extern char str_kT_HELP211UniqueName[];
 extern char str_kT_HELP211Password[];
@@ -17370,16 +17370,16 @@ extern char str_kT_HELP211Note[];
 
 extern "C" void func_001BA8B8(cFEStateCreateStep2* self, void* menu)
 {
-    func_001DA528(menu, 5);
+    cFEStateNetHelpPopup_setNumHelpOptions(menu, 5);
     *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP211CreateNewAccount);
-    func_001DA530(menu, 0, GetHashValue32(str_kT_HELP211UniqueName));
-    func_001DA530(menu, 1, GetHashValue32(str_kT_HELP211Password));
-    func_001DA530(menu, 2, GetHashValue32(str_kT_HELP211ValidEmail));
-    func_001DA510(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
-    func_001DA510(menu, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
-    func_001DA510(menu, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
-    func_001DA510(menu, 4, GetHashValue32(str_kT_HELPCmnMembershipAgreement), 2);
+    cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP211UniqueName));
+    cFEStateNetHelpPopup_setDescription(menu, 1, GetHashValue32(str_kT_HELP211Password));
+    cFEStateNetHelpPopup_setDescription(menu, 2, GetHashValue32(str_kT_HELP211ValidEmail));
+    cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
+    cFEStateNetHelpPopup_setOption(menu, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
+    cFEStateNetHelpPopup_setOption(menu, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setOption(menu, 4, GetHashValue32(str_kT_HELPCmnMembershipAgreement), 2);
     *(int*)((char*)menu + 0x64) = GetHashValue32(str_kT_HELP211Note);
 }
 #endif
@@ -18437,9 +18437,9 @@ extern "C" void cFEStateCreateDuplicate_onWidgetEvent(cFEStateCreateDuplicate* s
 INCLUDE_ASM("fe/feasyncfile", func_001BC190);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP212DuplicateAccountName[];
 extern char str_kT_HELP212DuplicateAccountNameMessage[];
 extern char str_kT_HELP212DuplicatePersona[];
@@ -18450,17 +18450,17 @@ extern char str_kT_HELPCmnPrevious[];
 
 extern "C" void func_001BC190(cFEStateCreateDuplicate* self, void* menu)
 {
-    func_001DA528(menu, 3);
+    cFEStateNetHelpPopup_setNumHelpOptions(menu, 3);
     if (self->mbAccount != 0) {
         *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP212DuplicateAccountName);
-        func_001DA530(menu, 0, GetHashValue32(str_kT_HELP212DuplicateAccountNameMessage));
+        cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP212DuplicateAccountNameMessage));
     } else {
         *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP212DuplicatePersona);
-        func_001DA530(menu, 0, GetHashValue32(str_kT_HELP212DuplicatePersonaMessage));
+        cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP212DuplicatePersonaMessage));
     }
-    func_001DA510(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(menu, 1, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
-    func_001DA510(menu, 2, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
+    cFEStateNetHelpPopup_setOption(menu, 2, GetHashValue32(str_kT_HELPCmnPrevious), 1);
 }
 #endif
 
@@ -19846,9 +19846,9 @@ extern "C" void cFEStateLobbyMenu_onPopupEvent(cFEStateLobbyMenu* self, void* pP
 INCLUDE_ASM("fe/feasyncfile", func_001BDE48);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP231MainLobby[];
 extern char str_kT_HELP231LobbyMessage[];
 extern char str_kT_HELPCmnChangeHighlight[];
@@ -19860,15 +19860,15 @@ extern char str_kT_HELPCmnPrevious[];
 
 extern "C" void func_001BDE48(cFEStateLobbyMenu* self, void* menu)
 {
-    func_001DA528(menu, 6);
+    cFEStateNetHelpPopup_setNumHelpOptions(menu, 6);
     *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP231MainLobby);
-    func_001DA530(menu, 0, GetHashValue32(str_kT_HELP231LobbyMessage));
-    func_001DA510(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
-    func_001DA510(menu, 2, GetHashValue32(str_kT_HELP231ScrollUserList), 8);
-    func_001DA510(menu, 3, GetHashValue32(str_kT_HELP231EnterRoom), 0);
-    func_001DA510(menu, 4, GetHashValue32(str_kT_BTNEAMessenger), 2);
-    func_001DA510(menu, 5, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP231LobbyMessage));
+    cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
+    cFEStateNetHelpPopup_setOption(menu, 2, GetHashValue32(str_kT_HELP231ScrollUserList), 8);
+    cFEStateNetHelpPopup_setOption(menu, 3, GetHashValue32(str_kT_HELP231EnterRoom), 0);
+    cFEStateNetHelpPopup_setOption(menu, 4, GetHashValue32(str_kT_BTNEAMessenger), 2);
+    cFEStateNetHelpPopup_setOption(menu, 5, GetHashValue32(str_kT_HELPCmnPrevious), 1);
 }
 #endif
 
@@ -20638,9 +20638,9 @@ extern "C" int func_001BED28(cFEStateNet* self, int a1, int a2)
 INCLUDE_ASM("fe/feasyncfile", func_001BED58);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP232CreateRoom[];
 extern char str_kT_HELP232CreateRoomMessage[];
 extern char str_kT_HELPCmnChangeHighlight[];
@@ -20650,13 +20650,13 @@ extern char str_kT_HELPCmnPrevious[];
 
 extern "C" void func_001BED58(cFEStateNetCreateRoomPopup* self, void* popup)
 {
-    func_001DA528(popup, 4);
+    cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP232CreateRoom);
-    func_001DA530(popup, 0, GetHashValue32(str_kT_HELP232CreateRoomMessage));
-    func_001DA510(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(popup, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
-    func_001DA510(popup, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
-    func_001DA510(popup, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP232CreateRoomMessage));
+    cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(popup, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
+    cFEStateNetHelpPopup_setOption(popup, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
+    cFEStateNetHelpPopup_setOption(popup, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
 }
 #endif
 
@@ -21300,9 +21300,9 @@ extern "C" void cFEStateLogin_onWidgetEvent(cFEStateLogin* self, void* popup, un
 INCLUDE_ASM("fe/feasyncfile", func_001BFAE0);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP201SelectLoginType[];
 extern char str_kT_HELP201SelectLoginTypeMessage[];
 extern char str_kT_HELPCmnChangeHighlight[];
@@ -21312,13 +21312,13 @@ extern char str_kT_HELPCmnMembershipAgreement[];
 
 extern "C" void func_001BFAE0(cFEStateLogin* self, void* popup)
 {
-    func_001DA528(popup, 4);
+    cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP201SelectLoginType);
-    func_001DA530(popup, 0, GetHashValue32(str_kT_HELP201SelectLoginTypeMessage));
-    func_001DA510(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(popup, 1, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
-    func_001DA510(popup, 2, GetHashValue32(str_kT_HELPCmnPrevious), 1);
-    func_001DA510(popup, 3, GetHashValue32(str_kT_HELPCmnMembershipAgreement), 2);
+    cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP201SelectLoginTypeMessage));
+    cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(popup, 1, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
+    cFEStateNetHelpPopup_setOption(popup, 2, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setOption(popup, 3, GetHashValue32(str_kT_HELPCmnMembershipAgreement), 2);
 }
 #endif
 
@@ -21437,9 +21437,9 @@ extern "C" void cFEStateOnlineMainMenu_onWidgetCreate(cFEStateNet* self, void* o
 INCLUDE_ASM("fe/feasyncfile", func_001BFD98);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP230OnlineMainMenu[];
 extern char str_kT_HELP230OnlineMainMenuMessage[];
 extern char str_kT_HELPCmnChangeHighlight[];
@@ -21449,13 +21449,13 @@ extern char str_kT_HELP230ReturnToMainMenu[];
 
 extern "C" void func_001BFD98(cFEStateNet* self, void* popup)
 {
-    func_001DA528(popup, 4);
+    cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP230OnlineMainMenu);
-    func_001DA530(popup, 0, GetHashValue32(str_kT_HELP230OnlineMainMenuMessage));
-    func_001DA510(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(popup, 1, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
-    func_001DA510(popup, 2, GetHashValue32(str_kT_BTNEAMessenger), 2);
-    func_001DA510(popup, 3, GetHashValue32(str_kT_HELP230ReturnToMainMenu), 1);
+    cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP230OnlineMainMenuMessage));
+    cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(popup, 1, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
+    cFEStateNetHelpPopup_setOption(popup, 2, GetHashValue32(str_kT_BTNEAMessenger), 2);
+    cFEStateNetHelpPopup_setOption(popup, 3, GetHashValue32(str_kT_HELP230ReturnToMainMenu), 1);
 }
 #endif
 
@@ -22173,9 +22173,9 @@ void* func_001C0E88(void* self)
 INCLUDE_ASM("fe/feasyncfile", func_001C0EA8);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP259MembershipAgreement[];
 extern char str_kT_HELP259MembershipAgreementMessage[];
 extern char str_kT_HELP259ScrollAgreement[];
@@ -22183,11 +22183,11 @@ extern char str_kT_HELPCmnPrevious[];
 
 extern "C" void func_001C0EA8(cFEStateOnlineAgreement* self, void* popup)
 {
-    func_001DA528(popup, 2);
+    cFEStateNetHelpPopup_setNumHelpOptions(popup, 2);
     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP259MembershipAgreement);
-    func_001DA530(popup, 0, GetHashValue32(str_kT_HELP259MembershipAgreementMessage));
-    func_001DA510(popup, 0, GetHashValue32(str_kT_HELP259ScrollAgreement), 8);
-    func_001DA510(popup, 1, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP259MembershipAgreementMessage));
+    cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELP259ScrollAgreement), 8);
+    cFEStateNetHelpPopup_setOption(popup, 1, GetHashValue32(str_kT_HELPCmnPrevious), 1);
 }
 #endif
 
@@ -22442,9 +22442,9 @@ extern "C" void func_001C13E0(cFEStateNetQuickPlayPopup* self, int show)
 INCLUDE_ASM("fe/feasyncfile", func_001C1488);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP233QuickMatchup[];
 extern char str_kT_HELP233QuickMatchupMessage[];
 extern char str_kT_HELPCmnChangeHighlight[];
@@ -22454,13 +22454,13 @@ extern char str_kT_HELPCmnPrevious[];
 
 extern "C" void func_001C1488(cFEStateNetQuickPlayPopup* self, void* popup)
 {
-    func_001DA528(popup, 4);
+    cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP233QuickMatchup);
-    func_001DA530(popup, 0, GetHashValue32(str_kT_HELP233QuickMatchupMessage));
-    func_001DA510(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(popup, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
-    func_001DA510(popup, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
-    func_001DA510(popup, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP233QuickMatchupMessage));
+    cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(popup, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
+    cFEStateNetHelpPopup_setOption(popup, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
+    cFEStateNetHelpPopup_setOption(popup, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
 }
 #endif
 
@@ -22865,9 +22865,9 @@ void* cFEStateNetSSXWorld_onUpdate(void* self)
 INCLUDE_ASM("fe/feasyncfile", func_001C1D30);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP234SSXWorld[];
 extern char str_kT_HELP234SSXWorldMessage[];
 extern char str_kT_HELPCmnChangeHighlight[];
@@ -22877,13 +22877,13 @@ extern char str_kT_HELPCmnPrevious[];
 
 extern "C" void func_001C1D30(cFEStateNet* self, void* popup)
 {
-    func_001DA528(popup, 4);
+    cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP234SSXWorld);
-    func_001DA530(popup, 0, GetHashValue32(str_kT_HELP234SSXWorldMessage));
-    func_001DA510(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(popup, 1, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
-    func_001DA510(popup, 2, GetHashValue32(str_kT_BTNEAMessenger), 2);
-    func_001DA510(popup, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP234SSXWorldMessage));
+    cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(popup, 1, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
+    cFEStateNetHelpPopup_setOption(popup, 2, GetHashValue32(str_kT_BTNEAMessenger), 2);
+    cFEStateNetHelpPopup_setOption(popup, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
 }
 #endif
 
@@ -23084,9 +23084,9 @@ void* cFEStateNetQuickMessages_onUpdate(void* self)
 INCLUDE_ASM("fe/feasyncfile", func_001C21C0);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP206QuickMessages[];
 extern char str_kT_HELP206QuickMessagesMessage[];
 extern char str_kT_HELPCmnChangeHighlight[];
@@ -23096,13 +23096,13 @@ extern char str_kT_206ResetMessages[];
 
 extern "C" void func_001C21C0(cFEStateNetQuickMessages* self, void* popup)
 {
-    func_001DA528(popup, 4);
+    cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP206QuickMessages);
-    func_001DA530(popup, 0, GetHashValue32(str_kT_HELP206QuickMessagesMessage));
-    func_001DA510(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(popup, 1, GetHashValue32(str_kT_HELP206EnterMessage), 0);
-    func_001DA510(popup, 2, GetHashValue32(str_kT_HELPCmnPrevious), 1);
-    func_001DA510(popup, 3, GetHashValue32(str_kT_206ResetMessages), 7);
+    cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP206QuickMessagesMessage));
+    cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(popup, 1, GetHashValue32(str_kT_HELP206EnterMessage), 0);
+    cFEStateNetHelpPopup_setOption(popup, 2, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setOption(popup, 3, GetHashValue32(str_kT_206ResetMessages), 7);
 }
 #endif
 
@@ -24037,9 +24037,9 @@ extern "C" void func_001C3310(cFEStateStats* self_)
 INCLUDE_ASM("fe/feasyncfile", func_001C3570);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP249HighScore[];
 extern char str_kT_HELP249HighScoreMessages[];
 extern char str_kT_HELPCmnChangeHighlight[];
@@ -24050,14 +24050,14 @@ extern char str_kT_HELPCmnPrevious[];
 
 extern "C" void func_001C3570(cFEStateStats* self, void* menu)
 {
-    func_001DA528(menu, 5);
+    cFEStateNetHelpPopup_setNumHelpOptions(menu, 5);
     *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP249HighScore);
-    func_001DA530(menu, 0, GetHashValue32(str_kT_HELP249HighScoreMessages));
-    func_001DA510(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
-    func_001DA510(menu, 2, GetHashValue32(str_kT_BTNEAMessenger), 2);
-    func_001DA510(menu, 3, GetHashValue32(str_kT_HELP249ScrollScore), 8);
-    func_001DA510(menu, 4, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP249HighScoreMessages));
+    cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
+    cFEStateNetHelpPopup_setOption(menu, 2, GetHashValue32(str_kT_BTNEAMessenger), 2);
+    cFEStateNetHelpPopup_setOption(menu, 3, GetHashValue32(str_kT_HELP249ScrollScore), 8);
+    cFEStateNetHelpPopup_setOption(menu, 4, GetHashValue32(str_kT_HELPCmnPrevious), 1);
 }
 #endif
 
@@ -25253,9 +25253,9 @@ extern "C" void* func_001C5430(cFEStateNet* self, int msg, int data)
 INCLUDE_ASM("fe/feasyncfile", func_001C5540);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP252ServerNews[];
 extern char str_kT_HELP252ServerNewsMessage[];
 extern char str_kT_HELP252ScrollNews[];
@@ -25264,12 +25264,12 @@ extern char str_kT_BTNEAMessenger[];
 
 extern "C" void func_001C5540(cFEStateNet* self, void* popup)
 {
-    func_001DA528(popup, 3);
+    cFEStateNetHelpPopup_setNumHelpOptions(popup, 3);
     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP252ServerNews);
-    func_001DA530(popup, 0, GetHashValue32(str_kT_HELP252ServerNewsMessage));
-    func_001DA510(popup, 0, GetHashValue32(str_kT_HELP252ScrollNews), 3);
-    func_001DA510(popup, 1, GetHashValue32(str_kT_HELPCmnPrevious), 1);
-    func_001DA510(popup, 2, GetHashValue32(str_kT_BTNEAMessenger), 2);
+    cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP252ServerNewsMessage));
+    cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELP252ScrollNews), 3);
+    cFEStateNetHelpPopup_setOption(popup, 1, GetHashValue32(str_kT_HELPCmnPrevious), 1);
+    cFEStateNetHelpPopup_setOption(popup, 2, GetHashValue32(str_kT_BTNEAMessenger), 2);
 }
 #endif
 

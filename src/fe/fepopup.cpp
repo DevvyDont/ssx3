@@ -5814,9 +5814,9 @@ extern "C" void cKeyboardPopup_AddAsciiEdit(cKeyboardPopup* self, int value);
 extern "C" bool cKeyboardPopup_updateToAscii_b(void* self, int value) __asm__("cKeyboardPopup_updateToAscii");
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup*, int, int);
 extern "C" void* func_001D9D48(void* mem, void* engine, void* owner);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern "C" void func_0039F190(void* self, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern int D_004A1A70;
@@ -5918,15 +5918,15 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
                 if ((int)SSXApp->Game == 0) {
                     changed = 1;
                     void* popup = func_001D9D48(cMemMan_alloc(320, str_cFEStateNetHelpPopup, 0x100, 0), self->mpEngine, self);
-                    func_001DA528(popup, 6);
+                    cFEStateNetHelpPopup_setNumHelpOptions(popup, 6);
                     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELPKeyboard);
-                    func_001DA530(popup, 0, GetHashValue32(str_kT_HELPKeyboardMessage));
-                    func_001DA510(popup, 0, GetHashValue32(str_kT_HELPKeyboardNavigateKeyboard), 4);
-                    func_001DA510(popup, 1, GetHashValue32(str_kT_HELPKeyboardNavigateKeyboard), 3);
-                    func_001DA510(popup, 2, GetHashValue32(str_kT_HELPKeyboardCapsLock), 5);
-                    func_001DA510(popup, 3, GetHashValue32(str_kT_HELPKeyboardShift), 6);
-                    func_001DA510(popup, 4, GetHashValue32(str_kT_HELPKeyboardSelectCharacter), 0);
-                    func_001DA510(popup, 5, GetHashValue32(str_kT_HELPKeyboardCancel), 1);
+                    cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELPKeyboardMessage));
+                    cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELPKeyboardNavigateKeyboard), 4);
+                    cFEStateNetHelpPopup_setOption(popup, 1, GetHashValue32(str_kT_HELPKeyboardNavigateKeyboard), 3);
+                    cFEStateNetHelpPopup_setOption(popup, 2, GetHashValue32(str_kT_HELPKeyboardCapsLock), 5);
+                    cFEStateNetHelpPopup_setOption(popup, 3, GetHashValue32(str_kT_HELPKeyboardShift), 6);
+                    cFEStateNetHelpPopup_setOption(popup, 4, GetHashValue32(str_kT_HELPKeyboardSelectCharacter), 0);
+                    cFEStateNetHelpPopup_setOption(popup, 5, GetHashValue32(str_kT_HELPKeyboardCancel), 1);
                     cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
                 }
                 sound = 5;

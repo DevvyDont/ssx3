@@ -1874,13 +1874,13 @@ extern "C" void func_00272250(void *framePtr, int block) {
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272258);
+INCLUDE_ASM("replay/replaycache", cReplayFrame__cReplayFrame);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
 extern void* cReplayFramePtr_vtbl[];
 
-extern "C" void func_00272258(int* self, int flags)
+extern "C" void cReplayFrame__cReplayFrame(int* self, int flags)
 {
     *(void**)self = cReplayFramePtr_vtbl;
     if (flags & 1) {

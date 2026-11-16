@@ -2418,12 +2418,12 @@ extern "C" void func_00231B50(void* self, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231C70);
+INCLUDE_ASM("main/gameload", cLoadScreen_loseFocus);
 #ifdef SKIP_ASM
 extern "C" int cFadeScreen_loseFocus(void* self);
 extern char* cAppMan_TheAppMan;
 
-extern "C" int func_00231C70(void* self)
+extern "C" int cLoadScreen_loseFocus(void* self)
 {
     if (*(float*)(cAppMan_TheAppMan + 0x38) == 100.0f) {
         return cFadeScreen_loseFocus(self);

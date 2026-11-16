@@ -4880,6 +4880,13 @@ cFEStateNetMessenger_onLoseTransition__FPv = 0x001E0FB8; //type:func
 cFEStateNetMessenger_onGainTransition = 0x001E0FC0; //type:func
 cPS2GraphicsMan_GetDTV__FPv = 0x00395320; //type:func
 
+// fn_leads2: names by evidence (docs/function_names.tsv)
+cFEStateNetHelpPopup_setOption__FPviii = 0x001DA510; //type:func
+cFEStateNetHelpPopup_setNumHelpOptions__FPvi = 0x001DA528; //type:func
+cFEStateNetHelpPopup_setDescription__FPvii = 0x001DA530; //type:func
+cLoadScreen_loseFocus = 0x00231C70; //type:func
+cReplayFrame__cReplayFrame = 0x00272258; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

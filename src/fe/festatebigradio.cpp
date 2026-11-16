@@ -650,9 +650,9 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w
 INCLUDE_ASM("fe/festatebigradio", func_00193C00);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-void func_001DA510(void* self, int i, int a, int b);
-void func_001DA528(void* self, int val);
-void func_001DA530(void* self, int i, int value);
+void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
+void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
+void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
 extern char str_kT_HELP65BraggingRights[];
 extern char str_kT_HELP65BraggingRightsMessage[];
 extern char str_kT_HELP65BraggingRightsMessage2[];
@@ -663,14 +663,14 @@ extern char str_kT_HELP65Cancel[];
 
 extern "C" void func_00193C00(void* self, void* popup)
 {
-    func_001DA528(popup, 4);
+    cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP65BraggingRights);
-    func_001DA530(popup, 0, GetHashValue32(str_kT_HELP65BraggingRightsMessage));
-    func_001DA530(popup, 1, GetHashValue32(str_kT_HELP65BraggingRightsMessage2));
-    func_001DA510(popup, 0, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
-    func_001DA510(popup, 1, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
-    func_001DA510(popup, 2, GetHashValue32(str_kT_HELP65Confirm), 0);
-    func_001DA510(popup, 3, GetHashValue32(str_kT_HELP65Cancel), 1);
+    cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP65BraggingRightsMessage));
+    cFEStateNetHelpPopup_setDescription(popup, 1, GetHashValue32(str_kT_HELP65BraggingRightsMessage2));
+    cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
+    cFEStateNetHelpPopup_setOption(popup, 1, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
+    cFEStateNetHelpPopup_setOption(popup, 2, GetHashValue32(str_kT_HELP65Confirm), 0);
+    cFEStateNetHelpPopup_setOption(popup, 3, GetHashValue32(str_kT_HELP65Cancel), 1);
 }
 #endif
 
