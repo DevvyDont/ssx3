@@ -50,6 +50,6 @@ CHECK_OFFSET(cMidiSys, mMidiBanks, 0x010);
 CHECK_SIZE(cMidiSys, 0x14);
 
 // The MIDI system: its constructor stores itself here (the cMidiSys base of the one cSSXAudio). EA name unknown.
-// instance global: cMidiSys* D_004A3744 (typed by tools/unify_global.py once its units agree)
+extern cMidiSys* D_004A3744;        // [R] the cMidiSys ctor stores self, its dtor func_002A82D8 clears it
 
 #endif /* SOUND_MIDISYS_H */

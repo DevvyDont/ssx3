@@ -30,6 +30,6 @@ CHECK_SIZE(cSoundSys, 0x8);
 
 // The current sound system: cSoundSys_cSoundSys stores itself here, cSoundSys__cSoundSys clears it. EA name unknown.
 // [U] SndRand (func_002ADF60) is called with it.
-// instance global: cSoundSys* SoundSys (typed by tools/unify_global.py once its units agree)
+extern cSoundSys* SoundSys;         // [O] On Tour SoundSys; [R] cSoundSys_cSoundSys stores self, the dtor clears it
 
 #endif /* SOUND_SOUNDSYS_H */

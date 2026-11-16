@@ -40,6 +40,6 @@ CHECK_OFFSET(cBankSys, mVtbl, 0x00C);
 CHECK_SIZE(cBankSys, 0x10);
 
 // The bank SFX system: cBankSys_cBankSys stores itself here (the cBankSys base of the one cSSXAudio). EA name unknown.
-// instance global: cBankSys* gBankSys (typed by tools/unify_global.py once its units agree)
+extern cBankSys* gBankSys;          // [O] On Tour gBankSys; [R] cBankSys_cBankSys stores self, the dtor clears it
 
 #endif /* SOUND_BANKSYS_H */

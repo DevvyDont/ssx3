@@ -1117,7 +1117,6 @@ public:
 
 extern "C" cSoundSys_cSoundSys_cObj* func_002A8FA0();
 extern char cSoundSys_vtbl[];
-extern void* SoundSys;
 
 /**
  * Constructs the sound system base and makes it the current one (SoundSys).
@@ -1131,7 +1130,7 @@ extern void* SoundSys;
 extern "C" void* cSoundSys_cSoundSys(cSoundSys* self, int audioMode)
 {
     self->mVtbl = (void**)cSoundSys_vtbl;
-    SoundSys = ((void*)self);
+    SoundSys = (cSoundSys*)(((void*)self));
     cSoundSys_cSoundSys_cObj* obj = func_002A8FA0();
     *(cSoundSys_cSoundSys_cObj**)self = obj;
     obj->v01(audioMode);
@@ -1151,7 +1150,6 @@ public:
 
 void operator_delete(int* ptr);
 extern char cSoundSys_vtbl[];
-extern void* SoundSys;
 
 /**
  * Destroys the sound system base: shuts down and deletes the platform sound object and clears SoundSys.
@@ -4248,7 +4246,6 @@ INCLUDE_ASM("sound/bankmonitor", func_002B24C0);
 #ifdef SKIP_ASM
 // PORT: func_002ADF60 is defined () but this caller passes the monitor.
 unsigned int func_002ADF60_p(void* p) __asm__("func_002ADF60");
-extern void* SoundSys;
 
 extern "C" int func_002B24C0(cSongInstance* p)
 {

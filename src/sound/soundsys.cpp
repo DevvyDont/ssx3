@@ -36,7 +36,6 @@ extern const char D_004A3668[];
 extern const char D_004A3670[];
 extern const sSndBsVt4 D_00483A60_bs __asm__("D_00483A60");
 extern const sSndBsVt7 D_00483A80_bs __asm__("D_00483A80");
-extern int gBankSys;
 
 /**
  * Constructs the cBankSys part of the audio system and allocates its bank and patch tables.
@@ -78,7 +77,7 @@ extern "C" char* cBankSys_cBankSys(cBankSys* self, int embedded, int count, int 
         t2.e[1].delta = D_00483A80_bs.e[1].delta + adj2;
     }
     self->mVtbl = (void**)D_00483A48;
-    gBankSys = (int)self;
+    gBankSys = (cBankSys*)((int)self);
     self->mBank = (int*)(new (D_004A3668, 0, 0) char[0x10]);
     self->mPatch = (int*)(new (D_004A3670, 0, 0) char[0x10]);
     return ((char*)self);
@@ -109,7 +108,6 @@ extern char D_00483A48[];
 extern const sSndDtVt4 D_00483A60;
 extern const sSndDtVt7 D_00483A80;
 extern char cBankMonitor_vtbl[];
-extern int gBankSys;
 
 // PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
 extern "C" void func_0028FEA0(cBankSys* self, int flags)
@@ -196,7 +194,6 @@ struct sSnd0018Req {
     int vol;                 // 0x24
 };
 
-extern sSnd0018Sys* D_004A3664_0018 __asm__("gBankSys");
 
 #define SND_0018_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define SND_0018_MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -233,14 +230,14 @@ static inline void snd0018AddVoice(void* vself, int a, int b)
 // Adds a voice on the global sound system for the request, sets its target and volume (clamped to 0..127), then commits.
 extern "C" int func_00290018(cBankSys* self, sSnd0018Req* req)
 {
-    snd0018AddVoice(D_004A3664_0018, req->f1C, req->f20);
-    sSnd0018Mgr* m1 = D_004A3664_0018->mgr;
+    snd0018AddVoice((sSnd0018Sys*)gBankSys, req->f1C, req->f20);
+    sSnd0018Mgr* m1 = (sSnd0018Mgr*)gBankSys->mpVBankManager;
     m1->sub.p3C[m1->sub.cur] = req->f18;
-    sSnd0018Mgr* m2 = D_004A3664_0018->mgr;
+    sSnd0018Mgr* m2 = (sSnd0018Mgr*)gBankSys->mpVBankManager;
     sSnd0018Sub* s2 = &m2->sub;
     s2->vals[m2->sub.cur] = req->vol;
     s2->ch[m2->sub.cur].vol = SND_0018_MAX(0, SND_0018_MIN(s2->vals[s2->cur], 0x7F));
-    func_002906B8((cBankSys*)D_004A3664_0018);
+    func_002906B8((cBankSys*)gBankSys);
     return 1;
 }
 #endif
@@ -302,7 +299,6 @@ struct sSnd0358Req {
     unsigned short f28;      // 0x28
 };
 
-extern sSnd0358Sys* D_004A3664_0358 __asm__("gBankSys");
 
 #define SND_0358_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define SND_0358_MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -339,16 +335,16 @@ static inline void snd0358AddVoice(void* vself, int a, int b)
 // Adds a voice on the global sound system for the request, sets its target and volume (clamped to 0..127), stores its 16-bit field, then commits.
 extern "C" int func_00290358(cBankSys* self, sSnd0358Req* req)
 {
-    snd0358AddVoice(D_004A3664_0358, req->f1C, req->f20);
-    sSnd0358Mgr* m1 = D_004A3664_0358->mgr;
+    snd0358AddVoice((sSnd0358Sys*)gBankSys, req->f1C, req->f20);
+    sSnd0358Mgr* m1 = (sSnd0358Mgr*)gBankSys->mpVBankManager;
     m1->sub.p3C[m1->sub.cur] = req->f18;
-    sSnd0358Mgr* m2 = D_004A3664_0358->mgr;
+    sSnd0358Mgr* m2 = (sSnd0358Mgr*)gBankSys->mpVBankManager;
     sSnd0358Sub* s2 = &m2->sub;
     s2->vals[m2->sub.cur] = req->vol;
     s2->ch[m2->sub.cur].vol = SND_0358_MAX(0, SND_0358_MIN(s2->vals[s2->cur], 0x7F));
-    sSnd0358Mgr* m3 = D_004A3664_0358->mgr;
+    sSnd0358Mgr* m3 = (sSnd0358Mgr*)gBankSys->mpVBankManager;
     m3->sub.ch[m3->sub.cur].fC = req->f28;
-    func_002906B8((cBankSys*)D_004A3664_0358);
+    func_002906B8((cBankSys*)gBankSys);
     return 1;
 }
 #endif
@@ -11457,7 +11453,6 @@ typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, f
 // cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
 // handle lists (func_002A4BA8 clears them; func_002A4CA0 picks from one) and their timing floats.
 extern "C" void* func_002A4BA8(tCrowdEventData* self);
-extern sSndSys69A0* D_004A36F8_c __asm__("D_004A36F8");
 extern sSndCallback D_004A3700_cb[] __asm__("D_004A3700");
 extern "C" void func_002A8450_c(sSndSys8140* self, int a, int b) __asm__("func_002A8450");
 extern "C" int func_002A86B8_c(sSndSys8140* self) __asm__("func_002A86B8");
@@ -11618,41 +11613,41 @@ void func_002A4E88_c(sCrowd4E88* self)
         if (pCurrAmbientInfo->handle >= 0) {
             sCrowdVec* pos = &pCurrAmbientInfo->vec;
             pCurrAmbientInfo->vec = mean;
-            sCrowdVoice* h = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8_c->mpVBankManager->sub, pCurrAmbientInfo->handle, 1);
+            sCrowdVoice* h = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8->mpVBankManager->sub, pCurrAmbientInfo->handle, 1);
             if (h == 0) {
-                crowdBegin(D_004A36F8_c, self->fD8, pCurrAmbientInfo->key, 1);
+                crowdBegin((sSndSys69A0*)D_004A36F8, self->fD8, pCurrAmbientInfo->key, 1);
                 {
-                    cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                    cBankManager* m2 = D_004A36F8->mpVBankManager;
                     m2->sub.tgt[m2->sub.cur] = pos;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                    cBankManager* m2 = D_004A36F8->mpVBankManager;
                     cSndPlayOpts* ss = &m2->sub;
                     ss->vals[m2->sub.cur] = best;
                     ss->ch[m2->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
                 }
                 {
-                    cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                    cBankManager* m2 = D_004A36F8->mpVBankManager;
                     m2->sub.p3C[m2->sub.cur] = self->f17C;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                    cBankManager* m2 = D_004A36F8->mpVBankManager;
                     m2->sub.p74[m2->sub.cur] = 1;
                 }
-                OPTS_Callback(D_004A36F8_c->mpVBankManager, D_004A3700_cb[0]);
+                OPTS_Callback(D_004A36F8->mpVBankManager, D_004A3700_cb[0]);
                 {
-                    cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                    cBankManager* m2 = D_004A36F8->mpVBankManager;
                     m2->sub.p60[m2->sub.cur] = (int)self;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                    cBankManager* m2 = D_004A36F8->mpVBankManager;
                     m2->sub.p7C[m2->sub.cur] = 0;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                    cBankManager* m2 = D_004A36F8->mpVBankManager;
                     m2->sub.p64[m2->sub.cur] = self->mViewPort;
                 }
-                pCurrAmbientInfo->handle = func_002906B8((cBankSys*)D_004A36F8_c);
+                pCurrAmbientInfo->handle = func_002906B8((cBankSys*)D_004A36F8);
             } else {
                 h->vol = best;
             }
@@ -11663,41 +11658,41 @@ void func_002A4E88_c(sCrowd4E88* self)
             if (pCurrAmbientInfo->cnt != 0 && pCurrAmbientInfo->handle >= 0) {
                 sCrowdVec* pos = &pCurrAmbientInfo->vec;
                 pCurrAmbientInfo->vec = chanPos[pCurrAmbientInfo->idx];
-                sCrowdVoice* h = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8_c->mpVBankManager->sub, pCurrAmbientInfo->handle, 1);
+                sCrowdVoice* h = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8->mpVBankManager->sub, pCurrAmbientInfo->handle, 1);
                 if (h == 0) {
-                    crowdBegin(D_004A36F8_c, self->fD8, pCurrAmbientInfo->key, 1);
+                    crowdBegin((sSndSys69A0*)D_004A36F8, self->fD8, pCurrAmbientInfo->key, 1);
                     {
-                        cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                        cBankManager* m2 = D_004A36F8->mpVBankManager;
                         m2->sub.tgt[m2->sub.cur] = pos;
                     }
                     {
-                        cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                        cBankManager* m2 = D_004A36F8->mpVBankManager;
                         cSndPlayOpts* ss = &m2->sub;
                         ss->vals[m2->sub.cur] = chanDist[pCurrAmbientInfo->idx] + chanSum[pCurrAmbientInfo->idx];
                         ss->ch[m2->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
                     }
                     {
-                        cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                        cBankManager* m2 = D_004A36F8->mpVBankManager;
                         m2->sub.p3C[m2->sub.cur] = self->f17C;
                     }
                     {
-                        cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                        cBankManager* m2 = D_004A36F8->mpVBankManager;
                         m2->sub.p74[m2->sub.cur] = 1;
                     }
                     {
-                        cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                        cBankManager* m2 = D_004A36F8->mpVBankManager;
                         m2->sub.p64[m2->sub.cur] = self->mViewPort;
                     }
-                    OPTS_Callback(D_004A36F8_c->mpVBankManager, D_004A3700_cb[0]);
+                    OPTS_Callback(D_004A36F8->mpVBankManager, D_004A3700_cb[0]);
                     {
-                        cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                        cBankManager* m2 = D_004A36F8->mpVBankManager;
                         m2->sub.p60[m2->sub.cur] = (int)self;
                     }
                     {
-                        cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                        cBankManager* m2 = D_004A36F8->mpVBankManager;
                         m2->sub.p7C[m2->sub.cur] = 0;
                     }
-                    pCurrAmbientInfo->handle = func_002906B8((cBankSys*)D_004A36F8_c);
+                    pCurrAmbientInfo->handle = func_002906B8((cBankSys*)D_004A36F8);
                 } else {
                     h->vol = chanDist[pCurrAmbientInfo->idx] + chanSum[pCurrAmbientInfo->idx];
                 }
@@ -11707,7 +11702,7 @@ void func_002A4E88_c(sCrowd4E88* self)
     int outA = 0x1000;
     int outB = 0x1000;
     if (self->state != 0) {
-        cBankSys* sys = D_004A36F8_c;
+        cCrowdSys* sys = D_004A36F8;
         sCrowdVt4E88* vt = (sCrowdVt4E88*)((void*)sys->mVtbl);
         int r = vt[2].fn((char*)sys + vt[2].delta, self->mViewPort, &outA, &outB);
         if (r == 1 || r == 2) {
@@ -11715,32 +11710,32 @@ void func_002A4E88_c(sCrowd4E88* self)
         }
         if (self->state == 1 && r != 3) {
             func_002A6848((cCrowdInstance*)self);
-            int e = func_002A4CA0((sSndRandList*)&D_004A36F8_c->ent[r].c);
+            int e = func_002A4CA0((sSndRandList*)&((sSndSys69A0*)D_004A36F8)->ent[r].c);
             if (e != 0) {
-                func_002A8450_c(D_004A36F8_c, self->fD8, e);
+                func_002A8450_c((sSndSys69A0*)D_004A36F8, self->fD8, e);
                 {
-                    cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                    cBankManager* m2 = D_004A36F8->mpVBankManager;
                     m2->sub.tgt[m2->sub.cur] = &self->vec10;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                    cBankManager* m2 = D_004A36F8->mpVBankManager;
                     cSndPlayOpts* ss = &m2->sub;
                     ss->vals[m2->sub.cur] = best * outB >> 12;
                     ss->ch[m2->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
                 }
                 {
-                    cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                    cBankManager* m2 = D_004A36F8->mpVBankManager;
                     m2->sub.p3C[m2->sub.cur] = self->f17C;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                    cBankManager* m2 = D_004A36F8->mpVBankManager;
                     m2->sub.p74[m2->sub.cur] = 1;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8_c->mpVBankManager;
+                    cBankManager* m2 = D_004A36F8->mpVBankManager;
                     m2->sub.p64[m2->sub.cur] = self->mViewPort;
                 }
-                self->handle = func_002A86B8_c(D_004A36F8_c);
+                self->handle = func_002A86B8_c((sSndSys69A0*)D_004A36F8);
                 if (self->handle >= 0) {
                     self->state = 2;
                 }
@@ -11748,7 +11743,7 @@ void func_002A4E88_c(sCrowd4E88* self)
         }
     }
     if (self->handle >= 0) {
-        sCrowdVoice* h = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8_c->mpVBankManager->sub, self->handle, 2);
+        sCrowdVoice* h = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8->mpVBankManager->sub, self->handle, 2);
         if (h == 0) {
             func_002A6848((cCrowdInstance*)self);
             self->f18C = 0;
@@ -11870,7 +11865,6 @@ struct sSndKey8_5D08 {
     long v;
 } __attribute__((packed));
 extern sSndKey8_5D08 D_004A3700_5D08[] __asm__("D_004A3700");
-extern sSnd5D08Sys* D_004A36F8_5D08 __asm__("D_004A36F8");
 
 #define SND_5D08_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define SND_5D08_MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -11922,8 +11916,8 @@ int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* P, int key)
             h++;
         } while (h < 3);
         found->grp->vec = *found->p;
-        sSnd5D08Sys* sys = D_004A36F8_5D08;
-        sSnd5D08Mgr* m = sys->mgr;
+        cCrowdSys* sys = D_004A36F8;
+        sSnd5D08Mgr* m = (sSnd5D08Mgr*)sys->mpVBankManager;
         int a = self->fD8;
         sSnd5D08Sub* s = &m->sub;
         m->sub.cur++;
@@ -11946,43 +11940,43 @@ int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* P, int key)
         s->p84[m->sub.cur] = 0;
         s->p78[m->sub.cur] = 0x7F;
         s->p7C[m->sub.cur] = 1;
-        sys->a4[sys->mgr->sub.cur] = a;
-        sys->a8[sys->mgr->sub.cur] = key;
+        sys->mBank[((sSnd5D08Mgr*)sys->mpVBankManager)->sub.cur] = a;
+        sys->mPatch[((sSnd5D08Mgr*)sys->mpVBankManager)->sub.cur] = key;
         {
-            sSnd5D08Sys* s2 = D_004A36F8_5D08;
-            s2->mgr->sub.tgt[s2->mgr->sub.cur] = &found->grp->vec;
-            sSnd5D08Mgr* m2 = s2->mgr;
+            cCrowdSys* s2 = D_004A36F8;
+            ((sSnd5D08Mgr*)s2->mpVBankManager)->sub.tgt[((sSnd5D08Mgr*)s2->mpVBankManager)->sub.cur] = &found->grp->vec;
+            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)s2->mpVBankManager;
             sSnd5D08Sub* ss = &m2->sub;
             ss->vals[m2->sub.cur] = found->v4;
             ss->ch[m2->sub.cur].vol = SND_5D08_MAX(0, SND_5D08_MIN(ss->vals[ss->cur], 0x7F));
         }
         {
-            sSnd5D08Mgr* m2 = D_004A36F8_5D08->mgr;
+            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
             m2->sub.p3C[m2->sub.cur] = self->f17C;
         }
         {
-            sSnd5D08Mgr* m2 = D_004A36F8_5D08->mgr;
+            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
             m2->sub.p74[m2->sub.cur] = 1;
         }
         {
-            sSnd5D08Mgr* m2 = D_004A36F8_5D08->mgr;
+            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
             m2->sub.p64[m2->sub.cur] = self->f0;
         }
         {
-            sSnd5D08Mgr* m2 = D_004A36F8_5D08->mgr;
+            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
             sSndKey8_5D08 k = D_004A3700_5D08[0];
             sSnd5D08Sub* s4 = &m2->sub;
             *(sSndKey8_5D08*)((char*)s4 + (m2->sub.cur << 3) + 0x40) = k;
         }
         {
-            sSnd5D08Mgr* m2 = D_004A36F8_5D08->mgr;
+            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
             m2->sub.p60[m2->sub.cur] = (int)self;
         }
         {
-            sSnd5D08Mgr* m2 = D_004A36F8_5D08->mgr;
+            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
             m2->sub.p7C[m2->sub.cur] = 0;
         }
-        found->grp->handle = func_002906B8((cBankSys*)D_004A36F8_5D08);
+        found->grp->handle = func_002906B8((cBankSys*)D_004A36F8);
     }
     return idx;
 }
@@ -11991,7 +11985,6 @@ int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* P, int key)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A62F0);
 #ifdef SKIP_ASM
-extern char** D_004A36F8;
 
 struct sSsVoice62F0 { int f0; int id; int refs; };
 struct sSsEnt62F0 { int active; int f4; sSsVoice62F0* v; };
@@ -12022,7 +12015,7 @@ extern "C" void func_002A62F0(cCrowdInstance* vself, int idx, float fade)
     self->ent[idx].v = 0;
     if (--v->refs == 0) {
         if (v->id >= 0) {
-            cBankMonitor_BANKMONITOR_StopHandle(*D_004A36F8 + 0x1D8, v->id, 1, fade);
+            cBankMonitor_BANKMONITOR_StopHandle((char*)D_004A36F8->mpVBankManager + 0x1D8, v->id, 1, fade);
         }
         v->id = -1;
         v->f0 = -1;
@@ -12033,7 +12026,7 @@ extern "C" void func_002A62F0(cCrowdInstance* vself, int idx, float fade)
     if (self->vol > 0.25f) self->vol = 0.25f;
     if (self->id >= 0) {
         if (fade == 0.0f) {
-            cBankMonitor_BANKMONITOR_StopHandle(*D_004A36F8 + 0x1D8, self->id, 2, fade);
+            cBankMonitor_BANKMONITOR_StopHandle((char*)D_004A36F8->mpVBankManager + 0x1D8, self->id, 2, fade);
         }
         self->id = -1;
         if (self->state == 2) self->state = 1;
@@ -12065,7 +12058,6 @@ extern "C" void func_002A6848(cCrowdInstance* self);
 extern "C" int func_002A4CA0(sSndRandList* list);
 extern "C" void func_002A8450(char** sys, int a, int b);
 extern "C" int func_002A86B8(char** sys);
-extern char** D_004A36F8;
 
 struct sSnd64A0Ent {
     char pad0[0x48];
@@ -12112,24 +12104,24 @@ extern "C" void func_002A64A0(cCrowdInstance* vself, int idx)
 {
     func_002A6848(vself);
     if (vself->mNumCrowdObjects == 0) return;
-    sSnd64A0Ent* e = &((sSnd64A0Sys*)D_004A36F8)->ent[idx];
+    sSnd64A0Ent* e = &((sSnd64A0Ent*)&D_004A36F8->mCrowdData[0])[idx];
     vself->mAmbientCheerIntensity = idx;
     vself->unk_188 = e->a + e->b;
     int r = func_002A4CA0((sSndRandList*)e);
     if (r == 0) return;
-    func_002A8450(D_004A36F8, vself->unk_0D8, r);
-    sSnd64A0Mgr* m1 = *(sSnd64A0Mgr**)D_004A36F8;
+    func_002A8450((char**)D_004A36F8, vself->unk_0D8, r);
+    sSnd64A0Mgr* m1 = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
     m1->sub.tgt[m1->sub.cur] = ((char*)vself) + 0x10;
-    sSnd64A0Mgr* m2 = *(sSnd64A0Mgr**)D_004A36F8;
+    sSnd64A0Mgr* m2 = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
     m2->sub.setVal(m2->sub.cur, vself->unk_178);
     m2->sub.update(m2->sub.cur);
-    sSnd64A0Mgr* m3 = *(sSnd64A0Mgr**)D_004A36F8;
+    sSnd64A0Mgr* m3 = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
     m3->sub.p3C[m3->sub.cur] = (int)vself->unk_17C;
-    sSnd64A0Mgr* m4 = *(sSnd64A0Mgr**)D_004A36F8;
+    sSnd64A0Mgr* m4 = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
     m4->sub.p74[m4->sub.cur] = 1;
-    sSnd64A0Mgr* m5 = *(sSnd64A0Mgr**)D_004A36F8;
+    sSnd64A0Mgr* m5 = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
     m5->sub.p64[m5->sub.cur] = *(int*)vself;
-    vself->unk_174 = func_002A86B8(D_004A36F8);
+    vself->unk_174 = func_002A86B8((char**)D_004A36F8);
     vself->unk_18C = idx + 1;
 }
 #endif
@@ -12141,7 +12133,6 @@ extern "C" void func_002A6848(cCrowdInstance* self);
 extern "C" int func_002A4CA0(sSndRandList* list);
 extern "C" void func_002A8450(char** sys, int a, int b);
 extern "C" int func_002A86B8(char** sys);
-extern char** D_004A36F8;
 
 struct sSnd6648Ent {
     char pad0[0x48];
@@ -12188,24 +12179,24 @@ extern "C" void func_002A6648(cCrowdInstance* vself, int idx)
 {
     func_002A6848(vself);
     if (vself->mNumCrowdObjects == 0) return;
-    sSnd6648Ent* e = &((sSnd6648Sys*)D_004A36F8)->ent[idx];
+    sSnd6648Ent* e = &((sSnd6648Ent*)&D_004A36F8->mCrowdData[0])[idx];
     vself->mAmbientCheerIntensity = idx;
     vself->unk_188 = e->a + e->b;
     int r = func_002A4CA0((sSndRandList*)((char*)e + 0x18));
     if (r == 0) return;
-    func_002A8450(D_004A36F8, vself->unk_0D8, r);
-    sSnd6648Mgr* m1 = *(sSnd6648Mgr**)D_004A36F8;
+    func_002A8450((char**)D_004A36F8, vself->unk_0D8, r);
+    sSnd6648Mgr* m1 = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
     m1->sub.tgt[m1->sub.cur] = ((char*)vself) + 0x10;
-    sSnd6648Mgr* m2 = *(sSnd6648Mgr**)D_004A36F8;
+    sSnd6648Mgr* m2 = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
     m2->sub.setVal(m2->sub.cur, vself->unk_178);
     m2->sub.update(m2->sub.cur);
-    sSnd6648Mgr* m3 = *(sSnd6648Mgr**)D_004A36F8;
+    sSnd6648Mgr* m3 = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
     m3->sub.p3C[m3->sub.cur] = (int)vself->unk_17C;
-    sSnd6648Mgr* m4 = *(sSnd6648Mgr**)D_004A36F8;
+    sSnd6648Mgr* m4 = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
     m4->sub.p74[m4->sub.cur] = 1;
-    sSnd6648Mgr* m5 = *(sSnd6648Mgr**)D_004A36F8;
+    sSnd6648Mgr* m5 = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
     m5->sub.p64[m5->sub.cur] = *(int*)vself;
-    vself->unk_174 = func_002A86B8(D_004A36F8);
+    vself->unk_174 = func_002A86B8((char**)D_004A36F8);
     vself->unk_18C = ~idx;
 }
 #endif
@@ -12239,7 +12230,6 @@ extern "C" void func_002A6808(cCrowdInstance* self)
 INCLUDE_ASM("sound/soundsys", func_002A6848);
 #ifdef SKIP_ASM
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
-extern char** D_004A36F8;
 
 extern "C" void func_002A6848(cCrowdInstance* self)
 {
@@ -12249,7 +12239,7 @@ extern "C" void func_002A6848(cCrowdInstance* self)
     }
     self->unk_180 = 0;
     if (self->unk_174 >= 0) {
-        cBankMonitor_BANKMONITOR_StopHandle(*D_004A36F8 + 0x1D8, self->unk_174, 2, 0.0f);
+        cBankMonitor_BANKMONITOR_StopHandle((char*)D_004A36F8->mpVBankManager + 0x1D8, self->unk_174, 2, 0.0f);
         self->unk_174 = -1;
     }
 }
@@ -12269,10 +12259,10 @@ extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt) {
     float t = self->unk_188;
     if (!(t <= 0.0f)) {
         int idx = self->mAmbientCheerIntensity;
-        char* base = (char*)D_004A36F8;
+        cCrowdSys* base = D_004A36F8;
         float rem = t - dt;
         self->unk_188 = rem;
-        char* e = base + (idx * 0x54 + 0x1C);
+        char* e = (char*)base + (idx * 0x54 + 0x1C);
         float f = *(float*)(e + 0x4C);
         int vol = 0x40;
         if (f < rem) {
@@ -12359,7 +12349,7 @@ extern "C" char* func_002A69A0(cCrowdSys* self, int embedded, int count, int unu
     self->mNumInstances = 0;
     self->mpCrowdInstances = 0;
     new (((char*)self) + 0x1C) sSnd69Ent[3];
-    D_004A36F8 = (char**)self;
+    D_004A36F8 = (cCrowdSys*)((char**)self);
     return ((char*)self);
 }
 #endif
@@ -13299,7 +13289,6 @@ extern char cBankMonitor_vtbl[];
 extern const char D_00483148[];
 extern const sSndCtVt4 D_004839F0_ct __asm__("D_004839F0");
 extern const sSndCtVt7 D_00483A10_ct __asm__("D_00483A10");
-extern int D_004A3744;
 
 /**
  * Constructs the MIDI part of the audio system (the ssxaudio.h notes: really cMidiSys's constructor).
@@ -13341,7 +13330,7 @@ extern "C" char* cController_cController(cMidiSys* self, int embedded, int count
     self->mVtbl = (void**)D_00483A48;
     func_003B97D8();
     self->mMidiBanks = (tMidiBank*)(new (D_00483148, 0, 0) char[0x20]) ;
-    D_004A3744 = (int)self;
+    D_004A3744 = (cMidiSys*)((int)self);
     return ((char*)self);
 }
 #endif
@@ -13372,7 +13361,6 @@ extern char D_00483A48[];
 extern const sSndDtBVt4 D_004839F0;
 extern const sSndDtBVt7 D_00483A10;
 extern char cBankMonitor_vtbl[];
-extern int D_004A3744;
 
 // PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
 extern "C" void func_002A82D8(cMidiSys* self, int flags)
@@ -13636,21 +13624,20 @@ extern "C" int func_002A86B8(char** vself)
 INCLUDE_ASM("sound/soundsys", func_002A8B28);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern sSnd8450Sys* D_004A3744_8B28 __asm__("D_004A3744");
 extern "C" int func_002A86B8(char** sys);
 
 extern "C" int func_002A8B28(cMidiSys* unused, char* obj)
 {
-    func_002A8450((char**)D_004A3744_8B28, *(int*)(obj + 0x1C), *(int*)(obj + 0x20));
-    sSnd8450Mgr* m = D_004A3744_8B28->mgr;
+    func_002A8450((char**)D_004A3744, *(int*)(obj + 0x1C), *(int*)(obj + 0x20));
+    sSnd8450Mgr* m = (sSnd8450Mgr*)D_004A3744->mpVBankManager;
     m->sub.p3C[m->sub.cur] = *(int*)(obj + 0x18);
-    sSnd8450Mgr* m2 = D_004A3744_8B28->mgr;
+    sSnd8450Mgr* m2 = (sSnd8450Mgr*)D_004A3744->mpVBankManager;
     sSnd8450Sub* s = &m2->sub;
     s->vals[m2->sub.cur] = *(int*)(obj + 0x24);
 #define SND_X (s->vals[s->cur])
 #define SND_MIN127 (SND_X < 0x7F ? SND_X : 0x7F)
     s->ch[m2->sub.cur].vol = SND_MIN127 < 0 ? 0 : SND_MIN127;
-    func_002A86B8((char**)D_004A3744_8B28);
+    func_002A86B8((char**)D_004A3744);
     return 1;
 }
 #endif

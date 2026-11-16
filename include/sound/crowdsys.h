@@ -154,6 +154,6 @@ CHECK_SIZE(cCrowdSys, 0x118);
 
 // The crowd system: func_002A69A0 stores itself here, func_002A6B50 clears it. EA name gpCrowdSys (preview assert
 // "gpCrowdSys" on the same gp-relative global; candidate for a symbol_addrs rename D_004A36F8 -> gpCrowdSys).
-// instance global: cCrowdSys* D_004A36F8 (typed by tools/unify_global.py once its units agree)
+extern cCrowdSys* D_004A36F8;       // [R] the cCrowdSys ctor func_002A69A0 stores self, its dtor clears it
 
 #endif /* SOUND_CROWDSYS_H */
