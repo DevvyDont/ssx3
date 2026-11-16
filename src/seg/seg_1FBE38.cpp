@@ -2848,7 +2848,7 @@ struct R12_F850 { int a; int b; int c; };
 extern R12_F850 D_004C9098_F850 __asm__("luno_gLunoNil");
 
 extern int D_00446530_F850[] __asm__("D_00446530");
-extern "C" void func_0010F1C0(int, int, float);
+extern "C" void cRider_flagEventWorld(int, int, float);
 extern int* D_004A3DD8_F850 __asm__("cWScriptMan_TheWScriptMan");
 extern char* D_004A28A8_F850 __asm__("SSXApp");
 extern int D_004A563C_F850 __asm__("D_004A563C");
@@ -2879,7 +2879,7 @@ extern "C" R12_F850 func_002FF850(int n, Ent_F850* e) {
         vp[0] = *D_004A3DD8_F850;
     char* o = *(char**)(D_004A28A8_F850 + 0x84);
     char* base = *(char**)(o + 0xC);
-    func_0010F1C0(*(int*)(base + (vp[0] << 2) + 0x28), vp[1], *(float*)&vp[2]);
+    cRider_flagEventWorld(*(int*)(base + (vp[0] << 2) + 0x28), vp[1], *(float*)&vp[2]);
     return D_004C9098_F850;
 }
 #endif
@@ -5087,7 +5087,7 @@ struct A_2EF8 { char pad[0x6C0]; };
 struct B_2EF8 { virtual void v01(); };
 struct D_2EF8 : A_2EF8, B_2EF8 { };
 struct Tab_2EF8 { char pad[0x28]; D_2EF8 *arr[1]; };
-extern "C" int func_00122EE8_2EF8(D_2EF8*, int) __asm__("func_00122EE8");
+extern "C" int cRider_getMissionInt_2EF8(D_2EF8*, int) __asm__("cRider_getMissionInt");
 // Script call: maps the script condition id to a rider condition and returns whether the current rider meets it.
 extern "C" void* func_00302EF8(void* self, int n, Ent_2EF8* e) {
     if (D_004A57B0_2EF8 == 0) {
@@ -5113,25 +5113,25 @@ extern "C" void* func_00302EF8(void* self, int n, Ent_2EF8* e) {
     D_2EF8* d = (D_2EF8*)b;
     int res;
     switch (vp[0]) {
-    case 3: res = func_00122EE8_2EF8(d, 0); break;
-    case 4: res = func_00122EE8_2EF8(d, 1); break;
-    case 1: res = func_00122EE8_2EF8(d, 2); break;
-    case 0: res = func_00122EE8_2EF8(d, 3); break;
-    case 2: res = func_00122EE8_2EF8(d, 4); break;
-    case 5: res = func_00122EE8_2EF8(d, 5); break;
-    case 6: res = func_00122EE8_2EF8(d, 6); break;
-    case 7: res = func_00122EE8_2EF8(d, 7); break;
-    case 9: res = func_00122EE8_2EF8(d, 8); break;
-    case 10: res = func_00122EE8_2EF8(d, 9); break;
-    case 11: res = func_00122EE8_2EF8(d, 10); break;
-    case 12: res = func_00122EE8_2EF8(d, 11); break;
-    case 13: res = func_00122EE8_2EF8(d, 12); break;
-    case 14: res = func_00122EE8_2EF8(d, 13); break;
-    case 15: res = func_00122EE8_2EF8(d, 14); break;
-    case 16: res = func_00122EE8_2EF8(d, 15); break;
-    case 17: res = func_00122EE8_2EF8(d, 16); break;
-    case 8: res = func_00122EE8_2EF8(d, 17); break;
-    case 18: res = func_00122EE8_2EF8(d, 18); break;
+    case 3: res = cRider_getMissionInt_2EF8(d, 0); break;
+    case 4: res = cRider_getMissionInt_2EF8(d, 1); break;
+    case 1: res = cRider_getMissionInt_2EF8(d, 2); break;
+    case 0: res = cRider_getMissionInt_2EF8(d, 3); break;
+    case 2: res = cRider_getMissionInt_2EF8(d, 4); break;
+    case 5: res = cRider_getMissionInt_2EF8(d, 5); break;
+    case 6: res = cRider_getMissionInt_2EF8(d, 6); break;
+    case 7: res = cRider_getMissionInt_2EF8(d, 7); break;
+    case 9: res = cRider_getMissionInt_2EF8(d, 8); break;
+    case 10: res = cRider_getMissionInt_2EF8(d, 9); break;
+    case 11: res = cRider_getMissionInt_2EF8(d, 10); break;
+    case 12: res = cRider_getMissionInt_2EF8(d, 11); break;
+    case 13: res = cRider_getMissionInt_2EF8(d, 12); break;
+    case 14: res = cRider_getMissionInt_2EF8(d, 13); break;
+    case 15: res = cRider_getMissionInt_2EF8(d, 14); break;
+    case 16: res = cRider_getMissionInt_2EF8(d, 15); break;
+    case 17: res = cRider_getMissionInt_2EF8(d, 16); break;
+    case 8: res = cRider_getMissionInt_2EF8(d, 17); break;
+    case 18: res = cRider_getMissionInt_2EF8(d, 18); break;
     default: res = 0; break;
     }
     *(int*)((char*)self + 8) = 1;
@@ -5345,13 +5345,13 @@ struct A_34F8 { char pad[0x6C0]; };
 struct B_34F8 { virtual void v01(); };
 struct D_34F8 : A_34F8, B_34F8 { };
 struct Tab_34F8 { char pad[0x28]; D_34F8 *arr[1]; };
-extern "C" int func_00122EE8_34F8(D_34F8*, int) __asm__("func_00122EE8");
+extern "C" int cRider_getMissionInt_34F8(D_34F8*, int) __asm__("cRider_getMissionInt");
 extern "C" void* func_003034F8(void* self) {
     D_34F8 *r = (*(Tab_34F8**)(*(char**)(D_004A28A8_34F8 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_34F8];
     B_34F8 *b = r;
     D_34F8 *d = (D_34F8*)b;
     unsigned v;
-    if (func_00122EE8_34F8(d, 4))
+    if (cRider_getMissionInt_34F8(d, 4))
         v = *(unsigned*)(*(char**)((char*)d + 0x77C) + 0xD4);
     else
         v = 0xFFFFFFFF;
@@ -5461,7 +5461,7 @@ extern int D_004A57D8_37B0 __asm__("D_004A57D8");
 extern int D_004A3D30_37B0[2] __asm__("D_004A3D30");
 extern int* D_004A3DD8_37B0 __asm__("cWScriptMan_TheWScriptMan");
 extern char* D_004A28A8_37B0 __asm__("SSXApp");
-extern "C" int func_00122EE8_37B0(char* rider, int which) __asm__("func_00122EE8");
+extern "C" int cRider_getMissionInt_37B0(char* rider, int which) __asm__("cRider_getMissionInt");
 
 struct Ent_37B0 { int idx; int val; int pad; int kind; };
 
@@ -5491,25 +5491,25 @@ extern "C" void* func_003037B0(void* self, int n, Ent_37B0* e)
     char* r = a ? a - 0x6C0 : 0;
     int res;
     switch (vp[0]) {
-    case 3: res = func_00122EE8_37B0(r, 0); break;
-    case 4: res = func_00122EE8_37B0(r, 1); break;
-    case 1: res = func_00122EE8_37B0(r, 2); break;
-    case 0: res = func_00122EE8_37B0(r, 3); break;
-    case 2: res = func_00122EE8_37B0(r, 4); break;
-    case 5: res = func_00122EE8_37B0(r, 5); break;
-    case 6: res = func_00122EE8_37B0(r, 6); break;
-    case 7: res = func_00122EE8_37B0(r, 7); break;
-    case 9: res = func_00122EE8_37B0(r, 8); break;
-    case 10: res = func_00122EE8_37B0(r, 9); break;
-    case 11: res = func_00122EE8_37B0(r, 10); break;
-    case 12: res = func_00122EE8_37B0(r, 11); break;
-    case 13: res = func_00122EE8_37B0(r, 12); break;
-    case 14: res = func_00122EE8_37B0(r, 13); break;
-    case 15: res = func_00122EE8_37B0(r, 14); break;
-    case 16: res = func_00122EE8_37B0(r, 15); break;
-    case 17: res = func_00122EE8_37B0(r, 16); break;
-    case 8: res = func_00122EE8_37B0(r, 17); break;
-    case 18: res = func_00122EE8_37B0(r, 18); break;
+    case 3: res = cRider_getMissionInt_37B0(r, 0); break;
+    case 4: res = cRider_getMissionInt_37B0(r, 1); break;
+    case 1: res = cRider_getMissionInt_37B0(r, 2); break;
+    case 0: res = cRider_getMissionInt_37B0(r, 3); break;
+    case 2: res = cRider_getMissionInt_37B0(r, 4); break;
+    case 5: res = cRider_getMissionInt_37B0(r, 5); break;
+    case 6: res = cRider_getMissionInt_37B0(r, 6); break;
+    case 7: res = cRider_getMissionInt_37B0(r, 7); break;
+    case 9: res = cRider_getMissionInt_37B0(r, 8); break;
+    case 10: res = cRider_getMissionInt_37B0(r, 9); break;
+    case 11: res = cRider_getMissionInt_37B0(r, 10); break;
+    case 12: res = cRider_getMissionInt_37B0(r, 11); break;
+    case 13: res = cRider_getMissionInt_37B0(r, 12); break;
+    case 14: res = cRider_getMissionInt_37B0(r, 13); break;
+    case 15: res = cRider_getMissionInt_37B0(r, 14); break;
+    case 16: res = cRider_getMissionInt_37B0(r, 15); break;
+    case 17: res = cRider_getMissionInt_37B0(r, 16); break;
+    case 8: res = cRider_getMissionInt_37B0(r, 17); break;
+    case 18: res = cRider_getMissionInt_37B0(r, 18); break;
     default: res = 0; break;
     }
     *(int*)((char*)self + 8) = 1;
@@ -7845,15 +7845,15 @@ INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_processStart);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A28A8_71F0 __asm__("SSXApp");
-void func_0010F2B8_71F0(void*) __asm__("func_0010F2B8__FPv");
+void cRider_flagEventMissionStart_71F0(void*) __asm__("cRider_flagEventMissionStart__FPv");
 extern "C" void cWScriptProcess_processStart_71F0(void*) __asm__("cWScriptProcess_processStart");
 struct Tab_71F0 { char pad[0x28]; void *arr[1]; };
 /**
- * Starts a mission: shows HUD effect 0x1A for one second on the manager's rider (func_0010F2B8), then runs
+ * Starts a mission: shows HUD effect 0x1A for one second on the manager's rider (cRider_flagEventMissionStart), then runs
  * the base process start.
  */
 extern "C" void cWScriptMission_processStart(void* self) {
-    func_0010F2B8_71F0((*(Tab_71F0**)(*(char**)(D_004A28A8_71F0 + 0x84) + 0xC))->arr[**(int**)((char*)self + 0x10)]);
+    cRider_flagEventMissionStart_71F0((*(Tab_71F0**)(*(char**)(D_004A28A8_71F0 + 0x84) + 0xC))->arr[**(int**)((char*)self + 0x10)]);
     cWScriptProcess_processStart_71F0(self);
 }
 #endif

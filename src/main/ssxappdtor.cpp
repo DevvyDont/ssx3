@@ -1960,7 +1960,7 @@ extern "C" void func_0022E8B8(int);
 extern "C" int func_0022E920(int);
 extern "C" void cGame_updateState(void *);
 void cWorld_update(void *);
-extern "C" void func_003A88A8(void *);
+extern "C" void cWorldCache_flushInActivePages(void *);
 
 extern "C" int func_00244A40(void *self) {
     void *vtbl;
@@ -1981,7 +1981,7 @@ extern "C" int func_00244A40(void *self) {
             vtbl = (void*)GrMan->mVtbl;
             (*(void (**)(void *))((char*)vtbl + 0x9C))((char*)GrMan + *(short *)((char*)vtbl + 0x98));
             func_0022E8B8(*(int *)((char*)self + 0x84));
-            func_003A88A8(**(void ***)((char*)self + 0x10));
+            cWorldCache_flushInActivePages(**(void ***)((char*)self + 0x10));
             *(int *)((char*)self + 0xA0) = 0;
         }
         return 0;

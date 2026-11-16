@@ -271,7 +271,7 @@ struct sWakeParamsD0B8 {
     float grip;
 };
 
-int func_0011FE98(void*);
+int cRider_getMotionState(void*);
 extern "C" void func_002DE058_D0B8(void* self, void* surf, t4Vector* pos) __asm__("func_002DE058");
 extern "C" void func_002DDD30_D0B8(void* self, t4Vector* pos, t4Vector* fwd, float width) __asm__("func_002DDD30");
 
@@ -525,7 +525,7 @@ done:
     }
     curParams.strength = speed * (baseStrength + speedBonus) * surf->f4C;
     int ok = 1;
-    if (func_0011FE98(self->rider) != 0 || wakeAbsD0B8(self->rider->mSlewed[11].cur) > 0.15f ||
+    if (cRider_getMotionState(self->rider) != 0 || wakeAbsD0B8(self->rider->mSlewed[11].cur) > 0.15f ||
         wakeMinStrengthD0B8() > curParams.strength || amt < 0.15f || curParams.grip < 0.05f) {
         curParams.strength = 0.0f;
         ok = 0;
@@ -535,7 +535,7 @@ done:
             curParams.strength = 0.0f;
             self->f90 = 0.0f;
         }
-        if (func_0011FE98(self->rider) == 0) {
+        if (cRider_getMotionState(self->rider) == 0) {
             self->v60 = wakeAddD0B8(wakeScaleD0B8(self->v60, 0.8f), wakeScaleD0B8(normal, 0.19999998807907104f));
             self->v70 = wakeAddD0B8(wakeScaleD0B8(self->v70, 0.8f), wakeScaleD0B8(side, 0.19999998807907104f));
             self->v80 = wakeAddD0B8(wakeScaleD0B8(self->v80, 0.8f), wakeScaleD0B8(fwd, 0.19999998807907104f));
@@ -2047,8 +2047,8 @@ struct sMtxF920 {
     sWakeVecE398 r0, r1, r2, r3;
 };
 
-int func_0011FE98(void*);
-int func_0011FEE8(void*);
+int cRider_getMotionState(void*);
+int cRider_getControlState(void*);
 int cRiderAnimBase_getCurrentAnimID(void*, int);
 extern "C" void func_002DF448_F920(void*) __asm__("func_002DF448");
 extern "C" void func_002DF4D0_F920(void*) __asm__("func_002DF4D0");
@@ -2169,9 +2169,9 @@ extern "C" void func_002DF920(sWakeFxF920* self)
         wakeDivEqF920(self->dir, wakeLenF920(self->dir));
     }
     self->iB0 = 1;
-    int st = func_0011FE98(self->obj);
+    int st = cRider_getMotionState(self->obj);
     self->iD4 = st;
-    if (st == 1 || st == 2 || st == 4 || func_0011FEE8(self->obj) == 9) {
+    if (st == 1 || st == 2 || st == 4 || cRider_getControlState(self->obj) == 9) {
         self->iB0 = 0;
     } else {
         char* o = self->obj;
@@ -2191,7 +2191,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     self->pD0 = (char*)SSXApp->Game->SurfPropCache + *(int*)(o + 0x438) * 0xB0;
     int x = 0;
     if (555.5555419921875f < acc && 555.5555419921875f < self->fB8) {
-        x = func_0011FEE8(o) != 9;
+        x = cRider_getControlState(o) != 9;
     }
     float f = acc * 0.5f;
     char* o2 = self->obj;
@@ -6763,7 +6763,7 @@ static inline float vu0Dot(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-int func_0011FE98(void*);
+int cRider_getMotionState(void*);
 
 
 struct sSeg_66B8 {
@@ -6890,7 +6890,7 @@ static inline void Trail_66B8(sWake_66B8* self, const t4Vector& pos, int on, flo
  */
 extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
 {
-    int air = func_0011FE98(self->rider) == 1;
+    int air = cRider_getMotionState(self->rider) == 1;
     int on = 0;
     if (!air) {
         char* riderPtr = self->rider;

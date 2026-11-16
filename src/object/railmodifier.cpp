@@ -1760,7 +1760,7 @@ extern void* cRollerModifier_vtbl[];
 void* cRigidBody_cRigidBody(void* self);
 extern "C" void SphereTree_SphereTree(void* self);
 extern void* cObjectInterface_getWorld_DF70() __asm__("cObjectInterface_getWorld");
-void* func_003A6CD8(void* a, void* b);
+void* cWorld_getPolyModelInfo(void* a, void* b);
 extern "C" void* tSphTreeList_getMeshTree(void* a, int b);
 extern "C" void SphereTree_TransformAbs(void* self, void* m, float scale);
 extern "C" void cRollerModifier_updateMOI(void* self);
@@ -1814,7 +1814,7 @@ extern "C" sRailDF70* func_0035DF70(sRailDF70* self, cStreamDF70* stream)
     cRigidBody_readFromReplayFrame(self->body, (cRigidBody_readFromReplayFrame_cObj*)stream);
     stream->v02(self->data, 40);
     self->id = stream->v03();
-    void* r = tSphTreeList_getMeshTree(func_003A6CD8(cObjectInterface_getWorld_DF70(), (void*)self->id), 0);
+    void* r = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(), (void*)self->id), 0);
     func_00327CC8(self->mover, r);
     sRmSrcDF70* src = self->src;
     sRmVec4 off;

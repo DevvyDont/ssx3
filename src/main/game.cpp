@@ -1218,7 +1218,7 @@ extern "C" void cGame_sectionUnloading(void* game, int section);
 extern "C" void cStreamMan_setBandWidthLimit(void* p, int v);
 extern "C" int cWorldView_isSectionUnLoaded(cWorldView* view, int section);
 extern "C" int cWorldView_loadSection(cWorldView* view, int section, float f);
-extern "C" int func_003A9958(cWorldView* view, int section);
+extern "C" int cWorldView_unloadSection(cWorldView* view, int section);
 extern "C" void cWorldView_activateSection(cWorldView* view, int section);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_00442150[];
@@ -1269,7 +1269,7 @@ extern "C" void cSectionMan_update(cSectionMan* self)
             }
             break;
         case 5:
-            if (func_003A9958(gameWorldView_22D8D8(self), section)) {
+            if (cWorldView_unloadSection(gameWorldView_22D8D8(self), section)) {
                 cSectionMan_mSectionMap[idx].field_0x8 = 7;
                 cGame_sectionUnloading(self->mpGame, section);
             }

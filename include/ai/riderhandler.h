@@ -111,9 +111,9 @@ struct cWipeoutMotion {
     t4Vector RiderAngVelocity;         // 0x30 [P] getRiderAngVel (retail cWipeoutMotion_getRiderAngVel = this + 0x30); [O]
     cRider* mRider;                    // 0x40 [R] virtual-base pointer to the shared cRider; [R] ctor cWipeoutMotion_cWipeoutMotion (in
                                        //      charge: this + 0x70)
-    cRiderSphereTree* BoardSphereTree; // 0x44 [P] getBoardSphereTree (retail func_001411A0 lw 0x44; preview 0x48); [O]
+    cRiderSphereTree* BoardSphereTree; // 0x44 [P] getBoardSphereTree (retail cWipeoutMotion_getBoardSphereTree lw 0x44; preview 0x48); [O]
     char pad_48[0x8];                  // 0x48
-    tBoundBox BoardIntersectBox;       // 0x50 [P] getBoardBoundBox (func_001411A8 = this + 0x50); [O]; [U] lq/sq
+    tBoundBox BoardIntersectBox;       // 0x50 [P] getBoardBoundBox (cWipeoutMotion_getBoardBoundBox = this + 0x50); [O]; [U] lq/sq
 };
 
 CHECK_OFFSET(cWipeoutMotion, WipeoutMotionState, 0x00);
@@ -177,7 +177,7 @@ CHECK_SIZE(cRailslideMotion, 0x60);
 // (0x00-0xA0, [O] size 0xA0).
 struct cHandplantMotion {
     t4Vector InitPos;          // 0x00 [O]; [U] sq/lqc2 (cHandplantMotion_init)
-    t4Vector ExitVel;          // 0x10 [O]; [U] vector and x/y/z/w reads (func_00139548 calcExitVel)
+    t4Vector ExitVel;          // 0x10 [O]; [U] vector and x/y/z/w reads (cHandplantMotion_calcExitVel calcExitVel)
     t4Vector SplineDir;        // 0x20 [O]; [U]
     t4Vector SplinePos;        // 0x30 [O]; [U] gainFocus: rider velocity = (SplinePos - pos) / EnterSec
     t4Vector ApproachDir;      // 0x40 [O]; [U]

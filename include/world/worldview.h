@@ -8,15 +8,15 @@
 // No vtable, no base class. EA's source: d:/ssx/code/source/world/worldview.cpp and ../source/world/worldview.h
 // (preview assert strings). Retail splits it over two units:
 //   world/worldcache (0x003A8F80-0x003A9800): cWorldView_cWorldView, cWorldView__cWorldView, cWorldView_init,
-//     cWorldView_purge, cWorldView_reset (reset), cWorldView_update, func_003A9558 (recursiveFlushPages),
-//     func_003A95C0 (recursiveIsEmptyPages), cWorldView_setFocus (setFocus), cWorldView_getFocus (getFocus),
+//     cWorldView_purge, cWorldView_reset (reset), cWorldView_update, cWorldView_recursiveFlushPages (recursiveFlushPages),
+//     cWorldView_recursiveIsEmptyPages (recursiveIsEmptyPages), cWorldView_setFocus (setFocus), cWorldView_getFocus (getFocus),
 //     cWorldView_getTestFocus (getTestFocus);
 //   world/worldview (0x003A9800-0x003AA2D8): cWorldView_getNumSections, cWorldView_getSectionName (getSectionName),
 //     cWorldView_isSectionLoaded, cWorldView_isSectionUnLoaded (isSectionUnLoaded), cWorldView_loadSection (loadSection),
-//     func_003A9958 (unloadSection), cWorldView_activateSection (activateSection), func_003A9A48 (deactivateSection),
-//     func_003A9A90 (getWorldBoundBox), cWorldView_getHull (getHull), func_003A9AB0 (getNumHull),
-//     func_003A9AC0 (isBoxValid), func_003A9BB8 (recursiveIsValid), func_003A9D60 (refreshStreamFocus),
-//     func_003A9E50 (getDistanceToBox), func_003AA028 (recursiveTreeFocus).
+//     cWorldView_unloadSection (unloadSection), cWorldView_activateSection (activateSection), cWorldView_deactivateSection (deactivateSection),
+//     cWorldView_getWorldBoundBox (getWorldBoundBox), cWorldView_getHull (getHull), cWorldView_getNumHull (getNumHull),
+//     cWorldView_isBoxValid (isBoxValid), cWorldView_recursiveIsValid (recursiveIsValid), cWorldView_refreshStreamFocus (refreshStreamFocus),
+//     cWorldView_getDistanceToBox (getDistanceToBox), cWorldView_recursiveTreeFocus (recursiveTreeFocus).
 // (Names from On Tour's cWorldView methods, matched by body; the rest of world/worldview is cChunkResolve,
 // cPS2ChunkResolve and cWScriptCache.)
 //
@@ -47,7 +47,7 @@ struct tStreamDataHeader {
     unsigned int m_uiCheckSum;      // 0x04 [O]
     unsigned int m_uiNumSections;   // 0x08 [P] assert mp_Hdr->m_uiNumSections; [U] cWorldView_getNumSections
     unsigned int m_uiNumBSPNodes;   // 0x0C [O]; [R] cWorldView_init: count of 0x60-byte nodes
-    unsigned int m_uiNumBSPHulls;   // 0x10 [P] assert mp_Hdr->m_uiNumBSPHulls; [U] func_003A9AB0 (getNumHull)
+    unsigned int m_uiNumBSPHulls;   // 0x10 [P] assert mp_Hdr->m_uiNumBSPHulls; [U] cWorldView_getNumHull (getNumHull)
     struct tBxSection* m_pSection;  // 0x14 [O]; [R] cWorldCache_init fixes it up to this + 0x50
     short m_iTable[28];             // 0x18 [O]; [R] cWorldCache_init: per-type counts of the shared cWorldCacheTable
 };
@@ -66,7 +66,7 @@ struct tBxBSPHeader {
     int m_iNumNodes;                // 0x0 [O]
     int m_iNumHulls;                // 0x4 [O]
     int m_iGlobalHull;              // 0x8 [P] assert mp_Section[i].m_BSP.m_iGlobalHull; [U] the section's own hull page
-                                    //     (cWorldView_update touchPage/isPageLoaded; func_003A9AC0)
+                                    //     (cWorldView_update touchPage/isPageLoaded; cWorldView_isBoxValid)
     tBxBSPNode* unk_0C;             // 0xC [O] an anonymous union; [R] cWorldView_init fixes the root node index up to a
                                     //     pointer; [U] the recursive tree walks start here
 };
@@ -94,8 +94,8 @@ CHECK_SIZE(tBxSection, 0x58);
 // One streamable hull page (On Tour tBxBSPHull). 0x44 bytes: getHull steps 0x44.
 struct tBxBSPHull {
     unsigned short m_uiNumChunk;    // 0x00 [O]; [U] cWorldCache_updatePages passes it to addStreamRequest; cHullPage's
-                                    //      ctor sizes its entry table by it; func_003A9AC0 tests it
-    unsigned short m_uiHullIndex;   // 0x02 [O]; [U] func_003A9558/func_003A95C0/func_003A9BB8 read it (lhu 2) as the
+                                    //      ctor sizes its entry table by it; cWorldView_isBoxValid tests it
+    unsigned short m_uiHullIndex;   // 0x02 [O]; [U] cWorldView_recursiveFlushPages/cWorldView_recursiveIsEmptyPages/cWorldView_recursiveIsValid read it (lhu 2) as the
                                     //      hull page id
     int m_iStreamOffset;            // 0x04 [O]; [U] cWorldCache_updatePages passes it to addStreamRequest
     unsigned int m_uiTotalDataSize; // 0x08 [O]
@@ -169,7 +169,7 @@ struct cWorldView {
                                     //       load/unload/activate/deactivate, update's state machine
     int unk_214[3];                 // 0x214 padding (tBoundBox alignment)
     tBoundBox m_WorldBoundBox;      // 0x220 [O]; [R] init copies section 0's root node box, reset = zero vectors;
-                                    //       [U] func_003A9A90 (getWorldBoundBox) returns its address
+                                    //       [U] cWorldView_getWorldBoundBox (getWorldBoundBox) returns its address
     tStreamFocusInfo m_StreamFocus[2]; // 0x240 [O] (kStreamFocus_Num = 2, one per local rider); [R] reset clears both
                                     //       and calls setFocus(i, zero, 0)
     unsigned int m_uiNumSectionsLoaded; // 0x2E0 [O]; [R] reset = 0; [U] update counts sections in state 5 or 6

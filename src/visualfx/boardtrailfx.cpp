@@ -296,7 +296,7 @@ extern "C" int func_002E86F0(sBTrail_86F0* self, float d)
 INCLUDE_ASM("visualfx/boardtrailfx", func_002E87E8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_0011FE98(void* self);
+int cRider_getMotionState(void* self);
 int cRiderAnimBase_getCurrentAnimID(void* self, int a1);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void* self, int a1);
 extern "C" int func_001446A0(void* self, int a1);
@@ -314,11 +314,11 @@ static inline int boardTrailCanDraw(char* r)
 // Picks the trail fade rate for the rider's current state; returns 0 when no trail should be drawn.
 extern "C" int func_002E87E8(char** self)
 {
-    if (func_0011FE98(self[0]) == 2) {
+    if (cRider_getMotionState(self[0]) == 2) {
         if (*(int*)(*(char**)(self[0] + 0x77C) + 0x30) != 0) {
             return 0;
         }
-    } else if (func_0011FE98(self[0]) != 0) {
+    } else if (cRider_getMotionState(self[0]) != 0) {
         if (!boardTrailCanDraw(self[0])) return 0;
         if (*(int*)(self[0] + 0xB00) == 0) return 0;
     }
@@ -715,7 +715,7 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     const sBTV4_8938& fwd = btBoneRow(self->rider, 2212, 0);
     sBTV4_8938 halfLengthVec = btScale(fwd, 87.5f);
     sBTV4_8938 halfWidthVec = btScale(side, 17.5f);
-    if (func_0011FE98(self->rider) == 0 || (btCanDraw(self->rider) && *(int*)(self->rider + 0xB00) != 0)) {
+    if (cRider_getMotionState(self->rider) == 0 || (btCanDraw(self->rider) && *(int*)(self->rider + 0xB00) != 0)) {
         sBTV4_8938 left = btSub(pos, halfLengthVec);
         float sideSign = 0.0f;
         sBTV4_8938 right = btAdd(pos, halfLengthVec);
@@ -797,7 +797,7 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     float fb = btDot(eb, dir);
     float st = btDot(et, across);
     float sb = btDot(eb, across);
-    if (func_0011FE98(self->rider) == 2) {
+    if (cRider_getMotionState(self->rider) == 2) {
         top = btAdd(btAdd(*(sBTV4_8938*)(self->rider + 0x460), btScale(across, st * 0.75f)), btScale(*(sBTV4_8938*)(self->rider + 0x370), D_004A3B28));
         bot = btAdd(btAdd(*(sBTV4_8938*)(self->rider + 0x460), btScale(across, sb * 0.75f)), btScale(*(sBTV4_8938*)(self->rider + 0x370), D_004A3B28));
     }
@@ -1391,7 +1391,7 @@ void cTrickBoostFX_readFromReplayFrame(void* self)
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_update);
 #ifdef SKIP_ASM
-int func_0011FE98(void* self);
+int cRider_getMotionState(void* self);
 void func_00392DE8(void* self, int val);
 extern "C" void cPlayerLights_AddDirectional(void* self, void* q, void* v);
 extern int cPowerUpFXToggles_m_TestTrickBoost;
@@ -1508,7 +1508,7 @@ extern "C" void cTrickBoostFX_update(sTrail_2EADD0* self)
         col.w = zeroF;
         cPlayerLights_AddDirectional(fs, &col, &sz);
     }
-    if (zeroF < speed && func_0011FE98(self->rider) == 1)
+    if (zeroF < speed && cRider_getMotionState(self->rider) == 1)
     {
         self->cur = (self->cur + 2) % 3;
         int n = self->count + 1;

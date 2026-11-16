@@ -413,7 +413,7 @@ extern int D_004A3AFC;
 extern char cRenderStateMan_m_state[];
 
 extern "C" void func_0036D428(void* self, float val);
-int func_0011FE98(void* self);
+int cRider_getMotionState(void* self);
 extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 extern "C" void tParticleEmitter_setColour(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d, float t);
 extern "C" void tParticleEmitter_setVelocity1(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d);
@@ -552,7 +552,7 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
     self->f78 = 0;
     float bspeed = Len_ABC8(*(sV4_ABC8*)(self->rider + 0x1E0));
     bool fastEnough = 277.77777099609375f < bspeed;
-    bool isRailSlide = func_0011FE98(self->rider) == 4;
+    bool isRailSlide = cRider_getMotionState(self->rider) == 4;
     if (fastEnough) {
         if (*(int*)(surfaceData + 0x8C)) {
             self->f70 = 1;

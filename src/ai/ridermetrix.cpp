@@ -77,7 +77,7 @@ extern "C" void cRiderMetrix_resetHUDfx(sRiderMetrix_001173B8* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117400);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_hasActiveHUDfx);
 #ifdef SKIP_ASM
 struct sRiderMetrixEntry_00117400
 {
@@ -111,7 +111,7 @@ static inline bool rmBitTest00117400(int* bits, int i)
  * @param type  the HUD effect id
  * @return 1 when the type's bit is set, else 0
  */
-extern "C" int func_00117400(sRiderMetrix_00117400* self, int type)
+extern "C" int cRiderMetrix_hasActiveHUDfx(sRiderMetrix_00117400* self, int type)
 {
     if (self->entries == 0)
         return 0;
@@ -134,7 +134,7 @@ extern "C" int func_00117400(sRiderMetrix_00117400* self, int type)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001174B0);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry001174B0 {
     short delta;
@@ -149,7 +149,7 @@ struct sVEntry001174B0 {
  *
  * @param obj  the replay frame
  */
-extern "C" void func_001174B0(void* self, void* obj)
+extern "C" void cRiderMetrix_writeToReplayFrame(void* self, void* obj)
 {
     sVEntry001174B0* vt = *(sVEntry001174B0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 428);
@@ -157,7 +157,7 @@ extern "C" void func_001174B0(void* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001174E8);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry001174E8 {
     short delta;
@@ -172,7 +172,7 @@ struct sVEntry001174E8 {
  *
  * @param obj  the replay frame
  */
-extern "C" void func_001174E8(void* self, void* obj)
+extern "C" void cRiderMetrix_readFromReplayFrame(void* self, void* obj)
 {
     sVEntry001174E8* vt = *(sVEntry001174E8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 428);
@@ -255,7 +255,7 @@ extern "C" void cRiderMetrix_removeHUDfx(void* self, int type);
 /**
  * Ends the rider's trick combo chain and removes its HUD effect.
  *
- * Removes HUD effect 3 (the combo display that func_00117638() shows), zeroes the combo count (+0x9C) and combo
+ * Removes HUD effect 3 (the combo display that cRiderMetrix_addToComboChain() shows), zeroes the combo count (+0x9C) and combo
  * score (+0xA0), and sets the chain timer (+0xA4) back to -1.
  */
 extern "C" void cRiderMetrix_resetComboChain(void* self)
@@ -268,7 +268,7 @@ extern "C" void cRiderMetrix_resetComboChain(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117638);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_addToComboChain);
 #ifdef SKIP_ASM
 extern "C" void func_001171A8(void* self, int type, int value, int arg, float f);
 
@@ -295,7 +295,7 @@ static inline bool rmIsState_117638(char* p, int st)
  * @param points  the points earned
  */
 // PORT: g++ <? (min) operator, removed in GCC 4.3.
-extern "C" void func_00117638(void* self, int points)
+extern "C" void cRiderMetrix_addToComboChain(void* self, int points)
 {
     char* metrix = (char*)self;
     if (points > 0)
@@ -472,7 +472,7 @@ extern "C" void cRiderMetrix_resetCurTrick(void* riderMetrix)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00117900__FPv);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_getCurTrickPower__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the current trick's power, the float at +0x14 that cRiderMetrix_getCurTrickPoints scales.
@@ -481,7 +481,7 @@ INCLUDE_ASM("ai/ridermetrix", func_00117900__FPv);
  *
  * @return the trick power
  */
-float func_00117900(void* self)
+float cRiderMetrix_getCurTrickPower(void* self)
 {
     return *(float*)((char*)self + 0x14);
 }
@@ -723,8 +723,8 @@ extern "C" void cHUDFX_update(void* slot);
 extern "C" void cRiderMetrix_updateStaticHUD(void* self);
 extern "C" void cSSXAudio_SetCurTrickPower(void* audio, void* rider, float mult);
 extern "C" void* func_00416210(void* dst, int c, int n);
-int func_0011FE98(void* rider);
-int func_0011FEE8(void* rider);
+int cRider_getMotionState(void* rider);
+int cRider_getControlState(void* rider);
 
 extern sGradeStep_119210 D_00459E00[];
 extern sGradeStep_119210 D_00459E20[];
@@ -826,7 +826,7 @@ extern "C" void cRiderMetrix_update(sMetrix17C28* self)
     float dt = self->rider->timeScale * 0.016666668f;
     float speed = len17C28(self->rider->vel);
     if (self->tA4 >= 0.0f) {
-        if (func_0011FE98(self->rider) == 0 && func_0011FEE8(self->rider) != 1) {
+        if (cRider_getMotionState(self->rider) == 0 && cRider_getControlState(self->rider) != 1) {
             self->tA4 = self->tA4 - dt;
             if (self->tA4 <= 0.0f) {
                 cRiderMetrix_earnComboChain(self);
@@ -893,7 +893,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_updateStaticHUD);
 extern "C" void cRiderMetrix_addHUDfx(void* self, int a, const char* b, float c, int d);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" int cRiderMetrix_calcTrickLevel(void* self, int points);
-int func_0011FEE8(void* rider);
+int cRider_getControlState(void* rider);
 extern "C" int AITick();
 extern "C" float func_0031C040(float a);
 extern "C" float cPrewindControl_getFlipSpinInputAng(void* p, int* fail);
@@ -1035,7 +1035,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
         cRiderMetrix_addHUDfx1(self, 1, pts, cRiderMetrix_calcTrickLevel(self, pts), -1.0f);
         cSSXAudio_PointsEvent(func_0028B180(), self->rider, pts);
     }
-    if (func_0011FEE8(self->rider) == 8 && !subStateIs_117FE0(self->rider->sub, 3))
+    if (cRider_getControlState(self->rider) == 8 && !subStateIs_117FE0(self->rider->sub, 3))
         func_001171A8_f(&self->slots[11], 11, 0, self->rider->sub->f330 <? 1.0f, 0);
     else
         cRiderMetrix_removeHUDfx(self, 11);
@@ -1047,7 +1047,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
     cRiderMetrix_removeHUDfx(self, 21);
     cRiderMetrix_removeHUDfx(self, 22);
     cRiderMetrix_removeHUDfx(self, 23);
-    if (func_0011FEE8(self->rider) != 2 && func_0011FEE8(self->rider) != 5) {
+    if (cRider_getControlState(self->rider) != 2 && cRider_getControlState(self->rider) != 5) {
         cRiderMetrix_removeHUDfx(self, 0xC);
         cRiderMetrix_removeHUDfx(self, 13);
         cRiderMetrix_removeHUDfx(self, 0xF);
@@ -1055,7 +1055,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
     } else {
         int fail = 0;
         float angle;
-        if (func_0011FEE8(self->rider) == 2)
+        if (cRider_getControlState(self->rider) == 2)
             angle = cPrewindControl_getFlipSpinInputAng((char*)self->rider->sub + 0x1F0, &fail);
         else
             angle = cSpinControl_getFlipSpinInputAng((char*)self->rider->sub + 0x230, &fail);
@@ -1082,7 +1082,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
             }
             func_001171A8_f(&self->slots[13], 13, 0, a, 0);
         }
-        if (func_0011FEE8(self->rider) == 2) {
+        if (cRider_getControlState(self->rider) == 2) {
             if (fail != 0)
                 cRiderMetrix_removeHUDfx(self, 0xC);
             else
@@ -1351,7 +1351,7 @@ extern "C" void cRiderMetrix_addTrick(void* self, sTrickId* id, int repeat)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119068);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_addGrab);
 #ifdef SKIP_ASM
 struct sMetrixRecent {
     char pad_0x00[0x60];
@@ -1366,7 +1366,7 @@ struct sMetrixRecent {
  * @param self_  the cRiderMetrix (this)
  * @param value  the grab id
  */
-extern "C" void func_00119068(void* self_, int value)
+extern "C" void cRiderMetrix_addGrab(void* self_, int value)
 {
     sMetrixRecent* self = (sMetrixRecent*)self_;
     for (int i = 0; i < 3; i++)
@@ -1386,7 +1386,7 @@ extern "C" void func_00119068(void* self_, int value)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001190F0);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_addToHistory);
 #ifdef SKIP_ASM
 struct sTrickId;
 
@@ -1438,7 +1438,7 @@ static inline int func_trickIdEqual(const void* a, const void* b, int size)
  */
 // sTrickId is defined later in the unit, hence the casts. Don't copy id_ into a typed
 // local: a separate local shifts every register by one.
-extern "C" int func_001190F0(void* self_, sTrickId* id_)
+extern "C" int cRiderMetrix_addToHistory(void* self_, sTrickId* id_)
 {
     sTrickHist190F0* self = (sTrickHist190F0*)self_;
     int count;
@@ -1611,7 +1611,7 @@ extern "C" float cRiderMetrix_evFrag(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119448);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evCollectMultiplier);
 #ifdef SKIP_ASM
 extern "C" void func_001171A8(void* self, int type, int value, int arg, float f);
 
@@ -1624,7 +1624,7 @@ extern "C" void func_001171A8(void* self, int type, int value, int arg, float f)
  * @param value  the multiplier
  * @return 0.0 (no boost)
  */
-extern "C" float func_00119448(char* self, float value)
+extern "C" float cRiderMetrix_evCollectMultiplier(char* self, float value)
 {
     *(int*)(self + 0x130) += 1;
     char* hudBank = *(char**)(self + 0x1B0);
@@ -1688,7 +1688,7 @@ extern "C" float cRiderMetrix_evCheckpoint(char* self, int timeBonusSec)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001195A8);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evSplitTime);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 
@@ -1700,7 +1700,7 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
  * @param value  the value to show
  * @return 0.0
  */
-extern "C" float func_001195A8(void* self, int value)
+extern "C" float cRiderMetrix_evSplitTime(void* self, int value)
 {
     cRiderMetrix_addHUDfx1(self, 42, value, 0, 5.0f);
     return 0.0f;
@@ -1708,7 +1708,7 @@ extern "C" float func_001195A8(void* self, int value)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_001195D8);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evSplitPoints);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 
@@ -1720,7 +1720,7 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
  * @param value  the value to show
  * @return 0.0
  */
-extern "C" float func_001195D8(void* self, int value)
+extern "C" float cRiderMetrix_evSplitPoints(void* self, int value)
 {
     cRiderMetrix_addHUDfx1(self, 43, value, 0, 5.0f);
     return 0.0f;
@@ -1728,7 +1728,7 @@ extern "C" float func_001195D8(void* self, int value)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119608);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evAddPoints);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
@@ -1754,7 +1754,7 @@ extern sGameSettings_119608 D_00535BC8_119608 __asm__("cBENewRaceInterface_newRa
  * @param pts  the points
  * @return 0.0
  */
-extern "C" float func_00119608(void* self, int pts)
+extern "C" float cRiderMetrix_evAddPoints(void* self, int pts)
 {
     int v = (int)(pts * *(float*)((char*)self + 0x1C4) + 0.5f);
     cBE_getInterface(cBE_getBE(), 0);
@@ -1822,12 +1822,12 @@ extern "C" float cRiderMetrix_evGrabHold(char* self, int id)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evReleaseGrab);
 #ifdef SKIP_ASM
-extern "C" void func_00119068(void* self_, int value);
+extern "C" void cRiderMetrix_addGrab(void* self_, int value);
 
 /**
  * Scores the end of a grab: records it in the trick and banks its hold time.
  *
- * func_00119068 (On Tour addGrab) adds @p grabID to the grab list. Ids >= 0x23 count as ubers (+0x54), and as super ubers
+ * cRiderMetrix_addGrab (On Tour addGrab) adds @p grabID to the grab list. Ids >= 0x23 count as ubers (+0x54), and as super ubers
  * (+0x58) while the rider's mUberLevel >= 6; ids >= 0x13 as tweaks (+0x50); others as grabs (+0x4C). The hold time
  * (+0x40) raises the longest hold (+0x48) and adds to the total (+0x44); the uber flag clears and the timer goes back
  * to -1. Field names are On Tour's cRiderMetrixState ones, which sit 8 bytes lower there.
@@ -1840,7 +1840,7 @@ extern "C" void func_00119068(void* self_, int value);
 extern "C" float cRiderMetrix_evReleaseGrab(void* riderMetrix, int grabID)
 {
     char* self = (char*)riderMetrix;
-    func_00119068(self, grabID);
+    cRiderMetrix_addGrab(self, grabID);
     if (grabID >= 35)
     {
         (*(int*)(self + 0x54))++;
@@ -2117,7 +2117,7 @@ extern "C" float cRiderMetrix_evWipeout(void* self, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_00119BB0);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evWipeoutRecover);
 #ifdef SKIP_ASM
 /**
  * Scores getting up after a wipeout: with @p a1 set shows HUD effect 33 for 1.5 s and returns a 0.1 boost.
@@ -2125,7 +2125,7 @@ INCLUDE_ASM("ai/ridermetrix", func_00119BB0);
  * @param a1  set when the player recovered by input
  * @return 0.1, or 0.0 when @p a1 is 0
  */
-extern "C" float func_00119BB0(void* self, int a1)
+extern "C" float cRiderMetrix_evWipeoutRecover(void* self, int a1)
 {
     float result;
     if (a1)
@@ -2410,7 +2410,7 @@ float cRiderMetrix_evAutoResetSurface(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011A0C0__FPv);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evDangerLevelChange__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing and returns 0.0.
@@ -2419,27 +2419,27 @@ INCLUDE_ASM("ai/ridermetrix", func_0011A0C0__FPv);
  *
  * @return 0.0
  */
-float func_0011A0C0(void* self)
+float cRiderMetrix_evDangerLevelChange(void* self)
 {
     return 0.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011A0D0);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evDangerFail);
 #ifdef SKIP_ASM
 /**
  * Does nothing and returns 0.0. Nothing in the source calls it.
  *
  * @return 0.0
  */
-extern "C" float func_0011A0D0(void) {
+extern "C" float cRiderMetrix_evDangerFail(void) {
     return 0.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/ridermetrix", func_0011A0E0);
+INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evMissionStart);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 
@@ -2448,7 +2448,7 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
  *
  * @return 0.0
  */
-extern "C" float func_0011A0E0(void* self)
+extern "C" float cRiderMetrix_evMissionStart(void* self)
 {
     cRiderMetrix_addHUDfx1(self, 26, 0, 0, 1.0f);
     return 0.0f;
@@ -2484,7 +2484,7 @@ extern "C" int cRiderMetrix_checkForMonsterTrick(void* self, sTrickId* id);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, int rider);
-extern "C" int func_001190F0(void* self, sTrickId* id);
+extern "C" int cRiderMetrix_addToHistory(void* self, sTrickId* id);
 extern "C" void cRiderMetrix_addTrick(void* self, sTrickId* id, int repeat);
 
 // Same layout as sTrickId, which the unit defines after this function.
@@ -2498,7 +2498,7 @@ struct sTrickIdA168 {
  *
  * When cRiderMetrix_buildTrickName (buildTrickName) gives a name: a monster-trick bonus from cRiderMetrix_checkForMonsterTrick adds bonus / 10000 to the
  * trick power (+0x14), shows HUD effect 0x32 and plays the monster-combo sound; then cRiderMetrix_addTrick (addTrick) announces
- * it, as a repeat when func_001190F0 finds it in the trick history.
+ * it, as a repeat when cRiderMetrix_addToHistory finds it in the trick history.
  *
  * @param stance  On Tour isFakieLand: landed fakie
  * @param alternate  On Tour isPipeLand: landed in a pipe
@@ -2518,7 +2518,7 @@ extern "C" void cRiderMetrix_earnName(void* self, int stance, int alternate, int
             cRiderMetrix_addHUDfx1(self, 50, pts, 0, 1.5f);
             cSSXAudio_LandedMonsterCombo(func_0028B180(), *(int*)((char*)self + 0x1AC));
         }
-        cRiderMetrix_addTrick(self, id, func_001190F0(self, id) > 0);
+        cRiderMetrix_addTrick(self, id, cRiderMetrix_addToHistory(self, id) > 0);
     }
 }
 #endif
@@ -2550,12 +2550,12 @@ extern "C" int cRiderMetrix_checkForMonsterTrick(void* self, sTrickId* id);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, int rider);
-extern "C" int func_001190F0(void* self, sTrickId* id);
+extern "C" int cRiderMetrix_addToHistory(void* self, sTrickId* id);
 extern "C" void cRiderMetrix_addTrick(void* self, sTrickId* id, int repeat);
 extern "C" int cRiderMetrix_getCurTrickPointsWithMult(void* self);
 extern "C" int cRiderMetrix_calcTrickLevel(void* self, int points);
 extern "C" int cRiderMetrix_getCurTrickStyleSubPoints(void* self);
-extern "C" void func_00117638(void* self, int points);
+extern "C" void cRiderMetrix_addToComboChain(void* self, int points);
 extern "C" void cSSXAudio_LandedUberTrick(void* audio, int rider, int ubers, int runUbers);
 extern "C" void cRiderMetrix_evAddCash(void* self, int kind, int amount);
 extern "C" void cRiderMetrix_delayComboChainReset(void* self, float seconds);
@@ -2590,10 +2590,10 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_earnNameAndPoints);
  *
  * Clears the live trick HUD effects and does nothing more once the race is over (cAI_isRaceFinished). With trick
  * points: names the trick (cRiderMetrix_buildTrickName), adds any monster bonus, announces it (cRiderMetrix_addTrick) and divides points and
- * boost by 1 + its repeats in the trick history (func_001190F0). The result goes into Totals: TotalPoints (+0x198),
+ * boost by 1 + its repeats in the trick history (cRiderMetrix_addToHistory). The result goes into Totals: TotalPoints (+0x198),
  * TotalStylePoints (+0x19C), NumTricksLanded (+0x110), the trick-level counts, best trick (+0x18C, with its name at
  * +0x190), spin and flip degrees, grab time, ubers and the air/grab/rail/plant records; the combo chain grows
- * (func_00117638). It then shows HUD effects 0x23 (0x24 for a repeat) and 0x18, or in free ride
+ * (cRiderMetrix_addToComboChain). It then shows HUD effects 0x23 (0x24 for a repeat) and 0x18, or in free ride
  * (cBENewRaceInterface_newRace +0x48 == 4, +0x49 == 0) pays cash via cRiderMetrix_evAddCash(0, min(total / 500, 20)).
  * Unless a rail or press continues the line, the combo gets at least 1.5 s more (cRiderMetrix_delayComboChainReset).
  *
@@ -2602,7 +2602,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_earnNameAndPoints);
  * @param style  the rail-slide mode landed in (On Tour rsmLand)
  * @param flag  the press landed in (On Tour pressLand)
  * @param takeoff  On Tour isTakeoff: called from a takeoff rather than a landing
- * @return the boost the trick earns (func_00117900 divided by 1 + repeats), 0.0 without points
+ * @return the boost the trick earns (cRiderMetrix_getCurTrickPower divided by 1 + repeats), 0.0 without points
  */
 extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alternate, int style, int flag, int takeoff)
 {
@@ -2644,7 +2644,7 @@ extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alte
                 cRiderMetrix_addHUDfx1(self, 50, bonus, 0, 1.5f);
                 cSSXAudio_LandedMonsterCombo(func_0028B180(), *(int*)((char*)self + 0x1ac));
             }
-            repeats = func_001190F0(self, &id);
+            repeats = cRiderMetrix_addToHistory(self, &id);
             cRiderMetrix_addTrick(self, &id, repeats > 0);
         }
         divisor = repeats + 1;
@@ -2652,8 +2652,8 @@ extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alte
         points = cRiderMetrix_getCurTrickPointsWithMult(self);
         grade = cRiderMetrix_calcTrickLevel(self, pending);
         inverted = cRiderMetrix_getCurTrickStyleSubPoints(self);
-        func_00117638(self, pending / divisor);
-        delta = func_00117900(self) / (float)divisor;
+        cRiderMetrix_addToComboChain(self, pending / divisor);
+        delta = cRiderMetrix_getCurTrickPower(self) / (float)divisor;
 
         points /= divisor;
         points -= points % 10;
@@ -3125,7 +3125,7 @@ extern "C" void InitTerminalVelocityTable(void)
 INCLUDE_ASM("ai/ridermetrix", cRider_updateTerminalVelocity);
 #ifdef SKIP_ASM
 extern "C" float func_001494C0(void* iface, int a1, int a2);
-int func_0011FE98(void* self);
+int cRider_getMotionState(void* self);
 extern float kTerminalVelocityTable[2][3][4][2];
 
 /**
@@ -3144,7 +3144,7 @@ extern "C" void cRider_updateTerminalVelocity(char* self)
     speedAttribute = speedAttribute + 1.0f - 1.0f;
     char* surfPropCache = (char*)SSXApp->Game;
     char* snow = *(char**)(surfPropCache + 0x44) + *(int*)(self + 0x438) * 176;
-    const int motionState = func_0011FE98(self);
+    const int motionState = cRider_getMotionState(self);
     const float surfaceProperty = (motionState == 0) ? *(float*)(snow + 4) : 1.0f;
     const bool fasterThanPacked = 0.0f < surfaceProperty;
     const int lowSurfaceIndex = fasterThanPacked ? 1 : 0;

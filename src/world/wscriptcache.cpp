@@ -7,8 +7,8 @@
 INCLUDE_ASM("world/wscriptcache", cWScriptCache_init);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
-void* func_003ACA50(void* self);
-extern "C" void func_003ACA70(int* self, int flags);
+void* cWScriptCacheEntry_cWScriptCacheEntry(void* self);
+extern "C" void cWScriptCacheEntry__cWScriptCacheEntry(int* self, int flags);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_tWScriptCache[];
@@ -16,9 +16,9 @@ extern char str_tWScriptCache[];
 /**
  * Sizes the world-script cache for a number of sections by replacing its section array with empty entries.
  *
- * Destroys any old array at +0x4 (func_003ACA70 on each entry, last to first) and frees it, stores @p count
+ * Destroys any old array at +0x4 (cWScriptCacheEntry__cWScriptCacheEntry on each entry, last to first) and frees it, stores @p count
  * at +0x8, allocates @p count 12-byte "tWScriptCache" entries behind an array cookie, constructs each
- * (func_003ACA50: state 0, +0x4 = -1, no data) and clears +0xC.
+ * (cWScriptCacheEntry_cWScriptCacheEntry: state 0, +0x4 = -1, no data) and clears +0xC.
  *
  * @param count  number of world sections (On Tour numSections)
  */
@@ -30,7 +30,7 @@ extern "C" void cWScriptCache_init(void* self, int count)
         char* oldEntry = (char*)(*(int*)(old - 0x10) * 0xC + (int)old);
         while (*(char**)((char*)self + 0x4) != oldEntry) {
             oldEntry -= 0xC;
-            func_003ACA70((int*)oldEntry, 0);
+            cWScriptCacheEntry__cWScriptCacheEntry((int*)oldEntry, 0);
         }
         cMemMan_free(*(char**)((char*)self + 0x4) - 0x10);
     }
@@ -42,7 +42,7 @@ extern "C" void cWScriptCache_init(void* self, int count)
     char* newEntry = arr;
     int i;
     for (i = count - 1; i != -1; i--, newEntry += 0xC) {
-        func_003ACA50(newEntry);
+        cWScriptCacheEntry_cWScriptCacheEntry(newEntry);
     }
     *slot = arr;
     *(int*)((char*)self + 0xC) = 0;
@@ -54,13 +54,13 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCache__cWScriptCache);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int*);
-extern "C" void func_003ACA70(int* self, int flags);
+extern "C" void cWScriptCacheEntry__cWScriptCacheEntry(int* self, int flags);
 extern int cWScriptCache_mpWScriptCache;
 
 /**
  * Destroys the world script cache and its per-section entries.
  *
- * If the entry array at +0x4 exists, runs func_003ACA70 (flag 0) on each 0xC-byte entry from the last to the first (the
+ * If the entry array at +0x4 exists, runs cWScriptCacheEntry__cWScriptCacheEntry (flag 0) on each 0xC-byte entry from the last to the first (the
  * count is the cookie at array - 0x10) and frees the block with cMemMan_free. Then clears cWScriptCache_mpWScriptCache
  * and calls operator delete when bit 0 of @p flags is set.
  *
@@ -74,7 +74,7 @@ extern "C" void cWScriptCache__cWScriptCache(int* self, int flags)
         char* p = (char*)(*(int*)(old - 0x10) * 0xC + (int)old);
         while (*(char**)((char*)self + 0x4) != p) {
             p -= 0xC;
-            func_003ACA70((int*)p, 0);
+            cWScriptCacheEntry__cWScriptCacheEntry((int*)p, 0);
         }
         cMemMan_free(*(char**)((char*)self + 0x4) - 0x10);
     }
@@ -86,20 +86,20 @@ extern "C" void cWScriptCache__cWScriptCache(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003AC980);
+INCLUDE_ASM("world/wscriptcache", cWScriptCache_update);
 #ifdef SKIP_ASM
-extern "C" void func_003ACAD0(int);
+extern "C" void cWScriptCacheEntry_update(int);
 
 /**
- * Updates every section's script cache entry: func_003ACAD0 on each of the mNumSections entries (0xC bytes each).
+ * Updates every section's script cache entry: cWScriptCacheEntry_update on each of the mNumSections entries (0xC bytes each).
  *
  * No C caller in the source.
  */
-extern "C" void func_003AC980(void *self) {
+extern "C" void cWScriptCache_update(void *self) {
     unsigned int i;
 
     for (i = 0; i < *(unsigned int *)((char *)self + 8); i++) {
-        func_003ACAD0(*(int *)((char *)self + 4) + i * 0xC);
+        cWScriptCacheEntry_update(*(int *)((char *)self + 4) + i * 0xC);
     }
 }
 #endif
@@ -153,7 +153,7 @@ struct sWScriptCacheEntry {
 };
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ACA38);
+INCLUDE_ASM("world/wscriptcache", cWScriptCache_getScriptBase);
 #ifdef SKIP_ASM
 /**
  * Returns section @p a1's script data (its cache entry's mpScriptHeader).
@@ -163,7 +163,7 @@ INCLUDE_ASM("world/wscriptcache", func_003ACA38);
  * @param a1  the section id
  * @return the script file header
  */
-extern "C" int func_003ACA38(void* self, int a1)
+extern "C" int cWScriptCache_getScriptBase(void* self, int a1)
 {
     sWScriptCacheEntry* p = *(sWScriptCacheEntry**)((char*)self + 0x4);
     return p[a1].field_0x8;
@@ -171,14 +171,14 @@ extern "C" int func_003ACA38(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ACA50__FPv);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_cWScriptCacheEntry__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs a script cache entry: state 0, mStreamed 0, async handle -1, no data.
  *
  * @return @p self
  */
-void* func_003ACA50(void* self)
+void* cWScriptCacheEntry_cWScriptCacheEntry(void* self)
 {
     int zero = 0;
     *(short*)self = (short)zero;
@@ -190,7 +190,7 @@ void* func_003ACA50(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ACA70);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry__cWScriptCacheEntry);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int*);
@@ -201,7 +201,7 @@ void operator_delete(int*);
  *
  * @param flags  bit 0 set to delete the object
  */
-extern "C" void func_003ACA70(int* self, int flags)
+extern "C" void cWScriptCacheEntry__cWScriptCacheEntry(int* self, int flags)
 {
     if (*(void**)((char*)self + 0x8) != 0 && *(short*)((char*)self + 0x2) == 0) {
         cMemMan_free(*(void**)((char*)self + 0x8));
@@ -213,7 +213,7 @@ extern "C" void func_003ACA70(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ACAD0);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void ASYNCFILE_release_CAD0(int, int *, int *) __asm__("ASYNCFILE_release");
@@ -224,7 +224,7 @@ extern "C" int ASYNCFILE_getstatus_CAD0(int) __asm__("ASYNCFILE_getstatus");
 extern "C" void MEM_copy_CAD0(int, int, int) __asm__("MEM_copy");
 int operator_new_CAD0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
 extern char str_WScriptFile[];
-extern "C" void func_003ACAD0_impl(void *self_) __asm__("func_003ACAD0");
+extern "C" void cWScriptCacheEntry_update_impl(void *self_) __asm__("cWScriptCacheEntry_update");
 /**
  * Finishes a script file load: once the entry is loading (state 1) and its async file reports status 1, takes the data,
  * unpacks or copies it into a new "WScriptFile" buffer (mpScriptHeader) and sets state 2.
@@ -234,7 +234,7 @@ extern "C" void func_003ACAD0_impl(void *self_) __asm__("func_003ACAD0");
  *
  * @param self_  the cWScriptCacheEntry
  */
-extern "C" void func_003ACAD0_impl(void *self_) {
+extern "C" void cWScriptCacheEntry_update_impl(void *self_) {
     char *self = (char*)self_;
     short st = *(short*)self;
     if (st == 1 && ASYNCFILE_getstatus_CAD0(*(int*)(self + 4)) == st) {
@@ -304,11 +304,11 @@ struct sWSCItemFields {
     int value;    // 0x8
 };
 
-extern "C" void func_003ACCD8(sWScriptCacheItem* e, void* world, int index);
+extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* e, void* world, int index);
 
 /**
  * Gives an entry the script data that came with the stream: stores @p value, marks it streamed (mStreamed 1, not freed
- * by the entry), sets state 2 and resolves it (func_003ACCD8 with cWorld_m_pTheWorld and @p index).
+ * by the entry), sets state 2 and resolves it (cWScriptCacheEntry_resolve with cWorld_m_pTheWorld and @p index).
  *
  * @param item  the cWScriptCacheEntry
  * @param index  the section id
@@ -320,19 +320,19 @@ extern "C" void func_003ACC50(sWScriptCacheItem* item, int index, int value)
     fields->value = value;
     fields->owned = 1;
     fields->type = 2;
-    func_003ACCD8(item, cWorld_m_pTheWorld, index);
+    cWScriptCacheEntry_resolve(item, cWorld_m_pTheWorld, index);
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ACC90);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_unload);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
 /**
  * Unloads an entry's script data: frees it unless streamed, clears mpScriptHeader and sets state 0.
  */
-extern "C" void func_003ACC90(void* self)
+extern "C" void cWScriptCacheEntry_unload(void* self)
 {
     void* buf = *(void**)((char*)self + 0x8);
     if (buf != 0) {
@@ -346,7 +346,7 @@ extern "C" void func_003ACC90(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ACCD8);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_resolve);
 #ifdef SKIP_ASM
 struct sWScriptCacheItem;
 void cMemMan_free(void* p);
@@ -417,7 +417,7 @@ static inline void* resolve_CCD8(char* w, sRef_CCD8 ref, int tblOff)
  * @param world  the cWorld
  * @param index  the section id
  */
-extern "C" void func_003ACCD8(sWScriptCacheItem* ep, void* world, int index)
+extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* ep, void* world, int index)
 {
     char* e = (char*)ep;
     char** wp = (char**)world;
@@ -502,7 +502,7 @@ extern "C" void func_003ACCD8(sWScriptCacheItem* ep, void* world, int index)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003AD120);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getWScriptHeaderId);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sRef_D120 {
@@ -528,7 +528,7 @@ static inline int valid_D120(sRef_D120 r)
  * @param entry  the script slot
  * @return the tResourceID, or -1
  */
-extern "C" unsigned int func_003AD120(void* cache, void* inst, int entry)
+extern "C" unsigned int cWScriptCacheEntry_getWScriptHeaderId(void* cache, void* inst, int entry)
 {
     char* data = *(char**)((char*)inst + 0x88);
     if (data == 0 || WSD_D120 == 0) {

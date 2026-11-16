@@ -1163,8 +1163,8 @@ struct sMgr_13A8 {
     int cur;
 };
 
-void func_001441A0(void*, void*);
-extern "C" int func_001441B8(sMgr_13A8*, int);
+void cDangerMan_DeleteTrackedDangerElemRecord(void*, void*);
+extern "C" int cDangerMan_CalcAppliedDangerLevel(sMgr_13A8*, int);
 
 static inline sObj_13A8* toPtr_13A8(unsigned int v)
 {
@@ -1208,7 +1208,7 @@ extern "C" void func_001013A8(sMgr_13A8* self)
             pCurrentRiderTrack->a = baseDangerZoneLevel;
             pCurrentRiderTrack->c = 60;
         }
-        pCurrentRiderTrack->b = func_001441B8(self, zoneCheckAIIndex);
+        pCurrentRiderTrack->b = cDangerMan_CalcAppliedDangerLevel(self, zoneCheckAIIndex);
     }
     do { // FAKEMATCH: see header
     for (int i = 0; i < 6; i++) {
@@ -1233,7 +1233,7 @@ extern "C" void func_001013A8(sMgr_13A8* self)
             if (pCurrElem->state == 1) {
                 pCurrElem->y -= 0.01666666753590107f;
                 if (pCurrElem->y <= 0.0f) {
-                    func_001441A0(self, pCurrElem);
+                    cDangerMan_DeleteTrackedDangerElemRecord(self, pCurrElem);
                     continue;
                 }
             }
@@ -1293,7 +1293,7 @@ struct sTable_101688 {
  * levels.
  *
  * Sets the tracked count to 0 and all 64 element states to 2 (free), clears the danger level and the
- * func_001441B8 value of each of the 6 rider records, chains the 64 zone nodes into the free list, empties
+ * cDangerMan_CalcAppliedDangerLevel value of each of the 6 rider records, chains the 64 zone nodes into the free list, empties
  * the active zone list, sets the zone-check rider index to 0 and clears +0x708.
  *
  * @param vself  the danger manager (cDangerMan)
@@ -1434,7 +1434,7 @@ extern "C" void func_00101728(sMgr_1728* self, unsigned int* idp, float x, float
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00101888);
 #ifdef SKIP_ASM
-void func_001441A0(void*, void*);
+void cDangerMan_DeleteTrackedDangerElemRecord(void*, void*);
 
 extern "C" void func_00101888(sMgr_1728* self, unsigned int* idp)
 {
@@ -1446,7 +1446,7 @@ extern "C" void func_00101888(sMgr_1728* self, unsigned int* idp)
             if (elemInfo->state != 2) {
                 remaining--;
                 if (elemInfo->id == *idp) {
-                    func_001441A0(self, elemInfo);
+                    cDangerMan_DeleteTrackedDangerElemRecord(self, elemInfo);
                     return;
                 }
             }
@@ -3514,8 +3514,8 @@ struct cScope_5398 {
     cScope_5398(void* tree, int flag) __asm__("cWorldRider_cWorldRider");
 };
 
-int func_0011FEE8_5398(void*) __asm__("func_0011FEE8__FPv");
-int func_0011FE98(void*);
+int cRider_getControlState_5398(void*) __asm__("cRider_getControlState__FPv");
+int cRider_getMotionState(void*);
 extern "C" void cRider_checkRailBodyCollisions(void*);
 extern "C" float func_00104E70_5398(char*, cScope_5398*, sContact_5398*) __asm__("func_00104E70");
 extern "C" int cRider_isGroundNormalValid(void*);
@@ -3657,7 +3657,7 @@ extern "C" void cRider_checkObjectCollisions(char* self, sV4_5398* norm)
 {
     sContact_5398 c;
     sInfo_5398 info;
-    if (func_0011FEE8_5398(self) == 9)
+    if (cRider_getControlState_5398(self) == 9)
         return;
     float zero = 0.0f;
     cRider_checkRailBodyCollisions(self);
@@ -3674,7 +3674,7 @@ extern "C" void cRider_checkObjectCollisions(char* self, sV4_5398* norm)
                 c.normal = *norm;
             else
                 c.normal = Div_5398(t, len);
-        } else if (func_0011FE98(self) == 4) {
+        } else if (cRider_getMotionState(self) == 4) {
             sV4_5398* up = (sV4_5398*)(*(char**)(self + 0x77C) + 0xB0);
             if (Dot_5398(c.normal, *up) > zero)
                 c.normal = *up;
@@ -3706,8 +3706,8 @@ extern "C" void cRider_checkObjectCollisions(char* self, sV4_5398* norm)
 INCLUDE_ASM("seg/seg_1218", cRider_doObjectCollision);
 #ifdef SKIP_ASM
 // Rider hits a surface: hit->n is the contact normal, hit->vel the surface velocity.
-int func_0011FEE8_57B8(void*) __asm__("func_0011FEE8__FPv");
-int func_0011FE98(void*);
+int cRider_getControlState_57B8(void*) __asm__("cRider_getControlState__FPv");
+int cRider_getMotionState(void*);
 // PORT: the project names this cRider_setControlState__FPv (one param); callers pass a state too.
 void cRider_setControlState_57B8(void* self, int v) __asm__("cRider_setControlState__FPv");
 int cRiderAnimBase_getCurrentAnimID(void* anim, int ch);
@@ -3905,7 +3905,7 @@ static inline float Sqrt_57B8(float x)
  */
 extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, sHit_57B8* hit, float depth)
 {
-    if (func_0011FEE8_57B8(rider) == 9)
+    if (cRider_getControlState_57B8(rider) == 9)
         return;
     int off = hit->surf * 12 + 0x10;
     float* surf = (float*)(*(char**)(obj + 0x88) + off);
@@ -3923,7 +3923,7 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         if (vn < 0.0f)
             vn = 0.0f;
         bounce = vn + Clamp_57B8(grip * vn, 55.55555725097656f, 1388.888916015625f);
-        if (func_0011FE98(rider) == 0)
+        if (cRider_getMotionState(rider) == 0)
             func_001065B0(rider, hit);
         cRider_updateOrientationImplicit(rider);
     } else {
@@ -3933,14 +3933,14 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         bounce = Sqrt_57B8((b * b - c) >? 0.0f) - b; // PORT: g++ maximum operator
     }
     float facing = DotV_57B8(rider->unk_180, hit->n);
-    if (func_0011FE98(rider) == 1 || (func_0011FE98(rider) == 2 && *(int*)((char*)rider->mRiderHandler + 0x30) == 1)) {
+    if (cRider_getMotionState(rider) == 1 || (cRider_getMotionState(rider) == 2 && *(int*)((char*)rider->mRiderHandler + 0x30) == 1)) {
         if (Len_57B8(rider->mVelocity) < 833.3333740234375f) {
             float* acc = &rider->mImpactAccum2;
             *acc = *acc + (2.5f - facing) * (hit->n.z >= 0.20000000298023224f ? hit->n.z : 0.20000000298023224f);
         }
     }
     int anim = cRiderAnimBase_getCurrentAnimCategory(rider->mRiderAnim, 2);
-    int state = func_0011FE98(rider);
+    int state = cRider_getMotionState(rider);
     if (state == 1 && (anim == 9 || anim == 2 || anim == 11 || anim == state) && facing > 0.30000001192092896f) {
         t4Vector w = Add_57B8(Sub_57B8(rider->mVelocity, hit->vel), Scale_57B8(hit->n, vn));
         float speed = Len_57B8(w);
@@ -3978,8 +3978,8 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
 //100%
 INCLUDE_ASM("seg/seg_1218", cRider_reactToCollision);
 #ifdef SKIP_ASM
-int func_0011FEE8_5D98(void*) __asm__("func_0011FEE8__FPv");
-int func_0011FE98(void*);
+int cRider_getControlState_5D98(void*) __asm__("cRider_getControlState__FPv");
+int cRider_getMotionState(void*);
 int AIrand();
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
@@ -4110,7 +4110,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
  */
 extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int id)
 {
-    if (func_0011FEE8_5D98(self) == 9)
+    if (cRider_getControlState_5D98(self) == 9)
         return;
     self->mImpactAccum += 1.0f - (Dot_5D98(info->off, self->mImpulse) >? 0.0f); // PORT: g++ maximum operator
     self->mImpulse = info->off;
@@ -4123,7 +4123,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
     sVEf_5D98* vt = *(sVEf_5D98**)&self->mVtbl;
     vt[kRiderVt_vibrationBump].fn((char*)self + vt[kRiderVt_vibrationBump].delta, info->vn);
     char* sub = (char*)&self->mVtbl;
-    if (func_0011FE98(self) == 2) {
+    if (cRider_getMotionState(self) == 2) {
         if (*(int*)((char*)self->mRiderHandler + 0x30) == 1) {
             sVEv_5D98* vt2 = *(sVEv_5D98**)sub;
             t4Vector* pos = vt2[kRiderVt_getPosition].fn(sub + vt2[kRiderVt_getPosition].delta);
@@ -4136,7 +4136,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
         *(t4Vector*)(h + 0x320) = self->mVelocity;
         return;
     }
-    if (func_0011FE98(self) == 1) {
+    if (cRider_getMotionState(self) == 1) {
         sVEv_5D98* vt2 = *(sVEv_5D98**)sub;
         t4Vector* pos = vt2[kRiderVt_getPosition].fn(sub + vt2[kRiderVt_getPosition].delta);
         sVEv_5D98* vt3 = *(sVEv_5D98**)sub;
@@ -4151,8 +4151,8 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
     float h = Dot_5D98(rel, Get_5D98((char*)self + 0x180));
     int cur = cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2);
     int anim = 438;
-    if (func_0011FEE8_5D98(self) != 11) {
-        if (func_0011FE98(self) == 1 && info->off.z > 0.800000011920929f) {
+    if (cRider_getControlState_5D98(self) != 11) {
+        if (cRider_getMotionState(self) == 1 && info->off.z > 0.800000011920929f) {
             if (cur == 20 || cur == 21) {
                 anim = 361;
             } else if (Abs_5D98(d1) > Abs_5D98(d0) && Abs_5D98(d1) > Abs_5D98(d2)) {
@@ -4165,7 +4165,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
             } else {
                 anim = d0 < 0.0f ? 357 : 356;
             }
-        } else if (func_0011FE98(self) == 1) {
+        } else if (cRider_getMotionState(self) == 1) {
             if (Abs_5D98(d1) > Abs_5D98(d0) && Abs_5D98(d1) > Abs_5D98(d2)) {
                 float minSpeed = 416.5320129394531f;
                 if (minSpeed < info->vn) {
@@ -4460,8 +4460,8 @@ INCLUDE_ASM("seg/seg_1218", cRider_checkRailBoardCollisions);
 #ifdef SKIP_ASM
 // Rider touches down: kill the velocity into the ground, classify the landing from the board's
 // orientation against the ground normal (state at 0x328), and start the landing reaction.
-int func_0011FEE8_57B8(void*) __asm__("func_0011FEE8__FPv");
-int func_0011FE98(void*);
+int cRider_getControlState_57B8(void*) __asm__("cRider_getControlState__FPv");
+int cRider_getMotionState(void*);
 // PORT: the project names these __FPv (one param); callers pass a state too.
 void cRider_setControlState_57B8(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_6848(void* self, int v) __asm__("cRider_setMotionState__FPv");
@@ -4714,7 +4714,7 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
     float upDot = Dot_6848(*(t4Vector*)&up, land.n);
     float angle = Atan2_6848(upDot, sideDot);
     int prev = RAIL_STYLE(self);
-    if (func_0011FEE8_57B8(self) == 1) {
+    if (cRider_getControlState_57B8(self) == 1) {
         if (self->IsRidingFakie == 0)
             RAIL_STYLE(self) = 1;
         else
@@ -4724,7 +4724,7 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
             RAIL_STYLE(self) = 2;
         else
             RAIL_STYLE(self) = 1;
-    } else if (func_0011FEE8_57B8(self) == 0xC) {
+    } else if (cRider_getControlState_57B8(self) == 0xC) {
         RAIL_STYLE(self) = 3;
     } else {
         sV_6848 front = Front_6848(bone);
@@ -4744,17 +4744,17 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
         }
     }
     self->mSurfaceType = land.mat;
-    if (func_0011FE98(self) == 1) {
+    if (cRider_getMotionState(self) == 1) {
         cRider_flagEventLand(self, 0, RAIL_STYLE(self), PRESS_TYPE(self), &land, imp);
     } else {
         cRider_flagEventBoostPowerUp(self, 1, cRiderMetrix_evLand(self->mMetrix, self->IsRidingFakie != self->IsGoofyStance, 0, RAIL_STYLE(self), PRESS_TYPE(self)));
     }
     *(int*)(D_004A3500_6848 + 0x598C) = land.mat;
     cRider_setMotionState_6848(self, 4);
-    int st = func_0011FEE8_57B8(self);
-    if (st == 0 || func_0011FEE8_57B8(self) == 4 || func_0011FEE8_57B8(self) == 5 || func_0011FEE8_57B8(self) == 11) {
+    int st = cRider_getControlState_57B8(self);
+    if (st == 0 || cRider_getControlState_57B8(self) == 4 || cRider_getControlState_57B8(self) == 5 || cRider_getControlState_57B8(self) == 11) {
         int fall = 0;
-        if (func_0011FEE8_57B8(self) == 5 || func_0011FEE8_57B8(self) == 4)
+        if (cRider_getControlState_57B8(self) == 5 || cRider_getControlState_57B8(self) == 4)
             fall = 1;
         cRider_setControlState_57B8(self, 13);
         cRider_doRailslideModeOrientation(self);
@@ -5040,7 +5040,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self) __asm__("cRider
  */
 extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
 {
-    if (func_0011FE98(self) == 4) {
+    if (cRider_getMotionState(self) == 4) {
         return 0;
     }
     sAnimModelBone* animModelBone = &self->mAnimModel->bones[self->mBoneHips];
@@ -5108,7 +5108,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
             vt[43].fn(h + vt[43].delta, &hit, &imp);
         }
     }
-    if (func_0011FE98(self) == 0) {
+    if (cRider_getMotionState(self) == 0) {
         hit.n = off;
         func_001065B0(self, &hit);
         cRider_updateOrientationImplicit(self);
@@ -5233,7 +5233,7 @@ static inline void ScaleEq(t4Vector& v, float s)
         : "memory");
 }
 
-int func_0011FE98(void*);
+int cRider_getMotionState(void*);
 
 // PORT: the project names this cRider_setControlState__FPv (one param); callers pass a state too.
 void cRider_setControlState_2(void* self, int v) __asm__("cRider_setControlState__FPv");
@@ -5313,7 +5313,7 @@ static inline float Kph_7578(float kph) { return kph / 3.6f; }
 extern "C" int cRider_checkHandplantCollisions(char* self)
 {
     cCheatFX_setCheatInput(*(char**)(self + 0x77C) + 0xD20, 2);
-    if (func_0011FE98(self) == 1) {
+    if (cRider_getMotionState(self) == 1) {
         if (*(float*)(self + 0x1E8) < Kph_7578(-2000.0f))
             return 0;
         if (Up_7578(self).z < 0.0f)
@@ -5644,8 +5644,8 @@ public:
     virtual sV4_7E70* GetPos();
 };
 
-int func_0011FEE8_7E70(void*) __asm__("func_0011FEE8__FPv");
-int func_0011FE98(void*);
+int cRider_getControlState_7E70(void*) __asm__("cRider_getControlState__FPv");
+int cRider_getMotionState(void*);
 int AIrand();
 extern "C" int cRider_isGroundNormalValid(void*);
 extern "C" void cAirPredictor_startLaunchIntoAir(void*, sV4_7E70*, sV4_7E70*, float);
@@ -5816,7 +5816,7 @@ static inline sV4_7E70 Get_7E70(char* p) { return *(sV4_7E70*)p; }
  */
 extern "C" void cRider_doOpponentCollision(char* self, char* other, sV4_7E70* n, int flag, float speed)
 {
-    if (func_0011FEE8_7E70(self) == 10)
+    if (cRider_getControlState_7E70(self) == 10)
         return;
     float absSpd = Abs_7E70(speed);
     float lim = 555.5555419921875f;
@@ -5827,7 +5827,7 @@ extern "C" void cRider_doOpponentCollision(char* self, char* other, sV4_7E70* n,
                    Sub_7E70(imp, Scale_7E70(*(sV4_7E70*)(self + 0x370), Dot_7E70(imp, *(sV4_7E70*)(self + 0x370)))));
     } else {
         AddEq_7E70(*(sV4_7E70*)(self + 0x1E0), imp);
-        if (func_0011FE98(self) == 1 || (func_0011FE98(self) == 2 && *(int*)(*(char**)(self + 0x77C) + 0x30) == 1)) {
+        if (cRider_getMotionState(self) == 1 || (cRider_getMotionState(self) == 2 && *(int*)(*(char**)(self + 0x77C) + 0x30) == 1)) {
             cAI_7E70* ai = (cAI_7E70*)(self + 0x6C0);
             sV4_7E70* pos = ai->GetPos();
             cAirPredictor_startLaunchIntoAir(*(void**)(self + 0x788), pos, ai->GetDir(), *(float*)(self + 0x2E4));
@@ -5835,9 +5835,9 @@ extern "C" void cRider_doOpponentCollision(char* self, char* other, sV4_7E70* n,
                 absSpd = 0.0f;
         }
     }
-    if (func_0011FE98(self) == 2)
+    if (cRider_getMotionState(self) == 2)
         return;
-    if (func_0011FEE8_7E70(self) == 9)
+    if (cRider_getControlState_7E70(self) == 9)
         return;
     if (absSpd < 39.99532699584961f)
         return;
@@ -5904,8 +5904,8 @@ struct sV4_8388
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-int func_0011FE98(void*);
-int func_0011FEE8_8388(void*) __asm__("func_0011FEE8__FPv");
+int cRider_getMotionState(void*);
+int cRider_getControlState_8388(void*) __asm__("cRider_getControlState__FPv");
 void cRider_setControlState_8388(void* self, int v) __asm__("cRider_setControlState__FPv");
 int AIrand();
 extern "C" void cBoardPressControl_forceExit(void*);
@@ -5979,11 +5979,11 @@ static inline sV4_8388 Get_8388(char* p) { return *(sV4_8388*)p; }
  */
 extern "C" void cRider_doBump(char* self, char* info, int flag)
 {
-    if (func_0011FE98(self) != 0 && func_0011FE98(self) != 4)
+    if (cRider_getMotionState(self) != 0 && cRider_getMotionState(self) != 4)
         return;
-    if (func_0011FEE8_8388(self) == 1) {
+    if (cRider_getControlState_8388(self) == 1) {
         cBoardPressControl_forceExit(*(char**)(self + 0x77C) + 0x1D0);
-    } else if (func_0011FEE8_8388(self) != 0 && func_0011FEE8_8388(self) != 2 && func_0011FEE8_8388(self) != 7) {
+    } else if (cRider_getControlState_8388(self) != 0 && cRider_getControlState_8388(self) != 2 && cRider_getControlState_8388(self) != 7) {
         return;
     }
     int played = 0;
@@ -5997,7 +5997,7 @@ extern "C" void cRider_doBump(char* self, char* info, int flag)
         if (*(int*)(self + 0x320))
             side = -side;
         if (*(float*)(info + 0x30) < 1111.111083984375f && Len_8388(*(sV4_8388*)(self + 0x1E0)) > 1388.888916015625f &&
-            func_0011FE98(self) != 4) {
+            cRider_getMotionState(self) != 4) {
             float a = *(float*)(self + 0x2DC);
             if (Abs_8388(a) < 6.2831854820251465f) {
                 if (a < 0.0f)
@@ -6290,7 +6290,7 @@ static inline float vDot_8A48(const sVec4_8A48& a, const sVec4_8A48& b)
     return r;
 }
 
-int func_0011FE98(void*);
+int cRider_getMotionState(void*);
 extern "C" int cOverlapList_splineIntersect(void*, sVec4_8A48*, sVec4_8A48*, int, float);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
@@ -6311,7 +6311,7 @@ extern "C" int func_001086B8(void*, sVec4_8A48*, sVec4_8A48*);
  */
 extern "C" int cRider_isRailLandSuccess(char* self, sVec4_8A48* tgt)
 {
-    if (func_0011FE98(self) != 0 && func_0011FE98(self) != 1)
+    if (cRider_getMotionState(self) != 0 && cRider_getMotionState(self) != 1)
         return 0;
     sVec4_8A48 p = vAdd_8A48(*(sVec4_8A48*)((char*)(*(sPath_8A48**)(self + 0x780))->nodes + (*(int*)(self + 0x8A0) << 5)),
                              *(sVec4_8A48*)(self + 0x9D0));
@@ -6606,9 +6606,9 @@ INCLUDE_ASM("seg/seg_1218", cComputer_getControlCmd);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void MEM_fill(void* dst, int value, int size);
-extern "C" float func_0010DEF0(void* self);
+extern "C" float cComputer_setupWarp(void* self);
 extern "C" void cRider_updateTimeWarp(void* self, float v);
-int func_0011FEE8_A768(void*) __asm__("func_0011FEE8__FPv");
+int cRider_getControlState_A768(void*) __asm__("cRider_getControlState__FPv");
 extern "C" void func_0010A960_A768(void* self, void* pad) __asm__("func_0010A960");
 extern "C" void cComputer_getPrewindCmd_A768(void* self, void* pad) __asm__("cComputer_getPrewindCmd");
 extern "C" void cComputer_getGateCmd_A768(void* self, void* pad) __asm__("cComputer_getGateCmd");
@@ -6621,7 +6621,7 @@ extern "C" void cComputer_getBoardPressCmd_A768(void* self, void* pad) __asm__("
 /**
  * Builds this computer rider's control command for the frame, the AI's stand-in for reading a pad.
  *
- * Zeroes the 8-byte command, applies the rubber-band time warp (cRider_updateTimeWarp() with func_0010DEF0's
+ * Zeroes the 8-byte command, applies the rubber-band time warp (cRider_updateTimeWarp() with cComputer_setupWarp's
  * factor), then fills it with the get*Cmd for the rider's control state: cruise (func_0010A960), board press,
  * prewind, natural air, spin, gate, railslide or wipeout (func_0010B750); other states leave it empty.
  * Outside the spin state it clears mGrabEndTime.
@@ -6632,8 +6632,8 @@ extern "C" void cComputer_getBoardPressCmd_A768(void* self, void* pad) __asm__("
 extern "C" void cComputer_getControlCmd(cComputer* self, void* _cmd)
 {
     MEM_fill(_cmd, 0, 8);
-    cRider_updateTimeWarp(self->mRider, func_0010DEF0(((char*)self)));
-    int state = func_0011FEE8_A768(self->mRider);
+    cRider_updateTimeWarp(self->mRider, cComputer_setupWarp(((char*)self)));
+    int state = cRider_getControlState_A768(self->mRider);
     switch (state) {
     case 0:
         func_0010A960_A768(((char*)self), _cmd);
@@ -6751,16 +6751,16 @@ public:
     Fn_A960 state;
 };
 
-extern "C" int func_0010D1A0(void*);
+extern "C" int cComputer_checkForReset(void*);
 extern "C" int cComputer_checkForBlock(void*);
-extern "C" int func_0010DBF0(void*, int*);
+extern "C" int cComputer_checkForPunching(void*, int*);
 
 extern "C" void func_0010A960(cObj_A960* self, sFlags_A960* f)
 {
     int t;
-    f->b12 = func_0010D1A0(self);
+    f->b12 = cComputer_checkForReset(self);
     self->fE20 = 0;
-    if (func_0010DBF0(self, &t)) {
+    if (cComputer_checkForPunching(self, &t)) {
         if (t)
             f->b19 = 1;
         else
@@ -7312,7 +7312,7 @@ extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
 INCLUDE_ASM("seg/seg_1218", func_0010B750);
 #ifdef SKIP_ASM
 extern "C" void func_0010B750(cComputer* computer, int *controlCmd) {
-    *controlCmd = (*controlCmd & ~0x1000) | ((func_0010D1A0(computer) & 1) << 0xC);
+    *controlCmd = (*controlCmd & ~0x1000) | ((cComputer_checkForReset(computer) & 1) << 0xC);
 }
 #endif
 

@@ -247,14 +247,14 @@ extern "C" void cWipeoutMotion_throwRider(cWipeoutMotion* self, sVec4WM* initVel
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_step);
 #ifdef SKIP_ASM
 extern "C" void func_00136F30();
-extern "C" void func_00137D18(void*);
-extern "C" void func_00137750(cWipeoutMotion*);
+extern "C" void cWipeoutMotion_stepGroundMotion(void*);
+extern "C" void cWipeoutMotion_stepAirMotion(cWipeoutMotion*);
 
 /**
  * Steps the wipeout physics one tick: the thrown board, then the rider on the ground or in the air.
  *
- * Calls func_00136F30 (the board, while the root pose override is on), then func_00137D18 for WMS_Ground or
- * func_00137750 (air predictor) for WMS_Air. func_00136F30 is declared without arguments here but still
+ * Calls func_00136F30 (the board, while the root pose override is on), then cWipeoutMotion_stepGroundMotion for WMS_Ground or
+ * cWipeoutMotion_stepAirMotion (air predictor) for WMS_Air. func_00136F30 is declared without arguments here but still
  * receives self.
  */
 extern "C" void cWipeoutMotion_step(int* self)
@@ -262,11 +262,11 @@ extern "C" void cWipeoutMotion_step(int* self)
     func_00136F30();
     if (*self == 0)
     {
-        func_00137D18(self);
+        cWipeoutMotion_stepGroundMotion(self);
     }
     else
     {
-        func_00137750((cWipeoutMotion*)self);
+        cWipeoutMotion_stepAirMotion((cWipeoutMotion*)self);
     }
 }
 #endif
@@ -807,7 +807,7 @@ extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137750);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_stepAirMotion);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cAirPredictor_updateFlightPath(void* ap, void* pos, void* vel, float dt);
@@ -842,7 +842,7 @@ static inline void vu0ScaleEqW7(sVec4W7& v, float s)
  *
  * @param wipeoutMotion  the cWipeoutMotion
  */
-extern "C" void func_00137750(cWipeoutMotion* wipeoutMotion)
+extern "C" void cWipeoutMotion_stepAirMotion(cWipeoutMotion* wipeoutMotion)
 {
     char* rider = (char*)wipeoutMotion->mRider;
     float dt = *(float*)(rider + 0x300) * 0.01666666753590107f;
@@ -893,9 +893,9 @@ struct sVEntH_137860 { short delta; short index; void (*fn)(void*, void*, const 
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
-extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir);
+extern "C" float cWipeoutMotion_intersectGround(void* self, char* hit, sVec4WG* dir);
 // PORT: the project names these __FPv (one void* param); this caller passes more.
-void func_00113998_137860(void* ap, void* pos, void* vel) __asm__("func_00113998__FPv");
+void cAirPredictor_land_137860(void* ap, void* pos, void* vel) __asm__("cAirPredictor_land__FPv");
 void func_00111AA0_137860(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 extern "C" void func_00106538(void* rider, const t4Vector& v);
 extern "C" void cRider_updateBoundBox(void* rider, int a1);
@@ -992,9 +992,9 @@ static inline bool isHuman_137860(cRider* rider)
  * relaunches it.
  *
  * Builds a world query from the rider's sphere tree (cWorldRider_cWorldRider; terrain only for a computer rider) and intersects
- * it with the rider's overlap list (func_003342D0, mWallHint). On a hit, func_00138960 (On Tour intersectGround) checks
+ * it with the rider's overlap list (func_003342D0, mWallHint). On a hit, cWipeoutMotion_intersectGround (On Tour intersectGround) checks
  * the ground below; if that is solid enough (>= 0.4), the rider is not moving away from it and is within 10 of it, the
- * rider lands: func_00113998 (On Tour cAirPredictor::land), the impact effect (func_00111AA0), the handler's landed
+ * rider lands: cAirPredictor_land (On Tour cAirPredictor::land), the impact effect (func_00111AA0), the handler's landed
  * flag and velocity (+0x314/+0x320), the ground normal, surface, contact point and height, the velocity loses its
  * into-ground part (passed to a hit object's vtable slot 43 scaled by the frame rate), any penetration is pushed out
  * (func_00106538) and the wipeout state (+0x0) becomes 0 (ground).
@@ -1016,7 +1016,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
     float d = func_003342D0(RIDER->mOverlapList, &sph, &hitA, (int)RIDER->mWallHint);
     if (d >= 0.0f)
     {
-        float t = func_00138960(self, (char*)&hitB, (sVec4WG*)&hitA.normal);
+        float t = cWipeoutMotion_intersectGround(self, (char*)&hitB, (sVec4WG*)&hitA.normal);
         float vn = 0.0f;
         float h = 0.0f;
         if (t >= 0.4000000059604645f)
@@ -1026,7 +1026,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
         }
         if (t >= 0.4000000059604645f && vn <= 0.0f && h <= 10.0f)
         {
-            func_00113998_137860(RIDER->mAirPredictor, &RIDER->mPosition, &RIDER->mVelocity);
+            cAirPredictor_land_137860(RIDER->mAirPredictor, &RIDER->mPosition, &RIDER->mVelocity);
             func_00111AA0_137860(RIDER->mRiderHandler, &hitB, &hitB.normal, hitB.material, vn);
             cRider* r2 = RIDER;
             char* hd = (char*)r2->mRiderHandler;
@@ -1081,7 +1081,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00137D18);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_stepGroundMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sHit_137D18 {
@@ -1110,7 +1110,7 @@ struct sMat_137D18 {
 
 struct sVEntH_137D18 { short delta; short index; void (*fn)(void*, void*, const t4Vector&); };
 
-extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir);
+extern "C" float cWipeoutMotion_intersectGround(void* self, char* hit, sVec4WG* dir);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 void func_00111AA0_137D18(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
@@ -1339,7 +1339,7 @@ static inline t4Vector getFront_137D18(cRider* rider)
  * (unk_3D0), x 3 + 1.5; slow slides (under 1111) during the root pose override or anim categories 29 / 25 blend toward
  * 40. It is scaled by mGroundNormal.z + 0.3 (clamped 0-1) and capped at 1 / dt. Position and velocity are integrated
  * with gravity -1800 and the speed capped at 3333.3, and the rider is aligned to the ground (cRider_alignRiderAxis).
- * func_00138960 then probes the ground: a hit updates unk_3D0, mGroundNormal, mSurfaceType, mGroundContactPoint and
+ * cWipeoutMotion_intersectGround then probes the ground: a hit updates unk_3D0, mGroundNormal, mSurfaceType, mGroundContactPoint and
  * unk_454; sinking deeper than the material limit (mAnimModel unk_140.x x material +0x18) pushes the rider out and
  * cancels the inward velocity, a shallower dip springs it back, both spawning the impact effect (func_00111AA0); more
  * than 10 above it launches the rider (cAirPredictor_startLaunchIntoAir, ForceNaturalAir (+0x4) = 1), as does a miss.
@@ -1349,7 +1349,7 @@ static inline t4Vector getFront_137D18(cRider* rider)
  * @param vself  the cWipeoutMotion
  */
 // Wipeout tumble: damps the spin, slides along the ground with surface friction, then re-probes the ground.
-extern "C" void func_00137D18(void* vself)
+extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
 {
     char* self = (char*)vself;
     float len = vu0Length_137D18(*(t4Vector*)(self + 0x30));
@@ -1387,7 +1387,7 @@ extern "C" void func_00137D18(void* vself)
     t4Vector dir = vu0Normalize_137D18(vu0Add_137D18(getFront_137D18(RIDER), vu0Scale_137D18(RIDER->mVelocity, 0.0036000001709908247f)));
     cRider_alignRiderAxis(RIDER, &RIDER->mGroundNormal, &dir, RIDER->mTimeScale * 2.0f, RIDER->mTimeScale * 6.632251739501953f);
     sHit_137D18 hit;
-    float d = func_00138960(self, (char*)&hit, (sVec4WG*)&RIDER->mGroundNormal);
+    float d = cWipeoutMotion_intersectGround(self, (char*)&hit, (sVec4WG*)&RIDER->mGroundNormal);
     if (0.0f <= d) {
         RIDER->unk_3D0 = hit.v20;
         RIDER->mGroundNormal = hit.normal;
@@ -1643,7 +1643,7 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("ai/motion/wipeoutmotion", func_00138960);
+INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_intersectGround);
 #ifdef SKIP_ASM
 extern "C" void* func_0032E100(void* seg, const sVec4WG& a, const sVec4WG& b, int n, float r);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
@@ -1707,7 +1707,7 @@ struct sVEntry_138960 { short delta; short index; void (*fn)(void*, void*); };
  * @param dir  the probe direction (the ground normal)
  * @return the hit distance, negative on a miss
  */
-extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir)
+extern "C" float cWipeoutMotion_intersectGround(void* self, char* hit, sVec4WG* dir)
 {
     char* rider = *(char**)((char*)self + 0x40);
     char seg[176];

@@ -1236,7 +1236,7 @@ extern "C" int func_0022E920(void* p);
 extern "C" void cGameViewMan_updateAll(void* p);
 extern "C" void cGame_updateState(void* self);
 extern "C" void func_0022E8B8(void* p);
-extern "C" void func_003A88A8(void* p);
+extern "C" void cWorldCache_flushInActivePages(void* p);
 extern "C" void func_002373B8(void* p);
 extern "C" void cOVStateManager_update(void);
 extern "C" int cMenuSys_isActive(void* p);
@@ -1385,7 +1385,7 @@ static inline int updatePause_2306B8(cGame* self)
             sVEntry_2306B8* vt = (sVEntry_2306B8*)ps2GraphicsMan->mVtbl;
             vt[19].fn((char*)ps2GraphicsMan + vt[19].delta);
             func_0022E8B8(((char*)self->ViewMan));
-            func_003A88A8(*((void**)((char*)self->World)));
+            cWorldCache_flushInActivePages(*((void**)((char*)self->World)));
             self->m_bFlushStreamer = 0;
         }
         return 0;

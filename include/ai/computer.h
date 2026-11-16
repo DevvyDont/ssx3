@@ -22,8 +22,8 @@
 // Member names are EA's, from SSX On Tour's PSP DWARF (cComputer, cComputerState, cRiderHandler), placed by:
 //   [P] the July 2003 preview's inline accessors (getCurrentTarget lw 0xE20, setInput sw 0xEF0, setCruiseLogic
 //       sh 0xEE8 + PMF 0xEF4, isAboutToRail lw ...), +0x50 in retail for cComputer's block;
-//   [R] retail's constructor/Init and the out-of-line accessors in ai/control/handplantcontrol: func_00144000
-//       setInput (sw 0xF40), func_00144008 getCurrentTarget (lw 0xE70), func_00144010 isAboutToRail (lw 0xE20),
+//   [R] retail's constructor/Init and the out-of-line accessors in ai/control/handplantcontrol: cComputer_setInput
+//       setInput (sw 0xF40), cComputer_getCurrentTarget getCurrentTarget (lw 0xE70), cComputer_isAboutToRail isAboutToRail (lw 0xE20),
 //       cComputer_setCruiseLogic setCruiseLogic (PMF D_0043CF20[i] -> 0xF44, i -> 0xF38);
 //   [U] how retail code uses the field (setIndividualRiderDifficulty, updateRiderDifficulty, the four
 //       shouldRider* tests, chooseRandom*Grab, scorePath, checkForBlock ...);
@@ -80,7 +80,7 @@ struct cComputer {
     int mIsGonnaMessUp;        // 0xE14 [O] (bool); [R] Init = 0
     int mIsNaturalAir;         // 0xE18 [O] (bool); [R] Init = 0
     int mToPipe;               // 0xE1C [O] (bool); [R] Init = 0
-    int mToRail;               // 0xE20 [O] (bool); [R] Init = 0; isAboutToRail (func_00144010) tests it
+    int mToRail;               // 0xE20 [O] (bool); [R] Init = 0; isAboutToRail (cComputer_isAboutToRail) tests it
     int mIsUber;               // 0xE24 [O] (bool); [U] set by the chooseRandom*Grab functions
     int mIsTweak;              // 0xE28 [O] (bool); [U] same
     float mHoldToLandTime;     // 0xE2C [O]; [U] swc1 in chooseRandom*Grab
@@ -92,9 +92,9 @@ struct cComputer {
     char pad_E44[0xC];         // 0xE44 t4Vector alignment
     t4Vector mStartJumpPos;    // 0xE50 [O]; [R] Init (sq); [U] checkForJumpEvent (cComputer_checkForJumpEvent) stores it
     t4Vector mEndJumpPos;      // 0xE60 [O]; [R] Init (sq); [U] same
-    int mTargetID;             // 0xE70 [P] getCurrentTarget (preview 0xE20); [R] Init = -1, func_00144008
-    int mWanderTime;           // 0xE74 [O]; [R] Init = 0; [U] func_0010D1A0
-    int mBadHeadingTime;       // 0xE78 [O]; [R] Init = 0; [U] func_0010D1A0
+    int mTargetID;             // 0xE70 [P] getCurrentTarget (preview 0xE20); [R] Init = -1, cComputer_getCurrentTarget
+    int mWanderTime;           // 0xE74 [O]; [R] Init = 0; [U] cComputer_checkForReset
+    int mBadHeadingTime;       // 0xE78 [O]; [R] Init = 0; [U] cComputer_checkForReset
     int GrabHistoryCounter[15]; // 0xE7C [O] (On Tour [7]); [R] Init/resetCounters clear 0x3C bytes; [U] cComputer_chooseRandomGrab
     int UberHistoryCounter[15]; // 0xEB8 [O]; [U] cComputer_chooseRandomUberGrab (chooseRandomUberGrab: sets mIsUber)
     int TweakHistoryCounter[15]; // 0xEF4 [O]; [U] cComputer_chooseRandomTweakGrab (chooseRandomTweakGrab)
@@ -103,7 +103,7 @@ struct cComputer {
     short mCruiseLogicID;      // 0xF38 [P] setCruiseLogic (preview sh 0xEE8); [R] Init = 1, cComputer_setCruiseLogic
     char pad_F3A[0x6];         // 0xF3A cComputerState is 16-byte aligned (t4Vector members)
     // ---- cComputer ----
-    cInput* Input;             // 0xF40 [P] setInput (preview 0xEF0); [R] func_00144000; [O]
+    cInput* Input;             // 0xF40 [P] setInput (preview 0xEF0); [R] cComputer_setInput; [O]
     tComputerCruiseLogic cruiseLogic; // 0xF44 [P] setCruiseLogic (preview 0xEF4); [R] Init = mCruiseLogic[1],
                                //       cComputer_setCruiseLogic; [U] func_0010A960 calls through it; [O] "void ::* cruiseLogic"
     char pad_F4C[0x4];         // 0xF4C the cRider virtual base is 16-byte aligned

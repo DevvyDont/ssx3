@@ -739,7 +739,7 @@ extern "C" void cSSXAudio_SetCurTrickPower(cSSXAudio* self, int id, float value)
 INCLUDE_ASM("sound/soundsys", func_00290FD0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int func_0011FE98(void*);
+int cRider_getMotionState(void*);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 
@@ -747,7 +747,7 @@ extern "C" int func_00290FD0(void* self, int which)
 {
     int result = 3;
     char* rider = (char*)cSSXAudio_GetFocusRider_p(self, which);
-    if (func_0011FE98(rider) != 1) {
+    if (cRider_getMotionState(rider) != 1) {
         return 3;
     }
     float trickPower = *(float*)((char*)self + (which << 2) + 0x6074);
@@ -1021,14 +1021,14 @@ extern "C" void cSSXAudio_PlayThunder(cSSXAudio* self)
 INCLUDE_ASM("sound/soundsys", cSSXAudio_Surface);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_0011FE98(void* rider);
+int cRider_getMotionState(void* rider);
 
 // PORT: the unit declares this as int(void*, int); defined under an asm label with its real type
 extern "C" int cSSXAudio_Surface_impl(void* self, void* rider) __asm__("cSSXAudio_Surface");
 /**
  * Returns the sound surface class for the ground a rider is on.
  *
- * When func_0011FE98 reports motion state 4 the surface comes from this+0x598C, otherwise from the rider's surface type
+ * When cRider_getMotionState reports motion state 4 the surface comes from this+0x598C, otherwise from the rider's surface type
  * at +0x438. Types 2, 3, 13 -> 1; 1 -> 2; 4 -> 3; 7, 8, 18 -> 7; 9 -> 5; 10 -> 4; 11 -> 8; everything else -> 0.
  *
  * @param rider  the rider (On Tour Rider)
@@ -1037,7 +1037,7 @@ extern "C" int cSSXAudio_Surface_impl(void* self, void* rider) __asm__("cSSXAudi
 extern "C" int cSSXAudio_Surface_impl(void* self, void* rider)
 {
     int x;
-    if (func_0011FE98(rider) == 4) {
+    if (cRider_getMotionState(rider) == 4) {
         x = *(int*)((char*)self + 0x598C);
     } else {
         x = *(int*)((char*)rider + 0x438);
@@ -1545,7 +1545,7 @@ extern "C" void cSSXAudio_BeginAllRiderSound(cSSXAudio* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_BeginRiderSound);
 #ifdef SKIP_ASM
-int func_0011FE98(void*);
+int cRider_getMotionState(void*);
 extern "C" int cSSXAudio_Surface(void* self, int id);
 extern "C" void func_002917D0(void* self, int id);
 extern "C" void func_00291C88(void* self, int id, int n);
@@ -1559,7 +1559,7 @@ extern "C" void func_00292508(void* self, int id, int n);
 // PORT: id is a pointer passed as int (the unit declares cSSXAudio_BeginRiderSound(void*, int)).
 extern "C" void cSSXAudio_BeginRiderSound(cSSXAudio* self, int id)
 {
-    int motion = func_0011FE98((void*)id);
+    int motion = cRider_getMotionState((void*)id);
     int n = cSSXAudio_Surface(self, id);
     *(int*)((char*)id + 0x760) = motion;
     *(int*)((char*)id + 0x764) = motion;
@@ -1681,10 +1681,10 @@ extern "C" void func_00292CB8(void* self, void* obj) {
     cRider* rider = *(cRider**)((char*)obj + 0x80);
     b = 0x40;
     volume = 0;
-    if (func_0011FE98(rider) == 0) {
+    if (cRider_getMotionState(rider) == 0) {
         func_00293168(self, rider, &volume, &b);
     }
-    if (func_0011FE98(rider) == 2) {
+    if (cRider_getMotionState(rider) == 2) {
         volume = 0;
     }
     int pos = rider->mFinishTime >= 0.0f;
@@ -1730,7 +1730,7 @@ extern "C" void cSSXAudio_HandleGlide(cSSXAudio* self, void* obj) {
     int volume;
     int bend;
     cRider* rider = *(cRider**)((char*)obj + 0x80);
-    int st = func_0011FE98(rider);
+    int st = cRider_getMotionState(rider);
     if (st != rider->unk_760) {
         rider->unk_760 = st;
     }
@@ -1750,7 +1750,7 @@ extern "C" void cSSXAudio_HandleGlide(cSSXAudio* self, void* obj) {
             cSSXAudio_GlideProgram(self, cSSXAudio_Surface(self, (int)rider), rider, &volume, &bend);
         }
     }
-    if (func_0011FE98(rider) == 2) {
+    if (cRider_getMotionState(rider) == 2) {
         volume = 0;
     }
     int paused = 0;
@@ -1784,7 +1784,7 @@ extern "C" void cSSXAudio_HandleAIGlide(cSSXAudio* self, void* obj) {
     int volume;
     int bend;
     cRider* rider = *(cRider**)((char*)obj + 0x80);
-    int st = func_0011FE98(rider);
+    int st = cRider_getMotionState(rider);
     if (st != rider->unk_760) {
         rider->unk_760 = st;
     }
@@ -1835,7 +1835,7 @@ extern "C" void cSSXAudio_HandleCarve(cSSXAudio* self, void* obj) {
     cRider* rider = *(cRider**)((char*)obj + 0x80);
     bend = 0x40;
     volume = 0;
-    int st = func_0011FE98(rider);
+    int st = cRider_getMotionState(rider);
     if (st == 1 || st == 5) {
         if (func_002934D0(self, rider->unk_76C, rider) == 2) {
             rider->unk_76C = 9;
@@ -1850,7 +1850,7 @@ extern "C" void cSSXAudio_HandleCarve(cSSXAudio* self, void* obj) {
             cSSXAudio_CarveProgram(self, cSSXAudio_Surface(self, (int)rider), rider, &volume, &bend);
         }
     }
-    if (func_0011FE98(rider) == 2) {
+    if (cRider_getMotionState(rider) == 2) {
         volume = 0;
     }
     int paused = 0;
@@ -1981,7 +1981,7 @@ extern "C" int func_002934D0(void *self, int kind, void *rider)
 
     switch (kind) {
     case 3:
-        result = ((func_0011FE98(rider) ^ 4) != 0) ? 0 : 2;
+        result = ((cRider_getMotionState(rider) ^ 4) != 0) ? 0 : 2;
         break;
     case 1:
     case 2:

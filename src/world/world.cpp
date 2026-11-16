@@ -359,7 +359,7 @@ struct cWorld_getWScriptHeaderId_sTable {
     cWorld_getWScriptHeaderId_sEntry* entries;
 };
 
-extern "C" int func_003AD120(cWorld_getWScriptHeaderId_sEntry* e, void* obj, int i);
+extern "C" int cWScriptCacheEntry_getWScriptHeaderId(cWorld_getWScriptHeaderId_sEntry* e, void* obj, int i);
 
 /**
  * Returns the resource id of one of an instance's world-script headers, from the script cache of the
@@ -371,7 +371,7 @@ extern "C" int func_003AD120(cWorld_getWScriptHeaderId_sEntry* e, void* obj, int
  */
 extern "C" int cWorld_getWScriptHeaderId(cWorld* self, void* obj, int i)
 {
-    return func_003AD120(&((cWorld_getWScriptHeaderId_sTable*)self->m_pWScriptCache)->entries[*(unsigned char*)((char*)obj + 0x78)], obj, i);
+    return cWScriptCacheEntry_getWScriptHeaderId(&((cWorld_getWScriptHeaderId_sTable*)self->m_pWScriptCache)->entries[*(unsigned char*)((char*)obj + 0x78)], obj, i);
 }
 #endif
 
@@ -491,37 +491,37 @@ extern "C" int cWorld_getMissionScripts(cWorld* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("world/world", func_003A6CC8__FPvT0);
+INCLUDE_ASM("world/world", cWorld_getSphereTreeInfo__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns a world instance's sphere-tree list: the word at +0x8 of the record that the instance's +0x88 record links at
- * +0xC (func_003ACCD8 puts a collide model there).
+ * +0xC (cWScriptCacheEntry_resolve puts a collide model there).
  *
- * No null checks. The body is identical to func_003A6CD8's.
+ * No null checks. The body is identical to cWorld_getPolyModelInfo's.
  *
  * @param a1  the tInstanceRecord
  * @return the list pointer
  */
-int func_003A6CC8(void* self, void* a1)
+int cWorld_getSphereTreeInfo(void* self, void* a1)
 {
     return *(int*)((char*)*(void**)((char*)*(void**)((char*)a1 + 0x88) + 0xc) + 0x8);
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/world", func_003A6CD8__FPvT0);
+INCLUDE_ASM("world/world", cWorld_getPolyModelInfo__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns a world instance's poly-model list: the word at +0x8 of the record that the instance's +0x88 record links at
- * +0xC (func_003ACCD8 puts a collide model there).
+ * +0xC (cWScriptCacheEntry_resolve puts a collide model there).
  *
- * No null checks. The body is identical to func_003A6CC8's; func_0035DF70 (railmodifier) passes its result to
+ * No null checks. The body is identical to cWorld_getSphereTreeInfo's; func_0035DF70 (railmodifier) passes its result to
  * tSphTreeList_getMeshTree.
  *
  * @param a1  the tInstanceRecord
  * @return the list pointer
  */
-int func_003A6CD8(void* self, void* a1)
+int cWorld_getPolyModelInfo(void* self, void* a1)
 {
     return *(int*)((char*)*(void**)((char*)*(void**)((char*)a1 + 0x88) + 0xc) + 0x8);
 }

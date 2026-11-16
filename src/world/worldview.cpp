@@ -123,7 +123,7 @@ extern "C" int cWorldView_loadSection(sView_3A98C8* self, unsigned int idx, floa
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9958);
+INCLUDE_ASM("world/worldview", cWorldView_unloadSection);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sViewEnt_3A9958 { int state; int pad; };
@@ -138,7 +138,7 @@ struct sView_3A9958 { int f0; char* info; char pad8[0xC]; sViewEnt_3A9958 ents[1
  * @param idx  the section id
  * @return 0 while the section is loading, else 1
  */
-extern "C" int func_003A9958(sView_3A9958* self, unsigned int idx)
+extern "C" int cWorldView_unloadSection(sView_3A9958* self, unsigned int idx)
 {
     if (self->info != 0 && idx < *(unsigned int*)(self->info + 8)) {
         switch (self->ents[idx].state) {
@@ -161,13 +161,13 @@ extern "C" int func_003A9958(sView_3A9958* self, unsigned int idx)
 //100%
 INCLUDE_ASM("world/worldview", cWorldView_activateSection);
 #ifdef SKIP_ASM
-extern "C" void func_003A8F10(void* world, unsigned int i);
+extern "C" void cWorldCache_activateSectionPatches(void* world, unsigned int i);
 struct cWorldView_activateSection_sEntry { int state; int field_0x4; };
 struct cWorldView_activateSection_sView { void* world; tStreamDataHeader* mp_Hdr; };
 /**
  * Activates a loaded world section.
  *
- * A loaded section (state 5) becomes active (6) and the world cache activates its contents (func_003A8F10).
+ * A loaded section (state 5) becomes active (6) and the world cache activates its contents (cWorldCache_activateSectionPatches).
  *
  * @param i  section id
  * @return 1 if the section is now active (or already was), 0 if it is not loaded or the id is out of range
@@ -182,7 +182,7 @@ extern "C" int cWorldView_activateSection(cWorldView* self, unsigned int i)
         int st = entry->state;
         if (st == 5) {
             entry->state = 6;
-            func_003A8F10(self->mp_WorldCache, i);
+            cWorldCache_activateSectionPatches(self->mp_WorldCache, i);
             return 1;
         } else if (st == 6) {
             return 1;
@@ -193,7 +193,7 @@ extern "C" int cWorldView_activateSection(cWorldView* self, unsigned int i)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9A48);
+INCLUDE_ASM("world/worldview", cWorldView_deactivateSection);
 #ifdef SKIP_ASM
 struct sWVSlot_9A48 { int state; int pad; };
 struct sWV_9A48 { char pad0[4]; tStreamDataHeader* sec; char pad8[0xC]; sWVSlot_9A48 slots[1]; };
@@ -205,7 +205,7 @@ struct sWV_9A48 { char pad0[4]; tStreamDataHeader* sec; char pad8[0xC]; sWVSlot_
  * @param idx  the section id
  * @return 1 for a valid index, else 0
  */
-extern "C" int func_003A9A48(sWV_9A48* self, unsigned int idx)
+extern "C" int cWorldView_deactivateSection(sWV_9A48* self, unsigned int idx)
 {
     if (self->sec != 0 && idx < (unsigned int)self->sec->m_uiNumSections) {
         if (self->slots[idx].state == 6) {
@@ -217,7 +217,7 @@ extern "C" int func_003A9A48(sWV_9A48* self, unsigned int idx)
 }
 #endif
 //100%
-INCLUDE_ASM("world/worldview", func_003A9A90);
+INCLUDE_ASM("world/worldview", cWorldView_getWorldBoundBox);
 #ifdef SKIP_ASM
 /**
  * Returns the address of the view's m_WorldBoundBox (+0x220). No C caller in the source.
@@ -225,7 +225,7 @@ INCLUDE_ASM("world/worldview", func_003A9A90);
  * @param arg0  the cWorldView (this)
  * @return the box's address
  */
-extern "C" int func_003A9A90(int arg0) {
+extern "C" int cWorldView_getWorldBoundBox(int arg0) {
     return arg0 + 544;
 }
 #endif
@@ -246,7 +246,7 @@ extern "C" void* cWorldView_getHull(cWorldView* self, int uiIdx)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9AB0__FPv);
+INCLUDE_ASM("world/worldview", cWorldView_getNumHull__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the number of hull pages: mp_Hdr->m_uiNumBSPHulls.
@@ -255,30 +255,30 @@ INCLUDE_ASM("world/worldview", func_003A9AB0__FPv);
  *
  * @return the hull count
  */
-int func_003A9AB0(void* self)
+int cWorldView_getNumHull(void* self)
 {
     return *(int*)((char*)*(void**)((char*)self + 0x4) + 0x10);
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9AC0);
+INCLUDE_ASM("world/worldview", cWorldView_isBoxValid);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cWorldCache_isPageLoaded(void* self, int a1);
-extern void func_003A9BB8_9AC0(void* self, int sec, int box, int* ok) __asm__("func_003A9BB8");
+extern void cWorldView_recursiveIsValid_9AC0(void* self, int sec, int box, int* ok) __asm__("cWorldView_recursiveIsValid");
 
 /**
  * Returns whether every hull page that @p box touches is loaded.
  *
  * First section 0's own hull page (m_BSP.m_iGlobalHull) must be loaded when it has chunks; then each Active section's
- * tree is searched with func_003A9BB8. No C caller in the source.
+ * tree is searched with cWorldView_recursiveIsValid. No C caller in the source.
  *
  * @param vself  the cWorldView
  * @param box  the box (minimum and maximum corners)
  * @return 1 when all those pages are loaded
  */
-extern "C" int func_003A9AC0(cWorldView* vself, int box)
+extern "C" int cWorldView_isBoxValid(cWorldView* vself, int box)
 {
     char* cur = (char*)vself->mp_Section;
     int ok;
@@ -292,13 +292,13 @@ extern "C" int func_003A9AC0(cWorldView* vself, int box)
     ok = 1;
     for (i = 0; i < ((cWorldView*)vself)->mp_Hdr->m_uiNumSections; i++) {
         if (*(int*)(((char*)vself) + 0x14 + i * 8) == 6)
-            func_003A9BB8_9AC0(((char*)vself), *(int*)((char*)vself->mp_Section + i * 0x58 + 0x1C), box, &ok);
+            cWorldView_recursiveIsValid_9AC0(((char*)vself), *(int*)((char*)vself->mp_Section + i * 0x58 + 0x1C), box, &ok);
     }
     return ok;
 }
 #endif
 //100%
-INCLUDE_ASM("world/worldview", func_003A9BB8);
+INCLUDE_ASM("world/worldview", cWorldView_recursiveIsValid);
 #ifdef SKIP_ASM
 extern "C" int cWorldCache_isPageLoaded(void* self, int a1);
 
@@ -366,7 +366,7 @@ static inline int overlap_9BB8(const sV4_9BB8* c, const sSection_9BB8* s)
  * @param box  the box (minimum and maximum corners)
  * @param ok  set on entry; cleared when a page is missing
  */
-extern "C" void func_003A9BB8(cWorldView* world, sSection_9BB8* sec, sV4_9BB8* box, int* ok)
+extern "C" void cWorldView_recursiveIsValid(cWorldView* world, sSection_9BB8* sec, sV4_9BB8* box, int* ok)
 {
     if (*ok == 0)
         return;
@@ -380,20 +380,20 @@ extern "C" void func_003A9BB8(cWorldView* world, sSection_9BB8* sec, sV4_9BB8* b
     }
     if (sec->child0 != 0) {
         if (Dot_9BB8(sec->n0, box[0]) < 0.0f) {
-            func_003A9BB8(world, sec->child0, box, ok);
+            cWorldView_recursiveIsValid(world, sec->child0, box, ok);
             if (*ok == 0)
                 return;
         }
     }
     if (sec->child1 != 0) {
         if (Dot_9BB8(sec->n1, box[1]) < 0.0f)
-            func_003A9BB8(world, sec->child1, box, ok);
+            cWorldView_recursiveIsValid(world, sec->child1, box, ok);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9D60);
+INCLUDE_ASM("world/worldview", cWorldView_refreshStreamFocus);
 #ifdef SKIP_ASM
 struct sWVSlot_9D60 {
     int state;
@@ -429,18 +429,18 @@ struct sWV_9D60 {
 };
 
 extern char* cAppMan_TheAppMan;
-extern "C" void func_003AA028(void* self, void* section, int cam, int loaded);
+extern "C" void cWorldView_recursiveTreeFocus(void* self, void* section, int cam, int loaded);
 
 /**
  * Recomputes which hull pages stream focus @p cam needs.
  *
  * Only for an active focus (m_StreamFocus[cam].m_bActive): resets m_fSafeRadius and m_fSafeTestRadius to m_fLoadRadius,
- * runs func_003AA028 on the root node of every Loaded or Active section (setting the safe radius only for Active ones),
+ * runs cWorldView_recursiveTreeFocus on the root node of every Loaded or Active section (setting the safe radius only for Active ones),
  * then stores the app frame (cAppMan_TheAppMan + 0x18) in m_iFocusTick and clears m_bFocusUpdate.
  *
  * @param cam  the focus index (0 or 1)
  */
-extern "C" void func_003A9D60(sWV_9D60* self, int cam)
+extern "C" void cWorldView_refreshStreamFocus(sWV_9D60* self, int cam)
 {
     if (*(int*)((char*)self + cam * 0x50 + 0x240) != 0) {
         int frame = *(int*)(cAppMan_TheAppMan + 0x18);
@@ -451,7 +451,7 @@ extern "C" void func_003A9D60(sWV_9D60* self, int cam)
         for (i = 0; i < (unsigned int)self->mp_Hdr->m_uiNumSections; i++) {
             int st = self->slots[i].state;
             if (st == 5 || st == 6) {
-                func_003AA028(self, self->items[i].section, cam, st == 6);
+                cWorldView_recursiveTreeFocus(self, self->items[i].section, cam, st == 6);
             }
         }
         *(int*)((char*)self + cam * 0x50 + 0x248) = frame;
@@ -461,7 +461,7 @@ extern "C" void func_003A9D60(sWV_9D60* self, int cam)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003A9E50);
+INCLUDE_ASM("world/worldview", cWorldView_getDistanceToBox);
 #ifdef SKIP_ASM
 // PORT: sqrt.s via inline asm (as an SDK math-header sqrtf would).
 static inline float sqrtf_3A9E50(float x)
@@ -479,8 +479,8 @@ struct t4Vector_3A9E50 {
 };
 
 // cWorldView::getDistanceToBox(const t4Vector& pos, const t4Vector& boxMin, const t4Vector& boxMax)
-extern "C" float func_003A9E50_impl(void* self, const t4Vector_3A9E50& pos, const t4Vector_3A9E50& boxMin,
-                                    const t4Vector_3A9E50& boxMax) __asm__("func_003A9E50");
+extern "C" float cWorldView_getDistanceToBox_impl(void* self, const t4Vector_3A9E50& pos, const t4Vector_3A9E50& boxMin,
+                                    const t4Vector_3A9E50& boxMax) __asm__("cWorldView_getDistanceToBox");
 
 /**
  * Returns the distance from @p pos to an axis-aligned box, or -1 when the point is inside it.
@@ -493,7 +493,7 @@ extern "C" float func_003A9E50_impl(void* self, const t4Vector_3A9E50& pos, cons
  * @param boxMax  the box's maximum corner
  * @return the distance, or -1 inside
  */
-extern "C" float func_003A9E50_impl(void* self, const t4Vector_3A9E50& pos, const t4Vector_3A9E50& boxMin,
+extern "C" float cWorldView_getDistanceToBox_impl(void* self, const t4Vector_3A9E50& pos, const t4Vector_3A9E50& boxMin,
                                     const t4Vector_3A9E50& boxMax)
 {
     bool bSpanX = boxMin.x() <= pos.x() && pos.x() <= boxMax.x();
@@ -580,11 +580,11 @@ extern "C" float func_003A9E50_impl(void* self, const t4Vector_3A9E50& pos, cons
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldview", func_003AA028);
+INCLUDE_ASM("world/worldview", cWorldView_recursiveTreeFocus);
 #ifdef SKIP_ASM
-extern "C" float func_003A9E50(void* self, void* pos, void* bmin, void* bmax);
+extern "C" float cWorldView_getDistanceToBox(void* self, void* pos, void* bmin, void* bmax);
 extern "C" int cWorldCache_isPageLoaded(void* self, int a1);
-extern "C" void func_003A8448(void* self, int i, float f);
+extern "C" void cWorldCache_touchPage(void* self, int i, float f);
 
 struct sV4_A028 {
     float x, y, z, w;
@@ -664,7 +664,7 @@ static inline int overlap_A028(const sV4_A028* c, const sSection_A028* s)
  * and the safe radius drops to 0 when the page is not loaded; outside it, a node farther than m_fLoadRadius is dropped
  * (with its children), the priority is (1 - distance / m_fLoadRadius) x 0.8 and the safe radius shrinks to the distance
  * of an unloaded page. The radius goes to m_fSafeRadius when @p loaded is set and to m_fSafeTestRadius when smaller;
- * the page is touched (func_003A8448). Children are visited by the same plane tests as func_003A9BB8, against the focus
+ * the page is touched (cWorldCache_touchPage). Children are visited by the same plane tests as cWorldView_recursiveIsValid, against the focus
  * box.
  *
  * @param self_  the cWorldView
@@ -672,12 +672,12 @@ static inline int overlap_A028(const sV4_A028* c, const sSection_A028* s)
  * @param cam  the focus index
  * @param loaded  set for an Active section (updates the safe radius)
  */
-extern "C" void func_003AA028(void* self_, void* sec_, int cam, int loaded)
+extern "C" void cWorldView_recursiveTreeFocus(void* self_, void* sec_, int cam, int loaded)
 {
     if (!overlap_A028(&((sWV_A028*)self_)->cams[cam].bmin, (sSection_A028*)sec_))
         return;
     if (((sSection_A028*)sec_)->info != 0) {
-        float d = func_003A9E50(self_, &((sWV_A028*)self_)->cams[cam].pos, sec_, ((sSection_A028*)sec_)->bmax);
+        float d = cWorldView_getDistanceToBox(self_, &((sWV_A028*)self_)->cams[cam].pos, sec_, ((sSection_A028*)sec_)->bmax);
         float m = ((sWV_A028*)self_)->cams[cam].near;
         float w;
         if (d < 0.0f) {
@@ -697,15 +697,15 @@ extern "C" void func_003AA028(void* self_, void* sec_, int cam, int loaded)
             ((sWV_A028*)self_)->cams[cam].near = m;
         if (m < ((sWV_A028*)self_)->cams[cam].best)
             ((sWV_A028*)self_)->cams[cam].best = m;
-        func_003A8448(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id, w);
+        cWorldCache_touchPage(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id, w);
     }
     if (((sSection_A028*)sec_)->child0 != 0) {
         if (Dot_A028(((sSection_A028*)sec_)->n0, ((sWV_A028*)self_)->cams[cam].bmin) < 0.0f)
-            func_003AA028(self_, ((sSection_A028*)sec_)->child0, cam, loaded);
+            cWorldView_recursiveTreeFocus(self_, ((sSection_A028*)sec_)->child0, cam, loaded);
     }
     if (((sSection_A028*)sec_)->child1 != 0) {
         if (Dot_A028(((sSection_A028*)sec_)->n1, ((sWV_A028*)self_)->cams[cam].bmax) < 0.0f)
-            func_003AA028(self_, ((sSection_A028*)sec_)->child1, cam, loaded);
+            cWorldView_recursiveTreeFocus(self_, ((sSection_A028*)sec_)->child1, cam, loaded);
     }
 }
 #endif
@@ -1490,7 +1490,7 @@ extern "C" int cChunkResolve_unresolveLight(void* self, void* pRTLight)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", func_003AACE0);
+INCLUDE_ASM("world/worldview", cChunkResolve_calcMaxLightDistance);
 #ifdef SKIP_ASM
 extern "C" float func_0040D758(float);
 extern "C" float func_0040DA10(float);
@@ -1506,7 +1506,7 @@ extern "C" float func_0040DA10(float);
  * @param divisor  the threshold strength
  * @return the distance
  */
-extern "C" float func_003AACE0(void* self, void* p, float divisor)
+extern "C" float cChunkResolve_calcMaxLightDistance(void* self, void* p, float divisor)
 {
     float prod = *(float*)((char*)p + 0x14) * *(float*)((char*)p + 0x18);
     float ratio = prod / divisor;
@@ -1823,7 +1823,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void operator_delete(int*);
-extern "C" void func_0012A490(void* p, unsigned char id);
+extern "C" void cAI_removeInjectedFile(void* p, unsigned char id);
 // PORT: func_001547E0__FPv is called with a second (byte) argument here.
 void func_001547E0_2(void* iface, unsigned char id) __asm__("func_001547E0__FPv");
 extern "C" void func_0016CF18(unsigned int param);
@@ -1914,7 +1914,7 @@ static inline void update_B498(char* w, int idx, void* item, const sWVBox_B498* 
  * Dispatches on @p msg: spatial types take their nodes out of the world's spatial hash (nash_Nash_findkey, nash_Cell_remnode)
  * and free them; type 13 purges a world audio file (func_002B6B30), 15 unloads a world-painter section (func_002BB5A8),
  * 18 detaches a script anchor table, 20 unattaches an audio bank, 19 removes mission stream data through BE interface
- * 10, 11 removes an occlusion curtain (func_00242570), 14 drops an AI file (func_0012A490) and 22 resets the avalanche;
+ * 10, 11 removes an occlusion curtain (func_00242570), 14 drops an AI file (cAI_removeInjectedFile) and 22 resets the avalanche;
  * types 17 and 21 go to func_0016CF18 and func_00210608. Other types need nothing.
  *
  * @param msg  stream data type of the chunk (On Tour eBxStreamDataType type)
@@ -2019,7 +2019,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
         break;
     case 14:
         data = 0;
-        func_0012A490(SSXApp->Game->AI, resourceId);
+        cAI_removeInjectedFile(SSXApp->Game->AI, resourceId);
         break;
     case 22:
         cAvalanche_reset();

@@ -17,7 +17,7 @@ INCLUDE_ASM("ai/rider", cRider_cRider);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_00140738(void* self);
+extern "C" void cRiderState_cRiderState(void* self);
 extern "C" void* cScriptObjRider_cScriptObjRider(void* self);
 extern "C" void* func_002F1850(void* mem, void* rider);
 extern "C" void* func_002EC9E0(void* self, int a1, int a2);
@@ -63,7 +63,7 @@ extern "C" void* cRider_cRider_impl(cRider* self) __asm__("cRider_cRider");
 /**
  * Constructs a rider: its bases and vtables, default fields and the helper objects it owns.
  *
- * Runs func_00140738 (clears the slewed channels and other base data) and the cScriptObjRider base
+ * Runs cRiderState_cRiderState (clears the slewed channels and other base data) and the cScriptObjRider base
  * constructor (cScriptObjRider_cScriptObjRider), installs the cRider, cScriptObjRider and cScriptObject vtables, sets mAIIndex,
  * mViewIndex and mSafeRenderTick to -1, mGroundMaterial to 0x31, mIsLocal and mRenderFlag to 1, and registers
  * the script object (cScriptObject_InitScriptObject).
@@ -79,7 +79,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
 {
     unsigned int none = 0xFFFFFFFF;
     int one = 1;
-    func_00140738(self);
+    cRiderState_cRiderState(self);
     self->mVtbl = cBeing_vtbl;
     cScriptObjRider_cScriptObjRider(&self->mScriptObjRiderVtbl);
     self->mScriptObjectVtbl = D_00459BD0;
@@ -1729,7 +1729,7 @@ extern "C" void cRider_doLegIK(void* self, void* obj, void* xf, float t);
 extern "C" void cRider_updateCollideInfo(void* self);
 extern "C" float func_0031C128(float x);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
-int func_0011FEE8(void* self);
+int cRider_getControlState(void* self);
 
 struct sXf_EB98 {
     sVec4W pos;
@@ -2028,7 +2028,7 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self) __asm__("cRider_updateS
 /**
  * Poses the rider's skeleton from its position and rotation plus spin, flip, lean, board tilt and leg adjustments.
  *
- * The root pose is mPosition/mRotation; in control state 5 (func_0011FEE8) the spin control (handler +0x230) adds the
+ * The root pose is mPosition/mRotation; in control state 5 (cRider_getControlState) the spin control (handler +0x230) adds the
  * flip/spin rotation (cSpinControl_applyFlipSpinAngle), then cRider_doLeanPoseAdjust leans it. Unless wiping out (state 13) channel 18
  * raises the body along its up axis. With mUseRootPoseOverride the board bones are reset and the board root takes the
  * override pose. cAnimModel_transform poses the bones from the body and board roots.
@@ -2044,13 +2044,13 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self)
     sXf_EB98 xf;
     xf.pos = *(sVec4W*)&self->mPosition;
     xf.rot = *(sVec4W*)&self->mRotation;
-    if (func_0011FEE8(self) == 5)
+    if (cRider_getControlState(self) == 5)
         cSpinControl_applyFlipSpinAngle((char*)self->mRiderHandler + 0x230, &xf);
     cRider_doLeanPoseAdjust(self, &xf);
     sXf_EB98 ab[2];
     ab[1] = xf;
     ab[0] = xf;
-    if (func_0011FEE8(self) != 13 && self->mSlewed[18].cur != 0.0f)
+    if (cRider_getControlState(self) != 13 && self->mSlewed[18].cur != 0.0f)
     {
         sVec4W s = Scale_EB98(t4vect_ZAxis, self->mSlewed[18].cur);
         ab[0].pos += Rot_EB98(ab[0].rot, s);
@@ -2099,7 +2099,7 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self)
             *bn = Combine_EB98(*b1, local);
         }
     }
-    if (func_0011FEE8(self) != 13 && self->unk_318 != 0.0f)
+    if (cRider_getControlState(self) != 13 && self->unk_318 != 0.0f)
     {
         sXf_EB98* bb = (sXf_EB98*)(self->mAnimModel->bones + self->mBoneBoardChild);
         {
@@ -2455,7 +2455,7 @@ void* cRider_setMotionState(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_0011FE98__FPv);
+INCLUDE_ASM("ai/rider", cRider_getMotionState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the rider's motion state: its mRiderHandler's MotionState (+0xDE0).
@@ -2465,7 +2465,7 @@ INCLUDE_ASM("ai/rider", func_0011FE98__FPv);
  * @param vself  the cRider
  * @return the motion state
  */
-int func_0011FE98(void* vself)
+int cRider_getMotionState(void* vself)
 {
     cRider* self = (cRider*)vself;
     return *(int*)((char*)self->mRiderHandler + 0xDE0);
@@ -2475,7 +2475,7 @@ int func_0011FE98(void* vself)
 extern "C" void* cRiderHandler__setControlState(void* obj);
 
 //100%
-INCLUDE_ASM("ai/rider", func_0011FEA8);
+INCLUDE_ASM("ai/rider", cRider_getMotionStateName);
 #ifdef SKIP_ASM
 extern "C" void cRiderHandler__getMotionStateName(int);
 
@@ -2486,7 +2486,7 @@ extern "C" void cRiderHandler__getMotionStateName(int);
  *
  * @param rider  the cRider
  */
-extern "C" void func_0011FEA8(void *rider) {
+extern "C" void cRider_getMotionStateName(void *rider) {
     cRiderHandler__getMotionStateName((*(int *)((char*)(rider) + (0x77C))));
 }
 #endif
@@ -2511,7 +2511,7 @@ void* cRider_setControlState(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_0011FEE8__FPv);
+INCLUDE_ASM("ai/rider", cRider_getControlState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the rider's control state: its mRiderHandler's ControlState (+0xDE4).
@@ -2522,7 +2522,7 @@ INCLUDE_ASM("ai/rider", func_0011FEE8__FPv);
  * @param vself  the cRider
  * @return the control state
  */
-int func_0011FEE8(void* vself)
+int cRider_getControlState(void* vself)
 {
     cRider* self = (cRider*)vself;
     return *(int*)((char*)self->mRiderHandler + 0xDE4);
@@ -2530,7 +2530,7 @@ int func_0011FEE8(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_0011FEF8);
+INCLUDE_ASM("ai/rider", cRider_getControlStateName);
 #ifdef SKIP_ASM
 extern "C" void cRiderHandler__getControlStateName(int);
 
@@ -2541,7 +2541,7 @@ extern "C" void cRiderHandler__getControlStateName(int);
  *
  * @param rider  the cRider
  */
-extern "C" void func_0011FEF8(void *rider) {
+extern "C" void cRider_getControlStateName(void *rider) {
     cRiderHandler__getControlStateName((*(int *)((char*)(rider) + (0x77C))));
 }
 #endif
@@ -2598,7 +2598,7 @@ int cBECharacterInterface_getWeight(void* iface, int character);
 extern "C" float cBEStatInterface_getCollisionAttrib(void* iface, int character, int stat);
 
 //100%
-INCLUDE_ASM("ai/rider", func_0011FF70);
+INCLUDE_ASM("ai/rider", cRider_getHeadPosition);
 #ifdef SKIP_ASM
 /**
  * Copies the position of the rider's head bone (mBoneHead in mAnimModel's bone array) into @p dst.
@@ -2607,7 +2607,7 @@ INCLUDE_ASM("ai/rider", func_0011FF70);
  * @return @p dst
  */
 // Copies the quadword of the anim model's transform unk_8A8 into dst (sibling of cRider_getHipPosition).
-extern "C" void* func_0011FF70(void* dst, cRider* self)
+extern "C" void* cRider_getHeadPosition(void* dst, cRider* self)
 {
     cAnimModel* animModel = self->mAnimModel;
     int i = self->mBoneHead;
@@ -2715,13 +2715,13 @@ extern "C" void cRider_updateBoost(cRider* self)
 {
     float step = self->mTimeScale * 0.01666666753590107f;
     self->mPowerUpBoostTimer = decay_1200D0(self->mPowerUpBoostTimer, step);
-    if (0.01666666753590107f < self->mPowerUpTrickTimer || func_0011FE98(self) != 1) {
+    if (0.01666666753590107f < self->mPowerUpTrickTimer || cRider_getMotionState(self) != 1) {
         self->mPowerUpTrickTimer = decay_1200D0(self->mPowerUpTrickTimer, step);
     }
     char* sub = (char*)&self->mVtbl;
     sVt_1200D0* vtEntry = &(*(sVt_1200D0**)sub)[kRiderVt_isComputer];
     vtEntry->fn(sub + vtEntry->delta);
-    if ((func_0011FE98(self) == 1 || func_0011FEE8(self) == 12) && 0.0f < self->mUberTimer && self->mUberTimer <= 0.01666666753590107f) {
+    if ((cRider_getMotionState(self) == 1 || cRider_getControlState(self) == 12) && 0.0f < self->mUberTimer && self->mUberTimer <= 0.01666666753590107f) {
         self->mUberTimer = 0.01666666753590107f;
     } else if (0.0f < self->mUberTimer) {
         self->mUberTimer = decay_1200D0(self->mUberTimer, step);
@@ -2741,12 +2741,12 @@ extern "C" void cRider_updateBoost(cRider* self)
             self->unk_2F8 = 1.0f;
             break;
         case 1:
-            if (func_0011FEE8(self) != 6) {
+            if (cRider_getControlState(self) != 6) {
                 self->unk_2F8 = decay_1200D0(self->unk_2F8, step * 0.004999999888241291f);
             }
             break;
         case 2:
-            if (func_0011FEE8(self) != 6) {
+            if (cRider_getControlState(self) != 6) {
                 self->unk_2F8 = decay_1200D0(self->unk_2F8, step * 0.02398611046373844f);
             }
             break;
@@ -2772,7 +2772,7 @@ struct sLook_120378 {
     sV_120378 restAlt;   // 0x20 offset quaternion (IsRidingFakie != 0)
 };
 
-int func_0011FEE8(void*);
+int cRider_getControlState(void*);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" int AITick();
 int cRiderAnimBase_getCurrentAnimID(void*, int);
@@ -2973,7 +2973,7 @@ extern "C" void func_00120378(void* vself)
     }
     if (AITick() % 6 == self->mAIIndex) {
         int still = speed <= 138.88888549804688f;
-        if (func_0011FEE8(self) == 11) {
+        if (cRider_getControlState(self) == 11) {
             still = 0;
             AddEq_120378(v, sV_120378(0.0f, 0.0f, 1000.0f, 0.0f));
         }
@@ -3128,7 +3128,7 @@ INCLUDE_ASM("ai/rider", cRider_updateSplit1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int AITick();
-extern "C" int func_001448A8(void* obj);
+extern "C" int cPlaybackMan_isRecord(void* obj);
 extern "C" void func_00332DB8(void*, void*);
 extern "C" void cRider_updateActiveLights(cRider*);
 extern "C" void cRider_SetNISGroundVectors(void* self, void* p);
@@ -3170,7 +3170,7 @@ extern "C" void cRider_updateSplit1(cRider* self)
         {
             void* obj = *(void**)(game + 0x34);
             int busy = 0;
-            if (func_001448A8(obj) || IsState1_120F20(obj))
+            if (cPlaybackMan_isRecord(obj) || IsState1_120F20(obj))
                 busy = 1;
             if (busy == 0)
                 goto skip;
@@ -3266,8 +3266,8 @@ extern "C" void cRider_updateSplit3(cRider* self)
     {
         cRider_checkForReset(self, 0, 2);
     }
-    else if (func_0011FE98(self) == 1 ||
-             (func_0011FE98(self) == 2 && *(int*)((char*)self->mRiderHandler + 0x30) == 1))
+    else if (cRider_getMotionState(self) == 1 ||
+             (cRider_getMotionState(self) == 2 && *(int*)((char*)self->mRiderHandler + 0x30) == 1))
     {
         char* obj = (char*)self->mAirPredictor;
         int ok = 0;
@@ -3336,7 +3336,7 @@ extern "C" void cRider_updateSplit4(cRider* self)
 extern "C" void* cRiderHandler_stepMotion(void* obj);
 
 //100%
-INCLUDE_ASM("ai/rider", func_001216E0__FPv);
+INCLUDE_ASM("ai/rider", cRider_updateSplit5__FPv);
 #ifdef SKIP_ASM
 /**
  * Steps the rider's motion: cRiderHandler_stepMotion on mRiderHandler.
@@ -3346,7 +3346,7 @@ INCLUDE_ASM("ai/rider", func_001216E0__FPv);
  * @param vself  the cRider
  * @return cRiderHandler_stepMotion's result
  */
-void* func_001216E0(void* vself)
+void* cRider_updateSplit5(void* vself)
 {
     cRider* self = (cRider*)vself;
     return cRiderHandler_stepMotion(self->mRiderHandler);
@@ -4247,7 +4247,7 @@ extern "C" void cRider_renderShadow(cRider* self)
 extern "C" void* func_002F2088(void* obj);
 
 //100%
-INCLUDE_ASM("ai/rider", func_00122618);
+INCLUDE_ASM("ai/rider", cRider_renderFX);
 #ifdef SKIP_ASM
 extern "C" void cRiderHandler_renderRiderFX(int);
 
@@ -4256,7 +4256,7 @@ extern "C" void cRiderHandler_renderRiderFX(int);
  *
  * @param rider  the cRider
  */
-extern "C" void func_00122618(void *rider) {
+extern "C" void cRider_renderFX(void *rider) {
     cRiderHandler_renderRiderFX((*(int *)((char*)(rider) + (0x77C))));
 }
 #endif
@@ -4449,7 +4449,7 @@ extern sV3_2898 D_004A5E40;
 extern "C" void func_00374D00(void* obj, sV3_2898* a, sV3_2898* b, sV3_2898* dir, sMat_2898* bones, int f);
 extern "C" void cAnimModel_rendershadow(void* model, int lod, sV4_2898* a, sV4_2898* b);
 extern "C" void func_00375890(void* obj);
-int func_0011FE98(void*);
+int cRider_getMotionState(void*);
 
 // PORT: PS2-only VU0 inline asm (vector add).
 static inline sV4_2898 Add_2898(const sV4_2898& a, const sV4_2898& b)
@@ -4567,7 +4567,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
         cPS2GraphicsMan* grManClearTex = GrMan;
         sVEI3_2898* vt4 = (sVEI3_2898*)grManClearTex->mVtbl;
         vt4[55].fn((char*)grManClearTex + vt4[55].delta, Tex_2898(Shadow_2898(self)), sV4_2898(0.0f, 0.0f, 0.0f, 0.0f));
-        if (func_0011FE98(self) == 0) {
+        if (cRider_getMotionState(self) == 0) {
             k = 0.0f;
         }
         sMat_2898 mat;
@@ -4629,7 +4629,7 @@ extern "C" float* cRider_getEventStartPos(float* out, cRider* rider)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_00122C88);
+INCLUDE_ASM("ai/rider", cRider_getVertDangerAngleMin);
 #ifdef SKIP_ASM
 /**
  * Returns 0.92508197, the limit cRider_isInVertZone compares mSmoothedHeading with (at or above it, or below its
@@ -4637,7 +4637,7 @@ INCLUDE_ASM("ai/rider", func_00122C88);
  *
  * @return 0.92508197
  */
-extern "C" float func_00122C88(void) {
+extern "C" float cRider_getVertDangerAngleMin(void) {
     return 0.92508197f;
 }
 #endif
@@ -4663,7 +4663,7 @@ extern "C" int cRider_isInVertZone(cRider* self)
 extern "C" int cRider_isGroundNormalValid(cRider* self);
 
 //100%
-INCLUDE_ASM("ai/rider", func_00122CD0__FPv);
+INCLUDE_ASM("ai/rider", cRider_isVertZoneApplicable__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns cRider_isGroundNormalValid for the rider.
@@ -4672,7 +4672,7 @@ INCLUDE_ASM("ai/rider", func_00122CD0__FPv);
  *
  * @return cRider_isGroundNormalValid's result
  */
-void* func_00122CD0(void* self)
+void* cRider_isVertZoneApplicable(void* self)
 {
     return (void*)cRider_isGroundNormalValid((cRider*)self);
 }
@@ -4684,13 +4684,13 @@ INCLUDE_ASM("ai/rider", cRider_updateDangerLevel);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00101A10(void* self, int character);
 extern "C" int cRider_isInVertZone(cRider* self);
-float func_0011A0C0_2(void* self, int state) __asm__("func_0011A0C0__FPv");
+float cRiderMetrix_evDangerLevelChange_2(void* self, int state) __asm__("cRiderMetrix_evDangerLevelChange__FPv");
 
 /**
  * Updates the rider's danger level (unk_5B0) from the AI's danger manager.
  *
  * Takes the manager's level for mAIIndex (func_00101A10); level 0 becomes 1 when the rider is on the ground
- * in a vert zone. A change goes to func_0011A0C0 on mMetrix, an empty stub in retail.
+ * in a vert zone. A change goes to cRiderMetrix_evDangerLevelChange on mMetrix, an empty stub in retail.
  */
 extern "C" void cRider_updateDangerLevel(cRider* self)
 {
@@ -4699,7 +4699,7 @@ extern "C" void cRider_updateDangerLevel(cRider* self)
     self->unk_5B0 = dangerLevel;
     if (dangerLevel == 0)
     {
-        if (func_00122CD0(self) != 0)
+        if (cRider_isVertZoneApplicable(self) != 0)
         {
             if (cRider_isInVertZone(self))
                 self->unk_5B0 = 1;
@@ -4707,21 +4707,21 @@ extern "C" void cRider_updateDangerLevel(cRider* self)
     }
     int cur = self->unk_5B0;
     if (old != cur)
-        func_0011A0C0_2(self->mMetrix, cur);
+        cRiderMetrix_evDangerLevelChange_2(self->mMetrix, cur);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ai/rider", cRider_estimateFinishTick);
 #ifdef SKIP_ASM
-float func_00113130(void* self);
+float cRider_getTotalPathDistance(void* self);
 
 struct sVEntry00122D78 { short delta; short index; int (*fn)(void*); };
 
 /**
  * Estimates the race-clock tick at which the rider will finish.
  *
- * The speed is the distance covered (func_00113130's float at +0x4D8, probably the course length, minus
+ * The speed is the distance covered (cRider_getTotalPathDistance's float at +0x4D8, probably the course length, minus
  * mDistToFinish) over the race clock (AI EventTimerTick), but at least 30 minus the AI index per tick.
  *
  * @return the race clock plus mDistToFinish over that speed
@@ -4730,7 +4730,7 @@ extern "C" int cRider_estimateFinishTick(cRider* self)
 {
     char* sub = (char*)&self->mVtbl;
     int n = *(int*)((char*)SSXApp->Game->AI + 0xC);
-    float rate = (func_00113130(self) - self->mDistToFinish) / (float)n;
+    float rate = (cRider_getTotalPathDistance(self) - self->mDistToFinish) / (float)n;
     sVEntry00122D78* vt = *(sVEntry00122D78**)sub;
     if (rate < 30.0f - (float)vt[kRiderVt_getAIIndex].fn(sub + vt[kRiderVt_getAIIndex].delta))
     {
@@ -4744,7 +4744,7 @@ extern "C" int cRider_estimateFinishTick(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_estimateFinishScore);
 #ifdef SKIP_ASM
-float func_00113130(void* self);
+float cRider_getTotalPathDistance(void* self);
 
 /**
  * Projects the rider's score at the finish from its score rate so far.
@@ -4756,7 +4756,7 @@ float func_00113130(void* self);
 extern "C" int cRider_estimateFinishScore(cRider* self)
 {
     int n = *(int*)((char*)self->mMetrix + 0x198) + 1;
-    float distCovered = func_00113130(self) - self->mDistToFinish;
+    float distCovered = cRider_getTotalPathDistance(self) - self->mDistToFinish;
     if (distCovered < 1.0f)
         distCovered = 1.0f;
     float scorePerDist = (float)n / distCovered;
@@ -4768,7 +4768,7 @@ extern "C" int cRider_estimateFinishScore(cRider* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_00122EE8);
+INCLUDE_ASM("ai/rider", cRider_getMissionInt);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int cSpinControl_isGrabHeld(void* p);
@@ -4789,41 +4789,41 @@ extern "C" int func_001446A0(void* self, int a1);
  * @param query  the query number
  * @return the answer (a flag or a count)
  */
-extern "C" int func_00122EE8(char* self, int query)
+extern "C" int cRider_getMissionInt(char* self, int query)
 {
     int res;
     switch (query) {
     case 0:
-        return func_0011FE98(self) == 2;
+        return cRider_getMotionState(self) == 2;
     case 1:
-        return func_0011FEE8(self) == 9;
+        return cRider_getControlState(self) == 9;
     case 2:
         {
             bool ok = false;
-            if (func_0011FE98(self) == 1 || (func_0011FE98(self) == 2 && *(int*)(*(char**)(self + 0x77C) + 0x30) == 1)) {
+            if (cRider_getMotionState(self) == 1 || (cRider_getMotionState(self) == 2 && *(int*)(*(char**)(self + 0x77C) + 0x30) == 1)) {
                 ok = true;
             }
             return ok;
         }
     case 3:
-        return func_0011FE98(self) == 0;
+        return cRider_getMotionState(self) == 0;
     case 4:
-        return func_0011FE98(self) == 4;
+        return cRider_getMotionState(self) == 4;
     case 5:
         res = 0;
-        if (func_0011FEE8(self) == 5) {
+        if (cRider_getControlState(self) == 5) {
             res = cSpinControl_isGrabHeld(*(char**)(self + 0x77C) + 0x230) != 0;
         }
         return res;
     case 6:
         res = 0;
-        if (func_0011FEE8(self) == 5) {
+        if (cRider_getControlState(self) == 5) {
             res = cSpinControl_isTweakHeld(*(char**)(self + 0x77C) + 0x230) != 0;
         }
         return res;
     case 7:
         res = 0;
-        if (func_0011FEE8(self) == 5) {
+        if (cRider_getControlState(self) == 5) {
             res = cSpinControl_isUberHeld(*(char**)(self + 0x77C) + 0x230) != 0;
         }
         return res;
@@ -4906,8 +4906,8 @@ extern "C" int cRider_isGroundNormalValid(cRider* self)
 {
     int grounded = 0;
 
-    if (func_0011FE98(self) == 0 ||
-        (func_0011FE98(self) == 2 && *(int*)((char*)self->mRiderHandler + 0x30) == 0)) {
+    if (cRider_getMotionState(self) == 0 ||
+        (cRider_getMotionState(self) == 2 && *(int*)((char*)self->mRiderHandler + 0x30) == 0)) {
         grounded = 1;
     }
     return grounded;
@@ -6555,7 +6555,7 @@ extern "C" void cRider_applyBoost(cRider* self, sRiderVec4_001250A8* impulse)
 {
     sRiderVec4_001250A8* velocity = (sRiderVec4_001250A8*)&self->mVelocity;
     riderAddEq_001250A8(*velocity, *impulse);
-    if (func_0011FE98(self) == 1)
+    if (cRider_getMotionState(self) == 1)
         cAirPredictor_startLaunchIntoAir(self->mAirPredictor, &self->mPosition, velocity, 3333.33349609375f);
 }
 #endif
@@ -7045,7 +7045,7 @@ struct sVEntryF_125B18 { short delta; short index; void (*fn)(void*, float, int)
  * With @p on 0 both levels are zeroed and func_00326CF0 stops the pad. Otherwise level 0 (bump) becomes max(level x
  * 0.9133 - 18.5, 0) and level 1 (rumble) is multiplied by 0.99167; when the pad's virtual slot 3 returns 2, slot 4 sets
  * motor 0 to max((rumble - 0.5) x 0.01, (bump - 2) / 972.2, 0) and motor 1 to max((rumble - 70) / 160, (bump - 100) /
- * 5000, 0). Called by func_001278E8 with &unk_DFC.
+ * 5000, 0). Called by cPlayer_vibrationUpdate with &unk_DFC.
  *
  * @param vibState  the two levels (bump, rumble)
  * @param a  the cPadDevice
@@ -7276,7 +7276,7 @@ __asm__("_vt$13cRider_125EB8 = cPlayer_vtbl\n"
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_001276F0);
+INCLUDE_ASM("ai/rider", cPlayer_getGrabHeld);
 #ifdef SKIP_ASM
 int cInput_getState(void*, int);
 /**
@@ -7286,7 +7286,7 @@ int cInput_getState(void*, int);
  *
  * @return the grab index, or -1
  */
-extern "C" int func_001276F0(char* self)
+extern "C" int cPlayer_getGrabHeld(char* self)
 {
     if (cInput_getState(*(void**)(self + 0xDF0), 0x1F))
         return 0;
@@ -7323,7 +7323,7 @@ extern "C" int func_001276F0(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_00127848);
+INCLUDE_ASM("ai/rider", cPlayer_getUberGrindHeld);
 #ifdef SKIP_ASM
 int cInput_getState(void*, int);
 
@@ -7334,7 +7334,7 @@ int cInput_getState(void*, int);
  *
  * @return the grind index, or -1
  */
-extern "C" int func_00127848(void* self)
+extern "C" int cPlayer_getUberGrindHeld(void* self)
 {
     if (cInput_getState(*(void**)((char*)self + 0xDF0), 27))
         return 0;
@@ -7349,12 +7349,12 @@ extern "C" int func_00127848(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_001278C0__FPv);
+INCLUDE_ASM("ai/rider", cPlayer_vibrationReset__FPv);
 #ifdef SKIP_ASM
 /**
  * Clears the player's two vibration levels, unk_DFC and unk_E00 (cRider virtual slot 16).
  */
-void func_001278C0(void* self)
+void cPlayer_vibrationReset(void* self)
 {
     *(float*)((char*)self + 0xE00) = 0.0f;
     *(float*)((char*)self + 0xDFC) = 0.0f;
@@ -7362,35 +7362,35 @@ void func_001278C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_001278D0);
+INCLUDE_ASM("ai/rider", cPlayer_vibrationBump);
 #ifdef SKIP_ASM
 /**
  * Raises the player's bump vibration level (unk_DFC) to @p val when that is higher (cRider virtual slot 17).
  *
  * @param val  the bump strength
  */
-extern "C" void func_001278D0(void* self, float val)
+extern "C" void cPlayer_vibrationBump(void* self, float val)
 {
     *(float*)((char*)self + 0xDFC) = val >? *(float*)((char*)self + 0xDFC);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_001278E0__FPvf);
+INCLUDE_ASM("ai/rider", cPlayer_vibrationRumble__FPvf);
 #ifdef SKIP_ASM
 /**
  * Sets the player's rumble vibration level (unk_E00) to @p val (cRider virtual slot 18).
  *
  * @param val  the rumble strength
  */
-void func_001278E0(void* self, float val)
+void cPlayer_vibrationRumble(void* self, float val)
 {
     *(float*)((char*)self + 0xE00) = val;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ai/rider", func_001278E8);
+INCLUDE_ASM("ai/rider", cPlayer_vibrationUpdate);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -7410,7 +7410,7 @@ static inline bool riderInRange_1278E8(int v)
  * Only with a Pad. Vibration stays on when the option interface (cBE_getInterface kind 1, func_001474E8) allows it for
  * the rider's AI index and the replay's first word is not 1-9; then func_00125B18 decays the levels and drives the pad.
  */
-extern "C" void func_001278E8(void* self)
+extern "C" void cPlayer_vibrationUpdate(void* self)
 {
     char* s = (char*)self;
     if (*(int*)(s + 0xDF4) != 0)
@@ -7431,11 +7431,11 @@ extern "C" void func_001278E8(void* self)
 //100%
 INCLUDE_ASM("ai/rider", cPlayer_getControlCmd);
 #ifdef SKIP_ASM
-int func_0011FEE8(void*);
+int cRider_getControlState(void*);
 extern "C" float cInput_getValue(void* pad, int axis);
 extern "C" void func_0026D178(void* cache, void* input);
 
-// One frame of pad input packed for the rider's current state (func_0011FEE8); each state has its own layout.
+// One frame of pad input packed for the rider's current state (cRider_getControlState); each state has its own layout.
 // Buttons are 1 bit, analog values are 0..31 in 6 bits.
 union sRiderInput_127998 {
     struct {
@@ -7498,10 +7498,10 @@ union sRiderInput_127998 {
  * Fills this frame's control command from the player's pad, packed for the rider's current control state, and records
  * it for replays.
  *
- * Zeroes the 8-byte command, then switches on the control state of the rider at +0x18 (func_0011FEE8, On Tour
+ * Zeroes the 8-byte command, then switches on the control state of the rider at +0x18 (cRider_getControlState, On Tour
  * getControlState). Each state packs its own layout (the low 12 bits stay zero): buttons (cInput_getState on the pad at
- * +0xDF0, 1 bit each) and analog values (cInput_getValue * 31, 6 bits each). States 4 and 5 also pack func_001276F0's
- * value and states 7 and 12 func_00127848's (8 bits each); state 5 adds a three-way value from axis 3 (-1 below -0.5, 1
+ * +0xDF0, 1 bit each) and analog values (cInput_getValue * 31, 6 bits each). States 4 and 5 also pack cPlayer_getGrabHeld's
+ * value and states 7 and 12 cPlayer_getUberGrindHeld's (8 bits each); state 5 adds a three-way value from axis 3 (-1 below -0.5, 1
  * above 0.5, else 0); state 11 packs two buttons and an analog value, state 8 two buttons, states 6 and 10 one analog
  * value and state 13 nothing. When a replay recorder is attached (+0xDF8) the command is passed to func_0026D178.
  *
@@ -7511,7 +7511,7 @@ union sRiderInput_127998 {
 extern "C" void cPlayer_getControlCmd(char* self, sRiderInput_127998* cmd)
 {
     MEM_fill(cmd, 0, 8);
-    switch (func_0011FEE8(*(void**)(self + 0x18))) {
+    switch (cRider_getControlState(*(void**)(self + 0x18))) {
     case 0: {
         float k = 31.0f;
         cmd->s0.b12 = cInput_getState(PAD_127998, 46);
@@ -7557,7 +7557,7 @@ extern "C" void cPlayer_getControlCmd(char* self, sRiderInput_127998* cmd)
         cmd->s7.b14 = cInput_getState(PAD_127998, 18);
         cmd->s7.b15 = cInput_getState(PAD_127998, 19);
         cmd->s7.b16 = cInput_getState(PAD_127998, 20);
-        cmd->s7.v17 = func_00127848(self);
+        cmd->s7.v17 = cPlayer_getUberGrindHeld(self);
         cmd->s7.a25 = (int)(cInput_getValue(PAD_127998, 23) * k);
         cmd->s7.w0 = (int)(cInput_getValue(PAD_127998, 13) * k);
         cmd->s7.w6 = (int)(cInput_getValue(PAD_127998, 3) * k);
@@ -7567,7 +7567,7 @@ extern "C" void cPlayer_getControlCmd(char* self, sRiderInput_127998* cmd)
         cmd->s12.b12 = cInput_getState(PAD_127998, 46);
         cmd->s12.b13 = cInput_getState(PAD_127998, 19);
         cmd->s12.b14 = cInput_getState(PAD_127998, 20);
-        cmd->s12.v15 = func_00127848(self);
+        cmd->s12.v15 = cPlayer_getUberGrindHeld(self);
         cmd->s12.a23 = (int)(cInput_getValue(PAD_127998, 23) * 31.0f);
         break;
     case 2: {
@@ -7596,7 +7596,7 @@ extern "C" void cPlayer_getControlCmd(char* self, sRiderInput_127998* cmd)
         cmd->s4.b13 = cInput_getState(PAD_127998, 25);
         cmd->s4.b14 = cInput_getState(PAD_127998, 5);
         cmd->s4.b15 = cInput_getState(PAD_127998, 6);
-        cmd->s4.v16 = func_001276F0(self);
+        cmd->s4.v16 = cPlayer_getGrabHeld(self);
         cmd->s4.a24 = (int)(cInput_getValue(PAD_127998, 0) * k);
         cmd->s4.w0 = (int)(cInput_getValue(PAD_127998, 1) * k);
         break;
@@ -7607,7 +7607,7 @@ extern "C" void cPlayer_getControlCmd(char* self, sRiderInput_127998* cmd)
         cmd->s4.b13 = cInput_getState(PAD_127998, 25);
         cmd->s4.b14 = cInput_getState(PAD_127998, 21);
         cmd->s4.b15 = cInput_getState(PAD_127998, 0xC);
-        cmd->s4.v16 = func_001276F0(self);
+        cmd->s4.v16 = cPlayer_getGrabHeld(self);
         cmd->s4.a24 = (int)(cInput_getValue(PAD_127998, 0xE) * k);
         cmd->s4.w0 = (int)(cInput_getValue(PAD_127998, 0xF) * k);
         cmd->s4.w12 = (int)(cInput_getValue(PAD_127998, 11) * k);

@@ -9,7 +9,7 @@
 // (world/streamman):
 //   cStreamMan_cStreamMan, cStreamMan__cStreamMan, cStreamMan_init (init), cStreamMan_reset (reset),
 //   cStreamMan_purge (purge), cStreamMan_addStreamRequest (addStreamRequest), cStreamMan_cancelStreamRequest (cancelStreamRequest),
-//   cStreamMan_setBandWidthLimit (setBandWidthLimit), cStreamMan_update (update), func_003A7218 (decompressChunk),
+//   cStreamMan_setBandWidthLimit (setBandWidthLimit), cStreamMan_update (update), cStreamMan_decompressChunk (decompressChunk),
 //   cStreamMan_processChunk (processChunk). The static _NULLCHUNK is cStreamMan_NULLCHUNK.
 //
 // Size 0xE8: cWorldCache's next member, mp_ChunkResolve, is at 0x3E8 = 0x300 + 0xE8 (cWorldCache_init stores

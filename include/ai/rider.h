@@ -79,7 +79,7 @@ struct sRiderPair {
 struct cRider {
     /* 0x000 */ sRiderPair mRelations[6]; // [X] [U] per other rider, by its mAIIndex (cRider_checkOpponentCollisions)
     /* 0x0D8 */ int unk_0D8; // set to -1, then passed to cRiderMetrix_reset(mMetrix, v) (cRider_initAlways)
-    /* 0x0DC */ float mRubberBandBehind; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarBehind, func_0010DEF0
+    /* 0x0DC */ float mRubberBandBehind; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarBehind, cComputer_setupWarp
     /* 0x0E0 */ float mRubberBandAhead; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarAhead
     /* 0x0E4 */ char unk_0E4[0x8];
     /* 0x0EC */ int unk_0EC; // selector 0..5: func_002A34D0 switches it to 1,2,4,8,0x10,0x200; func_002A1E68 compares it 0..4
@@ -89,7 +89,7 @@ struct cRider {
     /* 0x0FC */ char unk_0FC[0x4];
     /* 0x100 */ int unk_100; // cleared when the rider quits (cRider_doFinishEvent)
     /* 0x104 */ char unk_104[0xC];
-    /* 0x110 */ t4Vector mPosition; // [R] getPosition (func_001408F0)
+    /* 0x110 */ t4Vector mPosition; // [R] getPosition (cRider_getPosition)
     /* 0x120 */ t4Vector mRotation; // [P] getRotation (unshifted); quaternion, normalised by updateOrientationImplicit
     /* 0x130 */ t4Vector mRootPoseOverridePos; // [X] moved by AddEq by the wall-hit displacement (func_00137138)
     /* 0x140 */ char unk_140[0x10];
@@ -191,7 +191,7 @@ struct cRider {
     /* 0x754 */ float mAudioEdging; // [P] getAudioEdging_0_to_1
     /* 0x758 */ float mAudioPressure; // [P] getAudioPressure_0_to_1
     /* 0x75C */ float mAudioSpeed; // [P] getAudioSpeed_0_to_1
-    /* 0x760 */ int unk_760; // sound state = func_0011FE98(rider), written when it changes (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
+    /* 0x760 */ int unk_760; // sound state = cRider_getMotionState(rider), written when it changes (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
     /* 0x764 */ int unk_764; // written with the same value as 0x760 (cSSXAudio_BeginRiderSound)
     /* 0x768 */ int unk_768; // sound id from cSSXAudio_Surface(self, rider) (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
     /* 0x76C */ int unk_76C; // like 0x768; set to 9 on one func_002934D0 result (cSSXAudio_HandleCarve)

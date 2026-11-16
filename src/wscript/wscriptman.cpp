@@ -2403,7 +2403,7 @@ struct sWSManBB10 {
 class func_0030C6C8_cObj;
 extern "C" int func_0030C6C8(void* a, func_0030C6C8_cObj* obj);
 extern "C" void func_0030BC80(void* self, void** list, void* stream);
-extern "C" int func_003ACA38(void* a, int id);
+extern "C" int cWScriptCache_getScriptBase(void* a, int id);
 extern "C" void func_002257E0(void* obj, void* stream, int a2);
 
 extern "C" void func_0030BB10(sWSManBB10* self, void* stream)
@@ -2440,7 +2440,7 @@ extern "C" void func_0030BB10(sWSManBB10* self, void* stream)
             sWSVtVBB10* vtEntry = &(*(sWSVtVBB10**)stream)[1];
             int r;
             vtEntry->fn((char*)stream + vtEntry->delta, &j, 4);
-            r = func_003ACA38(*(void**)(self->world + 4), j);
+            r = cWScriptCache_getScriptBase(*(void**)(self->world + 4), j);
             func_002257E0(self->objs[j], stream, r);
         }
     }
@@ -2497,7 +2497,7 @@ struct sWSMan_30BD20 {
 struct cWScriptListHead;
 extern "C" void* cProcessList_removeHead(void* self);
 int func_0030B260(void* self, void* a1);
-extern "C" int func_003ACA38(void* a, int id);
+extern "C" int cWScriptCache_getScriptBase(void* a, int id);
 class func_0030C700_cObj;
 extern "C" int func_0030C700(void* a, func_0030C700_cObj* obj);
 class func_0030BEE8_cStream;
@@ -2511,7 +2511,7 @@ extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, cStream_30BD20* s
  * Reads the first 0x28C bytes of the manager, then the collect pool (func_0030C700). Every process in the active
  * (+0x2B8) and pending (+0x2BC) lists goes back to the idle list, and both lists are then read back from @p stream
  * (func_0030BEE8). The 50 section tables at +0x3CC are emptied (func_00224F68), and a count of saved tables follows,
- * each read back against its section's script base (func_003ACA38). Finally the current instance, infos, process and
+ * each read back against its section's script base (cWScriptCache_getScriptBase). Finally the current instance, infos, process and
  * task are cleared.
  *
  * @param stream  the replay frame to read from (On Tour data)
@@ -2549,7 +2549,7 @@ extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cStream_30B
     for (int j = 0; j < count; j++) {
         int id;
         stream->Read(&id, 4);
-        int r = func_003ACA38(*(void**)(self->world + 4), id);
+        int r = cWScriptCache_getScriptBase(*(void**)(self->world + 4), id);
         luno_cLunoTable_readFromReplayFrame(self->objs[id], stream, r);
     }
     *(int*)((char*)self + 0x290) = 0;

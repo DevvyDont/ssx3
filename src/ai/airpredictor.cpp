@@ -37,7 +37,7 @@ extern "C" void cAirPredictor_reset(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/airpredictor", func_00113200);
+INCLUDE_ASM("ai/airpredictor", cAirPredictor_simStep);
 #ifdef SKIP_ASM
 // FAKEMATCH: identical arms `else if (self) { state = 1; f20 = normal; f90 = surf; } else { same }` (cross-jumping merges them later; at
 // GCSE time they raise the expression table from 73 to 77 buckets, which gives the &p1/&p0 PRE copies retail's s5/s6 order); plain form 99.95%. Byte-identical and behaves like the plain form; landed marked under
@@ -86,8 +86,8 @@ struct sAirP_3200 {
 };
 
 extern sQuadR t4vect_ZAxis;
-// func_001139A0 is defined later in the unit (with its own vector type).
-float func_001139A0_3200(void* self, sVec4_3200* pos, sVec4_3200* vel, sVec4_3200* outPos, sVec4_3200* outVel) __asm__("func_001139A0");
+// cAirPredictor_simOneTick is defined later in the unit (with its own vector type).
+float cAirPredictor_simOneTick_3200(void* self, sVec4_3200* pos, sVec4_3200* vel, sVec4_3200* outPos, sVec4_3200* outVel) __asm__("cAirPredictor_simOneTick");
 // func_0032E100 (intersect/riderspheretree) builds the capsule and returns it.
 extern "C" sRay_3200* func_0032E100(sRay_3200* ray, sVec4_3200* a, sVec4_3200* b, int c, float d);
 extern "C" float func_00336850(void* world, sRay_3200* ray, sHit_3200* hit, int c);
@@ -225,7 +225,7 @@ static inline void vu0AddEq_3200(sVec4_3200& a, const sVec4_3200& b)
  * Runs the air predictor's simulation forward until the flight changes direction, then looks for the landing.
  *
  * Saves CurSimPos/CurSimVel (0x50/0x60), then repeatedly adds 1/60 to TotalAirTime (+0x98) and steps the sim one tick
- * (func_001139A0), recording ApexTime/GuessApexPos (+0x9C/+0x40) while the height keeps rising; it stops when the new
+ * (cAirPredictor_simOneTick), recording ApexTime/GuessApexPos (+0x9C/+0x40) while the height keeps rising; it stops when the new
  * velocity's direction differs from the start (speed * 0.99 > dot of the old unit velocity and the new velocity) or
  * after 270000 / TerminalVel (+0xA8) ticks. It then casts a capsule (func_0032E100) along the travelled segment,
  * lengthened by 2% at each end, against the world (func_00336850 in SimState 0, func_003378C0 otherwise). A hit facing
@@ -237,7 +237,7 @@ static inline void vu0AddEq_3200(sVec4_3200& a, const sVec4_3200& b)
  * @param vself  the cAirPredictor (this)
  */
 // cAirPredictor::simStep (On Tour names; the loop is a do-while in SSX 3).
-extern "C" void func_00113200(char* vself)
+extern "C" void cAirPredictor_simStep(char* vself)
 {
     sAirP_3200* self = (sAirP_3200*)vself;
     sVec4_3200 prevPos = self->pos;
@@ -250,7 +250,7 @@ extern "C" void func_00113200(char* vself)
         self->f98 += 0.01666666753590107f;
         numSubStep += 1.0f;
         float prevZ = self->pos.z;
-        speed = func_001139A0_3200(self, &self->pos, &self->vel, &self->pos, &self->vel);
+        speed = cAirPredictor_simOneTick_3200(self, &self->pos, &self->vel, &self->pos, &self->vel);
         if (prevZ <= self->pos.z) {
             self->f9C = self->f98;
             self->f40 = self->pos;
@@ -358,7 +358,7 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_updateFlightPath);
 extern sQuadR t4vect_Origin;
 extern sQuadR t4vect_XAxis;
 extern sQuadR t4vect_ZAxis;
-extern "C" void func_00113200(char* self);
+extern "C" void cAirPredictor_simStep(char* self);
 
 struct sVec4_3648
 {
@@ -366,8 +366,8 @@ struct sVec4_3648
     sVec4_3648() {}
 } __attribute__((aligned(16)));
 
-// func_001139A0 is defined later in the unit (with its own vector type).
-float func_001139A0_3648(char* self, sVec4_3648* pos, sVec4_3648* vel, sVec4_3648* outPos, sVec4_3648* outVel) __asm__("func_001139A0");
+// cAirPredictor_simOneTick is defined later in the unit (with its own vector type).
+float cAirPredictor_simOneTick_3648(char* self, sVec4_3648* pos, sVec4_3648* vel, sVec4_3648* outPos, sVec4_3648* outVel) __asm__("cAirPredictor_simOneTick");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline sVec4_3648 vu0Scale_3648(const sVec4_3648& v, float s)
@@ -406,10 +406,10 @@ static inline sVec4_3648 vu0Add_3648(const sVec4_3648& a, const sVec4_3648& b)
  * Past 60 s of simulated time (+0x98) it gives up: in state 2 (+0xAC) it switches to state 3 with a fixed frame
  * (t4vect_Origin, t4vect_XAxis, t4vect_ZAxis) and +0x90 = 13, otherwise it re-launches from @p airPos / @p airVel
  * (cAirPredictor_initLaunch) in state 2. Otherwise, in state 1 a sim more than 0.2 s behind the clock (+0xA0) is
- * re-launched, and in states 0 and 2 func_00113200 (On Tour simStep) runs until the sim passes the clock + dt or the
+ * re-launched, and in states 0 and 2 cAirPredictor_simStep (On Tour simStep) runs until the sim passes the clock + dt or the
  * state changes.
  *
- * Then the air position/velocity (+0x70/+0x80) are stepped in fixed 1/60 s ticks with func_001139A0 (On Tour
+ * Then the air position/velocity (+0x70/+0x80) are stepped in fixed 1/60 s ticks with cAirPredictor_simOneTick (On Tour
  * simOneTick), +0xA4 counting the time done. A remainder over 0.01 s is blended linearly between this tick and a
  * predicted next one (position w = 1), else the current values are copied out. The clock +0xA0 then advances by @p dt.
  *
@@ -436,27 +436,27 @@ extern "C" void cAirPredictor_updateFlightPath(char* self, sQuad* airPos, sQuad*
         }
         int st = *(int*)(self + 0xAC);
         if (st == 0) {
-            func_00113200(self);
+            cAirPredictor_simStep(self);
             while (*(int*)(self + 0xAC) == 0 && *(float*)(self + 0x98) < *(float*)(self + 0xA0) + dt) {
-                func_00113200(self);
+                cAirPredictor_simStep(self);
             }
         } else if (st == 2) {
-            func_00113200(self);
+            cAirPredictor_simStep(self);
             while (*(int*)(self + 0xAC) == 2 && *(float*)(self + 0x98) < *(float*)(self + 0xA0) + dt) {
-                func_00113200(self);
+                cAirPredictor_simStep(self);
             }
         }
     }
     float t = *(float*)(self + 0xA0) - *(float*)(self + 0xA4) + dt;
     while (t >= 0.01666666753590107f) {
         t -= 0.01666666753590107f;
-        func_001139A0_3648(self, (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80), (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80));
+        cAirPredictor_simOneTick_3648(self, (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80), (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80));
         *(float*)(self + 0xA4) += 0.01666666753590107f;
     }
     if (t > 0.009999999776482582f) {
         sVec4_3648 p;
         sVec4_3648 v;
-        func_001139A0_3648(self, (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80), &p, &v);
+        cAirPredictor_simOneTick_3648(self, (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80), &p, &v);
         float k = t * 59.999996185302734f;
         *(sVec4_3648*)airPos = vu0Add_3648(vu0Scale_3648(p, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x70), 1.0f - k));
         *(sVec4_3648*)airVel = vu0Add_3648(vu0Scale_3648(v, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x80), 1.0f - k));
@@ -470,7 +470,7 @@ extern "C" void cAirPredictor_updateFlightPath(char* self, sQuad* airPos, sQuad*
 #endif
 
 //100%
-INCLUDE_ASM("ai/airpredictor", func_00113998__FPv);
+INCLUDE_ASM("ai/airpredictor", cAirPredictor_land__FPv);
 #ifdef SKIP_ASM
 /**
  * Clears the air predictor's TotalAirTime (+0x98) when the rider lands.
@@ -478,14 +478,14 @@ INCLUDE_ASM("ai/airpredictor", func_00113998__FPv);
  * cWipeoutMotion_resolveAirMotion calls it with the rider's mPosition and mVelocity, which are ignored (the C
  * declaration takes only self).
  */
-void func_00113998(void* self)
+void cAirPredictor_land(void* self)
 {
     *(int*)((char*)self + 0x98) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/airpredictor", func_001139A0);
+INCLUDE_ASM("ai/airpredictor", cAirPredictor_simOneTick);
 #ifdef SKIP_ASM
 struct sVec4_1139A0
 {
@@ -564,7 +564,7 @@ static inline float vu0Length_1139A0(const sVec4_1139A0& v)
  *
  * nextPos = curPos + curVel / 60. nextVel = curVel plus a drag of -vel.x / 300 and -vel.y / 300 and gravity -31.67 per
  * tick (-14.17 while still rising). When the new speed exceeds TerminalVel (+0xA8) the velocity is scaled down to it.
- * Input and output may be the same vectors (func_00113200 passes them so).
+ * Input and output may be the same vectors (cAirPredictor_simStep passes them so).
  *
  * @param pos  the current position
  * @param vel  the current velocity
@@ -572,7 +572,7 @@ static inline float vu0Length_1139A0(const sVec4_1139A0& v)
  * @param outVel  receives the next velocity
  * @return the length of the new velocity, at most TerminalVel
  */
-extern "C" float func_001139A0(void* self, sVec4_1139A0* pos, sVec4_1139A0* vel, sVec4_1139A0* outPos, sVec4_1139A0* outVel)
+extern "C" float cAirPredictor_simOneTick(void* self, sVec4_1139A0* pos, sVec4_1139A0* vel, sVec4_1139A0* outPos, sVec4_1139A0* outVel)
 {
     *outPos = vu0Add_1139A0(*pos, vu0Scale_1139A0(*vel, 0.01666666753590107f));
     float dx = vel->x * -0.0033333336468786f;
@@ -602,7 +602,7 @@ extern "C" void func_00113A98(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ai/airpredictor", func_00113AA0);
+INCLUDE_ASM("ai/airpredictor", cAirPredictor_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry00113AA0 {
     short delta;
@@ -615,7 +615,7 @@ struct sVEntry00113AA0 {
  *
  * @param obj  the replay frame (cReplayFramePtr)
  */
-extern "C" void func_00113AA0(void* self, void* obj)
+extern "C" void cAirPredictor_writeToReplayFrame(void* self, void* obj)
 {
     sVEntry00113AA0* vt = *(sVEntry00113AA0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 176);
@@ -623,7 +623,7 @@ extern "C" void func_00113AA0(void* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("ai/airpredictor", func_00113AD8);
+INCLUDE_ASM("ai/airpredictor", cAirPredictor_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry00113AD8 {
     short delta;
@@ -636,7 +636,7 @@ struct sVEntry00113AD8 {
  *
  * @param obj  the replay frame (cReplayFramePtr)
  */
-extern "C" void func_00113AD8(void* self, void* obj)
+extern "C" void cAirPredictor_readFromReplayFrame(void* self, void* obj)
 {
     sVEntry00113AD8* vt = *(sVEntry00113AD8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 176);

@@ -1654,8 +1654,8 @@ typedef int (*Tris_4888)(void*, void*, void*, sWsHit_4888*, int);
 typedef int (*Hit_4888)(void*, void*, void*);
 typedef int (*Mesh_4888)(void*, void*, sWsHit_4888*, int);
 
-void* func_003A6CC8_4888(void* self, void* a1) __asm__("func_003A6CC8__FPvT0");
-void* func_003A6CD8_4888(void* self, void* a1) __asm__("func_003A6CD8__FPvT0");
+void* cWorld_getSphereTreeInfo_4888(void* self, void* a1) __asm__("cWorld_getSphereTreeInfo__FPvT0");
+void* cWorld_getPolyModelInfo_4888(void* self, void* a1) __asm__("cWorld_getPolyModelInfo__FPvT0");
 extern "C" void* tSphTreeList_getMeshTree(void* self, int a1);
 void* tPolyModelList_getMeshPolyModel_4888(void* self, int a1) __asm__("tPolyModelList_getMeshPolyModel__FPvi");
 // PORT: callers pass the hit capacity as a fifth argument the function never reads.
@@ -1947,10 +1947,10 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
         } else {
             if (((Hit_4888)intersectType->vt[9].fn)((char*)intersectType + intersectType->vt[9].delta, bone->mesh, bone->mesh + 0xC)) {
                 if (type == 3) {
-                    tri = tSphTreeList_getMeshTree(func_003A6CD8_4888(cWorld_m_pTheWorld, node), k);
+                    tri = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo_4888(cWorld_m_pTheWorld, node), k);
                     inum = ((Mesh_4888)intersectType->vt[6].fn)((char*)intersectType + intersectType->vt[6].delta, tri, ii, 64);
                 } else {
-                    inum = cWorldIntersectType_IsMeshInt_cap(intersectType, tPolyModelList_getMeshPolyModel_4888(func_003A6CC8_4888(cWorld_m_pTheWorld, node), k),
+                    inum = cWorldIntersectType_IsMeshInt_cap(intersectType, tPolyModelList_getMeshPolyModel_4888(cWorld_getSphereTreeInfo_4888(cWorld_m_pTheWorld, node), k),
                                              *(int*)(bone->mesh + 0x18) & 1, ii, 64);
                 }
             }

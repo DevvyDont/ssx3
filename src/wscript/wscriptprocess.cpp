@@ -805,13 +805,13 @@ public:
 
 class func_00308760_cObj;
 extern "C" int func_00308760(void* a, func_00308760_cObj* obj);
-extern "C" int func_003ACA38(void* map, int id);
+extern "C" int cWScriptCache_getScriptBase(void* map, int id);
 extern "C" void func_002257E0(void* obj, void* stream, int a2);
 
 extern "C" void func_00308038(void* self, func_00308038_cStream* stream)
 {
     stream->v01(self, 0x10);
-    int x = func_003ACA38(cWorld_m_pTheWorld->m_pWScriptCache, *(int*)((char*)self + 0x24));
+    int x = cWScriptCache_getScriptBase(cWorld_m_pTheWorld->m_pWScriptCache, *(int*)((char*)self + 0x24));
     int has = *(void**)((char*)self + 0x1C) != 0;
     stream->v01(&has, 4);
     if (has) {
@@ -835,7 +835,7 @@ public:
 };
 
 extern char str_ProcessLocalTable[];
-extern "C" int func_003ACA38(void* map, int id);
+extern "C" int cWScriptCache_getScriptBase(void* map, int id);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, func_00308118_cStream* stream, int a2);
@@ -845,7 +845,7 @@ extern "C" int func_00308798(void* a, func_00308798_cObj* obj);
 extern "C" void func_00308118(void* self, func_00308118_cStream* stream)
 {
     stream->v02(self, 0x10);
-    int x = func_003ACA38(cWorld_m_pTheWorld->m_pWScriptCache, *(int*)((char*)self + 0x24));
+    int x = cWScriptCache_getScriptBase(cWorld_m_pTheWorld->m_pWScriptCache, *(int*)((char*)self + 0x24));
     if (*(void**)((char*)self + 0x1C) != 0) {
         luno_cLunoTable__cLunoTable(*(void**)((char*)self + 0x1C), 3);
     }
@@ -1753,12 +1753,12 @@ struct cWScriptMan_unloadSection_sEntry {
 };
 
 extern "C" void cWScriptMan_purgeSection(void* self, int i);
-extern "C" void func_003ACC90(void* entry);
+extern "C" void cWScriptCacheEntry_unload(void* entry);
 
 /**
  * Unloads a world section's scripts: purges its processes, then releases its world script cache entry.
  *
- * After cWScriptMan_purgeSection() it calls func_003ACC90 on entry @p i of the world's script cache
+ * After cWScriptMan_purgeSection() it calls cWScriptCacheEntry_unload on entry @p i of the world's script cache
  * (m_pWScriptCache of the world at +0x28C), which frees the entry's buffer unless its +0x2 flag is set and
  * clears the entry.
  *
@@ -1769,7 +1769,7 @@ extern "C" void cWScriptMan_unloadSection(void* self, int i)
     cWScriptMan_purgeSection(self, i);
     cWScriptMan_unloadSection_sEntry* items =
         *(cWScriptMan_unloadSection_sEntry**)(*(char**)(*(char**)((char*)self + 0x28C) + 4) + 4);
-    func_003ACC90(&items[i]);
+    cWScriptCacheEntry_unload(&items[i]);
 }
 #endif
 

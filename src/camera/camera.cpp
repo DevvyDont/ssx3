@@ -4059,7 +4059,7 @@ struct sCam162138;
 extern "C" void cChaseCameraController_switchCamera_UserChange(cChaseCameraController* self, int v);
 extern "C" void cChaseCameraController_switchCamera_Slow(cChaseCameraController* self);
 extern "C" void cChaseCameraController_switchCamera_EndSlow(cChaseCameraController* self);
-int func_0011FE98(void*);
+int cRider_getMotionState(void*);
 
 struct sCamVec4_161AB0
 {
@@ -4109,7 +4109,7 @@ extern "C" void cChaseCameraController_processInput(cChaseCameraController* self
         cChaseCameraController_switchCamera_UserChange(self, mode);
     self->PreferredChaseAlgoLastFrame = mode;
     float speed = vlength_161AB0(((cCamRider_161AB0*)self->Target)->getVelocity()) * 0.035999998450279236f;
-    int boarding = func_0011FE98(*(void**)((char*)self->Target + 4)) == 5;
+    int boarding = cRider_getMotionState(*(void**)((char*)self->Target + 4)) == 5;
     if (self->GoingSlow == 0) {
         if (boarding) {
             self->GoingSlow = 1;
@@ -4499,7 +4499,7 @@ extern "C" void* cChaseCameraController_switchCamera_Restart(cChaseCameraControl
 //100%
 INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_Slow);
 #ifdef SKIP_ASM
-int func_0011FE98(void*);
+int cRider_getMotionState(void*);
 
 /**
  * Starts the slow-speed chase camera (0x42).
@@ -4511,7 +4511,7 @@ extern "C" void cChaseCameraController_switchCamera_Slow(cChaseCameraController*
 {
     ((sCam162138*)self)->b2 = 1;
     if (!((sCam162138*)self)->b0 && !((sCam162138*)self)->b1) {
-        float blendTime = func_0011FE98(*(void**)((char*)self->Target + 4)) == 5 ? 1.2000000476837158f : 0.6000000238418579f;
+        float blendTime = cRider_getMotionState(*(void**)((char*)self->Target + 4)) == 5 ? 1.2000000476837158f : 0.6000000238418579f;
         cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), 66, 0, blendTime * 0.01666666753590107f);
     }
 }
@@ -4746,7 +4746,7 @@ extern "C" void func_00162560(void) {
 //100%
 INCLUDE_ASM("camera/camera", func_00162568);
 #ifdef SKIP_ASM
-int func_0011FE98(void*);
+int cRider_getMotionState(void*);
 extern sVec_001607E0 D_004FF120_v162568 __asm__("t4vect_Zero");
 
 struct sVEi_162568 {
@@ -4858,7 +4858,7 @@ extern "C" void func_00162568_impl(char* self, char* out, float a, float b, floa
                                    float g, float h)
 {
     sVec_001607E0 v = cmGet_001607E0(self, 3);
-    int mode = func_0011FE98(*(void**)(*(char**)(self + 0x30) + 4));
+    int mode = cRider_getMotionState(*(void**)(*(char**)(self + 0x30) + 4));
     if (cmLength_001607E0(v) < 27.77777862548828f) {
         v = *(sVec_001607E0*)(self + 0x1B0);
     }

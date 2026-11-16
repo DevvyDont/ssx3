@@ -949,7 +949,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028C8C8);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 struct sRiderC8C8;
 extern "C" sRiderC8C8* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
-int func_0011FE98(void* rider);
+int cRider_getMotionState(void* rider);
 int func_0028D898(void* self);
 extern "C" void* func_00287968(void* self, int a1, int a2);
 extern "C" int cSSXAudio_ReplayMode(void* self);
@@ -1023,7 +1023,7 @@ extern "C" void func_0028C8C8(sBmC8C8* self)
         self->f6250--;
     sRiderC8C8* rider = cSSXAudio_GetFocusRider_p(self, -1);
     float spd;
-    if (func_0011FE98(rider) == 1) {
+    if (cRider_getMotionState(rider) == 1) {
         int s = rider->ap->state;
         int air = 0;
         if (s == 1 || s == 3)

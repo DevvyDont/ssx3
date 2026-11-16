@@ -10,7 +10,7 @@
 //   cWorld_cWorld, cWorld__cWorld, cWorld_init, cWorld_resetMap, cWorld_update (update), cWorld_load,
 //   cWorld_getWScriptHeaderId (getWScriptHeaderId), cWorld_getNumGlobalScripts (getNumGlobalScripts), cWorld_getGlobalScripts (getGlobalScripts),
 //   cWorld_getNumProcessScripts, cWorld_getProcessScripts, cWorld_getNumMissionScripts (getNumMissionScripts),
-//   cWorld_getMissionScripts (getMissionScripts), func_003A6CC8 (getSphereTreeInfo), func_003A6CD8 (getPolyModelInfo),
+//   cWorld_getMissionScripts (getMissionScripts), cWorld_getSphereTreeInfo (getSphereTreeInfo), cWorld_getPolyModelInfo (getPolyModelInfo),
 //   cWorld_getWScriptScript (getWScriptScript). Not methods: func_003A6948 (a static .sdb section-name check: path, count,
 //   names), tSphTreeList_getMeshTree and tPolyModelList_getMeshPolyModel (their first argument is a tPolyModelList / tSphTreeList).
 //

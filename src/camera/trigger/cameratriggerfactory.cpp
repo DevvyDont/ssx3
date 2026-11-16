@@ -4577,7 +4577,7 @@ static inline t4Vector ctAdd_00177EF8_7FC0(const t4Vector& a, const t4Vector& b)
 // (prototype from their definition at line 4013)
 extern "C" t4Vector cSPOKEChaseAlgorithm_getRiderPosition_7FC0(void* self) __asm__("cSPOKEChaseAlgorithm_getRiderPosition");
 
-int func_0011FE98_7FC0(void*) __asm__("func_0011FE98__FPv");
+int cRider_getMotionState_7FC0(void*) __asm__("cRider_getMotionState__FPv");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector ctSub_7FC0(const t4Vector& a, const t4Vector& b)
@@ -4667,7 +4667,7 @@ static inline t4Vector ctScaleP_7FC0(const t4Vector* v, float s)
  * up.
  *
  * The direction is @p in, or the target's handplant spline tangent (slot 10) while the rider's motion state
- * (func_0011FE98) is 5 (MS_Handplant); it is normalised, falling back to the target's front (slot 4) when shorter
+ * (cRider_getMotionState) is 5 (MS_Handplant); it is normalised, falling back to the target's front (slot 4) when shorter
  * than 0.01. LastLookDir = normalise(0.96 * LastLookDir + 0.04 * direction), or the direction itself when that sum is
  * under 0.02. The result is getRiderPosition + Z * 30 - LastLookDir * 250.
  *
@@ -4677,7 +4677,7 @@ static inline t4Vector ctScaleP_7FC0(const t4Vector* v, float s)
 extern "C" t4Vector cSPOKEChaseAlgorithm_getDesiredPosition(cSPOKEChaseAlgorithm* self, const t4Vector& in)
 {
     t4Vector dir;
-    if (func_0011FE98_7FC0(*(void**)((char*)self->Target + 4)) == 5)
+    if (cRider_getMotionState_7FC0(*(void**)((char*)self->Target + 4)) == 5)
         dir = *ctGetA_7FC0(self);
     else
         dir = in;
@@ -4836,7 +4836,7 @@ static inline float Sqrt_8208(float x)
 
 extern "C" t4Vector f_177FC0_8208(void* self, const t4Vector& v) __asm__("cSPOKEChaseAlgorithm_getDesiredPosition");
 extern "C" t4Vector f_177EF8_8208(void* self) __asm__("cSPOKEChaseAlgorithm_getRiderPosition");
-int func_0011FE98(void* self);
+int cRider_getMotionState(void* self);
 
 extern "C" void cSPOKEChaseAlgorithm_update_v(char* self) __asm__("cSPOKEChaseAlgorithm_update");
 
@@ -4868,7 +4868,7 @@ extern "C" void cSPOKEChaseAlgorithm_update_v(char* self)
         t = 0.0f;
     }
     float f = (1.0f - t) * 0.9879999756813049f;
-    if (func_0011FE98(*(void**)(*(char**)(self + 0x30) + 4)) == 5) {
+    if (cRider_getMotionState(*(void**)(*(char**)(self + 0x30) + 4)) == 5) {
         f = Sqrt_8208(f);
     }
     {

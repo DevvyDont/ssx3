@@ -265,7 +265,7 @@ struct sStreamMan7098 {
 };
 
 extern char* cAppMan_TheAppMan;
-void* func_003A7218(void* self, int a1, int a2, int a3);
+void* cStreamMan_decompressChunk(void* self, int a1, int a2, int a3);
 extern "C" int cStreamMan_processChunk(void* self, void* a, void* b);
 extern "C" void cWorldCache_signalPageLoadComplete(void* self, int a1);
 extern "C" unsigned char* func_003E12E0(void* cache);
@@ -277,7 +277,7 @@ extern "C" int func_003E1530(void* cache);
  *
  * Does nothing while inactive (+0x90). A chunk left half processed (+0xAC) is retried first. When throttled (+0xD4),
  * the countdown at +0xE0 drops by the app ticks passed and nothing more happens while it is positive. Then each chunk
- * func_003E12E0 returns resets the countdown, is decompressed (func_003A7218) into the buffer at +0x8C, released
+ * func_003E12E0 returns resets the countdown, is decompressed (cStreamMan_decompressChunk) into the buffer at +0x8C, released
  * (func_003E13E8) and handed to cStreamMan_processChunk; if that cannot finish, the chunk is marked pending. Only one chunk is
  * taken per call while throttled. Once func_003E1530 reports the end of the stream, the world cache is told page +0x94
  * is loaded, the manager goes inactive and the page becomes -1.
@@ -309,7 +309,7 @@ extern "C" void cStreamMan_update(sStreamMan7098* self)
         self->fE0 = self->fDC;
         size = (p[7] << 24) | (p[6] << 16) | (p[5] << 8) | p[4];
         // PORT: the payload pointer is passed as an int.
-        self->fB0 = func_003A7218(self, self->f8C, size - 8, (int)(p + 8));
+        self->fB0 = cStreamMan_decompressChunk(self, self->f8C, size - 8, (int)(p + 8));
         func_003E13E8(self->cache, p);
         self->fB4 = self->f8C;
         if (cStreamMan_processChunk(self, &self->fB0, &self->fB4) == 0) {
@@ -333,7 +333,7 @@ extern "C" void cStreamMan_update(sStreamMan7098* self)
 extern "C" void* unpack(int);
 
 //100%
-INCLUDE_ASM("world/streamman", func_003A7218__FPviii);
+INCLUDE_ASM("world/streamman", cStreamMan_decompressChunk__FPviii);
 #ifdef SKIP_ASM
 /**
  * Decompresses a stream chunk: unpack(@p a3, @p a1), returning the unpacked size.
@@ -346,7 +346,7 @@ INCLUDE_ASM("world/streamman", func_003A7218__FPviii);
  * @param a3  the compressed data
  * @return unpack's result
  */
-void* func_003A7218(void* self, int a1, int a2, int a3)
+void* cStreamMan_decompressChunk(void* self, int a1, int a2, int a3)
 {
     return unpack(a3);
 }
@@ -356,7 +356,7 @@ void* func_003A7218(void* self, int a1, int a2, int a3)
 INCLUDE_ASM("world/streamman", cStreamMan_processChunk);
 #ifdef SKIP_ASM
 extern "C" unsigned int cWorldCache_addBxStreamDataTest(void* cache, int group, int id, int key, int size);
-extern "C" void func_003A8CD0_s(void* self, int group, int id, unsigned int key, int a4) __asm__("func_003A8CD0");
+extern "C" void cWorldCache_addBxStreamDataSubmit_s(void* self, int group, int id, unsigned int key, int a4) __asm__("cWorldCache_addBxStreamDataSubmit");
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern int cStreamMan_NULLCHUNK;
 
@@ -388,7 +388,7 @@ struct sStreamMan7238 {
  * cWorldCache_addBxStreamDataTest asked for a destination for page m_ActiveHull: -1 means no room yet and 0 is returned
  * (the caller, cStreamMan_update, then sets m_bAllocFailed so the next call retests first); 0 means the block is
  * skipped (an empty one is submitted as cStreamMan_NULLCHUNK). Block data is copied with MEM_copy and each completed
- * block is submitted with func_003A8CD0, counting down the blocks left in the page (m_uiNumHullChunk). Leftover bytes
+ * block is submitted with cWorldCache_addBxStreamDataSubmit, counting down the blocks left in the page (m_uiNumHullChunk). Leftover bytes
  * shorter than a header are kept for the next call; when the page's last block is done the rest of the buffer is
  * dropped.
  *
@@ -487,7 +487,7 @@ extern "C" int cStreamMan_processChunk(void* self_, void* pcount_, void* pdata_)
                 self->dst += n;
                 if (self->size == 0)
                 {
-                    func_003A8CD0_s(self->cache, self->group, self->id, self->key, self->result);
+                    cWorldCache_addBxStreamDataSubmit_s(self->cache, self->group, self->id, self->key, self->result);
                     self->result = 0;
                     self->remaining--;
                 }
@@ -497,7 +497,7 @@ extern "C" int cStreamMan_processChunk(void* self_, void* pcount_, void* pdata_)
                 self->remaining--;
                 if (self->flagC4 != 0)
                 {
-                    func_003A8CD0_s(self->cache, self->group, self->id, self->key, (int)&cStreamMan_NULLCHUNK);
+                    cWorldCache_addBxStreamDataSubmit_s(self->cache, self->group, self->id, self->key, (int)&cStreamMan_NULLCHUNK);
                     self->flagC4 = 0;
                 }
             }

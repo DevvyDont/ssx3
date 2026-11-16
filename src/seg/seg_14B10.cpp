@@ -576,7 +576,7 @@ INCLUDE_ASM("seg/seg_14B10", func_00114298);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" float func_0031C040(float x);
 extern "C" float func_0031BF60(float x);
-int func_0011FE98(void* self);
+int cRider_getMotionState(void* self);
 extern "C" void cReplay_eventJump(int a, int b, void* c);
 extern "C" void func_00309848(void* self);
 extern "C" float cRiderMetrix_evTakeoff(void* self, int a, int b);
@@ -819,7 +819,7 @@ extern "C" void func_00114298(char* self, float speedFactor)
     }
     float lo = func_0031C040(0.8726646900177002f);
     float hi = func_0031C040(1.2217305898666382f);
-    if (func_0011FE98(self) == 4) {
+    if (cRider_getMotionState(self) == 4) {
         AddEq_4298(VEL_4298, Scale_4298(Up_4298(self), push));
     } else {
         float t = (*(float*)(self + 0x378) - lo) * (1.0f / (hi - lo));
@@ -1406,7 +1406,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 extern "C" void cRider_rotateOrientation(void* self, Q_5640 dir, float angle);
 // PORT: the unit defines func_00116930 with no parameters; this caller passes the rider.
 extern "C" void func_00116930_p(void* self) __asm__("func_00116930");
-int func_0011FE98(void* self);
+int cRider_getMotionState(void* self);
 extern Q_5640 D_004FF130_5640 __asm__("t4vect_Origin");
 extern Q_5640 D_004FF160_5640 __asm__("t4vect_ZAxis");
 
@@ -1437,7 +1437,7 @@ extern "C" void cRider_undoRailslideModeOrientation(char* self)
 {
     if (*(int*)(self + 0x328) == 0)
         return;
-    if (func_0011FE98(self) == 1) {
+    if (cRider_getMotionState(self) == 1) {
         if (*(int*)(self + 0x328) == 3 || *(int*)(self + 0x328) == 4)
             SetHeading_5640(*(char**)(self + 0x784), 0.0f);
         if (*(int*)(self + 0x328) == 3)
@@ -1446,7 +1446,7 @@ extern "C" void cRider_undoRailslideModeOrientation(char* self)
             cRiderAnimBase_play(*(void**)(self + 0x784), 277, 0, -1.0f);
         else
             cRiderAnimBase_play(*(void**)(self + 0x784), 268, 0, -1.0f);
-    } else if (func_0011FE98(self) == 0) {
+    } else if (cRider_getMotionState(self) == 0) {
         if (*(int*)(self + 0x328) == 3) {
             cRider_rotateOrientation(self, *(Q_5640*)(self + 0x1C0), 1.5707964f);
             cRiderAnimBase_changeHeadingOffset(*(void**)(self + 0x784), 1.5707964f);
@@ -1585,7 +1585,7 @@ extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" int AITick();
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void func_0029FF80(int snd, void* rider, int side);
-int func_0011FEE8(void* self);
+int cRider_getControlState(void* self);
 
 // PORT: PS2-only abs.s asm helper (fabsf off-PS2).
 static inline float vAbs_115B58(float x)
@@ -1649,7 +1649,7 @@ extern "C" void cRider_checkForReaction(char* self)
             break;
         case 5:
         case 6:
-            if (vAbs_115B58(*(float*)(self + 0x1FC)) < 0.75f && func_0011FEE8(self) == 0) {
+            if (vAbs_115B58(*(float*)(self + 0x1FC)) < 0.75f && cRider_getControlState(self) == 0) {
                 cRiderAnimBase_play(*(void**)(self + 0x784), 318, 0, -1.0f);
             }
             break;
@@ -1832,7 +1832,7 @@ static inline float Dot4_61D0(const V4_61D0& a, const V4_61D0& b)
 
 // PORT: returns a value (target keeps the state in v1 across the call)
 extern "C" int cRiderAnimBase_play_61D0(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
-int func_0011FE98(void* self);
+int cRider_getMotionState(void* self);
 // PORT: cRider_setControlState__FPv takes a second argument; bound by asm label
 void cRider_setControlState_61D0(void* self, int on) __asm__("cRider_setControlState__FPv");
 
@@ -1853,7 +1853,7 @@ extern "C" int cRider_checkForBoardPress(char* rider, float dir)
     int st;
     if (dir == 0.0f) return 0;
     if (*(int*)(rider + 0x328) == 3 || *(int*)(rider + 0x328) == 4) return 0;
-    if (!func_0011FE98(rider)) {
+    if (!cRider_getMotionState(rider)) {
         if (Dot4_61D0(*(V4_61D0*)(rider + 0x1E0), *(V4_61D0*)(rider + 0x3A0)) < 0.0f) return 0;
     }
     if (dir > 0.0f) {
@@ -1873,7 +1873,7 @@ INCLUDE_ASM("seg/seg_14B10", cRider_checkForPrewind);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRider_setControlState_62C8(void *, int) __asm__("cRider_setControlState__FPv");
-extern "C" int func_0011FEE8_62C8(void *) __asm__("func_0011FEE8__FPv");
+extern "C" int cRider_getControlState_62C8(void *) __asm__("cRider_getControlState__FPv");
 extern "C" void cBoardPressControl_forceExit(char *);
 extern "C" void cCheatFX_setCheatInput(char *, int);
 
@@ -1892,7 +1892,7 @@ extern "C" int cRider_checkForPrewind(char *self, int isJumpHeld, int isJumpPres
     if (isJumpPressed != 0)
         cCheatFX_setCheatInput(*(char **)(self + 0x77C) + 0xD20, 1);
     if ((*(float *)(self + 0x360) == 0.0f && isJumpHeld != 0) || isJumpPressed != 0) {
-        if (func_0011FEE8_62C8(self) == 1)
+        if (cRider_getControlState_62C8(self) == 1)
             cBoardPressControl_forceExit(*(char **)(self + 0x77C) + 0x1D0);
         cRider_setControlState_62C8(self, 2);
         return 1;

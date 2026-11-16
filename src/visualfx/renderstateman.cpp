@@ -879,7 +879,7 @@ extern "C" void cAirStreamerFX_readFromReplayFrame(cAirStreamerFX* self)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_update);
 #ifdef SKIP_ASM
-int func_0011FE98(void*);
+int cRider_getMotionState(void*);
 extern "C" int AITick();
 
 struct sRsVec4_EF6D0 {
@@ -983,7 +983,7 @@ static inline int Approach_EF6D0(int n, int step)
  */
 extern "C" void cAirStreamerFX_update(sTrail_EF6D0* self)
 {
-    if (func_0011FE98(self->rider) == 1) {
+    if (cRider_getMotionState(self->rider) == 1) {
         char* riderPtr = self->rider;
         sRsVec4_EF6D0 bodyOff = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x89C) << 6) + 0x30);
         sRsVec4_EF6D0 boardOff = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6) + 0x30);
