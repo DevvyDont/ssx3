@@ -33,7 +33,7 @@ struct cOVState {
     int mHashName;              // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;        // 0x010 [O]; [R] the ctor's engine argument; [U] cUIStateStack_findState(mpEngine + 0x18)
     signed char mCurrentCtrl;   // 0x014 [O]; [R] ctor stores -1
-    unsigned char mCtrlBits;    // 0x015 [O]; [R] ctor stores 0xF; [U] masks in func_0039E438 / func_001DD778
+    unsigned char mCtrlBits;    // 0x015 [O]; [R] ctor stores 0xF; [U] masks in func_0039E438 / cFEState_setControllerFilter
     char unk_016[0x2];          // 0x016 padding
     int miMiscData;             // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
     int mAttrState;             // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word (ui/uistate.h); [R] ctor sh 0x218

@@ -142,7 +142,7 @@ INCLUDE_ASM("ui/uiengine", cUIEngine_addScreenByHashName);
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void* cList_cList(void* self);
-extern "C" void func_001DD580(void* self);
+extern "C" void tAttrScreen_tAttrScreen(void* self);
 extern "C" void cUIScreen_setData(void* self, char* data);
 extern "C" void cUIState_addScreen(void* self, void* node);
 extern "C" void cUIScreen_createAllObjects(void* self);
@@ -204,7 +204,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* self, void* owner, unsigned
         newScreen->vt = cUIScreen_vtbl;
         newScreen->fC = 0;
         newScreen->f10 = 0;
-        func_001DD580(newScreen->o14);
+        tAttrScreen_tAttrScreen(newScreen->o14);
         cList_cList(newScreen->o18);
         newScreen->f34 = 0;
         newScreen->f38 = 0;

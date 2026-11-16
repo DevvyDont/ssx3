@@ -22,8 +22,8 @@
 //     cSectionMan_isSectionLoaded (isSectionLoaded), cSectionMan_getWorldSectionIDFromBELocationID (getWorldSectionIDFromBELocationID),
 //     cSectionMan_getWorldSectionIDFromBESectionID (getWorldSectionIDFromBESectionID), cSectionMan_getBESectionIDFromWorldSectionID (getBESectionIDFromWorldSectionID),
 //     cSectionMan_gotoLocation (gotoLocation);
-//   main/sectionman: cSectionMan_setSky, cSectionMan_initEventPool (initEventPool), func_0022E278 (allocEvent),
-//     func_0022E288 (freeEvent), cSectionMan_addActiveEvent (addActiveEvent), cSectionMan_getNextActiveEvent,
+//   main/sectionman: cSectionMan_setSky, cSectionMan_initEventPool (initEventPool), cSectionMan_allocEvent (allocEvent),
+//     cSectionMan_freeEvent (freeEvent), cSectionMan_addActiveEvent (addActiveEvent), cSectionMan_getNextActiveEvent,
 //     cSectionMan_removeActiveEvent (removeActiveEvent).
 //   Inline accessors used elsewhere: tiggerskyswap (sw 0x1A4), getLocationID (lw 0x1BC), transportwait /
 //   iswaitingtransport (0x1C8), isStreamReady (lw 0x1D0).
@@ -80,7 +80,7 @@ struct cSectionMan {
     int mStreamRate;                       // 0x1C4 [O] eStreamRate; [R] init = 0; [U] update stores 0..4 and passes
                                            //       mStreamBandWidthRates[it] to cStreamMan setBandWidthLimit
     int mWaitTransport;                    // 0x1C8 [O] (a bool); [R] init = 0; [U] transportwait() in
-                                           //       cGFUserSelectState_update, func_00236960 (preview assert names
+                                           //       cGFUserSelectState_update, cGFSectionLoadState_update (preview assert names
                                            //       getSectionMan()->iswaitingtransport())
     int mModeReset;                        // 0x1CC [O] (a bool); [R] init = 0; [U] gotoLocation = 1; changeMode clears
                                            //       it and calls the AI's vtable slot 5

@@ -56,7 +56,7 @@ struct cBigFile;
 struct cGameState;
 
 struct cGame {
-    void** mVtbl;                                // 0x000 [R] _vt$5cGame, stored after the base ctor func_00231CD0
+    void** mVtbl;                                // 0x000 [R] _vt$5cGame, stored after the base ctor cFadeScreen_cFadeScreen
     int unk_04;                                  // 0x004 base class data
     int unk_08;                                  // 0x008 base class data
     cAI* AI;                                     // 0x00C [P] getAI; [R] "AI"

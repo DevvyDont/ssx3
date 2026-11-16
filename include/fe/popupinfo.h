@@ -3,7 +3,7 @@
 
 // cPopupInfo: the description of one cScreenPopup (type, message, title, entry-box texts, up to 5 option names and
 // confirmations, layer offset, the id reported back to the owner, layout flags). Every cScreenPopup embeds one at
-// 0xBC (`info`, fe/screenpopup.h; getPopupInfo func_001DDC20 returns it); the online states fill it after
+// 0xBC (`info`, fe/screenpopup.h; getPopupInfo cScreenPopup_getPopupInfo returns it); the online states fill it after
 // cFEStateNet's createPopup (func_001A9C50) and show the popup with func_001A9BC0.
 //
 // Size 0xCC: the members end at 0xC8 and the vptr follows (retail _vt$10cPopupInfo cPopupInfo_vtbl, 1 slot: the destructor

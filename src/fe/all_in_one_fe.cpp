@@ -1968,11 +1968,11 @@ extern sColour D_004C8868;
 extern char D_004A2138[];
 extern "C" int cBEMissionInterface_isMissionCompleted(void*, int);
 extern "C" int func_00154240(void*, int);
-extern "C" void func_001DCA40(void* font, float x, float y, const char* fmt, ...);
+extern "C" void cFont_centertextf(void* font, float x, float y, const char* fmt, ...);
 
 static inline void PrintAt_FD38(void* font, float x, float y, const t2Vector& off, float f, int n)
 {
-    func_001DCA40(font, off.x + x, (off.y + y) - f, D_004A2138, n);
+    cFont_centertextf(font, off.x + x, (off.y + y) - f, D_004A2138, n);
 }
 static inline float* scaleP() { return &D_004A5B38; }
 extern "C" void func_0021FD38(char* self, char* obj) {
@@ -2273,7 +2273,7 @@ extern char D_0046D0D0[];
  * Destroys the lodge front-end state through the cFEState and cUIState destructors.
  *
  * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(): the same
- * body as cFEState's own destructor func_001DD750, so the class tears down nothing of its own. The g++ delete
+ * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
  * flags reach func_0039E390() untouched in the second argument register.
  */
 extern "C" void cFEStateLodge__cFEStateLodge(void *self) {
@@ -2306,7 +2306,7 @@ extern char D_0046D0D0[];
  * Destroys the lodge rider-detail front-end state through the cFEState and cUIState destructors.
  *
  * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(): the same
- * body as cFEState's own destructor func_001DD750, so the class tears down nothing of its own. The g++ delete
+ * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
  * flags reach func_0039E390() untouched in the second argument register.
  */
 extern "C" void cFEStateLodgeRiderDetail__cFEStateLodgeRiderDetail(void *self) {
@@ -2339,7 +2339,7 @@ extern char D_0046D0D0[];
  * Destroys the buy-attribute front-end state through the cFEState and cUIState destructors.
  *
  * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(): the same
- * body as cFEState's own destructor func_001DD750, so the class tears down nothing of its own. The g++ delete
+ * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
  * flags reach func_0039E390() untouched in the second argument register.
  */
 extern "C" void cFEStateBuyAttrib__cFEStateBuyAttrib(void *self) {
@@ -2372,7 +2372,7 @@ extern char D_0046D0D0[];
  * Destroys the career-stats front-end state through the cFEState and cUIState destructors.
  *
  * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(): the same
- * body as cFEState's own destructor func_001DD750, so the class tears down nothing of its own. The g++ delete
+ * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
  * flags reach func_0039E390() untouched in the second argument register.
  */
 extern "C" void cFEStateCareerStats__cFEStateCareerStats(void *self) {

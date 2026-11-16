@@ -18,7 +18,7 @@ INCLUDE_ASM("main/game2", cGame_sectionLoaded);
 
 INCLUDE_ASM("main/game2", cGame_sectionUnloading);
 
-INCLUDE_ASM("main/game2", func_00230430);
+INCLUDE_ASM("main/game2", cGame_loadWScriptManSection);
 
 INCLUDE_ASM("main/game2", cGame_exit);
 
@@ -26,9 +26,9 @@ INCLUDE_ASM("main/game2", cGame_stopReplay);
 
 INCLUDE_ASM("main/game2", func_00230640);
 
-INCLUDE_ASM("main/game2", func_00230698);
+INCLUDE_ASM("main/game2", cGame_getTransitionMan);
 
-INCLUDE_ASM("main/game2", func_002306A8);
+INCLUDE_ASM("main/game2", cGame_getSplashManager);
 
 INCLUDE_ASM("main/game2", cGame_update);
 
@@ -38,11 +38,11 @@ INCLUDE_ASM("main/game2", cGame_updateState);
 
 INCLUDE_ASM("main/game2", cGame_setState);
 
-INCLUDE_ASM("main/game2", func_00231278);
+INCLUDE_ASM("main/game2", cGame_setPreloadState);
 
 INCLUDE_ASM("main/game2", cGame_isPreloadedStateReady);
 
-INCLUDE_ASM("main/game2", func_00231320);
+INCLUDE_ASM("main/game2", cGame_doNextState);
 
 INCLUDE_ASM("main/game2", cGame_writeToReplayFrame);
 
@@ -54,19 +54,19 @@ INCLUDE_ASM("main/game2", cGame_canUserActivatePauseMenu);
 
 INCLUDE_ASM("main/game2", cLoadScreen_loseFocus);
 
-INCLUDE_ASM("main/game2", func_00231CB0);
+INCLUDE_ASM("main/game2", cLoadScreen_update);
 
-INCLUDE_ASM("main/game2", func_00231CD0);
+INCLUDE_ASM("main/game2", cFadeScreen_cFadeScreen);
 
 INCLUDE_ASM("main/game2", cFadeScreen_loseFocus);
 
 INCLUDE_ASM("main/game2", cFadeScreen_update);
 
-INCLUDE_ASM("main/game2", func_00231D60);
+INCLUDE_ASM("main/game2", cFadeScreen_drawFade);
 
 INCLUDE_ASM("main/game2", cLoadIndicator_update);
 
-INCLUDE_ASM("main/game2", func_00231FC0);
+INCLUDE_ASM("main/game2", cLoadIndicator_render);
 
 INCLUDE_ASM("main/game2", cPreStartScreen_cPreStartScreen);
 

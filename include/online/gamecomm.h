@@ -109,7 +109,7 @@ struct cGameComm {
     int unk_038;                 // 0x038 [U] this machine's end time (localDisconnected, gameEnded cGameComm_gameEnded)
     int unk_03C;                 // 0x03C [U] the peer's end time (exit-game command, gameEnded)
     int mSyncInput;              // 0x040 [O] (just before mServer in both games); [R] 1; [U] cInputSync (gamestate
-                                 //       func_002373B8 / func_00237A98) exchanges pads only while it is set;
+                                 //       cInputSync_preupdate / cInputSync_sendClientInput) exchanges pads only while it is set;
                                  //       updateSyncPacket requires it; displayError, gameEnded and the out-of-line
                                  //       stopSyncInput func_00244880 (main/ssxappdtor: sw $0, 0x40) clear it
     int mServer;                 // 0x044 [O]; [R] the constructor's second argument; [U] update/syncGame take the
@@ -185,7 +185,7 @@ struct cGameComm {
     int mBEBufferSize;           // 0x3F0 [O]; [R] cBENetworkInterface::getSyncDataSize() (0xC44)
     int mSyncWaitComplete;       // 0x3F4 [O]; [U] command 3 sets it; syncWait loops until it is set
     int mUnPauseFlag;            // 0x3F8 [O]; [U] set by a pause during the race, cleared by an unpause; cInputSync's
-                                 //       func_00237950 holds the race while it is set
+                                 //       cInputSync_aiinputready holds the race while it is set
     int mUnPauseTimer;           // 0x3FC [O]; [U] setUnPauseTimer (cGameComm_setUnPauseTimer) sets 180; counted down by update; the
                                  //       HUD (cOVStateHUD1P_onRender2D) shows it
     int mCheckSumSent;           // 0x400 [O]; [U] updateSyncPacket

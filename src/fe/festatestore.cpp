@@ -832,7 +832,7 @@ INCLUDE_ASM("fe/festatestore", cFEStateCredits__cFEStateCredits__FPv);
  * Destroys the credits front-end state through the cFEState and cUIState destructors.
  *
  * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(): the same
- * body as cFEState's own destructor func_001DD750, so the class tears down nothing of its own. The g++ delete
+ * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
  * flags reach func_0039E390() untouched in the second argument register.
  *
  * @return no meaningful value (func_0039E390() returns nothing)

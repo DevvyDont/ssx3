@@ -356,13 +356,13 @@ struct sVEntryV002339F8 {
     void (*fn)(void*);
 };
 
-extern "C" int func_00231D60(void* self);
+extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void func_00397DF8(void* engine);
 
 /**
  * Draws the front-end load screen.
  *
- * Returns 0 when the graphics manager's slot 17 (IsRenderReady) says no. Unless func_00231D60 (the base fade) draws
+ * Returns 0 when the graphics manager's slot 17 (IsRenderReady) says no. Unless cFadeScreen_drawFade (the base fade) draws
  * this frame, the UI object at +0xC is drawn (func_00397DF8); then the frame is flipped (slot 20) and 1 returned.
  *
  * @return 1 when a frame was drawn, 0 when the renderer was not ready
@@ -374,7 +374,7 @@ extern "C" int cFELoadScreen_render(void* self)
     if (vt[17].fn(graphicsMan + vt[17].delta) == 0) {
         return 0;
     }
-    if (func_00231D60(self) == 0) {
+    if (cFadeScreen_drawFade(self) == 0) {
         func_00397DF8(*(void**)((char*)self + 0xC));
     }
     graphicsMan = (char*)GrMan;
@@ -388,16 +388,16 @@ extern "C" int cFELoadScreen_render(void* self)
 INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_update);
 #ifdef SKIP_ASM
 extern "C" void func_00398038(void*);
-void func_00231CB0(void*);
+void cLoadScreen_update(void*);
 
 /**
  * Per-frame update of the front-end load screen: updates its UI object (+0xC, func_00398038), then runs the base
- * update func_00231CB0 (which calls cFadeScreen_update()).
+ * update cLoadScreen_update (which calls cFadeScreen_update()).
  */
 extern "C" void cFELoadScreen_update(void* self)
 {
     func_00398038(*(void**)((char*)self + 0xC));
-    func_00231CB0(self);
+    cLoadScreen_update(self);
 }
 #endif
 
@@ -422,10 +422,10 @@ extern "C" void cGameState_gotoNextState(void* self)
 //100%
 INCLUDE_ASM("fe/festateloadscreen", func_00233AD0);
 #ifdef SKIP_ASM
-extern "C" void func_00231278__FPvi(int);
+extern "C" void cGame_setPreloadState__FPvi(int);
 
 extern "C" void func_00233AD0(void) {
-    func_00231278__FPvi((*(int*)&cGameState_mpGame));
+    cGame_setPreloadState__FPvi((*(int*)&cGameState_mpGame));
 }
 #endif
 

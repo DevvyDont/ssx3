@@ -9,11 +9,11 @@
 // Size 0x6D0: cFEStateOnlineMainMenu, cFEStateNetNews and cFEStateNetSSXWorld are allocated with
 // cMemMan_alloc(0x6D0, "<class name>") and their constructors (cFEStateOnlineMainMenu_cFEStateOnlineMainMenu, cFEStateNetNews_cFEStateNetNews, cFEStateNetSSXWorld_cFEStateNetSSXWorld) only
 // call this class's constructor and store mHashName and the vtable; every other subclass's own fields start at 0x6D0.
-// Constructors: cFEStateNet(cUIEngine*, cUIState*) = cFEStateNet_cFEStateNet (unit fe/feasyncfile), default copy func_001DE7B0
+// Constructors: cFEStateNet(cUIEngine*, cUIState*) = cFEStateNet_cFEStateNet (unit fe/feasyncfile), default copy cFEStateNet_cFEStateNet1
 // (main/all_in_one_main); destructor cFEStateNet__cFEStateNet. Retail vtable _vt$11cFEStateNet = cFEStateNet_vtbl (32 slots; slots 24-31
-// are its own virtuals: func_001DE868, func_001A89B0, func_001AAB68, func_001AA9B0, func_001DE870, func_001DE8A8,
+// are its own virtuals: func_001DE868, func_001A89B0, func_001AAB68, func_001AA9B0, func_001DE870, cFEStateNet_isProcessingEvents,
 // func_001A8E40, func_001A8830). Methods: fe/feasyncfile 0x1A8500-0x1ABED8, plus the out-of-line inlines
-// func_001DE860/func_001DE868/func_001DE870/func_001DE890/func_001DE8A0/func_001DE8A8 in main/all_in_one_main.
+// func_001DE860/func_001DE868/func_001DE870/func_001DE890/func_001DE8A0/cFEStateNet_isProcessingEvents in main/all_in_one_main.
 // EA source: probably d:/ssx/code/source/fe/festatenet.cpp (the preview's assert strings name its subclasses' files,
 // festatenetmessenger.cpp, festatenetlobby.cpp ..., not this one).
 //
@@ -21,7 +21,7 @@
 // written out inline, as in fe/ovstate.h). Subclasses: retype a subclass method with this header only when it touches
 // nothing past 0x6D0; otherwise use the subclass's own header (e.g. fe/festatenetmessenger.h).
 // Evidence tags:
-//   [R] retail's constructors cFEStateNet_cFEStateNet / func_001DE7B0 and destructor cFEStateNet__cFEStateNet (and the cUIState
+//   [R] retail's constructors cFEStateNet_cFEStateNet / cFEStateNet_cFEStateNet1 and destructor cFEStateNet__cFEStateNet (and the cUIState
 //       constructor func_0039E318 for the base);
 //   [P] the July 2003 preview: _vt$11cFEStateNet, its inline isProcessingEvents (lw 0x38 = preview mpScreen),
 //       getFEPath/fePathIsOnline (a global, D_004A1A70 in retail, not a member) and its default constructor
@@ -60,7 +60,7 @@ struct cFEStateNet {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] _vt$11cFEStateNet cFEStateNet_vtbl, stored by cFEStateNet_cFEStateNet/func_001DE7B0;
+    void** mVtbl;                   // 0x008 [R] _vt$11cFEStateNet cFEStateNet_vtbl, stored by cFEStateNet_cFEStateNet/cFEStateNet_cFEStateNet1;
                                     //       subclasses store theirs after calling it
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] the subclass ctors store
@@ -82,7 +82,7 @@ struct cFEStateNet {
     signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then cFEStateNet_cFEStateNet stores 0 (sb)
     char unk_045[0x3];              // 0x045 padding
     // --- cFEStateNet
-    int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; func_001DE8A8 (own
+    int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; cFEStateNet_isProcessingEvents (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
                                     //       isProcessingEvents tested only the screen)
     unsigned int mLastPollFrame;    // 0x04C [R] 0; [U] func_001AAB68 (slot 26) polls the session for new messages /

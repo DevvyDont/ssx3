@@ -70,7 +70,7 @@ extern "C" void cPreStartScreen_update(sPreStart_232348* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232488);
+INCLUDE_ASM("main/loadscreens_prestart", cPreStartScreen_render);
 #ifdef SKIP_ASM
 struct sVec3_232488 {
     float x, y, z;
@@ -100,31 +100,31 @@ public:
     virtual void v19();
     virtual void v20();
 };
-extern "C" void func_00231FC0(void* a);
+extern "C" void cLoadIndicator_render(void* a);
 
 /**
  * Renders the pre-start screen: clears to black and draws the load indicator once the renderer is ready.
  *
  * Returns 0 without drawing while GrMan's IsRenderReady (slot 17) is 0. Otherwise sets the clear colour to (0, 0, 0)
- * (SetScreenClearColour, slot 15), draws SSXApp's load indicator (func_00231FC0) and the frame (DrawFrame, slot 20).
+ * (SetScreenClearColour, slot 15), draws SSXApp's load indicator (cLoadIndicator_render) and the frame (DrawFrame, slot 20).
  * Render slot (+0x3C) of cPreStartScreen_vtbl.
  *
  * @return 1 when a frame was drawn, otherwise 0
  */
-extern "C" int func_00232488(void)
+extern "C" int cPreStartScreen_render(void)
 {
     if (((cWorld232488*)GrMan)->v17() == 0) {
         return 0;
     }
     ((cWorld232488*)GrMan)->v15(sVec3_232488(0.0f, 0.0f, 0.0f));
-    func_00231FC0(SSXApp->LoadIndicator);
+    cLoadIndicator_render(SSXApp->LoadIndicator);
     ((cWorld232488*)GrMan)->v20();
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232510);
+INCLUDE_ASM("main/loadscreens_prestart", cPreStartScreen_loseFocus);
 #ifdef SKIP_ASM
 /**
  * Lets the pre-start screen lose focus once its timer (+0x4) reaches 0.75.
@@ -133,7 +133,7 @@ INCLUDE_ASM("main/loadscreens_prestart", func_00232510);
  *
  * @return 1 when the timer is at least 0.75, otherwise 0
  */
-extern "C" int func_00232510(void* self)
+extern "C" int cPreStartScreen_loseFocus(void* self)
 {
     if (*(float*)((char*)self + 0x4) < 0.75f) {
         return 0;
@@ -180,13 +180,13 @@ extern "C" void cInitLoadScreen_load(void)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232588);
+INCLUDE_ASM("main/loadscreens_prestart", cInitLoadScreen_update);
 #ifdef SKIP_ASM
 struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cLoadIndicator_update(void* fade);
-extern "C" void* func_00232AE0(void* self, int arg);
+extern "C" void* cStartScreen_cStartScreen(void* self, int arg);
 extern char str_StartScreen[];
 
 /**
@@ -194,11 +194,11 @@ extern char str_StartScreen[];
  *
  * Steps the indicator's phase (cLoadIndicator_update); its alpha (SSXApp's load indicator + 0x4) falls by 1/12 per
  * frame while the ending flag (+0x8) is set and rises otherwise, clamped to [0, 1]. When no next module is queued
- * (SSXApp + 0x4), creates a start screen (0x1C bytes, tag "StartScreen", func_00232AE0) with type 2 when the
+ * (SSXApp + 0x4), creates a start screen (0x1C bytes, tag "StartScreen", cStartScreen_cStartScreen) with type 2 when the
  * progressive flag (+0x4) is set, otherwise 0, and queues it with cAppMan_setNextModule. Update slot (+0x34) of
  * cInitLoadScreen_vtbl.
  */
-extern "C" void func_00232588(void* self)
+extern "C" void cInitLoadScreen_update(void* self)
 {
     cLoadIndicator_update(SSXApp->LoadIndicator);
     if (*(int*)((char*)self + 8) != 0) {
@@ -216,13 +216,13 @@ extern "C" void func_00232588(void* self)
     }
     if (*(int*)((char*)SSXApp + 4) == 0) {
         cAppMan_setNextModule((cAppMan*)SSXApp,
-            (unsigned int)func_00232AE0(cMemMan_alloc(0x1C, str_StartScreen, 0x100, 0), *(int*)((char*)self + 4) ? 2 : 0));
+            (unsigned int)cStartScreen_cStartScreen(cMemMan_alloc(0x1C, str_StartScreen, 0x100, 0), *(int*)((char*)self + 4) ? 2 : 0));
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232650);
+INCLUDE_ASM("main/loadscreens_prestart", cInitLoadScreen_render);
 #ifdef SKIP_ASM
 struct sVec3_232650 {
     float x, y, z;
@@ -252,30 +252,30 @@ public:
     virtual void v19();
     virtual void v20();
 };
-extern "C" void func_00231FC0(void* a);
+extern "C" void cLoadIndicator_render(void* a);
 
 /**
  * Renders the initial load screen: clears to black and draws the load indicator once the renderer is ready.
  *
- * Same body as func_00232488: IsRenderReady (slot 17), SetScreenClearColour (slot 15) with (0, 0, 0), the load
- * indicator (func_00231FC0) and DrawFrame (slot 20). Render slot (+0x3C) of cInitLoadScreen_vtbl.
+ * Same body as cPreStartScreen_render: IsRenderReady (slot 17), SetScreenClearColour (slot 15) with (0, 0, 0), the load
+ * indicator (cLoadIndicator_render) and DrawFrame (slot 20). Render slot (+0x3C) of cInitLoadScreen_vtbl.
  *
  * @return 1 when a frame was drawn, otherwise 0
  */
-extern "C" int func_00232650(void)
+extern "C" int cInitLoadScreen_render(void)
 {
     if (((cWorld232650*)GrMan)->v17() == 0) {
         return 0;
     }
     ((cWorld232650*)GrMan)->v15(sVec3_232650(0.0f, 0.0f, 0.0f));
-    func_00231FC0(SSXApp->LoadIndicator);
+    cLoadIndicator_render(SSXApp->LoadIndicator);
     ((cWorld232650*)GrMan)->v20();
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_002326D8);
+INCLUDE_ASM("main/loadscreens_prestart", cInitLoadScreen_loseFocus);
 #ifdef SKIP_ASM
 struct sLoadScreen2326D8 {
     int f0;
@@ -291,7 +291,7 @@ struct sLoadScreen2326D8 {
  *
  * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
  */
-extern "C" int func_002326D8(sLoadScreen2326D8* self)
+extern "C" int cInitLoadScreen_loseFocus(sLoadScreen2326D8* self)
 {
     self->done = 1;
     return *(float*)((char*)SSXApp->LoadIndicator + 4) == 0.0f;
@@ -310,12 +310,12 @@ void cPreGameLoadScreen_load(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232718__FPv);
+INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_load__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the load slot (+0x14) of D_0047D860, the pre-front-end load screen's vtable.
  */
-void func_00232718(void* self)
+void cPreFELoadScreen_load(void* self)
 {
 }
 #endif
@@ -341,7 +341,7 @@ void* cPreGameLoadScreen_cPreGameLoadScreen(void* self)
 extern void* D_0047D860[];
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232738__FPv);
+INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_cPreFELoadScreen__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs the pre-front-end load screen: clears the ending flag (+0x4) and stores the vtable D_0047D860.
@@ -350,7 +350,7 @@ INCLUDE_ASM("main/loadscreens_prestart", func_00232738__FPv);
  *
  * @return @p self
  */
-void* func_00232738(void* self)
+void* cPreFELoadScreen_cPreFELoadScreen(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
     *(int*)self = (int)(void*)D_0047D860;
@@ -382,7 +382,7 @@ extern "C" void cPreGameLoadScreen__cPreGameLoadScreen(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232780);
+INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen__cPreFELoadScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* D_0046D970[];
@@ -395,7 +395,7 @@ extern void* D_0046D970[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_00232780(void* self, int flags)
+extern "C" void cPreFELoadScreen__cPreFELoadScreen(void* self, int flags)
 {
     *(void***)self = D_0046D970;
     if (flags & 1) {
@@ -405,7 +405,7 @@ extern "C" void func_00232780(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_002327B0);
+INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen_loseFocus);
 #ifdef SKIP_ASM
 struct sLoadScreen2327B0 {
     int f0;
@@ -420,7 +420,7 @@ struct sLoadScreen2327B0 {
  *
  * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
  */
-extern "C" int func_002327B0(sLoadScreen2327B0* self)
+extern "C" int cPreGameLoadScreen_loseFocus(sLoadScreen2327B0* self)
 {
     self->done = 1;
     return *(float*)((char*)SSXApp->LoadIndicator + 4) == 0.0f;
@@ -428,7 +428,7 @@ extern "C" int func_002327B0(sLoadScreen2327B0* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_002327E8);
+INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_loseFocus);
 #ifdef SKIP_ASM
 struct sLoadScreen2327E8 {
     int f0;
@@ -443,7 +443,7 @@ struct sLoadScreen2327E8 {
  *
  * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
  */
-extern "C" int func_002327E8(sLoadScreen2327E8* self)
+extern "C" int cPreFELoadScreen_loseFocus(sLoadScreen2327E8* self)
 {
     self->done = 1;
     return *(float*)((char*)SSXApp->LoadIndicator + 4) == 0.0f;
@@ -451,7 +451,7 @@ extern "C" int func_002327E8(sLoadScreen2327E8* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232820);
+INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen_render);
 #ifdef SKIP_ASM
 struct sVec3_232820 {
     float x, y, z;
@@ -481,30 +481,30 @@ public:
     virtual void v19();
     virtual void v20();
 };
-extern "C" void func_00231FC0(void* a);
+extern "C" void cLoadIndicator_render(void* a);
 
 /**
  * Renders the pre-game load screen: clears to black and draws the load indicator once the renderer is ready.
  *
- * Same body as func_00232488 (IsRenderReady, SetScreenClearColour (0, 0, 0), func_00231FC0, DrawFrame). Render slot
+ * Same body as cPreStartScreen_render (IsRenderReady, SetScreenClearColour (0, 0, 0), cLoadIndicator_render, DrawFrame). Render slot
  * (+0x3C) of cPreGameLoadScreen_vtbl.
  *
  * @return 1 when a frame was drawn, otherwise 0
  */
-extern "C" int func_00232820(void)
+extern "C" int cPreGameLoadScreen_render(void)
 {
     if (((cWorld232820*)GrMan)->v17() == 0) {
         return 0;
     }
     ((cWorld232820*)GrMan)->v15(sVec3_232820(0.0f, 0.0f, 0.0f));
-    func_00231FC0(SSXApp->LoadIndicator);
+    cLoadIndicator_render(SSXApp->LoadIndicator);
     ((cWorld232820*)GrMan)->v20();
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_002328A8);
+INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_render);
 #ifdef SKIP_ASM
 struct sVec3_2328A8 {
     float x, y, z;
@@ -534,30 +534,30 @@ public:
     virtual void v19();
     virtual void v20();
 };
-extern "C" void func_00231FC0(void* a);
+extern "C" void cLoadIndicator_render(void* a);
 
 /**
  * Renders the pre-front-end load screen: clears to black and draws the load indicator once the renderer is ready.
  *
- * Same body as func_00232488 (IsRenderReady, SetScreenClearColour (0, 0, 0), func_00231FC0, DrawFrame). Render slot
+ * Same body as cPreStartScreen_render (IsRenderReady, SetScreenClearColour (0, 0, 0), cLoadIndicator_render, DrawFrame). Render slot
  * (+0x3C) of D_0047D860.
  *
  * @return 1 when a frame was drawn, otherwise 0
  */
-extern "C" int func_002328A8(void)
+extern "C" int cPreFELoadScreen_render(void)
 {
     if (((cWorld2328A8*)GrMan)->v17() == 0) {
         return 0;
     }
     ((cWorld2328A8*)GrMan)->v15(sVec3_2328A8(0.0f, 0.0f, 0.0f));
-    func_00231FC0(SSXApp->LoadIndicator);
+    cLoadIndicator_render(SSXApp->LoadIndicator);
     ((cWorld2328A8*)GrMan)->v20();
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232930);
+INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -565,9 +565,9 @@ struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cLoadIndicator_update(void* fade);
-extern "C" void* func_00231CD0_r(void* self) __asm__("func_00231CD0");
+extern "C" void* cFadeScreen_cFadeScreen_r(void* self) __asm__("cFadeScreen_cFadeScreen");
 extern char str_cGameLoadScreen[];
-extern void* D_0047D788[];
+extern void* cGameLoadScreen_vtbl[];
 
 struct sModule_232930 {
     void** vt;
@@ -583,13 +583,13 @@ struct sModule_232930 {
  *
  * Steps the indicator's phase (cLoadIndicator_update); its alpha (+0x4) falls by 1/12 per frame while the ending flag
  * (+0x4 of this) is set and rises otherwise, clamped to [0, 1]. When no next module is queued (SSXApp + 0x4), allocates
- * 0x18 bytes tagged "cGameLoadScreen", builds the fade base (func_00231CD0), stores D_0047D788, clears +0xC, +0x10 and
+ * 0x18 bytes tagged "cGameLoadScreen", builds the fade base (cFadeScreen_cFadeScreen), stores cGameLoadScreen_vtbl, clears +0xC, +0x10 and
  * +0x14 and queues it with cAppMan_setNextModule. Update slot (+0x34) of cPreGameLoadScreen_vtbl.
  */
 // Matches only with exceptions enabled for this unit (UNIT_CFLAGS "-fexceptions" in configure.py).
 // `tmp` is reused for the fade direction and the module handle: one variable spanning both blocks is what
 // gives the retail register allocation (the handle is taken before the fields are filled in).
-extern "C" void func_00232930(void* self)
+extern "C" void cPreGameLoadScreen_update(void* self)
 {
     int tmp;
     cLoadIndicator_update(SSXApp->LoadIndicator);
@@ -609,9 +609,9 @@ extern "C" void func_00232930(void* self)
     }
     if (*(int*)((char*)SSXApp + 4) == 0) {
         sModule_232930* m = (sModule_232930*)cMemMan_alloc(0x18, str_cGameLoadScreen, 0x100, 0);
-        func_00231CD0_r(m);
+        cFadeScreen_cFadeScreen_r(m);
         tmp = (unsigned int)m;
-        m->vt = D_0047D788;
+        m->vt = cGameLoadScreen_vtbl;
         m->fC = 0;
         m->f10 = 0;
         m->f14 = 0;
@@ -631,7 +631,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 
 extern "C" void cLoadIndicator_update(void* fade);
 
-extern "C" void* func_00231CD0_r(void* self) __asm__("func_00231CD0");
+extern "C" void* cFadeScreen_cFadeScreen_r(void* self) __asm__("cFadeScreen_cFadeScreen");
 
 
 extern char str_FELoad[];
@@ -654,7 +654,7 @@ struct sModule_232A00 {
  * at +0x4 is set and rises otherwise. When no next module is queued it creates a cFELoadScreen ("FELoad",
  * 0x1C bytes) and queues it.
  */
-// Same shape as func_00232930 (see the note there): exceptions enabled for this unit, `tmp` reused.
+// Same shape as cPreGameLoadScreen_update (see the note there): exceptions enabled for this unit, `tmp` reused.
 extern "C" void cPreFELoadScreen_update(void* self)
 {
     int tmp;
@@ -675,7 +675,7 @@ extern "C" void cPreFELoadScreen_update(void* self)
     }
     if (*(int*)((char*)SSXApp + 4) == 0) {
         sModule_232A00* loadScreen = (sModule_232A00*)cMemMan_alloc(0x1C, str_FELoad, 0x100, 0);
-        func_00231CD0_r(loadScreen);
+        cFadeScreen_cFadeScreen_r(loadScreen);
         tmp = (unsigned int)loadScreen;
         loadScreen->vt = cFELoadScreen_vtbl;
         loadScreen->fC = 0;
@@ -687,24 +687,24 @@ extern "C" void cPreFELoadScreen_update(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232AE0);
+INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_cStartScreen);
 #ifdef SKIP_ASM
-extern "C" void func_00231CD0(void* self);
-extern void* D_0047D7D0[];
+extern "C" void cFadeScreen_cFadeScreen(void* self);
+extern void* cStartScreen_vtbl[];
 
 /**
- * Constructs a start screen of a type: builds the fade base (func_00231CD0), stores the vtable D_0047D7D0, the type
+ * Constructs a start screen of a type: builds the fade base (cFadeScreen_cFadeScreen), stores the vtable cStartScreen_vtbl, the type
  * (+0x18) and clears the UI engine pointer (+0xC).
  *
- * cInitLoadScreen's update (func_00232588) builds it with type 2 (progressive) or 0.
+ * cInitLoadScreen's update (cInitLoadScreen_update) builds it with type 2 (progressive) or 0.
  *
  * @param arg  the start screen type (0 shows the memory card state, 2 the progressive-scan state)
  * @return @p self
  */
-extern "C" void* func_00232AE0(void* self, int arg)
+extern "C" void* cStartScreen_cStartScreen(void* self, int arg)
 {
-    func_00231CD0(self);
-    *(void***)self = D_0047D7D0;
+    cFadeScreen_cFadeScreen(self);
+    *(void***)self = cStartScreen_vtbl;
     *(int*)((char*)self + 0x18) = arg;
     *(int*)((char*)self + 0xC) = 0;
     return self;
@@ -712,7 +712,7 @@ extern "C" void* func_00232AE0(void* self, int arg)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232B28);
+INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_load);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cWorld_232B28 {
@@ -807,9 +807,9 @@ struct sUI_232B28 {
  * +0xC, loads "data/ui/su" (cUIEngine_loadFile), gives it SSXApp's FELocale (+0x10) and Fonts (+0x8) and a new
  * 0x1C-byte input (tag "GLUIInput", cFEInput_vtbl at +0x8) at +0xC of the engine. Type (+0x18) 0 pushes a
  * cFEStateMemCard (584 bytes, func_00186A08); type 2 pushes a 72-byte "cFEStateProgressive" (cUIState base
- * func_0039E2A0, vtable D_0047CA18); any other type pushes nothing. Load slot (+0x14) of D_0047D7D0.
+ * func_0039E2A0, vtable D_0047CA18); any other type pushes nothing. Load slot (+0x14) of cStartScreen_vtbl.
  */
-extern "C" void func_00232B28(void* self)
+extern "C" void cStartScreen_load(void* self)
 {
     ((cWorld_232B28*)GrMan)->v44(0x100);
     void* ui = func_00397B08(operator new(0x70, str_UIEngine_b, 0x100, 0));
@@ -839,7 +839,7 @@ extern "C" void func_00232B28(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232C98);
+INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_gainFocus);
 #ifdef SKIP_ASM
 extern int cDepthFog_m_Enable;
 extern int cScreenTint_m_Enable;
@@ -868,9 +868,9 @@ static inline void clear_2C98(int* p)
  * and light glow.
  *
  * Calls cGraphicsMan_UploadTextures, clears cDepthFog_m_Enable, cScreenTint_m_Enable and cLightGlow_m_Enable and sets
- * the clear colour to (0, 0, 0) (SetScreenClearColour, slot 15). GainFocus slot (+0x2C) of D_0047D7D0.
+ * the clear colour to (0, 0, 0) (SetScreenClearColour, slot 15). GainFocus slot (+0x2C) of cStartScreen_vtbl.
  */
-extern "C" void func_00232C98(void* self)
+extern "C" void cStartScreen_gainFocus(void* self)
 {
     cGraphicsMan_UploadTextures(GrMan);
     *(int*)((char*)self + 0x14) = 0;
@@ -886,43 +886,43 @@ extern "C" void func_00232C98(void* self)
 extern "C" void* cFadeScreen_loseFocus(void* self);
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232CF8__FPv);
+INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_loseFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Lets the start screen lose focus when its fade allows it: returns cFadeScreen_loseFocus.
  *
- * LoseFocus slot (+0x24) of D_0047D7D0.
+ * LoseFocus slot (+0x24) of cStartScreen_vtbl.
  *
  * @return cFadeScreen_loseFocus's result
  */
-void* func_00232CF8(void* self)
+void* cStartScreen_loseFocus(void* self)
 {
     return cFadeScreen_loseFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232D18);
+INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_update);
 #ifdef SKIP_ASM
-void func_00231CB0(void*);
+void cLoadScreen_update(void*);
 extern "C" void func_00398038(void*);
 
 /**
- * Updates the start screen: runs the load-screen update (func_00231CB0), updates the UI engine (func_00398038 on +0xC)
+ * Updates the start screen: runs the load-screen update (cLoadScreen_update), updates the UI engine (func_00398038 on +0xC)
  * and counts a display tick (+0x14).
  *
- * Update slot (+0x34) of D_0047D7D0.
+ * Update slot (+0x34) of cStartScreen_vtbl.
  */
-extern "C" void func_00232D18(void* self)
+extern "C" void cStartScreen_update(void* self)
 {
-    func_00231CB0(self);
+    cLoadScreen_update(self);
     func_00398038(*(void**)((char*)self + 0xC));
     (*(int*)((char*)self + 0x14))++;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232D50);
+INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_purge);
 #ifdef SKIP_ASM
 class cWorld232D50 {
 public:
@@ -954,9 +954,9 @@ extern "C" void cGraphicsMan_PurgeTextures(void* world);
  * Purges the start screen: flushes the renderer, destroys the UI engine and purges textures.
  *
  * Calls GrMan's FlushRenderer (slot 19), destroys the engine at +0xC with func_00397B70(engine, 3) when set, clears the
- * pointer and calls cGraphicsMan_PurgeTextures. Purge slot (+0x1C) of D_0047D7D0.
+ * pointer and calls cGraphicsMan_PurgeTextures. Purge slot (+0x1C) of cStartScreen_vtbl.
  */
-extern "C" void func_00232D50(void* self)
+extern "C" void cStartScreen_purge(void* self)
 {
     ((cWorld232D50*)GrMan)->v19();
     void* p = *(void**)((char*)self + 0xC);
@@ -969,7 +969,7 @@ extern "C" void func_00232D50(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232DA8);
+INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_render);
 #ifdef SKIP_ASM
 class cWorld232DA8 {
 public:
@@ -995,23 +995,23 @@ public:
     virtual void v19();
     virtual void v20();
 };
-extern "C" int func_00231D60(void* self);
+extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void func_00397DF8(void* obj);
 
 /**
  * Renders the start screen once the renderer is ready: the UI engine unless the fade covers the screen, then the frame.
  *
- * Returns 0 while GrMan's IsRenderReady (slot 17) is 0. Otherwise draws the fade (func_00231D60) and, when it is not
- * fully opaque, the UI engine (func_00397DF8 on +0xC), then DrawFrame (slot 20). Render slot (+0x3C) of D_0047D7D0.
+ * Returns 0 while GrMan's IsRenderReady (slot 17) is 0. Otherwise draws the fade (cFadeScreen_drawFade) and, when it is not
+ * fully opaque, the UI engine (func_00397DF8 on +0xC), then DrawFrame (slot 20). Render slot (+0x3C) of cStartScreen_vtbl.
  *
  * @return 1 when a frame was drawn, otherwise 0
  */
-extern "C" int func_00232DA8(void* self)
+extern "C" int cStartScreen_render(void* self)
 {
     if (((cWorld232DA8*)GrMan)->v17() == 0) {
         return 0;
     }
-    if (func_00231D60(self) == 0) {
+    if (cFadeScreen_drawFade(self) == 0) {
         func_00397DF8(*(void**)((char*)self + 0xC));
     }
     ((cWorld232DA8*)GrMan)->v20();
@@ -1020,7 +1020,7 @@ extern "C" int func_00232DA8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00232E20);
+INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_load);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1116,9 +1116,9 @@ struct cLoadItemC_2E20 {
  * - otherwise "cGameLoadState" (D_0047C948) with this screen as its owner (+0x48), after
  *   cGameLoadScreen_loadTexture(this, 0).
  *
- * Load slot (+0x14) of D_0047D788.
+ * Load slot (+0x14) of cGameLoadScreen_vtbl.
  */
-extern "C" void func_00232E20(void* self)
+extern "C" void cGameLoadScreen_load(void* self)
 {
     cPS2GraphicsMan* w = GrMan;
     sVE_2E20* vt = (sVE_2E20*)w->mVtbl;
@@ -1260,7 +1260,7 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00233260);
+INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_gainFocus);
 #ifdef SKIP_ASM
 extern int cDepthFog_m_Enable;
 extern "C" void cGraphicsMan_UploadTextures(void* g);
@@ -1284,9 +1284,9 @@ struct sVE_3260 {
  *
  * Calls cGraphicsMan_UploadTextures and cSSXApp_startGameLoad(SSXApp), clears cDepthFog_m_Enable, sets the clear colour
  * (0, 0, 0) (SetScreenClearColour, slot 15) and calls func_0028F768 on the audio (func_0028B180). GainFocus slot
- * (+0x2C) of D_0047D788.
+ * (+0x2C) of cGameLoadScreen_vtbl.
  */
-extern "C" void func_00233260(void)
+extern "C" void cGameLoadScreen_gainFocus(void)
 {
     cGraphicsMan_UploadTextures(GrMan);
     cSSXApp_startGameLoad(SSXApp);
@@ -1303,23 +1303,23 @@ extern "C" void func_00233260(void)
 extern "C" void* cLoadScreen_loseFocus(void* self);
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_002332C8__FPv);
+INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_loseFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Lets the game load screen lose focus: returns whether cLoadScreen_loseFocus returns non-zero.
  *
- * LoseFocus slot (+0x24) of D_0047D788.
+ * LoseFocus slot (+0x24) of cGameLoadScreen_vtbl.
  *
  * @return 1 or 0
  */
-int func_002332C8(void* self)
+int cGameLoadScreen_loseFocus(void* self)
 {
     return (cLoadScreen_loseFocus(self) != 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_002332E8);
+INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_purge);
 #ifdef SKIP_ASM
 extern "C" void cGraphicsMan_PurgeTextures(void* world);
 extern "C" void func_00397B70(void* obj, int a);
@@ -1388,9 +1388,9 @@ public:
  * Calls GrMan's FlushRenderer (slot 19), destroys the engine at +0xC with func_00397B70(engine, 3) when set (the
  * pointer is not cleared), removes each non-zero texture id of the pair at +0x10 (RemoveTexture, slot 50), calls
  * cGraphicsMan_PurgeTextures and func_0028FA98(audio, 1.0) on the audio (func_0028B180). Purge slot (+0x1C) of
- * D_0047D788.
+ * cGameLoadScreen_vtbl.
  */
-extern "C" void func_002332E8(void* self)
+extern "C" void cGameLoadScreen_purge(void* self)
 {
     ((cWorld002332E8*)GrMan)->v19();
     void* o = *(void**)((char*)self + 0xC);
@@ -1410,7 +1410,7 @@ extern "C" void func_002332E8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00233390);
+INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_render);
 #ifdef SKIP_ASM
 class cWorld233390 {
 public:
@@ -1436,24 +1436,24 @@ public:
     virtual void v19();
     virtual void v20();
 };
-extern "C" int func_00231D60(void* self);
+extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void func_00397DF8(void* obj);
 
 /**
  * Renders the game load screen once the renderer is ready: the UI engine unless the fade covers the screen, then the
  * frame.
  *
- * Same body as func_00232DA8 (IsRenderReady, func_00231D60, func_00397DF8 on +0xC, DrawFrame). Render slot (+0x3C) of
- * D_0047D788.
+ * Same body as cStartScreen_render (IsRenderReady, cFadeScreen_drawFade, func_00397DF8 on +0xC, DrawFrame). Render slot (+0x3C) of
+ * cGameLoadScreen_vtbl.
  *
  * @return 1 when a frame was drawn, otherwise 0
  */
-extern "C" int func_00233390(void* self)
+extern "C" int cGameLoadScreen_render(void* self)
 {
     if (((cWorld233390*)GrMan)->v17() == 0) {
         return 0;
     }
-    if (func_00231D60(self) == 0) {
+    if (cFadeScreen_drawFade(self) == 0) {
         func_00397DF8(*(void**)((char*)self + 0xC));
     }
     ((cWorld233390*)GrMan)->v20();
@@ -1462,21 +1462,21 @@ extern "C" int func_00233390(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", func_00233408);
+INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_update);
 #ifdef SKIP_ASM
 extern "C" void func_00398038(void*);
-void func_00231CB0(void*);
+void cLoadScreen_update(void*);
 
 /**
  * Updates the game load screen: updates the UI engine (func_00398038 on +0xC), then runs the load-screen update
- * (func_00231CB0).
+ * (cLoadScreen_update).
  *
- * Update slot (+0x34) of D_0047D788.
+ * Update slot (+0x34) of cGameLoadScreen_vtbl.
  */
-extern "C" void func_00233408(void* self)
+extern "C" void cGameLoadScreen_update(void* self)
 {
     func_00398038(*(void**)((char*)self + 0xC));
-    func_00231CB0(self);
+    cLoadScreen_update(self);
 }
 #endif
 

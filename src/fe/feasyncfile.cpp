@@ -4058,7 +4058,7 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
  *
  * Calls the state's own virtual at vtable entry 32 (cFEStateNet's func_001A8830 unless overridden, which sets the
  * player's buddy presence through func_00262768), then cUIState_onGainFocus with @p pPrevState, and sets unk_048 to 1
- * (func_001DE8A8 reports the state as processing events only while it is set).
+ * (cFEStateNet_isProcessingEvents reports the state as processing events only while it is set).
  *
  * @param pPrevState  the state that had the focus (On Tour: cUIState* pPrevState)
  */

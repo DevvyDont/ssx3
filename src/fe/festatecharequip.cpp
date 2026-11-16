@@ -6,7 +6,7 @@ INCLUDE_ASM("fe/festatecharequip", cFE_cFE);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void* func_00231CD0(void* self);
+extern "C" void* cFadeScreen_cFadeScreen(void* self);
 extern "C" void* cSimpleCamera_cSimpleCamera(void* self);
 extern "C" void* func_001A03C0(void* self);
 extern "C" void* func_0019CDF0(void* self);
@@ -31,7 +31,7 @@ public:
 /**
  * Constructs the front end: its camera, rider manager, asynchronous files, UI engine and effects loader.
  *
- * Runs the base constructor func_00231CD0, stores the vtable D_0046D878, builds the camera at +0x10 (vtable
+ * Runs the base constructor cFadeScreen_cFadeScreen, stores the vtable D_0046D878, builds the camera at +0x10 (vtable
  * at +0xA0) and sets it up with func_0015D700 (pi/4, 5, 5000), the rider manager at +0xB0 (On Tour
  * mRiderManager) and the object at +0x1A70, and allocates the UI engine ("UIEngine", +0xC) and an effects
  * loader ("FXLoader FE", +0xB5AA0).
@@ -40,7 +40,7 @@ public:
  */
 extern "C" void* cFE_cFE(void* self)
 {
-    func_00231CD0(self);
+    cFadeScreen_cFadeScreen(self);
     *(void***)((char*)self + 0x0) = D_0046D878;
     cSimpleCamera_cSimpleCamera((char*)self + 0x10);
     *(void***)((char*)self + 0xA0) = D_0046D8D8;

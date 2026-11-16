@@ -19,7 +19,7 @@
 // Retail = On Tour up to mRootGroup; mpState is at 0xD0 (On Tour 0xE0: its cUIGroup is 0xA0 bytes).
 //
 // mAttrScreen is EA's tAttrScreen (On Tour, LSB first): mFocused:1 mBufferAlloc:1. EA's type is 2 bytes (its constructor
-// func_001DD580 uses lhu/sh), but retail methods read and write the aligned word (lw/sw 0x14), so it is an int here.
+// tAttrScreen_tAttrScreen uses lhu/sh), but retail methods read and write the aligned word (lw/sw 0x14), so it is an int here.
 // The two embedded objects are kept as raw regions (no cList / cUIGroup layout yet):
 //   mThreads   = cList (0x1C: mStart node 0x18, mEnd node 0x24, cList vptr at 0x30);
 //   mRootGroup = cUIGroup (0x90: a cUIThing 0x40-0xB4 with its vptr at 0x48 and tAttrThing at 0x54, then its cList
@@ -45,7 +45,7 @@ struct cUIScreen {
     tUIScreenHeader* mpScreenHeader; // 0x010 [P] getHashName = mpScreenHeader's first word (preview lw 0x10; retail func_003A5C98);
                                      //       [R] = 0; cUIScreen_setData stores the record
     int mAttrScreen;                 // 0x014 [P] tAttrScreen: hasFocus/setFocus (bit 0, lw/sw 0x14; retail func_003A5CC0/func_003A5CD0);
-                                     //       [R] tAttrScreen ctor func_001DD580(this + 0x14); [U] bit 1 set/cleared by cUIScreen_setData
+                                     //       [R] tAttrScreen ctor tAttrScreen_tAttrScreen(this + 0x14); [U] bit 1 set/cleared by cUIScreen_setData
     cList mThreads;                  // 0x018 [O] cList of cUIThread; [U] cUIScreen_playFrame appends a "UIThread",
                                      //       cUIScreen_getPrimaryThread walks it; [R] the destructor tears down its vptrs (0x20/0x2C/0x30)
     tUIKeyframeBlock* mpKeyframeBlock; // 0x034 [O]; [R] = 0; cUIScreen_setData = record + record[2]; [U] the frame list searched by

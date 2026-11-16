@@ -2824,7 +2824,7 @@ extern "C" void func_003A5B48(int* self, int flags)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5B98);
 #ifdef SKIP_ASM
-extern "C" void* func_001DD580(void* self);
+extern "C" void* tAttrScreen_tAttrScreen(void* self);
 extern "C" void* cList_cList(void* p);
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern void* cUIScreen_vtbl[];
@@ -2834,7 +2834,7 @@ extern "C" void* func_003A5B98(cUIScreen* self)
     self->mpNext = (cListNode*)((char*)self);
     self->mpPrev = (cListNode*)((char*)self);
     self->mVtbl = cUIScreen_vtbl;
-    func_001DD580(((char*)self) + 0x14);
+    tAttrScreen_tAttrScreen(((char*)self) + 0x14);
     cList_cList(((char*)self) + 0x18);
     cUIThing_cUIThing(((char*)self) + 0x40, 0, 0);
     *(void***)(((char*)self) + 0x48) = cUIGroup_vtbl;
@@ -2845,7 +2845,7 @@ extern "C" void* func_003A5B98(cUIScreen* self)
 //100%
 INCLUDE_ASM("ui/uivector", cUIScreen_cUIScreen);
 #ifdef SKIP_ASM
-extern "C" void* func_001DD580(void* self);
+extern "C" void* tAttrScreen_tAttrScreen(void* self);
 extern "C" void* cList_cList(void* p);
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern void* cUIScreen_vtbl[];
@@ -2854,7 +2854,7 @@ extern void* cUIScreen_vtbl[];
  * Constructs a UI screen for a state (On Tour cUIScreen(cUIState* pState)).
  *
  * Self-links its list node, clears mpBuffer and mpScreenHeader, stores cUIScreen_vtbl, constructs its attributes at
- * +0x14 (func_001DD580) and the thread list (+0x18), clears the keyframe and object blocks and the object list, and
+ * +0x14 (tAttrScreen_tAttrScreen) and the thread list (+0x18), clears the keyframe and object blocks and the object list, and
  * builds the root group in place (cUIThing constructor at +0x40 with no screen or parent, cUIGroup_vtbl, its cList at
  * +0xB4). Then mpState = @p pState.
  *
@@ -2868,7 +2868,7 @@ extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, int pState)
     self->mpBuffer = 0;
     self->mpScreenHeader = 0;
     self->mVtbl = cUIScreen_vtbl;
-    func_001DD580(((char*)self) + 0x14);
+    tAttrScreen_tAttrScreen(((char*)self) + 0x14);
     cList_cList(((char*)self) + 0x18);
     self->mpKeyframeBlock = 0;
     self->mpObjectBlock = 0;

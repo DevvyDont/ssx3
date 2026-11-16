@@ -389,7 +389,7 @@ struct cWorld_getNumGlobalScripts_sTable {
     cWorld_getNumGlobalScripts_sEntry* entries;
 };
 
-extern "C" int func_003ADC80(cWorld_getNumGlobalScripts_sEntry* e);
+extern "C" int cWScriptCacheEntry_getNumGlobalScripts(cWorld_getNumGlobalScripts_sEntry* e);
 
 /**
  * Returns how many global world scripts a section has.
@@ -399,14 +399,14 @@ extern "C" int func_003ADC80(cWorld_getNumGlobalScripts_sEntry* e);
  */
 extern "C" int cWorld_getNumGlobalScripts(cWorld* self, int i)
 {
-    return func_003ADC80(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
+    return cWScriptCacheEntry_getNumGlobalScripts(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
 //100%
 INCLUDE_ASM("world/world", cWorld_getGlobalScripts);
 #ifdef SKIP_ASM
-extern "C" int func_003ADCB0(cWorld_getNumGlobalScripts_sEntry* e);
+extern "C" int cWScriptCacheEntry_getGlobalScripts(cWorld_getNumGlobalScripts_sEntry* e);
 
 /**
  * Returns a section's global world scripts.
@@ -416,7 +416,7 @@ extern "C" int func_003ADCB0(cWorld_getNumGlobalScripts_sEntry* e);
  */
 extern "C" int cWorld_getGlobalScripts(cWorld* self, int i)
 {
-    return func_003ADCB0(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
+    return cWScriptCacheEntry_getGlobalScripts(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -459,7 +459,7 @@ extern "C" int cWorld_getProcessScripts(cWorld* self, int i)
 //100%
 INCLUDE_ASM("world/world", cWorld_getNumMissionScripts);
 #ifdef SKIP_ASM
-extern "C" int func_003ADD40(cWorld_getNumGlobalScripts_sEntry* e);
+extern "C" int cWScriptCacheEntry_getNumMissionScripts(cWorld_getNumGlobalScripts_sEntry* e);
 
 /**
  * Returns how many mission scripts a section has.
@@ -469,14 +469,14 @@ extern "C" int func_003ADD40(cWorld_getNumGlobalScripts_sEntry* e);
  */
 extern "C" int cWorld_getNumMissionScripts(cWorld* self, int i)
 {
-    return func_003ADD40(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
+    return cWScriptCacheEntry_getNumMissionScripts(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
 //100%
 INCLUDE_ASM("world/world", cWorld_getMissionScripts);
 #ifdef SKIP_ASM
-extern "C" int func_003ADD70(cWorld_getNumGlobalScripts_sEntry* e);
+extern "C" int cWScriptCacheEntry_getMissionScripts(cWorld_getNumGlobalScripts_sEntry* e);
 
 /**
  * Returns a section's mission scripts.
@@ -486,7 +486,7 @@ extern "C" int func_003ADD70(cWorld_getNumGlobalScripts_sEntry* e);
  */
 extern "C" int cWorld_getMissionScripts(cWorld* self, int i)
 {
-    return func_003ADD70(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
+    return cWScriptCacheEntry_getMissionScripts(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[i]);
 }
 #endif
 
@@ -560,7 +560,7 @@ int tPolyModelList_getMeshPolyModel(void* self, int meshNum)
 //100%
 INCLUDE_ASM("world/world", cWorld_getWScriptScript);
 #ifdef SKIP_ASM
-extern "C" int func_003ADC50(cWorld_getNumGlobalScripts_sEntry* e, unsigned int i);
+extern "C" int cWScriptCacheEntry_getWScriptScript(cWorld_getNumGlobalScripts_sEntry* e, unsigned int i);
 
 /**
  * Returns the code of a world script given its resource id (low byte: section; the rest: index).
@@ -571,7 +571,7 @@ extern "C" int func_003ADC50(cWorld_getNumGlobalScripts_sEntry* e, unsigned int 
 extern "C" int cWorld_getWScriptScript(cWorld* self, unsigned int* handle)
 {
     unsigned int packed = *handle;
-    return func_003ADC50(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[packed & 0xFF], packed >> 8);
+    return cWScriptCacheEntry_getWScriptScript(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[packed & 0xFF], packed >> 8);
 }
 #endif
 

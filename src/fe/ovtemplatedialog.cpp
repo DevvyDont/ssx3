@@ -1815,7 +1815,7 @@ extern "C" void cAI_initFreeride(void* self);
 extern "C" void cRider_putAtStartpoint(void* self, int a1, int a2);
 extern "C" void cRider_cleanupAfterPutAt(void* self, int notify);
 extern "C" void cGame_partialRestart(void* self);
-void func_00238348(void* self);
+void cGameModeMan_restorePreviousHeat(void* self);
 extern "C" void cGameComm_localDisconnected(void* self, int a1);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
@@ -1913,7 +1913,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                     cGame_restart(Game_D5A8());
                 } else {
                     cReplay_stopAutoReplay(SSXApp->Game->Replay);
-                    func_00238348(SSXApp->GameModeMan);
+                    cGameModeMan_restorePreviousHeat(SSXApp->GameModeMan);
                     cGame_setState(SSXApp->Game, 13, 0, 1);
                     cOVStateManager_mStatus = 3;
                 }

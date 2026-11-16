@@ -1657,7 +1657,7 @@ void cMemMan_free(void* p);
 extern "C" void func_002BB348(void* self, int a, void* obj);
 extern "C" void func_003ACA10(void* self, int a, void* obj);
 extern "C" void* func_003AD188();
-extern "C" void func_00230430(void* self, int a);
+extern "C" void cGame_loadWScriptManSection(void* self, int a);
 void gCamTriggerMan_resolve(void* a, int b);
 extern "C" void cSSXScriptEngine_AttachAnchorDataTable(void* self, int a, void* obj);
 extern "C" void* cBE_getBE();
@@ -1783,7 +1783,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         if (cWorld_m_pTheWorld) {
             int sectionIdx = RID & 0xFF;
             func_003ACA10((char**)cWorld_m_pTheWorld->m_pWScriptCache, sectionIdx, obj);
-            func_00230430(func_003AD188(), sectionIdx);
+            cGame_loadWScriptManSection(func_003AD188(), sectionIdx);
         }
         break;
     case 18:

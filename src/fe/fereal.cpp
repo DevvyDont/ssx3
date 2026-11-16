@@ -90,7 +90,7 @@ extern "C" void* func_00186610(void* self, void* owner, int a);
 extern "C" void* func_00194A60(void* self, void* owner);
 extern "C" void* func_0018D240(void* self, void* owner);
 unsigned int cPreGameLoadScreen_cPreGameLoadScreen(void* mem);
-void* func_00232738(void* self);
+void* cPreFELoadScreen_cPreFELoadScreen(void* self);
 class cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* func_00194738(void* self, void* owner);
@@ -237,7 +237,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
         }
         case 1:
             SSXApp->unk_60 = 0;
-            cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)func_00232738(cMemMan_alloc(8, str_cPreFELoadScreen, 0x100, 0)));
+            cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreFELoadScreen_cPreFELoadScreen(cMemMan_alloc(8, str_cPreFELoadScreen, 0x100, 0)));
             return 0;
         }
     case 1:
@@ -1030,7 +1030,7 @@ extern "C" void cRealFE_purge(void* self)
 //100%
 INCLUDE_ASM("fe/fereal", cRealFE_render);
 #ifdef SKIP_ASM
-extern "C" int func_00231D60(void* self);
+extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void func_00253890(void* h, int a1);
 extern "C" void func_00398018(void* ui);
 extern "C" void func_001A0598(void* p);
@@ -1110,7 +1110,7 @@ static inline unsigned int feCallU(int slot)
 /**
  * Draws the front end: a black backdrop while a movie is queued, otherwise the 3D scene and the UI.
  *
- * Returns 0 when the graphics manager's slot 17 (IsRenderReady) says no. Counts +0xB5ADC down. If func_00231D60 (the
+ * Returns 0 when the graphics manager's slot 17 (IsRenderReady) says no. Counts +0xB5ADC down. If cFadeScreen_drawFade (the
  * base fade) returns non-zero, or a movie player exists (+0xB5AD4; drawn with func_00253890), it flips the frame (slot
  * 20) and returns 1. While cRealFE_mMovieList is non-zero it draws a full-screen black quad in an orthographic viewport
  * (slot 26) as a 4-vertex tri strip (slot 71). Otherwise it sets the perspective from the camera (+0x10, +0x14, +0x18
@@ -1128,7 +1128,7 @@ extern "C" int cRealFE_render(void* self)
     if (*(int*)((char*)self + 0xB5ADC) != 0) {
         *(int*)((char*)self + 0xB5ADC) -= 1;
     }
-    if (func_00231D60(self) != 0) {
+    if (cFadeScreen_drawFade(self) != 0) {
         feCall(20);
         return 1;
     }

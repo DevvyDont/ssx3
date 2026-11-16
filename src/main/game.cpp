@@ -1513,7 +1513,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cGame_setState(void* gm, int state, int a, int b);
-void func_00231278(void* gm, int state);
+void cGame_setPreloadState(void* gm, int state);
 extern int D_00535C08[];
 extern int D_004A11B8;
 
@@ -1528,7 +1528,7 @@ extern "C" void cSectionMan_preLoadMode(cSectionMan* self)
     D_00535C08[0] = self->mBELocationID;
     D_004A11B8 = 1;
     iface->v01();
-    func_00231278(self->mpGame, 10);
+    cGame_setPreloadState(self->mpGame, 10);
 }
 #endif
 

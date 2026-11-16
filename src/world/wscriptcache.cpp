@@ -549,7 +549,7 @@ INCLUDE_ASM("world/wscriptcache", func_003AD188);
 /**
  * Returns SSXApp->Game.
  *
- * cPS2ChunkResolve_resolve passes it to func_00230430 with the section index.
+ * cPS2ChunkResolve_resolve passes it to cGame_loadWScriptManSection with the section index.
  *
  * @return the cGame
  */
@@ -1009,7 +1009,7 @@ extern "C" void cChunkResolve__cChunkResolve(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ADC48__FPv);
+INCLUDE_ASM("world/wscriptcache", cChunkResolve_resolveMeshContext__FPv);
 #ifdef SKIP_ASM
 /**
  * Reports success for a mesh-context record without doing any work: always returns 1.
@@ -1019,14 +1019,14 @@ INCLUDE_ASM("world/wscriptcache", func_003ADC48__FPv);
  *
  * @return always 1 (resolved)
  */
-int func_003ADC48(void* self)
+int cChunkResolve_resolveMeshContext(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ADC50);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getWScriptScript);
 #ifdef SKIP_ASM
 /**
  * Returns the code of one script in a world-script cache entry.
@@ -1038,7 +1038,7 @@ INCLUDE_ASM("world/wscriptcache", func_003ADC50);
  * @param i  index of the script within the section
  * @return the script's code pointer, or 0 when the entry is not loaded
  */
-extern "C" int func_003ADC50(void* self, int i)
+extern "C" int cWScriptCacheEntry_getWScriptScript(void* self, int i)
 {
     if (*(short*)self == 3) {
         void* data = *(void**)((char*)self + 0x8);
@@ -1049,7 +1049,7 @@ extern "C" int func_003ADC50(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ADC80);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumGlobalScripts);
 #ifdef SKIP_ASM
 /**
  * Returns how many global scripts a loaded world-script cache entry has.
@@ -1057,7 +1057,7 @@ INCLUDE_ASM("world/wscriptcache", func_003ADC80);
  * @return the count at +0x10 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and it
  *         has data, else 0
  */
-extern "C" int func_003ADC80(void* self)
+extern "C" int cWScriptCacheEntry_getNumGlobalScripts(void* self)
 {
     if (*(short*)self == 3) {
         void* data = *(void**)((char*)self + 0x8);
@@ -1070,7 +1070,7 @@ extern "C" int func_003ADC80(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ADCB0);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getGlobalScripts);
 #ifdef SKIP_ASM
 /**
  * Returns the global-script records of a loaded world-script cache entry.
@@ -1078,7 +1078,7 @@ INCLUDE_ASM("world/wscriptcache", func_003ADCB0);
  * @return the pointer at +0x14 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and
  *         it has data, else 0
  */
-extern "C" int func_003ADCB0(void* self)
+extern "C" int cWScriptCacheEntry_getGlobalScripts(void* self)
 {
     if (*(short*)self == 3) {
         void* data = *(void**)((char*)self + 0x8);
@@ -1131,7 +1131,7 @@ extern "C" int cWScriptCacheEntry_getProcessScripts(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ADD40);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumMissionScripts);
 #ifdef SKIP_ASM
 /**
  * Returns how many mission scripts a loaded world-script cache entry has.
@@ -1139,7 +1139,7 @@ INCLUDE_ASM("world/wscriptcache", func_003ADD40);
  * @return the count at +0x20 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and it
  *         has data, else 0
  */
-extern "C" int func_003ADD40(void* self)
+extern "C" int cWScriptCacheEntry_getNumMissionScripts(void* self)
 {
     if (*(short*)self == 3) {
         void* data = *(void**)((char*)self + 0x8);
@@ -1152,7 +1152,7 @@ extern "C" int func_003ADD40(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ADD70);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getMissionScripts);
 #ifdef SKIP_ASM
 /**
  * Returns the mission-script records of a loaded world-script cache entry.
@@ -1160,7 +1160,7 @@ INCLUDE_ASM("world/wscriptcache", func_003ADD70);
  * @return the pointer at +0x24 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and
  *         it has data, else 0
  */
-extern "C" int func_003ADD70(void* self)
+extern "C" int cWScriptCacheEntry_getMissionScripts(void* self)
 {
     if (*(short*)self == 3) {
         void* data = *(void**)((char*)self + 0x8);

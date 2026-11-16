@@ -1049,7 +1049,6 @@ func_0017A978 = 0x0017A978; //type:func
 func_0017AC98 = 0x0017AC98; //type:func
 
 // --- src/main/loadscreens.cpp ---
-func_0017AE00 = 0x0017AE00; //type:func
 lbl_0017B734 = 0x0017B734; //type:label
 lbl_0017BA30 = 0x0017BA30; //type:label
 lbl_0017BC60 = 0x0017BC60; //type:label
@@ -3279,19 +3278,11 @@ lbl_0022E1C0 = 0x0022E1C0; //type:label
 lbl_0022E1D4 = 0x0022E1D4; //type:label
 lbl_0022E1E8 = 0x0022E1E8; //type:label
 lbl_0022E1FC = 0x0022E1FC; //type:label
-func_0022E278__FPv = 0x0022E278; //type:func
-func_0022E288__FPvT0 = 0x0022E288; //type:func
 
 // --- src/main/gamerender.cpp ---
-func_0022E550 = 0x0022E550; //type:func
-func_0022E8B8 = 0x0022E8B8; //type:func
-func_0022E920 = 0x0022E920; //type:func
 
 // --- src/main/gameload.cpp ---
-func_00230430 = 0x00230430; //type:func
 func_00230640 = 0x00230640; //type:func
-func_00230698__FPvi = 0x00230698; //type:func
-func_002306A8__FPvi = 0x002306A8; //type:func
 lbl_00230FFC = 0x00230FFC; //type:label
 lbl_00231004 = 0x00231004; //type:label
 lbl_0023100C = 0x0023100C; //type:label
@@ -3324,8 +3315,6 @@ lbl_002311B4 = 0x002311B4; //type:label
 lbl_002311C0 = 0x002311C0; //type:label
 lbl_002311CC = 0x002311CC; //type:label
 lbl_002311D8 = 0x002311D8; //type:label
-func_00231278__FPvi = 0x00231278; //type:func
-func_00231320 = 0x00231320; //type:func
 lbl_00231668 = 0x00231668; //type:label
 lbl_00231670 = 0x00231670; //type:label
 lbl_0023167C = 0x0023167C; //type:label
@@ -3360,38 +3349,8 @@ lbl_002317FC = 0x002317FC; //type:label
 lbl_00231808 = 0x00231808; //type:label
 lbl_00231814 = 0x00231814; //type:label
 lbl_00231824 = 0x00231824; //type:label
-func_00231CB0__FPv = 0x00231CB0; //type:func
-func_00231CD0 = 0x00231CD0; //type:func
-func_00231D60 = 0x00231D60; //type:func
-func_00231FC0 = 0x00231FC0; //type:func
 
 // --- src/main/loadscreens_prestart.cpp ---
-func_00232488 = 0x00232488; //type:func
-func_00232510 = 0x00232510; //type:func
-func_00232588 = 0x00232588; //type:func
-func_00232650 = 0x00232650; //type:func
-func_002326D8 = 0x002326D8; //type:func
-func_00232718__FPv = 0x00232718; //type:func
-func_00232738__FPv = 0x00232738; //type:func
-func_00232780 = 0x00232780; //type:func
-func_002327B0 = 0x002327B0; //type:func
-func_002327E8 = 0x002327E8; //type:func
-func_00232820 = 0x00232820; //type:func
-func_002328A8 = 0x002328A8; //type:func
-func_00232930 = 0x00232930; //type:func
-func_00232AE0 = 0x00232AE0; //type:func
-func_00232B28 = 0x00232B28; //type:func
-func_00232C98 = 0x00232C98; //type:func
-func_00232CF8__FPv = 0x00232CF8; //type:func
-func_00232D18 = 0x00232D18; //type:func
-func_00232D50 = 0x00232D50; //type:func
-func_00232DA8 = 0x00232DA8; //type:func
-func_00232E20 = 0x00232E20; //type:func
-func_00233260 = 0x00233260; //type:func
-func_002332C8__FPv = 0x002332C8; //type:func
-func_002332E8 = 0x002332E8; //type:func
-func_00233390 = 0x00233390; //type:func
-func_00233408 = 0x00233408; //type:func
 
 // --- src/fe/festateloadscreen.cpp ---
 func_00233640 = 0x00233640; //type:func
@@ -3410,34 +3369,12 @@ lbl_0023473C = 0x0023473C; //type:label
 func_00234910 = 0x00234910; //type:func
 
 // --- src/main/gamestate.cpp ---
-func_00234E20 = 0x00234E20; //type:func
-func_00234EF8 = 0x00234EF8; //type:func
 lbl_002350E0 = 0x002350E0; //type:label
 lbl_00235280 = 0x00235280; //type:label
 lbl_002352C0 = 0x002352C0; //type:label
 lbl_00235464 = 0x00235464; //type:label
 lbl_0023551C = 0x0023551C; //type:label
 lbl_00235540 = 0x00235540; //type:label
-func_00236208 = 0x00236208; //type:func
-func_00236868 = 0x00236868; //type:func
-func_002368A0 = 0x002368A0; //type:func
-func_00236960 = 0x00236960; //type:func
-func_00236AF0__FPv = 0x00236AF0; //type:func
-func_00236B38 = 0x00236B38; //type:func
-func_00236BB0 = 0x00236BB0; //type:func
-func_00236C48 = 0x00236C48; //type:func
-func_00236C88 = 0x00236C88; //type:func
-func_00236CD8 = 0x00236CD8; //type:func
-func_00236DA0 = 0x00236DA0; //type:func
-func_00236E60 = 0x00236E60; //type:func
-func_00236EA0 = 0x00236EA0; //type:func
-func_00237060 = 0x00237060; //type:func
-func_002370A0 = 0x002370A0; //type:func
-func_002373B8 = 0x002373B8; //type:func
-func_00237950 = 0x00237950; //type:func
-func_00237A98 = 0x00237A98; //type:func
-func_00237B28 = 0x00237B28; //type:func
-func_00237BE8 = 0x00237BE8; //type:func
 
 // --- src/main/gamemode.cpp ---
 lbl_002381F0 = 0x002381F0; //type:label
@@ -3455,12 +3392,6 @@ lbl_00238274 = 0x00238274; //type:label
 lbl_0023827C = 0x0023827C; //type:label
 lbl_00238284 = 0x00238284; //type:label
 lbl_0023828C = 0x0023828C; //type:label
-func_00238348__FPv = 0x00238348; //type:func
-func_00238B70 = 0x00238B70; //type:func
-func_00238BF8 = 0x00238BF8; //type:func
-func_00238C80 = 0x00238C80; //type:func
-func_00238D30 = 0x00238D30; //type:func
-func_00238DA8 = 0x00238DA8; //type:func
 func_00238E20 = 0x00238E20; //type:func
 func_00239230 = 0x00239230; //type:func
 func_002398E8 = 0x002398E8; //type:func
@@ -7241,12 +7172,6 @@ func_003AD198 = 0x003AD198; //type:func
 func_003AD1A8 = 0x003AD1A8; //type:func
 func_003AD230__FPv = 0x003AD230; //type:func
 func_003AD290 = 0x003AD290; //type:func
-func_003ADC48__FPv = 0x003ADC48; //type:func
-func_003ADC50 = 0x003ADC50; //type:func
-func_003ADC80 = 0x003ADC80; //type:func
-func_003ADCB0 = 0x003ADCB0; //type:func
-func_003ADD40 = 0x003ADD40; //type:func
-func_003ADD70 = 0x003ADD70; //type:func
 func_003ADDA0__FPv = 0x003ADDA0; //type:func
 func_003ADDC0 = 0x003ADDC0; //type:func
 func_003ADE08 = 0x003ADE08; //type:func

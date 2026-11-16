@@ -211,7 +211,7 @@ void* cGFGateState_readFromReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00234E20);
+INCLUDE_ASM("main/gamestate", cGFRidingState_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void cAI_setAIState(void*, int);
 extern "C" void* cBE_getBE();
@@ -229,7 +229,7 @@ extern signed char D_00535C10[];
  * 4, sets the AI's +0x14 to 1 and +0x8C to 0. Then cBE_setState(1) and, when no replay is playing (Replay state outside
  * 1-9), purges the UI's normal states (cUIStateStack_purgeNormalStates). Slot +0x2C (gainFocus) of D_0047D480.
  */
-extern "C" void func_00234E20(void)
+extern "C" void cGFRidingState_gainFocus(void)
 {
     cAI_setAIState(*(void**)(cGameState_mpGame + 0xC), 5);
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -283,7 +283,7 @@ void* cGFRidingState_readFromReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00234EF8);
+INCLUDE_ASM("main/gamestate", cGFTrackStartState_cGFTrackStartState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char cGFTrackStartState_vtbl[];
@@ -298,7 +298,7 @@ extern char* cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void* func_00234EF8(void* self)
+extern "C" void* cGFTrackStartState_cGFTrackStartState(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
     *(void**)((char*)self + 0xC) = D_0047D6E8;
@@ -1056,7 +1056,7 @@ extern "C" int cSSXScriptEngine_GetNISListState(void* p, int a);
 extern "C" int cSSXScriptEngine_IsActiveNISInTransition(void* p);
 extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
 extern "C" void cGameState_gotoNextState(void* self);
-void* func_00230698(void* self, int id);
+void* cGame_getTransitionMan(void* self, int id);
 extern char* cGameState_mpGame;
 extern int D_00535C04[];
 
@@ -1109,7 +1109,7 @@ extern "C" void cGFNextHeatState_update(void* self)
                 break;
             if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == 1)
                 break;
-            char* transitionMan = (char*)func_00230698(SSXApp->Game, 0);
+            char* transitionMan = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
             if (cSSXScriptEngine_IsActiveNISInTransition(ScriptEngine) != 0)
                 break;
             if (((cRiderObj_235CC8*)(transitionMan + 0x10))->isBusy() != 0)
@@ -1215,7 +1215,7 @@ extern "C" void cGameModeMan_initGameMode(void* gm, int mode);
 extern "C" void cGame_partialRestart(void* self);
 extern "C" void cRider_putAtStartpoint(void* self, int a1, int a2);
 extern "C" void cRider_cleanupAfterPutAt(void* self, int notify);
-void* func_00230698(void* self, int id);
+void* cGame_getTransitionMan(void* self, int id);
 // PORT: cTransitionObj_operator_new is the wake pool's allocator; it ignores the size the caller passes
 extern "C" void* cTransitionObj_operator_new_sz(int size) __asm__("cTransitionObj_operator_new");
 void* func_002E4D70(void* self);
@@ -1240,7 +1240,7 @@ extern "C" void cGFSessionTeleportState_gainFocus(void* self)
     cGame_partialRestart(SSXApp->Game);
     cRider_putAtStartpoint(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), *(int*)(iface + 0x10), 2);
     cRider_cleanupAfterPutAt(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1);
-    void* transitionMan = func_00230698(SSXApp->Game, 0);
+    void* transitionMan = cGame_getTransitionMan(SSXApp->Game, 0);
     char* fade = (char*)cTransitionObj_operator_new_sz(20);
     sColor_236058 colour;
     colour.r = one;
@@ -1306,7 +1306,7 @@ void* cGFSessionTeleportState_readFromReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236208);
+INCLUDE_ASM("main/gamestate", cGFUserSelectState_cGFUserSelectState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char cGFUserSelectState_vtbl[];
@@ -1321,7 +1321,7 @@ extern char* cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void* func_00236208(void* self)
+extern "C" void* cGFUserSelectState_cGFUserSelectState(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
     *(void**)((char*)self + 0xC) = D_0047D6E8;
@@ -1635,7 +1635,7 @@ extern "C" void cGFUserSelectState_readFromReplayFrame(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236868);
+INCLUDE_ASM("main/gamestate", cGFSectionLoadState_cGFSectionLoadState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D2C8[];
@@ -1649,7 +1649,7 @@ extern char* cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void* func_00236868(void* self)
+extern "C" void* cGFSectionLoadState_cGFSectionLoadState(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
     *(void**)((char*)self + 0xC) = D_0047D6E8;
@@ -1662,7 +1662,7 @@ extern "C" void* func_00236868(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_002368A0);
+INCLUDE_ASM("main/gamestate", cGFSectionLoadState_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1686,7 +1686,7 @@ struct sRace002368A0 {
  * func_00145CB0(player interface, i, 0) for each of the race's iNumberRiders. Clears the sub-state (+0x10). Slot +0x2C
  * (gainFocus) of D_0047D2C8.
  */
-extern "C" void func_002368A0(void* self)
+extern "C" void cGFSectionLoadState_gainFocus(void* self)
 {
     cBE_setState(0);
     cReplay_reset(*(void**)(cGameState_mpGame + 0x28));
@@ -1703,7 +1703,7 @@ extern "C" void func_002368A0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236960);
+INCLUDE_ASM("main/gamestate", cGFSectionLoadState_update);
 #ifdef SKIP_ASM
 struct sVec4_236960 {
     float x, y, z, w;
@@ -1735,11 +1735,11 @@ extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
  * Does nothing unless the section manager's mWaitTransport (+0x1C8) is set. Sub-state 0: once the location's section
  * (mBELocationID) is loaded, puts the world view's focus for the inactive view at the first rider's NIS end position
  * (cRider_GetNISEndPosition) with radius 45000 and goes to 1. Sub-state 1: waits until the test focus is at least 20000
- * away, the first transition manager (func_00230698) is idle and no NIS is in transition, then ends the transport
+ * away, the first transition manager (cGame_getTransitionMan) is idle and no NIS is in transition, then ends the transport
  * sequence (cSSXScriptEngine_EndTransportSequence), clears mWaitTransport, activates the location in mode 7
  * (cSectionMan_activate) and goes to 2. Slot +0x34 (update) of D_0047D2C8.
  */
-extern "C" void func_00236960(void* self)
+extern "C" void cGFSectionLoadState_update(void* self)
 {
     char* appGame = (char*)SSXApp->Game;
     char* sectionMan = *(char**)(appGame + 0x78);
@@ -1767,7 +1767,7 @@ extern "C" void func_00236960(void* self)
         if (dist < 20000.0f) {
             break;
         }
-        char* transitionMan = (char*)func_00230698(SSXApp->Game, 0);
+        char* transitionMan = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
         if (((cRiderObj_236960*)(transitionMan + 0x10))->isBusy() != 0) {
             break;
         }
@@ -1790,12 +1790,12 @@ extern "C" void func_00236960(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236AF0__FPv);
+INCLUDE_ASM("main/gamestate", cGFSectionLoadState_loseFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the section-load game state's loseFocus (slot +0x3C of D_0047D2C8).
  */
-void func_00236AF0(void* self)
+void cGFSectionLoadState_loseFocus(void* self)
 {
 }
 #endif
@@ -1835,7 +1835,7 @@ void* cGFSectionLoadState_readFromReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236B38);
+INCLUDE_ASM("main/gamestate", cGFTransportWaitState_loseFocus);
 #ifdef SKIP_ASM
 class cRace236B38 {
 public:
@@ -1853,7 +1853,7 @@ extern char* cGameState_mpGame;
  *
  * Slot +0x3C (loseFocus) of D_0047D588.
  */
-extern "C" void func_00236B38(void)
+extern "C" void cGFTransportWaitState_loseFocus(void)
 {
     (*(cRace236B38**)(cGameState_mpGame + 0xC))->v05(3);
 }
@@ -1894,7 +1894,7 @@ void* cGFTransportWaitState_readFromReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236BB0);
+INCLUDE_ASM("main/gamestate", cGFPreEventState_gainFocus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cBE_setState(int state);
@@ -1927,7 +1927,7 @@ struct sGameState_6BB0 {
  * pushes pause state 1 (D_005366E8[++D_004A2A54] = 1, cPauseState_Flags = D_004428F4). Slot +0x2C (gainFocus) of
  * D_0047D270.
  */
-extern "C" void func_00236BB0(sGameState_6BB0* self)
+extern "C" void cGFPreEventState_gainFocus(sGameState_6BB0* self)
 {
     self->done = 0;
     if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mError != 0) {
@@ -1944,7 +1944,7 @@ extern "C" void func_00236BB0(sGameState_6BB0* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236C48);
+INCLUDE_ASM("main/gamestate", cGFPreEventState_update);
 #ifdef SKIP_ASM
 extern "C" void cGameState_gotoNextState(void* self);
 
@@ -1954,7 +1954,7 @@ extern "C" void cGameState_gotoNextState(void* self);
  *
  * Calls cGameState_gotoNextState. Slot +0x34 (update) of D_0047D270.
  */
-extern "C" void func_00236C48(void* self)
+extern "C" void cGFPreEventState_update(void* self)
 {
     if (cGameComm_mGameComm == 0 || cGameComm_mGameComm->mError == 0) {
         if (*(int*)((char*)self + 8) == 1) {
@@ -1965,9 +1965,9 @@ extern "C" void func_00236C48(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236C88);
+INCLUDE_ASM("main/gamestate", cGFPreEventState_loseFocus);
 #ifdef SKIP_ASM
-extern "C" void func_00236CD8(void* self);
+extern "C" void cGFPreEventState_ResetGameState(void* self);
 extern int D_004A2A54;
 extern int cPauseState_Flags;
 extern int D_005366E8[];
@@ -1975,19 +1975,19 @@ extern int D_004428F0[];
 
 /**
  * Ends the pre-event game state: pops the pause stack (restoring cPauseState_Flags) and resets the game state with
- * func_00236CD8.
+ * cGFPreEventState_ResetGameState.
  *
  * Slot +0x3C (loseFocus) of D_0047D270. The pause stack index is not checked.
  */
-extern "C" void func_00236C88(void* self)
+extern "C" void cGFPreEventState_loseFocus(void* self)
 {
     cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-    func_00236CD8(self);
+    cGFPreEventState_ResetGameState(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236CD8);
+INCLUDE_ASM("main/gamestate", cGFPreEventState_ResetGameState);
 #ifdef SKIP_ASM
 class cRace236CD8 {
 public:
@@ -2018,7 +2018,7 @@ static inline int isMode4_236CD8()
  * Calls cSSXScriptEngine_ResetNISList(ScriptEngine, 0); unless the race's game mode (cGameMode, D_00535C10) is 4, calls
  * virtual slot 5 of the game's AI with 3 and sets the AI's +0x14 to 1; then func_002871B0 on the audio (func_0028B180).
  */
-extern "C" void func_00236CD8(void* self)
+extern "C" void cGFPreEventState_ResetGameState(void* self)
 {
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2065,7 +2065,7 @@ void* cGFPreEventState_readFromReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236DA0);
+INCLUDE_ASM("main/gamestate", cGFPostEventState_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -2089,7 +2089,7 @@ struct sRace00236DA0 {
  * cSSXScriptEngine_ResetNISList(ScriptEngine, 0), clears the overlay-done flag (+0x8) and calls
  * cOVStateManager_gotoOverlay(7). Slot +0x2C (gainFocus) of D_0047D218.
  */
-extern "C" void func_00236DA0(void* self)
+extern "C" void cGFPostEventState_gainFocus(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 0) {
@@ -2106,7 +2106,7 @@ extern "C" void func_00236DA0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236E60);
+INCLUDE_ASM("main/gamestate", cGFPostEventState_update);
 #ifdef SKIP_ASM
 extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 
@@ -2116,7 +2116,7 @@ extern "C" void cGame_setState(void* self, int a, int b, int refresh);
  *
  * Slot +0x34 (update) of D_0047D218.
  */
-extern "C" void func_00236E60(void* self)
+extern "C" void cGFPostEventState_update(void* self)
 {
     if (*(int*)((char*)self + 8) == 1) {
         cGame_setState(SSXApp->Game, 0xE, 2, 0);
@@ -2125,7 +2125,7 @@ extern "C" void func_00236E60(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00236EA0);
+INCLUDE_ASM("main/gamestate", cGFPostEventState_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern char* cGameState_mpGame;
@@ -2136,7 +2136,7 @@ extern char* cGameState_mpGame;
  *
  * Slot +0x3C (loseFocus) of D_0047D218.
  */
-extern "C" void func_00236EA0(void)
+extern "C" void cGFPostEventState_loseFocus(void)
 {
     cUIStateStack_purgeNormalStates(*(char**)(cGameState_mpGame + 0x48) + 0x18);
 }
@@ -2316,7 +2316,7 @@ extern "C" void cGFReplayStartState_loseFocus(void)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00237060);
+INCLUDE_ASM("main/gamestate", cInputSync_cInputSync);
 #ifdef SKIP_ASM
 /**
  * Constructs a networked input synchroniser for a latency and a sample count.
@@ -2328,7 +2328,7 @@ INCLUDE_ASM("main/gamestate", func_00237060);
  * @param numSamples  copies per sample
  * @return @p self
  */
-extern "C" void* func_00237060(void* self, int latencyFrames, int numSamples)
+extern "C" void* cInputSync_cInputSync(void* self, int latencyFrames, int numSamples)
 {
     *(int*)((char*)self + 0x4) = latencyFrames;
     *(int*)((char*)self + 0x8) = numSamples;
@@ -2341,22 +2341,22 @@ extern "C" void* func_00237060(void* self, int latencyFrames, int numSamples)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_002370A0);
+INCLUDE_ASM("main/gamestate", cInputSync__cInputSync);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 
-struct sEntry_func_002370A0 {
+struct sEntry_cInputSync__cInputSync {
     void* buf;
     int pad[3];
     int* a;
     int* b;
 };
 
-struct sObj_func_002370A0 {
+struct sObj_cInputSync__cInputSync {
     char pad[0x10];
     int count;
-    sEntry_func_002370A0 entries[1];
+    sEntry_cInputSync__cInputSync entries[1];
 };
 
 /**
@@ -2367,11 +2367,11 @@ struct sObj_func_002370A0 {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_002370A0(sObj_func_002370A0* self, int flags)
+extern "C" void cInputSync__cInputSync(sObj_cInputSync__cInputSync* self, int flags)
 {
     int i;
     for (i = 0; i < self->count; i++) {
-        sEntry_func_002370A0* entry = &self->entries[i];
+        sEntry_cInputSync__cInputSync* entry = &self->entries[i];
         if (entry->buf)
             cMemMan_free(entry->buf);
         operator_delete(entry->a);
@@ -2526,15 +2526,15 @@ extern "C" void* cInputSync_createremoteinput(sOwner_237280* self, int realinput
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_002373B8);
+INCLUDE_ASM("main/gamestate", cInputSync_preupdate);
 #ifdef SKIP_ASM
 // FAKEMATCH: redundant pointer local `psp` (`SyncedPad* psp = &syncedpads[i]; SyncedPad& sp = *psp;`) adds the one RTL insn
 // that puts the outer loop over loop.c's 257-insn hoist threshold, so the constant 24 is not hoisted into s5; plain form 97.12%
 // (99.69% with a ternary clamp). Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sPackSrc_7B28;
-extern "C" void func_00237BE8(void* self, sPackSrc_7B28* src, char* buf);
-extern "C" void func_00237A98(void* self, sPackSrc_7B28* src);
+extern "C" void cInputSync_decompressinput(void* self, sPackSrc_7B28* src, char* buf);
+extern "C" void cInputSync_sendClientInput(void* self, sPackSrc_7B28* src);
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" int cGameComm_readPacket(void* self, int ch, void* dst, int size);
 extern "C" float func_00258360(void* self);
@@ -2592,12 +2592,12 @@ struct cInputSync_2373B8 {
  * Fills the synced pads' sample rings for this frame: reads remote samples from the network and samples the local pads.
  *
  * Does nothing until cGameComm_mGameComm's state is 14 or more. A remote pad (no source pad) takes compressed samples
- * from cGameComm_readPacket while its ring has room, or, offline, neutral samples; each is decompressed (func_00237BE8)
+ * from cGameComm_readPacket while its ring has room, or, offline, neutral samples; each is decompressed (cInputSync_decompressinput)
  * and written numsamples times. A local pad, while under the send limit, samples its buttons every numsamples ticks,
- * sends them (func_00237A98), queues them, and recomputes the send limit from the connection's latency (func_00258360)
+ * sends them (cInputSync_sendClientInput), queues them, and recomputes the send limit from the connection's latency (func_00258360)
  * divided by the frame time (SSXApp + 0x14), at least 2 samples, capped at the ring size. cGame_update calls it.
  */
-extern "C" void func_002373B8(cInputSync_2373B8* self)
+extern "C" void cInputSync_preupdate(cInputSync_2373B8* self)
 {
     PadSample_2373B8 sample;
     CompressedSample_2373B8 compsample;
@@ -2613,7 +2613,7 @@ extern "C" void func_002373B8(cInputSync_2373B8* self)
             if (net) {
                 while (sp.writepos - sp.readpos < self->latency - (self->numsamples - 1) &&
                        cGameComm_readPacket(GameComm(), 0, &compsample, sizeof(compsample))) {
-                    func_00237BE8(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
+                    cInputSync_decompressinput(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
                     for (int j = 0; j < self->numsamples; j++) {
                         sp.samples[sp.writepos % self->latency] = sample;
                         sp.writepos++;
@@ -2622,7 +2622,7 @@ extern "C" void func_002373B8(cInputSync_2373B8* self)
             } else {
                 MEM_fill(&compsample, 0, sizeof(compsample));
                 compsample.NumButtons = 24;
-                func_00237BE8(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
+                cInputSync_decompressinput(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
                 while (sp.writepos - sp.readpos < self->latency - (self->numsamples - 1)) {
                     for (int j = 0; j < self->numsamples; j++) {
                         sp.samples[sp.writepos % self->latency] = sample;
@@ -2638,7 +2638,7 @@ extern "C" void func_002373B8(cInputSync_2373B8* self)
                 for (int j = 0; j < localsample.NumButtons; j++) {
                     localsample.Buttons[j] = sp.sourcepad->getButtonValue(j);
                 }
-                func_00237A98(self, (sPackSrc_7B28*)&localsample);
+                cInputSync_sendClientInput(self, (sPackSrc_7B28*)&localsample);
                 for (int j = 0; j < self->numsamples; j++) {
                     sp.samples[sp.writepos % self->latency] = localsample;
                     sp.writepos++;
@@ -2669,7 +2669,7 @@ void cInputSync_postupdate(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00237950);
+INCLUDE_ASM("main/gamestate", cInputSync_aiinputready);
 #ifdef SKIP_ASM
 struct sSlot237950 {
     int f0;
@@ -2691,7 +2691,7 @@ struct sOwner237950 {
  *
  * @return 1 when input is ready, otherwise 0
  */
-extern "C" int func_00237950(sOwner237950* self)
+extern "C" int cInputSync_aiinputready(sOwner237950* self)
 {
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm->mState < 14) {
@@ -2741,7 +2741,7 @@ struct sPlayer002379C8 {
 /**
  * Feeds the synced pads their next received input sample, once every player's input for the frame is there.
  *
- * Returns 0 while cGameComm_mGameComm's state is below 14 or func_00237950 says inputs are not ready; otherwise,
+ * Returns 0 while cGameComm_mGameComm's state is below 14 or cInputSync_aiinputready says inputs are not ready; otherwise,
  * for each synced pad, passes the current sample (cursor modulo the ring size) to cInputPad_update and advances it.
  *
  * @return 1 when the pads were updated
@@ -2751,7 +2751,7 @@ extern "C" int cInputSync_aiupdate(sPlayer002379C8* self)
     if (cGameComm_mGameComm->mState < 14) {
         return 0;
     }
-    if (func_00237950((sOwner237950*)self) == 0) {
+    if (cInputSync_aiinputready((sOwner237950*)self) == 0) {
         return 0;
     }
     int i;
@@ -2766,28 +2766,28 @@ extern "C" int cInputSync_aiupdate(sPlayer002379C8* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00237A98);
+INCLUDE_ASM("main/gamestate", cInputSync_sendClientInput);
 #ifdef SKIP_ASM
 struct sPackSrc_7B28;
 struct sPackDst_7B28;
-extern "C" int func_00237B28(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst);
-extern "C" void func_00237BE8(void* self, sPackSrc_7B28* src, char* buf);
+extern "C" int cInputSync_compressinput(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst);
+extern "C" void cInputSync_decompressinput(void* self, sPackSrc_7B28* src, char* buf);
 extern "C" void func_00257E98(void* mgr, int a, char* buf, int len);
 
 /**
  * Sends one local pad sample: compresses it, decompresses it back into @p src, and posts it on the network when the
  * session is synced, error-free and connected.
  *
- * Uses func_00237B28 and func_00237BE8, then func_00257E98(cGameComm_mGameComm, 0, buffer, length). Decompressing back
+ * Uses cInputSync_compressinput and cInputSync_decompressinput, then func_00257E98(cGameComm_mGameComm, 0, buffer, length). Decompressing back
  * makes the local copy match what the peer receives.
  *
  * @param src  the pad sample (button count and values)
  */
-extern "C" void func_00237A98(void* self, sPackSrc_7B28* src)
+extern "C" void cInputSync_sendClientInput(void* self, sPackSrc_7B28* src)
 {
     char buf[32];
-    int len = func_00237B28(self, src, (sPackDst_7B28*)buf);
-    func_00237BE8(self, src, buf);
+    int len = cInputSync_compressinput(self, src, (sPackDst_7B28*)buf);
+    cInputSync_decompressinput(self, src, buf);
     cGameComm* gameComm = cGameComm_mGameComm;
     int ok = gameComm->mSyncInput != 0 && gameComm->mError == 0 && gameComm->mConnected != 0;
     if (ok) {
@@ -2797,7 +2797,7 @@ extern "C" void func_00237A98(void* self, sPackSrc_7B28* src)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00237B28);
+INCLUDE_ASM("main/gamestate", cInputSync_compressinput);
 #ifdef SKIP_ASM
 struct sPackSrc_7B28 {
     int count;
@@ -2820,7 +2820,7 @@ struct sPackDst_7B28 {
  * @param dst  the compressed sample
  * @return the compressed size in bytes (4 + the kept bytes)
  */
-extern "C" int func_00237B28(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst)
+extern "C" int cInputSync_compressinput(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst)
 {
     int i;
     int j;
@@ -2842,7 +2842,7 @@ extern "C" int func_00237B28(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", func_00237BE8);
+INCLUDE_ASM("main/gamestate", cInputSync_decompressinput);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
 
@@ -2854,7 +2854,7 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  * @param out  the pad sample written
  * @param buf  the compressed sample
  */
-extern "C" void func_00237BE8(void* self, sPackSrc_7B28* out, char* buf)
+extern "C" void cInputSync_decompressinput(void* self, sPackSrc_7B28* out, char* buf)
 {
     sPackDst_7B28* in = (sPackDst_7B28*)buf;
     out->count = in->count;

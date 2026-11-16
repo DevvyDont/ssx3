@@ -195,7 +195,7 @@ struct sGameModeMan {
 /**
  * Switches the game-mode manager to a new event type and picks the matching mode handler.
  *
- * Purges the current handler (its slot 3, func_00238C80), stores @p type in iCurrentGameEvent and the new race's
+ * Purges the current handler (its slot 3, cGameModeHandler_purge), stores @p type in iCurrentGameEvent and the new race's
  * cGamePath in iCurrentGamePath. Online (path 2): events 0 -> handler 8, 1-3 -> 9, 4 -> 5, 5 -> 6, others 8.
  * Offline: 1-3 -> 0, 0 -> 1, 12 -> 2, 6-8 -> 4, 4 -> 5, 5 -> 6, 9-11 -> 7; other types keep the purged
  * handler index. Then sets bIsEventDone and calls cGameModeMan_restartHeat().
@@ -292,7 +292,7 @@ extern "C" void cGameModeMan_restartHeat(cGameModeMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238348__FPv);
+INCLUDE_ASM("main/gamemode", cGameModeMan_restorePreviousHeat__FPv);
 #ifdef SKIP_ASM
 /**
  * Takes back the last heat decision: copies iRestoreHeat (+0x74) into iNextHeat (+0x70).
@@ -301,7 +301,7 @@ INCLUDE_ASM("main/gamemode", func_00238348__FPv);
  *
  * @return the restored heat number
  */
-int func_00238348(void* self)
+int cGameModeMan_restorePreviousHeat(void* self)
 {
     int restoreHeat = *(int*)((char*)self + 0x74);
     *(int*)((char*)self + 0x70) = restoreHeat;
@@ -572,7 +572,7 @@ extern "C" void cGameModeMan_readFromReplayFrame(cGameModeMan* self, cGmStream_3
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238B70);
+INCLUDE_ASM("main/gamemode", cGameModeMan_sortScores);
 #ifdef SKIP_ASM
 extern int D_00536730[];
 extern int D_00536708[];
@@ -588,7 +588,7 @@ extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void
  *
  * @param n  number of riders to rank
  */
-extern "C" void func_00238B70(void* self, int n)
+extern "C" void cGameModeMan_sortScores(void* self, int n)
 {
     int i;
     for (i = 0; i < 10; i++) {
@@ -601,7 +601,7 @@ extern "C" void func_00238B70(void* self, int n)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238BF8);
+INCLUDE_ASM("main/gamemode", cGameModeMan_sortTimes);
 #ifdef SKIP_ASM
 extern int D_00536730[];
 extern int D_00536708[];
@@ -612,12 +612,12 @@ extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void
 /**
  * Ranks the first @p n riders by time, lowest first, into the rank tables.
  *
- * Same as func_00238B70 except that D_00536708 is sorted with func_00245E78 (ascending), so the smallest values in
+ * Same as cGameModeMan_sortScores except that D_00536708 is sorted with func_00245E78 (ascending), so the smallest values in
  * D_00536640 come first.
  *
  * @param n  number of riders to rank
  */
-extern "C" void func_00238BF8(void* self, int n)
+extern "C" void cGameModeMan_sortTimes(void* self, int n)
 {
     int i;
     for (i = 0; i < 10; i++) {
@@ -630,7 +630,7 @@ extern "C" void func_00238BF8(void* self, int n)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238C80);
+INCLUDE_ASM("main/gamemode", cGameModeHandler_purge);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 
@@ -669,10 +669,10 @@ struct sVEntry00238C80 {
  *
  * Through cGameModeHandler_pManager it sets bIsEventDone to 1, iCurrModeHandler, iLocation, iNextLocation and
  * iCurrentGameEvent to -1, clears the heat numbers, AI counts, time limit, point target and flags, zeroes iCharacters
- * and iCheatCharacters, then calls the handler's own slot +0x2C (func_00238DA8 by default). It is slot +0x1C of every
+ * and iCheatCharacters, then calls the handler's own slot +0x2C (cGameModeHandler_cleanRiderRanksTime by default). It is slot +0x1C of every
  * handler vtable; cGameModeMan_initGameMode calls it on the old handler.
  */
-extern "C" void func_00238C80(void* self)
+extern "C" void cGameModeHandler_purge(void* self)
 {
     cGameModeMan* gm = cGameModeHandler_pManager;
     gm->bIsEventDone = 1;
@@ -701,7 +701,7 @@ extern "C" void func_00238C80(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238D30);
+INCLUDE_ASM("main/gamemode", cGameModeHandler_cleanRiderRanksPoints);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern int D_00536730[];
@@ -716,7 +716,7 @@ extern int cGameModeMan_bGiveUp[];
  * Fills D_00536730 with the byte 9, and D_00536708, the score table D_00536640, D_005366A8 and cGameModeMan_bGiveUp
  * with 0. It is slot +0x24 of every handler vtable. Quirk: memset with 9 makes each rank word 0x09090909, not 9.
  */
-extern "C" void func_00238D30(void)
+extern "C" void cGameModeHandler_cleanRiderRanksPoints(void)
 {
     func_00416210(D_00536730, 9, 40);
     func_00416210(D_00536708, 0, 40);
@@ -727,7 +727,7 @@ extern "C" void func_00238D30(void)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238DA8);
+INCLUDE_ASM("main/gamemode", cGameModeHandler_cleanRiderRanksTime);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern int D_00536730[];
@@ -740,9 +740,9 @@ extern int cGameModeMan_bGiveUp[];
  * Clears the rank and score tables for a timed event.
  *
  * Fills D_00536730 and the time table D_00536640 with the byte 9 (0x09090909 per word, a large time), and D_00536708,
- * D_005366A8 and cGameModeMan_bGiveUp with 0. It is slot +0x2C of every handler vtable; func_00238C80 calls it.
+ * D_005366A8 and cGameModeMan_bGiveUp with 0. It is slot +0x2C of every handler vtable; cGameModeHandler_purge calls it.
  */
-extern "C" void func_00238DA8(void)
+extern "C" void cGameModeHandler_cleanRiderRanksTime(void)
 {
     func_00416210(D_00536730, 9, 40);
     func_00416210(D_00536708, 0, 40);
@@ -759,7 +759,7 @@ INCLUDE_ASM("main/gamemode", func_00238E20);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int func_001454F8(void* iface, int a1);
-extern "C" void func_00238B70(void* self, int n);
+extern "C" void cGameModeMan_sortScores(void* self, int n);
 // PORT: func_00239938 is defined as (void); this caller passes self.
 extern "C" void func_00239938_self(void* self) __asm__("func_00239938");
 struct sScore_239AA0;
@@ -821,7 +821,7 @@ static inline sRace_238E20* race_238E20()
  *
  * Sets the time limit from func_001454F8(race, heat) * 60 and iHeatNum from iNextHeat. Heat 1 (or 0) sets five timed AI
  * riders and, when the event was done, clears the score table (+0x4, 3 heats x 10 riders), runs slot +0x24, picks the
- * line-up (func_00239938) and the AI scores (func_00239AA0); it then ranks twice with sortScores (func_00238B70) and
+ * line-up (func_00239938) and the AI scores (func_00239AA0); it then ranks twice with sortScores (cGameModeMan_sortScores) and
  * puts the two leaders' characters in the race (AI + 0x20, + 0x24). Heat 2 ranks on heats 1 + 2; heat 3 is the last
  * heat and ranks on heat 3. When the game path (D_00535C11) is not 0 it first sets up a single heat-3 event with fresh
  * line-up. It fills the init slot (+0x14), which cGameModeMan_restartHeat calls.
@@ -897,7 +897,7 @@ extern "C" void func_00238E20(sScore_238E20* self)
         for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
             D_00536640[i] = self->t[2][i];
         }
-        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
+        cGameModeMan_sortScores((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         {
             cGameModeMan* h = cGameModeHandler_pManager;
             race_238E20()->f20 = h->iCharacters[D_00536708[0]];
@@ -906,7 +906,7 @@ extern "C" void func_00238E20(sScore_238E20* self)
                 D_00536640[i] = t0[i];
             }
         }
-        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
+        cGameModeMan_sortScores((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         cGameModeHandler_pManager->bIsEventDone = 0;
         break;
     }
@@ -919,7 +919,7 @@ extern "C" void func_00238E20(sScore_238E20* self)
         for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
             D_00536640[i] = self->t[1][i] + self->t[0][i];
         }
-        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
+        cGameModeMan_sortScores((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         break;
     case 3:
         g->bIsLastHeat = 1;
@@ -932,7 +932,7 @@ extern "C" void func_00238E20(sScore_238E20* self)
         for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
             D_00536640[i] = self->t[2][i];
         }
-        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
+        cGameModeMan_sortScores((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         break;
     }
 }
@@ -949,7 +949,7 @@ extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_00147D20(void* iface, int a1);
 extern "C" void func_00147E18(void* iface, int a1);
-extern "C" void func_00238B70(void* self, int n);
+extern "C" void cGameModeMan_sortScores(void* self, int n);
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
@@ -1019,7 +1019,7 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
         gm->iRestoreHeat = gm->iNextHeat;
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[0][i] + self->t[1][i];
-        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
+        cGameModeMan_sortScores((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         if (D_00536730[idx] < 3)
             cGameModeHandler_pManager->iNextHeat = 3;
         else
@@ -1027,7 +1027,7 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[0][i];
         if (D_00536730[idx] >= 3) {
-            func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
+            cGameModeMan_sortScores((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
             if (D_00536730[idx] >= 3) {
                 Rider_239230(idx)->unk_100 = 0;
                 break;
@@ -1038,7 +1038,7 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
     case 2:
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[0][i] + self->t[1][i];
-        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
+        cGameModeMan_sortScores((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[1][i];
         gm = cGameModeHandler_pManager;
@@ -1066,7 +1066,7 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
         }
         for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++)
             D_00536640[i] = self->t[2][i];
-        func_00238B70((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
+        cGameModeMan_sortScores((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         gm = cGameModeHandler_pManager;
         gm->iRestoreHeat = gm->iNextHeat;
         int lost = !(D_00536730[idx] < 3);
@@ -1197,7 +1197,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" short func_00147CB8(void* self, int which);
 extern "C" int func_001453D0(void* self, int kind, int place, int mode);
-extern "C" void func_00238B70(void* self, int n);
+extern "C" void cGameModeMan_sortScores(void* self, int n);
 extern unsigned int D_00536640[];
 extern int D_00536730[];
 
@@ -1221,7 +1221,7 @@ static inline int opt49_239AA0(sOpts_239AA0* o)
  *
  * For the non-simulated riders it clears all three heats and ranks them 5, 4, ...; for each simulated AI rider it asks
  * the race interface (func_001453D0) for a score per heat (or repeats heat 1's when the race setting at newRace + 0x49
- * is set), then ranks everyone with sortScores (func_00238B70).
+ * is set), then ranks everyone with sortScores (cGameModeMan_sortScores).
  */
 extern "C" void func_00239AA0(sScore_239AA0* self)
 {
@@ -1255,7 +1255,7 @@ extern "C" void func_00239AA0(sScore_239AA0* self)
         D_00536730[k] = r;
         k++;
     }
-    func_00238B70((char*)cGameModeHandler_pManager, nA + nB);
+    cGameModeMan_sortScores((char*)cGameModeHandler_pManager, nA + nB);
 }
 #endif
 
@@ -1438,7 +1438,7 @@ extern "C" void func_00239EC8(void* self, int idx)
         cGameModeMan* gm = cGameModeHandler_pManager;
         gm->bIsEventDone = 1;
         gm->bAreResultsLocked = 1;
-        func_00238B70(gm, 2);
+        cGameModeMan_sortScores(gm, 2);
         if (D_00536730[idx] > 0) {
             Rider_239230(idx)->unk_100 = 0;
         }
@@ -1914,7 +1914,7 @@ extern "C" void func_00147E18(void* iface, int a1);
 
 extern "C" int cRider_estimateFinishTick(void* self);
 
-extern "C" void func_00238BF8_A760(void* self, int n) __asm__("func_00238BF8");
+extern "C" void cGameModeMan_sortTimes_A760(void* self, int n) __asm__("cGameModeMan_sortTimes");
 
 static inline int vcall_23A760(char* obj, int slot)
 {
@@ -1927,7 +1927,7 @@ static inline int vcall_23A760(char* obj, int slot)
  *
  * Stores the finish tick (360000 for did-not-finish) in the heat's row of the table at +0x58. When the race is over and
  * the rider's state says so, estimates unfinished riders (cRider_estimateFinishTick), ranks with sortTimes
- * (func_00238BF8) and: a top-3 human goes to the next heat (heat 3 ends the event), otherwise repeats the heat. On the
+ * (cGameModeMan_sortTimes) and: a top-3 human goes to the next heat (heat 3 ends the event), otherwise repeats the heat. On the
  * career path it reports big wins and losses to the player interface (func_00147D20 / func_00147E18), and heat 3 locks
  * the results. Sets the human's +0x2F8 to 0.7, 0.35 or 0 by place. Slot +0x44 (raceFinish) of D_0047CF38.
  *
@@ -1963,7 +1963,7 @@ extern "C" void func_0023A760(cGMRaceHandler* self, int idx)
         }
         D_00536640[i] = self->tbl[heat][i];
     }
-    func_00238BF8_A760(cGameModeHandler_pManager, 10);
+    cGameModeMan_sortTimes_A760(cGameModeHandler_pManager, 10);
     cGameModeMan* gm = cGameModeHandler_pManager;
     gm->iRestoreHeat = gm->iNextHeat;
     if (D_00536730[n] < 3) {
@@ -2157,7 +2157,7 @@ extern int D_005366A8[];
 extern int D_00536730[];
 extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cRider_estimateFinishTick(void* self);
-extern "C" void func_00238BF8(void* self, int n);
+extern "C" void cGameModeMan_sortTimes(void* self, int n);
 
 struct sVEnt_23AE00 { short delta; short index; int (*fn)(void*); };
 
@@ -2204,7 +2204,7 @@ static inline int finished_23AE00(sRider_23AE00* r)
  * Records a rider's time in the online race of handler 8 and ranks the riders when the race is over.
  *
  * Stores the rider's time (360000 for did-not-finish) in its table (+0x0) and D_00536640. Once cAI_isRaceFinished,
- * estimates the unfinished riders (cRider_estimateFinishTick), ranks with sortTimes (func_00238BF8), clears +0x100 of a
+ * estimates the unfinished riders (cRider_estimateFinishTick), ranks with sortTimes (cGameModeMan_sortTimes), clears +0x100 of a
  * rider placed 4th or worse and locks the results. Slot +0x44 (raceFinish) of D_0047CED0.
  *
  * @param idx  the rider index
@@ -2230,7 +2230,7 @@ extern "C" void func_0023AE00(sSelf_23AE00* self, int idx)
             }
             D_00536640[i] = self->times[i];
         }
-        func_00238BF8((char*)cGameModeHandler_pManager, 10);
+        cGameModeMan_sortTimes((char*)cGameModeHandler_pManager, 10);
         if (D_00536730[idx] >= 3) {
             race_23AE00()->riders[idx]->f100 = 0;
         }
@@ -2701,7 +2701,7 @@ extern "C" void* cBE_getBE();
 extern "C" int cRider_estimateFinishTick(void* self);
 extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" void func_00238BF8(void* self, int n);
+extern "C" void cGameModeMan_sortTimes(void* self, int n);
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
@@ -2761,7 +2761,7 @@ extern "C" void func_0023B8C8(void* self, int idx)
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 2) {
-        func_00238BF8((char*)cGameModeHandler_pManager, 10);
+        cGameModeMan_sortTimes((char*)cGameModeHandler_pManager, 10);
         cGameModeHandler_pManager->bAreResultsLocked = 1;
         int w = 1;
         if (D_00536640[0] < D_00536640[1]) {
@@ -2782,7 +2782,7 @@ extern "C" void func_0023B8C8(void* self, int idx)
         int n = cBENewPlayerInterface_getHumanRider(player, 0);
         cGameModeMan* gm = cGameModeHandler_pManager;
         gm->bAreResultsLocked = 1;
-        func_00238BF8(gm, 10);
+        cGameModeMan_sortTimes(gm, 10);
         if (D_00536730[n] == 0 && *(int*)(Rider_23B8C8(idx) + 0x480) == 0) {
             *(int*)(Rider_23B8C8(idx) + 0x100) = 1;
             cGameModeMan* gm2 = cGameModeHandler_pManager;
@@ -2902,7 +2902,7 @@ extern "C" void* cBE_getBE();
 extern "C" int cRider_estimateFinishScore(void* self);
 extern "C" int cAI_isRaceFinished(void* race);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" void func_00238B70(void* self, int n);
+extern "C" void cGameModeMan_sortScores(void* self, int n);
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
@@ -2950,7 +2950,7 @@ extern "C" void func_0023BDB8(void* self, int idx)
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 2) {
-        func_00238B70((char*)cGameModeHandler_pManager, 2);
+        cGameModeMan_sortScores((char*)cGameModeHandler_pManager, 2);
         cGameModeHandler_pManager->bAreResultsLocked = 1;
         int w = 1;
         if (D_00536640[0] > D_00536640[1]) {
@@ -2972,7 +2972,7 @@ extern "C" void func_0023BDB8(void* self, int idx)
         int n = cBENewPlayerInterface_getHumanRider(player, 0);
         cGameModeMan* gm = cGameModeHandler_pManager;
         gm->bAreResultsLocked = 1;
-        func_00238B70(gm, 2);
+        cGameModeMan_sortScores(gm, 2);
         if (D_00536730[n] == 0 && *(int*)(Rider_23BDB8(idx) + 0x480) == 0) {
             *(int*)(Rider_23BDB8(idx) + 0x100) = 1;
             cGameModeMan* gm2 = cGameModeHandler_pManager;

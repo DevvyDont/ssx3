@@ -2554,7 +2554,7 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
 INCLUDE_ASM("seg/seg_1F1548", func_002F4118);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void *func_002306A8(void *, int);
+void *cGame_getSplashManager(void *, int);
 extern "C" void func_002F4260_4118(void *, float, void *) __asm__("func_002F4260");
 struct N4118 { char pad[0x84]; N4118 *c; };
 struct M4118 { char pad[0x10]; unsigned int cnt; };
@@ -2563,7 +2563,7 @@ extern "C" void func_002F4118(void *position, float speed) {
     unsigned int i = 0;
     if (((M4118 *)((N4118 *)((N4118 *)SSXApp)->c)->c)->cnt != 0) {
         do {
-            func_002F4260_4118(func_002306A8(((N4118 *)SSXApp)->c, i++), speed, position);
+            func_002F4260_4118(cGame_getSplashManager(((N4118 *)SSXApp)->c, i++), speed, position);
         } while (i < ((M4118 *)((N4118 *)((N4118 *)SSXApp)->c)->c)->cnt);
     }
 }
@@ -2580,14 +2580,14 @@ struct Obj41A8 : Base41A8 {
     virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
     virtual void v12(); virtual void v13();
 };
-Obj41A8 *func_002306A8_41A8(void *, int) __asm__("func_002306A8__FPvi");
+Obj41A8 *cGame_getSplashManager_41A8(void *, int) __asm__("cGame_getSplashManager__FPvi");
 #define F84(p) (*(char **)((char*)(p) + 0x84))
 
 /**
  * Tells the splash effects that a camera snapped: resets the splash manager of each view using that camera.
  *
  * Loops over the game's views (SSXApp->Game->ViewMan: count at +0x10, camera pointers from +0x4); where view i's camera
- * is @p camera and func_002306A8__FPvi(game, i) returns a splash manager, it calls that manager's virtual at +0x70,
+ * is @p camera and cGame_getSplashManager__FPvi(game, i) returns a splash manager, it calls that manager's virtual at +0x70,
  * cSplashManager_reset (reset), so no splashes carry over a camera cut. Called by cCameraController_snap and cCameraController_snapCurrent
  * (cameracontroller).
  *
@@ -2599,8 +2599,8 @@ extern "C" void cSplashManager_CameraSnapped(int camera) {
         do {
             char *t5 = F84(SSXApp);
             if (camera == *(int *)(F84(t5) + (i << 2) + 4)) {
-                if (func_002306A8_41A8(t5, i) != 0) {
-                    Obj41A8 *o = func_002306A8_41A8(F84(SSXApp), i);
+                if (cGame_getSplashManager_41A8(t5, i) != 0) {
+                    Obj41A8 *o = cGame_getSplashManager_41A8(F84(SSXApp), i);
                     o->v13();
                 }
             }

@@ -101,7 +101,7 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
 #endif
 
 //100%
-INCLUDE_ASM("main/gamerender", func_0022E550);
+INCLUDE_ASM("main/gamerender", cGameViewMan_updateViewState);
 #ifdef SKIP_ASM
 
 class cDisp22E550 {
@@ -162,7 +162,7 @@ struct cGameViewMan22E550 {
  * Then clears the world view's active flags for the unused view (one view) or for both (two views). cGame_updateState
  * calls it.
  */
-extern "C" void func_0022E550(cGameViewMan22E550* self)
+extern "C" void cGameViewMan_updateViewState(cGameViewMan22E550* self)
 {
     char* game = (char*)SSXApp->Game;
     int mode = *(int*)(game + 0x214);
@@ -315,7 +315,7 @@ extern "C" void cGameViewMan_updateAll(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamerender", func_0022E8B8);
+INCLUDE_ASM("main/gamerender", cGameViewMan_updateStreamFocus);
 #ifdef SKIP_ASM
 extern "C" void cCamera_updateStreamFocus(void* p);
 
@@ -325,7 +325,7 @@ extern "C" void cCamera_updateStreamFocus(void* p);
  *
  * cGame_update and cGame_render call it.
  */
-extern "C" void func_0022E8B8(void* self)
+extern "C" void cGameViewMan_updateStreamFocus(void* self)
 {
     unsigned int i;
     for (i = 0; i < *(unsigned int*)((char*)self + 0x10); i++) {
@@ -335,7 +335,7 @@ extern "C" void func_0022E8B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamerender", func_0022E920);
+INCLUDE_ASM("main/gamerender", cGameViewMan_isStreamReady);
 #ifdef SKIP_ASM
 struct sRenderList {
     int field_0x0;
@@ -350,7 +350,7 @@ struct sRenderList {
  *
  * @return 1 when every view is ready, otherwise 0
  */
-extern "C" int func_0022E920(sRenderList* self)
+extern "C" int cGameViewMan_isStreamReady(sRenderList* self)
 {
     unsigned int i;
     for (i = 0; i < self->count; i++) {
@@ -380,12 +380,12 @@ extern char D_0047D690[];
 extern char D_0047D6E8[];
 extern char* cGameState_mpGame;
 extern int D_004A2A54;
-extern "C" void func_00231CD0(void* self);
+extern "C" void cFadeScreen_cFadeScreen(void* self);
 extern "C" void* func_00233C10(void* self);
 extern "C" void func_00234188(void* self);
-extern "C" void* func_00234EF8(void* self);
-extern "C" void func_00236208(void* self);
-extern "C" void func_00236868(void* self);
+extern "C" void* cGFTrackStartState_cGFTrackStartState(void* self);
+extern "C" void cGFUserSelectState_cGFUserSelectState(void* self);
+extern "C" void cGFSectionLoadState_cGFSectionLoadState(void* self);
 extern "C" void func_00244240(int a);
 
 struct sArr_22E968 {
@@ -413,7 +413,7 @@ static inline void Init_22E968(char* s, int off, void* vt, int id)
 /**
  * Constructs the in-game module: clears its key subsystem pointers and builds its game-flow states in place.
  *
- * Runs the module base constructor (func_00231CD0), stores cGame's vtable, clears AI, DebugFont, UI,
+ * Runs the module base constructor (cFadeScreen_cFadeScreen), stores cGame's vtable, clears AI, DebugFont, UI,
  * InputSync and ViewMan, clears D_004A2A54 and calls func_00244240(0). It then constructs the cGF* state
  * objects in mStates (gate, podium, next heat, session teleport, replay start and others); each base state
  * constructor also clears cGameState_mpGame.
@@ -425,7 +425,7 @@ static inline void Init_22E968(char* s, int off, void* vt, int id)
  */
 extern "C" char* cGame_cGame(cGame* self)
 {
-    func_00231CD0(((char*)self));
+    cFadeScreen_cFadeScreen(((char*)self));
     *(int*)&self->AI = 0;
     *(int*)&self->DebugFont = 0;
     *(void**)&self->mVtbl = cGame_vtbl;
@@ -443,8 +443,8 @@ extern "C" char* cGame_cGame(cGame* self)
     Init_22E968(((char*)self), 296, D_0047D218, 8);
     Init_22E968(((char*)self), 312, D_0047D638, 11);
     Init_22E968(((char*)self), 328, D_0047D588, 10);
-    func_00234EF8(((char*)self) + 0x158);
-    func_00236868(((char*)self) + 0x178);
+    cGFTrackStartState_cGFTrackStartState(((char*)self) + 0x158);
+    cGFSectionLoadState_cGFSectionLoadState(((char*)self) + 0x178);
     Init_22E968(((char*)self), 396, cGFPodiumState_vtbl, 7);
     Base_22E968(((char*)self), 412);
     *(void**)(((char*)self) + 0x1A8) = cGFNextHeatState_vtbl;
@@ -452,7 +452,7 @@ extern "C" char* cGame_cGame(cGame* self)
     *(int*)(((char*)self) + 0x1B0) = 0;
     *(int*)(((char*)self) + 0x1B4) = 0;
     *(int*)(((char*)self) + 0x19C) = 1;
-    func_00236208(((char*)self) + 0x1B8);
+    cGFUserSelectState_cGFUserSelectState(((char*)self) + 0x1B8);
     Init_22E968(((char*)self), 476, cGFSessionTeleportState_vtbl, 10);
     Init_22E968(((char*)self), 492, cGFReplayStartState_vtbl, 4);
     self->PauseOwner = -1;

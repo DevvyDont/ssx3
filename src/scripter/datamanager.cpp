@@ -659,7 +659,7 @@ INCLUDE_ASM("scripter/datamanager", tNISList_Play);
 #ifdef SKIP_ASM
 extern char str_hud_e[];
 int GetHashValue32(char* s);
-void* func_00230698(void* self, int a1);
+void* cGame_getTransitionMan(void* self, int a1);
 char* func_0027C070(void* obj);
 extern "C" void func_00277778(void* self);
 extern "C" int func_00277DD8(void* self, void* a1);
@@ -768,7 +768,7 @@ int tNISList_Play_impl(char* self, int fade, int notify)
     if (func_00277DD8(self, item) == 0) {
         cSSXScriptEngine_PlayRequestScript_i(*(void**)self, *(int*)(self + 0x8), item->id, 0, (item->flags >> 3) & 1);
         if (*(int*)(self + 0x4) != 0) {
-            void* snd = func_00230698(SSXApp->Game, 0);
+            void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
             if (*(int*)((char*)snd + 0x44) != 0) {
                 func_002E4578(snd);
             }
@@ -934,7 +934,7 @@ INCLUDE_ASM("scripter/datamanager", func_00276868);
 #ifdef SKIP_ASM
 extern char str_hud_e[];
 int GetHashValue32(char* s);
-void* func_00230698(void* self, int a1);
+void* cGame_getTransitionMan(void* self, int a1);
 extern "C" void func_002E4578(void* p);
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* p);
 extern "C" void* cUIStateStack_findState(void* table, int hash);
@@ -962,7 +962,7 @@ extern "C" void func_00276868(void* nisList, int resetTransition)
         if (resetTransition != 0) {
             cCutSceneTransitionMan_ForceToRegularMode(gm);
             if (*(int*)(self + 0xB0) != 0) {
-                func_002E4578(func_00230698(SSXApp->Game, 0));
+                func_002E4578(cGame_getTransitionMan(SSXApp->Game, 0));
             }
         }
         char* table = (char*)SSXApp->Game->UI + 0x18;
@@ -1143,7 +1143,7 @@ void* func_00276CA8(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/datamanager", func_00276CC8);
 #ifdef SKIP_ASM
-void* func_00230698(void* self, int a1);
+void* cGame_getTransitionMan(void* self, int a1);
 extern "C" void tNISList_Play(void* self, int a1, int a2);
 extern "C" void func_00277778(void* self);
 extern "C" void func_00277800(void* self);
@@ -1179,7 +1179,7 @@ extern "C" void func_00276CC8(char* self)
     }
     if (*(int*)(self + 0xB0) != 0) {
         char* item = (char*)func_00283D70(self + 0xC, 0);
-        char* obj = (char*)func_00230698(SSXApp->Game, 0);
+        char* obj = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
         if (*(int*)(self + 0xB8) != 0) {
             if (--*(int*)(self + 0xB8) == 0) {
                 if (*(int*)(self + 0xAC) == 0) {
@@ -1216,7 +1216,7 @@ extern "C" void func_00276CC8(char* self)
     if (*(int*)(self + 0xC8) != 0) {
         if (--*(int*)(self + 0xC8) == 0) {
             if (*(int*)(self + 0xB0) != 0) {
-                func_002E4578(func_00230698(SSXApp->Game, 0));
+                func_002E4578(cGame_getTransitionMan(SSXApp->Game, 0));
                 *(int*)(self + 0xAC) = 0;
                 *(int*)(self + 0xB0) = 0;
                 *(int*)(self + 0xB8) = 0;
@@ -1736,7 +1736,7 @@ extern "C" void func_00277800(void* self)
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00277838);
 #ifdef SKIP_ASM
-void* func_00230698(void* self, int a1);
+void* cGame_getTransitionMan(void* self, int a1);
 extern "C" void func_00276868(void* self, int a1);
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 extern "C" void func_00277598(void* self, int index);
@@ -1787,7 +1787,7 @@ extern "C" void func_00277838(void* selfp)
         if (*(int*)(self + 0x4) != 0) {
             void* app = SSXApp->Game;
             void* fade = *(void**)((char*)app + 0x64);
-            char* transitionMan = (char*)func_00230698(app, 0);
+            char* transitionMan = (char*)cGame_getTransitionMan(app, 0);
             if (wasOn != 0 && *(int*)(transitionMan + 0x44) != 0) {
                 func_002EA780(fade, func_002E4678(transitionMan));
             } else {
@@ -1802,7 +1802,7 @@ extern "C" void func_00277838(void* selfp)
 INCLUDE_ASM("scripter/datamanager", tNISList_DoTransitionToNext);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void* func_00230698(void* self, int a1);
+void* cGame_getTransitionMan(void* self, int a1);
 char* func_0027C070(void* obj);
 extern "C" int func_00277DD8(void* self, void* a1);
 struct sDmEnt7DE8;
@@ -1839,7 +1839,7 @@ int tNISList_DoTransitionToNext_impl(char* self) __asm__("tNISList_DoTransitionT
  *
  * With a script transition running (+0xB0, On Tour mInScriptTransition) it returns 1, unless the start flag (+0xAC,
  * mIsStartTransition) is set: then it ends the transition (func_002E4578 on the game's transition manager,
- * func_00230698(Game, 0)) and returns 0. Otherwise it ends any transition and builds the next one. For a script head
+ * cGame_getTransitionMan(Game, 0)) and returns 0. Otherwise it ends any transition and builds the next one. For a script head
  * entry it reads the next-transition record of the script header (func_0027C070 of the request's player: type +0x10,
  * colour +0x11, in/hold/out frame shorts +0x12..+0x16, 1/60 s each): type 7 is a screen grab (cTransitionMan_StartTransitionScreenGrab) with no
  * wait, any other type a full transition (cTransitionMan_StartTransition with two cSSXScriptEngine_MakeTransitionObject objects; returns
@@ -1853,7 +1853,7 @@ int tNISList_DoTransitionToNext_impl(char* self)
 {
     if (*(int*)(self + 0xB0) != 0) {
         if (*(int*)(self + 0xAC) != 0) {
-            func_002E4578(func_00230698(SSXApp->Game, 0));
+            func_002E4578(cGame_getTransitionMan(SSXApp->Game, 0));
             return 0;
         }
         return 1;
@@ -1861,7 +1861,7 @@ int tNISList_DoTransitionToNext_impl(char* self)
     char* item = (char*)func_00283D70(self + 0xC, 0);
     if (func_00277DD8(self, item) == 0) {
         sDmFade_7980* f = (sDmFade_7980*)func_0027C070(cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)(item + 0xC)));
-        void* snd = func_00230698(SSXApp->Game, 0);
+        void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
         if (*(int*)((char*)snd + 0x44) != 0) {
             func_002E4578(snd);
         }
@@ -1886,7 +1886,7 @@ int tNISList_DoTransitionToNext_impl(char* self)
         }
     } else {
         sDmEnt_7980* e = (sDmEnt_7980*)func_00277DE8(self, (int*)item);
-        void* snd = func_00230698(SSXApp->Game, 0);
+        void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
         if (*(int*)((char*)snd + 0x44) != 0) {
             func_002E4578(snd);
         }
@@ -1910,7 +1910,7 @@ int tNISList_DoTransitionToNext_impl(char* self)
 INCLUDE_ASM("scripter/datamanager", func_00277C08);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void* func_00230698(void* self, int a1);
+void* cGame_getTransitionMan(void* self, int a1);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" void func_002826D8(void* self, int a1);
 extern "C" void func_00282720(void* self, int a1);
@@ -1985,7 +1985,7 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
         }
         if (self->f4) {
             func_002EA8B8(SSXApp->Game->CutSceneTransitionMan, 1);
-            char* p = (char*)func_00230698(SSXApp->Game, 0);
+            char* p = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
             if (*(int*)(p + 0x44)) {
                 func_002E4638(p, 1);
             }
@@ -2001,7 +2001,7 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
         }
         if (self->f4) {
             func_002EA8B8(SSXApp->Game->CutSceneTransitionMan, 0);
-            char* p = (char*)func_00230698(SSXApp->Game, 0);
+            char* p = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
             if (*(int*)(p + 0x44)) {
                 func_002E4638(p, 0);
             }

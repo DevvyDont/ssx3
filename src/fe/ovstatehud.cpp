@@ -1453,7 +1453,7 @@ extern "C" void func_001F16C0(void* self, int hour, int minute, int sec, int sec
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderTime);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_001DC990(void* font, float x, float y, const char* fmt, ...);
+extern "C" void cFont_textf(void* font, float x, float y, const char* fmt, ...);
 extern char D_004A2100[];
 extern char D_004A2108[];
 extern char str_pct_02d[];
@@ -1550,7 +1550,7 @@ extern "C" void cOVStateHUD1P_renderTime(void* self_, int hour, int minute, int 
         out[0] += sepW;
     }
     if (timeRenderFlags & 1)
-        func_001DC990(self->font, out[0], out[1], str_pct_02d_b, secFrac);
+        cFont_textf(self->font, out[0], out[1], str_pct_02d_b, secFrac);
 }
 #endif
 

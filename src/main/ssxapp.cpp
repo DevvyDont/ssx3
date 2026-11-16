@@ -823,7 +823,7 @@ extern "C" void* cSSXApp_getMCManager()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00227FA0);
+INCLUDE_ASM("main/ssxapp", cSSXApp_hasMCManager);
 #ifdef SKIP_ASM
 extern "C" void func_0023C850();
 
@@ -832,7 +832,7 @@ extern "C" void func_0023C850();
  *
  * The source declares it void, but the callee's result stays in the return register.
  */
-extern "C" void func_00227FA0(void) {
+extern "C" void cSSXApp_hasMCManager(void) {
     func_0023C850();
 }
 #endif
@@ -3637,9 +3637,9 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* a2, void* a3,
 INCLUDE_ASM("main/ssxapp", cGame_render);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_0022E8B8(void* views);
-extern "C" int func_0022E920(void* views);
-extern "C" int func_00231D60(void* self);
+extern "C" void cGameViewMan_updateStreamFocus(void* views);
+extern "C" int cGameViewMan_isStreamReady(void* views);
+extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void func_0022C830(void* self);
 extern "C" void func_0036A1E8();
 extern "C" void func_0031B6C8(void* m);
@@ -3947,11 +3947,11 @@ static inline void Grow_22B008(sBox_22B008& b, const sV4_22B008& c)
 
 static inline int IsReady_22B008(sGame_22B008* self)
 {
-    func_0022E8B8(self->views);
+    cGameViewMan_updateStreamFocus(self->views);
     if (self->f9C != 0) {
         return 0;
     }
-    if (func_0022E920(self->views) == 0) {
+    if (cGameViewMan_isStreamReady(self->views) == 0) {
         self->f9C = 1;
         self->fA0 = 1;
         return 0;
@@ -3963,7 +3963,7 @@ static inline int IsReady_22B008(sGame_22B008* self)
  * Draws one game frame: every camera view of the world, then the 2D overlays, UI and audio tick.
  *
  * Returns 0 when GrMan's slot 17 does; returns 1 early while StreamPause (slot 2) holds the frame, while the fade
- * screen is fully faded (func_00231D60) or while a script plays (func_0022C830 draws the cut scene). For each
+ * screen is fully faded (cFadeScreen_drawFade) or while a script plays (func_0022C830 draws the cut scene). For each
  * ViewMan view: sets the view, viewport (slot 24), camera matrix (slot 34) and projection (slot 25), draws SkyBox
  * (slot 4) with a near plane of 1.0, then the real near / far planes and render states; builds the world-space box
  * of the view frustum's eight corners (each corner sum, camera position included, is scaled by the near or far
@@ -3991,7 +3991,7 @@ extern "C" int cGame_render(sGame_22B008* self)
             return 1;
         }
     }
-    if (func_00231D60(self) != 0) {
+    if (cFadeScreen_drawFade(self) != 0) {
         return 1;
     }
     if (ScriptEngine->mIsPlaying != 0) {

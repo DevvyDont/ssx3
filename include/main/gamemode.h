@@ -13,16 +13,16 @@
 // Statics (not in the object; [O] names, retail sizes): aHandler[10] = D_00536668 (the cGameModeHandler subclass
 // instances getGM creates; iCurrModeHandler indexes it; purgeGM deletes 10), bGiveUp[6] = cGameModeMan_bGiveUp (restartHeat
 // clears 6 words), and the 10-entry score / rank tables D_00536640, D_00536708, D_00536730 that sortScores /
-// sortTimes (func_00238B70 / func_00238BF8) fill and writeToReplayFrame saves.
+// sortTimes (cGameModeMan_sortScores / cGameModeMan_sortTimes) fill and writeToReplayFrame saves.
 //
 // A FLAT layout, like main/game.h. Member names are EA's, from SSX On Tour's PSP DWARF (class cGameModeMan, 0x22C:
 // 62-entry character tables, byte bools), placed at retail offsets by:
 //   [R] retail code whose On Tour counterpart stores the same values in the same order: getGM's inlined
 //       constructor (iHeatNum = 0, iCurrModeHandler = 0, iCurrentGameEvent = -1), cGameModeHandler::purge
-//       (func_00238C80: iCurrModeHandler/iLocation/iNextLocation/iCurrentGameEvent = -1, bIsEventDone = 1, the rest 0,
+//       (cGameModeHandler_purge: iCurrModeHandler/iLocation/iNextLocation/iCurrentGameEvent = -1, bIsEventDone = 1, the rest 0,
 //       memset of both character tables), cGMFreerideHandler::init (func_0023B170: iHeatNum = 1, bIsLastHeat = 1,
 //       iCharacters[] = -1, iNextHeat = iRestoreHeat = 1, bAreResultsLocked = 1, iNextLocation = -1),
-//       restorePreviousHeat (func_00238348: iNextHeat = iRestoreHeat), initGameMode (iCurrentGameEvent = argument,
+//       restorePreviousHeat (cGameModeMan_restorePreviousHeat: iNextHeat = iRestoreHeat), initGameMode (iCurrentGameEvent = argument,
 //       iCurrentGamePath = cBENewRaceInterface::newRace.cGamePath, then iCurrModeHandler by event);
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order alone, where the fields on both sides of it are placed by [R].

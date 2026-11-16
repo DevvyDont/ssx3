@@ -2,69 +2,69 @@
 
 INCLUDE_ASM("main/loadscreens2", cPreStartScreen_update);
 
-INCLUDE_ASM("main/loadscreens2", func_00232488);
+INCLUDE_ASM("main/loadscreens2", cPreStartScreen_render);
 
-INCLUDE_ASM("main/loadscreens2", func_00232510);
+INCLUDE_ASM("main/loadscreens2", cPreStartScreen_loseFocus);
 
 INCLUDE_ASM("main/loadscreens2", cInitLoadScreen__cInitLoadScreen);
 
 INCLUDE_ASM("main/loadscreens2", cInitLoadScreen_load);
 
-INCLUDE_ASM("main/loadscreens2", func_00232588);
+INCLUDE_ASM("main/loadscreens2", cInitLoadScreen_update);
 
-INCLUDE_ASM("main/loadscreens2", func_00232650);
+INCLUDE_ASM("main/loadscreens2", cInitLoadScreen_render);
 
-INCLUDE_ASM("main/loadscreens2", func_002326D8);
+INCLUDE_ASM("main/loadscreens2", cInitLoadScreen_loseFocus);
 
 INCLUDE_ASM("main/loadscreens2", cPreGameLoadScreen_load);
 
-INCLUDE_ASM("main/loadscreens2", func_00232718);
+INCLUDE_ASM("main/loadscreens2", cPreFELoadScreen_load);
 
 INCLUDE_ASM("main/loadscreens2", cPreGameLoadScreen_cPreGameLoadScreen);
 
-INCLUDE_ASM("main/loadscreens2", func_00232738);
+INCLUDE_ASM("main/loadscreens2", cPreFELoadScreen_cPreFELoadScreen);
 
 INCLUDE_ASM("main/loadscreens2", cPreGameLoadScreen__cPreGameLoadScreen);
 
-INCLUDE_ASM("main/loadscreens2", func_00232780);
+INCLUDE_ASM("main/loadscreens2", cPreFELoadScreen__cPreFELoadScreen);
 
-INCLUDE_ASM("main/loadscreens2", func_002327B0);
+INCLUDE_ASM("main/loadscreens2", cPreGameLoadScreen_loseFocus);
 
-INCLUDE_ASM("main/loadscreens2", func_002327E8);
+INCLUDE_ASM("main/loadscreens2", cPreFELoadScreen_loseFocus);
 
-INCLUDE_ASM("main/loadscreens2", func_00232820);
+INCLUDE_ASM("main/loadscreens2", cPreGameLoadScreen_render);
 
-INCLUDE_ASM("main/loadscreens2", func_002328A8);
+INCLUDE_ASM("main/loadscreens2", cPreFELoadScreen_render);
 
-INCLUDE_ASM("main/loadscreens2", func_00232930);
+INCLUDE_ASM("main/loadscreens2", cPreGameLoadScreen_update);
 
 INCLUDE_ASM("main/loadscreens2", cPreFELoadScreen_update);
 
-INCLUDE_ASM("main/loadscreens2", func_00232AE0);
+INCLUDE_ASM("main/loadscreens2", cStartScreen_cStartScreen);
 
-INCLUDE_ASM("main/loadscreens2", func_00232B28);
+INCLUDE_ASM("main/loadscreens2", cStartScreen_load);
 
-INCLUDE_ASM("main/loadscreens2", func_00232C98);
+INCLUDE_ASM("main/loadscreens2", cStartScreen_gainFocus);
 
-INCLUDE_ASM("main/loadscreens2", func_00232CF8);
+INCLUDE_ASM("main/loadscreens2", cStartScreen_loseFocus);
 
-INCLUDE_ASM("main/loadscreens2", func_00232D18);
+INCLUDE_ASM("main/loadscreens2", cStartScreen_update);
 
-INCLUDE_ASM("main/loadscreens2", func_00232D50);
+INCLUDE_ASM("main/loadscreens2", cStartScreen_purge);
 
-INCLUDE_ASM("main/loadscreens2", func_00232DA8);
+INCLUDE_ASM("main/loadscreens2", cStartScreen_render);
 
-INCLUDE_ASM("main/loadscreens2", func_00232E20);
+INCLUDE_ASM("main/loadscreens2", cGameLoadScreen_load);
 
 INCLUDE_ASM("main/loadscreens2", cGameLoadScreen_loadTexture);
 
-INCLUDE_ASM("main/loadscreens2", func_00233260);
+INCLUDE_ASM("main/loadscreens2", cGameLoadScreen_gainFocus);
 
-INCLUDE_ASM("main/loadscreens2", func_002332C8);
+INCLUDE_ASM("main/loadscreens2", cGameLoadScreen_loseFocus);
 
-INCLUDE_ASM("main/loadscreens2", func_002332E8);
+INCLUDE_ASM("main/loadscreens2", cGameLoadScreen_purge);
 
-INCLUDE_ASM("main/loadscreens2", func_00233390);
+INCLUDE_ASM("main/loadscreens2", cGameLoadScreen_render);
 
-INCLUDE_ASM("main/loadscreens2", func_00233408);
+INCLUDE_ASM("main/loadscreens2", cGameLoadScreen_update);
 

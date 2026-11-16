@@ -52,11 +52,11 @@ extern "C" char* func_00145398(void* iface);
 extern "C" int func_00145C38(void* iface, int i);
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int i);
 extern "C" char* func_0014EE28(void* iface, int i);
-extern "C" void func_0017AE00(void* self);
-extern "C" void func_001DC990(void* self, float x, float y, const char* fmt, ...);
-extern "C" void func_001DC9D0(void* self, float x, float y, float sx, float sy, const char* str, int n);
-extern "C" void func_001DCA40(void* self, float x, float y, const char* fmt, ...);
-extern "C" void func_001DCA80(void* self, float x, float y, const char* fmt, ...);
+extern "C" void cBackgroundMan_renderImage(void* self);
+extern "C" void cFont_textf(void* self, float x, float y, const char* fmt, ...);
+extern "C" void cFont_textf1(void* self, float x, float y, float sx, float sy, const char* str, int n);
+extern "C" void cFont_centertextf(void* self, float x, float y, const char* fmt, ...);
+extern "C" void cFont_righttextf(void* self, float x, float y, const char* fmt, ...);
 extern "C" void func_00256038(void* comm, int* info);
 extern "C" char* func_0028B180();
 extern "C" void cFont_text(void* self, float x, float y, const char* str);
@@ -122,7 +122,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
 {
     sDbgPopup* popup = &self->popup;
     if (popup->active >= 0) {
-        func_0017AE00(popup);
+        cBackgroundMan_renderImage(popup);
         return;
     }
     cFont_Dbg* font = *(cFont_Dbg**)((char*)SSXApp->DebugFE + 0x18);
@@ -154,7 +154,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     y += lineheight;
     font->setColor(self->cursor == 3 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_1st_Time_WC_Flag);
-    func_001DCA80(font, 580.0f, y, str_pct_d_b, func_00145C38(intPlayer, 0));
+    cFont_righttextf(font, 580.0f, y, str_pct_d_b, func_00145C38(intPlayer, 0));
     y += lineheight;
     if (D_004A11B8 != 0)
         sprintf(buf, str_pct_s_pct_s_pct_s, cBENewRaceInterface_getLocation(newRace) + 4, cBENewRaceInterface_getLocation(newRace) + 0x44, cBENewRaceInterface_getLocation(newRace) + 0x34);
@@ -170,7 +170,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     y += lineheight;
     font->setColor(self->cursor == 6 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Control_Map);
-    func_001DCA80(font, 580.0f, y, str_pct_d_b, cBENewPlayerInterface_getControllerMapping(intPlayer, 0));
+    cFont_righttextf(font, 580.0f, y, str_pct_d_b, cBENewPlayerInterface_getControllerMapping(intPlayer, 0));
     y += lineheight;
     font->setColor(self->cursor == 7 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Board);
@@ -178,23 +178,23 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     y += lineheight;
     font->setColor(self->cursor == 8 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Number_of_AI_riders);
-    func_001DCA80(font, 580.0f, y, str_pct_d_b, D_00535C04[0]);
+    cFont_righttextf(font, 580.0f, y, str_pct_d_b, D_00535C04[0]);
     y += lineheight;
     font->setColor(self->cursor == 9 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Screen_Calibration);
-    func_001DCA80(font, 580.0f, y, str_pct_d_b, self->optVal);
+    cFont_righttextf(font, 580.0f, y, str_pct_d_b, self->optVal);
     y += lineheight;
     font->setColor(self->cursor == 10 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_HDTV);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sDbgVEntry* vt = (sDbgVEntry*)ps2GraphicsMan->mVtbl;
-        func_001DCA80(font, 580.0f, y, str_pct_s, vt[9].fn((char*)ps2GraphicsMan + vt[9].delta) ? str_On_480p : str_Off_NTSC);
+        cFont_righttextf(font, 580.0f, y, str_pct_s, vt[9].fn((char*)ps2GraphicsMan + vt[9].delta) ? str_On_480p : str_Off_NTSC);
     }
     y += lineheight;
     font->setColor(self->cursor == 11 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Playlist);
-    func_001DCA80(font, 580.0f, y, str_pct_s, func_0028B180() + (self->optTrack * 20 + 24740));
+    cFont_righttextf(font, 580.0f, y, str_pct_s, func_0028B180() + (self->optTrack * 20 + 24740));
     y += lineheight;
     unsigned int ip = 0;
     if (cCommSystem_mCommSystem != 0)
@@ -206,14 +206,14 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
         font->setColor(self->cursor == 12 ? selectColor : normalColor);
     else
         font->setColor(self->cursor == 12 ? selectColor : disabledColor);
-    func_001DC990(font, 60.0f, y, str_Network_pct_s, ipbuf);
-    func_001DCA80(font, 580.0f, y, str_pct_s, modes.name[self->optMode]);
+    cFont_textf(font, 60.0f, y, str_Network_pct_s, ipbuf);
+    cFont_righttextf(font, 580.0f, y, str_pct_s, modes.name[self->optMode]);
     y += lineheight;
     y += 5.0f;
     font->setColor(self->cursor == 13 ? selectColor : disabledColor);
-    func_001DCA40(font, 320.0f, y, str_Lobby);
+    cFont_centertextf(font, 320.0f, y, str_Lobby);
     font->setColor(self->cursor == 14 ? selectColor : normalColor);
-    func_001DCA40(font, 320.0f, y + lineheight, str_Real_Front_End);
+    cFont_centertextf(font, 320.0f, y + lineheight, str_Real_Front_End);
     if (*(int*)((char*)SSXApp + 0x4) == 0) {
         tARGB promptColour;
         promptColour.A = 1.0f;
@@ -229,7 +229,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     animCountColour.G = 0.5f;
     animCountColour.B = 0.5f;
     font->setColor(animCountColour);
-    func_001DC9D0(font, 60.0f, 420.0f, 0.5f, 0.5f, str_Anims_pct_d, 7);
+    cFont_textf1(font, 60.0f, 420.0f, 0.5f, 0.5f, str_Anims_pct_d, 7);
 }
 #endif
 
@@ -1384,8 +1384,8 @@ extern char str_pct_d_b[];
 extern "C" void func_00392908(void* self, float x, float y, const char* str);
 extern "C" void func_00392A60(void* self, const char* str, float x, float y);
 extern "C" void cFont_text(void* self, float x, float y, const char* str);
-extern "C" void func_001DCA80(void* self, float x, float y, const char* fmt, ...);
-extern "C" void func_001DCA40(void* self, float x, float y, const char* fmt, ...);
+extern "C" void cFont_righttextf(void* self, float x, float y, const char* fmt, ...);
+extern "C" void cFont_centertextf(void* self, float x, float y, const char* fmt, ...);
 extern "C" void func_002CC350(void* self);
 extern "C" void func_00256038(void* comm, int* out);
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -1577,14 +1577,14 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
         y += 20.0f;
         cFont_text(font, 110.0f, y, str_Host_Address);
         unsigned int ip = (unsigned int)LobbyMan_mLobbyMan->mHostAddr;
-        func_001DCA80(font, 530.0f, y, str_pct_d_pct_d_pct_d_pct_d, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
+        cFont_righttextf(font, 530.0f, y, str_pct_d_pct_d_pct_d_pct_d, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
         y += 20.0f;
         cFont_text(font, 110.0f, y, str_Client_Address);
         unsigned int ip2 = (unsigned int)LobbyMan_mLobbyMan->mOppoAddr;
-        func_001DCA80(font, 530.0f, y, str_pct_d_pct_d_pct_d_pct_d, ip2 >> 24, (ip2 >> 16) & 0xFF, (ip2 >> 8) & 0xFF, ip2 & 0xFF);
+        cFont_righttextf(font, 530.0f, y, str_pct_d_pct_d_pct_d_pct_d, ip2 >> 24, (ip2 >> 16) & 0xFF, (ip2 >> 8) & 0xFF, ip2 & 0xFF);
         y += 20.0f;
         cFont_text(font, 110.0f, y, str_Seed);
-        func_001DCA80(font, 530.0f, y, str_pct_d_b, LobbyMan_mLobbyMan->mSeed);
+        cFont_righttextf(font, 530.0f, y, str_pct_d_b, LobbyMan_mLobbyMan->mSeed);
         break;
     }
     }
@@ -1597,7 +1597,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.2f);
         unsigned int localAddr = ip;
-        func_001DCA40(font, 320.0f, 420.0f, str_pct_d_pct_d_pct_d_pct_d, localAddr >> 24, (localAddr >> 16) & 0xFF, (localAddr >> 8) & 0xFF, localAddr & 0xFF);
+        cFont_centertextf(font, 320.0f, 420.0f, str_pct_d_pct_d_pct_d_pct_d, localAddr >> 24, (localAddr >> 16) & 0xFF, (localAddr >> 8) & 0xFF, localAddr & 0xFF);
     }
 }
 #endif
@@ -1751,7 +1751,7 @@ extern "C" void func_0017F500(void* p_, int tex)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017F7B8);
 #ifdef SKIP_ASM
-extern "C" void func_00231CD0(void* self);
+extern "C" void cFadeScreen_cFadeScreen(void* self);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern char cDebugFE_vtbl[];
 
@@ -1774,7 +1774,7 @@ struct sDbgList17F7B8 {
 
 extern "C" void* func_0017F7B8(void* self)
 {
-    func_00231CD0(self);
+    cFadeScreen_cFadeScreen(self);
     *(void**)self = cDebugFE_vtbl;
     *(int*)((char*)self + 0x24) = 0;
     *(int*)((char*)self + 0x28) = 0;
@@ -2026,7 +2026,7 @@ extern "C" void cDebugFE_update(void* self)
 INCLUDE_ASM("fe/debugfe", cDebugFE_render);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
-extern "C" int func_00231D60(void* self);
+extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void func_0017F500(void* self, int a1);
 
 struct sVEnt_17FBF0 { short delta; short index; void* fn; };
@@ -2067,7 +2067,7 @@ static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
 /**
  * Draws the debug front end: a full-screen 640x480 view, the heartbeat and the active screen.
  *
- * Returns 0 at once when GrMan's slot 17 returns 0. Draws the fade overlay with func_00231D60 (cFadeScreen's
+ * Returns 0 at once when GrMan's slot 17 returns 0. Draws the fade overlay with cFadeScreen_drawFade (cFadeScreen's
  * render); unless that reports the screen fully faded it sets a black clear colour (slot 15), the 640x480 viewport
  * (slot 26), the identity matrix (slot 34) and the render-state bits, draws the heartbeat (func_0017F500 on +0x24
  * with the texture at +0x1C) and calls the active screen's render virtual (+0x14, slot 3). Always ends with GrMan
@@ -2082,7 +2082,7 @@ extern "C" int cDebugFE_render(char* self)
     if (!((FnI_17FBF0)vt[17].fn)((char*)ps2GraphicsMan + vt[17].delta)) {
         return 0;
     }
-    if (func_00231D60(self) == 0) {
+    if (cFadeScreen_drawFade(self) == 0) {
         cPS2GraphicsMan* graphicsMan1 = GrMan;
         sVEnt_17FBF0* vt1 = (sVEnt_17FBF0*)graphicsMan1->mVtbl;
         char* this1 = (char*)graphicsMan1 + vt1[15].delta;
@@ -2760,7 +2760,7 @@ extern "C" void cFEInput_update(sDebugFE1804B8* self)
 INCLUDE_ASM("fe/debugfe", func_00180508);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" unsigned short* func_001DD580(unsigned short* p);
+extern "C" unsigned short* tAttrScreen_tAttrScreen(unsigned short* p);
 extern "C" int cList_cList(void* p);
 extern "C" int cUIThing_cUIThing(void* p, int a1, int a2);
 extern int D_0046D1A0[];
@@ -2774,7 +2774,7 @@ extern "C" void* func_00180508(char* self, int a1)
     *(int*)(self + 0xC) = 0;
     *(int*)(self + 0x10) = 0;
     *(int**)(self + 8) = cUIScreen_vtbl;
-    func_001DD580((unsigned short*)(self + 0x14));
+    tAttrScreen_tAttrScreen((unsigned short*)(self + 0x14));
     cList_cList(self + 0x18);
     *(int*)(self + 0x34) = 0;
     *(int*)(self + 0x38) = 0;

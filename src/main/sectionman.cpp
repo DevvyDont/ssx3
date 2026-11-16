@@ -102,7 +102,7 @@ extern "C" void cSectionMan_initEventPool(cSectionMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/sectionman", func_0022E278__FPv);
+INCLUDE_ASM("main/sectionman", cSectionMan_allocEvent__FPv);
 #ifdef SKIP_ASM
 struct sSectionLink {
     int pad0;
@@ -117,7 +117,7 @@ struct sSectionLink {
  *
  * @return the event
  */
-void* func_0022E278(void* self)
+void* cSectionMan_allocEvent(void* self)
 {
     sSectionLink* node = *(sSectionLink**)((char*)self + 0x198);
     *(sSectionLink**)((char*)self + 0x198) = node->next;
@@ -126,7 +126,7 @@ void* func_0022E278(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/sectionman", func_0022E288__FPvT0);
+INCLUDE_ASM("main/sectionman", cSectionMan_freeEvent__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns an event to the section manager's free list: links @p node in front of m_pFreeEventList (+0x198).
@@ -136,7 +136,7 @@ INCLUDE_ASM("main/sectionman", func_0022E288__FPvT0);
  * @param node  the event to free
  * @return the previous head of the free list
  */
-int func_0022E288(void* self, void* node)
+int cSectionMan_freeEvent(void* self, void* node)
 {
     int prevHead = *(int*)((char*)self + 0x198);
     *(int*)((char*)node + 0x4) = prevHead;
@@ -153,7 +153,7 @@ struct sSectionNode_E298 {
     sSectionNode_E298* next; // 0x4
 };
 
-void* func_0022E278(void* self);
+void* cSectionMan_allocEvent(void* self);
 extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, void* prev, void* node);
 
 /**
@@ -177,7 +177,7 @@ extern "C" void cSectionMan_addActiveEvent(cSectionMan* self, int id)
             n = n->next;
         }
     }
-    n = (sSectionNode_E298*)func_0022E278(self);
+    n = (sSectionNode_E298*)cSectionMan_allocEvent(self);
     n->id = id;
     n->next = 0;
     if (prev != 0) {
@@ -210,8 +210,8 @@ extern "C" int cSectionMan_getNextActiveEvent(cSectionMan* self, void* pPrevEven
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/sectionman", cSectionMan_removeActiveEvent);
 #ifdef SKIP_ASM
-// PORT: the unit defines func_0022E288 as returning int; this caller treats it as void.
-void func_0022E288_v(void* self, void* node) __asm__("func_0022E288__FPvT0");
+// PORT: the unit defines cSectionMan_freeEvent as returning int; this caller treats it as void.
+void cSectionMan_freeEvent_v(void* self, void* node) __asm__("cSectionMan_freeEvent__FPvT0");
 
 /**
  * Unlinks an event from the active list and returns its node to the free list.
@@ -226,7 +226,7 @@ extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, void* prev, voi
     } else {
         *(int*)((char*)prev + 0x4) = *(int*)((char*)node + 0x4);
     }
-    func_0022E288_v(self, node);
+    cSectionMan_freeEvent_v(self, node);
     self->m_iNumActiveEvent = self->m_iNumActiveEvent - 1;
 }
 #endif

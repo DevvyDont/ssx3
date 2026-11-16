@@ -3236,7 +3236,7 @@ extern "C" void cPunchFX_readFromReplayFrame(void*);
 void cCheatFX_reset(void*);
 // PORT: cWorldPainterMan_reset is defined with an unused self param; this caller passes none.
 void cWorldPainterMan_reset_noarg() __asm__("cWorldPainterMan_reset__FPv");
-void* func_002306A8(void* self, int i);
+void* cGame_getSplashManager(void* self, int i);
 
 struct sVEntry00111890 { short delta; short index; void (*fn)(void*); };
 
@@ -3264,7 +3264,7 @@ extern "C" void cRiderHandler_resetRiderFX(cRiderHandler* self)
     int id = *(int*)((char*)self->GroundMotion.mRider + 0x870);
     if (id >= 0)
     {
-        char* obj = (char*)func_002306A8(SSXApp->Game, id);
+        char* obj = (char*)cGame_getSplashManager(SSXApp->Game, id);
         if (obj != 0)
         {
             sVEntry00111890* vt = *(sVEntry00111890**)(obj + 0xC);

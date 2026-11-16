@@ -47,7 +47,7 @@ void* cBigFile_cBigFile(cBigFile* p);
 extern "C" void cGame_loadTrack(cGame* self);
 extern "C" void* cReplay_cReplay(void* p);
 extern "C" void* cFXLoader_cFXLoader(void* p, int a);
-extern "C" void* func_00237060(void* p, int n, int m);
+extern "C" void* cInputSync_cInputSync(void* p, int n, int m);
 int BXrand();
 extern "C" void GMsrand(int seed);
 extern "C" void* cAI_cAI(void* p);
@@ -81,7 +81,7 @@ extern "C" void* cOVSound_cOVSound(void* p);
 extern "C" void* cOVStateHUD1P_cOVStateHUD1P(void* p, void* ui, int a);
 extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
 void func_0026F898(void* p, int a);
-void func_00231278(void* self, int val);
+void cGame_setPreloadState(void* self, int val);
 extern "C" void cGame_updateState(void* self);
 extern "C" void func_003E5398(int a);
 extern "C" int cGame_isPreloadedStateReady(void* self);
@@ -260,7 +260,7 @@ extern "C" void cGame_load(cGame* self)
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         float dt = *(float*)((char*)SSXApp + 0x14);
         int n = (int)((cBENetworkInterface_networkOpt.fLatency + (float)cGameComm_mGameComm->mNumSamples * dt) / dt) + 2;
-        self->InputSync = (cInputSync*)func_00237060(operator new(68, str_InputSync, 0, 0), n, cGameComm_mGameComm->mNumSamples);
+        self->InputSync = (cInputSync*)cInputSync_cInputSync(operator new(68, str_InputSync, 0, 0), n, cGameComm_mGameComm->mNumSamples);
     } else {
         GMsrand(BXrand());
     }
@@ -370,7 +370,7 @@ extern "C" void cGame_load(cGame* self)
         func_0026F898(self->Replay, D_004A3484);
         cGame_setState((self), 0x10, 0, 0);
     } else {
-        func_00231278((self), 10);
+        cGame_setPreloadState((self), 10);
         do {
             cGame_updateState((self));
             func_003E5398(0);
@@ -574,7 +574,7 @@ extern "C" void cCameraTriggerMan_purge(void* self);
 extern "C" void cFEAsyncManager_FlushFEAsyncTextures(void* p);
 extern "C" void cSSXScriptEngine_ForceEndScriptsAll(void* p);
 extern "C" void func_00397B70(void* p, int flags);
-extern "C" void func_002370A0(void* p, int flags);
+extern "C" void cInputSync__cInputSync(void* p, int flags);
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* p);
 void cSurfPropCache_purge(void* p);
 void operator_delete(int* p);
@@ -717,7 +717,7 @@ extern "C" void cGame_purge(char* self)
     cFEAsyncManager_FlushFEAsyncTextures(SSXApp->mFEAsyncManager);
     cSSXScriptEngine_ForceEndScriptsAll(ScriptEngine);
     if (*(void**)(self + 0x48) != 0) func_00397B70(*(void**)(self + 0x48), 3);
-    if (*(void**)(self + 0x7C) != 0) func_002370A0(*(void**)(self + 0x7C), 3);
+    if (*(void**)(self + 0x7C) != 0) cInputSync__cInputSync(*(void**)(self + 0x7C), 3);
     cCutSceneTransitionMan_ForceToRegularMode(*(void**)(self + 0x64));
     cSurfPropCache_purge(*(void**)(self + 0x44));
     operator_delete(*(int**)(self + 0x44));
@@ -1056,7 +1056,7 @@ extern "C" void cGame_sectionUnloading(cGame* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230430);
+INCLUDE_ASM("main/gameload", cGame_loadWScriptManSection);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: func_00308B58 is declared with one argument; it forwards the section id in $a1 to func_00308B78
@@ -1094,7 +1094,7 @@ static inline bool isSectionLoaded_0430(sScriptCache_0430* c, int sectionId)
  *
  * @param sectionId  the world section
  */
-extern "C" void func_00230430(void* self, int sectionId)
+extern "C" void cGame_loadWScriptManSection(void* self, int sectionId)
 {
     if (isSectionLoaded_0430((sScriptCache_0430*)cWorld_m_pTheWorld->m_pWScriptCache, sectionId)) {
         func_00308B58_2(cWScriptMan_TheWScriptMan, sectionId);
@@ -1111,7 +1111,7 @@ extern "C" void cGameComm_gameExit(void* p);
 extern "C" void func_00266DF8(void* p);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
-void* func_00232738(void* self);
+void* cPreFELoadScreen_cPreFELoadScreen(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern void* D_004A33F4;
 extern char str_PreGameLoadScreen[];
@@ -1140,7 +1140,7 @@ extern "C" void cGame_exit(cGame* self, int toFrontEnd)
     if (toFrontEnd != 0) {
         cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_PreGameLoadScreen, 0x100, 0)));
     } else {
-        cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)func_00232738(cMemMan_alloc(8, str_PreFELoad, 0x100, 0)));
+        cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreFELoadScreen_cPreFELoadScreen(cMemMan_alloc(8, str_PreFELoad, 0x100, 0)));
     }
 }
 #endif
@@ -1230,7 +1230,7 @@ extern "C" void func_00230640(void)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230698__FPvi);
+INCLUDE_ASM("main/gameload", cGame_getTransitionMan__FPvi);
 #ifdef SKIP_ASM
 /**
  * Returns the game's transition manager for one view: TransitionMan[@p i] (+0x5C).
@@ -1238,14 +1238,14 @@ INCLUDE_ASM("main/gameload", func_00230698__FPvi);
  * @param i  the view (player) index, 0 or 1
  * @return the cTransitionMan
  */
-int func_00230698(void* self, int i)
+int cGame_getTransitionMan(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0x5C);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_002306A8__FPvi);
+INCLUDE_ASM("main/gameload", cGame_getSplashManager__FPvi);
 #ifdef SKIP_ASM
 /**
  * Returns the game's splash manager for one view: SplashManager[@p i] (+0x68).
@@ -1253,7 +1253,7 @@ INCLUDE_ASM("main/gameload", func_002306A8__FPvi);
  * @param i  the view (player) index, 0 or 1
  * @return the cSplashManager
  */
-int func_002306A8(void* self, int i)
+int cGame_getSplashManager(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0x68);
 }
@@ -1265,12 +1265,12 @@ INCLUDE_ASM("main/gameload", cGame_update);
 extern "C" float func_002EE400(int id);
 extern "C" void cGameComm_update(void* p);
 extern "C" void cSSXScriptEngine_UpdateLoad(void* p);
-extern "C" int func_0022E920(void* p);
+extern "C" int cGameViewMan_isStreamReady(void* p);
 extern "C" void cGameViewMan_updateAll(void* p);
 extern "C" void cGame_updateState(void* self);
-extern "C" void func_0022E8B8(void* p);
+extern "C" void cGameViewMan_updateStreamFocus(void* p);
 extern "C" void cWorldCache_flushInActivePages(void* p);
-extern "C" void func_002373B8(void* p);
+extern "C" void cInputSync_preupdate(void* p);
 extern "C" void cOVStateManager_update(void);
 extern "C" int cMenuSys_isActive(void* p);
 extern "C" void func_002CC0C0(void* p);
@@ -1292,7 +1292,7 @@ extern "C" void cSSXAudio_PauseAudio(void* p);
 extern "C" void func_00294F48(void* p);
 extern "C" int func_0020CBA0(void);
 extern "C" void cPlaybackMan_update(void* p);
-extern "C" int func_00237950(void* p);
+extern "C" int cInputSync_aiinputready(void* p);
 extern "C" int cInputSync_aiupdate(void* p);
 extern "C" int cPlaybackMan_isPauseAI(void* p);
 extern "C" void cReplay_update(void* p);
@@ -1401,7 +1401,7 @@ static inline int canUpdate_2306B8(cGame* self)
 
 static inline int updatePause_2306B8(cGame* self)
 {
-    if (func_0022E920(((char*)self->ViewMan)) == 0 || *(int*)(((char*)self->SectionMan) + 0x1D0) == 0) {
+    if (cGameViewMan_isStreamReady(((char*)self->ViewMan)) == 0 || *(int*)(((char*)self->SectionMan) + 0x1D0) == 0) {
         *(int*)(*((char**)((char*)self->World)) + 0x3D4) = 0;
         cWorld_update(((char*)self->World));
         cGameViewMan_updateAll(((char*)self->ViewMan));
@@ -1409,7 +1409,7 @@ static inline int updatePause_2306B8(cGame* self)
             cGame_updateState(self);
             cSectionMan_update(((char*)self->SectionMan));
         }
-        if (self->IsStreamPaused == 0 && func_0022E920(((char*)self->ViewMan)) == 0) {
+        if (self->IsStreamPaused == 0 && cGameViewMan_isStreamReady(((char*)self->ViewMan)) == 0) {
             self->m_bFlushStreamer = 1;
         }
         self->IsStreamPaused = 1;
@@ -1417,7 +1417,7 @@ static inline int updatePause_2306B8(cGame* self)
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sVEntry_2306B8* vt = (sVEntry_2306B8*)ps2GraphicsMan->mVtbl;
             vt[19].fn((char*)ps2GraphicsMan + vt[19].delta);
-            func_0022E8B8(((char*)self->ViewMan));
+            cGameViewMan_updateStreamFocus(((char*)self->ViewMan));
             cWorldCache_flushInActivePages(*((void**)((char*)self->World)));
             self->m_bFlushStreamer = 0;
         }
@@ -1523,12 +1523,12 @@ extern "C" void cGame_update(cGame* self)
     cFadeScreen_update_v((self));
     if (canUpdate_2306B8((self)) && updatePause_2306B8((self))) {
         if ((char*)self->InputSync != 0) {
-            func_002373B8((char*)self->InputSync);
+            cInputSync_preupdate((char*)self->InputSync);
         }
         cOVStateManager_update();
         if (updateState_2306B8((self))) {
             int skip;
-            if ((char*)self->InputSync == 0 || func_00237950((char*)self->InputSync) != 0) {
+            if ((char*)self->InputSync == 0 || cInputSync_aiinputready((char*)self->InputSync) != 0) {
                 if (self->mCurrentStateID == 3) {
                     cGame_updateState((self));
                     cBucketMan_mergeBucket(&gBucketMan, 1);
@@ -1707,7 +1707,7 @@ INCLUDE_ASM("main/gameload", cGame_updateState);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0022E550(void* self);
+extern "C" void cGameViewMan_updateViewState(void* self);
 extern int cPauseState_Flags;
 
 class cGameState_0F40 {
@@ -1751,7 +1751,7 @@ struct sGameLoad_0F40 {
  * When mPendingStateID (+0x210) is set, the current state gets loseFocus() (slot 7) and becomes the previous one
  * (mPrevState, mPrevStateID), the member state for the id becomes mCurrentState / mCurrentStateID, the pending id and
  * mPendingStateStartupFlag (+0x21C) are cleared, a preload of that same state is forgotten, the split-screen layout is
- * refreshed (func_0022E550 on ViewMan, +0x84) and the new state gets gainFocus(startup flag) (slot 5). The per-function
+ * refreshed (cGameViewMan_updateViewState on ViewMan, +0x84) and the new state gets gainFocus(startup flag) (slot 5). The per-function
  * view names these slots enter/update/start/tick/exit. It also calls cBE_getInterface(SSXApp->BE, 7) and ignores the
  * result.
  *
@@ -1906,7 +1906,7 @@ extern "C" void cGame_updateState(void* self_)
         self->mPreloadingState = 0;
     }
     if (self->mCurrentState != 0) {
-        func_0022E550(self->ViewMan);
+        cGameViewMan_updateViewState(self->ViewMan);
         self->mCurrentState->gainFocus(arg);
     }
 }
@@ -1937,7 +1937,7 @@ extern "C" void cGame_setState(void* self, int iNextState, int startupFlag, int 
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231278__FPvi);
+INCLUDE_ASM("main/gameload", cGame_setPreloadState__FPvi);
 #ifdef SKIP_ASM
 /**
  * Asks the game to preload a state next: stores @p val in mPendingPreloadStateID (+0x208).
@@ -1946,7 +1946,7 @@ INCLUDE_ASM("main/gameload", func_00231278__FPvi);
  *
  * @param val  the state id to preload
  */
-void func_00231278(void* self, int val)
+void cGame_setPreloadState(void* self, int val)
 {
     *(int*)((char*)self + 0x208) = val;
 }
@@ -2011,7 +2011,7 @@ extern "C" int cGame_isPreloadedStateReady(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231320);
+INCLUDE_ASM("main/gameload", cGame_doNextState);
 #ifdef SKIP_ASM
 extern "C" void cGameState_gotoNextState(void* p);
 
@@ -2019,7 +2019,7 @@ extern "C" void cGameState_gotoNextState(void* p);
  * Moves the game to its next state: calls cGameState_gotoNextState on the current state (mCurrentState, +0x200) when
  * there is one.
  */
-extern "C" void func_00231320(void* self)
+extern "C" void cGame_doNextState(void* self)
 {
     void* gameState = *(void**)((char*)self + 0x200);
     if (gameState != 0) {
@@ -2442,7 +2442,7 @@ extern "C" int cGame_canUserActivatePauseMenu(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231B50);
+INCLUDE_ASM("main/gameload", cLoadScreen_drawSplash);
 #ifdef SKIP_ASM
 #include "bx/math3d.h"
 
@@ -2462,7 +2462,7 @@ struct sQuadVtx {
  *
  * @param value  the texture id
  */
-extern "C" void func_00231B50(void* self, int value) {
+extern "C" void cLoadScreen_drawSplash(void* self, int value) {
     sQuadVtx verts[4];
     t4Vector cornerPos;
     int i;
@@ -2519,7 +2519,7 @@ extern "C" int cLoadScreen_loseFocus(void* self)
 extern "C" void* cFadeScreen_update(void* self);
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231CB0__FPv);
+INCLUDE_ASM("main/gameload", cLoadScreen_update__FPv);
 #ifdef SKIP_ASM
 /**
  * Updates a load screen: calls cFadeScreen_update.
@@ -2529,14 +2529,14 @@ INCLUDE_ASM("main/gameload", func_00231CB0__FPv);
  *
  * @return cFadeScreen_update's result
  */
-void* func_00231CB0(void* self)
+void* cLoadScreen_update(void* self)
 {
     return cFadeScreen_update(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231CD0);
+INCLUDE_ASM("main/gameload", cFadeScreen_cFadeScreen);
 #ifdef SKIP_ASM
 extern char D_0047D980[];
 
@@ -2547,7 +2547,7 @@ extern char D_0047D980[];
  *
  * @return @p self
  */
-extern "C" void* func_00231CD0(void* self)
+extern "C" void* cFadeScreen_cFadeScreen(void* self)
 {
     *(void**)((char*)self + 0) = D_0047D980;
     *(float*)((char*)self + 4) = 0.20000000298023224f;
@@ -2600,7 +2600,7 @@ extern "C" void* cFadeScreen_update(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231D60);
+INCLUDE_ASM("main/gameload", cFadeScreen_drawFade);
 #ifdef SKIP_ASM
 extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z);
 extern int D_004A28AC;
@@ -2687,7 +2687,7 @@ static inline float Clamp231D60(float v, float lo, float hi)
  *
  * @return 1 once the fade is fully opaque (alpha >= 1), otherwise 0
  */
-extern "C" int func_00231D60(void* self)
+extern "C" int cFadeScreen_drawFade(void* self)
 {
     if (*(float*)((char*)self + 4) > 0.0f) {
     cPS2GraphicsMan* ctx = GrMan;
@@ -2745,7 +2745,7 @@ extern "C" void cLoadIndicator_update(float* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231FC0);
+INCLUDE_ASM("main/gameload", cLoadIndicator_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -2850,7 +2850,7 @@ extern char* D_004A28A8_1FC0 __asm__("SSXApp");
  * by cLoadIndicator_update); its colour (+0xC) takes the field at +0x4 as its first component. Then ends 2D mode and
  * the scene and pops the draw state. The pre-start load screens call it.
  */
-extern "C" void func_00231FC0(sFade_1FC0* self)
+extern "C" void cLoadIndicator_render(sFade_1FC0* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ((cGfx_1FC0*)ps2GraphicsMan)->stateTop[1] = ((cGfx_1FC0*)ps2GraphicsMan)->stateTop[0];

@@ -3,7 +3,7 @@
 
 // cScreenPopup: the front end's generic message/confirmation popup (title, message, up to 5 options, an optional
 // text-entry box that opens a cKeyboardPopup). A cUIState; its methods are in fe/fepopup.cpp. Retail vtable
-// cScreenPopup_vtbl (stored by cScreenPopup_cScreenPopup and the default ctor func_001DDBD0). Created with
+// cScreenPopup_vtbl (stored by cScreenPopup_cScreenPopup and the default ctor cScreenPopup_cScreenPopup1). Created with
 // cMemMan_alloc(0x360, "Confirmation Popup") + cScreenPopup_cScreenPopup (cScreenPopup_createConfirmationPopup,
 // feasyncfile.cpp); cFEPopupConfirm (fememcardcallbacks.cpp) derives from it.
 //
@@ -81,7 +81,7 @@ struct cScreenPopup {
     int mbNoEntryOnNext;            // 0x0B8 [O] (On Tour: bool); [U] cScreenPopup_onWidgetEvent sets/clears it,
                                     //       cScreenPopup_onWidgetMenu (case 6) tests it
     cPopupInfo info;                // 0x0BC [O] cPopupInfo info; [R] constructed by cPopupInfo_cPopupInfo(self + 0xBC), destroyed by
-                                    //       cPopupInfo__cPopupInfo; getPopupInfo (func_001DDC20) returns self + 0xBC; retail cPopupInfo
+                                    //       cPopupInfo__cPopupInfo; getPopupInfo (cScreenPopup_getPopupInfo) returns self + 0xBC; retail cPopupInfo
                                     //       is 0xCC bytes (data to 0xC4, vptr cPopupInfo_vtbl at 0xC8)
     float mvPosBackWhite[3];        // 0x188 [O]; [U] FillObjectPointers: "whitefg" position
     float mvPosBackRed[3];          // 0x194 [O]; [U] "redbg" position

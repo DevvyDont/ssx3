@@ -8454,7 +8454,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E8098);
 #ifdef SKIP_ASM
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
-extern "C" void func_00231320(void* self);
+extern "C" void cGame_doNextState(void* self);
 
 extern "C" void func_001E8098(void* self)
 {
@@ -8469,7 +8469,7 @@ extern "C" void func_001E8098(void* self)
     *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
     if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
         cUIStateStack_purgeNormalStates((char*)SSXApp->Game->UI + 0x18);
-        func_00231320(SSXApp->Game);
+        cGame_doNextState(SSXApp->Game);
     }
 }
 #endif
@@ -8478,7 +8478,7 @@ extern "C" void func_001E8098(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E8160);
 #ifdef SKIP_ASM
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
-extern "C" void func_00231320(void* self);
+extern "C" void cGame_doNextState(void* self);
 
 extern "C" void func_001E8160(void* self, void* popup, int event)
 {
@@ -8486,7 +8486,7 @@ extern "C" void func_001E8160(void* self, void* popup, int event)
         if (event == 5 && *(int*)((char*)self + 0xA0) != 0) {
             char* game = (char*)SSXApp->Game;
             cUIStateStack_purgeNormalStates(*(char**)(game + 0x48) + 0x18);
-            func_00231320(game);
+            cGame_doNextState(game);
         }
     }
 }
@@ -8672,7 +8672,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E87B8);
 #ifdef SKIP_ASM
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
-extern "C" void func_00231320(void* self);
+extern "C" void cGame_doNextState(void* self);
 
 extern "C" void func_001E87B8(void* self)
 {
@@ -8687,7 +8687,7 @@ extern "C" void func_001E87B8(void* self)
     *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
     if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
         cUIStateStack_purgeNormalStates((char*)SSXApp->Game->UI + 0x18);
-        func_00231320(SSXApp->Game);
+        cGame_doNextState(SSXApp->Game);
     }
 }
 #endif
@@ -8696,7 +8696,7 @@ extern "C" void func_001E87B8(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E8880);
 #ifdef SKIP_ASM
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
-extern "C" void func_00231320(void* self);
+extern "C" void cGame_doNextState(void* self);
 
 extern "C" void func_001E8880(void* self, void* popup, int event)
 {
@@ -8704,7 +8704,7 @@ extern "C" void func_001E8880(void* self, void* popup, int event)
         if (event == 5 && *(int*)((char*)self + 0xA0) != 0) {
             char* game = (char*)SSXApp->Game;
             cUIStateStack_purgeNormalStates(*(char**)(game + 0x48) + 0x18);
-            func_00231320(game);
+            cGame_doNextState(game);
         }
     }
 }

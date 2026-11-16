@@ -3,7 +3,7 @@
 
 // cBuyPopupInfo: what a buy popup (cUIStateBuyPopup, fe/uistatebuypopup.h) shows: the price, the player's cash or
 // remaining credits, and three strings (the item's name, its type and the question). cUIStateBuyPopup embeds one at
-// 0x48 (mInfo; getPopupInfo func_001DDCB8 returns this + 0x48); the shop states fill it through the init* methods.
+// 0x48 (mInfo; getPopupInfo cUIStateBuyPopup_getPopupInfo returns this + 0x48); the shop states fill it through the init* methods.
 //
 // Size 0x24: SSX On Tour's DWARF (class cBuyPopupInfo, size 0x24: mCost, mMoney, mCreditsLeft and three
 // tPopupElements, no virtuals), and cUIStateBuyPopup's next member (mAccept) sits at 0x6C = 0x48 + 0x24. EA's source:

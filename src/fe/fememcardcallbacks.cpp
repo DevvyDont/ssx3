@@ -1471,8 +1471,8 @@ struct sVEntryK1D8C50 {
  * Handles left/right on the memory-card screen: requests the previous or next card device, pulsing its arrow.
  *
  * Ignores all input while the busy flag (+0x1A8) is 1. Left (input vtable slot 19, probably isLeft) sets
- * +0x1FC, which callbackIsPrevDevicePressed (func_001DDD98) reads and clears; right (slot 20) sets +0x1F8 for
- * callbackIsNextDevicePressed (func_001DDD88). Either one plays the "left arr" or "right arr" frame label
+ * +0x1FC, which callbackIsPrevDevicePressed (cFEMemCard_isPrevMCPressed) reads and clears; right (slot 20) sets +0x1F8 for
+ * callbackIsNextDevicePressed (cFEMemCard_isNextMCPressed). Either one plays the "left arr" or "right arr" frame label
  * when the screen (+0x40) exists.
  *
  * @param input  the UI input (On Tour cUIInput* pInput)

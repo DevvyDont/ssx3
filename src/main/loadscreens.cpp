@@ -78,7 +78,7 @@ extern "C" int cBackgroundMan_loadImages(sBgMan_17ACC8* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens", func_0017AE00);
+INCLUDE_ASM("main/loadscreens", cBackgroundMan_renderImage);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 
@@ -170,7 +170,7 @@ static inline void setState_AE00()
  * the array at +0x0) as the state's texture (+0x10). Then pops the draw state, view and viewport (slots 32, 22).
  * cDebugMenuScreen_draw calls it for its popup instead of the menu.
  */
-extern "C" void func_0017AE00(sBgMan_AE00* self)
+extern "C" void cBackgroundMan_renderImage(sBgMan_AE00* self)
 {
     if (self->cur < 0 || self->cur >= self->count) {
         return;
@@ -450,7 +450,7 @@ struct cAppMan;
 int cInput_getState(void* pad, int button);
 extern "C" float cInput_getValue(void* pad, int axis);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-void* func_00232738(void* self);
+void* cPreFELoadScreen_cPreFELoadScreen(void* self);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void func_0017D0A8(sLS_B1B0* self);
@@ -559,7 +559,7 @@ static inline int bgCount_B4E0(sBgMan_17ACC8* bg)
  * Runs one frame of the debug start menu: moves between its 15 items, changes the selected one and starts the game.
  *
  * Input state 0x65 saves the choices (func_0017D0A8) and starts: item 14 (On Tour kRealFEItem) sets the app's word
- * +0x60 and moves to a cPreFELoadScreen module (func_00232738), any other item to a cPreGameLoadScreen. Up / down
+ * +0x60 and moves to a cPreFELoadScreen module (cPreFELoadScreen_cPreFELoadScreen), any other item to a cPreGameLoadScreen. Up / down
  * (cInput_getValue(.., 0x3D) 0 / 1, only while no background is previewed, f8C30 == -1) step the item, skipping 12
  * (network) without a comm system and 13 without a network connection. Left / right (2 / 3) change the item: 0 game
  * path (3 values; path 0 needs the track list and a WCBAM start location), 1 game mode (7), 2 game event (14), 3
@@ -575,7 +575,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         func_0017D0A8(self);
         if (self->f8C1C == 14) {
             D_004A28A8_b4->f60 = 1;
-            cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)func_00232738(cMemMan_alloc(8, str_cPreFELoadScreen, 0x100, 0)));
+            cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)cPreFELoadScreen_cPreFELoadScreen(cMemMan_alloc(8, str_cPreFELoadScreen, 0x100, 0)));
         } else {
             cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
         }

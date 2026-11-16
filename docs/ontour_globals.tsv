@@ -4763,3 +4763,5 @@ ps2_addr	name	previous	source	evidence
 00481190	online_FindPlayerEvent_vtbl	D_00481190	preview	builds/x/v2 pairs it with the preview's _vt$Q26online15FindPlayerEvent; LobbyMan_onPlayerFound posts these events
 00481170	online_PingEvent_vtbl	D_00481170	preview	builds/x/v2 pairs it with the preview's _vt$Q26online9PingEvent; LobbyMan_onPingReceived posts these events
 0046B808	cFEStateNet_vtbl	D_0046B808	preview	stored by the cFEStateNet ctor (0x1A8500); slot 1 is its dtor, slot 6 cFEStateNet_onGainFocus; the online front-end states' base vtable
+0047D7D0	cStartScreen_vtbl	D_0047D7D0	ontour	stored by cStartScreen_cStartScreen (0x232AE0, which builds/x/name_map.tsv matches to the preview's __12cStartScreen); its slots are cStartScreen's load/purge/loseFocus/gainFocus/update/render
+0047D788	cGameLoadScreen_vtbl	D_0047D788	ontour	the vtable of the 0x18-byte module func_00232930 allocates with the tag "cGameLoadScreen" (On Tour's cGameLoadScreen is 0x18 bytes); its slots are cGameLoadScreen's load/purge/loseFocus/gainFocus/update/render

@@ -5320,7 +5320,7 @@ INCLUDE_ASM("ai/ai", cResetControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int cResetControl_shouldTransition(cResetControl* self);
-void* func_00230698(void* self, int id);
+void* cGame_getTransitionMan(void* self, int id);
 extern "C" void func_002E4578(void* obj);
 void* func_002E4D70(void* self);
 extern "C" void cTransitionMan_StartTransition(void* self, int a1, void* a2, void* a3, float f0, float f1, float f2, int a4, void* a5);
@@ -5355,7 +5355,7 @@ static inline sFx_12F230* initFx_12F230(sFx_12F230* p, const sColor_12F230& col)
  * fade on the rider's view.
  *
  * FadePercent and the main-channel sequence rate (+0x90) are cleared (stored as integer 0). When
- * cResetControl_shouldTransition() allows it, a running effect on the rider's view (func_00230698 with
+ * cResetControl_shouldTransition() allows it, a running effect on the rider's view (cGame_getTransitionMan with
  * mViewIndex) is stopped (func_002E4578), then two white cFade_TObj fades go to cTransitionMan_StartTransition (times 0.5, 0,
  * 0.5) with a pointer to FadePercent, which drives the fade.
  */
@@ -5366,7 +5366,7 @@ extern "C" void cResetControl_gainFocus(cResetControl* self)
     *(int*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 0;
     if (cResetControl_shouldTransition(self))
     {
-        char* obj = (char*)func_00230698(SSXApp->Game, *(int*)((char*)self->mRider + 0x870));
+        char* obj = (char*)cGame_getTransitionMan(SSXApp->Game, *(int*)((char*)self->mRider + 0x870));
         if (*(int*)(obj + 0x44))
             func_002E4578(obj);
         sFx_12F230* firstFade = (sFx_12F230*)cTransitionObj_operator_new_sz(20);
@@ -5395,7 +5395,7 @@ INCLUDE_ASM("ai/ai", cResetControl_update);
 extern "C" void* cBE_getBE();
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int cResetControl_shouldTransition(cResetControl* self);
-void* func_00230698(void* self, int id);
+void* cGame_getTransitionMan(void* self, int id);
 extern "C" void func_002E4578(void* obj);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 extern "C" float cRiderMetrix_evReset(void* self, int a1);
@@ -5456,7 +5456,7 @@ extern "C" void cResetControl_update(cResetControl* self)
     if (self->FadePercent == 1.0f)
     {
         if (cResetControl_shouldTransition(self))
-            func_002E4578(func_00230698(SSXApp->Game, *(int*)((char*)self->mRider + 0x870)));
+            func_002E4578(cGame_getTransitionMan(SSXApp->Game, *(int*)((char*)self->mRider + 0x870)));
         cRiderMetrix_evTakeoff(*(void**)((char*)self->mRider + 0x790), 0, 0);
         *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0x90) = 1.0f;
         cRider_setControlState_impl(self->mRider, 4);

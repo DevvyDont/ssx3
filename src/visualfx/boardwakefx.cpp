@@ -6292,7 +6292,7 @@ extern "C" float func_002EE8A0(int i);
 extern "C" float func_002EE8E8(int i);
 extern "C" float func_002EE930(int i);
 extern "C" float func_002EE978(int i);
-void* func_002306A8(void* self, int i);
+void* cGame_getSplashManager(void* self, int i);
 extern "C" void func_002F4330(void* obj, float v);
 
 struct sWakeRec_5DA0 {
@@ -6309,7 +6309,7 @@ extern "C" void func_002E4F50(int* elem, sWakeRec_5DA0* rec);
  * The settings (snow and wind intensity, fluff, flake size, wind rotation, flurries, gravity and two colours)
  * come from the debug snowfall toggles when cSnowfallToggles_m_EnableTest is set. Otherwise they come from
  * the render-state manager (entries 6 and 7). The snow intensity also goes to func_002F4330 with the view's
- * func_002306A8 object.
+ * cGame_getSplashManager object.
  *
  * @param self  the snowfall node
  */
@@ -6348,7 +6348,7 @@ extern "C" void cSnowFall_update(void* self)
             recs[i].c1.z = func_002EE930(k);
             recs[i].c1.w = func_002EE978(k);
         }
-        func_002F4330(func_002306A8(SSXApp->Game, i), recs[i].f[0]);
+        func_002F4330(cGame_getSplashManager(SSXApp->Game, i), recs[i].f[0]);
     }
     int j;
     for (j = 0; j < 12; j++) {

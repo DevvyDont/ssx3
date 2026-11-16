@@ -285,11 +285,11 @@ extern "C" void func_00243AE8(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00243B18);
 #ifdef SKIP_ASM
-extern "C" void func_00231CD0(void *);
+extern "C" void cFadeScreen_cFadeScreen(void *);
 extern char D_0047D818[];
 
 extern "C" void *func_00243B18(void *self) {
-    func_00231CD0(self);
+    cFadeScreen_cFadeScreen(self);
     *(int *)((char *)self + 0xC) = 0;
     *(void **)((char *)self + 0) = D_0047D818;
     return self;
@@ -329,13 +329,13 @@ extern "C" void func_00243B80(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00243BB0);
 #ifdef SKIP_ASM
-extern "C" void func_00231CD0(void *);
-extern char D_0047D788[];
+extern "C" void cFadeScreen_cFadeScreen(void *);
+extern char cGameLoadScreen_vtbl[];
 
 extern "C" void *func_00243BB0(void *self) {
-    func_00231CD0(self);
+    cFadeScreen_cFadeScreen(self);
     *(int *)((char *)self + 0xC) = 0;
-    *(void **)((char *)self + 0) = D_0047D788;
+    *(void **)((char *)self + 0) = cGameLoadScreen_vtbl;
     *(int *)((char *)self + 0x10) = 0;
     *(int *)((char *)self + 0x14) = 0;
     return self;
@@ -376,11 +376,11 @@ extern "C" void cFELoadScreen__cFELoadScreen(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00243C30);
 #ifdef SKIP_ASM
-extern "C" void func_00231CD0(void *);
+extern "C" void cFadeScreen_cFadeScreen(void *);
 extern char cFELoadScreen_vtbl[];
 
 extern "C" void *func_00243C30(void *self) {
-    func_00231CD0(self);
+    cFadeScreen_cFadeScreen(self);
     *(int *)((char *)self + 0xC) = 0;
     *(void **)((char *)self + 0) = cFELoadScreen_vtbl;
     *(int *)((char *)self + 0x10) = 0;
@@ -1824,15 +1824,15 @@ void func_00244880(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244888);
 #ifdef SKIP_ASM
-extern "C" void func_0022E8B8(int);
-extern "C" int func_0022E920(int);
+extern "C" void cGameViewMan_updateStreamFocus(int);
+extern "C" int cGameViewMan_isStreamReady(int);
 
 extern "C" int func_00244888(void *self) {
-    func_0022E8B8(*(int *)((char*)self + 0x84));
+    cGameViewMan_updateStreamFocus(*(int *)((char*)self + 0x84));
     if (*(int *)((char*)self + 0x9C) != 0) {
         return 0;
     }
-    if (func_0022E920(*(int *)((char*)self + 0x84)) == 0) {
+    if (cGameViewMan_isStreamReady(*(int *)((char*)self + 0x84)) == 0) {
         *(int *)((char*)self + 0x9C) = 1;
         *(int *)((char*)self + 0xA0) = 1;
         return 0;
@@ -1956,8 +1956,8 @@ INCLUDE_ASM("main/ssxappdtor", func_00244A40);
 #ifdef SKIP_ASM
 extern "C" void cGameViewMan_updateAll(int);
 extern "C" void cSectionMan_update(void *);
-extern "C" void func_0022E8B8(int);
-extern "C" int func_0022E920(int);
+extern "C" void cGameViewMan_updateStreamFocus(int);
+extern "C" int cGameViewMan_isStreamReady(int);
 extern "C" void cGame_updateState(void *);
 void cWorld_update(void *);
 extern "C" void cWorldCache_flushInActivePages(void *);
@@ -1965,7 +1965,7 @@ extern "C" void cWorldCache_flushInActivePages(void *);
 extern "C" int func_00244A40(void *self) {
     void *vtbl;
 
-    if ((func_0022E920(*(int *)((char*)self + 0x84)) == 0) || (*(int *)(*(char **)((char*)self + 0x78) + 0x1D0) == 0)) {
+    if ((cGameViewMan_isStreamReady(*(int *)((char*)self + 0x84)) == 0) || (*(int *)(*(char **)((char*)self + 0x78) + 0x1D0) == 0)) {
         *(int *)(**(char ***)((char*)self + 0x10) + 0x3D4) = 0;
         cWorld_update(*(void **)((char*)self + 0x10));
         cGameViewMan_updateAll(*(int *)((char*)self + 0x84));
@@ -1973,14 +1973,14 @@ extern "C" int func_00244A40(void *self) {
             cGame_updateState(self);
             cSectionMan_update(*(void **)((char*)self + 0x78));
         }
-        if ((*(int *)((char*)self + 0x9C) == 0) && (func_0022E920(*(int *)((char*)self + 0x84)) == 0)) {
+        if ((*(int *)((char*)self + 0x9C) == 0) && (cGameViewMan_isStreamReady(*(int *)((char*)self + 0x84)) == 0)) {
             *(int *)((char*)self + 0xA0) = 1;
         }
         *(int *)((char*)self + 0x9C) = 1;
         if (*(int *)((char*)self + 0xA0) != 0) {
             vtbl = (void*)GrMan->mVtbl;
             (*(void (**)(void *))((char*)vtbl + 0x9C))((char*)GrMan + *(short *)((char*)vtbl + 0x98));
-            func_0022E8B8(*(int *)((char*)self + 0x84));
+            cGameViewMan_updateStreamFocus(*(int *)((char*)self + 0x84));
             cWorldCache_flushInActivePages(**(void ***)((char*)self + 0x10));
             *(int *)((char*)self + 0xA0) = 0;
         }
@@ -2179,7 +2179,7 @@ INCLUDE_ASM("main/ssxappdtor", func_00244E60);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sVE_244E60 { short delta; short index; void* fn; };
-extern "C" int func_00237950(int);
+extern "C" int cInputSync_aiinputready(int);
 extern "C" int cInputSync_aiupdate(int);
 extern "C" int cReplay_isPauseAI(int);
 extern "C" void cReplay_update(int);
@@ -2204,7 +2204,7 @@ extern "C" void func_00244E60(void* self)
     char* game = (char*)self;
     char* obj;
     int skip;
-    if (*(int*)(game + 0x7C) == 0 || func_00237950(*(int*)(game + 0x7C)) != 0) {
+    if (*(int*)(game + 0x7C) == 0 || cInputSync_aiinputready(*(int*)(game + 0x7C)) != 0) {
         if (*(int*)(game + 0x214) == 3) {
             obj = gBucketMan;
             cGame_updateState(self);

@@ -6501,7 +6501,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
 //100%
 INCLUDE_ASM("ai/rider", cRider_cancelRiderTransitions);
 #ifdef SKIP_ASM
-void* func_00230698(void* self, int id);
+void* cGame_getTransitionMan(void* self, int id);
 extern "C" void func_002E4578(void* p);
 
 /**
@@ -6515,8 +6515,8 @@ extern "C" void cRider_cancelRiderTransitions(cRider* self)
     void* w = SSXApp->Game;
     if (*(void**)((char*)w + 0x84) != 0 && self->mViewIndex >= 0)
     {
-        if (*(int*)((char*)func_00230698(w, self->mViewIndex) + 0x78) == 1)
-            func_002E4578(func_00230698(SSXApp->Game, self->mViewIndex));
+        if (*(int*)((char*)cGame_getTransitionMan(w, self->mViewIndex) + 0x78) == 1)
+            func_002E4578(cGame_getTransitionMan(SSXApp->Game, self->mViewIndex));
     }
 }
 #endif

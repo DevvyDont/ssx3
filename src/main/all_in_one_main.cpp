@@ -1243,7 +1243,7 @@ void sti_001DBC98(int init, int prio)
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DC900);
+INCLUDE_ASM("main/all_in_one_main", cAppModule__cAppModule);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern void* D_0046D970[];
@@ -1256,7 +1256,7 @@ extern void* D_0046D970[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_001DC900(void *self, int flags) {
+extern "C" void cAppModule__cAppModule(void *self, int flags) {
     *(void***)((char*)self + 0) = D_0046D970;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1268,14 +1268,14 @@ extern "C" void func_001DC900(void *self, int flags) {
  * Does nothing: the root module's default for vtable slot 0x1C, which the load screens, the front end and cSSXApp
  * inherit.
  */
-extern "C" void func_001DC930(void) {
+extern "C" void cAppModule_purge(void) {
 }
 
 /**
  * Does nothing: the root module's default for vtable slot 0x2C, which the load screens, the front end and cSSXApp
  * inherit.
  */
-extern "C" void func_001DC938(void) {
+extern "C" void cAppModule_gainFocus(void) {
 }
 
 //100%
@@ -1298,7 +1298,7 @@ extern "C" void cDebugScreen__cDebugScreen(void *self, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DC970);
+INCLUDE_ASM("main/all_in_one_main", cDebugFE_getFont);
 #ifdef SKIP_ASM
 /**
  * Returns the word at +0x18 of the debug front end, the font cDebugMenuScreen_draw reads from SSXApp's DebugFE.
@@ -1306,44 +1306,44 @@ INCLUDE_ASM("main/all_in_one_main", func_001DC970);
  * @param arg0  the debug front end
  * @return the word at +0x18
  */
-extern "C" int func_001DC970(void *arg0) {
+extern "C" int cDebugFE_getFont(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x18)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DC978);
+INCLUDE_ASM("main/all_in_one_main", cDebugFE_getBoxTID);
 #ifdef SKIP_ASM
 /**
- * Returns the word at +0x20 of the debug front end, 8 bytes after its font word (func_001DC970).
+ * Returns the word at +0x20 of the debug front end, 8 bytes after its font word (cDebugFE_getFont).
  *
  * @param arg0  the debug front end
  * @return the word at +0x20
  */
-extern "C" int func_001DC978(void *arg0) {
+extern "C" int cDebugFE_getBoxTID(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x20)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DC980);
+INCLUDE_ASM("main/all_in_one_main", cDebugFE_startlobby);
 #ifdef SKIP_ASM
 /**
  * Copies the word at +0x10 of the debug front end into +0x14, the word just before its font (+0x18).
  *
  * @param arg0  the debug front end
  */
-extern "C" void func_001DC980(void *arg0) {
+extern "C" void cDebugFE_startlobby(void *arg0) {
     (*(int *)((char*)(arg0) + (0x14))) = (int) (*(int *)((char*)(arg0) + (0x10)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DC990);
+INCLUDE_ASM("main/all_in_one_main", cFont_textf);
 #ifdef SKIP_ASM
 // PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
-typedef char* func_001DC990_va_list;
-#define func_001DC990_va_start(ap)                                                \
+typedef char* cFont_textf_va_list;
+#define cFont_textf_va_start(ap)                                                \
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
@@ -1361,19 +1361,19 @@ extern "C" void cFont_vtextf_C990(int, int, char*) __asm__("cFont_vtextf");
  * @param font  the font (cFont, the method's this)
  * @param fmt  printf-style format string
  */
-extern "C" void func_001DC990(float x, float y, int font, int fmt, ...)
+extern "C" void cFont_textf(float x, float y, int font, int fmt, ...)
 {
-    func_001DC990_va_list ap;
-    func_001DC990_va_start(ap);
+    cFont_textf_va_list ap;
+    cFont_textf_va_start(ap);
     cFont_vtextf_C990(font, fmt, ap);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DC9D0);
+INCLUDE_ASM("main/all_in_one_main", cFont_textf1);
 #ifdef SKIP_ASM
 // PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
-#define func_001DC9D0_va_start(ap)                                       \
+#define cFont_textf1_va_start(ap)                                       \
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
@@ -1396,10 +1396,10 @@ struct V2_C9D0 { float x, y; };
  * @param sx  horizontal scale factor
  * @param sy  vertical scale factor
  */
-extern "C" void func_001DC9D0(void *self, int fmt, float posX, float posY, float sx, float sy, ...)
+extern "C" void cFont_textf1(void *self, int fmt, float posX, float posY, float sx, float sy, ...)
 {
     char *ap;
-    func_001DC9D0_va_start(ap);
+    cFont_textf1_va_start(ap);
     *(float *)((char *)self + 0x38) = *(float *)((char *)self + 0x30) * sx;
     *(float *)((char *)self + 0x3C) = *(float *)((char *)self + 0x34) * sy;
     cFont_vtextf_C9D0(self, fmt, ap);
@@ -1408,11 +1408,11 @@ extern "C" void func_001DC9D0(void *self, int fmt, float posX, float posY, float
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCA40);
+INCLUDE_ASM("main/all_in_one_main", cFont_centertextf);
 #ifdef SKIP_ASM
 // PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
-typedef char* func_001DCA40_va_list;
-#define func_001DCA40_va_start(ap)                                                \
+typedef char* cFont_centertextf_va_list;
+#define cFont_centertextf_va_start(ap)                                                \
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
@@ -1429,20 +1429,20 @@ extern "C" void cFont_vcentertextf_CA40(int, int, char*) __asm__("cFont_vcentert
  * @param font  the font (cFont, the method's this)
  * @param fmt  printf-style format string
  */
-extern "C" void func_001DCA40(float x, float y, int font, int fmt, ...)
+extern "C" void cFont_centertextf(float x, float y, int font, int fmt, ...)
 {
-    func_001DCA40_va_list ap;
-    func_001DCA40_va_start(ap);
+    cFont_centertextf_va_list ap;
+    cFont_centertextf_va_start(ap);
     cFont_vcentertextf_CA40(font, fmt, ap);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCA80);
+INCLUDE_ASM("main/all_in_one_main", cFont_righttextf);
 #ifdef SKIP_ASM
 // PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
-typedef char* func_001DCA80_va_list;
-#define func_001DCA80_va_start(ap)                                                \
+typedef char* cFont_righttextf_va_list;
+#define cFont_righttextf_va_start(ap)                                                \
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
@@ -1459,16 +1459,16 @@ extern "C" void cFont_vrighttextf_CA80(int, int, char*) __asm__("cFont_vrighttex
  * @param font  the font (cFont, the method's this)
  * @param fmt  printf-style format string
  */
-extern "C" void func_001DCA80(float x, float y, int font, int fmt, ...)
+extern "C" void cFont_righttextf(float x, float y, int font, int fmt, ...)
 {
-    func_001DCA80_va_list ap;
-    func_001DCA80_va_start(ap);
+    cFont_righttextf_va_list ap;
+    cFont_righttextf_va_start(ap);
     cFont_vrighttextf_CA80(font, fmt, ap);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCAC0);
+INCLUDE_ASM("main/all_in_one_main", cFECamera__cFECamera);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern void* cSimpleCamera_vtbl[];
@@ -1481,7 +1481,7 @@ extern void* cSimpleCamera_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_001DCAC0(void *self, int flags) {
+extern "C" void cFECamera__cFECamera(void *self, int flags) {
     *(void***)((char*)self + 0x90) = cSimpleCamera_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1490,7 +1490,7 @@ extern "C" void func_001DCAC0(void *self, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCAF0);
+INCLUDE_ASM("main/all_in_one_main", cPrivateMessage__cPrivateMessage);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void *, int);
 extern int D_0046D8C0[];
@@ -1504,7 +1504,7 @@ extern int D_0046D8C0[];
  * @param arg0  the message (0x10 bytes: three cBXStrings and the vptr at +0xC)
  * @param arg1  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_001DCAF0(char *arg0, int arg1) {
+extern "C" void cPrivateMessage__cPrivateMessage(char *arg0, int arg1) {
     *(int **)(arg0 + 0xC) = D_0046D8C0;
     cBXString__cBXString(arg0 + 8, 2);
     cBXString__cBXString(arg0 + 4, 2);
@@ -1516,7 +1516,7 @@ extern "C" void func_001DCAF0(char *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCB60);
+INCLUDE_ASM("main/all_in_one_main", cFE_getCamera);
 #ifdef SKIP_ASM
 /**
  * Returns the front end's camera, the member at +0x10.
@@ -1524,13 +1524,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCB60);
  * @param realFe  the front end (cRealFE / cFE)
  * @return @p realFe + 0x10
  */
-extern "C" int func_001DCB60(int realFe) {
+extern "C" int cFE_getCamera(int realFe) {
     return realFe + 0x10;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCB68);
+INCLUDE_ASM("main/all_in_one_main", cFE_getCamera1);
 #ifdef SKIP_ASM
 /**
  * Returns the front end's camera, the member at +0x10 (the second of an identical pair of out-of-line copies).
@@ -1538,13 +1538,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCB68);
  * @param realFe  the front end (cRealFE / cFE)
  * @return @p realFe + 0x10
  */
-extern "C" int func_001DCB68(int realFe) {
+extern "C" int cFE_getCamera1(int realFe) {
     return realFe + 0x10;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCB70);
+INCLUDE_ASM("main/all_in_one_main", cFE_getHuman);
 #ifdef SKIP_ASM
 extern "C" void func_001A0538(int);
 
@@ -1556,13 +1556,13 @@ extern "C" void func_001A0538(int);
  *
  * @param realFe  the front end (cRealFE / cFE)
  */
-extern "C" void func_001DCB70(int realFe) {
+extern "C" void cFE_getHuman(int realFe) {
     func_001A0538(realFe + 176);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCB90);
+INCLUDE_ASM("main/all_in_one_main", cFE_getHuman1);
 #ifdef SKIP_ASM
 extern "C" void func_001A0548(int);
 
@@ -1574,13 +1574,13 @@ extern "C" void func_001A0548(int);
  *
  * @param realFe  the front end (cRealFE / cFE)
  */
-extern "C" void func_001DCB90(int realFe) {
+extern "C" void cFE_getHuman1(int realFe) {
     func_001A0548(realFe + 176);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCBB0);
+INCLUDE_ASM("main/all_in_one_main", cFE_getRiderManager);
 #ifdef SKIP_ASM
 /**
  * Returns the front end's rider manager, the member at +0xB0.
@@ -1588,13 +1588,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCBB0);
  * @param realFe  the front end (cRealFE / cFE)
  * @return @p realFe + 0xB0
  */
-extern "C" int func_001DCBB0(int realFe) {
+extern "C" int cFE_getRiderManager(int realFe) {
     return realFe + 176;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCBB8);
+INCLUDE_ASM("main/all_in_one_main", cFE_getRiderManager1);
 #ifdef SKIP_ASM
 /**
  * Returns the front end's rider manager, the member at +0xB0 (the second of an identical pair of out-of-line copies).
@@ -1602,13 +1602,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCBB8);
  * @param realFe  the front end (cRealFE / cFE)
  * @return @p realFe + 0xB0
  */
-extern "C" int func_001DCBB8(int realFe) {
+extern "C" int cFE_getRiderManager1(int realFe) {
     return realFe + 176;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCBC0);
+INCLUDE_ASM("main/all_in_one_main", cFE_getBoltFileManager);
 #ifdef SKIP_ASM
 /**
  * Returns the front end's member at +0x1A70 (the object cFE_cFE builds with func_0019CDF0).
@@ -1616,13 +1616,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCBC0);
  * @param realFe  the front end (cRealFE / cFE)
  * @return @p realFe + 0x1A70
  */
-extern "C" int func_001DCBC0(int realFe) {
+extern "C" int cFE_getBoltFileManager(int realFe) {
     return realFe + 6768;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCBC8);
+INCLUDE_ASM("main/all_in_one_main", cFE_getBoltFileManager1);
 #ifdef SKIP_ASM
 /**
  * Returns the front end's member at +0x1A70 (the second of an identical pair of out-of-line copies).
@@ -1630,13 +1630,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCBC8);
  * @param realFe  the front end (cRealFE / cFE)
  * @return @p realFe + 0x1A70
  */
-extern "C" int func_001DCBC8(int realFe) {
+extern "C" int cFE_getBoltFileManager1(int realFe) {
     return realFe + 6768;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCBD0);
+INCLUDE_ASM("main/all_in_one_main", cFE_getUI);
 #ifdef SKIP_ASM
 /**
  * Returns the front end's UI engine, the pointer at +0xC.
@@ -1644,13 +1644,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCBD0);
  * @param arg0  the front end (cFE)
  * @return the UI engine pointer cFE_cFE allocates ("UIEngine") and stores at +0xC
  */
-extern "C" int func_001DCBD0(void *arg0) {
+extern "C" int cFE_getUI(void *arg0) {
     return (*(int *)((char*)(arg0) + (0xC)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCBD8);
+INCLUDE_ASM("main/all_in_one_main", cUILocaleInterface__cUILocaleInterface);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern void* D_0046D848[];
@@ -1660,7 +1660,7 @@ extern void* D_0046D848[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_001DCBD8(void *self, int flags) {
+extern "C" void cUILocaleInterface__cUILocaleInterface(void *self, int flags) {
     *(void***)((char*)self + 4) = D_0046D848;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1669,7 +1669,7 @@ extern "C" void func_001DCBD8(void *self, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCC08);
+INCLUDE_ASM("main/all_in_one_main", cUILocaleInterface_setDisplayMode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_001E1090_CC08(void*, int) __asm__("func_001E1090");
@@ -1685,14 +1685,14 @@ extern "C" void func_001E1090_CC08(void*, int) __asm__("func_001E1090");
  *
  * @param v  the new display mode
  */
-extern "C" void func_001DCC08(signed char *self, signed char v) {
+extern "C" void cUILocaleInterface_setDisplayMode(signed char *self, signed char v) {
     *self = v;
     func_001E1090_CC08(self, v == 2);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCC38);
+INCLUDE_ASM("main/all_in_one_main", cUILocaleInterface_setLanguage);
 #ifdef SKIP_ASM
 /**
  * Sets the locale's language: the byte at +0x1.
@@ -1703,7 +1703,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCC38);
  * @param arg0  the locale interface
  * @param arg1  the language index
  */
-extern "C" void func_001DCC38(void *arg0, signed char arg1) {
+extern "C" void cUILocaleInterface_setLanguage(void *arg0, signed char arg1) {
     (*(signed char *)((char*)(arg0) + (1))) = arg1;
 }
 #endif
@@ -1740,7 +1740,7 @@ extern "C" int func_001DCC58(void) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCC60);
+INCLUDE_ASM("main/all_in_one_main", cFECustom_cFECustom1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_0046D810_CC60[] __asm__("cFECustom_vtbl");
@@ -1753,7 +1753,7 @@ extern void* D_0046D810_CC60[] __asm__("cFECustom_vtbl");
  * @param arg0  the object
  * @return @p arg0
  */
-extern "C" void *func_001DCC60(void *arg0) {
+extern "C" void *cFECustom_cFECustom1(void *arg0) {
     (*(int *)((char*)(arg0) + (0))) = 0;
     (*(void ***)((char*)(arg0) + (4))) = D_0046D810_CC60;
     return arg0;
@@ -1761,7 +1761,7 @@ extern "C" void *func_001DCC60(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCC78);
+INCLUDE_ASM("main/all_in_one_main", cFECustom__cFECustom);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern void* D_0046DD28[];
@@ -1773,7 +1773,7 @@ extern void* D_0046DD28[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_001DCC78(void *self, int flags) {
+extern "C" void cFECustom__cFECustom(void *self, int flags) {
     *(void***)((char*)self + 4) = D_0046DD28;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1784,11 +1784,11 @@ extern "C" void func_001DCC78(void *self, int flags) {
 /**
  * Does nothing: cFECustom's per-frame update (slot 0x14 of cFECustom_vtbl).
  */
-extern "C" void func_001DCCA8(void) {
+extern "C" void cFECustom_onUpdate(void) {
 }
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCCB0);
+INCLUDE_ASM("main/all_in_one_main", cFECustom_setProfileLaunchScreen);
 #ifdef SKIP_ASM
 /**
  * Stores a value in the word at +0xC of an object.
@@ -1798,13 +1798,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCCB0);
  * @param arg0  the object
  * @param arg1  the value to store
  */
-extern "C" void func_001DCCB0(void *arg0, int arg1) {
+extern "C" void cFECustom_setProfileLaunchScreen(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0xC))) = arg1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCCB8);
+INCLUDE_ASM("main/all_in_one_main", cRealFE_setStartState);
 #ifdef SKIP_ASM
 extern int cRealFE_mStartState;
 
@@ -1813,13 +1813,13 @@ extern int cRealFE_mStartState;
  *
  * @param startState  the state to start the front end in
  */
-extern "C" void func_001DCCB8(int startState) {
+extern "C" void cRealFE_setStartState(int startState) {
     cRealFE_mStartState = startState;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCCC0);
+INCLUDE_ASM("main/all_in_one_main", cRealFE_getStartState);
 #ifdef SKIP_ASM
 extern int cRealFE_mStartState;
 
@@ -1828,26 +1828,26 @@ extern int cRealFE_mStartState;
  *
  * @return cRealFE_mStartState
  */
-extern "C" int func_001DCCC0(void) {
+extern "C" int cRealFE_getStartState(void) {
     return cRealFE_mStartState;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCCC8);
+INCLUDE_ASM("main/all_in_one_main", cRealFE_playAttractMovie);
 #ifdef SKIP_ASM
 extern int cRealFE_mMovieList;
 
 /**
  * Sets bit 2 (value 4) of the front end's movie flags, the static cRealFE_mMovieList.
  */
-extern "C" void func_001DCCC8(void) {
+extern "C" void cRealFE_playAttractMovie(void) {
     cRealFE_mMovieList |= 4;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCCD8);
+INCLUDE_ASM("main/all_in_one_main", cRealFE_getConnMan);
 #ifdef SKIP_ASM
 /**
  * Returns the front end's connection manager at +0xB5AB0 (the one func_001A1CE8 builds with cConnMan_cConnMan__FPv).
@@ -1855,13 +1855,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCCD8);
  * @param realFe  the front end (cRealFE)
  * @return @p realFe + 0xB5AB0
  */
-extern "C" int func_001DCCD8(int realFe) {
+extern "C" int cRealFE_getConnMan(int realFe) {
     return realFe + 0xB5AB0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCCE8);
+INCLUDE_ASM("main/all_in_one_main", cRealFE_getGameConnMan);
 #ifdef SKIP_ASM
 /**
  * Returns the front end's game connection manager at +0xB5ABC (the one func_001A1CE8 builds with
@@ -1870,7 +1870,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCCE8);
  * @param realFe  the front end (cRealFE)
  * @return @p realFe + 0xB5ABC
  */
-extern "C" int func_001DCCE8(int realFe) {
+extern "C" int cRealFE_getGameConnMan(int realFe) {
     return realFe + 0xB5ABC;
 }
 #endif
@@ -2317,7 +2317,7 @@ extern "C" void func_001DD4C0(int menu, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD508);
+INCLUDE_ASM("main/all_in_one_main", cFEInput_cFEInput);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_0046D1D0_D508[] __asm__("cFEInput_vtbl");
@@ -2331,7 +2331,7 @@ extern void* D_0046D1D0_D508[] __asm__("cFEInput_vtbl");
  * @param arg0  the object
  * @return @p arg0
  */
-extern "C" void *func_001DD508(void *arg0) {
+extern "C" void *cFEInput_cFEInput(void *arg0) {
     (*(signed char *)((char*)(arg0) + (4))) = 0;
     (*(void ***)((char*)(arg0) + (8))) = D_0046D1D0_D508;
     (*(int *)((char*)(arg0) + (0x18))) = 0;
@@ -2407,7 +2407,7 @@ extern "C" int cFEInput_getAsciiKey(void *input) {
 INCLUDE_ASM("main/all_in_one_main", func_001DD578);
 #ifdef SKIP_ASM
 /**
- * Returns the word at +0x18 of an object; for a cFEInput that is the input device pointer func_001DD508 clears.
+ * Returns the word at +0x18 of an object; for a cFEInput that is the input device pointer cFEInput_cFEInput clears.
  *
  * It follows cFEInput's out-of-line getters (cFEInput_getKeyReady, getVKey, getAsciiKey).
  *
@@ -2420,7 +2420,7 @@ extern "C" int func_001DD578(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD580);
+INCLUDE_ASM("main/all_in_one_main", tAttrScreen_tAttrScreen);
 #ifdef SKIP_ASM
 /**
  * Constructs a UI screen's attribute word: sets bit 0 and clears bit 1, leaving the other bits.
@@ -2431,14 +2431,14 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD580);
  * @param attr  the attribute word (this)
  * @return @p attr
  */
-extern "C" unsigned short *func_001DD580(unsigned short *attr) {
+extern "C" unsigned short *tAttrScreen_tAttrScreen(unsigned short *attr) {
     *attr = (*attr | 1) & 0xFFFD;
     return attr;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD598);
+INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard__cScreenKeyboard);
 #ifdef SKIP_ASM
 extern "C" void cUIScreen__cUIScreen();
 
@@ -2447,13 +2447,13 @@ extern "C" void cUIScreen__cUIScreen();
  *
  * The object and the g++ delete flags pass through untouched in the argument registers.
  */
-extern "C" void func_001DD598(void) {
+extern "C" void cScreenKeyboard__cScreenKeyboard(void) {
     cUIScreen__cUIScreen();
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD5B8);
+INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_cScreenKeyboard);
 #ifdef SKIP_ASM
 extern "C" void cList_cList(void *);
 extern "C" int cUIThing_cUIThing(void *, int, int);
@@ -2465,20 +2465,20 @@ extern int cUIGroup_vtbl[];
  * Constructs an on-screen keyboard's cUIScreen part with no owning state.
  *
  * Links the list node to itself (+0x0, +0x4), zeroes the buffer and header pointers (+0xC, +0x10), stores
- * cUIScreen_vtbl, builds the attribute word (func_001DD580, +0x14) and the thread list (cList_cList, +0x18), zeroes the
+ * cUIScreen_vtbl, builds the attribute word (tAttrScreen_tAttrScreen, +0x14) and the thread list (cList_cList, +0x18), zeroes the
  * keyframe, object-block and object-list pointers (+0x34..+0x3C), builds the root group (cUIThing_cUIThing at +0x40,
  * cUIGroup_vtbl at +0x48, its cList at +0xB4), zeroes the state pointer at +0xD0 and finally stores the keyboard vtable
  * D_0046D1A0. Unlike func_00180508 it sets none of the keyboard's own fields.
  *
  * @return @p self
  */
-extern "C" void *func_001DD5B8(char *self) {
+extern "C" void *cScreenKeyboard_cScreenKeyboard(char *self) {
     *(char **)(self + 4) = self;
     *(char **)(self + 0) = self;
     *(int *)(self + 0xC) = 0;
     *(int *)(self + 0x10) = 0;
     *(int **)(self + 8) = cUIScreen_vtbl;
-    func_001DD580((unsigned short*)(self + 0x14));
+    tAttrScreen_tAttrScreen((unsigned short*)(self + 0x14));
     cList_cList(self + 0x18);
     *(int *)(self + 0x34) = 0;
     *(int *)(self + 0x38) = 0;
@@ -2493,7 +2493,7 @@ extern "C" void *func_001DD5B8(char *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD648);
+INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_getInputText);
 #ifdef SKIP_ASM
 /**
  * Returns the on-screen keyboard's input text buffer at +0xEC.
@@ -2501,13 +2501,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD648);
  * @param screen  the keyboard (vtable D_0046D1A0)
  * @return @p screen + 0xEC
  */
-extern "C" int func_001DD648(int screen) {
+extern "C" int cScreenKeyboard_getInputText(int screen) {
     return screen + 236;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD650);
+INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_getCurrentKey);
 #ifdef SKIP_ASM
 /**
  * Returns the on-screen keyboard's current key, the word at +0x170 (func_00180508 starts it at 10).
@@ -2515,13 +2515,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD650);
  * @param screen  the keyboard
  * @return the word at +0x170
  */
-extern "C" int func_001DD650(void *screen) {
+extern "C" int cScreenKeyboard_getCurrentKey(void *screen) {
     return (*(int *)((char*)(screen) + (0x170)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD658);
+INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeNumbers);
 #ifdef SKIP_ASM
 /**
  * Sets the on-screen keyboard's word at +0xD8 (func_00180508 starts it at 0).
@@ -2529,13 +2529,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD658);
  * @param screen  the keyboard
  * @param arg1  the new value
  */
-extern "C" void func_001DD658(void *screen, int arg1) {
+extern "C" void cScreenKeyboard_setIncludeNumbers(void *screen, int arg1) {
     (*(int *)((char*)(screen) + (0xD8))) = arg1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD660);
+INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeShift);
 #ifdef SKIP_ASM
 /**
  * Sets the on-screen keyboard's word at +0xDC (func_00180508 starts it at 0).
@@ -2543,13 +2543,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD660);
  * @param screen  the keyboard
  * @param arg1  the new value
  */
-extern "C" void func_001DD660(void *screen, int arg1) {
+extern "C" void cScreenKeyboard_setIncludeShift(void *screen, int arg1) {
     (*(int *)((char*)(screen) + (0xDC))) = arg1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD668);
+INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeSpace);
 #ifdef SKIP_ASM
 /**
  * Sets the on-screen keyboard's word at +0xE0 (func_00180508 starts it at 0).
@@ -2557,13 +2557,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD668);
  * @param screen  the keyboard
  * @param arg1  the new value
  */
-extern "C" void func_001DD668(void *screen, int arg1) {
+extern "C" void cScreenKeyboard_setIncludeSpace(void *screen, int arg1) {
     (*(int *)((char*)(screen) + (0xE0))) = arg1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD670);
+INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_cursorRight);
 #ifdef SKIP_ASM
 /**
  * Moves the on-screen keyboard's text cursor one place right, unless that would reach the length limit.
@@ -2573,7 +2573,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD670);
  *
  * @param screen  the keyboard
  */
-extern "C" void func_001DD670(void *screen) {
+extern "C" void cScreenKeyboard_cursorRight(void *screen) {
     int temp_3;
 
     temp_3 = (*(int *)((char*)(screen) + (0x16C))) + 1;
@@ -2584,7 +2584,7 @@ extern "C" void func_001DD670(void *screen) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD690);
+INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_cursorLeft);
 #ifdef SKIP_ASM
 /**
  * Moves the on-screen keyboard's text cursor one place left, unless it is already at 0.
@@ -2593,7 +2593,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD690);
  *
  * @param screen  the keyboard
  */
-extern "C" void func_001DD690(void *screen) {
+extern "C" void cScreenKeyboard_cursorLeft(void *screen) {
     int temp_2;
 
     temp_2 = (*(int *)((char*)(screen) + (0x16C)));
@@ -2668,7 +2668,7 @@ extern "C" void* func_001DD718(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD750);
+INCLUDE_ASM("main/all_in_one_main", cFEState__cFEState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_DD750(void*) __asm__("func_0039E390");
@@ -2681,14 +2681,14 @@ extern void* D_0046D0D0[];
  * The g++ delete flags pass through in the second argument register. cFEStateLodge, cFEStateLodgeRiderDetail,
  * cFEStateBuyAttrib, cFEStateCareerStats and cFEStateCredits destructors call it as their base destructor.
  */
-extern "C" void func_001DD750(void *self) {
+extern "C" void cFEState__cFEState(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DD750(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD778);
+INCLUDE_ASM("main/all_in_one_main", cFEState_setControllerFilter);
 #ifdef SKIP_ASM
 extern "C" int func_001A1CD0(int, signed char);
 
@@ -2701,7 +2701,7 @@ extern "C" int func_001A1CD0(int, signed char);
  *
  * @param n  number of users whose masks to remove
  */
-extern "C" void func_001DD778(char *self, signed char n) {
+extern "C" void cFEState_setControllerFilter(char *self, signed char n) {
     int i = 0;
     int mask = 0xFF;
     int realFe = **(int **)(self + 0x10);
@@ -2716,7 +2716,7 @@ extern "C" void func_001DD778(char *self, signed char n) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD800);
+INCLUDE_ASM("main/all_in_one_main", cFEState_setControllerMask);
 #ifdef SKIP_ASM
 extern "C" void func_001A1CB8(int, signed char, int);
 
@@ -2730,7 +2730,7 @@ extern "C" void func_001A1CB8(int, signed char, int);
  * @param userNum  the user
  * @param controllerNum  the controller port
  */
-extern "C" void func_001DD800(void *feState, signed char userNum, signed char controllerNum) {
+extern "C" void cFEState_setControllerMask(void *feState, signed char userNum, signed char controllerNum) {
     func_001A1CB8(*(*(int **)((char*)(feState) + (0x10))), userNum, (1 << controllerNum) & 0xFF);
 }
 #endif
@@ -2776,7 +2776,7 @@ extern "C" void cFEStateCheatCharSelect__cFEStateCheatCharSelect(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD890);
+INCLUDE_ASM("main/all_in_one_main", cFEStateCheatCharSelect_isDone);
 #ifdef SKIP_ASM
 /**
  * Tells whether the cheat character select has finished: returns the word at +0x74 (On Tour's mDone).
@@ -2784,13 +2784,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD890);
  * @param cheatCharSelect  the cheat character select state
  * @return non-zero once a choice has been made
  */
-extern "C" int func_001DD890(void *cheatCharSelect) {
+extern "C" int cFEStateCheatCharSelect_isDone(void *cheatCharSelect) {
     return (*(int *)((char*)(cheatCharSelect) + (0x74)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD898);
+INCLUDE_ASM("main/all_in_one_main", cFEStateCheatCharSelect_getCheatCharID);
 #ifdef SKIP_ASM
 /**
  * Returns the cheat character select's chosen character, the word at +0x70 (On Tour's mCheatCharID).
@@ -2798,7 +2798,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD898);
  * @param cheatCharSelect  the cheat character select state
  * @return the chosen character id
  */
-extern "C" int func_001DD898(void *cheatCharSelect) {
+extern "C" int cFEStateCheatCharSelect_getCheatCharID(void *cheatCharSelect) {
     return (*(int *)((char*)(cheatCharSelect) + (0x70)));
 }
 #endif
@@ -2844,7 +2844,7 @@ extern "C" void cFEStateRiderDetail__cFEStateRiderDetail(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD8F0);
+INCLUDE_ASM("main/all_in_one_main", cFEStateUberTrick__cFEStateUberTrick);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_DD8F0(void*) __asm__("func_0039E390");
@@ -2857,7 +2857,7 @@ extern void* D_0046D0D0[];
  * The g++ delete flags pass through in the second argument register. D_0046CCC0 is the vtable func_00183A98 stores in
  * the state allocated as "cFEStateUberTrick".
  */
-extern "C" void func_001DD8F0(void *self) {
+extern "C" void cFEStateUberTrick__cFEStateUberTrick(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DD8F0(self);
 }
@@ -2866,11 +2866,11 @@ extern "C" void func_001DD8F0(void *self) {
 /**
  * Does nothing: the uber-trick state's onMenuGainFocus (slot 0x6C of its vtable D_0046CCC0).
  */
-extern "C" void func_001DD918(void) {
+extern "C" void cFEStateUberTrick_onMenuGainFocus(void) {
 }
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD920);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupType);
 #ifdef SKIP_ASM
 /**
  * Sets a popup description's type, meType (+0x0).
@@ -2878,13 +2878,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD920);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param popupType  the type: -1 entry box, 0 no buttons, 1..5 options
  */
-extern "C" void func_001DD920(int *popupInfo, int popupType) {
+extern "C" void cPopupInfo_setPopupType(int *popupInfo, int popupType) {
     *popupInfo = popupType;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD928);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getPopupType);
 #ifdef SKIP_ASM
 /**
  * Returns a popup description's type, meType (+0x0).
@@ -2892,13 +2892,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD928);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return the popup type
  */
-extern "C" int func_001DD928(int *popupInfo) {
+extern "C" int cPopupInfo_getPopupType(int *popupInfo) {
     return *popupInfo;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD930);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setMiscData);
 #ifdef SKIP_ASM
 /**
  * Sets the id a popup reports back to its owner, miMiscData (+0x94).
@@ -2906,13 +2906,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD930);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param miscData  the value to report back
  */
-extern "C" void func_001DD930(void *popupInfo, int miscData) {
+extern "C" void cPopupInfo_setMiscData(void *popupInfo, int miscData) {
     (*(int *)((char*)(popupInfo) + (0x94))) = miscData;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD938);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getMiscData);
 #ifdef SKIP_ASM
 /**
  * Returns the id a popup reports back to its owner, miMiscData (+0x94).
@@ -2920,13 +2920,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD938);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return miMiscData
  */
-extern "C" int func_001DD938(void *popupInfo) {
+extern "C" int cPopupInfo_getMiscData(void *popupInfo) {
     return (*(int *)((char*)(popupInfo) + (0x94)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD940);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPassUpdate);
 #ifdef SKIP_ASM
 /**
  * Sets whether the popup lets the state below it keep updating, mbPassUpdate (+0x98).
@@ -2934,13 +2934,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD940);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param passUpdate  non-zero to keep updating the parent state
  */
-extern "C" void func_001DD940(void *popupInfo, int passUpdate) {
+extern "C" void cPopupInfo_setPassUpdate(void *popupInfo, int passUpdate) {
     (*(int *)((char*)(popupInfo) + (0x98))) = passUpdate;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD948);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getPassUpdate);
 #ifdef SKIP_ASM
 /**
  * Returns whether the popup lets the state below it keep updating, mbPassUpdate (+0x98).
@@ -2948,13 +2948,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD948);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return mbPassUpdate
  */
-extern "C" int func_001DD948(void *popupInfo) {
+extern "C" int cPopupInfo_getPassUpdate(void *popupInfo) {
     return (*(int *)((char*)(popupInfo) + (0x98)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD950);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setOffset);
 #ifdef SKIP_ASM
 struct V3_D950 { float x, y, z; };
 /**
@@ -2962,13 +2962,13 @@ struct V3_D950 { float x, y, z; };
  *
  * @param offset  the offset (x, y, z)
  */
-extern "C" void func_001DD950(void *self, V3_D950 offset) {
+extern "C" void cPopupInfo_setOffset(void *self, V3_D950 offset) {
     *(V3_D950 *)((char *)self + 0x9C) = offset;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD990);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getOffset);
 #ifdef SKIP_ASM
 struct V12_D990 { int a; int b; int c; };
 /**
@@ -2980,14 +2980,14 @@ struct V12_D990 { int a; int b; int c; };
  * @param src  the popup description (cPopupInfo)
  * @return @p dst
  */
-extern "C" V12_D990* func_001DD990(V12_D990* dst, char* src) {
+extern "C" V12_D990* cPopupInfo_getOffset(V12_D990* dst, char* src) {
     *dst = *(V12_D990*)(src + 0x9C);
     return dst;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD9B0);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setDefaultOption);
 #ifdef SKIP_ASM
 /**
  * Sets the option a popup starts on, miDefaultOption (+0xAC).
@@ -2995,13 +2995,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD9B0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param defaultOption  the option index (clear() sets -1)
  */
-extern "C" void func_001DD9B0(void *popupInfo, int defaultOption) {
+extern "C" void cPopupInfo_setDefaultOption(void *popupInfo, int defaultOption) {
     (*(int *)((char*)(popupInfo) + (0xAC))) = defaultOption;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD9B8);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getDefaultOption);
 #ifdef SKIP_ASM
 /**
  * Returns the option a popup starts on, miDefaultOption (+0xAC).
@@ -3009,13 +3009,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD9B8);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return miDefaultOption
  */
-extern "C" int func_001DD9B8(void *popupInfo) {
+extern "C" int cPopupInfo_getDefaultOption(void *popupInfo) {
     return (*(int *)((char*)(popupInfo) + (0xAC)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD9C0);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setReceivePrevCommand);
 #ifdef SKIP_ASM
 /**
  * Sets whether the popup reacts to the back command, mbReceivePrev (+0xA8).
@@ -3023,13 +3023,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD9C0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param receivePrev  non-zero to receive the back command (clear() sets 1)
  */
-extern "C" void func_001DD9C0(void *popupInfo, int receivePrev) {
+extern "C" void cPopupInfo_setReceivePrevCommand(void *popupInfo, int receivePrev) {
     (*(int *)((char*)(popupInfo) + (0xA8))) = receivePrev;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD9C8);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getReceivePrevCommand);
 #ifdef SKIP_ASM
 /**
  * Returns whether the popup reacts to the back command, mbReceivePrev (+0xA8).
@@ -3037,13 +3037,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD9C8);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return mbReceivePrev
  */
-extern "C" int func_001DD9C8(void *popupInfo) {
+extern "C" int cPopupInfo_getReceivePrevCommand(void *popupInfo) {
     return (*(int *)((char*)(popupInfo) + (0xA8)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD9D0);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setLayerOffset);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's draw-layer offset, miLayerOffset (+0x90).
@@ -3051,13 +3051,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD9D0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param layerOffset  the layer offset
  */
-extern "C" void func_001DD9D0(void *popupInfo, int layerOffset) {
+extern "C" void cPopupInfo_setLayerOffset(void *popupInfo, int layerOffset) {
     (*(int *)((char*)(popupInfo) + (0x90))) = layerOffset;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD9D8);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getLayerOffset);
 #ifdef SKIP_ASM
 /**
  * Returns a popup's draw-layer offset, miLayerOffset (+0x90).
@@ -3065,13 +3065,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD9D8);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return miLayerOffset
  */
-extern "C" int func_001DD9D8(void *popupInfo) {
+extern "C" int cPopupInfo_getLayerOffset(void *popupInfo) {
     return (*(int *)((char*)(popupInfo) + (0x90)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD9E0);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setBackgroundType);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's background style, meBackgroundType (+0xC0).
@@ -3079,13 +3079,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD9E0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param backgroundType  the background (0 online, 1 blue, 2 black)
  */
-extern "C" void func_001DD9E0(void *popupInfo, int backgroundType) {
+extern "C" void cPopupInfo_setBackgroundType(void *popupInfo, int backgroundType) {
     (*(int *)((char*)(popupInfo) + (0xC0))) = backgroundType;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD9E8);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getBackgroundType);
 #ifdef SKIP_ASM
 /**
  * Returns a popup's background style, meBackgroundType (+0xC0).
@@ -3093,13 +3093,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD9E8);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return meBackgroundType
  */
-extern "C" int func_001DD9E8(void *popupInfo) {
+extern "C" int cPopupInfo_getBackgroundType(void *popupInfo) {
     return (*(int *)((char*)(popupInfo) + (0xC0)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD9F0);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setMaxCharacters);
 #ifdef SKIP_ASM
 /**
  * Sets the most characters a popup's entry box takes, miMaxChars (+0xC4).
@@ -3107,13 +3107,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD9F0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param maxChars  the character limit
  */
-extern "C" void func_001DD9F0(void *popupInfo, int maxChars) {
+extern "C" void cPopupInfo_setMaxCharacters(void *popupInfo, int maxChars) {
     (*(int *)((char*)(popupInfo) + (0xC4))) = maxChars;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD9F8);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getMaxCharacters);
 #ifdef SKIP_ASM
 /**
  * Returns the most characters a popup's entry box takes, miMaxChars (+0xC4).
@@ -3121,13 +3121,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD9F8);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return miMaxChars
  */
-extern "C" int func_001DD9F8(void *popupInfo) {
+extern "C" int cPopupInfo_getMaxCharacters(void *popupInfo) {
     return (*(int *)((char*)(popupInfo) + (0xC4)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA00);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setMinBackgroundSize);
 #ifdef SKIP_ASM
 /**
  * Sets a popup's minimum background size, mfMinSize (+0xB0).
@@ -3135,13 +3135,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA00);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param fparg0  the minimum size
  */
-extern "C" void func_001DDA00(void *popupInfo, float fparg0) {
+extern "C" void cPopupInfo_setMinBackgroundSize(void *popupInfo, float fparg0) {
     (*(float *)((char*)(popupInfo) + (0xB0))) = fparg0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA08);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getMinBackgroundSize);
 #ifdef SKIP_ASM
 /**
  * Returns a popup's minimum background size, mfMinSize (+0xB0).
@@ -3149,13 +3149,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA08);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return mfMinSize
  */
-extern "C" float func_001DDA08(void *popupInfo) {
+extern "C" float cPopupInfo_getMinBackgroundSize(void *popupInfo) {
     return (*(float *)((char*)(popupInfo) + (0xB0)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA10);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setUseCenterAlignedOptions);
 #ifdef SKIP_ASM
 /**
  * Sets whether a popup centres its options, mbCenterOptions (+0xB8).
@@ -3163,13 +3163,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA10);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param centerOptions  non-zero to centre the options
  */
-extern "C" void func_001DDA10(void *popupInfo, int centerOptions) {
+extern "C" void cPopupInfo_setUseCenterAlignedOptions(void *popupInfo, int centerOptions) {
     (*(int *)((char*)(popupInfo) + (0xB8))) = centerOptions;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA18);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getUseCenterAlignedOptions);
 #ifdef SKIP_ASM
 /**
  * Returns whether a popup centres its options, mbCenterOptions (+0xB8).
@@ -3177,13 +3177,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA18);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return mbCenterOptions
  */
-extern "C" int func_001DDA18(void *popupInfo) {
+extern "C" int cPopupInfo_getUseCenterAlignedOptions(void *popupInfo) {
     return (*(int *)((char*)(popupInfo) + (0xB8)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA20);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setUseCenterAlignedText);
 #ifdef SKIP_ASM
 /**
  * Sets whether a popup centres its text, mbCenterText (+0xBC).
@@ -3191,13 +3191,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA20);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param centerText  non-zero to centre the text (clear() sets 1)
  */
-extern "C" void func_001DDA20(void *popupInfo, int centerText) {
+extern "C" void cPopupInfo_setUseCenterAlignedText(void *popupInfo, int centerText) {
     (*(int *)((char*)(popupInfo) + (0xBC))) = centerText;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA28);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getUseCenterAlignedText);
 #ifdef SKIP_ASM
 /**
  * Returns whether a popup centres its text, mbCenterText (+0xBC).
@@ -3205,7 +3205,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA28);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return mbCenterText
  */
-extern "C" int func_001DDA28(void *popupInfo) {
+extern "C" int cPopupInfo_getUseCenterAlignedText(void *popupInfo) {
     return (*(int *)((char*)(popupInfo) + (0xBC)));
 }
 #endif
@@ -3271,7 +3271,7 @@ extern "C" void func_001DDA60(V8_DA60* dst, V8_DA60* src) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDA78);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getPopupMessage);
 #ifdef SKIP_ASM
 /**
  * Returns a popup's message element, mtMessage (+0x4).
@@ -3279,7 +3279,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA78);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return @p popupInfo + 4
  */
-extern "C" int func_001DDA78(int popupInfo) {
+extern "C" int cPopupInfo_getPopupMessage(int popupInfo) {
     return popupInfo + 4;
 }
 #endif
@@ -3345,7 +3345,7 @@ extern "C" void func_001DDAB0(V8_DDAB0* dst, V8_DDAB0* src) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDAC8);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getPopupTitle);
 #ifdef SKIP_ASM
 /**
  * Returns a popup's title element, mtTitle (+0xC).
@@ -3353,7 +3353,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAC8);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return @p popupInfo + 0xC
  */
-extern "C" int func_001DDAC8(int popupInfo) {
+extern "C" int cPopupInfo_getPopupTitle(int popupInfo) {
     return popupInfo + 0xC;
 }
 #endif
@@ -3419,7 +3419,7 @@ extern "C" void func_001DDB00(V8_DDB00* dst, V8_DDB00* src) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDB18);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getPopupEntryBoxTitle);
 #ifdef SKIP_ASM
 /**
  * Returns a popup's entry-box title element, mtEntryBoxTitle (+0x14).
@@ -3427,7 +3427,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB18);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return @p popupInfo + 0x14
  */
-extern "C" int func_001DDB18(int popupInfo) {
+extern "C" int cPopupInfo_getPopupEntryBoxTitle(int popupInfo) {
     return popupInfo + 20;
 }
 #endif
@@ -3497,7 +3497,7 @@ extern "C" void func_001DDB50(V8_DDB50* dst, V8_DDB50* src) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDB68);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getPopupEntryBoxInitial);
 #ifdef SKIP_ASM
 /**
  * Returns the element holding the text a popup's entry box starts with, mtEntryBoxInitial (+0x1C).
@@ -3505,7 +3505,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB68);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return @p popupInfo + 0x1C
  */
-extern "C" int func_001DDB68(int popupInfo) {
+extern "C" int cPopupInfo_getPopupEntryBoxInitial(int popupInfo) {
     return popupInfo + 0x1C;
 }
 #endif
@@ -3573,7 +3573,7 @@ extern "C" void func_001DDBA0(V8_DDBA0* dst, V8_DDBA0* src) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDBB8);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getPopupPostPending);
 #ifdef SKIP_ASM
 /**
  * Returns a popup's "post pending" text element, mtPostPending (+0x4C).
@@ -3581,7 +3581,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDBB8);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return @p popupInfo + 0x4C
  */
-extern "C" int func_001DDBB8(int popupInfo) {
+extern "C" int cPopupInfo_getPopupPostPending(int popupInfo) {
     return popupInfo + 76;
 }
 #endif
@@ -3615,7 +3615,7 @@ extern "C" int func_001DDBC8(void *popupInfo) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDBD0);
+INCLUDE_ASM("main/all_in_one_main", cScreenPopup_cScreenPopup1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E318_DBD0(void *, int, int) __asm__("func_0039E318");
@@ -3639,7 +3639,7 @@ struct S_DBD0 {
  *
  * @return @p self
  */
-extern "C" S_DBD0 *func_001DDBD0(S_DBD0 *self) {
+extern "C" S_DBD0 *cScreenPopup_cScreenPopup1(S_DBD0 *self) {
     func_0039E318_DBD0(self, 0, 0);
     self->vt = cScreenPopup_vtbl;
     cPopupInfo_cPopupInfo_DBD0((char *)self + 0xBC);
@@ -3650,7 +3650,7 @@ extern "C" S_DBD0 *func_001DDBD0(S_DBD0 *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDC20);
+INCLUDE_ASM("main/all_in_one_main", cScreenPopup_getPopupInfo);
 #ifdef SKIP_ASM
 /**
  * Returns a screen popup's description, the cPopupInfo at +0xBC.
@@ -3658,13 +3658,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDC20);
  * @param screenPopup  the popup (cScreenPopup)
  * @return @p screenPopup + 0xBC
  */
-extern "C" int func_001DDC20(int screenPopup) {
+extern "C" int cScreenPopup_getPopupInfo(int screenPopup) {
     return screenPopup + 188;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDC28);
+INCLUDE_ASM("main/all_in_one_main", cScreenPopup_setPassUpdate);
 #ifdef SKIP_ASM
 /**
  * Sets whether a screen popup lets the state below it keep updating, mbPassUpdate (+0x2C0).
@@ -3672,13 +3672,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDC28);
  * @param screenPopup  the popup (cScreenPopup)
  * @param passUpdate  non-zero to keep updating the parent state
  */
-extern "C" void func_001DDC28(void *screenPopup, int passUpdate) {
+extern "C" void cScreenPopup_setPassUpdate(void *screenPopup, int passUpdate) {
     (*(int *)((char*)(screenPopup) + (0x2C0))) = passUpdate;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDC30);
+INCLUDE_ASM("main/all_in_one_main", cScreenPopup_getPassUpdate);
 #ifdef SKIP_ASM
 /**
  * Returns whether a screen popup lets the state below it keep updating, mbPassUpdate (+0x2C0).
@@ -3686,13 +3686,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDC30);
  * @param screenPopup  the popup (cScreenPopup)
  * @return mbPassUpdate
  */
-extern "C" int func_001DDC30(void *screenPopup) {
+extern "C" int cScreenPopup_getPassUpdate(void *screenPopup) {
     return (*(int *)((char*)(screenPopup) + (0x2C0)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDC38);
+INCLUDE_ASM("main/all_in_one_main", cScreenPopup_getEntryBoxText);
 #ifdef SKIP_ASM
 /**
  * Returns the text typed into a screen popup's entry box, the string mszInputText (+0x2B0).
@@ -3700,13 +3700,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDC38);
  * @param screenPopup  the popup (cScreenPopup)
  * @return the input text
  */
-extern "C" int func_001DDC38(void *screenPopup) {
+extern "C" int cScreenPopup_getEntryBoxText(void *screenPopup) {
     return (*(int *)((char*)(screenPopup) + (0x2B0)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDC40);
+INCLUDE_ASM("main/all_in_one_main", cScreenPopup_isShowing);
 #ifdef SKIP_ASM
 /**
  * Tells whether a screen popup is on screen: returns mbShowing (+0x2B8), which onCreateScreen sets and onDestroyScreen
@@ -3715,13 +3715,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDC40);
  * @param screenPopup  the popup (cScreenPopup)
  * @return mbShowing
  */
-extern "C" int func_001DDC40(void *screenPopup) {
+extern "C" int cScreenPopup_isShowing(void *screenPopup) {
     return (*(int *)((char*)(screenPopup) + (0x2B8)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDC48);
+INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup_cUIStateBuyPopup1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E318_DC48(void *, int, int) __asm__("func_0039E318");
@@ -3736,7 +3736,7 @@ extern int cUIStateBuyPopup_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_001DDC48(cUIStateBuyPopup* self) {
+extern "C" void *cUIStateBuyPopup_cUIStateBuyPopup1(cUIStateBuyPopup* self) {
     func_0039E318_DC48(self, 0, 0);
     self->mVtbl = (void**)cUIStateBuyPopup_vtbl;
     cBuyPopupInfo_clear_DC48((char *)self + 0x48);
@@ -3765,7 +3765,7 @@ extern "C" void cUIStateBuyPopup__cUIStateBuyPopup(cUIStateBuyPopup* self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDCB8);
+INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup_getPopupInfo);
 #ifdef SKIP_ASM
 /**
  * Returns a buy popup's purchase description, the cBuyPopupInfo at +0x48.
@@ -3773,13 +3773,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDCB8);
  * @param buyPopup  the popup (cUIStateBuyPopup)
  * @return @p buyPopup + 0x48
  */
-extern "C" int func_001DDCB8(int buyPopup) {
+extern "C" int cUIStateBuyPopup_getPopupInfo(int buyPopup) {
     return buyPopup + 72;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDCC0);
+INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup_isAccept);
 #ifdef SKIP_ASM
 /**
  * Tells whether the player accepted the purchase: returns mbAccept.
@@ -3787,13 +3787,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDCC0);
  * @param uiStateBuyPopup  the popup
  * @return mbAccept
  */
-extern "C" int func_001DDCC0(cUIStateBuyPopup* uiStateBuyPopup) {
+extern "C" int cUIStateBuyPopup_isAccept(cUIStateBuyPopup* uiStateBuyPopup) {
     return (uiStateBuyPopup->mbAccept);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDCC8);
+INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup_initBuySongByCredit);
 #ifdef SKIP_ASM
 extern "C" void cBuyPopupInfo_initBuySongByCredit(int);
 
@@ -3805,13 +3805,13 @@ extern "C" void cBuyPopupInfo_initBuySongByCredit(int);
  *
  * @param buyPopup  the popup (cUIStateBuyPopup)
  */
-extern "C" void func_001DDCC8(int buyPopup) {
+extern "C" void cUIStateBuyPopup_initBuySongByCredit(int buyPopup) {
     cBuyPopupInfo_initBuySongByCredit(buyPopup + 72);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDCE8);
+INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup_initBuySong);
 #ifdef SKIP_ASM
 extern "C" void cBuyPopupInfo_initBuySong(int);
 
@@ -3822,13 +3822,13 @@ extern "C" void cBuyPopupInfo_initBuySong(int);
  *
  * @param buyPopup  the popup (cUIStateBuyPopup)
  */
-extern "C" void func_001DDCE8(int buyPopup) {
+extern "C" void cUIStateBuyPopup_initBuySong(int buyPopup) {
     cBuyPopupInfo_initBuySong(buyPopup + 72);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDD08);
+INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup_initBuyReward);
 #ifdef SKIP_ASM
 extern "C" void func_001CAA18(int);
 
@@ -3840,13 +3840,13 @@ extern "C" void func_001CAA18(int);
  *
  * @param buyPopup  the popup (cUIStateBuyPopup)
  */
-extern "C" void func_001DDD08(int buyPopup) {
+extern "C" void cUIStateBuyPopup_initBuyReward(int buyPopup) {
     func_001CAA18(buyPopup + 72);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDD28);
+INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isSavePressed);
 #ifdef SKIP_ASM
 extern void *cFEMemCard_mInstance;
 
@@ -3858,13 +3858,13 @@ extern void *cFEMemCard_mInstance;
  *
  * @return the save-pressed word
  */
-extern "C" int func_001DDD28(void) {
+extern "C" int cFEMemCard_isSavePressed(void) {
     return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1DC)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDD38);
+INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isLoadPressed);
 #ifdef SKIP_ASM
 extern void *cFEMemCard_mInstance;
 
@@ -3876,13 +3876,13 @@ extern void *cFEMemCard_mInstance;
  *
  * @return the load-pressed word
  */
-extern "C" int func_001DDD38(void) {
+extern "C" int cFEMemCard_isLoadPressed(void) {
     return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1F4)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDD48);
+INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isDeletePressed);
 #ifdef SKIP_ASM
 extern void *cFEMemCard_mInstance;
 
@@ -3894,13 +3894,13 @@ extern void *cFEMemCard_mInstance;
  *
  * @return the delete-pressed word
  */
-extern "C" int func_001DDD48(void) {
+extern "C" int cFEMemCard_isDeletePressed(void) {
     return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1E0)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDD58);
+INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isCancelPressed);
 #ifdef SKIP_ASM
 extern void *cFEMemCard_mInstance;
 
@@ -3912,7 +3912,7 @@ extern void *cFEMemCard_mInstance;
  *
  * @return the cancel-pressed word before it was cleared
  */
-extern "C" int func_001DDD58(void) {
+extern "C" int cFEMemCard_isCancelPressed(void) {
     int temp_2;
 
     temp_2 = (*(int *)((char*)(cFEMemCard_mInstance) + (0x1E4)));
@@ -3922,7 +3922,7 @@ extern "C" int func_001DDD58(void) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDD68);
+INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isOWPressed);
 #ifdef SKIP_ASM
 extern void *cFEMemCard_mInstance;
 
@@ -3934,13 +3934,13 @@ extern void *cFEMemCard_mInstance;
  *
  * @return the overwrite-pressed word
  */
-extern "C" int func_001DDD68(void) {
+extern "C" int cFEMemCard_isOWPressed(void) {
     return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1F0)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDD78);
+INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isDeviceSelected);
 #ifdef SKIP_ASM
 extern void *cFEMemCard_mInstance;
 
@@ -3952,13 +3952,13 @@ extern void *cFEMemCard_mInstance;
  *
  * @return the device-selected word
  */
-extern "C" int func_001DDD78(void) {
+extern "C" int cFEMemCard_isDeviceSelected(void) {
     return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1A8)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDD88);
+INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isNextMCPressed);
 #ifdef SKIP_ASM
 extern void *cFEMemCard_mInstance;
 
@@ -3970,7 +3970,7 @@ extern void *cFEMemCard_mInstance;
  *
  * @return the next-device word before it was cleared
  */
-extern "C" int func_001DDD88(void) {
+extern "C" int cFEMemCard_isNextMCPressed(void) {
     int temp_2;
 
     temp_2 = (*(int *)((char*)(cFEMemCard_mInstance) + (0x1F8)));
@@ -3980,7 +3980,7 @@ extern "C" int func_001DDD88(void) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDD98);
+INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isPrevMCPressed);
 #ifdef SKIP_ASM
 extern void *cFEMemCard_mInstance;
 
@@ -3992,7 +3992,7 @@ extern void *cFEMemCard_mInstance;
  *
  * @return the previous-device word before it was cleared
  */
-extern "C" int func_001DDD98(void) {
+extern "C" int cFEMemCard_isPrevMCPressed(void) {
     int temp_2;
 
     temp_2 = (*(int *)((char*)(cFEMemCard_mInstance) + (0x1FC)));
@@ -4002,7 +4002,7 @@ extern "C" int func_001DDD98(void) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDDA8);
+INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isFormatPressed);
 #ifdef SKIP_ASM
 extern void *cFEMemCard_mInstance;
 
@@ -4014,13 +4014,13 @@ extern void *cFEMemCard_mInstance;
  *
  * @return the format-pressed word
  */
-extern "C" int func_001DDDA8(void) {
+extern "C" int cFEMemCard_isFormatPressed(void) {
     return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1E8)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDDB8);
+INCLUDE_ASM("main/all_in_one_main", cFEMemCard_callbackIsRetryPressed);
 #ifdef SKIP_ASM
 extern void *cFEMemCard_mInstance;
 
@@ -4032,7 +4032,7 @@ extern void *cFEMemCard_mInstance;
  *
  * @return the retry-pressed word before it was cleared
  */
-extern "C" int func_001DDDB8(void) {
+extern "C" int cFEMemCard_callbackIsRetryPressed(void) {
     int temp_2;
 
     temp_2 = (*(int *)((char*)(cFEMemCard_mInstance) + (0x1EC)));
@@ -4042,7 +4042,7 @@ extern "C" int func_001DDDB8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDDC8);
+INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isInstance);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A2028_DDC8 __asm__("cFEMemCard_mInstance");
@@ -4052,7 +4052,7 @@ extern int D_004A2028_DDC8 __asm__("cFEMemCard_mInstance");
  *
  * @return 1 when cFEMemCard_mInstance is set, otherwise 0
  */
-extern "C" int func_001DDDC8(void) {
+extern "C" int cFEMemCard_isInstance(void) {
     return D_004A2028_DDC8 != 0;
 }
 #endif
@@ -4060,7 +4060,7 @@ extern "C" int func_001DDDC8(void) {
 /**
  * Does nothing: the memory-card screen base's onCreateScreen (slot +0x24 of its vtable D_0046C980).
  */
-extern "C" void func_001DDDD8(void) {
+extern "C" void cFEMemCard_onCreateScreen(void) {
 }
 
 /**
@@ -4070,27 +4070,27 @@ extern "C" void func_001DDDD8(void) {
  * cFEStateProfileLoad, cFEStateOptionsDeviceSelect, cOVState_AUTOSAVE, cOVState_PROFILE and two more vtables
  * (D_004722B8, D_00472440).
  */
-extern "C" void func_001DDDE0(void) {
+extern "C" void cFEMemCard_onMenuGainFocus(void) {
 }
 
 /**
  * Does nothing: the memory-card screen base's onWidgetEvent (slot +0x9C of D_0046C980).
  */
-extern "C" void func_001DDDE8(void) {
+extern "C" void cFEMemCard_onWidgetEvent(void) {
 }
 
 /**
  * Does nothing: the memory-card screen base's slot +0xD4 of D_0046C980, which cOVState_AUTOSAVE fills with
  * cOVState_AUTOSAVE_displayStatus.
  */
-extern "C" void func_001DDDF0(void) {
+extern "C" void cFEMemCard_displayStatus(void) {
 }
 
 /**
  * Does nothing: the memory-card screen base's slot +0x10C of D_0046C980, which cFEStateProfileLoad overrides with
  * func_0018FAF0 and cFEStateOptionsDeviceSelect with func_0018E478.
  */
-extern "C" void func_001DDDF8(void) {
+extern "C" void cFEMemCard_updateDone(void) {
 }
 
 /**
@@ -4099,7 +4099,7 @@ extern "C" void func_001DDDF8(void) {
  * cFEStateProfileLoad (func_0018EF70), cFEStateOptionsDeviceSelect (func_0018E178), cOVState_PROFILE and
  * cFEStateMemCard override it with functions taking one flag.
  */
-extern "C" void func_001DDE00(void) {
+extern "C" void cFEMemCard_hideActionButtons(void) {
 }
 
 /**
@@ -4109,7 +4109,7 @@ extern "C" void func_001DDE00(void) {
  * cFEStateProfileLoad (func_0018F0B8) and cFEStateOptionsDeviceSelect (func_0018E2C0) override it with functions taking
  * one flag.
  */
-extern "C" void func_001DDE08(void) {
+extern "C" void cFEMemCard_hideDeleteButton(void) {
 }
 
 /**
@@ -4119,11 +4119,11 @@ extern "C" void func_001DDE08(void) {
  * cFEStateProfileLoad (func_0018F168) and cFEStateOptionsDeviceSelect (func_0018E368) override it with functions taking
  * a load flag and a save flag.
  */
-extern "C" void func_001DDE10(void) {
+extern "C" void cFEMemCard_hideMainButton(void) {
 }
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDE18);
+INCLUDE_ASM("main/all_in_one_main", cFEMemCard_cFEMemCard1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E2A0_DE18(void *, int) __asm__("func_0039E2A0");
@@ -4141,7 +4141,7 @@ extern unsigned short D_004A1390[];
  *
  * @return @p self
  */
-extern "C" void *func_001DDE18(void *self) {
+extern "C" void *cFEMemCard_cFEMemCard1(void *self) {
     func_0039E2A0_DE18(self, 0);
     *(int *)((char *)self + 0x98) = 0;
     *(int *)((char *)self + 0x48) = 0;
@@ -4156,7 +4156,7 @@ extern "C" void *func_001DDE18(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDE78);
+INCLUDE_ASM("main/all_in_one_main", cFEPopupConfirm_cFEPopupConfirm1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cScreenPopup_cScreenPopup_DE78(void *, int, int) __asm__("cScreenPopup_cScreenPopup");
@@ -4169,7 +4169,7 @@ extern int cFEPopupConfirm_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_001DDE78(void *self) {
+extern "C" void *cFEPopupConfirm_cFEPopupConfirm1(void *self) {
     cScreenPopup_cScreenPopup_DE78(self, 0, 0);
     *(int **)((char *)self + 8) = cFEPopupConfirm_vtbl;
     return self;
@@ -4196,7 +4196,7 @@ extern "C" void cFEPopupConfirm__cFEPopupConfirm(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDEE0);
+INCLUDE_ASM("main/all_in_one_main", cFEPopupConfirm_setUsePreFE);
 #ifdef SKIP_ASM
 extern int cFEPopupConfirm_mUsePreFE;
 
@@ -4205,13 +4205,13 @@ extern int cFEPopupConfirm_mUsePreFE;
  *
  * @param usePreFe  the new flag value
  */
-extern "C" void func_001DDEE0(int usePreFe) {
+extern "C" void cFEPopupConfirm_setUsePreFE(int usePreFe) {
     cFEPopupConfirm_mUsePreFE = usePreFe;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDEE8);
+INCLUDE_ASM("main/all_in_one_main", cFEStateOptions_cFEStateOptions);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E2A0_DEE8(void*, int) __asm__("func_0039E2A0");
@@ -4223,7 +4223,7 @@ extern void* cFEStateOptions_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DDEE8(void *self) {
+extern "C" void* cFEStateOptions_cFEStateOptions(void *self) {
     func_0039E2A0_DEE8(self, 0);
     *(void***)((char*)self + 8) = cFEStateOptions_vtbl;
     return self;
@@ -4251,7 +4251,7 @@ extern "C" void cFEStateOptions__cFEStateOptions(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDF48);
+INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsGame_cFEStateOptionsGame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E2A0_DF48(void*, int) __asm__("func_0039E2A0");
@@ -4263,7 +4263,7 @@ extern void* cFEStateOptionsGame_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DDF48(void *self) {
+extern "C" void* cFEStateOptionsGame_cFEStateOptionsGame(void *self) {
     func_0039E2A0_DF48(self, 0);
     *(void***)((char*)self + 8) = cFEStateOptionsGame_vtbl;
     return self;
@@ -4297,7 +4297,7 @@ extern "C" void func_001DDFA8(void) {
 }
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDFB0);
+INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsSound_cFEStateOptionsSound);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E2A0_DFB0(void*, int) __asm__("func_0039E2A0");
@@ -4309,7 +4309,7 @@ extern void* cFEStateOptionsSound_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DDFB0(void *self) {
+extern "C" void* cFEStateOptionsSound_cFEStateOptionsSound(void *self) {
     func_0039E2A0_DFB0(self, 0);
     *(void***)((char*)self + 8) = cFEStateOptionsSound_vtbl;
     return self;
@@ -4343,7 +4343,7 @@ extern "C" void func_001DE010(void) {
 }
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE018);
+INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsHUD_cFEStateOptionsHUD);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E2A0_E018(void*, int) __asm__("func_0039E2A0");
@@ -4357,7 +4357,7 @@ extern void* D_0046C550[];
  *
  * @return @p self
  */
-extern "C" void* func_001DE018(void *self) {
+extern "C" void* cFEStateOptionsHUD_cFEStateOptionsHUD(void *self) {
     func_0039E2A0_E018(self, 0);
     *(void***)((char*)self + 8) = D_0046C550;
     return self;
@@ -4365,7 +4365,7 @@ extern "C" void* func_001DE018(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE050);
+INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsHUD__cFEStateOptionsHUD);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_DE050(void*) __asm__("func_0039E390");
@@ -4377,7 +4377,7 @@ extern void* D_0046D0D0[];
  *
  * The g++ delete flags pass through in the second argument register.
  */
-extern "C" void func_001DE050(void *self) {
+extern "C" void cFEStateOptionsHUD__cFEStateOptionsHUD(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
     func_0039E390_DE050(self);
 }
@@ -4390,7 +4390,7 @@ extern "C" void func_001DE078(void) {
 }
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE080);
+INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsController_cFEStateOptionsController);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E2A0_E080(void *, int) __asm__("func_0039E2A0");
@@ -4404,7 +4404,7 @@ extern int cFEStateOptionsController_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_001DE080(void *self) {
+extern "C" void *cFEStateOptionsController_cFEStateOptionsController(void *self) {
     func_0039E2A0_E080(self, 0);
     *(int **)((char *)self + 8) = cFEStateOptionsController_vtbl;
     *((char *)self + 0x50) = 0;
@@ -4439,7 +4439,7 @@ extern "C" void func_001DE0E8(void) {
 }
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE0F0);
+INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E2A0_E0F0(void *, int) __asm__("func_0039E2A0");
@@ -4451,7 +4451,7 @@ extern int cFEStateOptionsSaveLoad_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_001DE0F0(void *self) {
+extern "C" void *cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad(void *self) {
     func_0039E2A0_E0F0(self, 0);
     *(int **)((char *)self + 8) = cFEStateOptionsSaveLoad_vtbl;
     return self;
@@ -4500,7 +4500,7 @@ extern "C" void* cFEStateOptionsDeviceSelect__cFEStateOptionsDeviceSelect(void *
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE178);
+INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cFEMemCard_cFEMemCard_E178(void *, int, int) __asm__("cFEMemCard_cFEMemCard");
@@ -4512,7 +4512,7 @@ extern int D_0046C228_E178[] __asm__("cFEStateOptionsDeviceSelect_vtbl");
  *
  * @return @p self
  */
-extern "C" void *func_001DE178(void *self) {
+extern "C" void *cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect(void *self) {
     cFEMemCard_cFEMemCard_E178(self, 0, 0);
     *(int **)((char *)self + 8) = D_0046C228_E178;
     return self;
@@ -4520,7 +4520,7 @@ extern "C" void *func_001DE178(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE1B8);
+INCLUDE_ASM("main/all_in_one_main", cFEStateProfileSelect_cFEStateProfileSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E2A0_E1B8(void *, int) __asm__("func_0039E2A0");
@@ -4532,7 +4532,7 @@ extern int cFEStateProfileSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_001DE1B8(void *self) {
+extern "C" void *cFEStateProfileSelect_cFEStateProfileSelect(void *self) {
     func_0039E2A0_E1B8(self, 0);
     *(int **)((char *)self + 8) = cFEStateProfileSelect_vtbl;
     return self;
@@ -4623,7 +4623,7 @@ extern "C" void func_001DE280(void *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE288);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_cKeyboardPopup1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E318_E288(void *, int, int) __asm__("func_0039E318");
@@ -4646,7 +4646,7 @@ struct S_E288 {
  *
  * @return @p self
  */
-extern "C" S_E288 *func_001DE288(S_E288 *self) {
+extern "C" S_E288 *cKeyboardPopup_cKeyboardPopup1(S_E288 *self) {
     func_0039E318_E288(self, 0, 0);
     self->vt = cKeyboardPopup_vtbl;
     self->v60 = 0x3F;
@@ -4669,7 +4669,7 @@ extern "C" int cKeyboardPopup_onLoseTransition(void) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE2E0);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getInputText);
 #ifdef SKIP_ASM
 /**
  * Returns the keyboard popup's edited text, mszEditString (+0x74).
@@ -4677,13 +4677,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE2E0);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return @p keyboard + 0x74
  */
-extern "C" int func_001DE2E0(int keyboard) {
+extern "C" int cKeyboardPopup_getInputText(int keyboard) {
     return keyboard + 116;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE2E8);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getInputTextLength);
 #ifdef SKIP_ASM
 extern "C" void strlen(int);
 
@@ -4693,13 +4693,13 @@ extern "C" void strlen(int);
  *
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  */
-extern "C" void func_001DE2E8(int keyboard) {
+extern "C" void cKeyboardPopup_getInputTextLength(int keyboard) {
     strlen(keyboard + 116);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE308);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getCurrentKey);
 #ifdef SKIP_ASM
 /**
  * Returns the keyboard popup's selected key, miCurrentKey (+0x140; 0..83).
@@ -4707,13 +4707,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE308);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return miCurrentKey
  */
-extern "C" int func_001DE308(void *keyboard) {
+extern "C" int cKeyboardPopup_getCurrentKey(void *keyboard) {
     return (*(int *)((char*)(keyboard) + (0x140)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE310);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setCurrentKey);
 #ifdef SKIP_ASM
 /**
  * Sets the keyboard popup's selected key, miCurrentKey (+0x140).
@@ -4721,13 +4721,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE310);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param currentKey  the key index (0..83)
  */
-extern "C" void func_001DE310(void *keyboard, int currentKey) {
+extern "C" void cKeyboardPopup_setCurrentKey(void *keyboard, int currentKey) {
     (*(int *)((char*)(keyboard) + (0x140))) = currentKey;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE318);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setKeyboardType);
 #ifdef SKIP_ASM
 /**
  * Sets the keyboard popup's layout, meType (+0x43C): 0 regular, 1 compact, 2 expanded.
@@ -4735,13 +4735,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE318);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param keyboardType  the layout
  */
-extern "C" void func_001DE318(void *keyboard, int keyboardType) {
+extern "C" void cKeyboardPopup_setKeyboardType(void *keyboard, int keyboardType) {
     (*(int *)((char*)(keyboard) + (0x43C))) = keyboardType;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE320);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getKeyboardType);
 #ifdef SKIP_ASM
 /**
  * Returns the keyboard popup's layout, meType (+0x43C).
@@ -4749,13 +4749,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE320);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return meType
  */
-extern "C" int func_001DE320(void *keyboard) {
+extern "C" int cKeyboardPopup_getKeyboardType(void *keyboard) {
     return (*(int *)((char*)(keyboard) + (0x43C)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE328);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getPopOnEnd);
 #ifdef SKIP_ASM
 /**
  * Returns whether accepting the text pops the keyboard popup, mbPopOnEnd (+0x420).
@@ -4763,13 +4763,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE328);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return mbPopOnEnd
  */
-extern "C" int func_001DE328(void *keyboard) {
+extern "C" int cKeyboardPopup_getPopOnEnd(void *keyboard) {
     return (*(int *)((char*)(keyboard) + (0x420)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE330);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setPopOnEnd);
 #ifdef SKIP_ASM
 /**
  * Sets whether accepting the text pops the keyboard popup, mbPopOnEnd (+0x420).
@@ -4777,13 +4777,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE330);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param popOnEnd  non-zero to pop on accept
  */
-extern "C" void func_001DE330(void *keyboard, int popOnEnd) {
+extern "C" void cKeyboardPopup_setPopOnEnd(void *keyboard, int popOnEnd) {
     (*(int *)((char*)(keyboard) + (0x420))) = popOnEnd;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE338);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setPassword);
 #ifdef SKIP_ASM
 /**
  * Sets whether the keyboard popup masks its text, mbPassword (+0x70).
@@ -4791,13 +4791,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE338);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param password  non-zero to show '*' characters
  */
-extern "C" void func_001DE338(void *keyboard, int password) {
+extern "C" void cKeyboardPopup_setPassword(void *keyboard, int password) {
     (*(int *)((char*)(keyboard) + (0x70))) = password;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE340);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setClearOnFirstCharacter);
 #ifdef SKIP_ASM
 /**
  * Sets whether the first key press clears the text, mbClearOnFirst (+0x54).
@@ -4805,13 +4805,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE340);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param clearOnFirst  non-zero to clear on the first key
  */
-extern "C" void func_001DE340(void *keyboard, int clearOnFirst) {
+extern "C" void cKeyboardPopup_setClearOnFirstCharacter(void *keyboard, int clearOnFirst) {
     (*(int *)((char*)(keyboard) + (0x54))) = clearOnFirst;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE348);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setDisableSpaceForFirst);
 #ifdef SKIP_ASM
 /**
  * Sets whether the space key stays disabled while the text is empty, mbDisableForFirst (+0x58).
@@ -4819,13 +4819,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE348);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param disableForFirst  non-zero to disable space for the first character
  */
-extern "C" void func_001DE348(void *keyboard, int disableForFirst) {
+extern "C" void cKeyboardPopup_setDisableSpaceForFirst(void *keyboard, int disableForFirst) {
     (*(int *)((char*)(keyboard) + (0x58))) = disableForFirst;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE350);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setIncludeSpace);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cKeyboardPopup_setIncludeKey_DE350(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
@@ -4836,13 +4836,13 @@ extern "C" void cKeyboardPopup_setIncludeKey_DE350(int, int, int, int) __asm__("
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param includeSpace  non-zero to enable the key
  */
-extern "C" void func_001DE350(int keyboard, int includeSpace) {
+extern "C" void cKeyboardPopup_setIncludeSpace(int keyboard, int includeSpace) {
     cKeyboardPopup_setIncludeKey_DE350(keyboard, 75, includeSpace, 2);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE378);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setIncludeTab);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cKeyboardPopup_setIncludeKey_DE378(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
@@ -4854,13 +4854,13 @@ extern "C" void cKeyboardPopup_setIncludeKey_DE378(int, int, int, int) __asm__("
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param includeKey  non-zero to enable the key
  */
-extern "C" void func_001DE378(int keyboard, int includeKey) {
+extern "C" void cKeyboardPopup_setIncludeTab(int keyboard, int includeKey) {
     cKeyboardPopup_setIncludeKey_DE378(keyboard, 0x1C, includeKey, 2);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE3A0);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setIncludeUp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cKeyboardPopup_setIncludeKey_DE3A0(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
@@ -4872,13 +4872,13 @@ extern "C" void cKeyboardPopup_setIncludeKey_DE3A0(int, int, int, int) __asm__("
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param includeKey  non-zero to enable the key
  */
-extern "C" void func_001DE3A0(int keyboard, int includeKey) {
+extern "C" void cKeyboardPopup_setIncludeUp(int keyboard, int includeKey) {
     cKeyboardPopup_setIncludeKey_DE3A0(keyboard, 69, includeKey, 2);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE3C8);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setIncludeDown);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cKeyboardPopup_setIncludeKey_DE3C8(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
@@ -4889,13 +4889,13 @@ extern "C" void cKeyboardPopup_setIncludeKey_DE3C8(int, int, int, int) __asm__("
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param includeKey  non-zero to enable the key
  */
-extern "C" void func_001DE3C8(int keyboard, int includeKey) {
+extern "C" void cKeyboardPopup_setIncludeDown(int keyboard, int includeKey) {
     cKeyboardPopup_setIncludeKey_DE3C8(keyboard, 79, includeKey, 2);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE3F0);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setIncludeBackslash);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cKeyboardPopup_setIncludeKey_DE3F0(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
@@ -4907,13 +4907,13 @@ extern "C" void cKeyboardPopup_setIncludeKey_DE3F0(int, int, int, int) __asm__("
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param includeKey  non-zero to enable the key
  */
-extern "C" void func_001DE3F0(int keyboard, int includeKey) {
+extern "C" void cKeyboardPopup_setIncludeBackslash(int keyboard, int includeKey) {
     cKeyboardPopup_setIncludeKey_DE3F0(keyboard, 41, includeKey, 2);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE418);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setIncludeQuestionMark);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cKeyboardPopup_setIncludeKey_DE418(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
@@ -4924,13 +4924,13 @@ extern "C" void cKeyboardPopup_setIncludeKey_DE418(int, int, int, int) __asm__("
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param includeKey  non-zero to enable the key
  */
-extern "C" void func_001DE418(int keyboard, int includeKey) {
+extern "C" void cKeyboardPopup_setIncludeQuestionMark(int keyboard, int includeKey) {
     cKeyboardPopup_setIncludeKey_DE418(keyboard, 66, includeKey, 2);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE440);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getMinCharacters);
 #ifdef SKIP_ASM
 /**
  * Returns the keyboard popup's minimum text length, miMinCharacters (+0x64).
@@ -4938,13 +4938,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE440);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return miMinCharacters
  */
-extern "C" int func_001DE440(void *keyboard) {
+extern "C" int cKeyboardPopup_getMinCharacters(void *keyboard) {
     return (*(int *)((char*)(keyboard) + (0x64)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE448);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getMaxCharacters);
 #ifdef SKIP_ASM
 /**
  * Returns the keyboard popup's maximum text length, miMaxCharacters (+0x60).
@@ -4952,13 +4952,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE448);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return miMaxCharacters
  */
-extern "C" int func_001DE448(void *keyboard) {
+extern "C" int cKeyboardPopup_getMaxCharacters(void *keyboard) {
     return (*(int *)((char*)(keyboard) + (0x60)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE450);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setReferEventsToParent);
 #ifdef SKIP_ASM
 /**
  * Sets whether the keyboard popup forwards its events to the parent state, mbReferEventsToParent (+0x438).
@@ -4966,13 +4966,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE450);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param referEvents  non-zero to forward events (cKeyboardPopup_handleEvent)
  */
-extern "C" void func_001DE450(void *keyboard, int referEvents) {
+extern "C" void cKeyboardPopup_setReferEventsToParent(void *keyboard, int referEvents) {
     (*(int *)((char*)(keyboard) + (0x438))) = referEvents;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE458);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getReferEventsToParent);
 #ifdef SKIP_ASM
 /**
  * Returns whether the keyboard popup forwards its events to the parent state, mbReferEventsToParent (+0x438).
@@ -4980,13 +4980,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE458);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return mbReferEventsToParent
  */
-extern "C" int func_001DE458(void *keyboard) {
+extern "C" int cKeyboardPopup_getReferEventsToParent(void *keyboard) {
     return (*(int *)((char*)(keyboard) + (0x438)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE460);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setCallParentsUpdate);
 #ifdef SKIP_ASM
 /**
  * Sets whether the keyboard popup runs its parent's onUpdate each frame, mbCallParentsUpdate (+0x440).
@@ -4994,13 +4994,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE460);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param callParentUpdate  non-zero to update the parent too (cKeyboardPopup_onUpdate)
  */
-extern "C" void func_001DE460(void *keyboard, int callParentUpdate) {
+extern "C" void cKeyboardPopup_setCallParentsUpdate(void *keyboard, int callParentUpdate) {
     (*(int *)((char*)(keyboard) + (0x440))) = callParentUpdate;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE468);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_isAcceptText);
 #ifdef SKIP_ASM
 /**
  * Tells whether the player accepted the keyboard popup's text: returns mbAcceptText (+0x5C), which the accept key sets.
@@ -5008,13 +5008,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE468);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return mbAcceptText
  */
-extern "C" int func_001DE468(void *keyboard) {
+extern "C" int cKeyboardPopup_isAcceptText(void *keyboard) {
     return (*(int *)((char*)(keyboard) + (0x5C)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE470);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_cursorRight);
 #ifdef SKIP_ASM
 /**
  * Moves the keyboard popup's text cursor one place right, while it stays below miMaxCharacters - 1.
@@ -5023,7 +5023,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE470);
  *
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  */
-extern "C" void func_001DE470(void *keyboard) {
+extern "C" void cKeyboardPopup_cursorRight(void *keyboard) {
     int temp_3;
 
     temp_3 = (*(int *)((char*)(keyboard) + (0x134)));
@@ -5034,7 +5034,7 @@ extern "C" void func_001DE470(void *keyboard) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE498);
+INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_cursorLeft);
 #ifdef SKIP_ASM
 /**
  * Moves the keyboard popup's text cursor one place left, unless it is already at 0.
@@ -5043,7 +5043,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE498);
  *
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  */
-extern "C" void func_001DE498(void *keyboard) {
+extern "C" void cKeyboardPopup_cursorLeft(void *keyboard) {
     int temp_2;
 
     temp_2 = (*(int *)((char*)(keyboard) + (0x134)));
@@ -5054,7 +5054,7 @@ extern "C" void func_001DE498(void *keyboard) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE4B0);
+INCLUDE_ASM("main/all_in_one_main", cFEStateCredits_cFEStateCredits);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E2A0_E4B0(void *, int) __asm__("func_0039E2A0");
@@ -5066,7 +5066,7 @@ extern int cFEStateCredits_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_001DE4B0(void *self) {
+extern "C" void *cFEStateCredits_cFEStateCredits(void *self) {
     func_0039E2A0_E4B0(self, 0);
     *(int **)((char *)self + 8) = cFEStateCredits_vtbl;
     return self;
@@ -5074,7 +5074,7 @@ extern "C" void *func_001DE4B0(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE4E8);
+INCLUDE_ASM("main/all_in_one_main", cFEStateEventSelect_cFEStateEventSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E2A0_E4E8(void *, int) __asm__("func_0039E2A0");
@@ -5089,7 +5089,7 @@ extern int cFEStateEventSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_001DE4E8(void *self) {
+extern "C" void *cFEStateEventSelect_cFEStateEventSelect(void *self) {
     func_0039E2A0_E4E8(self, 0);
     *(int **)((char *)self + 8) = cFEStateEventSelect_vtbl;
     func_002006B8_E4E8((char *)self + 0x48);
@@ -5122,7 +5122,7 @@ extern "C" void* cFEStateEventSelect__cFEStateEventSelect(void *self) {
 /**
  * Does nothing: the event select state's onMenuGainFocus (slot +0x6C of cFEStateEventSelect_vtbl).
  */
-extern "C" void func_001DE550(void) {
+extern "C" void cFEStateEventSelect_onMenuGainFocus(void) {
 }
 
 //100%
@@ -5146,7 +5146,7 @@ extern "C" void *func_001DE558(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE590);
+INCLUDE_ASM("main/all_in_one_main", cFEStateBackground_cFEStateBackground);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0039E2A0_E590(void*) __asm__("func_0039E2A0");
@@ -5160,7 +5160,7 @@ extern void* cFEStateBackground_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DE590(void *self) {
+extern "C" void* cFEStateBackground_cFEStateBackground(void *self) {
     func_0039E2A0_E590(self);
     *(void***)((char*)self + 8) = cFEStateBackground_vtbl;
     return self;
@@ -5199,7 +5199,7 @@ extern int D_0046BB88_E5F0[] __asm__("cFEStateTransition_vtbl");
  * Constructs the screen transition state with no engine (the default constructor): runs cUIState's constructor
  * (func_0039E2A0) with a null engine, then stores cFEStateTransition_vtbl at +0x8.
  *
- * Unlike func_001DE628 it leaves the two screen pointers (+0x48, +0x4C) unset.
+ * Unlike cFEStateTransition_cFEStateTransition it leaves the two screen pointers (+0x48, +0x4C) unset.
  *
  * @return @p self
  */
@@ -5211,7 +5211,7 @@ extern "C" void *func_001DE5F0(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE628);
+INCLUDE_ASM("main/all_in_one_main", cFEStateTransition_cFEStateTransition);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E2A0_E628(void *) __asm__("func_0039E2A0");
@@ -5225,7 +5225,7 @@ extern int D_0046BB88_E628[] __asm__("cFEStateTransition_vtbl");
  *
  * @return @p self
  */
-extern "C" void *func_001DE628(void *self) {
+extern "C" void *cFEStateTransition_cFEStateTransition(void *self) {
     func_0039E2A0_E628(self);
     *(int **)((char *)self + 8) = D_0046BB88_E628;
     *(int *)((char *)self + 0x48) = 0;
@@ -5256,7 +5256,7 @@ extern "C" void* cFEStateTransition__cFEStateTransition(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE690);
+INCLUDE_ASM("main/all_in_one_main", cFEStateTitle_cFEStateTitle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E2A0_E690(void *, int) __asm__("func_0039E2A0");
@@ -5268,7 +5268,7 @@ extern int cFEStateTitle_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_001DE690(void *self) {
+extern "C" void *cFEStateTitle_cFEStateTitle(void *self) {
     func_0039E2A0_E690(self, 0);
     *(int **)((char *)self + 8) = cFEStateTitle_vtbl;
     return self;
@@ -5297,7 +5297,7 @@ extern "C" void* cFEStateTitle__cFEStateTitle(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE6F0);
+INCLUDE_ASM("main/all_in_one_main", cFEStateMainMenu_cFEStateMainMenu);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E2A0_E6F0(void *, int) __asm__("func_0039E2A0");
@@ -5309,7 +5309,7 @@ extern int cFEStateMainMenu_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_001DE6F0(void *self) {
+extern "C" void *cFEStateMainMenu_cFEStateMainMenu(void *self) {
     func_0039E2A0_E6F0(self, 0);
     *(int **)((char *)self + 8) = cFEStateMainMenu_vtbl;
     return self;
@@ -5339,7 +5339,7 @@ extern "C" void* cFEStateMainMenu__cFEStateMainMenu(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE750);
+INCLUDE_ASM("main/all_in_one_main", cFEStateBonusMaterial_cFEStateBonusMaterial);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E2A0_E750(void *, int) __asm__("func_0039E2A0");
@@ -5351,7 +5351,7 @@ extern int cFEStateBonusMaterial_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_001DE750(void *self) {
+extern "C" void *cFEStateBonusMaterial_cFEStateBonusMaterial(void *self) {
     func_0039E2A0_E750(self, 0);
     *(int **)((char *)self + 8) = cFEStateBonusMaterial_vtbl;
     return self;
@@ -5381,7 +5381,7 @@ extern "C" void* cFEStateBonusMaterial__cFEStateBonusMaterial(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE7B0);
+INCLUDE_ASM("main/all_in_one_main", cFEStateNet_cFEStateNet1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E318_E7B0(void* self, int a1, int a2) __asm__("func_0039E318");
@@ -5413,7 +5413,7 @@ struct sList_E7B0 {
  * @return @p self
  */
 // Front-end state constructor: clears the state fields, sets the vtable, the name string and an empty list.
-extern "C" void* func_001DE7B0(cFEStateNet* self)
+extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
 {
     // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
     int unused[4];
@@ -5475,7 +5475,7 @@ extern "C" int func_001DE870(void) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE878);
+INCLUDE_ASM("main/all_in_one_main", cFEStateNet_getFEPath);
 #ifdef SKIP_ASM
 extern int D_004A1A70;
 
@@ -5484,13 +5484,13 @@ extern int D_004A1A70;
  *
  * @return D_004A1A70
  */
-extern "C" int func_001DE878(void) {
+extern "C" int cFEStateNet_getFEPath(void) {
     return D_004A1A70;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE880);
+INCLUDE_ASM("main/all_in_one_main", cFEStateNet_fePathIsOnline);
 #ifdef SKIP_ASM
 extern int D_004A1A70;
 
@@ -5499,7 +5499,7 @@ extern int D_004A1A70;
  *
  * @return 1 when D_004A1A70 is 1, otherwise 0
  */
-extern "C" int func_001DE880(void) {
+extern "C" int cFEStateNet_fePathIsOnline(void) {
     return D_004A1A70 == 1;
 }
 #endif
@@ -5534,7 +5534,7 @@ extern "C" void func_001DE8A0(cFEStateNet* feStateNet, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE8A8);
+INCLUDE_ASM("main/all_in_one_main", cFEStateNet_isProcessingEvents);
 #ifdef SKIP_ASM
 /**
  * Tells whether an online state handles net events: its screen (+0x40) exists and unk_048 (+0x48) is set.
@@ -5545,7 +5545,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE8A8);
  * @param netState  the online state (cFEStateNet)
  * @return 1 when both are set, otherwise 0
  */
-extern "C" int func_001DE8A8(void *netState) {
+extern "C" int cFEStateNet_isProcessingEvents(void *netState) {
     int var_3;
 
     var_3 = 0;
@@ -5557,7 +5557,7 @@ extern "C" int func_001DE8A8(void *netState) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE8C8);
+INCLUDE_ASM("main/all_in_one_main", cFEBlankPopup_cFEBlankPopup1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cFEStateNet_cFEStateNet_E8C8(void *, int, int) __asm__("cFEStateNet_cFEStateNet");
@@ -5569,7 +5569,7 @@ extern int D_0046B6F8_E8C8[] __asm__("cFEBlankPopup_vtbl");
  *
  * @return @p self
  */
-extern "C" void *func_001DE8C8(void *self) {
+extern "C" void *cFEBlankPopup_cFEBlankPopup1(void *self) {
     cFEStateNet_cFEStateNet_E8C8(self, 0, 0);
     *(int **)((char *)self + 8) = D_0046B6F8_E8C8;
     return self;
@@ -5613,18 +5613,18 @@ extern "C" void* cFEBlankPopup__cFEBlankPopup(void *self) {
 /**
  * Does nothing: the memory-card state's onWidgetEvent (slot +0x9C of cFEStateMemCard_vtbl).
  */
-extern "C" void func_001DE940(void) {
+extern "C" void cFEStateMemCard_onWidgetEvent(void) {
 }
 
 /**
- * Does nothing: slot +0x12C of cFEStateMemCard_vtbl, the slot func_001DDE00 fills in the memory-card base vtable
+ * Does nothing: slot +0x12C of cFEStateMemCard_vtbl, the slot cFEMemCard_hideActionButtons fills in the memory-card base vtable
  * D_0046C980.
  */
 extern "C" void func_001DE948(void) {
 }
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE950);
+INCLUDE_ASM("main/all_in_one_main", cFEStateMemCard_cFEStateMemCard);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cFEMemCard_cFEMemCard_E950(void *, int, int) __asm__("cFEMemCard_cFEMemCard");
@@ -5636,7 +5636,7 @@ extern int cFEStateMemCard_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_001DE950(void *self) {
+extern "C" void *cFEStateMemCard_cFEStateMemCard(void *self) {
     cFEMemCard_cFEMemCard_E950(self, 0, 0);
     *(int **)((char *)self + 8) = cFEStateMemCard_vtbl;
     return self;
@@ -5644,7 +5644,7 @@ extern "C" void *func_001DE950(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE990);
+INCLUDE_ASM("main/all_in_one_main", cFEStateLegal_cFEStateLegal);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E2A0_E990(void *, int) __asm__("func_0039E2A0");
@@ -5656,7 +5656,7 @@ extern int D_0046B4A0_E990[] __asm__("cFEStateLegal_vtbl");
  *
  * @return @p self
  */
-extern "C" void *func_001DE990(void *self) {
+extern "C" void *cFEStateLegal_cFEStateLegal(void *self) {
     func_0039E2A0_E990(self, 0);
     *(int **)((char *)self + 8) = D_0046B4A0_E990;
     return self;
@@ -5701,7 +5701,7 @@ extern "C" int cFEStateLegal_onGainTransition(void) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE9F8);
+INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset__cFEPopupOptionReset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_E9F8(void*) __asm__("func_0039E390");
@@ -5716,14 +5716,14 @@ extern void* D_0046B3D0[];
  *
  * @return the result of func_0039E390
  */
-extern "C" void* func_001DE9F8(void *self) {
+extern "C" void* cFEPopupOptionReset__cFEPopupOptionReset(void *self) {
     *(void***)((char*)self + 8) = D_0046B3D0;
     return func_0039E390_E9F8(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DEA20);
+INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int GetHashValue32_EA20(char *) __asm__("GetHashValue32__FPc");
@@ -5737,7 +5737,7 @@ extern char str_111resetopts[];
  * Stores GetHashValue32("111resetopts") in mHashName (+0xC), adds the screen with cUIEngine_addScreenByHashName on the
  * engine (+0x10), keeps it at +0x40 and, when it exists, calls cUIScreen_playFrame(screen, 0, 0).
  */
-extern "C" void func_001DEA20(void *self) {
+extern "C" void cFEPopupOptionReset_onCreateScreen(void *self) {
     int hashName = GetHashValue32_EA20(str_111resetopts);
     *(int *)((char *)self + 0xC) = hashName;
     int screen = cUIEngine_addScreenByHashName_EA20(*(int *)((char *)self + 0x10), self, hashName, 0);
@@ -5776,7 +5776,7 @@ extern "C" int func_001DEA80(void* self, int menu, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DEAA8);
+INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char*);
 extern "C" void func_0039F190(int, int);
@@ -5793,7 +5793,7 @@ extern char str_no[];
  * @param widget  the widget (may be null)
  * @param event  the widget event
  */
-extern "C" void func_001DEAA8(char *self, char *widget, int event) {
+extern "C" void cFEPopupOptionReset_onWidgetEvent(char *self, char *widget, int event) {
     if (widget != 0) {
         if (event == 5) {
             int yesCheckHash = *(int*)(widget + 0x38);
@@ -5813,7 +5813,7 @@ extern "C" void func_001DEAA8(char *self, char *widget, int event) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DEB50);
+INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset_getData);
 #ifdef SKIP_ASM
 /**
  * Returns the options-reset popup's answer, the signed byte at +0x48 (1 yes, 0 no).
@@ -5821,7 +5821,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DEB50);
  * @param resetPopup  the popup
  * @return the accept byte
  */
-extern "C" signed char func_001DEB50(void *resetPopup) {
+extern "C" signed char cFEPopupOptionReset_getData(void *resetPopup) {
     return (*(signed char *)((char*)(resetPopup) + (0x48)));
 }
 #endif
