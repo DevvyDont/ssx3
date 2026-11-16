@@ -23,7 +23,7 @@ INCLUDE_ASM("sce/crt0", func_00100008);
 // adda.s, sync.p, raw syscalls, ei). It zeroes every GPR/FPR/HI/LO/SA/ACC and FCSR, clears .bss (D_004A4C00 to
 // D_0053F115) with sq, calls SetupThread (syscall 0x3C: gp D_004A30F0, stack D_1FE0000, size D_20000, args D_004A5C00,
 // root func_001001D0) and takes the returned stack, SetupHeap (syscall 0x3D: D_0053F115, -1), then func_0042C300 and
-// func_00424020(0), enables interrupts, runs main(argc, argv) from the args block and exits with func_0042C6E8(ret).
+// FlushCache(0), enables interrupts, runs main(argc, argv) from the args block and exits with func_0042C6E8(ret).
 // A port replaces it with the platform's own startup.
 __asm__(
     ".set push\n.set noreorder\n.set noat\n"
@@ -131,7 +131,7 @@ __asm__(
     "syscall 0\n"
     "jal func_0042C300\n"
     "nop\n"
-    "jal func_00424020\n"
+    "jal FlushCache\n"
     "daddu $4, $0, $0\n"
     "ei\n"
     "lui $2, %hi(D_004A5C00)\n"

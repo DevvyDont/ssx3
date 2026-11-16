@@ -20,7 +20,7 @@ void BXsrand(unsigned int seed);
 extern "C" void func_003E5018(void);
 extern "C" void* func_004188C0(int size);
 extern "C" void func_00418910(void* p);
-extern "C" char* func_00423D80(void);
+extern "C" char* EndOfHeap(void);
 extern "C" void cMemMan_initialize(char* heap, int size);
 extern "C" void func_003E6690(int a);
 extern "C" void func_003E4AF0(int hz);
@@ -48,7 +48,7 @@ struct sIoCfg_SysInit {
  * Boot-time setup of the PS2 side: IOP modules, random seed, heap, file system and the per-frame sync task.
  *
  * Loads SIO2MAN, PADMAN, LIBSD, SNDDRV, MCMAN and MCSERV.IRX, seeds BXsrand() from a clock reading, hands the
- * memory from just past a 64-byte-aligned scratch block (+0x800) up to func_00423D80() to
+ * memory from just past a 64-byte-aligned scratch block (+0x800) up to EndOfHeap() to
  * cMemMan_initialize(), installs MEM_alloc/MEM_free as the file system's allocator, runs FILESYS_init(48,
  * 500, 32) and ASYNCFILE_init(16, 0), swaps sync task func_003E4000 for func_0031AD20 and finally passes
  * "cd:" to func_003DDE78() (probably selecting the default file device).
@@ -72,7 +72,7 @@ extern "C" void systemInit(void)
     char* heapProbe = (char*)func_004188C0(0x400);
     func_00418910(heapProbe);
     char* heap = (char*)(((int)heapProbe + 0x3F) & ~0x3F) + 0x800;
-    cMemMan_initialize(heap, func_00423D80() - heap);
+    cMemMan_initialize(heap, EndOfHeap() - heap);
     func_003E6690(1);
     func_003E4AF0(0x3C);
     sIoCfg_SysInit cfg;

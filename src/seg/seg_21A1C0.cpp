@@ -354,7 +354,7 @@ extern "C" void func_00319820(void* self)
 INCLUDE_ASM("seg/seg_21A1C0", func_003198A0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_00423DE0(int sema);
+extern "C" void WaitSema(int sema);
 extern "C" int func_0042A538(void* client, int cmd, int a, int b, int c, int d);
 extern "C" int func_00402398(int* status);
 extern char str_dev9x[];
@@ -363,7 +363,7 @@ extern char str_dev9x[];
 extern "C" void func_003198A0(int sema)
 {
     for (;;) {
-        func_00423DE0(sema);
+        WaitSema(sema);
         while (func_0042A538(str_dev9x, 0x4402, 0, 0, 0, 0) < 0)
             ;
         int status = 0;
@@ -377,11 +377,11 @@ extern "C" void func_003198A0(int sema)
 INCLUDE_ASM("seg/seg_21A1C0", func_00319910);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_00423DD0(void);
+extern "C" void iSignalSema(void);
 
 extern "C" void func_00319910(void)
 {
-    func_00423DD0();
+    iSignalSema();
 }
 #endif
 
@@ -414,9 +414,9 @@ struct sSemaParam_9930 {
 };
 
 extern "C" int func_0042B6D0(void* client);
-extern "C" int func_00423DA0(sSemaParam_9930* p);
-extern "C" int func_00423BA0(sThreadParam_9930* p);
-extern "C" int func_00423BC0(int thread, int arg);
+extern "C" int CreateSema(sSemaParam_9930* p);
+extern "C" int CreateThread(sThreadParam_9930* p);
+extern "C" int StartThread(int thread, int arg);
 extern "C" void func_00400D58(void (*fn)(void), int arg);
 extern "C" void func_003198A0(int sema);
 extern "C" void func_00319910(void);
@@ -434,14 +434,14 @@ extern "C" void func_00319930(void)
         sema.initCount = 0;
         sema.maxCount = 1;
         sema.option = 0;
-        D_004A5B54 = func_00423DA0(&sema);
+        D_004A5B54 = CreateSema(&sema);
         tp.stackSize = 0x2000;
         tp.gpReg = &_gp;
         tp.entry = func_003198A0;
         tp.stack = D_00538B10;
         tp.initPriority = 1;
-        D_004A5B70 = func_00423BA0(&tp);
-        func_00423BC0(D_004A5B70, D_004A5B54);
+        D_004A5B70 = CreateThread(&tp);
+        StartThread(D_004A5B70, D_004A5B54);
         func_00400D58(func_00319910, D_004A5B54);
     }
 }

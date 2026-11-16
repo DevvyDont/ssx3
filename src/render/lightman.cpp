@@ -1930,7 +1930,7 @@ extern "C" void func_00390F20()
 INCLUDE_ASM("render/lightman", func_003912A8);
 #ifdef SKIP_ASM
 extern char D_0043BD00[];
-extern "C" void func_00424020(int);
+extern "C" void FlushCache(int);
 
 // PORT: kicks a DMA chain on channel 0 (VIF0) through the PS2 hardware registers at
 // 0x10008000 (CHCR), 0x10008020 (QWC) and 0x10008030 (TADR); needs a platform shim.
@@ -1943,7 +1943,7 @@ extern "C" void func_003912A8(void)
     *(volatile int*)0x10008000 = 0x104;
     while (*(volatile int*)0x10008000 & 0x100) {
     }
-    func_00424020(0);
+    FlushCache(0);
 }
 #endif
 
@@ -1951,7 +1951,7 @@ extern "C" void func_003912A8(void)
 INCLUDE_ASM("render/lightman", func_00391360);
 #ifdef SKIP_ASM
 extern char D_0043CCA0[];
-extern "C" void func_00424020(int);
+extern "C" void FlushCache(int);
 
 // PORT: kicks a DMA chain on channel 0 (VIF0) through the PS2 hardware registers at
 // 0x10008000 (CHCR), 0x10008020 (QWC) and 0x10008030 (TADR); needs a platform shim.
@@ -1964,7 +1964,7 @@ extern "C" void func_00391360(void)
     *(volatile int*)0x10008000 = 0x104;
     while (*(volatile int*)0x10008000 & 0x100) {
     }
-    func_00424020(0);
+    FlushCache(0);
 }
 #endif
 

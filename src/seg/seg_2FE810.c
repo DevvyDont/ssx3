@@ -141,7 +141,7 @@ typedef struct {
     int waitType;
     int waitId;
     int wakeupCount;
-} sThreadParam;                 /* 0x30 bytes, as passed to func_00423BA0 / func_00423CA0 */
+} sThreadParam;                 /* 0x30 bytes, as passed to CreateThread / ReferThreadStatus */
 extern int D_00451610;          /* debug print level */
 extern int D_00451614;          /* callback thread id (0 = none) */
 extern int D_00451618;
@@ -301,19 +301,19 @@ void func_003FD810(void) {
         ".word D_00452800\n"
         ".word D_00453180\n"
         ".word D_0045162C\n"
-        ".word func_00423BA0\n"
-        ".word func_00423BC0\n"
-        ".word func_00423BB0\n"
-        ".word func_00423C30\n"
-        ".word func_00423CA0\n"
-        ".word func_00423BF0\n"
-        ".word func_00423C90\n"
-        ".word func_00423DA0\n"
-        ".word func_00423DE0\n"
-        ".word func_00423DB0\n"
-        ".word func_00423DC0\n"
-        ".word func_00423DF0\n"
-        ".word func_00424020\n"
+        ".word CreateThread\n"
+        ".word StartThread\n"
+        ".word DeleteThread\n"
+        ".word ChangeThreadPriority\n"
+        ".word ReferThreadStatus\n"
+        ".word TerminateThread\n"
+        ".word GetThreadId\n"
+        ".word CreateSema\n"
+        ".word WaitSema\n"
+        ".word DeleteSema\n"
+        ".word SignalSema\n"
+        ".word PollSema\n"
+        ".word FlushCache\n"
         ".word func_00426D18\n"
         ".word func_00427D60\n"
         ".word func_00427FE8\n"
@@ -323,14 +323,14 @@ void func_003FD810(void) {
         ".word func_00424570\n"
         ".word func_004245A0\n"
         ".word func_00426B48\n"
-        ".word func_00423DD0\n"
+        ".word iSignalSema\n"
         ".word func_00423B80\n"
-        ".word func_00423B20\n"
+        ".word SetAlarm\n"
         ".word func_00423B30\n"
         ".word func_00424880\n"
-        ".word func_00423AA0\n"
-        ".word func_004240E0\n"
-        ".word func_004239A0\n"
+        ".word RemoveIntcHandler\n"
+        ".word GsPutIMR\n"
+        ".word SetGsCrt\n"
         ".word func_00424558\n"
         ".word func_00424550\n"
         ".word func_00424460\n"
@@ -352,10 +352,10 @@ void func_003FD908(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FD910);
 #ifdef SKIP_ASM
 struct S3FD910 { short a; short b; short c; unsigned short d; int e; int f; };
-extern int func_00423AA0(int, int);
+extern int RemoveIntcHandler(int, int);
 extern void func_00424880(int);
-extern void func_004239A0(int, int, int);
-extern int func_004240E0(int);
+extern void SetGsCrt(int, int, int);
+extern int GsPutIMR(int);
 void *func_003FDAA0(void);
 void func_003FD910(short mode, short interlace, short videoMode, short frameMode) {
     struct S3FD910 *gsState;
@@ -367,15 +367,15 @@ void func_003FD910(short mode, short interlace, short videoMode, short frameMode
         gsState->a = interlace;
         gsState->b = videoMode;
         gsState->d = (*(volatile unsigned long *)0x12001000 >> 16) & 0xFF;
-        func_004240E0(0xFF00);
+        GsPutIMR(0xFF00);
         gsState->c = !!frameMode;
         if (gsState->e) {
             func_00424880(2);
-            func_00423AA0(2, gsState->f);
+            RemoveIntcHandler(2, gsState->f);
             gsState->e = 0;
             gsState->f = 0;
         }
-        func_004239A0(interlace & 1, videoMode & 0xFF, frameMode & 1);
+        SetGsCrt(interlace & 1, videoMode & 0xFF, frameMode & 1);
         break;
     case 1:
         *(volatile long *)0x12001000 = 0x100;
@@ -386,7 +386,7 @@ void func_003FD910(short mode, short interlace, short videoMode, short frameMode
         gsState->a = interlace;
         gsState->b = videoMode;
         gsState->d = (*(volatile unsigned long *)0x12001000 >> 16) & 0xFF;
-        func_004239A0(interlace & 1, videoMode & 0xFF, frameMode & 1);
+        SetGsCrt(interlace & 1, videoMode & 0xFF, frameMode & 1);
         break;
     }
 }
@@ -1722,8 +1722,8 @@ typedef struct {
     unsigned int size;
     unsigned int mode;
 } sSifDmaData;
-extern int func_00424140(int id);                       /* sceSifDmaStat */
-extern int func_00424160(sSifDmaData *sdd, int len);    /* sceSifSetDma */
+extern int sceSifDmaStat(int id);                       /* sceSifDmaStat */
+extern int sceSifSetDma(sSifDmaData *sdd, int len);    /* sceSifSetDma */
 extern void func_00424698(int *, int *);                /* SyncDCache */
 extern void func_00425C60();                            /* printf */
 extern char D_00497888[];
@@ -1735,7 +1735,7 @@ int func_003FF390(int port, int slot) {
     int id;
     int n;
     act = (int *)D_00526250[port][slot].actBuf;
-    if (D_00526250[port][slot].f0C != 0 && func_00424140(D_00526250[port][slot].f0C) >= 0) {
+    if (D_00526250[port][slot].f0C != 0 && sceSifDmaStat(D_00526250[port][slot].f0C) >= 0) {
         if (D_004515CC != 0)
             func_00425C60(D_00497888);
         return 0;
@@ -1748,7 +1748,7 @@ int func_003FF390(int port, int slot) {
     dma[0].data = (unsigned int)act;
     dma[0].size = 0x20;
     dma[0].mode = 0;
-    id = func_00424160(dma, 1);
+    id = sceSifSetDma(dma, 1);
     if (id == 0) {
         if (D_004515CC != 0)
             func_00425C60(D_00497888);
@@ -2249,9 +2249,9 @@ INCLUDE_ASM("seg/seg_2FE810", func_00400810);
 // PORT: PS2-only COP0 (enable interrupts) and memory barrier.
 #define SYNC_0810() __asm__ volatile("sync")
 #define EI_0810() __asm__ volatile("ei")
-extern void func_00423DD0(int);
+extern void iSignalSema(int);
 void func_00400810(int alarmId, int ticks, int sema) {
-    func_00423DD0(sema);
+    iSignalSema(sema);
     SYNC_0810();
     EI_0810();
 }
@@ -2260,7 +2260,7 @@ void func_00400810(int alarmId, int ticks, int sema) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400838);
 #ifdef SKIP_ASM
-extern int func_00423DA0(int *);
+extern int CreateSema(int *);
 extern void func_00400810(int, int, int);
 void func_00400838(unsigned short ticks) {
     int semaParam[6];
@@ -2268,10 +2268,10 @@ void func_00400838(unsigned short ticks) {
     semaParam[1] = 1;
     semaParam[2] = 0;
     semaParam[5] = 0;
-    sema = func_00423DA0(semaParam);
-    func_00423B20(ticks, func_00400810, sema);
-    func_00423DE0(sema);
-    func_00423DB0(sema);
+    sema = CreateSema(semaParam);
+    SetAlarm(ticks, func_00400810, sema);
+    WaitSema(sema);
+    DeleteSema(sema);
 }
 #endif
 
@@ -2299,7 +2299,7 @@ void (*func_004008A0(void (*cb)(int)))(int) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400908);
 #ifdef SKIP_ASM
-extern int func_00423DD0_i(int) __asm__("func_00423DD0");
+extern int iSignalSema_i(int) __asm__("iSignalSema");
 void func_00400908(int *p) {
     D_00451658 = *p;
     D_0045165C = D_00451658;
@@ -2308,9 +2308,9 @@ void func_00400908(int *p) {
         D_00451634 = 0;
         return;
     }
-    func_00423DD0_i(D_00451628);
+    iSignalSema_i(D_00451628);
     if (D_00451614 != 0 && D_005264C0 != 0)
-        func_00423DD0_i(D_00451620);
+        iSignalSema_i(D_00451620);
     else
         D_00451634 = 0;
     D_00451658 = 0;
@@ -2321,19 +2321,19 @@ void func_00400908(int *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_004009A8);
 #ifdef SKIP_ASM
 extern char D_004979E0[];
-extern void func_00423DE0(int);
-extern int func_00423BE0(void);
+extern void WaitSema(int);
+extern int ExitDeleteThread(void);
 extern void func_00425C60();
 void func_004009A8(void) {
     void (*fn)(int);
     for (;;) {
-        func_00423DE0(D_00451620);
+        WaitSema(D_00451620);
         if (D_00451658 == -1) {
             D_00451634 = 0;
             D_00451658 = 0;
             D_00451614 = 0;
             D_005264D4 = 0;
-            func_00423BE0();
+            ExitDeleteThread();
         }
         if (D_00451610 > 0)
             func_00425C60(D_004979E0, D_005264C0, D_0045165C);
@@ -2352,27 +2352,27 @@ void func_004009A8(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400A78);
 #ifdef SKIP_ASM
-extern int func_00423C90();
-extern int func_00423CA0_i(int, sThreadParam *) __asm__("func_00423CA0");
-extern int func_00423BA0(sThreadParam *);
-extern void func_00423BC0(int, int);
-extern void func_00423C30(int, int);
+extern int GetThreadId();
+extern int ReferThreadStatus_i(int, sThreadParam *) __asm__("ReferThreadStatus");
+extern int CreateThread(sThreadParam *);
+extern void StartThread(int, int);
+extern void ChangeThreadPriority(int, int);
 extern void func_004009A8(void);
 int func_00400A78(int a, int b, int c) {
     int ok;
     ok = 1;
     if (D_00451614 == 0) {
-        D_005264D8 = func_00423C90();
-        func_00423CA0_i(D_005264D8, &D_005264E0);
+        D_005264D8 = GetThreadId();
+        ReferThreadStatus_i(D_005264D8, &D_005264E0);
         D_00526510.stackSize = c;
         D_00526510.entry = func_004009A8;
         D_00526510.stack = b;
         D_00526510.initPriority = a;
         D_00526510.gpReg = 0;
-        D_00451614 = func_00423BA0(&D_00526510);
-        func_00423BC0(D_00451614, 0);
+        D_00451614 = CreateThread(&D_00526510);
+        StartThread(D_00451614, 0);
     } else {
-        func_00423C30(D_00451614, a);
+        ChangeThreadPriority(D_00451614, a);
         ok = 0;
     }
     return ok;
@@ -2415,7 +2415,7 @@ void func_00400B48(void *a) {
 INCLUDE_ASM("seg/seg_2FE810", func_00400C00);
 #ifdef SKIP_ASM
 struct QSema { int count; int max_count; int init_count; int wait_threads; int attr; int option; };
-extern int Q0C00_create(struct QSema *) __asm__("func_00423DA0");
+extern int Q0C00_create(struct QSema *) __asm__("CreateSema");
 void func_00400C00(void) {
     struct QSema s;
     if (D_00451628 == -1 || D_0045162C == -1 || D_00451630 == -1) {
@@ -2435,8 +2435,8 @@ void func_00400C00(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400CB8);
 #ifdef SKIP_ASM
-extern int cb_DB0(int) __asm__("func_00423DB0");
-extern void cb_DC0(int) __asm__("func_00423DC0");
+extern int cb_DB0(int) __asm__("DeleteSema");
+extern void cb_DC0(int) __asm__("SignalSema");
 extern void func_00426050(int);
 extern int cb_078() __asm__("func_0042C078");
 extern void func_0042C0C0(void);
@@ -2525,9 +2525,9 @@ extern char D_00497A40[];
 extern char D_00497A50[];
 extern char D_00497A60[];
 extern void func_00400C00();
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
-extern void func_00423CA0(int, sThreadParam *);
+extern int PollSema(int);
+extern void SignalSema(int);
+extern void ReferThreadStatus(int, sThreadParam *);
 extern void func_00425C60();
 extern int func_004013E8(int);
 extern void func_00426408(int);
@@ -2538,12 +2538,12 @@ int f0EA8(char *out, char *name, int arg) {
     int n;
     int v;
     func_00400C00();
-    if (D_00451628 != func_00423DF0(D_00451628))
+    if (D_00451628 != PollSema(D_00451628))
         return 0;
     D_0045161C = 1;
-    func_00423CA0(D_005264D8, &D_005264E0);
+    ReferThreadStatus(D_005264D8, &D_005264E0);
     if (func_004013E8(1) != 0) {
-        func_00423DC0(D_00451628);
+        SignalSema(D_00451628);
         return 0;
     }
     func_00426408(0);
@@ -2576,7 +2576,7 @@ int f0EA8(char *out, char *name, int arg) {
     D_00526540.self = &D_00526540;
     func_00426358((int)&D_00526540, 0x12C);
     if (func_00426D18(&D_005266C0, 0, 0, &D_00526540, 0x12C, D_00526680, 4, 0, 0) < 0) {
-        func_00423DC0(D_00451628);
+        SignalSema(D_00451628);
         return 0;
     }
     *(R0EA8 *)out = *(R0EA8 *)((int)&D_00526540 | 0x20000000);
@@ -2587,7 +2587,7 @@ int f0EA8(char *out, char *name, int arg) {
     if (D_00451610 > 0)
         func_00425C60(D_00497A60, ((int *)out)[0]);
     v = *(int *)((int)D_00526680 | 0x20000000);
-    func_00423DC0(D_00451628);
+    SignalSema(D_00451628);
     return v;
 }
 #endif
@@ -2607,24 +2607,24 @@ INCLUDE_ASM("seg/seg_2FE810", func_004011E0);
 extern char D_00497A78[];
 extern char D_00497AA0[];
 extern void func_00400C00();
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
-extern void func_00423CA0(int, sThreadParam *);
+extern int PollSema(int);
+extern void SignalSema(int);
+extern void ReferThreadStatus(int, sThreadParam *);
 extern void func_00425C60();
 extern int func_004013E8(int);
 extern void func_00426408(int);
 int func_004011E0(int a) {
     int i;
     func_00400C00();
-    if (D_00451628 != func_00423DF0(D_00451628)) {
+    if (D_00451628 != PollSema(D_00451628)) {
         if (D_00451610 > 0)
             func_00425C60(D_00497A78, a, D_0045161C);
         return 0;
     }
     D_0045161C = a;
-    func_00423CA0(D_005264D8, &D_005264E0);
+    ReferThreadStatus(D_005264D8, &D_005264E0);
     if (func_004013E8(1) != 0) {
-        func_00423DC0(D_00451628);
+        SignalSema(D_00451628);
         return 0;
     }
     func_00426408(0);
@@ -2652,17 +2652,17 @@ int func_004011E0(int a) {
 INCLUDE_ASM("seg/seg_2FE810", func_00401350);
 #ifdef SKIP_ASM
 extern int func_004011E0();
-extern void func_00423DC0(int);
+extern void SignalSema(int);
 int func_00401350(void) {
     int v;
     if (func_004011E0(2) == 0)
         return 0;
     if (func_00426D18(&D_004527D0, 14, 0, 0, 0, D_00451680, 4, 0, 0) < 0) {
-        func_00423DC0(D_00451628);
+        SignalSema(D_00451628);
         return 0;
     }
     v = *(int *)((unsigned)D_00451680 | 0x20000000);
-    func_00423DC0(D_00451628);
+    SignalSema(D_00451628);
     return v;
 }
 #endif
@@ -2709,24 +2709,24 @@ INCLUDE_ASM("seg/seg_2FE810", func_004014F8);
 extern char D_00497AD8[];
 extern char D_00497B00[];
 extern void func_00400C00();
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
-extern void func_00423CA0(int, sThreadParam *);
+extern int PollSema(int);
+extern void SignalSema(int);
+extern void ReferThreadStatus(int, sThreadParam *);
 extern void func_00425C60();
 extern int func_00401488(int);
 extern void func_00426408(int);
 int func_004014F8(int a) {
     int i;
     func_00400C00();
-    if (D_0045162C != func_00423DF0(D_0045162C)) {
+    if (D_0045162C != PollSema(D_0045162C)) {
         if (D_00451610 > 0)
             func_00425C60(D_00497AD8, a, D_00451618);
         return 0;
     }
     D_00451618 = a;
-    func_00423CA0(D_005264D8, &D_005264E0);
+    ReferThreadStatus(D_005264D8, &D_005264E0);
     if (func_00401488(1) != 0) {
-        func_00423DC0(D_0045162C);
+        SignalSema(D_0045162C);
         return 0;
     }
     func_00426408(0);
@@ -2806,7 +2806,7 @@ extern char D_00497B18[];
 extern char D_00497B38[];
 extern int func_00401488(int);
 extern void func_00426408(int);
-extern int func_00423C90();
+extern int GetThreadId();
 extern void func_00425C60();
 extern void func_00426358(int, int);
 
@@ -2821,7 +2821,7 @@ int func_00401718(int mode)
     if (func_00401488(1) != 0)
         return 0;
     func_00426408(0);
-    D_005264D8 = func_00423C90();
+    D_005264D8 = GetThreadId();
     D_00451624 = 1;
     D_00451644 = -1;
     D_0045163C = -1;
@@ -2892,8 +2892,8 @@ extern char D_00497B60[];
 extern char D_00497B80[];
 extern void func_00425C60();
 extern void func_00400C00();
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 extern int func_00401488(int);
 extern void func_00426408(int);
 extern void func_00426358(int, int);
@@ -2903,10 +2903,10 @@ int func_004019F8(int a) {
     if (D_00451610 > 0)
         func_00425C60(D_00497B48);
     func_00400C00();
-    if (D_0045162C != func_00423DF0(D_0045162C))
+    if (D_0045162C != PollSema(D_0045162C))
         return 6;
     if (func_00401488(1) != 0) {
-        func_00423DC0(D_0045162C);
+        SignalSema(D_0045162C);
         return a != 8 ? 6 : -1;
     }
     func_00426408(0);
@@ -2930,13 +2930,13 @@ int func_004019F8(int a) {
     D_00526750[0] = a;
     func_00426358((int)D_00526750, 4);
     if (func_00426D18(&D_00526710, 0, 0, D_00526750, 4, D_00452800, 4, 0, 0) < 0) {
-        func_00423DC0(D_0045162C);
+        SignalSema(D_0045162C);
         return a != 8 ? 6 : -1;
     }
     if (D_00451610 > 0)
         func_00425C60(D_00497B80);
     v = *(int *)((unsigned)D_00452800 | 0x20000000);
-    func_00423DC0(D_0045162C);
+    SignalSema(D_0045162C);
     return v;
 }
 #endif
@@ -2949,8 +2949,8 @@ extern char D_00497B60[];
 extern char D_00497B80[];
 extern void b1_log() __asm__("func_00425C60");
 extern void b1_0C00() __asm__("func_00400C00");
-extern int b1_3DF0(int) __asm__("func_00423DF0");
-extern void b1_3DC0(int) __asm__("func_00423DC0");
+extern int b1_3DF0(int) __asm__("PollSema");
+extern void b1_3DC0(int) __asm__("SignalSema");
 extern void b1_6408(int) __asm__("func_00426408");
 extern void b1_6358(int *, int) __asm__("func_00426358");
 extern int b1_19F8(int) __asm__("func_004019F8");
@@ -3013,7 +3013,7 @@ extern char D_00497BC8[];
 extern int func_00401350(void);
 extern int func_004011E0();
 extern void func_00425C60();
-extern void func_00423DC0(int);
+extern void SignalSema(int);
 extern void func_00426358(int, int);
 int func_00401DF8(int lsn, int sectors, int buf, unsigned char *mode) {
     int size;
@@ -3057,7 +3057,7 @@ int func_00401DF8(int lsn, int sectors, int buf, unsigned char *mode) {
     if (func_00426D18(&D_004527D0, 1, 1, p, 0x18, 0, 0, func_00400B48, D_00452700) < 0) {
         D_00451658 = 0;
         D_00451634 = 0;
-        func_00423DC0(D_00451628);
+        SignalSema(D_00451628);
         return 0;
     }
     if (D_00451610 > 0)
@@ -3071,7 +3071,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_00401FD8);
 #ifdef SKIP_ASM
 extern int func_004011E0();
 extern void func_00426358(int, int);
-extern void func_00423DC0(int);
+extern void SignalSema(int);
 int func_00401FD8(char *dst) {
     int v;
     int *p = D_00451700;
@@ -3083,7 +3083,7 @@ int func_00401FD8(char *dst) {
     D_00451658 = 3;
     if (func_00426D18(&D_004527D0, 4, 0, p, 12, D_00451680, 8, 0, 0) < 0) {
         D_00451658 = 0;
-        func_00423DC0(D_00451628);
+        SignalSema(D_00451628);
         return 0;
     }
     D_00451658 = 0;
@@ -3092,7 +3092,7 @@ int func_00401FD8(char *dst) {
         __builtin_memcpy(dst, (char *)((unsigned)D_00526780 | 0x20000000), 0x400);
     else
         __builtin_memcpy(dst, (char *)((unsigned)D_00526780 | 0x20000000), 0x810);
-    func_00423DC0(D_00451628);
+    SignalSema(D_00451628);
     return v;
 }
 #endif
@@ -3101,17 +3101,17 @@ int func_00401FD8(char *dst) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402268);
 #ifdef SKIP_ASM
 extern int func_004014F8();
-extern void func_00423DC0(int);
+extern void SignalSema(int);
 int func_00402268(void) {
     int v;
     if (func_004014F8(1) == 0)
         return 0;
     if (func_00426D18(&D_00453180, 3, 0, 0, 0, D_00452800, 4, 0, 0) < 0) {
-        func_00423DC0(D_0045162C);
+        SignalSema(D_0045162C);
         return 0;
     }
     v = *(int *)((unsigned)D_00452800 | 0x20000000);
-    func_00423DC0(D_0045162C);
+    SignalSema(D_0045162C);
     return v;
 }
 #endif
@@ -3120,17 +3120,17 @@ int func_00402268(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402300);
 #ifdef SKIP_ASM
 extern int func_004014F8();
-extern void func_00423DC0(int);
+extern void SignalSema(int);
 int func_00402300(void) {
     int v;
     if (func_004014F8(3) == 0)
         return -1;
     if (func_00426D18(&D_00453180, 4, 0, 0, 0, D_00452800, 4, 0, 0) < 0) {
-        func_00423DC0(D_0045162C);
+        SignalSema(D_0045162C);
         return -1;
     }
     v = *(int *)((unsigned)D_00452800 | 0x20000000);
-    func_00423DC0(D_0045162C);
+    SignalSema(D_0045162C);
     return v;
 }
 #endif
@@ -3139,18 +3139,18 @@ int func_00402300(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402398);
 #ifdef SKIP_ASM
 extern int func_004014F8();
-extern void func_00423DC0(int);
+extern void SignalSema(int);
 int func_00402398(int *out) {
     int v;
     if (func_004014F8(0x21) == 0)
         return 0;
     if (func_00426D18(&D_00453180, 0x21, 0, 0, 0, D_00452800, 8, 0, 0) < 0) {
-        func_00423DC0(D_0045162C);
+        SignalSema(D_0045162C);
         return 0;
     }
     *out = *(int *)((unsigned)(D_00452800 + 1) | 0x20000000);
     v = *(int *)((unsigned)D_00452800 | 0x20000000);
-    func_00423DC0(D_0045162C);
+    SignalSema(D_0045162C);
     return v;
 }
 #endif
@@ -3159,7 +3159,7 @@ int func_00402398(int *out) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402450);
 #ifdef SKIP_ASM
 extern int func_004014F8();
-extern void func_00423DC0(int);
+extern void SignalSema(int);
 extern void func_00426358_p(int *, int) __asm__("func_00426358");
 int func_00402450(int a) {
     int v;
@@ -3169,11 +3169,11 @@ int func_00402450(int a) {
     D_00452C40[0] = a;
     func_00426358_p(p, 4);
     if (func_00426D18(&D_00453180, D_004531A8, 0, p, D_004531AC, D_00452800, D_004531B0, 0, 0) < 0) {
-        func_00423DC0(D_0045162C);
+        SignalSema(D_0045162C);
         return 0;
     }
     v = *(int *)((unsigned)D_00452800 | 0x20000000);
-    func_00423DC0(D_0045162C);
+    SignalSema(D_0045162C);
     return v;
 }
 #endif
@@ -3185,7 +3185,7 @@ struct P8 { char b[8]; } __attribute__((packed));
 extern char D_00497BD8[];
 extern char D_00497BF8[];
 extern int func_004014F8();
-extern void func_00423DC0(int);
+extern void SignalSema(int);
 extern void func_00425C60();
 int func_00402520(struct P8 *a) {
     int v;
@@ -3194,14 +3194,14 @@ int func_00402520(struct P8 *a) {
     if (D_00451610 > 0)
         func_00425C60(D_00497BD8);
     if (func_00426D18(&D_00453180, 1, 0, 0, 0, D_00452800, 16, 0, 0) < 0) {
-        func_00423DC0(D_0045162C);
+        SignalSema(D_0045162C);
         return 0;
     }
     *a = *(struct P8 *)((unsigned)&D_00452800[1] | 0x20000000);
     if (D_00451610 > 0)
         func_00425C60(D_00497BF8);
     v = *(int *)((unsigned)D_00452800 | 0x20000000);
-    func_00423DC0(D_0045162C);
+    SignalSema(D_0045162C);
     return v;
 }
 #endif
@@ -3210,7 +3210,7 @@ int func_00402520(struct P8 *a) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402618);
 #ifdef SKIP_ASM
 extern int func_004014F8();
-extern void func_00423DC0(int);
+extern void SignalSema(int);
 extern void func_00426358_p(int *, int) __asm__("func_00426358");
 int func_00402618(int a, int *out) {
     int v;
@@ -3220,13 +3220,13 @@ int func_00402618(int a, int *out) {
     D_00452C40[0] = a;
     func_00426358_p(p, 4);
     if (func_00426D18(&D_00453180, 5, 0, p, 4, D_00452800, 8, 0, 0) < 0) {
-        func_00423DC0(D_0045162C);
+        SignalSema(D_0045162C);
         return -1;
     }
     if (out)
         *out = *(int *)((unsigned)&D_00452800[1] | 0x20000000);
     v = *(int *)((unsigned)D_00452800 | 0x20000000);
-    func_00423DC0(D_0045162C);
+    SignalSema(D_0045162C);
     return v;
 }
 #endif
@@ -3984,7 +3984,7 @@ void func_004034A8(int *mpegSys, int message) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403500);
 #ifdef SKIP_ASM
-extern void func_00424020(int) __asm__("func_00424020");
+extern void FlushCache(int) __asm__("FlushCache");
 extern int func_0042C078();
 extern void func_0042C0C0(void);
 void q3500(int base, unsigned addr, int n) __asm__("func_00403500");
@@ -4003,7 +4003,7 @@ void q3500(int base, unsigned addr, int n) {
         addr += chunk;
         tag += 2;
     }
-    func_00424020(0);
+    FlushCache(0);
     ret = func_0042C078();
     *(volatile int *)0x1000B430 = tagBase & 0xFFFFFFF;
     *(volatile int *)0x1000B420 = 0;
@@ -7059,7 +7059,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_00408DF0);
 #ifdef SKIP_ASM
 extern char D_004980D8[];
 extern int q8DF0_AddH(int, void *, int, void *) __asm__("func_00423AC0");
-extern int q8DF0_RemH(int, int) __asm__("func_00423AD0");
+extern int q8DF0_RemH(int, int) __asm__("RemoveDmacHandler");
 extern void q8DF0_En(int) __asm__("func_004249B8");
 extern void q8DF0_Dis(int) __asm__("func_00424950");
 extern int q8DF0_C078() __asm__("func_0042C078");
@@ -7146,7 +7146,7 @@ struct L9 { int ev; int pad[7]; unsigned cnt; unsigned addr; };
 extern int E_2C30(int, void *) __asm__("func_00402C30");
 extern void E_6DF0(char *, int) __asm__("func_00406DF0");
 extern int E_AddH(int, void *, int, void *) __asm__("func_00423AC0");
-extern int E_RemH(int, int) __asm__("func_00423AD0");
+extern int E_RemH(int, int) __asm__("RemoveDmacHandler");
 extern void E_49B8(int) __asm__("func_004249B8");
 extern void E_4950(int) __asm__("func_00424950");
 extern int E_C078() __asm__("func_0042C078");
@@ -7377,8 +7377,8 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409940);
 extern char D_004980F0[];
 extern char D_00498108[];
 extern char D_00498130[];
-extern int Q_sema(int *) __asm__("func_00423DA0");
-extern void Q_sig(int) __asm__("func_00423DC0");
+extern int Q_sema(int *) __asm__("CreateSema");
+extern void Q_sig(int) __asm__("SignalSema");
 extern void Q_log(char *) __asm__("func_00425C60");
 extern int Q_A360(int, int, int) __asm__("func_0040A360");
 extern void Q_6408(int) __asm__("func_00426408");
@@ -7398,7 +7398,7 @@ int func_00409940(void) {
         D_004533C8 = Q_sema(s);
     }
     Q_A360(0, 0, 0);
-    func_00423DE0(D_004533C4);
+    WaitSema(D_004533C4);
     Q_6408(0);
     for (;;) {
         if (func_00426B48(&D_005271C0, 0x80000400, 0) < 0) {
@@ -7436,12 +7436,12 @@ int func_00409940(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409B10);
 #ifdef SKIP_ASM
-extern int func_00423DB0(int);
+extern int DeleteSema(int);
 int func_00409B10(void) {
     if (D_004533C4 >= 0) {
-        func_00423DB0(D_004533C4);
+        DeleteSema(D_004533C4);
         D_004533C4 = -1;
-        func_00423DB0(D_004533C8);
+        DeleteSema(D_004533C8);
     }
     return 1;
 }
@@ -7461,20 +7461,20 @@ sSifClient *func_00409B60(int *a, int *b) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409B90);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 int func_00409B90(int a) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.origin = a;
     r = func_00426D18(&D_005271C0, 20, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 20;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -7482,21 +7482,21 @@ int func_00409B90(int a) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409C48);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 int func_00409C48(int a) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.port = a;
     r = func_00426D18(&D_005271C0, 21, 0, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r != 0) {
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
         return r;
     }
-    func_00423DC0(D_004533C4);
+    SignalSema(D_004533C4);
     return D_00528780[0];
 }
 #endif
@@ -7504,18 +7504,18 @@ int func_00409C48(int a) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409D10);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 extern char *strncpy(char *, const char *, int);
 int func_00409D10(int a, int b, int s_, int c) {
     char *s = (char *)s_;
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     if (s == 0 || s[0] == 0) {
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
         return -210;
     }
     strncpy(D_00527270.name, s, 0x3FF);
@@ -7527,7 +7527,7 @@ int func_00409D10(int a, int b, int s_, int c) {
     if (r == 0)
         D_004533C0 = 2;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -7548,20 +7548,20 @@ int func_00409E38(int a, int b, int c) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409E70);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 int func_00409E70(int a) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.fd = a;
     r = func_00426D18(&D_005271C0, 3, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 3;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -7569,13 +7569,13 @@ int func_00409E70(int a) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409F28);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 int func_00409F28(int a, int b, int c) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.fd = a;
     D_00527240.offset = b;
@@ -7584,7 +7584,7 @@ int func_00409F28(int a, int b, int c) {
     if (r == 0)
         D_004533C0 = 4;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -7613,14 +7613,14 @@ void func_0040A000(void *a) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040A090);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 extern void func_00426358(int, int);
 int func_0040A090(int a, int b, int c) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.fd = a;
     D_00527240.param = (int)D_005276C0;
@@ -7632,7 +7632,7 @@ int func_0040A090(int a, int b, int c) {
     if (r == 0)
         D_004533C0 = 5;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -7640,15 +7640,15 @@ int func_0040A090(int a, int b, int c) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040A1A8);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
-extern void func_00424020(int);
+extern int PollSema(int);
+extern void SignalSema(int);
+extern void FlushCache(int);
 int func_0040A1A8(int a, unsigned char *p, int n) {
     int r;
     unsigned i;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.fd = a;
     if (n < 17) {
@@ -7663,12 +7663,12 @@ int func_0040A1A8(int a, unsigned char *p, int n) {
     }
     for (i = 0; i < D_00527240.origin; i++)
         D_00527240.data[i] = p[i];
-    func_00424020(0);
+    FlushCache(0);
     r = func_00426D18(&D_005271C0, 6, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 6;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -7676,9 +7676,9 @@ int func_0040A1A8(int a, unsigned char *p, int n) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040A320);
 #ifdef SKIP_ASM
-extern void func_00423DD0(int);
+extern void iSignalSema(int);
 void func_0040A320(int alarmId, int ticks, int sema) {
-    func_00423DD0(sema);
+    iSignalSema(sema);
 }
 #endif
 
@@ -7686,18 +7686,18 @@ void func_0040A320(int alarmId, int ticks, int sema) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040A328);
 #ifdef SKIP_ASM
 extern void func_0040A320(int, int, int);
-extern void func_00423B20(int, void (*)(int, int, int), int);
-extern void func_00423DE0(int);
+extern void SetAlarm(int, void (*)(int, int, int), int);
+extern void WaitSema(int);
 void func_0040A328(unsigned short a) {
-    func_00423B20(a, func_0040A320, D_004533C8);
-    func_00423DE0(D_004533C8);
+    SetAlarm(a, func_0040A320, D_004533C8);
+    WaitSema(D_004533C8);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040A360);
 #ifdef SKIP_ASM
-extern void func_00423DC0(int);
+extern void SignalSema(int);
 extern void sleep_A328(int) __asm__("func_0040A328");
 int func_0040A360(int a, int *p, int *q) {
     int r;
@@ -7716,7 +7716,7 @@ int func_0040A360(int a, int *p, int *q) {
         D_004533C0 = 0;
         if (q)
             *q = D_00528780[0];
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     }
     return r;
 }
@@ -7739,14 +7739,14 @@ void func_0040A440(void *a) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040A498);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 extern void func_00426358(int, int);
 int func_0040A498(int a, int b, int *c, int *d, int *e) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.port = a;
     D_00527240.slot = b;
@@ -7771,7 +7771,7 @@ int func_0040A498(int a, int b, int *c, int *d, int *e) {
     if (r == 0)
         D_004533C0 = 1;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -7793,18 +7793,18 @@ int func_0040A618(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040A688);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 extern char *strncpy(char *, const char *, int);
 extern void func_00426358(int, int);
 int func_0040A688(int a, int b, char *s, int c, int d, int e) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     if (s == 0 || s[0] == 0) {
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
         return -210;
     }
     D_00527270.port = a;
@@ -7820,7 +7820,7 @@ int func_0040A688(int a, int b, char *s, int c, int d, int e) {
     if (r == 0)
         D_004533C0 = 13;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -7848,18 +7848,18 @@ void func_0040A7D0(void *dst) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040A858);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 extern char *strncpy(char *, const char *, int);
 extern void func_00426358(int, int);
 int func_0040A858(int a, int b, char *s, void *u) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     if (s == 0 || s[0] == 0) {
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
         return -210;
     }
     D_00527270.port = a;
@@ -7872,7 +7872,7 @@ int func_0040A858(int a, int b, char *s, void *u) {
     if (r == 0)
         D_004533C0 = 12;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -7880,13 +7880,13 @@ int func_0040A858(int a, int b, char *s, void *u) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040A998);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 int func_0040A998(int a, int b) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.port = a;
     D_00527240.slot = b;
@@ -7894,7 +7894,7 @@ int func_0040A998(int a, int b) {
     if (r == 0)
         D_004533C0 = 16;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -7902,17 +7902,17 @@ int func_0040A998(int a, int b) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040AA68);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 extern char *strncpy(char *, const char *, int);
 int func_0040AA68(int a, int b, char *s) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     if (s == 0 || s[0] == 0) {
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
         return -210;
     }
     strncpy(D_00527270.name, s, 0x3FF);
@@ -7924,7 +7924,7 @@ int func_0040AA68(int a, int b, char *s) {
     if (r == 0)
         D_004533C0 = 15;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -7932,20 +7932,20 @@ int func_0040AA68(int a, int b, char *s) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040AB80);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 int func_0040AB80(int a) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.fd = a;
     r = func_00426D18(&D_005271C0, 10, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 10;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -7953,9 +7953,9 @@ int func_0040AB80(int a) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040AC38);
 #ifdef SKIP_ASM
-extern int R_3DF0(int) __asm__("func_00423DF0");
-extern void R_3DC0(int) __asm__("func_00423DC0");
-extern void R_4020(int) __asm__("func_00424020");
+extern int R_3DF0(int) __asm__("PollSema");
+extern void R_3DC0(int) __asm__("SignalSema");
+extern void R_4020(int) __asm__("FlushCache");
 extern char *strncpy(char *, const char *, int);
 int func_0040AC38(int a, int b, char *s, sMcDirEntry *c, int e) {
     int r;
@@ -7989,19 +7989,19 @@ int func_0040AC38(int a, int b, char *s, sMcDirEntry *c, int e) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040AE00);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 extern char *strncpy(char *, const char *, int);
-extern void func_00424020(int);
+extern void FlushCache(int);
 int func_0040AE00(int a, int b, char *s, char *t) {
     int r;
     char *p;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     if (s == 0 || s[0] == 0 || t == 0) {
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
         return -210;
     }
     D_00527270.port = a;
@@ -8013,12 +8013,12 @@ int func_0040AE00(int a, int b, char *s, char *t) {
     p = D_00527220 - 0x20;
     p[0x3F] = 0;
     D_00527270.buffer = (int)p;
-    func_00424020(0);
+    FlushCache(0);
     r = func_00426D18(&D_005271C0, 14, 1, &D_00527270, 0x414, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 19;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -8026,13 +8026,13 @@ int func_0040AE00(int a, int b, char *s, char *t) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040AF58);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 int func_0040AF58(int a, int b) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.port = a;
     D_00527240.slot = b;
@@ -8040,7 +8040,7 @@ int func_0040AF58(int a, int b) {
     if (r == 0)
         D_004533C0 = 17;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -8048,17 +8048,17 @@ int func_0040AF58(int a, int b) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040B028);
 #ifdef SKIP_ASM
-extern int func_00423DF0(int);
-extern void func_00423DC0(int);
+extern int PollSema(int);
+extern void SignalSema(int);
 extern char *strncpy(char *, const char *, int);
 int func_0040B028(int a, int b, char *s) {
     int r;
     if (D_005271C0.server == 0)
         return -100;
-    if (func_00423DF0(D_004533C4) < 0)
+    if (PollSema(D_004533C4) < 0)
         return -200;
     if (s == 0 || s[0] == 0) {
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
         return -210;
     }
     D_00527270.port = a;
@@ -8069,7 +8069,7 @@ int func_0040B028(int a, int b, char *s) {
     if (r == 0)
         D_004533C0 = 18;
     else
-        func_00423DC0(D_004533C4);
+        SignalSema(D_004533C4);
     return r;
 }
 #endif
@@ -8144,7 +8144,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040B2D0);
 #ifdef SKIP_ASM
 struct C_B2D0 { unsigned *f0; int pad4; int f8; int pad[2]; int f14; int f18; void (*f1C)(int); int f20; int f24; int f28; int f2C; };
 struct E_B2D0 { char pad[0x1C]; struct C_B2D0 *ctx; unsigned code; int f24; int f28; int f2C; };
-extern void func_00423DD0(int);
+extern void iSignalSema(int);
 extern void func_0040B2B0(unsigned *);
 void func_0040B2D0(struct E_B2D0 *e) {
     struct C_B2D0 *c;
@@ -8153,26 +8153,26 @@ void func_0040B2D0(struct E_B2D0 *e) {
         c = e->ctx;
         if (c->f1C)
             c->f1C(c->f20);
-        func_00423DD0(c->f28);
+        iSignalSema(c->f28);
         break;
     case 0x80000019:
         c = e->ctx;
         c->f24 = e->f24;
         c->f14 = e->f28;
         c->f18 = e->f2C;
-        func_00423DD0(c->f28);
+        iSignalSema(c->f28);
         break;
     case 0x8000001C:
         break;
     case 0x8000001D:
         c = e->ctx;
         c->f2C = e->f24;
-        func_00423DD0(c->f28);
+        iSignalSema(c->f28);
         break;
     }
     c = e->ctx;
     if (c->f8 >= 0)
-        func_00423DD0(c->f8);
+        iSignalSema(c->f8);
     func_0040B2B0(c->f0);
     c->f0 = 0;
 }
@@ -8192,9 +8192,9 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040B400);
 #ifdef SKIP_ASM
 struct N_B400 { char pad0[0x14]; struct N_B400 *f14; int f18; struct C_B400 *f1C; int f20; int f24; int f28; int f2C; };
 struct C_B400 { struct N_B400 *f0; int f4; int f8; int padC; int f10; char pad14[0x10]; int f24; int f28; int pad2C; int f30; int f34; int f38; };
-extern int func_00423DA0(int *);
-extern int fr_B400(int) __asm__("func_00423DB0");
-extern void func_00423DE0(int);
+extern int CreateSema(int *);
+extern int fr_B400(int) __asm__("DeleteSema");
+extern void WaitSema(int);
 extern void lg_B400(char *) __asm__("func_00425C60");
 extern struct N_B400 *func_0040B208(char *);
 extern void rl_B400(struct N_B400 *) __asm__("func_0040B2B0");
@@ -8212,10 +8212,10 @@ int func_0040B400(int cc, int a, int flag, int d, int e, int f) {
     s[5] = 0;
     s[2] = 1;
     s[1] = 1;
-    c->f28 = func_00423DA0(s);
+    c->f28 = CreateSema(s);
     if (c->f28 < 0)
         return -3;
-    func_00423DE0(c->f28);
+    WaitSema(c->f28);
     c->f10 = a;
     c->f24 = 0;
     c->f30 = d;
@@ -8237,7 +8237,7 @@ int func_0040B400(int cc, int a, int flag, int d, int e, int f) {
     s[1] = 1;
     s[2] = 0;
     s[5] = 0;
-    h = func_00423DA0(s);
+    h = CreateSema(s);
     c->f8 = h;
     if (h < 0) {
         rl_B400(n);
@@ -8250,7 +8250,7 @@ int func_0040B400(int cc, int a, int flag, int d, int e, int f) {
         fr_B400(c->f28);
         return -2;
     }
-    func_00423DE0(h);
+    WaitSema(h);
     fr_B400(h);
     if (c->f24 == 0)
         fr_B400(c->f28);
@@ -8264,11 +8264,11 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040B5B0);
 struct O_B5B0 { int f0; int f4; int f8; int fC; int f10; int f14; int f18; int f1C; int f20; int f24; int f28; int f2C; };
 extern char D_00498178[];
 extern void b5_00425C60(char *, ...) __asm__("func_00425C60");
-extern int b5_00423DE0(int) __asm__("func_00423DE0");
-extern int b5_00423DB0(int) __asm__("func_00423DB0");
+extern int b5_00423DE0(int) __asm__("WaitSema");
+extern int b5_00423DB0(int) __asm__("DeleteSema");
 extern struct O_B5B0 *b5_0040B208(char *) __asm__("func_0040B208");
 extern void b5_0040B2B0(struct O_B5B0 *) __asm__("func_0040B2B0");
-extern int b5_00423DA0(struct QSema *) __asm__("func_00423DA0");
+extern int b5_00423DA0(struct QSema *) __asm__("CreateSema");
 extern int b5_004261B0(int, struct O_B5B0 *, int, int, int, int) __asm__("func_004261B0");
 int func_0040B5B0(struct O_B5B0 *a, int b) {
     struct O_B5B0 *t;
@@ -8315,9 +8315,9 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040B6D0);
 struct N_B6D0 { int f0; int f4; int f8; char padC[8]; int f14; int f18; int f1C; int f20; int f24; int f28; int f2C; int f30; int f34; };
 extern void lg3_B6D0(char *, char *, int) __asm__("func_00425C60");
 extern void lg1_B6D0(char *) __asm__("func_00425C60");
-extern int wt_B6D0(int) __asm__("func_00423DE0");
-extern int fr_B6D0(int) __asm__("func_00423DB0");
-extern int sm_B6D0(int *) __asm__("func_00423DA0");
+extern int wt_B6D0(int) __asm__("WaitSema");
+extern int fr_B6D0(int) __asm__("DeleteSema");
+extern int sm_B6D0(int *) __asm__("CreateSema");
 extern struct N_B6D0 *al_B6D0(char *) __asm__("func_0040B208");
 extern void rl_B6D0(struct N_B6D0 *) __asm__("func_0040B2B0");
 extern void sz_B6D0(int, int) __asm__("func_00426358");
@@ -8433,15 +8433,15 @@ int func_0040B9A8(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040B9E8);
 #ifdef SKIP_ASM
 extern int func_0040B9A8(void);
-extern void func_00423E50(unsigned *);
+extern void GetOsdConfigParam(unsigned *);
 int func_0040B9E8(void) {
     unsigned buf[1];
     int r;
-    func_00423E50(buf);
+    GetOsdConfigParam(buf);
     if (func_0040B9A8()) {
         r = D_004533FC[0];
     } else {
-        func_00423E50(buf);
+        GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0)
             r = (buf[0] >> 4) & 1;
         else
@@ -8463,12 +8463,12 @@ void func_0040BA48(sSysConfig *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040BA68);
 #ifdef SKIP_ASM
 extern int func_0040B9A8(void);
-extern void func_00423E50(unsigned *);
+extern void GetOsdConfigParam(unsigned *);
 int func_0040BA68(void) {
     unsigned buf[1];
     if (func_0040B9A8())
         return D_004533FA[0];
-    func_00423E50(buf);
+    GetOsdConfigParam(buf);
     return (buf[0] >> 1) & 3;
 }
 #endif
@@ -8477,12 +8477,12 @@ int func_0040BA68(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040BAA8);
 #ifdef SKIP_ASM
 extern int func_0040B9A8(void);
-extern void func_00423E50(unsigned *);
+extern void GetOsdConfigParam(unsigned *);
 int func_0040BAA8(void) {
     unsigned buf[1];
     if (func_0040B9A8())
         return D_004533FD[0];
-    func_00423E50(buf);
+    GetOsdConfigParam(buf);
     return buf[0] & 1;
 }
 #endif
@@ -8491,14 +8491,14 @@ int func_0040BAA8(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040BAE8);
 #ifdef SKIP_ASM
 extern int func_0040B9A8(void);
-extern void func_00423E50(unsigned *);
+extern void GetOsdConfigParam(unsigned *);
 int func_0040BAE8(void) {
     unsigned buf[1];
     int r;
     if (func_0040B9A8()) {
         r = D_004533F8.f0;
     } else {
-        func_00423E50(buf);
+        GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0) r = 0x21C; else r = (int)buf[0] >> 21;
     }
     return r;
@@ -8509,8 +8509,8 @@ int func_0040BAE8(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040BB38);
 #ifdef SKIP_ASM
 extern int func_0040B9A8(void);
-extern void func_00423E50(unsigned *);
-extern int func_004240B0(unsigned *, int, int);
+extern void GetOsdConfigParam(unsigned *);
+extern int GetOsdConfigParam2(unsigned *, int, int);
 int func_0040BB38(void) {
     unsigned buf[2];
     unsigned char v;
@@ -8518,11 +8518,11 @@ int func_0040BB38(void) {
     if (func_0040B9A8()) {
         r = D_004533FB[0];
     } else {
-        func_00423E50(buf);
+        GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0) {
             r = 0;
         } else {
-            func_004240B0(&buf[1], 1, 1);
+            GetOsdConfigParam2(&buf[1], 1, 1);
             v = ((unsigned char *)buf)[4];
             r = v >> 6;
         }
@@ -8535,8 +8535,8 @@ int func_0040BB38(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040BBA0);
 #ifdef SKIP_ASM
 extern int func_0040B9A8(void);
-extern void func_00423E50(unsigned *);
-extern int func_004240B0(unsigned *, int, int);
+extern void GetOsdConfigParam(unsigned *);
+extern int GetOsdConfigParam2(unsigned *, int, int);
 int func_0040BBA0(void) {
     unsigned buf[2];
     unsigned char v;
@@ -8544,11 +8544,11 @@ int func_0040BBA0(void) {
     if (func_0040B9A8()) {
         r = D_004533FE[0];
     } else {
-        func_00423E50(buf);
+        GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0) {
             r = 0;
         } else {
-            func_004240B0(&buf[1], 1, 1);
+            GetOsdConfigParam2(&buf[1], 1, 1);
             v = ((unsigned char *)buf)[4];
             r = (v >> 4) & 1;
         }
@@ -8561,8 +8561,8 @@ int func_0040BBA0(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040BC08);
 #ifdef SKIP_ASM
 extern int func_0040B9A8(void);
-extern void func_00423E50(unsigned *);
-extern int func_004240B0(unsigned *, int, int);
+extern void GetOsdConfigParam(unsigned *);
+extern int GetOsdConfigParam2(unsigned *, int, int);
 int func_0040BC08(void) {
     unsigned buf[2];
     unsigned char v;
@@ -8570,11 +8570,11 @@ int func_0040BC08(void) {
     if (func_0040B9A8()) {
         r = D_004533FF[0];
     } else {
-        func_00423E50(buf);
+        GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0) {
             r = 0;
         } else {
-            func_004240B0(&buf[1], 1, 1);
+            GetOsdConfigParam2(&buf[1], 1, 1);
             v = ((unsigned char *)buf)[4];
             r = (v >> 5) & 1;
         }
@@ -8762,8 +8762,8 @@ struct KbInfo_C028 { int n; char pad[0x8C]; };
 extern char D_00498240[];
 extern char D_00498258[];
 extern void k_6408(int) __asm__("func_00426408");
-extern int k_sema(struct QSema *) __asm__("func_00423DA0");
-extern int k_dsema(int) __asm__("func_00423DB0");
+extern int k_sema(struct QSema *) __asm__("CreateSema");
+extern int k_dsema(int) __asm__("DeleteSema");
 extern void k_log(char *) __asm__("func_00425C60");
 extern int sceUsbKbGetInfo(void *info);
 extern int k_C810(int, int *) __asm__("func_0040C810");
@@ -8853,16 +8853,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040C220);
 #ifdef SKIP_ASM
 extern int func_0042C078_0() __asm__("func_0042C078");
 extern void func_0042C0C0(void);
-extern int func_00423AA0(int, int);
+extern int RemoveIntcHandler(int, int);
 extern void func_00424880(int);
-extern int func_00423DB0(int);
+extern int DeleteSema(int);
 extern char D_00498278[];
 extern char D_004982A8[];
 int func_0040C220(void) {
     int n = 0;
     int s, r;
     s = func_0042C078_0();
-    r = func_00423AA0(3, D_0052909C);
+    r = RemoveIntcHandler(3, D_0052909C);
     if (r == 0)
         func_00424880(3);
     if (s)
@@ -8872,7 +8872,7 @@ int func_0040C220(void) {
         func_0040A618_log(D_00498278);
     }
     if (D_00453438 != -1) {
-        if (func_00423DB0(D_00453438) < 0) {
+        if (DeleteSema(D_00453438) < 0) {
             n++;
             func_0040A618_log(D_004982A8);
         } else {
@@ -8888,7 +8888,7 @@ INCLUDE_ASM("seg/seg_2FE810", sceUsbKbGetInfo);
 #ifdef SKIP_ASM
 extern char D_004982D0[];
 extern void func_0040C8B0(void *);
-extern void func_00423DE0(int);
+extern void WaitSema(int);
 extern void func_00425C60(char *, int);
 /**
  * Requests the USB keyboard driver's connection info over SIF RPC (Sony libusbkb).
@@ -8903,7 +8903,7 @@ int sceUsbKbGetInfo(void *info) {
     int result;
     if (D_00453438 == -1)
         return -1;
-    func_00423DE0(D_00453438);
+    WaitSema(D_00453438);
     result = func_00426D18(&D_005290A0, 1, 1, D_00529100, 16, D_00529140, 0x90, func_0040C8B0, 0);
     if (result != 0) {
         func_00425C60(D_004982D0, result);
@@ -8919,7 +8919,7 @@ int sceUsbKbGetInfo(void *info) {
 INCLUDE_ASM("seg/seg_2FE810", sceUsbKbRead);
 #ifdef SKIP_ASM
 extern void func_0040C8B0(void *);
-extern void func_00423DE0(int);
+extern void WaitSema(int);
 extern void func_00425C60(char *, int);
 /**
  * Requests the latest input data of one USB keyboard over SIF RPC (Sony libusbkb).
@@ -8938,7 +8938,7 @@ int sceUsbKbRead(unsigned kbdNo, void *data) {
     if (kbdNo >= D_00529000.n)
         return -11;
     D_00529100[0] = kbdNo;
-    func_00423DE0(D_00453438);
+    WaitSema(D_00453438);
     {
         int result = func_00426D18(&D_005290A0, 2, 1, D_00529100, 16, D_00529140, 0x50, func_0040C8B0, 0);
         if (result != 0) {
@@ -8958,7 +8958,7 @@ INCLUDE_ASM("seg/seg_2FE810", sceUsbKbGetLocation);
 #ifdef SKIP_ASM
 extern char D_00498320[];
 extern void func_0040C8B0(void *);
-extern void func_00423DE0(int);
+extern void WaitSema(int);
 extern void func_00425C60(char *, int);
 /**
  * Starts a request for the USB port location of a keyboard (Sony libusbkb).
@@ -8977,7 +8977,7 @@ int sceUsbKbGetLocation(int kbdNo, void *location) {
     if (kbdNo >= D_00529000.n)
         return -11;
     D_00529100[0] = kbdNo;
-    func_00423DE0(D_00453438);
+    WaitSema(D_00453438);
     {
         int result = func_00426D18(&D_005290A0, 3, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
         if (result != 0) {
@@ -8997,7 +8997,7 @@ INCLUDE_ASM("seg/seg_2FE810", sceUsbKbSetLEDStatus);
 #ifdef SKIP_ASM
 extern char D_00498350[];
 extern void func_0040C8B0(void *);
-extern void func_00423DE0(int);
+extern void WaitSema(int);
 extern void func_00425C60(char *, int);
 /**
  * Starts a request to set a keyboard's LED state (Sony libusbkb).
@@ -9016,7 +9016,7 @@ int sceUsbKbSetLEDStatus(int kbdNo, unsigned char ledStatus) {
         return -11;
     D_00529100[0] = kbdNo;
     D_00529100[1] = ledStatus;
-    func_00423DE0(D_00453438);
+    WaitSema(D_00453438);
     {
         int result = func_00426D18(&D_005290A0, 4, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
         if (result != 0) {
@@ -9037,7 +9037,7 @@ INCLUDE_ASM("seg/seg_2FE810", sceUsbKbSetLEDMode);
 #ifdef SKIP_ASM
 extern char D_00498380[];
 extern void func_0040C8B0(void *);
-extern void func_00423DE0(int);
+extern void WaitSema(int);
 extern void func_00425C60(char *, int);
 /**
  * Sets a keyboard's LED mode and sends it to the IOP (Sony libusbkb).
@@ -9060,7 +9060,7 @@ int sceUsbKbSetLEDMode(int kbdNo, unsigned mode) {
     D_00529000.port[kbdNo].ledMode = mode;
     D_00529100[0] = kbdNo;
     D_00529100[1] = mode;
-    func_00423DE0(semaId);
+    WaitSema(semaId);
     {
         int rpcResult = func_00426D18(&D_005290A0, 5, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
         if (rpcResult != 0) {
@@ -9122,14 +9122,14 @@ int func_0040C7C0(int a, unsigned b) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040C810);
 #ifdef SKIP_ASM
-extern void kb_signal4(int) __asm__("func_00423DC0");
+extern void kb_signal4(int) __asm__("SignalSema");
 extern int func_0040C8C0(void);
 int func_0040C810(int mode, int *out) {
     if (D_00453438 == -1)
         return -1;
     switch (mode) {
     case 0:
-        func_00423DE0(D_00453438);
+        WaitSema(D_00453438);
         *out = func_0040C8C0();
         kb_signal4(D_00453438);
         return 0;
@@ -9148,9 +9148,9 @@ int func_0040C810(int mode, int *out) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040C8B0);
 #ifdef SKIP_ASM
-extern void func_00423DD0(int);
+extern void iSignalSema(int);
 void func_0040C8B0(void *arg) {
-    func_00423DD0(D_00453438);
+    iSignalSema(D_00453438);
 }
 #endif
 
@@ -9557,7 +9557,7 @@ int func_0040D4A0(unsigned a) {
     if (a >= D_00529000.n)
         return -11;
     D_00529100[0] = a;
-    func_00423DE0(D_00453438);
+    WaitSema(D_00453438);
     r = func_00426D18(&D_005290A0, 6, 1, D_00529100, 16, D_00529140, 0, func_0040C8B0, 0);
     if (r != 0) {
         q_00425C60(D_004982F8, r);

@@ -732,13 +732,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F44F8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F4A78(void);
-extern int func_00423CC0(void);
+extern int SleepThread(void);
 extern volatile int D_004A5B04;
 void func_003F44F8(void) {
     while (1) {
         func_003F4A78();
         D_004A5B04 = 1;
-        func_00423CC0();
+        SleepThread();
         D_004A5B04 = 0;
     }
 }
@@ -756,17 +756,17 @@ struct sSifDma_4528 { int data; int addr; int size; int mode; };
 extern struct { unsigned char b; char pad[11]; int w; } D_00451300;
 extern volatile int D_004A5B00;
 extern volatile int D_004A5B08;
-extern int func_00423DE0(int);
-extern int func_00423DC0(int);
+extern int WaitSema(int);
+extern int SignalSema(int);
 extern int func_003F4A78(void);
-extern int func_00423C90(void);
+extern int GetThreadId(void);
 extern void func_0041605C(char *, char *, int);
 extern int func_00424698(int, int);
-extern int func_00424160(struct sSifDma_4528 *, int);
+extern int sceSifSetDma(struct sSifDma_4528 *, int);
 extern int func_003F4DE8(void);
 extern void func_004261B0(int, void *, int, int, int, int);
-extern int func_00423B20(int, void *, void *);
-extern int func_00423CC0(void);
+extern int SetAlarm(int, void *, void *);
+extern int SleepThread(void);
 extern unsigned int strlen(const char *);
 
 /* Writes back the D-cache over [a, a + n). */
@@ -797,13 +797,13 @@ int func_003F4528(struct sSifClient_4528 *cl, int flags, int fno, int a3, char *
         for (i = 0; seg[i].len > 0; i++) size += seg[i].len;
     }
     D_004A5B00 = 2;
-    func_00423DE0(g->sema);
+    WaitSema(g->sema);
     D_004A5B00 = 0;
     if ((g->head + 1) % g->cnt == g->tail) {
         while ((g->head + 1) % g->cnt == g->tail) {
-            func_00423DC0(g->sema);
+            SignalSema(g->sema);
             func_003F4A78();
-            func_00423DE0(g->sema);
+            WaitSema(g->sema);
         }
     }
     if (g->pad4DDC < g->pos) {
@@ -817,7 +817,7 @@ int func_003F4528(struct sSifClient_4528 *cl, int flags, int fno, int a3, char *
         avail = g->pos - 0x40;
     }
     if (avail < size) {
-        func_00423DC0(g->sema);
+        SignalSema(g->sema);
         return -1;
     }
     nowait = flags & 1;
@@ -826,7 +826,7 @@ int func_003F4528(struct sSifClient_4528 *cl, int flags, int fno, int a3, char *
     g->c[g->head].fn = (int (*)(int, int, int, int, int, int, int, int, int *))fn;
     g->c[g->head].out = out;
     g->c[g->head].arg = flags;
-    g->c[g->head].th = func_00423C90();
+    g->c[g->head].th = GetThreadId();
     if (size > 0) {
         if (seg != 0) {
             char *d = (char *)(g->base2 + off);
@@ -855,23 +855,23 @@ int func_003F4528(struct sSifClient_4528 *cl, int flags, int fno, int a3, char *
     dma[1].addr = g->pad4D98[1] + g->head * sizeof(struct sSifReq);
     dma[1].size = 0x20;
     dma[1].mode = 0;
-    ((int *)g->pad4DB8[0])[g->head] = dma[0].size != 0 ? func_00424160(&dma[0], 2) : func_00424160(&dma[1], 1);
+    ((int *)g->pad4DB8[0])[g->head] = dma[0].size != 0 ? sceSifSetDma(&dma[0], 2) : sceSifSetDma(&dma[1], 1);
     while (((int *)g->pad4DB8[0])[g->head] == 0) {
         t = func_003F4DE8();
         while (t == func_003F4DE8()) {
         }
-        ((int *)g->pad4DB8[0])[g->head] = dma[0].size != 0 ? func_00424160(&dma[0], 2) : func_00424160(&dma[1], 1);
+        ((int *)g->pad4DB8[0])[g->head] = dma[0].size != 0 ? sceSifSetDma(&dma[0], 2) : sceSifSetDma(&dma[1], 1);
     }
     if (nowait) func_004261B0(1, &D_00451300, D_00451300.b, 0, 0, 0);
     key = g->pad4DC8[1];
     if (size > 0) g->pad4DDC = off + (asize & ~0x3F);
     g->pad4DC8[1] = (g->pad4DC8[1] + 1) % *(int *)&g->buf[0x4D84];
     g->head = (g->head + 1) % g->cnt;
-    func_00423DC0(g->sema);
-    if (g->h4DEC < 0 && fn == 1) g->h4DEC = func_00423B20(8, (void *)func_003F4448, g);
+    SignalSema(g->sema);
+    if (g->h4DEC < 0 && fn == 1) g->h4DEC = SetAlarm(8, (void *)func_003F4448, g);
     if (fn == 1) {
         D_004A5B08 = 2;
-        func_00423CC0();
+        SleepThread();
         D_004A5B08 = 0;
     }
     return key;
@@ -890,20 +890,20 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4A78);
 extern struct sSifQueue D_0051F0C0;
 
 extern volatile int D_004A5B00;
-extern int func_00423DE0(int);
-extern int func_00423DC0(int);
-extern int func_00423CD0(int);
+extern int WaitSema(int);
+extern int SignalSema(int);
+extern int WakeupThread(int);
 int func_003F4A78(void) {
     struct sSifQueue *g = &D_0051F0C0;
     int n = 0;
     while (g->tail != g->head && g->b[g->tail].key == g->a[g->tail].key) {
         int th, key, kind, arg, p10, p14, addr, len, p8, pC;
         D_004A5B00 = 1;
-        func_00423DE0(g->sema);
+        WaitSema(g->sema);
         D_004A5B00 = 0;
         key = g->b[g->tail].key;
         if (key != g->a[g->tail].key) {
-            func_00423DC0(g->sema);
+            SignalSema(g->sema);
             return n;
         }
         th = 0;
@@ -929,8 +929,8 @@ int func_003F4A78(void) {
             g->pos += (g->a[g->tail].f4 + 0x3F) & ~0x3F;
         }
         g->tail = (g->tail + 1) % g->cnt;
-        func_00423DC0(g->sema);
-        if (th != 0) func_00423CD0(th);
+        SignalSema(g->sema);
+        if (th != 0) WakeupThread(th);
         n++;
     }
     return n;
@@ -1083,7 +1083,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4F40);
 extern struct sSifQueue D_0051F0C0;
 
 extern struct { unsigned char b; char pad[11]; int w; } D_00451340;
-extern void func_00424020(int);
+extern void FlushCache(int);
 extern void func_004261B0(int, void *, int, int, int, int);
 int func_003F4F40(void) {
     int r;
@@ -1093,7 +1093,7 @@ int func_003F4F40(void) {
     unsigned limit = 0x2FAF080;
     *flag = 0;
     D_00451340.w = (int)flag + 1;
-    func_00424020(0);
+    FlushCache(0);
     func_004261B0(1, &D_00451340, D_00451340.b, 0, 0, 0);
     r = 1;
     MFC0_COUNT_2F41(start);
@@ -1103,7 +1103,7 @@ int func_003F4F40(void) {
             r = 0;
             break;
         }
-        func_00424020(0);
+        FlushCache(0);
     }
     return r;
 }
@@ -1130,13 +1130,13 @@ extern void f5000_6210(void *, int, int) __asm__("func_00416210");
 /* func_004261B0 (sceSifSendCmd) returns its packet id; the unit declares it void. */
 extern int f5000_61B0(int, void *, int, int, int, int) __asm__("func_004261B0");
 extern int func_0042ABA0(int);
-extern int func_00424140(int);
+extern int sceSifDmaStat(int);
 extern void func_00425D38(void);
-extern int func_00423DA0(struct sSemaParam_5000 *);
-extern int func_00423BA0(struct sThreadParam_5000 *);
+extern int CreateSema(struct sSemaParam_5000 *);
+extern int CreateThread(struct sThreadParam_5000 *);
 extern int func_00423A90(int, int (*)(int, void *), int, void *);
 extern int func_004248E8(int);
-extern void func_00423BC0(int, void *);
+extern void StartThread(int, void *);
 extern int func_003F4410(int, void *);
 
 int func_003F5000(void) {
@@ -1195,26 +1195,26 @@ int func_003F5000(void) {
     g->pad4D98[1] = hdr.v[3];
     g->pad4DA4[1] = hdr.v[6];
     g->base1 = hdr.v[9];
-    func_00424020(0);
+    FlushCache(0);
     dma.data = (int)&hdr;
     dma.addr = g->pad4DB8[2];
     dma.size = 0x40;
     dma.mode = 0;
-    id = func_00424160(&dma, 1);
+    id = sceSifSetDma(&dma, 1);
     if (id == 0) return -3;
-    while (func_00424140(id) >= 0) {
+    while (sceSifDmaStat(id) >= 0) {
     }
     dma.data = (int)g->a;
     dma.addr = g->pad4D98[1];
     dma.size = 0x200;
     dma.mode = 0;
-    id = func_00424160(&dma, 1);
+    id = sceSifSetDma(&dma, 1);
     if (id == 0) return -4;
-    while (func_00424140(id) >= 0) {
+    while (sceSifDmaStat(id) >= 0) {
     }
     func_00425D38();
     D_00451340.w = g->pad4DB8[2];
-    func_00424020(0);
+    FlushCache(0);
     f5000_61B0(1, &D_00451340, D_00451340.b, 0, 0, 0);
     g->pad4DC8[1] = 1;
     g->cnt = ((struct sSifReq *)g->pad4D98[0] - g->a);
@@ -1225,7 +1225,7 @@ int func_003F5000(void) {
     sema.init_count = 1;
     sema.max_count = 1;
     sema.option = 0;
-    g->sema = func_00423DA0(&sema);
+    g->sema = CreateSema(&sema);
     g->h4DEC = -1;
     g->h4DF0 = -1;
     tp.func = func_003F44F8;
@@ -1234,11 +1234,11 @@ int func_003F5000(void) {
     tp.stackSize = 0x2000;
     tp.gpReg = &_gp;
     tp.option = 0;
-    g->h4DE8 = func_00423BA0(&tp);
+    g->h4DE8 = CreateThread(&tp);
     if (g->h4DE8 <= 0) return -5;
     g->h4DF4 = func_00423A90(2, func_003F4410, -1, g);
     func_004248E8(2);
-    func_00423BC0(g->h4DE8, g);
+    StartThread(g->h4DE8, g);
     D_004A4BB0 = 1;
     return 0;
 }
@@ -1255,18 +1255,18 @@ extern struct sSifQueue D_0051F0C0;
 extern int D_004A4BB0;
 
 extern void func_00423B30(int);
-extern void func_00423AA0(int, int);
-extern void func_00423BF0(int);
-extern void func_00423BB0(int);
-extern void func_00423DB0(int);
+extern void RemoveIntcHandler(int, int);
+extern void TerminateThread(int);
+extern void DeleteThread(int);
+extern void DeleteSema(int);
 int func_003F53F8(void) {
     struct sSifQueue *q = &D_0051F0C0;
     if (q->h4DEC >= 0) func_00423B30(q->h4DEC);
     if (q->h4DF0 >= 0) func_00423B30(q->h4DF0);
-    func_00423AA0(2, q->h4DF4);
-    func_00423BF0(q->h4DE8);
-    func_00423BB0(q->h4DE8);
-    func_00423DB0(q->sema);
+    RemoveIntcHandler(2, q->h4DF4);
+    TerminateThread(q->h4DE8);
+    DeleteThread(q->h4DE8);
+    DeleteSema(q->sema);
     D_004A4BB0 = 0;
     return 0;
 }
@@ -1292,7 +1292,7 @@ extern char D_00525F00[];
 extern int *RpcAlloc(int);
 extern void *f6210h(void *, int, int) __asm__("func_00416210");
 extern int func_00424698(int, int);
-extern void func_00424020(int);
+extern void FlushCache(int);
 extern void func_00256BD8(int *);
 extern int func_003F4C98(char *, int, int);
 extern int func_003F4C68(char *, int, int, int, int, int, int, int, int, int);
@@ -1312,7 +1312,7 @@ int *func_003F5478(int size) {
     f6210h((void *)p[6], 0, p[5]);
     func_00424698(p[1], p[1] + 0x20);
     func_00424698(p[6], p[6] + p[5]);
-    func_00424020(0);
+    FlushCache(0);
     func_003F4C98(D_00525F00, 'sess', 'crea');
     func_003F4C68(D_00525F00, 1, 0, size, 0, 0, 0, 0, 1, (int)p);
     if (p[0] == 0) {

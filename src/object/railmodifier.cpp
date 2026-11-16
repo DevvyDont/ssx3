@@ -7118,7 +7118,7 @@ extern "C" void func_00361F98(void* self, int cause, int (*handler)(void), int n
 INCLUDE_ASM("object/railmodifier", func_00362008);
 #ifdef SKIP_ASM
 extern "C" int func_00424880(int ch);
-extern "C" void* func_00423AA0(int ch, int id);
+extern "C" void* RemoveIntcHandler(int ch, int id);
 
 extern "C" void* func_00362008(void* self, int ch)
 {
@@ -7126,7 +7126,7 @@ extern "C" void* func_00362008(void* self, int ch)
     int* handlerSlot = (int*)((char*)self + (ch << 2));
     int id = *handlerSlot;
     *handlerSlot = -1;
-    return func_00423AA0(ch, id);
+    return RemoveIntcHandler(ch, id);
 }
 #endif
 
@@ -7146,7 +7146,7 @@ extern "C" void func_00362058(int owner, int channel, int handler, int next) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_003620C8);
 #ifdef SKIP_ASM
-extern "C" void func_00423AD0(int, int);
+extern "C" void RemoveDmacHandler(int, int);
 
 extern "C" void func_003620C8(char* self, int idx)
 {
@@ -7155,7 +7155,7 @@ extern "C" void func_003620C8(char* self, int idx)
     int* slot = (int*)(base + (idx << 2));
     int old = *slot;
     *slot = -1;
-    func_00423AD0(idx, old);
+    RemoveDmacHandler(idx, old);
 }
 #endif
 

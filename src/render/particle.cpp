@@ -2753,12 +2753,12 @@ INCLUDE_ASM("render/particle", func_00375A40);
 INCLUDE_ASM("render/particle", func_00376268);
 #ifdef SKIP_ASM
 extern "C" void func_00424880(int);
-extern "C" void func_00423AA0(int, int);
+extern "C" void RemoveIntcHandler(int, int);
 extern "C" void func_00424950(int);
-extern "C" void func_00423AD0(int, int);
-extern "C" void func_00423BF0(int);
-extern "C" void func_00423BB0(int);
-extern "C" void func_00423DB0(int);
+extern "C" void RemoveDmacHandler(int, int);
+extern "C" void TerminateThread(int);
+extern "C" void DeleteThread(int);
+extern "C" void DeleteSema(int);
 extern "C" void func_00367360(void*);
 void* func_00361F40(void* self);
 void operator_delete(int* ptr);
@@ -2767,13 +2767,13 @@ extern char D_005059D8[];
 extern "C" void func_00376268(void* self)
 {
     func_00424880(2);
-    func_00423AA0(2, *(int*)((char*)self + 0x5AC0));
+    RemoveIntcHandler(2, *(int*)((char*)self + 0x5AC0));
     func_00424950(1);
-    func_00423AD0(0, *(int*)((char*)self + 0x5AC4));
-    func_00423BF0(*(int*)((char*)self + 0x5AD0));
-    func_00423BB0(*(int*)((char*)self + 0x5AD0));
-    func_00423DB0(*(int*)((char*)self + 0x5AC8));
-    func_00423DB0(*(int*)((char*)self + 0x5ACC));
+    RemoveDmacHandler(0, *(int*)((char*)self + 0x5AC4));
+    TerminateThread(*(int*)((char*)self + 0x5AD0));
+    DeleteThread(*(int*)((char*)self + 0x5AD0));
+    DeleteSema(*(int*)((char*)self + 0x5AC8));
+    DeleteSema(*(int*)((char*)self + 0x5ACC));
     operator_delete(*(int**)((char*)self + 0x18F0));
     func_00367360(*(void**)((char*)self + 0x18F4));
     operator_delete(*(int**)((char*)self + 0x18F4));
@@ -3908,8 +3908,8 @@ struct sPtRS_7A10 {
 extern sPtRS_7A10 D_00501420_rs7A10 __asm__("sDrawState_s_defaultDrawState");
 extern char D_005059D8[];
 extern "C" void func_00363490(void* ring, unsigned int* a, int* x, unsigned int* b, int* y);
-extern "C" void* func_00423DE0(int sema);  // WaitSema (returns in $2: the call clobbers v0)
-extern "C" void func_00423DC0(int sema);
+extern "C" void* WaitSema(int sema);  // WaitSema (returns in $2: the call clobbers v0)
+extern "C" void SignalSema(int sema);
 extern "C" void func_004247D8(unsigned int start, unsigned int end);
 extern "C" void func_00362CC8(void* ring);
 void func_003673D0(void* p);
@@ -4002,7 +4002,7 @@ void cGfx_7A10::EndFrame_impl()
     int vif2;
     int gif2;
     func_00363490(*(void**)(s + 0x18F0), (unsigned int*)(s + 0x5A00), &vif2, (unsigned int*)(s + 0x5A14), &gif2);
-    func_00423DE0(*(int*)(s + 0x5ACC));
+    WaitSema(*(int*)(s + 0x5ACC));
     // bufState[2] (+0x5A90) and queuedIndex (+0x5AA4) are shared with the DMA kick thread
     // (func_00382760) and the VIF1 DMA interrupt: volatile, like func_003826E0's bufState.
     volatile int* bufState = (volatile int*)(s + 0x5A90);
@@ -4013,8 +4013,8 @@ void cGfx_7A10::EndFrame_impl()
     *(unsigned int*)(s + 0x5AB0) = gif1;
     *(int*)(s + 0x5AB4) = gif2;
     *state = 2;
-    func_00423DC0(*(int*)(s + 0x5ACC));
-    func_00423DC0(*(int*)(s + 0x5AC8));
+    SignalSema(*(int*)(s + 0x5ACC));
+    SignalSema(*(int*)(s + 0x5AC8));
     *(int*)(s + 0x5A10) = *(int*)(s + 0x5A10) == 0;
     *(int*)(s + 0x5A24) = *(int*)(s + 0x5A24) == 0;
     *(unsigned int*)(s + 0x5A00) = *(unsigned int*)(s + 0x5A04) = *(unsigned int*)(s + 0x5A0C) + *(int*)(s + 0x5A10) * 0xCCC80;
@@ -6000,7 +6000,7 @@ extern "C" int func_0037BD38(void* self, int psmA, int psmB)
 //100%
 INCLUDE_ASM("render/particle", func_0037BD98);
 #ifdef SKIP_ASM
-extern "C" void func_00424020(int);
+extern "C" void FlushCache(int);
 extern "C" void func_00367078(int gs);
 void* func_00367340(void* self, int a1, int a2);
 extern "C" int func_003673D8(int gs, int size);
@@ -6136,7 +6136,7 @@ extern "C" int func_0037BD98(sParticleTarget_37BD98* self, unsigned int a1, unsi
     else
         func_00367340((void*)self->gs, self->f5A80 << 11, self->width * self->height);
 
-    func_00424020(0);
+    FlushCache(0);
     *(volatile long*)0x12001000 = 8;
     while (!(*(volatile long*)0x12001000 & 8)) {
     }
@@ -9261,7 +9261,7 @@ extern "C" int func_003825C0(int cause, void* graphicsMan)
 //100%
 INCLUDE_ASM("render/particle", func_003825F8);
 #ifdef SKIP_ASM
-extern "C" void func_00423DD0(int sema);
+extern "C" void iSignalSema(int sema);
 
 extern "C" void func_003825F8(void* self)
 {
@@ -9270,7 +9270,7 @@ extern "C" void func_003825F8(void* self)
         if (vblanks >= *(int*)((char*)self + 0x5AB8)) {
             *(volatile int*)((char*)self + 0x5A8C) = 5;
             *(int*)((char*)self + 0x5ABC) = 0;
-            func_00423DD0(*(int*)((char*)self + 0x5AC8));
+            iSignalSema(*(int*)((char*)self + 0x5AC8));
         }
     }
 }
@@ -9297,13 +9297,13 @@ extern "C" int func_00382650(int cause, void* graphicsMan)
 //100%
 INCLUDE_ASM("render/particle", func_00382688);
 #ifdef SKIP_ASM
-extern "C" void func_00423DD0(int sema);
+extern "C" void iSignalSema(int sema);
 
 extern "C" void func_00382688(void* self)
 {
     if (*(volatile int*)((char*)self + 0x5A8C) == 1) {
         *(volatile int*)((char*)self + 0x5A8C) = 2;
-        func_00423DD0(*(int*)((char*)self + 0x5AC8));
+        iSignalSema(*(int*)((char*)self + 0x5AC8));
     } else if (*(volatile int*)((char*)self + 0x5A8C) == 3) {
         *(volatile int*)((char*)self + 0x5A8C) = 4;
     }
@@ -9375,9 +9375,9 @@ struct sPtKickGfx_2760 {
 };
 
 extern sPtQuad_2760 D_0044B9C0;
-extern "C" void* func_00423DE0(int sema);
-extern "C" void func_00423DC0(int sema);
-extern "C" void func_00424020(int);
+extern "C" void* WaitSema(int sema);
+extern "C" void SignalSema(int sema);
+extern "C" void FlushCache(int);
 extern "C" void func_00382AF0(void* self, int a, int b);
 
 // Renderer_DmaKickThread (REF structs/render.md): kicks the queued frame's two-phase VIF1 + GIF DMA chains.
@@ -9386,8 +9386,8 @@ extern "C" void* func_00382760(cPS2GraphicsMan* selfp)
 {
     sPtKickGfx_2760* self = (sPtKickGfx_2760*)selfp;
     for (;;) {
-        func_00423DE0(self->kickSema);
-        func_00423DE0(self->queueMutex);
+        WaitSema(self->kickSema);
+        WaitSema(self->queueMutex);
         if (self->kickState == 5) {
             self->bufState[self->inFlightIndex] = 0;
             self->kickState = 0;
@@ -9407,7 +9407,7 @@ extern "C" void* func_00382760(cPS2GraphicsMan* selfp)
             self->kickState = 1;
             self->inFlightVif2 = self->queuedVif2;
             self->inFlightGif2 = self->queuedGif2;
-            func_00424020(0);
+            FlushCache(0);
             while (*(volatile int*)0x1000D000 & 0x100) {
             }
             *(sPtQuad_2760*)0x10005000 = D_0044B9C0;
@@ -9436,7 +9436,7 @@ extern "C" void* func_00382760(cPS2GraphicsMan* selfp)
             *(volatile int*)0x10009030 = self->inFlightVif2;
             *(volatile int*)0x10009000 = 0x185;
         }
-        func_00423DC0(self->queueMutex);
+        SignalSema(self->queueMutex);
     }
 }
 #endif
@@ -9743,10 +9743,10 @@ extern "C" void func_00382AF0(void* vself, int en1, int waitVsync)
 INCLUDE_ASM("render/particle", func_00383770);
 #ifdef SKIP_ASM
 extern "C" void func_00383808(void *, int, int, int, int, int, int, int, int);
-extern "C" void func_00424020(int);
+extern "C" void FlushCache(int);
 
 extern "C" int func_00383770(void *graphicsMan, int destX, int destY, int width, int height, int src) {
-    func_00424020(0);
+    FlushCache(0);
     func_00383808(graphicsMan, src, (*(int *)((char*)(graphicsMan) + (0x5A84))) << 5, width, height, (*(int *)((char*)(graphicsMan) + (0x5A30))), (*(int *)((char*)(graphicsMan) + (0x5A3C))), destX, destY);
     return 1;
 }
@@ -12010,16 +12010,16 @@ extern "C" void cPS2GraphicsMan_SetScreenClearColour(cPS2GraphicsMan* self, cons
 INCLUDE_ASM("render/particle", func_00389118);
 #ifdef SKIP_ASM
 extern "C" void func_00424880(int);
-extern "C" void func_00423AA0(int, int);
+extern "C" void RemoveIntcHandler(int, int);
 extern "C" void func_00424950(int);
-extern "C" void func_00423AD0(int, int);
+extern "C" void RemoveDmacHandler(int, int);
 
 extern "C" void func_00389118(void* self)
 {
     func_00424880(2);
-    func_00423AA0(2, *(int*)((char*)self + 0x5AC0));
+    RemoveIntcHandler(2, *(int*)((char*)self + 0x5AC0));
     func_00424950(1);
-    func_00423AD0(0, *(int*)((char*)self + 0x5AC4));
+    RemoveDmacHandler(0, *(int*)((char*)self + 0x5AC4));
 }
 #endif
 

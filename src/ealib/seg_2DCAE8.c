@@ -5986,9 +5986,9 @@ int func_003E3538(int handle) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3588);
 #ifdef SKIP_ASM
-void func_00423DD0_3588(int) __asm__("func_00423DD0");
+void iSignalSema_3588(int) __asm__("iSignalSema");
 void func_003E3588(int a, int b, int c) {
-    func_00423DD0_3588(c);
+    iSignalSema_3588(c);
     // PORT: MIPS sync + EE ei (no C equivalent)
     __asm__ volatile("sync\n\tei");
 }
@@ -6000,8 +6000,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E35B0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct Cfg_35B0 { int f0, f4, f8, fc, f10, f14; } Cfg_35B0;
 extern void cb_35B0(void) __asm__("func_003E3588");
-extern void func_00423B20_35B0(int, void (*)(void), int) __asm__("func_00423B20");
-extern int func_00423DA0_35B0(Cfg_35B0 *) __asm__("func_00423DA0");
+extern void SetAlarm_35B0(int, void (*)(void), int) __asm__("SetAlarm");
+extern int CreateSema_35B0(Cfg_35B0 *) __asm__("CreateSema");
 
 void func_003E35B0(unsigned short arg0) {
     Cfg_35B0 c;
@@ -6010,10 +6010,10 @@ void func_003E35B0(unsigned short arg0) {
     c.f4 = 1;
     c.f8 = 0;
     c.f14 = 0;
-    temp_2 = func_00423DA0_35B0(&c);
-    func_00423B20_35B0(arg0, cb_35B0, temp_2);
-    func_00423DE0(temp_2);
-    func_00423DB0(temp_2);
+    temp_2 = CreateSema_35B0(&c);
+    SetAlarm_35B0(arg0, cb_35B0, temp_2);
+    WaitSema(temp_2);
+    DeleteSema(temp_2);
 }
 #endif
 
@@ -6143,9 +6143,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3AD8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00519C40_3AD8[] __asm__("D_00519C40");
-void func_00423DD0_3AD8(int) __asm__("func_00423DD0");
+void iSignalSema_3AD8(int) __asm__("iSignalSema");
 void func_003E3AD8(void) {
-    func_00423DD0_3AD8(D_00519C40_3AD8[3]);
+    iSignalSema_3AD8(D_00519C40_3AD8[3]);
 }
 #endif
 
@@ -6228,7 +6228,7 @@ void func_003E3BE0_impl(void) {
 
     while (1) {
         int fl;
-        func_00423DE0(D_00519C40.f0C);
+        WaitSema(D_00519C40.f0C);
         if (func_00402300_3618() != 0 || (D_00519C40.f00 & 8)) {
             fl = D_00519C40.f00 & ~8;
             D_00519C40.f00 = fl;
@@ -6287,7 +6287,7 @@ extern void func_00401BF0_3D78(int) __asm__("func_00401BF0");
 extern int func_00401DF8_3D78(int, int, void *, void *) __asm__("func_00401DF8");
 extern int func_00402300_3D78(void) __asm__("func_00402300");
 extern void func_00402450_3D78(int) __asm__("func_00402450");
-extern void func_00423DC0_3D78(int) __asm__("func_00423DC0");
+extern void SignalSema_3D78(int) __asm__("SignalSema");
 
 struct CdReq_3D78 { int left; int f4; int f8; int lba; int count; char *buf; };
 struct CdState_3D78 {
@@ -6354,7 +6354,7 @@ int func_003E3D78(void) {
     } while (func_00402300_3D78() != 0);
     func_00400A78_3D78(0xB, D_0051A480, 0x800);
     func_004008A0_3D78(func_003E3AD8);
-    func_00423DC0_3D78(D_00519C40_3D78.fC);
+    SignalSema_3D78(D_00519C40_3D78.fC);
     return 0;
 }
 #endif
@@ -6386,14 +6386,14 @@ extern void func_00402450_4040(int) __asm__("func_00402450");
 extern int func_00401BF0_4040(int) __asm__("func_00401BF0");
 extern int func_00402268_4040(void) __asm__("func_00402268");
 extern int func_00401FD8_4040(void *) __asm__("func_00401FD8");
-extern void func_00424020_4040(int) __asm__("func_00424020");
+extern void FlushCache_4040(int) __asm__("FlushCache");
 extern void MEM_clear_4040(void *, int) __asm__("MEM_clear");
 extern char *strcat_4040(char *, char *) __asm__("strcat");
 extern int func_00416B18_4040(char *, char *, int) __asm__("func_00416B18");
 extern int func_003E39A8_4040(void *, void *, unsigned int, int) __asm__("func_003E39A8");
-extern int func_00423DA0_4040(void *) __asm__("func_00423DA0");
-extern int func_00423BA0_4040(void *) __asm__("func_00423BA0");
-extern int func_00423BC0_4040(int, int) __asm__("func_00423BC0");
+extern int CreateSema_4040(void *) __asm__("CreateSema");
+extern int CreateThread_4040(void *) __asm__("CreateThread");
+extern int StartThread_4040(int, int) __asm__("StartThread");
 extern void func_00400A78_4040(int, void *, int) __asm__("func_00400A78");
 extern int func_004008A0_4040(void *) __asm__("func_004008A0");
 extern void func_003E3BE0_4040(void) __asm__("func_003E3BE0");
@@ -6504,7 +6504,7 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     D_00519C40_4040.lba = 0x10;
     D_00519C40_4040.mode[0] = 0;
     D_00519C40_4040.mode[2] = 0;
-    func_00424020_4040(0);
+    FlushCache_4040(0);
     D_00450C68 = D_00450C10_4040.alloc(str_Named_Dir, n * 0x108, 0);
     MEM_clear_4040(D_00450C68, n * 0x108);
     if (D_00450C10_4040.files != 0) {
@@ -6559,15 +6559,15 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     sp.init_count = 0;
     sp.max_count = 0x20;
     D_00450C68 = 0;
-    D_00519C40_4040.sema = func_00423DA0_4040(&sp);
+    D_00519C40_4040.sema = CreateSema_4040(&sp);
     tp.func = func_003E3BE0_4040;
     tp.stack = D_0051AC80;
     tp.gpReg = &D_004A30F0;
     tp.stackSize = 0x4000;
     tp.initPriority = 0xC;
     tp.option = 0;
-    D_00519C40_4040.tid = func_00423BA0_4040(&tp);
-    func_00423BC0_4040(D_00519C40_4040.tid, 0);
+    D_00519C40_4040.tid = CreateThread_4040(&tp);
+    StartThread_4040(D_00519C40_4040.tid, 0);
     func_00400A78_4040(0xB, D_0051A480, 0x800);
     func_004008A0_4040(func_003E3AD8_4040);
     D_00519C40_4040.sector = D_00519C80;
@@ -6583,18 +6583,18 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E44B0);
 extern void SYNCTASK_del_44B0(void (*)(void)) __asm__("SYNCTASK_del");
 extern void func_004008A0(int);
 extern void func_00401718(int);
-extern void func_00423BB0(int);
-extern void func_00423BF0(int);
-extern void func_00423DB0(int);
+extern void DeleteThread(int);
+extern void TerminateThread(int);
+extern void DeleteSema(int);
 extern int D_00519C40_9C40[] __asm__("D_00519C40");
 extern void func_003E4000_4000(void) __asm__("func_003E4000");
 
 void func_003E44B0(void) {
     SYNCTASK_del_44B0(func_003E4000_4000);
     func_004008A0(0);
-    func_00423BF0(D_00519C40_9C40[2]);
-    func_00423BB0(D_00519C40_9C40[2]);
-    func_00423DB0(D_00519C40_9C40[3]);
+    TerminateThread(D_00519C40_9C40[2]);
+    DeleteThread(D_00519C40_9C40[2]);
+    DeleteSema(D_00519C40_9C40[3]);
     func_00401718(5);
 }
 #endif
@@ -6871,7 +6871,7 @@ int func_003E4AF0(int hz) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4D68);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_00423AA0(int, int);
+extern void RemoveIntcHandler(int, int);
 extern void func_00424880(int);
 extern int D_00450DDC_0DDC[] __asm__("D_00450DDC");
 
@@ -6882,7 +6882,7 @@ void func_003E4D68(void) {
         reg = (volatile int *)0x10000810;
         *reg = 0;
         func_00424880(0xA);
-        func_00423AA0(0xA, D_00450DDC_0DDC[0]);
+        RemoveIntcHandler(0xA, D_00450DDC_0DDC[0]);
         D_00450DDC_0DDC[0] = 0;
     }
 }
@@ -7038,17 +7038,17 @@ int func_003E5008(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5018);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_00423C90_5018(void) __asm__("func_00423C90");
-extern void func_00423C30_5018(int, int) __asm__("func_00423C30");
+extern int GetThreadId_5018(void) __asm__("GetThreadId");
+extern void ChangeThreadPriority_5018(int, int) __asm__("ChangeThreadPriority");
 extern void MUTEX_create_5018(void *) __asm__("MUTEX_create");
 extern int D_00450DF8_5018[] __asm__("D_00450DF8");
 extern int D_0051ED88_5018[] __asm__("D_0051ED88");
 
 void func_003E5018(void) {
-    int t = func_00423C90_5018();
+    int t = GetThreadId_5018();
     D_00450DF8_5018[0] = 0x50533254;
     D_00450DF8_5018[1] = t;
-    func_00423C30_5018(t, 100);
+    ChangeThreadPriority_5018(t, 100);
     MUTEX_create_5018(D_0051ED88_5018);
 }
 #endif
@@ -7082,8 +7082,8 @@ void func_003E5098(int arg0, int arg1, int arg2, int arg3, int arg4) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E50C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_00423BA0(void *);
-extern void func_00423BC0(int, int);
+extern int CreateThread(void *);
+extern void StartThread(int, int);
 extern int D_004A30F0;
 
 struct sReq_50C8 {
@@ -7130,11 +7130,11 @@ int func_003E50C8_a(int *self, int arg1, int arg2, int arg3, int arg4, int arg5)
     req.c = arg4;
     req.kind = kind;
     req.tbl = &D_004A30F0;
-    r = func_00423BA0(&req);
+    r = CreateThread(&req);
     self[1] = r;
     if (r != 0) {
         self[0] = 0x50533254;
-        func_00423BC0(r, arg2);
+        StartThread(r, arg2);
         return 1;
     }
     return 0;
@@ -7145,7 +7145,7 @@ int func_003E50C8_a(int *self, int arg1, int arg2, int arg3, int arg4, int arg5)
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E51A0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_00423C00_51A0(int) __asm__("func_00423C00");
+extern void iTerminateThread_51A0(int) __asm__("iTerminateThread");
 extern int D_00450DE4_51A0[] __asm__("D_00450DE4");
 
 void func_003E51A0_51A0(char *arg0) __asm__("func_003E51A0");
@@ -7154,26 +7154,26 @@ void func_003E51A0_51A0(char *arg0) {
     int st[12];
 
     if (arg0 == (char*)0xFFFFFFFF) {
-        h = func_00423C90();
+        h = GetThreadId();
     } else {
         h = *(int*)(arg0 + 4);
     }
     if (D_00450DE4_51A0[0] != 0) {
-        func_00423CB0(h, st);
+        iReferThreadStatus(h, st);
     } else {
-        func_00423CA0(h, st);
+        ReferThreadStatus(h, st);
     }
     if (st[0] & 0xF) {
         if (D_00450DE4_51A0[0] != 0) {
-            func_00423C00_51A0(h);
+            iTerminateThread_51A0(h);
         } else {
-            func_00423BF0(h);
+            TerminateThread(h);
         }
-        func_00423BB0(h);
+        DeleteThread(h);
         return;
     }
     if (st[0] & 0x10) {
-        func_00423BB0(h);
+        DeleteThread(h);
     }
 }
 #endif
@@ -7207,12 +7207,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_yieldticks);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void abm_YT(char *) __asm__("REAL_abortmessage");
 extern int f5008_YT(void) __asm__("func_003E5008");
-extern int f3B20_YT(int, char *, int) __asm__("func_00423B20");
-extern void f3C50_YT(int) __asm__("func_00423C50");
-extern int f3C90_YT(void) __asm__("func_00423C90");
-extern void f3CA0_YT(int, int *) __asm__("func_00423CA0");
-extern void f3CB0_YT(int, int *) __asm__("func_00423CB0");
-extern void f3CC0_YT(void) __asm__("func_00423CC0");
+extern int f3B20_YT(int, char *, int) __asm__("SetAlarm");
+extern void f3C50_YT(int) __asm__("RotateThreadReadyQueue");
+extern int f3C90_YT(void) __asm__("GetThreadId");
+extern void f3CA0_YT(int, int *) __asm__("ReferThreadStatus");
+extern void f3CB0_YT(int, int *) __asm__("iReferThreadStatus");
+extern void f3CC0_YT(void) __asm__("SleepThread");
 extern void f4CE8_YT(int) __asm__("func_00424CE8");
 extern int D_0DA0_YT[] __asm__("D_00450DA0");
 extern int D_0DE4_YT[] __asm__("D_00450DE4");
@@ -7257,11 +7257,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5398);
 extern int D_00450DC8_5398 __asm__("D_00450DC8");
 extern int D_00450DE4_5398 __asm__("D_00450DE4");
 extern void THREAD_yieldticks_5398(int) __asm__("THREAD_yieldticks");
-extern int func_00423C90_5398(void) __asm__("func_00423C90");
-extern void func_00423CB0_5398(int, void *) __asm__("func_00423CB0");
+extern int GetThreadId_5398(void) __asm__("GetThreadId");
+extern void iReferThreadStatus_5398(int, void *) __asm__("iReferThreadStatus");
 extern void func_00424CE8_5398(int) __asm__("func_00424CE8");
-extern void func_00423CA0_5398(int, void *) __asm__("func_00423CA0");
-extern void func_00423C50_5398(int) __asm__("func_00423C50");
+extern void ReferThreadStatus_5398(int, void *) __asm__("ReferThreadStatus");
+extern void RotateThreadReadyQueue_5398(int) __asm__("RotateThreadReadyQueue");
 
 void func_003E5398_impl(int ms) __asm__("func_003E5398");
 void func_003E5398_impl(int ms) {
@@ -7273,11 +7273,11 @@ void func_003E5398_impl(int ms) {
         }
         THREAD_yieldticks_5398(t);
     } else if (D_00450DE4_5398 != 0) {
-        func_00423CB0_5398(func_00423C90_5398(), info);
+        iReferThreadStatus_5398(GetThreadId_5398(), info);
         func_00424CE8_5398(info[6]);
     } else {
-        func_00423CA0_5398(func_00423C90_5398(), info);
-        func_00423C50_5398(info[6]);
+        ReferThreadStatus_5398(GetThreadId_5398(), info);
+        RotateThreadReadyQueue_5398(info[6]);
     }
 }
 #endif
@@ -7289,7 +7289,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5440);
 extern int D_00450DFC_0DFC[] __asm__("D_00450DFC");
 
 int func_003E5440(char *arg0) {
-    int cur = func_00423C90();
+    int cur = GetThreadId();
     if (arg0 == 0) {
         return cur == D_00450DFC_0DFC[0];
     }
@@ -7304,9 +7304,9 @@ int func_003E5440(char *arg0) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5498);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_00423C90();
-extern void func_00423CA0(int, void *);
-extern void func_00423CB0(int, void *);
+extern int GetThreadId();
+extern void ReferThreadStatus(int, void *);
+extern void iReferThreadStatus(int, void *);
 extern int D_00450DE4_5498[] __asm__("D_00450DE4");
 extern int D_00450DFC_5498[] __asm__("D_00450DFC");
 
@@ -7316,14 +7316,14 @@ int func_003E5498(int *a0) {
     if (a0 == 0) {
         t = D_00450DFC_5498[0];
     } else if (a0 == (int *)-1) {
-        t = func_00423C90();
+        t = GetThreadId();
     } else {
         t = a0[1];
     }
     if (D_00450DE4_5498[0] != 0) {
-        func_00423CB0(t, sp);
+        iReferThreadStatus(t, sp);
     } else {
-        func_00423CA0(t, sp);
+        ReferThreadStatus(t, sp);
     }
     return sp[6];
 }
@@ -7333,9 +7333,9 @@ int func_003E5498(int *a0) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5508);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_00423C30_5508(int, int) __asm__("func_00423C30");
-extern void func_00423C40_5508(int, int) __asm__("func_00423C40");
-extern int func_00423C90_5508(void) __asm__("func_00423C90");
+extern void ChangeThreadPriority_5508(int, int) __asm__("ChangeThreadPriority");
+extern void iChangeThreadPriority_5508(int, int) __asm__("iChangeThreadPriority");
+extern int GetThreadId_5508(void) __asm__("GetThreadId");
 extern int D_00450DE4_5508[] __asm__("D_00450DE4");
 extern int D_00450DFC_5508[] __asm__("D_00450DFC");
 
@@ -7345,14 +7345,14 @@ int func_003E5508(void *arg0, int arg1) {
     if (arg0 == 0) {
         var_4 = D_00450DFC_5508[0];
     } else if (arg0 == (void *)0xFFFFFFFF) {
-        var_4 = func_00423C90_5508();
+        var_4 = GetThreadId_5508();
     } else {
         var_4 = (*(int *)((char*)(arg0) + (4)));
     }
     if (D_00450DE4_5508[0] != 0) {
-        func_00423C40_5508(var_4, arg1);
+        iChangeThreadPriority_5508(var_4, arg1);
     } else {
-        func_00423C30_5508(var_4, arg1);
+        ChangeThreadPriority_5508(var_4, arg1);
     }
     return 1;
 }
@@ -7362,8 +7362,8 @@ int func_003E5508(void *arg0, int arg1) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5580);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_00423CA0(int, void *);
-extern void func_00423CB0(int, void *);
+extern void ReferThreadStatus(int, void *);
+extern void iReferThreadStatus(int, void *);
 extern int D_00450DE4_0DE4[] __asm__("D_00450DE4");
 typedef struct { int pad; int f4; } A_5580;
 
@@ -7372,9 +7372,9 @@ int func_003E5580(A_5580 *arg0) {
     int r;
 
     if (D_00450DE4_0DE4[0] != 0) {
-        func_00423CB0(arg0->f4, &st);
+        iReferThreadStatus(arg0->f4, &st);
     } else {
-        func_00423CA0(arg0->f4, &st);
+        ReferThreadStatus(arg0->f4, &st);
     }
     r = 0;
     if ((st.v & 0x10) || st.v == 0) {
@@ -7390,7 +7390,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E55E0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void THREAD_yieldticks_55E0(int) __asm__("THREAD_yieldticks");
 extern int func_003E4E98_55E0() __asm__("func_003E4E98");
-extern void func_00423CA0_55E0(int, int *) __asm__("func_00423CA0");
+extern void ReferThreadStatus_55E0(int, int *) __asm__("ReferThreadStatus");
 
 int func_003E55E0(int *task, int timeout) {
     int sp[12];
@@ -7400,7 +7400,7 @@ int func_003E55E0(int *task, int timeout) {
     deadline = func_003E4E98_55E0() + timeout;
     threadId = task[1];
     do {
-        func_00423CA0_55E0(threadId, sp);
+        ReferThreadStatus_55E0(threadId, sp);
         if ((sp[0] & 0x10) || sp[0] == 0) break;
         THREAD_yieldticks_55E0(0);
     } while (timeout == 0 || deadline < func_003E4E98_55E0());
@@ -7411,10 +7411,10 @@ int func_003E55E0(int *task, int timeout) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5678);
 #ifdef SKIP_ASM
-extern void func_00423BE0();
+extern void ExitDeleteThread();
 
 void func_003E5678(void) {
-    func_00423BE0();
+    ExitDeleteThread();
 }
 #endif
 
@@ -7422,7 +7422,7 @@ void func_003E5678(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", MUTEX_create);
 #ifdef SKIP_ASM
 typedef struct { int a; int b; int c; int d[5]; } S_5698;
-extern int func_00423DA0(S_5698 *);
+extern int CreateSema(S_5698 *);
 
 /**
  * Creates a recursive mutex (@p self): no owner, count 0, and a binary semaphore (CreateSema).
@@ -7435,7 +7435,7 @@ int MUTEX_create(int *self) {
     self[1] = 0;
     optParam.b = 1;
     optParam.c = 1;
-    self[3] = func_00423DA0(&optParam);
+    self[3] = CreateSema(&optParam);
     return 0;
 }
 #endif
@@ -7443,18 +7443,18 @@ int MUTEX_create(int *self) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E56E0);
 #ifdef SKIP_ASM
-extern void func_00423DB0(int);
+extern void DeleteSema(int);
 
 void func_003E56E0(void *arg0) {
-    func_00423DB0((*(int *)((char*)(arg0) + (0xC))));
+    DeleteSema((*(int *)((char*)(arg0) + (0xC))));
 }
 #endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", MUTEX_lock);
 #ifdef SKIP_ASM
-extern int func_00423C90();
-extern void func_00423DE0(int);
+extern int GetThreadId();
+extern void WaitSema(int);
 
 /**
  * Locks a recursive mutex: a thread that already owns it only bumps the count, others wait on its semaphore.
@@ -7462,12 +7462,12 @@ extern void func_00423DE0(int);
  * @param mutex  the mutex (On Tour MUTEX*)
  */
 void MUTEX_lock(void *mutex) {
-    if ((*(int *)((char*)(mutex) + (4))) == func_00423C90()) {
+    if ((*(int *)((char*)(mutex) + (4))) == GetThreadId()) {
         (*(int *)((char*)(mutex) + (8))) = (int) ((*(int *)((char*)(mutex) + (8))) + 1);
         return;
     }
-    func_00423DE0((*(int *)((char*)(mutex) + (0xC))));
-    (*(int *)((char*)(mutex) + (4))) = func_00423C90();
+    WaitSema((*(int *)((char*)(mutex) + (0xC))));
+    (*(int *)((char*)(mutex) + (4))) = GetThreadId();
     (*(int *)((char*)(mutex) + (8))) = (int) ((*(int *)((char*)(mutex) + (8))) + 1);
 }
 #endif
@@ -7476,9 +7476,9 @@ void MUTEX_lock(void *mutex) {
 INCLUDE_ASM("ealib/seg_2DCAE8", MUTEX_unlock);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_00423C90();
-extern void func_00423DC0(int);
-extern void func_00423DD0(int);
+extern int GetThreadId();
+extern void SignalSema(int);
+extern void iSignalSema(int);
 extern int D_00450DE4_5760[] __asm__("D_00450DE4");
 
 void MUTEX_unlock_5760(void *arg0) __asm__("MUTEX_unlock");
@@ -7493,14 +7493,14 @@ void MUTEX_unlock_5760(void *arg0) __asm__("MUTEX_unlock");
  */
 void MUTEX_unlock_5760(void *mutex) {
     int *mutexWords = (int *)mutex;
-    if (mutexWords[1] == func_00423C90()) {
+    if (mutexWords[1] == GetThreadId()) {
         if (--mutexWords[2] != 0) return;
         mutexWords[1] = 0;
     }
     if (D_00450DE4_5760[0] != 0) {
-        func_00423DD0(mutexWords[3]);
+        iSignalSema(mutexWords[3]);
     } else {
-        func_00423DC0(mutexWords[3]);
+        SignalSema(mutexWords[3]);
     }
 }
 #endif

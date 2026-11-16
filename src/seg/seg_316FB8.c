@@ -2775,17 +2775,17 @@ func_00418958 (struct _reent_8958 *reent, wchar_t_8958 *pwc, const char *src, un
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00418CA8);
 #ifdef SKIP_ASM
-extern int func_00423C90(void);
-extern void func_00423DE0(int);
+extern int GetThreadId(void);
+extern void WaitSema(int);
 extern int D_00454CA8;
 extern int D_00454CAC;
 extern int D_00455248;
 void func_00418CA8(int unused) {
-    int id = func_00423C90();
+    int id = GetThreadId();
     if (D_00454CA8 == id) {
         D_00454CAC++;
     } else {
-        func_00423DE0(D_00455248);
+        WaitSema(D_00455248);
         D_00454CA8 = id;
         D_00454CAC++;
     }
@@ -2795,14 +2795,14 @@ void func_00418CA8(int unused) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00418D08);
 #ifdef SKIP_ASM
-extern void func_00423DC0(int);
+extern void SignalSema(int);
 extern int D_00454CA8;
 extern int D_00454CAC;
 extern int D_00455248;
 void func_00418D08(int unused) {
     if (--D_00454CAC == 0) {
         D_00454CA8 = -1;
-        func_00423DC0(D_00455248);
+        SignalSema(D_00455248);
     }
 }
 #endif
@@ -7841,7 +7841,7 @@ void func_00423980(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00423990);
+INCLUDE_ASM("seg/seg_316FB8", ResetEE);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423990, 0x1)
+SYSCALL_STUB(ResetEE, 0x1)
 #endif

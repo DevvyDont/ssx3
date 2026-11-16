@@ -106,7 +106,7 @@ extern char func_003FD908[];
 extern int func_003FD558(int*, int, int);
 extern void func_003FD660(int, int);
 extern int func_003FD758(int*, char*);
-extern void func_00424020(int);
+extern void FlushCache(int);
 int func_003FCFD8(int a, int b) {
     int obj[12];
     int hdr[3];
@@ -138,8 +138,8 @@ int func_003FCFD8(int a, int b) {
     if (*p == 0) {
         return -5;
     }
-    func_00424020(0);
-    func_00424020(2);
+    FlushCache(0);
+    FlushCache(2);
     return 0;
 }
 #endif

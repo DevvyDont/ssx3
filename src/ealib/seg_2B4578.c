@@ -10153,7 +10153,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C1578);
 typedef struct { char pad[0xC]; int v; int mode; } A_1578;
 typedef struct { char pad[0x1AA4]; int a; char pad2[0x5C]; int b; } G_1578;
 extern void func_003C4918_1578(int) __asm__("func_003C4918");
-extern void func_00423DD0(int);
+extern void iSignalSema(int);
 extern G_1578 D_0050AD00_AD00 __asm__("D_0050AD00");
 
 void func_003C1578(A_1578 *arg0) {
@@ -10165,7 +10165,7 @@ void func_003C1578(A_1578 *arg0) {
         break;
     case 0:
         D_0050AD00_AD00.b = arg0->v;
-        func_00423DD0(D_0050AD00_AD00.a);
+        iSignalSema(D_0050AD00_AD00.a);
         break;
     }
 }
@@ -10455,12 +10455,12 @@ void func_003C08F8_19A8(void* buf) __asm__("func_003C08F8");
 // (prototype from their definition at line 8288)
 void func_003C1298_19A8(void) __asm__("func_003C1298");
 
-extern int func_00423DE0_19A8(int) __asm__("func_00423DE0");
+extern int WaitSema_19A8(int) __asm__("WaitSema");
 extern void func_003C8968_19A8(int *, int) __asm__("func_003C8968");
 extern void func_003C51E8(void *, void *, int);
 extern void func_003C7080_19A8(void) __asm__("func_003C7080");
-extern void func_00424020(int);
-extern int func_00424160(void *, int);
+extern void FlushCache(int);
+extern int sceSifSetDma(void *, int);
 extern void (*D_0044C470)(void);
 extern char D_0050C910[];
 extern char D_0050C800[];
@@ -10469,7 +10469,7 @@ void func_003C19A8(void) {
     int s;
 
     for (;;) {
-        func_00423DE0_19A8(D_0050AD00_19A8.f1AA4);
+        WaitSema_19A8(D_0050AD00_19A8.f1AA4);
         if (D_0050AD00_19A8.f1AAD == 0) continue;
         D_0044C46C_19A8();
         if (D_0050A8E8.f328 != 0) D_0050A8E8.f328();
@@ -10491,13 +10491,13 @@ void func_003C19A8(void) {
         func_003C7080_19A8();
         *D_0050AD00_19A8.fCB4 = D_0050A8E8.f330;
         *(int *)D_0050AD00_19A8.fCB8 = D_0050A8E8.f330;
-        func_00424020(0);
+        FlushCache(0);
         do {
             DI_2B45_19A8();
             SYNCP_2B45_19A8();
             MFC0_STATUS_2B45_19A8(s);
         } while (s & 0x10000);
-        func_00424160(D_0050C800, 1);
+        sceSifSetDma(D_0050C800, 1);
         EI_2B45_19A8();
         if (D_0050A8E8.f32C != 0) D_0050A8E8.f32C();
         D_0044C470();
@@ -10636,11 +10636,11 @@ extern void func_003C7D00_1B80(L_1B80 *) __asm__("func_003C7D00");
 extern M_1B80 *func_003FDAA0_1B80(void) __asm__("func_003FDAA0");
 extern void *func_00416210_1B80(int, int, int) __asm__("func_00416210");
 extern int func_00423A80_1B80(int, void *, int) __asm__("func_00423A80");
-extern int func_00423BA0_1B80(T_1B80 *) __asm__("func_00423BA0");
-extern void func_00423BC0_1B80(int, int) __asm__("func_00423BC0");
-extern int func_00423C30_1B80(int, int) __asm__("func_00423C30");
-extern int func_00423C90_1B80(void) __asm__("func_00423C90");
-extern int func_00423DA0_1B80(R_1B80 *) __asm__("func_00423DA0");
+extern int CreateThread_1B80(T_1B80 *) __asm__("CreateThread");
+extern void StartThread_1B80(int, int) __asm__("StartThread");
+extern int ChangeThreadPriority_1B80(int, int) __asm__("ChangeThreadPriority");
+extern int GetThreadId_1B80(void) __asm__("GetThreadId");
+extern int CreateSema_1B80(R_1B80 *) __asm__("CreateSema");
 extern void func_00424880_1B80(int) __asm__("func_00424880");
 extern void func_004248E8_1B80(int) __asm__("func_004248E8");
 extern void func_00425FF0_1B80(void *, int) __asm__("func_00425FF0");
@@ -10726,7 +10726,7 @@ int func_003C1B80(void) {
     func_003B58D8_1B80();
     D_0050ACB0_1B80.f4 = 1;
     D_0050ACB0_1B80.f8 = 0;
-    D_0050AD00_1B80.f1AA4 = func_00423DA0_1B80(&D_0050ACB0_1B80);
+    D_0050AD00_1B80.f1AA4 = CreateSema_1B80(&D_0050ACB0_1B80);
     if (D_0044DD40_1B80 == 0) {
         func_00426408_1B80(0);
         func_0042AB18_1B80();
@@ -10755,9 +10755,9 @@ int func_003C1B80(void) {
     D_0050AC80_1B80.f14 = 6;
     D_0050AC80_1B80.f10 = D_004A30F0_1B80;
     D_0050AC80_1B80.f20 = 0;
-    D_00512B20_1B80 = func_00423BA0_1B80(&D_0050AC80_1B80);
-    func_00423BC0_1B80(D_00512B20_1B80, 0);
-    func_00423C30_1B80(func_00423C90_1B80(), 100);
+    D_00512B20_1B80 = CreateThread_1B80(&D_0050AC80_1B80);
+    StartThread_1B80(D_00512B20_1B80, 0);
+    ChangeThreadPriority_1B80(GetThreadId_1B80(), 100);
     func_003C35F8_1B80(8);
     func_003C35F8_1B80(4);
     for (i = 0; i < D_0050A8E8_1B80.f4C; i++) {
@@ -10859,11 +10859,11 @@ extern void func_003C0B10_2268(int, int, int) __asm__("func_003C0B10");
 extern void func_003C60E0_2268(void) __asm__("func_003C60E0");
 extern void func_003C8018_2268(void) __asm__("func_003C8018");
 extern void func_003CBC00_2268(int) __asm__("func_003CBC00");
-extern int func_00423AA0_2268(int, int) __asm__("func_00423AA0");
-extern void func_00423BB0_2268(int) __asm__("func_00423BB0");
-extern void func_00423BF0_2268(int) __asm__("func_00423BF0");
-extern void func_00423CA0_2268(int, void *) __asm__("func_00423CA0");
-extern void func_00423DB0_2268(int) __asm__("func_00423DB0");
+extern int RemoveIntcHandler_2268(int, int) __asm__("RemoveIntcHandler");
+extern void DeleteThread_2268(int) __asm__("DeleteThread");
+extern void TerminateThread_2268(int) __asm__("TerminateThread");
+extern void ReferThreadStatus_2268(int, void *) __asm__("ReferThreadStatus");
+extern void DeleteSema_2268(int) __asm__("DeleteSema");
 extern void func_00424880_2268(int) __asm__("func_00424880");
 extern void func_004248E8_2268(int) __asm__("func_004248E8");
 extern void func_0042AD08_2268(int) __asm__("func_0042AD08");
@@ -10882,19 +10882,19 @@ int func_003C2268(void) {
     }
     if (D_0050AD00_2268.f1AA8 >= 0) {
         func_00424880_2268(2);
-        if (func_00423AA0_2268(2, D_0050AD00_2268.f1AA8) > 0) {
+        if (RemoveIntcHandler_2268(2, D_0050AD00_2268.f1AA8) > 0) {
             func_004248E8_2268(2);
         }
     }
     func_003C0B10_2268(1, 0, 0);
-    func_00423CA0_2268(D_00512B20_2268[0], st);
+    ReferThreadStatus_2268(D_00512B20_2268[0], st);
     if (st[0] == 0x10) {
-        func_00423BB0_2268(D_00512B20_2268[0]);
+        DeleteThread_2268(D_00512B20_2268[0]);
     } else {
-        func_00423BF0_2268(D_00512B20_2268[0]);
-        func_00423BB0_2268(D_00512B20_2268[0]);
+        TerminateThread_2268(D_00512B20_2268[0]);
+        DeleteThread_2268(D_00512B20_2268[0]);
     }
-    func_00423DB0_2268(D_0050AD00_2268.f1AA4);
+    DeleteSema_2268(D_0050AD00_2268.f1AA4);
     for (i = 0; i < 1; i++) {
         func_0042AD08_2268(D_0050AD00_2268.v[i].h);
     }
@@ -11433,14 +11433,14 @@ struct sAD00 {
 extern struct sAD00 D_0050AD00;
 
 extern int D_0050ACE0_3300[] __asm__("D_0050ACE0");
-extern int func_00423DA0_3300(int *) __asm__("func_00423DA0");
+extern int CreateSema_3300(int *) __asm__("CreateSema");
 
 void func_003C3300(void) {
     D_0050ACE0_3300[1] = 0x14;
     D_0050AD00.f1B14 = -1;
     D_0050ACE0_3300[2] = 1;
     D_0050AD00.f1B18 = 0;
-    D_0050AD00.f1B10 = func_00423DA0_3300(D_0050ACE0_3300);
+    D_0050AD00.f1B10 = CreateSema_3300(D_0050ACE0_3300);
 }
 #endif
 
@@ -11455,10 +11455,10 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C3358);
 
 extern struct sAD00 D_0050AD00;
 
-extern void func_00423DB0(int);
+extern void DeleteSema(int);
 
 void func_003C3358(void) {
-    func_00423DB0(D_0050AD00.f1B10);
+    DeleteSema(D_0050AD00.f1B10);
 }
 #endif
 
@@ -11473,19 +11473,19 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C3380);
 
 extern struct sAD00 D_0050AD00;
 
-extern int func_00423C90(void);
-extern void func_00423DE0(int);
+extern int GetThreadId(void);
+extern void WaitSema(int);
 
 /* Recursive lock (pairs with func_003C33E0). The owner's re-entry bumps the count and returns early; jump2
    cross-jumps the two count increments into one copy, and the return label left behind keeps the epilogue
    restores below the final store, as in the target. */
 void func_003C3380(void) {
-    int r = func_00423C90();
+    int r = GetThreadId();
     if (D_0050AD00.f1B14 == r) {
         D_0050AD00.f1B18++;
         return;
     }
-    func_00423DE0(D_0050AD00.f1B10);
+    WaitSema(D_0050AD00.f1B10);
     D_0050AD00.f1B14 = r;
     D_0050AD00.f1B18++;
 }
@@ -11502,11 +11502,11 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C33E0);
 
 extern struct sAD00 D_0050AD00;
 
-extern int func_00423C90(void);
-extern void func_00423DC0(int);
+extern int GetThreadId(void);
+extern void SignalSema(int);
 
 void func_003C33E0(void) {
-    int r = func_00423C90();
+    int r = GetThreadId();
     if (D_0050AD00.f1B14 == r) {
         D_0050AD00.f1B18--;
         if (D_0050AD00.f1B18 == 0) {
@@ -11514,7 +11514,7 @@ void func_003C33E0(void) {
         }
     }
     if (D_0050AD00.f1B18 <= 0) {
-        func_00423DC0(D_0050AD00.f1B10);
+        SignalSema(D_0050AD00.f1B10);
     }
 }
 #endif
@@ -11897,12 +11897,12 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C43C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_43C0 { int a, b, c, d; };
-extern void func_00424020(int);
-extern void func_00424050(int);
-extern int func_00424140(int);
-extern int func_00424150(int);
-extern int func_00424160(void *, int);
-extern int func_00424170(void *, int);
+extern void FlushCache(int);
+extern void iFlushCache(int);
+extern int sceSifDmaStat(int);
+extern int isceSifDmaStat(int);
+extern int sceSifSetDma(void *, int);
+extern int isceSifSetDma(void *, int);
 extern int D_0044E178_43C0[] __asm__("D_0044E178");
 
 void func_003C43C0(int arg0, int arg1, int arg2, int arg3) {
@@ -11912,13 +11912,13 @@ void func_003C43C0(int arg0, int arg1, int arg2, int arg3) {
     s.b = arg1;
     s.d = 0;
     if (arg3 != 0) {
-        func_00424050(0);
-        while (func_00424150(D_0044E178_43C0[0]) >= 0) {}
-        D_0044E178_43C0[0] = func_00424170(&s, 1);
+        iFlushCache(0);
+        while (isceSifDmaStat(D_0044E178_43C0[0]) >= 0) {}
+        D_0044E178_43C0[0] = isceSifSetDma(&s, 1);
     } else {
-        func_00424020(0);
-        while (func_00424140(D_0044E178_43C0[0]) >= 0) {}
-        D_0044E178_43C0[0] = func_00424160(&s, 1);
+        FlushCache(0);
+        while (sceSifDmaStat(D_0044E178_43C0[0]) >= 0) {}
+        D_0044E178_43C0[0] = sceSifSetDma(&s, 1);
     }
 }
 #endif

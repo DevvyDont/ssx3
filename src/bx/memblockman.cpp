@@ -788,11 +788,11 @@ extern "C" int func_0031A490(int handlerArg, void (*handler)(int))
 INCLUDE_ASM("bx/memblockman", func_0031A6B8);
 #ifdef SKIP_ASM
 extern int D_004A3ECC;
-extern "C" void func_00423C30(int, int);
+extern "C" void ChangeThreadPriority(int, int);
 
 extern "C" void func_0031A6B8(void)
 {
-    func_00423C30(D_004A3ECC, 0x65);
+    ChangeThreadPriority(D_004A3ECC, 0x65);
 }
 #endif
 
@@ -807,11 +807,11 @@ extern "C" void func_0031ABD0();
 extern "C" void func_0031AC08();
 extern "C" void func_0031AC60();
 extern "C" int func_00416210(void* p, int c, int n);
-extern "C" int func_00423C90();
-extern "C" int func_00423CA0(int id, void* st);
-extern "C" int func_00423DA0(void* sema);
-extern "C" int func_00423BA0(void* tp);
-extern "C" void func_00423BC0(int id, void* arg);
+extern "C" int GetThreadId();
+extern "C" int ReferThreadStatus(int id, void* st);
+extern "C" int CreateSema(void* sema);
+extern "C" int CreateThread(void* tp);
+extern "C" void StartThread(int id, void* arg);
 extern "C" void func_00424880(int n);
 extern "C" int func_00423A90(int n, void (*a)(), int b, void (*c)());
 extern "C" int func_004248E8(int n);
@@ -874,18 +874,18 @@ extern "C" void func_0031A6D8(sMgr_31A6D8* self)
     sThreadParam_31A6D8 tp;
     self->f20 = 0;
     func_0031A308(self->vu0);
-    self->f10 = func_00423C90();
+    self->f10 = GetThreadId();
     func_00416210(&st, 0, 0x30);
-    func_00423CA0(self->f10, &st);
+    ReferThreadStatus(self->f10, &st);
     self->f14 = st.currentPriority;
     func_00416210(&s1, 0, 0x18);
-    self->fC = func_00423DA0(&s1);
+    self->fC = CreateSema(&s1);
     func_00416210(&s2, 0, 0x18);
-    self->f18 = func_00423DA0(&s2);
+    self->f18 = CreateSema(&s2);
     self->f1C = 0;
     func_00416210(&s3, 0, 0x18);
     s3.maxCount = 0x400;
-    self->f14044 = func_00423DA0(&s3);
+    self->f14044 = CreateSema(&s3);
     self->f14048 = 0;
     func_00416210(&tp, 0, 0x30);
     tp.status = 0x10;
@@ -897,13 +897,13 @@ extern "C" void func_0031A6D8(sMgr_31A6D8* self)
     tp.currentPriority = self->f14 + 1;
     tp.attr = 0;
     tp.option = 0;
-    self->f14040 = func_00423BA0(&tp);
+    self->f14040 = CreateThread(&tp);
     D_004A3ECC = self->f14040;
-    func_00423BC0(self->f14040, self);
+    StartThread(self->f14040, self);
     self->f4038 = 0;
     func_00416210(&s3, 0, 0x18);
     s3.maxCount = 0x400;
-    self->f4034 = func_00423DA0(&s3);
+    self->f4034 = CreateSema(&s3);
     func_00416210(&tp, 0, 0x30);
     tp.status = 0x10;
     tp.entry = func_0031AC08;
@@ -914,8 +914,8 @@ extern "C" void func_0031A6D8(sMgr_31A6D8* self)
     tp.currentPriority = self->f14 - 1;
     tp.attr = 0;
     tp.option = 0;
-    self->f4030 = func_00423BA0(&tp);
-    func_00423BC0(self->f4030, self);
+    self->f4030 = CreateThread(&tp);
+    StartThread(self->f4030, self);
     func_00424880(3);
     self->f14290 = func_00423A90(3, (void (*)())func_0031A490, 0, func_0031ABD0);
     func_004248E8(3);
@@ -926,32 +926,32 @@ extern "C" void func_0031A6D8(sMgr_31A6D8* self)
 INCLUDE_ASM("bx/memblockman", func_0031A920);
 #ifdef SKIP_ASM
 extern "C" void func_00424880(int);
-extern "C" void func_00423AA0(int, int);
+extern "C" void RemoveIntcHandler(int, int);
 extern "C" int func_004248E8(int);
-extern "C" void func_00423DC0(int);
-extern "C" void func_00423CC0();
-extern "C" void func_00423BF0(int);
-extern "C" void func_00423BB0(int);
-extern "C" void func_00423DB0(int);
+extern "C" void SignalSema(int);
+extern "C" void SleepThread();
+extern "C" void TerminateThread(int);
+extern "C" void DeleteThread(int);
+extern "C" void DeleteSema(int);
 
 extern "C" void func_0031A920(void* self)
 {
     func_00424880(3);
-    func_00423AA0(3, *(int*)((char*)self + 0x14290));
+    RemoveIntcHandler(3, *(int*)((char*)self + 0x14290));
     func_004248E8(3);
     *(volatile int*)((char*)self + 0x20) = 1;
-    func_00423DC0(*(int*)((char*)self + 0x14044));
-    func_00423DC0(*(int*)((char*)self + 0x4034));
-    func_00423CC0();
-    func_00423CC0();
-    func_00423BF0(*(int*)((char*)self + 0x4030));
-    func_00423BB0(*(int*)((char*)self + 0x4030));
-    func_00423BF0(*(int*)((char*)self + 0x14040));
-    func_00423BB0(*(int*)((char*)self + 0x14040));
-    func_00423DB0(*(int*)((char*)self + 0x4034));
-    func_00423DB0(*(int*)((char*)self + 0x14044));
-    func_00423DB0(*(int*)((char*)self + 0x18));
-    func_00423DB0(*(int*)((char*)self + 0xC));
+    SignalSema(*(int*)((char*)self + 0x14044));
+    SignalSema(*(int*)((char*)self + 0x4034));
+    SleepThread();
+    SleepThread();
+    TerminateThread(*(int*)((char*)self + 0x4030));
+    DeleteThread(*(int*)((char*)self + 0x4030));
+    TerminateThread(*(int*)((char*)self + 0x14040));
+    DeleteThread(*(int*)((char*)self + 0x14040));
+    DeleteSema(*(int*)((char*)self + 0x4034));
+    DeleteSema(*(int*)((char*)self + 0x14044));
+    DeleteSema(*(int*)((char*)self + 0x18));
+    DeleteSema(*(int*)((char*)self + 0xC));
 }
 #endif
 
@@ -982,8 +982,8 @@ extern "C" void func_0031AA18(void* self)
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031AA58);
 #ifdef SKIP_ASM
-extern "C" void* func_00423DE0(int);
-extern "C" int func_00423DF0(int);
+extern "C" void* WaitSema(int);
+extern "C" int PollSema(int);
 
 struct sMemBlkVEntryA {
     short delta;
@@ -1001,9 +1001,9 @@ extern "C" void func_0031AA58(void* self)
     *(int*)((char*)self + 0x1C) = 1;
     sMemBlkVEntryA* vt = *(sMemBlkVEntryA**)((char*)self + 0x8);
     vt[11].fn((char*)self + vt[11].delta);
-    func_00423DE0(*(int*)((char*)self + 0x18));
+    WaitSema(*(int*)((char*)self + 0x18));
     *(int*)((char*)self + 0x1C) = 0;
-    while (func_00423DF0(*(int*)((char*)self + 0x18)) == *(int*)((char*)self + 0x18))
+    while (PollSema(*(int*)((char*)self + 0x18)) == *(int*)((char*)self + 0x18))
     {
     }
     sMemBlkVEntryB* vt2 = *(sMemBlkVEntryB**)((char*)self + 0x8);
@@ -1014,24 +1014,24 @@ extern "C" void func_0031AA58(void* self)
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031AAC8);
 #ifdef SKIP_ASM
-extern "C" void func_00423DC0(int);
+extern "C" void SignalSema(int);
 
 extern "C" void func_0031AAC8(void* self)
 {
     if (*(int*)((char*)self + 0x1C) != 0) {
-        func_00423DC0(*(int*)((char*)self + 0x18));
+        SignalSema(*(int*)((char*)self + 0x18));
     }
 }
 #endif
 
-extern "C" void* func_00423DE0(int);
+extern "C" void* WaitSema(int);
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031AAF0__FPv);
 #ifdef SKIP_ASM
 void* func_0031AAF0(void* self)
 {
-    return func_00423DE0(*(int*)((char*)self + 0xc));
+    return WaitSema(*(int*)((char*)self + 0xc));
 }
 #endif
 
@@ -1042,9 +1042,9 @@ INCLUDE_ASM("bx/memblockman", func_0031AB10);
 // Wakes the thread at 0xC, then idles forever.
 extern "C" void func_0031AB10(void* self)
 {
-    func_00423DC0(*(int*)((char*)self + 0xC));
+    SignalSema(*(int*)((char*)self + 0xC));
     for (;;) {
-        func_00423CC0();
+        SleepThread();
     }
 }
 #endif
@@ -1053,8 +1053,8 @@ extern "C" void func_0031AB10(void* self)
 INCLUDE_ASM("bx/memblockman", func_0031AB30);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_00423C90();
-extern "C" void func_00423D10(int thread);
+extern "C" int GetThreadId();
+extern "C" void SuspendThread(int thread);
 int cExecutionMan_checkHalt(void* self, int flag);
 
 struct sMbVE_AB30 {
@@ -1073,9 +1073,9 @@ extern "C" void func_0031AB30(void* self)
 {
     char* s = (char*)self;
     *(volatile int*)(s + 0x4038) = 1;
-    int cur = func_00423C90();
+    int cur = GetThreadId();
     if (cur != *(int*)(s + 0x14040)) {
-        func_00423D10(*(int*)(s + 0x14040));
+        SuspendThread(*(int*)(s + 0x14040));
     }
     if (cur == *(int*)(s + 0x10)) {
         cExecutionMan_checkHalt(self, 0);
@@ -1108,13 +1108,13 @@ int func_0031ABC8(void* self)
 INCLUDE_ASM("bx/memblockman", func_0031ABD0);
 #ifdef SKIP_ASM
 void* func_00317520();
-extern "C" void func_00423DD0(int);
+extern "C" void iSignalSema(int);
 
 extern "C" void func_0031ABD0(void)
 {
     char* app = (char*)func_00317520();
     if (*(volatile int*)(app + 0x4038) == 0) {
-        func_00423DD0(*(int*)(app + 0x4034));
+        iSignalSema(*(int*)(app + 0x4034));
     }
 }
 #endif
@@ -1122,20 +1122,20 @@ extern "C" void func_0031ABD0(void)
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031AC08);
 #ifdef SKIP_ASM
-extern "C" void* func_00423DE0(int);
-extern "C" void func_00423CD0(int);
-extern "C" void func_00423CC0();
+extern "C" void* WaitSema(int);
+extern "C" void WakeupThread(int);
+extern "C" void SleepThread();
 // PORT: func_00317500__Fv is called with self here; bind the 1-arg form to that symbol.
 int func_00317500_1(void* self) __asm__("func_00317500__Fv");
 
 extern "C" void func_0031AC08(void* self)
 {
-    while (func_00423DE0(*(int*)((char*)self + 0x4034)), *(volatile int*)((char*)self + 0x20) == 0)
+    while (WaitSema(*(int*)((char*)self + 0x4034)), *(volatile int*)((char*)self + 0x20) == 0)
     {
         func_00317500_1(self);
     }
-    func_00423CD0(*(int*)((char*)self + 0x10));
-    func_00423CC0();
+    WakeupThread(*(int*)((char*)self + 0x10));
+    SleepThread();
 }
 #endif
 
@@ -1150,27 +1150,27 @@ struct sMemJobVEntry {
 
 extern "C" void func_0031AC60(void* self)
 {
-    while (func_00423DE0(*(int*)((char*)self + 0x14044)), *(volatile int*)((char*)self + 0x20) == 0)
+    while (WaitSema(*(int*)((char*)self + 0x14044)), *(volatile int*)((char*)self + 0x20) == 0)
     {
         void* obj = *(void* volatile*)((char*)self + 0x14048);
         sMemJobVEntry* vt = *(sMemJobVEntry**)obj;
         vt[2].fn((char*)obj + vt[2].delta);
         *(void* volatile*)((char*)self + 0x14048) = 0;
     }
-    func_00423CD0(*(int*)((char*)self + 0x10));
-    func_00423CC0();
+    WakeupThread(*(int*)((char*)self + 0x10));
+    SleepThread();
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031ACD8);
 #ifdef SKIP_ASM
-extern "C" void func_00423DC0(int);
+extern "C" void SignalSema(int);
 
 extern "C" void func_0031ACD8(void* self, int a1)
 {
     *(int*)((char*)self + 0x14048) = a1;
-    func_00423DC0(*(int*)((char*)self + 0x14044));
+    SignalSema(*(int*)((char*)self + 0x14044));
 }
 #endif
 
